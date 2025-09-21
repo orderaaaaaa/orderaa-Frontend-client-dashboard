@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import { useRouter, usePathname } from "next/navigation"
-import { Button } from "@/components/ui/button"
+import type React from "react";
+import { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
   Package,
@@ -16,11 +16,11 @@ import {
   X,
   ChevronDown,
   ChevronLeft,
-} from "lucide-react"
-import Link from "next/link"
+} from "lucide-react";
+import Link from "next/link";
 
 interface DashboardLayoutProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 const navigation = [
@@ -31,7 +31,7 @@ const navigation = [
     href: "/dashboard/orders",
     icon: ShoppingCart,
     children: [
-      { name: "جميع الطلبات", href: "/dashboard/orders/new" },
+      { name: "جميع الطلبات", href: "/dashboard/orders/allOrders" },
       { name: "تأكيد الطلبات ", href: "/dashboard/orders/completed" },
     ],
   },
@@ -62,37 +62,42 @@ const navigation = [
       { name: " موظفين الشحن", href: "/dashboard/settings/done" },
     ],
   },
-]
+];
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
-  const router = useRouter()
-  const pathname = usePathname()
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
 
   // Auto-open dropdown if pathname matches a child route
   useEffect(() => {
     navigation.forEach((item) => {
       if (item.children) {
-        const isChildActive = item.children.some((sub) => pathname.startsWith(sub.href))
+        const isChildActive = item.children.some((sub) =>
+          pathname.startsWith(sub.href)
+        );
         if (isChildActive) {
-          setOpenDropdown(item.name)
+          setOpenDropdown(item.name);
         }
       }
-    })
-  }, [pathname])
+    });
+  }, [pathname]);
 
   const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated")
-    localStorage.removeItem("userEmail")
-    router.push("/")
-  }
+    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("userEmail");
+    router.push("/");
+  };
 
   return (
     <div className="flex h-screen bg-background">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden" onClick={() => setSidebarOpen(false)} />
+        <div
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
       )}
 
       {/* Sidebar */}
@@ -102,7 +107,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
-        <div className="flex flex-col h-full" style={{ backgroundColor: "#5D24E1" }}>
+        <div
+          className="flex flex-col h-full"
+          style={{ backgroundColor: "#5D24E1" }}
+        >
           {/* Header */}
           <div className="flex items-center justify-between h-16 px-6 border-b border-white/10">
             <h1 className="text-xl font-bold text-white m-auto">Ordera</h1>
@@ -119,89 +127,108 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-2">
             {navigation.map((item) => {
-              const isActive = pathname === item.href
+              const isActive = pathname === item.href;
 
               // If item has children (dropdown)
               if (item.children) {
-                const isOpen = openDropdown === item.name
+                const isOpen = openDropdown === item.name;
                 return (
                   <div key={item.name}>
                     <button
                       onClick={() => setOpenDropdown(isOpen ? null : item.name)}
                       className={`
                         flex items-center justify-between w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors
-                        ${(isActive || isOpen) ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}
+                        ${
+                          isActive || isOpen
+                            ? "bg-white/20 text-white"
+                            : "text-white/80 hover:bg-white/10 hover:text-white"
+                        }
                       `}
                     >
                       <span className="flex items-center">
                         <item.icon className="mx-3 h-5 w-5" />
                         {item.name}
                       </span>
-                      {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                      {isOpen ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronLeft className="h-4 w-4" />
+                      )}
                     </button>
 
                     {/* Submenu with smooth animation */}
                     <div
                       className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                        isOpen ? "max-h-40 opacity-100 mt-2" : "max-h-0 opacity-0"
+                        isOpen
+                          ? "max-h-40 opacity-100 mt-2"
+                          : "max-h-0 opacity-0"
                       }`}
                     >
                       <div className="ml-10 space-y-2">
                         {item.children.map((sub) => {
-                          const isSubActive = pathname.startsWith(sub.href)
+                          const isSubActive = pathname.startsWith(sub.href);
                           return (
                             <Link
                               key={sub.name}
                               href={sub.href}
                               className={`
                                 block px-3 py-2 text-sm rounded-md transition-colors
-                                ${isSubActive ? "bg-white/20 text-white" : "text-white/70 hover:bg-white/10 hover:text-white"}
+                                ${
+                                  isSubActive
+                                    ? "bg-white/20 text-white"
+                                    : "text-white/70 hover:bg-white/10 hover:text-white"
+                                }
                               `}
                               onClick={() => setSidebarOpen(false)}
                             >
                               {sub.name}
                             </Link>
-                          )
+                          );
                         })}
                       </div>
                     </div>
                   </div>
-                )
+                );
               }
 
               // Regular nav item
               return (
-                
                 <Link
                   key={item.name}
                   href={item.href}
                   className={`
                     flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors
-                    ${isActive ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}
+                    ${
+                      isActive
+                        ? "bg-white/20 text-white"
+                        : "text-white/80 hover:bg-white/10 hover:text-white"
+                    }
                   `}
                   onClick={() => setSidebarOpen(false)}
                 >
                   <item.icon className="mx-3 h-5 w-5" />
                   {item.name}
                 </Link>
-              )
+              );
             })}
           </nav>
 
           {/* Logout button */}
           <div className="p-4 border-t border-white/10">
-           <Link
-    href="/dashboard/settings"
-    className={`
+            <Link
+              href="/dashboard/settings"
+              className={`
       flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors
-      ${pathname === "/dashboard/settings"
-        ? "bg-white/20 text-white"
-        : "text-white/80 hover:bg-white/10 hover:text-white"}
+      ${
+        pathname === "/dashboard/settings"
+          ? "bg-white/20 text-white"
+          : "text-white/80 hover:bg-white/10 hover:text-white"
+      }
     `}
-  >
-    <Settings className="mx-3 h-5 w-5" />
-    الاعدادات
-  </Link>
+            >
+              <Settings className="mx-3 h-5 w-5" />
+              الاعدادات
+            </Link>
             <Button
               onClick={handleLogout}
               variant="ghost"
@@ -218,7 +245,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
         <header className="bg-white border-b border-border h-16 flex items-center px-6">
-          <Button variant="ghost" size="sm" className="lg:hidden mr-4" onClick={() => setSidebarOpen(true)}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="lg:hidden mr-4"
+            onClick={() => setSidebarOpen(true)}
+          >
             <Menu className="h-5 w-5" />
           </Button>
           <div className="flex-1" />
@@ -229,6 +261,5 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <main className="flex-1 overflow-auto p-6">{children}</main>
       </div>
     </div>
-  
-  )
+  );
 }
