@@ -231,7 +231,7 @@ export default function AllOrders() {
                       <motion.div key={row.code} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
                         <Card className="w-full bg-gradient-to-b from-[#FCFAFD] to-[#EADBFF] border rounded-[20px] border-[#5D24E147]/28 shadow-lg">
                           <CardContent className="text-sm">
-                            
+
 
                             <div dir="rtl" className="space-y-2 h-full">
                               {/* Top row: time/checkbox + status GlassButton with same icon as filters */}
@@ -287,19 +287,24 @@ export default function AllOrders() {
                                 </div>
 
                                 {/* المدينة */}
-                                <div className="col-span-12 md:col-span-6 flex items-center gap-1.5 md:justify-start">
+                                <div className="col-span-12 md:col-span-12 flex items-center gap-1.5 md:justify-start">
                                   <MapPin className="w-4 h-4 text-black" />
                                   <span className="font-medium">{row.city}</span>
                                 </div>
 
+
+                                {/* المنتج */}
+                                <div className="col-span-12 md:col-span-6 flex items-center gap-1.5 md:justify-start">
+                                  <Package className="w-4 h-4 text-black" />
+                                  <span className="font-medium">{row.product}</span>
+                                </div>
                                 {/* السعر */}
                                 <div className="col-span-12 md:col-span-6 flex items-center gap-1.5">
                                   <Banknote className="w-4 h-4 text-black" />
                                   <span className="font-medium">{row.price}</span>
                                 </div>
-
-                                {/* المنتج */}
-                                <div className="col-span-12 md:col-span-6 flex items-center gap-1.5 md:justify-start">
+                                 {/* المنتج */}
+                                 <div className="col-span-12 md:col-span-6 flex items-center gap-1.5 md:justify-start">
                                   <Package className="w-4 h-4 text-black" />
                                   <span className="font-medium">{row.product}</span>
                                 </div>
@@ -309,6 +314,7 @@ export default function AllOrders() {
                                   <Image src={Vector2} alt="tries" width={16} height={16} className="shrink-0 brightness-0" />
                                   <span className="font-medium">المحاولات : 15</span>
                                 </div>
+                                
                               </div>
                             </div>
                           </CardContent>
