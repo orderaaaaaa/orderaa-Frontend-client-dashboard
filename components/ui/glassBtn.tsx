@@ -3,23 +3,26 @@ import React from "react";
 interface GlassButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
-  colors?: [string, string, string];
-  angleDeg?: number;
+  colors?: [string, string];        // [from, to]
+  angleDeg?: number;                // 90 = left -> right
+  fromPercent?: number;             // how much of the width the "from" color takes (0-100)
 }
 
 const GlassButton: React.FC<GlassButtonProps> = ({
   children,
   onClick,
-  colors = ["#FFFFFF", "#CBB5FD", "#FFFFFF"],
-  angleDeg = -7,
+  colors = ["#FFFFFF", "#CBB5FD"],
+  angleDeg = 160,
+  fromPercent = 30,                 // <-- make "from" take 70% by default
 }) => {
-  const [from, via, to] = colors;
+  const [from, to] = colors;
+  const p = Math.max(0, Math.min(100, fromPercent)); // clamp 0..100
+
   return (
     <button
       onClick={onClick}
       className="
-      w-[142px]
-      h-[39px]
+        w-[142px] h-[39px]
         relative overflow-hidden group
         inline-flex items-center justify-center gap-2 whitespace-nowrap
         rounded-3xl 
@@ -39,7 +42,8 @@ const GlassButton: React.FC<GlassButtonProps> = ({
         aria-hidden
         className="absolute inset-0 -z-10 transition-opacity duration-300 group-hover:opacity-0"
         style={{
-          backgroundImage: `linear-gradient(${angleDeg}deg, ${from}, ${via}, ${to})`,
+          // Two stops for 'from' so it occupies more of the gradient
+          backgroundImage: `linear-gradient(${angleDeg}deg, ${from} 0%, ${from} ${p}%, ${to} 100%)`,
         }}
       />
       <span className="relative z-0">{children}</span>

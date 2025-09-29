@@ -123,7 +123,7 @@ export default function LoginPage() {
           <input type="checkbox" className="h-4 w-4 rounded border-gray-300" />
           تذكرني
         </label>
-        <a href="#" className="text-[#5D24E1] hover:underline">نسيت كلمة المرور؟</a>
+        <a href="/forgetPassword" className="text-[#5D24E1] hover:underline">نسيت كلمة المرور؟</a>
       </div>
     </div>
 
