@@ -2,17 +2,9 @@
 
 import { AuthGuard } from "@/components/auth-guard";
 import { DashboardLayout } from "@/components/dashboard-layout";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  MoreVertical,
-  User,
-  Phone,
-  Package,
-  Banknote,
-  MapPin,
-} from "lucide-react";
-import Link from "next/link";
+import { User, Phone, Package, Banknote, MapPin, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import GlassButton from "@/components/ui/glassBtn";
 import Image from "next/image";
@@ -32,7 +24,6 @@ import filterIcon from "@/public/Icons/filterIcon.svg";
 
 /* ================================
    SearchableSelect (robust dropdown)
-   - يدعم: خارج-الضغط، Esc، الأسهم + Enter
    ================================ */
 function SearchableSelect({
   label,
@@ -47,21 +38,20 @@ function SearchableSelect({
   onChange: (v: string) => void;
   options: string[];
   placeholder?: string;
-  widthClass?: string; // للتحكم في العرض
+  widthClass?: string;
 }) {
-  const [open, setOpen] = React.useState(false);
-  const [q, setQ] = React.useState("");
-  const [activeIdx, setActiveIdx] = React.useState<number>(-1);
-  const ref = React.useRef<HTMLDivElement>(null);
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const [activeIdx, setActiveIdx] = useState<number>(-1);
+  const ref = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const filtered = React.useMemo(
     () => options.filter((o) => o.toLowerCase().includes(q.toLowerCase())),
     [options, q]
   );
 
-  // إغلاق عند الضغط خارجًا
-  React.useEffect(() => {
+  useEffect(() => {
     function onDocClick(e: MouseEvent) {
       if (!ref.current) return;
       if (!ref.current.contains(e.target as Node)) {
@@ -84,12 +74,9 @@ function SearchableSelect({
     };
   }, [open]);
 
-  // افتح وركّز على المدخل
-  React.useEffect(() => {
+  useEffect(() => {
     if (open) {
-      // reset حالة التنقل
       setActiveIdx(-1);
-      // تأخير بسيط لضمان mount
       setTimeout(() => inputRef.current?.focus(), 0);
     }
   }, [open]);
@@ -108,16 +95,13 @@ function SearchableSelect({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`px-3 py-2 rounded border border-gray-300 bg-white truncate flex items-center justify-between`}
+        className="px-3 py-2 rounded border border-gray-300 bg-white truncate flex items-center justify-between"
         aria-haspopup="listbox"
         aria-expanded={open}
       >
-        <span
-          className={`text-right ${value ? "text-gray-900" : "text-gray-500"}`}
-        >
+        <span className={`text-right ${value ? "text-gray-900" : "text-gray-500"}`}>
           {value || `اختر ${label}`}
         </span>
-        {/* Arrow */}
         <svg
           className={`w-4 h-4 transition-transform ${open ? "rotate-180" : ""}`}
           viewBox="0 0 20 20"
@@ -170,9 +154,7 @@ function SearchableSelect({
 
             <div role="listbox" className="max-h-56 overflow-auto">
               {filtered.length === 0 ? (
-                <div className="px-3 py-2 text-sm text-gray-500">
-                  لا توجد نتائج
-                </div>
+                <div className="px-3 py-2 text-sm text-gray-500">لا توجد نتائج</div>
               ) : (
                 filtered.map((opt, idx) => {
                   const active = idx === activeIdx;
@@ -202,17 +184,91 @@ function SearchableSelect({
   );
 }
 
+/* ================================
+   Types
+   ================================ */
+interface OrderProduct {
+  name: string;
+  price: number; // math-friendly
+  qty?: number;
+}
+
 interface Row {
   code: string;
   name: string;
   phone: string;
-  product: string;
-  price: string;
+  products: OrderProduct[];
   status: string;
   city: string;
+  area: string;
   notes: string;
 }
 
+/* ================================
+   Simple Modal (no libs)
+   ================================ */
+function SimpleModal({
+  open,
+  onClose,
+  title,
+  children,
+  maxWidth = "max-w-xl",
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: React.ReactNode;
+  children: React.ReactNode;
+  maxWidth?: string;
+}) {
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    if (open) document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center"
+      aria-modal="true"
+      role="dialog"
+    >
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/40"
+        onClick={(e) => {
+          // close only if backdrop clicked
+          if (e.target === e.currentTarget) onClose();
+        }}
+      />
+      {/* Panel */}
+      <div
+        ref={panelRef}
+        className={`relative z-[101] w-[92vw] ${maxWidth} rounded-2xl bg-white shadow-xl p-4`}
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-lg font-semibold">{title}</h3>
+          <button
+            onClick={onClose}
+            className="rounded-full px-3 py-1 text-sm border hover:bg-gray-50"
+          >
+            إغلاق
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* ================================
+   Component
+   ================================ */
 export default function AllOrders() {
   const tabs: { label: string; icon: any }[] = [
     { label: "طلبات جديدة", icon: Vector3 },
@@ -234,217 +290,232 @@ export default function AllOrders() {
   const getStatusIcon = (status: string) =>
     tabs.find((t) => t.label === status)?.icon ?? Vector;
 
+  /* ================================
+     Sample data with products[]
+     ================================ */
   const data: Row[] = [
     {
       code: "1001",
       name: "محمد بدر",
       phone: "01112223355",
-      product: "لاب توب Dell",
-      price: "200",
+      products: [
+        { name: "لاب توب Dell", price: 200 },
+        { name: "ماوس Logitech", price: 25 },
+        { name: "كيبورد ميكانيكي", price: 175 },
+      ],
       status: "طلبات جديدة",
       city: "القاهرة",
+      area: "مدينة نصر",
       notes: "اتصل به غداً",
     },
     {
       code: "1002",
       name: "أحمد حسن",
       phone: "01099887766",
-      product: "موبايل Samsung",
-      price: "250",
+      products: [
+        { name: "موبايل Samsung", price: 250 },
+        { name: "سماعات JBL", price: 30 },
+      ],
       status: "طلبات جديدة",
       city: "الجيزة",
+      area: "مدينة نصر",
       notes: "انتظار تأكيد",
     },
     {
       code: "1003",
       name: "خالد علي",
       phone: "0123456789",
-      product: "سماعات JBL",
-      price: "300",
+      products: [{ name: "سماعات JBL", price: 300 }],
       status: "طلبات جديدة",
       city: "الإسكندرية",
+      area: "مدينة نصر",
       notes: "تم إرسال عرض",
     },
     {
       code: "2001",
       name: "محمود سامي",
       phone: "01544556677",
-      product: "طابعة HP",
-      price: "180",
+      products: [{ name: "طابعة HP", price: 180 }],
       status: "تم المحاولة",
       city: "طنطا",
+      area: "مدينة نصر",
       notes: "مغلق",
     },
     {
       code: "2002",
       name: "فاطمة محمد",
       phone: "01033445566",
-      product: "شاشة LG",
-      price: "220",
+      products: [{ name: "شاشة LG", price: 220 }],
       status: "تم المحاولة",
       city: "القاهرة",
+      area: "مدينة نصر",
       notes: "سيعاود الاتصال",
     },
     {
       code: "3001",
       name: "يوسف سعيد",
       phone: "01299887755",
-      product: "ماوس Logitech",
-      price: "150",
+      products: [{ name: "ماوس Logitech", price: 150 }],
       status: "واتساب",
       city: "المنصورة",
+      area: "مدينة نصر",
       notes: "في انتظار الرد",
     },
     {
       code: "3002",
       name: "علي حسن",
       phone: "01011223344",
-      product: "كيبورد ميكانيكي",
-      price: "400",
+      products: [{ name: "كيبورد ميكانيكي", price: 400 }],
       status: "واتساب",
       city: "الإسكندرية",
+      area: "مدينة نصر",
       notes: "اقترح تخفيض",
     },
     {
       code: "4001",
       name: "سارة أحمد",
       phone: "01177889900",
-      product: "ساعة Apple Watch",
-      price: "275",
+      products: [{ name: "ساعة Apple Watch", price: 275 }],
       status: "إعادة اتصال",
       city: "الجيزة",
+      area: "مدينة نصر",
       notes: "اتصل بعد العصر",
     },
     {
       code: "4002",
       name: "مروان سمير",
       phone: "01522334455",
-      product: "سماعة AirPods",
-      price: "350",
+      products: [{ name: "سماعة AirPods", price: 350 }],
       status: "إعادة اتصال",
       city: "القاهرة",
+      area: "مدينة نصر",
       notes: "لا يرد",
     },
     {
       code: "5001",
       name: "داليا عادل",
       phone: "01077889900",
-      product: "كيس كمبيوتر",
-      price: "210",
+      products: [{ name: "كيس كمبيوتر", price: 210 }],
       status: "وقف التشغيل",
       city: "بورسعيد",
+      area: "مدينة نصر",
       notes: "رقم غير مستخدم",
     },
     {
       code: "5002",
       name: "كريم علي",
       phone: "01255443322",
-      product: "بروجيكتور",
-      price: "290",
+      products: [{ name: "بروجيكتور", price: 290 }],
       status: "وقف التشغيل",
       city: "القاهرة",
+      area: "مدينة نصر",
       notes: "مغلق نهائياً",
     },
     {
       code: "6001",
       name: "هدى محمود",
       phone: "01144556677",
-      product: "هارد SSD",
-      price: "310",
+      products: [{ name: "هارد SSD", price: 310 }],
       status: "لم يتم المحاولة امس",
       city: "الفيوم",
+      area: "مدينة نصر",
       notes: "لم يتصل أحد",
     },
     {
       code: "6002",
       name: "ياسين محمد",
       phone: "01588997766",
-      product: "كارت شاشة NVIDIA",
-      price: "260",
+      products: [{ name: "كارت شاشة NVIDIA", price: 260 }],
       status: "لم يتم المحاولة امس",
       city: "الإسكندرية",
+      area: "مدينة نصر",
       notes: "مطلوب تواصل اليوم",
     },
     {
       code: "7001",
       name: "نادر حسن",
       phone: "01044556677",
-      product: "لاب توب HP",
-      price: "500",
+      products: [{ name: "لاب توب HP", price: 500 }],
       status: "طلبات  تم التأكيد",
       city: "القاهرة",
+      area: "مدينة نصر",
       notes: "تم الدفع",
     },
     {
       code: "7002",
       name: "مها عبد الله",
       phone: "01222334455",
-      product: "تليفزيون Samsung",
-      price: "430",
+      products: [{ name: "تليفزيون Samsung", price: 430 }],
       status: "طلبات  تم التأكيد",
       city: "الجيزة",
+      area: "مدينة نصر",
       notes: "تسليم غداً",
     },
     {
       code: "8001",
       name: "رامي طارق",
       phone: "01199887755",
-      product: "غسالة LG",
-      price: "380",
+      products: [{ name: "غسالة LG", price: 380 }],
       status: "طلبات تم التحضير",
       city: "المنوفية",
+      area: "مدينة نصر",
       notes: "جاهز للشحن",
     },
     {
       code: "8002",
       name: "نور محمود",
       phone: "01066554433",
-      product: "ثلاجة Toshiba",
-      price: "270",
+      products: [{ name: "ثلاجة Toshiba", price: 270 }],
       status: "طلبات تم التحضير",
       city: "القاهرة",
+      area: "مدينة نصر",
       notes: "بانتظار شركة الشحن",
     },
     {
       code: "9001",
       name: "سامي حسين",
       phone: "01533221100",
-      product: "مكيف شارب",
-      price: "600",
+      products: [{ name: "مكيف شارب", price: 600 }],
       status: "طلبات في الشحن",
       city: "الإسكندرية",
+      area: "مدينة نصر",
       notes: "في الطريق",
     },
     {
       code: "9002",
       name: "جنى علي",
       phone: "01055667788",
-      product: "مروحة توشيبا",
-      price: "720",
+      products: [{ name: "مروحة توشيبا", price: 720 }],
       status: "طلبات في الشحن",
       city: "القاهرة",
+      area: "مدينة نصر",
       notes: "سيصل خلال يومين",
     },
     {
       code: "9003",
       name: "إسراء مصطفى",
       phone: "01277889900",
-      product: "دفاية كهرباء",
-      price: "450",
+      products: [{ name: "دفاية كهرباء", price: 450 }],
       status: "طلبات في الشحن",
       city: "بورسعيد",
+      area: "مدينة نصر",
       notes: "تم تأكيد العنوان",
     },
   ];
 
-  const productOptions = Array.from(new Set(data.map((d) => d.product))).sort();
-  const governorateOptions = Array.from(
-    new Set(data.map((d) => d.city))
+  /* ================================
+     Options
+     ================================ */
+  const productOptions = Array.from(
+    new Set(data.flatMap((d) => d.products.map((p) => p.name)))
   ).sort();
-  // placeholders
-  const sizeColorOptions = ["صغير - أسود", "متوسط - أبيض", "كبير - أزرق"];
-  const areaOptions = ["مدينة نصر", "المعادي", "الدقي", "الزقازيق", "طنطا"];
+  const governorateOptions = Array.from(new Set(data.map((d) => d.city))).sort();
+  const sizeColorOptions = ["صغير - أسود", "متوسط - أبيض", "كبير - أزرق"]; // placeholder
+  const areaOptions = ["مدينة نصر", "المعادي", "الدقي", "الزقازيق", "طنطا"]; // sample
 
+  /* ================================
+     Filters / State
+     ================================ */
   const [filters, setFilters] = useState({
     productName: "",
     sizeColor: "",
@@ -463,25 +534,40 @@ export default function AllOrders() {
   const pageSize = 6;
   const [showFilters, setShowFilters] = useState(false);
 
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogOrder, setDialogOrder] = useState<Row | null>(null);
+  const openOrderDialog = (order: Row) => {
+    setDialogOrder(order);
+    setDialogOpen(true);
+  };
+
+  /* ================================
+     Filtering
+     ================================ */
   const filteredData = data.filter((row) => {
     const matchStatusTab = !activeTab || row.status === activeTab;
-    const matchProduct =
-      !filters.productName || row.product === filters.productName;
-    const matchGov = !filters.governorate || row.city === filters.governorate;
 
-    // placeholders (لا توجد بيانات فعلية)
-    const matchSizeColor = !filters.sizeColor || true;
-    const matchArea = !filters.area || true;
+    const matchProduct =
+      !filters.productName ||
+      row.products.some((p) => p.name === filters.productName);
+
+    const matchGov = !filters.governorate || row.city === filters.governorate;
+    const matchSizeColor = !filters.sizeColor || true; // placeholder
+    const matchArea = !filters.area || row.area === filters.area;
 
     const matchShipment =
       !filters.shipmentCode || row.code.includes(filters.shipmentCode);
+
     const matchCustomer =
       !filters.customerName || row.name.includes(filters.customerName);
+
     const matchPhone = !filters.phone || row.phone.includes(filters.phone);
+
     const matchAddress =
       !filters.address ||
       row.notes.includes(filters.address) ||
-      row.city.includes(filters.address);
+      row.city.includes(filters.address) ||
+      row.area.includes(filters.address);
 
     return (
       matchStatusTab &&
@@ -509,6 +595,8 @@ export default function AllOrders() {
       prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
     );
   };
+
+  const formatCurrency = (n: number) => n.toLocaleString();
 
   return (
     <AuthGuard>
@@ -585,7 +673,7 @@ export default function AllOrders() {
                 <div className="flex items-center justify-between mb-3">
                   <button
                     onClick={() => setShowFilters((v) => !v)}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-md  hover:bg-gray-50 transition text-gray-800"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-md hover:bg-gray-50 transition text-gray-800"
                   >
                     <span className="inline-flex items-center gap-1">
                       <Image
@@ -608,7 +696,7 @@ export default function AllOrders() {
                       transition={{ duration: 0.25 }}
                       className="flex flex-wrap gap-4 mb-6 rounded-xl border border-white/50 bg-white/50 backdrop-blur-md shadow-sm p-4"
                     >
-                      {/* 8 Filters (أول 4 searchable dropdowns) */}
+                      {/* 4 searchable dropdowns */}
                       <SearchableSelect
                         label="اسم المنتج"
                         value={filters.productName}
@@ -651,11 +739,9 @@ export default function AllOrders() {
                         widthClass="w-56"
                       />
 
-                      {/* باقي الفلاتر Inputs */}
+                      {/* باقي الفلاتر */}
                       <div className="flex flex-col gap-1">
-                        <label className="text-xs text-gray-600">
-                          كود الشحنه
-                        </label>
+                        <label className="text-xs text-gray-600">كود الشحنه</label>
                         <input
                           type="text"
                           value={filters.shipmentCode}
@@ -671,9 +757,7 @@ export default function AllOrders() {
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <label className="text-xs text-gray-600">
-                          اسم العميل
-                        </label>
+                        <label className="text-xs text-gray-600">اسم العميل</label>
                         <input
                           type="text"
                           value={filters.customerName}
@@ -689,9 +773,7 @@ export default function AllOrders() {
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <label className="text-xs text-gray-600">
-                          رقم التليفون
-                        </label>
+                        <label className="text-xs text-gray-600">رقم التليفون</label>
                         <input
                           type="text"
                           value={filters.phone}
@@ -743,12 +825,10 @@ export default function AllOrders() {
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
-                      className="accent-[#5D24E1] "
+                      className="accent-[#5D24E1]"
                       checked={
                         paginatedData.length > 0 &&
-                        paginatedData.every((r) =>
-                          selectedRows.includes(r.code)
-                        )
+                        paginatedData.every((r) => selectedRows.includes(r.code))
                       }
                       onChange={(e) => {
                         if (e.target.checked)
@@ -767,9 +847,7 @@ export default function AllOrders() {
                           );
                       }}
                     />
-                    <span className="text-sm text-gray-600">
-                      تحديد الكل في الصفحة
-                    </span>
+                    <span className="text-sm text-gray-600">تحديد الكل في الصفحة</span>
                   </div>
                 </div>
 
@@ -782,6 +860,14 @@ export default function AllOrders() {
                 >
                   {paginatedData.map((row, i) => {
                     const StatusIcon = getStatusIcon(row.status);
+                    const first = row.products[0];
+                    const second = row.products[1];
+                    const extraCount = Math.max(0, row.products.length - 2);
+                    const total = row.products.reduce(
+                      (s, p) => s + p.price * (p.qty ?? 1),
+                      0
+                    );
+
                     return (
                       <motion.div
                         key={row.code}
@@ -789,39 +875,30 @@ export default function AllOrders() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.06 }}
                       >
-                        {/* zoom-out wrapper keeps layout width the same */}
-                        <div className="origin-top-right scale-[0.9] w-[111.111%]">
-                          <Card className="w-full bg-gradient-to-b from-[#FCFAFD] to-[#EADBFF] border rounded-[20px] border-[#5D24E147]/28 shadow-lg">
-                            <CardContent className="text-sm">
+                        <div className="origin-top-right scale-[0.9] w-[111.111%] font-bold">
+                          <Card
+                            className="w-full bg-gradient-to-b from-[#FCFAFD] to-[#EADBFF] rounded-[20px] shadow-lg"
+                            style={{ border: "1px solid rgba(93, 36, 225, 0.28)" }}
+                          >
+                            <CardContent className="text-sm leading-[1.1]">
                               <div dir="rtl" className="space-y-2 h-full">
-                                {/* Use a clean 2-col grid so left column items start at the same point */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 w-full">
                                   {/* الكود */}
                                   <div className="flex items-center gap-1.5">
-                                    <Image
-                                      src={IdIcon}
-                                      alt="ID"
-                                      width={16}
-                                      height={16}
-                                      className="shrink-0"
-                                    />
-                                    <span className="text-gray-600">الكود</span>
-                                    <span className="font-semibold">
-                                      {row.code}
-                                    </span>
+                                    <Image src={IdIcon} alt="ID" width={16} height={16} className="shrink-0 self-center" />
+                                    <span className="text-gray-600 leading-none">الكود</span>
+                                    <span className="font-semibold leading-none">{row.code}</span>
                                   </div>
 
-                                  {/* الميعاد + checkbox (kept on the left column, but aligned by the grid) */}
+                                  {/* الميعاد + checkbox */}
                                   <div className="flex items-center gap-1.5 justify-center md:justify-center">
-                                    <div className="flex items-center gap-2 ">
-                                      <span className="text-[12px] text-gray-600">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-[12px] text-gray-600 leading-none">
                                         منذ 3 أيام و 15 ساعة
                                       </span>
                                       <input
                                         type="checkbox"
-                                        checked={selectedRows.includes(
-                                          row.code
-                                        )}
+                                        checked={selectedRows.includes(row.code)}
                                         onChange={() => toggleRow(row.code)}
                                         className="accent-[#5D24E1]"
                                       />
@@ -830,95 +907,87 @@ export default function AllOrders() {
 
                                   {/* الاسم */}
                                   <div className="flex items-center gap-1.5">
-                                    <User className="w-4 h-4 text-black" />
-                                    <span className="font-medium">
-                                      {row.name}
-                                    </span>
+                                    <User className="w-4 h-4 text-black self-center" />
+                                    <span className="font-medium leading-none">{row.name}</span>
                                   </div>
 
-                                  {/* الحالة (removed ms-12/scale so it aligns with other left items) */}
-                                  {/* الحالة */}
                                   {/* الحالة */}
                                   <div className="flex items-center gap-1.5 justify-center">
-                                    {/*  */}
                                     <button
                                       type="button"
                                       style={{
                                         background:
                                           "linear-gradient(114.13deg, #FFFFFF 8.63%, #DCD1F5 54.17%, #FFFFFF 99.72%)",
                                       }}
-                                      className="
-    w-[132px] h-[30px] 
-    inline-flex items-center justify-center gap-1
-    rounded-[999px]
-    border border-[#5D24E147]
-    text-xs font-medium
-  "
+                                      className="w-[132px] h-[30px] inline-flex items-center justify-center gap-1 rounded-[999px] border border-[#5D24E147] text-xs font-medium"
                                     >
-                                      <Image
-                                        src={StatusIcon}
-                                        alt="status"
-                                        width={16}
-                                        height={16}
-                                        className="shrink-0"
-                                      />
-                                      <span className="text-[#5D24E1]">
-                                        {row.status}
-                                      </span>
+                                      <Image src={StatusIcon} alt="status" width={16} height={16} className="shrink-0 self-center" />
+                                      <span className="text-[#5D24E1] leading-none">{row.status}</span>
                                     </button>
                                   </div>
 
                                   {/* الهاتف */}
                                   <div className="flex items-center gap-1.5 md:col-span-2">
-                                    <Phone className="w-4 h-4 text-black" />
-                                    <span className="font-medium ltr:text-left rtl:text-right">
+                                    <Phone className="w-4 h-4 text-black self-center" />
+                                    <span className="font-medium leading-none ltr:text-left rtl:text-right">
                                       {row.phone}
                                     </span>
                                   </div>
 
-                                  {/* المدينة */}
+                                  {/* المدينة + المنطقة */}
                                   <div className="flex items-center gap-1.5 md:col-span-2">
-                                    <MapPin className="w-4 h-4 text-black" />
-                                    <span className="font-medium">
-                                      {row.city}
+                                    <MapPin className="w-4 h-4 text-black self-center" />
+                                    <span className="font-medium leading-none">
+                                      {row.city} - {row.area}
                                     </span>
                                   </div>
 
-                                  {/* المنتج */}
-                                  <div className="flex items-center gap-1.5">
-                                    <Package className="w-4 h-4 text-black" />
-                                    <span className="font-medium">
-                                      {row.product}
-                                    </span>
-                                  </div>
+                                  {/* المنتج الأول */}
+                                  {first && (
+                                    <div className="flex items-center gap-1.5">
+                                      <Package className="w-4 h-4 text-black self-center" />
+                                      <span className="font-medium leading-none">{first.name}</span>
+                                      <span className="font-medium leading-none ltr:ml-auto rtl:mr-auto">
+                                        {formatCurrency(first.price)}
+                                      </span>
+                                    </div>
+                                  )}
 
-                                  {/* السعر */}
-                                  <div className="flex items-center gap-1.5 justify-center">
-                                    <Banknote className="w-4 h-4 text-black" />
-                                    <span className="font-medium">
-                                      {row.price}
-                                    </span>
-                                  </div>
+                                  {/* المنتج الثاني + +N */}
+                                  {second && (
+                                    <div className="flex items-center gap-1.5">
+                                      <Package className="w-4 h-4 text-black self-center" />
+                                      <span className="font-medium leading-none">{second.name}</span>
+                                      <span className="font-medium leading-none ltr:ml-auto rtl:mr-auto">
+                                        {formatCurrency(second.price)}
+                                      </span>
 
-                                  <div className="flex items-center gap-1.5">
-                                    <Package className="w-4 h-4 text-black" />
-                                    <span className="font-medium">
-                                      {row.product}
+                                      {extraCount > 0 && (
+                                        <button
+                                          onClick={() => openOrderDialog(row)}
+                                          className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full border border-[#5D24E1] text-[#5D24E1] hover:bg-[#5D24E1] hover:text-white transition"
+                                          title="عرض باقي المنتجات"
+                                          type="button"
+                                        >
+                                          <Plus className="w-3 h-3" />
+                                          +{extraCount}
+                                        </button>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* الإجمالي */}
+                                  <div className="flex items-center gap-1.5 md:col-span-2 justify-center">
+                                    <Banknote className="w-4 h-4 text-black self-baseline-last" />
+                                    <span className="font-medium leading-none">
+                                      الإجمالي: {formatCurrency(total)}
                                     </span>
                                   </div>
 
                                   {/* المحاولات */}
-                                  <div className="flex items-center gap-1.5 justify-center">
-                                    <Image
-                                      src={Vector2}
-                                      alt="tries"
-                                      width={16}
-                                      height={16}
-                                      className="shrink-0 brightness-0"
-                                    />
-                                    <span className="font-medium">
-                                      المحاولات : 15
-                                    </span>
+                                  <div className="flex items-center gap-1.5 justify-center md:col-span-2">
+                                    <Image src={Vector2} alt="tries" width={16} height={16} className="shrink-0 brightness-0 self-center" />
+                                    <span className="font-medium leading-none">المحاولات : 15</span>
                                   </div>
                                 </div>
                               </div>
@@ -933,21 +1002,19 @@ export default function AllOrders() {
                 {/* Pagination + selected counter */}
                 <div className="flex justify-between items-center mt-6">
                   <div className="flex justify-center mt-4 gap-2">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                      (p) => (
-                        <button
-                          key={p}
-                          onClick={() => setPage(p)}
-                          className={`px-3 py-1 border rounded ${
-                            p === page
-                              ? "bg-purple-600 text-white border-purple-600"
-                              : "border-gray-300 hover:bg-gray-100"
-                          }`}
-                        >
-                          {p}
-                        </button>
-                      )
-                    )}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => setPage(p)}
+                        className={`px-3 py-1 border rounded ${
+                          p === page
+                            ? "bg-purple-600 text-white border-purple-600"
+                            : "border-gray-300 hover:bg-gray-100"
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ))}
                   </div>
 
                   {selectedRows.length > 0 && (
@@ -981,6 +1048,65 @@ export default function AllOrders() {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Simple Modal: all order products */}
+        <SimpleModal
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          title={<>تفاصيل الطلب #{dialogOrder?.code}</>}
+          maxWidth="max-w-2xl"
+        >
+          {dialogOrder && (
+            <div dir="rtl" className="space-y-4">
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-gray-600">الاسم:</span> {dialogOrder.name}
+                </div>
+                <div>
+                  <span className="text-gray-600">الهاتف:</span> {dialogOrder.phone}
+                </div>
+                <div className="col-span-2">
+                  <span className="text-gray-600">العنوان:</span>{" "}
+                  {dialogOrder.city} - {dialogOrder.area}
+                </div>
+                <div className="col-span-2">
+                  <span className="text-gray-600">الحالة:</span> {dialogOrder.status}
+                </div>
+              </div>
+
+              <div className="border rounded-lg overflow-hidden">
+                <div className="grid grid-cols-12 text-xs bg-gray-50 px-3 py-2 font-medium">
+                  <div className="col-span-7">المنتج</div>
+                  <div className="col-span-2 text-center">الكمية</div>
+                  <div className="col-span-3 text-left">السعر</div>
+                </div>
+                <div className="divide-y">
+                  {dialogOrder.products.map((p, idx) => (
+                    <div key={idx} className="grid grid-cols-12 px-3 py-2 text-sm">
+                      <div className="col-span-7">{p.name}</div>
+                      <div className="col-span-2 text-center">{p.qty ?? 1}</div>
+                      <div className="col-span-3 text-left">
+                        {formatCurrency(p.price)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-sm font-semibold">
+                <span>الإجمالي</span>
+                <span>
+                  {formatCurrency(
+                    dialogOrder.products.reduce(
+                      (s, p) => s + p.price * (p.qty ?? 1),
+                      0
+                    )
+                  )}
+                </span>
+              </div>
+            </div>
+          )}
+        </SimpleModal>
       </DashboardLayout>
     </AuthGuard>
   );
