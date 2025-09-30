@@ -16,6 +16,7 @@ import {
   X,
   ChevronDown,
   ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -64,11 +65,38 @@ const navigation = [
   },
 ];
 
+/* ===== Breadcrumb helper ===== */
+function getBreadcrumb(pathname: string) {
+  for (const item of navigation) {
+    if (item.children) {
+      const child = item.children.find((c) => pathname.startsWith(c.href));
+      if (child) {
+        return { parent: item.name, child: child.name };
+      }
+    }
+    if (pathname === item.href) {
+      return { parent: item.name, child: null as string | null };
+    }
+  }
+  const parent = navigation.find((n) => pathname.startsWith(n.href));
+  return { parent: parent?.name ?? "لوحة التحكم", child: null as string | null };
+}
+
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // mobile drawer
+  const [isCollapsed, setIsCollapsed] = useState(false); // desktop collapse
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+
+  // Restore collapse preference
+  useEffect(() => {
+    const saved = localStorage.getItem("sidebar_collapsed");
+    if (saved === "1") setIsCollapsed(true);
+  }, []);
+  useEffect(() => {
+    localStorage.setItem("sidebar_collapsed", isCollapsed ? "1" : "0");
+  }, [isCollapsed]);
 
   // Auto-open dropdown if pathname matches a child route
   useEffect(() => {
@@ -90,6 +118,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     router.push("/");
   };
 
+  const breadcrumb = getBreadcrumb(pathname);
+
+  const sidebarWidthExpanded = "w-64";
+  const sidebarWidthCollapsed = "w-20";
+
   return (
     <div className="flex h-screen bg-background">
       {/* Mobile sidebar overlay */}
@@ -103,17 +136,38 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Sidebar */}
       <div
         className={`
-          fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
+          fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+          lg:translate-x-0 lg:static lg:inset-0
         `}
       >
         <div
-          className="flex flex-col h-full"
+          className={`
+            flex flex-col h-full transition-[width] duration-300 ease-in-out
+            ${isCollapsed ? sidebarWidthCollapsed : sidebarWidthExpanded}
+          `}
           style={{ backgroundColor: "#5D24E1" }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between h-16 px-6 border-b border-white/10">
-            <h1 className="text-xl font-bold text-white m-auto">Ordera</h1>
+          <div className="flex items-center justify-between h-16 px-3 border-b border-white/10">
+            {!isCollapsed && (
+              <h1 className="text-xl font-bold text-white m-auto">Ordera</h1>
+            )}
+            {/* Desktop collapse toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden lg:flex text-white hover:bg-white/10"
+              onClick={() => setIsCollapsed((v) => !v)}
+              title={isCollapsed ? "توسيع القائمة" : "تصغير القائمة"}
+            >
+              {isCollapsed ? (
+                <ChevronRight className="h-5 w-5" />
+              ) : (
+                <ChevronLeft className="h-5 w-5" />
+              )}
+            </Button>
+            {/* Mobile close */}
             <Button
               variant="ghost"
               size="sm"
@@ -125,68 +179,78 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2">
+          <nav className="flex-1 px-2 py-4 space-y-2">
             {navigation.map((item) => {
               const isActive = pathname === item.href;
 
-              // If item has children (dropdown)
+              // Dropdown item
               if (item.children) {
                 const isOpen = openDropdown === item.name;
+
                 return (
-                  <div key={item.name}>
+                  <div key={item.name} className="group">
                     <button
-                      onClick={() => setOpenDropdown(isOpen ? null : item.name)}
+                      onClick={() => {
+                        if (isCollapsed) {
+                          setIsCollapsed(false);
+                          setOpenDropdown(item.name);
+                        } else {
+                          setOpenDropdown(isOpen ? null : item.name);
+                        }
+                      }}
                       className={`
-                        flex items-center justify-between w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors
+                        flex items-center justify-between w-full px-3 py-3 text-sm font-medium rounded-lg transition-colors
                         ${
                           isActive || isOpen
                             ? "bg-white/20 text-white"
                             : "text-white/80 hover:bg-white/10 hover:text-white"
                         }
                       `}
+                      style={{ direction: "rtl" }}
                     >
-                      <span className="flex items-center">
-                        <item.icon className="mx-3 h-5 w-5" />
-                        {item.name}
+                      <span className="flex items-center gap-2">
+                        <item.icon className="h-5 w-5 shrink-0" />
+                        {!isCollapsed && <span className="pr-2">{item.name}</span>}
                       </span>
-                      {isOpen ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronLeft className="h-4 w-4" />
-                      )}
+                      {!isCollapsed &&
+                        (isOpen ? (
+                          <ChevronDown className="h-4 w-4 shrink-0" />
+                        ) : (
+                          <ChevronLeft className="h-4 w-4 shrink-0" />
+                        ))}
                     </button>
 
-                    {/* Submenu with smooth animation */}
-                    <div
-                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                        isOpen
-                          ? "max-h-40 opacity-100 mt-2"
-                          : "max-h-0 opacity-0"
-                      }`}
-                    >
-                      <div className="ml-10 space-y-2">
-                        {item.children.map((sub) => {
-                          const isSubActive = pathname.startsWith(sub.href);
-                          return (
-                            <Link
-                              key={sub.name}
-                              href={sub.href}
-                              className={`
-                                block px-3 py-2 text-sm rounded-md transition-colors
-                                ${
-                                  isSubActive
-                                    ? "bg-white/20 text-white"
-                                    : "text-white/70 hover:bg-white/10 hover:text-white"
-                                }
-                              `}
-                              onClick={() => setSidebarOpen(false)}
-                            >
-                              {sub.name}
-                            </Link>
-                          );
-                        })}
+                    {/* Submenu */}
+                    {!isCollapsed && (
+                      <div
+                        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                          isOpen ? "max-h-40 opacity-100 mt-2" : "max-h-0 opacity-0"
+                        }`}
+                      >
+                        <div className="mr-8 space-y-2" style={{ direction: "rtl" }}>
+                          {item.children.map((sub) => {
+                            const isSubActive = pathname.startsWith(sub.href);
+                            return (
+                              <Link
+                                key={sub.name}
+                                href={sub.href}
+                                className={`
+                                  block px-3 py-2 text-sm rounded-md transition-colors
+                                  ${
+                                    isSubActive
+                                      ? "bg-white/20 text-white"
+                                      : "text-white/70 hover:bg-white/10 hover:text-white"
+                                  }
+                                `}
+                                onClick={() => setSidebarOpen(false)}
+                              >
+                                {sub.name}
+                              </Link>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 );
               }
@@ -197,7 +261,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   key={item.name}
                   href={item.href}
                   className={`
-                    flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors
+                    flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors
                     ${
                       isActive
                         ? "bg-white/20 text-white"
@@ -205,37 +269,40 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     }
                   `}
                   onClick={() => setSidebarOpen(false)}
+                  style={{ direction: "rtl" }}
                 >
-                  <item.icon className="mx-3 h-5 w-5" />
-                  {item.name}
+                  <item.icon className="h-5 w-5 shrink-0" />
+                  {!isCollapsed && <span className="pr-2">{item.name}</span>}
                 </Link>
               );
             })}
           </nav>
 
-          {/* Logout button */}
-          <div className="p-4 border-t border-white/10">
+          {/* Settings + Logout */}
+          <div className="p-3 border-t border-white/10" style={{ direction: "rtl" }}>
             <Link
               href="/dashboard/settings"
               className={`
-      flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors
-      ${
-        pathname === "/dashboard/settings"
-          ? "bg-white/20 text-white"
-          : "text-white/80 hover:bg-white/10 hover:text-white"
-      }
-    `}
+                flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors
+                ${
+                  pathname === "/dashboard/settings"
+                    ? "bg-white/20 text-white"
+                    : "text-white/80 hover:bg-white/10 hover:text-white"
+                }
+              `}
+              onClick={() => setSidebarOpen(false)}
             >
-              <Settings className="mx-3 h-5 w-5" />
-              الاعدادات
+              <Settings className="h-5 w-5 shrink-0" />
+              {!isCollapsed && <span className="pr-2">الاعدادات</span>}
             </Link>
+
             <Button
               onClick={handleLogout}
               variant="ghost"
-              className="w-full justify-start text-white/80 hover:bg-white/10 hover:text-white"
+              className="w-full justify-start text-white/80 hover:bg-white/10 hover:text-white mt-2"
             >
-              <LogOut className="mx-3 h-5 w-5" />
-              تسجيل الخروج
+              <LogOut className="h-5 w-5 shrink-0" />
+              {!isCollapsed && <span className="pr-2">تسجيل الخروج</span>}
             </Button>
           </div>
         </div>
@@ -244,21 +311,37 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="bg-white border-b border-border h-16 flex items-center px-6">
+        <header className="bg-white border-b border-border h-16 flex items-center px-4 lg:px-6">
+          {/* Mobile open */}
           <Button
             variant="ghost"
             size="sm"
-            className="lg:hidden mr-4"
+            className="lg:hidden mr-2"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu className="h-5 w-5" />
           </Button>
+
+          {/* Breadcrumb: Parent > Child (if child exists) */}
+          <div
+            className="flex items-center gap-2 text-base lg:text-lg font-semibold text-gray-800"
+            style={{ direction: "rtl" }}
+          >
+            <span className="text-[#5D24E1]">{breadcrumb.parent}</span>
+            {breadcrumb.child && (
+              <>
+                <ChevronLeft className="h-4 w-4 opacity-60" />
+                <span className="font-normal text-gray-700">{breadcrumb.child}</span>
+              </>
+            )}
+          </div>
+
           <div className="flex-1" />
           <div className="text-sm text-muted-foreground">Welcome, Admin</div>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto p-6">{children}</main>
+        <main className="flex-1 overflow-auto p-4 lg:p-6">{children}</main>
       </div>
     </div>
   );
