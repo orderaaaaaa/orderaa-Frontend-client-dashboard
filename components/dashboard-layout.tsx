@@ -121,7 +121,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const breadcrumb = getBreadcrumb(pathname);
 
   const sidebarWidthExpanded = "w-64";
-  const sidebarWidthCollapsed = "w-20";
+  const sidebarWidthCollapsed = "w-16";
 
   return (
     <div className="flex h-screen bg-background">
