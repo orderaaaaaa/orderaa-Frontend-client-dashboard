@@ -514,7 +514,11 @@ export default function AllOrders() {
   return (
     <AuthGuard>
       <DashboardLayout>
-        <div className="bg-white rounded-lg shadow p-6">
+        <div 
+          // style={{
+          //   transform: "scale(0.9)",
+          //   }}
+        className="bg-white rounded-lg shadow p-6 scale-90">
           <AnimatePresence>
             {open && (
               <motion.div
