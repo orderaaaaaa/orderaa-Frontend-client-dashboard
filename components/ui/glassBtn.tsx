@@ -3,9 +3,9 @@ import React from "react";
 interface GlassButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
-  colors?: [string, string];        // [from, to]
-  angleDeg?: number;                // 90 = left -> right
-  fromPercent?: number;             // how much of the width the "from" color takes (0-100)
+  colors?: [string, string]; // [from, to]
+  angleDeg?: number; // 90 = left -> right
+  fromPercent?: number; // how much of the width the "from" color takes (0-100)
 }
 
 const GlassButton: React.FC<GlassButtonProps> = ({
@@ -13,7 +13,7 @@ const GlassButton: React.FC<GlassButtonProps> = ({
   onClick,
   colors = ["#FFFFFF", "#CBB5FD"],
   angleDeg = 160,
-  fromPercent = 30,                 // <-- make "from" take 70% by default
+  fromPercent = 30, // <-- make "from" take 70% by default
 }) => {
   const [from, to] = colors;
   const p = Math.max(0, Math.min(100, fromPercent)); // clamp 0..100
@@ -22,7 +22,8 @@ const GlassButton: React.FC<GlassButtonProps> = ({
     <button
       onClick={onClick}
       className="
-        w-[142px] h-[39px]
+              min-w-[142px] w-auto
+ h-[39px]
         relative overflow-hidden group
         inline-flex items-center justify-center gap-2 whitespace-nowrap
         rounded-3xl 
