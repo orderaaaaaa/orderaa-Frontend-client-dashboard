@@ -135,7 +135,7 @@ function SearchableSelect({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
             transition={{ duration: 0.12 }}
-            className={`absolute z-20 mt-1 ${widthClass} rounded-lg border bg-white shadow-lg`}
+            className={`absolute z-20 mt-1 ${widthClass} rounded-lg border bg-white -shadowlg`}
           >
             <div className="p-2 border-b">
               <input
@@ -514,9 +514,7 @@ export default function AllOrders() {
   return (
     <AuthGuard>
       <DashboardLayout>
-        <div 
-       
-        className="bg-white rounded-lg shadow p-6 ">
+        <div className="bg-white rounded-lg shadow p-6 ">
           <AnimatePresence>
             {open && (
               <motion.div
@@ -793,111 +791,129 @@ export default function AllOrders() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.06 }}
                       >
-                       {/* zoom-out wrapper keeps layout width the same */}
-<div className="origin-top-right scale-[0.9] w-[111.111%]">
-  <Card className="w-full bg-gradient-to-b from-[#FCFAFD] to-[#EADBFF] border rounded-[20px] border-[#5D24E147]/28 shadow-lg">
-    <CardContent className="text-sm">
-      <div dir="rtl" className="space-y-2 h-full">
-        {/* Use a clean 2-col grid so left column items start at the same point */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 w-full">
+                        {/* zoom-out wrapper keeps layout width the same */}
+                        <div className="origin-top-right scale-[0.9] w-[111.111%]">
+                          <Card className="w-full bg-gradient-to-b from-[#FCFAFD] to-[#EADBFF] border rounded-[20px] border-[#5D24E147]/28 ">
+                            <CardContent className="text-sm">
+                              <div dir="rtl" className="space-y-2 h-full">
+                                {/* Use a clean 2-col grid so left column items start at the same point */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 w-full">
+                                  {/* الكود */}
+                                  <div className="flex items-center gap-1.5">
+                                    <Image
+                                      src={IdIcon}
+                                      alt="ID"
+                                      width={16}
+                                      height={16}
+                                      className="shrink-0"
+                                    />
+                                    <span className="text-gray-600">الكود</span>
+                                    <span className="font-semibold">
+                                      {row.code}
+                                    </span>
+                                  </div>
 
-          {/* الكود */}
-          <div className="flex items-center gap-1.5">
-            <Image
-              src={IdIcon}
-              alt="ID"
-              width={16}
-              height={16}
-              className="shrink-0"
-            />
-            <span className="text-gray-600">الكود</span>
-            <span className="font-semibold">{row.code}</span>
-          </div>
+                                  {/* الميعاد + checkbox (kept on the left column, but aligned by the grid) */}
+                                  <div className="flex items-center gap-1.5 justify-end md:justify-start">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-[12px] text-gray-600">
+                                        منذ 3 أيام و 15 ساعة
+                                      </span>
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedRows.includes(
+                                          row.code
+                                        )}
+                                        onChange={() => toggleRow(row.code)}
+                                        className="accent-[#5D24E1]"
+                                      />
+                                    </div>
+                                  </div>
 
-          {/* الميعاد + checkbox (kept on the left column, but aligned by the grid) */}
-          <div className="flex items-center gap-1.5 justify-end md:justify-start">
-            <div className="flex items-center gap-2">
-              <span className="text-[12px] text-gray-600">منذ 3 أيام و 15 ساعة</span>
-              <input
-                type="checkbox"
-                checked={selectedRows.includes(row.code)}
-                onChange={() => toggleRow(row.code)}
-                className="accent-[#5D24E1]"
-              />
-            </div>
-          </div>
+                                  {/* الاسم */}
+                                  <div className="flex items-center gap-1.5">
+                                    <User className="w-4 h-4 text-black" />
+                                    <span className="font-medium">
+                                      {row.name}
+                                    </span>
+                                  </div>
 
-          {/* الاسم */}
-          <div className="flex items-center gap-1.5">
-            <User className="w-4 h-4 text-black" />
-            <span className="font-medium">{row.name}</span>
-          </div>
+                                  {/* الحالة (removed ms-12/scale so it aligns with other left items) */}
+                                  <div className="flex items-center gap-1.5">
+                                    <GlassButton>
+                                      <span className="inline-flex items-center gap-2">
+                                        <Image
+                                          src={StatusIcon}
+                                          alt="status"
+                                          width={16}
+                                          height={16}
+                                          className="group-hover:invert group-hover:brightness-0 group-hover:contrast-200 group-hover:saturate-0"
+                                        />
+                                        <span className="px-1">
+                                          {row.status}
+                                        </span>
+                                      </span>
+                                    </GlassButton>
+                                  </div>
 
-          {/* الحالة (removed ms-12/scale so it aligns with other left items) */}
-          <div className="flex items-center gap-1.5">
-            <GlassButton>
-              <span className="inline-flex items-center gap-2">
-                <Image
-                  src={StatusIcon}
-                  alt="status"
-                  width={16}
-                  height={16}
-                  className="group-hover:invert group-hover:brightness-0 group-hover:contrast-200 group-hover:saturate-0"
-                />
-                <span className="px-1">{row.status}</span>
-              </span>
-            </GlassButton>
-          </div>
+                                  {/* الهاتف */}
+                                  <div className="flex items-center gap-1.5 md:col-span-2">
+                                    <Phone className="w-4 h-4 text-black" />
+                                    <span className="font-medium ltr:text-left rtl:text-right">
+                                      {row.phone}
+                                    </span>
+                                  </div>
 
-          {/* الهاتف */}
-          <div className="flex items-center gap-1.5 md:col-span-2">
-            <Phone className="w-4 h-4 text-black" />
-            <span className="font-medium ltr:text-left rtl:text-right">
-              {row.phone}
-            </span>
-          </div>
+                                  {/* المدينة */}
+                                  <div className="flex items-center gap-1.5 md:col-span-2">
+                                    <MapPin className="w-4 h-4 text-black" />
+                                    <span className="font-medium">
+                                      {row.city}
+                                    </span>
+                                  </div>
 
-          {/* المدينة */}
-          <div className="flex items-center gap-1.5 md:col-span-2">
-            <MapPin className="w-4 h-4 text-black" />
-            <span className="font-medium">{row.city}</span>
-          </div>
+                                  {/* المنتج */}
+                                  <div className="flex items-center gap-1.5">
+                                    <Package className="w-4 h-4 text-black" />
+                                    <span className="font-medium">
+                                      {row.product}
+                                    </span>
+                                  </div>
 
-          {/* المنتج */}
-          <div className="flex items-center gap-1.5">
-            <Package className="w-4 h-4 text-black" />
-            <span className="font-medium">{row.product}</span>
-          </div>
+                                  {/* السعر */}
+                                  <div className="flex items-center gap-1.5">
+                                    <Banknote className="w-4 h-4 text-black" />
+                                    <span className="font-medium">
+                                      {row.price}
+                                    </span>
+                                  </div>
 
-          {/* السعر */}
-          <div className="flex items-center gap-1.5">
-            <Banknote className="w-4 h-4 text-black" />
-            <span className="font-medium">{row.price}</span>
-          </div>
+                                  {/* المنتج (مكرر كما في كودك) */}
+                                  <div className="flex items-center gap-1.5">
+                                    <Package className="w-4 h-4 text-black" />
+                                    <span className="font-medium">
+                                      {row.product}
+                                    </span>
+                                  </div>
 
-          {/* المنتج (مكرر كما في كودك) */}
-          <div className="flex items-center gap-1.5">
-            <Package className="w-4 h-4 text-black" />
-            <span className="font-medium">{row.product}</span>
-          </div>
-
-          {/* المحاولات */}
-          <div className="flex items-center gap-1.5">
-            <Image
-              src={Vector2}
-              alt="tries"
-              width={16}
-              height={16}
-              className="shrink-0 brightness-0"
-            />
-            <span className="font-medium">المحاولات : 15</span>
-          </div>
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-</div>
-
+                                  {/* المحاولات */}
+                                  <div className="flex items-center gap-1.5">
+                                    <Image
+                                      src={Vector2}
+                                      alt="tries"
+                                      width={16}
+                                      height={16}
+                                      className="shrink-0 brightness-0"
+                                    />
+                                    <span className="font-medium">
+                                      المحاولات : 15
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
                       </motion.div>
                     );
                   })}
