@@ -849,10 +849,9 @@ export default function AllOrders() {
                                       }}
                                       className="
     w-[132px] h-[30px] 
-    inline-flex items-center justify-center gap-4
+    inline-flex items-center justify-center gap-1
     rounded-[999px]
     border border-[#5D24E147]
-    shadow-[0_4px_4px_0_#5D24E114]
     text-xs font-medium
   "
                                     >
