@@ -135,7 +135,7 @@ function SearchableSelect({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
             transition={{ duration: 0.12 }}
-            className={`absolute z-20 mt-1 ${widthClass} rounded-lg border bg-white -shadowlg`}
+            className={`absolute z-20 mt-1 ${widthClass} rounded-lg border bg-white shadow-lg`}
           >
             <div className="p-2 border-b">
               <input
@@ -226,7 +226,6 @@ export default function AllOrders() {
     { label: "تم التحضير", icon: Vector9 },
     { label: " في الشحن", icon: Vector7 },
     { label: "تقارير", icon: Vector6 },
-    { label: "تم الالغاء", icon: Vector10 },
     { label: " طلبات غير مكتمله", icon: Vector10 },
     { label: " طلبات مستعجلة", icon: Vector10 },
     { label: "تم الالغاء", icon: Vector10 },
@@ -586,7 +585,7 @@ export default function AllOrders() {
                 <div className="flex items-center justify-between mb-3">
                   <button
                     onClick={() => setShowFilters((v) => !v)}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-dashed border-gray-300 hover:bg-gray-50 transition text-gray-800"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-md  hover:bg-gray-50 transition text-gray-800"
                   >
                     <span className="inline-flex items-center gap-1">
                       <Image
@@ -597,7 +596,6 @@ export default function AllOrders() {
                         height={16}
                       />
                     </span>
-                    <span className="font-medium">الفلتر</span>
                   </button>
                 </div>
 
@@ -793,7 +791,7 @@ export default function AllOrders() {
                       >
                         {/* zoom-out wrapper keeps layout width the same */}
                         <div className="origin-top-right scale-[0.9] w-[111.111%]">
-                          <Card className="w-full bg-gradient-to-b from-[#FCFAFD] to-[#EADBFF] border rounded-[20px] border-[#5D24E147]/28 ">
+                          <Card className="w-full bg-gradient-to-b from-[#FCFAFD] to-[#EADBFF] border rounded-[20px] border-[#5D24E147]/28 shadow-lg">
                             <CardContent className="text-sm">
                               <div dir="rtl" className="space-y-2 h-full">
                                 {/* Use a clean 2-col grid so left column items start at the same point */}
@@ -814,8 +812,8 @@ export default function AllOrders() {
                                   </div>
 
                                   {/* الميعاد + checkbox (kept on the left column, but aligned by the grid) */}
-                                  <div className="flex items-center gap-1.5 justify-end md:justify-start">
-                                    <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-1.5 justify-center md:justify-center">
+                                    <div className="flex items-center gap-2 ">
                                       <span className="text-[12px] text-gray-600">
                                         منذ 3 أيام و 15 ساعة
                                       </span>
@@ -839,21 +837,36 @@ export default function AllOrders() {
                                   </div>
 
                                   {/* الحالة (removed ms-12/scale so it aligns with other left items) */}
-                                  <div className="flex items-center gap-1.5">
-                                    <GlassButton>
-                                      <span className="inline-flex items-center gap-2">
-                                        <Image
-                                          src={StatusIcon}
-                                          alt="status"
-                                          width={16}
-                                          height={16}
-                                          className="group-hover:invert group-hover:brightness-0 group-hover:contrast-200 group-hover:saturate-0"
-                                        />
-                                        <span className="px-1">
-                                          {row.status}
-                                        </span>
+                                  {/* الحالة */}
+                                  {/* الحالة */}
+                                  <div className="flex items-center gap-1.5 justify-center">
+                                    {/*  */}
+                                    <button
+                                      type="button"
+                                      style={{
+                                        background:
+                                          "linear-gradient(114.13deg, #FFFFFF 8.63%, #DCD1F5 54.17%, #FFFFFF 99.72%)",
+                                      }}
+                                      className="
+    w-[132px] h-[30px] 
+    inline-flex items-center justify-center gap-4
+    rounded-[999px]
+    border border-[#5D24E147]
+    shadow-[0_4px_4px_0_#5D24E114]
+    text-xs font-medium
+  "
+                                    >
+                                      <Image
+                                        src={StatusIcon}
+                                        alt="status"
+                                        width={16}
+                                        height={16}
+                                        className="shrink-0"
+                                      />
+                                      <span className="text-[#5D24E1]">
+                                        {row.status}
                                       </span>
-                                    </GlassButton>
+                                    </button>
                                   </div>
 
                                   {/* الهاتف */}
@@ -881,14 +894,13 @@ export default function AllOrders() {
                                   </div>
 
                                   {/* السعر */}
-                                  <div className="flex items-center gap-1.5">
+                                  <div className="flex items-center gap-1.5 justify-center">
                                     <Banknote className="w-4 h-4 text-black" />
                                     <span className="font-medium">
                                       {row.price}
                                     </span>
                                   </div>
 
-                                  {/* المنتج (مكرر كما في كودك) */}
                                   <div className="flex items-center gap-1.5">
                                     <Package className="w-4 h-4 text-black" />
                                     <span className="font-medium">
@@ -897,7 +909,7 @@ export default function AllOrders() {
                                   </div>
 
                                   {/* المحاولات */}
-                                  <div className="flex items-center gap-1.5">
+                                  <div className="flex items-center gap-1.5 justify-center">
                                     <Image
                                       src={Vector2}
                                       alt="tries"
