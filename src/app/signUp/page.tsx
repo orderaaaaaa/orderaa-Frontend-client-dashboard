@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useState, type ComponentType } from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useEffect, useRef, useState, type ComponentType } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Lock,
   Eye,
@@ -16,14 +16,14 @@ import {
   Map,
   Mail,
   Phone,
-} from "lucide-react";
+} from 'lucide-react';
 
-import { Cairo } from "next/font/google";
-import sideImage from "@/public/premium_photo-1681488262364-8aeb1b6aac56.avif";
+import { Cairo } from 'next/font/google';
+// import sideImage from "@/public/premium_photo-1681488262364-8aeb1b6aac56.avif";
 
 const cairo = Cairo({
-  subsets: ["arabic", "latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  subsets: ['arabic', 'latin'],
+  weight: ['400', '500', '600', '700', '800'],
 });
 
 type ComboProps = {
@@ -39,19 +39,19 @@ function ActivityCombobox({
   value,
   onChange,
   options,
-  placeholder = "اختر",
+  placeholder = 'اختر',
   icon: Icon = Briefcase,
 }: ComboProps) {
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const [customMode, setCustomMode] = useState(false);
-  const [customText, setCustomText] = useState("");
+  const [customText, setCustomText] = useState('');
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const customInputRef = useRef<HTMLInputElement | null>(null);
 
-  const hasOther = options.includes("أخرى");
+  const hasOther = options.includes('أخرى');
   const filtered = options
-    .filter((o) => o !== "أخرى")
+    .filter((o) => o !== 'أخرى')
     .filter((o) => o.toLowerCase().includes(query.toLowerCase()));
 
   // Close on outside click
@@ -62,20 +62,20 @@ function ActivityCombobox({
         setCustomMode(false);
       }
     };
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
   }, []);
 
   // Esc to close
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         setOpen(false);
         setCustomMode(false);
       }
     };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
   }, []);
 
   useEffect(() => {
@@ -88,8 +88,8 @@ function ActivityCombobox({
     onChange(v);
     setOpen(false);
     setCustomMode(false);
-    setCustomText("");
-    setQuery("");
+    setCustomText('');
+    setQuery('');
   };
 
   return (
@@ -102,8 +102,8 @@ function ActivityCombobox({
         aria-expanded={open}
       >
         <Icon className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <span className={value ? "text-gray-900" : "text-gray-500"}>
-          {value || (customMode ? "أخرى (اكتب هنا)" : placeholder)}
+        <span className={value ? 'text-gray-900' : 'text-gray-500'}>
+          {value || (customMode ? 'أخرى (اكتب هنا)' : placeholder)}
         </span>
         <ChevronsUpDown className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
       </button>
@@ -141,13 +141,13 @@ function ActivityCombobox({
                     onClick={() => {
                       onChange(opt);
                       setOpen(false);
-                      setQuery("");
+                      setQuery('');
                     }}
                     className="px-3 py-2 text-right cursor-pointer hover:bg-gray-50 flex items-center gap-2"
                   >
                     <Check
                       className={`h-4 w-4 ${
-                        value === opt ? "opacity-100" : "opacity-0"
+                        value === opt ? 'opacity-100' : 'opacity-0'
                       }`}
                     />
                     <span className="flex-1">{opt}</span>
@@ -161,7 +161,7 @@ function ActivityCombobox({
                     aria-selected={false}
                     onClick={() => {
                       setCustomMode(true);
-                      setQuery("");
+                      setQuery('');
                     }}
                     className="px-3 py-2 text-right cursor-pointer hover:bg-gray-50 flex items-center gap-2 border-t"
                   >
@@ -182,7 +182,7 @@ function ActivityCombobox({
                   value={customText}
                   onChange={(e) => setCustomText(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") {
+                    if (e.key === 'Enter') {
                       e.preventDefault();
                       commitCustom();
                     }
@@ -204,7 +204,7 @@ function ActivityCombobox({
                   type="button"
                   onClick={() => {
                     setCustomMode(false);
-                    setCustomText("");
+                    setCustomText('');
                   }}
                   className="px-3 py-2 rounded-md border"
                 >
@@ -222,118 +222,120 @@ function ActivityCombobox({
 export default function SignUpPage() {
   const router = useRouter();
 
-  const [name, setName] = useState("");
-  const [activity, setActivity] = useState("");
-  const [governorate, setGovernorate] = useState(""); // المحافظة
-  const [area, setArea] = useState(""); // المنطقة
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [name, setName] = useState('');
+  const [activity, setActivity] = useState('');
+  const [governorate, setGovernorate] = useState(''); // المحافظة
+  const [area, setArea] = useState(''); // المنطقة
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [mobile, setMobile] = useState("");
+  const [email, setEmail] = useState('');
+  const [mobile, setMobile] = useState('');
 
   // النشاطات (مع "أخرى")
   const activities = [
-    "مطعم",
-    "ملابس",
-    "إلكترونيات",
-    "مستلزمات منزلية",
-    "صيدلية",
-    "سوبر ماركت",
-    "أخرى",
+    'مطعم',
+    'ملابس',
+    'إلكترونيات',
+    'مستلزمات منزلية',
+    'صيدلية',
+    'سوبر ماركت',
+    'أخرى',
   ];
 
   // المحافظات (مع "أخرى")
   const governorates = [
-    "القاهرة",
-    "الجيزة",
-    "الإسكندرية",
-    "الشرقية",
-    "الدقهلية",
-    "المنيا",
-    "أسيوط",
-    "أسوان",
-    "الغربية",
-    "القليوبية",
-    "الفيوم",
-    "السويس",
-    "بورسعيد",
-    "الإسماعيلية",
-    "الأقصر",
-    "سوهاج",
-    "قنا",
-    "دمياط",
-    "البحيرة",
-    "بني سويف",
-    "مطروح",
-    "البحر الأحمر",
-    "الوادي الجديد",
-    "جنوب سيناء",
-    "شمال سيناء",
-    "أخرى",
+    'القاهرة',
+    'الجيزة',
+    'الإسكندرية',
+    'الشرقية',
+    'الدقهلية',
+    'المنيا',
+    'أسيوط',
+    'أسوان',
+    'الغربية',
+    'القليوبية',
+    'الفيوم',
+    'السويس',
+    'بورسعيد',
+    'الإسماعيلية',
+    'الأقصر',
+    'سوهاج',
+    'قنا',
+    'دمياط',
+    'البحيرة',
+    'بني سويف',
+    'مطروح',
+    'البحر الأحمر',
+    'الوادي الجديد',
+    'جنوب سيناء',
+    'شمال سيناء',
+    'أخرى',
   ];
 
   // مناطق لكل محافظة (أمثلة شائعة فقط)
   const areasByGovernorate: Record<string, string[]> = {
     القاهرة: [
-      "مدينة نصر",
-      "مصر الجديدة",
-      "المعادي",
-      "التجمع الخامس",
-      "حلوان",
-      "الزمالك",
-      "شبرا",
-      "أخرى",
+      'مدينة نصر',
+      'مصر الجديدة',
+      'المعادي',
+      'التجمع الخامس',
+      'حلوان',
+      'الزمالك',
+      'شبرا',
+      'أخرى',
     ],
     الجيزة: [
-      "الدقي",
-      "المهندسين",
-      "الهرم",
-      "6 أكتوبر",
-      "الشيخ زايد",
-      "العجوزة",
-      "أخرى",
+      'الدقي',
+      'المهندسين',
+      'الهرم',
+      '6 أكتوبر',
+      'الشيخ زايد',
+      'العجوزة',
+      'أخرى',
     ],
-    الإسكندرية: ["سموحة", "سيدي جابر", "العجمي", "محرم بك", "المندرة", "أخرى"],
+    الإسكندرية: ['سموحة', 'سيدي جابر', 'العجمي', 'محرم بك', 'المندرة', 'أخرى'],
   };
 
   // خيارات المنطقة حسب المحافظة المختارة
   const areaOptions = governorate
-    ? areasByGovernorate[governorate] ?? ["أخرى"]
+    ? areasByGovernorate[governorate] ?? ['أخرى']
     : [];
 
   const handleGovernorateChange = (val: string) => {
     setGovernorate(val);
-    setArea("");
+    setArea('');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError('');
 
-    if (!name.trim()) return setError("من فضلك أدخل اسم التاجر أو الشركة.");
-    if (!activity.trim()) return setError("من فضلك اختر النشاط أو اكتب نشاطك.");
+    if (!name.trim()) return setError('من فضلك أدخل اسم التاجر أو الشركة.');
+    if (!activity.trim()) return setError('من فضلك اختر النشاط أو اكتب نشاطك.');
     if (!governorate.trim())
-      return setError("من فضلك اختر المحافظة أو اكتبها.");
-    if (!area.trim()) return setError("من فضلك اختر المنطقة أو اكتبها.");
+      return setError('من فضلك اختر المحافظة أو اكتبها.');
+    if (!area.trim()) return setError('من فضلك اختر المنطقة أو اكتبها.');
     if (password.length < 8)
-      return setError("كلمة المرور يجب أن تكون 8 حروف/أرقام على الأقل.");
+      return setError('كلمة المرور يجب أن تكون 8 حروف/أرقام على الأقل.');
     if (password !== confirmPassword)
-      return setError("كلمتا المرور غير متطابقتين.");
+      return setError('كلمتا المرور غير متطابقتين.');
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return setError("من فضلك أدخل بريدًا إلكترونيًا صحيحًا.");
+      return setError('من فضلك أدخل بريدًا إلكترونيًا صحيحًا.');
     }
     if (!/^\d{10,15}$/.test(mobile)) {
-      return setError("رقم الموبايل يجب أن يكون من 10 إلى 15 رقمًا بدون فواصل.");
+      return setError(
+        'رقم الموبايل يجب أن يكون من 10 إلى 15 رقمًا بدون فواصل.'
+      );
     }
 
     setIsLoading(true);
     try {
       localStorage.setItem(
-        "signup_info",
+        'signup_info',
         JSON.stringify({
           name,
           activity,
@@ -345,9 +347,9 @@ export default function SignUpPage() {
         })
       );
 
-      router.push("/"); // العودة لتسجيل الدخول
+      router.push('/'); // العودة لتسجيل الدخول
     } catch {
-      setError("حدث خطأ أثناء إنشاء الحساب. برجاء المحاولة لاحقًا.");
+      setError('حدث خطأ أثناء إنشاء الحساب. برجاء المحاولة لاحقًا.');
     } finally {
       setIsLoading(false);
     }
@@ -360,13 +362,13 @@ export default function SignUpPage() {
       <div className="w-full max-w-5xl bg-white border rounded-2xl shadow-xl grid grid-cols-1 md:grid-cols-2 overflow-hidden">
         {/* Left: Image */}
         <div className="relative hidden md:block">
-          <Image
+          {/* <Image
             src={sideImage}
             alt="Welcome"
             fill
             className="object-left"
             priority
-          />
+          /> */}
           <div className="absolute inset-0 bg-black/10" />
         </div>
 
@@ -457,7 +459,7 @@ export default function SignUpPage() {
                     onChange={setArea}
                     options={areaOptions}
                     placeholder={
-                      governorate ? "اختر المنطقة" : "اختر المحافظة أولًا"
+                      governorate ? 'اختر المنطقة' : 'اختر المحافظة أولًا'
                     }
                     icon={Map}
                   />
@@ -493,7 +495,7 @@ export default function SignUpPage() {
                       type="tel"
                       value={mobile}
                       onChange={(e) =>
-                        setMobile(e.target.value.replace(/\D/g, ""))
+                        setMobile(e.target.value.replace(/\D/g, ''))
                       }
                       placeholder="مثال: 01123456789"
                       inputMode="numeric"
@@ -520,7 +522,7 @@ export default function SignUpPage() {
                       onClick={() => setShowPassword((s) => !s)}
                       className="absolute left-3 top-1/2 -translate-y-1/2"
                       aria-label={
-                        showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"
+                        showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'
                       }
                     >
                       {showPassword ? (
@@ -531,7 +533,7 @@ export default function SignUpPage() {
                     </button>
                     <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
                     <input
-                      type={showPassword ? "text" : "password"}
+                      type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
@@ -556,8 +558,8 @@ export default function SignUpPage() {
                       className="absolute left-3 top-1/2 -translate-y-1/2"
                       aria-label={
                         showConfirmPassword
-                          ? "إخفاء كلمة المرور"
-                          : "إظهار كلمة المرور"
+                          ? 'إخفاء كلمة المرور'
+                          : 'إظهار كلمة المرور'
                       }
                     >
                       {showConfirmPassword ? (
@@ -568,7 +570,7 @@ export default function SignUpPage() {
                     </button>
                     <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
                     <input
-                      type={showConfirmPassword ? "text" : "password"}
+                      type={showConfirmPassword ? 'text' : 'password'}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
@@ -586,11 +588,11 @@ export default function SignUpPage() {
               disabled={isLoading}
               className="w-full bg-[#5D24E1] text-white py-2.5 rounded-lg transition disabled:opacity-60"
             >
-              {isLoading ? "جارٍ إنشاء الحساب..." : "إنشاء حساب"}
+              {isLoading ? 'جارٍ إنشاء الحساب...' : 'إنشاء حساب'}
             </button>
 
             <p className="text-center text-sm text-gray-500">
-              لديك حساب بالفعل؟{" "}
+              لديك حساب بالفعل؟{' '}
               <a href="/" className="text-[#5D24E1] hover:underline">
                 سجّل الدخول
               </a>

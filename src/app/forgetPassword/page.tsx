@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { Cairo } from "next/font/google";
-import sideImage from "@/public/premium_photo-1681488262364-8aeb1b6aac56.avif";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { Cairo } from 'next/font/google';
+// import sideImage from "@/public/premium_photo-1681488262364-8aeb1b6aac56.avif";
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Mail,
   Phone,
@@ -14,50 +14,50 @@ import {
   EyeOff,
   KeyRound,
   ArrowRight,
-} from "lucide-react";
+} from 'lucide-react';
 
 const cairo = Cairo({
-  subsets: ["arabic", "latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  subsets: ['arabic', 'latin'],
+  weight: ['400', '500', '600', '700', '800'],
 });
 
-type Step = "identify" | "otp" | "reset";
-type Mode = "email" | "phone";
+type Step = 'identify' | 'otp' | 'reset';
+type Mode = 'email' | 'phone';
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
-  const [step, setStep] = useState<Step>("identify");
-  const [mode, setMode] = useState<Mode>("email");
+  const [step, setStep] = useState<Step>('identify');
+  const [mode, setMode] = useState<Mode>('email');
 
   // identify
-  const [identity, setIdentity] = useState("");
+  const [identity, setIdentity] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   // otp
-  const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
+  const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
   const setInputRef = (idx: number) => (el: HTMLInputElement | null) => {
     inputsRef.current[idx] = el;
   };
 
   // reset
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // helpers
   const validateIdentity = () => {
-    if (mode === "email") {
+    if (mode === 'email') {
       const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identity);
-      if (!ok) return "من فضلك أدخل بريدًا إلكترونيًا صحيحًا.";
+      if (!ok) return 'من فضلك أدخل بريدًا إلكترونيًا صحيحًا.';
     } else {
-      const digits = identity.replace(/\D/g, "");
+      const digits = identity.replace(/\D/g, '');
       const ok = /^\d{10,15}$/.test(digits);
-      if (!ok) return "رقم الموبايل يجب أن يكون من 10 إلى 15 رقمًا.";
+      if (!ok) return 'رقم الموبايل يجب أن يكون من 10 إلى 15 رقمًا.';
     }
-    return "";
+    return '';
   };
 
   const sendCode = async () => {
@@ -66,17 +66,17 @@ export default function ForgotPasswordPage() {
       setError(v);
       return;
     }
-    setError("");
+    setError('');
     setIsLoading(true);
     try {
       // محاكاة: استدعاء API لإرسال الكود
-      localStorage.setItem("fp_identity", JSON.stringify({ mode, identity }));
+      localStorage.setItem('fp_identity', JSON.stringify({ mode, identity }));
       await new Promise((res) => setTimeout(res, 600));
-      setStep("otp");
-      setOtp(["", "", "", "", "", ""]);
+      setStep('otp');
+      setOtp(['', '', '', '', '', '']);
       setTimeout(() => inputsRef.current[0]?.focus(), 0);
     } catch {
-      setError("فشل إرسال الكود. حاول مرة لاحقًا.");
+      setError('فشل إرسال الكود. حاول مرة لاحقًا.');
     } finally {
       setIsLoading(false);
     }
@@ -94,17 +94,17 @@ export default function ForgotPasswordPage() {
     i: number,
     e: React.KeyboardEvent<HTMLInputElement>
   ) => {
-    if (e.key === "Backspace" && !otp[i] && i > 0)
+    if (e.key === 'Backspace' && !otp[i] && i > 0)
       inputsRef.current[i - 1]?.focus();
-    if (e.key === "ArrowLeft" && i > 0) inputsRef.current[i - 1]?.focus();
-    if (e.key === "ArrowRight" && i < 5) inputsRef.current[i + 1]?.focus();
+    if (e.key === 'ArrowLeft' && i > 0) inputsRef.current[i - 1]?.focus();
+    if (e.key === 'ArrowRight' && i < 5) inputsRef.current[i + 1]?.focus();
   };
 
   const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    const text = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
     if (!text) return;
-    const arr = text.split("");
-    const next = Array(6).fill("");
+    const arr = text.split('');
+    const next = Array(6).fill('');
     arr.forEach((d, idx) => {
       next[idx] = d;
     });
@@ -113,20 +113,20 @@ export default function ForgotPasswordPage() {
   };
 
   const verifyOtp = async () => {
-    if (otp.join("").length !== 6) {
-      setError("أدخل كود مكوّن من 6 أرقام.");
+    if (otp.join('').length !== 6) {
+      setError('أدخل كود مكوّن من 6 أرقام.');
       return;
     }
-    setError("");
+    setError('');
     setIsLoading(true);
     try {
       // محاكاة: استدعاء API للتحقق
       await new Promise((res) => setTimeout(res, 600));
-      setStep("reset");
-      setPassword("");
-      setConfirmPassword("");
+      setStep('reset');
+      setPassword('');
+      setConfirmPassword('');
     } catch {
-      setError("كود غير صحيح. حاول مرة أخرى.");
+      setError('كود غير صحيح. حاول مرة أخرى.');
     } finally {
       setIsLoading(false);
     }
@@ -134,30 +134,30 @@ export default function ForgotPasswordPage() {
 
   const setNewPassword = async () => {
     if (password.length < 8) {
-      setError("كلمة المرور يجب أن تكون 8 حروف/أرقام على الأقل.");
+      setError('كلمة المرور يجب أن تكون 8 حروف/أرقام على الأقل.');
       return;
     }
     if (password !== confirmPassword) {
-      setError("كلمتا المرور غير متطابقتين.");
+      setError('كلمتا المرور غير متطابقتين.');
       return;
     }
-    setError("");
+    setError('');
     setIsLoading(true);
     try {
       // محاكاة: استدعاء API لتعيين كلمة المرور الجديدة
       await new Promise((res) => setTimeout(res, 600));
-      router.push("/");
+      router.push('/');
     } catch {
-      setError("تعذّر تعيين كلمة المرور الآن. حاول لاحقًا.");
+      setError('تعذّر تعيين كلمة المرور الآن. حاول لاحقًا.');
     } finally {
       setIsLoading(false);
     }
   };
 
   const Title = () => {
-    if (step === "identify") return "إعادة تعيين كلمة المرور";
-    if (step === "otp") return "أدخل كود التحقق";
-    return "تعيين كلمة مرور جديدة";
+    if (step === 'identify') return 'إعادة تعيين كلمة المرور';
+    if (step === 'otp') return 'أدخل كود التحقق';
+    return 'تعيين كلمة مرور جديدة';
   };
 
   return (
@@ -167,13 +167,13 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-5xl bg-white border rounded-2xl shadow-xl grid grid-cols-1 md:grid-cols-2 overflow-hidden">
         {/* Left: Image */}
         <div className="relative hidden md:block">
-          <Image
+          {/* <Image
             src={sideImage}
             alt="Forgot Password"
             fill
             className="object-left"
             priority
-          />
+          /> */}
           <div className="absolute inset-0 bg-black/10" />
         </div>
 
@@ -189,12 +189,15 @@ export default function ForgotPasswordPage() {
                 height={109}
                 priority
               />
-              <h1 className="text-2xl font-extrabold text-center"> {Title()} </h1>
+              <h1 className="text-2xl font-extrabold text-center">
+                {' '}
+                {Title()}{' '}
+              </h1>
               <p className="text-sm text-gray-500 text-center">
-                {step === "identify" &&
-                  "اختر طريقة الاسترجاع وأدخل بياناتك لنرسل لك كود التحقق."}
+                {step === 'identify' &&
+                  'اختر طريقة الاسترجاع وأدخل بياناتك لنرسل لك كود التحقق.'}
                 {/* {step === "otp" && "من فضلك أدخل الكود المرسل إليك."} */}
-                {step === "reset" && "قم بتعيين كلمة مرور قوية وسهلة التذكّر."}
+                {step === 'reset' && 'قم بتعيين كلمة مرور قوية وسهلة التذكّر.'}
               </p>
             </div>
 
@@ -205,29 +208,29 @@ export default function ForgotPasswordPage() {
             )}
 
             {/* STEP 1: IDENTIFY */}
-            {step === "identify" && (
+            {step === 'identify' && (
               <div className="space-y-5">
                 {/* Switch: Email / Phone */}
                 <div className="flex items-center justify-center">
                   <div className="inline-flex rounded-full border p-1 bg-gray-50">
                     <button
                       type="button"
-                      onClick={() => setMode("email")}
+                      onClick={() => setMode('email')}
                       className={`px-4 py-1.5 text-sm rounded-full transition ${
-                        mode === "email"
-                          ? "bg-[#5D24E1] text-white"
-                          : "text-gray-700"
+                        mode === 'email'
+                          ? 'bg-[#5D24E1] text-white'
+                          : 'text-gray-700'
                       }`}
                     >
                       بالبريد
                     </button>
                     <button
                       type="button"
-                      onClick={() => setMode("phone")}
+                      onClick={() => setMode('phone')}
                       className={`px-4 py-1.5 text-sm rounded-full transition ${
-                        mode === "phone"
-                          ? "bg-[#5D24E1] text-white"
-                          : "text-gray-700"
+                        mode === 'phone'
+                          ? 'bg-[#5D24E1] text-white'
+                          : 'text-gray-700'
                       }`}
                     >
                       بالموبايل
@@ -238,29 +241,29 @@ export default function ForgotPasswordPage() {
                 {/* Single Input */}
                 <div>
                   <label className="block text-sm text-gray-700 mb-1">
-                    {mode === "email" ? "البريد الإلكتروني" : "رقم الموبايل"}
+                    {mode === 'email' ? 'البريد الإلكتروني' : 'رقم الموبايل'}
                   </label>
                   <div className="relative">
-                    {mode === "email" ? (
+                    {mode === 'email' ? (
                       <Mail className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
                     ) : (
                       <Phone className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
                     )}
                     <input
                       dir="rtl"
-                      type={mode === "email" ? "email" : "tel"}
+                      type={mode === 'email' ? 'email' : 'tel'}
                       value={identity}
                       onChange={(e) => setIdentity(e.target.value)}
                       placeholder={
-                        mode === "email"
-                          ? "example@domain.com"
-                          : "مثال: 01123456789"
+                        mode === 'email'
+                          ? 'example@domain.com'
+                          : 'مثال: 01123456789'
                       }
-                      inputMode={mode === "email" ? "email" : "numeric"}
+                      inputMode={mode === 'email' ? 'email' : 'numeric'}
                       className="w-full pr-10 pl-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-right"
                     />
                   </div>
-                  {mode === "phone" && (
+                  {mode === 'phone' && (
                     <p className="text-xs text-gray-500 mt-1">
                       من 10 إلى 15 رقمًا بدون مسافات أو فواصل.
                     </p>
@@ -272,11 +275,11 @@ export default function ForgotPasswordPage() {
                   disabled={isLoading}
                   className="w-full bg-[#5D24E1] text-white py-2.5 rounded-lg transition disabled:opacity-60"
                 >
-                  {isLoading ? "جارٍ الإرسال..." : "إرسال الكود"}
+                  {isLoading ? 'جارٍ الإرسال...' : 'إرسال الكود'}
                 </button>
 
                 <p className="text-center text-sm text-gray-500">
-                  تذكّرت كلمة المرور؟{" "}
+                  تذكّرت كلمة المرور؟{' '}
                   <a href="/" className="text-[#5D24E1] hover:underline">
                     سجّل الدخول
                   </a>
@@ -285,13 +288,13 @@ export default function ForgotPasswordPage() {
             )}
 
             {/* STEP 2: OTP */}
-            {step === "otp" && (
+            {step === 'otp' && (
               <div className="space-y-5">
                 <div className="flex items-center justify-center gap-2">
                   <KeyRound className="h-5 w-5 text-[#5D24E1]" />
                   <span className="text-sm text-gray-600">
-                    أدخل الكود المرسل إلى{" "}
-                    {mode === "email" ? "بريدك" : "موبايلك"}
+                    أدخل الكود المرسل إلى{' '}
+                    {mode === 'email' ? 'بريدك' : 'موبايلك'}
                   </span>
                 </div>
 
@@ -317,7 +320,7 @@ export default function ForgotPasswordPage() {
                     disabled={isLoading}
                     className="flex-1 bg-[#5D24E1] text-white py-2.5 rounded-lg transition disabled:opacity-60"
                   >
-                    {isLoading ? "جارٍ التحقق..." : "تحقّق"}
+                    {isLoading ? 'جارٍ التحقق...' : 'تحقّق'}
                   </button>
                   <button
                     onClick={sendCode}
@@ -330,7 +333,7 @@ export default function ForgotPasswordPage() {
 
                 <button
                   type="button"
-                  onClick={() => setStep("identify")}
+                  onClick={() => setStep('identify')}
                   className="mx-auto flex items-center gap-1 text-sm text-gray-600 hover:text-gray-800"
                 >
                   <ArrowRight className="h-4 w-4" />
@@ -340,7 +343,7 @@ export default function ForgotPasswordPage() {
             )}
 
             {/* STEP 3: RESET PASSWORD */}
-            {step === "reset" && (
+            {step === 'reset' && (
               <div className="space-y-5">
                 <div>
                   <label className="block text-sm text-gray-700 mb-1">
@@ -352,7 +355,7 @@ export default function ForgotPasswordPage() {
                       onClick={() => setShowPassword((s) => !s)}
                       className="absolute left-3 top-1/2 -translate-y-1/2"
                       aria-label={
-                        showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"
+                        showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'
                       }
                     >
                       {showPassword ? (
@@ -363,7 +366,7 @@ export default function ForgotPasswordPage() {
                     </button>
                     <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
                     <input
-                      type={showPassword ? "text" : "password"}
+                      type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
@@ -387,8 +390,8 @@ export default function ForgotPasswordPage() {
                       className="absolute left-3 top-1/2 -translate-y-1/2"
                       aria-label={
                         showConfirmPassword
-                          ? "إخفاء كلمة المرور"
-                          : "إظهار كلمة المرور"
+                          ? 'إخفاء كلمة المرور'
+                          : 'إظهار كلمة المرور'
                       }
                     >
                       {showConfirmPassword ? (
@@ -399,7 +402,7 @@ export default function ForgotPasswordPage() {
                     </button>
                     <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
                     <input
-                      type={showConfirmPassword ? "text" : "password"}
+                      type={showConfirmPassword ? 'text' : 'password'}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
@@ -414,11 +417,11 @@ export default function ForgotPasswordPage() {
                   disabled={isLoading}
                   className="w-full bg-[#5D24E1] text-white py-2.5 rounded-lg transition disabled:opacity-60"
                 >
-                  {isLoading ? "جارٍ الحفظ..." : "تعيين كلمة المرور"}
+                  {isLoading ? 'جارٍ الحفظ...' : 'تعيين كلمة المرور'}
                 </button>
 
                 <p className="text-center text-sm text-gray-500">
-                  تذكّرت كلمة المرور؟{" "}
+                  تذكّرت كلمة المرور؟{' '}
                   <a href="/" className="text-[#5D24E1] hover:underline">
                     سجّل الدخول
                   </a>

@@ -1,20 +1,22 @@
-import type { Metadata } from "next";
-import { Cairo } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Cairo } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
+import './globals.css';
+
+//TODO: Check the sideImage issue, you can search by this => import sideImage from "@/public/premium_photo-1681488262364-8aeb1b6aac56.avif"
 
 export const metadata: Metadata = {
-  title: "Orderaa Dashboard",
-  description: "Orderaa management system",
-  generator: "v0.app",
+  title: 'Orderaa Dashboard',
+  description: 'Orderaa management system',
+  generator: 'v0.app',
 };
 
 // Load Cairo (Arabic + Latin)
 const cairo = Cairo({
-  subsets: ["arabic", "latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-cairo",
-  display: "swap",
+  subsets: ['arabic', 'latin'],
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
+  variable: '--font-cairo',
+  display: 'swap',
 });
 
 export default function RootLayout({
