@@ -1,9 +1,13 @@
+import React from 'react';
 import { Truck, Package, CheckCircle } from 'lucide-react';
 import { DashboardLayout } from '@/components/dashboard-layout';
 import PageTab from '@/components/ui/PageTab';
-import React from 'react';
+import OrderCard from './OrderCard';
+
+import ordersTabs from '@/constants/orders-tabs';
 
 //TODO: Tell the developer to add the rest of the tabs with their images
+//TODO: Loop over the tabs
 export default function AllOrdersRefactor() {
   return (
     <DashboardLayout>
@@ -12,7 +16,6 @@ export default function AllOrdersRefactor() {
           label="جميع الطلبات"
           count={3}
           icon={<Package width={18} height={18} />}
-          active
         />
         <PageTab
           label="طلبات جديده"
@@ -54,6 +57,15 @@ export default function AllOrdersRefactor() {
           count={2}
           icon={<Truck width={18} height={18} />}
         />
+      </div>
+
+      <div className="bg-black w-full h-2 mt-2 mb-4"></div>
+
+      <div className="flex gap-6 flex-wrap">
+        <OrderCard />
+        <OrderCard />
+        <OrderCard />
+        <OrderCard />
       </div>
     </DashboardLayout>
   );

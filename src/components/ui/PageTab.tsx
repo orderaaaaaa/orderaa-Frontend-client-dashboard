@@ -1,10 +1,11 @@
 type PageTabProps = {
   label: string;
-  count: number;
+  count?: number;
   icon: React.ReactNode;
   active?: boolean;
 };
 
+//TODO: Add the onClick active effect
 export default function PageTab({ label, count, icon, active }: PageTabProps) {
   return (
     <button
@@ -20,17 +21,19 @@ export default function PageTab({ label, count, icon, active }: PageTabProps) {
 
       <span className="truncate text-[15px]">{label}</span>
 
-      <span
-        className={`flex items-center justify-center px-2 py-[2px] font-bold text-[13px] rounded-full transition
+      {count !== undefined && (
+        <span
+          className={`flex items-center justify-center px-2 py-[2px] font-bold text-[13px] rounded-full transition
           ${
             active
               ? 'bg-white text-[#5D24E1]'
               : 'bg-[#5D24E1] text-white group-hover:bg-white group-hover:text-[#5D24E1]'
           }
         `}
-      >
-        {count}
-      </span>
+        >
+          {count}
+        </span>
+      )}
     </button>
   );
 }
