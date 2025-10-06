@@ -1,26 +1,26 @@
-"use client";
+'use client';
 
-import { AuthGuard } from "@/components/auth-guard";
-import { DashboardLayout } from "@/components/dashboard-layout";
-import React, { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { User, Phone, Package, Banknote, MapPin, Plus } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import GlassButton from "@/components/ui/glassBtn";
-import Image from "next/image";
+import { AuthGuard } from '@/components/auth-guard';
+import { DashboardLayout } from '@/components/dashboard-layout';
+import React, { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { User, Phone, Package, Banknote, MapPin, Plus } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import GlassButton from '@/components/ui/glassBtn';
+import Image from 'next/image';
 
-import Vector from "@/public/Icons/Vector.svg";
-import Vector2 from "@/public/Icons/Vector2.svg";
-import Vector3 from "@/public/Icons/Vector3.svg";
-import Vector4 from "@/public/Icons/Vector4.svg";
-import Vector5 from "@/public/Icons/Vector5.svg";
-import Vector6 from "@/public/Icons/Vector6.svg";
-import Vector7 from "@/public/Icons/Vector7.svg";
-import Vector8 from "@/public/Icons/Vector8.svg";
-import Vector9 from "@/public/Icons/Vector9.svg";
-import Vector10 from "@/public/Icons/Vector10.svg";
-import IdIcon from "@/public/Icons/id.svg";
-import filterIcon from "@/public/Icons/filterIcon.svg";
+import Vector from '@/../public/Icons/Vector.svg';
+import Vector2 from '@/../public/Icons/Vector2.svg';
+import Vector3 from '@/../public/Icons/Vector3.svg';
+import Vector4 from '@/../public/Icons/Vector4.svg';
+import Vector5 from '@/../public/Icons/Vector5.svg';
+import Vector6 from '@/../public/Icons/Vector6.svg';
+import Vector7 from '@/../public/Icons/Vector7.svg';
+import Vector8 from '@/../public/Icons/Vector8.svg';
+import Vector9 from '@/../public/Icons/Vector9.svg';
+import Vector10 from '@/../public/Icons/Vector10.svg';
+import IdIcon from '@/../public/Icons/id.svg';
+import filterIcon from '@/../public/Icons/filterIcon.svg';
 
 /* ================================
    SearchableSelect (robust dropdown)
@@ -30,8 +30,8 @@ function SearchableSelect({
   value,
   onChange,
   options,
-  placeholder = "ابحث...",
-  widthClass = "w-56",
+  placeholder = 'ابحث...',
+  widthClass = 'w-56',
 }: {
   label: string;
   value: string;
@@ -41,7 +41,7 @@ function SearchableSelect({
   widthClass?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState('');
   const [activeIdx, setActiveIdx] = useState<number>(-1);
   const ref = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -61,16 +61,16 @@ function SearchableSelect({
     }
     function onKey(e: KeyboardEvent) {
       if (!open) return;
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         setOpen(false);
         setActiveIdx(-1);
       }
     }
-    document.addEventListener("mousedown", onDocClick);
-    document.addEventListener("keydown", onKey);
+    document.addEventListener('mousedown', onDocClick);
+    document.addEventListener('keydown', onKey);
     return () => {
-      document.removeEventListener("mousedown", onDocClick);
-      document.removeEventListener("keydown", onKey);
+      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('keydown', onKey);
     };
   }, [open]);
 
@@ -83,7 +83,7 @@ function SearchableSelect({
 
   const commitSelect = (val: string) => {
     onChange(val);
-    setQ("");
+    setQ('');
     setOpen(false);
     setActiveIdx(-1);
   };
@@ -99,11 +99,13 @@ function SearchableSelect({
         aria-haspopup="listbox"
         aria-expanded={open}
       >
-        <span className={`text-right ${value ? "text-gray-900" : "text-gray-500"}`}>
+        <span
+          className={`text-right ${value ? 'text-gray-900' : 'text-gray-500'}`}
+        >
           {value || `اختر ${label}`}
         </span>
         <svg
-          className={`w-4 h-4 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`}
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden="true"
@@ -130,15 +132,15 @@ function SearchableSelect({
                   setActiveIdx(-1);
                 }}
                 onKeyDown={(e) => {
-                  if (e.key === "ArrowDown") {
+                  if (e.key === 'ArrowDown') {
                     e.preventDefault();
                     setActiveIdx((i) =>
                       Math.min(i + 1, Math.max(filtered.length - 1, 0))
                     );
-                  } else if (e.key === "ArrowUp") {
+                  } else if (e.key === 'ArrowUp') {
                     e.preventDefault();
                     setActiveIdx((i) => Math.max(i - 1, -1));
-                  } else if (e.key === "Enter") {
+                  } else if (e.key === 'Enter') {
                     e.preventDefault();
                     if (activeIdx >= 0 && filtered[activeIdx]) {
                       commitSelect(filtered[activeIdx]);
@@ -154,7 +156,9 @@ function SearchableSelect({
 
             <div role="listbox" className="max-h-56 overflow-auto">
               {filtered.length === 0 ? (
-                <div className="px-3 py-2 text-sm text-gray-500">لا توجد نتائج</div>
+                <div className="px-3 py-2 text-sm text-gray-500">
+                  لا توجد نتائج
+                </div>
               ) : (
                 filtered.map((opt, idx) => {
                   const active = idx === activeIdx;
@@ -168,7 +172,7 @@ function SearchableSelect({
                       onMouseLeave={() => setActiveIdx(-1)}
                       onClick={() => commitSelect(opt)}
                       className={`px-3 py-2 cursor-pointer ${
-                        active ? "bg-gray-100" : selected ? "bg-gray-50" : ""
+                        active ? 'bg-gray-100' : selected ? 'bg-gray-50' : ''
                       } hover:bg-gray-100`}
                     >
                       {opt}
@@ -212,7 +216,7 @@ function SimpleModal({
   onClose,
   title,
   children,
-  maxWidth = "max-w-xl",
+  maxWidth = 'max-w-xl',
 }: {
   open: boolean;
   onClose: () => void;
@@ -224,10 +228,10 @@ function SimpleModal({
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === 'Escape') onClose();
     }
-    if (open) document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    if (open) document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
   if (!open) return null;
@@ -271,20 +275,20 @@ function SimpleModal({
    ================================ */
 export default function AllOrders() {
   const tabs: { label: string; icon: any }[] = [
-    { label: "طلبات جديدة", icon: Vector3 },
-    { label: "تم المحاولة", icon: Vector2 },
-    { label: "في انتظار الدفع", icon: Vector2 },
-    { label: "واتساب", icon: Vector4 },
-    { label: "تأجيلات", icon: Vector },
-    { label: "إعادة اتصال", icon: Vector5 },
-    { label: "وقف التشغيل", icon: Vector },
-    { label: "تم التأكيد", icon: Vector8 },
-    { label: "تم التحضير", icon: Vector9 },
-    { label: " في الشحن", icon: Vector7 },
-    { label: "تقارير", icon: Vector6 },
-    { label: " طلبات غير مكتمله", icon: Vector10 },
-    { label: " طلبات مستعجلة", icon: Vector10 },
-    { label: "تم الالغاء", icon: Vector10 },
+    { label: 'طلبات جديدة', icon: Vector3 },
+    { label: 'تم المحاولة', icon: Vector2 },
+    { label: 'في انتظار الدفع', icon: Vector2 },
+    { label: 'واتساب', icon: Vector4 },
+    { label: 'تأجيلات', icon: Vector },
+    { label: 'إعادة اتصال', icon: Vector5 },
+    { label: 'وقف التشغيل', icon: Vector },
+    { label: 'تم التأكيد', icon: Vector8 },
+    { label: 'تم التحضير', icon: Vector9 },
+    { label: ' في الشحن', icon: Vector7 },
+    { label: 'تقارير', icon: Vector6 },
+    { label: ' طلبات غير مكتمله', icon: Vector10 },
+    { label: ' طلبات مستعجلة', icon: Vector10 },
+    { label: 'تم الالغاء', icon: Vector10 },
   ];
 
   const getStatusIcon = (status: string) =>
@@ -295,211 +299,211 @@ export default function AllOrders() {
      ================================ */
   const data: Row[] = [
     {
-      code: "1001",
-      name: "محمد بدر",
-      phone: "01112223355",
+      code: '1001',
+      name: 'محمد بدر',
+      phone: '01112223355',
       products: [
-        { name: "لاب توب Dell", price: 200 },
-        { name: "ماوس Logitech", price: 25 },
-        { name: "كيبورد ميكانيكي", price: 175 },
+        { name: 'لاب توب Dell', price: 200 },
+        { name: 'ماوس Logitech', price: 25 },
+        { name: 'كيبورد ميكانيكي', price: 175 },
       ],
-      status: "طلبات جديدة",
-      city: "القاهرة",
-      area: "مدينة نصر",
-      notes: "اتصل به غداً",
+      status: 'طلبات جديدة',
+      city: 'القاهرة',
+      area: 'مدينة نصر',
+      notes: 'اتصل به غداً',
     },
     {
-      code: "1002",
-      name: "أحمد حسن",
-      phone: "01099887766",
+      code: '1002',
+      name: 'أحمد حسن',
+      phone: '01099887766',
       products: [
-        { name: "موبايل Samsung", price: 250 },
-        { name: "سماعات JBL", price: 30 },
+        { name: 'موبايل Samsung', price: 250 },
+        { name: 'سماعات JBL', price: 30 },
       ],
-      status: "طلبات جديدة",
-      city: "الجيزة",
-      area: "مدينة نصر",
-      notes: "انتظار تأكيد",
+      status: 'طلبات جديدة',
+      city: 'الجيزة',
+      area: 'مدينة نصر',
+      notes: 'انتظار تأكيد',
     },
     {
-      code: "1003",
-      name: "خالد علي",
-      phone: "0123456789",
-      products: [{ name: "سماعات JBL", price: 300 }],
-      status: "طلبات جديدة",
-      city: "الإسكندرية",
-      area: "مدينة نصر",
-      notes: "تم إرسال عرض",
+      code: '1003',
+      name: 'خالد علي',
+      phone: '0123456789',
+      products: [{ name: 'سماعات JBL', price: 300 }],
+      status: 'طلبات جديدة',
+      city: 'الإسكندرية',
+      area: 'مدينة نصر',
+      notes: 'تم إرسال عرض',
     },
     {
-      code: "2001",
-      name: "محمود سامي",
-      phone: "01544556677",
-      products: [{ name: "طابعة HP", price: 180 }],
-      status: "تم المحاولة",
-      city: "طنطا",
-      area: "مدينة نصر",
-      notes: "مغلق",
+      code: '2001',
+      name: 'محمود سامي',
+      phone: '01544556677',
+      products: [{ name: 'طابعة HP', price: 180 }],
+      status: 'تم المحاولة',
+      city: 'طنطا',
+      area: 'مدينة نصر',
+      notes: 'مغلق',
     },
     {
-      code: "2002",
-      name: "فاطمة محمد",
-      phone: "01033445566",
-      products: [{ name: "شاشة LG", price: 220 }],
-      status: "تم المحاولة",
-      city: "القاهرة",
-      area: "مدينة نصر",
-      notes: "سيعاود الاتصال",
+      code: '2002',
+      name: 'فاطمة محمد',
+      phone: '01033445566',
+      products: [{ name: 'شاشة LG', price: 220 }],
+      status: 'تم المحاولة',
+      city: 'القاهرة',
+      area: 'مدينة نصر',
+      notes: 'سيعاود الاتصال',
     },
     {
-      code: "3001",
-      name: "يوسف سعيد",
-      phone: "01299887755",
-      products: [{ name: "ماوس Logitech", price: 150 }],
-      status: "واتساب",
-      city: "المنصورة",
-      area: "مدينة نصر",
-      notes: "في انتظار الرد",
+      code: '3001',
+      name: 'يوسف سعيد',
+      phone: '01299887755',
+      products: [{ name: 'ماوس Logitech', price: 150 }],
+      status: 'واتساب',
+      city: 'المنصورة',
+      area: 'مدينة نصر',
+      notes: 'في انتظار الرد',
     },
     {
-      code: "3002",
-      name: "علي حسن",
-      phone: "01011223344",
-      products: [{ name: "كيبورد ميكانيكي", price: 400 }],
-      status: "واتساب",
-      city: "الإسكندرية",
-      area: "مدينة نصر",
-      notes: "اقترح تخفيض",
+      code: '3002',
+      name: 'علي حسن',
+      phone: '01011223344',
+      products: [{ name: 'كيبورد ميكانيكي', price: 400 }],
+      status: 'واتساب',
+      city: 'الإسكندرية',
+      area: 'مدينة نصر',
+      notes: 'اقترح تخفيض',
     },
     {
-      code: "4001",
-      name: "سارة أحمد",
-      phone: "01177889900",
-      products: [{ name: "ساعة Apple Watch", price: 275 }],
-      status: "إعادة اتصال",
-      city: "الجيزة",
-      area: "مدينة نصر",
-      notes: "اتصل بعد العصر",
+      code: '4001',
+      name: 'سارة أحمد',
+      phone: '01177889900',
+      products: [{ name: 'ساعة Apple Watch', price: 275 }],
+      status: 'إعادة اتصال',
+      city: 'الجيزة',
+      area: 'مدينة نصر',
+      notes: 'اتصل بعد العصر',
     },
     {
-      code: "4002",
-      name: "مروان سمير",
-      phone: "01522334455",
-      products: [{ name: "سماعة AirPods", price: 350 }],
-      status: "إعادة اتصال",
-      city: "القاهرة",
-      area: "مدينة نصر",
-      notes: "لا يرد",
+      code: '4002',
+      name: 'مروان سمير',
+      phone: '01522334455',
+      products: [{ name: 'سماعة AirPods', price: 350 }],
+      status: 'إعادة اتصال',
+      city: 'القاهرة',
+      area: 'مدينة نصر',
+      notes: 'لا يرد',
     },
     {
-      code: "5001",
-      name: "داليا عادل",
-      phone: "01077889900",
-      products: [{ name: "كيس كمبيوتر", price: 210 }],
-      status: "وقف التشغيل",
-      city: "بورسعيد",
-      area: "مدينة نصر",
-      notes: "رقم غير مستخدم",
+      code: '5001',
+      name: 'داليا عادل',
+      phone: '01077889900',
+      products: [{ name: 'كيس كمبيوتر', price: 210 }],
+      status: 'وقف التشغيل',
+      city: 'بورسعيد',
+      area: 'مدينة نصر',
+      notes: 'رقم غير مستخدم',
     },
     {
-      code: "5002",
-      name: "كريم علي",
-      phone: "01255443322",
-      products: [{ name: "بروجيكتور", price: 290 }],
-      status: "وقف التشغيل",
-      city: "القاهرة",
-      area: "مدينة نصر",
-      notes: "مغلق نهائياً",
+      code: '5002',
+      name: 'كريم علي',
+      phone: '01255443322',
+      products: [{ name: 'بروجيكتور', price: 290 }],
+      status: 'وقف التشغيل',
+      city: 'القاهرة',
+      area: 'مدينة نصر',
+      notes: 'مغلق نهائياً',
     },
     {
-      code: "6001",
-      name: "هدى محمود",
-      phone: "01144556677",
-      products: [{ name: "هارد SSD", price: 310 }],
-      status: "لم يتم المحاولة امس",
-      city: "الفيوم",
-      area: "مدينة نصر",
-      notes: "لم يتصل أحد",
+      code: '6001',
+      name: 'هدى محمود',
+      phone: '01144556677',
+      products: [{ name: 'هارد SSD', price: 310 }],
+      status: 'لم يتم المحاولة امس',
+      city: 'الفيوم',
+      area: 'مدينة نصر',
+      notes: 'لم يتصل أحد',
     },
     {
-      code: "6002",
-      name: "ياسين محمد",
-      phone: "01588997766",
-      products: [{ name: "كارت شاشة NVIDIA", price: 260 }],
-      status: "لم يتم المحاولة امس",
-      city: "الإسكندرية",
-      area: "مدينة نصر",
-      notes: "مطلوب تواصل اليوم",
+      code: '6002',
+      name: 'ياسين محمد',
+      phone: '01588997766',
+      products: [{ name: 'كارت شاشة NVIDIA', price: 260 }],
+      status: 'لم يتم المحاولة امس',
+      city: 'الإسكندرية',
+      area: 'مدينة نصر',
+      notes: 'مطلوب تواصل اليوم',
     },
     {
-      code: "7001",
-      name: "نادر حسن",
-      phone: "01044556677",
-      products: [{ name: "لاب توب HP", price: 500 }],
-      status: "طلبات  تم التأكيد",
-      city: "القاهرة",
-      area: "مدينة نصر",
-      notes: "تم الدفع",
+      code: '7001',
+      name: 'نادر حسن',
+      phone: '01044556677',
+      products: [{ name: 'لاب توب HP', price: 500 }],
+      status: 'طلبات  تم التأكيد',
+      city: 'القاهرة',
+      area: 'مدينة نصر',
+      notes: 'تم الدفع',
     },
     {
-      code: "7002",
-      name: "مها عبد الله",
-      phone: "01222334455",
-      products: [{ name: "تليفزيون Samsung", price: 430 }],
-      status: "طلبات  تم التأكيد",
-      city: "الجيزة",
-      area: "مدينة نصر",
-      notes: "تسليم غداً",
+      code: '7002',
+      name: 'مها عبد الله',
+      phone: '01222334455',
+      products: [{ name: 'تليفزيون Samsung', price: 430 }],
+      status: 'طلبات  تم التأكيد',
+      city: 'الجيزة',
+      area: 'مدينة نصر',
+      notes: 'تسليم غداً',
     },
     {
-      code: "8001",
-      name: "رامي طارق",
-      phone: "01199887755",
-      products: [{ name: "غسالة LG", price: 380 }],
-      status: "طلبات تم التحضير",
-      city: "المنوفية",
-      area: "مدينة نصر",
-      notes: "جاهز للشحن",
+      code: '8001',
+      name: 'رامي طارق',
+      phone: '01199887755',
+      products: [{ name: 'غسالة LG', price: 380 }],
+      status: 'طلبات تم التحضير',
+      city: 'المنوفية',
+      area: 'مدينة نصر',
+      notes: 'جاهز للشحن',
     },
     {
-      code: "8002",
-      name: "نور محمود",
-      phone: "01066554433",
-      products: [{ name: "ثلاجة Toshiba", price: 270 }],
-      status: "طلبات تم التحضير",
-      city: "القاهرة",
-      area: "مدينة نصر",
-      notes: "بانتظار شركة الشحن",
+      code: '8002',
+      name: 'نور محمود',
+      phone: '01066554433',
+      products: [{ name: 'ثلاجة Toshiba', price: 270 }],
+      status: 'طلبات تم التحضير',
+      city: 'القاهرة',
+      area: 'مدينة نصر',
+      notes: 'بانتظار شركة الشحن',
     },
     {
-      code: "9001",
-      name: "سامي حسين",
-      phone: "01533221100",
-      products: [{ name: "مكيف شارب", price: 600 }],
-      status: "طلبات في الشحن",
-      city: "الإسكندرية",
-      area: "مدينة نصر",
-      notes: "في الطريق",
+      code: '9001',
+      name: 'سامي حسين',
+      phone: '01533221100',
+      products: [{ name: 'مكيف شارب', price: 600 }],
+      status: 'طلبات في الشحن',
+      city: 'الإسكندرية',
+      area: 'مدينة نصر',
+      notes: 'في الطريق',
     },
     {
-      code: "9002",
-      name: "جنى علي",
-      phone: "01055667788",
-      products: [{ name: "مروحة توشيبا", price: 720 }],
-      status: "طلبات في الشحن",
-      city: "القاهرة",
-      area: "مدينة نصر",
-      notes: "سيصل خلال يومين",
+      code: '9002',
+      name: 'جنى علي',
+      phone: '01055667788',
+      products: [{ name: 'مروحة توشيبا', price: 720 }],
+      status: 'طلبات في الشحن',
+      city: 'القاهرة',
+      area: 'مدينة نصر',
+      notes: 'سيصل خلال يومين',
     },
     {
-      code: "9003",
-      name: "إسراء مصطفى",
-      phone: "01277889900",
-      products: [{ name: "دفاية كهرباء", price: 450 }],
-      status: "طلبات في الشحن",
-      city: "بورسعيد",
-      area: "مدينة نصر",
-      notes: "تم تأكيد العنوان",
+      code: '9003',
+      name: 'إسراء مصطفى',
+      phone: '01277889900',
+      products: [{ name: 'دفاية كهرباء', price: 450 }],
+      status: 'طلبات في الشحن',
+      city: 'بورسعيد',
+      area: 'مدينة نصر',
+      notes: 'تم تأكيد العنوان',
     },
   ];
 
@@ -509,26 +513,28 @@ export default function AllOrders() {
   const productOptions = Array.from(
     new Set(data.flatMap((d) => d.products.map((p) => p.name)))
   ).sort();
-  const governorateOptions = Array.from(new Set(data.map((d) => d.city))).sort();
-  const sizeColorOptions = ["صغير - أسود", "متوسط - أبيض", "كبير - أزرق"]; // placeholder
-  const areaOptions = ["مدينة نصر", "المعادي", "الدقي", "الزقازيق", "طنطا"]; // sample
+  const governorateOptions = Array.from(
+    new Set(data.map((d) => d.city))
+  ).sort();
+  const sizeColorOptions = ['صغير - أسود', 'متوسط - أبيض', 'كبير - أزرق']; // placeholder
+  const areaOptions = ['مدينة نصر', 'المعادي', 'الدقي', 'الزقازيق', 'طنطا']; // sample
 
   /* ================================
      Filters / State
      ================================ */
   const [filters, setFilters] = useState({
-    productName: "",
-    sizeColor: "",
-    governorate: "",
-    area: "",
-    shipmentCode: "",
-    customerName: "",
-    phone: "",
-    address: "",
+    productName: '',
+    sizeColor: '',
+    governorate: '',
+    area: '',
+    shipmentCode: '',
+    customerName: '',
+    phone: '',
+    address: '',
   });
 
   const [open, setOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<string>('');
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [page, setPage] = useState(1);
   const pageSize = 6;
@@ -615,7 +621,7 @@ export default function AllOrders() {
                 <div className="flex flex-wrap gap-2 mb-6">
                   <GlassButton
                     onClick={() => {
-                      setActiveTab("");
+                      setActiveTab('');
                       setPage(1);
                     }}
                   >
@@ -657,8 +663,8 @@ export default function AllOrders() {
                           <span
                             className={`inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full text-[11px] ${
                               activeTab === t.label
-                                ? "bg-[#ffffff] text-[#5D24E1]"
-                                : "bg-[#5D24E1] text-white"
+                                ? 'bg-[#ffffff] text-[#5D24E1]'
+                                : 'bg-[#5D24E1] text-white'
                             } group-hover:bg-[#ffffff] group-hover:text-[#5D24E1]`}
                           >
                             {countForStatus(t.label)}
@@ -691,7 +697,7 @@ export default function AllOrders() {
                   {showFilters && (
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
+                      animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.25 }}
                       className="flex flex-wrap gap-4 mb-6 rounded-xl border border-white/50 bg-white/50 backdrop-blur-md shadow-sm p-4"
@@ -741,7 +747,9 @@ export default function AllOrders() {
 
                       {/* باقي الفلاتر */}
                       <div className="flex flex-col gap-1">
-                        <label className="text-xs text-gray-600">كود الشحنه</label>
+                        <label className="text-xs text-gray-600">
+                          كود الشحنه
+                        </label>
                         <input
                           type="text"
                           value={filters.shipmentCode}
@@ -757,7 +765,9 @@ export default function AllOrders() {
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <label className="text-xs text-gray-600">اسم العميل</label>
+                        <label className="text-xs text-gray-600">
+                          اسم العميل
+                        </label>
                         <input
                           type="text"
                           value={filters.customerName}
@@ -773,7 +783,9 @@ export default function AllOrders() {
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <label className="text-xs text-gray-600">رقم التليفون</label>
+                        <label className="text-xs text-gray-600">
+                          رقم التليفون
+                        </label>
                         <input
                           type="text"
                           value={filters.phone}
@@ -802,14 +814,14 @@ export default function AllOrders() {
                       <button
                         onClick={() =>
                           setFilters({
-                            productName: "",
-                            sizeColor: "",
-                            governorate: "",
-                            area: "",
-                            shipmentCode: "",
-                            customerName: "",
-                            phone: "",
-                            address: "",
+                            productName: '',
+                            sizeColor: '',
+                            governorate: '',
+                            area: '',
+                            shipmentCode: '',
+                            customerName: '',
+                            phone: '',
+                            address: '',
                           })
                         }
                         className="px-4 py-2 h-10 self-end rounded-md border border-gray-400 text-gray-600 hover:bg-gray-100"
@@ -828,7 +840,9 @@ export default function AllOrders() {
                       className="accent-[#5D24E1]"
                       checked={
                         paginatedData.length > 0 &&
-                        paginatedData.every((r) => selectedRows.includes(r.code))
+                        paginatedData.every((r) =>
+                          selectedRows.includes(r.code)
+                        )
                       }
                       onChange={(e) => {
                         if (e.target.checked)
@@ -847,7 +861,9 @@ export default function AllOrders() {
                           );
                       }}
                     />
-                    <span className="text-sm text-gray-600">تحديد الكل في الصفحة</span>
+                    <span className="text-sm text-gray-600">
+                      تحديد الكل في الصفحة
+                    </span>
                   </div>
                 </div>
 
@@ -878,16 +894,28 @@ export default function AllOrders() {
                         <div className="origin-top-right scale-[0.9] w-[111.111%] font-bold">
                           <Card
                             className="w-full bg-gradient-to-b from-[#FCFAFD] to-[#EADBFF] rounded-[20px] shadow-lg"
-                            style={{ border: "1px solid rgba(93, 36, 225, 0.28)" }}
+                            style={{
+                              border: '1px solid rgba(93, 36, 225, 0.28)',
+                            }}
                           >
                             <CardContent className="text-sm leading-[1.1]">
                               <div dir="rtl" className="space-y-2 h-full">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 w-full">
                                   {/* الكود */}
                                   <div className="flex items-center gap-1.5">
-                                    <Image src={IdIcon} alt="ID" width={16} height={16} className="shrink-0 self-center" />
-                                    <span className="text-gray-600 leading-none">الكود</span>
-                                    <span className="font-semibold leading-none">{row.code}</span>
+                                    <Image
+                                      src={IdIcon}
+                                      alt="ID"
+                                      width={16}
+                                      height={16}
+                                      className="shrink-0 self-center"
+                                    />
+                                    <span className="text-gray-600 leading-none">
+                                      الكود
+                                    </span>
+                                    <span className="font-semibold leading-none">
+                                      {row.code}
+                                    </span>
                                   </div>
 
                                   {/* الميعاد + checkbox */}
@@ -898,7 +926,9 @@ export default function AllOrders() {
                                       </span>
                                       <input
                                         type="checkbox"
-                                        checked={selectedRows.includes(row.code)}
+                                        checked={selectedRows.includes(
+                                          row.code
+                                        )}
                                         onChange={() => toggleRow(row.code)}
                                         className="accent-[#5D24E1]"
                                       />
@@ -908,7 +938,9 @@ export default function AllOrders() {
                                   {/* الاسم */}
                                   <div className="flex items-center gap-1.5">
                                     <User className="w-4 h-4 text-black self-center" />
-                                    <span className="font-medium leading-none">{row.name}</span>
+                                    <span className="font-medium leading-none">
+                                      {row.name}
+                                    </span>
                                   </div>
 
                                   {/* الحالة */}
@@ -917,12 +949,20 @@ export default function AllOrders() {
                                       type="button"
                                       style={{
                                         background:
-                                          "linear-gradient(114.13deg, #FFFFFF 8.63%, #DCD1F5 54.17%, #FFFFFF 99.72%)",
+                                          'linear-gradient(114.13deg, #FFFFFF 8.63%, #DCD1F5 54.17%, #FFFFFF 99.72%)',
                                       }}
                                       className="w-[132px] h-[30px] inline-flex items-center justify-center gap-1 rounded-[999px] border border-[#5D24E147] text-xs font-medium"
                                     >
-                                      <Image src={StatusIcon} alt="status" width={16} height={16} className="shrink-0 self-center" />
-                                      <span className="text-[#5D24E1] leading-none">{row.status}</span>
+                                      <Image
+                                        src={StatusIcon}
+                                        alt="status"
+                                        width={16}
+                                        height={16}
+                                        className="shrink-0 self-center"
+                                      />
+                                      <span className="text-[#5D24E1] leading-none">
+                                        {row.status}
+                                      </span>
                                     </button>
                                   </div>
 
@@ -946,7 +986,9 @@ export default function AllOrders() {
                                   {first && (
                                     <div className="flex items-center gap-1.5">
                                       <Package className="w-4 h-4 text-black self-center" />
-                                      <span className="font-medium leading-none">{first.name}</span>
+                                      <span className="font-medium leading-none">
+                                        {first.name}
+                                      </span>
                                       <span className="font-medium leading-none ltr:ml-auto rtl:mr-auto">
                                         {formatCurrency(first.price)}
                                       </span>
@@ -957,7 +999,9 @@ export default function AllOrders() {
                                   {second && (
                                     <div className="flex items-center gap-1.5">
                                       <Package className="w-4 h-4 text-black self-center" />
-                                      <span className="font-medium leading-none">{second.name}</span>
+                                      <span className="font-medium leading-none">
+                                        {second.name}
+                                      </span>
                                       <span className="font-medium leading-none ltr:ml-auto rtl:mr-auto">
                                         {formatCurrency(second.price)}
                                       </span>
@@ -969,8 +1013,8 @@ export default function AllOrders() {
                                           title="عرض باقي المنتجات"
                                           type="button"
                                         >
-                                          <Plus className="w-3 h-3" />
-                                          +{extraCount}
+                                          <Plus className="w-3 h-3" />+
+                                          {extraCount}
                                         </button>
                                       )}
                                     </div>
@@ -986,8 +1030,16 @@ export default function AllOrders() {
 
                                   {/* المحاولات */}
                                   <div className="flex items-center gap-1.5 justify-center md:col-span-2">
-                                    <Image src={Vector2} alt="tries" width={16} height={16} className="shrink-0 brightness-0 self-center" />
-                                    <span className="font-medium leading-none">المحاولات : 15</span>
+                                    <Image
+                                      src={Vector2}
+                                      alt="tries"
+                                      width={16}
+                                      height={16}
+                                      className="shrink-0 brightness-0 self-center"
+                                    />
+                                    <span className="font-medium leading-none">
+                                      المحاولات : 15
+                                    </span>
                                   </div>
                                 </div>
                               </div>
@@ -1002,19 +1054,21 @@ export default function AllOrders() {
                 {/* Pagination + selected counter */}
                 <div className="flex justify-between items-center mt-6">
                   <div className="flex justify-center mt-4 gap-2">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                      <button
-                        key={p}
-                        onClick={() => setPage(p)}
-                        className={`px-3 py-1 border rounded ${
-                          p === page
-                            ? "bg-purple-600 text-white border-purple-600"
-                            : "border-gray-300 hover:bg-gray-100"
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    ))}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (p) => (
+                        <button
+                          key={p}
+                          onClick={() => setPage(p)}
+                          className={`px-3 py-1 border rounded ${
+                            p === page
+                              ? 'bg-purple-600 text-white border-purple-600'
+                              : 'border-gray-300 hover:bg-gray-100'
+                          }`}
+                        >
+                          {p}
+                        </button>
+                      )
+                    )}
                   </div>
 
                   {selectedRows.length > 0 && (
@@ -1060,17 +1114,20 @@ export default function AllOrders() {
             <div dir="rtl" className="space-y-4">
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div>
-                  <span className="text-gray-600">الاسم:</span> {dialogOrder.name}
+                  <span className="text-gray-600">الاسم:</span>{' '}
+                  {dialogOrder.name}
                 </div>
                 <div>
-                  <span className="text-gray-600">الهاتف:</span> {dialogOrder.phone}
+                  <span className="text-gray-600">الهاتف:</span>{' '}
+                  {dialogOrder.phone}
                 </div>
                 <div className="col-span-2">
-                  <span className="text-gray-600">العنوان:</span>{" "}
+                  <span className="text-gray-600">العنوان:</span>{' '}
                   {dialogOrder.city} - {dialogOrder.area}
                 </div>
                 <div className="col-span-2">
-                  <span className="text-gray-600">الحالة:</span> {dialogOrder.status}
+                  <span className="text-gray-600">الحالة:</span>{' '}
+                  {dialogOrder.status}
                 </div>
               </div>
 
@@ -1082,7 +1139,10 @@ export default function AllOrders() {
                 </div>
                 <div className="divide-y">
                   {dialogOrder.products.map((p, idx) => (
-                    <div key={idx} className="grid grid-cols-12 px-3 py-2 text-sm">
+                    <div
+                      key={idx}
+                      className="grid grid-cols-12 px-3 py-2 text-sm"
+                    >
                       <div className="col-span-7">{p.name}</div>
                       <div className="col-span-2 text-center">{p.qty ?? 1}</div>
                       <div className="col-span-3 text-left">

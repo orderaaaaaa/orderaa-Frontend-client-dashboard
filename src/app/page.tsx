@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Cairo } from 'next/font/google';
-// import sideImage from "@/public/premium_photo-1681488262364-8aeb1b6aac56.avif"
+import sideImage from '@/../public/premium_photo-1681488262364-8aeb1b6aac56.avif';
 
 const cairo = Cairo({
   subsets: ['arabic', 'latin'],
@@ -44,13 +44,13 @@ export default function LoginPage() {
         {/* Left: Image */}
         <div className="relative hidden md:block">
           {/* Put /public/login-illustration.jpg in your project */}
-          {/* <Image
+          <Image
             src={sideImage}
             alt="Welcome"
             fill
             className="object-left"
             priority
-          /> */}
+          />
           <div className="absolute inset-0 bg-black/10" />
         </div>
 

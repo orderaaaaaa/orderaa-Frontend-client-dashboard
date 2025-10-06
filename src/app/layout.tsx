@@ -3,7 +3,10 @@ import { Cairo } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 
-//TODO: Check the sideImage issue, you can search by this => import sideImage from "@/public/premium_photo-1681488262364-8aeb1b6aac56.avif"
+// TODO: Check the sideImage issue. ✔️
+// TODO: Fix the publick folder routing issue.
+
+// The starting width is 430 for the screens
 
 export const metadata: Metadata = {
   title: 'Orderaa Dashboard',

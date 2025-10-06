@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 import { Cairo } from 'next/font/google';
-// import sideImage from "@/public/premium_photo-1681488262364-8aeb1b6aac56.avif";
+import sideImage from '@/../public/premium_photo-1681488262364-8aeb1b6aac56.avif';
 
 const cairo = Cairo({
   subsets: ['arabic', 'latin'],
@@ -362,13 +362,13 @@ export default function SignUpPage() {
       <div className="w-full max-w-5xl bg-white border rounded-2xl shadow-xl grid grid-cols-1 md:grid-cols-2 overflow-hidden">
         {/* Left: Image */}
         <div className="relative hidden md:block">
-          {/* <Image
+          <Image
             src={sideImage}
             alt="Welcome"
             fill
             className="object-left"
             priority
-          /> */}
+          />
           <div className="absolute inset-0 bg-black/10" />
         </div>
 
