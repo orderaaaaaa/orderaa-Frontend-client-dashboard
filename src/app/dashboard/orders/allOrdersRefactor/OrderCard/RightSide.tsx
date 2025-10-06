@@ -10,7 +10,9 @@ export default function RightSide() {
       </div>
       <Content icon="user" content="محمد عماد كمال" />
       <Content icon="phone" content="0123456789" />
-      <Content icon="location" content="القاهرة، مصر" />
+      <Content icon="phone" content="0123456789" />
+      <Content icon="phone" content="0123456789" />
+      <Content icon="location" content="القاهرة - مصر" />
       <Content icon="package" content="42 نايك اسود " />
       <Content icon="package" content="42 نايك اسود " />
     </div>
