@@ -79,7 +79,10 @@ function getBreadcrumb(pathname: string) {
     }
   }
   const parent = navigation.find((n) => pathname.startsWith(n.href));
-  return { parent: parent?.name ?? "لوحة التحكم", child: null as string | null };
+  return {
+    parent: parent?.name ?? "لوحة التحكم",
+    child: null as string | null,
+  };
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
@@ -124,7 +127,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const sidebarWidthCollapsed = "w-16";
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-gray-50">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
@@ -210,7 +213,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     >
                       <span className="flex items-center gap-2">
                         <item.icon className="h-5 w-5 shrink-0" />
-                        {!isCollapsed && <span className="pr-2">{item.name}</span>}
+                        {!isCollapsed && (
+                          <span className="pr-2">{item.name}</span>
+                        )}
                       </span>
                       {!isCollapsed &&
                         (isOpen ? (
@@ -224,10 +229,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     {!isCollapsed && (
                       <div
                         className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                          isOpen ? "max-h-40 opacity-100 mt-2" : "max-h-0 opacity-0"
+                          isOpen
+                            ? "max-h-40 opacity-100 mt-2"
+                            : "max-h-0 opacity-0"
                         }`}
                       >
-                        <div className="mr-8 space-y-2" style={{ direction: "rtl" }}>
+                        <div
+                          className="mr-8 space-y-2"
+                          style={{ direction: "rtl" }}
+                        >
                           {item.children.map((sub) => {
                             const isSubActive = pathname.startsWith(sub.href);
                             return (
@@ -279,7 +289,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </nav>
 
           {/* Settings + Logout */}
-          <div className="p-3 border-t border-white/10" style={{ direction: "rtl" }}>
+          <div
+            className="p-3 border-t border-white/10"
+            style={{ direction: "rtl" }}
+          >
             <Link
               href="/dashboard/settings"
               className={`
@@ -331,7 +344,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             {breadcrumb.child && (
               <>
                 <ChevronLeft className="h-4 w-4 opacity-60" />
-                <span className="font-normal text-gray-700">{breadcrumb.child}</span>
+                <span className="font-normal text-gray-700">
+                  {breadcrumb.child}
+                </span>
               </>
             )}
           </div>

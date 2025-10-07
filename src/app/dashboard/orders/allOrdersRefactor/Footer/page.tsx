@@ -67,13 +67,14 @@ const Footer: React.FC<FooterProps> = ({
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className="flex items-center justify-between mt-8 p-6 bg-white rounded-lg relative bottom-0">
+    <div className="flex flex-col sm:flex-row items-center sm:items-center justify-center sm:justify-between gap-4 mt-8 p-6 bg-white rounded-lg relative bottom-0">
       {/* Total Items */}
       <div className="text-gray-600 text-sm">
         عدد جميع الطلبات : {totalItems.toLocaleString()}
       </div>
       {/* Action Buttons */}
-      <div className="flex items-center space-x-3">
+      <div className="flex flex-col sm:flex-row gap-2 items-center justify-center sm:justify-start">
+        {" "}
         <Button
           variant="outline"
           className="flex items-center space-x-2 px-4 py-2 rounded-3xl border-[#682fee] text-[#682fee] hover:bg-purple-50 cursor-pointer"
@@ -88,7 +89,6 @@ const Footer: React.FC<FooterProps> = ({
           <FileSpreadsheet className="h-4 w-4" />
           <span>مشاركة شيت اكسيل</span>
         </Button>
-
         <Button
           variant="outline"
           className="flex items-center rounded-3xl px-4 py-2 border-[#5D24E1] text-[#5D24E1] hover:bg-purple-50 cursor-pointer"

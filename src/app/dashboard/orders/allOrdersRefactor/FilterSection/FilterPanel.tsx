@@ -25,7 +25,7 @@ export default function FilterPanel({
           animate={{ opacity: 1, scaleY: 1 }}
           exit={{ opacity: 0, scaleY: 0 }}
           style={{ originY: 0 }}
-          className="flex flex-wrap gap-4 mb-6 rounded-xl border-white/50 bg-white/50 backdrop-blur-md shadow-sm p-4 pt-1 will-change-transform transform-gpu"
+          className="flex flex-wrap gap-4 mb-6 rounded-xl border-white/50 bg-white/50 backdrop-blur-md shadow-sm p-4  will-change-transform transform-gpu"
         >
           <SearchableSelect
             value={filters.productName}
