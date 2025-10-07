@@ -1,6 +1,6 @@
-import Heading1 from '@/components/ui/typography/Heading1';
-import Image from 'next/image';
-import React from 'react';
+import Heading1 from "@/components/ui/typography/Heading1";
+import Image from "next/image";
+import React from "react";
 
 interface ContentProps {
   icon: string;

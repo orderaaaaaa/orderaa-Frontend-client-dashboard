@@ -1,24 +1,27 @@
-import PageTab from '@/components/ui/PageTab';
-import Heading1 from '@/components/ui/typography/Heading1';
-import { CheckCircle } from 'lucide-react';
-import Image from 'next/image';
-import React from 'react';
+import PageTab from "@/components/ui/PageTab";
+import Heading1 from "@/components/ui/typography/Heading1";
+import { CheckCircle } from "lucide-react";
+import Image from "next/image";
+import React from "react";
 
-export default function LeftSide() {
+interface LeftSideProps {
+  price: number;
+  trys: number;
+  status: string;
+}
+
+export default function LeftSide({ price, trys, status }: LeftSideProps) {
   return (
     <div className="flex flex-col justify-between items-center">
       <div className="flex flex-col gap-2">
         <span className="text-[#121212] text-[16px]">منذ 3 ايام و 5 ساعات</span>
 
-        <PageTab
-          label="طلبات جديده"
-          icon={<CheckCircle width={18} height={18} />}
-        />
+        <PageTab label={status} icon={<CheckCircle width={18} height={18} />} />
       </div>
 
       <div className="flex flex-col gap-2">
         <div className="flex gap-2 justify-center items-center">
-          <Heading1>2000</Heading1>
+          <Heading1>{price}</Heading1>
           <Heading1>جنيه</Heading1>
         </div>
 
@@ -30,7 +33,7 @@ export default function LeftSide() {
             height={16}
           />
           <Heading1>المحاولات:</Heading1>
-          <Heading1>15</Heading1>
+          <Heading1>{trys}</Heading1>
         </div>
       </div>
     </div>
