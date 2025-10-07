@@ -7,10 +7,10 @@ import FilterSection from "./FilterSection/index";
 import PageTab from "@/components/ui/PageTab";
 import OrderCard from "./OrderCard";
 import Footer from "./Footer/page";
-import { usePagination } from "../../../hooks/AllOrders/usePagination";
-import { useFilteredOrders } from "../../../hooks/AllOrders/useFilteredOrders";
+import { usePagination } from "../../../../hooks/AllOrders/usePagination";
+import { useFilteredOrders } from "../../../../hooks/AllOrders/useFilteredOrders";
 import { OrderFilters } from "@/types/orders";
-import { defaultEmptyFilters } from "../../../hooks/AllOrders/useFilterState";
+import { defaultEmptyFilters } from "../../../../hooks/AllOrders/useFilterState";
 
 import { dummyCards } from "@/constants/orders-tabs";
 
