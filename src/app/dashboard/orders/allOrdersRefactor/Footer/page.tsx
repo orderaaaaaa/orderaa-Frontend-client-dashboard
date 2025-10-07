@@ -67,7 +67,7 @@ const Footer: React.FC<FooterProps> = ({
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className="flex flex-col sm:flex-row items-center sm:items-center justify-center sm:justify-between gap-4 mt-8 p-6 bg-white rounded-lg relative bottom-0">
+    <div className="flex flex-col sm:flex-row items-center sm:items-center justify-center sm:justify-between gap-4 mt-8 p-6 bg-gray-50 rounded-lg relative bottom-0">
       {/* Total Items */}
       <div className="text-gray-600 text-sm">
         عدد جميع الطلبات : {totalItems.toLocaleString()}

@@ -91,7 +91,7 @@ export default function AllOrdersRefactor() {
       <FilterSection filters={filters} onChange={handleFilterChange} />
 
       {/* Orders Grid */}
-      <div className="grid grid-cols-3 grid-rows-3 gap-3 flex-wrap">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 grid-rows-3 gap-3 flex-wrap">
         {paginatedItems.map((card) => (
           <OrderCard key={card.id} {...card} />
         ))}
