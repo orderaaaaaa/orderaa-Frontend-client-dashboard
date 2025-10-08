@@ -3,6 +3,7 @@ import React from "react";
 import OrderDetailsCardId from "@/components/OrderDetails/OrderDetailsCardId";
 import OrderDetailsInfoStatus from "@/components/OrderDetails/OrderDetailsInfoStatus";
 import OrderDetailsProductCard from "@/components/OrderDetails/OrderDetailsProductCard";
+import OrderDetailsInfoComponent from "@/components/OrderDetails/OrderDetailsInfo";
 
 function OrderDetailsInfo() {
   return (
@@ -10,6 +11,7 @@ function OrderDetailsInfo() {
       <OrderDetailsCardId />
       <OrderDetailsInfoStatus />
       <OrderDetailsProductCard />
+      <OrderDetailsInfoComponent />
     </section>
   );
 }

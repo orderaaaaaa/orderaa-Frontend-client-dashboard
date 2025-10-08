@@ -1,7 +1,20 @@
 "use client";
 
 import React, { useState } from "react";
-import { Truck, Package, CheckCircle } from "lucide-react";
+import {
+  Truck,
+  Boxes,
+  BadgePlus,
+  Repeat,
+  CircleDollarSign,
+  Clock3,
+  PhoneCall,
+  Ban,
+  CircleX,
+  CheckCircle2,
+  FileText,
+} from "lucide-react";
+import Image from "next/image";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import FilterSection from "./FilterSection/index";
 import PageTab from "@/components/ui/PageTab";
@@ -43,47 +56,69 @@ export default function AllOrdersRefactor() {
         <PageTab
           label="جميع الطلبات"
           count={dummyCards.length}
-          icon={<Package width={18} height={18} />}
+          icon={<Boxes width={18} height={18} />}
         />
         <PageTab
           label="طلبات جديده"
           count={3}
-          icon={<CheckCircle width={18} height={18} />}
+          icon={<BadgePlus width={18} height={18} />}
         />
         <PageTab
-          label="في الشحن"
+          label="تم المحاولة"
           count={200}
-          icon={<Truck width={18} height={18} />}
+          icon={<Repeat width={18} height={18} />}
         />
         <PageTab
-          label="في الشحن"
+          label="في انتظار الدفع"
           count={15000}
-          icon={<Truck width={18} height={18} />}
+          icon={<CircleDollarSign width={18} height={18} />}
         />
         <PageTab
-          label="في الشحن"
+          label="واتساب"
           count={30000}
-          icon={<Truck width={18} height={18} />}
+          icon={
+            <Image
+              src="/whatsapp.png"
+              alt="WhatsApp icon"
+              width={14}
+              height={14}
+            />
+          }
         />
         <PageTab
-          label="في الشحن"
+          label="تأجيلات"
           count={67}
-          icon={<Truck width={18} height={18} />}
+          icon={<Clock3 width={18} height={18} />}
         />
         <PageTab
-          label="في الشحن"
+          label="اعادة اتصال"
           count={1}
-          icon={<Truck width={18} height={18} />}
+          icon={<PhoneCall width={18} height={18} />}
         />
         <PageTab
-          label="في الشحن"
+          label="وقوف التشغيل"
           count={0}
-          icon={<Truck width={18} height={18} />}
+          icon={<Ban width={18} height={18} />}
+        />
+        <PageTab
+          label="تم الغاء"
+          count={2}
+          icon={<CircleX width={18} height={18} />}
+        />
+        <PageTab
+          label="تم التحضير"
+          count={2}
+          icon={<CheckCircle2 width={18} height={18} />}
         />
         <PageTab
           label="في الشحن"
           count={2}
           icon={<Truck width={18} height={18} />}
+        />
+        <PageTab
+          label="تقارير"
+          count={2}
+          icon={<FileText width={18} height={18} />}
         />
       </div>
 
