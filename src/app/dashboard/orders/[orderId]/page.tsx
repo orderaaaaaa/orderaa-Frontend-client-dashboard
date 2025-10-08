@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { OrderFilters } from "@/types/orders";
+import React, { useState } from 'react';
+import { OrderFilters } from '@/types/orders';
 
-import { defaultEmptyFilters } from "../../../../hooks/AllOrders/useFilterState";
-import { useFilteredOrders } from "../../../../hooks/AllOrders/useFilteredOrders";
-import { useSearchParams } from "next/navigation";
-import { AuthGuard } from "@/components/auth-guard";
-import { DashboardLayout } from "@/components/dashboard-layout";
+import { defaultEmptyFilters } from '../../../../hooks/AllOrders/useFilterState';
+import { useFilteredOrders } from '../../../../hooks/AllOrders/useFilteredOrders';
+import { useSearchParams } from 'next/navigation';
+import { AuthGuard } from '@/components/auth-guard';
+import { DashboardLayout } from '@/components/dashboard-layout';
 import {
   Truck,
   Boxes,
@@ -20,12 +20,12 @@ import {
   CircleX,
   CheckCircle2,
   FileText,
-} from "lucide-react";
-import PageTab from "@/components/ui/PageTab";
-import { dummyCards } from "@/constants/orders-tabs";
-import FilterSection from "../allOrdersRefactor/FilterSection/index";
-import OrderDetailsInfo from "./OrderDetailsInfo";
-import Image from "next/image";
+} from 'lucide-react';
+import PageTab from '@/components/ui/PageTab';
+import { dummyCards } from '@/constants/orders-tabs';
+import FilterSection from '../allOrders/FilterSection';
+import OrderDetailsInfo from './OrderDetailsInfo';
+import Image from 'next/image';
 
 export default function OrderDetails({ params }: { params: { code: string } }) {
   const [filters, setFilters] = useState<OrderFilters>(defaultEmptyFilters);
@@ -35,15 +35,15 @@ export default function OrderDetails({ params }: { params: { code: string } }) {
   };
 
   const search = useSearchParams();
-  const name = search.get("name") || "";
-  const phone = search.get("phone") || "";
-  const product = search.get("product") || "";
-  const price = search.get("price") || "";
-  const status = search.get("status") || "";
-  const city = search.get("city") || "";
-  const notes = search.get("notes") || "";
+  const name = search.get('name') || '';
+  const phone = search.get('phone') || '';
+  const product = search.get('product') || '';
+  const price = search.get('price') || '';
+  const status = search.get('status') || '';
+  const city = search.get('city') || '';
+  const notes = search.get('notes') || '';
 
-  const imageSrc = "/placeholder.jpg";
+  const imageSrc = '/placeholder.jpg';
 
   return (
     <AuthGuard>
