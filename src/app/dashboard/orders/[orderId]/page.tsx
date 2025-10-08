@@ -48,6 +48,7 @@ export default function OrderDetails({ params }: { params: { code: string } }) {
   return (
     <AuthGuard>
       <DashboardLayout>
+        {/* TODO: What is the "hide" for? */}
         <div className="flex gap-4 md:flex-wrap overflow-x-auto hide">
           <PageTab
             label="جميع الطلبات"
