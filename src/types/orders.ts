@@ -7,6 +7,7 @@ export interface OrderFilters {
   customerName: string;
   phone: string;
   address: string;
+  executionDate: string;
 }
 
 export interface FilterOptions {
