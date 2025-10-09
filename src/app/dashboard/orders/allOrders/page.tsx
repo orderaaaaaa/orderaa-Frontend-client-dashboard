@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import { DashboardLayout } from "@/components/dashboard-layout";
-import FilterSection from "./FilterSection/index";
-import OrderCard from "./OrderCard";
-import Footer from "./Footer";
-import { usePagination } from "../../../../hooks/AllOrders/usePagination";
-import { useFilteredOrders } from "../../../../hooks/AllOrders/useFilteredOrders";
-import { OrderFilters } from "@/types/orders";
-import { defaultEmptyFilters } from "../../../../hooks/AllOrders/useFilterState";
-import PageTaps from "./pageTaps";
+import { DashboardLayout } from '@/components/dashboard-layout';
+import FilterSection from './FilterSection/index';
+import OrderCard from './OrderCard';
+import Footer from './Footer';
+import { usePagination } from '../../../../hooks/AllOrders/usePagination';
+import { useFilteredOrders } from '../../../../hooks/AllOrders/useFilteredOrders';
+import { OrderFilters } from '@/types/orders';
+import { defaultEmptyFilters } from '../../../../hooks/AllOrders/useFilterState';
+import PageTaps from './pageTaps';
 
-import { dummyCards } from "@/constants/orders-tabs";
-import { ScanLine } from "lucide-react";
+import { dummyCards } from '@/constants/orders-tabs';
+import { ScanLine } from 'lucide-react';
 
 export default function AllOrdersRefactor() {
   const [filters, setFilters] = useState<OrderFilters>(defaultEmptyFilters);
