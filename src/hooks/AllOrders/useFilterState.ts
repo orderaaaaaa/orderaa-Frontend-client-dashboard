@@ -1,22 +1,23 @@
-import { useEffect, useMemo, useState } from "react";
-import { FilterOptions, OrderFilters } from "@/types/orders";
+import { useEffect, useMemo, useState } from 'react';
+import { FilterOptions, OrderFilters } from '@/types/orders';
 
+//TODO: The executionDate field is not here
 export const defaultEmptyFilters: OrderFilters = {
-  productName: "",
-  sizeColor: "",
-  governorate: "",
-  area: "",
-  shipmentCode: "",
-  customerName: "",
-  phone: "",
-  address: "",
+  productName: '',
+  sizeColor: '',
+  governorate: '',
+  area: '',
+  shipmentCode: '',
+  customerName: '',
+  phone: '',
+  address: '',
 };
 
 export const defaultOptions: FilterOptions = {
-  productOptions: ["تيشيرت", "بنطال", "حذاء", "تيشيرت", "بنطال", "حذاء"],
-  sizeColorOptions: ["صغير - أسود", "متوسط - أبيض", "كبير - أزرق"],
-  governorateOptions: ["القاهرة", "الجيزة", "الإسكندرية"],
-  areaOptions: ["مدينة نصر", "المعادي", "الدقي"],
+  productOptions: ['تيشيرت', 'بنطال', 'حذاء', 'تيشيرت', 'بنطال', 'حذاء'],
+  sizeColorOptions: ['صغير - أسود', 'متوسط - أبيض', 'كبير - أزرق'],
+  governorateOptions: ['القاهرة', 'الجيزة', 'الإسكندرية'],
+  areaOptions: ['مدينة نصر', 'المعادي', 'الدقي'],
 };
 
 export function useFilterState(
