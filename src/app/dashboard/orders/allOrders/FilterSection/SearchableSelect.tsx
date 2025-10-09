@@ -71,7 +71,7 @@ const SearchableSelect = React.memo(function SearchableSelect({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="px-3 py-2 rounded border border-gray-300 bg-white font-medium truncate flex items-center justify-between"
+        className="px-3 py-2 relative rounded border cursor-pointer border-gray-300 bg-white font-medium truncate flex items-center justify-between"
         aria-haspopup="listbox"
         aria-expanded={open}
       >
@@ -81,7 +81,9 @@ const SearchableSelect = React.memo(function SearchableSelect({
           {value || `${placeholder}`}
         </span>
         <svg
-          className={`w-4 h-4 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`w-8 h-8 absolute left-2 top-1 text-gray-600 transition-transform ${
+            open ? "rotate-180" : ""
+          }`}
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden="true"
@@ -97,7 +99,7 @@ const SearchableSelect = React.memo(function SearchableSelect({
             animate={{ opacity: 1, y: 38 }}
             exit={{ opacity: 0, y: 4 }}
             transition={{ duration: 0.18 }}
-            className="absolute z-10 mt-1 w-auto max-h-60 overflow-auto rounded-md border border-gray-200 bg-white shadow-lg"
+            className="absolute ! z-100 mt-1 w-auto max-h-60 overflow-auto rounded-md border border-gray-200 bg-white shadow-lg"
             role="listbox"
           >
             <div className="p-2 border-b border-gray-100">
@@ -121,7 +123,7 @@ const SearchableSelect = React.memo(function SearchableSelect({
                     onMouseEnter={() => setActiveIdx(idx)}
                     onMouseLeave={() => setActiveIdx(-1)}
                     onClick={() => commitSelect(opt)}
-                    className={`px-3 py-2 text-sm cursor-pointer ${
+                    className={`px-3 py-2 z-20 cursor-pointer hover:bg-[#5D24E1] text-semibold  hover:text-white  ${
                       activeIdx === idx ? "bg-gray-100" : ""
                     }`}
                     role="option"

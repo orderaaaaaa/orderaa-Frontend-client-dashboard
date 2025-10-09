@@ -21,6 +21,7 @@ const dummyCards = [
     trys: 2,
     status: "في الشحن",
     city: "Cairo",
+    alert: 3,
   },
   {
     id: 2,
@@ -65,6 +66,7 @@ const dummyCards = [
     trys: 2,
     status: "في الشحن",
     city: "valorant",
+    alert: 10,
   },
   {
     id: 6,

@@ -3,19 +3,22 @@ import Image from "next/image";
 import React from "react";
 
 interface ContentProps {
-  icon: string;
+  icon?: string;
   content: string;
 }
 
 export default function Content({ icon, content }: ContentProps) {
   return (
     <div className="flex items-center gap-2">
-      <Image
-        src={`/Icons/${icon}.svg`}
-        alt="Refresh Icon"
-        width={18}
-        height={18}
-      />
+      {icon ? (
+        <Image
+          src={`/Icons/${icon}.svg`}
+          alt="Refresh Icon"
+          width={18}
+          height={18}
+        />
+      ) : null}
+
       <Heading1>{content}</Heading1>
     </div>
   );
