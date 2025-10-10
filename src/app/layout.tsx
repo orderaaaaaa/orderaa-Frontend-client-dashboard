@@ -18,6 +18,7 @@ const cairo = Cairo({
 });
 
 // Installing Zustand
+// Cleaning the Auth Folder structure and code
 
 export default function RootLayout({
   children,
