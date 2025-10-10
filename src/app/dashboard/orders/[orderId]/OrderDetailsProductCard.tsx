@@ -69,8 +69,10 @@ function OrderDetailsProductCard() {
             <h3 className="text-[#1E1E1E] font-bold text-lg ">
               {item.product}
             </h3>
-            <p className="text-[#1E1E1E] font-bold text-lg ">{item.color}</p>
-            <p className="text-[#1E1E1E] font-bold text-lg ">{item.prop}</p>
+            <div>
+              <p className="text-[#1E1E1E] font-bold text-lg ">{item.color}</p>
+              <p className="text-[#1E1E1E] font-bold text-lg ">{item.prop}</p>
+            </div>
 
             <p className="text-[#1E1E1E] font-bold text-lg ">
               {item.price} جنيه

@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl">
       {/* font-sans will map to Cairo via Tailwind config below */}
-      <body className={`${cairo.variable} font-sans`}>
+      <body className={`${cairo.variable} font-janna`}>
         {children}
         <Analytics />
       </body>

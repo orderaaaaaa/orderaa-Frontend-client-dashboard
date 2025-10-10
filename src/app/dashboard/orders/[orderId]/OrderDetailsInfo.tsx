@@ -7,7 +7,7 @@ import OrderDetailsInfoComponent from '@/app/dashboard/orders/[orderId]/OrderDet
 
 function OrderDetailsInfo() {
   return (
-    <section className="mx-auto p-4 bg-white rounded-lg shadow-sm">
+    <section className="mx-auto p-4 mt-5 bg-white rounded-lg shadow-sm">
       <OrderDetailsCardId />
       <OrderDetailsInfoStatus />
       <OrderDetailsProductCard />

@@ -10,7 +10,7 @@ import { usePagination } from '../../../../hooks/AllOrders/usePagination';
 import { useFilteredOrders } from '../../../../hooks/AllOrders/useFilteredOrders';
 import { OrderFilters } from '@/types/orders';
 import { defaultEmptyFilters } from '../../../../hooks/AllOrders/useFilterState';
-import PageTaps from './pageTaps';
+import PageTaps from '../pageTaps';
 
 import { dummyCards } from '@/constants/orders-tabs';
 import { ScanLine } from 'lucide-react';

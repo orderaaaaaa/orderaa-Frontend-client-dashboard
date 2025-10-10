@@ -1,4 +1,4 @@
-import { PhoneOff, CirclePlus } from 'lucide-react';
+import { PhoneMissed, CirclePlus } from 'lucide-react';
 
 const dumymyData = [
   { id: 1, status: 'لا يرد' },
@@ -23,15 +23,21 @@ function OrderDetailsInfoStatus() {
 
         <div className="flex flex-wrap gap-4 pb-2">
           {dumymyData.map((item) => (
-            <div
-              key={item.id}
-              className="flex gap-2 bg-white p-3 rounded-lg min-w-[100px] text-center"
-            >
-              <PhoneOff className="w-4" />
-              <p className="text-[14px] font-bold">
-                {item.status},<span>12/12/2024</span>,{''}{' '}
-                <span>منذ 2 يوم ,5 ساعات</span>
-              </p>
+            <div key={item.id}>
+              <div className="flex flex-col gap-2 bg-white p-3 rounded-lg min-w-[200px] text-center">
+                <div className="flex gap-2">
+                  <PhoneMissed className="w-4" />
+                  <p className="text-[14px] font-bold">
+                    {item.status} ,<span>12/12/2024</span>,
+                    <span>منذ 2 يوم, 5 ساعات </span>
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-[5400]">
+                    بواسطة الموظف محمد علاء في قسم التاكيد
+                  </p>
+                </div>
+              </div>
             </div>
           ))}
         </div>
