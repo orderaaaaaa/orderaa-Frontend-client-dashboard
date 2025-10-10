@@ -1,9 +1,9 @@
-import React from "react";
+import React from 'react';
 
-import OrderDetailsCardId from "@/components/OrderDetails/OrderDetailsCardId";
-import OrderDetailsInfoStatus from "@/components/OrderDetails/OrderDetailsInfoStatus";
-import OrderDetailsProductCard from "@/components/OrderDetails/OrderDetailsProductCard";
-import OrderDetailsInfoComponent from "@/components/OrderDetails/OrderDetailsInfo";
+import OrderDetailsCardId from '@/app/dashboard/orders/[orderId]/OrderDetailsCardId';
+import OrderDetailsInfoStatus from '@/app/dashboard/orders/[orderId]/OrderDetailsInfoStatus';
+import OrderDetailsProductCard from '@/app/dashboard/orders/[orderId]/OrderDetailsProductCard';
+import OrderDetailsInfoComponent from '@/app/dashboard/orders/[orderId]/OrderDetailsInfoComponent';
 
 function OrderDetailsInfo() {
   return (

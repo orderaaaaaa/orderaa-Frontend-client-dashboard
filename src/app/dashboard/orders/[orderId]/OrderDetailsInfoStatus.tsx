@@ -1,9 +1,9 @@
-import { PhoneOff, CirclePlus } from "lucide-react";
+import { PhoneOff, CirclePlus } from 'lucide-react';
 
 const dumymyData = [
-  { id: 1, status: "لا يرد" },
-  { id: 2, status: "مغلق" },
-  { id: 3, status: "مش بيجمع" },
+  { id: 1, status: 'لا يرد' },
+  { id: 2, status: 'مغلق' },
+  { id: 3, status: 'مش بيجمع' },
 ];
 
 function OrderDetailsInfoStatus() {
@@ -29,7 +29,7 @@ function OrderDetailsInfoStatus() {
             >
               <PhoneOff className="w-4" />
               <p className="text-[14px] font-bold">
-                {item.status},<span>12/12/2024</span>,{""}{" "}
+                {item.status},<span>12/12/2024</span>,{''}{' '}
                 <span>منذ 2 يوم ,5 ساعات</span>
               </p>
             </div>

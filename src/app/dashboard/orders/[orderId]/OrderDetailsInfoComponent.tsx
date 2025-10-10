@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   User,
   Phone,
@@ -8,11 +8,11 @@ import {
   Weight,
   Truck,
   CircleDollarSign,
-} from "lucide-react";
+} from 'lucide-react';
 
 function OrderDetailsInfoComponent() {
   const tagStyle =
-    "flex gap-2 bg-white shadow-xs items-center py-2 px-2 rounded-[5px] font-semibold";
+    'flex gap-2 bg-white shadow-xs items-center py-2 px-2 rounded-[5px] font-semibold';
 
   return (
     <>
@@ -41,7 +41,7 @@ function OrderDetailsInfoComponent() {
               مدينة نصر
             </p>
             <p className={tagStyle}>
-              {" "}
+              {' '}
               <Clock3 width={18} />
               10:30 مساءآ | 6:00 صباحآ
             </p>
@@ -51,7 +51,7 @@ function OrderDetailsInfoComponent() {
           <h2 className="text-[#5D24E1] font-semibol mb-3">بيانات المنتج</h2>
           <div className="grid grid-col-1 md:grid-cols-3 gap-6 ">
             <p className={tagStyle}>
-              {" "}
+              {' '}
               <Package width={20} />
               جلد
             </p>
