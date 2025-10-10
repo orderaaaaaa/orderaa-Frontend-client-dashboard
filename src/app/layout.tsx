@@ -3,11 +3,6 @@ import { Cairo } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 
-// TODO: Check the sideImage issue. ✔️
-// TODO: Fix the publick folder routing issue.
-
-// The starting width is 430 for the screens
-
 export const metadata: Metadata = {
   title: 'Orderaa Dashboard',
   description: 'Orderaa management system',
@@ -21,6 +16,8 @@ const cairo = Cairo({
   variable: '--font-cairo',
   display: 'swap',
 });
+
+// Installing Zustand
 
 export default function RootLayout({
   children,
