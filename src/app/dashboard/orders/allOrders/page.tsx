@@ -37,6 +37,10 @@ export default function AllOrdersRefactor() {
     goToPage(1);
   };
 
+  const handleScanClick = () => {
+    setSelect(!select);
+  };
+
   return (
     <DashboardLayout>
       <PageTaps data={dummyCards} />
@@ -45,20 +49,14 @@ export default function AllOrdersRefactor() {
 
       <div className="flex justify-between mt-10 mb-6 select-none">
         <p className="text-gray-700">عدد جميع الطلبات: {dummyCards.length}</p>
-        {select ? (
-          <ScanLine
-            className="ml-5 cursor-pointer text-[#5D24E1]"
-            onClick={() => setSelect(false)}
-          />
-        ) : (
-          <ScanLine
-            className="ml-5 cursor-pointer text-[#5D24E1]"
-            onClick={() => setSelect(true)}
-          />
-        )}
+
+        <ScanLine
+          className="ml-5 cursor-pointer text-[#5D24E1]"
+          onClick={handleScanClick}
+        />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 grid-rows-3 gap-3 flex-wrap my-4">
+      <div className="grid grid-cols-1 justify-items-center [@media(min-width:1200px)]:grid-cols-2 [@media(min-width:1641px)]:grid-cols-3 grid-rows-3 gap-3 my-4">
         {paginatedItems.map((card) => (
           <OrderCard key={card.id} select={select} {...card} />
         ))}

@@ -16,3 +16,16 @@ export interface FilterOptions {
   governorateOptions: string[];
   areaOptions: string[];
 }
+export interface OrderCardProps {
+  id: number;
+  name: string;
+  phone: string;
+  government: string;
+  items: string[];
+  price: number;
+  trys: number;
+  status: string;
+  city: string;
+  alert: number;
+  select: boolean;
+}

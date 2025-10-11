@@ -1,23 +1,8 @@
-import React from "react";
-import LeftSide from "./LeftSide";
-import RightSide from "./RightSide";
-import Image from "next/image";
-import { TriangleAlert } from "lucide-react";
-
-interface OrderCardProps {
-  id: number;
-  name: string;
-  phone: string;
-  government: string;
-  items: string[];
-  price: number;
-  trys: number;
-  status: string;
-  city: string;
-  alert: number;
-  select: boolean;
-}
-
+import React from 'react';
+import LeftSide from './LeftSide';
+import RightSide from './RightSide';
+import { OrderCardProps } from '@/types/orders';
+import { TriangleAlert } from 'lucide-react';
 export default function OrderCard({
   id,
   name,
@@ -37,21 +22,22 @@ export default function OrderCard({
       relative
       z-[0]
       grid
-      max-w-[500px] min-w-[300px]
+      max-sm:min-w-[400px]
+      max-w-[450px] min-w-[442px]
       bg-gradient-to-b from-[#FCFAFD] to-[#EADBFF] border-2 border-[#5D24E147]
-      rounded-[20px] py-4 px-2
+      rounded-[20px] py-3 px-2
       shadow-[0px_4px_4px_0px_#5D24E114]
-      ${select ? "grid-cols-[10px_1fr_1fr] gap-3" : "grid-cols-[1fr_1fr_auto]"}
+      grid-cols-[1px_1fr_1fr_10px] gap-3 
     `}
     >
-      {select ? (
-        <input
-          className="w-5 h-5 cursor-pointer border-2 border-[#5D24E1] rounded accent-[#5D24E1] transform"
-          type="checkbox"
-          name="select"
-          id=""
-        />
-      ) : null}
+      <input
+        className={`w-5 h-5 cursor-pointer mt-[3px] border-2 border-[#5D24E1] rounded accent-[#5D24E1] ${
+          select ? null : 'invisible'
+        }`}
+        type="checkbox"
+        name="select"
+        id=""
+      />
 
       <RightSide
         id={id}
@@ -63,6 +49,18 @@ export default function OrderCard({
       />
 
       <LeftSide alert={alert} price={price} trys={trys} status={status} />
+      {alert ? (
+        <div className="relative top-0 left-6">
+          <p className=" absolute max-sm:left-[-8px] top-[-3px] left-[1px] bg-red-500 text-[9px] text-white min-w-3 h-3 rounded-2xl text-center">
+            {alert}
+          </p>
+          <TriangleAlert
+            className="absolute max-sm:left-[-23px] top-[-30] left-[20] text-red-500"
+            width={24}
+            height={24}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }
