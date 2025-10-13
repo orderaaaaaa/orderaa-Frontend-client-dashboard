@@ -20,7 +20,7 @@ export default function Input({
 }: InputProps) {
   return (
     <div>
-      <label htmlFor={name} className="block text-sm mb-1">
+      <label htmlFor={name} className="block font-medium text-[16px] mb-1">
         {label}
       </label>
       <input
@@ -28,7 +28,7 @@ export default function Input({
         id={name}
         name={name}
         placeholder={placeholder}
-        className="w-full border rounded-lg py-2.5 px-3"
+        className="w-full border border-[#CED4DA] rounded-lg py-2.5 px-3 text-[18px]"
         {...(register ? { ...register(name) } : {})}
         {...rest}
       />

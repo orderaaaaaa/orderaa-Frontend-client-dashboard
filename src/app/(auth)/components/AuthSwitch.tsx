@@ -7,7 +7,7 @@ interface AuthSwitchProps {
 
 export default function AuthSwitch({ goTo }: AuthSwitchProps) {
   return (
-    <p className="text-center text-sm text-gray-500 m-8">
+    <p className="text-center text-sm text-gray-500 mt-11">
       {goTo === 'signin' ? (
         <>
           مسجل بالفعل؟ {``}

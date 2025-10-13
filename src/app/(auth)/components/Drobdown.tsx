@@ -22,11 +22,13 @@ export default function Drobdown({
 }: ComboboxProps) {
   return (
     <div className="w-full">
-      {label && <label className="block mb-1 text-sm">{label}</label>}
+      {label && (
+        <label className="block mb-1 font-medium text-[16px]">{label}</label>
+      )}
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full border rounded-lg py-2.5 px-3 bg-white"
+        className="w-full border border-[#CED4DA] rounded-lg py-2.5 px-3 text-[18px] text-[#878A99]"
       >
         <option value="">{placeholder}</option>
         {Array.isArray(options) &&

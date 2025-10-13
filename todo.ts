@@ -17,7 +17,7 @@
 // Check why the submit in signup doesn't work ✅
 // Integrate the Sign up ✅
 // Give Arsanous the domain link ✅
-// Finish the design
+// Finish the signup design ✅
 // Clean and finish the sign up page
 
 // Refactor the Sign in code
