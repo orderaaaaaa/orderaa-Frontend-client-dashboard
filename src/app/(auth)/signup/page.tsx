@@ -11,8 +11,8 @@ import Drobdown from '../components/Drobdown';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import AuthHeader from '../components/AuthHeader';
 import Input from '../components/Input';
-import Link from 'next/link';
-import Image from 'next/image';
+import AuthSwitch from '../components/AuthSwitch';
+import { signUp } from '@/lib/api/auth';
 
 export default function SignUpForm() {
   const router = useRouter();
@@ -21,7 +21,7 @@ export default function SignUpForm() {
     { key: string; value: string }[]
   >([]);
 
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [category, setCategory] = useState('');
 
   const [governorates, setGovernorates] = useState<
     { key: string; value: string }[]
@@ -57,6 +57,8 @@ export default function SignUpForm() {
       return;
     }
 
+    console.log('111111111111111111111111', signUpSchema);
+
     setLoadingCities(true);
     getCities(selectedGovernorate)
       .then((cities) => setCities(cities as { key: string; value: string }[]))
@@ -65,17 +67,20 @@ export default function SignUpForm() {
   }, [selectedGovernorate]);
 
   const onSubmit = async (values: SignUpSchema) => {
+    console.log('✅ Form submitted with values:', values);
     setError('');
     try {
-      const { data } = await api.post('/auth/signup', values);
+      const data = await signUp(values);
+      console.log('✅ API response:', data);
       if (data) router.push('/signin');
     } catch (err: any) {
+      console.error('❌ Sign-up error:', err);
       setError(err.response?.data?.message || 'حدث خطأ أثناء إنشاء الحساب.');
     }
   };
 
   return (
-    <section className="flex flex-col justify-center items-center">
+    <section className="flex flex-col justify-center items-center bg-white border rounded-2xl shadow-xl overflow-hidden">
       <AuthHeader
         title="انشاء حساب جديد"
         subtitle="ادخل معلوماتك للمتابعة مع Orderaa"
@@ -96,9 +101,9 @@ export default function SignUpForm() {
         <div className="flex justify-between items-center">
           <Input
             label="اسم صاحب المتجر"
-            name="name"
+            name="username"
             placeholder="أدخل اسمك"
-            error={errors.name?.message}
+            error={errors.username?.message}
             register={register}
           />
 
@@ -113,14 +118,14 @@ export default function SignUpForm() {
 
         {/* Activity */}
         <Drobdown
-          label="نوع النشاط"
-          value={selectedCategory}
-          onChange={setSelectedCategory}
+          value={watch('category')}
+          onChange={(val) => setValue('category', val)}
           options={categories}
           placeholder="اختر النشاط"
+          label="نوع النشاط"
         />
-        {errors.activity && (
-          <p className="text-xs text-red-500 mt-1">{errors.activity.message}</p>
+        {errors.category && (
+          <p className="text-xs text-red-500 mt-1">{errors.category.message}</p>
         )}
 
         {/* Email + Mobile */}
@@ -191,12 +196,7 @@ export default function SignUpForm() {
         </button>
       </form>
 
-      <p className="text-center text-sm text-gray-500 m-8">
-        مسجل بالفعل؟
-        <Link href="/signup" className="text-[#5D24E1] hover:underline">
-          سجل الدخول
-        </Link>
-      </p>
+      <AuthSwitch goTo="signin" />
     </section>
   );
 }
