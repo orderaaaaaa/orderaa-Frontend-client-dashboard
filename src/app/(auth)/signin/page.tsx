@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Cairo } from 'next/font/google';
 import sideImage from '@/../public/premium_photo-1681488262364-8aeb1b6aac56.avif';
+import Link from 'next/link';
 
 const cairo = Cairo({
   subsets: ['arabic', 'latin'],
@@ -171,9 +172,9 @@ export default function LoginPage() {
 
             <p className="text-center text-sm text-gray-500">
               ليس لديك حساب؟{' '}
-              <a href="/signUp" className="text-[#5D24E1] hover:underline">
+              <Link href="/signup" className="text-[#5D24E1] hover:underline">
                 أنشئ حسابًا
-              </a>
+              </Link>
             </p>
           </form>
         </div>
