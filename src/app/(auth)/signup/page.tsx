@@ -1,11 +1,11 @@
 'use client';
 
 import { useForm } from 'react-hook-form';
+import { Mail, User, Pen, Phone, LocateIcon, Lock } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signUpSchema, type SignUpSchema } from './schema';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import api from '@/lib/api';
 import { getCategories, getGovernorates, getCities } from '@/lib/api/lookups';
 import Drobdown from '../components/Drobdown';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -99,6 +99,7 @@ export default function SignUpForm() {
               placeholder="أدخل اسمك"
               error={errors.username?.message}
               register={register}
+              icon={User}
             />
 
             <Input
@@ -107,6 +108,7 @@ export default function SignUpForm() {
               placeholder="أسم المتجر..."
               error={errors.merchantName?.message}
               register={register}
+              icon={Pen}
             />
           </div>
 
@@ -131,6 +133,7 @@ export default function SignUpForm() {
             placeholder="أدخل بريدك الالكتروني..."
             error={errors.email?.message}
             register={register}
+            icon={Mail}
           />
 
           <Input
@@ -139,6 +142,7 @@ export default function SignUpForm() {
             placeholder="أدخل رقم الهاتف"
             error={errors.phoneNumber?.message}
             register={register}
+            icon={Phone}
           />
 
           {/* Governorate + City */}
@@ -149,6 +153,7 @@ export default function SignUpForm() {
               options={governorates}
               placeholder="اختر المحافظة"
               label="المحافظة"
+              icon={LocateIcon}
             />
 
             <Drobdown
@@ -159,6 +164,7 @@ export default function SignUpForm() {
               }
               placeholder="اختر المدينة"
               label="المدينة"
+              icon={LocateIcon}
             />
           </div>
 
@@ -171,6 +177,7 @@ export default function SignUpForm() {
               placeholder="••••••••"
               error={errors?.password?.message}
               register={register}
+              icon={Lock}
             />
 
             <Input
@@ -180,6 +187,7 @@ export default function SignUpForm() {
               placeholder="••••••••"
               error={errors?.confirmPassword?.message}
               register={register}
+              icon={Lock}
             />
           </div>
 
