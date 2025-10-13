@@ -75,12 +75,10 @@ export default function SignUpForm() {
   };
 
   return (
-    <section className="grid grid-cols-2 justify-center items-center">
-      <Image
-        src="/images/auth-image.png"
-        alt="auth-image"
-        width={1143}
-        height={1143}
+    <section className="flex flex-col justify-center items-center">
+      <AuthHeader
+        title="انشاء حساب جديد"
+        subtitle="ادخل معلوماتك للمتابعة مع Orderaa"
       />
 
       <form
@@ -93,11 +91,6 @@ export default function SignUpForm() {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-
-        <AuthHeader
-          title="انشاء حساب جديد"
-          subtitle="ادخل معلوماتك للمتابعة مع Orderaa"
-        />
 
         {/* Name */}
         <div className="flex justify-between items-center">
@@ -196,14 +189,14 @@ export default function SignUpForm() {
         >
           {isSubmitting ? 'جارٍ إنشاء الحساب...' : 'إنشاء حساب'}
         </button>
-
-        <p className="text-center text-sm text-gray-500">
-          مسجل بالفعل؟
-          <Link href="/signup" className="text-[#5D24E1] hover:underline">
-            سجل الدخول
-          </Link>
-        </p>
       </form>
+
+      <p className="text-center text-sm text-gray-500 m-8">
+        مسجل بالفعل؟
+        <Link href="/signup" className="text-[#5D24E1] hover:underline">
+          سجل الدخول
+        </Link>
+      </p>
     </section>
   );
 }
