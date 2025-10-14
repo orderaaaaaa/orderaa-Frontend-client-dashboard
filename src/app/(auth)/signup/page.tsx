@@ -4,29 +4,17 @@ import { useForm } from 'react-hook-form';
 import { Mail, User, Pen, Phone, LocateIcon, Lock } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signUpSchema, type SignUpSchema } from './schema';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getCategories, getGovernorates, getCities } from '@/lib/api/lookups';
 import Drobdown from '../components/Drobdown';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import AuthHeader from '../components/AuthHeader';
+import AuthForm from '../components/AuthForm';
 import Input from '../components/Input';
-import AuthSwitch from '../components/AuthSwitch';
 import { signUp } from '@/lib/api/auth';
+import { useAuthData } from '../hooks/useAuthData';
+import { useCities } from '../hooks/useCities';
 
 export default function SignUpForm() {
   const router = useRouter();
-
-  const [categories, setCategories] = useState<
-    { key: string; value: string }[]
-  >([]);
-
-  const [governorates, setGovernorates] = useState<
-    { key: string; value: string }[]
-  >([]);
-
-  const [cities, setCities] = useState<{ key: string; value: string }[]>([]);
-  const [loadingCities, setLoadingCities] = useState(false);
   const [error, setError] = useState('');
 
   const form = useForm<SignUpSchema>({
@@ -38,29 +26,16 @@ export default function SignUpForm() {
   const { errors, isSubmitting } = formState;
   const selectedGovernorate = watch('governorate');
 
-  /** Load categories + governorates on mount */
-  useEffect(() => {
-    Promise.all([getCategories(), getGovernorates()])
-      .then(([cats, govs]) => {
-        setCategories(cats as { key: string; value: string }[]);
-        setGovernorates(govs as { key: string; value: string }[]);
-      })
-      .catch(() => setError('حدث خطأ أثناء تحميل البيانات.'));
-  }, []);
+  /** Load categories + governorates using custom hook */
+  const { categories, governorates, error: dataError } = useAuthData();
 
-  /** Load cities when governorate changes */
-  useEffect(() => {
-    if (!selectedGovernorate) {
-      setCities([]);
-      return;
-    }
+  /** Load cities when governorate changes using custom hook */
+  const { cities, loadingCities } = useCities(selectedGovernorate);
 
-    setLoadingCities(true);
-    getCities(selectedGovernorate)
-      .then((cities) => setCities(cities as { key: string; value: string }[]))
-      .catch(() => setCities([]))
-      .finally(() => setLoadingCities(false));
-  }, [selectedGovernorate]);
+  // Merge errors from hook
+  if (dataError && !error) {
+    setError(dataError);
+  }
 
   const onSubmit = async (values: SignUpSchema) => {
     setError('');
@@ -73,135 +48,113 @@ export default function SignUpForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center mt-10 mb-10">
-      <section className="flex flex-col justify-center items-center p-12 border border-[#52525214] rounded-lg shadow-lg shadow-[#212121]">
-        <AuthHeader
-          title="انشاء حساب جديد"
-          subtitle="ادخل معلوماتك للمتابعة مع Orderaa"
+    <AuthForm
+      title="انشاء حساب جديد"
+      subtitle="ادخل معلوماتك للمتابعة مع Orderaa"
+      onSubmit={handleSubmit(onSubmit)}
+      error={error}
+      isSubmitting={isSubmitting}
+      submitButtonText="إنشاء حساب"
+      submitButtonLoadingText="جارٍ إنشاء الحساب..."
+      switchGoTo="signin"
+    >
+      {/* Name */}
+      <div className="flex flex-col md:flex-row gap-4 justify-between md:items-center">
+        <Input
+          label="اسم صاحب المتجر"
+          name="username"
+          placeholder="أدخل اسمك"
+          error={errors.username?.message}
+          register={register}
+          icon={User}
         />
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col w-full max-w-lg space-y-5 mx-auto mt-10"
-          dir="rtl"
-        >
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+        <Input
+          label="أسم المتجر"
+          name="merchantName"
+          placeholder="أسم المتجر..."
+          error={errors.merchantName?.message}
+          register={register}
+          icon={Pen}
+        />
+      </div>
 
-          {/* Name */}
-          <div className="flex flex-col md:flex-row gap-4 justify-between md:items-center">
-            <Input
-              label="اسم صاحب المتجر"
-              name="username"
-              placeholder="أدخل اسمك"
-              error={errors.username?.message}
-              register={register}
-              icon={User}
-            />
+      {/* Activity */}
+      <Drobdown
+        value={watch('category')}
+        onChange={(val) => setValue('category', val)}
+        options={categories}
+        placeholder="اختر النشاط"
+        label="نوع النشاط"
+      />
+      {errors.category && (
+        <p className="text-xs text-red-500 mt-1">{errors.category.message}</p>
+      )}
 
-            <Input
-              label="أسم المتجر"
-              name="merchantName"
-              placeholder="أسم المتجر..."
-              error={errors.merchantName?.message}
-              register={register}
-              icon={Pen}
-            />
-          </div>
+      {/* Email + Mobile */}
+      <Input
+        label="البريد الالكتروني"
+        name="email"
+        placeholder="أدخل بريدك الالكتروني..."
+        error={errors.email?.message}
+        register={register}
+        icon={Mail}
+      />
 
-          {/* Activity */}
-          <Drobdown
-            value={watch('category')}
-            onChange={(val) => setValue('category', val)}
-            options={categories}
-            placeholder="اختر النشاط"
-            label="نوع النشاط"
-          />
-          {errors.category && (
-            <p className="text-xs text-red-500 mt-1">
-              {errors.category.message}
-            </p>
-          )}
+      <Input
+        label="رقم الهاتف"
+        name="phoneNumber"
+        placeholder="أدخل رقم الهاتف"
+        error={errors.phoneNumber?.message}
+        register={register}
+        icon={Phone}
+      />
 
-          {/* Email + Mobile */}
-          <Input
-            label="البريد الالكتروني"
-            name="email"
-            placeholder="أدخل بريدك الالكتروني..."
-            error={errors.email?.message}
-            register={register}
-            icon={Mail}
-          />
+      {/* Governorate + City */}
+      <div className="flex flex-col md:flex-row gap-4 justify-between md:items-center">
+        <Drobdown
+          value={watch('governorate')}
+          onChange={(val) => setValue('governorate', val)}
+          options={governorates}
+          placeholder="اختر المحافظة"
+          label="المحافظة"
+          icon={LocateIcon}
+        />
 
-          <Input
-            label="رقم الهاتف"
-            name="phoneNumber"
-            placeholder="أدخل رقم الهاتف"
-            error={errors.phoneNumber?.message}
-            register={register}
-            icon={Phone}
-          />
+        <Drobdown
+          value={watch('city')}
+          onChange={(val) => setValue('city', val)}
+          options={
+            loadingCities ? [{ key: '', value: 'جار التحميل...' }] : cities
+          }
+          placeholder="اختر المدينة"
+          label="المدينة"
+          icon={LocateIcon}
+        />
+      </div>
 
-          {/* Governorate + City */}
-          <div className="flex flex-col md:flex-row gap-4 justify-between md:items-center">
-            <Drobdown
-              value={watch('governorate')}
-              onChange={(val) => setValue('governorate', val)}
-              options={governorates}
-              placeholder="اختر المحافظة"
-              label="المحافظة"
-              icon={LocateIcon}
-            />
+      {/* Passwords */}
+      <div className="flex flex-col md:flex-row gap-4 justify-between md:items-center">
+        <Input
+          label="كلمة المرور"
+          name="password"
+          type="password"
+          placeholder="••••••••"
+          error={errors?.password?.message}
+          register={register}
+          icon={Lock}
+        />
 
-            <Drobdown
-              value={watch('city')}
-              onChange={(val) => setValue('city', val)}
-              options={
-                loadingCities ? [{ key: '', value: 'جار التحميل...' }] : cities
-              }
-              placeholder="اختر المدينة"
-              label="المدينة"
-              icon={LocateIcon}
-            />
-          </div>
-
-          {/* Passwords */}
-          <div className="flex flex-col md:flex-row gap-4 justify-between md:items-center">
-            <Input
-              label="كلمة المرور"
-              name="password"
-              type="password"
-              placeholder="••••••••"
-              error={errors?.password?.message}
-              register={register}
-              icon={Lock}
-            />
-
-            <Input
-              label="تأكيد كلمة المرور"
-              name="confirmPassword"
-              type="password"
-              placeholder="••••••••"
-              error={errors?.confirmPassword?.message}
-              register={register}
-              icon={Lock}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-[#5D24E1] text-white py-2.5 rounded-lg transition disabled:opacity-60"
-          >
-            {isSubmitting ? 'جارٍ إنشاء الحساب...' : 'إنشاء حساب'}
-          </button>
-        </form>
-
-        <AuthSwitch goTo="signin" />
-      </section>
-    </div>
+        <Input
+          label="تأكيد كلمة المرور"
+          name="confirmPassword"
+          type="password"
+          placeholder="••••••••"
+          error={errors?.confirmPassword?.message}
+          register={register}
+          icon={Lock}
+        />
+      </div>
+    </AuthForm>
   );
 }

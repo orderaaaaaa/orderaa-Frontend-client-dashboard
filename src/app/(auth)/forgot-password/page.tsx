@@ -1,7 +1,5 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Cairo } from 'next/font/google';
 import sideImage from '@/../public/premium_photo-1681488262364-8aeb1b6aac56.avif';
@@ -15,143 +13,56 @@ import {
   KeyRound,
   ArrowRight,
 } from 'lucide-react';
+import { useForgotPassword } from '../hooks/useForgotPassword';
+import { useOTP } from '../hooks/useOTP';
 
 const cairo = Cairo({
   subsets: ['arabic', 'latin'],
   weight: ['400', '500', '600', '700', '800'],
 });
 
-type Step = 'identify' | 'otp' | 'reset';
-type Mode = 'email' | 'phone';
-
 export default function ForgotPasswordPage() {
-  const router = useRouter();
-  const [step, setStep] = useState<Step>('identify');
-  const [mode, setMode] = useState<Mode>('email');
+  const {
+    step,
+    setStep,
+    mode,
+    setMode,
+    identity,
+    setIdentity,
+    isLoading,
+    error,
+    password,
+    setPassword,
+    confirmPassword,
+    setConfirmPassword,
+    showPassword,
+    setShowPassword,
+    showConfirmPassword,
+    setShowConfirmPassword,
+    sendCode: sendCodeAction,
+    verifyOtp: verifyOtpAction,
+    setNewPassword,
+  } = useForgotPassword();
 
-  // identify
-  const [identity, setIdentity] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  // otp
-  const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
-  const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
-  const setInputRef = (idx: number) => (el: HTMLInputElement | null) => {
-    inputsRef.current[idx] = el;
-  };
-
-  // reset
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  // helpers
-  const validateIdentity = () => {
-    if (mode === 'email') {
-      const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identity);
-      if (!ok) return 'من فضلك أدخل بريدًا إلكترونيًا صحيحًا.';
-    } else {
-      const digits = identity.replace(/\D/g, '');
-      const ok = /^\d{10,15}$/.test(digits);
-      if (!ok) return 'رقم الموبايل يجب أن يكون من 10 إلى 15 رقمًا.';
-    }
-    return '';
-  };
+  const {
+    otp,
+    inputsRef,
+    setInputRef,
+    handleOtpChange,
+    handleOtpKeyDown,
+    handleOtpPaste,
+    resetOtp,
+  } = useOTP(6);
 
   const sendCode = async () => {
-    const v = validateIdentity();
-    if (v) {
-      setError(v);
-      return;
+    const result = await sendCodeAction();
+    if (result) {
+      resetOtp();
     }
-    setError('');
-    setIsLoading(true);
-    try {
-      // محاكاة: استدعاء API لإرسال الكود
-      localStorage.setItem('fp_identity', JSON.stringify({ mode, identity }));
-      await new Promise((res) => setTimeout(res, 600));
-      setStep('otp');
-      setOtp(['', '', '', '', '', '']);
-      setTimeout(() => inputsRef.current[0]?.focus(), 0);
-    } catch {
-      setError('فشل إرسال الكود. حاول مرة لاحقًا.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleOtpChange = (i: number, val: string) => {
-    if (!/^\d?$/.test(val)) return;
-    const next = [...otp];
-    next[i] = val;
-    setOtp(next);
-    if (val && i < 5) inputsRef.current[i + 1]?.focus();
-  };
-
-  const handleOtpKeyDown = (
-    i: number,
-    e: React.KeyboardEvent<HTMLInputElement>
-  ) => {
-    if (e.key === 'Backspace' && !otp[i] && i > 0)
-      inputsRef.current[i - 1]?.focus();
-    if (e.key === 'ArrowLeft' && i > 0) inputsRef.current[i - 1]?.focus();
-    if (e.key === 'ArrowRight' && i < 5) inputsRef.current[i + 1]?.focus();
-  };
-
-  const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-    if (!text) return;
-    const arr = text.split('');
-    const next = Array(6).fill('');
-    arr.forEach((d, idx) => {
-      next[idx] = d;
-    });
-    setOtp(next as string[]);
-    setTimeout(() => inputsRef.current[Math.min(arr.length, 5)]?.focus(), 0);
   };
 
   const verifyOtp = async () => {
-    if (otp.join('').length !== 6) {
-      setError('أدخل كود مكوّن من 6 أرقام.');
-      return;
-    }
-    setError('');
-    setIsLoading(true);
-    try {
-      // محاكاة: استدعاء API للتحقق
-      await new Promise((res) => setTimeout(res, 600));
-      setStep('reset');
-      setPassword('');
-      setConfirmPassword('');
-    } catch {
-      setError('كود غير صحيح. حاول مرة أخرى.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const setNewPassword = async () => {
-    if (password.length < 8) {
-      setError('كلمة المرور يجب أن تكون 8 حروف/أرقام على الأقل.');
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError('كلمتا المرور غير متطابقتين.');
-      return;
-    }
-    setError('');
-    setIsLoading(true);
-    try {
-      // محاكاة: استدعاء API لتعيين كلمة المرور الجديدة
-      await new Promise((res) => setTimeout(res, 600));
-      router.push('/');
-    } catch {
-      setError('تعذّر تعيين كلمة المرور الآن. حاول لاحقًا.');
-    } finally {
-      setIsLoading(false);
-    }
+    await verifyOtpAction(otp.join(''));
   };
 
   const Title = () => {
@@ -280,7 +191,7 @@ export default function ForgotPasswordPage() {
 
                 <p className="text-center text-sm text-gray-500">
                   تذكّرت كلمة المرور؟{' '}
-                  <a href="/" className="text-[#5D24E1] hover:underline">
+                  <a href="/signin" className="text-[#5D24E1] hover:underline">
                     سجّل الدخول
                   </a>
                 </p>
@@ -422,7 +333,7 @@ export default function ForgotPasswordPage() {
 
                 <p className="text-center text-sm text-gray-500">
                   تذكّرت كلمة المرور؟{' '}
-                  <a href="/" className="text-[#5D24E1] hover:underline">
+                  <a href="/signin" className="text-[#5D24E1] hover:underline">
                     سجّل الدخول
                   </a>
                 </p>
