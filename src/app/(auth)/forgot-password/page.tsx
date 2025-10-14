@@ -13,8 +13,7 @@ import {
   KeyRound,
   ArrowRight,
 } from 'lucide-react';
-import { useForgotPassword } from '../hooks/useForgotPassword';
-import { useOTP } from '../hooks/useOTP';
+import { useForgotPassword, useOTP } from '../hooks';
 
 const cairo = Cairo({
   subsets: ['arabic', 'latin'],

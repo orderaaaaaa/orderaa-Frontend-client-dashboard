@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import React from 'react';
-import { string } from 'zod';
 
 interface AuthHeaderProps {
   title: string;
