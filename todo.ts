@@ -20,6 +20,9 @@
 // Finish the signup design ✅
 // Clean and finish the sign up page
 
+// Update the logo ✅
+// Learn all about zod
+
 // Refactor the Sign in code
 // Integrate the Sign in
 
