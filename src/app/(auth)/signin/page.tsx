@@ -41,8 +41,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center mt-10 mb-10">
       <section className="flex flex-col justify-center items-center p-12 border border-[#52525214] rounded-lg shadow-lg shadow-[#212121]">
         <AuthHeader
-          title="انشاء حساب جديد"
-          subtitle="ادخل معلوماتك للمتابعة مع Orderaa"
+          title="أهلاً بك من جديد!"
+          subtitle="سجّل دخولك للمتابعة مع Orderaa"
         />
 
         <form

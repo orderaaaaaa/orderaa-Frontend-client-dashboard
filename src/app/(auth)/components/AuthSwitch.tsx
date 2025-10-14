@@ -17,9 +17,9 @@ export default function AuthSwitch({ goTo }: AuthSwitchProps) {
         </>
       ) : (
         <>
-          ليس لديك حساب؟
+          ليس لديك حساب؟ {``}
           <Link href="/signup" className="text-[#5D24E1] hover:underline">
-            إنشاء حساب{``}
+            إنشاء حساب
           </Link>
         </>
       )}
