@@ -23,7 +23,8 @@
 // Update the logo ✅
 // Learn all about zod
 
-// Refactor the Sign in code
-// Integrate the Sign in
+// Refactor the Sign in code ✅
+// Integrate the Sign in ✅
+// Create and finish the OTP process
 
 // Create and integrate nodmailer and finish The OTP process (Backend)

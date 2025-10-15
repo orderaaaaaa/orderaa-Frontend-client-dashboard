@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { resetPassword, sendOTP, verifyOTP } from '@/lib/api/auth';
 
 type Step = 'identify' | 'otp' | 'reset';
 
@@ -29,14 +30,8 @@ export function useForgotPassword() {
     setError('');
     setIsLoading(true);
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/auth/forgot-password/send-otp', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email }),
-      // });
-      // if (!response.ok) throw new Error('Failed to send OTP');
-      
+      await sendOTP(email);
+
       // Temporary: Store email for next step
       localStorage.setItem('fp_email', email);
       setStep('otp');
@@ -57,14 +52,8 @@ export function useForgotPassword() {
     setError('');
     setIsLoading(true);
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/auth/forgot-password/verify-otp', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email, otp: otpCode }),
-      // });
-      // if (!response.ok) throw new Error('Invalid OTP');
-      
+      await verifyOTP(email, otpCode);
+
       setStep('reset');
       setPassword('');
       setConfirmPassword('');
@@ -89,14 +78,8 @@ export function useForgotPassword() {
     setError('');
     setIsLoading(true);
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/auth/forgot-password/reset-password', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email, password }),
-      // });
-      // if (!response.ok) throw new Error('Failed to reset password');
-      
+      await resetPassword(email, password, confirmPassword);
+
       localStorage.removeItem('fp_email');
       router.push('/signin');
       return true;
