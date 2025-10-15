@@ -2,13 +2,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 type Step = 'identify' | 'otp' | 'reset';
-type Mode = 'email' | 'phone';
 
 export function useForgotPassword() {
   const router = useRouter();
   const [step, setStep] = useState<Step>('identify');
-  const [mode, setMode] = useState<Mode>('email');
-  const [identity, setIdentity] = useState('');
+  const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [password, setPassword] = useState('');
@@ -16,30 +14,31 @@ export function useForgotPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const validateIdentity = () => {
-    if (mode === 'email') {
-      const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identity);
-      if (!ok) return 'من فضلك أدخل بريدًا إلكترونيًا صحيحًا.';
-    } else {
-      const digits = identity.replace(/\D/g, '');
-      const ok = /^\d{10,15}$/.test(digits);
-      if (!ok) return 'رقم الموبايل يجب أن يكون من 10 إلى 15 رقمًا.';
-    }
+  const validateEmail = () => {
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!ok) return 'من فضلك أدخل بريدًا إلكترونيًا صحيحًا.';
     return '';
   };
 
   const sendCode = async () => {
-    const v = validateIdentity();
+    const v = validateEmail();
     if (v) {
       setError(v);
-      return;
+      return false;
     }
     setError('');
     setIsLoading(true);
     try {
-      // محاكاة: استدعاء API لإرسال الكود
-      localStorage.setItem('fp_identity', JSON.stringify({ mode, identity }));
-      await new Promise((res) => setTimeout(res, 600));
+      // TODO: Replace with actual API call
+      // const response = await fetch('/api/auth/forgot-password/send-otp', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ email }),
+      // });
+      // if (!response.ok) throw new Error('Failed to send OTP');
+      
+      // Temporary: Store email for next step
+      localStorage.setItem('fp_email', email);
       setStep('otp');
       return true;
     } catch {
@@ -58,8 +57,14 @@ export function useForgotPassword() {
     setError('');
     setIsLoading(true);
     try {
-      // محاكاة: استدعاء API للتحقق
-      await new Promise((res) => setTimeout(res, 600));
+      // TODO: Replace with actual API call
+      // const response = await fetch('/api/auth/forgot-password/verify-otp', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ email, otp: otpCode }),
+      // });
+      // if (!response.ok) throw new Error('Invalid OTP');
+      
       setStep('reset');
       setPassword('');
       setConfirmPassword('');
@@ -84,8 +89,15 @@ export function useForgotPassword() {
     setError('');
     setIsLoading(true);
     try {
-      // محاكاة: استدعاء API لتعيين كلمة المرور الجديدة
-      await new Promise((res) => setTimeout(res, 600));
+      // TODO: Replace with actual API call
+      // const response = await fetch('/api/auth/forgot-password/reset-password', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ email, password }),
+      // });
+      // if (!response.ok) throw new Error('Failed to reset password');
+      
+      localStorage.removeItem('fp_email');
       router.push('/signin');
       return true;
     } catch {
@@ -99,10 +111,8 @@ export function useForgotPassword() {
   return {
     step,
     setStep,
-    mode,
-    setMode,
-    identity,
-    setIdentity,
+    email,
+    setEmail,
     isLoading,
     error,
     setError,
