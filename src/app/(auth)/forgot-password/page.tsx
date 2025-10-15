@@ -3,7 +3,6 @@
 import { Mail, Lock, KeyRound, ArrowRight } from 'lucide-react';
 import { useForgotPassword, useOTP } from '../hooks';
 import AuthForm from '../components/AuthForm';
-import Input from '../components/Input';
 import Link from 'next/link';
 
 export default function ForgotPasswordPage() {
@@ -72,18 +71,25 @@ export default function ForgotPasswordPage() {
         switchGoTo="signin"
         showSwitch={false}
       >
-        <Input
-          label="البريد الإلكتروني"
-          name="email"
-          type="email"
-          placeholder="example@domain.com"
-          icon={Mail}
-          register={() => ({
-            value: email,
-            onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-              setEmail(e.target.value),
-          })}
-        />
+        <div>
+          <label htmlFor="email" className="block font-medium text-[16px] mb-1">
+            البريد الإلكتروني
+          </label>
+          <div className="relative">
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="example@domain.com"
+              className="w-full border border-[#CED4DA] rounded-lg py-2.5 px-3 pr-10 text-[18px]"
+            />
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+              <Mail size={20} />
+            </div>
+          </div>
+        </div>
 
         <p className="text-center text-sm text-gray-500">
           تذكّرت كلمة المرور؟{' '}
@@ -168,34 +174,48 @@ export default function ForgotPasswordPage() {
       switchGoTo="signin"
       showSwitch={false}
     >
-      <Input
-        label="كلمة المرور الجديدة"
-        name="password"
-        type="password"
-        placeholder="••••••••"
-        icon={Lock}
-        register={() => ({
-          value: password,
-          onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-            setPassword(e.target.value),
-        })}
-      />
-      <p className="text-xs text-gray-500 -mt-3">
-        8 حروف/أرقام على الأقل.
-      </p>
+      <div>
+        <label htmlFor="password" className="block font-medium text-[16px] mb-1">
+          كلمة المرور الجديدة
+        </label>
+        <div className="relative">
+          <input
+            type="password"
+            id="password"
+            name="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            className="w-full border border-[#CED4DA] rounded-lg py-2.5 px-3 pr-10 text-[18px]"
+          />
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+            <Lock size={20} />
+          </div>
+        </div>
+        <p className="text-xs text-gray-500 mt-1">
+          8 حروف/أرقام على الأقل.
+        </p>
+      </div>
 
-      <Input
-        label="تأكيد كلمة المرور"
-        name="confirmPassword"
-        type="password"
-        placeholder="••••••••"
-        icon={Lock}
-        register={() => ({
-          value: confirmPassword,
-          onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-            setConfirmPassword(e.target.value),
-        })}
-      />
+      <div>
+        <label htmlFor="confirmPassword" className="block font-medium text-[16px] mb-1">
+          تأكيد كلمة المرور
+        </label>
+        <div className="relative">
+          <input
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="••••••••"
+            className="w-full border border-[#CED4DA] rounded-lg py-2.5 px-3 pr-10 text-[18px]"
+          />
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+            <Lock size={20} />
+          </div>
+        </div>
+      </div>
 
       <p className="text-center text-sm text-gray-500">
         تذكّرت كلمة المرور؟{' '}
