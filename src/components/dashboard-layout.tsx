@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import type React from "react";
-import { useState, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import type React from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard,
   Package,
@@ -17,50 +17,51 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-} from "lucide-react";
-import Link from "next/link";
+} from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 const navigation = [
-  { name: " الرئيسية", href: "/dashboard", icon: LayoutDashboard },
-  { name: " المنتجات", href: "/dashboard/products", icon: Package },
+  { name: ' الرئيسية', href: '/dashboard', icon: LayoutDashboard },
+  { name: ' المنتجات', href: '/dashboard/products', icon: Package },
   {
-    name: " الطلبات ",
-    href: "/dashboard/orders",
+    name: ' الطلبات ',
+    href: '/dashboard/orders',
     icon: ShoppingCart,
     children: [
-      { name: "جميع الطلبات", href: "/dashboard/orders/allOrders" },
-      { name: "تأكيد الطلبات ", href: "/dashboard/orders/completed" },
+      { name: 'جميع الطلبات', href: '/dashboard/orders/allOrders' },
+      { name: 'تأكيد الطلبات ', href: '/dashboard/orders/completed' },
     ],
   },
   {
-    name: "قسم خدمة العملاء",
-    href: "/dashboard/customers",
+    name: 'قسم خدمة العملاء',
+    href: '/dashboard/customers',
     icon: Users,
     children: [
-      { name: "تأكيد الطلبات", href: "/dashboard/customers/inquiries" },
-      { name: "متابعة الطلبات", href: "/dashboard/customers/complaints" },
+      { name: 'تأكيد الطلبات', href: '/dashboard/customers/inquiries' },
+      { name: 'متابعة الطلبات', href: '/dashboard/customers/complaints' },
     ],
   },
   {
-    name: "قسم الشحن",
-    href: "/dashboard/analytics",
+    name: 'قسم الشحن',
+    href: '/dashboard/analytics',
     icon: BarChart3,
     children: [
-      { name: "تقارير ", href: "/dashboard/analytics/new" },
-      { name: " موظفين الشحن", href: "/dashboard/analytics/completed" },
+      { name: 'تقارير ', href: '/dashboard/analytics/new' },
+      { name: ' موظفين الشحن', href: '/dashboard/analytics/completed' },
     ],
   },
   {
-    name: "قسم التجهيز",
-    href: "/dashboard",
+    name: 'قسم التجهيز',
+    href: '/dashboard',
     icon: Settings,
     children: [
-      { name: " تقارير", href: "/dashboard/settings/pending" },
-      { name: " موظفين الشحن", href: "/dashboard/settings/done" },
+      { name: ' تقارير', href: '/dashboard/settings/pending' },
+      { name: ' موظفين الشحن', href: '/dashboard/settings/done' },
     ],
   },
 ];
@@ -80,7 +81,7 @@ function getBreadcrumb(pathname: string) {
   }
   const parent = navigation.find((n) => pathname.startsWith(n.href));
   return {
-    parent: parent?.name ?? "لوحة التحكم",
+    parent: parent?.name ?? 'لوحة التحكم',
     child: null as string | null,
   };
 }
@@ -94,11 +95,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // Restore collapse preference
   useEffect(() => {
-    const saved = localStorage.getItem("sidebar_collapsed");
-    if (saved === "1") setIsCollapsed(true);
+    const saved = localStorage.getItem('sidebar_collapsed');
+    if (saved === '1') setIsCollapsed(true);
   }, []);
   useEffect(() => {
-    localStorage.setItem("sidebar_collapsed", isCollapsed ? "1" : "0");
+    localStorage.setItem('sidebar_collapsed', isCollapsed ? '1' : '0');
   }, [isCollapsed]);
 
   // Auto-open dropdown if pathname matches a child route
@@ -116,15 +117,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }, [pathname]);
 
   const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("userEmail");
-    router.push("/");
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userEmail');
+    router.push('/');
   };
 
   const breadcrumb = getBreadcrumb(pathname);
 
-  const sidebarWidthExpanded = "w-64";
-  const sidebarWidthCollapsed = "w-16";
+  const sidebarWidthExpanded = 'w-64';
+  const sidebarWidthCollapsed = 'w-16';
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -140,7 +141,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <div
         className={`
           fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out
-          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0 lg:static lg:inset-0
         `}
       >
@@ -149,20 +150,28 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             flex flex-col h-full transition-[width] duration-300 ease-in-out
             ${isCollapsed ? sidebarWidthCollapsed : sidebarWidthExpanded}
           `}
-          style={{ backgroundColor: "#5D24E1" }}
+          style={{ backgroundColor: '#5D24E1' }}
         >
           {/* Header */}
           <div className="flex items-center justify-between h-16 px-3 border-b border-white/10">
-            {!isCollapsed && (
-              <h1 className="text-xl font-bold text-white m-auto">Ordera</h1>
-            )}
+            <div className="flex-1 flex justify-center items-center">
+              {!isCollapsed && (
+                <Image
+                  src="/images/logo-2.PNG"
+                  alt="Logo"
+                  width={106}
+                  height={26}
+                  className="object-contain"
+                />
+              )}
+            </div>
             {/* Desktop collapse toggle */}
             <Button
               variant="ghost"
               size="icon"
               className="hidden lg:flex text-white hover:bg-white/10"
               onClick={() => setIsCollapsed((v) => !v)}
-              title={isCollapsed ? "توسيع القائمة" : "تصغير القائمة"}
+              title={isCollapsed ? 'توسيع القائمة' : 'تصغير القائمة'}
             >
               {isCollapsed ? (
                 <ChevronRight className="h-5 w-5" />
@@ -205,11 +214,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                         flex items-center justify-between w-full px-3 py-3 text-sm font-medium rounded-lg transition-colors
                         ${
                           isActive || isOpen
-                            ? "bg-white/20 text-white"
-                            : "text-white/80 hover:bg-white/10 hover:text-white"
+                            ? 'bg-white/20 text-white'
+                            : 'text-white/80 hover:bg-white/10 hover:text-white'
                         }
                       `}
-                      style={{ direction: "rtl" }}
+                      style={{ direction: 'rtl' }}
                     >
                       <span className="flex items-center gap-2">
                         <item.icon className="h-5 w-5 shrink-0" />
@@ -230,13 +239,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                       <div
                         className={`overflow-hidden transition-all duration-300 ease-in-out ${
                           isOpen
-                            ? "max-h-40 opacity-100 mt-2"
-                            : "max-h-0 opacity-0"
+                            ? 'max-h-40 opacity-100 mt-2'
+                            : 'max-h-0 opacity-0'
                         }`}
                       >
                         <div
                           className="mr-8 space-y-2"
-                          style={{ direction: "rtl" }}
+                          style={{ direction: 'rtl' }}
                         >
                           {item.children.map((sub) => {
                             const isSubActive = pathname.startsWith(sub.href);
@@ -248,8 +257,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                                   block px-3 py-2 text-sm rounded-md transition-colors
                                   ${
                                     isSubActive
-                                      ? "bg-white/20 text-white"
-                                      : "text-white/70 hover:bg-white/10 hover:text-white"
+                                      ? 'bg-white/20 text-white'
+                                      : 'text-white/70 hover:bg-white/10 hover:text-white'
                                   }
                                 `}
                                 onClick={() => setSidebarOpen(false)}
@@ -274,12 +283,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors
                     ${
                       isActive
-                        ? "bg-white/20 text-white"
-                        : "text-white/80 hover:bg-white/10 hover:text-white"
+                        ? 'bg-white/20 text-white'
+                        : 'text-white/80 hover:bg-white/10 hover:text-white'
                     }
                   `}
                   onClick={() => setSidebarOpen(false)}
-                  style={{ direction: "rtl" }}
+                  style={{ direction: 'rtl' }}
                 >
                   <item.icon className="h-5 w-5 shrink-0" />
                   {!isCollapsed && <span className="pr-2">{item.name}</span>}
@@ -291,16 +300,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Settings + Logout */}
           <div
             className="p-3 border-t border-white/10"
-            style={{ direction: "rtl" }}
+            style={{ direction: 'rtl' }}
           >
             <Link
               href="/dashboard/settings"
               className={`
                 flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors
                 ${
-                  pathname === "/dashboard/settings"
-                    ? "bg-white/20 text-white"
-                    : "text-white/80 hover:bg-white/10 hover:text-white"
+                  pathname === '/dashboard/settings'
+                    ? 'bg-white/20 text-white'
+                    : 'text-white/80 hover:bg-white/10 hover:text-white'
                 }
               `}
               onClick={() => setSidebarOpen(false)}
@@ -338,7 +347,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Breadcrumb: Parent > Child (if child exists) */}
           <div
             className="flex items-center gap-2 text-base lg:text-lg font-semibold text-gray-800"
-            style={{ direction: "rtl" }}
+            style={{ direction: 'rtl' }}
           >
             <span className="text-[#5D24E1]">{breadcrumb.parent}</span>
             {breadcrumb.child && (
