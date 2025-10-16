@@ -10,7 +10,8 @@ import Drobdown from '../components/Drobdown';
 import AuthForm from '../components/AuthForm';
 import Input from '../components/Input';
 import { signUp } from '@/lib/api/auth';
-import { useAuthData, useCities } from '../hooks';
+import { useGovernorates, useCities } from '../hooks';
+import useCatigories from '../hooks/useCatigories';
 
 export default function SignUpForm() {
   const router = useRouter();
@@ -26,13 +27,15 @@ export default function SignUpForm() {
   const selectedGovernorate = watch('governorate');
 
   /** Load categories + governorates using custom hook */
-  const { categories, governorates, error: dataError } = useAuthData();
+  const { governorates, error: dataError } = useGovernorates();
+
+  const { categories, error: categoryError } = useCatigories();
 
   /** Load cities when governorate changes using custom hook */
   const { cities, loadingCities } = useCities(selectedGovernorate);
 
   // Merge errors from hook
-  if (dataError && !error) {
+  if (dataError && categoryError && !error) {
     setError(dataError);
   }
 
@@ -40,6 +43,7 @@ export default function SignUpForm() {
     setError('');
     try {
       const data = await signUp(values);
+
       if (data) router.push('/signin');
     } catch (err: any) {
       setError(err.response?.data?.message || 'حدث خطأ أثناء إنشاء الحساب.');
