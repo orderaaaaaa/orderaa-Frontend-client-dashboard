@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 
-import { DashboardLayout } from '@/components/dashboard-layout';
 import FilterSection from './FilterSection/index';
 import OrderCard from './OrderCard';
 import Footer from './Footer';
@@ -38,7 +37,7 @@ export default function AllOrdersRefactor() {
   };
 
   return (
-    <DashboardLayout>
+    <div>
       <PageTaps data={dummyCards} />
 
       <FilterSection filters={filters} onChange={handleFilterChange} />
@@ -74,6 +73,6 @@ export default function AllOrdersRefactor() {
         onPrevious={previousPage}
         onNext={nextPage}
       />
-    </DashboardLayout>
+    </div>
   );
 }
