@@ -15,6 +15,7 @@ export function useForgotPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  //TODO: Get the error messages from the backend locallized
   const validateEmail = () => {
     const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     if (!ok) return 'من فضلك أدخل بريدًا إلكترونيًا صحيحًا.';
