@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { getGovernorates } from '@/lib/api/lookups';
 import { DropdownOption } from '@/types';
 
-export function useGovernorates() {
+export default function useGovernorates() {
   const [governorates, setGovernorates] = useState<DropdownOption[]>([]);
   const [error, setError] = useState<string | null>(null);
 

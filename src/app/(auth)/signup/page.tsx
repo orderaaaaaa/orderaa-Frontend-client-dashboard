@@ -10,8 +10,7 @@ import Drobdown from '../components/Drobdown';
 import AuthForm from '../components/AuthForm';
 import Input from '../components/Input';
 import { signUp } from '@/lib/api/auth';
-import { useGovernorates, useCities } from '../hooks';
-import useCatigories from '../hooks/useCatigories';
+import { useGovernorates, useCatigories, useCities } from '@/hooks';
 
 export default function SignUpForm() {
   const router = useRouter();

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { getCities } from '@/lib/api/lookups';
 import { DropdownOption } from '@/types';
 
-export function useCities(selectedGovernorate: string) {
+export default function useCities(selectedGovernorate: string) {
   const [cities, setCities] = useState<DropdownOption[]>([]);
   const [loadingCities, setLoadingCities] = useState(false);
   const [error, setError] = useState<string | null>(null);
