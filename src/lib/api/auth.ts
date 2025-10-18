@@ -1,5 +1,20 @@
-import api from '..';
-import { SignUpPayload, SignInPayload } from './payload';
+import api from '.';
+
+export interface SignUpPayload {
+  username: string;
+  merchantName: string;
+  email: string;
+  phoneNumber: string;
+  city: string;
+  governorate: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface SignInPayload {
+  emailOrPhoneNumber: string;
+  password: string;
+}
 
 export async function signUp(payload: SignUpPayload) {
   const { data } = await api.post('/auth/signup', payload);
