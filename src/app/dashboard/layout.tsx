@@ -134,7 +134,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+            className="fixed inset-0 z-40 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
@@ -149,10 +149,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         >
           <div
             className={`
-            flex flex-col h-full transition-[width] duration-300 ease-in-out
-            ${isCollapsed ? sidebarWidthCollapsed : sidebarWidthExpanded}
-          `}
-            style={{ backgroundColor: '#5D24E1' }}
+    relative flex flex-col h-full transition-[width] duration-300 ease-in-out
+    ${isCollapsed ? sidebarWidthCollapsed : sidebarWidthExpanded}
+    rounded-md border border-gray-700 overflow-hidden
+    bg-[radial-gradient(circle_at_10%_10%,_#431F94_0%,_#5D24E1_100%)]
+    shadow-[0_2px_4px_-1px_rgba(0,0,0,0.06),_0_4px_6px_-1px_rgba(0,0,0,0.10)]
+  `}
           >
             {/* Header */}
             <div className="flex items-center justify-between h-16 px-3 border-b border-white/10">
