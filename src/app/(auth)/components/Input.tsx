@@ -2,13 +2,14 @@ import React from 'react';
 import { LucideIcon } from 'lucide-react';
 
 type InputProps = {
-  label: string;
+  label?: string;
   name: string;
   type?: string;
   placeholder?: string;
   error?: string;
   register?: any;
   icon?: LucideIcon;
+  className?: string; // optional className for the input element
 };
 
 export default function Input({
@@ -19,8 +20,14 @@ export default function Input({
   error,
   register,
   icon: Icon,
+  className,
   ...rest
 }: InputProps) {
+  const inputClassName =
+    `w-full border border-[#CED4DA] rounded-lg py-2.5 px-3 text-[18px] ${
+      Icon ? 'pr-10' : ''
+    } ${className ?? ''}`.trim();
+
   return (
     <div>
       <label htmlFor={name} className="block font-medium text-[16px] mb-1">
@@ -32,9 +39,7 @@ export default function Input({
           id={name}
           name={name}
           placeholder={placeholder}
-          className={`w-full border border-[#CED4DA] rounded-lg py-2.5 px-3 text-[18px] ${
-            Icon ? 'pr-10' : '' // Add right padding when icon is present
-          }`}
+          className={inputClassName}
           {...(register ? { ...register(name) } : {})}
           {...rest}
         />

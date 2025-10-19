@@ -16,12 +16,16 @@ import {
   X,
   ChevronDown,
   ChevronLeft,
+  ArrowLeft,
   ChevronRight,
   ChevronUp,
+  Search,
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { AuthGuard } from '@/components/auth-guard';
+import Input from '../(auth)/components/Input';
+import Dropdown from '../(auth)/components/Drobdown';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -96,6 +100,31 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false); // desktop collapse
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const pathname = usePathname();
+  const router = useRouter();
+
+  // User menu state
+  const [userMenuValue, setUserMenuValue] = useState<string>('');
+
+  const userOptions = [
+    { key: 'settings', value: 'الإعدادات' },
+    { key: 'logout', value: 'تسجيل الخروج' },
+  ];
+
+  const handleUserMenuChange = (key: string) => {
+    // Reset selection so the placeholder (username) remains visible
+    setUserMenuValue('');
+
+    if (key === 'settings') {
+      router.push('/dashboard/settings');
+      return;
+    }
+    if (key === 'logout') {
+      // Implement your actual logout logic here (e.g., call signOut, clear tokens, etc.)
+      // For now we redirect to a login route as an example:
+      router.push('/signin');
+      return;
+    }
+  };
 
   // Restore collapse preference
   useEffect(() => {
@@ -331,7 +360,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Main content */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Top bar */}
-          <header className="bg-white border-b border-border h-16 flex items-center px-4 lg:px-6">
+          <header className="flex justify-between items-center px-4 lg:px-6 h-16 bg-white border-b border-border">
             {/* Mobile open */}
             <Button
               variant="ghost"
@@ -342,25 +371,50 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <Menu className="h-5 w-5" />
             </Button>
 
-            {/* Breadcrumb: Parent > Child (if child exists) */}
-            <div
-              className="flex items-center gap-2 text-base lg:text-lg font-semibold text-gray-800"
-              style={{ direction: 'rtl' }}
-            >
-              <span className="text-[#5D24E1]">{breadcrumb.parent}</span>
-              {breadcrumb.child && (
-                <>
-                  <ChevronLeft className="h-4 w-4 opacity-60" />
-                  <span className="font-normal text-gray-700">
-                    {breadcrumb.child}
-                  </span>
-                </>
-              )}
-            </div>
+            <Input
+              name="search"
+              placeholder="ابحث هنا..."
+              icon={Search}
+              className="sm:rounded-[38px] lg:w-lg lg:rounded-[38px]"
+            />
 
-            <div className="flex-1" />
-            <div className="text-sm text-muted-foreground">Welcome, Admin</div>
+            <div className="flex items-center gap-3">
+              {
+                /* User name displayed as placeholder; dropdown used for actions */
+                //TODO: Fix the spacing issue
+              }
+              <Dropdown
+                value={userMenuValue}
+                onChange={handleUserMenuChange}
+                options={userOptions}
+                placeholder="جاد علي"
+                className="w-auto"
+                placeholderClassName="text-[#1F1F1F] font-bold text-[20px]"
+                selectClassName="border-0"
+              />
+            </div>
           </header>
+
+          {/* Breadcrumb: Parent > Child (if child exists) */}
+          <div
+            className="flex items-center gap-2 text-base lg:text-lg font-semibold text-gray-800 p-5"
+            style={{ direction: 'rtl' }}
+          >
+            <span className="text-[#5D24E1]">{breadcrumb.parent}</span>
+            {breadcrumb.child && (
+              <>
+                <ArrowLeft
+                  className="h-4 w-4 opacity-60"
+                  color="#292D32"
+                  width={15}
+                  height={15}
+                />
+                <span className="font-normal text-gray-700">
+                  {breadcrumb.child}
+                </span>
+              </>
+            )}
+          </div>
 
           {/* Page content */}
           <main className="flex-1 overflow-auto p-4 lg:p-6">{children}</main>
