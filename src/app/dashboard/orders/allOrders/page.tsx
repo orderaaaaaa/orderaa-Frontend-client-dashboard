@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 
-import FilterSection from './FilterSection/index';
-import OrderCard from './OrderCard';
-import Footer from './Footer';
+import FilterSection from './components/FilterSection';
+import OrderCard from './components/OrderCard';
+import Footer from './components/Footer';
 import { usePagination } from '../../../../hooks/AllOrders/usePagination';
 import { useFilteredOrders } from '../../../../hooks/AllOrders/useFilteredOrders';
 import { OrderFilters } from '@/types/orders';

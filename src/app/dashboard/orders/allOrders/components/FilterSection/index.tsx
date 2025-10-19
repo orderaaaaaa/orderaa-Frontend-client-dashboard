@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import React from "react";
-import { OrderFilters, FilterOptions } from "@/types/orders";
-import { useFilterState } from "../../../../../hooks/AllOrders/useFilterState";
-import FilterPanel from "./FilterPanel";
-import { SlidersHorizontal } from "lucide-react";
+import React from 'react';
+import { OrderFilters, FilterOptions } from '@/types/orders';
+import { useFilterState } from '@/hooks/AllOrders/useFilterState';
+import FilterPanel from './FilterPanel';
+import { SlidersHorizontal } from 'lucide-react';
 
 type FilterSectionProps = {
   open?: boolean;

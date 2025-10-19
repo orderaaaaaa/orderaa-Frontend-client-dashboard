@@ -1,16 +1,14 @@
-import React from "react";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { Button } from '@/components/ui/button';
 import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  MessageSquare,
   FileSpreadsheet,
   Edit,
   Truck,
   CircleAlert,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface FooterProps {
   currentPage: number;
@@ -48,7 +46,7 @@ const Footer: React.FC<FooterProps> = ({
       const end = Math.min(totalPages - 1, currentPage + 1);
 
       if (end < totalPages - 1) {
-        pages.push("...");
+        pages.push('...');
       }
 
       for (let i = end; i >= start; i--) {
@@ -56,7 +54,7 @@ const Footer: React.FC<FooterProps> = ({
       }
 
       if (start > 2) {
-        pages.push("...");
+        pages.push('...');
       }
 
       if (totalPages > 1) {
@@ -79,7 +77,7 @@ const Footer: React.FC<FooterProps> = ({
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-2 items-center justify-center sm:justify-start">
-        {" "}
+        {' '}
         <Button
           variant="outline"
           className="flex items-center space-x-2 px-4 py-2 rounded-3xl border-[#682fee] text-[#682fee] hover:bg-purple-50 cursor-pointer"
@@ -141,17 +139,17 @@ const Footer: React.FC<FooterProps> = ({
         <div className="flex items-center space-x-1">
           {pageNumbers.map((page, index) => (
             <React.Fragment key={index}>
-              {page === "..." ? (
+              {page === '...' ? (
                 <span className="px-2 py-1 text-gray-500">...</span>
               ) : (
                 <Button
-                  variant={page === currentPage ? "default" : "outline"}
+                  variant={page === currentPage ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => onPageChange(page as number)}
                   className={`h-8 w-8 p-0 cursor-pointer ${
                     page === currentPage
-                      ? "bg-[#5D24E1] text-white hover:bg-purple-700"
-                      : "text-[#682fee] hover:bg-gray-50"
+                      ? 'bg-[#5D24E1] text-white hover:bg-purple-700'
+                      : 'text-[#682fee] hover:bg-gray-50'
                   }`}
                 >
                   {page}
