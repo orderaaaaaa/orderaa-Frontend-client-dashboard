@@ -3,13 +3,14 @@ type PageTabProps = {
   count?: number;
   icon: React.ReactNode;
   active?: boolean;
+  onClick?: () => void;
 };
 
-//TODO: Add the onClick active effect
-export default function PageTab({ label, count, icon, active }: PageTabProps) {
+export default function PageTab({ label, count, icon, active, onClick }: PageTabProps) {
   return (
     <button
-      className={`group flex items-center justify-between gap-2 px-4 py-2 border-2 border-[#5D24E1] font-bold text-[15px] rounded-full transition
+      onClick={onClick}
+      className={`group flex items-center justify-between gap-2 px-4 py-2 border-2 border-[#5D24E1] font-bold text-[15px] rounded-full transition cursor-pointer
     ${
       active
         ? "bg-[#5D24E1] text-white"
