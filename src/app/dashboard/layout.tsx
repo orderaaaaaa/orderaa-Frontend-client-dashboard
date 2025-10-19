@@ -302,37 +302,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 );
               })}
             </nav>
-
-            {/* Settings + Logout */}
-            <div
-              className="p-3 border-t border-white/10"
-              style={{ direction: 'rtl' }}
-            >
-              <Link
-                href="/dashboard/settings"
-                className={`
-                flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors
-                ${
-                  pathname === '/dashboard/settings'
-                    ? 'bg-white/20 text-white'
-                    : 'text-white/80 hover:bg-white/10 hover:text-white'
-                }
-              `}
-                onClick={() => setSidebarOpen(false)}
-              >
-                <Settings className="h-5 w-5 shrink-0" />
-                {!isCollapsed && <span className="pr-2">الاعدادات</span>}
-              </Link>
-
-              <Button
-                onClick={handleLogout}
-                variant="ghost"
-                className="w-full justify-start text-white/80 hover:bg-white/10 hover:text-white mt-2"
-              >
-                <LogOut className="h-5 w-5 shrink-0" />
-                {!isCollapsed && <span className="pr-2">تسجيل الخروج</span>}
-              </Button>
-            </div>
           </div>
         </div>
 
