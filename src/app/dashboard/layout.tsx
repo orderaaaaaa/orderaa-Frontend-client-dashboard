@@ -94,6 +94,7 @@ function getBreadcrumb(pathname: string) {
 
 //TODO: Refactor and clean this
 //TODO: Fix the two first tabs size issue
+//TODO: Update the navbar icons to match the design
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false); // mobile drawer
