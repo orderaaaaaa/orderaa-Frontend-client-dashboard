@@ -9,7 +9,7 @@ import { signIn } from '@/lib/api/auth';
 
 import { Lock, User } from 'lucide-react';
 import AuthForm from '../components/AuthForm';
-import Input from '../components/Input';
+import Input from '../../../components/ui/Input';
 import Link from 'next/link';
 
 export default function LoginPage() {

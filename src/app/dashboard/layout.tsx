@@ -24,8 +24,8 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 import { AuthGuard } from '@/components/auth-guard';
-import Input from '../(auth)/components/Input';
-import Dropdown from '../(auth)/components/Drobdown';
+import Input from '../../components/ui/Input';
+import Dropdown from '../../components/ui/Drobdown';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;

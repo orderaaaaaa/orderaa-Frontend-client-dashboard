@@ -6,9 +6,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { signUpSchema, type SignUpSchema } from './schema';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Drobdown from '../components/Drobdown';
+import Drobdown from '../../../components/ui/Drobdown';
 import AuthForm from '../components/AuthForm';
-import Input from '../components/Input';
+import Input from '../../../components/ui/Input';
 import { signUp } from '@/lib/api/auth';
 import { useGovernorates, useCatigories, useCities } from '@/hooks';
 
