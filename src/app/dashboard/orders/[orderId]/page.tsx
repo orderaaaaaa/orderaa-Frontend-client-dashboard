@@ -2,10 +2,9 @@
 
 import React, { useState } from 'react';
 import { OrderFilters } from '@/types/orders';
+import { useOrderById } from '@/hooks/useOrderById';
 
 import { defaultEmptyFilters } from '../../../../hooks/AllOrders/useFilterState';
-import { useFilteredOrders } from '../../../../hooks/AllOrders/useFilteredOrders';
-import { useSearchParams } from 'next/navigation';
 import { AuthGuard } from '@/components/auth-guard';
 
 import {
@@ -22,56 +21,50 @@ import {
   FileText,
 } from 'lucide-react';
 import PageTab from '@/components/ui/PageTab';
-import { dummyCards } from '@/constants/orders-tabs';
 import FilterSection from '../allOrders/FilterSection';
 import OrderDetailsInfo from './OrderDetailsInfo';
-import Image from 'next/image';
 
-export default function OrderDetails({ params }: { params: { code: string } }) {
+export default function OrderDetails({
+  params,
+}: {
+  params: { orderId: string };
+}) {
   const [filters, setFilters] = useState<OrderFilters>(defaultEmptyFilters);
+  const orderId = parseInt(params.orderId, 10);
+
+  const { order, loading, error } = useOrderById(orderId);
 
   const handleFilterChange = (newFilters: OrderFilters) => {
     setFilters(newFilters);
   };
 
-  const search = useSearchParams();
-  const name = search.get('name') || '';
-  const phone = search.get('phone') || '';
-  const product = search.get('product') || '';
-  const price = search.get('price') || '';
-  const status = search.get('status') || '';
-  const city = search.get('city') || '';
-  const notes = search.get('notes') || '';
-
-  const imageSrc = '/placeholder.jpg';
-
   return (
     <AuthGuard>
-      {/* TODO: What is the "hide" for? */}
+      {/* Status Tabs */}
       <div className="flex gap-4 md:flex-wrap overflow-x-auto hide">
         <PageTab
           label="جميع الطلبات"
-          count={dummyCards.length}
+          count={0}
           icon={<Boxes width={18} height={18} />}
         />
         <PageTab
           label="طلبات جديده"
-          count={3}
+          count={0}
           icon={<BadgePlus width={18} height={18} />}
         />
         <PageTab
           label="تم المحاولة"
-          count={200}
+          count={0}
           icon={<Repeat width={18} height={18} />}
         />
         <PageTab
           label="في انتظار الدفع"
-          count={15000}
+          count={0}
           icon={<CircleDollarSign width={18} height={18} />}
         />
         <PageTab
           label="واتساب"
-          count={30000}
+          count={0}
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -84,15 +77,14 @@ export default function OrderDetails({ params }: { params: { code: string } }) {
             </svg>
           }
         />
-
         <PageTab
           label="تأجيلات"
-          count={67}
+          count={0}
           icon={<Clock3 width={18} height={18} />}
         />
         <PageTab
           label="اعادة اتصال"
-          count={1}
+          count={0}
           icon={<PhoneCall width={18} height={18} />}
         />
         <PageTab
@@ -102,28 +94,53 @@ export default function OrderDetails({ params }: { params: { code: string } }) {
         />
         <PageTab
           label="تم الغاء"
-          count={2}
+          count={0}
           icon={<CircleX width={18} height={18} />}
         />
         <PageTab
           label="تم التحضير"
-          count={2}
+          count={0}
           icon={<CheckCircle2 width={18} height={18} />}
         />
         <PageTab
           label="في الشحن"
-          count={2}
+          count={0}
           icon={<Truck width={18} height={18} />}
         />
         <PageTab
           label="تقارير"
-          count={2}
+          count={0}
           icon={<FileText width={18} height={18} />}
         />
       </div>
+
       {/* Filter Section */}
       <FilterSection filters={filters} onChange={handleFilterChange} />
-      <OrderDetailsInfo />
+
+      {/* Loading State */}
+      {loading && (
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5D24E1]"></div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mt-4">
+          <p className="font-medium">خطأ في تحميل تفاصيل الطلب</p>
+          <p className="text-sm">{error}</p>
+        </div>
+      )}
+
+      {/* Order Details */}
+      {!loading && !error && order && <OrderDetailsInfo order={order} />}
+
+      {/* Not Found State */}
+      {!loading && !error && !order && (
+        <div className="text-center py-20 text-gray-500">
+          <p className="text-lg font-medium">الطلب غير موجود</p>
+        </div>
+      )}
     </AuthGuard>
   );
 }

@@ -1,49 +1,77 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 
 import FilterSection from './FilterSection/index';
 import OrderCard from './OrderCard';
 import Footer from './Footer';
-import { usePagination } from '../../../../hooks/AllOrders/usePagination';
-import { useFilteredOrders } from '../../../../hooks/AllOrders/useFilteredOrders';
-import { OrderFilters } from '@/types/orders';
+import { OrderFilters, FilterOrdersDto } from '@/types/orders';
 import { defaultEmptyFilters } from '../../../../hooks/AllOrders/useFilterState';
 import PageTaps from './pageTaps';
-
-import { dummyCards } from '@/constants/orders-tabs';
+import { useOrders } from '@/hooks/useOrders';
 import { ScanLine } from 'lucide-react';
 
 export default function AllOrdersRefactor() {
   const [filters, setFilters] = useState<OrderFilters>(defaultEmptyFilters);
+  const [currentPage, setCurrentPage] = useState(1);
   const [select, setSelect] = useState(false);
-  const filteredOrders = useFilteredOrders(dummyCards, filters);
+  const itemsPerPage = 6;
 
-  const {
-    currentPage,
-    totalPages,
-    totalItems,
-    hasNextPage,
-    hasPreviousPage,
-    paginatedItems,
-    goToPage,
-    nextPage,
-    previousPage,
-  } = usePagination(filteredOrders, 1, 6);
+  // Convert UI filters to API DTO
+  const apiFilters = useMemo<FilterOrdersDto>(() => {
+    return {
+      page: currentPage,
+      limit: itemsPerPage,
+      customerName: filters.customerName || undefined,
+      phone: filters.phone || undefined,
+      governorate: filters.governorate || undefined,
+      city: filters.area || undefined,
+      productName: filters.productName || undefined,
+      shipmentCode: filters.shipmentCode || undefined,
+      search: filters.customerName || filters.phone || undefined,
+    };
+  }, [filters, currentPage]);
+
+  const { orders, loading, error, meta } = useOrders(apiFilters);
 
   const handleFilterChange = (newFilters: OrderFilters) => {
     setFilters(newFilters);
-    goToPage(1);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleNextPage = () => {
+    if (meta?.hasNextPage) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (meta?.hasPreviousPage) {
+      setCurrentPage((prev) => prev - 1);
+    }
   };
 
   return (
     <div>
-      <PageTaps data={dummyCards} />
+      <PageTaps data={orders} />
 
       <FilterSection filters={filters} onChange={handleFilterChange} />
 
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mt-4">
+          <p className="font-medium">خطأ في تحميل الطلبات</p>
+          <p className="text-sm">{error}</p>
+        </div>
+      )}
+
       <div className="flex justify-between mt-10 mb-6 select-none">
-        <p className="text-gray-700">عدد جميع الطلبات: {dummyCards.length}</p>
+        <p className="text-gray-700">
+          عدد جميع الطلبات: {meta?.totalItems || 0}
+        </p>
         {select ? (
           <ScanLine
             className="ml-5 cursor-pointer text-[#5D24E1]"
@@ -57,22 +85,50 @@ export default function AllOrdersRefactor() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 grid-rows-3 gap-3 flex-wrap my-4">
-        {paginatedItems.map((card) => (
-          <OrderCard key={card.id} select={select} {...card} />
-        ))}
-      </div>
+      {loading ? (
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5D24E1]"></div>
+        </div>
+      ) : orders.length === 0 ? (
+        <div className="text-center py-20 text-gray-500">
+          <p className="text-lg font-medium">لا توجد طلبات</p>
+          <p className="text-sm mt-2">جرب تغيير الفلاتر أو البحث</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 grid-rows-3 gap-3 flex-wrap my-4">
+          {orders.map((order) => (
+            <OrderCard
+              key={order.id}
+              id={order.id}
+              name={order.customerName}
+              phone={order.phone}
+              government={order.governorate}
+              items={order.items.map(
+                (item) => `${item.size} ${item.productName} ${item.color}`
+              )}
+              price={order.totalPrice}
+              trys={order.deliveryAttempts || 0}
+              status={order.status}
+              city={order.city}
+              alert={0}
+              select={select}
+            />
+          ))}
+        </div>
+      )}
 
-      <Footer
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalItems={filteredOrders.length}
-        hasNextPage={hasNextPage}
-        hasPreviousPage={hasPreviousPage}
-        onPageChange={goToPage}
-        onPrevious={previousPage}
-        onNext={nextPage}
-      />
+      {meta && (
+        <Footer
+          currentPage={meta.currentPage}
+          totalPages={meta.totalPages}
+          totalItems={meta.totalItems}
+          hasNextPage={meta.hasNextPage}
+          hasPreviousPage={meta.hasPreviousPage}
+          onPageChange={handlePageChange}
+          onPrevious={handlePreviousPage}
+          onNext={handleNextPage}
+        />
+      )}
     </div>
   );
 }
