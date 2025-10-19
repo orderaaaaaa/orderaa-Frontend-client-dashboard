@@ -17,6 +17,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -87,11 +88,13 @@ function getBreadcrumb(pathname: string) {
   };
 }
 
+//TODO: Refactor and clean this
+//TODO: Fix the two first tabs size issue
+
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false); // mobile drawer
   const [isCollapsed, setIsCollapsed] = useState(false); // desktop collapse
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const router = useRouter();
   const pathname = usePathname();
 
   // Restore collapse preference
@@ -117,10 +120,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     });
   }, [pathname]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('userEmail');
-    router.push('/');
+  // New helper: close mobile sidebar on small screens OR collapse sidebar on large screens
+  const handleNavItemClick = () => {
+    if (typeof window === 'undefined') return;
+    if (window.innerWidth < 1024) {
+      // mobile: close drawer
+      setSidebarOpen(false);
+    } else {
+      // large screens: collapse the sidebar (hide / minimize)
+      setIsCollapsed(true);
+    }
   };
 
   const breadcrumb = getBreadcrumb(pathname);
@@ -187,7 +196,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="lg:hidden text-white hover:bg-white/10"
+                className="lg:hidden text-white hover:bg-white/10 text-[20px] font-bold"
                 onClick={() => setSidebarOpen(false)}
               >
                 <X className="h-5 w-5" />
@@ -214,7 +223,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                             setOpenDropdown(isOpen ? null : item.name);
                           }
                           // Close mobile sidebar when clicking dropdown on mobile
-                          if (window.innerWidth < 1024) {
+                          if (
+                            typeof window !== 'undefined' &&
+                            window.innerWidth < 1024
+                          ) {
                             setSidebarOpen(false);
                           }
                         }}
@@ -222,23 +234,26 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         flex items-center justify-between w-full px-3 py-3 text-sm font-medium rounded-lg transition-colors
                         ${
                           isActive || isOpen
-                            ? 'bg-white/20 text-white'
-                            : 'text-white/80 hover:bg-white/10 hover:text-white'
+                            ? 'bg-white/20 text-white font-bold text-[20px]'
+                            : 'text-white/80 hover:bg-white/10 hover:text-white text-[20px]'
                         }
+                            
                       `}
                         style={{ direction: 'rtl' }}
                       >
-                        <span className="flex items-center gap-2">
+                        <span className="flex items-center gap-2 text-[20px] font-bold">
                           <item.icon className="h-5 w-5 shrink-0" />
                           {!isCollapsed && (
-                            <span className="pr-2">{item.name}</span>
+                            <span className="pr-2 text-[20px] font-bold">
+                              {item.name}
+                            </span>
                           )}
                         </span>
                         {!isCollapsed &&
                           (isOpen ? (
                             <ChevronDown className="h-4 w-4 shrink-0" />
                           ) : (
-                            <ChevronLeft className="h-4 w-4 shrink-0" />
+                            <ChevronUp className="h-4 w-4 shrink-0" />
                           ))}
                       </button>
 
@@ -249,7 +264,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                             isOpen
                               ? 'max-h-40 opacity-100 mt-2'
                               : 'max-h-0 opacity-0'
-                          }`}
+                          }
+                              
+                          `}
                         >
                           <div
                             className="mr-8 space-y-2"
@@ -265,11 +282,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                                   block px-3 py-2 text-sm rounded-md transition-colors
                                   ${
                                     isSubActive
-                                      ? 'bg-white/20 text-white'
-                                      : 'text-white/70 hover:bg-white/10 hover:text-white'
+                                      ? 'bg-white/20 text-white text-[20px]'
+                                      : 'text-white/70 hover:bg-white/10 hover:text-white text-[20px]'
                                   }
                                 `}
-                                  onClick={() => setSidebarOpen(false)}
+                                  onClick={() => {
+                                    handleNavItemClick();
+                                  }}
                                 >
                                   {sub.name}
                                 </Link>
@@ -295,7 +314,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         : 'text-white/80 hover:bg-white/10 hover:text-white'
                     }
                   `}
-                    onClick={() => setSidebarOpen(false)}
+                    onClick={() => {
+                      handleNavItemClick();
+                    }}
                     style={{ direction: 'rtl' }}
                   >
                     <item.icon className="h-5 w-5 shrink-0" />
