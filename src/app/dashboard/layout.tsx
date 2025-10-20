@@ -26,6 +26,7 @@ import Image from 'next/image';
 import { AuthGuard } from '@/components/auth-guard';
 import Input from '../../components/ui/Input';
 import Dropdown from '../../components/ui/Drobdown';
+import { useOrdersStore } from '@/store/ordersStore';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -105,6 +106,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // User menu state
   const [userMenuValue, setUserMenuValue] = useState<string>('');
+
+  // Search state from zustand store
+  const { searchQuery, setSearchQuery } = useOrdersStore();
 
   const userOptions = [
     { key: 'settings', value: 'الإعدادات' },
@@ -377,6 +381,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               placeholder="ابحث هنا..."
               icon={Search}
               className="sm:rounded-[38px] lg:w-lg lg:rounded-[38px]"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
 
             <div className="flex items-center gap-3">
