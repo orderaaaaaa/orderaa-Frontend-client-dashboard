@@ -5,6 +5,9 @@ import {
   PaginatedResponse,
 } from '@/types/orders';
 
+// TODO: Set NEXT_PUBLIC_API_URL environment variable to your backend URL
+// Example: NEXT_PUBLIC_API_URL=http://localhost:3000/api
+
 /**
  * Fetch orders with optional filters and pagination
  * @param filters - Filter options including status, search, page, and limit
@@ -38,3 +41,4 @@ export async function getOrderById(id: number): Promise<Order> {
     throw error;
   }
 }
+

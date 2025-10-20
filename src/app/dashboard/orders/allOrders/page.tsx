@@ -133,7 +133,7 @@ export default function AllOrdersRefactor() {
             phone={order.customer.phone}
             government={order.customer.governorate || 'غير محدد'}
             items={order.orderProducts.map(
-              (op) => `${op.product.name}${op.product.size ? ` - ${op.product.size}` : ''}${op.product.color ? ` - ${op.product.color}` : ''}`
+              (op: any) => `${op.product.name}${op.product.size ? ` - ${op.product.size}` : ''}${op.product.color ? ` - ${op.product.color}` : ''}`
             )}
             price={order.totalCost}
             trys={order.numberOfTriesToReach}
