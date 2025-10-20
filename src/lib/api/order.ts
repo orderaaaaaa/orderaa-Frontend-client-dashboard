@@ -1,12 +1,5 @@
 import api from './index';
-import {
-  Order,
-  FilterOrdersDto,
-  PaginatedResponse,
-} from '@/types/orders';
-
-// TODO: Set NEXT_PUBLIC_API_URL environment variable to your backend URL
-// Example: NEXT_PUBLIC_API_URL=http://localhost:3000/api
+import { Order, FilterOrdersDto, PaginatedResponse } from '@/types/orders';
 
 /**
  * Fetch orders with optional filters and pagination
@@ -17,9 +10,12 @@ export async function getOrders(
   filters?: FilterOrdersDto
 ): Promise<PaginatedResponse<Order>> {
   try {
-    const response = await api.get<PaginatedResponse<Order>>('/orders/all-orders', {
-      params: filters,
-    });
+    const response = await api.get<PaginatedResponse<Order>>(
+      '/orders/all-orders',
+      {
+        params: filters,
+      }
+    );
     return response.data;
   } catch (error) {
     console.error('Error fetching orders:', error);
@@ -41,4 +37,3 @@ export async function getOrderById(id: number): Promise<Order> {
     throw error;
   }
 }
-
