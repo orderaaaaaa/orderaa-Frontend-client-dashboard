@@ -9,7 +9,10 @@ type InputProps = {
   error?: string;
   register?: any;
   icon?: LucideIcon;
-  className?: string; // optional className for the input element
+  className?: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 };
 
 export default function Input({
@@ -21,6 +24,9 @@ export default function Input({
   register,
   icon: Icon,
   className,
+  value,
+  onChange,
+  onKeyDown,
   ...rest
 }: InputProps) {
   const inputClassName =
@@ -40,6 +46,9 @@ export default function Input({
           name={name}
           placeholder={placeholder}
           className={inputClassName}
+          value={value}
+          onChange={onChange}
+          onKeyDown={onKeyDown}
           {...(register ? { ...register(name) } : {})}
           {...rest}
         />

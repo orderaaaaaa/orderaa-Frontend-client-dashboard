@@ -7,7 +7,7 @@ import FilterSection from './components/FilterSection';
 import OrderCard from './components/OrderCard';
 import Footer from './components/Footer';
 import { usePagination } from '../../../../hooks/AllOrders/usePagination';
-import { useFilteredOrders } from '../../../../hooks/AllOrders/useFilteredOrders';
+import { useFilteredOrders, OrderDisplay } from '../../../../hooks/AllOrders/useFilteredOrders';
 import { useOrders, useOrderStats } from '../../../../hooks/AllOrders/useOrders';
 import { OrderFilters, OrderStatus, Order } from '@/types/orders';
 import { defaultEmptyFilters } from '../../../../hooks/AllOrders/useFilterState';
@@ -42,11 +42,26 @@ export default function AllOrdersRefactor() {
   // Fetch order stats for tab counts
   const { stats } = useOrderStats();
 
+  // Map backend Order to display format
+  const mapOrderToCard = (order: Order): OrderDisplay => ({
+    id: order.id,
+    name: order.customer?.name || 'Unknown',
+    phone: order.customer?.phone || '',
+    government: order.customer?.governorate || '',
+    items: order.orderProducts?.map(op => `${op.product.name} ${op.product.size || ''} ${op.product.color || ''}`.trim()) || [],
+    price: order.totalCost,
+    trys: order.numberOfTriesToReach,
+    status: order.status,
+    city: order.customer?.city || '',
+    alert: undefined,
+  });
+
   // Use backend data if available and not in dummy mode
-  const ordersToUse = useBackend && !loading ? backendOrders : dummyCards;
+  const mappedBackendOrders = backendOrders.map(mapOrderToCard);
+  const ordersToUse = useBackend && !loading ? mappedBackendOrders : dummyCards;
 
   // Apply local filtering for dummy data
-  const filteredOrders = useFilteredOrders(ordersToUse as any[], filters);
+  const filteredOrders = useFilteredOrders(ordersToUse, filters);
 
   // Pagination
   const {
@@ -59,7 +74,7 @@ export default function AllOrdersRefactor() {
     goToPage,
     nextPage,
     previousPage,
-  } = usePagination(useBackend ? backendOrders : filteredOrders, 1, 6);
+  } = usePagination(useBackend ? mappedBackendOrders : filteredOrders, 1, 6);
 
   // Update search from URL parameter
   useEffect(() => {
@@ -93,22 +108,8 @@ export default function AllOrdersRefactor() {
     }
   };
 
-  // Map backend Order to display format
-  const mapOrderToCard = (order: Order) => ({
-    id: order.id,
-    name: order.customer?.name || 'Unknown',
-    phone: order.customer?.phone || '',
-    government: order.customer?.governorate || '',
-    items: order.orderProducts?.map(op => `${op.product.name} ${op.product.size || ''} ${op.product.color || ''}`.trim()) || [],
-    price: order.totalCost,
-    trys: order.numberOfTriesToReach,
-    status: order.status,
-    city: order.customer?.city || '',
-    alert: undefined,
-  });
-
   const displayItems = useBackend 
-    ? backendOrders.map(mapOrderToCard) 
+    ? mappedBackendOrders 
     : paginatedItems;
 
   const displayPagination = useBackend ? backendPagination : {
@@ -150,7 +151,7 @@ export default function AllOrdersRefactor() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 grid-rows-3 gap-3 flex-wrap my-4">
-        {displayItems.map((card: any) => (
+        {displayItems.map((card) => (
           <OrderCard key={card.id} select={select} {...card} />
         ))}
       </div>

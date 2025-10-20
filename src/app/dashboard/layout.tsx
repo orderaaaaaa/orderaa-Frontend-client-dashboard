@@ -152,7 +152,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }, [pathname]);
 
   // Handle global search - navigate to orders page with search query
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent<HTMLInputElement> | React.KeyboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     if (searchValue.trim()) {
       // Navigate to orders page with search query
@@ -391,7 +391,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               onChange={(e) => setSearchValue(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  handleSearch(e as any);
+                  handleSearch(e);
                 }
               }}
             />

@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { OrderFilters } from "@/types/orders";
 
-export interface Order {
+// Display format for orders (used in OrderCard)
+export interface OrderDisplay {
   id: number;
   name: string;
   phone: string;
@@ -11,12 +12,13 @@ export interface Order {
   trys: number;
   status: string;
   city: string;
+  alert?: number;
 }
 
 export function useFilteredOrders(
-  orders: Order[],
+  orders: OrderDisplay[],
   filters: OrderFilters
-): Order[] {
+): OrderDisplay[] {
   return useMemo(() => {
     return orders.filter((order) => {
       if (

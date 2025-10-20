@@ -27,7 +27,7 @@ export async function fetchOrders(params?: FetchOrdersParams): Promise<Paginated
   if (params?.city) queryParams.append('city', params.city);
   if (params?.productName) queryParams.append('productName', params.productName);
 
-  const { data } = await api.get(`/orders?${queryParams.toString()}`);
+  const { data } = await api.get<PaginatedResponse<Order>>(`/orders?${queryParams.toString()}`);
   return data;
 }
 
@@ -35,7 +35,7 @@ export async function fetchOrders(params?: FetchOrdersParams): Promise<Paginated
  * Fetch a single order by ID
  */
 export async function fetchOrderById(id: number): Promise<Order> {
-  const { data } = await api.get(`/orders/${id}`);
+  const { data } = await api.get<Order>(`/orders/${id}`);
   return data;
 }
 
@@ -53,7 +53,7 @@ export async function fetchOrdersByStatus(
  * Get order statistics/counts by status
  */
 export async function fetchOrderStats(): Promise<Record<OrderStatus, number>> {
-  const { data } = await api.get('/orders/stats');
+  const { data } = await api.get<Record<OrderStatus, number>>('/orders/stats');
   return data;
 }
 
@@ -61,7 +61,7 @@ export async function fetchOrderStats(): Promise<Record<OrderStatus, number>> {
  * Update order status
  */
 export async function updateOrderStatus(id: number, status: OrderStatus): Promise<Order> {
-  const { data } = await api.patch(`/orders/${id}/status`, { status });
+  const { data } = await api.patch<Order>(`/orders/${id}/status`, { status });
   return data;
 }
 
