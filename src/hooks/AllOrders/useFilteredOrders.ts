@@ -1,17 +1,5 @@
 import { useMemo } from "react";
-import { OrderFilters } from "@/types/orders";
-
-export interface Order {
-  id: number;
-  name: string;
-  phone: string;
-  government: string;
-  items: string[];
-  price: number;
-  trys: number;
-  status: string;
-  city: string;
-}
+import { OrderFilters, Order } from "@/types/orders";
 
 export function useFilteredOrders(
   orders: Order[],
@@ -21,26 +9,26 @@ export function useFilteredOrders(
     return orders.filter((order) => {
       if (
         filters.customerName &&
-        !order.name.toLowerCase().includes(filters.customerName.toLowerCase())
+        !order.customer.name.toLowerCase().includes(filters.customerName.toLowerCase())
       ) {
         return false;
       }
 
-      if (filters.phone && !order.phone.includes(filters.phone)) {
+      if (filters.phone && !order.customer.phone.includes(filters.phone)) {
         return false;
       }
 
-      if (filters.governorate && order.government !== filters.governorate) {
+      if (filters.governorate && order.customer.governorate !== filters.governorate) {
         return false;
       }
 
-      if (filters.area && order.city !== filters.area) {
+      if (filters.area && order.customer.area !== filters.area) {
         return false;
       }
 
       if (filters.productName) {
-        const hasMatchingProduct = order.items.some((item) =>
-          item.toLowerCase().includes(filters.productName.toLowerCase())
+        const hasMatchingProduct = order.orderProducts.some((op) =>
+          op.product.name.toLowerCase().includes(filters.productName.toLowerCase())
         );
         if (!hasMatchingProduct) {
           return false;
@@ -48,9 +36,10 @@ export function useFilteredOrders(
       }
 
       if (filters.sizeColor) {
-        const hasMatchingSizeColor = order.items.some((item) =>
-          item.toLowerCase().includes(filters.sizeColor.toLowerCase())
-        );
+        const hasMatchingSizeColor = order.orderProducts.some((op) => {
+          const sizeColor = `${op.product.size || ''} ${op.product.color || ''}`.toLowerCase();
+          return sizeColor.includes(filters.sizeColor.toLowerCase());
+        });
         if (!hasMatchingSizeColor) {
           return false;
         }
@@ -58,14 +47,15 @@ export function useFilteredOrders(
 
       if (
         filters.shipmentCode &&
-        !order.id.toString().includes(filters.shipmentCode)
+        !order.code.includes(filters.shipmentCode)
       ) {
         return false;
       }
 
       if (
         filters.address &&
-        !order.city.toLowerCase().includes(filters.address.toLowerCase())
+        order.customer.address &&
+        !order.customer.address.toLowerCase().includes(filters.address.toLowerCase())
       ) {
         return false;
       }
