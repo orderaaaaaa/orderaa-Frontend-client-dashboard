@@ -100,6 +100,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false); // mobile drawer
   const [isCollapsed, setIsCollapsed] = useState(false); // desktop collapse
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [searchValue, setSearchValue] = useState('');
   const pathname = usePathname();
   const router = useRouter();
 
@@ -149,6 +150,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       }
     });
   }, [pathname]);
+
+  // Handle global search - navigate to orders page with search query
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchValue.trim()) {
+      // Navigate to orders page with search query
+      router.push(`/dashboard/orders/allOrders?search=${encodeURIComponent(searchValue.trim())}`);
+    }
+  };
 
   // New helper: close mobile sidebar on small screens OR collapse sidebar on large screens
   const handleNavItemClick = () => {
@@ -377,6 +387,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               placeholder="ابحث هنا..."
               icon={Search}
               className="sm:rounded-[38px] lg:w-lg lg:rounded-[38px]"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch(e as any);
+                }
+              }}
             />
 
             <div className="flex items-center gap-3">
