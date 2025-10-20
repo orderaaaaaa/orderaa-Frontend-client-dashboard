@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import PageTab from '@/components/ui/PageTab';
 import { dummyCards } from '@/constants/orders-tabs';
-import FilterSection from '../allOrders/FilterSection';
+import FilterSection from '../allOrders/components/FilterSection';
 import OrderDetailsInfo from './OrderDetailsInfo';
 import Image from 'next/image';
 
