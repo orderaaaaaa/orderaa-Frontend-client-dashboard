@@ -5,17 +5,21 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signInSchema, type SignInSchema } from './schema';
-import { signIn } from '@/lib/api/auth';
+import { fetchMe, signIn } from '@/lib/api/auth';
 
 import { Lock, User } from 'lucide-react';
 import AuthForm from '../components/AuthForm';
 import Input from '../../../components/ui/Input';
 import Link from 'next/link';
+import { useAuthStore } from '@/store/authStore';
 
 export default function LoginPage() {
   const [error, setError] = useState('');
   const [isChecked, setIsChecked] = useState(false);
   const router = useRouter();
+
+  const setToken = useAuthStore((state) => state.setToken);
+  const setUser = useAuthStore((state) => state.setUser);
 
   const form = useForm<SignInSchema>({
     resolver: zodResolver(signInSchema),
@@ -28,10 +32,21 @@ export default function LoginPage() {
   const onSubmit = async (values: SignInSchema) => {
     setError('');
     try {
-      const data = await signIn(values);
-      if (data) router.push('/dashboard');
+      const data = (await signIn(values)) as any;
+
+      if (data?.access_token) {
+        setToken(data.access_token);
+
+        const userData = (await fetchMe(data.access_token)) as any;
+
+        setUser(userData);
+
+        router.push('/dashboard');
+      } else {
+        setError('خطأ في بيانات تسجيل الدخول.');
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'حدث خطأ أثناء إنشاء الحساب.');
+      setError(err.response?.data?.message || 'حدث خطأ أثناء تسجيل الدخول.');
     }
   };
 

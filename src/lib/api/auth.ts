@@ -28,6 +28,15 @@ export async function signIn(payload: SignInPayload) {
   return data;
 }
 
+export async function fetchMe(token: string) {
+  const { data } = await api.get('/auth/me', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return data;
+}
+
 export async function sendOTP(email: string) {
   const { data } = await api.post('/auth/send-otp', { email });
 
