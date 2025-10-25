@@ -103,30 +103,30 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" defaultValue="Admin" />
+                    {/* <Input id="firstName" defaultValue="Admin" /> */}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" defaultValue="User" />
+                    {/* <Input id="lastName" defaultValue="User" /> */}
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input
+                  {/* <Input
                     id="email"
                     type="email"
                     defaultValue="Admin@gmail.com"
-                  />
+                  /> */}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
-                  <Input
+                  {/* <Input
                     id="phone"
                     type="tel"
                     placeholder="+1 (555) 123-4567"
-                  />
+                  /> */}
                 </div>
               </CardContent>
             </Card>
@@ -330,12 +330,12 @@ export default function SettingsPage() {
                   <div className="space-y-2">
                     <Label>Change Password</Label>
                     <div className="space-y-2">
-                      <Input type="password" placeholder="Current password" />
+                      {/* <Input type="password" placeholder="Current password" />
                       <Input type="password" placeholder="New password" />
                       <Input
                         type="password"
                         placeholder="Confirm new password"
-                      />
+                      /> */}
                     </div>
                   </div>
                 </div>
