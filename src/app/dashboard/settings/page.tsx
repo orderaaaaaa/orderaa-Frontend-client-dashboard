@@ -4,7 +4,6 @@ import { AuthGuard } from '@/components/auth-guard';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
@@ -140,7 +139,7 @@ export default function SettingsPage() {
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="storeName">Store Name</Label>
-                  <Input
+                  {/* <Input
                     id="storeName"
                     value={storeSettings.storeName}
                     onChange={(e) =>
@@ -149,7 +148,7 @@ export default function SettingsPage() {
                         storeName: e.target.value,
                       })
                     }
-                  />
+                  /> */}
                 </div>
 
                 <div className="space-y-2">
