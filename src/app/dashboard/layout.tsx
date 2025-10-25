@@ -105,6 +105,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const logout = useAuthStore((state) => state.logout);
+  const authUser = useAuthStore((state) => state.user);
 
   // User menu state
   const [userMenuValue, setUserMenuValue] = useState<string>('');
@@ -396,7 +397,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 value={userMenuValue}
                 onChange={handleUserMenuChange}
                 options={userOptions}
-                placeholder="جاد علي"
+                placeholder={authUser ? authUser.username : 'المستخدم'}
                 className="w-auto"
                 placeholderClassName="text-[#1F1F1F] font-bold text-[20px]"
                 selectClassName="border-0"
