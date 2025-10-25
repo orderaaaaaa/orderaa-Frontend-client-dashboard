@@ -1,7 +1,7 @@
 'use client';
 
 import { useForm } from 'react-hook-form';
-import { Mail, User, Pen, Phone, LocateIcon, Lock } from 'lucide-react';
+import { Mail, User, Pen, Phone, MapIcon, Lock } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signUpSchema, type SignUpSchema } from './schema';
 import { useState } from 'react';
@@ -120,7 +120,7 @@ export default function SignUpForm() {
           options={governorates}
           placeholder="اختر المحافظة"
           label="المحافظة"
-          icon={LocateIcon}
+          icon={MapIcon}
         />
 
         <Drobdown
@@ -131,7 +131,7 @@ export default function SignUpForm() {
           }
           placeholder="اختر المدينة"
           label="المدينة"
-          icon={LocateIcon}
+          icon={MapIcon}
         />
       </div>
 
