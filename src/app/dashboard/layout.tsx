@@ -40,17 +40,13 @@ const navigation = [
     name: ' الطلبات ',
     href: '/dashboard/orders',
     icon: Package,
-    children: [
-      { name: 'جميع الطلبات', href: '/dashboard/orders/allOrders' },
-      { name: 'تأكيد الطلبات ', href: '/dashboard/orders/completed' },
-    ],
+    children: [{ name: 'جميع الطلبات', href: '/dashboard/orders/allOrders' }],
   },
   {
     name: 'قسم خدمة العملاء',
     href: '/dashboard/customers',
     icon: Users,
     children: [
-      { name: 'تأكيد الطلبات', href: '/dashboard/customers/inquiries' },
       { name: 'متابعة الطلبات', href: '/dashboard/customers/complaints' },
     ],
   },
@@ -260,11 +256,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                             setOpenDropdown(isOpen ? null : item.name);
                           }
                           // Close mobile sidebar when clicking dropdown on mobile
-                          if (
-                            typeof window !== 'undefined' &&
-                            window.innerWidth < 1024
-                          ) {
-                            setSidebarOpen(false);
+                          if (isCollapsed) {
+                            setIsCollapsed(false);
+                            setOpenDropdown(item.name);
+                          } else {
+                            setOpenDropdown(isOpen ? null : item.name);
                           }
                         }}
                         className={`
