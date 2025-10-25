@@ -5,13 +5,10 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
-  LayoutDashboard,
+  House,
   Package,
-  ShoppingCart,
   Users,
-  BarChart3,
-  Settings,
-  LogOut,
+  Truck,
   Menu,
   X,
   ChevronDown,
@@ -20,6 +17,7 @@ import {
   ChevronRight,
   ChevronUp,
   Search,
+  PenBox,
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -27,18 +25,21 @@ import { AuthGuard } from '@/components/auth-guard';
 import Input from '../../components/ui/Input';
 import Dropdown from '../../components/ui/Drobdown';
 import { useOrdersStore } from '@/store/ordersStore';
+import { useAuthStore } from '@/store/authStore';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 const navigation = [
-  { name: ' الرئيسية', href: '/dashboard', icon: LayoutDashboard },
-  { name: ' المنتجات', href: '/dashboard/products', icon: Package },
+  { name: ' الرئيسية', href: '/dashboard', icon: House },
+
+  //TODO: Re-add products when the products page is ready
+  // { name: ' المنتجات', href: '/dashboard/products', icon: Package },
   {
     name: ' الطلبات ',
     href: '/dashboard/orders',
-    icon: ShoppingCart,
+    icon: Package,
     children: [
       { name: 'جميع الطلبات', href: '/dashboard/orders/allOrders' },
       { name: 'تأكيد الطلبات ', href: '/dashboard/orders/completed' },
@@ -56,7 +57,7 @@ const navigation = [
   {
     name: 'قسم الشحن',
     href: '/dashboard/analytics',
-    icon: BarChart3,
+    icon: Truck,
     children: [
       { name: 'تقارير ', href: '/dashboard/analytics/new' },
       { name: ' موظفين الشحن', href: '/dashboard/analytics/completed' },
@@ -65,7 +66,7 @@ const navigation = [
   {
     name: 'قسم التجهيز',
     href: '/dashboard',
-    icon: Settings,
+    icon: PenBox,
     children: [
       { name: ' تقارير', href: '/dashboard/settings/pending' },
       { name: ' موظفين الشحن', href: '/dashboard/settings/done' },
@@ -103,6 +104,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const pathname = usePathname();
   const router = useRouter();
+  const logout = useAuthStore((state) => state.logout);
 
   // User menu state
   const [userMenuValue, setUserMenuValue] = useState<string>('');
@@ -124,8 +126,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       return;
     }
     if (key === 'logout') {
-      // Implement your actual logout logic here (e.g., call signOut, clear tokens, etc.)
-      // For now we redirect to a login route as an example:
+      logout();
+      localStorage.removeItem('auth-storage');
       router.push('/signin');
       return;
     }
