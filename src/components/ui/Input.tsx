@@ -1,5 +1,5 @@
-import React from 'react';
-import { LucideIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { LucideIcon, Eye, EyeOff } from 'lucide-react';
 
 type InputProps = {
   label?: string;
@@ -27,10 +27,17 @@ export default function Input({
   onChange,
   ...rest
 }: InputProps) {
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Use px-10 for left and right padding if both icons could exist
   const inputClassName =
-    `w-full border border-[#CED4DA] rounded-lg py-2.5 px-3 text-[18px] ${
-      Icon ? 'pr-10' : ''
-    } ${className ?? ''}`.trim();
+    `w-full border border-[#CED4DA] rounded-lg py-2.5 px-10 text-[18px] ${
+      className ?? ''
+    }`.trim();
+
+  // Decide input type
+  const inputType =
+    type === 'password' ? (showPassword ? 'text' : 'password') : type;
 
   return (
     <div>
@@ -38,8 +45,19 @@ export default function Input({
         {label}
       </label>
       <div className="relative">
+        {/* Eye icon (for password) on the LEFT */}
+        {type === 'password' && (
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 focus:outline-none"
+            tabIndex={-1}
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        )}
         <input
-          type={type}
+          type={inputType}
           id={name}
           name={name}
           placeholder={placeholder}
@@ -49,6 +67,7 @@ export default function Input({
           {...(register ? { ...register(name) } : {})}
           {...rest}
         />
+        {/* Optional icon on the RIGHT */}
         {Icon && (
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
             <Icon size={20} />
