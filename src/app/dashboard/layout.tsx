@@ -340,20 +340,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     key={item.name}
                     href={item.href}
                     className={`
-                    flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors
-                    ${
-                      isActive
-                        ? 'bg-white/20 text-white'
-                        : 'text-white/80 hover:bg-white/10 hover:text-white'
-                    }
-                  `}
+    flex items-center px-3 py-3 text-[20px] font-bold rounded-lg transition-colors
+    ${
+      isActive
+        ? 'bg-white/20 text-white font-bold'
+        : 'text-white/80 hover:bg-white/10 hover:text-white'
+    }
+  `}
                     onClick={() => {
                       handleNavItemClick();
                     }}
                     style={{ direction: 'rtl' }}
                   >
                     <item.icon className="h-5 w-5 shrink-0" />
-                    {!isCollapsed && <span className="pr-2">{item.name}</span>}
+                    {!isCollapsed && (
+                      <span className="pr-2 text-[20px] font-bold">
+                        {item.name}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
