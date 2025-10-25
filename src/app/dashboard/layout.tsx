@@ -5,10 +5,6 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
-  House,
-  Package,
-  Users,
-  Truck,
   Menu,
   X,
   ChevronDown,
@@ -17,7 +13,6 @@ import {
   ChevronRight,
   ChevronUp,
   Search,
-  PenBox,
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -26,49 +21,11 @@ import Input from '../../components/ui/Input';
 import Dropdown from '../../components/ui/Drobdown';
 import { useOrdersStore } from '@/store/ordersStore';
 import { useAuthStore } from '@/store/authStore';
+import { navigation } from '@/constants/Navbar';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
-
-const navigation = [
-  { name: ' الرئيسية', href: '/dashboard', icon: House },
-
-  //TODO: Re-add products when the products page is ready
-  // { name: ' المنتجات', href: '/dashboard/products', icon: Package },
-  {
-    name: ' الطلبات ',
-    href: '/dashboard/orders',
-    icon: Package,
-    children: [{ name: 'جميع الطلبات', href: '/dashboard/orders/allOrders' }],
-  },
-  {
-    name: 'قسم خدمة العملاء',
-    href: '/dashboard/customers',
-    icon: Users,
-    children: [
-      { name: 'متابعة الطلبات', href: '/dashboard/customers/complaints' },
-    ],
-  },
-  {
-    name: 'قسم الشحن',
-    href: '/dashboard/analytics',
-    icon: Truck,
-    children: [
-      { name: 'تقارير ', href: '/dashboard/analytics/new' },
-      { name: ' موظفين الشحن', href: '/dashboard/analytics/completed' },
-    ],
-  },
-  {
-    name: 'قسم التجهيز',
-    href: '/dashboard',
-    icon: PenBox,
-    children: [
-      { name: ' تقارير', href: '/dashboard/settings/pending' },
-      { name: ' موظفين الشحن', href: '/dashboard/settings/done' },
-    ],
-  },
-];
 
 /* ===== Breadcrumb helper ===== */
 function getBreadcrumb(pathname: string) {
@@ -89,10 +46,6 @@ function getBreadcrumb(pathname: string) {
     child: null as string | null,
   };
 }
-
-//TODO: Refactor and clean this
-//TODO: Fix the two first tabs size issue
-//TODO: Update the navbar icons to match the design
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false); // mobile drawer
@@ -184,19 +137,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Sidebar */}
         <div
           className={`
-    fixed inset-y-0 right-0 z-50 transform transition-transform duration-300 ease-in-out
-    ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'}
-    lg:translate-x-0 lg:static lg:inset-0
-  `}
+            fixed inset-y-0 right-0 z-50 transform transition-transform duration-300 ease-in-out
+            ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'}
+            lg:translate-x-0 lg:static lg:inset-0
+          `}
         >
           <div
             className={`
-    relative flex flex-col h-full transition-[width] duration-300 ease-in-out
-    ${isCollapsed ? sidebarWidthCollapsed : sidebarWidthExpanded}
-    rounded-md border border-gray-700 overflow-hidden
-    bg-[radial-gradient(circle_at_10%_10%,_#431F94_0%,_#5D24E1_100%)]
-    shadow-[0_2px_4px_-1px_rgba(0,0,0,0.06),_0_4px_6px_-1px_rgba(0,0,0,0.10)]
-  `}
+              relative flex flex-col h-full transition-[width] duration-300 ease-in-out
+              ${isCollapsed ? sidebarWidthCollapsed : sidebarWidthExpanded}
+              rounded-md border border-gray-700 overflow-hidden
+              bg-[radial-gradient(circle_at_10%_10%,_#431F94_0%,_#5D24E1_100%)]
+              shadow-[0_2px_4px_-1px_rgba(0,0,0,0.06),_0_4px_6px_-1px_rgba(0,0,0,0.10)]
+            `}
           >
             {/* Header */}
             <div className="flex items-center justify-between h-16 px-3 border-b border-white/10">
@@ -264,20 +217,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                           }
                         }}
                         className={`
-                        flex items-center justify-between w-full px-3 py-3 text-sm font-medium rounded-lg transition-colors
-                        ${
-                          isActive || isOpen
-                            ? 'bg-white/20 text-white font-bold text-[20px]'
-                            : 'text-white/80 hover:bg-white/10 hover:text-white text-[20px]'
-                        }
-                            
-                      `}
+                          flex items-center justify-between w-full px-3 py-3 text-sm font-medium rounded-lg transition-colors
+                          ${
+                            isActive || isOpen
+                              ? 'bg-white/20 text-white font-bold text-[20px] cursor-default'
+                              : 'text-white/80 hover:bg-white/10 hover:text-white text-[20px]'
+                          }
+                        `}
                         style={{ direction: 'rtl' }}
                       >
                         <span className="flex items-center gap-2 text-[20px] font-bold">
-                          <item.icon className="h-5 w-5 shrink-0" />
+                          {item.icon && (
+                            <item.icon className="h-5 w-5 shrink-0" />
+                          )}
                           {!isCollapsed && (
-                            <span className="pr-2 text-[20px] font-bold">
+                            <span className="pr-2 text-[17px] font-bold">
                               {item.name}
                             </span>
                           )}
@@ -302,27 +256,32 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                           `}
                         >
                           <div
-                            className="mr-8 space-y-2"
+                            className="space-y-2"
                             style={{ direction: 'rtl' }}
                           >
                             {item.children.map((sub) => {
                               const isSubActive = pathname.startsWith(sub.href);
+                              const SubIcon = sub.icon;
+
                               return (
                                 <Link
                                   key={sub.name}
                                   href={sub.href}
                                   className={`
-                                  block px-3 py-2 text-sm rounded-md transition-colors
-                                  ${
-                                    isSubActive
-                                      ? 'bg-white/20 text-white text-[20px]'
-                                      : 'text-white/70 hover:bg-white/10 hover:text-white text-[20px]'
-                                  }
-                                `}
+                                    flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors
+                                    ${
+                                      isSubActive
+                                        ? 'bg-white/20 text-white text-[17px] cursor-default'
+                                        : 'text-white/70 hover:bg-white/10 hover:text-white text-[16px]'
+                                    }
+                                  `}
                                   onClick={() => {
                                     handleNavItemClick();
                                   }}
                                 >
+                                  {SubIcon && (
+                                    <SubIcon className="h-7 w-7 shrink-0" />
+                                  )}
                                   {sub.name}
                                 </Link>
                               );
@@ -340,19 +299,23 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     key={item.name}
                     href={item.href}
                     className={`
-    flex items-center px-3 py-3 text-[20px] font-bold rounded-lg transition-colors
-    ${
-      isActive
-        ? 'bg-white/20 text-white font-bold'
-        : 'text-white/80 hover:bg-white/10 hover:text-white'
-    }
-  `}
-                    onClick={() => {
+                      flex items-center px-3 py-3 text-[20px] font-bold rounded-lg transition-colors
+                      ${
+                        isActive
+                          ? 'bg-white/20 text-white font-bold cursor-default'
+                          : 'text-white/80 hover:bg-white/10 hover:text-white'
+                      }
+                    `}
+                    onClick={(e) => {
+                      if (isActive) {
+                        e.preventDefault(); // Prevent navigation if already active
+                        return;
+                      }
                       handleNavItemClick();
                     }}
                     style={{ direction: 'rtl' }}
                   >
-                    <item.icon className="h-5 w-5 shrink-0" />
+                    {item.icon && <item.icon className="h-5 w-5 shrink-0" />}
                     {!isCollapsed && (
                       <span className="pr-2 text-[20px] font-bold">
                         {item.name}
@@ -389,10 +352,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             />
 
             <div className="flex items-center gap-3">
-              {
-                /* User name displayed as placeholder; dropdown used for actions */
-                //TODO: Fix the spacing issue
-              }
               <Dropdown
                 value={userMenuValue}
                 onChange={handleUserMenuChange}
