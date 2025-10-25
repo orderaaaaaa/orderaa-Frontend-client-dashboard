@@ -15,10 +15,10 @@ interface DropdownProps {
   placeholder?: string;
   label?: string;
   icon?: LucideIcon;
-  className?: string; // wrapper class (container)
-  selectClassName?: string; // optional classes applied directly to the <select>
-  placeholderClassName?: string; // optional class applied when showing placeholder (value is empty)
-  placeholderStyle?: React.CSSProperties; // optional inline style when showing placeholder
+  className?: string;
+  selectClassName?: string;
+  placeholderClassName?: string;
+  placeholderStyle?: React.CSSProperties;
 }
 
 export default function Dropdown({
@@ -60,6 +60,13 @@ export default function Dropdown({
     return () => document.removeEventListener('mousedown', handleClick);
   }, [isOpen]);
 
+  // Set input value logic
+  const inputValue = isOpen
+    ? search
+    : selectedOption
+    ? selectedOption.value
+    : search;
+
   return (
     <div ref={ref} className={className ? className : 'w-full'}>
       {label && (
@@ -78,11 +85,11 @@ export default function Dropdown({
         )}
         <input
           type="text"
-          value={selectedOption ? selectedOption.value : search}
+          value={inputValue}
           onChange={(e) => {
             setSearch(e.target.value);
             setIsOpen(true);
-            onChange('');
+            // Do not clear selection on search
           }}
           onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
@@ -96,7 +103,6 @@ export default function Dropdown({
                 }`
           }
           style={!value && placeholderStyle ? placeholderStyle : undefined}
-          readOnly={!!selectedOption}
         />
         {isOpen && (
           <ul className="absolute z-10 left-0 right-0 bg-white border border-[#CED4DA] rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
