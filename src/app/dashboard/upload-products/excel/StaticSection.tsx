@@ -1,5 +1,6 @@
 import React from 'react';
 
+// Omar TODO: Make it DRY
 const StaticSection = () => {
   return (
     <div className="bg-gray-50 px-6 flex items-center justify-center" dir="rtl">

@@ -6,6 +6,7 @@ interface BreadcrumbProps {
   className?: string;
 }
 
+// Omar TODO: Import from a common utility file
 function getBreadcrumb(pathname: string) {
   for (const item of navigation) {
     if (item.children) {
