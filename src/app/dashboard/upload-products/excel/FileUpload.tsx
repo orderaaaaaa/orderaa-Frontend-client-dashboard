@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Download, FileText, CircleCheck, X } from 'lucide-react';
+import { Download, CircleCheck, X } from 'lucide-react';
 
 const FileUpload = () => {
   const [isDragging, setIsDragging] = useState(false);

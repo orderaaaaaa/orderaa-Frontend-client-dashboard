@@ -10,30 +10,42 @@ import {
   File,
 } from 'lucide-react';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
+import { CartIcon } from '@/components/icons'; // Import from your icons registry
 
 export type NavigationItem = {
   name: string;
   href: string;
-  icon?: ForwardRefExoticComponent<
-    Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>
-  >;
+  icon?:
+    | ForwardRefExoticComponent<
+        Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>
+      >
+    | ((props: { className?: string }) => JSX.Element);
   children?: NavigationItem[];
 };
 
 export const navigation: NavigationItem[] = [
   { name: ' الرئيسية', href: '/dashboard', icon: House },
   {
-    name: ' الطلبات ',
+    name: 'الطلبات',
     href: '/dashboard/orders',
     icon: Package,
-    children: [{ name: 'جميع الطلبات', href: '/dashboard/orders/allOrders' }],
+    children: [
+      {
+        name: 'جميع الطلبات',
+        href: '/dashboard/orders/allOrders',
+        icon: CartIcon, // Use your custom icon
+      },
+    ],
   },
   {
     name: 'قسم خدمة العملاء',
     href: '/dashboard/customers',
     icon: Users,
     children: [
-      { name: 'متابعة الطلبات', href: '/dashboard/customers/complaints' },
+      {
+        name: 'متابعة الطلبات',
+        href: '/dashboard/customers/complaints',
+      },
     ],
   },
   {
@@ -41,8 +53,16 @@ export const navigation: NavigationItem[] = [
     href: '/dashboard/analytics',
     icon: Truck,
     children: [
-      { name: 'تقارير ', href: '/dashboard/analytics/new' },
-      { name: ' موظفين الشحن', href: '/dashboard/analytics/completed' },
+      {
+        name: 'تقارير',
+        href: '/dashboard/analytics/new',
+        // No icon - now optional
+      },
+      {
+        name: 'موظفين الشحن',
+        href: '/dashboard/analytics/completed',
+        // No icon - now optional
+      },
     ],
   },
   {
@@ -50,8 +70,16 @@ export const navigation: NavigationItem[] = [
     href: '/dashboard',
     icon: PenBox,
     children: [
-      { name: ' تقارير', href: '/dashboard/settings/pending' },
-      { name: ' موظفين الشحن', href: '/dashboard/settings/done' },
+      {
+        name: 'تقارير',
+        href: '/dashboard/settings/pending',
+        // No icon - now optional
+      },
+      {
+        name: 'موظفين الشحن',
+        href: '/dashboard/settings/done',
+        // No icon - now optional
+      },
     ],
   },
   {
@@ -61,17 +89,17 @@ export const navigation: NavigationItem[] = [
     children: [
       {
         name: 'إضافة طلب يدوي',
-        href: '/dashboard/upload-products/manual', // ✅ Fixed: Added leading /
+        href: '/dashboard/upload-products/manual',
         icon: FolderPlus,
       },
       {
         name: 'إضافة طلب ايكسيل',
-        href: '/dashboard/upload-products/excel', // ✅ Fixed: Added leading /
+        href: '/dashboard/upload-products/excel',
         icon: File,
       },
       {
         name: 'اضافة طلب Ai',
-        href: '/dashboard/upload-products/api', // ✅ Fixed: Added leading /
+        href: '/dashboard/upload-products/api',
         icon: ListPlus,
       },
     ],

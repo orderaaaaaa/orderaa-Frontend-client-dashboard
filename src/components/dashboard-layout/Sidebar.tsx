@@ -76,7 +76,7 @@ export function Sidebar({
             <div className="flex-1 flex justify-center items-center">
               {!collapsed && (
                 <Image
-                  src="/images/orderaa-nav.PNG"
+                  src="/images/orderaa-nav.png"
                   alt="Logo"
                   width={200}
                   height={26}
