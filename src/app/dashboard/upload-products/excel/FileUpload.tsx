@@ -57,27 +57,27 @@ const FileUpload = () => {
 
   return (
     <div className="bg-gray-50 px-6 flex items-center justify-center" dir="rtl">
-      <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-4 p-8 shadow-sm">
+      <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-2 p-8 shadow-sm">
         <div className="flex gap-4 items-start">
           {/* Icon Container */}
-          <div className="flex-shrink-0 max-sm:p-3 p-4 bg-[#CCCCCC99] rounded-lg">
-            <Download className="w-5 h-5 rotate-180" />
+          <div className="flex-shrink-0 max-sm:p-2 p-4 bg-[#CCCCCC99] rounded-lg">
+            <Download className="w-5 h-5 max-sm:w-4 max-sm:w-h rotate-180" />
           </div>
 
           {/* Content */}
           <div className="flex-col py-3 w-full">
-            <h3 className="text-2xl font-normal text-gray-900 mb-6 text-right">
+            <h3 className="text-2xl font-normal max-sm:text-[19px] max-sm:font-semibold text-gray-900 max-sm:mb-3 mb-6 text-right">
               قم بتحميل ملف الإكسل الخاص بك
             </h3>
 
-            <p className="text-gray-600 font-normal leading-relaxed mb-6 text-right">
+            <p className="text-gray-600 max-sm:text-sm font-normal leading-relaxed mb-6 text-right">
               اختر ملف Excel الذي يحتوي على بياناتك. تأكد من أنه يتبع تنسيق
               القالب.
             </p>
 
             {/* Drop Zone */}
             <div
-              className={`max-w-[923px] border-2 mx-auto border-dashed rounded-2xl py-20 mb-6 transition-all cursor-pointer ${
+              className={`max-w-[923px] relative max-sm:left-5 border-2 mx-auto border-dashed rounded-2xl py-20 mb-6 transition-all cursor-pointer ${
                 isDragging
                   ? 'border-purple-400 bg-purple-50'
                   : 'border-gray-300 hover:border-gray-400 bg-white'
@@ -88,22 +88,23 @@ const FileUpload = () => {
               onClick={handleBrowseClick}
             >
               <div className="flex flex-col items-center justify-center text-center gap-4">
-                <FileText
+                <img
+                  src="/Icons/file.svg"
                   className="w-14 h-14 text-gray-400"
-                  strokeWidth={1.5}
+                  // strokeWidth={1.5}
                 />
                 {uploadedFile ? (
                   <div className="">
-                    <h5 className="flex gap-2 items-center text-lg">
+                    <h5 className="flex gap-2 items-center text-lg max-sm:text-base">
                       Start company template
                       <CircleCheck className="w-6 h-6 text-[#5D24E1]" />
                     </h5>
-                    <p className="text-gray-600 text-base text-[16px] ml-4">
-                      Click to change file
+                    <p className="text-gray-600 text-base text-[14px] ml-4">
+                      اضغط لتغيير الملف
                     </p>
                   </div>
                 ) : (
-                  <p className="text-gray-600 text-base">
+                  <p className="text-gray-600 text-[16px]">
                     انقر لتحديد ملف إكسل
                   </p>
                 )}
@@ -118,18 +119,18 @@ const FileUpload = () => {
               />
             </div>
 
-            <div className="flex gap-4 justify-center">
+            <div className="flex gap-4 max-sm:gap-1 justify-center relative max-sm:left-5">
               <a
                 onClick={handleUpload}
-                className="flex cursor-pointer justify-center w-full max-w-md h-[46px] text-lg items-center gap-2 px-6 py-3 font-normal rounded-full bg-[#5D24E1] text-white transition-all"
+                className="flex cursor-pointer justify-center max-sm:gap-1 max-sm:text-sm  w-full max-w-md h-[46px] text-lg items-center gap-2 px-6 py-3 font-normal rounded-full bg-[#5D24E1] text-white transition-all"
               >
                 <Download className="w-5 h-5 rotate-x-180" />
-                تحميل الملف
+                تحليل الملف
               </a>
               {uploadedFile ? (
                 <button
                   onClick={handleClearFile}
-                  className="flex items-center font-bold text-[15px] cursor-pointer gap-4 border-2 px-5 text-[#5D24E199] border-[#5D24E199] rounded-full"
+                  className="flex items-center font-bold text-[15px] cursor-pointer gap-4 max-sm:gap-1 max-sm:text-sm border-2 px-5 text-[#5D24E199] border-[#5D24E199] rounded-full"
                 >
                   {' '}
                   <X className="w-5 h-5 " />
