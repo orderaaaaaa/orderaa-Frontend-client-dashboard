@@ -146,7 +146,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             className={`
               relative flex flex-col h-full transition-[width] duration-300 ease-in-out
               ${isCollapsed ? sidebarWidthCollapsed : sidebarWidthExpanded}
-              rounded-md border border-gray-700 overflow-hidden
+              rounded-l-md border border-gray-700 overflow-hidden
               bg-[radial-gradient(circle_at_10%_10%,_#431F94_0%,_#5D24E1_100%)]
               shadow-[0_2px_4px_-1px_rgba(0,0,0,0.06),_0_4px_6px_-1px_rgba(0,0,0,0.10)]
             `}
@@ -156,7 +156,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="flex-1 flex justify-center items-center">
                 {!isCollapsed && (
                   <Image
-                    src="/images/logo-2.PNG"
+                    src="/images/orderaa-nav.png"
                     alt="Logo"
                     width={106}
                     height={26}
