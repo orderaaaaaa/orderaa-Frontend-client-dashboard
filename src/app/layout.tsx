@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   title: 'Orderaa Dashboard',
   description: 'Orderaa management system',
   generator: 'v0.app',
+  icons: {
+    icon: '/images/favicon.png',
+  },
 };
 
 // Load Cairo (Arabic + Latin)
