@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import { Download, CircleCheck, X, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { processExcelFile } from '@/lib/excel/processor';
+import { importBulkOrders, transformToApiFormat, getMerchantIdFromUser } from '@/lib/api/bulk-import';
+import { useAuthStore } from '@/store/authStore';
 
 const FileUpload = () => {
   const [isDragging, setIsDragging] = useState(false);
@@ -10,6 +12,7 @@ const FileUpload = () => {
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const { user } = useAuthStore();
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -58,8 +61,12 @@ const FileUpload = () => {
 
   const handleUpload = async () => {
     if (!uploadedFile) {
-      // If no file selected, open file browser
       handleBrowseClick();
+      return;
+    }
+
+    if (!user) {
+      setError('يجب تسجيل الدخول أولاً');
       return;
     }
 
@@ -67,17 +74,61 @@ const FileUpload = () => {
     setError(null);
 
     try {
-      // Process the Excel file
       const results = await processExcelFile(uploadedFile);
 
-      // Store results in sessionStorage to avoid URL length limits
-      sessionStorage.setItem('excelValidationResults', JSON.stringify(results));
-      
-      // Navigate to results page
+      if (results.errorCount > 0) {
+        sessionStorage.setItem('excelValidationResults', JSON.stringify(results));
+        sessionStorage.setItem('excelValidationOnly', 'true');
+        router.push(`/dashboard/upload-products/excel/results`);
+        return;
+      }
+
+      const apiOrders = transformToApiFormat(
+        results.validOrders.map(order => ({
+          rowIndex: order.rowIndex,
+          data: order.data,
+        })),
+        results.detectedFormat
+      );
+
+      const merchantId = getMerchantIdFromUser(user.sub);
+
+      const backendResponse = await importBulkOrders({
+        format: results.detectedFormat,
+        merchantId,
+        orders: apiOrders,
+      });
+
+      const combinedResults = {
+        ...results,
+        backendResponse,
+        imported: true,
+      };
+
+      sessionStorage.setItem('excelValidationResults', JSON.stringify(combinedResults));
+      sessionStorage.removeItem('excelValidationOnly');
+
       router.push(`/dashboard/upload-products/excel/results`);
     } catch (err: any) {
-      console.error('Error processing file:', err);
-      setError(err.message || 'حدث خطأ أثناء معالجة الملف');
+      if (err.response) {
+        const status = err.response.status;
+        const message = err.response.data?.message || err.message;
+
+        if (status === 401) {
+          setError('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى');
+        } else if (status === 404) {
+          setError('لم يتم العثور على المتجر. يرجى التواصل مع الدعم');
+        } else if (status === 400) {
+          setError(`خطأ في البيانات: ${message}`);
+        } else {
+          setError(`خطأ من الخادم: ${message}`);
+        }
+      } else if (err.request) {
+        setError('لا يمكن الاتصال بالخادم. تحقق من اتصالك بالإنترنت');
+      } else {
+        setError(err.message || 'حدث خطأ أثناء معالجة الملف');
+      }
+
       setIsProcessing(false);
     }
   };
@@ -85,7 +136,6 @@ const FileUpload = () => {
   const handleClearFile = () => {
     setUploadedFile(null);
     setError(null);
-    // Reset the file input value to allow selecting the same file again
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -120,11 +170,10 @@ const FileUpload = () => {
 
             {/* Drop Zone */}
             <div
-              className={`max-w-[923px] relative max-sm:left-5 border-2 mx-auto border-dashed rounded-2xl py-20 mb-6 transition-all cursor-pointer ${
-                isDragging
-                  ? 'border-purple-400 bg-purple-50'
-                  : 'border-gray-300 hover:border-gray-400 bg-white'
-              }`}
+              className={`max-w-[923px] relative max-sm:left-5 border-2 mx-auto border-dashed rounded-2xl py-20 mb-6 transition-all cursor-pointer ${isDragging
+                ? 'border-purple-400 bg-purple-50'
+                : 'border-gray-300 hover:border-gray-400 bg-white'
+                }`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
@@ -134,7 +183,7 @@ const FileUpload = () => {
                 <img
                   src="/Icons/file.svg"
                   className="w-14 h-14 text-gray-400"
-                  // strokeWidth={1.5}
+                // strokeWidth={1.5}
                 />
                 {uploadedFile ? (
                   <div className="">
