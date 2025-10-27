@@ -56,7 +56,7 @@ const DownloadTemplate = ({ onDownload }: DownloadTemplateProps) => {
             <div className="flex gap-4 max-sm:flex-col">
               <button
                 onClick={handleDownloadAppFormat}
-                className="flex cursor-pointer max-sm:text-base hover:bg-gray-100 justify-center w-full max-w-[280px] h-[46px] text-lg items-center gap-2 px-10 py-3 font-normal rounded-lg border-2 transition-all"
+                className="flex cursor-pointer max-sm:text-sm hover:bg-gray-100 justify-center w-full max-w-[320px] h-[46px] text-lg items-center gap-2 px-6 py-3 font-normal rounded-lg border-2 border-gray-300 text-gray-700 transition-all whitespace-nowrap"
               >
                 <Download className="w-5 h-5" />
                 تحميل قالب Orderaa
@@ -64,7 +64,7 @@ const DownloadTemplate = ({ onDownload }: DownloadTemplateProps) => {
 
               <button
                 onClick={handleDownloadEasyOrderFormat}
-                className="flex cursor-pointer max-sm:text-base hover:bg-gray-100 justify-center w-full max-w-[280px] h-[46px] text-lg items-center gap-2 px-10 py-3 font-normal rounded-lg border-2 transition-all"
+                className="flex cursor-pointer max-sm:text-sm hover:bg-gray-100 justify-center w-full max-w-[320px] h-[46px] text-lg items-center gap-2 px-6 py-3 font-normal rounded-lg border-2 border-gray-300 text-gray-700 transition-all whitespace-nowrap"
               >
                 <Download className="w-5 h-5" />
                 تحميل قالب EasyOrder
