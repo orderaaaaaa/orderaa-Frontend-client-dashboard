@@ -1,10 +1,39 @@
+'use client';
+
 import { Download } from 'lucide-react';
+import { generateAppFormatTemplate, generateEasyOrderFormatTemplate } from '@/lib/excel/template-generator';
 
 interface DownloadTemplateProps {
   onDownload: () => void;
 }
 
 const DownloadTemplate = ({ onDownload }: DownloadTemplateProps) => {
+  const handleDownloadAppFormat = () => {
+    const blob = generateAppFormatTemplate();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'orderaa-template.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    onDownload();
+  };
+
+  const handleDownloadEasyOrderFormat = () => {
+    const blob = generateEasyOrderFormatTemplate();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'easyorder-template.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    onDownload();
+  };
+
   return (
     <div className="bg-gray-50 px-6 flex items-center justify-center" dir="rtl">
       <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-2 p-8 shadow-sm">
@@ -15,24 +44,32 @@ const DownloadTemplate = ({ onDownload }: DownloadTemplateProps) => {
           </div>
 
           {/* Content */}
-          <div className="flex-col py-3">
+          <div className="flex-col py-3 w-full">
             <h3 className="text-2xl text-gray-900 mb-6">تحميل نموذج إكسل</h3>
 
             <p className="text-gray-600 leading-relaxed max-sm:text-sm mb-6">
-              قم بتنزيل نموذج Excel الخاص بنا لضمان تنسيق تاريخك بشكل صحيح.
+              قم بتنزيل نموذج Excel الخاص بنا لضمان تنسيق بياناتك بشكل صحيح.
               <br />
               يتضمن النموذج جميع الحقول المطلوبة ومثال.
             </p>
 
-            <a
-              download
-              href="/ordera.png"
-              onClick={onDownload}
-              className="flex cursor-pointer max-sm:text-base hover:bg-gray-100 justify-center w-[234px] h-[46px] text-lg items-center gap-2 px-10 py-3 font-normal rounded-lg border-2 "
-            >
-              <Download className="w-5 h-5" />
-              تحميل القالب
-            </a>
+            <div className="flex gap-4 max-sm:flex-col">
+              <button
+                onClick={handleDownloadAppFormat}
+                className="flex cursor-pointer max-sm:text-base hover:bg-gray-100 justify-center w-full max-w-[280px] h-[46px] text-lg items-center gap-2 px-10 py-3 font-normal rounded-lg border-2 transition-all"
+              >
+                <Download className="w-5 h-5" />
+                تحميل قالب Orderaa
+              </button>
+
+              <button
+                onClick={handleDownloadEasyOrderFormat}
+                className="flex cursor-pointer max-sm:text-base hover:bg-gray-100 justify-center w-full max-w-[280px] h-[46px] text-lg items-center gap-2 px-10 py-3 font-normal rounded-lg border-2 transition-all"
+              >
+                <Download className="w-5 h-5" />
+                تحميل قالب EasyOrder
+              </button>
+            </div>
           </div>
         </div>
       </div>

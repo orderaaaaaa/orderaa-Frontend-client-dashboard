@@ -1,10 +1,15 @@
 import React, { useState, useRef } from 'react';
-import { Download, CircleCheck, X } from 'lucide-react';
+import { Download, CircleCheck, X, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { processExcelFile } from '@/lib/excel/processor';
 
 const FileUpload = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -19,15 +24,29 @@ const FileUpload = () => {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
+    setError(null);
 
     const files = e.dataTransfer.files;
     if (files.length > 0) {
-      setUploadedFile(files[0]);
+      const file = files[0];
+      // Validate file type
+      if (
+        file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+        file.type === 'application/vnd.ms-excel' ||
+        file.name.endsWith('.xlsx') ||
+        file.name.endsWith('.xls') ||
+        file.name.endsWith('.csv')
+      ) {
+        setUploadedFile(file);
+      } else {
+        setError('يرجى اختيار ملف Excel صحيح (.xlsx, .xls, .csv)');
+      }
     }
   };
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
+    setError(null);
     if (files && files.length > 0) {
       setUploadedFile(files[0]);
     }
@@ -37,18 +56,35 @@ const FileUpload = () => {
     fileInputRef.current?.click();
   };
 
-  const handleUpload = () => {
-    if (uploadedFile) {
-      // Handle file upload logic here
-      console.log('Uploading file:', uploadedFile.name);
-    } else {
+  const handleUpload = async () => {
+    if (!uploadedFile) {
       // If no file selected, open file browser
       handleBrowseClick();
+      return;
+    }
+
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      // Process the Excel file
+      const results = await processExcelFile(uploadedFile);
+
+      // Store results in sessionStorage to avoid URL length limits
+      sessionStorage.setItem('excelValidationResults', JSON.stringify(results));
+      
+      // Navigate to results page
+      router.push(`/dashboard/upload-products/excel/results`);
+    } catch (err: any) {
+      console.error('Error processing file:', err);
+      setError(err.message || 'حدث خطأ أثناء معالجة الملف');
+      setIsProcessing(false);
     }
   };
 
   const handleClearFile = () => {
     setUploadedFile(null);
+    setError(null);
     // Reset the file input value to allow selecting the same file again
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -75,6 +111,13 @@ const FileUpload = () => {
               القالب.
             </p>
 
+            {/* Error Message */}
+            {error && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-right">
+                <p className="text-red-600 text-sm">{error}</p>
+              </div>
+            )}
+
             {/* Drop Zone */}
             <div
               className={`max-w-[923px] relative max-sm:left-5 border-2 mx-auto border-dashed rounded-2xl py-20 mb-6 transition-all cursor-pointer ${
@@ -96,7 +139,7 @@ const FileUpload = () => {
                 {uploadedFile ? (
                   <div className="">
                     <h5 className="flex gap-2 items-center text-lg max-sm:text-base">
-                      Start company template
+                      {uploadedFile.name}
                       <CircleCheck className="w-6 h-6 text-[#5D24E1]" />
                     </h5>
                     <p className="text-gray-600 text-base text-[14px] ml-4">
@@ -105,7 +148,7 @@ const FileUpload = () => {
                   </div>
                 ) : (
                   <p className="text-gray-600 text-[16px]">
-                    انقر لتحديد ملف إكسل
+                    انقر لتحديد ملف إكسل أو اسحبه هنا
                   </p>
                 )}
               </div>
@@ -120,17 +163,27 @@ const FileUpload = () => {
             </div>
 
             <div className="flex gap-4 max-sm:gap-1 justify-center relative max-sm:left-5">
-              <a
+              <button
                 onClick={handleUpload}
-                className="flex cursor-pointer justify-center max-sm:gap-1 max-sm:text-sm  w-full max-w-md h-[46px] text-lg items-center gap-2 px-6 py-3 font-normal rounded-full bg-[#5D24E1] text-white transition-all"
+                disabled={isProcessing}
+                className="flex cursor-pointer justify-center max-sm:gap-1 max-sm:text-sm w-full max-w-md h-[46px] text-lg items-center gap-2 px-6 py-3 font-normal rounded-full bg-[#5D24E1] text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#4a1db5]"
               >
-                <Download className="w-5 h-5 rotate-x-180" />
-                تحليل الملف
-              </a>
-              {uploadedFile ? (
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    جاري التحليل...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-5 h-5 rotate-180" />
+                    تحليل الملف
+                  </>
+                )}
+              </button>
+              {uploadedFile && !isProcessing ? (
                 <button
                   onClick={handleClearFile}
-                  className="flex items-center font-bold text-[15px] cursor-pointer gap-4 max-sm:gap-1 max-sm:text-sm border-2 px-5 text-[#5D24E199] border-[#5D24E199] rounded-full"
+                  className="flex items-center font-bold text-[15px] cursor-pointer gap-4 max-sm:gap-1 max-sm:text-sm border-2 px-5 text-[#5D24E199] border-[#5D24E199] rounded-full hover:bg-red-50 hover:text-red-600 hover:border-red-600 transition-all"
                 >
                   {' '}
                   <X className="w-5 h-5 " />
