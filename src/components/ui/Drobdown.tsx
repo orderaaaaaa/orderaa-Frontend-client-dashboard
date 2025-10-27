@@ -73,10 +73,20 @@ export default function Dropdown({
         <label className="block mb-1 font-medium text-[16px]">{label}</label>
       )}
       <div className="relative">
-        {/* Dropdown Arrow on the LEFT */}
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
-          <ChevronDown size={20} />
-        </div>
+        {/* Dropdown Arrow on the LEFT - Clickable */}
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="absolute cursor-pointer left-5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
+          aria-label="Toggle dropdown"
+        >
+          <ChevronDown
+            size={20}
+            className={`transition-transform duration-200 ${
+              isOpen ? 'rotate-180' : ''
+            }`}
+          />
+        </button>
         {/* Optional icon on the RIGHT */}
         {Icon && (
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">

@@ -31,7 +31,7 @@ export function TopBar({
         onClick={onMenuToggle}
         aria-label="Open menu"
       >
-        <Menu className="h-5 w-5" />
+        <Menu className="h-5 w-5 text-[#5D24E1]" />
       </Button>
 
       {/* Search input */}

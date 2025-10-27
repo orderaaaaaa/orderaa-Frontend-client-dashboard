@@ -11,6 +11,7 @@ function Exel() {
 
   const handleDownload = () => {
     setDownloaded(true);
+    setTimeout(() => setDownloaded(false), 3000);
   };
 
   return (
