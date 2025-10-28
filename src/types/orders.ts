@@ -18,9 +18,10 @@ export enum OrderStatus {
 export interface Customer {
   id: number;
   name: string;
-  phone: string;
+  phoneNumber: string;
   address?: string;
   governorate?: string;
+  city?: string;
   area?: string;
 }
 
@@ -67,17 +68,32 @@ export interface Order {
 export interface FilterOrdersDto {
   status?: OrderStatus;
   search?: string;
+  customerName?: string;
+  customerPhone?: string;
+  governorate?: string;
+  city?: string;
+  area?: string;
+  productName?: string;
   page?: number;
   limit?: number;
+  merchantId?: string;
+  customerId?: string;
+  code?: string;
+  totalCost?: string;
+  numberOfTriesToReach?: string;
+  createdAfter?: string;
+  createdBefore?: string;
 }
 
 // Pagination Response
 export interface PaginatedResponse<T> {
   data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 // Legacy filters (for FilterSection component)
@@ -85,6 +101,7 @@ export interface OrderFilters {
   productName: string;
   sizeColor: string;
   governorate: string;
+  city: string;
   area: string;
   shipmentCode: string;
   customerName: string;
@@ -98,4 +115,32 @@ export interface FilterOptions {
   sizeColorOptions: string[];
   governorateOptions: string[];
   areaOptions: string[];
+}
+
+// Filter Options Response (from backend)
+export interface FilterOptionsData {
+  governorates: string[];
+  cities: string[];
+  areas: string[];
+  productNames: string[];
+  productSizes: string[];
+  productColors: string[];
+}
+
+export interface FilterOptionsResponse {
+  success: boolean;
+  data: FilterOptionsData;
+}
+
+// Order Statistics Response (from backend)
+export interface OrderStatistics {
+  totalOrders: number;
+  statusCounts: Record<string, number>;
+  totalRevenue: number;
+  averageOrderValue: number;
+}
+
+export interface OrderStatisticsResponse {
+  success: boolean;
+  data: OrderStatistics;
 }

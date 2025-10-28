@@ -6,6 +6,7 @@ import { TriangleAlert } from "lucide-react";
 
 interface OrderCardProps {
   id: number;
+  code: string;
   name: string;
   phone: string;
   government: string;
@@ -16,10 +17,14 @@ interface OrderCardProps {
   city: string;
   alert: number;
   select: boolean;
+  isSelected?: boolean;
+  onSelectionChange?: (checked: boolean) => void;
+  createdAt?: string;
 }
 
 export default function OrderCard({
   id,
+  code,
   name,
   phone,
   government,
@@ -30,7 +35,16 @@ export default function OrderCard({
   city,
   alert,
   select,
+  isSelected = false,
+  onSelectionChange,
+  createdAt,
 }: OrderCardProps) {
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (onSelectionChange) {
+      onSelectionChange(e.target.checked);
+    }
+  };
+
   return (
     <div
       className={`
@@ -48,13 +62,16 @@ export default function OrderCard({
         <input
           className="w-5 h-5 cursor-pointer border-2 border-[#5D24E1] rounded accent-[#5D24E1] transform"
           type="checkbox"
+          checked={isSelected}
+          onChange={handleCheckboxChange}
           name="select"
-          id=""
+          id={`order-select-${id}`}
         />
       ) : null}
 
       <RightSide
         id={id}
+        code={code}
         name={name}
         phone={phone}
         government={government}
@@ -62,7 +79,7 @@ export default function OrderCard({
         city={city}
       />
 
-      <LeftSide alert={alert} price={price} trys={trys} status={status} />
+      <LeftSide alert={alert} price={price} trys={trys} status={status} createdAt={createdAt} />
     </div>
   );
 }

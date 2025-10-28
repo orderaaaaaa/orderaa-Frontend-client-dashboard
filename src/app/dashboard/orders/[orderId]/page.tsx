@@ -23,7 +23,8 @@ import {
 } from 'lucide-react';
 import PageTab from '@/components/ui/PageTab';
 import { dummyCards } from '@/constants/orders-tabs';
-import FilterSection from '../allOrders/components/FilterSection';
+import FilterPanel from '../allOrders/components/FilterSection/FilterPanel';
+import { defaultOptions } from '@/hooks/AllOrders/useFilterState';
 import OrderDetailsInfo from './OrderDetailsInfo';
 import Image from 'next/image';
 
@@ -122,7 +123,13 @@ export default function OrderDetails({ params }: { params: { code: string } }) {
         />
       </div>
       {/* Filter Section */}
-      <FilterSection filters={filters} onChange={handleFilterChange} />
+      <div className="max-sm:hidden relative z-10 bg-white rounded-xl py-[3px] mt-6">
+        <FilterPanel
+          filters={filters}
+          updateFilters={handleFilterChange}
+          options={defaultOptions}
+        />
+      </div>
       <OrderDetailsInfo />
     </AuthGuard>
   );

@@ -9,6 +9,7 @@ import {
   Truck,
   CircleAlert,
 } from 'lucide-react';
+import { Order } from '@/types/orders';
 
 interface FooterProps {
   currentPage: number;
@@ -19,6 +20,7 @@ interface FooterProps {
   onPageChange: (page: number) => void;
   onPrevious: () => void;
   onNext: () => void;
+  onExportExcel?: () => void;
 }
 
 const Footer: React.FC<FooterProps> = ({
@@ -30,6 +32,7 @@ const Footer: React.FC<FooterProps> = ({
   onPageChange,
   onPrevious,
   onNext,
+  onExportExcel,
 }) => {
   const getPageNumbers = () => {
     const pages = [];
@@ -88,6 +91,7 @@ const Footer: React.FC<FooterProps> = ({
         <Button
           variant="default"
           className="flex items-center rounded-3xl space-x-2 px-4 py-2 bg-[#5D24E1] text-white hover:bg-[#682fee] cursor-pointer"
+          onClick={onExportExcel}
         >
           <FileSpreadsheet className="h-4 w-4" />
           <span>مشاركة شيت اكسيل</span>
@@ -146,11 +150,10 @@ const Footer: React.FC<FooterProps> = ({
                   variant={page === currentPage ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => onPageChange(page as number)}
-                  className={`h-8 w-8 p-0 cursor-pointer ${
-                    page === currentPage
-                      ? 'bg-[#5D24E1] text-white hover:bg-purple-700'
-                      : 'text-[#682fee] hover:bg-gray-50'
-                  }`}
+                  className={`h-8 w-8 p-0 cursor-pointer ${page === currentPage
+                    ? 'bg-[#5D24E1] text-white hover:bg-purple-700'
+                    : 'text-[#682fee] hover:bg-gray-50'
+                    }`}
                 >
                   {page}
                 </Button>

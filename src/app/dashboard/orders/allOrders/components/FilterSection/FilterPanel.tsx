@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useCallback } from "react";
 import { OrderFilters, FilterOptions } from "@/types/orders";
 import SearchableSelect from "./SearchableSelect";
 import { Calendar } from "lucide-react";
@@ -16,8 +16,21 @@ export default function FilterPanel({
   updateFilters,
   options,
 }: Props) {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+  };
+
+  const handleInputChange = useCallback((field: keyof OrderFilters, value: string) => {
+    updateFilters({ ...filters, [field]: value });
+  }, [filters, updateFilters]);
+
   return (
-    <div className=" grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 backdrop-blur-md p-4 will-change-transform transform-gpu">
+    <div
+      className=" grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 backdrop-blur-md p-4 will-change-transform transform-gpu"
+      onKeyDown={handleKeyDown}
+    >
       {/* {"كود الشحنه"} */}
       <div className="flex flex-col gap-1  text-base font-medium">
         <input
@@ -61,9 +74,8 @@ export default function FilterPanel({
             onChange={(e) =>
               updateFilters({ ...filters, executionDate: e.target.value })
             }
-            className={`w-full px-10 rounded border border-gray-300 bg-white text-right focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              filters.executionDate ? "has-value py-2" : "py-5"
-            }`}
+            className={`w-full px-10 rounded border border-gray-300 bg-white text-right focus:outline-none focus:ring-2 focus:ring-blue-500 ${filters.executionDate ? "has-value py-2" : "py-5"
+              }`}
           />
           <Calendar
             className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500  pointer-events-none"

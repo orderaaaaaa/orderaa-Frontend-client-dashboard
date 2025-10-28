@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { FilterOptions, OrderFilters } from '@/types/orders';
 
-//TODO: The executionDate field is not here
 export const defaultEmptyFilters: OrderFilters = {
   productName: '',
   sizeColor: '',
   governorate: '',
+  city: '',
   area: '',
   shipmentCode: '',
   customerName: '',
   phone: '',
   address: '',
+  executionDate: '',
 };
 
 export const defaultOptions: FilterOptions = {

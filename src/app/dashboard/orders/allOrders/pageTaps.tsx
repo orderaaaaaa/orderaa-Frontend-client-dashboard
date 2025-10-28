@@ -22,10 +22,11 @@ import { useOrdersStore } from "@/store/ordersStore";
 
 interface PageTapsProps {
   data?: any[];
-  statusCounts?: Record<OrderStatus, number>;
+  statusCounts?: Record<string, number>;
+  totalOrders?: number;
 }
 
-function PageTaps({ data, statusCounts }: PageTapsProps) {
+function PageTaps({ data, statusCounts, totalOrders }: PageTapsProps) {
   const { selectedStatus, setSelectedStatus } = useOrdersStore();
 
   const handleTabClick = (status: OrderStatus | null) => {
@@ -36,7 +37,7 @@ function PageTaps({ data, statusCounts }: PageTapsProps) {
     <div className="flex gap-4 md:flex-wrap overflow-x-auto hide">
       <PageTab
         label="جميع الطلبات"
-        count={data?.length}
+        count={totalOrders ?? data?.length ?? 0}
         icon={<Boxes width={18} height={18} />}
         active={selectedStatus === null}
         onClick={() => handleTabClick(null)}
