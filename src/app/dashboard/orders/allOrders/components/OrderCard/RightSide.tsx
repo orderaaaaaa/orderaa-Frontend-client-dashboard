@@ -3,6 +3,7 @@ import Content from './Content';
 import { Plus } from 'lucide-react';
 interface RightSideProps {
   id: number;
+  code: string;
   name: string;
   phone: string;
   government: string;
@@ -12,6 +13,7 @@ interface RightSideProps {
 
 export default function RightSide({
   id,
+  code,
   name,
   phone,
   government,
@@ -22,7 +24,7 @@ export default function RightSide({
     <div className="flex flex-col relative gap-1 px-4 ">
       <div className="flex items-center gap-2">
         <Content icon="id" content="الكود:" />
-        <span className="text-[18px]">{id}</span>
+        <span className="text-[18px]">{code}</span>
       </div>
       <Content icon="user" content={name} />
       <Content icon="phone" content={phone} />

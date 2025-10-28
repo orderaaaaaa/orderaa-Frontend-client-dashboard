@@ -1,5 +1,5 @@
 import api from './index';
-import { Order, FilterOrdersDto, PaginatedResponse } from '@/types/orders';
+import { Order, FilterOrdersDto, PaginatedResponse, FilterOptionsResponse, OrderStatisticsResponse } from '@/types/orders';
 
 /**
  * Fetch orders with optional filters and pagination
@@ -18,7 +18,6 @@ export async function getOrders(
     );
     return response.data;
   } catch (error) {
-    console.error('Error fetching orders:', error);
     throw error;
   }
 }
@@ -33,7 +32,32 @@ export async function getOrderById(id: number): Promise<Order> {
     const response = await api.get<Order>(`/orders/${id}`);
     return response.data;
   } catch (error) {
-    console.error(`Error fetching order ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch dynamic filter options from backend
+ * @returns Filter options (governorates, cities, areas, products, etc.)
+ */
+export async function getFilterOptions(): Promise<FilterOptionsResponse> {
+  try {
+    const response = await api.get<FilterOptionsResponse>('/orders/filter-options');
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+/**
+ * Fetch order statistics
+ * @returns Statistics (total orders, status counts, revenue, etc.)
+ */
+export async function getOrderStatistics(): Promise<OrderStatisticsResponse> {
+  try {
+    const response = await api.get<OrderStatisticsResponse>('/orders/statistics');
+    return response.data;
+  } catch (error) {
     throw error;
   }
 }

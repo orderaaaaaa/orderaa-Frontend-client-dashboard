@@ -1,27 +1,33 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, forwardRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 type Props = {
   value: string;
   onChange: (v: string) => void;
+  onBlur?: () => void;
   options: string[];
   placeholder?: string;
   widthClass?: string;
+  error?: string;
+  name?: string;
 };
 
-const SearchableSelect = React.memo(function SearchableSelect({
+const SearchableSelect = forwardRef<HTMLDivElement, Props>(function SearchableSelect({
   value,
   onChange,
+  onBlur,
   options,
   placeholder = "ابحث...",
   widthClass = "w-56",
-}: Props) {
+  error,
+  name,
+}, ref) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [activeIdx, setActiveIdx] = useState<number>(-1);
-  const ref = useRef<HTMLDivElement>(null);
+  const internalRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const filtered = useMemo(
@@ -31,10 +37,11 @@ const SearchableSelect = React.memo(function SearchableSelect({
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
-      if (!ref.current) return;
-      if (!ref.current.contains(e.target as Node)) {
+      if (!internalRef.current) return;
+      if (!internalRef.current.contains(e.target as Node)) {
         setOpen(false);
         setActiveIdx(-1);
+        if (onBlur) onBlur();
       }
     }
     function onKey(e: KeyboardEvent) {
@@ -67,11 +74,12 @@ const SearchableSelect = React.memo(function SearchableSelect({
   };
 
   return (
-    <div className={`flex flex-col gap-1  ${widthClass}`} ref={ref}>
+    <div className={`flex flex-col gap-1  ${widthClass}`} ref={ref || internalRef}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="px-3 py-2 relative rounded border cursor-pointer border-gray-300 bg-white font-medium truncate flex items-center justify-between"
+        className={`px-3 py-2 relative rounded border cursor-pointer bg-white font-medium truncate flex items-center justify-between ${error ? 'border-red-500' : 'border-gray-300'
+          }`}
         aria-haspopup="listbox"
         aria-expanded={open}
       >
@@ -81,9 +89,8 @@ const SearchableSelect = React.memo(function SearchableSelect({
           {value || `${placeholder}`}
         </span>
         <svg
-          className={`w-8 h-8 absolute left-2 top-1 text-gray-600 transition-transform ${
-            open ? "rotate-180" : ""
-          }`}
+          className={`w-8 h-8 absolute left-2 top-1 text-gray-600 transition-transform ${open ? "rotate-180" : ""
+            }`}
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden="true"
@@ -123,9 +130,8 @@ const SearchableSelect = React.memo(function SearchableSelect({
                     onMouseEnter={() => setActiveIdx(idx)}
                     onMouseLeave={() => setActiveIdx(-1)}
                     onClick={() => commitSelect(opt)}
-                    className={`px-3 py-2 z-20 cursor-pointer hover:bg-[#5D24E1] text-semibold  hover:text-white  ${
-                      activeIdx === idx ? "bg-gray-100" : ""
-                    }`}
+                    className={`px-3 py-2 z-20 cursor-pointer hover:bg-[#5D24E1] text-semibold  hover:text-white  ${activeIdx === idx ? "bg-gray-100" : ""
+                      }`}
                     role="option"
                     aria-selected={value === opt}
                   >
@@ -137,6 +143,9 @@ const SearchableSelect = React.memo(function SearchableSelect({
           </motion.div>
         )}
       </AnimatePresence>
+      {error && (
+        <span className="text-xs text-red-500 mt-1">{error}</span>
+      )}
     </div>
   );
 });
