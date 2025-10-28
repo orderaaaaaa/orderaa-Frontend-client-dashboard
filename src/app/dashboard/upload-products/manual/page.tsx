@@ -4,15 +4,20 @@ import ClientInformation from './ClientInformation';
 import Order from './Order';
 import OrderDetails from './OrderDetails';
 import ShippingAndPayment from './ShippingAndPayment';
+import { useProductDropdownStore } from '@/store/productDropdownStore';
 import Products from './Products';
 
 function Manual() {
+  const selectedProducts = useProductDropdownStore(
+    (state) => state.selectedProducts
+  );
   return (
     <>
       <div className="flex flex-col gap-[26px]">
         <Order />
         <OrderDetails />
-        <Products />
+        {selectedProducts.length > 0 && <Products />}
+
         <ClientInformation />
         <ShippingAndPayment />
         <div className="flex justify-end ml-6">
