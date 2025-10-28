@@ -1,3 +1,5 @@
+import { LucideIcon } from 'lucide-react';
+
 // Order Status Enum
 export enum OrderStatus {
   TRIED_TO_REACH_CUSTOMER = 'TRIED_TO_REACH_CUSTOMER',
@@ -28,13 +30,17 @@ export interface Customer {
 export interface Product {
   id: number;
   name: string;
-  size?: string;
-  color?: string;
-  material?: string;
-  weight?: string;
-  manufactureCompany?: string;
+  price: string;
+  image: string;
+  variants: Variant[]; // Change from string[] to Variant[]
   createdAt: string;
   updatedAt: string;
+}
+
+// Add Variant interface
+export interface Variant {
+  id: number;
+  name: string;
 }
 
 // Order Product Interface
@@ -98,4 +104,25 @@ export interface FilterOptions {
   sizeColorOptions: string[];
   governorateOptions: string[];
   areaOptions: string[];
+}
+
+// export interface Product {
+//   id: number;
+//   name: string;
+//   price: string;
+//   image: string;
+//   variants: string[];
+// }
+
+export interface ProductDropdownProps {
+  value?: Product[];
+  onChange: (products: Product[]) => void;
+  placeholder?: string;
+  label?: string;
+  icon?: React.ComponentType<{ size?: number }>;
+  className?: string;
+  selectClassName?: string;
+  placeholderClassName?: string;
+  placeholderStyle?: React.CSSProperties;
+  onAddProductClick?: (selectedProducts: Product[]) => void; // Add this line
 }

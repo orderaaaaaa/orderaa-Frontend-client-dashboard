@@ -122,7 +122,7 @@ export default function Dropdown({
               filteredOptions.map((option) => (
                 <li
                   key={option.key}
-                  className={`p-3 cursor-pointer hover:bg-[#5D24E1] hover:text-white rounded-lg relative group ${
+                  className={`p-3 cursor-pointer hover:bg-[#5D24E1] hover:text-white font-semibold rounded-lg relative group ${
                     value === option.key ? 'bg-gray-200' : ''
                   }`}
                   onClick={() => {
