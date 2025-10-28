@@ -30,6 +30,7 @@ export interface Customer {
 export interface Variant {
   id: number;
   name: string;
+  size: string;
 }
 
 // Product Interface

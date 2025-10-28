@@ -18,7 +18,7 @@ export const DropdownContent: React.FC<DropdownContentProps> = ({
       <h1 className="p-2 bg-[#A084F3] text-[16px] rounded-sm my-5 max-w-[312px] text-white">
         الاسم
       </h1>
-      <div className="sticky top-0 z-10 bg-[#EAEAEA40] p-4 mb-2 rounded-sm flex justify-between text-sm font-semibold">
+      <div className="sticky top-1 z-10 backdrop-blur-xs bg-[#EAEAEA66] p-4 mb-2 rounded-sm flex justify-between text-sm font-semibold">
         <div className="w-1/4 text-center">الصور</div>
         <div className="w-1/2 text-center">الاسم</div>
         <div className="w-1/4 text-center">السعر</div>

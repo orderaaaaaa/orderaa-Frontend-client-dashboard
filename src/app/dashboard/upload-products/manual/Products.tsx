@@ -2,24 +2,13 @@
 
 import React from 'react';
 import { useProductDropdownStore } from '@/store/productDropdownStore';
+import { Pen, Trash2 } from 'lucide-react';
 
 function Products() {
   // Access the store to get selected products
   const selectedProducts = useProductDropdownStore(
     (state) => state.selectedProducts
   );
-
-  // Helper function to get size range based on product type
-  const getSizeRange = (productId: number) => {
-    const sizeRanges: Record<number, string> = {
-      1: '42-44', // اورجينال - jacket sizes
-      2: 'M-L', // جاكيت رياضي - jacket sizes
-      3: '42-45', // حذاء رياضي - shoe sizes
-      4: 'واحد', // سماعات - one size
-      5: 'واحد', // هاتف ذكي - one size
-    };
-    return sizeRanges[productId] || 'واحد';
-  };
 
   // Remove product from cart
   const removeProduct = (productId: number) => {
@@ -53,9 +42,9 @@ function Products() {
           </div>
           <div>
             <div className="mt-6 bg-[#EAEAEA40] p-4 mb-2 rounded-sm grid grid-cols-[1fr_2fr_1fr] text-sm font-semibold text-center">
-              <div className="text-start mr-20">المنتج</div>
+              <div className="text-start sm:mr-20">المنتج</div>
               <div>الكميه</div>
-              <div className="text-end ml-20">الاجمالي</div>
+              <div className="text-end sm:ml-20">الاجمالي</div>
             </div>
           </div>
         </header>
@@ -66,7 +55,7 @@ function Products() {
             {selectedProducts.map((product) => (
               <div
                 key={product.id}
-                className="bg-white p-4 rounded-sm border border-gray-200 grid grid-cols-[1fr_2fr_1fr] items-center"
+                className="bg-white p-4 rounded-sm border-b border-gray-200 grid grid-cols-[1fr_2fr_3fr] sm:grid-cols-[1fr_2fr_1fr] items-center"
               >
                 {/* Product Column */}
                 <div className="flex items-center gap-3">
@@ -78,25 +67,30 @@ function Products() {
                     />
                   </div>
                   <div className="flex flex-col"></div>
-                  <div className="flex flex-col text-sm">
-                    <h3 className="font-medium">{product.name}</h3>
-                    <span className="text-gray-600">
-                      الالوان: {product.variant.name}
+                  <div className="flex flex-col text-sm gap-2">
+                    <h3 className="text-[18px] max-sm:text-[15px]">
+                      {product.name}
+                    </h3>
+                    <span>
+                      <span className="text-gray-500  sm:ml-5 max-sm:text-[13px] text-[15px]">
+                        {' '}
+                        الالوان:
+                      </span>{' '}
+                      {product.variant.name}
                     </span>
-                    <span className="text-gray-600">
-                      المقاسات: {getSizeRange(product.id)}
+                    <span className="">
+                      <span className="text-gray-500 sm:ml-5 max-sm:text-[13px] text-[15px]">
+                        المقاسات:{' '}
+                      </span>{' '}
+                      {product.variant.size}
                     </span>
+                    <div className="flex gap-12">
+                      <span className="text-gray-500">{product.price}</span>
+                      <button className=" hover:text-gray-600 cursor-pointer">
+                        <Pen className="w-4" />
+                      </button>
+                    </div>
                   </div>
-                  <button className="text-gray-400 hover:text-gray-600">
-                    <svg
-                      className="w-4 h-4"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                    </svg>
-                  </button>
-                  <span className="text-gray-700">{product.price}</span>
                 </div>
 
                 {/* Quantity Column */}
@@ -105,29 +99,14 @@ function Products() {
                 </div>
 
                 {/* Total Column */}
-                <div className="flex items-center justify-end gap-2">
+                <div className="flex max-sm:flex-col items-center justify-end gap-4 max-sm:ml-0 ml-13">
+                  <h2 className="text-gray-700">{product.price} ج.م</h2>
                   <button
                     onClick={() => removeProduct(product.id)}
                     className="text-red-500 hover:text-red-700"
                   >
-                    <svg
-                      className="w-4 h-4"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"
-                        clipRule="evenodd"
-                      />
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <Trash2 className="w-4" />
                   </button>
-                  <span className="text-gray-700">{product.price} ج.م</span>
                 </div>
               </div>
             ))}

@@ -21,7 +21,7 @@ function OrderDetails() {
             label="اسم المنتج"
             placeholder="ابحث عن منتج"
             className="max-w-[931px]"
-            selectClassName="border-2 w-full bg-[#EAEAEA40] p-2 rounded-sm mt-3"
+            selectClassName="border-2 w-full bg-[#EAEAEA40] p-2 rounded-sm"
           />
         </div>
       </div>

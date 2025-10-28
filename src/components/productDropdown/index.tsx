@@ -29,7 +29,7 @@ export default function ProductDropdown({
   return (
     <div ref={ref} className={className}>
       {label && (
-        <label className="block mb-1 font-medium text-[16px]">{label}</label>
+        <label className="block mb-4 font-medium text-[16px]">{label}</label>
       )}
       <div className="relative">
         <DropdownInput
