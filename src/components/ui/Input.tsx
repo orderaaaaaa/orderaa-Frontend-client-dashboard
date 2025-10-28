@@ -31,7 +31,7 @@ export default function Input({
 
   // Use px-10 for left and right padding if both icons could exist
   const inputClassName =
-    `w-full border border-[#CED4DA] rounded-lg py-2.5 px-10 text-[18px] ${
+    `w-full border border-[#CED4DA] rounded-md p-2 text-[15px] ${
       className ?? ''
     }`.trim();
 
@@ -41,7 +41,7 @@ export default function Input({
 
   return (
     <div>
-      <label htmlFor={name} className="block font-medium text-[16px] mb-1">
+      <label htmlFor={name} className="block text-[18px] mb-1">
         {label}
       </label>
       <div className="relative">
