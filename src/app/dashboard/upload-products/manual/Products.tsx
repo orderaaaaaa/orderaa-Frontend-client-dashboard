@@ -47,7 +47,6 @@ function Products() {
         {/* Display selected products */}
         {selectedProducts.length > 0 && (
           <div className="space-y-2">
-            {/*  */}
             {selectedProducts.map((product) => (
               <div
                 key={product.id}
