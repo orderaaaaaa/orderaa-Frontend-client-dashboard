@@ -34,12 +34,7 @@ function Products() {
       <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-2 p-8 shadow-sm">
         <header>
           <h1 className="font-bold text-[28px] mb-10">المنتجات</h1>
-          <div className="flex justify-center">
-            <h2 className="text-[22px] p-3 w-[350px] text-center rounded-sm bg-[#A084F3] text-white">
-              {' '}
-              اختر المنتجات
-            </h2>
-          </div>
+
           <div>
             <div className="mt-6 bg-[#EAEAEA40] p-4 mb-2 rounded-sm grid grid-cols-[1fr_2fr_1fr] text-sm font-semibold text-center">
               <div className="text-start sm:mr-20">المنتج</div>
@@ -55,11 +50,11 @@ function Products() {
             {selectedProducts.map((product) => (
               <div
                 key={product.id}
-                className="bg-white p-4 rounded-sm border-b border-gray-200 grid grid-cols-[1fr_2fr_3fr] sm:grid-cols-[1fr_2fr_1fr] items-center"
+                className="bg-white relative max-sm:p-0 p-4 rounded-sm border-b border-gray-200 grid grid-cols-[1fr_2fr_3fr] sm:grid-cols-[1fr_2fr_1fr] items-center"
               >
                 {/* Product Column */}
-                <div className="flex items-center gap-3">
-                  <div className="relative w-20 h-20 overflow-hidden rounded border border-gray-200">
+                <div className="flex items-center gap-3 max-sm:gap-2">
+                  <div className="relative w-20 h-20 max-sm:w-15 max-sm:h-15 overflow-hidden rounded border border-gray-200">
                     <img
                       src={product.image}
                       alt={product.name}
@@ -68,7 +63,7 @@ function Products() {
                   </div>
                   <div className="flex flex-col"></div>
                   <div className="flex flex-col text-sm gap-2">
-                    <h3 className="text-[18px] max-sm:text-[15px]">
+                    <h3 className="text-[18px] max-sm:text-[15px] sm:font-semibold">
                       {product.name}
                     </h3>
                     <span>
@@ -84,30 +79,30 @@ function Products() {
                       </span>{' '}
                       {product.variant.size}
                     </span>
-                    <div className="flex gap-12">
-                      <span className="text-gray-500">{product.price}</span>
-                      <button className=" hover:text-gray-600 cursor-pointer">
-                        <Pen className="w-4" />
-                      </button>
-                    </div>
+                    <div className="flex gap-12"></div>
                   </div>
                 </div>
 
                 {/* Quantity Column */}
                 <div className="text-center">
-                  <span className="text-gray-700">1</span>
+                  <span className="text-gray-700 text-sm">1</span>
                 </div>
 
                 {/* Total Column */}
-                <div className="flex max-sm:flex-col items-center justify-end gap-4 max-sm:ml-0 ml-13">
-                  <h2 className="text-gray-700">{product.price} ج.م</h2>
-                  <button
-                    onClick={() => removeProduct(product.id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 className="w-4" />
+                <div className="flex items-center justify-end gap-4 max-sm:ml-0 ml-13">
+                  <h2 className="text-gray-700 max-sm:text-[12px]">
+                    {product.price} ج.م
+                  </h2>
+                  <button className="hover:text-gray-600 cursor-pointer">
+                    <Pen className="w-4 max-sm:w-3" />
                   </button>
                 </div>
+                <button
+                  onClick={() => removeProduct(product.id)}
+                  className="text-red-500 absolute left-3 bottom-3 sm:bottom-[40%]  cursor-pointer hover:text-red-700"
+                >
+                  <Trash2 className="w-4" />
+                </button>
               </div>
             ))}
           </div>
@@ -134,7 +129,7 @@ function Products() {
                   clipRule="evenodd"
                 />
               </svg>
-              <span>إضافة طلب</span>
+              <span>إضافه منتج</span>
             </button>
           </div>
         )}
