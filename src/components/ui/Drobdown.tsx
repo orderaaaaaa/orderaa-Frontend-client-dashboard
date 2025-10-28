@@ -82,7 +82,7 @@ export default function Dropdown({
         >
           <ChevronDown
             size={20}
-            className={`transition-transform duration-200 ${
+            className={`transition-transform mt-3 duration-200 ${
               isOpen ? 'rotate-180' : ''
             }`}
           />
@@ -122,7 +122,7 @@ export default function Dropdown({
               filteredOptions.map((option) => (
                 <li
                   key={option.key}
-                  className={`px-3 py-2 cursor-pointer hover:bg-gray-100 ${
+                  className={`p-3 cursor-pointer hover:bg-[#5D24E1] hover:text-white font-semibold rounded-lg relative group ${
                     value === option.key ? 'bg-gray-200' : ''
                   }`}
                   onClick={() => {
@@ -132,6 +132,7 @@ export default function Dropdown({
                   }}
                 >
                   {option.value}
+                  <div className="absolute bottom-0 right-[9%] w-[80%] h-px bg-gray-200 opacity-100 group-hover:opacity-0 transition-opacity"></div>
                 </li>
               ))
             )}
