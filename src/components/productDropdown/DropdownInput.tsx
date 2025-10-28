@@ -1,10 +1,10 @@
-import { Product } from '@/types/orders';
+import { SelectedProduct } from '@/types/orders';
 import { ChevronDown } from 'lucide-react';
 
 interface DropdownInputProps {
   isOpen: boolean;
   search: string;
-  selectedProducts: Product[];
+  selectedProducts: SelectedProduct[];
   placeholder: string;
   selectClassName?: string;
   placeholderClassName?: string;

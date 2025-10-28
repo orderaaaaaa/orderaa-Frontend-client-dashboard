@@ -14,7 +14,7 @@ export const DropdownContent: React.FC<DropdownContentProps> = ({
   const pendingSelectionsCount = Object.keys(selectedVariants).length;
 
   return (
-    <div className="absolute z-10 left-0 right-0 bg-white border border-[#CED4DA] rounded-lg mt-1 max-h-200 overflow-y-auto shadow-lg px-4">
+    <div className="absolute z-10 left-0 right-0 bg-white border border-[#CED4DA] rounded-lg mt-1 max-sm:max-h-100 max-h-200 overflow-y-auto shadow-lg px-4">
       <h1 className="p-2 bg-[#A084F3] text-[16px] rounded-sm my-5 max-w-[312px] text-white">
         الاسم
       </h1>

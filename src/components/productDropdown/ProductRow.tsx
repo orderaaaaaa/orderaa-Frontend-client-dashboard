@@ -24,6 +24,18 @@ export const ProductRow: React.FC<ProductRowProps> = ({
 }) => {
   const hasVariants = product.variants.length > 0;
 
+  // Helper function to get size range based on product type
+  const getSizeForProduct = (productId: number) => {
+    const sizeRanges: Record<number, string> = {
+      1: '42-44', // اورجينال - jacket sizes
+      2: 'M-L', // جاكيت رياضي - jacket sizes
+      3: '42-45', // حذاء رياضي - shoe sizes
+      4: 'واحد', // سماعات - one size
+      5: 'واحد', // هاتف ذكي - one size
+    };
+    return sizeRanges[productId] || 'واحد';
+  };
+
   return (
     <div
       className={`border-b mb-2 border-gray-100 rounded-sm transition-colors ${
@@ -53,7 +65,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
 
         {/* Product Price */}
         <div className="w-1/4 text-center text-gray-700">
-          {product.price} ريال
+          {product.price} ج.م
         </div>
       </div>
 
@@ -76,7 +88,12 @@ export const ProductRow: React.FC<ProductRowProps> = ({
                   onChange={(e) => onVariantSelect(product.id, variant, e)}
                   className="h-4 w-4 text-[#5D24E1] border-gray-300 focus:ring-[#5D24E1] accent-[#5D24E1] cursor-pointer"
                 />
-                <span className="text-sm">{variant.name}</span>
+                <div className="flex flex-col text-sm">
+                  <span className="text-gray-600">
+                    الالوان : {variant.name} المقاسات{' '}
+                    {getSizeForProduct(product.id)}
+                  </span>
+                </div>
               </label>
             ))}
           </div>

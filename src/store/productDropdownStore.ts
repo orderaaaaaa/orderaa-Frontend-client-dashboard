@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Product, Variant } from '@/types/orders';
+import { Product, Variant, SelectedProduct } from '@/types/orders';
 
 interface ProductWithVariant {
   product: Product;
@@ -13,14 +13,14 @@ interface ProductDropdownState {
   expandedProductId: number | null;
 
   // Selection State
-  selectedProducts: Product[];
+  selectedProducts: SelectedProduct[];
   selectedVariants: Record<number, Variant | undefined>;
   pendingSelections: Record<number, ProductWithVariant>;
 
   // Actions
   toggleDropdown: () => void;
   setSearch: (search: string) => void;
-  setSelectedProducts: (products: Product[]) => void;
+  setSelectedProducts: (products: SelectedProduct[]) => void;
   expandProduct: (productId: number) => void;
   collapseProduct: () => void;
   toggleProductExpansion: (productId: number) => void;
@@ -31,7 +31,7 @@ interface ProductDropdownState {
   ) => void;
   deselectVariant: (productId: number) => void;
   clearPendingSelections: () => void;
-  confirmSelections: () => Product[];
+  confirmSelections: () => SelectedProduct[];
   reset: () => void;
 }
 
@@ -39,7 +39,7 @@ const initialState = {
   isOpen: false,
   search: '',
   expandedProductId: null,
-  selectedProducts: [] as Product[],
+  selectedProducts: [] as SelectedProduct[],
   selectedVariants: {} as Record<number, Variant | undefined>,
   pendingSelections: {} as Record<number, ProductWithVariant>,
 };
@@ -129,10 +129,20 @@ export const useProductDropdownStore = create<ProductDropdownState>(
     },
 
     confirmSelections: () => {
-      const { pendingSelections, selectedProducts } = get();
-      const newProducts = Object.values(pendingSelections).map(
-        (selection) => selection.product
-      );
+      const { pendingSelections } = get();
+
+      // Convert pending selections to SelectedProduct format (product + selected variant only)
+      const newProducts: SelectedProduct[] = Object.values(
+        pendingSelections
+      ).map((selection) => ({
+        id: selection.product.id,
+        name: selection.product.name,
+        price: selection.product.price,
+        image: selection.product.image,
+        variant: selection.variant,
+        createdAt: selection.product.createdAt,
+        updatedAt: selection.product.updatedAt,
+      }));
 
       set({
         selectedProducts: newProducts,

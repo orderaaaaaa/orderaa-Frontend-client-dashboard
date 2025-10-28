@@ -26,6 +26,12 @@ export interface Customer {
   area?: string;
 }
 
+// Variant interface
+export interface Variant {
+  id: number;
+  name: string;
+}
+
 // Product Interface
 export interface Product {
   id: number;
@@ -37,10 +43,15 @@ export interface Product {
   updatedAt: string;
 }
 
-// Add Variant interface
-export interface Variant {
+// Selected Product Interface (product with only the selected variant)
+export interface SelectedProduct {
   id: number;
   name: string;
+  price: string;
+  image: string;
+  variant: Variant;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Order Product Interface
@@ -118,17 +129,9 @@ export interface FilterOptions {
   areaOptions: string[];
 }
 
-// export interface Product {
-//   id: number;
-//   name: string;
-//   price: string;
-//   image: string;
-//   variants: string[];
-// }
-
 export interface ProductDropdownProps {
-  value?: Product[];
-  onChange?: (products: Product[]) => void;
+  value?: SelectedProduct[];
+  onChange?: (products: SelectedProduct[]) => void;
   placeholder?: string;
   label?: string;
   icon?: React.ComponentType<{ size?: number }>;
@@ -136,5 +139,5 @@ export interface ProductDropdownProps {
   selectClassName?: string;
   placeholderClassName?: string;
   placeholderStyle?: React.CSSProperties;
-  onAddProductClick?: (selectedProducts: Product[]) => void;
+  onAddProductClick?: (selectedProducts: SelectedProduct[]) => void;
 }

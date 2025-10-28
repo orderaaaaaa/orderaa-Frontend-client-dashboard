@@ -10,7 +10,7 @@ function Order() {
     <div className="bg-gray-50 px-6 flex items-center justify-center" dir="rtl">
       <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-2 p-8 shadow-sm">
         <h1 className="font-bold text-[28px] mb-6">طلب</h1>
-        <div className="grid grid-cols-2 mb-8">
+        <div className="grid grid-cols-2 max-sm:grid-cols-1 max-sm:gap-6 mb-8">
           <Dropdown
             label="منصة"
             value={userMenuValue}
