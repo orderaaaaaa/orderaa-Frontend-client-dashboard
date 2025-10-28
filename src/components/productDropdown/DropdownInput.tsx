@@ -1,5 +1,5 @@
 import { Product } from '@/types/orders';
-import { ChevronDown, Plus } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
 interface DropdownInputProps {
   isOpen: boolean;
@@ -28,47 +28,49 @@ export const DropdownInput: React.FC<DropdownInputProps> = ({
   onSearchChange,
   onSearchFocus,
 }) => {
+  const defaultClassName =
+    'w-full border border-[#CED4DA] rounded-lg py-2.5 px-10 text-[18px] transition-colors';
+  const hasSelection = selectedProducts.length > 0;
+
+  const inputClassName =
+    selectClassName ||
+    `${defaultClassName} ${
+      hasSelection ? 'text-[#111827]' : placeholderClassName ?? 'text-[#878A99]'
+    }`;
+
   return (
     <>
+      {/* Toggle Button */}
       <button
         type="button"
         onClick={onToggle}
-        className="absolute cursor-pointer left-5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
+        className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
         aria-label="Toggle dropdown"
       >
         <ChevronDown
           size={20}
-          className={`transition-transform mt-3 duration-200 ${
+          className={`transition-transform duration-200 ${
             isOpen ? 'rotate-180' : ''
           }`}
         />
       </button>
 
+      {/* Optional Icon */}
       {Icon && (
-        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
           <Icon size={20} />
         </div>
       )}
 
+      {/* Search Input */}
       <input
         type="text"
         value={search}
         onChange={onSearchChange}
         onFocus={onSearchFocus}
         placeholder={placeholder}
-        className={
-          selectClassName ||
-          `w-full border border-[#CED4DA] rounded-lg py-2.5 px-10 text-[18px] ${
-            selectedProducts.length > 0
-              ? 'text-[#111827]'
-              : placeholderClassName ?? 'text-[#878A99]'
-          }`
-        }
-        style={
-          !selectedProducts.length && placeholderStyle
-            ? placeholderStyle
-            : undefined
-        }
+        className={inputClassName}
+        style={!hasSelection && placeholderStyle ? placeholderStyle : undefined}
       />
     </>
   );

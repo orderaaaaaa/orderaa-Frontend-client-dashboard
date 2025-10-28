@@ -22,58 +22,71 @@ export const ProductRow: React.FC<ProductRowProps> = ({
   onProductClick,
   onVariantSelect,
 }) => {
+  const hasVariants = product.variants.length > 0;
+
   return (
     <div
-      className={`border-b mb-2 border-gray-100 rounded-sm ${
-        isSelected ? 'bg-gray-50' : ''
+      className={`border-b mb-2 border-gray-100 rounded-sm transition-colors ${
+        isSelected ? 'bg-gray-50' : 'bg-white'
       }`}
       dir="rtl"
     >
+      {/* Main Product Row */}
       <div
-        className="flex items-center p-3 cursor-pointer hover:bg-gray-50"
+        className="flex items-center p-3 cursor-pointer hover:bg-gray-50 transition-colors"
         onClick={() => onProductClick(product)}
       >
+        {/* Product Image */}
         <div className="w-1/4 flex justify-center">
-          <div className="relative left-5 h-12 w-12 overflow-hidden rounded-md">
+          <div className="relative h-12 w-12 overflow-hidden rounded-md border border-gray-200">
             <Image
               src={product.image}
               alt={product.name}
               fill
-              style={{ objectFit: 'cover' }}
+              className="object-cover"
             />
           </div>
         </div>
-        <div className="w-1/2 text-center">{product.name}</div>
-        <div className="w-1/4 text-center">{product.price}</div>
+
+        {/* Product Name */}
+        <div className="w-1/2 text-center font-medium">{product.name}</div>
+
+        {/* Product Price */}
+        <div className="w-1/4 text-center text-gray-700">
+          {product.price} ريال
+        </div>
       </div>
 
-      {isExpanded && product.variants.length > 0 && (
+      {/* Variants Section */}
+      {isExpanded && hasVariants && (
         <div
-          className="p-3 pr-8 border-t border-gray-200"
+          className="p-4 pr-8 border-t border-gray-200 bg-white"
           onClick={(e) => e.stopPropagation()}
         >
-          {product.variants.map((variant) => (
-            <div
-              key={`${product.id}-${variant.id}`}
-              className="flex items-center mb-2 last:mb-0"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <input
-                type="radio"
-                id={`variant-${product.id}-${variant.id}`}
-                name={`variant-${product.id}`}
-                checked={selectedVariant?.id === variant.id}
-                onChange={(e) => onVariantSelect(product.id, variant, e)}
-                className="h-4 w-4 text-[#5D24E1] border-gray-300 focus:ring-[#5D24E1] accent-[#5D24E1] cursor-pointer"
-              />
+          <div className="space-y-2">
+            {product.variants.map((variant) => (
               <label
-                htmlFor={`variant-${product.id}-${variant.id}`}
-                className="mr-2 text-sm cursor-pointer"
+                key={`${product.id}-${variant.id}`}
+                className="flex items-center gap-3 cursor-pointer hover:text-[#5D24E1] transition-colors"
               >
-                {variant.name}
+                <input
+                  type="radio"
+                  name={`variant-${product.id}`}
+                  checked={selectedVariant?.id === variant.id}
+                  onChange={(e) => onVariantSelect(product.id, variant, e)}
+                  className="h-4 w-4 text-[#5D24E1] border-gray-300 focus:ring-[#5D24E1] accent-[#5D24E1] cursor-pointer"
+                />
+                <span className="text-sm">{variant.name}</span>
               </label>
-            </div>
-          ))}
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Show indicator if no variants */}
+      {isExpanded && !hasVariants && (
+        <div className="p-3 pr-8 border-t border-gray-200 text-sm text-gray-500 text-center">
+          لا توجد متغيرات متاحة
         </div>
       )}
     </div>

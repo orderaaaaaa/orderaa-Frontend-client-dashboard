@@ -1,20 +1,7 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
-import { Product, Variant } from '@/types/orders';
+import { DropdownContentProps } from '@/types/orders';
 import { ProductRow } from './ProductRow';
-
-interface DropdownContentProps {
-  filteredProducts: Product[];
-  selectedVariants: Record<number, Variant | undefined>;
-  expandedProductId: number | null;
-  onProductClick: (product: Product) => void;
-  onVariantSelect: (
-    productId: number,
-    variant: Variant,
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => void;
-  onAddProduct: () => void;
-}
 
 export const DropdownContent: React.FC<DropdownContentProps> = ({
   filteredProducts,
@@ -37,12 +24,13 @@ export const DropdownContent: React.FC<DropdownContentProps> = ({
         <div className="w-1/4 text-center">السعر</div>
       </div>
 
+      {/* Products List */}
       {filteredProducts.length === 0 ? (
         <div className="px-3 py-2 text-[#878A99] text-center">
           لا توجد نتائج
         </div>
       ) : (
-        <div>
+        <div className="pb-4">
           {filteredProducts.map((product) => (
             <ProductRow
               key={product.id}
@@ -54,23 +42,25 @@ export const DropdownContent: React.FC<DropdownContentProps> = ({
               onVariantSelect={onVariantSelect}
             />
           ))}
-          <div className="flex justify-between items-center p-3 border-t border-gray-200">
-            {pendingSelectionsCount > 0 && (
-              <div className="text-sm text-gray-600">
-                {pendingSelectionsCount} منتج مختار
-              </div>
-            )}
-            <button
-              onClick={onAddProduct}
-              className="w-40 flex items-center justify-center p-3 rounded-full bg-[#5D24E1] text-white transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-              disabled={pendingSelectionsCount === 0}
-            >
-              <Plus size={18} className="ml-1" />
-              <span>إضافة طلب ({pendingSelectionsCount})</span>
-            </button>
-          </div>
         </div>
       )}
+
+      {/* Footer Actions */}
+      <div className="sticky bottom-0 bg-white border-t border-gray-200 p-3 flex justify-between items-center">
+        {pendingSelectionsCount > 0 && (
+          <div className="text-sm font-medium text-gray-700">
+            {pendingSelectionsCount} منتج مختار
+          </div>
+        )}
+        <button
+          onClick={onAddProduct}
+          disabled={pendingSelectionsCount === 0}
+          className="w-40 flex items-center justify-center p-3 rounded-full cursor-pointer bg-[#5D24E1] text-white hover:bg-[#4a1fa8] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          <Plus size={18} className="ml-1" />
+          <span>إضافة طلب</span>
+        </button>
+      </div>
     </div>
   );
 };

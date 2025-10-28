@@ -76,6 +76,18 @@ export interface FilterOrdersDto {
   page?: number;
   limit?: number;
 }
+export interface DropdownContentProps {
+  filteredProducts: Product[];
+  selectedVariants: Record<number, Variant | undefined>;
+  expandedProductId: number | null;
+  onProductClick: (product: Product) => void;
+  onVariantSelect: (
+    productId: number,
+    variant: Variant,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => void;
+  onAddProduct: () => void;
+}
 
 // Pagination Response
 export interface PaginatedResponse<T> {
@@ -116,7 +128,7 @@ export interface FilterOptions {
 
 export interface ProductDropdownProps {
   value?: Product[];
-  onChange: (products: Product[]) => void;
+  onChange?: (products: Product[]) => void;
   placeholder?: string;
   label?: string;
   icon?: React.ComponentType<{ size?: number }>;
@@ -124,5 +136,5 @@ export interface ProductDropdownProps {
   selectClassName?: string;
   placeholderClassName?: string;
   placeholderStyle?: React.CSSProperties;
-  onAddProductClick?: (selectedProducts: Product[]) => void; // Add this line
+  onAddProductClick?: (selectedProducts: Product[]) => void;
 }

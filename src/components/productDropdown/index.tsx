@@ -6,7 +6,15 @@ import { useProductDropdown } from './useProductDropdown';
 import { DropdownContent } from './DropdownContent';
 import { DropdownInput } from './DropdownInput';
 
-export default function ProductDropdown(props: ProductDropdownProps) {
+export default function ProductDropdown({
+  label,
+  placeholder = 'ابحث عن منتج',
+  className = 'w-full',
+  selectClassName,
+  placeholderClassName,
+  placeholderStyle,
+  icon,
+}: ProductDropdownProps) {
   const {
     ref,
     isOpen,
@@ -16,25 +24,23 @@ export default function ProductDropdown(props: ProductDropdownProps) {
     expandedProductId,
     filteredProducts,
     handlers,
-  } = useProductDropdown(props);
+  } = useProductDropdown();
 
   return (
-    <div ref={ref} className={props.className || 'w-full'}>
-      {props.label && (
-        <label className="block mb-1 font-medium text-[16px]">
-          {props.label}
-        </label>
+    <div ref={ref} className={className}>
+      {label && (
+        <label className="block mb-1 font-medium text-[16px]">{label}</label>
       )}
       <div className="relative">
         <DropdownInput
           isOpen={isOpen}
           search={search}
           selectedProducts={selectedProducts}
-          placeholder={props.placeholder || 'ابحث عن منتج'}
-          selectClassName={props.selectClassName}
-          placeholderClassName={props.placeholderClassName}
-          placeholderStyle={props.placeholderStyle}
-          icon={props.icon}
+          placeholder={placeholder}
+          selectClassName={selectClassName}
+          placeholderClassName={placeholderClassName}
+          placeholderStyle={placeholderStyle}
+          icon={icon}
           onToggle={handlers.handleToggleDropdown}
           onSearchChange={handlers.handleSearchChange}
           onSearchFocus={handlers.handleSearchFocus}
