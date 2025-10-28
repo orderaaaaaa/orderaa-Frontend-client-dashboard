@@ -1,5 +1,3 @@
-import { LucideIcon } from 'lucide-react';
-
 // Order Status Enum
 export enum OrderStatus {
   TRIED_TO_REACH_CUSTOMER = 'TRIED_TO_REACH_CUSTOMER',
@@ -26,31 +24,15 @@ export interface Customer {
   area?: string;
 }
 
-// Variant interface
-export interface Variant {
-  id: number;
-  name: string;
-  size: string;
-}
-
 // Product Interface
 export interface Product {
   id: number;
   name: string;
-  price: string;
-  image: string;
-  variants: Variant[]; // Change from string[] to Variant[]
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Selected Product Interface (product with only the selected variant)
-export interface SelectedProduct {
-  id: number;
-  name: string;
-  price: string;
-  image: string;
-  variant: Variant;
+  size?: string;
+  color?: string;
+  material?: string;
+  weight?: string;
+  manufactureCompany?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -88,18 +70,6 @@ export interface FilterOrdersDto {
   page?: number;
   limit?: number;
 }
-export interface DropdownContentProps {
-  filteredProducts: Product[];
-  selectedVariants: Record<number, Variant | undefined>;
-  expandedProductId: number | null;
-  onProductClick: (product: Product) => void;
-  onVariantSelect: (
-    productId: number,
-    variant: Variant,
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => void;
-  onAddProduct: () => void;
-}
 
 // Pagination Response
 export interface PaginatedResponse<T> {
@@ -128,17 +98,4 @@ export interface FilterOptions {
   sizeColorOptions: string[];
   governorateOptions: string[];
   areaOptions: string[];
-}
-
-export interface ProductDropdownProps {
-  value?: SelectedProduct[];
-  onChange?: (products: SelectedProduct[]) => void;
-  placeholder?: string;
-  label?: string;
-  icon?: React.ComponentType<{ size?: number }>;
-  className?: string;
-  selectClassName?: string;
-  placeholderClassName?: string;
-  placeholderStyle?: React.CSSProperties;
-  onAddProductClick?: (selectedProducts: SelectedProduct[]) => void;
 }

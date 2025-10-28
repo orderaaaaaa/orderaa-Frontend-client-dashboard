@@ -2,15 +2,34 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: true, // optional if you're using cookies
+  withCredentials: true,
 });
 
-// Optional: Add interceptors for auth tokens
 api.interceptors.request.use((config) => {
-  const token =
-    typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  if (token) config!.headers!.Authorization = `Bearer ${token}`;
+  if (typeof window !== 'undefined') {
+    const authStorage = localStorage.getItem('auth-storage');
+
+    if (authStorage) {
+      try {
+        const { state } = JSON.parse(authStorage);
+        const token = state?.token;
+
+        if (token && config.headers) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      } catch (error) {
+      }
+    }
+  }
+
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 export default api;
