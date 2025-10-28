@@ -9,6 +9,14 @@ import {
 export function detectExcelFormat(headers: string[]): ExcelFormat {
   const normalizedHeaders = headers.map((h) => h.trim().toLowerCase());
 
+  const hasSallaColumns = 
+    normalizedHeaders.some(h => h.includes('salla') || h.includes('سلة')) ||
+    normalizedHeaders.includes('order id') ||
+    normalizedHeaders.includes('order number') ||
+    normalizedHeaders.includes('customer name') ||
+    normalizedHeaders.includes('اسم العميل') ||
+    normalizedHeaders.includes('رقم الطلب');
+
   const hasAppFormatColumns =
     normalizedHeaders.includes('product name 1') ||
     normalizedHeaders.includes('variant 1');
@@ -23,14 +31,27 @@ export function detectExcelFormat(headers: string[]): ExcelFormat {
 
   const hasBasicOrderColumns =
     normalizedHeaders.includes('fullname') ||
+    normalizedHeaders.includes('full name') ||
+    normalizedHeaders.includes('customer name') ||
+    normalizedHeaders.includes('اسم العميل') ||
     normalizedHeaders.includes('phone') ||
+    normalizedHeaders.includes('هاتف') ||
+    normalizedHeaders.includes('رقم الهاتف') ||
     normalizedHeaders.includes('city') ||
-    normalizedHeaders.includes('address');
+    normalizedHeaders.includes('مدينة') ||
+    normalizedHeaders.includes('محافظة') ||
+    normalizedHeaders.includes('address') ||
+    normalizedHeaders.includes('عنوان') ||
+    hasSallaColumns;
 
   if (!hasBasicOrderColumns) {
     throw new Error(
-      'تنسيق الملف غير صحيح. يرجى استخدام أحد القوالب المتاحة (Orderaa أو EasyOrder)'
+      `تنسيق الملف غير صحيح. الأعمدة الموجودة: ${headers.join(', ')}. يرجى استخدام أحد القوالب المتاحة (Orderaa أو EasyOrder) أو ملف Salla صحيح`
     );
+  }
+
+  if (hasSallaColumns) {
+    return 'easyorder';
   }
 
   if (hasEasyOrderColumns) {
@@ -51,14 +72,46 @@ export async function parseExcelFile(
     reader.onload = (e) => {
       try {
         const data = e.target?.result;
-        const workbook = XLSX.read(data, { type: 'binary' });
+        
+        if (!data) {
+          reject(new Error('فشل في قراءة محتوى الملف'));
+          return;
+        }
+
+        let workbook;
+        try {
+          workbook = XLSX.read(data, { type: 'binary' });
+        } catch (binaryError) {
+          try {
+            workbook = XLSX.read(data, { type: 'array' });
+          } catch (arrayError) {
+            try {
+              workbook = XLSX.read(data, { type: 'base64' });
+            } catch (base64Error) {
+              const errorMsg = binaryError instanceof Error ? binaryError.message : 'خطأ غير معروف';
+              reject(new Error(`فشل في قراءة الملف. تفاصيل الخطأ: ${errorMsg}`));
+              return;
+            }
+          }
+        }
+
+        if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
+          reject(new Error('الملف لا يحتوي على أي صفحات عمل'));
+          return;
+        }
 
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
 
+        if (!worksheet) {
+          reject(new Error('فشل في قراءة صفحة العمل الأولى'));
+          return;
+        }
+
         const jsonData = XLSX.utils.sheet_to_json(worksheet, {
           raw: false,
           defval: '',
+          blankrows: false,
         });
 
         if (jsonData.length === 0) {
@@ -75,7 +128,8 @@ export async function parseExcelFile(
           data: jsonData as (AppFormatRow | EasyOrderFormatRow)[],
         });
       } catch (error) {
-        reject(new Error('فشل في قراءة الملف. تأكد من أن الملف بتنسيق Excel صحيح'));
+        const errorMsg = error instanceof Error ? error.message : 'خطأ غير معروف';
+        reject(new Error(`فشل في قراءة الملف. تأكد من أن الملف بتنسيق Excel صحيح. تفاصيل: ${errorMsg}`));
       }
     };
 

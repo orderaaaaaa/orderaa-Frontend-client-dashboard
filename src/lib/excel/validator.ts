@@ -6,6 +6,15 @@ import {
 } from '@/types/excel-upload';
 import { isEmpty, isValidPhoneNumber, isValidNumber } from './parser';
 
+function getValueFromRow(row: any, possibleNames: string[]): any {
+  for (const name of possibleNames) {
+    if (row[name] !== undefined && row[name] !== null && row[name] !== '') {
+      return row[name];
+    }
+  }
+  return undefined;
+}
+
 export function validateAppFormatRow(
   row: AppFormatRow,
   rowIndex: number
@@ -15,14 +24,14 @@ export function validateAppFormatRow(
   if (isEmpty(row.FullName)) {
     errors.push({
       field: 'FullName',
-      message: 'بدون اسم العنوان غير مكتمل',
+      message: 'اسم العميل مطلوب',
     });
   }
 
   if (isEmpty(row.Phone)) {
     errors.push({
       field: 'Phone',
-      message: 'نحتاج إلى بعض المساعدة، يرجى توضيح ما يلي: رقم الهاتف مفقود',
+      message: 'رقم الهاتف مطلوب',
     });
   } else if (!isValidPhoneNumber(row.Phone)) {
     errors.push({
@@ -41,19 +50,19 @@ export function validateAppFormatRow(
   if (isEmpty(row.Address)) {
     errors.push({
       field: 'Address',
-      message: 'بدون العنوان غير مكتمل',
+      message: 'العنوان مطلوب',
     });
   }
 
   if (isEmpty(row['Shipping Cost'])) {
     errors.push({
       field: 'Shipping Cost',
-      message: 'لم يمكن تحديد السعر - تكلفة الشحن مطلوبة',
+      message: 'تكلفة الشحن مطلوبة',
     });
   } else if (!isValidNumber(row['Shipping Cost'])) {
     errors.push({
       field: 'Shipping Cost',
-      message: 'لم يمكن تحديد السعر - تكلفة الشحن غير صحيحة',
+      message: 'تكلفة الشحن غير صحيحة',
     });
   }
 
@@ -85,55 +94,138 @@ export function validateEasyOrderFormatRow(
 ): OrderValidationResult {
   const errors: ValidationError[] = [];
 
-  if (isEmpty(row.FullName)) {
+  const fullName = getValueFromRow(row, [
+    'FullName',
+    'Full Name', 
+    'Customer Name',
+    'اسم العميل',
+    'الاسم',
+    'Name'
+  ]);
+
+  if (isEmpty(fullName)) {
     errors.push({
       field: 'FullName',
-      message: 'بدون اسم العنوان غير مكتمل',
+      message: 'اسم العميل مطلوب',
     });
   }
 
-  if (isEmpty(row.Phone)) {
+  const phone = getValueFromRow(row, [
+    'Phone',
+    'رقم الهاتف',
+    'هاتف',
+    'Mobile',
+    'Phone Number',
+    'Customer Phone'
+  ]);
+
+  if (isEmpty(phone)) {
     errors.push({
       field: 'Phone',
-      message: 'نحتاج إلى بعض المساعدة، يرجى توضيح ما يلي: رقم الهاتف مفقود',
+      message: 'رقم الهاتف مطلوب',
     });
-  } else if (!isValidPhoneNumber(row.Phone)) {
+  } else if (!isValidPhoneNumber(phone)) {
     errors.push({
       field: 'Phone',
       message: 'رقم الهاتف غير صحيح',
     });
   }
 
-  if (isEmpty(row.Address)) {
+  const address = getValueFromRow(row, [
+    'Address',
+    'عنوان',
+    'العنوان',
+    'Customer Address',
+    'Shipping Address'
+  ]);
+
+  if (isEmpty(address)) {
     errors.push({
       field: 'Address',
-      message: 'بدون العنوان غير مكتمل',
+      message: 'العنوان مطلوب',
     });
   }
 
-  if (isEmpty(row['Shipping Cost'])) {
-    errors.push({
-      field: 'Shipping Cost',
-      message: 'لم يمكن تحديد السعر - تكلفة الشحن مطلوبة',
-    });
-  } else if (!isValidNumber(row['Shipping Cost'])) {
-    errors.push({
-      field: 'Shipping Cost',
-      message: 'لم يمكن تحديد السعر - تكلفة الشحن غير صحيحة',
-    });
-  }
+  const totalCost = getValueFromRow(row, [
+    'Total Cost',
+    'التكلفة الإجمالية',
+    'Total',
+    'Total Amount'
+  ]);
 
-  if (isEmpty(row['Product Name'])) {
+  if (isEmpty(totalCost)) {
     errors.push({
-      field: 'Product Name',
-      message: 'يجب إضافة منتج واحد على الأقل',
+      field: 'Total Cost',
+      message: 'التكلفة الإجمالية مطلوبة',
     });
-  }
-
-  if (!isEmpty(row['Total Cost']) && !isValidNumber(row['Total Cost'])) {
+  } else if (!isValidNumber(totalCost)) {
     errors.push({
       field: 'Total Cost',
       message: 'التكلفة الإجمالية غير صحيحة',
+    });
+  }
+
+  const variant = getValueFromRow(row, [
+    'Variant',
+    'المقاس',
+    'اللون',
+    'Product Variant',
+    'Size',
+    'Color'
+  ]);
+
+  if (isEmpty(variant)) {
+    errors.push({
+      field: 'Variant',
+      message: 'المقاس/اللون مطلوب',
+    });
+  }
+
+  const quantity = getValueFromRow(row, [
+    'Quantity',
+    'الكمية',
+    'Qty',
+    'Amount'
+  ]);
+
+  if (isEmpty(quantity)) {
+    errors.push({
+      field: 'Quantity',
+      message: 'الكمية مطلوبة',
+    });
+  } else if (!isValidNumber(quantity)) {
+    errors.push({
+      field: 'Quantity',
+      message: 'الكمية غير صحيحة',
+    });
+  }
+
+  const sku = getValueFromRow(row, [
+    'SKU',
+    'Product Code',
+    'Code',
+    'كود المنتج'
+  ]);
+
+  if (isEmpty(sku)) {
+    errors.push({
+      field: 'SKU',
+      message: 'كود المنتج (SKU) مطلوب',
+    });
+  }
+
+  const shippingCost = getValueFromRow(row, [
+    'Shipping Cost',
+    'تكلفة الشحن',
+    'Shipping',
+    'Delivery Cost',
+    'Shipping Fee'
+  ]);
+
+  if (!isEmpty(shippingCost) && !isValidNumber(shippingCost)) {
+    errors.push({
+      field: 'Shipping Cost',
+      message: 'تكلفة الشحن غير صحيحة',
     });
   }
 
@@ -144,17 +236,17 @@ export function validateEasyOrderFormatRow(
     });
   }
 
+  if (!isEmpty(row['Coupon Discount']) && !isValidNumber(row['Coupon Discount'])) {
+    errors.push({
+      field: 'Coupon Discount',
+      message: 'خصم الكوبون غير صحيح',
+    });
+  }
+
   if (!isEmpty(row['Item Price']) && !isValidNumber(row['Item Price'])) {
     errors.push({
       field: 'Item Price',
       message: 'سعر المنتج غير صحيح',
-    });
-  }
-
-  if (!isEmpty(row.Quantity) && !isValidNumber(row.Quantity)) {
-    errors.push({
-      field: 'Quantity',
-      message: 'الكمية غير صحيحة',
     });
   }
 

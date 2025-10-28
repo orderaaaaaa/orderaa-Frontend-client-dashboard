@@ -28,6 +28,12 @@ export default function ValidationResultsPage() {
     }
   }, []);
 
+  const clearCacheAndReload = () => {
+    sessionStorage.removeItem('excelValidationResults');
+    sessionStorage.removeItem('excelValidationOnly');
+    router.push('/dashboard/upload-products/excel');
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -64,11 +70,75 @@ export default function ValidationResultsPage() {
 
   return (
     <div className="w-full min-h-screen bg-gray-50 p-6" dir="rtl">
-      <div className="max-w-[656px]">
-        <div
-          dir="rtl"
-          className="flex flex-row justify-start items-center gap-2 w-full max-w-[584px] h-[60px] mb-6"
-        >
+      {errorCount === 0 ? (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="max-w-[656px] w-full text-center">
+            <div className="bg-green-50 border border-green-200 rounded-xl p-8">
+              <CheckCircle2 className="w-20 h-20 text-green-500 mx-auto mb-6" />
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                {imported ? '🎉 تم إنشاء جميع الطلبات بنجاح!' : 'تم التحقق من جميع الطلبات بنجاح!'}
+              </h2>
+              <p className="text-lg text-gray-600 mb-8">
+                {imported ? `تم إنشاء ${displaySuccessCount} طلب في النظام` : `جميع الـ ${successCount} طلب جاهزة للمعالجة`}
+              </p>
+              
+              <div className="flex gap-4 justify-center">
+                <button
+                  onClick={() => {
+                    sessionStorage.removeItem('excelValidationResults');
+                    sessionStorage.removeItem('excelValidationOnly');
+                    router.push('/dashboard/upload-products/excel');
+                  }}
+                  className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <ArrowRight className="w-5 h-5" />
+                  رفع ملف جديد
+                </button>
+
+                {!imported && (
+                  <button
+                    onClick={() => {
+                      alert('تم إرسال البيانات بالفعل! تحقق من الطلبات في قائمة الطلبات');
+                    }}
+                    className="px-6 py-3 bg-[#5D24E1] text-white rounded-lg hover:bg-[#4a1db5] transition-colors"
+                  >
+                    إرسال الطلبات ({successCount})
+                  </button>
+                )}
+
+                {imported && displaySuccessCount > 0 && (
+                  <button
+                    onClick={() => {
+                      sessionStorage.removeItem('excelValidationResults');
+                      sessionStorage.removeItem('excelValidationOnly');
+                      router.push('/dashboard/orders/allOrders');
+                    }}
+                    className="px-6 py-3 bg-[#5D24E1] text-white rounded-lg hover:bg-[#4a1db5] transition-colors"
+                  >
+                    عرض الطلبات ({displaySuccessCount})
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="max-w-[656px]">
+          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center gap-2 text-blue-800" dir="rtl">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <span className="font-medium">
+                هذه نتائج محفوظة مؤقتاً. لرؤية النتائج المحدثة، يرجى رفع الملف مرة أخرى باستخدام الزر أدناه.
+              </span>
+            </div>
+          </div>
+          
+          <div
+            dir="rtl"
+            className="flex flex-row justify-start items-center gap-2 w-full max-w-[584px] h-[60px] mb-6"
+          >
           <span className="font-bold text-[32px] leading-[60px] text-black whitespace-nowrap">
             نتيجة التحقق تم {imported ? 'إنشاء' : 'استلام'}
           </span>
@@ -131,12 +201,12 @@ export default function ValidationResultsPage() {
                 </div>
 
                 <div className="flex flex-row justify-end items-center p-2.5 gap-2.5 w-full min-h-[87px] mt-1.5 bg-[#FF000408]">
-                  <div className="font-normal text-sm leading-[26px] text-right w-full text-[#FF0004]" dir="rtl">
-                    <div className="mb-1">
-                      نحتاج إلى بعض المساعدة. يرجى توضيح ما يلي:
+                  <div className="font-bold text-sm leading-[26px] text-right w-full text-[#FF0004]" dir="rtl">
+                    <div className="mb-2 font-normal block">
+                      نحتاج إلى بعض المساعدة، يرجى توضيح ما يلي:
                     </div>
                     {order.errors.map((error, index) => (
-                      <div key={index}>
+                      <div key={index} className="mb-1 block">
                         {error.message}
                       </div>
                     ))}
@@ -147,56 +217,21 @@ export default function ValidationResultsPage() {
           </div>
         )}
 
-        {errorCount === 0 && (
-          <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
-            <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              {imported ? '🎉 تم إنشاء جميع الطلبات بنجاح!' : 'تم التحقق من جميع الطلبات بنجاح!'}
-            </h2>
-            <p className="text-gray-600">
-              {imported ? `تم إنشاء ${displaySuccessCount} طلب في النظام` : `جميع الـ ${successCount} طلب جاهزة للمعالجة`}
-            </p>
-          </div>
-        )}
-
-        <div className="mt-8 flex gap-4 justify-center">
-          <button
-            onClick={() => {
-              sessionStorage.removeItem('excelValidationResults');
-              sessionStorage.removeItem('excelValidationOnly');
-              router.push('/dashboard/upload-products/excel');
-            }}
-            className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            <ArrowRight className="w-5 h-5" />
-            رفع ملف جديد
-          </button>
-
-          {errorCount === 0 && successCount > 0 && !imported && (
-            <button
-              onClick={() => {
-                alert('تم إرسال البيانات بالفعل! تحقق من الطلبات في قائمة الطلبات');
-              }}
-              className="px-6 py-3 bg-[#5D24E1] text-white rounded-lg hover:bg-[#4a1db5] transition-colors"
-            >
-              إرسال الطلبات ({successCount})
-            </button>
-          )}
-
-          {imported && displaySuccessCount > 0 && (
+          <div className="mt-8 flex gap-4 justify-center">
             <button
               onClick={() => {
                 sessionStorage.removeItem('excelValidationResults');
                 sessionStorage.removeItem('excelValidationOnly');
-                router.push('/dashboard/orders/allOrders');
+                router.push('/dashboard/upload-products/excel');
               }}
-              className="px-6 py-3 bg-[#5D24E1] text-white rounded-lg hover:bg-[#4a1db5] transition-colors"
+              className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              عرض الطلبات ({displaySuccessCount})
+              <ArrowRight className="w-5 h-5" />
+              رفع ملف جديد
             </button>
-          )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
