@@ -26,6 +26,7 @@ export interface Customer {
   city?: string;
   area?: string;
   phoneNumber: string;
+  altPhone?: string;
 }
 
 // Variant interface
@@ -42,6 +43,9 @@ export interface Product {
   price: string;
   image: string;
   variants: Variant[]; // Change from string[] to Variant[]
+  material: string;
+  weight: string;
+  manufactureCompany: string;
   createdAt: string;
   updatedAt: string;
 }
