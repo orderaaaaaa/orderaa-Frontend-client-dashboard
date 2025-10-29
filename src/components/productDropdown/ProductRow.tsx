@@ -22,7 +22,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
   onProductClick,
   onVariantSelect,
 }) => {
-  const hasVariants = product.variants.length > 0;
+  const hasVariants = (product.variants?.length ?? 0) > 0;
 
   return (
     <div
