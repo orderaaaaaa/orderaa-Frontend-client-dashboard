@@ -9,8 +9,13 @@ import {
   Truck,
   CircleDollarSign,
 } from "lucide-react";
+import { Order } from "@/types/orders";
 
-function OrderDetailsInfoComponent() {
+interface OrderDetailsInfoComponentProps {
+  order: Order;
+}
+
+function OrderDetailsInfoComponent({ order }: OrderDetailsInfoComponentProps) {
   const tagStyle =
     "flex gap-2 bg-white shadow-xs items-center py-2 px-2 rounded-[5px] font-semibold";
 
@@ -22,23 +27,23 @@ function OrderDetailsInfoComponent() {
           <div className="grid grid-col-1 md:grid-cols-3 gap-6 ">
             <p className={tagStyle}>
               <User />
-              محمد يحيي عبداللطيف
+              {order.customer.name}
             </p>
             <p className={tagStyle}>
               <Phone width={18} />
-              01027464951
+              {order.customer.phoneNumber}
             </p>
             <p className={tagStyle}>
               <Phone width={18} />
-              01027464951
+              {order.customer.altPhone || order.customer.phoneNumber}
             </p>
             <p className={tagStyle}>
               <MapPinned width={18} />
-              القاهره
+              {order.customer.governorate || 'غير محدد'}
             </p>
             <p className={tagStyle}>
               <MapPinned width={18} />
-              مدينة نصر
+              {order.customer.city || 'غير محدد'}
             </p>
             <p className={tagStyle}>
               {" "}
@@ -53,15 +58,15 @@ function OrderDetailsInfoComponent() {
             <p className={tagStyle}>
               {" "}
               <Package width={20} />
-              جلد
+              {order.orderProducts?.[0]?.product?.material || 'جلد'}
             </p>
             <p className={tagStyle}>
               <Weight width={18} />
-              خفيف
+              {order.orderProducts?.[0]?.product?.weight || 'خفيف'}
             </p>
             <p className={tagStyle}>
               <Package width={20} />
-              مستورد
+              {order.orderProducts?.[0]?.product?.manufactureCompany || 'مستورد'}
             </p>
             <p className={tagStyle}>
               <Truck width={20} />
@@ -69,7 +74,7 @@ function OrderDetailsInfoComponent() {
             </p>
             <p className={tagStyle}>
               <CircleDollarSign width={18} />
-              2000 جنيه
+              {order.totalCost} جنيه
             </p>
           </div>
         </div>
@@ -78,8 +83,7 @@ function OrderDetailsInfoComponent() {
             <h3 className="mb-3">العنوان:</h3>
             <p className={tagStyle}>
               <span className="max-w-3/4">
-                ٣٣٧ ح -خدائق الاهرام - البوابه الرابعه - الدور الاول امام
-                الاسانسير خامس شارع خلف الكنيسه
+                {order.customer.address || 'غير محدد'}
               </span>
             </p>
           </div>
@@ -89,8 +93,7 @@ function OrderDetailsInfoComponent() {
 
             <p className={tagStyle}>
               <span className="max-w-3/4">
-                انا مسافر يوم التلات ومحتاجه بسرعه من فضلكم وعايز مقاس 43 لون
-                زيتي
+                {order.notes || 'لا توجد ملاحظات'}
               </span>
             </p>
           </div>

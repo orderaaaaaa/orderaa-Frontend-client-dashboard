@@ -1,4 +1,5 @@
 import React from "react";
+import { useRouter } from "next/navigation";
 import LeftSide from "./LeftSide";
 import RightSide from "./RightSide";
 import Image from "next/image";
@@ -39,14 +40,21 @@ export default function OrderCard({
   onSelectionChange,
   createdAt,
 }: OrderCardProps) {
+  const router = useRouter();
+
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onSelectionChange) {
       onSelectionChange(e.target.checked);
     }
   };
 
+  const handleCardClick = () => {
+    router.push(`/dashboard/orders/${id}`);
+  };
+
   return (
     <div
+      onClick={handleCardClick}
       className={`
       relative
       z-[0]
@@ -55,15 +63,20 @@ export default function OrderCard({
       bg-gradient-to-b from-[#FCFAFD] to-[#EADBFF] border-2 border-[#5D24E147]
       rounded-[20px] py-4 px-2
       shadow-[0px_4px_4px_0px_#5D24E114]
+      cursor-pointer
+      transition-all duration-200
+      hover:shadow-[0px_6px_12px_0px_#5D24E126]
+      hover:scale-[1.02]
       ${select ? "grid-cols-[10px_1fr_1fr] gap-3" : "grid-cols-[1fr_1fr_auto]"}
     `}
     >
       {select ? (
         <input
-          className="w-5 h-5 cursor-pointer border-2 border-[#5D24E1] rounded accent-[#5D24E1] transform"
+          className="w-5 h-5 cursor-pointer border-2 border-[#5D24E1] rounded accent-[#5D24E1] transform z-10"
           type="checkbox"
           checked={isSelected}
           onChange={handleCheckboxChange}
+          onClick={(e) => e.stopPropagation()}
           name="select"
           id={`order-select-${id}`}
         />

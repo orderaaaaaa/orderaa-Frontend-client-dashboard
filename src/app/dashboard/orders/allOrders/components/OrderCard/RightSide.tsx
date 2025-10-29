@@ -21,10 +21,12 @@ export default function RightSide({
   city,
 }: RightSideProps) {
   return (
-    <div className="flex flex-col relative gap-1 px-4 ">
-      <div className="flex items-center gap-2">
-        <Content icon="id" content="الكود:" />
-        <span className="text-[18px]">{code}</span>
+    <div className="flex flex-col relative gap-1 px-4 min-w-0">
+      <div className="flex items-start gap-2 min-w-0">
+        <div className="flex-shrink-0">
+          <Content icon="id" content="الكود:" />
+        </div>
+        <span className="text-[14px] break-all flex-1 min-w-0">{code}</span>
       </div>
       <Content icon="user" content={name} />
       <Content icon="phone" content={phone} />
