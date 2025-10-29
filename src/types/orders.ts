@@ -1,3 +1,5 @@
+import { LucideIcon } from 'lucide-react';
+
 // Order Status Enum
 export enum OrderStatus {
   TRIED_TO_REACH_CUSTOMER = 'TRIED_TO_REACH_CUSTOMER',
@@ -14,33 +16,41 @@ export enum OrderStatus {
   MISSING = 'MISSING',
 }
 
-// Order Format Enum
-export enum OrderFormat {
-  APP = 'APP',
-  EASYORDER = 'EASYORDER',
-}
-
 // Customer Interface
 export interface Customer {
   id: number;
   name: string;
-  phoneNumber: string;
-  altPhone?: string;
+  phone: string;
   address?: string;
   governorate?: string;
-  city?: string;
   area?: string;
+}
+
+// Variant interface
+export interface Variant {
+  id: number;
+  name: string;
+  size: string;
 }
 
 // Product Interface
 export interface Product {
   id: number;
   name: string;
-  size?: string;
-  color?: string;
-  material?: string;
-  weight?: string;
-  manufactureCompany?: string;
+  price: string;
+  image: string;
+  variants: Variant[]; // Change from string[] to Variant[]
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Selected Product Interface (product with only the selected variant)
+export interface SelectedProduct {
+  id: number;
+  name: string;
+  price: string;
+  image: string;
+  variant: Variant;
   createdAt: string;
   updatedAt: string;
 }
@@ -52,8 +62,6 @@ export interface OrderProduct {
   productId: number;
   quantity: number;
   price: number;
-  sku?: string;
-  variant?: string;
   product: Product;
 }
 
@@ -65,23 +73,6 @@ export interface Order {
   totalCost: number;
   numberOfTriesToReach: number;
   notes?: string;
-  format: OrderFormat;
-
-  // Order details
-  shippingCost?: number;
-  paymentStatus?: string;
-  paymentMethod?: string;
-  coupon?: string;
-  couponDiscount?: number;
-
-  // Marketing & tracking
-  utmSource?: string;
-  utmCampaign?: string;
-
-  // External integrations
-  externalOrderId?: string;
-  referralCode?: string;
-
   createdAt: string;
   updatedAt: string;
   merchantId: number;
@@ -94,32 +85,29 @@ export interface Order {
 export interface FilterOrdersDto {
   status?: OrderStatus;
   search?: string;
-  customerName?: string;
-  customerPhone?: string;
-  governorate?: string;
-  city?: string;
-  area?: string;
-  productName?: string;
   page?: number;
   limit?: number;
-  merchantId?: string;
-  customerId?: string;
-  code?: string;
-  totalCost?: string;
-  numberOfTriesToReach?: string;
-  createdAfter?: string;
-  createdBefore?: string;
+}
+export interface DropdownContentProps {
+  filteredProducts: Product[];
+  selectedVariants: Record<number, Variant | undefined>;
+  expandedProductId: number | null;
+  onProductClick: (product: Product) => void;
+  onVariantSelect: (
+    productId: number,
+    variant: Variant,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => void;
+  onAddProduct: () => void;
 }
 
 // Pagination Response
 export interface PaginatedResponse<T> {
   data: T[];
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 // Legacy filters (for FilterSection component)
@@ -127,7 +115,6 @@ export interface OrderFilters {
   productName: string;
   sizeColor: string;
   governorate: string;
-  city: string;
   area: string;
   shipmentCode: string;
   customerName: string;
@@ -143,30 +130,15 @@ export interface FilterOptions {
   areaOptions: string[];
 }
 
-// Filter Options Response (from backend)
-export interface FilterOptionsData {
-  governorates: string[];
-  cities: string[];
-  areas: string[];
-  productNames: string[];
-  productSizes: string[];
-  productColors: string[];
-}
-
-export interface FilterOptionsResponse {
-  success: boolean;
-  data: FilterOptionsData;
-}
-
-// Order Statistics Response (from backend)
-export interface OrderStatistics {
-  totalOrders: number;
-  statusCounts: Record<string, number>;
-  totalRevenue: number;
-  averageOrderValue: number;
-}
-
-export interface OrderStatisticsResponse {
-  success: boolean;
-  data: OrderStatistics;
+export interface ProductDropdownProps {
+  value?: SelectedProduct[];
+  onChange?: (products: SelectedProduct[]) => void;
+  placeholder?: string;
+  label?: string;
+  icon?: React.ComponentType<{ size?: number }>;
+  className?: string;
+  selectClassName?: string;
+  placeholderClassName?: string;
+  placeholderStyle?: React.CSSProperties;
+  onAddProductClick?: (selectedProducts: SelectedProduct[]) => void;
 }
