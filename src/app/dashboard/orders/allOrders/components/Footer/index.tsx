@@ -90,7 +90,7 @@ const Footer: React.FC<FooterProps> = ({
         </Button>
         <Button
           variant="default"
-          className="flex items-center rounded-3xl space-x-2 px-4 py-2 bg-[#5D24E1] text-white hover:bg-[#682fee] cursor-pointer"
+          className="flex items-center rounded-3xl space-x-2 px-4 py-2 border-[#682fee] border-1 hover:bg-[#5D24E1] bg-white text-white hover:bg-[#682fee] hover:text-white text-[#682fee] cursor-pointer"
           onClick={onExportExcel}
         >
           <FileSpreadsheet className="h-4 w-4" />

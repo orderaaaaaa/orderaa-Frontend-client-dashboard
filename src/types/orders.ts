@@ -14,11 +14,18 @@ export enum OrderStatus {
   MISSING = 'MISSING',
 }
 
+// Order Format Enum
+export enum OrderFormat {
+  APP = 'APP',
+  EASYORDER = 'EASYORDER',
+}
+
 // Customer Interface
 export interface Customer {
   id: number;
   name: string;
   phoneNumber: string;
+  altPhone?: string;
   address?: string;
   governorate?: string;
   city?: string;
@@ -45,6 +52,8 @@ export interface OrderProduct {
   productId: number;
   quantity: number;
   price: number;
+  sku?: string;
+  variant?: string;
   product: Product;
 }
 
@@ -56,6 +65,23 @@ export interface Order {
   totalCost: number;
   numberOfTriesToReach: number;
   notes?: string;
+  format: OrderFormat;
+
+  // Order details
+  shippingCost?: number;
+  paymentStatus?: string;
+  paymentMethod?: string;
+  coupon?: string;
+  couponDiscount?: number;
+
+  // Marketing & tracking
+  utmSource?: string;
+  utmCampaign?: string;
+
+  // External integrations
+  externalOrderId?: string;
+  referralCode?: string;
+
   createdAt: string;
   updatedAt: string;
   merchantId: number;
