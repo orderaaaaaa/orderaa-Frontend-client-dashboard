@@ -43,6 +43,10 @@ export const navigation: NavigationItem[] = [
     icon: Users,
     children: [
       {
+        name: 'تقارير خدمع العملاء',
+        href: '/dashboard/customers/customer-service',
+      },
+      {
         name: 'متابعة الطلبات',
         href: '/dashboard/customers/complaints',
       },
