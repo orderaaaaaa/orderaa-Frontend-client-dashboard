@@ -60,7 +60,7 @@ export const useProductDropdown = () => {
   ) => {
     e.stopPropagation();
 
-    const product = filteredProducts.find((p) => p.id === productId);
+    const product = filteredProducts.find((p) => p.id === productId) as any;
     if (!product) return;
 
     selectVariant(productId, variant, product);
