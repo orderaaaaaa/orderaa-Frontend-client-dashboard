@@ -39,21 +39,27 @@ export default function AllOrdersRefactor() {
   const { options } = useFilterOptions();
 
   // React Hook Form setup
-  const handleFormSubmit = useCallback((data: OrderFiltersFormData) => {
-    updateLocalFilters(data);
-  }, [updateLocalFilters]);
+  const handleFormSubmit = useCallback(
+    (data: OrderFiltersFormData) => {
+      updateLocalFilters(data);
+    },
+    [updateLocalFilters]
+  );
 
-  const { control, formState: { errors } } = useFilterForm({
+  const {
+    control,
+    formState: { errors },
+  } = useFilterForm({
     onSubmit: handleFormSubmit,
   });
 
   // Handle order selection
   const handleOrderSelect = useCallback((orderId: number, checked: boolean) => {
-    setSelectedOrderIds(prev => {
+    setSelectedOrderIds((prev) => {
       if (checked) {
         return [...prev, orderId];
       } else {
-        return prev.filter(id => id !== orderId);
+        return prev.filter((id) => id !== orderId);
       }
     });
   }, []);
@@ -65,7 +71,7 @@ export default function AllOrdersRefactor() {
       setSelectedOrderIds([]);
     } else {
       // Select all current page orders
-      setSelectedOrderIds(orders.map(o => o.id));
+      setSelectedOrderIds(orders.map((o) => o.id));
     }
   }, [orders, selectedOrderIds]);
 
@@ -83,7 +89,9 @@ export default function AllOrdersRefactor() {
 
       if (select && selectedOrderIds.length > 0) {
         // Export only selected orders
-        ordersToExport = orders.filter(order => selectedOrderIds.includes(order.id));
+        ordersToExport = orders.filter((order) =>
+          selectedOrderIds.includes(order.id)
+        );
 
         if (ordersToExport.length === 0) {
           alert('الرجاء تحديد طلبات للتصدير');
@@ -91,7 +99,9 @@ export default function AllOrdersRefactor() {
         }
 
         const fileName = exportOrdersToExcel(ordersToExport, 'selected_orders');
-        alert(`تم تصدير ${ordersToExport.length} طلب محدد بنجاح! \nاسم الملف: ${fileName}`);
+        alert(
+          `تم تصدير ${ordersToExport.length} طلب محدد بنجاح! \nاسم الملف: ${fileName}`
+        );
       } else {
         // Export all filtered orders
         const exportFilters = { ...apiFilters, limit: 10000, page: 1 };
@@ -103,7 +113,9 @@ export default function AllOrdersRefactor() {
         }
 
         const fileName = exportOrdersToExcel(response.data, 'all_orders');
-        alert(`تم تصدير ${response.data.length} طلب بنجاح! \nاسم الملف: ${fileName}`);
+        alert(
+          `تم تصدير ${response.data.length} طلب بنجاح! \nاسم الملف: ${fileName}`
+        );
       }
     } catch (error) {
       alert('فشل في تصدير الطلبات. الرجاء المحاولة مرة أخرى.');
@@ -116,7 +128,7 @@ export default function AllOrdersRefactor() {
       setLoading(true);
       setError(null);
       try {
-        const response = await getOrders(apiFilters);
+        const response = (await getOrders(apiFilters)) as any;
         setOrders(response.data);
         setTotalOrders(response.pagination.total);
         setTotalPages(response.pagination.totalPages);
@@ -144,7 +156,10 @@ export default function AllOrdersRefactor() {
         errors={errors}
         options={{
           productOptions: options.productNames || [],
-          sizeColorOptions: [...(options.productSizes || []), ...(options.productColors || [])],
+          sizeColorOptions: [
+            ...(options.productSizes || []),
+            ...(options.productColors || []),
+          ],
           governorateOptions: options.governorates || [],
           areaOptions: options.areas || [],
         }}
@@ -197,19 +212,26 @@ export default function AllOrdersRefactor() {
                   key={order.id}
                   select={select}
                   isSelected={selectedOrderIds.includes(order.id)}
-                  onSelectionChange={(checked) => handleOrderSelect(order.id, checked)}
+                  onSelectionChange={(checked) =>
+                    handleOrderSelect(order.id, checked)
+                  }
                   id={order.id}
                   code={order.code}
                   name={order.customer.name}
                   phone={order.customer.phoneNumber}
                   government={order.customer.governorate || 'غير محدد'}
                   items={order.orderProducts.map(
-                    (op: any) => `${op.product.name}${op.product.size ? ` - ${op.product.size}` : ''}${op.product.color ? ` - ${op.product.color}` : ''}`
+                    (op: any) =>
+                      `${op.product.name}${
+                        op.product.size ? ` - ${op.product.size}` : ''
+                      }${op.product.color ? ` - ${op.product.color}` : ''}`
                   )}
                   price={order.totalCost}
                   trys={order.numberOfTriesToReach}
                   status={order.status}
-                  city={order.customer.area || order.customer.city || 'غير محدد'}
+                  city={
+                    order.customer.area || order.customer.city || 'غير محدد'
+                  }
                   alert={0}
                   createdAt={order.createdAt}
                 />
@@ -231,14 +253,19 @@ export default function AllOrdersRefactor() {
                 key={order.id}
                 select={select}
                 isSelected={selectedOrderIds.includes(order.id)}
-                onSelectionChange={(checked) => handleOrderSelect(order.id, checked)}
+                onSelectionChange={(checked) =>
+                  handleOrderSelect(order.id, checked)
+                }
                 id={order.id}
                 code={order.code}
                 name={order.customer.name}
                 phone={order.customer.phoneNumber}
                 government={order.customer.governorate || 'غير محدد'}
                 items={order.orderProducts.map(
-                  (op: any) => `${op.product.name}${op.product.size ? ` - ${op.product.size}` : ''}${op.product.color ? ` - ${op.product.color}` : ''}`
+                  (op: any) =>
+                    `${op.product.name}${
+                      op.product.size ? ` - ${op.product.size}` : ''
+                    }${op.product.color ? ` - ${op.product.color}` : ''}`
                 )}
                 price={order.totalCost}
                 trys={order.numberOfTriesToReach}
@@ -251,9 +278,7 @@ export default function AllOrdersRefactor() {
           </div>
 
           {orders.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
-              لا توجد طلبات
-            </div>
+            <div className="text-center py-12 text-gray-500">لا توجد طلبات</div>
           )}
         </>
       )}

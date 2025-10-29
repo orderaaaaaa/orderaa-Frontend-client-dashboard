@@ -23,7 +23,9 @@ export interface Customer {
   phone: string;
   address?: string;
   governorate?: string;
+  city?: string;
   area?: string;
+  phoneNumber: string;
 }
 
 // Variant interface
