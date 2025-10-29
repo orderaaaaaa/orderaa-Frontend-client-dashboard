@@ -43,8 +43,10 @@ export interface Product {
   price: string;
   image: string;
   variants: Variant[]; // Change from string[] to Variant[]
+  color: string;
   material: string;
   weight: string;
+  size: string;
   manufactureCompany: string;
   createdAt: string;
   updatedAt: string;
@@ -69,6 +71,7 @@ export interface OrderProduct {
   quantity: number;
   price: number;
   product: Product;
+  variant: string;
 }
 
 // Order Interface
