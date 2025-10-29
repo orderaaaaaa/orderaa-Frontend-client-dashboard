@@ -51,7 +51,7 @@ function ClientInformation() {
         </div>
         <div className="flex flex-col gap-10 mt-7">
           <Textarea
-            label="اختر المحافظه"
+            // label="اختر المحافظه"
             name=""
             placeholder="اسم الشارع، رقم المبنى، الشقة، إلخ"
             className="max-w-[1158px] h-[162px] mt-3 bg-[#EAEAEA40]"
@@ -59,7 +59,7 @@ function ClientInformation() {
             onChange={() => {}}
           />
           <Textarea
-            label="اختر المحافظه"
+            // label="اختر المحافظه"
             name=""
             placeholder="اسم الشارع، رقم المبنى، الشقة، إلخ"
             className="max-w-[1158px] h-[162px] mt-3 bg-[#EAEAEA40] mb-10"
