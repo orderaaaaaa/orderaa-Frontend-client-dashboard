@@ -22,7 +22,7 @@ function Order() {
             placeholder={'اختر المنصة'}
             className="max-w-[502px] "
             placeholderClassName="text-[#1F1F1F] !py-1 font-bold "
-            selectClassName="border-2 w-full  bg-[#EAEAEA40] p-1 rounded-sm border-2 border-[#5D24E1]"
+            selectClassName="border-1 w-full  bg-[#EAEAEA40] p-1 rounded-sm  border-[#5D24E1]"
           />
           <Dropdown
             label="اسم الصفحة"
@@ -32,7 +32,7 @@ function Order() {
             placeholder={'اختر الصفحة'}
             className="max-w-[502px]"
             placeholderClassName="text-[#1F1F1F] font-bold text-[20px]"
-            selectClassName="border-2 w-full  bg-[#EAEAEA40] p-1 rounded-sm border-2 border-[#5D24E1]"
+            selectClassName="border-1 w-full  bg-[#EAEAEA40] p-1 rounded-sm  !border-[#5D24E1]"
           />
         </div>
       </div>

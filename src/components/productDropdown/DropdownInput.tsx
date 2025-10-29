@@ -17,26 +17,14 @@ interface DropdownInputProps {
 
 export const DropdownInput: React.FC<DropdownInputProps> = ({
   isOpen,
-  search,
+
   selectedProducts,
   placeholder,
-  selectClassName,
   placeholderClassName,
-  placeholderStyle,
   icon: Icon,
   onToggle,
-  onSearchChange,
-  onSearchFocus,
 }) => {
-  const defaultClassName =
-    'w-full border border-[#CED4DA] rounded-lg py-2.5 px-10 text-[18px] transition-colors';
   const hasSelection = selectedProducts.length > 0;
-
-  const inputClassName =
-    selectClassName ||
-    `${defaultClassName} ${
-      hasSelection ? 'text-[#111827]' : placeholderClassName ?? 'text-[#878A99]'
-    }`;
 
   return (
     <>
@@ -44,34 +32,30 @@ export const DropdownInput: React.FC<DropdownInputProps> = ({
       <button
         type="button"
         onClick={onToggle}
-        className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
+        className="w-full border border-[#5D24E1] cursor-pointer rounded-lg py-2.5 px-10 text-[18px] transition-colors text-left flex items-center justify-between"
         aria-label="Toggle dropdown"
       >
-        <ChevronDown
-          size={20}
-          className={`transition-transform duration-200 ${
-            isOpen ? 'rotate-180' : ''
-          }`}
-        />
-      </button>
+        <span
+          className={
+            hasSelection
+              ? 'text-[#111827]'
+              : placeholderClassName ?? 'text-[#878A99]'
+          }
+        >
+          {hasSelection ? `${selectedProducts.length} منتج مختار` : placeholder}
+        </span>
 
-      {/* Optional Icon */}
-      {Icon && (
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-          <Icon size={20} />
+        <div className="flex items-center">
+          {/* Optional Icon */}
+
+          <ChevronDown
+            size={20}
+            className={`text-gray-400 transition-transform duration-200 ${
+              isOpen ? 'rotate-180' : ''
+            }`}
+          />
         </div>
-      )}
-
-      {/* Search Input */}
-      <input
-        type="text"
-        value={search}
-        onChange={onSearchChange}
-        onFocus={onSearchFocus}
-        placeholder={placeholder}
-        className={inputClassName}
-        style={!hasSelection && placeholderStyle ? placeholderStyle : undefined}
-      />
+      </button>
     </>
   );
 };

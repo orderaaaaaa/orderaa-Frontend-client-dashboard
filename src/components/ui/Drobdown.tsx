@@ -109,9 +109,11 @@ export default function Dropdown({
           className={
             selectClassName
               ? selectClassName
-              : `w-full border-2 !border-[#5D24E1] rounded-lg py-2.5 px-10 text-[18px]
-                 bg-[#EAEAEA40] focus:border-[#5D24E1] focus:ring-[3px] focus:!ring-[#5D24E1]/50 
+              : `w-full border-2  rounded-lg py-2.5 px-10 text-[18px]
+                 bg-[#EAEAEA40]  
                  outline-none transition duration-150 ease-in-out 
+                 border-[#5D24E1]
+                 focus:border-[#5D24E1] !focus:!ring-4 focus:!ring-[#5D24E1]/50 accent-amber-100
                  ${
                    value
                      ? 'text-[#111827]'
