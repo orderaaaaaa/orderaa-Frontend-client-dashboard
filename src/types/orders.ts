@@ -37,16 +37,11 @@ export interface Variant {
 export interface Product {
   id: number;
   name: string;
-  size?: string;
-  color?: string;
-  material?: string;
-  price?: string;
-  image?: string;
-  variants?: Variant[]; // Change from string[] to Variant[]
-  createdAt?: string;
-  updatedAt?: string;
-  weight?: string;
-  manufactureCompany?: string;
+  price: string;
+  image: string;
+  variants: Variant[]; // Change from string[] to Variant[]
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Selected Product Interface (product with only the selected variant)

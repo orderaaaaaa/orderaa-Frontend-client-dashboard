@@ -13,6 +13,18 @@ export function SvgIcon({
   className = 'h-5 w-5',
   alt = 'icon',
 }: SvgIconProps) {
+  // Check if it's an SVG file
+  const isSvg = src.toLowerCase().endsWith('.svg');
+
+  if (isSvg) {
+    // For SVG files, use a regular img tag to avoid Next.js Image optimization issues
+    return (
+      <div className={className}>
+        <img src={src} alt={alt} className="w-full h-full" />
+      </div>
+    );
+  }
+
   return (
     <div className={className}>
       <Image

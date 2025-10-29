@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useProductDropdownStore } from '@/store/productDropdownStore';
-import { Pen, Trash2 } from 'lucide-react';
+import { Pen, Plus, Trash2 } from 'lucide-react';
 
 function Products() {
   // Access the store to get selected products
@@ -33,10 +33,10 @@ function Products() {
     <div className="bg-gray-50 px-6 flex items-center justify-center" dir="rtl">
       <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-2 p-8 shadow-sm">
         <header>
-          <h1 className="font-bold text-[28px] mb-10">المنتجات</h1>
+          <h1 className="font-bold text-[28px]">المنتجات</h1>
 
           <div>
-            <div className="mt-6 bg-[#EAEAEA40] p-4 mb-2 rounded-sm grid grid-cols-[1fr_2fr_1fr] text-sm font-semibold text-center">
+            <div className="mt-4 bg-[#EAEAEA40] p-4 mb-2 rounded-sm grid sm:grid-cols-[1fr_2fr_1fr] grid-cols-[5fr_3fr_1fr] text-sm font-semibold text-center">
               <div className="text-start sm:mr-20">المنتج</div>
               <div>الكميه</div>
               <div className="text-end sm:ml-20">الاجمالي</div>
@@ -51,7 +51,7 @@ function Products() {
             {selectedProducts.map((product) => (
               <div
                 key={product.id}
-                className="bg-white relative max-sm:p-0 p-4 rounded-sm border-b border-gray-200 grid grid-cols-[1fr_2fr_3fr] sm:grid-cols-[1fr_2fr_1fr] items-center"
+                className="bg-white relative max-sm:p-0 p-4 rounded-sm border-b border-gray-200 grid grid-cols-[7fr_10px_3fr]  sm:grid-cols-[1fr_2fr_1fr] items-center"
               >
                 {/* Product Column */}
                 <div className="flex items-center gap-3 max-sm:gap-2">
@@ -86,11 +86,11 @@ function Products() {
 
                 {/* Quantity Column */}
                 <div className="text-center">
-                  <span className="text-gray-700 text-sm">1</span>
+                  <span className="text-gray-700 text-sm ">1</span>
                 </div>
 
                 {/* Total Column */}
-                <div className="flex items-center justify-end gap-4 max-sm:ml-0 ml-13">
+                <div className="flex items-center justify-end gap-1 max-sm:ml-0 ml-13 mt-1">
                   <h2 className="text-gray-700 max-sm:text-[12px]">
                     {product.price} ج.م
                   </h2>
@@ -100,7 +100,7 @@ function Products() {
                 </div>
                 <button
                   onClick={() => removeProduct(product.id)}
-                  className="text-red-500 absolute left-3 bottom-3 sm:bottom-[40%]  cursor-pointer hover:text-red-700"
+                  className="text-red-500 absolute left-3 bottom-1 sm:bottom-[40%]  cursor-pointer hover:text-red-700"
                 >
                   <Trash2 className="w-4" />
                 </button>
@@ -117,19 +117,9 @@ function Products() {
             </div>
             <button
               onClick={handleAddOrder}
-              className="w-40 flex items-center justify-center p-3 rounded-full bg-[#5D24E1] text-white hover:bg-[#4a1fa8] transition-colors"
+              className="w-30 flex items-center gap-1 cursor-pointer justify-center px-3 mb-4 py-2 rounded-full bg-[#5D24E1] text-white hover:bg-[#4a1fa8] transition-colors"
             >
-              <svg
-                className="w-5 h-5 ml-2"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <Plus className="w-4 h-4 mt-1 " />
               <span>إضافه منتج</span>
             </button>
           </div>

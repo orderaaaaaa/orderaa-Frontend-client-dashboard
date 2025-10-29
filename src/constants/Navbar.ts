@@ -10,7 +10,7 @@ import {
   File,
 } from 'lucide-react';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
-import { CartIcon } from '@/components/icons'; // Import from your icons registry
+import { CartIcon, ExcelIcon } from '@/components/icons'; // Import from your icons registry
 
 export type NavigationItem = {
   name: string;
@@ -93,9 +93,9 @@ export const navigation: NavigationItem[] = [
         icon: FolderPlus,
       },
       {
-        name: 'إضافة طلب ايكسيل',
+        name: 'إضافة طلب Excel',
         href: '/dashboard/upload-products/excel',
-        icon: File,
+        icon: ExcelIcon,
       },
       {
         name: 'اضافة طلب Ai',
