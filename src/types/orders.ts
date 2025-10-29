@@ -98,7 +98,7 @@ export interface FilterOrdersDto {
   limit?: number;
 }
 export interface DropdownContentProps {
-  filteredProducts: Product[];
+  filteredProducts: Product[] | any;
   selectedVariants: Record<number, Variant | undefined>;
   expandedProductId: number | null;
   onProductClick: (product: Product) => void;

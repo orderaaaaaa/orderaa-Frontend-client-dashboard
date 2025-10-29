@@ -31,7 +31,7 @@ export const DropdownContent: React.FC<DropdownContentProps> = ({
         </div>
       ) : (
         <div className="pb-4">
-          {filteredProducts.map((product) => (
+          {filteredProducts.map((product: any) => (
             <ProductRow
               key={product.id}
               product={product}
