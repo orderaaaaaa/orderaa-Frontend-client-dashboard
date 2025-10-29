@@ -4,9 +4,12 @@ import { Textarea } from '@/components/ui/textarea';
 
 function ClientInformation() {
   return (
-    <div className="bg-gray-50 px-6 flex items-center justify-center" dir="rtl">
-      <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-2 p-8 shadow-sm">
-        <h1 className="font-bold text-[28px] mb-6">معلومات العميل</h1>
+    <div
+      className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center"
+      dir="rtl"
+    >
+      <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
+        <h1 className="font-bold text-[22px] mb-6">معلومات العميل</h1>
         <div className="grid grid-cols-2 max-sm:grid-cols-1 gap-8">
           {/* username */}
           <Input
@@ -51,15 +54,14 @@ function ClientInformation() {
         </div>
         <div className="flex flex-col gap-10 mt-7">
           <Textarea
-            // label="اختر المحافظه"
-            name=""
+            label="اختر المحافظه"
+            name="address"
             placeholder="اسم الشارع، رقم المبنى، الشقة، إلخ"
-            className="max-w-[1158px] h-[162px] mt-3 bg-[#EAEAEA40]"
-            //   value=
+            className="max-w-[1158px] h-[162px] mt-3 bg-[#EAEAEA40] "
             onChange={() => {}}
           />
           <Textarea
-            // label="اختر المحافظه"
+            label="ملاحظات العميل"
             name=""
             placeholder="اسم الشارع، رقم المبنى، الشقة، إلخ"
             className="max-w-[1158px] h-[162px] mt-3 bg-[#EAEAEA40] mb-10"

@@ -6,16 +6,17 @@ import { useProductDropdownStore } from '@/store/productDropdownStore';
 
 function OrderDetails() {
   // Use the store to get selected products
-  const selectedProducts = useProductDropdownStore(
-    (state) => state.selectedProducts
-  );
-
-  console.log(selectedProducts);
+  // const selectedProducts = useProductDropdownStore(
+  //   (state) => state.selectedProducts
+  // );
 
   return (
-    <div className="bg-gray-50 px-6 flex items-center justify-center" dir="rtl">
-      <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-2 p-8 shadow-sm">
-        <h1 className="font-bold text-[28px] mb-6">تفاصيل المنتج</h1>
+    <div
+      className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center"
+      dir="rtl"
+    >
+      <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
+        <h1 className="font-bold text-[22px] mb-6">تفاصيل المنتج</h1>
         <div className="mb-5">
           <ProductDropdown
             label="اسم المنتج"

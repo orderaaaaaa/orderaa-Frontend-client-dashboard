@@ -30,10 +30,13 @@ function Products() {
   };
 
   return (
-    <div className="bg-gray-50 px-6 flex items-center justify-center" dir="rtl">
-      <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-2 p-8 shadow-sm">
+    <div
+      className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center"
+      dir="rtl"
+    >
+      <div className="w-full bg-white border max-sm:p-5 border-gray-200 rounded-xl p-8 shadow-sm">
         <header>
-          <h1 className="font-bold text-[28px]">المنتجات</h1>
+          <h1 className="font-bold text-[22px]">المنتجات</h1>
 
           <div>
             <div className="mt-4 bg-[#EAEAEA40] p-4 mb-2 rounded-sm grid sm:grid-cols-[1fr_2fr_1fr] grid-cols-[5fr_3fr_1fr] text-sm font-semibold text-center">

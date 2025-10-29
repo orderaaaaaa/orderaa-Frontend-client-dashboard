@@ -22,58 +22,63 @@ export default function Input({
   error,
   register,
   icon: Icon,
-  className,
+  className = '',
   value,
   onChange,
   ...rest
 }: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
-  // Use px-10 for left and right padding if both icons could exist
-  const inputClassName =
-    `w-full border border-[#CED4DA] rounded-lg py-2.5 px-10 text-[18px] ${
-      className ?? ''
-    }`.trim();
-
-  // Decide input type
+  // Determine the correct input type (for password visibility toggle)
   const inputType =
     type === 'password' ? (showPassword ? 'text' : 'password') : type;
 
   return (
-    <div>
-      <label htmlFor={name} className="block font-medium text-[16px] mb-1">
-        {label}
-      </label>
+    <div className="w-full">
+      {label && (
+        <label htmlFor={name} className="block font-medium text-[16px] mb-1">
+          {label}
+        </label>
+      )}
+
       <div className="relative">
-        {/* Eye icon (for password) on the LEFT */}
+        {/* 👁 Password toggle (left side) */}
         {type === 'password' && (
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 focus:outline-none"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 focus:outline-none"
             tabIndex={-1}
           >
             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         )}
+
+        {/* 🟣 Main Input */}
         <input
           type={inputType}
           id={name}
           name={name}
           placeholder={placeholder}
-          className={inputClassName}
+          className={`w-full rounded-lg py-2.5 px-10 text-[18px] 
+            border-[0.5px] border-[#5D24E1] bg-[#EAEAEA40] 
+            focus:border-[#5D24E1] focus:ring-[3px] focus:ring-[#5D24E1]/50 
+            outline-none transition duration-150 ease-in-out 
+            disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
           value={value}
           onChange={onChange}
-          {...(register ? { ...register(name) } : {})}
+          {...(register ? register(name) : {})}
           {...rest}
         />
-        {/* Optional icon on the RIGHT */}
+
+        {/* Optional right-side icon */}
         {Icon && (
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
             <Icon size={20} />
           </div>
         )}
       </div>
+
       {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </div>
   );
