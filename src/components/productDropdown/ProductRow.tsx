@@ -22,7 +22,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
   onProductClick,
   onVariantSelect,
 }) => {
-  const hasVariants = (product.variants?.length ?? 0) > 0;
+  const hasVariants = (product.varients?.length ?? 0) > 0;
 
   return (
     <div
@@ -40,7 +40,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
         <div className="w-1/4 flex justify-center">
           <div className="relative h-12 w-12 overflow-hidden rounded-md border border-gray-200">
             <Image
-              src={product.image}
+              src={product.image as string}
               alt={product.name}
               fill
               className="object-cover"
@@ -64,7 +64,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
           onClick={(e) => e.stopPropagation()}
         >
           <div className="space-y-2">
-            {product.variants.map((variant) => (
+            {product.varients!.map((variant) => (
               <label
                 key={`${product.id}-${variant.id}`}
                 className="flex items-center gap-3 cursor-pointer hover:text-[#5D24E1] transition-colors"

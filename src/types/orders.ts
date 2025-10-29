@@ -36,22 +36,6 @@ export interface Variant {
   size: string;
 }
 
-// Product Interface
-export interface Product {
-  id: number;
-  name: string;
-  price: string;
-  image: string;
-  variants: Variant[]; // Change from string[] to Variant[]
-  color: string;
-  material: string;
-  weight: string;
-  size: string;
-  manufactureCompany: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 // Selected Product Interface (product with only the selected variant)
 export interface SelectedProduct {
   id: number;
@@ -61,17 +45,6 @@ export interface SelectedProduct {
   variant: Variant;
   createdAt: string;
   updatedAt: string;
-}
-
-// Order Product Interface
-export interface OrderProduct {
-  id: number;
-  orderId: number;
-  productId: number;
-  quantity: number;
-  price: number;
-  product: Product;
-  variant: string;
 }
 
 // Order Interface
@@ -150,4 +123,165 @@ export interface ProductDropdownProps {
   placeholderClassName?: string;
   placeholderStyle?: React.CSSProperties;
   onAddProductClick?: (selectedProducts: SelectedProduct[]) => void;
+}
+
+// Order Format Enum
+export enum OrderFormat {
+  APP = 'APP',
+  EASYORDER = 'EASYORDER',
+}
+
+// Customer Interface
+export interface Customer {
+  id: number;
+  name: string;
+  phoneNumber: string;
+  altPhone?: string;
+  address?: string;
+  governorate?: string;
+  city?: string;
+  area?: string;
+}
+
+// Product Interface
+export interface Product {
+  id: number;
+  name: string;
+  size?: string;
+  color?: string;
+  material?: string;
+  weight?: string;
+  varients?: Variant[];
+  price: number;
+  sku?: string;
+  image?: string;
+  manufactureCompany?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Order Product Interface
+export interface OrderProduct {
+  id: number;
+  orderId: number;
+  productId: number;
+  quantity: number;
+  price: number;
+  sku?: string;
+  variant?: string;
+  product: Product;
+}
+
+// Order Interface
+export interface Order {
+  id: number;
+  code: string;
+  status: OrderStatus;
+  totalCost: number;
+  numberOfTriesToReach: number;
+  notes?: string;
+  format: OrderFormat;
+
+  // Order details
+  shippingCost?: number;
+  paymentStatus?: string;
+  paymentMethod?: string;
+  coupon?: string;
+  couponDiscount?: number;
+
+  // Marketing & tracking
+  utmSource?: string;
+  utmCampaign?: string;
+
+  // External integrations
+  externalOrderId?: string;
+  referralCode?: string;
+
+  createdAt: string;
+  updatedAt: string;
+  merchantId: number;
+  customerId: number;
+  customer: Customer;
+  orderProducts: OrderProduct[];
+}
+
+// Filter DTO (matching backend FilterOrdersDto)
+export interface FilterOrdersDto {
+  status?: OrderStatus;
+  search?: string;
+  customerName?: string;
+  customerPhone?: string;
+  governorate?: string;
+  city?: string;
+  area?: string;
+  productName?: string;
+  page?: number;
+  limit?: number;
+  merchantId?: string;
+  customerId?: string;
+  code?: string;
+  totalCost?: string;
+  numberOfTriesToReach?: string;
+  createdAfter?: string;
+  createdBefore?: string;
+}
+
+// Pagination Response
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+// Legacy filters (for FilterSection component)
+export interface OrderFilters {
+  productName: string;
+  sizeColor: string;
+  governorate: string;
+  city: string;
+  area: string;
+  shipmentCode: string;
+  customerName: string;
+  phone: string;
+  address: string;
+  executionDate?: string;
+}
+
+export interface FilterOptions {
+  productOptions: string[];
+  sizeColorOptions: string[];
+  governorateOptions: string[];
+  areaOptions: string[];
+}
+
+// Filter Options Response (from backend)
+export interface FilterOptionsData {
+  governorates: string[];
+  cities: string[];
+  areas: string[];
+  productNames: string[];
+  productSizes: string[];
+  productColors: string[];
+}
+
+export interface FilterOptionsResponse {
+  success: boolean;
+  data: FilterOptionsData;
+}
+
+// Order Statistics Response (from backend)
+export interface OrderStatistics {
+  totalOrders: number;
+  statusCounts: Record<string, number>;
+  totalRevenue: number;
+  averageOrderValue: number;
+}
+
+export interface OrderStatisticsResponse {
+  success: boolean;
+  data: OrderStatistics;
 }

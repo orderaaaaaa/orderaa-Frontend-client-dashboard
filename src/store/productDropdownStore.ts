@@ -142,7 +142,7 @@ export const useProductDropdownStore = create<ProductDropdownState>(
         variant: selection.variant,
         createdAt: selection.product.createdAt ?? '',
         updatedAt: selection.product.updatedAt ?? '',
-      }));
+      })) as any;
 
       set({
         selectedProducts: newProducts,
