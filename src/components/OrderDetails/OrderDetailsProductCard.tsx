@@ -12,7 +12,7 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
     color: orderProduct.product.color || orderProduct.variant || '',
     prop: orderProduct.product.size || orderProduct.quantity,
     price: orderProduct.price,
-    img: '/wireless-headphones.png',
+    img: orderProduct.product.image || '/wireless-headphones.png',
   })) || [];
 
   return (
