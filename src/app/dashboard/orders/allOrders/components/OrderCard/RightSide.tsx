@@ -30,10 +30,8 @@ export default function RightSide({
       </div>
       <Content icon="user" content={name} />
       <Content icon="phone" content={phone} />
-      <div className="flex gap-2">
-        <Content icon="location" content={government} />
-        <span className="font-bold">-</span>
-        <Content content={city} />
+      <div className="flex gap-2 items-center">
+        <Content icon="location" content={`${government} - ${city}`} />
       </div>
       {items?.map((item, index) => (
         <Content key={index} icon="package" content={item} />
