@@ -8,6 +8,7 @@ import {
   LucideProps,
   FolderPlus,
   File,
+  Link2,
 } from 'lucide-react';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
 import { CartIcon, ExcelIcon } from '@/components/icons'; // Import from your icons registry
@@ -16,10 +17,10 @@ export type NavigationItem = {
   name: string;
   href: string;
   icon?:
-    | ForwardRefExoticComponent<
-        Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>
-      >
-    | ((props: { className?: string }) => JSX.Element);
+  | ForwardRefExoticComponent<
+    Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>
+  >
+  | ((props: { className?: string }) => JSX.Element);
   children?: NavigationItem[];
 };
 
@@ -107,5 +108,10 @@ export const navigation: NavigationItem[] = [
         icon: ListPlus,
       },
     ],
+  },
+  {
+    name: 'الربط مع متجر خارجي',
+    href: '/dashboard/integrations',
+    icon: Link2,
   },
 ];
