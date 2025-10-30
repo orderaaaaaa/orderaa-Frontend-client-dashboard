@@ -21,12 +21,9 @@ function Products() {
     return sum + parseInt(product.price);
   }, 0);
 
-  // Handle add order
-  const handleAddOrder = () => {
-    console.log('Order created with products:', selectedProducts);
-    console.log('Total price:', totalPrice);
-    // Here you would typically send the order to your API
-    alert(`تم إنشاء الطلب بنجاح! المجموع: ${totalPrice} ج.م`);
+  // Open product selection modal
+  const handleOpenProductModal = () => {
+    useProductDropdownStore.setState({ isOpen: true });
   };
 
   return (
@@ -119,7 +116,7 @@ function Products() {
               المجموع الكلي: {totalPrice} ج.م
             </div>
             <button
-              onClick={handleAddOrder}
+              onClick={handleOpenProductModal}
               className="w-30 flex items-center gap-1 cursor-pointer justify-center px-3 mb-4 py-2 rounded-full bg-[#5D24E1] text-white hover:bg-[#4a1fa8] transition-colors"
             >
               <Plus className="w-4 h-4 mt-1 " />
