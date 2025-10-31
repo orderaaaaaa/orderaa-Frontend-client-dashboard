@@ -21,7 +21,7 @@ export default function CylinderChartSVG() {
       {/* Header */}
       <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-6">
         <h2 className="font-bold text-lg text-right text-gray-900">
-          طلبات تم المحاولة
+          محاولات تأكيد الطلبات{' '}
         </h2>
       </div>
       <div className="flex flex-col md:flex-row justify-center p-1 w-full max-w-3xl gap-11 mt-9">

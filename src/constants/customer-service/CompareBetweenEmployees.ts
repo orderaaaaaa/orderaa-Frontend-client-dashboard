@@ -1,3 +1,5 @@
+// constants/customer-service/CompareBetweenEmployees.ts
+
 export const TABLE_HEADERS = [
   { id: 1, key: 'name', label: 'الاسم' },
   { id: 2, key: 'performance', label: 'الاداء' },
@@ -65,4 +67,56 @@ export const TABLE_DATA = [
     breakDuration: '40 دقيقة',
   },
   // Add more data objects as needed
+];
+
+// NEW DATA FOR THE SECOND TABLE
+export const NEW_TABLE_HEADERS = [
+  { id: 1, key: 'employee', label: 'الموظف' },
+  { id: 2, key: 'totalCalls', label: 'إجمالي المكالمات' },
+  { id: 3, key: 'confirmed', label: 'تأكيد' },
+  { id: 4, key: 'postponed', label: 'تاجيل' },
+  { id: 5, key: 'noProfit', label: 'عدم الربح' },
+  { id: 6, key: 'employmentDuration', label: 'المدة التوظف' },
+  { id: 7, key: 'afterIntention', label: 'بعد النواي' },
+  { id: 8, key: 'afterNext', label: 'بعد التالية' },
+  { id: 9, key: 'thirdAverage', label: 'بمدل الثالثة' },
+];
+
+export const NEW_TABLE_DATA = [
+  {
+    id: 1,
+    employee: 'ساره خالد',
+    totalCalls: '136',
+    confirmed: '136',
+    postponed: '112',
+    noProfit: '112',
+    employmentDuration: '106/أمتر',
+    afterIntention: '14%',
+    afterNext: '14%',
+    thirdAverage: '14%',
+  },
+  {
+    id: 2,
+    employee: 'ساره خالد',
+    totalCalls: '136',
+    confirmed: '136',
+    postponed: '112',
+    noProfit: '112',
+    employmentDuration: '106/أمتر',
+    afterIntention: '14%',
+    afterNext: '14%',
+    thirdAverage: '14%',
+  },
+  {
+    id: 3,
+    employee: 'ساره خالد',
+    totalCalls: '136',
+    confirmed: '136',
+    postponed: '112',
+    noProfit: '112',
+    employmentDuration: '106/أمتر',
+    afterIntention: '14%',
+    afterNext: '14%',
+    thirdAverage: '14%',
+  },
 ];

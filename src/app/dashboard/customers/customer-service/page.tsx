@@ -12,6 +12,9 @@ import SuccessfulCallTime from './components/Charts/SuccessCallesTimeChart';
 import OrdersDone from './components/Charts/OrdersDone';
 import ConfirmationAttempts from './components/Charts/ConfirmationAttemptsCart';
 import BestEmployeesChart from './components/Charts/BestEmployeesChart';
+import EgyptMapSection from './EgyptMapSection';
+import AverageCallDurationChart from './components/Charts/AverageCallDurationChart';
+import DistributingCallsToConfirmOrders from './components/Charts/DistributingCallsToConfirmOrders';
 
 function CustomerService() {
   return (
@@ -25,14 +28,15 @@ function CustomerService() {
         <SuccessfulCallTime />
         <ConfirmationAttempts />
         <OrdersDone />
-        <ConfirmationAttempts />
-        <ConfirmationAttempts />
+        <AverageCallDurationChart />
+        <DistributingCallsToConfirmOrders />
       </div>
       {/* <BestEmployeesChart /> */}
       <CompareCompare />
       <CallDetails />
       <CompareBetweenEmployees />
-      {/* <StopHours /> */}
+      <StopHours />
+      <EgyptMapSection />
     </>
   );
 }

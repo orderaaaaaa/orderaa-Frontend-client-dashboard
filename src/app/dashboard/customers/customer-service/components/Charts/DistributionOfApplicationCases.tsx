@@ -84,7 +84,7 @@ export default function OrdersStatusChart(): JSX.Element {
   return (
     <div className="w-full max-w-3xl p-6 bg-white rounded-2xl shadow-xl">
       <h2 className="font-bold text-lg mb-2 border-b border-gray-200 pb-2">
-        توزيع حالات الطلبات
+        توزيع حالات الطلبات{' '}
       </h2>
       <div className="flex flex-col md:flex-row items-center justify-center p-1 w-full max-w-3xl gap-10 mt-9">
         {/* Legend (all 8 items) */}

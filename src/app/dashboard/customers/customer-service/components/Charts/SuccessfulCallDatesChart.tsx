@@ -8,6 +8,11 @@ import {
   Tooltip,
   CartesianGrid,
 } from 'recharts';
+
+import {
+  CustomActiveDot,
+  CustomTooltipArabic,
+} from '@/components/ui/CustomChartDots';
 interface EmployeeData {
   label: string;
   بوستينا: number;
@@ -28,8 +33,10 @@ function SuccessfulCallDates() {
 
   return (
     <div className="w-full max-w-3xl p-6 bg-white rounded-2xl shadow-xl">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-semibold">اجمالي الطلبات</h3>
+      <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-6">
+        <h2 className="font-bold text-lg text-right text-gray-900">
+          مواعيد المكالمات الناجحة{' '}
+        </h2>
       </div>
 
       <div style={{ width: '100%', height: '100%' }}>
