@@ -129,30 +129,38 @@ export const useProductDropdownStore = create<ProductDropdownState>(
     },
 
     confirmSelections: () => {
-      const { pendingSelections } = get();
+      const { pendingSelections, selectedProducts } = get();
 
-      // Convert pending selections to SelectedProduct format (product + selected variant only)
       const newProducts: SelectedProduct[] = Object.values(
         pendingSelections
       ).map((selection) => ({
         id: selection.product.id,
         name: selection.product.name,
-        price: selection.product.price ?? '',
-        image: selection.product.image ?? '',
+        price: (selection.product as any).price ?? '',
+        image: (selection.product as any).image ?? '',
         variant: selection.variant,
-        createdAt: selection.product.createdAt ?? '',
-        updatedAt: selection.product.updatedAt ?? '',
+        createdAt: (selection.product as any).createdAt ?? '',
+        updatedAt: (selection.product as any).updatedAt ?? '',
       })) as any;
 
+      // Merge with existing without duplicating same product+variant
+      const merged = [...selectedProducts];
+      for (const p of newProducts) {
+        const exists = merged.some(
+          (m) => m.id === p.id && m.variant?.id === p.variant?.id
+        );
+        if (!exists) merged.push(p);
+      }
+
       set({
-        selectedProducts: newProducts,
+        selectedProducts: merged,
         pendingSelections: {},
         selectedVariants: {},
         isOpen: false,
         expandedProductId: null,
       });
 
-      return newProducts;
+      return merged;
     },
 
     reset: () => {

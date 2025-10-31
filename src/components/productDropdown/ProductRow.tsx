@@ -22,7 +22,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
   onProductClick,
   onVariantSelect,
 }) => {
-  const hasVariants = (product.varients?.length ?? 0) > 0;
+  const hasVariants = product.variants?.length;
 
   return (
     <div
@@ -60,11 +60,11 @@ export const ProductRow: React.FC<ProductRowProps> = ({
       {/* Variants Section */}
       {isExpanded && hasVariants && (
         <div
-          className="p-4 pr-8 border-t border-gray-200 bg-white"
+          className="py-4 mr-10 border-t border-gray-200 bg-white"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="space-y-2">
-            {product.varients!.map((variant) => (
+            {product.variants!.map((variant) => (
               <label
                 key={`${product.id}-${variant.id}`}
                 className="flex items-center gap-3 cursor-pointer hover:text-[#5D24E1] transition-colors"

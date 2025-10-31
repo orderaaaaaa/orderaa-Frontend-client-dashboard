@@ -35,37 +35,38 @@ export default function Dropdown({
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [flashKey, setFlashKey] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
-  // Filter options based on search
   const filteredOptions = Array.isArray(options)
     ? options.filter((option) =>
         option.value.toLowerCase().includes(search.toLowerCase())
       )
     : [];
 
-  // Find the selected option value
   const selectedOption = options.find((opt) => opt.key === value);
 
-  // Close dropdown if clicked outside
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     }
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClick);
-    }
+    if (isOpen) document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [isOpen]);
 
-  // Set input value logic
   const inputValue = isOpen
     ? search
     : selectedOption
     ? selectedOption.value
     : search;
+
+  // === handle flash on click ===
+  const handleFlash = (key: string) => {
+    setFlashKey(key);
+    setTimeout(() => setFlashKey(null), 200); // reset after 200ms
+  };
 
   return (
     <div ref={ref} className={className ? className : 'w-full'}>
@@ -73,11 +74,11 @@ export default function Dropdown({
         <label className="block mb-1 font-medium text-[16px]">{label}</label>
       )}
       <div className="relative">
-        {/* Dropdown Arrow on the LEFT - Clickable */}
+        {/* ▼ Button */}
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="absolute cursor-pointer left-5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
+          className="absolute cursor-pointer left-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
           aria-label="Toggle dropdown"
         >
           <ChevronDown
@@ -87,33 +88,42 @@ export default function Dropdown({
             }`}
           />
         </button>
-        {/* Optional icon on the RIGHT */}
+
+        {/* Optional icon */}
         {Icon && (
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
             <Icon size={20} />
           </div>
         )}
+
+        {/* Input */}
         <input
           type="text"
           value={inputValue}
           onChange={(e) => {
             setSearch(e.target.value);
             setIsOpen(true);
-            // Do not clear selection on search
           }}
           onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
           className={
             selectClassName
               ? selectClassName
-              : `w-full border border-[#CED4DA] rounded-lg py-2.5 px-10 text-[18px] ${
-                  value
-                    ? 'text-[#111827]'
-                    : placeholderClassName ?? 'text-[#878A99]'
-                }`
+              : `w-full border-2  rounded-lg py-2.5 px-10 text-[18px]
+                 bg-[#EAEAEA40]  
+                 outline-none transition duration-150 ease-in-out 
+                 border-[#5D24E1]
+                 focus:border-[#5D24E1] !focus:!ring-4 focus:!ring-[#5D24E1]/50 accent-amber-100
+                 ${
+                   value
+                     ? 'text-[#111827]'
+                     : placeholderClassName ?? 'text-[#878A99]'
+                 }`
           }
           style={!value && placeholderStyle ? placeholderStyle : undefined}
         />
+
+        {/* Dropdown Menu */}
         {isOpen && (
           <ul className="absolute z-10 left-0 right-0 bg-white border border-[#CED4DA] rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
             {filteredOptions.length === 0 ? (
@@ -122,11 +132,21 @@ export default function Dropdown({
               filteredOptions.map((option) => (
                 <li
                   key={option.key}
-                  className={`px-3 py-2 cursor-pointer hover:bg-gray-100 ${
-                    value === option.key ? 'bg-gray-200' : ''
-                  }`}
+                  className={`px-3 py-2 cursor-pointer select-none transition-colors duration-150
+                    ${
+                      value === option.key
+                        ? 'bg-[#5D24E1] text-white'
+                        : flashKey === option.key
+                        ? 'bg-[#5D24E1]/70 text-white'
+                        : 'text-[#1F1F1F]'
+                    }
+                    hover:bg-[#5D24E1] hover:text-white 
+                    md:hover:bg-[#5D24E1] md:hover:text-white 
+                    md:active:scale-95 active:bg-[#5D24E1]/80 active:text-white
+                  `}
                   onClick={() => {
                     onChange(option.key);
+                    handleFlash(option.key);
                     setSearch('');
                     setIsOpen(false);
                   }}

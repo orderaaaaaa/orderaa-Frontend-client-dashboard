@@ -21,19 +21,19 @@ function Products() {
     return sum + parseInt(product.price);
   }, 0);
 
-  // Handle add order
-  const handleAddOrder = () => {
-    console.log('Order created with products:', selectedProducts);
-    console.log('Total price:', totalPrice);
-    // Here you would typically send the order to your API
-    alert(`تم إنشاء الطلب بنجاح! المجموع: ${totalPrice} ج.م`);
+  // Open product selection modal
+  const handleOpenProductModal = () => {
+    useProductDropdownStore.setState({ isOpen: true });
   };
 
   return (
-    <div className="bg-gray-50 px-6 flex items-center justify-center" dir="rtl">
-      <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-2 p-8 shadow-sm">
+    <div
+      className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center"
+      dir="rtl"
+    >
+      <div className="w-full bg-white border max-sm:p-5 border-gray-200 rounded-xl p-8 shadow-sm">
         <header>
-          <h1 className="font-bold text-[28px]">المنتجات</h1>
+          <h1 className="font-bold text-[22px]">المنتجات</h1>
 
           <div>
             <div className="mt-4 bg-[#EAEAEA40] p-4 mb-2 rounded-sm grid sm:grid-cols-[1fr_2fr_1fr] grid-cols-[5fr_3fr_1fr] text-sm font-semibold text-center">
@@ -116,7 +116,7 @@ function Products() {
               المجموع الكلي: {totalPrice} ج.م
             </div>
             <button
-              onClick={handleAddOrder}
+              onClick={handleOpenProductModal}
               className="w-30 flex items-center gap-1 cursor-pointer justify-center px-3 mb-4 py-2 rounded-full bg-[#5D24E1] text-white hover:bg-[#4a1fa8] transition-colors"
             >
               <Plus className="w-4 h-4 mt-1 " />
