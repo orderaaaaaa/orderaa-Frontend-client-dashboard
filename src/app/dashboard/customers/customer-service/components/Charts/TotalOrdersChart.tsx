@@ -8,7 +8,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
   CartesianGrid,
 } from 'recharts';
 
@@ -41,7 +40,7 @@ export default function GradientAreaChart() {
       { label: 'W4', value1: 260, value2: 170, value3: 80 },
     ],
     month: [
-      { label: 'Jan', value1: 270, value2: 180, value3: 70 },
+      { label: 'Jan', value1: 130, value2: 60, value3: 30 },
       { label: 'Feb', value1: 250, value2: 170, value3: 80 },
       { label: 'Mar', value1: 280, value2: 200, value3: 90 },
       { label: 'Apr', value1: 300, value2: 220, value3: 100 },
@@ -103,7 +102,11 @@ export default function GradientAreaChart() {
               </linearGradient>
             </defs>
 
-            <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+            <XAxis
+              dataKey="label"
+              tick={{ fontSize: 12 }}
+              padding={{ left: 50, right: 50 }} // Add padding to start and end
+            />
             <YAxis
               domain={[0, 300]}
               ticks={[0, 60, 120, 180, 240, 300]}

@@ -12,7 +12,7 @@ const hoursConst = [
 
 function StopHours() {
   return (
-    <div className="w-full max-w-full p-6 bg-white mt-10 rounded-2xl shadow-xl py-10">
+    <div className="w-full p-6 bg-white mt-10 rounded-2xl shadow-xl py-10">
       <h1 className="text-xl font-semibold text-[#292D32]">ساعات التوقف</h1>
 
       <div className="!w-full flex items-center justify-between max-md:flex-col-reverse max-md:gap-10 mt-10 px-8">
@@ -70,17 +70,15 @@ function StopHours() {
         </div>
 
         {/* Right side - circular info */}
-        <div className="flex flex-col items-center relative ">
-          <div className="">
-            <div>
-              <h3 className="mb-5 font-medium text-[#292D32] w-[300px]">
-                اول محاولة التواصل بعد الطلب
-              </h3>
-            </div>
-            <div className="flex flex-col justify-center h-[200px] w-[200px] shadow-xl items-center py-5 bg-gradient-to-b from-[#321082] to-[#7849E6] rounded-full text-white">
-              <h3 className="font-medium text-[32px]">50</h3>
-              <p className="text-xl">ساعه</p>
-            </div>
+        <div className="flex flex-col items-center lg:relative lg:left-30 lg:bottom-4 ">
+          <div>
+            <h3 className="mb-5 font-medium text-[#292D32] w-[300px] text-center">
+              اول محاولة التواصل بعد الطلب
+            </h3>
+          </div>
+          <div className="flex flex-col justify-center h-[200px] w-[200px] shadow-xl items-center py-5 bg-gradient-to-b from-[#321082] to-[#7849E6] rounded-full text-white">
+            <h3 className="font-medium text-[32px]">50</h3>
+            <p className="text-xl">ساعه</p>
           </div>
         </div>
       </div>
