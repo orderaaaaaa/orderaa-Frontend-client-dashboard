@@ -76,7 +76,9 @@ export default function OrdersStatusChart(): JSX.Element {
     animate();
   }, []);
 
-  const total = data.reduce((sum, d) => sum + d.value, 0);
+  // 🟣 Only use the first 7 slices for the chart
+  const chartData = data.slice(0, 7);
+  const total = chartData.reduce((sum, d) => sum + d.value, 0);
   let startAngle = 0;
 
   return (
@@ -85,7 +87,7 @@ export default function OrdersStatusChart(): JSX.Element {
         توزيع حالات الطلبات
       </h2>
       <div className="flex flex-col md:flex-row items-center justify-center p-1 w-full max-w-3xl gap-10 mt-9">
-        {/* Legend */}
+        {/* Legend (all 8 items) */}
         <div className="flex flex-col text-right text-gray-800 gap-2 mt-6 md:mt-0 md:mr-8 space-y-2">
           {data.map((d, i) => (
             <div key={i} className="flex items-center gap-3">
@@ -99,17 +101,18 @@ export default function OrdersStatusChart(): JSX.Element {
             </div>
           ))}
         </div>
-        {/* Chart */}
+
+        {/* Chart (only 7 slices) */}
         <svg
           viewBox="0 0 400 400"
           width={300}
           height={300}
           className="drop-shadow-2xl"
         >
-          {data.map((d, i) => {
+          {chartData.map((d, i) => {
             const sliceAngle = (d.value / total) * 360 * progress;
             const endAngle = startAngle + sliceAngle;
-            const radius = 180 - i * 8; // smaller radius each slice (polar feel)
+            const radius = 180 - i * 8;
             const path = describeArc(200, 200, radius, startAngle, endAngle);
             startAngle += sliceAngle;
             return (

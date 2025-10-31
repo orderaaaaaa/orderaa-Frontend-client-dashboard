@@ -12,9 +12,9 @@ const data = [
 export default function CylinderChartSVG() {
   const maxValue = Math.max(...data.map((d) => d.value));
   const chartHeight = 260;
-  const barWidth = 70;
+  const barWidth = 60;
   const spacing = 20;
-  const bottomY = chartHeight + 15;
+  const bottomY = chartHeight + 30;
 
   return (
     <div className="w-full max-w-3xl bg-white rounded-3xl shadow-xl p-8">
@@ -29,12 +29,12 @@ export default function CylinderChartSVG() {
         <div className="w-1/3 ps-6">
           <ul className="flex flex-col gap-8 text-right">
             {data.map((d, i) => (
-              <li key={i} className="flex items-center gap-3">
+              <li key={i} className="flex items-center gap-2">
                 <span
-                  className="inline-block w-7 h-7 rounded-[5px] shadow"
+                  className="inline-block w-5 h-5 rounded-[5px] shadow"
                   style={{ backgroundColor: d.color }}
                 ></span>
-                <span className="text-gray-800 text-lg font-semibold">
+                <span className="text-gray-800 text-[15px] font-medium">
                   {d.label}
                 </span>
                 <span className="text-gray-800/50 text-lg font-semibold">

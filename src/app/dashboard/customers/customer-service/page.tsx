@@ -11,23 +11,24 @@ import SuccessfulCallDates from './components/Charts/SuccessfulCallDatesChart';
 import SuccessfulCallTime from './components/Charts/SuccessCallesTimeChart';
 import OrdersDone from './components/Charts/OrdersDone';
 import ConfirmationAttempts from './components/Charts/ConfirmationAttemptsCart';
+import BestEmployeesChart from './components/Charts/BestEmployeesChart';
 
 function CustomerService() {
   return (
     <>
       <TapsCustomer />
       <SummaryCard />
-      <div className="grid grid-cols-2 max-md:grid-cols-1 gap-4 mt-10 w-[100%]">
+      <div className="grid grid-cols-2 max-md:grid-cols-1 gap-4 mt-10 w-[90%]">
         <CallDistributionChart />
         <TotalOrdersChart />
         <SuccessfulCallDates />
         <SuccessfulCallTime />
         <ConfirmationAttempts />
         <OrdersDone />
-        <TotalOrdersChart />
-        <TotalOrdersChart />
-        <TotalOrdersChart />
+        <ConfirmationAttempts />
+        <ConfirmationAttempts />
       </div>
+      {/* <BestEmployeesChart /> */}
       <CompareCompare />
       <CallDetails />
       <CompareBetweenEmployees />
