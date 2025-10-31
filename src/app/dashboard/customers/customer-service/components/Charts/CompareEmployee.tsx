@@ -21,24 +21,29 @@ interface EmployeeData {
 
 export default function CompareEmployee() {
   const employeeData: EmployeeData[] = [
-    { label: 'السبت', بوستينا: 95, سارة: 42, ليان: 30 },
-    { label: 'الاحد', بوستينا: 30, سارة: 76, ليان: 30 },
-    { label: 'الاثنين', بوستينا: 68, سارة: 20, ليان: 97 },
-    { label: 'الثلاثاء', بوستينا: 15, سارة: 90, ليان: 20 },
-    { label: 'الاربعاء', بوستينا: 82, سارة: 33, ليان: 60 },
-    { label: 'الخميس', بوستينا: 99, سارة: 58, ليان: 10 },
     { label: 'الجمعة', بوستينا: 40, سارة: 95, ليان: 78 },
+    { label: 'الخميس', بوستينا: 99, سارة: 58, ليان: 10 },
+    { label: 'الاربعاء', بوستينا: 82, سارة: 33, ليان: 60 },
+    { label: 'الثلاثاء', بوستينا: 15, سارة: 90, ليان: 20 },
+    { label: 'الاثنين', بوستينا: 68, سارة: 20, ليان: 97 },
+    { label: 'الاحد', بوستينا: 30, سارة: 76, ليان: 30 },
+    { label: 'السبت', بوستينا: 95, سارة: 42, ليان: 30 },
   ];
 
   return (
-    <div className="w-full max-w-3xl p-6 bg-white ">
-      <div style={{ width: '100%', height: 350 }}>
-        <ResponsiveContainer width="100%" height="100%">
+    <div className="w-full max-md:ml-37 h-full max-w-4xl  p-6 ">
+      <div style={{ width: '100%', height: '100%' }}>
+        <ResponsiveContainer
+          width="100%"
+          maxHeight={500}
+          minWidth={370}
+          minHeight={350}
+        >
           <AreaChart
             data={employeeData}
             margin={{ top: 10, right: 30, left: -30, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="5" stroke="#A078FC" />
+            <CartesianGrid strokeDasharray="5" />
             <defs>
               <linearGradient id="colorليان" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#33147B" />
@@ -46,7 +51,11 @@ export default function CompareEmployee() {
               </linearGradient>
             </defs>
 
-            <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+            <XAxis
+              dataKey="label"
+              tick={{ fontSize: 12 }}
+              padding={{ left: 50, right: 50 }} // Add padding to start and end
+            />
             <YAxis
               domain={[0, 100]}
               ticks={[0, 20, 40, 60, 80, 100]}
@@ -56,7 +65,7 @@ export default function CompareEmployee() {
 
             <Area
               dataKey="بوستينا"
-              stroke="#33147B"
+              stroke="#5D24E1"
               strokeWidth={1}
               fill="#C3A9FF"
               fillOpacity={1}
@@ -72,8 +81,8 @@ export default function CompareEmployee() {
             />
             <Area
               dataKey="ليان"
-              stroke="#C3A9FF"
-              strokeWidth={2}
+              stroke="#CBB5FD"
+              strokeWidth={1}
               fill="url(#colorليان)"
               fillOpacity={1}
               name="ليان"

@@ -3,7 +3,11 @@ import { TABLE_DATA } from '@/constants/customer-service/CompareBetweenEmployees
 import Table from './components/Table';
 
 function CallDetails() {
-  return <Table data={TABLE_DATA} type={true} />;
+  return (
+    <>
+      <Table data={TABLE_DATA} type={true} name="تفاصيل المكالمات لكل موظف" />{' '}
+    </>
+  );
 }
 
 export default CallDetails;

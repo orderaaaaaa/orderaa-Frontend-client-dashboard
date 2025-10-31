@@ -2,7 +2,7 @@ import React from 'react';
 import SummaryCard from './SummaryCard';
 import TapsCustomer from './components/TapsCustomer';
 import TotalOrdersChart from './components/Charts/TotalOrdersChart';
-import DistributionOfApplicationCases from './components/Charts/DistributionOfApplicationCases';
+import { CallDistributionChart } from './components/Charts/DistributionOfApplicationCases';
 import StopHours from './StopHours';
 import CompareBetweenEmployees from './CompareBetweenEmployees';
 import CallDetails from './CallDetails';
@@ -23,7 +23,7 @@ function CustomerService() {
         <TotalOrdersChart />
         <TotalOrdersChart />
       </div>
-      {/* <DistributionOfApplicationCases /> */}
+      {/* <CallDistributionChart /> */}
       <CompareCompare />
       <CallDetails />
       <CompareBetweenEmployees />

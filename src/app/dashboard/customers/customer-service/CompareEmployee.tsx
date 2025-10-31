@@ -29,9 +29,9 @@ export const MOCK_EMPLOYEE_STATS = [
 
 function CompareEmployees() {
   return (
-    <div className="w-full flex flex-col lg:flex-row justify-between items-stretch gap-8 p-6 bg-white rounded-2xl shadow-xl mt-10">
+    <div className="w-full flex flex-col xl:flex-row justify-between items-stretch gap-8 p-6 bg-white rounded-2xl shadow-xl mt-10">
       {/* Employee Stats Section */}
-      <div className="w-full lg:w-[30%] flex flex-col justify-between">
+      <div className="w-full xl:w-[30%] flex flex-col justify-between">
         <h2 className="text-xl font-bold mb-4 text-right">مقارنة الموظفين</h2>
         <div className="flex flex-col gap-4 h-full">
           {MOCK_EMPLOYEE_STATS.map((employee) => (
@@ -39,7 +39,7 @@ function CompareEmployees() {
               key={employee.id}
               className="border-2 border-[#5D24E1] rounded-3xl p-4 shadow-sm hover:shadow-md transition-shadow flex-1 flex flex-col justify-center"
             >
-              <h3 className="text-lg font-semibold mb-3 text-right">
+              <h3 className="text-xl font-semibold mb-3 text-right">
                 {employee.name}
               </h3>
               <div className="grid grid-cols-2 text-right gap-2">
@@ -60,8 +60,8 @@ function CompareEmployees() {
       </div>
 
       {/* Chart Section */}
-      <div className="w-full lg:w-[60%] flex items-center justify-center">
-        <div className="rounded-lg p-4 w-full h-80 lg:h-[500px] flex items-center justify-center">
+      <div className="w-full xl:w-[70%] flex items-center justify-center">
+        <div className="rounded-xl p-4 w-full h-full xl:max-h-[500px] flex items-center justify-center">
           <AreaChartComponent />
         </div>
       </div>
