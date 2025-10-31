@@ -206,7 +206,7 @@ export default function AllOrdersRefactor() {
             </div>
           </div>
           <div className="opacity-30 pointer-events-none">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 grid-rows-3 gap-3 flex-wrap my-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 grid-rows-3 gap-3 flex-wrap my-4 justify-items-center">
               {orders.map((order) => (
                 <OrderCard
                   key={order.id}
@@ -219,11 +219,11 @@ export default function AllOrdersRefactor() {
                   code={order.code}
                   name={order.customer.name}
                   phone={order.customer.phoneNumber}
+                  altPhone={order.customer.altPhone}
                   government={order.customer.governorate || 'غير محدد'}
                   items={order.orderProducts.map(
                     (op: any) =>
-                      `${op.product.name}${
-                        op.product.size ? ` - ${op.product.size}` : ''
+                      `${op.product.name}${op.product.size ? ` - ${op.product.size}` : ''
                       }${op.product.color ? ` - ${op.product.color}` : ''}`
                   )}
                   price={order.totalCost}
@@ -247,7 +247,7 @@ export default function AllOrdersRefactor() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 grid-rows-3 gap-3 flex-wrap my-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 grid-rows-3 gap-3 flex-wrap my-4 justify-items-center">
             {orders.map((order) => (
               <OrderCard
                 key={order.id}
@@ -260,11 +260,11 @@ export default function AllOrdersRefactor() {
                 code={order.code}
                 name={order.customer.name}
                 phone={order.customer.phoneNumber}
+                altPhone={order.customer.altPhone}
                 government={order.customer.governorate || 'غير محدد'}
                 items={order.orderProducts.map(
                   (op: any) =>
-                    `${op.product.name}${
-                      op.product.size ? ` - ${op.product.size}` : ''
+                    `${op.product.name}${op.product.size ? ` - ${op.product.size}` : ''
                     }${op.product.color ? ` - ${op.product.color}` : ''}`
                 )}
                 price={order.totalCost}
