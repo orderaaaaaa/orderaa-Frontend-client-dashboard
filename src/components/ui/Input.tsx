@@ -62,7 +62,7 @@ export default function Input({
           name={name}
           placeholder={placeholder}
           className={`w-full rounded-lg py-2.5 px-10 text-[18px] 
-            border-[0.5px] border-[#5D24E1] bg-[#EAEAEA40] 
+            border-1 placeholder:text-gray-400 text-[#5D24E4] border-[#5D24E1] bg-[#EAEAEA40] 
             focus:border-[#5D24E1] focus:ring-[3px] focus:ring-[#5D24E1]/50 
             outline-none transition duration-150 ease-in-out 
             disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
