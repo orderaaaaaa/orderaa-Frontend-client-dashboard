@@ -15,22 +15,23 @@ interface EmployeeData {
   ليان: number;
 }
 
-function SuccessfulCallTime() {
+function SuccessCallesTimeChartMorning() {
   const employeeData: EmployeeData[] = [
-    { label: 'الجمعة', بوستينا: 40, سارة: 95, ليان: 78 },
-    { label: 'الخميس', بوستينا: 99, سارة: 58, ليان: 10 },
-    { label: 'الاربعاء', بوستينا: 82, سارة: 33, ليان: 60 },
-    { label: 'الثلاثاء', بوستينا: 15, سارة: 90, ليان: 20 },
-    { label: 'الاثنين', بوستينا: 68, سارة: 20, ليان: 97 },
-    { label: 'الاحد', بوستينا: 30, سارة: 76, ليان: 30 },
-    { label: 'السبت', بوستينا: 95, سارة: 42, ليان: 30 },
+    { label: '8:00am', بوستينا: 40, سارة: 95, ليان: 78 },
+    { label: '9:00am', بوستينا: 99, سارة: 58, ليان: 10 },
+    { label: '10:00am', بوستينا: 82, سارة: 33, ليان: 60 },
+    { label: '11:00am', بوستينا: 15, سارة: 90, ليان: 20 },
+    { label: '12:00am', بوستينا: 68, سارة: 20, ليان: 97 },
+    { label: '1:00pm', بوستينا: 30, سارة: 76, ليان: 30 },
+    { label: '3:00pm', بوستينا: 95, سارة: 42, ليان: 30 },
   ];
   return (
-    <div className="w-full max-w-3xl p-6 bg-white rounded-2xl shadow-xl">
+    <section className="p-6 pb-1">
       <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-6">
         <h2 className="font-bold text-lg text-right text-gray-900">
           مواعيد المكالمات الناجحة{' '}
         </h2>
+        <p>شيفت صباحي (8 إلي 12)</p>
       </div>
 
       <div style={{ width: '100%', height: '100%' }}>
@@ -42,7 +43,7 @@ function SuccessfulCallTime() {
         >
           <AreaChart
             data={employeeData}
-            margin={{ top: 10, right: 30, left: -30, bottom: 0 }}
+            margin={{ top: 10, right: 50, left: 10, bottom: 0 }}
           >
             <CartesianGrid strokeDasharray="5" />
             <defs>
@@ -94,8 +95,8 @@ function SuccessfulCallTime() {
           </AreaChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </section>
   );
 }
 
-export default SuccessfulCallTime;
+export default SuccessCallesTimeChartMorning;

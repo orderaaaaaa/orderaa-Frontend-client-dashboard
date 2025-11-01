@@ -181,3 +181,25 @@ input[type="checkbox"]:checked::after {
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
+
+/* Swiper pagination custom styling for Success Calls Time Chart */
+.success-calls-time-swiper .swiper-pagination {
+  position: relative;
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.swiper-pagination-bullet-custom {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background-color: #d1d5db;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.swiper-pagination-bullet-active-custom {
+  background-color: #5D24E1;
+}

@@ -1,18 +1,25 @@
+'use client';
 import React from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
 import SummaryCard from './components/SummaryCard';
 import TapsCustomer from './components/TapsCustomer';
 import TotalOrdersChart from './components/Charts/TotalOrdersChart';
 import CallDistributionChart from './components/Charts/DistributionOfApplicationCases';
-import StopHours from './StopHours';
-import CompareBetweenEmployees from './CompareBetweenEmployees';
-import CallDetails from './CallDetails';
-import CompareCompare from './CompareEmployee';
+import StopHours from './components/StopHours';
+import CompareBetweenEmployees from './components/CompareBetweenEmployees';
+import CallDetails from './components/CallDetails';
+import CompareCompare from './components/CompareEmployee';
 import SuccessfulCallDates from './components/Charts/SuccessfulCallDatesChart';
-import SuccessfulCallTime from './components/Charts/SuccessCallesTimeChart';
+import SuccessCallesTimeChartMorning from './components/Charts/SuccessCallesTimeChartMorning';
+import SuccessCallesTimeChartEvening from './components/Charts/SuccessCallesTimeChartEvening';
+import SuccessCallesTimeChartMidLevel from './components/Charts/SuccessCallesTimeChartMidLevel';
 import OrdersDone from './components/Charts/OrdersDone';
 import ConfirmationAttempts from './components/Charts/ConfirmationAttemptsCart';
 import BestEmployeesChart from './components/Charts/BestEmployeesChart';
-import EgyptMapSection from './EgyptMapSection';
+import EgyptMapSection from './components/EgyptMapSection';
 import AverageCallDurationChart from './components/Charts/AverageCallDurationChart';
 import DistributingCallsToConfirmOrders from './components/Charts/DistributingCallsToConfirmOrders';
 
@@ -25,7 +32,27 @@ function CustomerService() {
         <CallDistributionChart />
         <TotalOrdersChart />
         <SuccessfulCallDates />
-        <SuccessfulCallTime />
+        <div className="relative bg-white rounded-2xl pb-6 shadow-xl max-w-3xl">
+          <Swiper
+            modules={[Pagination]}
+            pagination={{
+              clickable: true,
+              bulletActiveClass: 'swiper-pagination-bullet-active-custom',
+              bulletClass: 'swiper-pagination-bullet-custom',
+            }}
+            className="success-calls-time-swiper"
+          >
+            <SwiperSlide>
+              <SuccessCallesTimeChartMorning />
+            </SwiperSlide>
+            <SwiperSlide>
+              <SuccessCallesTimeChartEvening />
+            </SwiperSlide>
+            <SwiperSlide>
+              <SuccessCallesTimeChartMidLevel />
+            </SwiperSlide>
+          </Swiper>
+        </div>
         <ConfirmationAttempts />
         <OrdersDone />
         <AverageCallDurationChart />

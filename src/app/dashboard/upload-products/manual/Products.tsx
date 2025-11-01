@@ -23,8 +23,6 @@ function Products() {
 
   // Handle add order
   const handleAddOrder = () => {
-    console.log('Order created with products:', selectedProducts);
-    console.log('Total price:', totalPrice);
     // Here you would typically send the order to your API
     alert(`تم إنشاء الطلب بنجاح! المجموع: ${totalPrice} ج.م`);
   };

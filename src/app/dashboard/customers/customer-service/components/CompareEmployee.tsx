@@ -1,5 +1,5 @@
 import { Plus } from 'lucide-react';
-import AreaChartComponent from './components/Charts/CompareEmployee';
+import AreaChartComponent from './Charts/CompareEmployee';
 
 export const MOCK_EMPLOYEE_STATS = [
   {
