@@ -12,7 +12,7 @@ export default function DistributingCallsToConfirmOrders() {
   const chartWidth = (barWidth + spacing) * callDistributionData.length + 60;
 
   return (
-    <div className="w-full max-w-5xl bg-white rounded-3xl shadow-xl p-8 mx-auto">
+    <div className="w-full max-w-3xl bg-white rounded-3xl shadow-xl p-8">
       {/* Header */}
       <div className="border-b border-gray-200 pb-3 mb-2 flex justify-between">
         <h2 className="font-bold text-lg text-gray-900 text-right">

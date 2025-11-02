@@ -12,7 +12,7 @@ export default function AverageCallDurationChart() {
   const chartWidth = (barWidth + spacing) * averageCallDurationData.length;
 
   return (
-    <div className="w-full max-w-5xl bg-white rounded-3xl shadow-xl p-8 mx-auto">
+    <div className="w-full max-w-3xl bg-white rounded-3xl shadow-xl p-8">
       {/* Header */}
       <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-6">
         <h2 className="font-bold text-lg text-right text-gray-900">
