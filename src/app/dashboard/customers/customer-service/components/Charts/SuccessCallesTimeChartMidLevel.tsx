@@ -8,23 +8,9 @@ import {
   Tooltip,
   CartesianGrid,
 } from 'recharts';
-interface EmployeeData {
-  label: string;
-  بوستينا: number;
-  سارة: number;
-  ليان: number;
-}
+import { midLevelShiftData } from '../../constants/SuccessCallesTimeChartConst';
 
 function SuccessCallesTimeChartMidLevel() {
-  const employeeData: EmployeeData[] = [
-    { label: '8:00am', بوستينا: 40, سارة: 95, ليان: 78 },
-    { label: '9:00am', بوستينا: 99, سارة: 58, ليان: 10 },
-    { label: '10:00am', بوستينا: 82, سارة: 33, ليان: 60 },
-    { label: '11:00am', بوستينا: 15, سارة: 90, ليان: 20 },
-    { label: '12:00am', بوستينا: 68, سارة: 20, ليان: 97 },
-    { label: '1:00pm', بوستينا: 30, سارة: 76, ليان: 30 },
-    { label: '3:00pm', بوستينا: 95, سارة: 42, ليان: 30 },
-  ];
   return (
     <div className=" p-6 pb-1">
       <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-6">
@@ -42,7 +28,7 @@ function SuccessCallesTimeChartMidLevel() {
           minHeight={350}
         >
           <AreaChart
-            data={employeeData}
+            data={midLevelShiftData}
             margin={{ top: 10, right: 30, left: -30, bottom: 0 }}
           >
             <CartesianGrid strokeDasharray="5" />

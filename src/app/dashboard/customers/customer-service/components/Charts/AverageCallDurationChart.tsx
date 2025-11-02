@@ -1,14 +1,7 @@
 'use client';
 
 import React from 'react';
-
-const data = [
-  { label: 'مؤكد', value: 4 },
-  { label: 'مؤجل', value: 12 },
-  { label: 'ملفي', value: 8 },
-  { label: 'غير ناجحة', value: 9 },
-  { label: 'لايوجد رد', value: 6 },
-];
+import { averageCallDurationData } from '../../constants/AverageCallDurationChartConst';
 
 export default function AverageCallDurationChart() {
   const maxValue = 16;
@@ -29,7 +22,7 @@ export default function AverageCallDurationChart() {
       {/* Chart container */}
       <div className="relative">
         <svg
-          width={(barWidth + spacing) * data.length + 60}
+          width={(barWidth + spacing) * averageCallDurationData.length + 60}
           height={chartHeight + 100}
           className="overflow-visible"
         >
@@ -40,7 +33,7 @@ export default function AverageCallDurationChart() {
               <g key={i}>
                 <line
                   x1="0"
-                  x2={(barWidth + spacing) * data.length}
+                  x2={(barWidth + spacing) * averageCallDurationData.length}
                   y1={y}
                   y2={y}
                   stroke="#ddd"
@@ -59,7 +52,7 @@ export default function AverageCallDurationChart() {
           })}
 
           {/* Bars */}
-          {data.map((d, i) => {
+          {averageCallDurationData.map((d, i) => {
             const barHeight = (d.value / maxValue) * chartHeight;
             const x = i * (barWidth + spacing) + 40;
             const y = bottomY - barHeight;

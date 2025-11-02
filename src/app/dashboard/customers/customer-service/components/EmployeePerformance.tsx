@@ -1,15 +1,7 @@
 'use client';
 
 import React from 'react';
-
-const data = [
-  { label: 'جاكلين', value: 55 },
-  { label: 'أمنية', value: 65 },
-  { label: 'بسمة', value: 75 },
-  { label: 'ندى', value: 80 },
-  { label: 'كريمة', value: 70 },
-  { label: 'يوسيتنا', value: 40 },
-];
+import { employeePerformanceData } from '../constants/EmployeePerformanceConst';
 
 export default function EmployeePerformance() {
   const maxValue = 100;
@@ -29,7 +21,7 @@ export default function EmployeePerformance() {
 
       {/* Chart */}
       <svg
-        width={(barWidth + spacing) * data.length + 40}
+        width={(barWidth + spacing) * employeePerformanceData.length + 40}
         height={chartHeight + 100}
         className="overflow-visible mx-auto block"
       >
@@ -48,7 +40,7 @@ export default function EmployeePerformance() {
             <g key={i}>
               <line
                 x1="0"
-                x2={(barWidth + spacing) * data.length + 20}
+                x2={(barWidth + spacing) * employeePerformanceData.length + 20}
                 y1={y}
                 y2={y}
                 stroke="#E5E7EB"
@@ -67,7 +59,7 @@ export default function EmployeePerformance() {
         })}
 
         {/* Bars */}
-        {data.map((d, i) => {
+        {employeePerformanceData.map((d, i) => {
           const barHeight = (d.value / maxValue) * chartHeight;
           const x = i * (barWidth + spacing) + 40;
           const y = bottomY - barHeight;

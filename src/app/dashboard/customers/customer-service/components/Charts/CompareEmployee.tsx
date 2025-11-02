@@ -11,24 +11,9 @@ import {
   Legend,
   CartesianGrid,
 } from 'recharts';
-
-interface EmployeeData {
-  label: string;
-  بوستينا: number;
-  سارة: number;
-  ليان: number;
-}
+import { compareEmployeeChartData } from '../../constants/CompareEmployeeChartConst';
 
 export default function CompareEmployee() {
-  const employeeData: EmployeeData[] = [
-    { label: 'الجمعة', بوستينا: 40, سارة: 95, ليان: 78 },
-    { label: 'الخميس', بوستينا: 99, سارة: 58, ليان: 10 },
-    { label: 'الاربعاء', بوستينا: 82, سارة: 33, ليان: 60 },
-    { label: 'الثلاثاء', بوستينا: 15, سارة: 90, ليان: 20 },
-    { label: 'الاثنين', بوستينا: 68, سارة: 20, ليان: 97 },
-    { label: 'الاحد', بوستينا: 30, سارة: 76, ليان: 30 },
-    { label: 'السبت', بوستينا: 95, سارة: 42, ليان: 30 },
-  ];
 
   return (
     <div className="w-full max-md:ml-37 h-full max-w-4xl  p-6 ">
@@ -40,7 +25,7 @@ export default function CompareEmployee() {
           minHeight={350}
         >
           <AreaChart
-            data={employeeData}
+            data={compareEmployeeChartData}
             margin={{ top: 10, right: 30, left: -30, bottom: 0 }}
           >
             <CartesianGrid strokeDasharray="5" />

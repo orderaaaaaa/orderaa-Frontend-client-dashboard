@@ -1,14 +1,7 @@
 import React from 'react';
 import { Progress } from '@/components/ui/progress';
 import { ArrowLeft } from 'lucide-react';
-
-const hoursConst = [
-  { id: 1, value: 20, from: '12:30م', to: '1:30م', total: '1 س .30د' },
-  { id: 2, value: 55, from: '2:00م', to: '2:30م', total: '1 س .30د' },
-  { id: 3, value: 35, from: '3:00م', to: '3:30م', total: '1 س .30د' },
-  { id: 4, value: 70, from: '4:30م', to: '5:30م', total: '1 س .30د' },
-  { id: 5, value: 90, from: '5:30م', to: '6:30م', total: '1 س .30د' },
-];
+import { stopHoursData } from '../constants/StopHoursConst';
 
 function StopHours() {
   return (
@@ -18,7 +11,7 @@ function StopHours() {
       <div className="!w-full flex items-center justify-between max-md:flex-col-reverse max-md:gap-10 mt-10 px-8">
         {/* Left side - progress list */}
         <div className="w-full flex flex-col gap-10">
-          {hoursConst.map(({ id, value, from, to, total }) => (
+          {stopHoursData.map(({ id, value, from, to, total }) => (
             <div key={id} className="flex flex-col gap-3">
               <div className="flex gap-4 items-center">
                 <p className="font-medium text-[#292D32]">{from}</p>

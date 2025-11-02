@@ -1,16 +1,10 @@
 'use client';
 
 import React from 'react';
-
-const data = [
-  { label: 'المحاولة الاولى', value: 47, color: '#B8A3EB' },
-  { label: 'المحاولة الثانية', value: 40, color: '#5D24E1' },
-  { label: 'المحاولة الثالثة', value: 20, color: '#DAD1ED' },
-  { label: 'المحاولة الرابعة', value: 100, color: '#CABDE9' },
-];
+import { confirmationAttemptsData } from '../../constants/ConfirmationAttemptsCartConst';
 
 export default function CylinderChartSVG() {
-  const maxValue = Math.max(...data.map((d) => d.value));
+  const maxValue = Math.max(...confirmationAttemptsData.map((d) => d.value));
   const chartHeight = 260;
   const barWidth = 60;
   const spacing = 20;
@@ -28,7 +22,7 @@ export default function CylinderChartSVG() {
         {/* Legend */}
         <div className="w-1/3 ps-6">
           <ul className="flex flex-col gap-8 text-right">
-            {data.map((d, i) => (
+            {confirmationAttemptsData.map((d, i) => (
               <li key={i} className="flex items-center gap-2">
                 <span
                   className="inline-block w-5 h-5 rounded-[5px] shadow"
@@ -46,11 +40,11 @@ export default function CylinderChartSVG() {
         </div>
         {/* Chart */}
         <svg
-          width={(barWidth + spacing) * data.length}
+          width={(barWidth + spacing) * confirmationAttemptsData.length}
           height={chartHeight + 80}
           className="overflow-visible"
         >
-          {data.map((d, i) => {
+          {confirmationAttemptsData.map((d, i) => {
             const barHeight = (d.value / 100) * chartHeight;
             const x = i * (barWidth + spacing);
             const y = bottomY - barHeight;

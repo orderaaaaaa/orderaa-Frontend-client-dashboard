@@ -1,13 +1,7 @@
 'use client';
 
 import React from 'react';
-
-const data = [
-  { label: 'المكالمة الاولى', value: 12 },
-  { label: 'المكالمة الثانية', value: 45 },
-  { label: 'المكالمة الثالثة', value: 30 },
-  { label: '+4 مكالمات', value: 35 },
-];
+import { callDistributionData } from '../../constants/DistributingCallsToConfirmOrdersConst';
 
 export default function DistributingCallsToConfirmOrders() {
   const maxValue = 60; // 60% max
@@ -31,7 +25,7 @@ export default function DistributingCallsToConfirmOrders() {
 
       {/* Chart */}
       <svg
-        width={(barWidth + spacing) * data.length + 40}
+        width={(barWidth + spacing) * callDistributionData.length + 40}
         height={chartHeight + 100}
         className="overflow-visible mx-auto block"
       >
@@ -42,7 +36,7 @@ export default function DistributingCallsToConfirmOrders() {
             <g key={i}>
               <line
                 x1="0"
-                x2={(barWidth + spacing) * data.length + 20}
+                x2={(barWidth + spacing) * callDistributionData.length + 20}
                 y1={y}
                 y2={y}
                 stroke="#E5E7EB"
@@ -61,7 +55,7 @@ export default function DistributingCallsToConfirmOrders() {
         })}
 
         {/* Bars */}
-        {data.map((d, i) => {
+        {callDistributionData.map((d, i) => {
           const barHeight = (d.value / maxValue) * chartHeight;
           const x = i * (barWidth + spacing) + 40;
           const y = bottomY - barHeight;

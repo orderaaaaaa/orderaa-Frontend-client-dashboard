@@ -29,7 +29,7 @@ function CustomerService() {
     <>
       <TapsCustomer />
       <SummaryCard />
-      <div className="grid grid-cols-2 max-md:grid-cols-1 gap-4 mt-10 w-[90%]">
+      <div className="grid grid-cols-2 max-md:grid-cols-1 gap-4 mt-10 smw-[90%]">
         <CallDistributionChart />
         <TotalOrdersChart />
         <SuccessfulCallDates />

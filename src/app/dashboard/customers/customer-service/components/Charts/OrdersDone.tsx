@@ -1,69 +1,12 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-
-type Bar = {
-  current: number;
-  total: number;
-};
-
-const bars: Bar[] = [
-  { current: 110, total: 120 },
-  { current: 70, total: 90 },
-  { current: 35, total: 70 },
-  { current: 20, total: 50 },
-  { current: 8, total: 30 },
-  { current: 1, total: 10 },
-];
-
-const totalDone = bars.reduce((sum, b) => sum + b.current, 0);
-const totalAll = bars.reduce((sum, b) => sum + b.total, 0);
-const donePercent = (totalDone / totalAll) * 100;
-const notDonePercent = 100 - donePercent;
-
-function polarToCartesian(
-  cx: number,
-  cy: number,
-  r: number,
-  angleInDegrees: number
-) {
-  const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
-  return {
-    x: cx + r * Math.cos(angleInRadians),
-    y: cy + r * Math.sin(angleInRadians),
-  };
-}
-
-function describeArc(
-  cx: number,
-  cy: number,
-  r: number,
-  startAngle: number,
-  endAngle: number
-): string {
-  const start = polarToCartesian(cx, cy, r, endAngle);
-  const end = polarToCartesian(cx, cy, r, startAngle);
-  const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
-  return [
-    'M',
-    cx,
-    cy,
-    'L',
-    start.x,
-    start.y,
-    'A',
-    r,
-    r,
-    0,
-    largeArcFlag,
-    0,
-    end.x,
-    end.y,
-    'Z',
-  ].join(' ');
-}
+import { ordersDoneBars } from '../../constants/OrdersDoneConst';
+import { describeArc } from '../../helpers/svgHelpers';
 
 export default function OrdersAttempted(): JSX.Element {
   const [progress, setProgress] = useState(0);
+  const totalDone = ordersDoneBars.reduce((sum, b) => sum + b.current, 0);
+  const totalAll = ordersDoneBars.reduce((sum, b) => sum + b.total, 0);
 
   useEffect(() => {
     let frame = 0;
@@ -143,7 +86,7 @@ export default function OrdersAttempted(): JSX.Element {
         </div>
         {/* Progress bars */}
         <div className="flex flex-col w-full md:w-1/2 space-y-5">
-          {bars.map((bar, i) => {
+          {ordersDoneBars.map((bar, i) => {
             const value = (bar.current / bar.total) * 100 * progress;
             return (
               <div key={i} className="flex items-center justify-end gap-3">

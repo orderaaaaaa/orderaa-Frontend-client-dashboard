@@ -1,35 +1,6 @@
 'use client';
 import React from 'react';
-
-const regions = [
-  { name: 'القاهرة', percent: 70, value: 200 },
-  { name: 'الجيزة', percent: 60, value: 200 },
-  { name: 'القليوبية', percent: 60, value: 200 },
-  { name: 'الإسكندرية', percent: 60, value: 200 },
-  { name: 'الإسماعيلية', percent: 60, value: 200 },
-  { name: 'المنوفية', percent: 70, value: 200 },
-  { name: 'الدقهلية', percent: 60, value: 200 },
-  { name: 'بورسعيد', percent: 60, value: 200 },
-  { name: 'السويس', percent: 60, value: 200 },
-  { name: 'قنا', percent: 60, value: 200 },
-  { name: 'الغربية', percent: 60, value: 200 },
-  { name: 'كفر الشيخ', percent: 60, value: 200 },
-  { name: 'البحيرة', percent: 60, value: 200 },
-  { name: 'المنيا', percent: 60, value: 200 },
-  { name: 'مطروح', percent: 60, value: 200 },
-  { name: 'شمال سيناء', percent: 60, value: 200 },
-  { name: 'جنوب سيناء', percent: 60, value: 200 },
-  { name: 'بني سويف', percent: 60, value: 200 },
-  { name: 'الفيوم', percent: 60, value: 200 },
-  { name: 'أسيوط', percent: 60, value: 200 },
-  { name: 'سوهاج', percent: 60, value: 200 },
-  { name: 'الشرقية', percent: 60, value: 200 },
-  { name: 'دمياط', percent: 60, value: 200 },
-  { name: 'أسوان', percent: 60, value: 200 },
-  { name: 'الأقصر', percent: 60, value: 200 },
-  { name: 'البحر الأحمر', percent: 60, value: 200 },
-  { name: 'الوادي الجديد', percent: 60, value: 200 },
-];
+import { egyptRegions } from '../constants/EgyptMapSectionConst';
 
 export default function EgyptMapSection() {
   return (
@@ -45,7 +16,7 @@ export default function EgyptMapSection() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Regions List */}
         <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-right">
-          {regions.map((r, i) => (
+          {egyptRegions.map((r, i) => (
             <div key={i} className="flex flex-col">
               <div className="flex justify-between text-sm text-gray-700 mb-1">
                 <span>{r.percent}%</span>
