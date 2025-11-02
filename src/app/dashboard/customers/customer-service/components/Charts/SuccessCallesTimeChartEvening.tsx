@@ -9,8 +9,17 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { eveningShiftData } from '../../constants/SuccessCallesTimeChartConst';
+import useBreakpoint from '../../hooks/useBreakpoint';
 
 function SuccessCallesTimeChartEvening() {
+  const breakpoint = useBreakpoint();
+
+  // Responsive margins based on screen size
+  const margin =
+    breakpoint === 'lg' || breakpoint === 'xl' || breakpoint === '2xl'
+      ? { top: 10, right: 30, left: -30, bottom: 0 } // large screens
+      : { top: 10, right: 0, left: -30, bottom: 0 }; // small/medium screens
+
   return (
     <div className=" p-6 pb-1">
       <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-6">
@@ -29,9 +38,9 @@ function SuccessCallesTimeChartEvening() {
         >
           <AreaChart
             data={eveningShiftData}
-            margin={{ top: 10, right: 30, left: -30, bottom: 0 }}
+            margin={margin}
           >
-            <CartesianGrid strokeDasharray="5" />
+            <CartesianGrid strokeDasharray="5" vertical horizontal />
             <defs>
               <linearGradient id="colorليان" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#33147B" />

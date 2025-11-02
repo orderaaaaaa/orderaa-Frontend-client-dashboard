@@ -14,8 +14,17 @@ import {
   CustomTooltipArabic,
   CustomActiveDot,
 } from '@/components/ui/CustomChartDots';
+import useBreakpoint from '../../hooks/useBreakpoint';
 
 export default function SuccessfulCallDates() {
+  const breakpoint = useBreakpoint();
+
+  // Responsive margins based on screen size
+  const margin =
+    breakpoint === 'lg' || breakpoint === 'xl' || breakpoint === '2xl'
+      ? { top: 10, right: 30, left: -30, bottom: 0 } // large screens
+      : { top: 10, right: 0, left: -30, bottom: 0 }; // small/medium screens
+
   return (
     <div className="w-full max-w-3xl p-6 bg-white rounded-2xl shadow-xl">
       {/* Header */}
@@ -30,7 +39,7 @@ export default function SuccessfulCallDates() {
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={employeeData}
-            margin={{ top: 10, right: 30, left: -30, bottom: 0 }}
+            margin={margin}
             className="sm:pr-10"
           >
             {/* Grid */}
