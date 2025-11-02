@@ -45,7 +45,7 @@ function StopHours() {
                     }}
                   />
                 </svg>
-                <div className="absolute left-[-760px] top-[-30px] max-sm:left-[-470px] inset-0 flex flex-col items-center gap-[3px] justify-center">
+                <div className="relative right-[235px] top-[-15px] sm:absolute sm:left-[-525px] sm:top-[-30px]   inset-0 flex flex-col items-center gap-[3px] justify-center">
                   <span className="text-[#292D32] font-semibold !text-[10px] leading-none">
                     {total.split(' ').slice(0, 2)}
                   </span>

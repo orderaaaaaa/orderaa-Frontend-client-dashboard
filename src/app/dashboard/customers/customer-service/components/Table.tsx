@@ -32,11 +32,10 @@ interface ITableRow {
 interface ITableProps {
   data: ITableRow[];
   type: boolean;
-  name: string;
   headers?: ITableHeader[];
 }
 
-function Table({ data, type, name, headers }: ITableProps) {
+function Table({ data, type, headers }: ITableProps) {
   const tableHeaders = headers || TABLE_HEADERS;
   const columnsCount = tableHeaders.length;
 
@@ -59,85 +58,82 @@ function Table({ data, type, name, headers }: ITableProps) {
   const gridColsClass = gridColsMap[columnsCount] || 'grid-cols-1';
 
   return (
-    <div className="w-full p-4 sm:p-6 md:p-7 bg-white mt-10 rounded-2xl shadow-xl">
-      <h1 className="font-semibold mb-6 sm:mb-18">{name}</h1>
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse min-w-[700px] sm:min-w-full">
-          <thead>
-            <tr
-              className={`grid ${gridColsClass} bg-[#f2edfd] items-center sm:py-2 rounded-sm mb-2 text-[12px] sm:text-sm`}
-            >
-              {tableHeaders.map((header) => (
-                <th
-                  key={header.id}
-                  className="py-2 sm:px-5 font-semibold text-center"
-                >
-                  {header.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
+    <div className="overflow-x-auto mt-14">
+      <table className="w-full border-collapse min-w-[700px] sm:min-w-full">
+        <thead>
+          <tr
+            className={`grid ${gridColsClass} bg-[#f2edfd] items-center sm:py-2 rounded-sm mb-2 text-[12px] sm:text-sm`}
+          >
+            {tableHeaders.map((header) => (
+              <th
+                key={header.id}
+                className="py-2 sm:px-5 font-semibold text-center"
+              >
+                {header.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
 
-          <tbody>
-            {data?.map((row) => {
-              const { rating, color } = row.performance
-                ? getPerformanceRating(row.performance)
-                : { rating: '', color: '' };
+        <tbody>
+          {data?.map((row) => {
+            const { rating, color } = row.performance
+              ? getPerformanceRating(row.performance)
+              : { rating: '', color: '' };
 
-              return (
-                <tr
-                  key={row.id}
-                  className={`grid ${gridColsClass} border-b border-gray-100 hover:bg-gray-50 transition-colors text-xs sm:text-sm`}
-                >
-                  {tableHeaders.map((header) => {
-                    // Handle special case for performance column with type prop
-                    if (
-                      header.key === 'performance' &&
-                      row.performance !== undefined
-                    ) {
-                      return (
-                        <td
-                          key={header.id}
-                          className="p-3 sm:p-5 text-center flex justify-center items-center gap-2"
-                        >
-                          <span>{row.performance}%</span>
-                          {type && (
-                            <span
-                              className="px-2 py-1 text-white text-xs rounded-sm"
-                              style={{ backgroundColor: color }}
-                            >
-                              {rating}
-                            </span>
-                          )}
-                        </td>
-                      );
-                    }
-
-                    // Handle name/employee column
-                    if (header.key === 'name' || header.key === 'employee') {
-                      return (
-                        <td
-                          key={header.id}
-                          className="py-2 sm:p-5 text-center truncate"
-                        >
-                          {row.name || row.employee}
-                        </td>
-                      );
-                    }
-
-                    // Default: render cell value
+            return (
+              <tr
+                key={row.id}
+                className={`grid ${gridColsClass} border-b border-gray-100 hover:bg-gray-50 transition-colors text-xs sm:text-sm`}
+              >
+                {tableHeaders.map((header) => {
+                  // Handle special case for performance column with type prop
+                  if (
+                    header.key === 'performance' &&
+                    row.performance !== undefined
+                  ) {
                     return (
-                      <td key={header.id} className="py-3 sm:p-5 text-center">
-                        {row[header.key] || '-'}
+                      <td
+                        key={header.id}
+                        className="p-3 sm:p-5 text-center flex justify-center items-center gap-2"
+                      >
+                        <span>{row.performance}%</span>
+                        {type && (
+                          <span
+                            className="px-2 py-1 text-white text-xs rounded-sm"
+                            style={{ backgroundColor: color }}
+                          >
+                            {rating}
+                          </span>
+                        )}
                       </td>
                     );
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                  }
+
+                  // Handle name/employee column
+                  if (header.key === 'name' || header.key === 'employee') {
+                    return (
+                      <td
+                        key={header.id}
+                        className="py-2 sm:p-5 text-center truncate"
+                      >
+                        {row.name || row.employee}
+                      </td>
+                    );
+                  }
+
+                  // Default: render cell value
+                  return (
+                    <td key={header.id} className="py-3 sm:p-5 text-center">
+                      {row[header.key] || '-'}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
