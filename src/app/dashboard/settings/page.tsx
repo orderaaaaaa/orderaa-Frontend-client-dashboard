@@ -163,6 +163,7 @@ export default function SettingsPage() {
                       })
                     }
                     rows={3}
+                    name="storeDescription"
                   />
                 </div>
 

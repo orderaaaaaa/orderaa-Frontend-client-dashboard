@@ -19,6 +19,14 @@ function OrderDetailsInfoComponent({ order }: OrderDetailsInfoComponentProps) {
   const tagStyle =
     "flex gap-2 bg-white shadow-xs items-center py-2 px-2 rounded-[5px] font-semibold";
 
+  // Format time from createdAt
+  const createdDate = new Date(order.createdAt);
+  const formattedTime = createdDate.toLocaleTimeString('ar-EG', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+
   return (
     <>
       <div className="flex flex-col gap-4 font-medium p-4 bg-gray-50 mt-8 rounded-xl ">
@@ -39,16 +47,20 @@ function OrderDetailsInfoComponent({ order }: OrderDetailsInfoComponentProps) {
             </p>
             <p className={tagStyle}>
               <MapPinned width={18} />
-              {order.customer.governorate || 'غير محدد'}
+              <span className={order.customer.governorate ? '' : 'text-red-500'}>
+                {order.customer.governorate || 'غير محدد'}
+              </span>
             </p>
             <p className={tagStyle}>
               <MapPinned width={18} />
-              {order.customer.city || 'غير محدد'}
+              <span className={order.customer.city ? '' : 'text-red-500'}>
+                {order.customer.city || 'غير محدد'}
+              </span>
             </p>
             <p className={tagStyle}>
               {" "}
               <Clock3 width={18} />
-              10:30 مساءآ | 6:00 صباحآ
+              {formattedTime}
             </p>
           </div>
         </div>
@@ -82,7 +94,7 @@ function OrderDetailsInfoComponent({ order }: OrderDetailsInfoComponentProps) {
           <div className="max-w-[500px]">
             <h3 className="mb-3">العنوان:</h3>
             <p className={tagStyle}>
-              <span className="max-w-3/4">
+              <span className={`max-w-3/4 ${order.customer.address ? '' : 'text-red-500'}`}>
                 {order.customer.address || 'غير محدد'}
               </span>
             </p>

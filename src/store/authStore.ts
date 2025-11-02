@@ -5,6 +5,7 @@ interface User {
   sub: number;
   username: string;
   role: string;
+  merchantId?: number;
 }
 
 interface AuthState {

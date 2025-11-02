@@ -70,6 +70,7 @@ export interface FilterOrdersDto {
   page?: number;
   limit?: number;
 }
+// In the DropdownContentProps interface, add:
 export interface DropdownContentProps {
   filteredProducts: Product[] | any;
   selectedVariants: Record<number, Variant | undefined>;
@@ -81,8 +82,10 @@ export interface DropdownContentProps {
     e: React.ChangeEvent<HTMLInputElement>
   ) => void;
   onAddProduct: () => void;
+  search: string;
+  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onClose: () => void; // Add this line
 }
-
 // Pagination Response
 export interface PaginatedResponse<T> {
   data: T[];
@@ -151,7 +154,7 @@ export interface Product {
   color?: string;
   material?: string;
   weight?: string;
-  varients?: Variant[];
+  variants?: Variant[];
   price: number;
   sku?: string;
   image?: string;

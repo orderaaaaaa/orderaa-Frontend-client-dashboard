@@ -21,10 +21,10 @@ export const useProductDropdown = () => {
     confirmSelections,
   } = store;
 
-  // Handle click outside to close dropdown
+  // Handle escape key to close modal
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+    const handleEscapeKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
         useProductDropdownStore.setState({
           isOpen: false,
           expandedProductId: null,
@@ -33,9 +33,16 @@ export const useProductDropdown = () => {
     };
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () =>
-        document.removeEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEscapeKey);
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+
+      return () => {
+        document.removeEventListener('keydown', handleEscapeKey);
+        document.body.style.overflow = 'unset';
+      };
+    } else {
+      document.body.style.overflow = 'unset';
     }
   }, [isOpen]);
 
@@ -68,6 +75,8 @@ export const useProductDropdown = () => {
 
   const handleAddProduct = () => {
     confirmSelections();
+    // Close modal after adding products
+    useProductDropdownStore.setState({ isOpen: false });
   };
 
   return {
