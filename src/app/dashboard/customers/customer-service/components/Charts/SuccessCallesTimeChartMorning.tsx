@@ -18,8 +18,8 @@ export default function SuccessCallesTimeChartMorning() {
   // Responsive margins based on screen size
   const margin =
     breakpoint === 'lg' || breakpoint === 'xl' || breakpoint === '2xl'
-      ? { top: 10, right: 40, left: -20, bottom: 0 } // large screens
-      : { top: 10, right: 0, left: -20, bottom: 0 }; // small/medium screens
+      ? { top: 20, right: 30, left: -30, bottom: 10 } // large screens
+      : { top: 50, right: 0, left: -30, bottom: 50 }; // small/medium screens
 
   return (
     <section className="p-6 pb-1">
@@ -57,11 +57,7 @@ export default function SuccessCallesTimeChartMorning() {
             </defs>
 
             {/* Axes */}
-            <XAxis
-              dataKey="label"
-              tick={{ fontSize: 12 }}
-              padding={{ left: 40, right: 40 }}
-            />
+            <XAxis dataKey="label" tick={{ fontSize: 12 }} />
             <YAxis
               domain={[0, 100]}
               ticks={[0, 20, 40, 60, 80, 100]}

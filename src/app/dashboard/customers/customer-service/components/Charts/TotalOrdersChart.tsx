@@ -15,19 +15,19 @@ import {
   CustomActiveDot,
   CustomTooltipArabic,
 } from '@/components/ui/CustomChartDots';
-import useBreakpoint from '../../hooks/useBreakpoint'; // 👈 import the hook
+import useBreakpoint from '../../hooks/useBreakpoint';
 import { datasets, rangeOptions } from '../../constants/TotalOrdarConst';
 import { DataPoint, RangeType } from '../../types';
 
 export default function GradientAreaChart() {
   const [range, setRange] = useState<RangeType>('month');
-  const breakpoint = useBreakpoint(); // 👈 detect breakpoint
+  const breakpoint = useBreakpoint();
 
-  // Responsive margins based on screen size
+  // Responsive margins
   const margin =
     breakpoint === 'lg' || breakpoint === 'xl' || breakpoint === '2xl'
-      ? { top: 20, right: 30, left: -30, bottom: 10 } // large screens
-      : { top: 20, right: 0, left: -30, bottom: 10 }; // small/medium screens
+      ? { top: 20, right: 30, left: -30, bottom: 10 }
+      : { top: 50, right: 0, left: -30, bottom: 50 };
 
   const data: DataPoint[] = [...datasets[range]];
 
@@ -35,24 +35,19 @@ export default function GradientAreaChart() {
 
   return (
     <div className="w-full max-w-3xl p-6 bg-white rounded-2xl shadow-xl">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-6">
         <h3 className="text-xl font-semibold">اجمالي الطلبات</h3>
-        <div className="w-40">
-          <Dropdown
-            value={range}
-            onChange={handleRangeChange}
-            options={rangeOptions}
-            placeholder="اختر الفترة"
-            className="w-full"
-            selectClassName="w-full border border-gray-300 rounded-lg py-2 px-10 text-sm focus:outline-none focus:ring focus:ring-indigo-200"
-          />
-        </div>
       </div>
 
       <div style={{ width: '100%', height: 350 }}>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={margin}>
-            <CartesianGrid strokeDasharray="5" vertical horizontal />
+            {/* ✅ Only vertical grid lines */}
+            <CartesianGrid
+              strokeDasharray="5"
+              vertical={false}
+              horizontal={true}
+            />
 
             {/* Gradients */}
             <defs>
@@ -70,11 +65,8 @@ export default function GradientAreaChart() {
               </linearGradient>
             </defs>
 
-            <XAxis
-              dataKey="label"
-              tick={{ fontSize: 12 }}
-              padding={{ left: 40, right: 40 }}
-            />
+            {/* If you want XAxis back later */}
+            <XAxis dataKey="label" tick={{ fontSize: 12 }} />
             <YAxis
               domain={[0, 300]}
               ticks={[0, 60, 120, 180, 240, 300]}

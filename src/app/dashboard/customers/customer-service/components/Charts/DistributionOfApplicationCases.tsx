@@ -36,7 +36,7 @@ export default function OrdersStatusChart(): JSX.Element {
                 className="w-4 h-4 rounded-[4px]"
                 style={{ backgroundColor: d.color }}
               ></span>
-              <span className="text-[15px] font-medium">
+              <span className="sm:text-[15px] max-sm:text-[13px] font-medium">
                 {d.label} ({d.value})
               </span>
             </div>

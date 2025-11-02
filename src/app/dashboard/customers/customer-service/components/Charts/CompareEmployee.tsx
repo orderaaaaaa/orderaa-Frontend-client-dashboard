@@ -14,7 +14,6 @@ import {
 import { compareEmployeeChartData } from '../../constants/CompareEmployeeChartConst';
 
 export default function CompareEmployee() {
-
   return (
     <div className="w-full max-md:ml-37 h-full max-w-4xl  p-6 ">
       <div style={{ width: '100%', height: '100%' }}>
@@ -36,11 +35,7 @@ export default function CompareEmployee() {
               </linearGradient>
             </defs>
 
-            <XAxis
-              dataKey="label"
-              tick={{ fontSize: 12 }}
-              padding={{ left: 50, right: 50 }} // Add padding to start and end
-            />
+            <XAxis dataKey="label" tick={{ fontSize: 12 }} />
             <YAxis
               domain={[0, 100]}
               ticks={[0, 20, 40, 60, 80, 100]}

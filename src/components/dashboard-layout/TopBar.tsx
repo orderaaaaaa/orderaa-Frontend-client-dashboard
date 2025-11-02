@@ -40,7 +40,7 @@ export function TopBar({
     <header
       className={clsx(
         'flex flex-col lg:flex-row justify-between items-center mb-8',
-        'px-4 lg:px-6 py-1 pb-8 lg:py-0',
+        'px-4 lg:px-6 py-1 pb-4 lg:py-0',
         'max-sm:bg-gradient-to-t from-[#33147B] to-[#5D24E1] max-sm:text-white border-b rounded-b-2xl',
         'relative'
       )}
@@ -66,14 +66,14 @@ export function TopBar({
       </div>
 
       {/* ✅ Mobile: search bar */}
-      <div className="w-[80%] top-15 absolute  lg:hidden">
+      <div className="w-[80%] top-12 absolute  lg:hidden">
         <Input
           name="search"
           placeholder="بحث"
           icon={Search}
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className=" bg-white text-black placeholder:text-[#5d24e1] placeholder:font-medium border-2 !border-[#5D24E1]/30"
+          className=" bg-white text-black placeholder:text-[#5d24e1] h-9 placeholder:font-medium border-2 !border-[#5D24E1]/30"
         />
       </div>
 

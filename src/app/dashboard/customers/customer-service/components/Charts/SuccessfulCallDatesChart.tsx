@@ -22,8 +22,8 @@ export default function SuccessfulCallDates() {
   // Responsive margins based on screen size
   const margin =
     breakpoint === 'lg' || breakpoint === 'xl' || breakpoint === '2xl'
-      ? { top: 10, right: 30, left: -30, bottom: 0 } // large screens
-      : { top: 10, right: 0, left: -30, bottom: 0 }; // small/medium screens
+      ? { top: 20, right: 30, left: -30, bottom: 10 } // large screens
+      : { top: 50, right: 0, left: -30, bottom: 50 }; // small/medium screens
 
   return (
     <div className="w-full max-w-3xl p-6 bg-white rounded-2xl shadow-xl">
@@ -37,11 +37,7 @@ export default function SuccessfulCallDates() {
       {/* Chart */}
       <div style={{ width: '100%', height: 350 }}>
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={employeeData}
-            margin={margin}
-            className="sm:pr-10"
-          >
+          <AreaChart data={employeeData} margin={margin} className="sm:pr-10">
             {/* Grid */}
             <CartesianGrid
               strokeDasharray="5"
@@ -58,11 +54,7 @@ export default function SuccessfulCallDates() {
             </defs>
 
             {/* X & Y Axes */}
-            <XAxis
-              dataKey="label"
-              tick={{ fontSize: 12 }}
-              padding={{ left: 40, right: 40 }}
-            />
+            <XAxis dataKey="label" tick={{ fontSize: 12 }} />
             <YAxis
               domain={[0, 100]}
               ticks={[0, 20, 40, 60, 80, 100]}
