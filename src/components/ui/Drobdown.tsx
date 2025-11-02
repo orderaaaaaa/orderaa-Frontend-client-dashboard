@@ -19,6 +19,8 @@ interface DropdownProps {
   selectClassName?: string;
   placeholderClassName?: string;
   placeholderStyle?: React.CSSProperties;
+  arrowClassName?: string;
+  dropdownClassName?: string;
 }
 
 export default function Dropdown({
@@ -32,6 +34,8 @@ export default function Dropdown({
   selectClassName,
   placeholderClassName,
   placeholderStyle,
+  arrowClassName,
+  dropdownClassName,
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -77,7 +81,10 @@ export default function Dropdown({
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="absolute cursor-pointer left-5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
+          className={
+            arrowClassName ||
+            'absolute cursor-pointer left-0 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10'
+          }
           aria-label="Toggle dropdown"
         >
           <ChevronDown
@@ -95,6 +102,7 @@ export default function Dropdown({
         )}
         <input
           type="text"
+          dir="ltr"
           value={inputValue}
           onChange={(e) => {
             setSearch(e.target.value);
@@ -106,7 +114,7 @@ export default function Dropdown({
           className={
             selectClassName
               ? selectClassName
-              : `w-full border border-[#CED4DA] rounded-lg py-2.5 px-10 text-[18px] ${
+              : `w-full border border-[#CED4DA] rounded-lg py-2.5 pl-3 pr-3 text-[18px] overflow-hidden text-ellipsis whitespace-nowrap text-left ${
                   value
                     ? 'text-[#111827]'
                     : placeholderClassName ?? 'text-[#878A99]'
@@ -115,14 +123,19 @@ export default function Dropdown({
           style={!value && placeholderStyle ? placeholderStyle : undefined}
         />
         {isOpen && (
-          <ul className="absolute z-10 left-0 right-0 bg-white border border-[#CED4DA] rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+          <ul
+            className={
+              dropdownClassName ||
+              'absolute z-10 left-0 right-0 bg-white  rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg'
+            }
+          >
             {filteredOptions.length === 0 ? (
               <li className="px-3 py-2 text-[#878A99]">{'لا توجد نتائج'}</li>
             ) : (
               filteredOptions.map((option) => (
                 <li
                   key={option.key}
-                  className={`px-3 py-2 cursor-pointer hover:bg-gray-100 ${
+                  className={`px-3 py-2 cursor-pointer text-[#111827] hover:bg-gray-100 ${
                     value === option.key ? 'bg-gray-200' : ''
                   }`}
                   onClick={() => {
