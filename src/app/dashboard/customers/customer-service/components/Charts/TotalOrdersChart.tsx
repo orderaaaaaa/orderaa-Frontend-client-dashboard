@@ -11,77 +11,27 @@ import {
   CartesianGrid,
 } from 'recharts';
 import Dropdown from '@/components/ui/Drobdown';
-
 import {
   CustomActiveDot,
   CustomTooltipArabic,
 } from '@/components/ui/CustomChartDots';
-
-interface DataPoint {
-  label: string;
-  value1: number;
-  value2: number;
-  value3: number;
-}
-
-type RangeType = 'day' | 'week' | 'month' | 'year';
-
-// Custom Tooltip Component
+import useBreakpoint from '../../hooks/useBreakpoint'; // 👈 import the hook
+import { datasets, rangeOptions } from '../../constants/TotalOrdarConst';
+import { DataPoint, RangeType } from '../../types';
 
 export default function GradientAreaChart() {
   const [range, setRange] = useState<RangeType>('month');
+  const breakpoint = useBreakpoint(); // 👈 detect breakpoint
 
-  const rangeOptions = [
-    { key: 'day', value: 'يوم' },
-    { key: 'week', value: 'أسبوع' },
-    { key: 'month', value: 'الشهور' },
-    { key: 'year', value: 'سنة' },
-  ];
-
-  const datasets: Record<RangeType, DataPoint[]> = {
-    day: [
-      { label: 'الإثنين', value1: 260, value2: 180, value3: 90 },
-      { label: 'الثلاثاء', value1: 240, value2: 160, value3: 80 },
-      { label: 'الأربعاء', value1: 280, value2: 200, value3: 100 },
-      { label: 'الخميس', value1: 270, value2: 190, value3: 70 },
-      { label: 'الجمعة', value1: 300, value2: 210, value3: 120 },
-      { label: 'السبت', value1: 250, value2: 170, value3: 100 },
-      { label: 'الأحد', value1: 260, value2: 180, value3: 90 },
-    ],
-    week: [
-      { label: 'الأسبوع 1', value1: 280, value2: 190, value3: 90 },
-      { label: 'الأسبوع 2', value1: 270, value2: 180, value3: 100 },
-      { label: 'الأسبوع 3', value1: 290, value2: 200, value3: 110 },
-      { label: 'الأسبوع 4', value1: 260, value2: 170, value3: 80 },
-    ],
-    month: [
-      { label: 'يناير', value1: 130, value2: 60, value3: 30 },
-      { label: 'فبراير', value1: 250, value2: 170, value3: 30 },
-      { label: 'مارس', value1: 280, value2: 200, value3: 30 },
-      { label: 'أبريل', value1: 300, value2: 220, value3: 150 },
-      { label: 'مايو', value1: 260, value2: 190, value3: 80 },
-      { label: 'يونيو', value1: 240, value2: 160, value3: 70 },
-      { label: 'يوليو', value1: 230, value2: 150, value3: 60 },
-      { label: 'أغسطس', value1: 220, value2: 140, value3: 50 },
-      { label: 'سبتمبر', value1: 200, value2: 130, value3: 40 },
-      { label: 'أكتوبر', value1: 180, value2: 120, value3: 30 },
-      { label: 'نوفمبر', value1: 160, value2: 100, value3: 20 },
-      { label: 'ديسمبر', value1: 140, value2: 90, value3: 10 },
-    ],
-    year: [
-      { label: '2020', value1: 250, value2: 160, value3: 80 },
-      { label: '2021', value1: 270, value2: 180, value3: 90 },
-      { label: '2022', value1: 290, value2: 200, value3: 100 },
-      { label: '2023', value1: 260, value2: 170, value3: 70 },
-      { label: '2024', value1: 280, value2: 190, value3: 80 },
-    ],
-  };
+  // Responsive margins based on screen size
+  const margin =
+    breakpoint === 'lg' || breakpoint === 'xl' || breakpoint === '2xl'
+      ? { top: 20, right: 30, left: -30, bottom: 10 } // large screens
+      : { top: 20, right: 0, left: -30, bottom: 10 }; // small/medium screens
 
   const data: DataPoint[] = [...datasets[range]];
 
-  const handleRangeChange = (value: string) => {
-    setRange(value as RangeType);
-  };
+  const handleRangeChange = (value: string) => setRange(value as RangeType);
 
   return (
     <div className="w-full max-w-3xl p-6 bg-white rounded-2xl shadow-xl">
@@ -101,15 +51,10 @@ export default function GradientAreaChart() {
 
       <div style={{ width: '100%', height: 350 }}>
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={data}
-            margin={{ top: 10, right: 30, left: -30, bottom: 0 }}
-          >
-            <CartesianGrid
-              strokeDasharray="5"
-              vertical={true}
-              horizontal={true}
-            />
+          <AreaChart data={data} margin={margin}>
+            <CartesianGrid strokeDasharray="5" vertical horizontal />
+
+            {/* Gradients */}
             <defs>
               <linearGradient id="colorValue3" x1="0" y1=".2" x2="0" y2="1">
                 <stop offset="0%" stopColor="#5d24e1" stopOpacity={0.9} />
@@ -142,7 +87,6 @@ export default function GradientAreaChart() {
               stroke="#5d24e1"
               strokeWidth={2}
               fill="url(#colorValue1)"
-              fillOpacity={1}
               name="المجموعة 1"
               activeDot={<CustomActiveDot />}
             />
@@ -151,7 +95,6 @@ export default function GradientAreaChart() {
               stroke="#8055e4"
               strokeWidth={2}
               fill="url(#colorValue2)"
-              fillOpacity={1}
               name="المجموعة 2"
               activeDot={<CustomActiveDot />}
             />
@@ -160,7 +103,6 @@ export default function GradientAreaChart() {
               stroke="#B08FFB"
               strokeWidth={2}
               fill="url(#colorValue3)"
-              fillOpacity={1}
               name="المجموعة 3"
               activeDot={<CustomActiveDot />}
             />

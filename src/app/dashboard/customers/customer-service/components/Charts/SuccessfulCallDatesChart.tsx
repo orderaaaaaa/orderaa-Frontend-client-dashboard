@@ -9,28 +9,9 @@ import {
   CartesianGrid,
 } from 'recharts';
 
-import {
-  CustomActiveDot,
-  CustomTooltipArabic,
-} from '@/components/ui/CustomChartDots';
-interface EmployeeData {
-  label: string;
-  بوستينا: number;
-  سارة: number;
-  ليان: number;
-}
+import { employeeData } from '../../constants/SuccessfulCallDatesChartConst';
 
 function SuccessfulCallDates() {
-  const employeeData: EmployeeData[] = [
-    { label: 'الجمعة', بوستينا: 40, سارة: 95, ليان: 78 },
-    { label: 'الخميس', بوستينا: 99, سارة: 58, ليان: 10 },
-    { label: 'الاربعاء', بوستينا: 82, سارة: 33, ليان: 60 },
-    { label: 'الثلاثاء', بوستينا: 15, سارة: 90, ليان: 20 },
-    { label: 'الاثنين', بوستينا: 68, سارة: 20, ليان: 97 },
-    { label: 'الاحد', بوستينا: 30, سارة: 76, ليان: 30 },
-    { label: 'السبت', بوستينا: 95, سارة: 42, ليان: 30 },
-  ];
-
   return (
     <div className="w-full max-w-3xl p-6 bg-white rounded-2xl shadow-xl">
       <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-6">

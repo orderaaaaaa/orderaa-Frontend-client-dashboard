@@ -22,6 +22,7 @@ import BestEmployeesChart from './components/Charts/BestEmployeesChart';
 import EgyptMapSection from './components/EgyptMapSection';
 import AverageCallDurationChart from './components/Charts/AverageCallDurationChart';
 import DistributingCallsToConfirmOrders from './components/Charts/DistributingCallsToConfirmOrders';
+import EmployeePerformance from './components/EmployeePerformance';
 
 function CustomerService() {
   return (
@@ -58,6 +59,7 @@ function CustomerService() {
         <AverageCallDurationChart />
         <DistributingCallsToConfirmOrders />
       </div>
+      <EmployeePerformance />
       {/* <BestEmployeesChart /> */}
       <CompareCompare />
       <CallDetails />
