@@ -12,7 +12,6 @@ type InputProps = {
   className?: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  required?: boolean;
 };
 
 export default function Input({
@@ -23,63 +22,58 @@ export default function Input({
   error,
   register,
   icon: Icon,
-  className = '',
+  className,
   value,
   onChange,
   ...rest
 }: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
-  // Determine the correct input type (for password visibility toggle)
+  // Use px-10 for left and right padding if both icons could exist
+  const inputClassName =
+    `w-full border border-[#CED4DA] rounded-lg py-1.5 px-10 text-[18px] ${
+      className ?? ''
+    }`.trim();
+
+  // Decide input type
   const inputType =
     type === 'password' ? (showPassword ? 'text' : 'password') : type;
 
   return (
-    <div className="w-full">
-      {label && (
-        <label htmlFor={name} className="block font-medium text-[16px] mb-1">
-          {label}
-        </label>
-      )}
-
+    <div>
+      <label htmlFor={name} className="block font-medium text-[16px] mb-1">
+        {label}
+      </label>
       <div className="relative">
-        {/* 👁 Password toggle (left side) */}
+        {/* Eye icon (for password) on the LEFT */}
         {type === 'password' && (
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 focus:outline-none"
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 focus:outline-none"
             tabIndex={-1}
           >
             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         )}
-
-        {/* 🟣 Main Input */}
         <input
           type={inputType}
           id={name}
           name={name}
           placeholder={placeholder}
-          className={`w-full rounded-lg py-2.5 px-10 text-[18px] 
-            border-1 placeholder:text-gray-400 text-[#5D24E4] border-[#5D24E1] bg-[#EAEAEA40] 
-            focus:border-[#5D24E1] focus:ring-[3px] focus:ring-[#5D24E1]/50 
-            outline-none transition duration-150 ease-in-out 
-            disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+          className={inputClassName}
           value={value}
           onChange={onChange}
-          {...(register ? register(name) : {})}
+          {...(register ? { ...register(name) } : {})}
           {...rest}
         />
-
-        {/* Optional right-side icon */}
+        {/* Optional icon on the RIGHT */}
         {Icon && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#5d24e1]">
             <Icon size={20} />
           </div>
         )}
       </div>
-
       {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </div>
   );

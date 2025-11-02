@@ -6,6 +6,7 @@ import { LucideIcon, ChevronDown } from 'lucide-react';
 interface ComboboxOption {
   key: string;
   value: string;
+  icon?: LucideIcon;
 }
 
 interface DropdownProps {
@@ -19,6 +20,8 @@ interface DropdownProps {
   selectClassName?: string;
   placeholderClassName?: string;
   placeholderStyle?: React.CSSProperties;
+  arrowClassName?: string;
+  dropdownClassName?: string;
 }
 
 export default function Dropdown({
@@ -32,41 +35,42 @@ export default function Dropdown({
   selectClassName,
   placeholderClassName,
   placeholderStyle,
+  arrowClassName,
+  dropdownClassName,
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const [flashKey, setFlashKey] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
+  // Filter options based on search
   const filteredOptions = Array.isArray(options)
     ? options.filter((option) =>
         option.value.toLowerCase().includes(search.toLowerCase())
       )
     : [];
 
+  // Find the selected option value
   const selectedOption = options.find((opt) => opt.key === value);
 
+  // Close dropdown if clicked outside
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     }
-    if (isOpen) document.addEventListener('mousedown', handleClick);
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClick);
+    }
     return () => document.removeEventListener('mousedown', handleClick);
   }, [isOpen]);
 
+  // Set input value logic
   const inputValue = isOpen
     ? search
     : selectedOption
     ? selectedOption.value
     : search;
-
-  // === handle flash on click ===
-  const handleFlash = (key: string) => {
-    setFlashKey(key);
-    setTimeout(() => setFlashKey(null), 200); // reset after 200ms
-  };
 
   return (
     <div ref={ref} className={className ? className : 'w-full'}>
@@ -74,11 +78,14 @@ export default function Dropdown({
         <label className="block mb-1 font-medium text-[16px]">{label}</label>
       )}
       <div className="relative">
-        {/* ▼ Button */}
+        {/* Dropdown Arrow on the LEFT - Clickable */}
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="absolute cursor-pointer left-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
+          className={
+            arrowClassName ||
+            'absolute cursor-pointer left-0 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10'
+          }
           aria-label="Toggle dropdown"
         >
           <ChevronDown
@@ -88,72 +95,68 @@ export default function Dropdown({
             }`}
           />
         </button>
-
-        {/* Optional icon */}
+        {/* Optional icon on the RIGHT */}
         {Icon && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
             <Icon size={20} />
           </div>
         )}
-
-        {/* Input */}
         <input
           type="text"
           value={inputValue}
           onChange={(e) => {
             setSearch(e.target.value);
             setIsOpen(true);
+            // Do not clear selection on search
           }}
           onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
           className={
             selectClassName
               ? selectClassName
-              : `w-full border-2  rounded-lg py-2.5 px-10 text-[18px]
-                 bg-[#EAEAEA40]  
-                 outline-none transition duration-150 ease-in-out 
-                 border-[#5D24E1]
-                 focus:border-[#5D24E1] !focus:!ring-4 focus:!ring-[#5D24E1]/50 accent-amber-100
-                 ${
-                   value
-                     ? 'text-[#111827]'
-                     : placeholderClassName ?? 'text-[#878A99]'
-                 }`
+              : `w-full border border-[#CED4DA] rounded-lg py-2.5 pl-3 pr-3  text-[18px] overflow-hidden text-ellipsis whitespace-nowrap text-left ${
+                  value
+                    ? 'text-[#111827] '
+                    : placeholderClassName ?? 'text-[#878A99]'
+                }`
           }
           style={!value && placeholderStyle ? placeholderStyle : undefined}
         />
-
-        {/* Dropdown Menu */}
         {isOpen && (
-          <ul className="absolute z-10 left-0 right-0 bg-white border border-[#CED4DA] rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+          <ul
+            className={
+              dropdownClassName ||
+              'absolute z-10 left-0 right-0 bg-white  rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg'
+            }
+          >
             {filteredOptions.length === 0 ? (
               <li className="px-3 py-2 text-[#878A99]">{'لا توجد نتائج'}</li>
             ) : (
-              filteredOptions.map((option) => (
-                <li
-                  key={option.key}
-                  className={`px-3 py-2 cursor-pointer select-none transition-colors duration-150
-                    ${
-                      value === option.key
-                        ? 'bg-[#5D24E1] text-white'
-                        : flashKey === option.key
-                        ? 'bg-[#5D24E1]/70 text-white'
-                        : 'text-[#1F1F1F]'
-                    }
-                    hover:bg-[#5D24E1] hover:text-white 
-                    md:hover:bg-[#5D24E1] md:hover:text-white 
-                    md:active:scale-95 active:bg-[#5D24E1]/80 active:text-white
-                  `}
-                  onClick={() => {
-                    onChange(option.key);
-                    handleFlash(option.key);
-                    setSearch('');
-                    setIsOpen(false);
-                  }}
-                >
-                  {option.value}
-                </li>
-              ))
+              filteredOptions.map((option) => {
+                const IconComponent = option.icon;
+                return (
+                  <li
+                    key={option.key}
+                    className={`px-3 py-2 cursor-pointer text-[#111827] hover:bg-gray-100 flex items-center gap-2 ${
+                      value === option.key ? 'bg-gray-200' : ''
+                    }`}
+                    style={{ direction: 'rtl' }}
+                    onClick={() => {
+                      onChange(option.key);
+                      setSearch('');
+                      setIsOpen(false);
+                    }}
+                  >
+                    <span className="flex-1">{option.value}</span>
+                    {IconComponent && (
+                      <IconComponent
+                        size={20}
+                        className="text-gray-400 flex-shrink-0"
+                      />
+                    )}
+                  </li>
+                );
+              })
             )}
           </ul>
         )}
