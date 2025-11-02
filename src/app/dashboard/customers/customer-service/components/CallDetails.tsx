@@ -1,7 +1,6 @@
 import React from 'react';
 import { TABLE_DATA } from '@/constants/customer-service/CompareBetweenEmployees';
 import Table from './Table';
-import { Plus } from 'lucide-react';
 
 function CallDetails() {
   return (
