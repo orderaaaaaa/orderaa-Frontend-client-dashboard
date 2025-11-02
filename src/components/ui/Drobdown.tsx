@@ -84,7 +84,7 @@ export default function Dropdown({
           onClick={() => setIsOpen(!isOpen)}
           className={
             arrowClassName ||
-            'absolute cursor-pointer left-0 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10'
+            'absolute cursor-pointer px-3 left-0 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10'
           }
           aria-label="Toggle dropdown"
         >
