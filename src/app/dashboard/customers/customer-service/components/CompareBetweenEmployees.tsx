@@ -1,10 +1,18 @@
 import React from 'react';
-import { TABLE_DATA } from '@/constants/customer-service/CompareBetweenEmployees';
+import {
+  COMPARE_EMPLOYEES_DATA,
+  COMPARE_EMPLOYEES_HEADERS,
+} from '@/constants/customer-service/CompareBetweenEmployees';
 import Table from './Table';
 
 function CompareBetweenEmployees() {
   return (
-    <Table data={TABLE_DATA} type={false} name=" تفاصيل مقارنة بين موظفين " />
+    <Table
+      data={COMPARE_EMPLOYEES_DATA}
+      headers={COMPARE_EMPLOYEES_HEADERS}
+      type={false}
+      name=" تفاصيل مقارنة بين موظفين "
+    />
   );
 }
 

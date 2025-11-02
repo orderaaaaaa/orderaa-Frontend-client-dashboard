@@ -9,9 +9,10 @@ export default function AverageCallDurationChart() {
   const barWidth = 60;
   const spacing = 30;
   const bottomY = chartHeight + 30;
+  const chartWidth = (barWidth + spacing) * averageCallDurationData.length;
 
   return (
-    <div className="w-full max-w-3xl bg-white rounded-3xl shadow-xl p-8">
+    <div className="w-full max-w-5xl bg-white rounded-3xl shadow-xl p-8 mx-auto">
       {/* Header */}
       <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-6">
         <h2 className="font-bold text-lg text-right text-gray-900">
@@ -20,30 +21,32 @@ export default function AverageCallDurationChart() {
       </div>
 
       {/* Chart container */}
-      <div className="relative">
+      <div className="relative flex justify-center sm:top-10 sm:right-4">
         <svg
-          width={(barWidth + spacing) * averageCallDurationData.length + 60}
-          height={chartHeight + 100}
-          className="overflow-visible"
+          viewBox={`-40 0 ${chartWidth + 60} ${chartHeight + 100}`}
+          preserveAspectRatio="xMidYMid meet"
+          className="w-[100%] sm:w-[90%] md:w-[80%] h-auto mx-auto"
         >
-          {/* Y-axis labels */}
+          {/* Y-axis grid lines & labels */}
           {[0, 4, 8, 12, 16].map((val, i) => {
             const y = bottomY - (val / maxValue) * chartHeight;
             return (
               <g key={i}>
                 <line
                   x1="0"
-                  x2={(barWidth + spacing) * averageCallDurationData.length}
+                  x2={
+                    (barWidth + spacing) * averageCallDurationData.length + 20
+                  }
                   y1={y}
                   y2={y}
                   stroke="#ddd"
                   strokeDasharray="4"
                 />
                 <text
-                  x="-30"
+                  x="-25"
                   y={y + 5}
                   textAnchor="end"
-                  className="fill-gray-600 text-sm "
+                  className="fill-gray-600 text-[10px] sm:text-xs md:text-sm"
                 >
                   {val} دقيقة
                 </text>
@@ -82,7 +85,7 @@ export default function AverageCallDurationChart() {
                   fill="#EDE4FF"
                 />
 
-                {/* Main filled part */}
+                {/* Filled part */}
                 <rect
                   x="0"
                   y={y}
@@ -98,12 +101,12 @@ export default function AverageCallDurationChart() {
                   fill="#5D24E1"
                 />
 
-                {/* Label below */}
+                {/* Label */}
                 <text
                   x={barWidth / 2}
                   y={bottomY + 35}
                   textAnchor="middle"
-                  className="fill-[#5D24E1] font-semibold text-[14px]"
+                  className="fill-[#5D24E1] font-semibold text-[10px] sm:text-[12px] md:text-[14px]"
                 >
                   {d.label}
                 </text>

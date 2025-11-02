@@ -29,7 +29,7 @@ export default function OrdersStatusChart(): JSX.Element {
       </h2>
       <div className="grid 2xl:grid-cols-2 grid-cols-1 items-center justify-center sm:w-[90%] w-full mt-9">
         {/* Legend (all 8 items) */}
-        <div className="grid grid-cols-2 justify-center items-center text-right text-gray-800 gap-2 mt-6 md:mt-0 md:mr-8 space-y-2">
+        <div className="grid max-2xl:grid-cols-2 justify-center items-center text-right text-gray-800 gap-2 mt-6 md:mt-0 md:mr-8 space-y-2">
           {distributionData.map((d, i) => (
             <div key={i} className="flex items-center gap-3">
               <span

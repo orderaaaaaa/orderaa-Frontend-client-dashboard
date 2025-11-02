@@ -2,35 +2,72 @@ import React from 'react';
 import { TABLE_HEADERS } from '@/constants/customer-service/CompareBetweenEmployees';
 import { getPerformanceRating } from '@/lib/customers/getPerformanceRating';
 
+interface ITableHeader {
+  id: number;
+  key: string;
+  label: string;
+}
+
 interface ITableRow {
   id: number;
-  name: string;
-  performance: number;
-  totalCalls: string;
-  confirmed: string;
-  cancelled: string;
-  postponed: string;
-  noResponse: string;
-  incomplete: string;
-  workHours: string;
-  breakDuration: string;
+  name?: string;
+  employee?: string;
+  performance?: number;
+  totalCalls?: string;
+  confirmed?: string;
+  cancelled?: string;
+  postponed?: string;
+  noResponse?: string;
+  noAnswer?: string;
+  incomplete?: string;
+  workHours?: string;
+  breakDuration?: string;
+  stopDuration?: string;
+  afterFirst?: string;
+  afterSecond?: string;
+  afterThird?: string;
+  [key: string]: any;
 }
 
 interface ITableProps {
   data: ITableRow[];
   type: boolean;
   name: string;
+  headers?: ITableHeader[];
 }
 
-function Table({ data, type, name }: ITableProps) {
+function Table({ data, type, name, headers }: ITableProps) {
+  const tableHeaders = headers || TABLE_HEADERS;
+  const columnsCount = tableHeaders.length;
+
+  // Map column counts to Tailwind grid classes
+  const gridColsMap: { [key: number]: string } = {
+    1: 'grid-cols-1',
+    2: 'grid-cols-2',
+    3: 'grid-cols-3',
+    4: 'grid-cols-4',
+    5: 'grid-cols-5',
+    6: 'grid-cols-6',
+    7: 'grid-cols-7',
+    8: 'grid-cols-8',
+    9: 'grid-cols-9',
+    10: 'grid-cols-10',
+    11: 'grid-cols-11',
+    12: 'grid-cols-12',
+  };
+
+  const gridColsClass = gridColsMap[columnsCount] || 'grid-cols-1';
+
   return (
     <div className="w-full p-4 sm:p-6 md:p-7 bg-white mt-10 rounded-2xl shadow-xl">
       <h1 className="font-semibold mb-6 sm:mb-18">{name}</h1>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse min-w-[700px] sm:min-w-full">
           <thead>
-            <tr className="grid grid-cols-10 bg-[#f2edfd] items-center sm:py-2 rounded-sm mb-2 text-[12px] sm:text-sm">
-              {TABLE_HEADERS.map((header) => (
+            <tr
+              className={`grid ${gridColsClass} bg-[#f2edfd] items-center sm:py-2 rounded-sm mb-2 text-[12px] sm:text-sm`}
+            >
+              {tableHeaders.map((header) => (
                 <th
                   key={header.id}
                   className="py-2 sm:px-5 font-semibold text-center"
@@ -43,39 +80,58 @@ function Table({ data, type, name }: ITableProps) {
 
           <tbody>
             {data?.map((row) => {
-              const { rating, color } = getPerformanceRating(row.performance);
+              const { rating, color } = row.performance
+                ? getPerformanceRating(row.performance)
+                : { rating: '', color: '' };
 
               return (
                 <tr
                   key={row.id}
-                  className="grid grid-cols-10 border-b border-gray-100 hover:bg-gray-50 transition-colors text-xs sm:text-sm"
+                  className={`grid ${gridColsClass} border-b border-gray-100 hover:bg-gray-50 transition-colors text-xs sm:text-sm`}
                 >
-                  <td className="py-2 sm:p-5 text-center truncate">
-                    {row.name}
-                  </td>
+                  {tableHeaders.map((header) => {
+                    // Handle special case for performance column with type prop
+                    if (
+                      header.key === 'performance' &&
+                      row.performance !== undefined
+                    ) {
+                      return (
+                        <td
+                          key={header.id}
+                          className="p-3 sm:p-5 text-center flex justify-center items-center gap-2"
+                        >
+                          <span>{row.performance}%</span>
+                          {type && (
+                            <span
+                              className="px-2 py-1 text-white text-xs rounded-sm"
+                              style={{ backgroundColor: color }}
+                            >
+                              {rating}
+                            </span>
+                          )}
+                        </td>
+                      );
+                    }
 
-                  <td className="p-3 sm:p-5 text-center flex justify-center items-center gap-2">
-                    <span>{row.performance}%</span>
-                    {type && (
-                      <span
-                        className="px-2 py-1 text-white text-xs rounded-sm"
-                        style={{ backgroundColor: color }}
-                      >
-                        {rating}
-                      </span>
-                    )}
-                  </td>
+                    // Handle name/employee column
+                    if (header.key === 'name' || header.key === 'employee') {
+                      return (
+                        <td
+                          key={header.id}
+                          className="py-2 sm:p-5 text-center truncate"
+                        >
+                          {row.name || row.employee}
+                        </td>
+                      );
+                    }
 
-                  <td className="py-3 sm:p-5 text-center">{row.totalCalls}</td>
-                  <td className="py-3 sm:p-5 text-center">{row.confirmed}</td>
-                  <td className="py-3 sm:p-5 text-center">{row.cancelled}</td>
-                  <td className="py-3 sm:p-5 text-center">{row.postponed}</td>
-                  <td className="py-3 sm:p-5 text-center">{row.noResponse}</td>
-                  <td className="py-3 sm:p-5 text-center">{row.incomplete}</td>
-                  <td className="py-3 sm:p-5 text-center">{row.workHours}</td>
-                  <td className="py-3 sm:p-5 text-center">
-                    {row.breakDuration}
-                  </td>
+                    // Default: render cell value
+                    return (
+                      <td key={header.id} className="py-3 sm:p-5 text-center">
+                        {row[header.key] || '-'}
+                      </td>
+                    );
+                  })}
                 </tr>
               );
             })}

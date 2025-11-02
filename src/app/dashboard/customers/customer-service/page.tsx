@@ -64,7 +64,7 @@ function CustomerService() {
       <CompareCompare />
       <CallDetails />
       <CompareBetweenEmployees />
-      <StopHours />
+      {/* <StopHours /> */}
       <EgyptMapSection />
     </>
   );
