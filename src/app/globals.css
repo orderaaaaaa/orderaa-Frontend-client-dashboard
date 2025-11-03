@@ -1,9 +1,9 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
-:root {
+/* :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -37,7 +37,7 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-}
+} */
 
 .dark {
   --background: oklch(0.145 0 0);
@@ -123,14 +123,14 @@
     @apply bg-background text-foreground;
   }
 }
-input[type="date"]::-webkit-datetime-edit-text,
-input[type="date"]::-webkit-datetime-edit-month-field,
-input[type="date"]::-webkit-datetime-edit-day-field,
-input[type="date"]::-webkit-datetime-edit-year-field {
+input[type='date']::-webkit-datetime-edit-text,
+input[type='date']::-webkit-datetime-edit-month-field,
+input[type='date']::-webkit-datetime-edit-day-field,
+input[type='date']::-webkit-datetime-edit-year-field {
   display: none;
 }
 
-input[type="date"]::-webkit-calendar-picker-indicator {
+input[type='date']::-webkit-calendar-picker-indicator {
   position: absolute;
   left: 0;
   top: 0;
@@ -140,22 +140,22 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
 }
 
-input[type="date"]:focus::-webkit-datetime-edit-text,
-input[type="date"]:focus::-webkit-datetime-edit-month-field,
-input[type="date"]:focus::-webkit-datetime-edit-day-field,
-input[type="date"]:focus::-webkit-datetime-edit-year-field {
+input[type='date']:focus::-webkit-datetime-edit-text,
+input[type='date']:focus::-webkit-datetime-edit-month-field,
+input[type='date']:focus::-webkit-datetime-edit-day-field,
+input[type='date']:focus::-webkit-datetime-edit-year-field {
   display: none;
 }
 
-input[type="date"].has-value::-webkit-datetime-edit-text,
-input[type="date"].has-value::-webkit-datetime-edit-month-field,
-input[type="date"].has-value::-webkit-datetime-edit-day-field,
-input[type="date"].has-value::-webkit-datetime-edit-year-field {
+input[type='date'].has-value::-webkit-datetime-edit-text,
+input[type='date'].has-value::-webkit-datetime-edit-month-field,
+input[type='date'].has-value::-webkit-datetime-edit-day-field,
+input[type='date'].has-value::-webkit-datetime-edit-year-field {
   display: inline;
 }
 
 /* Custom checkbox styling */
-input[type="checkbox"] {
+input[type='checkbox'] {
   appearance: none;
   -webkit-appearance: none;
   width: 1.25rem;
@@ -166,12 +166,12 @@ input[type="checkbox"] {
   position: relative;
 }
 
-input[type="checkbox"]:checked {
+input[type='checkbox']:checked {
   background-color: #5d24e1;
 }
 
-input[type="checkbox"]:checked::after {
-  content: "";
+input[type='checkbox']:checked::after {
+  content: '';
   position: absolute;
   left: 6px;
   top: 4px;
