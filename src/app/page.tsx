@@ -10,6 +10,12 @@ import Footer from './(home)/Footer';
 import SmartMarketing from './(home)/SmartMarketing';
 import Departments from './(home)/Departments';
 import InventorySection from './(home)/InventorySection';
+import AIDepartments from './(home)/AIDepartments';
+import VideoSection from './(home)/VideoSection';
+import TeamManagementSection from './(home)/TeamManagementSection';
+import SmartAccountsAndSuppliers from './(home)/SmartAccountsAndSuppliers';
+import DepartmentsFinanceAndOps from './(home)/DepartmentsFinanceAndOps';
+import FullControlSection from './(home)/FullControlSection';
 
 const zain = Zain({
   subsets: ['latin'],
@@ -44,14 +50,19 @@ const Page = () => {
           className="absolute top-[-40px] left-0 w-full max-w-[806px]"
         />
       </div>
-
       {/* Foreground Content */}
       <div className="relative z-10">
         <Header />
         <Hero />
         <Features />
         <InventorySection />
+        <TeamManagementSection />
         <Departments />
+        <FullControlSection />
+        <SmartAccountsAndSuppliers />
+        <DepartmentsFinanceAndOps />
+        <VideoSection />
+        <AIDepartments />
         <SmartMarketing />
         <Pricing />
         <FaqSection />

@@ -1,51 +1,89 @@
+'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import React from 'react';
+import React, { useState } from 'react';
+import { Menu, X } from 'lucide-react'; // For hamburger icons
 
 function Header() {
-  return (
-    <section className="container mx-auto m-0 p-0 text-white">
-      <div className="flex justify-between py-6">
-        <Image
-          src={'/icons/Orderaa.svg'}
-          alt=""
-          width={70}
-          height={10}
-          className="w-full max-w-[160px]"
-        />
-        <div>
-          <ul className="border-1 border-[#5D24E1] px-12 py-2 rounded-4xl flex gap-10 bg-[#FFFFFF]/4">
-            <li>
-              <Link href="#">الصفحة الرئيسية</Link>
-            </li>
-            <li>
-              {' '}
-              <Link href="#">الباقات</Link>
-            </li>
-            <li>
-              {' '}
-              <Link href="#">الخدمات</Link>
-            </li>
-          </ul>
-        </div>
+  const [isOpen, setIsOpen] = useState(false);
 
-        <div className="space-x-3">
+  return (
+    <header className="container mx-auto px-4 text-white">
+      <div className="flex justify-between items-center py-6">
+        {/* Logo */}
+        <Link href="/">
+          <Image
+            src="/icons/Orderaa.svg"
+            alt="Orderaa logo"
+            width={120}
+            height={40}
+            className="max-w-[160px]"
+          />
+        </Link>
+
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-10 bg-[#FFFFFF]/10 border border-[#5D24E1] px-10 py-2 rounded-3xl">
+          <Link href="#">الصفحة الرئيسية</Link>
+          <Link href="#">الباقات</Link>
+          <Link href="#">الخدمات</Link>
+        </nav>
+
+        {/* Desktop Buttons */}
+        <div className="hidden md:flex items-center gap-3">
           <Link
             href="/signup"
-            className="border-1 border-[#5D24E1] py-2 px-3 rounded-4xl bg-[#FFFFFF]/4"
+            className="border border-[#5D24E1] py-2 px-4 rounded-3xl bg-[#FFFFFF]/10"
           >
-            {' '}
-            تسجيل الحساب{' '}
+            تسجيل الحساب
           </Link>
           <Link
             href="/signin"
-            className="border-1 border-[#5D24E1] py-2 px-3 rounded-4xl bg-[#FFFFFF]/4"
+            className="border border-[#5D24E1] py-2 px-4 rounded-3xl bg-[#FFFFFF]/10"
           >
             تسجيل الدخول
           </Link>
         </div>
+
+        {/* Mobile Burger */}
+        <button
+          className="md:hidden border border-[#5D24E1] p-2 rounded-2xl bg-[#FFFFFF]/10"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {isOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </div>
-    </section>
+
+      {/* Mobile Menu */}
+      {isOpen && (
+        <div className="md:hidden flex flex-col items-center gap-5 py-6 bg-[#1A1A1A]/90 border-t border-[#5D24E1] rounded-b-2xl">
+          <Link href="#" onClick={() => setIsOpen(false)}>
+            الصفحة الرئيسية
+          </Link>
+          <Link href="#" onClick={() => setIsOpen(false)}>
+            الباقات
+          </Link>
+          <Link href="#" onClick={() => setIsOpen(false)}>
+            الخدمات
+          </Link>
+          <div className="flex flex-col gap-3 w-full items-center">
+            <Link
+              href="/signup"
+              className="border border-[#5D24E1] py-2 px-4 rounded-3xl bg-[#FFFFFF]/10 w-3/4 text-center"
+              onClick={() => setIsOpen(false)}
+            >
+              تسجيل الحساب
+            </Link>
+            <Link
+              href="/signin"
+              className="border border-[#5D24E1] py-2 px-4 rounded-3xl bg-[#FFFFFF]/10 w-3/4 text-center"
+              onClick={() => setIsOpen(false)}
+            >
+              تسجيل الدخول
+            </Link>
+          </div>
+        </div>
+      )}
+    </header>
   );
 }
 

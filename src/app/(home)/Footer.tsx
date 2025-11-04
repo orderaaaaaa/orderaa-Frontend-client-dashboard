@@ -85,10 +85,10 @@ const Footer: React.FC = () => {
       </div>
 
       {/* Floating chat icon (bottom-left mirrored) */}
-      <div className="fixed bottom-25 right-20 z-50 ">
+      <div className="fixed bottom-15 right-15 z-50 ">
         <div className="relative">
-          <div className="absolute inset-0 bg-[#491eb3] blur-2xl opacity-50 rounded-full animate-pulse" />
-          <button className="relative bg-transparent border cursor-pointer border-[#491eb3] rounded-full p-3 hover:bg-[#491eb3]/30 transition-all duration-300 backdrop-blur-sm">
+          <div className="absolute inset-0 bg-[#491eb3] blur-2xl  opacity-50 rounded-full animate-pulse" />
+          <button className="relative bg-transparent cursor-pointer rounded-full p-3 shadow-2xl shadow-[#491eb3] hover:bg-[#491eb3]/30 transition-all duration-300 backdrop-blur-sm">
             <MessageCircle className="w-6 h-6 text-purple-400" />
           </button>
         </div>
