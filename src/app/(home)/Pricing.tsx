@@ -59,8 +59,13 @@ function Pricing() {
   ];
 
   return (
-    <section className="container mx-auto py-20 px-4 text-center text-white">
-      <h2 className="text-2xl md:text-3xl font-bold mb-8 md:mb-17">باقات وأسعار أوردرًا</h2>
+    <section
+      id="pricing"
+      className="container mx-auto py-10 sm:py-20 px-4 text-center text-white"
+    >
+      <h2 className="text-2xl md:text-3xl font-bold mb-8 md:mb-17">
+        باقات وأسعار أوردرًا
+      </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[...plans].reverse().map((plan, index) => (

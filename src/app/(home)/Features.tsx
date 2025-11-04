@@ -47,7 +47,10 @@ const featuresBottom: Feature[] = [
 
 const Features: React.FC = () => {
   return (
-    <section className="relative py-20 text-white text-right font-sans px-4">
+    <section
+      id="features"
+      className="relative mt-10 py-5 md:py-20 md:mt-0 text-white text-right font-sans px-4"
+    >
       <div className="container mx-auto px-2 md:px-6">
         {/* Header */}
         <div className="text-center mb-8 md:mb-14">
@@ -66,7 +69,9 @@ const Features: React.FC = () => {
               key={feature.title}
               className={`w-full flex flex-col justify-center items-center text-center p-4 md:p-0 ${
                 idx === 1 ? 'md:border-x border-[#EDF0EE40]' : ''
-              } ${idx !== 2 ? 'border-b md:border-b-0 border-[#EDF0EE40]' : ''}`}
+              } ${
+                idx !== 2 ? 'border-b md:border-b-0 border-[#EDF0EE40]' : ''
+              }`}
             >
               <div className="flex flex-col gap-4 justify-center items-center">
                 <div className="flex flex-col items-center">
@@ -75,13 +80,15 @@ const Features: React.FC = () => {
                     alt={feature.title}
                     width={60}
                     height={60}
-                    className="mb-4 w-[50px] h-[50px]"
+                    className="mb-4 w-[50px] h-[50px] max-sm:w-[40px]"
                   />
-                  <h3 className="text-[18px] md:text-[20px] w-full max-w-[250px] font-semibold mb-2">
+                  <h3 className="text-[16px] md:text-[20px] w-full max-w-[250px] font-semibold mb-2">
                     {feature.title}
                   </h3>
                 </div>
-                <p className="text-[13px] md:text-[14px] max-w-[280px] px-4">{feature.desc}</p>
+                <p className="text-[12px] md:text-[14px] max-w-[280px] px-4">
+                  {feature.desc}
+                </p>
               </div>
             </div>
           ))}
@@ -94,7 +101,9 @@ const Features: React.FC = () => {
               key={feature.title}
               className={`w-full flex flex-col justify-center items-center text-center p-4 md:p-0 ${
                 idx === 1 ? 'md:border-x border-[#EDF0EE40]' : ''
-              } ${idx !== 2 ? 'border-b md:border-b-0 border-[#EDF0EE40]' : ''}`}
+              } ${
+                idx !== 2 ? 'border-b md:border-b-0 border-[#EDF0EE40]' : ''
+              }`}
             >
               <div className="flex flex-col gap-4 justify-center items-center">
                 <div className="flex flex-col items-center">
@@ -103,13 +112,15 @@ const Features: React.FC = () => {
                     alt={feature.title}
                     width={60}
                     height={60}
-                    className="mb-4 w-[50px] h-[50px]"
+                    className="mb-4 w-[50px] h-[50px] max-sm:w-[40px]"
                   />
-                  <h3 className="text-[18px] md:text-[20px] w-full max-w-[250px] font-semibold mb-2">
+                  <h3 className="text-[16px] md:text-[20px] w-full max-w-[250px] font-semibold mb-2">
                     {feature.title}
                   </h3>
                 </div>
-                <p className="text-[13px] md:text-[14px] max-w-[280px] px-4">{feature.desc}</p>
+                <p className="text-[12px] md:text-[14px] max-w-[280px] px-4">
+                  {feature.desc}
+                </p>
               </div>
             </div>
           ))}

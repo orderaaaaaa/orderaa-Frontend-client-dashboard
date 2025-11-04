@@ -42,11 +42,13 @@ const FaqSection: React.FC = () => {
   };
 
   return (
-    <section className="relative py-20 text-white z-10 px-4">
+    <section className="relative py-5 sm:py-20 text-white z-10 px-4">
       <div className="container relative mx-auto px-2 md:px-6 grid grid-cols-1 md:grid-cols-2 z-10 gap-8 md:gap-12 items-center">
         {/* Right side */}
-        <div className="text-right order-2 md:order-1">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6">أسئلة متكررة</h2>
+        <div className="text-right max-sm:mt-4 order-2 md:order-1">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6">
+            أسئلة متكررة
+          </h2>
           <p className="text-base md:text-lg text-gray-300 mb-4 leading-relaxed">
             بعض الأسئلة التي تتكرر من عملاء وزوار الموقع.
             <br />

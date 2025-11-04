@@ -32,14 +32,14 @@ const AIDepartments: React.FC = () => {
   ];
 
   return (
-    <section className="relative py-20 md:py-35 text-white mt-10 px-4">
+    <section className="relative py-5 max-sm:mb-10 md:py-35 text-white mt-10 px-4">
       {/* Background assets - Hidden on mobile */}
       <Image
         src="/icons/StarAsset.svg"
         alt=""
         width={1006}
         height={1006}
-        className="absolute top-[-60px] right-0 w-[100%] -z-20 hidden md:block"
+        className="absolute top-[-110px] right-0 w-[100%] -z-20 hidden md:block"
       />
       <Image
         src="/icons/Beam.svg"

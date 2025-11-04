@@ -19,7 +19,7 @@ export default function TeamPerformanceSection() {
   ];
 
   return (
-    <section className="relative py-20 text-white overflow-hidden">
+    <section className="relative sm:py-20 text-white overflow-hidden">
       <div className="container mx-auto flex flex-col md:flex-row px-6 gap-10 relative">
         {/* ✅ Right Side - Text Content */}
         <div className="w-full md:w-1/2 text-right relative order-2 md:order-1">
@@ -52,26 +52,30 @@ export default function TeamPerformanceSection() {
 
         {/* ✅ Left Side - Chart Image */}
         <div className="relative md:bottom-5 md:right-40 flex flex-col w-full md:max-w-[80%] text-center gap-4 justify-center order-1 md:order-2">
-          <h3 className="text-xl md:text-2xl mb-4 md:mb-0">إدارة الفريق بذكاء</h3>
+          <h3 className="text-xl md:text-2xl mb-4 md:mb-0">
+            إدارة الفريق بذكاء
+          </h3>
           <Image
             src="/icons/Dashboard4.svg"
             alt="مقارنة الموظفين"
             width={600}
             height={350}
-            className="w-full md:w-[75%] rounded-2xl mx-auto"
+            className="w-full relative max-sm:left-4 md:w-[75%] rounded-2xl mx-auto"
           />
         </div>
 
         {/* ✅ Bottom Card - Mobile: Normal Flow, Desktop: Absolute */}
-        <div className="order-3 md:absolute md:bottom-20 md:left-[960px] md:transform md:-translate-x-1/2 w-full md:max-w-[1050px] backdrop-blur-lg bg-white/5 border-2 border-[#5D24E1]/40 rounded-[30px] flex flex-col md:flex-row justify-between items-stretch gap-6 p-8 md:p-16 mt-10 md:mt-0">
+        <div className="order-3 z-30 md:absolute md:bottom-30 md:left-[960px] md:transform md:-translate-x-1/2 w-full md:max-w-[1050px] backdrop-blur-lg bg-white/5 border-2 border-[#5D24E1]/40 rounded-[30px] flex flex-col md:flex-row justify-between items-stretch gap-6 p-8 md:p-16 mt-10 md:mt-0">
           {data.map((item, i) => (
             <div
               key={i}
               className="flex flex-row-reverse items-center justify-between text-right w-full gap-6"
             >
               <div className="flex flex-col text-white space-y-2">
-                <h3 className="text-xl md:text-2xl font-semibold">{item.title}</h3>
-                <p className="text-[#A0A0A8] text-base md:text-lg leading-relaxed">
+                <h3 className="text-[16px] md:text-2xl font-semibold">
+                  {item.title}
+                </h3>
+                <p className="text-[#A0A0A8] text-[12px] md:text-lg leading-relaxed">
                   {item.description}
                 </p>
               </div>

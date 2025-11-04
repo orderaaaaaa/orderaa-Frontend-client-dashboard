@@ -35,8 +35,8 @@ const DepartmentsFinanceAndOps: React.FC = () => {
             key={i}
             className={`relative p-6 md:p-10 rounded-[25px] bg-black border border-[#5D24E1] overflow-hidden transition-transform duration-300 hover:scale-[1.02] ${
               i === 0
-                ? 'shadow-[30px_30px_50px_-15px_#3a168d]'
-                : 'shadow-[-30px_30px_50px_-15px_#3a168d]'
+                ? 'shadow-[#3a168d] shadow-2xl sm:shadow-[30px_30px_50px_-15px_#3a168d]'
+                : 'shadow-[#3a168d] shadow-2xl sm:shadow-[-30px_30px_50px_-15px_#3a168d]'
             }`}
           >
             <h3 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8 text-white text-center md:text-right">
@@ -55,7 +55,7 @@ const DepartmentsFinanceAndOps: React.FC = () => {
                       strokeWidth={3}
                     />
                   </span>
-                  <p className="text-[16px] md:text-[20px] text-[#939499] text-right">
+                  <p className="text-[14px] md:text-[20px] text-[#939499] text-right">
                     {item}
                   </p>
                 </li>

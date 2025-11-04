@@ -24,8 +24,8 @@ function Header() {
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-10 bg-[#FFFFFF]/10 border border-[#5D24E1] px-10 py-2 rounded-3xl">
           <Link href="#">الصفحة الرئيسية</Link>
-          <Link href="#">الباقات</Link>
-          <Link href="#">الخدمات</Link>
+          <Link href="#pricing">الباقات</Link>
+          <Link href="#features">الخدمات</Link>
         </nav>
 
         {/* Desktop Buttons */}

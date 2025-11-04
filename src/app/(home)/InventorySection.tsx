@@ -5,7 +5,7 @@ import Image from 'next/image';
 
 const InventorySection: React.FC = () => {
   return (
-    <section className="relative text-white py-26 container mx-auto text-right px-4">
+    <section className="relative text-white py-15 sm:py-26 container mx-auto text-right px-4">
       <div className="px-2 md:px-6 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
         {/* Right side - Dashboard & Features */}
         <div className="order-2 lg:order-1">
@@ -68,13 +68,12 @@ const InventorySection: React.FC = () => {
             رؤية واضحة لحالة المخزون
           </h3>
 
-          {/* Placeholder image for inventory chart */}
           <Image
             src={'/icons/Dashboard1.svg'}
             height={1000}
             width={2}
             alt=""
-            className="w-full max-w-[520px] border mb-4"
+            className="w-full relative max-sm:left-4 max-w-[520px] border mb-4"
           />
 
           <p className="text-gray-300 leading-relaxed text-center lg:text-right text-[14px] md:text-[16px] max-w-md">
