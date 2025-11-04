@@ -6,8 +6,8 @@ import { MessageCircle } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
-    <footer dir="rtl" className="relative py-12">
-      <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
+    <footer dir="rtl" className="relative py-12 px-4">
+      <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-8 md:gap-10">
         {/* Right side - Logo */}
         <div className="flex flex-col items-center md:items-start gap-4">
           <Image
@@ -20,8 +20,8 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Middle - Navigation */}
-        <div className="flex flex-col items-center gap-6">
-          <ul className="flex gap-10 text-lg">
+        <div className="flex flex-col items-center gap-4 md:gap-6">
+          <ul className="flex flex-col md:flex-row gap-4 md:gap-10 text-base md:text-lg">
             <li>
               <Link
                 href="#"

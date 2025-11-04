@@ -6,22 +6,22 @@ export default function VideoSection() {
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (
-    <section className="relative py-20 text-white">
-      <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-10 px-6">
+    <section className="relative py-20 text-white px-4">
+      <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-10 px-2 md:px-6">
         {/* Left text */}
-        <div className="w-full md:w-[40%] text-right">
-          <h2 className="text-3xl font-bold mb-6">
+        <div className="w-full md:w-[40%] text-right order-2 md:order-1">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">
             شاهد هذا الفيديو لتتعرف على{' '}
             <span className="text-[#8E6BFF]">Orderaa</span>
           </h2>
-          <p className="text-gray-300 text-[22px] leading-relaxed">
+          <p className="text-gray-300 text-[18px] md:text-[22px] leading-relaxed">
             افهم في دقيقتين كيف يساعدك النظام على إدارة الطلبات، متابعة العملاء،
             وتحقيق مبيعاتك بسهولة – كل شيء في مكان واحد.
           </p>
         </div>
 
         {/* Right: video area */}
-        <div className="relative w-full md:w-1/2 rounded-3xl overflow-hidden border border-[#5D24E1]/40 shadow-[0_0_30px_rgba(93,36,225,0.2)]">
+        <div className="relative w-full md:w-1/2 rounded-3xl overflow-hidden border border-[#5D24E1]/40 shadow-[0_0_30px_rgba(93,36,225,0.2)] order-1 md:order-2">
           {!isPlaying ? (
             <>
               {/* Preview image */}

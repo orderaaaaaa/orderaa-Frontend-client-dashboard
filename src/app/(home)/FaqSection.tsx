@@ -42,23 +42,23 @@ const FaqSection: React.FC = () => {
   };
 
   return (
-    <section className="relative py-20 text-white  z-10 ">
-      <div className="container relative mx-auto px-6 grid md:grid-cols-2 z-10 gap-12 items-center">
+    <section className="relative py-20 text-white z-10 px-4">
+      <div className="container relative mx-auto px-2 md:px-6 grid grid-cols-1 md:grid-cols-2 z-10 gap-8 md:gap-12 items-center">
         {/* Right side */}
-        <div className="text-right">
-          <h2 className="text-4xl font-bold mb-6">أسئلة متكررة</h2>
-          <p className="text-lg text-gray-300 mb-4 leading-relaxed">
+        <div className="text-right order-2 md:order-1">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6">أسئلة متكررة</h2>
+          <p className="text-base md:text-lg text-gray-300 mb-4 leading-relaxed">
             بعض الأسئلة التي تتكرر من عملاء وزوار الموقع.
             <br />
             هل لديك أي سؤال؟
           </p>
-          <button className="bg-gradient-to-r from-[#9716EF] to-[#260A46] text-white mt-6 mr-15 px-25 py-3 rounded-[7px] text-lg font-semibold hover:opacity-90 transition cursor-pointer">
+          <button className="bg-gradient-to-r from-[#9716EF] to-[#260A46] text-white mt-4 md:mt-6 mr-0 md:mr-15 px-6 md:px-25 py-3 rounded-[7px] text-base md:text-lg font-semibold hover:opacity-90 transition cursor-pointer">
             اشترك الآن
           </button>
         </div>
 
         {/* Left side - FAQ list */}
-        <div className="bg-black/80 border border-[#491eb3] rounded-3xl shadow-[30px_25px_50px_-15px_#3a168d] p-10 shadow-[#491eb3]">
+        <div className="bg-black/80 border border-[#491eb3] rounded-3xl shadow-[30px_25px_50px_-15px_#3a168d] p-6 md:p-10 shadow-[#491eb3] order-1 md:order-2">
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
             return (

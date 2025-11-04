@@ -60,13 +60,13 @@ function Pricing() {
 
   return (
     <section className="container mx-auto py-20 px-4 text-center text-white">
-      <h2 className="text-3xl font-bold mb-17">باقات وأسعار أوردرًا</h2>
+      <h2 className="text-2xl md:text-3xl font-bold mb-8 md:mb-17">باقات وأسعار أوردرًا</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[...plans].reverse().map((plan, index) => (
           <div
             key={index}
-            className={`relative rounded-2xl p-6 border h-[400px] border-purple-700 flex flex-col shadow-lg transition-transform duration-300 hover:scale-105 bg-[#0d0d0d] overflow-hidden`}
+            className={`relative rounded-2xl p-6 border min-h-[400px] md:h-[400px] border-purple-700 flex flex-col shadow-lg transition-transform duration-300 hover:scale-105 bg-[#0d0d0d] overflow-hidden`}
           >
             {/* 💜 Radial Gradient from Top-Left */}
             {plan.gradient && (
@@ -103,9 +103,7 @@ function Pricing() {
 
             {/* Button */}
             <button
-              className={`w-full !mt-6 relative z-10 py-2 rounded-full border cursor-pointer border-purple-500 hover:bg-purple-700 ${
-                plan.highlight ? ' top-6' : 'top-15'
-              } transition`}
+              className={`w-full !mt-auto relative z-10 py-2 rounded-full border cursor-pointer border-purple-500 hover:bg-purple-700 transition`}
             >
               {plan.button}
             </button>

@@ -26,8 +26,8 @@ const zain = Zain({
 const Page = () => {
   return (
     <main className={`${zain.className} relative bg-[#040711] text-white`}>
-      {/* Background Images */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
+      {/* Background Images - Hidden on mobile */}
+      <div className="absolute inset-0 z-0 pointer-events-none hidden md:block">
         <Image
           src="/icons/group.svg"
           alt=""
