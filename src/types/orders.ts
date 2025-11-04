@@ -2,18 +2,22 @@ import { LucideIcon } from 'lucide-react';
 
 // Order Status Enum
 export enum OrderStatus {
-  TRIED_TO_REACH_CUSTOMER = 'TRIED_TO_REACH_CUSTOMER',
+  NEW_ORDER = 'NEW_ORDER',
+  STOPPED = 'STOPPED',
+  CALL_AGAIN = 'CALL_AGAIN',
+  POSTPONED = 'POSTPONED',
+  REGISTERED = 'REGISTERED',
   WAITING_FOR_PAYMENT = 'WAITING_FOR_PAYMENT',
-  ON_HOLD = 'ON_HOLD',
-  CALLED_CUSTOMER_AGAIN = 'CALLED_CUSTOMER_AGAIN',
-  CANCELLED = 'CANCELLED',
+  ATTEMPTED = 'ATTEMPTED',
   CONFIRMED = 'CONFIRMED',
   PREPARED = 'PREPARED',
-  SHIPPED = 'SHIPPED',
-  RETURNED = 'RETURNED',
+  RETURNED_DELIVERED = 'RETURNED_DELIVERED',
+  REPORTS = 'REPORTS',
+  SHIPPING = 'SHIPPING',
   DELIVERED = 'DELIVERED',
-  DOWN_PAYMENT = 'DOWN_PAYMENT',
   MISSING = 'MISSING',
+  PARTIAL_DELIVERY = 'PARTIAL_DELIVERY',
+  CANCELLED = 'CANCELLED',
 }
 
 // Customer Interface
@@ -47,8 +51,8 @@ export interface SelectedProduct {
   updatedAt: string;
 }
 
-// Order Interface
-export interface Order {
+// Order Interface (for simple use cases)
+export interface SimpleOrder {
   id: number;
   code: string;
   status: OrderStatus;
@@ -59,8 +63,8 @@ export interface Order {
   updatedAt: string;
   merchantId: number;
   customerId: number;
-  customer: Customer;
-  orderProducts: OrderProduct[];
+  customers: Customer;
+  order_products: OrderProduct[];
 }
 
 // Filter DTO (matching backend FilterOrdersDto)
@@ -172,7 +176,7 @@ export interface OrderProduct {
   price: number;
   sku?: string;
   variant?: string;
-  product: Product;
+  products: Product;
 }
 
 // Order Interface
@@ -204,8 +208,8 @@ export interface Order {
   updatedAt: string;
   merchantId: number;
   customerId: number;
-  customer: Customer;
-  orderProducts: OrderProduct[];
+  customers: Customer;
+  order_products: OrderProduct[];
 }
 
 // Filter DTO (matching backend FilterOrdersDto)
@@ -232,12 +236,10 @@ export interface FilterOrdersDto {
 // Pagination Response
 export interface PaginatedResponse<T> {
   data: T[];
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 // Legacy filters (for FilterSection component)

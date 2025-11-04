@@ -31,26 +31,26 @@ export interface OrderaaFormatExportData {
  */
 export function exportOrderaaFormat(orders: Order[], filename: string = 'orderaa_orders') {
     const excelData: OrderaaFormatExportData[] = orders.map((order) => {
-        const products = order.orderProducts || [];
+        const products = order.order_products || [];
 
         const data: OrderaaFormatExportData = {
-            'FullName': order.customer.name,
-            'Phone': order.customer.phoneNumber,
-            'Phone 2': order.customer.altPhone || '',
-            'City': order.customer.city || order.customer.governorate || '',
-            'Address': order.customer.address || '',
+            'FullName': order.customers.name,
+            'Phone': order.customers.phoneNumber,
+            'Phone 2': order.customers.altPhone || '',
+            'City': order.customers.city || order.customers.governorate || '',
+            'Address': order.customers.address || '',
             'Shipping Cost': order.shippingCost || 0,
             'Note': order.notes || '',
             'Utm Source': order.utmSource || '',
             'Utm Campaign': order.utmCampaign || '',
             'Payment Status': order.paymentStatus || '',
-            'Product Name 1': products[0]?.product.name || '',
+            'Product Name 1': products[0]?.products.name || '',
             'Variant 1': products[0]?.variant || formatVariant(products[0]?.product),
         };
 
         // Add second product if exists (template only supports 2 products)
         if (products[1]) {
-            data['Product Name 2'] = products[1].product.name;
+            data['Product Name 2'] = products[1].products.name;
             data['Variant 2'] = products[1].variant || formatVariant(products[1].product);
         }
 
@@ -106,7 +106,7 @@ function formatVariant(product?: { size?: string; color?: string }): string {
 function getPaymentStatusFromOrderStatus(status: string): string {
     const statusMap: Record<string, string> = {
         'WAITING_FOR_PAYMENT': 'pending',
-        'DOWN_PAYMENT': 'partial',
+        'PARTIAL_DELIVERY': 'partial',
         'DELIVERED': 'paid',
         'CONFIRMED': 'confirmed',
     };

@@ -9,26 +9,26 @@ export function useFilteredOrders(
     return orders.filter((order) => {
       if (
         filters.customerName &&
-        !order.customer.name.toLowerCase().includes(filters.customerName.toLowerCase())
+        !order.customers.name.toLowerCase().includes(filters.customerName.toLowerCase())
       ) {
         return false;
       }
 
-      if (filters.phone && !order.customer.phoneNumber.includes(filters.phone)) {
+      if (filters.phone && !order.customers.phoneNumber.includes(filters.phone)) {
         return false;
       }
 
-      if (filters.governorate && order.customer.governorate !== filters.governorate) {
+      if (filters.governorate && order.customers.governorate !== filters.governorate) {
         return false;
       }
 
-      if (filters.area && order.customer.area !== filters.area) {
+      if (filters.area && order.customers.area !== filters.area) {
         return false;
       }
 
       if (filters.productName) {
-        const hasMatchingProduct = order.orderProducts.some((op) =>
-          op.product.name.toLowerCase().includes(filters.productName.toLowerCase())
+        const hasMatchingProduct = order.order_products.some((op) =>
+          op.products.name.toLowerCase().includes(filters.productName.toLowerCase())
         );
         if (!hasMatchingProduct) {
           return false;
@@ -36,8 +36,8 @@ export function useFilteredOrders(
       }
 
       if (filters.sizeColor) {
-        const hasMatchingSizeColor = order.orderProducts.some((op) => {
-          const sizeColor = `${op.product.size || ''} ${op.product.color || ''}`.toLowerCase();
+        const hasMatchingSizeColor = order.order_products.some((op) => {
+          const sizeColor = `${op.products.size || ''} ${op.products.color || ''}`.toLowerCase();
           return sizeColor.includes(filters.sizeColor.toLowerCase());
         });
         if (!hasMatchingSizeColor) {
@@ -54,8 +54,8 @@ export function useFilteredOrders(
 
       if (
         filters.address &&
-        order.customer.address &&
-        !order.customer.address.toLowerCase().includes(filters.address.toLowerCase())
+        order.customers.address &&
+        !order.customers.address.toLowerCase().includes(filters.address.toLowerCase())
       ) {
         return false;
       }
