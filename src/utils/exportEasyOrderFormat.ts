@@ -47,28 +47,28 @@ export interface EasyOrderFormatExportData {
  */
 export function exportEasyOrderFormat(orders: Order[], filename: string = 'easyorder_orders') {
     const excelData: EasyOrderFormatExportData[] = orders.map((order) => {
-        const products = order.orderProducts || [];
+        const products = order.order_products || [];
         const firstProduct = products[0];
 
         const data: EasyOrderFormatExportData = {
             'ID': order.id.toString(),
             'Status': order.status,
-            'FullName': order.customer.name,
-            'Phone': order.customer.phoneNumber,
-            'City': order.customer.city || order.customer.governorate || '',
-            'Address': order.customer.address || '',
+            'FullName': order.customers.name,
+            'Phone': order.customers.phoneNumber,
+            'City': order.customers.city || order.customers.governorate || '',
+            'Address': order.customers.address || '',
             'Total Cost': order.totalCost,
             'Product Cost': order.totalCost - (order.shippingCost || 0),
             'Shipping Cost': order.shippingCost || 0,
             'Coupon': order.coupon || '',
             'Coupon Discount': order.couponDiscount || 0,
-            'Product Name': firstProduct?.product.name || '',
+            'Product Name': firstProduct?.products.name || '',
             'Variant': firstProduct?.variant || formatVariant(firstProduct?.product),
             'Quantity': firstProduct?.quantity || 1,
-            'SKU': firstProduct?.sku || generateSKU(firstProduct?.product.name, firstProduct?.product.size, firstProduct?.product.color),
+            'SKU': firstProduct?.sku || generateSKU(firstProduct?.products.name, firstProduct?.products.size, firstProduct?.products.color),
             'Item Price': firstProduct?.price || 0,
             'CreatedAt': new Date(order.createdAt).toISOString(),
-            'Alt Phone': order.customer.altPhone || '',
+            'Alt Phone': order.customers.altPhone || '',
             'Note': order.notes || '',
             'Utm Source': order.utmSource || '',
             'Utm Campaign': order.utmCampaign || '',
@@ -156,7 +156,7 @@ function generateSKU(productName: string, size?: string, color?: string): string
 function getPaymentStatus(status: string): string {
     const statusMap: Record<string, string> = {
         'WAITING_FOR_PAYMENT': 'pending',
-        'DOWN_PAYMENT': 'partial',
+        'PARTIAL_DELIVERY': 'partial',
         'DELIVERED': 'paid',
         'CONFIRMED': 'confirmed',
     };

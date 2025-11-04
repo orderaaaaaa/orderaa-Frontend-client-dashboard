@@ -2,6 +2,7 @@ import { Order, OrderFormat } from '@/types/orders';
 import * as XLSX from 'xlsx';
 import { exportOrderaaFormat } from './exportOrderaaFormat';
 import { exportEasyOrderFormat } from './exportEasyOrderFormat';
+import { toast } from 'sonner';
 
 export interface ExportOrderData {
     'كود الطلب': string;
@@ -27,7 +28,7 @@ export interface ExportOrderData {
  */
 export function exportOrdersToExcel(orders: Order[], filename: string = 'orders') {
     if (orders.length === 0) {
-        alert('لا توجد طلبات لتصديرها');
+        toast.error('لا توجد طلبات لتصديرها');
         return null;
     }
 
@@ -87,17 +88,17 @@ export function exportInArabicFormat(orders: Order[], filename: string = 'orders
     // Transform orders data to Excel format
     const excelData: ExportOrderData[] = orders.map((order) => ({
         'كود الطلب': order.code,
-        'اسم العميل': order.customer.name,
-        'رقم الهاتف': order.customer.phoneNumber,
-        'المحافظة': order.customer.governorate || '',
-        'المدينة': order.customer.city || '',
-        'المنطقة': order.customer.area || '',
-        'العنوان': order.customer.address || '',
-        'المنتجات': order.orderProducts
+        'اسم العميل': order.customers.name,
+        'رقم الهاتف': order.customers.phoneNumber,
+        'المحافظة': order.customers.governorate || '',
+        'المدينة': order.customers.city || '',
+        'المنطقة': order.customers.area || '',
+        'العنوان': order.customers.address || '',
+        'المنتجات': order.order_products
             .map((op: any) => {
-                const product = `${op.product.name}`;
-                const size = op.product.size ? ` - ${op.product.size}` : '';
-                const color = op.product.color ? ` - ${op.product.color}` : '';
+                const product = `${op.products.name}`;
+                const size = op.products.size ? ` - ${op.products.size}` : '';
+                const color = op.products.color ? ` - ${op.products.color}` : '';
                 const quantity = op.quantity ? ` (×${op.quantity})` : '';
                 return `${product}${size}${color}${quantity}`;
             })
@@ -155,27 +156,27 @@ function transformOrdersForOrderaaFormat(orders: Order[]) {
     // Implementation matches exportOrderaaFormat but returns data instead of downloading
     // Template supports ONLY 2 products
     return orders.map((order) => {
-        const products = order.orderProducts || [];
+        const products = order.order_products || [];
 
         const data: any = {
-            'FullName': order.customer.name,
-            'Phone': order.customer.phoneNumber,
-            'Phone 2': order.customer.altPhone || '',
-            'City': order.customer.city || order.customer.governorate || '',
-            'Address': order.customer.address || '',
+            'FullName': order.customers.name,
+            'Phone': order.customers.phoneNumber,
+            'Phone 2': order.customers.altPhone || '',
+            'City': order.customers.city || order.customers.governorate || '',
+            'Address': order.customers.address || '',
             'Shipping Cost': order.shippingCost || 0,
             'Note': order.notes || '',
             'Utm Source': order.utmSource || '',
             'Utm Campaign': order.utmCampaign || '',
             'Payment Status': order.paymentStatus || '',
-            'Product Name 1': products[0]?.product.name || '',
-            'Variant 1': products[0]?.variant || formatVariant(products[0]?.product),
+            'Product Name 1': products[0]?.products.name || '',
+            'Variant 1': products[0]?.variant || formatVariant(products[0]?.products),
         };
 
         // Add second product if exists (template only supports 2 products)
         if (products[1]) {
-            data['Product Name 2'] = products[1].product.name;
-            data['Variant 2'] = products[1].variant || formatVariant(products[1].product);
+            data['Product Name 2'] = products[1].products.name;
+            data['Variant 2'] = products[1].variant || formatVariant(products[1].products);
         }
 
         return data;
@@ -184,28 +185,28 @@ function transformOrdersForOrderaaFormat(orders: Order[]) {
 
 function transformOrdersForEasyOrderFormat(orders: Order[]) {
     return orders.map((order) => {
-        const products = order.orderProducts || [];
+        const products = order.order_products || [];
         const firstProduct = products[0];
 
         return {
             'ID': order.id.toString(),
             'Status': order.status,
-            'FullName': order.customer.name,
-            'Phone': order.customer.phoneNumber,
-            'City': order.customer.city || '',
-            'Address': order.customer.address || '',
+            'FullName': order.customers.name,
+            'Phone': order.customers.phoneNumber,
+            'City': order.customers.city || '',
+            'Address': order.customers.address || '',
             'Total Cost': order.totalCost,
             'Product Cost': order.totalCost - (order.shippingCost || 0),
             'Shipping Cost': order.shippingCost || 0,
             'Coupon': order.coupon || '',
             'Coupon Discount': order.couponDiscount || 0,
-            'Product Name': firstProduct?.product.name || '',
+            'Product Name': firstProduct?.products.name || '',
             'Variant': firstProduct?.variant || formatVariant(firstProduct?.product),
             'Quantity': firstProduct?.quantity || 1,
             'SKU': firstProduct?.sku || '',
             'Item Price': firstProduct?.price || 0,
             'CreatedAt': new Date(order.createdAt).toISOString(),
-            'Alt Phone': order.customer.altPhone || '',
+            'Alt Phone': order.customers.altPhone || '',
             'Note': order.notes || '',
             'Utm Source': order.utmSource || '',
             'Utm Campaign': order.utmCampaign || '',
@@ -231,7 +232,7 @@ function formatVariant(product?: { size?: string; color?: string }): string {
 function getPaymentStatus(status: string): string {
     const statusMap: Record<string, string> = {
         'WAITING_FOR_PAYMENT': 'pending',
-        'DOWN_PAYMENT': 'partial',
+        'PARTIAL_DELIVERY': 'partial',
         'DELIVERED': 'paid',
         'CONFIRMED': 'confirmed',
     };
@@ -252,18 +253,22 @@ function extractUtmFromNotes(type: 'source' | 'campaign', notes?: string): strin
 
 function getStatusInArabic(status: string): string {
     const statusMap: Record<string, string> = {
-        TRIED_TO_REACH_CUSTOMER: 'طلبات جديدة',
+        NEW_ORDER: 'طلبات جديدة',
+        STOPPED: 'وقف التشغيل',
+        CALL_AGAIN: 'إعادة اتصال',
+        POSTPONED: 'تأجيلات',
+        REGISTERED: 'منتسب',
         WAITING_FOR_PAYMENT: 'في انتظار الدفع',
-        ON_HOLD: 'تأجيلات',
-        CALLED_CUSTOMER_AGAIN: 'اعادة اتصال',
-        CANCELLED: 'تم الإلغاء',
+        ATTEMPTED: 'تم المحاولة',
         CONFIRMED: 'تم التأكيد',
         PREPARED: 'تم التحضير',
-        SHIPPED: 'في الشحن',
-        RETURNED: 'مرتجع',
+        RETURNED_DELIVERED: 'مرتجع مسلم',
+        REPORTS: 'تقرير',
+        SHIPPING: 'في الشحن',
         DELIVERED: 'تم التسليم',
-        DOWN_PAYMENT: 'دفعة مقدمة',
         MISSING: 'طلبات مفقودة',
+        PARTIAL_DELIVERY: 'تسليم جزئى',
+        CANCELLED: 'تم الإلغاء',
     };
 
     return statusMap[status] || status;
