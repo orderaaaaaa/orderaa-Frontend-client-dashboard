@@ -114,4 +114,9 @@ export const navigation: NavigationItem[] = [
     href: '/dashboard/integrations',
     icon: Link2,
   },
+  {
+    name: 'الموظفين',
+    href: '/dashboard/employees',
+    icon: Users,
+  },
 ];

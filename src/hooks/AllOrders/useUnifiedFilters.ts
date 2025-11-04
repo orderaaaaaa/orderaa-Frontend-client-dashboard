@@ -21,7 +21,7 @@ export function useUnifiedFilters() {
 
     // Pagination state
     const [page, setPage] = useState(1);
-    const limit = 10; // Server-side pagination
+    const [limit, setLimit] = useState(10);
 
     // Debounced filters for API calls
     const [debouncedFilters, setDebouncedFilters] = useState<OrderFilters>(localFilters);
@@ -119,6 +119,11 @@ export function useUnifiedFilters() {
         setPage(newPage);
     }, []);
 
+    const updateLimit = useCallback((newLimit: number) => {
+        setLimit(newLimit);
+        setPage(1);
+    }, []);
+
     return {
         apiFilters,
         localFilters,
@@ -128,6 +133,7 @@ export function useUnifiedFilters() {
         setPage,
         goToPage,
         limit,
+        updateLimit,
     };
 }
 

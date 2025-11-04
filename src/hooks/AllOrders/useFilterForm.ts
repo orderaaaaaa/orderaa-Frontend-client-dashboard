@@ -22,7 +22,7 @@ interface UseFilterFormProps {
  * @example
  * ```tsx
  * const { register, control, handleSubmit, formState } = useFilterForm({
- *   onSubmit: (data) => console.log(data)
+ *   onSubmit: (data) => handleFormSubmit(data)
  * });
  * ```
  */

@@ -23,7 +23,6 @@ export default function useCities(selectedGovernorate: string) {
       } catch (err: any) {
         setCities([]);
         setError(err?.message || 'Error fetching cities');
-        console.error('Error fetching cities:', err);
       } finally {
         setLoadingCities(false);
       }

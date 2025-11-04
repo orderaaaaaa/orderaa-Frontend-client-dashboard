@@ -20,16 +20,28 @@ interface OrderCardProps {
   isSelected?: boolean;
   onSelectionChange?: (checked: boolean) => void;
   createdAt?: string;
+  repeatCount?: number;
+  onRepeatClick?: () => void;
 }
 
 const getStatusText = (status: string): string => {
   const statusMap: Record<string, string> = {
-    'PENDING': 'قيد الانتظار',
+    'NEW_ORDER': 'طلب جديد',
+    'STOPPED': 'وقف التشغيل',
+    'CALL_AGAIN': 'إعادة اتصال',
+    'POSTPONED': 'مؤجل',
+    'REGISTERED': 'منتسب',
+    'WAITING_FOR_PAYMENT': 'في انتظار الدفع',
+    'ATTEMPTED': 'تم المحاولة',
     'CONFIRMED': 'مؤكد',
+    'PREPARED': 'تم التحضير',
+    'RETURNED_DELIVERED': 'مرتجع مسلم',
+    'REPORTS': 'تقرير',
     'SHIPPING': 'في الشحن',
     'DELIVERED': 'تم التسليم',
+    'MISSING': 'مفقود',
+    'PARTIAL_DELIVERY': 'تسليم جزئى',
     'CANCELLED': 'ملغي',
-    'RETURNED': 'مرتجع',
   };
   return statusMap[status] || status;
 };
@@ -70,6 +82,8 @@ export default function OrderCard({
   isSelected = false,
   onSelectionChange,
   createdAt,
+  repeatCount = 0,
+  onRepeatClick,
 }: OrderCardProps) {
   const router = useRouter();
 
@@ -81,6 +95,13 @@ export default function OrderCard({
 
   const handleCardClick = () => {
     router.push(`/dashboard/orders/${id}`);
+  };
+
+  const handleRepeatClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onRepeatClick) {
+      onRepeatClick();
+    }
   };
 
   return (
@@ -98,6 +119,22 @@ export default function OrderCard({
               onClick={(e) => e.stopPropagation()}
               className="w-5 h-5 border-2 border-[#5D24E1] rounded-[4px] cursor-pointer accent-[#5D24E1]"
             />
+          )}
+          {repeatCount > 1 && (
+            <button
+              onClick={handleRepeatClick}
+              className="relative flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
+              title="عرض جميع طلبات العميل"
+            >
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14 4L24 21H4L14 4Z" fill="#DC2626" stroke="#DC2626" strokeWidth="2" strokeLinejoin="round"/>
+                <path d="M14 11V15" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <circle cx="14" cy="18" r="1" fill="white"/>
+              </svg>
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 rounded-full flex items-center justify-center border-2 border-white">
+                <span className="text-[10px] font-bold text-white">{repeatCount}</span>
+              </div>
+            </button>
           )}
         </div>
 

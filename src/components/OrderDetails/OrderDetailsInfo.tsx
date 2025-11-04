@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   User,
   Phone,
@@ -8,53 +8,88 @@ import {
   Weight,
   Truck,
   CircleDollarSign,
+  Edit2,
 } from "lucide-react";
 import { Order } from "@/types/orders";
+import EditCustomerModal from "./EditCustomerModal";
+import { updateCustomer } from "@/lib/api/order";
 
 interface OrderDetailsInfoComponentProps {
   order: Order;
+  onCustomerUpdate?: (updatedOrder: Order) => void;
 }
 
-function OrderDetailsInfoComponent({ order }: OrderDetailsInfoComponentProps) {
+function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfoComponentProps) {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [localOrder, setLocalOrder] = useState(order);
+
   const tagStyle =
     "flex gap-2 bg-white shadow-xs items-center py-2 px-2 rounded-[5px] font-semibold";
 
   // Format time from createdAt
-  const createdDate = new Date(order.createdAt);
+  const createdDate = new Date(localOrder.createdAt);
   const formattedTime = createdDate.toLocaleTimeString('ar-EG', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: true
   });
 
+  const handleSaveCustomer = async (customerData: any) => {
+    await updateCustomer(localOrder.customers.id, customerData);
+    
+    // Update local state
+    const updatedOrder = {
+      ...localOrder,
+      customers: {
+        ...localOrder.customers,
+        ...customerData,
+      },
+    };
+    setLocalOrder(updatedOrder);
+    
+    // Notify parent if callback provided
+    if (onCustomerUpdate) {
+      onCustomerUpdate(updatedOrder);
+    }
+  };
+
   return (
     <>
       <div className="flex flex-col gap-4 font-medium p-4 bg-gray-50 mt-8 rounded-xl ">
         <div className="">
-          <h2 className="text-[#5D24E1] font-semibold mb-3">بيانات العميل</h2>
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-[#5D24E1] font-semibold">بيانات العميل</h2>
+            <button
+              onClick={() => setIsEditModalOpen(true)}
+              className="text-[#5D24E1] hover:text-[#4A1CB8] transition-colors p-1"
+              title="تعديل بيانات العميل"
+            >
+              <Edit2 size={20} />
+            </button>
+          </div>
           <div className="grid grid-col-1 md:grid-cols-3 gap-6 ">
             <p className={tagStyle}>
               <User />
-              {order.customer.name}
+              {localOrder.customers.name}
             </p>
             <p className={tagStyle}>
               <Phone width={18} />
-              {order.customer.phoneNumber}
+              {localOrder.customers.phoneNumber}
             </p>
             <p className={tagStyle}>
               <Phone width={18} />
-              {order.customer.altPhone || order.customer.phoneNumber}
+              {localOrder.customers.altPhone || localOrder.customers.phoneNumber}
             </p>
             <p className={tagStyle}>
               <MapPinned width={18} />
-              <span className={order.customer.governorate ? '' : 'text-red-500'}>
-                {order.customer.governorate || 'غير محدد'}
+              <span className={localOrder.customers.governorate ? '' : 'text-red-500'}>
+                {localOrder.customers.governorate || 'غير محدد'}
               </span>
             </p>
             <p className={tagStyle}>
               <MapPinned width={18} />
-              <span className={order.customer.city ? '' : 'text-red-500'}>
-                {order.customer.city || 'غير محدد'}
+              <span className={localOrder.customers.city ? '' : 'text-red-500'}>
+                {localOrder.customers.city || 'غير محدد'}
               </span>
             </p>
             <p className={tagStyle}>
@@ -70,15 +105,15 @@ function OrderDetailsInfoComponent({ order }: OrderDetailsInfoComponentProps) {
             <p className={tagStyle}>
               {" "}
               <Package width={20} />
-              {order.orderProducts?.[0]?.product?.material || 'جلد'}
+              {localOrder.order_products?.[0]?.products?.material || 'جلد'}
             </p>
             <p className={tagStyle}>
               <Weight width={18} />
-              {order.orderProducts?.[0]?.product?.weight || 'خفيف'}
+              {localOrder.order_products?.[0]?.products?.weight || 'خفيف'}
             </p>
             <p className={tagStyle}>
               <Package width={20} />
-              {order.orderProducts?.[0]?.product?.manufactureCompany || 'مستورد'}
+              {localOrder.order_products?.[0]?.products?.manufactureCompany || 'مستورد'}
             </p>
             <p className={tagStyle}>
               <Truck width={20} />
@@ -86,7 +121,7 @@ function OrderDetailsInfoComponent({ order }: OrderDetailsInfoComponentProps) {
             </p>
             <p className={tagStyle}>
               <CircleDollarSign width={18} />
-              {order.totalCost} جنيه
+              {localOrder.totalCost} جنيه
             </p>
           </div>
         </div>
@@ -94,8 +129,8 @@ function OrderDetailsInfoComponent({ order }: OrderDetailsInfoComponentProps) {
           <div className="max-w-[500px]">
             <h3 className="mb-3">العنوان:</h3>
             <p className={tagStyle}>
-              <span className={`max-w-3/4 ${order.customer.address ? '' : 'text-red-500'}`}>
-                {order.customer.address || 'غير محدد'}
+              <span className={`max-w-3/4 ${localOrder.customers.address ? '' : 'text-red-500'}`}>
+                {localOrder.customers.address || 'غير محدد'}
               </span>
             </p>
           </div>
@@ -105,7 +140,7 @@ function OrderDetailsInfoComponent({ order }: OrderDetailsInfoComponentProps) {
 
             <p className={tagStyle}>
               <span className="max-w-3/4">
-                {order.notes || 'لا توجد ملاحظات'}
+                {localOrder.notes || 'لا توجد ملاحظات'}
               </span>
             </p>
           </div>
@@ -119,6 +154,14 @@ function OrderDetailsInfoComponent({ order }: OrderDetailsInfoComponentProps) {
           تأكيد
         </button>
       </div>
+
+      {/* Edit Customer Modal */}
+      <EditCustomerModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        customerData={localOrder.customers}
+        onSave={handleSaveCustomer}
+      />
     </>
   );
 }
