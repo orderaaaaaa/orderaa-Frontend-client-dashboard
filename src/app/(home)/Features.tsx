@@ -2,48 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-
-interface Feature {
-  icon: string;
-  title: string;
-  desc: string;
-}
-
-const featuresTop: Feature[] = [
-  {
-    icon: '/icons/layout.svg',
-    title: 'أوتوميشن ذكي يوفر وقت فريقك',
-    desc: 'نظام يدير المكالمات، الرسائل، وتحديث الطلبات تلقائيًا بدون تدخل يدوي.',
-  },
-  {
-    icon: '/icons/shareit.svg',
-    title: 'إدارة الطلبات من أول مكالمة لحد التسليم',
-    desc: 'تتبع كل مرحلة بسهولة: تأكيد – تغليف – شحن – تحصيل – مرتجع.',
-  },
-  {
-    icon: '/icons/Connection.svg',
-    title: 'تواصل تلقائي مع العملاء عبر واتساب',
-    desc: 'رسائل ودّية فورية بعد المكالمة لزيادة فرص التأكيد وتقليل الإلغاء بدون تدخل بشري.',
-  },
-];
-
-const featuresBottom: Feature[] = [
-  {
-    icon: '/icons/analys.svg',
-    title: 'سجل تفاعلات ذكي لكل عميل',
-    desc: 'اعرف كل مكالمة أو رسالة واتساب تمت مع العميل، وراجع الأداء بسهولة.',
-  },
-  {
-    icon: '/icons/WebDesignTools.svg',
-    title: 'تكامل كامل مع أدواتك المفضلة',
-    desc: 'يربط متجرك بـ Shopify، EasyOrders، شركات الشحن، و Meta CAPI تلقائيًا.',
-  },
-  {
-    icon: '/icons/ClientService.svg',
-    title: 'تقارير وتحليلات دقيقة لحركة المبيعات',
-    desc: 'اعرف أداء متجرك لحظة بلحظة: الأرباح، نسب التحويل، المصروفات والمبيعات.',
-  },
-];
+import { featuresTop, featuresBottom } from '@/constants/Home';
 
 const Features: React.FC = () => {
   return (

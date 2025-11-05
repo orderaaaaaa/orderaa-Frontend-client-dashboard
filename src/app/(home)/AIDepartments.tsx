@@ -2,35 +2,8 @@
 
 import Image from 'next/image';
 import React from 'react';
-
+import { cards } from '@/constants/Home';
 const AIDepartments: React.FC = () => {
-  const cards = [
-    {
-      title: 'قسم تأكيد الطلبات عن طريق AI',
-      items: [
-        'واتساب، ميسنجر',
-        'تيك توك، انستجرام.',
-        'خلي الـ AI يوفر وقتك ومجهودك وفلوسك، ويشيل من عليك جزء من الاوبريشن بشكل كبير.',
-      ],
-    },
-    {
-      title: 'الأقسام التحليلية (Analytics & BI)',
-      items: [
-        'ذكاء الأعمال (Business Intelligence) – Dashboards، تقارير الأداء، التحليلات التنبؤية.',
-        'إدارة المخاطر والامتثال (Risk & Compliance) – السياسات، المراجعة الداخلية، Audit trails.',
-        'اسأل النظام عن أي معلومة تخص الطلبات، العملاء، أو التقارير – والـ AI هيرد عليك بالأرقام والتحليلات الدقيقة.',
-      ],
-    },
-    {
-      title: 'الأقسام الإدارية (HR & Admin)',
-      items: [
-        'الموارد البشرية (HRM) – الموظفين، الحضور والانصراف، المرتبات، تقييم الأداء.',
-        'إدارة الرواتب (Payroll) – الاستحقاقات، الخصومات، التأمينات، الضرائب.',
-        'إدارة الصلاحيات والمستخدمين (Access Control) – الأدوار، الصلاحيات، التتبع الأمني.',
-      ],
-    },
-  ];
-
   return (
     <section className="relative py-5 max-sm:mb-10 md:py-35 text-white mt-10 px-4">
       {/* Background assets - Hidden on mobile */}

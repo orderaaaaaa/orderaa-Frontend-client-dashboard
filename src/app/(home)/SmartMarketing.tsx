@@ -3,15 +3,9 @@
 import Image from 'next/image';
 import { Check } from 'lucide-react';
 import React from 'react';
+import { SmartMarketingPoints } from '@/constants/Home';
 
 const SmartMarketing: React.FC = () => {
-  const points = [
-    'كل جنيه في إعلانك ليه نتيجة واضحة',
-    'تحليل دقيق لأداء الإعلان: اعرف بالضبط كل حملة جابت كام طلب وتأثيرها على المبيعات.',
-    'قرارات مدعومة بالأرقام: أوقف الإعلانات الضعيفة وزد ميزانية الحملات الناجحة بثقة.',
-    'تقرير تلقائي بالأداء الأسبوعي: يوصلك تلقائيًا عشان تتابع النتائج بسهولة.',
-  ];
-
   return (
     <section className="relative py-10 sm:py-20 z-10 container mx-auto w-full px-4">
       <div className="flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-16">
@@ -22,7 +16,7 @@ const SmartMarketing: React.FC = () => {
           </h2>
 
           <ul className="space-y-4 md:space-y-6">
-            {points.map((point, i) => (
+            {SmartMarketingPoints.map((point, i) => (
               <li
                 key={i}
                 className="flex items-start gap-3 justify-start text-[16px] md:text-[20px] lg:text-[22px]"

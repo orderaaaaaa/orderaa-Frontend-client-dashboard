@@ -2,27 +2,9 @@
 
 import React from 'react';
 import { Check } from 'lucide-react';
+import { data } from '@/constants/Home';
 
 const Departments: React.FC = () => {
-  const data = [
-    {
-      title: 'الأقسام الداعمة',
-      items: [
-        'إدارة الشحن والنقل (Logistics / Fleet) – تتبع الشحنات، أوامر التوصيل، المندوبين.',
-        'إدارة الجودة (Quality Control) – الفحص، الاعتماد، التقارير.',
-        'الدعم الفني (Helpdesk / ITSM) – التذاكر، الحلول، إدارة الأنظمة.',
-      ],
-    },
-    {
-      title: 'الأقسام التكاملية (Integration & Extensions)',
-      items: [
-        'الربط مع الأنظمة الخارجية –  API Management & Integrations (Shopify, Easy Orders, WhatsApp، وغيرها).',
-        'بوابة العملاء والموردين (Portals) – لتسهيل التعامل المباشر عبر الإنترنت.',
-        'الأتمتة (Automation / AI Agent) – روبوتات محادثة، تأكيد الطلبات، سير العمل الذكي.',
-      ],
-    },
-  ];
-
   return (
     <section className="relative py-15 sm:py-20 z-10 px-4">
       <div className="container mx-auto px-2 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">

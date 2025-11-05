@@ -1,41 +1,10 @@
 'use client';
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronDown } from 'lucide-react';
-
-type FaqItem = {
-  question: string;
-  answer: string;
-};
+import { faqs } from '@/constants/Home';
 
 const FaqSection: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-
-  const faqs: FaqItem[] = [
-    {
-      question: 'ما هو نظام Orderaa؟',
-      answer:
-        'نظام Orderaa هو منصة متكاملة لإدارة الطلبات والمبيعات بسهولة وفعالية.',
-    },
-    {
-      question: 'هل أحتاج خبرة تقنية لاستخدام النظام؟',
-      answer:
-        'لا تحتاج لأي خبرة تقنية، النظام مصمم ليكون سهل الاستخدام للجميع.',
-    },
-    {
-      question: 'هل يمكن تجربة النظام قبل الاشتراك؟',
-      answer: 'نعم، يمكنك تجربة النظام مجاناً قبل الاشتراك للتعرف على مميزاته.',
-    },
-    {
-      question: 'هل النظام آمن؟',
-      answer:
-        'طبعاً، يستخدم Orderaa أحدث تقنيات التشفير لحماية بيانات العملاء والمعاملات بالكامل.',
-    },
-    {
-      question: 'هل يمكن ربط النظام بمتجري الإلكتروني؟',
-      answer:
-        'نعم، يمكن ربط النظام بمتجرك الإلكتروني بسهولة عبر واجهات الربط الجاهزة.',
-    },
-  ];
 
   const toggleFaq = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);

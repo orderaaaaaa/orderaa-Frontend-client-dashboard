@@ -16,6 +16,7 @@ import TeamManagementSection from './(home)/TeamManagementSection';
 import SmartAccountsAndSuppliers from './(home)/SmartAccountsAndSuppliers';
 import DepartmentsFinanceAndOps from './(home)/DepartmentsFinanceAndOps';
 import FullControlSection from './(home)/FullControlSection';
+import SmartReportsSection from './(home)/SmartReportsSection';
 
 const zain = Zain({
   subsets: ['latin'],
@@ -60,6 +61,7 @@ const Page = () => {
         <Departments />
         <FullControlSection />
         <SmartAccountsAndSuppliers />
+        <SmartReportsSection />
         <DepartmentsFinanceAndOps />
         <VideoSection />
         <AIDepartments />

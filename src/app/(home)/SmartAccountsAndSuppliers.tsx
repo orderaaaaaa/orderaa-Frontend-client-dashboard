@@ -2,36 +2,13 @@
 
 import React from 'react';
 import { Check } from 'lucide-react';
+import { SmartAccountsAndSuppliersData } from '@/constants/Home';
 
 const SmartAccountsAndSuppliers: React.FC = () => {
-  const data = [
-    {
-      title: 'قسم مشتريات الموردين',
-      items: [
-        'لكل مورد سجل كامل يجمع فواتيره، مدفوعاته، ومواعيد التسليم.',
-        'النظام ينظّم علاقتك بالموردين ويخليك تتابع التوريد خطوة بخطوة بدون أوراق أو فوضى.',
-        'تنبيهات ذكية قبل مواعيد التسليم لتفادي التأخير.',
-        'تتبع المدفوعات والفواتير بدقة لكل مورد.',
-        'تحليل التزام الموردين بنسبة التسليم وجودة الأداء.',
-        'تقارير شهرية توضح المصروفات والموردين الأكثر تكراراً.',
-      ],
-    },
-    {
-      title: 'قسم الحسابات الذكي',
-      items: [
-        'من أول مصاريف الشحن لحد أرباحك الصافية – كل جنيه داخل أو خارج مسجل ومرتبط بالأرقام، علشان تشوف أرباحك الحقيقية لحظة بلحظة.',
-        'عرض التدفقات النقدية اليومية (Cash Flow) لتعرف موقفك المالي لحظة بلحظة.',
-        'تقارير مالية جاهزة تظهر التكاليف، الأرباح، ونسب النمو شهرياً.',
-        'ربط مباشر مع الطلبات والحملات التسويقية لتحليل التكلفة مقابل العائد (ROI).',
-        'في الحساب هتتعرف على كل أوردر بيكلفك مبلغ قد إيه في كل قسم من أقسام تشغيلك.',
-      ],
-    },
-  ];
-
   return (
     <section className="relative py-15 sm:py-20 z-10 px-4">
       <div className="container mx-auto px-2 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
-        {data.map((card, i) => (
+        {SmartAccountsAndSuppliersData.map((card, i) => (
           <div
             key={i}
             className={`relative p-6 md:p-10 rounded-[25px] bg-black border border-[#5D24E1] overflow-hidden transition-transform duration-300 hover:scale-[1.02] ${

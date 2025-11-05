@@ -3,21 +3,9 @@
 import Image from 'next/image';
 import { Check, TrendingUp, TrendingDown, Users } from 'lucide-react';
 import React from 'react';
+import { TeamPerformanceSectionData } from '@/constants/Home';
 
 export default function TeamPerformanceSection() {
-  const data = [
-    {
-      title: 'لوحة افضل الأداء',
-      description:
-        'يعرض أفضل الموظفين في إنجاز الطلبات وتحقيق التارجت لخلق منافسة إيجابية.',
-    },
-    {
-      title: 'سجل نشاط كامل لكل موظف',
-      description:
-        'تقدر تراجع كل خطوة قام بيها – من المكالمات للرسائل وحتى تغيير الحالات.',
-    },
-  ];
-
   return (
     <section className="relative sm:py-20 text-white overflow-hidden">
       <div className="container mx-auto flex flex-col md:flex-row px-6 gap-10 relative">
@@ -66,7 +54,7 @@ export default function TeamPerformanceSection() {
 
         {/* ✅ Bottom Card - Mobile: Normal Flow, Desktop: Absolute */}
         <div className="order-3 z-30 md:absolute md:bottom-30 md:left-[960px] md:transform md:-translate-x-1/2 w-full md:max-w-[1050px] backdrop-blur-lg bg-white/5 border-2 border-[#5D24E1]/40 rounded-[30px] flex flex-col md:flex-row justify-between items-stretch gap-6 p-8 md:p-16 mt-10 md:mt-0">
-          {data.map((item, i) => (
+          {TeamPerformanceSectionData.map((item, i) => (
             <div
               key={i}
               className="flex flex-row-reverse items-center justify-between text-right w-full gap-6"

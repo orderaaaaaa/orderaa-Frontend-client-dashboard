@@ -2,35 +2,13 @@
 
 import React from 'react';
 import { Check } from 'lucide-react';
+import { DepartmentsFinanceAndOpsData } from '@/constants/Home';
 
 const DepartmentsFinanceAndOps: React.FC = () => {
-  const data = [
-    {
-      title: 'الأقسام التشغيلية',
-      items: [
-        'إدارة المشتريات (Procurement) – متابعة الموردين، عروض الأسعار، أوامر الشراء، الفواتير.',
-        'إدارة المخزون (Inventory Management) – الكميات، الحركات، التحويلات بين المخازن، الجرد، التنبيهات.',
-        'إدارة المبيعات (Sales) – أوامر البيع، الفواتير، العمولات، تتبع العملاء.',
-        'إدارة العملاء (CRM) – تتبع العملاء، المكالمات، الشكاوى، متابعة الأداء، العروض الترويجية.',
-        'إدارة سلسلة الإمداد (Supply Chain) – ربط المشتريات بالمخزون بالمبيعات والشحن.',
-      ],
-    },
-    {
-      title: 'الأقسام المالية (Financial)',
-      items: [
-        'المحاسبة العامة (General Ledger) – القيود، الحسابات، التسويات، مراكز التكلفة.',
-        'الحسابات الدائنة (Accounts Payable) – الموردين والمدفوعات.',
-        'الحسابات المدينة (Accounts Receivable) – العملاء والتحصيلات.',
-        'الخزانة والبنوك (Treasury) – التدفقات النقدية، الحسابات البنكية، الموازنات.',
-        'الميزانيات والتقارير المالية (Financial Reporting) – القوائم، التحليل المالي، مؤشرات الأداء.',
-      ],
-    },
-  ];
-
   return (
     <section className="relative py-20 z-10 px-4">
       <div className="container mx-auto px-2 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
-        {data.map((card, i) => (
+        {DepartmentsFinanceAndOpsData.map((card, i) => (
           <div
             key={i}
             className={`relative p-6 md:p-10 rounded-[25px] bg-black border border-[#5D24E1] overflow-hidden transition-transform duration-300 hover:scale-[1.02] ${
