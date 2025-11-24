@@ -17,10 +17,10 @@ export type NavigationItem = {
   name: string;
   href: string;
   icon?:
-  | ForwardRefExoticComponent<
-    Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>
-  >
-  | ((props: { className?: string }) => JSX.Element);
+    | ForwardRefExoticComponent<
+        Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>
+      >
+    | ((props: { className?: string }) => JSX.Element);
   children?: NavigationItem[];
 };
 
@@ -44,8 +44,9 @@ export const navigation: NavigationItem[] = [
     icon: Users,
     children: [
       {
-        name: 'تقارير خدمع العملاء',
+        name: 'تقارير الكول سنتر ',
         href: '/dashboard/customers/customer-service',
+        icon: FolderPlus,
       },
       {
         name: 'متابعة الطلبات',

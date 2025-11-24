@@ -1,20 +1,14 @@
 'use client';
 
 import React from 'react';
-
-const data = [
-  { label: 'المحاولة الاولى', value: 47, color: '#B8A3EB' },
-  { label: 'المحاولة الثانية', value: 40, color: '#5D24E1' },
-  { label: 'المحاولة الثالثة', value: 20, color: '#DAD1ED' },
-  { label: 'المحاولة الرابعة', value: 100, color: '#CABDE9' },
-];
+import { confirmationAttemptsData } from '../../constants/ConfirmationAttemptsCartConst';
 
 export default function CylinderChartSVG() {
-  const maxValue = Math.max(...data.map((d) => d.value));
+  const maxValue = Math.max(...confirmationAttemptsData.map((d) => d.value));
   const chartHeight = 260;
   const barWidth = 60;
   const spacing = 20;
-  const bottomY = chartHeight + 30;
+  const bottomY = chartHeight + 27;
 
   return (
     <div className="w-full max-w-3xl bg-white rounded-3xl shadow-xl p-8">
@@ -24,11 +18,11 @@ export default function CylinderChartSVG() {
           محاولات تأكيد الطلبات{' '}
         </h2>
       </div>
-      <div className="flex flex-col md:flex-row justify-center p-1 w-full max-w-3xl gap-11 mt-9">
+      <div className="grid grid-cols-2 max-2xl:grid-cols-1 justify-center p-1 w-[80%] max-w-3xl gap-11 mt-9">
         {/* Legend */}
-        <div className="w-1/3 ps-6">
-          <ul className="flex flex-col gap-8 text-right">
-            {data.map((d, i) => (
+        <div className="w-full  ps-6 text-right">
+          <ul className="grid grid-cols-2 2xl:grid-cols-1 gap-4">
+            {confirmationAttemptsData.map((d, i) => (
               <li key={i} className="flex items-center gap-2">
                 <span
                   className="inline-block w-5 h-5 rounded-[5px] shadow"
@@ -46,11 +40,11 @@ export default function CylinderChartSVG() {
         </div>
         {/* Chart */}
         <svg
-          width={(barWidth + spacing) * data.length}
+          width={(barWidth + spacing) * confirmationAttemptsData.length}
           height={chartHeight + 80}
           className="overflow-visible"
         >
-          {data.map((d, i) => {
+          {confirmationAttemptsData.map((d, i) => {
             const barHeight = (d.value / 100) * chartHeight;
             const x = i * (barWidth + spacing);
             const y = bottomY - barHeight;

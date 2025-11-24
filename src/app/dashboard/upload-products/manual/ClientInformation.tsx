@@ -93,7 +93,6 @@ function ClientInformation({
               value={customerName}
               onChange={(e) => onCustomerNameChange(e.target.value)}
               error={errors?.customerName}
-              required
             />
           </div>
           {/*  phone */}
@@ -107,7 +106,6 @@ function ClientInformation({
               value={phoneNumber}
               onChange={(e) => onPhoneNumberChange(e.target.value)}
               error={errors?.phoneNumber}
-              required
             />
           </div>
           {/* choose gov */}
