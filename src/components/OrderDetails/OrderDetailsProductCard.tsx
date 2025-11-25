@@ -220,7 +220,7 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
           <button
             onClick={() => setIsAddNewProductModalOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-[#5D24E1] text-white rounded-lg hover:bg-[#4B1BC4] transition-colors"
-            style={{ fontFamily: 'Janna LT' }}
+            style={{}}
           >
             <Plus className="w-5 h-5" strokeWidth={2} />
             <span className="text-sm font-bold">إضافة منتج جديد</span>
@@ -230,7 +230,7 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
             onClick={() => setIsAddSameTypeModalOpen(true)}
             disabled={productsData.length === 0}
             className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-[#5D24E1] text-[#5D24E1] rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ fontFamily: 'Janna LT' }}
+            style={{}}
           >
             <Copy className="w-5 h-5" strokeWidth={2} />
             <span className="text-sm font-bold">إضافة منتج من نفس النوع</span>

@@ -70,7 +70,7 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
     <div
       className="fixed inset-0 bg-transparent flex items-center justify-center z-50"
       onClick={onClose}
-      style={{ fontFamily: 'Janna LT' }}
+      style={{}}
     >
       <div
         className="bg-white rounded-[20px] shadow-lg"
@@ -123,7 +123,6 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
                   fontSize: '18px',
                   color: '#5F5E5E',
                   background: '#FFFFFF',
-                  fontFamily: 'Janna LT'
                 }}
               />
             </div>
@@ -147,7 +146,6 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
                   fontSize: '18px',
                   color: '#5F5E5E',
                   background: '#FFFFFF',
-                  fontFamily: 'Janna LT'
                 }}
               />
             </div>
@@ -174,7 +172,6 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
                   fontSize: '18px',
                   color: '#5F5E5E',
                   background: '#FFFFFF',
-                  fontFamily: 'Janna LT'
                 }}
               />
             </div>
@@ -198,7 +195,6 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
                   fontSize: '18px',
                   color: '#5F5E5E',
                   background: '#FFFFFF',
-                  fontFamily: 'Janna LT'
                 }}
               />
             </div>
@@ -225,7 +221,6 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
                   fontSize: '18px',
                   color: '#5F5E5E',
                   background: '#FFFFFF',
-                  fontFamily: 'Janna LT'
                 }}
               />
             </div>
@@ -249,7 +244,6 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
                   fontSize: '18px',
                   color: '#5F5E5E',
                   background: '#FFFFFF',
-                  fontFamily: 'Janna LT'
                 }}
               />
             </div>

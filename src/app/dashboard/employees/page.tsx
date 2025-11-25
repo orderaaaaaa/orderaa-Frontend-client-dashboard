@@ -61,10 +61,10 @@ export default function EmployeesPage() {
               <User className="w-8 h-8 text-white" strokeWidth={1.5} />
             </div>
             <div className="flex flex-col items-end gap-1" style={{ textAlign: 'right', alignItems: 'flex-end' }}>
-              <h1 className="text-2xl font-normal" style={{ fontFamily: 'Janna LT', textAlign: 'right', width: '100%' }}>
+              <h1 className="text-2xl font-normal" style={{ textAlign: 'right', width: '100%' }}>
                 إضافة موظف جديد
               </h1>
-              <p className="text-base font-normal text-black" style={{ fontFamily: 'Janna LT', textAlign: 'right', width: '100%' }}>
+              <p className="text-base font-normal text-black" style={{ textAlign: 'right', width: '100%' }}>
                 املأ جميع البيانات لإضافة الموظف
               </p>
             </div>
@@ -78,7 +78,7 @@ export default function EmployeesPage() {
             <div className="w-full flex flex-col items-end gap-4" style={{ direction: 'rtl' }}>
               <div className="w-full flex items-center gap-2" style={{ direction: 'rtl', justifyContent: 'flex-start', width: '100%', alignItems: 'center' }}>
                 <User className="w-6 h-6 text-[#5D24E1] flex-shrink-0" strokeWidth={1.5} />
-                <span className="text-lg font-normal text-right" style={{ fontFamily: 'Janna LT', textAlign: 'right' }}>
+                <span className="text-lg font-normal text-right" style={{ textAlign: 'right' }}>
                   صلاحية الموظف
                 </span>
               </div>
@@ -86,7 +86,7 @@ export default function EmployeesPage() {
                 <select
                   {...register('accessLevel')}
                   className="w-full h-full px-4 pr-10 bg-transparent text-right text-base font-normal text-black/60 appearance-none"
-                  style={{ fontFamily: 'Janna LT', direction: 'rtl', textAlign: 'right' }}
+                  style={{ direction: 'rtl', textAlign: 'right' }}
                 >
                   <option value="">اختر صلاحية الموظف</option>
                   <option value="SUPER_ADMIN">سوبر ادمن</option>
@@ -104,7 +104,7 @@ export default function EmployeesPage() {
             <div className="w-full flex flex-col items-end gap-4" style={{ direction: 'rtl' }}>
               <div className="w-full flex items-center gap-2" style={{ direction: 'rtl', justifyContent: 'flex-start', width: '100%', alignItems: 'center' }}>
                 <User className="w-6 h-6 text-[#5D24E1] flex-shrink-0" strokeWidth={1.5} />
-                <span className="text-lg font-normal text-right" style={{ fontFamily: 'Janna LT', textAlign: 'right' }}>
+                <span className="text-lg font-normal text-right" style={{ textAlign: 'right' }}>
                   قسم الموظف
                 </span>
               </div>
@@ -112,7 +112,7 @@ export default function EmployeesPage() {
                 <select
                   {...register('department')}
                   className="w-full h-full px-4 pr-10 bg-transparent text-right text-base font-normal text-black/60 appearance-none"
-                  style={{ fontFamily: 'Janna LT', direction: 'rtl', textAlign: 'right' }}
+                  style={{ direction: 'rtl', textAlign: 'right' }}
                 >
                   <option value="">اختر القسم</option>
                   <option value="CONFIRMATION">تاكيد</option>
@@ -132,7 +132,7 @@ export default function EmployeesPage() {
               <div className="flex-1 flex flex-col items-end gap-4" style={{ direction: 'rtl' }}>
                 <div className="w-full flex items-center gap-2" style={{ direction: 'rtl', justifyContent: 'flex-start', width: '100%', alignItems: 'center' }}>
                   <Briefcase className="w-6 h-6 text-[#5D24E1] flex-shrink-0" strokeWidth={1.5} />
-                  <span className="text-lg font-normal text-right" style={{ fontFamily: 'Janna LT', textAlign: 'right' }}>
+                  <span className="text-lg font-normal text-right" style={{ textAlign: 'right' }}>
                     الاسم الكامل للموظف
                   </span>
                 </div>
@@ -141,7 +141,7 @@ export default function EmployeesPage() {
                   type="text"
                   placeholder="أدخل الاسم الكامل"
                   className="w-full h-[46px] px-4 bg-[rgba(234,234,234,0.25)] border border-black/16 rounded text-right text-base font-normal text-black placeholder:text-black/60"
-                  style={{ fontFamily: 'Janna LT', direction: 'rtl', textAlign: 'right' }}
+                  style={{ direction: 'rtl', textAlign: 'right' }}
                 />
                 {errors.fullName && (
                   <span className="text-red-500 text-sm text-right" style={{ textAlign: 'right' }}>{errors.fullName.message}</span>
@@ -152,7 +152,7 @@ export default function EmployeesPage() {
               <div className="flex-1 flex flex-col items-end gap-4" style={{ direction: 'rtl' }}>
                 <div className="w-full flex items-center gap-2" style={{ direction: 'rtl', justifyContent: 'flex-start', width: '100%', alignItems: 'center' }}>
                   <Phone className="w-6 h-6 text-[#5D24E1] flex-shrink-0" strokeWidth={1.5} />
-                  <span className="text-lg font-normal text-right" style={{ fontFamily: 'Janna LT', textAlign: 'right' }}>
+                  <span className="text-lg font-normal text-right" style={{ textAlign: 'right' }}>
                     رقم الهاتف
                   </span>
                 </div>
@@ -162,7 +162,7 @@ export default function EmployeesPage() {
                   placeholder="01234567890"
                   dir="ltr"
                   className="w-full h-[46px] px-4 bg-[rgba(234,234,234,0.25)] border border-black/16 rounded text-right text-base font-normal text-black placeholder:text-black/60"
-                  style={{ fontFamily: 'Janna LT', textAlign: 'right' }}
+                  style={{ textAlign: 'right' }}
                 />
                 {errors.phoneNumber && (
                   <span className="text-red-500 text-sm text-right" style={{ textAlign: 'right' }}>{errors.phoneNumber.message}</span>
@@ -176,7 +176,7 @@ export default function EmployeesPage() {
               <div className="flex-1 flex flex-col items-end gap-4" style={{ direction: 'rtl' }}>
                 <div className="w-full flex items-center gap-2" style={{ direction: 'rtl', justifyContent: 'flex-start', width: '100%', alignItems: 'center' }}>
                   <Mail className="w-6 h-6 text-[#001A72] flex-shrink-0" strokeWidth={1.5} />
-                  <span className="text-lg font-normal text-right" style={{ fontFamily: 'Janna LT', textAlign: 'right' }}>
+                  <span className="text-lg font-normal text-right" style={{ textAlign: 'right' }}>
                     البريد الإلكتروني
                   </span>
                 </div>
@@ -186,7 +186,7 @@ export default function EmployeesPage() {
                   placeholder="example@domain.com"
                   dir="ltr"
                   className="w-full h-[46px] px-4 bg-[rgba(234,234,234,0.25)] border border-black/16 rounded text-right text-base font-normal text-black placeholder:text-black/60"
-                  style={{ fontFamily: 'Janna LT', textAlign: 'right' }}
+                  style={{ textAlign: 'right' }}
                 />
                 {errors.email && (
                   <span className="text-red-500 text-sm text-right" style={{ textAlign: 'right' }}>{errors.email.message}</span>
@@ -197,7 +197,7 @@ export default function EmployeesPage() {
               <div className="flex-1 flex flex-col items-end gap-4" style={{ direction: 'rtl' }}>
                 <div className="w-full flex items-center gap-2" style={{ direction: 'rtl', justifyContent: 'flex-start', width: '100%', alignItems: 'center' }}>
                   <MapPin className="w-6 h-6 text-[#5D24E1] flex-shrink-0" strokeWidth={1.5} />
-                  <span className="text-lg font-normal text-right" style={{ fontFamily: 'Janna LT', textAlign: 'right' }}>
+                  <span className="text-lg font-normal text-right" style={{ textAlign: 'right' }}>
                     العنوان
                   </span>
                 </div>
@@ -206,7 +206,7 @@ export default function EmployeesPage() {
                   type="text"
                   placeholder="العنوان"
                   className="w-full h-[46px] px-4 bg-[rgba(234,234,234,0.25)] border border-black/16 rounded text-right text-base font-normal text-black placeholder:text-black/60"
-                  style={{ fontFamily: 'Janna LT', direction: 'rtl', textAlign: 'right' }}
+                  style={{ direction: 'rtl', textAlign: 'right' }}
                 />
                 {errors.address && (
                   <span className="text-red-500 text-sm text-right" style={{ textAlign: 'right' }}>{errors.address.message}</span>
@@ -220,7 +220,7 @@ export default function EmployeesPage() {
               <div className="flex-1 flex flex-col items-end gap-4" style={{ direction: 'rtl' }}>
                 <div className="w-full flex items-center gap-2" style={{ direction: 'rtl', justifyContent: 'flex-start', width: '100%', alignItems: 'center' }}>
                   <Lock className="w-6 h-6 text-[#5D24E1] flex-shrink-0" strokeWidth={1.5} />
-                  <span className="text-lg font-normal text-right" style={{ fontFamily: 'Janna LT', textAlign: 'right' }}>
+                  <span className="text-lg font-normal text-right" style={{ textAlign: 'right' }}>
                     كلمة المرور
                   </span>
                 </div>
@@ -230,7 +230,7 @@ export default function EmployeesPage() {
                     type={showPassword ? 'text' : 'password'}
                     placeholder="كلمة المرور"
                     className="w-full h-[46px] px-4 pr-12 bg-[rgba(234,234,234,0.25)] border border-black/16 rounded text-right text-base font-normal text-black placeholder:text-black/60"
-                    style={{ fontFamily: 'Janna LT', direction: 'rtl', textAlign: 'right' }}
+                    style={{ direction: 'rtl', textAlign: 'right' }}
                   />
                   <button
                     type="button"
@@ -253,7 +253,7 @@ export default function EmployeesPage() {
               <div className="flex-1 flex flex-col items-end gap-4" style={{ direction: 'rtl' }}>
                 <div className="w-full flex items-center gap-2" style={{ direction: 'rtl', justifyContent: 'flex-start', width: '100%', alignItems: 'center' }}>
                   <Lock className="w-6 h-6 text-[#5D24E1] flex-shrink-0" strokeWidth={1.5} />
-                  <span className="text-lg font-normal text-right" style={{ fontFamily: 'Janna LT', textAlign: 'right' }}>
+                  <span className="text-lg font-normal text-right" style={{ textAlign: 'right' }}>
                     تأكيد كلمة المرور
                   </span>
                 </div>
@@ -263,7 +263,7 @@ export default function EmployeesPage() {
                     type={showConfirmPassword ? 'text' : 'password'}
                     placeholder="أعد كتابة كلمة المرور"
                     className="w-full h-[46px] px-4 pr-12 bg-[rgba(234,234,234,0.25)] border border-black/16 rounded text-right text-base font-normal text-black placeholder:text-black/60"
-                    style={{ fontFamily: 'Janna LT', direction: 'rtl', textAlign: 'right' }}
+                    style={{ direction: 'rtl', textAlign: 'right' }}
                   />
                   <button
                     type="button"
@@ -289,7 +289,7 @@ export default function EmployeesPage() {
               <div className="flex-1 flex flex-col items-end gap-4" style={{ direction: 'rtl' }}>
                 <div className="w-full flex items-center gap-2" style={{ direction: 'rtl', justifyContent: 'flex-start', width: '100%', alignItems: 'center' }}>
                   <Clock className="w-6 h-6 text-[#5D24E1] flex-shrink-0" strokeWidth={1.5} />
-                  <span className="text-lg font-normal text-right" style={{ fontFamily: 'Janna LT', textAlign: 'right' }}>
+                  <span className="text-lg font-normal text-right" style={{ textAlign: 'right' }}>
                     ساعات العمل
                   </span>
                 </div>
@@ -298,7 +298,7 @@ export default function EmployeesPage() {
                   type="text"
                   placeholder="من 9 صباحاً إلى 5 مساءً"
                   className="w-full h-[46px] px-4 bg-[rgba(234,234,234,0.25)] border border-black/16 rounded text-right text-base font-normal text-black placeholder:text-black/60"
-                  style={{ fontFamily: 'Janna LT', direction: 'rtl', textAlign: 'right' }}
+                  style={{ direction: 'rtl', textAlign: 'right' }}
                 />
                 {errors.workingHours && (
                   <span className="text-red-500 text-sm text-right" style={{ textAlign: 'right' }}>{errors.workingHours.message}</span>
@@ -313,7 +313,7 @@ export default function EmployeesPage() {
                 type="submit"
                 disabled={isSubmitting}
                 className="px-8 py-3 bg-[#5D24E1] text-white rounded-lg text-lg font-normal hover:bg-[#682fee] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                style={{ fontFamily: 'Janna LT', direction: 'rtl' }}
+                style={{ direction: 'rtl' }}
               >
                 <Plus className="w-5 h-5 flex-shrink-0" />
                 <span className="text-right" style={{ textAlign: 'right' }}>{isSubmitting ? 'جاري الإضافة...' : 'إضافة موظف جديد'}</span>
@@ -322,7 +322,7 @@ export default function EmployeesPage() {
                 type="button"
                 onClick={handleClearAll}
                 className="px-8 py-3 bg-white border border-[#5D24E1] text-[#5D24E1] rounded-lg text-lg font-normal hover:bg-[#5D24E1]/5 transition-colors flex items-center gap-2"
-                style={{ fontFamily: 'Janna LT', direction: 'rtl' }}
+                style={{ direction: 'rtl' }}
               >
                 <X className="w-5 h-5 flex-shrink-0" />
                 <span className="text-right" style={{ textAlign: 'right' }}>مسح الكل</span>

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Cairo } from 'next/font/google';
+import localFont from 'next/font/local';
 import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 
@@ -12,11 +12,10 @@ export const metadata: Metadata = {
   },
 };
 
-// Load Cairo (Arabic + Latin)
-const cairo = Cairo({
-  subsets: ['arabic', 'latin'],
-  weight: ['300', '400', '500', '600', '700', '800', '900'],
-  variable: '--font-cairo',
+// Load Beiruti (Arabic + Latin)
+const beiruti = localFont({
+  src: '../assets/fonts/Beiruti.ttf',
+  variable: '--font-beiruti',
   display: 'swap',
 });
 
@@ -28,8 +27,8 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ar" dir="rtl">
-      {/* font-sans will map to Cairo via Tailwind config below */}
-      <body className={`${cairo.variable} font-sans`}>
+      {/* font-sans will map to Beiruti via Tailwind config below */}
+      <body className={`${beiruti.variable} font-sans`}>
         {children}
         <Analytics />
       </body>

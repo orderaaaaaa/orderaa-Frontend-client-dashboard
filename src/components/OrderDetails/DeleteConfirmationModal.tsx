@@ -48,7 +48,7 @@ export default function DeleteConfirmationModal({
         >
           <h2
             className="text-xl font-bold text-black text-center"
-            style={{ fontFamily: 'Janna LT' }}
+            style={{}}
           >
             حذف المنتج
           </h2>
@@ -72,21 +72,21 @@ export default function DeleteConfirmationModal({
             
             <p
               className="text-lg font-bold text-[#1F1F1F]"
-              style={{ fontFamily: 'Janna LT' }}
+              style={{}}
             >
               هل أنت متأكد من حذف هذا المنتج؟
             </p>
             
             <p
               className="text-base font-normal text-[#5F5E5E]"
-              style={{ fontFamily: 'Janna LT' }}
+              style={{}}
             >
               {productName}
             </p>
             
             <p
               className="text-sm font-normal text-[#5F5E5E]"
-              style={{ fontFamily: 'Janna LT' }}
+              style={{}}
             >
               لا يمكن التراجع عن هذا الإجراء
             </p>
@@ -102,7 +102,7 @@ export default function DeleteConfirmationModal({
           >
             <span
               className="text-lg font-bold text-[#5F5E5E]"
-              style={{ fontFamily: 'Janna LT' }}
+              style={{}}
             >
               إلغاء
             </span>
@@ -116,7 +116,7 @@ export default function DeleteConfirmationModal({
             <Trash2 className="w-5 h-5 text-white" strokeWidth={2.5} />
             <span
               className="text-lg font-bold text-white"
-              style={{ fontFamily: 'Janna LT' }}
+              style={{}}
             >
               حذف
             </span>

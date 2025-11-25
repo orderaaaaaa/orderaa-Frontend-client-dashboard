@@ -79,7 +79,7 @@ export default function AddNewProductModal({
         >
           <h2
             className="text-xl font-bold text-black text-center"
-            style={{ fontFamily: 'Janna LT' }}
+            style={{}}
           >
             إضافة منتج جديد
           </h2>
@@ -99,7 +99,7 @@ export default function AddNewProductModal({
             <div className="w-full">
               <label
                 className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right"
-                style={{ fontFamily: 'Janna LT' }}
+                style={{}}
               >
                 النوع
               </label>
@@ -113,7 +113,7 @@ export default function AddNewProductModal({
                     setIsQuantityDropdownOpen(false);
                   }}
                   className="w-full h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E] flex items-center justify-between"
-                  style={{ fontFamily: 'Janna LT', direction: 'rtl' }}
+                  style={{ direction: 'rtl' }}
                 >
                   <span>{selectedProduct ? selectedProduct.name : 'اختر المنتج'}</span>
                   <svg
@@ -143,7 +143,7 @@ export default function AddNewProductModal({
                           onChange={(e) => setSearchTerm(e.target.value)}
                           placeholder="ابحث عن منتج..."
                           className="w-full h-[45px] bg-white border border-[#ECECEC] rounded-[25px] px-12 text-right text-base"
-                          style={{ fontFamily: 'Janna LT', direction: 'rtl' }}
+                          style={{ direction: 'rtl' }}
                           autoFocus
                         />
                         <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#5F5E5E]" />
@@ -161,7 +161,7 @@ export default function AddNewProductModal({
                               setSearchTerm('');
                             }}
                             className="w-full px-6 py-3 text-right text-lg text-[#5F5E5E] hover:bg-purple-50 transition-colors flex justify-end items-center gap-2"
-                            style={{ fontFamily: 'Janna LT' }}
+                            style={{}}
                           >
                             <span>{product.name}</span>
                             {product.image && (
@@ -174,7 +174,7 @@ export default function AddNewProductModal({
                           </button>
                         ))
                       ) : (
-                        <div className="px-6 py-6 text-center text-[#5F5E5E]" style={{ fontFamily: 'Janna LT' }}>
+                        <div className="px-6 py-6 text-center text-[#5F5E5E]" style={{}}>
                           لا توجد منتجات
                         </div>
                       )}
@@ -190,7 +190,7 @@ export default function AddNewProductModal({
               <div className="flex-1">
                 <label
                   className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right"
-                  style={{ fontFamily: 'Janna LT' }}
+                  style={{}}
                 >
                   الكمية
                 </label>
@@ -204,7 +204,7 @@ export default function AddNewProductModal({
                       setIsProductDropdownOpen(false);
                     }}
                     className="w-full h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E] flex items-center justify-between"
-                    style={{ fontFamily: 'Janna LT', direction: 'rtl' }}
+                    style={{ direction: 'rtl' }}
                   >
                     <span>{quantity}</span>
                     <svg
@@ -233,7 +233,7 @@ export default function AddNewProductModal({
                             setIsQuantityDropdownOpen(false);
                           }}
                           className="w-full px-6 py-3 text-right text-lg text-[#5F5E5E] hover:bg-purple-50 transition-colors"
-                          style={{ fontFamily: 'Janna LT' }}
+                          style={{}}
                         >
                           {option}
                         </button>
@@ -247,7 +247,7 @@ export default function AddNewProductModal({
               <div className="flex-1">
                 <label
                   className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right"
-                  style={{ fontFamily: 'Janna LT' }}
+                  style={{}}
                 >
                   اللون
                 </label>
@@ -261,7 +261,7 @@ export default function AddNewProductModal({
                       setIsProductDropdownOpen(false);
                     }}
                     className="w-full h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E] flex items-center justify-between"
-                    style={{ fontFamily: 'Janna LT', direction: 'rtl' }}
+                    style={{ direction: 'rtl' }}
                   >
                     <span>{color}</span>
                     <svg
@@ -290,7 +290,7 @@ export default function AddNewProductModal({
                             setIsColorDropdownOpen(false);
                           }}
                           className="w-full px-6 py-3 text-right text-lg text-[#5F5E5E] hover:bg-purple-50 transition-colors"
-                          style={{ fontFamily: 'Janna LT' }}
+                          style={{}}
                         >
                           {option}
                         </button>
@@ -304,7 +304,7 @@ export default function AddNewProductModal({
               <div className="flex-1">
                 <label
                   className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right"
-                  style={{ fontFamily: 'Janna LT' }}
+                  style={{}}
                 >
                   القياس
                 </label>
@@ -318,7 +318,7 @@ export default function AddNewProductModal({
                       setIsProductDropdownOpen(false);
                     }}
                     className="w-full h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E] flex items-center justify-between"
-                    style={{ fontFamily: 'Janna LT', direction: 'rtl' }}
+                    style={{ direction: 'rtl' }}
                   >
                     <span>{size}</span>
                     <svg
@@ -347,7 +347,7 @@ export default function AddNewProductModal({
                             setIsSizeDropdownOpen(false);
                           }}
                           className="w-full px-6 py-3 text-right text-lg text-[#5F5E5E] hover:bg-purple-50 transition-colors"
-                          style={{ fontFamily: 'Janna LT' }}
+                          style={{}}
                         >
                           {option}
                         </button>
@@ -369,7 +369,7 @@ export default function AddNewProductModal({
           <Plus className="w-5 h-5 text-white" strokeWidth={2.5} />
           <span
             className="text-lg font-bold text-white"
-            style={{ fontFamily: 'Janna LT' }}
+            style={{}}
           >
             إضافة
           </span>

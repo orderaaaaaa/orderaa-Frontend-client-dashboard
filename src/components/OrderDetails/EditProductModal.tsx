@@ -64,7 +64,7 @@ export default function EditProductModal({
         >
           <h2
             className="text-xl font-bold text-black text-center"
-            style={{ fontFamily: 'Janna LT' }}
+            style={{}}
           >
             تعديل المنتج
           </h2>
@@ -84,7 +84,7 @@ export default function EditProductModal({
             <div className="w-[374px]">
               <label
                 className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right"
-                style={{ fontFamily: 'Janna LT' }}
+                style={{}}
               >
                 القياس
               </label>
@@ -96,7 +96,7 @@ export default function EditProductModal({
                     setIsColorDropdownOpen(false);
                   }}
                   className="w-full h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E] flex items-center justify-between"
-                  style={{ fontFamily: 'Janna LT', direction: 'rtl' }}
+                  style={{ direction: 'rtl' }}
                 >
                   <span>{size}</span>
                   <svg
@@ -125,7 +125,7 @@ export default function EditProductModal({
                           setIsSizeDropdownOpen(false);
                         }}
                         className="w-full px-6 py-3 text-right text-lg text-[#5F5E5E] hover:bg-purple-50 transition-colors"
-                        style={{ fontFamily: 'Janna LT' }}
+                        style={{}}
                       >
                         {option}
                       </button>
@@ -139,7 +139,7 @@ export default function EditProductModal({
             <div className="w-[374px]">
               <label
                 className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right"
-                style={{ fontFamily: 'Janna LT' }}
+                style={{}}
               >
                 اللون
               </label>
@@ -151,7 +151,7 @@ export default function EditProductModal({
                     setIsSizeDropdownOpen(false);
                   }}
                   className="w-full h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E] flex items-center justify-between"
-                  style={{ fontFamily: 'Janna LT', direction: 'rtl' }}
+                  style={{ direction: 'rtl' }}
                 >
                   <span>{color}</span>
                   <svg
@@ -180,7 +180,7 @@ export default function EditProductModal({
                           setIsColorDropdownOpen(false);
                         }}
                         className="w-full px-6 py-3 text-right text-lg text-[#5F5E5E] hover:bg-purple-50 transition-colors"
-                        style={{ fontFamily: 'Janna LT' }}
+                        style={{}}
                       >
                         {option}
                       </button>
@@ -200,7 +200,7 @@ export default function EditProductModal({
           <Check className="w-5 h-5 text-white" strokeWidth={2.5} />
           <span
             className="text-lg font-bold text-white"
-            style={{ fontFamily: 'Janna LT' }}
+            style={{}}
           >
             حفظ
           </span>

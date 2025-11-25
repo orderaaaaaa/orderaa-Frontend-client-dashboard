@@ -66,10 +66,10 @@ export function Sidebar({
           className={`
             relative flex flex-col h-full transition-[width] duration-300 ease-in-out
             ${collapsed ? SIDEBAR_WIDTH.COLLAPSED : SIDEBAR_WIDTH.EXPANDED}
-            rounded-l-md border border-gray-700 overflow-hidden
-            bg-[radial-gradient(circle_at_10%_10%,_#431F94_0%,_#5D24E1_100%)]
+             border border-gray-700 overflow-hidden
             shadow-[0_2px_4px_-1px_rgba(0,0,0,0.06),_0_4px_6px_-1px_rgba(0,0,0,0.10)]
           `}
+          style={{ background: 'linear-gradient(180deg, #5D24E1 0%, #33147B 100%)' }}
         >
           {/* Header */}
           <div className="flex items-center justify-between h-16 px-3 border-b border-white/10">
@@ -90,7 +90,7 @@ export function Sidebar({
             <Button
               variant="ghost"
               size="icon"
-              className="hidden lg:flex text-white hover:bg-white/10"
+              className="hidden lg:flex !text-white hover:bg-white/10"
               onClick={onCollapseToggle}
               title={collapsed ? 'توسيع القائمة' : 'تصغير القائمة'}
               aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -117,7 +117,7 @@ export function Sidebar({
           {/* Navigation */}
           <nav
             aria-label="Main navigation"
-            className="flex-1 px-2 py-4 space-y-2"
+            className="flex-1 px-2 py-4 space-y-1"
           >
             {navigation.map((item) => {
               const isActive = pathname === item.href;
@@ -125,18 +125,20 @@ export function Sidebar({
               // Dropdown item
               if (item.children) {
                 const isOpen = openDropdown === item.name;
+                // Check if any child is active to make parent bold
+                const hasActiveChild = item.children.some((sub) => pathname.startsWith(sub.href));
 
                 return (
                   <div key={item.name} className="group">
                     <button
                       onClick={() => handleDropdownClick(item.name)}
                       className={`
-                        flex items-center justify-between w-full px-3 py-3 text-sm font-medium rounded-lg transition-colors
-                        ${
-                          isActive || isOpen
-                            ? 'bg-white/20 text-white font-bold text-[20px] cursor-default'
-                            : 'text-white/80 hover:bg-white/10 hover:text-white text-[20px]'
+                        flex items-center justify-between w-full px-3 py-3 text-sm font-medium rounded-lg transition-colors cursor-pointer
+                        ${isActive
+                          ? 'bg-white/20 text-white text-[20px] cursor-default'
+                          : 'text-white/80 hover:bg-white/10 hover:text-white text-[20px]'
                         }
+                        ${hasActiveChild ? 'font-bold text-white' : ''}
                       `}
                       style={{ direction: 'rtl' }}
                       aria-expanded={isOpen}
@@ -157,12 +159,12 @@ export function Sidebar({
                       </span>
                       {!collapsed &&
                         (isOpen ? (
-                          <ChevronDown
+                          <ChevronUp
                             className="h-4 w-4 shrink-0"
                             aria-hidden="true"
                           />
                         ) : (
-                          <ChevronUp
+                          <ChevronDown
                             className="h-4 w-4 shrink-0"
                             aria-hidden="true"
                           />
@@ -173,13 +175,12 @@ export function Sidebar({
                     {!collapsed && (
                       <div
                         id={`submenu-${item.name}`}
-                        className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                          isOpen
-                            ? 'max-h-40 opacity-100 mt-2'
-                            : 'max-h-0 opacity-0'
-                        }`}
+                        className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen
+                          ? 'max-h-40 opacity-100 mt-2'
+                          : 'max-h-0 opacity-0'
+                          }`}
                       >
-                        <div className="space-y-2" style={{ direction: 'rtl' }}>
+                        <div className="px-4 space-y-1" style={{ direction: 'rtl' }}>
                           {item.children.map((sub) => {
                             const isSubActive = pathname.startsWith(sub.href);
                             const SubIcon = sub.icon;
@@ -190,12 +191,16 @@ export function Sidebar({
                                 href={sub.href}
                                 className={`
                                   flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors
-                                  ${
-                                    isSubActive
-                                      ? 'bg-white/20 text-white text-[17px] cursor-default'
-                                      : 'text-white/70 hover:bg-white/10 hover:text-white text-[16px]'
+                                  ${isSubActive
+                                    ? 'text-white text-[17px] cursor-default font-medium'
+                                    : 'text-white/70 hover:bg-white/10 hover:text-white text-[16px]'
                                   }
                                 `}
+                                style={isSubActive ? {
+                                  backgroundColor: '#2C028F',
+                                  boxShadow: '0px 2px 4px 0px #00000080 inset',
+                                  fontWeight: 500
+                                } : {}}
                                 onClick={onNavItemClick}
                                 aria-current={isSubActive ? 'page' : undefined}
                               >
@@ -223,10 +228,9 @@ export function Sidebar({
                   href={item.href}
                   className={`
                     flex items-center px-3 py-3 text-[20px] font-bold rounded-lg transition-colors
-                    ${
-                      isActive
-                        ? 'bg-white/20 text-white font-bold cursor-default'
-                        : 'text-white/80 hover:bg-white/10 hover:text-white'
+                    ${isActive
+                      ? 'bg-white/20 text-white font-bold cursor-default'
+                      : 'text-white/80 hover:bg-white/10 hover:text-white'
                     }
                   `}
                   onClick={(e) => {
@@ -246,7 +250,7 @@ export function Sidebar({
                     />
                   )}
                   {!collapsed && (
-                    <span className="pr-2 text-[20px] font-bold">
+                    <span className="pr-2 font-medium">
                       {item.name}
                     </span>
                   )}
