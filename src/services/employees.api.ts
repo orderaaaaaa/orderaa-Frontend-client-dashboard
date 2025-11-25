@@ -16,7 +16,7 @@ interface CreateEmployeeRequest {
 
 export const employeesApi = {
   async getAll(token: string): Promise<Employee[]> {
-    const response = await axios.get(`${API_BASE_URL}/employees`, {
+    const response = await axios.get<Employee[]>(`${API_BASE_URL}/employees`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -25,7 +25,7 @@ export const employeesApi = {
   },
 
   async getById(token: string, id: number): Promise<Employee> {
-    const response = await axios.get(`${API_BASE_URL}/employees/${id}`, {
+    const response = await axios.get<Employee>(`${API_BASE_URL}/employees/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -45,7 +45,7 @@ export const employeesApi = {
       workingHours: data.workingHours || undefined,
     };
 
-    const response = await axios.post(`${API_BASE_URL}/employees`, requestData, {
+    const response = await axios.post<Employee>(`${API_BASE_URL}/employees`, requestData, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ export const employeesApi = {
   },
 
   async update(token: string, id: number, data: Partial<EmployeeFormData>): Promise<Employee> {
-    const response = await axios.patch(`${API_BASE_URL}/employees/${id}`, data, {
+    const response = await axios.patch<Employee>(`${API_BASE_URL}/employees/${id}`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
