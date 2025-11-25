@@ -201,7 +201,7 @@ function transformOrdersForEasyOrderFormat(orders: Order[]) {
             'Coupon': order.coupon || '',
             'Coupon Discount': order.couponDiscount || 0,
             'Product Name': firstProduct?.products.name || '',
-            'Variant': firstProduct?.variant || formatVariant(firstProduct?.product),
+            'Variant': firstProduct?.variant || formatVariant(firstProduct?.products),
             'Quantity': firstProduct?.quantity || 1,
             'SKU': firstProduct?.sku || '',
             'Item Price': firstProduct?.price || 0,
