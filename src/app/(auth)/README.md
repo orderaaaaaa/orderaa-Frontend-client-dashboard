@@ -11,7 +11,7 @@ This directory contains all authentication-related pages and components using Ne
 │   ├── AuthHeader.tsx # Header with logo, title, and subtitle
 │   ├── AuthSwitch.tsx # Toggle between signin/signup
 │   ├── Input.tsx      # Form input with icon and error support
-│   └── Drobdown.tsx   # Dropdown/select component
+│   └── Dropdown.tsx   # Dropdown/select component
 ├── hooks/             # Custom hooks (file colocation)
 │   ├── index.ts       # Barrel export for all hooks
 │   ├── useAuthData.ts # Loads categories and governorates

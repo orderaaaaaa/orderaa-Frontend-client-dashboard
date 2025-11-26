@@ -227,7 +227,7 @@ export function Sidebar({
                   key={item.name}
                   href={item.href}
                   className={`
-                    flex items-center px-3 py-3 text-[20px] font-bold rounded-lg transition-colors
+                    flex items-center px-3 py-3 text-[18px] font-medium rounded-lg transition-colors
                     ${isActive
                       ? 'bg-white/20 text-white font-bold cursor-default'
                       : 'text-white/80 hover:bg-white/10 hover:text-white'

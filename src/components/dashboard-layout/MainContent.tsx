@@ -19,7 +19,7 @@ export function PageContent({
   className?: string;
 }) {
   return (
-    <main className={`flex-1 overflow-auto p-4 lg:p-6 ${className}`}>
+    <main className={`flex-1 overflow-auto p-4 ${className}`}>
       {children}
     </main>
   );

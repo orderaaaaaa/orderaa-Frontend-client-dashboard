@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { signUpSchema, type SignUpSchema } from './schema';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Drobdown from '../../../components/ui/Drobdown';
+import Dropdown from '../../../components/ui/Dropdown';
 import AuthForm from '../components/AuthForm';
 import Input from '../../../components/ui/Input';
 import { signUp } from '@/lib/api/auth';
@@ -82,7 +82,7 @@ export default function SignUpForm() {
       </div>
 
       {/* Activity */}
-      <Drobdown
+      <Dropdown
         value={watch('category')}
         onChange={(val) => setValue('category', val)}
         options={categories}
@@ -114,7 +114,7 @@ export default function SignUpForm() {
 
       {/* Governorate + City */}
       <div className="flex flex-col md:flex-row gap-4 justify-between md:items-center">
-        <Drobdown
+        <Dropdown
           value={watch('governorate')}
           onChange={(val) => setValue('governorate', val)}
           options={governorates}
@@ -123,7 +123,7 @@ export default function SignUpForm() {
           icon={MapIcon}
         />
 
-        <Drobdown
+        <Dropdown
           value={watch('city')}
           onChange={(val) => setValue('city', val)}
           options={

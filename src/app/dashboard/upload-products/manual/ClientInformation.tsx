@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback } from 'react';
 import Input from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/textarea';
-import Dropdown from '@/components/ui/Drobdown';
+import Dropdown from '@/components/ui/Dropdown';
 
 import { GOVERNORATES } from '@/constants/Eg-Governorates-Ar';
 import { getAreasByGovernorate } from '@/constants/Eg-Areas-Ar';
@@ -119,11 +119,10 @@ function ClientInformation({
               className="w-full"
               options={GOVERNORATES}
               placeholderClassName="text-[#1F1F1F] !py-1 font-bold "
-              selectClassName={`border-1 w-full  bg-[#EAEAEA40] px-3 py-3 rounded-sm ${
-                errors?.governorate
+              selectClassName={`border-1 w-full  bg-[#EAEAEA40] px-3 py-3 rounded-sm ${errors?.governorate
                   ? 'border-red-500 focus:border-red-500'
                   : 'border-[#5D24E1]'
-              }`}
+                }`}
               placeholder="اختر المحافظة"
               value={governorate}
               onChange={handleGovernorateChange}
@@ -143,11 +142,10 @@ function ClientInformation({
               className="w-full"
               options={areaOptions}
               placeholderClassName="text-[#1F1F1F] !py-1 font-bold "
-              selectClassName={`border-1 w-full  bg-[#EAEAEA40] px-3 py-3 rounded-sm ${
-                errors?.area
+              selectClassName={`border-1 w-full  bg-[#EAEAEA40] px-3 py-3 rounded-sm ${errors?.area
                   ? 'border-red-500 focus:border-red-500'
                   : 'border-[#5D24E1]'
-              }`}
+                }`}
               placeholder={governorate ? 'اختر المنطقة' : 'اختر المحافظة أولاً'}
               value={area}
               onChange={handleAreaChange}

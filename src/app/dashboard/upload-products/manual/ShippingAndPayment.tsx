@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Dropdown from '@/components/ui/Drobdown';
+import Dropdown from '@/components/ui/Dropdown';
 import { USER_MENU_OPTIONS } from '@/constants/dashboard-layout';
 import Input from '@/components/ui/Input';
 
@@ -51,9 +51,8 @@ function ShippingAndPayment() {
 
             {/* Expandable Shipping Input */}
             <div
-              className={`transition-all duration-300 ease-in-out  ${
-                shipping ? 'max-h-40 opacity-100 mt-4' : 'max-h-0 opacity-0'
-              }`}
+              className={`transition-all duration-300 ease-in-out  ${shipping ? 'max-h-40 opacity-100 mt-4' : 'max-h-0 opacity-0'
+                }`}
             >
               <p className="text-gray-500 max-sm:text-[14px] text-[17px] mb-1">
                 أضف تكلفة الشحن إلى هذا الطلب
@@ -63,7 +62,7 @@ function ShippingAndPayment() {
                 type="number"
                 placeholder="..10000"
                 className="max-w-[502px] bg-[#EAEAEA40] mt-3"
-                onChange={() => {}}
+                onChange={() => { }}
               />
             </div>
           </div>
@@ -101,11 +100,10 @@ function ShippingAndPayment() {
 
             {/* Dropdown (kept exactly as is) */}
             <div
-              className={`transition-all duration-300 ease-in-out  ${
-                includeShipping
+              className={`transition-all duration-300 ease-in-out  ${includeShipping
                   ? 'max-h-40 opacity-100 mt-4'
                   : 'max-h-0 opacity-0'
-              }`}
+                }`}
             >
               <Dropdown
                 value={paymentMethod}

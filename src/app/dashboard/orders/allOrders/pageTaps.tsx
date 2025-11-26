@@ -38,7 +38,7 @@ function PageTaps({ data, statusCounts, totalOrders }: PageTapsProps) {
   };
 
   return (
-    <div className="flex gap-4 md:flex-wrap overflow-x-auto hide">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 w-full">
       <PageTab
         label="جميع الطلبات"
         count={totalOrders ?? data?.length ?? 0}

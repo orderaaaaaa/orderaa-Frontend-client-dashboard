@@ -38,9 +38,25 @@ export default function OrderDetails({ params }: { params: { orderId: string } }
       try {
         setLoading(true);
         const orderId = parseInt(params.orderId);
-        const orderData = await getOrderById(orderId);
-        setOrder(orderData);
-        setError(null);
+
+        // Try to fetch from API first
+        try {
+          const orderData = await getOrderById(orderId);
+          setOrder(orderData);
+          setError(null);
+        } catch (apiErr) {
+          // Fallback to mock data if API fails
+          console.warn('API failed, searching in mock data:', apiErr);
+          const { mockOrders } = await import('@/mocks/mockData');
+          const mockOrder = mockOrders.find(o => o.id === orderId);
+
+          if (mockOrder) {
+            setOrder(mockOrder);
+            setError(null);
+          } else {
+            setError('الطلب غير موجود');
+          }
+        }
       } catch (err: any) {
         setError(err?.response?.data?.message || 'فشل في تحميل بيانات الطلب');
       } finally {

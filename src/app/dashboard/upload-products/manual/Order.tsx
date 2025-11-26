@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Dropdown from '@/components/ui/Drobdown';
+import Dropdown from '@/components/ui/Dropdown';
 import { USER_MENU_OPTIONS } from '@/constants/dashboard-layout';
 
 type OrderProps = {
@@ -40,11 +40,10 @@ function Order({
               options={USER_MENU_OPTIONS}
               placeholder={'اختر المنصة'}
               placeholderClassName="text-[#1F1F1F] !py-1 font-bold "
-              selectClassName={`border-1 w-full  bg-[#EAEAEA40] p-1 rounded-sm ${
-                errors?.platform
+              selectClassName={`border-1 w-full  bg-[#EAEAEA40] p-1 rounded-sm ${errors?.platform
                   ? 'border-red-500 focus:border-red-500'
                   : 'border-[#5D24E1]'
-              }`}
+                }`}
             />
             {errors?.platform && (
               <p className="text-xs text-red-500 mt-1">{errors.platform}</p>
@@ -63,11 +62,10 @@ function Order({
               options={USER_MENU_OPTIONS}
               placeholder={'اختر الصفحة'}
               placeholderClassName="text-[#1F1F1F] font-bold text-[20px]"
-              selectClassName={`border-1 w-full  bg-[#EAEAEA40] p-1 rounded-sm ${
-                errors?.pageName
+              selectClassName={`border-1 w-full  bg-[#EAEAEA40] p-1 rounded-sm ${errors?.pageName
                   ? 'border-red-500 focus:border-red-500'
                   : '!border-[#5D24E1]'
-              }`}
+                }`}
             />
             {errors?.pageName && (
               <p className="text-xs text-red-500 mt-1">{errors.pageName}</p>

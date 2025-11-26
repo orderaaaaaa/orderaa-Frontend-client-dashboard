@@ -39,11 +39,12 @@ export function TopBar({
   return (
     <header
       className={clsx(
-        'flex flex-col lg:flex-row justify-between items-center mb-8',
+        'flex flex-col lg:flex-row justify-between items-center',
         'px-4 lg:px-6 py-1 pb-4 lg:py-0',
-        'max-sm:bg-gradient-to-t from-[#33147B] to-[#5D24E1] max-sm:text-white border-b rounded-b-2xl',
+        'max-sm:bg-gradient-to-t from-[#33147B] to-[#5D24E1] max-sm:text-white border-b',
         'relative'
       )}
+      style={{ boxShadow: '0px 4px 12px 0px #00000014' }}
     >
       {/* ✅ Mobile: email + burger menu */}
       <div className="flex items-center justify-between w-full lg:hidden mt-2">
@@ -78,12 +79,12 @@ export function TopBar({
       </div>
 
       {/* ✅ Desktop version */}
-      <div className="hidden lg:flex justify-between items-center w-full h-16">
+      <div className="hidden lg:grid grid-cols-[1fr_auto] gap-4 items-center w-full h-16">
         <Input
           name="search"
-          placeholder="ابحث هنا..."
+          placeholder="البحث"
           icon={Search}
-          className="sm:rounded-[38px] lg:w-lg lg:rounded-[38px]"
+          className="sm:rounded-[38px] lg:rounded-[38px] bg-[#5D24E1]/8 border-0"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           aria-label="Search"

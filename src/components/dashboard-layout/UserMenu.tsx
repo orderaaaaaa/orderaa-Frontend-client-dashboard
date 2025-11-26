@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Dropdown from '../ui/Drobdown';
+import Dropdown from '../ui/Dropdown';
 import { USER_MENU_OPTIONS } from '@/constants/dashboard-layout';
 import { UserMenuKey } from '@/hooks/useSidebar';
 import { useAuthStore } from '@/store/authStore';
@@ -45,20 +45,20 @@ export function UserMenu({
       }
       placeholderClassName={
         isMobile
-          ? 'text-white font-bold text-[20px]'
-          : 'text-[#1F1F1F] font-bold text-[20px]'
+          ? '!text-[#1F1F1F] font-bold text-[20px]'
+          : '!text-[#1F1F1F] font-bold text-[20px]'
       }
       selectClassName={
         isMobile
-          ? 'border-0 bg-transparent rounded-lg py-2.5 pl-[22px] pr-2 text-[14px] text-white placeholder:text-white overflow-hidden text-ellipsis whitespace-nowrap min-w-[100px] text-left'
-          : 'border-0 rounded-lg py-2.5 pl-[22px] pr-2 text-[18px] text-[#1F1F1F] placeholder:text-[#878A99] overflow-hidden text-ellipsis whitespace-nowrap min-w-[150px] max-w-[200px] text-left'
+          ? 'border-0 bg-transparent rounded-lg py-2.5 pl-[22px] pr-2 !text-[#1F1F1F] text-[14px] placeholder:!text-[#1F1F1F] overflow-hidden text-ellipsis whitespace-nowrap min-w-[100px] text-left cursor-pointer outline-none font-bold'
+          : 'border-0 py-2.5 !text-[#1F1F1F] text-[18px] overflow-hidden text-ellipsis whitespace-nowrap cursor-pointer outline-none font-bold placeholder:!text-[#1F1F1F]'
       }
       arrowClassName={
         isMobile
-          ? 'absolute cursor-pointer left-0 top-1/2 transform -translate-y-1/2 text-white hover:text-white/80 transition-colors z-10'
-          : 'absolute cursor-pointer left-0 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10'
+          ? 'absolute cursor-pointer left-0 top-1/2 transform -translate-y-1/2 transition-colors z-10'
+          : 'absolute cursor-pointer left-0 top-1/2 transform -translate-y-1/2 hover:text-gray-600 transition-colors z-10'
       }
-      dropdownClassName="absolute z-10 left-0 right-0 bg-white rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg"
+      dropdownClassName="absolute z-50 left-0 right-0 bg-white rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg"
     />
   );
 }

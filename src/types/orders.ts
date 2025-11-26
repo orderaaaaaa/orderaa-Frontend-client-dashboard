@@ -196,7 +196,6 @@ export interface Order {
   paymentMethod?: string;
   coupon?: string;
   couponDiscount?: number;
-
   // Marketing & tracking
   utmSource?: string;
   utmCampaign?: string;

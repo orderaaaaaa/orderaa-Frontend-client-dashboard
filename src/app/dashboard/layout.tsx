@@ -11,7 +11,6 @@ import { navigation } from '@/constants/Navbar';
 import {
   Sidebar,
   TopBar,
-  Breadcrumb,
   MainContent,
   PageContent,
   ErrorBoundary,
@@ -80,8 +79,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               username={user?.username}
               onUserAction={handleUserAction}
             />
-
-            <Breadcrumb />
 
             <PageContent>{children}</PageContent>
           </MainContent>
