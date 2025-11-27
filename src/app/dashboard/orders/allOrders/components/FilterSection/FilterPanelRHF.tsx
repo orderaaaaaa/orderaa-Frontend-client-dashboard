@@ -33,9 +33,9 @@ export default function FilterPanel({ control, errors, options }: Props) {
                     <div className="flex flex-col gap-1 text-base font-medium">
                         <textarea
                             {...field}
-                            placeholder="كود الشحنة (سطر لكل كود)"
-                           
-                            className={`max-w-62 px-3 rounded border bg-white  ${errors.shipmentCode ? 'border-red-500' : 'border-gray-300'
+                            placeholder="كود الشحنة"
+                            rows={1}
+                            className={`max-w-62 px-3 py-2 rounded border bg-white resize-none ${errors.shipmentCode ? 'border-red-500' : 'border-gray-300'
                                 }`}
                         />
                         {errors.shipmentCode && (

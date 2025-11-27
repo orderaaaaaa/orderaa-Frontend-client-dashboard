@@ -31,13 +31,13 @@ export default function AuthForm({
   showSwitch = true,
 }: AuthFormProps) {
   return (
-    <div className="min-h-screen flex items-center justify-center mt-10 mb-10">
-      <section className="flex flex-col justify-center items-center p-12 border border-[#52525214] rounded-lg shadow-lg shadow-[#212121]">
+    <div className="flex items-center justify-center min-h-screen py-5 px-4">
+      <section className="flex flex-col justify-center items-center p-7 w-full max-w-2xl border border-[#52525214] rounded-lg shadow-lg shadow-[#212121]">
         <AuthHeader title={title} subtitle={subtitle} />
 
         <form
           onSubmit={onSubmit}
-          className="flex flex-col w-full max-w-lg space-y-5 mx-auto mt-10"
+          className="flex flex-col w-full max-w-lg space-y-5 mx-auto mt-6"
           dir="rtl"
         >
           {error && (

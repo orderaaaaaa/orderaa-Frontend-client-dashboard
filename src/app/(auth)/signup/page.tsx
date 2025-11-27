@@ -120,7 +120,7 @@ export default function SignUpForm() {
           options={governorates}
           placeholder="اختر المحافظة"
           label="المحافظة"
-          icon={MapIcon}
+          icon={<MapIcon className='text-[#5d24e1]' />}
         />
 
         <Dropdown
@@ -131,7 +131,7 @@ export default function SignUpForm() {
           }
           placeholder="اختر المدينة"
           label="المدينة"
-          icon={MapIcon}
+          icon={<MapIcon className='text-[#5d24e1]'/>}
         />
       </div>
 

@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware';
 interface User {
   sub: number;
   username: string;
+  email?: string;
   role: string;
   merchantId?: number;
 }

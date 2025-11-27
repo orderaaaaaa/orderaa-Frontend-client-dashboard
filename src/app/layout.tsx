@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import { Analytics } from '@vercel/analytics/next';
+import "react-day-picker/dist/style.css"
 import './globals.css';
 
 export const metadata: Metadata = {

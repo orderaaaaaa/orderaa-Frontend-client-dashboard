@@ -107,7 +107,7 @@ export default function OrderCard({
   return (
     <div
       onClick={handleCardClick}
-      className="relative w-[400px] bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.1)] rounded-[10px] border-2 border-[#5D24E1] cursor-pointer hover:shadow-[0px_6px_20px_rgba(93,36,225,0.15)] transition-all duration-200 flex flex-col"
+      className="relative w-[300px] bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.1)] rounded-[10px] border-2 border-[#5D24E1] cursor-pointer hover:shadow-[0px_6px_20px_rgba(93,36,225,0.15)] transition-all duration-200 flex flex-col"
     >
       <div className="flex flex-row justify-between items-center px-6 py-4">
         <div className="flex items-center gap-3">

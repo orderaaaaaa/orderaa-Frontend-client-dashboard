@@ -38,8 +38,9 @@ function PageTaps({ data, statusCounts, totalOrders }: PageTapsProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 w-full">
-      <PageTab
+    <div className="w-full">
+      <div className="flex md:grid sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 overflow-x-auto pb-2 md:overflow-x-visible scrollbar-thin -mx-1 px-1">
+        <PageTab
         label="جميع الطلبات"
         count={totalOrders ?? data?.length ?? 0}
         icon={<Boxes width={18} height={18} />}
@@ -158,6 +159,7 @@ function PageTaps({ data, statusCounts, totalOrders }: PageTapsProps) {
         active={selectedStatus === OrderStatus.CANCELLED}
         onClick={() => handleTabClick(OrderStatus.CANCELLED)}
       />
+      </div>
     </div>
   );
 }

@@ -15,13 +15,14 @@ interface DropdownProps {
   options?: ComboboxOption[];
   placeholder?: string;
   label?: string;
-  icon?: LucideIcon;
+  icon?: React.ReactNode;
   className?: string;
   selectClassName?: string;
   placeholderClassName?: string;
   placeholderStyle?: React.CSSProperties;
   arrowClassName?: string;
   dropdownClassName?: string;
+  readOnly?: boolean;
 }
 
 export default function Dropdown({
@@ -30,13 +31,14 @@ export default function Dropdown({
   options = [],
   placeholder = 'اختر',
   label,
-  icon: Icon,
+  icon,
   className,
   selectClassName,
   placeholderClassName,
   placeholderStyle,
   arrowClassName,
   dropdownClassName,
+  readOnly = false,
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -95,28 +97,32 @@ export default function Dropdown({
           />
         </button>
         {/* Optional icon on the RIGHT */}
-        {Icon && (
+        {icon && (
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
-            <Icon size={20} />
+            {icon}
           </div>
         )}
+
         <input
           type="text"
           value={inputValue}
           onChange={(e) => {
-            setSearch(e.target.value);
-            setIsOpen(true);
-            // Do not clear selection on search
+            if (!readOnly) {
+              setSearch(e.target.value);
+              setIsOpen(true);
+            }
           }}
-          onFocus={() => setIsOpen(true)}
+          onFocus={() => !readOnly && setIsOpen(true)}
+          onClick={() => readOnly && setIsOpen(!isOpen)}
           placeholder={placeholder}
+          readOnly={readOnly}
           className={
             selectClassName
               ? selectClassName
-              : `w-full border border-[#CED4DA] rounded-lg py-2.5 pl-3 pr-3  text-[18px] overflow-hidden text-ellipsis whitespace-nowrap text-left ${value
+              : `w-full border border-[#CED4DA] rounded-lg py-2.5 pl-10 ${icon ? 'pr-10' : 'pr-3'} text-[18px] overflow-hidden text-ellipsis whitespace-nowrap ${value
                 ? '!text-[#1F1F1F]'
                 : placeholderClassName ?? '!text-[#1F1F1F]'
-              }`
+              } ${readOnly ? 'cursor-pointer' : ''}`
           }
           style={!value && placeholderStyle ? placeholderStyle : undefined}
         />

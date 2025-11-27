@@ -17,8 +17,14 @@ import { useInfiniteScroll } from '@/hooks/AllOrders/useInfiniteScroll';
 import { exportOrdersToExcel } from '@/utils/exportOrders';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { Breadcrumb } from '@/components/dashboard-layout';
-import Input from '@/components/ui/Input';
-import Dropdown from '@/components/ui/Dropdown';
+import { DatePicker } from '@/components/ui/datepicker';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 import { ScanLine, ArrowUp, Calendar, ArrowLeft } from 'lucide-react';
 import { mockOrders, mockStatistics } from '@/mocks/mockData';
@@ -26,8 +32,8 @@ import { mockOrders, mockStatistics } from '@/mocks/mockData';
 export default function AllOrdersRefactor() {
   const [select, setSelect] = useState(false);
   const [selectedOrderIds, setSelectedOrderIds] = useState<number[]>([]);
-  const [fromDate, setFromDate] = useState('');
-  const [toDate, setToDate] = useState('');
+  const [fromDate, setFromDate] = useState<Date | null>(null);
+  const [toDate, setToDate] = useState<Date | null>(null);
   const [timePeriod, setTimePeriod] = useState('');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -262,8 +268,8 @@ export default function AllOrdersRefactor() {
   }, [apiFilters, calculateRepeatCounts, limit]);
 
   return (
-    <div>
-      <div className='flex flex-row items-center justify-between mb-7'>
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className='flex flex-row items-center justify-between mb-7 w-full'>
         <Breadcrumb
           items={[
             { title: 'الطلبات', href: '/dashboard/orders' },
@@ -271,42 +277,39 @@ export default function AllOrdersRefactor() {
           ]}
         />
 
-        <div className="flex items-center gap-3">
-          <Input
-            type="date"
-            name="fromDate"
+        <div className="flex items-center justify-center md:justify-start gap-2 sm:gap-3 px-3 flex-shrink-0">
+          <DatePicker
+            selected={fromDate}
+            onChange={setFromDate}
             placeholder="من تاريخ"
             icon={Calendar}
-            value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
-            className="h-10 text-sm border border-[#CED4DA] rounded-[4px] placeholder:!text-black"
+            className="w-12 sm:w-auto"
+            maxDate={toDate || undefined}
           />
 
-          <ArrowLeft className="text-[#5D24E1]" size="20" />
+          <ArrowLeft className="text-[#5D24E1] flex-shrink-0" size="20" />
 
-          <Input
-            type="date"
-            name="toDate"
-            placeholder="الى تاريخ"
+          <DatePicker
+            selected={toDate}
+            onChange={setToDate}
+            placeholder="إلى تاريخ"
             icon={Calendar}
-            value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
-            className="h-10 text-sm border border-[#CED4DA] rounded-[4px]"
+            className="w-12 sm:w-auto"
+            minDate={fromDate || undefined}
           />
-          <Dropdown
-            value={timePeriod}
-            onChange={setTimePeriod}
-            options={[
-              { key: 'day', value: 'يوم' },
-              { key: 'week', value: 'اسبوع' },
-              { key: 'month', value: 'شهر' },
-              { key: 'quarter', value: 'ربع سنوي' },
-              { key: 'year', value: 'سنه' },
-            ]}
-            placeholder="الفترة الزمنية"
-            className="w-[180px]"
-            selectClassName="border border-[#CED4DA] rounded-lg py-2.5 pl-10 pr-3 text-[16px] h-10"
-          />
+
+          <Select value={timePeriod} onValueChange={setTimePeriod}>
+            <SelectTrigger className="w-32 sm:w-[180px] flex-shrink-0 border-[#CED4DA] rounded-lg h-10 text-[16px]">
+              <SelectValue placeholder="الفترة الزمنية" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="day">يوم</SelectItem>
+              <SelectItem value="week">اسبوع</SelectItem>
+              <SelectItem value="month">شهر</SelectItem>
+              <SelectItem value="quarter">ربع سنوي</SelectItem>
+              <SelectItem value="year">سنه</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -329,7 +332,7 @@ export default function AllOrdersRefactor() {
           areaOptions: options.areas || [],
         }}
       />
-      3
+
       <div className="flex justify-between mt-10 mb-6 select-none">
         <div className="flex items-center gap-4">
           <p className="text-gray-700">عدد جميع الطلبات: {totalOrders}</p>

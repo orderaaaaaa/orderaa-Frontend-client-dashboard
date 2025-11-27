@@ -14,7 +14,7 @@ export default function PageTab({ label, count, icon, active, onClick }: PageTab
       variant="ghost"
       size="lg"
       onClick={onClick}
-      className={`group flex items-center justify-between gap-2 px-4 py-2 border text-base rounded-[8px] transition 
+      className={`group flex items-center justify-between gap-2 px-4 py-2 border text-base rounded-[8px] transition flex-shrink-0 min-w-fit
     ${active
           ? "bg-[#5D24E1] text-white font-bold hover:bg-[#5D24E1] hover:text-white"
           : "text-[#00000099] border-[#00000014]"
