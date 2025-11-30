@@ -83,12 +83,12 @@ export default function AddNewProductModal({
           >
             إضافة منتج جديد
           </h2>
-          
+
           <button
             onClick={onClose}
             className="absolute left-8 w-6 h-6 flex items-center justify-center hover:opacity-70 transition-opacity"
           >
-            <X className="w-6 h-6 text-black" strokeWidth={2} />
+            <X className="w-6 h-6 text-black cursor-pointer" strokeWidth={2} />
           </button>
         </div>
 

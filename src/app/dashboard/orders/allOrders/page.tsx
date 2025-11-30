@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-import { ScanLine, ArrowUp, Calendar, ArrowLeft } from 'lucide-react';
+import { Scan, ScanLine, ArrowUp, Calendar, ArrowLeft, X } from 'lucide-react';
 import { mockOrders, mockStatistics } from '@/mocks/mockData';
 
 export default function AllOrdersRefactor() {
@@ -346,23 +346,34 @@ export default function AllOrdersRefactor() {
                 : `تحديد الكل (${orders.length})`}
             </button>
           )}
-          {select && selectedOrderIds.length > 0 && (
-            <span className="text-sm text-gray-600">
-              تم تحديد {selectedOrderIds.length} طلب
-            </span>
-          )}
         </div>
-        {select ? (
-          <ScanLine
-            className="ml-5 cursor-pointer text-[#5D24E1]"
-            onClick={() => setSelect(false)}
-          />
-        ) : (
-          <ScanLine
-            className="ml-5 cursor-pointer text-[#5D24E1]"
-            onClick={() => setSelect(true)}
-          />
-        )}
+        <div className='flex flex-row items-center justify-center gap-3 text-white'>
+          {select && selectedOrderIds.length > 0 && (
+            <div className='flex flex-row items-center justify-center gap-2'>
+              <X onClick={() => setSelect(false)} className="cursor-pointer text-[#5D24E1] h-5 w-5" />
+              <span className="text-sm text-gray-600">
+                تم تحديد {selectedOrderIds.length} طلب
+              </span>
+            </div>
+          )}
+          <div className='bg-[#5D24E1] flex flex-row items-center justify-center gap-3 px-5 py-2 rounded-full'>
+            <p>تحديد</p>
+            <div>
+              {select ? (
+                <ScanLine
+                  className="cursor-pointer text-white"
+                  onClick={() => setSelect(false)}
+                />
+              ) : (
+                <Scan
+                  className="cursor-pointer text-white"
+                  onClick={() => setSelect(true)}
+                />
+              )}
+            </div>
+
+          </div>
+        </div>
       </div>
 
       {loading && orders.length === 0 ? (

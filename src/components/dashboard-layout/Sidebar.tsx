@@ -13,6 +13,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { navigation } from '@/constants/Navbar';
 import { SIDEBAR_WIDTH } from '@/constants/dashboard-layout';
+import Logo from '@/assets/images/updated-logo.png';
 
 interface SidebarProps {
   open: boolean;
@@ -76,8 +77,8 @@ export function Sidebar({
             <div className="flex-1 flex justify-center items-center">
               {!collapsed && (
                 <Image
-                  src="/images/orderaa-nav.png"
-                  alt="Logo"
+                  src={Logo}
+                  alt="Ordera Logo"
                   width={200}
                   height={26}
                   className="object-contain"

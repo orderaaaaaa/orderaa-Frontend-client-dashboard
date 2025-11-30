@@ -1,4 +1,5 @@
-import { Files, TriangleAlert, History, CirclePlus } from "lucide-react";
+import React, { useState } from "react";
+import { Copy, TriangleAlert, History } from "lucide-react";
 import { Order } from "@/types/orders";
 
 interface OrderDetailsCardIdProps {
@@ -6,6 +7,8 @@ interface OrderDetailsCardIdProps {
 }
 
 const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
+  const [copied, setCopied] = useState(false);
+
   const createdDate = new Date(order.createdAt);
   const now = new Date();
   const diffMs = now.getTime() - createdDate.getTime();
@@ -16,20 +19,45 @@ const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
     ? `منذ ${diffDays} يوم, ${diffHours}ساعات`
     : `منذ ${diffHours} ساعات`;
 
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(order.code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = order.code;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } finally {
+        document.body.removeChild(ta);
+      }
+    }
+  };
+
   return (
-    <div className="hidden">
+    <div>
       <div className="relative max-xl:mb-20">
         <div>
-          <h3 className="flex gap-2 text-lg items-center font-semibold mb-1">
-            <Files className="w-4 text-[#7038f3]" />
+          <h3 className="flex gap-3 text-xl items-center font-bold mb-1">
+            <Copy
+              onClick={handleCopy}
+              className="w-4 h-4 text-[#7038f3] cursor-pointer"
+              role="button"
+            />
+            {/* order code */}
             {order.code}
-            <History className="bg-[#F6F2FC] w-8 h-8 p-1 rounded-full text-[#5D24E1] border-1 border-[#CBB5FD]" />
+            <History className="bg-[#F6F2FC] w-6 h-6 cursor-pointer p-1 rounded-full text-[#5D24E1] border-1 border-[#CBB5FD]" />
           </h3>
-          <p className="text-xs font-semibold mr-6 mb-4">
+          <p className="text-xs font-bold mr-7 mb-4">
             {createdDate.toLocaleDateString('ar-EG')} <span>{timeAgo}</span>
           </p>
           <div className="absolute top-1 left-[-16px] overflow-x-auto">
-            <div className="flex flex-col xl:flex-row gap-2">
+            <div className="flex flex-col xl:flex-row gap-2 px-5">
               <button className=" relative bg-[#F6F2FC] text-white border-1 border-[#CBB5FD] !rounded-full max-xl:!rounded-l-3xl p-2 px-4 cursor-pointer">
                 <h3 className="flex gap-2 text-sm items-center font-semibold mb-1 text-[#5D24E1] ">
                   <TriangleAlert className="w-5 text-[#5D24E1] relative " />
@@ -38,7 +66,7 @@ const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
               </button>
               <button className="bg-[#F6F2FC] text-white border-1 border-[#CBB5FD] !rounded-r-3xl p-2 px-4 cursor-pointer">
                 <h3 className="flex gap-2 text-sm items-center font-semibold mb-1 text-[#5D24E1] relative ">
-                  <TriangleAlert className="w-5 text-yellow-500 " />
+                  <TriangleAlert className="w-5 text-yellow-500" />
                   <p className="bg-red-600 absolute top-[-3px] right-[-4px] w-3 h-3 text-[8px] text-center rounded-full text-white">
                     {" "}
                     3
@@ -50,6 +78,20 @@ const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
           </div>
         </div>
       </div>
+
+      {/* Toast */}
+      {copied && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 right-6 z-50 bg-white shadow-md rounded-lg px-4 py-2 flex items-center gap-2 border border-[rgba(0,0,0,0.06)]"
+        >
+          <svg className="w-4 h-4 text-green-600" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span className="text-sm text-gray-800">تم النسخ</span>
+        </div>
+      )}
     </div>
   );
 };

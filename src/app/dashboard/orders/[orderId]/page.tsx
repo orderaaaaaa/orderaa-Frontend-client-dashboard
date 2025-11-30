@@ -175,7 +175,7 @@ export default function OrderDetails({ params }: { params: { orderId: string } }
           icon={<FileText width={18} height={18} />}
         />
       </div>
-      <div className="max-sm:hidden relative z-10 bg-white rounded-xl py-[3px] mt-6">
+      <div className="max-sm:hidden relative z-10 bg-white rounded-xl py-[3px] mt-6 mb-3">
         <FilterPanel
           filters={filters}
           updateFilters={handleFilterChange}

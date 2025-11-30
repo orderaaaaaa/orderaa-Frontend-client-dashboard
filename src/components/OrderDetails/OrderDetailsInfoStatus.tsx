@@ -1,5 +1,5 @@
-import { PhoneOff, CirclePlus } from "lucide-react";
 import { Order } from "@/types/orders";
+import { PhoneOff, CirclePlus } from "lucide-react";
 
 interface OrderDetailsInfoStatusProps {
   order: Order;

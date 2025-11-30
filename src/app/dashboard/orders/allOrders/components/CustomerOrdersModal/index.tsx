@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { Order } from '@/types/orders';
 import { getOrders } from '@/lib/api/order';
 import OrderCard from '../OrderCard';
+import { Button } from '@/components/ui/button';
 
 interface CustomerOrdersModalProps {
   isOpen: boolean;
@@ -80,7 +81,7 @@ export default function CustomerOrdersModal({
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <X className="w-6 h-6 text-gray-600" />
+            <X className="cursor-pointer w-6 h-6 text-gray-600" />
           </button>
         </div>
 
@@ -140,12 +141,12 @@ export default function CustomerOrdersModal({
 
         <div className="px-8 py-4 border-t border-gray-200 bg-gray-50">
           <div className="flex items-center justify-between">
-            <button
+            <Button
               onClick={onClose}
               className="px-6 py-2.5 bg-[#5D24E1] text-white rounded-full hover:bg-[#682fee] transition-colors font-medium"
             >
               إغلاق
-            </button>
+            </Button>
             <p className="text-sm text-gray-600">
               إجمالي الطلبات: <span className="font-bold text-[#5D24E1]">{orders.length}</span>
             </p>

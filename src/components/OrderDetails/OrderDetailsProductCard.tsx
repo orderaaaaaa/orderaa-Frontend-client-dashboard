@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Trash2, SquarePen, Copy, Plus } from 'lucide-react';
+import { Trash2, SquarePen, PackagePlus, CirclePlus } from 'lucide-react';
 import { Order, Product } from '@/types/orders';
 import EditProductModal from './EditProductModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
@@ -9,12 +9,12 @@ import AddSameTypeProductModal from './AddSameTypeProductModal';
 import AddNewProductModal from './AddNewProductModal';
 import { updateOrderProduct, deleteOrderProduct, getAllProducts, addOrderProduct } from '@/lib/api/order';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 interface OrderDetailsProductCardProps {
   order: Order;
 }
 
-// Helper function to parse variant string (e.g., "37 - اسود" or just "اسود" or just "37")
 function parseVariant(variant: string | null | undefined): { size: string; color: string } {
   if (!variant) {
     return { size: '37', color: 'اسود' };
@@ -45,7 +45,7 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
     order.order_products?.map((orderProduct) => {
       // Parse the variant to get size and color
       const variantData = parseVariant(orderProduct.variant);
-      
+
       return {
         id: orderProduct.id,
         productId: orderProduct.productId,
@@ -215,71 +215,72 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
   return (
     <>
       {/* Header with action buttons */}
-      <div className="mt-6 flex justify-between items-center mb-4">
-        <div className="flex gap-3">
-          <button
-            onClick={() => setIsAddNewProductModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#5D24E1] text-white rounded-lg hover:bg-[#4B1BC4] transition-colors"
-            style={{}}
-          >
-            <Plus className="w-5 h-5" strokeWidth={2} />
-            <span className="text-sm font-bold">إضافة منتج جديد</span>
-          </button>
-          
-          <button
-            onClick={() => setIsAddSameTypeModalOpen(true)}
-            disabled={productsData.length === 0}
-            className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-[#5D24E1] text-[#5D24E1] rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{}}
-          >
-            <Copy className="w-5 h-5" strokeWidth={2} />
-            <span className="text-sm font-bold">إضافة منتج من نفس النوع</span>
-          </button>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {productsData.map((item) => (
-          <div
-            key={item.id}
-            className="grid
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className='grid grid-cols-2 gap-2'>
+          {productsData.map((item) => (
+            <div
+              key={item.id}
+              className="grid
               grid-cols-[1fr_1fr]
               gap-5
               max-w-[380px]
               bg-gradient-to-b from-[#FCFAFD] to-[#EADBFF] border-2 border-[#5D24E147]
               rounded-[20px] py-4 px-2
               shadow-[0px_4px_4px_0px_#5D24E114]"
-          >
-            <div className="flex flex-col gap-2 mx-2">
-              <h3 className="text-[#1E1E1E] font-bold text-lg ">
-                {item.product}
-              </h3>
-              <p className="text-[#1E1E1E] font-bold text-lg ">اللون: {item.color}</p>
-              <p className="text-[#1E1E1E] font-bold text-lg ">القياس: {item.size}</p>
+            >
+              <div className="flex flex-col gap-2 mx-2">
+                <h3 className="text-[#1E1E1E] font-bold text-lg ">
+                  {item.product}
+                </h3>
+                <p className="text-[#1E1E1E] font-bold text-lg ">اللون: {item.color}</p>
+                <p className="text-[#1E1E1E] font-bold text-lg ">القياس: {item.size}</p>
 
-              <p className="text-[#1E1E1E] font-bold text-lg ">
-                {item.price} جنيه
-              </p>
-            </div>
-            <div className="flex flex-col items-end ml-3">
-              <div className="flex justify-end gap-2 mb-2">
-                <Trash2
-                  className="cursor-pointer w-5 text-red-600 hover:text-red-700 transition-colors"
-                  onClick={() => handleDeleteClick(item.id)}
-                />
-                <SquarePen
-                  className="cursor-pointer w-5 hover:text-purple-700 transition-colors"
-                  onClick={() => handleEditClick(item.id)}
+                <p className="text-[#1E1E1E] font-bold text-lg ">
+                  {item.price} جنيه
+                </p>
+              </div>
+              <div className="flex flex-col items-end ml-3">
+                <div className="flex justify-end gap-2 mb-2">
+                  <Trash2
+                    className="cursor-pointer w-5 text-red-600 hover:text-red-700 transition-colors"
+                    onClick={() => handleDeleteClick(item.id)}
+                  />
+                  <SquarePen
+                    className="cursor-pointer w-5 hover:text-purple-700 transition-colors"
+                    onClick={() => handleEditClick(item.id)}
+                  />
+                </div>
+                <img
+                  src={item.img}
+                  alt=""
+                  className="border-1 flex border-[#B8A3EB] rounded-2xl w-[120px] h-[120px] object-cover"
                 />
               </div>
-              <img
-                src={item.img}
-                alt=""
-                className="border-1 flex border-[#B8A3EB] rounded-2xl w-[120px] h-[120px] object-cover"
-              />
             </div>
+          ))}
+        </div>
+
+        <div className="mt-6 flex justify-end items-start mb-4">
+          <div className="flex gap-3">
+            <Button
+              onClick={() => setIsAddNewProductModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#5D24E1] text-white rounded-lg hover:bg-[#4B1BC4] transition-colors"
+            >
+              <PackagePlus className="w-5 h-5" strokeWidth={2} />
+              <span className="text-sm font-bold">إضافة منتج جديد</span>
+            </Button>
+
+            <Button
+              onClick={() => setIsAddSameTypeModalOpen(true)}
+              disabled={productsData.length === 0}
+              className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-[#5D24E1] text-[#5D24E1] rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <CirclePlus className="w-5 h-5" strokeWidth={2} />
+              <span className="text-sm font-bold">إضافة منتج من نفس النوع</span>
+            </Button>
           </div>
-        ))}
+        </div>
       </div>
 
       {editingProduct && (

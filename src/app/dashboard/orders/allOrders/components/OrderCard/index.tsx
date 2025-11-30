@@ -1,7 +1,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Package, MapPin, Phone, User } from "lucide-react";
+import { Package, MapPin, Phone, User, MapPinHouse, TriangleAlert } from "lucide-react";
 
 interface OrderCardProps {
   id: number;
@@ -109,8 +109,9 @@ export default function OrderCard({
       onClick={handleCardClick}
       className="relative w-[300px] bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.1)] rounded-[10px] border-2 border-[#5D24E1] cursor-pointer hover:shadow-[0px_6px_20px_rgba(93,36,225,0.15)] transition-all duration-200 flex flex-col"
     >
-      <div className="flex flex-row justify-between items-center px-6 py-4">
-        <div className="flex items-center gap-3">
+      <div className="grid grid-cols-3 items-center p-2 gap-4">
+        {/* Right: Checkbox */}
+        <div className="flex justify-center">
           {select && (
             <input
               type="checkbox"
@@ -120,34 +121,36 @@ export default function OrderCard({
               className="w-5 h-5 border-2 border-[#5D24E1] rounded-[4px] cursor-pointer accent-[#5D24E1]"
             />
           )}
+        </div>
+
+        {/* Center: Empty space */}
+        <div></div>
+
+        {/* Left: Repeat icon and created at */}
+        <div className="flex flex-col justify-center items-center gap-2">
           {repeatCount > 1 && (
             <button
               onClick={handleRepeatClick}
               className="relative flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
               title="عرض جميع طلبات العميل"
             >
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M14 4L24 21H4L14 4Z" fill="#DC2626" stroke="#DC2626" strokeWidth="2" strokeLinejoin="round"/>
-                <path d="M14 11V15" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                <circle cx="14" cy="18" r="1" fill="white"/>
-              </svg>
-              <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 rounded-full flex items-center justify-center border-2 border-white">
-                <span className="text-[10px] font-bold text-white">{repeatCount}</span>
+              <TriangleAlert className="w-8 h-8 text-red-600" style={{ strokeWidth: 1.5 }} />
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white text-red-600 rounded-full flex items-center justify-center border-2 border-white">
+                <span className="text-[15px] font-bold">{repeatCount}</span>
               </div>
             </button>
           )}
+          <span className="text-xs font-normal text-[#5D24E1] tracking-tight text-center">
+            {getTimeAgo(createdAt)}
+          </span>
         </div>
-
-        <span className="text-xs font-normal text-[#5D24E1] tracking-tight">
-          {getTimeAgo(createdAt)}
-        </span>
       </div>
 
       <div className="flex flex-col items-start px-6 gap-3 flex-grow" >
         {code && code !== 'غير محدد' && (
           <div className="flex flex-row-reverse items-center gap-2">
             <span className="text-base font-medium text-black">{code}</span>
-            <span className="text-base font-normal text-black">:الكود</span>
+            <span className="text-base font-normal text-black">الكود :</span>
             <Image src="/Icons/id.svg" alt="code" width={18} height={18} className="flex-shrink-0 opacity-50" />
           </div>
         )}
@@ -188,7 +191,11 @@ export default function OrderCard({
             <Package className="w-[18px] h-[18px] flex-shrink-0" style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }} />
           </div>
         )}
-
+        {/* full address */}
+        <div className="flex flex-row-reverse items-center gap-2">
+          <span className="text-sm font-normal text-gray-600">Adddrrrrreeeeesssssssss</span>
+          <MapPinHouse className="w-[18px] h-[18px] flex-shrink-0" style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }} />
+        </div>
         {price && (
           <div className="flex flex-row-reverse items-center gap-2">
             <span className="text-base font-medium text-black">{price} جنيه</span>
