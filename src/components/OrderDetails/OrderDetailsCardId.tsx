@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Copy, TriangleAlert, History } from "lucide-react";
 import { Order } from "@/types/orders";
+import { toast } from 'react-toastify'
 
 interface OrderDetailsCardIdProps {
   order: Order;
@@ -24,6 +25,8 @@ const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
       await navigator.clipboard.writeText(order.code);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      toast.success('تم نسخ الكود بنجاح');
+      console.log("hhh")
     } catch {
       const ta = document.createElement("textarea");
       ta.value = order.code;
@@ -35,6 +38,7 @@ const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
         setTimeout(() => setCopied(false), 2000);
       } finally {
         document.body.removeChild(ta);
+        toast.error('فشل في نسخ الكود');
       }
     }
   };
@@ -58,13 +62,13 @@ const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
           </p>
           <div className="absolute top-1 left-[-16px] overflow-x-auto">
             <div className="flex flex-col xl:flex-row gap-2 px-5">
-              <button className=" relative bg-[#F6F2FC] text-white border-1 border-[#CBB5FD] !rounded-full max-xl:!rounded-l-3xl p-2 px-4 cursor-pointer">
+              <button className=" relative bg-[#F6F2FC] text-white border-1 border-[#CBB5FD] !rounded-full max-xl:!rounded-l-3xl p-2 px-4">
                 <h3 className="flex gap-2 text-sm items-center font-semibold mb-1 text-[#5D24E1] ">
                   <TriangleAlert className="w-5 text-[#5D24E1] relative " />
                   الطلب مفتوح من قبل محمد علاء في قسم التاكيد{" "}
                 </h3>
               </button>
-              <button className="bg-[#F6F2FC] text-white border-1 border-[#CBB5FD] !rounded-r-3xl p-2 px-4 cursor-pointer">
+              <button className="bg-[#F6F2FC] text-white border-1 border-[#CBB5FD] !rounded-r-3xl p-2 px-4">
                 <h3 className="flex gap-2 text-sm items-center font-semibold mb-1 text-[#5D24E1] relative ">
                   <TriangleAlert className="w-5 text-yellow-500" />
                   <p className="bg-red-600 absolute top-[-3px] right-[-4px] w-3 h-3 text-[8px] text-center rounded-full text-white">
@@ -80,7 +84,7 @@ const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
       </div>
 
       {/* Toast */}
-      {copied && (
+      {/* {copied && (
         <div
           role="status"
           aria-live="polite"
@@ -91,7 +95,7 @@ const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
           </svg>
           <span className="text-sm text-gray-800">تم النسخ</span>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

@@ -44,7 +44,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
       <div className="font-medium p-4 bg-gray-50 mt-8 rounded-xl">
         <div className="flex justify-between">
           <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-lg text-[#5D24E1] font-bold">الحالات</h2>
+            <h2 className="text-lg text-[#5D24E1] font-bold">المحاولات</h2>
             <p className="border-1 border-[#5D24E1] text-[#5D24E1] w-5 h-5 text-sm text-center rounded-full">
               {dumymyData.length}
             </p>

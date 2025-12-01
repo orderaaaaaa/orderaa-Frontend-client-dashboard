@@ -3,6 +3,7 @@ import localFont from 'next/font/local';
 import { Analytics } from '@vercel/analytics/next';
 import "react-day-picker/dist/style.css"
 import './globals.css';
+import ToastifyProvider from '@/components/ToastifyProvider';
 
 export const metadata: Metadata = {
   title: 'Orderaa Dashboard',
@@ -20,18 +21,15 @@ const beiruti = localFont({
   display: 'swap',
 });
 
-// Installing Zustand
-// Cleaning the Auth Folder structure and code
-
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ar" dir="rtl">
-      {/* font-sans will map to Beiruti via Tailwind config below */}
       <body className={`${beiruti.variable} font-sans`}>
         {children}
         <Analytics />
+        <ToastifyProvider />
       </body>
     </html>
   );

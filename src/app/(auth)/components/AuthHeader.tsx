@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import React from 'react';
+import Logo from '@/assets/images/Blue-logo.png';
 
 interface AuthHeaderProps {
   title: string;
@@ -9,8 +10,12 @@ interface AuthHeaderProps {
 export default function AuthHeader({ title, subtitle }: AuthHeaderProps) {
   return (
     <div className="flex flex-col justify-center items-center">
-      <Image src="/images/logo.JPG" alt="logo" width={200} height={50} />
-
+      <Image
+        src={Logo}
+        alt="Ordera Logo"
+        width={150}
+        priority
+      />
       <div className="flex flex-col justify-center items-center gap-1">
         <p className="font-bold text-[#212529] text-[25px]">{title}</p>
 
