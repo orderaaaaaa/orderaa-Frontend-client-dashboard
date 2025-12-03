@@ -73,7 +73,7 @@ export function TopBar({
           </Button>
           <div className="flex items-center gap-2 text-white">
             <span className="font-medium text-base">
-              {authUser?.username || username || 'جاد علي'}
+              {authUser?.username || username}
             </span>
             <User className="h-5 w-5" />
           </div>

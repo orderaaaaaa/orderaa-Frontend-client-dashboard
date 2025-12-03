@@ -1,26 +1,40 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Order, OrderFilters } from '@/types/orders';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Order } from '@/types/orders';
 import { getOrderById } from '@/lib/api/order';
 import { AuthGuard } from '@/components/auth-guard';
-import { defaultEmptyFilters, defaultOptions } from '../../../../hooks/AllOrders/useFilterState';
 import PageTaps from '../allOrders/pageTaps';
-import FilterPanel from '../allOrders/components/FilterSection/FilterPanel';
+import FilterSection from '../allOrders/components/FilterSection';
 import OrderDetailsInfo from './OrderDetailsInfo';
 import { useOrderStatistics } from '@/hooks/AllOrders/useOrderStatistics';
+import { useFilterForm } from '@/hooks/AllOrders/useFilterForm';
+import { useFilterOptions } from '@/hooks/AllOrders/useFilterOptions';
+import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 
 export default function OrderDetails({ params }: { params: { orderId: string } }) {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<OrderFilters>(defaultEmptyFilters);
 
   const { statistics } = useOrderStatistics();
+  const { options } = useFilterOptions();
 
-  const handleFilterChange = (newFilters: OrderFilters) => {
-    setFilters(newFilters);
-  };
+  // React Hook Form setup
+  const handleFormSubmit = useCallback(
+    (data: OrderFiltersFormData) => {
+      // Handle filter changes here if needed
+      console.log('Filters changed:', data);
+    },
+    []
+  );
+
+  const {
+    control,
+    formState: { errors },
+  } = useFilterForm({
+    onSubmit: handleFormSubmit,
+  });
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -86,11 +100,19 @@ export default function OrderDetails({ params }: { params: { orderId: string } }
         statusCounts={statistics?.statusCounts || {}}
         totalOrders={statistics?.totalOrders || 0}
       />
-      <div className="max-sm:hidden relative z-10 bg-white rounded-xl py-[3px] mt-6 mb-3">
-        <FilterPanel
-          filters={filters}
-          updateFilters={handleFilterChange}
-          options={defaultOptions}
+      <div className="max-sm:hidden">
+        <FilterSection
+          control={control}
+          errors={errors}
+          options={{
+            productOptions: options.productNames || [],
+            sizeColorOptions: [
+              ...(options.productSizes || []),
+              ...(options.productColors || []),
+            ],
+            governorateOptions: options.governorates || [],
+            areaOptions: options.areas || [],
+          }}
         />
       </div>
       <OrderDetailsInfo order={order} />

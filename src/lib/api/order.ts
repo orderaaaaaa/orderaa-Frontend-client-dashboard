@@ -1,5 +1,5 @@
 import api from './index';
-import { Order, FilterOrdersDto, PaginatedResponse, FilterOptionsResponse, OrderStatisticsResponse } from '@/types/orders';
+import { Order, FilterOrdersDto, PaginatedResponse, FilterOptionsResponse, OrderStatisticsResponse, OrderStatusesResponse } from '@/types/orders';
 
 /**
  * Fetch orders with optional filters and pagination
@@ -168,6 +168,19 @@ export async function updateCustomer(
       `/customers/${customerId}`,
       customerData
     );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+/**
+ * Fetch order statuses
+ * @returns List of order statuses with labels
+ */
+export async function getOrderStatuses(): Promise<OrderStatusesResponse> {
+  try {
+    const response = await api.get<OrderStatusesResponse>('/orders/statuses');
     return response.data;
   } catch (error) {
     throw error;

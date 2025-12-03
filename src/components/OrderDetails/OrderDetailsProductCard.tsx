@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { Trash2, SquarePen, PackagePlus, CirclePlus } from 'lucide-react';
-import { Order, Product } from '@/types/orders';
+import { Order, Product, OrderProduct } from '@/types/orders';
 import EditProductModal from './EditProductModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import AddSameTypeProductModal from './AddSameTypeProductModal';
 import AddNewProductModal from './AddNewProductModal';
+import ProductDetailsModal from './ProductDetailsModal';
 import { updateOrderProduct, deleteOrderProduct, getAllProducts, addOrderProduct } from '@/lib/api/order';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -40,6 +41,7 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
   const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
   const [isAddSameTypeModalOpen, setIsAddSameTypeModalOpen] = useState(false);
   const [isAddNewProductModalOpen, setIsAddNewProductModalOpen] = useState(false);
+  const [viewingProductId, setViewingProductId] = useState<number | null>(null);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [productsData, setProductsData] = useState(
     order.order_products?.map((orderProduct) => {
@@ -80,11 +82,15 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
     setDeletingProductId(productId);
   };
 
+  const handleViewDetailsClick = (productId: number) => {
+    setViewingProductId(productId);
+  };
+
   const handleSaveEdit = async (productId: number, size: string, color: string) => {
     try {
       // Create variant string (format: "size - color")
       const variant = `${size} - ${color}`;
-      
+
       // Call backend API
       await updateOrderProduct(productId, variant);
 
@@ -127,6 +133,10 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
 
   const deletingProduct = productsData.find(
     (item) => item.id === deletingProductId
+  );
+
+  const viewingOrderProduct = order.order_products?.find(
+    (orderProduct) => orderProduct.id === viewingProductId
   );
 
   const handleAddSameTypeProduct = async (size: string, color: string, quantity: number) => {
@@ -239,6 +249,14 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
                 <p className="text-[#1E1E1E] font-bold text-lg ">
                   {item.price} جنيه
                 </p>
+
+                <Button
+                  variant="ghost"
+                  onClick={() => handleViewDetailsClick(item.id)}
+                  className="text-[#5D24E1] text-sm font-bold hover:underline text-right mt-1"
+                >
+                  عرض المزيد
+                </Button>
               </div>
               <div className="flex flex-col items-end ml-3">
                 <div className="flex justify-end gap-2 mb-2">
@@ -316,6 +334,12 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
         onClose={() => setIsAddNewProductModalOpen(false)}
         onSave={handleAddNewProduct}
         products={allProducts}
+      />
+
+      <ProductDetailsModal
+        isOpen={viewingProductId !== null}
+        onClose={() => setViewingProductId(null)}
+        orderProduct={viewingOrderProduct || null}
       />
     </>
   );

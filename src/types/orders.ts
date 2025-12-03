@@ -192,10 +192,18 @@ export interface Order {
 
   // Order details
   shippingCost?: number;
+  shippingCompany?: string;
   paymentStatus?: string;
   paymentMethod?: string;
   coupon?: string;
   couponDiscount?: number;
+
+  // Product details
+  material?: string;
+  weight?: string;
+  countryOfManufacture?: string;
+  packagingNotes?: string;
+
   // Marketing & tracking
   utmSource?: string;
   utmCampaign?: string;
@@ -289,4 +297,15 @@ export interface OrderStatistics {
 export interface OrderStatisticsResponse {
   success: boolean;
   data: OrderStatistics;
+}
+
+// Order Status Item
+export interface OrderStatusItem {
+  value: string;
+  label: string;
+}
+
+// Order Statuses Response (from backend)
+export interface OrderStatusesResponse {
+  statuses: OrderStatusItem[];
 }
