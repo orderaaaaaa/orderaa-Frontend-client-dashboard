@@ -100,7 +100,7 @@ export default function OrderDetails({ params }: { params: { orderId: string } }
         statusCounts={statistics?.statusCounts || {}}
         totalOrders={statistics?.totalOrders || 0}
       />
-      <div className="max-sm:hidden">
+      <div>
         <FilterSection
           control={control}
           errors={errors}
