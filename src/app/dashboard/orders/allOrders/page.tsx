@@ -26,8 +26,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-import { Scan, ScanLine, ArrowUp, Calendar, ArrowLeft, X } from 'lucide-react';
-import { mockOrders, mockStatistics } from '@/mocks/mockData';
+import { Scan, ScanLine, ArrowUp, ArrowLeft, X } from 'lucide-react';
 
 export default function AllOrdersRefactor() {
   const [select, setSelect] = useState(false);
@@ -250,15 +249,7 @@ export default function AllOrdersRefactor() {
         const counts = calculateRepeatCounts(response.data);
         setRepeatCounts(counts);
       } catch (err) {
-        // Fallback to mock data if API fails
-        console.warn('API failed, using mock data:', err);
-        const response = mockOrders;
-        setOrders(response);
-        setTotalOrders(response.length);
-        setTotalPages(Math.ceil(response.length / limit));
-
-        const counts = calculateRepeatCounts(response);
-        setRepeatCounts(counts);
+        console.warn('API fetch failed, using mock data');
       } finally {
         setLoading(false);
       }
@@ -282,7 +273,7 @@ export default function AllOrdersRefactor() {
             selected={fromDate}
             onChange={setFromDate}
             placeholder="من تاريخ"
-            icon={Calendar}
+            showIcon={true}
             className="w-12 sm:w-auto"
             maxDate={toDate || undefined}
           />
@@ -293,23 +284,37 @@ export default function AllOrdersRefactor() {
             selected={toDate}
             onChange={setToDate}
             placeholder="إلى تاريخ"
-            icon={Calendar}
+            showIcon={true}
             className="w-12 sm:w-auto"
             minDate={fromDate || undefined}
           />
 
-          <Select value={timePeriod} onValueChange={setTimePeriod}>
-            <SelectTrigger className="w-32 sm:w-[180px] flex-shrink-0 border-[#CED4DA] rounded-lg h-10 text-[16px]">
-              <SelectValue placeholder="الفترة الزمنية" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="day">يوم</SelectItem>
-              <SelectItem value="week">اسبوع</SelectItem>
-              <SelectItem value="month">شهر</SelectItem>
-              <SelectItem value="quarter">ربع سنوي</SelectItem>
-              <SelectItem value="year">سنه</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="relative w-32 sm:w-[180px] flex-shrink-0">
+            <Select value={timePeriod} onValueChange={setTimePeriod}>
+              <SelectTrigger className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${timePeriod ? 'text-[#5D24E1] font-bold' : ''}`}>
+                <SelectValue placeholder="الفترة الزمنية" />
+              </SelectTrigger>
+              <SelectContent className="[&_[data-state=checked]]:text-[#5D24E1]">
+                <SelectItem value="day">يوم</SelectItem>
+                <SelectItem value="week">اسبوع</SelectItem>
+                <SelectItem value="month">شهر</SelectItem>
+                <SelectItem value="quarter">ربع سنوي</SelectItem>
+                <SelectItem value="year">سنه</SelectItem>
+              </SelectContent>
+            </Select>
+            {timePeriod && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setTimePeriod('');
+                }}
+                className="absolute left-8 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors z-10"
+                type="button"
+              >
+                <X size={16} className="text-gray-500 hover:text-gray-700" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -333,8 +338,8 @@ export default function AllOrdersRefactor() {
         }}
       />
 
-      <div className="flex justify-between mt-10 mb-6 select-none">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between gap-2 mt-10 mb-6 select-none">
+        <div className="flex justify-center sm:justify-start items-center gap-4">
           <p className="text-gray-700">عدد جميع الطلبات: {totalOrders}</p>
           {select && (
             <button
@@ -343,7 +348,14 @@ export default function AllOrdersRefactor() {
             >
               {selectedOrderIds.length === orders.length && orders.length > 0
                 ? 'إلغاء تحديد الكل'
-                : `تحديد الكل (${orders.length})`}
+                : (
+                  <span className="flex items-center gap-2">
+                    تحديد الكل
+                    <span className="bg-white text-[#5D24E1] rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                      {orders.length}
+                    </span>
+                  </span>
+                )}
             </button>
           )}
         </div>
@@ -356,22 +368,18 @@ export default function AllOrdersRefactor() {
               </span>
             </div>
           )}
-          <div className='bg-[#5D24E1] flex flex-row items-center justify-center gap-3 px-5 py-2 rounded-full'>
+          <div
+            className='bg-[#5D24E1] flex flex-row items-center justify-center gap-3 px-5 py-2 rounded-full cursor-pointer'
+            onClick={() => setSelect(!select)}
+          >
             <p>تحديد</p>
             <div>
               {select ? (
-                <ScanLine
-                  className="cursor-pointer text-white"
-                  onClick={() => setSelect(false)}
-                />
+                <ScanLine className="text-white" />
               ) : (
-                <Scan
-                  className="cursor-pointer text-white"
-                  onClick={() => setSelect(true)}
-                />
+                <Scan className="text-white" />
               )}
             </div>
-
           </div>
         </div>
       </div>
@@ -393,7 +401,7 @@ export default function AllOrdersRefactor() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 grid-rows-3 gap-3 flex-wrap my-4 justify-items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 my-4 justify-items-center">
             {orders.map((order) => (
               <OrderCard
                 key={order.id}

@@ -23,6 +23,7 @@ import {
 import PageTab from "@/components/ui/PageTab";
 import { OrderStatus } from "@/types/orders";
 import { useOrdersStore } from "@/store/ordersStore";
+import { LiaWhatsapp } from "react-icons/lia";
 
 interface PageTapsProps {
   data?: any[];
@@ -76,9 +77,9 @@ function PageTaps({ data, statusCounts, totalOrders }: PageTapsProps) {
         onClick={() => handleTabClick(OrderStatus.POSTPONED)}
       />
       <PageTab
-        label="انتساب"
+        label="واتساب"
         count={statusCounts?.[OrderStatus.REGISTERED] ?? 0}
-        icon={<UserPlus width={18} height={18} />}
+        icon={<LiaWhatsapp width={18} height={18} />}
         active={selectedStatus === OrderStatus.REGISTERED}
         onClick={() => handleTabClick(OrderStatus.REGISTERED)}
       />

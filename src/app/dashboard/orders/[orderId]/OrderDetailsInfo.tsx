@@ -12,7 +12,7 @@ interface OrderDetailsInfoProps {
 
 function OrderDetailsInfo({ order }: OrderDetailsInfoProps) {
   return (
-    <section className="mx-auto p-4 bg-white rounded-lg shadow-sm">
+    <section className="mx-auto mt-3 p-4 bg-white rounded-lg shadow-sm">
       <OrderDetailsCardId order={order} />
       <OrderDetailsInfoStatus order={order} />
       <OrderDetailsProductCard order={order} />

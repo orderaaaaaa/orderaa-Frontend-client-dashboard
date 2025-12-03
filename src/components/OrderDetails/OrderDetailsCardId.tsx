@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Copy, TriangleAlert, History } from "lucide-react";
 import { Order } from "@/types/orders";
 import { toast } from 'react-toastify'
+import CustomerOrdersModal from "@/app/dashboard/orders/allOrders/components/CustomerOrdersModal";
 
 interface OrderDetailsCardIdProps {
   order: Order;
@@ -9,6 +10,7 @@ interface OrderDetailsCardIdProps {
 
 const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
   const [copied, setCopied] = useState(false);
+  const [isCustomerOrdersModalOpen, setIsCustomerOrdersModalOpen] = useState(false);
 
   const createdDate = new Date(order.createdAt);
   const now = new Date();
@@ -45,30 +47,35 @@ const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
 
   return (
     <div>
-      <div className="relative max-xl:mb-20">
-        <div>
-          <h3 className="flex gap-3 text-xl items-center font-bold mb-1">
-            <Copy
-              onClick={handleCopy}
-              className="w-4 h-4 text-[#7038f3] cursor-pointer"
-              role="button"
-            />
-            {/* order code */}
-            {order.code}
-            <History className="bg-[#F6F2FC] w-6 h-6 cursor-pointer p-1 rounded-full text-[#5D24E1] border-1 border-[#CBB5FD]" />
-          </h3>
-          <p className="text-xs font-bold mr-7 mb-4">
-            {createdDate.toLocaleDateString('ar-EG')} <span>{timeAgo}</span>
-          </p>
-          <div className="absolute top-1 left-[-16px] overflow-x-auto">
-            <div className="flex flex-col xl:flex-row gap-2 px-5">
+      <div className="max-xl:mb-20">
+        <div className="flex sm:justify-between flex-col sm:flex-row">
+          <div className="flex flex-col items-center sm:items-start">
+            <h3 className="flex gap-3 text-xl items-center font-bold mb-1">
+              <Copy
+                onClick={handleCopy}
+                className="w-4 h-4 text-[#7038f3] cursor-pointer"
+                role="button"
+              />
+              {/* order code */}
+              {order.code}
+              <History className="bg-[#F6F2FC] w-6 h-6 cursor-pointer p-1 rounded-full text-[#5D24E1] border-1 border-[#CBB5FD]" />
+            </h3>
+            <p className="text-xs font-bold mr-7 mb-4">
+              {createdDate.toLocaleDateString('ar-EG')} <span>{timeAgo}</span>
+            </p>
+          </div>
+          <div className="">
+            <div className="flex flex-col sm:flex-row xl:flex-row gap-2 sm:px-5">
               <button className=" relative bg-[#F6F2FC] text-white border-1 border-[#CBB5FD] !rounded-full max-xl:!rounded-l-3xl p-2 px-4">
                 <h3 className="flex gap-2 text-sm items-center font-semibold mb-1 text-[#5D24E1] ">
                   <TriangleAlert className="w-5 text-[#5D24E1] relative " />
                   الطلب مفتوح من قبل محمد علاء في قسم التاكيد{" "}
                 </h3>
               </button>
-              <button className="bg-[#F6F2FC] text-white border-1 border-[#CBB5FD] !rounded-r-3xl p-2 px-4">
+              <button
+                className="cursor-pointer bg-[#F6F2FC] text-white border-1 border-[#CBB5FD] !rounded-r-3xl p-2 px-4"
+                onClick={() => setIsCustomerOrdersModalOpen(true)}
+              >
                 <h3 className="flex gap-2 text-sm items-center font-semibold mb-1 text-[#5D24E1] relative ">
                   <TriangleAlert className="w-5 text-yellow-500" />
                   <p className="bg-red-600 absolute top-[-3px] right-[-4px] w-3 h-3 text-[8px] text-center rounded-full text-white">
@@ -96,6 +103,14 @@ const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
           <span className="text-sm text-gray-800">تم النسخ</span>
         </div>
       )} */}
+
+      {/* Customer Orders Modal */}
+      <CustomerOrdersModal
+        isOpen={isCustomerOrdersModalOpen}
+        onClose={() => setIsCustomerOrdersModalOpen(false)}
+        customerPhone={order.customers.phoneNumber}
+        customerName={order.customers.name}
+      />
     </div>
   );
 };

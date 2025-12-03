@@ -13,7 +13,7 @@ export default function AuthHeader({ title, subtitle }: AuthHeaderProps) {
       <Image
         src={Logo}
         alt="Ordera Logo"
-        width={150}
+        width={200}
         priority
       />
       <div className="flex flex-col justify-center items-center gap-1">

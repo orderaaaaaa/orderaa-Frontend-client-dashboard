@@ -5,7 +5,7 @@ import { Control, Controller, FieldErrors } from "react-hook-form";
 import { OrderFiltersFormData } from "@/schemas/orderFilters.schema";
 import { FilterOptions } from "@/types/orders";
 import SearchableSelect from "./SearchableSelect";
-import { Calendar } from "lucide-react";
+import { DatePicker } from "@/components/ui/datepicker";
 
 type Props = {
     control: Control<OrderFiltersFormData>;
@@ -35,7 +35,7 @@ export default function FilterPanel({ control, errors, options }: Props) {
                             {...field}
                             placeholder="كود الشحنة"
                             rows={1}
-                            className={`max-w-62 px-3 py-2 rounded border bg-white resize-none ${errors.shipmentCode ? 'border-red-500' : 'border-gray-300'
+                            className={`sm:max-w-62 px-3 py-2 rounded border bg-white resize-none ${errors.shipmentCode ? 'border-red-500' : 'border-gray-300'
                                 }`}
                         />
                         {errors.shipmentCode && (
@@ -55,7 +55,7 @@ export default function FilterPanel({ control, errors, options }: Props) {
                             {...field}
                             type="text"
                             placeholder="اسم العميل"
-                            className={`max-w-62 px-3 py-2 rounded border bg-white ${errors.customerName ? 'border-red-500' : 'border-gray-300'
+                            className={`sm:max-w-62 px-3 py-2 rounded border bg-white ${errors.customerName ? 'border-red-500' : 'border-gray-300'
                                 }`}
                         />
                         {errors.customerName && (
@@ -75,7 +75,7 @@ export default function FilterPanel({ control, errors, options }: Props) {
                             {...field}
                             type="text"
                             placeholder="رقم الهاتف"
-                            className={`max-w-62 px-3 py-2 rounded border bg-white ${errors.phone ? 'border-red-500' : 'border-gray-300'
+                            className={`sm:max-w-62 px-3 py-2 rounded border bg-white ${errors.phone ? 'border-red-500' : 'border-gray-300'
                                 }`}
                         />
                         {errors.phone && (
@@ -91,23 +91,13 @@ export default function FilterPanel({ control, errors, options }: Props) {
                 control={control}
                 render={({ field }) => (
                     <div className="flex flex-col gap-1 font-medium">
-                        <div className="relative max-w-62">
-                            <input
-                                {...field}
-                                type="date"
-                                className={`w-full px-10 rounded border bg-white text-right focus:outline-none focus:ring-2 focus:ring-blue-500 ${field.value ? "has-value py-2" : "py-5"
-                                    } ${errors.executionDate ? 'border-red-500' : 'border-gray-300'}`}
-                            />
-                            <Calendar
-                                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
-                                size={20}
-                            />
-                            {!field.value && (
-                                <span className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
-                                    تاريخ التنفيذ
-                                </span>
-                            )}
-                        </div>
+                        <DatePicker
+                            selected={field.value ? new Date(field.value) : null}
+                            onChange={(date) => field.onChange(date ? date.toISOString().split('T')[0] : '')}
+                            placeholder="تاريخ التنفيذ"
+                            className="sm:max-w-62 border border-gray-300 rounded bg-white"
+                            isClearable
+                        />
                         {errors.executionDate && (
                             <span className="text-xs text-red-500">{errors.executionDate.message}</span>
                         )}
@@ -120,7 +110,7 @@ export default function FilterPanel({ control, errors, options }: Props) {
                 <input
                     type="text"
                     placeholder="اسم الموظف"
-                    className="max-w-62 px-3 py-2 rounded border border-gray-300 bg-white"
+                    className="sm:max-w-62 px-3 py-2 rounded border border-gray-300 bg-white"
                     disabled
                 />
             </div>
@@ -136,7 +126,7 @@ export default function FilterPanel({ control, errors, options }: Props) {
                         onBlur={field.onBlur}
                         options={options.productOptions}
                         placeholder="اسم الحملة"
-                        widthClass="max-w-62"
+                        widthClass="sm:max-w-62"
                         error={errors.productName?.message}
                     />
                 )}
@@ -153,7 +143,7 @@ export default function FilterPanel({ control, errors, options }: Props) {
                         onBlur={field.onBlur}
                         options={options.governorateOptions}
                         placeholder="المحافظة"
-                        widthClass="max-w-62"
+                        widthClass="sm:max-w-62"
                         error={errors.governorate?.message}
                     />
                 )}
@@ -170,7 +160,7 @@ export default function FilterPanel({ control, errors, options }: Props) {
                         onBlur={field.onBlur}
                         options={options.areaOptions}
                         placeholder="المنطقة"
-                        widthClass="max-w-62"
+                        widthClass="sm:max-w-62"
                         error={errors.area?.message}
                     />
                 )}
@@ -187,7 +177,7 @@ export default function FilterPanel({ control, errors, options }: Props) {
                         onBlur={field.onBlur}
                         options={options.sizeColorOptions}
                         placeholder="المصدر"
-                        widthClass="max-w-62"
+                        widthClass="sm:max-w-62"
                         error={errors.sizeColor?.message}
                     />
                 )}
@@ -203,7 +193,7 @@ export default function FilterPanel({ control, errors, options }: Props) {
                             {...field}
                             type="text"
                             placeholder="العنوان"
-                            className={`max-w-62 px-3 py-2 rounded border bg-white ${errors.address ? 'border-red-500' : 'border-gray-300'
+                            className={`sm:max-w-62 px-3 py-2 rounded border bg-white ${errors.address ? 'border-red-500' : 'border-gray-300'
                                 }`}
                         />
                         {errors.address && (
@@ -224,7 +214,7 @@ export default function FilterPanel({ control, errors, options }: Props) {
                         onBlur={field.onBlur}
                         options={options.sizeColorOptions}
                         placeholder="الاحدث"
-                        widthClass="max-w-62"
+                        widthClass="sm:max-w-62"
                     />
                 )}
             />
@@ -240,7 +230,7 @@ export default function FilterPanel({ control, errors, options }: Props) {
                         onBlur={field.onBlur}
                         options={options.sizeColorOptions}
                         placeholder="الجديد"
-                        widthClass="max-w-62"
+                        widthClass="sm:max-w-62"
                     />
                 )}
             />

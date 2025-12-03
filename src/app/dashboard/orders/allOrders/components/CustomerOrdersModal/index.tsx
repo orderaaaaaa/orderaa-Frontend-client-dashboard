@@ -21,6 +21,7 @@ export default function CustomerOrdersModal({
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedOrderIds, setSelectedOrderIds] = useState<number[]>([]);
 
   useEffect(() => {
     if (!isOpen || !customerPhone) return;
@@ -28,13 +29,14 @@ export default function CustomerOrdersModal({
     const fetchCustomerOrders = async () => {
       setLoading(true);
       setError(null);
+      setSelectedOrderIds([]);
       try {
         const response = await getOrders({
           customerPhone: customerPhone,
           limit: 1000,
           page: 1,
         });
-        
+
         setOrders(response.data);
       } catch (err) {
         setError('فشل في تحميل طلبات العميل');
@@ -45,6 +47,14 @@ export default function CustomerOrdersModal({
 
     fetchCustomerOrders();
   }, [isOpen, customerPhone]);
+
+  const handleCheckboxChange = (orderId: number, checked: boolean) => {
+    if (checked) {
+      setSelectedOrderIds((prev) => [...prev, orderId]);
+    } else {
+      setSelectedOrderIds((prev) => prev.filter((id) => id !== orderId));
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -111,29 +121,37 @@ export default function CustomerOrdersModal({
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-center">
               {orders.map((order) => (
-                <OrderCard
-                  key={order.id}
-                  select={false}
-                  isSelected={false}
-                  id={order.id}
-                  code={order.code}
-                  name={order.customers.name}
-                  phone={order.customers.phoneNumber}
-                  altPhone={order.customers.altPhone}
-                  government={order.customers.governorate || 'غير محدد'}
-                  items={order.order_products.map(
-                    (op: any) =>
-                      `${op.products.name}${op.products.size ? ` - ${op.products.size}` : ''
-                      }${op.products.color ? ` - ${op.products.color}` : ''}`
-                  )}
-                  price={order.totalCost}
-                  trys={order.numberOfTriesToReach}
-                  status={order.status}
-                  city={order.customers.area || order.customers.city || 'غير محدد'}
-                  alert={0}
-                  createdAt={order.createdAt}
-                  repeatCount={orders.length}
-                />
+                <div key={order.id} className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedOrderIds.includes(order.id)}
+                    onChange={(e) => handleCheckboxChange(order.id, e.target.checked)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-5 h-5 mt-2 border-2 border-[#5D24E1] rounded-[4px] cursor-pointer accent-[#5D24E1] flex-shrink-0"
+                  />
+                  <OrderCard
+                    id={order.id}
+                    select={false}
+                    isSelected={false}
+                    code={order.code}
+                    name={order.customers.name}
+                    phone={order.customers.phoneNumber}
+                    altPhone={order.customers.altPhone}
+                    government={order.customers.governorate || 'غير محدد'}
+                    items={order.order_products.map(
+                      (op: any) =>
+                        `${op.products.name}${op.products.size ? ` - ${op.products.size}` : ''
+                        }${op.products.color ? ` - ${op.products.color}` : ''}`
+                    )}
+                    price={order.totalCost}
+                    trys={order.numberOfTriesToReach}
+                    status={order.status}
+                    city={order.customers.area || order.customers.city || 'غير محدد'}
+                    alert={0}
+                    createdAt={order.createdAt}
+                    repeatCount={orders.length}
+                  />
+                </div>
               ))}
             </div>
           )}

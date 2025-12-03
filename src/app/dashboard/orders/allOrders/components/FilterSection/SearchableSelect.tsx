@@ -89,7 +89,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, Props>(function SearchableSe
           {value || `${placeholder}`}
         </span>
         <svg
-          className={`w-8 h-8 absolute left-2 top-1 text-gray-600 transition-transform ${open ? "rotate-180" : ""
+          className={`w-6 h-6 absolute left-2 top-2 text-gray-400 transition-transform ${open ? "rotate-180" : ""
             }`}
           viewBox="0 0 20 20"
           fill="currentColor"
@@ -106,7 +106,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, Props>(function SearchableSe
             animate={{ opacity: 1, y: 38 }}
             exit={{ opacity: 0, y: 4 }}
             transition={{ duration: 0.18 }}
-            className="absolute ! z-100 mt-1 w-auto max-h-60 overflow-auto rounded-md border border-gray-200 bg-white shadow-lg"
+            className="absolute !z-100 mt-1 w-auto max-h-60 overflow-auto rounded-md border border-gray-200 bg-white shadow-lg"
             role="listbox"
           >
             <div className="p-2 border-b border-gray-100">

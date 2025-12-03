@@ -217,7 +217,7 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
       {/* Header with action buttons */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className='grid grid-cols-2 gap-2'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
           {productsData.map((item) => (
             <div
               key={item.id}
@@ -242,10 +242,12 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
               </div>
               <div className="flex flex-col items-end ml-3">
                 <div className="flex justify-end gap-2 mb-2">
-                  <Trash2
-                    className="cursor-pointer w-5 text-red-600 hover:text-red-700 transition-colors"
-                    onClick={() => handleDeleteClick(item.id)}
-                  />
+                  {productsData.length > 1 && (
+                    <Trash2
+                      className="cursor-pointer w-5 text-red-600 hover:text-red-700 transition-colors"
+                      onClick={() => handleDeleteClick(item.id)}
+                    />
+                  )}
                   <SquarePen
                     className="cursor-pointer w-5 hover:text-purple-700 transition-colors"
                     onClick={() => handleEditClick(item.id)}

@@ -17,6 +17,7 @@ export interface DatePickerProps {
   maxDate?: Date;
   disabled?: boolean;
   isClearable?: boolean;
+  showIcon?: boolean;
   icon?: React.ComponentType<{ className?: string; size?: string | number }>;
   showMonthDropdown?: boolean;
   showYearDropdown?: boolean;
@@ -38,6 +39,7 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
       maxDate,
       disabled = false,
       isClearable = false,
+      showIcon = false,
       icon: Icon = Calendar,
       showMonthDropdown = true,
       showYearDropdown = true,
@@ -49,9 +51,11 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
   ) => {
     return (
       <div className={cn('relative', className)}>
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
-          <Icon className="text-gray-400" size={20} />
-        </div>
+        {showIcon && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+            <Icon className="text-gray-400" size={20} />
+          </div>
+        )}
         <ReactDatePicker
           selected={selected}
           onChange={onChange}
@@ -67,10 +71,14 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
           dropdownMode={dropdownMode}
           scrollableYearDropdown={scrollableYearDropdown}
           yearDropdownItemNumber={yearDropdownItemNumber}
+          readOnly
+          onFocus={(e) => e.target.blur()}
+          autoComplete="off"
           className={cn(
             'w-full h-10 text-sm rounded-[4px]',
             'border-0 sm:border sm:border-[#CED4DA]',
-            'pr-10 pl-3 text-right',
+            showIcon ? 'pr-10 pl-3' : 'pr-3 pl-3',
+            'text-right',
             'placeholder:text-black placeholder:opacity-60',
             'focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent',
             'disabled:bg-gray-100 disabled:cursor-not-allowed',
@@ -139,7 +147,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
         dateFormat={dateFormat}
         maxDate={endDate || undefined}
         className="w-12 sm:w-auto"
-        icon={showIcon ? Calendar : undefined}
+        showIcon={showIcon}
       />
 
       {separator}
@@ -151,7 +159,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
         dateFormat={dateFormat}
         minDate={startDate || undefined}
         className="w-12 sm:w-auto"
-        icon={showIcon ? Calendar : undefined}
+        showIcon={showIcon}
       />
     </div>
   );
