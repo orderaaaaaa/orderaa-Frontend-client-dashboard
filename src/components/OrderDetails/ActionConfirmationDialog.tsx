@@ -1,6 +1,7 @@
 'use client';
 
-import { X, Check } from 'lucide-react';
+import { useState } from 'react';
+import { LiaTimesSolid, LiaCheckCircle } from 'react-icons/lia';
 import { Button } from '../ui/button';
 
 interface ActionConfirmationDialogProps {
@@ -22,6 +23,8 @@ export default function ActionConfirmationDialog({
   confirmText = 'تأكيد',
   cancelText = 'إلغاء',
 }: ActionConfirmationDialogProps) {
+  const [isConfirming, setIsConfirming] = useState(false);
+
   if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -31,8 +34,13 @@ export default function ActionConfirmationDialog({
   };
 
   const handleConfirm = () => {
-    onConfirm();
-    onClose();
+    setIsConfirming(true);
+    // Wait for animation to complete before calling onConfirm
+    setTimeout(() => {
+      onConfirm();
+      setIsConfirming(false);
+      onClose();
+    }, 600);
   };
 
   return (
@@ -42,9 +50,28 @@ export default function ActionConfirmationDialog({
       dir="rtl"
     >
       <div
-        className="relative w-full max-w-[500px] bg-white rounded-[20px] shadow-xl"
+        className={`relative w-full max-w-[500px] bg-white rounded-[20px] shadow-xl transition-all duration-300 ${
+          isConfirming ? 'scale-95 opacity-90' : 'scale-100 opacity-100'
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Success Animation Overlay */}
+        {isConfirming && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/95 rounded-[20px] z-10">
+            <div className="flex flex-col items-center gap-4">
+              <div className="relative">
+                <LiaCheckCircle
+                  className="w-24 h-24 text-green-500 animate-[bounce_0.6s_ease-in-out]"
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-24 h-24 rounded-full border-4 border-green-500 animate-ping opacity-75"></div>
+                </div>
+              </div>
+              <p className="text-lg font-bold text-green-600 animate-pulse">تم التأكيد</p>
+            </div>
+          </div>
+        )}
+
         {/* Header with gradient background */}
         <div
           className="h-[79px] rounded-t-[20px] flex items-center justify-center px-8"
@@ -61,8 +88,9 @@ export default function ActionConfirmationDialog({
             variant="ghost"
             onClick={onClose}
             className="absolute left-8 w-6 h-6 flex items-center justify-center hover:opacity-70 transition-opacity"
+            disabled={isConfirming}
           >
-            <X className="w-6 h-6 text-black" strokeWidth={2} />
+            <LiaTimesSolid className="w-6 h-6 text-black" />
           </Button>
         </div>
 
@@ -78,15 +106,17 @@ export default function ActionConfirmationDialog({
               variant="outline"
               onClick={onClose}
               className="px-8 py-2 border-2 border-[#5D24E1] text-[#5D24E1] rounded-[28px] font-bold hover:bg-purple-50 transition-colors"
+              disabled={isConfirming}
             >
               {cancelText}
             </Button>
             <Button
               variant="default"
               onClick={handleConfirm}
-              className="px-8 py-2 bg-[#5D24E1] rounded-[28px] font-bold text-white hover:bg-[#4B1BC4] transition-colors"
+              className="px-8 py-2 bg-[#5D24E1] rounded-[28px] font-bold text-white hover:bg-[#4B1BC4] transition-all duration-200 hover:scale-105"
+              disabled={isConfirming}
             >
-              <Check className="w-4 h-4 ml-2" />
+              <LiaCheckCircle className="w-5 h-5 ml-2" />
               {confirmText}
             </Button>
           </div>

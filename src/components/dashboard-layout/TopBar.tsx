@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Menu, Search, User } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
 import Input from '../ui/Input';
 import { UserMenu } from './UserMenu';
 import { UserMenuKey } from '@/hooks/useSidebar';
@@ -71,12 +71,6 @@ export function TopBar({
           >
             <Search className="h-5 w-5" />
           </Button>
-          <div className="flex items-center gap-2 text-white">
-            <span className="font-medium text-base">
-              {authUser?.username || username}
-            </span>
-            <User className="h-5 w-5" />
-          </div>
         </div>
         {/* ✅ Mobile: User dropdown */}
         <div className="lg:hidden">

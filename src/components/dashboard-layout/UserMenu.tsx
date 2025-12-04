@@ -34,13 +34,13 @@ export function UserMenu({
   };
 
   const isMobile = variant === 'mobile';
-  const displayText = isMobile
-    ? (email || authUser?.email || 'البريد الإلكتروني')
-    : (authUser ? authUser.username : username || 'المستخدم');
+  const displayText = authUser ? authUser.username : username || email;
 
   return (
-    <div className='flex flex-row'>
-      <p className='mt-1 font-bold text-[#1F1F1F]'>أهلا يا </p>
+    <div className='flex flex-row items-center gap-2'>
+      <p className={isMobile ? 'font-normal text-white text-[16px]' : 'font-bold text-[#1F1F1F] text-[20px]'}>
+        اهلا يا{' '}
+      </p>
       <Dropdown
         value={userMenuValue}
         onChange={handleUserMenuChange}
@@ -59,12 +59,12 @@ export function UserMenu({
         }
         selectClassName={
           isMobile
-            ? 'border-0 rounded-lg py-2.5  !text-[#1F1F1F] text-[16px] placeholder:!text-white overflow-hidden text-ellipsis whitespace-nowrap cursor-pointer outline-none font-normal'
-            : 'border-0 py-2.5 !text-[#1F1F1F] text-[18px] overflow-hidden text-ellipsis whitespace-nowrap cursor-pointer outline-none font-bold placeholder:!text-[#1F1F1F]'
+            ? 'border-0 rounded-lg py-2.5 pr-0 !text-[#1F1F1F] text-[16px] placeholder:!text-white overflow-hidden text-ellipsis whitespace-nowrap cursor-pointer outline-none font-normal'
+            : 'border-0 py-2.5 pr-0 !text-[#1F1F1F] text-[18px] overflow-hidden text-ellipsis whitespace-nowrap cursor-pointer outline-none font-bold placeholder:!text-[#1F1F1F]'
         }
         arrowClassName={
           isMobile
-            ? 'absolute cursor-pointer left-3 top-1/2 transform -translate-y-1/2 transition-colors z-10'
+            ? 'absolute cursor-pointer left-0 top-1/2 transform -translate-y-1/2 transition-colors z-10'
             : 'absolute cursor-pointer left-0 top-1/2 transform -translate-y-1/2 hover:text-gray-600 transition-colors z-10'
         }
         dropdownClassName="absolute z-50 left-0 right-0 bg-white rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg"
