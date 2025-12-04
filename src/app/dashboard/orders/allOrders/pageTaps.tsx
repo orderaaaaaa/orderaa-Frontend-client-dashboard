@@ -86,10 +86,10 @@ function PageTaps({ data, statusCounts, totalOrders }: PageTapsProps) {
   if (loading) {
     return (
       <div className="w-full">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
-          <div className="animate-pulse h-20 bg-gray-200 rounded-lg"></div>
-          <div className="animate-pulse h-20 bg-gray-200 rounded-lg"></div>
-          <div className="animate-pulse h-20 bg-gray-200 rounded-lg"></div>
+        <div className="flex md:grid sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 overflow-x-auto pb-2 md:overflow-x-visible scrollbar-thin -mx-1 px-1">
+          <div className="animate-pulse h-10 bg-gray-200 rounded-lg min-w-[150px]"></div>
+          <div className="animate-pulse h-10 bg-gray-200 rounded-lg min-w-[150px]"></div>
+          <div className="animate-pulse h-10 bg-gray-200 rounded-lg min-w-[150px]"></div>
         </div>
       </div>
     );
@@ -97,7 +97,7 @@ function PageTaps({ data, statusCounts, totalOrders }: PageTapsProps) {
 
   return (
     <div className="w-full">
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+      <div className="flex md:grid sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 overflow-x-auto pb-2 md:overflow-x-visible scrollbar-thin -mx-1 px-1">
         {/* All Orders Tab */}
         <PageTab
           label="جميع الطلبات"
