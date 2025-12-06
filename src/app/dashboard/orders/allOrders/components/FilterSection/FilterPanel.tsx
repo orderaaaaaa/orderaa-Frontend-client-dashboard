@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { OrderFilters, FilterOptions } from "@/types/orders";
 import SearchableSelect from "./SearchableSelect";
+import { DatePicker } from "@/components/ui/datepicker";
 import { Calendar } from "lucide-react";
 
 type Props = {
@@ -25,6 +26,28 @@ export default function FilterPanel({
   const handleInputChange = useCallback((field: keyof OrderFilters, value: string) => {
     updateFilters({ ...filters, [field]: value });
   }, [filters, updateFilters]);
+
+  // Convert string date to Date object for DatePicker
+  const [executionDate, setExecutionDate] = useState<Date | null>(
+    filters.executionDate ? new Date(filters.executionDate) : null
+  );
+
+  // Sync executionDate with filters
+  useEffect(() => {
+    if (filters.executionDate && !executionDate) {
+      setExecutionDate(new Date(filters.executionDate));
+    } else if (!filters.executionDate && executionDate) {
+      setExecutionDate(null);
+    }
+  }, [filters.executionDate]);
+
+  const handleDateChange = (date: Date | null) => {
+    setExecutionDate(date);
+    updateFilters({
+      ...filters,
+      executionDate: date ? date.toISOString().split('T')[0] : ''
+    });
+  };
 
   return (
     <div
@@ -67,26 +90,15 @@ export default function FilterPanel({
       </div>
       {/* {"تاريخ التنفيز"} */}
       <div className="flex flex-col gap-1 font-medium">
-        <div className="relative max-w-62">
-          <input
-            type="date"
-            value={filters.executionDate}
-            onChange={(e) =>
-              updateFilters({ ...filters, executionDate: e.target.value })
-            }
-            className={`w-full px-10 rounded border border-gray-300 bg-white text-right focus:outline-none focus:ring-2 focus:ring-blue-500 ${filters.executionDate ? "has-value py-2" : "py-5"
-              }`}
-          />
-          <Calendar
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500  pointer-events-none"
-            size={20}
-          />
-          {!filters.executionDate && (
-            <span className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
-              تاريخ التنفيذ
-            </span>
-          )}
-        </div>
+        <DatePicker
+          selected={executionDate}
+          onChange={handleDateChange}
+          placeholder="تاريخ التنفيذ"
+          showIcon={true}
+          icon={Calendar}
+          isClearable={true}
+          className="max-w-62"
+        />
       </div>
       {/* اسم الموظف */}
       <div className="flex flex-col gap-1 font-medium">

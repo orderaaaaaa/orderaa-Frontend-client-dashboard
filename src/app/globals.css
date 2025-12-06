@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -123,14 +123,14 @@
     @apply bg-background text-foreground;
   }
 }
-input[type="date"]::-webkit-datetime-edit-text,
-input[type="date"]::-webkit-datetime-edit-month-field,
-input[type="date"]::-webkit-datetime-edit-day-field,
-input[type="date"]::-webkit-datetime-edit-year-field {
+input[type='date']::-webkit-datetime-edit-text,
+input[type='date']::-webkit-datetime-edit-month-field,
+input[type='date']::-webkit-datetime-edit-day-field,
+input[type='date']::-webkit-datetime-edit-year-field {
   display: none;
 }
 
-input[type="date"]::-webkit-calendar-picker-indicator {
+input[type='date']::-webkit-calendar-picker-indicator {
   position: absolute;
   left: 0;
   top: 0;
@@ -140,22 +140,22 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
 }
 
-input[type="date"]:focus::-webkit-datetime-edit-text,
-input[type="date"]:focus::-webkit-datetime-edit-month-field,
-input[type="date"]:focus::-webkit-datetime-edit-day-field,
-input[type="date"]:focus::-webkit-datetime-edit-year-field {
+input[type='date']:focus::-webkit-datetime-edit-text,
+input[type='date']:focus::-webkit-datetime-edit-month-field,
+input[type='date']:focus::-webkit-datetime-edit-day-field,
+input[type='date']:focus::-webkit-datetime-edit-year-field {
   display: none;
 }
 
-input[type="date"].has-value::-webkit-datetime-edit-text,
-input[type="date"].has-value::-webkit-datetime-edit-month-field,
-input[type="date"].has-value::-webkit-datetime-edit-day-field,
-input[type="date"].has-value::-webkit-datetime-edit-year-field {
+input[type='date'].has-value::-webkit-datetime-edit-text,
+input[type='date'].has-value::-webkit-datetime-edit-month-field,
+input[type='date'].has-value::-webkit-datetime-edit-day-field,
+input[type='date'].has-value::-webkit-datetime-edit-year-field {
   display: inline;
 }
 
 /* Custom checkbox styling */
-input[type="checkbox"] {
+input[type='checkbox'] {
   appearance: none;
   -webkit-appearance: none;
   width: 1.25rem;
@@ -166,12 +166,12 @@ input[type="checkbox"] {
   position: relative;
 }
 
-input[type="checkbox"]:checked {
+input[type='checkbox']:checked {
   background-color: #5d24e1;
 }
 
-input[type="checkbox"]:checked::after {
-  content: "";
+input[type='checkbox']:checked::after {
+  content: '';
   position: absolute;
   left: 6px;
   top: 4px;
@@ -201,7 +201,7 @@ input[type="checkbox"]:checked::after {
 }
 
 .swiper-pagination-bullet-active-custom {
-  background-color: #5D24E1;
+  background-color: #5d24e1;
 }
 
 /* React DatePicker Custom Styles - RTL Support */
@@ -219,29 +219,6 @@ input[type="checkbox"]:checked::after {
 
 /* Mobile responsiveness for calendar */
 @media (max-width: 640px) {
-  /* Backdrop overlay */
-  .react-datepicker-popper::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: -1;
-  }
-
-  .react-datepicker-popper {
-    transform: none !important;
-    inset: auto !important;
-    position: fixed !important;
-    left: 50% !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    max-width: 90vw;
-    max-height: 90vh;
-  }
-
   .datepicker-rtl {
     font-size: 0.875rem;
     width: fit-content;
@@ -274,7 +251,7 @@ input[type="checkbox"]:checked::after {
 }
 
 .datepicker-rtl .react-datepicker__header {
-  background-color: #5D24E1;
+  background-color: #5d24e1;
   border-bottom: none;
   border-radius: 8px 8px 0 0;
   padding-top: 12px;
@@ -318,7 +295,7 @@ input[type="checkbox"]:checked::after {
 
 .datepicker-rtl .react-datepicker__day--selected,
 .datepicker-rtl .react-datepicker__day--keyboard-selected {
-  background-color: #5D24E1;
+  background-color: #5d24e1;
   color: white;
   border-radius: 4px;
   font-weight: 600;
@@ -327,7 +304,7 @@ input[type="checkbox"]:checked::after {
 .datepicker-rtl .react-datepicker__day--in-range,
 .datepicker-rtl .react-datepicker__day--in-selecting-range {
   background-color: #e9d5ff;
-  color: #5D24E1;
+  color: #5d24e1;
   border-radius: 0;
 }
 
@@ -335,7 +312,7 @@ input[type="checkbox"]:checked::after {
 .datepicker-rtl .react-datepicker__day--range-end,
 .datepicker-rtl .react-datepicker__day--selecting-range-start,
 .datepicker-rtl .react-datepicker__day--selecting-range-end {
-  background-color: #5D24E1;
+  background-color: #5d24e1;
   color: white;
   border-radius: 4px;
 }
@@ -384,7 +361,7 @@ input[type="checkbox"]:checked::after {
   border-top: 1px solid #e5e7eb;
   padding: 8px;
   text-align: center;
-  color: #5D24E1;
+  color: #5d24e1;
   font-weight: 600;
   cursor: pointer;
 }
@@ -404,7 +381,7 @@ input[type="checkbox"]:checked::after {
 }
 
 .react-datepicker__close-icon:hover::after {
-  background-color: #5D24E1;
+  background-color: #5d24e1;
 }
 
 /* Month and Year Dropdown Styling - RTL */
@@ -436,7 +413,7 @@ input[type="checkbox"]:checked::after {
 .datepicker-rtl .react-datepicker__month-select:hover,
 .datepicker-rtl .react-datepicker__year-select:hover {
   background-color: rgba(255, 255, 255, 1);
-  color: #5D24E1;
+  color: #5d24e1;
 }
 
 .datepicker-rtl .react-datepicker__month-select:focus,
@@ -455,7 +432,7 @@ input[type="checkbox"]:checked::after {
 .datepicker-rtl .react-datepicker__month-select option:hover,
 .datepicker-rtl .react-datepicker__year-select option:hover {
   background-color: #e9d5ff;
-  color: #5D24E1;
+  color: #5d24e1;
 }
 
 /* Scrollable year dropdown */
@@ -482,7 +459,7 @@ input[type="checkbox"]:checked::after {
 
 .datepicker-rtl .react-datepicker__year-option--selected,
 .datepicker-rtl .react-datepicker__month-option--selected {
-  background-color: #5D24E1;
+  background-color: #5d24e1;
   color: white;
   font-weight: 600;
 }
@@ -493,26 +470,26 @@ input[type="checkbox"]:checked::after {
 }
 
 /* Select Component RTL Support */
-[data-slot="select-trigger"] {
+[data-slot='select-trigger'] {
   text-align: right;
   direction: rtl;
 }
 
-[data-slot="select-content"] {
+[data-slot='select-content'] {
   direction: rtl;
 }
 
-[data-slot="select-item"] {
+[data-slot='select-item'] {
   text-align: right;
   direction: rtl;
 }
 
 /* Hide scrollbar for horizontal scroll */
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 .scrollbar-hide::-webkit-scrollbar {
-  display: none;  /* Chrome, Safari and Opera */
+  display: none; /* Chrome, Safari and Opera */
 }

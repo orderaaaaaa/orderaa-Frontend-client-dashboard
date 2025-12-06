@@ -13,6 +13,9 @@ export interface DatePickerProps {
   className?: string;
   dateFormat?: string;
   showTimeSelect?: boolean;
+  showTimeSelectOnly?: boolean;
+  timeIntervals?: number;
+  timeCaption?: string;
   minDate?: Date;
   maxDate?: Date;
   disabled?: boolean;
@@ -35,6 +38,9 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
       className,
       dateFormat = 'dd/MM/yyyy',
       showTimeSelect = false,
+      showTimeSelectOnly = false,
+      timeIntervals = 30,
+      timeCaption = 'الوقت',
       minDate,
       maxDate,
       disabled = false,
@@ -62,17 +68,18 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
           dateFormat={dateFormat}
           placeholderText={placeholder}
           showTimeSelect={showTimeSelect}
-          minDate={minDate}
+          showTimeSelectOnly={showTimeSelectOnly}
+          timeIntervals={timeIntervals}
+          timeCaption={timeCaption}
+          minDate={showTimeSelectOnly ? new Date() : minDate}
           maxDate={maxDate}
           disabled={disabled}
           isClearable={isClearable}
-          showMonthDropdown={showMonthDropdown}
-          showYearDropdown={showYearDropdown}
+          showMonthDropdown={showTimeSelectOnly ? false : showMonthDropdown}
+          showYearDropdown={showTimeSelectOnly ? false : showYearDropdown}
           dropdownMode={dropdownMode}
           scrollableYearDropdown={scrollableYearDropdown}
           yearDropdownItemNumber={yearDropdownItemNumber}
-          readOnly
-          onFocus={(e) => e.target.blur()}
           autoComplete="off"
           className={cn(
             'w-full h-10 text-sm rounded-[4px]',
@@ -86,22 +93,27 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
           )}
           calendarClassName="datepicker-rtl"
           popperClassName="datepicker-popper-rtl"
-          wrapperClassName="w-full"
+          wrapperClassName="w-full relative"
           showPopperArrow={false}
-          popperPlacement="bottom-end"
+          popperPlacement="bottom-start"
           popperModifiers={[
+            {
+              name: 'offset',
+              options: {
+                offset: [0, 8],
+              },
+            } as any,
             {
               name: 'preventOverflow',
               options: {
-                rootBoundary: 'viewport',
-                tether: false,
-                altAxis: true,
+                boundary: 'clippingParents',
+                padding: 8,
               },
             } as any,
             {
               name: 'flip',
               options: {
-                fallbackPlacements: ['top-end', 'bottom-start', 'top-start'],
+                fallbackPlacements: ['top-start', 'bottom-end', 'top-end'],
               },
             } as any,
           ]}

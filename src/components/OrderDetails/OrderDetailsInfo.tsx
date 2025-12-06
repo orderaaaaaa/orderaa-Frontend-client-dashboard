@@ -27,12 +27,32 @@ import {
   LiaPhoneSlashSolid,
   LiaLockSolid,
   LiaExchangeAltSolid,
+  LiaPlusSolid,
+  LiaTrashSolid,
 } from "react-icons/lia";
 import { Order } from "@/types/orders";
 import { updateCustomer } from "@/lib/api/order";
 import { Button } from "../ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/datepicker";
 import ActionConfirmationDialog from "./ActionConfirmationDialog";
 import EditShippingModal, { ShippingData } from "./EditShippingModal";
+import SimpleConfirmationModal from "./SimpleConfirmationModal";
+import BaseModal from "@/components/ui/base-modal";
+import {
+  UrgentModal,
+  CancelOrderModal,
+  StopOperationModal,
+  PostponeHoursModal,
+  PostponeDaysModal,
+  AddColorProductModal,
+} from "./ActionModals";
 
 interface OrderDetailsInfoComponentProps {
   order: Order;
@@ -64,6 +84,36 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
   // Shipping modal state
   const [isShippingModalOpen, setIsShippingModalOpen] = useState(false);
 
+  // Action modals state
+  const [isUrgentModalOpen, setIsUrgentModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isStopOperationModalOpen, setIsStopOperationModalOpen] = useState(false);
+  const [isPostponeHoursModalOpen, setIsPostponeHoursModalOpen] = useState(false);
+  const [isPostponeDaysModalOpen, setIsPostponeDaysModalOpen] = useState(false);
+  const [isAddColorProductModalOpen, setIsAddColorProductModalOpen] = useState(false);
+
+  // Simple confirmation modals
+  const [isRejectModificationConfirmOpen, setIsRejectModificationConfirmOpen] = useState(false);
+  const [isWaitingPaymentConfirmOpen, setIsWaitingPaymentConfirmOpen] = useState(false);
+
+  // Packaging notes modal
+  const [isPackagingNotesModalOpen, setIsPackagingNotesModalOpen] = useState(false);
+  const [newPackagingNote, setNewPackagingNote] = useState('');
+
+  // Phone number management
+  const [phoneNumbers, setPhoneNumbers] = useState<string[]>([
+    localOrder.customers.phoneNumber,
+    ...(localOrder.customers.altPhone ? [localOrder.customers.altPhone] : [])
+  ]);
+  const [isPhoneDropdownOpen, setIsPhoneDropdownOpen] = useState<number | null>(null);
+  const [editingPhoneIndex, setEditingPhoneIndex] = useState<number | null>(null);
+  const [newPhoneNumber, setNewPhoneNumber] = useState('');
+  const phoneDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Time range state
+  const [timeFrom, setTimeFrom] = useState<Date | null>(null);
+  const [timeTo, setTimeTo] = useState<Date | null>(null);
+
   const arrowDropdownRef = useRef<HTMLDivElement>(null);
   const followUpDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -75,6 +125,7 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
     const handleClickOutside = (event: MouseEvent) => {
       if (arrowDropdownRef.current && !arrowDropdownRef.current.contains(event.target as Node)) {
         setIsArrowDropdownOpen(false);
+        setIsWhatsappAccordionOpen(false);
       }
       if (followUpDropdownRef.current && !followUpDropdownRef.current.contains(event.target as Node)) {
         setIsFollowUpDropdownOpen(false);
@@ -87,17 +138,8 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
     };
   }, []);
 
-  // Arrow dropdown options
-  const arrowOptions = [
-    { label: 'مستعجل', action: 'urgent', icon: <LiaBoltSolid className="w-5 h-5" /> },
-    { label: 'الغاء', action: 'cancel', icon: <LiaBanSolid className="w-5 h-5" /> },
-    { label: 'رفض التعديل', action: 'reject_modification', icon: <LiaTimesCircleSolid className="w-5 h-5" /> },
-    { label: 'تأجيل ساعات', action: 'postpone_hours', icon: <LiaHourglassSolid className="w-5 h-5" /> },
-    { label: 'تأجيل أيام', action: 'postpone_days', icon: <LiaCalendarAltSolid className="w-5 h-5" /> },
-    { label: 'متابعة واتساب', action: 'whatsapp_followup', icon: <LiaWhatsapp className="w-5 h-5" /> },
-    { label: 'وقف التشغيل', action: 'stop_operation', icon: <LiaStopCircleSolid className="w-5 h-5" /> },
-    { label: 'في انتظار الدفع', action: 'waiting_payment', icon: <LiaLockSolid className="w-5 h-5" /> },
-  ];
+  // State for WhatsApp accordion in dropdown
+  const [isWhatsappAccordionOpen, setIsWhatsappAccordionOpen] = useState(false);
 
   // Follow-up dropdown options
   const followUpOptions = [
@@ -107,21 +149,157 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
     { label: 'فتح و قفل', action: 'open_close', icon: <LiaExchangeAltSolid className="w-5 h-5" /> },
   ];
 
-  const handleActionClick = (label: string, action: string) => {
+  // Arrow dropdown options
+  const arrowOptions = [
+    { label: 'مستعجل', action: 'urgent', icon: <LiaBoltSolid className="w-5 h-5" />, hasSubOptions: false },
+    { label: 'الغاء', action: 'cancel', icon: <LiaBanSolid className="w-5 h-5" />, hasSubOptions: false },
+    { label: 'رفض التعديل', action: 'reject_modification', icon: <LiaTimesCircleSolid className="w-5 h-5" />, hasSubOptions: false },
+    { label: 'تأجيل ساعات', action: 'postpone_hours', icon: <LiaHourglassSolid className="w-5 h-5" />, hasSubOptions: false },
+    { label: 'تأجيل أيام', action: 'postpone_days', icon: <LiaCalendarAltSolid className="w-5 h-5" />, hasSubOptions: false },
+    {
+      label: 'متابعة واتساب',
+      action: 'whatsapp_followup',
+      icon: <LiaWhatsapp className="w-5 h-5" />,
+      hasSubOptions: true,
+      subOptions: [
+        { label: 'إرسال صورة على الطبيعة', action: 'send_natural_image' },
+        { label: 'إرسال فيديو على الطبيعة', action: 'send_natural_video' },
+        { label: 'إرسال صور بروفيشنال', action: 'send_professional_images' },
+        { label: 'إرسال صور لون معين بروفيشنال', action: 'send_professional_color' },
+        { label: 'إرسال صورة لون معين على الطبيعة', action: 'send_natural_color' },
+      ]
+    },
+    { label: 'وقف التشغيل', action: 'stop_operation', icon: <LiaStopCircleSolid className="w-5 h-5" />, hasSubOptions: false },
+    { label: 'في انتظار الدفع', action: 'waiting_payment', icon: <LiaLockSolid className="w-5 h-5" />, hasSubOptions: false },
+  ];
+
+
+  const handleActionClick = (label: string, action: string, hasSubOptions?: boolean) => {
+    // If it has sub-options (WhatsApp), toggle accordion instead of closing dropdown
+    if (hasSubOptions && action === 'whatsapp_followup') {
+      setIsWhatsappAccordionOpen(!isWhatsappAccordionOpen);
+      return;
+    }
+
+    setIsArrowDropdownOpen(false);
+    setIsWhatsappAccordionOpen(false);
+
+    // Handle different actions
+    switch (action) {
+      case 'urgent':
+        setIsUrgentModalOpen(true);
+        break;
+      case 'cancel':
+        setIsCancelModalOpen(true);
+        break;
+      case 'stop_operation':
+        setIsStopOperationModalOpen(true);
+        break;
+      case 'reject_modification':
+        setIsRejectModificationConfirmOpen(true);
+        break;
+      case 'postpone_hours':
+        setIsPostponeHoursModalOpen(true);
+        break;
+      case 'postpone_days':
+        setIsPostponeDaysModalOpen(true);
+        break;
+      case 'waiting_payment':
+        setIsWaitingPaymentConfirmOpen(true);
+        break;
+      default:
+        // Fallback to old confirmation dialog
+        setConfirmationDialog({
+          isOpen: true,
+          title: `تأكيد ${label}`,
+          message: `هل أنت متأكد من ${label} لهذا الطلب؟`,
+          action,
+        });
+    }
+  };
+
+  const handleWhatsappSubOptionClick = (action: string, label: string) => {
+    setIsArrowDropdownOpen(false);
+    setIsWhatsappAccordionOpen(false);
+
+    // Handle color image requests - open color selection modal
+    if (action === 'send_professional_color' || action === 'send_natural_color') {
+      setIsAddColorProductModalOpen(true);
+    } else {
+      // For all other WhatsApp options, open confirmation dialog
+      setConfirmationDialog({
+        isOpen: true,
+        title: `تأكيد ${label}`,
+        message: `هل أنت متأكد من ${label} للعميل عبر واتساب؟`,
+        action: action,
+      });
+    }
+  };
+
+  const handleFollowUpClick = (label: string, action: string) => {
+    setIsFollowUpDropdownOpen(false);
     setConfirmationDialog({
       isOpen: true,
       title: `تأكيد ${label}`,
       message: `هل أنت متأكد من ${label} لهذا الطلب؟`,
-      action,
+      action: action,
     });
-    setIsArrowDropdownOpen(false);
-    setIsFollowUpDropdownOpen(false);
   };
 
   const handleConfirmAction = () => {
     // TODO: Add API call to update order status based on confirmationDialog.action
     console.log('Confirmed action:', confirmationDialog.action);
     // You can add API call here based on the action
+  };
+
+  // Handler functions for each action modal
+  const handleUrgentConfirm = (data: { shippingCompany?: string; urgentDate: string }) => {
+    console.log('Urgent order confirmed:', data);
+    // TODO: Add API call to mark order as urgent
+    setIsUrgentModalOpen(false);
+  };
+
+  const handleCancelOrderConfirm = (data: { reason: string; notes: string }) => {
+    console.log('Order cancelled:', data);
+    // TODO: Add API call to cancel order
+    setIsCancelModalOpen(false);
+  };
+
+  const handleStopOperationConfirm = (notes: string) => {
+    console.log('Operation stopped:', notes);
+    // TODO: Add API call to stop operation
+    setIsStopOperationModalOpen(false);
+  };
+
+  const handlePostponeHoursConfirm = (data: { duration?: '30min' | '1hour' | '2hours'; time?: Date }) => {
+    console.log('Order postponed:', data);
+    // TODO: Add API call to postpone order by hours/duration
+    setIsPostponeHoursModalOpen(false);
+  };
+
+  const handlePostponeDaysConfirm = (data: { duration?: '1day' | '2days' | '3days' | 'week'; date?: Date }) => {
+    console.log('Order postponed:', data);
+    // TODO: Add API call to postpone order by days/duration
+    setIsPostponeDaysModalOpen(false);
+  };
+
+
+  const handleAddColorProductConfirm = (color: string) => {
+    console.log('Color product selected:', color);
+    // TODO: Add logic to send color image via WhatsApp
+    setIsAddColorProductModalOpen(false);
+  };
+
+  const handleRejectModificationConfirm = () => {
+    console.log('Modification rejected');
+    // TODO: Add API call to reject modification
+    setIsRejectModificationConfirmOpen(false);
+  };
+
+  const handleWaitingPaymentConfirm = () => {
+    console.log('Waiting for payment');
+    // TODO: Add API call to mark order as waiting for payment
+    setIsWaitingPaymentConfirmOpen(false);
   };
 
   const handleConfirmClick = () => {
@@ -133,13 +311,132 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
     });
   };
 
-  // Format time from createdAt
-  const createdDate = new Date(localOrder.createdAt);
-  const formattedTime = createdDate.toLocaleTimeString('ar-EG', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true
-  });
+  // Payment method options
+  const paymentMethodOptions = [
+    { value: 'كاش', label: 'كاش' },
+    { value: 'فيزا', label: 'فيزا' },
+    { value: 'انستا باي', label: 'انستا باي' },
+    { value: 'محفظة الكترونيه', label: 'محفظة الكترونيه' },
+  ];
+
+  // Payment status options
+  const paymentStatusOptions = [
+    { value: 'دفع عند الاستلام', label: 'دفع عند الاستلام' },
+    { value: 'مدفوع', label: 'مدفوع' },
+  ];
+
+  // Phone number handlers
+  const handlePhoneCall = (phoneNumber: string) => {
+    window.location.href = `tel:${phoneNumber}`;
+  };
+
+  const handleAddPhone = () => {
+    setNewPhoneNumber('');
+    setEditingPhoneIndex(phoneNumbers.length);
+    setIsPhoneDropdownOpen(null);
+  };
+
+  const handleEditPhone = (index: number) => {
+    setNewPhoneNumber(phoneNumbers[index]);
+    setEditingPhoneIndex(index);
+    setIsPhoneDropdownOpen(null);
+  };
+
+  const handleRemovePhone = async (index: number) => {
+    const updatedPhones = phoneNumbers.filter((_, i) => i !== index);
+    setPhoneNumbers(updatedPhones);
+
+    // Update customer with new phone numbers
+    try {
+      await updateCustomer(localOrder.customers.id, {
+        phoneNumber: updatedPhones[0] || '',
+        altPhone: updatedPhones[1] || undefined,
+      });
+
+      const updatedOrder = {
+        ...localOrder,
+        customers: {
+          ...localOrder.customers,
+          phoneNumber: updatedPhones[0] || '',
+          altPhone: updatedPhones[1] || undefined,
+        },
+      };
+      setLocalOrder(updatedOrder);
+      if (onCustomerUpdate) {
+        onCustomerUpdate(updatedOrder);
+      }
+    } catch (error) {
+      console.error('Failed to update phone numbers:', error);
+    }
+  };
+
+  const handleSavePhone = async () => {
+    if (!newPhoneNumber.trim()) return;
+
+    const updatedPhones = [...phoneNumbers];
+    if (editingPhoneIndex !== null) {
+      if (editingPhoneIndex >= phoneNumbers.length) {
+        // Adding new phone
+        updatedPhones.push(newPhoneNumber);
+      } else {
+        // Editing existing phone
+        updatedPhones[editingPhoneIndex] = newPhoneNumber;
+      }
+    }
+
+    setPhoneNumbers(updatedPhones);
+    setEditingPhoneIndex(null);
+    setNewPhoneNumber('');
+
+    // Update customer with new phone numbers
+    try {
+      await updateCustomer(localOrder.customers.id, {
+        phoneNumber: updatedPhones[0] || '',
+        altPhone: updatedPhones[1] || undefined,
+      });
+
+      const updatedOrder = {
+        ...localOrder,
+        customers: {
+          ...localOrder.customers,
+          phoneNumber: updatedPhones[0] || '',
+          altPhone: updatedPhones[1] || undefined,
+        },
+      };
+      setLocalOrder(updatedOrder);
+      if (onCustomerUpdate) {
+        onCustomerUpdate(updatedOrder);
+      }
+    } catch (error) {
+      console.error('Failed to update phone numbers:', error);
+    }
+  };
+
+  const handleCancelPhoneEdit = () => {
+    setEditingPhoneIndex(null);
+    setNewPhoneNumber('');
+  };
+
+  // Packaging notes handler
+  const handleAddPackagingNote = async () => {
+    if (!newPackagingNote.trim()) return;
+
+    const updatedNotes = localOrder.packagingNotes
+      ? `${localOrder.packagingNotes}\n${newPackagingNote}`
+      : newPackagingNote;
+
+    const updatedOrder = {
+      ...localOrder,
+      packagingNotes: updatedNotes,
+    };
+    setLocalOrder(updatedOrder);
+    setNewPackagingNote('');
+    setIsPackagingNotesModalOpen(false);
+
+    if (onCustomerUpdate) {
+      onCustomerUpdate(updatedOrder);
+    }
+  };
 
   const handleStartEdit = (field: EditableField, currentValue: string | undefined) => {
     setEditingField(field);
@@ -237,7 +534,7 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
     className = ''
   }: {
     field: EditableField;
-    icon: any;
+    icon?: any;
     value: string | undefined;
     label: string;
     className?: string;
@@ -249,18 +546,19 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
     return (
       <div className={`flex flex-col gap-1 ${className}`}>
         <p className="font-bold text-[#121212]">{label}</p>
-        <div className={`${tagStyle} relative`}>
-          <Icon size={18} />
+        <div className={`${tagStyle} relative overflow-hidden`}>
+          {Icon && <Icon size={18} />}
           {isEditing ? (
             <>
               <input
                 type="text"
                 value={tempValue}
                 onChange={(e) => setTempValue(e.target.value)}
-                className="flex-1 border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
+                className="flex-1 border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1] min-w-0 max-w-full"
                 autoFocus
+                style={{ maxWidth: 'calc(100% - 60px)' }}
               />
-              <div className="flex gap-1">
+              <div className="flex gap-1 flex-shrink-0">
                 <button
                   onClick={handleSaveField}
                   className="p-1 hover:bg-green-100 rounded transition-colors"
@@ -277,11 +575,11 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
             </>
           ) : (
             <>
-              <div className="w-full flex items-start justify-between">
-                <p className={isEmpty ? 'text-red-500' : ''}>{displayValue}</p>
+              <div className="w-full flex items-start justify-between min-w-0">
+                <p className={`${isEmpty ? 'text-red-500' : ''} truncate flex-1 min-w-0`}>{displayValue}</p>
                 <button
                   onClick={() => handleStartEdit(field, value)}
-                  className="cursor-pointer p-1 hover:bg-purple-100 rounded transition-colors"
+                  className="cursor-pointer p-1 hover:bg-purple-100 rounded transition-colors flex-shrink-0"
                 >
                   <LiaEditSolid className="w-4 h-4 text-[#5D24E1]" />
                 </button>
@@ -308,53 +606,175 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
               label="اسم العميل"
             />
 
-            <EditableField
+            {/* <EditableField
               field="shippingCompany"
               icon={LiaTruckSolid}
               value={localOrder.shippingCompany}
               label="شركة الشحن"
-            />
+            /> */}
 
-            <EditableField
+            {/* <EditableField
               field="city"
               icon={LiaMapMarkerAltSolid}
               value={localOrder.customers.city}
               label="المدينة"
-            />
+            /> */}
 
-            <EditableField
+            {/* <EditableField
               field="governorate"
               icon={LiaMapMarkerAltSolid}
               value={localOrder.customers.governorate}
               label="المحافظة"
-            />
+            /> */}
 
+            {/* Time Range */}
             <div className="flex flex-col gap-1">
               <p className="font-bold text-[#121212]">الوقت</p>
-              <div className={tagStyle}>
-                <LiaClockSolid size={18} />
-                {formattedTime}
+              <div className="flex items-center gap-2">
+                <DatePicker
+                  selected={timeFrom}
+                  onChange={setTimeFrom}
+                  placeholder="من"
+                  showTimeSelect={true}
+                  showTimeSelectOnly={true}
+                  dateFormat="h:mm aa"
+                  timeCaption="الوقت"
+                  showIcon={true}
+                  icon={LiaClockSolid}
+                  className="flex-1"
+                />
+                <span className="text-[#5F5E5E]">-</span>
+                <DatePicker
+                  selected={timeTo}
+                  onChange={setTimeTo}
+                  placeholder="إلى"
+                  showTimeSelect={true}
+                  showTimeSelectOnly={true}
+                  dateFormat="h:mm aa"
+                  timeCaption="الوقت"
+                  showIcon={true}
+                  icon={LiaClockSolid}
+                  className="flex-1"
+                />
               </div>
             </div>
 
-            <EditableField
-              field="phoneNumber"
-              icon={LiaPhoneSolid}
-              value={localOrder.customers.phoneNumber}
-              label="رقم الهاتف"
-            />
-
-            <EditableField
-              field="altPhone"
-              icon={LiaPhoneSolid}
-              value={localOrder.customers.altPhone}
-              label="رقم بديل"
-            />
+            {/* Phone Numbers */}
+            <div className="flex flex-col gap-2">
+              <p className="font-bold text-[#121212]">أرقام الهاتف</p>
+              <div className="space-y-2">
+                {phoneNumbers.map((phone, index) => (
+                  <div key={index} className="relative" ref={index === 0 ? phoneDropdownRef : null}>
+                    {editingPhoneIndex === index ? (
+                      <div className="flex gap-2 items-center">
+                        <input
+                          type="tel"
+                          value={newPhoneNumber}
+                          onChange={(e) => setNewPhoneNumber(e.target.value)}
+                          className="flex-1 border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
+                          autoFocus
+                        />
+                        <button
+                          onClick={handleSavePhone}
+                          className="p-1 hover:bg-green-100 rounded transition-colors"
+                        >
+                          <LiaCheckSolid className="w-4 h-4 text-green-600" />
+                        </button>
+                        <button
+                          onClick={handleCancelPhoneEdit}
+                          className="p-1 hover:bg-red-100 rounded transition-colors"
+                        >
+                          <LiaTimesSolid className="w-4 h-4 text-red-600" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className={`${tagStyle} relative`}>
+                        <LiaPhoneSolid size={18} />
+                        <button
+                          onClick={() => handlePhoneCall(phone)}
+                          className="flex-1 text-right hover:text-[#5D24E1] transition-colors"
+                        >
+                          {phone}
+                        </button>
+                        <div className="relative">
+                          <button
+                            onClick={() => setIsPhoneDropdownOpen(isPhoneDropdownOpen === index ? null : index)}
+                            className="p-1 hover:bg-purple-100 rounded transition-colors"
+                          >
+                            <LiaEditSolid className="w-4 h-4 text-[#5D24E1]" />
+                          </button>
+                          {isPhoneDropdownOpen === index && (
+                            <div className="absolute bottom-full mb-2 right-0 min-w-[150px] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50" dir="rtl">
+                              <button
+                                onClick={() => handlePhoneCall(phone)}
+                                className="w-full px-4 py-2 text-right text-sm hover:bg-purple-50 transition-colors flex items-center gap-2 justify-start"
+                              >
+                                <LiaPhoneSolid className="w-4 h-4" />
+                                اتصال
+                              </button>
+                              <button
+                                onClick={() => handleEditPhone(index)}
+                                className="w-full px-4 py-2 text-right text-sm hover:bg-purple-50 transition-colors flex items-center gap-2 justify-start"
+                              >
+                                <LiaEditSolid className="w-4 h-4" />
+                                تعديل
+                              </button>
+                              {phoneNumbers.length > 1 && (
+                                <button
+                                  onClick={() => handleRemovePhone(index)}
+                                  className="w-full px-4 py-2 text-right text-sm hover:bg-red-50 transition-colors flex items-center gap-2 justify-start text-red-600"
+                                >
+                                  <LiaTrashSolid className="w-4 h-4" />
+                                  حذف
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {editingPhoneIndex === phoneNumbers.length && (
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="tel"
+                      value={newPhoneNumber}
+                      onChange={(e) => setNewPhoneNumber(e.target.value)}
+                      placeholder="أدخل رقم الهاتف"
+                      className="flex-1 border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
+                      autoFocus
+                    />
+                    <button
+                      onClick={handleSavePhone}
+                      className="p-1 hover:bg-green-100 rounded transition-colors"
+                    >
+                      <LiaCheckSolid className="w-4 h-4 text-green-600" />
+                    </button>
+                    <button
+                      onClick={handleCancelPhoneEdit}
+                      className="p-1 hover:bg-red-100 rounded transition-colors"
+                    >
+                      <LiaTimesSolid className="w-4 h-4 text-red-600" />
+                    </button>
+                  </div>
+                )}
+                {editingPhoneIndex !== phoneNumbers.length && (
+                  <button
+                    onClick={handleAddPhone}
+                    className="flex items-center gap-2 text-[#5D24E1] text-sm font-bold hover:text-[#4B1BC4] transition-colors"
+                  >
+                    <LiaPlusSolid className="w-4 h-4" />
+                    إضافة رقم هاتف
+                  </button>
+                )}
+              </div>
+            </div>
 
             <div className="md:col-span-4">
               <EditableField
                 field="notes"
-                icon={LiaCommentDotsSolid}
+                // icon={LiaCommentDotsSolid}
                 value={localOrder.notes}
                 label="ملاحظات"
               />
@@ -376,32 +796,81 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
               value={localOrder.shippingCost ? String(localOrder.shippingCost) : undefined}
               label="سعر الشحن"
             />
-            <EditableField
-              field="paymentMethod"
-              icon={LiaCreditCardSolid}
-              value={localOrder.paymentMethod}
-              label="طريقة الدفع"
-            />
-            <EditableField
-              field="paymentStatus"
-              icon={LiaMoneyBillWaveSolid}
-              value={localOrder.paymentStatus}
-              label="حالة الدفع"
-            />
+            {/* Payment Method Dropdown */}
+            <div className="flex flex-col gap-1">
+              <p className="font-bold text-[#121212]">طريقة الدفع</p>
+              <div className={`${tagStyle} relative`}>
+                <LiaCreditCardSolid size={18} />
+                <Select
+                  value={localOrder.paymentMethod || ''}
+                  onValueChange={async (value) => {
+                    const updatedOrder = {
+                      ...localOrder,
+                      paymentMethod: value,
+                    };
+                    setLocalOrder(updatedOrder);
+                    if (onCustomerUpdate) {
+                      onCustomerUpdate(updatedOrder);
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-full border-none shadow-none h-auto p-0 bg-transparent">
+                    <SelectValue placeholder="اختر طريقة الدفع" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {paymentMethodOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Payment Status Dropdown */}
+            <div className="flex flex-col gap-1">
+              <p className="font-bold text-[#121212]">حالة الدفع</p>
+              <div className={`${tagStyle} relative`}>
+                <LiaMoneyBillWaveSolid size={18} />
+                <Select
+                  value={localOrder.paymentStatus || ''}
+                  onValueChange={async (value) => {
+                    const updatedOrder = {
+                      ...localOrder,
+                      paymentStatus: value,
+                    };
+                    setLocalOrder(updatedOrder);
+                    if (onCustomerUpdate) {
+                      onCustomerUpdate(updatedOrder);
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-full border-none shadow-none h-auto p-0 bg-transparent">
+                    <SelectValue placeholder="اختر حالة الدفع" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {paymentStatusOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
 
         </div>
 
-        {/* Shipping Section - Visually Separated */}
-        <div className="bg-white px-1 border-t border-b border-[#E5E7EB] pt-2">
+        <div className="bg-white pt-2">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-[#5D24E1] font-bold text-lg">بيانات الشحن</h2>
             <Button
               variant="ghost"
               onClick={() => setIsShippingModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-[#5D24E1] text-[#5D24E1] rounded-lg hover:bg-purple-50 transition-colors font-bold"
+              className="flex items-center gap-2 px-4 py-2 bg-white text-[#5D24E1] rounded-lg hover:bg-purple-50 transition-colors font-bold"
             >
-              تعديل
               <LiaEditSolid className="w-4 h-4" />
             </Button>
           </div>
@@ -449,32 +918,25 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
           </div>
         </div>
 
-        <h2 className="text-[#5D24E1] font-bold text-lg mt-6">بيانات المنتج</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:grid-rows-1 gap-6">
-          <EditableField
-            field="material"
-            icon={LiaBoxSolid}
-            value={localOrder.material}
-            label="الخامة"
-          />
-          <EditableField
-            field="weight"
-            icon={LiaWeightHangingSolid}
-            value={localOrder.weight}
-            label="الوزن"
-          />
-          <EditableField
-            field="countryOfManufacture"
-            icon={LiaBoxOpenSolid}
-            value={localOrder.countryOfManufacture}
-            label="بلد التصنيع"
-          />
-          <EditableField
-            field="packagingNotes"
-            icon={LiaBoxSolid}
-            value={localOrder.packagingNotes}
-            label="ملاحظه لقسم التغليف"
-          />
+        {/* Packaging Notes Section */}
+        <div className="flex flex-col gap-2 mt-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-[#5D24E1] font-bold text-lg">ملاحظات التغليف</h2>
+            <Button
+              variant="ghost"
+              onClick={() => setIsPackagingNotesModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-white text-[#5D24E1] rounded-lg hover:bg-purple-50 transition-colors font-bold"
+            >
+              <LiaPlusSolid className="w-4 h-4" />
+              إضافة ملاحظة
+            </Button>
+          </div>
+          {localOrder.packagingNotes && (
+            <div className={`${tagStyle} min-h-[60px]`}>
+              <LiaBoxSolid size={18} />
+              <p className="flex-1 whitespace-pre-wrap">{localOrder.packagingNotes}</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -510,6 +972,9 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
                 onClick={() => {
                   setIsArrowDropdownOpen(!isArrowDropdownOpen);
                   setIsFollowUpDropdownOpen(false);
+                  if (!isArrowDropdownOpen) {
+                    setIsWhatsappAccordionOpen(false);
+                  }
                 }}
                 className="w-9 h-9 p-0 rounded-full border-2 border-[#5D24E1] hover:bg-purple-50 transition-colors"
               >
@@ -517,47 +982,69 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
               </Button>
             </div>
 
-            {/* Arrow Dropdown Menu */}
-            {isArrowDropdownOpen && (
-              <div className="absolute bottom-full mb-2 left-0 min-w-[200px] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50">
-                {arrowOptions.map((option) => (
-                  <Button
-                    key={option.action}
-                    variant="ghost"
-                    onClick={() => handleActionClick(option.label, option.action)}
-                    className="w-full px-4 py-3 text-right text-sm font-bold text-[#1F1F1F] hover:bg-purple-50 transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3 justify-end"
-                  >
-                    {option.label}
-                    {option.icon}
-                  </Button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Follow-up Button with Dropdown */}
-          <div className="relative" ref={followUpDropdownRef}>
-
-
             {/* Follow-up Dropdown Menu */}
             {isFollowUpDropdownOpen && (
-              <div className="absolute bottom-full mb-2 left-0 min-w-[180px] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50">
+              <div className="absolute bottom-full mb-2 right-0 min-w-[180px] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50" dir="rtl">
                 {followUpOptions.map((option) => (
                   <Button
                     key={option.action}
                     variant="ghost"
-                    onClick={() => handleActionClick(option.label, option.action)}
-                    className="w-full px-4 py-3 text-right text-sm font-bold text-[#1F1F1F] hover:bg-purple-50 transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3 justify-end"
+                    onClick={() => handleFollowUpClick(option.label, option.action)}
+                    className="w-full px-4 py-3 text-right text-sm font-bold text-[#1F1F1F] hover:bg-purple-50 transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3 justify-start"
                   >
-                    {option.label}
                     {option.icon}
+                    {option.label}
                   </Button>
                 ))}
               </div>
             )}
+
+            {/* Arrow Dropdown Menu */}
+            {isArrowDropdownOpen && (
+              <div className="absolute bottom-full mb-2 right-0 min-w-[280px] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50" dir="rtl">
+                {arrowOptions.map((option) => (
+                  <div key={option.action}>
+                    {/* Main Option Button */}
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleActionClick(option.label, option.action, option.hasSubOptions)}
+                      className="w-full px-4 py-3 text-sm font-bold text-[#1F1F1F] hover:bg-purple-50 transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3 justify-start"
+                    >
+                      <div className="flex flex-row items-center justify-between gap-2 w-full">
+                        <div className="flex flex-row items-center gap-2">
+                          {option.icon}
+                          {option.label}
+                        </div>
+                        <div className="">
+                          {option.hasSubOptions && (
+                            <LiaAngleDownSolid
+                              className={`w-4 h-4 transition-transform ${isWhatsappAccordionOpen && option.action === 'whatsapp_followup' ? 'rotate-180' : ''
+                                }`}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </Button>
+
+                    {/* Sub-options Accordion */}
+                    {option.hasSubOptions && option.subOptions && isWhatsappAccordionOpen && option.action === 'whatsapp_followup' && (
+                      <div className="bg-white " dir="rtl">
+                        {option.subOptions.map((subOption) => (
+                          <button
+                            key={subOption.action}
+                            onClick={() => handleWhatsappSubOptionClick(subOption.action, subOption.label)}
+                            className="w-full px-8 py-2.5 text-right text-xs cursor-pointer hover:bg-purple-50 transition-colors flex items-center justify-start"
+                          >
+                            {subOption.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-
-
         </div>
       </div>
 
@@ -582,6 +1069,85 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
           address: localOrder.customers.address,
         }}
       />
+
+      {/* Action Modals */}
+      <UrgentModal
+        isOpen={isUrgentModalOpen}
+        onClose={() => setIsUrgentModalOpen(false)}
+        onConfirm={handleUrgentConfirm}
+      />
+
+      <CancelOrderModal
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+        onConfirm={handleCancelOrderConfirm}
+      />
+
+      <StopOperationModal
+        isOpen={isStopOperationModalOpen}
+        onClose={() => setIsStopOperationModalOpen(false)}
+        onConfirm={handleStopOperationConfirm}
+      />
+
+      <PostponeHoursModal
+        isOpen={isPostponeHoursModalOpen}
+        onClose={() => setIsPostponeHoursModalOpen(false)}
+        onConfirm={handlePostponeHoursConfirm}
+      />
+
+      <PostponeDaysModal
+        isOpen={isPostponeDaysModalOpen}
+        onClose={() => setIsPostponeDaysModalOpen(false)}
+        onConfirm={handlePostponeDaysConfirm}
+      />
+
+      <AddColorProductModal
+        isOpen={isAddColorProductModalOpen}
+        onClose={() => setIsAddColorProductModalOpen(false)}
+        onSave={handleAddColorProductConfirm}
+        currentProductColors={localOrder.order_products?.map(op => op.products.color).filter(Boolean) as string[]}
+      />
+
+      {/* Simple Confirmation Modals */}
+      <SimpleConfirmationModal
+        isOpen={isRejectModificationConfirmOpen}
+        onClose={() => setIsRejectModificationConfirmOpen(false)}
+        onConfirm={handleRejectModificationConfirm}
+        title="رفض التعديل"
+        message="هل أنت متأكد من رفض التعديل لهذا الطلب؟"
+      />
+
+      <SimpleConfirmationModal
+        isOpen={isWaitingPaymentConfirmOpen}
+        onClose={() => setIsWaitingPaymentConfirmOpen(false)}
+        onConfirm={handleWaitingPaymentConfirm}
+        title="في انتظار الدفع"
+        message="هل أنت متأكد من تحديد الطلب كـ في انتظار الدفع؟"
+      />
+
+      {/* Packaging Notes Modal */}
+      <BaseModal
+        isOpen={isPackagingNotesModalOpen}
+        onClose={() => {
+          setIsPackagingNotesModalOpen(false);
+          setNewPackagingNote('');
+        }}
+        title="إضافة ملاحظة للتغليف"
+        onConfirm={handleAddPackagingNote}
+        confirmText="حفظ"
+      >
+        <div className="space-y-4">
+          <div className="flex flex-col gap-2">
+            <label className="font-bold text-[#1F1F1F]">الملاحظة</label>
+            <textarea
+              value={newPackagingNote}
+              onChange={(e) => setNewPackagingNote(e.target.value)}
+              placeholder="أدخل ملاحظة للتغليف..."
+              className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base min-h-[120px] resize-none focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
+            />
+          </div>
+        </div>
+      </BaseModal>
     </>
   );
 }
