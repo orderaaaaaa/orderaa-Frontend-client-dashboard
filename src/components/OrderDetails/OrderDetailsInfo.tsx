@@ -630,32 +630,33 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
             {/* Time Range */}
             <div className="flex flex-col gap-1">
               <p className="font-bold text-[#121212]">الوقت</p>
-              <div className="flex items-center gap-2">
-                <DatePicker
-                  selected={timeFrom}
-                  onChange={setTimeFrom}
-                  placeholder="من"
-                  showTimeSelect={true}
-                  showTimeSelectOnly={true}
-                  dateFormat="h:mm aa"
-                  timeCaption="الوقت"
-                  showIcon={true}
-                  icon={LiaClockSolid}
-                  className="flex-1"
-                />
-                <span className="text-[#5F5E5E]">-</span>
-                <DatePicker
-                  selected={timeTo}
-                  onChange={setTimeTo}
-                  placeholder="إلى"
-                  showTimeSelect={true}
-                  showTimeSelectOnly={true}
-                  dateFormat="h:mm aa"
-                  timeCaption="الوقت"
-                  showIcon={true}
-                  icon={LiaClockSolid}
-                  className="flex-1"
-                />
+              <div className={`${tagStyle} relative`}>
+                <LiaClockSolid size={18} />
+                <div className="flex items-center gap-2 flex-1">
+                  <DatePicker
+                    selected={timeFrom}
+                    onChange={setTimeFrom}
+                    placeholder="من"
+                    showTimeSelect={true}
+                    showTimeSelectOnly={true}
+                    dateFormat="h:mm aa"
+                    timeCaption="الوقت"
+                    showIcon={false}
+                    className="flex-1 border-none shadow-none bg-transparent p-0 h-auto font-bold text-[15px] text-[#000000]"
+                  />
+                  <span className="text-[#5F5E5E]">-</span>
+                  <DatePicker
+                    selected={timeTo}
+                    onChange={setTimeTo}
+                    placeholder="إلى"
+                    showTimeSelect={true}
+                    showTimeSelectOnly={true}
+                    dateFormat="h:mm aa"
+                    timeCaption="الوقت"
+                    showIcon={false}
+                    className="flex-1 border-none shadow-none bg-transparent p-0 h-auto font-bold text-[15px] text-[#000000]"
+                  />
+                </div>
               </div>
             </div>
 
