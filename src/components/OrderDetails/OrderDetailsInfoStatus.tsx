@@ -46,7 +46,11 @@ const getTimeAgo = (date: string): string => {
 };
 
 // Helper function to get icon for event type
-const getEventIcon = (eventType: string) => {
+const getEventIcon = (eventType?: string) => {
+  if (!eventType) {
+    return <History className="w-4 h-4 text-gray-600" />;
+  }
+
   switch (eventType.toLowerCase()) {
     case 'status_change':
     case 'confirmed':
@@ -68,13 +72,13 @@ const getEventIcon = (eventType: string) => {
 function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
   // Use events from API if available, otherwise create default event
   const events = order.events && order.events.length > 0
-    ? order.events.map(event => ({
-      id: event.id,
-      status: event.status ? (statusLabelMap[event.status] || event.status) : event.description || event.eventType,
+    ? order.events.map((event, index) => ({
+      id: event.id || index + 1,
+      status: event.status ? (statusLabelMap[event.status] || event.status) : event.description || event.eventType || 'حدث',
       date: new Date(event.createdAt).toLocaleDateString('ar-EG'),
       time: getTimeAgo(event.createdAt),
-      eventType: event.eventType,
-      description: event.description,
+      eventType: event.eventType || 'default',
+      description: event.description || '',
     }))
     : [
       {
