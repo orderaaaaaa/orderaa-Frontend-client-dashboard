@@ -7,7 +7,7 @@ import { Button } from '../ui/button';
 interface ActionConfirmationDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   title: string;
   message: string;
   confirmText?: string;
@@ -33,14 +33,24 @@ export default function ActionConfirmationDialog({
     }
   };
 
-  const handleConfirm = () => {
-    setIsConfirming(true);
-    // Wait for animation to complete before calling onConfirm
-    setTimeout(() => {
-      onConfirm();
+  const handleConfirm = async () => {
+    try {
+      // Call onConfirm FIRST and wait for it to complete
+      await onConfirm();
+
+      // Only show success animation and close if onConfirm succeeded
+      setIsConfirming(true);
+
+      // Wait for animation to complete before closing
+      setTimeout(() => {
+        setIsConfirming(false);
+        onClose();
+      }, 600);
+    } catch (error) {
+      // If onConfirm fails, don't show animation or close modal
+      console.error('Confirmation action failed:', error);
       setIsConfirming(false);
-      onClose();
-    }, 600);
+    }
   };
 
   return (
@@ -50,9 +60,8 @@ export default function ActionConfirmationDialog({
       dir="rtl"
     >
       <div
-        className={`relative w-full max-w-[500px] bg-white rounded-[20px] shadow-xl transition-all duration-300 ${
-          isConfirming ? 'scale-95 opacity-90' : 'scale-100 opacity-100'
-        }`}
+        className={`relative w-full max-w-[500px] bg-white rounded-[20px] shadow-xl transition-all duration-300 ${isConfirming ? 'scale-95 opacity-90' : 'scale-100 opacity-100'
+          }`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Success Animation Overlay */}
@@ -74,7 +83,7 @@ export default function ActionConfirmationDialog({
 
         {/* Header with gradient background */}
         <div
-          className="h-[79px] rounded-t-[20px] flex items-center justify-center px-8"
+          className="h-[60px] rounded-t-[20px] flex items-center justify-center px-8"
           style={{
             background:
               'linear-gradient(105.28deg, #FFFFFF 1.48%, #CBB5FD 182.49%, #FFFFFF 187.88%)',

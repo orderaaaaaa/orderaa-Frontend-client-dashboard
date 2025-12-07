@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-
+import { toast } from 'react-toastify';
 import FilterSection from './components/FilterSection';
 import OrderCard from './components/OrderCard';
 import Footer from './components/Footer';
@@ -109,12 +109,12 @@ export default function AllOrdersRefactor() {
         );
 
         if (ordersToExport.length === 0) {
-          alert('الرجاء تحديد طلبات للتصدير');
+          toast.warning('الرجاء تحديد طلبات للتصدير');
           return;
         }
 
         const fileName = exportOrdersToExcel(ordersToExport, 'selected_orders');
-        alert(
+        toast.success(
           `تم تصدير ${ordersToExport.length} طلب محدد بنجاح! \nاسم الملف: ${fileName}`
         );
       } else {
@@ -125,30 +125,30 @@ export default function AllOrdersRefactor() {
           const response = await getOrders(exportFilters);
 
           if (response.data.length === 0) {
-            alert('لا توجد طلبات لتصديرها');
+            toast.warning('لا توجد طلبات لتصديرها');
             return;
           }
 
           const fileName = exportOrdersToExcel(response.data, 'all_orders');
-          alert(
+          toast.success(
             `تم تصدير ${response.data.length} طلب بنجاح! \nاسم الملف: ${fileName}`
           );
         } catch (apiErr) {
           // Fallback to current orders in memory (mock or loaded data)
           console.warn('API failed for export, using current orders');
           if (orders.length === 0) {
-            alert('لا توجد طلبات لتصديرها');
+            toast.warning('لا توجد طلبات لتصديرها');
             return;
           }
 
           const fileName = exportOrdersToExcel(orders, 'all_orders');
-          alert(
+          toast.success(
             `تم تصدير ${orders.length} طلب بنجاح! \nاسم الملف: ${fileName}`
           );
         }
       }
     } catch (error) {
-      alert('فشل في تصدير الطلبات. الرجاء المحاولة مرة أخرى.');
+      toast.error('فشل في تصدير الطلبات. الرجاء المحاولة مرة أخرى.');
     }
   }, [apiFilters, select, selectedOrderIds, orders]);
 

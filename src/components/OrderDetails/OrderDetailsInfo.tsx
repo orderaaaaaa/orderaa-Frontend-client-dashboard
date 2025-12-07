@@ -11,8 +11,6 @@ import {
   LiaTimesSolid,
   LiaAngleDownSolid,
   LiaFileInvoiceDollarSolid,
-  LiaWeightHangingSolid,
-  LiaBoxOpenSolid,
   LiaMoneyBillWaveSolid,
   LiaCreditCardSolid,
   LiaCheckCircle,
@@ -30,8 +28,9 @@ import {
   LiaPlusSolid,
   LiaTrashSolid,
 } from "react-icons/lia";
-import { Order } from "@/types/orders";
-import { updateCustomer } from "@/lib/api/order";
+import { toast } from "react-toastify";
+import { Order, OrderStatus, OrderStatusItem } from "@/types/orders";
+import { updateCustomer, updateOrder, getNextOrderId, getOrderById, getOrderStatuses } from "@/lib/api/order";
 import { Button } from "../ui/button";
 import {
   Select,
@@ -57,11 +56,25 @@ import {
 interface OrderDetailsInfoComponentProps {
   order: Order;
   onCustomerUpdate?: (updatedOrder: Order) => void;
+  onOrderUpdate?: (updatedOrder: Order) => void;
+  onNavigateToNextOrder?: (nextOrderId: number) => void;
+  dateRange?: {
+    from: Date | null;
+    to: Date | null;
+  };
+  statusFilter?: OrderStatus | null;
 }
 
 type EditableField = 'name' | 'city' | 'governorate' | 'phoneNumber' | 'altPhone' | 'address' | 'notes' | 'shippingCompany' | 'totalCost' | 'shippingCost' | 'material' | 'weight' | 'countryOfManufacture' | 'packagingNotes' | 'paymentMethod' | 'paymentStatus' | null;
 
-function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfoComponentProps) {
+function OrderDetailsInfoComponent({
+  order,
+  onCustomerUpdate,
+  onOrderUpdate,
+  onNavigateToNextOrder,
+  dateRange,
+  statusFilter
+}: OrderDetailsInfoComponentProps) {
   const [localOrder, setLocalOrder] = useState(order);
   const [editingField, setEditingField] = useState<EditableField>(null);
   const [tempValue, setTempValue] = useState<string>('');
@@ -114,11 +127,29 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
   const [timeFrom, setTimeFrom] = useState<Date | null>(null);
   const [timeTo, setTimeTo] = useState<Date | null>(null);
 
+  // Status options from API (for display purposes)
+  const [availableStatuses, setAvailableStatuses] = useState<OrderStatusItem[]>([]);
+
   const arrowDropdownRef = useRef<HTMLDivElement>(null);
   const followUpDropdownRef = useRef<HTMLDivElement>(null);
 
   const tagStyle =
     "flex gap-2 bg-white shadow-xs items-center py-2 px-2 rounded-[5px] font-bold text-[15px] text-[#000000]";
+
+  // Fetch available statuses from API
+  useEffect(() => {
+    const fetchStatuses = async () => {
+      try {
+        const response = await getOrderStatuses();
+        setAvailableStatuses(response.statuses);
+      } catch (error) {
+        console.error('Failed to fetch order statuses:', error);
+        toast.error('فشل في تحميل حالات الطلبات');
+      }
+    };
+
+    fetchStatuses();
+  }, []);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -162,11 +193,8 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
       icon: <LiaWhatsapp className="w-5 h-5" />,
       hasSubOptions: true,
       subOptions: [
-        { label: 'إرسال صورة على الطبيعة', action: 'send_natural_image' },
-        { label: 'إرسال فيديو على الطبيعة', action: 'send_natural_video' },
-        { label: 'إرسال صور بروفيشنال', action: 'send_professional_images' },
-        { label: 'إرسال صور لون معين بروفيشنال', action: 'send_professional_color' },
-        { label: 'إرسال صورة لون معين على الطبيعة', action: 'send_natural_color' },
+        { label: 'إرسال صورة', action: 'send_natural_image' },
+        { label: 'إرسال فيديو', action: 'send_natural_video' },
       ]
     },
     { label: 'وقف التشغيل', action: 'stop_operation', icon: <LiaStopCircleSolid className="w-5 h-5" />, hasSubOptions: false },
@@ -246,43 +274,150 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
     });
   };
 
-  const handleConfirmAction = () => {
-    // TODO: Add API call to update order status based on confirmationDialog.action
-    console.log('Confirmed action:', confirmationDialog.action);
-    // You can add API call here based on the action
+  // Map action strings to OrderStatus enum values
+  const getStatusFromAction = (action: string): OrderStatus | null => {
+    const actionToStatusMap: Record<string, OrderStatus> = {
+      'confirm': OrderStatus.CONFIRMED, // Main confirm button
+      'urgent': OrderStatus.CONFIRMED, // Assuming urgent maps to CONFIRMED
+      'cancel': OrderStatus.CANCELLED,
+      'stop_operation': OrderStatus.STOPPED,
+      'postpone_hours': OrderStatus.POSTPONED,
+      'postpone_days': OrderStatus.POSTPONED,
+      'waiting_payment': OrderStatus.WAITING_FOR_PAYMENT,
+      'reject_modification': OrderStatus.REGISTERED, // Adjust based on your business logic
+      'no_answer': OrderStatus.CALL_AGAIN,
+      'closed': OrderStatus.STOPPED,
+      'not_collecting': OrderStatus.STOPPED,
+      'open_close': OrderStatus.STOPPED,
+    };
+    return actionToStatusMap[action] || null;
+  };
+
+  // Helper function to handle status update and navigation
+  // Returns true if successful, false if failed
+  const handleStatusUpdateAndNavigate = async (status: OrderStatus, updateData: Partial<Order> | Record<string, any> = {}): Promise<boolean> => {
+    try {
+      // Scenario 1: Update status via PATCH
+      const updatedOrder = await updateOrder(localOrder.id, {
+        ...updateData,
+        status,
+      });
+
+      setLocalOrder(updatedOrder);
+      if (onOrderUpdate) {
+        onOrderUpdate(updatedOrder);
+      }
+
+      // Show success message
+      const statusLabel = availableStatuses.find(s => s.value === status)?.label || status;
+      toast.success(`تم تحديث حالة الطلب إلى ${statusLabel} بنجاح`);
+
+      // If we have date range, try to get next order (status filter is optional)
+      if (onNavigateToNextOrder && dateRange) {
+        const fromISO = dateRange.from?.toISOString();
+        const toISO = dateRange.to?.toISOString();
+
+        if (fromISO && toISO) {
+          try {
+            const nextOrderResponse = await getNextOrderId(
+              localOrder.id,
+              statusFilter || undefined, // Pass status filter if available
+              fromISO,
+              toISO
+            );
+
+            if (nextOrderResponse?.orderId) {
+              // Navigate to next order (the page will fetch the new order details)
+              onNavigateToNextOrder(nextOrderResponse.orderId);
+            }
+          } catch (nextErr) {
+            console.error('Failed to get next order:', nextErr);
+            // Continue even if next order fails - might be the last order
+          }
+        }
+      }
+
+      return true; // Success
+    } catch (error) {
+      console.error('Failed to update order:', error);
+      toast.error('فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.');
+      return false; // Failure
+    }
+  };
+
+  const handleConfirmAction = async () => {
+    const status = getStatusFromAction(confirmationDialog.action);
+    if (status) {
+      const success = await handleStatusUpdateAndNavigate(status);
+      // If failed, throw error to prevent dialog from closing
+      if (!success) {
+        throw new Error('Failed to update order status');
+      }
+      // Success - dialog will close itself with animation
+    }
+    // Dialog will handle closing with animation
   };
 
   // Handler functions for each action modal
-  const handleUrgentConfirm = (data: { shippingCompany?: string; urgentDate: string }) => {
-    console.log('Urgent order confirmed:', data);
-    // TODO: Add API call to mark order as urgent
-    setIsUrgentModalOpen(false);
+  const handleUrgentConfirm = async (data: { shippingCompany?: string; urgentDate: string }) => {
+    const updateData: any = {
+      urgentDate: data.urgentDate,
+    };
+    if (data.shippingCompany) {
+      updateData.shippingCompany = data.shippingCompany;
+    }
+    const success = await handleStatusUpdateAndNavigate(OrderStatus.CONFIRMED, updateData);
+    // Only close modal if API call was successful
+    if (success) {
+      setIsUrgentModalOpen(false);
+    }
   };
 
-  const handleCancelOrderConfirm = (data: { reason: string; notes: string }) => {
-    console.log('Order cancelled:', data);
-    // TODO: Add API call to cancel order
-    setIsCancelModalOpen(false);
+  const handleCancelOrderConfirm = async (data: { reason: string; notes: string }) => {
+    const updateData: Partial<Order> = {
+      notes: data.notes ? `${data.reason}: ${data.notes}` : data.reason,
+    };
+    const success = await handleStatusUpdateAndNavigate(OrderStatus.CANCELLED, updateData);
+    // Only close modal if API call was successful
+    if (success) {
+      setIsCancelModalOpen(false);
+    }
   };
 
-  const handleStopOperationConfirm = (notes: string) => {
-    console.log('Operation stopped:', notes);
-    // TODO: Add API call to stop operation
-    setIsStopOperationModalOpen(false);
+  const handleStopOperationConfirm = async (notes: string) => {
+    const updateData: Partial<Order> = {
+      notes: notes,
+    };
+    const success = await handleStatusUpdateAndNavigate(OrderStatus.STOPPED, updateData);
+    // Only close modal if API call was successful
+    if (success) {
+      setIsStopOperationModalOpen(false);
+    }
   };
 
-  const handlePostponeHoursConfirm = (data: { duration?: '30min' | '1hour' | '2hours'; time?: Date }) => {
-    console.log('Order postponed:', data);
-    // TODO: Add API call to postpone order by hours/duration
-    setIsPostponeHoursModalOpen(false);
+  const handlePostponeHoursConfirm = async (data: { duration?: '30min' | '1hour' | '2hours'; time?: Date }) => {
+    const updateData: any = {};
+    if (data.time) {
+      updateData.executionDate = data.time.toISOString();
+    }
+    const success = await handleStatusUpdateAndNavigate(OrderStatus.POSTPONED, updateData);
+    // Only close modal if API call was successful
+    if (success) {
+      setIsPostponeHoursModalOpen(false);
+    }
   };
 
-  const handlePostponeDaysConfirm = (data: { duration?: '1day' | '2days' | '3days' | 'week'; date?: Date }) => {
-    console.log('Order postponed:', data);
-    // TODO: Add API call to postpone order by days/duration
-    setIsPostponeDaysModalOpen(false);
+  const handlePostponeDaysConfirm = async (data: { duration?: '1day' | '2days' | '3days' | 'week'; date?: Date }) => {
+    const updateData: any = {};
+    if (data.date) {
+      updateData.executionDate = data.date.toISOString();
+    }
+    const success = await handleStatusUpdateAndNavigate(OrderStatus.POSTPONED, updateData);
+    // Only close modal if API call was successful
+    if (success) {
+      setIsPostponeDaysModalOpen(false);
+    }
   };
-
 
   const handleAddColorProductConfirm = (color: string) => {
     console.log('Color product selected:', color);
@@ -290,16 +425,20 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
     setIsAddColorProductModalOpen(false);
   };
 
-  const handleRejectModificationConfirm = () => {
-    console.log('Modification rejected');
-    // TODO: Add API call to reject modification
-    setIsRejectModificationConfirmOpen(false);
+  const handleRejectModificationConfirm = async () => {
+    const success = await handleStatusUpdateAndNavigate(OrderStatus.REGISTERED);
+    // Only close modal if API call was successful
+    if (success) {
+      setIsRejectModificationConfirmOpen(false);
+    }
   };
 
-  const handleWaitingPaymentConfirm = () => {
-    console.log('Waiting for payment');
-    // TODO: Add API call to mark order as waiting for payment
-    setIsWaitingPaymentConfirmOpen(false);
+  const handleWaitingPaymentConfirm = async () => {
+    const success = await handleStatusUpdateAndNavigate(OrderStatus.WAITING_FOR_PAYMENT);
+    // Only close modal if API call was successful
+    if (success) {
+      setIsWaitingPaymentConfirmOpen(false);
+    }
   };
 
   const handleConfirmClick = () => {
@@ -421,20 +560,30 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
   const handleAddPackagingNote = async () => {
     if (!newPackagingNote.trim()) return;
 
-    const updatedNotes = localOrder.packagingNotes
-      ? `${localOrder.packagingNotes}\n${newPackagingNote}`
-      : newPackagingNote;
+    try {
+      const updatedNotes = localOrder.packagingNotes
+        ? `${localOrder.packagingNotes}\n${newPackagingNote}`
+        : newPackagingNote;
 
-    const updatedOrder = {
-      ...localOrder,
-      packagingNotes: updatedNotes,
-    };
-    setLocalOrder(updatedOrder);
-    setNewPackagingNote('');
-    setIsPackagingNotesModalOpen(false);
+      const updatedOrder = await updateOrder(localOrder.id, {
+        packagingNotes: updatedNotes,
+      });
 
-    if (onCustomerUpdate) {
-      onCustomerUpdate(updatedOrder);
+      setLocalOrder(updatedOrder);
+      setNewPackagingNote('');
+      setIsPackagingNotesModalOpen(false);
+
+      if (onOrderUpdate) {
+        onOrderUpdate(updatedOrder);
+      }
+      if (onCustomerUpdate) {
+        onCustomerUpdate(updatedOrder);
+      }
+
+      toast.success('تم تحديث ملاحظات التغليف بنجاح');
+    } catch (error) {
+      console.error('Failed to update packaging notes:', error);
+      toast.error('فشل في تحديث ملاحظات التغليف. يرجى المحاولة مرة أخرى.');
     }
   };
 
@@ -451,37 +600,39 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
   const handleSaveField = async () => {
     if (!editingField) return;
 
-    const updateData: any = {};
-    updateData[editingField] = tempValue;
-
     try {
-      // Fields that are on the order object
+      // Fields that are on the order object directly
       const orderFields = ['notes', 'totalCost', 'shippingCost', 'shippingCompany', 'material', 'weight', 'countryOfManufacture', 'packagingNotes', 'paymentMethod', 'paymentStatus'];
 
       if (orderFields.includes(editingField)) {
-        // Update order fields - you may need to add an API call for this
-        const updatedOrder = {
-          ...localOrder,
+        // Scenario 2: Update order field via PATCH API
+        const updateData: Partial<Order> = {
           [editingField]: tempValue,
         };
+
+        const updatedOrder = await updateOrder(localOrder.id, updateData);
         setLocalOrder(updatedOrder);
 
+        if (onOrderUpdate) {
+          onOrderUpdate(updatedOrder);
+        }
         if (onCustomerUpdate) {
           onCustomerUpdate(updatedOrder);
         }
       } else {
-        // Update customer fields
-        await updateCustomer(localOrder.customers.id, updateData);
-
-        const updatedOrder = {
-          ...localOrder,
+        // Update customer fields via order PATCH API (only send the changed field)
+        const updateData: any = {
           customers: {
-            ...localOrder.customers,
-            ...updateData,
+            [editingField]: tempValue,
           },
         };
+
+        const updatedOrder = await updateOrder(localOrder.id, updateData);
         setLocalOrder(updatedOrder);
 
+        if (onOrderUpdate) {
+          onOrderUpdate(updatedOrder);
+        }
         if (onCustomerUpdate) {
           onCustomerUpdate(updatedOrder);
         }
@@ -489,39 +640,40 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
 
       setEditingField(null);
       setTempValue('');
+
+      toast.success('تم تحديث البيانات بنجاح');
     } catch (error) {
       console.error('Failed to update field:', error);
+      toast.error('فشل في تحديث الحقل. يرجى المحاولة مرة أخرى.');
     }
   };
 
   // Handle shipping data save
   const handleSaveShippingData = async (data: ShippingData) => {
     try {
-      // Update customer with new shipping data
-      await updateCustomer(localOrder.customers.id, {
-        governorate: data.governorate,
-        city: data.city,
-        address: data.address,
-      });
-
-      const updatedOrder = {
-        ...localOrder,
+      // Update order with shipping data via PATCH API (only send changed fields)
+      const updatedOrder = await updateOrder(localOrder.id, {
         shippingCompany: data.shippingCompany,
         customers: {
-          ...localOrder.customers,
           governorate: data.governorate,
           city: data.city,
           address: data.address,
         },
-      };
+      });
 
       setLocalOrder(updatedOrder);
 
+      if (onOrderUpdate) {
+        onOrderUpdate(updatedOrder);
+      }
       if (onCustomerUpdate) {
         onCustomerUpdate(updatedOrder);
       }
+
+      toast.success('تم تحديث بيانات الشحن بنجاح');
     } catch (error) {
       console.error('Failed to update shipping data:', error);
+      toast.error('فشل في تحديث بيانات الشحن. يرجى المحاولة مرة أخرى.');
     }
   };
 
@@ -805,13 +957,20 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
                 <Select
                   value={localOrder.paymentMethod || ''}
                   onValueChange={async (value) => {
-                    const updatedOrder = {
-                      ...localOrder,
-                      paymentMethod: value,
-                    };
-                    setLocalOrder(updatedOrder);
-                    if (onCustomerUpdate) {
-                      onCustomerUpdate(updatedOrder);
+                    try {
+                      const updatedOrder = await updateOrder(localOrder.id, {
+                        paymentMethod: value,
+                      });
+                      setLocalOrder(updatedOrder);
+                      if (onOrderUpdate) {
+                        onOrderUpdate(updatedOrder);
+                      }
+                      if (onCustomerUpdate) {
+                        onCustomerUpdate(updatedOrder);
+                      }
+                    } catch (error) {
+                      console.error('Failed to update payment method:', error);
+                      toast.error('فشل في تحديث طريقة الدفع. يرجى المحاولة مرة أخرى.');
                     }
                   }}
                 >
@@ -837,13 +996,20 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
                 <Select
                   value={localOrder.paymentStatus || ''}
                   onValueChange={async (value) => {
-                    const updatedOrder = {
-                      ...localOrder,
-                      paymentStatus: value,
-                    };
-                    setLocalOrder(updatedOrder);
-                    if (onCustomerUpdate) {
-                      onCustomerUpdate(updatedOrder);
+                    try {
+                      const updatedOrder = await updateOrder(localOrder.id, {
+                        paymentStatus: value,
+                      });
+                      setLocalOrder(updatedOrder);
+                      if (onOrderUpdate) {
+                        onOrderUpdate(updatedOrder);
+                      }
+                      if (onCustomerUpdate) {
+                        onCustomerUpdate(updatedOrder);
+                      }
+                    } catch (error) {
+                      console.error('Failed to update payment status:', error);
+                      toast.error('فشل في تحديث حالة الدفع. يرجى المحاولة مرة أخرى.');
                     }
                   }}
                 >
@@ -1052,7 +1218,7 @@ function OrderDetailsInfoComponent({ order, onCustomerUpdate }: OrderDetailsInfo
       {/* Confirmation Dialog */}
       <ActionConfirmationDialog
         isOpen={confirmationDialog.isOpen}
-        onClose={() => setConfirmationDialog({ ...confirmationDialog, isOpen: false })}
+        onClose={() => setConfirmationDialog({ isOpen: false, title: '', message: '', action: '' })}
         onConfirm={handleConfirmAction}
         title={confirmationDialog.title}
         message={confirmationDialog.message}

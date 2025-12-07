@@ -218,6 +218,19 @@ export interface Order {
   customerId: number;
   customers: Customer;
   order_products: OrderProduct[];
+  events?: OrderEvent[];
+}
+
+// Order Event Interface
+export interface OrderEvent {
+  id: number;
+  orderId: number;
+  eventType: string;
+  status?: string;
+  description?: string;
+  metadata?: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Filter DTO (matching backend FilterOrdersDto)

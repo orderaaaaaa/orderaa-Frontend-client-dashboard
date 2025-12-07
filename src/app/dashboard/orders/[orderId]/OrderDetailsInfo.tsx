@@ -1,5 +1,5 @@
 import React from "react";
-import { Order } from "@/types/orders";
+import { Order, OrderStatus } from "@/types/orders";
 
 import OrderDetailsCardId from "@/components/OrderDetails/OrderDetailsCardId";
 import OrderDetailsInfoStatus from "@/components/OrderDetails/OrderDetailsInfoStatus";
@@ -8,15 +8,34 @@ import OrderDetailsInfoComponent from "@/components/OrderDetails/OrderDetailsInf
 
 interface OrderDetailsInfoProps {
   order: Order;
+  onOrderUpdate?: (updatedOrder: Order) => void;
+  onNavigateToNextOrder?: (nextOrderId: number) => void;
+  dateRange?: {
+    from: Date | null;
+    to: Date | null;
+  };
+  statusFilter?: OrderStatus | null;
 }
 
-function OrderDetailsInfo({ order }: OrderDetailsInfoProps) {
+function OrderDetailsInfo({
+  order,
+  onOrderUpdate,
+  onNavigateToNextOrder,
+  dateRange,
+  statusFilter
+}: OrderDetailsInfoProps) {
   return (
     <section className="mx-auto mt-3 p-4 bg-white rounded-lg shadow-sm">
       <OrderDetailsCardId order={order} />
       <OrderDetailsInfoStatus order={order} />
       <OrderDetailsProductCard order={order} />
-      <OrderDetailsInfoComponent order={order} />
+      <OrderDetailsInfoComponent
+        order={order}
+        onOrderUpdate={onOrderUpdate}
+        onNavigateToNextOrder={onNavigateToNextOrder}
+        dateRange={dateRange}
+        statusFilter={statusFilter}
+      />
     </section>
   );
 }
