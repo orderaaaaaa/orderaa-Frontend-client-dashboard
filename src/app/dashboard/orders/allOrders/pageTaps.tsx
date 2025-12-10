@@ -27,6 +27,7 @@ interface PageTapsProps {
   data?: any[];
   statusCounts?: Record<string, number>;
   totalOrders?: number;
+  onStatusChange?: (status: OrderStatus | null) => void;
 }
 
 // Icon mapping based on status value
@@ -59,7 +60,7 @@ const getIconForStatus = (statusValue: string): React.ReactNode => {
   return iconMap[statusValue] || <Boxes width={18} height={18} />;
 };
 
-function PageTaps({ data, statusCounts, totalOrders }: PageTapsProps) {
+function PageTaps({ data, statusCounts, totalOrders, onStatusChange }: PageTapsProps) {
   const { selectedStatus, setSelectedStatus } = useOrdersStore();
   const [statuses, setStatuses] = useState<OrderStatusItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,7 +81,8 @@ function PageTaps({ data, statusCounts, totalOrders }: PageTapsProps) {
   }, []);
 
   const handleTabClick = (status: OrderStatus | null) => {
-    setSelectedStatus(status);
+    setSelectedStatus(status); // Keep store in sync
+    onStatusChange?.(status); // Call callback if provided
   };
 
   if (loading) {

@@ -27,7 +27,7 @@ export interface OrderActionsState {
     status: OrderStatus,
     updateData?: Partial<Order> | Record<string, any>
   ) => Promise<boolean>;
-  handleUrgent: (data: { shippingCompany?: string; urgentDate: string }) => Promise<boolean>;
+  handleUrgent: (data: { shippingCost?: number; urgentDate: string }) => Promise<boolean>;
   handleCancel: (data: { reason: string; notes: string }) => Promise<boolean>;
   handleStopOperation: (notes: string) => Promise<boolean>;
   handlePostponeHours: (data: { duration?: '30min' | '1hour' | '2hours'; time?: Date }) => Promise<boolean>;
@@ -160,15 +160,15 @@ export function useOrderActions({
    * Handle urgent action
    */
   const handleUrgent = useCallback(
-    async (data: { shippingCompany?: string; urgentDate: string }) => {
+    async (data: { shippingCost?: number; urgentDate: string }) => {
       const status = getStatusFromAction('urgent');
       if (!status) return false;
 
       const updateData: any = {
         urgentDate: data.urgentDate,
       };
-      if (data.shippingCompany) {
-        updateData.shippingCompany = data.shippingCompany;
+      if (data.shippingCost !== undefined) {
+        updateData.shippingCost = data.shippingCost;
       }
       return await handleStatusUpdateAndNavigate(status, updateData);
     },

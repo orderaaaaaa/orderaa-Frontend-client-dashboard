@@ -50,7 +50,7 @@ export function OrderActionModals({
   const [newPackagingNote, setNewPackagingNote] = useState('');
 
   // Handlers for modals that need to close on success
-  const handleUrgentConfirm = async (data: { shippingCompany?: string; urgentDate: string }) => {
+  const handleUrgentConfirm = async (data: { shippingCost?: number; urgentDate: string }) => {
     const success = await actions.handleUrgent(data);
     if (success) {
       modals.urgent.close();

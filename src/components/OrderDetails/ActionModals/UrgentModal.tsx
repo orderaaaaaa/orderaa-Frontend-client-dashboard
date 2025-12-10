@@ -1,44 +1,125 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import { DatePicker } from '@/components/ui/datepicker';
-import { LiaTruckSolid, LiaCalendarAltSolid } from 'react-icons/lia';
+import { LiaCalendarAltSolid, LiaMoneyBillWaveSolid } from 'react-icons/lia';
+import { z } from 'zod';
+
+type UrgentOption = 'today' | 'tomorrow' | 'after2days';
+
+const shippingCostSchema = z
+  .string()
+  .refine((val) => val === '' || /^\d*\.?\d*$/.test(val), {
+    message: 'يجب إدخال أرقام فقط',
+  })
+  .transform((val) => (val === '' ? undefined : Number(val)));
 
 interface UrgentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (data: { shippingCompany?: string; urgentDate: string }) => void;
+  onConfirm: (data: { shippingCost?: number; urgentDate: string }) => void;
 }
+
+const getDateFromOption = (option: UrgentOption): Date => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  switch (option) {
+    case 'today':
+      return today;
+    case 'tomorrow':
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      return tomorrow;
+    case 'after2days':
+      const after2days = new Date(today);
+      after2days.setDate(after2days.getDate() + 2);
+      return after2days;
+  }
+};
 
 export default function UrgentModal({
   isOpen,
   onClose,
   onConfirm,
 }: UrgentModalProps) {
-  const [shippingCompany, setShippingCompany] = useState('');
-  const [urgentDate, setUrgentDate] = useState<Date | null>(null);
+  const [selectedOption, setSelectedOption] = useState<UrgentOption>('today');
+  const [urgentDate, setUrgentDate] = useState<Date | null>(getDateFromOption('today'));
+  const [shippingCost, setShippingCost] = useState('');
+  const [shippingCostError, setShippingCostError] = useState('');
+
+  useEffect(() => {
+    if (selectedOption) {
+      setUrgentDate(getDateFromOption(selectedOption));
+    }
+  }, [selectedOption]);
+
+  const handleDateChange = (date: Date | null) => {
+    setUrgentDate(date);
+    // Clear radio selection when manually picking a date
+    if (date) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const diffDays = Math.round((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 0) setSelectedOption('today');
+      else if (diffDays === 1) setSelectedOption('tomorrow');
+      else if (diffDays === 2) setSelectedOption('after2days');
+    }
+  };
 
   const handleConfirm = () => {
     if (!urgentDate) {
       alert('التاريخ مطلوب');
       return;
     }
-    // Format date as ISO string or your preferred format
+
+    // Validate shipping cost with Zod
+    const shippingCostResult = shippingCostSchema.safeParse(shippingCost);
+    if (!shippingCostResult.success) {
+      setShippingCostError(shippingCostResult.error.errors[0]?.message || 'قيمة غير صالحة');
+      return;
+    }
+
     const formattedDate = urgentDate.toISOString().split('T')[0];
-    onConfirm({ shippingCompany: shippingCompany || undefined, urgentDate: formattedDate });
+    onConfirm({
+      shippingCost: shippingCostResult.data,
+      urgentDate: formattedDate
+    });
     handleReset();
   };
 
   const handleReset = () => {
-    setShippingCompany('');
-    setUrgentDate(null);
+    setSelectedOption('today');
+    setUrgentDate(getDateFromOption('today'));
+    setShippingCost('');
+    setShippingCostError('');
   };
 
   const handleClose = () => {
     handleReset();
     onClose();
   };
+
+  const handleShippingCostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setShippingCost(value);
+
+    // Validate with Zod
+    const result = shippingCostSchema.safeParse(value);
+    if (!result.success) {
+      setShippingCostError(result.error.errors[0]?.message || 'قيمة غير صالحة');
+    } else {
+      setShippingCostError('');
+    }
+  };
+
+  const radioOptions: { value: UrgentOption; label: string }[] = [
+    { value: 'today', label: 'اليوم' },
+    { value: 'tomorrow', label: 'غدا' },
+    { value: 'after2days', label: 'بعد يومين' },
+  ];
 
   return (
     <BaseModal
@@ -49,36 +130,67 @@ export default function UrgentModal({
       confirmText="تأكيد"
     >
       <div className="space-y-6">
-        {/* Shipping Company - Optional */}
-        <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F] flex items-center gap-2">
-            <LiaTruckSolid className="w-5 h-5" />
-            شركة الشحن (اختياري)
-          </label>
-          <input
-            type="text"
-            value={shippingCompany}
-            onChange={(e) => setShippingCompany(e.target.value)}
-            placeholder="أدخل اسم شركة الشحن"
-            className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
-          />
+        {/* Radio Options */}
+        <div className="flex gap-6">
+          {radioOptions.map((option) => (
+            <label
+              key={option.value}
+              className="flex items-center gap-2 cursor-pointer"
+            >
+              <input
+                type="radio"
+                name="urgentOption"
+                value={option.value}
+                checked={selectedOption === option.value}
+                onChange={(e) => setSelectedOption(e.target.value as UrgentOption)}
+                className="w-5 h-5 accent-[#5D24E1]"
+              />
+              <span className="text-[#1F1F1F] font-medium">{option.label}</span>
+            </label>
+          ))}
         </div>
 
-        {/* Urgent Date - Mandatory */}
-        <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F] flex items-center gap-2">
-            <LiaCalendarAltSolid className="w-5 h-5" />
-            التاريخ <span className="text-red-600">*</span>
-          </label>
-          <DatePicker
-            selected={urgentDate}
-            onChange={setUrgentDate}
-            placeholder="اختر التاريخ"
-            minDate={new Date()}
-            showIcon={true}
-            icon={LiaCalendarAltSolid}
-            className="w-full"
-          />
+        {/* Date Picker and Shipping Cost */}
+        <div className="flex gap-4">
+          {/* Date Picker */}
+          <div className="flex-1 flex flex-col gap-2">
+            <label className="font-bold text-[#1F1F1F] flex items-center gap-2">
+              <LiaCalendarAltSolid className="w-5 h-5" />
+              تاريخ
+            </label>
+            <DatePicker
+              selected={urgentDate}
+              onChange={handleDateChange}
+              placeholder="اختر التاريخ"
+              minDate={new Date()}
+              showIcon={true}
+              icon={LiaCalendarAltSolid}
+              className="w-full"
+            />
+          </div>
+
+          {/* Shipping Cost */}
+          <div className="flex-1 flex flex-col gap-2">
+            <label className="font-bold text-[#1F1F1F] flex items-center gap-2">
+              <LiaMoneyBillWaveSolid className="w-5 h-5" />
+              مصاريف الشحن
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={shippingCost}
+              onChange={handleShippingCostChange}
+              placeholder="0"
+              className={`w-full border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:border-transparent ${
+                shippingCostError
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'border-[#ECECEC] focus:ring-[#5D24E1]'
+              }`}
+            />
+            {shippingCostError && (
+              <span className="text-red-500 text-sm">{shippingCostError}</span>
+            )}
+          </div>
         </div>
       </div>
     </BaseModal>
