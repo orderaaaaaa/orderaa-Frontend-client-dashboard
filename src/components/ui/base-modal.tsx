@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from './button';
 
@@ -9,7 +9,7 @@ interface BaseModalProps {
   onClose: () => void;
   title: string;
   children: ReactNode;
-  onConfirm?: () => void;
+  onConfirm?: () => void | Promise<void>;
   confirmText?: string;
   cancelText?: string;
   showFooter?: boolean;
@@ -31,10 +31,13 @@ export default function BaseModal({
   showFooter = true,
   confirmButtonClassName,
   cancelButtonClassName,
-  isLoading = false,
+  isLoading: externalIsLoading = false,
   maxWidth = 'w-[827px]',
   height,
 }: BaseModalProps) {
+  const [internalIsLoading, setInternalIsLoading] = useState(false);
+  const isLoading = externalIsLoading || internalIsLoading;
+
   if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -43,9 +46,17 @@ export default function BaseModal({
     }
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (onConfirm && !isLoading) {
-      onConfirm();
+      try {
+        setInternalIsLoading(true);
+        await onConfirm();
+        setInternalIsLoading(false);
+      } catch (error) {
+        // If onConfirm throws error, don't close modal (user can retry)
+        console.error('Confirmation action failed:', error);
+        setInternalIsLoading(false);
+      }
     }
   };
 

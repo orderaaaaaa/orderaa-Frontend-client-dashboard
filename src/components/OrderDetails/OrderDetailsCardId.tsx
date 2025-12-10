@@ -3,6 +3,7 @@ import { Copy, TriangleAlert, History } from "lucide-react";
 import { Order } from "@/types/orders";
 import { toast } from 'react-toastify'
 import CustomerOrdersModal from "@/app/dashboard/orders/allOrders/components/CustomerOrdersModal";
+import OrderHistoryModal from "./OrderHistoryModal";
 
 interface OrderDetailsCardIdProps {
   order: Order;
@@ -11,6 +12,7 @@ interface OrderDetailsCardIdProps {
 const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
   const [copied, setCopied] = useState(false);
   const [isCustomerOrdersModalOpen, setIsCustomerOrdersModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
   const createdDate = new Date(order.createdAt);
   const now = new Date();
@@ -58,7 +60,10 @@ const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
               />
               {/* order code */}
               {order.code}
-              <History className="bg-[#F6F2FC] w-6 h-6 cursor-pointer p-1 rounded-full text-[#5D24E1] border-1 border-[#CBB5FD]" />
+              <History
+                onClick={() => setIsHistoryModalOpen(true)}
+                className="bg-[#F6F2FC] w-6 h-6 cursor-pointer p-1 rounded-full text-[#5D24E1] border-1 border-[#CBB5FD]"
+              />
             </h3>
             <p className="text-xs font-bold mr-7 mb-4">
               {createdDate.toLocaleDateString('ar-EG')} <span>{timeAgo}</span>
@@ -110,6 +115,13 @@ const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
         onClose={() => setIsCustomerOrdersModalOpen(false)}
         customerPhone={order.customers.phoneNumber}
         customerName={order.customers.name}
+      />
+
+      {/* Order History Modal */}
+      <OrderHistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        events={order.events || []}
       />
     </div>
   );
