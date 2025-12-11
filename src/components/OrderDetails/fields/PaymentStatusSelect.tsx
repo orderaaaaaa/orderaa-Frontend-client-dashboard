@@ -1,12 +1,6 @@
 import React from 'react';
 import { LiaMoneyBillWaveSolid } from 'react-icons/lia';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
 /**
  * Props for PaymentStatusSelect component
@@ -20,10 +14,7 @@ export interface PaymentStatusSelectProps {
 /**
  * Payment status options
  */
-const paymentStatusOptions = [
-  { value: 'دفع عند الاستلام', label: 'دفع عند الاستلام' },
-  { value: 'مدفوع', label: 'مدفوع' },
-];
+const paymentStatusOptions = ['دفع عند الاستلام', 'مدفوع'];
 
 /**
  * PaymentStatusSelect Component
@@ -37,26 +28,22 @@ export function PaymentStatusSelect({
   onChange,
   className = '',
 }: PaymentStatusSelectProps) {
-  const tagStyle =
-    "flex gap-2 bg-white shadow-xs items-center py-2 px-2 rounded-[5px] font-bold text-[15px] text-[#000000]";
-
   return (
-    <div className={`flex flex-col gap-1 ${className}`}>
+    <div className={`flex flex-col gap-1 min-w-0 ${className}`}>
       <p className="font-bold text-[#121212]">حالة الدفع</p>
-      <div className={`${tagStyle} relative`}>
-        <LiaMoneyBillWaveSolid size={18} />
-        <Select value={value || ''} onValueChange={onChange}>
-          <SelectTrigger className="w-full border-none shadow-none h-auto p-0 bg-transparent">
-            <SelectValue placeholder="اختر حالة الدفع" />
-          </SelectTrigger>
-          <SelectContent>
-            {paymentStatusOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="flex gap-2 bg-white shadow-xs items-center py-1 px-2 rounded-[5px]">
+        <LiaMoneyBillWaveSolid size={18} className="flex-shrink-0" />
+        <SearchableSelect
+          value={value}
+          onValueChange={onChange}
+          options={paymentStatusOptions}
+          placeholder="اختر حالة الدفع"
+          searchPlaceholder="بحث..."
+          emptyMessage="لا توجد حالات دفع متاحة"
+          noResultsMessage="لا توجد نتائج للبحث"
+          triggerClassName="flex-1 border-none shadow-none h-auto p-0 bg-transparent font-bold text-[15px] text-[#000000]"
+          searchThreshold={5}
+        />
       </div>
     </div>
   );

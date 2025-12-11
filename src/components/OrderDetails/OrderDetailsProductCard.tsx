@@ -243,8 +243,8 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
                 <h3 className="text-[#1E1E1E] font-bold text-lg ">
                   {item.product}
                 </h3>
-                <p className="text-[#1E1E1E] font-bold text-lg ">اللون: {item.color}</p>
-                <p className="text-[#1E1E1E] font-bold text-lg ">القياس: {item.size}</p>
+                {/* <p className="text-[#1E1E1E] font-bold text-lg ">اللون: {item.color}</p>
+                <p className="text-[#1E1E1E] font-bold text-lg ">القياس: {item.size}</p> */}
 
                 <p className="text-[#1E1E1E] font-bold text-lg ">
                   {item.price} جنيه

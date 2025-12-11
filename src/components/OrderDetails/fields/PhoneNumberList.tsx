@@ -73,39 +73,39 @@ export function PhoneNumberList({
   };
 
   return (
-    <div className={`flex flex-col gap-2 ${className}`}>
+    <div className={`flex flex-col gap-2 min-w-0 ${className}`}>
       <p className="font-bold text-[#121212]">أرقام الهاتف</p>
       <div className="space-y-2">
         {phones.phoneNumbers.map((phone, index) => (
           <div key={index} className="relative" ref={index === 0 ? phoneDropdownRef : null}>
             {phones.editingIndex === index ? (
-              <div className="flex gap-2 items-center">
+              <div className="flex gap-2 items-center w-full overflow-hidden">
                 <input
                   type="tel"
                   value={phones.newPhoneNumber}
                   onChange={(e) => phones.setNewPhoneNumber(e.target.value)}
-                  className="flex-1 border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
+                  className="flex-1 min-w-0 border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
                   autoFocus
                 />
                 <button
                   onClick={phones.handleSave}
-                  className="p-1 hover:bg-green-100 rounded transition-colors"
+                  className="p-1 hover:bg-green-100 rounded transition-colors flex-shrink-0"
                 >
                   <LiaCheckSolid className="w-4 h-4 text-green-600" />
                 </button>
                 <button
                   onClick={phones.handleCancel}
-                  className="p-1 hover:bg-red-100 rounded transition-colors"
+                  className="p-1 hover:bg-red-100 rounded transition-colors flex-shrink-0"
                 >
                   <LiaTimesSolid className="w-4 h-4 text-red-600" />
                 </button>
               </div>
             ) : (
               <div className={`${tagStyle} relative`}>
-                <LiaPhoneSolid size={18} />
+                <LiaPhoneSolid size={18} className="flex-shrink-0" />
                 <button
                   onClick={() => handlePhoneCall(phone)}
-                  className="flex-1 text-right hover:text-[#5D24E1] transition-colors"
+                  className="flex-1 min-w-0 text-right hover:text-[#5D24E1] transition-colors truncate"
                 >
                   {phone}
                 </button>
@@ -120,8 +120,7 @@ export function PhoneNumberList({
                   </button>
                   {isPhoneDropdownOpen === index && (
                     <div
-                      className="absolute bottom-full mb-2 right-0 min-w-[150px] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50"
-                      dir="rtl"
+                      className="absolute top-full mt-2 left-0 min-w-[150px] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50"
                     >
                       <button
                         onClick={() => {
@@ -160,24 +159,24 @@ export function PhoneNumberList({
           </div>
         ))}
         {phones.editingIndex === phones.phoneNumbers.length && (
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-2 items-center w-full overflow-hidden">
             <input
               type="tel"
               value={phones.newPhoneNumber}
               onChange={(e) => phones.setNewPhoneNumber(e.target.value)}
               placeholder="أدخل رقم الهاتف"
-              className="flex-1 border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
+              className="flex-1 min-w-0 border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
               autoFocus
             />
             <button
               onClick={phones.handleSave}
-              className="p-1 hover:bg-green-100 rounded transition-colors"
+              className="p-1 hover:bg-green-100 rounded transition-colors flex-shrink-0"
             >
               <LiaCheckSolid className="w-4 h-4 text-green-600" />
             </button>
             <button
               onClick={phones.handleCancel}
-              className="p-1 hover:bg-red-100 rounded transition-colors"
+              className="p-1 hover:bg-red-100 rounded transition-colors flex-shrink-0"
             >
               <LiaTimesSolid className="w-4 h-4 text-red-600" />
             </button>

@@ -17,6 +17,7 @@ export interface EditableTextFieldProps {
   onSave: (value: string) => Promise<void>;
   placeholder?: string;
   className?: string;
+  multiline?: boolean;
 }
 
 /**
@@ -33,6 +34,7 @@ export function EditableTextField({
   onSave,
   placeholder,
   className = '',
+  multiline = false,
 }: EditableTextFieldProps) {
   const field = useEditableField({
     initialValue: value,
@@ -46,22 +48,31 @@ export function EditableTextField({
   const displayValue = isEmpty ? '-' : value;
 
   return (
-    <div className={`flex flex-col gap-1 ${className}`}>
+    <div className={`flex flex-col gap-1 min-w-0 ${className}`}>
       <p className="font-bold text-[#121212]">{label}</p>
-      <div className={`${tagStyle} relative overflow-hidden`}>
-        {Icon && <Icon size={18} />}
+      <div className={`${tagStyle} relative overflow-hidden w-full`}>
+        {Icon && <Icon size={18} className="flex-shrink-0" />}
         {field.isEditing ? (
-          <>
-            <input
-              type="text"
-              value={field.value}
-              onChange={(e) => field.setValue(e.target.value)}
-              placeholder={placeholder}
-              className="flex-1 border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1] min-w-0 max-w-full"
-              autoFocus
-              style={{ maxWidth: 'calc(100% - 60px)' }}
-            />
-            <div className="flex gap-1 flex-shrink-0">
+          <div className={`flex ${multiline ? 'flex-col' : 'items-center'} gap-1 flex-1 min-w-0 overflow-hidden`}>
+            {multiline ? (
+              <textarea
+                value={field.value}
+                onChange={(e) => field.setValue(e.target.value)}
+                placeholder={placeholder}
+                className="flex-1 min-w-0 w-full border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1] min-h-[60px] resize-y"
+                autoFocus
+              />
+            ) : (
+              <input
+                type="text"
+                value={field.value}
+                onChange={(e) => field.setValue(e.target.value)}
+                placeholder={placeholder}
+                className="flex-1 min-w-0 border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
+                autoFocus
+              />
+            )}
+            <div className={`flex gap-1 ${multiline ? 'self-end' : 'flex-shrink-0'}`}>
               <button
                 onClick={field.saveEdit}
                 className="p-1 hover:bg-green-100 rounded transition-colors"
@@ -75,21 +86,19 @@ export function EditableTextField({
                 <LiaTimesSolid className="cursor-pointer w-4 h-4 text-red-600" />
               </button>
             </div>
-          </>
+          </div>
         ) : (
-          <>
-            <div className="w-full flex items-start justify-between min-w-0">
-              <p className={`${isEmpty ? 'text-red-500' : ''} truncate flex-1 min-w-0`}>
-                {displayValue}
-              </p>
-              <button
-                onClick={field.startEdit}
-                className="cursor-pointer p-1 hover:bg-purple-100 rounded transition-colors flex-shrink-0"
-              >
-                <LiaEditSolid className="w-4 h-4 text-[#5D24E1]" />
-              </button>
-            </div>
-          </>
+          <div className="w-full flex items-start justify-between min-w-0 overflow-hidden">
+            <p className={`${isEmpty ? 'text-red-500' : ''} whitespace-pre-wrap break-words flex-1 min-w-0`}>
+              {displayValue}
+            </p>
+            <button
+              onClick={field.startEdit}
+              className="cursor-pointer p-1 hover:bg-purple-100 rounded transition-colors flex-shrink-0"
+            >
+              <LiaEditSolid className="w-4 h-4 text-[#5D24E1]" />
+            </button>
+          </div>
         )}
       </div>
     </div>

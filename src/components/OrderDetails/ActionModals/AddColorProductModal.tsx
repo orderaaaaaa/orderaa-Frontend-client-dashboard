@@ -1,7 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { toast } from 'react-toastify';
 import BaseModal from '@/components/ui/base-modal';
+import { SearchableSelect } from '@/components/ui/searchable-select';
+import { getFilterOptions } from '@/lib/api/order';
 
 interface AddColorProductModalProps {
   isOpen: boolean;
@@ -10,7 +13,7 @@ interface AddColorProductModalProps {
   currentProductColors?: string[];
 }
 
-const colorOptions = ['اسود', 'ابيض', 'احمر', 'ازرق', 'اخضر', 'بني', 'رمادي', 'اصفر', 'برتقالي', 'بنفسجي', 'وردي', 'بيج'];
+const defaultColorOptions = ['اسود', 'ابيض', 'احمر', 'ازرق', 'اخضر', 'بني', 'رمادي', 'اصفر', 'برتقالي', 'بنفسجي', 'وردي', 'بيج'];
 
 export default function AddColorProductModal({
   isOpen,
@@ -19,27 +22,50 @@ export default function AddColorProductModal({
   currentProductColors = [],
 }: AddColorProductModalProps) {
   const [selectedColor, setSelectedColor] = useState('');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [colorOptions, setColorOptions] = useState<string[]>(defaultColorOptions);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch filter options from API
+  useEffect(() => {
+    if (isOpen) {
+      setIsLoading(true);
+      getFilterOptions()
+        .then((response) => {
+          const { productColors } = response.data;
+          if (productColors && productColors.length > 0) {
+            setColorOptions(productColors);
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to fetch filter options:', error);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
       setSelectedColor('');
-      setIsDropdownOpen(false);
     }
   }, [isOpen]);
 
+  // Check if form is valid
+  const isFormValid = useMemo(() => {
+    return selectedColor !== '';
+  }, [selectedColor]);
+
   const handleSave = () => {
-    if (!selectedColor) {
-      alert('يرجى اختيار اللون');
-      return;
-    }
+    if (!selectedColor) return;
     onSave(selectedColor);
+    toast.success('تم إضافة اللون بنجاح');
     setSelectedColor('');
+    onClose();
   };
 
   const handleClose = () => {
     setSelectedColor('');
-    setIsDropdownOpen(false);
     onClose();
   };
 
@@ -50,6 +76,7 @@ export default function AddColorProductModal({
       title="إضافة منتج من نفس اللون"
       onConfirm={handleSave}
       confirmText="إضافة"
+      confirmDisabled={!isFormValid}
     >
       <div className="space-y-6">
         <p className="text-[#5F5E5E] text-sm">
@@ -61,53 +88,19 @@ export default function AddColorProductModal({
           <label className="font-bold text-[#1F1F1F]">
             اللون <span className="text-red-600">*</span>
           </label>
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-full h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E] flex items-center justify-between"
-              style={{ direction: 'rtl' }}
-            >
-              <span className={selectedColor ? 'text-[#1F1F1F]' : ''}>
-                {selectedColor || 'اختر اللون'}
-              </span>
-              <svg
-                width="15"
-                height="30"
-                viewBox="0 0 15 30"
-                fill="none"
-                className="transform rotate-90"
-              >
-                <path
-                  d="M13.5 7.5L7.5 13.5L1.5 7.5"
-                  stroke="#5F5E5E"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-            {isDropdownOpen && (
-              <div className="absolute top-full mt-2 w-full bg-white border border-[#ECECEC] rounded-2xl shadow-lg max-h-60 overflow-y-auto z-10">
-                {colorOptions.map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => {
-                      setSelectedColor(color);
-                      setIsDropdownOpen(false);
-                    }}
-                    className={`w-full px-6 py-3 text-right text-lg transition-colors ${
-                      selectedColor === color
-                        ? 'bg-[#F6F2FC] text-[#5D24E1] font-bold'
-                        : 'text-[#5F5E5E] hover:bg-purple-50'
-                    }`}
-                  >
-                    {color}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <SearchableSelect
+            value={selectedColor}
+            onValueChange={setSelectedColor}
+            options={colorOptions}
+            placeholder="اختر اللون"
+            searchPlaceholder="بحث عن اللون..."
+            emptyMessage="لا توجد ألوان متاحة"
+            noResultsMessage="لا توجد نتائج للبحث"
+            triggerClassName="h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E]"
+            className="rounded-2xl border-[#ECECEC]"
+            loading={isLoading}
+            searchThreshold={5}
+          />
         </div>
 
         {/* Current Product Colors Info */}
@@ -130,4 +123,3 @@ export default function AddColorProductModal({
     </BaseModal>
   );
 }
-

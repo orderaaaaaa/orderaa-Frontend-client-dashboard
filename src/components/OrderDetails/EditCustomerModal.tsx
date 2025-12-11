@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { X, Check } from 'lucide-react';
-import { toast } from 'sonner';
+import React, { useState, useEffect, useMemo } from 'react';
+import { LiaTimesSolid, LiaCheckSolid } from 'react-icons/lia';
+import { toast } from 'react-toastify';
+import { Button } from '../ui/button';
 
 interface EditCustomerModalProps {
   isOpen: boolean;
@@ -46,6 +47,18 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
     }
   }, [isOpen, customerData]);
 
+  // Check if any value has changed
+  const hasChanges = useMemo(() => {
+    return (
+      formData.name !== (customerData.name || '') ||
+      formData.phoneNumber !== (customerData.phoneNumber || '') ||
+      formData.altPhone !== (customerData.altPhone || '') ||
+      formData.governorate !== (customerData.governorate || '') ||
+      formData.city !== (customerData.city || '') ||
+      formData.address !== (customerData.address || '')
+    );
+  }, [formData, customerData]);
+
   if (!isOpen) return null;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,6 +67,7 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
   };
 
   const handleSave = async () => {
+    if (!hasChanges) return;
     setIsSubmitting(true);
     try {
       await onSave(formData);
@@ -66,15 +80,17 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
     }
   };
 
+  const handleCancel = () => {
+    onClose();
+  };
+
   return (
     <div
-      className="fixed inset-0 bg-transparent flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
       onClick={onClose}
-      style={{}}
     >
       <div
-        className="bg-white rounded-[20px] shadow-lg"
-        style={{ width: '827px', maxHeight: '90vh', overflow: 'auto' }}
+        className="bg-white rounded-[20px] shadow-lg w-full max-w-[827px] mx-4 max-h-[90vh] overflow-auto"
         onClick={(e) => e.stopPropagation()}
         dir="rtl"
       >
@@ -89,27 +105,21 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
             onClick={onClose}
             className="text-black hover:text-gray-700 transition-colors"
           >
-            <X size={24} />
+            <LiaTimesSolid className="w-6 h-6 cursor-pointer" />
           </button>
-          <h2
-            className="font-bold text-center flex-1"
-            style={{ fontSize: '20px', lineHeight: '37px', color: '#000000' }}
-          >
+          <h2 className="font-bold text-center flex-1 text-xl text-black">
             تعديل البيانات الشخصية
           </h2>
-          <div style={{ width: '24px' }}></div>
+          <div className="w-6"></div>
         </div>
 
         {/* Form Content */}
-        <div className="p-8" style={{ direction: 'rtl' }}>
+        <div className="p-8">
           {/* First Row: Name and Phone */}
-          <div className="flex gap-10 mb-6">
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
             {/* Name */}
             <div className="flex-1">
-              <label
-                className="block mb-4 font-bold"
-                style={{ fontSize: '18px', lineHeight: '33px', color: '#000000', textAlign: 'right' }}
-              >
+              <label className="block mb-3 font-bold text-lg text-black text-right">
                 الاسم الكامل
               </label>
               <input
@@ -118,21 +128,13 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
                 value={formData.name}
                 onChange={handleInputChange}
                 placeholder="محمد بدر مصطفى"
-                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right"
-                style={{
-                  fontSize: '18px',
-                  color: '#5F5E5E',
-                  background: '#FFFFFF',
-                }}
+                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
               />
             </div>
 
             {/* Phone Number */}
             <div className="flex-1">
-              <label
-                className="block mb-4 font-bold"
-                style={{ fontSize: '18px', lineHeight: '33px', color: '#000000', textAlign: 'right' }}
-              >
+              <label className="block mb-3 font-bold text-lg text-black text-right">
                 رقم الهاتف الأول
               </label>
               <input
@@ -141,24 +143,16 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
                 value={formData.phoneNumber}
                 onChange={handleInputChange}
                 placeholder="01127454951"
-                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right"
-                style={{
-                  fontSize: '18px',
-                  color: '#5F5E5E',
-                  background: '#FFFFFF',
-                }}
+                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
               />
             </div>
           </div>
 
           {/* Second Row: Alt Phone and Governorate */}
-          <div className="flex gap-10 mb-6">
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
             {/* Alt Phone */}
             <div className="flex-1">
-              <label
-                className="block mb-4 font-bold"
-                style={{ fontSize: '18px', lineHeight: '33px', color: '#000000', textAlign: 'right' }}
-              >
+              <label className="block mb-3 font-bold text-lg text-black text-right">
                 رقم الهاتف الثاني
               </label>
               <input
@@ -167,21 +161,13 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
                 value={formData.altPhone}
                 onChange={handleInputChange}
                 placeholder="01127454951"
-                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right"
-                style={{
-                  fontSize: '18px',
-                  color: '#5F5E5E',
-                  background: '#FFFFFF',
-                }}
+                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
               />
             </div>
 
             {/* Governorate */}
             <div className="flex-1">
-              <label
-                className="block mb-4 font-bold"
-                style={{ fontSize: '18px', lineHeight: '33px', color: '#000000', textAlign: 'right' }}
-              >
+              <label className="block mb-3 font-bold text-lg text-black text-right">
                 المحافظة
               </label>
               <input
@@ -190,24 +176,16 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
                 value={formData.governorate}
                 onChange={handleInputChange}
                 placeholder="القاهرة"
-                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right"
-                style={{
-                  fontSize: '18px',
-                  color: '#5F5E5E',
-                  background: '#FFFFFF',
-                }}
+                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
               />
             </div>
           </div>
 
           {/* Third Row: City and Address */}
-          <div className="flex gap-10 mb-6">
+          <div className="flex flex-col md:flex-row gap-6 mb-8">
             {/* City */}
             <div className="flex-1">
-              <label
-                className="block mb-4 font-bold"
-                style={{ fontSize: '18px', lineHeight: '33px', color: '#000000', textAlign: 'right' }}
-              >
+              <label className="block mb-3 font-bold text-lg text-black text-right">
                 المدينة
               </label>
               <input
@@ -216,21 +194,13 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
                 value={formData.city}
                 onChange={handleInputChange}
                 placeholder="مدينة نصر"
-                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right"
-                style={{
-                  fontSize: '18px',
-                  color: '#5F5E5E',
-                  background: '#FFFFFF',
-                }}
+                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
               />
             </div>
 
             {/* Address */}
             <div className="flex-1">
-              <label
-                className="block mb-4 font-bold"
-                style={{ fontSize: '18px', lineHeight: '33px', color: '#000000', textAlign: 'right' }}
-              >
+              <label className="block mb-3 font-bold text-lg text-black text-right">
                 العنوان
               </label>
               <input
@@ -239,35 +209,30 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
                 value={formData.address}
                 onChange={handleInputChange}
                 placeholder="شارع 15, مدينة نصر"
-                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right"
-                style={{
-                  fontSize: '18px',
-                  color: '#5F5E5E',
-                  background: '#FFFFFF',
-                }}
+                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
               />
             </div>
           </div>
 
-          {/* Save Button */}
-          <div className="flex justify-start mt-8">
-            <button
-              onClick={handleSave}
-              disabled={isSubmitting}
-              className="flex items-center gap-2 px-6 py-2 rounded-[28px] border-[1.5px] font-bold transition-colors disabled:opacity-50"
-              style={{
-                background: '#5D24E1',
-                borderColor: '#5D24E1',
-                color: '#FFFFFF',
-                fontSize: '18px',
-                minWidth: '146px',
-                height: '37px',
-                justifyContent: 'center',
-              }}
+          {/* Footer Buttons */}
+          <div className="flex justify-between">
+            <Button
+              onClick={handleCancel}
+              variant="outline"
+              className="w-[146px] h-[37px] border-[1.5px] border-[#ECECEC] rounded-[28px] flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
             >
-              <span>حفظ</span>
-              <Check size={20} strokeWidth={3} />
-            </button>
+              <LiaTimesSolid className="w-5 h-5 text-[#5F5E5E]" />
+              <span className="text-lg font-bold text-[#5F5E5E]">إلغاء</span>
+            </Button>
+
+            <Button
+              onClick={handleSave}
+              disabled={!hasChanges || isSubmitting}
+              className="w-[146px] h-[37px] bg-[#5D24E1] border-[1.5px] border-[#5D24E1] rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <LiaCheckSolid className="w-5 h-5 text-white" />
+              <span className="text-lg font-bold text-white">حفظ</span>
+            </Button>
           </div>
         </div>
       </div>
@@ -276,5 +241,3 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
 };
 
 export default EditCustomerModal;
-
-

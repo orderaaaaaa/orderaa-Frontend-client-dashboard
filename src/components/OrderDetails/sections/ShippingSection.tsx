@@ -32,7 +32,7 @@ export function ShippingSection({
           <LiaEditSolid className="w-4 h-4" />
         </Button>
       </div>
-      <div className="grid grid-col-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 overflow-hidden">
         {/* Shipping Company */}
         <div className="flex flex-col gap-1">
           <p className="font-bold text-[#121212]">الشركة</p>

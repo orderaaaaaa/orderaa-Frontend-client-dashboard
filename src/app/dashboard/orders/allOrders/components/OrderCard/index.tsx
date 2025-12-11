@@ -15,6 +15,7 @@ interface OrderCardProps {
   trys: number;
   status: string;
   city: string;
+  address: string;
   alert: number;
   select: boolean;
   isSelected?: boolean;
@@ -77,6 +78,7 @@ export default function OrderCard({
   trys,
   status,
   city,
+  address,
   alert,
   select,
   isSelected = false,
@@ -193,7 +195,7 @@ export default function OrderCard({
         )}
         {/* full address */}
         <div className="flex flex-row-reverse items-center gap-2">
-          <span className="text-sm font-normal text-gray-600">Adddrrrrreeeeesssssssss</span>
+          <span className="text-sm font-normal text-gray-600">{address}</span>
           <MapPinHouse className="w-[18px] h-[18px] flex-shrink-0" style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }} />
         </div>
         {price && (

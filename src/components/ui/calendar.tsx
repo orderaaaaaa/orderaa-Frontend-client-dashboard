@@ -25,17 +25,6 @@ function Calendar({
 }) {
   const defaultClassNames = getDefaultClassNames()
 
-  React.useEffect(() => {
-    console.log('📆 Calendar Component Mounted', {
-      mode: props.mode,
-      dir: props.dir,
-      props: props
-    });
-    return () => {
-      console.log('📆 Calendar Component Unmounted');
-    };
-  }, [props]);
-
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}

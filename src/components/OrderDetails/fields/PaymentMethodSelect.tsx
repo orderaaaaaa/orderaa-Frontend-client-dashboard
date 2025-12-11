@@ -1,12 +1,6 @@
 import React from 'react';
 import { LiaCreditCardSolid } from 'react-icons/lia';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
 /**
  * Props for PaymentMethodSelect component
@@ -20,12 +14,7 @@ export interface PaymentMethodSelectProps {
 /**
  * Payment method options
  */
-const paymentMethodOptions = [
-  { value: 'كاش', label: 'كاش' },
-  { value: 'فيزا', label: 'فيزا' },
-  { value: 'انستا باي', label: 'انستا باي' },
-  { value: 'محفظة الكترونيه', label: 'محفظة الكترونيه' },
-];
+const paymentMethodOptions = ['كاش', 'فيزا', 'انستا باي', 'محفظة الكترونيه'];
 
 /**
  * PaymentMethodSelect Component
@@ -39,26 +28,22 @@ export function PaymentMethodSelect({
   onChange,
   className = '',
 }: PaymentMethodSelectProps) {
-  const tagStyle =
-    "flex gap-2 bg-white shadow-xs items-center py-2 px-2 rounded-[5px] font-bold text-[15px] text-[#000000]";
-
   return (
-    <div className={`flex flex-col gap-1 ${className}`}>
+    <div className={`flex flex-col gap-1 min-w-0 ${className}`}>
       <p className="font-bold text-[#121212]">طريقة الدفع</p>
-      <div className={`${tagStyle} relative`}>
-        <LiaCreditCardSolid size={18} />
-        <Select value={value || ''} onValueChange={onChange}>
-          <SelectTrigger className="w-full border-none shadow-none h-auto p-0 bg-transparent">
-            <SelectValue placeholder="اختر طريقة الدفع" />
-          </SelectTrigger>
-          <SelectContent>
-            {paymentMethodOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="flex gap-2 bg-white shadow-xs items-center py-1 px-2 rounded-[5px]">
+        <LiaCreditCardSolid size={18} className="flex-shrink-0" />
+        <SearchableSelect
+          value={value}
+          onValueChange={onChange}
+          options={paymentMethodOptions}
+          placeholder="اختر طريقة الدفع"
+          searchPlaceholder="بحث..."
+          emptyMessage="لا توجد طرق دفع متاحة"
+          noResultsMessage="لا توجد نتائج للبحث"
+          triggerClassName="flex-1 border-none shadow-none h-auto p-0 bg-transparent font-bold text-[15px] text-[#000000]"
+          searchThreshold={5}
+        />
       </div>
     </div>
   );

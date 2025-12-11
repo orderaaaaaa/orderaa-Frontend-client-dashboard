@@ -1,7 +1,7 @@
 'use client';
 
 import React, { ReactNode, useState } from 'react';
-import { X } from 'lucide-react';
+import { LiaTimesSolid } from 'react-icons/lia';
 import { Button } from './button';
 
 interface BaseModalProps {
@@ -16,6 +16,7 @@ interface BaseModalProps {
   confirmButtonClassName?: string;
   cancelButtonClassName?: string;
   isLoading?: boolean;
+  confirmDisabled?: boolean;
   maxWidth?: string;
   height?: string;
 }
@@ -32,6 +33,7 @@ export default function BaseModal({
   confirmButtonClassName,
   cancelButtonClassName,
   isLoading: externalIsLoading = false,
+  confirmDisabled = false,
   maxWidth = 'w-[827px]',
   height,
 }: BaseModalProps) {
@@ -47,7 +49,7 @@ export default function BaseModal({
   };
 
   const handleConfirm = async () => {
-    if (onConfirm && !isLoading) {
+    if (onConfirm && !isLoading && !confirmDisabled) {
       try {
         setInternalIsLoading(true);
         await onConfirm();
@@ -82,14 +84,13 @@ export default function BaseModal({
             {title}
           </h2>
 
-          <Button
-            variant="outline"
+          <button
             onClick={onClose}
             disabled={isLoading}
             className="absolute left-8 w-6 h-6 flex items-center justify-center hover:opacity-70 transition-opacity disabled:opacity-50"
           >
-            <X className="w-6 h-6 text-black" strokeWidth={2} />
-          </Button>
+            <LiaTimesSolid className="w-6 h-6 text-black cursor-pointer" />
+          </button>
         </div>
 
         {/* Content */}
@@ -99,7 +100,7 @@ export default function BaseModal({
 
         {/* Footer */}
         {showFooter && (
-          <div className="px-8 pb-8 flex gap-4 justify-end flex-shrink-0">
+          <div className="px-8 pb-8 flex gap-4 justify-between flex-shrink-0">
             {/* Cancel Button */}
             <Button
               variant="outline"
@@ -110,6 +111,7 @@ export default function BaseModal({
                 'w-[146px] h-[37px] bg-white border-[1.5px] border-[#ECECEC] rounded-[28px] flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors disabled:opacity-50'
               }
             >
+              <LiaTimesSolid className="w-5 h-5 text-[#5F5E5E]" />
               <span className="text-lg font-bold text-[#5F5E5E]">
                 {cancelText}
               </span>
@@ -120,10 +122,10 @@ export default function BaseModal({
               <Button
                 variant="outline"
                 onClick={handleConfirm}
-                disabled={isLoading}
+                disabled={isLoading || confirmDisabled}
                 className={
                   confirmButtonClassName ||
-                  'w-[146px] h-[37px] bg-[#5D24E1] border-[1.5px] border-[#5D24E1] rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50'
+                  'w-[146px] h-[37px] bg-[#5D24E1] border-[1.5px] border-[#5D24E1] rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 }
               >
                 <span className="text-lg font-bold text-white">
@@ -137,4 +139,3 @@ export default function BaseModal({
     </div>
   );
 }
-

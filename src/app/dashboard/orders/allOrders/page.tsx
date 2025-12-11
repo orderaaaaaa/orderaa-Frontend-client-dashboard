@@ -425,6 +425,7 @@ export default function AllOrdersRefactor() {
                 trys={order.numberOfTriesToReach}
                 status={order.status}
                 city={order.customers.area || order.customers.city || 'غير محدد'}
+                address={order.customers.address || 'غير محدد'}
                 alert={0}
                 createdAt={order.createdAt}
                 repeatCount={repeatCounts[order.customers.phoneNumber] || 0}

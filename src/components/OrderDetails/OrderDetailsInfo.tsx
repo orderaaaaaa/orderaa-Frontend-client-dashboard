@@ -199,7 +199,7 @@ function OrderDetailsInfoComponent({
 
   return (
     <>
-      <div className="flex flex-col gap-4 font-medium p-4 bg-gray-50 mt-8 rounded-xl mb-24">
+      <div className="flex flex-col gap-4 font-medium p-4 bg-gray-50 mt-8 rounded-xl mb-24 overflow-hidden w-full max-w-full">
         <CustomerDataSection
           order={localOrder}
           onUpdate={updateField}

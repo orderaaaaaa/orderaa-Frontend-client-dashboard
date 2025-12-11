@@ -28,7 +28,7 @@ export function CustomerDataSection({
       <div className="flex justify-between items-center mb-3">
         <h2 className="text-[#5D24E1] font-semibold">بيانات العميل</h2>
       </div>
-      <div className="grid grid-col-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <EditableTextField
           label="اسم العميل"
           value={order.customers.name}
@@ -59,6 +59,7 @@ export function CustomerDataSection({
             onSave={async (value) => {
               await onUpdate('notes', value);
             }}
+            multiline
           />
         </div>
       </div>
