@@ -44,8 +44,17 @@ function buildApiFilters(
   };
 
   if (status) filters.status = status;
-  if (fromDate) filters.createdAfter = formatDateToISO(fromDate);
-  if (toDate) filters.createdBefore = formatDateToISO(toDate);
+
+  // Date range and confirmedDate are mutually exclusive
+  // If confirmedDate is set, use that; otherwise use date range
+  const hasConfirmedDate = formFilters?.executionDate;
+
+  if (hasConfirmedDate) {
+    filters.confirmedDate = formFilters.executionDate;
+  } else {
+    if (fromDate) filters.createdAfter = formatDateToISO(fromDate);
+    if (toDate) filters.createdBefore = formatDateToISO(toDate);
+  }
 
   if (formFilters) {
     if (formFilters.customerName) filters.customerName = formFilters.customerName;

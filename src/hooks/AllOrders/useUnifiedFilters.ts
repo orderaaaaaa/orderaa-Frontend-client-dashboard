@@ -2,8 +2,17 @@ import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { OrderFilters, OrderStatus, FilterOrdersDto } from '@/types/orders';
 import { useOrdersStore } from '@/store/ordersStore';
 
+// Helper to format date to ISO string
+const formatDateToISO = (date: Date): string => {
+    return date.toISOString();
+};
+
 export function useUnifiedFilters() {
     const { searchQuery, selectedStatus } = useOrdersStore();
+
+    // Date range state (mutually exclusive with executionDate)
+    const [fromDate, setFromDateInternal] = useState<Date | null>(null);
+    const [toDate, setToDateInternal] = useState<Date | null>(null);
 
     // Local filters from FilterSection
     const [localFilters, setLocalFilters] = useState<OrderFilters>({
@@ -27,6 +36,21 @@ export function useUnifiedFilters() {
     const [debouncedFilters, setDebouncedFilters] = useState<OrderFilters>(localFilters);
     const debounceTimerRef = useRef<NodeJS.Timeout>();
 
+    // Date range setters - clear executionDate when date range is set
+    const setFromDate = useCallback((date: Date | null) => {
+        setFromDateInternal(date);
+        if (date) {
+            setLocalFilters(prev => ({ ...prev, executionDate: '' }));
+        }
+    }, []);
+
+    const setToDate = useCallback((date: Date | null) => {
+        setToDateInternal(date);
+        if (date) {
+            setLocalFilters(prev => ({ ...prev, executionDate: '' }));
+        }
+    }, []);
+
     // Debounce filter changes
     useEffect(() => {
         if (debounceTimerRef.current) {
@@ -45,6 +69,14 @@ export function useUnifiedFilters() {
         };
     }, [localFilters]);
 
+    // Clear date range when executionDate is set
+    useEffect(() => {
+        if (localFilters.executionDate) {
+            setFromDateInternal(null);
+            setToDateInternal(null);
+        }
+    }, [localFilters.executionDate]);
+
     // Build unified filter object for API using debounced filters
     const apiFilters = useMemo((): FilterOrdersDto => {
         const filters: FilterOrdersDto = {
@@ -60,6 +92,15 @@ export function useUnifiedFilters() {
         // Add search from store
         if (searchQuery) {
             filters.search = searchQuery;
+        }
+
+        // Date range and confirmedDate are mutually exclusive
+        // If confirmedDate (executionDate) is set, use that; otherwise use date range
+        if (debouncedFilters.executionDate) {
+            filters.confirmedDate = debouncedFilters.executionDate;
+        } else {
+            if (fromDate) filters.createdAfter = formatDateToISO(fromDate);
+            if (toDate) filters.createdBefore = formatDateToISO(toDate);
         }
 
         // Add debounced local filters
@@ -92,7 +133,7 @@ export function useUnifiedFilters() {
         }
 
         return filters;
-    }, [selectedStatus, searchQuery, debouncedFilters, page, limit]);
+    }, [selectedStatus, searchQuery, debouncedFilters, fromDate, toDate, page, limit]);
 
     const updateLocalFilters = useCallback((newFilters: Partial<OrderFilters>) => {
         setLocalFilters((prev) => ({ ...prev, ...newFilters }));
@@ -112,6 +153,8 @@ export function useUnifiedFilters() {
             address: '',
             executionDate: '',
         });
+        setFromDateInternal(null);
+        setToDateInternal(null);
         setPage(1);
     }, []);
 
@@ -134,6 +177,11 @@ export function useUnifiedFilters() {
         goToPage,
         limit,
         updateLimit,
+        // Date range state and setters
+        fromDate,
+        setFromDate,
+        toDate,
+        setToDate,
     };
 }
 

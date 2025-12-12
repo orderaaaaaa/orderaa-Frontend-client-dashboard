@@ -34,7 +34,16 @@ export function UserMenu({
   };
 
   const isMobile = variant === 'mobile';
-  const displayText = authUser ? authUser.username : username || email;
+  const displayText = authUser?.username || username || email;
+
+  // Show loading spinner while user data is loading
+  if (!displayText) {
+    return (
+      <div className='flex flex-row items-center gap-2'>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"/>
+      </div>
+    );
+  }
 
   return (
     <div className='flex flex-row items-center gap-2'>

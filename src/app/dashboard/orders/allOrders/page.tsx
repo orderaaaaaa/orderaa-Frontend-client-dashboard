@@ -31,8 +31,6 @@ import { Scan, ScanLine, ArrowUp, ArrowLeft, X } from 'lucide-react';
 export default function AllOrdersRefactor() {
   const [select, setSelect] = useState(false);
   const [selectedOrderIds, setSelectedOrderIds] = useState<number[]>([]);
-  const [fromDate, setFromDate] = useState<Date | null>(null);
-  const [toDate, setToDate] = useState<Date | null>(null);
   const [timePeriod, setTimePeriod] = useState('');
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState<string>('');
   const [selectedCustomerName, setSelectedCustomerName] = useState<string>('');
@@ -46,6 +44,10 @@ export default function AllOrdersRefactor() {
     page,
     limit,
     updateLimit,
+    fromDate,
+    setFromDate,
+    toDate,
+    setToDate,
   } = useUnifiedFilters();
 
   const {
@@ -237,7 +239,7 @@ export default function AllOrdersRefactor() {
             onChange={setFromDate}
             placeholder="من تاريخ"
             showIcon={true}
-            className="w-12 sm:w-auto"
+            className="w-[120px] sm:w-[140px]"
             maxDate={toDate || undefined}
           />
 
@@ -248,7 +250,7 @@ export default function AllOrdersRefactor() {
             onChange={setToDate}
             placeholder="إلى تاريخ"
             showIcon={true}
-            className="w-12 sm:w-auto"
+            className="w-[120px] sm:w-[140px]"
             minDate={fromDate || undefined}
           />
 

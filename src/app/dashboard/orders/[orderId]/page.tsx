@@ -108,7 +108,7 @@ export default function OrderDetails({ params }: { params: { orderId: string } }
               onChange={setFromDate}
               placeholder="من تاريخ"
               showIcon={true}
-              className="w-12 sm:w-auto"
+              className="w-[120px] sm:w-[140px]"
               maxDate={toDate || undefined}
             />
 
@@ -119,7 +119,7 @@ export default function OrderDetails({ params }: { params: { orderId: string } }
               onChange={setToDate}
               placeholder="إلى تاريخ"
               showIcon={true}
-              className="w-12 sm:w-auto"
+              className="w-[120px] sm:w-[140px]"
               minDate={fromDate || undefined}
             />
 
@@ -207,7 +207,7 @@ export default function OrderDetails({ params }: { params: { orderId: string } }
             onChange={setFromDate}
             placeholder="من تاريخ"
             showIcon={true}
-            className="w-12 sm:w-auto"
+            className="w-[140px]"
             maxDate={toDate || undefined}
           />
 
@@ -218,7 +218,7 @@ export default function OrderDetails({ params }: { params: { orderId: string } }
             onChange={setToDate}
             placeholder="إلى تاريخ"
             showIcon={true}
-            className="w-12 sm:w-auto"
+            className="w-[140px]"
             minDate={fromDate || undefined}
           />
 

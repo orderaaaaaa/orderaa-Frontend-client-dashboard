@@ -256,6 +256,7 @@ export interface FilterOrdersDto {
   numberOfTriesToReach?: string;
   createdAfter?: string;
   createdBefore?: string;
+  confirmedDate?: string;
 }
 
 // Pagination Response
