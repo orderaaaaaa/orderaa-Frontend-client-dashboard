@@ -1,25 +1,31 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { LiaClockSolid } from 'react-icons/lia';
-import { DatePicker } from '@/components/ui/datepicker';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
-/**
- * Props for TimeRangeField component
- */
+// Generate time options in 30-minute intervals
+const generateTimeOptions = (): string[] => {
+  const options: string[] = [];
+  for (let hour = 0; hour < 24; hour++) {
+    for (let minute = 0; minute < 60; minute += 30) {
+      const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+      const period = hour < 12 ? 'ص' : 'م';
+      const minuteStr = minute.toString().padStart(2, '0');
+      options.push(`${hour12}:${minuteStr} ${period}`);
+    }
+  }
+  return options;
+};
+
+const TIME_OPTIONS = generateTimeOptions();
+
 export interface TimeRangeFieldProps {
-  timeFrom: Date | null;
-  timeTo: Date | null;
-  onTimeFromChange: (date: Date | null) => void;
-  onTimeToChange: (date: Date | null) => void;
+  timeFrom?: string;
+  timeTo?: string;
+  onTimeFromChange: (time: string) => void;
+  onTimeToChange: (time: string) => void;
   className?: string;
 }
 
-/**
- * TimeRangeField Component
- *
- * Displays a time range picker with two DatePicker components
- *
- * @param props - Component props
- */
 export function TimeRangeField({
   timeFrom,
   timeTo,
@@ -33,31 +39,31 @@ export function TimeRangeField({
   return (
     <div className={`flex flex-col gap-1 min-w-0 ${className}`}>
       <p className="font-bold text-[#121212]">الوقت</p>
-      <div className={`${tagStyle} relative overflow-hidden`}>
+      <div className={`${tagStyle} relative`}>
         <LiaClockSolid size={18} className="flex-shrink-0" />
-        <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
-          <DatePicker
-            selected={timeFrom}
-            onChange={onTimeFromChange}
+        <div className="flex items-center gap-2 flex-1">
+          <SearchableSelect
+            className='w-full'
+            value={timeFrom}
+            onValueChange={onTimeFromChange}
+            options={TIME_OPTIONS}
             placeholder="من"
-            showTimeSelect={true}
-            showTimeSelectOnly={true}
-            dateFormat="h:mm aa"
-            timeCaption="الوقت"
-            showIcon={false}
-            className="flex-1 min-w-0 border-none shadow-none bg-transparent p-0 h-auto font-bold text-[15px] text-[#000000]"
+            searchPlaceholder="ابحث عن الوقت..."
+            noResultsMessage="لا توجد نتائج"
+            triggerClassName="!border-0 !shadow-none !bg-transparent !px-1 !py-0 !h-auto !rounded-none !w-auto min-w-[70px] font-bold text-[15px] text-[#000000] hover:!bg-gray-100"
+            searchThreshold={0}
           />
           <span className="text-[#5F5E5E] flex-shrink-0">-</span>
-          <DatePicker
-            selected={timeTo}
-            onChange={onTimeToChange}
+          <SearchableSelect
+            className='w-full'
+            value={timeTo}
+            onValueChange={onTimeToChange}
+            options={TIME_OPTIONS}
             placeholder="إلى"
-            showTimeSelect={true}
-            showTimeSelectOnly={true}
-            dateFormat="h:mm aa"
-            timeCaption="الوقت"
-            showIcon={false}
-            className="flex-1 min-w-0 border-none shadow-none bg-transparent p-0 h-auto font-bold text-[15px] text-[#000000]"
+            searchPlaceholder="ابحث عن الوقت..."
+            noResultsMessage="لا توجد نتائج"
+            triggerClassName="!border-0 !shadow-none !bg-transparent !px-1 !py-0 !h-auto !rounded-none !w-auto min-w-[70px] font-bold text-[15px] text-[#000000] hover:!bg-gray-100"
+            searchThreshold={0}
           />
         </div>
       </div>

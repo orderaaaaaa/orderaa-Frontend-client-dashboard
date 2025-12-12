@@ -105,7 +105,7 @@ export function PhoneNumberList({
                 <LiaPhoneSolid size={18} className="flex-shrink-0" />
                 <button
                   onClick={() => handlePhoneCall(phone)}
-                  className="flex-1 min-w-0 text-right hover:text-[#5D24E1] transition-colors truncate"
+                  className="flex-1 min-w-0 text-right hover:text-[#5D24E1] transition-colors truncate cursor-pointer"
                 >
                   {phone}
                 </button>

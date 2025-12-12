@@ -204,6 +204,10 @@ export interface Order {
   countryOfManufacture?: string;
   packagingNotes?: string;
 
+  // Time preferences
+  timeFrom?: string;
+  timeTo?: string;
+
   // Marketing & tracking
   utmSource?: string;
   utmCampaign?: string;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { LiaUserSolid } from 'react-icons/lia';
 import { EditableTextField } from '../fields/EditableTextField';
 import { PhoneNumberList } from '../fields/PhoneNumberList';
@@ -20,8 +20,13 @@ export function CustomerDataSection({
   onPhoneUpdate,
   className = '',
 }: CustomerDataSectionProps) {
-  const [timeFrom, setTimeFrom] = useState<Date | null>(null);
-  const [timeTo, setTimeTo] = useState<Date | null>(null);
+  const handleTimeFromChange = async (time: string) => {
+    await onUpdate('timeFrom', time);
+  };
+
+  const handleTimeToChange = async (time: string) => {
+    await onUpdate('timeTo', time);
+  };
 
   return (
     <div className={className}>
@@ -39,10 +44,10 @@ export function CustomerDataSection({
         />
 
         <TimeRangeField
-          timeFrom={timeFrom}
-          timeTo={timeTo}
-          onTimeFromChange={setTimeFrom}
-          onTimeToChange={setTimeTo}
+          timeFrom={order.timeFrom}
+          timeTo={order.timeTo}
+          onTimeFromChange={handleTimeFromChange}
+          onTimeToChange={handleTimeToChange}
         />
 
         <PhoneNumberList

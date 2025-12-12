@@ -31,7 +31,7 @@ export function PricingSection({ order, onUpdate, className = '' }: PricingSecti
           value={String(order.totalCost)}
           icon={LiaFileInvoiceDollarSolid}
           onSave={async (value) => {
-            await onUpdate('totalCost', value);
+            await onUpdate('totalCost', Number(value));
           }}
         />
         <EditableTextField
@@ -39,7 +39,7 @@ export function PricingSection({ order, onUpdate, className = '' }: PricingSecti
           value={order.shippingCost ? String(order.shippingCost) : undefined}
           icon={LiaTruckSolid}
           onSave={async (value) => {
-            await onUpdate('shippingCost', value);
+            await onUpdate('shippingCost', Number(value));
           }}
         />
         <PaymentMethodSelect
