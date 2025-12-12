@@ -1,38 +1,24 @@
-import { useState, useEffect } from 'react';
-import { getFilterOptions } from '@/lib/api/order';
-//TODO: This type doesn't exist
-// import { FilterOptionsData } from '@/types/orders';
+import { useFilterOptionsQuery } from '@/services/orders';
 
+/**
+ * Hook for fetching filter options using React Query
+ * Maintains backward compatible interface
+ */
 export function useFilterOptions() {
-  const [options, setOptions] = useState<any>({
+  const { data, isLoading, error } = useFilterOptionsQuery();
+
+  const defaultOptions = {
     governorates: [],
     cities: [],
     areas: [],
     productNames: [],
     productSizes: [],
     productColors: [],
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  };
 
-  useEffect(() => {
-    const fetchOptions = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await getFilterOptions();
-        if (response.success && response.data) {
-          setOptions(response.data);
-        }
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch filter options');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOptions();
-  }, []);
-
-  return { options, loading, error };
+  return {
+    options: data?.success ? data.data : defaultOptions,
+    loading: isLoading,
+    error: error?.message || null,
+  };
 }

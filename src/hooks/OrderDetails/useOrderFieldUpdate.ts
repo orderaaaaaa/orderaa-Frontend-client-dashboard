@@ -1,38 +1,25 @@
 import { useCallback } from 'react';
 import { toast } from 'react-toastify';
-import { updateOrder } from '@/lib/api/order';
-import { Order } from '@/types/orders';
+import { useUpdateOrder } from '@/services/orders';
+import type { Order } from '@/types/orders';
 
-/**
- * Callback function type for order updates
- */
 export type OnOrderUpdate = (updatedOrder: Order) => void;
 
-/**
- * Custom hook for updating order fields
- *
- * @param orderId - The ID of the order to update
- * @param onOrderUpdate - Callback function called after successful update
- * @returns Update function for order fields
- *
- * @example
- * const updateField = useOrderFieldUpdate(order.id, onOrderUpdate);
- *
- * // Usage:
- * await updateField('paymentMethod', 'كاش');
- * await updateField('customers.name', 'أحمد');
- */
+// Custom hook for updating order fields using React Query mutation
+// Automatically invalidates the order cache after successful update
 export function useOrderFieldUpdate(
   orderId: number,
   onOrderUpdate?: OnOrderUpdate
 ) {
+  const updateOrderMutation = useUpdateOrder();
+
   const updateField = useCallback(
-    async (fieldPath: string, value: any) => {
+    async (fieldPath: string, value: unknown) => {
       try {
         // Determine if this is a customer field or order field
         const isCustomerField = fieldPath.startsWith('customers.');
 
-        let updateData: any;
+        let updateData: Record<string, unknown>;
 
         if (isCustomerField) {
           // Extract the customer field name
@@ -49,7 +36,11 @@ export function useOrderFieldUpdate(
           };
         }
 
-        const updatedOrder = await updateOrder(orderId, updateData);
+        // Use the mutation - this automatically invalidates queries
+        const updatedOrder = await updateOrderMutation.mutateAsync({
+          orderId,
+          data: updateData,
+        });
 
         if (onOrderUpdate) {
           onOrderUpdate(updatedOrder);
@@ -63,7 +54,7 @@ export function useOrderFieldUpdate(
         throw error;
       }
     },
-    [orderId, onOrderUpdate]
+    [orderId, onOrderUpdate, updateOrderMutation]
   );
 
   return updateField;

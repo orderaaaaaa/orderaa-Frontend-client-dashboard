@@ -1,20 +1,25 @@
 'use client'
 import React from 'react'
-import { ToastContainer } from 'react-toastify'
+import { ToastContainer, Slide } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
 export default function ToastifyProvider() {
   return (
     <ToastContainer
-      position="top-left" // TODO: change position based when setup localization
-      autoClose={2000}
+      position="top-center"
+      autoClose={3000}
       hideProgressBar={false}
-      newestOnTop={false}
+      newestOnTop
       closeOnClick
       rtl
       pauseOnFocusLoss
       draggable
       pauseOnHover
+      theme="colored"
+      transition={Slide}
+      toastClassName="!z-[99999]"
+      className="!z-[99999]"
+      style={{ zIndex: 99999 }}
     />
   )
 }

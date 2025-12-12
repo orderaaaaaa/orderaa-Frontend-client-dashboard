@@ -162,7 +162,10 @@ export function useOrderActions({
   const handleUrgent = useCallback(
     async (data: { shippingCost?: number; urgentDate: string }) => {
       const status = getStatusFromAction('urgent');
-      if (!status) return false;
+      if (!status) {
+        toast.error('فشل في تحديد حالة الطلب. يرجى المحاولة مرة أخرى.');
+        return false;
+      }
 
       const updateData: any = {
         urgentDate: data.urgentDate,
@@ -181,7 +184,10 @@ export function useOrderActions({
   const handleCancel = useCallback(
     async (data: { reason: string; notes: string }) => {
       const status = getStatusFromAction('cancel');
-      if (!status) return false;
+      if (!status) {
+        toast.error('فشل في تحديد حالة الطلب. يرجى المحاولة مرة أخرى.');
+        return false;
+      }
 
       const updateData: Partial<Order> = {
         notes: data.notes ? `${data.reason}: ${data.notes}` : data.reason,
@@ -197,7 +203,10 @@ export function useOrderActions({
   const handleStopOperation = useCallback(
     async (notes: string) => {
       const status = getStatusFromAction('stop_operation');
-      if (!status) return false;
+      if (!status) {
+        toast.error('فشل في تحديد حالة الطلب. يرجى المحاولة مرة أخرى.');
+        return false;
+      }
 
       const updateData: Partial<Order> = {
         notes: notes,
@@ -213,7 +222,10 @@ export function useOrderActions({
   const handlePostponeHours = useCallback(
     async (data: { duration?: '30min' | '1hour' | '2hours'; time?: Date }) => {
       const status = getStatusFromAction('postpone_hours');
-      if (!status) return false;
+      if (!status) {
+        toast.error('فشل في تحديد حالة الطلب. يرجى المحاولة مرة أخرى.');
+        return false;
+      }
 
       const updateData: any = {};
       if (data.time) {
@@ -230,7 +242,10 @@ export function useOrderActions({
   const handlePostponeDays = useCallback(
     async (data: { duration?: '1day' | '2days' | '3days' | 'week'; date?: Date }) => {
       const status = getStatusFromAction('postpone_days');
-      if (!status) return false;
+      if (!status) {
+        toast.error('فشل في تحديد حالة الطلب. يرجى المحاولة مرة أخرى.');
+        return false;
+      }
 
       const updateData: any = {};
       if (data.date) {
@@ -246,7 +261,10 @@ export function useOrderActions({
    */
   const handleRejectModification = useCallback(async () => {
     const status = getStatusFromAction('reject_modification');
-    if (!status) return false;
+    if (!status) {
+      toast.error('فشل في تحديد حالة الطلب. يرجى المحاولة مرة أخرى.');
+      return false;
+    }
     return await handleStatusUpdateAndNavigate(status);
   }, [getStatusFromAction, handleStatusUpdateAndNavigate]);
 
@@ -255,7 +273,10 @@ export function useOrderActions({
    */
   const handleWaitingPayment = useCallback(async () => {
     const status = getStatusFromAction('waiting_payment');
-    if (!status) return false;
+    if (!status) {
+      toast.error('فشل في تحديد حالة الطلب. يرجى المحاولة مرة أخرى.');
+      return false;
+    }
     return await handleStatusUpdateAndNavigate(status);
   }, [getStatusFromAction, handleStatusUpdateAndNavigate]);
 
@@ -268,6 +289,8 @@ export function useOrderActions({
       if (status) {
         return await handleStatusUpdateAndNavigate(status);
       }
+      // Show error toast if status couldn't be determined
+      toast.error('فشل في تحديد حالة الطلب. يرجى المحاولة مرة أخرى.');
       return false;
     },
     [getStatusFromAction, handleStatusUpdateAndNavigate]

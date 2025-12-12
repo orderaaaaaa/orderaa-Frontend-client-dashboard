@@ -37,7 +37,7 @@ export default function CancelOrderModal({
       return;
     }
     onConfirm({ reason, notes });
-    handleReset();
+    // Don't reset here - only reset when modal closes (on success via handleClose)
   };
 
   const handleReset = () => {

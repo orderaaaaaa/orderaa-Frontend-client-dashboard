@@ -34,7 +34,7 @@ export default function PostponeHoursModal({
       duration: selectedDuration || undefined,
       time: postponeTime || undefined
     });
-    handleReset();
+    // Don't reset here - only reset when modal closes (on success via handleClose)
   };
 
   const handleReset = () => {

@@ -23,7 +23,7 @@ interface UrgentModalProps {
 
 const getDateFromOption = (option: UrgentOption): Date => {
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  today.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
 
   switch (option) {
     case 'today':
@@ -37,6 +37,14 @@ const getDateFromOption = (option: UrgentOption): Date => {
       after2days.setDate(after2days.getDate() + 2);
       return after2days;
   }
+};
+
+// Format date as YYYY-MM-DD in local timezone
+const formatDateLocal = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
 export default function UrgentModal({
@@ -82,12 +90,12 @@ export default function UrgentModal({
       return;
     }
 
-    const formattedDate = urgentDate.toISOString().split('T')[0];
+    const formattedDate = formatDateLocal(urgentDate);
     onConfirm({
       shippingCost: shippingCostResult.data,
       urgentDate: formattedDate
     });
-    handleReset();
+    // Don't reset here - only reset when modal closes (on success via handleClose)
   };
 
   const handleReset = () => {

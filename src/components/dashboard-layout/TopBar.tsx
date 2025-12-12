@@ -45,7 +45,7 @@ export function TopBar({
       className={clsx(
         'flex flex-col lg:flex-row justify-between items-center',
         'px-4 lg:px-6 py-3 lg:py-0',
-        'max-sm:bg-gradient-to-b from-[#5D24E1] to-[#33147B] max-sm:text-white border-b',
+        'max-lg:bg-gradient-to-b from-[#5D24E1] to-[#33147B] max-sm:text-white border-b',
         'relative'
       )}
       style={{ boxShadow: '0px 4px 12px 0px #00000014' }}

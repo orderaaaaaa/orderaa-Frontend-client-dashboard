@@ -23,7 +23,7 @@ export default function StopOperationModal({
       return;
     }
     onConfirm(notes);
-    setNotes('');
+    // Don't reset here - only reset when modal closes (on success via handleClose)
   };
 
   const handleClose = () => {
@@ -43,7 +43,7 @@ export default function StopOperationModal({
         <div className="flex flex-col gap-2">
           <label className="font-bold text-[#1F1F1F] flex items-center gap-2">
             <LiaCommentDotsSolid className="w-5 h-5" />
-            الملاحظات <span className="text-red-600">*</span>
+            سبب وقف التشغيل <span className="text-red-600">*</span>
           </label>
           <textarea
             value={notes}

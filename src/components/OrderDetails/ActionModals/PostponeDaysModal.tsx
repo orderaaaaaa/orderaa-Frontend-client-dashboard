@@ -35,7 +35,7 @@ export default function PostponeDaysModal({
       duration: selectedDuration || undefined,
       date: postponeDate || undefined
     });
-    handleReset();
+    // Don't reset here - only reset when modal closes (on success via handleClose)
   };
 
   const handleReset = () => {

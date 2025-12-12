@@ -2,27 +2,16 @@ import React from 'react';
 import { LiaMoneyBillWaveSolid } from 'react-icons/lia';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 
-/**
- * Props for PaymentStatusSelect component
- */
 export interface PaymentStatusSelectProps {
   value: string | undefined;
   onChange: (value: string) => void;
   className?: string;
 }
 
-/**
- * Payment status options
- */
+
 const paymentStatusOptions = ['دفع عند الاستلام', 'مدفوع'];
 
-/**
- * PaymentStatusSelect Component
- *
- * Displays a dropdown for selecting payment status
- *
- * @param props - Component props
- */
+
 export function PaymentStatusSelect({
   value,
   onChange,

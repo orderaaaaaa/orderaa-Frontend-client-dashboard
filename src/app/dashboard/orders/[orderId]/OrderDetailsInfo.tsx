@@ -8,7 +8,6 @@ import OrderDetailsInfoComponent from "@/components/OrderDetails/OrderDetailsInf
 
 interface OrderDetailsInfoProps {
   order: Order;
-  onOrderUpdate?: (updatedOrder: Order) => void;
   onNavigateToNextOrder?: (nextOrderId: number) => void;
   dateRange?: {
     from: Date | null;
@@ -19,7 +18,6 @@ interface OrderDetailsInfoProps {
 
 function OrderDetailsInfo({
   order,
-  onOrderUpdate,
   onNavigateToNextOrder,
   dateRange,
   statusFilter
@@ -31,7 +29,6 @@ function OrderDetailsInfo({
       <OrderDetailsProductCard order={order} />
       <OrderDetailsInfoComponent
         order={order}
-        onOrderUpdate={onOrderUpdate}
         onNavigateToNextOrder={onNavigateToNextOrder}
         dateRange={dateRange}
         statusFilter={statusFilter}

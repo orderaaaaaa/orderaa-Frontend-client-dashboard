@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next';
 import "react-day-picker/dist/style.css"
 import './globals.css';
 import ToastifyProvider from '@/components/ToastifyProvider';
+import QueryProvider from '@/providers/QueryProvider';
 
 export const metadata: Metadata = {
   title: 'Orderaa Dashboard',
@@ -27,7 +28,9 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl">
       <body className={`${beiruti.variable} font-sans`}>
-        {children}
+        <QueryProvider>
+          {children}
+        </QueryProvider>
         <Analytics />
         <ToastifyProvider />
       </body>

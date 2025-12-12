@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { Order } from '@/types/orders';
-import { getOrders } from '@/lib/api/order';
+import type { Order, OrderProduct } from '@/types/orders';
+import { useCustomerOrders } from '@/services/orders';
 import OrderCard from '../OrderCard';
 import { Button } from '@/components/ui/button';
 
@@ -18,35 +18,24 @@ export default function CustomerOrdersModal({
   customerPhone,
   customerName,
 }: CustomerOrdersModalProps) {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [selectedOrderIds, setSelectedOrderIds] = useState<number[]>([]);
 
+  // Use React Query for fetching customer orders
+  const {
+    data: ordersData,
+    isLoading: loading,
+    error: queryError,
+  } = useCustomerOrders(customerPhone, { enabled: isOpen && !!customerPhone });
+
+  const orders = ordersData?.data ?? [];
+  const error = queryError ? 'فشل في تحميل طلبات العميل' : null;
+
+  // Reset selection when modal opens
   useEffect(() => {
-    if (!isOpen || !customerPhone) return;
-
-    const fetchCustomerOrders = async () => {
-      setLoading(true);
-      setError(null);
+    if (isOpen) {
       setSelectedOrderIds([]);
-      try {
-        const response = await getOrders({
-          customerPhone: customerPhone,
-          limit: 1000,
-          page: 1,
-        });
-
-        setOrders(response.data);
-      } catch (err) {
-        setError('فشل في تحميل طلبات العميل');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCustomerOrders();
-  }, [isOpen, customerPhone]);
+    }
+  }, [isOpen]);
 
   const handleCheckboxChange = (orderId: number, checked: boolean) => {
     if (checked) {
@@ -64,7 +53,7 @@ export default function CustomerOrdersModal({
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col m-4">
         <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-[#5D24E1]/5 to-[#682fee]/5">
           <div className="flex items-center gap-4">
@@ -86,7 +75,7 @@ export default function CustomerOrdersModal({
               </p>
             </div>
           </div>
-          
+
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -120,7 +109,7 @@ export default function CustomerOrdersModal({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-center">
-              {orders.map((order) => (
+              {orders.map((order: Order) => (
                 <div key={order.id} className="flex items-start gap-3">
                   <input
                     type="checkbox"
@@ -175,4 +164,3 @@ export default function CustomerOrdersModal({
     </div>
   );
 }
-

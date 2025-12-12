@@ -1,23 +1,23 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { toast } from 'react-toastify';
 import FilterSection from './components/FilterSection';
 import OrderCard from './components/OrderCard';
 import Footer from './components/Footer';
 import CustomerOrdersModal from './components/CustomerOrdersModal';
-import { Order, OrderStatus } from '@/types/orders';
+import type { Order } from '@/types/orders';
 import PageTaps from './pageTaps';
-import { getOrders } from '@/lib/api/order';
 import { useUnifiedFilters } from '@/hooks/AllOrders/useUnifiedFilters';
 import { useOrderStatistics } from '@/hooks/AllOrders/useOrderStatistics';
 import { useFilterOptions } from '@/hooks/AllOrders/useFilterOptions';
 import { useFilterForm } from '@/hooks/AllOrders/useFilterForm';
-import { useInfiniteScroll } from '@/hooks/AllOrders/useInfiniteScroll';
 import { exportOrdersToExcel } from '@/utils/exportOrders';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { Breadcrumb } from '@/components/dashboard-layout';
 import { DatePicker } from '@/components/ui/datepicker';
+import { useOrders } from '@/services/orders';
+import { getOrders } from '@/lib/api/order';
 import {
   Select,
   SelectContent,
@@ -34,24 +34,63 @@ export default function AllOrdersRefactor() {
   const [fromDate, setFromDate] = useState<Date | null>(null);
   const [toDate, setToDate] = useState<Date | null>(null);
   const [timePeriod, setTimePeriod] = useState('');
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalOrders, setTotalOrders] = useState(0);
+  const [selectedCustomerPhone, setSelectedCustomerPhone] = useState<string>('');
+  const [selectedCustomerName, setSelectedCustomerName] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
   const {
     apiFilters,
-    localFilters,
     updateLocalFilters,
-    page,
     goToPage,
+    page,
     limit,
     updateLimit,
   } = useUnifiedFilters();
 
+  const {
+    data: ordersData,
+    isLoading: loading,
+    error: queryError,
+  } = useOrders(apiFilters);
+
   const { statistics } = useOrderStatistics();
   const { options } = useFilterOptions();
+
+  const orders = ordersData?.data ?? [];
+  const totalOrders = ordersData?.total ?? 0;
+  const totalPages = ordersData?.totalPages ?? 1;
+  const currentPage = ordersData?.page ?? 1;
+  const error = queryError?.message ?? null;
+
+  // Track previous page to detect page changes (initialized with current page to skip initial scroll)
+  const prevPageRef = useRef<number>(page);
+
+  // Scroll to top when page changes
+  useEffect(() => {
+    if (prevPageRef.current !== page) {
+      prevPageRef.current = page;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [page]);
+
+  // Calculate repeat counts from orders
+  const calculateRepeatCounts = useCallback((ordersList: Order[]) => {
+    const phoneCounts: Record<string, number> = {};
+
+    ordersList.forEach((order) => {
+      const phone = order.customers.phoneNumber;
+      if (phone && phone !== 'غير محدد') {
+        phoneCounts[phone] = (phoneCounts[phone] || 0) + 1;
+      }
+    });
+
+    return phoneCounts;
+  }, []);
+
+  const repeatCounts = useMemo(() => {
+    return calculateRepeatCounts(orders);
+  }, [orders, calculateRepeatCounts]);
 
   // React Hook Form setup
   const handleFormSubmit = useCallback(
@@ -152,26 +191,6 @@ export default function AllOrdersRefactor() {
     }
   }, [apiFilters, select, selectedOrderIds, orders]);
 
-  const calculateRepeatCounts = useCallback((ordersList: Order[]) => {
-    const phoneCounts: Record<string, number> = {};
-
-    ordersList.forEach((order) => {
-      const phone = order.customers.phoneNumber;
-      if (phone && phone !== 'غير محدد') {
-        phoneCounts[phone] = (phoneCounts[phone] || 0) + 1;
-      }
-    });
-
-    return phoneCounts;
-  }, []);
-
-  const [repeatCounts, setRepeatCounts] = useState<Record<string, number>>({});
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [selectedCustomerPhone, setSelectedCustomerPhone] = useState<string>('');
-  const [selectedCustomerName, setSelectedCustomerName] = useState<string>('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [showBackToTop, setShowBackToTop] = useState(false);
-
   // Handle scroll to show/hide back-to-top button
   useEffect(() => {
     const handleScroll = () => {
@@ -201,62 +220,6 @@ export default function AllOrdersRefactor() {
     setSelectedCustomerName('');
   }, []);
 
-  const handleLoadMore = useCallback(async () => {
-    if (isLoadingMore || page >= totalPages) return;
-
-    setIsLoadingMore(true);
-    try {
-      const nextPage = page + 1;
-
-      try {
-        // Try API first
-        const response = await getOrders({ ...apiFilters, page: nextPage });
-
-        setOrders((prevOrders) => [...prevOrders, ...response.data]);
-        goToPage(nextPage);
-
-        const allOrders = [...orders, ...response.data];
-        const counts = calculateRepeatCounts(allOrders);
-        setRepeatCounts(counts);
-      } catch (apiErr) {
-        // For mock data, we don't need to load more as it's all client-side
-        console.warn('Load more not available in mock mode');
-      }
-    } catch (err) {
-    } finally {
-      setIsLoadingMore(false);
-    }
-  }, [isLoadingMore, page, totalPages, apiFilters, orders, goToPage, calculateRepeatCounts]);
-
-  const { sentinelRef } = useInfiniteScroll({
-    onLoadMore: handleLoadMore,
-    hasMore: page < totalPages,
-    isLoading: isLoadingMore,
-  });
-
-  // Fetch orders from API with unified filters
-  useEffect(() => {
-    const fetchOrders = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        // Try to fetch from API first
-        const response = await getOrders(apiFilters);
-        setOrders(response.data);
-        setTotalOrders(response.total);
-        setTotalPages(response.totalPages);
-
-        const counts = calculateRepeatCounts(response.data);
-        setRepeatCounts(counts);
-      } catch (err) {
-        console.warn('API fetch failed, using mock data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, [apiFilters, calculateRepeatCounts, limit]);
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">
@@ -401,7 +364,7 @@ export default function AllOrdersRefactor() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 my-4 justify-items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 my-4 justify-items-center">
             {orders.map((order) => (
               <OrderCard
                 key={order.id}
@@ -437,12 +400,6 @@ export default function AllOrdersRefactor() {
           {orders.length === 0 && (
             <div className="text-center py-12 text-gray-500">لا توجد طلبات</div>
           )}
-
-          {page < totalPages && (
-            <div ref={sentinelRef} className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#5D24E1]"></div>
-            </div>
-          )}
         </>
       )}
 
@@ -454,14 +411,14 @@ export default function AllOrdersRefactor() {
       />
 
       <Footer
-        currentPage={page}
+        currentPage={currentPage}
         totalPages={totalPages}
         totalItems={totalOrders}
-        hasNextPage={page < totalPages}
-        hasPreviousPage={page > 1}
+        hasNextPage={currentPage < totalPages}
+        hasPreviousPage={currentPage > 1}
         onPageChange={goToPage}
-        onPrevious={() => goToPage(Math.max(1, page - 1))}
-        onNext={() => goToPage(Math.min(totalPages, page + 1))}
+        onPrevious={() => goToPage(Math.max(1, currentPage - 1))}
+        onNext={() => goToPage(Math.min(totalPages, currentPage + 1))}
         onExportExcel={handleExportExcel}
         currentPageSize={limit}
         onPageSizeChange={updateLimit}

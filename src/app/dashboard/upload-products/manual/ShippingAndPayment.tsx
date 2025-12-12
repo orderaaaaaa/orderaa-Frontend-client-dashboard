@@ -101,8 +101,8 @@ function ShippingAndPayment() {
             {/* Dropdown (kept exactly as is) */}
             <div
               className={`transition-all duration-300 ease-in-out  ${includeShipping
-                  ? 'max-h-40 opacity-100 mt-4'
-                  : 'max-h-0 opacity-0'
+                ? 'max-h-40 opacity-100 mt-4'
+                : 'max-h-0 opacity-0'
                 }`}
             >
               <Dropdown

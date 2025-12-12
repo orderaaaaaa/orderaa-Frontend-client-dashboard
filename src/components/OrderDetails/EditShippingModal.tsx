@@ -20,13 +20,13 @@ export interface ShippingData {
 }
 
 interface Governorate {
-  id: string;
-  name: string;
+  key: string;
+  value: string;
 }
 
 interface City {
-  id: string;
-  name: string;
+  key: string;
+  value: string;
 }
 
 const shippingCompanyOptions = ['ارامبكس', 'فيدكس', 'DHL', 'شركة أخرى'];
@@ -46,13 +46,13 @@ export default function EditShippingModal({
 
   // Convert governorates to string array for SearchableSelect
   const governorateOptions = useMemo(
-    () => governorates.map((gov) => gov.name),
+    () => governorates.map((gov) => gov.value),
     [governorates]
   );
 
   // Convert cities to string array for SearchableSelect
   const cityOptions = useMemo(
-    () => cities.map((city) => city.name),
+    () => cities.map((city) => city.value),
     [cities]
   );
 
@@ -125,8 +125,8 @@ export default function EditShippingModal({
   };
 
   const handleGovernorateChange = (value: string) => {
-    const governorate = governorates.find((g) => g.name === value);
-    setSelectedGovernorateId(governorate?.id || '');
+    const governorate = governorates.find((g) => g.value === value);
+    setSelectedGovernorateId(governorate?.key || '');
     setFormData({
       ...formData,
       governorate: value,

@@ -1,9 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Order } from '@/types/orders';
-import { getOrderById } from '@/lib/api/order';
 import { AuthGuard } from '@/components/auth-guard';
 import PageTaps from '../allOrders/pageTaps';
 import FilterSection from '../allOrders/components/FilterSection';
@@ -12,6 +10,7 @@ import { useOrderStatistics } from '@/hooks/AllOrders/useOrderStatistics';
 import { useFilterForm } from '@/hooks/AllOrders/useFilterForm';
 import { useFilterOptions } from '@/hooks/AllOrders/useFilterOptions';
 import { useOrderDetailsNavigation } from '@/hooks/OrderDetails/useOrderDetailsNavigation';
+import { useOrderById } from '@/services/orders';
 import { DatePicker } from '@/components/ui/datepicker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, X } from 'lucide-react';
@@ -19,9 +18,16 @@ import { TimePeriod } from '@/utils/dateRangeUtils';
 
 export default function OrderDetails({ params }: { params: { orderId: string } }) {
   const router = useRouter();
-  const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const orderId = parseInt(params.orderId);
+
+  // Use React Query for fetching order - auto refetches when cache is invalidated
+  const {
+    data: order,
+    isLoading: loading,
+    error: queryError,
+  } = useOrderById(orderId);
+
+  const error = queryError ? 'فشل في تحميل بيانات الطلب' : null;
 
   const { statistics } = useOrderStatistics();
   const { options } = useFilterOptions();
@@ -42,7 +48,7 @@ export default function OrderDetails({ params }: { params: { orderId: string } }
     isEmpty,
     handleFilterFormChange,
   } = useOrderDetailsNavigation({
-    initialOrderId: parseInt(params.orderId),
+    initialOrderId: orderId,
   });
 
   // React Hook Form setup - connected to navigation hook
@@ -55,37 +61,10 @@ export default function OrderDetails({ params }: { params: { orderId: string } }
 
   // Navigate to target order when it changes
   useEffect(() => {
-    if (targetOrderId && targetOrderId !== parseInt(params.orderId)) {
+    if (targetOrderId && targetOrderId !== orderId) {
       router.push(`/dashboard/orders/${targetOrderId}`);
     }
-  }, [targetOrderId, params.orderId, router]);
-
-  useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        setLoading(true);
-        const orderId = parseInt(params.orderId);
-
-        // Try to fetch from API first
-        try {
-          const orderData = await getOrderById(orderId);
-          setOrder(orderData);
-          setError(null);
-        } catch (apiErr) {
-          // Fallback to mock data if API fails
-          console.warn('API failed, searching in mock data:', apiErr);
-        }
-      } catch (err: any) {
-        setError(err?.response?.data?.message || 'فشل في تحميل بيانات الطلب');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (params.orderId) {
-      fetchOrder();
-    }
-  }, [params.orderId]);
+  }, [targetOrderId, orderId, router]);
 
   if (loading) {
     return (
@@ -302,7 +281,6 @@ export default function OrderDetails({ params }: { params: { orderId: string } }
         )}
         <OrderDetailsInfo
           order={order}
-          onOrderUpdate={setOrder}
           onNavigateToNextOrder={(nextOrderId) => {
             router.push(`/dashboard/orders/${nextOrderId}`);
           }}
