@@ -1,19 +1,93 @@
 "use client";
 
-import React from "react";
-import { Control, Controller, FieldErrors } from "react-hook-form";
+import React, { useState, useEffect } from "react";
+import { Control, Controller, FieldErrors, useWatch, UseFormSetValue } from "react-hook-form";
 import { OrderFiltersFormData } from "@/schemas/orderFilters.schema";
 import { FilterOptions } from "@/types/orders";
 import SearchableSelect from "./SearchableSelect";
 import { DatePicker } from "@/components/ui/datepicker";
+import { getGovernorates, getCities } from "@/lib/api/lookups";
+
+interface GovernorateData {
+    key: string;
+    value: string;
+}
+
+interface CityData {
+    key: string;
+    value: string;
+}
 
 type Props = {
     control: Control<OrderFiltersFormData>;
     errors: FieldErrors<OrderFiltersFormData>;
     options: FilterOptions;
+    setValue?: UseFormSetValue<OrderFiltersFormData>;
 };
 
-export default function FilterPanel({ control, errors, options }: Props) {
+export default function FilterPanel({ control, errors, options, setValue }: Props) {
+    const [governorates, setGovernorates] = useState<GovernorateData[]>([]);
+    const [cities, setCities] = useState<CityData[]>([]);
+    const [isLoadingCities, setIsLoadingCities] = useState(false);
+
+    // Watch governorate field value
+    const selectedGovernorate = useWatch({
+        control,
+        name: "governorate",
+    });
+
+    // Fetch governorates on mount
+    useEffect(() => {
+        const fetchGovernorates = async () => {
+            try {
+                const data = await getGovernorates();
+                if (Array.isArray(data)) {
+                    setGovernorates(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch governorates:", error);
+            }
+        };
+        fetchGovernorates();
+    }, []);
+
+    // Fetch cities when governorate changes
+    useEffect(() => {
+        const fetchCities = async () => {
+            if (!selectedGovernorate) {
+                setCities([]);
+                return;
+            }
+
+            // Find the governorate key from the selected value
+            const governorate = governorates.find(
+                (g) => g.value === selectedGovernorate
+            );
+            if (!governorate) {
+                setCities([]);
+                return;
+            }
+
+            setIsLoadingCities(true);
+            try {
+                const data = await getCities(governorate.key);
+                if (Array.isArray(data)) {
+                    setCities(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch cities:", error);
+                setCities([]);
+            } finally {
+                setIsLoadingCities(false);
+            }
+        };
+        fetchCities();
+    }, [selectedGovernorate, governorates]);
+
+    // Get governorate values for the dropdown
+    const governorateOptions = governorates.map((g) => g.value);
+    // Get city values for the dropdown
+    const cityOptions = cities.map((c) => c.value);
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -139,9 +213,15 @@ export default function FilterPanel({ control, errors, options }: Props) {
                 render={({ field }) => (
                     <SearchableSelect
                         value={field.value || ''}
-                        onChange={field.onChange}
+                        onChange={(value) => {
+                            field.onChange(value);
+                            // Clear area when governorate changes
+                            if (setValue) {
+                                setValue('area', '');
+                            }
+                        }}
                         onBlur={field.onBlur}
-                        options={options.governorateOptions}
+                        options={governorateOptions}
                         placeholder="المحافظة"
                         widthClass="sm:max-w-62"
                         error={errors.governorate?.message}
@@ -158,10 +238,11 @@ export default function FilterPanel({ control, errors, options }: Props) {
                         value={field.value || ''}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
-                        options={options.areaOptions}
-                        placeholder="المنطقة"
+                        options={cityOptions}
+                        placeholder={isLoadingCities ? "جاري التحميل..." : "المنطقة"}
                         widthClass="sm:max-w-62"
                         error={errors.area?.message}
+                        disabled={!selectedGovernorate || isLoadingCities}
                     />
                 )}
             />

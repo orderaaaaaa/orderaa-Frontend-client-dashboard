@@ -12,6 +12,7 @@ type Props = {
   widthClass?: string;
   error?: string;
   name?: string;
+  disabled?: boolean;
 };
 
 const SearchableSelect = forwardRef<HTMLDivElement, Props>(function SearchableSelect({
@@ -23,6 +24,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, Props>(function SearchableSe
   widthClass = "w-56",
   error,
   name,
+  disabled = false,
 }, ref) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
@@ -31,7 +33,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, Props>(function SearchableSe
   const inputRef = useRef<HTMLInputElement>(null);
 
   const filtered = useMemo(
-    () => options.filter((o) => o.toLowerCase().includes(q.toLowerCase())),
+    () => (options || []).filter((o) => o && o.toLowerCase().includes(q.toLowerCase())),
     [options, q]
   );
 
@@ -77,9 +79,13 @@ const SearchableSelect = forwardRef<HTMLDivElement, Props>(function SearchableSe
     <div className={`flex flex-col gap-1  ${widthClass}`} ref={ref || internalRef}>
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
-        className={`px-3 py-2 relative rounded border cursor-pointer bg-white font-medium truncate flex items-center justify-between ${error ? 'border-red-500' : 'border-gray-300'
-          }`}
+        onClick={() => !disabled && setOpen((v) => !v)}
+        disabled={disabled}
+        className={`px-3 py-2 relative rounded border font-medium truncate flex items-center justify-between ${
+          disabled
+            ? 'bg-gray-100 cursor-not-allowed text-gray-400 border-gray-200'
+            : 'cursor-pointer bg-white'
+        } ${error ? 'border-red-500' : 'border-gray-300'}`}
         aria-haspopup="listbox"
         aria-expanded={open}
       >

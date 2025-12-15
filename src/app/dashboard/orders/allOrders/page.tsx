@@ -111,6 +111,7 @@ export default function AllOrdersRefactor() {
   const {
     control,
     formState: { errors },
+    setValue,
   } = useFilterForm({
     onSubmit: handleFormSubmit,
   });
@@ -322,6 +323,7 @@ export default function AllOrdersRefactor() {
       <FilterSection
         control={control}
         errors={errors}
+        setValue={setValue}
         options={{
           productOptions: options.productNames || [],
           sizeColorOptions: [

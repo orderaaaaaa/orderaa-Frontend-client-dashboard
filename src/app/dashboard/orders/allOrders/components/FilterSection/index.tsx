@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Control, FieldErrors } from 'react-hook-form';
+import { Control, FieldErrors, UseFormSetValue } from 'react-hook-form';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { FilterOptions } from '@/types/orders';
 import FilterPanelRHF from './FilterPanelRHF';
@@ -11,6 +11,7 @@ type FilterSectionProps = {
   control: Control<OrderFiltersFormData>;
   errors: FieldErrors<OrderFiltersFormData>;
   options?: FilterOptions;
+  setValue?: UseFormSetValue<OrderFiltersFormData>;
 };
 
 const FilterSection = React.memo(function FilterSection({
@@ -22,6 +23,7 @@ const FilterSection = React.memo(function FilterSection({
     governorateOptions: [],
     areaOptions: [],
   },
+  setValue,
 }: FilterSectionProps) {
   return (
     <div className="relative z-10 bg-white rounded-xl py-[3px] mt-6">
@@ -32,7 +34,7 @@ const FilterSection = React.memo(function FilterSection({
         </div>
       </div>
 
-      <FilterPanelRHF control={control} errors={errors} options={options} />
+      <FilterPanelRHF control={control} errors={errors} options={options} setValue={setValue} />
     </div>
   );
 });

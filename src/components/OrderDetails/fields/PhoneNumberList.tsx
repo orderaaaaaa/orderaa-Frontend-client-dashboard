@@ -6,8 +6,11 @@ import {
   LiaTimesSolid,
   LiaPlusSolid,
   LiaTrashSolid,
+  LiaCopySolid,
 } from 'react-icons/lia';
 import { usePhoneNumbers } from '@/hooks/OrderDetails/usePhoneNumbers';
+import { Button } from '@/components/ui/button';
+import { toast } from 'react-toastify';
 
 /**
  * Props for PhoneNumberList component
@@ -67,6 +70,15 @@ export function PhoneNumberList({
     window.location.href = `tel:${phone}`;
   };
 
+  const handleCopyPhone = async (phone: string) => {
+    try {
+      await navigator.clipboard.writeText(phone);
+      toast.success('تم نسخ الرقم');
+    } catch {
+      toast.error('فشل في نسخ الرقم');
+    }
+  };
+
   const handleEditClick = (index: number) => {
     phones.handleEdit(index);
     setIsPhoneDropdownOpen(null);
@@ -110,19 +122,21 @@ export function PhoneNumberList({
                   {phone}
                 </button>
                 <div className="relative">
-                  <button
+                  <Button
+                    variant="ghost"
                     onClick={() =>
                       setIsPhoneDropdownOpen(isPhoneDropdownOpen === index ? null : index)
                     }
                     className="p-1 hover:bg-purple-100 rounded transition-colors"
                   >
                     <LiaEditSolid className="w-4 h-4 text-[#5D24E1]" />
-                  </button>
+                  </Button>
                   {isPhoneDropdownOpen === index && (
                     <div
                       className="absolute top-full mt-2 left-0 min-w-[150px] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50"
                     >
-                      <button
+                      <Button
+                        variant="ghost"
                         onClick={() => {
                           handlePhoneCall(phone);
                           setIsPhoneDropdownOpen(null);
@@ -131,16 +145,29 @@ export function PhoneNumberList({
                       >
                         <LiaPhoneSolid className="w-4 h-4" />
                         اتصال
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          handleCopyPhone(phone);
+                          setIsPhoneDropdownOpen(null);
+                        }}
+                        className="w-full px-4 py-2 text-right text-sm hover:bg-purple-50 transition-colors flex items-center gap-2 justify-start"
+                      >
+                        <LiaCopySolid className="w-4 h-4" />
+                        نسخ
+                      </Button>
+                      <Button
+                        variant="ghost"
                         onClick={() => handleEditClick(index)}
                         className="w-full px-4 py-2 text-right text-sm hover:bg-purple-50 transition-colors flex items-center gap-2 justify-start"
                       >
                         <LiaEditSolid className="w-4 h-4" />
                         تعديل
-                      </button>
+                      </Button>
                       {phones.phoneNumbers.length > 1 && (
-                        <button
+                        <Button
+                          variant="ghost"
                           onClick={() => {
                             phones.handleRemove(index);
                             setIsPhoneDropdownOpen(null);
@@ -149,7 +176,7 @@ export function PhoneNumberList({
                         >
                           <LiaTrashSolid className="w-4 h-4" />
                           حذف
-                        </button>
+                        </Button>
                       )}
                     </div>
                   )}

@@ -39,14 +39,6 @@ const getDateFromOption = (option: UrgentOption): Date => {
   }
 };
 
-// Format date as YYYY-MM-DD in local timezone
-const formatDateLocal = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
 export default function UrgentModal({
   isOpen,
   onClose,
@@ -90,10 +82,9 @@ export default function UrgentModal({
       return;
     }
 
-    const formattedDate = formatDateLocal(urgentDate);
     onConfirm({
       shippingCost: shippingCostResult.data,
-      urgentDate: formattedDate
+      urgentDate: urgentDate.toISOString()
     });
     // Don't reset here - only reset when modal closes (on success via handleClose)
   };
