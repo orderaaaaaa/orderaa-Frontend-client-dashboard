@@ -6,6 +6,7 @@ import FilterSection from './components/FilterSection';
 import OrderCard from './components/OrderCard';
 import Footer from './components/Footer';
 import CustomerOrdersModal from './components/CustomerOrdersModal';
+import BulkActionsBar from '@/components/BulkActionsBar';
 import type { Order } from '@/types/orders';
 import PageTaps from './pageTaps';
 import { useUnifiedFilters } from '@/hooks/AllOrders/useUnifiedFilters';
@@ -93,6 +94,11 @@ export default function AllOrdersRefactor() {
   const repeatCounts = useMemo(() => {
     return calculateRepeatCounts(orders);
   }, [orders, calculateRepeatCounts]);
+
+  // Get selected orders as Order objects for BulkActionsBar
+  const selectedOrders = useMemo(() => {
+    return orders.filter((order) => selectedOrderIds.includes(order.id));
+  }, [orders, selectedOrderIds]);
 
   // React Hook Form setup
   const handleFormSubmit = useCallback(
@@ -192,6 +198,30 @@ export default function AllOrdersRefactor() {
       toast.error('فشل في تصدير الطلبات. الرجاء المحاولة مرة أخرى.');
     }
   }, [apiFilters, select, selectedOrderIds, orders]);
+
+  // Handle Edit Status
+  const handleEditStatus = useCallback(() => {
+    // TODO: Implement edit status functionality
+    toast.info(`سيتم تعديل حالة ${selectedOrders.length} طلب`);
+  }, [selectedOrders]);
+
+  // Handle WhatsApp Share
+  const handleShareWhatsApp = useCallback(() => {
+    // TODO: Implement WhatsApp share functionality
+    toast.info(`سيتم مشاركة ${selectedOrders.length} طلب عبر واتساب`);
+  }, [selectedOrders]);
+
+  // Handle Shipping
+  const handleShipping = useCallback(() => {
+    // TODO: Implement shipping functionality
+    toast.info(`سيتم شحن ${selectedOrders.length} طلب`);
+  }, [selectedOrders]);
+
+  // Handle Other
+  const handleOther = useCallback(() => {
+    // TODO: Implement other functionality
+    toast.info(`${selectedOrders.length} طلب محدد`);
+  }, [selectedOrders]);
 
   // Handle scroll to show/hide back-to-top button
   useEffect(() => {
@@ -421,11 +451,23 @@ export default function AllOrdersRefactor() {
         onPageChange={goToPage}
         onPrevious={() => goToPage(Math.max(1, currentPage - 1))}
         onNext={() => goToPage(Math.min(totalPages, currentPage + 1))}
-        onExportExcel={handleExportExcel}
         currentPageSize={limit}
         onPageSizeChange={updateLimit}
-        hasSelectedOrders={selectedOrderIds.length > 0}
+        hasSelectedOrders={selectedOrders.length > 0 && !isModalOpen}
       />
+
+      {/* Bulk Actions Bar - fixed at bottom, hidden when modal is open */}
+      {!isModalOpen && (
+        <BulkActionsBar
+          selectedOrders={selectedOrders}
+          onEditStatus={handleEditStatus}
+          onExportExcel={handleExportExcel}
+          onShareWhatsApp={handleShareWhatsApp}
+          onShipping={handleShipping}
+          onOther={handleOther}
+          position="fixed"
+        />
+      )}
 
       {/* Back to Top Button */}
       {showBackToTop && (

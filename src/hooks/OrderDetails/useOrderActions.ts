@@ -1,12 +1,11 @@
 import { useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { updateOrder, getNextOrderId } from '@/lib/api/order';
 import { Order, OrderStatus, OrderStatusItem } from '@/types/orders';
 import { ShippingData } from '@/components/OrderDetails/EditShippingModal';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
 
-/**
- * Options for useOrderActions hook
- */
 export interface UseOrderActionsOptions {
   order: Order;
   onOrderUpdate?: (updatedOrder: Order) => void;
@@ -19,9 +18,6 @@ export interface UseOrderActionsOptions {
   availableStatuses: OrderStatusItem[];
 }
 
-/**
- * Return type for useOrderActions hook
- */
 export interface OrderActionsState {
   handleStatusUpdateAndNavigate: (
     status: OrderStatus,
@@ -39,24 +35,6 @@ export interface OrderActionsState {
   handleAddPackagingNote: (note: string) => Promise<void>;
 }
 
-/**
- * Custom hook to centralize all order action logic
- *
- * @param options - Configuration options
- * @returns Object with all action handler functions
- *
- * @example
- * const actions = useOrderActions({
- *   order: localOrder,
- *   onOrderUpdate,
- *   onNavigateToNextOrder,
- *   dateRange,
- *   statusFilter,
- *   availableStatuses
- * });
- *
- * // Usage: actions.handleConfirmAction(), actions.handleUrgent(data), etc.
- */
 export function useOrderActions({
   order,
   onOrderUpdate,
@@ -65,10 +43,8 @@ export function useOrderActions({
   statusFilter,
   availableStatuses,
 }: UseOrderActionsOptions): OrderActionsState {
-  /**
-   * Map action strings to status values by searching through availableStatuses
-   * This ensures we use the actual status values from the API rather than hardcoded enums
-   */
+  const queryClient = useQueryClient();
+
   const getStatusFromAction = useCallback((action: string): OrderStatus | null => {
     // Map action strings to the status value identifiers we expect from the API
     const actionToStatusValueMap: Record<string, string> = {
@@ -100,9 +76,6 @@ export function useOrderActions({
     return matchedStatus ? (matchedStatus.value as OrderStatus) : null;
   }, [availableStatuses]);
 
-  /**
-   * Core function to handle status update and navigation
-   */
   const handleStatusUpdateAndNavigate = useCallback(
     async (
       status: OrderStatus,
@@ -111,7 +84,15 @@ export function useOrderActions({
       try {
         const updatedOrder = await updateOrder(order.id, {
           ...updateData,
-          status,
+          attemptedEvent: status,
+        });
+
+        // Invalidate order details cache to get fresh data
+        queryClient.invalidateQueries({
+          queryKey: [QUERY_KEYS.ORDER_DETAILS, order.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [QUERY_KEYS.ORDER_STATISTICS],
         });
 
         if (onOrderUpdate) {
@@ -153,12 +134,9 @@ export function useOrderActions({
         return false;
       }
     },
-    [order.id, onOrderUpdate, onNavigateToNextOrder, dateRange, statusFilter, availableStatuses]
+    [order.id, onOrderUpdate, onNavigateToNextOrder, dateRange, statusFilter, availableStatuses, queryClient]
   );
 
-  /**
-   * Handle urgent action
-   */
   const handleUrgent = useCallback(
     async (data: { shippingCost?: number; urgentDate: string }) => {
       const status = getStatusFromAction('urgent');
@@ -178,9 +156,6 @@ export function useOrderActions({
     [getStatusFromAction, handleStatusUpdateAndNavigate]
   );
 
-  /**
-   * Handle cancel action
-   */
   const handleCancel = useCallback(
     async (data: { reason: string; notes: string }) => {
       const status = getStatusFromAction('cancel');
@@ -197,9 +172,6 @@ export function useOrderActions({
     [getStatusFromAction, handleStatusUpdateAndNavigate]
   );
 
-  /**
-   * Handle stop operation action
-   */
   const handleStopOperation = useCallback(
     async (notes: string) => {
       const status = getStatusFromAction('stop_operation');
@@ -216,9 +188,6 @@ export function useOrderActions({
     [getStatusFromAction, handleStatusUpdateAndNavigate]
   );
 
-  /**
-   * Handle postpone hours action
-   */
   const handlePostponeHours = useCallback(
     async (data: { duration?: '30min' | '1hour' | '2hours'; time?: Date }) => {
       const status = getStatusFromAction('postpone_hours');
@@ -236,9 +205,6 @@ export function useOrderActions({
     [getStatusFromAction, handleStatusUpdateAndNavigate]
   );
 
-  /**
-   * Handle postpone days action
-   */
   const handlePostponeDays = useCallback(
     async (data: { duration?: '1day' | '2days' | '3days' | 'week'; date?: Date }) => {
       const status = getStatusFromAction('postpone_days');
@@ -256,9 +222,6 @@ export function useOrderActions({
     [getStatusFromAction, handleStatusUpdateAndNavigate]
   );
 
-  /**
-   * Handle reject modification action
-   */
   const handleRejectModification = useCallback(async () => {
     const status = getStatusFromAction('reject_modification');
     if (!status) {
@@ -268,9 +231,6 @@ export function useOrderActions({
     return await handleStatusUpdateAndNavigate(status);
   }, [getStatusFromAction, handleStatusUpdateAndNavigate]);
 
-  /**
-   * Handle waiting payment action
-   */
   const handleWaitingPayment = useCallback(async () => {
     const status = getStatusFromAction('waiting_payment');
     if (!status) {
@@ -280,9 +240,6 @@ export function useOrderActions({
     return await handleStatusUpdateAndNavigate(status);
   }, [getStatusFromAction, handleStatusUpdateAndNavigate]);
 
-  /**
-   * Handle generic confirm action (from dialog)
-   */
   const handleConfirmAction = useCallback(
     async (action: string) => {
       const status = getStatusFromAction(action);
@@ -296,9 +253,6 @@ export function useOrderActions({
     [getStatusFromAction, handleStatusUpdateAndNavigate]
   );
 
-  /**
-   * Handle shipping data update
-   */
   const handleUpdateShipping = useCallback(
     async (data: ShippingData) => {
       try {

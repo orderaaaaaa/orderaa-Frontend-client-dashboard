@@ -59,7 +59,7 @@ export function EditableTextField({
                 value={field.value}
                 onChange={(e) => field.setValue(e.target.value)}
                 placeholder={placeholder}
-                className="flex-1 min-w-0 w-full border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1] min-h-[60px] resize-y"
+                className="flex-1 min-w-0 w-full border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1] min-h-[150px] resize-y"
                 autoFocus
               />
             ) : (

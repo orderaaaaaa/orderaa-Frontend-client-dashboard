@@ -12,6 +12,7 @@ type InputProps = {
   className?: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 };
 
 export default function Input({
@@ -25,6 +26,7 @@ export default function Input({
   className,
   value,
   onChange,
+  onKeyDown,
   ...rest
 }: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
@@ -64,6 +66,7 @@ export default function Input({
           className={inputClassName}
           value={value}
           onChange={onChange}
+          onKeyDown={onKeyDown}
           {...(register ? { ...register(name) } : {})}
           {...rest}
         />

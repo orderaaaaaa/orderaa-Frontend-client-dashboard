@@ -1,13 +1,15 @@
 'use client';
 
 import type React from 'react';
-import { useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { useEffect, useCallback, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 import { AuthGuard } from '@/components/auth-guard';
 import { useOrdersStore } from '@/store/ordersStore';
 import { useSidebar } from '@/hooks/useSidebar';
 import { useAuthActions } from '@/hooks/useAuthActions';
 import { navigation } from '@/constants/Navbar';
+import { getOrders } from '@/lib/api/order';
 import {
   Sidebar,
   TopBar,
@@ -34,9 +36,50 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     handleNavItemClick,
   } = useSidebar();
 
-  const { searchQuery, setSearchQuery } = useOrdersStore();
+  const { setSearchQuery } = useOrdersStore();
   const { user, handleUserAction } = useAuthActions();
   const pathname = usePathname();
+  const router = useRouter();
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Check if we're on the order details page (pattern: /dashboard/orders/[number])
+  const isOrderDetailsPage = useCallback(() => {
+    const orderDetailsPattern = /^\/dashboard\/orders\/\d+$/;
+    return orderDetailsPattern.test(pathname);
+  }, [pathname]);
+
+  // Handle search - behavior depends on current page
+  const handleSearch = useCallback(async (query: string) => {
+    if (isOrderDetailsPage()) {
+      // On order details page: search and navigate to first result
+      setIsSearching(true);
+      try {
+        const response = await getOrders({ search: query, limit: 1, page: 1 });
+        if (response.data && response.data.length > 0) {
+          const firstOrder = response.data[0];
+          router.push(`/dashboard/orders/${firstOrder.id}`);
+        } else {
+          toast.info('لا يوجد بيانات للبحث');
+        }
+      } catch (error) {
+        console.error('Search failed:', error);
+        toast.error('فشل البحث');
+      } finally {
+        setIsSearching(false);
+      }
+    } else {
+      // On any other page: update store and navigate to all orders page
+      setSearchQuery(query);
+      if (!pathname.includes('/dashboard/orders/allOrders')) {
+        router.push('/dashboard/orders/allOrders');
+      }
+    }
+  }, [pathname, router, setSearchQuery, isOrderDetailsPage]);
+
+  // Handle clear search - clear the store to refetch all orders
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery('');
+  }, [setSearchQuery]);
 
   // Auto-open dropdown if pathname matches a child route
   useEffect(() => {
@@ -74,8 +117,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <MainContent>
             <TopBar
               onMenuToggle={handleSidebarToggle}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
+              onSearch={handleSearch}
+              onClearSearch={handleClearSearch}
+              isSearching={isSearching}
               username={user?.username}
               onUserAction={handleUserAction}
             />

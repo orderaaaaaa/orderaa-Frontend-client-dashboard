@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Menu, Search } from 'lucide-react';
+import { LiaSearchSolid, LiaTimesSolid } from 'react-icons/lia';
 import Input from '../ui/Input';
 import { UserMenu } from './UserMenu';
 import { UserMenuKey } from '@/hooks/useSidebar';
@@ -11,21 +12,35 @@ import clsx from 'clsx';
 
 interface TopBarProps {
   onMenuToggle: () => void;
-  searchQuery: string;
-  onSearchChange: (value: string) => void;
+  onSearch: (query: string) => void;
+  onClearSearch: () => void;
+  isSearching?: boolean;
   username?: string;
   onUserAction: (key: UserMenuKey) => void;
 }
 
 export function TopBar({
   onMenuToggle,
-  searchQuery,
-  onSearchChange,
+  onSearch,
+  onClearSearch,
+  isSearching = false,
   username,
   onUserAction,
 }: TopBarProps) {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const authUser = useAuthStore((state) => state.user);
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      onSearch(searchQuery.trim());
+    }
+  };
+
+  const handleClear = () => {
+    setSearchQuery('');
+    onClearSearch();
+  };
 
   // ✅ Update the browser top bar color
   useEffect(() => {
@@ -87,28 +102,85 @@ export function TopBar({
       {/* ✅ Mobile: Search bar (toggleable) */}
       {showMobileSearch && (
         <div className="w-full lg:hidden mt-3">
-          <Input
-            name="search"
-            placeholder="بحث"
-            icon={Search}
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="bg-white text-black placeholder:text-[#5d24e1] h-10 placeholder:font-medium border-2 !border-[#5D24E1]/30 rounded-lg"
-          />
+          <div className="relative">
+            <Input
+              name="search"
+              placeholder="بحث"
+              icon={Search}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSearch()}
+              className="bg-white text-black placeholder:text-[#5d24e1] h-10 placeholder:font-medium border-2 !border-[#5D24E1]/30 rounded-lg !pl-20"
+            />
+            <div className="absolute left-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              {searchQuery && (
+                <Button
+                  type="button"
+                  onClick={handleClear}
+                  className="p-1 text-gray-400 hover:text-gray-600"
+                  aria-label="مسح البحث"
+                >
+                  <LiaTimesSolid className="h-4 w-4" />
+                </Button>
+              )}
+              <Button
+                type="button"
+                onClick={handleSearch}
+                disabled={isSearching}
+                className="p-1.5 bg-[#5D24E1] hover:bg-[#4a1db8] text-white rounded-md disabled:opacity-70"
+                aria-label="بحث"
+              >
+                {isSearching ? (
+                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <LiaSearchSolid className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </div>
         </div>
       )}
 
       {/* ✅ Desktop version */}
       <div className="hidden lg:grid grid-cols-[1fr_auto] gap-4 items-center w-full h-16">
-        <Input
-          name="search"
-          placeholder="البحث"
-          icon={Search}
-          className="sm:rounded-[38px] lg:rounded-[38px] bg-[#5D24E1]/8 border-0"
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          aria-label="Search"
-        />
+        <div className="relative">
+          <Input
+            name="search"
+            placeholder="البحث"
+            icon={Search}
+            className="sm:rounded-[38px] lg:rounded-[38px] bg-[#5D24E1]/8 border-0 !pl-24"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSearch()}
+            aria-label="Search"
+          />
+          <div className="absolute left-0 top-1/2 -translate-y-4 flex items-center gap-1">
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                type="button"
+                onClick={handleClear}
+                className="p-1.5 text-gray-400 hover:text-gray-600"
+                aria-label="مسح البحث"
+              >
+                <LiaTimesSolid className="h-4 w-4" />
+              </Button>
+            )}
+            <Button
+              type="button"
+              onClick={handleSearch}
+              disabled={isSearching}
+              className="p-2 bg-[#5D24E1] hover:bg-[#4a1db8] text-white rounded-full disabled:opacity-70"
+              aria-label="بحث"
+            >
+              {isSearching ? (
+                <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <LiaSearchSolid className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        </div>
 
         <div className="flex items-center gap-3">
           <UserMenu

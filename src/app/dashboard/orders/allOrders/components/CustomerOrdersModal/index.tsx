@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { X } from 'lucide-react';
-import type { Order, OrderProduct } from '@/types/orders';
+import { toast } from 'react-toastify';
+import type { Order } from '@/types/orders';
 import { useCustomerOrders } from '@/services/orders';
 import OrderCard from '../OrderCard';
 import { Button } from '@/components/ui/button';
+import BulkActionsBar from '@/components/BulkActionsBar';
+import { exportOrdersToExcel } from '@/utils/exportOrders';
 
 interface CustomerOrdersModalProps {
   isOpen: boolean;
@@ -30,6 +33,11 @@ export default function CustomerOrdersModal({
   const orders = ordersData?.data ?? [];
   const error = queryError ? 'فشل في تحميل طلبات العميل' : null;
 
+  // Get selected orders as Order objects
+  const selectedOrders = useMemo(() => {
+    return orders.filter((order: Order) => selectedOrderIds.includes(order.id));
+  }, [orders, selectedOrderIds]);
+
   // Reset selection when modal opens
   useEffect(() => {
     if (isOpen) {
@@ -37,13 +45,63 @@ export default function CustomerOrdersModal({
     }
   }, [isOpen]);
 
-  const handleCheckboxChange = (orderId: number, checked: boolean) => {
+  const handleCheckboxChange = useCallback((orderId: number, checked: boolean) => {
     if (checked) {
       setSelectedOrderIds((prev) => [...prev, orderId]);
     } else {
       setSelectedOrderIds((prev) => prev.filter((id) => id !== orderId));
     }
-  };
+  }, []);
+
+  // Handle select all toggle
+  const handleSelectAllToggle = useCallback(() => {
+    if (selectedOrderIds.length === orders.length && orders.length > 0) {
+      setSelectedOrderIds([]);
+    } else {
+      setSelectedOrderIds(orders.map((o: Order) => o.id));
+    }
+  }, [orders, selectedOrderIds]);
+
+  // Handle Excel export for modal orders
+  const handleExportExcel = useCallback(() => {
+    try {
+      if (selectedOrders.length === 0) {
+        toast.warning('الرجاء تحديد طلبات للتصدير');
+        return;
+      }
+
+      const fileName = exportOrdersToExcel(selectedOrders, `customer_${customerPhone}_orders`);
+      toast.success(
+        `تم تصدير ${selectedOrders.length} طلب بنجاح! \nاسم الملف: ${fileName}`
+      );
+    } catch (err) {
+      toast.error('فشل في تصدير الطلبات. الرجاء المحاولة مرة أخرى.');
+    }
+  }, [selectedOrders, customerPhone]);
+
+  // Handle Edit Status
+  const handleEditStatus = useCallback(() => {
+    // TODO: Implement edit status functionality
+    toast.info(`سيتم تعديل حالة ${selectedOrders.length} طلب`);
+  }, [selectedOrders]);
+
+  // Handle WhatsApp Share
+  const handleShareWhatsApp = useCallback(() => {
+    // TODO: Implement WhatsApp share functionality
+    toast.info(`سيتم مشاركة ${selectedOrders.length} طلب عبر واتساب`);
+  }, [selectedOrders]);
+
+  // Handle Shipping
+  const handleShipping = useCallback(() => {
+    // TODO: Implement shipping functionality
+    toast.info(`سيتم شحن ${selectedOrders.length} طلب`);
+  }, [selectedOrders]);
+
+  // Handle Other
+  const handleOther = useCallback(() => {
+    // TODO: Implement other functionality
+    toast.info(`${selectedOrders.length} طلب محدد`);
+  }, [selectedOrders]);
 
   if (!isOpen) return null;
 
@@ -84,7 +142,35 @@ export default function CustomerOrdersModal({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-8">
+        {/* Selection toolbar */}
+        {orders.length > 0 && !loading && !error && (
+          <div className="flex items-center justify-between px-8 py-3 bg-gray-50 border-b border-gray-200">
+            <div className="flex items-center gap-3">
+              <Button
+                onClick={handleSelectAllToggle}
+                className="px-4 py-2 text-sm bg-[#5D24E1] text-white rounded-lg hover:bg-[#682fee] transition-colors"
+              >
+                {selectedOrderIds.length === orders.length && orders.length > 0
+                  ? 'إلغاء تحديد الكل'
+                  : (
+                    <span className="flex items-center gap-2">
+                      تحديد الكل
+                      <span className="bg-white text-[#5D24E1] rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                        {orders.length}
+                      </span>
+                    </span>
+                  )}
+              </Button>
+              {selectedOrderIds.length > 0 && (
+                <span className="text-sm text-gray-600">
+                  تم تحديد {selectedOrderIds.length} طلب
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className={`flex-1 overflow-y-auto p-8 ${selectedOrders.length > 0 ? 'pb-24' : ''}`}>
           {loading ? (
             <div className="flex items-center justify-center min-h-[400px]">
               <div className="text-center">
@@ -160,6 +246,18 @@ export default function CustomerOrdersModal({
             </p>
           </div>
         </div>
+
+        {/* Bulk Actions Bar - sticky inside modal */}
+        <BulkActionsBar
+          selectedOrders={selectedOrders}
+          onEditStatus={handleEditStatus}
+          onExportExcel={handleExportExcel}
+          onShareWhatsApp={handleShareWhatsApp}
+          onShipping={handleShipping}
+          onOther={handleOther}
+          position="sticky"
+          className="rounded-b-2xl"
+        />
       </div>
     </div>
   );

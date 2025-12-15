@@ -1,11 +1,6 @@
 import api from './index';
 import { Order, OrderStatus, FilterOrdersDto, PaginatedResponse, FilterOptionsResponse, OrderStatisticsResponse, OrderStatusesResponse } from '@/types/orders';
 
-/**
- * Fetch orders with optional filters and pagination
- * @param filters - Filter options including status, search, page, and limit
- * @returns Paginated response with orders
- */
 export async function getOrders(
   filters?: FilterOrdersDto
 ): Promise<PaginatedResponse<Order>> {
@@ -22,11 +17,6 @@ export async function getOrders(
   }
 }
 
-/**
- * Fetch a single order by ID
- * @param id - Order ID
- * @returns Order details
- */
 export async function getOrderById(id: number): Promise<Order> {
   try {
     const response = await api.get<Order>(`/orders/${id}`);
@@ -36,10 +26,6 @@ export async function getOrderById(id: number): Promise<Order> {
   }
 }
 
-/**
- * Fetch dynamic filter options from backend
- * @returns Filter options (governorates, cities, areas, products, etc.)
- */
 export async function getFilterOptions(): Promise<FilterOptionsResponse> {
   try {
     const response = await api.get<FilterOptionsResponse>('/orders/filter-options');
@@ -49,10 +35,6 @@ export async function getFilterOptions(): Promise<FilterOptionsResponse> {
   }
 }
 
-/**
- * Fetch order statistics
- * @returns Statistics (total orders, status counts, revenue, etc.)
- */
 export async function getOrderStatistics(): Promise<OrderStatisticsResponse> {
   try {
     const response = await api.get<OrderStatisticsResponse>('/orders/statistics');
@@ -62,12 +44,6 @@ export async function getOrderStatistics(): Promise<OrderStatisticsResponse> {
   }
 }
 
-/**
- * Update order product variant (size and color)
- * @param orderProductId - Order product ID
- * @param variant - Variant string (e.g., "37 - اسود")
- * @returns Updated order product
- */
 export async function updateOrderProduct(
   orderProductId: number,
   variant: string
@@ -83,11 +59,6 @@ export async function updateOrderProduct(
   }
 }
 
-/**
- * Delete an order product
- * @param orderProductId - Order product ID
- * @returns Deletion confirmation
- */
 export async function deleteOrderProduct(
   orderProductId: number
 ): Promise<any> {
@@ -101,10 +72,6 @@ export async function deleteOrderProduct(
   }
 }
 
-/**
- * Get all products
- * @returns List of all products
- */
 export async function getAllProducts(): Promise<any> {
   try {
     const response = await api.get('/orders/products');
@@ -114,19 +81,15 @@ export async function getAllProducts(): Promise<any> {
   }
 }
 
-/**
- * Add a product to an order
- * @param orderId - Order ID
- * @param productId - Product ID
- * @param variant - Variant string (e.g., "37 - اسود")
- * @param quantity - Quantity
- * @param price - Price
- * @returns Added order product
- */
+export interface ProductVariant {
+  label: string;
+  value: string;
+}
+
 export async function addOrderProduct(
   orderId: number,
   productId: number,
-  variant: string,
+  variants: ProductVariant[],
   quantity: number,
   price: number
 ): Promise<any> {
@@ -135,7 +98,7 @@ export async function addOrderProduct(
       `/orders/${orderId}/products`,
       {
         productId,
-        variant,
+        variants,
         quantity,
         price,
       }
@@ -146,12 +109,6 @@ export async function addOrderProduct(
   }
 }
 
-/**
- * Update customer information
- * @param customerId - Customer ID
- * @param customerData - Updated customer data
- * @returns Updated customer
- */
 export async function updateCustomer(
   customerId: number,
   customerData: {
@@ -174,10 +131,6 @@ export async function updateCustomer(
   }
 }
 
-/**
- * Fetch order statuses
- * @returns List of order statuses with labels
- */
 export async function getOrderStatuses(): Promise<OrderStatusesResponse> {
   try {
     const response = await api.get<OrderStatusesResponse>('/orders/statuses');
@@ -187,12 +140,6 @@ export async function getOrderStatuses(): Promise<OrderStatusesResponse> {
   }
 }
 
-/**
- * Update order details (PATCH)
- * @param orderId - Order ID
- * @param orderData - Partial order data to update (only send fields that changed)
- * @returns Updated order
- */
 export async function updateOrder(
   orderId: number,
   orderData: Partial<Order> | Record<string, any>
@@ -205,14 +152,6 @@ export async function updateOrder(
   }
 }
 
-/**
- * Get next order ID based on status and date range
- * @param orderId - Current order ID
- * @param status - Order status filter
- * @param from - Start date (ISO format)
- * @param to - End date (ISO format)
- * @returns Next order ID
- */
 export async function getNextOrderId(
   orderId: number,
   status?: OrderStatus,

@@ -11,7 +11,7 @@ import { Button } from '../ui/button';
 interface AddNewProductModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (productId: number, size: string, color: string, quantity: number) => void;
+  onSave: (productId: number, size: string, color: string, quantity: number) => Promise<void>;
   products: Product[];
 }
 
@@ -78,11 +78,16 @@ export default function AddNewProductModal({
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!selectedProduct) return;
-    onSave(selectedProduct.id, size, color, quantity);
-    toast.success('تم إضافة المنتج بنجاح');
-    onClose();
+    try {
+      await onSave(selectedProduct.id, size, color, quantity);
+      toast.success('تم إضافة المنتج بنجاح');
+      onClose();
+    } catch (error) {
+      console.error('Failed to add product:', error);
+      toast.error('فشل في إضافة المنتج. يرجى المحاولة مرة أخرى.');
+    }
   };
 
   const handleCancel = () => {

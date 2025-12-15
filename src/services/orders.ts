@@ -204,19 +204,19 @@ export const useAddOrderProduct = () => {
     mutationFn: async ({
       orderId,
       productId,
-      variant,
+      variants,
       quantity,
       price,
     }: {
       orderId: number;
       productId: number;
-      variant: string;
+      variants: { label: string; value: string }[];
       quantity: number;
       price: number;
     }) => {
       const response = await http.post(`/orders/${orderId}/products`, {
         productId,
-        variant,
+        variants,
         quantity,
         price,
       });

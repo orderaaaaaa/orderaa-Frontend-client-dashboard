@@ -1,15 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Trash2, SquarePen, PackagePlus, CirclePlus } from 'lucide-react';
-import { Order, Product, OrderProduct } from '@/types/orders';
+import { Order, Product } from '@/types/orders';
 import EditProductModal from './EditProductModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import AddSameTypeProductModal from './AddSameTypeProductModal';
 import AddNewProductModal from './AddNewProductModal';
 import ProductDetailsModal from './ProductDetailsModal';
 import { updateOrderProduct, deleteOrderProduct, getAllProducts, addOrderProduct } from '@/lib/api/order';
-import { toast } from 'sonner';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 
 interface OrderDetailsProductCardProps {
@@ -37,6 +39,7 @@ function parseVariant(variant: string | null | undefined): { size: string; color
 }
 
 function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
+  const queryClient = useQueryClient();
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
   const [isAddSameTypeModalOpen, setIsAddSameTypeModalOpen] = useState(false);
@@ -60,6 +63,24 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
       };
     }) || []
   );
+
+  // Sync productsData when order.order_products changes (e.g., after query invalidation)
+  useEffect(() => {
+    setProductsData(
+      order.order_products?.map((orderProduct) => {
+        const variantData = parseVariant(orderProduct.variant);
+        return {
+          id: orderProduct.id,
+          productId: orderProduct.productId,
+          product: orderProduct.products.name,
+          color: variantData.color || orderProduct.products.color || 'اسود',
+          size: variantData.size || orderProduct.products.size || '37',
+          price: orderProduct.price,
+          img: orderProduct.products.image || '/wireless-headphones.png',
+        };
+      }) || []
+    );
+  }, [order.order_products]);
 
   // Load all products on mount
   useEffect(() => {
@@ -112,19 +133,13 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
   const handleConfirmDelete = async () => {
     if (!deletingProductId) return;
 
-    try {
-      // Call backend API
-      await deleteOrderProduct(deletingProductId);
+    // Call backend API
+    await deleteOrderProduct(deletingProductId);
 
-      // Remove from local state
-      setProductsData((prev) =>
-        prev.filter((item) => item.id !== deletingProductId)
-      );
-
-      toast.success('تم حذف المنتج بنجاح');
-    } catch (error) {
-      toast.error('فشل في حذف المنتج');
-    }
+    // Invalidate order details to get fresh data
+    queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.ORDER_DETAILS, order.id],
+    });
   };
 
   const editingProduct = productsData.find(
@@ -148,32 +163,25 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
         return;
       }
 
-      const variant = `${size} - ${color}`;
+      const variants = [
+        { label: 'Size', value: size },
+        { label: 'Color', value: color },
+      ];
       const price = referenceProduct.price; // Use same price as reference product
 
       // Add product to order
-      const newOrderProduct = await addOrderProduct(
+      await addOrderProduct(
         order.id,
         referenceProduct.productId,
-        variant,
+        variants,
         quantity,
         price
       );
 
-      // Add to local state
-      const variantData = parseVariant(variant);
-      setProductsData((prev) => [
-        ...prev,
-        {
-          id: newOrderProduct.id,
-          productId: newOrderProduct.productId,
-          product: newOrderProduct.products.name,
-          color: variantData.color,
-          size: variantData.size,
-          price: newOrderProduct.price,
-          img: newOrderProduct.products.image || '/wireless-headphones.png',
-        },
-      ]);
+      // Invalidate order details to get fresh data with new product
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORDER_DETAILS, order.id],
+      });
 
       toast.success('تم إضافة المنتج بنجاح');
     } catch (error) {
@@ -182,44 +190,30 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
   };
 
   const handleAddNewProduct = async (productId: number, size: string, color: string, quantity: number) => {
-    try {
-      const selectedProduct = allProducts.find(p => p.id === productId);
-      if (!selectedProduct) {
-        toast.error('المنتج غير موجود');
-        return;
-      }
-
-      const variant = `${size} - ${color}`;
-      const price = selectedProduct.price || 0;
-
-      // Add product to order
-      const newOrderProduct = await addOrderProduct(
-        order.id,
-        productId,
-        variant,
-        quantity,
-        price
-      );
-
-      // Add to local state
-      const variantData = parseVariant(variant);
-      setProductsData((prev) => [
-        ...prev,
-        {
-          id: newOrderProduct.id,
-          productId: newOrderProduct.productId,
-          product: newOrderProduct.products.name,
-          color: variantData.color,
-          size: variantData.size,
-          price: newOrderProduct.price,
-          img: newOrderProduct.products.image || '/wireless-headphones.png',
-        },
-      ]);
-
-      toast.success('تم إضافة المنتج بنجاح');
-    } catch (error) {
-      toast.error('فشل في إضافة المنتج');
+    const selectedProduct = allProducts.find(p => p.id === productId);
+    if (!selectedProduct) {
+      throw new Error('المنتج غير موجود');
     }
+
+    const variants = [
+      { label: 'Size', value: size },
+      { label: 'Color', value: color },
+    ];
+    const price = selectedProduct.price || 0;
+
+    // Add product to order
+    await addOrderProduct(
+      order.id,
+      productId,
+      variants,
+      quantity,
+      price
+    );
+
+    // Invalidate order details to get fresh data with new product
+    queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.ORDER_DETAILS, order.id],
+    });
   };
 
   return (
