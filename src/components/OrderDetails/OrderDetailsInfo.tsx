@@ -223,6 +223,7 @@ function OrderDetailsInfoComponent({
       </div>
 
       <OrderActionsFooter
+        orderStatus={localOrder.status}
         onConfirm={handleConfirmClick}
         onFollowUpClick={handleFollowUpClick}
         onActionClick={handleActionClick}

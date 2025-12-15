@@ -8,8 +8,10 @@ import { Button } from '@/components/ui/button';
 import { useDropdownState } from '@/hooks/OrderDetails/useDropdownState';
 import { FollowUpDropdown } from './FollowUpDropdown';
 import { ActionsDropdown } from './ActionsDropdown';
+import { OrderStatus } from '@/types/orders';
 
 export interface OrderActionsFooterProps {
+  orderStatus: OrderStatus;
   onConfirm: () => void;
   onFollowUpClick: (label: string, action: string) => void;
   onActionClick: (label: string, action: string, hasSubOptions?: boolean) => void;
@@ -17,6 +19,7 @@ export interface OrderActionsFooterProps {
 }
 
 export function OrderActionsFooter({
+  orderStatus,
   onConfirm,
   onFollowUpClick,
   onActionClick,
@@ -104,6 +107,7 @@ export function OrderActionsFooter({
           {/* Actions Dropdown */}
           <ActionsDropdown
             isOpen={actionsDropdown.isOpen}
+            orderStatus={orderStatus}
             onActionClick={handleActionClick}
             onSubOptionClick={handleWhatsappSubOptionClick}
           />

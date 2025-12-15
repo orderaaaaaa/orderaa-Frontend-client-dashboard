@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   LiaBoltSolid,
   LiaBanSolid,
@@ -11,6 +11,7 @@ import {
   LiaAngleDownSolid,
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
+import { OrderStatus } from '@/types/orders';
 
 /**
  * Sub-option type for WhatsApp actions
@@ -59,6 +60,7 @@ const arrowOptions: ActionOption[] = [
  */
 export interface ActionsDropdownProps {
   isOpen: boolean;
+  orderStatus: OrderStatus;
   onActionClick: (label: string, action: string, hasSubOptions?: boolean) => void;
   onSubOptionClick: (action: string, label: string) => void;
 }
@@ -70,8 +72,19 @@ export interface ActionsDropdownProps {
  *
  * @param props - Component props
  */
-export function ActionsDropdown({ isOpen, onActionClick, onSubOptionClick }: ActionsDropdownProps) {
+export function ActionsDropdown({ isOpen, orderStatus, onActionClick, onSubOptionClick }: ActionsDropdownProps) {
   const [isWhatsappAccordionOpen, setIsWhatsappAccordionOpen] = useState(false);
+
+  // Filter options based on order status
+  const filteredOptions = useMemo(() => {
+    return arrowOptions.filter((option) => {
+      // "وقف التشغيل" only appears when order status is CONFIRMED
+      if (option.action === 'stop_operation') {
+        return orderStatus === OrderStatus.CONFIRMED;
+      }
+      return true;
+    });
+  }, [orderStatus]);
 
   if (!isOpen) return null;
 
@@ -89,7 +102,7 @@ export function ActionsDropdown({ isOpen, onActionClick, onSubOptionClick }: Act
       className="absolute bottom-full mb-2 right-0 min-w-[280px] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50"
       dir="rtl"
     >
-      {arrowOptions.map((option) => (
+      {filteredOptions.map((option) => (
         <div key={option.action}>
           {/* Main Option Button */}
           <Button
