@@ -59,18 +59,10 @@ export default function FilterPanel({ control, errors, options, setValue }: Prop
                 return;
             }
 
-            // Find the governorate key from the selected value
-            const governorate = governorates.find(
-                (g) => g.value === selectedGovernorate
-            );
-            if (!governorate) {
-                setCities([]);
-                return;
-            }
-
+            // selectedGovernorate is now the key, use it directly
             setIsLoadingCities(true);
             try {
-                const data = await getCities(governorate.key);
+                const data = await getCities(selectedGovernorate);
                 if (Array.isArray(data)) {
                     setCities(data);
                 }
@@ -84,10 +76,10 @@ export default function FilterPanel({ control, errors, options, setValue }: Prop
         fetchCities();
     }, [selectedGovernorate, governorates]);
 
-    // Get governorate values for the dropdown
-    const governorateOptions = governorates.map((g) => g.value);
-    // Get city values for the dropdown
-    const cityOptions = cities.map((c) => c.value);
+    // Pass full objects to the dropdown (key for API, value for display)
+    const governorateOptions = governorates;
+    // Pass full objects to the dropdown
+    const cityOptions = cities;
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             e.preventDefault();

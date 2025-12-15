@@ -3,16 +3,20 @@
 import React, { useEffect, useMemo, useRef, useState, forwardRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
+type OptionObject = { key: string; value: string };
+type OptionType = string | OptionObject;
+
 type Props = {
   value: string;
   onChange: (v: string) => void;
   onBlur?: () => void;
-  options: string[];
+  options: OptionType[];
   placeholder?: string;
   widthClass?: string;
   error?: string;
   name?: string;
   disabled?: boolean;
+  displayValue?: string; // For showing the display text when value is a key
 };
 
 const SearchableSelect = forwardRef<HTMLDivElement, Props>(function SearchableSelect({
@@ -25,6 +29,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, Props>(function SearchableSe
   error,
   name,
   disabled = false,
+  displayValue,
 }, ref) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
@@ -32,10 +37,41 @@ const SearchableSelect = forwardRef<HTMLDivElement, Props>(function SearchableSe
   const internalRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Check if options are objects or strings
+  const isObjectOptions = useMemo(() => {
+    return options.length > 0 && typeof options[0] === 'object';
+  }, [options]);
+
+  // Get display text for an option
+  const getDisplayText = (opt: OptionType): string => {
+    if (typeof opt === 'string') return opt;
+    return opt.value;
+  };
+
+  // Get key/value for an option
+  const getOptionKey = (opt: OptionType): string => {
+    if (typeof opt === 'string') return opt;
+    return opt.key;
+  };
+
   const filtered = useMemo(
-    () => (options || []).filter((o) => o && o.toLowerCase().includes(q.toLowerCase())),
+    () => (options || []).filter((o) => {
+      if (!o) return false;
+      const text = getDisplayText(o);
+      return text && text.toLowerCase().includes(q.toLowerCase());
+    }),
     [options, q]
   );
+
+  // Get the display value for the current selection
+  const currentDisplayValue = useMemo(() => {
+    if (displayValue) return displayValue;
+    if (!value) return '';
+    if (!isObjectOptions) return value;
+    // Find the option that matches the key
+    const opt = (options as OptionObject[]).find(o => o.key === value);
+    return opt ? opt.value : value;
+  }, [value, displayValue, options, isObjectOptions]);
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
@@ -68,8 +104,8 @@ const SearchableSelect = forwardRef<HTMLDivElement, Props>(function SearchableSe
     }
   }, [open]);
 
-  const commitSelect = (val: string) => {
-    onChange(val);
+  const commitSelect = (opt: OptionType) => {
+    onChange(getOptionKey(opt));
     setQ("");
     setOpen(false);
     setActiveIdx(-1);
@@ -90,9 +126,9 @@ const SearchableSelect = forwardRef<HTMLDivElement, Props>(function SearchableSe
         aria-expanded={open}
       >
         <span
-          className={`text-right ${value ? "text-gray-900" : "text-gray-500"}`}
+          className={`text-right ${currentDisplayValue ? "text-gray-900" : "text-gray-500"}`}
         >
-          {value || `${placeholder}`}
+          {currentDisplayValue || `${placeholder}`}
         </span>
         <svg
           className={`w-6 h-6 absolute left-2 top-2 text-gray-400 transition-transform ${open ? "rotate-180" : ""
@@ -132,16 +168,16 @@ const SearchableSelect = forwardRef<HTMLDivElement, Props>(function SearchableSe
               ) : (
                 filtered.map((opt, idx) => (
                   <li
-                    key={opt}
+                    key={getOptionKey(opt)}
                     onMouseEnter={() => setActiveIdx(idx)}
                     onMouseLeave={() => setActiveIdx(-1)}
                     onClick={() => commitSelect(opt)}
                     className={`px-3 py-2 z-20 cursor-pointer hover:bg-[#5D24E1] text-semibold  hover:text-white  ${activeIdx === idx ? "bg-gray-100" : ""
                       }`}
                     role="option"
-                    aria-selected={value === opt}
+                    aria-selected={value === getOptionKey(opt)}
                   >
-                    {opt}
+                    {getDisplayText(opt)}
                   </li>
                 ))
               )}
