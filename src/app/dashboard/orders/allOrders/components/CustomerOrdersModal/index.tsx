@@ -126,7 +126,7 @@ export default function CustomerOrdersModal({
               </div>
             </div>
             <div className="text-right">
-              <h2 className="text-2xl font-bold text-gray-800">جميع طلبات العميل</h2>
+              <h2 className="test-lg sm:text-2xl font-bold text-gray-800">جميع طلبات العميل</h2>
               <p className="text-sm text-gray-600 mt-1">
                 {customerName && customerName !== 'غير محدد' ? customerName + ' - ' : ''}
                 <span dir="ltr" className="inline-block">{customerPhone}</span>
@@ -170,7 +170,7 @@ export default function CustomerOrdersModal({
           </div>
         )}
 
-        <div className={`flex-1 overflow-y-auto p-8 ${selectedOrders.length > 0 ? 'pb-24' : ''}`}>
+        <div className="flex-1 overflow-y-auto p-8">
           {loading ? (
             <div className="flex items-center justify-center min-h-[400px]">
               <div className="text-center">
@@ -233,7 +233,7 @@ export default function CustomerOrdersModal({
           )}
         </div>
 
-        <div className="px-8 py-4 border-t border-gray-200 bg-gray-50">
+        <div className={`px-8 py-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl ${selectedOrders.length > 0 ? 'pb-20' : ''}`}>
           <div className="flex items-center justify-between">
             <Button
               onClick={onClose}
@@ -247,7 +247,7 @@ export default function CustomerOrdersModal({
           </div>
         </div>
 
-        {/* Bulk Actions Bar - sticky inside modal */}
+        {/* Bulk Actions Bar - absolute positioned inside modal */}
         <BulkActionsBar
           selectedOrders={selectedOrders}
           onEditStatus={handleEditStatus}
@@ -255,7 +255,7 @@ export default function CustomerOrdersModal({
           onShareWhatsApp={handleShareWhatsApp}
           onShipping={handleShipping}
           onOther={handleOther}
-          position="sticky"
+          position="absolute"
           className="rounded-b-2xl"
         />
       </div>

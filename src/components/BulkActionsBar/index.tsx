@@ -15,7 +15,7 @@ interface BulkActionsBarProps {
   onShareWhatsApp?: () => void;
   onShipping?: () => void;
   onOther?: () => void;
-  position?: 'fixed' | 'sticky';
+  position?: 'fixed' | 'sticky' | 'absolute';
   className?: string;
 }
 
@@ -33,9 +33,11 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
     return null;
   }
 
-  const positionClasses = position === 'fixed'
-    ? 'fixed bottom-0 left-0 right-0 z-50'
-    : 'sticky bottom-0 z-10';
+  const positionClasses = {
+    fixed: 'fixed bottom-0 left-0 right-0 z-50',
+    sticky: 'sticky bottom-0 z-10',
+    absolute: 'absolute bottom-0 left-0 right-0 z-10',
+  }[position];
 
   return (
     <div className={`${positionClasses} bg-white border-t border-gray-200 shadow-lg py-4 px-6 ${className}`}>
