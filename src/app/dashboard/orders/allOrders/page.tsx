@@ -254,9 +254,23 @@ export default function AllOrdersRefactor() {
   }, []);
 
 
+  const showBulkActions = selectedOrders.length > 0 && !isModalOpen;
+
+  // Add padding to body when bulk actions bar is visible
+  useEffect(() => {
+    if (showBulkActions) {
+      document.body.style.paddingBottom = '80px';
+    } else {
+      document.body.style.paddingBottom = '0px';
+    }
+    return () => {
+      document.body.style.paddingBottom = '0px';
+    };
+  }, [showBulkActions]);
+
   return (
     <div className="w-full max-w-full overflow-x-hidden">
-      <div className='flex flex-row items-center justify-between mb-7 w-full'>
+      <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-7 w-full'>
         <Breadcrumb
           items={[
             { title: 'الطلبات', href: '/dashboard/orders' },
@@ -264,7 +278,7 @@ export default function AllOrdersRefactor() {
           ]}
         />
 
-        <div className="flex items-center justify-center md:justify-start gap-2 sm:gap-3 px-3 flex-shrink-0">
+        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 px-3 w-full sm:w-auto">
           <DatePicker
             selected={fromDate}
             onChange={setFromDate}
@@ -455,11 +469,11 @@ export default function AllOrdersRefactor() {
         onNext={() => goToPage(Math.min(totalPages, currentPage + 1))}
         currentPageSize={limit}
         onPageSizeChange={updateLimit}
-        hasSelectedOrders={selectedOrders.length > 0 && !isModalOpen}
+        hasSelectedOrders={showBulkActions}
       />
 
       {/* Bulk Actions Bar - fixed at bottom, hidden when modal is open */}
-      {!isModalOpen && (
+      {showBulkActions && (
         <BulkActionsBar
           selectedOrders={selectedOrders}
           onEditStatus={handleEditStatus}
@@ -481,6 +495,7 @@ export default function AllOrdersRefactor() {
           <ArrowUp className="w-6 h-6" />
         </button>
       )}
+
     </div>
   );
 }

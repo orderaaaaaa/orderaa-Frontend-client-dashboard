@@ -101,8 +101,8 @@ export default function OrderDetails({ params }: { params: { orderId: string } }
   if (isEmpty) {
     return (
       <AuthGuard>
-        <div className='flex flex-row items-center justify-between mb-7 w-full'>
-          <div className="flex items-center justify-center md:justify-start gap-2 sm:gap-3 px-3 flex-shrink-0">
+        <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-7 w-full'>
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 px-3 w-full sm:w-auto">
             <DatePicker
               selected={fromDate}
               onChange={setFromDate}
@@ -200,14 +200,14 @@ export default function OrderDetails({ params }: { params: { orderId: string } }
 
   return (
     <AuthGuard>
-      <div className='flex flex-row items-center justify-between mb-7 w-full'>
-        <div className="flex items-center justify-center md:justify-start gap-2 sm:gap-3 px-3 flex-shrink-0">
+      <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-7 w-full'>
+        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 px-3 w-full sm:w-auto">
           <DatePicker
             selected={fromDate}
             onChange={setFromDate}
             placeholder="من تاريخ"
             showIcon={true}
-            className="w-[140px]"
+            className="w-[120px] sm:w-[140px]"
             maxDate={toDate || undefined}
           />
 
@@ -218,11 +218,11 @@ export default function OrderDetails({ params }: { params: { orderId: string } }
             onChange={setToDate}
             placeholder="إلى تاريخ"
             showIcon={true}
-            className="w-[140px]"
+            className="w-[120px] sm:w-[140px]"
             minDate={fromDate || undefined}
           />
 
-          <div className="relative w-32 sm:w-[180px] flex-shrink-0">
+          <div className="relative w-32 sm:w-[180px]">
             <Select value={timePeriod} onValueChange={(value) => setTimePeriod(value as TimePeriod)}>
               <SelectTrigger className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${timePeriod ? 'text-[#5D24E1] font-bold' : ''}`}>
                 <SelectValue placeholder="الفترة الزمنية" />

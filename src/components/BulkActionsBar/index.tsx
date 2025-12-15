@@ -39,7 +39,8 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
 
   return (
     <div className={`${positionClasses} bg-white border-t border-gray-200 shadow-lg py-4 px-6 ${className}`}>
-      <div className="flex flex-row gap-2 items-center justify-center max-w-7xl mx-auto overflow-auto">
+      <div className="mx-auto overflow-auto">
+        <div className='pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl'>
         <Button
           variant="outline"
           className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border-[#5D24E1] text-[#5D24E1] hover:bg-[#5D24E1] hover:text-white transition-colors cursor-pointer"
@@ -89,6 +90,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
           <CircleAlert className="h-4 w-4" />
           <span>اخرى</span>
         </Button>
+        </div>
       </div>
     </div>
   );
