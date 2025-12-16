@@ -11,10 +11,8 @@ import {
 import { useCreateEmployee } from '@/hooks/useEmployees';
 import EmployeeFormHeader from './EmployeeFormHeader';
 import EmployeeFormFields from './EmployeeFormFields';
-import { Plus, X } from 'lucide-react';
 
 export default function EmployeesPage() {
-  const router = useRouter();
   const {
     register,
     handleSubmit,
