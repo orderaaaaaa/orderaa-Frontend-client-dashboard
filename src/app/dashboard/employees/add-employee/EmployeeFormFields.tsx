@@ -252,7 +252,7 @@ export default function EmployeeFormFields({
               }}
             >
               <Mail
-                className="w-6 h-6 text-[#001A72] flex-shrink-0"
+                className="w-6 h-6 text-[#5D24E1] flex-shrink-0"
                 strokeWidth={1.5}
               />
               <span

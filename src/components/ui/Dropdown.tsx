@@ -146,7 +146,7 @@ export default function Dropdown({
                   <li
                     key={option.key}
                     className={`px-3 py-2 cursor-pointer text-[#111827] hover:!bg-[#5D24E1] hover:text-white flex items-center gap-2 ${
-                      value === option.key ? 'bg-gray-200' : ''
+                      value === option.key ? 'bg-[#5D24E1] text-white' : ''
                     }`}
                     style={{ direction: 'rtl' }}
                     onClick={() => {
