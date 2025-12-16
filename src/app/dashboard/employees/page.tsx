@@ -1,5 +1,87 @@
+// page.tsx
+'use client';
+
 import React from 'react';
+import { useEmployees } from '@/hooks/useEmployees';
+import { Employee } from '@/schemas/employee.schema';
+import EmployeeHeader from './components/EmployeeHeader';
+import { StatCard } from './components/StatCard';
+import { STAT_CARDS } from '@/constants/employees/statCard';
 
 export default function AllEmployees() {
-  return <div></div>;
+  const { data: employees, isLoading, isError } = useEmployees();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-4 bg-red-50 text-red-700 rounded-lg">
+        Failed to load employees. Please try again later.
+      </div>
+    );
+  }
+
+  const getCountByAccessLevel = (accessLevel: string) => {
+    if (accessLevel === 'TOTAL') {
+      return employees?.length || 0;
+    }
+    return (
+      employees?.filter((emp: Employee) => emp.accessLevel === accessLevel)
+        .length || 0
+    );
+  };
+
+  return (
+    <div className="p-6">
+      <EmployeeHeader />
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-6">
+        {STAT_CARDS.map((card) => (
+          <StatCard
+            key={card.title}
+            title={card.title}
+            count={getCountByAccessLevel(card.accessLevel)}
+            iconBgColor={card.iconBgColor}
+            iconPath={card.iconPath}
+            alt={card.alt}
+          />
+        ))}
+      </div>
+
+      <div className="mt-10">
+        <h1 className="text-2xl font-bold mb-6">All Employees</h1>
+
+        {employees?.length === 0 ? (
+          <div className="text-center py-8 bg-gray-50 rounded-lg">
+            <p className="text-gray-500">No employees found.</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <ul className="divide-y divide-gray-200">
+              {employees?.map((employee: Employee) => (
+                <li key={employee.id} className="px-6 py-4 hover:bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {employee.fullName}
+                      </p>
+                      <p className="text-sm text-gray-500">{employee.email}</p>
+                    </div>
+                    <span className="px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                      {employee.accessLevel}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
