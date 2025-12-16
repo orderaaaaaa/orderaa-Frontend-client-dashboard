@@ -112,7 +112,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, Props>(function SearchableSe
   };
 
   return (
-    <div className={`flex flex-col gap-1  ${widthClass}`} ref={ref || internalRef}>
+    <div className={`relative flex flex-col gap-1  ${widthClass}`} ref={ref || internalRef}>
       <button
         type="button"
         onClick={() => !disabled && setOpen((v) => !v)}

@@ -8,6 +8,8 @@ import {
 import { EmployeeFormData } from '@/schemas/employee.schema';
 import Input from '@/components/ui/Input';
 import Dropdown from '@/components/ui/Dropdown';
+import SearchableSelect from '@/app/dashboard/orders/allOrders/components/FilterSection/SearchableSelect';
+import useGovernorates from '@/hooks/useGovernorates';
 import {
   User,
   Phone,
@@ -38,6 +40,8 @@ export default function EmployeeFormFields({
 }: EmployeeFormFieldsProps) {
   const accessLevel = watch('accessLevel');
   const department = watch('department');
+  const address = watch('address');
+  const { governorates } = useGovernorates();
 
   return (
     <div
@@ -300,16 +304,25 @@ export default function EmployeeFormFields({
                 العنوان
               </span>
             </div>
-            <div className="w-full">
-              <Input
-                label=""
-                name="address"
-                type="text"
-                placeholder="العنوان"
-                register={register}
+            <div className="w-full relative">
+              <SearchableSelect
+                value={address || ''}
+                onChange={(v) =>
+                  setValue('address', v, { shouldValidate: true })
+                }
+                options={governorates}
+                placeholder="المحافظة"
+                widthClass="w-full"
                 error={errors.address?.message}
-                className="!h-[46px] !px-4 !py-0 bg-[rgba(234,234,234,0.25)] !border-black/16 text-right text-base font-normal text-black placeholder:text-black/60"
               />
+              {errors.address && (
+                <span
+                  className="text-red-500 text-sm text-right mt-1 block"
+                  style={{ textAlign: 'right' }}
+                >
+                  {errors.address.message}
+                </span>
+              )}
             </div>
           </div>
         </div>
