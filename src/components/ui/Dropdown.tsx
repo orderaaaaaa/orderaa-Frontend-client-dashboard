@@ -47,8 +47,8 @@ export default function Dropdown({
   // Filter options based on search
   const filteredOptions = Array.isArray(options)
     ? options.filter((option) =>
-      option.value.toLowerCase().includes(search.toLowerCase())
-    )
+        option.value.toLowerCase().includes(search.toLowerCase())
+      )
     : [];
 
   // Find the selected option value
@@ -71,8 +71,8 @@ export default function Dropdown({
   const inputValue = isOpen
     ? search
     : selectedOption
-      ? selectedOption.value
-      : search;
+    ? selectedOption.value
+    : search;
 
   return (
     <div ref={ref} className={className ? className : 'w-full'}>
@@ -86,14 +86,15 @@ export default function Dropdown({
           onClick={() => setIsOpen(!isOpen)}
           className={
             arrowClassName ||
-            'absolute cursor-pointer px-3 left-0 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10'
+            'absolute cursor-pointer px-3 left-0 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors'
           }
           aria-label="Toggle dropdown"
         >
           <ChevronDown
             size={20}
-            className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
-              }`}
+            className={`transition-transform duration-200 relative ${
+              isOpen ? 'rotate-180' : ''
+            }`}
           />
         </button>
         {/* Optional icon on the RIGHT */}
@@ -119,10 +120,13 @@ export default function Dropdown({
           className={
             selectClassName
               ? selectClassName
-              : `w-full border border-[#CED4DA] rounded-lg py-2.5 pl-10 ${icon ? 'pr-10' : 'pr-3'} text-[18px] overflow-hidden text-ellipsis whitespace-nowrap ${value
-                ? '!text-[#1F1F1F]'
-                : placeholderClassName ?? '!text-[#1F1F1F]'
-              } ${readOnly ? 'cursor-pointer' : ''}`
+              : `w-full border border-[#CED4DA] rounded-lg py-2.5 pl-10 ${
+                  icon ? 'pr-10' : 'pr-3'
+                } text-[18px] overflow-hidden text-ellipsis whitespace-nowrap ${
+                  value
+                    ? '!text-[#1F1F1F]'
+                    : placeholderClassName ?? '!text-[#1F1F1F]'
+                } ${readOnly ? 'cursor-pointer' : ''}`
           }
           style={!value && placeholderStyle ? placeholderStyle : undefined}
         />
@@ -141,8 +145,9 @@ export default function Dropdown({
                 return (
                   <li
                     key={option.key}
-                    className={`px-3 py-2 cursor-pointer text-[#111827] hover:bg-gray-100 flex items-center gap-2 ${value === option.key ? 'bg-gray-200' : ''
-                      }`}
+                    className={`px-3 py-2 cursor-pointer text-[#111827] hover:!bg-[#5D24E1] hover:text-white flex items-center gap-2 ${
+                      value === option.key ? 'bg-gray-200' : ''
+                    }`}
                     style={{ direction: 'rtl' }}
                     onClick={() => {
                       onChange(option.key);
