@@ -9,6 +9,7 @@ import { EmployeeFormData } from '@/schemas/employee.schema';
 import Input from '@/components/ui/Input';
 import Dropdown from '@/components/ui/Dropdown';
 import SearchableSelect from '@/app/dashboard/orders/allOrders/components/FilterSection/SearchableSelect';
+import WorkHoursTimePicker from '@/components/ui/WorkHoursTimePicker';
 import useGovernorates from '@/hooks/useGovernorates';
 import {
   User,
@@ -41,6 +42,7 @@ export default function EmployeeFormFields({
   const accessLevel = watch('accessLevel');
   const department = watch('department');
   const address = watch('address');
+  const workingHours = watch('workingHours');
   const { governorates } = useGovernorates();
 
   return (
@@ -433,20 +435,19 @@ export default function EmployeeFormFields({
               />
               <span
                 className="text-base md:text-lg font-normal text-right"
-                style={{ textAlign: 'right' }}
+                style={{ textAlign: 'right', direction: 'ltr' }}
               >
                 ساعات العمل
               </span>
             </div>
             <div className="w-full">
-              <Input
-                label=""
-                name="workingHours"
-                type="text"
-                placeholder="من 9 صباحاً إلى 5 مساءً"
-                register={register}
+              <WorkHoursTimePicker
+                value={workingHours || ''}
+                onChange={(value) =>
+                  setValue('workingHours', value, { shouldValidate: true })
+                }
                 error={errors.workingHours?.message}
-                className="!h-[46px] !px-4 !py-0 bg-[rgba(234,234,234,0.25)] !border-black/16 text-right text-base font-normal text-black placeholder:text-black/60"
+                placeholder="9 : AM - 5 : PM"
               />
             </div>
           </div>
