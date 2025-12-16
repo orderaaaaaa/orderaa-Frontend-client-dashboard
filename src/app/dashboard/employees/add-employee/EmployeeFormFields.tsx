@@ -1,0 +1,445 @@
+import React from 'react';
+import {
+  UseFormRegister,
+  FieldErrors,
+  UseFormWatch,
+  UseFormSetValue,
+} from 'react-hook-form';
+import { EmployeeFormData } from '@/schemas/employee.schema';
+import Input from '@/components/ui/Input';
+import Dropdown from '@/components/ui/Dropdown';
+import {
+  User,
+  Phone,
+  Briefcase,
+  MapPin,
+  Mail,
+  Lock,
+  Clock,
+} from 'lucide-react';
+
+import {
+  ACCESS_LEVEL_OPTIONS,
+  DEPARTMENT_OPTIONS,
+} from '@/constants/employees/employeesFormOptions';
+
+type EmployeeFormFieldsProps = {
+  register: UseFormRegister<EmployeeFormData>;
+  errors: FieldErrors<EmployeeFormData>;
+  watch: UseFormWatch<EmployeeFormData>;
+  setValue: UseFormSetValue<EmployeeFormData>;
+};
+
+export default function EmployeeFormFields({
+  register,
+  errors,
+  watch,
+  setValue,
+}: EmployeeFormFieldsProps) {
+  const accessLevel = watch('accessLevel');
+  const department = watch('department');
+
+  return (
+    <div
+      className="px-4 md:px-8 lg:px-[165px] py-6 md:py-[34px]"
+      style={{ direction: 'rtl' }}
+    >
+      <div
+        className="flex flex-col items-end gap-6"
+        style={{ direction: 'rtl' }}
+      >
+        {/* صلاحية الموظف */}
+        <div
+          className="w-full flex flex-col items-end gap-4"
+          style={{ direction: 'rtl' }}
+        >
+          <div
+            className="w-full flex items-center gap-2"
+            style={{
+              direction: 'rtl',
+              justifyContent: 'flex-start',
+              width: '100%',
+              alignItems: 'center',
+            }}
+          >
+            <User
+              className="w-6 h-6 text-[#5D24E1] flex-shrink-0"
+              strokeWidth={1.5}
+            />
+            <span
+              className="text-base md:text-lg font-normal text-right"
+              style={{ textAlign: 'right' }}
+            >
+              صلاحية الموظف
+            </span>
+          </div>
+          <div className="w-full">
+            <Dropdown
+              value={accessLevel || ''}
+              onChange={(value) =>
+                setValue('accessLevel', value, { shouldValidate: true })
+              }
+              options={ACCESS_LEVEL_OPTIONS}
+              placeholder="اختر صلاحية الموظف"
+              selectClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 !text-lg ${
+                errors?.accessLevel
+                  ? 'border-red-500 focus:border-red-500'
+                  : 'border-black/16'
+              } rounded text-right text-base font-normal text-black`}
+              placeholderClassName="text-black/60"
+            />
+            {errors.accessLevel && (
+              <span
+                className="text-red-500 text-sm text-right mt-1 block"
+                style={{ textAlign: 'right' }}
+              >
+                {errors.accessLevel.message}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* قسم الموظف */}
+        <div
+          className="w-full flex flex-col items-end gap-4"
+          style={{ direction: 'rtl' }}
+        >
+          <div
+            className="w-full flex items-center gap-2"
+            style={{
+              direction: 'rtl',
+              justifyContent: 'flex-start',
+              width: '100%',
+              alignItems: 'center',
+            }}
+          >
+            <User
+              className="w-6 h-6 text-[#5D24E1] flex-shrink-0"
+              strokeWidth={1.5}
+            />
+            <span
+              className="text-base md:text-lg font-normal text-right"
+              style={{ textAlign: 'right' }}
+            >
+              قسم الموظف
+            </span>
+          </div>
+          <div className="w-full">
+            <Dropdown
+              value={department || ''}
+              onChange={(value) =>
+                setValue('department', value, { shouldValidate: true })
+              }
+              options={DEPARTMENT_OPTIONS}
+              placeholder="اختر القسم"
+              selectClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 !text-lg  ${
+                errors?.department
+                  ? 'border-red-500 focus:border-red-500'
+                  : 'border-black/16'
+              } rounded text-right text-base font-normal text-black/55`}
+              placeholderClassName="text-black/60"
+            />
+            {errors.department && (
+              <span
+                className="text-red-500 text-sm text-right mt-1 block"
+                style={{ textAlign: 'right' }}
+              >
+                {errors.department.message}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* الاسم الكامل و رقم الهاتف */}
+        <div
+          className="w-full flex flex-col md:flex-row items-start gap-6 md:gap-10"
+          style={{ direction: 'rtl' }}
+        >
+          {/* الاسم الكامل */}
+          <div
+            className="flex-1 w-full flex flex-col items-end gap-4"
+            style={{ direction: 'rtl' }}
+          >
+            <div
+              className="w-full flex items-center gap-2"
+              style={{
+                direction: 'rtl',
+                justifyContent: 'flex-start',
+                width: '100%',
+                alignItems: 'center',
+              }}
+            >
+              <Briefcase
+                className="w-6 h-6 text-[#5D24E1] flex-shrink-0"
+                strokeWidth={1.5}
+              />
+              <span
+                className="text-base md:text-lg font-normal text-right"
+                style={{ textAlign: 'right' }}
+              >
+                الاسم الكامل للموظف
+              </span>
+            </div>
+            <div className="w-full">
+              <Input
+                label=""
+                name="fullName"
+                type="text"
+                placeholder="أدخل الاسم الكامل"
+                register={register}
+                error={errors.fullName?.message}
+                className="!h-[46px] !px-4 !py-0 bg-[rgba(234,234,234,0.25)] !border-black/16 text-right text-base font-normal text-black placeholder:text-black/60"
+              />
+            </div>
+          </div>
+
+          {/* رقم الهاتف */}
+          <div
+            className="flex-1 w-full flex flex-col items-end gap-4"
+            style={{ direction: 'rtl' }}
+          >
+            <div
+              className="w-full flex items-center gap-2"
+              style={{
+                direction: 'rtl',
+                justifyContent: 'flex-start',
+                width: '100%',
+                alignItems: 'center',
+              }}
+            >
+              <Phone
+                className="w-6 h-6 text-[#5D24E1] flex-shrink-0"
+                strokeWidth={1.5}
+              />
+              <span
+                className="text-base md:text-lg font-normal text-right"
+                style={{ textAlign: 'right' }}
+              >
+                رقم الهاتف
+              </span>
+            </div>
+            <div className="w-full">
+              <Input
+                label=""
+                name="phoneNumber"
+                type="text"
+                placeholder="01234567890"
+                register={register}
+                error={errors.phoneNumber?.message}
+                className="!h-[46px] !px-4 !py-0 bg-[rgba(234,234,234,0.25)] !border-black/16 text-right text-base font-normal text-black placeholder:text-black/60"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* البريد الإلكتروني و العنوان */}
+        <div
+          className="w-full flex flex-col md:flex-row items-start gap-6 md:gap-10"
+          style={{ direction: 'rtl' }}
+        >
+          {/* البريد الإلكتروني */}
+          <div
+            className="flex-1 w-full flex flex-col items-end gap-4"
+            style={{ direction: 'rtl' }}
+          >
+            <div
+              className="w-full flex items-center gap-2"
+              style={{
+                direction: 'rtl',
+                justifyContent: 'flex-start',
+                width: '100%',
+                alignItems: 'center',
+              }}
+            >
+              <Mail
+                className="w-6 h-6 text-[#001A72] flex-shrink-0"
+                strokeWidth={1.5}
+              />
+              <span
+                className="text-base md:text-lg font-normal text-right"
+                style={{ textAlign: 'right' }}
+              >
+                البريد الإلكتروني
+              </span>
+            </div>
+            <div className="w-full">
+              <Input
+                label=""
+                name="email"
+                type="email"
+                placeholder="example@domain.com"
+                register={register}
+                error={errors.email?.message}
+                className="!h-[46px] !px-4 !py-0 bg-[rgba(234,234,234,0.25)] !border-black/16 text-right text-base font-normal text-black placeholder:text-black/60"
+              />
+            </div>
+          </div>
+
+          {/* العنوان */}
+          <div
+            className="flex-1 w-full flex flex-col items-end gap-4"
+            style={{ direction: 'rtl' }}
+          >
+            <div
+              className="w-full flex items-center gap-2"
+              style={{
+                direction: 'rtl',
+                justifyContent: 'flex-start',
+                width: '100%',
+                alignItems: 'center',
+              }}
+            >
+              <MapPin
+                className="w-6 h-6 text-[#5D24E1] flex-shrink-0"
+                strokeWidth={1.5}
+              />
+              <span
+                className="text-base md:text-lg font-normal text-right"
+                style={{ textAlign: 'right' }}
+              >
+                العنوان
+              </span>
+            </div>
+            <div className="w-full">
+              <Input
+                label=""
+                name="address"
+                type="text"
+                placeholder="العنوان"
+                register={register}
+                error={errors.address?.message}
+                className="!h-[46px] !px-4 !py-0 bg-[rgba(234,234,234,0.25)] !border-black/16 text-right text-base font-normal text-black placeholder:text-black/60"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* كلمة المرور و تأكيد كلمة المرور */}
+        <div
+          className="w-full flex flex-col md:flex-row items-start gap-6 md:gap-10"
+          style={{ direction: 'rtl' }}
+        >
+          {/* كلمة المرور */}
+          <div
+            className="flex-1 w-full flex flex-col items-end gap-4"
+            style={{ direction: 'rtl' }}
+          >
+            <div
+              className="w-full flex items-center gap-2"
+              style={{
+                direction: 'rtl',
+                justifyContent: 'flex-start',
+                width: '100%',
+                alignItems: 'center',
+              }}
+            >
+              <Lock
+                className="w-6 h-6 text-[#5D24E1] flex-shrink-0"
+                strokeWidth={1.5}
+              />
+              <span
+                className="text-base md:text-lg font-normal text-right"
+                style={{ textAlign: 'right' }}
+              >
+                كلمة المرور
+              </span>
+            </div>
+            <div className="w-full">
+              <Input
+                label=""
+                name="password"
+                type="password"
+                placeholder="كلمة المرور"
+                register={register}
+                error={errors.password?.message}
+                className="!h-[46px] !px-4 !pr-12 !py-0 bg-[rgba(234,234,234,0.25)] !border-black/16 text-right text-base font-normal text-black placeholder:text-black/60"
+              />
+            </div>
+          </div>
+
+          {/* تأكيد كلمة المرور */}
+          <div
+            className="flex-1 w-full flex flex-col items-end gap-4"
+            style={{ direction: 'rtl' }}
+          >
+            <div
+              className="w-full flex items-center gap-2"
+              style={{
+                direction: 'rtl',
+                justifyContent: 'flex-start',
+                width: '100%',
+                alignItems: 'center',
+              }}
+            >
+              <Lock
+                className="w-6 h-6 text-[#5D24E1] flex-shrink-0"
+                strokeWidth={1.5}
+              />
+              <span
+                className="text-base md:text-lg font-normal text-right"
+                style={{ textAlign: 'right' }}
+              >
+                تأكيد كلمة المرور
+              </span>
+            </div>
+            <div className="w-full">
+              <Input
+                label=""
+                name="confirmPassword"
+                type="password"
+                placeholder="أعد كتابة كلمة المرور"
+                register={register}
+                error={errors.confirmPassword?.message}
+                className="!h-[46px] !px-4 !pr-12 !py-0 bg-[rgba(234,234,234,0.25)] !border-black/16 text-right text-base font-normal text-black placeholder:text-black/60"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ساعات العمل */}
+        <div
+          className="w-full flex flex-col md:flex-row items-start gap-6 md:gap-10"
+          style={{ direction: 'rtl' }}
+        >
+          <div
+            className="flex-1 w-full flex flex-col items-end gap-4"
+            style={{ direction: 'rtl' }}
+          >
+            <div
+              className="w-full flex items-center gap-2"
+              style={{
+                direction: 'rtl',
+                justifyContent: 'flex-start',
+                width: '100%',
+                alignItems: 'center',
+              }}
+            >
+              <Clock
+                className="w-6 h-6 text-[#5D24E1] flex-shrink-0"
+                strokeWidth={1.5}
+              />
+              <span
+                className="text-base md:text-lg font-normal text-right"
+                style={{ textAlign: 'right' }}
+              >
+                ساعات العمل
+              </span>
+            </div>
+            <div className="w-full">
+              <Input
+                label=""
+                name="workingHours"
+                type="text"
+                placeholder="من 9 صباحاً إلى 5 مساءً"
+                register={register}
+                error={errors.workingHours?.message}
+                className="!h-[46px] !px-4 !py-0 bg-[rgba(234,234,234,0.25)] !border-black/16 text-right text-base font-normal text-black placeholder:text-black/60"
+              />
+            </div>
+          </div>
+          <div className="flex-1 hidden md:block"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
