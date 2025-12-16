@@ -1,77 +1,21 @@
-import axios from 'axios';
-import { EmployeeFormData, Employee, EmployeesResponse } from '@/schemas/employee.schema';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-
-interface CreateEmployeeRequest {
-  accessLevel: string;
-  department: string;
-  fullName: string;
-  phoneNumber: string;
-  email?: string;
-  address: string;
-  password: string;
-  workingHours?: string;
-}
+import { api } from '@/lib/api/axios';
+import { Employee, EmployeeFormData } from '@/schemas/employee.schema';
 
 export const employeesApi = {
-  async getAll(token: string): Promise<Employee[]> {
-    const response = await axios.get<Employee[]>(`${API_BASE_URL}/employees`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
+  getAll: () => api.get<Employee[]>('/employees').then((res) => res.data),
+  getById: (id: number) =>
+    api.get<Employee>(`/employees/${id}`).then((res) => res.data),
+  create: (data: EmployeeFormData) => {
+    // Remove confirmPassword before sending to API
+    const { confirmPassword, ...apiData } = data;
+    return api.post<Employee>('/employees', apiData).then((res) => res.data);
   },
-
-  async getById(token: string, id: number): Promise<Employee> {
-    const response = await axios.get<Employee>(`${API_BASE_URL}/employees/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
+  update: (id: number, data: Partial<EmployeeFormData>) => {
+    // Remove confirmPassword if it exists before sending to API
+    const { confirmPassword, ...apiData } = data;
+    return api
+      .patch<Employee>(`/employees/${id}`, apiData)
+      .then((res) => res.data);
   },
-
-  async create(token: string, data: EmployeeFormData): Promise<Employee> {
-    const requestData: CreateEmployeeRequest = {
-      accessLevel: data.accessLevel,
-      department: data.department,
-      fullName: data.fullName,
-      phoneNumber: data.phoneNumber,
-      email: data.email || undefined,
-      address: data.address,
-      password: data.password,
-      workingHours: data.workingHours || undefined,
-    };
-
-    const response = await axios.post<Employee>(`${API_BASE_URL}/employees`, requestData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-    return response.data;
-  },
-
-  async update(token: string, id: number, data: Partial<EmployeeFormData>): Promise<Employee> {
-    const response = await axios.patch<Employee>(`${API_BASE_URL}/employees/${id}`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-    return response.data;
-  },
-
-  async delete(token: string, id: number): Promise<void> {
-    await axios.delete(`${API_BASE_URL}/employees/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-  },
+  delete: (id: number) => api.delete(`/employees/${id}`),
 };
-
-
-
