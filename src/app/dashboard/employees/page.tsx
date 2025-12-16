@@ -46,6 +46,7 @@ export default function AllEmployees() {
             key={card.title}
             title={card.title}
             count={getCountByAccessLevel(card.accessLevel)}
+            borderColor={card.borderColor}
             iconBgColor={card.iconBgColor}
             iconPath={card.iconPath}
             alt={card.alt}
@@ -54,8 +55,6 @@ export default function AllEmployees() {
       </div>
 
       <div className="mt-10">
-        <h1 className="text-2xl font-bold mb-6">All Employees</h1>
-
         {employees?.length === 0 ? (
           <div className="text-center py-8 bg-gray-50 rounded-lg">
             <p className="text-gray-500">No employees found.</p>
