@@ -42,7 +42,7 @@ export const navigation: NavigationItem[] = [
   },
   {
     name: 'التقارير',
-    href: '/dashboard/customers/customer-service',
+    href: '/dashboard/Reports',
     icon: ChartNoAxesCombined,
   },
   {
