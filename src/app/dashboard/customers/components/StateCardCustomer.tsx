@@ -1,6 +1,5 @@
 import React from 'react';
 import { SvgIcon } from '@/components/ui/svg-icon';
-import clsx from 'clsx';
 
 interface StatsCardProps {
   iconSrc: string;
@@ -16,21 +15,10 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   label,
   value,
   subtitle,
-  iconColor = 'text-purple-600',
-  iconBgColor = 'bg-purple-50',
 }) => (
-  <div className="bg-white flex gap-4 rounded-lg p-6 items-start shadow-sm border border-gray-100">
-    <div
-      className={clsx(
-        'flex items-center justify-center rounded-lg p-2',
-        iconBgColor
-      )}
-    >
-      <SvgIcon
-        src={iconSrc}
-        className={clsx('w-6 h-6', iconColor)}
-        alt={label}
-      />
+  <div className="bg-white flex gap-4 rounded-lg py-5 px-4 items-start shadow-sm border border-gray-100">
+    <div className="flex items-center justify-center rounded-lg p-2">
+      <SvgIcon src={iconSrc} className="w-9 h-9" alt={label} />
     </div>
     <div>
       <span className="text-gray-600 text-2xl block mb-2">{label}</span>
