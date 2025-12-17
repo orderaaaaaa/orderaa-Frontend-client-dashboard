@@ -10,19 +10,8 @@ import {
   CalendarClock,
   CalendarDays,
 } from 'lucide-react';
-
-interface Employee {
-  id: number;
-  accessLevel: string;
-  department: string;
-  fullName: string;
-  phoneNumber: string;
-  email?: string;
-  address?: string;
-  workingHours?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+import { useUpdateEmployeeStatus } from '@/hooks/useEmployees';
+import { Employee } from '@/schemas/employee.schema';
 
 interface EmployeeCardProps {
   employee: Employee;
@@ -39,9 +28,26 @@ export function EmployeeCard({
 }: EmployeeCardProps) {
   const isNegative = performance < 0;
   const performanceColor = isNegative ? '#ff0004' : '#3cc900';
+  const updateStatusMutation = useUpdateEmployeeStatus();
+
+  // Get online status, default to false if not provided
+  const isOnline = employee.isOnline ?? false;
+
+  // Colors for online/offline status
+  const statusColor = isOnline ? '#3cc900' : '#9ca3af'; // green when online, gray when offline
+  const borderColor = isOnline ? '#3cc900' : '#9ca3af';
 
   // Normalize phone number for links (WhatsApp requires digits only)
   const normalizedPhone = employee.phoneNumber.replace(/\D/g, '');
+
+  // Handle status toggle
+  const handleStatusToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    updateStatusMutation.mutate({
+      id: employee.id,
+      isOnline: !isOnline,
+    });
+  };
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 max-w-[420px]">
@@ -56,20 +62,23 @@ export function EmployeeCard({
             {employee.department}
           </span>
         </div>
-
         {/* Avatar */}
         <div className="relative">
           <div
             className="w-20 h-20 rounded-full border-2 flex items-center justify-center"
-            style={{ borderColor: '#3cc900' }}
+            style={{ borderColor: borderColor }}
           >
             <User size={32} className="text-[#5d24e1]" strokeWidth={2} />
           </div>
 
-          {/* Online indicator */}
-          <div
-            className="absolute bottom-0 right-0 w-5 h-5 rounded-full border-4 border-white"
-            style={{ backgroundColor: '#3cc900' }}
+          {/* Online/Offline indicator */}
+          <button
+            onClick={handleStatusToggle}
+            disabled={updateStatusMutation.isPending}
+            className="absolute bottom-0 right-0 w-5 h-5 rounded-full border-4 border-white cursor-pointer hover:scale-110 transition-transform disabled:cursor-not-allowed disabled:opacity-50"
+            style={{ backgroundColor: statusColor }}
+            title={isOnline ? 'متصل (اضغط للتغيير)' : 'غير متصل (اضغط للتغيير)'}
+            aria-label={isOnline ? 'متصل' : 'غير متصل'}
           />
         </div>
       </div>

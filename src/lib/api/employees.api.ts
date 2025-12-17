@@ -17,5 +17,10 @@ export const employeesApi = {
       .patch<Employee>(`/employees/${id}`, apiData)
       .then((res) => res.data);
   },
+  updateStatus: (id: number, isOnline: boolean) => {
+    return api
+      .patch<Employee>(`/employees/${id}/status`, { isOnline })
+      .then((res) => res.data);
+  },
   delete: (id: number) => api.delete(`/employees/${id}`),
 };

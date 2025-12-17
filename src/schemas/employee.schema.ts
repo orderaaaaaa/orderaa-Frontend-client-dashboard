@@ -50,6 +50,7 @@ export interface Employee {
   address: string;
   email?: string;
   workingHours?: string;
+  isOnline?: boolean;
   createdAt: string;
   updatedAt: string;
 }

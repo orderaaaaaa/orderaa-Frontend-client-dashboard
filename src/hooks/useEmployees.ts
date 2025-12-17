@@ -51,6 +51,31 @@ export const useUpdateEmployee = () => {
   });
 };
 
+// Update employee status
+export const useUpdateEmployeeStatus = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      isOnline,
+    }: {
+      id: number;
+      isOnline: boolean;
+    }) => {
+      return await employeesApi.updateStatus(id, isOnline);
+    },
+    onSuccess: () => {
+      toast.success('تم تحديث حالة الموظف بنجاح');
+      queryClient.invalidateQueries({ queryKey: ['employees'] });
+    },
+    onError: (error: any) => {
+      toast.error(
+        error?.response?.data?.message || 'حدث خطأ أثناء تحديث حالة الموظف'
+      );
+    },
+  });
+};
+
 // Delete employee
 export const useDeleteEmployee = () => {
   const queryClient = useQueryClient();
