@@ -1,8 +1,6 @@
-'use client';
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { employeesApi } from '@/services/employees.api';
+import { employeesApi } from '@/lib/api/employees.api';
 import { Employee, EmployeeFormData } from '@/schemas/employee.schema';
 
 // Fetch all employees
