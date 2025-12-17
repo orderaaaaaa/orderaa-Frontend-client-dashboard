@@ -57,7 +57,7 @@ export default function AllEmployees() {
       <EmployeeHeader />
 
       {/* بطاقات الإحصائيات */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-6">
         {STAT_CARDS.map((card) => (
           <StatCard
             key={card.title}
@@ -93,7 +93,7 @@ export default function AllEmployees() {
                 </div>
               </Then>
               <Else>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                   {filteredEmployees?.map((employee: Employee) => (
                     <EmployeeCard
                       key={employee.id}

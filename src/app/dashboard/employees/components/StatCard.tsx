@@ -24,7 +24,7 @@ export const StatCard = ({
         borderColor ?? 'border-gray-200'
       }`}
     >
-      <div className="grid grid-cols-[50px_1fr] gap-5 justify-between">
+      <div className="grid grid-cols-[50px_1fr] gap-5">
         <div
           className={`${iconBgColor} p-3 rounded-lg h-[50px] shadow-lg border-2 ${
             borderColor ?? 'border-gray-200'
