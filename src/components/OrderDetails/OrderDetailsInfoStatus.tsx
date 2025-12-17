@@ -5,6 +5,7 @@ interface OrderDetailsInfoStatusProps {
   order: Order;
 }
 
+
 const statusLabelMap: Record<string, string> = {
   TRIED_TO_REACH_CUSTOMER: 'لا يرد',
   WAITING_FOR_PAYMENT: 'في انتظار الدفع',
