@@ -16,7 +16,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   value,
   subtitle,
 }) => (
-  <div className="bg-white flex gap-4 rounded-lg py-5 px-4 items-start shadow-sm border border-gray-100">
+  <div className="bg-white flex gap-4 rounded-lg py-5 px-4 items-start shadow-lg border border-gray-100">
     <div className="flex items-center justify-center rounded-lg p-2">
       <SvgIcon src={iconSrc} className="w-9 h-9" alt={label} />
     </div>

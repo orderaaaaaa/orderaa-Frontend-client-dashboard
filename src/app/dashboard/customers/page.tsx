@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import CustomerHeader from './components/CustomerHeader';
 import CustomerStates from './components/CustomerStates';
+import CustomerSearch from './components/CustomerSearch';
 
 export default function CustomersPage() {
   const [fromDate, setFromDate] = useState<Date | null>(null);
@@ -20,6 +21,14 @@ export default function CustomersPage() {
         onTimePeriodChange={setTimePeriod}
       />
       <CustomerStates />
+      <CustomerSearch
+        fromDate={fromDate}
+        onFromDateChange={setFromDate}
+        onTimePeriodChange={setTimePeriod}
+        onToDateChange={setToDate}
+        timePeriod={timePeriod}
+        toDate={toDate}
+      />
     </div>
   );
 }
