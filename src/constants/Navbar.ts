@@ -47,7 +47,7 @@ export const navigation: NavigationItem[] = [
   },
   {
     name: 'العملاء',
-    href: '/dashboard/employees',
+    href: '/dashboard/customers',
     icon: Users,
   },
   {
