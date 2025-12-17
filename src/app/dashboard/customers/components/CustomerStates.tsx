@@ -2,22 +2,20 @@ import React from 'react';
 import { StatsCard } from './StateCardCustomer';
 import { statsData } from '../constants/stateItem';
 
-const StatsDashboard: React.FC = () => {
+export default function CustomerStates() {
   return (
-    <div className="w-[95%] p-6" dir="rtl">
-      <div className="grid grid-cols-5 gap-4">
-        {statsData.map((stat, index) => (
-          <StatsCard
-            key={index}
-            icon={stat.icon}
-            label={stat.label}
-            value={stat.value}
-            subtitle={stat.subtitle}
-          />
-        ))}
-      </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
+      {statsData.map((stat, index) => (
+        <StatsCard
+          key={index}
+          iconSrc={stat.iconSrc}
+          label={stat.label}
+          value={stat.value}
+          subtitle={stat.subtitle}
+          iconColor={stat.iconColor}
+          iconBgColor={stat.iconBgColor}
+        />
+      ))}
     </div>
   );
-};
-
-export default StatsDashboard;
+}

@@ -1,61 +1,68 @@
-import {
-  Users,
-  ShoppingBag,
-  Award,
-  Receipt,
-  Phone,
-  DollarSign,
-  Eye,
-  LucideIcon,
-} from 'lucide-react';
-
-interface StatItem {
-  icon: LucideIcon;
+export interface StatItem {
+  iconSrc: string;
   label: string;
   value: string;
   subtitle?: string;
+  iconColor: string;
+  iconBgColor: string;
 }
 
 export const statsData: StatItem[] = [
   {
-    icon: Users,
-    label: 'إجمالي العملاء',
-    value: '15',
-  },
-  {
-    icon: Receipt,
-    label: 'إجمالي الطلبات',
-    value: '208',
-    subtitle: '13.9 طلب لكل عميل',
-  },
-  {
-    icon: Award,
-    label: 'عملاء مميزين',
-    value: '15',
-  },
-  {
-    icon: ShoppingBag,
-    label: 'مشتري بالجملة',
-    value: '12',
-  },
-  {
-    icon: Users,
+    iconSrc: '/icons/ghost.svg',
     label: 'عميل شبح',
     value: '8',
+    iconColor: 'text-blue-600',
+    iconBgColor: 'bg-blue-50',
   },
   {
-    icon: Eye,
-    label: 'متفرج على الانترنت',
+    iconSrc: '/icons/wholesale.svg',
+    label: 'مشتري بالجملة',
+    value: '12',
+    iconColor: 'text-green-600',
+    iconBgColor: 'bg-green-50',
+  },
+  {
+    iconSrc: '/icons/premium.svg',
+    label: 'عملاء مميزين',
     value: '15',
+    iconColor: 'text-purple-600',
+    iconBgColor: 'bg-purple-50',
   },
   {
-    icon: DollarSign,
-    label: 'قيمة عالية',
+    iconSrc: '/icons/orders.svg',
+    label: 'إحصائي الطلبات',
     value: '208',
+    subtitle: 'طلب لكل عميل 13.9',
+    iconColor: 'text-orange-600',
+    iconBgColor: 'bg-orange-50',
   },
   {
-    icon: Phone,
+    iconSrc: '/icons/customers.svg',
+    label: 'إحصائي العملاء',
+    value: '15',
+    iconColor: 'text-indigo-600',
+    iconBgColor: 'bg-indigo-50',
+  },
+  {
+    iconSrc: '/icons/no-response.svg',
     label: 'لا يرد',
     value: '15',
+    iconColor: 'text-red-600',
+    iconBgColor: 'bg-red-50',
+  },
+  {
+    iconSrc: '/icons/high-value.svg',
+    label: 'قيمة عالية',
+    value: '208',
+    iconColor: 'text-yellow-600',
+    iconBgColor: 'bg-yellow-50',
+  },
+  {
+    iconSrc: '/icons/online-viewer.svg',
+    label: 'متفرج على الانترنت',
+    value: '15',
+    iconColor: 'text-cyan-600',
+    iconBgColor: 'bg-cyan-50',
   },
 ];

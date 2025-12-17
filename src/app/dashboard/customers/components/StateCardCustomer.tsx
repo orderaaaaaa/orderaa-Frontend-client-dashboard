@@ -1,24 +1,41 @@
-import { LucideIcon } from 'lucide-react';
+import React from 'react';
+import { SvgIcon } from '@/components/ui/svg-icon';
+import clsx from 'clsx';
 
 interface StatsCardProps {
-  icon: LucideIcon;
+  iconSrc: string;
   label: string;
   value: string;
   subtitle?: string;
+  iconColor?: string;
+  iconBgColor?: string;
 }
 
 export const StatsCard: React.FC<StatsCardProps> = ({
-  icon: Icon,
+  iconSrc,
   label,
   value,
   subtitle,
+  iconColor = 'text-purple-600',
+  iconBgColor = 'bg-purple-50',
 }) => (
-  <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-    <div className="flex items-center justify-between mb-2">
-      <span className="text-gray-600 text-sm">{label}</span>
-      <Icon className="w-6 h-6 text-purple-600" />
+  <div className="bg-white flex gap-4 rounded-lg p-6 items-start shadow-sm border border-gray-100">
+    <div
+      className={clsx(
+        'flex items-center justify-center rounded-lg p-2',
+        iconBgColor
+      )}
+    >
+      <SvgIcon
+        src={iconSrc}
+        className={clsx('w-6 h-6', iconColor)}
+        alt={label}
+      />
     </div>
-    <div className="text-3xl font-bold text-gray-900">{value}</div>
-    {subtitle && <div className="text-xs text-gray-500 mt-1">{subtitle}</div>}
+    <div>
+      <span className="text-gray-600 text-2xl block mb-2">{label}</span>
+      <div className="text-3xl font-bold text-gray-900">{value}</div>
+      {subtitle && <div className="text-xs text-gray-500 mt-1">{subtitle}</div>}
+    </div>
   </div>
 );
