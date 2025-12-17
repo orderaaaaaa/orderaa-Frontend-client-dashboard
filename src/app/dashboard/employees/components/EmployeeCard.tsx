@@ -124,7 +124,7 @@ export function EmployeeCard({
       {/* Action Buttons */}
       <div className="flex justify-center gap-4">
         <button className="bg-white hover:bg-gray-50 text-[#5D24E1] border-2 border-[#5D24E1] rounded-2xl py-3 px-4 flex items-center justify-center gap-2 transition-colors font-medium">
-          <span dir="ltr">+20 {employee.phoneNumber}</span>
+          <span dir="ltr">+2 {employee.phoneNumber}</span>
           <Phone size={20} />
         </button>
 
