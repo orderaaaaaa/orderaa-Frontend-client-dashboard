@@ -1,14 +1,24 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { employeesApi } from '@/lib/api/employees.api';
-import { Employee, EmployeeFormData } from '@/schemas/employee.schema';
+import { Employee, EmployeeFormData, EmployeeFilters, PaginatedEmployeesResponse } from '@/schemas/employee.schema';
 
-// Fetch all employees
+// Fetch all employees (legacy - use useFilteredEmployees instead)
 export const useEmployees = () => {
   return useQuery<Employee[]>({
     queryKey: ['employees'],
     queryFn: async () => {
       return await employeesApi.getAll();
+    },
+  });
+};
+
+// Fetch filtered and paginated employees
+export const useFilteredEmployees = (filters: EmployeeFilters) => {
+  return useQuery<PaginatedEmployeesResponse>({
+    queryKey: ['employees', 'filtered', filters],
+    queryFn: async () => {
+      return await employeesApi.getFiltered(filters);
     },
   });
 };

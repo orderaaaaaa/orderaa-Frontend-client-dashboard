@@ -33,8 +33,8 @@ export function EmployeeCard({ employee }: EmployeeCardProps) {
   const performanceColor = isNegative ? '#ff0004' : '#3cc900';
 
   // Get attendance data, defaults to 0
-  const workDays = employee.workingDays ?? 0;
-  const vacationDays = employee.leaveDays ?? 0;
+  const workDays = employee.workingDaysThisMonth ?? 0;
+  const vacationDays = employee.leaveDaysThisMonth ?? 0;
 
   // Normalize phone number for links (WhatsApp requires digits only)
   const normalizedPhone = employee.phoneNumber.replace(/\D/g, '');

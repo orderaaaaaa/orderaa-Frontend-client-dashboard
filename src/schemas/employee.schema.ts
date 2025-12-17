@@ -53,8 +53,8 @@ export interface Employee {
   isOnline?: boolean;
   performanceScore?: number;
   performanceChange?: number;
-  workingDays?: number;
-  leaveDays?: number;
+  workingDaysThisMonth?: number;
+  leaveDaysThisMonth?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -68,6 +68,29 @@ export interface EmployeesResponse {
     limit: number;
     totalPages: number;
   };
+}
+
+// Paginated employees response from filtered endpoint
+export interface PaginatedEmployeesResponse {
+  currentPage: number;
+  totalPages: number;
+  itemsPerPage: number;
+  totalItems: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  data: Employee[];
+}
+
+// Employee filter parameters
+export interface EmployeeFilters {
+  name?: string;
+  phoneNumber?: string;
+  email?: string;
+  accessLevel?: string;
+  department?: string;
+  performance?: 'LOW' | 'HIGH' | 'ALL';
+  page?: number;
+  limit?: number;
 }
 
 
