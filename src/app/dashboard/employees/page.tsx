@@ -98,9 +98,6 @@ export default function AllEmployees() {
                     <EmployeeCard
                       key={employee.id}
                       employee={employee}
-                      performance={10}
-                      vacationDays={0}
-                      workDays={0}
                     />
                   ))}
                 </div>

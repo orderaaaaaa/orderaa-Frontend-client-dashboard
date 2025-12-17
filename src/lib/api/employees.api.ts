@@ -22,5 +22,15 @@ export const employeesApi = {
       .patch<Employee>(`/employees/${id}/status`, { isOnline })
       .then((res) => res.data);
   },
+  updatePerformance: (id: number, data: { performanceScore: number; performanceChange: number }) => {
+    return api
+      .patch<Employee>(`/employees/${id}/performance`, data)
+      .then((res) => res.data);
+  },
+  updateAttendance: (id: number, data: { workingDays: number; leaveDays: number }) => {
+    return api
+      .patch<Employee>(`/employees/${id}/attendance`, data)
+      .then((res) => res.data);
+  },
   delete: (id: number) => api.delete(`/employees/${id}`),
 };

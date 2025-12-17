@@ -76,6 +76,66 @@ export const useUpdateEmployeeStatus = () => {
   });
 };
 
+// Update employee performance
+export const useUpdateEmployeePerformance = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      performanceScore,
+      performanceChange,
+    }: {
+      id: number;
+      performanceScore: number;
+      performanceChange: number;
+    }) => {
+      return await employeesApi.updatePerformance(id, {
+        performanceScore,
+        performanceChange,
+      });
+    },
+    onSuccess: () => {
+      toast.success('تم تحديث أداء الموظف بنجاح');
+      queryClient.invalidateQueries({ queryKey: ['employees'] });
+    },
+    onError: (error: any) => {
+      toast.error(
+        error?.response?.data?.message || 'حدث خطأ أثناء تحديث أداء الموظف'
+      );
+    },
+  });
+};
+
+// Update employee attendance
+export const useUpdateEmployeeAttendance = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      workingDays,
+      leaveDays,
+    }: {
+      id: number;
+      workingDays: number;
+      leaveDays: number;
+    }) => {
+      return await employeesApi.updateAttendance(id, {
+        workingDays,
+        leaveDays,
+      });
+    },
+    onSuccess: () => {
+      toast.success('تم تحديث حضور الموظف بنجاح');
+      queryClient.invalidateQueries({ queryKey: ['employees'] });
+    },
+    onError: (error: any) => {
+      toast.error(
+        error?.response?.data?.message || 'حدث خطأ أثناء تحديث حضور الموظف'
+      );
+    },
+  });
+};
+
 // Delete employee
 export const useDeleteEmployee = () => {
   const queryClient = useQueryClient();

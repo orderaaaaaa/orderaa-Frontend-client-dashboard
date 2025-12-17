@@ -51,6 +51,10 @@ export interface Employee {
   email?: string;
   workingHours?: string;
   isOnline?: boolean;
+  performanceScore?: number;
+  performanceChange?: number;
+  workingDays?: number;
+  leaveDays?: number;
   createdAt: string;
   updatedAt: string;
 }

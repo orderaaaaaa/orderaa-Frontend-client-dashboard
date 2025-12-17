@@ -15,19 +15,9 @@ import { Employee } from '@/schemas/employee.schema';
 
 interface EmployeeCardProps {
   employee: Employee;
-  performance?: number; // نسبة الأداء
-  workDays?: number; // أيام العمل
-  vacationDays?: number; // أيام الإجازة
 }
 
-export function EmployeeCard({
-  employee,
-  performance = 12,
-  workDays = 5,
-  vacationDays = 0,
-}: EmployeeCardProps) {
-  const isNegative = performance < 0;
-  const performanceColor = isNegative ? '#ff0004' : '#3cc900';
+export function EmployeeCard({ employee }: EmployeeCardProps) {
   const updateStatusMutation = useUpdateEmployeeStatus();
 
   // Get online status, default to false if not provided
@@ -36,6 +26,15 @@ export function EmployeeCard({
   // Colors for online/offline status
   const statusColor = isOnline ? '#3cc900' : '#9ca3af'; // green when online, gray when offline
   const borderColor = isOnline ? '#3cc900' : '#9ca3af';
+
+  // Get performance data, use performanceChange for display, default to 0
+  const performance = employee.performanceChange ?? 0;
+  const isNegative = performance < 0;
+  const performanceColor = isNegative ? '#ff0004' : '#3cc900';
+
+  // Get attendance data, defaults to 0
+  const workDays = employee.workingDays ?? 0;
+  const vacationDays = employee.leaveDays ?? 0;
 
   // Normalize phone number for links (WhatsApp requires digits only)
   const normalizedPhone = employee.phoneNumber.replace(/\D/g, '');
