@@ -38,7 +38,7 @@ export const StatCard = ({
         </div>
         <div>
           <p className="text-[#00000099] text-2xl">{title}</p>
-          <p className="text-2xl font-bold mt-2 text-ce">{count}</p>
+          <p className="text-3xl mt-2">{count}</p>
         </div>
       </div>
     </div>

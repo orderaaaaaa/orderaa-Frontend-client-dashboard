@@ -1,8 +1,8 @@
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
-import React from 'react';
+import React, { memo } from 'react';
 
-const EmployeeHeader = () => {
+const EmployeeHeader = memo(() => {
   return (
     <div className="sm:px-8 py-2 flex flex-row-reverse justify-between items-start">
       <Link href="/dashboard/employees/add-employee">
@@ -17,6 +17,8 @@ const EmployeeHeader = () => {
       </div>
     </div>
   );
-};
+});
+
+EmployeeHeader.displayName = 'EmployeeHeader';
 
 export default EmployeeHeader;
