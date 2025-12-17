@@ -9,6 +9,8 @@ import {
   FolderPlus,
   File,
   Link2,
+  IdCardIcon,
+  ChartNoAxesCombined,
 } from 'lucide-react';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
 import { CartIcon, ExcelIcon } from '@/components/icons'; // Import from your icons registry
@@ -39,55 +41,54 @@ export const navigation: NavigationItem[] = [
     ],
   },
   {
-    name: 'قسم خدمة العملاء',
-    href: '/dashboard/customers',
+    name: 'التقارير',
+    href: '/dashboard/customers/customer-service',
+    icon: ChartNoAxesCombined,
+  },
+  {
+    name: 'العملاء',
+    href: '/dashboard/employees',
     icon: Users,
-    children: [
-      {
-        name: 'تقارير الكول سنتر ',
-        href: '/dashboard/customers/customer-service',
-        icon: FolderPlus,
-      },
-      {
-        name: 'متابعة الطلبات',
-        href: '/dashboard/customers/complaints',
-      },
-    ],
   },
   {
-    name: 'قسم الشحن',
-    href: '/dashboard/analytics',
-    icon: Truck,
-    children: [
-      {
-        name: 'تقارير',
-        href: '/dashboard/analytics/new',
-        // No icon - now optional
-      },
-      {
-        name: 'موظفين الشحن',
-        href: '/dashboard/analytics/completed',
-        // No icon - now optional
-      },
-    ],
+    name: 'الموظفين',
+    href: '/dashboard/employees',
+    icon: IdCardIcon,
   },
-  {
-    name: 'قسم التجهيز',
-    href: '/dashboard',
-    icon: PenBox,
-    children: [
-      {
-        name: 'تقارير',
-        href: '/dashboard/settings/pending',
-        // No icon - now optional
-      },
-      {
-        name: 'موظفين الشحن',
-        href: '/dashboard/settings/done',
-        // No icon - now optional
-      },
-    ],
-  },
+  // {
+  //   name: 'قسم الشحن',
+  //   href: '/dashboard/analytics',
+  //   icon: Truck,
+  //   children: [
+  //     {
+  //       name: 'تقارير',
+  //       href: '/dashboard/analytics/new',
+  //       // No icon - now optional
+  //     },
+  //     {
+  //       name: 'موظفين الشحن',
+  //       href: '/dashboard/analytics/completed',
+  //       // No icon - now optional
+  //     },
+  //   ],
+  // },
+  // {
+  //   name: 'قسم التجهيز',
+  //   href: '/dashboard',
+  //   icon: PenBox,
+  //   children: [
+  //     {
+  //       name: 'تقارير',
+  //       href: '/dashboard/settings/pending',
+  //       // No icon - now optional
+  //     },
+  //     {
+  //       name: 'موظفين الشحن',
+  //       href: '/dashboard/settings/done',
+  //       // No icon - now optional
+  //     },
+  //   ],
+  // },
   {
     name: 'إضافه طلب جديد',
     href: '/dashboard',
@@ -114,10 +115,5 @@ export const navigation: NavigationItem[] = [
     name: 'الربط مع متجر خارجي',
     href: '/dashboard/integrations',
     icon: Link2,
-  },
-  {
-    name: 'الموظفين',
-    href: '/dashboard/employees',
-    icon: Users,
   },
 ];
