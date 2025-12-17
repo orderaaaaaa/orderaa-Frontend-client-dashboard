@@ -7,7 +7,9 @@ import { Employee } from '@/schemas/employee.schema';
 import EmployeeHeader from './components/EmployeeHeader';
 import { StatCard } from './components/StatCard';
 import { STAT_CARDS } from '@/constants/employees/statCard';
-import { EmployeeSearchFilter } from './components/EmployeeSearchFilter'; // المسار المعدل
+import { EmployeeSearchFilter } from './components/EmployeeSearchFilter';
+import { Else, If, Then } from 'react-if';
+import { EmployeeCard } from './components/EmployeeCard';
 
 export default function AllEmployees() {
   const { data: employees, isLoading, isError } = useEmployees();
@@ -41,14 +43,6 @@ export default function AllEmployees() {
         .length || 0
     );
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
 
   if (isError) {
     return (
@@ -84,37 +78,37 @@ export default function AllEmployees() {
         onAccessLevelChange={setSelectedAccessLevel}
       />
 
-      {/* قائمة الموظفين بعد التصفية */}
-      <div className="mt-10">
-        {filteredEmployees?.length === 0 ? (
-          <div className="text-center py-8 bg-gray-50 rounded-lg">
-            <p className="text-gray-500">لم يتم العثور على موظفين.</p>
+      <If condition={isLoading}>
+        <Then>
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
           </div>
-        ) : (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <ul className="divide-y divide-gray-200">
-              {filteredEmployees?.map((employee: Employee) => (
-                <li key={employee.id} className="px-6 py-4 hover:bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {employee.fullName}
-                      </p>
-                      <p className="text-sm text-gray-500">{employee.email}</p>
-                      <p className="text-sm text-gray-400">
-                        {employee.phoneNumber}
-                      </p>
-                    </div>
-                    <span className="px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                      {employee.accessLevel}
-                    </span>
-                  </div>
-                </li>
-              ))}
-            </ul>
+        </Then>
+        <Else>
+          <div className="mt-10">
+            <If condition={filteredEmployees.length === 0}>
+              <Then>
+                <div className="text-center py-8 bg-gray-50 rounded-lg">
+                  <p className="text-gray-500">لم يتم العثور على موظفين.</p>
+                </div>
+              </Then>
+              <Else>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {filteredEmployees?.map((employee: Employee) => (
+                    <EmployeeCard
+                      key={employee.id}
+                      employee={employee}
+                      performance={10}
+                      vacationDays={0}
+                      workDays={0}
+                    />
+                  ))}
+                </div>
+              </Else>
+            </If>
           </div>
-        )}
-      </div>
+        </Else>
+      </If>
     </div>
   );
 }
