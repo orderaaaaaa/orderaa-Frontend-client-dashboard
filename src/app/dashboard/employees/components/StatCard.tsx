@@ -20,7 +20,7 @@ export const StatCard = ({
 }: StatCardProps) => {
   return (
     <div
-      className={`bg-white p-6 rounded-lg shadow-lg border-2 border-solid ${
+      className={`bg-white max-sm:cursor-grab max-sm:active:cursor-grabbing p-6 rounded-lg sm:shadow-lg border-2 border-solid ${
         borderColor ?? 'border-gray-200'
       }`}
     >
@@ -30,11 +30,7 @@ export const StatCard = ({
             borderColor ?? 'border-gray-200'
           }`}
         >
-          <SvgIcon
-            src={iconPath}
-            className="h-6 w-6" // Adjust size as needed
-            alt={alt}
-          />
+          <SvgIcon src={iconPath} className="h-6 w-6" alt={alt} />
         </div>
         <div>
           <p className="text-[#00000099] text-2xl">{title}</p>

@@ -1,47 +1,99 @@
 // page.tsx
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { useEmployees } from '@/hooks/useEmployees';
-import { Employee } from '@/schemas/employee.schema';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useFilteredEmployees } from '@/hooks/useEmployees';
+import { Employee, EmployeeFilters } from '@/schemas/employee.schema';
 import EmployeeHeader from './components/EmployeeHeader';
 import { StatCard } from './components/StatCard';
 import { STAT_CARDS } from '@/constants/employees/statCard';
 import { EmployeeSearchFilter } from './components/EmployeeSearchFilter';
 import { Else, If, Then } from 'react-if';
 import { EmployeeCard } from './components/EmployeeCard';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Pagination as CustomPagination } from './components/Pagination';
+import { Pagination as SwiperPagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
 
 export default function AllEmployees() {
-  const { data: employees, isLoading, isError } = useEmployees();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAccessLevel, setSelectedAccessLevel] = useState<string>('ALL');
+  const [selectedDepartment, setSelectedDepartment] = useState<string>('ALL');
+  const [selectedPerformance, setSelectedPerformance] = useState<string>('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit] = useState(10);
 
-  // فلترة البيانات حسب البحث ومستوى الوصول
-  const filteredEmployees = useMemo(() => {
-    if (!employees) return [];
+  // Build filters object
+  const filters: EmployeeFilters = useMemo(() => {
+    const filterObj: EmployeeFilters = {
+      page: currentPage,
+      limit: limit,
+    };
 
-    return employees.filter((emp: Employee) => {
-      const matchesSearch =
-        emp.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        emp.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        emp.phoneNumber?.includes(searchQuery);
+    // Add search query to appropriate field (name, phoneNumber, or email)
+    if (searchQuery.trim()) {
+      // Try to detect if it's a phone number (only digits)
+      if (/^\d+$/.test(searchQuery.trim())) {
+        filterObj.phoneNumber = searchQuery.trim();
+      } else if (searchQuery.includes('@')) {
+        // Email contains @
+        filterObj.email = searchQuery.trim();
+      } else {
+        // Default to name search
+        filterObj.name = searchQuery.trim();
+      }
+    }
 
-      const matchesAccessLevel =
-        selectedAccessLevel === 'ALL' ||
-        emp.accessLevel === selectedAccessLevel;
+    if (selectedAccessLevel !== 'ALL') {
+      filterObj.accessLevel = selectedAccessLevel;
+    }
 
-      return matchesSearch && matchesAccessLevel;
-    });
-  }, [employees, searchQuery, selectedAccessLevel]);
+    if (selectedDepartment !== 'ALL') {
+      filterObj.department = selectedDepartment;
+    }
+
+    if (selectedPerformance !== 'ALL') {
+      filterObj.performance = selectedPerformance as 'LOW' | 'HIGH';
+    }
+
+    return filterObj;
+  }, [
+    searchQuery,
+    selectedAccessLevel,
+    selectedDepartment,
+    selectedPerformance,
+    currentPage,
+    limit,
+  ]);
+
+  const {
+    data: paginatedResponse,
+    isLoading,
+    isError,
+  } = useFilteredEmployees(filters);
+
+  const employees = paginatedResponse?.data || [];
+  const totalItems = paginatedResponse?.totalItems || 0;
+
+  // Reset to page 1 when filters change (except page changes)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    searchQuery,
+    selectedAccessLevel,
+    selectedDepartment,
+    selectedPerformance,
+  ]);
 
   const getCountByAccessLevel = (accessLevel: string) => {
+    // This would need to be updated to use the API if needed
+    // For now, we'll return the totalItems as a fallback
     if (accessLevel === 'TOTAL') {
-      return employees?.length || 0;
+      return totalItems;
     }
-    return (
-      employees?.filter((emp: Employee) => emp.accessLevel === accessLevel)
-        .length || 0
-    );
+    // We could fetch counts per access level if needed
+    return 0;
   };
 
   if (isError) {
@@ -57,7 +109,31 @@ export default function AllEmployees() {
       <EmployeeHeader />
 
       {/* بطاقات الإحصائيات */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-6">
+      <div className="block sm:hidden mt-6">
+        <Swiper
+          modules={[SwiperPagination]}
+          spaceBetween={16}
+          slidesPerView={1}
+          pagination={{ clickable: true }}
+          className="stat-cards-swiper"
+        >
+          {STAT_CARDS.map((card) => (
+            <SwiperSlide key={card.title}>
+              <StatCard
+                title={card.title}
+                count={getCountByAccessLevel(card.accessLevel)}
+                borderColor={card.borderColor}
+                iconBgColor={card.iconBgColor}
+                iconPath={card.iconPath}
+                alt={card.alt}
+              />
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
+
+      {/* Desktop: Grid */}
+      <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-6">
         {STAT_CARDS.map((card) => (
           <StatCard
             key={card.title}
@@ -76,6 +152,10 @@ export default function AllEmployees() {
         onSearchChange={setSearchQuery}
         selectedAccessLevel={selectedAccessLevel}
         onAccessLevelChange={setSelectedAccessLevel}
+        selectedDepartment={selectedDepartment}
+        onDepartmentChange={setSelectedDepartment}
+        selectedPerformance={selectedPerformance}
+        onPerformanceChange={setSelectedPerformance}
       />
 
       <If condition={isLoading}>
@@ -86,7 +166,7 @@ export default function AllEmployees() {
         </Then>
         <Else>
           <div className="mt-10">
-            <If condition={filteredEmployees.length === 0}>
+            <If condition={employees.length === 0}>
               <Then>
                 <div className="text-center py-8 bg-gray-50 rounded-lg">
                   <p className="text-gray-500">لم يتم العثور على موظفين.</p>
@@ -94,16 +174,20 @@ export default function AllEmployees() {
               </Then>
               <Else>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-                  {filteredEmployees?.map((employee: Employee) => (
-                    <EmployeeCard
-                      key={employee.id}
-                      employee={employee}
-                      performance={10}
-                      vacationDays={0}
-                      workDays={0}
-                    />
+                  {employees?.map((employee: Employee) => (
+                    <EmployeeCard key={employee.id} employee={employee} />
                   ))}
                 </div>
+
+                {paginatedResponse && (
+                  <CustomPagination
+                    currentPage={paginatedResponse.currentPage}
+                    totalPages={paginatedResponse.totalPages}
+                    hasNextPage={paginatedResponse.hasNextPage}
+                    hasPreviousPage={paginatedResponse.hasPreviousPage}
+                    onPageChange={setCurrentPage}
+                  />
+                )}
               </Else>
             </If>
           </div>

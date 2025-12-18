@@ -10,6 +10,8 @@ import {
 import { useCreateEmployee } from '@/hooks/useEmployees';
 import EmployeeFormHeader from './EmployeeFormHeader';
 import EmployeeFormFields from './EmployeeFormFields';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 
 export default function EmployeesPage() {
   const {
@@ -19,17 +21,44 @@ export default function EmployeesPage() {
     reset,
     watch,
     setValue,
+    setError,
   } = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeSchema),
   });
 
   const createEmployee = useCreateEmployee();
+  const router = useRouter();
 
   const onSubmit = (data: EmployeeFormData) => {
-    createEmployee.mutate(data, { onSuccess: () => reset() });
-  };
+    createEmployee.mutate(data, {
+      onSuccess: () => {
+        reset();
+        router.push('/dashboard/employees');
+      },
+      onError: (error: any) => {
+        const status = error?.response?.status;
+        const message =
+          error?.response?.data?.message ||
+          'رقم الهاتف أو البريد الإلكتروني مستخدم بالفعل';
 
-  const handleClearAll = () => reset();
+        if (status === 409) {
+          setError('phoneNumber', {
+            type: 'manual',
+            message,
+          });
+
+          setError('email', {
+            type: 'manual',
+            message,
+          });
+
+          return;
+        }
+
+        toast.error('حدث خطأ أثناء إضافة الموظف');
+      },
+    });
+  };
 
   return (
     <div
@@ -56,13 +85,6 @@ export default function EmployeesPage() {
             <span>
               {createEmployee.isPending ? 'جاري الإضافة...' : 'إضافة موظف جديد'}
             </span>
-          </button>
-          <button
-            type="button"
-            onClick={handleClearAll}
-            className="w-auto px-4 sm:px-8 py-1 bg-white border cursor-pointer border-[#5D24E1] text-[#5D24E1] rounded-full text-base md:text-lg font-semibold hover:bg-[#5D24E1]/5 transition-colors flex items-center justify-center gap-2"
-          >
-            مسح الكل
           </button>
         </div>
       </form>
