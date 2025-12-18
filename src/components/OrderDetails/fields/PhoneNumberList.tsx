@@ -99,7 +99,7 @@ export function PhoneNumberList({
                   type="tel"
                   value={phones.newPhoneNumber}
                   onChange={(e) => phones.setNewPhoneNumber(e.target.value)}
-                  className="flex-1 min-w-0 w-full border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
+                  className="flex-1 min-w-0 w-full border border-[#5D24E1] rounded px-2 py-1 text-base focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
                   autoFocus
                 />
                 <button
@@ -195,7 +195,7 @@ export function PhoneNumberList({
               value={phones.newPhoneNumber}
               onChange={(e) => phones.setNewPhoneNumber(e.target.value)}
               placeholder="أدخل رقم الهاتف"
-              className="flex-1 min-w-0 w-full border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
+              className="flex-1 min-w-0 w-full border border-[#5D24E1] rounded px-2 py-1 text-base focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
               autoFocus
             />
             <button
