@@ -130,7 +130,7 @@ export function EmployeeCard({ employee }: EmployeeCardProps) {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-center gap-4">
+      <div className="grid grid-cols-2 gap-4">
         {/* Phone Call */}
         <a
           href={`tel:${normalizedPhone}`}

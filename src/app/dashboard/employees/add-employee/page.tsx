@@ -29,8 +29,6 @@ export default function EmployeesPage() {
     createEmployee.mutate(data, { onSuccess: () => reset() });
   };
 
-  const handleClearAll = () => reset();
-
   return (
     <div
       className="w-full max-w-[1242px] mx-auto px-4 md:px-6 lg:px-0"
@@ -56,13 +54,6 @@ export default function EmployeesPage() {
             <span>
               {createEmployee.isPending ? 'جاري الإضافة...' : 'إضافة موظف جديد'}
             </span>
-          </button>
-          <button
-            type="button"
-            onClick={handleClearAll}
-            className="w-auto px-4 sm:px-8 py-1 bg-white border cursor-pointer border-[#5D24E1] text-[#5D24E1] rounded-full text-base md:text-lg font-semibold hover:bg-[#5D24E1]/5 transition-colors flex items-center justify-center gap-2"
-          >
-            مسح الكل
           </button>
         </div>
       </form>
