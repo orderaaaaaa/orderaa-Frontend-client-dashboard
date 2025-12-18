@@ -48,12 +48,12 @@ export function EditableTextField({
   const displayValue = isEmpty ? '-' : value;
 
   return (
-    <div className={`flex flex-col gap-1 min-w-0 ${className}`}>
+    <div className={`flex flex-col gap-1 min-w-0 overflow-hidden ${className}`}>
       <p className="font-bold text-[#121212]">{label}</p>
-      <div className={`${tagStyle} relative w-full ${field.isEditing && multiline ? '' : 'overflow-hidden'}`}>
+      <div className={`${tagStyle} relative w-full overflow-hidden`}>
         {Icon && <Icon size={18} className="flex-shrink-0 self-start mt-1" />}
         {field.isEditing ? (
-          <div className={`flex ${multiline ? 'flex-col' : 'items-center'} gap-1 flex-1 min-w-0`}>
+          <div className={`flex ${multiline ? 'flex-col' : 'items-center'} gap-1 flex-1 min-w-0 w-full overflow-hidden`}>
             {multiline ? (
               <textarea
                 value={field.value}
@@ -68,7 +68,7 @@ export function EditableTextField({
                 value={field.value}
                 onChange={(e) => field.setValue(e.target.value)}
                 placeholder={placeholder}
-                className="flex-1 min-w-0 border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
+                className="flex-1 min-w-0 w-full border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
                 autoFocus
               />
             )}

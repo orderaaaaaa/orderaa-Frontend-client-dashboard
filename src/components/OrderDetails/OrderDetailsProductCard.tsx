@@ -115,14 +115,10 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
       // Call backend API
       await updateOrderProduct(productId, variant);
 
-      // Update local state
-      setProductsData((prev) =>
-        prev.map((item) =>
-          item.id === productId
-            ? { ...item, size: size, color: color }
-            : item
-        )
-      );
+      // Invalidate order details cache to get fresh data
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORDER_DETAILS, order.id],
+      });
 
       toast.success('تم تحديث المنتج بنجاح');
     } catch (error) {

@@ -37,11 +37,11 @@ export function TimeRangeField({
     "flex gap-2 bg-white shadow-xs items-center py-2 px-2 rounded-[5px] font-bold text-[15px] text-[#000000]";
 
   return (
-    <div className={`flex flex-col gap-1 min-w-0 ${className}`}>
+    <div className={`flex flex-col gap-1 min-w-0 overflow-hidden ${className}`}>
       <p className="font-bold text-[#121212]">الوقت</p>
-      <div className={`${tagStyle} relative`}>
+      <div className={`${tagStyle} relative overflow-hidden`}>
         <LiaClockSolid size={18} className="flex-shrink-0" />
-        <div className="flex items-center gap-2 flex-1">
+        <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
           <SearchableSelect
             className='w-full'
             value={timeFrom}

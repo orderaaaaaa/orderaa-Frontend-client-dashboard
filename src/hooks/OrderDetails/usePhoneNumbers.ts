@@ -1,11 +1,14 @@
 import { useState, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { updateCustomer } from '@/lib/api/order';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
 
 /**
  * Options for usePhoneNumbers hook
  */
 export interface UsePhoneNumbersOptions {
   customerId: number;
+  orderId: number;
   initialPhones: (string | undefined)[];
   onUpdate?: (phoneNumber: string, altPhone?: string) => void;
 }
@@ -42,9 +45,12 @@ export interface PhoneNumbersState {
  */
 export function usePhoneNumbers({
   customerId,
+  orderId,
   initialPhones,
   onUpdate,
 }: UsePhoneNumbersOptions): PhoneNumbersState {
+  const queryClient = useQueryClient();
+
   // Filter out undefined/null values and create initial phone list
   const [phoneNumbers, setPhoneNumbers] = useState<string[]>(
     initialPhones.filter((phone): phone is string => Boolean(phone))
@@ -73,6 +79,11 @@ export function usePhoneNumbers({
           altPhone: updatedPhones[1] || undefined,
         });
 
+        // Invalidate order details cache to get fresh data
+        queryClient.invalidateQueries({
+          queryKey: [QUERY_KEYS.ORDER_DETAILS, orderId],
+        });
+
         if (onUpdate) {
           onUpdate(updatedPhones[0] || '', updatedPhones[1]);
         }
@@ -82,7 +93,7 @@ export function usePhoneNumbers({
         setPhoneNumbers(phoneNumbers);
       }
     },
-    [customerId, phoneNumbers, onUpdate]
+    [customerId, orderId, phoneNumbers, onUpdate, queryClient]
   );
 
   const handleSave = useCallback(async () => {
@@ -109,6 +120,11 @@ export function usePhoneNumbers({
         altPhone: updatedPhones[1] || undefined,
       });
 
+      // Invalidate order details cache to get fresh data
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORDER_DETAILS, orderId],
+      });
+
       if (onUpdate) {
         onUpdate(updatedPhones[0] || '', updatedPhones[1]);
       }
@@ -117,7 +133,7 @@ export function usePhoneNumbers({
       // Revert on error
       setPhoneNumbers(phoneNumbers);
     }
-  }, [customerId, phoneNumbers, editingIndex, newPhoneNumber, onUpdate]);
+  }, [customerId, orderId, phoneNumbers, editingIndex, newPhoneNumber, onUpdate, queryClient]);
 
   const handleCancel = useCallback(() => {
     setEditingIndex(null);

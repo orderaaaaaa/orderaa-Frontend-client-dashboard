@@ -121,7 +121,7 @@ const EasyOrderModal = ({
   const steps = [
     'قم بتسجيل الدخول إلى حسابك في منصة Easy Orders من خلال موقعهم الرسمي.',
     'انتقل إلى الاعدادات (Settings).',
-    'اختر قسم Webhooks أو Integrations.',
+    'اختر قسم Webhooks.',
     'اضغط على "Create Webhook" أو "إنشاء ربط جديد".',
     'اختر الحدث: "Order Created" (عند إنشاء طلب جديد).',
     'انسخ رابط الـ Webhook من الحقل أدناه وألصقه في حقل Webhook URL في Easy Orders.',

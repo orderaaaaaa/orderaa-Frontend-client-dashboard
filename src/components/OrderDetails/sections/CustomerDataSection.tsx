@@ -1,10 +1,13 @@
 import React from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { LiaUserSolid } from 'react-icons/lia';
 import { EditableTextField } from '../fields/EditableTextField';
 import { PhoneNumberList } from '../fields/PhoneNumberList';
 import { TimeRangeField } from '../fields/TimeRangeField';
 import { Order } from '@/types/orders';
-
+import { updateCustomer } from '@/lib/api/order';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { toast } from 'react-toastify';
 
 export interface CustomerDataSectionProps {
   order: Order;
@@ -13,13 +16,14 @@ export interface CustomerDataSectionProps {
   className?: string;
 }
 
-
 export function CustomerDataSection({
   order,
   onUpdate,
   onPhoneUpdate,
   className = '',
 }: CustomerDataSectionProps) {
+  const queryClient = useQueryClient();
+
   const handleTimeFromChange = async (time: string) => {
     await onUpdate('timeFrom', time);
   };
@@ -28,19 +32,34 @@ export function CustomerDataSection({
     await onUpdate('timeTo', time);
   };
 
+  const handleCustomerNameUpdate = async (name: string) => {
+    try {
+      await updateCustomer(order.customers.id, { name });
+
+      // Invalidate order details cache to get fresh data
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORDER_DETAILS, order.id],
+      });
+
+      toast.success('تم تحديث اسم العميل بنجاح');
+    } catch (error) {
+      console.error('Failed to update customer name:', error);
+      toast.error('فشل في تحديث اسم العميل');
+      throw error;
+    }
+  };
+
   return (
-    <div className={className}>
+    <div className={`overflow-hidden ${className}`}>
       <div className="flex justify-between items-center mb-3">
         <h2 className="text-[#5D24E1] font-semibold">بيانات العميل</h2>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 overflow-hidden">
         <EditableTextField
           label="اسم العميل"
           value={order.customers.name}
           icon={LiaUserSolid}
-          onSave={async (value) => {
-            await onUpdate('customers.name', value);
-          }}
+          onSave={handleCustomerNameUpdate}
         />
 
         <TimeRangeField
@@ -52,6 +71,7 @@ export function CustomerDataSection({
 
         <PhoneNumberList
           customerId={order.customers.id}
+          orderId={order.id}
           phoneNumber={order.customers.phoneNumber}
           altPhone={order.customers.altPhone}
           onUpdate={onPhoneUpdate}

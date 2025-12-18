@@ -17,6 +17,7 @@ import { toast } from 'react-toastify';
  */
 export interface PhoneNumberListProps {
   customerId: number;
+  orderId: number;
   phoneNumber: string;
   altPhone?: string;
   onUpdate?: (phoneNumber: string, altPhone?: string) => void;
@@ -32,6 +33,7 @@ export interface PhoneNumberListProps {
  */
 export function PhoneNumberList({
   customerId,
+  orderId,
   phoneNumber,
   altPhone,
   onUpdate,
@@ -39,6 +41,7 @@ export function PhoneNumberList({
 }: PhoneNumberListProps) {
   const phones = usePhoneNumbers({
     customerId,
+    orderId,
     initialPhones: [phoneNumber, altPhone],
     onUpdate,
   });
@@ -85,18 +88,18 @@ export function PhoneNumberList({
   };
 
   return (
-    <div className={`flex flex-col gap-2 min-w-0 ${className}`}>
+    <div className={`flex flex-col gap-2 min-w-0 overflow-hidden ${className}`}>
       <p className="font-bold text-[#121212]">أرقام الهاتف</p>
-      <div className="space-y-2">
+      <div className="space-y-2 overflow-hidden">
         {phones.phoneNumbers.map((phone, index) => (
-          <div key={index} className="relative" ref={index === 0 ? phoneDropdownRef : null}>
+          <div key={index} className="relative overflow-hidden" ref={index === 0 ? phoneDropdownRef : null}>
             {phones.editingIndex === index ? (
               <div className="flex gap-2 items-center w-full overflow-hidden">
                 <input
                   type="tel"
                   value={phones.newPhoneNumber}
                   onChange={(e) => phones.setNewPhoneNumber(e.target.value)}
-                  className="flex-1 min-w-0 border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
+                  className="flex-1 min-w-0 w-full border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
                   autoFocus
                 />
                 <button
@@ -113,7 +116,7 @@ export function PhoneNumberList({
                 </button>
               </div>
             ) : (
-              <div className={`${tagStyle} relative`}>
+              <div className={`${tagStyle} relative overflow-hidden`}>
                 <LiaPhoneSolid size={18} className="flex-shrink-0" />
                 <button
                   onClick={() => handlePhoneCall(phone)}
@@ -192,7 +195,7 @@ export function PhoneNumberList({
               value={phones.newPhoneNumber}
               onChange={(e) => phones.setNewPhoneNumber(e.target.value)}
               placeholder="أدخل رقم الهاتف"
-              className="flex-1 min-w-0 border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
+              className="flex-1 min-w-0 w-full border border-[#5D24E1] rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
               autoFocus
             />
             <button

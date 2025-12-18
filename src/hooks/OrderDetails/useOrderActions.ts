@@ -265,6 +265,11 @@ export function useOrderActions({
           },
         });
 
+        // Invalidate order details cache to get fresh data
+        queryClient.invalidateQueries({
+          queryKey: [QUERY_KEYS.ORDER_DETAILS, order.id],
+        });
+
         if (onOrderUpdate) {
           onOrderUpdate(updatedOrder);
         }
@@ -276,12 +281,9 @@ export function useOrderActions({
         throw error;
       }
     },
-    [order.id, onOrderUpdate]
+    [order.id, onOrderUpdate, queryClient]
   );
 
-  /**
-   * Handle adding packaging note
-   */
   const handleAddPackagingNote = useCallback(
     async (note: string) => {
       if (!note.trim()) return;
@@ -295,6 +297,11 @@ export function useOrderActions({
           packagingNotes: updatedNotes,
         });
 
+        // Invalidate order details cache to get fresh data
+        queryClient.invalidateQueries({
+          queryKey: [QUERY_KEYS.ORDER_DETAILS, order.id],
+        });
+
         if (onOrderUpdate) {
           onOrderUpdate(updatedOrder);
         }
@@ -306,7 +313,7 @@ export function useOrderActions({
         throw error;
       }
     },
-    [order.id, order.packagingNotes, onOrderUpdate]
+    [order.id, order.packagingNotes, onOrderUpdate, queryClient]
   );
 
   return {
