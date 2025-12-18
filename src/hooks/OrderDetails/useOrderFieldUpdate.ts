@@ -29,6 +29,9 @@ export function useOrderFieldUpdate(
               [customerField]: value,
             },
           };
+        } else if (fieldPath === 'availableTime' && typeof value === 'object' && value !== null) {
+          // Special case: availableTime sends both availableFrom and availableTo
+          updateData = value as Record<string, unknown>;
         } else {
           // Direct order field
           updateData = {

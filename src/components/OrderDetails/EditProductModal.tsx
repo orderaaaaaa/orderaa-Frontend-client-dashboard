@@ -3,48 +3,61 @@
 import { useState, useEffect, useMemo } from 'react';
 import { LiaTimesSolid, LiaCheckSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
-import { useFilterOptionsQuery } from '@/services/orders';
+import { useProductVariantsOptions, SelectedVariant } from '@/services/orders';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { Button } from '../ui/button';
 
 interface EditProductModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (size: string, color: string) => void;
-  currentSize: string | number;
-  currentColor: string;
+  onSave: (variants: SelectedVariant[]) => void;
+  productId: number;
+  currentVariants: Record<string, string>;
 }
 
 export default function EditProductModal({
   isOpen,
   onClose,
   onSave,
-  currentSize,
-  currentColor,
+  productId,
+  currentVariants,
 }: EditProductModalProps) {
-  const [size, setSize] = useState(String(currentSize));
-  const [color, setColor] = useState(currentColor);
+  const [selectedValues, setSelectedValues] = useState<Record<string, string>>(currentVariants);
 
-  // Fetch filter options using React Query
-  const { data: filterOptions, isLoading } = useFilterOptionsQuery();
-  const sizeOptions = filterOptions?.data?.productSizes ?? [];
-  const colorOptions = filterOptions?.data?.productColors ?? [];
+  // Fetch variant options for this product
+  const { data: variantOptions = [], isLoading } = useProductVariantsOptions(
+    isOpen ? productId : null
+  );
 
   useEffect(() => {
-    setSize(String(currentSize));
-    setColor(currentColor);
-  }, [currentSize, currentColor]);
+    setSelectedValues(currentVariants);
+  }, [currentVariants]);
 
   // Check if any value has changed
   const hasChanges = useMemo(() => {
-    return size !== String(currentSize) || color !== currentColor;
-  }, [size, color, currentSize, currentColor]);
+    return Object.keys(selectedValues).some(
+      (key) => selectedValues[key] !== currentVariants[key]
+    );
+  }, [selectedValues, currentVariants]);
 
   if (!isOpen) return null;
 
+  const handleValueChange = (label: string, value: string) => {
+    setSelectedValues((prev) => ({
+      ...prev,
+      [label]: value,
+    }));
+  };
+
   const handleSave = () => {
     if (!hasChanges) return;
-    onSave(size, color);
+
+    // Convert selected values to array format for API
+    const variants: SelectedVariant[] = Object.entries(selectedValues).map(
+      ([label, value]) => ({ label, value })
+    );
+
+    onSave(variants);
     toast.success('تم تعديل المنتج بنجاح');
     onClose();
   };
@@ -91,44 +104,32 @@ export default function EditProductModal({
 
         {/* Content */}
         <div className="pt-[101px] px-8 pb-24">
-          <div className="flex flex-col md:flex-row gap-4 justify-end">
-            {/* Size Dropdown - Right side */}
-            <div className="w-full md:w-[374px]">
-              <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
-                القياس
-              </label>
-              <SearchableSelect
-                value={size}
-                onValueChange={setSize}
-                options={sizeOptions}
-                placeholder="اختر القياس"
-                searchPlaceholder="بحث عن القياس..."
-                disabled={isLoading || sizeOptions.length === 0}
-                triggerClassName="h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E]"
-                className="rounded-2xl border-[#ECECEC]"
-                searchThreshold={5}
-                debounceMs={300}
-              />
-            </div>
-
-            {/* Color Dropdown - Left side */}
-            <div className="w-full md:w-[374px]">
-              <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
-                اللون
-              </label>
-              <SearchableSelect
-                value={color}
-                onValueChange={setColor}
-                options={colorOptions}
-                placeholder="اختر اللون"
-                searchPlaceholder="بحث عن اللون..."
-                disabled={isLoading || colorOptions.length === 0}
-                triggerClassName="h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E]"
-                className="rounded-2xl border-[#ECECEC]"
-                searchThreshold={5}
-                debounceMs={300}
-              />
-            </div>
+          <div className="flex flex-col md:flex-row gap-4 justify-end flex-wrap">
+            {isLoading ? (
+              <div className="w-full text-center text-gray-500">جاري التحميل...</div>
+            ) : variantOptions.length === 0 ? (
+              <div className="w-full text-center text-gray-500">لا توجد خيارات متاحة</div>
+            ) : (
+              variantOptions.map((option) => (
+                <div key={option.label} className="w-full md:w-[374px]">
+                  <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
+                    {option.label}
+                  </label>
+                  <SearchableSelect
+                    value={selectedValues[option.label] || ''}
+                    onValueChange={(value) => handleValueChange(option.label, value)}
+                    options={option.values}
+                    placeholder={`اختر ${option.label}`}
+                    searchPlaceholder={`بحث عن ${option.label}...`}
+                    disabled={option.values.length === 0}
+                    triggerClassName="h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E]"
+                    className="rounded-2xl border-[#ECECEC]"
+                    searchThreshold={5}
+                    debounceMs={300}
+                  />
+                </div>
+              ))
+            )}
           </div>
         </div>
 

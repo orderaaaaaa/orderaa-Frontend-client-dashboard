@@ -23,6 +23,36 @@ export enum OrderStatus {
   REPORTS = 'REPORTS',
 }
 
+// Payment Method Enum (synced with backend)
+export enum PaymentMethod {
+  CASH = 'CASH',
+  VISA_CARD = 'VISA_CARD',
+  INSTAPAY = 'INSTAPAY',
+  WALLET = 'WALLET',
+}
+
+// Payment Status Enum (synced with backend)
+export enum PaymentStatus {
+  PAID = 'PAID',
+  CASH_ON_DELIVERY = 'CASH_ON_DELIVERY',
+  PARTIALLY_PAID = 'PARTIALLY_PAID',
+}
+
+// Payment Method Arabic Labels
+export const PaymentMethodLabels: Record<PaymentMethod, string> = {
+  [PaymentMethod.CASH]: 'كاش',
+  [PaymentMethod.VISA_CARD]: 'فيزا',
+  [PaymentMethod.INSTAPAY]: 'انستا باي',
+  [PaymentMethod.WALLET]: 'محفظة الكترونية',
+};
+
+// Payment Status Arabic Labels
+export const PaymentStatusLabels: Record<PaymentStatus, string> = {
+  [PaymentStatus.PAID]: 'مدفوع',
+  [PaymentStatus.CASH_ON_DELIVERY]: 'دفع عند الاستلام',
+  [PaymentStatus.PARTIALLY_PAID]: 'مدفوع جزئياً',
+};
+
 // Customer Interface
 export interface Customer {
   id: number;
@@ -191,7 +221,7 @@ export interface Order {
   numberOfTriesToReach: number;
   notes?: string;
   format: OrderFormat;
-
+  totalCustomerOrders: number;
   // Order details
   shippingCost?: number;
   shippingCompany?: string;
@@ -209,6 +239,8 @@ export interface Order {
   // Time preferences
   timeFrom?: string;
   timeTo?: string;
+  availableFrom?: string;
+  availableTo?: string;
 
   // Marketing & tracking
   utmSource?: string;
@@ -224,19 +256,16 @@ export interface Order {
   customerId: number;
   customers: Customer;
   order_products: OrderProduct[];
-  events?: OrderEvent[];
+  order_events?: OrderEvent[];
 }
 
-// Order Event Interface
+// Order Event Interface (from order details API)
 export interface OrderEvent {
   id: number;
   orderId: number;
-  eventType: string;
-  status?: string;
-  description?: string;
-  metadata?: Record<string, any>;
+  status: string;
+  note?: string | null;
   createdAt: string;
-  updatedAt: string;
 }
 
 // Filter DTO (matching backend FilterOrdersDto)

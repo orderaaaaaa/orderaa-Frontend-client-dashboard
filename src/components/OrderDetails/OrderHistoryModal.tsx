@@ -8,12 +8,13 @@ import { OrderEvent } from '@/types/orders';
 interface OrderHistoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  events: OrderEvent[] | string[];
+  events: OrderEvent[];
 }
 
 interface ParsedEvent {
   status: string;
   displayDate: string;
+  note?: string | null;
 }
 
 export default function OrderHistoryModal({
@@ -23,19 +24,7 @@ export default function OrderHistoryModal({
 }: OrderHistoryModalProps) {
   const parseEvents = (): ParsedEvent[] => {
     return events.map((event) => {
-      let status = '';
-      let dateString = '';
-
-      if (typeof event === 'string') {
-        const parts = event.split(' - ');
-        status = parts[0] || '';
-        dateString = parts[1] || '';
-      } else {
-        status = event.eventType || event.status || '';
-        dateString = event.createdAt;
-      }
-
-      const date = new Date(dateString);
+      const date = new Date(event.createdAt);
 
       const day = String(date.getDate()).padStart(2, '0');
       const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -43,8 +32,9 @@ export default function OrderHistoryModal({
       const displayDate = `${day}-${month}-${year}`;
 
       return {
-        status,
+        status: event.status,
         displayDate,
+        note: event.note,
       };
     });
   };
@@ -97,6 +87,12 @@ export default function OrderHistoryModal({
                   <p className="text-sm text-[#5F5E5E] text-center">
                     {event.displayDate}
                   </p>
+
+                  {event.note && (
+                    <p className="text-xs text-[#888] text-center mt-1 max-w-[100px] truncate">
+                      {event.note}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>

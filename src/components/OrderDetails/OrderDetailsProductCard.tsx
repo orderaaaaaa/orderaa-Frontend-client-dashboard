@@ -13,6 +13,7 @@ import {
   useDeleteOrderProduct,
   useAddOrderProduct,
   useAllProducts,
+  SelectedVariant,
 } from '@/services/orders';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
@@ -21,24 +22,40 @@ interface OrderDetailsProductCardProps {
   order: Order;
 }
 
-function parseVariant(variant: string | null | undefined): { size: string; color: string } {
+function parseVariantToRecord(variant: string | null | undefined): Record<string, string> {
   if (!variant) {
-    return { size: '37', color: 'اسود' };
+    return {};
   }
 
-  // Check if variant contains both size and color (e.g., "37 - اسود")
+  // Try to parse as JSON array of {label, value} objects
+  try {
+    const parsed = JSON.parse(variant);
+    if (Array.isArray(parsed)) {
+      const record: Record<string, string> = {};
+      parsed.forEach((item: { label?: string; value?: string }) => {
+        if (item.label && item.value) {
+          record[item.label] = item.value;
+        }
+      });
+      return record;
+    }
+  } catch {
+    // Not JSON, try legacy format
+  }
+
+  // Legacy format: "size - color"
   if (variant.includes(' - ')) {
     const [size, color] = variant.split(' - ').map(s => s.trim());
-    return { size: size || '37', color: color || 'اسود' };
+    return { size: size || '', color: color || '' };
   }
 
   // Check if it's just a number (size)
   if (/^\d+$/.test(variant.trim())) {
-    return { size: variant.trim(), color: 'اسود' };
+    return { size: variant.trim() };
   }
 
   // Otherwise, assume it's a color
-  return { size: '37', color: variant.trim() };
+  return { color: variant.trim() };
 }
 
 function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
@@ -55,16 +72,14 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
   const [viewingProductId, setViewingProductId] = useState<number | null>(null);
   const [productsData, setProductsData] = useState(
     order.order_products?.map((orderProduct) => {
-      // Parse the variant to get size and color
-      const variantData = parseVariant(orderProduct.variant);
+      // Parse the variant to get variants record
+      const variants = parseVariantToRecord(orderProduct.variant);
 
       return {
         id: orderProduct.id,
         productId: orderProduct.productId,
         product: orderProduct.products.name,
-        // Use variant data if available, otherwise use product defaults
-        color: variantData.color || orderProduct.products.color || 'اسود',
-        size: variantData.size || orderProduct.products.size || '37',
+        variants,
         price: orderProduct.price,
         img: orderProduct.products.image || '/wireless-headphones.png',
       };
@@ -75,13 +90,12 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
   useEffect(() => {
     setProductsData(
       order.order_products?.map((orderProduct) => {
-        const variantData = parseVariant(orderProduct.variant);
+        const variants = parseVariantToRecord(orderProduct.variant);
         return {
           id: orderProduct.id,
           productId: orderProduct.productId,
           product: orderProduct.products.name,
-          color: variantData.color || orderProduct.products.color || 'اسود',
-          size: variantData.size || orderProduct.products.size || '37',
+          variants,
           price: orderProduct.price,
           img: orderProduct.products.image || '/wireless-headphones.png',
         };
@@ -108,15 +122,12 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
     setViewingProductId(productId);
   };
 
-  const handleSaveEdit = async (productId: number, size: string, color: string) => {
+  const handleSaveEdit = async (productId: number, variants: SelectedVariant[]) => {
     try {
-      // Create variant string (format: "size - color")
-      const variant = `${size} - ${color}`;
-
       // Call backend API using mutation (handles cache invalidation automatically)
       await updateOrderProductMutation.mutateAsync({
         orderProductId: productId,
-        variant,
+        variants,
       });
 
       toast.success('تم تحديث المنتج بنجاح');
@@ -286,9 +297,9 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
         <EditProductModal
           isOpen={editingProductId !== null}
           onClose={() => setEditingProductId(null)}
-          onSave={(size, color) => handleSaveEdit(editingProduct.id, size, color)}
-          currentSize={editingProduct.size}
-          currentColor={editingProduct.color}
+          onSave={(variants) => handleSaveEdit(editingProduct.id, variants)}
+          productId={editingProduct.productId}
+          currentVariants={editingProduct.variants}
         />
       )}
 

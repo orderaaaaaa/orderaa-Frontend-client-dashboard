@@ -1,72 +1,84 @@
-import React, { useMemo } from 'react';
+import React, { useState } from 'react';
 import { LiaClockSolid } from 'react-icons/lia';
-import { SearchableSelect } from '@/components/ui/searchable-select';
+import TimePickerModal from '../TimePickerModal';
 
-// Generate time options in 30-minute intervals
-const generateTimeOptions = (): string[] => {
-  const options: string[] = [];
-  for (let hour = 0; hour < 24; hour++) {
-    for (let minute = 0; minute < 60; minute += 30) {
-      const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-      const period = hour < 12 ? 'ص' : 'م';
-      const minuteStr = minute.toString().padStart(2, '0');
-      options.push(`${hour12}:${minuteStr} ${period}`);
-    }
+// Format display time (e.g., "10 am" -> "10:00 AM")
+const formatDisplayTime = (time?: string): string => {
+  if (!time) return '--';
+
+  // Try parsing "X am/pm" format
+  const match = time.match(/(\d{1,2})\s*(am|pm)/i);
+  if (match) {
+    const hour = match[1];
+    const period = match[2].toUpperCase();
+    return `${hour}:00 ${period}`;
   }
-  return options;
-};
 
-const TIME_OPTIONS = generateTimeOptions();
+  // Try parsing Arabic format "X:XX ص/م"
+  const arabicMatch = time.match(/(\d{1,2}):?(\d{0,2})\s*(ص|م)/);
+  if (arabicMatch) {
+    const hour = arabicMatch[1];
+    const minute = arabicMatch[2] || '00';
+    const period = arabicMatch[3] === 'ص' ? 'AM' : 'PM';
+    return `${hour}:${minute.padStart(2, '0')} ${period}`;
+  }
+
+  return time;
+};
 
 export interface TimeRangeFieldProps {
   timeFrom?: string;
   timeTo?: string;
-  onTimeFromChange: (time: string) => void;
-  onTimeToChange: (time: string) => void;
+  onTimeChange: (availableFrom: string, availableTo: string) => Promise<void>;
   className?: string;
 }
 
 export function TimeRangeField({
   timeFrom,
   timeTo,
-  onTimeFromChange,
-  onTimeToChange,
+  onTimeChange,
   className = '',
 }: TimeRangeFieldProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const tagStyle =
     "flex gap-2 bg-white shadow-xs items-center py-2 px-2 rounded-[5px] font-bold text-[15px] text-[#000000]";
 
+  const handleSave = async (availableFrom: string, availableTo: string) => {
+    await onTimeChange(availableFrom, availableTo);
+  };
+
+  const displayFrom = formatDisplayTime(timeFrom);
+  const displayTo = formatDisplayTime(timeTo);
+
   return (
-    <div className={`flex flex-col gap-1 min-w-0 overflow-hidden ${className}`}>
-      <p className="font-bold text-[#121212]">الوقت</p>
-      <div className={`${tagStyle} relative overflow-hidden`}>
-        <LiaClockSolid size={18} className="flex-shrink-0" />
-        <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
-          <SearchableSelect
-            className='w-full'
-            value={timeFrom}
-            onValueChange={onTimeFromChange}
-            options={TIME_OPTIONS}
-            placeholder="من"
-            searchPlaceholder="ابحث عن الوقت..."
-            noResultsMessage="لا توجد نتائج"
-            triggerClassName="!border-0 !shadow-none !bg-transparent !px-1 !py-0 !h-auto !rounded-none !w-auto min-w-[70px] font-bold text-[15px] text-[#000000] hover:!bg-gray-100"
-            searchThreshold={0}
-          />
-          <span className="text-[#5F5E5E] flex-shrink-0">-</span>
-          <SearchableSelect
-            className='w-full'
-            value={timeTo}
-            onValueChange={onTimeToChange}
-            options={TIME_OPTIONS}
-            placeholder="إلى"
-            searchPlaceholder="ابحث عن الوقت..."
-            noResultsMessage="لا توجد نتائج"
-            triggerClassName="!border-0 !shadow-none !bg-transparent !px-1 !py-0 !h-auto !rounded-none !w-auto min-w-[70px] font-bold text-[15px] text-[#000000] hover:!bg-gray-100"
-            searchThreshold={0}
-          />
+    <>
+      <div className={`flex flex-col gap-1 min-w-0 overflow-hidden ${className}`}>
+        <p className="font-bold text-[#121212]">الوقت</p>
+        <div
+          className={`${tagStyle} relative overflow-hidden cursor-pointer hover:bg-gray-50 transition-colors`}
+          onClick={() => setIsModalOpen(true)}
+        >
+          <LiaClockSolid size={18} className="flex-shrink-0" />
+          <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
+            <span className="font-bold text-[15px] text-[#000000] min-w-[70px]">
+              {displayFrom}
+            </span>
+            <span className="text-[#5F5E5E] flex-shrink-0">-</span>
+            <span className="font-bold text-[15px] text-[#000000] min-w-[70px]">
+              {displayTo}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+
+      <TimePickerModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSave}
+        initialFrom={timeFrom}
+        initialTo={timeTo}
+      />
+    </>
   );
 }

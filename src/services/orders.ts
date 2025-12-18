@@ -162,13 +162,13 @@ export const useUpdateOrderProduct = () => {
   return useMutation({
     mutationFn: async ({
       orderProductId,
-      variant,
+      variants,
     }: {
       orderProductId: number;
-      variant: string;
+      variants: { label: string; value: string }[];
     }) => {
       const response = await http.patch(`/orders/order-product/${orderProductId}`, {
-        variant,
+        variants,
       });
       return response.data;
     },
@@ -230,6 +230,12 @@ export const useAddOrderProduct = () => {
   });
 };
 
+// Phone number entry for API
+export interface PhoneNumberEntry {
+  phoneNumber: string;
+  isPrimary: boolean;
+}
+
 // Update customer mutation
 export const useUpdateCustomer = () => {
   const queryClient = useQueryClient();
@@ -242,8 +248,7 @@ export const useUpdateCustomer = () => {
       customerId: number;
       data: {
         name?: string;
-        phoneNumber?: string;
-        altPhone?: string;
+        phoneNumbers?: PhoneNumberEntry[];
         governorate?: string;
         city?: string;
         address?: string;
@@ -268,6 +273,32 @@ export const useAllProducts = () => {
       const response = await http.get<Product[]>('/orders/products');
       return response.data;
     },
+  });
+};
+
+// Variant option from API
+export interface VariantOption {
+  label: string;
+  values: string[];
+}
+
+// Selected variant for API payload
+export interface SelectedVariant {
+  label: string;
+  value: string;
+}
+
+// Fetch product variant options
+export const useProductVariantsOptions = (productId: number | null) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.PRODUCT_VARIANTS_OPTIONS, productId] as QueryKey,
+    queryFn: async () => {
+      const response = await http.get<VariantOption[]>(
+        `/products/${productId}/variants-options`
+      );
+      return response.data;
+    },
+    enabled: !!productId,
   });
 };
 

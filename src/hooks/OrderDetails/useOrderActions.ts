@@ -243,15 +243,14 @@ export function useOrderActions({
   const handleUpdateShipping = useCallback(
     async (data: ShippingData) => {
       try {
+        // Send flat object (not nested in customers)
         const updatedOrder = await updateOrderMutation.mutateAsync({
           orderId: order.id,
           data: {
             shippingCompany: data.shippingCompany,
-            customers: {
-              governorate: data.governorate,
-              city: data.city,
-              address: data.address,
-            },
+            governorate: data.governorate,
+            city: data.city,
+            address: data.address,
           },
         });
 

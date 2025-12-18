@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useUpdateCustomer } from '@/services/orders';
+import { useUpdateCustomer, PhoneNumberEntry } from '@/services/orders';
 
 /**
  * Options for usePhoneNumbers hook
@@ -25,6 +25,14 @@ export interface PhoneNumbersState {
   handleSave: () => Promise<void>;
   handleCancel: () => void;
 }
+
+// Helper function to convert phone strings to API format
+const toPhoneNumberEntries = (phones: string[]): PhoneNumberEntry[] => {
+  return phones.map((phone, index) => ({
+    phoneNumber: phone,
+    isPrimary: index === 0,
+  }));
+};
 
 /**
  * Custom hook to manage phone number CRUD operations
@@ -75,8 +83,7 @@ export function usePhoneNumbers({
         await updateCustomerMutation.mutateAsync({
           customerId,
           data: {
-            phoneNumber: updatedPhones[0] || '',
-            altPhone: updatedPhones[1] || undefined,
+            phoneNumbers: toPhoneNumberEntries(updatedPhones),
           },
         });
 
@@ -114,8 +121,7 @@ export function usePhoneNumbers({
       await updateCustomerMutation.mutateAsync({
         customerId,
         data: {
-          phoneNumber: updatedPhones[0] || '',
-          altPhone: updatedPhones[1] || undefined,
+          phoneNumbers: toPhoneNumberEntries(updatedPhones),
         },
       });
 

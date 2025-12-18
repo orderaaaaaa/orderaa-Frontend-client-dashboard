@@ -13,6 +13,7 @@ export const QUERY_KEYS = {
 
   // Products
   PRODUCTS: 'products',
+  PRODUCT_VARIANTS_OPTIONS: 'product-variants-options',
 
   // Lookups
   GOVERNORATES: 'governorates',

@@ -22,12 +22,8 @@ export function CustomerDataSection({
 }: CustomerDataSectionProps) {
   const updateCustomerMutation = useUpdateCustomer();
 
-  const handleTimeFromChange = async (time: string) => {
-    await onUpdate('timeFrom', time);
-  };
-
-  const handleTimeToChange = async (time: string) => {
-    await onUpdate('timeTo', time);
+  const handleTimeChange = async (availableFrom: string, availableTo: string) => {
+    await onUpdate('availableTime', { availableFrom, availableTo });
   };
 
   const handleCustomerNameUpdate = async (name: string) => {
@@ -59,10 +55,9 @@ export function CustomerDataSection({
         />
 
         <TimeRangeField
-          timeFrom={order.timeFrom}
-          timeTo={order.timeTo}
-          onTimeFromChange={handleTimeFromChange}
-          onTimeToChange={handleTimeToChange}
+          timeFrom={order.availableFrom || order.timeFrom}
+          timeTo={order.availableTo || order.timeTo}
+          onTimeChange={handleTimeChange}
         />
 
         <PhoneNumberList

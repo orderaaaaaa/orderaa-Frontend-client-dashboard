@@ -71,39 +71,19 @@ const getEventIcon = (eventType?: string) => {
 };
 
 function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
-  // Use events from API if available, otherwise create default event
-  const events = order.events && order.events.length > 0
-    ? order.events.map((event, index) => ({
-      id: event.id || index + 1,
-      status: event.status ? (statusLabelMap[event.status] || event.status) : event.description || event.eventType || 'حدث',
-      date: new Date(event.createdAt).toLocaleDateString('ar-EG'),
-      time: getTimeAgo(event.createdAt),
-      eventType: event.eventType || 'default',
-      description: event.description || '',
-    }))
-    : [
-      {
-        id: 1,
-        status: statusLabelMap[order.status] || order.status,
-        date: new Date(order.createdAt).toLocaleDateString('ar-EG'),
-        time: getTimeAgo(order.createdAt),
-        eventType: 'created',
-        description: 'تم إنشاء الطلب',
-      },
-    ];
+  // Filter order_events to only show events with notes
+  const eventsWithNotes = order.order_events?.filter((event: OrderEvent) => event.note) || [];
 
-  // Add number of tries if greater than 0
+  const events = eventsWithNotes.map((event: OrderEvent, index: number) => ({
+    id: event.id || index + 1,
+    status: event.status ? (statusLabelMap[event.status] || event.status) : 'حدث',
+    date: new Date(event.createdAt).toLocaleDateString('ar-EG'),
+    time: getTimeAgo(event.createdAt),
+    eventType: event.status || 'default',
+    description: event.note || '',
+  }));
+
   const displayData = [...events];
-  if (order.numberOfTriesToReach > 0 && !events.some(e => e.eventType === 'call_attempt')) {
-    displayData.push({
-      id: events.length + 1,
-      status: "محاولات الوصول",
-      date: `${order.numberOfTriesToReach} مرة`,
-      time: "",
-      eventType: 'call_attempt',
-      description: `تم محاولة الاتصال ${order.numberOfTriesToReach} مرة`,
-    });
-  }
 
   return (
     <div className="max-sm:hidden">

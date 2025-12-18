@@ -19,7 +19,6 @@ const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
   const diffMs = now.getTime() - createdDate.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
   const timeAgo = diffDays > 0
     ? `منذ ${diffDays} يوم, ${diffHours}ساعات`
     : `منذ ${diffHours} ساعات`;
@@ -84,8 +83,7 @@ const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
                 <h3 className="flex gap-2 text-sm items-center font-semibold mb-1 text-[#5D24E1] relative ">
                   <TriangleAlert className="w-5 text-yellow-500" />
                   <p className="bg-red-600 absolute top-[-3px] right-[-4px] w-3 h-3 text-[8px] text-center rounded-full text-white">
-                    {" "}
-                    3
+                    {order.totalCustomerOrders}
                   </p>
                   هذا العميل قام بالطلب اكثر من مره
                 </h3>
@@ -121,7 +119,7 @@ const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
       <OrderHistoryModal
         isOpen={isHistoryModalOpen}
         onClose={() => setIsHistoryModalOpen(false)}
-        events={order.events || []}
+        events={order.order_events || []}
       />
     </div>
   );
