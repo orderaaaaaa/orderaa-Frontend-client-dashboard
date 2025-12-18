@@ -1,7 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { employeesApi } from '@/lib/api/employees.api';
-import { Employee, EmployeeFormData, EmployeeFilters, PaginatedEmployeesResponse } from '@/schemas/employee.schema';
+import {
+  Employee,
+  EmployeeFormData,
+  EmployeeFilters,
+  PaginatedEmployeesResponse,
+} from '@/schemas/employee.schema';
 
 // Fetch all employees (legacy - use useFilteredEmployees instead)
 export const useEmployees = () => {
@@ -34,11 +39,6 @@ export const useCreateEmployee = () => {
       toast.success('تم إضافة الموظف بنجاح');
       queryClient.invalidateQueries({ queryKey: ['employees'] });
     },
-    onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message || 'حدث خطأ أثناء إضافة الموظف'
-      );
-    },
   });
 };
 
@@ -65,13 +65,7 @@ export const useUpdateEmployee = () => {
 export const useUpdateEmployeeStatus = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({
-      id,
-      isOnline,
-    }: {
-      id: number;
-      isOnline: boolean;
-    }) => {
+    mutationFn: async ({ id, isOnline }: { id: number; isOnline: boolean }) => {
       return await employeesApi.updateStatus(id, isOnline);
     },
     onSuccess: () => {
