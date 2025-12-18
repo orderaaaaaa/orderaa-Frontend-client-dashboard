@@ -10,7 +10,11 @@ import { STAT_CARDS } from '@/constants/employees/statCard';
 import { EmployeeSearchFilter } from './components/EmployeeSearchFilter';
 import { Else, If, Then } from 'react-if';
 import { EmployeeCard } from './components/EmployeeCard';
-import { Pagination } from './components/Pagination';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Pagination as CustomPagination } from './components/Pagination';
+import { Pagination as SwiperPagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
 
 export default function AllEmployees() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,9 +58,20 @@ export default function AllEmployees() {
     }
 
     return filterObj;
-  }, [searchQuery, selectedAccessLevel, selectedDepartment, selectedPerformance, currentPage, limit]);
+  }, [
+    searchQuery,
+    selectedAccessLevel,
+    selectedDepartment,
+    selectedPerformance,
+    currentPage,
+    limit,
+  ]);
 
-  const { data: paginatedResponse, isLoading, isError } = useFilteredEmployees(filters);
+  const {
+    data: paginatedResponse,
+    isLoading,
+    isError,
+  } = useFilteredEmployees(filters);
 
   const employees = paginatedResponse?.data || [];
   const totalItems = paginatedResponse?.totalItems || 0;
@@ -64,7 +79,12 @@ export default function AllEmployees() {
   // Reset to page 1 when filters change (except page changes)
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedAccessLevel, selectedDepartment, selectedPerformance]);
+  }, [
+    searchQuery,
+    selectedAccessLevel,
+    selectedDepartment,
+    selectedPerformance,
+  ]);
 
   const getCountByAccessLevel = (accessLevel: string) => {
     // This would need to be updated to use the API if needed
@@ -89,7 +109,31 @@ export default function AllEmployees() {
       <EmployeeHeader />
 
       {/* بطاقات الإحصائيات */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-6">
+      <div className="block sm:hidden mt-6">
+        <Swiper
+          modules={[SwiperPagination]}
+          spaceBetween={16}
+          slidesPerView={1}
+          pagination={{ clickable: true }}
+          className="stat-cards-swiper"
+        >
+          {STAT_CARDS.map((card) => (
+            <SwiperSlide key={card.title}>
+              <StatCard
+                title={card.title}
+                count={getCountByAccessLevel(card.accessLevel)}
+                borderColor={card.borderColor}
+                iconBgColor={card.iconBgColor}
+                iconPath={card.iconPath}
+                alt={card.alt}
+              />
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
+
+      {/* Desktop: Grid */}
+      <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-6">
         {STAT_CARDS.map((card) => (
           <StatCard
             key={card.title}
@@ -131,15 +175,12 @@ export default function AllEmployees() {
               <Else>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                   {employees?.map((employee: Employee) => (
-                    <EmployeeCard
-                      key={employee.id}
-                      employee={employee}
-                    />
+                    <EmployeeCard key={employee.id} employee={employee} />
                   ))}
                 </div>
-                
+
                 {paginatedResponse && (
-                  <Pagination
+                  <CustomPagination
                     currentPage={paginatedResponse.currentPage}
                     totalPages={paginatedResponse.totalPages}
                     hasNextPage={paginatedResponse.hasNextPage}

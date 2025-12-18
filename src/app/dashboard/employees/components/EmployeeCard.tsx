@@ -9,6 +9,7 @@ import {
   TrendingUp,
   CalendarClock,
   CalendarDays,
+  Mail,
 } from 'lucide-react';
 import { useUpdateEmployeeStatus } from '@/hooks/useEmployees';
 import { Employee } from '@/schemas/employee.schema';
@@ -20,26 +21,20 @@ interface EmployeeCardProps {
 export function EmployeeCard({ employee }: EmployeeCardProps) {
   const updateStatusMutation = useUpdateEmployeeStatus();
 
-  // Get online status, default to false if not provided
   const isOnline = employee.isOnline ?? false;
 
-  // Colors for online/offline status
-  const statusColor = isOnline ? '#3cc900' : '#9ca3af'; // green when online, gray when offline
+  const statusColor = isOnline ? '#3cc900' : '#9ca3af';
   const borderColor = isOnline ? '#3cc900' : '#9ca3af';
 
-  // Get performance data, use performanceChange for display, default to 0
   const performance = employee.performanceChange ?? 0;
   const isNegative = performance < 0;
   const performanceColor = isNegative ? '#ff0004' : '#3cc900';
 
-  // Get attendance data, defaults to 0
   const workDays = employee.workingDaysThisMonth ?? 0;
   const vacationDays = employee.leaveDaysThisMonth ?? 0;
 
-  // Normalize phone number for links (WhatsApp requires digits only)
   const normalizedPhone = employee.phoneNumber.replace(/\D/g, '');
 
-  // Handle status toggle
   const handleStatusToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     updateStatusMutation.mutate({
@@ -57,9 +52,14 @@ export function EmployeeCard({ employee }: EmployeeCardProps) {
           <h3 className="text-2xl font-bold text-gray-900 my-4">
             {employee.fullName}
           </h3>
-          <span className="inline-block border text-gray-700 px-4 py-1 rounded-full text-sm">
-            {employee.department}
-          </span>
+          <div className="flex flex-wrap gap-2 justify-start">
+            <span className="inline-block border text-gray-700 px-4 py-1 rounded-full text-sm">
+              {employee.department}
+            </span>
+            <span className="inline-block border text-gray-700 px-4 py-1 rounded-full text-sm">
+              {employee.accessLevel}
+            </span>
+          </div>
         </div>
         {/* Avatar */}
         <div className="relative">
@@ -131,21 +131,33 @@ export function EmployeeCard({ employee }: EmployeeCardProps) {
 
       {/* Action Buttons */}
       <div className="grid grid-cols-2 gap-4">
-        {/* Phone Call */}
-        <a
-          href={`tel:${normalizedPhone}`}
-          className="bg-white hover:bg-gray-50 text-[#5D24E1] border-2 border-[#5D24E1] rounded-2xl py-3 px-4 flex items-center justify-center gap-2 transition-colors font-medium"
-        >
-          <span dir="ltr">{employee.phoneNumber}</span>
-          <Phone size={20} />
-        </a>
+        {/* Phone + Email */}
+        <div className="col-span-2 grid grid-cols-2 gap-4">
+          {/* Phone Call */}
+          <a
+            href={`tel:${normalizedPhone}`}
+            className="bg-white hover:bg-gray-50 text-[#5D24E1] border-2 border-[#5D24E1] rounded-2xl py-3 px-4 flex items-center justify-center gap-2 transition-colors font-medium"
+          >
+            <span dir="ltr">{employee.phoneNumber}</span>
+            <Phone size={20} />
+          </a>
 
-        {/* WhatsApp */}
+          {/* Email */}
+          <a
+            href={`mailto:${employee.email}`}
+            className="bg-white hover:bg-gray-50 text-[#5D24E1] border-2 border-[#5D24E1] rounded-2xl py-3 px-4 flex items-center justify-center gap-2 transition-colors font-medium"
+          >
+            <span dir="ltr">{employee.email}</span>
+            <Mail size={20} />
+          </a>
+        </div>
+
+        {/* WhatsApp (full width second row) */}
         <a
           href={`https://wa.me/+2${normalizedPhone}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="bg-[#5d24e1] text-white rounded-2xl py-3 px-5 flex items-center justify-center gap-2 transition-colors font-medium"
+          className="col-span-2 bg-[#5d24e1] hover:bg-[#682fee] text-white rounded-2xl py-3 px-5 flex items-center justify-center gap-2 transition-colors font-medium"
         >
           <span className="text-xl">WhatsApp</span>
           <MessageCircle size={25} />
