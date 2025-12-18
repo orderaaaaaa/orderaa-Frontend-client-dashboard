@@ -7,7 +7,7 @@ import { LiaCommentDotsSolid } from 'react-icons/lia';
 interface CancelOrderModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (data: { reason: string; notes: string }) => void;
+  onConfirm: (data: { reason: string; notes: string }) => void | Promise<void>;
 }
 
 // TODO: Fetch these from backend
@@ -31,13 +31,14 @@ export default function CancelOrderModal({
   const [notes, setNotes] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!reason) {
       alert('السبب مطلوب');
       return;
     }
-    onConfirm({ reason, notes });
-    // Don't reset here - only reset when modal closes (on success via handleClose)
+    await onConfirm({ reason, notes });
+    // Reset form after successful confirmation
+    handleReset();
   };
 
   const handleReset = () => {

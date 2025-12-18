@@ -8,7 +8,7 @@ import { LiaClockSolid } from 'react-icons/lia';
 interface PostponeHoursModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (data: { duration?: '30min' | '1hour' | '2hours'; time?: Date }) => void;
+  onConfirm: (data: { duration?: '30min' | '1hour' | '2hours'; time?: Date }) => void | Promise<void>;
 }
 
 const durationOptions = [
@@ -25,16 +25,17 @@ export default function PostponeHoursModal({
   const [selectedDuration, setSelectedDuration] = useState<'30min' | '1hour' | '2hours' | null>(null);
   const [postponeTime, setPostponeTime] = useState<Date | null>(null);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!selectedDuration && !postponeTime) {
       alert('يرجى اختيار مدة التأجيل أو وقت التأجيل');
       return;
     }
-    onConfirm({
+    await onConfirm({
       duration: selectedDuration || undefined,
       time: postponeTime || undefined
     });
-    // Don't reset here - only reset when modal closes (on success via handleClose)
+    // Reset form after successful confirmation
+    handleReset();
   };
 
   const handleReset = () => {

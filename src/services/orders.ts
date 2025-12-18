@@ -288,15 +288,28 @@ export interface SelectedVariant {
   value: string;
 }
 
+// API response structure for variant options
+interface VariantOptionsApiResponse {
+  variantOptions: Array<{
+    label?: string;
+    values: string[];
+  }>;
+}
+
 // Fetch product variant options
 export const useProductVariantsOptions = (productId: number | null) => {
   return useQuery({
     queryKey: [QUERY_KEYS.PRODUCT_VARIANTS_OPTIONS, productId] as QueryKey,
     queryFn: async () => {
-      const response = await http.get<VariantOption[]>(
+      const response = await http.get<VariantOptionsApiResponse>(
         `/products/${productId}/variants-options`
       );
-      return response.data;
+      // Extract variantOptions array from response and add default labels if missing
+      const variantOptions = response.data.variantOptions || [];
+      return variantOptions.map((option, index) => ({
+        label: option.label || `variant_${index}`,
+        values: option.values,
+      })) as VariantOption[];
     },
     enabled: !!productId,
   });

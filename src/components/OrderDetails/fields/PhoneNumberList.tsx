@@ -215,7 +215,7 @@ export function PhoneNumberList({
         {phones.editingIndex !== phones.phoneNumbers.length && (
           <button
             onClick={phones.handleAdd}
-            className="flex items-center gap-2 text-[#5D24E1] text-sm font-bold hover:text-[#4B1BC4] transition-colors"
+            className="flex items-center gap-2 text-[#5D24E1] text-sm font-bold hover:text-[#4B1BC4] transition-colors cursor-pointer"
           >
             <LiaPlusSolid className="w-4 h-4" />
             إضافة رقم هاتف

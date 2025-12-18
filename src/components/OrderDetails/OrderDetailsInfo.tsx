@@ -173,10 +173,32 @@ function OrderDetailsInfoComponent({
     }
   };
 
+  // Follow-up actions that should use handleFollowUpAction
+  const followUpActions = ['no_answer', 'closed', 'not_collecting', 'open_close'];
+
+  // Map action to label for follow-up actions
+  const followUpActionLabels: Record<string, string> = {
+    'no_answer': 'لا يرد',
+    'closed': 'مغلق',
+    'not_collecting': 'مش بيجمع',
+    'open_close': 'فتح و قفل',
+  };
+
   const handleConfirmAction = async () => {
-    const success = await actions.handleConfirmAction(confirmationDialog.action);
-    if (!success) {
-      throw new Error('Failed to update order status');
+    const action = confirmationDialog.action;
+
+    // Check if this is a follow-up action
+    if (followUpActions.includes(action)) {
+      const label = followUpActionLabels[action] || action;
+      const success = await actions.handleFollowUpAction(label);
+      if (!success) {
+        throw new Error('Failed to update follow-up');
+      }
+    } else {
+      const success = await actions.handleConfirmAction(action);
+      if (!success) {
+        throw new Error('Failed to update order status');
+      }
     }
   };
 

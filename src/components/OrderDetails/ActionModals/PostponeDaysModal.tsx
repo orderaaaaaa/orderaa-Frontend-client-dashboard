@@ -8,7 +8,7 @@ import { LiaCalendarAltSolid } from 'react-icons/lia';
 interface PostponeDaysModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (data: { duration?: '1day' | '2days' | '3days' | 'week'; date?: Date }) => void;
+  onConfirm: (data: { duration?: '1day' | '2days' | '3days' | 'week'; date?: Date }) => void | Promise<void>;
 }
 
 const dayOptions = [
@@ -26,16 +26,17 @@ export default function PostponeDaysModal({
   const [selectedDuration, setSelectedDuration] = useState<'1day' | '2days' | '3days' | 'week' | null>(null);
   const [postponeDate, setPostponeDate] = useState<Date | null>(null);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!selectedDuration && !postponeDate) {
       alert('يرجى اختيار مدة التأجيل أو تاريخ التأجيل');
       return;
     }
-    onConfirm({
+    await onConfirm({
       duration: selectedDuration || undefined,
       date: postponeDate || undefined
     });
-    // Don't reset here - only reset when modal closes (on success via handleClose)
+    // Reset form after successful confirmation
+    handleReset();
   };
 
   const handleReset = () => {

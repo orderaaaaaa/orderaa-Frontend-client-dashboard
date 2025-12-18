@@ -99,7 +99,7 @@ export function ActionsDropdown({ isOpen, orderStatus, onActionClick, onSubOptio
 
   return (
     <div
-      className="absolute bottom-full mb-2 right-0 min-w-[280px] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50"
+      className="absolute bottom-full mb-2 right-0 min-w-[200px] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50"
       dir="rtl"
     >
       {filteredOptions.map((option) => (

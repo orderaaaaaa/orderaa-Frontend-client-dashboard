@@ -4,56 +4,63 @@ import { useState, useEffect, useMemo } from 'react';
 import { LiaTimesSolid, LiaPlusSolid, LiaMinusSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
 import { SearchableSelect } from '@/components/ui/searchable-select';
-import { useFilterOptionsQuery } from '@/services/orders';
+import { useProductVariantsOptions, SelectedVariant } from '@/services/orders';
 import { Button } from '../ui/button';
 
 interface AddSameTypeProductModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (size: string, color: string, quantity: number) => void;
+  onSave: (variants: SelectedVariant[], quantity: number) => void;
   productType: string;
+  productId: number | null;
 }
-
-const defaultSizeOptions = ['37', '38', '39', '40', '41', '42', '43', '44', '45'];
-const defaultColorOptions = ['اسود', 'ابيض', 'احمر', 'ازرق', 'اخضر', 'بني', 'رمادي'];
 
 export default function AddSameTypeProductModal({
   isOpen,
   onClose,
   onSave,
   productType,
+  productId,
 }: AddSameTypeProductModalProps) {
-  const [size, setSize] = useState('');
-  const [color, setColor] = useState('');
+  const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
 
-  // Fetch filter options using React Query
-  const { data: filterOptions, isLoading } = useFilterOptionsQuery();
-  const sizeOptions = filterOptions?.data?.productSizes?.length
-    ? filterOptions.data.productSizes
-    : defaultSizeOptions;
-  const colorOptions = filterOptions?.data?.productColors?.length
-    ? filterOptions.data.productColors
-    : defaultColorOptions;
+  // Fetch variant options for this product
+  const { data: variantOptions = [], isLoading } = useProductVariantsOptions(
+    isOpen ? productId : null
+  );
 
   useEffect(() => {
     if (isOpen) {
-      setSize('');
-      setColor('');
+      setSelectedVariants({});
       setQuantity(1);
     }
   }, [isOpen]);
 
-  // Check if form is valid (all required fields filled)
+  // Check if form is valid (at least one variant selected and quantity > 0)
   const isFormValid = useMemo(() => {
-    return size !== '' && color !== '' && quantity > 0;
-  }, [size, color, quantity]);
+    const hasVariants = variantOptions.length === 0 || Object.keys(selectedVariants).length > 0;
+    return hasVariants && quantity > 0;
+  }, [selectedVariants, quantity, variantOptions.length]);
 
   if (!isOpen) return null;
 
+  const handleVariantChange = (label: string, value: string) => {
+    setSelectedVariants((prev) => ({
+      ...prev,
+      [label]: value,
+    }));
+  };
+
   const handleSave = () => {
     if (!isFormValid) return;
-    onSave(size, color, quantity);
+
+    // Convert selected variants to array format
+    const variants: SelectedVariant[] = Object.entries(selectedVariants).map(
+      ([label, value]) => ({ label, value })
+    );
+
+    onSave(variants, quantity);
     toast.success('تم إضافة المنتج بنجاح');
     onClose();
   };
@@ -121,10 +128,10 @@ export default function AddSameTypeProductModal({
               </div>
             </div>
 
-            {/* Row with 3 dropdowns */}
-            <div className="flex flex-col md:flex-row gap-4">
+            {/* Row with Quantity and Dynamic Variant Options */}
+            <div className="flex flex-col md:flex-row gap-4 flex-wrap">
               {/* Quantity Controls */}
-              <div className="flex-1">
+              <div className="flex-1 min-w-[200px]">
                 <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
                   الكمية
                 </label>
@@ -151,45 +158,37 @@ export default function AddSameTypeProductModal({
                 </div>
               </div>
 
-              {/* Color Dropdown */}
-              <div className="flex-1">
-                <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
-                  اللون
-                </label>
-                <SearchableSelect
-                  value={color}
-                  onValueChange={setColor}
-                  options={colorOptions}
-                  placeholder="اختر اللون"
-                  searchPlaceholder="بحث عن اللون..."
-                  emptyMessage="لا توجد ألوان متاحة"
-                  noResultsMessage="لا توجد نتائج للبحث"
-                  triggerClassName="h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E]"
-                  className="rounded-2xl border-[#ECECEC]"
-                  loading={isLoading}
-                  searchThreshold={5}
-                />
-              </div>
-
-              {/* Size Dropdown */}
-              <div className="flex-1">
-                <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
-                  القياس
-                </label>
-                <SearchableSelect
-                  value={size}
-                  onValueChange={setSize}
-                  options={sizeOptions}
-                  placeholder="اختر القياس"
-                  searchPlaceholder="بحث عن القياس..."
-                  emptyMessage="لا توجد مقاسات متاحة"
-                  noResultsMessage="لا توجد نتائج للبحث"
-                  triggerClassName="h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E]"
-                  className="rounded-2xl border-[#ECECEC]"
-                  loading={isLoading}
-                  searchThreshold={5}
-                />
-              </div>
+              {/* Dynamic Variant Options */}
+              {isLoading ? (
+                <div className="flex-1 min-w-[200px] flex items-center justify-center">
+                  <span className="text-gray-500">جاري تحميل الخيارات...</span>
+                </div>
+              ) : variantOptions.length === 0 ? (
+                <div className="flex-1 min-w-[200px] flex items-center justify-center">
+                  <span className="text-gray-500">لا توجد خيارات متاحة لهذا المنتج</span>
+                </div>
+              ) : (
+                variantOptions.map((option) => (
+                  <div key={option.label} className="flex-1 min-w-[200px]">
+                    <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
+                      {option.label}
+                    </label>
+                    <SearchableSelect
+                      value={selectedVariants[option.label] || ''}
+                      onValueChange={(value) => handleVariantChange(option.label, value)}
+                      options={option.values}
+                      placeholder={`اختر ${option.label}`}
+                      searchPlaceholder={`بحث عن ${option.label}...`}
+                      emptyMessage="لا توجد خيارات متاحة"
+                      noResultsMessage="لا توجد نتائج للبحث"
+                      triggerClassName="h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E]"
+                      className="rounded-2xl border-[#ECECEC]"
+                      disabled={option.values.length === 0}
+                      searchThreshold={5}
+                    />
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

@@ -29,6 +29,7 @@ export interface OrderActionsState {
   handleRejectModification: () => Promise<boolean>;
   handleWaitingPayment: () => Promise<boolean>;
   handleConfirmAction: (action: string) => Promise<boolean>;
+  handleFollowUpAction: (label: string) => Promise<boolean>;
   handleUpdateShipping: (data: ShippingData) => Promise<void>;
   handleAddPackagingNote: (note: string) => Promise<void>;
 }
@@ -53,7 +54,7 @@ export function useOrderActions({
       'postpone_hours': 'POSTPONED',
       'postpone_days': 'POSTPONED',
       'waiting_payment': 'WAITING_FOR_PAYMENT',
-      'reject_modification': 'REGISTERED',
+      'reject_modification': 'STOPPED',
       'no_answer': 'CALL_AGAIN',
       'closed': 'STOPPED',
       'not_collecting': 'STOPPED',
@@ -82,7 +83,7 @@ export function useOrderActions({
           orderId: order.id,
           data: {
             ...updateData,
-            attemptedEvent: status,
+            status: status,
           },
         });
 
@@ -152,8 +153,8 @@ export function useOrderActions({
         return false;
       }
 
-      const updateData: Partial<Order> = {
-        notes: data.notes ? `${data.reason}: ${data.notes}` : data.reason,
+      const updateData: Record<string, unknown> = {
+        cancelReason: data.notes ? `${data.reason}: ${data.notes}` : data.reason,
       };
       return await handleStatusUpdateAndNavigate(status, updateData);
     },
@@ -184,9 +185,9 @@ export function useOrderActions({
         return false;
       }
 
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
       if (data.time) {
-        updateData.executionDate = data.time.toISOString();
+        updateData.postponedUntil = data.time.toISOString();
       }
       return await handleStatusUpdateAndNavigate(status, updateData);
     },
@@ -201,9 +202,9 @@ export function useOrderActions({
         return false;
       }
 
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
       if (data.date) {
-        updateData.executionDate = data.date.toISOString();
+        updateData.postponedUntil = data.date.toISOString();
       }
       return await handleStatusUpdateAndNavigate(status, updateData);
     },
@@ -238,6 +239,55 @@ export function useOrderActions({
       return false;
     },
     [getStatusFromAction, handleStatusUpdateAndNavigate]
+  );
+
+  const handleFollowUpAction = useCallback(
+    async (label: string): Promise<boolean> => {
+      try {
+        const updatedOrder = await updateOrderMutation.mutateAsync({
+          orderId: order.id,
+          data: {
+            status: 'ATTEMPTED',
+            eventNote: label,
+          },
+        });
+
+        if (onOrderUpdate) {
+          onOrderUpdate(updatedOrder);
+        }
+
+        toast.success(`تم تسجيل المتابعة: ${label}`);
+
+        if (onNavigateToNextOrder && dateRange) {
+          const fromISO = dateRange.from?.toISOString();
+          const toISO = dateRange.to?.toISOString();
+
+          if (fromISO && toISO) {
+            try {
+              const nextOrderResponse = await getNextOrderId(
+                order.id,
+                statusFilter || undefined,
+                fromISO,
+                toISO
+              );
+
+              if (nextOrderResponse?.orderId) {
+                onNavigateToNextOrder(nextOrderResponse.orderId);
+              }
+            } catch (nextErr) {
+              console.error('Failed to get next order:', nextErr);
+            }
+          }
+        }
+
+        return true;
+      } catch (error) {
+        console.error('Failed to update follow-up:', error);
+        toast.error('فشل في تسجيل المتابعة. يرجى المحاولة مرة أخرى.');
+        return false;
+      }
+    },
+    [order.id, onOrderUpdate, onNavigateToNextOrder, dateRange, statusFilter, updateOrderMutation, getNextOrderId]
   );
 
   const handleUpdateShipping = useCallback(
@@ -308,6 +358,7 @@ export function useOrderActions({
     handleRejectModification,
     handleWaitingPayment,
     handleConfirmAction,
+    handleFollowUpAction,
     handleUpdateShipping,
     handleAddPackagingNote,
   };

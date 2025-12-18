@@ -160,7 +160,7 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
     (orderProduct) => orderProduct.id === viewingProductId
   );
 
-  const handleAddSameTypeProduct = async (size: string, color: string, quantity: number) => {
+  const handleAddSameTypeProduct = async (variants: SelectedVariant[], quantity: number) => {
     try {
       // Get the first product as the reference (assuming they all have the same type in this order)
       const referenceProduct = productsData[0];
@@ -169,10 +169,6 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
         return;
       }
 
-      const variants = [
-        { label: 'Size', value: size },
-        { label: 'Color', value: color },
-      ];
       const price = referenceProduct.price; // Use same price as reference product
 
       // Add product to order using mutation (handles cache invalidation automatically)
@@ -313,6 +309,7 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
         onClose={() => setIsAddSameTypeModalOpen(false)}
         onSave={handleAddSameTypeProduct}
         productType={productsData[0]?.product || ''}
+        productId={productsData[0]?.productId || null}
       />
 
       <AddNewProductModal

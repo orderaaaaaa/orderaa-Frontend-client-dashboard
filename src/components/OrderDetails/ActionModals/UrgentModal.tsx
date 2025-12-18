@@ -18,7 +18,7 @@ const shippingCostSchema = z
 interface UrgentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (data: { shippingCost?: number; urgentDate: string }) => void;
+  onConfirm: (data: { shippingCost?: number; urgentDate: string }) => void | Promise<void>;
 }
 
 const getDateFromOption = (option: UrgentOption): Date => {
@@ -69,7 +69,7 @@ export default function UrgentModal({
     }
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!urgentDate) {
       alert('التاريخ مطلوب');
       return;
@@ -82,11 +82,12 @@ export default function UrgentModal({
       return;
     }
 
-    onConfirm({
+    await onConfirm({
       shippingCost: shippingCostResult.data,
       urgentDate: urgentDate.toISOString()
     });
-    // Don't reset here - only reset when modal closes (on success via handleClose)
+    // Reset form after successful confirmation
+    handleReset();
   };
 
   const handleReset = () => {

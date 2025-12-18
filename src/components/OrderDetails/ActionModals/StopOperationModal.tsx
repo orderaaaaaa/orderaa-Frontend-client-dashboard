@@ -7,7 +7,7 @@ import { LiaCommentDotsSolid } from 'react-icons/lia';
 interface StopOperationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (notes: string) => void;
+  onConfirm: (notes: string) => void | Promise<void>;
 }
 
 export default function StopOperationModal({
@@ -17,13 +17,14 @@ export default function StopOperationModal({
 }: StopOperationModalProps) {
   const [notes, setNotes] = useState('');
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!notes.trim()) {
       alert('الملاحظات مطلوبة');
       return;
     }
-    onConfirm(notes);
-    // Don't reset here - only reset when modal closes (on success via handleClose)
+    await onConfirm(notes);
+    // Reset form after successful confirmation
+    setNotes('');
   };
 
   const handleClose = () => {
