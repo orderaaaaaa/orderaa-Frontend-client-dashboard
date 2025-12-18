@@ -9,7 +9,7 @@ import { useOrdersStore } from '@/store/ordersStore';
 import { useSidebar } from '@/hooks/useSidebar';
 import { useAuthActions } from '@/hooks/useAuthActions';
 import { navigation } from '@/constants/Navbar';
-import { getOrders } from '@/lib/api/order';
+import { useFetchOrdersForSearch } from '@/services/orders';
 import {
   Sidebar,
   TopBar,
@@ -38,6 +38,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const { setSearchQuery } = useOrdersStore();
   const { user, handleUserAction } = useAuthActions();
+  const { fetchOrdersForSearch } = useFetchOrdersForSearch();
   const pathname = usePathname();
   const router = useRouter();
   const [isSearching, setIsSearching] = useState(false);
@@ -54,7 +55,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       // On order details page: search and navigate to first result
       setIsSearching(true);
       try {
-        const response = await getOrders({ search: query, limit: 1, page: 1 });
+        const response = await fetchOrdersForSearch({ search: query, limit: 1, page: 1 });
         if (response.data && response.data.length > 0) {
           const firstOrder = response.data[0];
           router.push(`/dashboard/orders/${firstOrder.id}`);
@@ -74,7 +75,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         router.push('/dashboard/orders/allOrders');
       }
     }
-  }, [pathname, router, setSearchQuery, isOrderDetailsPage]);
+  }, [pathname, router, setSearchQuery, isOrderDetailsPage, fetchOrdersForSearch]);
 
   // Handle clear search - clear the store to refetch all orders
   const handleClearSearch = useCallback(() => {

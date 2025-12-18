@@ -1,10 +1,8 @@
 import { useCallback } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import { updateOrder, getNextOrderId } from '@/lib/api/order';
 import { Order, OrderStatus, OrderStatusItem } from '@/types/orders';
 import { ShippingData } from '@/components/OrderDetails/EditShippingModal';
-import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { useUpdateOrder, useGetNextOrderId } from '@/services/orders';
 
 export interface UseOrderActionsOptions {
   order: Order;
@@ -43,10 +41,10 @@ export function useOrderActions({
   statusFilter,
   availableStatuses,
 }: UseOrderActionsOptions): OrderActionsState {
-  const queryClient = useQueryClient();
+  const updateOrderMutation = useUpdateOrder();
+  const { getNextOrderId } = useGetNextOrderId();
 
   const getStatusFromAction = useCallback((action: string): OrderStatus | null => {
-    // Map action strings to the status value identifiers we expect from the API
     const actionToStatusValueMap: Record<string, string> = {
       'confirm': 'CONFIRMED',
       'urgent': 'CONFIRMED',
@@ -67,12 +65,10 @@ export function useOrderActions({
       return null;
     }
 
-    // Search for the status in availableStatuses from the API
     const matchedStatus = availableStatuses.find(
       (status) => status.value === expectedStatusValue
     );
 
-    // Return the matched status value, or null if not found
     return matchedStatus ? (matchedStatus.value as OrderStatus) : null;
   }, [availableStatuses]);
 
@@ -82,28 +78,21 @@ export function useOrderActions({
       updateData: Partial<Order> | Record<string, any> = {}
     ): Promise<boolean> => {
       try {
-        const updatedOrder = await updateOrder(order.id, {
-          ...updateData,
-          attemptedEvent: status,
-        });
-
-        // Invalidate order details cache to get fresh data
-        queryClient.invalidateQueries({
-          queryKey: [QUERY_KEYS.ORDER_DETAILS, order.id],
-        });
-        queryClient.invalidateQueries({
-          queryKey: [QUERY_KEYS.ORDER_STATISTICS],
+        const updatedOrder = await updateOrderMutation.mutateAsync({
+          orderId: order.id,
+          data: {
+            ...updateData,
+            attemptedEvent: status,
+          },
         });
 
         if (onOrderUpdate) {
           onOrderUpdate(updatedOrder);
         }
 
-        // Show success message
         const statusLabel = availableStatuses.find((s) => s.value === status)?.label || status;
         toast.success(`تم تحديث حالة الطلب إلى ${statusLabel} بنجاح`);
 
-        // Try to get next order if date range is available
         if (onNavigateToNextOrder && dateRange) {
           const fromISO = dateRange.from?.toISOString();
           const toISO = dateRange.to?.toISOString();
@@ -122,7 +111,6 @@ export function useOrderActions({
               }
             } catch (nextErr) {
               console.error('Failed to get next order:', nextErr);
-              // Continue even if next order fails
             }
           }
         }
@@ -134,7 +122,7 @@ export function useOrderActions({
         return false;
       }
     },
-    [order.id, onOrderUpdate, onNavigateToNextOrder, dateRange, statusFilter, availableStatuses, queryClient]
+    [order.id, onOrderUpdate, onNavigateToNextOrder, dateRange, statusFilter, availableStatuses, updateOrderMutation, getNextOrderId]
   );
 
   const handleUrgent = useCallback(
@@ -246,7 +234,6 @@ export function useOrderActions({
       if (status) {
         return await handleStatusUpdateAndNavigate(status);
       }
-      // Show error toast if status couldn't be determined
       toast.error('فشل في تحديد حالة الطلب. يرجى المحاولة مرة أخرى.');
       return false;
     },
@@ -256,18 +243,16 @@ export function useOrderActions({
   const handleUpdateShipping = useCallback(
     async (data: ShippingData) => {
       try {
-        const updatedOrder = await updateOrder(order.id, {
-          shippingCompany: data.shippingCompany,
-          customers: {
-            governorate: data.governorate,
-            city: data.city,
-            address: data.address,
+        const updatedOrder = await updateOrderMutation.mutateAsync({
+          orderId: order.id,
+          data: {
+            shippingCompany: data.shippingCompany,
+            customers: {
+              governorate: data.governorate,
+              city: data.city,
+              address: data.address,
+            },
           },
-        });
-
-        // Invalidate order details cache to get fresh data
-        queryClient.invalidateQueries({
-          queryKey: [QUERY_KEYS.ORDER_DETAILS, order.id],
         });
 
         if (onOrderUpdate) {
@@ -281,7 +266,7 @@ export function useOrderActions({
         throw error;
       }
     },
-    [order.id, onOrderUpdate, queryClient]
+    [order.id, onOrderUpdate, updateOrderMutation]
   );
 
   const handleAddPackagingNote = useCallback(
@@ -293,13 +278,11 @@ export function useOrderActions({
           ? `${order.packagingNotes}\n${note}`
           : note;
 
-        const updatedOrder = await updateOrder(order.id, {
-          packagingNotes: updatedNotes,
-        });
-
-        // Invalidate order details cache to get fresh data
-        queryClient.invalidateQueries({
-          queryKey: [QUERY_KEYS.ORDER_DETAILS, order.id],
+        const updatedOrder = await updateOrderMutation.mutateAsync({
+          orderId: order.id,
+          data: {
+            packagingNotes: updatedNotes,
+          },
         });
 
         if (onOrderUpdate) {
@@ -313,7 +296,7 @@ export function useOrderActions({
         throw error;
       }
     },
-    [order.id, order.packagingNotes, onOrderUpdate, queryClient]
+    [order.id, order.packagingNotes, onOrderUpdate, updateOrderMutation]
   );
 
   return {

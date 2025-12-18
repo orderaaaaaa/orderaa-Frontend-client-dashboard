@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { LiaTimesSolid, LiaCheckSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
-import { getFilterOptions } from '@/lib/api/order';
+import { useFilterOptionsQuery } from '@/services/orders';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { Button } from '../ui/button';
 
@@ -24,31 +24,11 @@ export default function EditProductModal({
 }: EditProductModalProps) {
   const [size, setSize] = useState(String(currentSize));
   const [color, setColor] = useState(currentColor);
-  const [sizeOptions, setSizeOptions] = useState<string[]>([]);
-  const [colorOptions, setColorOptions] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      setIsLoading(true);
-      getFilterOptions()
-        .then((response) => {
-          const { productSizes, productColors } = response.data;
-          if (productSizes && productSizes.length > 0) {
-            setSizeOptions(productSizes);
-          }
-          if (productColors && productColors.length > 0) {
-            setColorOptions(productColors);
-          }
-        })
-        .catch((error) => {
-          console.error('Failed to fetch filter options:', error);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    }
-  }, [isOpen]);
+  // Fetch filter options using React Query
+  const { data: filterOptions, isLoading } = useFilterOptionsQuery();
+  const sizeOptions = filterOptions?.data?.productSizes ?? [];
+  const colorOptions = filterOptions?.data?.productColors ?? [];
 
   useEffect(() => {
     setSize(String(currentSize));

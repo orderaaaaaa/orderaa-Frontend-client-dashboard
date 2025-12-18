@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { OrderStatus, FilterOrdersDto } from '@/types/orders';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
-import { getOrders } from '@/lib/api/order';
+import { useFetchOrdersForSearch } from '@/services/orders';
 import { TimePeriod, calculateDateRangeFromPeriod, formatDateToISO } from '@/utils/dateRangeUtils';
 
 interface UseOrderDetailsNavigationOptions {
@@ -77,6 +77,8 @@ function buildApiFilters(
 export function useOrderDetailsNavigation({
   initialOrderId,
 }: UseOrderDetailsNavigationOptions): UseOrderDetailsNavigationReturn {
+  const { fetchOrdersForSearch } = useFetchOrdersForSearch();
+
   // Track if component has mounted (to skip initial render)
   const hasMounted = useRef(false);
   // Track if change was user-initiated (to prevent URL change loops)
@@ -198,7 +200,7 @@ export function useOrderDetailsNavigation({
 
       try {
         const filters = buildApiFilters(status, fromDate, toDate, debouncedFormFilters);
-        const response = await getOrders(filters);
+        const response = await fetchOrdersForSearch(filters);
 
         // Check if request was aborted
         if (abortControllerRef.current?.signal.aborted) {
@@ -235,7 +237,7 @@ export function useOrderDetailsNavigation({
         abortControllerRef.current.abort();
       }
     };
-  }, [status, fromDate, toDate, debouncedFormFilters, triggerVersion]);
+  }, [status, fromDate, toDate, debouncedFormFilters, triggerVersion, fetchOrdersForSearch]);
 
   return {
     // Filter state

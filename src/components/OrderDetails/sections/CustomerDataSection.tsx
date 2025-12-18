@@ -1,12 +1,10 @@
 import React from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { LiaUserSolid } from 'react-icons/lia';
 import { EditableTextField } from '../fields/EditableTextField';
 import { PhoneNumberList } from '../fields/PhoneNumberList';
 import { TimeRangeField } from '../fields/TimeRangeField';
 import { Order } from '@/types/orders';
-import { updateCustomer } from '@/lib/api/order';
-import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { useUpdateCustomer } from '@/services/orders';
 import { toast } from 'react-toastify';
 
 export interface CustomerDataSectionProps {
@@ -22,7 +20,7 @@ export function CustomerDataSection({
   onPhoneUpdate,
   className = '',
 }: CustomerDataSectionProps) {
-  const queryClient = useQueryClient();
+  const updateCustomerMutation = useUpdateCustomer();
 
   const handleTimeFromChange = async (time: string) => {
     await onUpdate('timeFrom', time);
@@ -34,11 +32,9 @@ export function CustomerDataSection({
 
   const handleCustomerNameUpdate = async (name: string) => {
     try {
-      await updateCustomer(order.customers.id, { name });
-
-      // Invalidate order details cache to get fresh data
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.ORDER_DETAILS, order.id],
+      await updateCustomerMutation.mutateAsync({
+        customerId: order.customers.id,
+        data: { name },
       });
 
       toast.success('تم تحديث اسم العميل بنجاح');

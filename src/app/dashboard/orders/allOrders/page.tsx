@@ -17,8 +17,7 @@ import { exportOrdersToExcel } from '@/utils/exportOrders';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { Breadcrumb } from '@/components/dashboard-layout';
 import { DatePicker } from '@/components/ui/datepicker';
-import { useOrders } from '@/services/orders';
-import { getOrders } from '@/lib/api/order';
+import { useOrders, useFetchOrdersForExport } from '@/services/orders';
 import {
   Select,
   SelectContent,
@@ -59,6 +58,7 @@ export default function AllOrdersRefactor() {
 
   const { statistics } = useOrderStatistics();
   const { options } = useFilterOptions();
+  const { fetchOrdersForExport } = useFetchOrdersForExport();
 
   const orders = ordersData?.data ?? [];
   const totalOrders = ordersData?.total ?? 0;
@@ -168,9 +168,7 @@ export default function AllOrdersRefactor() {
       } else {
         // Export all filtered orders
         try {
-          // Try API first
-          const exportFilters = { ...apiFilters, limit: 10000, page: 1 };
-          const response = await getOrders(exportFilters);
+          const response = await fetchOrdersForExport(apiFilters);
 
           if (response.data.length === 0) {
             toast.warning('لا توجد طلبات لتصديرها');
@@ -182,7 +180,7 @@ export default function AllOrdersRefactor() {
             `تم تصدير ${response.data.length} طلب بنجاح! \nاسم الملف: ${fileName}`
           );
         } catch (apiErr) {
-          // Fallback to current orders in memory (mock or loaded data)
+          // Fallback to current orders in memory
           console.warn('API failed for export, using current orders');
           if (orders.length === 0) {
             toast.warning('لا توجد طلبات لتصديرها');
@@ -198,7 +196,7 @@ export default function AllOrdersRefactor() {
     } catch (error) {
       toast.error('فشل في تصدير الطلبات. الرجاء المحاولة مرة أخرى.');
     }
-  }, [apiFilters, select, selectedOrderIds, orders]);
+  }, [apiFilters, select, selectedOrderIds, orders, fetchOrdersForExport]);
 
   // Handle Edit Status
   const handleEditStatus = useCallback(() => {

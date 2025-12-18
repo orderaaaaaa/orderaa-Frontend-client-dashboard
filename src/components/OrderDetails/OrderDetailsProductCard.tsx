@@ -1,16 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { Trash2, SquarePen, PackagePlus, CirclePlus } from 'lucide-react';
-import { Order, Product } from '@/types/orders';
+import { Order } from '@/types/orders';
 import EditProductModal from './EditProductModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import AddSameTypeProductModal from './AddSameTypeProductModal';
 import AddNewProductModal from './AddNewProductModal';
 import ProductDetailsModal from './ProductDetailsModal';
-import { updateOrderProduct, deleteOrderProduct, getAllProducts, addOrderProduct } from '@/lib/api/order';
-import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import {
+  useUpdateOrderProduct,
+  useDeleteOrderProduct,
+  useAddOrderProduct,
+  useAllProducts,
+} from '@/services/orders';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 
@@ -39,13 +42,17 @@ function parseVariant(variant: string | null | undefined): { size: string; color
 }
 
 function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
-  const queryClient = useQueryClient();
+  // React Query mutations and queries
+  const updateOrderProductMutation = useUpdateOrderProduct();
+  const deleteOrderProductMutation = useDeleteOrderProduct();
+  const addOrderProductMutation = useAddOrderProduct();
+  const { data: allProducts = [], error: productsError } = useAllProducts();
+
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
   const [isAddSameTypeModalOpen, setIsAddSameTypeModalOpen] = useState(false);
   const [isAddNewProductModalOpen, setIsAddNewProductModalOpen] = useState(false);
   const [viewingProductId, setViewingProductId] = useState<number | null>(null);
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [productsData, setProductsData] = useState(
     order.order_products?.map((orderProduct) => {
       // Parse the variant to get size and color
@@ -82,18 +89,12 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
     );
   }, [order.order_products]);
 
-  // Load all products on mount
+  // Show error if products fail to load
   useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const products = await getAllProducts();
-        setAllProducts(products);
-      } catch (error) {
-        toast.error('فشل في تحميل المنتجات');
-      }
-    };
-    loadProducts();
-  }, []);
+    if (productsError) {
+      toast.error('فشل في تحميل المنتجات');
+    }
+  }, [productsError]);
 
   const handleEditClick = (productId: number) => {
     setEditingProductId(productId);
@@ -112,12 +113,10 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
       // Create variant string (format: "size - color")
       const variant = `${size} - ${color}`;
 
-      // Call backend API
-      await updateOrderProduct(productId, variant);
-
-      // Invalidate order details cache to get fresh data
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.ORDER_DETAILS, order.id],
+      // Call backend API using mutation (handles cache invalidation automatically)
+      await updateOrderProductMutation.mutateAsync({
+        orderProductId: productId,
+        variant,
       });
 
       toast.success('تم تحديث المنتج بنجاح');
@@ -129,13 +128,13 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
   const handleConfirmDelete = async () => {
     if (!deletingProductId) return;
 
-    // Call backend API
-    await deleteOrderProduct(deletingProductId);
-
-    // Invalidate order details to get fresh data
-    queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.ORDER_DETAILS, order.id],
-    });
+    try {
+      // Call backend API using mutation (handles cache invalidation automatically)
+      await deleteOrderProductMutation.mutateAsync(deletingProductId);
+      toast.success('تم حذف المنتج بنجاح');
+    } catch (error) {
+      toast.error('فشل في حذف المنتج');
+    }
   };
 
   const editingProduct = productsData.find(
@@ -165,18 +164,13 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
       ];
       const price = referenceProduct.price; // Use same price as reference product
 
-      // Add product to order
-      await addOrderProduct(
-        order.id,
-        referenceProduct.productId,
+      // Add product to order using mutation (handles cache invalidation automatically)
+      await addOrderProductMutation.mutateAsync({
+        orderId: order.id,
+        productId: referenceProduct.productId,
         variants,
         quantity,
-        price
-      );
-
-      // Invalidate order details to get fresh data with new product
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.ORDER_DETAILS, order.id],
+        price,
       });
 
       toast.success('تم إضافة المنتج بنجاح');
@@ -197,18 +191,13 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
     ];
     const price = selectedProduct.price || 0;
 
-    // Add product to order
-    await addOrderProduct(
-      order.id,
+    // Add product to order using mutation (handles cache invalidation automatically)
+    await addOrderProductMutation.mutateAsync({
+      orderId: order.id,
       productId,
       variants,
       quantity,
-      price
-    );
-
-    // Invalidate order details to get fresh data with new product
-    queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.ORDER_DETAILS, order.id],
+      price,
     });
   };
 

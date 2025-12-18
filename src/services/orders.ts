@@ -14,6 +14,7 @@ import {
   FilterOptionsResponse,
   OrderStatisticsResponse,
   OrderStatusesResponse,
+  Product,
 } from '@/types/orders';
 
 // Fetch orders with filters and pagination
@@ -264,8 +265,58 @@ export const useAllProducts = () => {
   return useQuery({
     queryKey: [QUERY_KEYS.PRODUCTS] as QueryKey,
     queryFn: async () => {
-      const response = await http.get('/orders/products');
+      const response = await http.get<Product[]>('/orders/products');
       return response.data;
     },
   });
+};
+
+// Fetch orders for export (bypasses regular query cache, fetches fresh data)
+export const useFetchOrdersForExport = () => {
+  const fetchOrdersForExport = async (filters: FilterOrdersDto) => {
+    const exportFilters = { ...filters, limit: 10000, page: 1 };
+    const response = await http.get<PaginatedResponse<Order>>(
+      '/orders/all-orders',
+      { params: exportFilters }
+    );
+    return response.data;
+  };
+
+  return { fetchOrdersForExport };
+};
+
+// Get next order ID for navigation
+export const useGetNextOrderId = () => {
+  const getNextOrderId = async (
+    orderId: number,
+    status?: string,
+    from?: string,
+    to?: string
+  ) => {
+    const params: Record<string, string> = {};
+    if (status) params.status = status;
+    if (from) params.from = from;
+    if (to) params.to = to;
+
+    const response = await http.get<{ orderId: number }>(
+      `/orders/${orderId}/next`,
+      { params }
+    );
+    return response.data;
+  };
+
+  return { getNextOrderId };
+};
+
+// Fetch orders for search (one-time fetch, not cached)
+export const useFetchOrdersForSearch = () => {
+  const fetchOrdersForSearch = async (filters: FilterOrdersDto) => {
+    const response = await http.get<PaginatedResponse<Order>>(
+      '/orders/all-orders',
+      { params: filters }
+    );
+    return response.data;
+  };
+
+  return { fetchOrdersForSearch };
 };

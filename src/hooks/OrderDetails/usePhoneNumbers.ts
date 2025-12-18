@@ -1,7 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { updateCustomer } from '@/lib/api/order';
-import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { useUpdateCustomer } from '@/services/orders';
 
 /**
  * Options for usePhoneNumbers hook
@@ -49,7 +47,7 @@ export function usePhoneNumbers({
   initialPhones,
   onUpdate,
 }: UsePhoneNumbersOptions): PhoneNumbersState {
-  const queryClient = useQueryClient();
+  const updateCustomerMutation = useUpdateCustomer();
 
   // Filter out undefined/null values and create initial phone list
   const [phoneNumbers, setPhoneNumbers] = useState<string[]>(
@@ -74,14 +72,12 @@ export function usePhoneNumbers({
       setPhoneNumbers(updatedPhones);
 
       try {
-        await updateCustomer(customerId, {
-          phoneNumber: updatedPhones[0] || '',
-          altPhone: updatedPhones[1] || undefined,
-        });
-
-        // Invalidate order details cache to get fresh data
-        queryClient.invalidateQueries({
-          queryKey: [QUERY_KEYS.ORDER_DETAILS, orderId],
+        await updateCustomerMutation.mutateAsync({
+          customerId,
+          data: {
+            phoneNumber: updatedPhones[0] || '',
+            altPhone: updatedPhones[1] || undefined,
+          },
         });
 
         if (onUpdate) {
@@ -93,7 +89,7 @@ export function usePhoneNumbers({
         setPhoneNumbers(phoneNumbers);
       }
     },
-    [customerId, orderId, phoneNumbers, onUpdate, queryClient]
+    [customerId, phoneNumbers, onUpdate, updateCustomerMutation]
   );
 
   const handleSave = useCallback(async () => {
@@ -115,14 +111,12 @@ export function usePhoneNumbers({
     setNewPhoneNumber('');
 
     try {
-      await updateCustomer(customerId, {
-        phoneNumber: updatedPhones[0] || '',
-        altPhone: updatedPhones[1] || undefined,
-      });
-
-      // Invalidate order details cache to get fresh data
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.ORDER_DETAILS, orderId],
+      await updateCustomerMutation.mutateAsync({
+        customerId,
+        data: {
+          phoneNumber: updatedPhones[0] || '',
+          altPhone: updatedPhones[1] || undefined,
+        },
       });
 
       if (onUpdate) {
@@ -133,7 +127,7 @@ export function usePhoneNumbers({
       // Revert on error
       setPhoneNumbers(phoneNumbers);
     }
-  }, [customerId, orderId, phoneNumbers, editingIndex, newPhoneNumber, onUpdate, queryClient]);
+  }, [customerId, phoneNumbers, editingIndex, newPhoneNumber, onUpdate, updateCustomerMutation]);
 
   const handleCancel = useCallback(() => {
     setEditingIndex(null);

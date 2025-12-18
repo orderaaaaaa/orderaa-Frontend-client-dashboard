@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Truck,
   Boxes,
@@ -18,10 +18,10 @@ import {
   PackageCheck,
 } from "lucide-react";
 import PageTab from "@/components/ui/PageTab";
-import { OrderStatus, OrderStatusItem } from "@/types/orders";
+import { OrderStatus } from "@/types/orders";
 import { useOrdersStore } from "@/store/ordersStore";
 import { LiaWhatsapp } from "react-icons/lia";
-import { getOrderStatuses } from "@/lib/api/order";
+import { useOrderStatusesQuery } from "@/services/orders";
 
 interface PageTapsProps {
   data?: any[];
@@ -62,23 +62,9 @@ const getIconForStatus = (statusValue: string): React.ReactNode => {
 
 function PageTaps({ data, statusCounts, totalOrders, onStatusChange }: PageTapsProps) {
   const { selectedStatus, setSelectedStatus } = useOrdersStore();
-  const [statuses, setStatuses] = useState<OrderStatusItem[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchStatuses = async () => {
-      try {
-        const response = await getOrderStatuses();
-        setStatuses(response.statuses);
-      } catch (error) {
-        console.error('Failed to fetch order statuses:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStatuses();
-  }, []);
+  const { data: statusesData, isLoading: loading } = useOrderStatusesQuery();
+  const statuses = statusesData?.statuses ?? [];
 
   const handleTabClick = (status: OrderStatus | null) => {
     setSelectedStatus(status); // Keep store in sync

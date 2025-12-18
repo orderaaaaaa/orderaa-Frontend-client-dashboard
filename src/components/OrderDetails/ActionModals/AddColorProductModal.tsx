@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { toast } from 'react-toastify';
 import BaseModal from '@/components/ui/base-modal';
 import { SearchableSelect } from '@/components/ui/searchable-select';
-import { getFilterOptions } from '@/lib/api/order';
+import { useFilterOptionsQuery } from '@/services/orders';
 
 interface AddColorProductModalProps {
   isOpen: boolean;
@@ -22,28 +22,12 @@ export default function AddColorProductModal({
   currentProductColors = [],
 }: AddColorProductModalProps) {
   const [selectedColor, setSelectedColor] = useState('');
-  const [colorOptions, setColorOptions] = useState<string[]>(defaultColorOptions);
-  const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch filter options from API
-  useEffect(() => {
-    if (isOpen) {
-      setIsLoading(true);
-      getFilterOptions()
-        .then((response) => {
-          const { productColors } = response.data;
-          if (productColors && productColors.length > 0) {
-            setColorOptions(productColors);
-          }
-        })
-        .catch((error) => {
-          console.error('Failed to fetch filter options:', error);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    }
-  }, [isOpen]);
+  // Fetch filter options using React Query
+  const { data: filterOptions, isLoading } = useFilterOptionsQuery();
+  const colorOptions = filterOptions?.data?.productColors?.length
+    ? filterOptions.data.productColors
+    : defaultColorOptions;
 
   useEffect(() => {
     if (isOpen) {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Order, OrderStatus, OrderStatusItem } from '@/types/orders';
-import { getOrderStatuses } from '@/lib/api/order';
+import { useOrderStatusesQuery } from '@/services/orders';
 import { useModalState } from '@/hooks/OrderDetails/useModalState';
 import { useOrderActions } from '@/hooks/OrderDetails/useOrderActions';
 import { useOrderFieldUpdate } from '@/hooks/OrderDetails/useOrderFieldUpdate';
@@ -34,7 +34,6 @@ function OrderDetailsInfoComponent({
 }: OrderDetailsInfoComponentProps) {
   // Local state
   const [localOrder, setLocalOrder] = useState(order);
-  const [availableStatuses, setAvailableStatuses] = useState<OrderStatusItem[]>([]);
   const [confirmationDialog, setConfirmationDialog] = useState<{
     isOpen: boolean;
     title: string;
@@ -46,6 +45,17 @@ function OrderDetailsInfoComponent({
     message: '',
     action: '',
   });
+
+  // Fetch available statuses using React Query
+  const { data: statusesData, error: statusesError } = useOrderStatusesQuery();
+  const availableStatuses = statusesData?.statuses ?? [];
+
+  // Show error toast if statuses fail to load
+  useEffect(() => {
+    if (statusesError) {
+      toast.error('فشل في تحميل حالات الطلبات');
+    }
+  }, [statusesError]);
 
   // Custom Hooks
   const modals = useModalState([
@@ -83,21 +93,6 @@ function OrderDetailsInfoComponent({
   });
 
   const updateField = useOrderFieldUpdate(localOrder.id, handleUpdate);
-
-  // Fetch available statuses from API
-  useEffect(() => {
-    const fetchStatuses = async () => {
-      try {
-        const response = await getOrderStatuses();
-        setAvailableStatuses(response.statuses);
-      } catch (error) {
-        console.error('Failed to fetch order statuses:', error);
-        toast.error('فشل في تحميل حالات الطلبات');
-      }
-    };
-
-    fetchStatuses();
-  }, []);
 
   // Update local order when prop changes
   useEffect(() => {
