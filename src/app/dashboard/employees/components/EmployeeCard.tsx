@@ -1,4 +1,3 @@
-// components/employees/EmployeeCard.tsx
 'use client';
 
 import React from 'react';
@@ -13,6 +12,10 @@ import {
 } from 'lucide-react';
 import { useUpdateEmployeeStatus } from '@/hooks/useEmployees';
 import { Employee } from '@/schemas/employee.schema';
+import {
+  getAccessLevelLabel,
+  getDepartmentLabel,
+} from '../utils/employeeMappers';
 
 interface EmployeeCardProps {
   employee: Employee;
@@ -54,10 +57,10 @@ export function EmployeeCard({ employee }: EmployeeCardProps) {
           </h3>
           <div className="flex flex-wrap gap-2 justify-start">
             <span className="inline-block border text-gray-700 px-4 py-1 rounded-full text-sm">
-              {employee.department}
+              {getDepartmentLabel(employee.department)}
             </span>
             <span className="inline-block border text-gray-700 px-4 py-1 rounded-full text-sm">
-              {employee.accessLevel}
+              {getAccessLevelLabel(employee.accessLevel)}
             </span>
           </div>
         </div>
@@ -145,7 +148,7 @@ export function EmployeeCard({ employee }: EmployeeCardProps) {
           {/* Email */}
           <a
             href={`mailto:${employee.email}`}
-            className="bg-white hover:bg-gray-50 text-[#5D24E1] border-2 border-[#5D24E1] rounded-2xl py-3 px-4 flex items-center justify-center gap-2 transition-colors font-medium"
+            className="bg-white hover:bg-gray-50 truncate text-[#5D24E1] border-2 border-[#5D24E1] rounded-2xl py-3 px-4 flex items-center justify-center gap-2 transition-colors font-medium"
           >
             <span dir="ltr">{employee.email}</span>
             <Mail size={20} />
