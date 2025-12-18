@@ -5,18 +5,15 @@ import { LiaTimesSolid, LiaPlusSolid, LiaMinusSolid, LiaSearchSolid } from 'reac
 import { toast } from 'react-toastify';
 import { Product } from '@/types/orders';
 import { SearchableSelect } from '@/components/ui/searchable-select';
-import { useFilterOptionsQuery } from '@/services/orders';
+import { useProductVariantsOptions, SelectedVariant } from '@/services/orders';
 import { Button } from '../ui/button';
 
 interface AddNewProductModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (productId: number, size: string, color: string, quantity: number) => Promise<void>;
+  onSave: (productId: number, variants: SelectedVariant[], quantity: number) => Promise<void>;
   products: Product[];
 }
-
-const defaultSizeOptions = ['37', '38', '39', '40', '41', '42', '43', '44', '45'];
-const defaultColorOptions = ['اسود', 'ابيض', 'احمر', 'ازرق', 'اخضر', 'بني', 'رمادي'];
 
 export default function AddNewProductModal({
   isOpen,
@@ -25,30 +22,29 @@ export default function AddNewProductModal({
   products,
 }: AddNewProductModalProps) {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [size, setSize] = useState('');
-  const [color, setColor] = useState('');
+  const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
 
-  // Fetch filter options using React Query
-  const { data: filterOptions, isLoading } = useFilterOptionsQuery();
-  const sizeOptions = filterOptions?.data?.productSizes?.length
-    ? filterOptions.data.productSizes
-    : defaultSizeOptions;
-  const colorOptions = filterOptions?.data?.productColors?.length
-    ? filterOptions.data.productColors
-    : defaultColorOptions;
+  // Fetch variant options when a product is selected
+  const { data: variantOptions = [], isLoading: isLoadingVariants } = useProductVariantsOptions(
+    selectedProduct?.id ?? null
+  );
 
   useEffect(() => {
     if (isOpen) {
       setSelectedProduct(null);
-      setSize('');
-      setColor('');
+      setSelectedVariants({});
       setQuantity(1);
       setSearchTerm('');
     }
   }, [isOpen]);
+
+  // Reset selected variants when product changes
+  useEffect(() => {
+    setSelectedVariants({});
+  }, [selectedProduct?.id]);
 
   // Check if form is valid (product selected is required)
   const isFormValid = useMemo(() => {
@@ -61,10 +57,22 @@ export default function AddNewProductModal({
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleVariantChange = (label: string, value: string) => {
+    setSelectedVariants((prev) => ({
+      ...prev,
+      [label]: value,
+    }));
+  };
+
   const handleSave = async () => {
     if (!selectedProduct) return;
     try {
-      await onSave(selectedProduct.id, size, color, quantity);
+      // Convert selected variants to array format
+      const variants: SelectedVariant[] = Object.entries(selectedVariants).map(
+        ([label, value]) => ({ label, value })
+      );
+
+      await onSave(selectedProduct.id, variants, quantity);
       toast.success('تم إضافة المنتج بنجاح');
       onClose();
     } catch (error) {
@@ -204,10 +212,10 @@ export default function AddNewProductModal({
               </div>
             </div>
 
-            {/* Row with 3 dropdowns */}
-            <div className="flex flex-col md:flex-row gap-4">
+            {/* Row with Quantity and Dynamic Variant Options */}
+            <div className="flex flex-col md:flex-row gap-4 flex-wrap">
               {/* Quantity Controls */}
-              <div className="flex-1">
+              <div className="flex-1 min-w-[200px]">
                 <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
                   الكمية
                 </label>
@@ -234,45 +242,39 @@ export default function AddNewProductModal({
                 </div>
               </div>
 
-              {/* Color Dropdown */}
-              <div className="flex-1">
-                <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
-                  اللون
-                </label>
-                <SearchableSelect
-                  value={color}
-                  onValueChange={setColor}
-                  options={colorOptions}
-                  placeholder="اختر اللون"
-                  searchPlaceholder="بحث عن اللون..."
-                  emptyMessage="لا توجد ألوان متاحة"
-                  noResultsMessage="لا توجد نتائج للبحث"
-                  triggerClassName="h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E]"
-                  className="rounded-2xl border-[#ECECEC]"
-                  loading={isLoading}
-                  searchThreshold={5}
-                />
-              </div>
-
-              {/* Size Dropdown */}
-              <div className="flex-1">
-                <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
-                  القياس
-                </label>
-                <SearchableSelect
-                  value={size}
-                  onValueChange={setSize}
-                  options={sizeOptions}
-                  placeholder="اختر القياس"
-                  searchPlaceholder="بحث عن القياس..."
-                  emptyMessage="لا توجد مقاسات متاحة"
-                  noResultsMessage="لا توجد نتائج للبحث"
-                  triggerClassName="h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E]"
-                  className="rounded-2xl border-[#ECECEC]"
-                  loading={isLoading}
-                  searchThreshold={5}
-                />
-              </div>
+              {/* Dynamic Variant Options */}
+              {selectedProduct && (
+                isLoadingVariants ? (
+                  <div className="flex-1 min-w-[200px] flex items-center justify-center">
+                    <span className="text-gray-500">جاري تحميل الخيارات...</span>
+                  </div>
+                ) : variantOptions.length === 0 ? (
+                  <div className="flex-1 min-w-[200px] flex items-center justify-center">
+                    <span className="text-gray-500">لا توجد خيارات متاحة لهذا المنتج</span>
+                  </div>
+                ) : (
+                  variantOptions.map((option) => (
+                    <div key={option.label} className="flex-1 min-w-[200px]">
+                      <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
+                        {option.label}
+                      </label>
+                      <SearchableSelect
+                        value={selectedVariants[option.label] || ''}
+                        onValueChange={(value) => handleVariantChange(option.label, value)}
+                        options={option.values}
+                        placeholder={`اختر ${option.label}`}
+                        searchPlaceholder={`بحث عن ${option.label}...`}
+                        emptyMessage="لا توجد خيارات متاحة"
+                        noResultsMessage="لا توجد نتائج للبحث"
+                        triggerClassName="h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E]"
+                        className="rounded-2xl border-[#ECECEC]"
+                        disabled={option.values.length === 0}
+                        searchThreshold={5}
+                      />
+                    </div>
+                  ))
+                )
+              )}
             </div>
           </div>
         </div>

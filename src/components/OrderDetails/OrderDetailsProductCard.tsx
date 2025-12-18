@@ -190,16 +190,12 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
     }
   };
 
-  const handleAddNewProduct = async (productId: number, size: string, color: string, quantity: number) => {
+  const handleAddNewProduct = async (productId: number, variants: SelectedVariant[], quantity: number) => {
     const selectedProduct = allProducts.find(p => p.id === productId);
     if (!selectedProduct) {
       throw new Error('المنتج غير موجود');
     }
 
-    const variants = [
-      { label: 'Size', value: size },
-      { label: 'Color', value: color },
-    ];
     const price = selectedProduct.price || 0;
 
     // Add product to order using mutation (handles cache invalidation automatically)
