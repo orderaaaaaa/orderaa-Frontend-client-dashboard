@@ -42,7 +42,7 @@ export function TimeRangeField({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const tagStyle =
-    "flex gap-2 bg-white shadow-xs items-center py-2 px-2 rounded-[5px] font-bold text-[15px] text-[#000000]";
+    "flex gap-1 sm:gap-2 bg-white shadow-xs items-center py-2 px-2 rounded-[5px] font-bold text-[13px] sm:text-[15px] text-[#000000]";
 
   const handleSave = async (availableFrom: string, availableTo: string) => {
     await onTimeChange(availableFrom, availableTo);
@@ -53,19 +53,19 @@ export function TimeRangeField({
 
   return (
     <>
-      <div className={`flex flex-col gap-1 min-w-0 overflow-hidden ${className}`}>
-        <p className="font-bold text-[#121212]">الوقت</p>
+      <div className={`flex flex-col gap-1 min-w-0 ${className}`}>
+        <p className="font-bold text-[#121212] text-sm sm:text-base">الوقت</p>
         <div
-          className={`${tagStyle} relative overflow-hidden cursor-pointer hover:bg-gray-50 transition-colors`}
+          className={`${tagStyle} relative cursor-pointer hover:bg-gray-50 transition-colors`}
           onClick={() => setIsModalOpen(true)}
         >
           <LiaClockSolid size={18} className="flex-shrink-0" />
-          <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
-            <span className="font-bold text-[15px] text-[#000000] min-w-[70px]">
+          <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0">
+            <span className="font-bold text-[13px] sm:text-[15px] text-[#000000] whitespace-nowrap">
               {displayFrom}
             </span>
             <span className="text-[#5F5E5E] flex-shrink-0">-</span>
-            <span className="font-bold text-[15px] text-[#000000] min-w-[70px]">
+            <span className="font-bold text-[13px] sm:text-[15px] text-[#000000] whitespace-nowrap">
               {displayTo}
             </span>
           </div>
