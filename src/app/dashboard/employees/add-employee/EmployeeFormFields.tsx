@@ -1,10 +1,4 @@
 import React from 'react';
-import {
-  UseFormRegister,
-  FieldErrors,
-  UseFormWatch,
-  UseFormSetValue,
-} from 'react-hook-form';
 import { EmployeeFormData } from '@/schemas/employee.schema';
 import Input from '@/components/ui/Input';
 import Dropdown from '@/components/ui/Dropdown';
@@ -25,13 +19,7 @@ import {
   ACCESS_LEVEL_OPTIONS,
   DEPARTMENT_OPTIONS,
 } from '@/constants/employees/employeesFormOptions';
-
-type EmployeeFormFieldsProps = {
-  register: UseFormRegister<EmployeeFormData>;
-  errors: FieldErrors<EmployeeFormData>;
-  watch: UseFormWatch<EmployeeFormData>;
-  setValue: UseFormSetValue<EmployeeFormData>;
-};
+import { EmployeeFormFieldsProps } from '../types/employee.types';
 
 export default function EmployeeFormFields({
   register,
@@ -54,7 +42,7 @@ export default function EmployeeFormFields({
         className="flex flex-col items-end gap-6"
         style={{ direction: 'rtl' }}
       >
-        {/* صلاحية الموظف */}
+        {/* Employee Access */}
         <div
           className="w-full flex flex-col items-end gap-4"
           style={{ direction: 'rtl' }}
@@ -105,7 +93,7 @@ export default function EmployeeFormFields({
           </div>
         </div>
 
-        {/* قسم الموظف */}
+        {/* Employee Department  */}
         <div
           className="w-full flex flex-col items-end gap-4"
           style={{ direction: 'rtl' }}
@@ -142,7 +130,7 @@ export default function EmployeeFormFields({
                 errors?.department
                   ? 'border-red-500 focus:border-red-500'
                   : 'border-black/16'
-              } rounded text-right text-base font-normal text-black/55`}
+              } rounded text-right text-base font-normal`}
               placeholderClassName="text-black/60"
             />
             {errors.department && (
@@ -156,12 +144,12 @@ export default function EmployeeFormFields({
           </div>
         </div>
 
-        {/* الاسم الكامل و رقم الهاتف */}
+        {/* Employee Name and Phone Number */}
         <div
           className="w-full flex flex-col md:flex-row items-start gap-6 md:gap-10"
           style={{ direction: 'rtl' }}
         >
-          {/* الاسم الكامل */}
+          {/* Full Name */}
           <div
             className="flex-1 w-full flex flex-col items-end gap-4"
             style={{ direction: 'rtl' }}
@@ -199,7 +187,7 @@ export default function EmployeeFormFields({
             </div>
           </div>
 
-          {/* رقم الهاتف */}
+          {/* Phone Number */}
           <div
             className="flex-1 w-full flex flex-col items-end gap-4"
             style={{ direction: 'rtl' }}
@@ -238,7 +226,7 @@ export default function EmployeeFormFields({
           </div>
         </div>
 
-        {/* البريد الإلكتروني و العنوان */}
+        {/* Email and Address */}
         <div
           className="w-full flex flex-col md:flex-row items-start gap-6 md:gap-10"
           style={{ direction: 'rtl' }}
@@ -329,12 +317,12 @@ export default function EmployeeFormFields({
           </div>
         </div>
 
-        {/* كلمة المرور و تأكيد كلمة المرور */}
+        {/* Password And Password Confirmation */}
         <div
           className="w-full flex flex-col md:flex-row items-start gap-6 md:gap-10"
           style={{ direction: 'rtl' }}
         >
-          {/* كلمة المرور */}
+          {/* Password */}
           <div
             className="flex-1 w-full flex flex-col items-end gap-4"
             style={{ direction: 'rtl' }}
@@ -372,7 +360,7 @@ export default function EmployeeFormFields({
             </div>
           </div>
 
-          {/* تأكيد كلمة المرور */}
+          {/* Password Confirmation*/}
           <div
             className="flex-1 w-full flex flex-col items-end gap-4"
             style={{ direction: 'rtl' }}
@@ -411,7 +399,7 @@ export default function EmployeeFormFields({
           </div>
         </div>
 
-        {/* ساعات العمل */}
+        {/* Working Hours */}
         <div
           className="w-full flex flex-col md:flex-row items-start gap-6 md:gap-10"
           style={{ direction: 'rtl' }}

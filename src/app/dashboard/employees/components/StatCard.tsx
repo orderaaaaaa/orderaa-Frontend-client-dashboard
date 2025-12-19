@@ -1,14 +1,6 @@
 // components/StatCard.tsx
 import { SvgIcon } from '@/components/ui/svg-icon'; // Adjust path as needed
-
-interface StatCardProps {
-  title: string;
-  count: number;
-  iconBgColor: string;
-  iconPath: string;
-  alt?: string;
-  borderColor?: string;
-}
+import { StatCardProps } from '../types/stat.types';
 
 export const StatCard = ({
   title,
