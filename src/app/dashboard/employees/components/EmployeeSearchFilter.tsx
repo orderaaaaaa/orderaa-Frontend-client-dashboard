@@ -63,7 +63,7 @@ export function EmployeeSearchFilter({
           <input
             type="text"
             placeholder={placeholder}
-            className="flex-1 border-none bg-transparent focus:outline-none  focus:ring-0 text-gray-700 text-lg font-semibold placeholder:text-gray-400 text-right"
+            className="flex-1 border-none bg-transparent focus:outline-none  focus:ring-0 text-gray-700 text-[12px] sm:text-lg font-semibold placeholder:text-gray-400 text-right"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
           />
