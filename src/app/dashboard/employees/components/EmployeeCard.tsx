@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   User,
   Phone,
@@ -10,12 +10,13 @@ import {
   CalendarDays,
   Mail,
 } from 'lucide-react';
-import { useUpdateEmployeeStatus } from '@/hooks/useEmployees';
+import { useUpdateEmployeeStatus } from '@/app/dashboard/employees/hooks/useEmployees';
 import { Employee } from '@/schemas/employee.schema';
 import {
   getAccessLevelLabel,
   getDepartmentLabel,
 } from '../utils/employeeMappers';
+import { AttendanceModal } from './AttendanceModal';
 
 interface EmployeeCardProps {
   employee: Employee;
@@ -23,6 +24,8 @@ interface EmployeeCardProps {
 
 export function EmployeeCard({ employee }: EmployeeCardProps) {
   const updateStatusMutation = useUpdateEmployeeStatus();
+  const [attendanceModalOpen, setAttendanceModalOpen] = useState(false);
+  const [leaveModalOpen, setLeaveModalOpen] = useState(false);
 
   const isOnline = employee.isOnline ?? false;
 
@@ -44,6 +47,14 @@ export function EmployeeCard({ employee }: EmployeeCardProps) {
       id: employee.id,
       isOnline: !isOnline,
     });
+  };
+
+  const handleWorkDaysClick = () => {
+    setAttendanceModalOpen(true);
+  };
+
+  const handleVacationDaysClick = () => {
+    setLeaveModalOpen(true);
   };
 
   return (
@@ -111,7 +122,10 @@ export function EmployeeCard({ employee }: EmployeeCardProps) {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="bg-[#f2eefd] shadow-md rounded-2xl p-3 text-center border-2 border-[#5D24E129]">
+        <button
+          onClick={handleWorkDaysClick}
+          className="bg-[#f2eefd] shadow-md rounded-2xl p-3 text-center border-2 border-[#5D24E129] hover:bg-[#e8dff9] transition-colors cursor-pointer"
+        >
           <div className="flex items-center justify-center gap-2 mb-2">
             <CalendarClock size={24} className="text-gray-700" />
             <span className="text-gray-700 text-xl font-semibold">
@@ -119,9 +133,12 @@ export function EmployeeCard({ employee }: EmployeeCardProps) {
             </span>
           </div>
           <div className="text-2xl text-gray-900">{workDays}</div>
-        </div>
+        </button>
 
-        <div className="bg-[#f2eefd] shadow-md rounded-2xl p-3 text-center border-2 border-[#5D24E129]">
+        <button
+          onClick={handleVacationDaysClick}
+          className="bg-[#f2eefd] shadow-md rounded-2xl p-3 text-center border-2 border-[#5D24E129] hover:bg-[#e8dff9] transition-colors cursor-pointer"
+        >
           <div className="flex items-center justify-center gap-2 mb-2">
             <CalendarDays size={25} className="text-gray-700" />
             <span className="text-gray-700 text-xl font-semibold">
@@ -129,7 +146,7 @@ export function EmployeeCard({ employee }: EmployeeCardProps) {
             </span>
           </div>
           <div className="text-2xl text-gray-900">{vacationDays}</div>
-        </div>
+        </button>
       </div>
 
       {/* Action Buttons */}
@@ -166,6 +183,22 @@ export function EmployeeCard({ employee }: EmployeeCardProps) {
           <MessageCircle size={25} />
         </a>
       </div>
+
+      {/* Attendance Modals */}
+      <AttendanceModal
+        isOpen={attendanceModalOpen}
+        onClose={() => setAttendanceModalOpen(false)}
+        employeeId={employee.id}
+        employeeName={employee.fullName}
+        type="attendance"
+      />
+      <AttendanceModal
+        isOpen={leaveModalOpen}
+        onClose={() => setLeaveModalOpen(false)}
+        employeeId={employee.id}
+        employeeName={employee.fullName}
+        type="leave"
+      />
     </div>
   );
 }

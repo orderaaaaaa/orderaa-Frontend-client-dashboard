@@ -1,6 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { employeesApi } from '@/lib/api/employees.api';
+import {
+  employeesApi,
+  EmployeeAttendanceResponse,
+} from '@/app/dashboard/employees/api/employees.api';
 import {
   Employee,
   EmployeeFormData,
@@ -150,5 +153,16 @@ export const useDeleteEmployee = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
     },
+  });
+};
+
+// Get employee attendance by month
+export const useEmployeeAttendance = (id: number, month: string, enabled = true) => {
+  return useQuery<EmployeeAttendanceResponse>({
+    queryKey: ['employees', id, 'attendance', month],
+    queryFn: async () => {
+      return await employeesApi.getAttendance(id, month);
+    },
+    enabled: enabled && !!id && !!month,
   });
 };

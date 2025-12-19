@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { useFilteredEmployees } from '@/hooks/useEmployees';
+import { useFilteredEmployees } from '@/app/dashboard/employees/hooks/useEmployees';
 import { Employee, EmployeeFilters } from '@/schemas/employee.schema';
 import EmployeeHeader from './components/EmployeeHeader';
 import { StatCard } from './components/StatCard';
