@@ -7,7 +7,7 @@ import {
   employeeSchema,
   type EmployeeFormData,
 } from '@/schemas/employee.schema';
-import { useCreateEmployee } from '@/hooks/useEmployees';
+import { useCreateEmployee } from '@/app/dashboard/employees/hooks/useEmployees';
 import EmployeeFormHeader from './EmployeeFormHeader';
 import EmployeeFormFields from './EmployeeFormFields';
 import { useRouter } from 'next/navigation';
@@ -32,6 +32,7 @@ export default function EmployeesPage() {
   const onSubmit = (data: EmployeeFormData) => {
     createEmployee.mutate(data, {
       onSuccess: () => {
+        toast.success('تم إضافة الموظف بنجاح');
         reset();
         router.push('/dashboard/employees');
       },
@@ -52,10 +53,14 @@ export default function EmployeesPage() {
             message,
           });
 
+          // Show toast for duplicate error
+          toast.error(message);
           return;
         }
 
-        toast.error('حدث خطأ أثناء إضافة الموظف');
+        // Other errors are already handled by the mutation's onError
+        // But we'll also show it here to be safe
+        toast.error(message);
       },
     });
   };

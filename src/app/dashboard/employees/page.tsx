@@ -2,11 +2,11 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { useFilteredEmployees } from '@/hooks/useEmployees';
+import { useFilteredEmployees } from '@/app/dashboard/employees/hooks/useEmployees';
 import { Employee, EmployeeFilters } from '@/schemas/employee.schema';
 import EmployeeHeader from './components/EmployeeHeader';
 import { StatCard } from './components/StatCard';
-import { STAT_CARDS } from '@/constants/employees/statCard';
+import { STAT_CARDS } from '@/app/dashboard/employees/constants/statCard';
 import { EmployeeSearchFilter } from './components/EmployeeSearchFilter';
 import { Else, If, Then } from 'react-if';
 import { EmployeeCard } from './components/EmployeeCard';
@@ -31,16 +31,12 @@ export default function AllEmployees() {
       limit: limit,
     };
 
-    // Add search query to appropriate field (name, phoneNumber, or email)
     if (searchQuery.trim()) {
-      // Try to detect if it's a phone number (only digits)
       if (/^\d+$/.test(searchQuery.trim())) {
         filterObj.phoneNumber = searchQuery.trim();
       } else if (searchQuery.includes('@')) {
-        // Email contains @
         filterObj.email = searchQuery.trim();
       } else {
-        // Default to name search
         filterObj.name = searchQuery.trim();
       }
     }
@@ -76,7 +72,6 @@ export default function AllEmployees() {
   const employees = paginatedResponse?.data || [];
   const totalItems = paginatedResponse?.totalItems || 0;
 
-  // Reset to page 1 when filters change (except page changes)
   useEffect(() => {
     setCurrentPage(1);
   }, [
@@ -87,12 +82,9 @@ export default function AllEmployees() {
   ]);
 
   const getCountByAccessLevel = (accessLevel: string) => {
-    // This would need to be updated to use the API if needed
-    // For now, we'll return the totalItems as a fallback
     if (accessLevel === 'TOTAL') {
       return totalItems;
     }
-    // We could fetch counts per access level if needed
     return 0;
   };
 
@@ -132,7 +124,6 @@ export default function AllEmployees() {
         </Swiper>
       </div>
 
-      {/* Desktop: Grid */}
       <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-6">
         {STAT_CARDS.map((card) => (
           <StatCard

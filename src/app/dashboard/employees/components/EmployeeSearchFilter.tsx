@@ -2,19 +2,7 @@
 
 import React, { useState } from 'react';
 import { Search, SlidersVertical, X } from 'lucide-react';
-
-interface EmployeeSearchFilterProps {
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-  selectedAccessLevel: string;
-  onAccessLevelChange: (level: string) => void;
-  selectedDepartment: string;
-  onDepartmentChange: (department: string) => void;
-  selectedPerformance: string;
-  onPerformanceChange: (performance: string) => void;
-  placeholder?: string;
-  className?: string;
-}
+import { EmployeeSearchFilterProps } from '../types/filter.types';
 
 const ACCESS_LEVEL_OPTIONS = [
   { value: 'ALL', label: 'جميع المستويات' },
@@ -75,7 +63,7 @@ export function EmployeeSearchFilter({
           <input
             type="text"
             placeholder={placeholder}
-            className="flex-1 border-none bg-transparent focus:outline-none  focus:ring-0 text-gray-700 text-lg font-semibold placeholder:text-gray-400 text-right"
+            className="flex-1 border-none bg-transparent focus:outline-none  focus:ring-0 text-gray-700 text-[12px] sm:text-lg font-semibold placeholder:text-gray-400 text-right"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
           />

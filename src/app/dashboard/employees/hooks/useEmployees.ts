@@ -1,12 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
-import { employeesApi } from '@/lib/api/employees.api';
+import { toast } from 'react-toastify';
+import { employeesApi } from '@/app/dashboard/employees/api/employees.api';
 import {
   Employee,
   EmployeeFormData,
   EmployeeFilters,
   PaginatedEmployeesResponse,
 } from '@/schemas/employee.schema';
+import { EmployeeAttendanceResponse } from '../types/attendance.types';
 
 // Fetch all employees (legacy - use useFilteredEmployees instead)
 export const useEmployees = () => {
@@ -38,6 +39,11 @@ export const useCreateEmployee = () => {
     onSuccess: () => {
       toast.success('تم إضافة الموظف بنجاح');
       queryClient.invalidateQueries({ queryKey: ['employees'] });
+    },
+    onError: (error: any) => {
+      const message =
+        error?.response?.data?.message || 'حدث خطأ أثناء إضافة الموظف';
+      toast.error(message);
     },
   });
 };
@@ -150,5 +156,20 @@ export const useDeleteEmployee = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
     },
+  });
+};
+
+// Get employee attendance by month
+export const useEmployeeAttendance = (
+  id: number,
+  month: string,
+  enabled = true
+) => {
+  return useQuery<EmployeeAttendanceResponse>({
+    queryKey: ['employees', id, 'attendance', month],
+    queryFn: async () => {
+      return await employeesApi.getAttendance(id, month);
+    },
+    enabled: enabled && !!id && !!month,
   });
 };
