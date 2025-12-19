@@ -1,5 +1,4 @@
 import React from 'react';
-import { EmployeeFormData } from '@/schemas/employee.schema';
 import Input from '@/components/ui/Input';
 import Dropdown from '@/components/ui/Dropdown';
 import SearchableSelect from '@/app/dashboard/orders/allOrders/components/FilterSection/SearchableSelect';
@@ -18,7 +17,7 @@ import {
 import {
   ACCESS_LEVEL_OPTIONS,
   DEPARTMENT_OPTIONS,
-} from '@/constants/employees/employeesFormOptions';
+} from '@/app/dashboard/employees/constants/employeesFormOptions';
 import { EmployeeFormFieldsProps } from '../types/employee.types';
 
 export default function EmployeeFormFields({
