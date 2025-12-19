@@ -1,15 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import {
-  employeesApi,
-  EmployeeAttendanceResponse,
-} from '@/app/dashboard/employees/api/employees.api';
+import { employeesApi } from '@/app/dashboard/employees/api/employees.api';
 import {
   Employee,
   EmployeeFormData,
   EmployeeFilters,
   PaginatedEmployeesResponse,
 } from '@/schemas/employee.schema';
+import { EmployeeAttendanceResponse } from '../types/attendance.types';
 
 // Fetch all employees (legacy - use useFilteredEmployees instead)
 export const useEmployees = () => {

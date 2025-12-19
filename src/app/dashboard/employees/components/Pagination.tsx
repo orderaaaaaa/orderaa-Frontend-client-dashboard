@@ -2,15 +2,7 @@
 
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-interface PaginationProps {
-  currentPage: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-  onPageChange: (page: number) => void;
-  className?: string;
-}
+import { PaginationProps } from '../types/pagination.types';
 
 export function Pagination({
   currentPage,

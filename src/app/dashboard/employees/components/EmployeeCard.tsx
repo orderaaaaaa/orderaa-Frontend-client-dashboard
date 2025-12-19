@@ -17,10 +17,7 @@ import {
   getDepartmentLabel,
 } from '../utils/employeeMappers';
 import { AttendanceModal } from './AttendanceModal';
-
-interface EmployeeCardProps {
-  employee: Employee;
-}
+import { EmployeeCardProps } from '../types/employee.types';
 
 export function EmployeeCard({ employee }: EmployeeCardProps) {
   const updateStatusMutation = useUpdateEmployeeStatus();

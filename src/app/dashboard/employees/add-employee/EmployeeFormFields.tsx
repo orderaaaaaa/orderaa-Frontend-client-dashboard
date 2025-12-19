@@ -1,10 +1,4 @@
 import React from 'react';
-import {
-  UseFormRegister,
-  FieldErrors,
-  UseFormWatch,
-  UseFormSetValue,
-} from 'react-hook-form';
 import { EmployeeFormData } from '@/schemas/employee.schema';
 import Input from '@/components/ui/Input';
 import Dropdown from '@/components/ui/Dropdown';
@@ -25,13 +19,7 @@ import {
   ACCESS_LEVEL_OPTIONS,
   DEPARTMENT_OPTIONS,
 } from '@/constants/employees/employeesFormOptions';
-
-type EmployeeFormFieldsProps = {
-  register: UseFormRegister<EmployeeFormData>;
-  errors: FieldErrors<EmployeeFormData>;
-  watch: UseFormWatch<EmployeeFormData>;
-  setValue: UseFormSetValue<EmployeeFormData>;
-};
+import { EmployeeFormFieldsProps } from '../types/employee.types';
 
 export default function EmployeeFormFields({
   register,

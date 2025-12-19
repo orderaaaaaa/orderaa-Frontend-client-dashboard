@@ -5,6 +5,7 @@ import {
   PaginatedEmployeesResponse,
   EmployeeFilters,
 } from '@/schemas/employee.schema';
+import { EmployeeAttendanceResponse } from '../types/attendance.types';
 
 export const employeesApi = {
   getAll: () => Http.get<Employee[]>('/employees').then((res) => res.data),
@@ -65,17 +66,3 @@ export const employeesApi = {
     ).then((res) => res.data);
   },
 };
-
-export interface EmployeeAttendanceResponse {
-  employeeId: number;
-  fullName: string;
-  attendanceDates: string[];
-  leaveDates: string[];
-  month: string;
-  statistics: {
-    totalWorkingDays: number;
-    attendedDays: number;
-    leaveDays: number;
-    attendancePercentage: number;
-  };
-}

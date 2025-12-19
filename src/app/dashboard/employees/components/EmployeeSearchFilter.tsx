@@ -2,19 +2,7 @@
 
 import React, { useState } from 'react';
 import { Search, SlidersVertical, X } from 'lucide-react';
-
-interface EmployeeSearchFilterProps {
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-  selectedAccessLevel: string;
-  onAccessLevelChange: (level: string) => void;
-  selectedDepartment: string;
-  onDepartmentChange: (department: string) => void;
-  selectedPerformance: string;
-  onPerformanceChange: (performance: string) => void;
-  placeholder?: string;
-  className?: string;
-}
+import { EmployeeSearchFilterProps } from '../types/filter.types';
 
 const ACCESS_LEVEL_OPTIONS = [
   { value: 'ALL', label: 'جميع المستويات' },

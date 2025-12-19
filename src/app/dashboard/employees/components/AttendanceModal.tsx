@@ -6,14 +6,7 @@ import { useEmployeeAttendance } from '../hooks/useEmployees';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { CalendarClock, CalendarDays, Loader2 } from 'lucide-react';
-
-interface AttendanceModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  employeeId: number;
-  employeeName: string;
-  type: 'attendance' | 'leave';
-}
+import { AttendanceModalProps } from '../types/attendance.types';
 
 export function AttendanceModal({
   isOpen,
