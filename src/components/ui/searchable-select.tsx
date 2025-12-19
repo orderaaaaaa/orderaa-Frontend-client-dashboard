@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { CheckIcon, ChevronDownIcon, Search, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useDebounce } from '@/utils/debounce';
 import {
   Popover,
   PopoverContent,
@@ -24,22 +25,6 @@ interface SearchableSelectProps {
   loading?: boolean;
   searchThreshold?: number; // Show search when options exceed this number (default: 5)
   debounceMs?: number; // Debounce delay in milliseconds (default: 300)
-}
-
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
 }
 
 export function SearchableSelect({

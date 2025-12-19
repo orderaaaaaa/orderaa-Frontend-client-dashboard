@@ -3,6 +3,7 @@ import { OrderStatus, FilterOrdersDto } from '@/types/orders';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { useFetchOrdersForSearch } from '@/services/orders';
 import { TimePeriod, calculateDateRangeFromPeriod, formatDateToISO } from '@/utils/dateRangeUtils';
+import { useDebounce } from '@/utils/debounce';
 
 interface UseOrderDetailsNavigationOptions {
   initialOrderId: number;
@@ -97,13 +98,12 @@ export function useOrderDetailsNavigation({
   const [toDate, setToDateInternal] = useState<Date | null>(null);
   const [timePeriod, setTimePeriodInternal] = useState<TimePeriod>('');
   const [formFilters, setFormFilters] = useState<OrderFiltersFormData | null>(null);
-  const [debouncedFormFilters, setDebouncedFormFilters] = useState<OrderFiltersFormData | null>(null);
+
+  // Debounce form filters using utility hook
+  const debouncedFormFilters = useDebounce(formFilters, 500);
 
   // Trigger counter for re-fetching even when values don't change
   const [triggerVersion, setTriggerVersion] = useState(0);
-
-  // Debounce timer ref
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Set mounted flag after first render
   useEffect(() => {
@@ -154,31 +154,12 @@ export function useOrderDetailsNavigation({
     setFormFilters(data);
   }, []);
 
-  // Debounce form filter changes (500ms delay)
+  // Mark user-initiated when debounced filters change
   useEffect(() => {
-    // Clear existing timer
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-
-    // Don't debounce if formFilters is null (initial state)
-    if (formFilters === null) {
-      return;
-    }
-
-    // Set new debounce timer
-    debounceTimerRef.current = setTimeout(() => {
+    if (debouncedFormFilters !== null) {
       isUserInitiated.current = true;
-      setDebouncedFormFilters(formFilters);
-    }, 500);
-
-    // Cleanup on unmount or when formFilters changes
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, [formFilters]);
+    }
+  }, [debouncedFormFilters]);
 
   // Effect to fetch orders and determine navigation target
   useEffect(() => {

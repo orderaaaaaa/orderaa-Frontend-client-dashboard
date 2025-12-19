@@ -1,6 +1,7 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { OrderFilters, OrderStatus, FilterOrdersDto } from '@/types/orders';
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import { OrderFilters, FilterOrdersDto } from '@/types/orders';
 import { useOrdersStore } from '@/store/ordersStore';
+import { useDebounce } from '@/utils/debounce';
 
 // Helper to format date to ISO string
 const formatDateToISO = (date: Date): string => {
@@ -32,9 +33,8 @@ export function useUnifiedFilters() {
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(10);
 
-    // Debounced filters for API calls
-    const [debouncedFilters, setDebouncedFilters] = useState<OrderFilters>(localFilters);
-    const debounceTimerRef = useRef<NodeJS.Timeout>();
+    // Debounced filters for API calls using utility hook
+    const debouncedFilters = useDebounce(localFilters, 500);
 
     // Date range setters - clear executionDate when date range is set
     const setFromDate = useCallback((date: Date | null) => {
@@ -51,23 +51,10 @@ export function useUnifiedFilters() {
         }
     }, []);
 
-    // Debounce filter changes
+    // Reset to page 1 when debounced filters change
     useEffect(() => {
-        if (debounceTimerRef.current) {
-            clearTimeout(debounceTimerRef.current);
-        }
-
-        debounceTimerRef.current = setTimeout(() => {
-            setDebouncedFilters(localFilters);
-            setPage(1); // Reset to page 1 on filter change
-        }, 500); // 500ms debounce
-
-        return () => {
-            if (debounceTimerRef.current) {
-                clearTimeout(debounceTimerRef.current);
-            }
-        };
-    }, [localFilters]);
+        setPage(1);
+    }, [debouncedFilters]);
 
     // Clear date range when executionDate is set
     useEffect(() => {

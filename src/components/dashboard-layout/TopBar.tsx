@@ -8,6 +8,7 @@ import Input from '../ui/Input';
 import { UserMenu } from './UserMenu';
 import { UserMenuKey } from '@/hooks/useSidebar';
 import { useAuthStore } from '@/store/authStore';
+import { useDebounce } from '@/utils/debounce';
 import clsx from 'clsx';
 
 interface TopBarProps {
@@ -30,6 +31,16 @@ export function TopBar({
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const authUser = useAuthStore((state) => state.user);
+
+  // Debounce search query for auto-search
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+  // Auto-search when debounced query changes
+  useEffect(() => {
+    if (debouncedSearchQuery.trim()) {
+      onSearch(debouncedSearchQuery.trim());
+    }
+  }, [debouncedSearchQuery, onSearch]);
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
