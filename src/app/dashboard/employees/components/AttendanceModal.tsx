@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import { useEmployeeAttendance } from '../hooks/useEmployees';
 import { format } from 'date-fns';
@@ -25,9 +25,9 @@ export function AttendanceModal({
     isOpen
   );
 
-  const dates = type === 'attendance' ? data?.attendanceDates : data?.leaveDates;
-  const title =
-    type === 'attendance' ? 'أيام العمل' : 'أيام الإجازة';
+  const dates =
+    type === 'attendance' ? data?.attendanceDates : data?.leaveDates;
+  const title = type === 'attendance' ? 'أيام العمل' : 'أيام الإجازة';
   const emptyMessage =
     type === 'attendance'
       ? 'لا توجد أيام عمل مسجلة لهذا الشهر'
@@ -78,7 +78,9 @@ export function AttendanceModal({
           <div className="bg-[#f2eefd] rounded-xl p-4 mb-4 border-2 border-[#5D24E129]">
             <div className="grid grid-cols-2 gap-4 text-center">
               <div>
-                <div className="text-sm text-gray-600 mb-1">إجمالي أيام العمل</div>
+                <div className="text-sm text-gray-600 mb-1">
+                  إجمالي أيام العمل
+                </div>
                 <div className="text-2xl font-bold text-gray-900">
                   {data.statistics.totalWorkingDays}
                 </div>
@@ -158,4 +160,3 @@ export function AttendanceModal({
     </BaseModal>
   );
 }
-

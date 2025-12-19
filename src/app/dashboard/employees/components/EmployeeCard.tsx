@@ -11,7 +11,6 @@ import {
   Mail,
 } from 'lucide-react';
 import { useUpdateEmployeeStatus } from '@/app/dashboard/employees/hooks/useEmployees';
-import { Employee } from '@/schemas/employee.schema';
 import {
   getAccessLevelLabel,
   getDepartmentLabel,
