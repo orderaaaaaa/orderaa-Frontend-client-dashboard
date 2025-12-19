@@ -9,6 +9,14 @@ export interface StatCardConfig {
 
 export const STAT_CARDS: StatCardConfig[] = [
   {
+    title: 'إجمالي الموظفين',
+    accessLevel: 'TOTAL',
+    borderColor: 'border-[#2489E114]',
+    iconBgColor: 'bg-[#edf6fd]',
+    iconPath: '/Icons/total-employees.svg',
+    alt: 'Total Employees icon',
+  },
+  {
     title: 'موظف',
     accessLevel: 'EMPLOYEE',
     borderColor: 'border-[#C9E9D2]',
@@ -38,13 +46,5 @@ export const STAT_CARDS: StatCardConfig[] = [
     iconBgColor: 'bg-[#f2edfd]',
     iconPath: '/Icons/super-admin.svg',
     alt: 'Super Admin icon',
-  },
-  {
-    title: 'إجمالي الموظفين',
-    accessLevel: 'TOTAL',
-    borderColor: 'border-[#2489E114]',
-    iconBgColor: 'bg-[#edf6fd]',
-    iconPath: '/Icons/total-employees.svg',
-    alt: 'Total Employees icon',
   },
 ];

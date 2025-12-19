@@ -32,6 +32,7 @@ export default function EmployeesPage() {
   const onSubmit = (data: EmployeeFormData) => {
     createEmployee.mutate(data, {
       onSuccess: () => {
+        toast.success('تم إضافة الموظف بنجاح');
         reset();
         router.push('/dashboard/employees');
       },
@@ -52,10 +53,14 @@ export default function EmployeesPage() {
             message,
           });
 
+          // Show toast for duplicate error
+          toast.error(message);
           return;
         }
 
-        toast.error('حدث خطأ أثناء إضافة الموظف');
+        // Other errors are already handled by the mutation's onError
+        // But we'll also show it here to be safe
+        toast.error(message);
       },
     });
   };

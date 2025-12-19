@@ -6,7 +6,7 @@ import { useFilteredEmployees } from '@/app/dashboard/employees/hooks/useEmploye
 import { Employee, EmployeeFilters } from '@/schemas/employee.schema';
 import EmployeeHeader from './components/EmployeeHeader';
 import { StatCard } from './components/StatCard';
-import { STAT_CARDS } from '@/constants/employees/statCard';
+import { STAT_CARDS } from '@/app/dashboard/employees/constants/statCard';
 import { EmployeeSearchFilter } from './components/EmployeeSearchFilter';
 import { Else, If, Then } from 'react-if';
 import { EmployeeCard } from './components/EmployeeCard';
