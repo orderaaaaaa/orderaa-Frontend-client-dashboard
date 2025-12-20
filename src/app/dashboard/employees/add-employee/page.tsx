@@ -21,7 +21,6 @@ export default function EmployeesPage() {
     reset,
     watch,
     setValue,
-    setError,
   } = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeSchema),
   });
@@ -35,32 +34,6 @@ export default function EmployeesPage() {
         toast.success('تم إضافة الموظف بنجاح');
         reset();
         router.push('/dashboard/employees');
-      },
-      onError: (error: any) => {
-        const status = error?.response?.status;
-        const message =
-          error?.response?.data?.message ||
-          'رقم الهاتف أو البريد الإلكتروني مستخدم بالفعل';
-
-        if (status === 409) {
-          setError('phoneNumber', {
-            type: 'manual',
-            message,
-          });
-
-          setError('email', {
-            type: 'manual',
-            message,
-          });
-
-          // Show toast for duplicate error
-          toast.error(message);
-          return;
-        }
-
-        // Other errors are already handled by the mutation's onError
-        // But we'll also show it here to be safe
-        toast.error(message);
       },
     });
   };

@@ -6,3 +6,12 @@ export interface StatCardProps {
   alt?: string;
   borderColor?: string;
 }
+
+export interface StatCardConfig {
+  title: string;
+  accessLevel: string;
+  borderColor?: string;
+  iconBgColor: string;
+  iconPath: string;
+  alt?: string; // Optional alt text
+}

@@ -13,55 +13,74 @@ import { EmployeeCard } from './components/EmployeeCard';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination as CustomPagination } from './components/Pagination';
 import { Pagination as SwiperPagination } from 'swiper/modules';
+import { FILTER_ALL } from './constants/employeesFilterOptions';
 import 'swiper/css';
 import 'swiper/css/pagination';
 
+const limit = 10;
+
+type FilterSelections = {
+  accessLevel: string;
+  department: string;
+  performance: string;
+};
+
 export default function AllEmployees() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedAccessLevel, setSelectedAccessLevel] = useState<string>('ALL');
-  const [selectedDepartment, setSelectedDepartment] = useState<string>('ALL');
-  const [selectedPerformance, setSelectedPerformance] = useState<string>('ALL');
+  //TODO:search logic rerender problem from parent to child component
+
+  const [filterSelections, setFilterSelections] = useState<FilterSelections>({
+    accessLevel: FILTER_ALL,
+    department: FILTER_ALL,
+    performance: FILTER_ALL,
+  });
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit] = useState(10);
+
+  // Wrapper functions to maintain API compatibility with child component
+  const setSelectedAccessLevel = (level: string) => {
+    setFilterSelections((prev) => ({ ...prev, accessLevel: level }));
+  };
+
+  const setSelectedDepartment = (department: string) => {
+    setFilterSelections((prev) => ({ ...prev, department }));
+  };
+
+  const setSelectedPerformance = (performance: string) => {
+    setFilterSelections((prev) => ({ ...prev, performance }));
+  };
 
   // Build filters object
   const filters: EmployeeFilters = useMemo(() => {
+    const query = searchQuery.trim();
+
     const filterObj: EmployeeFilters = {
       page: currentPage,
-      limit: limit,
+      limit,
+      ...(filterSelections.accessLevel !== FILTER_ALL && {
+        accessLevel: filterSelections.accessLevel,
+      }),
+      ...(filterSelections.department !== FILTER_ALL && {
+        department: filterSelections.department,
+      }),
+      ...(filterSelections.performance !== FILTER_ALL && {
+        performance: filterSelections.performance as 'LOW' | 'HIGH',
+      }),
     };
 
-    if (searchQuery.trim()) {
-      if (/^\d+$/.test(searchQuery.trim())) {
-        filterObj.phoneNumber = searchQuery.trim();
-      } else if (searchQuery.includes('@')) {
-        filterObj.email = searchQuery.trim();
-      } else {
-        filterObj.name = searchQuery.trim();
-      }
+    if (!query) {
+      return filterObj;
     }
 
-    if (selectedAccessLevel !== 'ALL') {
-      filterObj.accessLevel = selectedAccessLevel;
-    }
-
-    if (selectedDepartment !== 'ALL') {
-      filterObj.department = selectedDepartment;
-    }
-
-    if (selectedPerformance !== 'ALL') {
-      filterObj.performance = selectedPerformance as 'LOW' | 'HIGH';
+    if (/^\d+$/.test(query)) {
+      filterObj.phoneNumber = query;
+    } else if (query.includes('@')) {
+      filterObj.email = query;
+    } else {
+      filterObj.name = query;
     }
 
     return filterObj;
-  }, [
-    searchQuery,
-    selectedAccessLevel,
-    selectedDepartment,
-    selectedPerformance,
-    currentPage,
-    limit,
-  ]);
+  }, [searchQuery, filterSelections, currentPage]);
 
   const {
     data: paginatedResponse,
@@ -74,12 +93,7 @@ export default function AllEmployees() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [
-    searchQuery,
-    selectedAccessLevel,
-    selectedDepartment,
-    selectedPerformance,
-  ]);
+  }, [searchQuery, filterSelections]);
 
   const getCountByAccessLevel = (accessLevel: string) => {
     if (accessLevel === 'TOTAL') {
@@ -141,11 +155,11 @@ export default function AllEmployees() {
       <EmployeeSearchFilter
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        selectedAccessLevel={selectedAccessLevel}
+        selectedAccessLevel={filterSelections.accessLevel}
         onAccessLevelChange={setSelectedAccessLevel}
-        selectedDepartment={selectedDepartment}
+        selectedDepartment={filterSelections.department}
         onDepartmentChange={setSelectedDepartment}
-        selectedPerformance={selectedPerformance}
+        selectedPerformance={filterSelections.performance}
         onPerformanceChange={setSelectedPerformance}
       />
 
@@ -157,7 +171,8 @@ export default function AllEmployees() {
         </Then>
         <Else>
           <div className="mt-10">
-            <If condition={employees.length === 0}>
+            <If condition={employees.length < 0}>
+              {' '}
               <Then>
                 <div className="text-center py-8 bg-gray-50 rounded-lg">
                   <p className="text-gray-500">لم يتم العثور على موظفين.</p>
