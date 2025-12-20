@@ -1,8 +1,9 @@
 // components/StatCard.tsx
+import React, { memo } from 'react';
 import { SvgIcon } from '@/components/ui/svg-icon'; // Adjust path as needed
 import { StatCardProps } from '../types/stat.types';
 
-export const StatCard = ({
+export const StatCard = memo(({
   title,
   count,
   iconBgColor,
@@ -31,4 +32,6 @@ export const StatCard = ({
       </div>
     </div>
   );
-};
+});
+
+StatCard.displayName = 'StatCard';

@@ -1,11 +1,4 @@
-export interface StatCardConfig {
-  title: string;
-  accessLevel: string;
-  borderColor?: string;
-  iconBgColor: string;
-  iconPath: string;
-  alt?: string; // Optional alt text
-}
+import { StatCardConfig } from '../types/stat.types';
 
 export const STAT_CARDS: StatCardConfig[] = [
   {
