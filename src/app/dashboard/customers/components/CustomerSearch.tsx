@@ -30,6 +30,7 @@ export default function CustomerHeader({
   const [clientStatus, setClientStatus] = useState('');
   const [orderStatus, setOrderStatus] = useState('');
   const [activityType, setActivityType] = useState('');
+  const [timePeriodChange, setTimePeriodChange] = useState('');
   const [allCustomers, setAllCustomers] = useState('');
   const [code, setCode] = useState('');
 

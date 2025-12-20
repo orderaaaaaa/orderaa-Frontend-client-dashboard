@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import CustomerHeader from './components/CustomerHeader';
 import CustomerStates from './components/CustomerStates';
 import CustomerSearch from './components/CustomerSearch';
+import CustomerTable from './components/CustomerTable';
 
 export default function CustomersPage() {
   const [fromDate, setFromDate] = useState<Date | null>(null);
@@ -29,6 +30,7 @@ export default function CustomersPage() {
         timePeriod={timePeriod}
         toDate={toDate}
       />
+      <CustomerTable />
     </div>
   );
 }
