@@ -95,93 +95,94 @@ export function EmployeeSearchFilter({
               onClick={() => setShowFilterDropdown(false)}
             />
 
-            <div className="absolute left-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-20 w-[280px] max-h-[500px] overflow-y-auto">
+            <div className="absolute left-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-[500px] overflow-y-auto">
               {/* Header */}
               <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">الفلاتر</h3>
                 {hasActiveFilters && (
                   <button
                     onClick={handleClearAllFilters}
-                    className="text-sm text-[#5d24e1] hover:text-[#4a1db8] flex items-center gap-1"
+                    className="text-sm bg-[#5d24e1] hover:bg-[#6b33ee] p-2 rounded-lg font-semibold text-white cursor-pointer flex items-center gap-1"
                   >
                     <X size={16} />
                     مسح الكل
                   </button>
                 )}
               </div>
-
-              {/* Access Level Filter */}
-              <div className="p-4 border-b border-gray-100">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  مستوى الصلاحية
-                </label>
-                <div className="space-y-1">
-                  {ACCESS_LEVEL_OPTIONS.map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => {
-                        setAccessLevel(option.value);
-                      }}
-                      className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${
-                        selectedAccessLevel === option.value
-                          ? 'bg-[#5d24e1] text-white font-medium'
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
+              <div className="flex">
+                {/* Access Level Filter */}
+                <div className="p-4 border-b border-gray-100">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    مستوى الصلاحية
+                  </label>
+                  <div className="space-y-1">
+                    {ACCESS_LEVEL_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => {
+                          setAccessLevel(option.value);
+                        }}
+                        className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${
+                          selectedAccessLevel === option.value
+                            ? 'bg-[#5d24e1] text-white font-medium'
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Department Filter */}
-              <div className="p-4 border-b border-gray-100">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  القسم
-                </label>
-                <div className="space-y-1">
-                  {DEPARTMENT_OPTIONS.map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => {
-                        setDepartment(option.value);
-                      }}
-                      className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${
-                        selectedDepartment === option.value
-                          ? 'bg-[#5d24e1] text-white font-medium'
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
+                {/* Department Filter */}
+                <div className="p-4 border-b border-gray-100">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    القسم
+                  </label>
+                  <div className="space-y-1">
+                    {DEPARTMENT_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => {
+                          setDepartment(option.value);
+                        }}
+                        className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${
+                          selectedDepartment === option.value
+                            ? 'bg-[#5d24e1] text-white font-medium'
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Performance Filter */}
-              <div className="p-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  مستوى الأداء
-                </label>
-                <div className="space-y-1">
-                  {PERFORMANCE_OPTIONS.map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => {
-                        setPerformance(option.value);
-                      }}
-                      className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${
-                        selectedPerformance === option.value
-                          ? 'bg-[#5d24e1] text-white font-medium'
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
+                {/* Performance Filter */}
+                <div className="p-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    مستوى الأداء
+                  </label>
+                  <div className="space-y-1">
+                    {PERFORMANCE_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => {
+                          setPerformance(option.value);
+                        }}
+                        className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${
+                          selectedPerformance === option.value
+                            ? 'bg-[#5d24e1] text-white font-medium'
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
