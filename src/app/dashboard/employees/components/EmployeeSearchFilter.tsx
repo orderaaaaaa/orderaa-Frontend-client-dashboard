@@ -1,37 +1,61 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, SlidersVertical, X } from 'lucide-react';
-import { EmployeeSearchFilterProps } from '../types/filter.types';
 import {
   ACCESS_LEVEL_OPTIONS,
   DEPARTMENT_OPTIONS,
   PERFORMANCE_OPTIONS,
+  FILTER_ALL,
 } from '../constants/employeesFilterOptions';
+import { useDebounce } from '@/utils/debounce';
+import { useEmployeesStore } from '@/store/employeesStore';
+
+interface EmployeeSearchFilterProps {
+  placeholder?: string;
+  className?: string;
+}
 
 export function EmployeeSearchFilter({
-  searchQuery,
-  onSearchChange,
-  selectedAccessLevel,
-  onAccessLevelChange,
-  selectedDepartment,
-  onDepartmentChange,
-  selectedPerformance,
-  onPerformanceChange,
   placeholder = 'ابحث عن موظف بالاسم، الهاتف، أو البريد الإلكتروني',
   className = '',
 }: EmployeeSearchFilterProps) {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
+
+  const selectedAccessLevel = useEmployeesStore(
+    (state) => state.filterSelections.accessLevel
+  );
+  const selectedDepartment = useEmployeesStore(
+    (state) => state.filterSelections.department
+  );
+  const selectedPerformance = useEmployeesStore(
+    (state) => state.filterSelections.performance
+  );
+
+  const setDebouncedSearchQuery = useEmployeesStore(
+    (state) => state.setDebouncedSearchQuery
+  );
+  const setAccessLevel = useEmployeesStore((state) => state.setAccessLevel);
+  const setDepartment = useEmployeesStore((state) => state.setDepartment);
+  const setPerformance = useEmployeesStore((state) => state.setPerformance);
+
+  const debouncedSearchQuery = useDebounce(searchInput, 500);
+
+  useEffect(() => {
+    setDebouncedSearchQuery(debouncedSearchQuery);
+  }, [debouncedSearchQuery, setDebouncedSearchQuery]);
 
   const hasActiveFilters =
-    selectedAccessLevel !== 'ALL' ||
-    selectedDepartment !== 'ALL' ||
-    selectedPerformance !== 'ALL';
+    selectedAccessLevel !== FILTER_ALL ||
+    selectedDepartment !== FILTER_ALL ||
+    selectedPerformance !== FILTER_ALL;
 
-  const clearAllFilters = () => {
-    onAccessLevelChange('ALL');
-    onDepartmentChange('ALL');
-    onPerformanceChange('ALL');
+  const clearAllFilters = useEmployeesStore((state) => state.clearFilters);
+
+  const handleClearAllFilters = () => {
+    clearAllFilters();
+    setSearchInput('');
   };
 
   return (
@@ -48,8 +72,8 @@ export function EmployeeSearchFilter({
             type="text"
             placeholder={placeholder}
             className="flex-1 border-none bg-transparent focus:outline-none  focus:ring-0 text-gray-700 text-[12px] sm:text-lg font-semibold placeholder:text-gray-400 text-right"
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
           />
         </div>
 
@@ -77,7 +101,7 @@ export function EmployeeSearchFilter({
                 <h3 className="text-lg font-semibold text-gray-900">الفلاتر</h3>
                 {hasActiveFilters && (
                   <button
-                    onClick={clearAllFilters}
+                    onClick={handleClearAllFilters}
                     className="text-sm text-[#5d24e1] hover:text-[#4a1db8] flex items-center gap-1"
                   >
                     <X size={16} />
@@ -97,7 +121,7 @@ export function EmployeeSearchFilter({
                       key={option.value}
                       type="button"
                       onClick={() => {
-                        onAccessLevelChange(option.value);
+                        setAccessLevel(option.value);
                       }}
                       className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${
                         selectedAccessLevel === option.value
@@ -122,7 +146,7 @@ export function EmployeeSearchFilter({
                       key={option.value}
                       type="button"
                       onClick={() => {
-                        onDepartmentChange(option.value);
+                        setDepartment(option.value);
                       }}
                       className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${
                         selectedDepartment === option.value
@@ -147,7 +171,7 @@ export function EmployeeSearchFilter({
                       key={option.value}
                       type="button"
                       onClick={() => {
-                        onPerformanceChange(option.value);
+                        setPerformance(option.value);
                       }}
                       className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${
                         selectedPerformance === option.value

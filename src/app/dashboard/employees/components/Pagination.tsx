@@ -30,7 +30,6 @@ export function Pagination({
     }
   };
 
-  // Generate page numbers to display
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
     const maxVisible = 5;
@@ -142,5 +141,3 @@ export function Pagination({
     </div>
   );
 }
-
-

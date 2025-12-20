@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import {
   User,
   Phone,
@@ -18,7 +18,9 @@ import {
 import { AttendanceModal } from './AttendanceModal';
 import { EmployeeCardProps } from '../types/employee.types';
 
-export function EmployeeCard({ employee }: EmployeeCardProps) {
+export const EmployeeCard = memo(function EmployeeCard({
+  employee,
+}: EmployeeCardProps) {
   const updateStatusMutation = useUpdateEmployeeStatus();
   const [attendanceModalOpen, setAttendanceModalOpen] = useState(false);
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
@@ -168,7 +170,7 @@ export function EmployeeCard({ employee }: EmployeeCardProps) {
           </a>
         </div>
 
-        {/* WhatsApp (full width second row) */}
+        {/* WhatsApp */}
         <a
           href={`https://wa.me/+2${normalizedPhone}`}
           target="_blank"
@@ -197,4 +199,4 @@ export function EmployeeCard({ employee }: EmployeeCardProps) {
       />
     </div>
   );
-}
+});
