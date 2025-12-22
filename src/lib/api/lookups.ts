@@ -7,13 +7,22 @@ export async function getCategories() {
 }
 
 export async function getGovernorates() {
-  const { data } = await api.get('/lookups/governorates?lang=ar');
+  const { data } = await api.get('/lookups/governorates', {
+    headers: {
+      'Accept-Language': 'ar',
+    },
+  });
   return data;
 }
 
 export async function getCities(governorateId: string) {
   const { data } = await api.get(
-    `/locations/governorates/${governorateId}/cities?lang=ar`
+    `/lookups/governorates/${governorateId}/cities`,
+    {
+      headers: {
+        'Accept-Language': 'ar',
+      },
+    }
   );
   return data;
 }

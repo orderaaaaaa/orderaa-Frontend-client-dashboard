@@ -21,7 +21,7 @@ export const personalDataSchema = z.object({
       message: 'رقم الهاتف يجب أن يكون 11 رقم ويبدأ بـ 01',
     }),
   governorate: z.string().optional(),
+  city: z.string().optional(),
 });
 
 export type PersonalDataFormData = z.infer<typeof personalDataSchema>;
-

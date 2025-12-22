@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -11,14 +11,17 @@ import Input from '@/components/ui/Input';
 import PasswordStrengthIndicator from '@/components/ui/PasswordStrengthIndicator';
 import { LiaLockSolid } from 'react-icons/lia';
 import { FaShieldAlt } from 'react-icons/fa';
-import api from '@/lib/api';
+import useChangePassword from '../hooks/useChangePassword';
 
 export default function AccountSecurity() {
+  const { changePassword, isLoading, isSuccess } = useChangePassword();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
+    reset,
   } = useForm<AccountSecurityFormData>({
     resolver: zodResolver(accountSecuritySchema),
     defaultValues: {
@@ -32,25 +35,21 @@ export default function AccountSecurity() {
   const oldPassword = watch('oldPassword');
   const confirmPassword = watch('confirmPassword');
 
-  // Check if all fields have values
   const hasAllValues = Boolean(
     oldPassword?.trim() && password?.trim() && confirmPassword?.trim()
   );
 
   const onSubmit = async (data: AccountSecurityFormData) => {
-    try {
-      await api.patch('/settings/account-security', {
-        oldPassword: data.oldPassword,
-        newPassword: data.password,
-      });
-
-      // Handle success (you can add toast notification here)
-      console.log('Password updated successfully');
-    } catch (error) {
-      console.error('Error updating password:', error);
-      // Handle error (you can add toast notification here)
-    }
+    changePassword({
+      currentPassword: data.oldPassword,
+      newPassword: data.password,
+      confirmPassword: data.confirmPassword,
+    });
   };
+
+  useEffect(() => {
+    if (isSuccess) reset();
+  }, [isSuccess, reset]);
 
   return (
     <div className="bg-white rounded-lg p-6" style={{ direction: 'rtl' }}>
@@ -170,14 +169,14 @@ export default function AccountSecurity() {
         <div className="mt-6 flex justify-end">
           <button
             type="submit"
-            disabled={!hasAllValues}
+            disabled={!hasAllValues || isLoading}
             className={`px-12 py-2 text-lg rounded-lg font-medium transition-colors ${
-              hasAllValues
+              hasAllValues && !isLoading
                 ? 'bg-[#5D24E1] text-white cursor-pointer'
                 : 'bg-[#c4c4c4] text-white cursor-not-allowed'
             }`}
           >
-            تحديث كلمة المرور
+            {isLoading ? 'جاري التحديث...' : 'تحديث كلمة المرور'}
           </button>
         </div>
       </form>
