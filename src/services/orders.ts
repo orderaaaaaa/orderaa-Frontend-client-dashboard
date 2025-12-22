@@ -85,7 +85,7 @@ export const useOrderStatusesQuery = () => {
     queryKey: [QUERY_KEYS.ORDER_STATUSES] as QueryKey,
     queryFn: async () => {
       const response =
-        await http.get<OrderStatusesResponse>('/orders/statuses');
+        await http.get<OrderStatusesResponse>('/lookups/order-statuses');
       return response.data;
     },
     staleTime: Infinity,
