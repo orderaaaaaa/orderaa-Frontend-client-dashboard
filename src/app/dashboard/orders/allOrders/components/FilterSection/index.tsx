@@ -85,21 +85,21 @@ const FilterSection = React.memo(function FilterSection({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="بحث..."
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
+                className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
                 autoFocus
               />
             </div>
 
             <ul className="max-h-48 overflow-y-auto py-1">
               {filteredOptions.length === 0 ? (
-                <li className="px-3 py-2 text-gray-500 text-sm text-center">
+                <li className="px-3 py-2 text-gray-500 text-base text-center">
                   {availableFilters.length === 0 ? 'تم اضافة جميع الفلاتر' : 'لا توجد نتائج'}
                 </li>
               ) : (
                 filteredOptions.map((filter) => (
                   <li
                     key={filter.key}
-                    className="px-3 py-2 cursor-pointer text-gray-700 hover:bg-[#5D24E1] hover:text-white transition-colors"
+                    className="px-3 py-2 cursor-pointer text-gray-700 text-base hover:bg-[#5D24E1] hover:text-white transition-colors"
                     onClick={() => addFilter(filter.key)}
                   >
                     {filter.label}
