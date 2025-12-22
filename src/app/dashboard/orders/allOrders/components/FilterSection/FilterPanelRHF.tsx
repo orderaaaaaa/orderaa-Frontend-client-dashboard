@@ -8,7 +8,6 @@ import SearchableSelect from "./SearchableSelect";
 import { DatePicker } from "@/components/ui/datepicker";
 import { getGovernorates, getCities } from "@/lib/api/lookups";
 import { LiaTimesSolid } from "react-icons/lia";
-import { Button } from "@/components/ui/button";
 
 interface GovernorateData {
   key: string;
@@ -29,7 +28,7 @@ interface FilterDefinition {
 }
 
 export const FILTER_DEFINITIONS: FilterDefinition[] = [
-  { key: 'shipmentCode', label: 'كود الشحنة', type: 'textarea' },
+  { key: 'shipmentCode', label: 'كود الشحنة', type: 'text' },
   { key: 'customerName', label: 'اسم العميل', type: 'text' },
   { key: 'phone', label: 'رقم الهاتف', type: 'text' },
   { key: 'executionDate', label: 'تاريخ التنفيذ', type: 'date' },
@@ -52,19 +51,20 @@ interface FilterChipProps {
 
 const FilterChip = React.memo(function FilterChip({ filterKey, label, children, onRemove }: FilterChipProps) {
   return (
-    <div className="flex flex-col gap-1 flex-1 min-w-[250px] w-full">
-      <span className="text-sm font-medium text-gray-600">{label}</span>
-      <div className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2">
+    <div className="flex flex-col gap-1 w-full">
+      {/* <span className="text-sm font-medium text-gray-600">{label}</span> */}
+      <div className="flex items-center gap-2 rounded-lg px-3 py-2">
         <div className="flex-1 min-w-0 h-10">
           {children}
         </div>
-        <Button
+        <button
+          type="button"
           onClick={() => onRemove(filterKey)}
-          className="flex-shrink-0 flex items-center justify-center w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors p-0"
+          className="cursor-pointer flex-shrink-0 w-5 h-5 bg-gray-500 hover:bg-gray-700 text-white rounded-full flex items-center justify-center transition-colors"
           aria-label={`إزالة ${label}`}
         >
           <LiaTimesSolid className="w-3 h-3" />
-        </Button>
+        </button>
       </div>
     </div>
   );
@@ -321,7 +321,7 @@ export default function FilterPanel({
 
   return (
     <div
-      className="flex flex-wrap flex-col sm:flex-row items-start gap-4 px-4 py-4"
+      className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 px-4 py-4"
       onKeyDown={handleKeyDown}
     >
       {activeFilters.map((filterKey) => {
