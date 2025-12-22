@@ -11,7 +11,7 @@ import Input from '@/components/ui/Input';
 import PasswordStrengthIndicator from '@/components/ui/PasswordStrengthIndicator';
 import { LiaLockSolid } from 'react-icons/lia';
 import { FaShieldAlt } from 'react-icons/fa';
-import useChangePassword from '../hooks/useSettings';
+import useChangePassword from '../hooks/useChangePassword';
 
 export default function AccountSecurity() {
   const { changePassword, isLoading, isSuccess } = useChangePassword();
