@@ -35,7 +35,6 @@ export default function AccountSecurity() {
   const oldPassword = watch('oldPassword');
   const confirmPassword = watch('confirmPassword');
 
-  // Check if all fields have values
   const hasAllValues = Boolean(
     oldPassword?.trim() && password?.trim() && confirmPassword?.trim()
   );

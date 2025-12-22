@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -9,8 +9,6 @@ import {
 } from '@/schemas/personalData.schema';
 import Input from '@/components/ui/Input';
 import SearchableSelect from '@/app/dashboard/orders/allOrders/components/FilterSection/SearchableSelect';
-import { getGovernorates } from '@/lib/api/lookups';
-import api from '@/lib/api';
 import { LiaBuilding, LiaPhoneSolid } from 'react-icons/lia';
 import { CiAt } from 'react-icons/ci';
 import { IoBriefcaseOutline } from 'react-icons/io5';
@@ -48,13 +46,10 @@ export default function PersonalData() {
   const phoneNumber = watch('phoneNumber');
   const { cities: cityOptions, loadingCities } = useCities(governorate || '');
 
-  // Clear city when governorate changes
   useEffect(() => {
     if (!governorate) {
-      // Clear city if governorate is cleared
       setValue('city', '');
     } else if (city) {
-      // Check if current city belongs to the new governorate
       const cityExists = cityOptions.some((c) => c.key === city);
       if (!cityExists) {
         setValue('city', '');
@@ -70,7 +65,6 @@ export default function PersonalData() {
       (city && city.trim())
   );
   const onSubmit = async (data: PersonalDataFormData) => {
-    // Build payload - only include non-empty values
     const payload: Partial<{
       username: string;
       email: string;
@@ -79,13 +73,11 @@ export default function PersonalData() {
       city: string;
     }> = {};
 
-    // Simple field mapping - only add if value exists
     if (data.fullName?.trim()) payload.username = data.fullName.trim();
     if (data.email?.trim()) payload.email = data.email.trim();
     if (data.phoneNumber?.trim()) payload.phoneNumber = data.phoneNumber.trim();
     if (data.governorate?.trim()) payload.governorate = data.governorate.trim();
 
-    // City: transform format and only send if governorate is provided
     if (data.governorate?.trim() && data.city?.trim()) {
       payload.city = transformCityKeyForAPI(data.city.trim());
     }
@@ -93,7 +85,6 @@ export default function PersonalData() {
     updateProfile(payload);
   };
 
-  // Reset form after successful save
   useEffect(() => {
     if (isSuccess) reset();
   }, [isSuccess, reset]);
@@ -106,7 +97,7 @@ export default function PersonalData() {
           <img
             src="/Icons/WebAccount.svg"
             alt="Web Account"
-            className="w-5 h-5"
+            className="w-5 h-5 accent-[#5D24E1]"
           />
         </div>
         <h2 className="text-2xl font-medium text-right">البيانات الشخصية</h2>
