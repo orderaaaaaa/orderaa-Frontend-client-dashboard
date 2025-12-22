@@ -17,7 +17,7 @@ import {
   getDepartmentLabel,
 } from '../utils/employeeMappers';
 import { AttendanceModal } from './AttendanceModal';
-import { EmployeeCardProps } from '../types/employee.types';
+import { EmployeeCardProps } from '../add-employee/types/employee.types';
 import Link from 'next/link';
 
 export const EmployeeCard = memo(function EmployeeCard({
