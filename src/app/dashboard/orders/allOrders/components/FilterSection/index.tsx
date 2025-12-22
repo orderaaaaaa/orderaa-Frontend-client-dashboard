@@ -56,20 +56,15 @@ const FilterSection = React.memo(function FilterSection({
 
   return (
     <div className="bg-white rounded-xl py-[3px] mt-6">
-      <div className="flex items-center justify-between px-4 py-2">
-        <div className="inline-flex items-center text-lg gap-3 rounded-md text-gray-800 font-medium">
-          <LiaSlidersHSolid className="w-5 h-5" />
-          الفلتر
-        </div>
-
+      <div className="flex items-center justify-start px-4 py-2">
         <Popover open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="default"
               className="flex items-center gap-2 bg-[#5D24E1] text-white rounded-lg py-2.5 px-4 text-base font-medium hover:bg-[#4A1DB8] transition-colors focus:outline-none focus:ring-2 focus:ring-[#4A1DB8]"
             >
-              <LiaFilterSolid className="w-5 h-5" />
-              <span>اضف فلتر</span>
+              <LiaSlidersHSolid className="w-5 h-5" />
+              <span>فلتر</span>
               <LiaAngleDownSolid
                 className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}
               />
