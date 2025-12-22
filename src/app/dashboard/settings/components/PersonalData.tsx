@@ -17,6 +17,7 @@ import { IoBriefcaseOutline } from 'react-icons/io5';
 import useGovernorates from '@/hooks/useGovernorates';
 import useCities from '@/hooks/useCities';
 import useUpdateProfile from '../hooks/useUpdateProfile';
+import { transformCityKeyForAPI } from '@/utils';
 
 export default function PersonalData() {
   const { governorates, isLoading: loadingGovernorates } = useGovernorates();
@@ -69,31 +70,24 @@ export default function PersonalData() {
       (city && city.trim())
   );
   const onSubmit = async (data: PersonalDataFormData) => {
-    // Build payload - only send non-empty values
-    const payload: {
-      username?: string;
-      email?: string;
-      phoneNumber?: string;
-      governorate?: string;
-      city?: string;
-    } = {};
+    // Build payload - only include non-empty values
+    const payload: Partial<{
+      username: string;
+      email: string;
+      phoneNumber: string;
+      governorate: string;
+      city: string;
+    }> = {};
 
-    if (data.fullName?.trim()) {
-      payload.username = data.fullName.trim();
-    }
-    if (data.email?.trim()) {
-      payload.email = data.email.trim();
-    }
-    if (data.phoneNumber?.trim()) {
-      // Send phoneNumber as string, not number
-      payload.phoneNumber = data.phoneNumber.trim();
-    }
-    if (data.governorate?.trim()) {
-      payload.governorate = data.governorate.trim();
-    }
-    // Only send city if governorate is also provided and city is valid
+    // Simple field mapping - only add if value exists
+    if (data.fullName?.trim()) payload.username = data.fullName.trim();
+    if (data.email?.trim()) payload.email = data.email.trim();
+    if (data.phoneNumber?.trim()) payload.phoneNumber = data.phoneNumber.trim();
+    if (data.governorate?.trim()) payload.governorate = data.governorate.trim();
+
+    // City: transform format and only send if governorate is provided
     if (data.governorate?.trim() && data.city?.trim()) {
-      payload.city = data.city.trim();
+      payload.city = transformCityKeyForAPI(data.city.trim());
     }
 
     updateProfile(payload);
@@ -277,7 +271,7 @@ export default function PersonalData() {
                 className="text-base md:text-xl font-medium text-right"
                 style={{ textAlign: 'right' }}
               >
-                المدينة
+                المنطقة
               </span>
             </div>
             <div className="w-full relative">
@@ -293,7 +287,7 @@ export default function PersonalData() {
                       ? 'اختر المحافظة أولاً'
                       : loadingCities
                       ? 'جاري التحميل...'
-                      : 'اختر المدينة'
+                      : 'اختر المنطقة'
                   }
                   disabled={!governorate || loadingCities}
                   widthClass="w-full"

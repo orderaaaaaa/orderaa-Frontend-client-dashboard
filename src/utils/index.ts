@@ -5,3 +5,5 @@ export {
   useDebouncedState,
   type UseDebounceOptions,
 } from './debounce';
+
+export { transformCityKeyForAPI } from './cityUtils';
