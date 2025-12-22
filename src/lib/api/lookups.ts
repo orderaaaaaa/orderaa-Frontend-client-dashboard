@@ -7,7 +7,7 @@ export async function getCategories() {
 }
 
 export async function getGovernorates() {
-  const { data } = await api.get('/locations/governorates?lang=ar');
+  const { data } = await api.get('/lookups/governorates?lang=ar');
   return data;
 }
 

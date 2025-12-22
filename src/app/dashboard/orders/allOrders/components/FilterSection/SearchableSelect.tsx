@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState, forwardRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
-type OptionObject = { key: string; value: string };
+type OptionObject = { key: string; value?: string; label?: string };
 type OptionType = string | OptionObject;
 
 type Props = {
@@ -16,7 +16,7 @@ type Props = {
   error?: string;
   name?: string;
   disabled?: boolean;
-  displayValue?: string; // For showing the display text when value is a key
+  displayValue?: string;
 };
 
 const SearchableSelect = forwardRef<HTMLDivElement, Props>(
@@ -46,10 +46,10 @@ const SearchableSelect = forwardRef<HTMLDivElement, Props>(
       return options.length > 0 && typeof options[0] === 'object';
     }, [options]);
 
-    // Get display text for an option
+    // Get display text for an option - support both 'value' and 'label'
     const getDisplayText = (opt: OptionType): string => {
       if (typeof opt === 'string') return opt;
-      return opt.value;
+      return opt.value || opt.label || '';
     };
 
     // Get key/value for an option
@@ -75,7 +75,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, Props>(
       if (!isObjectOptions) return value;
       // Find the option that matches the key
       const opt = (options as OptionObject[]).find((o) => o.key === value);
-      return opt ? opt.value : value;
+      return opt ? opt.value || opt.label || value : value;
     }, [value, displayValue, options, isObjectOptions]);
 
     useEffect(() => {

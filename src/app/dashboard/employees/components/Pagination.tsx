@@ -109,7 +109,7 @@ export function Pagination({
 
           return (
             <button
-              key={pageNumber}
+              key={index}
               onClick={() => handlePageClick(pageNumber)}
               className={`w-10 h-10 rounded-lg border transition-colors ${
                 isActive

@@ -31,7 +31,6 @@ export default function EmployeesPage() {
   const onSubmit = (data: EmployeeFormData) => {
     createEmployee.mutate(data, {
       onSuccess: () => {
-        toast.success('تم إضافة الموظف بنجاح');
         reset();
         router.push('/dashboard/employees');
       },
