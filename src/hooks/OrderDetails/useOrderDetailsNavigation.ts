@@ -4,6 +4,7 @@ import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { useFetchOrdersForSearch } from '@/services/orders';
 import { TimePeriod, calculateDateRangeFromPeriod, formatDateToISO } from '@/utils/dateRangeUtils';
 import { useDebounce } from '@/utils/debounce';
+import { toast } from 'react-toastify';
 
 interface UseOrderDetailsNavigationOptions {
   initialOrderId: number;
@@ -118,18 +119,33 @@ export function useOrderDetailsNavigation({
   }, []);
 
   const setFromDate = useCallback((date: Date | null) => {
+    // Block if executionDate is set
+    if (date && formFilters?.executionDate) {
+      toast.error('لا يمكن تحديد نطاق التاريخ وتاريخ التنفيذ معاً. يرجى إزالة تاريخ التنفيذ أولاً.');
+      return;
+    }
     isUserInitiated.current = true;
     setFromDateInternal(date);
     setTimePeriodInternal(''); // Clear time period when manually setting date
-  }, []);
+  }, [formFilters?.executionDate]);
 
   const setToDate = useCallback((date: Date | null) => {
+    // Block if executionDate is set
+    if (date && formFilters?.executionDate) {
+      toast.error('لا يمكن تحديد نطاق التاريخ وتاريخ التنفيذ معاً. يرجى إزالة تاريخ التنفيذ أولاً.');
+      return;
+    }
     isUserInitiated.current = true;
     setToDateInternal(date);
     setTimePeriodInternal(''); // Clear time period when manually setting date
-  }, []);
+  }, [formFilters?.executionDate]);
 
   const setTimePeriod = useCallback((period: TimePeriod) => {
+    // Block if executionDate is set
+    if (period && formFilters?.executionDate) {
+      toast.error('لا يمكن تحديد نطاق التاريخ وتاريخ التنفيذ معاً. يرجى إزالة تاريخ التنفيذ أولاً.');
+      return;
+    }
     isUserInitiated.current = true;
     setTimePeriodInternal(period);
 
@@ -141,7 +157,7 @@ export function useOrderDetailsNavigation({
         setToDateInternal(range.to);
       }
     }
-  }, []);
+  }, [formFilters?.executionDate]);
 
   const clearTimePeriod = useCallback(() => {
     isUserInitiated.current = true;
@@ -151,8 +167,16 @@ export function useOrderDetailsNavigation({
   }, []);
 
   const handleFilterFormChange = useCallback((data: OrderFiltersFormData) => {
+    // Block executionDate if date range is set
+    if (data.executionDate && (fromDate || toDate)) {
+      toast.error('لا يمكن تحديد تاريخ التنفيذ ونطاق التاريخ معاً. يرجى إزالة نطاق التاريخ أولاً.');
+      // Remove executionDate from the update
+      const { executionDate, ...restData } = data;
+      setFormFilters(restData as OrderFiltersFormData);
+      return;
+    }
     setFormFilters(data);
-  }, []);
+  }, [fromDate, toDate]);
 
   // Mark user-initiated when debounced filters change
   useEffect(() => {
