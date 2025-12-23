@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { Search, SlidersVertical } from 'lucide-react';
 import Dropdown from '@/components/ui/Dropdown';
-import { SearchableSelect } from '@/components/ui/searchable-select';
 import {
   activityTypeOptions,
   clientStatusOptions,
-  codeOptions,
   customerOptions,
   orderStatusOptions,
 } from '../constants/SearchConst';
@@ -35,7 +33,7 @@ export default function CustomerHeader({
   const [code, setCode] = useState('');
 
   return (
-    <div className="bg-white w-[90%] rounded-lg shadow-md mb-6">
+    <div className="bg-white w-[97%] mx-auto rounded-lg shadow-md mb-6">
       <div className="p-6">
         <div className="flex flex-row-reverse items-center gap-4">
           {/* Advanced Filters Button */}
@@ -59,7 +57,7 @@ export default function CustomerHeader({
               className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-[#5d24e1] focus:border-transparent text-right placeholder-gray-400 placeholder:font-semibold"
               dir="rtl"
             />
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#5d24e1]" />
           </div>
         </div>
       </div>
@@ -113,21 +111,6 @@ export default function CustomerHeader({
               readOnly={true}
               selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-md font-semibold bg-white hover:bg-gray-50 text-right"
             />
-
-            {/* Code SearchableSelect */}
-            <div className="relative">
-              <SearchableSelect
-                value={code}
-                onValueChange={setCode}
-                options={codeOptions}
-                placeholder="بحث"
-                searchPlaceholder="بحث عن الكود..."
-                emptyMessage="لا توجد أكواد متاحة"
-                noResultsMessage="لا توجد نتائج للبحث"
-                triggerClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-3 text-md font-semibold bg-white hover:bg-gray-50 text-right"
-                searchThreshold={3}
-              />
-            </div>
           </div>
         </div>
       )}

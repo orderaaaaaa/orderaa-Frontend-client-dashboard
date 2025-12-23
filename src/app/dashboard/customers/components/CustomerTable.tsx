@@ -1,177 +1,177 @@
-import React, { useState } from 'react';
-import {
-  Phone,
-  Mail,
-  Calendar,
-  ShoppingBag,
-  MoreVertical,
-  Flag,
-} from 'lucide-react';
-import {
-  customersTableData,
-  statusColors,
-  activityTypeColors,
-} from '../constants/CustomerTableData';
+import React from 'react';
+import { Phone, Mail, Calendar, ShoppingBag, MoreVertical } from 'lucide-react';
+import { useGetCustomers } from '../hooks/useGetCustomers';
+
+const TABLE_HEADERS = [
+  { label: 'العميل', align: 'right' },
+  { label: 'التواصل', align: 'right' },
+  { label: 'عدد الطلبات', align: 'center' },
+  { label: 'اخر طلب', align: 'center' },
+  { label: 'الحالة', align: 'center' },
+  { label: 'النشارات', align: 'center' },
+  { label: 'إجمالي المشتريات', align: 'center' },
+  { label: 'الإجراءات', align: 'center' },
+];
+
+const getStatusColor = (status: string) => {
+  const colors: Record<string, string> = {
+    نشط: 'bg-green-50 text-green-700 border border-green-200',
+    'تم التوصيل': 'bg-green-50 text-green-700 border border-green-200',
+    'تم الشحن': 'bg-blue-50 text-blue-700 border border-blue-200',
+    ملغي: 'bg-red-50 text-red-700 border border-red-200',
+    مرتجع: 'bg-yellow-50 text-yellow-700 border border-yellow-200',
+  };
+  return colors[status] || 'bg-gray-50 text-gray-700 border border-gray-200';
+};
+
+const getActivityColor = (activity: string) => {
+  const colors: Record<string, string> = {
+    'Loyal Buyer': 'bg-green-50 text-green-600 border border-green-200',
+    'bulk buyer': 'bg-purple-50 text-purple-600 border border-purple-200',
+    'Window shopper': 'bg-purple-50 text-purple-600 border border-purple-200',
+    'No Show': 'bg-red-50 text-red-600 border border-red-200',
+  };
+  return colors[activity] || 'bg-gray-50 text-gray-600 border border-gray-200';
+};
 
 export default function CustomerTable() {
-  const [showCheckboxes, setShowCheckboxes] = useState(false);
-  const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
+  const { data, isLoading, isError, error } = useGetCustomers({
+    page: 1,
+    limit: 10,
+  });
 
-  const toggleCheckbox = (customerId: string) => {
-    setSelectedCustomers((prev) =>
-      prev.includes(customerId)
-        ? prev.filter((id) => id !== customerId)
-        : [...prev, customerId]
+  if (isLoading) {
+    return (
+      <div className="w-full bg-white rounded-lg shadow-sm p-8 text-center">
+        <div className="text-gray-600">جاري التحميل...</div>
+      </div>
     );
-  };
+  }
 
-  const toggleAllCheckboxes = () => {
-    if (selectedCustomers.length === customersTableData.length) {
-      setSelectedCustomers([]);
-    } else {
-      setSelectedCustomers(customersTableData.map((customer) => customer.id));
-    }
-  };
+  if (isError) {
+    return (
+      <div className="w-full bg-white rounded-lg shadow-sm p-8 text-center">
+        <div className="text-red-600">
+          حدث خطأ في تحميل البيانات: {error?.message}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className=" w-[98%] rounded-lg shadow-md">
-      {/* Toggle Checkbox Button */}
-      <div className="p-4 flex justify-end">
-        <button
-          onClick={() => setShowCheckboxes(!showCheckboxes)}
-          className="px-4 py-2 bg-[#5d24e1] text-white rounded-lg hover:bg-[#4a1db3] transition-colors font-medium"
-        >
-          {showCheckboxes ? 'إخفاء علامات التحديد' : 'إظهار علامات التحديد'}
-        </button>
-      </div>
-
-      {/* Table */}
+    <div className="w-full bg-white rounded-lg shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr className="text-right bg-[#7849E614]">
-              {showCheckboxes && (
-                <th className="px-6 py-4">
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedCustomers.length === customersTableData.length
-                    }
-                    onChange={toggleAllCheckboxes}
-                    className="w-5 h-5 cursor-pointer accent-[#5d24e1]"
-                  />
+        <table className="w-full" dir="rtl">
+          <thead>
+            <tr className="bg-[#F8F7FC] border-b border-gray-200">
+              {TABLE_HEADERS.map((header, index) => (
+                <th
+                  key={index}
+                  className={`px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap text-${header.align}`}
+                >
+                  {header.label}
                 </th>
-              )}
-              <th className="px-6 py-4 text-sm font-semibold text-gray-700">
-                العميل
-              </th>
-              <th className="px-6 py-4 text-sm font-semibold text-gray-700">
-                التواصل
-              </th>
-              <th className="px-6 py-4 text-sm font-semibold text-gray-700">
-                عدد الطلبات
-              </th>
-              <th className="px-6 py-4 text-sm font-semibold text-gray-700">
-                اخر طلب
-              </th>
-              <th className="px-6 py-4 text-sm font-semibold text-gray-700">
-                الحالة
-              </th>
-              <th className="px-6 py-4 text-sm font-semibold text-gray-700">
-                النشارات
-              </th>
-              <th className="px-6 py-4 text-sm font-semibold text-gray-700">
-                إجمالي المشتريات
-              </th>
-              <th className="px-6 py-4 text-sm font-semibold text-gray-700">
-                الإجراءات
-              </th>
+              ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
-            {customersTableData.map((customer) => (
+          <tbody className="divide-y divide-gray-100">
+            {data?.data.map((customer) => (
               <tr
                 key={customer.id}
                 className="hover:bg-gray-50 transition-colors"
               >
-                {showCheckboxes && (
-                  <td className="px-6 py-4">
-                    <input
-                      type="checkbox"
-                      checked={selectedCustomers.includes(customer.id)}
-                      onChange={() => toggleCheckbox(customer.id)}
-                      className="w-5 h-5 cursor-pointer accent-[#5d24e1]"
-                    />
-                  </td>
-                )}
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3 flex-row-reverse">
-                    {customer.flagged && (
-                      <Flag className="w-4 h-4 text-orange-500 fill-orange-500" />
-                    )}
-                    <div className="text-right">
-                      <div className="font-semibold text-gray-900">
-                        {customer.name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {customer.code}
-                      </div>
+                {/* العميل */}
+                <td className="px-4 py-4 whitespace-nowrap">
+                  <div className="text-right">
+                    <div className="font-semibold text-gray-900 text-base">
+                      {customer.name}
+                    </div>
+                    <div className="text-sm text-gray-500 mt-0.5">
+                      #{customer.id}
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4">
-                  <div className="flex flex-col gap-1 items-end">
-                    <div className="flex items-center gap-2 flex-row-reverse text-sm text-gray-600">
-                      <Phone className="w-4 h-4" />
-                      <span>{customer.phone}</span>
-                    </div>
-                    <div className="flex items-center gap-2 flex-row-reverse text-sm text-gray-600">
-                      <Mail className="w-4 h-4" />
-                      <span>{customer.email}</span>
+
+                {/* التواصل */}
+                <td className="px-4 py-4">
+                  <div className="flex flex-col gap-2 items-end min-w-[180px]">
+                    {customer.phoneNumbers.slice(0, 1).map((phone, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2 text-sm text-gray-700"
+                      >
+                        <span className="font-medium">{phone}</span>
+                        <Phone className="w-4 h-4 text-gray-400" />
+                      </div>
+                    ))}
+                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                      <span className="font-medium">{customer.email}</span>
+                      <Mail className="w-4 h-4 text-gray-400" />
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2 flex-row-reverse justify-end">
+
+                {/* عدد الطلبات */}
+                <td className="px-4 py-4 text-center whitespace-nowrap">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-md border border-gray-200">
+                    <span className="font-semibold text-gray-900 text-base">
+                      {customer.numberOfOrders}
+                    </span>
                     <ShoppingBag className="w-4 h-4 text-gray-500" />
-                    <span className="font-medium text-gray-900">
-                      {customer.orderCount}
-                    </span>
                   </div>
                 </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2 flex-row-reverse justify-end">
+
+                {/* اخر طلب */}
+                <td className="px-4 py-4 text-center whitespace-nowrap">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-md border border-gray-200">
+                    <span className="text-sm text-gray-700 font-medium">
+                      {customer.latestOrder?.createdAt
+                        ? new Date(customer.latestOrder.createdAt)
+                            .toLocaleDateString('ar-EG', {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit',
+                            })
+                            .replace(/\//g, '/ ')
+                        : '-'}
+                    </span>
                     <Calendar className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-600">
-                      {customer.lastOrderDate}
-                    </span>
                   </div>
                 </td>
-                <td className="px-6 py-4">
+
+                {/* الحالة */}
+                <td className="px-4 py-4 text-center whitespace-nowrap">
                   <span
-                    className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
-                      statusColors[customer.status]
-                    }`}
+                    className={`inline-flex px-4 py-1.5 rounded-full text-sm font-medium ${getStatusColor(
+                      customer.isBlocked ? 'محظور' : 'نشط'
+                    )}`}
                   >
-                    {customer.status}
+                    {customer.isBlocked ? 'محظور' : 'نشط'}
                   </span>
                 </td>
-                <td className="px-6 py-4">
+
+                {/* النشارات */}
+                <td className="px-4 py-4 text-center whitespace-nowrap">
                   <span
-                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
-                      activityTypeColors[customer.activityType]
-                    }`}
+                    className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium ${getActivityColor(
+                      'Loyal Buyer'
+                    )}`}
                   >
-                    {customer.activityType} {customer.activityIcon}
+                    <span>🏆</span>
+                    <span>Loyal Buyer</span>
                   </span>
                 </td>
-                <td className="px-6 py-4">
-                  <span className="font-semibold text-gray-900">
-                    {customer.totalSpent}
+
+                {/* إجمالي المشتريات */}
+                <td className="px-4 py-4 text-center whitespace-nowrap">
+                  <span className="font-bold text-gray-900 text-base">
+                    {customer.totalAmount.toLocaleString('ar-EG')} جنيه
                   </span>
                 </td>
-                <td className="px-6 py-4">
-                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+
+                {/* الإجراءات */}
+                <td className="px-4 py-4 text-center whitespace-nowrap">
+                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors inline-flex items-center justify-center">
                     <MoreVertical className="w-5 h-5 text-gray-600" />
                   </button>
                 </td>

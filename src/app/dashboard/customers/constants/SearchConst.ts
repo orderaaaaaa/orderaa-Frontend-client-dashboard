@@ -23,15 +23,3 @@ export const customerOptions = [
   { key: 'all', value: 'جميع العملاء' },
   { key: 'premium', value: 'المميزين فقط' },
 ];
-
-// Mock code options - replace with actual data
-export const codeOptions = [
-  'CODE001',
-  'CODE002',
-  'CODE003',
-  'CODE004',
-  'CODE005',
-  'CODE006',
-  'CODE007',
-  'CODE008',
-];
