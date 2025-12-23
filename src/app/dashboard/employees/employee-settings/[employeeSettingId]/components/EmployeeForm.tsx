@@ -9,6 +9,10 @@ import SearchableSelect from '@/app/dashboard/orders/allOrders/components/Filter
 import WorkHoursTimePicker from '@/components/ui/WorkHoursTimePicker';
 import useGovernorates from '@/hooks/useGovernorates';
 import {
+  validateEgyptianPhoneNumber,
+  getPhoneNumberErrorMessage,
+} from '@/utils/validators/phoneValidator';
+import {
   User,
   Phone,
   Briefcase,
@@ -144,6 +148,12 @@ export default function EmployeeForm({
             type="text"
             placeholder="01234567890"
             register={register}
+            registerOptions={{
+              // required: 'رقم الهاتف مطلوب',
+              validate: (val: string) =>
+                validateEgyptianPhoneNumber(val) ||
+                getPhoneNumberErrorMessage(val),
+            }}
             error={errors.phoneNumber?.message}
             className="!h-[46px] !px-4 bg-[rgba(234,234,234,0.25)] !border-black/16 text-right"
           />
@@ -164,6 +174,13 @@ export default function EmployeeForm({
             type="email"
             placeholder="example@domain.com"
             register={register}
+            registerOptions={{
+              required: 'البريد الإلكتروني مطلوب',
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: 'البريد الإلكتروني غير صحيح',
+              },
+            }}
             error={errors.email?.message}
             className="!h-[46px] !px-4 bg-[rgba(234,234,234,0.25)] !border-black/16 text-right"
           />
