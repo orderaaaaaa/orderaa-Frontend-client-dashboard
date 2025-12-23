@@ -42,7 +42,6 @@ export default function EmployeeForm({
   const {
     register,
     handleSubmit,
-    reset,
     watch,
     setValue,
     formState: { errors },
@@ -54,10 +53,6 @@ export default function EmployeeForm({
   const department = watch('department');
   const address = watch('address');
   const workingHours = watch('workingHours');
-
-  useEffect(() => {
-    reset(employee);
-  }, [employee, reset]);
 
   const onSubmitHandler = (data: Employee) => {
     const { id, ...updateData } = data as any;
@@ -243,13 +238,6 @@ export default function EmployeeForm({
 
       {/* Buttons */}
       <div className="flex justify-end gap-4 pt-4">
-        <button
-          type="button"
-          onClick={() => reset(employee)}
-          className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
-        >
-          Reset
-        </button>
         <button
           type="submit"
           disabled={isLoading}
