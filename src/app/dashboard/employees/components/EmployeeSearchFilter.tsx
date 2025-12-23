@@ -97,7 +97,7 @@ export function EmployeeSearchFilter({
 
             <div className="absolute left-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-[500px] overflow-y-auto">
               {/* Header */}
-              <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3  items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">الفلاتر</h3>
                 {hasActiveFilters && (
                   <button
@@ -109,10 +109,10 @@ export function EmployeeSearchFilter({
                   </button>
                 )}
               </div>
-              <div className="flex">
+              <div className="grid grid-cols-3">
                 {/* Access Level Filter */}
                 <div className="p-4 border-b border-gray-100">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-[12px] sm:text-sm max-sm:text-center font-medium text-gray-700 mb-2">
                     مستوى الصلاحية
                   </label>
                   <div className="space-y-1">
@@ -137,7 +137,7 @@ export function EmployeeSearchFilter({
 
                 {/* Department Filter */}
                 <div className="p-4 border-b border-gray-100">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs max-sm:text-center font-medium text-gray-700 mb-2">
                     القسم
                   </label>
                   <div className="space-y-1">
@@ -162,7 +162,7 @@ export function EmployeeSearchFilter({
 
                 {/* Performance Filter */}
                 <div className="p-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs sm:text-sm max-sm:text-center font-medium text-gray-700 mb-2">
                     مستوى الأداء
                   </label>
                   <div className="space-y-1">

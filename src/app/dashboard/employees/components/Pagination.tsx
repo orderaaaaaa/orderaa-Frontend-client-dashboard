@@ -12,6 +12,8 @@ export function Pagination({
   onPageChange,
   className = '',
 }: PaginationProps) {
+  const safeTotalPages = Math.max(0, totalPages || 0);
+
   const handlePrevious = () => {
     if (hasPreviousPage && currentPage > 1) {
       onPageChange(currentPage - 1);
@@ -25,7 +27,7 @@ export function Pagination({
   };
 
   const handlePageClick = (page: number) => {
-    if (page >= 1 && page <= totalPages && page !== currentPage) {
+    if (page >= 1 && page <= safeTotalPages && page !== currentPage) {
       onPageChange(page);
     }
   };
@@ -34,22 +36,22 @@ export function Pagination({
     const pages: (number | string)[] = [];
     const maxVisible = 5;
 
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) {
+    if (safeTotalPages <= maxVisible) {
+      for (let i = 1; i <= safeTotalPages; i++) {
         pages.push(i);
       }
     } else {
       pages.push(1);
 
       let startPage = Math.max(2, currentPage - 1);
-      let endPage = Math.min(totalPages - 1, currentPage + 1);
+      let endPage = Math.min(safeTotalPages - 1, currentPage + 1);
 
       if (currentPage <= 3) {
         endPage = 4;
       }
 
-      if (currentPage >= totalPages - 2) {
-        startPage = totalPages - 3;
+      if (currentPage >= safeTotalPages - 2) {
+        startPage = safeTotalPages - 3;
       }
 
       if (startPage > 2) {
@@ -60,17 +62,17 @@ export function Pagination({
         pages.push(i);
       }
 
-      if (endPage < totalPages - 1) {
+      if (endPage < safeTotalPages - 1) {
         pages.push('...');
       }
 
-      pages.push(totalPages);
+      pages.push(safeTotalPages);
     }
 
     return pages;
   };
 
-  if (totalPages <= 1) {
+  if (safeTotalPages <= 1) {
     return null;
   }
 
@@ -109,7 +111,7 @@ export function Pagination({
 
           return (
             <button
-              key={pageNumber}
+              key={index}
               onClick={() => handlePageClick(pageNumber)}
               className={`w-10 h-10 rounded-lg border transition-colors ${
                 isActive

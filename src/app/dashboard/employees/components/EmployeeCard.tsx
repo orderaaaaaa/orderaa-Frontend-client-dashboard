@@ -17,8 +17,10 @@ import {
   getDepartmentLabel,
 } from '../utils/employeeMappers';
 import { AttendanceModal } from './AttendanceModal';
-import { EmployeeCardProps } from '../types/employee.types';
+import { EmployeeCardProps } from '../add-employee/types/employee.types';
 import Link from 'next/link';
+import { If, Then } from 'react-if';
+import { useAuthStore } from '@/store/authStore';
 
 export const EmployeeCard = memo(function EmployeeCard({
   employee,
@@ -57,16 +59,23 @@ export const EmployeeCard = memo(function EmployeeCard({
     setLeaveModalOpen(true);
   };
 
+  const { user } = useAuthStore();
+
   return (
     <div className="bg-white relative rounded-2xl shadow-sm border border-gray-100 p-6 max-w-[420px]">
       {/* Header */}
       <div className="flex flex-row-reverse items-center justify-end gap-5 mb-6">
-        <Link href={`employees/employee-settings/${employee.id}`}>
-          <Edit
-            size={20}
-            className="text-gray-600 absolute top-5 left-5 hover:text-gray-900 cursor-pointer"
-          />
-        </Link>
+        <If condition={user?.role !== 'EMPLOYEE'}>
+          <Then>
+            <Link href={`employees/employee-settings/${employee.id}`}>
+              <Edit
+                size={20}
+                className="text-gray-600 absolute top-5 left-5 hover:text-gray-900 cursor-pointer"
+              />
+            </Link>
+          </Then>
+        </If>
+
         {/* Name & Department */}
         <div className="text-right">
           <h3 className="text-2xl font-bold text-gray-900 my-4">

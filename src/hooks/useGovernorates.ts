@@ -1,22 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { getGovernorates } from '@/lib/api/lookups';
 import { DropdownOption } from '@/types';
 
 export default function useGovernorates() {
-  const [governorates, setGovernorates] = useState<DropdownOption[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data: governorates = [],
+    error,
+    isLoading,
+    isFetching,
+  } = useQuery<DropdownOption[], Error>({
+    queryKey: ['governorates'],
+    queryFn: async () => {
+      const data = await getGovernorates();
+      return data as DropdownOption[];
+    },
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
 
-  useEffect(() => {
-    const fetchGovernorates = async () => {
-      try {
-        const data = await getGovernorates();
-        setGovernorates(data as DropdownOption[]);
-      } catch (error: any) {
-        setError(error?.response?.data?.message);
-      }
-    };
-    fetchGovernorates();
-  }, []);
-
-  return { governorates, error };
+  return {
+    governorates,
+    error: error?.message ?? null,
+    isLoading,
+    isFetching,
+  };
 }
