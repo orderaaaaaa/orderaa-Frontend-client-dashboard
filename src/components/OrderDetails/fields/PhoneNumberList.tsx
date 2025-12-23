@@ -18,9 +18,8 @@ import { toast } from 'react-toastify';
 export interface PhoneNumberListProps {
   customerId: number;
   orderId: number;
-  phoneNumber: string;
-  altPhone?: string;
-  onUpdate?: (phoneNumber: string, altPhone?: string) => void;
+  phoneNumbers: string[];
+  onUpdate?: (phoneNumbers: string[]) => void;
   className?: string;
 }
 
@@ -34,15 +33,14 @@ export interface PhoneNumberListProps {
 export function PhoneNumberList({
   customerId,
   orderId,
-  phoneNumber,
-  altPhone,
+  phoneNumbers: initialPhoneNumbers,
   onUpdate,
   className = '',
 }: PhoneNumberListProps) {
   const phones = usePhoneNumbers({
     customerId,
     orderId,
-    initialPhones: [phoneNumber, altPhone],
+    initialPhones: initialPhoneNumbers,
     onUpdate,
   });
 

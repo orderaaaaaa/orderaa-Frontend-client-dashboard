@@ -82,7 +82,7 @@ export default function AllOrdersRefactor() {
     const phoneCounts: Record<string, number> = {};
 
     ordersList.forEach((order) => {
-      const phone = order.customers.phoneNumber;
+      const phone = order.customers.phone_numbers?.[0];
       if (phone && phone !== 'غير محدد') {
         phoneCounts[phone] = (phoneCounts[phone] || 0) + 1;
       }
@@ -422,8 +422,7 @@ export default function AllOrdersRefactor() {
                 id={order.id}
                 code={order.code}
                 name={order.customers.name}
-                phone={order.customers.phoneNumber}
-                altPhone={order.customers.altPhone}
+                phoneNumbers={order.customers.phone_numbers}
                 government={order.customers.governorate || 'غير محدد'}
                 items={order.order_products.map(
                   (op: any) =>
@@ -437,8 +436,8 @@ export default function AllOrdersRefactor() {
                 address={order.customers.address || 'غير محدد'}
                 alert={0}
                 createdAt={order.createdAt}
-                repeatCount={repeatCounts[order.customers.phoneNumber] || 0}
-                onRepeatClick={() => handleRepeatClick(order.customers.phoneNumber, order.customers.name)}
+                repeatCount={repeatCounts[order.customers.phone_numbers?.[0]] || 0}
+                onRepeatClick={() => handleRepeatClick(order.customers.phone_numbers?.[0], order.customers.name)}
               />
             ))}
           </div>

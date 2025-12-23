@@ -53,19 +53,6 @@ export const PaymentStatusLabels: Record<PaymentStatus, string> = {
   [PaymentStatus.PARTIALLY_PAID]: 'مدفوع جزئياً',
 };
 
-// Customer Interface
-export interface Customer {
-  id: number;
-  name: string;
-  phone: string;
-  address?: string;
-  governorate?: string;
-  city?: string;
-  area?: string;
-  phoneNumber: string;
-  altPhone?: string;
-}
-
 // Variant interface
 export interface Variant {
   id: number;
@@ -182,8 +169,7 @@ export enum OrderFormat {
 export interface Customer {
   id: number;
   name: string;
-  phoneNumber: string;
-  altPhone?: string;
+  phone_numbers: string[];
   address?: string;
   governorate?: string;
   city?: string;

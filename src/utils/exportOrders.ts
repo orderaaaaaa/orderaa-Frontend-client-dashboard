@@ -89,7 +89,7 @@ export function exportInArabicFormat(orders: Order[], filename: string = 'orders
     const excelData: ExportOrderData[] = orders.map((order) => ({
         'كود الطلب': order.code,
         'اسم العميل': order.customers.name,
-        'رقم الهاتف': order.customers.phoneNumber,
+        'رقم الهاتف': order.customers.phone_numbers?.join(', ') || '',
         'المحافظة': order.customers.governorate || '',
         'المدينة': order.customers.city || '',
         'المنطقة': order.customers.area || '',
@@ -160,8 +160,8 @@ function transformOrdersForOrderaaFormat(orders: Order[]) {
 
         const data: any = {
             'FullName': order.customers.name,
-            'Phone': order.customers.phoneNumber,
-            'Phone 2': order.customers.altPhone || '',
+            'Phone': order.customers.phone_numbers?.[0] || '',
+            'Phone 2': order.customers.phone_numbers?.[1] || '',
             'City': order.customers.city || order.customers.governorate || '',
             'Address': order.customers.address || '',
             'Shipping Cost': order.shippingCost || 0,
@@ -192,7 +192,7 @@ function transformOrdersForEasyOrderFormat(orders: Order[]) {
             'ID': order.id.toString(),
             'Status': order.status,
             'FullName': order.customers.name,
-            'Phone': order.customers.phoneNumber,
+            'Phone': order.customers.phone_numbers?.[0] || '',
             'City': order.customers.city || '',
             'Address': order.customers.address || '',
             'Total Cost': order.totalCost,
@@ -206,7 +206,7 @@ function transformOrdersForEasyOrderFormat(orders: Order[]) {
             'SKU': firstProduct?.sku || '',
             'Item Price': firstProduct?.price || 0,
             'CreatedAt': new Date(order.createdAt).toISOString(),
-            'Alt Phone': order.customers.altPhone || '',
+            'Alt Phone': order.customers.phone_numbers?.[1] || '',
             'Note': order.notes || '',
             'Utm Source': order.utmSource || '',
             'Utm Campaign': order.utmCampaign || '',

@@ -7,8 +7,8 @@ import { useUpdateCustomer } from '@/services/orders';
 export interface UsePhoneNumbersOptions {
   customerId: number;
   orderId: number;
-  initialPhones: (string | undefined)[];
-  onUpdate?: (phoneNumber: string, altPhone?: string) => void;
+  initialPhones: string[];
+  onUpdate?: (phoneNumbers: string[]) => void;
 }
 
 /**
@@ -35,8 +35,8 @@ export interface PhoneNumbersState {
  * @example
  * const phones = usePhoneNumbers({
  *   customerId: order.customers.id,
- *   initialPhones: [order.customers.phoneNumber, order.customers.altPhone],
- *   onUpdate: (phone, altPhone) => { ... }
+ *   initialPhones: order.customers.phoneNumbers,
+ *   onUpdate: (phoneNumbers) => { ... }
  * });
  *
  * // Usage: phones.phoneNumbers, phones.handleAdd(), phones.handleEdit(index), etc.
@@ -49,9 +49,9 @@ export function usePhoneNumbers({
 }: UsePhoneNumbersOptions): PhoneNumbersState {
   const updateCustomerMutation = useUpdateCustomer();
 
-  // Filter out undefined/null values and create initial phone list
+  // Initialize phone list from array
   const [phoneNumbers, setPhoneNumbers] = useState<string[]>(
-    initialPhones.filter((phone): phone is string => Boolean(phone))
+    initialPhones.filter(Boolean)
   );
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [newPhoneNumber, setNewPhoneNumber] = useState('');
@@ -80,7 +80,7 @@ export function usePhoneNumbers({
         });
 
         if (onUpdate) {
-          onUpdate(updatedPhones[0] || '', updatedPhones[1]);
+          onUpdate(updatedPhones);
         }
       } catch (error) {
         console.error('Failed to update phone numbers:', error);
@@ -118,7 +118,7 @@ export function usePhoneNumbers({
       });
 
       if (onUpdate) {
-        onUpdate(updatedPhones[0] || '', updatedPhones[1]);
+        onUpdate(updatedPhones);
       }
     } catch (error) {
       console.error('Failed to update phone numbers:', error);

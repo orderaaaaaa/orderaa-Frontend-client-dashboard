@@ -14,7 +14,7 @@ export function useFilteredOrders(
         return false;
       }
 
-      if (filters.phone && !order.customers.phoneNumber.includes(filters.phone)) {
+      if (filters.phone && !order.customers.phone_numbers?.some(p => p?.includes(filters.phone))) {
         return false;
       }
 

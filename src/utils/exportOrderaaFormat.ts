@@ -35,8 +35,8 @@ export function exportOrderaaFormat(orders: Order[], filename: string = 'orderaa
 
         const data: OrderaaFormatExportData = {
             'FullName': order.customers.name,
-            'Phone': order.customers.phoneNumber,
-            'Phone 2': order.customers.altPhone || '',
+            'Phone': order.customers.phone_numbers?.[0] || '',
+            'Phone 2': order.customers.phone_numbers?.[1] || '',
             'City': order.customers.city || order.customers.governorate || '',
             'Address': order.customers.address || '',
             'Shipping Cost': order.shippingCost || 0,

@@ -210,8 +210,7 @@ export default function CustomerOrdersModal({
                     isSelected={false}
                     code={order.code}
                     name={order.customers.name}
-                    phone={order.customers.phoneNumber}
-                    altPhone={order.customers.altPhone}
+                    phoneNumbers={order.customers.phone_numbers}
                     government={order.customers.governorate || 'غير محدد'}
                     items={order.order_products.map(
                       (op: any) =>

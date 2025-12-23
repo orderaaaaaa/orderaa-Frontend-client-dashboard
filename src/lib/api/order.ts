@@ -113,8 +113,7 @@ export async function updateCustomer(
   customerId: number,
   customerData: {
     name?: string;
-    phoneNumber?: string;
-    altPhone?: string;
+    phoneNumbers?: string[];
     governorate?: string;
     city?: string;
     address?: string;

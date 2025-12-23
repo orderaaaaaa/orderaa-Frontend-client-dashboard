@@ -212,13 +212,12 @@ function OrderDetailsInfoComponent({
     }
   };
 
-  const handlePhoneUpdate = (phoneNumber: string, altPhone?: string) => {
+  const handlePhoneUpdate = (phoneNumbers: string[]) => {
     const updatedOrder = {
       ...localOrder,
       customers: {
         ...localOrder.customers,
-        phoneNumber,
-        altPhone,
+        phone_numbers: phoneNumbers,
       },
     };
     handleUpdate(updatedOrder);

@@ -113,7 +113,7 @@ const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
       <CustomerOrdersModal
         isOpen={isCustomerOrdersModalOpen}
         onClose={() => setIsCustomerOrdersModalOpen(false)}
-        customerPhone={order.customers.phoneNumber}
+        customerPhone={order.customers.phone_numbers?.[0]}
         customerName={order.customers.name}
       />
 
