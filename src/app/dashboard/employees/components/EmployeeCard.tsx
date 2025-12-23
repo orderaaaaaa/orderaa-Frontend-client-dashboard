@@ -19,7 +19,7 @@ import {
 import { AttendanceModal } from './AttendanceModal';
 import { EmployeeCardProps } from '../add-employee/types/employee.types';
 import Link from 'next/link';
-import { If } from 'react-if';
+import { If, Then } from 'react-if';
 import { useAuthStore } from '@/store/authStore';
 
 export const EmployeeCard = memo(function EmployeeCard({
@@ -60,19 +60,20 @@ export const EmployeeCard = memo(function EmployeeCard({
   };
 
   const { user } = useAuthStore();
-  console.log('user', user?.role);
 
   return (
     <div className="bg-white relative rounded-2xl shadow-sm border border-gray-100 p-6 max-w-[420px]">
       {/* Header */}
       <div className="flex flex-row-reverse items-center justify-end gap-5 mb-6">
         <If condition={user?.role !== 'EMPLOYEE'}>
-          <Link href={`employees/employee-settings/${employee.id}`}>
-            <Edit
-              size={20}
-              className="text-gray-600 absolute top-5 left-5 hover:text-gray-900 cursor-pointer"
-            />
-          </Link>
+          <Then>
+            <Link href={`employees/employee-settings/${employee.id}`}>
+              <Edit
+                size={20}
+                className="text-gray-600 absolute top-5 left-5 hover:text-gray-900 cursor-pointer"
+              />
+            </Link>
+          </Then>
         </If>
 
         {/* Name & Department */}
