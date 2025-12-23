@@ -6,6 +6,7 @@ import {
   EmployeeFormData,
   EmployeeFilters,
   PaginatedEmployeesResponse,
+  EmployeeSummary,
 } from '@/schemas/employee.schema';
 import { EmployeeAttendanceResponse } from '../types/attendance.types';
 
@@ -28,6 +29,16 @@ export const useFilteredEmployees = (
     queryKey: ['employees', 'filtered', filters],
     queryFn: async () => {
       return await employeesApi.getFiltered(filters);
+    },
+    enabled: options?.enabled ?? true,
+  });
+
+// Employee summary (counts by role)
+export const useEmployeesSummary = (options?: { enabled?: boolean }) =>
+  useQuery<EmployeeSummary>({
+    queryKey: ['employees', 'summary'],
+    queryFn: async () => {
+      return await employeesApi.getSummary();
     },
     enabled: options?.enabled ?? true,
   });
