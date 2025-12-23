@@ -67,4 +67,25 @@ export const statsData: StatItem[] = [
     iconColor: 'text-red-600',
     iconBgColor: 'bg-red-50',
   },
+  {
+    iconSrc: '/icons/ShippingPaid.svg',
+    label: 'Shipping Paid',
+    value: '15',
+    iconColor: 'text-red-600',
+    iconBgColor: 'bg-red-50',
+  },
+  {
+    iconSrc: '/icons/OppositeOpinion.svg',
+    label: 'Opposite Opinion',
+    value: '15',
+    iconColor: 'text-red-600',
+    iconBgColor: 'bg-red-50',
+  },
+  {
+    iconSrc: '/icons/Cancel.svg',
+    label: 'Cancel',
+    value: '15',
+    iconColor: 'text-red-600',
+    iconBgColor: 'bg-red-50',
+  },
 ];
