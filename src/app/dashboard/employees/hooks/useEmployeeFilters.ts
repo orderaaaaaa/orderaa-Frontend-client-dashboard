@@ -47,10 +47,21 @@ export function useEmployeeFilters() {
     return filterObj;
   }, [debouncedSearchQuery, filterSelections, currentPage]);
 
+  const hasActiveFilters = useMemo(() => {
+    const query = debouncedSearchQuery.trim();
+    const hasSearch = query.length > 0;
+    const hasSelectFilters =
+      filterSelections.accessLevel !== FILTER_ALL ||
+      filterSelections.department !== FILTER_ALL ||
+      filterSelections.performance !== FILTER_ALL;
+
+    return hasSearch || hasSelectFilters;
+  }, [debouncedSearchQuery, filterSelections]);
+
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearchQuery, filterSelections, setCurrentPage]);
 
-  return { filters, limit };
+  return { filters, limit, hasActiveFilters };
 }

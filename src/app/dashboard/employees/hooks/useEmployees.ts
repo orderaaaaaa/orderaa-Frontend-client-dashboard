@@ -9,44 +9,28 @@ import {
 } from '@/schemas/employee.schema';
 import { EmployeeAttendanceResponse } from '../types/attendance.types';
 
-// Fetch all employees (legacy - use useFilteredEmployees instead)
-export const useEmployees = () => {
-  return useQuery<Employee[]>({
+// Fetch all employees
+export const useEmployees = (options?: { enabled?: boolean }) =>
+  useQuery<Employee[]>({
     queryKey: ['employees'],
     queryFn: async () => {
       return await employeesApi.getAll();
     },
+    enabled: options?.enabled ?? true,
   });
-};
 
 // Fetch filtered and paginated employees
-export const useFilteredEmployees = (filters: EmployeeFilters) => {
-  return useQuery<PaginatedEmployeesResponse>({
+export const useFilteredEmployees = (
+  filters: EmployeeFilters,
+  options?: { enabled?: boolean }
+) =>
+  useQuery<PaginatedEmployeesResponse>({
     queryKey: ['employees', 'filtered', filters],
     queryFn: async () => {
       return await employeesApi.getFiltered(filters);
     },
+    enabled: options?.enabled ?? true,
   });
-};
-
-// Create employee
-export const useCreateEmployee = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (data: EmployeeFormData) => {
-      return await employeesApi.create(data);
-    },
-    onSuccess: () => {
-      toast.success('تم إضافة الموظف بنجاح');
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
-    },
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.message || 'حدث خطأ أثناء إضافة الموظف';
-      toast.error(message);
-    },
-  });
-};
 
 // Update employee
 export const useUpdateEmployee = () => {

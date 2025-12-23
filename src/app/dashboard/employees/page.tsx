@@ -2,26 +2,18 @@
 
 import React from 'react';
 import { If, Then, Else } from 'react-if';
-import { useFilteredEmployees } from '@/app/dashboard/employees/hooks/useEmployees';
+import { useEmployeesList } from '@/app/dashboard/employees/hooks/useEmployeesList';
 import EmployeeHeader from './components/EmployeeHeader';
 import { StatCardsSection } from './components/StatCardsSection';
 import { EmployeeSearchFilter } from './components/EmployeeSearchFilter';
 import { EmployeeCard } from './components/EmployeeCard';
 import { Pagination } from './components/Pagination';
-import { useEmployeeFilters } from './hooks/useEmployeeFilters';
 import { useEmployeesStore } from '@/store/employeesStore';
 
 export default function AllEmployees() {
-  const { filters } = useEmployeeFilters();
+  const { employees, totalItems, paginationProps, isLoading, isError } =
+    useEmployeesList();
 
-  const {
-    data: paginatedResponse,
-    isLoading,
-    isError,
-  } = useFilteredEmployees(filters);
-
-  const employees = paginatedResponse?.data || [];
-  const totalItems = paginatedResponse?.totalItems || 0;
   const setCurrentPage = useEmployeesStore((state) => state.setCurrentPage);
 
   if (isError) {
@@ -41,7 +33,7 @@ export default function AllEmployees() {
       <If condition={isLoading}>
         <Then>
           <div className="flex justify-center items-center h-64 mt-10">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5D24E1]"></div>
           </div>
         </Then>
         <Else>
@@ -59,12 +51,12 @@ export default function AllEmployees() {
                   ))}
                 </div>
 
-                {paginatedResponse && (
+                {paginationProps && (
                   <Pagination
-                    currentPage={paginatedResponse.currentPage}
-                    totalPages={paginatedResponse.totalPages}
-                    hasNextPage={paginatedResponse.hasNextPage}
-                    hasPreviousPage={paginatedResponse.hasPreviousPage}
+                    currentPage={paginationProps.currentPage}
+                    totalPages={paginationProps.totalPages}
+                    hasNextPage={paginationProps.hasNextPage}
+                    hasPreviousPage={paginationProps.hasPreviousPage}
                     onPageChange={setCurrentPage}
                   />
                 )}
