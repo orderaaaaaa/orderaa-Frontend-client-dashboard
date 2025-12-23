@@ -61,9 +61,9 @@ export default function AllOrdersRefactor() {
   const { fetchOrdersForExport } = useFetchOrdersForExport();
 
   const orders = ordersData?.data ?? [];
-  const totalOrders = ordersData?.total ?? 0;
-  const totalPages = ordersData?.totalPages ?? 1;
-  const currentPage = ordersData?.page ?? 1;
+  const totalOrders = ordersData?.meta?.totalItems ?? 0;
+  const totalPages = ordersData?.meta?.totalPages ?? 1;
+  const currentPage = ordersData?.meta?.currentPage ?? 1;
   const error = queryError?.message ?? null;
 
   // Track previous page to detect page changes (initialized with current page to skip initial scroll)

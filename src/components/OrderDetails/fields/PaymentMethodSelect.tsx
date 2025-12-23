@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { LiaCreditCardSolid } from 'react-icons/lia';
 import { SearchableSelect } from '@/components/ui/searchable-select';
-import { PaymentMethod, PaymentMethodLabels } from '@/types/orders';
+import { usePaymentMethods } from '@/hooks';
 
 export interface PaymentMethodSelectProps {
   value: string | undefined;
@@ -9,36 +9,49 @@ export interface PaymentMethodSelectProps {
   className?: string;
 }
 
-// Get Arabic label from enum value
-const getArabicLabel = (enumValue: string | undefined): string => {
-  if (!enumValue) return '';
-  return PaymentMethodLabels[enumValue as PaymentMethod] || enumValue;
-};
-
-// Get enum value from Arabic label
-const getEnumValue = (arabicLabel: string): string => {
-  const entry = Object.entries(PaymentMethodLabels).find(
-    ([, label]) => label === arabicLabel
-  );
-  return entry ? entry[0] : arabicLabel;
-};
-
-// Arabic options for display
-const paymentMethodOptions = Object.values(PaymentMethodLabels);
-
 export function PaymentMethodSelect({
   value,
   onChange,
   className = '',
 }: PaymentMethodSelectProps) {
-  // Convert enum value to Arabic for display
-  const displayValue = getArabicLabel(value);
+  const [hasBeenOpened, setHasBeenOpened] = useState(false);
+  const { paymentMethods, isLoading } = usePaymentMethods(hasBeenOpened);
 
-  // Handle change - convert Arabic back to enum value
-  const handleChange = (arabicValue: string) => {
-    const enumValue = getEnumValue(arabicValue);
-    onChange(enumValue);
+  const handleOpenChange = (open: boolean) => {
+    if (open && !hasBeenOpened) {
+      setHasBeenOpened(true);
+    }
   };
+
+  // Create a map of key -> label for lookups
+  const methodMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    paymentMethods.forEach((method) => {
+      map[method.key] = method.label;
+    });
+    return map;
+  }, [paymentMethods]);
+
+  // Create reverse map label -> key
+  const reverseMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    paymentMethods.forEach((method) => {
+      map[method.label] = method.key;
+    });
+    return map;
+  }, [paymentMethods]);
+
+  // Get label from key for display
+  const displayValue = value ? methodMap[value] || value : '';
+
+  // Handle change - convert label back to key
+  const handleChange = (label: string) => {
+    const key = reverseMap[label] || label;
+    onChange(key);
+  };
+
+  // Get labels for options
+  const options = paymentMethods.map((method) => method.label);
 
   return (
     <div className={`flex flex-col gap-1 min-w-0 overflow-hidden ${className}`}>
@@ -48,13 +61,15 @@ export function PaymentMethodSelect({
         <SearchableSelect
           value={displayValue}
           onValueChange={handleChange}
-          options={paymentMethodOptions}
+          options={options}
           placeholder="اختر طريقة الدفع"
           searchPlaceholder="بحث..."
           emptyMessage="لا توجد طرق دفع متاحة"
           noResultsMessage="لا توجد نتائج للبحث"
           triggerClassName="flex-1 border-none shadow-none h-auto p-0 bg-transparent font-bold text-[15px] text-[#000000]"
           searchThreshold={5}
+          loading={isLoading}
+          onOpenChange={handleOpenChange}
         />
       </div>
     </div>

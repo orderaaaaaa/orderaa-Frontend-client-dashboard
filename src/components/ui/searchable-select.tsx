@@ -25,6 +25,7 @@ interface SearchableSelectProps {
   loading?: boolean;
   searchThreshold?: number; // Show search when options exceed this number (default: 5)
   debounceMs?: number; // Debounce delay in milliseconds (default: 300)
+  onOpenChange?: (open: boolean) => void; // Callback when dropdown opens/closes
 }
 
 export function SearchableSelect({
@@ -41,8 +42,14 @@ export function SearchableSelect({
   loading = false,
   searchThreshold = 5,
   debounceMs = 300,
+  onOpenChange,
 }: SearchableSelectProps) {
   const [open, setOpen] = useState(false);
+
+  const handleOpenChange = useCallback((isOpen: boolean) => {
+    setOpen(isOpen);
+    onOpenChange?.(isOpen);
+  }, [onOpenChange]);
   const [searchQuery, setSearchQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -64,10 +71,10 @@ export function SearchableSelect({
   const handleSelect = useCallback(
     (selectedValue: string) => {
       onValueChange(selectedValue);
-      setOpen(false);
+      handleOpenChange(false);
       setSearchQuery('');
     },
-    [onValueChange]
+    [onValueChange, handleOpenChange]
   );
 
   // Focus input when popover opens
@@ -115,13 +122,13 @@ export function SearchableSelect({
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <button
           type="button"
           disabled={disabled || loading}
           className={cn(
-            'flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background',
+            'cursor-pointer flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background',
             'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
             'disabled:cursor-not-allowed disabled:opacity-50',
             '[&>span]:line-clamp-1',

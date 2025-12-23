@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Trash2, SquarePen, PackagePlus, CirclePlus } from 'lucide-react';
-import { Order } from '@/types/orders';
+import { Order, OrderProductVariant } from '@/types/orders';
 import EditProductModal from './EditProductModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import AddSameTypeProductModal from './AddSameTypeProductModal';
@@ -22,42 +22,6 @@ interface OrderDetailsProductCardProps {
   order: Order;
 }
 
-function parseVariantToRecord(variant: string | null | undefined): Record<string, string> {
-  if (!variant) {
-    return {};
-  }
-
-  // Try to parse as JSON array of {label, value} objects
-  try {
-    const parsed = JSON.parse(variant);
-    if (Array.isArray(parsed)) {
-      const record: Record<string, string> = {};
-      parsed.forEach((item: { label?: string; value?: string }) => {
-        if (item.label && item.value) {
-          record[item.label] = item.value;
-        }
-      });
-      return record;
-    }
-  } catch {
-    // Not JSON, try legacy format
-  }
-
-  // Legacy format: "size - color"
-  if (variant.includes(' - ')) {
-    const [size, color] = variant.split(' - ').map(s => s.trim());
-    return { size: size || '', color: color || '' };
-  }
-
-  // Check if it's just a number (size)
-  if (/^\d+$/.test(variant.trim())) {
-    return { size: variant.trim() };
-  }
-
-  // Otherwise, assume it's a color
-  return { color: variant.trim() };
-}
-
 function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
   // React Query mutations and queries
   const updateOrderProductMutation = useUpdateOrderProduct();
@@ -71,35 +35,27 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
   const [isAddNewProductModalOpen, setIsAddNewProductModalOpen] = useState(false);
   const [viewingProductId, setViewingProductId] = useState<number | null>(null);
   const [productsData, setProductsData] = useState(
-    order.order_products?.map((orderProduct) => {
-      // Parse the variant to get variants record
-      const variants = parseVariantToRecord(orderProduct.variant);
-
-      return {
-        id: orderProduct.id,
-        productId: orderProduct.productId,
-        product: orderProduct.products.name,
-        variants,
-        price: orderProduct.price,
-        img: orderProduct.products.image || '/wireless-headphones.png',
-      };
-    }) || []
+    order.order_products?.map((orderProduct) => ({
+      id: orderProduct.id,
+      productId: orderProduct.productId,
+      product: orderProduct.products.name,
+      variants: orderProduct.variants || [],
+      price: orderProduct.price,
+      img: orderProduct.products.image || '/wireless-headphones.png',
+    })) || []
   );
 
   // Sync productsData when order.order_products changes (e.g., after query invalidation)
   useEffect(() => {
     setProductsData(
-      order.order_products?.map((orderProduct) => {
-        const variants = parseVariantToRecord(orderProduct.variant);
-        return {
-          id: orderProduct.id,
-          productId: orderProduct.productId,
-          product: orderProduct.products.name,
-          variants,
-          price: orderProduct.price,
-          img: orderProduct.products.image || '/wireless-headphones.png',
-        };
-      }) || []
+      order.order_products?.map((orderProduct) => ({
+        id: orderProduct.id,
+        productId: orderProduct.productId,
+        product: orderProduct.products.name,
+        variants: orderProduct.variants || [],
+        price: orderProduct.price,
+        img: orderProduct.products.image || '/wireless-headphones.png',
+      })) || []
     );
   }, [order.order_products]);
 
@@ -225,8 +181,16 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
                 <h3 className="text-[#1E1E1E] font-bold text-lg ">
                   {item.product}
                 </h3>
-                {/* <p className="text-[#1E1E1E] font-bold text-lg ">اللون: {item.color}</p>
-                <p className="text-[#1E1E1E] font-bold text-lg ">القياس: {item.size}</p> */}
+
+                {item.variants.length > 0 && (
+                  <div className="flex flex-col gap-1">
+                    {item.variants.map((variant, idx) => (
+                      <p key={idx} className="text-[#1E1E1E] text-sm">
+                        {variant.label}: {variant.value}
+                      </p>
+                    ))}
+                  </div>
+                )}
 
                 <p className="text-[#1E1E1E] font-bold text-lg ">
                   {item.price} جنيه
@@ -291,7 +255,10 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
           onClose={() => setEditingProductId(null)}
           onSave={(variants) => handleSaveEdit(editingProduct.id, variants)}
           productId={editingProduct.productId}
-          currentVariants={editingProduct.variants}
+          currentVariants={editingProduct.variants.reduce(
+            (acc, v) => ({ ...acc, [v.label]: v.value }),
+            {} as Record<string, string>
+          )}
         />
       )}
 

@@ -11,6 +11,7 @@ import { ShippingSection } from './sections/ShippingSection';
 import { PackagingNotesSection } from './sections/PackagingNotesSection';
 import { OrderActionsFooter } from './actions/OrderActionsFooter';
 import { OrderActionModals } from './modals/OrderActionModals';
+import { ErrorModal } from './modals/ErrorModal';
 
 interface OrderDetailsInfoComponentProps {
   order: Order;
@@ -45,10 +46,17 @@ function OrderDetailsInfoComponent({
     message: '',
     action: '',
   });
+  const [errorModal, setErrorModal] = useState<{
+    isOpen: boolean;
+    message: string;
+  }>({
+    isOpen: false,
+    message: '',
+  });
 
   // Fetch available statuses using React Query
   const { data: statusesData, error: statusesError } = useOrderStatusesQuery();
-  const availableStatuses = statusesData?.statuses ?? [];
+  const availableStatuses = statusesData ?? [];
 
   // Show error toast if statuses fail to load
   useEffect(() => {
@@ -187,18 +195,20 @@ function OrderDetailsInfoComponent({
   const handleConfirmAction = async () => {
     const action = confirmationDialog.action;
 
-    // Check if this is a follow-up action
-    if (followUpActions.includes(action)) {
-      const label = followUpActionLabels[action] || action;
-      const success = await actions.handleFollowUpAction(label);
-      if (!success) {
-        throw new Error('Failed to update follow-up');
+    try {
+      // Check if this is a follow-up action
+      if (followUpActions.includes(action)) {
+        const label = followUpActionLabels[action] || action;
+        await actions.handleFollowUpAction(label);
+      } else {
+        await actions.handleConfirmAction(action);
       }
-    } else {
-      const success = await actions.handleConfirmAction(action);
-      if (!success) {
-        throw new Error('Failed to update order status');
-      }
+    } catch (error: any) {
+      // Show error modal with API error message
+      setErrorModal({
+        isOpen: true,
+        message: error?.message || 'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.',
+      });
     }
   };
 
@@ -256,6 +266,13 @@ function OrderDetailsInfoComponent({
           setConfirmationDialog({ isOpen: false, title: '', message: '', action: '' })
         }
         onConfirmAction={handleConfirmAction}
+      />
+
+      <ErrorModal
+        isOpen={errorModal.isOpen}
+        onClose={() => setErrorModal({ isOpen: false, message: '' })}
+        title="فشل"
+        message={errorModal.message}
       />
     </>
   );

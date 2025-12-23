@@ -13,7 +13,7 @@ import {
   PaginatedResponse,
   FilterOptionsResponse,
   OrderStatisticsResponse,
-  OrderStatusesResponse,
+  OrderStatusItem,
   Product,
 } from '@/types/orders';
 
@@ -46,8 +46,8 @@ export const useInfiniteOrders = (filters: Omit<FilterOrdersDto, 'page'>) => {
     },
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
-      if (lastPage.page < lastPage.totalPages) {
-        return lastPage.page + 1;
+      if (lastPage.meta.hasNextPage) {
+        return lastPage.meta.currentPage + 1;
       }
       return undefined;
     },
@@ -84,9 +84,8 @@ export const useOrderStatusesQuery = () => {
   return useQuery({
     queryKey: [QUERY_KEYS.ORDER_STATUSES] as QueryKey,
     queryFn: async () => {
-      const response =
-        await http.get<OrderStatusesResponse>('/lookups/order-statuses');
-      return response.data;
+      const response = await http.get<{ statuses: OrderStatusItem[] }>('/lookups/order-statuses');
+      return response.data.statuses;
     },
     staleTime: Infinity,
   });
@@ -230,12 +229,6 @@ export const useAddOrderProduct = () => {
   });
 };
 
-// Phone number entry for API
-export interface PhoneNumberEntry {
-  phoneNumber: string;
-  isPrimary: boolean;
-}
-
 // Update customer mutation
 export const useUpdateCustomer = () => {
   const queryClient = useQueryClient();
@@ -248,7 +241,7 @@ export const useUpdateCustomer = () => {
       customerId: number;
       data: {
         name?: string;
-        phoneNumbers?: PhoneNumberEntry[];
+        phoneNumbers?: string[];
         governorate?: string;
         city?: string;
         address?: string;

@@ -64,11 +64,11 @@ function PageTaps({ data, statusCounts, totalOrders, onStatusChange }: PageTapsP
   const { selectedStatus, setSelectedStatus } = useOrdersStore();
 
   const { data: statusesData, isLoading: loading } = useOrderStatusesQuery();
-  const statuses = statusesData?.statuses ?? [];
+  const statuses = statusesData ?? [];
 
   const handleTabClick = (status: OrderStatus | null) => {
-    setSelectedStatus(status); // Keep store in sync
-    onStatusChange?.(status); // Call callback if provided
+    setSelectedStatus(status); 
+    onStatusChange?.(status); 
   };
 
   if (loading) {
@@ -86,7 +86,6 @@ function PageTaps({ data, statusCounts, totalOrders, onStatusChange }: PageTapsP
   return (
     <div className="w-full">
       <div className="flex md:grid sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 overflow-x-auto pb-2 md:overflow-x-visible scrollbar-thin -mx-1 px-1">
-        {/* All Orders Tab */}
         <PageTab
           label="جميع الطلبات"
           count={totalOrders ?? data?.length ?? 0}
@@ -95,15 +94,14 @@ function PageTaps({ data, statusCounts, totalOrders, onStatusChange }: PageTapsP
           onClick={() => handleTabClick(null)}
         />
 
-        {/* Dynamic Status Tabs from API */}
         {statuses.map((status) => (
           <PageTab
-            key={status.value}
+            key={status.key}
             label={status.label}
-            count={statusCounts?.[status.value] ?? 0}
-            icon={getIconForStatus(status.value)}
-            active={selectedStatus === status.value as OrderStatus}
-            onClick={() => handleTabClick(status.value as OrderStatus)}
+            count={statusCounts?.[status.key] ?? 0}
+            icon={getIconForStatus(status.key)}
+            active={selectedStatus === status.key as OrderStatus}
+            onClick={() => handleTabClick(status.key as OrderStatus)}
           />
         ))}
       </div>

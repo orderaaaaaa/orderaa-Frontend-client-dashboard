@@ -123,13 +123,20 @@ export interface DropdownContentProps {
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onClose: () => void; // Add this line
 }
+// Pagination Meta
+export interface PaginationMeta {
+  currentPage: number;
+  totalPages: number;
+  itemsPerPage: number;
+  totalItems: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
 // Pagination Response
 export interface PaginatedResponse<T> {
   data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  meta: PaginationMeta;
 }
 
 // Legacy filters (for FilterSection component)
@@ -200,6 +207,12 @@ export interface Product {
   updatedAt: string;
 }
 
+// Order Product Variant
+export interface OrderProductVariant {
+  label: string;
+  value: string;
+}
+
 // Order Product Interface
 export interface OrderProduct {
   id: number;
@@ -209,6 +222,7 @@ export interface OrderProduct {
   price: number;
   sku?: string;
   variant?: string;
+  variants?: OrderProductVariant[];
   products: Product;
 }
 
@@ -290,13 +304,20 @@ export interface FilterOrdersDto {
   confirmedDate?: string;
 }
 
+// Pagination Meta
+export interface PaginationMeta {
+  currentPage: number;
+  totalPages: number;
+  itemsPerPage: number;
+  totalItems: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
 // Pagination Response
 export interface PaginatedResponse<T> {
   data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  meta: PaginationMeta;
 }
 
 // Legacy filters (for FilterSection component)
@@ -348,13 +369,8 @@ export interface OrderStatisticsResponse {
   data: OrderStatistics;
 }
 
-// Order Status Item
+// Order Status Item (from /lookups/order-statuses API)
 export interface OrderStatusItem {
-  value: string;
+  key: string;
   label: string;
-}
-
-// Order Statuses Response (from backend)
-export interface OrderStatusesResponse {
-  statuses: OrderStatusItem[];
 }

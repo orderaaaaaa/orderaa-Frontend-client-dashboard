@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { Button } from '../ui/button';
 import { getGovernorates, getCities } from '@/lib/api/lookups';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import { useShippingCompanies } from '@/hooks';
 
 interface EditShippingModalProps {
   isOpen: boolean;
@@ -29,8 +30,6 @@ interface City {
   value: string;
 }
 
-const shippingCompanyOptions = ['ارامبكس', 'فيدكس', 'DHL', 'شركة أخرى'];
-
 export default function EditShippingModal({
   isOpen,
   onClose,
@@ -43,6 +42,31 @@ export default function EditShippingModal({
   const [loadingGovernorates, setLoadingGovernorates] = useState(false);
   const [loadingCities, setLoadingCities] = useState(false);
   const [selectedGovernorateId, setSelectedGovernorateId] = useState<string>('');
+
+  const { shippingCompanies, isLoading: loadingShippingCompanies } = useShippingCompanies(isOpen);
+
+  // Create maps for shipping company key <-> label conversion
+  const shippingCompanyMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    shippingCompanies.forEach((company) => {
+      map[company.key] = company.label;
+    });
+    return map;
+  }, [shippingCompanies]);
+
+  const shippingCompanyReverseMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    shippingCompanies.forEach((company) => {
+      map[company.label] = company.key;
+    });
+    return map;
+  }, [shippingCompanies]);
+
+  // Convert shipping companies to string array for SearchableSelect
+  const shippingCompanyOptions = useMemo(
+    () => shippingCompanies.map((company) => company.label),
+    [shippingCompanies]
+  );
 
   // Convert governorates to string array for SearchableSelect
   const governorateOptions = useMemo(
@@ -71,8 +95,12 @@ export default function EditShippingModal({
     const fetchGovernorates = async () => {
       try {
         setLoadingGovernorates(true);
-        const data = await getGovernorates();
-        setGovernorates(data as Governorate[]);
+        const data = await getGovernorates() as { key: string; label?: string; value?: string }[];
+        const transformed = data.map((item) => ({
+          key: item.key,
+          value: item.label || item.value || '',
+        }));
+        setGovernorates(transformed);
       } catch (error) {
         console.error('Failed to load governorates:', error);
       } finally {
@@ -95,8 +123,12 @@ export default function EditShippingModal({
 
       try {
         setLoadingCities(true);
-        const data = await getCities(selectedGovernorateId);
-        setCities(data as City[]);
+        const data = await getCities(selectedGovernorateId) as { key: string; label?: string; value?: string }[];
+        const transformed = data.map((item) => ({
+          key: item.key,
+          value: item.label || item.value || '',
+        }));
+        setCities(transformed);
       } catch (error) {
         console.error('Failed to load cities:', error);
         setCities([]);
@@ -157,9 +189,9 @@ export default function EditShippingModal({
             <div className="flex flex-col gap-2">
               <label className="font-bold text-[#1F1F1F]">الشركة</label>
               <SearchableSelect
-                value={formData.shippingCompany}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, shippingCompany: value })
+                value={formData.shippingCompany ? shippingCompanyMap[formData.shippingCompany] || formData.shippingCompany : ''}
+                onValueChange={(label) =>
+                  setFormData({ ...formData, shippingCompany: shippingCompanyReverseMap[label] || label })
                 }
                 options={shippingCompanyOptions}
                 placeholder="اختر الشركة"
@@ -168,6 +200,7 @@ export default function EditShippingModal({
                 noResultsMessage="لا توجد نتائج للبحث"
                 triggerClassName="w-full border-[#CED4DA] rounded-lg h-12"
                 searchThreshold={5}
+                loading={loadingShippingCompanies}
               />
             </div>
 

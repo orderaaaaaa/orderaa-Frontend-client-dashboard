@@ -5,6 +5,7 @@ import {
   LiaTimesSolid,
 } from 'react-icons/lia';
 import { IconType } from 'react-icons';
+import { z } from 'zod';
 import { useEditableField } from '@/hooks/OrderDetails/useEditableField';
 
 /**
@@ -18,6 +19,8 @@ export interface EditableTextFieldProps {
   placeholder?: string;
   className?: string;
   multiline?: boolean;
+  inputType?: 'text' | 'number';
+  validationSchema?: z.ZodSchema<string>;
 }
 
 /**
@@ -35,10 +38,13 @@ export function EditableTextField({
   placeholder,
   className = '',
   multiline = false,
+  inputType = 'text',
+  validationSchema,
 }: EditableTextFieldProps) {
   const field = useEditableField({
     initialValue: value,
     onSave,
+    validationSchema,
   });
 
   const tagStyle =
@@ -53,39 +59,54 @@ export function EditableTextField({
       <div className={`${tagStyle} relative w-full overflow-hidden`}>
         {Icon && <Icon size={18} className="flex-shrink-0 self-start mt-1" />}
         {field.isEditing ? (
-          <div className={`flex ${multiline ? 'flex-col' : 'items-center'} gap-1 flex-1 min-w-0 w-full overflow-hidden`}>
-            {multiline ? (
-              <textarea
-                value={field.value}
-                onChange={(e) => field.setValue(e.target.value)}
-                placeholder={placeholder}
-                className="flex-1 min-w-0 w-full border border-[#5D24E1] rounded px-2 py-1 text-base focus:outline-none focus:ring-1 focus:ring-[#5D24E1] min-h-[200px] resize-y"
-                autoFocus
-              />
-            ) : (
-              <input
-                type="text"
-                value={field.value}
-                onChange={(e) => field.setValue(e.target.value)}
-                placeholder={placeholder}
-                className="flex-1 min-w-0 w-full border border-[#5D24E1] rounded px-2 py-1 text-base focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
-                autoFocus
-              />
-            )}
-            <div className={`flex gap-1 ${multiline ? 'self-end' : 'flex-shrink-0'}`}>
-              <button
-                onClick={field.saveEdit}
-                className="p-1 hover:bg-green-100 rounded transition-colors"
-              >
-                <LiaCheckSolid className="cursor-pointer w-4 h-4 text-green-600" />
-              </button>
-              <button
-                onClick={field.cancelEdit}
-                className="p-1 hover:bg-red-100 rounded transition-colors"
-              >
-                <LiaTimesSolid className="cursor-pointer w-4 h-4 text-red-600" />
-              </button>
+          <div className={`flex ${multiline ? 'flex-col' : 'flex-col'} gap-1 flex-1 min-w-0 w-full overflow-hidden`}>
+            <div className={`flex ${multiline ? 'flex-col' : 'items-center'} gap-1`}>
+              {multiline ? (
+                <textarea
+                  value={field.value}
+                  onChange={(e) => field.setValue(e.target.value)}
+                  placeholder={placeholder}
+                  className={`flex-1 min-w-0 w-full border rounded px-2 py-1 text-base focus:outline-none focus:ring-1 min-h-[200px] resize-y ${
+                    field.error
+                      ? 'border-red-500 focus:ring-red-500'
+                      : 'border-[#5D24E1] focus:ring-[#5D24E1]'
+                  }`}
+                  autoFocus
+                />
+              ) : (
+                <input
+                  type={inputType === 'number' ? 'text' : 'text'}
+                  inputMode={inputType === 'number' ? 'numeric' : 'text'}
+                  value={field.value}
+                  onChange={(e) => field.setValue(e.target.value)}
+                  placeholder={placeholder}
+                  className={`flex-1 min-w-0 w-full border rounded px-2 py-1 text-base focus:outline-none focus:ring-1 ${
+                    field.error
+                      ? 'border-red-500 focus:ring-red-500'
+                      : 'border-[#5D24E1] focus:ring-[#5D24E1]'
+                  }`}
+                  autoFocus
+                />
+              )}
+              <div className={`flex gap-1 ${multiline ? 'self-end' : 'flex-shrink-0'}`}>
+                <button
+                  onClick={field.saveEdit}
+                  disabled={!!field.error}
+                  className="p-1 hover:bg-green-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <LiaCheckSolid className="cursor-pointer w-4 h-4 text-green-600" />
+                </button>
+                <button
+                  onClick={field.cancelEdit}
+                  className="p-1 hover:bg-red-100 rounded transition-colors"
+                >
+                  <LiaTimesSolid className="cursor-pointer w-4 h-4 text-red-600" />
+                </button>
+              </div>
             </div>
+            {field.error && (
+              <span className="text-red-500 text-xs">{field.error}</span>
+            )}
           </div>
         ) : (
           <div className="w-full flex items-start justify-between min-w-0 overflow-hidden">

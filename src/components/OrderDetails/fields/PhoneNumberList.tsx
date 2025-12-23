@@ -104,13 +104,13 @@ export function PhoneNumberList({
                 />
                 <button
                   onClick={phones.handleSave}
-                  className="p-1 hover:bg-green-100 rounded transition-colors flex-shrink-0"
+                  className="p-1 hover:bg-green-100 rounded transition-colors flex-shrink-0 cursor-pointer"
                 >
                   <LiaCheckSolid className="w-4 h-4 text-green-600" />
                 </button>
                 <button
                   onClick={phones.handleCancel}
-                  className="p-1 hover:bg-red-100 rounded transition-colors flex-shrink-0"
+                  className="p-1 hover:bg-red-100 rounded transition-colors flex-shrink-0 cursor-pointer"
                 >
                   <LiaTimesSolid className="w-4 h-4 text-red-600" />
                 </button>
@@ -200,13 +200,13 @@ export function PhoneNumberList({
             />
             <button
               onClick={phones.handleSave}
-              className="p-1 hover:bg-green-100 rounded transition-colors flex-shrink-0"
+              className="p-1 hover:bg-green-100 rounded transition-colors flex-shrink-0 cursor-pointer"
             >
               <LiaCheckSolid className="w-4 h-4 text-green-600" />
             </button>
             <button
               onClick={phones.handleCancel}
-              className="p-1 hover:bg-red-100 rounded transition-colors flex-shrink-0"
+              className="p-1 hover:bg-red-100 rounded transition-colors flex-shrink-0 cursor-pointer"
             >
               <LiaTimesSolid className="w-4 h-4 text-red-600" />
             </button>
