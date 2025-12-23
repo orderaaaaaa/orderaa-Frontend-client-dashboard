@@ -17,7 +17,7 @@ import {
 import {
   ACCESS_LEVEL_OPTIONS,
   DEPARTMENT_OPTIONS,
-} from '@/app/dashboard/employees/add-employee/constants/employeesFormOptions';
+} from '@/app/dashboard/employees/constants/employeesFormOptions';
 import { EmployeeFormFieldsProps } from '../types/employee.types';
 
 export default function EmployeeFormFields({
