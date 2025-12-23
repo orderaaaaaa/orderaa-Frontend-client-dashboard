@@ -9,7 +9,12 @@ import {
 } from '@/schemas/personalData.schema';
 import Input from '@/components/ui/Input';
 import SearchableSelect from '@/app/dashboard/orders/allOrders/components/FilterSection/SearchableSelect';
-import { LiaBuilding, LiaPhoneSolid } from 'react-icons/lia';
+import {
+  LiaBuilding,
+  LiaPhoneSolid,
+  LiaShieldAltSolid,
+  LiaUserEditSolid,
+} from 'react-icons/lia';
 import { CiAt } from 'react-icons/ci';
 import { IoBriefcaseOutline } from 'react-icons/io5';
 import useGovernorates from '@/hooks/useGovernorates';
@@ -93,12 +98,8 @@ export default function PersonalData() {
     <div className="bg-white rounded-lg p-6" style={{ direction: 'rtl' }}>
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
-        <div className=" p-4 bg-[#5D24E114] rounded flex items-center justify-center">
-          <img
-            src="/Icons/WebAccount.svg"
-            alt="Web Account"
-            className="w-5 h-5 accent-[#5D24E1]"
-          />
+        <div className=" p-3 bg-[#5D24E114] rounded flex items-center justify-center">
+          <LiaUserEditSolid className="w-7 h-7 text-[#5D24E1]" />
         </div>
         <h2 className="text-2xl font-medium text-right">البيانات الشخصية</h2>
       </div>

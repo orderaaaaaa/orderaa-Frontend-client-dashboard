@@ -7,7 +7,7 @@ import {
   employeeSchema,
   type EmployeeFormData,
 } from '@/schemas/employee.schema';
-import { useCreateEmployee } from '@/app/dashboard/employees/hooks/useEmployees';
+import { useCreateEmployee } from './hooks/useCreateEmployee';
 import EmployeeFormHeader from './components/EmployeeFormHeader';
 import EmployeeFormFields from './components/EmployeeFormFields';
 import { useRouter } from 'next/navigation';
