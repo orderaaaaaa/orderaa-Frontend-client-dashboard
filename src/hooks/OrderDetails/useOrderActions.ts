@@ -94,25 +94,27 @@ export function useOrderActions({
         const statusLabel = availableStatuses.find((s) => s.key === status)?.label || status;
         toast.success(`تم تحديث حالة الطلب إلى ${statusLabel} بنجاح`);
 
-        if (onNavigateToNextOrder && dateRange) {
-          const fromISO = dateRange.from?.toISOString();
-          const toISO = dateRange.to?.toISOString();
+        if (onNavigateToNextOrder) {
+          const fromISO = dateRange?.from?.toISOString();
+          const toISO = dateRange?.to?.toISOString();
 
-          if (fromISO && toISO) {
-            try {
-              const nextOrderResponse = await getNextOrderId(
-                order.id,
-                statusFilter || undefined,
-                fromISO,
-                toISO
-              );
+          try {
+            const nextOrderResponse = await getNextOrderId(
+              order.id,
+              statusFilter || undefined,
+              fromISO,
+              toISO
+            );
 
-              if (nextOrderResponse?.orderId) {
-                onNavigateToNextOrder(nextOrderResponse.orderId);
-              }
-            } catch (nextErr) {
-              console.error('Failed to get next order:', nextErr);
+            if (nextOrderResponse?.id) {
+              onNavigateToNextOrder(nextOrderResponse.id);
             }
+          } catch (nextErr: any) {
+            console.error('Failed to get next order:', nextErr);
+            const errorMessage =
+              nextErr?.response?.data?.message ||
+              'لا يوجد طلبات أخرى مطابقة للفلاتر';
+            toast.info(errorMessage);
           }
         }
 
@@ -263,25 +265,27 @@ export function useOrderActions({
 
         toast.success(`تم تسجيل المتابعة: ${label}`);
 
-        if (onNavigateToNextOrder && dateRange) {
-          const fromISO = dateRange.from?.toISOString();
-          const toISO = dateRange.to?.toISOString();
+        if (onNavigateToNextOrder) {
+          const fromISO = dateRange?.from?.toISOString();
+          const toISO = dateRange?.to?.toISOString();
 
-          if (fromISO && toISO) {
-            try {
-              const nextOrderResponse = await getNextOrderId(
-                order.id,
-                statusFilter || undefined,
-                fromISO,
-                toISO
-              );
+          try {
+            const nextOrderResponse = await getNextOrderId(
+              order.id,
+              statusFilter || undefined,
+              fromISO,
+              toISO
+            );
 
-              if (nextOrderResponse?.orderId) {
-                onNavigateToNextOrder(nextOrderResponse.orderId);
-              }
-            } catch (nextErr) {
-              console.error('Failed to get next order:', nextErr);
+            if (nextOrderResponse?.id) {
+              onNavigateToNextOrder(nextOrderResponse.id);
             }
+          } catch (nextErr: any) {
+            console.error('Failed to get next order:', nextErr);
+            const errorMessage =
+              nextErr?.response?.data?.message ||
+              'لا يوجد طلبات أخرى مطابقة للفلاتر';
+            toast.info(errorMessage);
           }
         }
 

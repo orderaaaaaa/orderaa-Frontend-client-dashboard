@@ -335,7 +335,7 @@ export const useGetNextOrderId = () => {
     if (from) params.from = from;
     if (to) params.to = to;
 
-    const response = await http.get<{ orderId: number }>(
+    const response = await http.get<{ id: number }>(
       `/orders/${orderId}/next`,
       { params }
     );
@@ -345,7 +345,6 @@ export const useGetNextOrderId = () => {
   return { getNextOrderId };
 };
 
-// Fetch orders for search (one-time fetch, not cached)
 export const useFetchOrdersForSearch = () => {
   const fetchOrdersForSearch = async (filters: FilterOrdersDto) => {
     const response = await http.get<PaginatedResponse<Order>>(
