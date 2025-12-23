@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { LiaTimesSolid, LiaCheckSolid } from 'react-icons/lia';
-import { toast } from 'react-toastify';
 import { Button } from '../ui/button';
 import { getGovernorates, getCities } from '@/lib/api/lookups';
 import { SearchableSelect } from '@/components/ui/searchable-select';
@@ -9,7 +8,7 @@ import { useShippingCompanies } from '@/hooks';
 interface EditShippingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: ShippingData) => void;
+  onSave: (data: ShippingData) => Promise<void>;
   initialData: ShippingData;
 }
 
@@ -68,19 +67,48 @@ export default function EditShippingModal({
     [shippingCompanies]
   );
 
-  // Convert governorates to string array for SearchableSelect
+  const governorateMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    governorates.forEach((gov) => {
+      map[gov.key] = gov.value;
+    });
+    return map;
+  }, [governorates]);
+
+  const governorateReverseMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    governorates.forEach((gov) => {
+      map[gov.value] = gov.key;
+    });
+    return map;
+  }, [governorates]);
+
+  const cityMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    cities.forEach((city) => {
+      map[city.key] = city.value;
+    });
+    return map;
+  }, [cities]);
+
+  const cityReverseMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    cities.forEach((city) => {
+      map[city.value] = city.key;
+    });
+    return map;
+  }, [cities]);
+
   const governorateOptions = useMemo(
     () => governorates.map((gov) => gov.value),
     [governorates]
   );
 
-  // Convert cities to string array for SearchableSelect
   const cityOptions = useMemo(
     () => cities.map((city) => city.value),
     [cities]
   );
 
-  // Check if any value has changed
   const hasChanges = useMemo(() => {
     return (
       formData.shippingCompany !== initialData.shippingCompany ||
@@ -90,7 +118,6 @@ export default function EditShippingModal({
     );
   }, [formData, initialData]);
 
-  // Load governorates on mount
   useEffect(() => {
     const fetchGovernorates = async () => {
       try {
@@ -140,29 +167,49 @@ export default function EditShippingModal({
     fetchCities();
   }, [selectedGovernorateId]);
 
-  // Update form data when initial data changes
-  useEffect(() => {
-    setFormData(initialData);
-  }, [initialData]);
+  // Track if modal was previously open to detect opening
+  const wasOpenRef = React.useRef(false);
 
-  const handleSave = () => {
-    if (!hasChanges) return;
-    onSave(formData);
-    toast.success('تم تعديل بيانات الشحن بنجاح');
-    onClose();
+  // Only reset form data when modal opens (not on every initialData change)
+  useEffect(() => {
+    if (isOpen && !wasOpenRef.current) {
+      // Modal just opened - reset form to initial data
+      setFormData(initialData);
+      if (initialData.governorate) {
+        setSelectedGovernorateId(initialData.governorate);
+      } else {
+        setSelectedGovernorateId('');
+      }
+    }
+    wasOpenRef.current = isOpen;
+  }, [isOpen, initialData]);
+
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (!hasChanges || isSaving) return;
+
+    setIsSaving(true);
+    try {
+      await onSave(formData);
+      onClose();
+    } catch {
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
     onClose();
   };
 
-  const handleGovernorateChange = (value: string) => {
-    const governorate = governorates.find((g) => g.value === value);
-    setSelectedGovernorateId(governorate?.key || '');
+  const handleGovernorateChange = (label: string) => {
+    const key = governorateReverseMap[label] || '';
+    setSelectedGovernorateId(key);
     setFormData({
       ...formData,
-      governorate: value,
-      city: '', // Reset city when governorate changes
+      governorate: key,
+      city: '',
     });
   };
 
@@ -208,7 +255,7 @@ export default function EditShippingModal({
             <div className="flex flex-col gap-2">
               <label className="font-bold text-[#1F1F1F]">المحافظة</label>
               <SearchableSelect
-                value={formData.governorate}
+                value={formData.governorate ? governorateMap[formData.governorate] || formData.governorate : ''}
                 onValueChange={handleGovernorateChange}
                 options={governorateOptions}
                 placeholder="اختر المحافظة"
@@ -225,9 +272,9 @@ export default function EditShippingModal({
             <div className="flex flex-col gap-2">
               <label className="font-bold text-[#1F1F1F]">المنطقة</label>
               <SearchableSelect
-                value={formData.city}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, city: value })
+                value={formData.city ? cityMap[formData.city] || formData.city : ''}
+                onValueChange={(label) =>
+                  setFormData({ ...formData, city: cityReverseMap[label] || label })
                 }
                 options={cityOptions}
                 placeholder={
@@ -274,11 +321,17 @@ export default function EditShippingModal({
 
             <Button
               onClick={handleSave}
-              disabled={!hasChanges}
+              disabled={!hasChanges || isSaving}
               className="w-[146px] h-[37px] bg-[#5D24E1] border-[1.5px] border-[#5D24E1] rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <LiaCheckSolid className="w-5 h-5 text-white" />
-              <span className="text-lg font-bold text-white">حفظ</span>
+              {isSaving ? (
+                <span className="text-lg font-bold text-white">جاري الحفظ...</span>
+              ) : (
+                <>
+                  <LiaCheckSolid className="w-5 h-5 text-white" />
+                  <span className="text-lg font-bold text-white">حفظ</span>
+                </>
+              )}
             </Button>
           </div>
         </div>
