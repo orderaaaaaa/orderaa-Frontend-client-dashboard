@@ -22,7 +22,6 @@ export const StatCardsSection = memo(
     const countsByRole = useMemo(() => {
       const map = new Map<string, number>();
       summary?.byRole.forEach((item) => map.set(item.role, item.count));
-      // Fallback total from prop if API missing
       map.set('TOTAL', summary?.totalEmployees ?? totalItems);
       return map;
     }, [summary, totalItems]);
@@ -80,7 +79,7 @@ export const StatCardsSection = memo(
             centeredSlides
             slidesPerView="auto"
             cardsEffect={{
-              slideShadows: false, // match demo style
+              slideShadows: false,
               rotate: true,
               perSlideOffset: 8,
             }}
