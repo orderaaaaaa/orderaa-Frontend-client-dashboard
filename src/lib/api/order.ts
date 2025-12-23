@@ -1,5 +1,5 @@
 import api from './index';
-import { Order, OrderStatus, FilterOrdersDto, PaginatedResponse, FilterOptionsResponse, OrderStatisticsResponse, OrderStatusesResponse } from '@/types/orders';
+import { Order, OrderStatus, FilterOrdersDto, PaginatedResponse, FilterOptionsResponse, OrderStatisticsResponse } from '@/types/orders';
 
 export async function getOrders(
   filters?: FilterOrdersDto
@@ -125,15 +125,6 @@ export async function updateCustomer(
       `/customers/${customerId}`,
       customerData
     );
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-}
-
-export async function getOrderStatuses(): Promise<OrderStatusesResponse> {
-  try {
-    const response = await api.get<OrderStatusesResponse>('/orders/statuses');
     return response.data;
   } catch (error) {
     throw error;
