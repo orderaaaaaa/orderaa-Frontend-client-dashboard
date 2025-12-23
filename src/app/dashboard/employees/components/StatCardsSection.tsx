@@ -36,10 +36,7 @@ export const StatCardsSection = memo(
     const mobileStatCards = useMemo(
       () =>
         STAT_CARDS.map((card) => (
-          <SwiperSlide
-            key={card.title}
-            className="!w-[260px]" // required for cards effect
-          >
+          <SwiperSlide key={card.title} className="!w-[260px]">
             <StatCard
               title={card.title}
               count={getCountByAccessLevel(card.accessLevel)}
