@@ -108,3 +108,8 @@ export interface EmployeeFilters {
   page?: number;
   limit?: number;
 }
+
+export interface EmployeeSummary {
+  byRole: { role: string; count: number }[];
+  totalEmployees: number;
+}

@@ -7,11 +7,10 @@ import {
   employeeSchema,
   type EmployeeFormData,
 } from '@/schemas/employee.schema';
-import { useCreateEmployee } from '@/app/dashboard/employees/hooks/useEmployees';
-import EmployeeFormHeader from './EmployeeFormHeader';
-import EmployeeFormFields from './EmployeeFormFields';
+import { useCreateEmployee } from './hooks/useCreateEmployee';
+import EmployeeFormHeader from './components/EmployeeFormHeader';
+import EmployeeFormFields from './components/EmployeeFormFields';
 import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify';
 
 export default function EmployeesPage() {
   const {

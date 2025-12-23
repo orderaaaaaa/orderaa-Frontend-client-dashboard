@@ -4,6 +4,7 @@ import {
   EmployeeFormData,
   PaginatedEmployeesResponse,
   EmployeeFilters,
+  EmployeeSummary,
 } from '@/schemas/employee.schema';
 import { EmployeeAttendanceResponse } from '../types/attendance.types';
 
@@ -65,4 +66,6 @@ export const employeesApi = {
       `/employees/${id}/attendance?month=${month}`
     ).then((res) => res.data);
   },
+  getSummary: () =>
+    Http.get<EmployeeSummary>('/employees/summary').then((res) => res.data),
 };

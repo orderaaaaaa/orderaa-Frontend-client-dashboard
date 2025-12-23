@@ -2,11 +2,14 @@
 
 import React, { useMemo, useCallback, memo } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination as SwiperPagination } from 'swiper/modules';
+import { EffectCards } from 'swiper/modules';
+
 import { StatCard } from './StatCard';
 import { STAT_CARDS } from '../constants/statCard';
+import { useEmployeesSummary } from '../hooks/useEmployees';
+
 import 'swiper/css';
-import 'swiper/css/pagination';
+import 'swiper/css/effect-cards';
 
 interface StatCardsSectionProps {
   totalItems: number;
@@ -14,20 +17,26 @@ interface StatCardsSectionProps {
 
 export const StatCardsSection = memo(
   function StatCardsSection({ totalItems }: StatCardsSectionProps) {
+    const { data: summary } = useEmployeesSummary();
+
+    const countsByRole = useMemo(() => {
+      const map = new Map<string, number>();
+      summary?.byRole.forEach((item) => map.set(item.role, item.count));
+      map.set('TOTAL', summary?.totalEmployees ?? totalItems);
+      return map;
+    }, [summary, totalItems]);
+
     const getCountByAccessLevel = useCallback(
       (accessLevel: string) => {
-        if (accessLevel === 'TOTAL') {
-          return totalItems;
-        }
-        return 0;
+        return countsByRole.get(accessLevel) ?? 0;
       },
-      [totalItems]
+      [countsByRole]
     );
 
     const mobileStatCards = useMemo(
       () =>
         STAT_CARDS.map((card) => (
-          <SwiperSlide key={card.title}>
+          <SwiperSlide key={card.title} className="!w-[260px]">
             <StatCard
               title={card.title}
               count={getCountByAccessLevel(card.accessLevel)}
@@ -59,29 +68,33 @@ export const StatCardsSection = memo(
 
     return (
       <>
-        {/* Mobile Stat Cards */}
+        {/* Mobile – Swiper Cards Effect */}
         <div className="block sm:hidden mt-6">
           <Swiper
-            modules={[SwiperPagination]}
-            spaceBetween={16}
-            slidesPerView={1}
-            pagination={{ clickable: true }}
-            className="stat-cards-swiper"
+            effect="cards"
+            grabCursor
+            centeredSlides
+            slidesPerView="auto"
+            cardsEffect={{
+              slideShadows: false,
+              rotate: true,
+              perSlideOffset: 8,
+            }}
+            modules={[EffectCards]}
+            className="w-full max-w-xs mx-auto"
           >
             {mobileStatCards}
           </Swiper>
         </div>
 
-        {/* Desktop Stat Cards */}
+        {/* Desktop – Grid */}
         <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-6">
           {desktopStatCards}
         </div>
       </>
     );
   },
-  (prevProps, nextProps) => {
-    return prevProps.totalItems === nextProps.totalItems;
-  }
+  (prev, next) => prev.totalItems === next.totalItems
 );
 
 StatCardsSection.displayName = 'StatCardsSection';

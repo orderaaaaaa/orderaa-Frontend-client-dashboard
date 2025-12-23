@@ -8,6 +8,7 @@ type InputProps = {
   placeholder?: string;
   error?: string;
   register?: any;
+  registerOptions?: any;
   icon?: LucideIcon;
   className?: string;
   value?: string;
@@ -22,6 +23,7 @@ export default function Input({
   placeholder,
   error,
   register,
+  registerOptions,
   icon: Icon,
   className,
   value,
@@ -67,7 +69,7 @@ export default function Input({
           value={value}
           onChange={onChange}
           onKeyDown={onKeyDown}
-          {...(register ? { ...register(name) } : {})}
+          {...(register ? { ...register(name, registerOptions) } : {})}
           {...rest}
         />
         {/* Optional icon on the RIGHT */}
