@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { LiaTimesSolid, LiaCheckSolid } from 'react-icons/lia';
-import { toast } from 'react-toastify';
 import { Button } from '../ui/button';
 import { getGovernorates, getCities } from '@/lib/api/lookups';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import { useShippingCompanies } from '@/hooks';
 
 interface EditShippingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: ShippingData) => void;
+  onSave: (data: ShippingData) => Promise<void>;
   initialData: ShippingData;
 }
 
@@ -29,8 +29,6 @@ interface City {
   value: string;
 }
 
-const shippingCompanyOptions = ['ارامبكس', 'فيدكس', 'DHL', 'شركة أخرى'];
-
 export default function EditShippingModal({
   isOpen,
   onClose,
@@ -44,19 +42,73 @@ export default function EditShippingModal({
   const [loadingCities, setLoadingCities] = useState(false);
   const [selectedGovernorateId, setSelectedGovernorateId] = useState<string>('');
 
-  // Convert governorates to string array for SearchableSelect
+  const { shippingCompanies, isLoading: loadingShippingCompanies } = useShippingCompanies(isOpen);
+
+  // Create maps for shipping company key <-> label conversion
+  const shippingCompanyMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    shippingCompanies.forEach((company) => {
+      map[company.key] = company.label;
+    });
+    return map;
+  }, [shippingCompanies]);
+
+  const shippingCompanyReverseMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    shippingCompanies.forEach((company) => {
+      map[company.label] = company.key;
+    });
+    return map;
+  }, [shippingCompanies]);
+
+  // Convert shipping companies to string array for SearchableSelect
+  const shippingCompanyOptions = useMemo(
+    () => shippingCompanies.map((company) => company.label),
+    [shippingCompanies]
+  );
+
+  const governorateMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    governorates.forEach((gov) => {
+      map[gov.key] = gov.value;
+    });
+    return map;
+  }, [governorates]);
+
+  const governorateReverseMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    governorates.forEach((gov) => {
+      map[gov.value] = gov.key;
+    });
+    return map;
+  }, [governorates]);
+
+  const cityMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    cities.forEach((city) => {
+      map[city.key] = city.value;
+    });
+    return map;
+  }, [cities]);
+
+  const cityReverseMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    cities.forEach((city) => {
+      map[city.value] = city.key;
+    });
+    return map;
+  }, [cities]);
+
   const governorateOptions = useMemo(
     () => governorates.map((gov) => gov.value),
     [governorates]
   );
 
-  // Convert cities to string array for SearchableSelect
   const cityOptions = useMemo(
     () => cities.map((city) => city.value),
     [cities]
   );
 
-  // Check if any value has changed
   const hasChanges = useMemo(() => {
     return (
       formData.shippingCompany !== initialData.shippingCompany ||
@@ -66,13 +118,16 @@ export default function EditShippingModal({
     );
   }, [formData, initialData]);
 
-  // Load governorates on mount
   useEffect(() => {
     const fetchGovernorates = async () => {
       try {
         setLoadingGovernorates(true);
-        const data = await getGovernorates();
-        setGovernorates(data as Governorate[]);
+        const data = await getGovernorates() as { key: string; label?: string; value?: string }[];
+        const transformed = data.map((item) => ({
+          key: item.key,
+          value: item.label || item.value || '',
+        }));
+        setGovernorates(transformed);
       } catch (error) {
         console.error('Failed to load governorates:', error);
       } finally {
@@ -95,8 +150,12 @@ export default function EditShippingModal({
 
       try {
         setLoadingCities(true);
-        const data = await getCities(selectedGovernorateId);
-        setCities(data as City[]);
+        const data = await getCities(selectedGovernorateId) as { key: string; label?: string; value?: string }[];
+        const transformed = data.map((item) => ({
+          key: item.key,
+          value: item.label || item.value || '',
+        }));
+        setCities(transformed);
       } catch (error) {
         console.error('Failed to load cities:', error);
         setCities([]);
@@ -108,29 +167,49 @@ export default function EditShippingModal({
     fetchCities();
   }, [selectedGovernorateId]);
 
-  // Update form data when initial data changes
-  useEffect(() => {
-    setFormData(initialData);
-  }, [initialData]);
+  // Track if modal was previously open to detect opening
+  const wasOpenRef = React.useRef(false);
 
-  const handleSave = () => {
-    if (!hasChanges) return;
-    onSave(formData);
-    toast.success('تم تعديل بيانات الشحن بنجاح');
-    onClose();
+  // Only reset form data when modal opens (not on every initialData change)
+  useEffect(() => {
+    if (isOpen && !wasOpenRef.current) {
+      // Modal just opened - reset form to initial data
+      setFormData(initialData);
+      if (initialData.governorate) {
+        setSelectedGovernorateId(initialData.governorate);
+      } else {
+        setSelectedGovernorateId('');
+      }
+    }
+    wasOpenRef.current = isOpen;
+  }, [isOpen, initialData]);
+
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (!hasChanges || isSaving) return;
+
+    setIsSaving(true);
+    try {
+      await onSave(formData);
+      onClose();
+    } catch {
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
     onClose();
   };
 
-  const handleGovernorateChange = (value: string) => {
-    const governorate = governorates.find((g) => g.value === value);
-    setSelectedGovernorateId(governorate?.key || '');
+  const handleGovernorateChange = (label: string) => {
+    const key = governorateReverseMap[label] || '';
+    setSelectedGovernorateId(key);
     setFormData({
       ...formData,
-      governorate: value,
-      city: '', // Reset city when governorate changes
+      governorate: key,
+      city: '',
     });
   };
 
@@ -157,9 +236,9 @@ export default function EditShippingModal({
             <div className="flex flex-col gap-2">
               <label className="font-bold text-[#1F1F1F]">الشركة</label>
               <SearchableSelect
-                value={formData.shippingCompany}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, shippingCompany: value })
+                value={formData.shippingCompany ? shippingCompanyMap[formData.shippingCompany] || formData.shippingCompany : ''}
+                onValueChange={(label) =>
+                  setFormData({ ...formData, shippingCompany: shippingCompanyReverseMap[label] || label })
                 }
                 options={shippingCompanyOptions}
                 placeholder="اختر الشركة"
@@ -168,6 +247,7 @@ export default function EditShippingModal({
                 noResultsMessage="لا توجد نتائج للبحث"
                 triggerClassName="w-full border-[#CED4DA] rounded-lg h-12"
                 searchThreshold={5}
+                loading={loadingShippingCompanies}
               />
             </div>
 
@@ -175,7 +255,7 @@ export default function EditShippingModal({
             <div className="flex flex-col gap-2">
               <label className="font-bold text-[#1F1F1F]">المحافظة</label>
               <SearchableSelect
-                value={formData.governorate}
+                value={formData.governorate ? governorateMap[formData.governorate] || formData.governorate : ''}
                 onValueChange={handleGovernorateChange}
                 options={governorateOptions}
                 placeholder="اختر المحافظة"
@@ -192,9 +272,9 @@ export default function EditShippingModal({
             <div className="flex flex-col gap-2">
               <label className="font-bold text-[#1F1F1F]">المنطقة</label>
               <SearchableSelect
-                value={formData.city}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, city: value })
+                value={formData.city ? cityMap[formData.city] || formData.city : ''}
+                onValueChange={(label) =>
+                  setFormData({ ...formData, city: cityReverseMap[label] || label })
                 }
                 options={cityOptions}
                 placeholder={
@@ -241,11 +321,17 @@ export default function EditShippingModal({
 
             <Button
               onClick={handleSave}
-              disabled={!hasChanges}
+              disabled={!hasChanges || isSaving}
               className="w-[146px] h-[37px] bg-[#5D24E1] border-[1.5px] border-[#5D24E1] rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <LiaCheckSolid className="w-5 h-5 text-white" />
-              <span className="text-lg font-bold text-white">حفظ</span>
+              {isSaving ? (
+                <span className="text-lg font-bold text-white">جاري الحفظ...</span>
+              ) : (
+                <>
+                  <LiaCheckSolid className="w-5 h-5 text-white" />
+                  <span className="text-lg font-bold text-white">حفظ</span>
+                </>
+              )}
             </Button>
           </div>
         </div>

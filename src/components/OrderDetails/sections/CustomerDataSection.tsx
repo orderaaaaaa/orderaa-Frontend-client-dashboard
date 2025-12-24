@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 export interface CustomerDataSectionProps {
   order: Order;
   onUpdate: (field: string, value: any) => Promise<Order>;
-  onPhoneUpdate?: (phoneNumber: string, altPhone?: string) => void;
+  onPhoneUpdate?: (phoneNumbers: string[]) => void;
   className?: string;
 }
 
@@ -63,8 +63,7 @@ export function CustomerDataSection({
         <PhoneNumberList
           customerId={order.customers.id}
           orderId={order.id}
-          phoneNumber={order.customers.phoneNumber}
-          altPhone={order.customers.altPhone}
+          phoneNumbers={order.customers.phone_numbers}
           onUpdate={onPhoneUpdate}
         />
 

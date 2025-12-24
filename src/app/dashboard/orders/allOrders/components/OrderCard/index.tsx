@@ -7,8 +7,7 @@ interface OrderCardProps {
   id: number;
   code: string;
   name: string;
-  phone: string;
-  altPhone?: string;
+  phoneNumbers: string[];
   government: string;
   items: string[];
   price: number;
@@ -70,8 +69,7 @@ export default function OrderCard({
   id,
   code,
   name,
-  phone,
-  altPhone,
+  phoneNumbers,
   government,
   items,
   price,
@@ -173,19 +171,12 @@ export default function OrderCard({
           </div>
         ) : null}
 
-        {phone && phone !== 'غير محدد' && (
-          <div className="flex flex-row-reverse items-center gap-2">
+        {phoneNumbers.filter(p => p && p !== 'غير محدد').map((phone, index) => (
+          <div key={index} className="flex flex-row-reverse items-center gap-2">
             <span className="text-base font-medium text-black" dir="ltr">{phone}</span>
             <Phone className="w-[18px] h-[18px] flex-shrink-0" style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }} />
           </div>
-        )}
-
-        {altPhone && altPhone !== 'غير محدد' && altPhone !== phone && (
-          <div className="flex flex-row-reverse items-center gap-2">
-            <span className="text-base font-medium text-black" dir="ltr">{altPhone}</span>
-            <Phone className="w-[18px] h-[18px] flex-shrink-0" style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }} />
-          </div>
-        )}
+        ))}
 
         {items && items[0] && items[0] !== 'غير محدد' && (
           <div className="flex flex-row-reverse items-center gap-2">

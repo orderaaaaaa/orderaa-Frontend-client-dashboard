@@ -80,13 +80,13 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
     date: new Date(event.createdAt).toLocaleDateString('ar-EG'),
     time: getTimeAgo(event.createdAt),
     eventType: event.status || 'default',
-    description: event.note || '',
+    note: event.note || '',
   }));
 
   const displayData = [...events];
 
   return (
-    <div className="max-sm:hidden">
+    <div>
       <div className="font-medium p-4 bg-gray-50 mt-8 rounded-xl">
         <div className="flex justify-between">
           <div className="flex items-center gap-2 mb-4">
@@ -104,12 +104,12 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
             <div
               key={item.id}
               className="flex gap-2 bg-white p-3 rounded-lg min-w-[120px] hover:shadow-md transition-shadow"
-              title={item.description}
+              title={item.note}
             >
               {getEventIcon(item.eventType)}
               <div className="flex flex-col">
                 <p className="text-[14px] font-bold text-[#1F1F1F]">
-                  {item.status}
+                  {item.note}
                 </p>
                 <p className="text-[12px] text-gray-600">
                   {item.date}

@@ -113,8 +113,7 @@ export async function updateCustomer(
   customerId: number,
   customerData: {
     name?: string;
-    phoneNumber?: string;
-    altPhone?: string;
+    phoneNumbers?: string[];
     governorate?: string;
     city?: string;
     address?: string;
@@ -148,14 +147,14 @@ export async function getNextOrderId(
   status?: OrderStatus,
   from?: string,
   to?: string
-): Promise<{ orderId: number }> {
+): Promise<{ id: number }> {
   try {
     const params: any = {};
     if (status) params.status = status;
     if (from) params.from = from;
     if (to) params.to = to;
 
-    const response = await api.get<{ orderId: number }>(
+    const response = await api.get<{ id: number }>(
       `/orders/${orderId}/next`,
       { params }
     );

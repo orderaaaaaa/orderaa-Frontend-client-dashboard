@@ -67,10 +67,10 @@ export function useOrderActions({
     }
 
     const matchedStatus = availableStatuses.find(
-      (status) => status.value === expectedStatusValue
+      (status) => status.key === expectedStatusValue
     );
 
-    return matchedStatus ? (matchedStatus.value as OrderStatus) : null;
+    return matchedStatus ? (matchedStatus.key as OrderStatus) : null;
   }, [availableStatuses]);
 
   const handleStatusUpdateAndNavigate = useCallback(
@@ -91,36 +91,44 @@ export function useOrderActions({
           onOrderUpdate(updatedOrder);
         }
 
-        const statusLabel = availableStatuses.find((s) => s.value === status)?.label || status;
+        const statusLabel = availableStatuses.find((s) => s.key === status)?.label || status;
         toast.success(`تم تحديث حالة الطلب إلى ${statusLabel} بنجاح`);
 
-        if (onNavigateToNextOrder && dateRange) {
-          const fromISO = dateRange.from?.toISOString();
-          const toISO = dateRange.to?.toISOString();
+        if (onNavigateToNextOrder) {
+          const fromISO = dateRange?.from?.toISOString();
+          const toISO = dateRange?.to?.toISOString();
 
-          if (fromISO && toISO) {
-            try {
-              const nextOrderResponse = await getNextOrderId(
-                order.id,
-                statusFilter || undefined,
-                fromISO,
-                toISO
-              );
+          try {
+            const nextOrderResponse = await getNextOrderId(
+              order.id,
+              statusFilter || undefined,
+              fromISO,
+              toISO
+            );
 
-              if (nextOrderResponse?.orderId) {
-                onNavigateToNextOrder(nextOrderResponse.orderId);
-              }
-            } catch (nextErr) {
-              console.error('Failed to get next order:', nextErr);
+            if (nextOrderResponse?.id) {
+              onNavigateToNextOrder(nextOrderResponse.id);
             }
+          } catch (nextErr: any) {
+            console.error('Failed to get next order:', nextErr);
+            const errorMessage =
+              nextErr?.response?.data?.message ||
+              'لا يوجد طلبات أخرى مطابقة للفلاتر';
+            toast.info(errorMessage);
           }
         }
 
         return true;
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to update order:', error);
-        toast.error('فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.');
-        return false;
+        // Extract error message from API response
+        const apiErrorMessage =
+          error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          error?.message ||
+          'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.';
+        // Re-throw with the API error message
+        throw new Error(apiErrorMessage);
       }
     },
     [order.id, onOrderUpdate, onNavigateToNextOrder, dateRange, statusFilter, availableStatuses, updateOrderMutation, getNextOrderId]
@@ -232,11 +240,10 @@ export function useOrderActions({
   const handleConfirmAction = useCallback(
     async (action: string) => {
       const status = getStatusFromAction(action);
-      if (status) {
-        return await handleStatusUpdateAndNavigate(status);
+      if (!status) {
+        throw new Error('فشل في تحديد حالة الطلب. يرجى المحاولة مرة أخرى.');
       }
-      toast.error('فشل في تحديد حالة الطلب. يرجى المحاولة مرة أخرى.');
-      return false;
+      return await handleStatusUpdateAndNavigate(status);
     },
     [getStatusFromAction, handleStatusUpdateAndNavigate]
   );
@@ -258,33 +265,41 @@ export function useOrderActions({
 
         toast.success(`تم تسجيل المتابعة: ${label}`);
 
-        if (onNavigateToNextOrder && dateRange) {
-          const fromISO = dateRange.from?.toISOString();
-          const toISO = dateRange.to?.toISOString();
+        if (onNavigateToNextOrder) {
+          const fromISO = dateRange?.from?.toISOString();
+          const toISO = dateRange?.to?.toISOString();
 
-          if (fromISO && toISO) {
-            try {
-              const nextOrderResponse = await getNextOrderId(
-                order.id,
-                statusFilter || undefined,
-                fromISO,
-                toISO
-              );
+          try {
+            const nextOrderResponse = await getNextOrderId(
+              order.id,
+              statusFilter || undefined,
+              fromISO,
+              toISO
+            );
 
-              if (nextOrderResponse?.orderId) {
-                onNavigateToNextOrder(nextOrderResponse.orderId);
-              }
-            } catch (nextErr) {
-              console.error('Failed to get next order:', nextErr);
+            if (nextOrderResponse?.id) {
+              onNavigateToNextOrder(nextOrderResponse.id);
             }
+          } catch (nextErr: any) {
+            console.error('Failed to get next order:', nextErr);
+            const errorMessage =
+              nextErr?.response?.data?.message ||
+              'لا يوجد طلبات أخرى مطابقة للفلاتر';
+            toast.info(errorMessage);
           }
         }
 
         return true;
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to update follow-up:', error);
-        toast.error('فشل في تسجيل المتابعة. يرجى المحاولة مرة أخرى.');
-        return false;
+        // Extract error message from API response
+        const apiErrorMessage =
+          error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          error?.message ||
+          'فشل في تسجيل المتابعة. يرجى المحاولة مرة أخرى.';
+        // Re-throw with the API error message
+        throw new Error(apiErrorMessage);
       }
     },
     [order.id, onOrderUpdate, onNavigateToNextOrder, dateRange, statusFilter, updateOrderMutation, getNextOrderId]

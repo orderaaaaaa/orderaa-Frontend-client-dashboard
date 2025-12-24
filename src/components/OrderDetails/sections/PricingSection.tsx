@@ -1,9 +1,16 @@
 import React from 'react';
 import { LiaFileInvoiceDollarSolid, LiaTruckSolid } from 'react-icons/lia';
+import { z } from 'zod';
 import { EditableTextField } from '../fields/EditableTextField';
 import { PaymentMethodSelect } from '../fields/PaymentMethodSelect';
 import { PaymentStatusSelect } from '../fields/PaymentStatusSelect';
 import { Order } from '@/types/orders';
+
+// Validation schema for price fields - only numbers allowed
+const priceSchema = z.string().refine(
+  (val) => val === '' || /^\d*\.?\d*$/.test(val),
+  { message: 'يجب إدخال أرقام فقط' }
+);
 
 /**
  * Props for PricingSection component
@@ -30,6 +37,8 @@ export function PricingSection({ order, onUpdate, className = '' }: PricingSecti
           label="السعر"
           value={String(order.totalCost)}
           icon={LiaFileInvoiceDollarSolid}
+          inputType="number"
+          validationSchema={priceSchema}
           onSave={async (value) => {
             await onUpdate('totalCost', Number(value));
           }}
@@ -38,6 +47,8 @@ export function PricingSection({ order, onUpdate, className = '' }: PricingSecti
           label="سعر الشحن"
           value={order.shippingCost ? String(order.shippingCost) : undefined}
           icon={LiaTruckSolid}
+          inputType="number"
+          validationSchema={priceSchema}
           onSave={async (value) => {
             await onUpdate('shippingCost', Number(value));
           }}

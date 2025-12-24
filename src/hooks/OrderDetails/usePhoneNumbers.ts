@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useUpdateCustomer, PhoneNumberEntry } from '@/services/orders';
+import { useUpdateCustomer } from '@/services/orders';
 
 /**
  * Options for usePhoneNumbers hook
@@ -7,8 +7,8 @@ import { useUpdateCustomer, PhoneNumberEntry } from '@/services/orders';
 export interface UsePhoneNumbersOptions {
   customerId: number;
   orderId: number;
-  initialPhones: (string | undefined)[];
-  onUpdate?: (phoneNumber: string, altPhone?: string) => void;
+  initialPhones: string[];
+  onUpdate?: (phoneNumbers: string[]) => void;
 }
 
 /**
@@ -26,14 +26,6 @@ export interface PhoneNumbersState {
   handleCancel: () => void;
 }
 
-// Helper function to convert phone strings to API format
-const toPhoneNumberEntries = (phones: string[]): PhoneNumberEntry[] => {
-  return phones.map((phone, index) => ({
-    phoneNumber: phone,
-    isPrimary: index === 0,
-  }));
-};
-
 /**
  * Custom hook to manage phone number CRUD operations
  *
@@ -43,8 +35,8 @@ const toPhoneNumberEntries = (phones: string[]): PhoneNumberEntry[] => {
  * @example
  * const phones = usePhoneNumbers({
  *   customerId: order.customers.id,
- *   initialPhones: [order.customers.phoneNumber, order.customers.altPhone],
- *   onUpdate: (phone, altPhone) => { ... }
+ *   initialPhones: order.customers.phoneNumbers,
+ *   onUpdate: (phoneNumbers) => { ... }
  * });
  *
  * // Usage: phones.phoneNumbers, phones.handleAdd(), phones.handleEdit(index), etc.
@@ -57,9 +49,9 @@ export function usePhoneNumbers({
 }: UsePhoneNumbersOptions): PhoneNumbersState {
   const updateCustomerMutation = useUpdateCustomer();
 
-  // Filter out undefined/null values and create initial phone list
+  // Initialize phone list from array
   const [phoneNumbers, setPhoneNumbers] = useState<string[]>(
-    initialPhones.filter((phone): phone is string => Boolean(phone))
+    initialPhones.filter(Boolean)
   );
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [newPhoneNumber, setNewPhoneNumber] = useState('');
@@ -83,12 +75,12 @@ export function usePhoneNumbers({
         await updateCustomerMutation.mutateAsync({
           customerId,
           data: {
-            phoneNumbers: toPhoneNumberEntries(updatedPhones),
+            phoneNumbers: updatedPhones,
           },
         });
 
         if (onUpdate) {
-          onUpdate(updatedPhones[0] || '', updatedPhones[1]);
+          onUpdate(updatedPhones);
         }
       } catch (error) {
         console.error('Failed to update phone numbers:', error);
@@ -121,12 +113,12 @@ export function usePhoneNumbers({
       await updateCustomerMutation.mutateAsync({
         customerId,
         data: {
-          phoneNumbers: toPhoneNumberEntries(updatedPhones),
+          phoneNumbers: updatedPhones,
         },
       });
 
       if (onUpdate) {
-        onUpdate(updatedPhones[0] || '', updatedPhones[1]);
+        onUpdate(updatedPhones);
       }
     } catch (error) {
       console.error('Failed to update phone numbers:', error);

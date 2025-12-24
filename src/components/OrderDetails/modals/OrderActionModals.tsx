@@ -114,14 +114,8 @@ export function OrderActionModals({
   };
 
   const handleShippingSave = async (data: ShippingData) => {
-    try {
-      await actions.handleUpdateShipping(data);
-      modals.shipping.close();
-    } catch (error) {
-      // Error is already handled by the action (toast shown)
-      // Don't close the modal so user can retry
-      console.error('Failed to update shipping:', error);
-    }
+    // Let errors propagate to the modal's handleSave which handles closing
+    await actions.handleUpdateShipping(data);
   };
 
   const handlePackagingNoteSave = async () => {

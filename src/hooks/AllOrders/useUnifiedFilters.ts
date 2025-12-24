@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { OrderFilters, FilterOrdersDto } from '@/types/orders';
 import { useOrdersStore } from '@/store/ordersStore';
 import { useDebounce } from '@/utils/debounce';
+import { toast } from 'react-toastify';
 
 // Helper to format date to ISO string
 const formatDateToISO = (date: Date): string => {
@@ -36,33 +37,27 @@ export function useUnifiedFilters() {
     // Debounced filters for API calls using utility hook
     const debouncedFilters = useDebounce(localFilters, 500);
 
-    // Date range setters - clear executionDate when date range is set
+    // Date range setters - block if executionDate is set
     const setFromDate = useCallback((date: Date | null) => {
-        setFromDateInternal(date);
-        if (date) {
-            setLocalFilters(prev => ({ ...prev, executionDate: '' }));
+        if (date && localFilters.executionDate) {
+            toast.error('لا يمكن تحديد نطاق التاريخ وتاريخ التنفيذ معاً. يرجى إزالة تاريخ التنفيذ أولاً.');
+            return;
         }
-    }, []);
+        setFromDateInternal(date);
+    }, [localFilters.executionDate]);
 
     const setToDate = useCallback((date: Date | null) => {
-        setToDateInternal(date);
-        if (date) {
-            setLocalFilters(prev => ({ ...prev, executionDate: '' }));
+        if (date && localFilters.executionDate) {
+            toast.error('لا يمكن تحديد نطاق التاريخ وتاريخ التنفيذ معاً. يرجى إزالة تاريخ التنفيذ أولاً.');
+            return;
         }
-    }, []);
+        setToDateInternal(date);
+    }, [localFilters.executionDate]);
 
     // Reset to page 1 when debounced filters change
     useEffect(() => {
         setPage(1);
     }, [debouncedFilters]);
-
-    // Clear date range when executionDate is set
-    useEffect(() => {
-        if (localFilters.executionDate) {
-            setFromDateInternal(null);
-            setToDateInternal(null);
-        }
-    }, [localFilters.executionDate]);
 
     // Build unified filter object for API using debounced filters
     const apiFilters = useMemo((): FilterOrdersDto => {
@@ -123,9 +118,19 @@ export function useUnifiedFilters() {
     }, [selectedStatus, searchQuery, debouncedFilters, fromDate, toDate, page, limit]);
 
     const updateLocalFilters = useCallback((newFilters: Partial<OrderFilters>) => {
+        // Block executionDate if date range is set
+        if (newFilters.executionDate && (fromDate || toDate)) {
+            toast.error('لا يمكن تحديد تاريخ التنفيذ ونطاق التاريخ معاً. يرجى إزالة نطاق التاريخ أولاً.');
+            // Remove executionDate from the update
+            const { executionDate, ...restFilters } = newFilters;
+            if (Object.keys(restFilters).length > 0) {
+                setLocalFilters((prev) => ({ ...prev, ...restFilters }));
+            }
+            return;
+        }
         setLocalFilters((prev) => ({ ...prev, ...newFilters }));
         // Note: Page reset happens in the debounce effect
-    }, []);
+    }, [fromDate, toDate]);
 
     const resetFilters = useCallback(() => {
         setLocalFilters({
