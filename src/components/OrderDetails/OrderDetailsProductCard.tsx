@@ -17,6 +17,8 @@ import {
 } from '@/services/orders';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
+import { LiaLongArrowAltLeftSolid } from "react-icons/lia";
+import Image from 'next/image';
 
 interface OrderDetailsProductCardProps {
   order: Order;
@@ -164,64 +166,72 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
     <>
       {/* Header with action buttons */}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
           {productsData.map((item) => (
             <div
               key={item.id}
-              className="grid
-              grid-cols-[1fr_1fr]
-              gap-5
-              max-w-[380px]
-              bg-gradient-to-b from-[#FCFAFD] to-[#EADBFF] border-2 border-[#5D24E147]
-              rounded-[20px] py-4 px-2
+              className="flex flex-col
+              max-w-[390px]
+              bg-gradient-to-b from-[#FFFFFF] to-[#EADBFF] border 
+              rounded-[20px] pt-4 pb-3 px-2
               shadow-[0px_4px_4px_0px_#5D24E114]"
             >
-              <div className="flex flex-col gap-2 mx-2">
-                <h3 className="text-[#1E1E1E] font-bold text-lg ">
-                  {item.product}
-                </h3>
+              <div className="grid grid-cols-[1fr_1fr] gap-5">
+                <div className="flex flex-col gap-2 mx-2">
+                  <h3 className="text-[#1E1E1E] font-bold text-lg ">
+                    {item.product}
+                  </h3>
 
-                {item.variants.length > 0 && (
-                  <div className="flex flex-col gap-1">
-                    {item.variants.map((variant, idx) => (
-                      <p key={idx} className="text-[#1E1E1E] text-sm">
-                        {variant.label}: {variant.value}
-                      </p>
-                    ))}
-                  </div>
-                )}
-
-                <p className="text-[#1E1E1E] font-bold text-lg ">
-                  {item.price} جنيه
-                </p>
-
-                <Button
-                  variant="ghost"
-                  onClick={() => handleViewDetailsClick(item.id)}
-                  className="text-[#5D24E1] text-sm font-bold hover:underline text-right mt-1"
-                >
-                  عرض المزيد
-                </Button>
-              </div>
-              <div className="flex flex-col items-end ml-3">
-                <div className="flex justify-end gap-2 mb-2">
-                  {productsData.length > 1 && (
-                    <Trash2
-                      className="cursor-pointer w-5 text-red-600 hover:text-red-700 transition-colors"
-                      onClick={() => handleDeleteClick(item.id)}
-                    />
+                  {item.variants.length > 0 && (
+                    <div className="flex flex-col gap-1">
+                      {item.variants.map((variant, idx) => (
+                        <p key={idx} className="text-base font-bold text-black">
+                          {variant.label}: {variant.value}
+                        </p>
+                      ))}
+                    </div>
                   )}
-                  <SquarePen
-                    className="cursor-pointer w-5 hover:text-purple-700 transition-colors"
-                    onClick={() => handleEditClick(item.id)}
+
+                  <p className="text-[#1E1E1E] font-bold text-lg ">
+                    {item.price} جنيه
+                  </p>
+
+                </div>
+                <div className="flex flex-col items-end ml-2">
+                  <div className="flex justify-end gap-2 mb-4">
+                    <SquarePen
+                      className="cursor-pointer w-4 hover:text-purple-700 transition-colors"
+                      onClick={() => handleEditClick(item.id)}
+                    />
+                    {productsData.length > 1 && (
+                      <Trash2
+                        className="cursor-pointer w-4 text-red-600 hover:text-red-700 transition-colors"
+                        onClick={() => handleDeleteClick(item.id)}
+                      />
+                    )}
+                  </div>
+                  <Image
+                    src={item.img}
+                    alt={item.product}
+                    width={120}
+                    height={120}
+                    className="border flex border-[#B8A3EB] rounded-xl"
                   />
                 </div>
-                <img
-                  src={item.img}
-                  alt=""
-                  className="border-1 flex border-[#B8A3EB] rounded-2xl w-[120px] h-[120px] object-cover"
-                />
+              </div>
+              <hr className='border border-gray-300 mt-3' />
+              <div className='flex justify-start'>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleViewDetailsClick(item.id)}
+                  className="text-[#5D24E1] text-sm font-bold hover:underline text-right mt-1 hover:bg-transparent transition-colors hover:text-[#5D24E1]"
+                >
+                  المزيد
+                  <LiaLongArrowAltLeftSolid className="w-4 h-4 rotate-45" />
+                </Button>
+
               </div>
             </div>
           ))}
