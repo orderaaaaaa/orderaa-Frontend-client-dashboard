@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { PaginationProps } from '../types/pagination.types';
+import { PaginationProps } from '../app/dashboard/employees/types/pagination.types';
 
 export function Pagination({
   currentPage,
@@ -77,7 +77,7 @@ export function Pagination({
   }
 
   return (
-    <div className={`flex items-center justify-center gap-2 mt-8 ${className}`}>
+    <div className={`flex items-center justify-center gap-2 ${className}`}>
       {/* Previous Button */}
       <button
         onClick={handlePrevious}

@@ -12,8 +12,6 @@ export default function CustomerStates() {
           label={stat.label}
           value={stat.value}
           subtitle={stat.subtitle}
-          iconColor={stat.iconColor}
-          iconBgColor={stat.iconBgColor}
         />
       ))}
     </div>

@@ -7,7 +7,7 @@ import EmployeeHeader from './components/EmployeeHeader';
 import { StatCardsSection } from './components/StatCardsSection';
 import { EmployeeSearchFilter } from './components/EmployeeSearchFilter';
 import { EmployeeCard } from './components/EmployeeCard';
-import { Pagination } from './components/Pagination';
+import { Pagination } from '../../../components/Pagination';
 import { useEmployeesStore } from '@/store/employeesStore';
 
 export default function AllEmployees() {
