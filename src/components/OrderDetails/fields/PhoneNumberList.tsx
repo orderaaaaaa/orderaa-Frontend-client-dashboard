@@ -86,11 +86,11 @@ export function PhoneNumberList({
   };
 
   return (
-    <div className={`flex flex-col gap-2 min-w-0 overflow-hidden ${className}`}>
+    <div className={`flex flex-col gap-2 min-w-0 ${className}`}>
       <p className="font-bold text-[#121212]">أرقام الهاتف</p>
-      <div className="space-y-2 overflow-hidden">
+      <div className="space-y-2">
         {phones.phoneNumbers.map((phone, index) => (
-          <div key={index} className="relative overflow-hidden" ref={index === 0 ? phoneDropdownRef : null}>
+          <div key={index} className="relative" ref={index === 0 ? phoneDropdownRef : null}>
             {phones.editingIndex === index ? (
               <div className="flex gap-2 items-center w-full overflow-hidden">
                 <input
@@ -114,7 +114,7 @@ export function PhoneNumberList({
                 </button>
               </div>
             ) : (
-              <div className={`${tagStyle} relative overflow-hidden`}>
+              <div className={`${tagStyle} relative`}>
                 <LiaPhoneSolid size={18} className="flex-shrink-0" />
                 <button
                   onClick={() => handlePhoneCall(phone)}
@@ -134,7 +134,7 @@ export function PhoneNumberList({
                   </Button>
                   {isPhoneDropdownOpen === index && (
                     <div
-                      className="absolute top-full mt-2 left-0 min-w-[150px] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50"
+                      className="absolute top-full mt-2 left-0 min-w-[150px] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-[999999999]"
                     >
                       <Button
                         variant="ghost"

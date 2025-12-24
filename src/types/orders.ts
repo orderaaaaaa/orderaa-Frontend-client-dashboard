@@ -263,9 +263,15 @@ export interface Order {
 export interface OrderEvent {
   id: number;
   orderId: number;
+  employeeId?: number | null;
   status: string;
   note?: string | null;
   createdAt: string;
+  employee?: {
+    id: number;
+    fullName: string;
+    department: string;
+  } | null;
 }
 
 // Filter DTO (matching backend FilterOrdersDto)

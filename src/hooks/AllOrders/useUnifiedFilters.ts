@@ -3,11 +3,65 @@ import { OrderFilters, FilterOrdersDto } from '@/types/orders';
 import { useOrdersStore } from '@/store/ordersStore';
 import { useDebounce } from '@/utils/debounce';
 import { toast } from 'react-toastify';
+import { UrlFilterState } from '@/utils/urlFilters';
 
 // Helper to format date to ISO string
 const formatDateToISO = (date: Date): string => {
     return date.toISOString();
 };
+
+// Helper function to build API filters from URL filter state
+export function buildApiFiltersFromUrlState(urlFilters: UrlFilterState): FilterOrdersDto {
+    const filters: FilterOrdersDto = {
+        page: urlFilters.page,
+        limit: urlFilters.limit,
+    };
+
+    // Add status
+    if (urlFilters.status) {
+        filters.status = urlFilters.status;
+    }
+
+    // Add search
+    if (urlFilters.search) {
+        filters.search = urlFilters.search;
+    }
+
+    // Date range and confirmedDate are mutually exclusive
+    if (urlFilters.localFilters.executionDate) {
+        filters.confirmedDate = urlFilters.localFilters.executionDate;
+    } else {
+        if (urlFilters.fromDate) filters.createdAfter = formatDateToISO(urlFilters.fromDate);
+        if (urlFilters.toDate) filters.createdBefore = formatDateToISO(urlFilters.toDate);
+    }
+
+    // Add local filters
+    const { localFilters } = urlFilters;
+
+    if (localFilters.customerName) {
+        filters.customerName = localFilters.customerName;
+    }
+    if (localFilters.phone) {
+        filters.customerPhone = localFilters.phone;
+    }
+    if (localFilters.governorate) {
+        filters.governorate = localFilters.governorate;
+    }
+    if (localFilters.city) {
+        filters.city = localFilters.city;
+    }
+    if (localFilters.area) {
+        filters.area = localFilters.area;
+    }
+    if (localFilters.productName) {
+        filters.productName = localFilters.productName;
+    }
+    if (localFilters.shipmentCode) {
+        filters.code = localFilters.shipmentCode;
+    }
+
+    return filters;
+}
 
 export function useUnifiedFilters() {
     const { searchQuery, selectedStatus } = useOrdersStore();

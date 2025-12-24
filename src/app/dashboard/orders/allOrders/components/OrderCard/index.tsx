@@ -124,7 +124,7 @@ export default function OrderCard({
         </div>
 
         {/* Center: Empty space */}
-        <div></div>
+        <div />
 
         {/* Left: Repeat icon and created at */}
         <div className="flex flex-col justify-center items-center gap-2">
@@ -171,6 +171,12 @@ export default function OrderCard({
           </div>
         ) : null}
 
+        {/* full address */}
+        <div className="flex flex-row-reverse items-center gap-2">
+          <span className="text-sm font-normal text-gray-600">{address}</span>
+          <MapPinHouse className="w-[18px] h-[18px] flex-shrink-0" style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }} />
+        </div>
+        
         {phoneNumbers.filter(p => p && p !== 'غير محدد').map((phone, index) => (
           <div key={index} className="flex flex-row-reverse items-center gap-2">
             <span className="text-base font-medium text-black" dir="ltr">{phone}</span>
@@ -184,11 +190,7 @@ export default function OrderCard({
             <Package className="w-[18px] h-[18px] flex-shrink-0" style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }} />
           </div>
         )}
-        {/* full address */}
-        <div className="flex flex-row-reverse items-center gap-2">
-          <span className="text-sm font-normal text-gray-600">{address}</span>
-          <MapPinHouse className="w-[18px] h-[18px] flex-shrink-0" style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }} />
-        </div>
+
         {price && (
           <div className="flex flex-row-reverse items-center gap-2">
             <span className="text-base font-medium text-black">{price} جنيه</span>

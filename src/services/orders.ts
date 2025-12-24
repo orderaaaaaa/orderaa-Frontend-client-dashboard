@@ -100,6 +100,8 @@ export const useOrderById = (id: number | null) => {
       return response.data;
     },
     enabled: !!id,
+    staleTime: 0,
+    gcTime: 0,
   });
 };
 
@@ -343,6 +345,29 @@ export const useGetNextOrderId = () => {
   };
 
   return { getNextOrderId };
+};
+
+// Get previous order ID for navigation
+export const useGetPreviousOrderId = () => {
+  const getPreviousOrderId = async (
+    orderId: number,
+    status?: string,
+    from?: string,
+    to?: string
+  ) => {
+    const params: Record<string, string> = {};
+    if (status) params.status = status;
+    if (from) params.from = from;
+    if (to) params.to = to;
+
+    const response = await http.get<{ id: number }>(
+      `/orders/${orderId}/previous`,
+      { params }
+    );
+    return response.data;
+  };
+
+  return { getPreviousOrderId };
 };
 
 export const useFetchOrdersForSearch = () => {

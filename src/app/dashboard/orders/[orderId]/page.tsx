@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthGuard } from '@/components/auth-guard';
 import PageTaps from '../allOrders/pageTaps';
@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, X } from 'lucide-react';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 
-export default function OrderDetails({ params }: { params: { orderId: string } }) {
+function OrderDetailsContent({ params }: { params: { orderId: string } }) {
   const router = useRouter();
   const orderId = parseInt(params.orderId);
 
@@ -58,6 +58,11 @@ export default function OrderDetails({ params }: { params: { orderId: string } }
   } = useFilterForm({
     onSubmit: handleFilterFormChange,
   });
+
+  // Memoized callback for order navigation to prevent stale closures
+  const handleNavigateToOrder = useCallback((nextOrderId: number) => {
+    router.push(`/dashboard/orders/${nextOrderId}`);
+  }, [router]);
 
   // Navigate to target order when it changes
   useEffect(() => {
@@ -155,6 +160,7 @@ export default function OrderDetails({ params }: { params: { orderId: string } }
           statusCounts={statistics?.statusCounts || {}}
           totalOrders={statistics?.totalOrders || 0}
           onStatusChange={setStatus}
+          currentStatus={status}
         />
         <div>
           <FilterSection
@@ -254,6 +260,7 @@ export default function OrderDetails({ params }: { params: { orderId: string } }
         statusCounts={statistics?.statusCounts || {}}
         totalOrders={statistics?.totalOrders || 0}
         onStatusChange={setStatus}
+        currentStatus={status}
       />
       <div>
         <FilterSection
@@ -281,9 +288,7 @@ export default function OrderDetails({ params }: { params: { orderId: string } }
         )}
         <OrderDetailsInfo
           order={order}
-          onNavigateToNextOrder={(nextOrderId) => {
-            router.push(`/dashboard/orders/${nextOrderId}`);
-          }}
+          onNavigateToNextOrder={handleNavigateToOrder}
           dateRange={{
             from: fromDate,
             to: toDate,
@@ -292,5 +297,28 @@ export default function OrderDetails({ params }: { params: { orderId: string } }
         />
       </div>
     </AuthGuard>
+  );
+}
+
+// Loading fallback component
+function OrderDetailsLoading() {
+  return (
+    <AuthGuard>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5D24E1] mx-auto"></div>
+          <p className="mt-4 text-gray-600">جاري تحميل بيانات الطلب...</p>
+        </div>
+      </div>
+    </AuthGuard>
+  );
+}
+
+// Default export with Suspense wrapper for useSearchParams
+export default function OrderDetails({ params }: { params: { orderId: string } }) {
+  return (
+    <Suspense fallback={<OrderDetailsLoading />}>
+      <OrderDetailsContent params={params} />
+    </Suspense>
   );
 }

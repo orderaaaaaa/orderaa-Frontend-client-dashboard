@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
 import { toast } from 'react-toastify';
 import FilterSection from './components/FilterSection';
 import OrderCard from './components/OrderCard';
@@ -9,7 +9,7 @@ import CustomerOrdersModal from './components/CustomerOrdersModal';
 import BulkActionsBar from '@/components/BulkActionsBar';
 import type { Order } from '@/types/orders';
 import PageTaps from './pageTaps';
-import { useUnifiedFilters } from '@/hooks/AllOrders/useUnifiedFilters';
+import { buildApiFiltersFromUrlState } from '@/hooks/AllOrders/useUnifiedFilters';
 import { useOrderStatistics } from '@/hooks/AllOrders/useOrderStatistics';
 import { useFilterOptions } from '@/hooks/AllOrders/useFilterOptions';
 import { useFilterForm } from '@/hooks/AllOrders/useFilterForm';
@@ -18,6 +18,8 @@ import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { Breadcrumb } from '@/components/dashboard-layout';
 import { DatePicker } from '@/components/ui/datepicker';
 import { useOrders, useFetchOrdersForExport } from '@/services/orders';
+import { useUrlFilters } from '@/hooks/useUrlFilters';
+import { TimePeriod } from '@/utils/dateRangeUtils';
 import {
   Select,
   SelectContent,
@@ -28,27 +30,35 @@ import {
 
 import { Scan, ScanLine, ArrowUp, ArrowLeft, X } from 'lucide-react';
 
-export default function AllOrdersRefactor() {
+function AllOrdersContent() {
   const [select, setSelect] = useState(false);
   const [selectedOrderIds, setSelectedOrderIds] = useState<number[]>([]);
-  const [timePeriod, setTimePeriod] = useState('');
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState<string>('');
   const [selectedCustomerName, setSelectedCustomerName] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
 
+  // URL-based filter state
   const {
-    apiFilters,
-    updateLocalFilters,
-    goToPage,
-    page,
-    limit,
-    updateLimit,
-    fromDate,
+    filters,
+    setStatus,
     setFromDate,
-    toDate,
     setToDate,
-  } = useUnifiedFilters();
+    setTimePeriod,
+    setPage,
+    setLimit,
+    updateLocalFilters,
+    resetFilters,
+    isInitialized,
+  } = useUrlFilters();
+
+  // Build API filters from URL state
+  const apiFilters = useMemo(() => {
+    return buildApiFiltersFromUrlState(filters);
+  }, [filters]);
+
+  // Destructure for easier access
+  const { fromDate, toDate, timePeriod, page, limit } = filters;
 
   const {
     data: ordersData,
@@ -298,7 +308,7 @@ export default function AllOrdersRefactor() {
           />
 
           <div className="relative w-32 sm:w-[180px] flex-shrink-0">
-            <Select value={timePeriod} onValueChange={setTimePeriod}>
+            <Select value={timePeriod} onValueChange={(value) => setTimePeriod(value as TimePeriod)}>
               <SelectTrigger className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${timePeriod ? 'text-[#5D24E1] font-bold' : ''}`}>
                 <SelectValue placeholder="الفترة الزمنية" />
               </SelectTrigger>
@@ -314,7 +324,7 @@ export default function AllOrdersRefactor() {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setTimePeriod('');
+                  setTimePeriod('' as TimePeriod);
                 }}
                 className="absolute left-8 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors z-10"
                 type="button"
@@ -330,6 +340,8 @@ export default function AllOrdersRefactor() {
         data={orders}
         statusCounts={statistics?.statusCounts || {}}
         totalOrders={totalOrders}
+        onStatusChange={setStatus}
+        currentStatus={filters.status}
       />
 
       <FilterSection
@@ -461,11 +473,11 @@ export default function AllOrdersRefactor() {
         totalItems={totalOrders}
         hasNextPage={currentPage < totalPages}
         hasPreviousPage={currentPage > 1}
-        onPageChange={goToPage}
-        onPrevious={() => goToPage(Math.max(1, currentPage - 1))}
-        onNext={() => goToPage(Math.min(totalPages, currentPage + 1))}
+        onPageChange={setPage}
+        onPrevious={() => setPage(Math.max(1, currentPage - 1))}
+        onNext={() => setPage(Math.min(totalPages, currentPage + 1))}
         currentPageSize={limit}
-        onPageSizeChange={updateLimit}
+        onPageSizeChange={setLimit}
         hasSelectedOrders={showBulkActions}
       />
 
@@ -494,5 +506,28 @@ export default function AllOrdersRefactor() {
       )}
 
     </div>
+  );
+}
+
+// Loading fallback component
+function AllOrdersLoading() {
+  return (
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5D24E1] mx-auto"></div>
+          <p className="mt-4 text-gray-600">جاري تحميل الطلبات...</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Default export with Suspense wrapper for useSearchParams
+export default function AllOrdersRefactor() {
+  return (
+    <Suspense fallback={<AllOrdersLoading />}>
+      <AllOrdersContent />
+    </Suspense>
   );
 }

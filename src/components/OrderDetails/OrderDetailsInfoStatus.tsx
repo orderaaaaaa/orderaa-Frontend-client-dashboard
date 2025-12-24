@@ -26,7 +26,6 @@ const statusLabelMap: Record<string, string> = {
   REGISTERED: 'مسجل',
 };
 
-// Helper function to format time ago
 const getTimeAgo = (date: string): string => {
   const eventDate = new Date(date);
   const now = new Date();
@@ -81,6 +80,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
     time: getTimeAgo(event.createdAt),
     eventType: event.status || 'default',
     note: event.note || '',
+    employee: event.employee,
   }));
 
   const displayData = [...events];
@@ -120,6 +120,14 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
                     </>
                   )}
                 </p>
+                {item.employee && (
+                  <p className="text-[11px] text-gray-500 mt-1">
+                    بواسطة: <span className="font-medium text-[#5D24E1]">{item.employee.fullName}</span>
+                    {item.employee.department && (
+                      <span className="text-gray-400"> ({item.employee.department})</span>
+                    )}
+                  </p>
+                )}
               </div>
             </div>
           ))}

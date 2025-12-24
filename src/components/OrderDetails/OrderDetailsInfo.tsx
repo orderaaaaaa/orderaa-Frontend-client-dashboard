@@ -4,6 +4,7 @@ import { useOrderStatusesQuery } from '@/services/orders';
 import { useModalState } from '@/hooks/OrderDetails/useModalState';
 import { useOrderActions } from '@/hooks/OrderDetails/useOrderActions';
 import { useOrderFieldUpdate } from '@/hooks/OrderDetails/useOrderFieldUpdate';
+import { useOrderNavigation } from '@/hooks/OrderDetails/useOrderNavigation';
 import { toast } from 'react-toastify';
 import { CustomerDataSection } from './sections/CustomerDataSection';
 import { PricingSection } from './sections/PricingSection';
@@ -98,6 +99,13 @@ function OrderDetailsInfoComponent({
     dateRange,
     statusFilter,
     availableStatuses,
+  });
+
+  const navigation = useOrderNavigation({
+    orderId: order.id,
+    onNavigate: onNavigateToNextOrder,
+    dateRange,
+    statusFilter,
   });
 
   const updateField = useOrderFieldUpdate(localOrder.id, handleUpdate);
@@ -225,7 +233,7 @@ function OrderDetailsInfoComponent({
 
   return (
     <>
-      <div className="flex flex-col gap-4 font-medium p-4 bg-gray-50 mt-8 rounded-xl mb-24 overflow-hidden w-full max-w-full">
+      <div className="flex flex-col gap-4 font-medium p-4 bg-gray-50 mt-8 rounded-xl mb-24 w-full max-w-full">
         <CustomerDataSection
           order={localOrder}
           onUpdate={updateField}
@@ -254,6 +262,10 @@ function OrderDetailsInfoComponent({
         onFollowUpClick={handleFollowUpClick}
         onActionClick={handleActionClick}
         onWhatsappSubOptionClick={handleWhatsappSubOptionClick}
+        onNavigateNext={navigation.navigateToNext}
+        onNavigatePrevious={navigation.navigateToPrevious}
+        isNavigatingNext={navigation.isNavigatingNext}
+        isNavigatingPrevious={navigation.isNavigatingPrevious}
       />
 
       <OrderActionModals

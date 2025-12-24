@@ -3,6 +3,8 @@ import {
   LiaCheckCircle,
   LiaCommentDotsSolid,
   LiaAngleDownSolid,
+  LiaAngleLeftSolid,
+  LiaAngleRightSolid,
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { useDropdownState } from '@/hooks/OrderDetails/useDropdownState';
@@ -16,6 +18,10 @@ export interface OrderActionsFooterProps {
   onFollowUpClick: (label: string, action: string) => void;
   onActionClick: (label: string, action: string, hasSubOptions?: boolean) => void;
   onWhatsappSubOptionClick: (action: string, label: string) => void;
+  onNavigateNext?: () => void;
+  onNavigatePrevious?: () => void;
+  isNavigatingNext?: boolean;
+  isNavigatingPrevious?: boolean;
 }
 
 export function OrderActionsFooter({
@@ -24,6 +30,10 @@ export function OrderActionsFooter({
   onFollowUpClick,
   onActionClick,
   onWhatsappSubOptionClick,
+  onNavigateNext,
+  onNavigatePrevious,
+  isNavigatingNext = false,
+  isNavigatingPrevious = false,
 }: OrderActionsFooterProps) {
   const followUpDropdown = useDropdownState();
   const actionsDropdown = useDropdownState();
@@ -61,11 +71,39 @@ export function OrderActionsFooter({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 py-4 px-6">
-      <div className="flex gap-2 justify-center items-center sm:justify-end max-w-7xl mx-auto">
-        {/* Dropdowns Container */}
+      <div className="flex gap-2 justify-between items-center">
+        <div className="flex gap-2 items-center sm:rtl:ms-14 sm:ltr:me-14">
+          <Button
+            variant="outline"
+            onClick={onNavigatePrevious}
+            disabled={isNavigatingPrevious || !onNavigatePrevious}
+            className="w-10 h-10 p-0 rounded-full border-2 border-gray-300 hover:border-[#5D24E1] hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="الطلب السابق"
+          >
+            {isNavigatingPrevious ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#5D24E1]"></div>
+            ) : (
+              <LiaAngleRightSolid className="w-5 h-5 text-gray-600" />
+            )}
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={onNavigateNext}
+            disabled={isNavigatingNext || !onNavigateNext}
+            className="w-10 h-10 p-0 rounded-full border-2 border-gray-300 hover:border-[#5D24E1] hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="الطلب التالي"
+          >
+            {isNavigatingNext ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#5D24E1]"></div>
+            ) : (
+              <LiaAngleLeftSolid className="w-5 h-5 text-gray-600" />
+            )}
+          </Button>
+        </div>
+
         <div className="relative" ref={actionsDropdown.ref}>
           <div className="flex flex-row gap-2">
-            {/* Confirm Button */}
             <Button
               variant="default"
               onClick={onConfirm}
@@ -75,7 +113,6 @@ export function OrderActionsFooter({
               تأكيد
             </Button>
 
-            {/* Follow-up Button */}
             <div className="relative" ref={followUpDropdown.ref}>
               <Button
                 variant="outline"
@@ -86,11 +123,9 @@ export function OrderActionsFooter({
                 متابعة
               </Button>
 
-              {/* Follow-up Dropdown */}
               <FollowUpDropdown isOpen={followUpDropdown.isOpen} onClick={handleFollowUpClick} />
             </div>
 
-            {/* More Actions Button */}
             <Button
               variant="ghost"
               onClick={handleActionsToggle}
@@ -104,7 +139,6 @@ export function OrderActionsFooter({
             </Button>
           </div>
 
-          {/* Actions Dropdown */}
           <ActionsDropdown
             isOpen={actionsDropdown.isOpen}
             orderStatus={orderStatus}
