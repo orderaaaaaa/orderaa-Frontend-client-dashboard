@@ -13,7 +13,6 @@ export async function getCustomers(
     limit,
   };
 
-  // Only add optional params if they're provided
   if (search !== undefined && search !== '') {
     params.search = search;
   }

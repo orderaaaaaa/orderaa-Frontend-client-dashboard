@@ -1,26 +1,40 @@
-import React, { useState } from 'react';
-import { ShoppingBag } from 'lucide-react';
-import { TfiMore } from 'react-icons/tfi';
-import { LiaWhatsapp, LiaCalendarAltSolid } from 'react-icons/lia';
-import { GoMail, GoDotFill } from 'react-icons/go';
+import React, { useState, useEffect } from 'react';
+
 import { useGetCustomers } from '../hooks/useGetCustomers';
 import { useEditCustomer } from '../hooks/useEditCustomer';
 import { TABLE_HEADERS } from '../constants/CustomerHeaders';
-import { If, Then } from 'react-if';
-import { getStatusColor } from '../lib/getBadgeColor';
-import { getActivityColor } from '../lib/getActivityColor';
-import { ORDER_STATUS_AR } from '../lib/orderStatusAr';
 import { Pagination } from '@/components/Pagination';
 import { CustomerRow } from './CustomerRow';
 
-export default function CustomerTable() {
+interface CustomerTableProps {
+  searchTerm?: string;
+  clientStatus?: string;
+  orderStatus?: string;
+}
+
+export default function CustomerTable({
+  searchTerm = '',
+  clientStatus,
+  orderStatus,
+}: CustomerTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const limit = 10;
 
+  // Convert clientStatus string to boolean or undefined
+  const isBlockedParam = React.useMemo(() => {
+    if (clientStatus === undefined) return undefined;
+    if (clientStatus === 'true') return true;
+    if (clientStatus === 'false') return false;
+    return undefined;
+  }, [clientStatus]);
+
   const { data, isLoading, isError, error } = useGetCustomers({
     page: currentPage,
     limit: limit,
+    search: searchTerm,
+    isBlocked: isBlockedParam,
+    latestOrderStatus: orderStatus,
   });
 
   const editCustomerMutation = useEditCustomer({
@@ -45,12 +59,11 @@ export default function CustomerTable() {
     });
   };
 
-  const toggleMenu = (customerId: number) => {
-    setOpenMenuId(openMenuId === customerId ? null : customerId);
-  };
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, clientStatus, orderStatus]);
 
-  // Close menu when clicking outside
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (openMenuId && !(event.target as Element).closest('.menu-container')) {
         setOpenMenuId(null);
