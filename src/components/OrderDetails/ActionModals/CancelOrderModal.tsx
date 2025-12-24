@@ -32,14 +32,12 @@ export default function CancelOrderModal({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleConfirm = async () => {
-    if (!reason) {
-      alert('السبب مطلوب');
-      return;
-    }
     await onConfirm({ reason, notes });
     // Reset form after successful confirmation
     handleReset();
   };
+
+  const isFormValid = !!reason;
 
   const handleReset = () => {
     setReason('');
@@ -59,7 +57,8 @@ export default function CancelOrderModal({
       title="إلغاء الطلب"
       onConfirm={handleConfirm}
       confirmText="تأكيد الإلغاء"
-      confirmButtonClassName="px-8 py-2 bg-red-600 rounded-[28px] font-bold text-white hover:bg-red-700 transition-all duration-200 hover:scale-105"
+      confirmDisabled={!isFormValid}
+      confirmButtonClassName="px-8 py-2 bg-red-600 rounded-[28px] font-bold text-white hover:bg-red-700 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
     >
       <div className="space-y-6">
         {/* Cancel Reason - Dropdown */}

@@ -18,10 +18,6 @@ export default function StopOperationModal({
   const [notes, setNotes] = useState('');
 
   const handleConfirm = async () => {
-    if (!notes.trim()) {
-      alert('الملاحظات مطلوبة');
-      return;
-    }
     await onConfirm(notes);
     // Reset form after successful confirmation
     setNotes('');
@@ -32,6 +28,8 @@ export default function StopOperationModal({
     onClose();
   };
 
+  const isFormValid = !!notes.trim();
+
   return (
     <BaseModal
       isOpen={isOpen}
@@ -39,6 +37,7 @@ export default function StopOperationModal({
       title="وقف التشغيل"
       onConfirm={handleConfirm}
       confirmText="تأكيد"
+      confirmDisabled={!isFormValid}
     >
       <div className="space-y-4">
         <div className="flex flex-col gap-2">

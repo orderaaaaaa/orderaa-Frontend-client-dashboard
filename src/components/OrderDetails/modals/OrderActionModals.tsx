@@ -221,6 +221,7 @@ export function OrderActionModals({
         title="إضافة ملاحظة للتغليف"
         onConfirm={handlePackagingNoteSave}
         confirmText="حفظ"
+        confirmDisabled={!newPackagingNote.trim()}
       >
         <div className="space-y-4">
           <div className="flex flex-col gap-2">

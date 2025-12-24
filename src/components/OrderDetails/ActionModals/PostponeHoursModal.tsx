@@ -26,10 +26,6 @@ export default function PostponeHoursModal({
   const [postponeTime, setPostponeTime] = useState<Date | null>(null);
 
   const handleConfirm = async () => {
-    if (!selectedDuration && !postponeTime) {
-      alert('يرجى اختيار مدة التأجيل أو وقت التأجيل');
-      return;
-    }
     await onConfirm({
       duration: selectedDuration || undefined,
       time: postponeTime || undefined
@@ -48,6 +44,8 @@ export default function PostponeHoursModal({
     onClose();
   };
 
+  const isFormValid = !!selectedDuration || !!postponeTime;
+
   return (
     <BaseModal
       isOpen={isOpen}
@@ -55,6 +53,7 @@ export default function PostponeHoursModal({
       title="تأجيل ساعات"
       onConfirm={handleConfirm}
       confirmText="حفظ"
+      confirmDisabled={!isFormValid}
     >
       <div className="space-y-6">
         {/* Duration Radio Buttons */}

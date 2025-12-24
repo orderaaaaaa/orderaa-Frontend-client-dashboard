@@ -27,10 +27,6 @@ export default function PostponeDaysModal({
   const [postponeDate, setPostponeDate] = useState<Date | null>(null);
 
   const handleConfirm = async () => {
-    if (!selectedDuration && !postponeDate) {
-      alert('يرجى اختيار مدة التأجيل أو تاريخ التأجيل');
-      return;
-    }
     await onConfirm({
       duration: selectedDuration || undefined,
       date: postponeDate || undefined
@@ -49,6 +45,8 @@ export default function PostponeDaysModal({
     onClose();
   };
 
+  const isFormValid = !!selectedDuration || !!postponeDate;
+
   return (
     <BaseModal
       isOpen={isOpen}
@@ -56,6 +54,7 @@ export default function PostponeDaysModal({
       title="تأجيل أيام"
       onConfirm={handleConfirm}
       confirmText="حفظ"
+      confirmDisabled={!isFormValid}
     >
       <div className="space-y-6">
         {/* Duration Radio Buttons */}
