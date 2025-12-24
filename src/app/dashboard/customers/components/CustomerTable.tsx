@@ -4,15 +4,18 @@ import { TfiMore } from 'react-icons/tfi';
 import { LiaWhatsapp, LiaCalendarAltSolid } from 'react-icons/lia';
 import { GoMail, GoDotFill } from 'react-icons/go';
 import { useGetCustomers } from '../hooks/useGetCustomers';
+import { useEditCustomer } from '../hooks/useEditCustomer';
 import { TABLE_HEADERS } from '../constants/CustomerHeaders';
 import { If, Then } from 'react-if';
 import { getStatusColor } from '../lib/getBadgeColor';
 import { getActivityColor } from '../lib/getActivityColor';
 import { ORDER_STATUS_AR } from '../lib/orderStatusAr';
 import { Pagination } from '@/components/Pagination';
+import { CustomerRow } from './CustomerRow';
 
 export default function CustomerTable() {
   const [currentPage, setCurrentPage] = useState(1);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const limit = 10;
 
   const { data, isLoading, isError, error } = useGetCustomers({
@@ -20,9 +23,43 @@ export default function CustomerTable() {
     limit: limit,
   });
 
+  const editCustomerMutation = useEditCustomer({
+    onSuccess: () => {
+      setOpenMenuId(null);
+    },
+  });
+
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
+
+  const handleToggleBlock = (
+    customerId: number,
+    currentBlockStatus: boolean
+  ) => {
+    editCustomerMutation.mutate({
+      customerId,
+      payload: {
+        isBlocked: !currentBlockStatus,
+      },
+    });
+  };
+
+  const toggleMenu = (customerId: number) => {
+    setOpenMenuId(openMenuId === customerId ? null : customerId);
+  };
+
+  // Close menu when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (openMenuId && !(event.target as Element).closest('.menu-container')) {
+        setOpenMenuId(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [openMenuId]);
 
   if (isLoading) {
     return (
@@ -61,123 +98,22 @@ export default function CustomerTable() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {data?.data.map((customer) => (
-                <tr
+                <CustomerRow
                   key={customer.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  {/* العميل */}
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="text-right flex items-center">
-                      <If condition={customer.isBlocked}>
-                        <Then>
-                          <GoDotFill className="text-[#f61515] w-6 h-6" />
-                        </Then>
-                      </If>
-                      <div className="font-semibold text-gray-900">
-                        {customer.name}
-                      </div>
-                    </div>
-                  </td>
-
-                  {/* التواصل */}
-                  <td className="px-4 py-4">
-                    <div className="flex flex-col gap-2 min-w-[180px]">
-                      {customer.phoneNumbers.slice(0, 1).map((phone, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center gap-2 md:text-md text-gray-800"
-                        >
-                          <LiaWhatsapp className="w-6 h-6 text-gray-600" />
-                          <span className="font-medium">{phone}</span>
-                        </div>
-                      ))}
-                      <If condition={customer.email}>
-                        <Then>
-                          <div className="flex items-center gap-2 md:text-md text-gray-800">
-                            <GoMail className="w-5 h-5 text-gray-600" />
-                            <span className="font-medium">
-                              {customer.email}
-                            </span>
-                          </div>
-                        </Then>
-                      </If>
-                    </div>
-                  </td>
-
-                  {/* عدد الطلبات */}
-                  <td className="px-4 py-4 text-center whitespace-nowrap">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md">
-                      <ShoppingBag className="w-5 h-5 text-gray-500" />
-                      <span className="font-medium text-gray-900 text-lg">
-                        {customer.numberOfOrders}
-                      </span>
-                    </div>
-                  </td>
-
-                  {/* اخر طلب */}
-                  <td className="px-4 py-4 text-center whitespace-nowrap">
-                    <div className="inline-flex items-center gap-2 px-3 rounded-md">
-                      <LiaCalendarAltSolid className="w-5 h-5 text-gray-500" />
-
-                      <span className="md:text-md text-gray-800 font-medium">
-                        {customer.latestOrder?.createdAt
-                          ? new Date(customer.latestOrder.createdAt)
-                              .toLocaleDateString('eng', {
-                                year: 'numeric',
-                                month: '2-digit',
-                                day: '2-digit',
-                              })
-                              .replace(/\//g, '/ ')
-                          : '-'}
-                      </span>
-                    </div>
-                  </td>
-
-                  {/* الحالة */}
-                  <td className="px-4 py-4 text-center whitespace-nowrap">
-                    <span
-                      className={`px-5 py-1 text-sm font-medium rounded-full inline-flex items-center ${getStatusColor(
-                        customer.latestOrder?.status
-                      )}`}
-                    >
-                      {customer.latestOrder
-                        ? ORDER_STATUS_AR[customer.latestOrder.status]
-                        : '—'}
-                    </span>
-                  </td>
-
-                  {/* النشاطات */}
-                  <td className="px-4 py-4 text-center whitespace-nowrap">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium ${getActivityColor(
-                        'Loyal Buyer'
-                      )}`}
-                    >
-                      <span>🏆</span>
-                      <span>Loyal Buyer</span>
-                    </span>
-                  </td>
-
-                  {/* إجمالي المشتريات */}
-                  <td className="px-4 py-4 text-center whitespace-nowrap">
-                    <span className="font-medium text-gray-900 text-base">
-                      {customer.totalAmount} جنية
-                    </span>
-                  </td>
-
-                  {/* الإجراءات */}
-                  <td className="px-4 py-4 text-center whitespace-nowrap">
-                    <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors inline-flex items-center justify-center">
-                      <TfiMore className="w-5 h-5 text-gray-600 cursor-pointer" />
-                    </button>
-                  </td>
-                </tr>
+                  customer={customer}
+                  onToggleBlock={handleToggleBlock}
+                  isPending={editCustomerMutation.isPending}
+                />
               ))}
             </tbody>
           </table>
         </div>
       </div>
-      <div>
+      <div className="flex justify-between items-center w-[97%] mx-auto mt-10 mb-5">
+        <div className="text-lg">
+          عرض <span className="font-bold">1- {data?.data.length}</span> من اصل{' '}
+          <span className="font-bold">{data?.meta.totalItems}</span> عميل
+        </div>
         <Pagination
           currentPage={data?.meta.currentPage || 1}
           totalPages={data?.meta.totalPages || 1}

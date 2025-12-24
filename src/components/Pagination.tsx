@@ -77,7 +77,7 @@ export function Pagination({
   }
 
   return (
-    <div className={`flex items-center justify-center gap-2 mt-8 ${className}`}>
+    <div className={`flex items-center justify-center gap-2 ${className}`}>
       {/* Previous Button */}
       <button
         onClick={handlePrevious}

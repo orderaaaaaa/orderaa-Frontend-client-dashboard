@@ -95,7 +95,7 @@ export default function CustomerHeader({
               value={activityType}
               onChange={setActivityType}
               options={activityTypeOptions}
-              placeholder="نوع النشارة"
+              placeholder="نوع الشاره"
               readOnly={true}
               selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-md font-semibold bg-white hover:bg-gray-50 text-right"
               arrowClassName="absolute cursor-pointer px-3 left-0 top-1/2 transform -translate-y-1/2 text-gray-500"

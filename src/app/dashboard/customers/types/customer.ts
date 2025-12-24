@@ -15,11 +15,11 @@ export interface Customer {
   id: number;
   name: string;
   phoneNumbers: string[];
-  email?: string; // optional (not always present)
+  email?: string;
   numberOfOrders: number;
   latestOrder: Order | null;
   totalAmount: number;
-  notes: string[];
+  notes: string;
   isBlocked: boolean;
 
   governorate: string | null;
