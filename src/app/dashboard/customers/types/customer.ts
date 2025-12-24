@@ -4,25 +4,29 @@ export interface Location {
 }
 
 export interface Order {
-  id?: number;
-  totalAmount?: number;
-  createdAt?: string;
+  id: number;
+  code: string;
+  status: OrderStatus;
+  totalCost: number;
+  createdAt: string;
 }
 
 export interface Customer {
   id: number;
   name: string;
   phoneNumbers: string[];
-  email: string;
+  email?: string; // optional (not always present)
   numberOfOrders: number;
-  latestOrder: Order;
+  latestOrder: Order | null;
   totalAmount: number;
   notes: string[];
   isBlocked: boolean;
-  governorate: Location;
-  city: Location;
-  address: Location;
-  area: Location;
+
+  governorate: string | null;
+  city: string | null;
+  area: string | null;
+  address: string;
+
   createdAt: string;
   updatedAt: string;
 }
