@@ -1,12 +1,14 @@
 import React from 'react';
-import { Phone, Mail, Calendar, ShoppingBag, MoreVertical } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
+import { TfiMore } from 'react-icons/tfi';
 import { LiaWhatsapp, LiaCalendarAltSolid } from 'react-icons/lia';
-import { GoMail } from 'react-icons/go';
+import { GoMail, GoDotFill } from 'react-icons/go';
 import { useGetCustomers } from '../hooks/useGetCustomers';
 import { TABLE_HEADERS } from '../constants/CustomerHeaders';
 import { If, Then } from 'react-if';
 import { getStatusColor } from '../lib/getBadgeColor';
 import { getActivityColor } from '../lib/getActivityColor';
+import { ORDER_STATUS_AR } from '../lib/orderStatusAr';
 
 export default function CustomerTable() {
   const { data, isLoading, isError, error } = useGetCustomers({
@@ -56,8 +58,13 @@ export default function CustomerTable() {
               >
                 {/* العميل */}
                 <td className="px-4 py-4 whitespace-nowrap">
-                  <div className="text-right">
-                    <div className="font-semibold text-gray-900 text-base">
+                  <div className="text-right flex items-center">
+                    <If condition={customer.isBlocked}>
+                      <Then>
+                        <GoDotFill className="text-[#f61515] w-6 h-6" />
+                      </Then>
+                    </If>
+                    <div className="font-semibold text-gray-900">
                       {customer.name}
                     </div>
                   </div>
@@ -118,11 +125,13 @@ export default function CustomerTable() {
                 {/* الحالة */}
                 <td className="px-4 py-4 text-center whitespace-nowrap">
                   <span
-                    className={`px-3 py-1 text-xs font-medium rounded-full inline-flex items-center ${getStatusColor(
+                    className={`px-5 py-1 text-sm font-medium rounded-full inline-flex items-center ${getStatusColor(
                       customer.latestOrder?.status
                     )}`}
                   >
-                    {customer.latestOrder?.status ?? '—'}
+                    {customer.latestOrder
+                      ? ORDER_STATUS_AR[customer.latestOrder.status]
+                      : '—'}
                   </span>
                 </td>
 
@@ -140,15 +149,15 @@ export default function CustomerTable() {
 
                 {/* إجمالي المشتريات */}
                 <td className="px-4 py-4 text-center whitespace-nowrap">
-                  <span className="font-bold text-gray-900 text-base">
-                    {customer.totalAmount} جنيه
+                  <span className="font-medium text-gray-900 text-base">
+                    {customer.totalAmount} جنية
                   </span>
                 </td>
 
                 {/* الإجراءات */}
                 <td className="px-4 py-4 text-center whitespace-nowrap">
                   <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors inline-flex items-center justify-center">
-                    <MoreVertical className="w-5 h-5 text-gray-600" />
+                    <TfiMore className="w-5 h-5 text-gray-600 cursor-pointer" />
                   </button>
                 </td>
               </tr>
