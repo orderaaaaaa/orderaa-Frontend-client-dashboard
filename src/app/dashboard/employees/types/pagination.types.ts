@@ -6,4 +6,3 @@ export interface PaginationProps {
   onPageChange: (page: number) => void;
   className?: string;
 }
-
