@@ -2,17 +2,17 @@
 
 import React, { useEffect, useState } from 'react';
 import { X, Mail, Phone, Calendar, ShoppingBag } from 'lucide-react';
-import { useCustomer } from '../hooks/useGetCustomerId';
-import OrdersTab from './tabs/OrdersTab';
-import StatsTab from './tabs/StatsTab';
-import NotesTab from './tabs/NotesTab';
+import { useCustomer } from '../../hooks/useGetCustomerId';
+import OrdersTab from '../tabs/OrdersTab';
+import StatsTab from '../tabs/StatsTab';
+import NotesTab from '../tabs/NotesTab';
 import { If, Then } from 'react-if';
 import { FiMail } from 'react-icons/fi';
 import { ImBlocked } from 'react-icons/im';
 import { LiaWhatsapp } from 'react-icons/lia';
 import { BsFiletypeCsv } from 'react-icons/bs';
 import { TbMoneybag } from 'react-icons/tb';
-import { Customer, Order } from '../types/customer';
+import { Customer, Order } from '../../types/customer';
 
 interface CustomerDetailsModalProps {
   customerId?: number;

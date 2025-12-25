@@ -5,7 +5,7 @@ import { useEditCustomer } from '../hooks/useEditCustomer';
 import { TABLE_HEADERS } from '../constants/CustomerHeaders';
 import { Pagination } from '@/components/Pagination';
 import { CustomerRow } from './CustomerRow';
-import CustomerDetailsModal from './CustomerDetailsModal'; // Import the modal
+import CustomerDetailsModal from './modals/CustomerDetailsModal'; // Import the modal
 
 interface CustomerTableProps {
   searchTerm?: string;

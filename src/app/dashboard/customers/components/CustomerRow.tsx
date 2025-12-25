@@ -11,7 +11,7 @@ import { getStatusColor } from '../lib/getBadgeColor';
 import { getActivityColor } from '../lib/getActivityColor';
 import { ORDER_STATUS_AR } from '../lib/orderStatusAr';
 
-import CustomerBanConfirmationModal from './CustomerBanConfirmationModal';
+import CustomerBanConfirmationModal from './modals/CustomerBanConfirmationModal';
 
 interface CustomerRowProps {
   customer: any;
