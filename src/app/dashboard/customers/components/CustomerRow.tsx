@@ -65,12 +65,10 @@ export const CustomerRow = memo(function CustomerRow({
 
   return (
     <>
-      {/* ================= ROW ================= */}
       <tr
         onClick={() => onRowClick(customer.id)} // Use the prop instead
         className="hover:bg-gray-50 transition-colors cursor-pointer"
       >
-        {/* ... rest of the row JSX remains exactly the same ... */}
         {/* العميل */}
         <td className="px-4 py-4 whitespace-nowrap">
           <div className="flex items-center gap-1">
@@ -196,9 +194,6 @@ export const CustomerRow = memo(function CustomerRow({
         </td>
       </tr>
 
-      {/* ================= MODALS ================= */}
-      {/* Remove CustomerDetailsModal from here */}
-      {/* Keep only the ban modal since it's row-specific */}
       <CustomerBanConfirmationModal
         id={customer.id.toString()}
         isOpen={showBanModal}
