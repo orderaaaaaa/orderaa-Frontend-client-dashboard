@@ -148,9 +148,10 @@ export function OrderActionModals({
         onSave={handleShippingSave}
         initialData={{
           shippingCompany: order.shippingCompany,
-          governorate: order.customers.governorate,
-          city: order.customers.city,
-          address: order.customers.address,
+          governorate: order.governorate,
+          city: order.city,
+          address: order.address,
+          externalGovernorate: order.externalGovernorate,
         }}
       />
 

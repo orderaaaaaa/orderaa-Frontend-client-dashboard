@@ -235,6 +235,7 @@ export interface Order {
   governorate?: string;
   city?: string;
   address?: string;
+  externalGovernorate?: string;
 
   // Product details
   material?: string;

@@ -17,6 +17,7 @@ export interface ShippingData {
   governorate?: string;
   city?: string;
   address?: string;
+  externalGovernorate?: string;
 }
 
 interface Governorate {
@@ -43,7 +44,6 @@ export default function EditShippingModal({
   const [selectedGovernorateId, setSelectedGovernorateId] = useState<string>('');
 
   const { shippingCompanies, isLoading: loadingShippingCompanies } = useShippingCompanies(isOpen);
-
   // Create maps for shipping company key <-> label conversion
   const shippingCompanyMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -258,7 +258,7 @@ export default function EditShippingModal({
                 value={formData.governorate ? governorateMap[formData.governorate] || formData.governorate : ''}
                 onValueChange={handleGovernorateChange}
                 options={governorateOptions}
-                placeholder="اختر المحافظة"
+                placeholder={initialData.governorate || initialData.externalGovernorate || 'اختر المحافظة'}
                 searchPlaceholder="بحث عن محافظة..."
                 emptyMessage="لا توجد محافظات متاحة"
                 noResultsMessage="لا توجد نتائج للبحث"

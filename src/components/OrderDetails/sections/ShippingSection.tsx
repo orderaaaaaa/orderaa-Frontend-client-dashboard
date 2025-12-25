@@ -8,6 +8,7 @@ export interface ShippingSectionProps {
   address?: string;
   onEditClick: () => void;
   className?: string;
+  externalGovernorate?: string;
 }
 
 interface ShippingFieldProps {
@@ -42,6 +43,7 @@ export function ShippingSection({
   address,
   onEditClick,
   className = '',
+  externalGovernorate,
 }: ShippingSectionProps) {
   return (
     <div className={`flex flex-col justify-start gap-2 ${className}`}>
@@ -63,7 +65,7 @@ export function ShippingSection({
 
         <ShippingField
           label="المحافظة"
-          value={governorate}
+          value={governorate || externalGovernorate}
           icon={<LiaMapMarkerAltSolid size={18} />}
         />
 
