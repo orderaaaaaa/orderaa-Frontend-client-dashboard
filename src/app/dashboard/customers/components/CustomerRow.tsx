@@ -10,6 +10,7 @@ import { If, Then } from 'react-if';
 import { getStatusColor } from '../lib/getBadgeColor';
 import { getActivityColor } from '../lib/getActivityColor';
 import { ORDER_STATUS_AR } from '../lib/orderStatusAr';
+import CustomerBanConfirmationModal from './CustomerBanConfirmationModal'; // Import the modal
 
 interface CustomerRowProps {
   customer: any;
@@ -23,6 +24,7 @@ export const CustomerRow = memo(function CustomerRow({
   isPending,
 }: CustomerRowProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showBanModal, setShowBanModal] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   // Close dropdown on outside click
@@ -41,133 +43,160 @@ export const CustomerRow = memo(function CustomerRow({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isMenuOpen]);
 
+  const handleBanClick = () => {
+    setIsMenuOpen(false); // Close dropdown immediately
+    if (customer.isBlocked) {
+      // If already blocked, just unblock directly without confirmation
+      onToggleBlock(customer.id, customer.isBlocked);
+    } else {
+      // If not blocked, show confirmation modal
+      setShowBanModal(true);
+    }
+  };
+
+  const handleConfirmBan = () => {
+    onToggleBlock(customer.id, customer.isBlocked);
+    setShowBanModal(false);
+  };
+
   return (
-    <tr className="hover:bg-gray-50 transition-colors">
-      {/* العميل */}
-      <td className="px-4 py-4 whitespace-nowrap">
-        <div className="flex items-center gap-1">
-          <If condition={customer.isBlocked}>
-            <Then>
-              <GoDotFill className="text-[#f61515] w-5 h-5" />
-            </Then>
-          </If>
-          <span className="font-semibold text-gray-900">{customer.name}</span>
-        </div>
-      </td>
+    <>
+      <tr className="hover:bg-gray-50 transition-colors">
+        {/* العميل */}
+        <td className="px-4 py-4 whitespace-nowrap">
+          <div className="flex items-center gap-1">
+            <If condition={customer.isBlocked}>
+              <Then>
+                <GoDotFill className="text-[#f61515] w-5 h-5" />
+              </Then>
+            </If>
+            <span className="font-semibold text-gray-900">{customer.name}</span>
+          </div>
+        </td>
 
-      {/* التواصل */}
-      <td className="px-4 py-4">
-        <div className="flex flex-col gap-2 min-w-[180px]">
-          {customer.phoneNumbers
-            ?.slice(0, 1)
-            .map((phone: string, idx: number) => (
-              <div key={idx} className="flex items-center gap-2 text-gray-800">
-                <LiaWhatsapp className="w-5 h-5 text-gray-600" />
-                <span className="font-medium">{phone}</span>
-              </div>
-            ))}
+        {/* التواصل */}
+        <td className="px-4 py-4">
+          <div className="flex flex-col gap-2 min-w-[180px]">
+            {customer.phoneNumbers
+              ?.slice(0, 1)
+              .map((phone: string, idx: number) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-2 text-gray-800"
+                >
+                  <LiaWhatsapp className="w-5 h-5 text-gray-600" />
+                  <span className="font-medium">{phone}</span>
+                </div>
+              ))}
 
-          <If condition={customer.email}>
-            <Then>
-              <div className="flex items-center gap-2 text-gray-800">
-                <GoMail className="w-5 h-5 text-gray-600" />
-                <span className="font-medium">{customer.email}</span>
-              </div>
-            </Then>
-          </If>
-        </div>
-      </td>
+            <If condition={customer.email}>
+              <Then>
+                <div className="flex items-center gap-2 text-gray-800">
+                  <GoMail className="w-5 h-5 text-gray-600" />
+                  <span className="font-medium">{customer.email}</span>
+                </div>
+              </Then>
+            </If>
+          </div>
+        </td>
 
-      {/* عدد الطلبات */}
-      <td className="px-4 py-4 text-center whitespace-nowrap">
-        <div className="inline-flex items-center gap-2">
-          <ShoppingBag className="w-5 h-5 text-gray-500" />
-          <span className="font-medium text-gray-900 text-lg">
-            {customer.numberOfOrders}
-          </span>
-        </div>
-      </td>
+        {/* عدد الطلبات */}
+        <td className="px-4 py-4 text-center whitespace-nowrap">
+          <div className="inline-flex items-center gap-2">
+            <ShoppingBag className="w-5 h-5 text-gray-500" />
+            <span className="font-medium text-gray-900 text-lg">
+              {customer.numberOfOrders}
+            </span>
+          </div>
+        </td>
 
-      {/* اخر طلب */}
-      <td className="px-4 py-4 text-center whitespace-nowrap">
-        <div className="inline-flex items-center gap-2">
-          <LiaCalendarAltSolid className="w-5 h-5 text-gray-500" />
-          <span className="font-medium text-gray-800">
-            {customer.latestOrder?.createdAt
-              ? new Date(customer.latestOrder.createdAt).toLocaleDateString(
-                  'en-GB'
-                )
-              : '-'}
-          </span>
-        </div>
-      </td>
+        {/* اخر طلب */}
+        <td className="px-4 py-4 text-center whitespace-nowrap">
+          <div className="inline-flex items-center gap-2">
+            <LiaCalendarAltSolid className="w-5 h-5 text-gray-500" />
+            <span className="font-medium text-gray-800">
+              {customer.latestOrder?.createdAt
+                ? new Date(customer.latestOrder.createdAt).toLocaleDateString(
+                    'en-GB'
+                  )
+                : '-'}
+            </span>
+          </div>
+        </td>
 
-      {/* الحالة */}
-      <td className="px-4 py-4 text-center whitespace-nowrap">
-        <span
-          className={`px-5 py-1 text-sm font-medium rounded-full inline-flex items-center ${getStatusColor(
-            customer.latestOrder?.status
-          )}`}
-        >
-          {customer.latestOrder
-            ? ORDER_STATUS_AR[
-                customer.latestOrder.status as keyof typeof ORDER_STATUS_AR
-              ]
-            : '—'}
-        </span>
-      </td>
-
-      {/* النشاطات */}
-      <td className="px-4 py-4 text-center whitespace-nowrap">
-        <span
-          className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium ${getActivityColor(
-            'Loyal Buyer'
-          )}`}
-        >
-          <span>🏆</span>
-          <span>Loyal Buyer</span>
-        </span>
-      </td>
-
-      {/* إجمالي المشتريات */}
-      <td className="px-4 py-4 text-center whitespace-nowrap">
-        <span className="font-medium text-gray-900">
-          {customer.totalAmount} جنية
-        </span>
-      </td>
-
-      {/* الإجراءات */}
-      <td className="px-4 py-4 text-center whitespace-nowrap">
-        <div ref={menuRef} className="relative">
-          <button
-            onClick={() => setIsMenuOpen((v) => !v)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+        {/* الحالة */}
+        <td className="px-4 py-4 text-center whitespace-nowrap">
+          <span
+            className={`px-5 py-1 text-sm font-medium rounded-full inline-flex items-center ${getStatusColor(
+              customer.latestOrder?.status
+            )}`}
           >
-            <TfiMore className="w-5 h-5 text-gray-600" />
-          </button>
+            {customer.latestOrder
+              ? ORDER_STATUS_AR[
+                  customer.latestOrder.status as keyof typeof ORDER_STATUS_AR
+                ]
+              : '—'}
+          </span>
+        </td>
 
-          {isMenuOpen && (
-            <div className="absolute left-0 mt-2 bg-white rounded-lg shadow-lg border z-10 min-w-[140px]">
-              <button
-                onClick={() => {
-                  setIsMenuOpen(false); // close dropdown immediately
-                  onToggleBlock(customer.id, customer.isBlocked);
-                }}
-                disabled={isPending}
-                className={`w-full px-6 py-2 text-center transition-colors hover:bg-gray-50 ${
-                  customer.isBlocked ? 'text-green-600' : 'text-red-600'
-                } ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                {isPending
-                  ? 'جاري...'
-                  : customer.isBlocked
-                  ? 'إلغاء الحظر'
-                  : 'حظر'}
-              </button>
-            </div>
-          )}
-        </div>
-      </td>
-    </tr>
+        {/* النشاطات */}
+        <td className="px-4 py-4 text-center whitespace-nowrap">
+          <span
+            className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium ${getActivityColor(
+              'Loyal Buyer'
+            )}`}
+          >
+            <span>🏆</span>
+            <span>Loyal Buyer</span>
+          </span>
+        </td>
+
+        {/* إجمالي المشتريات */}
+        <td className="px-4 py-4 text-center whitespace-nowrap">
+          <span className="font-medium text-gray-900">
+            {customer.totalAmount} جنية
+          </span>
+        </td>
+
+        {/* الإجراءات */}
+        <td className="px-4 py-4 text-center whitespace-nowrap">
+          <div ref={menuRef} className="relative">
+            <button
+              onClick={() => setIsMenuOpen((v) => !v)}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <TfiMore className="w-5 h-5 text-gray-600" />
+            </button>
+
+            {isMenuOpen && (
+              <div className="absolute left-0 mt-2 bg-white rounded-lg shadow-lg border z-10 min-w-[140px]">
+                <button
+                  onClick={handleBanClick}
+                  disabled={isPending}
+                  className={`w-full px-6 py-2 text-center transition-colors hover:bg-gray-50 ${
+                    customer.isBlocked ? 'text-green-600' : 'text-red-600'
+                  } ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {isPending
+                    ? 'جاري...'
+                    : customer.isBlocked
+                    ? 'إلغاء الحظر'
+                    : 'حظر'}
+                </button>
+              </div>
+            )}
+          </div>
+        </td>
+      </tr>
+
+      {/* Ban Confirmation Modal */}
+      <CustomerBanConfirmationModal
+        id={customer.id.toString()}
+        isOpen={showBanModal}
+        onClose={() => setShowBanModal(false)}
+        onConfirm={handleConfirmBan}
+        customer={customer} // Pass the full customer object for display
+      />
+    </>
   );
 });
