@@ -5,6 +5,7 @@ import { useEditCustomer } from '../hooks/useEditCustomer';
 import { TABLE_HEADERS } from '../constants/CustomerHeaders';
 import { Pagination } from '@/components/Pagination';
 import { CustomerRow } from './CustomerRow';
+import CustomerDetailsModal from './modals/CustomerDetailsModal'; // Import the modal
 
 interface CustomerTableProps {
   searchTerm?: string;
@@ -19,6 +20,10 @@ export default function CustomerTable({
 }: CustomerTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(
+    null
+  ); // Add this state
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false); // Add this state
   const limit = 10;
 
   // Convert clientStatus string to boolean or undefined
@@ -57,6 +62,12 @@ export default function CustomerTable({
         isBlocked: !currentBlockStatus,
       },
     });
+  };
+
+  // Add this handler
+  const handleRowClick = (customerId: number) => {
+    setSelectedCustomerId(customerId);
+    setIsDetailsModalOpen(true);
   };
 
   useEffect(() => {
@@ -115,6 +126,7 @@ export default function CustomerTable({
                   key={customer.id}
                   customer={customer}
                   onToggleBlock={handleToggleBlock}
+                  onRowClick={handleRowClick} // Pass the handler
                   isPending={editCustomerMutation.isPending}
                 />
               ))}
@@ -122,6 +134,17 @@ export default function CustomerTable({
           </table>
         </div>
       </div>
+
+      {/* Add single modal at the table level */}
+      <CustomerDetailsModal
+        customerId={selectedCustomerId || undefined}
+        isOpen={isDetailsModalOpen}
+        onClose={() => {
+          setIsDetailsModalOpen(false);
+          setSelectedCustomerId(null);
+        }}
+      />
+
       <div className="flex justify-between items-center w-[97%] mx-auto mt-10 mb-5">
         <div className="text-lg">
           عرض <span className="font-bold">1- {data?.data.length}</span> من اصل{' '}

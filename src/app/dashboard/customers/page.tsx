@@ -16,7 +16,6 @@ export default function CustomersPage() {
   );
   const [orderStatus, setOrderStatus] = useState<string | undefined>(undefined);
 
-  // Memoize callback functions to prevent unnecessary re-renders
   const handleFromDateChange = useCallback((date: Date | null) => {
     setFromDate(date);
   }, []);
@@ -34,12 +33,10 @@ export default function CustomersPage() {
   }, []);
 
   const handleClientStatusChange = useCallback((status: string) => {
-    // Convert empty string to undefined
     setClientStatus(status === '' ? undefined : status);
   }, []);
 
   const handleOrderStatusChange = useCallback((status: string) => {
-    // Convert empty string or 'all' to undefined
     setOrderStatus(status === '' || status === 'all' ? undefined : status);
   }, []);
 

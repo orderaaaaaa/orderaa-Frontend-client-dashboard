@@ -39,9 +39,7 @@ export default function CustomerSearch({
   const [activityType, setActivityType] = useState('');
   const [timePeriodChange, setTimePeriodChange] = useState('');
   const [allCustomers, setAllCustomers] = useState('');
-  const [code, setCode] = useState('');
 
-  // Create debounced search function
   const debouncedSearch = useMemo(
     () =>
       debounce((searchTerm: string) => {
@@ -50,7 +48,6 @@ export default function CustomerSearch({
     [onSearchChange]
   );
 
-  // Handle local search input changes
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
@@ -60,19 +57,17 @@ export default function CustomerSearch({
     [debouncedSearch]
   );
 
-  // Handle client status change
   const handleClientStatusChange = useCallback(
     (value: string) => {
       setClientStatus(value);
 
-      // Map UI status to API status
       let apiStatus: string | undefined;
       if (value === 'active') {
-        apiStatus = 'false'; // Not blocked
+        apiStatus = 'false';
       } else if (value === 'frozen') {
-        apiStatus = 'true'; // Blocked
+        apiStatus = 'true';
       } else {
-        apiStatus = ''; // Clear filter (empty string will be handled by API)
+        apiStatus = '';
       }
 
       onClientStatusChange(apiStatus);
@@ -80,17 +75,15 @@ export default function CustomerSearch({
     [onClientStatusChange]
   );
 
-  // Handle order status change
   const handleOrderStatusChange = useCallback(
     (value: string) => {
       setOrderStatus(value);
 
-      // Map UI status to API status
       let apiStatus: string | undefined;
       if (value === 'all') {
-        apiStatus = ''; // Clear filter
+        apiStatus = '';
       } else {
-        apiStatus = value; // Use the key directly from orderStatusOptions
+        apiStatus = value;
       }
 
       onOrderStatusChange(apiStatus);
@@ -98,7 +91,6 @@ export default function CustomerSearch({
     [onOrderStatusChange]
   );
 
-  // Cleanup debounced function on unmount
   useEffect(() => {
     return () => {
       debouncedSearch.cancel();
@@ -109,7 +101,6 @@ export default function CustomerSearch({
     <div className="bg-white w-[97%] mx-auto rounded-lg shadow-md mb-6">
       <div className="p-6">
         <div className="flex flex-row-reverse items-center gap-4">
-          {/* Advanced Filters Button */}
           <button
             onClick={() => setIsFilterOpen(!isFilterOpen)}
             className={`flex items-center gap-2 px-12 py-2.5 rounded-lg transition-all cursor-pointer ${
@@ -204,20 +195,6 @@ export default function CustomerSearch({
                 placeholder="جميع العملاء"
                 readOnly={true}
                 selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-md font-semibold bg-white hover:bg-gray-50 text-right"
-              />
-            </div>
-
-            {/* Date inputs (kept as per requirement) */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-right">
-                الفترة الزمنية
-              </label>
-              <input
-                type="text"
-                value={timePeriod || ''}
-                onChange={(e) => onTimePeriodChange(e.target.value)}
-                placeholder="الفترة الزمنية"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-md font-semibold bg-white hover:bg-gray-50 text-right"
               />
             </div>
           </div>
