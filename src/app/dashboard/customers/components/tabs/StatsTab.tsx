@@ -1,5 +1,4 @@
 import React from 'react';
-import { CheckCircle, Clock, Package } from 'lucide-react';
 
 interface StatsTabProps {
   deliveryRate: number;
@@ -20,102 +19,54 @@ const StatsTab: React.FC<StatsTabProps> = ({
   returned,
   totalOrders,
 }) => {
+  const statCards = [
+    {
+      title: 'نسبة المرتجعات',
+      rate: returnRate,
+      label: 'طلبات مرتجعة',
+      count: returned,
+    },
+    {
+      title: 'نسبة الإلغاء',
+      rate: cancellationRate,
+      label: 'طلبات ملغية',
+      count: cancelled,
+    },
+    {
+      title: 'معدل التسليم',
+      rate: deliveryRate,
+      label: 'تم التسليم',
+      count: delivered,
+    },
+  ];
+
   return (
-    <div className="grid grid-cols-3 gap-4 mb-8">
-      {/* نسبة المرتجعات */}
-      <div className="flex flex-col">
-        {/* Header */}
-        <div className="bg-[#dbd1f5] border-b rounded-t-lg border-[#dbd1f5] p-3">
-          <p className="text-lg font-medium text-center text-gray-900">
-            نسبة المرتجعات
-          </p>
-        </div>
-
-        {/* Content */}
-        <div className="bg-[#ffffff] shadow-lg rounded-lg p-4 flex-1">
-          <div className="flex flex-col h-full">
-            <div className="mb-4">
-              <div className="flex items-center justify-between">
-                <p className="text-3xl font-bold text-gray-900">
-                  {returnRate}%
-                </p>
-              </div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      {statCards.map((card, idx) => (
+        <div
+          key={idx}
+          className="flex flex-col border border-gray-100 rounded-xl overflow-hidden shadow-sm"
+        >
+          <div className="bg-[#dbd1f5] p-3 text-center text-gray-900 font-medium">
+            {card.title}
+          </div>
+          <div className="bg-white p-5 flex flex-col h-full">
+            <div className="mb-4 text-center md:text-right">
+              <p className="text-3xl font-bold text-gray-900">{card.rate}%</p>
             </div>
-
-            <div className="mt-auto flex items-center gap-2">
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-[#666666]">طلبات مرتجعة</span>
-                <span className="font-medium text-gray-900">{returned}</span>
+            <div className="mt-auto flex flex-wrap items-center justify-center md:justify-start gap-3 text-xs md:text-sm border-t pt-3">
+              <div className="flex gap-1">
+                <span className="text-gray-500">{card.label}:</span>
+                <span className="font-bold">{card.count}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-[#666666]">من إجمالي الطلبات</span>
-                <span className="font-medium text-gray-900">{totalOrders}</span>
+              <div className="flex gap-1 border-r pr-3 border-gray-200">
+                <span className="text-gray-500">الإجمالي:</span>
+                <span className="font-bold">{totalOrders}</span>
               </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* نسبة الإلغاء */}
-      <div className="flex flex-col h-full">
-        {/* Header */}
-        <div className="bg-[#dbd1f5] border-b rounded-t-lg border-[#dbd1f5] p-3">
-          <p className="text-lg font-medium text-center text-gray-900">
-            نسبة الإلغاء
-          </p>
-        </div>
-
-        {/* Content */}
-        <div className="bg-[#ffffff] shadow-lg rounded-lg p-4 flex-1">
-          <div className="flex flex-col h-full">
-            <div className="mb-4">
-              <div className="flex items-center justify-between">
-                <p className="text-3xl font-bold text-gray-900">
-                  {cancellationRate}%
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-auto flex items-center gap-2">
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-[#666666]">طلبات ملغية</span>
-                <span className="font-medium text-gray-900">{cancelled}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-[#666666]">إجمالي الطلبات</span>
-                <span className="font-medium text-gray-900">{totalOrders}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* معدل التسليم */}
-      <div className="flex flex-col h-full">
-        {/* Header */}
-        <div className="bg-[#dbd1f5] border-b rounded-t-lg border-[#dbd1f5] p-3">
-          <p className="text-lg font-medium text-center text-gray-900">
-            معدل التسليم
-          </p>
-        </div>
-
-        {/* Content */}
-        <div className="bg-[#ffffff] shadow-lg rounded-lg p-4 flex-1">
-          <div className="flex flex-col h-full">
-            <div className="mb-4">
-              <div className="flex items-center justify-between">
-                <p className="text-3xl font-bold text-gray-900">
-                  {deliveryRate}%
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-auto flex items-center gap-2">
-              <span className="text-[#666666]">تم التسليم</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      ))}
     </div>
   );
 };

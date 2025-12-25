@@ -46,45 +46,55 @@ const CustomerBanConfirmationModal: React.FC<
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+      dir="rtl"
+    >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+      />
 
-      {/* Modal */}
-      <div className="relative bg-white rounded-xl p-6 shadow-2xl w-[50%] mx-4 overflow-hidden">
+      {/* Modal Container */}
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md md:max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between border-gray-200">
-          <div>
-            <h2 className="text-xl text-[#95071f] flex gap-2 items-center font-semibold text-right">
-              <span>
-                <TfiAlert />
-              </span>
-              هل متأكد حظر هذا العميل
-            </h2>
+        <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-50">
+          <div className="flex items-center gap-3 text-[#95071f]">
+            <div className="bg-red-50 p-2 rounded-full">
+              <TfiAlert className="w-5 h-5 md:w-6 md:h-6" />
+            </div>
+            <h2 className="text-lg md:text-xl font-bold">تأكيد الحظر</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600"
             aria-label="إغلاق"
           >
-            <X className="w-5 h-5 text-gray-500" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Client Info */}
-        <div className="px-6 py-3 space-y-6 border-b border-gray-200">
-          <div className="space-y-4">
-            <h3 className="text-2xl font-medium text-gray-900 text-right">
+        {/* Content Body */}
+        <div className="p-6 space-y-4">
+          <p className="text-gray-600 text-sm md:text-base leading-relaxed">
+            هل أنت متأكد من {customer?.isBlocked ? 'إلغاء حظر' : 'حظر'} هذا
+            العميل؟ لن يتمكن هذا المستخدم من القيام بعمليات جديدة.
+          </p>
+
+          <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">
               {customer?.name}
             </h3>
-            <div className="flex flex-wrap gap-3 mt-6">
+
+            <div className="flex flex-wrap gap-2">
               {patches.map((patch, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 bg-white shadow-sm"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-white shadow-sm"
                 >
-                  <span className="text-gray-600">{patch.icon}</span>
-                  <span className="text-gray-800 text-sm font-medium">
+                  <span className="text-[#5d24e1]">{patch.icon}</span>
+                  <span className="text-gray-700 text-xs md:text-sm font-medium">
                     {patch.state}
                   </span>
                 </div>
@@ -94,21 +104,19 @@ const CustomerBanConfirmationModal: React.FC<
         </div>
 
         {/* Footer Actions */}
-        <div className="flex justify-end">
-          <div className="grid sm:grid-cols-2 w-[45%] gap-3 p-6">
-            <button
-              onClick={handleConfirm}
-              className={`px-6 py-3 font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-[#5d24e1] text-white`}
-            >
-              {customer?.isBlocked ? 'تأكيد إلغاء الحظر' : 'تأكيد الحظر'}
-            </button>
-            <button
-              onClick={onClose}
-              className="px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border border-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-            >
-              إلغاء
-            </button>
-          </div>
+        <div className="p-4 md:p-6 bg-gray-50/50 flex flex-col sm:flex-row-reverse gap-3">
+          <button
+            onClick={handleConfirm}
+            className="w-full sm:flex-1 px-6 py-3 font-bold rounded-xl transition-all bg-[#5d24e1] text-white hover:bg-[#4a1cb5] shadow-lg shadow-purple-200 active:scale-95"
+          >
+            {customer?.isBlocked ? 'تأكيد إلغاء الحظر' : 'تأكيد الحظر'}
+          </button>
+          <button
+            onClick={onClose}
+            className="w-full sm:flex-1 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-xl border border-gray-200 transition-all active:scale-95"
+          >
+            إلغاء
+          </button>
         </div>
       </div>
     </div>

@@ -31,7 +31,7 @@ export default function CustomerHeader({
 }: CustomerHeaderProps) {
   return (
     <div className="flex flex-col mt-3 w-[95%] mx-auto sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-4">
-      <h1 className="text-5xl mb-4 font-semibold">إداره العملاء</h1>
+      <h1 className="text-3xl md:text-4xl mb-4 font-semibold">إداره العملاء</h1>
 
       <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 px-3 w-full sm:w-auto">
         <DatePicker
