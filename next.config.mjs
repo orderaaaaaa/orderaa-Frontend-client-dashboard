@@ -1,6 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'easyorders.fra1.digitaloceanspaces.com',
+      },
+    ],
+  },
 };
 
 export default nextConfig;
