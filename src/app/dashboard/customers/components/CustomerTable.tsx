@@ -145,7 +145,7 @@ export default function CustomerTable({
         }}
       />
 
-      <div className="flex justify-between items-center w-[97%] mx-auto mt-10 mb-5">
+      <div className="flex flex-wrap justify-center max-sm:gap-4 sm:justify-between items-center w-[97%] mx-auto mt-10 mb-5">
         <div className="text-lg">
           عرض <span className="font-bold">1- {data?.data.length}</span> من اصل{' '}
           <span className="font-bold">{data?.meta.totalItems}</span> عميل
