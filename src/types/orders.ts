@@ -231,6 +231,11 @@ export interface Order {
   coupon?: string;
   couponDiscount?: number;
 
+  // Shipping address
+  governorate?: string;
+  city?: string;
+  address?: string;
+
   // Product details
   material?: string;
   weight?: string;
