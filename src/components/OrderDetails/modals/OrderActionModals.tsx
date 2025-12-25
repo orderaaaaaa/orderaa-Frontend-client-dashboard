@@ -57,7 +57,7 @@ export function OrderActionModals({
     }
   };
 
-  const handleCancelOrderConfirm = async (data: { reason: string; notes: string }) => {
+  const handleCancelOrderConfirm = async (data: { reasonId: number; notes: string }) => {
     const success = await actions.handleCancel(data);
     if (success) {
       modals.cancel.close();
