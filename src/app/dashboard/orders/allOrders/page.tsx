@@ -87,24 +87,6 @@ function AllOrdersContent() {
     }
   }, [page]);
 
-  // Calculate repeat counts from orders
-  const calculateRepeatCounts = useCallback((ordersList: Order[]) => {
-    const phoneCounts: Record<string, number> = {};
-
-    ordersList.forEach((order) => {
-      const phone = order.customers.phone_numbers?.[0];
-      if (phone && phone !== 'غير محدد') {
-        phoneCounts[phone] = (phoneCounts[phone] || 0) + 1;
-      }
-    });
-
-    return phoneCounts;
-  }, []);
-
-  const repeatCounts = useMemo(() => {
-    return calculateRepeatCounts(orders);
-  }, [orders, calculateRepeatCounts]);
-
   // Get selected orders as Order objects for BulkActionsBar
   const selectedOrders = useMemo(() => {
     return orders.filter((order) => selectedOrderIds.includes(order.id));
@@ -448,7 +430,7 @@ function AllOrdersContent() {
                 address={order.customers.address || 'غير محدد'}
                 alert={0}
                 createdAt={order.createdAt}
-                repeatCount={repeatCounts[order.customers.phone_numbers?.[0]] || 0}
+                repeatCount={order.customers.totalCustomerOrders || 0}
                 onRepeatClick={() => handleRepeatClick(order.customers.phone_numbers?.[0], order.customers.name)}
               />
             ))}

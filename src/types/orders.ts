@@ -174,6 +174,7 @@ export interface Customer {
   governorate?: string;
   city?: string;
   area?: string;
+  totalCustomerOrders?: number;
 }
 
 // Product Interface
