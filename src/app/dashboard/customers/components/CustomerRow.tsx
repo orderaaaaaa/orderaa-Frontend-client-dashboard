@@ -10,21 +10,26 @@ import { If, Then } from 'react-if';
 import { getStatusColor } from '../lib/getBadgeColor';
 import { getActivityColor } from '../lib/getActivityColor';
 import { ORDER_STATUS_AR } from '../lib/orderStatusAr';
-import CustomerBanConfirmationModal from './CustomerBanConfirmationModal'; // Import the modal
+
+import CustomerBanConfirmationModal from './CustomerBanConfirmationModal';
 
 interface CustomerRowProps {
   customer: any;
   onToggleBlock: (customerId: number, currentBlockStatus: boolean) => void;
   isPending: boolean;
+  onRowClick: (customerId: number) => void; // Add this prop
 }
 
 export const CustomerRow = memo(function CustomerRow({
   customer,
   onToggleBlock,
   isPending,
+  onRowClick, // Receive this prop
 }: CustomerRowProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
+  // Remove showDetailsModal state from here
+
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   // Close dropdown on outside click
@@ -44,12 +49,11 @@ export const CustomerRow = memo(function CustomerRow({
   }, [isMenuOpen]);
 
   const handleBanClick = () => {
-    setIsMenuOpen(false); // Close dropdown immediately
+    setIsMenuOpen(false);
+
     if (customer.isBlocked) {
-      // If already blocked, just unblock directly without confirmation
       onToggleBlock(customer.id, customer.isBlocked);
     } else {
-      // If not blocked, show confirmation modal
       setShowBanModal(true);
     }
   };
@@ -61,7 +65,12 @@ export const CustomerRow = memo(function CustomerRow({
 
   return (
     <>
-      <tr className="hover:bg-gray-50 transition-colors">
+      {/* ================= ROW ================= */}
+      <tr
+        onClick={() => onRowClick(customer.id)} // Use the prop instead
+        className="hover:bg-gray-50 transition-colors cursor-pointer"
+      >
+        {/* ... rest of the row JSX remains exactly the same ... */}
         {/* العميل */}
         <td className="px-4 py-4 whitespace-nowrap">
           <div className="flex items-center gap-1">
@@ -80,10 +89,7 @@ export const CustomerRow = memo(function CustomerRow({
             {customer.phoneNumbers
               ?.slice(0, 1)
               .map((phone: string, idx: number) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-2 text-gray-800"
-                >
+                <div key={idx} className="flex items-center gap-2">
                   <LiaWhatsapp className="w-5 h-5 text-gray-600" />
                   <span className="font-medium">{phone}</span>
                 </div>
@@ -91,7 +97,7 @@ export const CustomerRow = memo(function CustomerRow({
 
             <If condition={customer.email}>
               <Then>
-                <div className="flex items-center gap-2 text-gray-800">
+                <div className="flex items-center gap-2">
                   <GoMail className="w-5 h-5 text-gray-600" />
                   <span className="font-medium">{customer.email}</span>
                 </div>
@@ -104,7 +110,7 @@ export const CustomerRow = memo(function CustomerRow({
         <td className="px-4 py-4 text-center whitespace-nowrap">
           <div className="inline-flex items-center gap-2">
             <ShoppingBag className="w-5 h-5 text-gray-500" />
-            <span className="font-medium text-gray-900 text-lg">
+            <span className="font-medium text-lg">
               {customer.numberOfOrders}
             </span>
           </div>
@@ -114,7 +120,7 @@ export const CustomerRow = memo(function CustomerRow({
         <td className="px-4 py-4 text-center whitespace-nowrap">
           <div className="inline-flex items-center gap-2">
             <LiaCalendarAltSolid className="w-5 h-5 text-gray-500" />
-            <span className="font-medium text-gray-800">
+            <span className="font-medium">
               {customer.latestOrder?.createdAt
                 ? new Date(customer.latestOrder.createdAt).toLocaleDateString(
                     'en-GB'
@@ -127,7 +133,7 @@ export const CustomerRow = memo(function CustomerRow({
         {/* الحالة */}
         <td className="px-4 py-4 text-center whitespace-nowrap">
           <span
-            className={`px-5 py-1 text-sm font-medium rounded-full inline-flex items-center ${getStatusColor(
+            className={`px-5 py-1 text-sm font-medium rounded-full ${getStatusColor(
               customer.latestOrder?.status
             )}`}
           >
@@ -139,7 +145,7 @@ export const CustomerRow = memo(function CustomerRow({
           </span>
         </td>
 
-        {/* النشاطات */}
+        {/* النشاط */}
         <td className="px-4 py-4 text-center whitespace-nowrap">
           <span
             className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium ${getActivityColor(
@@ -151,19 +157,20 @@ export const CustomerRow = memo(function CustomerRow({
           </span>
         </td>
 
-        {/* إجمالي المشتريات */}
+        {/* الإجمالي */}
         <td className="px-4 py-4 text-center whitespace-nowrap">
-          <span className="font-medium text-gray-900">
-            {customer.totalAmount} جنية
-          </span>
+          <span className="font-medium">{customer.totalAmount} جنية</span>
         </td>
 
         {/* الإجراءات */}
-        <td className="px-4 py-4 text-center whitespace-nowrap">
+        <td
+          className="px-4 py-4 text-center whitespace-nowrap"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div ref={menuRef} className="relative">
             <button
               onClick={() => setIsMenuOpen((v) => !v)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-lg"
             >
               <TfiMore className="w-5 h-5 text-gray-600" />
             </button>
@@ -173,7 +180,7 @@ export const CustomerRow = memo(function CustomerRow({
                 <button
                   onClick={handleBanClick}
                   disabled={isPending}
-                  className={`w-full px-6 py-2 text-center transition-colors hover:bg-gray-50 ${
+                  className={`w-full px-6 py-2 transition-colors hover:bg-gray-50 ${
                     customer.isBlocked ? 'text-green-600' : 'text-red-600'
                   } ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
@@ -189,13 +196,15 @@ export const CustomerRow = memo(function CustomerRow({
         </td>
       </tr>
 
-      {/* Ban Confirmation Modal */}
+      {/* ================= MODALS ================= */}
+      {/* Remove CustomerDetailsModal from here */}
+      {/* Keep only the ban modal since it's row-specific */}
       <CustomerBanConfirmationModal
         id={customer.id.toString()}
         isOpen={showBanModal}
         onClose={() => setShowBanModal(false)}
         onConfirm={handleConfirmBan}
-        customer={customer} // Pass the full customer object for display
+        customer={customer}
       />
     </>
   );
