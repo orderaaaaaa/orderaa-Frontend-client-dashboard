@@ -25,7 +25,6 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  // Cast the hook response to use your Customer interface + orders array
   const { data, isLoading, isError, refetch } = useCustomer(customerId) as {
     data: (Customer & { orders: Order[] }) | undefined;
     isLoading: boolean;
@@ -43,15 +42,33 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
     }
   }, [isOpen, customerId, refetch]);
 
+  // Handler for WhatsApp with +2 prefix
+  const handleWhatsappClick = () => {
+    if (data?.phoneNumbers?.[0]) {
+      // Remove any non-numeric characters from the phone number
+      const cleanNumber = data.phoneNumbers[0].replace(/\D/g, '');
+      // Prepend +2 if not already present (assuming local numbers)
+      const formattedNumber = cleanNumber.startsWith('2')
+        ? cleanNumber
+        : `2${cleanNumber}`;
+      window.open(`https://wa.me/${formattedNumber}`, '_blank');
+    }
+  };
+
+  // Handler for Email
+  const handleEmailClick = () => {
+    if (data?.email) {
+      window.location.href = `mailto:${data.email}`;
+    }
+  };
+
   if (!isOpen) return null;
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-        <div className="bg-white rounded-xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-auto relative">
-          <div className="flex justify-center items-center h-64 mt-10">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5D24E1]"></div>
-          </div>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+        <div className="bg-white rounded-xl shadow-xl w-full max-w-6xl h-[60vh] flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5D24E1]"></div>
         </div>
       </div>
     );
@@ -59,11 +76,9 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
 
   if (isError || !data) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-        <div className="bg-white rounded-xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-auto relative">
-          <div className="p-6 text-center py-20 text-red-600">
-            حدث خطأ أثناء تحميل البيانات
-          </div>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+        <div className="bg-white rounded-xl shadow-xl w-full max-w-6xl p-10 text-center text-red-600">
+          حدث خطأ أثناء تحميل البيانات
         </div>
       </div>
     );
@@ -86,10 +101,10 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 md:p-4"
       dir="rtl"
     >
-      <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-auto relative">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-6xl max-h-[95vh] overflow-y-auto relative">
         <button
           onClick={onClose}
           className="p-2 absolute hover:bg-gray-100 rounded-lg left-3 top-3 cursor-pointer z-10"
@@ -97,91 +112,95 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
           <X className="w-5 h-5" />
         </button>
 
-        <div className="p-6">
-          <div className="mb-6">
+        <div className="p-4 md:p-8">
+          <div className="mb-6 mt-4 md:mt-0">
             <div className="flex items-center gap-3">
               <If condition={data.isBlocked}>
                 <Then>
-                  <ImBlocked className="text-red-500 w-6 h-6" />
+                  <ImBlocked className="text-red-500 w-5 h-5 md:w-6 md:h-6" />
                 </Then>
               </If>
-              <h1 className="text-2xl font-bold text-gray-900">{data.name}</h1>
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+                {data.name}
+              </h1>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-2 p-5 bg-[#f4f4f4] mb-5 rounded-sm">
-            <button className="cursor-pointer flex gap-2 items-center bg-[#5d24e1] text-white px-4 py-2 rounded-md text-lg font-normal">
-              <LiaWhatsapp /> إرسال الواتساب
+          <div className="flex flex-wrap gap-2 p-3 md:p-5 bg-[#f4f4f4] mb-5 rounded-md">
+            <button
+              onClick={handleWhatsappClick}
+              className="flex-1 min-w-[140px] justify-center cursor-pointer flex gap-2 items-center bg-[#5d24e1] text-white px-4 py-2 rounded-md text-sm md:text-base font-medium hover:bg-[#4a1cb5] transition-colors"
+            >
+              <LiaWhatsapp className="text-xl" /> <span>واتساب</span>
             </button>
-            <button className="cursor-pointer flex gap-2 items-center bg-white px-4 py-2 rounded-md text-lg font-normal">
-              <FiMail /> إرسال البريد
+            <button
+              onClick={handleEmailClick}
+              className="flex-1 min-w-[140px] justify-center cursor-pointer flex gap-2 items-center bg-white border border-gray-200 px-4 py-2 rounded-md text-sm md:text-base font-medium hover:bg-gray-50 transition-colors"
+            >
+              <FiMail /> <span>بريد</span>
             </button>
-            <button className="cursor-pointer flex gap-2 items-center bg-white px-4 py-2 rounded-md text-lg font-normal">
-              <BsFiletypeCsv /> تصدير
+            <button className="flex-1 min-w-[140px] justify-center cursor-pointer flex gap-2 items-center bg-white border border-gray-200 px-4 py-2 rounded-md text-sm md:text-base font-medium hover:bg-gray-50 transition-colors">
+              <BsFiletypeCsv /> <span>تصدير</span>
             </button>
           </div>
 
-          {/* Contact and Overview Cards */}
-          <div className="grid grid-cols-4 gap-4 mb-8">
-            <div className="flex flex-col h-full border border-gray-100 rounded-xl overflow-hidden">
-              <div className="bg-[#dbd1f5] p-3 text-center text-gray-900 font-medium">
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="flex flex-col border border-gray-100 rounded-xl overflow-hidden">
+              <div className="bg-[#dbd1f5] p-2 text-center text-gray-900 font-medium text-sm">
                 معلومات التواصل
               </div>
-              <div className="bg-white p-4 flex-1 space-y-3">
-                <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-gray-400" />
-                  <span className="font-medium">
-                    {data.phoneNumbers[0] || '—'}
-                  </span>
+              <div className="bg-white p-4 space-y-2">
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <Phone className="w-4 h-4 text-gray-400" />{' '}
+                  {data.phoneNumbers[0] || '—'}
                 </div>
-                <div className="flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-gray-400" />
-                  <span className="font-medium truncate">
-                    {data.email || '—'}
-                  </span>
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <Mail className="w-4 h-4 text-gray-400" />{' '}
+                  <span className="truncate">{data.email || '—'}</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col h-full border border-gray-100 rounded-xl overflow-hidden">
-              <div className="bg-[#dbd1f5] p-3 text-center text-gray-900 font-medium">
+            <div className="flex flex-col border border-gray-100 rounded-xl overflow-hidden">
+              <div className="bg-[#dbd1f5] p-2 text-center text-gray-900 font-medium text-sm">
                 عدد الطلبات
               </div>
-              <div className="bg-white p-4 flex-1">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="bg-white p-4">
+                <div className="flex items-center gap-2">
                   <ShoppingBag className="w-5 h-5 text-gray-400" />
-                  <p className="text-2xl font-bold">{data.numberOfOrders}</p>
+                  <p className="text-xl font-bold">{data.numberOfOrders}</p>
                 </div>
-                <div className="text-sm text-gray-500">
+                <div className="text-xs text-gray-500 mt-1">
                   {delivered} مؤكد • {returned} مرتجع
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col h-full border border-gray-100 rounded-xl overflow-hidden">
-              <div className="bg-[#dbd1f5] p-3 text-center text-gray-900 font-medium">
+            <div className="flex flex-col border border-gray-100 rounded-xl overflow-hidden">
+              <div className="bg-[#dbd1f5] p-2 text-center text-gray-900 font-medium text-sm">
                 إجمالي المشتريات
               </div>
-              <div className="bg-white p-4 flex-1">
+              <div className="bg-white p-4">
                 <div className="flex items-center gap-2">
                   <TbMoneybag className="text-gray-600 w-5 h-5" />
-                  <p className="text-2xl font-bold">
+                  <p className="text-xl font-bold">
                     {data.totalAmount.toLocaleString()}
                   </p>
                 </div>
-                <p className="text-sm text-gray-500 mt-2">جنيه مصري</p>
+                <p className="text-xs text-gray-500 mt-1">جنيه مصري</p>
               </div>
             </div>
 
-            <div className="flex flex-col h-full border border-gray-100 rounded-xl overflow-hidden">
-              <div className="bg-[#dbd1f5] p-3 text-center text-gray-900 font-medium">
+            <div className="flex flex-col border border-gray-100 rounded-xl overflow-hidden">
+              <div className="bg-[#dbd1f5] p-2 text-center text-gray-900 font-medium text-sm">
                 آخر طلب
               </div>
-              <div className="bg-white p-4 flex-1">
+              <div className="bg-white p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <Calendar className="w-5 h-5 text-gray-400" />
-                  <p className="font-bold">
+                  <Calendar className="w-4 h-4 text-gray-400" />
+                  <p className="font-bold text-sm">
                     {data.latestOrder?.createdAt
                       ? new Date(
                           data.latestOrder.createdAt
@@ -191,7 +210,7 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
                 </div>
                 {data.latestOrder && (
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                       data.latestOrder.status === 'DELIVERED'
                         ? 'bg-green-50 text-green-600'
                         : 'bg-blue-50 text-blue-600'
@@ -207,14 +226,14 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
           </div>
 
           {/* Navigation */}
-          <div className="flex gap-1 mb-6 p-1.5 bg-gray-100 rounded-full">
+          <div className="flex gap-1 mb-6 p-1 bg-gray-100 rounded-lg md:rounded-full">
             {['orders', 'stats', 'notes'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab as any)}
-                className={`flex-1 py-2.5 rounded-full text-center font-medium transition-all ${
+                className={`flex-1 py-2 rounded-lg md:rounded-full text-center text-xs md:text-sm font-medium transition-all ${
                   activeTab === tab
-                    ? 'bg-[#5d24e1] text-white'
+                    ? 'bg-[#5d24e1] text-white shadow-sm'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -227,26 +246,32 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
             ))}
           </div>
 
-          {/* Tabs Content */}
-          {activeTab === 'orders' && <OrdersTab orders={data.orders} />}
-          {activeTab === 'stats' && (
-            <StatsTab
-              deliveryRate={deliveryRate}
-              cancellationRate={cancellationRate}
-              returnRate={returnRate}
-              totalOrders={totalOrders}
-              delivered={delivered}
-              cancelled={cancelled}
-              returned={returned}
-            />
-          )}
-          {activeTab === 'notes' && (
-            <NotesTab
-              /* Fix for string vs string[] error: ensure notes is always an array */
-              notes={Array.isArray(data.notes) ? data.notes : [data.notes]}
-              createdAt={data.createdAt}
-            />
-          )}
+          <div className="mt-4">
+            {activeTab === 'orders' && <OrdersTab orders={data.orders} />}
+            {activeTab === 'stats' && (
+              <StatsTab
+                deliveryRate={deliveryRate}
+                cancellationRate={cancellationRate}
+                returnRate={returnRate}
+                totalOrders={totalOrders}
+                delivered={delivered}
+                cancelled={cancelled}
+                returned={returned}
+              />
+            )}
+            {activeTab === 'notes' && (
+              <NotesTab
+                notes={
+                  Array.isArray(data.notes)
+                    ? data.notes
+                    : data.notes
+                    ? [data.notes]
+                    : []
+                }
+                createdAt={data.createdAt}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
