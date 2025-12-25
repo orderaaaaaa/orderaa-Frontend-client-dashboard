@@ -222,7 +222,6 @@ export interface Order {
   numberOfTriesToReach: number;
   notes?: string;
   format: OrderFormat;
-  totalCustomerOrders: number;
   // Order details
   shippingCost?: number;
   shippingCompany?: string;

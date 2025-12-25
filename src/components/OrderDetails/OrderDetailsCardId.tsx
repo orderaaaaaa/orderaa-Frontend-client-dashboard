@@ -76,7 +76,7 @@ const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
                   الطلب مفتوح من قبل محمد علاء في قسم التاكيد{" "}
                 </h3>
               </button>
-              {order.totalCustomerOrders > 1 && (
+              {(order.customers.totalCustomerOrders ?? 0) > 1 && (
                   <button
                     className="cursor-pointer bg-[#F6F2FC] text-white border-1 border-[#CBB5FD] !rounded-r-3xl p-2 px-4"
                     onClick={() => setIsCustomerOrdersModalOpen(true)}
@@ -84,7 +84,7 @@ const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
                     <h3 className="flex gap-2 text-sm items-center font-semibold mb-1 text-[#5D24E1] relative ">
                       <TriangleAlert className="w-5 text-yellow-500" />
                       <p className="bg-red-600 absolute top-[-3px] right-[-4px] w-3 h-3 text-[8px] text-center rounded-full text-white">
-                        {order.totalCustomerOrders}
+                        {order.customers.totalCustomerOrders}
                       </p>
                       هذا العميل قام بالطلب اكثر من مره
                     </h3>
