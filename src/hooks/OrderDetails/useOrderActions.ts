@@ -201,7 +201,8 @@ export function useOrderActions({
           error?.response?.data?.error ||
           error?.message ||
           'فشل في إلغاء الطلب. يرجى المحاولة مرة أخرى.';
-        throw new Error(apiErrorMessage);
+        toast.error(apiErrorMessage);
+        return false;
       }
     },
     [order.id, onOrderUpdate, onNavigateToNextOrder, dateRange, statusFilter, cancelOrderMutation, getNextOrderId]
