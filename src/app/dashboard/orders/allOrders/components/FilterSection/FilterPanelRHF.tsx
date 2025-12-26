@@ -1,23 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Control, Controller, FieldErrors, useWatch, UseFormSetValue } from "react-hook-form";
 import { OrderFiltersFormData } from "@/schemas/orderFilters.schema";
 import { FilterOptions } from "@/types/orders";
 import SearchableSelect from "./SearchableSelect";
 import { DatePicker } from "@/components/ui/datepicker";
-import { getGovernorates, getCities } from "@/lib/api/lookups";
+import { useGovernoratesQuery, useCitiesQuery } from "@/services/lookups";
 import { LiaTimesSolid } from "react-icons/lia";
-
-interface GovernorateData {
-  key: string;
-  value: string;
-}
-
-interface CityData {
-  key: string;
-  value: string;
-}
 
 export type FilterKey = keyof OrderFiltersFormData | 'employeeName';
 
@@ -87,51 +77,14 @@ export default function FilterPanel({
   activeFilters,
   onRemoveFilter,
 }: Props) {
-  const [governorates, setGovernorates] = useState<GovernorateData[]>([]);
-  const [cities, setCities] = useState<CityData[]>([]);
-  const [isLoadingCities, setIsLoadingCities] = useState(false);
-
   const selectedGovernorate = useWatch({
     control,
     name: "governorate",
   });
 
-  useEffect(() => {
-    const fetchGovernorates = async () => {
-      try {
-        const data = await getGovernorates();
-        if (Array.isArray(data)) {
-          setGovernorates(data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch governorates:", error);
-      }
-    };
-    fetchGovernorates();
-  }, []);
-
-  useEffect(() => {
-    const fetchCities = async () => {
-      if (!selectedGovernorate) {
-        setCities([]);
-        return;
-      }
-
-      setIsLoadingCities(true);
-      try {
-        const data = await getCities(selectedGovernorate);
-        if (Array.isArray(data)) {
-          setCities(data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch cities:", error);
-        setCities([]);
-      } finally {
-        setIsLoadingCities(false);
-      }
-    };
-    fetchCities();
-  }, [selectedGovernorate, governorates]);
+  // Use React Query hooks for caching
+  const { data: governorates = [] } = useGovernoratesQuery();
+  const { data: cities = [], isLoading: isLoadingCities } = useCitiesQuery(selectedGovernorate);
 
   const governorateOptions = governorates;
   const cityOptions = cities;
