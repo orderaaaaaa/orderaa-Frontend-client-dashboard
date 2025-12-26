@@ -208,19 +208,16 @@ export const useAddOrderProduct = () => {
       productId,
       variants,
       quantity,
-      price,
     }: {
       orderId: number;
       productId: number;
       variants: { label: string; value: string }[];
       quantity: number;
-      price: number;
     }) => {
       const response = await http.post(`/orders/${orderId}/products`, {
         productId,
         variants,
         quantity,
-        price,
       });
       return response.data;
     },

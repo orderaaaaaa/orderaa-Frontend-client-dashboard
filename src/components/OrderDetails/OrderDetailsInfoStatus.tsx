@@ -70,18 +70,20 @@ const getEventIcon = (eventType?: string) => {
 };
 
 function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
-  // Filter order_events to only show events with notes
-  const eventsWithNotes = order.order_events?.filter((event: OrderEvent) => event.note) || [];
+  const allEvents = order.order_events || [];
 
-  const events = eventsWithNotes.map((event: OrderEvent, index: number) => ({
-    id: event.id || index + 1,
-    status: event.status ? (statusLabelMap[event.status] || event.status) : 'حدث',
-    date: new Date(event.createdAt).toLocaleDateString('ar-EG'),
-    time: getTimeAgo(event.createdAt),
-    eventType: event.status || 'default',
-    note: event.note || '',
-    employee: event.employee,
-  }));
+  const events = allEvents.map((event: OrderEvent, index: number) => {
+    const statusLabel = event.status ? (statusLabelMap[event.status] || event.status) : 'حدث';
+    return {
+      id: event.id || index + 1,
+      status: statusLabel,
+      date: new Date(event.createdAt).toLocaleDateString('ar-EG'),
+      time: getTimeAgo(event.createdAt),
+      eventType: event.status || 'default',
+      note: event.note || statusLabel,
+      employee: event.employee,
+    };
+  });
 
   const displayData = [...events];
 

@@ -25,6 +25,18 @@ export default function PostponeHoursModal({
   const [selectedDuration, setSelectedDuration] = useState<'30min' | '1hour' | '2hours' | null>(null);
   const [postponeTime, setPostponeTime] = useState<Date | null>(null);
 
+  const handleSelectDuration = (duration: '30min' | '1hour' | '2hours') => {
+    setSelectedDuration(duration);
+    setPostponeTime(null); // Clear time picker when selecting duration
+  };
+
+  const handleSelectTime = (time: Date | null) => {
+    setPostponeTime(time);
+    if (time) {
+      setSelectedDuration(null); // Clear duration when selecting time
+    }
+  };
+
   const handleConfirm = async () => {
     await onConfirm({
       duration: selectedDuration || undefined,
@@ -69,7 +81,7 @@ export default function PostponeHoursModal({
                   name="duration"
                   value={option.value}
                   checked={selectedDuration === option.value}
-                  onChange={() => setSelectedDuration(option.value)}
+                  onChange={() => handleSelectDuration(option.value)}
                   className="w-5 h-5 text-[#5D24E1] border-gray-300 focus:ring-[#5D24E1] focus:ring-2"
                 />
                 <span className="text-base font-bold text-[#1F1F1F]">
@@ -88,10 +100,9 @@ export default function PostponeHoursModal({
           </label>
           <DatePicker
             selected={postponeTime}
-            onChange={setPostponeTime}
+            onChange={handleSelectTime}
             placeholder="اختر الوقت"
-            showTimeSelect={true}
-            dateFormat="h:mm aa"
+            showTimeSelectOnly={true}
             showIcon={true}
             icon={LiaClockSolid}
             className="w-full"

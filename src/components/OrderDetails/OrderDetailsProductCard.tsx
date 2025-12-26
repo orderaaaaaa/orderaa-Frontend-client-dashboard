@@ -127,15 +127,12 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
         return;
       }
 
-      const price = referenceProduct.price; // Use same price as reference product
-
       // Add product to order using mutation (handles cache invalidation automatically)
       await addOrderProductMutation.mutateAsync({
         orderId: order.id,
         productId: referenceProduct.productId,
         variants,
         quantity,
-        price,
       });
 
       toast.success('تم إضافة المنتج بنجاح');
@@ -145,20 +142,12 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
   };
 
   const handleAddNewProduct = async (productId: number, variants: SelectedVariant[], quantity: number) => {
-    const selectedProduct = allProducts.find(p => p.id === productId);
-    if (!selectedProduct) {
-      throw new Error('المنتج غير موجود');
-    }
-
-    const price = selectedProduct.price || 0;
-
     // Add product to order using mutation (handles cache invalidation automatically)
     await addOrderProductMutation.mutateAsync({
       orderId: order.id,
       productId,
       variants,
       quantity,
-      price,
     });
   };
 
