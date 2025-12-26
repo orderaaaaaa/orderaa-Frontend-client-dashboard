@@ -41,11 +41,15 @@ const FilterSection = React.memo(function FilterSection({
 
   const removeFilter = (filterKey: FilterKey) => {
     setActiveFilters(activeFilters.filter(f => f !== filterKey));
-    if (setValue && filterKey !== 'employeeName' && filterKey !== 'latest' && filterKey !== 'newest') {
-      setValue(filterKey as keyof OrderFiltersFormData, '', {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
+    if (setValue && filterKey !== 'employeeName') {
+      if (filterKey === 'newFirst') {
+        setValue('newFirst', undefined, { shouldDirty: true, shouldValidate: true });
+      } else {
+        setValue(filterKey as keyof OrderFiltersFormData, '', {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+      }
     }
   };
 

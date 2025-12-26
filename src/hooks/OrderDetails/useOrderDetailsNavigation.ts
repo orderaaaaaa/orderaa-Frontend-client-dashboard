@@ -65,6 +65,8 @@ function buildApiFilters(
     if (formFilters.area) filters.area = formFilters.area;
     if (formFilters.productName) filters.productName = formFilters.productName;
     if (formFilters.shipmentCode) filters.code = formFilters.shipmentCode;
+    if (formFilters.newFirst !== undefined) filters.newFirst = formFilters.newFirst;
+    if (formFilters.orderByDirection) filters.orderByDirection = formFilters.orderByDirection;
   }
 
   return filters;
@@ -99,6 +101,13 @@ export function useOrderDetailsNavigation({
     const fromDate = parseDateFromUrl(searchParams.get('from'));
     const toDate = parseDateFromUrl(searchParams.get('to'));
 
+    const newFirstParam = searchParams.get('newFirst');
+    const newFirst = newFirstParam === 'true' ? true : newFirstParam === 'false' ? false : undefined;
+    const orderByDirectionParam = searchParams.get('orderByDirection');
+    const orderByDirection = (orderByDirectionParam === 'asc' || orderByDirectionParam === 'desc')
+      ? orderByDirectionParam
+      : '';
+
     const formFilters: OrderFiltersFormData = {
       customerName: searchParams.get('customerName') || '',
       phone: searchParams.get('phone') || '',
@@ -110,9 +119,11 @@ export function useOrderDetailsNavigation({
       shipmentCode: searchParams.get('shipmentCode') || '',
       address: searchParams.get('address') || '',
       executionDate: searchParams.get('executionDate') || '',
+      newFirst,
+      orderByDirection,
     };
 
-    const hasFormFilters = Object.values(formFilters).some(v => v !== '');
+    const hasFormFilters = Object.values(formFilters).some(v => v !== '' && v !== undefined);
 
     return {
       status,
@@ -164,6 +175,8 @@ export function useOrderDetailsNavigation({
         if (formFilters.shipmentCode) params.set('shipmentCode', formFilters.shipmentCode);
         if (formFilters.address) params.set('address', formFilters.address);
         if (formFilters.executionDate) params.set('executionDate', formFilters.executionDate);
+        if (formFilters.newFirst !== undefined) params.set('newFirst', String(formFilters.newFirst));
+        if (formFilters.orderByDirection) params.set('orderByDirection', formFilters.orderByDirection);
       }
 
       const newParamsString = params.toString();

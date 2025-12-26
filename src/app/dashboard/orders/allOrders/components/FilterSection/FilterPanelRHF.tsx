@@ -19,7 +19,7 @@ interface CityData {
   value: string;
 }
 
-export type FilterKey = keyof OrderFiltersFormData | 'employeeName' | 'latest' | 'newest';
+export type FilterKey = keyof OrderFiltersFormData | 'employeeName';
 
 interface FilterDefinition {
   key: FilterKey;
@@ -38,8 +38,8 @@ export const FILTER_DEFINITIONS: FilterDefinition[] = [
   { key: 'area', label: 'المنطقة', type: 'select' },
   { key: 'sizeColor', label: 'المصدر', type: 'select' },
   { key: 'address', label: 'العنوان', type: 'text' },
-  { key: 'latest', label: 'الاحدث', type: 'select' },
-  { key: 'newest', label: 'الجديد', type: 'select' },
+  { key: 'newFirst', label: 'الأحدث', type: 'select' },
+  { key: 'orderByDirection', label: 'الترتيب', type: 'select' },
 ];
 
 interface FilterChipProps {
@@ -156,7 +156,7 @@ export default function FilterPanel({
               <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter}>
                 <textarea
                   {...field}
-                  value={field.value ?? ''}
+                  value={String(field.value ?? '')}
                   placeholder={label}
                   rows={1}
                   className={`w-full h-full px-3 rounded border bg-white resize-none text-base ${errors[key as keyof OrderFiltersFormData] ? 'border-red-500' : 'border-gray-300'}`}
@@ -176,7 +176,7 @@ export default function FilterPanel({
               <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter}>
                 <input
                   {...field}
-                  value={field.value ?? ''}
+                  value={String(field.value ?? '')}
                   type="text"
                   placeholder={label}
                   className={`w-full h-full px-3 rounded border bg-white ${errors[key as keyof OrderFiltersFormData] ? 'border-red-500' : 'border-gray-300'}`}
@@ -195,7 +195,7 @@ export default function FilterPanel({
             render={({ field }) => (
               <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter}>
                 <DatePicker
-                  selected={field.value ? new Date(field.value) : null}
+                  selected={field.value && typeof field.value === 'string' ? new Date(field.value) : null}
                   onChange={(date) => field.onChange(date ? date.toISOString().split('T')[0] : '')}
                   placeholder={label}
                   className="w-full h-full border border-gray-300 rounded bg-white"
@@ -279,7 +279,7 @@ export default function FilterPanel({
             />
           );
         }
-        if (key === 'sizeColor' || key === 'latest' || key === 'newest') {
+        if (key === 'sizeColor') {
           return (
             <Controller
               key={key}
@@ -292,6 +292,56 @@ export default function FilterPanel({
                     onChange={field.onChange}
                     onBlur={field.onBlur}
                     options={options.sizeColorOptions}
+                    placeholder={label}
+                    widthClass="w-full"
+                  />
+                </FilterChip>
+              )}
+            />
+          );
+        }
+        if (key === 'newFirst') {
+          const newFirstOptions = [
+            { key: 'true', value: 'الأجدد' },
+            { key: 'false', value: 'الأقدم' },
+          ];
+          return (
+            <Controller
+              key={key}
+              name="newFirst"
+              control={control}
+              render={({ field }) => (
+                <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter}>
+                  <SearchableSelect
+                    value={field.value === true ? 'true' : field.value === false ? 'false' : ''}
+                    onChange={(value) => field.onChange(value === 'true')}
+                    onBlur={field.onBlur}
+                    options={newFirstOptions}
+                    placeholder={label}
+                    widthClass="w-full"
+                  />
+                </FilterChip>
+              )}
+            />
+          );
+        }
+        if (key === 'orderByDirection') {
+          const orderByDirectionOptions = [
+            { key: 'asc', value: 'ترتيب تصاعدي' },
+            { key: 'desc', value: 'ترتيب تنازلي' },
+          ];
+          return (
+            <Controller
+              key={key}
+              name="orderByDirection"
+              control={control}
+              render={({ field }) => (
+                <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter}>
+                  <SearchableSelect
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    options={orderByDirectionOptions}
                     placeholder={label}
                     widthClass="w-full"
                   />

@@ -131,12 +131,15 @@ export interface OrderFilters {
   productName: string;
   sizeColor: string;
   governorate: string;
+  city: string;
   area: string;
   shipmentCode: string;
   customerName: string;
   phone: string;
   address: string;
   executionDate?: string;
+  newFirst?: boolean;
+  orderByDirection?: 'asc' | 'desc' | '';
 }
 
 export interface FilterOptions {
@@ -300,6 +303,8 @@ export interface FilterOrdersDto {
   createdAfter?: string;
   createdBefore?: string;
   confirmedDate?: string;
+  newFirst?: boolean;
+  orderByDirection?: 'asc' | 'desc';
 }
 
 // Pagination Meta
@@ -316,27 +321,6 @@ export interface PaginationMeta {
 export interface PaginatedResponse<T> {
   data: T[];
   meta: PaginationMeta;
-}
-
-// Legacy filters (for FilterSection component)
-export interface OrderFilters {
-  productName: string;
-  sizeColor: string;
-  governorate: string;
-  city: string;
-  area: string;
-  shipmentCode: string;
-  customerName: string;
-  phone: string;
-  address: string;
-  executionDate?: string;
-}
-
-export interface FilterOptions {
-  productOptions: string[];
-  sizeColorOptions: string[];
-  governorateOptions: string[];
-  areaOptions: string[];
 }
 
 // Filter Options Response (from backend)

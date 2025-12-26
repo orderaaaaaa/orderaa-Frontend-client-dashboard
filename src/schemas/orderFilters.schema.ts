@@ -59,6 +59,11 @@ export const orderFiltersSchema = z.object({
     area: z.string().optional().or(z.literal('')),
 
     sizeColor: z.string().optional().or(z.literal('')),
+
+    // Sorting fields
+    newFirst: z.boolean().optional(),
+
+    orderByDirection: z.enum(['asc', 'desc']).optional().or(z.literal('')),
 });
 
 /**
@@ -80,5 +85,7 @@ export const defaultFilterValues: OrderFiltersFormData = {
     city: '',
     area: '',
     sizeColor: '',
+    newFirst: undefined,
+    orderByDirection: '',
 };
 
