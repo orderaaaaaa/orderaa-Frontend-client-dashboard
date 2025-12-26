@@ -117,9 +117,9 @@ export default function CustomerOrdersModal({
           <div className="flex items-center gap-4">
             <div className="relative flex items-center justify-center">
               <svg width="32" height="32" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M14 4L24 21H4L14 4Z" fill="#DC2626" stroke="#DC2626" strokeWidth="2" strokeLinejoin="round"/>
-                <path d="M14 11V15" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                <circle cx="14" cy="18" r="1" fill="white"/>
+                <path d="M14 4L24 21H4L14 4Z" fill="#DC2626" stroke="#DC2626" strokeWidth="2" strokeLinejoin="round" />
+                <path d="M14 11V15" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                <circle cx="14" cy="18" r="1" fill="white" />
               </svg>
               <div className="absolute -top-1 -right-1 w-6 h-6 bg-red-600 rounded-full flex items-center justify-center border-2 border-white">
                 <span className="text-xs font-bold text-white">{orders.length}</span>
@@ -211,7 +211,7 @@ export default function CustomerOrdersModal({
                     code={order.code}
                     name={order.customers.name}
                     phoneNumbers={order.customers.phone_numbers}
-                    government={order.customers.governorate || 'غير محدد'}
+                    government={order.governorate || order.externalGovernorate || 'غير محدد'}
                     items={order.order_products.map(
                       (op: any) =>
                         `${op.products.name}${op.products.size ? ` - ${op.products.size}` : ''

@@ -417,7 +417,7 @@ function AllOrdersContent() {
                 code={order.code}
                 name={order.customers.name}
                 phoneNumbers={order.customers.phone_numbers}
-                government={order.customers.governorate || 'غير محدد'}
+                government={order.governorate || order.externalGovernorate || 'غير محدد'}
                 items={order.order_products.map(
                   (op: any) =>
                     `${op.products.name}${op.products.size ? ` - ${op.products.size}` : ''
