@@ -70,10 +70,6 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
           ))}
         </div>
       </div>
-      {/* Mobile Hint */}
-      <div className="md:hidden text-center text-[10px] text-gray-400 mt-2 italic">
-        اسحب الجدول لمشاهدة كافة التفاصيل ←
-      </div>
     </div>
   );
 };

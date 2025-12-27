@@ -59,7 +59,7 @@ export default function CustomerSearch({
   const handleClientStatusChange = useCallback(
     (value: string) => {
       setClientStatus(value);
-      let apiStatus =
+      const apiStatus =
         value === 'active' ? 'false' : value === 'frozen' ? 'true' : '';
       onClientStatusChange(apiStatus);
     },
@@ -73,6 +73,23 @@ export default function CustomerSearch({
     },
     [onOrderStatusChange]
   );
+
+  const handleResetFilters = () => {
+    setLocalSearch('');
+    setClientStatus('');
+    setOrderStatus('');
+    setActivityType('');
+    setAllCustomers('');
+
+    debouncedSearch.cancel();
+    onSearchChange('');
+    onClientStatusChange('');
+    onOrderStatusChange('');
+
+    onFromDateChange(null);
+    onToDateChange(null);
+    onTimePeriodChange('');
+  };
 
   useEffect(() => {
     return () => {
@@ -98,7 +115,7 @@ export default function CustomerSearch({
             <span className="font-medium whitespace-nowrap">فلاتر متقدمة</span>
           </button>
 
-          {/* Search Input Container */}
+          {/* Search Input */}
           <div className="flex-1 relative">
             <input
               type="text"
@@ -113,7 +130,7 @@ export default function CustomerSearch({
         </div>
       </div>
 
-      {/* Extended Filters - Responsive Grid */}
+      {/* Filters */}
       {isFilterOpen && (
         <div className="px-4 md:px-6 pb-6 border-t border-gray-50 pt-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -127,7 +144,7 @@ export default function CustomerSearch({
                 onChange={handleClientStatusChange}
                 options={clientStatusOptions}
                 placeholder="اختر الحالة"
-                readOnly={true}
+                readOnly
                 selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-sm font-semibold bg-white text-right"
                 arrowClassName="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
                 dropdownClassName="absolute z-20 left-0 right-0 bg-white rounded-lg mt-1 max-h-48 overflow-y-auto shadow-xl border border-gray-200"
@@ -144,7 +161,7 @@ export default function CustomerSearch({
                 onChange={handleOrderStatusChange}
                 options={orderStatusOptions}
                 placeholder="اختر حالة الطلب"
-                readOnly={true}
+                readOnly
                 selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-sm font-semibold bg-white text-right"
                 arrowClassName="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
                 dropdownClassName="absolute z-20 left-0 right-0 bg-white rounded-lg mt-1 max-h-48 overflow-y-auto shadow-xl border border-gray-200"
@@ -161,7 +178,7 @@ export default function CustomerSearch({
                 onChange={setActivityType}
                 options={activityTypeOptions}
                 placeholder="نوع الشاره"
-                readOnly={true}
+                readOnly
                 selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-sm font-semibold bg-white text-right"
                 arrowClassName="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
                 dropdownClassName="absolute z-20 left-0 right-0 bg-white rounded-lg mt-1 max-h-48 overflow-y-auto shadow-xl border border-gray-200"
@@ -178,11 +195,21 @@ export default function CustomerSearch({
                 onChange={setAllCustomers}
                 options={customerOptions}
                 placeholder="عرض الجميع"
-                readOnly={true}
+                readOnly
                 selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-sm font-semibold bg-white text-right"
                 arrowClassName="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
               />
             </div>
+          </div>
+
+          {/* Reset Button */}
+          <div className="flex justify-end mt-6">
+            <button
+              onClick={handleResetFilters}
+              className="px-6 py-2 rounded-lg cursor-pointer border border-[#5d24e1] text-[#5d24e1] font-medium hover:bg-[#5d24e1] hover:text-white transition-all"
+            >
+              إعادة تعيين الفلاتر
+            </button>
           </div>
         </div>
       )}
