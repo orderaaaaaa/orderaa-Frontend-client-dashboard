@@ -17,18 +17,25 @@ interface CustomerRowProps {
   customer: any;
   onToggleBlock: (customerId: number, currentBlockStatus: boolean) => void;
   isPending: boolean;
-  onRowClick: (customerId: number) => void; // Add this prop
+  onRowClick: (customerId: number) => void;
 }
+
+const toWhatsAppNumber = (phone: string) => {
+  const cleaned = phone.replace(/\s+/g, '');
+  if (cleaned.startsWith('0')) {
+    return `+20${cleaned.slice(1)}`;
+  }
+  return cleaned;
+};
 
 export const CustomerRow = memo(function CustomerRow({
   customer,
   onToggleBlock,
   isPending,
-  onRowClick, // Receive this prop
+  onRowClick,
 }: CustomerRowProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
-  // Remove showDetailsModal state from here
 
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -63,10 +70,13 @@ export const CustomerRow = memo(function CustomerRow({
     setShowBanModal(false);
   };
 
+  const phone = customer.phoneNumbers?.[0];
+  const whatsappNumber = phone ? toWhatsAppNumber(phone) : null;
+
   return (
     <>
       <tr
-        onClick={() => onRowClick(customer.id)} // Use the prop instead
+        onClick={() => onRowClick(customer.id)}
         className="hover:bg-gray-50 transition-colors cursor-pointer"
       >
         {/* العميل */}
@@ -84,14 +94,28 @@ export const CustomerRow = memo(function CustomerRow({
         {/* التواصل */}
         <td className="px-4 py-4">
           <div className="flex flex-col gap-2 min-w-[180px]">
-            {customer.phoneNumbers
-              ?.slice(0, 1)
-              .map((phone: string, idx: number) => (
-                <div key={idx} className="flex items-center gap-2">
-                  <LiaWhatsapp className="w-5 h-5 text-gray-600" />
-                  <span className="font-medium">{phone}</span>
-                </div>
-              ))}
+            {phone && (
+              <div className="flex items-center gap-2">
+                {/* WhatsApp */}
+                <a
+                  href={`https://wa.me/${whatsappNumber}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <LiaWhatsapp className="w-5 h-5 text-[#5D24E1] hover:opacity-80" />
+                </a>
+
+                {/* Phone Call */}
+                <a
+                  href={`tel:${phone}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="font-medium hover:underline"
+                >
+                  {phone}
+                </a>
+              </div>
+            )}
 
             <If condition={customer.email}>
               <Then>
