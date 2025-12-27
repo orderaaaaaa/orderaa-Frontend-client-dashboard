@@ -171,19 +171,35 @@ export const EmployeeCard = memo(function EmployeeCard({
           {/* Phone Call */}
           <a
             href={`tel:${normalizedPhone}`}
-            className="bg-white hover:bg-gray-50 text-[#5D24E1] border-2 border-[#5D24E1] rounded-2xl py-3 px-4 flex items-center justify-center gap-2 transition-colors font-medium"
+            className="bg-white hover:bg-gray-50 text-[#5D24E1]
+             border-2 border-[#5D24E1] rounded-2xl
+             py-3 px-4
+             flex items-center justify-center gap-2
+             min-w-0 overflow-hidden
+             transition-colors font-medium"
           >
-            <span dir="ltr">{employee.phoneNumber}</span>
-            <Phone size={20} />
+            <span dir="ltr" className="truncate max-w-full min-w-0">
+              {employee.phoneNumber}
+            </span>
+
+            <Phone size={20} className="max-sm:hidden shrink-0" />
           </a>
 
           {/* Email */}
           <a
             href={`mailto:${employee.email}`}
-            className="bg-white hover:bg-gray-50 truncate text-[#5D24E1] border-2 border-[#5D24E1] rounded-2xl py-3 px-4 flex items-center justify-center gap-2 transition-colors font-medium"
+            className="bg-white hover:bg-gray-50 text-[#5D24E1]
+             border-2 border-[#5D24E1] rounded-2xl
+             py-3 px-4
+             flex items-center justify-center gap-2
+             min-w-0 overflow-hidden
+             transition-colors font-medium"
           >
-            <span dir="ltr">{employee.email}</span>
-            <Mail size={20} />
+            <span dir="ltr" className="truncate max-w-full min-w-0">
+              {employee.email}
+            </span>
+
+            <Mail size={20} className="max-sm:hidden shrink-0" />
           </a>
         </div>
 
