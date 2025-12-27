@@ -75,9 +75,10 @@ export default function AddNewProductModal({
       await onSave(selectedProduct.id, variants, quantity);
       toast.success('تم إضافة المنتج بنجاح');
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to add product:', error);
-      toast.error('فشل في إضافة المنتج. يرجى المحاولة مرة أخرى.');
+      const apiErrorMessage = error?.response?.data?.message || 'فشل في إضافة المنتج. يرجى المحاولة مرة أخرى.';
+      toast.error(apiErrorMessage);
     }
   };
 

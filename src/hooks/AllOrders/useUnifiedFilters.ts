@@ -59,6 +59,12 @@ export function buildApiFiltersFromUrlState(urlFilters: UrlFilterState): FilterO
     if (localFilters.shipmentCode) {
         filters.code = localFilters.shipmentCode;
     }
+    if (localFilters.newFirst !== undefined) {
+        filters.newFirst = localFilters.newFirst;
+    }
+    if (localFilters.orderByDirection) {
+        filters.orderByDirection = localFilters.orderByDirection;
+    }
 
     return filters;
 }

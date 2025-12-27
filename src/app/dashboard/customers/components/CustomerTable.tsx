@@ -1,17 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 
 import { useGetCustomers } from '../hooks/useGetCustomers';
 import { useEditCustomer } from '../hooks/useEditCustomer';
 import { TABLE_HEADERS } from '../constants/CustomerHeaders';
 import { Pagination } from '@/components/Pagination';
 import { CustomerRow } from './CustomerRow';
-import CustomerDetailsModal from './modals/CustomerDetailsModal'; // Import the modal
+import CustomerDetailsModal from './modals/CustomerDetailsModal';
+import { RxChevronUp } from 'react-icons/rx';
 
 interface CustomerTableProps {
   searchTerm?: string;
   clientStatus?: string;
   orderStatus?: string;
 }
+
+const LIMIT_OPTIONS = [10, 15, 20, 25];
 
 export default function CustomerTable({
   searchTerm = '',
@@ -22,12 +25,14 @@ export default function CustomerTable({
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(
     null
-  ); // Add this state
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false); // Add this state
-  const limit = 10;
+  );
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [limit, setLimit] = useState(10);
+  const [isLimitOpen, setIsLimitOpen] = useState(false);
 
-  // Convert clientStatus string to boolean or undefined
-  const isBlockedParam = React.useMemo(() => {
+  const limitRef = useRef<HTMLDivElement | null>(null);
+
+  const isBlockedParam = useMemo(() => {
     if (clientStatus === undefined) return undefined;
     if (clientStatus === 'true') return true;
     if (clientStatus === 'false') return false;
@@ -36,7 +41,7 @@ export default function CustomerTable({
 
   const { data, isLoading, isError, error } = useGetCustomers({
     page: currentPage,
-    limit: limit,
+    limit,
     search: searchTerm,
     isBlocked: isBlockedParam,
     latestOrderStatus: orderStatus,
@@ -64,10 +69,15 @@ export default function CustomerTable({
     });
   };
 
-  // Add this handler
   const handleRowClick = (customerId: number) => {
     setSelectedCustomerId(customerId);
     setIsDetailsModalOpen(true);
+  };
+
+  const handleSelectLimit = (value: number) => {
+    setLimit(value);
+    setCurrentPage(1);
+    setIsLimitOpen(false);
   };
 
   useEffect(() => {
@@ -76,6 +86,13 @@ export default function CustomerTable({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      if (
+        limitRef.current &&
+        !limitRef.current.contains(event.target as Node)
+      ) {
+        setIsLimitOpen(false);
+      }
+
       if (openMenuId && !(event.target as Element).closest('.menu-container')) {
         setOpenMenuId(null);
       }
@@ -126,7 +143,7 @@ export default function CustomerTable({
                   key={customer.id}
                   customer={customer}
                   onToggleBlock={handleToggleBlock}
-                  onRowClick={handleRowClick} // Pass the handler
+                  onRowClick={handleRowClick}
                   isPending={editCustomerMutation.isPending}
                 />
               ))}
@@ -135,7 +152,6 @@ export default function CustomerTable({
         </div>
       </div>
 
-      {/* Add single modal at the table level */}
       <CustomerDetailsModal
         customerId={selectedCustomerId || undefined}
         isOpen={isDetailsModalOpen}
@@ -145,7 +161,7 @@ export default function CustomerTable({
         }}
       />
 
-      <div className="flex justify-between items-center w-[97%] mx-auto mt-10 mb-5">
+      <div className="flex flex-wrap justify-center max-sm:gap-4 sm:justify-between items-center w-[97%] mx-auto mt-10 mb-5">
         <div className="text-lg">
           عرض <span className="font-bold">1- {data?.data.length}</span> من اصل{' '}
           <span className="font-bold">{data?.meta.totalItems}</span> عميل
@@ -157,6 +173,35 @@ export default function CustomerTable({
           hasPreviousPage={data?.meta.hasPreviousPage || false}
           onPageChange={handlePageChange}
         />
+      </div>
+
+      {/* Limit Dropdown */}
+      <div ref={limitRef} className="relative w-fit">
+        <div
+          onClick={() => setIsLimitOpen((prev) => !prev)}
+          className="bg-[#5D24E1] w-15 py-1 rounded-full text-white flex items-center justify-center cursor-pointer select-none"
+        >
+          {limit}
+          <RxChevronUp
+            className={`transition-transform ${
+              isLimitOpen ? 'rotate-180' : ''
+            }`}
+          />
+        </div>
+
+        {isLimitOpen && (
+          <div className="absolute bottom-full mb-2 w-full bg-white rounded-lg shadow-md overflow-hidden">
+            {LIMIT_OPTIONS.map((option) => (
+              <div
+                key={option}
+                onClick={() => handleSelectLimit(option)}
+                className="text-[#5D24E1] text-center py-1 cursor-pointer hover:bg-[#f1eefa]"
+              >
+                {option}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </>
   );

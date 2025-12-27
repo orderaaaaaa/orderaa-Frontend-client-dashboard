@@ -244,10 +244,11 @@ function OrderDetailsInfoComponent({
 
         <ShippingSection
           shippingCompany={localOrder.shippingCompany}
-          governorate={localOrder.customers.governorate}
-          city={localOrder.customers.city}
-          address={localOrder.customers.address}
+          governorate={localOrder.governorate}
+          city={localOrder.city}
+          address={localOrder.address}
           onEditClick={modals.shipping.open}
+          externalGovernorate={localOrder.externalGovernorate}
         />
 
         <PackagingNotesSection

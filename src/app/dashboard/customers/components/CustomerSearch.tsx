@@ -37,7 +37,6 @@ export default function CustomerSearch({
   const [clientStatus, setClientStatus] = useState('');
   const [orderStatus, setOrderStatus] = useState('');
   const [activityType, setActivityType] = useState('');
-  const [timePeriodChange, setTimePeriodChange] = useState('');
   const [allCustomers, setAllCustomers] = useState('');
 
   const debouncedSearch = useMemo(
@@ -60,16 +59,8 @@ export default function CustomerSearch({
   const handleClientStatusChange = useCallback(
     (value: string) => {
       setClientStatus(value);
-
-      let apiStatus: string | undefined;
-      if (value === 'active') {
-        apiStatus = 'false';
-      } else if (value === 'frozen') {
-        apiStatus = 'true';
-      } else {
-        apiStatus = '';
-      }
-
+      const apiStatus =
+        value === 'active' ? 'false' : value === 'frozen' ? 'true' : '';
       onClientStatusChange(apiStatus);
     },
     [onClientStatusChange]
@@ -78,18 +69,27 @@ export default function CustomerSearch({
   const handleOrderStatusChange = useCallback(
     (value: string) => {
       setOrderStatus(value);
-
-      let apiStatus: string | undefined;
-      if (value === 'all') {
-        apiStatus = '';
-      } else {
-        apiStatus = value;
-      }
-
-      onOrderStatusChange(apiStatus);
+      onOrderStatusChange(value === 'all' ? '' : value);
     },
     [onOrderStatusChange]
   );
+
+  const handleResetFilters = () => {
+    setLocalSearch('');
+    setClientStatus('');
+    setOrderStatus('');
+    setActivityType('');
+    setAllCustomers('');
+
+    debouncedSearch.cancel();
+    onSearchChange('');
+    onClientStatusChange('');
+    onOrderStatusChange('');
+
+    onFromDateChange(null);
+    onToDateChange(null);
+    onTimePeriodChange('');
+  };
 
   useEffect(() => {
     return () => {
@@ -98,29 +98,31 @@ export default function CustomerSearch({
   }, [debouncedSearch]);
 
   return (
-    <div className="bg-white w-[97%] mx-auto rounded-lg shadow-md mb-6">
-      <div className="p-6">
-        <div className="flex flex-row-reverse items-center gap-4">
+    <div className="bg-white w-[95%] md:w-[97%] mx-auto rounded-lg shadow-md mb-6">
+      <div className="p-4 md:p-6">
+        {/* Main Search Row */}
+        <div className="flex flex-col-reverse md:flex-row-reverse items-stretch md:items-center gap-4">
+          {/* Filter Toggle Button */}
           <button
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className={`flex items-center gap-2 px-12 py-2.5 rounded-lg transition-all cursor-pointer ${
+            className={`flex items-center justify-center gap-2 px-6 md:px-12 py-2.5 rounded-lg transition-all cursor-pointer border ${
               isFilterOpen
-                ? 'bg-[#5d24e1] text-white shadow-lg'
-                : 'border border-gray-300 hover:bg-gray-50'
+                ? 'bg-[#5d24e1] text-white shadow-md border-[#5d24e1]'
+                : 'border-gray-300 hover:bg-gray-50 text-gray-700'
             }`}
           >
             <SlidersVertical className="w-5 h-5" />
-            <p className="font-medium">فلاتر متقدمة</p>
+            <span className="font-medium whitespace-nowrap">فلاتر متقدمة</span>
           </button>
 
-          {/* Search Bar */}
+          {/* Search Input */}
           <div className="flex-1 relative">
             <input
               type="text"
               value={localSearch}
               onChange={handleSearchChange}
-              placeholder="البحث بالاسم، رقم الهاتف، البريد الالكتروني أو الكود"
-              className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-[#5d24e1] focus:border-transparent text-right placeholder-gray-400 placeholder:font-semibold"
+              placeholder="البحث بالاسم، رقم الهاتف، أو الكود..."
+              className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-[#5d24e1] focus:border-transparent text-right placeholder-gray-400"
               dir="rtl"
             />
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#5d24e1]" />
@@ -128,47 +130,47 @@ export default function CustomerSearch({
         </div>
       </div>
 
-      {/* Extended Filters */}
+      {/* Filters */}
       {isFilterOpen && (
-        <div className="px-6 pb-6">
-          <div className="grid grid-cols-5 gap-4">
-            {/* Client Status Dropdown */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-right">
+        <div className="px-4 md:px-6 pb-6 border-t border-gray-50 pt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Client Status */}
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700 text-right">
                 حالة العميل
               </label>
               <Dropdown
                 value={clientStatus}
                 onChange={handleClientStatusChange}
                 options={clientStatusOptions}
-                placeholder="حالة العميل"
-                readOnly={true}
-                selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-md font-semibold bg-white hover:bg-gray-50 text-right"
-                arrowClassName="absolute cursor-pointer px-3 left-0 top-1/2 transform -translate-y-1/2 text-gray-500"
-                dropdownClassName="absolute z-10 left-0 right-0 bg-white rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg border border-gray-200"
+                placeholder="اختر الحالة"
+                readOnly
+                selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-sm font-semibold bg-white text-right"
+                arrowClassName="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+                dropdownClassName="absolute z-20 left-0 right-0 bg-white rounded-lg mt-1 max-h-48 overflow-y-auto shadow-xl border border-gray-200"
               />
             </div>
 
-            {/* Order Status Dropdown */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-right">
+            {/* Order Status */}
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700 text-right">
                 حالة الطلب
               </label>
               <Dropdown
                 value={orderStatus}
                 onChange={handleOrderStatusChange}
                 options={orderStatusOptions}
-                placeholder="حالة الطلب"
-                readOnly={true}
-                selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-md font-semibold bg-white hover:bg-gray-50 text-right"
-                arrowClassName="absolute cursor-pointer px-3 left-0 top-1/2 transform -translate-y-1/2 text-gray-500"
-                dropdownClassName="absolute z-10 left-0 right-0 bg-white rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg border border-gray-200"
+                placeholder="اختر حالة الطلب"
+                readOnly
+                selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-sm font-semibold bg-white text-right"
+                arrowClassName="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+                dropdownClassName="absolute z-20 left-0 right-0 bg-white rounded-lg mt-1 max-h-48 overflow-y-auto shadow-xl border border-gray-200"
               />
             </div>
 
-            {/* Activity Type Dropdown - Kept but not functional */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-right">
+            {/* Activity Type */}
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700 text-right">
                 نوع الشارة
               </label>
               <Dropdown
@@ -176,27 +178,38 @@ export default function CustomerSearch({
                 onChange={setActivityType}
                 options={activityTypeOptions}
                 placeholder="نوع الشاره"
-                readOnly={true}
-                selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-md font-semibold bg-white hover:bg-gray-50 text-right"
-                arrowClassName="absolute cursor-pointer px-3 left-0 top-1/2 transform -translate-y-1/2 text-gray-500"
-                dropdownClassName="absolute z-10 left-0 right-0 bg-white rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg border border-gray-200"
+                readOnly
+                selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-sm font-semibold bg-white text-right"
+                arrowClassName="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+                dropdownClassName="absolute z-20 left-0 right-0 bg-white rounded-lg mt-1 max-h-48 overflow-y-auto shadow-xl border border-gray-200"
               />
             </div>
 
-            {/* All Customers Dropdown - Kept but not functional */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-right">
+            {/* All Customers */}
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700 text-right">
                 جميع العملاء
               </label>
               <Dropdown
                 value={allCustomers}
                 onChange={setAllCustomers}
                 options={customerOptions}
-                placeholder="جميع العملاء"
-                readOnly={true}
-                selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-md font-semibold bg-white hover:bg-gray-50 text-right"
+                placeholder="عرض الجميع"
+                readOnly
+                selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-sm font-semibold bg-white text-right"
+                arrowClassName="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
               />
             </div>
+          </div>
+
+          {/* Reset Button */}
+          <div className="flex justify-end mt-6">
+            <button
+              onClick={handleResetFilters}
+              className="px-6 py-2 rounded-lg cursor-pointer border border-[#5d24e1] text-[#5d24e1] font-medium hover:bg-[#5d24e1] hover:text-white transition-all"
+            >
+              إعادة تعيين الفلاتر
+            </button>
           </div>
         </div>
       )}

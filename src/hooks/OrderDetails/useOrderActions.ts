@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { Order, OrderStatus, OrderStatusItem } from '@/types/orders';
 import { ShippingData } from '@/components/OrderDetails/EditShippingModal';
-import { useUpdateOrder, useGetNextOrderId } from '@/services/orders';
+import { useUpdateOrder, useGetNextOrderId, useCancelOrder } from '@/services/orders';
 
 export interface UseOrderActionsOptions {
   order: Order;
@@ -22,7 +22,7 @@ export interface OrderActionsState {
     updateData?: Partial<Order> | Record<string, any>
   ) => Promise<boolean>;
   handleUrgent: (data: { shippingCost?: number; urgentDate: string }) => Promise<boolean>;
-  handleCancel: (data: { reason: string; notes: string }) => Promise<boolean>;
+  handleCancel: (data: { reasonId: number; notes: string }) => Promise<boolean>;
   handleStopOperation: (notes: string) => Promise<boolean>;
   handlePostponeHours: (data: { duration?: '30min' | '1hour' | '2hours'; time?: Date }) => Promise<boolean>;
   handlePostponeDays: (data: { duration?: '1day' | '2days' | '3days' | 'week'; date?: Date }) => Promise<boolean>;
@@ -43,6 +43,7 @@ export function useOrderActions({
   availableStatuses,
 }: UseOrderActionsOptions): OrderActionsState {
   const updateOrderMutation = useUpdateOrder();
+  const cancelOrderMutation = useCancelOrder();
   const { getNextOrderId } = useGetNextOrderId();
 
   const getStatusFromAction = useCallback((action: string): OrderStatus | null => {
@@ -154,19 +155,57 @@ export function useOrderActions({
   );
 
   const handleCancel = useCallback(
-    async (data: { reason: string; notes: string }) => {
-      const status = getStatusFromAction('cancel');
-      if (!status) {
-        toast.error('فشل في تحديد حالة الطلب. يرجى المحاولة مرة أخرى.');
+    async (data: { reasonId: number; notes: string }) => {
+      try {
+        const updatedOrder = await cancelOrderMutation.mutateAsync({
+          orderId: order.id,
+          reasonId: data.reasonId,
+          notes: data.notes || undefined,
+        });
+
+        if (onOrderUpdate) {
+          onOrderUpdate(updatedOrder);
+        }
+
+        toast.success('تم إلغاء الطلب بنجاح');
+
+        if (onNavigateToNextOrder) {
+          const fromISO = dateRange?.from?.toISOString();
+          const toISO = dateRange?.to?.toISOString();
+
+          try {
+            const nextOrderResponse = await getNextOrderId(
+              order.id,
+              statusFilter || undefined,
+              fromISO,
+              toISO
+            );
+
+            if (nextOrderResponse?.id) {
+              onNavigateToNextOrder(nextOrderResponse.id);
+            }
+          } catch (nextErr: any) {
+            console.error('Failed to get next order:', nextErr);
+            const errorMessage =
+              nextErr?.response?.data?.message ||
+              'لا يوجد طلبات أخرى مطابقة للفلاتر';
+            toast.info(errorMessage);
+          }
+        }
+
+        return true;
+      } catch (error: any) {
+        console.error('Failed to cancel order:', error);
+        const apiErrorMessage =
+          error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          error?.message ||
+          'فشل في إلغاء الطلب. يرجى المحاولة مرة أخرى.';
+        toast.error(apiErrorMessage);
         return false;
       }
-
-      const updateData: Record<string, unknown> = {
-        cancelReason: data.notes ? `${data.reason}: ${data.notes}` : data.reason,
-      };
-      return await handleStatusUpdateAndNavigate(status, updateData);
     },
-    [getStatusFromAction, handleStatusUpdateAndNavigate]
+    [order.id, onOrderUpdate, onNavigateToNextOrder, dateRange, statusFilter, cancelOrderMutation, getNextOrderId]
   );
 
   const handleStopOperation = useCallback(

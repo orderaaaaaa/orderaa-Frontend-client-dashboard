@@ -5,6 +5,7 @@ type FilterSelections = {
   accessLevel: string;
   department: string;
   performance: string;
+  limit: number;
 };
 
 interface EmployeesStore {
@@ -17,6 +18,7 @@ interface EmployeesStore {
   setAccessLevel: (level: string) => void;
   setDepartment: (department: string) => void;
   setPerformance: (performance: string) => void;
+  setLimit: (limit: number) => void;
 
   // Pagination
   currentPage: number;
@@ -30,6 +32,7 @@ const initialFilterSelections: FilterSelections = {
   accessLevel: FILTER_ALL,
   department: FILTER_ALL,
   performance: FILTER_ALL,
+  limit: 10,
 };
 
 export const useEmployeesStore = create<EmployeesStore>((set) => ({
@@ -48,6 +51,10 @@ export const useEmployeesStore = create<EmployeesStore>((set) => ({
   setPerformance: (performance) =>
     set((state) => ({
       filterSelections: { ...state.filterSelections, performance },
+    })),
+  setLimit: (limit) =>
+    set((state) => ({
+      filterSelections: { ...state.filterSelections, limit },
     })),
 
   currentPage: 1,

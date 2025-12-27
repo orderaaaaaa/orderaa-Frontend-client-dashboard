@@ -1,7 +1,3 @@
-/**
- * Query keys for React Query
- * Centralized query key management for cache invalidation
- */
 export const QUERY_KEYS = {
   // Orders
   ORDERS: 'orders',
@@ -19,6 +15,10 @@ export const QUERY_KEYS = {
   GOVERNORATES: 'governorates',
   CITIES: 'cities',
   AREAS: 'areas',
+
+  // Cancellation Reasons
+  CANCELLATION_REASONS: 'cancellation-reasons',
+  TOP_CANCELLATION_REASONS: 'top-cancellation-reasons',
 } as const;
 
 export type QueryKeyType = (typeof QUERY_KEYS)[keyof typeof QUERY_KEYS];

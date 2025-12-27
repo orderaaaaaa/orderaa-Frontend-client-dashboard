@@ -208,19 +208,16 @@ export const useAddOrderProduct = () => {
       productId,
       variants,
       quantity,
-      price,
     }: {
       orderId: number;
       productId: number;
       variants: { label: string; value: string }[];
       quantity: number;
-      price: number;
     }) => {
       const response = await http.post(`/orders/${orderId}/products`, {
         productId,
         variants,
         quantity,
-        price,
       });
       return response.data;
     },
@@ -380,4 +377,74 @@ export const useFetchOrdersForSearch = () => {
   };
 
   return { fetchOrdersForSearch };
+};
+
+// Cancellation reason interface
+export interface CancellationReason {
+  id: number;
+  reasonName: string;
+  isActive: boolean;
+  displayOrder: number;
+  usageCount: number;
+  lastUsedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Fetch all cancellation reasons
+export const useCancellationReasons = (enabled: boolean = true) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.CANCELLATION_REASONS] as QueryKey,
+    queryFn: async () => {
+      const response = await http.get<CancellationReason[]>('/cancellation-reasons');
+      return response.data;
+    },
+    enabled,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+// Fetch top 5 cancellation reasons
+export const useTopCancellationReasons = (enabled: boolean = true) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.TOP_CANCELLATION_REASONS] as QueryKey,
+    queryFn: async () => {
+      const response = await http.get<CancellationReason[]>('/cancellation-reasons/top');
+      return response.data;
+    },
+    enabled,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+// Cancel order mutation
+export const useCancelOrder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      orderId,
+      reasonId,
+      notes,
+    }: {
+      orderId: number;
+      reasonId: number;
+      notes?: string;
+    }) => {
+      const response = await http.post<Order>(`/orders/${orderId}/cancel`, {
+        cancelReasonId: reasonId,
+        notes,
+      });
+      return response.data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORDER_DETAILS, variables.orderId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORDER_STATISTICS],
+      });
+    },
+  });
 };

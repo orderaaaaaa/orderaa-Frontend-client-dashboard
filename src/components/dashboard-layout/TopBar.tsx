@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Menu, Search } from 'lucide-react';
 import { LiaSearchSolid, LiaTimesSolid } from 'react-icons/lia';
@@ -32,15 +32,19 @@ export function TopBar({
   const [searchQuery, setSearchQuery] = useState('');
   const authUser = useAuthStore((state) => state.user);
 
+  // Use ref to store onSearch to avoid triggering effect when callback reference changes
+  const onSearchRef = useRef(onSearch);
+  onSearchRef.current = onSearch;
+
   // Debounce search query for auto-search
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   // Auto-search when debounced query changes
   useEffect(() => {
     if (debouncedSearchQuery.trim()) {
-      onSearch(debouncedSearchQuery.trim());
+      onSearchRef.current(debouncedSearchQuery.trim());
     }
-  }, [debouncedSearchQuery, onSearch]);
+  }, [debouncedSearchQuery]);
 
   const handleSearch = () => {
     if (searchQuery.trim()) {

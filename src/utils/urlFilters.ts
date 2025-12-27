@@ -33,6 +33,8 @@ export const DEFAULT_FILTER_STATE: UrlFilterState = {
     phone: '',
     address: '',
     executionDate: '',
+    newFirst: undefined,
+    orderByDirection: undefined,
   },
 };
 
@@ -154,6 +156,12 @@ export function serializeFiltersToUrl(state: UrlFilterState): URLSearchParams {
   if (localFilters.executionDate) {
     params.set('executionDate', localFilters.executionDate);
   }
+  if (localFilters.newFirst !== undefined) {
+    params.set('newFirst', String(localFilters.newFirst));
+  }
+  if (localFilters.orderByDirection) {
+    params.set('orderByDirection', localFilters.orderByDirection);
+  }
 
   return params;
 }
@@ -187,6 +195,16 @@ export function parseFiltersFromUrl(params: URLSearchParams): UrlFilterState {
   const page = parseNumber(params.get('page'), 1, 1);
   const limit = parseNumber(params.get('limit'), 10, 1);
 
+  // Parse newFirst (boolean)
+  const newFirstParam = params.get('newFirst');
+  const newFirst = newFirstParam === 'true' ? true : newFirstParam === 'false' ? false : undefined;
+
+  // Parse orderByDirection
+  const orderByDirectionParam = params.get('orderByDirection');
+  const orderByDirection = (orderByDirectionParam === 'asc' || orderByDirectionParam === 'desc')
+    ? orderByDirectionParam
+    : undefined;
+
   // Local filters
   const localFilters: OrderFilters = {
     productName: params.get('productName') || '',
@@ -199,6 +217,8 @@ export function parseFiltersFromUrl(params: URLSearchParams): UrlFilterState {
     phone: params.get('phone') || '',
     address: params.get('address') || '',
     executionDate,
+    newFirst,
+    orderByDirection,
   };
 
   return {
@@ -245,6 +265,8 @@ export function areFiltersEqual(a: UrlFilterState, b: UrlFilterState): boolean {
   if (aFilters.phone !== bFilters.phone) return false;
   if (aFilters.address !== bFilters.address) return false;
   if (aFilters.executionDate !== bFilters.executionDate) return false;
+  if (aFilters.newFirst !== bFilters.newFirst) return false;
+  if (aFilters.orderByDirection !== bFilters.orderByDirection) return false;
 
   return true;
 }

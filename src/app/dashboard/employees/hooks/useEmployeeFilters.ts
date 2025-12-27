@@ -3,12 +3,13 @@ import { EmployeeFilters } from '@/schemas/employee.schema';
 import { FILTER_ALL } from '../constants/employeesFilterOptions';
 import { useEmployeesStore } from '@/store/employeesStore';
 
-const limit = 10;
+
 
 export function useEmployeeFilters() {
   const debouncedSearchQuery = useEmployeesStore(
     (state) => state.debouncedSearchQuery
   );
+  const limit = useEmployeesStore((state) => state.filterSelections.limit);
   const filterSelections = useEmployeesStore((state) => state.filterSelections);
   const currentPage = useEmployeesStore((state) => state.currentPage);
   const setCurrentPage = useEmployeesStore((state) => state.setCurrentPage);
