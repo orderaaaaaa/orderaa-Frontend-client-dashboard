@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { LiaTimesSolid, LiaPlusSolid, LiaMinusSolid, LiaSearchSolid } from 'react-icons/lia';
+import { LiaTimesSolid, LiaPlusSolid, LiaMinusSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
 import { Product } from '@/types/orders';
 import { SearchableSelect } from '@/components/ui/searchable-select';
@@ -24,38 +24,41 @@ export default function AddNewProductModal({
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
 
-  // Fetch variant options when a product is selected
   const { data: variantOptions = [], isLoading: isLoadingVariants } = useProductVariantsOptions(
     selectedProduct?.id ?? null
   );
+
+  const productOptions = useMemo(() => products.map((p) => p.name), [products]);
+
+  const productsByName = useMemo(() => {
+    const map = new Map<string, Product>();
+    products.forEach((p) => map.set(p.name, p));
+    return map;
+  }, [products]);
 
   useEffect(() => {
     if (isOpen) {
       setSelectedProduct(null);
       setSelectedVariants({});
       setQuantity(1);
-      setSearchTerm('');
     }
   }, [isOpen]);
 
-  // Reset selected variants when product changes
   useEffect(() => {
     setSelectedVariants({});
   }, [selectedProduct?.id]);
 
-  // Check if form is valid (product selected is required)
   const isFormValid = useMemo(() => {
     return selectedProduct !== null;
   }, [selectedProduct]);
 
   if (!isOpen) return null;
 
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleProductChange = (productName: string) => {
+    const product = productsByName.get(productName) || null;
+    setSelectedProduct(product);
+  };
 
   const handleVariantChange = (label: string, value: string) => {
     setSelectedVariants((prev) => ({
@@ -67,7 +70,6 @@ export default function AddNewProductModal({
   const handleSave = async () => {
     if (!selectedProduct) return;
     try {
-      // Convert selected variants to array format
       const variants: SelectedVariant[] = Object.entries(selectedVariants).map(
         ([label, value]) => ({ label, value })
       );
@@ -138,84 +140,21 @@ export default function AddNewProductModal({
               <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
                 النوع
               </label>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setIsProductDropdownOpen(!isProductDropdownOpen)}
-                  className="w-full h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E] flex items-center justify-between"
-                  style={{ direction: 'rtl' }}
-                >
-                  <span>{selectedProduct ? selectedProduct.name : 'اختر المنتج'}</span>
-                  <svg
-                    width="15"
-                    height="30"
-                    viewBox="0 0 15 30"
-                    fill="none"
-                    className="transform rotate-90"
-                  >
-                    <path
-                      d="M13.5 7.5L7.5 13.5L1.5 7.5"
-                      stroke="#5F5E5E"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-                {isProductDropdownOpen && (
-                  <div className="absolute top-full mt-2 w-full bg-white border border-[#ECECEC] rounded-2xl shadow-lg max-h-80 overflow-hidden z-10">
-                    {/* Search Input */}
-                    <div className="sticky top-0 bg-white p-4 border-b border-[#ECECEC]">
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          placeholder="ابحث عن منتج..."
-                          className="w-full h-[45px] bg-white border border-[#ECECEC] rounded-[25px] px-12 text-right text-base"
-                          style={{ direction: 'rtl' }}
-                          autoFocus
-                        />
-                        <LiaSearchSolid className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#5F5E5E]" />
-                      </div>
-                    </div>
-                    {/* Products List */}
-                    <div className="max-h-60 overflow-y-auto">
-                      {filteredProducts.length > 0 ? (
-                        filteredProducts.map((product) => (
-                          <button
-                            key={product.id}
-                            onClick={() => {
-                              setSelectedProduct(product);
-                              setIsProductDropdownOpen(false);
-                              setSearchTerm('');
-                            }}
-                            className="w-full px-6 py-3 text-right text-lg text-[#5F5E5E] hover:bg-purple-50 transition-colors flex justify-end items-center gap-2"
-                          >
-                            <span>{product.name}</span>
-                            {product.image && (
-                              <img
-                                src={product.image}
-                                alt={product.name}
-                                className="w-8 h-8 rounded object-cover"
-                              />
-                            )}
-                          </button>
-                        ))
-                      ) : (
-                        <div className="px-6 py-6 text-center text-[#5F5E5E]">
-                          لا توجد منتجات
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
+              <SearchableSelect
+                value={selectedProduct?.name || ''}
+                onValueChange={handleProductChange}
+                options={productOptions}
+                placeholder="اختر المنتج"
+                searchPlaceholder="ابحث عن منتج..."
+                emptyMessage="لا توجد منتجات"
+                noResultsMessage="لا توجد نتائج للبحث"
+                triggerClassName="h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E]"
+                className="rounded-2xl border-[#ECECEC]"
+                searchThreshold={5}
+              />
             </div>
 
-            {/* Row with Quantity and Dynamic Variant Options */}
             <div className="flex flex-col md:flex-row gap-4 flex-wrap">
-              {/* Quantity Controls */}
               <div className="flex-1 min-w-[200px]">
                 <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
                   الكمية
@@ -243,7 +182,6 @@ export default function AddNewProductModal({
                 </div>
               </div>
 
-              {/* Dynamic Variant Options */}
               {selectedProduct && (
                 isLoadingVariants ? (
                   <div className="flex-1 min-w-[200px] flex items-center justify-center">
@@ -280,7 +218,6 @@ export default function AddNewProductModal({
           </div>
         </div>
 
-        {/* Footer Buttons */}
         <div className="absolute bottom-[30px] right-8 left-8 flex justify-between">
           <Button
             onClick={handleCancel}

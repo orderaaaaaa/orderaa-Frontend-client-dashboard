@@ -32,3 +32,20 @@ export async function getShippingCompanies() {
   const { data } = await http.get('/lookups/shipping-companies');
   return data;
 }
+
+export async function getShippingGovernorates(shippingCompanyKey: string) {
+  const { data } = await http.get(
+    `/shipping-locations/${shippingCompanyKey}/governorates`
+  );
+  return data;
+}
+
+export async function getShippingCities(
+  shippingCompanyKey: string,
+  governorateKey: string
+) {
+  const { data } = await http.get(
+    `/shipping-locations/${shippingCompanyKey}/governorates/${governorateKey}/cities`
+  );
+  return data;
+}

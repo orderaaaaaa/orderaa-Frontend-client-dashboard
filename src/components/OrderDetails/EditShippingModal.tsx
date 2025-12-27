@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { LiaTimesSolid, LiaCheckSolid } from 'react-icons/lia';
 import { Button } from '../ui/button';
-import { getGovernorates, getCities } from '@/lib/api/lookups';
+import { getShippingGovernorates, getShippingCities } from '@/lib/api/lookups';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { useShippingCompanies } from '@/hooks';
 
@@ -20,14 +20,9 @@ export interface ShippingData {
   externalGovernorate?: string;
 }
 
-interface Governorate {
+interface LocationOption {
   key: string;
-  value: string;
-}
-
-interface City {
-  key: string;
-  value: string;
+  label: string;
 }
 
 export default function EditShippingModal({
@@ -37,14 +32,16 @@ export default function EditShippingModal({
   initialData,
 }: EditShippingModalProps) {
   const [formData, setFormData] = useState<ShippingData>(initialData);
-  const [governorates, setGovernorates] = useState<Governorate[]>([]);
-  const [cities, setCities] = useState<City[]>([]);
+  const [governorates, setGovernorates] = useState<LocationOption[]>([]);
+  const [cities, setCities] = useState<LocationOption[]>([]);
   const [loadingGovernorates, setLoadingGovernorates] = useState(false);
   const [loadingCities, setLoadingCities] = useState(false);
-  const [selectedGovernorateId, setSelectedGovernorateId] = useState<string>('');
+
+  const [selectedShippingCompanyKey, setSelectedShippingCompanyKey] = useState<string>('');
+  const [selectedGovernorateKey, setSelectedGovernorateKey] = useState<string>('');
 
   const { shippingCompanies, isLoading: loadingShippingCompanies } = useShippingCompanies(isOpen);
-  // Create maps for shipping company key <-> label conversion
+
   const shippingCompanyMap = useMemo(() => {
     const map: Record<string, string> = {};
     shippingCompanies.forEach((company) => {
@@ -61,51 +58,26 @@ export default function EditShippingModal({
     return map;
   }, [shippingCompanies]);
 
-  // Convert shipping companies to string array for SearchableSelect
   const shippingCompanyOptions = useMemo(
     () => shippingCompanies.map((company) => company.label),
     [shippingCompanies]
   );
 
-  const governorateMap = useMemo(() => {
+  const governorateLabelToKey = useMemo(() => {
     const map: Record<string, string> = {};
     governorates.forEach((gov) => {
-      map[gov.key] = gov.value;
+      map[gov.label] = gov.key;
     });
     return map;
   }, [governorates]);
-
-  const governorateReverseMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    governorates.forEach((gov) => {
-      map[gov.value] = gov.key;
-    });
-    return map;
-  }, [governorates]);
-
-  const cityMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    cities.forEach((city) => {
-      map[city.key] = city.value;
-    });
-    return map;
-  }, [cities]);
-
-  const cityReverseMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    cities.forEach((city) => {
-      map[city.value] = city.key;
-    });
-    return map;
-  }, [cities]);
 
   const governorateOptions = useMemo(
-    () => governorates.map((gov) => gov.value),
+    () => governorates.map((gov) => gov.label),
     [governorates]
   );
 
   const cityOptions = useMemo(
-    () => cities.map((city) => city.value),
+    () => cities.map((city) => city.label),
     [cities]
   );
 
@@ -120,42 +92,40 @@ export default function EditShippingModal({
 
   useEffect(() => {
     const fetchGovernorates = async () => {
+      if (!selectedShippingCompanyKey) {
+        setGovernorates([]);
+        return;
+      }
+
       try {
         setLoadingGovernorates(true);
-        const data = await getGovernorates() as { key: string; label?: string; value?: string }[];
-        const transformed = data.map((item) => ({
-          key: item.key,
-          value: item.label || item.value || '',
-        }));
-        setGovernorates(transformed);
+        const data = await getShippingGovernorates(selectedShippingCompanyKey) as LocationOption[];
+        setGovernorates(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Failed to load governorates:', error);
+        setGovernorates([]);
       } finally {
         setLoadingGovernorates(false);
       }
     };
 
-    if (isOpen) {
-      fetchGovernorates();
-    }
-  }, [isOpen]);
+    fetchGovernorates();
+  }, [selectedShippingCompanyKey]);
 
-  // Load cities when governorate changes
   useEffect(() => {
     const fetchCities = async () => {
-      if (!selectedGovernorateId) {
+      if (!selectedShippingCompanyKey || !selectedGovernorateKey) {
         setCities([]);
         return;
       }
 
       try {
         setLoadingCities(true);
-        const data = await getCities(selectedGovernorateId) as { key: string; label?: string; value?: string }[];
-        const transformed = data.map((item) => ({
-          key: item.key,
-          value: item.label || item.value || '',
-        }));
-        setCities(transformed);
+        const data = await getShippingCities(
+          selectedShippingCompanyKey,
+          selectedGovernorateKey
+        ) as LocationOption[];
+        setCities(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Failed to load cities:', error);
         setCities([]);
@@ -165,21 +135,21 @@ export default function EditShippingModal({
     };
 
     fetchCities();
-  }, [selectedGovernorateId]);
+  }, [selectedShippingCompanyKey, selectedGovernorateKey]);
 
-  // Track if modal was previously open to detect opening
   const wasOpenRef = React.useRef(false);
 
-  // Only reset form data when modal opens (not on every initialData change)
   useEffect(() => {
     if (isOpen && !wasOpenRef.current) {
-      // Modal just opened - reset form to initial data
       setFormData(initialData);
-      if (initialData.governorate) {
-        setSelectedGovernorateId(initialData.governorate);
+      if (initialData.shippingCompany) {
+        setSelectedShippingCompanyKey(initialData.shippingCompany);
       } else {
-        setSelectedGovernorateId('');
+        setSelectedShippingCompanyKey('');
       }
+      setSelectedGovernorateKey('');
+      setGovernorates([]);
+      setCities([]);
     }
     wasOpenRef.current = isOpen;
   }, [isOpen, initialData]);
@@ -203,13 +173,32 @@ export default function EditShippingModal({
     onClose();
   };
 
-  const handleGovernorateChange = (label: string) => {
-    const key = governorateReverseMap[label] || '';
-    setSelectedGovernorateId(key);
+  const handleShippingCompanyChange = (label: string) => {
+    const key = shippingCompanyReverseMap[label] || '';
+    setSelectedShippingCompanyKey(key);
+    setSelectedGovernorateKey('');
     setFormData({
       ...formData,
-      governorate: key,
+      shippingCompany: key,
+      governorate: '',
       city: '',
+    });
+  };
+
+  const handleGovernorateChange = (label: string) => {
+    const key = governorateLabelToKey[label] || '';
+    setSelectedGovernorateKey(key);
+    setFormData({
+      ...formData,
+      governorate: label,
+      city: '',
+    });
+  };
+
+  const handleCityChange = (label: string) => {
+    setFormData({
+      ...formData,
+      city: label,
     });
   };
 
@@ -236,10 +225,8 @@ export default function EditShippingModal({
             <div className="flex flex-col gap-2">
               <label className="font-bold text-[#1F1F1F]">الشركة</label>
               <SearchableSelect
-                value={formData.shippingCompany ? shippingCompanyMap[formData.shippingCompany] || formData.shippingCompany : ''}
-                onValueChange={(label) =>
-                  setFormData({ ...formData, shippingCompany: shippingCompanyReverseMap[label] || label })
-                }
+                value={selectedShippingCompanyKey ? shippingCompanyMap[selectedShippingCompanyKey] || '' : ''}
+                onValueChange={handleShippingCompanyChange}
                 options={shippingCompanyOptions}
                 placeholder="اختر الشركة"
                 searchPlaceholder="بحث عن شركة..."
@@ -255,15 +242,24 @@ export default function EditShippingModal({
             <div className="flex flex-col gap-2">
               <label className="font-bold text-[#1F1F1F]">المحافظة</label>
               <SearchableSelect
-                value={formData.governorate ? governorateMap[formData.governorate] || formData.governorate : ''}
+                value={formData.governorate || ''}
                 onValueChange={handleGovernorateChange}
                 options={governorateOptions}
-                placeholder={initialData.governorate || initialData.externalGovernorate || 'اختر المحافظة'}
+                placeholder={
+                  !selectedShippingCompanyKey
+                    ? 'اختر الشركة أولاً'
+                    : initialData.governorate || initialData.externalGovernorate || 'اختر المحافظة'
+                }
                 searchPlaceholder="بحث عن محافظة..."
-                emptyMessage="لا توجد محافظات متاحة"
+                emptyMessage={
+                  !selectedShippingCompanyKey
+                    ? 'اختر الشركة أولاً'
+                    : 'لا توجد محافظات متاحة'
+                }
                 noResultsMessage="لا توجد نتائج للبحث"
                 triggerClassName="w-full border-[#CED4DA] rounded-lg h-12"
                 loading={loadingGovernorates}
+                disabled={!selectedShippingCompanyKey}
                 searchThreshold={5}
               />
             </div>
@@ -272,24 +268,28 @@ export default function EditShippingModal({
             <div className="flex flex-col gap-2">
               <label className="font-bold text-[#1F1F1F]">المنطقة</label>
               <SearchableSelect
-                value={formData.city ? cityMap[formData.city] || formData.city : ''}
-                onValueChange={(label) =>
-                  setFormData({ ...formData, city: cityReverseMap[label] || label })
-                }
+                value={formData.city || ''}
+                onValueChange={handleCityChange}
                 options={cityOptions}
                 placeholder={
-                  !selectedGovernorateId ? 'اختر المحافظة أولاً' : 'اختر المنطقة'
+                  !selectedShippingCompanyKey
+                    ? 'اختر الشركة أولاً'
+                    : !selectedGovernorateKey
+                    ? 'اختر المحافظة أولاً'
+                    : 'اختر المنطقة'
                 }
                 searchPlaceholder="بحث عن منطقة..."
                 emptyMessage={
-                  !selectedGovernorateId
+                  !selectedShippingCompanyKey
+                    ? 'اختر الشركة أولاً'
+                    : !selectedGovernorateKey
                     ? 'اختر المحافظة أولاً'
                     : 'لا توجد مناطق متاحة'
                 }
                 noResultsMessage="لا توجد نتائج للبحث"
                 triggerClassName="w-full border-[#CED4DA] rounded-lg h-12"
                 loading={loadingCities}
-                disabled={!selectedGovernorateId}
+                disabled={!selectedShippingCompanyKey || !selectedGovernorateKey}
                 searchThreshold={5}
               />
             </div>
