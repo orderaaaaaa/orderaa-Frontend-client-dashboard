@@ -24,6 +24,8 @@ interface OrderDetailsInfoComponentProps {
     to: Date | null;
   };
   statusFilter?: OrderStatus | null;
+  isLockedByOther?: boolean;
+  onUnlock?: () => Promise<void>;
 }
 
 function OrderDetailsInfoComponent({
@@ -33,8 +35,9 @@ function OrderDetailsInfoComponent({
   onNavigateToNextOrder,
   dateRange,
   statusFilter,
+  isLockedByOther,
+  onUnlock,
 }: OrderDetailsInfoComponentProps) {
-  // Local state
   const [localOrder, setLocalOrder] = useState(order);
   const [confirmationDialog, setConfirmationDialog] = useState<{
     isOpen: boolean;
@@ -55,18 +58,15 @@ function OrderDetailsInfoComponent({
     message: '',
   });
 
-  // Fetch available statuses using React Query
   const { data: statusesData, error: statusesError } = useOrderStatusesQuery();
   const availableStatuses = statusesData ?? [];
 
-  // Show error toast if statuses fail to load
   useEffect(() => {
     if (statusesError) {
       toast.error('فشل في تحميل حالات الطلبات');
     }
   }, [statusesError]);
 
-  // Custom Hooks
   const modals = useModalState([
     'urgent',
     'cancel',
@@ -110,12 +110,10 @@ function OrderDetailsInfoComponent({
 
   const updateField = useOrderFieldUpdate(localOrder.id, handleUpdate);
 
-  // Update local order when prop changes
   useEffect(() => {
     setLocalOrder(order);
   }, [order]);
 
-  // Handlers
   const handleConfirmClick = () => {
     setConfirmationDialog({
       isOpen: true,
@@ -135,12 +133,10 @@ function OrderDetailsInfoComponent({
   };
 
   const handleActionClick = (label: string, action: string, hasSubOptions?: boolean) => {
-    // If it has sub-options (WhatsApp), ignore the click
     if (hasSubOptions) {
       return;
     }
 
-    // Handle different actions
     switch (action) {
       case 'urgent':
         modals.urgent.open();
@@ -164,7 +160,6 @@ function OrderDetailsInfoComponent({
         modals.waitingPayment.open();
         break;
       default:
-        // Fallback to old confirmation dialog
         setConfirmationDialog({
           isOpen: true,
           title: `تأكيد ${label}`,
@@ -175,11 +170,9 @@ function OrderDetailsInfoComponent({
   };
 
   const handleWhatsappSubOptionClick = (action: string, label: string) => {
-    // Handle color image requests - open color selection modal
     if (action === 'send_professional_color' || action === 'send_natural_color') {
       modals.addColorProduct.open();
     } else {
-      // For all other WhatsApp options, open confirmation dialog
       setConfirmationDialog({
         isOpen: true,
         title: `تأكيد ${label}`,
@@ -189,10 +182,8 @@ function OrderDetailsInfoComponent({
     }
   };
 
-  // Follow-up actions that should use handleFollowUpAction
   const followUpActions = ['no_answer', 'closed', 'not_collecting', 'open_close'];
 
-  // Map action to label for follow-up actions
   const followUpActionLabels: Record<string, string> = {
     'no_answer': 'لا يرد',
     'closed': 'مغلق',
@@ -204,15 +195,16 @@ function OrderDetailsInfoComponent({
     const action = confirmationDialog.action;
 
     try {
-      // Check if this is a follow-up action
       if (followUpActions.includes(action)) {
         const label = followUpActionLabels[action] || action;
         await actions.handleFollowUpAction(label);
       } else {
         await actions.handleConfirmAction(action);
       }
+      if (onUnlock) {
+        await onUnlock();
+      }
     } catch (error: any) {
-      // Show error modal with API error message
       setErrorModal({
         isOpen: true,
         message: error?.message || 'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.',
@@ -267,6 +259,7 @@ function OrderDetailsInfoComponent({
         onNavigatePrevious={navigation.navigateToPrevious}
         isNavigatingNext={navigation.isNavigatingNext}
         isNavigatingPrevious={navigation.isNavigatingPrevious}
+        isLockedByOther={isLockedByOther}
       />
 
       <OrderActionModals

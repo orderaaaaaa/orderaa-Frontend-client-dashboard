@@ -266,9 +266,15 @@ export interface Order {
   customers: Customer;
   order_products: OrderProduct[];
   order_events?: OrderEvent[];
+  locked_by?: OrderLockedBy | null;
 }
 
-// Order Event Interface (from order details API)
+export interface OrderLockedBy {
+  id: number;
+  name: string;
+  department: string;
+}
+
 export interface OrderEvent {
   id: number;
   orderId: number;

@@ -22,10 +22,10 @@ import Image from 'next/image';
 
 interface OrderDetailsProductCardProps {
   order: Order;
+  isLockedByOther?: boolean;
 }
 
-function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
-  // React Query mutations and queries
+function OrderDetailsProductCard({ order, isLockedByOther = false }: OrderDetailsProductCardProps) {
   const updateOrderProductMutation = useUpdateOrderProduct();
   const deleteOrderProductMutation = useDeleteOrderProduct();
   const addOrderProductMutation = useAddOrderProduct();
@@ -47,7 +47,6 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
     })) || []
   );
 
-  // Sync productsData when order.order_products changes (e.g., after query invalidation)
   useEffect(() => {
     setProductsData(
       order.order_products?.map((orderProduct) => ({
@@ -61,7 +60,6 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
     );
   }, [order.order_products]);
 
-  // Show error if products fail to load
   useEffect(() => {
     if (productsError) {
       toast.error('فشل في تحميل المنتجات');
@@ -82,7 +80,6 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
 
   const handleSaveEdit = async (productId: number, variants: SelectedVariant[]) => {
     try {
-      // Call backend API using mutation (handles cache invalidation automatically)
       await updateOrderProductMutation.mutateAsync({
         orderProductId: productId,
         variants,
@@ -98,7 +95,6 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
     if (!deletingProductId) return;
 
     try {
-      // Call backend API using mutation (handles cache invalidation automatically)
       await deleteOrderProductMutation.mutateAsync(deletingProductId);
       toast.success('تم حذف المنتج بنجاح');
     } catch (error) {
@@ -120,14 +116,12 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
 
   const handleAddSameTypeProduct = async (variants: SelectedVariant[], quantity: number) => {
     try {
-      // Get the first product as the reference (assuming they all have the same type in this order)
       const referenceProduct = productsData[0];
       if (!referenceProduct) {
         toast.error('لا توجد منتجات في الطلب');
         return;
       }
 
-      // Add product to order using mutation (handles cache invalidation automatically)
       await addOrderProductMutation.mutateAsync({
         orderId: order.id,
         productId: referenceProduct.productId,
@@ -142,7 +136,6 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
   };
 
   const handleAddNewProduct = async (productId: number, variants: SelectedVariant[], quantity: number) => {
-    // Add product to order using mutation (handles cache invalidation automatically)
     await addOrderProductMutation.mutateAsync({
       orderId: order.id,
       productId,
@@ -153,8 +146,6 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
 
   return (
     <>
-      {/* Header with action buttons */}
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
           {productsData.map((item) => (
@@ -190,13 +181,13 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
                 <div className="flex flex-col items-end ml-2">
                   <div className="flex justify-end gap-2 mb-4">
                     <SquarePen
-                      className="cursor-pointer w-4 hover:text-purple-700 transition-colors"
-                      onClick={() => handleEditClick(item.id)}
+                      className={`w-4 transition-colors ${isLockedByOther ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:text-purple-700'}`}
+                      onClick={() => !isLockedByOther && handleEditClick(item.id)}
                     />
                     {productsData.length > 1 && (
                       <Trash2
-                        className="cursor-pointer w-4 text-red-600 hover:text-red-700 transition-colors"
-                        onClick={() => handleDeleteClick(item.id)}
+                        className={`w-4 text-red-600 transition-colors ${isLockedByOther ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:text-red-700'}`}
+                        onClick={() => !isLockedByOther && handleDeleteClick(item.id)}
                       />
                     )}
                   </div>
@@ -230,7 +221,8 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
           <div className="flex gap-3">
             <Button
               onClick={() => setIsAddNewProductModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#5D24E1] text-white rounded-lg hover:bg-[#4B1BC4] transition-colors"
+              disabled={isLockedByOther}
+              className="flex items-center gap-2 px-4 py-2 bg-[#5D24E1] text-white rounded-lg hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <PackagePlus className="w-5 h-5" strokeWidth={2} />
               <span className="text-sm font-bold">إضافة منتج جديد</span>
@@ -238,7 +230,7 @@ function OrderDetailsProductCard({ order }: OrderDetailsProductCardProps) {
 
             <Button
               onClick={() => setIsAddSameTypeModalOpen(true)}
-              disabled={productsData.length === 0}
+              disabled={productsData.length === 0 || isLockedByOther}
               className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-[#5D24E1] text-[#5D24E1] rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <CirclePlus className="w-5 h-5" strokeWidth={2} />

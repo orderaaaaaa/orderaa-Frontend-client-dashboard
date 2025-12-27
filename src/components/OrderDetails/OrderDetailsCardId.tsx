@@ -1,15 +1,18 @@
 import React, { useState } from "react";
 import { Copy, TriangleAlert, History } from "lucide-react";
-import { Order } from "@/types/orders";
+import { Order, OrderLockedBy } from "@/types/orders";
 import { toast } from 'react-toastify'
 import CustomerOrdersModal from "@/app/dashboard/orders/allOrders/components/CustomerOrdersModal";
 import OrderHistoryModal from "./OrderHistoryModal";
+import OrderLockedBanner from "./OrderLockedBanner";
 
 interface OrderDetailsCardIdProps {
   order: Order;
+  isLockedByOther?: boolean;
+  lockedBy?: OrderLockedBy | null;
 }
 
-const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
+const OrderDetailsCardId = ({ order, isLockedByOther, lockedBy }: OrderDetailsCardIdProps) => {
   const [copied, setCopied] = useState(false);
   const [isCustomerOrdersModalOpen, setIsCustomerOrdersModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
@@ -70,12 +73,9 @@ const OrderDetailsCardId = ({ order }: OrderDetailsCardIdProps) => {
           </div>
           <div className="">
             <div className="flex flex-col sm:flex-row xl:flex-row gap-2 sm:px-5">
-              <button className=" relative bg-[#F6F2FC] text-white border-1 border-[#CBB5FD] !rounded-full max-xl:!rounded-l-3xl p-2 px-4">
-                <h3 className="flex gap-2 text-sm items-center font-semibold mb-1 text-[#5D24E1] ">
-                  <TriangleAlert className="w-5 text-[#5D24E1] relative " />
-                  الطلب مفتوح من قبل محمد علاء في قسم التاكيد{" "}
-                </h3>
-              </button>
+              {isLockedByOther && lockedBy && (
+                <OrderLockedBanner lockedBy={lockedBy} />
+              )}
               {(order?.customers?.totalCustomerOrders ?? 0) > 1 && (
                   <button
                     className="cursor-pointer bg-[#F6F2FC] text-white border-1 border-[#CBB5FD] !rounded-r-3xl p-2 px-4"

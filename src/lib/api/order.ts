@@ -204,3 +204,19 @@ export async function cancelOrder(
     throw error;
   }
 }
+
+export async function lockOrder(orderId: number): Promise<void> {
+  try {
+    await api.post(`/orders/${orderId}/lock`);
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function unlockOrder(orderId: number): Promise<void> {
+  try {
+    await api.post(`/orders/${orderId}/unlock`);
+  } catch (error) {
+    throw error;
+  }
+}

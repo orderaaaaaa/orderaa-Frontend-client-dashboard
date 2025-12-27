@@ -1,5 +1,5 @@
 import React from "react";
-import { Order, OrderStatus } from "@/types/orders";
+import { Order, OrderStatus, OrderLockedBy } from "@/types/orders";
 
 import OrderDetailsCardId from "@/components/OrderDetails/OrderDetailsCardId";
 import OrderDetailsInfoStatus from "@/components/OrderDetails/OrderDetailsInfoStatus";
@@ -14,24 +14,36 @@ interface OrderDetailsInfoProps {
     to: Date | null;
   };
   statusFilter?: OrderStatus | null;
+  isLockedByOther?: boolean;
+  lockedBy?: OrderLockedBy | null;
+  onUnlock?: () => Promise<void>;
 }
 
 function OrderDetailsInfo({
   order,
   onNavigateToNextOrder,
   dateRange,
-  statusFilter
+  statusFilter,
+  isLockedByOther,
+  lockedBy,
+  onUnlock,
 }: OrderDetailsInfoProps) {
   return (
     <section className="mx-auto mt-3 p-4 bg-white rounded-lg shadow-sm">
-      <OrderDetailsCardId order={order} />
-      <OrderDetailsInfoStatus order={order} />
-      <OrderDetailsProductCard order={order} />
+      <OrderDetailsCardId
+        order={order}
+        isLockedByOther={isLockedByOther}
+        lockedBy={lockedBy}
+      />
+      <OrderDetailsInfoStatus order={order} isLockedByOther={isLockedByOther} />
+      <OrderDetailsProductCard order={order} isLockedByOther={isLockedByOther} />
       <OrderDetailsInfoComponent
         order={order}
         onNavigateToNextOrder={onNavigateToNextOrder}
         dateRange={dateRange}
         statusFilter={statusFilter}
+        isLockedByOther={isLockedByOther}
+        onUnlock={onUnlock}
       />
     </section>
   );

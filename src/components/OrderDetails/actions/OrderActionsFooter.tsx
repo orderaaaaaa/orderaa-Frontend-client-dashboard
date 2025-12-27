@@ -22,6 +22,7 @@ export interface OrderActionsFooterProps {
   onNavigatePrevious?: () => void;
   isNavigatingNext?: boolean;
   isNavigatingPrevious?: boolean;
+  isLockedByOther?: boolean;
 }
 
 export function OrderActionsFooter({
@@ -34,6 +35,7 @@ export function OrderActionsFooter({
   onNavigatePrevious,
   isNavigatingNext = false,
   isNavigatingPrevious = false,
+  isLockedByOther = false,
 }: OrderActionsFooterProps) {
   const followUpDropdown = useDropdownState();
   const actionsDropdown = useDropdownState();
@@ -107,7 +109,8 @@ export function OrderActionsFooter({
             <Button
               variant="default"
               onClick={onConfirm}
-              className="py-2 px-10 rounded-2xl bg-[#5D24E1] text-white text-sm font-bold hover:bg-[#4B1BC4] transition-all duration-700 hover:scale-105 flex items-center gap-2"
+              disabled={isLockedByOther}
+              className="py-2 px-10 rounded-2xl bg-[#5D24E1] text-white text-sm font-bold hover:bg-[#4B1BC4] transition-all duration-700 hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               <LiaCheckCircle className="w-5 h-5" />
               تأكيد
@@ -117,7 +120,8 @@ export function OrderActionsFooter({
               <Button
                 variant="outline"
                 onClick={handleFollowUpToggle}
-                className="py-2 px-10 border-2 rounded-2xl border-[#5D24E1] text-[#5D24E1] text-sm font-bold hover:bg-purple-50 transition-colors flex items-center gap-2"
+                disabled={isLockedByOther}
+                className="py-2 px-10 border-2 rounded-2xl border-[#5D24E1] text-[#5D24E1] text-sm font-bold hover:bg-purple-50 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <LiaCommentDotsSolid className="w-5 h-5" />
                 متابعة
@@ -129,7 +133,8 @@ export function OrderActionsFooter({
             <Button
               variant="ghost"
               onClick={handleActionsToggle}
-              className="w-9 h-9 p-0 rounded-full border-2 border-[#5D24E1] hover:bg-purple-50 transition-colors"
+              disabled={isLockedByOther}
+              className="w-9 h-9 p-0 rounded-full border-2 border-[#5D24E1] hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <LiaAngleDownSolid
                 className={`w-5 h-5 text-[#5D24E1] transition-all ${

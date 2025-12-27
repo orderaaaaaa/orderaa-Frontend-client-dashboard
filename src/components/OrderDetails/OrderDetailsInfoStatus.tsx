@@ -3,8 +3,8 @@ import { PhoneOff, CirclePlus, History, CheckCircle2, XCircle, Clock } from "luc
 
 interface OrderDetailsInfoStatusProps {
   order: Order;
+  isLockedByOther?: boolean;
 }
-
 
 const statusLabelMap: Record<string, string> = {
   TRIED_TO_REACH_CUSTOMER: 'لا يرد',
@@ -45,7 +45,6 @@ const getTimeAgo = (date: string): string => {
   }
 };
 
-// Helper function to get icon for event type
 const getEventIcon = (eventType?: string) => {
   if (!eventType) {
     return <History className="w-4 h-4 text-gray-600" />;

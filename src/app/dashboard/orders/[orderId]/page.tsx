@@ -11,6 +11,7 @@ import { useFilterForm } from '@/hooks/AllOrders/useFilterForm';
 import { useFilterOptions } from '@/hooks/AllOrders/useFilterOptions';
 import { useOrderDetailsNavigation } from '@/hooks/OrderDetails/useOrderDetailsNavigation';
 import { useOrderById } from '@/services/orders';
+import { useOrderLock } from '@/hooks/useOrderLock';
 import { DatePicker } from '@/components/ui/datepicker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, X } from 'lucide-react';
@@ -20,7 +21,6 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
   const router = useRouter();
   const orderId = parseInt(params.orderId);
 
-  // Use React Query for fetching order - auto refetches when cache is invalidated
   const {
     data: order,
     isLoading: loading,
@@ -29,10 +29,19 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
 
   const error = queryError ? 'فشل في تحميل بيانات الطلب' : null;
 
+  const {
+    isLockedByOther,
+    lockedBy,
+    unlock,
+  } = useOrderLock({
+    orderId: order?.id ?? null,
+    lockedBy: order?.locked_by,
+    enabled: !!order,
+  });
+
   const { statistics } = useOrderStatistics();
   const { options } = useFilterOptions();
 
-  // Navigation hook - handles filter state and navigation
   const {
     status,
     setStatus,
@@ -51,7 +60,6 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
     initialOrderId: orderId,
   });
 
-  // React Hook Form setup - connected to navigation hook
   const {
     control,
     formState: { errors },
@@ -59,12 +67,10 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
     onSubmit: handleFilterFormChange,
   });
 
-  // Memoized callback for order navigation to prevent stale closures
   const handleNavigateToOrder = useCallback((nextOrderId: number) => {
     router.push(`/dashboard/orders/${nextOrderId}`);
   }, [router]);
 
-  // Navigate to target order when it changes
   useEffect(() => {
     if (targetOrderId && targetOrderId !== orderId) {
       router.push(`/dashboard/orders/${targetOrderId}`);
@@ -102,7 +108,6 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
     );
   }
 
-  // Show empty state when filters result in no orders
   if (isEmpty) {
     return (
       <AuthGuard>
@@ -294,13 +299,15 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
             to: toDate,
           }}
           statusFilter={status}
+          isLockedByOther={isLockedByOther}
+          lockedBy={lockedBy}
+          onUnlock={unlock}
         />
       </div>
     </AuthGuard>
   );
 }
 
-// Loading fallback component
 function OrderDetailsLoading() {
   return (
     <AuthGuard>
@@ -314,7 +321,6 @@ function OrderDetailsLoading() {
   );
 }
 
-// Default export with Suspense wrapper for useSearchParams
 export default function OrderDetails({ params }: { params: { orderId: string } }) {
   return (
     <Suspense fallback={<OrderDetailsLoading />}>
