@@ -9,12 +9,14 @@ import { EmployeeSearchFilter } from './components/EmployeeSearchFilter';
 import { EmployeeCard } from './components/EmployeeCard';
 import { Pagination } from '../../../components/Pagination';
 import { useEmployeesStore } from '@/store/employeesStore';
+import { LimitSelector } from './components/LimitSelector';
 
 export default function AllEmployees() {
   const { employees, totalItems, paginationProps, isLoading, isError } =
     useEmployeesList();
 
   const setCurrentPage = useEmployeesStore((state) => state.setCurrentPage);
+  const limit = useEmployeesStore((state) => state.filterSelections.limit);
 
   if (isError) {
     return (
@@ -52,13 +54,19 @@ export default function AllEmployees() {
                 </div>
 
                 {paginationProps && (
-                  <Pagination
-                    currentPage={paginationProps.currentPage}
-                    totalPages={paginationProps.totalPages}
-                    hasNextPage={paginationProps.hasNextPage}
-                    hasPreviousPage={paginationProps.hasPreviousPage}
-                    onPageChange={setCurrentPage}
-                  />
+                  <div className="flex max-sm:flex-col max-sm:gap-4 justify-between items-center mt-6">
+                     <p className="text-sm text-gray-500">
+                        {`عرض ${Math.min((paginationProps.currentPage - 1) * limit + 1, totalItems)}-${Math.min(paginationProps.currentPage * limit, totalItems)} من ${totalItems} موظف`}
+                     </p>
+                    <Pagination
+                      currentPage={paginationProps.currentPage}
+                      totalPages={paginationProps.totalPages}
+                      hasNextPage={paginationProps.hasNextPage}
+                      hasPreviousPage={paginationProps.hasPreviousPage}
+                      onPageChange={setCurrentPage}
+                    />
+                     <LimitSelector />
+                  </div>
                 )}
               </Else>
             </If>
