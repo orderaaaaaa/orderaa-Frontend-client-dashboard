@@ -11,6 +11,7 @@ import {
   Link2,
   IdCardIcon,
   ChartNoAxesCombined,
+  TruckIcon,
 } from 'lucide-react';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
 import { CartIcon, ExcelIcon } from '@/components/icons'; // Import from your icons registry
@@ -115,5 +116,10 @@ export const navigation: NavigationItem[] = [
     name: 'الربط مع متجر خارجي',
     href: '/dashboard/integrations',
     icon: Link2,
+  },
+  {
+    name: 'الربط مع شركة الشحن',
+    href: '/dashboard/link-shipping-company',
+    icon: TruckIcon,
   },
 ];
