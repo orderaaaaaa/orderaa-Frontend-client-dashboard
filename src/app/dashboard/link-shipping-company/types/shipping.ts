@@ -3,14 +3,17 @@ export type ShippingProviderId =
   | 'shipblu'
   | 'mylerz'
   | 'bosta'
-  | 'jt_express';
+  | 'jt_express'
+  | 'turbo';
 
 export interface ShippingConfig {
   id?: string;
-  providerId: ShippingProviderId;
-  webhookUrl: string;
-  webhookSecret: string;
-  isEnabled: boolean;
+  shippingCompany?: string;
+  authKey?: string;
+  clientCode?: string;
+  webhookUrl?: string; // keeping compatible just in case, though Turbo uses specific keys
+  webhookSecret?: string;
+  isActive: boolean;
   metadata?: Record<string, any>;
 }
 

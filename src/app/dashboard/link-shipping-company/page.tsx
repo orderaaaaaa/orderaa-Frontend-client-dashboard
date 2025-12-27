@@ -8,10 +8,13 @@ export default function ShippingIntegrationsPage() {
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen" dir="rtl">
+    <div className="p-8 container mx-auto bg-gray-50 min-h-screen" dir="rtl">
       <header className="mb-10">
-        <h1 className="text-3xl font-bold text-gray-900">شركات الشحن</h1>
-        <p className="text-gray-500 mt-2">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-1 h-8 bg-[#5D24E1] rounded-full"></div>
+          <h1 className="text-3xl font-bold text-gray-900">شركات الشحن</h1>
+        </div>
+        <p className="text-gray-600 text-lg mr-6">
           قم بربط متجرك مع شركات الشحن لتلقي تحديثات الحالات تلقائياً
         </p>
       </header>
