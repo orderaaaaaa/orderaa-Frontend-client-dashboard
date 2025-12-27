@@ -63,7 +63,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
               <div className="text-center text-gray-900 font-bold text-sm">
                 {order.totalCost}
               </div>
-              <div className="text-center text-gray-500 text-xs truncate px-1">
+              <div className="text-center text-gray-500 text-xs  px-1">
                 {order.notes || 'تم التوصيل بنجاح'}
               </div>
             </div>
