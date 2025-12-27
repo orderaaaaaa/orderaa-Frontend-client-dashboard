@@ -1,7 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, ShoppingCart, Copy, Check, Play, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  X,
+  ShoppingCart,
+  Copy,
+  Check,
+  Play,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import { webhookApi, WebhookConfigResponse } from '@/lib/api/webhooks';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
@@ -34,7 +42,10 @@ const EasyOrderModal = ({
   const getBaseUrl = () => {
     const envUrl = process.env.NEXT_PUBLIC_API_URL;
 
-    if (envUrl && (envUrl.includes('localhost') || envUrl.includes('127.0.0.1'))) {
+    if (
+      envUrl &&
+      (envUrl.includes('localhost') || envUrl.includes('127.0.0.1'))
+    ) {
       return 'https://api.orderaa.com';
     }
 
@@ -100,8 +111,8 @@ const EasyOrderModal = ({
     } catch (err: any) {
       setError(
         err.response?.data?.message ||
-        err.response?.data?.error ||
-        'حدث خطأ أثناء حفظ الربط. يرجى المحاولة مرة أخرى.',
+          err.response?.data?.error ||
+          'حدث خطأ أثناء حفظ الربط. يرجى المحاولة مرة أخرى.'
       );
     } finally {
       setIsLoading(false);
@@ -132,20 +143,20 @@ const EasyOrderModal = ({
   return (
     <>
       <style jsx global>{`
-                .custom-scrollbar::-webkit-scrollbar {
-                    width: 6px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: #CBD5E0;
-                    border-radius: 3px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: #A0AEC0;
-                }
-            `}</style>
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #cbd5e0;
+          border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #a0aec0;
+        }
+      `}</style>
 
       <div
         className="fixed inset-0 bg-black/50 z-40 transition-opacity"
@@ -179,7 +190,10 @@ const EasyOrderModal = ({
             <div className="bg-blue-50 rounded-xl flex items-center p-6">
               <div className="flex items-center gap-4 ">
                 <div className="flex items-center justify-center w-16 h-16 bg-white border border-[#2489E1] shadow-[0px_4px_22px_rgba(0,0,0,0.08)] rounded-lg">
-                  <ShoppingCart className="w-11 h-11 text-[#001A72]" strokeWidth={1.5} />
+                  <ShoppingCart
+                    className="w-11 h-11 text-[#001A72]"
+                    strokeWidth={1.5}
+                  />
                 </div>
                 <div className="flex flex-col items-start gap-4 order-1">
                   <p className="text-sm text-gray-600 order-2">
@@ -191,27 +205,7 @@ const EasyOrderModal = ({
                 </div>
               </div>
             </div>
-
-            <div className="space-y-4">
-              <h4 className="font-semibold text-gray-900">
-                خطوات إعداد Webhook
-              </h4>
-
-              <div className="space-y-3">
-                {steps.map((step, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-row items-center px-8 py-2.5 gap-2.5 min-h-[65px] bg-[rgba(36,137,225,0.02)] border border-[rgba(36,137,225,0.16)] rounded-lg"
-                  >
-                    <span className="flex-shrink-0 w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-medium">
-                      {index + 1}
-                    </span>
-                    <p className="flex-1 text-lg leading-[33px] text-right text-black">{step}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
+            <h4 className="font-semibold text-gray-900">فيديو توضيحي</h4>
             <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
               <button
                 onClick={() => setShowVideo(!showVideo)}
@@ -242,17 +236,49 @@ const EasyOrderModal = ({
                   <div className="aspect-video bg-gray-900 rounded-lg flex items-center justify-center">
                     <div className="text-center text-white">
                       <Play className="w-16 h-16 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm opacity-75">سيتم إضافة الفيديو قريباً</p>
+                      <p className="text-sm opacity-75">
+                        سيتم إضافة الفيديو قريباً
+                      </p>
                     </div>
                   </div>
                 </div>
               )}
             </div>
 
+            <div className="space-y-4">
+              <h4 className="font-semibold text-gray-900">
+                خطوات إعداد Webhook
+              </h4>
+
+              <div className="space-y-3">
+                {steps.map((step, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-row items-center px-8 py-2.5 gap-2.5 min-h-[65px] bg-[rgba(36,137,225,0.02)] border border-[rgba(36,137,225,0.16)] rounded-lg"
+                  >
+                    <span className="flex-shrink-0 w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-medium">
+                      {index + 1}
+                    </span>
+                    <p className="flex-1 text-lg leading-[33px] text-right text-black">
+                      {step}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-                <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                <svg
+                  className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 <p className="text-sm text-red-700">{error}</p>
               </div>
@@ -293,12 +319,16 @@ const EasyOrderModal = ({
                   disabled={isLoading}
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  للتطوير: استخدم رابط ngrok. للإنتاج: سيتم استخدام الرابط تلقائياً
+                  للتطوير: استخدم رابط ngrok. للإنتاج: سيتم استخدام الرابط
+                  تلقائياً
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 text-left" dir="ltr">
+                <label
+                  className="block text-sm font-medium text-gray-700 mb-2 text-left"
+                  dir="ltr"
+                >
                   <span className="text-red-500 ml-1">*</span>
                   Webhook Secret
                 </label>
@@ -314,7 +344,8 @@ const EasyOrderModal = ({
                   minLength={10}
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  مفتاح السرية يستخدم للتحقق من صحة الطلبات الواردة من Easy Orders
+                  مفتاح السرية يستخدم للتحقق من صحة الطلبات الواردة من Easy
+                  Orders
                 </p>
               </div>
 
@@ -327,13 +358,27 @@ const EasyOrderModal = ({
                   {isLoading ? (
                     <>
                       <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
                       </svg>
                       جاري الحفظ...
                     </>
+                  ) : existingConfig ? (
+                    'تحديث الربط'
                   ) : (
-                    existingConfig ? 'تحديث الربط' : 'إنشاء الربط'
+                    'إنشاء الربط'
                   )}
                 </Button>
                 <Button

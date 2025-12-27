@@ -144,25 +144,8 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
               </div>
             </div>
 
-            {/* Steps */}
-            <div className="space-y-4">
-              <h4 className="font-semibold text-gray-900">خطوات التفعيل</h4>
-              <div className="space-y-3">
-                {steps.map((step, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center px-4 py-3 gap-3 bg-gray-50 border border-gray-100 rounded-lg"
-                  >
-                    <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold">
-                      {index + 1}
-                    </span>
-                    <p className="flex-1 text-gray-700 text-sm">{step}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* Video Accordion */}
+            <h4 className="font-semibold text-gray-900">فيديو توضيحي</h4>
             <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
               <button
                 onClick={() => setShowVideo(!showVideo)}
@@ -201,6 +184,24 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Steps */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-gray-900">خطوات التفعيل</h4>
+              <div className="space-y-3">
+                {steps.map((step, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center px-4 py-3 gap-3 bg-gray-50 border border-gray-100 rounded-lg"
+                  >
+                    <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold">
+                      {index + 1}
+                    </span>
+                    <p className="flex-1 text-gray-700 text-sm">{step}</p>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Error Message */}
