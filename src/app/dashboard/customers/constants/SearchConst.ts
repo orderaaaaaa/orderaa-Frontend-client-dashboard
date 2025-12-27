@@ -25,11 +25,11 @@ export const orderStatusOptions = [
 ];
 
 export const activityTypeOptions = [
-  { key: 'loyal', value: 'Loyal Buyer 👑' },
-  { key: 'bulk', value: 'bulk buyer 📋' },
-  { key: 'ghost', value: 'Ghost agent 👻' },
-  { key: 'window', value: 'Window shopper 🛍️' },
-  { key: 'high', value: 'High Value 💰' },
+  { key: 'loyal', value: 'Loyal Buyer ' },
+  { key: 'bulk', value: 'bulk buyer ' },
+  { key: 'ghost', value: 'Ghost agent ' },
+  { key: 'window', value: 'Window shopper ' },
+  { key: 'high', value: 'High Value ' },
 ];
 
 export const customerOptions = [

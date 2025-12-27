@@ -7,15 +7,14 @@ export interface StatItem {
 
 export const statsData: StatItem[] = [
   {
-    iconSrc: '/Icons/customers.svg',
-    label: 'Loyal Buyer',
-    value: '15',
-  },
-  {
     iconSrc: '/Icons/orders.svg',
     label: 'إحصائي الطلبات',
     value: '208',
-    subtitle: 'طلب لكل عميل 13.9',
+  },
+  {
+    iconSrc: '/Icons/customers.svg',
+    label: 'Loyal Buyer',
+    value: '15',
   },
   {
     iconSrc: '/Icons/premium.svg',
