@@ -15,7 +15,11 @@ import CustomerBanConfirmationModal from './modals/CustomerBanConfirmationModal'
 
 interface CustomerRowProps {
   customer: any;
-  onToggleBlock: (customerId: number, currentBlockStatus: boolean) => void;
+  onToggleBlock: (
+    customerId: number,
+    currentBlockStatus: boolean,
+    note?: string
+  ) => void;
   isPending: boolean;
   onRowClick: (customerId: number) => void;
 }
@@ -57,19 +61,13 @@ export const CustomerRow = memo(function CustomerRow({
 
   const handleBanClick = () => {
     setIsMenuOpen(false);
-
-    if (customer.isBlocked) {
-      onToggleBlock(customer.id, customer.isBlocked);
-    } else {
-      setShowBanModal(true);
-    }
+    setShowBanModal(true);
   };
 
-  const handleConfirmBan = () => {
-    onToggleBlock(customer.id, customer.isBlocked);
+  const handleConfirmBan = (id: string, note: string) => {
+    onToggleBlock(customer.id, customer.isBlocked, note);
     setShowBanModal(false);
   };
-
   const phone = customer.phoneNumbers?.[0];
   const whatsappNumber = phone ? toWhatsAppNumber(phone) : null;
 
@@ -192,17 +190,17 @@ export const CustomerRow = memo(function CustomerRow({
           <div ref={menuRef} className="relative">
             <button
               onClick={() => setIsMenuOpen((v) => !v)}
-              className="p-2 hover:bg-gray-100 rounded-lg"
+              className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
             >
               <TfiMore className="w-5 h-5 text-gray-600" />
             </button>
 
             {isMenuOpen && (
-              <div className="absolute left-0 mt-2 bg-white rounded-lg shadow-lg border z-10 min-w-[140px]">
+              <div className="absolute left-0 mt-1 bg-white rounded-lg shadow-lg border z-10 min-w-[140px]">
                 <button
                   onClick={handleBanClick}
                   disabled={isPending}
-                  className={`w-full px-6 py-2 transition-colors hover:bg-gray-50 ${
+                  className={`w-full px-6 py-2 transition-colors hover:bg-gray-50 cursor-pointer ${
                     customer.isBlocked ? 'text-green-600' : 'text-red-600'
                   } ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >

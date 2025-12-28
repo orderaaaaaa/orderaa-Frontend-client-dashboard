@@ -59,12 +59,14 @@ export default function CustomerTable({
 
   const handleToggleBlock = (
     customerId: number,
-    currentBlockStatus: boolean
+    currentBlockStatus: boolean,
+    note?: string
   ) => {
     editCustomerMutation.mutate({
       customerId,
       payload: {
         isBlocked: !currentBlockStatus,
+        notes: note || '', // إرسال نص فارغ إذا لم توجد ملاحظة لتجنب خطأ النوع
       },
     });
   };
