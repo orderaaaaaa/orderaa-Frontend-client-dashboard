@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, SlidersVertical } from 'lucide-react';
+import { Search, SlidersVertical, X as XIcon } from 'lucide-react';
 import Dropdown from '@/components/ui/Dropdown';
 import {
   activityTypeOptions,
@@ -74,23 +74,6 @@ export default function CustomerSearch({
     [onOrderStatusChange]
   );
 
-  const handleResetFilters = () => {
-    setLocalSearch('');
-    setClientStatus('');
-    setOrderStatus('');
-    setActivityType('');
-    setAllCustomers('');
-
-    debouncedSearch.cancel();
-    onSearchChange('');
-    onClientStatusChange('');
-    onOrderStatusChange('');
-
-    onFromDateChange(null);
-    onToDateChange(null);
-    onTimePeriodChange('');
-  };
-
   useEffect(() => {
     return () => {
       debouncedSearch.cancel();
@@ -125,6 +108,19 @@ export default function CustomerSearch({
               className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-[#5d24e1] focus:border-transparent text-right placeholder-gray-400"
               dir="rtl"
             />
+            {localSearch && (
+              <button
+                type="button"
+                onClick={() => {
+                  setLocalSearch('');
+                  debouncedSearch.cancel();
+                  onSearchChange('');
+                }}
+                className="absolute right-8 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <XIcon className="w-4 h-4" />
+              </button>
+            )}
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#5d24e1]" />
           </div>
         </div>
@@ -135,7 +131,7 @@ export default function CustomerSearch({
         <div className="px-4 md:px-6 pb-6 border-t border-gray-50 pt-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Client Status */}
-            <div className="space-y-1">
+            <div className="relative space-y-1">
               <label className="block text-sm font-medium text-gray-700 text-right">
                 حالة العميل
               </label>
@@ -149,10 +145,19 @@ export default function CustomerSearch({
                 arrowClassName="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
                 dropdownClassName="absolute z-20 left-0 right-0 bg-white rounded-lg mt-1 max-h-48 overflow-y-auto shadow-xl border border-gray-200"
               />
+              {clientStatus && (
+                <button
+                  type="button"
+                  onClick={() => handleClientStatusChange('')}
+                  className="absolute top-9 left-10 text-[#5D24E1] cursor-pointer"
+                >
+                  <XIcon className="w-4 h-4" />
+                </button>
+              )}
             </div>
 
             {/* Order Status */}
-            <div className="space-y-1">
+            <div className="relative space-y-1">
               <label className="block text-sm font-medium text-gray-700 text-right">
                 حالة الطلب
               </label>
@@ -166,10 +171,19 @@ export default function CustomerSearch({
                 arrowClassName="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
                 dropdownClassName="absolute z-20 left-0 right-0 bg-white rounded-lg mt-1 max-h-48 overflow-y-auto shadow-xl border border-gray-200"
               />
+              {orderStatus && (
+                <button
+                  type="button"
+                  onClick={() => handleOrderStatusChange('')}
+                  className="absolute top-9 left-10 text-[#5D24E1] cursor-pointer"
+                >
+                  <XIcon className="w-4 h-4" />
+                </button>
+              )}
             </div>
 
             {/* Activity Type */}
-            <div className="space-y-1">
+            <div className="relative space-y-1">
               <label className="block text-sm font-medium text-gray-700 text-right">
                 نوع الشارة
               </label>
@@ -183,10 +197,19 @@ export default function CustomerSearch({
                 arrowClassName="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
                 dropdownClassName="absolute z-20 left-0 right-0 bg-white rounded-lg mt-1 max-h-48 overflow-y-auto shadow-xl border border-gray-200"
               />
+              {activityType && (
+                <button
+                  type="button"
+                  onClick={() => setActivityType('')}
+                  className="absolute top-9 left-10 text-[#5D24E1] cursor-pointer"
+                >
+                  <XIcon className="w-4 h-4" />
+                </button>
+              )}
             </div>
 
             {/* All Customers */}
-            <div className="space-y-1">
+            <div className="relative space-y-1">
               <label className="block text-sm font-medium text-gray-700 text-right">
                 جميع العملاء
               </label>
@@ -199,17 +222,16 @@ export default function CustomerSearch({
                 selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-sm font-semibold bg-white text-right"
                 arrowClassName="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
               />
+              {allCustomers && (
+                <button
+                  type="button"
+                  onClick={() => setAllCustomers('')}
+                  className="absolute top-9 left-10 text-[#5D24E1] cursor-pointer"
+                >
+                  <XIcon className="w-4 h-4" />
+                </button>
+              )}
             </div>
-          </div>
-
-          {/* Reset Button */}
-          <div className="flex justify-end mt-6">
-            <button
-              onClick={handleResetFilters}
-              className="px-6 py-2 rounded-lg cursor-pointer border border-[#5d24e1] text-[#5d24e1] font-medium hover:bg-[#5d24e1] hover:text-white transition-all"
-            >
-              إعادة تعيين الفلاتر
-            </button>
           </div>
         </div>
       )}

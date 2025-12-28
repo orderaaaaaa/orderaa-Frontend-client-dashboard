@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   ShoppingCart,
@@ -11,8 +11,12 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { webhookApi, WebhookConfigResponse } from '@/lib/api/webhooks';
-import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
+import { useGetWebhookConfig } from './hooks/useGetWebhookConfig';
+import { useIntegrations } from './hooks/useIntegrations';
+import { useQueryClient } from '@tanstack/react-query';
+import { useAuthStore } from '@/store/authStore';
+import { LiaEyeSolid, LiaEyeSlashSolid } from 'react-icons/lia';
 
 interface EasyOrderModalProps {
   isOpen: boolean;
@@ -27,41 +31,70 @@ const EasyOrderModal = ({
   onSuccess,
   existingConfig,
 }: EasyOrderModalProps) => {
+  const { user } = useAuthStore();
+  const merchantId = user?.merchantId;
+  const queryClient = useQueryClient();
+
+  // --- Webhook State ---
   const [webhookSecret, setWebhookSecret] = useState('');
   const [customWebhookUrl, setCustomWebhookUrl] = useState('');
+  const [showSecret, setShowSecret] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  // --- Integration API Key State ---
+  const [apiKey, setApiKey] = useState('');
+  const [existingIntegrationId, setExistingIntegrationId] = useState<
+    number | null
+  >(null);
+
+  // --- UI Toggle States ---
+  const [showApiDropdown, setShowApiDropdown] = useState(false);
+  const [showWebhookDropdown, setShowWebhookDropdown] = useState(false);
+
+  // --- General UI State ---
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
-  const [copied, setCopied] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
-  const { user } = useAuthStore();
 
-  if (!isOpen) return null;
+  const { data: webhookData } = useGetWebhookConfig();
+  const { integrations, createIntegration, updateIntegration } =
+    useIntegrations();
 
-  const merchantId = user?.merchantId;
-
+  // --- URL Logic ---
   const getBaseUrl = () => {
     const envUrl = process.env.NEXT_PUBLIC_API_URL;
-
     if (
       envUrl &&
       (envUrl.includes('localhost') || envUrl.includes('127.0.0.1'))
     ) {
       return 'https://api.orderaa.com';
     }
-
     return envUrl || 'https://api.orderaa.com';
   };
 
-  const baseUrl = getBaseUrl();
   const defaultWebhookUrl = merchantId
-    ? `${baseUrl}/webhooks/easy-orders/${merchantId}`
-    : `${baseUrl}/webhooks/easy-orders/[MERCHANT_ID]`;
+    ? `${getBaseUrl()}/webhooks/easy-orders/${merchantId}`
+    : `${getBaseUrl()}/webhooks/easy-orders/[MERCHANT_ID]`;
+
+  useEffect(() => {
+    if (webhookData) {
+      setWebhookSecret(webhookData.webhookSecret || '');
+      setCustomWebhookUrl(webhookData.webhookUrl || '');
+    }
+  }, [webhookData]);
+
+  useEffect(() => {
+    if (integrations) {
+      const existing = integrations.find((c) => c.provider === 'EASY_ORDERS');
+      if (existing) {
+        setApiKey(existing.apiKey);
+        setExistingIntegrationId(existing.id);
+      }
+    }
+  }, [integrations]);
+
+  if (!isOpen) return null;
 
   const handleCopyUrl = () => {
-    if (!merchantId) {
-      setError('لا يمكن الحصول على معرف التاجر. يرجى تسجيل الدخول مرة أخرى.');
-      return;
-    }
     const urlToCopy = customWebhookUrl.trim() || defaultWebhookUrl;
     navigator.clipboard.writeText(urlToCopy);
     setCopied(true);
@@ -71,49 +104,41 @@ const EasyOrderModal = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
-    if (!merchantId) {
-      setError('لا يمكن العثور على معرف التاجر. يرجى تسجيل الدخول مرة أخرى.');
-      return;
-    }
-
-    if (!webhookSecret.trim()) {
-      setError('يرجى إدخال مفتاح السرية (Secret)');
-      return;
-    }
-
-    if (webhookSecret.length < 10) {
-      setError('مفتاح السرية يجب أن يكون 10 أحرف على الأقل');
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      const fullWebhookUrl = customWebhookUrl.trim() || defaultWebhookUrl;
+      const finalUrl = customWebhookUrl.trim() || defaultWebhookUrl;
 
+      // 1. Webhook Logic (Patch if existingConfig exists)
       if (existingConfig) {
         await webhookApi.updateConfig({
-          webhookUrl: fullWebhookUrl,
+          webhookUrl: finalUrl,
           webhookSecret: webhookSecret.trim(),
         });
       } else {
         await webhookApi.createConfig({
-          webhookUrl: fullWebhookUrl,
+          webhookUrl: finalUrl,
           webhookSecret: webhookSecret.trim(),
         });
       }
 
+      // 2. API Key Logic (Patch if existingIntegrationId exists)
+      if (apiKey.trim()) {
+        if (existingIntegrationId) {
+          await updateIntegration({
+            id: existingIntegrationId,
+            apiKey: apiKey.trim(),
+          });
+        } else {
+          await createIntegration(apiKey.trim());
+        }
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['integration-configs'] });
       onSuccess();
       onClose();
-      setWebhookSecret('');
-      setCustomWebhookUrl('');
     } catch (err: any) {
-      setError(
-        err.response?.data?.message ||
-          err.response?.data?.error ||
-          'حدث خطأ أثناء حفظ الربط. يرجى المحاولة مرة أخرى.'
-      );
+      setError(err.response?.data?.message || 'حدث خطأ أثناء حفظ الإعدادات.');
     } finally {
       setIsLoading(false);
     }
@@ -121,43 +146,27 @@ const EasyOrderModal = ({
 
   const handleClose = () => {
     if (!isLoading) {
-      setWebhookSecret('');
-      setCustomWebhookUrl('');
       setError('');
-      setShowVideo(false);
       onClose();
     }
   };
 
-  const steps = [
-    'قم بتسجيل الدخول إلى حسابك في منصة Easy Orders من خلال موقعهم الرسمي.',
-    'انتقل إلى الاعدادات (Settings).',
-    'اختر قسم Webhooks.',
-    'اضغط على "Create Webhook" أو "إنشاء ربط جديد".',
-    'اختر الحدث: "Order Created" (عند إنشاء طلب جديد).',
-    'انسخ رابط الـ Webhook من الحقل أدناه وألصقه في حقل Webhook URL في Easy Orders.',
-    'قم بإنشاء مفتاح سرية (Secret) قوي (10 أحرف على الأقل) وألصقه في Easy Orders وفي حقل Webhook Secret أدناه.',
-    'احفظ الإعدادات في Easy Orders، ثم اضغط "إنشاء الربط" أو "تحديث الربط" في هذه الصفحة.',
+  const webhookSteps = [
+    'قم بتسجيل الدخول إلى حسابك في منصة Easy Orders.',
+    'انتقل إلى الاعدادات (Settings) واختر Webhooks.',
+    'اضغط على "Create Webhook" واختر الحدث: "Order Created".',
+    'انسخ رابط الـ Webhook أدناه وألصقه في Easy Orders.',
+    'قم بإنشاء مفتاح سرية (Secret) قوي وألصقه في الحقلين.',
+  ];
+
+  const integrationSteps = [
+    'انتقل إلى قسم Public API في Easy Orders.',
+    'اضغط على "إنشاء" واختر "الوصول للمنتجات".',
+    'انسخ مفتاح الـ API Key وألصقه أدناه.',
   ];
 
   return (
     <>
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #cbd5e0;
-          border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #a0aec0;
-        }
-      `}</style>
-
       <div
         className="fixed inset-0 bg-black/50 z-40 transition-opacity"
         onClick={handleClose}
@@ -166,17 +175,16 @@ const EasyOrderModal = ({
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
           className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden"
-          onClick={(e) => e.stopPropagation()}
           dir="rtl"
         >
+          {/* Header */}
           <div className="bg-gray-50 border-b border-gray-200 px-6 py-4 flex items-center justify-between flex-shrink-0">
             <h2 className="text-xl font-bold text-gray-900">ربط المتاجر</h2>
             <Button
               variant="ghost"
               onClick={handleClose}
               disabled={isLoading}
-              className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
-              aria-label="Close modal"
+              className="text-gray-400 hover:text-gray-600"
             >
               <X className="w-6 h-6" />
             </Button>
@@ -187,16 +195,14 @@ const EasyOrderModal = ({
               قم بربط متجرك لمراقبة الطلبات تلقائياً
             </p>
 
-            <div className="bg-blue-50 rounded-xl flex items-center p-6">
-              <div className="flex items-center gap-4 ">
-                <div className="flex items-center justify-center w-16 h-16 bg-white border border-[#2489E1] shadow-[0px_4px_22px_rgba(0,0,0,0.08)] rounded-lg">
-                  <ShoppingCart
-                    className="w-11 h-11 text-[#001A72]"
-                    strokeWidth={1.5}
-                  />
+            {/* Platform Card */}
+            <div className="bg-blue-50 rounded-xl flex items-center p-6 border border-[#2489E1]/20">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center justify-center w-16 h-16 bg-white border border-[#2489E1] shadow-sm rounded-lg">
+                  <ShoppingCart className="w-11 h-11 text-[#001A72]" />
                 </div>
-                <div className="flex flex-col items-start gap-4 order-1">
-                  <p className="text-sm text-gray-600 order-2">
+                <div className="flex flex-col items-start gap-1">
+                  <p className="text-sm text-gray-600">
                     اتبع التعليمات ادناه للربط
                   </p>
                   <h3 className="text-lg font-semibold text-gray-900">
@@ -205,191 +211,214 @@ const EasyOrderModal = ({
                 </div>
               </div>
             </div>
+
+            {/* Static Video Section (No Dropdown) */}
             <h4 className="font-semibold text-gray-900">فيديو توضيحي</h4>
-            <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+            <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
+              <div className="aspect-video w-full md:h-[300px] bg-gray-900 rounded-lg flex flex-col items-center justify-center text-white text-sm">
+                <Play className="w-12 h-12 mb-2 opacity-30" />
+                <span className="opacity-75">سيتم إضافة الفيديو قريباً</span>
+              </div>
+            </div>
+
+            {/* 1. API Key Dropdown */}
+            <div className="bg-[#fbfdfe] rounded-xl border border-[#2489E1]/30 overflow-hidden transition-all duration-300">
               <button
-                onClick={() => setShowVideo(!showVideo)}
-                className="w-full p-4 flex items-center justify-between hover:bg-gray-100 transition-colors"
+                type="button"
+                onClick={() => setShowApiDropdown(!showApiDropdown)}
+                className="w-full flex items-center justify-between p-6 cursor-pointer hover:bg-blue-100/30 transition-colors"
               >
-                <div className="flex items-start gap-3">
-                  <div className="bg-[#5D24E1] text-white p-2 rounded-lg flex-shrink-0">
-                    <Play className="w-5 h-5" />
+                <div className="flex items-center gap-3">
+                  <div className="bg-[#2489E1] text-white p-2 rounded-lg">
+                    <ShoppingCart className="w-5 h-5" />
                   </div>
-                  <div className="flex-1 text-right">
-                    <p className="font-semibold text-gray-900 mb-1">
-                      فيديو تعليمي
+                  <div className="text-right">
+                    <p className="font-semibold text-gray-900">
+                      إعدادات الربط (API Key)
                     </p>
-                    <p className="text-sm text-gray-600">
-                      شاهد هذا الفيديو لمعرفة كيفية إعداد الربط
+                    <p className="text-sm text-gray-600 italic">
+                      اختياري: لربط المخزون تلقائياً
                     </p>
                   </div>
                 </div>
-                {showVideo ? (
-                  <ChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                {showApiDropdown ? (
+                  <ChevronUp className="w-6 h-6 text-[#2489E1]" />
                 ) : (
-                  <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                  <ChevronDown className="w-6 h-6 text-[#2489E1]" />
                 )}
               </button>
 
-              {showVideo && (
-                <div className="p-4 pt-0 border-t border-gray-200">
-                  <div className="aspect-video bg-gray-900 rounded-lg flex items-center justify-center">
-                    <div className="text-center text-white">
-                      <Play className="w-16 h-16 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm opacity-75">
-                        سيتم إضافة الفيديو قريباً
-                      </p>
+              {showApiDropdown && (
+                <div className="p-6 pt-0 space-y-4 animate-in fade-in slide-in-from-top-2">
+                  <div className="space-y-3 border-t border-blue-200/50 pt-4">
+                    {integrationSteps.map((step, i) => (
+                      <div
+                        key={i}
+                        className="flex flex-row items-center px-6 py-2.5 gap-2.5 bg-[rgba(36,137,225,0.02)] border border-[rgba(36,137,225,0.16)] rounded-lg"
+                      >
+                        <span className="flex-shrink-0 w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-medium">
+                          {i + 1}
+                        </span>
+                        <p className="flex-1 text-md text-right text-black">
+                          {step}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border mt-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+                      API Key
+                    </label>
+                    <input
+                      type="text"
+                      value={apiKey}
+                      onChange={(e) => setApiKey(e.target.value)}
+                      placeholder="أدخل مفتاح الـ API"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg text-left font-mono"
+                      dir="ltr"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 2. Webhook Dropdown */}
+            <div className="bg-[#fbfdfe] rounded-xl border border-[#5D24E1]/30 overflow-hidden transition-all duration-300">
+              <button
+                type="button"
+                onClick={() => setShowWebhookDropdown(!showWebhookDropdown)}
+                className="w-full flex items-center justify-between p-6 cursor-pointer hover:bg-purple-100/30 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="bg-[#5D24E1] text-white p-2 rounded-lg">
+                    <Play className="w-5 h-5" />
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-gray-900">
+                      إعدادات الـ Webhook
+                    </p>
+                    <p className="text-sm text-gray-600 italic">
+                      مطلوب: لمراقبة الطلبات الجديدة
+                    </p>
+                  </div>
+                </div>
+                {showWebhookDropdown ? (
+                  <ChevronUp className="w-6 h-6 text-[#5D24E1]" />
+                ) : (
+                  <ChevronDown className="w-6 h-6 text-[#5D24E1]" />
+                )}
+              </button>
+
+              {showWebhookDropdown && (
+                <div className="p-6 pt-0 space-y-4 animate-in fade-in slide-in-from-top-2">
+                  <div className="space-y-3 border-t border-purple-200/50 pt-4">
+                    {webhookSteps.map((step, i) => (
+                      <div
+                        key={i}
+                        className="flex flex-row items-center px-6 py-2.5 gap-2.5 bg-[rgba(93,36,225,0.02)] border border-[rgba(93,36,225,0.16)] rounded-lg"
+                      >
+                        <span className="flex-shrink-0 w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-medium">
+                          {i + 1}
+                        </span>
+                        <p className="flex-1 text-md text-right text-black">
+                          {step}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-4 bg-gray-50/50 p-4 rounded-xl border border-gray-100 mt-2">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Webhook URL
+                        </label>
+                        <button
+                          type="button"
+                          onClick={handleCopyUrl}
+                          className="flex items-center gap-2 px-3 py-1 bg-[#5D24E1] text-white text-xs rounded-md hover:bg-[#4A1CB8]"
+                        >
+                          {copied ? (
+                            <Check className="w-3 h-3" />
+                          ) : (
+                            <Copy className="w-3 h-3" />
+                          )}
+                          {copied ? 'تم النسخ' : 'نسخ'}
+                        </button>
+                      </div>
+                      <input
+                        type="url"
+                        value={customWebhookUrl || defaultWebhookUrl}
+                        onChange={(e) => setCustomWebhookUrl(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-left text-sm font-mono focus:ring-2 focus:ring-[#5D24E1] outline-none"
+                        dir="ltr"
+                        placeholder="https://..."
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        className="block text-sm font-medium text-gray-700 mb-2 text-left"
+                        dir="ltr"
+                      >
+                        Webhook Secret
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showSecret ? 'text' : 'password'}
+                          value={webhookSecret}
+                          onChange={(e) => setWebhookSecret(e.target.value)}
+                          placeholder="Secret key"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg text-left focus:ring-2 focus:ring-[#5D24E1] pr-12 font-mono"
+                          dir="ltr"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowSecret(!showSecret)}
+                          className="absolute inset-y-0 right-2 flex items-center"
+                        >
+                          <span className="text-white rounded-md cursor-pointer p-1.5 bg-[#5D24E1]">
+                            {showSecret ? (
+                              <LiaEyeSlashSolid className="w-4 h-4" />
+                            ) : (
+                              <LiaEyeSolid className="w-4 h-4" />
+                            )}
+                          </span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="space-y-4">
-              <h4 className="font-semibold text-gray-900">
-                خطوات إعداد Webhook
-              </h4>
-
-              <div className="space-y-3">
-                {steps.map((step, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-row items-center px-8 py-2.5 gap-2.5 min-h-[65px] bg-[rgba(36,137,225,0.02)] border border-[rgba(36,137,225,0.16)] rounded-lg"
-                  >
-                    <span className="flex-shrink-0 w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-medium">
-                      {index + 1}
-                    </span>
-                    <p className="flex-1 text-lg leading-[33px] text-right text-black">
-                      {step}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-                <svg
-                  className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <p className="text-sm text-red-700">{error}</p>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm text-center">
+                {error}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    رابط الـ Webhook (Webhook URL)
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleCopyUrl}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-[#5D24E1] hover:bg-[#4A1CB8] text-white text-sm rounded-md transition-colors"
-                    disabled={isLoading}
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="w-4 h-4" />
-                        تم النسخ
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-4 h-4" />
-                        نسخ
-                      </>
-                    )}
-                  </button>
-                </div>
-                <input
-                  type="url"
-                  value={customWebhookUrl || defaultWebhookUrl}
-                  onChange={(e) => setCustomWebhookUrl(e.target.value)}
-                  placeholder="أدخل رابط الـ Webhook"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5D24E1] focus:border-[#5D24E1] outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed font-mono text-sm"
-                  dir="ltr"
-                  disabled={isLoading}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  للتطوير: استخدم رابط ngrok. للإنتاج: سيتم استخدام الرابط
-                  تلقائياً
-                </p>
-              </div>
-
-              <div>
-                <label
-                  className="block text-sm font-medium text-gray-700 mb-2 text-left"
-                  dir="ltr"
-                >
-                  <span className="text-red-500 ml-1">*</span>
-                  Webhook Secret
-                </label>
-                <input
-                  type="text"
-                  value={webhookSecret}
-                  onChange={(e) => setWebhookSecret(e.target.value)}
-                  placeholder="Enter your Webhook Secret from Easy Orders"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5D24E1] focus:border-[#5D24E1] outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed text-left"
-                  dir="ltr"
-                  disabled={isLoading}
-                  required
-                  minLength={10}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  مفتاح السرية يستخدم للتحقق من صحة الطلبات الواردة من Easy
-                  Orders
-                </p>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="flex-1 bg-[#5D24E1] hover:bg-[#4A1CB8] text-white font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isLoading ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                          fill="none"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        />
-                      </svg>
-                      جاري الحفظ...
-                    </>
-                  ) : existingConfig ? (
-                    'تحديث الربط'
-                  ) : (
-                    'إنشاء الربط'
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={handleClose}
-                  disabled={isLoading}
-                  className="flex-1 bg-white hover:bg-gray-50 text-gray-700 font-medium py-3 px-6 rounded-lg border border-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  إلغاء
-                </Button>
-              </div>
+            {/* Submit Actions */}
+            <form onSubmit={handleSubmit} className="flex gap-3 pt-4">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="flex-1 bg-[#5D24E1] text-white h-12 hover:bg-[#4A1CB8] font-bold text-lg"
+              >
+                {isLoading
+                  ? 'جاري الحفظ...'
+                  : existingConfig || existingIntegrationId
+                  ? 'تحديث الربط'
+                  : 'إنشاء الربط'}
+              </Button>
+              <Button
+                type="button"
+                onClick={handleClose}
+                className="flex-1 bg-white border border-gray-300 text-gray-700 h-12 hover:bg-gray-50"
+              >
+                إلغاء
+              </Button>
             </form>
           </div>
         </div>

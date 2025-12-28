@@ -6,6 +6,7 @@ import { CheckCircle2, AlertCircle } from 'lucide-react';
 import EasyOrderModal from './EasyOrderModal';
 import { webhookApi, WebhookConfigResponse } from '@/lib/api/webhooks';
 import { Button } from '@/components/ui/button';
+import { Else, If, Then } from 'react-if';
 
 interface IntegrationPlatform {
   name: string;
@@ -26,6 +27,14 @@ const platforms: IntegrationPlatform[] = [
     isActive: true,
   },
   {
+    id: 'shopify',
+    name: 'Shopify',
+    logo: '/integrations/shopify.svg',
+    description: 'ربط متجرك بمنصة Shopify',
+    buttonText: 'إنشاء ربط جديد',
+    isActive: false,
+  },
+  {
     id: 'wordpress',
     name: 'WordPress',
     logo: '/integrations/wordpress.svg',
@@ -38,14 +47,6 @@ const platforms: IntegrationPlatform[] = [
     name: 'WooCommerce',
     logo: '/integrations/woocommerce.svg',
     description: 'ربط متجرك بمنصة WooCommerce',
-    buttonText: 'إنشاء ربط جديد',
-    isActive: false,
-  },
-  {
-    id: 'shopify',
-    name: 'Shopify',
-    logo: '/integrations/shopify.svg',
-    description: 'ربط متجرك بمنصة Shopify',
     buttonText: 'إنشاء ربط جديد',
     isActive: false,
   },
@@ -69,9 +70,10 @@ const IntegrationCard = ({
     <div
       className={`
         relative bg-white rounded-2xl p-8 transition-all duration-300
-        ${platform.isActive
-          ? 'border-2 border-[#5D24E1] shadow-lg shadow-purple-100'
-          : 'border border-gray-200 hover:border-gray-300 hover:shadow-md'
+        ${
+          platform.isActive
+            ? 'border-2 border-[#5D24E1] shadow-lg shadow-purple-100'
+            : 'border border-gray-200 hover:border-gray-300 hover:shadow-md'
         }
       `}
     >
@@ -104,16 +106,20 @@ const IntegrationCard = ({
         onClick={() => platform.isActive && onButtonClick(platform.id)}
         className={`
           w-full h-12 rounded-lg font-medium text-white transition-all duration-200
-          ${platform.isActive
-            ? isConnected
-              ? 'bg-gray-600 hover:bg-gray-700'
-              : 'bg-[#5D24E1] hover:bg-[#4A1CB8] active:bg-[#3D17A0]'
-            : 'bg-gray-400 cursor-not-allowed'
+          ${
+            platform.isActive
+              ? isConnected
+                ? 'bg-gray-600 hover:bg-gray-700'
+                : 'bg-[#5D24E1] hover:bg-[#4A1CB8] active:bg-[#3D17A0]'
+              : 'bg-gray-400 cursor-not-allowed'
           }
         `}
         disabled={!platform.isActive}
       >
-        {isConnected ? 'إدارة الربط' : platform.buttonText}
+        <If condition={platform.isActive}>
+          <Then>{isConnected ? 'إدارة الربط' : platform.buttonText}</Then>
+          <Else>قريباً</Else>
+        </If>
       </Button>
     </div>
   );
@@ -133,10 +139,11 @@ const Notification = ({ message, type, onClose }: NotificationProps) => {
 
   return (
     <div
-      className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-4 rounded-lg shadow-lg transition-all ${type === 'success'
-        ? 'bg-green-50 border border-green-200'
-        : 'bg-red-50 border border-red-200'
-        }`}
+      className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-4 rounded-lg shadow-lg transition-all ${
+        type === 'success'
+          ? 'bg-green-50 border border-green-200'
+          : 'bg-red-50 border border-red-200'
+      }`}
       dir="rtl"
     >
       {type === 'success' ? (
@@ -145,7 +152,9 @@ const Notification = ({ message, type, onClose }: NotificationProps) => {
         <AlertCircle className="w-5 h-5 text-red-600" />
       )}
       <span
-        className={`font-medium ${type === 'success' ? 'text-green-900' : 'text-red-900'}`}
+        className={`font-medium ${
+          type === 'success' ? 'text-green-900' : 'text-red-900'
+        }`}
       >
         {message}
       </span>
