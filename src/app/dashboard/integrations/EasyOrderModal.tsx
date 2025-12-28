@@ -10,19 +10,14 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-import { webhookApi, WebhookConfigResponse } from '@/lib/api/webhooks';
+import { webhookApi } from '@/lib/api/webhooks';
 import { Button } from '@/components/ui/button';
 import { useGetWebhookConfig } from './hooks/useGetWebhookConfig';
 import { useIntegrations } from './hooks/useIntegrations';
 import { useQueryClient } from '@tanstack/react-query';
 import { LiaEyeSolid, LiaEyeSlashSolid } from 'react-icons/lia';
-
-interface EasyOrderModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  existingConfig: WebhookConfigResponse | null;
-}
+import { EasyOrderModalProps } from './types/easyOrderModal';
+import { integrationSteps, webhookSteps } from './constants/steps';
 
 const EasyOrderModal = ({
   isOpen,
@@ -130,26 +125,6 @@ const EasyOrderModal = ({
       onClose();
     }
   };
-
-  const webhookSteps = [
-    'قم بتسجيل الدخول إلى حسابك في منصة Easy Orders من خلال موقعهم الرسمي.',
-    'انتقل إلى الاعدادات (Settings).',
-    'اختر قسم Webhooks.',
-    'اضغط على "Create Webhook" أو "إنشاء ربط جديد".',
-    'اختر الحدث: "Order Created" (عند إنشاء طلب جديد).',
-    'انسخ رابط الـ Webhook من الحقل أدناه وألصقه في حقل Webhook URL في Easy Orders.',
-    'قم بإنشاء مفتاح سرية (Secret) قوي (10 أحرف على الأقل) وألصقه في Easy Orders وفي حقل Webhook Secret أدناه.',
-    'احفظ الإعدادات في Easy Orders، ثم اضغط "تحديث الربط" أو "إنشاء الربط" في هذه الصفحة.',
-  ];
-
-  const integrationSteps = [
-    'اختار قسم public api',
-    'اضغط على "Create" أو "إنشاء',
-    'اختر الحدث: "Product Accessed" (الوصول الي المنتجات)',
-    'انسخ المفتاح السري API Key',
-    'أدخل مفتاح الـ API في الحقل أدناه لإتمام الربط التلقائي للمخزون والطلبات.',
-    'الصق المفتاح السري ادناه في المكان المخصص له.',
-  ];
 
   return (
     <>

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Truck, Check, ChevronDown, ChevronUp, Play } from 'lucide-react';
+import { X, Truck, ChevronDown, ChevronUp, Play } from 'lucide-react';
 import { useShippingQuery } from '../hooks/useShippingQuery';
 import { Button } from '@/components/ui/button';
-import { ShippingConfig } from '../types/shipping';
+import { steps } from '../constants/steps';
 
 interface Props {
   providerId: string;
@@ -24,8 +24,6 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
     if (config?.metadata?.rawJson) {
       setJsonInput(config.metadata.rawJson);
     } else if (config) {
-      // If we have config but no rawJson metadata, we might want to construct it or leave empty
-      // For now, leaving empty or specific fields if they existed
     }
   }, [config]);
 
@@ -65,16 +63,6 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
       setError(err.message || 'حدث خطأ أثناء الحفظ');
     }
   };
-
-  const steps = [
-    'قم بتسجيل الدخول إلى لوحة تحكم تيربو (Turbo).',
-    'انتقل إلى اعدادات الحساب  .',
-    'قسم ربط API',
-    'اختار الطرود',
-    'انسخ كود الربط (JSON Object) الذي يحتوي على authentication_key و main_client_code.',
-    'ألصق الكود في الحقل أدناه.',
-    'اضغط على "تفعيل الربط" للحفظ.',
-  ];
 
   if (!isOpen) return null;
 
