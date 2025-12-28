@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-
 import { useGetCustomers } from '../hooks/useGetCustomers';
 import { useEditCustomer } from '../hooks/useEditCustomer';
 import { TABLE_HEADERS } from '../constants/CustomerHeaders';
 import { Pagination } from '@/components/Pagination';
 import { CustomerRow } from './CustomerRow';
+import { CustomerCard } from './CustomerCard'; // Imported new component
 import CustomerDetailsModal from './modals/CustomerDetailsModal';
 import { RxChevronUp } from 'react-icons/rx';
 
@@ -48,14 +48,10 @@ export default function CustomerTable({
   });
 
   const editCustomerMutation = useEditCustomer({
-    onSuccess: () => {
-      setOpenMenuId(null);
-    },
+    onSuccess: () => setOpenMenuId(null),
   });
 
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-  };
+  const handlePageChange = (newPage: number) => setCurrentPage(newPage);
 
   const handleToggleBlock = (
     customerId: number,
@@ -66,7 +62,7 @@ export default function CustomerTable({
       customerId,
       payload: {
         isBlocked: !currentBlockStatus,
-        notes: note || '', // إرسال نص فارغ إذا لم توجد ملاحظة لتجنب خطأ النوع
+        notes: note || '',
       },
     });
   };
@@ -94,12 +90,10 @@ export default function CustomerTable({
       ) {
         setIsLimitOpen(false);
       }
-
       if (openMenuId && !(event.target as Element).closest('.menu-container')) {
         setOpenMenuId(null);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [openMenuId]);
@@ -124,7 +118,8 @@ export default function CustomerTable({
 
   return (
     <>
-      <div className="w-[97%] mx-auto bg-white rounded-lg shadow-sm overflow-hidden">
+      {/* 1. TABLE VIEW: Only visible on lg screens and up */}
+      <div className="hidden lg:block w-[97%] mx-auto bg-white rounded-lg shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full" dir="rtl">
             <thead>
@@ -154,6 +149,19 @@ export default function CustomerTable({
         </div>
       </div>
 
+      {/* 2. CARD GRID VIEW: Visible on screens smaller than lg */}
+      <div className="lg:hidden w-[97%] mx-auto grid grid-cols-1 sm:grid-cols-2  gap-6">
+        {data?.data.map((customer) => (
+          <CustomerCard
+            key={customer.id}
+            customer={customer}
+            onToggleBlock={handleToggleBlock}
+            onRowClick={handleRowClick}
+            isPending={editCustomerMutation.isPending}
+          />
+        ))}
+      </div>
+
       <CustomerDetailsModal
         customerId={selectedCustomerId || undefined}
         isOpen={isDetailsModalOpen}
@@ -178,10 +186,10 @@ export default function CustomerTable({
       </div>
 
       {/* Limit Dropdown */}
-      <div ref={limitRef} className="relative w-fit">
+      <div ref={limitRef} className="relative w-fit mr-[1.5%]">
         <div
           onClick={() => setIsLimitOpen((prev) => !prev)}
-          className="bg-[#5D24E1] w-15 py-1 rounded-full text-white flex items-center justify-center cursor-pointer select-none"
+          className="bg-[#5D24E1] w-15 py-1 px-3 rounded-full text-white flex items-center justify-center cursor-pointer select-none"
         >
           {limit}
           <RxChevronUp
@@ -192,7 +200,7 @@ export default function CustomerTable({
         </div>
 
         {isLimitOpen && (
-          <div className="absolute bottom-full mb-2 w-full bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="absolute bottom-full mb-2 w-full bg-white rounded-lg shadow-md overflow-hidden z-10">
             {LIMIT_OPTIONS.map((option) => (
               <div
                 key={option}
