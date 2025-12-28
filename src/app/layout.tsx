@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: 'Orderaa management system',
   generator: 'v0.app',
   icons: {
-    icon: '/ico.png',
+    icon: '/favicon.ico',
   },
 };
 
