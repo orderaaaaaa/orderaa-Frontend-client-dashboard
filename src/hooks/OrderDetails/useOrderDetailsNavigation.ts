@@ -33,6 +33,7 @@ interface UseOrderDetailsNavigationReturn {
   isEmpty: boolean;
 
   handleFilterFormChange: (data: OrderFiltersFormData) => void;
+  navigateToOrder: (orderId: number) => void;
 }
 
 
@@ -276,6 +277,48 @@ export function useOrderDetailsNavigation({
     setToDateInternal(null);
   }, []);
 
+  // Helper to build URL params from current filter state
+  const buildCurrentUrlParams = useCallback(() => {
+    const params = new URLSearchParams();
+
+    if (status) params.set('status', status);
+    if (timePeriod) params.set('period', timePeriod);
+
+    if (!formFilters?.executionDate) {
+      const fromStr = formatDateForUrl(fromDate);
+      if (fromStr) params.set('from', fromStr);
+      const toStr = formatDateForUrl(toDate);
+      if (toStr) params.set('to', toStr);
+    }
+
+    if (formFilters) {
+      if (formFilters.customerName) params.set('customerName', formFilters.customerName);
+      if (formFilters.phone) params.set('phone', formFilters.phone);
+      if (formFilters.governorate) params.set('governorate', formFilters.governorate);
+      if (formFilters.city) params.set('city', formFilters.city);
+      if (formFilters.area) params.set('area', formFilters.area);
+      if (formFilters.productName) params.set('productName', formFilters.productName);
+      if (formFilters.sizeColor) params.set('sizeColor', formFilters.sizeColor);
+      if (formFilters.shipmentCode) params.set('shipmentCode', formFilters.shipmentCode);
+      if (formFilters.address) params.set('address', formFilters.address);
+      if (formFilters.executionDate) params.set('executionDate', formFilters.executionDate);
+      if (formFilters.newFirst !== undefined) params.set('newFirst', String(formFilters.newFirst));
+      if (formFilters.orderByDirection) params.set('orderByDirection', formFilters.orderByDirection);
+    }
+
+    return params;
+  }, [status, timePeriod, fromDate, toDate, formFilters]);
+
+  // Navigate to an order while preserving current filter state in URL
+  const navigateToOrder = useCallback((orderId: number) => {
+    const params = buildCurrentUrlParams();
+    const paramsString = params.toString();
+    const url = paramsString
+      ? `/dashboard/orders/${orderId}?${paramsString}`
+      : `/dashboard/orders/${orderId}`;
+    router.push(url);
+  }, [buildCurrentUrlParams, router]);
+
   const handleFilterFormChange = useCallback((data: OrderFiltersFormData) => {
     if (data.executionDate && (fromDate || toDate)) {
       toast.error('لا يمكن تحديد تاريخ التنفيذ ونطاق التاريخ معاً. يرجى إزالة نطاق التاريخ أولاً.');
@@ -367,5 +410,6 @@ export function useOrderDetailsNavigation({
     isEmpty,
 
     handleFilterFormChange,
+    navigateToOrder,
   };
 }

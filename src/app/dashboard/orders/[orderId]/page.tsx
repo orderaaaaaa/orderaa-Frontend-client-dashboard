@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useEffect, Suspense, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, Suspense } from 'react';
 import { AuthGuard } from '@/components/auth-guard';
 import PageTaps from '../allOrders/pageTaps';
 import FilterSection from '../allOrders/components/FilterSection';
@@ -18,7 +17,6 @@ import { ArrowLeft, X } from 'lucide-react';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 
 function OrderDetailsContent({ params }: { params: { orderId: string } }) {
-  const router = useRouter();
   const orderId = parseInt(params.orderId);
 
   const {
@@ -56,6 +54,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
     isNavigating,
     isEmpty,
     handleFilterFormChange,
+    navigateToOrder,
   } = useOrderDetailsNavigation({
     initialOrderId: orderId,
   });
@@ -67,15 +66,11 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
     onSubmit: handleFilterFormChange,
   });
 
-  const handleNavigateToOrder = useCallback((nextOrderId: number) => {
-    router.push(`/dashboard/orders/${nextOrderId}`);
-  }, [router]);
-
   useEffect(() => {
     if (targetOrderId && targetOrderId !== orderId) {
-      router.push(`/dashboard/orders/${targetOrderId}`);
+      navigateToOrder(targetOrderId);
     }
-  }, [targetOrderId, orderId, router]);
+  }, [targetOrderId, orderId, navigateToOrder]);
 
   if (loading) {
     return (
@@ -293,7 +288,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
         )}
         <OrderDetailsInfo
           order={order}
-          onNavigateToNextOrder={handleNavigateToOrder}
+          onNavigateToNextOrder={navigateToOrder}
           dateRange={{
             from: fromDate,
             to: toDate,
