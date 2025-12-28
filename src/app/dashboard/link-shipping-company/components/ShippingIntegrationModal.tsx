@@ -3,6 +3,9 @@ import { X, Truck, ChevronDown, ChevronUp, Play } from 'lucide-react';
 import { useShippingQuery } from '../hooks/useShippingQuery';
 import { Button } from '@/components/ui/button';
 import { steps } from '../constants/steps';
+import { webhookApi } from '@/lib/api/webhooks';
+import { LiaEyeSlashSolid, LiaEyeSolid } from 'react-icons/lia';
+import { If, Then } from 'react-if';
 
 interface Props {
   providerId: string;
@@ -19,6 +22,8 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
   const [jsonInput, setJsonInput] = useState('');
   const [error, setError] = useState<string>('');
   const [showVideo, setShowVideo] = useState(false);
+  const [showAuthKey, setShowAuthKey] = useState(false);
+  const [showClientCode, setShowClientCode] = useState(false);
 
   useEffect(() => {
     if (config?.metadata?.rawJson) {
@@ -49,10 +54,10 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
       const payload = {
         shippingCompany: 'TURBO',
         authKey: parsed.authentication_key,
-        clientCode: parsed.main_client_code?.toString(), // Ensure string if needed
+        clientCode: parsed.main_client_code?.toString(),
         isActive: true,
         metadata: {
-          rawJson: jsonInput, // Store raw input for convenience if needed later
+          rawJson: jsonInput,
           ...parsed,
         },
       };
@@ -209,6 +214,66 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                 {error}
               </div>
             )}
+
+            <If condition={config?.isActive}>
+              <Then>
+                <div className="flex flex-col gap-2">
+                  <div className="relative bg-gray-100 py-2 px-2 rounded-sm flex items-center justify-between">
+                    <div>
+                      <span className="font-bold">ال api الخاص بك : </span>
+                      <span className="font-mono">
+                        {showAuthKey ? config?.authKey : '************'}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="ml-2 text-gray-500 hover:text-gray-700"
+                      onClick={() => setShowAuthKey((prev) => !prev)}
+                    >
+                      {showAuthKey ? (
+                        <LiaEyeSlashSolid
+                          size={18}
+                          className="text-[#5D24E1] cursor-pointer"
+                        />
+                      ) : (
+                        <LiaEyeSolid
+                          size={18}
+                          className="text-[#5D24E1] cursor-pointer"
+                        />
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="relative bg-gray-100 py-2 px-2 rounded-sm flex items-center justify-between">
+                    <div>
+                      <span className="font-bold">
+                        ال clientCode الخاص بك :
+                      </span>
+                      <span className="font-mono">
+                        {showClientCode ? config?.clientCode : '************'}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="ml-2 text-gray-500 hover:text-gray-700"
+                      onClick={() => setShowClientCode((prev) => !prev)}
+                    >
+                      {showClientCode ? (
+                        <LiaEyeSlashSolid
+                          size={18}
+                          className="text-[#5D24E1] cursor-pointer"
+                        />
+                      ) : (
+                        <LiaEyeSolid
+                          size={18}
+                          className="text-[#5D24E1] cursor-pointer"
+                        />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </Then>
+            </If>
 
             {/* Form */}
             <form onSubmit={handleSave} className="space-y-4">
