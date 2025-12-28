@@ -105,11 +105,11 @@ export const navigation: NavigationItem[] = [
         href: '/dashboard/upload-products/excel',
         icon: ExcelIcon,
       },
-      {
-        name: 'اضافة طلب Ai',
-        href: '/dashboard/upload-products/api',
-        icon: ListPlus,
-      },
+      // {
+      //   name: 'اضافة طلب Ai',
+      //   href: '/dashboard/upload-products/api',
+      //   icon: ListPlus,
+      // },
     ],
   },
   {
