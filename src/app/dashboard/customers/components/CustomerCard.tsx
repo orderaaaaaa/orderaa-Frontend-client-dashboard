@@ -151,7 +151,7 @@ export function CustomerCard({
               <LiaCalendarAltSolid size={18} className="text-[#5D24E1]" />
               <span className="font-medium">
                 آخر طلب:{' '}
-                <span className="font-bold">
+                <span className="font-medium">
                   {customer.latestOrder?.createdAt
                     ? new Date(
                         customer.latestOrder.createdAt

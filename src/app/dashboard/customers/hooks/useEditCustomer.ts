@@ -1,4 +1,4 @@
-// useEditCustomer.ts - Updated to accept options
+// useEditCustomer.ts
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { editCustomer } from '../api/editCustomer';
 import { UpdateCustomerPayload } from '../types/updateCustomerPayload';
@@ -8,10 +8,9 @@ interface UseEditCustomerParams {
   payload: Omit<UpdateCustomerPayload, 'id'>;
 }
 
-// Allow users to pass their own callbacks
 export function useEditCustomer(options?: {
-  onSuccess?: () => void;
-  onError?: (error: Error) => void;
+  onSuccess?: (data: any, variables: UseEditCustomerParams) => void;
+  onError?: (error: Error, variables: UseEditCustomerParams) => void;
   onSettled?: () => void;
 }) {
   const queryClient = useQueryClient();
@@ -22,12 +21,10 @@ export function useEditCustomer(options?: {
 
     onMutate: async ({ customerId, payload }) => {
       await queryClient.cancelQueries({ queryKey: ['customers'] });
-
       const previousCustomers = queryClient.getQueryData(['customers']);
 
       queryClient.setQueryData(['customers'], (old: any) => {
         if (!old?.data) return old;
-
         return {
           ...old,
           data: old.data.map((customer: any) =>
@@ -43,12 +40,11 @@ export function useEditCustomer(options?: {
       if (context?.previousCustomers) {
         queryClient.setQueryData(['customers'], context.previousCustomers);
       }
-
-      options?.onError?.(err);
+      options?.onError?.(err, variables);
     },
 
-    onSuccess: () => {
-      options?.onSuccess?.();
+    onSuccess: (data, variables) => {
+      options?.onSuccess?.(data, variables);
     },
 
     onSettled: () => {

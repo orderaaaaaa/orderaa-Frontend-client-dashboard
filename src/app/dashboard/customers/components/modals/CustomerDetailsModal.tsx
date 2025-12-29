@@ -13,6 +13,8 @@ import { LiaWhatsapp } from 'react-icons/lia';
 import { BsFiletypeCsv } from 'react-icons/bs';
 import { TbMoneybag } from 'react-icons/tb';
 import { Customer, Order } from '../../types/customer';
+import { ORDER_STATUS_AR } from '../../lib/orderStatusAr';
+import { getStatusColor } from '../../lib/getBadgeColor';
 
 interface CustomerDetailsModalProps {
   customerId?: number;
@@ -149,17 +151,30 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <div className="flex flex-col border border-gray-100 rounded-xl overflow-hidden">
               <div className="bg-[#dbd1f5] p-2 text-center text-gray-900 font-medium text-sm">
-                معلومات التواصل
+                آخر طلب
               </div>
-              <div className="bg-white p-4 space-y-2">
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <Phone className="w-4 h-4 text-gray-400" />{' '}
-                  {data.phoneNumbers[0] || '—'}
+              <div className="bg-white p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Calendar className="w-4 h-4 text-gray-400" />
+                  <p className="font-bold text-sm">
+                    {data.latestOrder?.createdAt
+                      ? new Date(
+                          data.latestOrder.createdAt
+                        ).toLocaleDateString()
+                      : '—'}
+                  </p>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <Mail className="w-4 h-4 text-gray-400" />{' '}
-                  <span className="truncate">{data.email || '—'}</span>
-                </div>
+                {data.latestOrder && (
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[13px] font-bold ${getStatusColor(
+                      data.latestOrder.status
+                    )}`}
+                  >
+                    {ORDER_STATUS_AR[
+                      data.latestOrder.status as keyof typeof ORDER_STATUS_AR
+                    ] || data.latestOrder.status}
+                  </span>
+                )}
               </div>
             </div>
 
