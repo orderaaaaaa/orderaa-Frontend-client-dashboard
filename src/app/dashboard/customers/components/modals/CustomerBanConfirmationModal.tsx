@@ -4,6 +4,7 @@ import { TfiAlert } from 'react-icons/tfi';
 import { LiaGhostSolid } from 'react-icons/lia';
 import { PiEyesFill } from 'react-icons/pi';
 import Input from '@/components/ui/Input';
+import { toast } from 'react-toastify';
 
 interface CustomerBanConfirmationModalProps {
   id: string;

@@ -1,16 +1,13 @@
 'use client';
-
 import React, { memo, useEffect, useRef, useState } from 'react';
 import { ShoppingBag } from 'lucide-react';
 import { TfiMore } from 'react-icons/tfi';
 import { LiaWhatsapp, LiaCalendarAltSolid } from 'react-icons/lia';
 import { GoMail, GoDotFill } from 'react-icons/go';
 import { If, Then } from 'react-if';
-
 import { getStatusColor } from '../lib/getBadgeColor';
 import { getActivityColor } from '../lib/getActivityColor';
 import { ORDER_STATUS_AR } from '../lib/orderStatusAr';
-
 import CustomerBanConfirmationModal from './modals/CustomerBanConfirmationModal';
 
 interface CustomerRowProps {
@@ -22,6 +19,7 @@ interface CustomerRowProps {
   ) => void;
   isPending: boolean;
   onRowClick: (customerId: number) => void;
+  showNotesColumn: boolean; // New Prop
 }
 
 const toWhatsAppNumber = (phone: string) => {
@@ -37,13 +35,12 @@ export const CustomerRow = memo(function CustomerRow({
   onToggleBlock,
   isPending,
   onRowClick,
+  showNotesColumn,
 }: CustomerRowProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
-
   const menuRef = useRef<HTMLDivElement | null>(null);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -54,7 +51,6 @@ export const CustomerRow = memo(function CustomerRow({
         setIsMenuOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isMenuOpen]);
@@ -68,6 +64,7 @@ export const CustomerRow = memo(function CustomerRow({
     onToggleBlock(customer.id, customer.isBlocked, note);
     setShowBanModal(false);
   };
+
   const phone = customer.phoneNumbers?.[0];
   const whatsappNumber = phone ? toWhatsAppNumber(phone) : null;
 
@@ -77,7 +74,6 @@ export const CustomerRow = memo(function CustomerRow({
         onClick={() => onRowClick(customer.id)}
         className="hover:bg-gray-50 transition-colors cursor-pointer"
       >
-        {/* العميل */}
         <td className="px-4 py-4 whitespace-nowrap">
           <div className="flex items-center gap-1">
             <If condition={customer.isBlocked}>
@@ -89,12 +85,10 @@ export const CustomerRow = memo(function CustomerRow({
           </div>
         </td>
 
-        {/* التواصل */}
         <td className="px-4 py-4">
           <div className="flex flex-col gap-2 min-w-[180px]">
             {phone && (
               <div className="flex items-center gap-2">
-                {/* WhatsApp */}
                 <a
                   href={`https://wa.me/${whatsappNumber}`}
                   target="_blank"
@@ -103,8 +97,6 @@ export const CustomerRow = memo(function CustomerRow({
                 >
                   <LiaWhatsapp className="w-5 h-5 text-[#5D24E1] hover:opacity-80" />
                 </a>
-
-                {/* Phone Call */}
                 <a
                   href={`tel:${phone}`}
                   onClick={(e) => e.stopPropagation()}
@@ -114,7 +106,6 @@ export const CustomerRow = memo(function CustomerRow({
                 </a>
               </div>
             )}
-
             <If condition={customer.email}>
               <Then>
                 <div className="flex items-center gap-2">
@@ -126,7 +117,6 @@ export const CustomerRow = memo(function CustomerRow({
           </div>
         </td>
 
-        {/* عدد الطلبات */}
         <td className="px-4 py-4 text-center whitespace-nowrap">
           <div className="inline-flex items-center gap-2">
             <ShoppingBag className="w-5 h-5 text-gray-500" />
@@ -136,7 +126,6 @@ export const CustomerRow = memo(function CustomerRow({
           </div>
         </td>
 
-        {/* اخر طلب */}
         <td className="px-4 py-4 text-center whitespace-nowrap">
           <div className="inline-flex items-center gap-2">
             <LiaCalendarAltSolid className="w-5 h-5 text-gray-500" />
@@ -150,7 +139,6 @@ export const CustomerRow = memo(function CustomerRow({
           </div>
         </td>
 
-        {/* الحالة */}
         <td className="px-4 py-4 text-center whitespace-nowrap">
           <span
             className={`px-5 py-1 text-sm font-medium rounded-full ${getStatusColor(
@@ -165,7 +153,6 @@ export const CustomerRow = memo(function CustomerRow({
           </span>
         </td>
 
-        {/* النشاط */}
         <td className="px-4 py-4 text-center whitespace-nowrap">
           <span
             className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium ${getActivityColor(
@@ -177,12 +164,19 @@ export const CustomerRow = memo(function CustomerRow({
           </span>
         </td>
 
-        {/* الإجمالي */}
         <td className="px-4 py-4 text-center whitespace-nowrap">
           <span className="font-medium">{customer.totalAmount} جنية</span>
         </td>
 
-        {/* الإجراءات */}
+        {/* Dynamic Ban Notes Column */}
+        {showNotesColumn && (
+          <td className="px-4 py-4 text-center whitespace-nowrap">
+            <span className="font-medium text-gray-600">
+              {customer.isBlocked ? customer.notes || '—' : '—'}
+            </span>
+          </td>
+        )}
+
         <td
           className="px-4 py-4 text-center whitespace-nowrap"
           onClick={(e) => e.stopPropagation()}
@@ -194,7 +188,6 @@ export const CustomerRow = memo(function CustomerRow({
             >
               <TfiMore className="w-5 h-5 text-gray-600" />
             </button>
-
             {isMenuOpen && (
               <div className="absolute left-0 mt-1 bg-white rounded-lg shadow-lg border z-10 min-w-[140px]">
                 <button
@@ -215,7 +208,6 @@ export const CustomerRow = memo(function CustomerRow({
           </div>
         </td>
       </tr>
-
       <CustomerBanConfirmationModal
         id={customer.id.toString()}
         isOpen={showBanModal}
