@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, Suspense } from 'react';
+import React, { useEffect, useRef, Suspense } from 'react';
 import { AuthGuard } from '@/components/auth-guard';
 import PageTaps from '../allOrders/pageTaps';
 import FilterSection from '../allOrders/components/FilterSection';
@@ -53,6 +53,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
     targetOrderId,
     isNavigating,
     isEmpty,
+    formFilters,
     handleFilterFormChange,
     navigateToOrder,
   } = useOrderDetailsNavigation({
@@ -62,9 +63,26 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
   const {
     control,
     formState: { errors },
+    reset,
+    setValue,
   } = useFilterForm({
     onSubmit: handleFilterFormChange,
+    defaultValues: formFilters || undefined,
   });
+
+  // Track previous formFilters to prevent unnecessary resets
+  const prevFormFiltersRef = useRef<string | null>(null);
+
+  // Reset form when formFilters changes from URL sync (only on actual value change)
+  useEffect(() => {
+    if (!formFilters) return;
+
+    const currentFiltersStr = JSON.stringify(formFilters);
+    if (prevFormFiltersRef.current === currentFiltersStr) return;
+
+    prevFormFiltersRef.current = currentFiltersStr;
+    reset(formFilters, { keepDefaultValues: false });
+  }, [formFilters, reset]);
 
   useEffect(() => {
     if (targetOrderId && targetOrderId !== orderId) {
@@ -175,6 +193,8 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
               governorateOptions: options.governorates || [],
               areaOptions: options.areas || [],
             }}
+            initialFormFilters={formFilters}
+            setValue={setValue}
           />
         </div>
         <div className="flex items-center justify-center min-h-[400px]">
@@ -275,6 +295,8 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
             governorateOptions: options.governorates || [],
             areaOptions: options.areas || [],
           }}
+          initialFormFilters={formFilters}
+          setValue={setValue}
         />
       </div>
       <div className="relative">

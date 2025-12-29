@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Control, FieldErrors, UseFormSetValue } from 'react-hook-form';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { FilterOptions } from '@/types/orders';
@@ -14,7 +14,26 @@ type FilterSectionProps = {
   errors: FieldErrors<OrderFiltersFormData>;
   options?: FilterOptions;
   setValue?: UseFormSetValue<OrderFiltersFormData>;
+  initialFormFilters?: OrderFiltersFormData | null;
 };
+
+// Helper to get active filter keys from form values
+function getActiveFiltersFromFormValues(formFilters: OrderFiltersFormData | null | undefined): FilterKey[] {
+  if (!formFilters) return [];
+
+  const activeKeys: FilterKey[] = [];
+
+  for (const def of FILTER_DEFINITIONS) {
+    if (def.key === 'employeeName') continue; // Skip placeholder
+
+    const value = formFilters[def.key as keyof OrderFiltersFormData];
+    if (value !== undefined && value !== '' && value !== null) {
+      activeKeys.push(def.key);
+    }
+  }
+
+  return activeKeys;
+}
 
 const FilterSection = React.memo(function FilterSection({
   control,
@@ -26,8 +45,29 @@ const FilterSection = React.memo(function FilterSection({
     areaOptions: [],
   },
   setValue,
+  initialFormFilters,
 }: FilterSectionProps) {
-  const [activeFilters, setActiveFilters] = useState<FilterKey[]>([]);
+  const [activeFilters, setActiveFilters] = useState<FilterKey[]>(() =>
+    getActiveFiltersFromFormValues(initialFormFilters)
+  );
+
+  // Track if we've initialized from URL params
+  const hasInitializedRef = useRef(false);
+
+  // Update active filters when initialFormFilters changes (from URL sync)
+  useEffect(() => {
+    if (!initialFormFilters) return;
+
+    const filtersFromUrl = getActiveFiltersFromFormValues(initialFormFilters);
+    if (filtersFromUrl.length > 0 && !hasInitializedRef.current) {
+      hasInitializedRef.current = true;
+      setActiveFilters(prev => {
+        // Merge URL filters with any user-added filters
+        const merged = new Set([...prev, ...filtersFromUrl]);
+        return Array.from(merged);
+      });
+    }
+  }, [initialFormFilters]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
