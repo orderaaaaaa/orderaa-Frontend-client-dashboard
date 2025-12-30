@@ -59,10 +59,6 @@ const StatsTab: React.FC<StatsTabProps> = ({
                 <span className="text-gray-500">{card.label}:</span>
                 <span className="font-bold">{card.count}</span>
               </div>
-              <div className="flex gap-1 border-r pr-3 border-gray-200">
-                <span className="text-gray-500">الإجمالي:</span>
-                <span className="font-bold">{totalOrders}</span>
-              </div>
             </div>
           </div>
         </div>

@@ -162,16 +162,21 @@ export default function CustomerTable({
         </div>
       </div>
 
-      <div className="lg:hidden w-[97%] mx-auto grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {data?.data.map((customer: any) => (
-          <CustomerCard
-            key={customer.id}
-            customer={customer}
-            onToggleBlock={handleToggleBlock}
-            onRowClick={handleRowClick}
-            isPending={editCustomerMutation.isPending}
-          />
-        ))}
+      <div className="lg:hidden w-full px-[1.5%]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 justify-items-center">
+          {data?.data.map((customer: any) => (
+            <div key={customer.id} className="w-full max-w-md">
+              {' '}
+              {/* Wrapper to control individual card width */}
+              <CustomerCard
+                customer={customer}
+                onToggleBlock={handleToggleBlock}
+                onRowClick={handleRowClick}
+                isPending={editCustomerMutation.isPending}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       <CustomerDetailsModal
@@ -196,33 +201,34 @@ export default function CustomerTable({
           onPageChange={handlePageChange}
         />
       </div>
-
-      <div ref={limitRef} className="relative w-fit mr-[1.5%]">
-        <div
-          onClick={() => setIsLimitOpen((prev) => !prev)}
-          className="bg-[#5D24E1] w-15 py-1 px-3 rounded-full text-white flex items-center justify-center cursor-pointer select-none"
-        >
-          {limit}
-          <RxChevronUp
-            className={`transition-transform ${
-              isLimitOpen ? 'rotate-180' : ''
-            }`}
-          />
-        </div>
-
-        {isLimitOpen && (
-          <div className="absolute bottom-full mb-2 w-full bg-white rounded-lg shadow-md overflow-hidden z-10">
-            {LIMIT_OPTIONS.map((option) => (
-              <div
-                key={option}
-                onClick={() => handleSelectLimit(option)}
-                className="text-[#5D24E1] text-center py-1 cursor-pointer hover:bg-[#f1eefa]"
-              >
-                {option}
-              </div>
-            ))}
+      <div className="flex max-sm:justify-center">
+        <div ref={limitRef} className="relative w-fit mr-[1.5%]">
+          <div
+            onClick={() => setIsLimitOpen((prev) => !prev)}
+            className="bg-[#5D24E1] w-15 py-1 px-3 rounded-full text-white flex items-center justify-center cursor-pointer select-none"
+          >
+            {limit}
+            <RxChevronUp
+              className={`transition-transform ${
+                isLimitOpen ? 'rotate-180' : ''
+              }`}
+            />
           </div>
-        )}
+
+          {isLimitOpen && (
+            <div className="absolute bottom-full mb-2 w-full bg-white rounded-lg shadow-md overflow-hidden z-10">
+              {LIMIT_OPTIONS.map((option) => (
+                <div
+                  key={option}
+                  onClick={() => handleSelectLimit(option)}
+                  className="text-[#5D24E1] text-center py-1 cursor-pointer hover:bg-[#f1eefa]"
+                >
+                  {option}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </>
   );

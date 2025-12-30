@@ -34,8 +34,9 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
     refetch: () => void;
   };
 
+  // تم تغيير التبويب الافتراضي هنا إلى 'stats'
   const [activeTab, setActiveTab] = useState<'orders' | 'stats' | 'notes'>(
-    'orders'
+    'stats'
   );
 
   useEffect(() => {
@@ -44,12 +45,9 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
     }
   }, [isOpen, customerId, refetch]);
 
-  // Handler for WhatsApp with +2 prefix
   const handleWhatsappClick = () => {
     if (data?.phoneNumbers?.[0]) {
-      // Remove any non-numeric characters from the phone number
       const cleanNumber = data.phoneNumbers[0].replace(/\D/g, '');
-      // Prepend +2 if not already present (assuming local numbers)
       const formattedNumber = cleanNumber.startsWith('2')
         ? cleanNumber
         : `2${cleanNumber}`;
@@ -57,7 +55,6 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
     }
   };
 
-  // Handler for Email
   const handleEmailClick = () => {
     if (data?.email) {
       window.location.href = `mailto:${data.email}`;
@@ -128,7 +125,6 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex flex-wrap gap-2 p-3 md:p-5 bg-[#f4f4f4] mb-5 rounded-md">
             <button
               onClick={handleWhatsappClick}
@@ -147,7 +143,6 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
             </button>
           </div>
 
-          {/* Summary Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <div className="flex flex-col border border-gray-100 rounded-xl overflow-hidden">
               <div className="bg-[#dbd1f5] p-2 text-center text-gray-900 font-medium text-sm">
@@ -208,6 +203,7 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
               </div>
             </div>
 
+            {/* تم إبقاء البطاقة الرابعة كما كانت في الكود الأصلي */}
             <div className="flex flex-col border border-gray-100 rounded-xl overflow-hidden">
               <div className="bg-[#dbd1f5] p-2 text-center text-gray-900 font-medium text-sm">
                 آخر طلب
@@ -240,9 +236,9 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
             </div>
           </div>
 
-          {/* Navigation */}
+          {/* Navigation - تم إعادة ترتيب المصفوفة لتكون الإحصائيات هي الأولى */}
           <div className="flex gap-1 mb-6 p-1 bg-gray-100 rounded-lg md:rounded-full">
-            {['orders', 'stats', 'notes'].map((tab) => (
+            {['stats', 'orders', 'notes'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab as any)}
@@ -252,17 +248,16 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
-                {tab === 'orders'
-                  ? 'سجل الطلبات'
-                  : tab === 'stats'
+                {tab === 'stats'
                   ? 'الإحصائيات'
+                  : tab === 'orders'
+                  ? 'سجل الطلبات'
                   : 'الملاحظات'}
               </button>
             ))}
           </div>
 
           <div className="mt-4">
-            {activeTab === 'orders' && <OrdersTab orders={data.orders} />}
             {activeTab === 'stats' && (
               <StatsTab
                 deliveryRate={deliveryRate}
@@ -274,6 +269,7 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
                 returned={returned}
               />
             )}
+            {activeTab === 'orders' && <OrdersTab orders={data.orders} />}
             {activeTab === 'notes' && (
               <NotesTab
                 notes={
