@@ -39,6 +39,7 @@ export default function EditShippingModal({
 
   const [selectedShippingCompanyKey, setSelectedShippingCompanyKey] = useState<string>('');
   const [selectedGovernorateKey, setSelectedGovernorateKey] = useState<string>('');
+  const [fetchTrigger, setFetchTrigger] = useState(0);
 
   const { shippingCompanies, isLoading: loadingShippingCompanies } = useShippingCompanies(isOpen);
 
@@ -110,7 +111,7 @@ export default function EditShippingModal({
     };
 
     fetchGovernorates();
-  }, [selectedShippingCompanyKey]);
+  }, [selectedShippingCompanyKey, fetchTrigger]);
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -137,6 +138,16 @@ export default function EditShippingModal({
     fetchCities();
   }, [selectedShippingCompanyKey, selectedGovernorateKey]);
 
+  // Set selectedGovernorateKey when governorates are loaded and we have an initial governorate
+  useEffect(() => {
+    if (governorates.length > 0 && formData.governorate && !selectedGovernorateKey) {
+      const matchingGov = governorates.find(gov => gov.label === formData.governorate);
+      if (matchingGov) {
+        setSelectedGovernorateKey(matchingGov.key);
+      }
+    }
+  }, [governorates, formData.governorate, selectedGovernorateKey]);
+
   const wasOpenRef = React.useRef(false);
 
   useEffect(() => {
@@ -144,12 +155,16 @@ export default function EditShippingModal({
       setFormData(initialData);
       if (initialData.shippingCompany) {
         setSelectedShippingCompanyKey(initialData.shippingCompany);
+        // Set loading immediately to avoid showing "no options" before the effect runs
+        setLoadingGovernorates(true);
       } else {
         setSelectedShippingCompanyKey('');
       }
       setSelectedGovernorateKey('');
       setGovernorates([]);
       setCities([]);
+      // Trigger refetch even if shipping company key is the same
+      setFetchTrigger(prev => prev + 1);
     }
     wasOpenRef.current = isOpen;
   }, [isOpen, initialData]);
@@ -258,7 +273,7 @@ export default function EditShippingModal({
                 }
                 noResultsMessage="لا توجد نتائج للبحث"
                 triggerClassName="w-full border-[#CED4DA] rounded-lg h-12"
-                loading={loadingGovernorates}
+                loading={loadingGovernorates || (!!selectedShippingCompanyKey && governorateOptions.length === 0)}
                 disabled={!selectedShippingCompanyKey}
                 searchThreshold={5}
               />

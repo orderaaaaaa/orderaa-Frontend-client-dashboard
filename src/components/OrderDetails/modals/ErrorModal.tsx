@@ -57,7 +57,7 @@ export function ErrorModal({
             <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
               <LiaTimesCircleSolid className="w-10 h-10 text-red-500" />
             </div>
-            <p className="text-base text-[#1F1F1F] text-center">{message}</p>
+            <p className="text-base text-[#1F1F1F] text-center whitespace-pre-line">{message}</p>
           </div>
         </div>
 

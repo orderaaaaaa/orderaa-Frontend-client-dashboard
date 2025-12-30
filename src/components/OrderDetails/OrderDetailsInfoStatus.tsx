@@ -7,23 +7,24 @@ interface OrderDetailsInfoStatusProps {
 }
 
 const statusLabelMap: Record<string, string> = {
-  TRIED_TO_REACH_CUSTOMER: 'لا يرد',
-  WAITING_FOR_PAYMENT: 'في انتظار الدفع',
-  ON_HOLD: 'معلق',
-  CALLED_CUSTOMER_AGAIN: 'اعادة اتصال',
-  CANCELLED: 'ملغي',
-  CONFIRMED: 'مؤكد',
-  PREPARED: 'تم التحضير',
-  SHIPPED: 'في الشحن',
-  RETURNED: 'مرتجع',
-  DELIVERED: 'تم التوصيل',
-  DOWN_PAYMENT: 'دفعة مقدمة',
-  MISSING: 'مفقود',
   NEW_ORDER: 'طلب جديد',
+  ATTEMPTED: 'تمت المحاولة',
+  WAITING_FOR_PAYMENT: 'في انتظار الدفع',
+  WHATSAPP: 'واتساب',
+  POSTPONED: 'مؤجل',
   CALL_AGAIN: 'اعادة اتصال',
   STOPPED: 'متوقف',
-  POSTPONED: 'مؤجل',
+  CANCELLED: 'ملغي',
+  UNCOMPLETED: 'غير مكتمل',
+  CONFIRMED: 'مؤكد',
+  PREPARED: 'تم التحضير',
+  SHIPPING: 'في الشحن',
+  RETURNED_DELIVERED: 'مرتجع بعد التوصيل',
+  DELIVERED: 'تم التوصيل',
+  PARTIAL_DELIVERY: 'توصيل جزئي',
+  MISSING: 'مفقود',
   REGISTERED: 'مسجل',
+  REPORTS: 'تقارير',
 };
 
 const getTimeAgo = (date: string): string => {
@@ -50,19 +51,30 @@ const getEventIcon = (eventType?: string) => {
     return <History className="w-4 h-4 text-gray-600" />;
   }
 
-  switch (eventType.toLowerCase()) {
-    case 'status_change':
-    case 'confirmed':
+  switch (eventType) {
+    case 'CONFIRMED':
+    case 'DELIVERED':
+    case 'PREPARED':
+    case 'REGISTERED':
       return <CheckCircle2 className="w-4 h-4 text-green-600" />;
-    case 'cancelled':
-    case 'stopped':
+    case 'CANCELLED':
+    case 'STOPPED':
+    case 'RETURNED_DELIVERED':
+    case 'MISSING':
       return <XCircle className="w-4 h-4 text-red-600" />;
-    case 'postponed':
-    case 'pending':
+    case 'POSTPONED':
+    case 'WAITING_FOR_PAYMENT':
+    case 'UNCOMPLETED':
+    case 'PARTIAL_DELIVERY':
       return <Clock className="w-4 h-4 text-orange-600" />;
-    case 'call_attempt':
-    case 'tried_to_reach':
+    case 'ATTEMPTED':
+    case 'CALL_AGAIN':
+    case 'WHATSAPP':
       return <PhoneOff className="w-4 h-4 text-blue-600" />;
+    case 'SHIPPING':
+      return <History className="w-4 h-4 text-purple-600" />;
+    case 'NEW_ORDER':
+      return <History className="w-4 h-4 text-[#5D24E1]" />;
     default:
       return <History className="w-4 h-4 text-gray-600" />;
   }
@@ -121,14 +133,14 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
                     </>
                   )}
                 </p>
-                {item.employee && (
+                {/* {item.employee && (
                   <p className="text-[11px] text-gray-500 mt-1">
                     بواسطة: <span className="font-medium text-[#5D24E1]">{item.employee.fullName}</span>
                     {item.employee.department && (
                       <span className="text-gray-400"> ({item.employee.department})</span>
                     )}
                   </p>
-                )}
+                )} */}
               </div>
             </div>
           ))}
