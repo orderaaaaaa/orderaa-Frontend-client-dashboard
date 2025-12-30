@@ -5,4 +5,5 @@ export { default as StopOperationModal } from './StopOperationModal';
 export { default as PostponeHoursModal } from './PostponeHoursModal';
 export { default as PostponeDaysModal } from './PostponeDaysModal';
 export { default as AddColorProductModal } from './AddColorProductModal';
+export { default as RejectModificationModal } from './RejectModificationModal';
 

@@ -27,7 +27,7 @@ export interface OrderActionsState {
   handleStopOperation: (notes: string) => Promise<boolean>;
   handlePostponeHours: (data: { duration?: '30min' | '1hour' | '2hours'; time?: Date }) => Promise<boolean>;
   handlePostponeDays: (data: { duration?: '1day' | '2days' | '3days' | 'week'; date?: Date }) => Promise<boolean>;
-  handleRejectModification: () => Promise<boolean>;
+  handleRejectModification: (notes: string) => Promise<boolean>;
   handleWaitingPayment: () => Promise<boolean>;
   handleConfirmAction: (action: string) => Promise<boolean>;
   handleFollowUpAction: (label: string) => Promise<boolean>;
@@ -63,7 +63,7 @@ export function useOrderActions({
       'postpone_hours': 'POSTPONED',
       'postpone_days': 'POSTPONED',
       'waiting_payment': 'WAITING_FOR_PAYMENT',
-      'reject_modification': 'STOPPED',
+      'reject_modification': 'EDIT_REJECTED',
       'no_answer': 'CALL_AGAIN',
       'closed': 'STOPPED',
       'not_collecting': 'STOPPED',
@@ -282,14 +282,21 @@ export function useOrderActions({
     [getStatusFromAction, handleStatusUpdateAndNavigate]
   );
 
-  const handleRejectModification = useCallback(async () => {
-    const status = getStatusFromAction('reject_modification');
-    if (!status) {
-      toast.error('فشل في تحديد حالة الطلب. يرجى المحاولة مرة أخرى.');
-      return false;
-    }
-    return await handleStatusUpdateAndNavigate(status);
-  }, [getStatusFromAction, handleStatusUpdateAndNavigate]);
+  const handleRejectModification = useCallback(
+    async (notes: string) => {
+      const status = getStatusFromAction('reject_modification');
+      if (!status) {
+        toast.error('فشل في تحديد حالة الطلب. يرجى المحاولة مرة أخرى.');
+        return false;
+      }
+
+      const updateData = {
+        eventNote: notes,
+      };
+      return await handleStatusUpdateAndNavigate(status, updateData);
+    },
+    [getStatusFromAction, handleStatusUpdateAndNavigate]
+  );
 
   const handleWaitingPayment = useCallback(async () => {
     const status = getStatusFromAction('waiting_payment');

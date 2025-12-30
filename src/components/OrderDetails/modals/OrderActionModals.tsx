@@ -13,6 +13,7 @@ import {
   PostponeHoursModal,
   PostponeDaysModal,
   AddColorProductModal,
+  RejectModificationModal,
 } from '../ActionModals';
 
 /**
@@ -97,12 +98,11 @@ export function OrderActionModals({
     modals.addColorProduct.close();
   };
 
-  const handleRejectModificationConfirm = async () => {
-    const success = await actions.handleRejectModification();
-    if (!success) {
-      throw new Error('Failed to reject modification');
+  const handleRejectModificationConfirm = async (notes: string) => {
+    const success = await actions.handleRejectModification(notes);
+    if (success) {
+      modals.rejectModification.close();
     }
-    modals.rejectModification.close();
   };
 
   const handleWaitingPaymentConfirm = async () => {
@@ -124,8 +124,6 @@ export function OrderActionModals({
       setNewPackagingNote('');
       modals.packagingNotes.close();
     } catch (error) {
-      // Error is already handled by the action (toast shown)
-      // Don't close the modal so user can retry
       console.error('Failed to add packaging note:', error);
     }
   };
@@ -195,15 +193,14 @@ export function OrderActionModals({
         }
       />
 
-      {/* Simple Confirmation Modals */}
-      <SimpleConfirmationModal
+      {/* Reject Modification Modal */}
+      <RejectModificationModal
         isOpen={modals.rejectModification.isOpen}
         onClose={modals.rejectModification.close}
         onConfirm={handleRejectModificationConfirm}
-        title="رفض التعديل"
-        message="هل أنت متأكد من رفض التعديل لهذا الطلب؟"
       />
 
+      {/* Simple Confirmation Modals */}
       <SimpleConfirmationModal
         isOpen={modals.waitingPayment.isOpen}
         onClose={modals.waitingPayment.close}
