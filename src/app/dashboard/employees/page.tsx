@@ -54,10 +54,21 @@ export default function AllEmployees() {
                 </div>
 
                 {paginationProps && (
-                  <div className="flex max-sm:flex-col max-sm:gap-4 justify-between items-center mt-6">
-                     <p className="text-sm text-gray-500">
-                        {`عرض ${Math.min((paginationProps.currentPage - 1) * limit + 1, totalItems)}-${Math.min(paginationProps.currentPage * limit, totalItems)} من ${totalItems} موظف`}
-                     </p>
+                  <div className="flex max-sm:flex-col max-sm:gap-4 justify-between items-center mt-6 md:mb-4">
+                    <div className="text-lg text-gray-900">
+                      عرض{' '}
+                      <span className="font-bold">
+                        {`${Math.min(
+                          (paginationProps.currentPage - 1) * limit + 1,
+                          totalItems
+                        )} - ${Math.min(
+                          paginationProps.currentPage * limit,
+                          totalItems
+                        )}`}
+                      </span>{' '}
+                      من أصل <span className="font-bold">{totalItems}</span>{' '}
+                      موظف
+                    </div>
                     <Pagination
                       currentPage={paginationProps.currentPage}
                       totalPages={paginationProps.totalPages}
@@ -65,9 +76,9 @@ export default function AllEmployees() {
                       hasPreviousPage={paginationProps.hasPreviousPage}
                       onPageChange={setCurrentPage}
                     />
-                     <LimitSelector />
                   </div>
                 )}
+                <LimitSelector />
               </Else>
             </If>
           </div>

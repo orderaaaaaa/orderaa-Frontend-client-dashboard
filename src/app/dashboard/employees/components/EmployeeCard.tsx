@@ -11,7 +11,7 @@ import {
   Mail,
   Edit,
 } from 'lucide-react';
-import { useUpdateEmployeeStatus } from '@/app/dashboard/employees/hooks/useEmployees';
+// Removed useUpdateEmployeeStatus import
 import {
   getAccessLevelLabel,
   getDepartmentLabel,
@@ -25,7 +25,7 @@ import { useAuthStore } from '@/store/authStore';
 export const EmployeeCard = memo(function EmployeeCard({
   employee,
 }: EmployeeCardProps) {
-  const updateStatusMutation = useUpdateEmployeeStatus();
+  // Removed updateStatusMutation logic
   const [attendanceModalOpen, setAttendanceModalOpen] = useState(false);
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
 
@@ -43,13 +43,7 @@ export const EmployeeCard = memo(function EmployeeCard({
 
   const normalizedPhone = employee.phoneNumber.replace(/\D/g, '');
 
-  const handleStatusToggle = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    updateStatusMutation.mutate({
-      id: employee.id,
-      isOnline: !isOnline,
-    });
-  };
+  // Removed handleStatusToggle function
 
   const handleWorkDaysClick = () => {
     setAttendanceModalOpen(true);
@@ -62,9 +56,9 @@ export const EmployeeCard = memo(function EmployeeCard({
   const { user } = useAuthStore();
 
   return (
-    <div className="bg-white relative rounded-2xl shadow-sm border border-gray-100 p-6 max-w-[420px]">
+    <div className="bg-white relative rounded-2xl shadow-sm border border-gray-100 p-4 max-w-[420px]">
       {/* Header */}
-      <div className="flex flex-row-reverse items-center justify-end gap-5 mb-6">
+      <div className="flex flex-row-reverse items-center justify-end gap-4 mb-4">
         <If condition={user?.role !== 'EMPLOYEE'}>
           <Then>
             <Link href={`employees/employee-settings/${employee.id}`}>
@@ -78,11 +72,11 @@ export const EmployeeCard = memo(function EmployeeCard({
 
         {/* Name & Department */}
         <div className="text-right">
-          <h3 className="text-2xl font-bold text-gray-900 my-4">
+          <h3 className="text-2xl font-bold text-gray-900 my-2">
             {employee.fullName}
           </h3>
-          <div className="flex flex-wrap gap-2 justify-start">
-            <span className="inline-block border text-gray-700 px-4 py-1 rounded-full text-sm">
+          <div className="flex gap-2 justify-start">
+            <span className="inline-block border text-gray-700 px-2 lg:px-4 py-1 rounded-full text-sm">
               {getDepartmentLabel(employee.department)}
             </span>
             <span className="inline-block border text-gray-700 px-4 py-1 rounded-full text-sm">
@@ -90,7 +84,7 @@ export const EmployeeCard = memo(function EmployeeCard({
             </span>
           </div>
         </div>
-        {/* Avatar */}
+        {/* Avatar Area */}
         <div className="relative">
           <div
             className="w-20 h-20 rounded-full border-2 flex items-center justify-center"
@@ -99,21 +93,18 @@ export const EmployeeCard = memo(function EmployeeCard({
             <User size={32} className="text-[#5d24e1]" strokeWidth={2} />
           </div>
 
-          {/* Online/Offline indicator */}
-          <button
-            onClick={handleStatusToggle}
-            disabled={updateStatusMutation.isPending}
-            className="absolute bottom-0 right-0 w-5 h-5 rounded-full border-4 border-white cursor-pointer hover:scale-110 transition-transform disabled:cursor-not-allowed disabled:opacity-50"
+          <div
+            className="absolute bottom-0 right-0 w-5 h-5 rounded-full border-4 border-white transition-transform"
             style={{ backgroundColor: statusColor }}
-            title={isOnline ? 'متصل (اضغط للتغيير)' : 'غير متصل (اضغط للتغيير)'}
+            title={isOnline ? 'متصل' : 'غير متصل'}
             aria-label={isOnline ? 'متصل' : 'غير متصل'}
           />
         </div>
       </div>
 
       {/* Performance */}
-      <div className="mb-6">
-        <div className="flex flex-row-reverse items-center justify-between mb-2">
+      <div className="mb-5">
+        <div className="flex flex-row-reverse items-center justify-between mb-1">
           <div
             className="flex items-center gap-2"
             style={{ color: performanceColor }}
@@ -136,31 +127,33 @@ export const EmployeeCard = memo(function EmployeeCard({
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-4 mb-4">
         <button
           onClick={handleWorkDaysClick}
           className="bg-[#f2eefd] shadow-md rounded-2xl p-3 text-center border-2 border-[#5D24E129] hover:bg-[#e8dff9] transition-colors cursor-pointer"
         >
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <CalendarClock size={24} className="text-gray-700" />
-            <span className="text-gray-700 text-xl font-semibold">
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <CalendarClock className="text-gray-700 w-5 h-5 lg:w-6 lg:h-6" />
+            <span className="text-gray-700 lg:text-xl font-semibold">
               أيام العمل
             </span>
           </div>
-          <div className="text-2xl text-gray-900">{workDays}</div>
+          <div className="text-xl lg:text-2xl text-gray-900">{workDays}</div>
         </button>
 
         <button
           onClick={handleVacationDaysClick}
           className="bg-[#f2eefd] shadow-md rounded-2xl p-3 text-center border-2 border-[#5D24E129] hover:bg-[#e8dff9] transition-colors cursor-pointer"
         >
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <CalendarDays size={25} className="text-gray-700" />
-            <span className="text-gray-700 text-xl font-semibold">
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <CalendarDays className="text-gray-700 w-5 h-5 lg:w-6 lg:h-6" />
+            <span className="text-gray-700 lg:text-xl font-semibold">
               أيام الإجازة
             </span>
           </div>
-          <div className="text-2xl text-gray-900">{vacationDays}</div>
+          <div className="text-xl lg:text-2xl text-gray-900">
+            {vacationDays}
+          </div>
         </button>
       </div>
 
@@ -168,12 +161,11 @@ export const EmployeeCard = memo(function EmployeeCard({
       <div className="grid grid-cols-2 gap-4">
         {/* Phone + Email */}
         <div className="col-span-2 grid grid-cols-2 gap-4">
-          {/* Phone Call */}
           <a
             href={`tel:${normalizedPhone}`}
             className="bg-white hover:bg-gray-50 text-[#5D24E1]
              border-2 border-[#5D24E1] rounded-2xl
-             py-3 px-4
+             py-3 lg:px-4
              flex items-center justify-center gap-2
              min-w-0 overflow-hidden
              transition-colors font-medium"
@@ -181,16 +173,14 @@ export const EmployeeCard = memo(function EmployeeCard({
             <span dir="ltr" className="truncate max-w-full min-w-0">
               {employee.phoneNumber}
             </span>
-
-            <Phone size={20} className="max-sm:hidden shrink-0" />
+            <Phone className="max-md:hidden shrink-0 w-4 h-4 lg:h-5 lg:w-5" />
           </a>
 
-          {/* Email */}
           <a
             href={`mailto:${employee.email}`}
             className="bg-white hover:bg-gray-50 text-[#5D24E1]
              border-2 border-[#5D24E1] rounded-2xl
-             py-3 px-4
+             py-3 lg:px-4
              flex items-center justify-center gap-2
              min-w-0 overflow-hidden
              transition-colors font-medium"
@@ -198,8 +188,7 @@ export const EmployeeCard = memo(function EmployeeCard({
             <span dir="ltr" className="truncate max-w-full min-w-0">
               {employee.email}
             </span>
-
-            <Mail size={20} className="max-sm:hidden shrink-0" />
+            <Mail className="max-md:hidden shrink-0 w-4 h-4 lg:h-5 lg:w-5" />
           </a>
         </div>
 

@@ -1,10 +1,11 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { TfiAlert } from 'react-icons/tfi';
 import { LiaGhostSolid } from 'react-icons/lia';
 import { PiEyesFill } from 'react-icons/pi';
 import Input from '@/components/ui/Input';
-import { toast } from 'react-toastify';
 
 interface CustomerBanConfirmationModalProps {
   id: string;
@@ -14,7 +15,7 @@ interface CustomerBanConfirmationModalProps {
   customer?: {
     name: string;
     isBlocked?: boolean;
-    notes?: string | string[]; // تعديل لتقبل النوعين
+    notes?: string | string[];
   };
 }
 
@@ -26,14 +27,12 @@ const patches = [
 const CustomerBanConfirmationModal: React.FC<
   CustomerBanConfirmationModalProps
 > = ({ id, isOpen, onClose, onConfirm, customer }) => {
-  // تحويل المصفوفة إلى نص إذا لزم الأمر لمنع خطأ الـ API
   const initialNote = Array.isArray(customer?.notes)
     ? customer.notes.join(', ')
     : customer?.notes || '';
 
   const [note, setNote] = useState(initialNote);
 
-  // تحديث الملاحظة عند فتح المودال لعميل مختلف
   useEffect(() => {
     if (isOpen) setNote(initialNote);
   }, [isOpen, initialNote]);
@@ -105,27 +104,33 @@ const CustomerBanConfirmationModal: React.FC<
           </div>
         </div>
 
-        {/* حقل الإدخال فوق أزرار التأكيد مباشرة */}
         <div className="p-4 md:p-6 bg-gray-50/50 space-y-4">
-          <Input
-            label={isUnbanning ? 'سبب إلغاء الحظر' : 'سبب الحظر'}
-            name="notes"
-            placeholder="اكتب ملاحظاتك هنا..."
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            className="bg-white"
-          />
+          {/* Hide the input if we are unbanning */}
+          {!isUnbanning && (
+            <Input
+              label="سبب الحظر"
+              name="notes"
+              placeholder="اكتب ملاحظاتك هنا..."
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              className="bg-white"
+            />
+          )}
 
           <div className="flex flex-col sm:flex-row-reverse gap-3">
             <button
-              onClick={() => onConfirm?.(id, note)}
-              className="w-full sm:flex-1 px-6 py-3 cursor-pointer font-bold rounded-xl transition-all text-white shadow-lg active:scale-95 bg-[#5d24e1] hover:bg-[#4a1cb5] shadow-purple-200"
+              onClick={() => onConfirm?.(id, isUnbanning ? '' : note)}
+              className={`w-full sm:flex-1 px-6 py-3 cursor-pointer font-bold rounded-xl transition-all text-white shadow-lg active:scale-95 ${
+                isUnbanning
+                  ? 'bg-green-600 hover:bg-green-700 shadow-green-100'
+                  : 'bg-[#5d24e1] hover:bg-[#4a1cb5] shadow-purple-200'
+              }`}
             >
               {isUnbanning ? 'تأكيد إلغاء الحظر' : 'تأكيد الحظر'}
             </button>
             <button
               onClick={onClose}
-              className="w-full sm:flex-1 px-6 py-3 bg-white text-gray-700 font-bold rounded-xl border border-gray-200"
+              className="w-full sm:flex-1 px-6 py-3 bg-white text-gray-700 font-bold rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
             >
               إلغاء
             </button>
