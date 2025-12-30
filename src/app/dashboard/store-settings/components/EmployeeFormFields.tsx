@@ -6,6 +6,7 @@ import {
   Edit3,
   FilePenLine,
   RotateCcw,
+  CopyX,
 } from 'lucide-react';
 
 import {
@@ -30,7 +31,6 @@ export default function OrderSettingsFields({
 }: Props) {
   const canEditOrder = watch('canEditOrder');
 
-  // Helper to render the styled toggle switch
   const ToggleSwitch = ({
     name,
     checked,
@@ -45,9 +45,6 @@ export default function OrderSettingsFields({
         checked={checked}
         {...register(name)}
       />
-      {/* Added 'scale-75 md:scale-100' to make the toggle smaller on mobile 
-          Added 'origin-right' to ensure it scales from the correct side in RTL 
-      */}
       <div
         className="relative w-[66px] h-[30px] bg-gray-200 peer-focus:outline-none rounded-full 
                   peer peer-checked:after:translate-x-full peer-checked:after:border-white 
@@ -63,10 +60,9 @@ export default function OrderSettingsFields({
   return (
     <div className="px-4 md:px-10 py-6 md:py-[34px]" dir="rtl">
       <div className="flex lg:w-2/3 flex-col gap-8">
-        {/* Phone Number Input */}
+        {/* حقل رقم الهاتف */}
         <div className="w-full flex flex-col gap-4">
           <div className="w-full flex items-start gap-2">
-            {/* Added 'mt-1' to icon to align specifically with the H3 text top */}
             <Phone className="w-6 h-6 text-[#5D24E1] mt-0.5" />
             <div>
               <h3 className="text-lg font-semibold leading-tight">
@@ -86,7 +82,7 @@ export default function OrderSettingsFields({
           />
         </div>
 
-        {/* Can Open Order Toggle */}
+        {/* حقل فتح الشحنة */}
         <div className="flex items-start justify-between border-b border-gray-100 pb-6">
           <div className="flex items-start gap-3">
             <PackageOpen className="w-6 h-6 text-[#5D24E1] mt-0.5" />
@@ -102,7 +98,7 @@ export default function OrderSettingsFields({
           <ToggleSwitch name="canOpenOrder" checked={watch('canOpenOrder')} />
         </div>
 
-        {/* Can Edit Order Toggle + Conditional Category */}
+        {/* حقل تعديل محتوى الشحنة */}
         <div className="flex flex-col gap-4 border-b border-gray-100 pb-6">
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-3">
@@ -138,8 +134,8 @@ export default function OrderSettingsFields({
           </div>
         </div>
 
-        {/* Shipping Return Cost */}
-        <div className="w-full flex flex-col gap-4">
+        {/* حقل تكلفة مرتجع الشحن */}
+        <div className="w-full flex flex-col gap-4 border-b border-gray-100 pb-6">
           <div className="w-full flex items-start gap-2">
             <RotateCcw className="w-6 h-6 text-[#5D24E1] mt-0.5" />
             <div>
@@ -156,6 +152,28 @@ export default function OrderSettingsFields({
             register={register}
             type="number"
             placeholder="0.00"
+            className="!h-[46px] bg-[#EAEAEA40] text-right w-full"
+          />
+        </div>
+
+        {/* الحقل الجديد: عدد المرات المتبقية لإلغاء الطلب */}
+        <div className="w-full flex flex-col gap-4">
+          <div className="w-full flex items-start gap-2">
+            <CopyX className="w-6 h-6 text-[#5D24E1] mt-0.5" />
+            <div>
+              <h3 className="text-lg font-semibold leading-tight">
+                الالغاء التلقائي للطلب{' '}
+              </h3>
+              <p className="text-sm text-gray-500">
+                الغاء الطلب تلقائي بعد كام محاوله؟
+              </p>
+            </div>
+          </div>
+          <Input
+            name="autoCancelAttempts"
+            register={register}
+            type="number"
+            placeholder="مثال: 3"
             className="!h-[46px] bg-[#EAEAEA40] text-right w-full"
           />
         </div>
