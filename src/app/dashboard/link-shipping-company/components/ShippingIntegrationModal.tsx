@@ -3,14 +3,15 @@ import { X, Truck, ChevronDown, ChevronUp, Play } from 'lucide-react';
 import { useShippingQuery } from '../hooks/useShippingQuery';
 import { Button } from '@/components/ui/button';
 import { steps } from '../constants/steps';
-import { webhookApi } from '@/lib/api/webhooks';
 import { LiaEyeSlashSolid, LiaEyeSolid } from 'react-icons/lia';
 import { If, Then } from 'react-if';
+import { ShippingConfig } from '../types/shipping';
 
 interface Props {
   providerId: string;
   isOpen: boolean;
   onClose: () => void;
+  initialData?: ShippingConfig;
 }
 
 export const ShippingIntegrationModal: React.FC<Props> = ({
@@ -18,6 +19,7 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
   isOpen,
   onClose,
 }) => {
+  // Pass providerId to the hook
   const { config, saveConfig, isSaving } = useShippingQuery(providerId);
   const [jsonInput, setJsonInput] = useState('');
   const [error, setError] = useState<string>('');
@@ -25,12 +27,13 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
   const [showAuthKey, setShowAuthKey] = useState(false);
   const [showClientCode, setShowClientCode] = useState(false);
 
+  // Removed the setJsonInput call so the input remains empty for new data
   useEffect(() => {
-    if (config?.metadata?.rawJson) {
-      setJsonInput(config.metadata.rawJson);
-    } else if (config) {
+    if (!isOpen) {
+      setJsonInput('');
+      setError('');
     }
-  }, [config]);
+  }, [isOpen]);
 
   const validateAndParseJson = (input: string) => {
     try {
@@ -52,7 +55,7 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
       const parsed = validateAndParseJson(jsonInput);
 
       const payload = {
-        shippingCompany: 'TURBO',
+        shippingCompany: providerId.toUpperCase(),
         authKey: parsed.authentication_key,
         clientCode: parsed.main_client_code?.toString(),
         isActive: true,
@@ -63,6 +66,7 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
       };
 
       await saveConfig(payload);
+      setJsonInput(''); // Clear input after successful save
       onClose();
     } catch (err: any) {
       setError(err.message || 'حدث خطأ أثناء الحفظ');
@@ -215,7 +219,8 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
               </div>
             )}
 
-            <If condition={config?.isActive}>
+            {/* Display existing config values */}
+            <If condition={!!config?.isActive}>
               <Then>
                 <div className="flex flex-col gap-2">
                   <div className="relative bg-gray-100 py-2 px-2 rounded-sm flex items-center justify-between">
@@ -275,7 +280,7 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
               </Then>
             </If>
 
-            {/* Form */}
+            {/* Form - Always empty now for new JSON input */}
             <form onSubmit={handleSave} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -290,14 +295,14 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                   disabled={isSaving}
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  قم بلصق كود JSON كاملاً هنا
+                  قم بلصق كود JSON كاملاً هنا لتحديث البيانات
                 </p>
               </div>
 
               <div className="flex gap-3 pt-4 border-t border-gray-100">
                 <Button
                   type="submit"
-                  disabled={isSaving}
+                  disabled={isSaving || !jsonInput.trim()}
                   className="flex-1 bg-[#5D24E1] hover:bg-[#4A1CB8] h-12 text-lg"
                 >
                   {isSaving ? 'جاري التفعيل...' : 'تفعيل الربط'}

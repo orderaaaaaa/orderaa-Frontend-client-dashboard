@@ -12,6 +12,7 @@ import {
   IdCardIcon,
   ChartNoAxesCombined,
   TruckIcon,
+  HousePlus,
 } from 'lucide-react';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
 import { CartIcon, ExcelIcon } from '@/components/icons'; // Import from your icons registry
@@ -121,5 +122,10 @@ export const navigation: NavigationItem[] = [
     name: 'الربط مع شركة الشحن',
     href: '/dashboard/link-shipping-company',
     icon: TruckIcon,
+  },
+  {
+    name: 'اعدادات المتجر',
+    href: '/dashboard/store-settings',
+    icon: HousePlus,
   },
 ];

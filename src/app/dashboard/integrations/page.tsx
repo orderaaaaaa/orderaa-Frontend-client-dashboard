@@ -67,16 +67,7 @@ const IntegrationCard = ({
     platform.id === 'easyorder' && webhookConfig && webhookConfig.isActive;
 
   return (
-    <div
-      className={`
-        relative bg-white rounded-2xl p-8 transition-all duration-300
-        ${
-          platform.isActive
-            ? 'border-2 border-[#5D24E1] shadow-lg shadow-purple-100'
-            : 'border border-gray-200 hover:border-gray-300 hover:shadow-md'
-        }
-      `}
-    >
+    <div className="relative bg-white rounded-2xl p-8 transition-all duration-300 border border-gray-200 hover:border-gray-300 hover:shadow-md">
       {isConnected && (
         <div className="absolute top-4 left-4 bg-green-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
           <CheckCircle2 className="w-3 h-3" />

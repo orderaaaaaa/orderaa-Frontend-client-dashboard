@@ -1,5 +1,7 @@
 import React from 'react';
 import { LuHistory } from 'react-icons/lu';
+import { getStatusColor } from '../../lib/getBadgeColor';
+import { ORDER_STATUS_AR } from '../../lib/orderStatusAr';
 
 interface OrdersTabProps {
   orders: any[];
@@ -45,11 +47,20 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
               <div className="text-center text-gray-600 text-xs">
                 {new Date(order.createdAt).toLocaleDateString('en-GB')}
               </div>
+
+              {/* Updated Status Badge Logic */}
               <div className="flex justify-center">
-                <span className="px-3 py-1 rounded-full text-[10px] font-bold border bg-blue-50 text-blue-600 border-blue-50 uppercase">
-                  {order.status === 'DELIVERED' ? 'تم التوصيل' : order.status}
+                <span
+                  className={`px-3 py-1 rounded-full text-[10px] font-bold border ${getStatusColor(
+                    order.status
+                  )}`}
+                >
+                  {ORDER_STATUS_AR[
+                    order.status as keyof typeof ORDER_STATUS_AR
+                  ] || order.status}
                 </span>
               </div>
+
               <div className="text-center text-gray-800 text-xs">
                 {order.order_products?.reduce(
                   (sum: number, item: any) => sum + (item.quantity || 1),
@@ -64,7 +75,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
                 {order.totalCost}
               </div>
               <div className="text-center text-gray-500 text-xs  px-1">
-                {order.notes || 'تم التوصيل بنجاح'}
+                {order.notes || '—'}
               </div>
             </div>
           ))}

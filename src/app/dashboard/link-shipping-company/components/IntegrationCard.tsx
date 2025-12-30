@@ -3,33 +3,23 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { ShippingProvider } from '../types/shipping';
 import { CheckCircle2 } from 'lucide-react';
-import { useShippingQuery } from '../hooks/useShippingQuery';
 
 interface IntegrationCardProps {
   provider: ShippingProvider;
+  config?: any; // Config received from parent
   onConnect: () => void;
 }
 
 export const IntegrationCard: React.FC<IntegrationCardProps> = ({
   provider,
+  config,
   onConnect,
 }) => {
-  const { config } = useShippingQuery(provider.id);
-  
-  // Check if the returned config belongs to this provider
-  const isCorrectProvider = config?.shippingCompany?.toUpperCase() === provider.id.toUpperCase();
-  const isConnected = isCorrectProvider && (config?.isActive ?? false);
+  // Use the passed config to determine connection status
+  const isConnected = config?.isActive ?? false;
 
   return (
-    <div
-      className={`
-        relative bg-white rounded-2xl p-8 transition-all duration-300
-        ${provider.isActive
-          ? 'border-2 border-[#5D24E1] shadow-lg shadow-purple-100'
-          : 'border border-gray-200 hover:border-gray-300 hover:shadow-md'
-        }
-      `}
-    >
+    <div className="relative bg-white rounded-2xl p-8 transition-all duration-300 border border-gray-200 hover:border-gray-300 hover:shadow-md">
       {isConnected && (
         <div className="absolute top-4 left-4 bg-green-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
           <CheckCircle2 className="w-3 h-3" />
@@ -64,17 +54,21 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
         disabled={!provider.isActive}
         className={`
           w-full h-12 rounded-lg font-medium text-white transition-all duration-200
-          ${provider.isActive
-            ? isConnected
-              ? 'bg-gray-600 hover:bg-gray-700'
-              : 'bg-[#5D24E1] hover:bg-[#4A1CB8] active:bg-[#3D17A0]'
-            : 'bg-gray-400 cursor-not-allowed'
+          ${
+            provider.isActive
+              ? isConnected
+                ? 'bg-gray-600 hover:bg-gray-700'
+                : 'bg-[#5D24E1] hover:bg-[#4A1CB8] active:bg-[#3D17A0]'
+              : 'bg-gray-400 cursor-not-allowed'
           }
         `}
       >
-        {isConnected ? 'إدارة الربط' : provider.isActive ? 'إنشاء ربط جديد' : 'قريباً'}
+        {isConnected
+          ? 'إدارة الربط'
+          : provider.isActive
+          ? 'إنشاء ربط جديد'
+          : 'قريباً'}
       </Button>
-      
     </div>
   );
 };

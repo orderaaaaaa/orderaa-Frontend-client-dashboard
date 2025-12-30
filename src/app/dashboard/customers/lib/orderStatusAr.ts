@@ -12,7 +12,7 @@ export const ORDER_STATUS_AR: Record<OrderStatus, string> = {
   DELIVERED: 'تم التوصيل',
   RETURNED_DELIVERED: 'تم التوصيل ثم مرتجع',
 
-  ATTEMPTED: 'محاولة توصيل',
+  ATTEMPTED: 'تم المحاوله',
   WAITING_FOR_PAYMENT: 'بانتظار الدفع',
   POSTPONED: 'مؤجل',
   PARTIAL_DELIVERY: 'توصيل جزئي',

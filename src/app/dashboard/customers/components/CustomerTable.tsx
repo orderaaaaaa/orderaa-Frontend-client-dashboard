@@ -4,7 +4,7 @@ import { useEditCustomer } from '../hooks/useEditCustomer';
 import { TABLE_HEADERS } from '../constants/CustomerHeaders';
 import { Pagination } from '@/components/Pagination';
 import { CustomerRow } from './CustomerRow';
-import { CustomerCard } from './CustomerCard'; // Imported new component
+import { CustomerCard } from './CustomerCard';
 import CustomerDetailsModal from './modals/CustomerDetailsModal';
 import { RxChevronUp } from 'react-icons/rx';
 
@@ -46,6 +46,19 @@ export default function CustomerTable({
     isBlocked: isBlockedParam,
     latestOrderStatus: orderStatus,
   });
+
+  // Logic to determine if the Ban Notes column should appear
+  const hasBlockedCustomers = useMemo(() => {
+    return data?.data.some((customer: any) => customer.isBlocked) || false;
+  }, [data]);
+
+  // Filter headers based on the presence of blocked customers
+  const activeHeaders = useMemo(() => {
+    return TABLE_HEADERS.filter(
+      (header) =>
+        !header.isConditional || (header.isConditional && hasBlockedCustomers)
+    );
+  }, [hasBlockedCustomers]);
 
   const editCustomerMutation = useEditCustomer({
     onSuccess: () => setOpenMenuId(null),
@@ -118,13 +131,12 @@ export default function CustomerTable({
 
   return (
     <>
-      {/* 1. TABLE VIEW: Only visible on lg screens and up */}
       <div className="hidden lg:block w-[97%] mx-auto bg-white rounded-lg shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full" dir="rtl">
             <thead>
               <tr className="bg-[#f1eefa]">
-                {TABLE_HEADERS.map((header, index) => (
+                {activeHeaders.map((header, index) => (
                   <th
                     key={index}
                     className={`px-4 py-4 md:text-md font-medium text-gray-700 whitespace-nowrap text-${header.align}`}
@@ -135,13 +147,14 @@ export default function CustomerTable({
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {data?.data.map((customer) => (
+              {data?.data.map((customer: any) => (
                 <CustomerRow
                   key={customer.id}
                   customer={customer}
                   onToggleBlock={handleToggleBlock}
                   onRowClick={handleRowClick}
                   isPending={editCustomerMutation.isPending}
+                  showNotesColumn={hasBlockedCustomers} // Pass the visibility state
                 />
               ))}
             </tbody>
@@ -149,9 +162,8 @@ export default function CustomerTable({
         </div>
       </div>
 
-      {/* 2. CARD GRID VIEW: Visible on screens smaller than lg */}
-      <div className="lg:hidden w-[97%] mx-auto grid grid-cols-1 sm:grid-cols-2  gap-6">
-        {data?.data.map((customer) => (
+      <div className="lg:hidden w-[97%] mx-auto grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {data?.data.map((customer: any) => (
           <CustomerCard
             key={customer.id}
             customer={customer}
@@ -185,7 +197,6 @@ export default function CustomerTable({
         />
       </div>
 
-      {/* Limit Dropdown */}
       <div ref={limitRef} className="relative w-fit mr-[1.5%]">
         <div
           onClick={() => setIsLimitOpen((prev) => !prev)}

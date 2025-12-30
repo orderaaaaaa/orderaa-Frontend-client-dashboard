@@ -6,5 +6,6 @@ export const TABLE_HEADERS = [
   { label: 'الحالة', align: 'center' },
   { label: 'الشارات', align: 'center' },
   { label: 'إجمالي المشتريات', align: 'center' },
+  { label: 'سبب الحظر', align: 'center', isConditional: true }, //
   { label: 'الإجراءات', align: 'center' },
 ];
