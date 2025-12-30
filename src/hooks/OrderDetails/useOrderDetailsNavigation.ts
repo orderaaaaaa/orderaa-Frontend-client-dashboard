@@ -31,7 +31,9 @@ interface UseOrderDetailsNavigationReturn {
   targetOrderId: number | null;
   isNavigating: boolean;
   isEmpty: boolean;
+  setNoOrdersFound: () => void;
 
+  formFilters: OrderFiltersFormData | null;
   handleFilterFormChange: (data: OrderFiltersFormData) => void;
   navigateToOrder: (orderId: number) => void;
 }
@@ -84,6 +86,7 @@ export function useOrderDetailsNavigation({
   const hasMounted = useRef(false);
   const isUserInitiated = useRef(false);
   const isUpdatingUrl = useRef(false);
+  const isSyncingFromUrl = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const [targetOrderId, setTargetOrderId] = useState<number | null>(null);
@@ -151,6 +154,49 @@ export function useOrderDetailsNavigation({
     hasMounted.current = true;
   }, []);
 
+  // Sync state from URL params after navigation (when searchParams changes)
+  useEffect(() => {
+    if (!searchParams || isUpdatingUrl.current) return;
+
+    const urlState = getInitialState();
+
+    // Check if any values differ from current state
+    const statusDiffers = urlState.status !== status;
+    const timePeriodDiffers = urlState.timePeriod !== timePeriod;
+    const fromDateDiffers = urlState.fromDate?.getTime() !== fromDate?.getTime();
+    const toDateDiffers = urlState.toDate?.getTime() !== toDate?.getTime();
+    const formFiltersDiffers = JSON.stringify(urlState.formFilters) !== JSON.stringify(formFilters);
+
+    if (!statusDiffers && !timePeriodDiffers && !fromDateDiffers && !toDateDiffers && !formFiltersDiffers) {
+      return;
+    }
+
+    // Set flag to prevent URL updates while syncing
+    isSyncingFromUrl.current = true;
+
+    if (statusDiffers) {
+      setStatusInternal(urlState.status);
+    }
+    if (timePeriodDiffers) {
+      setTimePeriodInternal(urlState.timePeriod);
+    }
+    if (fromDateDiffers) {
+      setFromDateInternal(urlState.fromDate);
+    }
+    if (toDateDiffers) {
+      setToDateInternal(urlState.toDate);
+    }
+    if (formFiltersDiffers) {
+      setFormFilters(urlState.formFilters);
+    }
+
+    // Reset flag after state updates are processed
+    setTimeout(() => {
+      isSyncingFromUrl.current = false;
+    }, 100);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
   const updateUrl = useCallback(
     (useReplace: boolean = false) => {
       const params = new URLSearchParams();
@@ -210,7 +256,7 @@ export function useOrderDetailsNavigation({
   }, []);
 
   useEffect(() => {
-    if (hasMounted.current && !isUpdatingUrl.current) {
+    if (hasMounted.current && !isUpdatingUrl.current && !isSyncingFromUrl.current) {
       updateUrl(false);
     }
   }, [status, updateUrl]);
@@ -226,7 +272,7 @@ export function useOrderDetailsNavigation({
   }, [formFilters?.executionDate]);
 
   useEffect(() => {
-    if (hasMounted.current && !isUpdatingUrl.current) {
+    if (hasMounted.current && !isUpdatingUrl.current && !isSyncingFromUrl.current) {
       updateUrl(false);
     }
   }, [fromDate, updateUrl]);
@@ -242,7 +288,7 @@ export function useOrderDetailsNavigation({
   }, [formFilters?.executionDate]);
 
   useEffect(() => {
-    if (hasMounted.current && !isUpdatingUrl.current) {
+    if (hasMounted.current && !isUpdatingUrl.current && !isSyncingFromUrl.current) {
       updateUrl(false);
     }
   }, [toDate, updateUrl]);
@@ -265,7 +311,7 @@ export function useOrderDetailsNavigation({
   }, [formFilters?.executionDate]);
 
   useEffect(() => {
-    if (hasMounted.current && !isUpdatingUrl.current) {
+    if (hasMounted.current && !isUpdatingUrl.current && !isSyncingFromUrl.current) {
       updateUrl(false);
     }
   }, [timePeriod, updateUrl]);
@@ -275,6 +321,11 @@ export function useOrderDetailsNavigation({
     setTimePeriodInternal('');
     setFromDateInternal(null);
     setToDateInternal(null);
+  }, []);
+
+  const setNoOrdersFound = useCallback(() => {
+    setIsEmpty(true);
+    setTargetOrderId(null);
   }, []);
 
   // Helper to build URL params from current filter state
@@ -320,6 +371,10 @@ export function useOrderDetailsNavigation({
   }, [buildCurrentUrlParams, router]);
 
   const handleFilterFormChange = useCallback((data: OrderFiltersFormData) => {
+    // Skip updates when syncing from URL to prevent loops
+    if (isSyncingFromUrl.current) {
+      return;
+    }
     if (data.executionDate && (fromDate || toDate)) {
       toast.error('لا يمكن تحديد تاريخ التنفيذ ونطاق التاريخ معاً. يرجى إزالة نطاق التاريخ أولاً.');
       const { executionDate, ...restData } = data;
@@ -330,7 +385,7 @@ export function useOrderDetailsNavigation({
   }, [fromDate, toDate]);
 
   useEffect(() => {
-    if (hasMounted.current && !isUpdatingUrl.current && debouncedFormFilters !== null) {
+    if (hasMounted.current && !isUpdatingUrl.current && !isSyncingFromUrl.current && debouncedFormFilters !== null) {
       debouncedUpdateUrl();
     }
   }, [debouncedFormFilters, debouncedUpdateUrl]);
@@ -408,7 +463,9 @@ export function useOrderDetailsNavigation({
     targetOrderId,
     isNavigating,
     isEmpty,
+    setNoOrdersFound,
 
+    formFilters,
     handleFilterFormChange,
     navigateToOrder,
   };

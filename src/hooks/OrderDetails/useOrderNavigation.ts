@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { OrderStatus } from '@/types/orders';
 import { useGetNextOrderId, useGetPreviousOrderId } from '@/services/orders';
@@ -6,6 +6,7 @@ import { useGetNextOrderId, useGetPreviousOrderId } from '@/services/orders';
 export interface UseOrderNavigationOptions {
   orderId: number;
   onNavigate?: (targetOrderId: number) => void;
+  onNoOrdersFound?: () => void;
   dateRange?: {
     from: Date | null;
     to: Date | null;
@@ -23,6 +24,7 @@ export interface UseOrderNavigationReturn {
 export function useOrderNavigation({
   orderId,
   onNavigate,
+  onNoOrdersFound,
   dateRange,
   statusFilter,
 }: UseOrderNavigationOptions): UseOrderNavigationReturn {
@@ -31,6 +33,12 @@ export function useOrderNavigation({
 
   const [isNavigatingNext, setIsNavigatingNext] = useState(false);
   const [isNavigatingPrevious, setIsNavigatingPrevious] = useState(false);
+
+  // Use ref to always have access to the latest callback in async operations
+  const onNoOrdersFoundRef = useRef(onNoOrdersFound);
+  useEffect(() => {
+    onNoOrdersFoundRef.current = onNoOrdersFound;
+  }, [onNoOrdersFound]);
 
   const navigateToNext = useCallback(async () => {
     if (!onNavigate) return;
@@ -49,13 +57,21 @@ export function useOrderNavigation({
 
       if (response?.id) {
         onNavigate(response.id);
+      } else if (onNoOrdersFoundRef.current) {
+        onNoOrdersFoundRef.current();
+      } else {
+        toast.info('لا يوجد طلب تالي مطابق للفلاتر');
       }
     } catch (error: any) {
       console.error('Failed to get next order:', error);
-      const errorMessage =
-        error?.response?.data?.message ||
-        'لا يوجد طلب تالي مطابق للفلاتر';
-      toast.info(errorMessage);
+      if (onNoOrdersFoundRef.current) {
+        onNoOrdersFoundRef.current();
+      } else {
+        const errorMessage =
+          error?.response?.data?.message ||
+          'لا يوجد طلب تالي مطابق للفلاتر';
+        toast.info(errorMessage);
+      }
     } finally {
       setIsNavigatingNext(false);
     }
@@ -78,13 +94,21 @@ export function useOrderNavigation({
 
       if (response?.id) {
         onNavigate(response.id);
+      } else if (onNoOrdersFoundRef.current) {
+        onNoOrdersFoundRef.current();
+      } else {
+        toast.info('لا يوجد طلب سابق مطابق للفلاتر');
       }
     } catch (error: any) {
       console.error('Failed to get previous order:', error);
-      const errorMessage =
-        error?.response?.data?.message ||
-        'لا يوجد طلب سابق مطابق للفلاتر';
-      toast.info(errorMessage);
+      if (onNoOrdersFoundRef.current) {
+        onNoOrdersFoundRef.current();
+      } else {
+        const errorMessage =
+          error?.response?.data?.message ||
+          'لا يوجد طلب سابق مطابق للفلاتر';
+        toast.info(errorMessage);
+      }
     } finally {
       setIsNavigatingPrevious(false);
     }
