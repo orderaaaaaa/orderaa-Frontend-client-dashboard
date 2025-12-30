@@ -53,6 +53,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
     targetOrderId,
     isNavigating,
     isEmpty,
+    setNoOrdersFound,
     formFilters,
     handleFilterFormChange,
     navigateToOrder,
@@ -311,6 +312,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
         <OrderDetailsInfo
           order={order}
           onNavigateToNextOrder={navigateToOrder}
+          onNoOrdersFound={setNoOrdersFound}
           dateRange={{
             from: fromDate,
             to: toDate,

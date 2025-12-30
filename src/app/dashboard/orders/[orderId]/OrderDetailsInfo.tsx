@@ -9,6 +9,7 @@ import OrderDetailsInfoComponent from "@/components/OrderDetails/OrderDetailsInf
 interface OrderDetailsInfoProps {
   order: Order;
   onNavigateToNextOrder?: (nextOrderId: number) => void;
+  onNoOrdersFound?: () => void;
   dateRange?: {
     from: Date | null;
     to: Date | null;
@@ -22,6 +23,7 @@ interface OrderDetailsInfoProps {
 function OrderDetailsInfo({
   order,
   onNavigateToNextOrder,
+  onNoOrdersFound,
   dateRange,
   statusFilter,
   isLockedByOther,
@@ -40,6 +42,7 @@ function OrderDetailsInfo({
       <OrderDetailsInfoComponent
         order={order}
         onNavigateToNextOrder={onNavigateToNextOrder}
+        onNoOrdersFound={onNoOrdersFound}
         dateRange={dateRange}
         statusFilter={statusFilter}
         isLockedByOther={isLockedByOther}

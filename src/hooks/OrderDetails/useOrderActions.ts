@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { Order, OrderStatus, OrderStatusItem } from '@/types/orders';
 import { ShippingData } from '@/components/OrderDetails/EditShippingModal';
@@ -8,6 +8,7 @@ export interface UseOrderActionsOptions {
   order: Order;
   onOrderUpdate?: (updatedOrder: Order) => void;
   onNavigateToNextOrder?: (nextOrderId: number) => void;
+  onNoOrdersFound?: () => void;
   dateRange?: {
     from: Date | null;
     to: Date | null;
@@ -38,6 +39,7 @@ export function useOrderActions({
   order,
   onOrderUpdate,
   onNavigateToNextOrder,
+  onNoOrdersFound,
   dateRange,
   statusFilter,
   availableStatuses,
@@ -45,6 +47,12 @@ export function useOrderActions({
   const updateOrderMutation = useUpdateOrder();
   const cancelOrderMutation = useCancelOrder();
   const { getNextOrderId } = useGetNextOrderId();
+
+  // Use ref to always have access to the latest callback in async operations
+  const onNoOrdersFoundRef = useRef(onNoOrdersFound);
+  useEffect(() => {
+    onNoOrdersFoundRef.current = onNoOrdersFound;
+  }, [onNoOrdersFound]);
 
   const getStatusFromAction = useCallback((action: string): OrderStatus | null => {
     const actionToStatusValueMap: Record<string, string> = {
@@ -109,13 +117,21 @@ export function useOrderActions({
 
             if (nextOrderResponse?.id) {
               onNavigateToNextOrder(nextOrderResponse.id);
+            } else if (onNoOrdersFoundRef.current) {
+              onNoOrdersFoundRef.current();
+            } else {
+              toast.info('لا يوجد طلبات أخرى مطابقة للفلاتر');
             }
           } catch (nextErr: any) {
             console.error('Failed to get next order:', nextErr);
-            const errorMessage =
-              nextErr?.response?.data?.message ||
-              'لا يوجد طلبات أخرى مطابقة للفلاتر';
-            toast.info(errorMessage);
+            if (onNoOrdersFoundRef.current) {
+              onNoOrdersFoundRef.current();
+            } else {
+              const errorMessage =
+                nextErr?.response?.data?.message ||
+                'لا يوجد طلبات أخرى مطابقة للفلاتر';
+              toast.info(errorMessage);
+            }
           }
         }
 
@@ -132,7 +148,7 @@ export function useOrderActions({
         throw new Error(apiErrorMessage);
       }
     },
-    [order.id, onOrderUpdate, onNavigateToNextOrder, dateRange, statusFilter, availableStatuses, updateOrderMutation, getNextOrderId]
+    [order.id, onOrderUpdate, onNavigateToNextOrder, onNoOrdersFound, dateRange, statusFilter, availableStatuses, updateOrderMutation, getNextOrderId]
   );
 
   const handleUrgent = useCallback(
@@ -183,13 +199,21 @@ export function useOrderActions({
 
             if (nextOrderResponse?.id) {
               onNavigateToNextOrder(nextOrderResponse.id);
+            } else if (onNoOrdersFoundRef.current) {
+              onNoOrdersFoundRef.current();
+            } else {
+              toast.info('لا يوجد طلبات أخرى مطابقة للفلاتر');
             }
           } catch (nextErr: any) {
             console.error('Failed to get next order:', nextErr);
-            const errorMessage =
-              nextErr?.response?.data?.message ||
-              'لا يوجد طلبات أخرى مطابقة للفلاتر';
-            toast.info(errorMessage);
+            if (onNoOrdersFoundRef.current) {
+              onNoOrdersFoundRef.current();
+            } else {
+              const errorMessage =
+                nextErr?.response?.data?.message ||
+                'لا يوجد طلبات أخرى مطابقة للفلاتر';
+              toast.info(errorMessage);
+            }
           }
         }
 
@@ -205,7 +229,7 @@ export function useOrderActions({
         return false;
       }
     },
-    [order.id, onOrderUpdate, onNavigateToNextOrder, dateRange, statusFilter, cancelOrderMutation, getNextOrderId]
+    [order.id, onOrderUpdate, onNavigateToNextOrder, onNoOrdersFound, dateRange, statusFilter, cancelOrderMutation, getNextOrderId]
   );
 
   const handleStopOperation = useCallback(
@@ -318,13 +342,21 @@ export function useOrderActions({
 
             if (nextOrderResponse?.id) {
               onNavigateToNextOrder(nextOrderResponse.id);
+            } else if (onNoOrdersFoundRef.current) {
+              onNoOrdersFoundRef.current();
+            } else {
+              toast.info('لا يوجد طلبات أخرى مطابقة للفلاتر');
             }
           } catch (nextErr: any) {
             console.error('Failed to get next order:', nextErr);
-            const errorMessage =
-              nextErr?.response?.data?.message ||
-              'لا يوجد طلبات أخرى مطابقة للفلاتر';
-            toast.info(errorMessage);
+            if (onNoOrdersFoundRef.current) {
+              onNoOrdersFoundRef.current();
+            } else {
+              const errorMessage =
+                nextErr?.response?.data?.message ||
+                'لا يوجد طلبات أخرى مطابقة للفلاتر';
+              toast.info(errorMessage);
+            }
           }
         }
 
@@ -341,7 +373,7 @@ export function useOrderActions({
         throw new Error(apiErrorMessage);
       }
     },
-    [order.id, onOrderUpdate, onNavigateToNextOrder, dateRange, statusFilter, updateOrderMutation, getNextOrderId]
+    [order.id, onOrderUpdate, onNavigateToNextOrder, onNoOrdersFound, dateRange, statusFilter, updateOrderMutation, getNextOrderId]
   );
 
   const handleUpdateShipping = useCallback(

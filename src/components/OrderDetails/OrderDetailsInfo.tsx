@@ -19,6 +19,7 @@ interface OrderDetailsInfoComponentProps {
   onCustomerUpdate?: (updatedOrder: Order) => void;
   onOrderUpdate?: (updatedOrder: Order) => void;
   onNavigateToNextOrder?: (nextOrderId: number) => void;
+  onNoOrdersFound?: () => void;
   dateRange?: {
     from: Date | null;
     to: Date | null;
@@ -33,6 +34,7 @@ function OrderDetailsInfoComponent({
   onCustomerUpdate,
   onOrderUpdate,
   onNavigateToNextOrder,
+  onNoOrdersFound,
   dateRange,
   statusFilter,
   isLockedByOther,
@@ -96,6 +98,7 @@ function OrderDetailsInfoComponent({
     order: localOrder,
     onOrderUpdate: handleUpdate,
     onNavigateToNextOrder,
+    onNoOrdersFound,
     dateRange,
     statusFilter,
     availableStatuses,
@@ -104,6 +107,7 @@ function OrderDetailsInfoComponent({
   const navigation = useOrderNavigation({
     orderId: order.id,
     onNavigate: onNavigateToNextOrder,
+    onNoOrdersFound,
     dateRange,
     statusFilter,
   });

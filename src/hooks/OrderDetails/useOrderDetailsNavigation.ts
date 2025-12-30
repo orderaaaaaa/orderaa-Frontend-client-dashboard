@@ -31,6 +31,7 @@ interface UseOrderDetailsNavigationReturn {
   targetOrderId: number | null;
   isNavigating: boolean;
   isEmpty: boolean;
+  setNoOrdersFound: () => void;
 
   formFilters: OrderFiltersFormData | null;
   handleFilterFormChange: (data: OrderFiltersFormData) => void;
@@ -322,6 +323,11 @@ export function useOrderDetailsNavigation({
     setToDateInternal(null);
   }, []);
 
+  const setNoOrdersFound = useCallback(() => {
+    setIsEmpty(true);
+    setTargetOrderId(null);
+  }, []);
+
   // Helper to build URL params from current filter state
   const buildCurrentUrlParams = useCallback(() => {
     const params = new URLSearchParams();
@@ -457,6 +463,7 @@ export function useOrderDetailsNavigation({
     targetOrderId,
     isNavigating,
     isEmpty,
+    setNoOrdersFound,
 
     formFilters,
     handleFilterFormChange,
