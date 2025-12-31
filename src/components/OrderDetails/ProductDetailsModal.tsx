@@ -25,15 +25,22 @@ export default function ProductDetailsModal({
     }
   };
 
-  // Detail row component for consistent styling
-  const DetailRow = ({ label, value }: { label: string; value: string | number | undefined | null }) => {
+  const DetailRow = ({
+    label,
+    value,
+  }: {
+    label: string;
+    value: string | number | undefined | null;
+  }) => {
     const displayValue = value || '-';
     const isEmpty = !value;
 
     return (
-      <div className="flex justify-between items-center py-3 border-b border-gray-100">
-        <span className="text-[#1F1F1F] font-bold text-base">{label}:</span>
-        <span className={`text-base ${isEmpty ? 'text-red-500' : 'text-[#5F5E5E]'}`}>
+      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+        <span className="text-[#1F1F1F] font-bold text-sm">{label}:</span>
+        <span
+          className={`text-sm ${isEmpty ? 'text-red-500' : 'text-[#5F5E5E]'}`}
+        >
           {displayValue}
         </span>
       </div>
@@ -42,66 +49,71 @@ export default function ProductDetailsModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       onClick={handleBackdropClick}
       dir="rtl"
     >
       <div
-        className="relative w-full max-w-[900px] max-h-[90vh] bg-white rounded-[20px] shadow-xl overflow-hidden"
+        className="relative w-full max-w-[600px] max-h-[90vh] bg-white rounded-[20px] shadow-xl overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header with gradient background */}
+        {/* Header - Scaled down height */}
         <div
-          className="sticky top-0 h-[79px] rounded-t-[20px] flex items-center justify-center px-8 z-10"
+          className="shrink-0 h-[60px] flex items-center justify-center px-6 z-10"
           style={{
             background:
               'linear-gradient(105.28deg, #FFFFFF 1.48%, #CBB5FD 182.49%, #FFFFFF 187.88%)',
           }}
         >
-          <h2 className="text-xl font-bold text-black text-center">
+          <h2 className="text-lg font-bold text-black text-center">
             تفاصيل المنتج
           </h2>
 
           <Button
             variant="ghost"
             onClick={onClose}
-            className="absolute left-8 w-6 h-6 flex items-center justify-center hover:opacity-70 transition-opacity"
+            className="absolute left-6 w-8 h-8 p-0 flex items-center justify-center hover:bg-black/5 rounded-full transition-colors"
           >
-            <X className="w-6 h-6 text-black" strokeWidth={2} />
+            <X className="w-5 h-5 text-black" strokeWidth={2} />
           </Button>
         </div>
 
-        {/* Content - Scrollable */}
-        <div className="overflow-y-auto max-h-[calc(90vh-79px)] px-8 py-6">
-          {/* Product Image and Name */}
-          <div className="flex flex-col items-center mb-6">
+        {/* Content - More compact padding */}
+        <div className="overflow-y-auto px-6 py-4">
+          <div className="flex flex-col items-center mb-4">
             <img
               src={product.image || '/wireless-headphones.png'}
               alt={product.name}
-              className="w-[200px] h-[200px] object-cover rounded-2xl border-2 border-[#B8A3EB] mb-4"
+              className="w-[150px] h-[150px] object-cover rounded-xl border-2 border-[#B8A3EB] mb-3"
             />
-            <h3 className="text-2xl font-bold text-[#1E1E1E] text-center">
+            <h3 className="text-xl font-bold text-[#1E1E1E] text-center px-4">
               {product.name}
             </h3>
           </div>
 
-          {/* Product Details */}
-          <div className="max-w-2xl mx-auto">
-            <h4 className="text-lg font-bold text-[#5D24E1] mb-4 text-center">معلومات المنتج</h4>
-            <DetailRow label="الخامة" value={product.material} />
-            <DetailRow label="الوزن" value={product.weight} />
-            <DetailRow label="شركة التصنيع" value={product.manufactureCompany} />
+          <div className="w-full">
+            <h4 className="text-base font-bold text-[#5D24E1] mb-2 text-center">
+              معلومات المنتج
+            </h4>
+            <div className="bg-gray-50/50 rounded-xl px-4 py-2">
+              <DetailRow label="الخامة" value={product.material} />
+              <DetailRow label="الوزن" value={product.weight} />
+              <DetailRow
+                label="شركة التصنيع"
+                value={product.manufactureCompany}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Close Button at Bottom */}
-        <div className="sticky bottom-0 bg-white border-t border-gray-200 px-8 py-4 flex justify-center">
+        {/* Footer - Reduced padding */}
+        <div className="shrink-0 bg-white border-t border-gray-100 px-6 py-3 flex justify-center">
           <Button
             variant="default"
             onClick={onClose}
-            className="w-[146px] h-[37px] bg-[#5D24E1] border-[1.5px] border-[#5D24E1] rounded-[28px] flex items-center justify-center hover:bg-[#4B1BC4] transition-colors"
+            className="w-[120px] h-[36px] bg-[#5D24E1] rounded-[28px] hover:bg-[#4B1BC4] transition-colors"
           >
-            <span className="text-lg font-bold text-white">إغلاق</span>
+            <span className="text-sm font-bold text-white">إغلاق</span>
           </Button>
         </div>
       </div>

@@ -17,7 +17,7 @@ import {
 } from '@/services/orders';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
-import { LiaLongArrowAltLeftSolid } from "react-icons/lia";
+import { LiaLongArrowAltLeftSolid } from 'react-icons/lia';
 import Image from 'next/image';
 
 interface OrderDetailsProductCardProps {
@@ -25,16 +25,22 @@ interface OrderDetailsProductCardProps {
   isLockedByOther?: boolean;
 }
 
-function OrderDetailsProductCard({ order, isLockedByOther = false }: OrderDetailsProductCardProps) {
+function OrderDetailsProductCard({
+  order,
+  isLockedByOther = false,
+}: OrderDetailsProductCardProps) {
   const updateOrderProductMutation = useUpdateOrderProduct();
   const deleteOrderProductMutation = useDeleteOrderProduct();
   const addOrderProductMutation = useAddOrderProduct();
   const { data: allProducts = [], error: productsError } = useAllProducts();
 
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
-  const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
+  const [deletingProductId, setDeletingProductId] = useState<number | null>(
+    null
+  );
   const [isAddSameTypeModalOpen, setIsAddSameTypeModalOpen] = useState(false);
-  const [isAddNewProductModalOpen, setIsAddNewProductModalOpen] = useState(false);
+  const [isAddNewProductModalOpen, setIsAddNewProductModalOpen] =
+    useState(false);
   const [viewingProductId, setViewingProductId] = useState<number | null>(null);
   const [productsData, setProductsData] = useState(
     order.order_products?.map((orderProduct) => ({
@@ -78,7 +84,10 @@ function OrderDetailsProductCard({ order, isLockedByOther = false }: OrderDetail
     setViewingProductId(productId);
   };
 
-  const handleSaveEdit = async (productId: number, variants: SelectedVariant[]) => {
+  const handleSaveEdit = async (
+    productId: number,
+    variants: SelectedVariant[]
+  ) => {
     try {
       await updateOrderProductMutation.mutateAsync({
         orderProductId: productId,
@@ -114,7 +123,10 @@ function OrderDetailsProductCard({ order, isLockedByOther = false }: OrderDetail
     (orderProduct) => orderProduct.id === viewingProductId
   );
 
-  const handleAddSameTypeProduct = async (variants: SelectedVariant[], quantity: number) => {
+  const handleAddSameTypeProduct = async (
+    variants: SelectedVariant[],
+    quantity: number
+  ) => {
     try {
       const referenceProduct = productsData[0];
       if (!referenceProduct) {
@@ -135,7 +147,11 @@ function OrderDetailsProductCard({ order, isLockedByOther = false }: OrderDetail
     }
   };
 
-  const handleAddNewProduct = async (productId: number, variants: SelectedVariant[], quantity: number) => {
+  const handleAddNewProduct = async (
+    productId: number,
+    variants: SelectedVariant[],
+    quantity: number
+  ) => {
     await addOrderProductMutation.mutateAsync({
       orderId: order.id,
       productId,
@@ -147,7 +163,7 @@ function OrderDetailsProductCard({ order, isLockedByOther = false }: OrderDetail
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
-        <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {productsData.map((item) => (
             <div
               key={item.id}
@@ -176,18 +192,29 @@ function OrderDetailsProductCard({ order, isLockedByOther = false }: OrderDetail
                   <p className="text-[#1E1E1E] font-bold text-lg ">
                     {item.price} جنيه
                   </p>
-
                 </div>
                 <div className="flex flex-col items-end ml-2">
                   <div className="flex justify-end gap-2 mb-4">
                     <SquarePen
-                      className={`w-4 transition-colors ${isLockedByOther ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:text-purple-700'}`}
-                      onClick={() => !isLockedByOther && handleEditClick(item.id)}
+                      className={`w-4 transition-colors ${
+                        isLockedByOther
+                          ? 'opacity-50 cursor-not-allowed'
+                          : 'cursor-pointer hover:text-purple-700'
+                      }`}
+                      onClick={() =>
+                        !isLockedByOther && handleEditClick(item.id)
+                      }
                     />
                     {productsData.length > 1 && (
                       <Trash2
-                        className={`w-4 text-red-600 transition-colors ${isLockedByOther ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:text-red-700'}`}
-                        onClick={() => !isLockedByOther && handleDeleteClick(item.id)}
+                        className={`w-4 text-red-600 transition-colors ${
+                          isLockedByOther
+                            ? 'opacity-50 cursor-not-allowed'
+                            : 'cursor-pointer hover:text-red-700'
+                        }`}
+                        onClick={() =>
+                          !isLockedByOther && handleDeleteClick(item.id)
+                        }
                       />
                     )}
                   </div>
@@ -200,8 +227,8 @@ function OrderDetailsProductCard({ order, isLockedByOther = false }: OrderDetail
                   />
                 </div>
               </div>
-              <hr className='border border-gray-300 mt-3' />
-              <div className='flex justify-start'>
+              <hr className="border border-gray-300 mt-3" />
+              <div className="flex justify-start">
                 <Button
                   size="sm"
                   variant="ghost"
@@ -211,7 +238,6 @@ function OrderDetailsProductCard({ order, isLockedByOther = false }: OrderDetail
                   المزيد
                   <LiaLongArrowAltLeftSolid className="w-4 h-4 rotate-45" />
                 </Button>
-
               </div>
             </div>
           ))}

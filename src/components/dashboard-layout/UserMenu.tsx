@@ -56,28 +56,37 @@ export function UserMenu({
   // Show loading spinner while user data is loading
   if (!displayText) {
     return (
-      <div className='flex flex-row items-center'>
+      <div className="flex flex-row items-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto" />
       </div>
     );
   }
 
   return (
-    <div ref={menuRef} className='relative flex flex-row items-center'>
-      <span className={isMobile ? 'font-normal text-white text-[16px]' : 'font-bold text-[#1F1F1F] text-base'}>
+    <div ref={menuRef} className="relative flex flex-row items-center">
+      <span
+        className={
+          isMobile
+            ? 'font-normal text-white text-[16px]'
+            : 'font-bold text-[#1F1F1F] text-base'
+        }
+      >
         اهلا يا
       </span>
       <Button
         variant="ghost"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center cursor-pointer ${isMobile
-          ? 'font-normal text-white text-[16px] hover:text-white'
-          : 'font-bold text-[#1F1F1F] text-base'
-          } transition-colors hover:bg-transparent`}
+        className={`flex items-center !p-1  cursor-pointer ${
+          isMobile
+            ? 'font-normal text-white text-[16px] hover:text-white'
+            : 'font-bold text-[#1F1F1F] text-base'
+        } transition-colors hover:bg-transparent`}
       >
-        <span className="mr-1">{displayText}</span>
+        <span>{displayText}</span>
         <LiaAngleDownSolid
-          className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 transition-transform duration-200 ${
+            isOpen ? 'rotate-180' : ''
+          }`}
         />
       </Button>
 
