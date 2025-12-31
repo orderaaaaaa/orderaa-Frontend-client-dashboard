@@ -24,7 +24,11 @@ import { exportOrdersToExcel } from '@/utils/exportOrders';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { Breadcrumb } from '@/components/dashboard-layout';
 import { DatePicker } from '@/components/ui/datepicker';
-import { useOrders, useFetchOrdersForExport, useOrderStatusesQuery } from '@/services/orders';
+import {
+  useOrders,
+  useFetchOrdersForExport,
+  useOrderStatusesQuery,
+} from '@/services/orders';
 import { useBulkOrders } from './hooks/useOrderBulk';
 import { useUpdateOrdersBatch } from './hooks/useUpdateOrdersBatch';
 import { useQueryClient } from '@tanstack/react-query';
@@ -44,7 +48,8 @@ import { Scan, ScanLine, ArrowUp, ArrowLeft, X } from 'lucide-react';
 function AllOrdersContent() {
   const [select, setSelect] = useState(false);
   const [selectedOrderIds, setSelectedOrderIds] = useState<number[]>([]);
-  const [selectAllMatchingFilters, setSelectAllMatchingFilters] = useState(false);
+  const [selectAllMatchingFilters, setSelectAllMatchingFilters] =
+    useState(false);
   const queryClient = useQueryClient();
   const [selectedCustomerPhone, setSelectedCustomerPhone] =
     useState<string>('');
@@ -175,8 +180,6 @@ function AllOrdersContent() {
     return orders.filter((order) => selectedOrderIds.includes(order.id));
   }, [orders, selectedOrderIds]);
 
-  const isAllPageSelected = orders.length > 0 && selectedOrderIds.length === orders.length;
-
   // React Hook Form setup
   const handleFormSubmit = useCallback(
     (data: OrderFiltersFormData) => {
@@ -194,29 +197,32 @@ function AllOrdersContent() {
   });
 
   // Handle order selection
-  const handleOrderSelect = useCallback((orderId: number, checked: boolean) => {
-    // If we were in "Select All Store" mode, interacting with individual checkbox breaks it
-    if (selectAllMatchingFilters) {
-      setSelectAllMatchingFilters(false);
-      // If unchecked, we can't easily keep "all except one" without complex logic, so we reset to empty or current page
-      // For simplicity, we just fallback to selecting only the current page (minus the one unchecked)??
-      // Or just start fresh:
-      if (checked) {
-        setSelectedOrderIds([orderId]);
-      } else {
-        setSelectedOrderIds([]);
+  const handleOrderSelect = useCallback(
+    (orderId: number, checked: boolean) => {
+      // If we were in "Select All Store" mode, interacting with individual checkbox breaks it
+      if (selectAllMatchingFilters) {
+        setSelectAllMatchingFilters(false);
+        // If unchecked, we can't easily keep "all except one" without complex logic, so we reset to empty or current page
+        // For simplicity, we just fallback to selecting only the current page (minus the one unchecked)??
+        // Or just start fresh:
+        if (checked) {
+          setSelectedOrderIds([orderId]);
+        } else {
+          setSelectedOrderIds([]);
+        }
+        return;
       }
-      return;
-    }
 
-    setSelectedOrderIds((prev) => {
-      if (checked) {
-        return [...prev, orderId];
-      } else {
-        return prev.filter((id) => id !== orderId);
-      }
-    });
-  }, [selectAllMatchingFilters]);
+      setSelectedOrderIds((prev) => {
+        if (checked) {
+          return [...prev, orderId];
+        } else {
+          return prev.filter((id) => id !== orderId);
+        }
+      });
+    },
+    [selectAllMatchingFilters]
+  );
 
   // Handle select all toggle (Selects All Store to trigger Bulk logic)
   const handleSelectAllToggle = useCallback(() => {
@@ -229,7 +235,7 @@ function AllOrdersContent() {
       // "When ever the user touches this تحديد الكل button then select the state use bulk"
       setSelectAllMatchingFilters(true);
       // We don't need individual IDs for bulk
-      setSelectedOrderIds([]); 
+      setSelectedOrderIds([]);
     }
   }, [selectAllMatchingFilters]);
 
@@ -300,45 +306,54 @@ function AllOrdersContent() {
   }, [apiFilters, select, selectedOrderIds, orders, fetchOrdersForExport]);
 
   // Handle Edit Status
-  const handleEditStatus = useCallback((statusKey: string) => {
-    if (!statusKey) return;
+  const handleEditStatus = useCallback(
+    (statusKey: string) => {
+      if (!statusKey) return;
 
-    if (selectAllMatchingFilters) {
-      // Send filters logic - use bulk endpoint
-      // Ensure we have a status filter to pass?
-      // User mentioned sending status in query.
-      // If filters.status is set, use it. If not?
-      const currentStatusFilter = filters.status;
-      
-      // API requires status filter for bulk updates
-      if (!currentStatusFilter) {
-          toast.warning('يجب تحديد حالة لتصفية الطلبات قبل استخدام تحديث الكل');
+      if (selectAllMatchingFilters) {
+        // Send filters logic - use bulk endpoint
+        // Ensure we have a status filter to pass?
+        // User mentioned sending status in query.
+        // If filters.status is set, use it. If not?
+        const currentStatusFilter = filters.status;
+
+        // API requires status filter for bulk updates
+        if (!currentStatusFilter) {
+          toast.warning('يجب تحديد  فلتر الطلبات قبل استخدام تحديث الكل');
           return;
+        }
+
+        bulkUpdateOrders({
+          payload: {
+            status: statusKey as any,
+            // We DO NOT send filters in body based on user feedback "we don't send id ... we only send staues"
+            // We only send the new status in body.
+          },
+          currentStatus: currentStatusFilter,
+        });
+      } else {
+        // Send IDs - use BATCH endpoint
+        if (selectedOrderIds.length === 0) return;
+
+        // Construct batch payload
+        const batchPayload = {
+          orders: selectedOrderIds.map((id) => ({
+            id,
+            updates: { status: statusKey as any },
+          })),
+        };
+
+        batchUpdateOrders(batchPayload);
       }
-
-      bulkUpdateOrders({
-         payload: {
-          status: statusKey as any,
-          // We DO NOT send filters in body based on user feedback "we don't send id ... we only send staues"
-          // We only send the new status in body.
-         },
-         currentStatus: currentStatusFilter
-      });
-    } else {
-      // Send IDs - use BATCH endpoint
-      if (selectedOrderIds.length === 0) return;
-      
-      // Construct batch payload
-      const batchPayload = {
-        orders: selectedOrderIds.map(id => ({
-          id,
-          updates: { status: statusKey as any }
-        }))
-      };
-
-      batchUpdateOrders(batchPayload);
-    }
-  }, [selectAllMatchingFilters, filters.status, selectedOrderIds, bulkUpdateOrders, batchUpdateOrders]);
+    },
+    [
+      selectAllMatchingFilters,
+      filters.status,
+      selectedOrderIds,
+      bulkUpdateOrders,
+      batchUpdateOrders,
+    ]
+  );
 
   // Handle WhatsApp Share
   const handleShareWhatsApp = useCallback(() => {
@@ -387,7 +402,8 @@ function AllOrdersContent() {
     setSelectedCustomerName('');
   }, []);
 
-  const showBulkActions = (selectedOrders.length > 0 || selectAllMatchingFilters) && !isModalOpen;
+  const showBulkActions =
+    (selectedOrders.length > 0 || selectAllMatchingFilters) && !isModalOpen;
 
   // Add padding to body when bulk actions bar is visible
   useEffect(() => {
@@ -495,55 +511,15 @@ function AllOrdersContent() {
                 onClick={handleSelectAllToggle}
                 className="px-4 py-2 text-sm bg-[#5D24E1] text-white rounded-lg hover:bg-[#682fee] transition-colors"
               >
-                {isAllPageSelected ? (
+                {selectAllMatchingFilters ? (
                   'إلغاء تحديد الكل'
                 ) : (
-                  <span className="flex items-center gap-2">
-                    تحديد الكل
-                    <span className="bg-white text-[#5D24E1] rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
-                      {orders.length}
-                    </span>
-                  </span>
+                  <span className="flex items-center gap-2">تحديد الكل</span>
                 )}
               </button>
             </div>
           )}
         </div>
-        
-        {/* Select All Store Message logic is now merged into the main button as requested */}
-        {select && selectAllMatchingFilters && (
-          <div className="w-full flex justify-center order-last sm:order-none sm:w-auto">
-             <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-2 rounded-lg text-sm flex items-center gap-2">
-                <span>تم تحديد جميع الطلبات في المتجر ({totalOrders}).</span>
-                <button 
-                  onClick={() => {
-                    setSelectAllMatchingFilters(false);
-                    setSelectedOrderIds([]);
-                  }}
-                  className="font-bold underline hover:text-blue-800"
-                >
-                  إلغاء التحديد
-                </button>
-             </div>
-          </div>
-        )}
-
-        {select && selectAllMatchingFilters && (
-           <div className="w-full flex justify-center order-last sm:order-none sm:w-auto">
-             <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-2 rounded-lg text-sm flex items-center gap-2">
-                <span>تم تحديد جميع الطلبات في المتجر ({totalOrders}).</span>
-                <button 
-                  onClick={() => {
-                    setSelectAllMatchingFilters(false);
-                    setSelectedOrderIds([]);
-                  }}
-                  className="font-bold underline hover:text-blue-800"
-                >
-                  إلغاء التحديد
-                </button>
-             </div>
-          </div>
-        )}
 
         <div className="flex flex-row items-center justify-center gap-3 text-white">
           {select && selectedOrderIds.length > 0 && (
@@ -595,7 +571,10 @@ function AllOrdersContent() {
               <OrderCard
                 key={order.id}
                 select={select}
-                isSelected={selectAllMatchingFilters || selectedOrderIds.includes(order.id)}
+                isSelected={
+                  selectAllMatchingFilters ||
+                  selectedOrderIds.includes(order.id)
+                }
                 onSelectionChange={(checked) =>
                   handleOrderSelect(order.id, checked)
                 }

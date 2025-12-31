@@ -53,7 +53,9 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
     }
   };
 
-  const selectedCount = isAllSelected ? totalStoreOrders : selectedOrders.length;
+  const selectedCount = isAllSelected
+    ? totalStoreOrders
+    : selectedOrders.length;
 
   return (
     <div
@@ -63,11 +65,11 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
         <div className="pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
           {/* Status Dropdown using Select */}
           <Select onValueChange={handleStatusSelect}>
-            <SelectTrigger
-              className="group flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border border-[#5D24E1] text-[#5D24E1] hover:bg-[#5D24E1] hover:text-white transition-colors cursor-pointer whitespace-nowrap w-auto h-auto focus:ring-0 focus:ring-offset-0 ring-offset-0"
-            >
+            <SelectTrigger className="group flex items-center gap-2 px-4 py-2 rounded-3xl !bg-white border border-[#5D24E1] !text-[#5D24E1] hover:!bg-[#5D24E1] hover:text-white transition-colors cursor-pointer whitespace-nowrap w-auto h-auto focus:ring-0 focus:ring-offset-0 ring-offset-0">
               <Edit className="h-4 w-4 group-hover:text-white" />
-              <span className="group-hover:text-white">تعديل الحالة ({selectedCount})</span>
+              <span className="group-hover:text-white">
+                تعديل الحالة ({selectedCount})
+              </span>
             </SelectTrigger>
             <SelectContent align="end" className="max-h-[300px]">
               {statusOptions.length > 0 ? (
@@ -75,13 +77,15 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
                   <SelectItem
                     key={status.key}
                     value={status.key}
-                    className="cursor-pointer justify-end"
+                    className="cursor-pointer justify-end  hover:!text-white hover:!bg-[#5D24E1] "
                   >
                     {status.label}
                   </SelectItem>
                 ))
               ) : (
-                <div className="p-2 text-center text-sm text-gray-500">لا توجد حالات متاحة</div>
+                <div className="p-2 text-center text-sm text-gray-500">
+                  لا توجد حالات متاحة
+                </div>
               )}
             </SelectContent>
           </Select>
