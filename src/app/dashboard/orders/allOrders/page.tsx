@@ -307,12 +307,7 @@ function AllOrdersContent() {
   return (
     <div className="w-full max-w-full overflow-x-hidden">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-7 w-full">
-        <Breadcrumb
-          items={[
-            { title: 'الطلبات', href: '/dashboard/orders' },
-            { title: 'جميع الطلبات' },
-          ]}
-        />
+        <Breadcrumb items={[{ title: 'الطلبات' }, { title: 'جميع الطلبات' }]} />
 
         <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 px-3 w-full sm:w-auto">
           <DatePicker
