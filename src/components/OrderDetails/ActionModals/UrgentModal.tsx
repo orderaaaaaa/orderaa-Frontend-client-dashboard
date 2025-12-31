@@ -23,7 +23,7 @@ interface UrgentModalProps {
 
 const getDateFromOption = (option: UrgentOption): Date => {
   const today = new Date();
-  today.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
+  today.setHours(12, 0, 0, 0);
 
   switch (option) {
     case 'today':
@@ -44,8 +44,8 @@ export default function UrgentModal({
   onClose,
   onConfirm,
 }: UrgentModalProps) {
-  const [selectedOption, setSelectedOption] = useState<UrgentOption>('today');
-  const [urgentDate, setUrgentDate] = useState<Date | null>(getDateFromOption('today'));
+  const [selectedOption, setSelectedOption] = useState<UrgentOption | null>(null);
+  const [urgentDate, setUrgentDate] = useState<Date | null>(null);
   const [shippingCost, setShippingCost] = useState('');
   const [shippingCostError, setShippingCostError] = useState('');
 
@@ -57,7 +57,6 @@ export default function UrgentModal({
 
   const handleDateChange = (date: Date | null) => {
     setUrgentDate(date);
-    // Clear radio selection when manually picking a date
     if (date) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -66,6 +65,9 @@ export default function UrgentModal({
       if (diffDays === 0) setSelectedOption('today');
       else if (diffDays === 1) setSelectedOption('tomorrow');
       else if (diffDays === 2) setSelectedOption('after2days');
+      else setSelectedOption(null);
+    } else {
+      setSelectedOption(null);
     }
   };
 
@@ -75,7 +77,6 @@ export default function UrgentModal({
       return;
     }
 
-    // Validate shipping cost with Zod
     const shippingCostResult = shippingCostSchema.safeParse(shippingCost);
     if (!shippingCostResult.success) {
       setShippingCostError(shippingCostResult.error.errors[0]?.message || 'قيمة غير صالحة');
@@ -86,13 +87,12 @@ export default function UrgentModal({
       shippingCost: shippingCostResult.data,
       urgentDate: urgentDate.toISOString()
     });
-    // Reset form after successful confirmation
     handleReset();
   };
 
   const handleReset = () => {
-    setSelectedOption('today');
-    setUrgentDate(getDateFromOption('today'));
+    setSelectedOption(null);
+    setUrgentDate(null);
     setShippingCost('');
     setShippingCostError('');
   };
@@ -106,7 +106,6 @@ export default function UrgentModal({
     const value = e.target.value;
     setShippingCost(value);
 
-    // Validate with Zod
     const result = shippingCostSchema.safeParse(value);
     if (!result.success) {
       setShippingCostError(result.error.errors[0]?.message || 'قيمة غير صالحة');
@@ -128,6 +127,7 @@ export default function UrgentModal({
       title="مستعجل"
       onConfirm={handleConfirm}
       confirmText="تأكيد"
+      confirmDisabled={!urgentDate}
     >
       <div className="space-y-6">
         {/* Radio Options */}

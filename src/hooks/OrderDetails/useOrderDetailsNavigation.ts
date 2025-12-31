@@ -87,6 +87,7 @@ export function useOrderDetailsNavigation({
   const isUserInitiated = useRef(false);
   const isUpdatingUrl = useRef(false);
   const isSyncingFromUrl = useRef(false);
+  const isInitialLoadComplete = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const [targetOrderId, setTargetOrderId] = useState<number | null>(null);
@@ -152,15 +153,17 @@ export function useOrderDetailsNavigation({
 
   useEffect(() => {
     hasMounted.current = true;
+    const timer = setTimeout(() => {
+      isInitialLoadComplete.current = true;
+    }, 600);
+    return () => clearTimeout(timer);
   }, []);
 
-  // Sync state from URL params after navigation (when searchParams changes)
   useEffect(() => {
     if (!searchParams || isUpdatingUrl.current) return;
 
     const urlState = getInitialState();
 
-    // Check if any values differ from current state
     const statusDiffers = urlState.status !== status;
     const timePeriodDiffers = urlState.timePeriod !== timePeriod;
     const fromDateDiffers = urlState.fromDate?.getTime() !== fromDate?.getTime();
@@ -391,7 +394,9 @@ export function useOrderDetailsNavigation({
   }, [debouncedFormFilters, debouncedUpdateUrl]);
 
   useEffect(() => {
-    if (debouncedFormFilters !== null) {
+    // Only mark as user-initiated if initial load is complete
+    // This prevents URL-parsed filters from triggering a fetch on page load
+    if (debouncedFormFilters !== null && isInitialLoadComplete.current) {
       isUserInitiated.current = true;
     }
   }, [debouncedFormFilters]);

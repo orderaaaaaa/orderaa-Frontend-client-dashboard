@@ -5,7 +5,6 @@ import { useEffect, useCallback, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { AuthGuard } from '@/components/auth-guard';
-import { useOrdersStore } from '@/store/ordersStore';
 import { useSidebar } from '@/hooks/useSidebar';
 import { useAuthActions } from '@/hooks/useAuthActions';
 import { navigation } from '@/constants/Navbar';
@@ -36,7 +35,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     handleNavItemClick,
   } = useSidebar();
 
-  const { setSearchQuery } = useOrdersStore();
   const { user, handleUserAction } = useAuthActions();
   const { fetchOrdersForSearch } = useFetchOrdersForSearch();
   const pathname = usePathname();
@@ -69,18 +67,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         setIsSearching(false);
       }
     } else {
-      // On any other page: update store and navigate to all orders page
-      setSearchQuery(query);
-      if (!pathname.includes('/dashboard/orders/allOrders')) {
-        router.push('/dashboard/orders/allOrders');
-      }
+      // On any other page: navigate to all orders page with search query in URL
+      const searchParams = new URLSearchParams();
+      searchParams.set('search', query);
+      router.push(`/dashboard/orders/allOrders?${searchParams.toString()}`);
     }
-  }, [pathname, router, setSearchQuery, isOrderDetailsPage, fetchOrdersForSearch]);
+  }, [router, isOrderDetailsPage, fetchOrdersForSearch]);
 
-  // Handle clear search - clear the store to refetch all orders
+  // Handle clear search - navigate to all orders without search param
   const handleClearSearch = useCallback(() => {
-    setSearchQuery('');
-  }, [setSearchQuery]);
+    if (pathname.includes('/dashboard/orders/allOrders')) {
+      router.push('/dashboard/orders/allOrders');
+    }
+  }, [pathname, router]);
 
   // Auto-open dropdown if pathname matches a child route
   useEffect(() => {

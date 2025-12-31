@@ -4,6 +4,7 @@ import React from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import { OrderEvent } from '@/types/orders';
 import { PhoneOff, History, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { getTimeAgo } from '@/utils/timeAgo';
 
 interface OrderHistoryModalProps {
   isOpen: boolean;
@@ -30,25 +31,6 @@ const statusLabelMap: Record<string, string> = {
   MISSING: 'مفقود',
   REGISTERED: 'مسجل',
   REPORTS: 'تقارير',
-};
-
-const getTimeAgo = (date: string): string => {
-  const eventDate = new Date(date);
-  const now = new Date();
-  const diffMs = now.getTime() - eventDate.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-
-  if (diffDays > 0) {
-    return `منذ ${diffDays} يوم ${diffHours > 0 ? `و ${diffHours} ساعات` : ''}`;
-  } else if (diffHours > 0) {
-    return `منذ ${diffHours} ساعات`;
-  } else if (diffMinutes > 0) {
-    return `منذ ${diffMinutes} دقيقة`;
-  } else {
-    return 'الآن';
-  }
 };
 
 const getEventIcon = (eventType?: string) => {

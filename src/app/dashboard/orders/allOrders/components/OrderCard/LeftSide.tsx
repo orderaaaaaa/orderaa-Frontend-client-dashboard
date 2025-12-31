@@ -3,6 +3,7 @@ import Heading1 from "@/components/ui/typography/Heading1";
 import { CheckCircle, TriangleAlert } from "lucide-react";
 import Image from "next/image";
 import React from "react";
+import { getTimeAgo } from "@/utils/timeAgo";
 
 interface LeftSideProps {
   price: number;
@@ -10,33 +11,6 @@ interface LeftSideProps {
   status: string;
   alert: number;
   createdAt?: string;
-}
-
-function getRelativeTime(dateString?: string): string {
-  if (!dateString) return "منذ وقت غير محدد";
-
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-
-  const seconds = Math.floor(diffMs / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-
-  if (days > 0) {
-    const remainingHours = hours % 24;
-    if (remainingHours > 0) {
-      return `منذ ${days} ${days === 1 ? 'يوم' : 'ايام'} و ${remainingHours} ${remainingHours === 1 ? 'ساعة' : 'ساعات'}`;
-    }
-    return `منذ ${days} ${days === 1 ? 'يوم' : 'ايام'}`;
-  } else if (hours > 0) {
-    return `منذ ${hours} ${hours === 1 ? 'ساعة' : 'ساعات'}`;
-  } else if (minutes > 0) {
-    return `منذ ${minutes} ${minutes === 1 ? 'دقيقة' : 'دقائق'}`;
-  } else {
-    return 'منذ لحظات';
-  }
 }
 
 export default function LeftSide({
@@ -49,7 +23,7 @@ export default function LeftSide({
   return (
     <div className="flex flex-col justify-between items-center">
       <div className="flex flex-col gap-2">
-        <span className="text-[#121212] text-[16px]">{getRelativeTime(createdAt)}</span>
+        <span className="text-[#121212] text-[16px]">{getTimeAgo(createdAt)}</span>
         {alert ? (
           <div className="relative">
             <p className=" absolute top-[-35px] left-[-15px] bg-red-500 text-[9px] text-white min-w-3 h-3 rounded-2xl text-center">

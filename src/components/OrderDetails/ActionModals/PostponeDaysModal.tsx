@@ -1,37 +1,77 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import { DatePicker } from '@/components/ui/datepicker';
 import { LiaCalendarAltSolid } from 'react-icons/lia';
 
+type DurationOption = '1day' | '2days' | '3days' | 'week';
+
 interface PostponeDaysModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (data: { duration?: '1day' | '2days' | '3days' | 'week'; date?: Date }) => void | Promise<void>;
+  onConfirm: (data: { duration?: DurationOption; date?: Date }) => void | Promise<void>;
 }
 
 const dayOptions = [
-  { label: 'يوم', value: '1day' as const },
-  { label: 'يومين', value: '2days' as const },
-  { label: '3 ايام', value: '3days' as const },
-  { label: 'اسبوع', value: 'week' as const },
+  { label: 'يوم', value: '1day' as const, days: 1 },
+  { label: 'يومين', value: '2days' as const, days: 2 },
+  { label: '3 ايام', value: '3days' as const, days: 3 },
+  { label: 'اسبوع', value: 'week' as const, days: 7 },
 ];
+
+const getDateFromDuration = (duration: DurationOption): Date => {
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  const option = dayOptions.find(o => o.value === duration);
+  if (option) {
+    date.setDate(date.getDate() + option.days);
+  }
+  return date;
+};
+
+const getDurationFromDate = (date: Date): DurationOption | null => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+  const option = dayOptions.find(o => o.days === diffDays);
+  return option?.value || null;
+};
 
 export default function PostponeDaysModal({
   isOpen,
   onClose,
   onConfirm,
 }: PostponeDaysModalProps) {
-  const [selectedDuration, setSelectedDuration] = useState<'1day' | '2days' | '3days' | 'week' | null>(null);
+  const [selectedDuration, setSelectedDuration] = useState<DurationOption | null>(null);
   const [postponeDate, setPostponeDate] = useState<Date | null>(null);
 
+  // Sync date when duration is selected
+  useEffect(() => {
+    if (selectedDuration) {
+      setPostponeDate(getDateFromDuration(selectedDuration));
+    }
+  }, [selectedDuration]);
+
+  const handleDateChange = (date: Date | null) => {
+    setPostponeDate(date);
+    if (date) {
+      const matchingDuration = getDurationFromDate(date);
+      setSelectedDuration(matchingDuration);
+    } else {
+      setSelectedDuration(null);
+    }
+  };
+
   const handleConfirm = async () => {
+    if (!postponeDate) {
+      return;
+    }
     await onConfirm({
       duration: selectedDuration || undefined,
-      date: postponeDate || undefined
+      date: postponeDate
     });
-    // Reset form after successful confirmation
     handleReset();
   };
 
@@ -45,8 +85,6 @@ export default function PostponeDaysModal({
     onClose();
   };
 
-  const isFormValid = !!selectedDuration || !!postponeDate;
-
   return (
     <BaseModal
       isOpen={isOpen}
@@ -54,7 +92,7 @@ export default function PostponeDaysModal({
       title="تأجيل أيام"
       onConfirm={handleConfirm}
       confirmText="حفظ"
-      confirmDisabled={!isFormValid}
+      confirmDisabled={!postponeDate}
     >
       <div className="space-y-6">
         {/* Duration Radio Buttons */}
@@ -89,7 +127,7 @@ export default function PostponeDaysModal({
           </label>
           <DatePicker
             selected={postponeDate}
-            onChange={setPostponeDate}
+            onChange={handleDateChange}
             placeholder="اختر التاريخ"
             minDate={new Date()}
             showIcon={true}

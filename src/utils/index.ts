@@ -7,3 +7,5 @@ export {
 } from './debounce';
 
 export { transformCityKeyForAPI } from './cityUtils';
+
+export { getTimeAgo, getTimeAgoShort } from './timeAgo';

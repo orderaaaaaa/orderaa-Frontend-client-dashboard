@@ -20,6 +20,7 @@ import { DatePicker } from '@/components/ui/datepicker';
 import { useOrders, useFetchOrdersForExport } from '@/services/orders';
 import { useUrlFilters } from '@/hooks/useUrlFilters';
 import { TimePeriod } from '@/utils/dateRangeUtils';
+import { formatDateForUrl } from '@/utils/urlFilters';
 import {
   Select,
   SelectContent,
@@ -55,6 +56,37 @@ function AllOrdersContent() {
   // Build API filters from URL state
   const apiFilters = useMemo(() => {
     return buildApiFiltersFromUrlState(filters);
+  }, [filters]);
+
+  // Build filter params string for navigation to order details (excludes page/limit)
+  const orderDetailsFilterParams = useMemo(() => {
+    const params = new URLSearchParams();
+
+    if (filters.status) params.set('status', filters.status);
+    if (filters.timePeriod) params.set('period', filters.timePeriod);
+
+    if (!filters.localFilters.executionDate) {
+      const fromStr = formatDateForUrl(filters.fromDate);
+      if (fromStr) params.set('from', fromStr);
+      const toStr = formatDateForUrl(filters.toDate);
+      if (toStr) params.set('to', toStr);
+    }
+
+    const { localFilters } = filters;
+    if (localFilters.customerName) params.set('customerName', localFilters.customerName);
+    if (localFilters.phone) params.set('phone', localFilters.phone);
+    if (localFilters.governorate) params.set('governorate', localFilters.governorate);
+    if (localFilters.city) params.set('city', localFilters.city);
+    if (localFilters.area) params.set('area', localFilters.area);
+    if (localFilters.productName) params.set('productName', localFilters.productName);
+    if (localFilters.sizeColor) params.set('sizeColor', localFilters.sizeColor);
+    if (localFilters.shipmentCode) params.set('shipmentCode', localFilters.shipmentCode);
+    if (localFilters.address) params.set('address', localFilters.address);
+    if (localFilters.executionDate) params.set('executionDate', localFilters.executionDate);
+    if (localFilters.newFirst !== undefined) params.set('newFirst', String(localFilters.newFirst));
+    if (localFilters.orderByDirection) params.set('orderByDirection', localFilters.orderByDirection);
+
+    return params.toString();
   }, [filters]);
 
   // Destructure for easier access
@@ -432,6 +464,7 @@ function AllOrdersContent() {
                 createdAt={order.createdAt}
                 repeatCount={order.customers.totalCustomerOrders || 0}
                 onRepeatClick={() => handleRepeatClick(order.customers.phone_numbers?.[0], order.customers.name)}
+                filterParams={orderDetailsFilterParams}
               />
             ))}
           </div>

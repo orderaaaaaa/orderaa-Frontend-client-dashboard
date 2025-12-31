@@ -5,6 +5,7 @@ import { toast } from 'react-toastify'
 import CustomerOrdersModal from "@/app/dashboard/orders/allOrders/components/CustomerOrdersModal";
 import OrderHistoryModal from "./OrderHistoryModal";
 import OrderLockedBanner from "./OrderLockedBanner";
+import { getTimeAgo } from "@/utils/timeAgo";
 
 interface OrderDetailsCardIdProps {
   order: Order;
@@ -18,13 +19,7 @@ const OrderDetailsCardId = ({ order, isLockedByOther, lockedBy }: OrderDetailsCa
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
   const createdDate = new Date(order.createdAt);
-  const now = new Date();
-  const diffMs = now.getTime() - createdDate.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const timeAgo = diffDays > 0
-    ? `منذ ${diffDays} يوم, ${diffHours}ساعات`
-    : `منذ ${diffHours} ساعات`;
+  const timeAgo = getTimeAgo(order.createdAt);
 
   const handleCopy = async () => {
     try {

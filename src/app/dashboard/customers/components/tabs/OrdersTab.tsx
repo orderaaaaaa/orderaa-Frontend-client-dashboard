@@ -2,23 +2,13 @@ import React from 'react';
 import { LuHistory } from 'react-icons/lu';
 import { getStatusColor } from '../../lib/getBadgeColor';
 import { ORDER_STATUS_AR } from '../../lib/orderStatusAr';
+import { getTimeAgo } from '@/utils/timeAgo';
 
 interface OrdersTabProps {
   orders: any[];
 }
 
 const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
-  const getRelativeTime = (dateString: string) => {
-    const past = new Date(dateString);
-    const now = new Date();
-    const diffInMs = now.getTime() - past.getTime();
-    const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-    const hours = Math.floor(
-      (diffInMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-    );
-    return `منذ ${days} يوم، ${hours} ساعات`;
-  };
-
   return (
     <div className="w-full" dir="rtl">
       <div className="overflow-x-auto pb-4">
@@ -69,7 +59,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
               </div>
               <div className="flex items-center justify-center gap-1 text-gray-500 text-[10px]">
                 <LuHistory className="text-purple-500 text-base" />
-                <span>{getRelativeTime(order.createdAt)}</span>
+                <span>{getTimeAgo(order.createdAt)}</span>
               </div>
               <div className="text-center text-gray-900 font-bold text-sm">
                 {order.totalCost}

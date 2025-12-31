@@ -2,6 +2,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Package, MapPin, Phone, User, MapPinHouse, TriangleAlert } from "lucide-react";
+import { getTimeAgo } from "@/utils/timeAgo";
 
 interface OrderCardProps {
   id: number;
@@ -22,6 +23,7 @@ interface OrderCardProps {
   createdAt?: string;
   repeatCount?: number;
   onRepeatClick?: () => void;
+  filterParams?: string;
 }
 
 const getStatusText = (status: string): string => {
@@ -46,25 +48,6 @@ const getStatusText = (status: string): string => {
   return statusMap[status] || status;
 };
 
-const getTimeAgo = (dateString?: string): string => {
-  if (!dateString) return '';
-
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
-  if (diffDays > 0) {
-    return `منذ ${diffDays} ${diffDays === 1 ? 'يوم' : 'ايام'}${diffHours > 0 ? ` و ${diffHours} ${diffHours === 1 ? 'ساعة' : 'ساعات'}` : ''}`;
-  } else if (diffHours > 0) {
-    return `منذ ${diffHours} ${diffHours === 1 ? 'ساعة' : 'ساعات'}`;
-  } else {
-    const diffMinutes = Math.floor(diffMs / (1000 * 60));
-    return `منذ ${diffMinutes} ${diffMinutes === 1 ? 'دقيقة' : 'دقائق'}`;
-  }
-};
-
 export default function OrderCard({
   id,
   code,
@@ -84,6 +67,7 @@ export default function OrderCard({
   createdAt,
   repeatCount = 0,
   onRepeatClick,
+  filterParams,
 }: OrderCardProps) {
   const router = useRouter();
 
@@ -94,7 +78,10 @@ export default function OrderCard({
   };
 
   const handleCardClick = () => {
-    router.push(`/dashboard/orders/${id}`);
+    const url = filterParams
+      ? `/dashboard/orders/${id}?${filterParams}`
+      : `/dashboard/orders/${id}`;
+    router.push(url);
   };
 
   const handleRepeatClick = (e: React.MouseEvent) => {

@@ -146,11 +146,6 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             disabled={(date) => {
               // Compare dates without time
               const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-              const today = new Date();
-              const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-
-              // Disable future dates
-              if (dateOnly > todayOnly) return true;
 
               if (minDate) {
                 const minDateOnly = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate());
