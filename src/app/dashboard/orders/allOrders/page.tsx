@@ -1,6 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+  Suspense,
+} from 'react';
 import { toast } from 'react-toastify';
 import FilterSection from './components/FilterSection';
 import OrderCard from './components/OrderCard';
@@ -34,7 +41,8 @@ import { Scan, ScanLine, ArrowUp, ArrowLeft, X } from 'lucide-react';
 function AllOrdersContent() {
   const [select, setSelect] = useState(false);
   const [selectedOrderIds, setSelectedOrderIds] = useState<number[]>([]);
-  const [selectedCustomerPhone, setSelectedCustomerPhone] = useState<string>('');
+  const [selectedCustomerPhone, setSelectedCustomerPhone] =
+    useState<string>('');
   const [selectedCustomerName, setSelectedCustomerName] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -73,18 +81,25 @@ function AllOrdersContent() {
     }
 
     const { localFilters } = filters;
-    if (localFilters.customerName) params.set('customerName', localFilters.customerName);
+    if (localFilters.customerName)
+      params.set('customerName', localFilters.customerName);
     if (localFilters.phone) params.set('phone', localFilters.phone);
-    if (localFilters.governorate) params.set('governorate', localFilters.governorate);
+    if (localFilters.governorate)
+      params.set('governorate', localFilters.governorate);
     if (localFilters.city) params.set('city', localFilters.city);
     if (localFilters.area) params.set('area', localFilters.area);
-    if (localFilters.productName) params.set('productName', localFilters.productName);
+    if (localFilters.productName)
+      params.set('productName', localFilters.productName);
     if (localFilters.sizeColor) params.set('sizeColor', localFilters.sizeColor);
-    if (localFilters.shipmentCode) params.set('shipmentCode', localFilters.shipmentCode);
+    if (localFilters.shipmentCode)
+      params.set('shipmentCode', localFilters.shipmentCode);
     if (localFilters.address) params.set('address', localFilters.address);
-    if (localFilters.executionDate) params.set('executionDate', localFilters.executionDate);
-    if (localFilters.newFirst !== undefined) params.set('newFirst', String(localFilters.newFirst));
-    if (localFilters.orderByDirection) params.set('orderByDirection', localFilters.orderByDirection);
+    if (localFilters.executionDate)
+      params.set('executionDate', localFilters.executionDate);
+    if (localFilters.newFirst !== undefined)
+      params.set('newFirst', String(localFilters.newFirst));
+    if (localFilters.orderByDirection)
+      params.set('orderByDirection', localFilters.orderByDirection);
 
     return params.toString();
   }, [filters]);
@@ -259,7 +274,7 @@ function AllOrdersContent() {
   const scrollToTop = useCallback(() => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: 'smooth',
     });
   }, []);
 
@@ -274,7 +289,6 @@ function AllOrdersContent() {
     setSelectedCustomerPhone('');
     setSelectedCustomerName('');
   }, []);
-
 
   const showBulkActions = selectedOrders.length > 0 && !isModalOpen;
 
@@ -292,7 +306,7 @@ function AllOrdersContent() {
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">
-      <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-7 w-full'>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-7 w-full">
         <Breadcrumb
           items={[
             { title: 'الطلبات', href: '/dashboard/orders' },
@@ -322,8 +336,15 @@ function AllOrdersContent() {
           />
 
           <div className="relative w-32 sm:w-[180px] flex-shrink-0">
-            <Select value={timePeriod} onValueChange={(value) => setTimePeriod(value as TimePeriod)}>
-              <SelectTrigger className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${timePeriod ? 'text-[#5D24E1] font-bold' : ''}`}>
+            <Select
+              value={timePeriod}
+              onValueChange={(value) => setTimePeriod(value as TimePeriod)}
+            >
+              <SelectTrigger
+                className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${
+                  timePeriod ? 'text-[#5D24E1] font-bold' : ''
+                }`}
+              >
                 <SelectValue placeholder="الفترة الزمنية" />
               </SelectTrigger>
               <SelectContent className="[&_[data-state=checked]]:text-[#5D24E1]">
@@ -381,30 +402,34 @@ function AllOrdersContent() {
               onClick={handleSelectAllToggle}
               className="px-4 py-2 text-sm bg-[#5D24E1] text-white rounded-lg hover:bg-[#682fee] transition-colors"
             >
-              {selectedOrderIds.length === orders.length && orders.length > 0
-                ? 'إلغاء تحديد الكل'
-                : (
-                  <span className="flex items-center gap-2">
-                    تحديد الكل
-                    <span className="bg-white text-[#5D24E1] rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
-                      {orders.length}
-                    </span>
+              {selectedOrderIds.length === orders.length &&
+              orders.length > 0 ? (
+                'إلغاء تحديد الكل'
+              ) : (
+                <span className="flex items-center gap-2">
+                  تحديد الكل
+                  <span className="bg-white text-[#5D24E1] rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                    {orders.length}
                   </span>
-                )}
+                </span>
+              )}
             </button>
           )}
         </div>
-        <div className='flex flex-row items-center justify-center gap-3 text-white'>
+        <div className="flex flex-row items-center justify-center gap-3 text-white">
           {select && selectedOrderIds.length > 0 && (
-            <div className='flex flex-row items-center justify-center gap-2'>
-              <X onClick={() => setSelect(false)} className="cursor-pointer text-[#5D24E1] h-5 w-5" />
+            <div className="flex flex-row items-center justify-center gap-2">
+              <X
+                onClick={() => setSelect(false)}
+                className="cursor-pointer text-[#5D24E1] h-5 w-5"
+              />
               <span className="text-sm text-gray-600">
                 تم تحديد {selectedOrderIds.length} طلب
               </span>
             </div>
           )}
           <div
-            className='bg-[#5D24E1] flex flex-row items-center justify-center gap-3 px-5 py-2 rounded-full cursor-pointer'
+            className="bg-[#5D24E1] flex flex-row items-center justify-center gap-3 px-5 py-2 rounded-full cursor-pointer"
             onClick={() => setSelect(!select)}
           >
             <p>تحديد</p>
@@ -436,7 +461,7 @@ function AllOrdersContent() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 my-4 justify-items-center">
+          <div className="grid container mx-auto grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 my-4 justify-items-center">
             {orders.map((order) => (
               <OrderCard
                 key={order.id}
@@ -449,21 +474,31 @@ function AllOrdersContent() {
                 code={order.code}
                 name={order.customers.name}
                 phoneNumbers={order.customers.phone_numbers}
-                government={order.governorate || order.externalGovernorate || 'غير محدد'}
+                government={
+                  order.governorate || order.externalGovernorate || 'غير محدد'
+                }
                 items={order.order_products.map(
                   (op: any) =>
-                    `${op.products.name}${op.products.size ? ` - ${op.products.size}` : ''
+                    `${op.products.name}${
+                      op.products.size ? ` - ${op.products.size}` : ''
                     }${op.products.color ? ` - ${op.products.color}` : ''}`
                 )}
                 price={order.totalCost}
                 trys={order.numberOfTriesToReach}
                 status={order.status}
-                city={order.customers.area || order.customers.city || 'غير محدد'}
+                city={
+                  order.customers.area || order.customers.city || 'غير محدد'
+                }
                 address={order.customers.address || 'غير محدد'}
                 alert={0}
                 createdAt={order.createdAt}
                 repeatCount={order.customers.totalCustomerOrders || 0}
-                onRepeatClick={() => handleRepeatClick(order.customers.phone_numbers?.[0], order.customers.name)}
+                onRepeatClick={() =>
+                  handleRepeatClick(
+                    order.customers.phone_numbers?.[0],
+                    order.customers.name
+                  )
+                }
                 filterParams={orderDetailsFilterParams}
               />
             ))}
@@ -519,7 +554,6 @@ function AllOrdersContent() {
           <ArrowUp className="w-6 h-6" />
         </button>
       )}
-
     </div>
   );
 }
