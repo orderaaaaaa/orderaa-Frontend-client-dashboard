@@ -24,7 +24,10 @@ import { exportOrdersToExcel } from '@/utils/exportOrders';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { Breadcrumb } from '@/components/dashboard-layout';
 import { DatePicker } from '@/components/ui/datepicker';
-import { useOrders, useFetchOrdersForExport } from '@/services/orders';
+import { useOrders, useFetchOrdersForExport, useOrderStatusesQuery } from '@/services/orders';
+import { useBulkOrders } from './hooks/useOrderBulk';
+import { useUpdateOrdersBatch } from './hooks/useUpdateOrdersBatch';
+import { useQueryClient } from '@tanstack/react-query';
 import { useUrlFilters } from '@/hooks/useUrlFilters';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import { formatDateForUrl } from '@/utils/urlFilters';
@@ -41,6 +44,8 @@ import { Scan, ScanLine, ArrowUp, ArrowLeft, X } from 'lucide-react';
 function AllOrdersContent() {
   const [select, setSelect] = useState(false);
   const [selectedOrderIds, setSelectedOrderIds] = useState<number[]>([]);
+  const [selectAllMatchingFilters, setSelectAllMatchingFilters] = useState(false);
+  const queryClient = useQueryClient();
   const [selectedCustomerPhone, setSelectedCustomerPhone] =
     useState<string>('');
   const [selectedCustomerName, setSelectedCustomerName] = useState<string>('');
@@ -111,7 +116,38 @@ function AllOrdersContent() {
     data: ordersData,
     isLoading: loading,
     error: queryError,
+    refetch,
   } = useOrders(apiFilters);
+
+  const { data: statusOptions } = useOrderStatusesQuery();
+  // Batch update mutation (for specific IDs)
+  const { mutate: batchUpdateOrders } = useUpdateOrdersBatch({
+    onSuccess: (data) => {
+      toast.success(data.message || 'تم تحديث حالة الطلبات بنجاح');
+      setSelectedOrderIds([]);
+      setSelect(false);
+      refetch();
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || 'فشل تحديث حالة الطلبات');
+    },
+  });
+
+  const { mutate: bulkUpdateOrders } = useBulkOrders({
+    onSuccess: (data) => {
+      toast.success(data.message || 'تم تحديث حالة الطلبات بنجاح');
+      setSelectedOrderIds([]);
+      setSelectAllMatchingFilters(false);
+      setSelect(false);
+      refetch();
+      // Invalidate stats to update counts
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || 'فشل تحديث حالة الطلبات');
+    },
+  });
 
   const { statistics } = useOrderStatistics();
   const { options } = useFilterOptions();
@@ -134,10 +170,12 @@ function AllOrdersContent() {
     }
   }, [page]);
 
-  // Get selected orders as Order objects for BulkActionsBar
+  // Get selected orders as Order objects for BulkActionsBar (only relevant for current page visual)
   const selectedOrders = useMemo(() => {
     return orders.filter((order) => selectedOrderIds.includes(order.id));
   }, [orders, selectedOrderIds]);
+
+  const isAllPageSelected = orders.length > 0 && selectedOrderIds.length === orders.length;
 
   // React Hook Form setup
   const handleFormSubmit = useCallback(
@@ -157,6 +195,20 @@ function AllOrdersContent() {
 
   // Handle order selection
   const handleOrderSelect = useCallback((orderId: number, checked: boolean) => {
+    // If we were in "Select All Store" mode, interacting with individual checkbox breaks it
+    if (selectAllMatchingFilters) {
+      setSelectAllMatchingFilters(false);
+      // If unchecked, we can't easily keep "all except one" without complex logic, so we reset to empty or current page
+      // For simplicity, we just fallback to selecting only the current page (minus the one unchecked)??
+      // Or just start fresh:
+      if (checked) {
+        setSelectedOrderIds([orderId]);
+      } else {
+        setSelectedOrderIds([]);
+      }
+      return;
+    }
+
     setSelectedOrderIds((prev) => {
       if (checked) {
         return [...prev, orderId];
@@ -164,23 +216,33 @@ function AllOrdersContent() {
         return prev.filter((id) => id !== orderId);
       }
     });
-  }, []);
+  }, [selectAllMatchingFilters]);
 
-  // Handle select all toggle
+  // Handle select all toggle (Selects All Store to trigger Bulk logic)
   const handleSelectAllToggle = useCallback(() => {
-    if (selectedOrderIds.length === orders.length && orders.length > 0) {
+    if (selectAllMatchingFilters) {
       // Deselect all
+      setSelectAllMatchingFilters(false);
       setSelectedOrderIds([]);
     } else {
-      // Select all current page orders
-      setSelectedOrderIds(orders.map((o) => o.id));
+      // Select ALL matching filters (Bulk Mode)
+      // "When ever the user touches this تحديد الكل button then select the state use bulk"
+      setSelectAllMatchingFilters(true);
+      // We don't need individual IDs for bulk
+      setSelectedOrderIds([]); 
     }
-  }, [orders, selectedOrderIds]);
+  }, [selectAllMatchingFilters]);
+
+  // Handle select all matching filters (All Store)
+  const handleSelectAllStore = useCallback(() => {
+    setSelectAllMatchingFilters(true);
+  }, []);
 
   // Clear selection when select mode is turned off
   useEffect(() => {
     if (!select) {
       setSelectedOrderIds([]);
+      setSelectAllMatchingFilters(false);
     }
   }, [select]);
 
@@ -238,10 +300,45 @@ function AllOrdersContent() {
   }, [apiFilters, select, selectedOrderIds, orders, fetchOrdersForExport]);
 
   // Handle Edit Status
-  const handleEditStatus = useCallback(() => {
-    // TODO: Implement edit status functionality
-    toast.info(`سيتم تعديل حالة ${selectedOrders.length} طلب`);
-  }, [selectedOrders]);
+  const handleEditStatus = useCallback((statusKey: string) => {
+    if (!statusKey) return;
+
+    if (selectAllMatchingFilters) {
+      // Send filters logic - use bulk endpoint
+      // Ensure we have a status filter to pass?
+      // User mentioned sending status in query.
+      // If filters.status is set, use it. If not?
+      const currentStatusFilter = filters.status;
+      
+      // API requires status filter for bulk updates
+      if (!currentStatusFilter) {
+          toast.warning('يجب تحديد حالة لتصفية الطلبات قبل استخدام تحديث الكل');
+          return;
+      }
+
+      bulkUpdateOrders({
+         payload: {
+          status: statusKey as any,
+          // We DO NOT send filters in body based on user feedback "we don't send id ... we only send staues"
+          // We only send the new status in body.
+         },
+         currentStatus: currentStatusFilter
+      });
+    } else {
+      // Send IDs - use BATCH endpoint
+      if (selectedOrderIds.length === 0) return;
+      
+      // Construct batch payload
+      const batchPayload = {
+        orders: selectedOrderIds.map(id => ({
+          id,
+          updates: { status: statusKey as any }
+        }))
+      };
+
+      batchUpdateOrders(batchPayload);
+    }
+  }, [selectAllMatchingFilters, filters.status, selectedOrderIds, bulkUpdateOrders, batchUpdateOrders]);
 
   // Handle WhatsApp Share
   const handleShareWhatsApp = useCallback(() => {
@@ -290,7 +387,7 @@ function AllOrdersContent() {
     setSelectedCustomerName('');
   }, []);
 
-  const showBulkActions = selectedOrders.length > 0 && !isModalOpen;
+  const showBulkActions = (selectedOrders.length > 0 || selectAllMatchingFilters) && !isModalOpen;
 
   // Add padding to body when bulk actions bar is visible
   useEffect(() => {
@@ -393,24 +490,61 @@ function AllOrdersContent() {
         <div className="flex justify-center sm:justify-start items-center gap-4">
           <p className="text-gray-700">عدد جميع الطلبات: {totalOrders}</p>
           {select && (
-            <button
-              onClick={handleSelectAllToggle}
-              className="px-4 py-2 text-sm bg-[#5D24E1] text-white rounded-lg hover:bg-[#682fee] transition-colors"
-            >
-              {selectedOrderIds.length === orders.length &&
-              orders.length > 0 ? (
-                'إلغاء تحديد الكل'
-              ) : (
-                <span className="flex items-center gap-2">
-                  تحديد الكل
-                  <span className="bg-white text-[#5D24E1] rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
-                    {orders.length}
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handleSelectAllToggle}
+                className="px-4 py-2 text-sm bg-[#5D24E1] text-white rounded-lg hover:bg-[#682fee] transition-colors"
+              >
+                {isAllPageSelected ? (
+                  'إلغاء تحديد الكل'
+                ) : (
+                  <span className="flex items-center gap-2">
+                    تحديد الكل
+                    <span className="bg-white text-[#5D24E1] rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                      {orders.length}
+                    </span>
                   </span>
-                </span>
-              )}
-            </button>
+                )}
+              </button>
+            </div>
           )}
         </div>
+        
+        {/* Select All Store Message logic is now merged into the main button as requested */}
+        {select && selectAllMatchingFilters && (
+          <div className="w-full flex justify-center order-last sm:order-none sm:w-auto">
+             <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-2 rounded-lg text-sm flex items-center gap-2">
+                <span>تم تحديد جميع الطلبات في المتجر ({totalOrders}).</span>
+                <button 
+                  onClick={() => {
+                    setSelectAllMatchingFilters(false);
+                    setSelectedOrderIds([]);
+                  }}
+                  className="font-bold underline hover:text-blue-800"
+                >
+                  إلغاء التحديد
+                </button>
+             </div>
+          </div>
+        )}
+
+        {select && selectAllMatchingFilters && (
+           <div className="w-full flex justify-center order-last sm:order-none sm:w-auto">
+             <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-2 rounded-lg text-sm flex items-center gap-2">
+                <span>تم تحديد جميع الطلبات في المتجر ({totalOrders}).</span>
+                <button 
+                  onClick={() => {
+                    setSelectAllMatchingFilters(false);
+                    setSelectedOrderIds([]);
+                  }}
+                  className="font-bold underline hover:text-blue-800"
+                >
+                  إلغاء التحديد
+                </button>
+             </div>
+          </div>
+        )}
+
         <div className="flex flex-row items-center justify-center gap-3 text-white">
           {select && selectedOrderIds.length > 0 && (
             <div className="flex flex-row items-center justify-center gap-2">
@@ -461,7 +595,7 @@ function AllOrdersContent() {
               <OrderCard
                 key={order.id}
                 select={select}
-                isSelected={selectedOrderIds.includes(order.id)}
+                isSelected={selectAllMatchingFilters || selectedOrderIds.includes(order.id)}
                 onSelectionChange={(checked) =>
                   handleOrderSelect(order.id, checked)
                 }
@@ -538,11 +672,14 @@ function AllOrdersContent() {
         <BulkActionsBar
           selectedOrders={selectedOrders}
           onEditStatus={handleEditStatus}
+          statusOptions={statusOptions || []}
           onExportExcel={handleExportExcel}
           onShareWhatsApp={handleShareWhatsApp}
           onShipping={handleShipping}
           onOther={handleOther}
           position="fixed"
+          isAllSelected={selectAllMatchingFilters}
+          totalStoreOrders={totalOrders}
         />
       )}
 

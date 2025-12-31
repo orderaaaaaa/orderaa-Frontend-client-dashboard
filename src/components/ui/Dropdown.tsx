@@ -23,6 +23,7 @@ interface DropdownProps {
   arrowClassName?: string;
   dropdownClassName?: string;
   readOnly?: boolean;
+  iconClassName?: string;
 }
 
 export default function Dropdown({
@@ -39,6 +40,7 @@ export default function Dropdown({
   arrowClassName,
   dropdownClassName,
   readOnly = false,
+  iconClassName,
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -79,7 +81,7 @@ export default function Dropdown({
       {label && (
         <label className="block mb-1 font-medium text-[16px]">{label}</label>
       )}
-      <div className="relative">
+      <div className="relative group">
         {/* Dropdown Arrow on the LEFT - Clickable */}
         <button
           type="button"
@@ -99,7 +101,7 @@ export default function Dropdown({
         </button>
         {/* Optional icon on the RIGHT */}
         {icon && (
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
+          <div className={`absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none transition-colors ${iconClassName || 'text-gray-400'}`}>
             {icon}
           </div>
         )}

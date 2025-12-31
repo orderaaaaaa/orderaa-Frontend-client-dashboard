@@ -1,3 +1,6 @@
+
+import { FilterOrdersDto } from '@/types/orders';
+
 /* =========================
    ORDER STATUS (SHARED)
    ========================= */
@@ -36,6 +39,9 @@ export interface BulkRequest {
   postponedUntil?: string; // ISO 8601
   cancelReason?: string;
   cancelNotes?: string;
+  ids?: number[];
+  filters?: FilterOrdersDto;
+  excludeIds?: number[];
 }
 
 export interface BulkUpdateResponse {

@@ -2,29 +2,42 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { FileSpreadsheet, Edit, Truck, CircleAlert } from 'lucide-react';
 import type { Order } from '@/types/orders';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from '@/components/ui/select';
+import { OrderStatusItem } from '@/types/orders';
 
 interface BulkActionsBarProps {
   selectedOrders: Order[];
-  onEditStatus?: () => void;
+  onEditStatus?: (statusKey: string) => void;
+  statusOptions?: OrderStatusItem[];
   onExportExcel?: () => void;
   onShareWhatsApp?: () => void;
   onShipping?: () => void;
   onOther?: () => void;
   position?: 'fixed' | 'sticky' | 'absolute';
   className?: string;
+  isAllSelected?: boolean;
+  totalStoreOrders?: number;
 }
 
 const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
   selectedOrders,
   onEditStatus,
+  statusOptions = [],
   onExportExcel,
   onShareWhatsApp,
   onShipping,
   onOther,
   position = 'fixed',
   className = '',
+  isAllSelected = false,
+  totalStoreOrders = 0,
 }) => {
-  if (selectedOrders.length === 0) {
+  if (selectedOrders.length === 0 && !isAllSelected) {
     return null;
   }
 
@@ -34,26 +47,48 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
     absolute: 'absolute bottom-0 left-0 right-0 z-10',
   }[position];
 
+  const handleStatusSelect = (statusKey: string) => {
+    if (onEditStatus) {
+      onEditStatus(statusKey);
+    }
+  };
+
+  const selectedCount = isAllSelected ? totalStoreOrders : selectedOrders.length;
+
   return (
     <div
       className={`${positionClasses} bg-white border-t border-gray-200 shadow-lg py-4 px-6 ${className}`}
     >
-      {/* 1. Added scrollbar-hide here */}
       <div className="mx-auto overflow-x-auto scrollbar-hide">
-        {/* 2. Added w-max to ensure buttons don't wrap and actually trigger the scroll */}
         <div className="pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
-          <Button
-            variant="outline"
-            className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border-[#5D24E1] text-[#5D24E1] hover:bg-[#5D24E1] hover:text-white transition-colors cursor-pointer whitespace-nowrap"
-            onClick={onEditStatus}
-          >
-            <Edit className="h-4 w-4" />
-            <span>تعديل الحالة</span>
-          </Button>
+          {/* Status Dropdown using Select */}
+          <Select onValueChange={handleStatusSelect}>
+            <SelectTrigger
+              className="group flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border border-[#5D24E1] text-[#5D24E1] hover:bg-[#5D24E1] hover:text-white transition-colors cursor-pointer whitespace-nowrap w-auto h-auto focus:ring-0 focus:ring-offset-0 ring-offset-0"
+            >
+              <Edit className="h-4 w-4 group-hover:text-white" />
+              <span className="group-hover:text-white">تعديل الحالة ({selectedCount})</span>
+            </SelectTrigger>
+            <SelectContent align="end" className="max-h-[300px]">
+              {statusOptions.length > 0 ? (
+                statusOptions.map((status) => (
+                  <SelectItem
+                    key={status.key}
+                    value={status.key}
+                    className="cursor-pointer justify-end"
+                  >
+                    {status.label}
+                  </SelectItem>
+                ))
+              ) : (
+                <div className="p-2 text-center text-sm text-gray-500">لا توجد حالات متاحة</div>
+              )}
+            </SelectContent>
+          </Select>
 
           <Button
             variant="outline"
-            className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border-[#5D24E1] text-[#5D24E1] hover:bg-[#5D24E1] hover:text-white transition-colors cursor-pointer whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border-[#5D24E1] text-[#5D24E1] hover:bg-[#5D24E1] hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
             onClick={onExportExcel}
           >
             <FileSpreadsheet className="h-4 w-4" />
@@ -62,7 +97,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
 
           <Button
             variant="outline"
-            className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border-[#5D24E1] text-[#5D24E1] hover:bg-[#5D24E1] hover:text-white transition-colors cursor-pointer whitespace-nowrap [&:hover_svg]:fill-white"
+            className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border-[#5D24E1] text-[#5D24E1] hover:bg-[#5D24E1] hover:text-white transition-colors cursor-pointer whitespace-nowrap [&:hover_svg]:fill-white h-10"
             onClick={onShareWhatsApp}
           >
             <svg
@@ -80,7 +115,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
 
           <Button
             variant="outline"
-            className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border-[#5D24E1] text-[#5D24E1] hover:bg-[#5D24E1] hover:text-white transition-colors cursor-pointer whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border-[#5D24E1] text-[#5D24E1] hover:bg-[#5D24E1] hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
             onClick={onShipping}
           >
             <Truck className="h-4 w-4" />
@@ -89,7 +124,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
 
           <Button
             variant="outline"
-            className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border-[#5D24E1] text-[#5D24E1] hover:bg-[#5D24E1] hover:text-white transition-colors cursor-pointer whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border-[#5D24E1] text-[#5D24E1] hover:bg-[#5D24E1] hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
             onClick={onOther}
           >
             <CircleAlert className="h-4 w-4" />

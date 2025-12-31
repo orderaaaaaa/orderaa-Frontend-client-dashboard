@@ -7,9 +7,17 @@ import {
 } from '../types/Bulk';
 
 export async function bulkOrders(
-  payload: BulkRequest
+  payload: BulkRequest,
+  currentStatus?: string
 ): Promise<BulkUpdateResponse> {
-  const { data } = await http.post<BulkUpdateResponse>('/orders/bulk', payload);
+  const params = currentStatus ? { status: currentStatus } : {};
+  const { data } = await http.patch<BulkUpdateResponse>(
+    '/orders/bulk',
+    payload,
+    {
+      params,
+    }
+  );
 
   return data;
 }
@@ -17,7 +25,7 @@ export async function bulkOrders(
 export const updateOrdersBatch = async (
   payload: OrdersBatchRequest
 ): Promise<OrdersBatchResponse> => {
-  const { data } = await http.post<OrdersBatchResponse>(
+  const { data } = await http.patch<OrdersBatchResponse>(
     '/orders/batch',
     payload
   );
