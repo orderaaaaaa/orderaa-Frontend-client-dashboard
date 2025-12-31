@@ -472,12 +472,19 @@ function AllOrdersContent() {
                 government={
                   order.governorate || order.externalGovernorate || 'غير محدد'
                 }
-                items={order.order_products.map(
-                  (op: any) =>
-                    `${op.products.name}${
-                      op.products.size ? ` - ${op.products.size}` : ''
-                    }${op.products.color ? ` - ${op.products.color}` : ''}`
-                )}
+                // Updated Mapping Logic for Items and Variants
+                items={order.order_products.map((op: any) => {
+                  const productName = op.products?.name || 'منتج غير معروف';
+
+                  const variantDetails =
+                    op.variants && op.variants.length > 0
+                      ? op.variants.map((v: any) => v.value).join('') // Use empty join for "42black"
+                      : '';
+
+                  return variantDetails
+                    ? `${productName} - ${variantDetails}`
+                    : productName;
+                })}
                 price={order.totalCost}
                 trys={order.numberOfTriesToReach}
                 status={order.status}

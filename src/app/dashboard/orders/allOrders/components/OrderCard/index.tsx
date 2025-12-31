@@ -101,7 +101,7 @@ export default function OrderCard({
   return (
     <div
       onClick={handleCardClick}
-      className="relative w-full h-full md:max-w-[300px] bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.1)] rounded-[10px] cursor-pointer hover:shadow-[0px_6px_20px_rgba(93,36,225,0.15)] transition-all duration-200 flex flex-col"
+      className="relative w-full h-full max-w-[300px] bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.1)] rounded-[10px] cursor-pointer hover:shadow-[0px_6px_20px_rgba(93,36,225,0.15)] transition-all duration-200 flex flex-col"
     >
       <div className="grid grid-cols-3 items-center py-2 gap-4">
         {/* Right: Checkbox */}
@@ -125,7 +125,7 @@ export default function OrderCard({
           {repeatCount > 1 && (
             <button
               onClick={handleRepeatClick}
-              className="relative flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
+              className="absolute top-7 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
               title="عرض جميع طلبات العميل"
             >
               <TriangleAlert
@@ -168,6 +168,23 @@ export default function OrderCard({
           </div>
         )}
 
+        {phoneNumbers
+          .filter((p) => p && p !== 'غير محدد')
+          .map((phone, index) => (
+            <div
+              key={index}
+              className="flex flex-row-reverse items-center gap-2"
+            >
+              <span className="text-base font-medium text-black" dir="ltr">
+                {phone}
+              </span>
+              <Phone
+                className="w-[18px] h-[18px] flex-shrink-0"
+                style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
+              />
+            </div>
+          ))}
+
         {(government && government !== 'غير محدد') ||
         (city && city !== 'غير محدد') ? (
           <div className="flex flex-row-reverse items-center gap-2">
@@ -197,30 +214,17 @@ export default function OrderCard({
           />
         </div>
 
-        {phoneNumbers
-          .filter((p) => p && p !== 'غير محدد')
-          .map((phone, index) => (
-            <div
-              key={index}
-              className="flex flex-row-reverse items-center gap-2"
-            >
-              <span className="text-base font-medium text-black" dir="ltr">
-                {phone}
-              </span>
-              <Phone
-                className="w-[18px] h-[18px] flex-shrink-0"
-                style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
-              />
-            </div>
-          ))}
-
         {items && items[0] && items[0] !== 'غير محدد' && (
-          <div className="flex flex-row-reverse items-center gap-2">
-            <span className="text-base font-medium text-black">{items[0]}</span>
+          <div className="flex flex-row items-center gap-2 w-full">
             <Package
               className="w-[18px] h-[18px] flex-shrink-0"
               style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
             />
+            <div className="flex flex-row-reverse flex-wrap gap-1">
+              <span className="text-base font-medium text-black text-right">
+                {items[0]}
+              </span>
+            </div>
           </div>
         )}
 
