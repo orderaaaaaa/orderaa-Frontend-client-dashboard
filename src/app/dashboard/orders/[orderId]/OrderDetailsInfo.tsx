@@ -1,10 +1,10 @@
-import React from "react";
-import { Order, OrderStatus, OrderLockedBy } from "@/types/orders";
+import React from 'react';
+import { Order, OrderStatus, OrderLockedBy } from '@/types/orders';
 
-import OrderDetailsCardId from "@/components/OrderDetails/OrderDetailsCardId";
-import OrderDetailsInfoStatus from "@/components/OrderDetails/OrderDetailsInfoStatus";
-import OrderDetailsProductCard from "@/components/OrderDetails/OrderDetailsProductCard";
-import OrderDetailsInfoComponent from "@/components/OrderDetails/OrderDetailsInfo";
+import OrderDetailsCardId from '@/components/OrderDetails/OrderDetailsCardId';
+import OrderDetailsInfoStatus from '@/components/OrderDetails/OrderDetailsInfoStatus';
+import OrderDetailsProductCard from '@/components/OrderDetails/OrderDetailsProductCard';
+import OrderDetailsInfoComponent from '@/components/OrderDetails/OrderDetailsInfo';
 
 interface OrderDetailsInfoProps {
   order: Order;
@@ -38,7 +38,10 @@ function OrderDetailsInfo({
         lockedBy={lockedBy}
       />
       <OrderDetailsInfoStatus order={order} isLockedByOther={isLockedByOther} />
-      <OrderDetailsProductCard order={order} isLockedByOther={isLockedByOther} />
+      <OrderDetailsProductCard
+        order={order}
+        isLockedByOther={isLockedByOther}
+      />
       <OrderDetailsInfoComponent
         order={order}
         onNavigateToNextOrder={onNavigateToNextOrder}

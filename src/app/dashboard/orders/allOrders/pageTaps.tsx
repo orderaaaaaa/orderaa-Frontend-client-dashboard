@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Truck,
   Boxes,
@@ -16,12 +16,12 @@ import {
   ClipboardCheck,
   Copy,
   PackageCheck,
-} from "lucide-react";
-import PageTab from "@/components/ui/PageTab";
-import { OrderStatus } from "@/types/orders";
-import { useOrdersStore } from "@/store/ordersStore";
-import { LiaWhatsapp } from "react-icons/lia";
-import { useOrderStatusesQuery } from "@/services/orders";
+} from 'lucide-react';
+import PageTab from '@/components/ui/PageTab';
+import { OrderStatus } from '@/types/orders';
+import { useOrdersStore } from '@/store/ordersStore';
+import { LiaWhatsapp } from 'react-icons/lia';
+import { useOrderStatusesQuery } from '@/services/orders';
 
 interface PageTapsProps {
   data?: any[];
@@ -61,11 +61,19 @@ const getIconForStatus = (statusValue: string): React.ReactNode => {
   return iconMap[statusValue] || <Boxes width={18} height={18} />;
 };
 
-function PageTaps({ data, statusCounts, totalOrders, onStatusChange, currentStatus }: PageTapsProps) {
-  const { selectedStatus: storeSelectedStatus, setSelectedStatus } = useOrdersStore();
+function PageTaps({
+  data,
+  statusCounts,
+  totalOrders,
+  onStatusChange,
+  currentStatus,
+}: PageTapsProps) {
+  const { selectedStatus: storeSelectedStatus, setSelectedStatus } =
+    useOrdersStore();
 
   // Use prop if provided (URL mode), otherwise fall back to Zustand store
-  const selectedStatus = currentStatus !== undefined ? currentStatus : storeSelectedStatus;
+  const selectedStatus =
+    currentStatus !== undefined ? currentStatus : storeSelectedStatus;
 
   const { data: statusesData, isLoading: loading } = useOrderStatusesQuery();
   const statuses = statusesData ?? [];
@@ -93,7 +101,8 @@ function PageTaps({ data, statusCounts, totalOrders, onStatusChange, currentStat
 
   return (
     <div className="w-full">
-      <div className="flex md:grid sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 overflow-x-auto pb-2 md:overflow-x-visible scrollbar-thin -mx-1 px-1">
+      <div className="flex md:grid sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 overflow-x-auto pb-2 md:overflow-x-visible scrollbar-hide -mx-1 px-1">
+        {' '}
         <PageTab
           label="جميع الطلبات"
           count={totalOrders ?? data?.length ?? 0}
@@ -101,14 +110,13 @@ function PageTaps({ data, statusCounts, totalOrders, onStatusChange, currentStat
           active={selectedStatus === null}
           onClick={() => handleTabClick(null)}
         />
-
         {statuses.map((status) => (
           <PageTab
             key={status.key}
             label={status.label}
             count={statusCounts?.[status.key] ?? 0}
             icon={getIconForStatus(status.key)}
-            active={selectedStatus === status.key as OrderStatus}
+            active={selectedStatus === (status.key as OrderStatus)}
             onClick={() => handleTabClick(status.key as OrderStatus)}
           />
         ))}

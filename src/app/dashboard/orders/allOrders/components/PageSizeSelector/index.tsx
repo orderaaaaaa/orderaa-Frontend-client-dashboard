@@ -19,7 +19,10 @@ export default function PageSizeSelector({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -33,7 +36,8 @@ export default function PageSizeSelector({
     setIsOpen(false);
   };
 
-  const displayValue = currentSize === totalItems ? 'الكل' : currentSize.toString();
+  const displayValue =
+    currentSize === totalItems ? 'الكل' : currentSize.toString();
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -45,19 +49,23 @@ export default function PageSizeSelector({
         <ChevronDown
           width={20}
           height={20}
-          className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className={`transition-transform duration-200 ${
+            isOpen ? 'rotate-180' : ''
+          }`}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute bottom-full left-0 mb-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[120px] overflow-hidden">
+        <div className="absolute bottom-full right-[-15px] mb-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[120px] overflow-hidden">
           <div className="py-1">
             {PAGE_SIZE_OPTIONS.map((size) => (
               <button
                 key={size}
                 onClick={() => handleSizeSelect(size)}
                 className={`w-full text-right px-4 py-2 text-sm hover:bg-[#5D24E1]/10 transition-colors ${
-                  currentSize === size ? 'bg-[#5D24E1]/20 text-[#5D24E1] font-medium' : 'text-gray-700'
+                  currentSize === size
+                    ? 'bg-[#5D24E1]/20 text-[#5D24E1] font-medium'
+                    : 'text-gray-700'
                 }`}
               >
                 {size} طلب
@@ -66,7 +74,9 @@ export default function PageSizeSelector({
             <button
               onClick={() => handleSizeSelect(totalItems)}
               className={`w-full text-right px-4 py-2 text-sm hover:bg-[#5D24E1]/10 transition-colors border-t border-gray-100 ${
-                currentSize === totalItems ? 'bg-[#5D24E1]/20 text-[#5D24E1] font-medium' : 'text-gray-700'
+                currentSize === totalItems
+                  ? 'bg-[#5D24E1]/20 text-[#5D24E1] font-medium'
+                  : 'text-gray-700'
               }`}
             >
               الكل ({totalItems})
@@ -77,4 +87,3 @@ export default function PageSizeSelector({
     </div>
   );
 }
-

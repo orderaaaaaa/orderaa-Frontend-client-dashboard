@@ -12,9 +12,16 @@ import { useOrderDetailsNavigation } from '@/hooks/OrderDetails/useOrderDetailsN
 import { useOrderById } from '@/services/orders';
 import { useOrderLock } from '@/hooks/useOrderLock';
 import { DatePicker } from '@/components/ui/datepicker';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { ArrowLeft, X } from 'lucide-react';
 import { TimePeriod } from '@/utils/dateRangeUtils';
+import { Breadcrumb } from '@/components/dashboard-layout';
 
 function OrderDetailsContent({ params }: { params: { orderId: string } }) {
   const orderId = parseInt(params.orderId);
@@ -27,11 +34,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
 
   const error = queryError ? 'فشل في تحميل بيانات الطلب' : null;
 
-  const {
-    isLockedByOther,
-    lockedBy,
-    unlock,
-  } = useOrderLock({
+  const { isLockedByOther, lockedBy, unlock } = useOrderLock({
     orderId: order?.id ?? null,
     lockedBy: order?.locked_by,
     enabled: !!order,
@@ -125,7 +128,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
   if (isEmpty) {
     return (
       <AuthGuard>
-        <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-7 w-full'>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-7 w-full">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 px-3 w-full sm:w-auto">
             <DatePicker
               selected={fromDate}
@@ -148,8 +151,15 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
             />
 
             <div className="relative w-32 sm:w-[180px] flex-shrink-0">
-              <Select value={timePeriod} onValueChange={(value) => setTimePeriod(value as TimePeriod)}>
-                <SelectTrigger className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${timePeriod ? 'text-[#5D24E1] font-bold' : ''}`}>
+              <Select
+                value={timePeriod}
+                onValueChange={(value) => setTimePeriod(value as TimePeriod)}
+              >
+                <SelectTrigger
+                  className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${
+                    timePeriod ? 'text-[#5D24E1] font-bold' : ''
+                  }`}
+                >
                   <SelectValue placeholder="الفترة الزمنية" />
                 </SelectTrigger>
                 <SelectContent className="[&_[data-state=checked]]:text-[#5D24E1]">
@@ -227,7 +237,13 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
 
   return (
     <AuthGuard>
-      <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-7 w-full'>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-7 w-full">
+        <Breadcrumb
+          items={[
+            { title: 'الطلبات' },
+            { title: 'جميع الطلبات', href: '/dashboard/orders/allOrders' },
+          ]}
+        />
         <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 px-3 w-full sm:w-auto">
           <DatePicker
             selected={fromDate}
@@ -250,8 +266,15 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
           />
 
           <div className="relative w-32 sm:w-[180px]">
-            <Select value={timePeriod} onValueChange={(value) => setTimePeriod(value as TimePeriod)}>
-              <SelectTrigger className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${timePeriod ? 'text-[#5D24E1] font-bold' : ''}`}>
+            <Select
+              value={timePeriod}
+              onValueChange={(value) => setTimePeriod(value as TimePeriod)}
+            >
+              <SelectTrigger
+                className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${
+                  timePeriod ? 'text-[#5D24E1] font-bold' : ''
+                }`}
+              >
                 <SelectValue placeholder="الفترة الزمنية" />
               </SelectTrigger>
               <SelectContent className="[&_[data-state=checked]]:text-[#5D24E1]">
@@ -340,7 +363,11 @@ function OrderDetailsLoading() {
   );
 }
 
-export default function OrderDetails({ params }: { params: { orderId: string } }) {
+export default function OrderDetails({
+  params,
+}: {
+  params: { orderId: string };
+}) {
   return (
     <Suspense fallback={<OrderDetailsLoading />}>
       <OrderDetailsContent params={params} />
