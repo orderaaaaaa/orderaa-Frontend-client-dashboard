@@ -314,13 +314,13 @@ function AllOrdersContent() {
           ]}
         />
 
-        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 px-3 w-full sm:w-auto">
+        <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 px-3 w-full sm:w-auto">
           <DatePicker
             selected={fromDate}
             onChange={setFromDate}
             placeholder="من تاريخ"
             showIcon={true}
-            className="w-[120px] sm:w-[140px]"
+            className="w-[100px] sm:w-[140px]"
             maxDate={toDate || undefined}
           />
 
@@ -331,11 +331,11 @@ function AllOrdersContent() {
             onChange={setToDate}
             placeholder="إلى تاريخ"
             showIcon={true}
-            className="w-[120px] sm:w-[140px]"
+            className="w-[100px] sm:w-[140px]"
             minDate={fromDate || undefined}
           />
 
-          <div className="relative w-32 sm:w-[180px] flex-shrink-0">
+          <div className="relative w-30 sm:w-[180px] flex-shrink-0">
             <Select
               value={timePeriod}
               onValueChange={(value) => setTimePeriod(value as TimePeriod)}
