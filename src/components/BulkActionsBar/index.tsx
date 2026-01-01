@@ -64,7 +64,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
       <div className="mx-auto overflow-x-auto scrollbar-hide">
         <div className="pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
           {/* Status Dropdown using Select */}
-          <Select onValueChange={handleStatusSelect}>
+          {/* <Select onValueChange={handleStatusSelect}>
             <SelectTrigger className="group flex items-center gap-2 px-4 py-2 rounded-3xl !bg-white border border-[#5D24E1] !text-[#5D24E1] hover:!bg-[#5D24E1] hover:text-white transition-colors cursor-pointer whitespace-nowrap w-auto h-auto focus:ring-0 focus:ring-offset-0 ring-offset-0">
               <Edit className="h-4 w-4 group-hover:text-white" />
               <span className="group-hover:text-white">
@@ -88,7 +88,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
                 </div>
               )}
             </SelectContent>
-          </Select>
+          </Select> */}
 
           <Button
             variant="outline"

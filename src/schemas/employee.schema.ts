@@ -40,16 +40,30 @@ export const employeeFormSchema = z
     // Password
     password: z
       .string()
-      .min(6, { message: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' }),
-    confirmPassword: z.string().min(6, { message: 'تأكيد كلمة المرور مطلوب' }),
+      .optional()
+      .or(z.literal(''))
+      .transform((val) => (val === '' ? undefined : val)),
 
+    confirmPassword: z
+      .string()
+      .optional()
+      .or(z.literal(''))
+      .transform((val) => (val === '' ? undefined : val)),
     // Work schedule
     workingHours: z.string().optional(),
   })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'كلمة المرور وتأكيد كلمة المرور غير متطابقين',
-    path: ['confirmPassword'],
-  });
+  .refine(
+    (data) => {
+      if (data.password || data.confirmPassword) {
+        return data.password === data.confirmPassword;
+      }
+      return true;
+    },
+    {
+      message: 'كلمة المرور وتأكيد كلمة المرور غير متطابقين',
+      path: ['confirmPassword'],
+    }
+  );
 
 export type EmployeeFormData = z.infer<typeof employeeFormSchema>;
 

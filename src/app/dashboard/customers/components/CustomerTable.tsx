@@ -201,7 +201,7 @@ export default function CustomerTable({
           onPageChange={handlePageChange}
         />
       </div>
-      <div className="flex max-sm:justify-center">
+      <div className="flex">
         <div ref={limitRef} className="relative w-fit mr-[1.5%]">
           <div
             onClick={() => setIsLimitOpen((prev) => !prev)}

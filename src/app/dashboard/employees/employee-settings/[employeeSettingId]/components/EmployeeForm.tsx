@@ -54,8 +54,18 @@ export default function EmployeeForm({
   const address = watch('address');
   const workingHours = watch('workingHours');
 
-  const onSubmitHandler = (data: Employee) => {
-    const { id, ...updateData } = data as any;
+  const onSubmitHandler = (data: any) => {
+    const updateData = { ...data };
+
+    delete updateData.id;
+
+    if (!updateData.password || updateData.password.trim() === '') {
+      delete updateData.password;
+      delete updateData.confirmPassword;
+    }
+
+    delete updateData.confirmPassword;
+
     onSubmit(updateData);
   };
 

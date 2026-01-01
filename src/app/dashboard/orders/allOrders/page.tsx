@@ -585,6 +585,7 @@ function AllOrdersContent() {
                 government={
                   order.governorate || order.externalGovernorate || 'غير محدد'
                 }
+                shippingId={order.shippingId}
                 // Updated Mapping Logic for Items and Variants
                 items={order.order_products.map((op: any) => {
                   const productName = op.products?.name || 'منتج غير معروف';

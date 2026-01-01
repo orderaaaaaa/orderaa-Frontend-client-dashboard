@@ -1,6 +1,5 @@
 import { LucideIcon } from 'lucide-react';
 
-
 // Order Status Enum (synced with backend)
 export enum OrderStatus {
   NEW_ORDER = 'NEW_ORDER',
@@ -238,6 +237,7 @@ export interface Order {
   city?: string;
   address?: string;
   externalGovernorate?: string;
+  shippingId: string;
 
   // Product details
   material?: string;

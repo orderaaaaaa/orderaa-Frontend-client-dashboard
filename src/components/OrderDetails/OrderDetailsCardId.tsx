@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { Copy, TriangleAlert, History } from "lucide-react";
-import { Order, OrderLockedBy } from "@/types/orders";
-import { toast } from 'react-toastify'
-import CustomerOrdersModal from "@/app/dashboard/orders/allOrders/components/CustomerOrdersModal";
-import OrderHistoryModal from "./OrderHistoryModal";
-import OrderLockedBanner from "./OrderLockedBanner";
-import { getTimeAgo } from "@/utils/timeAgo";
+import React, { useState } from 'react';
+import { Copy, TriangleAlert, History } from 'lucide-react';
+import { Order, OrderLockedBy } from '@/types/orders';
+import { toast } from 'react-toastify';
+import CustomerOrdersModal from '@/app/dashboard/orders/allOrders/components/CustomerOrdersModal';
+import OrderHistoryModal from './OrderHistoryModal';
+import OrderLockedBanner from './OrderLockedBanner';
+import { getTimeAgo } from '@/utils/timeAgo';
 
 interface OrderDetailsCardIdProps {
   order: Order;
@@ -13,33 +13,39 @@ interface OrderDetailsCardIdProps {
   lockedBy?: OrderLockedBy | null;
 }
 
-const OrderDetailsCardId = ({ order, isLockedByOther, lockedBy }: OrderDetailsCardIdProps) => {
+const OrderDetailsCardId = ({
+  order,
+  isLockedByOther,
+  lockedBy,
+}: OrderDetailsCardIdProps) => {
   const [copied, setCopied] = useState(false);
-  const [isCustomerOrdersModalOpen, setIsCustomerOrdersModalOpen] = useState(false);
+  const [isCustomerOrdersModalOpen, setIsCustomerOrdersModalOpen] =
+    useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
   const createdDate = new Date(order.createdAt);
   const timeAgo = getTimeAgo(order.createdAt);
 
-  const handleCopy = async () => {
+  const handleCopy = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(order.code);
+      await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
       toast.success('تم نسخ الكود بنجاح');
-      console.log("hhh")
     } catch {
-      const ta = document.createElement("textarea");
-      ta.value = order.code;
+      const ta = document.createElement('textarea');
+      ta.value = text;
       document.body.appendChild(ta);
       ta.select();
       try {
-        document.execCommand("copy");
+        document.execCommand('copy');
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+        toast.success('تم نسخ الكود بنجاح');
+      } catch {
+        toast.error('فشل في نسخ الكود');
       } finally {
         document.body.removeChild(ta);
-        toast.error('فشل في نسخ الكود');
       }
     }
   };
@@ -51,7 +57,7 @@ const OrderDetailsCardId = ({ order, isLockedByOther, lockedBy }: OrderDetailsCa
           <div className="flex flex-col items-center sm:items-start">
             <h3 className="flex gap-3 text-xl items-center font-bold mb-1">
               <Copy
-                onClick={handleCopy}
+                onClick={() => handleCopy(order.code)} // Pass order code here
                 className="w-4 h-4 text-[#7038f3] cursor-pointer"
                 role="button"
               />
@@ -65,6 +71,14 @@ const OrderDetailsCardId = ({ order, isLockedByOther, lockedBy }: OrderDetailsCa
             <p className="text-xs font-bold mr-7 mb-4">
               {createdDate.toLocaleDateString('ar-EG')} <span>{timeAgo}</span>
             </p>
+            <h3 className="flex gap-3 text-lg items-center font-semibold mb-1">
+              <Copy
+                onClick={() => handleCopy(order.shippingId)} // Pass shippingId here
+                className="w-4 h-4 text-[#7038f3] cursor-pointer"
+                role="button"
+              />
+              كود الشحن: {order.shippingId}
+            </h3>
           </div>
           <div className="">
             <div className="flex flex-col sm:flex-row xl:flex-row gap-2 sm:px-5">
@@ -72,19 +86,19 @@ const OrderDetailsCardId = ({ order, isLockedByOther, lockedBy }: OrderDetailsCa
                 <OrderLockedBanner lockedBy={lockedBy} />
               )}
               {(order?.customers?.totalCustomerOrders ?? 0) > 1 && (
-                  <button
-                    className="cursor-pointer bg-[#F6F2FC] text-white border-1 border-[#CBB5FD] !rounded-r-3xl p-2 px-4"
-                    onClick={() => setIsCustomerOrdersModalOpen(true)}
-                  >
-                    <h3 className="flex gap-2 text-sm items-center font-semibold mb-1 text-[#5D24E1] relative ">
-                      <TriangleAlert className="w-5 text-yellow-500" />
-                      <p className="bg-red-600 absolute top-[-3px] right-[-4px] w-3 h-3 text-[8px] text-center rounded-full text-white">
-                        {order?.customers?.totalCustomerOrders}
-                      </p>
-                      هذا العميل قام بالطلب اكثر من مره
-                    </h3>
-                  </button>
-               )}
+                <button
+                  className="cursor-pointer bg-[#F6F2FC] text-white border-1 border-[#CBB5FD] !rounded-r-3xl p-2 px-4"
+                  onClick={() => setIsCustomerOrdersModalOpen(true)}
+                >
+                  <h3 className="flex gap-2 text-sm items-center font-semibold mb-1 text-[#5D24E1] relative ">
+                    <TriangleAlert className="w-5 text-yellow-500" />
+                    <p className="bg-red-600 absolute top-[-3px] right-[-4px] w-3 h-3 text-[8px] text-center rounded-full text-white">
+                      {order?.customers?.totalCustomerOrders}
+                    </p>
+                    هذا العميل قام بالطلب اكثر من مره
+                  </h3>
+                </button>
+              )}
             </div>
           </div>
         </div>
