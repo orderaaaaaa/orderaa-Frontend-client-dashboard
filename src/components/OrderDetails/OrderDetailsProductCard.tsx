@@ -223,7 +223,7 @@ function OrderDetailsProductCard({
                     alt={item.product}
                     width={120}
                     height={120}
-                    className="border flex border-[#B8A3EB] rounded-xl"
+                    className="w-[120px] h-[120px] border border-[#B8A3EB] rounded-xl object-cover shrink-0"
                   />
                 </div>
               </div>

@@ -45,13 +45,16 @@ export default function CustomerOrdersModal({
     }
   }, [isOpen]);
 
-  const handleCheckboxChange = useCallback((orderId: number, checked: boolean) => {
-    if (checked) {
-      setSelectedOrderIds((prev) => [...prev, orderId]);
-    } else {
-      setSelectedOrderIds((prev) => prev.filter((id) => id !== orderId));
-    }
-  }, []);
+  const handleCheckboxChange = useCallback(
+    (orderId: number, checked: boolean) => {
+      if (checked) {
+        setSelectedOrderIds((prev) => [...prev, orderId]);
+      } else {
+        setSelectedOrderIds((prev) => prev.filter((id) => id !== orderId));
+      }
+    },
+    []
+  );
 
   // Handle select all toggle
   const handleSelectAllToggle = useCallback(() => {
@@ -70,7 +73,10 @@ export default function CustomerOrdersModal({
         return;
       }
 
-      const fileName = exportOrdersToExcel(selectedOrders, `customer_${customerPhone}_orders`);
+      const fileName = exportOrdersToExcel(
+        selectedOrders,
+        `customer_${customerPhone}_orders`
+      );
       toast.success(
         `تم تصدير ${selectedOrders.length} طلب بنجاح! \nاسم الملف: ${fileName}`
       );
@@ -116,20 +122,45 @@ export default function CustomerOrdersModal({
         <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-[#5D24E1]/5 to-[#682fee]/5">
           <div className="flex items-center gap-4">
             <div className="relative flex items-center justify-center">
-              <svg width="32" height="32" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M14 4L24 21H4L14 4Z" fill="#DC2626" stroke="#DC2626" strokeWidth="2" strokeLinejoin="round" />
-                <path d="M14 11V15" stroke="white" strokeWidth="2" strokeLinecap="round" />
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 28 28"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M14 4L24 21H4L14 4Z"
+                  fill="#DC2626"
+                  stroke="#DC2626"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M14 11V15"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
                 <circle cx="14" cy="18" r="1" fill="white" />
               </svg>
               <div className="absolute -top-1 -right-1 w-6 h-6 bg-red-600 rounded-full flex items-center justify-center border-2 border-white">
-                <span className="text-xs font-bold text-white">{orders.length}</span>
+                <span className="text-xs font-bold text-white">
+                  {orders.length}
+                </span>
               </div>
             </div>
             <div className="text-right">
-              <h2 className="test-lg sm:text-2xl font-bold text-gray-800">جميع طلبات العميل</h2>
+              <h2 className="test-lg sm:text-2xl font-bold text-gray-800">
+                جميع طلبات العميل
+              </h2>
               <p className="text-sm text-gray-600 mt-1">
-                {customerName && customerName !== 'غير محدد' ? customerName + ' - ' : ''}
-                <span dir="ltr" className="inline-block">{customerPhone}</span>
+                {customerName && customerName !== 'غير محدد'
+                  ? customerName + ' - '
+                  : ''}
+                <span dir="ltr" className="inline-block">
+                  {customerPhone}
+                </span>
               </p>
             </div>
           </div>
@@ -150,16 +181,17 @@ export default function CustomerOrdersModal({
                 onClick={handleSelectAllToggle}
                 className="px-4 py-2 text-sm bg-[#5D24E1] text-white rounded-lg hover:bg-[#682fee] transition-colors"
               >
-                {selectedOrderIds.length === orders.length && orders.length > 0
-                  ? 'إلغاء تحديد الكل'
-                  : (
-                    <span className="flex items-center gap-2">
-                      تحديد الكل
-                      <span className="bg-white text-[#5D24E1] rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
-                        {orders.length}
-                      </span>
+                {selectedOrderIds.length === orders.length &&
+                orders.length > 0 ? (
+                  'إلغاء تحديد الكل'
+                ) : (
+                  <span className="flex items-center gap-2">
+                    تحديد الكل
+                    <span className="bg-white text-[#5D24E1] rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                      {orders.length}
                     </span>
-                  )}
+                  </span>
+                )}
               </Button>
               {selectedOrderIds.length > 0 && (
                 <span className="text-sm text-gray-600">
@@ -175,7 +207,9 @@ export default function CustomerOrdersModal({
             <div className="flex items-center justify-center min-h-[400px]">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#5D24E1] mx-auto"></div>
-                <p className="mt-4 text-gray-600 text-lg">جاري تحميل الطلبات...</p>
+                <p className="mt-4 text-gray-600 text-lg">
+                  جاري تحميل الطلبات...
+                </p>
               </div>
             </div>
           ) : error ? (
@@ -190,7 +224,9 @@ export default function CustomerOrdersModal({
           ) : orders.length === 0 ? (
             <div className="flex items-center justify-center min-h-[400px]">
               <div className="text-center">
-                <p className="text-gray-500 text-lg">لا توجد طلبات لهذا العميل</p>
+                <p className="text-gray-500 text-lg">
+                  لا توجد طلبات لهذا العميل
+                </p>
               </div>
             </div>
           ) : (
@@ -200,9 +236,11 @@ export default function CustomerOrdersModal({
                   <input
                     type="checkbox"
                     checked={selectedOrderIds.includes(order.id)}
-                    onChange={(e) => handleCheckboxChange(order.id, e.target.checked)}
+                    onChange={(e) =>
+                      handleCheckboxChange(order.id, e.target.checked)
+                    }
                     onClick={(e) => e.stopPropagation()}
-                    className="w-5 h-5 mt-2 border-2 border-[#5D24E1] rounded-[4px] cursor-pointer accent-[#5D24E1] flex-shrink-0"
+                    className="relative right-10 z-100 w-5 h-5 mt-2 border-2 border-[#5D24E1] rounded-[4px] cursor-pointer accent-[#5D24E1] flex-shrink-0"
                   />
                   <OrderCard
                     id={order.id}
@@ -211,16 +249,23 @@ export default function CustomerOrdersModal({
                     code={order.code}
                     name={order.customers.name}
                     phoneNumbers={order.customers.phone_numbers}
-                    government={order.governorate || order.externalGovernorate || 'غير محدد'}
+                    government={
+                      order.governorate ||
+                      order.externalGovernorate ||
+                      'غير محدد'
+                    }
                     items={order.order_products.map(
                       (op: any) =>
-                        `${op.products.name}${op.products.size ? ` - ${op.products.size}` : ''
+                        `${op.products.name}${
+                          op.products.size ? ` - ${op.products.size}` : ''
                         }${op.products.color ? ` - ${op.products.color}` : ''}`
                     )}
                     price={order.totalCost}
                     trys={order.numberOfTriesToReach}
                     status={order.status}
-                    city={order.customers.area || order.customers.city || 'غير محدد'}
+                    city={
+                      order.customers.area || order.customers.city || 'غير محدد'
+                    }
                     address={order.customers.address || 'غير محدد'}
                     alert={0}
                     createdAt={order.createdAt}
@@ -232,7 +277,11 @@ export default function CustomerOrdersModal({
           )}
         </div>
 
-        <div className={`px-8 py-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl ${selectedOrders.length > 0 ? 'pb-20' : ''}`}>
+        <div
+          className={`px-8 py-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl ${
+            selectedOrders.length > 0 ? 'pb-20' : ''
+          }`}
+        >
           <div className="flex items-center justify-between">
             <Button
               onClick={onClose}
@@ -241,7 +290,8 @@ export default function CustomerOrdersModal({
               إغلاق
             </Button>
             <p className="text-sm text-gray-600">
-              إجمالي الطلبات: <span className="font-bold text-[#5D24E1]">{orders.length}</span>
+              إجمالي الطلبات:{' '}
+              <span className="font-bold text-[#5D24E1]">{orders.length}</span>
             </p>
           </div>
         </div>

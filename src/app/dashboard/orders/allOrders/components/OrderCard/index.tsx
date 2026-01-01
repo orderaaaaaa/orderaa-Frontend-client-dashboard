@@ -10,6 +10,7 @@ import {
   TriangleAlert,
   Ban,
   FileText,
+  Truck,
 } from 'lucide-react';
 import { getTimeAgo } from '@/utils/timeAgo';
 
@@ -28,6 +29,7 @@ interface OrderCardProps {
   alert: number;
   select: boolean;
   isSelected?: boolean;
+  shippingId?: string;
   onSelectionChange?: (checked: boolean) => void;
   createdAt?: string;
   repeatCount?: number;
@@ -67,6 +69,7 @@ export default function OrderCard({
   government,
   items,
   price,
+  shippingId,
   trys,
   status,
   city,
@@ -192,14 +195,14 @@ export default function OrderCard({
           ))}
 
         {(government && government !== 'غير محدد') ||
-          (city && city !== 'غير محدد') ? (
+        (city && city !== 'غير محدد') ? (
           <div className="flex flex-row-reverse items-center gap-2">
             <span className="text-base font-medium text-black">
               {government && government !== 'غير محدد' ? government : ''}
               {government &&
-                government !== 'غير محدد' &&
-                city &&
-                city !== 'غير محدد'
+              government !== 'غير محدد' &&
+              city &&
+              city !== 'غير محدد'
                 ? ' - '
                 : ''}
               {city && city !== 'غير محدد' ? city : ''}
@@ -246,6 +249,15 @@ export default function OrderCard({
               height={18}
               className="flex-shrink-0 opacity-50"
             />
+          </div>
+        )}
+
+        {shippingId && (
+          <div className="flex flex-row-reverse items-center gap-2">
+            <span className="text-base font-medium text-black">
+              {shippingId}
+            </span>
+            <Truck height={18} className="flex-shrink-0 opacity-30" />
           </div>
         )}
 
