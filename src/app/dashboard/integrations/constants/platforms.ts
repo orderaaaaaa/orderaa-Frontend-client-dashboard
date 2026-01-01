@@ -4,6 +4,7 @@ export const platforms: IntegrationPlatform[] = [
   {
     id: 'easyorder',
     name: 'Easy Order',
+    providerKey: 'EASY_ORDERS', // هذه القيمة تطابق "provider" في الـ API log
     logo: '/integrations/easyorder.svg',
     description: 'ربط متجرك بمنصة Easy Order',
     buttonText: 'إنشاء ربط جديد',

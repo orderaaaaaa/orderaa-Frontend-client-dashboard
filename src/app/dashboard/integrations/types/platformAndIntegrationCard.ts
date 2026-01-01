@@ -1,8 +1,10 @@
 import { WebhookConfigResponse } from '@/lib/api/webhooks';
+import { IntegrationResponse } from './apiIntegration';
 
 export interface IntegrationPlatform {
   name: string;
   logo: string;
+  providerKey?: string;
   description: string;
   buttonText: string;
   isActive: boolean;
@@ -10,7 +12,8 @@ export interface IntegrationPlatform {
 }
 
 export interface IntegrationCardProps {
+  integrations: IntegrationResponse[] | undefined;
   platform: IntegrationPlatform;
   onButtonClick: (platformId: string) => void;
-  webhookConfig: WebhookConfigResponse | null;
+  webhookConfig?: WebhookConfigResponse;
 }

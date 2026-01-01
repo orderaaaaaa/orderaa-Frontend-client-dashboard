@@ -6,32 +6,19 @@ import { webhookApi, WebhookConfigResponse } from '@/lib/api/webhooks';
 import { platforms } from './constants/platforms';
 import { IntegrationCard } from './components/IntegrationCard';
 import { Notification } from './components/Notification';
+import { useGetWebhookConfig } from './hooks/useGetWebhookConfig';
+import { useIntegrations } from './hooks/useIntegrations';
 
 const IntegrationsPage = () => {
   const [isEasyOrderModalOpen, setIsEasyOrderModalOpen] = useState(false);
-  const [webhookConfig, setWebhookConfig] =
-    useState<WebhookConfigResponse | null>(null);
+
   const [notification, setNotification] = useState<{
     message: string;
     type: 'success' | 'error';
   } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadWebhookConfig();
-  }, []);
-
-  const loadWebhookConfig = async () => {
-    try {
-      const config = await webhookApi.getConfig();
-      setWebhookConfig(config);
-    } catch (error: any) {
-      if (error.response?.status !== 404) {
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data: easyData, isLoading: isLoadingWebHook } = useGetWebhookConfig();
+  const { integrations } = useIntegrations();
 
   const handleCardButtonClick = (platformId: string) => {
     if (platformId === 'easyorder') {
@@ -48,7 +35,6 @@ const IntegrationsPage = () => {
       message: 'تم إنشاء الربط بنجاح! سيتم استقبال الطلبات تلقائياً الآن.',
       type: 'success',
     });
-    loadWebhookConfig();
   };
 
   return (
@@ -65,7 +51,7 @@ const IntegrationsPage = () => {
             </p>
           </div>
 
-          {isLoading ? (
+          {isLoadingWebHook ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[1, 2, 3, 4].map((i) => (
                 <div
@@ -87,8 +73,9 @@ const IntegrationsPage = () => {
                 <IntegrationCard
                   key={platform.id}
                   platform={platform}
+                  integrations={integrations}
                   onButtonClick={handleCardButtonClick}
-                  webhookConfig={webhookConfig}
+                  webhookConfig={easyData}
                 />
               ))}
             </div>
@@ -100,7 +87,7 @@ const IntegrationsPage = () => {
         isOpen={isEasyOrderModalOpen}
         onClose={handleModalClose}
         onSuccess={handleModalSuccess}
-        existingConfig={webhookConfig}
+        existingConfig={easyData}
       />
 
       {notification && (

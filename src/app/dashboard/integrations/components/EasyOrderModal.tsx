@@ -26,7 +26,7 @@ interface EasyOrderModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  existingConfig: WebhookConfigResponse | null;
+  existingConfig?: WebhookConfigResponse;
 }
 
 const EasyOrderModal = ({
