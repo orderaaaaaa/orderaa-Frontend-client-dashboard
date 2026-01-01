@@ -61,6 +61,7 @@ const arrowOptions: ActionOption[] = [
 export interface ActionsDropdownProps {
   isOpen: boolean;
   orderStatus: OrderStatus;
+  lastEventStatus?: string;
   onActionClick: (label: string, action: string, hasSubOptions?: boolean) => void;
   onSubOptionClick: (action: string, label: string) => void;
 }
@@ -72,19 +73,27 @@ export interface ActionsDropdownProps {
  *
  * @param props - Component props
  */
-export function ActionsDropdown({ isOpen, orderStatus, onActionClick, onSubOptionClick }: ActionsDropdownProps) {
+export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, onActionClick, onSubOptionClick }: ActionsDropdownProps) {
   const [isWhatsappAccordionOpen, setIsWhatsappAccordionOpen] = useState(false);
 
-  // Filter options based on order status
+  // Filter options based on order status and last event status
   const filteredOptions = useMemo(() => {
     return arrowOptions.filter((option) => {
       // "وقف التشغيل" only appears when order status is CONFIRMED
       if (option.action === 'stop_operation') {
         return orderStatus === OrderStatus.CONFIRMED;
       }
+      // "مستعجل" should be hidden when order status is CONFIRMED
+      if (option.action === 'urgent') {
+        return orderStatus !== OrderStatus.CONFIRMED;
+      }
+      // "في انتظار الدفع" should be hidden when last event status is WAITING_FOR_PAYMENT
+      if (option.action === 'waiting_payment') {
+        return lastEventStatus !== 'WAITING_FOR_PAYMENT';
+      }
       return true;
     });
-  }, [orderStatus]);
+  }, [orderStatus, lastEventStatus]);
 
   if (!isOpen) return null;
 

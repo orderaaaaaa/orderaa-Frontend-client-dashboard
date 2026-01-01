@@ -3,7 +3,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { OrderStatus, FilterOrdersDto } from '@/types/orders';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { useFetchOrdersForSearch } from '@/services/orders';
-import { TimePeriod, calculateDateRangeFromPeriod, formatDateToISO } from '@/utils/dateRangeUtils';
+import { TimePeriod, calculateDateRangeFromPeriod } from '@/utils/dateRangeUtils';
 import { useDebounce, useDebouncedCallback } from '@/utils/debounce';
 import { toast } from 'react-toastify';
 import {
@@ -38,6 +38,20 @@ interface UseOrderDetailsNavigationReturn {
   navigateToOrder: (orderId: number) => void;
 }
 
+// Helper to format date to ISO string for API calls
+// Sets time to start of day (00:00:00) for 'from' dates
+const formatDateToISOStart = (date: Date): string => {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString();
+};
+
+// Sets time to end of day (23:59:59.999) for 'to' dates
+const formatDateToISOEnd = (date: Date): string => {
+  const d = new Date(date);
+  d.setHours(23, 59, 59, 999);
+  return d.toISOString();
+};
 
 function buildApiFilters(
   status: OrderStatus | null,
@@ -56,8 +70,13 @@ function buildApiFilters(
   if (hasConfirmedDate) {
     filters.confirmedDate = formFilters.executionDate;
   } else {
-    if (fromDate) filters.createdAfter = formatDateToISO(fromDate);
-    if (toDate) filters.createdBefore = formatDateToISO(toDate);
+    // Always set both dates if either is present for consistent filtering
+    if (fromDate) {
+      filters.createdAfter = formatDateToISOStart(fromDate);
+    }
+    if (toDate) {
+      filters.createdBefore = formatDateToISOEnd(toDate);
+    }
   }
 
   if (formFilters) {

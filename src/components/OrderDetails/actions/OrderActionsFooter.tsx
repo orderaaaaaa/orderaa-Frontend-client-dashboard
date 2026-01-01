@@ -14,6 +14,7 @@ import { OrderStatus } from '@/types/orders';
 
 export interface OrderActionsFooterProps {
   orderStatus: OrderStatus;
+  lastEventStatus?: string;
   onConfirm: () => void;
   onFollowUpClick: (label: string, action: string) => void;
   onActionClick: (label: string, action: string, hasSubOptions?: boolean) => void;
@@ -27,6 +28,7 @@ export interface OrderActionsFooterProps {
 
 export function OrderActionsFooter({
   orderStatus,
+  lastEventStatus,
   onConfirm,
   onFollowUpClick,
   onActionClick,
@@ -106,15 +108,17 @@ export function OrderActionsFooter({
 
         <div className="relative" ref={actionsDropdown.ref}>
           <div className="flex flex-row gap-2">
-            <Button
-              variant="default"
-              onClick={onConfirm}
-              disabled={isLockedByOther}
-              className="py-2 px-10 rounded-2xl bg-[#5D24E1] text-white text-sm font-bold hover:bg-[#4B1BC4] transition-all duration-700 hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-            >
-              <LiaCheckCircle className="w-5 h-5" />
-              تأكيد
-            </Button>
+            {orderStatus !== OrderStatus.CONFIRMED && (
+              <Button
+                variant="default"
+                onClick={onConfirm}
+                disabled={isLockedByOther}
+                className="py-2 px-10 rounded-2xl bg-[#5D24E1] text-white text-sm font-bold hover:bg-[#4B1BC4] transition-all duration-700 hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                <LiaCheckCircle className="w-5 h-5" />
+                تأكيد
+              </Button>
+            )}
 
             <div className="relative" ref={followUpDropdown.ref}>
               <Button
@@ -147,6 +151,7 @@ export function OrderActionsFooter({
           <ActionsDropdown
             isOpen={actionsDropdown.isOpen}
             orderStatus={orderStatus}
+            lastEventStatus={lastEventStatus}
             onActionClick={handleActionClick}
             onSubOptionClick={handleWhatsappSubOptionClick}
           />

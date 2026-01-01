@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { OrderStatus, OrderFilters } from '@/types/orders';
 import { TimePeriod, calculateDateRangeFromPeriod } from '@/utils/dateRangeUtils';
@@ -9,7 +9,6 @@ import {
   DEFAULT_FILTER_STATE,
   parseFiltersFromUrl,
   serializeFiltersToUrl,
-  areFiltersEqual,
 } from '@/utils/urlFilters';
 import { useDebouncedCallback } from '@/utils/debounce';
 import { toast } from 'react-toastify';
@@ -44,6 +43,9 @@ export function useUrlFilters(): UseUrlFiltersReturn {
   // Internal state (synced with URL)
   const [filters, setFilters] = useState<UrlFilterState>(DEFAULT_FILTER_STATE);
 
+  // Track pending URL update type (null = no pending, 'push' or 'replace')
+  const pendingUrlUpdate = useRef<'push' | 'replace' | null>(null);
+
   // Ref to track if we're currently updating URL to prevent loops
   const isUpdatingUrl = useRef(false);
 
@@ -75,29 +77,36 @@ export function useUrlFilters(): UseUrlFiltersReturn {
     }
   }, [searchParams, isInitialized]);
 
-  // Update URL with current filters
-  const updateUrl = useCallback(
-    (newFilters: UrlFilterState, useReplace: boolean = false) => {
-      const params = serializeFiltersToUrl(newFilters);
-      const newParamsString = params.toString();
-      const newUrl = newParamsString ? `${pathname}?${newParamsString}` : pathname;
+  // Sync URL with state changes - runs AFTER state update
+  useEffect(() => {
+    if (!isInitialized || pendingUrlUpdate.current === null) return;
 
-      isUpdatingUrl.current = true;
-      prevParamsString.current = newParamsString;
+    const params = serializeFiltersToUrl(filters);
+    const newParamsString = params.toString();
+    const newUrl = newParamsString ? `${pathname}?${newParamsString}` : pathname;
 
-      if (useReplace) {
-        router.replace(newUrl, { scroll: false });
-      } else {
-        router.push(newUrl, { scroll: false });
-      }
-    },
-    [pathname, router]
-  );
+    isUpdatingUrl.current = true;
+    prevParamsString.current = newParamsString;
+
+    const updateType = pendingUrlUpdate.current;
+    pendingUrlUpdate.current = null;
+
+    if (updateType === 'replace') {
+      router.replace(newUrl, { scroll: false });
+    } else {
+      router.push(newUrl, { scroll: false });
+    }
+  }, [filters, isInitialized, pathname, router]);
+
+  // Helper to schedule URL update after state change
+  const scheduleUrlUpdate = useCallback((type: 'push' | 'replace') => {
+    pendingUrlUpdate.current = type;
+  }, []);
 
   // Debounced URL update for text inputs (uses replace to avoid history spam)
-  const debouncedUpdateUrl = useDebouncedCallback(
-    (newFilters: UrlFilterState) => {
-      updateUrl(newFilters, true);
+  const debouncedScheduleUrlUpdate = useDebouncedCallback(
+    () => {
+      scheduleUrlUpdate('replace');
     },
     500
   );
@@ -107,11 +116,11 @@ export function useUrlFilters(): UseUrlFiltersReturn {
     (status: OrderStatus | null) => {
       setFilters((prev) => {
         const newFilters = { ...prev, status, page: 1 };
-        updateUrl(newFilters, false);
         return newFilters;
       });
+      scheduleUrlUpdate('push');
     },
-    [updateUrl]
+    [scheduleUrlUpdate]
   );
 
   // Set search (debounced update)
@@ -119,22 +128,24 @@ export function useUrlFilters(): UseUrlFiltersReturn {
     (search: string) => {
       setFilters((prev) => {
         const newFilters = { ...prev, search, page: 1 };
-        debouncedUpdateUrl(newFilters);
         return newFilters;
       });
+      debouncedScheduleUrlUpdate();
     },
-    [debouncedUpdateUrl]
+    [debouncedScheduleUrlUpdate]
   );
 
   // Set from date (immediate update with history, handles mutual exclusivity)
   const setFromDate = useCallback(
     (date: Date | null) => {
+      let shouldUpdate = true;
       setFilters((prev) => {
         // Block if executionDate is set
         if (date && prev.localFilters.executionDate) {
           toast.error(
             'لا يمكن تحديد نطاق التاريخ وتاريخ التنفيذ معاً. يرجى إزالة تاريخ التنفيذ أولاً.'
           );
+          shouldUpdate = false;
           return prev;
         }
 
@@ -145,22 +156,26 @@ export function useUrlFilters(): UseUrlFiltersReturn {
           timePeriod: '' as TimePeriod,
           page: 1,
         };
-        updateUrl(newFilters, false);
         return newFilters;
       });
+      if (shouldUpdate) {
+        scheduleUrlUpdate('push');
+      }
     },
-    [updateUrl]
+    [scheduleUrlUpdate]
   );
 
   // Set to date (immediate update with history, handles mutual exclusivity)
   const setToDate = useCallback(
     (date: Date | null) => {
+      let shouldUpdate = true;
       setFilters((prev) => {
         // Block if executionDate is set
         if (date && prev.localFilters.executionDate) {
           toast.error(
             'لا يمكن تحديد نطاق التاريخ وتاريخ التنفيذ معاً. يرجى إزالة تاريخ التنفيذ أولاً.'
           );
+          shouldUpdate = false;
           return prev;
         }
 
@@ -171,22 +186,26 @@ export function useUrlFilters(): UseUrlFiltersReturn {
           timePeriod: '' as TimePeriod,
           page: 1,
         };
-        updateUrl(newFilters, false);
         return newFilters;
       });
+      if (shouldUpdate) {
+        scheduleUrlUpdate('push');
+      }
     },
-    [updateUrl]
+    [scheduleUrlUpdate]
   );
 
   // Set time period (immediate update with history, calculates date range)
   const setTimePeriod = useCallback(
     (period: TimePeriod) => {
+      let shouldUpdate = true;
       setFilters((prev) => {
         // Block if executionDate is set
         if (period && prev.localFilters.executionDate) {
           toast.error(
             'لا يمكن تحديد الفترة الزمنية وتاريخ التنفيذ معاً. يرجى إزالة تاريخ التنفيذ أولاً.'
           );
+          shouldUpdate = false;
           return prev;
         }
 
@@ -200,11 +219,13 @@ export function useUrlFilters(): UseUrlFiltersReturn {
           toDate: dateRange?.to ?? null,
           page: 1,
         };
-        updateUrl(newFilters, false);
         return newFilters;
       });
+      if (shouldUpdate) {
+        scheduleUrlUpdate('push');
+      }
     },
-    [updateUrl]
+    [scheduleUrlUpdate]
   );
 
   // Set page (immediate update with history)
@@ -212,11 +233,11 @@ export function useUrlFilters(): UseUrlFiltersReturn {
     (page: number) => {
       setFilters((prev) => {
         const newFilters = { ...prev, page };
-        updateUrl(newFilters, false);
         return newFilters;
       });
+      scheduleUrlUpdate('push');
     },
-    [updateUrl]
+    [scheduleUrlUpdate]
   );
 
   // Set limit (immediate update with history, resets page)
@@ -224,16 +245,24 @@ export function useUrlFilters(): UseUrlFiltersReturn {
     (limit: number) => {
       setFilters((prev) => {
         const newFilters = { ...prev, limit, page: 1 };
-        updateUrl(newFilters, false);
         return newFilters;
       });
+      scheduleUrlUpdate('push');
     },
-    [updateUrl]
+    [scheduleUrlUpdate]
   );
 
   // Update local filters (handles mutual exclusivity and hierarchical filters)
   const updateLocalFilters = useCallback(
     (newLocalFilters: Partial<OrderFilters>) => {
+      // Determine if this is a text input (should be debounced)
+      const textFields = ['customerName', 'phone', 'shipmentCode', 'address', 'search'];
+      const isTextInput = Object.keys(newLocalFilters).some((key) =>
+        textFields.includes(key)
+      );
+
+      let shouldUpdate = true;
+
       setFilters((prev) => {
         // Block executionDate if date range is set
         if (newLocalFilters.executionDate && (prev.fromDate || prev.toDate)) {
@@ -243,6 +272,7 @@ export function useUrlFilters(): UseUrlFiltersReturn {
           // Remove executionDate from the update
           const { executionDate, ...restFilters } = newLocalFilters;
           if (Object.keys(restFilters).length === 0) {
+            shouldUpdate = false;
             return prev;
           }
           newLocalFilters = restFilters;
@@ -259,12 +289,6 @@ export function useUrlFilters(): UseUrlFiltersReturn {
           updatedLocalFilters.area = '';
         }
 
-        // Determine if this is a text input (should be debounced)
-        const textFields = ['customerName', 'phone', 'shipmentCode', 'address', 'search'];
-        const isTextInput = Object.keys(newLocalFilters).some((key) =>
-          textFields.includes(key)
-        );
-
         const newFilters = {
           ...prev,
           localFilters: updatedLocalFilters,
@@ -278,24 +302,25 @@ export function useUrlFilters(): UseUrlFiltersReturn {
           newFilters.timePeriod = '';
         }
 
-        if (isTextInput) {
-          debouncedUpdateUrl(newFilters);
-        } else {
-          updateUrl(newFilters, false);
-        }
-
         return newFilters;
       });
+
+      if (shouldUpdate) {
+        if (isTextInput) {
+          debouncedScheduleUrlUpdate();
+        } else {
+          scheduleUrlUpdate('push');
+        }
+      }
     },
-    [updateUrl, debouncedUpdateUrl]
+    [scheduleUrlUpdate, debouncedScheduleUrlUpdate]
   );
 
   // Reset all filters
   const resetFilters = useCallback(() => {
-    const newFilters = { ...DEFAULT_FILTER_STATE };
-    setFilters(newFilters);
-    updateUrl(newFilters, false);
-  }, [updateUrl]);
+    setFilters({ ...DEFAULT_FILTER_STATE });
+    scheduleUrlUpdate('push');
+  }, [scheduleUrlUpdate]);
 
   return {
     filters,

@@ -8,6 +8,8 @@ import {
   User,
   MapPinHouse,
   TriangleAlert,
+  Ban,
+  FileText,
 } from 'lucide-react';
 import { getTimeAgo } from '@/utils/timeAgo';
 
@@ -31,6 +33,8 @@ interface OrderCardProps {
   repeatCount?: number;
   onRepeatClick?: () => void;
   filterParams?: string;
+  cancelReason?: string | null;
+  cancelNotes?: string | null;
 }
 
 const getStatusText = (status: string): string => {
@@ -75,6 +79,8 @@ export default function OrderCard({
   repeatCount = 0,
   onRepeatClick,
   filterParams,
+  cancelReason,
+  cancelNotes,
 }: OrderCardProps) {
   const router = useRouter();
 
@@ -186,14 +192,14 @@ export default function OrderCard({
           ))}
 
         {(government && government !== 'غير محدد') ||
-        (city && city !== 'غير محدد') ? (
+          (city && city !== 'غير محدد') ? (
           <div className="flex flex-row-reverse items-center gap-2">
             <span className="text-base font-medium text-black">
               {government && government !== 'غير محدد' ? government : ''}
               {government &&
-              government !== 'غير محدد' &&
-              city &&
-              city !== 'غير محدد'
+                government !== 'غير محدد' &&
+                city &&
+                city !== 'غير محدد'
                 ? ' - '
                 : ''}
               {city && city !== 'غير محدد' ? city : ''}
@@ -240,6 +246,33 @@ export default function OrderCard({
               height={18}
               className="flex-shrink-0 opacity-50"
             />
+          </div>
+        )}
+
+        {status === 'CANCELLED' && (cancelReason || cancelNotes) && (
+          <div className="flex flex-col gap-3 w-full">
+            {cancelReason && (
+              <div className="flex items-start gap-2">
+                <Ban
+                  className="w-[18px] h-[18px] flex-shrink-0"
+                  style={{ strokeWidth: 1.5, color: 'rgba(220,38,38,0.7)' }}
+                />
+                <span className="text-base font-medium text-red-600">
+                  {cancelReason}
+                </span>
+              </div>
+            )}
+            {cancelNotes && (
+              <div className="flex items-start gap-2">
+                <FileText
+                  className="w-[18px] h-[18px] flex-shrink-0"
+                  style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
+                />
+                <span className="text-base font-medium text-gray-600">
+                  {cancelNotes}
+                </span>
+              </div>
+            )}
           </div>
         )}
       </div>
