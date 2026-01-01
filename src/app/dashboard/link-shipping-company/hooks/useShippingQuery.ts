@@ -31,11 +31,29 @@ export const useShippingQuery = (providerId?: string) => {
     },
   });
 
+  const updateConfig = useMutation({
+    mutationFn: async ({
+      data,
+      shippingCompany,
+    }: {
+      data: any;
+      shippingCompany: string;
+    }) => {
+      return shippingApi.updateConfig(data, shippingCompany);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shipping-configs'] });
+    },
+  });
+
   return {
     configs: configQuery.data ?? [],
-    config, // Return the single config found
+    config,
     isLoading: configQuery.isLoading,
     isSaving: upsertMutation.isPending,
     saveConfig: upsertMutation.mutateAsync,
+    updateConfig: updateConfig.mutateAsync,
+    isUpdatingConfig: upsertMutation.isPending,
+    errorUpdateConfig: upsertMutation.isError,
   };
 };
