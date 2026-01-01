@@ -13,12 +13,12 @@ import {
 } from 'lucide-react';
 import { webhookApi, WebhookConfigResponse } from '@/lib/api/webhooks';
 import { Button } from '@/components/ui/button';
-import { useGetWebhookConfig } from './hooks/useGetWebhookConfig';
-import { useIntegrations } from './hooks/useIntegrations';
+import { useGetWebhookConfig } from '../hooks/useGetWebhookConfig';
+import { useIntegrations } from '../hooks/useIntegrations';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
 import { LiaEyeSolid, LiaEyeSlashSolid } from 'react-icons/lia';
-import { integrationSteps, webhookSteps } from './constants/steps';
+import { integrationSteps, webhookSteps } from '../constants/steps';
 import { Else, If, Then } from 'react-if';
 import { MdQuestionMark } from 'react-icons/md';
 
