@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import Input from '@/components/ui/Input';
 import {
   Phone,
@@ -15,7 +15,10 @@ import {
   UseFormWatch,
   UseFormSetValue,
 } from 'react-hook-form';
+// Ensure this path matches your folder structure
 import { OrderSettingsFormData } from '../schemas/store';
+import { useIntegrations } from '../../integrations/hooks/useIntegrations';
+import { If, Then } from 'react-if';
 
 interface Props {
   register: UseFormRegister<OrderSettingsFormData>;
@@ -29,7 +32,14 @@ export default function OrderSettingsFields({
   errors,
   watch,
 }: Props) {
-  const canEditOrder = watch('canEditOrder');
+  // Watch the specific field for conditional rendering
+  const canEditOrderValue = watch('canEditOrder');
+
+  const { integrations } = useIntegrations();
+
+  const isApiConnected = useMemo(() => {
+    return integrations?.some((item) => item.isActive);
+  }, [integrations]);
 
   const ToggleSwitch = ({
     name,
@@ -60,109 +70,123 @@ export default function OrderSettingsFields({
   return (
     <div className="px-4 md:px-10 py-6 md:py-[34px]" dir="rtl">
       <div className="flex lg:w-2/3 flex-col gap-8">
-        {/* حقل رقم الهاتف */}
-        <div className="w-full flex flex-col gap-4">
-          <div className="w-full flex items-start gap-2">
-            <Phone className="w-6 h-6 text-[#5D24E1] mt-0.5" />
-            <div>
-              <h3 className="text-lg font-semibold leading-tight">
-                رقم الهاتف
-              </h3>
-              <p className="text-sm text-gray-500">
-                اضف رقم للمتابعه مع شركه الشحن
-              </p>
+        <If condition={isApiConnected}>
+          <Then>
+            {/* Phone Number */}
+            <div className="w-full flex flex-col gap-4">
+              <div className="w-full flex items-start gap-2">
+                <Phone className="w-6 h-6 text-[#5D24E1] mt-0.5" />
+                <div>
+                  <h3 className="text-lg font-semibold leading-tight">
+                    رقم الهاتف
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    اضف رقم للمتابعه مع شركه الشحن
+                  </p>
+                </div>
+              </div>
+              <Input
+                name="phoneNumber"
+                register={register}
+                registerOptions={{
+                  setValueAs: (v: string) => (v === '' ? undefined : v),
+                }}
+                placeholder="01xxxxxxxxx"
+                error={errors.phoneNumber?.message}
+              />
             </div>
-          </div>
-          <Input
-            name="phoneNumber"
-            register={register}
-            placeholder="01xxxxxxxxx"
-            error={errors.phoneNumber?.message}
-            className="!h-[46px] bg-[#EAEAEA40] text-right w-full"
-          />
-        </div>
 
-        {/* حقل فتح الشحنة */}
-        <div className="flex items-start justify-between border-b border-gray-100 pb-6">
-          <div className="flex items-start gap-3">
-            <PackageOpen className="w-6 h-6 text-[#5D24E1] mt-0.5" />
-            <div>
-              <h3 className="text-lg font-semibold leading-tight">
-                فتح الشحنة
-              </h3>
-              <p className="text-sm text-gray-500">
-                هل تريد معاينه الشحنه من قبل العميل؟
-              </p>
+            {/* Open Order */}
+            <div className="flex items-start justify-between border-b border-gray-100 pb-6">
+              <div className="flex items-start gap-3">
+                <PackageOpen className="w-6 h-6 text-[#5D24E1] mt-0.5" />
+                <div>
+                  <h3 className="text-lg font-semibold leading-tight">
+                    فتح الشحنة
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    هل تريد معاينه الشحنه من قبل العميل؟
+                  </p>
+                </div>
+              </div>
+              <ToggleSwitch
+                name="canOpenOrder"
+                checked={!!watch('canOpenOrder')} // Use !! to ensure boolean
+              />
             </div>
-          </div>
-          <ToggleSwitch name="canOpenOrder" checked={watch('canOpenOrder')} />
-        </div>
 
-        {/* حقل تعديل محتوى الشحنة */}
-        <div className="flex flex-col gap-4 border-b border-gray-100 pb-6">
-          <div className="flex items-start justify-between">
-            <div className="flex items-start gap-3">
-              <Edit3 className="w-6 h-6 text-[#5D24E1] mt-0.5" />
-              <div>
-                <h3 className="text-lg font-semibold leading-tight">
-                  تعديل محتوي الشحنة
-                </h3>
-                <p className="text-sm text-gray-500">
-                  امكانيه تعديل محتوي الشحنه من قبل الموظف
-                </p>
+            {/* Edit Order */}
+            <div className="flex flex-col gap-4 border-b border-gray-100 pb-6">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-3">
+                  <Edit3 className="w-6 h-6 text-[#5D24E1] mt-0.5" />
+                  <div>
+                    <h3 className="text-lg font-semibold leading-tight">
+                      تعديل محتوي الشحنة
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      امكانيه تعديل محتوي الشحنه من قبل الموظف
+                    </p>
+                  </div>
+                </div>
+                <ToggleSwitch
+                  name="canEditOrder"
+                  checked={!!watch('canEditOrder')} // Fixed field name and type
+                />
+              </div>
+
+              <div
+                className={`transition-all duration-300 overflow-hidden ${
+                  canEditOrderValue
+                    ? 'max-h-40 opacity-100 mt-2'
+                    : 'max-h-0 opacity-0'
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <FilePenLine className="w-5 h-5 text-[#5D24E1]" />
+                  <span className="text-base">اسم المنتج</span>
+                </div>
+                <Input
+                  name="category"
+                  register={register}
+                  placeholder="أدخل اسم المنتج"
+                  error={errors.category?.message}
+                  className="!h-[46px] bg-[#EAEAEA40] text-right w-full !px-5"
+                />
               </div>
             </div>
-            <ToggleSwitch name="canEditOrder" checked={canEditOrder} />
-          </div>
 
-          <div
-            className={`transition-all duration-300 overflow-hidden ${
-              !canEditOrder ? 'max-h-40 opacity-100 mt-2' : 'max-h-0 opacity-0'
-            }`}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <FilePenLine className="w-5 h-5 text-[#5D24E1]" />
-              <span className="text-base">اسم المنتج</span>
+            {/* Return Cost */}
+            <div className="w-full flex flex-col gap-4 border-b border-gray-100 pb-6">
+              <div className="w-full flex items-start gap-2">
+                <RotateCcw className="w-6 h-6 text-[#5D24E1] mt-0.5" />
+                <div>
+                  <h3 className="text-lg font-semibold leading-tight">
+                    تكلفة مرتجع الشحن
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    في حاله رفض العميل استلام الشحنة يتم دفع مبلغ.
+                  </p>
+                </div>
+              </div>
+              <Input
+                name="returnShippingCost"
+                register={register}
+                type="text"
+                placeholder="0.00"
+                className="!h-[46px] bg-[#EAEAEA40] text-right w-full !px-5"
+              />
             </div>
-            <Input
-              name="category"
-              register={register}
-              placeholder="أدخل اسم المنتج"
-              error={errors.category?.message}
-              className="!h-[46px] bg-[#EAEAEA40] text-right w-full"
-            />
-          </div>
-        </div>
+          </Then>
+        </If>
 
-        {/* حقل تكلفة مرتجع الشحن */}
-        <div className="w-full flex flex-col gap-4 border-b border-gray-100 pb-6">
-          <div className="w-full flex items-start gap-2">
-            <RotateCcw className="w-6 h-6 text-[#5D24E1] mt-0.5" />
-            <div>
-              <h3 className="text-lg font-semibold leading-tight">
-                تكلفة مرتجع الشحن
-              </h3>
-              <p className="text-sm text-gray-500">
-                في حاله رفض العميل استلام الشحنة يتم دفع مبلغ.
-              </p>
-            </div>
-          </div>
-          <Input
-            name="returnShippingCost"
-            register={register}
-            type="number"
-            placeholder="0.00"
-            className="!h-[46px] bg-[#EAEAEA40] text-right w-full"
-          />
-        </div>
-
-        {/* الحقل الجديد: عدد المرات المتبقية لإلغاء الطلب */}
+        {/* Auto Cancel */}
         <div className="w-full flex flex-col gap-4">
           <div className="w-full flex items-start gap-2">
             <CopyX className="w-6 h-6 text-[#5D24E1] mt-0.5" />
             <div>
               <h3 className="text-lg font-semibold leading-tight">
-                الالغاء التلقائي للطلب{' '}
+                الالغاء التلقائي للطلب
               </h3>
               <p className="text-sm text-gray-500">
                 الغاء الطلب تلقائي بعد كام محاوله؟
@@ -172,9 +196,14 @@ export default function OrderSettingsFields({
           <Input
             name="autoCancelAttempts"
             register={register}
+            registerOptions={{
+              valueAsNumber: true,
+              setValueAs: (v: any) => (v === '' ? undefined : parseInt(v, 10)),
+            }}
             type="number"
             placeholder="مثال: 3"
-            className="!h-[46px] bg-[#EAEAEA40] text-right w-full"
+            error={errors.autoCancelAttempts?.message}
+            className="!h-[46px] bg-[#EAEAEA40] text-right w-full !px-5"
           />
         </div>
       </div>
