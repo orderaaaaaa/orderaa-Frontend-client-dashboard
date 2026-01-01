@@ -19,7 +19,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
 import { LiaEyeSolid, LiaEyeSlashSolid } from 'react-icons/lia';
 import { integrationSteps, webhookSteps } from './constants/steps';
-import { If, Then } from 'react-if';
+import { Else, If, Then } from 'react-if';
+import { MdQuestionMark } from 'react-icons/md';
 
 interface EasyOrderModalProps {
   isOpen: boolean;
@@ -231,6 +232,12 @@ const EasyOrderModal = ({
                       متصل
                     </div>
                   </Then>
+                  <Else>
+                    <div className="absolute top-1 left-1 w-fit h-7 bg-gray-200 text-gray-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
+                      <MdQuestionMark className="w-3 h-3" />
+                      قم بلربط
+                    </div>
+                  </Else>
                 </If>
 
                 {/* Main Wrapper - items-end aligns the chevron with the bottom text line */}
@@ -378,6 +385,12 @@ const EasyOrderModal = ({
                       متصل
                     </div>
                   </Then>
+                  <Else>
+                    <div className="absolute top-1 left-1 w-fit h-7 bg-gray-200 text-gray-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
+                      <MdQuestionMark className="w-3 h-3" />
+                      قم بلربط
+                    </div>
+                  </Else>
                 </If>
 
                 {/* Main Wrapper */}
