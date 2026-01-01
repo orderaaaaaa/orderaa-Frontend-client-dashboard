@@ -78,7 +78,14 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
       if (showTimeSelect) {
         return format(date, 'dd/MM/yyyy h:mm aa', { locale: ar });
       }
-      return format(date, dateFormat.replace('dd', 'd').replace('MM', 'M').replace('yyyy', 'yyyy'), { locale: ar });
+      return format(
+        date,
+        dateFormat
+          .replace('dd', 'd')
+          .replace('MM', 'M')
+          .replace('yyyy', 'yyyy'),
+        { locale: ar }
+      );
     };
 
     const handleClear = (e: React.MouseEvent) => {
@@ -122,11 +129,7 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             ) : null}
           </Button>
         </PopoverTrigger>
-        <PopoverContent
-          className="w-auto p-0"
-          align="start"
-          sideOffset={4}
-        >
+        <PopoverContent className="w-auto p-0" align="start" sideOffset={4}>
           <Calendar
             mode="single"
             selected={selected || undefined}
@@ -145,14 +148,26 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             }}
             disabled={(date) => {
               // Compare dates without time
-              const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+              const dateOnly = new Date(
+                date.getFullYear(),
+                date.getMonth(),
+                date.getDate()
+              );
 
               if (minDate) {
-                const minDateOnly = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate());
+                const minDateOnly = new Date(
+                  minDate.getFullYear(),
+                  minDate.getMonth(),
+                  minDate.getDate()
+                );
                 if (dateOnly < minDateOnly) return true;
               }
               if (maxDate) {
-                const maxDateOnly = new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate());
+                const maxDateOnly = new Date(
+                  maxDate.getFullYear(),
+                  maxDate.getMonth(),
+                  maxDate.getDate()
+                );
                 if (dateOnly > maxDateOnly) return true;
               }
               return false;
@@ -247,9 +262,7 @@ function TimePicker({
             className
           )}
         >
-          {showIcon && (
-            <Icon className="ml-2 h-4 w-4 text-gray-400 shrink-0" />
-          )}
+          {showIcon && <Icon className="ml-2 h-4 w-4 text-gray-400 shrink-0" />}
           <span className="flex-1 text-right truncate">
             {selected ? formatDisplayTime(selected) : placeholder}
           </span>
@@ -286,10 +299,10 @@ function TimePicker({
                 setOpen(false);
               }}
               className={cn(
-                'w-full px-4 py-2 text-right text-sm hover:bg-accent transition-colors',
-                selected &&
-                  format(selected, 'HH:mm') === option.value &&
-                  'bg-primary text-primary-foreground hover:bg-primary'
+                'w-full px-4 py-2 text-right text-sm hover:bg-accent transition-colors cursor-pointer',
+                selected && format(selected, 'HH:mm') === option.value
+                  ? 'bg-[#5D24E1] text-white hover:bg-[#4a1db5]' // Use your purple here
+                  : 'text-gray-700'
               )}
             >
               {option.label}
