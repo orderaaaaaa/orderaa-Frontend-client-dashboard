@@ -9,6 +9,7 @@ import {
   Play,
   ChevronDown,
   ChevronUp,
+  CheckCircle2,
 } from 'lucide-react';
 import { webhookApi, WebhookConfigResponse } from '@/lib/api/webhooks';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,9 @@ import { useIntegrations } from './hooks/useIntegrations';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
 import { LiaEyeSolid, LiaEyeSlashSolid } from 'react-icons/lia';
+import { integrationSteps, webhookSteps } from './constants/steps';
+import { Else, If, Then } from 'react-if';
+import { MdQuestionMark } from 'react-icons/md';
 
 interface EasyOrderModalProps {
   isOpen: boolean;
@@ -39,6 +43,7 @@ const EasyOrderModal = ({
   const [webhookSecret, setWebhookSecret] = useState('');
   const [customWebhookUrl, setCustomWebhookUrl] = useState('');
   const [showSecret, setShowSecret] = useState(false);
+  const [showApi, setShowApi] = useState(false);
   const [copied, setCopied] = useState(false);
 
   // --- Integration API Key State ---
@@ -101,15 +106,33 @@ const EasyOrderModal = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleApiSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
+    try {
+      if (existingIntegrationId) {
+        await updateIntegration({
+          id: existingIntegrationId,
+          apiKey: apiKey.trim(),
+        });
+      } else {
+        await createIntegration(apiKey.trim());
+      }
+      queryClient.invalidateQueries({ queryKey: ['integration-configs'] });
+    } catch (err: any) {
+      setError('خطأ في حفظ مفتاح API');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  const handleWebhookSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
     try {
       const finalUrl = customWebhookUrl.trim() || defaultWebhookUrl;
-
-      // 1. Webhook Logic (Patch if existingConfig exists)
       if (existingConfig) {
         await webhookApi.updateConfig({
           webhookUrl: finalUrl,
@@ -121,24 +144,9 @@ const EasyOrderModal = ({
           webhookSecret: webhookSecret.trim(),
         });
       }
-
-      // 2. API Key Logic (Patch if existingIntegrationId exists)
-      if (apiKey.trim()) {
-        if (existingIntegrationId) {
-          await updateIntegration({
-            id: existingIntegrationId,
-            apiKey: apiKey.trim(),
-          });
-        } else {
-          await createIntegration(apiKey.trim());
-        }
-      }
-
-      queryClient.invalidateQueries({ queryKey: ['integration-configs'] });
-      onSuccess();
-      onClose();
+      // Success feedback
     } catch (err: any) {
-      setError(err.response?.data?.message || 'حدث خطأ أثناء حفظ الإعدادات.');
+      setError('خطأ في حفظ الـ Webhook');
     } finally {
       setIsLoading(false);
     }
@@ -151,19 +159,7 @@ const EasyOrderModal = ({
     }
   };
 
-  const webhookSteps = [
-    'قم بتسجيل الدخول إلى حسابك في منصة Easy Orders.',
-    'انتقل إلى الاعدادات (Settings) واختر Webhooks.',
-    'اضغط على "Create Webhook" واختر الحدث: "Order Created".',
-    'انسخ رابط الـ Webhook أدناه وألصقه في Easy Orders.',
-    'قم بإنشاء مفتاح سرية (Secret) قوي وألصقه في الحقلين.',
-  ];
-
-  const integrationSteps = [
-    'انتقل إلى قسم Public API في Easy Orders.',
-    'اضغط على "إنشاء" واختر "الوصول للمنتجات".',
-    'انسخ مفتاح الـ API Key وألصقه أدناه.',
-  ];
+  const showIsConnectWebhook = existingConfig?.webhookSecret;
 
   return (
     <>
@@ -221,96 +217,61 @@ const EasyOrderModal = ({
               </div>
             </div>
 
-            {/* 1. API Key Dropdown */}
-            <div className="bg-[#fbfdfe] rounded-xl border border-[#2489E1]/30 overflow-hidden transition-all duration-300">
-              <button
-                type="button"
-                onClick={() => setShowApiDropdown(!showApiDropdown)}
-                className="w-full flex items-center justify-between p-6 cursor-pointer hover:bg-blue-100/30 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="bg-[#2489E1] text-white p-2 rounded-lg">
-                    <ShoppingCart className="w-5 h-5" />
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-gray-900">
-                      إعدادات الربط (API Key)
-                    </p>
-                    <p className="text-sm text-gray-600 italic">
-                      اختياري: لربط المخزون تلقائياً
-                    </p>
-                  </div>
-                </div>
-                {showApiDropdown ? (
-                  <ChevronUp className="w-6 h-6 text-[#2489E1]" />
-                ) : (
-                  <ChevronDown className="w-6 h-6 text-[#2489E1]" />
-                )}
-              </button>
-
-              {showApiDropdown && (
-                <div className="p-6 pt-0 space-y-4 animate-in fade-in slide-in-from-top-2">
-                  <div className="space-y-3 border-t border-blue-200/50 pt-4">
-                    {integrationSteps.map((step, i) => (
-                      <div
-                        key={i}
-                        className="flex flex-row items-center px-6 py-2.5 gap-2.5 bg-[rgba(36,137,225,0.02)] border border-[rgba(36,137,225,0.16)] rounded-lg"
-                      >
-                        <span className="flex-shrink-0 w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-medium">
-                          {i + 1}
-                        </span>
-                        <p className="flex-1 text-md text-right text-black">
-                          {step}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="bg-white p-4 rounded-lg border mt-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-                      API Key
-                    </label>
-                    <input
-                      type="text"
-                      value={apiKey}
-                      onChange={(e) => setApiKey(e.target.value)}
-                      placeholder="أدخل مفتاح الـ API"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg text-left font-mono"
-                      dir="ltr"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* 2. Webhook Dropdown */}
+            {/*  Webhook Dropdown */}
             <div className="bg-[#fbfdfe] rounded-xl border border-[#5D24E1]/30 overflow-hidden transition-all duration-300">
               <button
                 type="button"
                 onClick={() => setShowWebhookDropdown(!showWebhookDropdown)}
-                className="w-full flex items-center justify-between p-6 cursor-pointer hover:bg-purple-100/30 transition-colors"
+                className="w-full relative py-7 px-4 cursor-pointer hover:bg-purple-100/30 transition-colors"
               >
-                <div className="flex items-center gap-3">
-                  <div className="bg-[#5D24E1] text-white p-2 rounded-lg">
-                    <Play className="w-5 h-5" />
+                {/* Absolute Badge */}
+                <If condition={showIsConnectWebhook}>
+                  <Then>
+                    <div className="absolute top-1 left-1 w-fit h-7 bg-green-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" />
+                      متصل
+                    </div>
+                  </Then>
+                  <Else>
+                    <div className="absolute top-1 left-1 w-fit h-7 bg-gray-200 text-gray-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
+                      <MdQuestionMark className="w-3 h-3" />
+                      قم بلربط
+                    </div>
+                  </Else>
+                </If>
+
+                {/* Main Wrapper - items-end aligns the chevron with the bottom text line */}
+                <div className="flex items-end justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-[#5D24E1] text-white p-2 rounded-lg">
+                      <Play className="w-5 h-5" />
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-gray-900 leading-none mb-1">
+                        إعدادات الـ Webhook
+                      </p>
+                      <p className="text-sm text-gray-600 italic leading-none">
+                        مطلوب: لمراقبة الطلبات الجديدة
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-gray-900">
-                      إعدادات الـ Webhook
-                    </p>
-                    <p className="text-sm text-gray-600 italic">
-                      مطلوب: لمراقبة الطلبات الجديدة
-                    </p>
+
+                  {/* Chevron - pb-[2px] added to fine-tune the optical alignment with the text baseline */}
+                  <div className="relative top-1 left-1">
+                    {showWebhookDropdown ? (
+                      <ChevronUp className="w-6 h-6 text-[#5D24E1]" />
+                    ) : (
+                      <ChevronDown className="w-6 h-6 text-[#5D24E1]" />
+                    )}
                   </div>
                 </div>
-                {showWebhookDropdown ? (
-                  <ChevronUp className="w-6 h-6 text-[#5D24E1]" />
-                ) : (
-                  <ChevronDown className="w-6 h-6 text-[#5D24E1]" />
-                )}
               </button>
 
               {showWebhookDropdown && (
-                <div className="p-6 pt-0 space-y-4 animate-in fade-in slide-in-from-top-2">
+                <form
+                  onSubmit={handleWebhookSubmit}
+                  className="p-6 pt-0 space-y-4 animate-in fade-in slide-in-from-top-2"
+                >
                   <div className="space-y-3 border-t border-purple-200/50 pt-4">
                     {webhookSteps.map((step, i) => (
                       <div
@@ -389,7 +350,152 @@ const EasyOrderModal = ({
                       </div>
                     </div>
                   </div>
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className="flex-1 bg-[#5D24E1] text-white h-10"
+                    >
+                      {existingConfig ? 'تحديث Webhook' : 'حفظ Webhook'}
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => setShowWebhookDropdown(false)}
+                      className="bg-gray-100 text-gray-600 h-10 px-4"
+                    >
+                      إلغاء
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </div>
+
+            {/*  API Key Dropdown */}
+            <div className="bg-[#fbfdfe] rounded-xl border border-[#5D24E1]/30 overflow-hidden transition-all duration-300">
+              <button
+                type="button"
+                onClick={() => setShowApiDropdown(!showApiDropdown)}
+                className="w-full relative py-7 px-4 cursor-pointer hover:bg-purple-100/30 transition-colors"
+              >
+                {/* Absolute Badge */}
+                <If condition={existingIntegrationId}>
+                  <Then>
+                    <div className="absolute top-1 left-1 w-fit h-7 bg-green-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" />
+                      متصل
+                    </div>
+                  </Then>
+                  <Else>
+                    <div className="absolute top-1 left-1 w-fit h-7 bg-gray-200 text-gray-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
+                      <MdQuestionMark className="w-3 h-3" />
+                      قم بلربط
+                    </div>
+                  </Else>
+                </If>
+
+                {/* Main Wrapper */}
+                <div className="flex items-end justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-[#5D24E1] text-white p-2 rounded-lg">
+                      <ShoppingCart className="w-5 h-5" />
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-gray-900 leading-none mb-1">
+                        إعدادات الربط (API Key)
+                      </p>
+                      <p className="text-sm text-gray-600 italic leading-none">
+                        اختياري: لربط المخزون تلقائياً
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Chevron */}
+                  <div className="relative top-1 left-1">
+                    {showApiDropdown ? (
+                      <ChevronUp className="w-6 h-6 text-[#5D24E1]" />
+                    ) : (
+                      <ChevronDown className="w-6 h-6 text-[#5D24E1]" />
+                    )}
+                  </div>
                 </div>
+              </button>
+
+              {showApiDropdown && (
+                <form
+                  onSubmit={handleApiSubmit}
+                  className="p-6 pt-0 space-y-4 animate-in fade-in slide-in-from-top-2"
+                >
+                  {/* Steps Section */}
+                  <div className="space-y-3 border-t border-purple-200/50 pt-4">
+                    {integrationSteps.map((step, i) => (
+                      <div
+                        key={i}
+                        className="flex flex-row items-center px-6 py-2.5 gap-2.5 bg-[rgba(93,36,225,0.02)] border border-[rgba(93,36,225,0.16)] rounded-lg"
+                      >
+                        <span className="flex-shrink-0 w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-medium">
+                          {i + 1}
+                        </span>
+                        <p className="flex-1 text-md text-right text-black">
+                          {step}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Input Section */}
+                  <div className="space-y-4 bg-gray-50/50 p-4 rounded-xl border border-gray-100 mt-2">
+                    <div>
+                      <label
+                        className="block text-sm font-medium text-gray-700 mb-2 text-left"
+                        dir="ltr"
+                      >
+                        API Key
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showApi ? 'text' : 'password'}
+                          value={apiKey}
+                          onChange={(e) => setApiKey(e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg text-left focus:ring-2 focus:ring-[#5D24E1] pr-12 font-mono outline-none"
+                          dir="ltr"
+                          placeholder="Enter your API key"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowApi(!showApi)}
+                          className="absolute inset-y-0 right-2 flex items-center"
+                        >
+                          <span className="text-white rounded-md cursor-pointer p-1.5 bg-[#5D24E1] hover:bg-[#4A1CB8] transition-colors">
+                            {showApi ? (
+                              <LiaEyeSlashSolid className="w-4 h-4" />
+                            ) : (
+                              <LiaEyeSolid className="w-4 h-4" />
+                            )}
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className="flex-1 bg-[#5D24E1] text-white h-10"
+                    >
+                      {existingIntegrationId ? 'تحديث API' : 'حفظ API'}
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => setShowApiDropdown(false)}
+                      className="bg-gray-100 text-gray-600 h-10 px-4"
+                    >
+                      إلغاء
+                    </Button>
+                  </div>
+                </form>
               )}
             </div>
 
@@ -398,28 +504,6 @@ const EasyOrderModal = ({
                 {error}
               </div>
             )}
-
-            {/* Submit Actions */}
-            <form onSubmit={handleSubmit} className="flex gap-3 pt-4">
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="flex-1 bg-[#5D24E1] text-white h-12 hover:bg-[#4A1CB8] font-bold text-lg"
-              >
-                {isLoading
-                  ? 'جاري الحفظ...'
-                  : existingConfig || existingIntegrationId
-                  ? 'تحديث الربط'
-                  : 'إنشاء الربط'}
-              </Button>
-              <Button
-                type="button"
-                onClick={handleClose}
-                className="flex-1 bg-white border border-gray-300 text-gray-700 h-12 hover:bg-gray-50"
-              >
-                إلغاء
-              </Button>
-            </form>
           </div>
         </div>
       </div>
