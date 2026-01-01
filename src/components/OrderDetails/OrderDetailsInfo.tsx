@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Order, OrderStatus, OrderStatusItem } from '@/types/orders';
 import { useOrderStatusesQuery } from '@/services/orders';
 import { useModalState } from '@/hooks/OrderDetails/useModalState';
@@ -113,6 +113,18 @@ function OrderDetailsInfoComponent({
   });
 
   const updateField = useOrderFieldUpdate(localOrder.id, handleUpdate);
+
+  // Get the last event status from order events
+  const lastEventStatus = useMemo(() => {
+    if (!localOrder.order_events || localOrder.order_events.length === 0) {
+      return undefined;
+    }
+    // Sort by createdAt descending and get the first (most recent) event
+    const sortedEvents = [...localOrder.order_events].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    return sortedEvents[0]?.status;
+  }, [localOrder.order_events]);
 
   useEffect(() => {
     setLocalOrder(order);
@@ -255,6 +267,7 @@ function OrderDetailsInfoComponent({
 
       <OrderActionsFooter
         orderStatus={localOrder.status}
+        lastEventStatus={lastEventStatus}
         onConfirm={handleConfirmClick}
         onFollowUpClick={handleFollowUpClick}
         onActionClick={handleActionClick}
@@ -275,6 +288,7 @@ function OrderDetailsInfoComponent({
           setConfirmationDialog({ isOpen: false, title: '', message: '', action: '' })
         }
         onConfirmAction={handleConfirmAction}
+        onError={(message) => setErrorModal({ isOpen: true, message })}
       />
 
       <ErrorModal

@@ -245,6 +245,10 @@ export interface Order {
   countryOfManufacture?: string;
   packagingNotes?: string;
 
+  // Cancel info
+  cancelReason?: string | null;
+  cancelNotes?: string | null;
+
   // Time preferences
   timeFrom?: string;
   timeTo?: string;

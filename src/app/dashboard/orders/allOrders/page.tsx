@@ -615,6 +615,8 @@ function AllOrdersContent() {
                   )
                 }
                 filterParams={orderDetailsFilterParams}
+                cancelReason={order.cancelReason}
+                cancelNotes={order.cancelNotes}
               />
             ))}
           </div>

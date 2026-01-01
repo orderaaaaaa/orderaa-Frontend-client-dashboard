@@ -31,6 +31,7 @@ export interface OrderActionModalsProps {
   };
   onCloseConfirmation: () => void;
   onConfirmAction: () => Promise<void>;
+  onError?: (message: string) => void;
 }
 
 /**
@@ -47,14 +48,21 @@ export function OrderActionModals({
   confirmationDialog,
   onCloseConfirmation,
   onConfirmAction,
+  onError,
 }: OrderActionModalsProps) {
   const [newPackagingNote, setNewPackagingNote] = useState('');
 
   // Handlers for modals that need to close on success
   const handleUrgentConfirm = async (data: { shippingCost?: number; urgentDate: string }) => {
-    const success = await actions.handleUrgent(data);
-    if (success) {
-      modals.urgent.close();
+    try {
+      const success = await actions.handleUrgent(data);
+      if (success) {
+        modals.urgent.close();
+      }
+    } catch (error: any) {
+      if (onError) {
+        onError(error?.message || 'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.');
+      }
     }
   };
 
