@@ -20,7 +20,8 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
   onClose,
 }) => {
   // Pass providerId to the hook
-  const { config, saveConfig, isSaving } = useShippingQuery(providerId);
+  const { config, saveConfig, updateConfig, isSaving } =
+    useShippingQuery(providerId);
   const [jsonInput, setJsonInput] = useState('');
   const [error, setError] = useState<string>('');
   const [showVideo, setShowVideo] = useState(false);
@@ -54,19 +55,25 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
     try {
       const parsed = validateAndParseJson(jsonInput);
 
-      const payload = {
-        shippingCompany: providerId.toUpperCase(),
+      const basePayload = {
         authKey: parsed.authentication_key,
         clientCode: parsed.main_client_code?.toString(),
         isActive: true,
-        metadata: {
-          rawJson: jsonInput,
-          ...parsed,
-        },
       };
 
-      await saveConfig(payload);
-      setJsonInput(''); // Clear input after successful save
+      if (!config?.authKey) {
+        await saveConfig({
+          shippingCompany: providerId.toUpperCase(),
+          ...basePayload,
+        });
+      } else {
+        await updateConfig({
+          data: basePayload,
+          shippingCompany: providerId.toUpperCase(),
+        });
+      }
+
+      setJsonInput('');
       onClose();
     } catch (err: any) {
       setError(err.message || 'حدث خطأ أثناء الحفظ');

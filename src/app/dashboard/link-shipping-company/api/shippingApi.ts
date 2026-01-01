@@ -14,8 +14,11 @@ export const shippingApi = {
   },
 
   // PUT: Update configuration
-  updateConfig: async (config: any) => {
-    const { data } = await http.put(`/shipping-config`, config);
+  updateConfig: async (config: any, shippingCompany: string) => {
+    const { data } = await http.put(
+      `/shipping-config/${shippingCompany}`,
+      config
+    );
     return data;
   },
 
