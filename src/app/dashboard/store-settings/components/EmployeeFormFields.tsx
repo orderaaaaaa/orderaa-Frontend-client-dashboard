@@ -33,7 +33,7 @@ export default function OrderSettingsFields({
   watch,
 }: Props) {
   // Watch the specific field for conditional rendering
-  const canEditOrderValue = watch('canEditOrder');
+  const canEditOrderValue = watch('employeeCanEditContent');
 
   const { integrations } = useIntegrations();
 
@@ -86,13 +86,13 @@ export default function OrderSettingsFields({
                 </div>
               </div>
               <Input
-                name="phoneNumber"
+                name="shippingPhoneNumber"
                 register={register}
                 registerOptions={{
                   setValueAs: (v: string) => (v === '' ? undefined : v),
                 }}
                 placeholder="01xxxxxxxxx"
-                error={errors.phoneNumber?.message}
+                error={errors.shippingPhoneNumber?.message}
               />
             </div>
 
@@ -110,8 +110,8 @@ export default function OrderSettingsFields({
                 </div>
               </div>
               <ToggleSwitch
-                name="canOpenOrder"
-                checked={!!watch('canOpenOrder')} // Use !! to ensure boolean
+                name="canOpenShipment" // Updated
+                checked={!!watch('canOpenShipment')}
               />
             </div>
 
@@ -130,8 +130,8 @@ export default function OrderSettingsFields({
                   </div>
                 </div>
                 <ToggleSwitch
-                  name="canEditOrder"
-                  checked={!!watch('canEditOrder')} // Fixed field name and type
+                  name="employeeCanEditContent" // Updated
+                  checked={!!watch('employeeCanEditContent')}
                 />
               </div>
 
@@ -147,10 +147,10 @@ export default function OrderSettingsFields({
                   <span className="text-base">اسم المنتج</span>
                 </div>
                 <Input
-                  name="category"
+                  name="defaultShipmentContent"
                   register={register}
                   placeholder="أدخل اسم المنتج"
-                  error={errors.category?.message}
+                  error={errors.defaultShipmentContent?.message}
                   className="!h-[46px] bg-[#EAEAEA40] text-right w-full !px-5"
                 />
               </div>
@@ -170,7 +170,7 @@ export default function OrderSettingsFields({
                 </div>
               </div>
               <Input
-                name="returnShippingCost"
+                name="defaultReturnShippingCost"
                 register={register}
                 type="text"
                 placeholder="0.00"

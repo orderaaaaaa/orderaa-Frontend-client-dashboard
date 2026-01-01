@@ -1,24 +1,27 @@
 import { z } from 'zod';
 
 export const orderSettingsSchema = z.object({
-  phoneNumber: z
+  shippingPhoneNumber: z
     .string()
     .trim()
     .optional()
-    .refine((val) => !val || (val.length >= 11 && val.length <= 12), {
-      message: 'يجب أن يكون رقم الهاتف من 11 إلى 12 رقم',
+    .refine((val) => !val || (val.length >= 11 && val.length <= 13), {
+      message: 'يجب أن يكون رقم الهاتف من 11 إلى 13 رقم',
     }),
 
-  canOpenOrder: z.boolean().optional(),
-  canEditOrder: z.boolean().optional(),
+  canOpenShipment: z.boolean().default(false), // Changed from canOpenOrder
+  employeeCanEditContent: z.boolean().default(false), // Changed from canEditOrder
 
-  category: z.string().optional(),
-  returnShippingCost: z.string().optional(),
+  defaultShipmentContent: z.string().optional(), // Changed from category
+  defaultReturnShippingCost: z.preprocess(
+    (val) => (val === '' ? undefined : Number(val)),
+    z.number().optional()
+  ), // Changed from returnShippingCost
 
-  autoCancelAttempts: z
-    .union([z.number(), z.nan()])
-    .optional()
-    .transform((v) => (Number.isNaN(v) ? undefined : v)),
+  autoCancelAttempts: z.preprocess(
+    (val) => (val === '' ? undefined : Number(val)),
+    z.number().optional()
+  ),
 });
 
 export type OrderSettingsFormData = z.infer<typeof orderSettingsSchema>;
