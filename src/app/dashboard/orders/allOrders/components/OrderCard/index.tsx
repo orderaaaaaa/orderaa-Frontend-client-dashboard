@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
+import { If, Then } from 'react-if';
 
 interface OrderCardProps {
   id: number;
@@ -284,11 +285,22 @@ export default function OrderCard({
           </span>
         </div>
 
-        <div className="flex flex-row items-center gap-2">
-          <Image src="/Icons/repeat.svg" alt="tries" width={20} height={20} />
-          <span className="text-xs font-medium text-[#5D24E1]">المحاولات:</span>
-          <span className="text-xs font-medium text-[#5D24E1]">{trys}</span>
-        </div>
+        <If condition={trys > 0}>
+          <Then>
+            <div className="flex flex-row items-center gap-2">
+              <Image
+                src="/Icons/repeat.svg"
+                alt="tries"
+                width={20}
+                height={20}
+              />
+              <span className="text-xs font-medium text-[#5D24E1]">
+                المحاولات:
+              </span>
+              <span className="text-xs font-medium text-[#5D24E1]">{trys}</span>
+            </div>
+          </Then>
+        </If>
       </div>
     </div>
   );
