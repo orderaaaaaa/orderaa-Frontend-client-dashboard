@@ -15,6 +15,10 @@ export const QUERY_KEYS = {
   GOVERNORATES: 'governorates',
   CITIES: 'cities',
   AREAS: 'areas',
+  SHIPPING_COMPANIES: 'shipping-companies',
+  PAYMENT_METHODS: 'payment-methods',
+  PAYMENT_STATUSES: 'payment-statuses',
+  CATEGORIES: 'categories',
 
   // Cancellation Reasons
   CANCELLATION_REASONS: 'cancellation-reasons',

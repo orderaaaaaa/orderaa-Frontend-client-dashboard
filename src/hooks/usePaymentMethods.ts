@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getPaymentMethods } from '@/lib/api/lookups';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
 
 export interface PaymentMethodOption {
   key: string;
@@ -13,7 +14,7 @@ export default function usePaymentMethods(enabled: boolean = true) {
     isLoading,
     isFetching,
   } = useQuery<PaymentMethodOption[]>({
-    queryKey: ['payment-methods'],
+    queryKey: [QUERY_KEYS.PAYMENT_METHODS],
     queryFn: async () => {
       const data = await getPaymentMethods();
       return data as PaymentMethodOption[];

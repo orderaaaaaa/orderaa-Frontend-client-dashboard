@@ -1,4 +1,3 @@
-import { LucideIcon } from 'lucide-react';
 
 // Order Status Enum (synced with backend)
 export enum OrderStatus {
@@ -20,36 +19,6 @@ export enum OrderStatus {
   PARTIAL_DELIVERY = 'PARTIAL_DELIVERY',
   MISSING = 'MISSING',
 }
-
-// Payment Method Enum (synced with backend)
-export enum PaymentMethod {
-  CASH = 'CASH',
-  VISA_CARD = 'VISA_CARD',
-  INSTAPAY = 'INSTAPAY',
-  WALLET = 'WALLET',
-}
-
-// Payment Status Enum (synced with backend)
-export enum PaymentStatus {
-  PAID = 'PAID',
-  CASH_ON_DELIVERY = 'CASH_ON_DELIVERY',
-  PARTIALLY_PAID = 'PARTIALLY_PAID',
-}
-
-// Payment Method Arabic Labels
-export const PaymentMethodLabels: Record<PaymentMethod, string> = {
-  [PaymentMethod.CASH]: 'كاش',
-  [PaymentMethod.VISA_CARD]: 'فيزا',
-  [PaymentMethod.INSTAPAY]: 'انستا باي',
-  [PaymentMethod.WALLET]: 'محفظة الكترونية',
-};
-
-// Payment Status Arabic Labels
-export const PaymentStatusLabels: Record<PaymentStatus, string> = {
-  [PaymentStatus.PAID]: 'مدفوع',
-  [PaymentStatus.CASH_ON_DELIVERY]: 'دفع عند الاستلام',
-  [PaymentStatus.PARTIALLY_PAID]: 'مدفوع جزئياً',
-};
 
 // Variant interface
 export interface Variant {

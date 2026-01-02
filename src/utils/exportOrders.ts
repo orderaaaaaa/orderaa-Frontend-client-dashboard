@@ -27,12 +27,12 @@ export interface ExportOrderData {
  * - Uses appropriate format exporter based on order.format field
  * @param orders - Array of orders to export
  * @param filename - Base filename for the export
- * @param statusLabels - Optional map of status keys to labels (from API)
+ * @param statusLabels - Map of status keys to labels (from API)
  */
 export function exportOrdersToExcel(
     orders: Order[],
     filename: string = 'orders',
-    statusLabels?: Map<string, string>
+    statusLabels: Map<string, string>
 ) {
     if (orders.length === 0) {
         toast.error('لا توجد طلبات لتصديرها');
@@ -92,12 +92,12 @@ export function exportOrdersToExcel(
  * This is the original export format with Arabic headers
  * @param orders - Array of orders to export
  * @param filename - Base filename for the export
- * @param statusLabels - Optional map of status keys to labels (from API)
+ * @param statusLabels - Map of status keys to labels (from API)
  */
 export function exportInArabicFormat(
     orders: Order[],
     filename: string = 'orders',
-    statusLabels?: Map<string, string>
+    statusLabels: Map<string, string>
 ) {
     // Transform orders data to Excel format
     const excelData: ExportOrderData[] = orders.map((order) => ({
@@ -118,7 +118,7 @@ export function exportInArabicFormat(
             })
             .join(', '),
         'السعر الإجمالي': order.totalCost,
-        'الحالة': statusLabels?.get(order.status) || getStatusInArabic(order.status),
+        'الحالة': statusLabels.get(order.status) || order.status,
         'عدد المحاولات': order.numberOfTriesToReach,
         'تاريخ الإنشاء': new Date(order.createdAt).toLocaleDateString('ar-EG', {
             year: 'numeric',
@@ -243,48 +243,4 @@ function formatVariant(product?: { size?: string; color?: string }): string {
     return parts.join(' - ');
 }
 
-function getPaymentStatus(status: string): string {
-    const statusMap: Record<string, string> = {
-        'WAITING_FOR_PAYMENT': 'pending',
-        'PARTIAL_DELIVERY': 'partial',
-        'DELIVERED': 'paid',
-        'CONFIRMED': 'confirmed',
-    };
-
-    return statusMap[status] || 'pending';
-}
-
-function extractUtmFromNotes(type: 'source' | 'campaign', notes?: string): string {
-    if (!notes) return '';
-
-    const regex = type === 'source'
-        ? /utm[_\s]source[:\s]*([^\n,]+)/i
-        : /utm[_\s]campaign[:\s]*([^\n,]+)/i;
-
-    const match = notes.match(regex);
-    return match ? match[1].trim() : '';
-}
-
-function getStatusInArabic(status: string): string {
-    const statusMap: Record<string, string> = {
-        NEW_ORDER: 'طلبات جديدة',
-        STOPPED: 'وقف التشغيل',
-        CALL_AGAIN: 'إعادة اتصال',
-        POSTPONED: 'تأجيلات',
-        REGISTERED: 'منتسب',
-        WAITING_FOR_PAYMENT: 'في انتظار الدفع',
-        ATTEMPTED: 'تم المحاولة',
-        CONFIRMED: 'تم التأكيد',
-        PREPARED: 'تم التحضير',
-        RETURNED_DELIVERED: 'مرتجع مسلم',
-        REPORTS: 'تقرير',
-        SHIPPING: 'في الشحن',
-        DELIVERED: 'تم التسليم',
-        MISSING: 'طلبات مفقودة',
-        PARTIAL_DELIVERY: 'تسليم جزئى',
-        CANCELLED: 'تم الإلغاء',
-    };
-
-    return statusMap[status] || status;
-}
 

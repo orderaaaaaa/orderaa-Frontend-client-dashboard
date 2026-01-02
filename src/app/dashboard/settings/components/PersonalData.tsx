@@ -17,13 +17,12 @@ import {
 } from 'react-icons/lia';
 import { CiAt } from 'react-icons/ci';
 import { IoBriefcaseOutline } from 'react-icons/io5';
-import useGovernorates from '@/hooks/useGovernorates';
-import useCities from '@/hooks/useCities';
+import { useGovernoratesQuery, useCitiesQuery } from '@/services/lookups';
 import useUpdateProfile from '../hooks/useUpdateProfile';
 import { transformCityKeyForAPI } from '@/utils';
 
 export default function PersonalData() {
-  const { governorates, isLoading: loadingGovernorates } = useGovernorates();
+  const { data: governorates = [], isLoading: loadingGovernorates } = useGovernoratesQuery();
   const { updateProfile, isLoading: isSaving, isSuccess } = useUpdateProfile();
 
   const {
@@ -49,7 +48,7 @@ export default function PersonalData() {
   const fullName = watch('fullName');
   const email = watch('email');
   const phoneNumber = watch('phoneNumber');
-  const { cities: cityOptions, loadingCities } = useCities(governorate || '');
+  const { data: cityOptions = [], isLoading: loadingCities } = useCitiesQuery(governorate || '');
 
   useEffect(() => {
     if (!governorate) {

@@ -1,10 +1,8 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import Input from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/textarea';
 import Dropdown from '@/components/ui/Dropdown';
-
-import { GOVERNORATES } from '@/constants/Eg-Governorates-Ar';
-import { getAreasByGovernorate } from '@/constants/Eg-Areas-Ar';
+import { useGovernoratesQuery, useCitiesQuery } from '@/services/lookups';
 
 type ClientInformationProps = {
   customerName: string;
@@ -44,11 +42,9 @@ function ClientInformation({
   onNotesChange,
   errors,
 }: ClientInformationProps) {
-  // Get areas based on selected governorate
-  const areaOptions = useMemo(() => {
-    if (!governorate) return [];
-    return getAreasByGovernorate(governorate);
-  }, [governorate]);
+  // Fetch governorates and areas from API
+  const { data: governorateOptions = [] } = useGovernoratesQuery();
+  const { data: areaOptions = [], isLoading: isLoadingAreas } = useCitiesQuery(governorate);
 
   // Handle governorate change - reset area when governorate changes
   const handleGovernorateChange = useCallback(
@@ -117,7 +113,7 @@ function ClientInformation({
             </div>
             <Dropdown
               className="w-full"
-              options={GOVERNORATES}
+              options={governorateOptions}
               placeholderClassName="text-[#1F1F1F] !py-1 font-bold "
               selectClassName={`border-1 w-full  bg-[#EAEAEA40] px-3 py-3 rounded-sm ${errors?.governorate
                   ? 'border-red-500 focus:border-red-500'
@@ -146,7 +142,7 @@ function ClientInformation({
                   ? 'border-red-500 focus:border-red-500'
                   : 'border-[#5D24E1]'
                 }`}
-              placeholder={governorate ? 'اختر المنطقة' : 'اختر المحافظة أولاً'}
+              placeholder={!governorate ? 'اختر المحافظة أولاً' : isLoadingAreas ? 'جاري التحميل...' : 'اختر المنطقة'}
               value={area}
               onChange={handleAreaChange}
             />

@@ -3,7 +3,7 @@ import Input from '@/components/ui/Input';
 import Dropdown from '@/components/ui/Dropdown';
 import SearchableSelect from '@/app/dashboard/orders/allOrders/components/FilterSection/SearchableSelect';
 import WorkHoursTimePicker from '@/components/ui/WorkHoursTimePicker';
-import useGovernorates from '@/hooks/useGovernorates';
+import { useGovernoratesQuery } from '@/services/lookups';
 import {
   validateEgyptianPhoneNumber,
   getPhoneNumberErrorMessage,
@@ -34,7 +34,7 @@ export default function EmployeeFormFields({
   const department = watch('department');
   const address = watch('address');
   const workingHours = watch('workingHours');
-  const { governorates } = useGovernorates();
+  const { data: governorates = [] } = useGovernoratesQuery();
 
   return (
     <div

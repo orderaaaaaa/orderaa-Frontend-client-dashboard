@@ -10,7 +10,8 @@ import Dropdown from '../../../components/ui/Dropdown';
 import AuthForm from '../components/AuthForm';
 import Input from '../../../components/ui/Input';
 import { signUp } from '@/lib/api/auth';
-import { useGovernorates, useCatigories, useCities } from '@/hooks';
+import { useCatigories } from '@/hooks';
+import { useGovernoratesQuery, useCitiesQuery } from '@/services/lookups';
 
 export default function SignUpForm() {
   const router = useRouter();
@@ -25,17 +26,17 @@ export default function SignUpForm() {
   const { errors, isSubmitting } = formState;
   const selectedGovernorate = watch('governorate');
 
-  /** Load categories + governorates using custom hook */
-  const { governorates, error: dataError } = useGovernorates();
+  /** Load categories + governorates using React Query hooks */
+  const { data: governorates = [], error: governoratesError } = useGovernoratesQuery();
 
   const { categories, error: categoryError } = useCatigories();
 
-  /** Load cities when governorate changes using custom hook */
-  const { cities, loadingCities } = useCities(selectedGovernorate);
+  /** Load cities when governorate changes using React Query hook */
+  const { data: cities = [], isLoading: loadingCities } = useCitiesQuery(selectedGovernorate);
 
   // Merge errors from hook
-  if (dataError && categoryError && !error) {
-    setError(dataError);
+  if (governoratesError && categoryError && !error) {
+    setError(governoratesError.message || 'حدث خطأ في تحميل البيانات');
   }
 
   const onSubmit = async (values: SignUpSchema) => {
