@@ -1,6 +1,6 @@
 import { useCallback, useRef, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { Order, OrderStatus, OrderStatusItem } from '@/types/orders';
+import { Order, OrderStatusItem } from '@/types/orders';
 import { ShippingData } from '@/components/OrderDetails/EditShippingModal';
 import { useUpdateOrder, useGetNextOrderId, useCancelOrder } from '@/services/orders';
 
@@ -13,13 +13,13 @@ export interface UseOrderActionsOptions {
     from: Date | null;
     to: Date | null;
   };
-  statusFilter?: OrderStatus | null;
+  statusFilter?: string | null;
   availableStatuses: OrderStatusItem[];
 }
 
 export interface OrderActionsState {
   handleStatusUpdateAndNavigate: (
-    status: OrderStatus,
+    status: string,
     updateData?: Partial<Order> | Record<string, any>
   ) => Promise<boolean>;
   handleUrgent: (data: { shippingCost?: number; urgentDate: string }) => Promise<boolean>;
@@ -54,7 +54,7 @@ export function useOrderActions({
     onNoOrdersFoundRef.current = onNoOrdersFound;
   }, [onNoOrdersFound]);
 
-  const getStatusFromAction = useCallback((action: string): OrderStatus | null => {
+  const getStatusFromAction = useCallback((action: string): string | null => {
     const actionToStatusValueMap: Record<string, string> = {
       'confirm': 'CONFIRMED',
       'urgent': 'CONFIRMED',
@@ -79,12 +79,12 @@ export function useOrderActions({
       (status) => status.key === expectedStatusValue
     );
 
-    return matchedStatus ? (matchedStatus.key as OrderStatus) : null;
+    return matchedStatus ? matchedStatus.key : null;
   }, [availableStatuses]);
 
   const handleStatusUpdateAndNavigate = useCallback(
     async (
-      status: OrderStatus,
+      status: string,
       updateData: Partial<Order> | Record<string, any> = {},
       options: { skipToast?: boolean } = {}
     ): Promise<boolean> => {

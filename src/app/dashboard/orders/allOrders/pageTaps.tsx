@@ -18,7 +18,6 @@ import {
   PackageCheck,
 } from 'lucide-react';
 import PageTab from '@/components/ui/PageTab';
-import { OrderStatus } from '@/types/orders';
 import { useOrdersStore } from '@/store/ordersStore';
 import { LiaWhatsapp } from 'react-icons/lia';
 import { useOrderStatusesQuery } from '@/services/orders';
@@ -27,8 +26,8 @@ interface PageTapsProps {
   data?: any[];
   statusCounts?: Record<string, number>;
   totalOrders?: number;
-  onStatusChange?: (status: OrderStatus | null) => void;
-  currentStatus?: OrderStatus | null;
+  onStatusChange?: (status: string | null) => void;
+  currentStatus?: string | null;
 }
 
 // Icon mapping based on status value
@@ -78,7 +77,7 @@ function PageTaps({
   const { data: statusesData, isLoading: loading } = useOrderStatusesQuery();
   const statuses = statusesData ?? [];
 
-  const handleTabClick = (status: OrderStatus | null) => {
+  const handleTabClick = (status: string | null) => {
     // If callback is provided (URL mode), use it; otherwise fall back to Zustand
     if (onStatusChange) {
       onStatusChange(status);
@@ -116,8 +115,8 @@ function PageTaps({
             label={status.label}
             count={statusCounts?.[status.key] ?? 0}
             icon={getIconForStatus(status.key)}
-            active={selectedStatus === (status.key as OrderStatus)}
-            onClick={() => handleTabClick(status.key as OrderStatus)}
+            active={selectedStatus === status.key}
+            onClick={() => handleTabClick(status.key)}
           />
         ))}
       </div>

@@ -1,7 +1,9 @@
+'use client';
+
 import React from 'react';
 import { LuHistory } from 'react-icons/lu';
 import { getStatusColor } from '../../lib/getBadgeColor';
-import { ORDER_STATUS_AR } from '../../lib/orderStatusAr';
+import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { getTimeAgo } from '@/utils/timeAgo';
 
 interface OrdersTabProps {
@@ -9,6 +11,8 @@ interface OrdersTabProps {
 }
 
 const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
+  const { getStatusLabel } = useStatusLabel();
+
   return (
     <div className="w-full" dir="rtl">
       <div className="overflow-x-auto pb-4">
@@ -45,9 +49,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
                     order.status
                   )}`}
                 >
-                  {ORDER_STATUS_AR[
-                    order.status as keyof typeof ORDER_STATUS_AR
-                  ] || order.status}
+                  {getStatusLabel(order.status)}
                 </span>
               </div>
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { X } from 'lucide-react';
 import { toast } from 'react-toastify';
 import type { Order } from '@/types/orders';
-import { useCustomerOrders } from '@/services/orders';
+import { useCustomerOrders, useOrderStatusesQuery } from '@/services/orders';
 import OrderCard from '../OrderCard';
 import { Button } from '@/components/ui/button';
 import BulkActionsBar from '@/components/BulkActionsBar';
@@ -32,6 +32,13 @@ export default function CustomerOrdersModal({
 
   const orders = ordersData?.data ?? [];
   const error = queryError ? 'فشل في تحميل طلبات العميل' : null;
+
+  const { data: statusOptions } = useOrderStatusesQuery();
+
+  const statusLabelsMap = useMemo(() => {
+    if (!statusOptions) return new Map<string, string>();
+    return new Map(statusOptions.map((s) => [s.key, s.label]));
+  }, [statusOptions]);
 
   // Get selected orders as Order objects
   const selectedOrders = useMemo(() => {
@@ -75,7 +82,8 @@ export default function CustomerOrdersModal({
 
       const fileName = exportOrdersToExcel(
         selectedOrders,
-        `customer_${customerPhone}_orders`
+        `customer_${customerPhone}_orders`,
+        statusLabelsMap
       );
       toast.success(
         `تم تصدير ${selectedOrders.length} طلب بنجاح! \nاسم الملف: ${fileName}`
@@ -83,7 +91,7 @@ export default function CustomerOrdersModal({
     } catch (err) {
       toast.error('فشل في تصدير الطلبات. الرجاء المحاولة مرة أخرى.');
     }
-  }, [selectedOrders, customerPhone]);
+  }, [selectedOrders, customerPhone, statusLabelsMap]);
 
   // Handle Edit Status
   const handleEditStatus = useCallback(() => {

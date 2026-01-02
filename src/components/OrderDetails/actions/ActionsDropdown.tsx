@@ -11,7 +11,6 @@ import {
   LiaAngleDownSolid,
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
-import { OrderStatus } from '@/types/orders';
 
 /**
  * Sub-option type for WhatsApp actions
@@ -60,7 +59,7 @@ const arrowOptions: ActionOption[] = [
  */
 export interface ActionsDropdownProps {
   isOpen: boolean;
-  orderStatus: OrderStatus;
+  orderStatus: string;
   lastEventStatus?: string;
   onActionClick: (label: string, action: string, hasSubOptions?: boolean) => void;
   onSubOptionClick: (action: string, label: string) => void;
@@ -81,11 +80,11 @@ export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, onAction
     return arrowOptions.filter((option) => {
       // "وقف التشغيل" only appears when order status is CONFIRMED
       if (option.action === 'stop_operation') {
-        return orderStatus === OrderStatus.CONFIRMED;
+        return orderStatus === 'CONFIRMED';
       }
       // "مستعجل" should be hidden when order status is CONFIRMED
       if (option.action === 'urgent') {
-        return orderStatus !== OrderStatus.CONFIRMED;
+        return orderStatus !== 'CONFIRMED';
       }
       // "في انتظار الدفع" should be hidden when last event status is WAITING_FOR_PAYMENT
       if (option.action === 'waiting_payment') {

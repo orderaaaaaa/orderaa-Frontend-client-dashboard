@@ -10,10 +10,9 @@ import { Button } from '@/components/ui/button';
 import { useDropdownState } from '@/hooks/OrderDetails/useDropdownState';
 import { FollowUpDropdown } from './FollowUpDropdown';
 import { ActionsDropdown } from './ActionsDropdown';
-import { OrderStatus } from '@/types/orders';
 
 export interface OrderActionsFooterProps {
-  orderStatus: OrderStatus;
+  orderStatus: string;
   lastEventStatus?: string;
   onConfirm: () => void;
   onFollowUpClick: (label: string, action: string) => void;
@@ -108,7 +107,7 @@ export function OrderActionsFooter({
 
         <div className="relative" ref={actionsDropdown.ref}>
           <div className="flex flex-row gap-2">
-            {orderStatus !== OrderStatus.CONFIRMED && (
+            {orderStatus !== 'CONFIRMED' && (
               <Button
                 variant="default"
                 onClick={onConfirm}

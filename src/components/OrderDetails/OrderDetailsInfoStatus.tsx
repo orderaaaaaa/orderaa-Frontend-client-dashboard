@@ -1,32 +1,14 @@
+'use client';
+
 import { Order, OrderEvent } from "@/types/orders";
 import { PhoneOff, CirclePlus, History, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { getTimeAgo } from "@/utils/timeAgo";
+import { useStatusLabel } from "@/hooks/useStatusLabel";
 
 interface OrderDetailsInfoStatusProps {
   order: Order;
   isLockedByOther?: boolean;
 }
-
-const statusLabelMap: Record<string, string> = {
-  NEW_ORDER: 'طلب جديد',
-  ATTEMPTED: 'تمت المحاولة',
-  WAITING_FOR_PAYMENT: 'في انتظار الدفع',
-  WHATSAPP: 'واتساب',
-  POSTPONED: 'مؤجل',
-  CALL_AGAIN: 'اعادة اتصال',
-  STOPPED: 'متوقف',
-  CANCELLED: 'ملغي',
-  UNCOMPLETED: 'غير مكتمل',
-  CONFIRMED: 'مؤكد',
-  PREPARED: 'تم التحضير',
-  SHIPPING: 'في الشحن',
-  RETURNED_DELIVERED: 'مرتجع بعد التوصيل',
-  DELIVERED: 'تم التوصيل',
-  PARTIAL_DELIVERY: 'توصيل جزئي',
-  MISSING: 'مفقود',
-  REGISTERED: 'مسجل',
-  REPORTS: 'تقارير',
-};
 
 const getEventIcon = (eventType?: string) => {
   if (!eventType) {
@@ -63,10 +45,11 @@ const getEventIcon = (eventType?: string) => {
 };
 
 function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
+  const { getStatusLabel } = useStatusLabel();
   const allEvents = order.order_events || [];
 
   const events = allEvents.map((event: OrderEvent, index: number) => {
-    const statusLabel = event.status ? (statusLabelMap[event.status] || event.status) : 'حدث';
+    const statusLabel = event.status ? getStatusLabel(event.status) : 'حدث';
     return {
       id: event.id || index + 1,
       status: statusLabel,

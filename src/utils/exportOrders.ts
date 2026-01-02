@@ -25,8 +25,15 @@ export interface ExportOrderData {
  * - Detects if orders are mixed formats or single format
  * - Exports each format separately if mixed
  * - Uses appropriate format exporter based on order.format field
+ * @param orders - Array of orders to export
+ * @param filename - Base filename for the export
+ * @param statusLabels - Optional map of status keys to labels (from API)
  */
-export function exportOrdersToExcel(orders: Order[], filename: string = 'orders') {
+export function exportOrdersToExcel(
+    orders: Order[],
+    filename: string = 'orders',
+    statusLabels?: Map<string, string>
+) {
     if (orders.length === 0) {
         toast.error('لا توجد طلبات لتصديرها');
         return null;
@@ -77,14 +84,21 @@ export function exportOrdersToExcel(orders: Order[], filename: string = 'orders'
     }
 
     // Fallback: Use Arabic format for display/reporting
-    return exportInArabicFormat(orders, filename);
+    return exportInArabicFormat(orders, filename, statusLabels);
 }
 
 /**
  * Export orders in Arabic format (for internal reporting)
  * This is the original export format with Arabic headers
+ * @param orders - Array of orders to export
+ * @param filename - Base filename for the export
+ * @param statusLabels - Optional map of status keys to labels (from API)
  */
-export function exportInArabicFormat(orders: Order[], filename: string = 'orders') {
+export function exportInArabicFormat(
+    orders: Order[],
+    filename: string = 'orders',
+    statusLabels?: Map<string, string>
+) {
     // Transform orders data to Excel format
     const excelData: ExportOrderData[] = orders.map((order) => ({
         'كود الطلب': order.code,
@@ -104,7 +118,7 @@ export function exportInArabicFormat(orders: Order[], filename: string = 'orders
             })
             .join(', '),
         'السعر الإجمالي': order.totalCost,
-        'الحالة': getStatusInArabic(order.status),
+        'الحالة': statusLabels?.get(order.status) || getStatusInArabic(order.status),
         'عدد المحاولات': order.numberOfTriesToReach,
         'تاريخ الإنشاء': new Date(order.createdAt).toLocaleDateString('ar-EG', {
             year: 'numeric',

@@ -14,7 +14,7 @@ import { User } from 'lucide-react';
 import { If, Then } from 'react-if';
 import { getStatusColor } from '../lib/getBadgeColor';
 import { getActivityColor } from '../lib/getActivityColor';
-import { ORDER_STATUS_AR } from '../lib/orderStatusAr';
+import { useStatusLabel } from '@/hooks/useStatusLabel';
 import CustomerBanConfirmationModal from './modals/CustomerBanConfirmationModal';
 
 interface CustomerCardProps {
@@ -45,6 +45,7 @@ export function CustomerCard({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const { getStatusLabel } = useStatusLabel();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -218,9 +219,7 @@ export function CustomerCard({
               )}`}
             >
               {customer.latestOrder
-                ? ORDER_STATUS_AR[
-                    customer.latestOrder.status as keyof typeof ORDER_STATUS_AR
-                  ]
+                ? getStatusLabel(customer.latestOrder.status)
                 : '—'}
             </span>
           </div>

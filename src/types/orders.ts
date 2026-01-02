@@ -6,6 +6,7 @@ export enum OrderStatus {
   ATTEMPTED = 'ATTEMPTED',
   WAITING_FOR_PAYMENT = 'WAITING_FOR_PAYMENT',
   WHATSAPP = 'WHATSAPP',
+  EDIT_REJECTED = 'EDIT_REJECTED',
   POSTPONED = 'POSTPONED',
   CALL_AGAIN = 'CALL_AGAIN',
   STOPPED = 'STOPPED',
@@ -18,8 +19,6 @@ export enum OrderStatus {
   DELIVERED = 'DELIVERED',
   PARTIAL_DELIVERY = 'PARTIAL_DELIVERY',
   MISSING = 'MISSING',
-  REGISTERED = 'REGISTERED',
-  REPORTS = 'REPORTS',
 }
 
 // Payment Method Enum (synced with backend)
@@ -74,7 +73,7 @@ export interface SelectedProduct {
 export interface SimpleOrder {
   id: number;
   code: string;
-  status: OrderStatus;
+  status: string;
   totalCost: number;
   numberOfTriesToReach: number;
   notes?: string;
@@ -88,7 +87,7 @@ export interface SimpleOrder {
 
 // Filter DTO (matching backend FilterOrdersDto)
 export interface FilterOrdersDto {
-  status?: OrderStatus;
+  status?: string;
   search?: string;
   page?: number;
   limit?: number;
@@ -219,7 +218,7 @@ export interface OrderProduct {
 export interface Order {
   id: number;
   code: string;
-  status: OrderStatus;
+  status: string;
   totalCost: number;
   numberOfTriesToReach: number;
   notes?: string;
@@ -295,7 +294,7 @@ export interface OrderEvent {
 
 // Filter DTO (matching backend FilterOrdersDto)
 export interface FilterOrdersDto {
-  status?: OrderStatus;
+  status?: string;
   search?: string;
   customerName?: string;
   customerPhone?: string;

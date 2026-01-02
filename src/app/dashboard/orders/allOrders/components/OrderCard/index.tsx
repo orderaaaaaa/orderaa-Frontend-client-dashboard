@@ -13,6 +13,7 @@ import {
   Truck,
 } from 'lucide-react';
 import { getTimeAgo } from '@/utils/timeAgo';
+import { useStatusLabel } from '@/hooks/useStatusLabel';
 
 interface OrderCardProps {
   id: number;
@@ -39,28 +40,6 @@ interface OrderCardProps {
   cancelNotes?: string | null;
 }
 
-const getStatusText = (status: string): string => {
-  const statusMap: Record<string, string> = {
-    NEW_ORDER: 'طلب جديد',
-    STOPPED: 'وقف التشغيل',
-    CALL_AGAIN: 'إعادة اتصال',
-    POSTPONED: 'مؤجل',
-    REGISTERED: 'منتسب',
-    WAITING_FOR_PAYMENT: 'في انتظار الدفع',
-    ATTEMPTED: 'تم المحاولة',
-    CONFIRMED: 'مؤكد',
-    PREPARED: 'تم التحضير',
-    RETURNED_DELIVERED: 'مرتجع مسلم',
-    REPORTS: 'تقرير',
-    SHIPPING: 'في الشحن',
-    DELIVERED: 'تم التسليم',
-    MISSING: 'مفقود',
-    PARTIAL_DELIVERY: 'تسليم جزئى',
-    CANCELLED: 'ملغي',
-  };
-  return statusMap[status] || status;
-};
-
 export default function OrderCard({
   id,
   code,
@@ -86,6 +65,7 @@ export default function OrderCard({
   cancelNotes,
 }: OrderCardProps) {
   const router = useRouter();
+  const { getStatusLabel } = useStatusLabel();
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onSelectionChange) {
@@ -300,7 +280,7 @@ export default function OrderCard({
             height={20}
           />
           <span className="text-xs font-medium text-[#5D24E1]">
-            {getStatusText(status)}
+            {getStatusLabel(status)}
           </span>
         </div>
 

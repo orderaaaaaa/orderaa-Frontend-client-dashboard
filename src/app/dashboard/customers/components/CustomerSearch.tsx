@@ -5,9 +5,9 @@ import {
   activityTypeOptions,
   clientStatusOptions,
   customerOptions,
-  orderStatusOptions,
 } from '../constants/SearchConst';
 import debounce from 'lodash/debounce';
+import { useOrderStatusesQuery } from '@/services/orders';
 
 interface CustomerSearchProps {
   fromDate: Date | null;
@@ -38,6 +38,18 @@ export default function CustomerSearch({
   const [orderStatus, setOrderStatus] = useState('');
   const [activityType, setActivityType] = useState('');
   const [allCustomers, setAllCustomers] = useState('');
+
+  const { data: statusesData } = useOrderStatusesQuery();
+
+  const orderStatusOptions = useMemo(() => {
+    const baseOption = { key: 'all', value: 'جميع الحالات' };
+    if (!statusesData) return [baseOption];
+    const dynamicOptions = statusesData.map((status) => ({
+      key: status.key,
+      value: status.label,
+    }));
+    return [baseOption, ...dynamicOptions];
+  }, [statusesData]);
 
   const debouncedSearch = useMemo(
     () =>

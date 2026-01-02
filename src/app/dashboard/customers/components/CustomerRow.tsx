@@ -7,7 +7,7 @@ import { GoMail, GoDotFill } from 'react-icons/go';
 import { If, Then } from 'react-if';
 import { getStatusColor } from '../lib/getBadgeColor';
 import { getActivityColor } from '../lib/getActivityColor';
-import { ORDER_STATUS_AR } from '../lib/orderStatusAr';
+import { useStatusLabel } from '@/hooks/useStatusLabel';
 import CustomerBanConfirmationModal from './modals/CustomerBanConfirmationModal';
 import { useEditCustomer } from '../hooks/useEditCustomer';
 import { toast } from 'react-toastify';
@@ -41,6 +41,7 @@ export const CustomerRow = memo(function CustomerRow({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const { getStatusLabel } = useStatusLabel();
 
   // Hook handles the mutation and notifications
   const { mutate: editCustomer, isPending: isUpdating } = useEditCustomer({
@@ -167,9 +168,7 @@ export const CustomerRow = memo(function CustomerRow({
             )}`}
           >
             {customer.latestOrder
-              ? ORDER_STATUS_AR[
-                  customer.latestOrder.status as keyof typeof ORDER_STATUS_AR
-                ]
+              ? getStatusLabel(customer.latestOrder.status)
               : '—'}
           </span>
         </td>

@@ -14,7 +14,7 @@ interface OrderDetailsInfoProps {
     from: Date | null;
     to: Date | null;
   };
-  statusFilter?: OrderStatus | null;
+  statusFilter?: string | null;
   isLockedByOther?: boolean;
   lockedBy?: OrderLockedBy | null;
   onUnlock?: () => Promise<void>;

@@ -1,5 +1,5 @@
 import api from './index';
-import { Order, OrderStatus, FilterOrdersDto, PaginatedResponse, FilterOptionsResponse, OrderStatisticsResponse } from '@/types/orders';
+import { Order, FilterOrdersDto, PaginatedResponse, FilterOptionsResponse, OrderStatisticsResponse } from '@/types/orders';
 
 export async function getOrders(
   filters?: FilterOrdersDto
@@ -144,7 +144,7 @@ export async function updateOrder(
 
 export async function getNextOrderId(
   orderId: number,
-  status?: OrderStatus,
+  status?: string,
   from?: string,
   to?: string
 ): Promise<{ id: number }> {

@@ -13,7 +13,7 @@ import { LiaWhatsapp } from 'react-icons/lia';
 import { BsFiletypeCsv } from 'react-icons/bs';
 import { TbMoneybag } from 'react-icons/tb';
 import { Customer, Order } from '../../types/customer';
-import { ORDER_STATUS_AR } from '../../lib/orderStatusAr';
+import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { getStatusColor } from '../../lib/getBadgeColor';
 
 interface CustomerDetailsModalProps {
@@ -38,6 +38,7 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
   const [activeTab, setActiveTab] = useState<'orders' | 'stats' | 'notes'>(
     'stats'
   );
+  const { getStatusLabel } = useStatusLabel();
 
   useEffect(() => {
     if (isOpen && customerId) {
@@ -165,9 +166,7 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
                       data.latestOrder.status
                     )}`}
                   >
-                    {ORDER_STATUS_AR[
-                      data.latestOrder.status as keyof typeof ORDER_STATUS_AR
-                    ] || data.latestOrder.status}
+                    {getStatusLabel(data.latestOrder.status)}
                   </span>
                 )}
               </div>
