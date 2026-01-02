@@ -5,7 +5,6 @@ import { X, Mail, Phone, Calendar, ShoppingBag } from 'lucide-react';
 import { useCustomer } from '../../hooks/useGetCustomerId';
 import OrdersTab from '../tabs/OrdersTab';
 import StatsTab from '../tabs/StatsTab';
-import NotesTab from '../tabs/NotesTab';
 import { If, Then } from 'react-if';
 import { FiMail } from 'react-icons/fi';
 import { ImBlocked } from 'react-icons/im';
@@ -35,9 +34,7 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
   };
 
   // تم تغيير التبويب الافتراضي هنا إلى 'stats'
-  const [activeTab, setActiveTab] = useState<'orders' | 'stats' | 'notes'>(
-    'stats'
-  );
+  const [activeTab, setActiveTab] = useState<'orders' | 'stats'>('stats');
   const { getStatusLabel } = useStatusLabel();
 
   useEffect(() => {
@@ -245,7 +242,7 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
 
           {/* Navigation - تم إعادة ترتيب المصفوفة لتكون الإحصائيات هي الأولى */}
           <div className="flex gap-1 mb-6 p-1 bg-gray-100 rounded-lg md:rounded-full">
-            {['stats', 'orders', 'notes'].map((tab) => (
+            {['stats', 'orders'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab as any)}
@@ -277,18 +274,6 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
               />
             )}
             {activeTab === 'orders' && <OrdersTab orders={data.orders} />}
-            {activeTab === 'notes' && (
-              <NotesTab
-                notes={
-                  Array.isArray(data.notes)
-                    ? data.notes
-                    : data.notes
-                    ? [data.notes]
-                    : []
-                }
-                createdAt={data.createdAt}
-              />
-            )}
           </div>
         </div>
       </div>
