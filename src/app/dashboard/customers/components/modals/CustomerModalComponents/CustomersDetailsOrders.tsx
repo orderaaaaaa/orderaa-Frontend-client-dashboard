@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { LuHistory } from 'react-icons/lu';
-import { getStatusColor } from '../../lib/getBadgeColor';
+import { getStatusColor } from '../../../lib/getBadgeColor';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { getTimeAgo } from '@/utils/timeAgo';
 
@@ -16,6 +16,12 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
   return (
     <div className="w-full" dir="rtl">
       <div className="overflow-x-auto pb-4">
+        <div className="mb-1">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-1 h-8 bg-[#5D24E1] rounded-full"></div>
+            <h1 className="text-lg font-bold text-gray-900">سجل الطلبات</h1>
+          </div>
+        </div>
         {/* Force a minimum width so the table columns remain readable */}
         <div className="min-w-[850px] flex flex-col gap-3">
           {/* Table Header */}
