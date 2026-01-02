@@ -151,6 +151,7 @@ export default function AddNewProductModal({
                 triggerClassName="h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E]"
                 className="rounded-2xl border-[#ECECEC]"
                 searchThreshold={5}
+                clearable
               />
             </div>
 

@@ -104,7 +104,7 @@ export function SearchableSelect({
   const getEmptyStateMessage = () => {
     if (loading) {
       return (
-        <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
+        <div className="flex items-center justify-center gap-2 py-6 text-base text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
           <span>جاري التحميل...</span>
         </div>
@@ -112,14 +112,14 @@ export function SearchableSelect({
     }
     if (!hasOptions) {
       return (
-        <div className="py-6 text-center text-sm text-muted-foreground">
+        <div className="py-6 text-center text-base text-muted-foreground">
           {emptyMessage}
         </div>
       );
     }
     if (filteredOptions.length === 0 && debouncedSearchQuery.trim()) {
       return (
-        <div className="py-6 text-center text-sm text-muted-foreground">
+        <div className="py-6 text-center text-base text-muted-foreground">
           {noResultsMessage}
         </div>
       );
@@ -134,7 +134,7 @@ export function SearchableSelect({
           type="button"
           disabled={disabled || loading}
           className={cn(
-            'cursor-pointer flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background',
+            'cursor-pointer flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background',
             'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
             'disabled:cursor-not-allowed disabled:opacity-50',
             '[&>span]:line-clamp-1',
@@ -186,7 +186,7 @@ export function SearchableSelect({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                className="flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground"
               />
             </div>
           )}
@@ -198,7 +198,7 @@ export function SearchableSelect({
                   type="button"
                   onClick={() => handleSelect(option)}
                   className={cn(
-                    'relative flex w-full cursor-pointer items-center rounded-sm py-2 pr-8 pl-2 text-sm outline-none',
+                    'relative flex w-full cursor-pointer items-center rounded-sm py-2 pr-8 pl-2 text-base outline-none',
                     'hover:bg-accent hover:text-accent-foreground',
                     'focus:bg-accent focus:text-accent-foreground',
                     value === option && 'bg-accent'
