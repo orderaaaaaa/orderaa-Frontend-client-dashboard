@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Employee } from '../types/employee';
 import Input from '@/components/ui/Input';
@@ -25,6 +24,7 @@ import {
   ACCESS_LEVEL_OPTIONS,
   DEPARTMENT_OPTIONS,
 } from '../../../constants/employeesFormOptions';
+import { toast } from 'react-toastify';
 
 interface EmployeeFormProps {
   employee: Employee;
@@ -44,8 +44,10 @@ export default function EmployeeForm({
     handleSubmit,
     watch,
     setValue,
+    setError,
+    clearErrors,
     formState: { errors },
-  } = useForm<Employee>({
+  } = useForm<Employee & { passwordConfirmation?: string }>({
     defaultValues: employee,
   });
 
@@ -55,16 +57,25 @@ export default function EmployeeForm({
   const workingHours = watch('workingHours');
 
   const onSubmitHandler = (data: any) => {
+    if (data.password && data.password !== data.passwordConfirmation) {
+      setError('passwordConfirmation', {
+        type: 'manual',
+        message: 'الباسورد غير متطابق',
+      });
+      toast.error('الباسورد غير متطابق');
+      return;
+    }
+
+    clearErrors('passwordConfirmation');
+
     const updateData = { ...data };
 
+    delete updateData.passwordConfirmation;
     delete updateData.id;
 
     if (!updateData.password || updateData.password.trim() === '') {
       delete updateData.password;
-      delete updateData.confirmPassword;
     }
-
-    delete updateData.confirmPassword;
 
     onSubmit(updateData);
   };
@@ -221,6 +232,25 @@ export default function EmployeeForm({
             placeholder="كلمة المرور"
             register={register}
             error={errors.password?.message}
+            className="!h-[46px] !px-4 !pr-12 bg-[rgba(234,234,234,0.25)] !border-black/16 text-right"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <div className="flex items-center gap-2 mb-2 justify-start w-full">
+            <Lock className="w-6 h-6 text-[#5D24E1]" strokeWidth={1.5} />
+            <span className="text-base md:text-lg font-normal">
+              تاكيد كلمة المرور
+            </span>
+          </div>
+          <Input
+            name="passwordConfirmation"
+            type="password"
+            placeholder="تأكيد كلمة المرور"
+            register={register}
+            error={errors.passwordConfirmation?.message}
             className="!h-[46px] !px-4 !pr-12 bg-[rgba(234,234,234,0.25)] !border-black/16 text-right"
           />
         </div>
