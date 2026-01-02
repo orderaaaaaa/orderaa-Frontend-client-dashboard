@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -12,6 +14,7 @@ import {
   FileText,
   Truck,
 } from 'lucide-react';
+import { CiBarcode } from 'react-icons/ci';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { If, Then } from 'react-if';
@@ -54,7 +57,6 @@ export default function OrderCard({
   status,
   city,
   address,
-  alert,
   select,
   isSelected = false,
   onSelectionChange,
@@ -69,9 +71,7 @@ export default function OrderCard({
   const { getStatusLabel } = useStatusLabel();
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (onSelectionChange) {
-      onSelectionChange(e.target.checked);
-    }
+    onSelectionChange?.(e.target.checked);
   };
 
   const handleCardClick = () => {
@@ -83,9 +83,7 @@ export default function OrderCard({
 
   const handleRepeatClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onRepeatClick) {
-      onRepeatClick();
-    }
+    onRepeatClick?.();
   };
 
   return (
@@ -93,71 +91,70 @@ export default function OrderCard({
       onClick={handleCardClick}
       className="relative w-full h-full md:max-w-[300px] bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.1)] rounded-[10px] cursor-pointer hover:shadow-[0px_6px_20px_rgba(93,36,225,0.15)] transition-all duration-200 flex flex-col"
     >
-      <div className="grid grid-cols-3 items-center py-2 gap-4">
-        {/* Right: Checkbox */}
-        <div className="flex relative left-5 justify-center">
-          {select && (
-            <input
-              type="checkbox"
-              checked={isSelected}
-              onChange={handleCheckboxChange}
-              onClick={(e) => e.stopPropagation()}
-              className="w-5 h-5 border-2 border-[#5D24E1] rounded-[4px] cursor-pointer accent-[#5D24E1]"
-            />
-          )}
-        </div>
-
-        {/* Center: Empty space */}
-        <div />
-
-        {/* Left: Repeat icon and created at */}
-        <div className="flex flex-col justify-center items-center gap-2">
-          {repeatCount > 1 && (
-            <button
-              onClick={handleRepeatClick}
-              className="absolute top-7 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
-              title="عرض جميع طلبات العميل"
-            >
-              <TriangleAlert
-                className="w-8 h-8 text-red-600"
-                style={{ strokeWidth: 1.5 }}
-              />
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white text-red-600 rounded-full flex items-center justify-center border-2 border-white">
-                <span className="text-[15px] font-bold">{repeatCount}</span>
-              </div>
-            </button>
-          )}
-          <span className="text-xs font-normal text-[#5D24E1] tracking-tight text-center">
-            {getTimeAgo(createdAt)}
-          </span>
-        </div>
+      {/* Checkbox – top right */}
+      <div className="flex justify-start mb-1 px-4 pt-3">
+        {select && (
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={handleCheckboxChange}
+            onClick={(e) => e.stopPropagation()}
+            className="w-5 h-5 border-2 border-[#5D24E1] rounded-[4px] cursor-pointer accent-[#5D24E1]"
+          />
+        )}
       </div>
 
+      {/* Content */}
       <div className="flex flex-col items-start px-6 gap-3 flex-grow">
+        {/* Code */}
         {code && code !== 'غير محدد' && (
           <div className="flex flex-row-reverse items-center gap-2">
             <span className="text-base font-medium text-black">{code}</span>
             <span className="text-base font-normal text-black">الكود :</span>
-            <Image
-              src="/Icons/id.svg"
-              alt="code"
-              width={18}
-              height={18}
-              className="flex-shrink-0 opacity-50"
-            />
+            <CiBarcode className="opacity-50 w-4 h-4" />
           </div>
         )}
 
+        {/* Name + Alert + Time */}
         {name && name !== 'غير محدد' && (
-          <div className="flex flex-row-reverse items-center gap-2">
-            <span className="text-base font-medium text-black">{name}</span>
-            <User
-              className="w-[18px] h-[18px] flex-shrink-0"
-              style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
-            />
+          <div className="flex flex-row items-center justify-between w-full">
+            <div className="flex flex-row-reverse items-center gap-2">
+              <span className="text-base font-medium text-black">{name}</span>
+              <User
+                className="w-[18px] h-[18px]"
+                style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
+              />
+            </div>
+
+            <div
+              className={`flex absolute left-8  flex-col-reverse items-center gap-3
+                ${select ? 'top-10' : 'top-5'}
+                `}
+            >
+              {repeatCount > 1 && (
+                <button
+                  onClick={handleRepeatClick}
+                  className="relative hover:scale-110 transition-transform"
+                  title="عرض جميع طلبات العميل"
+                >
+                  <TriangleAlert
+                    className="w-6 h-6 text-red-600 cursor-pointer"
+                    style={{ strokeWidth: 1.5 }}
+                  />
+                  <span className="absolute top-3 right-[-4px] w-4 h-4 text-[11px] font-bold bg-white text-red-600 rounded-full flex items-center justify-center">
+                    {repeatCount}
+                  </span>
+                </button>
+              )}
+
+              <span className="text-xs text-[#5D24E1] whitespace-nowrap">
+                {getTimeAgo(createdAt)}
+              </span>
+            </div>
           </div>
         )}
 
+        {/* Phones */}
         {phoneNumbers
           .filter((p) => p && p !== 'غير محدد')
           .map((phone, index) => (
@@ -169,55 +166,48 @@ export default function OrderCard({
                 {phone}
               </span>
               <Phone
-                className="w-[18px] h-[18px] flex-shrink-0"
+                className="w-[18px] h-[18px]"
                 style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
               />
             </div>
           ))}
 
-        {(government && government !== 'غير محدد') ||
-        (city && city !== 'غير محدد') ? (
+        {/* Location */}
+        {(government || city) && (
           <div className="flex flex-row-reverse items-center gap-2">
             <span className="text-base font-medium text-black">
-              {government && government !== 'غير محدد' ? government : ''}
-              {government &&
-              government !== 'غير محدد' &&
-              city &&
-              city !== 'غير محدد'
-                ? ' - '
-                : ''}
-              {city && city !== 'غير محدد' ? city : ''}
+              {[government, city]
+                .filter((v) => v && v !== 'غير محدد')
+                .join(' - ')}
             </span>
             <MapPin
-              className="w-[18px] h-[18px] flex-shrink-0"
+              className="w-[18px] h-[18px]"
               style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
             />
           </div>
-        ) : null}
+        )}
 
-        {/* full address */}
+        {/* Address */}
         <div className="flex flex-row-reverse items-center gap-2">
-          <span className="text-sm font-normal text-gray-600">{address}</span>
+          <span className="text-sm text-gray-600">{address}</span>
           <MapPinHouse
-            className="w-[18px] h-[18px] flex-shrink-0"
+            className="w-[18px] h-[18px]"
             style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
           />
         </div>
 
-        {items && items[0] && items[0] !== 'غير محدد' && (
-          <div className="flex flex-row items-center gap-2 w-full">
+        {/* Items */}
+        {items?.[0] && items[0] !== 'غير محدد' && (
+          <div className="flex items-center gap-2">
             <Package
-              className="w-[18px] h-[18px] flex-shrink-0"
+              className="w-[18px] h-[18px]"
               style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
             />
-            <div className="flex flex-row-reverse flex-wrap gap-1">
-              <span className="text-base font-medium text-black text-right">
-                {items[0]}
-              </span>
-            </div>
+            <span className="text-base font-medium text-black">{items[0]}</span>
           </div>
         )}
 
+        {/* Price */}
         {price && (
           <div className="flex flex-row-reverse items-center gap-2">
             <span className="text-base font-medium text-black">
@@ -228,41 +218,44 @@ export default function OrderCard({
               alt="price"
               width={18}
               height={18}
-              className="flex-shrink-0 opacity-50"
+              className="opacity-50"
             />
           </div>
         )}
 
+        {/* Shipping */}
         {shippingId && (
           <div className="flex flex-row-reverse items-center gap-2">
             <span className="text-base font-medium text-black">
               {shippingId}
             </span>
-            <Truck height={18} className="flex-shrink-0 opacity-30" />
+            <Truck className="opacity-30" height={18} />
           </div>
         )}
 
+        {/* Cancel Info */}
         {status === 'CANCELLED' && (cancelReason || cancelNotes) && (
           <div className="flex flex-col gap-3 w-full">
             {cancelReason && (
               <div className="flex items-start gap-2">
                 <Ban
-                  className="w-[18px] h-[18px] flex-shrink-0"
+                  className="w-[18px] h-[18px]"
                   style={{ strokeWidth: 1.5, color: 'rgba(220,38,38,0.7)' }}
                 />
                 <span className="text-base font-medium text-red-600">
-                  {cancelReason}
+                  سبب الالغاء: {cancelReason}
                 </span>
               </div>
             )}
             {cancelNotes && (
               <div className="flex items-start gap-2">
                 <FileText
-                  className="w-[18px] h-[18px] flex-shrink-0"
+                  className="w-[18px] h-[18px]"
                   style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
                 />
-                <span className="text-base font-medium text-gray-600">
-                  {cancelNotes}
+                <span className="text-base text-gray-600">
+                  {' '}
+                  ملاحظات الالغاء: {cancelNotes}
                 </span>
               </div>
             )}
@@ -270,10 +263,11 @@ export default function OrderCard({
         )}
       </div>
 
-      <div className="mx-6 mt-5 mb-3 border-t border-[rgba(0,0,0,0.08)]"></div>
+      {/* Footer */}
+      <div className="mx-6 mt-5 mb-3 border-t border-black/10" />
 
       <div className="flex flex-row-reverse justify-between items-center px-6 pb-4">
-        <div className="flex flex-row items-center gap-2">
+        <div className="flex items-center gap-2">
           <Image
             src="/Icons/shipping.svg"
             alt="shipping"
@@ -287,7 +281,7 @@ export default function OrderCard({
 
         <If condition={trys > 0}>
           <Then>
-            <div className="flex flex-row items-center gap-2">
+            <div className="flex items-center gap-2">
               <Image
                 src="/Icons/repeat.svg"
                 alt="tries"

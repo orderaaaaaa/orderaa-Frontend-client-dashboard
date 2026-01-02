@@ -238,7 +238,7 @@ export default function CustomerOrdersModal({
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {orders.map((order: Order) => (
                 <div key={order.id} className="flex items-start gap-3">
                   <input
@@ -248,7 +248,7 @@ export default function CustomerOrdersModal({
                       handleCheckboxChange(order.id, e.target.checked)
                     }
                     onClick={(e) => e.stopPropagation()}
-                    className="relative right-10 z-100 w-5 h-5 mt-2 border-2 border-[#5D24E1] rounded-[4px] cursor-pointer accent-[#5D24E1] flex-shrink-0"
+                    className="relative right-9 top-[-2px] z-100 w-4 h-4 mt-2 border-2 border-[#5D24E1] rounded-[4px] cursor-pointer accent-[#5D24E1] flex-shrink-0"
                   />
                   <OrderCard
                     id={order.id}
