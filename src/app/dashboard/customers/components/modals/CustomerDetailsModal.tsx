@@ -205,32 +205,40 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
             {/* تم إبقاء البطاقة الرابعة كما كانت في الكود الأصلي */}
             <div className="flex flex-col border border-gray-100 rounded-xl overflow-hidden">
               <div className="bg-[#dbd1f5] p-2 text-center text-gray-900 font-medium text-sm">
-                آخر طلب
+                معلومات التواصل
               </div>
               <div className="bg-white p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Calendar className="w-4 h-4 text-gray-400" />
-                  <p className="font-bold text-sm">
-                    {data.latestOrder?.createdAt
-                      ? new Date(
-                          data.latestOrder.createdAt
-                        ).toLocaleDateString()
-                      : '—'}
-                  </p>
+                <div className="flex flex-col gap-2">
+                  {/* Phone Numbers Mapping */}
+                  {data.phoneNumbers.map((phone: string, index: number) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-gray-400" />
+                      <a
+                        href={`tel:${phone}`}
+                        className="font-bold text-sm hover:underline text-gray-900"
+                      >
+                        {phone}
+                      </a>
+                    </div>
+                  ))}
+
+                  {/* Email Logic with Icon and Placeholder */}
+                  <div className="flex items-center gap-2 mt-1">
+                    <Mail className="w-4 h-4 text-gray-400" />
+                    {data.email ? (
+                      <a
+                        href={`mailto:${data.email}`}
+                        className="font-bold text-sm hover:underline text-gray-900"
+                      >
+                        {data.email}
+                      </a>
+                    ) : (
+                      <span className="text-sm text-gray-400 italic">
+                        لا يوجد بريد إلكتروني
+                      </span>
+                    )}
+                  </div>
                 </div>
-                {data.latestOrder && (
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      data.latestOrder.status === 'DELIVERED'
-                        ? 'bg-green-50 text-green-600'
-                        : 'bg-blue-50 text-blue-600'
-                    }`}
-                  >
-                    {data.latestOrder.status === 'DELIVERED'
-                      ? 'تم التوصيل'
-                      : data.latestOrder.status}
-                  </span>
-                )}
               </div>
             </div>
           </div>
