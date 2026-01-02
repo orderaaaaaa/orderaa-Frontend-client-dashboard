@@ -6,6 +6,7 @@ import CustomerOrdersModal from '@/app/dashboard/orders/allOrders/components/Cus
 import OrderHistoryModal from './OrderHistoryModal';
 import OrderLockedBanner from './OrderLockedBanner';
 import { getTimeAgo } from '@/utils/timeAgo';
+import { If, Then } from 'react-if';
 
 interface OrderDetailsCardIdProps {
   order: Order;
@@ -71,14 +72,18 @@ const OrderDetailsCardId = ({
             <p className="text-xs font-bold mr-7 mb-4">
               {createdDate.toLocaleDateString('ar-EG')} <span>{timeAgo}</span>
             </p>
-            <h3 className="flex gap-3 text-lg items-center font-semibold mb-1">
-              <Copy
-                onClick={() => handleCopy(order.shippingId)} // Pass shippingId here
-                className="w-4 h-4 text-[#7038f3] cursor-pointer"
-                role="button"
-              />
-              كود الشحن: {order.shippingId}
-            </h3>
+            <If condition={order.shippingId}>
+              <Then>
+                <h3 className="flex gap-3 text-lg items-center font-semibold mb-1">
+                  <Copy
+                    onClick={() => handleCopy(order.shippingId)}
+                    className="w-4 h-4 text-[#7038f3] cursor-pointer"
+                    role="button"
+                  />
+                  كود الشحن: {order.shippingId}
+                </h3>
+              </Then>
+            </If>
           </div>
           <div className="">
             <div className="flex flex-col sm:flex-row xl:flex-row gap-2 sm:px-5">
