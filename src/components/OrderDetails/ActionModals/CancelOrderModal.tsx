@@ -123,6 +123,7 @@ export default function CancelOrderModal({
                       ? 'border-[#5D24E1] bg-[#F6F2FC]'
                       : 'border-[#ECECEC]'
                       }`}
+                    clearable
                   />
                 </div>
               )}

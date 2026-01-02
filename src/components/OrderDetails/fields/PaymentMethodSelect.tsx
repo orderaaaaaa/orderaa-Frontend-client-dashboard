@@ -70,6 +70,7 @@ export function PaymentMethodSelect({
           searchThreshold={5}
           loading={isLoading}
           onOpenChange={handleOpenChange}
+          clearable
         />
       </div>
     </div>

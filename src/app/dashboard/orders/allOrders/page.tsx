@@ -35,15 +35,30 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useUrlFilters } from '@/hooks/useUrlFilters';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import { formatDateForUrl } from '@/utils/urlFilters';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
 import { Scan, ScanLine, ArrowUp, ArrowLeft, X } from 'lucide-react';
+
+// Time period options mapping
+const TIME_PERIOD_OPTIONS: { value: TimePeriod; label: string }[] = [
+  { value: 'day', label: 'يوم' },
+  { value: 'week', label: 'اسبوع' },
+  { value: 'month', label: 'شهر' },
+  { value: 'quarter', label: 'ربع سنوي' },
+  { value: 'year', label: 'سنه' },
+];
+
+const TIME_PERIOD_LABELS = TIME_PERIOD_OPTIONS.map((opt) => opt.label);
+
+const getLabelFromValue = (value: TimePeriod | ''): string => {
+  const option = TIME_PERIOD_OPTIONS.find((opt) => opt.value === value);
+  return option?.label || '';
+};
+
+const getValueFromLabel = (label: string): TimePeriod | '' => {
+  const option = TIME_PERIOD_OPTIONS.find((opt) => opt.label === label);
+  return option?.value || '';
+};
 
 function AllOrdersContent() {
   const [select, setSelect] = useState(false);
@@ -422,59 +437,41 @@ function AllOrdersContent() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-7 w-full">
         <Breadcrumb items={[{ title: 'الطلبات' }, { title: 'جميع الطلبات' }]} />
 
-        <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 px-3 w-full sm:w-auto">
-          <DatePicker
-            selected={fromDate}
-            onChange={setFromDate}
-            placeholder="من تاريخ"
-            showIcon={true}
-            className="w-[100px] sm:w-[140px]"
-            maxDate={toDate || undefined}
-          />
+        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 px-3 w-full sm:w-auto">
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <DatePicker
+              selected={fromDate}
+              onChange={setFromDate}
+              placeholder="من تاريخ"
+              showIcon={true}
+              className="flex-1 sm:flex-none sm:w-[140px]"
+              maxDate={toDate || undefined}
+            />
 
-          <ArrowLeft className="text-[#5D24E1] flex-shrink-0" size="20" />
+            <ArrowLeft className="text-[#5D24E1] flex-shrink-0" size="20" />
 
-          <DatePicker
-            selected={toDate}
-            onChange={setToDate}
-            placeholder="إلى تاريخ"
-            showIcon={true}
-            className="w-[100px] sm:w-[140px]"
-            minDate={fromDate || undefined}
-          />
+            <DatePicker
+              selected={toDate}
+              onChange={setToDate}
+              placeholder="إلى تاريخ"
+              showIcon={true}
+              className="flex-1 sm:flex-none sm:w-[140px]"
+              minDate={fromDate || undefined}
+            />
+          </div>
 
-          <div className="relative w-30 sm:w-[180px] flex-shrink-0">
-            <Select
-              value={timePeriod}
-              onValueChange={(value) => setTimePeriod(value as TimePeriod)}
-            >
-              <SelectTrigger
-                className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${
-                  timePeriod ? 'text-[#5D24E1] font-bold' : ''
-                }`}
-              >
-                <SelectValue placeholder="الفترة الزمنية" />
-              </SelectTrigger>
-              <SelectContent className="[&_[data-state=checked]]:text-[#5D24E1]">
-                <SelectItem value="day">يوم</SelectItem>
-                <SelectItem value="week">اسبوع</SelectItem>
-                <SelectItem value="month">شهر</SelectItem>
-                <SelectItem value="quarter">ربع سنوي</SelectItem>
-                <SelectItem value="year">سنه</SelectItem>
-              </SelectContent>
-            </Select>
-            {timePeriod && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setTimePeriod('' as TimePeriod);
-                }}
-                className="absolute left-8 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors z-10"
-                type="button"
-              >
-                <X size={16} className="text-gray-500 hover:text-gray-700" />
-              </button>
-            )}
+          <div className="w-full sm:w-[180px] flex-shrink-0">
+            <SearchableSelect
+              value={getLabelFromValue(timePeriod)}
+              onValueChange={(label) => setTimePeriod(getValueFromLabel(label))}
+              options={TIME_PERIOD_LABELS}
+              placeholder="الفترة الزمنية"
+              triggerClassName={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${
+                timePeriod ? 'text-[#5D24E1] font-bold' : ''
+              }`}
+              searchThreshold={10}
+              clearable
+            />
           </div>
         </div>
       </div>

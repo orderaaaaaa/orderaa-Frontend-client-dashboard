@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { CheckIcon, ChevronDownIcon, Search, Loader2 } from 'lucide-react';
+import { CheckIcon, ChevronDownIcon, Search, Loader2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/utils/debounce';
 import {
@@ -17,15 +17,16 @@ interface SearchableSelectProps {
   options: string[];
   placeholder?: string;
   searchPlaceholder?: string;
-  emptyMessage?: string; // Message when no options available
-  noResultsMessage?: string; // Message when search returns no results
+  emptyMessage?: string; 
+  noResultsMessage?: string; 
   className?: string;
   triggerClassName?: string;
   disabled?: boolean;
   loading?: boolean;
-  searchThreshold?: number; // Show search when options exceed this number (default: 5)
-  debounceMs?: number; // Debounce delay in milliseconds (default: 300)
-  onOpenChange?: (open: boolean) => void; // Callback when dropdown opens/closes
+  searchThreshold?: number;
+  debounceMs?: number;
+  onOpenChange?: (open: boolean) => void; 
+  clearable?: boolean; // Show clear button when value is selected
 }
 
 export function SearchableSelect({
@@ -43,6 +44,7 @@ export function SearchableSelect({
   searchThreshold = 5,
   debounceMs = 300,
   onOpenChange,
+  clearable = false,
 }: SearchableSelectProps) {
   const [open, setOpen] = useState(false);
 
@@ -77,24 +79,28 @@ export function SearchableSelect({
     [onValueChange, handleOpenChange]
   );
 
-  // Focus input when popover opens
+  const handleClear = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onValueChange('');
+    },
+    [onValueChange]
+  );
+
   useEffect(() => {
     if (open && showSearch && inputRef.current) {
-      // Small delay to ensure the popover is rendered
       setTimeout(() => {
         inputRef.current?.focus();
       }, 50);
     }
   }, [open, showSearch]);
 
-  // Reset search when closing
   useEffect(() => {
     if (!open) {
       setSearchQuery('');
     }
   }, [open]);
 
-  // Determine the empty state message
   const getEmptyStateMessage = () => {
     if (loading) {
       return (
@@ -145,7 +151,24 @@ export function SearchableSelect({
               value || placeholder
             )}
           </span>
-          <ChevronDownIcon className="h-4 w-4 opacity-50 flex-shrink-0" />
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {clearable && value && !disabled && !loading && (
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={handleClear}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    handleClear(e as unknown as React.MouseEvent);
+                  }
+                }}
+                className="p-0.5 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="h-4 w-4 text-gray-500 hover:text-gray-700" />
+              </span>
+            )}
+            <ChevronDownIcon className="h-4 w-4 opacity-50" />
+          </div>
         </button>
       </PopoverTrigger>
       <PopoverContent
