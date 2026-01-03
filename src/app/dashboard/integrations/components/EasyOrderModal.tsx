@@ -113,7 +113,7 @@ const EasyOrderModal = ({
     try {
       if (existingIntegrationId) {
         await updateIntegration({
-          id: existingIntegrationId,
+          provider: 'EASY_ORDERS',
           apiKey: apiKey.trim(),
         });
       } else {

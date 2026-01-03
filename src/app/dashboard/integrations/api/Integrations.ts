@@ -25,13 +25,16 @@ export const integrationApi = {
   },
 
   // PATCH /integration-configs/{id}
-  update: async (id: number, apiKey: string): Promise<IntegrationResponse> => {
+  update: async (
+    provider: string,
+    apiKey: string
+  ): Promise<IntegrationResponse> => {
     const payload = {
       apiKey: apiKey,
       isActive: true,
     };
-    const response = await http.patch<IntegrationResponse>(
-      `/integration-configs/${id}`,
+    const response = await http.put<IntegrationResponse>(
+      `/integration-configs/${provider}`,
       payload
     );
     return response.data;
