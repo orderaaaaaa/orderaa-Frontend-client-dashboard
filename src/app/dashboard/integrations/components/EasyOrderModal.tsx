@@ -21,6 +21,7 @@ import { LiaEyeSolid, LiaEyeSlashSolid } from 'react-icons/lia';
 import { integrationSteps, webhookSteps } from '../constants/steps';
 import { Else, If, Then } from 'react-if';
 import { MdQuestionMark } from 'react-icons/md';
+import { toast } from 'react-toastify';
 
 interface EasyOrderModalProps {
   isOpen: boolean;
@@ -116,8 +117,11 @@ const EasyOrderModal = ({
           provider: 'EASY_ORDERS',
           apiKey: apiKey.trim(),
         });
+
+        toast.success('تم تحديث اعدادات ربط API بنجاح');
       } else {
         await createIntegration(apiKey.trim());
+        toast.success('تم انشاء ربط API بنجاح');
       }
       queryClient.invalidateQueries({ queryKey: ['integration-configs'] });
     } catch (err: any) {
