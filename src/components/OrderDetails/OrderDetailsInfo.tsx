@@ -190,15 +190,14 @@ function OrderDetailsInfoComponent({
     }
   };
 
-  function getShippingLabel(value?: string) {
-    switch (value) {
+  const shippingLabel = useMemo(() => {
+    switch (localOrder.shippingCompany) {
       case 'TURBO':
         return 'تربو';
-
       default:
-        return value ?? '';
+        return localOrder.shippingCompany ?? '';
     }
-  }
+  }, [localOrder.shippingCompany]);
 
   const handleWhatsappSubOptionClick = (action: string, label: string) => {
     if (
@@ -277,7 +276,7 @@ function OrderDetailsInfoComponent({
         <PricingSection order={localOrder} onUpdate={updateField} />
 
         <ShippingSection
-          shippingCompany={getShippingLabel(localOrder.shippingCompany)}
+          shippingCompany={shippingLabel}
           governorate={localOrder.governorate}
           city={localOrder.city}
           address={localOrder.address}
