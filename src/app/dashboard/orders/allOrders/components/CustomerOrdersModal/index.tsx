@@ -238,7 +238,7 @@ export default function CustomerOrdersModal({
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {orders.map((order: Order) => (
                 <div key={order.id} className="flex items-start gap-3">
                   <input
@@ -262,12 +262,18 @@ export default function CustomerOrdersModal({
                       order.externalGovernorate ||
                       'غير محدد'
                     }
-                    items={order.order_products.map(
-                      (op: any) =>
-                        `${op.products.name}${
-                          op.products.size ? ` - ${op.products.size}` : ''
-                        }${op.products.color ? ` - ${op.products.color}` : ''}`
-                    )}
+                    items={order.order_products.map((op: any) => {
+                      const productName = op.products?.name || 'منتج غير معروف';
+
+                      const variantDetails =
+                        op.variants && op.variants.length > 0
+                          ? op.variants.map((v: any) => v.value).join('')
+                          : '';
+
+                      return variantDetails
+                        ? `${productName} - ${variantDetails}`
+                        : productName;
+                    })}
                     price={order.totalCost}
                     trys={order.numberOfTriesToReach}
                     status={order.status}

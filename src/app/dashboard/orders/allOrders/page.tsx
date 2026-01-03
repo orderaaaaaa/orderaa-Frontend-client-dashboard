@@ -290,7 +290,11 @@ function AllOrdersContent() {
           return;
         }
 
-        const fileName = exportOrdersToExcel(ordersToExport, 'selected_orders', statusLabelsMap);
+        const fileName = exportOrdersToExcel(
+          ordersToExport,
+          'selected_orders',
+          statusLabelsMap
+        );
         toast.success(
           `تم تصدير ${ordersToExport.length} طلب محدد بنجاح! \nاسم الملف: ${fileName}`
         );
@@ -304,7 +308,11 @@ function AllOrdersContent() {
             return;
           }
 
-          const fileName = exportOrdersToExcel(response.data, 'all_orders', statusLabelsMap);
+          const fileName = exportOrdersToExcel(
+            response.data,
+            'all_orders',
+            statusLabelsMap
+          );
           toast.success(
             `تم تصدير ${response.data.length} طلب بنجاح! \nاسم الملف: ${fileName}`
           );
@@ -316,7 +324,11 @@ function AllOrdersContent() {
             return;
           }
 
-          const fileName = exportOrdersToExcel(orders, 'all_orders', statusLabelsMap);
+          const fileName = exportOrdersToExcel(
+            orders,
+            'all_orders',
+            statusLabelsMap
+          );
           toast.success(
             `تم تصدير ${orders.length} طلب بنجاح! \nاسم الملف: ${fileName}`
           );
@@ -325,7 +337,14 @@ function AllOrdersContent() {
     } catch (error) {
       toast.error('فشل في تصدير الطلبات. الرجاء المحاولة مرة أخرى.');
     }
-  }, [apiFilters, select, selectedOrderIds, orders, fetchOrdersForExport, statusLabelsMap]);
+  }, [
+    apiFilters,
+    select,
+    selectedOrderIds,
+    orders,
+    fetchOrdersForExport,
+    statusLabelsMap,
+  ]);
 
   // Handle Edit Status
   const handleEditStatus = useCallback(
