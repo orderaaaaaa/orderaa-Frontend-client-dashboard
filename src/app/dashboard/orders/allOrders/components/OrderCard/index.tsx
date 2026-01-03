@@ -87,7 +87,7 @@ export default function OrderCard({
   return (
     <div
       onClick={handleCardClick}
-      className="relative w-full h-full md:max-w-[300px] bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.1)] rounded-[10px] cursor-pointer hover:shadow-[0px_6px_20px_rgba(93,36,225,0.15)] transition-all duration-200 flex flex-col"
+      className="relative w-full h-full max-w-[90%] md:max-w-[300px] bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.1)] rounded-[10px] cursor-pointer hover:shadow-[0px_6px_20px_rgba(93,36,225,0.15)] transition-all duration-200 flex flex-col"
     >
       {/* Checkbox – top right */}
       <div className="flex justify-start mb-1 px-4 pt-3">
