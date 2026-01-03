@@ -121,7 +121,8 @@ function OrderDetailsInfoComponent({
     }
     // Sort by createdAt descending and get the first (most recent) event
     const sortedEvents = [...localOrder.order_events].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
     return sortedEvents[0]?.status;
   }, [localOrder.order_events]);
@@ -148,7 +149,11 @@ function OrderDetailsInfoComponent({
     });
   };
 
-  const handleActionClick = (label: string, action: string, hasSubOptions?: boolean) => {
+  const handleActionClick = (
+    label: string,
+    action: string,
+    hasSubOptions?: boolean
+  ) => {
     if (hasSubOptions) {
       return;
     }
@@ -185,8 +190,21 @@ function OrderDetailsInfoComponent({
     }
   };
 
+  function getShippingLabel(value?: string) {
+    switch (value) {
+      case 'TURBO':
+        return 'تربو';
+
+      default:
+        return value ?? '';
+    }
+  }
+
   const handleWhatsappSubOptionClick = (action: string, label: string) => {
-    if (action === 'send_professional_color' || action === 'send_natural_color') {
+    if (
+      action === 'send_professional_color' ||
+      action === 'send_natural_color'
+    ) {
       modals.addColorProduct.open();
     } else {
       setConfirmationDialog({
@@ -198,13 +216,18 @@ function OrderDetailsInfoComponent({
     }
   };
 
-  const followUpActions = ['no_answer', 'closed', 'not_collecting', 'open_close'];
+  const followUpActions = [
+    'no_answer',
+    'closed',
+    'not_collecting',
+    'open_close',
+  ];
 
   const followUpActionLabels: Record<string, string> = {
-    'no_answer': 'لا يرد',
-    'closed': 'مغلق',
-    'not_collecting': 'مش بيجمع',
-    'open_close': 'فتح و قفل',
+    no_answer: 'لا يرد',
+    closed: 'مغلق',
+    not_collecting: 'مش بيجمع',
+    open_close: 'فتح و قفل',
   };
 
   const handleConfirmAction = async () => {
@@ -223,7 +246,8 @@ function OrderDetailsInfoComponent({
     } catch (error: any) {
       setErrorModal({
         isOpen: true,
-        message: error?.message || 'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.',
+        message:
+          error?.message || 'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.',
       });
     }
   };
@@ -239,6 +263,8 @@ function OrderDetailsInfoComponent({
     handleUpdate(updatedOrder);
   };
 
+  console.log(localOrder);
+
   return (
     <>
       <div className="flex flex-col gap-4 font-medium p-4 bg-gray-50 mt-8 rounded-xl mb-24 w-full max-w-full">
@@ -251,7 +277,7 @@ function OrderDetailsInfoComponent({
         <PricingSection order={localOrder} onUpdate={updateField} />
 
         <ShippingSection
-          shippingCompany={localOrder.shippingCompany}
+          shippingCompany={getShippingLabel(localOrder.shippingCompany)}
           governorate={localOrder.governorate}
           city={localOrder.city}
           address={localOrder.address}
@@ -285,7 +311,12 @@ function OrderDetailsInfoComponent({
         actions={actions}
         confirmationDialog={confirmationDialog}
         onCloseConfirmation={() =>
-          setConfirmationDialog({ isOpen: false, title: '', message: '', action: '' })
+          setConfirmationDialog({
+            isOpen: false,
+            title: '',
+            message: '',
+            action: '',
+          })
         }
         onConfirmAction={handleConfirmAction}
         onError={(message) => setErrorModal({ isOpen: true, message })}
