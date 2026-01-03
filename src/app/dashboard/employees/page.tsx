@@ -54,7 +54,7 @@ export default function AllEmployees() {
                 </div>
 
                 {paginationProps && (
-                  <div className="flex max-sm:flex-col max-sm:gap-4 justify-between items-center mt-6 md:mb-4">
+                  <div className="flex max-sm:flex-col max-sm:gap-4 justify-between items-center mt-6 mb-4">
                     <div className="text-lg text-gray-900">
                       عرض{' '}
                       <span className="font-bold">

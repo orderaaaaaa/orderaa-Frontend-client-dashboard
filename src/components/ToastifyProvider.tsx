@@ -1,7 +1,7 @@
-'use client'
-import React from 'react'
-import { ToastContainer, Slide } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+'use client';
+import React from 'react';
+import { ToastContainer, Slide } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function ToastifyProvider() {
   return (
@@ -11,7 +11,7 @@ export default function ToastifyProvider() {
       hideProgressBar={false}
       newestOnTop
       closeOnClick
-      rtl
+      rtl={true}
       pauseOnFocusLoss
       draggable
       pauseOnHover
@@ -21,5 +21,5 @@ export default function ToastifyProvider() {
       className="!z-[99999]"
       style={{ zIndex: 99999 }}
     />
-  )
+  );
 }
