@@ -64,7 +64,7 @@ export default function OrderSettingsPage() {
 
       <header className="mb-10">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-1 h-8 bg-[#5D24E1] rounded-full"></div>
+          <div className="w-1 h-8 bg-primary rounded-full"></div>
           <h1 className="text-3xl font-bold text-gray-900">اعدادات المتجر</h1>
         </div>
       </header>
@@ -83,7 +83,7 @@ export default function OrderSettingsPage() {
           <button
             type="submit"
             disabled={isUpdating}
-            className={`px-10 py-3 bg-[#5D24E1] text-white rounded-full font-bold transition-all ${
+            className={`px-10 py-3 bg-primary text-white rounded-full font-bold transition-all ${
               isUpdating
                 ? 'opacity-50 cursor-not-allowed'
                 : 'hover:bg-[#4a1cb5]'

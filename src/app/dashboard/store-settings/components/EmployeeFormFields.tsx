@@ -126,7 +126,7 @@ export default function OrderSettingsFields({
                   peer peer-checked:after:translate-x-full peer-checked:after:border-white 
                   after:content-[''] after:absolute after:top-0 after:left-0 after:bg-white 
                   after:border-gray-300 after:border after:rounded-full after:h-[30px] after:w-[30px] 
-                  after:transition-all peer-checked:bg-[#5D24E1] 
+                  after:transition-all peer-checked:bg-primary 
                   rtl:peer-checked:after:-translate-x-full rtl:after:left-auto rtl:after:right-0
                   scale-75 md:scale-100 origin-right"
       />
@@ -138,7 +138,7 @@ export default function OrderSettingsFields({
       <div className="flex lg:w-1/3 flex-col gap-8">
         <div className="w-1/2 flex flex-col gap-4 border-b border-gray-100 pb-6">
           <div className="w-full flex items-start gap-2">
-            <ImageIcon className="w-6 h-6 text-[#5D24E1] mt-0.5" />
+            <ImageIcon className="w-6 h-6 text-primary mt-0.5" />
             <div>
               <h3 className="text-lg font-semibold leading-tight">
                 شعار المتجر
@@ -153,8 +153,8 @@ export default function OrderSettingsFields({
             <div
               className={`flex-1 w-full min-h-[120px] border-2 border-dashed rounded-lg transition-all ${
                 isDragging
-                  ? 'border-[#5D24E1] bg-[#5D24E1]/5'
-                  : 'border-gray-300 bg-gray-50 hover:border-[#5D24E1]'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-gray-300 bg-gray-50 hover:border-primary'
               }`}
               onDragEnter={handleDragEnter}
               onDragOver={handleDragOver}
@@ -187,7 +187,7 @@ export default function OrderSettingsFields({
                       اسحب الصورة وأفلتها هنا
                     </p>
                     <p className="text-xs text-gray-400">أو</p>
-                    <span className="text-sm text-[#5D24E1] font-medium mt-1">
+                    <span className="text-sm text-primary font-medium mt-1">
                       تصفح الملفات
                     </span>
                   </div>
@@ -218,7 +218,7 @@ export default function OrderSettingsFields({
             {/* Phone Number */}
             <div className="w-full flex flex-col gap-4">
               <div className="w-full flex items-start gap-2">
-                <Phone className="w-6 h-6 text-[#5D24E1] mt-0.5" />
+                <Phone className="w-6 h-6 text-primary mt-0.5" />
                 <div>
                   <h3 className="text-lg font-semibold leading-tight">
                     رقم الهاتف
@@ -243,7 +243,7 @@ export default function OrderSettingsFields({
             {/* Open Order */}
             <div className="flex items-start justify-between border-b border-gray-100 pb-6">
               <div className="flex items-start gap-3">
-                <PackageOpen className="w-6 h-6 text-[#5D24E1] mt-0.5" />
+                <PackageOpen className="w-6 h-6 text-primary mt-0.5" />
                 <div>
                   <h3 className="text-lg font-semibold leading-tight">
                     فتح الشحنة
@@ -263,7 +263,7 @@ export default function OrderSettingsFields({
             <div className="flex flex-col gap-4 border-b border-gray-100 pb-6">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
-                  <Edit3 className="w-6 h-6 text-[#5D24E1] mt-0.5" />
+                  <Edit3 className="w-6 h-6 text-primary mt-0.5" />
                   <div>
                     <h3 className="text-lg font-semibold leading-tight">
                       تعديل محتوي الشحنة
@@ -287,7 +287,7 @@ export default function OrderSettingsFields({
                 }`}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <FilePenLine className="w-5 h-5 text-[#5D24E1]" />
+                  <FilePenLine className="w-5 h-5 text-primary" />
                   <span className="text-base">اسم المنتج</span>
                 </div>
                 <Input
@@ -303,7 +303,7 @@ export default function OrderSettingsFields({
             {/* Return Cost */}
             <div className="w-full flex flex-col gap-4 border-b border-gray-100 pb-6">
               <div className="w-full flex items-start gap-2">
-                <RotateCcw className="w-6 h-6 text-[#5D24E1] mt-0.5" />
+                <RotateCcw className="w-6 h-6 text-primary mt-0.5" />
                 <div>
                   <h3 className="text-lg font-semibold leading-tight">
                     تكلفة مرتجع الشحن
@@ -327,7 +327,7 @@ export default function OrderSettingsFields({
         {/* Auto Cancel */}
         <div className="w-full flex flex-col gap-4">
           <div className="w-full flex items-start gap-2">
-            <CopyX className="w-6 h-6 text-[#5D24E1] mt-0.5" />
+            <CopyX className="w-6 h-6 text-primary mt-0.5" />
             <div>
               <h3 className="text-lg font-semibold leading-tight">
                 الالغاء التلقائي للطلب
