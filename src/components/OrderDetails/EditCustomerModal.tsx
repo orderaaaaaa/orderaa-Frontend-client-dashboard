@@ -96,7 +96,7 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
       >
         {/* Header */}
         <div
-          className="h-[79px] rounded-t-[20px] flex items-center justify-between px-6"
+          className="h-[60px] rounded-t-[20px] flex items-center justify-between px-6"
           style={{
             background: 'linear-gradient(105.28deg, #FFFFFF 1.48%, #CBB5FD 182.49%, #FFFFFF 187.88%)',
           }}

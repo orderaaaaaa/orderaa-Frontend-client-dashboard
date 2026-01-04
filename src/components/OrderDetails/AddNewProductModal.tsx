@@ -114,7 +114,7 @@ export default function AddNewProductModal({
       >
         {/* Header with gradient background */}
         <div
-          className="absolute top-0 left-0 right-0 h-[79px] rounded-t-[20px] flex items-center justify-center px-8"
+          className="absolute top-0 left-0 right-0 h-[60px] rounded-t-[20px] flex items-center justify-center px-8"
           style={{
             background:
               'linear-gradient(105.28deg, #FFFFFF 1.48%, #CBB5FD 182.49%, #FFFFFF 187.88%)',

@@ -225,11 +225,18 @@ export function useOrderActions({
         return true;
       } catch (error: any) {
         console.error('Failed to cancel order:', error);
-        const apiErrorMessage =
-          error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          error?.message ||
-          'فشل في إلغاء الطلب. يرجى المحاولة مرة أخرى.';
+        // Extract error message from API response (handle both string and array formats)
+        const responseMessage = error?.response?.data?.message;
+        let apiErrorMessage: string;
+        if (Array.isArray(responseMessage)) {
+          apiErrorMessage = responseMessage.join(', ');
+        } else {
+          apiErrorMessage =
+            responseMessage ||
+            error?.response?.data?.error ||
+            error?.message ||
+            'فشل في إلغاء الطلب. يرجى المحاولة مرة أخرى.';
+        }
         toast.error(apiErrorMessage);
         return false;
       }

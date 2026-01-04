@@ -74,7 +74,7 @@ export default function BaseModal({
       >
         {/* Header with gradient background */}
         <div
-          className="h-[79px] rounded-t-[20px] flex items-center justify-center px-8 flex-shrink-0 relative"
+          className="h-[60px] rounded-t-[20px] flex items-center justify-center px-8 flex-shrink-0 relative"
           style={{
             background:
               'linear-gradient(105.28deg, #FFFFFF 1.48%, #CBB5FD 182.49%, #FFFFFF 187.88%)',
@@ -87,9 +87,9 @@ export default function BaseModal({
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="absolute left-8 w-6 h-6 flex items-center justify-center hover:opacity-70 transition-opacity disabled:opacity-50"
+            className="absolute left-8 flex items-center justify-center hover:opacity-70 transition-opacity disabled:opacity-50"
           >
-            <LiaTimesSolid className="w-6 h-6 text-black cursor-pointer" />
+            <LiaTimesSolid className="w-4 h-4 text-black cursor-pointer" />
           </button>
         </div>
 

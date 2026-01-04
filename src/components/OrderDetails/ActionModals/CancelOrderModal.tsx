@@ -23,6 +23,8 @@ export default function CancelOrderModal({
   const { data: allReasons = [], isLoading: loadingAllReasons } = useCancellationReasons(isOpen);
   const { data: topReasons = [], isLoading: loadingTopReasons } = useTopCancellationReasons(isOpen);
 
+  const selectedReason = allReasons.find(r => r.id === selectedReasonId);
+
   const handleConfirm = async () => {
     if (!selectedReasonId) return;
     await onConfirm({ reasonId: selectedReasonId, notes });
@@ -41,7 +43,6 @@ export default function CancelOrderModal({
     onClose();
   };
 
-  const selectedReason = allReasons.find(r => r.id === selectedReasonId);
   const isSelectedFromTopReasons = topReasons.some(t => t.id === selectedReasonId);
 
   const isLoading = loadingAllReasons || loadingTopReasons;
@@ -75,8 +76,7 @@ export default function CancelOrderModal({
             </div>
           ) : (
             <>
-              {/* Top Reasons as Radio Buttons */}
-              <div className="flex flex-col gap-2">
+              <div className="grid sm:grid-cols-3 grid-cols-1 gap-2">
                 {topReasons.map((reason) => (
                   <label
                     key={reason.id}
@@ -87,7 +87,7 @@ export default function CancelOrderModal({
                     onClick={() => setSelectedReasonId(reason.id)}
                   >
                     <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${selectedReasonId === reason.id
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${selectedReasonId === reason.id
                         ? 'border-[#5D24E1]'
                         : 'border-gray-300'
                         }`}
@@ -97,7 +97,7 @@ export default function CancelOrderModal({
                       )}
                     </div>
                     <span
-                      className={`text-base ${selectedReasonId === reason.id
+                      className={`text-sm ${selectedReasonId === reason.id
                         ? 'text-[#5D24E1] font-semibold'
                         : 'text-[#1F1F1F]'
                         }`}

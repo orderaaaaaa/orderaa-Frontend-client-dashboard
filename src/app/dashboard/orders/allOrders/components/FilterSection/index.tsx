@@ -99,7 +99,7 @@ const FilterSection = React.memo(function FilterSection({
   );
 
   return (
-    <div className="bg-white rounded-xl py-[3px] mt-6">
+    <div className="bg-white rounded-xl py-[3px] mt-6 shadow-sm">
       <div className="flex items-center justify-start px-4 py-2">
         <Popover open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <PopoverTrigger asChild>
