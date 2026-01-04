@@ -5,12 +5,12 @@ function WalletTransactionLog() {
   const headers = ['التاريخ', 'الاشتراك', 'طريقة الدفع', 'المبلغ'];
 
   return (
-    <div className="container mx-auto mt-10 px-4 mb-20" dir="rtl">
+    <div className="mt-10 sm:px-4 mb-20" dir="rtl">
       <h2 className="text-2xl font-bold mb-6 text-right">سجل المعاملات</h2>
 
       <div className="w-full">
         {/* Table Header */}
-        <div className="grid grid-cols-4 bg-white border border-[#ebebeb] rounded-xl py-5 px-6 mb-1 text-center">
+        <div className="grid grid-cols-4 bg-white border border-[#ebebeb] rounded-xl py-5 sm:px-6 mb-1 text-center">
           {headers.map((header, index) => (
             <span key={index} className="text-gray-600 font-medium text-lg">
               {header}
@@ -23,7 +23,7 @@ function WalletTransactionLog() {
           {TRANSACTIONS_LOG.map((row) => (
             <div
               key={row.id}
-              className="grid grid-cols-4 items-center bg-white border border-[#ebebeb] rounded-xl py-4 px-6 hover:shadow-sm transition-shadow text-center"
+              className="grid grid-cols-4 items-center bg-white border border-[#ebebeb] rounded-xl py-4 px-2 sm:px-6 hover:shadow-sm transition-shadow text-center"
             >
               <div className="text-gray-800 font-medium">{row.date}</div>
               <div className="text-gray-800 font-medium">{row.planName}</div>

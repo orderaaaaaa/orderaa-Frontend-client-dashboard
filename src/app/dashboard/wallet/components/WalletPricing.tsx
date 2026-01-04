@@ -1,8 +1,19 @@
-import React from 'react';
-import { WALLET_PRICING_PLANS } from '../constants/plans';
+'use client';
+import React, { useState } from 'react';
+import { WALLET_PRICING_PLANS, WalletPricingPlan } from '../constants/plans';
 import { IoCheckmark } from 'react-icons/io5';
+import PaymentModal from './modals/PaymentModal';
 
 function WalletPricing() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<WalletPricingPlan | null>(
+    null
+  );
+
+  const handleOpenModal = (plan: WalletPricingPlan) => {
+    setSelectedPlan(plan);
+    setIsModalOpen(true);
+  };
   return (
     <section id="pricing" className="mt-13 sm:px-4">
       <h2 className="text-2xl font-bold mb-8">خطة الشحن و الاشتراك </h2>
@@ -57,6 +68,7 @@ function WalletPricing() {
             </div>
 
             <button
+              onClick={() => handleOpenModal(plan)}
               className={`w-[98%] mx-auto mt-auto py-2 rounded-full font-bold transition cursor-pointer text-xl
                 ${
                   plan.gradient
@@ -69,6 +81,14 @@ function WalletPricing() {
           </div>
         ))}
       </div>
+
+      {selectedPlan && (
+        <PaymentModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          plan={selectedPlan}
+        />
+      )}
     </section>
   );
 }

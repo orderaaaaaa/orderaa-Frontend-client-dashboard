@@ -5,7 +5,7 @@ import WalletTransactionLog from './components/WalletTransactionLog';
 
 function Wallet() {
   return (
-    <div className="px-7 py-5">
+    <div className="px-3 sm:px-7 py-5">
       <WalletHeader />
       <WalletPricing />
       <WalletTransactionLog />
