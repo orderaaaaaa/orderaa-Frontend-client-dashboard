@@ -40,6 +40,7 @@ export default function OrderSettingsPage() {
 
   const onSubmit = async (data: OrderSettingsFormData) => {
     const submissionData: OrderSettingsFormData = {
+      language: data.language,
       canOpenShipment: data.canOpenShipment,
       employeeCanEditContent: data.employeeCanEditContent,
       shippingPhoneNumber: data.shippingPhoneNumber,
