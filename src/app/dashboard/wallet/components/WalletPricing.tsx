@@ -1,5 +1,5 @@
 import React from 'react';
-import { WALLET_PRICING_PLANS, WalletPricingPlan } from '../constants/plans';
+import { WALLET_PRICING_PLANS } from '../constants/plans';
 import { IoCheckmark } from 'react-icons/io5';
 
 function WalletPricing() {

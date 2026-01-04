@@ -1,6 +1,5 @@
-import { Wallet, RefreshCcw } from 'lucide-react';
 import React from 'react';
-import { LuWallet } from 'react-icons/lu';
+import { LuWallet, LuRefreshCcw } from 'react-icons/lu';
 
 export interface WalletPricingPlan {
   title: string;
@@ -55,7 +54,7 @@ export const WALLET_PRICING_PLANS: WalletPricingPlan[] = [
     title: 'اشتراك شهري ثابت',
     price: '30 دولار',
     subtitle: '(1500 جنية)',
-    icon: <RefreshCcw className="w-7 h-7 text-white" />,
+    icon: <LuRefreshCcw className="w-7 h-7 text-white" />,
     features: [
       'شحن محفظة بقيمة 5 دولار',
       'يخصم 0.50 من كل طلب',
