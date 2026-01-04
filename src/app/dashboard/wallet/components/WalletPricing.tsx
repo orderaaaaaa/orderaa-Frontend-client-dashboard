@@ -4,10 +4,10 @@ import { IoCheckmark } from 'react-icons/io5';
 
 function WalletPricing() {
   return (
-    <section id="pricing" className="container mx-auto mt-13 px-4">
+    <section id="pricing" className="mt-13 sm:px-4">
       <h2 className="text-2xl font-bold mb-8">خطة الشحن و الاشتراك </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
         {WALLET_PRICING_PLANS.map((plan, index) => (
           <div
             key={index}
