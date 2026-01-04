@@ -43,6 +43,7 @@ function ClientInformation({
   errors,
 }: ClientInformationProps) {
   // Fetch governorates and areas from API
+  
   const { data: governorateOptions = [] } = useGovernoratesQuery();
   const { data: areaOptions = [], isLoading: isLoadingAreas } = useCitiesQuery(governorate);
 
