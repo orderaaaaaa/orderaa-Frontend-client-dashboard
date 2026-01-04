@@ -1,7 +1,6 @@
 import React from 'react';
 import Input from '@/components/ui/Input';
-import Dropdown from '@/components/ui/Dropdown';
-import SearchableSelect from '@/app/dashboard/orders/allOrders/components/FilterSection/SearchableSelect';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 import WorkHoursTimePicker from '@/components/ui/WorkHoursTimePicker';
 import { useGovernoratesQuery } from '@/services/lookups';
 import {
@@ -71,28 +70,19 @@ export default function EmployeeFormFields({
             </span>
           </div>
           <div className="w-full">
-            <Dropdown
+            <SearchableSelect
               value={accessLevel || ''}
               onChange={(value) =>
                 setValue('accessLevel', value, { shouldValidate: true })
               }
               options={ACCESS_LEVEL_OPTIONS}
               placeholder="اختر صلاحية الموظف"
-              selectClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 !text-lg ${
-                errors?.accessLevel
-                  ? 'border-red-500 focus:border-red-500'
-                  : 'border-black/16'
+              widthClass="w-full"
+              error={errors?.accessLevel?.message}
+              triggerClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 text-lg ${
+                errors?.accessLevel ? 'border-red-500' : 'border-black/16'
               } rounded text-right text-base font-normal text-black`}
-              placeholderClassName="text-black/60"
             />
-            {errors.accessLevel && (
-              <span
-                className="text-red-500 text-sm text-right mt-1 block"
-                style={{ textAlign: 'right' }}
-              >
-                {errors.accessLevel.message}
-              </span>
-            )}
           </div>
         </div>
 
@@ -122,28 +112,19 @@ export default function EmployeeFormFields({
             </span>
           </div>
           <div className="w-full">
-            <Dropdown
+            <SearchableSelect
               value={department || ''}
               onChange={(value) =>
                 setValue('department', value, { shouldValidate: true })
               }
               options={DEPARTMENT_OPTIONS}
               placeholder="اختر القسم"
-              selectClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 !text-lg  ${
-                errors?.department
-                  ? 'border-red-500 focus:border-red-500'
-                  : 'border-black/16'
+              widthClass="w-full"
+              error={errors?.department?.message}
+              triggerClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 text-lg ${
+                errors?.department ? 'border-red-500' : 'border-black/16'
               } rounded text-right text-base font-normal`}
-              placeholderClassName="text-black/60"
             />
-            {errors.department && (
-              <span
-                className="text-red-500 text-sm text-right mt-1 block"
-                style={{ textAlign: 'right' }}
-              >
-                {errors.department.message}
-              </span>
-            )}
           </div>
         </div>
 

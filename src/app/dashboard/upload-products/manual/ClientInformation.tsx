@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import Input from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/textarea';
-import Dropdown from '@/components/ui/Dropdown';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 import { useGovernoratesQuery, useCitiesQuery } from '@/services/lookups';
 
 type ClientInformationProps = {
@@ -112,21 +112,17 @@ function ClientInformation({
                 اختر المحافظة <span className="text-red-500">*</span>
               </label>
             </div>
-            <Dropdown
-              className="w-full"
-              options={governorateOptions}
-              placeholderClassName="text-[#1F1F1F] !py-1 font-bold "
-              selectClassName={`border-1 w-full  bg-[#EAEAEA40] px-3 py-3 rounded-sm ${errors?.governorate
-                  ? 'border-red-500 focus:border-red-500'
-                  : 'border-[#5D24E1]'
-                }`}
-              placeholder="اختر المحافظة"
+            <SearchableSelect
               value={governorate}
               onChange={handleGovernorateChange}
+              options={governorateOptions}
+              placeholder="اختر المحافظة"
+              widthClass="w-full"
+              error={errors?.governorate}
+              triggerClassName={`border w-full bg-[#EAEAEA40] px-3 py-3 rounded-sm ${
+                errors?.governorate ? 'border-red-500' : 'border-[#5D24E1]'
+              }`}
             />
-            {errors?.governorate && (
-              <p className="text-xs text-red-500 mt-1">{errors.governorate}</p>
-            )}
           </div>
           {/* choose area */}
           <div className="max-w-[502px]" data-field-error="area">
@@ -135,21 +131,19 @@ function ClientInformation({
                 منطقة <span className="text-red-500">*</span>
               </label>
             </div>
-            <Dropdown
-              className="w-full"
-              options={areaOptions}
-              placeholderClassName="text-[#1F1F1F] !py-1 font-bold "
-              selectClassName={`border-1 w-full  bg-[#EAEAEA40] px-3 py-3 rounded-sm ${errors?.area
-                  ? 'border-red-500 focus:border-red-500'
-                  : 'border-[#5D24E1]'
-                }`}
-              placeholder={!governorate ? 'اختر المحافظة أولاً' : isLoadingAreas ? 'جاري التحميل...' : 'اختر المنطقة'}
+            <SearchableSelect
               value={area}
               onChange={handleAreaChange}
+              options={areaOptions}
+              placeholder={!governorate ? 'اختر المحافظة أولاً' : isLoadingAreas ? 'جاري التحميل...' : 'اختر المنطقة'}
+              widthClass="w-full"
+              disabled={!governorate || isLoadingAreas}
+              loading={isLoadingAreas}
+              error={errors?.area}
+              triggerClassName={`border w-full bg-[#EAEAEA40] px-3 py-3 rounded-sm ${
+                errors?.area ? 'border-red-500' : 'border-[#5D24E1]'
+              }`}
             />
-            {errors?.area && (
-              <p className="text-xs text-red-500 mt-1">{errors.area}</p>
-            )}
           </div>
         </div>
         <div className="flex flex-col gap-10 mt-7">

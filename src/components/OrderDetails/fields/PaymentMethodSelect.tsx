@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { LiaCreditCardSolid } from 'react-icons/lia';
-import { SearchableSelect } from '@/components/ui/searchable-select';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { usePaymentMethods } from '@/hooks';
 
 export interface PaymentMethodSelectProps {

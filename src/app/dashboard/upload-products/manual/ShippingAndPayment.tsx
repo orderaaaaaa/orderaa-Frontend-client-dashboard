@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Dropdown from '@/components/ui/Dropdown';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 import { USER_MENU_OPTIONS } from '@/constants/dashboard-layout';
 import Input from '@/components/ui/Input';
 
@@ -105,13 +105,13 @@ function ShippingAndPayment() {
                 : 'max-h-0 opacity-0'
                 }`}
             >
-              <Dropdown
+              <SearchableSelect
                 value={paymentMethod}
                 onChange={setPaymentMethod}
                 options={USER_MENU_OPTIONS}
                 placeholder="اختر طريقة الدفع"
-                className="max-w-[921px]"
-                selectClassName="border-2 border-[#5D24E1] w-full bg-[#EAEAEA40] p-2 rounded-sm  focus:!border-[#5D24E1] focus:ring-[1px] focus:!ring-[#5D24E1]/50"
+                widthClass="max-w-[921px]"
+                triggerClassName="border-2 border-[#5D24E1] w-full bg-[#EAEAEA40] p-2 rounded-sm focus:!border-[#5D24E1] focus:ring-[1px] focus:!ring-[#5D24E1]/50"
               />
             </div>
           </div>

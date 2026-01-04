@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import { LiaCommentDotsSolid } from 'react-icons/lia';
-import { SearchableSelect } from '@/components/ui/searchable-select';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useCancellationReasons, useTopCancellationReasons } from '@/services/orders';
 
 interface CancelOrderModalProps {

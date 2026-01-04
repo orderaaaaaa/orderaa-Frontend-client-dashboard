@@ -8,7 +8,7 @@ import {
   PersonalDataFormData,
 } from '@/schemas/personalData.schema';
 import Input from '@/components/ui/Input';
-import SearchableSelect from '@/app/dashboard/orders/allOrders/components/FilterSection/SearchableSelect';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 import {
   LiaBuilding,
   LiaPhoneSolid,

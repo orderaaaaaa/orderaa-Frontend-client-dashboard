@@ -35,7 +35,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useUrlFilters } from '@/hooks/useUrlFilters';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import { formatDateForUrl } from '@/utils/urlFilters';
-import { SearchableSelect } from '@/components/ui/searchable-select';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 
 import { Scan, ScanLine, ArrowUp, ArrowLeft, X } from 'lucide-react';
 

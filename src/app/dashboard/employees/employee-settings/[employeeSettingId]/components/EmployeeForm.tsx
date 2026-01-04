@@ -3,8 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { Employee } from '../types/employee';
 import Input from '@/components/ui/Input';
-import Dropdown from '@/components/ui/Dropdown';
-import SearchableSelect from '@/app/dashboard/orders/allOrders/components/FilterSection/SearchableSelect';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 import WorkHoursTimePicker from '@/components/ui/WorkHoursTimePicker';
 import { useGovernoratesQuery } from '@/services/lookups';
 import {
@@ -94,22 +93,19 @@ export default function EmployeeForm({
             صلاحية الموظف
           </span>
         </div>
-        <Dropdown
+        <SearchableSelect
           value={accessLevel || ''}
           onChange={(value) =>
             setValue('accessLevel', value, { shouldValidate: true })
           }
           options={ACCESS_LEVEL_OPTIONS}
           placeholder="اختر صلاحية الموظف"
-          selectClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 text-lg ${
+          widthClass="w-full"
+          error={errors?.accessLevel?.message}
+          triggerClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 text-lg ${
             errors?.accessLevel ? 'border-red-500' : 'border-black/16'
           } rounded text-right`}
         />
-        {errors.accessLevel && (
-          <p className="text-red-500 text-sm mt-1">
-            {errors.accessLevel.message}
-          </p>
-        )}
       </div>
 
       {/* Department */}
@@ -118,22 +114,19 @@ export default function EmployeeForm({
           <Briefcase className="w-6 h-6 text-[#5D24E1]" strokeWidth={1.5} />
           <span className="text-base md:text-lg font-normal">قسم الموظف</span>
         </div>
-        <Dropdown
+        <SearchableSelect
           value={department || ''}
           onChange={(value) =>
             setValue('department', value, { shouldValidate: true })
           }
           options={DEPARTMENT_OPTIONS}
           placeholder="اختر القسم"
-          selectClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 text-lg ${
+          widthClass="w-full"
+          error={errors?.department?.message}
+          triggerClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 text-lg ${
             errors?.department ? 'border-red-500' : 'border-black/16'
           } rounded text-right`}
         />
-        {errors.department && (
-          <p className="text-red-500 text-sm mt-1">
-            {errors.department.message}
-          </p>
-        )}
       </div>
 
       {/* Full Name & Phone */}

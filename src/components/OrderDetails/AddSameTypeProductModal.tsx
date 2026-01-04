@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { LiaTimesSolid, LiaPlusSolid, LiaMinusSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
-import { SearchableSelect } from '@/components/ui/searchable-select';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useProductVariantsOptions, SelectedVariant } from '@/services/orders';
 import { Button } from '../ui/button';
 

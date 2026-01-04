@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { LiaTimesSolid, LiaCheckSolid } from 'react-icons/lia';
 import { Button } from '../ui/button';
 import { getShippingGovernorates, getShippingCities } from '@/lib/api/lookups';
-import { SearchableSelect } from '@/components/ui/searchable-select';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useShippingCompanies } from '@/hooks';
 
 interface EditShippingModalProps {

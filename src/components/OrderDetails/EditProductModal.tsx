@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { LiaTimesSolid, LiaCheckSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
 import { useProductVariantsOptions, SelectedVariant } from '@/services/orders';
-import { SearchableSelect } from '@/components/ui/searchable-select';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { Button } from '../ui/button';
 
 interface EditProductModalProps {
