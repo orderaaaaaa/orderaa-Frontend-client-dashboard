@@ -187,7 +187,7 @@ export default function OrderCard({
 
         {/* Address */}
         <div className="flex flex-row-reverse items-center gap-2">
-          <span className="text-sm text-gray-600">{address}</span>
+          <span className="text-base font-medium text-black">{address}</span>
           <MapPinHouse
             className="w-[18px] h-[18px]"
             style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
@@ -251,7 +251,7 @@ export default function OrderCard({
                   className="w-[18px] h-[18px]"
                   style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
                 />
-                <span className="text-base text-gray-600">
+                <span className="text-base font-medium text-red-600">
                   {' '}
                   ملاحظات الالغاء: {cancelNotes}
                 </span>
