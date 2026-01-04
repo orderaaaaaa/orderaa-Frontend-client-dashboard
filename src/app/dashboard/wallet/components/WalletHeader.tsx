@@ -5,13 +5,13 @@ function WalletHeader() {
   return (
     <header>
       <h1 className="text-4xl font-semibold mb-8 text-gray-800">محفظتي</h1>
-      <div className="flex justify-between items-center bg-[#5d24e1] text-white px-10 py-5 rounded-lg">
+      <div className="flex justify-between w-1/3 items-center bg-[#5d24e1] text-white px-10 py-7 rounded-lg">
         <div className="flex gap-2">
           <LiaWalletSolid className="w-7 h-7" />
           <div className="flex flex-col gap-1">
-            <h3 className="font-semibold text-xl">الرصيد الحالي</h3>
-            <div className="flex gap-3">
-              <p className="font-medium text-[18px]">
+            <h3 className="font-semibold text-2xl">الرصيد الحالي</h3>
+            <div className="flex gap-3 items-center">
+              <p className="font-medium text-[23px]">
                 1250
                 <span className="ml-1">EGP</span>
               </p>
