@@ -27,8 +27,8 @@ export default function OrderSettingsPage() {
   } = useForm<OrderSettingsFormData>({
     resolver: zodResolver(orderSettingsSchema),
     defaultValues: {
-      canOpenShipment: false, // Updated
-      employeeCanEditContent: false, // Updated
+      canOpenShipment: false,
+      employeeCanEditContent: false,
     },
   });
 
@@ -38,8 +38,20 @@ export default function OrderSettingsPage() {
     }
   }, [settings, reset]);
 
-  const onSubmit = (data: OrderSettingsFormData) => {
-    updateSettings(data);
+  const onSubmit = async (data: OrderSettingsFormData) => {
+    const submissionData: OrderSettingsFormData = {
+      canOpenShipment: data.canOpenShipment,
+      employeeCanEditContent: data.employeeCanEditContent,
+      shippingPhoneNumber: data.shippingPhoneNumber,
+      defaultShipmentContent: data.defaultShipmentContent,
+      defaultReturnShippingCost: data.defaultReturnShippingCost,
+      autoCancelAttempts: data.autoCancelAttempts,
+    };
+
+    if (data.logo && data.logo[0] instanceof File) {
+      submissionData.logo = data.logo[0];
+    }
+    updateSettings(submissionData);
   };
 
   if (isLoading) {
@@ -52,7 +64,7 @@ export default function OrderSettingsPage() {
 
       <header className="mb-10">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-1 h-8 bg-primary rounded-full"></div>
+          <div className="w-1 h-8 bg-[#5D24E1] rounded-full"></div>
           <h1 className="text-3xl font-bold text-gray-900">اعدادات المتجر</h1>
         </div>
       </header>
