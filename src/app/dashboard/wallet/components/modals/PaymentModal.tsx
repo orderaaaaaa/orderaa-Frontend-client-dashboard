@@ -51,7 +51,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           <div className="flex justify-between items-center mb-4 pb-4 border-b border-gray-200/60">
             <span className="text-gray-600 font-medium">المبلغ المطلوب</span>
             <div className="text-left">
-              <p className="text-[#5d24e1] font-bold text-xl">
+              <p className="text-primary font-bold text-xl">
                 {plan.price.replace(' دولار', '$')}
               </p>
               <p className="text-gray-400 text-sm">{plan.subtitle}</p>
@@ -83,23 +83,21 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             <label
               key={method.id}
               className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all
-                ${
-                  paymentMethod === method.id
-                    ? 'border-[#5d24e1] bg-[#F8F5FF]'
-                    : 'border-gray-100 hover:border-gray-200'
+                ${paymentMethod === method.id
+                  ? 'border-primary bg-[#F8F5FF]'
+                  : 'border-gray-100 hover:border-gray-200'
                 }`}
             >
               <div className="flex items-center gap-3">
                 <div
                   className={`w-6 h-6 rounded-full border-2 flex items-center justify-center
-                  ${
-                    paymentMethod === method.id
-                      ? 'border-[#5d24e1]'
+                  ${paymentMethod === method.id
+                      ? 'border-primary'
                       : 'border-gray-300'
-                  }`}
+                    }`}
                 >
                   {paymentMethod === method.id && (
-                    <div className="w-3 h-3 bg-[#5d24e1] rounded-full" />
+                    <div className="w-3 h-3 bg-primary rounded-full" />
                   )}
                 </div>
                 <span className="font-semibold text-gray-800">
@@ -120,12 +118,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
         {/* Actions */}
         <div className="flex gap-4">
-          <button className="flex-1 bg-[#5d24e1] text-white py-4 rounded-2xl font-bold text-lg hover:bg-[#4a1dc4] transition-colors shadow-lg shadow-purple-200">
+          <button className="flex-1 bg-primary text-white py-4 rounded-2xl font-bold text-lg hover:bg-[#4a1dc4] transition-colors shadow-lg shadow-purple-200">
             تاكيد الدفع
           </button>
           <button
             onClick={onClose}
-            className="flex-1 bg-white border-2 border-[#5d24e1] text-[#5d24e1] py-4 rounded-2xl font-bold text-lg hover:bg-purple-50 transition-colors"
+            className="flex-1 bg-white border-2 border-primary text-primary py-4 rounded-2xl font-bold text-lg hover:bg-purple-50 transition-colors"
           >
             إلغاء الدفع
           </button>

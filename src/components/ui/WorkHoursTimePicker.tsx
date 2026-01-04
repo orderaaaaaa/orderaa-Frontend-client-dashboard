@@ -123,9 +123,8 @@ export default function WorkHoursTimePicker({
           placeholder={placeholder}
           readOnly
           style={{ direction: 'ltr', textAlign: 'right' }}
-          className={`w-full h-[46px] px-4 bg-[rgba(234,234,234,0.25)] border ${
-            error ? 'border-red-500' : 'border-black/16'
-          } rounded text-base font-normal text-black placeholder:text-black/60 cursor-pointer`}
+          className={`w-full h-[46px] px-4 bg-[rgba(234,234,234,0.25)] border ${error ? 'border-red-500' : 'border-black/16'
+            } rounded text-base font-normal text-black placeholder:text-black/60 cursor-pointer`}
         />
         {error && (
           <span
@@ -178,11 +177,10 @@ export default function WorkHoursTimePicker({
                           key={hour}
                           type="button"
                           onClick={() => setTempStartHour(hour)}
-                          className={`py-3 px-4 rounded-lg font-medium transition-all cursor-pointer ${
-                            tempStartHour === hour
-                              ? 'bg-[#5D24E1] text-white shadow-lg scale-105'
+                          className={`py-3 px-4 rounded-lg font-medium transition-all cursor-pointer ${tempStartHour === hour
+                              ? 'bg-primary text-white shadow-lg scale-105'
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
+                            }`}
                         >
                           {hour}
                         </button>
@@ -199,22 +197,20 @@ export default function WorkHoursTimePicker({
                       <button
                         type="button"
                         onClick={() => setTempStartPeriod('AM')}
-                        className={`py-4 rounded-lg font-medium transition-all cursor-pointer ${
-                          tempStartPeriod === 'AM'
-                            ? 'bg-[#5D24E1] text-white shadow-lg'
+                        className={`py-4 rounded-lg font-medium transition-all cursor-pointer ${tempStartPeriod === 'AM'
+                            ? 'bg-primary text-white shadow-lg'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
+                          }`}
                       >
                         AM (صباحاً)
                       </button>
                       <button
                         type="button"
                         onClick={() => setTempStartPeriod('PM')}
-                        className={`py-4 rounded-lg font-medium transition-all cursor-pointer ${
-                          tempStartPeriod === 'PM'
-                            ? 'bg-[#5D24E1] text-white shadow-lg'
+                        className={`py-4 rounded-lg font-medium transition-all cursor-pointer ${tempStartPeriod === 'PM'
+                            ? 'bg-primary text-white shadow-lg'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
+                          }`}
                       >
                         PM (مساءً)
                       </button>
@@ -225,9 +221,9 @@ export default function WorkHoursTimePicker({
                   <div className="mt-6 p-4 bg-purple-50 rounded-lg text-center">
                     <p className="text-sm text-gray-600 mb-1">الوقت المحدد</p>
                     {tempStartHour !== null &&
-                    tempStartPeriod !== null &&
-                    !isNaN(tempStartHour) ? (
-                      <div className="text-2xl font-bold text-[#5D24E1] flex items-center justify-center gap-1">
+                      tempStartPeriod !== null &&
+                      !isNaN(tempStartHour) ? (
+                      <div className="text-2xl font-bold text-primary flex items-center justify-center gap-1">
                         <span>{tempStartPeriod}</span>
                         <span>:</span>
                         <span>{tempStartHour}</span>
@@ -257,11 +253,10 @@ export default function WorkHoursTimePicker({
                           key={hour}
                           type="button"
                           onClick={() => setTempEndHour(hour)}
-                          className={`py-3 px-4 rounded-lg font-medium transition-all cursor-pointer ${
-                            tempEndHour === hour
-                              ? 'bg-[#5D24E1] text-white shadow-lg scale-105'
+                          className={`py-3 px-4 rounded-lg font-medium transition-all cursor-pointer ${tempEndHour === hour
+                              ? 'bg-primary text-white shadow-lg scale-105'
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
+                            }`}
                         >
                           {hour}
                         </button>
@@ -278,22 +273,20 @@ export default function WorkHoursTimePicker({
                       <button
                         type="button"
                         onClick={() => setTempEndPeriod('AM')}
-                        className={`py-4 rounded-lg font-medium transition-all cursor-pointer ${
-                          tempEndPeriod === 'AM'
-                            ? 'bg-[#5D24E1] text-white shadow-lg'
+                        className={`py-4 rounded-lg font-medium transition-all cursor-pointer ${tempEndPeriod === 'AM'
+                            ? 'bg-primary text-white shadow-lg'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
+                          }`}
                       >
                         AM (صباحاً)
                       </button>
                       <button
                         type="button"
                         onClick={() => setTempEndPeriod('PM')}
-                        className={`py-4 rounded-lg font-medium transition-all cursor-pointer ${
-                          tempEndPeriod === 'PM'
-                            ? 'bg-[#5D24E1] text-white shadow-lg'
+                        className={`py-4 rounded-lg font-medium transition-all cursor-pointer ${tempEndPeriod === 'PM'
+                            ? 'bg-primary text-white shadow-lg'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
+                          }`}
                       >
                         PM (مساءً)
                       </button>
@@ -304,9 +297,9 @@ export default function WorkHoursTimePicker({
                   <div className="mt-6 p-4 bg-purple-50 rounded-lg text-center">
                     <p className="text-sm text-gray-600 mb-1">الوقت المحدد</p>
                     {tempEndHour !== null &&
-                    tempEndPeriod !== null &&
-                    !isNaN(tempEndHour) ? (
-                      <div className="text-2xl font-bold text-[#5D24E1] flex items-center justify-center gap-1">
+                      tempEndPeriod !== null &&
+                      !isNaN(tempEndHour) ? (
+                      <div className="text-2xl font-bold text-primary flex items-center justify-center gap-1">
                         <span>{tempEndPeriod}</span>
                         <span>:</span>
                         <span>{tempEndHour}</span>
@@ -356,11 +349,10 @@ export default function WorkHoursTimePicker({
                 type="button"
                 onClick={handleApply}
                 disabled={!isComplete}
-                className={`px-8 py-3 rounded-lg font-medium transition-colors shadow-lg ${
-                  isComplete
-                    ? 'bg-[#5D24E1] text-white hover:bg-[#4a1cb8] cursor-pointer'
+                className={`px-8 py-3 rounded-lg font-medium transition-colors shadow-lg ${isComplete
+                    ? 'bg-primary text-white hover:bg-[#4a1cb8] cursor-pointer'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
-                }`}
+                  }`}
               >
                 تطبيق
               </button>

@@ -27,7 +27,7 @@ function CustomersDetailsShare({
     <div className="flex flex-wrap gap-2 p-3 md:p-5 bg-[#f4f4f4] mb-5 rounded-md">
       <button
         onClick={handleWhatsappClick}
-        className="flex-1 min-w-[140px] justify-center cursor-pointer flex gap-2 items-center bg-[#5d24e1] text-white px-4 py-2 rounded-md text-sm md:text-base font-medium hover:bg-[#4a1cb5] transition-colors"
+        className="flex-1 min-w-[140px] justify-center cursor-pointer flex gap-2 items-center bg-primary text-white px-4 py-2 rounded-md text-sm md:text-base font-medium hover:bg-[#4a1cb5] transition-colors"
       >
         <LiaWhatsapp className="text-xl" /> <span>واتساب</span>
       </button>

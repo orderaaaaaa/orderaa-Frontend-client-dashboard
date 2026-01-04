@@ -236,7 +236,7 @@ export function OrderActionModals({
               value={newPackagingNote}
               onChange={(e) => setNewPackagingNote(e.target.value)}
               placeholder="أدخل ملاحظة للتغليف..."
-              className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base min-h-[120px] resize-none focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
+              className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base min-h-[120px] resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
         </div>

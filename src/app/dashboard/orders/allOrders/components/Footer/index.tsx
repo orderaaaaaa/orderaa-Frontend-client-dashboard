@@ -101,7 +101,7 @@ const Footer: React.FC<FooterProps> = ({
                   size="sm"
                   onClick={() => onPageChange(page as number)}
                   className={`h-8 w-8 p-0 cursor-pointer ${page === currentPage
-                    ? 'bg-[#5D24E1] text-white hover:bg-purple-700'
+                    ? 'bg-primary text-white hover:bg-purple-700'
                     : 'text-[#682fee] hover:bg-gray-50'
                     }`}
                 >

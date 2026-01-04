@@ -48,12 +48,12 @@ export function ShippingSection({
   return (
     <div className={`flex flex-col justify-start gap-2 ${className}`}>
       <div className="flex justify-between items-center">
-        <h2 className="text-[#5D24E1] font-semibold">بيانات الشحن</h2>
+        <h2 className="text-primary font-semibold">بيانات الشحن</h2>
         <button
           onClick={onEditClick}
           className="cursor-pointer p-1 hover:bg-purple-100 rounded transition-colors"
         >
-          <LiaEditSolid className="w-4 h-4 text-[#5D24E1]" />
+          <LiaEditSolid className="w-4 h-4 text-primary" />
         </button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 overflow-hidden">

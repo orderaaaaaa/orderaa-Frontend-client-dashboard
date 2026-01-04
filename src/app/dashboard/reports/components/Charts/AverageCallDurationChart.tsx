@@ -106,7 +106,7 @@ export default function AverageCallDurationChart() {
                   x={barWidth / 2}
                   y={bottomY + 35}
                   textAnchor="middle"
-                  className="fill-[#5D24E1] font-semibold text-[10px] sm:text-[12px] md:text-[14px]"
+                  className="fill-primary font-semibold text-[10px] sm:text-[12px] md:text-[14px]"
                 >
                   {d.label}
                 </text>

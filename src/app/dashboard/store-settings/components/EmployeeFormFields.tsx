@@ -50,7 +50,7 @@ export default function OrderSettingsFields({
                   peer peer-checked:after:translate-x-full peer-checked:after:border-white 
                   after:content-[''] after:absolute after:top-0 after:left-0 after:bg-white 
                   after:border-gray-300 after:border after:rounded-full after:h-[30px] after:w-[30px] 
-                  after:transition-all peer-checked:bg-[#5D24E1] 
+                  after:transition-all peer-checked:bg-primary 
                   rtl:peer-checked:after:-translate-x-full rtl:after:left-auto rtl:after:right-0
                   scale-75 md:scale-100 origin-right"
       />
@@ -63,7 +63,7 @@ export default function OrderSettingsFields({
         {/* حقل رقم الهاتف */}
         <div className="w-full flex flex-col gap-4">
           <div className="w-full flex items-start gap-2">
-            <Phone className="w-6 h-6 text-[#5D24E1] mt-0.5" />
+            <Phone className="w-6 h-6 text-primary mt-0.5" />
             <div>
               <h3 className="text-lg font-semibold leading-tight">
                 رقم الهاتف
@@ -85,7 +85,7 @@ export default function OrderSettingsFields({
         {/* حقل فتح الشحنة */}
         <div className="flex items-start justify-between border-b border-gray-100 pb-6">
           <div className="flex items-start gap-3">
-            <PackageOpen className="w-6 h-6 text-[#5D24E1] mt-0.5" />
+            <PackageOpen className="w-6 h-6 text-primary mt-0.5" />
             <div>
               <h3 className="text-lg font-semibold leading-tight">
                 فتح الشحنة
@@ -102,7 +102,7 @@ export default function OrderSettingsFields({
         <div className="flex flex-col gap-4 border-b border-gray-100 pb-6">
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-3">
-              <Edit3 className="w-6 h-6 text-[#5D24E1] mt-0.5" />
+              <Edit3 className="w-6 h-6 text-primary mt-0.5" />
               <div>
                 <h3 className="text-lg font-semibold leading-tight">
                   تعديل محتوي الشحنة
@@ -116,12 +116,11 @@ export default function OrderSettingsFields({
           </div>
 
           <div
-            className={`transition-all duration-300 overflow-hidden ${
-              !canEditOrder ? 'max-h-40 opacity-100 mt-2' : 'max-h-0 opacity-0'
-            }`}
+            className={`transition-all duration-300 overflow-hidden ${!canEditOrder ? 'max-h-40 opacity-100 mt-2' : 'max-h-0 opacity-0'
+              }`}
           >
             <div className="flex items-center gap-2 mb-2">
-              <FilePenLine className="w-5 h-5 text-[#5D24E1]" />
+              <FilePenLine className="w-5 h-5 text-primary" />
               <span className="text-base">اسم المنتج</span>
             </div>
             <Input
@@ -137,7 +136,7 @@ export default function OrderSettingsFields({
         {/* حقل تكلفة مرتجع الشحن */}
         <div className="w-full flex flex-col gap-4 border-b border-gray-100 pb-6">
           <div className="w-full flex items-start gap-2">
-            <RotateCcw className="w-6 h-6 text-[#5D24E1] mt-0.5" />
+            <RotateCcw className="w-6 h-6 text-primary mt-0.5" />
             <div>
               <h3 className="text-lg font-semibold leading-tight">
                 تكلفة مرتجع الشحن
@@ -159,7 +158,7 @@ export default function OrderSettingsFields({
         {/* الحقل الجديد: عدد المرات المتبقية لإلغاء الطلب */}
         <div className="w-full flex flex-col gap-4">
           <div className="w-full flex items-start gap-2">
-            <CopyX className="w-6 h-6 text-[#5D24E1] mt-0.5" />
+            <CopyX className="w-6 h-6 text-primary mt-0.5" />
             <div>
               <h3 className="text-lg font-semibold leading-tight">
                 الالغاء التلقائي للطلب{' '}

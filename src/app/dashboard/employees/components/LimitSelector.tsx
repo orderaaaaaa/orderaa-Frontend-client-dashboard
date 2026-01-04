@@ -7,7 +7,7 @@ const LIMIT_OPTIONS = [10, 15, 20, 25];
 export const LimitSelector = () => {
   const [isLimitOpen, setIsLimitOpen] = useState(false);
   const limitRef = useRef<HTMLDivElement | null>(null);
-  
+
   const limit = useEmployeesStore((state) => state.filterSelections.limit);
   const setLimit = useEmployeesStore((state) => state.setLimit);
   const setCurrentPage = useEmployeesStore((state) => state.setCurrentPage);
@@ -36,13 +36,12 @@ export const LimitSelector = () => {
     <div ref={limitRef} className="relative w-fit">
       <div
         onClick={() => setIsLimitOpen((prev) => !prev)}
-        className="bg-[#5D24E1] w-15 py-1 px-3 rounded-full text-white flex items-center justify-center cursor-pointer select-none gap-2"
+        className="bg-primary w-15 py-1 px-3 rounded-full text-white flex items-center justify-center cursor-pointer select-none gap-2"
       >
         {limit}
         <RxChevronUp
-          className={`transition-transform ${
-            isLimitOpen ? 'rotate-180' : ''
-          }`}
+          className={`transition-transform ${isLimitOpen ? 'rotate-180' : ''
+            }`}
         />
       </div>
 
@@ -52,7 +51,7 @@ export const LimitSelector = () => {
             <div
               key={option}
               onClick={() => handleSelectLimit(option)}
-              className="text-[#5D24E1] text-center py-1 cursor-pointer hover:bg-[#f1eefa]"
+              className="text-primary text-center py-1 cursor-pointer hover:bg-[#f1eefa]"
             >
               {option}
             </div>

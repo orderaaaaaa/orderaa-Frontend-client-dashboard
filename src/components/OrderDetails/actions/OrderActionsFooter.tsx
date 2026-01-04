@@ -80,11 +80,11 @@ export function OrderActionsFooter({
             variant="outline"
             onClick={onNavigatePrevious}
             disabled={isNavigatingPrevious || !onNavigatePrevious}
-            className="w-10 h-10 p-0 rounded-full border-2 border-gray-300 hover:border-[#5D24E1] hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-10 h-10 p-0 rounded-full border-2 border-gray-300 hover:border-primary hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             title="الطلب السابق"
           >
             {isNavigatingPrevious ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#5D24E1]"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
             ) : (
               <LiaAngleRightSolid className="w-5 h-5 text-gray-600" />
             )}
@@ -94,11 +94,11 @@ export function OrderActionsFooter({
             variant="outline"
             onClick={onNavigateNext}
             disabled={isNavigatingNext || !onNavigateNext}
-            className="w-10 h-10 p-0 rounded-full border-2 border-gray-300 hover:border-[#5D24E1] hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-10 h-10 p-0 rounded-full border-2 border-gray-300 hover:border-primary hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             title="الطلب التالي"
           >
             {isNavigatingNext ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#5D24E1]"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
             ) : (
               <LiaAngleLeftSolid className="w-5 h-5 text-gray-600" />
             )}
@@ -112,7 +112,7 @@ export function OrderActionsFooter({
                 variant="default"
                 onClick={onConfirm}
                 disabled={isLockedByOther}
-                className="py-2 px-10 rounded-2xl bg-[#5D24E1] text-white text-sm font-bold hover:bg-[#4B1BC4] transition-all duration-700 hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                className="py-2 px-10 rounded-2xl bg-primary text-white text-sm font-bold hover:bg-[#4B1BC4] transition-all duration-700 hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 <LiaCheckCircle className="w-5 h-5" />
                 تأكيد
@@ -124,7 +124,7 @@ export function OrderActionsFooter({
                 variant="outline"
                 onClick={handleFollowUpToggle}
                 disabled={isLockedByOther}
-                className="py-2 px-10 border-2 rounded-2xl border-[#5D24E1] text-[#5D24E1] text-sm font-bold hover:bg-purple-50 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="py-2 px-10 border-2 rounded-2xl border-primary text-primary text-sm font-bold hover:bg-purple-50 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <LiaCommentDotsSolid className="w-5 h-5" />
                 متابعة
@@ -137,12 +137,11 @@ export function OrderActionsFooter({
               variant="ghost"
               onClick={handleActionsToggle}
               disabled={isLockedByOther}
-              className="w-9 h-9 p-0 rounded-full border-2 border-[#5D24E1] hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-9 h-9 p-0 rounded-full border-2 border-primary hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <LiaAngleDownSolid
-                className={`w-5 h-5 text-[#5D24E1] transition-all ${
-                  actionsDropdown.isOpen ? 'rotate-180' : ''
-                }`}
+                className={`w-5 h-5 text-primary transition-all ${actionsDropdown.isOpen ? 'rotate-180' : ''
+                  }`}
               />
             </Button>
           </div>

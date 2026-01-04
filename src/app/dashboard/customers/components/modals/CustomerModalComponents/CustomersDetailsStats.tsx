@@ -9,7 +9,7 @@ const StatsTab: React.FC<StatsTabProps> = (props) => {
     <div className="mb-8">
       <div className="mb-1">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-1 h-8 bg-[#5D24E1] rounded-full"></div>
+          <div className="w-1 h-8 bg-primary rounded-full"></div>
           <h1 className="text-lg font-bold text-gray-900">الأحصائيات</h1>
         </div>
       </div>

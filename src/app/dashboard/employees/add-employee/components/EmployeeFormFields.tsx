@@ -59,7 +59,7 @@ export default function EmployeeFormFields({
             }}
           >
             <User
-              className="w-6 h-6 text-[#5D24E1] flex-shrink-0"
+              className="w-6 h-6 text-primary flex-shrink-0"
               strokeWidth={1.5}
             />
             <span
@@ -79,9 +79,8 @@ export default function EmployeeFormFields({
               placeholder="اختر صلاحية الموظف"
               widthClass="w-full"
               error={errors?.accessLevel?.message}
-              triggerClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 text-lg ${
-                errors?.accessLevel ? 'border-red-500' : 'border-black/16'
-              } rounded text-right text-base font-normal text-black`}
+              triggerClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 text-lg ${errors?.accessLevel ? 'border-red-500' : 'border-black/16'
+                } rounded text-right text-base font-normal text-black`}
             />
           </div>
         </div>
@@ -101,7 +100,7 @@ export default function EmployeeFormFields({
             }}
           >
             <User
-              className="w-6 h-6 text-[#5D24E1] flex-shrink-0"
+              className="w-6 h-6 text-primary flex-shrink-0"
               strokeWidth={1.5}
             />
             <span
@@ -121,9 +120,8 @@ export default function EmployeeFormFields({
               placeholder="اختر القسم"
               widthClass="w-full"
               error={errors?.department?.message}
-              triggerClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 text-lg ${
-                errors?.department ? 'border-red-500' : 'border-black/16'
-              } rounded text-right text-base font-normal`}
+              triggerClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 text-lg ${errors?.department ? 'border-red-500' : 'border-black/16'
+                } rounded text-right text-base font-normal`}
             />
           </div>
         </div>
@@ -148,7 +146,7 @@ export default function EmployeeFormFields({
               }}
             >
               <Briefcase
-                className="w-6 h-6 text-[#5D24E1] flex-shrink-0"
+                className="w-6 h-6 text-primary flex-shrink-0"
                 strokeWidth={1.5}
               />
               <span
@@ -186,7 +184,7 @@ export default function EmployeeFormFields({
               }}
             >
               <Phone
-                className="w-6 h-6 text-[#5D24E1] flex-shrink-0"
+                className="w-6 h-6 text-primary flex-shrink-0"
                 strokeWidth={1.5}
               />
               <span
@@ -236,7 +234,7 @@ export default function EmployeeFormFields({
               }}
             >
               <Mail
-                className="w-6 h-6 text-[#5D24E1] flex-shrink-0"
+                className="w-6 h-6 text-primary flex-shrink-0"
                 strokeWidth={1.5}
               />
               <span
@@ -281,7 +279,7 @@ export default function EmployeeFormFields({
               }}
             >
               <MapPin
-                className="w-6 h-6 text-[#5D24E1] flex-shrink-0"
+                className="w-6 h-6 text-primary flex-shrink-0"
                 strokeWidth={1.5}
               />
               <span
@@ -334,7 +332,7 @@ export default function EmployeeFormFields({
               }}
             >
               <Lock
-                className="w-6 h-6 text-[#5D24E1] flex-shrink-0"
+                className="w-6 h-6 text-primary flex-shrink-0"
                 strokeWidth={1.5}
               />
               <span
@@ -372,7 +370,7 @@ export default function EmployeeFormFields({
               }}
             >
               <Lock
-                className="w-6 h-6 text-[#5D24E1] flex-shrink-0"
+                className="w-6 h-6 text-primary flex-shrink-0"
                 strokeWidth={1.5}
               />
               <span
@@ -415,7 +413,7 @@ export default function EmployeeFormFields({
               }}
             >
               <Clock
-                className="w-6 h-6 text-[#5D24E1] flex-shrink-0"
+                className="w-6 h-6 text-primary flex-shrink-0"
                 strokeWidth={1.5}
               />
               <span

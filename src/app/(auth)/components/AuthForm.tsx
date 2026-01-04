@@ -49,7 +49,7 @@ export default function AuthForm({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-[#5D24E1] text-white py-2.5 rounded-lg transition disabled:opacity-60"
+            className="w-full bg-primary text-white py-2.5 rounded-lg transition disabled:opacity-60"
           >
             {isSubmitting ? submitButtonLoadingText : submitButtonText}
           </button>

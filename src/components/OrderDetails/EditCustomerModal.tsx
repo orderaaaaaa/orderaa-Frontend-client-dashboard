@@ -128,7 +128,7 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
                 value={formData.name}
                 onChange={handleInputChange}
                 placeholder="محمد بدر مصطفى"
-                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
+                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
 
@@ -143,7 +143,7 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
                 value={formData.phoneNumber}
                 onChange={handleInputChange}
                 placeholder="01127454951"
-                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
+                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
           </div>
@@ -161,7 +161,7 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
                 value={formData.altPhone}
                 onChange={handleInputChange}
                 placeholder="01127454951"
-                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
+                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
 
@@ -176,7 +176,7 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
                 value={formData.governorate}
                 onChange={handleInputChange}
                 placeholder="القاهرة"
-                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
+                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
           </div>
@@ -194,7 +194,7 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
                 value={formData.city}
                 onChange={handleInputChange}
                 placeholder="مدينة نصر"
-                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
+                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
 
@@ -209,7 +209,7 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
                 value={formData.address}
                 onChange={handleInputChange}
                 placeholder="شارع 15, مدينة نصر"
-                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
+                className="w-full h-[46px] px-4 rounded-[38px] border border-[#ECECEC] text-right text-lg text-[#5F5E5E] bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
           </div>
@@ -228,7 +228,7 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
             <Button
               onClick={handleSave}
               disabled={!hasChanges || isSubmitting}
-              className="w-[146px] h-[37px] bg-[#5D24E1] border-[1.5px] border-[#5D24E1] rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-[146px] h-[37px] bg-primary border-[1.5px] border-primary rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <LiaCheckSolid className="w-5 h-5 text-white" />
               <span className="text-lg font-bold text-white">حفظ</span>

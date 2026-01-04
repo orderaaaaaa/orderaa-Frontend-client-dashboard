@@ -25,7 +25,7 @@ export function ErrorModal({
     }
   };
 
-  
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
@@ -66,7 +66,7 @@ export function ErrorModal({
           <Button
             variant="outline"
             onClick={onClose}
-            className="w-[146px] h-[37px] bg-[#5D24E1] border-[1.5px] border-[#5D24E1] rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors"
+            className="w-[146px] h-[37px] bg-primary border-[1.5px] border-primary rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors"
           >
             <span className="text-lg font-bold text-white">إغلاق</span>
           </Button>

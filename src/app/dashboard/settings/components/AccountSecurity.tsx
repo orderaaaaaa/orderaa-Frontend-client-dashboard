@@ -56,7 +56,7 @@ export default function AccountSecurity() {
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
         <div className="p-4 bg-[#5D24E114] rounded flex items-center justify-center relative">
-          <FaShieldAlt className="w-5 h-5 text-[#5D24E1]" />
+          <FaShieldAlt className="w-5 h-5 text-primary" />
         </div>
         <h2 className="text-2xl font-medium text-right">امان الحساب</h2>
       </div>
@@ -74,7 +74,7 @@ export default function AccountSecurity() {
                 alignItems: 'center',
               }}
             >
-              <LiaLockSolid className="w-6 h-6 text-[#5D24E1] flex-shrink-0" />
+              <LiaLockSolid className="w-6 h-6 text-primary flex-shrink-0" />
               <span
                 className="text-base md:text-xl font-medium text-right"
                 style={{ textAlign: 'right' }}
@@ -106,7 +106,7 @@ export default function AccountSecurity() {
                 alignItems: 'center',
               }}
             >
-              <LiaLockSolid className="w-6 h-6 text-[#5D24E1] flex-shrink-0" />
+              <LiaLockSolid className="w-6 h-6 text-primary flex-shrink-0" />
               <span
                 className="text-base md:text-xl font-medium text-right"
                 style={{ textAlign: 'right' }}
@@ -138,7 +138,7 @@ export default function AccountSecurity() {
                 alignItems: 'center',
               }}
             >
-              <LiaLockSolid className="w-6 h-6 text-[#5D24E1] flex-shrink-0" />
+              <LiaLockSolid className="w-6 h-6 text-primary flex-shrink-0" />
               <span
                 className="text-base md:text-xl font-medium text-right"
                 style={{ textAlign: 'right' }}
@@ -170,11 +170,10 @@ export default function AccountSecurity() {
           <button
             type="submit"
             disabled={!hasAllValues || isLoading}
-            className={`px-12 py-2 text-lg rounded-lg font-medium transition-colors ${
-              hasAllValues && !isLoading
-                ? 'bg-[#5D24E1] text-white cursor-pointer'
+            className={`px-12 py-2 text-lg rounded-lg font-medium transition-colors ${hasAllValues && !isLoading
+                ? 'bg-primary text-white cursor-pointer'
                 : 'bg-[#c4c4c4] text-white cursor-not-allowed'
-            }`}
+              }`}
           >
             {isLoading ? 'جاري التحديث...' : 'تحديث كلمة المرور'}
           </button>

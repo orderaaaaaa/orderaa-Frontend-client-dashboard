@@ -11,7 +11,7 @@ function WalletHeader() {
       {/* Changed to 1 column on mobile, 2 columns on medium screens and up */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Wallet Card */}
-        <div className="flex justify-between items-center bg-[#5d24e1] text-white px-5 md:px-10 py-7 rounded-lg">
+        <div className="flex justify-between items-center bg-primary text-white px-5 md:px-10 py-7 rounded-lg">
           <div className="flex gap-2">
             <LiaWalletSolid className="w-7 h-7" />
             <div className="flex flex-col gap-1">

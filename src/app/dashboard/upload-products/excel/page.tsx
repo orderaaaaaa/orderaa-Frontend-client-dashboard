@@ -23,7 +23,7 @@ function Exel() {
       </div>
       {downloaded && (
         <div className="flex w-[304px] h-[41px] items-center gap-4 px-6 mr-6 mt-3 shadow-sm rounded-lg bg-white font-semibold text-lg">
-          <CircleCheck className="w-6 h-6 text-[#5D24E1]" />
+          <CircleCheck className="w-6 h-6 text-primary" />
           تم تنزيل القالب بنجاح
         </div>
       )}

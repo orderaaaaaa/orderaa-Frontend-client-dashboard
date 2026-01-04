@@ -28,7 +28,7 @@ export default function NotFound() {
                   <div className="w-[120%] h-[120%] border-4 border-primary rounded-full animate-spin-slow opacity-40" />
                 </div> */}
               </span>
-              <span className="inline-block text-[#5D24E1] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+              <span className="inline-block text-primary animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
                 4
               </span>
             </h1>
@@ -59,7 +59,7 @@ export default function NotFound() {
           <Button
             asChild
             size="lg"
-            className="min-w-[200px] group text-xl bg-[#5d24e1] hover:bg-[#6b33ee]"
+            className="min-w-[200px] group text-xl bg-primary hover:bg-[#6b33ee]"
           >
             <Link href="/dashboard">
               <Home className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />

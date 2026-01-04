@@ -88,7 +88,7 @@ export default function EmployeeForm({
       {/* Access Level */}
       <div className="w-full flex flex-col items-end gap-2">
         <div className="flex items-center gap-2 mb-2 justify-start w-full">
-          <User className="w-6 h-6 text-[#5D24E1]" strokeWidth={1.5} />
+          <User className="w-6 h-6 text-primary" strokeWidth={1.5} />
           <span className="text-base md:text-lg font-normal">
             صلاحية الموظف
           </span>
@@ -102,16 +102,15 @@ export default function EmployeeForm({
           placeholder="اختر صلاحية الموظف"
           widthClass="w-full"
           error={errors?.accessLevel?.message}
-          triggerClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 text-lg ${
-            errors?.accessLevel ? 'border-red-500' : 'border-black/16'
-          } rounded text-right`}
+          triggerClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 text-lg ${errors?.accessLevel ? 'border-red-500' : 'border-black/16'
+            } rounded text-right`}
         />
       </div>
 
       {/* Department */}
       <div className="w-full flex flex-col items-end gap-2">
         <div className="flex items-center gap-2 mb-2 justify-start w-full">
-          <Briefcase className="w-6 h-6 text-[#5D24E1]" strokeWidth={1.5} />
+          <Briefcase className="w-6 h-6 text-primary" strokeWidth={1.5} />
           <span className="text-base md:text-lg font-normal">قسم الموظف</span>
         </div>
         <SearchableSelect
@@ -123,9 +122,8 @@ export default function EmployeeForm({
           placeholder="اختر القسم"
           widthClass="w-full"
           error={errors?.department?.message}
-          triggerClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 text-lg ${
-            errors?.department ? 'border-red-500' : 'border-black/16'
-          } rounded text-right`}
+          triggerClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 text-lg ${errors?.department ? 'border-red-500' : 'border-black/16'
+            } rounded text-right`}
         />
       </div>
 
@@ -133,7 +131,7 @@ export default function EmployeeForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <User className="w-6 h-6 text-[#5D24E1]" strokeWidth={1.5} />
+            <User className="w-6 h-6 text-primary" strokeWidth={1.5} />
             <span className="text-base md:text-lg font-normal">
               الاسم الكامل
             </span>
@@ -149,7 +147,7 @@ export default function EmployeeForm({
         </div>
         <div>
           <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <Phone className="w-6 h-6 text-[#5D24E1]" strokeWidth={1.5} />
+            <Phone className="w-6 h-6 text-primary" strokeWidth={1.5} />
             <span className="text-base md:text-lg font-normal">رقم الهاتف</span>
           </div>
           <Input
@@ -173,7 +171,7 @@ export default function EmployeeForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <Mail className="w-6 h-6 text-[#5D24E1]" strokeWidth={1.5} />
+            <Mail className="w-6 h-6 text-primary" strokeWidth={1.5} />
             <span className="text-base md:text-lg font-normal">
               البريد الإلكتروني
             </span>
@@ -196,7 +194,7 @@ export default function EmployeeForm({
         </div>
         <div>
           <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <MapPin className="w-6 h-6 text-[#5D24E1]" strokeWidth={1.5} />
+            <MapPin className="w-6 h-6 text-primary" strokeWidth={1.5} />
             <span className="text-base md:text-lg font-normal">المحافظة</span>
           </div>
           <SearchableSelect
@@ -214,7 +212,7 @@ export default function EmployeeForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <Lock className="w-6 h-6 text-[#5D24E1]" strokeWidth={1.5} />
+            <Lock className="w-6 h-6 text-primary" strokeWidth={1.5} />
             <span className="text-base md:text-lg font-normal">
               كلمة المرور
             </span>
@@ -233,7 +231,7 @@ export default function EmployeeForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <Lock className="w-6 h-6 text-[#5D24E1]" strokeWidth={1.5} />
+            <Lock className="w-6 h-6 text-primary" strokeWidth={1.5} />
             <span className="text-base md:text-lg font-normal">
               تاكيد كلمة المرور
             </span>
@@ -253,7 +251,7 @@ export default function EmployeeForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <Clock className="w-6 h-6 text-[#5D24E1]" strokeWidth={1.5} />
+            <Clock className="w-6 h-6 text-primary" strokeWidth={1.5} />
             <span className="text-base md:text-lg font-normal">
               ساعات العمل
             </span>
@@ -274,7 +272,7 @@ export default function EmployeeForm({
         <button
           type="submit"
           disabled={isLoading}
-          className="px-6 py-2 bg-[#5D24E1] text-white rounded-md cursor-pointer disabled:opacity-50"
+          className="px-6 py-2 bg-primary text-white rounded-md cursor-pointer disabled:opacity-50"
         >
           {isLoading ? 'يتم الحفظ...' : 'حفظ التغيرات'}
         </button>

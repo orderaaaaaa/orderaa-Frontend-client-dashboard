@@ -125,7 +125,7 @@ export default function BaseModal({
                 disabled={isLoading || confirmDisabled}
                 className={
                   confirmButtonClassName ||
-                  'w-[146px] h-[37px] bg-[#5D24E1] border-[1.5px] border-[#5D24E1] rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  'w-[146px] h-[37px] bg-primary border-[1.5px] border-primary rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 }
               >
                 <span className="text-lg font-bold text-white">

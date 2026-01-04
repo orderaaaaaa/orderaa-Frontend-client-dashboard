@@ -29,12 +29,12 @@ const GlassButton: React.FC<GlassButtonProps> = ({
         rounded-3xl 
         px-5 py-2.5 
         text-xs font-bold  
-        text-[#5D24E1] 
+        text-primary 
 
         backdrop-blur-md 
-        border-[1.5px] border-[#5D24E1]
+        border-[1.5px] border-primary
         shadow-lg 
-        bg-transparent hover:bg-[#5D24E1]
+        bg-transparent hover:bg-primary
         hover:text-[#FFFFFF] 
         transition-all duration-300
         [&_img]:transition-all [&_img]:duration-300 group-hover:[&_img]:invert group-hover:[&_img]:brightness-0 group-hover:[&_img]:contrast-200 group-hover:[&_img]:saturate-0

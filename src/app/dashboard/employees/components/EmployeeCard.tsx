@@ -90,7 +90,7 @@ export const EmployeeCard = memo(function EmployeeCard({
             className="w-20 h-20 rounded-full border-2 flex items-center justify-center"
             style={{ borderColor: borderColor }}
           >
-            <User size={32} className="text-[#5d24e1]" strokeWidth={2} />
+            <User size={32} className="text-primary" strokeWidth={2} />
           </div>
 
           <div
@@ -163,8 +163,8 @@ export const EmployeeCard = memo(function EmployeeCard({
         <div className="col-span-2 grid grid-cols-2 gap-4">
           <a
             href={`tel:${normalizedPhone}`}
-            className="bg-white hover:bg-gray-50 text-[#5D24E1]
-             border-2 border-[#5D24E1] rounded-2xl
+            className="bg-white hover:bg-gray-50 text-primary
+             border-2 border-primary rounded-2xl
              py-3 lg:px-4
              flex items-center justify-center gap-2
              min-w-0 overflow-hidden
@@ -178,8 +178,8 @@ export const EmployeeCard = memo(function EmployeeCard({
 
           <a
             href={`mailto:${employee.email}`}
-            className="bg-white hover:bg-gray-50 text-[#5D24E1]
-             border-2 border-[#5D24E1] rounded-2xl
+            className="bg-white hover:bg-gray-50 text-primary
+             border-2 border-primary rounded-2xl
              py-3 lg:px-4
              flex items-center justify-center gap-2
              min-w-0 overflow-hidden
@@ -197,7 +197,7 @@ export const EmployeeCard = memo(function EmployeeCard({
           href={`https://wa.me/+2${normalizedPhone}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="col-span-2 bg-[#5d24e1] hover:bg-[#682fee] text-white rounded-2xl py-3 px-5 flex items-center justify-center gap-2 transition-colors font-medium"
+          className="col-span-2 bg-primary hover:bg-[#682fee] text-white rounded-2xl py-3 px-5 flex items-center justify-center gap-2 transition-colors font-medium"
         >
           <span className="text-xl">WhatsApp</span>
           <MessageCircle size={25} />

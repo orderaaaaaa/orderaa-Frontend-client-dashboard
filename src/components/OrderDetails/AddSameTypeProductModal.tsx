@@ -151,7 +151,7 @@ export default function AddSameTypeProductModal({
                     type="button"
                     onClick={incrementQuantity}
                     disabled={quantity >= 99}
-                    className="w-10 h-10 rounded-full bg-[#5D24E1] hover:bg-[#4B1BC4] flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-10 h-10 rounded-full bg-primary hover:bg-[#4B1BC4] flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <LiaPlusSolid className="w-5 h-5 text-white" />
                   </button>
@@ -207,7 +207,7 @@ export default function AddSameTypeProductModal({
           <Button
             onClick={handleSave}
             disabled={!isFormValid}
-            className="w-[146px] h-[37px] bg-[#5D24E1] border-[1.5px] border-[#5D24E1] rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-[146px] h-[37px] bg-primary border-[1.5px] border-primary rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <LiaPlusSolid className="w-5 h-5 text-white" />
             <span className="text-lg font-bold text-white">إضافة</span>

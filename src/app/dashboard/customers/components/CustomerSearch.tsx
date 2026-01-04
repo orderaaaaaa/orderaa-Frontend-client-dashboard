@@ -100,11 +100,10 @@ export default function CustomerSearch({
           {/* Filter Toggle Button */}
           <button
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className={`flex items-center justify-center gap-2 px-6 md:px-12 py-2.5 rounded-lg transition-all cursor-pointer border ${
-              isFilterOpen
-                ? 'bg-[#5d24e1] text-white shadow-md border-[#5d24e1]'
+            className={`flex items-center justify-center gap-2 px-6 md:px-12 py-2.5 rounded-lg transition-all cursor-pointer border ${isFilterOpen
+                ? 'bg-primary text-white shadow-md border-primary'
                 : 'border-gray-300 hover:bg-gray-50 text-gray-700'
-            }`}
+              }`}
           >
             <SlidersVertical className="w-5 h-5" />
             <span className="font-medium whitespace-nowrap">فلاتر متقدمة</span>
@@ -117,7 +116,7 @@ export default function CustomerSearch({
               value={localSearch}
               onChange={handleSearchChange}
               placeholder="البحث بالاسم، رقم الهاتف، أو الكود..."
-              className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-[#5d24e1] focus:border-transparent text-right placeholder-gray-400"
+              className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-right placeholder-gray-400"
               dir="rtl"
             />
             {localSearch && (
@@ -133,7 +132,7 @@ export default function CustomerSearch({
                 <XIcon className="w-4 h-4" />
               </button>
             )}
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#5d24e1]" />
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary" />
           </div>
         </div>
       </div>

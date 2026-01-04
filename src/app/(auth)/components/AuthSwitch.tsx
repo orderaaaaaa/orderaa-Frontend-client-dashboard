@@ -11,14 +11,14 @@ export default function AuthSwitch({ goTo }: AuthSwitchProps) {
       {goTo === 'signin' ? (
         <>
           مسجل بالفعل؟ {``}
-          <Link href="/signin" className="text-[#5D24E1] hover:underline">
+          <Link href="/signin" className="text-primary hover:underline">
             سجل الدخول
           </Link>
         </>
       ) : (
         <>
           ليس لديك حساب؟ {``}
-          <Link href="/signup" className="text-[#5D24E1] hover:underline">
+          <Link href="/signup" className="text-primary hover:underline">
             إنشاء حساب
           </Link>
         </>

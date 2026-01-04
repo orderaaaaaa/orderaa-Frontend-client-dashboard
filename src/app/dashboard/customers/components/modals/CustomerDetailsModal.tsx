@@ -40,7 +40,7 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
         <div className="bg-white rounded-xl shadow-xl w-full max-w-6xl h-[60vh] flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5D24E1]"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
       </div>
     );

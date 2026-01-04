@@ -19,7 +19,7 @@ function TapsCustomer() {
           className="relative w-full max-w-[240px] mx-auto cursor-pointer group"
         >
           {/* Gradient border wrapper */}
-          <div className="p-[2px] rounded-full bg-gradient-to-r from-[#5D24E1] to-[#B8A3EB] transition-transform duration-200 group-hover:scale-[1.02]">
+          <div className="p-[2px] rounded-full bg-gradient-to-r from-primary to-[#B8A3EB] transition-transform duration-200 group-hover:scale-[1.02]">
             {/* Inner content */}
             <div className="flex items-center justify-center gap-2 rounded-full bg-[#efebfa] py-2 px-5 sm:px-6">
               <Image
@@ -29,7 +29,7 @@ function TapsCustomer() {
                 height={24}
                 className="object-contain"
               />
-              <span className="font-medium text-[13px] sm:text-[14px] text-[#5D24E1] whitespace-nowrap">
+              <span className="font-medium text-[13px] sm:text-[14px] text-primary whitespace-nowrap">
                 {title}
               </span>
             </div>

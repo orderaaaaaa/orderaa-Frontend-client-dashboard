@@ -103,7 +103,7 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             className={cn(
               'w-full h-10 justify-start text-right font-normal',
               'border border-[#CED4DA] rounded-[4px] bg-white',
-              'hover:bg-gray-50 focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent',
+              'hover:bg-gray-50 focus:ring-2 focus:ring-primary focus:border-transparent',
               !selected && 'text-muted-foreground',
               className
             )}
@@ -176,7 +176,7 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             startMonth={new Date(2020, 0)}
             endMonth={new Date(2030, 11)}
             autoFocus
-            //dir="rtl"
+          //dir="rtl"
           />
           {showTimeSelect && (
             <div className="border-t p-3">
@@ -257,7 +257,7 @@ function TimePicker({
           className={cn(
             'w-full h-10 justify-start text-right font-normal',
             'border border-[#CED4DA] rounded-[4px] bg-white',
-            'hover:bg-gray-50 focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent',
+            'hover:bg-gray-50 focus:ring-2 focus:ring-primary focus:border-transparent',
             !selected && 'text-muted-foreground',
             className
           )}
@@ -301,7 +301,7 @@ function TimePicker({
               className={cn(
                 'w-full px-4 py-2 text-right text-sm hover:bg-accent transition-colors cursor-pointer',
                 selected && format(selected, 'HH:mm') === option.value
-                  ? 'bg-[#5D24E1] text-white hover:bg-[#4a1db5]' // Use your purple here
+                  ? 'bg-primary text-white hover:bg-[#4a1db5]' // Use your purple here
                   : 'text-gray-700'
               )}
             >
@@ -347,7 +347,7 @@ function TimeSelector({
         value={currentTime}
         onChange={handleTimeChange}
         step={timeIntervals * 60}
-        className="flex-1 h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[#5D24E1]"
+        className="flex-1 h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
       />
     </div>
   );

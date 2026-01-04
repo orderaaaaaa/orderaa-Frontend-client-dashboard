@@ -92,7 +92,7 @@ export default function ProductDetailsModal({
           </div>
 
           <div className="w-full">
-            <h4 className="text-base font-bold text-[#5D24E1] mb-2 text-center">
+            <h4 className="text-base font-bold text-primary mb-2 text-center">
               معلومات المنتج
             </h4>
             <div className="bg-gray-50/50 rounded-xl px-4 py-2">
@@ -111,7 +111,7 @@ export default function ProductDetailsModal({
           <Button
             variant="default"
             onClick={onClose}
-            className="w-[120px] h-[36px] bg-[#5D24E1] rounded-[28px] hover:bg-[#4B1BC4] transition-colors"
+            className="w-[120px] h-[36px] bg-primary rounded-[28px] hover:bg-[#4B1BC4] transition-colors"
           >
             <span className="text-sm font-bold text-white">إغلاق</span>
           </Button>

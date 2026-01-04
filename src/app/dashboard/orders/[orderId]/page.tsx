@@ -99,7 +99,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
       <AuthGuard>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5D24E1] mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
             <p className="mt-4 text-gray-600">جاري تحميل بيانات الطلب...</p>
           </div>
         </div>
@@ -115,7 +115,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
             <p className="text-red-600 text-lg mb-4">{error}</p>
             <button
               onClick={() => window.history.back()}
-              className="px-6 py-3 bg-[#5D24E1] text-white rounded-lg hover:bg-[#4a1db5] transition-colors"
+              className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-[#4a1db5] transition-colors"
             >
               العودة للطلبات
             </button>
@@ -139,7 +139,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
               maxDate={toDate || undefined}
             />
 
-            <ArrowLeft className="text-[#5D24E1] flex-shrink-0" size="20" />
+            <ArrowLeft className="text-primary flex-shrink-0" size="20" />
 
             <DatePicker
               selected={toDate}
@@ -156,13 +156,12 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
                 onValueChange={(value) => setTimePeriod(value as TimePeriod)}
               >
                 <SelectTrigger
-                  className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${
-                    timePeriod ? 'text-[#5D24E1] font-bold' : ''
-                  }`}
+                  className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${timePeriod ? 'text-primary font-bold' : ''
+                    }`}
                 >
                   <SelectValue placeholder="الفترة الزمنية" />
                 </SelectTrigger>
-                <SelectContent className="[&_[data-state=checked]]:text-[#5D24E1]">
+                <SelectContent className="[&_[data-state=checked]]:text-primary">
                   <SelectItem value="day">يوم</SelectItem>
                   <SelectItem value="week">اسبوع</SelectItem>
                   <SelectItem value="month">شهر</SelectItem>
@@ -225,7 +224,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
             <p className="text-red-600 text-lg mb-4">الطلب غير موجود</p>
             <button
               onClick={() => window.history.back()}
-              className="px-6 py-3 bg-[#5D24E1] text-white rounded-lg hover:bg-[#4a1db5] transition-colors"
+              className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-[#4a1db5] transition-colors"
             >
               العودة للطلبات
             </button>
@@ -254,7 +253,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
             maxDate={toDate || undefined}
           />
 
-          <ArrowLeft className="text-[#5D24E1] flex-shrink-0" size="20" />
+          <ArrowLeft className="text-primary flex-shrink-0" size="20" />
 
           <DatePicker
             selected={toDate}
@@ -271,13 +270,12 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
               onValueChange={(value) => setTimePeriod(value as TimePeriod)}
             >
               <SelectTrigger
-                className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${
-                  timePeriod ? 'text-[#5D24E1] font-bold' : ''
-                }`}
+                className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${timePeriod ? 'text-primary font-bold' : ''
+                  }`}
               >
                 <SelectValue placeholder="الفترة الزمنية" />
               </SelectTrigger>
-              <SelectContent className="[&_[data-state=checked]]:text-[#5D24E1]">
+              <SelectContent className="[&_[data-state=checked]]:text-primary">
                 <SelectItem value="day">يوم</SelectItem>
                 <SelectItem value="week">اسبوع</SelectItem>
                 <SelectItem value="month">شهر</SelectItem>
@@ -327,7 +325,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
         {isNavigating && (
           <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 rounded-lg">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#5D24E1] mx-auto"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
               <p className="mt-2 text-gray-600 text-sm">جاري البحث...</p>
             </div>
           </div>
@@ -355,7 +353,7 @@ function OrderDetailsLoading() {
     <AuthGuard>
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5D24E1] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-gray-600">جاري تحميل بيانات الطلب...</p>
         </div>
       </div>

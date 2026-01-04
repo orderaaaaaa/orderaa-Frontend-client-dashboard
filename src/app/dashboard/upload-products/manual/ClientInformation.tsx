@@ -43,7 +43,7 @@ function ClientInformation({
   errors,
 }: ClientInformationProps) {
   // Fetch governorates and areas from API
-  
+
   const { data: governorateOptions = [] } = useGovernoratesQuery();
   const { data: areaOptions = [], isLoading: isLoadingAreas } = useCitiesQuery(governorate);
 
@@ -119,9 +119,8 @@ function ClientInformation({
               placeholder="اختر المحافظة"
               widthClass="w-full"
               error={errors?.governorate}
-              triggerClassName={`border w-full bg-[#EAEAEA40] px-3 py-3 rounded-sm ${
-                errors?.governorate ? 'border-red-500' : 'border-[#5D24E1]'
-              }`}
+              triggerClassName={`border w-full bg-[#EAEAEA40] px-3 py-3 rounded-sm ${errors?.governorate ? 'border-red-500' : 'border-primary'
+                }`}
             />
           </div>
           {/* choose area */}
@@ -140,9 +139,8 @@ function ClientInformation({
               disabled={!governorate || isLoadingAreas}
               loading={isLoadingAreas}
               error={errors?.area}
-              triggerClassName={`border w-full bg-[#EAEAEA40] px-3 py-3 rounded-sm ${
-                errors?.area ? 'border-red-500' : 'border-[#5D24E1]'
-              }`}
+              triggerClassName={`border w-full bg-[#EAEAEA40] px-3 py-3 rounded-sm ${errors?.area ? 'border-red-500' : 'border-primary'
+                }`}
             />
           </div>
         </div>

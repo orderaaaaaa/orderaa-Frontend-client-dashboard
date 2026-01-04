@@ -278,7 +278,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={searchPlaceholder}
-                    className="w-full px-2 py-1.5 rounded border border-gray-200 text-sm focus:outline-none focus:border-[#5D24E1]"
+                    className="w-full px-2 py-1.5 rounded border border-gray-200 text-sm focus:outline-none focus:border-primary"
                   />
                 </div>
               )}
@@ -295,9 +295,9 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
                         onClick={() => commitSelect(opt)}
                         className={cn(
                           'px-3 py-2 cursor-pointer flex items-center justify-between gap-2',
-                          'hover:bg-[#5D24E1] hover:text-white',
+                          'hover:bg-primary hover:text-white',
                           activeIdx === idx && !isSelected && 'bg-gray-100',
-                          isSelected && 'bg-[#5D24E1] text-white'
+                          isSelected && 'bg-primary text-white'
                         )}
                         role="option"
                         aria-selected={isSelected}

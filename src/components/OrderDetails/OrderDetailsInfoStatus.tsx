@@ -38,7 +38,7 @@ const getEventIcon = (eventType?: string) => {
     case 'SHIPPING':
       return <History className="w-4 h-4 text-purple-600" />;
     case 'NEW_ORDER':
-      return <History className="w-4 h-4 text-[#5D24E1]" />;
+      return <History className="w-4 h-4 text-primary" />;
     default:
       return <History className="w-4 h-4 text-gray-600" />;
   }
@@ -68,13 +68,13 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
       <div className="font-medium p-4 bg-gray-50 mt-8 rounded-xl">
         <div className="flex justify-between">
           <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-lg text-[#5D24E1] font-bold">سجل الأحداث</h2>
-            <p className="border-1 border-[#5D24E1] text-[#5D24E1] w-6 h-6 text-sm text-center rounded-full flex items-center justify-center">
+            <h2 className="text-lg text-primary font-bold">سجل الأحداث</h2>
+            <p className="border-1 border-primary text-primary w-6 h-6 text-sm text-center rounded-full flex items-center justify-center">
               {displayData.length}
             </p>
           </div>
 
-          {/* <CirclePlus className="w-4 h-4 text-[#5D24E1] cursor-pointer" /> */}
+          {/* <CirclePlus className="w-4 h-4 text-primary cursor-pointer" /> */}
         </div>
 
         <div className="flex flex-wrap gap-3 pb-2">
@@ -94,13 +94,13 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
                   {item.time && (
                     <>
                       {" • "}
-                      <span className="text-[#5D24E1]">{item.time}</span>
+                      <span className="text-primary">{item.time}</span>
                     </>
                   )}
                 </p>
                 {/* {item.employee && (
                   <p className="text-[11px] text-gray-500 mt-1">
-                    بواسطة: <span className="font-medium text-[#5D24E1]">{item.employee.fullName}</span>
+                    بواسطة: <span className="font-medium text-primary">{item.employee.fullName}</span>
                     {item.employee.department && (
                       <span className="text-gray-400"> ({item.employee.department})</span>
                     )}

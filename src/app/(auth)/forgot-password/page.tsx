@@ -93,7 +93,7 @@ export default function ForgotPasswordPage() {
 
         <p className="text-center text-sm text-gray-500">
           تذكّرت كلمة المرور؟{' '}
-          <Link href="/signin" className="text-[#5D24E1] hover:underline">
+          <Link href="/signin" className="text-primary hover:underline">
             سجّل الدخول
           </Link>
         </p>
@@ -117,7 +117,7 @@ export default function ForgotPasswordPage() {
       >
         <div className="space-y-5">
           <div className="flex items-center justify-center gap-2">
-            <KeyRound className="h-5 w-5 text-[#5D24E1]" />
+            <KeyRound className="h-5 w-5 text-primary" />
             <span className="text-sm text-gray-600">
               أدخل الكود المرسل إلى بريدك
             </span>
@@ -143,7 +143,7 @@ export default function ForgotPasswordPage() {
             type="button"
             onClick={handleResendCode}
             disabled={isLoading}
-            className="w-full text-sm text-[#5D24E1] hover:underline disabled:opacity-60"
+            className="w-full text-sm text-primary hover:underline disabled:opacity-60"
           >
             إعادة إرسال الكود
           </button>
@@ -219,7 +219,7 @@ export default function ForgotPasswordPage() {
 
       <p className="text-center text-sm text-gray-500">
         تذكّرت كلمة المرور؟{' '}
-        <Link href="/signin" className="text-[#5D24E1] hover:underline">
+        <Link href="/signin" className="text-primary hover:underline">
           سجّل الدخول
         </Link>
       </p>

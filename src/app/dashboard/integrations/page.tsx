@@ -43,7 +43,7 @@ const IntegrationsPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-1 h-8 bg-[#5D24E1] rounded-full"></div>
+              <div className="w-1 h-8 bg-primary rounded-full"></div>
               <h1 className="text-3xl font-bold text-gray-900">ربط المنصات</h1>
             </div>
             <p className="text-gray-600 text-lg mr-6">

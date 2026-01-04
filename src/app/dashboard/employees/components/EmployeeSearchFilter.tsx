@@ -80,9 +80,8 @@ export function EmployeeSearchFilter({
         <button
           type="button"
           onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-          className={`flex-shrink-0 hover:bg-gray-100 rounded-full p-1 cursor-pointer transition-colors ${
-            hasActiveFilters ? 'text-[#5d24e1]' : 'text-gray-600'
-          }`}
+          className={`flex-shrink-0 hover:bg-gray-100 rounded-full p-1 cursor-pointer transition-colors ${hasActiveFilters ? 'text-primary' : 'text-gray-600'
+            }`}
         >
           <SlidersVertical size={20} />
         </button>
@@ -102,7 +101,7 @@ export function EmployeeSearchFilter({
                 {hasActiveFilters && (
                   <button
                     onClick={handleClearAllFilters}
-                    className="text-sm bg-[#5d24e1] hover:bg-[#6b33ee] p-2 rounded-lg font-semibold text-white cursor-pointer flex items-center gap-1"
+                    className="text-sm bg-primary hover:bg-[#6b33ee] p-2 rounded-lg font-semibold text-white cursor-pointer flex items-center gap-1"
                   >
                     <X size={16} />
                     مسح الكل
@@ -123,11 +122,10 @@ export function EmployeeSearchFilter({
                         onClick={() => {
                           setAccessLevel(option.value);
                         }}
-                        className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${
-                          selectedAccessLevel === option.value
-                            ? 'bg-[#5d24e1] text-white font-medium'
+                        className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${selectedAccessLevel === option.value
+                            ? 'bg-primary text-white font-medium'
                             : 'text-gray-700 hover:bg-gray-100'
-                        }`}
+                          }`}
                       >
                         {option.label}
                       </button>
@@ -148,11 +146,10 @@ export function EmployeeSearchFilter({
                         onClick={() => {
                           setDepartment(option.value);
                         }}
-                        className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${
-                          selectedDepartment === option.value
-                            ? 'bg-[#5d24e1] text-white font-medium'
+                        className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${selectedDepartment === option.value
+                            ? 'bg-primary text-white font-medium'
                             : 'text-gray-700 hover:bg-gray-100'
-                        }`}
+                          }`}
                       >
                         {option.label}
                       </button>
@@ -173,11 +170,10 @@ export function EmployeeSearchFilter({
                         onClick={() => {
                           setPerformance(option.value);
                         }}
-                        className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${
-                          selectedPerformance === option.value
-                            ? 'bg-[#5d24e1] text-white font-medium'
+                        className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${selectedPerformance === option.value
+                            ? 'bg-primary text-white font-medium'
                             : 'text-gray-700 hover:bg-gray-100'
-                        }`}
+                          }`}
                       >
                         {option.label}
                       </button>

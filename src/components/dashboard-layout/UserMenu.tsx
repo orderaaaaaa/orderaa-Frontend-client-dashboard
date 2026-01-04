@@ -76,17 +76,15 @@ export function UserMenu({
       <Button
         variant="ghost"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center !p-1  cursor-pointer ${
-          isMobile
+        className={`flex items-center !p-1  cursor-pointer ${isMobile
             ? 'font-normal text-white text-[16px] hover:text-white'
             : 'font-bold text-[#1F1F1F] text-base'
-        } transition-colors hover:bg-transparent`}
+          } transition-colors hover:bg-transparent`}
       >
         <span>{displayText}</span>
         <LiaAngleDownSolid
-          className={`w-4 h-4 transition-transform duration-200 ${
-            isOpen ? 'rotate-180' : ''
-          }`}
+          className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
+            }`}
         />
       </Button>
 
@@ -95,7 +93,7 @@ export function UserMenu({
           {USER_MENU_OPTIONS.map((option) => (
             <li
               key={option.key}
-              className="px-3 py-2 cursor-pointer text-[#111827] hover:bg-[#5D24E1] hover:text-white"
+              className="px-3 py-2 cursor-pointer text-[#111827] hover:bg-primary hover:text-white"
               style={{ direction: 'rtl' }}
               onClick={() => handleOptionClick(option.key)}
             >

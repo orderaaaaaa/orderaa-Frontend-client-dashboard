@@ -75,7 +75,7 @@ export function TopBar({
       className={clsx(
         'flex flex-col lg:flex-row justify-between items-center',
         'px-4 lg:px-6 py-3 lg:py-0',
-        'max-lg:bg-gradient-to-b from-[#5D24E1] to-[#33147B] max-sm:text-white border-b',
+        'max-lg:bg-gradient-to-b from-primary to-[#33147B] max-sm:text-white border-b',
         'relative'
       )}
       style={{ boxShadow: '0px 4px 12px 0px #00000014' }}
@@ -125,7 +125,7 @@ export function TopBar({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSearch()}
-              className="bg-white text-black placeholder:text-[#5d24e1] h-10 placeholder:font-medium border-2 !border-[#5D24E1]/30 rounded-lg !pl-20"
+              className="bg-white text-black placeholder:text-primary h-10 placeholder:font-medium border-2 !border-primary/30 rounded-lg !pl-20"
             />
             <div className="absolute left-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
               {searchQuery && (
@@ -142,7 +142,7 @@ export function TopBar({
                 type="button"
                 onClick={handleSearch}
                 disabled={isSearching}
-                className="p-1.5 bg-[#5D24E1] hover:bg-[#4a1db8] text-white rounded-md disabled:opacity-70"
+                className="p-1.5 bg-primary hover:bg-[#4a1db8] text-white rounded-md disabled:opacity-70"
                 aria-label="بحث"
               >
                 {isSearching ? (
@@ -163,7 +163,7 @@ export function TopBar({
             name="search"
             placeholder="البحث"
             icon={Search}
-            className="sm:rounded-[38px] lg:rounded-[38px] bg-[#5D24E1]/8 border-0 !pl-24"
+            className="sm:rounded-[38px] lg:rounded-[38px] bg-primary/8 border-0 !pl-24"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSearch()}
@@ -185,7 +185,7 @@ export function TopBar({
               type="button"
               onClick={handleSearch}
               disabled={isSearching}
-              className="p-2 bg-[#5D24E1] hover:bg-[#4a1db8] text-white rounded-full disabled:opacity-70"
+              className="p-2 bg-primary hover:bg-[#4a1db8] text-white rounded-full disabled:opacity-70"
               aria-label="بحث"
             >
               {isSearching ? (

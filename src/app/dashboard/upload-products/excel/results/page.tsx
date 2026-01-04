@@ -38,7 +38,7 @@ export default function ValidationResultsPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5D24E1] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-gray-600">جاري التحميل...</p>
         </div>
       </div>
@@ -52,7 +52,7 @@ export default function ValidationResultsPage() {
           <p className="text-gray-600">لا توجد نتائج للعرض</p>
           <button
             onClick={() => router.push('/dashboard/upload-products/excel')}
-            className="mt-4 text-[#5D24E1] hover:underline"
+            className="mt-4 text-primary hover:underline"
           >
             العودة
           </button>
@@ -100,7 +100,7 @@ export default function ValidationResultsPage() {
                     onClick={() => {
                       alert('تم إرسال البيانات بالفعل! تحقق من الطلبات في قائمة الطلبات');
                     }}
-                    className="px-6 py-3 bg-[#5D24E1] text-white rounded-lg hover:bg-[#4a1db5] transition-colors"
+                    className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-[#4a1db5] transition-colors"
                   >
                     إرسال الطلبات ({successCount})
                   </button>
@@ -113,7 +113,7 @@ export default function ValidationResultsPage() {
                       sessionStorage.removeItem('excelValidationOnly');
                       router.push('/dashboard/orders/allOrders');
                     }}
-                    className="px-6 py-3 bg-[#5D24E1] text-white rounded-lg hover:bg-[#4a1db5] transition-colors"
+                    className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-[#4a1db5] transition-colors"
                   >
                     عرض الطلبات ({displaySuccessCount})
                   </button>

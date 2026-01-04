@@ -156,11 +156,10 @@ export default function TimePickerModal({
                       key={hour}
                       type="button"
                       onClick={() => setTempStartHour(hour)}
-                      className={`py-2 sm:py-3 px-2 sm:px-4 rounded-lg font-medium transition-all cursor-pointer text-sm sm:text-base ${
-                        tempStartHour === hour
-                          ? 'bg-[#5D24E1] text-white shadow-lg scale-105'
+                      className={`py-2 sm:py-3 px-2 sm:px-4 rounded-lg font-medium transition-all cursor-pointer text-sm sm:text-base ${tempStartHour === hour
+                          ? 'bg-primary text-white shadow-lg scale-105'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
+                        }`}
                     >
                       {hour}
                     </button>
@@ -177,22 +176,20 @@ export default function TimePickerModal({
                   <button
                     type="button"
                     onClick={() => setTempStartPeriod('am')}
-                    className={`py-3 sm:py-4 rounded-lg font-medium transition-all cursor-pointer text-xs sm:text-base ${
-                      tempStartPeriod === 'am'
-                        ? 'bg-[#5D24E1] text-white shadow-lg'
+                    className={`py-3 sm:py-4 rounded-lg font-medium transition-all cursor-pointer text-xs sm:text-base ${tempStartPeriod === 'am'
+                        ? 'bg-primary text-white shadow-lg'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     AM (صباحاً)
                   </button>
                   <button
                     type="button"
                     onClick={() => setTempStartPeriod('pm')}
-                    className={`py-3 sm:py-4 rounded-lg font-medium transition-all cursor-pointer text-xs sm:text-base ${
-                      tempStartPeriod === 'pm'
-                        ? 'bg-[#5D24E1] text-white shadow-lg'
+                    className={`py-3 sm:py-4 rounded-lg font-medium transition-all cursor-pointer text-xs sm:text-base ${tempStartPeriod === 'pm'
+                        ? 'bg-primary text-white shadow-lg'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     PM (مساءً)
                   </button>
@@ -203,9 +200,9 @@ export default function TimePickerModal({
               <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-purple-50 rounded-lg text-center">
                 <p className="text-xs sm:text-sm text-gray-600 mb-1">الوقت المحدد</p>
                 {tempStartHour !== null &&
-                tempStartPeriod !== null &&
-                !isNaN(tempStartHour) ? (
-                  <div className="text-xl sm:text-2xl font-bold text-[#5D24E1] flex items-center justify-center gap-1">
+                  tempStartPeriod !== null &&
+                  !isNaN(tempStartHour) ? (
+                  <div className="text-xl sm:text-2xl font-bold text-primary flex items-center justify-center gap-1">
                     <span>{tempStartHour}</span>
                     <span>{tempStartPeriod.toUpperCase()}</span>
                   </div>
@@ -234,11 +231,10 @@ export default function TimePickerModal({
                       key={hour}
                       type="button"
                       onClick={() => setTempEndHour(hour)}
-                      className={`py-2 sm:py-3 px-2 sm:px-4 rounded-lg font-medium transition-all cursor-pointer text-sm sm:text-base ${
-                        tempEndHour === hour
-                          ? 'bg-[#5D24E1] text-white shadow-lg scale-105'
+                      className={`py-2 sm:py-3 px-2 sm:px-4 rounded-lg font-medium transition-all cursor-pointer text-sm sm:text-base ${tempEndHour === hour
+                          ? 'bg-primary text-white shadow-lg scale-105'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
+                        }`}
                     >
                       {hour}
                     </button>
@@ -255,22 +251,20 @@ export default function TimePickerModal({
                   <button
                     type="button"
                     onClick={() => setTempEndPeriod('am')}
-                    className={`py-3 sm:py-4 rounded-lg font-medium transition-all cursor-pointer text-xs sm:text-base ${
-                      tempEndPeriod === 'am'
-                        ? 'bg-[#5D24E1] text-white shadow-lg'
+                    className={`py-3 sm:py-4 rounded-lg font-medium transition-all cursor-pointer text-xs sm:text-base ${tempEndPeriod === 'am'
+                        ? 'bg-primary text-white shadow-lg'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     AM (صباحاً)
                   </button>
                   <button
                     type="button"
                     onClick={() => setTempEndPeriod('pm')}
-                    className={`py-3 sm:py-4 rounded-lg font-medium transition-all cursor-pointer text-xs sm:text-base ${
-                      tempEndPeriod === 'pm'
-                        ? 'bg-[#5D24E1] text-white shadow-lg'
+                    className={`py-3 sm:py-4 rounded-lg font-medium transition-all cursor-pointer text-xs sm:text-base ${tempEndPeriod === 'pm'
+                        ? 'bg-primary text-white shadow-lg'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     PM (مساءً)
                   </button>
@@ -281,9 +275,9 @@ export default function TimePickerModal({
               <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-purple-50 rounded-lg text-center">
                 <p className="text-xs sm:text-sm text-gray-600 mb-1">الوقت المحدد</p>
                 {tempEndHour !== null &&
-                tempEndPeriod !== null &&
-                !isNaN(tempEndHour) ? (
-                  <div className="text-xl sm:text-2xl font-bold text-[#5D24E1] flex items-center justify-center gap-1">
+                  tempEndPeriod !== null &&
+                  !isNaN(tempEndHour) ? (
+                  <div className="text-xl sm:text-2xl font-bold text-primary flex items-center justify-center gap-1">
                     <span>{tempEndHour}</span>
                     <span>{tempEndPeriod.toUpperCase()}</span>
                   </div>
@@ -330,11 +324,10 @@ export default function TimePickerModal({
             type="button"
             onClick={handleApply}
             disabled={!isComplete}
-            className={`px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-medium transition-colors shadow-lg text-sm sm:text-base ${
-              isComplete
-                ? 'bg-[#5D24E1] text-white hover:bg-[#4a1cb8] cursor-pointer'
+            className={`px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-medium transition-colors shadow-lg text-sm sm:text-base ${isComplete
+                ? 'bg-primary text-white hover:bg-[#4a1cb8] cursor-pointer'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
-            }`}
+              }`}
           >
             تطبيق
           </button>

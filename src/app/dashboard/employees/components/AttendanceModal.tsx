@@ -68,7 +68,7 @@ export function AttendanceModal({
             type="month"
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             dir="ltr"
           />
         </div>
@@ -110,7 +110,7 @@ export function AttendanceModal({
         {/* Loading State */}
         {isLoading && (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-8 h-8 animate-spin text-[#5D24E1]" />
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         )}
 
@@ -128,9 +128,9 @@ export function AttendanceModal({
               <div className="space-y-2 max-h-[400px] overflow-y-auto">
                 <div className="flex items-center gap-2 mb-3">
                   {type === 'attendance' ? (
-                    <CalendarClock className="w-5 h-5 text-[#5D24E1]" />
+                    <CalendarClock className="w-5 h-5 text-primary" />
                   ) : (
-                    <CalendarDays className="w-5 h-5 text-[#5D24E1]" />
+                    <CalendarDays className="w-5 h-5 text-primary" />
                   )}
                   <span className="font-semibold text-gray-700">
                     {getMonthName(selectedMonth)}

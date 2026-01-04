@@ -157,7 +157,7 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                 type="button"
               >
                 <div className="flex items-start gap-3">
-                  <div className="bg-[#5D24E1] text-white p-2 rounded-lg flex-shrink-0">
+                  <div className="bg-primary text-white p-2 rounded-lg flex-shrink-0">
                     <Play className="w-5 h-5" />
                   </div>
                   <div className="flex-1 text-right">
@@ -245,12 +245,12 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                       {showAuthKey ? (
                         <LiaEyeSlashSolid
                           size={18}
-                          className="text-[#5D24E1] cursor-pointer"
+                          className="text-primary cursor-pointer"
                         />
                       ) : (
                         <LiaEyeSolid
                           size={18}
-                          className="text-[#5D24E1] cursor-pointer"
+                          className="text-primary cursor-pointer"
                         />
                       )}
                     </button>
@@ -273,12 +273,12 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                       {showClientCode ? (
                         <LiaEyeSlashSolid
                           size={18}
-                          className="text-[#5D24E1] cursor-pointer"
+                          className="text-primary cursor-pointer"
                         />
                       ) : (
                         <LiaEyeSolid
                           size={18}
-                          className="text-[#5D24E1] cursor-pointer"
+                          className="text-primary cursor-pointer"
                         />
                       )}
                     </button>
@@ -297,7 +297,7 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                   value={jsonInput}
                   onChange={(e) => setJsonInput(e.target.value)}
                   placeholder='{"authentication_key": "...", "main_client_code": ...}'
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5D24E1] focus:border-[#5D24E1] outline-none transition-all font-mono text-sm h-48 bg-gray-50"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all font-mono text-sm h-48 bg-gray-50"
                   dir="ltr"
                   disabled={isSaving}
                 />
@@ -310,7 +310,7 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                 <Button
                   type="submit"
                   disabled={isSaving || !jsonInput.trim()}
-                  className="flex-1 bg-[#5D24E1] hover:bg-[#4A1CB8] h-12 text-lg"
+                  className="flex-1 bg-primary hover:bg-[#4A1CB8] h-12 text-lg"
                 >
                   {isSaving ? 'جاري التفعيل...' : 'تفعيل الربط'}
                 </Button>

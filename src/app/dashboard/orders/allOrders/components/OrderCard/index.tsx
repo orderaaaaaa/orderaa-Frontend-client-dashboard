@@ -97,7 +97,7 @@ export default function OrderCard({
             checked={isSelected}
             onChange={handleCheckboxChange}
             onClick={(e) => e.stopPropagation()}
-            className="w-5 h-5 border-2 border-[#5D24E1] rounded-[4px] cursor-pointer accent-[#5D24E1]"
+            className="w-5 h-5 border-2 border-primary rounded-[4px] cursor-pointer accent-primary"
           />
         )}
       </div>
@@ -145,7 +145,7 @@ export default function OrderCard({
                 </button>
               )}
 
-              <span className="text-xs text-[#5D24E1] whitespace-nowrap">
+              <span className="text-xs text-primary whitespace-nowrap">
                 {getTimeAgo(createdAt)}
               </span>
             </div>
@@ -272,7 +272,7 @@ export default function OrderCard({
             width={20}
             height={20}
           />
-          <span className="text-xs font-medium text-[#5D24E1]">
+          <span className="text-xs font-medium text-primary">
             {getStatusLabel(status)}
           </span>
         </div>
@@ -286,10 +286,10 @@ export default function OrderCard({
                 width={20}
                 height={20}
               />
-              <span className="text-xs font-medium text-[#5D24E1]">
+              <span className="text-xs font-medium text-primary">
                 المحاولات:
               </span>
-              <span className="text-xs font-medium text-[#5D24E1]">{trys}</span>
+              <span className="text-xs font-medium text-primary">{trys}</span>
             </div>
           </Then>
         </If>

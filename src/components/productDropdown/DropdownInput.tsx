@@ -32,7 +32,7 @@ export const DropdownInput: React.FC<DropdownInputProps> = ({
       <button
         type="button"
         onClick={onToggle}
-        className="w-full border border-[#5D24E1] cursor-pointer rounded-lg py-2.5 px-10 text-[18px] transition-colors text-left flex items-center justify-between"
+        className="w-full border border-primary cursor-pointer rounded-lg py-2.5 px-10 text-[18px] transition-colors text-left flex items-center justify-between"
         aria-label="Toggle dropdown"
       >
         <span
@@ -50,9 +50,8 @@ export const DropdownInput: React.FC<DropdownInputProps> = ({
 
           <ChevronDown
             size={20}
-            className={`text-gray-400 transition-transform duration-200 ${
-              isOpen ? 'rotate-180' : ''
-            }`}
+            className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
+              }`}
           />
         </div>
       </button>

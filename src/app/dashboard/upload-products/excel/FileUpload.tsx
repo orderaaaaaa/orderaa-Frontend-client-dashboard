@@ -189,7 +189,7 @@ const FileUpload = () => {
                   <div className="">
                     <h5 className="flex gap-2 items-center text-lg max-sm:text-base">
                       {uploadedFile.name}
-                      <CircleCheck className="w-6 h-6 text-[#5D24E1]" />
+                      <CircleCheck className="w-6 h-6 text-primary" />
                     </h5>
                     <p className="text-gray-600 text-base text-[14px] ml-4">
                       اضغط لتغيير الملف
@@ -215,7 +215,7 @@ const FileUpload = () => {
               <button
                 onClick={handleUpload}
                 disabled={isProcessing}
-                className="flex cursor-pointer justify-center max-sm:gap-1 max-sm:text-sm w-full max-w-md h-[46px] text-lg items-center gap-2 px-6 py-3 font-normal rounded-full bg-[#5D24E1] text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#4a1db5]"
+                className="flex cursor-pointer justify-center max-sm:gap-1 max-sm:text-sm w-full max-w-md h-[46px] text-lg items-center gap-2 px-6 py-3 font-normal rounded-full bg-primary text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#4a1db5]"
               >
                 {isProcessing ? (
                   <>

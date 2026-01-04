@@ -37,7 +37,7 @@ export default function OrderSettingsPage() {
     <div className="w-full container mx-auto px-4 py-10" dir="rtl">
       <header className="mb-10">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-1 h-8 bg-[#5D24E1] rounded-full"></div>
+          <div className="w-1 h-8 bg-primary rounded-full"></div>
           <h1 className="text-3xl font-bold text-gray-900">اعدادات المتجر</h1>
         </div>
       </header>
@@ -54,7 +54,7 @@ export default function OrderSettingsPage() {
         <div className="mt-6 flex justify-start">
           <button
             type="submit"
-            className="px-10 py-3 bg-[#5D24E1] text-white rounded-full font-bold hover:bg-[#4a1cb5] transition-all"
+            className="px-10 py-3 bg-primary text-white rounded-full font-bold hover:bg-[#4a1cb5] transition-all"
           >
             حفظ البيانات
           </button>

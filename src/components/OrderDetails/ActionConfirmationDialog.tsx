@@ -119,7 +119,7 @@ export default function ActionConfirmationDialog({
             <Button
               variant="outline"
               onClick={onClose}
-              className="px-8 py-2 border-2 border-[#5D24E1] text-[#5D24E1] rounded-[28px] font-bold hover:bg-purple-50 transition-colors"
+              className="px-8 py-2 border-2 border-primary text-primary rounded-[28px] font-bold hover:bg-purple-50 transition-colors"
               disabled={isLoading}
             >
               {cancelText}
@@ -127,7 +127,7 @@ export default function ActionConfirmationDialog({
             <Button
               variant="default"
               onClick={handleConfirm}
-              className="px-8 py-2 bg-[#5D24E1] rounded-[28px] font-bold text-white hover:bg-[#4B1BC4] transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-8 py-2 bg-primary rounded-[28px] font-bold text-white hover:bg-[#4B1BC4] transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading}
             >
               <LiaCheckCircle className="w-5 h-5 ml-2" />

@@ -22,11 +22,10 @@ function WalletPricing() {
         {WALLET_PRICING_PLANS.map((plan, index) => (
           <div
             key={index}
-            className={`relative rounded-2xl p-9 border min-h-[450px] flex flex-col transition-transform duration-300 hover:scale-105 overflow-hidden text-right hover:border hover:border-[#5d24e1]
-              ${
-                plan.gradient
-                  ? 'bg-[#5826E8] border-transparent text-white'
-                  : 'bg-white border-gray-100 shadow-xl text-gray-800'
+            className={`relative rounded-2xl p-9 border min-h-[450px] flex flex-col transition-transform duration-300 hover:scale-105 overflow-hidden text-right hover:border hover:border-primary
+              ${plan.gradient
+                ? 'bg-[#5826E8] border-transparent text-white'
+                : 'bg-white border-gray-100 shadow-xl text-gray-800'
               } 
               `}
           >
@@ -40,16 +39,14 @@ function WalletPricing() {
             <div className="relative z-10 flex flex-col gap-6">
               <div className="flex items-baseline gap-4 mb-4">
                 <span
-                  className={`text-4xl font-bold ${
-                    plan.gradient ? 'text-white' : 'text-[#5826E8]'
-                  }`}
+                  className={`text-4xl font-bold ${plan.gradient ? 'text-white' : 'text-[#5826E8]'
+                    }`}
                 >
                   {plan.price}
                 </span>
                 <p
-                  className={`text-xl font-medium ${
-                    plan.gradient ? 'text-purple-100' : 'text-gray-900'
-                  }`}
+                  className={`text-xl font-medium ${plan.gradient ? 'text-purple-100' : 'text-gray-900'
+                    }`}
                 >
                   {plan.subtitle}
                 </p>
@@ -70,10 +67,9 @@ function WalletPricing() {
             <button
               onClick={() => handleOpenModal(plan)}
               className={`w-[98%] mx-auto mt-auto py-2 rounded-full font-bold transition cursor-pointer text-xl
-                ${
-                  plan.gradient
-                    ? 'bg-white text-[#5826E8] hover:bg-gray-100'
-                    : 'bg-white border border-[#5826E8] text-[#5826E8] hover:bg-[#5d24e1] hover:text-white'
+                ${plan.gradient
+                  ? 'bg-white text-[#5826E8] hover:bg-gray-100'
+                  : 'bg-white border border-[#5826E8] text-[#5826E8] hover:bg-primary hover:text-white'
                 }`}
             >
               {plan.button}

@@ -99,7 +99,7 @@ export default function ProductsPage() {
               Manage your product inventory
             </p>
           </div>
-          <Button className="bg-[#5D24E1] hover:bg-[#4A1DB8]">
+          <Button className="bg-primary hover:bg-[#4A1DB8]">
             <Plus className="mr-2 h-4 w-4" />
             Add Product
           </Button>

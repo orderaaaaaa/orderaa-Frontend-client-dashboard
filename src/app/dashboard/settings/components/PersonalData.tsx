@@ -63,10 +63,10 @@ export default function PersonalData() {
 
   const hasAnyValue = Boolean(
     (fullName && fullName.trim()) ||
-      (email && email.trim()) ||
-      (phoneNumber && phoneNumber.trim()) ||
-      (governorate && governorate.trim()) ||
-      (city && city.trim())
+    (email && email.trim()) ||
+    (phoneNumber && phoneNumber.trim()) ||
+    (governorate && governorate.trim()) ||
+    (city && city.trim())
   );
   const onSubmit = async (data: PersonalDataFormData) => {
     const payload: Partial<{
@@ -98,7 +98,7 @@ export default function PersonalData() {
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
         <div className=" p-3 bg-[#5D24E114] rounded flex items-center justify-center">
-          <LiaUserEditSolid className="w-7 h-7 text-[#5D24E1]" />
+          <LiaUserEditSolid className="w-7 h-7 text-primary" />
         </div>
         <h2 className="text-2xl font-medium text-right">البيانات الشخصية</h2>
       </div>
@@ -116,7 +116,7 @@ export default function PersonalData() {
                 alignItems: 'center',
               }}
             >
-              <IoBriefcaseOutline className="w-6 h-6 text-[#5D24E1] flex-shrink-0" />
+              <IoBriefcaseOutline className="w-6 h-6 text-primary flex-shrink-0" />
               <span
                 className="text-base md:text-xl font-medium text-right"
                 style={{ textAlign: 'right' }}
@@ -148,7 +148,7 @@ export default function PersonalData() {
                 alignItems: 'center',
               }}
             >
-              <LiaPhoneSolid className="w-6 h-6 text-[#5D24E1] flex-shrink-0" />
+              <LiaPhoneSolid className="w-6 h-6 text-primary flex-shrink-0" />
               <span
                 className="text-base md:text-xl font-medium text-right"
                 style={{ textAlign: 'right' }}
@@ -180,7 +180,7 @@ export default function PersonalData() {
                 alignItems: 'center',
               }}
             >
-              <CiAt className="w-6 h-6 text-[#5D24E1] flex-shrink-0" />
+              <CiAt className="w-6 h-6 text-primary flex-shrink-0" />
               <span
                 className="text-base md:text-xl font-medium text-right"
                 style={{ textAlign: 'right' }}
@@ -213,7 +213,7 @@ export default function PersonalData() {
               }}
             >
               <div className="relative">
-                <LiaBuilding className="w-6 h-6 text-[#5D24E1] flex-shrink-0" />
+                <LiaBuilding className="w-6 h-6 text-primary flex-shrink-0" />
               </div>
               <span
                 className="text-base md:text-xl font-medium text-right"
@@ -256,7 +256,7 @@ export default function PersonalData() {
               }}
             >
               <div className="relative">
-                <LiaBuilding className="w-6 h-6 text-[#5D24E1] flex-shrink-0" />
+                <LiaBuilding className="w-6 h-6 text-primary flex-shrink-0" />
               </div>
               <span
                 className="text-base md:text-xl font-medium text-right"
@@ -277,8 +277,8 @@ export default function PersonalData() {
                     !governorate
                       ? 'اختر المحافظة أولاً'
                       : loadingCities
-                      ? 'جاري التحميل...'
-                      : 'اختر المنطقة'
+                        ? 'جاري التحميل...'
+                        : 'اختر المنطقة'
                   }
                   disabled={!governorate || loadingCities}
                   widthClass="w-full"
@@ -293,11 +293,10 @@ export default function PersonalData() {
           <button
             type="submit"
             disabled={!hasAnyValue || isSaving}
-            className={`px-12 py-2 text-lg rounded-lg font-medium transition-colors ${
-              hasAnyValue && !isSaving
-                ? 'bg-[#5D24E1] text-white cursor-pointer'
+            className={`px-12 py-2 text-lg rounded-lg font-medium transition-colors ${hasAnyValue && !isSaving
+                ? 'bg-primary text-white cursor-pointer'
                 : 'bg-[#c4c4c4] text-white cursor-not-allowed'
-            }`}
+              }`}
           >
             {isSaving ? 'جاري الحفظ...' : 'حفظ التغيرات'}
           </button>

@@ -117,7 +117,7 @@ export const CustomerRow = memo(function CustomerRow({
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <LiaWhatsapp className="w-5 h-5 text-[#5D24E1] hover:opacity-80" />
+                  <LiaWhatsapp className="w-5 h-5 text-primary hover:opacity-80" />
                 </a>
                 <a
                   href={`tel:${phone}`}
@@ -154,8 +154,8 @@ export const CustomerRow = memo(function CustomerRow({
             <span className="font-medium">
               {customer.latestOrder?.createdAt
                 ? new Date(customer.latestOrder.createdAt).toLocaleDateString(
-                    'en-GB'
-                  )
+                  'en-GB'
+                )
                 : '-'}
             </span>
           </div>
@@ -212,19 +212,17 @@ export const CustomerRow = memo(function CustomerRow({
                 <button
                   onClick={handleBanClick}
                   disabled={isPending || isUpdating}
-                  className={`w-full px-6 py-2 transition-colors hover:bg-gray-50 cursor-pointer ${
-                    customer.isBlocked ? 'text-green-600' : 'text-red-600'
-                  } ${
-                    isPending || isUpdating
+                  className={`w-full px-6 py-2 transition-colors hover:bg-gray-50 cursor-pointer ${customer.isBlocked ? 'text-green-600' : 'text-red-600'
+                    } ${isPending || isUpdating
                       ? 'opacity-50 cursor-not-allowed'
                       : ''
-                  }`}
+                    }`}
                 >
                   {isPending || isUpdating
                     ? 'جاري...'
                     : customer.isBlocked
-                    ? 'إلغاء الحظر'
-                    : 'حظر'}
+                      ? 'إلغاء الحظر'
+                      : 'حظر'}
                 </button>
               </div>
             )}

@@ -41,7 +41,7 @@ const getEventIcon = (eventType?: string) => {
     case 'SHIPPING':
       return <History className="w-4 h-4 text-purple-600" />;
     case 'NEW_ORDER':
-      return <History className="w-4 h-4 text-[#5D24E1]" />;
+      return <History className="w-4 h-4 text-primary" />;
     default:
       return <History className="w-4 h-4 text-gray-600" />;
   }
@@ -126,7 +126,7 @@ export default function OrderHistoryModal({
                   </h3>
 
                   {event.note !== event.status && (
-                    <p className="text-sm text-[#5D24E1] text-center mb-1 max-w-[140px]">
+                    <p className="text-sm text-primary text-center mb-1 max-w-[140px]">
                       {event.note}
                     </p>
                   )}

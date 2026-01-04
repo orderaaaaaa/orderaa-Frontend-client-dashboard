@@ -127,7 +127,7 @@ export default function CustomerOrdersModal({
       />
 
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col m-4">
-        <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-[#5D24E1]/5 to-[#682fee]/5">
+        <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-primary/5 to-[#682fee]/5">
           <div className="flex items-center gap-4">
             <div className="relative flex items-center justify-center">
               <svg
@@ -187,15 +187,15 @@ export default function CustomerOrdersModal({
             <div className="flex items-center gap-3">
               <Button
                 onClick={handleSelectAllToggle}
-                className="px-4 py-2 text-sm bg-[#5D24E1] text-white rounded-lg hover:bg-[#682fee] transition-colors"
+                className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-[#682fee] transition-colors"
               >
                 {selectedOrderIds.length === orders.length &&
-                orders.length > 0 ? (
+                  orders.length > 0 ? (
                   'إلغاء تحديد الكل'
                 ) : (
                   <span className="flex items-center gap-2">
                     تحديد الكل
-                    <span className="bg-white text-[#5D24E1] rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                    <span className="bg-white text-primary rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
                       {orders.length}
                     </span>
                   </span>
@@ -214,7 +214,7 @@ export default function CustomerOrdersModal({
           {loading ? (
             <div className="flex items-center justify-center min-h-[400px]">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#5D24E1] mx-auto"></div>
+                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary mx-auto"></div>
                 <p className="mt-4 text-gray-600 text-lg">
                   جاري تحميل الطلبات...
                 </p>
@@ -248,7 +248,7 @@ export default function CustomerOrdersModal({
                       handleCheckboxChange(order.id, e.target.checked)
                     }
                     onClick={(e) => e.stopPropagation()}
-                    className="relative right-9 top-[-2px] z-100 w-4 h-4 mt-2 border-2 border-[#5D24E1] rounded-[4px] cursor-pointer accent-[#5D24E1] flex-shrink-0"
+                    className="relative right-9 top-[-2px] z-100 w-4 h-4 mt-2 border-2 border-primary rounded-[4px] cursor-pointer accent-primary flex-shrink-0"
                   />
                   <OrderCard
                     id={order.id}
@@ -292,20 +292,19 @@ export default function CustomerOrdersModal({
         </div>
 
         <div
-          className={`px-8 py-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl ${
-            selectedOrders.length > 0 ? 'pb-20' : ''
-          }`}
+          className={`px-8 py-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl ${selectedOrders.length > 0 ? 'pb-20' : ''
+            }`}
         >
           <div className="flex items-center justify-between">
             <Button
               onClick={onClose}
-              className="px-6 py-2.5 bg-[#5D24E1] text-white rounded-full hover:bg-[#682fee] transition-colors font-medium"
+              className="px-6 py-2.5 bg-primary text-white rounded-full hover:bg-[#682fee] transition-colors font-medium"
             >
               إغلاق
             </Button>
             <p className="text-sm text-gray-600">
               إجمالي الطلبات:{' '}
-              <span className="font-bold text-[#5D24E1]">{orders.length}</span>
+              <span className="font-bold text-primary">{orders.length}</span>
             </p>
           </div>
         </div>

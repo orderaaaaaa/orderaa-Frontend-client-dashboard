@@ -66,11 +66,10 @@ export function EditableTextField({
                   value={field.value}
                   onChange={(e) => field.setValue(e.target.value)}
                   placeholder={placeholder}
-                  className={`flex-1 min-w-0 w-full border rounded px-2 py-1 text-base focus:outline-none focus:ring-1 min-h-[200px] resize-y ${
-                    field.error
+                  className={`flex-1 min-w-0 w-full border rounded px-2 py-1 text-base focus:outline-none focus:ring-1 min-h-[200px] resize-y ${field.error
                       ? 'border-red-500 focus:ring-red-500'
-                      : 'border-[#5D24E1] focus:ring-[#5D24E1]'
-                  }`}
+                      : 'border-primary focus:ring-primary'
+                    }`}
                   autoFocus
                 />
               ) : (
@@ -80,11 +79,10 @@ export function EditableTextField({
                   value={field.value}
                   onChange={(e) => field.setValue(e.target.value)}
                   placeholder={placeholder}
-                  className={`flex-1 min-w-0 w-full border rounded px-2 py-1 text-base focus:outline-none focus:ring-1 ${
-                    field.error
+                  className={`flex-1 min-w-0 w-full border rounded px-2 py-1 text-base focus:outline-none focus:ring-1 ${field.error
                       ? 'border-red-500 focus:ring-red-500'
-                      : 'border-[#5D24E1] focus:ring-[#5D24E1]'
-                  }`}
+                      : 'border-primary focus:ring-primary'
+                    }`}
                   autoFocus
                 />
               )}
@@ -117,7 +115,7 @@ export function EditableTextField({
               onClick={field.startEdit}
               className="cursor-pointer p-1 hover:bg-purple-100 rounded transition-colors flex-shrink-0"
             >
-              <LiaEditSolid className="w-4 h-4 text-[#5D24E1]" />
+              <LiaEditSolid className="w-4 h-4 text-primary" />
             </button>
           </div>
         )}

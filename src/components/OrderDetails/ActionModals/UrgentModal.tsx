@@ -143,7 +143,7 @@ export default function UrgentModal({
                 value={option.value}
                 checked={selectedOption === option.value}
                 onChange={(e) => setSelectedOption(e.target.value as UrgentOption)}
-                className="w-5 h-5 accent-[#5D24E1]"
+                className="w-5 h-5 accent-primary"
               />
               <span className="text-[#1F1F1F] font-medium">{option.label}</span>
             </label>
@@ -181,11 +181,10 @@ export default function UrgentModal({
               value={shippingCost}
               onChange={handleShippingCostChange}
               placeholder="0"
-              className={`w-full border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:border-transparent ${
-                shippingCostError
+              className={`w-full border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:border-transparent ${shippingCostError
                   ? 'border-red-500 focus:ring-red-500'
-                  : 'border-[#ECECEC] focus:ring-[#5D24E1]'
-              }`}
+                  : 'border-[#ECECEC] focus:ring-primary'
+                }`}
             />
             {shippingCostError && (
               <span className="text-red-500 text-sm">{shippingCostError}</span>

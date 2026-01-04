@@ -94,7 +94,7 @@ export default function LoginPage() {
         </div>
         <Link
           href="/forgot-password"
-          className="text-[#5D24E1] hover:underline"
+          className="text-primary hover:underline"
         >
           نسيت كلمة المرور؟
         </Link>

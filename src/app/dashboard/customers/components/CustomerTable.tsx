@@ -114,7 +114,7 @@ export default function CustomerTable({
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64 mt-10">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5D24E1]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -205,13 +205,12 @@ export default function CustomerTable({
         <div ref={limitRef} className="relative w-fit mr-[1.5%]">
           <div
             onClick={() => setIsLimitOpen((prev) => !prev)}
-            className="bg-[#5D24E1] w-15 py-1 px-3 rounded-full text-white flex items-center justify-center cursor-pointer select-none"
+            className="bg-primary w-15 py-1 px-3 rounded-full text-white flex items-center justify-center cursor-pointer select-none"
           >
             {limit}
             <RxChevronUp
-              className={`transition-transform ${
-                isLimitOpen ? 'rotate-180' : ''
-              }`}
+              className={`transition-transform ${isLimitOpen ? 'rotate-180' : ''
+                }`}
             />
           </div>
 
@@ -221,7 +220,7 @@ export default function CustomerTable({
                 <div
                   key={option}
                   onClick={() => handleSelectLimit(option)}
-                  className="text-[#5D24E1] text-center py-1 cursor-pointer hover:bg-[#f1eefa]"
+                  className="text-primary text-center py-1 cursor-pointer hover:bg-[#f1eefa]"
                 >
                   {option}
                 </div>

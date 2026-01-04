@@ -40,9 +40,8 @@ function Order({
               placeholder="اختر المنصة"
               widthClass="w-full"
               error={errors?.platform}
-              triggerClassName={`border w-full bg-[#EAEAEA40] p-1 rounded-sm ${
-                errors?.platform ? 'border-red-500' : 'border-[#5D24E1]'
-              }`}
+              triggerClassName={`border w-full bg-[#EAEAEA40] p-1 rounded-sm ${errors?.platform ? 'border-red-500' : 'border-primary'
+                }`}
             />
           </div>
           <div className="max-w-[502px]" data-field-error="pageName">
@@ -58,9 +57,8 @@ function Order({
               placeholder="اختر الصفحة"
               widthClass="w-full"
               error={errors?.pageName}
-              triggerClassName={`border w-full bg-[#EAEAEA40] p-1 rounded-sm ${
-                errors?.pageName ? 'border-red-500' : 'border-[#5D24E1]'
-              }`}
+              triggerClassName={`border w-full bg-[#EAEAEA40] p-1 rounded-sm ${errors?.pageName ? 'border-red-500' : 'border-primary'
+                }`}
             />
           </div>
         </div>

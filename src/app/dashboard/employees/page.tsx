@@ -35,7 +35,7 @@ export default function AllEmployees() {
       <If condition={isLoading}>
         <Then>
           <div className="flex justify-center items-center h-64 mt-10">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5D24E1]"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
         </Then>
         <Else>

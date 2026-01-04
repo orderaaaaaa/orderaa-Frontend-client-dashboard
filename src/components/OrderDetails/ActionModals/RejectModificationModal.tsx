@@ -48,7 +48,7 @@ export default function RejectModificationModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="أضف سبب رفض التعديل..."
-            className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base min-h-[150px] resize-none focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
+            className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base min-h-[150px] resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             required
           />
         </div>

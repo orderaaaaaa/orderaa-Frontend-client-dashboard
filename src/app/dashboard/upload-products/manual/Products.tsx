@@ -117,7 +117,7 @@ function Products() {
             </div>
             <button
               onClick={handleOpenProductModal}
-              className="w-30 flex items-center gap-1 cursor-pointer justify-center px-3 mb-4 py-2 rounded-full bg-[#5D24E1] text-white hover:bg-[#4a1fa8] transition-colors"
+              className="w-30 flex items-center gap-1 cursor-pointer justify-center px-3 mb-4 py-2 rounded-full bg-primary text-white hover:bg-[#4a1fa8] transition-colors"
             >
               <Plus className="w-4 h-4 mt-1 " />
               <span>إضافه منتج</span>

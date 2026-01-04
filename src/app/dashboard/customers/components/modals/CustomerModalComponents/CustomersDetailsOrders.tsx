@@ -18,7 +18,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
       <div className="overflow-x-auto pb-4">
         <div className="mb-1">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-1 h-8 bg-[#5D24E1] rounded-full"></div>
+            <div className="w-1 h-8 bg-primary rounded-full"></div>
             <h1 className="text-lg font-bold text-gray-900">سجل الطلبات</h1>
           </div>
         </div>

@@ -474,7 +474,7 @@ function AllOrdersContent() {
               maxDate={toDate || undefined}
             />
 
-            <ArrowLeft className="text-[#5D24E1] flex-shrink-0" size="20" />
+            <ArrowLeft className="text-primary flex-shrink-0" size="20" />
 
             <DatePicker
               selected={toDate}
@@ -492,9 +492,8 @@ function AllOrdersContent() {
               onValueChange={(label) => setTimePeriod(getValueFromLabel(label))}
               options={TIME_PERIOD_LABELS}
               placeholder="الفترة الزمنية"
-              triggerClassName={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${
-                timePeriod ? 'text-[#5D24E1] font-bold' : ''
-              }`}
+              triggerClassName={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${timePeriod ? 'text-primary font-bold' : ''
+                }`}
               searchThreshold={10}
               clearable
             />
@@ -532,7 +531,7 @@ function AllOrdersContent() {
             <div className="flex flex-col gap-2">
               <button
                 onClick={handleSelectAllToggle}
-                className="px-4 py-2 text-sm bg-[#5D24E1] text-white rounded-lg hover:bg-[#682fee] transition-colors"
+                className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-[#682fee] transition-colors"
               >
                 {selectAllMatchingFilters ? (
                   'إلغاء تحديد الكل'
@@ -549,7 +548,7 @@ function AllOrdersContent() {
             <div className="flex flex-row items-center justify-center gap-2">
               <X
                 onClick={() => setSelect(false)}
-                className="cursor-pointer text-[#5D24E1] h-5 w-5"
+                className="cursor-pointer text-primary h-5 w-5"
               />
               <span className="text-sm text-gray-600">
                 تم تحديد {selectedOrderIds.length} طلب
@@ -557,7 +556,7 @@ function AllOrdersContent() {
             </div>
           )}
           <div
-            className="bg-[#5D24E1] flex flex-row items-center justify-center gap-3 px-5 py-2 rounded-full cursor-pointer"
+            className="bg-primary flex flex-row items-center justify-center gap-3 px-5 py-2 rounded-full cursor-pointer"
             onClick={() => setSelect(!select)}
           >
             <p>تحديد</p>
@@ -576,7 +575,7 @@ function AllOrdersContent() {
         <div className="relative">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5D24E1] mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
               <p className="mt-4 text-gray-600">جاري تحميل الطلبات...</p>
             </div>
           </div>
@@ -692,7 +691,7 @@ function AllOrdersContent() {
       {showBackToTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 left-8 z-50 p-4 bg-[#5D24E1] text-white rounded-full shadow-lg hover:bg-[#682fee] transition-all duration-300 hover:scale-110"
+          className="fixed bottom-8 left-8 z-50 p-4 bg-primary text-white rounded-full shadow-lg hover:bg-[#682fee] transition-all duration-300 hover:scale-110"
           aria-label="العودة للأعلى"
         >
           <ArrowUp className="w-6 h-6" />
@@ -708,7 +707,7 @@ function AllOrdersLoading() {
     <div className="w-full max-w-full overflow-x-hidden">
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5D24E1] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-gray-600">جاري تحميل الطلبات...</p>
         </div>
       </div>
