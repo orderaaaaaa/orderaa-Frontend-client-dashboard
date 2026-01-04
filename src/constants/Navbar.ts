@@ -13,6 +13,7 @@ import {
   ChartNoAxesCombined,
   TruckIcon,
   HousePlus,
+  Wallet,
 } from 'lucide-react';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
 import { CartIcon, ExcelIcon } from '@/components/icons'; // Import from your icons registry
@@ -127,5 +128,10 @@ export const navigation: NavigationItem[] = [
     name: 'اعدادات المتجر',
     href: '/dashboard/store-settings',
     icon: HousePlus,
+  },
+  {
+    name: 'المحفظة',
+    href: '/dashboard/wallet',
+    icon: Wallet,
   },
 ];
