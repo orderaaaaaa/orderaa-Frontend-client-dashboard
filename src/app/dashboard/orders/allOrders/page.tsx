@@ -504,7 +504,7 @@ function AllOrdersContent() {
       <PageTaps
         data={orders}
         statusCounts={statistics?.statusCounts || {}}
-        totalOrders={totalOrders}
+        totalOrders={statistics?.totalOrders || 0}
         onStatusChange={setStatus}
         currentStatus={filters.status}
       />
