@@ -54,20 +54,19 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
         disabled={!provider.isActive}
         className={`
           w-full h-12 rounded-lg font-medium text-white transition-all duration-200
-          ${
-            provider.isActive
-              ? isConnected
-                ? 'bg-gray-600 hover:bg-gray-700'
-                : 'bg-[#5D24E1] hover:bg-[#4A1CB8] active:bg-[#3D17A0]'
-              : 'bg-gray-400 cursor-not-allowed'
+          ${provider.isActive
+            ? isConnected
+              ? 'bg-gray-600 hover:bg-gray-700'
+              : 'bg-primary hover:bg-[#4A1CB8] active:bg-[#3D17A0]'
+            : 'bg-gray-400 cursor-not-allowed'
           }
         `}
       >
         {isConnected
           ? 'إدارة الربط'
           : provider.isActive
-          ? 'إنشاء ربط جديد'
-          : 'قريباً'}
+            ? 'إنشاء ربط جديد'
+            : 'قريباً'}
       </Button>
     </div>
   );

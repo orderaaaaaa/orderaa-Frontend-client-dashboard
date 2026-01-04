@@ -11,7 +11,7 @@ export default function EmployeeFormHeader() {
         className="flex items-center gap-5"
         style={{ direction: 'rtl', justifyContent: 'flex-start' }}
       >
-        <div className="w-[53px] h-[52px] bg-[#5D24E1] shadow-[0px_4px_22px_rgba(0,0,0,0.08)] rounded-lg flex items-center justify-center flex-shrink-0">
+        <div className="w-[53px] h-[52px] bg-primary shadow-[0px_4px_22px_rgba(0,0,0,0.08)] rounded-lg flex items-center justify-center flex-shrink-0">
           <User className="w-8 h-8 text-white" strokeWidth={1.5} />
         </div>
         <div

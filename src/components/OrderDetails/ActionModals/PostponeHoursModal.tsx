@@ -82,7 +82,7 @@ export default function PostponeHoursModal({
                   value={option.value}
                   checked={selectedDuration === option.value}
                   onChange={() => handleSelectDuration(option.value)}
-                  className="w-5 h-5 text-[#5D24E1] border-gray-300 focus:ring-[#5D24E1] focus:ring-2"
+                  className="w-5 h-5 text-primary border-gray-300 focus:ring-primary focus:ring-2"
                 />
                 <span className="text-base font-bold text-[#1F1F1F]">
                   {option.label}

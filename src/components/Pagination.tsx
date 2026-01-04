@@ -82,11 +82,10 @@ export function Pagination({
       <button
         onClick={handlePrevious}
         disabled={!hasPreviousPage}
-        className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-colors ${
-          hasPreviousPage
-            ? 'border-gray-300 hover:bg-[#5d24e1] hover:text-white hover:border-[#5d24e1] text-gray-700'
+        className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-colors ${hasPreviousPage
+            ? 'border-gray-300 hover:bg-primary hover:text-white hover:border-primary text-gray-700'
             : 'border-gray-200 text-gray-400 cursor-not-allowed'
-        }`}
+          }`}
         aria-label="الصفحة السابقة"
       >
         <ChevronRight size={20} />
@@ -113,11 +112,10 @@ export function Pagination({
             <button
               key={index}
               onClick={() => handlePageClick(pageNumber)}
-              className={`w-10 h-10 rounded-lg border transition-colors ${
-                isActive
-                  ? 'bg-[#5d24e1] text-white border-[#5d24e1] font-medium'
-                  : 'border-gray-300 text-gray-700 hover:bg-[#5d24e1] hover:text-white hover:border-[#5d24e1]'
-              }`}
+              className={`w-10 h-10 rounded-lg border transition-colors ${isActive
+                  ? 'bg-primary text-white border-primary font-medium'
+                  : 'border-gray-300 text-gray-700 hover:bg-primary hover:text-white hover:border-primary'
+                }`}
               aria-label={`الصفحة ${pageNumber}`}
               aria-current={isActive ? 'page' : undefined}
             >
@@ -131,11 +129,10 @@ export function Pagination({
       <button
         onClick={handleNext}
         disabled={!hasNextPage}
-        className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-colors ${
-          hasNextPage
-            ? 'border-gray-300 hover:bg-[#5d24e1] hover:text-white hover:border-[#5d24e1] text-gray-700'
+        className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-colors ${hasNextPage
+            ? 'border-gray-300 hover:bg-primary hover:text-white hover:border-primary text-gray-700'
             : 'border-gray-200 text-gray-400 cursor-not-allowed'
-        }`}
+          }`}
         aria-label="الصفحة التالية"
       >
         <ChevronLeft size={20} />

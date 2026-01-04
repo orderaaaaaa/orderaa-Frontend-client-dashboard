@@ -54,14 +54,12 @@ const CustomerBanConfirmationModal: React.FC<
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md md:max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
         <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-50">
           <div
-            className={`flex items-center gap-3 ${
-              isUnbanning ? 'text-green-600' : 'text-[#95071f]'
-            }`}
+            className={`flex items-center gap-3 ${isUnbanning ? 'text-green-600' : 'text-[#95071f]'
+              }`}
           >
             <div
-              className={`${
-                isUnbanning ? 'bg-green-50' : 'bg-red-50'
-              } p-2 rounded-full`}
+              className={`${isUnbanning ? 'bg-green-50' : 'bg-red-50'
+                } p-2 rounded-full`}
             >
               <TfiAlert className="w-5 h-5 md:w-6 md:h-6" />
             </div>
@@ -94,7 +92,7 @@ const CustomerBanConfirmationModal: React.FC<
                   key={index}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-white"
                 >
-                  <span className="text-[#5d24e1]">{patch.icon}</span>
+                  <span className="text-primary">{patch.icon}</span>
                   <span className="text-gray-700 text-xs md:text-sm font-medium">
                     {patch.state}
                   </span>
@@ -120,11 +118,10 @@ const CustomerBanConfirmationModal: React.FC<
           <div className="flex flex-col sm:flex-row-reverse gap-3">
             <button
               onClick={() => onConfirm?.(id, isUnbanning ? '' : note)}
-              className={`w-full sm:flex-1 px-6 py-3 cursor-pointer font-bold rounded-xl transition-all text-white shadow-lg active:scale-95 ${
-                isUnbanning
+              className={`w-full sm:flex-1 px-6 py-3 cursor-pointer font-bold rounded-xl transition-all text-white shadow-lg active:scale-95 ${isUnbanning
                   ? 'bg-green-600 hover:bg-green-700 shadow-green-100'
-                  : 'bg-[#5d24e1] hover:bg-[#4a1cb5] shadow-purple-200'
-              }`}
+                  : 'bg-primary hover:bg-[#4a1cb5] shadow-purple-200'
+                }`}
             >
               {isUnbanning ? 'تأكيد إلغاء الحظر' : 'تأكيد الحظر'}
             </button>

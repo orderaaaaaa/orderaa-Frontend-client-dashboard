@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Search, SlidersVertical, X as XIcon } from 'lucide-react';
-import Dropdown from '@/components/ui/Dropdown';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 import {
   activityTypeOptions,
   clientStatusOptions,
   customerOptions,
-  orderStatusOptions,
 } from '../constants/SearchConst';
 import debounce from 'lodash/debounce';
+import { useOrderStatusesQuery } from '@/services/orders';
 
 interface CustomerSearchProps {
   fromDate: Date | null;
@@ -38,6 +38,18 @@ export default function CustomerSearch({
   const [orderStatus, setOrderStatus] = useState('');
   const [activityType, setActivityType] = useState('');
   const [allCustomers, setAllCustomers] = useState('');
+
+  const { data: statusesData } = useOrderStatusesQuery();
+
+  const orderStatusOptions = useMemo(() => {
+    const baseOption = { key: 'all', value: 'جميع الحالات' };
+    if (!statusesData) return [baseOption];
+    const dynamicOptions = statusesData.map((status) => ({
+      key: status.key,
+      value: status.label,
+    }));
+    return [baseOption, ...dynamicOptions];
+  }, [statusesData]);
 
   const debouncedSearch = useMemo(
     () =>
@@ -88,11 +100,10 @@ export default function CustomerSearch({
           {/* Filter Toggle Button */}
           <button
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className={`flex items-center justify-center gap-2 px-6 md:px-12 py-2.5 rounded-lg transition-all cursor-pointer border ${
-              isFilterOpen
-                ? 'bg-[#5d24e1] text-white shadow-md border-[#5d24e1]'
+            className={`flex items-center justify-center gap-2 px-6 md:px-12 py-2.5 rounded-lg transition-all cursor-pointer border ${isFilterOpen
+                ? 'bg-primary text-white shadow-md border-primary'
                 : 'border-gray-300 hover:bg-gray-50 text-gray-700'
-            }`}
+              }`}
           >
             <SlidersVertical className="w-5 h-5" />
             <span className="font-medium whitespace-nowrap">فلاتر متقدمة</span>
@@ -105,7 +116,7 @@ export default function CustomerSearch({
               value={localSearch}
               onChange={handleSearchChange}
               placeholder="البحث بالاسم، رقم الهاتف، أو الكود..."
-              className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-[#5d24e1] focus:border-transparent text-right placeholder-gray-400"
+              className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-right placeholder-gray-400"
               dir="rtl"
             />
             {localSearch && (
@@ -121,7 +132,7 @@ export default function CustomerSearch({
                 <XIcon className="w-4 h-4" />
               </button>
             )}
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#5d24e1]" />
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary" />
           </div>
         </div>
       </div>
@@ -131,106 +142,67 @@ export default function CustomerSearch({
         <div className="px-4 md:px-6 pb-6 border-t border-gray-50 pt-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Client Status */}
-            <div className="relative space-y-1">
+            <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700 text-right">
                 حالة العميل
               </label>
-              <Dropdown
+              <SearchableSelect
                 value={clientStatus}
                 onChange={handleClientStatusChange}
                 options={clientStatusOptions}
                 placeholder="اختر الحالة"
-                readOnly
-                selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-sm font-semibold bg-white text-right"
-                arrowClassName="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
-                dropdownClassName="absolute z-20 left-0 right-0 bg-white rounded-lg mt-1 max-h-48 overflow-y-auto shadow-xl border border-gray-200"
+                widthClass="w-full"
+                clearable
+                triggerClassName="w-full border border-gray-300 rounded-lg py-2.5 px-3 text-sm font-semibold bg-white text-right"
               />
-              {clientStatus && (
-                <button
-                  type="button"
-                  onClick={() => handleClientStatusChange('')}
-                  className="absolute top-9 left-10 text-[#5D24E1] cursor-pointer"
-                >
-                  <XIcon className="w-4 h-4" />
-                </button>
-              )}
             </div>
 
             {/* Order Status */}
-            <div className="relative space-y-1">
+            <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700 text-right">
                 حالة الطلب
               </label>
-              <Dropdown
+              <SearchableSelect
                 value={orderStatus}
                 onChange={handleOrderStatusChange}
                 options={orderStatusOptions}
                 placeholder="اختر حالة الطلب"
-                readOnly
-                selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-sm font-semibold bg-white text-right"
-                arrowClassName="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
-                dropdownClassName="absolute z-20 left-0 right-0 bg-white rounded-lg mt-1 max-h-48 overflow-y-auto shadow-xl border border-gray-200"
+                widthClass="w-full"
+                clearable
+                triggerClassName="w-full border border-gray-300 rounded-lg py-2.5 px-3 text-sm font-semibold bg-white text-right"
               />
-              {orderStatus && (
-                <button
-                  type="button"
-                  onClick={() => handleOrderStatusChange('')}
-                  className="absolute top-9 left-10 text-[#5D24E1] cursor-pointer"
-                >
-                  <XIcon className="w-4 h-4" />
-                </button>
-              )}
             </div>
 
             {/* Activity Type */}
-            <div className="relative space-y-1">
+            <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700 text-right">
                 نوع الشارة
               </label>
-              <Dropdown
+              <SearchableSelect
                 value={activityType}
                 onChange={setActivityType}
                 options={activityTypeOptions}
                 placeholder="نوع الشاره"
-                readOnly
-                selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-sm font-semibold bg-white text-right"
-                arrowClassName="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
-                dropdownClassName="absolute z-20 left-0 right-0 bg-white rounded-lg mt-1 max-h-48 overflow-y-auto shadow-xl border border-gray-200"
+                widthClass="w-full"
+                clearable
+                triggerClassName="w-full border border-gray-300 rounded-lg py-2.5 px-3 text-sm font-semibold bg-white text-right"
               />
-              {activityType && (
-                <button
-                  type="button"
-                  onClick={() => setActivityType('')}
-                  className="absolute top-9 left-10 text-[#5D24E1] cursor-pointer"
-                >
-                  <XIcon className="w-4 h-4" />
-                </button>
-              )}
             </div>
 
             {/* All Customers */}
-            <div className="relative space-y-1">
+            <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700 text-right">
                 جميع العملاء
               </label>
-              <Dropdown
+              <SearchableSelect
                 value={allCustomers}
                 onChange={setAllCustomers}
                 options={customerOptions}
                 placeholder="عرض الجميع"
-                readOnly
-                selectClassName="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3 text-sm font-semibold bg-white text-right"
-                arrowClassName="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+                widthClass="w-full"
+                clearable
+                triggerClassName="w-full border border-gray-300 rounded-lg py-2.5 px-3 text-sm font-semibold bg-white text-right"
               />
-              {allCustomers && (
-                <button
-                  type="button"
-                  onClick={() => setAllCustomers('')}
-                  className="absolute top-9 left-10 text-[#5D24E1] cursor-pointer"
-                >
-                  <XIcon className="w-4 h-4" />
-                </button>
-              )}
             </div>
           </div>
         </div>

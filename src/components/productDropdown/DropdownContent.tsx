@@ -92,7 +92,7 @@ export const DropdownContent: React.FC<DropdownContentProps> = ({
           <button
             onClick={onAddProduct}
             disabled={pendingSelectionsCount === 0}
-            className="px-6 py-3 rounded-full cursor-pointer bg-[#5D24E1] text-white hover:bg-[#4a1fa8] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-6 py-3 rounded-full cursor-pointer bg-primary text-white hover:bg-[#4a1fa8] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <Plus size={18} />
             <span>إضافة طلب ({pendingSelectionsCount})</span>

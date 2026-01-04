@@ -6,7 +6,7 @@ export interface Location {
 export interface Order {
   id: number;
   code: string;
-  status: OrderStatus;
+  status: string;
   totalCost: number;
   createdAt: string;
 }
@@ -45,28 +45,10 @@ export interface PaginatedCustomers {
   meta: PaginationMeta;
 }
 
-export type OrderStatus =
-  | 'NEW_ORDER'
-  | 'ATTEMPTED'
-  | 'WAITING_FOR_PAYMENT'
-  | 'WHATSAPP'
-  | 'POSTPONED'
-  | 'CALL_AGAIN'
-  | 'STOPPED'
-  | 'CANCELLED'
-  | 'UNCOMPLETED'
-  | 'CONFIRMED'
-  | 'PREPARED'
-  | 'SHIPPING'
-  | 'RETURNED_DELIVERED'
-  | 'DELIVERED'
-  | 'PARTIAL_DELIVERY'
-  | 'MISSING';
-
 export interface GetCustomersParams {
   page?: number;
   limit?: number;
   search?: string;
   isBlocked?: boolean;
-  latestOrderStatus?: OrderStatus;
+  latestOrderStatus?: string;
 }

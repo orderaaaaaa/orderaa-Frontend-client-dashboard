@@ -1,13 +1,12 @@
 import { create } from 'zustand';
-import { OrderStatus } from '@/types/orders';
 
 interface OrdersStore {
   searchQuery: string;
-  selectedStatus: OrderStatus | null;
+  selectedStatus: string | null;
   setSearchQuery: (query: string) => void;
-  setSelectedStatus: (status: OrderStatus | null) => void;
+  setSelectedStatus: (status: string | null) => void;
   clearFilters: () => void;
-  initializeFromUrl: (status: OrderStatus | null, search: string) => void;
+  initializeFromUrl: (status: string | null, search: string) => void;
 }
 
 export const useOrdersStore = create<OrdersStore>((set) => ({

@@ -1,10 +1,6 @@
 import React from 'react';
 import { Else, If, Then } from 'react-if';
-
-interface NotesTabProps {
-  notes: string[];
-  createdAt: string;
-}
+import { NotesTabProps } from '../../../types/CustomersDetailsModal';
 
 const NotesTab: React.FC<NotesTabProps> = ({ notes, createdAt }) => {
   return (

@@ -1,6 +1,6 @@
 import { useQuery, QueryKey } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
-import { getGovernorates, getCities } from '@/lib/api/lookups';
+import { getGovernorates, getCities, getPaymentMethods, getPaymentStatuses } from '@/lib/api/lookups';
 
 interface GovernorateData {
   key: string;
@@ -35,5 +35,39 @@ export const useCitiesQuery = (governorateKey: string | undefined) => {
     },
     enabled: !!governorateKey,
     staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+interface PaymentMethodData {
+  key: string;
+  label: string;
+}
+
+interface PaymentStatusData {
+  key: string;
+  label: string;
+}
+
+// Fetch payment methods with caching
+export const usePaymentMethodsQuery = () => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.PAYMENT_METHODS] as QueryKey,
+    queryFn: async () => {
+      const data = await getPaymentMethods();
+      return Array.isArray(data) ? (data as PaymentMethodData[]) : [];
+    },
+    staleTime: Infinity,
+  });
+};
+
+// Fetch payment statuses with caching
+export const usePaymentStatusesQuery = () => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.PAYMENT_STATUSES] as QueryKey,
+    queryFn: async () => {
+      const data = await getPaymentStatuses();
+      return Array.isArray(data) ? (data as PaymentStatusData[]) : [];
+    },
+    staleTime: Infinity,
   });
 };

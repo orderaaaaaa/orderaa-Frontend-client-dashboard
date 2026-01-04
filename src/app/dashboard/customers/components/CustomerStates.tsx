@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 // 1. Import Swiper components and modules
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCards } from 'swiper/modules';
@@ -24,27 +24,25 @@ export default function CustomerStates({
   clientStatus,
   orderStatus,
 }: CustomerStatesProps) {
-  // Get total count of ALL customers (no filters, just for counting)
   const { data: allCustomersData } = useGetCustomers({
     page: 1,
-    limit: 1, // We only need meta.totalItems, minimal data fetch
-    // No search or filter parameters to get total count
+    limit: 1,
   });
 
-  // Extract the total items count from the API response
   const totalOrdersCount =
     allCustomersData?.meta?.totalItems?.toString() || '0';
 
-  // Transform stats data - replace only "إحصائي الطلبات" value with real count
-  const transformedStatsData = statsData.map((stat) => {
-    if (stat.label === 'إحصائي الطلبات') {
-      return {
-        ...stat,
-        value: totalOrdersCount,
-      };
-    }
-    return stat;
-  });
+  const transformedStatsData = useMemo(() => {
+    return statsData.map((stat) => {
+      if (stat.label === 'جميع العملاء') {
+        return {
+          ...stat,
+          value: totalOrdersCount,
+        };
+      }
+      return stat;
+    });
+  }, [totalOrdersCount]);
 
   return (
     <div className="w-full mb-10" dir="rtl">

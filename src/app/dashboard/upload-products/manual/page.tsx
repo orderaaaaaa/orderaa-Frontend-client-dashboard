@@ -114,7 +114,7 @@ function Manual() {
       });
 
       await createManualOrder(payload);
-      
+
       // Success - reset form and show success message
       setSubmitSuccess(true);
       setOrderSource({ platform: '', pageName: '' });
@@ -128,7 +128,7 @@ function Manual() {
       });
       useProductDropdownStore.getState().setSelectedProducts([]);
       setErrors({});
-      
+
       // Clear success message after 5 seconds
       setTimeout(() => setSubmitSuccess(false), 5000);
     } catch (error) {
@@ -228,11 +228,10 @@ function Manual() {
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className={`flex py-2 gap-2 text-md items-center text-white w-40 px-5 rounded-full font-bold transition-opacity ${
-              isSubmitting
+            className={`flex py-2 gap-2 text-md items-center text-white w-40 px-5 rounded-full font-bold transition-opacity ${isSubmitting
                 ? 'bg-gray-400 cursor-not-allowed opacity-70'
-                : 'bg-[#5D24E1] cursor-pointer hover:bg-[#4a1fa8]'
-            }`}
+                : 'bg-primary cursor-pointer hover:bg-[#4a1fa8]'
+              }`}
           >
             {isSubmitting ? (
               <>

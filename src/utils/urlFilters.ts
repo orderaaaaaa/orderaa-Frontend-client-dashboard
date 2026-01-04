@@ -1,9 +1,9 @@
-import { OrderStatus, OrderFilters } from '@/types/orders';
+import { OrderFilters } from '@/types/orders';
 import { TimePeriod } from './dateRangeUtils';
 
 // URL filter state interface
 export interface UrlFilterState {
-  status: OrderStatus | null;
+  status: string | null;
   search: string;
   fromDate: Date | null;
   toDate: Date | null;
@@ -38,15 +38,13 @@ export const DEFAULT_FILTER_STATE: UrlFilterState = {
   },
 };
 
-// All valid OrderStatus values
-const ORDER_STATUS_VALUES = Object.values(OrderStatus);
-
 // All valid TimePeriod values
 const TIME_PERIOD_VALUES: TimePeriod[] = ['day', 'week', 'month', 'quarter', 'year', ''];
 
-// Check if a string is a valid OrderStatus
-export function isValidOrderStatus(value: string): value is OrderStatus {
-  return ORDER_STATUS_VALUES.includes(value as OrderStatus);
+// Status validation is now dynamic - any non-empty string is valid
+// The backend is the source of truth for valid statuses
+export function isValidOrderStatus(value: string): boolean {
+  return value.length > 0;
 }
 
 // Check if a string is a valid TimePeriod
@@ -168,9 +166,9 @@ export function serializeFiltersToUrl(state: UrlFilterState): URLSearchParams {
 
 // Parse URLSearchParams to filter state
 export function parseFiltersFromUrl(params: URLSearchParams): UrlFilterState {
-  // Status
+  // Status - accept any string, backend is source of truth
   const statusParam = params.get('status');
-  const status = statusParam && isValidOrderStatus(statusParam) ? statusParam : null;
+  const status = statusParam || null;
 
   // Search
   const search = params.get('search') || '';

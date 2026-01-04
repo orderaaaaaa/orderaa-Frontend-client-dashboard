@@ -21,6 +21,7 @@ import { LiaEyeSolid, LiaEyeSlashSolid } from 'react-icons/lia';
 import { integrationSteps, webhookSteps } from '../constants/steps';
 import { Else, If, Then } from 'react-if';
 import { MdQuestionMark } from 'react-icons/md';
+import { toast } from 'react-toastify';
 
 interface EasyOrderModalProps {
   isOpen: boolean;
@@ -113,11 +114,14 @@ const EasyOrderModal = ({
     try {
       if (existingIntegrationId) {
         await updateIntegration({
-          id: existingIntegrationId,
+          provider: 'EASY_ORDERS',
           apiKey: apiKey.trim(),
         });
+
+        toast.success('تم تحديث اعدادات ربط API بنجاح');
       } else {
         await createIntegration(apiKey.trim());
+        toast.success('تم انشاء ربط API بنجاح');
       }
       queryClient.invalidateQueries({ queryKey: ['integration-configs'] });
     } catch (err: any) {
@@ -218,7 +222,7 @@ const EasyOrderModal = ({
             </div>
 
             {/*  Webhook Dropdown */}
-            <div className="bg-[#fbfdfe] rounded-xl border border-[#5D24E1]/30 overflow-hidden transition-all duration-300">
+            <div className="bg-[#fbfdfe] rounded-xl border border-primary/30 overflow-hidden transition-all duration-300">
               <button
                 type="button"
                 onClick={() => setShowWebhookDropdown(!showWebhookDropdown)}
@@ -243,7 +247,7 @@ const EasyOrderModal = ({
                 {/* Main Wrapper - items-end aligns the chevron with the bottom text line */}
                 <div className="flex items-end justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="bg-[#5D24E1] text-white p-2 rounded-lg">
+                    <div className="bg-primary text-white p-2 rounded-lg">
                       <Play className="w-5 h-5" />
                     </div>
                     <div className="text-right">
@@ -259,9 +263,9 @@ const EasyOrderModal = ({
                   {/* Chevron - pb-[2px] added to fine-tune the optical alignment with the text baseline */}
                   <div className="relative top-1 left-1">
                     {showWebhookDropdown ? (
-                      <ChevronUp className="w-6 h-6 text-[#5D24E1]" />
+                      <ChevronUp className="w-6 h-6 text-primary" />
                     ) : (
-                      <ChevronDown className="w-6 h-6 text-[#5D24E1]" />
+                      <ChevronDown className="w-6 h-6 text-primary" />
                     )}
                   </div>
                 </div>
@@ -297,7 +301,7 @@ const EasyOrderModal = ({
                         <button
                           type="button"
                           onClick={handleCopyUrl}
-                          className="flex items-center gap-2 px-3 py-1 bg-[#5D24E1] text-white text-xs rounded-md hover:bg-[#4A1CB8]"
+                          className="flex items-center gap-2 px-3 py-1 bg-primary text-white text-xs rounded-md hover:bg-[#4A1CB8]"
                         >
                           {copied ? (
                             <Check className="w-3 h-3" />
@@ -311,7 +315,7 @@ const EasyOrderModal = ({
                         type="url"
                         value={customWebhookUrl || defaultWebhookUrl}
                         onChange={(e) => setCustomWebhookUrl(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-left text-sm font-mono focus:ring-2 focus:ring-[#5D24E1] outline-none"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-left text-sm font-mono focus:ring-2 focus:ring-primary outline-none"
                         dir="ltr"
                         placeholder="https://..."
                       />
@@ -330,7 +334,7 @@ const EasyOrderModal = ({
                           value={webhookSecret}
                           onChange={(e) => setWebhookSecret(e.target.value)}
                           placeholder="Secret key"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg text-left focus:ring-2 focus:ring-[#5D24E1] pr-12 font-mono"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg text-left focus:ring-2 focus:ring-primary pr-12 font-mono"
                           dir="ltr"
                           required
                         />
@@ -339,7 +343,7 @@ const EasyOrderModal = ({
                           onClick={() => setShowSecret(!showSecret)}
                           className="absolute inset-y-0 right-2 flex items-center"
                         >
-                          <span className="text-white rounded-md cursor-pointer p-1.5 bg-[#5D24E1]">
+                          <span className="text-white rounded-md cursor-pointer p-1.5 bg-primary">
                             {showSecret ? (
                               <LiaEyeSlashSolid className="w-4 h-4" />
                             ) : (
@@ -354,7 +358,7 @@ const EasyOrderModal = ({
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="flex-1 bg-[#5D24E1] text-white h-10"
+                      className="flex-1 bg-primary text-white h-10"
                     >
                       {existingConfig ? 'تحديث Webhook' : 'حفظ Webhook'}
                     </Button>
@@ -371,7 +375,7 @@ const EasyOrderModal = ({
             </div>
 
             {/*  API Key Dropdown */}
-            <div className="bg-[#fbfdfe] rounded-xl border border-[#5D24E1]/30 overflow-hidden transition-all duration-300">
+            <div className="bg-[#fbfdfe] rounded-xl border border-primary/30 overflow-hidden transition-all duration-300">
               <button
                 type="button"
                 onClick={() => setShowApiDropdown(!showApiDropdown)}
@@ -396,7 +400,7 @@ const EasyOrderModal = ({
                 {/* Main Wrapper */}
                 <div className="flex items-end justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="bg-[#5D24E1] text-white p-2 rounded-lg">
+                    <div className="bg-primary text-white p-2 rounded-lg">
                       <ShoppingCart className="w-5 h-5" />
                     </div>
                     <div className="text-right">
@@ -412,9 +416,9 @@ const EasyOrderModal = ({
                   {/* Chevron */}
                   <div className="relative top-1 left-1">
                     {showApiDropdown ? (
-                      <ChevronUp className="w-6 h-6 text-[#5D24E1]" />
+                      <ChevronUp className="w-6 h-6 text-primary" />
                     ) : (
-                      <ChevronDown className="w-6 h-6 text-[#5D24E1]" />
+                      <ChevronDown className="w-6 h-6 text-primary" />
                     )}
                   </div>
                 </div>
@@ -456,7 +460,7 @@ const EasyOrderModal = ({
                           type={showApi ? 'text' : 'password'}
                           value={apiKey}
                           onChange={(e) => setApiKey(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg text-left focus:ring-2 focus:ring-[#5D24E1] pr-12 font-mono outline-none"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg text-left focus:ring-2 focus:ring-primary pr-12 font-mono outline-none"
                           dir="ltr"
                           placeholder="Enter your API key"
                           required
@@ -466,7 +470,7 @@ const EasyOrderModal = ({
                           onClick={() => setShowApi(!showApi)}
                           className="absolute inset-y-0 right-2 flex items-center"
                         >
-                          <span className="text-white rounded-md cursor-pointer p-1.5 bg-[#5D24E1] hover:bg-[#4A1CB8] transition-colors">
+                          <span className="text-white rounded-md cursor-pointer p-1.5 bg-primary hover:bg-[#4A1CB8] transition-colors">
                             {showApi ? (
                               <LiaEyeSlashSolid className="w-4 h-4" />
                             ) : (
@@ -483,7 +487,7 @@ const EasyOrderModal = ({
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="flex-1 bg-[#5D24E1] text-white h-10"
+                      className="flex-1 bg-primary text-white h-10"
                     >
                       {existingIntegrationId ? 'تحديث API' : 'حفظ API'}
                     </Button>

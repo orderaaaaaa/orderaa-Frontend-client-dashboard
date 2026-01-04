@@ -25,7 +25,7 @@ export function ErrorModal({
     }
   };
 
-  
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
@@ -37,7 +37,7 @@ export function ErrorModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div
-          className="h-[60px] sm:h-[79px] rounded-t-[20px] flex items-center justify-center px-8 flex-shrink-0 relative"
+          className="h-[60px] rounded-t-[20px] flex items-center justify-center px-8 flex-shrink-0 relative"
           style={{
             background:
               'linear-gradient(105.28deg, #FFFFFF 1.48%, #CBB5FD 182.49%, #FFFFFF 187.88%)',
@@ -66,7 +66,7 @@ export function ErrorModal({
           <Button
             variant="outline"
             onClick={onClose}
-            className="w-[146px] h-[37px] bg-[#5D24E1] border-[1.5px] border-[#5D24E1] rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors"
+            className="w-[146px] h-[37px] bg-primary border-[1.5px] border-primary rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors"
           >
             <span className="text-lg font-bold text-white">إغلاق</span>
           </Button>

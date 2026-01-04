@@ -196,22 +196,20 @@ function OrderDetailsProductCard({
                 <div className="flex flex-col items-end ml-2">
                   <div className="flex justify-end gap-2 mb-4">
                     <SquarePen
-                      className={`w-4 transition-colors ${
-                        isLockedByOther
+                      className={`w-4 transition-colors ${isLockedByOther
                           ? 'opacity-50 cursor-not-allowed'
                           : 'cursor-pointer hover:text-purple-700'
-                      }`}
+                        }`}
                       onClick={() =>
                         !isLockedByOther && handleEditClick(item.id)
                       }
                     />
                     {productsData.length > 1 && (
                       <Trash2
-                        className={`w-4 text-red-600 transition-colors ${
-                          isLockedByOther
+                        className={`w-4 text-red-600 transition-colors ${isLockedByOther
                             ? 'opacity-50 cursor-not-allowed'
                             : 'cursor-pointer hover:text-red-700'
-                        }`}
+                          }`}
                         onClick={() =>
                           !isLockedByOther && handleDeleteClick(item.id)
                         }
@@ -223,7 +221,7 @@ function OrderDetailsProductCard({
                     alt={item.product}
                     width={120}
                     height={120}
-                    className="border flex border-[#B8A3EB] rounded-xl"
+                    className="w-[120px] h-[120px] border border-[#B8A3EB] rounded-xl object-cover shrink-0"
                   />
                 </div>
               </div>
@@ -233,7 +231,7 @@ function OrderDetailsProductCard({
                   size="sm"
                   variant="ghost"
                   onClick={() => handleViewDetailsClick(item.id)}
-                  className="text-[#5D24E1] text-sm font-bold hover:underline text-right mt-1 hover:bg-transparent transition-colors hover:text-[#5D24E1]"
+                  className="text-primary text-sm font-bold hover:underline text-right mt-1 hover:bg-transparent transition-colors hover:text-primary"
                 >
                   المزيد
                   <LiaLongArrowAltLeftSolid className="w-4 h-4 rotate-45" />
@@ -248,7 +246,7 @@ function OrderDetailsProductCard({
             <Button
               onClick={() => setIsAddNewProductModalOpen(true)}
               disabled={isLockedByOther}
-              className="flex items-center gap-2 px-4 py-2 bg-[#5D24E1] text-white rounded-lg hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <PackagePlus className="w-5 h-5" strokeWidth={2} />
               <span className="text-sm font-bold">إضافة منتج جديد</span>
@@ -257,7 +255,7 @@ function OrderDetailsProductCard({
             <Button
               onClick={() => setIsAddSameTypeModalOpen(true)}
               disabled={productsData.length === 0 || isLockedByOther}
-              className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-[#5D24E1] text-[#5D24E1] rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-primary text-primary rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <CirclePlus className="w-5 h-5" strokeWidth={2} />
               <span className="text-sm font-bold">إضافة منتج من نفس النوع</span>

@@ -20,9 +20,8 @@ export function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
   return (
     <div
       // On mobile: Hide if second item has no href. On PC: Always show.
-      className={`${
-        hasSecondItemHref ? 'flex' : 'hidden'
-      } md:flex items-center gap-2 font-semibold ${className}`}
+      className={`${hasSecondItemHref ? 'flex' : 'hidden'
+        } md:flex items-center gap-2 font-semibold ${className}`}
       style={{ direction: 'rtl' }}
     >
       {items.map((item, index) => {
@@ -30,10 +29,10 @@ export function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
         const isLast = index === items.length - 1;
 
         const firstItemClasses =
-          'text-[#5D24E1] font-bold text-xl md:text-3xl transition-all hover:opacity-80';
+          'text-primary font-bold text-xl md:text-3xl transition-all hover:opacity-80';
 
         const secondaryItemClasses =
-          'font-normal text-lg md:text-xl text-[#1F1F1F] transition-all hover:text-[#5D24E1]';
+          'font-normal text-lg md:text-xl text-[#1F1F1F] transition-all hover:text-primary';
 
         return (
           <div key={index} className="flex items-center gap-2">

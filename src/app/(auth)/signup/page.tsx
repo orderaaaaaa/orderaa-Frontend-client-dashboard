@@ -1,16 +1,17 @@
 'use client';
 
 import { useForm } from 'react-hook-form';
-import { Mail, User, Pen, Phone, MapIcon, Lock } from 'lucide-react';
+import { Mail, User, Pen, Phone, Lock } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signUpSchema, type SignUpSchema } from './schema';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Dropdown from '../../../components/ui/Dropdown';
 import AuthForm from '../components/AuthForm';
 import Input from '../../../components/ui/Input';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 import { signUp } from '@/lib/api/auth';
-import { useGovernorates, useCatigories, useCities } from '@/hooks';
+import { useCatigories } from '@/hooks';
+import { useGovernoratesQuery, useCitiesQuery } from '@/services/lookups';
 
 export default function SignUpForm() {
   const router = useRouter();
@@ -25,17 +26,13 @@ export default function SignUpForm() {
   const { errors, isSubmitting } = formState;
   const selectedGovernorate = watch('governorate');
 
-  /** Load categories + governorates using custom hook */
-  const { governorates, error: dataError } = useGovernorates();
-
+  const { data: governorates = [], error: governoratesError } = useGovernoratesQuery();
+  const { data: cities = [], isLoading: loadingCities } = useCitiesQuery(selectedGovernorate);
   const { categories, error: categoryError } = useCatigories();
 
-  /** Load cities when governorate changes using custom hook */
-  const { cities, loadingCities } = useCities(selectedGovernorate);
-
   // Merge errors from hook
-  if (dataError && categoryError && !error) {
-    setError(dataError);
+  if (governoratesError && categoryError && !error) {
+    setError(governoratesError.message || 'حدث خطأ في تحميل البيانات');
   }
 
   const onSubmit = async (values: SignUpSchema) => {
@@ -82,16 +79,18 @@ export default function SignUpForm() {
       </div>
 
       {/* Activity */}
-      <Dropdown
-        value={watch('category')}
-        onChange={(val) => setValue('category', val)}
-        options={categories}
-        placeholder="اختر النشاط"
-        label="نوع النشاط"
-      />
-      {errors.category && (
-        <p className="text-xs text-red-500 mt-1">{errors.category.message}</p>
-      )}
+      <div className="flex flex-col gap-1">
+        <label className="block mb-1 font-medium text-[16px]">نوع النشاط</label>
+        <SearchableSelect
+          value={watch('category') || ''}
+          onChange={(val) => setValue('category', val)}
+          options={categories}
+          placeholder="اختر النشاط"
+          widthClass="w-full"
+          error={errors.category?.message}
+          clearable
+        />
+      </div>
 
       {/* Email + Mobile */}
       <Input
@@ -114,25 +113,33 @@ export default function SignUpForm() {
 
       {/* Governorate + City */}
       <div className="flex flex-col md:flex-row gap-4 justify-between md:items-center">
-        <Dropdown
-          value={watch('governorate')}
-          onChange={(val) => setValue('governorate', val)}
-          options={governorates}
-          placeholder="اختر المحافظة"
-          label="المحافظة"
-          icon={<MapIcon className='text-[#5d24e1]' />}
-        />
+        <div className="flex flex-col gap-1 w-full">
+          <label className="block mb-1 font-medium text-[16px]">المحافظة</label>
+          <SearchableSelect
+            value={watch('governorate') || ''}
+            onChange={(val) => {
+              setValue('governorate', val);
+              setValue('city', '');
+            }}
+            options={governorates}
+            placeholder="اختر المحافظة"
+            widthClass="w-full"
+            error={errors.governorate?.message}
+          />
+        </div>
 
-        <Dropdown
-          value={watch('city')}
-          onChange={(val) => setValue('city', val)}
-          options={
-            loadingCities ? [{ key: '', value: 'جار التحميل...' }] : cities
-          }
-          placeholder="اختر المدينة"
-          label="المدينة"
-          icon={<MapIcon className='text-[#5d24e1]'/>}
-        />
+        <div className="flex flex-col gap-1 w-full">
+          <label className="block mb-1 font-medium text-[16px]">المدينة</label>
+          <SearchableSelect
+            value={watch('city') || ''}
+            onChange={(val) => setValue('city', val)}
+            options={cities}
+            placeholder={!selectedGovernorate ? 'اختر المحافظة أولاً' : loadingCities ? 'جاري التحميل...' : 'اختر المدينة'}
+            widthClass="w-full"
+            disabled={!selectedGovernorate || loadingCities}
+            error={errors.city?.message}
+          />
+        </div>
       </div>
 
       {/* Passwords */}

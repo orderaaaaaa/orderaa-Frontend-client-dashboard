@@ -5,33 +5,13 @@ import BaseModal from '@/components/ui/base-modal';
 import { OrderEvent } from '@/types/orders';
 import { PhoneOff, History, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { getTimeAgo } from '@/utils/timeAgo';
+import { useStatusLabel } from '@/hooks/useStatusLabel';
 
 interface OrderHistoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   events: OrderEvent[];
 }
-
-const statusLabelMap: Record<string, string> = {
-  NEW_ORDER: 'طلب جديد',
-  ATTEMPTED: 'تمت المحاولة',
-  WAITING_FOR_PAYMENT: 'في انتظار الدفع',
-  WHATSAPP: 'واتساب',
-  POSTPONED: 'مؤجل',
-  CALL_AGAIN: 'اعادة اتصال',
-  STOPPED: 'متوقف',
-  CANCELLED: 'ملغي',
-  UNCOMPLETED: 'غير مكتمل',
-  CONFIRMED: 'مؤكد',
-  PREPARED: 'تم التحضير',
-  SHIPPING: 'في الشحن',
-  RETURNED_DELIVERED: 'مرتجع بعد التوصيل',
-  DELIVERED: 'تم التوصيل',
-  PARTIAL_DELIVERY: 'توصيل جزئي',
-  MISSING: 'مفقود',
-  REGISTERED: 'مسجل',
-  REPORTS: 'تقارير',
-};
 
 const getEventIcon = (eventType?: string) => {
   if (!eventType) {
@@ -61,7 +41,7 @@ const getEventIcon = (eventType?: string) => {
     case 'SHIPPING':
       return <History className="w-4 h-4 text-purple-600" />;
     case 'NEW_ORDER':
-      return <History className="w-4 h-4 text-[#5D24E1]" />;
+      return <History className="w-4 h-4 text-primary" />;
     default:
       return <History className="w-4 h-4 text-gray-600" />;
   }
@@ -81,9 +61,11 @@ export default function OrderHistoryModal({
   onClose,
   events,
 }: OrderHistoryModalProps) {
+  const { getStatusLabel } = useStatusLabel();
+
   const parseEvents = (): ParsedEvent[] => {
     return events.map((event, index) => {
-      const statusLabel = event.status ? (statusLabelMap[event.status] || event.status) : 'حدث';
+      const statusLabel = event.status ? getStatusLabel(event.status) : 'حدث';
       const displayDate = new Date(event.createdAt).toLocaleDateString('ar-EG');
       const timeAgo = getTimeAgo(event.createdAt);
 
@@ -144,7 +126,7 @@ export default function OrderHistoryModal({
                   </h3>
 
                   {event.note !== event.status && (
-                    <p className="text-sm text-[#5D24E1] text-center mb-1 max-w-[140px]">
+                    <p className="text-sm text-primary text-center mb-1 max-w-[140px]">
                       {event.note}
                     </p>
                   )}

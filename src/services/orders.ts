@@ -433,7 +433,7 @@ export const useCancelOrder = () => {
     }) => {
       const response = await http.post<Order>(`/orders/${orderId}/cancel`, {
         cancelReasonId: reasonId,
-        notes,
+        cancelNotes: notes,
       });
       return response.data;
     },

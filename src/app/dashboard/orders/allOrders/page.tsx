@@ -35,15 +35,30 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useUrlFilters } from '@/hooks/useUrlFilters';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import { formatDateForUrl } from '@/utils/urlFilters';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 
 import { Scan, ScanLine, ArrowUp, ArrowLeft, X } from 'lucide-react';
+
+// Time period options mapping
+const TIME_PERIOD_OPTIONS: { value: TimePeriod; label: string }[] = [
+  { value: 'day', label: 'يوم' },
+  { value: 'week', label: 'اسبوع' },
+  { value: 'month', label: 'شهر' },
+  { value: 'quarter', label: 'ربع سنوي' },
+  { value: 'year', label: 'سنه' },
+];
+
+const TIME_PERIOD_LABELS = TIME_PERIOD_OPTIONS.map((opt) => opt.label);
+
+const getLabelFromValue = (value: TimePeriod | ''): string => {
+  const option = TIME_PERIOD_OPTIONS.find((opt) => opt.value === value);
+  return option?.label || '';
+};
+
+const getValueFromLabel = (label: string): TimePeriod | '' => {
+  const option = TIME_PERIOD_OPTIONS.find((opt) => opt.label === label);
+  return option?.value || '';
+};
 
 function AllOrdersContent() {
   const [select, setSelect] = useState(false);
@@ -125,6 +140,13 @@ function AllOrdersContent() {
   } = useOrders(apiFilters);
 
   const { data: statusOptions } = useOrderStatusesQuery();
+
+  // Create status labels map for export
+  const statusLabelsMap = useMemo(() => {
+    if (!statusOptions) return new Map<string, string>();
+    return new Map(statusOptions.map((s) => [s.key, s.label]));
+  }, [statusOptions]);
+
   // Batch update mutation (for specific IDs)
   const { mutate: batchUpdateOrders } = useUpdateOrdersBatch({
     onSuccess: (data) => {
@@ -268,7 +290,11 @@ function AllOrdersContent() {
           return;
         }
 
-        const fileName = exportOrdersToExcel(ordersToExport, 'selected_orders');
+        const fileName = exportOrdersToExcel(
+          ordersToExport,
+          'selected_orders',
+          statusLabelsMap
+        );
         toast.success(
           `تم تصدير ${ordersToExport.length} طلب محدد بنجاح! \nاسم الملف: ${fileName}`
         );
@@ -282,7 +308,11 @@ function AllOrdersContent() {
             return;
           }
 
-          const fileName = exportOrdersToExcel(response.data, 'all_orders');
+          const fileName = exportOrdersToExcel(
+            response.data,
+            'all_orders',
+            statusLabelsMap
+          );
           toast.success(
             `تم تصدير ${response.data.length} طلب بنجاح! \nاسم الملف: ${fileName}`
           );
@@ -294,7 +324,11 @@ function AllOrdersContent() {
             return;
           }
 
-          const fileName = exportOrdersToExcel(orders, 'all_orders');
+          const fileName = exportOrdersToExcel(
+            orders,
+            'all_orders',
+            statusLabelsMap
+          );
           toast.success(
             `تم تصدير ${orders.length} طلب بنجاح! \nاسم الملف: ${fileName}`
           );
@@ -303,7 +337,14 @@ function AllOrdersContent() {
     } catch (error) {
       toast.error('فشل في تصدير الطلبات. الرجاء المحاولة مرة أخرى.');
     }
-  }, [apiFilters, select, selectedOrderIds, orders, fetchOrdersForExport]);
+  }, [
+    apiFilters,
+    select,
+    selectedOrderIds,
+    orders,
+    fetchOrdersForExport,
+    statusLabelsMap,
+  ]);
 
   // Handle Edit Status
   const handleEditStatus = useCallback(
@@ -422,59 +463,40 @@ function AllOrdersContent() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-7 w-full">
         <Breadcrumb items={[{ title: 'الطلبات' }, { title: 'جميع الطلبات' }]} />
 
-        <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 px-3 w-full sm:w-auto">
-          <DatePicker
-            selected={fromDate}
-            onChange={setFromDate}
-            placeholder="من تاريخ"
-            showIcon={true}
-            className="w-[100px] sm:w-[140px]"
-            maxDate={toDate || undefined}
-          />
+        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 px-3 w-full sm:w-auto">
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <DatePicker
+              selected={fromDate}
+              onChange={setFromDate}
+              placeholder="من تاريخ"
+              showIcon={true}
+              className="flex-1 sm:flex-none sm:w-[140px]"
+              maxDate={toDate || undefined}
+            />
 
-          <ArrowLeft className="text-[#5D24E1] flex-shrink-0" size="20" />
+            <ArrowLeft className="text-primary flex-shrink-0" size="20" />
 
-          <DatePicker
-            selected={toDate}
-            onChange={setToDate}
-            placeholder="إلى تاريخ"
-            showIcon={true}
-            className="w-[100px] sm:w-[140px]"
-            minDate={fromDate || undefined}
-          />
+            <DatePicker
+              selected={toDate}
+              onChange={setToDate}
+              placeholder="إلى تاريخ"
+              showIcon={true}
+              className="flex-1 sm:flex-none sm:w-[140px]"
+              minDate={fromDate || undefined}
+            />
+          </div>
 
-          <div className="relative w-30 sm:w-[180px] flex-shrink-0">
-            <Select
-              value={timePeriod}
-              onValueChange={(value) => setTimePeriod(value as TimePeriod)}
-            >
-              <SelectTrigger
-                className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${
-                  timePeriod ? 'text-[#5D24E1] font-bold' : ''
+          <div className="w-full sm:w-[180px] flex-shrink-0">
+            <SearchableSelect
+              value={getLabelFromValue(timePeriod)}
+              onValueChange={(label) => setTimePeriod(getValueFromLabel(label))}
+              options={TIME_PERIOD_LABELS}
+              placeholder="الفترة الزمنية"
+              triggerClassName={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${timePeriod ? 'text-primary font-bold' : ''
                 }`}
-              >
-                <SelectValue placeholder="الفترة الزمنية" />
-              </SelectTrigger>
-              <SelectContent className="[&_[data-state=checked]]:text-[#5D24E1]">
-                <SelectItem value="day">يوم</SelectItem>
-                <SelectItem value="week">اسبوع</SelectItem>
-                <SelectItem value="month">شهر</SelectItem>
-                <SelectItem value="quarter">ربع سنوي</SelectItem>
-                <SelectItem value="year">سنه</SelectItem>
-              </SelectContent>
-            </Select>
-            {timePeriod && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setTimePeriod('' as TimePeriod);
-                }}
-                className="absolute left-8 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors z-10"
-                type="button"
-              >
-                <X size={16} className="text-gray-500 hover:text-gray-700" />
-              </button>
-            )}
+              searchThreshold={10}
+              clearable
+            />
           </div>
         </div>
       </div>
@@ -482,7 +504,7 @@ function AllOrdersContent() {
       <PageTaps
         data={orders}
         statusCounts={statistics?.statusCounts || {}}
-        totalOrders={totalOrders}
+        totalOrders={statistics?.totalOrders || 0}
         onStatusChange={setStatus}
         currentStatus={filters.status}
       />
@@ -509,7 +531,7 @@ function AllOrdersContent() {
             <div className="flex flex-col gap-2">
               <button
                 onClick={handleSelectAllToggle}
-                className="px-4 py-2 text-sm bg-[#5D24E1] text-white rounded-lg hover:bg-[#682fee] transition-colors"
+                className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-[#682fee] transition-colors"
               >
                 {selectAllMatchingFilters ? (
                   'إلغاء تحديد الكل'
@@ -526,7 +548,7 @@ function AllOrdersContent() {
             <div className="flex flex-row items-center justify-center gap-2">
               <X
                 onClick={() => setSelect(false)}
-                className="cursor-pointer text-[#5D24E1] h-5 w-5"
+                className="cursor-pointer text-primary h-5 w-5"
               />
               <span className="text-sm text-gray-600">
                 تم تحديد {selectedOrderIds.length} طلب
@@ -534,7 +556,7 @@ function AllOrdersContent() {
             </div>
           )}
           <div
-            className="bg-[#5D24E1] flex flex-row items-center justify-center gap-3 px-5 py-2 rounded-full cursor-pointer"
+            className="bg-primary flex flex-row items-center justify-center gap-3 px-5 py-2 rounded-full cursor-pointer"
             onClick={() => setSelect(!select)}
           >
             <p>تحديد</p>
@@ -553,7 +575,7 @@ function AllOrdersContent() {
         <div className="relative">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5D24E1] mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
               <p className="mt-4 text-gray-600">جاري تحميل الطلبات...</p>
             </div>
           </div>
@@ -585,6 +607,7 @@ function AllOrdersContent() {
                 government={
                   order.governorate || order.externalGovernorate || 'غير محدد'
                 }
+                shippingId={order.shippingId}
                 // Updated Mapping Logic for Items and Variants
                 items={order.order_products.map((op: any) => {
                   const productName = op.products?.name || 'منتج غير معروف';
@@ -668,7 +691,7 @@ function AllOrdersContent() {
       {showBackToTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 left-8 z-50 p-4 bg-[#5D24E1] text-white rounded-full shadow-lg hover:bg-[#682fee] transition-all duration-300 hover:scale-110"
+          className="fixed bottom-8 left-8 z-50 p-4 bg-primary text-white rounded-full shadow-lg hover:bg-[#682fee] transition-all duration-300 hover:scale-110"
           aria-label="العودة للأعلى"
         >
           <ArrowUp className="w-6 h-6" />
@@ -684,7 +707,7 @@ function AllOrdersLoading() {
     <div className="w-full max-w-full overflow-x-hidden">
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5D24E1] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-gray-600">جاري تحميل الطلبات...</p>
         </div>
       </div>

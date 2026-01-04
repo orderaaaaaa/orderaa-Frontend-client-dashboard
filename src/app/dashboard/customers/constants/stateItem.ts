@@ -8,7 +8,7 @@ export interface StatItem {
 export const statsData: StatItem[] = [
   {
     iconSrc: '/Icons/orders.svg',
-    label: 'جميع عملاء',
+    label: 'جميع العملاء',
     value: '208',
   },
   {

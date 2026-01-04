@@ -61,12 +61,11 @@ export const IntegrationCard = ({
         onClick={() => platform.isActive && onButtonClick(platform.id)}
         className={`
           w-full h-12 rounded-lg font-medium text-white transition-all duration-200
-          ${
-            platform.isActive
-              ? WebhookEasyOrderConnect || isApiConnected
-                ? 'bg-gray-600 hover:bg-gray-700'
-                : 'bg-[#5D24E1] hover:bg-[#4A1CB8] active:bg-[#3D17A0]'
-              : 'bg-gray-400 cursor-not-allowed'
+          ${platform.isActive
+            ? WebhookEasyOrderConnect || isApiConnected
+              ? 'bg-gray-600 hover:bg-gray-700'
+              : 'bg-primary hover:bg-[#4A1CB8] active:bg-[#3D17A0]'
+            : 'bg-gray-400 cursor-not-allowed'
           }
         `}
         disabled={!platform.isActive}

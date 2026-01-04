@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Dropdown from '@/components/ui/Dropdown';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 import { USER_MENU_OPTIONS } from '@/constants/dashboard-layout';
 import Input from '@/components/ui/Input';
 
@@ -43,7 +43,7 @@ function ShippingAndPayment() {
                                 peer peer-checked:after:translate-x-full peer-checked:after:border-white 
                                 after:content-[''] after:absolute after:top-0 after:left-0 after:bg-white 
                                 after:border-gray-300 after:border after:rounded-full after:h-[30px] after:w-[30px] 
-                                after:transition-all peer-checked:bg-[#5D24E1] 
+                                after:transition-all peer-checked:bg-primary 
                                 rtl:peer-checked:after:-translate-x-full rtl:after:left-auto rtl:after:right-0"
                 />
               </label>
@@ -92,7 +92,7 @@ function ShippingAndPayment() {
                                 peer peer-checked:after:translate-x-full peer-checked:after:border-white 
                                 after:content-[''] after:absolute after:top-0 after:left-0 after:bg-white 
                                 after:border-gray-300 after:border after:rounded-full after:h-[30px] after:w-[30px] 
-                                after:transition-all peer-checked:bg-[#5D24E1] 
+                                after:transition-all peer-checked:bg-primary 
                                 rtl:peer-checked:after:-translate-x-full rtl:after:left-auto rtl:after:right-0"
                 />
               </label>
@@ -105,13 +105,13 @@ function ShippingAndPayment() {
                 : 'max-h-0 opacity-0'
                 }`}
             >
-              <Dropdown
+              <SearchableSelect
                 value={paymentMethod}
                 onChange={setPaymentMethod}
                 options={USER_MENU_OPTIONS}
                 placeholder="اختر طريقة الدفع"
-                className="max-w-[921px]"
-                selectClassName="border-2 border-[#5D24E1] w-full bg-[#EAEAEA40] p-2 rounded-sm  focus:!border-[#5D24E1] focus:ring-[1px] focus:!ring-[#5D24E1]/50"
+                widthClass="max-w-[921px]"
+                triggerClassName="border-2 border-primary w-full bg-[#EAEAEA40] p-2 rounded-sm focus:!border-primary focus:ring-[1px] focus:!ring-primary/50"
               />
             </div>
           </div>
@@ -141,7 +141,7 @@ function ShippingAndPayment() {
                                 peer peer-checked:after:translate-x-full peer-checked:after:border-white 
                                 after:content-[''] after:absolute after:top-0 after:left-0 after:bg-white 
                                 after:border-gray-300 after:border after:rounded-full after:h-[30px] after:w-[30px] 
-                                after:transition-all peer-checked:bg-[#5D24E1] 
+                                after:transition-all peer-checked:bg-primary 
                                 rtl:peer-checked:after:-translate-x-full rtl:after:left-auto rtl:after:right-0"
                 />
               </label>

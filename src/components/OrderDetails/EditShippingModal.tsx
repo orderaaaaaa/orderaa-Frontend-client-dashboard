@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { LiaTimesSolid, LiaCheckSolid } from 'react-icons/lia';
 import { Button } from '../ui/button';
 import { getShippingGovernorates, getShippingCities } from '@/lib/api/lookups';
-import { SearchableSelect } from '@/components/ui/searchable-select';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useShippingCompanies } from '@/hooks';
 
 interface EditShippingModalProps {
@@ -290,16 +290,16 @@ export default function EditShippingModal({
                   !selectedShippingCompanyKey
                     ? 'اختر الشركة أولاً'
                     : !selectedGovernorateKey
-                    ? 'اختر المحافظة أولاً'
-                    : 'اختر المنطقة'
+                      ? 'اختر المحافظة أولاً'
+                      : 'اختر المنطقة'
                 }
                 searchPlaceholder="بحث عن منطقة..."
                 emptyMessage={
                   !selectedShippingCompanyKey
                     ? 'اختر الشركة أولاً'
                     : !selectedGovernorateKey
-                    ? 'اختر المحافظة أولاً'
-                    : 'لا توجد مناطق متاحة'
+                      ? 'اختر المحافظة أولاً'
+                      : 'لا توجد مناطق متاحة'
                 }
                 noResultsMessage="لا توجد نتائج للبحث"
                 triggerClassName="w-full border-[#CED4DA] rounded-lg h-12"
@@ -318,7 +318,7 @@ export default function EditShippingModal({
               onChange={(e) =>
                 setFormData({ ...formData, address: e.target.value })
               }
-              className="w-full border border-[#CED4DA] rounded-lg p-3 min-h-[120px] resize-none focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
+              className="w-full border border-[#CED4DA] rounded-lg p-3 min-h-[120px] resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="أدخل العنوان بالتفصيل..."
             />
           </div>
@@ -337,7 +337,7 @@ export default function EditShippingModal({
             <Button
               onClick={handleSave}
               disabled={!hasChanges || isSaving}
-              className="w-[146px] h-[37px] bg-[#5D24E1] border-[1.5px] border-[#5D24E1] rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-[146px] h-[37px] bg-primary border-[1.5px] border-primary rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSaving ? (
                 <span className="text-lg font-bold text-white">جاري الحفظ...</span>

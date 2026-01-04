@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getPaymentStatuses } from '@/lib/api/lookups';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
 
 export interface PaymentStatusOption {
   key: string;
@@ -13,7 +14,7 @@ export default function usePaymentStatuses(enabled: boolean = true) {
     isLoading,
     isFetching,
   } = useQuery<PaymentStatusOption[]>({
-    queryKey: ['payment-statuses'],
+    queryKey: [QUERY_KEYS.PAYMENT_STATUSES],
     queryFn: async () => {
       const data = await getPaymentStatuses();
       return data as PaymentStatusOption[];

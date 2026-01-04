@@ -25,7 +25,7 @@ function CompareEmployees() {
             {MOCK_EMPLOYEE_STATS.map((employee) => (
               <div
                 key={employee.id}
-                className="border-2 border-[#5D24E1] rounded-3xl p-4 shadow-sm hover:shadow-md transition-shadow flex-1 flex flex-col justify-center"
+                className="border-2 border-primary rounded-3xl p-4 shadow-sm hover:shadow-md transition-shadow flex-1 flex flex-col justify-center"
               >
                 <h3 className="text-xl font-semibold mb-3 text-right">
                   {employee.name}

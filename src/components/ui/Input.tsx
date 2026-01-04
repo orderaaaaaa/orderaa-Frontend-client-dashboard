@@ -35,9 +35,8 @@ export default function Input({
 
   // Use px-10 for left and right padding if both icons could exist
   const inputClassName =
-    `w-full border border-[#CED4DA] rounded-lg py-1.5 px-10 text-[18px] ${
-      className ?? ''
-    }`.trim();
+    `w-full border border-[#CED4DA] rounded-lg py-1.5 px-10 text-[18px] ${className ?? ''
+      }`.trim();
 
   // Decide input type
   const inputType =
@@ -74,7 +73,7 @@ export default function Input({
         />
         {/* Optional icon on the RIGHT */}
         {Icon && (
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#5d24e1]">
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary">
             <Icon size={20} />
           </div>
         )}

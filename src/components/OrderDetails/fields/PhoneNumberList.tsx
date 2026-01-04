@@ -97,7 +97,7 @@ export function PhoneNumberList({
                   type="tel"
                   value={phones.newPhoneNumber}
                   onChange={(e) => phones.setNewPhoneNumber(e.target.value)}
-                  className="flex-1 min-w-0 w-full border border-[#5D24E1] rounded px-2 py-1 text-base focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
+                  className="flex-1 min-w-0 w-full border border-primary rounded px-2 py-1 text-base focus:outline-none focus:ring-1 focus:ring-primary"
                   autoFocus
                 />
                 <button
@@ -118,7 +118,7 @@ export function PhoneNumberList({
                 <LiaPhoneSolid size={18} className="flex-shrink-0" />
                 <button
                   onClick={() => handlePhoneCall(phone)}
-                  className="flex-1 min-w-0 text-right hover:text-[#5D24E1] transition-colors truncate cursor-pointer"
+                  className="flex-1 min-w-0 text-right hover:text-primary transition-colors truncate cursor-pointer"
                 >
                   {phone}
                 </button>
@@ -130,7 +130,7 @@ export function PhoneNumberList({
                     }
                     className="p-1 hover:bg-purple-100 rounded transition-colors"
                   >
-                    <LiaEditSolid className="w-4 h-4 text-[#5D24E1]" />
+                    <LiaEditSolid className="w-4 h-4 text-primary" />
                   </Button>
                   {isPhoneDropdownOpen === index && (
                     <div
@@ -193,7 +193,7 @@ export function PhoneNumberList({
               value={phones.newPhoneNumber}
               onChange={(e) => phones.setNewPhoneNumber(e.target.value)}
               placeholder="أدخل رقم الهاتف"
-              className="flex-1 min-w-0 w-full border border-[#5D24E1] rounded px-2 py-1 text-base focus:outline-none focus:ring-1 focus:ring-[#5D24E1]"
+              className="flex-1 min-w-0 w-full border border-primary rounded px-2 py-1 text-base focus:outline-none focus:ring-1 focus:ring-primary"
               autoFocus
             />
             <button
@@ -213,7 +213,7 @@ export function PhoneNumberList({
         {phones.editingIndex !== phones.phoneNumbers.length && (
           <button
             onClick={phones.handleAdd}
-            className="flex items-center gap-2 text-[#5D24E1] text-sm font-bold hover:text-[#4B1BC4] transition-colors cursor-pointer"
+            className="flex items-center gap-2 text-primary text-sm font-bold hover:text-[#4B1BC4] transition-colors cursor-pointer"
           >
             <LiaPlusSolid className="w-4 h-4" />
             إضافة رقم هاتف

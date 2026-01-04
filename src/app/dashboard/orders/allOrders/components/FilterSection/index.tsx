@@ -99,13 +99,13 @@ const FilterSection = React.memo(function FilterSection({
   );
 
   return (
-    <div className="bg-white rounded-xl py-[3px] mt-6">
+    <div className="bg-white rounded-xl py-[3px] mt-6 shadow-sm">
       <div className="flex items-center justify-start px-4 py-2">
         <Popover open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="default"
-              className="flex items-center gap-2 bg-[#5D24E1] text-white rounded-lg py-2.5 px-4 text-base font-medium hover:bg-[#4A1DB8] transition-colors focus:outline-none focus:ring-2 focus:ring-[#4A1DB8]"
+              className="flex items-center gap-2 bg-primary text-white rounded-lg py-2.5 px-4 text-base font-medium hover:bg-[#4A1DB8] transition-colors focus:outline-none focus:ring-2 focus:ring-[#4A1DB8]"
             >
               <LiaSlidersHSolid className="w-5 h-5" />
               <span>فلتر</span>
@@ -124,7 +124,7 @@ const FilterSection = React.memo(function FilterSection({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="بحث..."
-                className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
+                className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 autoFocus
               />
             </div>
@@ -138,7 +138,7 @@ const FilterSection = React.memo(function FilterSection({
                 filteredOptions.map((filter) => (
                   <li
                     key={filter.key}
-                    className="px-3 py-2 cursor-pointer text-gray-700 text-base hover:bg-[#5D24E1] hover:text-white transition-colors"
+                    className="px-3 py-2 cursor-pointer text-gray-700 text-base hover:bg-primary hover:text-white transition-colors"
                     onClick={() => addFilter(filter.key)}
                   >
                     {filter.label}

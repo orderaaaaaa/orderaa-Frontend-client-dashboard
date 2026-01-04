@@ -26,9 +26,8 @@ export const ProductRow: React.FC<ProductRowProps> = ({
 
   return (
     <div
-      className={`border-b mb-2 border-gray-100 rounded-sm transition-colors ${
-        isSelected ? 'bg-gray-50' : 'bg-white'
-      }`}
+      className={`border-b mb-2 border-gray-100 rounded-sm transition-colors ${isSelected ? 'bg-gray-50' : 'bg-white'
+        }`}
       dir="rtl"
     >
       {/* Main Product Row */}
@@ -67,14 +66,14 @@ export const ProductRow: React.FC<ProductRowProps> = ({
             {product.variants!.map((variant) => (
               <label
                 key={`${product.id}-${variant.id}`}
-                className="flex items-center gap-3 cursor-pointer hover:text-[#5D24E1] transition-colors"
+                className="flex items-center gap-3 cursor-pointer hover:text-primary transition-colors"
               >
                 <input
                   type="radio"
                   name={`variant-${product.id}`}
                   checked={selectedVariant?.id === variant.id}
                   onChange={(e) => onVariantSelect(product.id, variant, e)}
-                  className="h-4 w-4 text-[#5D24E1] border-gray-300 focus:ring-[#5D24E1] accent-[#5D24E1] cursor-pointer"
+                  className="h-4 w-4 text-primary border-gray-300 focus:ring-primary accent-primary cursor-pointer"
                 />
                 <div className="flex flex-col text-sm">
                   <span className="text-gray-600">

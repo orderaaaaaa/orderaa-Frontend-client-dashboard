@@ -60,7 +60,7 @@ export default function OrderSettingsFields({
                   peer peer-checked:after:translate-x-full peer-checked:after:border-white 
                   after:content-[''] after:absolute after:top-0 after:left-0 after:bg-white 
                   after:border-gray-300 after:border after:rounded-full after:h-[30px] after:w-[30px] 
-                  after:transition-all peer-checked:bg-[#5D24E1] 
+                  after:transition-all peer-checked:bg-primary 
                   rtl:peer-checked:after:-translate-x-full rtl:after:left-auto rtl:after:right-0
                   scale-75 md:scale-100 origin-right"
       />
@@ -183,7 +183,7 @@ export default function OrderSettingsFields({
         {/* Auto Cancel */}
         <div className="w-full flex flex-col gap-4">
           <div className="w-full flex items-start gap-2">
-            <CopyX className="w-6 h-6 text-[#5D24E1] mt-0.5" />
+            <CopyX className="w-6 h-6 text-primary mt-0.5" />
             <div>
               <h3 className="text-lg font-semibold leading-tight">
                 الالغاء التلقائي للطلب

@@ -25,7 +25,7 @@ export default function EgyptMapSection() {
               </div>
               <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#5D24E1] rounded-full"
+                  className="h-full bg-primary rounded-full"
                   style={{ width: `${r.percent}%` }}
                 ></div>
               </div>

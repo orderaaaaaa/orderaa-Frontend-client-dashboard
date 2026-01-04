@@ -56,7 +56,7 @@ export default function EmployeesPage() {
           <button
             type="submit"
             disabled={createEmployee.isPending}
-            className="w-auto px-4 sm:px-8 py-1 bg-[#5D24E1] cursor-pointer rounded-full text-white text-base md:text-lg font-semibold hover:bg-[#682fee] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-auto px-4 sm:px-8 py-1 bg-primary cursor-pointer rounded-full text-white text-base md:text-lg font-semibold hover:bg-[#682fee] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <span>
               {createEmployee.isPending ? 'جاري الإضافة...' : 'إضافة موظف جديد'}

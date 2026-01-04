@@ -13,7 +13,7 @@ export default function ShippingIntegrationsPage() {
     <div className="p-8 container mx-auto bg-gray-50 min-h-screen" dir="rtl">
       <header className="mb-10">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-1 h-8 bg-[#5D24E1] rounded-full"></div>
+          <div className="w-1 h-8 bg-primary rounded-full"></div>
           <h1 className="text-3xl font-bold text-gray-900">شركات الشحن</h1>
         </div>
         <p className="text-gray-600 text-lg mr-6">
@@ -23,7 +23,7 @@ export default function ShippingIntegrationsPage() {
 
       {isLoading ? (
         <div className="flex justify-center items-center h-64 mt-10">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5D24E1]"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

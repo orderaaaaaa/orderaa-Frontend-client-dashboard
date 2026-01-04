@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getShippingCompanies } from '@/lib/api/lookups';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
 
 export interface ShippingCompanyOption {
   key: string;
@@ -13,7 +14,7 @@ export default function useShippingCompanies(enabled: boolean = true) {
     isLoading,
     isFetching,
   } = useQuery<ShippingCompanyOption[]>({
-    queryKey: ['shipping-companies'],
+    queryKey: [QUERY_KEYS.SHIPPING_COMPANIES],
     queryFn: async () => {
       const data = await getShippingCompanies();
       return data as ShippingCompanyOption[];

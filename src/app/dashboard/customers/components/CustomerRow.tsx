@@ -7,8 +7,10 @@ import { GoMail, GoDotFill } from 'react-icons/go';
 import { If, Then } from 'react-if';
 import { getStatusColor } from '../lib/getBadgeColor';
 import { getActivityColor } from '../lib/getActivityColor';
-import { ORDER_STATUS_AR } from '../lib/orderStatusAr';
+import { useStatusLabel } from '@/hooks/useStatusLabel';
 import CustomerBanConfirmationModal from './modals/CustomerBanConfirmationModal';
+import { useEditCustomer } from '../hooks/useEditCustomer';
+import { toast } from 'react-toastify';
 
 interface CustomerRowProps {
   customer: any;
@@ -19,7 +21,7 @@ interface CustomerRowProps {
   ) => void;
   isPending: boolean;
   onRowClick: (customerId: number) => void;
-  showNotesColumn: boolean; // New Prop
+  showNotesColumn: boolean;
 }
 
 const toWhatsAppNumber = (phone: string) => {
@@ -32,7 +34,6 @@ const toWhatsAppNumber = (phone: string) => {
 
 export const CustomerRow = memo(function CustomerRow({
   customer,
-  onToggleBlock,
   isPending,
   onRowClick,
   showNotesColumn,
@@ -40,6 +41,21 @@ export const CustomerRow = memo(function CustomerRow({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const { getStatusLabel } = useStatusLabel();
+
+  // Hook handles the mutation and notifications
+  const { mutate: editCustomer, isPending: isUpdating } = useEditCustomer({
+    onSuccess: (data, variables) => {
+      if (variables.payload.isBlocked) {
+        toast.success('تم الحظر بنجاح');
+      } else {
+        toast.success('تم إلغاء الحظر بنجاح');
+      }
+    },
+    onError: () => {
+      toast.error('حدث خطأ ما، يرجى المحاولة مرة أخرى');
+    },
+  });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -61,7 +77,13 @@ export const CustomerRow = memo(function CustomerRow({
   };
 
   const handleConfirmBan = (id: string, note: string) => {
-    onToggleBlock(customer.id, customer.isBlocked, note);
+    editCustomer({
+      customerId: customer.id,
+      payload: {
+        isBlocked: !customer.isBlocked,
+        notes: note,
+      },
+    });
     setShowBanModal(false);
   };
 
@@ -95,7 +117,7 @@ export const CustomerRow = memo(function CustomerRow({
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <LiaWhatsapp className="w-5 h-5 text-[#5D24E1] hover:opacity-80" />
+                  <LiaWhatsapp className="w-5 h-5 text-primary hover:opacity-80" />
                 </a>
                 <a
                   href={`tel:${phone}`}
@@ -132,8 +154,8 @@ export const CustomerRow = memo(function CustomerRow({
             <span className="font-medium">
               {customer.latestOrder?.createdAt
                 ? new Date(customer.latestOrder.createdAt).toLocaleDateString(
-                    'en-GB'
-                  )
+                  'en-GB'
+                )
                 : '-'}
             </span>
           </div>
@@ -146,9 +168,7 @@ export const CustomerRow = memo(function CustomerRow({
             )}`}
           >
             {customer.latestOrder
-              ? ORDER_STATUS_AR[
-                  customer.latestOrder.status as keyof typeof ORDER_STATUS_AR
-                ]
+              ? getStatusLabel(customer.latestOrder.status)
               : '—'}
           </span>
         </td>
@@ -168,7 +188,6 @@ export const CustomerRow = memo(function CustomerRow({
           <span className="font-medium">{customer.totalAmount} جنية</span>
         </td>
 
-        {/* Dynamic Ban Notes Column */}
         {showNotesColumn && (
           <td className="px-4 py-4 text-center whitespace-nowrap">
             <span className="font-medium text-gray-600">
@@ -192,16 +211,18 @@ export const CustomerRow = memo(function CustomerRow({
               <div className="absolute left-0 mt-1 bg-white rounded-lg shadow-lg border z-10 min-w-[140px]">
                 <button
                   onClick={handleBanClick}
-                  disabled={isPending}
-                  className={`w-full px-6 py-2 transition-colors hover:bg-gray-50 cursor-pointer ${
-                    customer.isBlocked ? 'text-green-600' : 'text-red-600'
-                  } ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={isPending || isUpdating}
+                  className={`w-full px-6 py-2 transition-colors hover:bg-gray-50 cursor-pointer ${customer.isBlocked ? 'text-green-600' : 'text-red-600'
+                    } ${isPending || isUpdating
+                      ? 'opacity-50 cursor-not-allowed'
+                      : ''
+                    }`}
                 >
-                  {isPending
+                  {isPending || isUpdating
                     ? 'جاري...'
                     : customer.isBlocked
-                    ? 'إلغاء الحظر'
-                    : 'حظر'}
+                      ? 'إلغاء الحظر'
+                      : 'حظر'}
                 </button>
               </div>
             )}

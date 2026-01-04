@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import { LiaCommentDotsSolid } from 'react-icons/lia';
-import { SearchableSelect } from '@/components/ui/searchable-select';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useCancellationReasons, useTopCancellationReasons } from '@/services/orders';
 
 interface CancelOrderModalProps {
@@ -23,6 +23,8 @@ export default function CancelOrderModal({
   const { data: allReasons = [], isLoading: loadingAllReasons } = useCancellationReasons(isOpen);
   const { data: topReasons = [], isLoading: loadingTopReasons } = useTopCancellationReasons(isOpen);
 
+  const selectedReason = allReasons.find(r => r.id === selectedReasonId);
+
   const handleConfirm = async () => {
     if (!selectedReasonId) return;
     await onConfirm({ reasonId: selectedReasonId, notes });
@@ -41,7 +43,6 @@ export default function CancelOrderModal({
     onClose();
   };
 
-  const selectedReason = allReasons.find(r => r.id === selectedReasonId);
   const isSelectedFromTopReasons = topReasons.some(t => t.id === selectedReasonId);
 
   const isLoading = loadingAllReasons || loadingTopReasons;
@@ -71,34 +72,33 @@ export default function CancelOrderModal({
 
           {isLoading ? (
             <div className="flex items-center justify-center py-4">
-              <div className="w-6 h-6 border-2 border-[#5D24E1] border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : (
             <>
-              {/* Top Reasons as Radio Buttons */}
-              <div className="flex flex-col gap-2">
+              <div className="grid sm:grid-cols-3 grid-cols-1 gap-2">
                 {topReasons.map((reason) => (
                   <label
                     key={reason.id}
                     className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer border transition-all ${selectedReasonId === reason.id
-                      ? 'border-[#5D24E1] bg-[#F6F2FC]'
+                      ? 'border-primary bg-[#F6F2FC]'
                       : 'border-[#ECECEC] hover:border-[#CBB5FD] hover:bg-[#FDFBFF]'
                       }`}
                     onClick={() => setSelectedReasonId(reason.id)}
                   >
                     <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${selectedReasonId === reason.id
-                        ? 'border-[#5D24E1]'
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${selectedReasonId === reason.id
+                        ? 'border-primary'
                         : 'border-gray-300'
                         }`}
                     >
                       {selectedReasonId === reason.id && (
-                        <div className="w-2.5 h-2.5 rounded-full bg-[#5D24E1]"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-primary"></div>
                       )}
                     </div>
                     <span
-                      className={`text-base ${selectedReasonId === reason.id
-                        ? 'text-[#5D24E1] font-semibold'
+                      className={`text-sm ${selectedReasonId === reason.id
+                        ? 'text-primary font-semibold'
                         : 'text-[#1F1F1F]'
                         }`}
                     >
@@ -120,9 +120,10 @@ export default function CancelOrderModal({
                     emptyMessage="لا توجد أسباب متاحة"
                     noResultsMessage="لا توجد نتائج للبحث"
                     triggerClassName={`border rounded-lg px-4 py-3 text-base ${selectedReason && !isSelectedFromTopReasons
-                      ? 'border-[#5D24E1] bg-[#F6F2FC]'
+                      ? 'border-primary bg-[#F6F2FC]'
                       : 'border-[#ECECEC]'
                       }`}
+                    clearable
                   />
                 </div>
               )}
@@ -140,7 +141,7 @@ export default function CancelOrderModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="أضف ملاحظات إضافية..."
-            className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base min-h-[120px] resize-none focus:outline-none focus:ring-2 focus:ring-[#5D24E1] focus:border-transparent"
+            className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base min-h-[120px] resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           />
         </div>
       </div>

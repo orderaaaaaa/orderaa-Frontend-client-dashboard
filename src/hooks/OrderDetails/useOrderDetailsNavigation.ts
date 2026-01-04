@@ -1,13 +1,12 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { OrderStatus, FilterOrdersDto } from '@/types/orders';
+import { FilterOrdersDto } from '@/types/orders';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { useFetchOrdersForSearch } from '@/services/orders';
 import { TimePeriod, calculateDateRangeFromPeriod } from '@/utils/dateRangeUtils';
 import { useDebounce, useDebouncedCallback } from '@/utils/debounce';
 import { toast } from 'react-toastify';
 import {
-  isValidOrderStatus,
   isValidTimePeriod,
   formatDateForUrl,
   parseDateFromUrl,
@@ -18,8 +17,8 @@ interface UseOrderDetailsNavigationOptions {
 }
 
 interface UseOrderDetailsNavigationReturn {
-  status: OrderStatus | null;
-  setStatus: (status: OrderStatus | null) => void;
+  status: string | null;
+  setStatus: (status: string | null) => void;
   fromDate: Date | null;
   setFromDate: (date: Date | null) => void;
   toDate: Date | null;
@@ -54,7 +53,7 @@ const formatDateToISOEnd = (date: Date): string => {
 };
 
 function buildApiFilters(
-  status: OrderStatus | null,
+  status: string | null,
   fromDate: Date | null,
   toDate: Date | null,
   formFilters: OrderFiltersFormData | null
@@ -119,7 +118,7 @@ export function useOrderDetailsNavigation({
     }
 
     const statusParam = searchParams.get('status');
-    const status = statusParam && isValidOrderStatus(statusParam) ? (statusParam as OrderStatus) : null;
+    const status = statusParam || null;
     const periodParam = searchParams.get('period');
     const timePeriod = periodParam && isValidTimePeriod(periodParam) ? (periodParam as TimePeriod) : '';
     const fromDate = parseDateFromUrl(searchParams.get('from'));
@@ -160,7 +159,7 @@ export function useOrderDetailsNavigation({
 
   const initialState = getInitialState();
 
-  const [status, setStatusInternal] = useState<OrderStatus | null>(initialState.status);
+  const [status, setStatusInternal] = useState<string | null>(initialState.status);
   const [fromDate, setFromDateInternal] = useState<Date | null>(initialState.fromDate);
   const [toDate, setToDateInternal] = useState<Date | null>(initialState.toDate);
   const [timePeriod, setTimePeriodInternal] = useState<TimePeriod>(initialState.timePeriod);
@@ -271,7 +270,7 @@ export function useOrderDetailsNavigation({
     500
   );
 
-  const setStatus = useCallback((newStatus: OrderStatus | null) => {
+  const setStatus = useCallback((newStatus: string | null) => {
     isUserInitiated.current = true;
     setStatusInternal(newStatus);
     setTriggerVersion((v) => v + 1);

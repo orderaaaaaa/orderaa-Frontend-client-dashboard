@@ -103,25 +103,4 @@ function formatVariant(product?: { size?: string; color?: string }): string {
     return parts.join(' - ');
 }
 
-function getPaymentStatusFromOrderStatus(status: string): string {
-    const statusMap: Record<string, string> = {
-        'WAITING_FOR_PAYMENT': 'pending',
-        'PARTIAL_DELIVERY': 'partial',
-        'DELIVERED': 'paid',
-        'CONFIRMED': 'confirmed',
-    };
-
-    return statusMap[status] || 'pending';
-}
-
-function extractUtmFromNotes(type: 'source' | 'campaign', notes?: string): string {
-    if (!notes) return '';
-
-    const regex = type === 'source'
-        ? /utm[_\s]source[:\s]*([^\n,]+)/i
-        : /utm[_\s]campaign[:\s]*([^\n,]+)/i;
-
-    const match = notes.match(regex);
-    return match ? match[1].trim() : '';
-}
 

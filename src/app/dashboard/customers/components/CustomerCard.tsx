@@ -14,7 +14,7 @@ import { User } from 'lucide-react';
 import { If, Then } from 'react-if';
 import { getStatusColor } from '../lib/getBadgeColor';
 import { getActivityColor } from '../lib/getActivityColor';
-import { ORDER_STATUS_AR } from '../lib/orderStatusAr';
+import { useStatusLabel } from '@/hooks/useStatusLabel';
 import CustomerBanConfirmationModal from './modals/CustomerBanConfirmationModal';
 
 interface CustomerCardProps {
@@ -45,6 +45,7 @@ export function CustomerCard({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const { getStatusLabel } = useStatusLabel();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -103,7 +104,7 @@ export function CustomerCard({
         <div className="grid grid-cols-2 gap-x-4 gap-y-4 text-right px-4 py-4">
           <div className="space-y-3">
             <div className="flex items-center gap-2 justify-start">
-              <User size={18} className="text-[#5D24E1] " />
+              <User size={18} className="text-primary " />
               <span className="font-medium">{customer.name}</span>
             </div>
 
@@ -115,7 +116,7 @@ export function CustomerCard({
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <LiaWhatsapp className="w-5 h-5 text-[#5D24E1] hover:opacity-80" />
+                  <LiaWhatsapp className="w-5 h-5 text-primary hover:opacity-80" />
                 </a>
                 <a
                   href={`tel:${phone}`}
@@ -130,7 +131,7 @@ export function CustomerCard({
             <If condition={customer.email}>
               <Then>
                 <div className="flex items-center gap-2 justify-start overflow-hidden">
-                  <GoMail size={18} className="text-[#5D24E1]" />
+                  <GoMail size={18} className="text-primary" />
                   <span className="truncate font-medium text-sm">
                     {customer.email}
                   </span>
@@ -141,27 +142,27 @@ export function CustomerCard({
 
           <div className="space-y-3">
             <div className="flex items-center gap-2 justify-start">
-              <ShoppingBag size={18} className="text-[#5D24E1] " />
+              <ShoppingBag size={18} className="text-primary " />
               <span className="font-medium">
                 عدد الطلبات:{' '}
                 <span className="font-medium">{customer.numberOfOrders}</span>
               </span>
             </div>
             <div className="flex items-center gap-2 justify-start">
-              <LiaCalendarAltSolid size={18} className="text-[#5D24E1]" />
+              <LiaCalendarAltSolid size={18} className="text-primary" />
               <span className="font-medium">
                 آخر طلب:{' '}
                 <span className="font-medium">
                   {customer.latestOrder?.createdAt
                     ? new Date(
-                        customer.latestOrder.createdAt
-                      ).toLocaleDateString('en-GB')
+                      customer.latestOrder.createdAt
+                    ).toLocaleDateString('en-GB')
                     : '-'}
                 </span>
               </span>
             </div>
             <div className="flex items-center gap-2 justify-start">
-              <LiaDollarSignSolid size={20} className="text-[#5D24E1] " />
+              <LiaDollarSignSolid size={20} className="text-primary " />
               <span className="font-medium">{customer.totalAmount} جنيه</span>
             </div>
           </div>
@@ -200,9 +201,8 @@ export function CustomerCard({
                     setIsMenuOpen(false);
                   }}
                   disabled={isPending}
-                  className={`w-full px-4 py-2 text-right transition-colors hover:bg-gray-50 ${
-                    customer.isBlocked ? 'text-green-600' : 'text-red-600'
-                  }`}
+                  className={`w-full px-4 py-2 text-right transition-colors hover:bg-gray-50 ${customer.isBlocked ? 'text-green-600' : 'text-red-600'
+                    }`}
                 >
                   {customer.isBlocked ? 'إلغاء الحظر' : 'حظر'}
                 </button>
@@ -218,9 +218,7 @@ export function CustomerCard({
               )}`}
             >
               {customer.latestOrder
-                ? ORDER_STATUS_AR[
-                    customer.latestOrder.status as keyof typeof ORDER_STATUS_AR
-                  ]
+                ? getStatusLabel(customer.latestOrder.status)
                 : '—'}
             </span>
           </div>

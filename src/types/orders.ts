@@ -1,5 +1,3 @@
-import { LucideIcon } from 'lucide-react';
-
 
 // Order Status Enum (synced with backend)
 export enum OrderStatus {
@@ -7,6 +5,7 @@ export enum OrderStatus {
   ATTEMPTED = 'ATTEMPTED',
   WAITING_FOR_PAYMENT = 'WAITING_FOR_PAYMENT',
   WHATSAPP = 'WHATSAPP',
+  EDIT_REJECTED = 'EDIT_REJECTED',
   POSTPONED = 'POSTPONED',
   CALL_AGAIN = 'CALL_AGAIN',
   STOPPED = 'STOPPED',
@@ -19,39 +18,7 @@ export enum OrderStatus {
   DELIVERED = 'DELIVERED',
   PARTIAL_DELIVERY = 'PARTIAL_DELIVERY',
   MISSING = 'MISSING',
-  REGISTERED = 'REGISTERED',
-  REPORTS = 'REPORTS',
 }
-
-// Payment Method Enum (synced with backend)
-export enum PaymentMethod {
-  CASH = 'CASH',
-  VISA_CARD = 'VISA_CARD',
-  INSTAPAY = 'INSTAPAY',
-  WALLET = 'WALLET',
-}
-
-// Payment Status Enum (synced with backend)
-export enum PaymentStatus {
-  PAID = 'PAID',
-  CASH_ON_DELIVERY = 'CASH_ON_DELIVERY',
-  PARTIALLY_PAID = 'PARTIALLY_PAID',
-}
-
-// Payment Method Arabic Labels
-export const PaymentMethodLabels: Record<PaymentMethod, string> = {
-  [PaymentMethod.CASH]: 'كاش',
-  [PaymentMethod.VISA_CARD]: 'فيزا',
-  [PaymentMethod.INSTAPAY]: 'انستا باي',
-  [PaymentMethod.WALLET]: 'محفظة الكترونية',
-};
-
-// Payment Status Arabic Labels
-export const PaymentStatusLabels: Record<PaymentStatus, string> = {
-  [PaymentStatus.PAID]: 'مدفوع',
-  [PaymentStatus.CASH_ON_DELIVERY]: 'دفع عند الاستلام',
-  [PaymentStatus.PARTIALLY_PAID]: 'مدفوع جزئياً',
-};
 
 // Variant interface
 export interface Variant {
@@ -75,7 +42,7 @@ export interface SelectedProduct {
 export interface SimpleOrder {
   id: number;
   code: string;
-  status: OrderStatus;
+  status: string;
   totalCost: number;
   numberOfTriesToReach: number;
   notes?: string;
@@ -89,7 +56,7 @@ export interface SimpleOrder {
 
 // Filter DTO (matching backend FilterOrdersDto)
 export interface FilterOrdersDto {
-  status?: OrderStatus;
+  status?: string;
   search?: string;
   page?: number;
   limit?: number;
@@ -220,7 +187,7 @@ export interface OrderProduct {
 export interface Order {
   id: number;
   code: string;
-  status: OrderStatus;
+  status: string;
   totalCost: number;
   numberOfTriesToReach: number;
   notes?: string;
@@ -238,6 +205,7 @@ export interface Order {
   city?: string;
   address?: string;
   externalGovernorate?: string;
+  shippingId: string;
 
   // Product details
   material?: string;
@@ -295,7 +263,7 @@ export interface OrderEvent {
 
 // Filter DTO (matching backend FilterOrdersDto)
 export interface FilterOrdersDto {
-  status?: OrderStatus;
+  status?: string;
   search?: string;
   customerName?: string;
   customerPhone?: string;

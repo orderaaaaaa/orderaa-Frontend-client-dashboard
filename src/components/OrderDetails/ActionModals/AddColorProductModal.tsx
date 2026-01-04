@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { toast } from 'react-toastify';
 import BaseModal from '@/components/ui/base-modal';
-import { SearchableSelect } from '@/components/ui/searchable-select';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useFilterOptionsQuery } from '@/services/orders';
 
 interface AddColorProductModalProps {

@@ -11,7 +11,7 @@ export interface UseOrderNavigationOptions {
     from: Date | null;
     to: Date | null;
   };
-  statusFilter?: OrderStatus | null;
+  statusFilter?: string | null;
 }
 
 export interface UseOrderNavigationReturn {

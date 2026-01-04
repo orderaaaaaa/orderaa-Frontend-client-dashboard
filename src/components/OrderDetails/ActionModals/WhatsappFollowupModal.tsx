@@ -45,7 +45,7 @@ export default function WhatsappFollowupModal({
 
   const handleOptionClick = (optionId: string) => {
     const option = followupOptions.find((opt) => opt.id === optionId);
-    
+
     if (option?.hasSubOptions) {
       setExpandedOption(expandedOption === optionId ? null : optionId);
     } else {
@@ -100,18 +100,16 @@ export default function WhatsappFollowupModal({
             {/* Main Option */}
             <button
               onClick={() => handleOptionClick(option.id)}
-              className={`w-full px-4 py-3 text-right flex items-center justify-between transition-colors ${
-                selectedOption === option.id && !option.hasSubOptions
-                  ? 'bg-[#F6F2FC] text-[#5D24E1]'
+              className={`w-full px-4 py-3 text-right flex items-center justify-between transition-colors ${selectedOption === option.id && !option.hasSubOptions
+                  ? 'bg-[#F6F2FC] text-primary'
                   : 'hover:bg-gray-50 text-[#1F1F1F]'
-              }`}
+                }`}
             >
               <span className="font-bold">{option.label}</span>
               {option.hasSubOptions && (
                 <LiaAngleDownSolid
-                  className={`w-5 h-5 transition-transform ${
-                    expandedOption === option.id ? 'rotate-180' : ''
-                  }`}
+                  className={`w-5 h-5 transition-transform ${expandedOption === option.id ? 'rotate-180' : ''
+                    }`}
                 />
               )}
             </button>
@@ -123,11 +121,10 @@ export default function WhatsappFollowupModal({
                   <button
                     key={subOption.id}
                     onClick={() => handleSubOptionClick(option.id, subOption.id, subOption.label)}
-                    className={`w-full px-6 py-3 text-right text-sm transition-colors ${
-                      selectedSubOption === subOption.id
-                        ? 'bg-[#F6F2FC] text-[#5D24E1] font-bold'
+                    className={`w-full px-6 py-3 text-right text-sm transition-colors ${selectedSubOption === subOption.id
+                        ? 'bg-[#F6F2FC] text-primary font-bold'
                         : 'hover:bg-gray-100 text-[#5F5E5E]'
-                    }`}
+                      }`}
                   >
                     {subOption.label}
                   </button>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { OrderStatus, OrderFilters } from '@/types/orders';
+import { OrderFilters } from '@/types/orders';
 import { TimePeriod, calculateDateRangeFromPeriod } from '@/utils/dateRangeUtils';
 import {
   UrlFilterState,
@@ -18,7 +18,7 @@ interface UseUrlFiltersReturn {
   filters: UrlFilterState;
 
   // Update functions (auto-sync to URL)
-  setStatus: (status: OrderStatus | null) => void;
+  setStatus: (status: string | null) => void;
   setSearch: (search: string) => void;
   setFromDate: (date: Date | null) => void;
   setToDate: (date: Date | null) => void;
@@ -113,7 +113,7 @@ export function useUrlFilters(): UseUrlFiltersReturn {
 
   // Set status (immediate update with history)
   const setStatus = useCallback(
-    (status: OrderStatus | null) => {
+    (status: string | null) => {
       setFilters((prev) => {
         const newFilters = { ...prev, status, page: 1 };
         return newFilters;

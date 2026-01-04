@@ -52,7 +52,7 @@ export default function DeleteConfirmationModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div
-          className="h-[79px] rounded-t-[20px] flex items-center justify-between px-8"
+          className="h-[60px] rounded-t-[20px] flex items-center justify-between px-8"
           style={{
             background:
               'linear-gradient(105.28deg, #FFFFFF 1.48%, #CBB5FD 182.49%, #FFFFFF 187.88%)',

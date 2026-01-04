@@ -43,7 +43,7 @@ export default function CustomerHeader({
           maxDate={toDate || undefined}
         />
 
-        <ArrowLeft className="text-[#5D24E1] flex-shrink-0" size="20" />
+        <ArrowLeft className="text-primary flex-shrink-0" size="20" />
 
         <DatePicker
           selected={toDate}
@@ -57,13 +57,12 @@ export default function CustomerHeader({
         <div className="relative w-32 sm:w-[180px] flex-shrink-0">
           <Select value={timePeriod} onValueChange={onTimePeriodChange}>
             <SelectTrigger
-              className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${
-                timePeriod ? 'text-[#5D24E1] font-bold' : ''
-              }`}
+              className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${timePeriod ? 'text-primary font-bold' : ''
+                }`}
             >
               <SelectValue placeholder="الفترة الزمنية" />
             </SelectTrigger>
-            <SelectContent className="[&_[data-state=checked]]:text-[#5D24E1]">
+            <SelectContent className="[&_[data-state=checked]]:text-primary">
               <SelectItem value="day">يوم</SelectItem>
               <SelectItem value="week">اسبوع</SelectItem>
               <SelectItem value="month">شهر</SelectItem>

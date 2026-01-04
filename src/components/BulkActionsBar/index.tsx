@@ -64,8 +64,8 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
       <div className="mx-auto overflow-x-auto scrollbar-hide">
         <div className="pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
           {/* Status Dropdown using Select */}
-          <Select onValueChange={handleStatusSelect}>
-            <SelectTrigger className="group flex items-center gap-2 px-4 py-2 rounded-3xl !bg-white border border-[#5D24E1] !text-[#5D24E1] hover:!bg-[#5D24E1] hover:text-white transition-colors cursor-pointer whitespace-nowrap w-auto h-auto focus:ring-0 focus:ring-offset-0 ring-offset-0">
+          {/* <Select onValueChange={handleStatusSelect}>
+            <SelectTrigger className="group flex items-center gap-2 px-4 py-2 rounded-3xl !bg-white border border-primary !text-primary hover:!bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap w-auto h-auto focus:ring-0 focus:ring-offset-0 ring-offset-0">
               <Edit className="h-4 w-4 group-hover:text-white" />
               <span className="group-hover:text-white">
                 تعديل الحالة ({selectedCount})
@@ -77,7 +77,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
                   <SelectItem
                     key={status.key}
                     value={status.key}
-                    className="cursor-pointer justify-end  hover:!text-white hover:!bg-[#5D24E1] "
+                    className="cursor-pointer justify-end  hover:!text-white hover:!bg-primary "
                   >
                     {status.label}
                   </SelectItem>
@@ -88,11 +88,11 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
                 </div>
               )}
             </SelectContent>
-          </Select>
+          </Select> */}
 
           <Button
             variant="outline"
-            className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border-[#5D24E1] text-[#5D24E1] hover:bg-[#5D24E1] hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
+            className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
             onClick={onExportExcel}
           >
             <FileSpreadsheet className="h-4 w-4" />
@@ -101,7 +101,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
 
           <Button
             variant="outline"
-            className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border-[#5D24E1] text-[#5D24E1] hover:bg-[#5D24E1] hover:text-white transition-colors cursor-pointer whitespace-nowrap [&:hover_svg]:fill-white h-10"
+            className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap [&:hover_svg]:fill-white h-10"
             onClick={onShareWhatsApp}
           >
             <svg
@@ -119,7 +119,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
 
           <Button
             variant="outline"
-            className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border-[#5D24E1] text-[#5D24E1] hover:bg-[#5D24E1] hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
+            className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
             onClick={onShipping}
           >
             <Truck className="h-4 w-4" />
@@ -128,7 +128,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
 
           <Button
             variant="outline"
-            className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border-[#5D24E1] text-[#5D24E1] hover:bg-[#5D24E1] hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
+            className="flex items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
             onClick={onOther}
           >
             <CircleAlert className="h-4 w-4" />

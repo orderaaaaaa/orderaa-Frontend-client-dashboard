@@ -43,15 +43,14 @@ export default function PageSizeSelector({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex gap-2 text-sm bg-[#5D24E1] rounded-full text-white py-2 px-4 justify-center items-center cursor-pointer hover:bg-[#682fee] transition-colors min-w-[80px]"
+        className="flex gap-2 text-sm bg-primary rounded-full text-white py-2 px-4 justify-center items-center cursor-pointer hover:bg-[#682fee] transition-colors min-w-[80px]"
       >
         <span className="font-medium">{displayValue}</span>
         <ChevronDown
           width={20}
           height={20}
-          className={`transition-transform duration-200 ${
-            isOpen ? 'rotate-180' : ''
-          }`}
+          className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
+            }`}
         />
       </button>
 
@@ -62,22 +61,20 @@ export default function PageSizeSelector({
               <button
                 key={size}
                 onClick={() => handleSizeSelect(size)}
-                className={`w-full text-right px-4 py-2 text-sm hover:bg-[#5D24E1]/10 transition-colors ${
-                  currentSize === size
-                    ? 'bg-[#5D24E1]/20 text-[#5D24E1] font-medium'
+                className={`w-full text-right px-4 py-2 text-sm hover:bg-primary/10 transition-colors ${currentSize === size
+                    ? 'bg-primary/20 text-primary font-medium'
                     : 'text-gray-700'
-                }`}
+                  }`}
               >
                 {size} طلب
               </button>
             ))}
             <button
               onClick={() => handleSizeSelect(totalItems)}
-              className={`w-full text-right px-4 py-2 text-sm hover:bg-[#5D24E1]/10 transition-colors border-t border-gray-100 ${
-                currentSize === totalItems
-                  ? 'bg-[#5D24E1]/20 text-[#5D24E1] font-medium'
+              className={`w-full text-right px-4 py-2 text-sm hover:bg-primary/10 transition-colors border-t border-gray-100 ${currentSize === totalItems
+                  ? 'bg-primary/20 text-primary font-medium'
                   : 'text-gray-700'
-              }`}
+                }`}
             >
               الكل ({totalItems})
             </button>

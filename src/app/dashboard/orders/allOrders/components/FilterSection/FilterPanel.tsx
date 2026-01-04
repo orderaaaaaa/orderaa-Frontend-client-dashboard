@@ -2,7 +2,7 @@
 
 import React, { useCallback, useState, useEffect } from "react";
 import { OrderFilters, FilterOptions } from "@/types/orders";
-import SearchableSelect from "./SearchableSelect";
+import SearchableSelect from "@/components/ui/SearchableSelect";
 import { DatePicker } from "@/components/ui/datepicker";
 import { Calendar } from "lucide-react";
 

@@ -18,8 +18,8 @@ export const useIntegrations = () => {
 
   // NEW: Update mutation
   const updateIntegrationMutation = useMutation({
-    mutationFn: ({ id, apiKey }: { id: number; apiKey: string }) =>
-      integrationApi.update(id, apiKey),
+    mutationFn: ({ provider, apiKey }: { provider: string; apiKey: string }) =>
+      integrationApi.update(provider, apiKey),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['integration-configs'] });
     },

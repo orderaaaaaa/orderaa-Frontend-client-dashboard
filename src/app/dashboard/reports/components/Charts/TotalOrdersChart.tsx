@@ -10,7 +10,6 @@ import {
   Tooltip,
   CartesianGrid,
 } from 'recharts';
-import Dropdown from '@/components/ui/Dropdown';
 import {
   CustomActiveDot,
   CustomTooltipArabic,

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { LiaMoneyBillWaveSolid } from 'react-icons/lia';
-import { SearchableSelect } from '@/components/ui/searchable-select';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { usePaymentStatuses } from '@/hooks';
 
 export interface PaymentStatusSelectProps {
