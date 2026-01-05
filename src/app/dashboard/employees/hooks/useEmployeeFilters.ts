@@ -12,7 +12,6 @@ export function useEmployeeFilters() {
   const currentPage = useEmployeesStore((state) => state.currentPage);
   const setCurrentPage = useEmployeesStore((state) => state.setCurrentPage);
 
-  // Build filters object
   const filters: EmployeeFilters = useMemo(() => {
     const query = debouncedSearchQuery.trim();
 
