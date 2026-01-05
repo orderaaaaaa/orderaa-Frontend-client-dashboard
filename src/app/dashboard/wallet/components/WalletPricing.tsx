@@ -1,19 +1,8 @@
-'use client';
-import React, { useState } from 'react';
-import { WALLET_PRICING_PLANS, WalletPricingPlan } from '../constants/plans';
+import React from 'react';
+import { WALLET_PRICING_PLANS } from '../constants/plans';
 import { IoCheckmark } from 'react-icons/io5';
-import PaymentModal from './modals/PaymentModal';
 
 function WalletPricing() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<WalletPricingPlan | null>(
-    null
-  );
-
-  const handleOpenModal = (plan: WalletPricingPlan) => {
-    setSelectedPlan(plan);
-    setIsModalOpen(true);
-  };
   return (
     <section id="pricing" className="mt-13 sm:px-4">
       <h2 className="text-2xl font-bold mb-8">خطة الشحن و الاشتراك </h2>
@@ -23,9 +12,10 @@ function WalletPricing() {
           <div
             key={index}
             className={`relative rounded-2xl p-9 border min-h-[450px] flex flex-col transition-transform duration-300 hover:scale-105 overflow-hidden text-right hover:border hover:border-primary
-              ${plan.gradient
-                ? 'bg-[#5826E8] border-transparent text-white'
-                : 'bg-white border-gray-100 shadow-xl text-gray-800'
+              ${
+                plan.gradient
+                  ? 'bg-[#5826E8] border-transparent text-white'
+                  : 'bg-white border-gray-100 shadow-xl text-gray-800'
               } 
               `}
           >
@@ -39,14 +29,16 @@ function WalletPricing() {
             <div className="relative z-10 flex flex-col gap-6">
               <div className="flex items-baseline gap-4 mb-4">
                 <span
-                  className={`text-4xl font-bold ${plan.gradient ? 'text-white' : 'text-[#5826E8]'
-                    }`}
+                  className={`text-4xl font-bold ${
+                    plan.gradient ? 'text-white' : 'text-[#5826E8]'
+                  }`}
                 >
                   {plan.price}
                 </span>
                 <p
-                  className={`text-xl font-medium ${plan.gradient ? 'text-purple-100' : 'text-gray-900'
-                    }`}
+                  className={`text-xl font-medium ${
+                    plan.gradient ? 'text-purple-100' : 'text-gray-900'
+                  }`}
                 >
                   {plan.subtitle}
                 </p>
@@ -65,11 +57,11 @@ function WalletPricing() {
             </div>
 
             <button
-              onClick={() => handleOpenModal(plan)}
               className={`w-[98%] mx-auto mt-auto py-2 rounded-full font-bold transition cursor-pointer text-xl
-                ${plan.gradient
-                  ? 'bg-white text-[#5826E8] hover:bg-gray-100'
-                  : 'bg-white border border-[#5826E8] text-[#5826E8] hover:bg-primary hover:text-white'
+                ${
+                  plan.gradient
+                    ? 'bg-white text-[#5826E8] hover:bg-gray-100'
+                    : 'bg-white border border-[#5826E8] text-[#5826E8] hover:bg-primary hover:text-white'
                 }`}
             >
               {plan.button}
@@ -77,14 +69,6 @@ function WalletPricing() {
           </div>
         ))}
       </div>
-
-      {selectedPlan && (
-        <PaymentModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          plan={selectedPlan}
-        />
-      )}
     </section>
   );
 }

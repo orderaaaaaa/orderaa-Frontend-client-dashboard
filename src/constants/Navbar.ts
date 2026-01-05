@@ -1,34 +1,34 @@
+import { CartIcon, ExcelIcon } from '@/components/icons';
+import {
+  LiaBoxesSolid,
+  LiaWalletSolid,
+  LiaTruckSolid,
+  LiaIdCard,
+  LiaClipboardCheckSolid,
+} from 'react-icons/lia';
 import {
   House,
   Package,
   Users,
-  Truck,
-  PenBox,
   ListPlus,
   LucideProps,
   FolderPlus,
-  File,
   Link2,
-  IdCardIcon,
   ChartNoAxesCombined,
-  TruckIcon,
   HousePlus,
-  Wallet,
 } from 'lucide-react';
-import { LiaClipboardCheckSolid } from "react-icons/lia";
 import { IconType } from 'react-icons';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
-import { CartIcon, ExcelIcon } from '@/components/icons'; // Import from your icons registry
 
 export type NavigationItem = {
   name: string;
   href: string;
   icon?:
-    | ForwardRefExoticComponent<
-        Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>
-      >
-    | ((props: { className?: string }) => JSX.Element)
-    | IconType;
+  | ForwardRefExoticComponent<
+    Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>
+  >
+  | ((props: { className?: string }) => JSX.Element)
+  | IconType;
   children?: NavigationItem[];
 };
 
@@ -42,13 +42,13 @@ export const navigation: NavigationItem[] = [
       {
         name: 'جميع الطلبات',
         href: '/dashboard/orders/allOrders',
-        icon: CartIcon, // Use your custom icon
+        icon: CartIcon,
       },
       {
         name: 'تأكيد الطلبات',
         href: '/dashboard/orders/confirm-orders',
         icon: LiaClipboardCheckSolid,
-      }
+      },
     ],
   },
   {
@@ -64,42 +64,8 @@ export const navigation: NavigationItem[] = [
   {
     name: 'الموظفين',
     href: '/dashboard/employees',
-    icon: IdCardIcon,
+    icon: LiaIdCard,
   },
-  // {
-  //   name: 'قسم الشحن',
-  //   href: '/dashboard/analytics',
-  //   icon: Truck,
-  //   children: [
-  //     {
-  //       name: 'تقارير',
-  //       href: '/dashboard/analytics/new',
-  //       // No icon - now optional
-  //     },
-  //     {
-  //       name: 'موظفين الشحن',
-  //       href: '/dashboard/analytics/completed',
-  //       // No icon - now optional
-  //     },
-  //   ],
-  // },
-  // {
-  //   name: 'قسم التجهيز',
-  //   href: '/dashboard',
-  //   icon: PenBox,
-  //   children: [
-  //     {
-  //       name: 'تقارير',
-  //       href: '/dashboard/settings/pending',
-  //       // No icon - now optional
-  //     },
-  //     {
-  //       name: 'موظفين الشحن',
-  //       href: '/dashboard/settings/done',
-  //       // No icon - now optional
-  //     },
-  //   ],
-  // },
   {
     name: 'إضافه طلب جديد',
     href: '/dashboard',
@@ -115,11 +81,6 @@ export const navigation: NavigationItem[] = [
         href: '/dashboard/upload-products/excel',
         icon: ExcelIcon,
       },
-      // {
-      //   name: 'اضافة طلب Ai',
-      //   href: '/dashboard/upload-products/api',
-      //   icon: ListPlus,
-      // },
     ],
   },
   {
@@ -130,7 +91,7 @@ export const navigation: NavigationItem[] = [
   {
     name: 'الربط مع شركة الشحن',
     href: '/dashboard/link-shipping-company',
-    icon: TruckIcon,
+    icon: LiaTruckSolid,
   },
   {
     name: 'اعدادات المتجر',
@@ -140,6 +101,11 @@ export const navigation: NavigationItem[] = [
   {
     name: 'المحفظة',
     href: '/dashboard/wallet',
-    icon: Wallet,
+    icon: LiaWalletSolid,
+  },
+  {
+    name: 'المنتجات',
+    href: '/dashboard/products',
+    icon: LiaBoxesSolid,
   },
 ];

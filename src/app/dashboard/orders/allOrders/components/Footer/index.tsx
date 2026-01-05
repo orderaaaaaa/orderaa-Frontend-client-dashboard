@@ -1,9 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import PageSizeSelector from '../PageSizeSelector';
 
 interface FooterProps {
@@ -70,15 +67,20 @@ const Footer: React.FC<FooterProps> = ({
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className={`flex flex-col sm:flex-row items-center sm:items-center justify-center sm:justify-between gap-4 px-6 bg-gray-50 rounded-lg relative bottom-0 ${hasSelectedOrders ? 'pb-24 sm:pb-28' : 'pb-6'}`}>
-      <PageSizeSelector
-        currentSize={currentPageSize}
-        totalItems={totalItems}
-        onSizeChange={onPageSizeChange}
-      />
-
+    <div
+      className={`flex flex-col-reverse sm:flex-row sm:items-center justify-center sm:justify-between gap-4 px-6 bg-gray-50 rounded-lg relative bottom-0 ${
+        hasSelectedOrders ? 'pb-24 sm:pb-28' : 'pb-6'
+      }`}
+    >
+      <div className="flex">
+        <PageSizeSelector
+          currentSize={currentPageSize}
+          totalItems={totalItems}
+          onSizeChange={onPageSizeChange}
+        />
+      </div>
       {/* Pagination */}
-      <div className="flex items-center space-x-2">
+      <div className="flex justify-center items-center space-x-2">
         {/* Previous Button */}
         <Button
           variant="outline"
@@ -100,10 +102,11 @@ const Footer: React.FC<FooterProps> = ({
                   variant={page === currentPage ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => onPageChange(page as number)}
-                  className={`h-8 w-8 p-0 cursor-pointer ${page === currentPage
-                    ? 'bg-primary text-white hover:bg-purple-700'
-                    : 'text-[#682fee] hover:bg-gray-50'
-                    }`}
+                  className={`h-8 w-8 p-0 cursor-pointer ${
+                    page === currentPage
+                      ? 'bg-primary text-white hover:bg-purple-700'
+                      : 'text-[#682fee] hover:bg-gray-50'
+                  }`}
                 >
                   {page}
                 </Button>
