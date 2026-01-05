@@ -33,53 +33,30 @@ interface EasyOrderModalProps {
 const EasyOrderModal = ({
   isOpen,
   onClose,
-  onSuccess,
   existingConfig,
 }: EasyOrderModalProps) => {
-  const { user } = useAuthStore();
-  const merchantId = user?.merchantId;
   const queryClient = useQueryClient();
 
-  // --- Webhook State ---
   const [webhookSecret, setWebhookSecret] = useState('');
   const [customWebhookUrl, setCustomWebhookUrl] = useState('');
   const [showSecret, setShowSecret] = useState(false);
   const [showApi, setShowApi] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // --- Integration API Key State ---
   const [apiKey, setApiKey] = useState('');
   const [existingIntegrationId, setExistingIntegrationId] = useState<
     number | null
   >(null);
 
-  // --- UI Toggle States ---
   const [showApiDropdown, setShowApiDropdown] = useState(false);
   const [showWebhookDropdown, setShowWebhookDropdown] = useState(false);
 
-  // --- General UI State ---
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
 
   const { data: webhookData } = useGetWebhookConfig();
   const { integrations, createIntegration, updateIntegration } =
     useIntegrations();
-
-  // --- URL Logic ---
-  const getBaseUrl = () => {
-    const envUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (
-      envUrl &&
-      (envUrl.includes('localhost') || envUrl.includes('127.0.0.1'))
-    ) {
-      return 'https://api.orderaa.com';
-    }
-    return envUrl || 'https://api.orderaa.com';
-  };
-
-  const defaultWebhookUrl = merchantId
-    ? `${getBaseUrl()}/webhooks/easy-orders/${merchantId}`
-    : `${getBaseUrl()}/webhooks/easy-orders/[MERCHANT_ID]`;
 
   useEffect(() => {
     if (webhookData) {
@@ -101,7 +78,7 @@ const EasyOrderModal = ({
   if (!isOpen) return null;
 
   const handleCopyUrl = () => {
-    const urlToCopy = customWebhookUrl.trim() || defaultWebhookUrl;
+    const urlToCopy = customWebhookUrl.trim();
     navigator.clipboard.writeText(urlToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -136,7 +113,7 @@ const EasyOrderModal = ({
     setError('');
     setIsLoading(true);
     try {
-      const finalUrl = customWebhookUrl.trim() || defaultWebhookUrl;
+      const finalUrl = customWebhookUrl.trim();
       if (existingConfig) {
         await webhookApi.updateConfig({
           webhookUrl: finalUrl,
@@ -313,7 +290,7 @@ const EasyOrderModal = ({
                       </div>
                       <input
                         type="url"
-                        value={customWebhookUrl || defaultWebhookUrl}
+                        value={customWebhookUrl}
                         onChange={(e) => setCustomWebhookUrl(e.target.value)}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-left text-sm font-mono focus:ring-2 focus:ring-primary outline-none"
                         dir="ltr"

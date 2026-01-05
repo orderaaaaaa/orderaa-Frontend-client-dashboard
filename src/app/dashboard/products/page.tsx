@@ -24,13 +24,19 @@ function productsPage() {
 
         {/* Pagination */}
         <div className="w-full md:w-auto flex justify-center md:justify-start">
-          <Pagination
-            currentPage={page}
-            totalPages={data?.totalPages || 0}
-            hasNextPage={!!data?.hasNextPage}
-            hasPreviousPage={!!data?.hasPreviousPage}
-            onPageChange={setPage}
-          />
+          <div className="flex max-sm:flex-col max-sm:gap-4 justify-between items-center mt-6 mb-4">
+            <div className="text-lg text-gray-900">
+              عرض <span className="font-bold">{`${limit}`}</span> من أصل{' '}
+              <span className="font-bold">{data?.totalItems}</span> موظف
+            </div>
+            <Pagination
+              currentPage={page}
+              totalPages={data?.totalPages || 0}
+              hasNextPage={!!data?.hasNextPage}
+              hasPreviousPage={!!data?.hasPreviousPage}
+              onPageChange={setPage}
+            />
+          </div>
         </div>
       </div>
     </div>

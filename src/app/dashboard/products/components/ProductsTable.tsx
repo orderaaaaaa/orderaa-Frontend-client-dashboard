@@ -41,7 +41,7 @@ function ProductsTable() {
         <Input
           name=""
           placeholder="ابحث عن المنتج"
-          className="!px-5 bg-gray-100 min-w-[300px]"
+          className="!px-5 min-w-[300px]"
         />
 
         <button

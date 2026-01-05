@@ -190,7 +190,7 @@ export default function CustomerTable({
 
       <div className="flex flex-wrap justify-center max-sm:gap-4 sm:justify-between items-center w-[97%] mx-auto mt-10 mb-5">
         <div className="text-lg">
-          عرض <span className="font-bold">1- {data?.data.length}</span> من اصل{' '}
+          عرض <span className="font-bold">{data?.data.length}</span> من اصل{' '}
           <span className="font-bold">{data?.meta.totalItems}</span> عميل
         </div>
         <Pagination
@@ -209,8 +209,9 @@ export default function CustomerTable({
           >
             {limit}
             <RxChevronUp
-              className={`transition-transform ${isLimitOpen ? 'rotate-180' : ''
-                }`}
+              className={`transition-transform ${
+                isLimitOpen ? 'rotate-180' : ''
+              }`}
             />
           </div>
 

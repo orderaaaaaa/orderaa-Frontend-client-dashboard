@@ -103,7 +103,7 @@ export function ShippingSection({
             register={register}
             placeholder="أدخل اسم المنتج"
             error={errors.defaultShipmentContent?.message}
-            className="!h-[46px] bg-[#EAEAEA40] text-right w-full !px-5"
+            className="!h-[55px] text-right w-full !px-5"
           />
         </div>
       </div>
@@ -126,7 +126,7 @@ export function ShippingSection({
           register={register}
           type="text"
           placeholder="0.00"
-          className="!h-[46px] bg-[#EAEAEA40] text-right w-full !px-5"
+          className="!h-[46px] text-right w-full !px-5"
         />
       </div>
     </>
