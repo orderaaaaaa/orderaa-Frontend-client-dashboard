@@ -3,12 +3,17 @@ import { RxChevronUp } from 'react-icons/rx';
 
 const LIMIT_OPTIONS = [10, 15, 20, 25];
 
-interface LimitSelectorProps {
+export interface LimitSelectorProps {
   limit: number;
   onLimitChange: (value: number) => void;
+  className?: string;
 }
 
-export const LimitSelector = ({ limit, onLimitChange }: LimitSelectorProps) => {
+export const LimitSelector = ({
+  limit,
+  onLimitChange,
+  className,
+}: LimitSelectorProps) => {
   const [isLimitOpen, setIsLimitOpen] = useState(false);
   const limitRef = useRef<HTMLDivElement | null>(null);
 
@@ -31,10 +36,10 @@ export const LimitSelector = ({ limit, onLimitChange }: LimitSelectorProps) => {
   }, []);
 
   return (
-    <div ref={limitRef} className="relative w-fit">
+    <div ref={limitRef} className={`relative w-fit ${className || ''}`}>
       <div
         onClick={() => setIsLimitOpen((prev) => !prev)}
-        className="bg-primary w-15 py-1 px-3 rounded-full text-white flex items-center justify-center cursor-pointer select-none gap-2"
+        className="bg-primary min-w-[60px] py-1 px-3 rounded-full text-white flex items-center justify-center cursor-pointer select-none gap-2"
       >
         {limit}
         <RxChevronUp
@@ -43,7 +48,7 @@ export const LimitSelector = ({ limit, onLimitChange }: LimitSelectorProps) => {
       </div>
 
       {isLimitOpen && (
-        <div className="absolute bottom-full mb-2 w-full bg-white rounded-lg shadow-md overflow-hidden z-10">
+        <div className="absolute bottom-full mb-2 w-full bg-white rounded-lg shadow-md overflow-hidden z-50">
           {LIMIT_OPTIONS.map((option) => (
             <div
               key={option}

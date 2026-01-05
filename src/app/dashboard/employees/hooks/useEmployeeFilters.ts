@@ -1,9 +1,7 @@
 import { useMemo, useEffect } from 'react';
 import { EmployeeFilters } from '@/schemas/employee.schema';
 import { FILTER_ALL } from '../constants/employeesFilterOptions';
-import { useEmployeesStore } from '@/store/employeesStore';
-
-
+import { useEmployeesStore } from '@/app/dashboard/employees/store/employeesStore';
 
 export function useEmployeeFilters() {
   const debouncedSearchQuery = useEmployeesStore(
@@ -46,7 +44,7 @@ export function useEmployeeFilters() {
     }
 
     return filterObj;
-  }, [debouncedSearchQuery, filterSelections, currentPage]);
+  }, [debouncedSearchQuery, filterSelections, currentPage, limit]);
 
   const hasActiveFilters = useMemo(() => {
     const query = debouncedSearchQuery.trim();

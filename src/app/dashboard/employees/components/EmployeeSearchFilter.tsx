@@ -9,7 +9,7 @@ import {
   FILTER_ALL,
 } from '../constants/employeesFilterOptions';
 import { useDebounce } from '@/utils/debounce';
-import { useEmployeesStore } from '@/store/employeesStore';
+import { useEmployeesStore } from '@/app/dashboard/employees/store/employeesStore';
 
 interface EmployeeSearchFilterProps {
   placeholder?: string;
@@ -80,8 +80,9 @@ export function EmployeeSearchFilter({
         <button
           type="button"
           onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-          className={`flex-shrink-0 hover:bg-gray-100 rounded-full p-1 cursor-pointer transition-colors ${hasActiveFilters ? 'text-primary' : 'text-gray-600'
-            }`}
+          className={`flex-shrink-0 hover:bg-gray-100 rounded-full p-1 cursor-pointer transition-colors ${
+            hasActiveFilters ? 'text-primary' : 'text-gray-600'
+          }`}
         >
           <SlidersVertical size={20} />
         </button>
@@ -122,10 +123,11 @@ export function EmployeeSearchFilter({
                         onClick={() => {
                           setAccessLevel(option.value);
                         }}
-                        className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${selectedAccessLevel === option.value
+                        className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${
+                          selectedAccessLevel === option.value
                             ? 'bg-primary text-white font-medium'
                             : 'text-gray-700 hover:bg-gray-100'
-                          }`}
+                        }`}
                       >
                         {option.label}
                       </button>
@@ -146,10 +148,11 @@ export function EmployeeSearchFilter({
                         onClick={() => {
                           setDepartment(option.value);
                         }}
-                        className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${selectedDepartment === option.value
+                        className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${
+                          selectedDepartment === option.value
                             ? 'bg-primary text-white font-medium'
                             : 'text-gray-700 hover:bg-gray-100'
-                          }`}
+                        }`}
                       >
                         {option.label}
                       </button>
@@ -170,10 +173,11 @@ export function EmployeeSearchFilter({
                         onClick={() => {
                           setPerformance(option.value);
                         }}
-                        className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${selectedPerformance === option.value
+                        className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${
+                          selectedPerformance === option.value
                             ? 'bg-primary text-white font-medium'
                             : 'text-gray-700 hover:bg-gray-100'
-                          }`}
+                        }`}
                       >
                         {option.label}
                       </button>

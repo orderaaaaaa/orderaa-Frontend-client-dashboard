@@ -131,7 +131,7 @@ export const navigation: NavigationItem[] = [
     icon: LiaWalletSolid,
   },
   {
-    name: 'المحفظة',
+    name: 'المنتجات',
     href: '/dashboard/products',
     icon: LiaBoxesSolid,
   },

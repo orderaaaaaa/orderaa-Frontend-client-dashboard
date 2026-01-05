@@ -8,7 +8,7 @@ import { StatCardsSection } from './components/StatCardsSection';
 import { EmployeeSearchFilter } from './components/EmployeeSearchFilter';
 import { EmployeeCard } from './components/EmployeeCard';
 import { Pagination } from '../../../components/Pagination';
-import { useEmployeesStore } from '@/store/employeesStore';
+import { useEmployeesStore } from '@/app/dashboard/employees/store/employeesStore';
 import { LimitSelector } from './components/LimitSelector';
 
 export default function AllEmployees() {
