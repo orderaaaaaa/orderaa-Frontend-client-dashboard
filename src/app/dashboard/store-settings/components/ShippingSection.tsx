@@ -1,11 +1,11 @@
 import Input from '@/components/ui/Input';
 import {
-  Phone,
-  PackageOpen,
-  Edit3,
-  FilePenLine,
-  RotateCcw,
-} from 'lucide-react';
+  LiaPhoneSolid,
+  LiaBoxOpenSolid,
+  LiaEditSolid,
+  LiaRedoAltSolid,
+  LiaPenSolid,
+} from 'react-icons/lia';
 import { UseFormRegister, FieldErrors, UseFormWatch } from 'react-hook-form';
 import { OrderSettingsFormData } from '../schemas/store';
 import { ToggleSwitch } from './ToggleSwitch';
@@ -28,7 +28,7 @@ export function ShippingSection({
       {/* Phone Number */}
       <div className="w-full flex flex-col gap-4">
         <div className="w-full flex items-start gap-2">
-          <Phone className="w-6 h-6 text-primary mt-0.5" />
+          <LiaPhoneSolid className="w-6 h-6 text-primary mt-0.5" />
           <div>
             <h3 className="text-lg font-semibold leading-tight">رقم الهاتف</h3>
             <p className="text-sm text-gray-500">
@@ -51,7 +51,7 @@ export function ShippingSection({
       {/* Open Order */}
       <div className="flex items-start justify-between border-b border-gray-100 pb-6">
         <div className="flex items-start gap-3">
-          <PackageOpen className="w-6 h-6 text-primary mt-0.5" />
+          <LiaBoxOpenSolid className="w-6 h-6 text-primary mt-0.5" />
           <div>
             <h3 className="text-lg font-semibold leading-tight">فتح الشحنة</h3>
             <p className="text-sm text-gray-500">
@@ -70,7 +70,7 @@ export function ShippingSection({
       <div className="flex flex-col gap-4 border-b border-gray-100 pb-6">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
-            <Edit3 className="w-6 h-6 text-primary mt-0.5" />
+            <LiaEditSolid className="w-6 h-6 text-primary mt-0.5" />
             <div>
               <h3 className="text-lg font-semibold leading-tight">
                 تعديل محتوي الشحنة
@@ -95,7 +95,7 @@ export function ShippingSection({
           }`}
         >
           <div className="flex items-center gap-2 mb-2">
-            <FilePenLine className="w-5 h-5 text-primary" />
+            <LiaPenSolid className="w-5 h-5 text-primary" />
             <span className="text-base">اسم المنتج</span>
           </div>
           <Input
@@ -111,7 +111,7 @@ export function ShippingSection({
       {/* Return Cost */}
       <div className="w-full flex flex-col gap-4 border-b border-gray-100 pb-6">
         <div className="w-full flex items-start gap-2">
-          <RotateCcw className="w-6 h-6 text-primary mt-0.5" />
+          <LiaRedoAltSolid className="w-6 h-6 text-primary mt-0.5" />
           <div>
             <h3 className="text-lg font-semibold leading-tight">
               تكلفة مرتجع الشحن
