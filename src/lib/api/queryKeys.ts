@@ -6,6 +6,7 @@ export const QUERY_KEYS = {
   ORDER_FILTER_OPTIONS: 'order-filter-options',
   ORDER_STATUSES: 'order-statuses',
   CUSTOMER_ORDERS: 'customer-orders',
+  CONFIRM_ORDER_STATISTICS: 'confirm-order-statistics',
 
   // Products
   PRODUCTS: 'products',

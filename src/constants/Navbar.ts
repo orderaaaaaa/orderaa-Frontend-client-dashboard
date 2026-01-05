@@ -15,6 +15,8 @@ import {
   HousePlus,
   Wallet,
 } from 'lucide-react';
+import { LiaClipboardCheckSolid } from "react-icons/lia";
+import { IconType } from 'react-icons';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
 import { CartIcon, ExcelIcon } from '@/components/icons'; // Import from your icons registry
 
@@ -25,7 +27,8 @@ export type NavigationItem = {
     | ForwardRefExoticComponent<
         Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>
       >
-    | ((props: { className?: string }) => JSX.Element);
+    | ((props: { className?: string }) => JSX.Element)
+    | IconType;
   children?: NavigationItem[];
 };
 
@@ -41,6 +44,11 @@ export const navigation: NavigationItem[] = [
         href: '/dashboard/orders/allOrders',
         icon: CartIcon, // Use your custom icon
       },
+      {
+        name: 'تأكيد الطلبات',
+        href: '/dashboard/orders/confirm-orders',
+        icon: LiaClipboardCheckSolid,
+      }
     ],
   },
   {
