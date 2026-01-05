@@ -1,7 +1,7 @@
 import React from 'react';
 import { StatCard } from './StatCard';
 import { ConfirmOrderStatistics } from '../../types';
-import { CheckCircle2, Truck, XCircle, Clock } from 'lucide-react';
+import { LiaBoxOpenSolid, LiaCheckCircleSolid, LiaFileAltSolid, LiaPrintSolid } from 'react-icons/lia';
 
 interface StatisticsSectionProps {
   statistics: ConfirmOrderStatistics | null;
@@ -34,25 +34,29 @@ export function StatisticsSection({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 my-6">
       <StatCard
-        icon={<CheckCircle2 className="w-8 h-8 text-green-600" />}
+        icon={<LiaCheckCircleSolid className="w-8 h-8 text-primary" />}
         label="الطلبات المؤكدة"
+        desc="جاهزة للطباعة"
         value={statistics?.confirmedOrders ?? 0}
       />
       <StatCard
-        icon={<Truck className="w-8 h-8 text-blue-600" />}
-        label="الطلبات المرسليمها"
+        icon={<LiaPrintSolid className="w-8 h-8 text-primary" />}
+        label="الطلبات الغير مطبوعة"
+        desc='بحاجة للطباعة'
         value={statistics?.ordersToDeliver ?? 0}
       />
       <StatCard
-        icon={<XCircle className="w-8 h-8 text-red-600" />}
-        label="الطلبات المرفوضة"
+        icon={<LiaFileAltSolid className="w-8 h-8 text-primary" />}
+        label="الطلبات المطبوعة"
+        desc="تم الطباعة"
         value={statistics?.rejectedOrders ?? 0}
       />
       <StatCard
-        icon={<Clock className="w-8 h-8 text-orange-600" />}
-        label="الطلبات المتبقية"
+        icon={<LiaBoxOpenSolid className="w-8 h-8 text-primary" />}
+        label="الطلبات المغلفة"
+        desc="جاهزة للشحن"
         value={statistics?.remainingOrders ?? 0}
       />
     </div>

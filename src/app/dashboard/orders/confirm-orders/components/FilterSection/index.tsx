@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import clsx from 'clsx';
 import { Control, FieldErrors, UseFormSetValue } from 'react-hook-form';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { FilterOptions } from '@/types/orders';
@@ -11,6 +12,7 @@ import FilterPanelRHF, {
 import {
   LiaSlidersHSolid,
   LiaAngleDownSolid,
+  LiaPrintSolid,
 } from 'react-icons/lia';
 import {
   Popover,
@@ -19,6 +21,7 @@ import {
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { PrintStatusToggle } from './PrintStatusToggle';
+import { PrintInvoicesModal } from './PrintInvoicesModal';
 import { PrintStatus } from '../../types';
 
 interface FilterSectionProps {
@@ -31,6 +34,8 @@ interface FilterSectionProps {
   onPrintStatusChange: (status: PrintStatus) => void;
   printedCount?: number;
   notPrintedCount?: number;
+  onPrintInvoices?: (count: number) => void | Promise<void>;
+  isPrinting?: boolean;
 }
 
 function getActiveFiltersFromFormValues(
@@ -67,10 +72,13 @@ export function FilterSection({
   onPrintStatusChange,
   printedCount = 0,
   notPrintedCount = 0,
+  onPrintInvoices,
+  isPrinting = false,
 }: FilterSectionProps) {
   const [activeFilters, setActiveFilters] = useState<FilterKey[]>(() =>
     getActiveFiltersFromFormValues(initialFormFilters)
   );
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
   const hasInitializedRef = useRef(false);
 
@@ -126,19 +134,16 @@ export function FilterSection({
     <div className="bg-white rounded-xl py-[3px] mt-6 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-4 px-4 py-2">
         <div className="flex items-center gap-3">
-          {/* Filter Button */}
           <Popover open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
             <PopoverTrigger asChild>
-              <Button
-                variant="default"
-                className="flex items-center gap-2 bg-primary text-white rounded-lg py-2.5 px-4 text-base font-medium hover:bg-[#4A1DB8] transition-colors focus:outline-none focus:ring-2 focus:ring-[#4A1DB8]"
-              >
-                <LiaSlidersHSolid className="w-5 h-5" />
+              <Button variant="default" size="lg">
+                <LiaSlidersHSolid className="size-5" />
                 <span>فلتر</span>
                 <LiaAngleDownSolid
-                  className={`w-4 h-4 transition-transform duration-200 ${
-                    isDropdownOpen ? 'rotate-180' : ''
-                  }`}
+                  className={clsx(
+                    'size-4 transition-transform duration-200',
+                    isDropdownOpen && 'rotate-180'
+                  )}
                 />
               </Button>
             </PopoverTrigger>
@@ -179,27 +184,15 @@ export function FilterSection({
             </PopoverContent>
           </Popover>
 
-          {/* Placeholder Button (functionality TBD) */}
           <Button
             variant="outline"
-            className="flex items-center gap-2 border-gray-300 text-gray-600 rounded-lg py-2.5 px-4 text-base font-medium hover:bg-gray-50 transition-colors"
-            disabled
+            size="lg"
+            onClick={() => setIsPrintModalOpen(true)}
           >
-            <span>زر إضافي</span>
-          </Button>
-
-          {/* Placeholder Filter with 2 options (functionality TBD) */}
-          <Button
-            variant="outline"
-            className="flex items-center gap-2 border-gray-300 text-gray-600 rounded-lg py-2.5 px-4 text-base font-medium hover:bg-gray-50 transition-colors"
-            disabled
-          >
-            <span>فلتر إضافي</span>
-            <LiaAngleDownSolid className="w-4 h-4" />
+            <LiaPrintSolid className="size-5" />
           </Button>
         </div>
 
-        {/* Print Status Toggle */}
         <PrintStatusToggle
           value={printStatus}
           onChange={onPrintStatusChange}
@@ -218,6 +211,18 @@ export function FilterSection({
           onRemoveFilter={removeFilter}
         />
       )}
+
+      <PrintInvoicesModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        onPrint={async (count) => {
+          if (onPrintInvoices) {
+            await onPrintInvoices(count);
+          }
+          setIsPrintModalOpen(false);
+        }}
+        isLoading={isPrinting}
+      />
     </div>
   );
 }

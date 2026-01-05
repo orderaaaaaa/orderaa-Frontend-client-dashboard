@@ -1,8 +1,10 @@
 'use client';
 
 import React from 'react';
+import clsx from 'clsx';
 import { PrintStatus } from '../../types';
 import { LiaPrintSolid } from 'react-icons/lia';
+import { Button } from '@/components/ui/button';
 
 interface PrintStatusToggleProps {
   value: PrintStatus;
@@ -26,49 +28,45 @@ export function PrintStatusToggle({
   };
 
   return (
-    <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 p-1">
-      <button
-        type="button"
+    <div className="flex items-center gap-1 bg-white rounded-lg border border-gray-200 p-1">
+      <Button
+        variant={value === 'printed' ? 'default' : 'ghost'}
+        size="sm"
         onClick={() => handleToggle('printed')}
-        className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-          value === 'printed'
-            ? 'bg-primary text-white'
-            : 'text-gray-600 hover:bg-gray-100'
-        }`}
+        className={clsx(value !== 'printed' && 'text-gray-600')}
       >
-        <LiaPrintSolid className="w-4 h-4" />
+        <LiaPrintSolid className="size-4" />
         <span>طلبات تم طباعتها</span>
         <span
-          className={`px-2 py-0.5 rounded-full text-xs ${
+          className={clsx(
+            'px-2 py-0.5 rounded-full text-xs',
             value === 'printed'
               ? 'bg-white/20 text-white'
               : 'bg-gray-100 text-gray-600'
-          }`}
+          )}
         >
           {printedCount}
         </span>
-      </button>
+      </Button>
 
-      <button
-        type="button"
+      <Button
+        variant={value === 'not_printed' ? 'default' : 'ghost'}
+        size="sm"
         onClick={() => handleToggle('not_printed')}
-        className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-          value === 'not_printed'
-            ? 'bg-primary text-white'
-            : 'text-gray-600 hover:bg-gray-100'
-        }`}
+        className={clsx(value !== 'not_printed' && 'text-gray-600')}
       >
         <span>طلبات لم يتم طباعتها</span>
         <span
-          className={`px-2 py-0.5 rounded-full text-xs ${
+          className={clsx(
+            'px-2 py-0.5 rounded-full text-xs',
             value === 'not_printed'
               ? 'bg-white/20 text-white'
               : 'bg-gray-100 text-gray-600'
-          }`}
+          )}
         >
           {notPrintedCount}
         </span>
-      </button>
+      </Button>
     </div>
   );
 }

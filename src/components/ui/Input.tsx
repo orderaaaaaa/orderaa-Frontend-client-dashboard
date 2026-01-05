@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import clsx from 'clsx';
 import { LucideIcon, Eye, EyeOff } from 'lucide-react';
 
 type InputProps = {
   label?: string;
-  name: string;
+  name?: string;
   type?: string;
   placeholder?: string;
   error?: string;
@@ -11,9 +12,16 @@ type InputProps = {
   registerOptions?: any;
   icon?: LucideIcon;
   className?: string;
-  value?: string;
+  inputClassName?: string;
+  value?: string | number;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+  min?: number | string;
+  max?: number | string;
+  step?: number | string;
+  autoFocus?: boolean;
+  id?: string;
 };
 
 export default function Input({
@@ -26,29 +34,40 @@ export default function Input({
   registerOptions,
   icon: Icon,
   className,
+  inputClassName: customInputClassName,
   value,
   onChange,
   onKeyDown,
+  disabled,
+  min,
+  max,
+  step,
+  autoFocus,
+  id,
   ...rest
 }: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
-  // Use px-10 for left and right padding if both icons could exist
-  const inputClassName =
-    `w-full border border-[#CED4DA] rounded-lg py-1.5 px-10 text-[18px] ${className ?? ''
-      }`.trim();
+  const hasIcon = Icon || type === 'password';
+  const inputClassName = clsx(
+    'w-full border border-gray-200 rounded-lg py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed',
+    hasIcon ? 'px-10' : 'px-4',
+    customInputClassName
+  );
 
-  // Decide input type
   const inputType =
     type === 'password' ? (showPassword ? 'text' : 'password') : type;
 
+  const inputId = id || name;
+
   return (
-    <div>
-      <label htmlFor={name} className="block font-medium text-[16px] mb-1">
-        {label}
-      </label>
+    <div className={className}>
+      {label && (
+        <label htmlFor={inputId} className="block font-medium text-base mb-2">
+          {label}
+        </label>
+      )}
       <div className="relative">
-        {/* Eye icon (for password) on the LEFT */}
         {type === 'password' && (
           <button
             type="button"
@@ -61,17 +80,21 @@ export default function Input({
         )}
         <input
           type={inputType}
-          id={name}
+          id={inputId}
           name={name}
           placeholder={placeholder}
           className={inputClassName}
           value={value}
           onChange={onChange}
           onKeyDown={onKeyDown}
+          disabled={disabled}
+          min={min}
+          max={max}
+          step={step}
+          autoFocus={autoFocus}
           {...(register ? { ...register(name, registerOptions) } : {})}
           {...rest}
         />
-        {/* Optional icon on the RIGHT */}
         {Icon && (
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary">
             <Icon size={20} />

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Copy, TriangleAlert, History } from 'lucide-react';
 import { Order, OrderLockedBy } from '@/types/orders';
 import { toast } from 'react-toastify';
-import CustomerOrdersModal from '@/app/dashboard/orders/allOrders/components/CustomerOrdersModal';
+import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 import OrderHistoryModal from './OrderHistoryModal';
 import OrderLockedBanner from './OrderLockedBanner';
 import { getTimeAgo } from '@/utils/timeAgo';

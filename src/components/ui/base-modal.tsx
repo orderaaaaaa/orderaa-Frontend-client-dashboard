@@ -11,6 +11,7 @@ interface BaseModalProps {
   children: ReactNode;
   onConfirm?: () => void | Promise<void>;
   confirmText?: string;
+  confirmIcon?: ReactNode;
   cancelText?: string;
   showFooter?: boolean;
   confirmButtonClassName?: string;
@@ -28,6 +29,7 @@ export default function BaseModal({
   children,
   onConfirm,
   confirmText = 'حفظ',
+  confirmIcon,
   cancelText = 'إلغاء',
   showFooter = true,
   confirmButtonClassName,
@@ -128,6 +130,7 @@ export default function BaseModal({
                   'w-[146px] h-[37px] bg-primary border-[1.5px] border-primary rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 }
               >
+                {confirmIcon}
                 <span className="text-lg font-bold text-white">
                   {isLoading ? 'جاري الحفظ...' : confirmText}
                 </span>

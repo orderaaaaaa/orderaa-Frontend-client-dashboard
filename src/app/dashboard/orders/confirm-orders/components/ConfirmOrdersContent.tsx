@@ -1,22 +1,24 @@
 'use client';
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import clsx from 'clsx';
 import { toast } from 'react-toastify';
 import { ArrowUp, ArrowLeft, Scan, ScanLine, X } from 'lucide-react';
 
 import { Breadcrumb } from '@/components/dashboard-layout';
 import { DatePicker } from '@/components/ui/datepicker';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
+import { Button } from '@/components/ui/button';
 import BulkActionsBar from '@/components/BulkActionsBar';
-import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
-import Footer from '@/app/dashboard/orders/allOrders/components/Footer';
-import CustomerOrdersModal from '@/app/dashboard/orders/allOrders/components/CustomerOrdersModal';
+import OrderCard from '@/components/orders/OrderCard';
+import Footer from '@/components/orders/Footer';
+import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 
 import { useOrders, useOrderStatusesQuery } from '@/services/orders';
-import { useOrderStatistics } from '@/hooks/AllOrders/useOrderStatistics';
-import { useFilterOptions } from '@/hooks/AllOrders/useFilterOptions';
-import { useFilterForm } from '@/hooks/AllOrders/useFilterForm';
-import { buildApiFiltersFromUrlState } from '@/hooks/AllOrders/useUnifiedFilters';
+import { useOrderStatistics } from '@/hooks/orders/useOrderStatistics';
+import { useFilterOptions } from '@/hooks/orders/useFilterOptions';
+import { useFilterForm } from '@/hooks/orders/useFilterForm';
+import { buildApiFiltersFromUrlState } from '@/hooks/orders/useUnifiedFilters';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import { formatDateForUrl } from '@/utils/urlFilters';
@@ -56,7 +58,6 @@ export function ConfirmOrdersContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
 
-  // URL-based filter state with print status
   const {
     filters,
     setStatus,
@@ -71,12 +72,10 @@ export function ConfirmOrdersContent() {
     setPrintStatus,
   } = useConfirmOrdersFilters();
 
-  // Build API filters from URL state
   const apiFilters = useMemo(() => {
     return buildApiFiltersFromUrlState(filters);
   }, [filters]);
 
-  // Build filter params for order details navigation
   const orderDetailsFilterParams = useMemo(() => {
     const params = new URLSearchParams();
 
@@ -110,7 +109,6 @@ export function ConfirmOrdersContent() {
 
   const { fromDate, toDate, timePeriod, page, limit } = filters;
 
-  // Fetch orders
   const {
     data: ordersData,
     isLoading: loading,
@@ -120,7 +118,6 @@ export function ConfirmOrdersContent() {
 
   const { data: statusOptions } = useOrderStatusesQuery();
 
-  // Statistics
   const { statistics } = useOrderStatistics();
   const { statistics: confirmStatistics, loading: statsLoading } =
     useConfirmOrderStatistics();
@@ -132,7 +129,6 @@ export function ConfirmOrdersContent() {
   const currentPage = ordersData?.meta?.currentPage ?? 1;
   const error = queryError?.message ?? null;
 
-  // Bulk selection
   const {
     selectMode,
     toggleSelectMode,
@@ -145,7 +141,6 @@ export function ConfirmOrdersContent() {
     clearSelections,
   } = useConfirmOrderBulk({ orders });
 
-  // Track previous page for scroll
   const prevPageRef = useRef<number>(page);
 
   useEffect(() => {
@@ -155,7 +150,6 @@ export function ConfirmOrdersContent() {
     }
   }, [page]);
 
-  // Form setup
   const handleFormSubmit = useCallback(
     (data: OrderFiltersFormData) => {
       updateLocalFilters(data);
@@ -171,7 +165,6 @@ export function ConfirmOrdersContent() {
     onSubmit: handleFormSubmit,
   });
 
-  // Handle bulk status edit
   const handleEditStatus = useCallback(
     (statusKey: string) => {
       if (!statusKey) return;
@@ -181,27 +174,22 @@ export function ConfirmOrdersContent() {
     []
   );
 
-  // Handle Excel export
   const handleExportExcel = useCallback(() => {
     toast.info('سيتم تصدير الطلبات إلى Excel');
   }, []);
 
-  // Handle WhatsApp share
   const handleShareWhatsApp = useCallback(() => {
     toast.info(`سيتم مشاركة ${selectedOrders.length} طلب عبر واتساب`);
   }, [selectedOrders]);
 
-  // Handle Shipping
   const handleShipping = useCallback(() => {
     toast.info(`سيتم شحن ${selectedOrders.length} طلب`);
   }, [selectedOrders]);
 
-  // Handle Other
   const handleOther = useCallback(() => {
     toast.info(`${selectedOrders.length} طلب محدد`);
   }, [selectedOrders]);
 
-  // Scroll handling
   useEffect(() => {
     const handleScroll = () => {
       setShowBackToTop(window.scrollY > 500);
@@ -230,7 +218,6 @@ export function ConfirmOrdersContent() {
   const showBulkActions =
     (selectedOrders.length > 0 || selectAllMatchingFilters) && !isModalOpen;
 
-  // Add padding when bulk actions bar is visible
   useEffect(() => {
     if (showBulkActions) {
       document.body.style.paddingBottom = '80px';
@@ -244,7 +231,6 @@ export function ConfirmOrdersContent() {
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-7 w-full">
         <Breadcrumb
           items={[{ title: 'الطلبات' }, { title: 'تأكيد الطلبات' }]}
@@ -279,9 +265,10 @@ export function ConfirmOrdersContent() {
               onValueChange={(label) => setTimePeriod(getValueFromLabel(label))}
               options={TIME_PERIOD_LABELS}
               placeholder="الفترة الزمنية"
-              triggerClassName={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${
-                timePeriod ? 'text-primary font-bold' : ''
-              }`}
+              triggerClassName={clsx(
+                'w-full border-[#CED4DA] rounded-lg h-10 text-[16px]',
+                timePeriod && 'text-primary font-bold'
+              )}
               searchThreshold={10}
               clearable
             />
@@ -289,7 +276,6 @@ export function ConfirmOrdersContent() {
         </div>
       </div>
 
-      {/* Status Tabs */}
       <PageTabs
         statusCounts={statistics?.statusCounts || {}}
         totalOrders={statistics?.totalOrders || 0}
@@ -297,10 +283,8 @@ export function ConfirmOrdersContent() {
         currentStatus={filters.status}
       />
 
-      {/* Statistics Section */}
       <StatisticsSection statistics={confirmStatistics} isLoading={statsLoading} />
 
-      {/* Filter Section */}
       <FilterSection
         control={control}
         errors={errors}
@@ -320,17 +304,13 @@ export function ConfirmOrdersContent() {
         notPrintedCount={0}
       />
 
-      {/* Selection Controls */}
       <div className="flex flex-col sm:flex-row justify-between gap-2 mt-10 mb-6 select-none">
         <div className="flex justify-center sm:justify-start items-center gap-4">
           <p className="text-gray-700">عدد جميع الطلبات: {totalOrders}</p>
           {selectMode && (
-            <button
-              onClick={handleSelectAllToggle}
-              className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-[#682fee] transition-colors"
-            >
+            <Button variant="default" size="sm" onClick={handleSelectAllToggle}>
               {selectAllMatchingFilters ? 'إلغاء تحديد الكل' : 'تحديد الكل'}
-            </button>
+            </Button>
           )}
         </div>
 
@@ -346,23 +326,17 @@ export function ConfirmOrdersContent() {
               </span>
             </div>
           )}
-          <div
-            className="bg-primary flex flex-row items-center justify-center gap-3 px-5 py-2 rounded-full cursor-pointer"
+          <Button
+            variant="default"
             onClick={toggleSelectMode}
+            className="rounded-full px-5"
           >
-            <p>تحديد</p>
-            <div>
-              {selectMode ? (
-                <ScanLine className="text-white" />
-              ) : (
-                <Scan className="text-white" />
-              )}
-            </div>
-          </div>
+            <span>تحديد</span>
+            {selectMode ? <ScanLine /> : <Scan />}
+          </Button>
         </div>
       </div>
 
-      {/* Orders Grid */}
       {loading && orders.length === 0 ? (
         <div className="relative">
           <div className="flex items-center justify-center min-h-[400px]">
@@ -439,7 +413,6 @@ export function ConfirmOrdersContent() {
         </>
       )}
 
-      {/* Customer Orders Modal */}
       <CustomerOrdersModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
@@ -447,7 +420,6 @@ export function ConfirmOrdersContent() {
         customerName={selectedCustomerName}
       />
 
-      {/* Footer */}
       <Footer
         currentPage={currentPage}
         totalPages={totalPages}
@@ -462,7 +434,6 @@ export function ConfirmOrdersContent() {
         hasSelectedOrders={showBulkActions}
       />
 
-      {/* Bulk Actions Bar */}
       {showBulkActions && (
         <BulkActionsBar
           selectedOrders={selectedOrders}
@@ -478,15 +449,16 @@ export function ConfirmOrdersContent() {
         />
       )}
 
-      {/* Back to Top Button */}
       {showBackToTop && (
-        <button
+        <Button
+          variant="default"
+          size="icon"
           onClick={scrollToTop}
-          className="fixed bottom-8 left-8 z-50 p-4 bg-primary text-white rounded-full shadow-lg hover:bg-[#682fee] transition-all duration-300 hover:scale-110"
+          className="fixed bottom-8 left-8 z-50 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
           aria-label="العودة للأعلى"
         >
-          <ArrowUp className="w-6 h-6" />
-        </button>
+          <ArrowUp className="size-6" />
+        </Button>
       )}
     </div>
   );
