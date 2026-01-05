@@ -8,7 +8,7 @@ import { StatCardsSection } from './components/StatCardsSection';
 import { EmployeeSearchFilter } from './components/EmployeeSearchFilter';
 import { EmployeeCard } from './components/EmployeeCard';
 import { Pagination } from '../../../components/Pagination';
-import { useEmployeesStore } from '@/store/employeesStore';
+import { useEmployeesStore } from '@/app/dashboard/employees/store/employeesStore';
 import { LimitSelector } from './components/LimitSelector';
 
 export default function AllEmployees() {
@@ -17,6 +17,7 @@ export default function AllEmployees() {
 
   const setCurrentPage = useEmployeesStore((state) => state.setCurrentPage);
   const limit = useEmployeesStore((state) => state.filterSelections.limit);
+  const setLimit = useEmployeesStore((state) => state.setLimit);
 
   if (isError) {
     return (
@@ -78,7 +79,7 @@ export default function AllEmployees() {
                     />
                   </div>
                 )}
-                <LimitSelector />
+                <LimitSelector limit={limit} onLimitChange={setLimit} />
               </Else>
             </If>
           </div>
