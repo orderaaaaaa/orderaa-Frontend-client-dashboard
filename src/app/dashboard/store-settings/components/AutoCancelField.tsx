@@ -1,4 +1,4 @@
-import { CopyX } from 'lucide-react';
+import { LuCopyX } from 'react-icons/lu';
 import Input from '@/components/ui/Input';
 import { UseFormRegister, FieldErrors } from 'react-hook-form';
 import { OrderSettingsFormData } from '../schemas/store';
@@ -12,7 +12,7 @@ export function AutoCancelField({ register, errors }: AutoCancelFieldProps) {
   return (
     <div className="w-full flex flex-col gap-4">
       <div className="w-full flex items-start gap-2">
-        <CopyX className="w-6 h-6 text-primary mt-0.5" />
+        <LuCopyX className="w-6 h-6 text-primary mt-0.5" />
         <div>
           <h3 className="text-lg font-semibold leading-tight">
             الالغاء التلقائي للطلب

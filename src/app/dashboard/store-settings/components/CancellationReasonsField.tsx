@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Hash, X } from 'lucide-react';
+import { IoMdClose } from 'react-icons/io';
+import { LiaHashtagSolid } from 'react-icons/lia';
+
 import { UseFormSetValue, UseFormWatch, FieldErrors } from 'react-hook-form';
 import { OrderSettingsFormData } from '../schemas/store';
 
@@ -37,7 +39,7 @@ export function CancellationReasonsField({
   return (
     <div className="w-full flex flex-col gap-4 border-b border-gray-100 pb-6">
       <div className="w-full flex items-start gap-2">
-        <Hash className="w-6 h-6 text-primary mt-0.5" />
+        <LiaHashtagSolid className="w-6 h-6 text-primary mt-0.5" />
         <div>
           <h3 className="text-lg font-semibold leading-tight">
             اسباب الغاء الطلب
@@ -60,7 +62,7 @@ export function CancellationReasonsField({
               onClick={() => removeReason(index)}
               className="hover:text-red-400 transition-colors"
             >
-              <X className="w-3 h-3" />
+              <IoMdClose className="w-3 h-3" />
             </button>
           </div>
         ))}

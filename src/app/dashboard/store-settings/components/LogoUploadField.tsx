@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { IoMdClose } from 'react-icons/io';
+import { LiaCloudUploadAltSolid, LiaImageSolid } from 'react-icons/lia';
+
 import { UseFormSetValue, UseFormWatch, FieldErrors } from 'react-hook-form';
 import { OrderSettingsFormData } from '../schemas/store';
 
@@ -82,7 +84,7 @@ export function LogoUploadField({
   return (
     <div className="w-full md:w-2/3 xl:w-1/2 flex flex-col gap-4 border-b border-gray-100 pb-6">
       <div className="w-full flex items-start gap-2">
-        <ImageIcon className="w-6 h-6 text-primary mt-0.5" />
+        <LiaImageSolid className="w-6 h-6 text-primary mt-0.5" />
         <div>
           <h3 className="text-lg font-semibold leading-tight">شعار المتجر</h3>
           <p className="text-sm text-gray-500">قم برفع شعار المتجر الخاص بك</p>
@@ -117,12 +119,12 @@ export function LogoUploadField({
                   }}
                   className="absolute top-0 right-0 cursor-pointer bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
                 >
-                  <X className="w-4 h-4" />
+                  <IoMdClose className="w-4 h-4" />
                 </button>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center text-center">
-                <Upload className="w-10 h-10 text-gray-400 mb-2" />
+                <LiaCloudUploadAltSolid className="w-10 h-10 text-gray-400 mb-2" />
                 <p className="text-sm text-gray-600 mb-1">
                   اسحب الصورة وأفلتها هنا
                 </p>
