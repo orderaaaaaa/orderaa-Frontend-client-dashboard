@@ -1,20 +1,24 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { RxChevronUp } from 'react-icons/rx';
-import { useEmployeesStore } from '@/store/employeesStore';
 
 const LIMIT_OPTIONS = [10, 15, 20, 25];
 
-export const LimitSelector = () => {
+export interface LimitSelectorProps {
+  limit: number;
+  onLimitChange: (value: number) => void;
+  className?: string;
+}
+
+export const LimitSelector = ({
+  limit,
+  onLimitChange,
+  className,
+}: LimitSelectorProps) => {
   const [isLimitOpen, setIsLimitOpen] = useState(false);
   const limitRef = useRef<HTMLDivElement | null>(null);
 
-  const limit = useEmployeesStore((state) => state.filterSelections.limit);
-  const setLimit = useEmployeesStore((state) => state.setLimit);
-  const setCurrentPage = useEmployeesStore((state) => state.setCurrentPage);
-
   const handleSelectLimit = (value: number) => {
-    setLimit(value);
-    setCurrentPage(1);
+    onLimitChange(value);
     setIsLimitOpen(false);
   };
 
@@ -27,26 +31,24 @@ export const LimitSelector = () => {
         setIsLimitOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   return (
-    <div ref={limitRef} className="relative w-fit">
+    <div ref={limitRef} className={`relative w-fit ${className || ''}`}>
       <div
         onClick={() => setIsLimitOpen((prev) => !prev)}
-        className="bg-primary w-15 py-1 px-3 rounded-full text-white flex items-center justify-center cursor-pointer select-none gap-2"
+        className="bg-primary min-w-[60px] py-1 px-3 rounded-full text-white flex items-center justify-center cursor-pointer select-none gap-2"
       >
         {limit}
         <RxChevronUp
-          className={`transition-transform ${isLimitOpen ? 'rotate-180' : ''
-            }`}
+          className={`transition-transform ${isLimitOpen ? 'rotate-180' : ''}`}
         />
       </div>
 
       {isLimitOpen && (
-        <div className="absolute bottom-full mb-2 w-full bg-white rounded-lg shadow-md overflow-hidden z-10">
+        <div className="absolute bottom-full mb-2 w-full bg-white rounded-lg shadow-md overflow-hidden z-50">
           {LIMIT_OPTIONS.map((option) => (
             <div
               key={option}

@@ -55,6 +55,7 @@ export const useEmployeesStore = create<EmployeesStore>((set) => ({
   setLimit: (limit) =>
     set((state) => ({
       filterSelections: { ...state.filterSelections, limit },
+      currentPage: 1, // <--- Reset to page 1 when limit changes
     })),
 
   currentPage: 1,
