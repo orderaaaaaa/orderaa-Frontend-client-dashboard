@@ -17,6 +17,7 @@ export default function AllEmployees() {
 
   const setCurrentPage = useEmployeesStore((state) => state.setCurrentPage);
   const limit = useEmployeesStore((state) => state.filterSelections.limit);
+  const setLimit = useEmployeesStore((state) => state.setLimit);
 
   if (isError) {
     return (
@@ -78,7 +79,7 @@ export default function AllEmployees() {
                     />
                   </div>
                 )}
-                <LimitSelector />
+                <LimitSelector limit={limit} onLimitChange={setLimit} />
               </Else>
             </If>
           </div>

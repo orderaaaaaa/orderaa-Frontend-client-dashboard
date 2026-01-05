@@ -1,20 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { RxChevronUp } from 'react-icons/rx';
-import { useEmployeesStore } from '@/store/employeesStore';
 
 const LIMIT_OPTIONS = [10, 15, 20, 25];
 
-export const LimitSelector = () => {
+interface LimitSelectorProps {
+  limit: number;
+  onLimitChange: (value: number) => void;
+}
+
+export const LimitSelector = ({ limit, onLimitChange }: LimitSelectorProps) => {
   const [isLimitOpen, setIsLimitOpen] = useState(false);
   const limitRef = useRef<HTMLDivElement | null>(null);
 
-  const limit = useEmployeesStore((state) => state.filterSelections.limit);
-  const setLimit = useEmployeesStore((state) => state.setLimit);
-  const setCurrentPage = useEmployeesStore((state) => state.setCurrentPage);
-
   const handleSelectLimit = (value: number) => {
-    setLimit(value);
-    setCurrentPage(1);
+    onLimitChange(value);
     setIsLimitOpen(false);
   };
 
@@ -27,7 +26,6 @@ export const LimitSelector = () => {
         setIsLimitOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -40,8 +38,7 @@ export const LimitSelector = () => {
       >
         {limit}
         <RxChevronUp
-          className={`transition-transform ${isLimitOpen ? 'rotate-180' : ''
-            }`}
+          className={`transition-transform ${isLimitOpen ? 'rotate-180' : ''}`}
         />
       </div>
 
