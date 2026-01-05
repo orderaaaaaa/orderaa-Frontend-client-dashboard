@@ -10,6 +10,7 @@ import {
   Image as ImageIcon,
   Upload,
   X,
+  Hash,
 } from 'lucide-react';
 
 import {
@@ -39,6 +40,8 @@ export default function OrderSettingsFields({
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const reasons = watch('cancellationReasons') || [];
+  const [inputValue, setInputValue] = useState('');
   const logoFile = watch('logo');
 
   useEffect(() => {
@@ -107,6 +110,24 @@ export default function OrderSettingsFields({
     setSelectedFile(null);
   };
 
+  const addReason = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && inputValue.trim()) {
+      e.preventDefault();
+      // Prevent duplicates
+      if (!reasons.includes(inputValue.trim())) {
+        setValue('cancellationReasons', [...reasons, inputValue.trim()]);
+      }
+      setInputValue('');
+    }
+  };
+
+  const removeReason = (indexToRemove: number) => {
+    const updatedreasons = reasons.filter(
+      (_, index) => index !== indexToRemove
+    );
+    setValue('cancellationReasons', updatedreasons);
+  };
+
   const ToggleSwitch = ({
     name,
     checked,
@@ -136,7 +157,7 @@ export default function OrderSettingsFields({
   return (
     <div className="px-4 md:px-10 py-6 md:py-[34px]" dir="rtl">
       <div className="flex lg:w-[37%] flex-col gap-8">
-        <div className="w-1/2 flex flex-col gap-4 border-b border-gray-100 pb-6">
+        <div className="w-full md:w-2/3 xl:w-1/2 flex flex-col gap-4 border-b border-gray-100 pb-6">
           <div className="w-full flex items-start gap-2">
             <ImageIcon className="w-6 h-6 text-primary mt-0.5" />
             <div>
@@ -220,10 +241,10 @@ export default function OrderSettingsFields({
             </div>
             <div>
               <h3 className="text-lg font-semibold leading-tight">
-                لغة الفاتورة
+                لغة بوليصة الشحن
               </h3>
               <p className="text-sm text-gray-500">
-                اختر اللغة الافتراضية للفاتورة
+                اختار اللغة التي تريد طباعه بوليصة الشحن بها{' '}
               </p>
             </div>
           </div>
@@ -259,6 +280,83 @@ export default function OrderSettingsFields({
               </span>
             </label>
           </div>
+        </div>
+
+        {/* Cancellation Reasons Field */}
+        <div className="w-full flex flex-col gap-4 border-b border-gray-100 pb-6">
+          <div className="w-full flex items-start gap-2">
+            <Hash className="w-6 h-6 text-primary mt-0.5" />
+            <div>
+              <h3 className="text-lg font-semibold leading-tight">
+                اسباب الغاء الطلب
+              </h3>
+              <p className="text-sm text-gray-500">
+                أضف الأسباب التي تظهر عند إلغاء الطلب
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 p-2 border-2 border-gray-200 rounded-xl bg-gray-50 focus-within:border-primary transition-all">
+            {reasons.map((reason, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-2 bg-primary text-white font-semibold px-3 py-1.5 rounded-full text-sm"
+              >
+                <span>{reason}</span>
+                <button
+                  type="button"
+                  onClick={() => removeReason(index)}
+                  className="hover:text-red-400 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+            <input
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={addReason}
+              placeholder="اكتب السبب واضغط Enter"
+              className="flex-1 bg-transparent outline-none py-1 px-2 text-sm min-w-[120px]"
+            />
+          </div>
+          {errors.cancellationReasons && (
+            <p className="text-red-500 text-xs">
+              {errors.cancellationReasons.message}
+            </p>
+          )}
+        </div>
+
+        {/* Auto Cancel */}
+        <div className="w-full flex flex-col gap-4">
+          <div className="w-full flex items-start gap-2">
+            <CopyX className="w-6 h-6 text-primary mt-0.5" />
+            <div>
+              <h3 className="text-lg font-semibold leading-tight">
+                الالغاء التلقائي للطلب
+              </h3>
+              <p className="text-sm text-gray-500">
+                الغاء الطلب تلقائي بعد كام محاوله؟
+              </p>
+            </div>
+          </div>
+          <Input
+            name="autoCancelAttempts"
+            register={register}
+            registerOptions={{
+              valueAsNumber: true,
+              setValueAs: (v: any) => (v === '' ? undefined : parseInt(v, 10)),
+            }}
+            type="number"
+            placeholder="مثال: 3"
+            error={errors.autoCancelAttempts?.message}
+            className="!h-[46px] bg-[#EAEAEA40] text-right w-full !px-5"
+          />
+        </div>
+        <div className="flex items-center gap-3 mb-3 mt-5">
+          <div className="w-1 h-8 bg-primary rounded-full"></div>
+          <h2 className="text-2xl font-bold text-gray-900">قسم الشحن</h2>
         </div>
         <If condition={!isApiConnected}>
           <Then>
@@ -370,33 +468,6 @@ export default function OrderSettingsFields({
             </div>
           </Then>
         </If>
-
-        {/* Auto Cancel */}
-        <div className="w-full flex flex-col gap-4">
-          <div className="w-full flex items-start gap-2">
-            <CopyX className="w-6 h-6 text-primary mt-0.5" />
-            <div>
-              <h3 className="text-lg font-semibold leading-tight">
-                الالغاء التلقائي للطلب
-              </h3>
-              <p className="text-sm text-gray-500">
-                الغاء الطلب تلقائي بعد كام محاوله؟
-              </p>
-            </div>
-          </div>
-          <Input
-            name="autoCancelAttempts"
-            register={register}
-            registerOptions={{
-              valueAsNumber: true,
-              setValueAs: (v: any) => (v === '' ? undefined : parseInt(v, 10)),
-            }}
-            type="number"
-            placeholder="مثال: 3"
-            error={errors.autoCancelAttempts?.message}
-            className="!h-[46px] bg-[#EAEAEA40] text-right w-full !px-5"
-          />
-        </div>
       </div>
     </div>
   );

@@ -27,8 +27,8 @@ export const orderSettingsSchema = z.object({
       { message: 'يرجى اختيار صورة بصيغة PNG أو JPG فقط' }
     ),
 
-  language: z.enum(['ar', 'en']).default('ar'), // Add this line
-
+  language: z.enum(['ar', 'en']).default('ar'),
+  cancellationReasons: z.array(z.string()).default([]),
   shippingPhoneNumber: z
     .string()
     .trim()

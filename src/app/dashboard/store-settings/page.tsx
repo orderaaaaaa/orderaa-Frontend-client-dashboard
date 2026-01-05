@@ -47,6 +47,7 @@ export default function OrderSettingsPage() {
       defaultShipmentContent: data.defaultShipmentContent,
       defaultReturnShippingCost: data.defaultReturnShippingCost,
       autoCancelAttempts: data.autoCancelAttempts,
+      cancellationReasons: data.cancellationReasons,
     };
 
     if (data.logo && data.logo[0] instanceof File) {
