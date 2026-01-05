@@ -16,6 +16,7 @@ import { CiBarcode } from 'react-icons/ci';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { If, Then } from 'react-if';
+import { getStatusBadgeConfig } from '@/lib/status-badges';
 
 interface OrderCardProps {
   id: number;
@@ -67,7 +68,7 @@ export default function OrderCard({
 }: OrderCardProps) {
   const router = useRouter();
   const { getStatusLabel } = useStatusLabel();
-
+  const { classes, Icon } = getStatusBadgeConfig(status);
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onSelectionChange?.(e.target.checked);
   };
@@ -265,13 +266,10 @@ export default function OrderCard({
       <div className="mx-6 mt-5 mb-3 border-t border-black/10" />
 
       <div className="flex flex-row-reverse justify-between items-center px-6 pb-4">
-        <div className="flex items-center gap-2">
-          <Image
-            src="/Icons/shipping.svg"
-            alt="shipping"
-            width={20}
-            height={20}
-          />
+        <div
+          className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium ${classes}`}
+        >
+          <Icon className="w-4 h-4" />
           <span className="text-xs font-medium text-primary">
             {getStatusLabel(status)}
           </span>
