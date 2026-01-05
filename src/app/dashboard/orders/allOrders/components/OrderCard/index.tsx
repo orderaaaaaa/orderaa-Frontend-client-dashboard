@@ -125,7 +125,7 @@ export default function OrderCard({
             </div>
 
             <div
-              className={`flex absolute left-8  flex-col-reverse items-center gap-3
+              className={`flex absolute left-5 flex-col-reverse items-center gap-3
                 ${select ? 'top-10' : 'top-5'}
                 `}
             >
