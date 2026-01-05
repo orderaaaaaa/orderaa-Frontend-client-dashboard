@@ -50,7 +50,7 @@ export default function OrderSettingsFields({
 
         <SectionHeader />
 
-        <If condition={!isApiConnected}>
+        <If condition={isApiConnected}>
           <Then>
             <ShippingSection
               register={register}

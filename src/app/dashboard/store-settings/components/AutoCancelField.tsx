@@ -26,8 +26,18 @@ export function AutoCancelField({ register, errors }: AutoCancelFieldProps) {
         name="autoCancelAttempts"
         register={register}
         registerOptions={{
-          valueAsNumber: true,
-          setValueAs: (v: any) => (v === '' ? undefined : parseInt(v, 10)),
+          setValueAs: (v: any) => {
+            if (v === '' || v === null || v === undefined) return undefined;
+            const num = parseInt(v, 10);
+            if (isNaN(num)) return undefined;
+            return num < 0 ? 0 : num;
+          },
+          onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value;
+            if (value && parseInt(value) < 0) {
+              e.target.value = '0';
+            }
+          },
         }}
         type="number"
         placeholder="مثال: 3"

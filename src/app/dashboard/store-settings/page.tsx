@@ -27,6 +27,8 @@ export default function OrderSettingsPage() {
   } = useForm<OrderSettingsFormData>({
     resolver: zodResolver(orderSettingsSchema),
     defaultValues: {
+      language: 'ar',
+      cancellationReasons: [],
       canOpenShipment: false,
       employeeCanEditContent: false,
     },
@@ -34,26 +36,41 @@ export default function OrderSettingsPage() {
 
   useEffect(() => {
     if (settings) {
-      reset(settings);
+      reset({
+        language: settings.language || 'ar',
+        cancellationReasons: settings.cancellationReasons || [],
+        canOpenShipment: settings.canOpenShipment || false,
+        employeeCanEditContent: settings.employeeCanEditContent || false,
+        shippingPhoneNumber: settings.shippingPhoneNumber,
+        defaultShipmentContent: settings.defaultShipmentContent,
+        defaultReturnShippingCost: settings.defaultReturnShippingCost,
+        autoCancelAttempts: settings.autoCancelAttempts,
+        logo: settings.logo,
+      });
     }
   }, [settings, reset]);
 
   const onSubmit = async (data: OrderSettingsFormData) => {
-    const submissionData: OrderSettingsFormData = {
-      language: data.language,
-      canOpenShipment: data.canOpenShipment,
-      employeeCanEditContent: data.employeeCanEditContent,
-      shippingPhoneNumber: data.shippingPhoneNumber,
-      defaultShipmentContent: data.defaultShipmentContent,
-      defaultReturnShippingCost: data.defaultReturnShippingCost,
-      autoCancelAttempts: data.autoCancelAttempts,
-      cancellationReasons: data.cancellationReasons,
-    };
+    const submissionData = Object.entries(data).reduce((acc, [key, value]) => {
+      const typedKey = key as keyof OrderSettingsFormData;
 
-    if (data.logo && data.logo[0] instanceof File) {
-      submissionData.logo = data.logo[0];
-    }
-    updateSettings(submissionData);
+      if (value === undefined || value === null || value === '') return acc;
+
+      if (Array.isArray(value) && value.length === 0) return acc;
+
+      if (typedKey === 'logo' && value && value[0] instanceof File) {
+        acc[typedKey] = value[0];
+        return acc;
+      }
+
+      if (typedKey === 'logo' && !(value && value[0] instanceof File))
+        return acc;
+
+      acc[typedKey] = value;
+      return acc;
+    }, {} as Partial<OrderSettingsFormData>);
+
+    updateSettings(submissionData as OrderSettingsFormData);
   };
 
   if (isLoading) {

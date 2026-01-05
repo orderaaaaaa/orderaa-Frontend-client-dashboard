@@ -27,8 +27,8 @@ export const orderSettingsSchema = z.object({
       { message: 'يرجى اختيار صورة بصيغة PNG أو JPG فقط' }
     ),
 
-  language: z.enum(['ar', 'en']).default('ar'),
-  cancellationReasons: z.array(z.string()).default([]),
+  language: z.enum(['ar', 'en']).optional(),
+  cancellationReasons: z.array(z.string()).optional(),
   shippingPhoneNumber: z
     .string()
     .trim()
@@ -37,19 +37,22 @@ export const orderSettingsSchema = z.object({
       message: 'يجب أن يكون رقم الهاتف من 11 إلى 13 رقم',
     }),
 
-  canOpenShipment: z.boolean().default(false),
-  employeeCanEditContent: z.boolean().default(false),
+  canOpenShipment: z.boolean().optional(),
+  employeeCanEditContent: z.boolean().optional(),
 
   defaultShipmentContent: z.string().optional(),
   defaultReturnShippingCost: z.preprocess(
-    (val) => (val === '' ? undefined : Number(val)),
+    (val) =>
+      val === '' || val === null || val === undefined ? undefined : Number(val),
     z.number().optional()
   ),
 
-  autoCancelAttempts: z.preprocess(
-    (val) => (val === '' ? undefined : Number(val)),
-    z.number().optional()
-  ),
+  autoCancelAttempts: z.preprocess((val) => {
+    if (val === '' || val === null || val === undefined) return undefined;
+    const num = Number(val);
+    if (isNaN(num)) return undefined;
+    return num < 0 ? 0 : num;
+  }, z.number().min(0, { message: 'يجب أن يكون الرقم 0 أو أكبر' }).optional()),
 });
 
 export type OrderSettingsFormData = z.infer<typeof orderSettingsSchema>;
