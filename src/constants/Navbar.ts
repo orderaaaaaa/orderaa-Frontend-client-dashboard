@@ -1,40 +1,36 @@
+import { CartIcon } from '@/components/icons';
 import {
-  House,
-  Package,
-  Users,
-  Truck,
-  PenBox,
-  ListPlus,
-  LucideProps,
-  FolderPlus,
-  File,
-  Link2,
-  IdCardIcon,
-  ChartNoAxesCombined,
-  TruckIcon,
-  HousePlus,
-  Wallet,
-} from 'lucide-react';
-import { ForwardRefExoticComponent, RefAttributes } from 'react';
-import { CartIcon, ExcelIcon } from '@/components/icons'; // Import from your icons registry
+  LiaBoxesSolid,
+  LiaWalletSolid,
+  LiaTruckSolid,
+  LiaIdCard,
+} from 'react-icons/lia';
+import type { ComponentType } from 'react';
+import {
+  LuHousePlus,
+  LuHouse,
+  LuLink2,
+  LuFolderPlus,
+  LuListPlus,
+  LuUsers,
+  LuChartNoAxesCombined,
+  LuPackage,
+} from 'react-icons/lu';
+import { PiMicrosoftExcelLogoFill } from 'react-icons/pi';
 
 export type NavigationItem = {
   name: string;
   href: string;
-  icon?:
-    | ForwardRefExoticComponent<
-        Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>
-      >
-    | ((props: { className?: string }) => JSX.Element);
+  icon?: ComponentType<{ className?: string }>;
   children?: NavigationItem[];
 };
 
 export const navigation: NavigationItem[] = [
-  { name: ' الرئيسية', href: '/dashboard', icon: House },
+  { name: ' الرئيسية', href: '/dashboard', icon: LuHouse },
   {
     name: 'الطلبات',
     href: '/dashboard/orders',
-    icon: Package,
+    icon: LuPackage,
     children: [
       {
         name: 'جميع الطلبات',
@@ -46,17 +42,17 @@ export const navigation: NavigationItem[] = [
   {
     name: 'التقارير',
     href: '/dashboard/reports',
-    icon: ChartNoAxesCombined,
+    icon: LuChartNoAxesCombined,
   },
   {
     name: 'العملاء',
     href: '/dashboard/customers',
-    icon: Users,
+    icon: LuUsers,
   },
   {
     name: 'الموظفين',
     href: '/dashboard/employees',
-    icon: IdCardIcon,
+    icon: LiaIdCard,
   },
   // {
   //   name: 'قسم الشحن',
@@ -95,17 +91,17 @@ export const navigation: NavigationItem[] = [
   {
     name: 'إضافه طلب جديد',
     href: '/dashboard',
-    icon: ListPlus,
+    icon: LuListPlus,
     children: [
       {
         name: 'إضافة طلب يدوي',
         href: '/dashboard/upload-products/manual',
-        icon: FolderPlus,
+        icon: LuFolderPlus,
       },
       {
         name: 'إضافة طلب Excel',
         href: '/dashboard/upload-products/excel',
-        icon: ExcelIcon,
+        icon: PiMicrosoftExcelLogoFill,
       },
       // {
       //   name: 'اضافة طلب Ai',
@@ -117,21 +113,26 @@ export const navigation: NavigationItem[] = [
   {
     name: 'الربط مع متجر خارجي',
     href: '/dashboard/integrations',
-    icon: Link2,
+    icon: LuLink2,
   },
   {
     name: 'الربط مع شركة الشحن',
     href: '/dashboard/link-shipping-company',
-    icon: TruckIcon,
+    icon: LiaTruckSolid,
   },
   {
     name: 'اعدادات المتجر',
     href: '/dashboard/store-settings',
-    icon: HousePlus,
+    icon: LuHousePlus,
   },
   {
     name: 'المحفظة',
     href: '/dashboard/wallet',
-    icon: Wallet,
+    icon: LiaWalletSolid,
+  },
+  {
+    name: 'المحفظة',
+    href: '/dashboard/products',
+    icon: LiaBoxesSolid,
   },
 ];
