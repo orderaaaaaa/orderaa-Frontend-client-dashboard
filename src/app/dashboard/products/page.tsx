@@ -24,7 +24,7 @@ function ProductsPage() {
           <span className="font-bold">
             {Math.min(page * limit, data?.totalItems || 0)}
           </span>{' '}
-          من أصل <span className="font-bold">{data?.totalItems || 0}</span> موظف
+          من أصل <span className="font-bold">{data?.totalItems || 0}</span> منتج
         </div>
         <Pagination
           currentPage={page}

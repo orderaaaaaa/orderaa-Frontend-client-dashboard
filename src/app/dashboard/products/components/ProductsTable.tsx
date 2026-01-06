@@ -59,10 +59,11 @@ function ProductsTable() {
 
       {/* ===== Desktop Table ===== */}
       <div className="hidden md:block overflow-hidden rounded-lg border bg-white shadow-sm">
-        <table className="w-full text-right border-collapse" dir="rtl">
+        <table className="w-full border-collapse table-fixed" dir="rtl">
           <thead>
             <tr className="bg-gray-50 border-b text-primary">
-              <th className="p-4 w-12 text-center">
+              {/* Checkbox Col - Minimal width */}
+              <th className="p-4 w-14 text-center">
                 {showCheckboxes && (
                   <button
                     onClick={toggleSelectAll}
@@ -77,13 +78,29 @@ function ProductsTable() {
                   </button>
                 )}
               </th>
-              <th className="p-4 font-bold text-sm">صورة المنتج</th>
-              <th className="p-4 font-bold text-sm">الاسم</th>
-              <th className="p-4 font-bold text-sm">السعر</th>
-              <th className="p-4 font-bold text-sm">تاريخ الإنشاء</th>
-              <th className="p-4 font-bold text-sm text-center">المباع</th>
-              <th className="p-4 font-bold text-sm text-center">تعديل</th>
-              <th className="p-4 font-bold text-sm text-center">الطلبات</th>
+
+              {/* Data Cols - Perfectly Equal and Centered */}
+              <th className="p-4 w-[calc(100%/7)] text-center font-bold text-sm">
+                صورة المنتج
+              </th>
+              <th className="p-4 w-[calc(100%/7)] text-center font-bold text-sm">
+                الاسم
+              </th>
+              <th className="p-4 w-[calc(100%/7)] text-center font-bold text-sm">
+                السعر
+              </th>
+              <th className="p-4 w-[calc(100%/7)] text-center font-bold text-sm">
+                تاريخ الإنشاء
+              </th>
+              <th className="p-4 w-[calc(100%/7)] text-center font-bold text-sm">
+                عدد القطع المُباعه{' '}
+              </th>
+              <th className="p-4 w-[calc(100%/7)] text-center font-bold text-sm">
+                تعديل
+              </th>
+              <th className="p-4 w-[calc(100%/7)] text-center font-bold text-sm">
+                الطلبات
+              </th>
             </tr>
           </thead>
 
@@ -103,31 +120,38 @@ function ProductsTable() {
                       type="checkbox"
                       checked={selectedIds.includes(product.id)}
                       onChange={() => toggleSelect(product.id)}
-                      className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                      className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer mx-auto"
                     />
                   )}
                 </td>
 
                 <td className="p-4">
-                  <img
-                    src={
-                      product.images?.[0] || 'https://placehold.net/600x600.png'
-                    }
-                    alt={product.name}
-                    className="w-16 h-16 rounded-lg object-cover border bg-gray-50"
-                  />
+                  <div className="flex justify-center">
+                    <img
+                      src={
+                        product.images?.[0] ||
+                        'https://placehold.net/600x600.png'
+                      }
+                      alt={product.name}
+                      className="w-20 h-20 rounded-lg object-cover border bg-gray-50 shadow-sm"
+                    />
+                  </div>
                 </td>
 
-                <td className="p-4 font-medium text-gray-900">
-                  {product.name}
+                <td className="p-4 text-center font-medium text-gray-900">
+                  <span className="block truncate px-2">{product.name}</span>
                 </td>
-                <td className="p-4 text-gray-600">{product.price}</td>
-                <td className="p-4 text-gray-500 text-sm">
+
+                <td className="p-4 text-center text-gray-600 font-semibold">
+                  {product.price}
+                </td>
+
+                <td className="p-4 text-center text-gray-500 text-sm">
                   {new Date(product.createdAt).toLocaleDateString('en-US')}
                 </td>
+
                 <td className="p-4 text-center text-gray-600">0</td>
 
-                {/* Centered Edit Button */}
                 <td className="p-4">
                   <div className="flex justify-center items-center">
                     <button className="text-primary flex items-center gap-1 hover:underline font-medium">
@@ -148,7 +172,7 @@ function ProductsTable() {
         </table>
       </div>
 
-      {/* ===== Mobile Cards (kept for responsiveness) ===== */}
+      {/* Mobile Cards (Images updated here too) */}
       <div className="md:hidden flex flex-col gap-3">
         {data?.data.map((product) => (
           <div
@@ -159,34 +183,33 @@ function ProductsTable() {
                 : ''
             }`}
           >
-            <div className="flex gap-4">
+            <div className="flex gap-4 items-center">
               <img
                 src={product.images?.[0] || 'https://placehold.net/600x600.png'}
-                className="w-20 h-20 rounded-lg object-cover border"
+                className="w-24 h-24 rounded-lg object-cover border"
               />
-
               <div className="flex-1 space-y-1 text-right" dir="rtl">
                 <h3 className="font-semibold text-gray-900">{product.name}</h3>
                 <p className="text-sm text-gray-600">السعر: {product.price}</p>
-                <p className="text-sm text-gray-400">
-                  {new Date(product.createdAt).toLocaleDateString('en-US')}
-                </p>
+                <span className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-500">
+                  الطلبات: {product.totalOrders}
+                </span>
+
                 <div className="flex justify-between items-center mt-2">
-                  <span className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-500">
-                    الطلبات: {product.totalOrders}
+                  <span className="text-sm text-gray-600">
+                    عدد القطع المُباعه: 0
                   </span>
                   <button className="text-primary text-sm flex items-center gap-1 font-medium">
                     <LiaEditSolid /> تعديل
                   </button>
                 </div>
               </div>
-
               {showCheckboxes && (
                 <input
                   type="checkbox"
                   checked={selectedIds.includes(product.id)}
                   onChange={() => toggleSelect(product.id)}
-                  className="mt-1 w-5 h-5 text-primary rounded border-gray-300"
+                  className="w-5 h-5 text-primary rounded border-gray-300"
                 />
               )}
             </div>
