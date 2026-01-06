@@ -25,7 +25,7 @@ export function UserMenu({
   const authUser = useAuthStore((state) => state.user);
 
   const isMobile = variant === 'mobile';
-  const displayText = authUser?.username || username || email;
+  const displayText = authUser?.username || username || email || 'user';
 
   // Close dropdown when clicking outside
   useEffect(() => {

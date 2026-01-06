@@ -25,7 +25,6 @@ interface OrderDetailsInfoComponentProps {
     to: Date | null;
   };
   statusFilter?: string | null;
-  isLockedByOther?: boolean;
   onUnlock?: () => Promise<void>;
 }
 
@@ -37,7 +36,6 @@ function OrderDetailsInfoComponent({
   onNoOrdersFound,
   dateRange,
   statusFilter,
-  isLockedByOther,
   onUnlock,
 }: OrderDetailsInfoComponentProps) {
   const [localOrder, setLocalOrder] = useState(order);
@@ -99,6 +97,7 @@ function OrderDetailsInfoComponent({
     onOrderUpdate: handleUpdate,
     onNavigateToNextOrder,
     onNoOrdersFound,
+    onUnlock,
     dateRange,
     statusFilter,
     availableStatuses,
@@ -239,9 +238,6 @@ function OrderDetailsInfoComponent({
       } else {
         await actions.handleConfirmAction(action);
       }
-      if (onUnlock) {
-        await onUnlock();
-      }
     } catch (error: any) {
       setErrorModal({
         isOpen: true,
@@ -301,7 +297,6 @@ function OrderDetailsInfoComponent({
         onNavigatePrevious={navigation.navigateToPrevious}
         isNavigatingNext={navigation.isNavigatingNext}
         isNavigatingPrevious={navigation.isNavigatingPrevious}
-        isLockedByOther={isLockedByOther}
       />
 
       <OrderActionModals

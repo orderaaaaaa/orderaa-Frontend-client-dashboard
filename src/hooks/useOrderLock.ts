@@ -26,15 +26,33 @@ export function useOrderLock({
   const [lockError, setLockError] = useState<string | null>(null);
   const [hasLock, setHasLock] = useState(false);
   const user = useAuthStore((state) => state.user);
+
+  const hasLockRef = useRef(false);
+  const orderIdRef = useRef<number | null>(null);
   const hasAttemptedLock = useRef(false);
 
   const currentEmployeeId = user?.employeeId;
-
   const isLockedByCurrentUser = lockedBy?.id === currentEmployeeId;
   const isLockedByOther = lockedBy !== null && lockedBy !== undefined && !isLockedByCurrentUser;
 
   useEffect(() => {
-    if (!enabled || !orderId || hasAttemptedLock.current) return;
+    hasLockRef.current = hasLock;
+  }, [hasLock]);
+
+  useEffect(() => {
+    orderIdRef.current = orderId;
+  }, [orderId]);
+
+  useEffect(() => {
+    if (!enabled || !orderId) return;
+
+    if (hasAttemptedLock.current && orderIdRef.current !== orderId) {
+      hasAttemptedLock.current = false;
+      setHasLock(false);
+      setLockError(null);
+    }
+
+    if (hasAttemptedLock.current) return;
 
     if (lockedBy !== null && lockedBy !== undefined) {
       if (isLockedByCurrentUser) {
@@ -74,22 +92,21 @@ export function useOrderLock({
   }, [orderId, isLockedByOther]);
 
   useEffect(() => {
-    if (!enabled || !orderId) return;
+    if (!enabled) return;
 
     return () => {
-      if (hasLock || isLockedByCurrentUser) {
-        unlockOrder(orderId).catch((error) => {
+      const currentOrderId = orderIdRef.current;
+      const currentHasLock = hasLockRef.current;
+
+      if (currentHasLock && currentOrderId) {
+        unlockOrder(currentOrderId).catch((error) => {
           console.error('Failed to unlock order on cleanup:', error);
         });
       }
-    };
-  }, [enabled, orderId, hasLock, isLockedByCurrentUser]);
 
-  useEffect(() => {
-    hasAttemptedLock.current = false;
-    setHasLock(false);
-    setLockError(null);
-  }, [orderId]);
+      hasAttemptedLock.current = false;
+    };
+  }, [enabled, orderId]);
 
   return {
     isLockedByOther,

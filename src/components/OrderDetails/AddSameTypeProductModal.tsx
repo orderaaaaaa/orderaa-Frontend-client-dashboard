@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { LiaTimesSolid, LiaPlusSolid, LiaMinusSolid } from 'react-icons/lia';
-import { toast } from 'react-toastify';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useProductVariantsOptions, SelectedVariant } from '@/services/orders';
 import { Button } from '../ui/button';
@@ -39,7 +38,7 @@ export default function AddSameTypeProductModal({
 
   // Check if form is valid (at least one variant selected and quantity > 0)
   const isFormValid = useMemo(() => {
-    const hasVariants = variantOptions.length === 0 || Object.keys(selectedVariants).length > 0;
+    const hasVariants = variantOptions.length === 0 || Object.keys(selectedVariants).length === variantOptions.length;
     return hasVariants && quantity > 0;
   }, [selectedVariants, quantity, variantOptions.length]);
 
@@ -61,7 +60,6 @@ export default function AddSameTypeProductModal({
     );
 
     onSave(variants, quantity);
-    toast.success('تم إضافة المنتج بنجاح');
     onClose();
   };
 

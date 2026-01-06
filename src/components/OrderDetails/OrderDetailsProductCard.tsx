@@ -245,7 +245,6 @@ function OrderDetailsProductCard({
           <div className="flex gap-3">
             <Button
               onClick={() => setIsAddNewProductModalOpen(true)}
-              disabled={isLockedByOther}
               className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <PackagePlus className="w-5 h-5" strokeWidth={2} />
@@ -254,7 +253,7 @@ function OrderDetailsProductCard({
 
             <Button
               onClick={() => setIsAddSameTypeModalOpen(true)}
-              disabled={productsData.length === 0 || isLockedByOther}
+              disabled={productsData.length === 0}
               className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-primary text-primary rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <CirclePlus className="w-5 h-5" strokeWidth={2} />

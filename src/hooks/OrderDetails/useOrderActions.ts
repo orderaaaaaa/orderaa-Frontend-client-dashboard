@@ -9,6 +9,7 @@ export interface UseOrderActionsOptions {
   onOrderUpdate?: (updatedOrder: Order) => void;
   onNavigateToNextOrder?: (nextOrderId: number) => void;
   onNoOrdersFound?: () => void;
+  onUnlock?: () => Promise<void>;
   dateRange?: {
     from: Date | null;
     to: Date | null;
@@ -40,6 +41,7 @@ export function useOrderActions({
   onOrderUpdate,
   onNavigateToNextOrder,
   onNoOrdersFound,
+  onUnlock,
   dateRange,
   statusFilter,
   availableStatuses,
@@ -53,6 +55,11 @@ export function useOrderActions({
   useEffect(() => {
     onNoOrdersFoundRef.current = onNoOrdersFound;
   }, [onNoOrdersFound]);
+
+  const onUnlockRef = useRef(onUnlock);
+  useEffect(() => {
+    onUnlockRef.current = onUnlock;
+  }, [onUnlock]);
 
   const getStatusFromAction = useCallback((action: string): string | null => {
     const actionToStatusValueMap: Record<string, string> = {
@@ -99,6 +106,10 @@ export function useOrderActions({
 
         if (onOrderUpdate) {
           onOrderUpdate(updatedOrder);
+        }
+
+        if (onUnlockRef.current) {
+          await onUnlockRef.current();
         }
 
         const statusLabel = availableStatuses.find((s) => s.key === status)?.label || status;
@@ -186,6 +197,10 @@ export function useOrderActions({
 
         if (onOrderUpdate) {
           onOrderUpdate(updatedOrder);
+        }
+
+        if (onUnlockRef.current) {
+          await onUnlockRef.current();
         }
 
         toast.success('تم إلغاء الطلب بنجاح');
@@ -344,6 +359,10 @@ export function useOrderActions({
 
         if (onOrderUpdate) {
           onOrderUpdate(updatedOrder);
+        }
+
+        if (onUnlockRef.current) {
+          await onUnlockRef.current();
         }
 
         toast.success(`تم تسجيل المتابعة: ${label}`);

@@ -48,7 +48,6 @@ function OrderDetailsInfo({
         onNoOrdersFound={onNoOrdersFound}
         dateRange={dateRange}
         statusFilter={statusFilter}
-        isLockedByOther={isLockedByOther}
         onUnlock={onUnlock}
       />
     </section>
