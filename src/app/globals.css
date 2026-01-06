@@ -3,15 +3,15 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* :root {
+:root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #5D24E1;
-  --primary-foreground: #FFFFFF;
+  --primary: #5d24e1;
+  --primary-foreground: #ffffff;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -31,13 +31,13 @@
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: #5D24E1;
-  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-primary: #5d24e1;
+  --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-} */
+}
 
 .dark {
   --background: oklch(0.145 0 0);
@@ -46,8 +46,8 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.145 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: #5D24E1;
-  --primary-foreground: #FFFFFF;
+  --primary: #5d24e1;
+  --primary-foreground: #ffffff;
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -66,8 +66,8 @@
   --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: #5D24E1;
-  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-primary: #5d24e1;
+  --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
@@ -213,7 +213,7 @@ input[type='checkbox']:checked::after {
 }
 
 /* Calendar Dropdown Styles */
-[data-slot="calendar"] select {
+[data-slot='calendar'] select {
   appearance: none;
   background-color: white;
   border: 1px solid #e5e7eb;
@@ -230,17 +230,17 @@ input[type='checkbox']:checked::after {
   direction: rtl;
 }
 
-[data-slot="calendar"] select:hover {
+[data-slot='calendar'] select:hover {
   border-color: #5d24e1;
 }
 
-[data-slot="calendar"] select:focus {
+[data-slot='calendar'] select:focus {
   outline: none;
   border-color: #5d24e1;
   box-shadow: 0 0 0 2px rgba(93, 36, 225, 0.2);
 }
 
-[data-slot="calendar"] select option {
+[data-slot='calendar'] select option {
   direction: rtl;
   text-align: right;
 }

@@ -1,8 +1,7 @@
 'use client';
-import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState } from 'react';
-import { Menu, X } from 'lucide-react'; // For hamburger icons
+import { Menu, X } from 'lucide-react'; // For hamburger Icons
 
 function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,8 +11,8 @@ function Header() {
       <div className="flex justify-between items-center py-6">
         {/* Logo */}
         <Link href="/">
-          <Image
-            src="/icons/Orderaa.svg"
+          <img
+            src="/Icons/Orderaa.svg"
             alt="Orderaa logo"
             width={120}
             height={40}

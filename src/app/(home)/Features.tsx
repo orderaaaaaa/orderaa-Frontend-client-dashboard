@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import { featuresTop, featuresBottom } from '@/constants/Home';
 
 const Features: React.FC = () => {
@@ -34,7 +33,7 @@ const Features: React.FC = () => {
             >
               <div className="flex flex-col gap-4 justify-center items-center">
                 <div className="flex flex-col items-center">
-                  <Image
+                  <img
                     src={feature.icon}
                     alt={feature.title}
                     width={60}
@@ -66,7 +65,7 @@ const Features: React.FC = () => {
             >
               <div className="flex flex-col gap-4 justify-center items-center">
                 <div className="flex flex-col items-center">
-                  <Image
+                  <img
                     src={feature.icon}
                     alt={feature.title}
                     width={60}

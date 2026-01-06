@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 
 const InventorySection: React.FC = () => {
   return (
@@ -13,8 +12,8 @@ const InventorySection: React.FC = () => {
             منصة واحدة لإدارة متجرك بالكامل!
           </h1>
           {/* Hidden on mobile */}
-          <Image
-            src={'/icons/Dashboard2.svg'}
+          <img
+            src={'/Icons/Dashboard2.svg'}
             width={10}
             height={10}
             alt=""
@@ -68,8 +67,8 @@ const InventorySection: React.FC = () => {
             رؤية واضحة لحالة المخزون
           </h3>
 
-          <Image
-            src={'/icons/Dashboard1.svg'}
+          <img
+            src={'/Icons/Dashboard1.svg'}
             height={1000}
             width={2}
             alt=""

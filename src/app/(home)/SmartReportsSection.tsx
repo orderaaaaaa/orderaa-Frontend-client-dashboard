@@ -1,5 +1,4 @@
 import { Check } from 'lucide-react';
-import Image from 'next/image';
 import React from 'react';
 
 export default function SmartReportsSection() {
@@ -9,12 +8,12 @@ export default function SmartReportsSection() {
         التقارير والتحليل الذكي
       </h2>
       <div className=" flex flex-col-reverse md:flex-row items-center md:items-start gap-12 max-md:gap-25">
-        {/* Image Section */}
+        {/* img Section */}
         <div className="w-full md:w-[60%] relative flex flex-col items-center md:items-end ">
-          {/* Bottom Image */}
+          {/* Bottom img */}
           <div className="relative w-full md:w-[590px] md:-bottom-13 order-1">
-            <Image
-              src="/icons/Dashboard9.svg"
+            <img
+              src="/Icons/Dashboard9.svg"
               alt="التقارير والتحليل الذكي"
               width={900}
               height={600}
@@ -22,10 +21,10 @@ export default function SmartReportsSection() {
             />
           </div>
 
-          {/* Top Image (overlapping) */}
+          {/* Top img (overlapping) */}
           <div className="absolute top-[-60px] md:top-[-55px] right-0 w-[100%] md:w-[590px]">
-            <Image
-              src="/icons/Dashboard10.svg"
+            <img
+              src="/Icons/Dashboard10.svg"
               alt="تحليل الأداء"
               width={900}
               height={600}

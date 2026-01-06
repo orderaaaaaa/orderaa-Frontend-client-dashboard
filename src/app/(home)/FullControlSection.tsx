@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import React from 'react';
 
 export default function FullControlSection() {
@@ -14,10 +13,9 @@ export default function FullControlSection() {
         <div className="flex flex-col items-center text-center">
           <h3 className="text-lg font-semibold mb-4">إدارة الحسابات</h3>
           <div className="relative w-full max-w-[400px] aspect-[4/3] max-xl:max-w-[80%] overflow-hidden max-xl:right-5">
-            <Image
-              src="/icons/Dashboard5.svg"
+            <img
+              src="/Icons/Dashboard5.svg"
               alt="إدارة الحسابات"
-              fill
               className="object-contain rounded-2xl"
             />
           </div>
@@ -26,10 +24,9 @@ export default function FullControlSection() {
         <div className="flex flex-col items-center text-center">
           <h3 className="text-lg font-semibold sm:mb-4">إدارة الشحن</h3>
           <div className="relative w-full max-w-[400px] aspect-[4/4] sm:aspect-[4/3] max-xl:max-w-[80%] overflow-hidden max-xl:left-5">
-            <Image
-              src="/icons/Dashboard6.svg"
+            <img
+              src="/Icons/Dashboard6.svg"
               alt="إدارة الشحن"
-              fill
               className="object-contain rounded-2xl"
             />
           </div>
@@ -38,10 +35,9 @@ export default function FullControlSection() {
         <div className="flex flex-col items-center text-center">
           <h3 className="text-lg font-semibold sm:mb-4">إدارة المخزون</h3>
           <div className="relative w-full max-w-[400px] aspect-[4/4] sm:aspect-[4/3] max-xl:max-w-[80%] overflow-hidden max-xl:right-7">
-            <Image
-              src="/icons/Dashboard7.svg"
+            <img
+              src="/Icons/Dashboard7.svg"
               alt="إدارة المخزون"
-              fill
               className="object-contain rounded-2xl"
             />
           </div>
@@ -50,10 +46,9 @@ export default function FullControlSection() {
         <div className="flex flex-col items-center text-center">
           <h3 className="text-lg font-semibold sm:mb-4">إدارة الطلبات</h3>
           <div className="relative w-full max-w-[400px] aspect-[4/4] sm:aspect-[4/3] max-xl:max-w-[80%] overflow-hidden max-xl:left-5 max-sm:bottom-5">
-            <Image
-              src="/icons/Dashboard8.svg"
+            <img
+              src="/Icons/Dashboard8.svg"
               alt="إدارة الطلبات"
-              fill
               className="object-contain rounded-2xl"
             />
           </div>
@@ -67,10 +62,9 @@ export default function FullControlSection() {
             إدارة الحسابات
           </h3>
           <div className="relative w-full aspect-[4/3] overflow-hidden">
-            <Image
-              src="/icons/Dashboard5.svg"
+            <img
+              src="/Icons/Dashboard5.svg"
               alt="إدارة الحسابات"
-              fill
               className="object-contain rounded-2xl"
             />
           </div>
@@ -80,10 +74,9 @@ export default function FullControlSection() {
         <div className="absolute top-[80px] left-[300px] w-full max-w-[650px] h-[650px] flex flex-col items-center text-center z-80">
           <h3 className="text-lg md:text-xl font-semibold mb-4">إدارة الشحن</h3>
           <div className="relative w-full aspect-[4/3] overflow-hidden">
-            <Image
-              src="/icons/Dashboard6.svg"
+            <img
+              src="/Icons/Dashboard6.svg"
               alt="إدارة الشحن"
-              fill
               className="object-contain rounded-2xl"
             />
           </div>
@@ -95,10 +88,9 @@ export default function FullControlSection() {
             إدارة المخزون
           </h3>
           <div className="relative w-full aspect-[4/3] overflow-hidden">
-            <Image
-              src="/icons/Dashboard7.svg"
+            <img
+              src="/Icons/Dashboard7.svg"
               alt="إدارة المخزون"
-              fill
               className="object-contain rounded-2xl"
             />
           </div>
@@ -110,10 +102,9 @@ export default function FullControlSection() {
             إدارة الطلبات
           </h3>
           <div className="relative w-full aspect-[4/3] overflow-hidden">
-            <Image
-              src="/icons/Dashboard8.svg"
+            <img
+              src="/Icons/Dashboard8.svg"
               alt="إدارة الطلبات"
-              fill
               className="object-contain rounded-2xl"
             />
           </div>

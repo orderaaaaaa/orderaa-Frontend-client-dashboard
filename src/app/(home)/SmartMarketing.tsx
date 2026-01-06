@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { Check } from 'lucide-react';
 import React from 'react';
 import { SmartMarketingPoints } from '@/constants/Home';
@@ -29,11 +28,11 @@ const SmartMarketing: React.FC = () => {
             ))}
           </ul>
         </div>
-        {/* 💜 Left Image with Glow */}
-        {/* Image Box */}
+        {/* 💜 Left img with Glow */}
+        {/* img Box */}
         <div className="w-full lg:w-1/2 order-1 lg:order-2">
-          <Image
-            src="/icons/frame1.svg"
+          <img
+            src="/Icons/frame1.svg"
             width={10}
             height={1}
             alt="التسويق الذكي"

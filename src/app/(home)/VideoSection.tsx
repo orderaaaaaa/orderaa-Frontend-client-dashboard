@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import Image from 'next/image';
 
 export default function VideoSection() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -24,9 +23,9 @@ export default function VideoSection() {
         <div className="relative w-full md:w-1/2 rounded-3xl overflow-hidden border border-[#5D24E1]/40 shadow-[0_0_30px_rgba(93,36,225,0.2)] order-1 md:order-2">
           {!isPlaying ? (
             <>
-              {/* Preview image */}
-              <Image
-                src="/icons/Dashboard3.svg"
+              {/* Preview img */}
+              <img
+                src="/Icons/Dashboard3.svg"
                 alt="Dashboard Preview"
                 width={800}
                 height={300}

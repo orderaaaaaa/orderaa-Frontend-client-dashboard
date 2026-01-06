@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import React from 'react';
 import { Zen_Dots } from 'next/font/google';
 
@@ -13,17 +12,17 @@ function Hero() {
   return (
     <>
       <section className="grid grid-cols-1 md:grid-cols-2 container justify-center items-center mx-auto relative px-4 md:px-0">
-        {/* Images - Hidden on mobile */}
-        <div className="relative grid justify-center hidden md:grid">
-          <Image
-            src={'/icons/AI-Model.svg'}
+        {/* imgs - Hidden on mobile */}
+        <div className="relative  justify-center hidden md:grid">
+          <img
+            src={'/Icons/AI-Model.svg'}
             className="w-full max-w-[450.57px] "
             width={200}
             height={200}
             alt=""
           />
-          <Image
-            src={'/icons/Dashboard.svg'}
+          <img
+            src={'/Icons/Dashboard.svg'}
             className="w-full max-w-[540px] relative top-[-120px] left-[25px]"
             width={200}
             height={200}
@@ -46,26 +45,27 @@ function Hero() {
           </button>
           <div className="grid grid-cols-2 gap-4">
             <p className="text-end text-[16px] md:text-[20px] m-0 p-0">
-              + 578M <br /> <span className="text-[10px] md:text-[12px]">عملاء نشطين</span>
+              + 578M <br />{' '}
+              <span className="text-[10px] md:text-[12px]">عملاء نشطين</span>
             </p>
             <div className="flex gap-2 relative">
-              <Image
-                src={'/images/person3.png'}
+              <img
+                src={'/Images/person3.png'}
                 className="w-full max-w-[40px] max-h-[40px] rounded-full border-2 border-white"
                 width={40}
                 height={4}
                 alt=""
               />
 
-              <Image
-                src={'/images/person1.png'}
+              <img
+                src={'/Images/person1.png'}
                 className="w-full max-w-[40px] max-h-[40px] rounded-full border-2 border-white absolute right-6"
                 width={40}
                 height={4}
                 alt=""
               />
-              <Image
-                src={'/images/person2.png'}
+              <img
+                src={'/Images/person2.png'}
                 className="w-full max-w-[40px] max-h-[40px] rounded-full border-2 border-white"
                 width={40}
                 height={10}

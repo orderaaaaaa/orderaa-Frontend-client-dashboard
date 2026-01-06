@@ -1,5 +1,4 @@
 'use client';
-import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 import { MessageCircle } from 'lucide-react';
@@ -10,8 +9,8 @@ const Footer: React.FC = () => {
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-5 md:gap-10">
         {/* Right side - Logo */}
         <div className="flex flex-col items-center md:items-start gap-4">
-          <Image
-            src="/icons/Orderaa.svg"
+          <img
+            src="/Icons/Orderaa.svg"
             alt="Orderaa Logo"
             width={160}
             height={50}
@@ -49,7 +48,7 @@ const Footer: React.FC = () => {
           </ul>
         </div>
 
-        {/* Left side - Social icons */}
+        {/* Left side - Social Icons */}
         <div className="flex flex-col mb-4 items-center md:items-end gap-4">
           <p className="text-lg font-medium text-center">تابعنا على</p>
           <div className="flex gap-3">
@@ -60,8 +59,8 @@ const Footer: React.FC = () => {
                   href="#"
                   className="hover:scale-110 transition-transform duration-300"
                 >
-                  <Image
-                    src={`/icons/${icon}.svg`}
+                  <img
+                    src={`/Icons/${icon}.svg`}
                     width={35}
                     height={35}
                     alt={icon}

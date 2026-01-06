@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { Check, TrendingUp, TrendingDown, Users } from 'lucide-react';
 import React from 'react';
 import { TeamPerformanceSectionData } from '@/constants/Home';
@@ -38,13 +37,13 @@ export default function TeamPerformanceSection() {
           </ul>
         </div>
 
-        {/* ✅ Left Side - Chart Image */}
+        {/* ✅ Left Side - Chart img */}
         <div className="relative md:bottom-5 md:right-40 flex flex-col w-full md:max-w-[80%] text-center gap-4 justify-center order-1 md:order-2">
           <h3 className="text-xl md:text-2xl mb-4 md:mb-0">
             إدارة الفريق بذكاء
           </h3>
-          <Image
-            src="/icons/Dashboard4.svg"
+          <img
+            src="/Icons/Dashboard4.svg"
             alt="مقارنة الموظفين"
             width={600}
             height={350}
