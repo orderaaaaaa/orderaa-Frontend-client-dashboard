@@ -7,6 +7,7 @@ import OrderHistoryModal from './OrderHistoryModal';
 import OrderLockedBanner from './OrderLockedBanner';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { If, Then } from 'react-if';
+import { getRemainingTime } from '@/utils/getRemainingTime';
 
 interface OrderDetailsCardIdProps {
   order: Order;
@@ -69,9 +70,19 @@ const OrderDetailsCardId = ({
                 className="bg-[#F6F2FC] w-6 h-6 cursor-pointer p-1 rounded-full text-primary border-1 border-[#CBB5FD]"
               />
             </h3>
-            <p className="text-xs font-bold mr-7 mb-4">
+            <p className="text-xs font-bold sm:mr-7 mb-4">
               {createdDate.toLocaleDateString('ar-EG')} <span>{timeAgo}</span>
             </p>
+            <If condition={order.postponedUntil}>
+              <Then>
+                <p className="flex items-center gap-1 text-sm md:text-base font-bold  mb-4 bg-amber-50 py-2 px-3 rounded-2xl text-amber-500">
+                  <TriangleAlert />
+                  <span>
+                    {getRemainingTime(order.postponedUntil)} علي التاجيل
+                  </span>
+                </p>
+              </Then>
+            </If>
             <If condition={order.shippingId}>
               <Then>
                 <h3 className="flex gap-3 text-lg items-center font-semibold mb-1">
