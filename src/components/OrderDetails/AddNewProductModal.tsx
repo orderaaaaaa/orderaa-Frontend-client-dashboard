@@ -56,12 +56,13 @@ export default function AddNewProductModal({
 
   const isFormValid = useMemo(() => {
     const hasProduct = !!selectedProduct;
-    const allVariantsSelected = variantOptions.every(
-      (opt) => selectedVariants[opt.label]
-    );
+    const variantsReady = !isLoadingVariants;
+    const allVariantsSelected =
+      variantOptions.length === 0 ||
+      Object.keys(selectedVariants).length === variantOptions.length;
 
-    return hasProduct && allVariantsSelected;
-  }, [selectedProduct, variantOptions, selectedVariants]);
+    return hasProduct && variantsReady && allVariantsSelected && quantity > 0;
+  }, [selectedProduct, variantOptions, selectedVariants, isLoadingVariants, quantity]);
 
   if (!isOpen) return null;
 
