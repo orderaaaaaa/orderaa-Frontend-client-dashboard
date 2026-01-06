@@ -102,13 +102,15 @@ export interface EmployeesResponse {
 
 // Paginated employees response from filtered endpoint
 export interface PaginatedEmployeesResponse {
-  currentPage: number;
-  totalPages: number;
-  itemsPerPage: number;
-  totalItems: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
   data: Employee[];
+  meta: {
+    currentPage: number;
+    totalPages: number;
+    itemsPerPage: number;
+    totalItems: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
 }
 
 // Employee filter parameters

@@ -64,7 +64,7 @@ export default function AllEmployees() {
                         )}`}
                       </span>{' '}
                       من أصل{' '}
-                      <span className="font-bold">{employees.length}</span> موظف
+                      <span className="font-bold">{totalItems}</span> موظف
                     </div>
                     <Pagination
                       currentPage={paginationProps.currentPage}

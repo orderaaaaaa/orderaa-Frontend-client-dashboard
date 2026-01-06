@@ -20,12 +20,12 @@ export function useEmployeesList() {
   const { employees, totalItems, paginationProps } = React.useMemo(() => {
     return {
       employees: paginatedData?.data ?? [],
-      totalItems: paginatedData?.totalItems ?? 0,
+      totalItems: paginatedData?.meta?.totalItems ?? 0,
       paginationProps: {
-        currentPage: paginatedData?.currentPage ?? currentPage,
-        totalPages: paginatedData?.totalPages ?? 1,
-        hasNextPage: paginatedData?.hasNextPage ?? false,
-        hasPreviousPage: paginatedData?.hasPreviousPage ?? false,
+        currentPage: paginatedData?.meta?.currentPage ?? currentPage,
+        totalPages: paginatedData?.meta?.totalPages ?? 1,
+        hasNextPage: paginatedData?.meta?.hasNextPage ?? false,
+        hasPreviousPage: paginatedData?.meta?.hasPreviousPage ?? false,
       },
     };
   }, [paginatedData, currentPage]);
