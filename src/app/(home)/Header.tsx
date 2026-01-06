@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import React, { useState } from 'react';
 import { Menu, X } from 'lucide-react'; // For hamburger Icons
+import { Assets } from './assets';
 
 function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,12 +13,13 @@ function Header() {
         {/* Logo */}
         <Link href="/">
           <img
-            src="/Icons/Orderaa.svg"
+            src={Assets.Orderaa.src}
             alt="Orderaa logo"
             width={120}
             height={40}
             className="max-w-[160px]"
           />
+
         </Link>
 
         {/* Desktop Nav */}

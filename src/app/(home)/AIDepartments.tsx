@@ -2,33 +2,35 @@
 
 import React from 'react';
 import { cards } from '@/constants/Home';
+import Image from 'next/image';
+import { Assets } from './assets';
 const AIDepartments: React.FC = () => {
   return (
     <section className="relative py-5 max-sm:mb-10 md:py-35 text-white mt-10 px-4">
       {/* Background assets - Hidden on mobile */}
       <img
-        src="/Icons/StarAsset.svg"
+        src={Assets.StarAsset.src}
         alt=""
         width={1006}
         height={1006}
         className="absolute top-[-110px] right-0 w-[100%] -z-20 hidden md:block"
       />
       <img
-        src="/Icons/Beam.svg"
+        src={Assets.Beam.src}
         alt=""
         width={1006}
         height={1006}
         className="absolute top-[-230px] right-0 w-full max-w-[640px] hidden md:block"
       />
       <img
-        src="/Icons/Robot.svg"
+        src={Assets.Robot.src}
         alt=""
         width={1006}
         height={1006}
         className="absolute top-[-10px] right-0 w-full max-w-[550px] opacity-50 hidden md:block"
       />
       <img
-        src="/Icons/AI-Model.svg"
+        src={Assets.AIModel.src}
         alt=""
         width={1006}
         height={1006}
@@ -58,8 +60,8 @@ const AIDepartments: React.FC = () => {
 
             {/* glowing shape behind the card */}
             <div className="absolute bottom-0 w-[110%] -z-10 translate-y-6">
-              <img
-                src="/Icons/shape.png"
+              <Image
+                src={Assets.Shape}
                 alt=""
                 width={400}
                 height={60}

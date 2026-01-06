@@ -34,7 +34,7 @@ const Features: React.FC = () => {
               <div className="flex flex-col gap-4 justify-center items-center">
                 <div className="flex flex-col items-center">
                   <img
-                    src={feature.icon}
+                    src={feature.icon.src}
                     alt={feature.title}
                     width={60}
                     height={60}
@@ -66,7 +66,7 @@ const Features: React.FC = () => {
               <div className="flex flex-col gap-4 justify-center items-center">
                 <div className="flex flex-col items-center">
                   <img
-                    src={feature.icon}
+                    src={feature.icon.src}
                     alt={feature.title}
                     width={60}
                     height={60}

@@ -98,25 +98,29 @@ export const faqs: FaqItem[] = [
   },
 ];
 
+import { Assets } from '@/app/(home)/assets';
+
+// ... (existing code, but I need to be careful with replace)
+
 interface Feature {
-  icon: string;
+  icon: any; // Allow StaticImageData or string
   title: string;
   desc: string;
 }
 
 export const featuresTop: Feature[] = [
   {
-    icon: '/icons/layout.svg',
+    icon: Assets.Layout,
     title: 'أوتوميشن ذكي يوفر وقت فريقك',
     desc: 'نظام يدير المكالمات، الرسائل، وتحديث الطلبات تلقائيًا بدون تدخل يدوي.',
   },
   {
-    icon: '/icons/shareit.svg',
+    icon: Assets.Shareit,
     title: 'إدارة الطلبات من أول مكالمة لحد التسليم',
     desc: 'تتبع كل مرحلة بسهولة: تأكيد – تغليف – شحن – تحصيل – مرتجع.',
   },
   {
-    icon: '/icons/Connection.svg',
+    icon: Assets.Connection,
     title: 'تواصل تلقائي مع العملاء عبر واتساب',
     desc: 'رسائل ودّية فورية بعد المكالمة لزيادة فرص التأكيد وتقليل الإلغاء بدون تدخل بشري.',
   },
@@ -124,17 +128,17 @@ export const featuresTop: Feature[] = [
 
 export const featuresBottom: Feature[] = [
   {
-    icon: '/icons/analys.svg',
+    icon: Assets.Analys,
     title: 'سجل تفاعلات ذكي لكل عميل',
     desc: 'اعرف كل مكالمة أو رسالة واتساب تمت مع العميل، وراجع الأداء بسهولة.',
   },
   {
-    icon: '/icons/WebDesignTools.svg',
+    icon: Assets.WebDesignTools,
     title: 'تكامل كامل مع أدواتك المفضلة',
     desc: 'يربط متجرك بـ Shopify، EasyOrders، شركات الشحن، و Meta CAPI تلقائيًا.',
   },
   {
-    icon: '/icons/ClientService.svg',
+    icon: Assets.ClientService,
     title: 'تقارير وتحليلات دقيقة لحركة المبيعات',
     desc: 'اعرف أداء متجرك لحظة بلحظة: الأرباح، نسب التحويل، المصروفات والمبيعات.',
   },

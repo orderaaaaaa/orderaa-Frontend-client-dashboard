@@ -1,5 +1,7 @@
 'use client';
 import { useState } from 'react';
+import { Assets } from './assets';
+import { PlayIcon } from './components/PlayIcon';
 
 export default function VideoSection() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -25,7 +27,7 @@ export default function VideoSection() {
             <>
               {/* Preview img */}
               <img
-                src="/Icons/Dashboard3.svg"
+                src={Assets.Dashboard3.src}
                 alt="Dashboard Preview"
                 width={800}
                 height={300}
@@ -38,14 +40,7 @@ export default function VideoSection() {
                 className="absolute inset-0 flex items-center cursor-pointer justify-center bg-black/30 hover:bg-black/50 transition-all"
               >
                 <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm border border-white/40 flex items-center justify-center hover:scale-110 transition-transform">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="white"
-                    viewBox="0 0 24 24"
-                    className="w-10 h-10"
-                  >
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
+                  <PlayIcon className="w-10 h-10" />
                 </div>
               </button>
             </>

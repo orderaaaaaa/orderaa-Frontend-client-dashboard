@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { Assets } from './assets';
 
 const InventorySection: React.FC = () => {
   return (
@@ -13,7 +14,7 @@ const InventorySection: React.FC = () => {
           </h1>
           {/* Hidden on mobile */}
           <img
-            src={'/Icons/Dashboard2.svg'}
+            src={Assets.Dashboard2.src}
             width={10}
             height={10}
             alt=""
@@ -68,7 +69,7 @@ const InventorySection: React.FC = () => {
           </h3>
 
           <img
-            src={'/Icons/Dashboard1.svg'}
+            src={Assets.Dashboard1.src}
             height={1000}
             width={2}
             alt=""

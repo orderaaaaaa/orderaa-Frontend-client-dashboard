@@ -1,5 +1,7 @@
 import React from 'react';
 import { Zen_Dots } from 'next/font/google';
+import Image from 'next/image';
+import { Assets } from './assets';
 
 // ✅ Import Zen Dots only here (since only Hero uses it)
 const zenDots = Zen_Dots({
@@ -15,14 +17,14 @@ function Hero() {
         {/* imgs - Hidden on mobile */}
         <div className="relative  justify-center hidden md:grid">
           <img
-            src={'/Icons/AI-Model.svg'}
+            src={Assets.AIModel.src}
             className="w-full max-w-[450.57px] "
             width={200}
             height={200}
             alt=""
           />
           <img
-            src={'/Icons/Dashboard.svg'}
+            src={Assets.Dashboard.src}
             className="w-full max-w-[540px] relative top-[-120px] left-[25px]"
             width={200}
             height={200}
@@ -49,26 +51,26 @@ function Hero() {
               <span className="text-[10px] md:text-[12px]">عملاء نشطين</span>
             </p>
             <div className="flex gap-2 relative">
-              <img
-                src={'/Images/person3.png'}
+              <Image
+                src={Assets.Person3}
                 className="w-full max-w-[40px] max-h-[40px] rounded-full border-2 border-white"
                 width={40}
-                height={4}
+                height={40}
                 alt=""
               />
 
-              <img
-                src={'/Images/person1.png'}
+              <Image
+                src={Assets.Person1}
                 className="w-full max-w-[40px] max-h-[40px] rounded-full border-2 border-white absolute right-6"
                 width={40}
-                height={4}
+                height={40}
                 alt=""
               />
-              <img
-                src={'/Images/person2.png'}
+              <Image
+                src={Assets.Person2}
                 className="w-full max-w-[40px] max-h-[40px] rounded-full border-2 border-white"
                 width={40}
-                height={10}
+                height={40}
                 alt=""
               />
             </div>

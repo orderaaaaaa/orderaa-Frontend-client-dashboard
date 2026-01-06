@@ -2,6 +2,16 @@
 import Link from 'next/link';
 import React from 'react';
 import { MessageCircle } from 'lucide-react';
+import Image from 'next/image';
+import { Assets } from './assets';
+
+const socialIcons: Record<string, any> = {
+  WhatsApp: Assets.WhatsApp,
+  facebook: Assets.Facebook,
+  Linkedin: Assets.Linkedin,
+  instgram: Assets.Instgram,
+  TikTok: Assets.TikTok,
+};
 
 const Footer: React.FC = () => {
   return (
@@ -10,7 +20,7 @@ const Footer: React.FC = () => {
         {/* Right side - Logo */}
         <div className="flex flex-col items-center md:items-start gap-4">
           <img
-            src="/Icons/Orderaa.svg"
+            src={Assets.Orderaa.src}
             alt="Orderaa Logo"
             width={160}
             height={50}
@@ -60,7 +70,7 @@ const Footer: React.FC = () => {
                   className="hover:scale-110 transition-transform duration-300"
                 >
                   <img
-                    src={`/Icons/${icon}.svg`}
+                    src={socialIcons[icon].src}
                     width={35}
                     height={35}
                     alt={icon}

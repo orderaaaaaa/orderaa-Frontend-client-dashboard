@@ -3,6 +3,7 @@
 import { Check, TrendingUp, TrendingDown, Users } from 'lucide-react';
 import React from 'react';
 import { TeamPerformanceSectionData } from '@/constants/Home';
+import { Assets } from './assets';
 
 export default function TeamPerformanceSection() {
   return (
@@ -43,7 +44,7 @@ export default function TeamPerformanceSection() {
             إدارة الفريق بذكاء
           </h3>
           <img
-            src="/Icons/Dashboard4.svg"
+            src={Assets.Dashboard4.src}
             alt="مقارنة الموظفين"
             width={600}
             height={350}

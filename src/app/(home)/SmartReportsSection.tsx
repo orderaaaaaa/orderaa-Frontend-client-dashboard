@@ -1,5 +1,6 @@
 import { Check } from 'lucide-react';
 import React from 'react';
+import { Assets } from './assets';
 
 export default function SmartReportsSection() {
   return (
@@ -13,7 +14,7 @@ export default function SmartReportsSection() {
           {/* Bottom img */}
           <div className="relative w-full md:w-[590px] md:-bottom-13 order-1">
             <img
-              src="/Icons/Dashboard9.svg"
+              src={Assets.Dashboard9.src}
               alt="التقارير والتحليل الذكي"
               width={900}
               height={600}
@@ -24,7 +25,7 @@ export default function SmartReportsSection() {
           {/* Top img (overlapping) */}
           <div className="absolute top-[-60px] md:top-[-55px] right-0 w-[100%] md:w-[590px]">
             <img
-              src="/Icons/Dashboard10.svg"
+              src={Assets.Dashboard10.src}
               alt="تحليل الأداء"
               width={900}
               height={600}

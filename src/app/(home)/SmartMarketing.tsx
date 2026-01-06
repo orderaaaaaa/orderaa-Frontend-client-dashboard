@@ -3,6 +3,7 @@
 import { Check } from 'lucide-react';
 import React from 'react';
 import { SmartMarketingPoints } from '@/constants/Home';
+import { Assets } from './assets';
 
 const SmartMarketing: React.FC = () => {
   return (
@@ -32,7 +33,7 @@ const SmartMarketing: React.FC = () => {
         {/* img Box */}
         <div className="w-full lg:w-1/2 order-1 lg:order-2">
           <img
-            src="/Icons/frame1.svg"
+            src={Assets.Frame1.src}
             width={10}
             height={1}
             alt="التسويق الذكي"

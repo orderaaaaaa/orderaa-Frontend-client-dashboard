@@ -1,4 +1,5 @@
 import React from 'react';
+import { Assets } from './assets';
 
 export default function FullControlSection() {
   return (
@@ -14,7 +15,7 @@ export default function FullControlSection() {
           <h3 className="text-lg font-semibold mb-4">إدارة الحسابات</h3>
           <div className="relative w-full max-w-[400px] aspect-[4/3] max-xl:max-w-[80%] overflow-hidden max-xl:right-5">
             <img
-              src="/Icons/Dashboard5.svg"
+              src={Assets.Dashboard5.src}
               alt="إدارة الحسابات"
               className="object-contain rounded-2xl"
             />
@@ -25,7 +26,7 @@ export default function FullControlSection() {
           <h3 className="text-lg font-semibold sm:mb-4">إدارة الشحن</h3>
           <div className="relative w-full max-w-[400px] aspect-[4/4] sm:aspect-[4/3] max-xl:max-w-[80%] overflow-hidden max-xl:left-5">
             <img
-              src="/Icons/Dashboard6.svg"
+              src={Assets.Dashboard6.src}
               alt="إدارة الشحن"
               className="object-contain rounded-2xl"
             />
@@ -36,7 +37,7 @@ export default function FullControlSection() {
           <h3 className="text-lg font-semibold sm:mb-4">إدارة المخزون</h3>
           <div className="relative w-full max-w-[400px] aspect-[4/4] sm:aspect-[4/3] max-xl:max-w-[80%] overflow-hidden max-xl:right-7">
             <img
-              src="/Icons/Dashboard7.svg"
+              src={Assets.Dashboard7.src}
               alt="إدارة المخزون"
               className="object-contain rounded-2xl"
             />
@@ -47,7 +48,7 @@ export default function FullControlSection() {
           <h3 className="text-lg font-semibold sm:mb-4">إدارة الطلبات</h3>
           <div className="relative w-full max-w-[400px] aspect-[4/4] sm:aspect-[4/3] max-xl:max-w-[80%] overflow-hidden max-xl:left-5 max-sm:bottom-5">
             <img
-              src="/Icons/Dashboard8.svg"
+              src={Assets.Dashboard8.src}
               alt="إدارة الطلبات"
               className="object-contain rounded-2xl"
             />
@@ -63,7 +64,7 @@ export default function FullControlSection() {
           </h3>
           <div className="relative w-full aspect-[4/3] overflow-hidden">
             <img
-              src="/Icons/Dashboard5.svg"
+              src={Assets.Dashboard5.src}
               alt="إدارة الحسابات"
               className="object-contain rounded-2xl"
             />
@@ -75,7 +76,7 @@ export default function FullControlSection() {
           <h3 className="text-lg md:text-xl font-semibold mb-4">إدارة الشحن</h3>
           <div className="relative w-full aspect-[4/3] overflow-hidden">
             <img
-              src="/Icons/Dashboard6.svg"
+              src={Assets.Dashboard6.src}
               alt="إدارة الشحن"
               className="object-contain rounded-2xl"
             />
@@ -89,7 +90,7 @@ export default function FullControlSection() {
           </h3>
           <div className="relative w-full aspect-[4/3] overflow-hidden">
             <img
-              src="/Icons/Dashboard7.svg"
+              src={Assets.Dashboard7.src}
               alt="إدارة المخزون"
               className="object-contain rounded-2xl"
             />
@@ -103,7 +104,7 @@ export default function FullControlSection() {
           </h3>
           <div className="relative w-full aspect-[4/3] overflow-hidden">
             <img
-              src="/Icons/Dashboard8.svg"
+              src={Assets.Dashboard8.src}
               alt="إدارة الطلبات"
               className="object-contain rounded-2xl"
             />
