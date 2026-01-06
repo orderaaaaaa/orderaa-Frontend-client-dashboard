@@ -41,6 +41,7 @@ export class ErrorBoundary extends Component<
   }
 }
 
+
 export function SidebarError() {
   return (
     <div className="p-4 text-center text-red-600">
