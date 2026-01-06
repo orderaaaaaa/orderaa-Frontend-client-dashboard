@@ -31,7 +31,11 @@ function ProductsTable() {
   };
 
   if (isLoading) {
-    return <div className="p-10 text-center text-primary">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-64 mt-10">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   return (

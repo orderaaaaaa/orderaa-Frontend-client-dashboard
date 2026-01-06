@@ -42,19 +42,15 @@ function ClientInformation({
   onNotesChange,
   errors,
 }: ClientInformationProps) {
-  // Fetch governorates and areas from API
-
   const { data: governorateOptions = [] } = useGovernoratesQuery();
   const { data: areaOptions = [], isLoading: isLoadingAreas } =
     useCitiesQuery(governorate);
 
-  // Handle governorate change - reset area when governorate changes
   const handleGovernorateChange = useCallback(
     (value: string) => {
       if (typeof onGovernorateChange === 'function') {
         onGovernorateChange(value);
       }
-      // Reset area when governorate changes
       if (value !== governorate && typeof onAreaChange === 'function') {
         onAreaChange('');
       }
