@@ -1,4 +1,3 @@
-
 // Order Status Enum (synced with backend)
 export enum OrderStatus {
   NEW_ORDER = 'NEW_ORDER',
@@ -222,6 +221,7 @@ export interface Order {
   timeTo?: string;
   availableFrom?: string;
   availableTo?: string;
+  postponedUntil?: string;
 
   // Marketing & tracking
   utmSource?: string;

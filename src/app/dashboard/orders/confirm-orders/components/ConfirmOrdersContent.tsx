@@ -1,6 +1,12 @@
 'use client';
 
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+} from 'react';
 import clsx from 'clsx';
 import { toast } from 'react-toastify';
 import { ArrowUp, ArrowLeft, Scan, ScanLine, X } from 'lucide-react';
@@ -10,7 +16,7 @@ import { DatePicker } from '@/components/ui/datepicker';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { Button } from '@/components/ui/button';
 import BulkActionsBar from '@/components/BulkActionsBar';
-import OrderCard from '@/components/orders/OrderCard';
+import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
 import Footer from '@/components/orders/Footer';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 
@@ -165,14 +171,11 @@ export function ConfirmOrdersContent() {
     onSubmit: handleFormSubmit,
   });
 
-  const handleEditStatus = useCallback(
-    (statusKey: string) => {
-      if (!statusKey) return;
-      // TODO: Implement batch/bulk update logic
-      toast.info(`سيتم تحديث حالة الطلبات إلى ${statusKey}`);
-    },
-    []
-  );
+  const handleEditStatus = useCallback((statusKey: string) => {
+    if (!statusKey) return;
+    // TODO: Implement batch/bulk update logic
+    toast.info(`سيتم تحديث حالة الطلبات إلى ${statusKey}`);
+  }, []);
 
   const handleExportExcel = useCallback(() => {
     toast.info('سيتم تصدير الطلبات إلى Excel');
@@ -283,7 +286,10 @@ export function ConfirmOrdersContent() {
         currentStatus={filters.status}
       />
 
-      <StatisticsSection statistics={confirmStatistics} isLoading={statsLoading} />
+      <StatisticsSection
+        statistics={confirmStatistics}
+        isLoading={statsLoading}
+      />
 
       <FilterSection
         control={control}

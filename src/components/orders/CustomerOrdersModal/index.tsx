@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import { toast } from 'react-toastify';
 import type { Order } from '@/types/orders';
 import { useCustomerOrders, useOrderStatusesQuery } from '@/services/orders';
-import OrderCard from '../OrderCard';
+import OrderCard from '../../../app/dashboard/orders/allOrders/components/OrderCard';
 import { Button } from '@/components/ui/button';
 import BulkActionsBar from '@/components/BulkActionsBar';
 import { exportOrdersToExcel } from '@/utils/exportOrders';
@@ -190,7 +190,7 @@ export default function CustomerOrdersModal({
                 className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-[#682fee] transition-colors"
               >
                 {selectedOrderIds.length === orders.length &&
-                  orders.length > 0 ? (
+                orders.length > 0 ? (
                   'إلغاء تحديد الكل'
                 ) : (
                   <span className="flex items-center gap-2">
@@ -292,8 +292,9 @@ export default function CustomerOrdersModal({
         </div>
 
         <div
-          className={`px-8 py-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl ${selectedOrders.length > 0 ? 'pb-20' : ''
-            }`}
+          className={`px-8 py-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl ${
+            selectedOrders.length > 0 ? 'pb-20' : ''
+          }`}
         >
           <div className="flex items-center justify-between">
             <Button
