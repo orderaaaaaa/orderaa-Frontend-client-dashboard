@@ -14,40 +14,28 @@ export interface WalletPricingPlan {
 
 export const WALLET_PRICING_PLANS: WalletPricingPlan[] = [
   {
-    title: 'خطة 5 دولار',
+    title: 'شحن 5 دولار',
     price: '5 دولار',
     subtitle: '(250 جنية)',
     icon: <LuWallet className="w-7 h-7 text-[#6135c9]" />,
-    features: [
-      'شحن محفظة بقيمة 5 دولار',
-      'يخصم 0.50 من كل طلب',
-      'رسوم خدمة بنسبة 2% على جميع المعاملات',
-    ],
+    features: ['شحن محفظة بقيمة 5 دولار', 'يخصم 0.50 من كل طلب'],
     button: 'اشحن الآن',
     highlight: true, // Used for the purple border/button in the image
   },
   {
-    title: 'خطة 10 دولار',
+    title: 'شحن 10 دولار',
     price: '10 دولار',
     subtitle: '(500 جنية)',
     icon: <LuWallet className="w-7 h-7 text-[#6135c9]" />,
-    features: [
-      'شحن محفظة بقيمة 5 دولار',
-      'يخصم 0.50 من كل طلب',
-      'رسوم خدمة بنسبة 2% على جميع المعاملات',
-    ],
+    features: ['شحن محفظة بقيمة 5 دولار', 'يخصم 0.50 من كل طلب'],
     button: 'اشحن الآن',
   },
   {
-    title: 'خطة 20 دولار',
+    title: 'شحن 20 دولار',
     price: '20 دولار',
     subtitle: '(1000 جنية)',
     icon: <LuWallet className="w-7 h-7 text-[#6135c9]" />,
-    features: [
-      'شحن محفظة بقيمة 5 دولار',
-      'يخصم 0.50 من كل طلب',
-      'رسوم خدمة بنسبة 2% على جميع المعاملات',
-    ],
+    features: ['شحن محفظة بقيمة 5 دولار', 'يخصم 0.50 من كل طلب'],
     button: 'اشحن الآن',
   },
   {
@@ -55,11 +43,7 @@ export const WALLET_PRICING_PLANS: WalletPricingPlan[] = [
     price: '30 دولار',
     subtitle: '(1500 جنية)',
     icon: <LuRefreshCcw className="w-7 h-7 text-white" />,
-    features: [
-      'شحن محفظة بقيمة 5 دولار',
-      'يخصم 0.50 من كل طلب',
-      'رسوم خدمة بنسبة 2% على جميع المعاملات',
-    ],
+    features: ['شحن محفظة بقيمة 5 دولار', 'يخصم 0.50 من كل طلب'],
     button: 'اشحن الآن',
     gradient: true, // Used for the solid purple background
   },

@@ -6,15 +6,13 @@ import { Pagination } from '@/components/Pagination';
 import { CustomerRow } from './CustomerRow';
 import { CustomerCard } from './CustomerCard';
 import CustomerDetailsModal from './modals/CustomerDetailsModal';
-import { RxChevronUp } from 'react-icons/rx';
+import { LimitSelector } from '../../employees/components/LimitSelector';
 
 interface CustomerTableProps {
   searchTerm?: string;
   clientStatus?: string;
   orderStatus?: string;
 }
-
-const LIMIT_OPTIONS = [10, 15, 20, 25];
 
 export default function CustomerTable({
   searchTerm = '',
@@ -28,9 +26,6 @@ export default function CustomerTable({
   );
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [limit, setLimit] = useState(10);
-  const [isLimitOpen, setIsLimitOpen] = useState(false);
-
-  const limitRef = useRef<HTMLDivElement | null>(null);
 
   const isBlockedParam = useMemo(() => {
     if (clientStatus === undefined) return undefined;
@@ -88,7 +83,6 @@ export default function CustomerTable({
   const handleSelectLimit = (value: number) => {
     setLimit(value);
     setCurrentPage(1);
-    setIsLimitOpen(false);
   };
 
   useEffect(() => {
@@ -97,12 +91,6 @@ export default function CustomerTable({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        limitRef.current &&
-        !limitRef.current.contains(event.target as Node)
-      ) {
-        setIsLimitOpen(false);
-      }
       if (openMenuId && !(event.target as Element).closest('.menu-container')) {
         setOpenMenuId(null);
       }
@@ -188,10 +176,16 @@ export default function CustomerTable({
         }}
       />
 
-      <div className="flex flex-wrap justify-center max-sm:gap-4 sm:justify-between items-center w-[97%] mx-auto mt-10 mb-5">
-        <div className="text-lg">
-          عرض <span className="font-bold">1- {data?.data.length}</span> من اصل{' '}
-          <span className="font-bold">{data?.meta.totalItems}</span> عميل
+      <div className="flex max-sm:flex-col max-sm:gap-4 justify-between items-center w-[97%] mx-auto mt-6 mb-4">
+        <div className="text-lg text-gray-900">
+          عرض{' '}
+          <span className="font-bold">
+            {Math.min(
+              (data?.meta.currentPage || 1) * limit,
+              data?.meta.totalItems || 0
+            )}
+          </span>{' '}
+          من أصل <span className="font-bold">{data?.meta.totalItems}</span> عميل
         </div>
         <Pagination
           currentPage={data?.meta.currentPage || 1}
@@ -201,33 +195,8 @@ export default function CustomerTable({
           onPageChange={handlePageChange}
         />
       </div>
-      <div className="flex">
-        <div ref={limitRef} className="relative w-fit mr-[1.5%]">
-          <div
-            onClick={() => setIsLimitOpen((prev) => !prev)}
-            className="bg-primary w-15 py-1 px-3 rounded-full text-white flex items-center justify-center cursor-pointer select-none"
-          >
-            {limit}
-            <RxChevronUp
-              className={`transition-transform ${isLimitOpen ? 'rotate-180' : ''
-                }`}
-            />
-          </div>
-
-          {isLimitOpen && (
-            <div className="absolute bottom-full mb-2 w-full bg-white rounded-lg shadow-md overflow-hidden z-10">
-              {LIMIT_OPTIONS.map((option) => (
-                <div
-                  key={option}
-                  onClick={() => handleSelectLimit(option)}
-                  className="text-primary text-center py-1 cursor-pointer hover:bg-[#f1eefa]"
-                >
-                  {option}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      <div className="w-[97%] mx-auto">
+        <LimitSelector limit={limit} onLimitChange={handleSelectLimit} />
       </div>
     </>
   );

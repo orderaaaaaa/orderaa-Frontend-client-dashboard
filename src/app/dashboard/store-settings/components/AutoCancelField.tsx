@@ -42,7 +42,7 @@ export function AutoCancelField({ register, errors }: AutoCancelFieldProps) {
         type="number"
         placeholder="مثال: 3"
         error={errors.autoCancelAttempts?.message}
-        className="!h-[46px] bg-[#EAEAEA40] text-right w-full !px-5"
+        className="!h-[46px] text-right w-full !px-5"
       />
     </div>
   );

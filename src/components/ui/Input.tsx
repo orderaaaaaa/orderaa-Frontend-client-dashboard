@@ -50,7 +50,7 @@ export default function Input({
 
   const hasIcon = Icon || type === 'password';
   const inputClassName = clsx(
-    'w-full border border-gray-200 rounded-lg py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed',
+    'w-full border border-gray-200 rounded-lg py-3 text-base focus:outline-none !bg-gray-100  focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed',
     hasIcon ? 'px-10' : 'px-4',
     customInputClassName
   );

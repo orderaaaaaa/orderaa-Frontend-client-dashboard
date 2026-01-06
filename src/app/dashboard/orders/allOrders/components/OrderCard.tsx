@@ -17,31 +17,9 @@ import { getTimeAgo } from '@/utils/timeAgo';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { If, Then } from 'react-if';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
-
-interface OrderCardProps {
-  id: number;
-  code: string;
-  name: string;
-  phoneNumbers: string[];
-  government: string;
-  items: string[];
-  price: number;
-  trys: number;
-  status: string;
-  city: string;
-  address: string;
-  alert: number;
-  select: boolean;
-  isSelected?: boolean;
-  shippingId?: string;
-  onSelectionChange?: (checked: boolean) => void;
-  createdAt?: string;
-  repeatCount?: number;
-  onRepeatClick?: () => void;
-  filterParams?: string;
-  cancelReason?: string | null;
-  cancelNotes?: string | null;
-}
+import { getRemainingTime } from '@/utils/getRemainingTime';
+import { LiaClock } from 'react-icons/lia';
+import { OrderCardProps } from '@/app/dashboard/orders/allOrders/types/OrderProps';
 
 export default function OrderCard({
   id,
@@ -65,6 +43,7 @@ export default function OrderCard({
   filterParams,
   cancelReason,
   cancelNotes,
+  postponedUntil,
 }: OrderCardProps) {
   const router = useRouter();
   const { getStatusLabel } = useStatusLabel();
@@ -232,6 +211,15 @@ export default function OrderCard({
           </div>
         )}
 
+        {postponedUntil && (
+          <div className="flex flex-row-reverse items-center gap-2">
+            <p className="text-base font-medium text-black">
+              {getRemainingTime(postponedUntil)}
+            </p>
+            <LiaClock className="opacity-30" height={18} />
+          </div>
+        )}
+
         {/* Cancel Info */}
         {status === 'CANCELLED' && (cancelReason || cancelNotes) && (
           <div className="flex flex-col gap-3 w-full">
@@ -270,9 +258,7 @@ export default function OrderCard({
           className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium ${classes}`}
         >
           <Icon className="w-4 h-4" />
-          <span className="text-xs font-medium text-primary">
-            {getStatusLabel(status)}
-          </span>
+          <span className="text-xs font-medium">{getStatusLabel(status)}</span>
         </div>
 
         <If condition={trys > 0}>

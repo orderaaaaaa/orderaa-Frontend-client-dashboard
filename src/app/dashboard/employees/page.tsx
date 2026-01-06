@@ -53,22 +53,18 @@ export default function AllEmployees() {
                     <EmployeeCard key={employee.id} employee={employee} />
                   ))}
                 </div>
-
                 {paginationProps && (
                   <div className="flex max-sm:flex-col max-sm:gap-4 justify-between items-center mt-6 mb-4">
                     <div className="text-lg text-gray-900">
                       عرض{' '}
                       <span className="font-bold">
                         {`${Math.min(
-                          (paginationProps.currentPage - 1) * limit + 1,
-                          totalItems
-                        )} - ${Math.min(
                           paginationProps.currentPage * limit,
-                          totalItems
+                          employees.length
                         )}`}
                       </span>{' '}
-                      من أصل <span className="font-bold">{totalItems}</span>{' '}
-                      موظف
+                      من أصل{' '}
+                      <span className="font-bold">{totalItems}</span> موظف
                     </div>
                     <Pagination
                       currentPage={paginationProps.currentPage}

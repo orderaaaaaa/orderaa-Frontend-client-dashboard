@@ -10,7 +10,7 @@ import React, {
 } from 'react';
 import { toast } from 'react-toastify';
 import FilterSection from './components/FilterSection';
-import OrderCard from '@/components/orders/OrderCard';
+import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
 import Footer from '@/components/orders/Footer';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 import BulkActionsBar from '@/components/BulkActionsBar';
@@ -492,8 +492,9 @@ function AllOrdersContent() {
               onValueChange={(label) => setTimePeriod(getValueFromLabel(label))}
               options={TIME_PERIOD_LABELS}
               placeholder="الفترة الزمنية"
-              triggerClassName={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${timePeriod ? 'text-primary font-bold' : ''
-                }`}
+              triggerClassName={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${
+                timePeriod ? 'text-primary font-bold' : ''
+              }`}
               searchThreshold={10}
               clearable
             />
@@ -640,6 +641,7 @@ function AllOrdersContent() {
                 filterParams={orderDetailsFilterParams}
                 cancelReason={order.cancelReason}
                 cancelNotes={order.cancelNotes}
+                postponedUntil={order.postponedUntil}
               />
             ))}
           </div>

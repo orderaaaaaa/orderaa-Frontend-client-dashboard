@@ -11,7 +11,11 @@ import { Button } from '../ui/button';
 interface AddNewProductModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (productId: number, variants: SelectedVariant[], quantity: number) => Promise<void>;
+  onSave: (
+    productId: number,
+    variants: SelectedVariant[],
+    quantity: number
+  ) => Promise<void>;
   products: Product[];
 }
 
@@ -22,12 +26,13 @@ export default function AddNewProductModal({
   products,
 }: AddNewProductModalProps) {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
+  const [selectedVariants, setSelectedVariants] = useState<
+    Record<string, string>
+  >({});
   const [quantity, setQuantity] = useState(1);
 
-  const { data: variantOptions = [], isLoading: isLoadingVariants } = useProductVariantsOptions(
-    selectedProduct?.id ?? null
-  );
+  const { data: variantOptions = [], isLoading: isLoadingVariants } =
+    useProductVariantsOptions(selectedProduct?.id ?? null);
 
   const productOptions = useMemo(() => products.map((p) => p.name), [products]);
 
@@ -50,8 +55,13 @@ export default function AddNewProductModal({
   }, [selectedProduct?.id]);
 
   const isFormValid = useMemo(() => {
-    return selectedProduct !== null;
-  }, [selectedProduct]);
+    const hasProduct = !!selectedProduct;
+    const allVariantsSelected = variantOptions.every(
+      (opt) => selectedVariants[opt.label]
+    );
+
+    return hasProduct && allVariantsSelected;
+  }, [selectedProduct, variantOptions, selectedVariants]);
 
   if (!isOpen) return null;
 
@@ -79,7 +89,9 @@ export default function AddNewProductModal({
       onClose();
     } catch (error: any) {
       console.error('Failed to add product:', error);
-      const apiErrorMessage = error?.response?.data?.message || 'فشل في إضافة المنتج. يرجى المحاولة مرة أخرى.';
+      const apiErrorMessage =
+        error?.response?.data?.message ||
+        'فشل في إضافة المنتج. يرجى المحاولة مرة أخرى.';
       toast.error(apiErrorMessage);
     }
   };
@@ -183,14 +195,18 @@ export default function AddNewProductModal({
                 </div>
               </div>
 
-              {selectedProduct && (
-                isLoadingVariants ? (
+              {selectedProduct &&
+                (isLoadingVariants ? (
                   <div className="flex-1 min-w-[200px] flex items-center justify-center">
-                    <span className="text-gray-500">جاري تحميل الخيارات...</span>
+                    <span className="text-gray-500">
+                      جاري تحميل الخيارات...
+                    </span>
                   </div>
                 ) : variantOptions.length === 0 ? (
                   <div className="flex-1 min-w-[200px] flex items-center justify-center">
-                    <span className="text-gray-500">لا توجد خيارات متاحة لهذا المنتج</span>
+                    <span className="text-gray-500">
+                      لا توجد خيارات متاحة لهذا المنتج
+                    </span>
                   </div>
                 ) : (
                   variantOptions.map((option) => (
@@ -200,7 +216,9 @@ export default function AddNewProductModal({
                       </label>
                       <SearchableSelect
                         value={selectedVariants[option.label] || ''}
-                        onValueChange={(value) => handleVariantChange(option.label, value)}
+                        onValueChange={(value) =>
+                          handleVariantChange(option.label, value)
+                        }
                         options={option.values}
                         placeholder={`اختر ${option.label}`}
                         searchPlaceholder={`بحث عن ${option.label}...`}
@@ -213,8 +231,7 @@ export default function AddNewProductModal({
                       />
                     </div>
                   ))
-                )
-              )}
+                ))}
             </div>
           </div>
         </div>

@@ -42,18 +42,15 @@ function ClientInformation({
   onNotesChange,
   errors,
 }: ClientInformationProps) {
-  // Fetch governorates and areas from API
-
   const { data: governorateOptions = [] } = useGovernoratesQuery();
-  const { data: areaOptions = [], isLoading: isLoadingAreas } = useCitiesQuery(governorate);
+  const { data: areaOptions = [], isLoading: isLoadingAreas } =
+    useCitiesQuery(governorate);
 
-  // Handle governorate change - reset area when governorate changes
   const handleGovernorateChange = useCallback(
     (value: string) => {
       if (typeof onGovernorateChange === 'function') {
         onGovernorateChange(value);
       }
-      // Reset area when governorate changes
       if (value !== governorate && typeof onAreaChange === 'function') {
         onAreaChange('');
       }
@@ -86,7 +83,7 @@ function ClientInformation({
               name="customerName"
               type="text"
               placeholder="أدخل الاسم الكامل للعميل"
-              className="max-w-[502px] mt-3 bg-[#EAEAEA40]"
+              className="max-w-[502px] mt-3"
               value={customerName}
               onChange={(e) => onCustomerNameChange(e.target.value)}
               error={errors?.customerName}
@@ -99,7 +96,7 @@ function ClientInformation({
               name="phoneNumber"
               type="text"
               placeholder="أدخل رقم الهاتف"
-              className="max-w-[502px] mt-3 bg-[#EAEAEA40]"
+              className="max-w-[502px] mt-3"
               value={phoneNumber}
               onChange={(e) => onPhoneNumberChange(e.target.value)}
               error={errors?.phoneNumber}
@@ -119,8 +116,9 @@ function ClientInformation({
               placeholder="اختر المحافظة"
               widthClass="w-full"
               error={errors?.governorate}
-              triggerClassName={`border w-full bg-[#EAEAEA40] px-3 py-3 rounded-sm ${errors?.governorate ? 'border-red-500' : 'border-primary'
-                }`}
+              triggerClassName={`border w-full bg-[#EAEAEA40] px-3 py-3 rounded-sm ${
+                errors?.governorate ? 'border-red-500' : 'border-primary'
+              }`}
             />
           </div>
           {/* choose area */}
@@ -134,13 +132,20 @@ function ClientInformation({
               value={area}
               onChange={handleAreaChange}
               options={areaOptions}
-              placeholder={!governorate ? 'اختر المحافظة أولاً' : isLoadingAreas ? 'جاري التحميل...' : 'اختر المنطقة'}
+              placeholder={
+                !governorate
+                  ? 'اختر المحافظة أولاً'
+                  : isLoadingAreas
+                  ? 'جاري التحميل...'
+                  : 'اختر المنطقة'
+              }
               widthClass="w-full"
               disabled={!governorate || isLoadingAreas}
               loading={isLoadingAreas}
               error={errors?.area}
-              triggerClassName={`border w-full bg-[#EAEAEA40] px-3 py-3 rounded-sm ${errors?.area ? 'border-red-500' : 'border-primary'
-                }`}
+              triggerClassName={`border w-full bg-[#EAEAEA40] px-3 py-3 rounded-sm ${
+                errors?.area ? 'border-red-500' : 'border-primary'
+              }`}
             />
           </div>
         </div>

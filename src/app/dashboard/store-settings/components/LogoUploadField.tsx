@@ -87,7 +87,10 @@ export function LogoUploadField({
         <LiaImageSolid className="w-6 h-6 text-primary mt-0.5" />
         <div>
           <h3 className="text-lg font-semibold leading-tight">شعار المتجر</h3>
-          <p className="text-sm text-gray-500">قم برفع شعار المتجر الخاص بك</p>
+          <p className="text-sm text-gray-500">
+            {' '}
+            قم برفع شعار المتجر الخاص بك لكي يظهر علي بوليصةالشحن
+          </p>
         </div>
       </div>
 

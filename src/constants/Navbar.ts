@@ -1,6 +1,6 @@
 import { CartIcon, ExcelIcon } from '@/components/icons';
 import {
-  LiaBoxesSolid,
+  LiaBoxOpenSolid,
   LiaWalletSolid,
   LiaTruckSolid,
   LiaIdCard,
@@ -24,11 +24,11 @@ export type NavigationItem = {
   name: string;
   href: string;
   icon?:
-  | ForwardRefExoticComponent<
-    Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>
-  >
-  | ((props: { className?: string }) => JSX.Element)
-  | IconType;
+    | ForwardRefExoticComponent<
+        Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>
+      >
+    | ((props: { className?: string }) => JSX.Element)
+    | IconType;
   children?: NavigationItem[];
 };
 
@@ -106,6 +106,6 @@ export const navigation: NavigationItem[] = [
   {
     name: 'المنتجات',
     href: '/dashboard/products',
-    icon: LiaBoxesSolid,
+    icon: LiaBoxOpenSolid,
   },
 ];
