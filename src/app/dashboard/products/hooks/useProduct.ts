@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { productsApi } from '../api/products'; // Adjust path as needed
 import { productKeys } from './queryKeys';
+import { UpdateVariantsPayload } from '../types/products';
 
 export const useGetProducts = (page: number, limit: number) => {
   return useQuery({
@@ -15,5 +16,20 @@ export const useGetProductVariants = (productId: number) => {
     queryKey: productKeys.variants(productId),
     queryFn: () => productsApi.getVariantOptions(productId),
     enabled: !!productId,
+  });
+};
+
+export const useUpdateProductVariants = (productId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: UpdateVariantsPayload) =>
+      productsApi.updateVariantsOptions(productId, payload),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: productKeys.variants(productId),
+      });
+    },
   });
 };

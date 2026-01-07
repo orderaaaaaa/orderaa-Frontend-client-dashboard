@@ -16,8 +16,6 @@ function ProductsPage() {
       <ProductsHeader />
       <ProductsTable />
 
-      {/* Pagination Footer Container */}
-      {/* flex-row-reverse ensures Pagination is on the left and Info is on the right for LTR documents */}
       <div className="flex max-sm:flex-col max-sm:gap-4 justify-between items-center mt-6 mb-4">
         <div className="text-lg text-gray-900">
           عرض{' '}
