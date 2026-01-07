@@ -21,8 +21,7 @@ api.interceptors.request.use((config) => {
         if (token && config.headers) {
           config.headers.Authorization = `Bearer ${token}`;
         }
-      } catch (error) {
-      }
+      } catch (error) {}
     }
   }
 
@@ -32,6 +31,12 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('auth-storage');
+
+      window.location.href = '/signin';
+    }
+
     return Promise.reject(error);
   }
 );

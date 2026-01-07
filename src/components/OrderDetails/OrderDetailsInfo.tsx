@@ -258,8 +258,6 @@ function OrderDetailsInfoComponent({
     handleUpdate(updatedOrder);
   };
 
-  console.log(localOrder);
-
   return (
     <>
       <div className="flex flex-col gap-4 font-medium p-4 bg-gray-50 mt-8 rounded-xl mb-24 w-full max-w-full">

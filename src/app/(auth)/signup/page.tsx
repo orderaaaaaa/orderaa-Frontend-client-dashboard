@@ -1,6 +1,6 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { Mail, User, Pen, Phone, Lock } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signUpSchema, type SignUpSchema } from './schema';
@@ -12,23 +12,47 @@ import SearchableSelect from '@/components/ui/SearchableSelect';
 import { signUp } from '@/lib/api/auth';
 import { useCatigories } from '@/hooks';
 import { useGovernoratesQuery, useCitiesQuery } from '@/services/lookups';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 
 export default function SignUpForm() {
   const router = useRouter();
   const [error, setError] = useState('');
 
+  const { isChecking } = useAuthGuard(false);
+
   const form = useForm<SignUpSchema>({
     resolver: zodResolver(signUpSchema),
     mode: 'onChange',
+    defaultValues: {
+      username: '',
+      merchantName: '',
+      email: '',
+      phoneNumber: '',
+      password: '',
+      confirmPassword: '',
+      category: '',
+      governorate: '',
+      city: '',
+    },
   });
 
-  const { register, handleSubmit, setValue, watch, formState } = form;
+  const { register, handleSubmit, setValue, watch, control, formState } = form;
   const { errors, isSubmitting } = formState;
   const selectedGovernorate = watch('governorate');
 
-  const { data: governorates = [], error: governoratesError } = useGovernoratesQuery();
-  const { data: cities = [], isLoading: loadingCities } = useCitiesQuery(selectedGovernorate);
+  const { data: governorates = [], error: governoratesError } =
+    useGovernoratesQuery();
+  const { data: cities = [], isLoading: loadingCities } =
+    useCitiesQuery(selectedGovernorate);
   const { categories, error: categoryError } = useCatigories();
+
+  if (isChecking) {
+    return (
+      <div className="flex justify-center items-center h-64 mt-10">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   // Merge errors from hook
   if (governoratesError && categoryError && !error) {
@@ -54,7 +78,7 @@ export default function SignUpForm() {
       error={error}
       isSubmitting={isSubmitting}
       submitButtonText="إنشاء حساب"
-      submitButtonLoadingText="جارٍ إنشاء الحساب..."
+      submitButtonLoadingText="جار إنشاء الحساب..."
       switchGoTo="signin"
     >
       {/* Name */}
@@ -81,14 +105,20 @@ export default function SignUpForm() {
       {/* Activity */}
       <div className="flex flex-col gap-1">
         <label className="block mb-1 font-medium text-[16px]">نوع النشاط</label>
-        <SearchableSelect
-          value={watch('category') || ''}
-          onChange={(val) => setValue('category', val)}
-          options={categories}
-          placeholder="اختر النشاط"
-          widthClass="w-full"
-          error={errors.category?.message}
-          clearable
+        <Controller
+          name="category"
+          control={control}
+          render={({ field }) => (
+            <SearchableSelect
+              value={field.value || ''}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              options={categories}
+              placeholder="اختر النشاط"
+              error={errors.category?.message}
+              clearable
+            />
+          )}
         />
       </div>
 
@@ -115,29 +145,44 @@ export default function SignUpForm() {
       <div className="flex flex-col md:flex-row gap-4 justify-between md:items-center">
         <div className="flex flex-col gap-1 w-full">
           <label className="block mb-1 font-medium text-[16px]">المحافظة</label>
-          <SearchableSelect
-            value={watch('governorate') || ''}
-            onChange={(val) => {
-              setValue('governorate', val);
-              setValue('city', '');
-            }}
-            options={governorates}
-            placeholder="اختر المحافظة"
-            widthClass="w-full"
-            error={errors.governorate?.message}
+          <Controller
+            name="governorate"
+            control={control}
+            render={({ field }) => (
+              <SearchableSelect
+                value={field.value || ''}
+                onChange={(val) => {
+                  field.onChange(val);
+                  setValue('city', '', { shouldValidate: true });
+                }}
+                onBlur={field.onBlur}
+                options={governorates}
+                placeholder="اختر المحافظة"
+                widthClass="w-full"
+                error={errors.governorate?.message}
+              />
+            )}
           />
         </div>
 
         <div className="flex flex-col gap-1 w-full">
           <label className="block mb-1 font-medium text-[16px]">المدينة</label>
-          <SearchableSelect
-            value={watch('city') || ''}
-            onChange={(val) => setValue('city', val)}
-            options={cities}
-            placeholder={!selectedGovernorate ? 'اختر المحافظة أولاً' : loadingCities ? 'جاري التحميل...' : 'اختر المدينة'}
-            widthClass="w-full"
-            disabled={!selectedGovernorate || loadingCities}
-            error={errors.city?.message}
+          <Controller
+            name="city"
+            control={control}
+            render={({ field }) => (
+              <SearchableSelect
+                value={field.value || ''}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                options={cities}
+                placeholder="اختر المدينة"
+                error={errors.city?.message}
+                widthClass="w-full"
+                disabled={!selectedGovernorate || loadingCities}
+                loading={loadingCities}
+              />
+            )}
           />
         </div>
       </div>

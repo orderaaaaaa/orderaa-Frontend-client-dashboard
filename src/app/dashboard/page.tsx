@@ -1,9 +1,20 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 import { ShoppingCart, Users, Package, TrendingUp } from 'lucide-react';
 
 export default function DashboardPage() {
+  const { isChecking } = useAuthGuard(true);
+
+  if (isChecking) {
+    return (
+      <div className="flex justify-center items-center h-64 mt-10">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   // Localizers for Arabic (uses Arabic-Indic digits)
   const numberFormatter = new Intl.NumberFormat('ar-EG');
   const percentFormatter = new Intl.NumberFormat('ar-EG', {
@@ -22,7 +33,6 @@ export default function DashboardPage() {
   const revenue = 45231;
 
   return (
-    // Set Right-to-Left direction and Arabic language
     <div dir="rtl" lang="ar" className="space-y-6 text-right">
       <div>
         <h1 className="text-3xl font-bold text-foreground">لوحة التحكم</h1>

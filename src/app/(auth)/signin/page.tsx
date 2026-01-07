@@ -12,11 +12,13 @@ import AuthForm from '../components/AuthForm';
 import Input from '../../../components/ui/Input';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 
 export default function LoginPage() {
   const [error, setError] = useState('');
   const [isChecked, setIsChecked] = useState(false);
   const router = useRouter();
+  const { isChecking } = useAuthGuard(false);
 
   const setToken = useAuthStore((state) => state.setToken);
   const setUser = useAuthStore((state) => state.setUser);
@@ -49,6 +51,14 @@ export default function LoginPage() {
       setError(err.response?.data?.message || 'حدث خطأ أثناء تسجيل الدخول.');
     }
   };
+
+  if (isChecking) {
+    return (
+      <div className="flex justify-center items-center h-64 mt-10">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <AuthForm
@@ -92,10 +102,7 @@ export default function LoginPage() {
             تذكرني
           </label>
         </div>
-        <Link
-          href="/forgot-password"
-          className="text-primary hover:underline"
-        >
+        <Link href="/forgot-password" className="text-primary hover:underline">
           نسيت كلمة المرور؟
         </Link>
       </div>

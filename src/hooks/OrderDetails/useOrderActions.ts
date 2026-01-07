@@ -2,7 +2,11 @@ import { useCallback, useRef, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { Order, OrderStatusItem } from '@/types/orders';
 import { ShippingData } from '@/components/OrderDetails/EditShippingModal';
-import { useUpdateOrder, useGetNextOrderId, useCancelOrder } from '@/services/orders';
+import {
+  useUpdateOrder,
+  useGetNextOrderId,
+  useCancelOrder,
+} from '@/services/orders';
 
 export interface UseOrderActionsOptions {
   order: Order;
@@ -23,11 +27,20 @@ export interface OrderActionsState {
     status: string,
     updateData?: Partial<Order> | Record<string, any>
   ) => Promise<boolean>;
-  handleUrgent: (data: { shippingCost?: number; urgentDate: string }) => Promise<boolean>;
+  handleUrgent: (data: {
+    shippingCost?: number;
+    urgentDate: string;
+  }) => Promise<boolean>;
   handleCancel: (data: { reasonId: number; notes: string }) => Promise<boolean>;
   handleStopOperation: (notes: string) => Promise<boolean>;
-  handlePostponeHours: (data: { duration?: '30min' | '1hour' | '2hours'; time?: Date }) => Promise<boolean>;
-  handlePostponeDays: (data: { duration?: '1day' | '2days' | '3days' | 'week'; date?: Date }) => Promise<boolean>;
+  handlePostponeHours: (data: {
+    duration?: '30min' | '1hour' | '2hours';
+    time?: Date;
+  }) => Promise<boolean>;
+  handlePostponeDays: (data: {
+    duration?: '1day' | '2days' | '3days' | 'week';
+    date?: Date;
+  }) => Promise<boolean>;
   handleRejectModification: (notes: string) => Promise<boolean>;
   handleWaitingPayment: () => Promise<boolean>;
   handleConfirmAction: (action: string) => Promise<boolean>;
@@ -61,33 +74,36 @@ export function useOrderActions({
     onUnlockRef.current = onUnlock;
   }, [onUnlock]);
 
-  const getStatusFromAction = useCallback((action: string): string | null => {
-    const actionToStatusValueMap: Record<string, string> = {
-      'confirm': 'CONFIRMED',
-      'urgent': 'CONFIRMED',
-      'cancel': 'CANCELLED',
-      'stop_operation': 'STOPPED',
-      'postpone_hours': 'POSTPONED',
-      'postpone_days': 'POSTPONED',
-      'waiting_payment': 'WAITING_FOR_PAYMENT',
-      'reject_modification': 'EDIT_REJECTED',
-      'no_answer': 'CALL_AGAIN',
-      'closed': 'STOPPED',
-      'not_collecting': 'STOPPED',
-      'open_close': 'STOPPED',
-    };
+  const getStatusFromAction = useCallback(
+    (action: string): string | null => {
+      const actionToStatusValueMap: Record<string, string> = {
+        confirm: 'CONFIRMED',
+        urgent: 'CONFIRMED',
+        cancel: 'CANCELLED',
+        stop_operation: 'STOPPED',
+        postpone_hours: 'POSTPONED',
+        postpone_days: 'POSTPONED',
+        waiting_payment: 'WAITING_FOR_PAYMENT',
+        reject_modification: 'EDIT_REJECTED',
+        no_answer: 'CALL_AGAIN',
+        closed: 'STOPPED',
+        not_collecting: 'STOPPED',
+        open_close: 'STOPPED',
+      };
 
-    const expectedStatusValue = actionToStatusValueMap[action];
-    if (!expectedStatusValue) {
-      return null;
-    }
+      const expectedStatusValue = actionToStatusValueMap[action];
+      if (!expectedStatusValue) {
+        return null;
+      }
 
-    const matchedStatus = availableStatuses.find(
-      (status) => status.key === expectedStatusValue
-    );
+      const matchedStatus = availableStatuses.find(
+        (status) => status.key === expectedStatusValue
+      );
 
-    return matchedStatus ? matchedStatus.key : null;
-  }, [availableStatuses]);
+      return matchedStatus ? matchedStatus.key : null;
+    },
+    [availableStatuses]
+  );
 
   const handleStatusUpdateAndNavigate = useCallback(
     async (
@@ -112,7 +128,8 @@ export function useOrderActions({
           await onUnlockRef.current();
         }
 
-        const statusLabel = availableStatuses.find((s) => s.key === status)?.label || status;
+        const statusLabel =
+          availableStatuses.find((s) => s.key === status)?.label || status;
         toast.success(`تم تحديث حالة الطلب إلى ${statusLabel} بنجاح`);
 
         if (onNavigateToNextOrder) {
@@ -164,7 +181,17 @@ export function useOrderActions({
         throw new Error(apiErrorMessage);
       }
     },
-    [order.id, onOrderUpdate, onNavigateToNextOrder, onNoOrdersFound, dateRange, statusFilter, availableStatuses, updateOrderMutation, getNextOrderId]
+    [
+      order.id,
+      onOrderUpdate,
+      onNavigateToNextOrder,
+      onNoOrdersFound,
+      dateRange,
+      statusFilter,
+      availableStatuses,
+      updateOrderMutation,
+      getNextOrderId,
+    ]
   );
 
   const handleUrgent = useCallback(
@@ -181,7 +208,9 @@ export function useOrderActions({
       if (data.shippingCost !== undefined) {
         updateData.shippingCost = data.shippingCost;
       }
-      return await handleStatusUpdateAndNavigate(status, updateData, { skipToast: true });
+      return await handleStatusUpdateAndNavigate(status, updateData, {
+        skipToast: true,
+      });
     },
     [getStatusFromAction, handleStatusUpdateAndNavigate]
   );
@@ -256,7 +285,16 @@ export function useOrderActions({
         return false;
       }
     },
-    [order.id, onOrderUpdate, onNavigateToNextOrder, onNoOrdersFound, dateRange, statusFilter, cancelOrderMutation, getNextOrderId]
+    [
+      order.id,
+      onOrderUpdate,
+      onNavigateToNextOrder,
+      onNoOrdersFound,
+      dateRange,
+      statusFilter,
+      cancelOrderMutation,
+      getNextOrderId,
+    ]
   );
 
   const handleStopOperation = useCallback(
@@ -286,14 +324,35 @@ export function useOrderActions({
       const updateData: Record<string, unknown> = {};
       if (data.time) {
         updateData.postponedUntil = data.time.toISOString();
+      } else if (data.duration) {
+        const now = new Date();
+        const postponedTime = new Date(now);
+
+        switch (data.duration) {
+          case '30min':
+            postponedTime.setMinutes(now.getMinutes() + 30);
+            break;
+          case '1hour':
+            postponedTime.setHours(now.getHours() + 1);
+            break;
+          case '2hours':
+            postponedTime.setHours(now.getHours() + 2);
+            break;
+        }
+
+        updateData.postponedUntil = postponedTime.toISOString();
       }
+
       return await handleStatusUpdateAndNavigate(status, updateData);
     },
     [getStatusFromAction, handleStatusUpdateAndNavigate]
   );
 
   const handlePostponeDays = useCallback(
-    async (data: { duration?: '1day' | '2days' | '3days' | 'week'; date?: Date }) => {
+    async (data: {
+      duration?: '1day' | '2days' | '3days' | 'week';
+      date?: Date;
+    }) => {
       const status = getStatusFromAction('postpone_days');
       if (!status) {
         toast.error('فشل في تحديد حالة الطلب. يرجى المحاولة مرة أخرى.');
@@ -413,7 +472,16 @@ export function useOrderActions({
         return false;
       }
     },
-    [order.id, onOrderUpdate, onNavigateToNextOrder, onNoOrdersFound, dateRange, statusFilter, updateOrderMutation, getNextOrderId]
+    [
+      order.id,
+      onOrderUpdate,
+      onNavigateToNextOrder,
+      onNoOrdersFound,
+      dateRange,
+      statusFilter,
+      updateOrderMutation,
+      getNextOrderId,
+    ]
   );
 
   const handleUpdateShipping = useCallback(

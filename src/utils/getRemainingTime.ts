@@ -9,19 +9,25 @@ export function getRemainingTime(dateInput?: string | Date | null): string {
 
   if (diffMs <= 0) return 'انتهى الوقت';
 
-  const totalHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const days = Math.floor(totalHours / 24);
-  const hours = totalHours % 24;
+  const totalMinutes = Math.floor(diffMs / (1000 * 60));
 
-  if (days > 0 && hours > 0) {
-    return `متبقي ${days} ${days === 1 ? 'يوم' : 'أيام'} و ${hours} ${
-      hours === 1 ? 'ساعة' : 'ساعات'
-    }`;
-  }
+  const days = Math.floor(totalMinutes / (60 * 24));
+  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+  const minutes = totalMinutes % 60;
+
+  const parts: string[] = [];
 
   if (days > 0) {
-    return `متبقي ${days} ${days === 1 ? 'يوم' : 'أيام'}`;
+    parts.push(`${days} ${days === 1 ? 'يوم' : 'أيام'}`);
   }
 
-  return `متبقي ${hours} ${hours === 1 ? 'ساعة' : 'ساعات'}`;
+  if (hours > 0) {
+    parts.push(`${hours} ${hours === 1 ? 'ساعة' : 'ساعات'}`);
+  }
+
+  if (minutes > 0) {
+    parts.push(`${minutes} ${minutes === 1 ? 'دقيقة' : 'دقائق'}`);
+  }
+
+  return `متبقي ${parts.join(' و ')}`;
 }

@@ -56,6 +56,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
       className,
       triggerClassName,
       error,
+      name,
       disabled = false,
       loading = false,
       displayValue,
@@ -206,6 +207,10 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
         className={cn('relative flex flex-col gap-1', widthClass, className)}
         ref={ref || internalRef}
       >
+        {name && (
+          <input type="hidden" name={name} value={value} onChange={() => {}} />
+        )}
+
         <button
           type="button"
           onClick={() => !disabled && !loading && handleOpenChange(!open)}
