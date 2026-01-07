@@ -2,25 +2,38 @@ import React from 'react';
 import {
   Truck,
   Boxes,
-  BadgePlus,
   Repeat,
   CircleDollarSign,
   Clock3,
   PhoneCall,
-  Ban,
-  CircleX,
-  CheckCircle2,
   FileText,
-  FileX,
-  FileScan,
   ClipboardCheck,
   Copy,
-  PackageCheck,
 } from 'lucide-react';
+import { HiOutlineReceiptRefund } from 'react-icons/hi2';
+
 import PageTab from '@/components/ui/PageTab';
 import { useOrdersStore } from '@/store/ordersStore';
-import { LiaWhatsapp } from 'react-icons/lia';
 import { useOrderStatusesQuery } from '@/services/orders';
+import {
+  MdCheckCircleOutline,
+  MdErrorOutline,
+  MdLoop,
+  MdOutlineBlock,
+  MdOutlineCalendarMonth,
+  MdOutlineCancel,
+  MdOutlineFiberNew,
+  MdOutlineInventory2,
+  MdOutlineLocalShipping,
+  MdOutlinePayments,
+  MdOutlinePhoneCallback,
+  MdQuestionMark,
+  MdReceiptLong,
+} from 'react-icons/md';
+import { FaWhatsapp } from 'react-icons/fa';
+import { FaBoxesPacking } from 'react-icons/fa6';
+import { LuPenOff } from 'react-icons/lu';
+import { BsInboxes } from 'react-icons/bs';
 
 interface PageTapsProps {
   data?: any[];
@@ -30,31 +43,36 @@ interface PageTapsProps {
   currentStatus?: string | null;
 }
 
-// Icon mapping based on status value
-const getIconForStatus = (statusValue: string): React.ReactNode => {
+//TODO:Omar Move it to external constant file Later Pls
+const ICON_SIZE = 'w-5 h-5';
+export const getIconForStatus = (statusValue: string): React.ReactNode => {
   const iconMap: Record<string, React.ReactNode> = {
-    TRIED_TO_REACH_CUSTOMER: <Repeat width={18} height={18} />,
-    WAITING_FOR_PAYMENT: <CircleDollarSign width={18} height={18} />,
-    ON_HOLD: <Clock3 width={18} height={18} />,
-    CALLED_CUSTOMER_AGAIN: <PhoneCall width={18} height={18} />,
-    CANCELLED: <CircleX width={18} height={18} />,
-    CONFIRMED: <CheckCircle2 width={18} height={18} />,
-    PREPARED: <PackageCheck width={18} height={18} />,
-    SHIPPED: <Truck width={18} height={18} />,
-    RETURNED: <Copy width={18} height={18} />,
-    DELIVERED: <ClipboardCheck width={18} height={18} />,
-    DOWN_PAYMENT: <CircleDollarSign width={18} height={18} />,
-    MISSING: <FileX width={18} height={18} />,
-    NEW_ORDER: <BadgePlus width={18} height={18} />,
-    STOPPED: <Ban width={18} height={18} />,
-    CALL_AGAIN: <PhoneCall width={18} height={18} />,
-    POSTPONED: <Clock3 width={18} height={18} />,
-    REGISTERED: <LiaWhatsapp width={18} height={18} />,
-    ATTEMPTED: <Repeat width={18} height={18} />,
-    RETURNED_DELIVERED: <Copy width={18} height={18} />,
-    REPORTS: <FileText width={18} height={18} />,
-    SHIPPING: <Truck width={18} height={18} />,
-    PARTIAL_DELIVERY: <FileScan width={18} height={18} />,
+    TRIED_TO_REACH_CUSTOMER: <Repeat className={ICON_SIZE} />,
+    WAITING_FOR_PAYMENT: <MdOutlinePayments className={ICON_SIZE} />,
+    ON_HOLD: <Clock3 className={ICON_SIZE} />,
+    CALLED_CUSTOMER_AGAIN: <PhoneCall className={ICON_SIZE} />,
+    CANCELLED: <MdOutlineCancel className={ICON_SIZE} />,
+    UNCOMPLETED: <MdErrorOutline className={ICON_SIZE} />,
+    CONFIRMED: <MdCheckCircleOutline className={ICON_SIZE} />,
+    WAITING_FOR_PACKAGING: <FaBoxesPacking className={ICON_SIZE} />,
+    PREPARED: <MdOutlineInventory2 className={ICON_SIZE} />,
+    EDIT_REJECTED: <LuPenOff className={ICON_SIZE} />,
+    WHATSAPP: <FaWhatsapp className={ICON_SIZE} />,
+    SHIPPED: <MdOutlineLocalShipping className={ICON_SIZE} />,
+    RETURNED: <Copy className={ICON_SIZE} />,
+    DELIVERED: <ClipboardCheck className={ICON_SIZE} />,
+    DOWN_PAYMENT: <CircleDollarSign className={ICON_SIZE} />,
+    MISSING: <MdQuestionMark className={ICON_SIZE} />,
+    NEW_ORDER: <MdOutlineFiberNew className={ICON_SIZE} />,
+    STOPPED: <MdOutlineBlock className={ICON_SIZE} />,
+    CALL_AGAIN: <MdOutlinePhoneCallback className={ICON_SIZE} />,
+    POSTPONED: <MdOutlineCalendarMonth className={ICON_SIZE} />,
+    REGISTERED: <MdCheckCircleOutline className={ICON_SIZE} />,
+    ATTEMPTED: <MdLoop className={ICON_SIZE} />,
+    RETURNED_DELIVERED: <HiOutlineReceiptRefund className={ICON_SIZE} />,
+    REPORTS: <FileText className={ICON_SIZE} />,
+    SHIPPING: <MdOutlineLocalShipping className={ICON_SIZE} />,
+    PARTIAL_DELIVERY: <MdReceiptLong className={ICON_SIZE} />,
   };
 
   return iconMap[statusValue] || <Boxes width={18} height={18} />;
@@ -105,7 +123,7 @@ function PageTaps({
         <PageTab
           label="جميع الطلبات"
           count={totalOrders ?? data?.length ?? 0}
-          icon={<Boxes width={18} height={18} />}
+          icon={<BsInboxes className={ICON_SIZE} />}
           active={selectedStatus === null}
           onClick={() => handleTabClick(null)}
         />

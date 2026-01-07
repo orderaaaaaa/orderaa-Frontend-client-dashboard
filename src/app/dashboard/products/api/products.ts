@@ -1,5 +1,9 @@
 import http from '@/lib/api/http';
-import { ProductsResponse, VariantsOptionsResponse } from '../types/products';
+import {
+  ProductsResponse,
+  UpdateVariantsPayload,
+  VariantsOptionsResponse,
+} from '../types/products';
 
 export const productsApi = {
   getAll: async (page: number, limit: number): Promise<ProductsResponse> => {
@@ -19,5 +23,12 @@ export const productsApi = {
       `/products/${productId}/variants-options`
     );
     return response.data;
+  },
+
+  updateVariantsOptions: async (
+    productId: number,
+    payload: UpdateVariantsPayload
+  ) => {
+    await http.put(`/products/${productId}`, payload);
   },
 };

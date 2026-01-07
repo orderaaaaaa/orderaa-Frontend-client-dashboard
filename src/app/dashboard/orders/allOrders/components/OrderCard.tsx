@@ -212,11 +212,11 @@ export default function OrderCard({
         )}
 
         {postponedUntil && (
-          <div className="flex flex-row-reverse items-center gap-2">
-            <p className="text-base font-medium text-black">
-              {getRemainingTime(postponedUntil)}
+          <div className="flex flex-row-reverse items-center gap-2 text-amber-400 ">
+            <p className="text-base font-medium ">
+              مواجل: {getRemainingTime(postponedUntil)}
             </p>
-            <LiaClock className="opacity-30" height={18} />
+            <LiaClock className="w-5 h-5" />
           </div>
         )}
 

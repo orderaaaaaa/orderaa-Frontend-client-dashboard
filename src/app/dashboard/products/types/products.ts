@@ -42,3 +42,9 @@ export interface ProductState {
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
 }
+
+export type VariantItem = Record<string, string>;
+
+export interface UpdateVariantsPayload {
+  variants: VariantItem[];
+}

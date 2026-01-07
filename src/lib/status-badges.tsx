@@ -1,50 +1,68 @@
 import { IconType } from 'react-icons';
 import {
   MdOutlineFiberNew,
+  MdCheckCircleOutline,
   MdLoop,
   MdOutlinePayments,
   MdOutlineCalendarMonth,
-  MdOutlinePhoneCallback,
-  MdOutlineBlock,
-  MdOutlineCancel,
-  MdOutlineInventory2,
-  MdOutlineLocalShipping,
-  MdCheckCircleOutline,
-  MdErrorOutline,
-  MdAssignmentReturn,
-  MdPriceCheck,
-  MdQuestionMark,
   MdReceiptLong,
+  MdOutlinePhoneCallback,
+  MdOutlineInventory2,
+  MdOutlineCancel,
+  MdErrorOutline,
+  MdQuestionMark,
+  MdOutlineLocalShipping,
+  MdOutlineBlock,
 } from 'react-icons/md';
-import { IoMdCloseCircleOutline } from 'react-icons/io';
 import { FaWhatsapp } from 'react-icons/fa';
+import { FaBoxesPacking } from 'react-icons/fa6';
 
+import {
+  Repeat,
+  Clock3,
+  PhoneCall,
+  Copy,
+  CircleDollarSign,
+  FileText,
+  ClipboardCheck,
+} from 'lucide-react';
+import { HiOutlineReceiptRefund } from 'react-icons/hi';
 // Import the original color function
 import { getStatusColor } from '@/app/dashboard/customers/lib/getBadgeColor';
+import { LuPenOff } from 'react-icons/lu';
 
 interface StatusBadgeConfig {
   classes: string;
   Icon: IconType;
 }
 
-const STATUS_ICONS: Record<string, IconType> = {
-  NEW_ORDER: MdOutlineFiberNew,
-  CONFIRMED: MdCheckCircleOutline,
-  ATTEMPTED: MdLoop,
+export const STATUS_ICONS: Record<string, IconType> = {
+  TRIED_TO_REACH_CUSTOMER: Repeat,
   WAITING_FOR_PAYMENT: MdOutlinePayments,
-  POSTPONED: MdOutlineCalendarMonth,
-  PARTIAL_DELIVERY: MdReceiptLong,
-  WHATSAPP: FaWhatsapp,
-  CALL_AGAIN: MdOutlinePhoneCallback,
-  PREPARED: MdOutlineInventory2,
-  EDIT_REJECTED: IoMdCloseCircleOutline,
-  STOPPED: MdOutlineBlock,
+  ON_HOLD: Clock3,
+  CALLED_CUSTOMER_AGAIN: PhoneCall,
   CANCELLED: MdOutlineCancel,
   UNCOMPLETED: MdErrorOutline,
+  CONFIRMED: MdCheckCircleOutline,
+  WAITING_FOR_PACKAGING: FaBoxesPacking,
+  PREPARED: MdOutlineInventory2,
+  EDIT_REJECTED: LuPenOff,
+  WHATSAPP: FaWhatsapp,
+  SHIPPED: MdOutlineLocalShipping,
+  RETURNED: Copy,
+  DELIVERED: ClipboardCheck,
+  DOWN_PAYMENT: CircleDollarSign,
   MISSING: MdQuestionMark,
+  NEW_ORDER: MdOutlineFiberNew,
+  STOPPED: MdOutlineBlock,
+  CALL_AGAIN: MdOutlinePhoneCallback,
+  POSTPONED: MdOutlineCalendarMonth,
+  REGISTERED: MdCheckCircleOutline, // changed from FaWhatsapp
+  ATTEMPTED: MdLoop,
+  RETURNED_DELIVERED: HiOutlineReceiptRefund,
+  REPORTS: FileText,
   SHIPPING: MdOutlineLocalShipping,
-  RETURNED_DELIVERED: MdAssignmentReturn,
-  DELIVERED: MdPriceCheck,
+  PARTIAL_DELIVERY: MdReceiptLong,
 };
 
 export const getStatusBadgeConfig = (status: string): StatusBadgeConfig => {
