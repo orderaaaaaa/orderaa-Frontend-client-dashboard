@@ -101,6 +101,9 @@ export function ShippingSection({
           <Input
             name="defaultShipmentContent"
             register={register}
+            registerOptions={{
+              setValueAs: (v: string) => (v === '' ? undefined : v),
+            }}
             placeholder="أدخل اسم المنتج"
             error={errors.defaultShipmentContent?.message}
             className="!h-[55px] text-right w-full !px-5"
@@ -124,9 +127,19 @@ export function ShippingSection({
         <Input
           name="defaultReturnShippingCost"
           register={register}
-          type="text"
+          registerOptions={{
+            setValueAs: (v: any) => {
+              if (v === '' || v === null || v === undefined) return undefined;
+              const num = parseFloat(v);
+              if (isNaN(num)) return undefined;
+              return num;
+            },
+          }}
+          type="number"
+          step="0.01"
           placeholder="0.00"
           className="!h-[46px] text-right w-full !px-5"
+          error={errors.defaultReturnShippingCost?.message}
         />
       </div>
     </>

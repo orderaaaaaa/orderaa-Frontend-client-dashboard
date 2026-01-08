@@ -73,7 +73,7 @@ const InventorySection: React.FC = () => {
             height={1000}
             width={2}
             alt=""
-            className="w-full relative max-sm:left-4 max-w-[520px] border mb-4"
+            className="w-full relative max-sm:left-4 max-w-[520px] mb-4"
           />
 
           <p className="text-gray-300 leading-relaxed text-center lg:text-right text-[14px] md:text-[16px] max-w-md">

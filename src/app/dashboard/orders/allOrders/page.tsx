@@ -317,7 +317,6 @@ function AllOrdersContent() {
             `تم تصدير ${response.data.length} طلب بنجاح! \nاسم الملف: ${fileName}`
           );
         } catch (apiErr) {
-          // Fallback to current orders in memory
           console.warn('API failed for export, using current orders');
           if (orders.length === 0) {
             toast.warning('لا توجد طلبات لتصديرها');
@@ -352,13 +351,8 @@ function AllOrdersContent() {
       if (!statusKey) return;
 
       if (selectAllMatchingFilters) {
-        // Send filters logic - use bulk endpoint
-        // Ensure we have a status filter to pass?
-        // User mentioned sending status in query.
-        // If filters.status is set, use it. If not?
         const currentStatusFilter = filters.status;
 
-        // API requires status filter for bulk updates
         if (!currentStatusFilter) {
           toast.warning('يجب تحديد  فلتر الطلبات قبل استخدام تحديث الكل');
           return;
@@ -367,16 +361,12 @@ function AllOrdersContent() {
         bulkUpdateOrders({
           payload: {
             status: statusKey as any,
-            // We DO NOT send filters in body based on user feedback "we don't send id ... we only send staues"
-            // We only send the new status in body.
           },
           currentStatus: currentStatusFilter,
         });
       } else {
-        // Send IDs - use BATCH endpoint
         if (selectedOrderIds.length === 0) return;
 
-        // Construct batch payload
         const batchPayload = {
           orders: selectedOrderIds.map((id) => ({
             id,

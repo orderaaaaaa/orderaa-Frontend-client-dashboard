@@ -43,7 +43,7 @@ function Hero() {
             ستجد ما تحتاجة لادارة متجرك الالكتروني باستخدام الذكاء الاصطناعي
           </p>
           <button className="bg-gradient-to-l from-[#260946] to-[#9716EF] cursor-pointer font-bold text-[15px] md:text-[17px] py-3 px-7 !rounded-[10px]">
-            ابدء تجربتك المجانية لمدة 7 ايام{' '}
+            ابدء تجربتك المجانية لمدة 14 ايام{' '}
           </button>
           <div className="grid grid-cols-2 gap-4">
             <p className="text-end text-[16px] md:text-[20px] m-0 p-0">

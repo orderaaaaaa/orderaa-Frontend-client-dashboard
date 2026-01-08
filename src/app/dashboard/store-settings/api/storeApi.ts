@@ -1,5 +1,4 @@
 import http from '@/lib/api/http';
-import { OrderSettingsFormData } from '../schemas/store';
 import { MerchantSettingsResponse } from '../types/store';
 
 export const merchantSettingsApi = {
@@ -11,11 +10,16 @@ export const merchantSettingsApi = {
   },
 
   updateSettings: async (
-    data: OrderSettingsFormData
+    formData: FormData
   ): Promise<MerchantSettingsResponse> => {
     const response = await http.put<MerchantSettingsResponse>(
       '/merchants/settings',
-      data
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
     );
     return response.data;
   },

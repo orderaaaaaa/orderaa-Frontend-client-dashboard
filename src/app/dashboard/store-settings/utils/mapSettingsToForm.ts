@@ -1,0 +1,17 @@
+import { OrderSettingsFormData } from '../schemas/store';
+import { ORDER_SETTINGS_DEFAULTS } from '../schemas/store.defaults';
+
+export function mapSettingsToForm(
+  settings: Partial<OrderSettingsFormData>
+): OrderSettingsFormData {
+  return {
+    ...ORDER_SETTINGS_DEFAULTS,
+    ...settings,
+    language: settings.language ?? 'ar',
+    cancellationReasons: settings.cancellationReasons ?? [],
+    canOpenShipment: settings.canOpenShipment ?? false,
+    employeeCanEditContent: settings.employeeCanEditContent ?? false,
+    defaultReturnShippingCost: settings.defaultReturnShippingCost ?? 0,
+    autoCancelAttempts: settings.autoCancelAttempts ?? 0,
+  };
+}

@@ -4,6 +4,7 @@ import { LiaCloudUploadAltSolid, LiaImageSolid } from 'react-icons/lia';
 
 import { UseFormSetValue, UseFormWatch, FieldErrors } from 'react-hook-form';
 import { OrderSettingsFormData } from '../schemas/store';
+import { useMerchantSettings } from '../hooks/useStoreSettings';
 
 interface LogoUploadFieldProps {
   watch: UseFormWatch<OrderSettingsFormData>;
@@ -16,16 +17,21 @@ export function LogoUploadField({
   setValue,
   errors,
 }: LogoUploadFieldProps) {
+  const { settings } = useMerchantSettings();
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const logoFile = watch('logo');
+
+  useEffect(() => {
+    if (settings?.logo && !logoFile) {
+      setPreview(settings.logo);
+    }
+  }, [settings?.logo, logoFile]);
 
   useEffect(() => {
     if (logoFile && logoFile[0] instanceof File) {
       const objectUrl = URL.createObjectURL(logoFile[0]);
       setPreview(objectUrl);
-      setSelectedFile(logoFile[0]);
       return () => URL.revokeObjectURL(objectUrl);
     }
   }, [logoFile]);
@@ -65,7 +71,6 @@ export function LogoUploadField({
     const dataTransfer = new DataTransfer();
     dataTransfer.items.add(file);
     setValue('logo', dataTransfer.files);
-    setSelectedFile(file);
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,7 +83,6 @@ export function LogoUploadField({
   const handleRemoveImage = () => {
     setValue('logo', undefined);
     setPreview(null);
-    setSelectedFile(null);
   };
 
   return (
@@ -88,7 +92,6 @@ export function LogoUploadField({
         <div>
           <h3 className="text-lg font-semibold leading-tight">شعار المتجر</h3>
           <p className="text-sm text-gray-500">
-            {' '}
             قم برفع شعار المتجر الخاص بك لكي يظهر علي بوليصةالشحن
           </p>
         </div>
