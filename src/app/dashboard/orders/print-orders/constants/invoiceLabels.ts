@@ -1,4 +1,4 @@
-import { InvoiceLabels } from '../types/invoice';
+import { InvoiceLabels, InvoiceStoreInfo } from '../types/invoice';
 
 export const INVOICE_LABELS: Record<'ar' | 'en', InvoiceLabels> = {
   ar: {
@@ -62,4 +62,11 @@ export const INVOICE_LABELS: Record<'ar' | 'en', InvoiceLabels> = {
     cashOnDelivery: 'Cash on delivery',
     cod: 'COD',
   },
+};
+
+export const STORE_INFO: InvoiceStoreInfo = {
+  name: 'Orderaa',
+  nameEn: 'Orderaa',
+  phoneNumbers: ['01234567890', '01098765432'],
+  contactQRValue: 'https://orderaa.com',
 };

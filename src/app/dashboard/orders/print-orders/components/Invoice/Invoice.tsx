@@ -161,21 +161,21 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
       <div className="grid grid-cols-2 border border-t-0 border-black">
         <div className="p-2 space-y-1 border-e border-black">
           <div className="grid grid-cols-2 justify-between border-b border-gray-300 pb-1">
-            <span className="text-sm text-gray-700">{labels.allowOpenShipment}</span>
+            <span className="">{labels.allowOpenShipment}</span>
             <span className="text-sm font-bold text-end">
               {data.shipping.allowOpenShipment ? labels.yes : labels.no}
             </span>
           </div>
           <div className="grid grid-cols-2 justify-between border-b border-gray-300 pb-1">
-            <span className="text-sm text-gray-700">{labels.paymentMethod} :</span>
+            <span className="">{labels.paymentMethod} :</span>
             <span className="text-sm font-bold text-end">{getPaymentMethodDisplay()}</span>
           </div>
           <div className="grid grid-cols-2 justify-between border-b border-gray-300 pb-1">
-            <span className="text-sm text-gray-700">{labels.paymentStatus} :</span>
+            <span className="">{labels.paymentStatus} :</span>
             <span className="text-sm font-bold text-end">{getPaymentStatusDisplay()}</span>
           </div>
           <div className="grid grid-cols-2 justify-between">
-            <span className="text-sm text-gray-700">{labels.shipmentStatus}</span>
+            <span className="">{labels.shipmentStatus}</span>
             <span className="text-sm font-bold text-end">{data.shipping.shipmentStatus || '-'}</span>
           </div>
         </div>

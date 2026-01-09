@@ -16,7 +16,13 @@ export const usePrintOrderStatisticsQuery = () => {
   });
 };
 
-export async function printOrders(count: number): Promise<Order[]> {
-  const response = await http.post<Order[]>('/orders/print', { count });
+interface PrintOrdersResponse {
+  success: boolean;
+  printedCount: number;
+  orders: Order[];
+}
+
+export async function printOrders(count: number): Promise<PrintOrdersResponse> {
+  const response = await http.post<PrintOrdersResponse>('/orders/print', { count });
   return response.data;
 }
