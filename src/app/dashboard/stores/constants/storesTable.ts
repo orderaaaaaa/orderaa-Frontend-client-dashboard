@@ -3,24 +3,23 @@
 import { IStoreTableHeader } from '../types/stores';
 
 export const STORES_TABLE_HEADERS: IStoreTableHeader[] = [
-  { id: 1, key: 'storeName', label: 'Store Name' },
-  { id: 2, key: 'requestsCount', label: 'Orders Count' },
-  { id: 3, key: 'department', label: 'Department' },
-  { id: 4, key: 'sales', label: 'Sales' },
-  { id: 5, key: 'revenue', label: 'Revenue' },
-  { id: 6, key: 'deliveryRate', label: 'Delivery Rate' },
-  { id: 7, key: 'dateAdded', label: 'Date Added' },
-  { id: 8, key: 'profitDate', label: 'Merchant Profit' },
-  { id: 9, key: 'actions', label: 'Actions' },
+  { id: 1, key: 'storeName', label: 'اسم المتجر' },
+  { id: 2, key: 'requestsCount', label: 'عدد الطلبات' },
+  { id: 3, key: 'department', label: 'القسم' },
+  { id: 4, key: 'sales', label: 'المبيعات' },
+  { id: 5, key: 'revenue', label: 'الايرادات' },
+  { id: 6, key: 'deliveryRate', label: 'نسبة التسليم' },
+  { id: 7, key: 'dateAdded', label: 'تاريخ الاضافة' },
+  { id: 8, key: 'profitDate', label: 'ارباح التاجر' },
+  { id: 9, key: 'actions', label: 'اجراءات' },
 ];
 
-// Sample data for stores
 export const STORES_SAMPLE_DATA = [
   {
     id: 1,
-    storeName: 'Mashi Shoes',
+    storeName: 'أحذية ماشي',
     requestsCount: 40,
-    department: 'Shoes',
+    department: 'أحذية',
     sales: '12,850',
     revenue: '850,300 جنية',
     deliveryRate: '94%',
@@ -31,9 +30,9 @@ export const STORES_SAMPLE_DATA = [
   },
   {
     id: 2,
-    storeName: 'Leather Bags',
+    storeName: 'حقائب جلدية',
     requestsCount: 40,
-    department: 'Bags',
+    department: 'حقائب',
     sales: '10,200',
     revenue: '420,000 جنية',
     deliveryRate: '87%',
@@ -44,9 +43,9 @@ export const STORES_SAMPLE_DATA = [
   },
   {
     id: 3,
-    storeName: 'Sportswear',
+    storeName: 'ملابس رياضية',
     requestsCount: 40,
-    department: 'Clothing',
+    department: 'ملابس',
     sales: '10,500',
     revenue: '203,000 جنية',
     deliveryRate: '92%',
@@ -57,9 +56,9 @@ export const STORES_SAMPLE_DATA = [
   },
   {
     id: 4,
-    storeName: 'Mashi Shoes',
+    storeName: 'أحذية ماشي',
     requestsCount: 40,
-    department: 'Shoes',
+    department: 'أحذية',
     sales: '12,850',
     revenue: '850,300 جنية',
     deliveryRate: '94%',
