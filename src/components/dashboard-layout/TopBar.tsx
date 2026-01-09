@@ -105,14 +105,14 @@ export function TopBar({
         {/* ✅ Mobile: User dropdown */}
         <div className="lg:hidden">
           <UserMenu
-            username={authUser?.username || username}
+            //* Comment ot change this if named username
+            username={authUser?.name || username}
             email={authUser?.email}
             onUserAction={onUserAction}
             variant="mobile"
           />
         </div>
       </div>
-
 
       {/* ✅ Mobile: Search bar (toggleable) */}
       {showMobileSearch && (
@@ -124,8 +124,10 @@ export function TopBar({
               icon={Search}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSearch()}
-              className="bg-white text-black placeholder:text-primary h-10 placeholder:font-medium border-2 !border-primary/30 rounded-lg !pl-20"
+              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
+                e.key === 'Enter' && handleSearch()
+              }
+              inputClassName="bg-[#f3f4f6] text-black placeholder:text-primary w-full placeholder:font-medium border-2 !border-primary/30 rounded-lg !pl-20"
             />
             <div className="absolute left-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
               {searchQuery && (
@@ -163,10 +165,12 @@ export function TopBar({
             name="search"
             placeholder="البحث"
             icon={Search}
-            className="sm:rounded-[38px] lg:rounded-[38px] bg-primary/8 border-0 !pl-24"
+            inputClassName="sm:rounded-[38px] lg:rounded-[38px] bg-primary/8 border-0 !pl-24"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSearch()}
+            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
+              e.key === 'Enter' && handleSearch()
+            }
             aria-label="Search"
           />
           <div className="absolute left-0 top-1/2 -translate-y-4 flex items-center gap-1">
@@ -199,7 +203,9 @@ export function TopBar({
 
         <div className="flex items-center gap-3">
           <UserMenu
-            username={username}
+            //* Comment ot change this if named username
+            username={authUser?.name || username}
+            email={authUser?.email}
             onUserAction={onUserAction}
             variant="desktop"
           />
