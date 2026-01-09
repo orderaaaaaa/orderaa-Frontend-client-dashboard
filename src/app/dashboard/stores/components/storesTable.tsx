@@ -13,14 +13,14 @@ const getStatusBadge = (status?: 'active' | 'inactive') => {
 
   if (status === 'active') {
     return (
-      <span className="px-4 bg-[#f7fdf5] text-[#3cc900] font-semibold rounded-md border border-[#3cc900] inline-block">
+      <span className="px-4 bg-[#f7fdf5] text-[#3cc900] font-semibold rounded-md border border-[#3cc900] inline-block max-md:text-center">
         نشط
       </span>
     );
   }
 
   return (
-    <span className="px-2 bg-[#f5f5f5] text-[#626262] font-semibold rounded-md border border-[#626262] inline-block">
+    <span className="px-2 bg-[#f5f5f5] text-[#626262] font-semibold rounded-md border border-[#626262] inline-block max-md:text-center">
       غير نشط
     </span>
   );
@@ -30,7 +30,7 @@ function StoresTable({ data, headers }: StoresTableProps) {
   const tableHeaders = headers || STORES_TABLE_HEADERS;
 
   return (
-    <div className="overflow-x-auto mt-8 bg-white rounded-lg p-8">
+    <div className="overflow-x-auto mt-8 bg-white rounded-lg md:p-8">
       <table className="w-full border-collapse min-w-[1200px]">
         <thead>
           <tr className="bg-[#f2edfd] text-sm">

@@ -33,7 +33,6 @@ const StoresFilters = ({}) => {
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="ابحث عن المتجر"
           icon={Search}
-          className="w-fulls"
           inputClassName="h-[41px] text-base !bg-primary/8  rounded-sm !text-primary !border-[#cbc7d5] text-xl font-semibold pr-10 pl-10"
         />
         <SearchableSelect

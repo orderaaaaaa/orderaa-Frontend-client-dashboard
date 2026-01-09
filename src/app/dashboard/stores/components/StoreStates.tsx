@@ -5,7 +5,7 @@ import { STORE_DUMMY_DATA } from '../constants/store_dummy_data';
 
 function StoreStates() {
   return (
-    <section className="grid grid-cols-4 gap-4">
+    <section className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {STORE_CARDS.map((card) => {
         const data = STORE_DUMMY_DATA.find((d) => d.id === card.id);
 
