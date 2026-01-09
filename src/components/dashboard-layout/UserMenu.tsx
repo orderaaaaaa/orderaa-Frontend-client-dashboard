@@ -25,7 +25,8 @@ export function UserMenu({
   const authUser = useAuthStore((state) => state.user);
 
   const isMobile = variant === 'mobile';
-  const displayText = authUser?.username || username || email || 'user';
+  //* Comment ot change this if named username
+  const displayText = authUser?.name || username || email || 'user';
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -76,15 +77,17 @@ export function UserMenu({
       <Button
         variant="ghost"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center !p-1  cursor-pointer ${isMobile
+        className={`flex items-center !p-1  cursor-pointer ${
+          isMobile
             ? 'font-normal text-white text-[16px] hover:text-white'
             : 'font-bold text-[#1F1F1F] text-base'
-          } transition-colors hover:bg-transparent`}
+        } transition-colors hover:bg-transparent`}
       >
         <span>{displayText}</span>
         <LiaAngleDownSolid
-          className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
-            }`}
+          className={`w-4 h-4 transition-transform duration-200 ${
+            isOpen ? 'rotate-180' : ''
+          }`}
         />
       </Button>
 

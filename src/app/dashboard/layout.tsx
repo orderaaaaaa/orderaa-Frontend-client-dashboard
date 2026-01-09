@@ -48,31 +48,38 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }, [pathname]);
 
   // Handle search - behavior depends on current page
-  const handleSearch = useCallback(async (query: string) => {
-    if (isOrderDetailsPage()) {
-      // On order details page: search and navigate to first result
-      setIsSearching(true);
-      try {
-        const response = await fetchOrdersForSearch({ search: query, limit: 1, page: 1 });
-        if (response.data && response.data.length > 0) {
-          const firstOrder = response.data[0];
-          router.push(`/dashboard/orders/${firstOrder.id}`);
-        } else {
-          toast.info('لا يوجد بيانات للبحث');
+  const handleSearch = useCallback(
+    async (query: string) => {
+      if (isOrderDetailsPage()) {
+        // On order details page: search and navigate to first result
+        setIsSearching(true);
+        try {
+          const response = await fetchOrdersForSearch({
+            search: query,
+            limit: 1,
+            page: 1,
+          });
+          if (response.data && response.data.length > 0) {
+            const firstOrder = response.data[0];
+            router.push(`/dashboard/orders/${firstOrder.id}`);
+          } else {
+            toast.info('لا يوجد بيانات للبحث');
+          }
+        } catch (error) {
+          console.error('Search failed:', error);
+          toast.error('فشل البحث');
+        } finally {
+          setIsSearching(false);
         }
-      } catch (error) {
-        console.error('Search failed:', error);
-        toast.error('فشل البحث');
-      } finally {
-        setIsSearching(false);
+      } else {
+        // On any other page: navigate to all orders page with search query in URL
+        const searchParams = new URLSearchParams();
+        searchParams.set('search', query);
+        router.push(`/dashboard/orders/allOrders?${searchParams.toString()}`);
       }
-    } else {
-      // On any other page: navigate to all orders page with search query in URL
-      const searchParams = new URLSearchParams();
-      searchParams.set('search', query);
-      router.push(`/dashboard/orders/allOrders?${searchParams.toString()}`);
-    }
-  }, [router, isOrderDetailsPage, fetchOrdersForSearch]);
+    },
+    [router, isOrderDetailsPage, fetchOrdersForSearch]
+  );
 
   // Handle clear search - navigate to all orders without search param
   const handleClearSearch = useCallback(() => {
@@ -120,7 +127,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               onSearch={handleSearch}
               onClearSearch={handleClearSearch}
               isSearching={isSearching}
-              username={user?.username}
+              //* Comment ot change this if named username
+              username={user?.name}
               onUserAction={handleUserAction}
             />
 

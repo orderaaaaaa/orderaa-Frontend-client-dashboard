@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+//* Comment ot change this if named username
 interface User {
   sub: number;
-  username: string;
+  name: string;
   email?: string;
   role: string;
   merchantId?: number;

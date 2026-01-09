@@ -41,21 +41,21 @@ const Page = () => {
       {/* Background Images - Hidden on mobile */}
       <div className="absolute inset-0 z-0 pointer-events-none hidden md:block">
         <Image
-          src="/icons/group.svg"
+          src="/Icons/group.svg"
           alt=""
           width={1400}
           height={1400}
           className="absolute top-0 right-[5px] w-[1300px]"
         />
         <Image
-          src="/icons/Ellipse 1.svg"
+          src="/Icons/Ellipse 1.svg"
           alt=""
           width={1006}
           height={1006}
           className="absolute  top-0 right-0 w-full max-w-[1006px]"
         />
         <Image
-          src="/icons/Ellipse 2.svg"
+          src="/Icons/Ellipse 2.svg"
           alt=""
           width={1006}
           height={1006}
