@@ -22,4 +22,5 @@ export interface OrderCardProps {
   filterParams?: string;
   cancelReason?: string | null;
   cancelNotes?: string | null;
+  isPrinted?: boolean;
 }

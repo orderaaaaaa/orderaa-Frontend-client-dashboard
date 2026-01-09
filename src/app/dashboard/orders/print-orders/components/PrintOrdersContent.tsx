@@ -33,9 +33,9 @@ import { PageTabs } from './PageTabs';
 import { StatisticsSection } from './StatisticsSection';
 import { FilterSection } from './FilterSection';
 import {
-  useConfirmOrdersFilters,
-  useConfirmOrderStatistics,
-  useConfirmOrderBulk,
+  usePrintOrdersFilters,
+  usePrintOrderStatistics,
+  usePrintOrderBulk,
 } from '../hooks';
 
 const TIME_PERIOD_OPTIONS: { value: TimePeriod; label: string }[] = [
@@ -58,7 +58,7 @@ const getValueFromLabel = (label: string): TimePeriod | '' => {
   return option?.value || '';
 };
 
-export function ConfirmOrdersContent() {
+export function PrintOrdersContent() {
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState('');
   const [selectedCustomerName, setSelectedCustomerName] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -76,7 +76,7 @@ export function ConfirmOrdersContent() {
     isInitialized,
     printStatus,
     setPrintStatus,
-  } = useConfirmOrdersFilters();
+  } = usePrintOrdersFilters();
 
   const apiFilters = useMemo(() => {
     return buildApiFiltersFromUrlState(filters);
@@ -125,8 +125,8 @@ export function ConfirmOrdersContent() {
   const { data: statusOptions } = useOrderStatusesQuery();
 
   const { statistics } = useOrderStatistics();
-  const { statistics: confirmStatistics, loading: statsLoading } =
-    useConfirmOrderStatistics();
+  const { statistics: printStatistics, loading: statsLoading } =
+    usePrintOrderStatistics();
   const { options } = useFilterOptions();
 
   const orders = ordersData?.data ?? [];
@@ -145,7 +145,7 @@ export function ConfirmOrdersContent() {
     handleOrderSelect,
     handleSelectAllToggle,
     clearSelections,
-  } = useConfirmOrderBulk({ orders });
+  } = usePrintOrderBulk({ orders });
 
   const prevPageRef = useRef<number>(page);
 
@@ -236,7 +236,7 @@ export function ConfirmOrdersContent() {
     <div className="w-full max-w-full overflow-x-hidden">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-7 w-full">
         <Breadcrumb
-          items={[{ title: 'الطلبات' }, { title: 'تأكيد الطلبات' }]}
+          items={[{ title: 'الطلبات' }, { title: 'طباعة الطلبات' }]}
         />
 
         <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 px-3 w-full sm:w-auto">
@@ -287,7 +287,7 @@ export function ConfirmOrdersContent() {
       />
 
       <StatisticsSection
-        statistics={confirmStatistics}
+        statistics={printStatistics}
         isLoading={statsLoading}
       />
 
@@ -409,6 +409,7 @@ export function ConfirmOrdersContent() {
                 filterParams={orderDetailsFilterParams}
                 cancelReason={order.cancelReason}
                 cancelNotes={order.cancelNotes}
+                isPrinted={order.isPrinted}
               />
             ))}
           </div>
