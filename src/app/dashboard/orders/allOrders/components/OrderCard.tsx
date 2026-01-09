@@ -18,7 +18,7 @@ import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { If, Then } from 'react-if';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
 import { getRemainingTime } from '@/utils/getRemainingTime';
-import { LiaClock } from 'react-icons/lia';
+import { LiaClock, LiaPrintSolid } from 'react-icons/lia';
 import { OrderCardProps } from '@/app/dashboard/orders/allOrders/types/OrderProps';
 
 export default function OrderCard({
@@ -44,6 +44,7 @@ export default function OrderCard({
   cancelReason,
   cancelNotes,
   postponedUntil,
+  isPrinted = false,
 }: OrderCardProps) {
   const router = useRouter();
   const { getStatusLabel } = useStatusLabel();
@@ -123,6 +124,12 @@ export default function OrderCard({
                     {repeatCount}
                   </span>
                 </button>
+              )}
+
+              {isPrinted && (
+                <div title="تمت الطباعة">
+                  <LiaPrintSolid className="w-5 h-5 text-green-600" />
+                </div>
               )}
 
               <span className="text-xs text-primary whitespace-nowrap">
@@ -254,12 +261,17 @@ export default function OrderCard({
       <div className="mx-6 mt-5 mb-3 border-t border-black/10" />
 
       <div className="flex flex-row-reverse justify-between items-center px-6 pb-4">
-        <div
-          className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium ${classes}`}
-        >
-          <Icon className="w-4 h-4" />
-          <span className="text-xs font-medium">{getStatusLabel(status)}</span>
-        </div>
+        {isPrinted ? (
+          <div title="تمت الطباعة">
+            <LiaPrintSolid className="w-5 h-5 text-green-600" />
+          </div>
+        ) :
+          <div
+            className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium ${classes}`}
+          >
+            <Icon className="w-4 h-4" />
+            <span className="text-xs font-medium">{getStatusLabel(status)}</span>
+          </div>}
 
         <If condition={trys > 0}>
           <Then>

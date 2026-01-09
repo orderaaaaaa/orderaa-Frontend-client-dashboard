@@ -1,10 +1,10 @@
 import React from 'react';
 import { StatCard } from './StatCard';
-import { ConfirmOrderStatistics } from '../../types';
+import { PrintOrderStatistics } from '../../types';
 import { LiaBoxOpenSolid, LiaCheckCircleSolid, LiaFileAltSolid, LiaPrintSolid } from 'react-icons/lia';
 
 interface StatisticsSectionProps {
-  statistics: ConfirmOrderStatistics | null;
+  statistics: PrintOrderStatistics | null;
   isLoading: boolean;
 }
 

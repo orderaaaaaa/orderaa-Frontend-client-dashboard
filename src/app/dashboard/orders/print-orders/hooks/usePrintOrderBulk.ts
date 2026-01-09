@@ -3,21 +3,19 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import type { Order } from '@/types/orders';
 
-interface UseConfirmOrderBulkProps {
+interface UsePrintOrderBulkProps {
   orders: Order[];
 }
 
-export function useConfirmOrderBulk({ orders }: UseConfirmOrderBulkProps) {
+export function usePrintOrderBulk({ orders }: UsePrintOrderBulkProps) {
   const [selectMode, setSelectMode] = useState(false);
   const [selectedOrderIds, setSelectedOrderIds] = useState<number[]>([]);
   const [selectAllMatchingFilters, setSelectAllMatchingFilters] = useState(false);
 
-  // Get selected orders as Order objects
   const selectedOrders = useMemo(() => {
     return orders.filter((order) => selectedOrderIds.includes(order.id));
   }, [orders, selectedOrderIds]);
 
-  // Handle order selection
   const handleOrderSelect = useCallback(
     (orderId: number, checked: boolean) => {
       if (selectAllMatchingFilters) {
@@ -41,7 +39,6 @@ export function useConfirmOrderBulk({ orders }: UseConfirmOrderBulkProps) {
     [selectAllMatchingFilters]
   );
 
-  // Handle select all toggle
   const handleSelectAllToggle = useCallback(() => {
     if (selectAllMatchingFilters) {
       setSelectAllMatchingFilters(false);
@@ -52,7 +49,6 @@ export function useConfirmOrderBulk({ orders }: UseConfirmOrderBulkProps) {
     }
   }, [selectAllMatchingFilters]);
 
-  // Clear selection when select mode is turned off
   useEffect(() => {
     if (!selectMode) {
       setSelectedOrderIds([]);
@@ -60,12 +56,10 @@ export function useConfirmOrderBulk({ orders }: UseConfirmOrderBulkProps) {
     }
   }, [selectMode]);
 
-  // Toggle select mode
   const toggleSelectMode = useCallback(() => {
     setSelectMode((prev) => !prev);
   }, []);
 
-  // Clear all selections
   const clearSelections = useCallback(() => {
     setSelectedOrderIds([]);
     setSelectAllMatchingFilters(false);

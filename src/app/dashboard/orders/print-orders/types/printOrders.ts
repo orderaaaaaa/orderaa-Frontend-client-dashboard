@@ -1,18 +1,18 @@
 import { FilterOrdersDto } from '@/types/orders';
 
-export interface ConfirmOrderStatistics {
+export interface PrintOrderStatistics {
   confirmedOrders: number;
   ordersToDeliver: number;
   rejectedOrders: number;
   remainingOrders: number;
 }
 
-export interface ConfirmOrderStatisticsResponse {
+export interface PrintOrderStatisticsResponse {
   success: boolean;
-  data: ConfirmOrderStatistics;
+  data: PrintOrderStatistics;
 }
 
-export interface ConfirmOrderFilters extends FilterOrdersDto {
+export interface PrintOrderFilters extends FilterOrdersDto {
   printStatus?: 'printed' | 'not_printed' | null;
 }
 

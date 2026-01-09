@@ -34,8 +34,6 @@ interface FilterSectionProps {
   onPrintStatusChange: (status: PrintStatus) => void;
   printedCount?: number;
   notPrintedCount?: number;
-  onPrintInvoices?: (count: number) => void | Promise<void>;
-  isPrinting?: boolean;
 }
 
 function getActiveFiltersFromFormValues(
@@ -72,8 +70,6 @@ export function FilterSection({
   onPrintStatusChange,
   printedCount = 0,
   notPrintedCount = 0,
-  onPrintInvoices,
-  isPrinting = false,
 }: FilterSectionProps) {
   const [activeFilters, setActiveFilters] = useState<FilterKey[]>(() =>
     getActiveFiltersFromFormValues(initialFormFilters)
@@ -215,13 +211,6 @@ export function FilterSection({
       <PrintInvoicesModal
         isOpen={isPrintModalOpen}
         onClose={() => setIsPrintModalOpen(false)}
-        onPrint={async (count) => {
-          if (onPrintInvoices) {
-            await onPrintInvoices(count);
-          }
-          setIsPrintModalOpen(false);
-        }}
-        isLoading={isPrinting}
       />
     </div>
   );

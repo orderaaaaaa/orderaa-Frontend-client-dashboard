@@ -46,8 +46,8 @@ export const navigation: NavigationItem[] = [
         icon: CartIcon,
       },
       {
-        name: 'تأكيد الطلبات',
-        href: '/dashboard/orders/confirm-orders',
+        name: 'طباعة الطلبات',
+        href: '/dashboard/orders/print-orders',
         icon: LiaClipboardCheckSolid,
       },
     ],

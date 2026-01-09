@@ -239,6 +239,7 @@ export interface Order {
   order_products: OrderProduct[];
   order_events?: OrderEvent[];
   locked_by?: OrderLockedBy | null;
+  isPrinted?: boolean;
 }
 
 export interface OrderLockedBy {

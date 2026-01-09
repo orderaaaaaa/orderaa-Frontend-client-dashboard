@@ -1,9 +1,9 @@
 'use client';
 
 import { Suspense } from 'react';
-import { ConfirmOrdersContent } from './components/ConfirmOrdersContent';
+import { PrintOrdersContent } from './components/PrintOrdersContent';
 
-function ConfirmOrdersLoading() {
+function PrintOrdersLoading() {
   return (
     <div className="w-full max-w-full overflow-x-hidden">
       <div className="flex items-center justify-center min-h-[400px]">
@@ -16,10 +16,10 @@ function ConfirmOrdersLoading() {
   );
 }
 
-export default function ConfirmOrdersPage() {
+export default function PrintOrdersPage() {
   return (
-    <Suspense fallback={<ConfirmOrdersLoading />}>
-      <ConfirmOrdersContent />
+    <Suspense fallback={<PrintOrdersLoading />}>
+      <PrintOrdersContent />
     </Suspense>
   );
 }
