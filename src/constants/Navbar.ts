@@ -110,7 +110,7 @@ export const navigation: NavigationItem[] = [
     icon: LiaBoxOpenSolid,
   },
   {
-    name: 'المنتجات',
+    name: 'المتاجر',
     href: '/dashboard/stores',
     icon: LiaStoreSolid,
   },
