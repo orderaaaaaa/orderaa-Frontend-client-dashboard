@@ -17,7 +17,7 @@ interface PrintInvoicesModalProps {
 }
 
 const STORE_INFO: InvoiceStoreInfo = {
-  name: 'اوردرا',
+  name: 'Orderaa',
   nameEn: 'Orderaa',
   phoneNumbers: ['01234567890', '01098765432'],
   contactQRValue: 'https://orderaa.com',
@@ -39,6 +39,9 @@ const MOCK_ORDERS: Order[] = [
     paymentMethod: 'كاش',
     paymentStatus: 'الدفع عند الاستلام',
     packagingNotes: 'يرجى التغليف بعناية - منتج قابل للكسر',
+    timeFrom: '10:00',
+    timeTo: '14:00',
+    shippingCost: 50,
     createdAt: '2024-01-15T10:30:00Z',
     updatedAt: '2024-01-15T10:30:00Z',
     merchantId: 1,
@@ -106,6 +109,7 @@ const MOCK_ORDERS: Order[] = [
     packagingNotes: 'طلب عاجل - التسليم قبل الساعة 6 مساءً',
     timeFrom: '14:00',
     timeTo: '18:00',
+    shippingCost: 75,
     createdAt: '2024-01-15T14:00:00Z',
     updatedAt: '2024-01-15T14:00:00Z',
     merchantId: 1,
@@ -159,17 +163,8 @@ export function PrintInvoicesModal({
       const ordersToUse = MOCK_ORDERS.slice(0, count);
       const invoices = mapOrdersToInvoices(ordersToUse, language);
       setInvoicesToPrint(invoices);
-
-      setTimeout(() => {
-        window.print();
-        setTimeout(() => {
-          setIsPrinting(false);
-          setInvoicesToPrint([]);
-          toast.success('تم إنشاء الفاتورة بنجاح');
-          handleReset();
-          onClose();
-        }, 500);
-      }, 100);
+      setIsPrinting(false);
+      toast.success('تم إنشاء الفاتورة بنجاح');
     }
   };
 
@@ -249,16 +244,24 @@ export function PrintInvoicesModal({
         </div>
       </BaseModal>
 
-      {isPrinting && typeof document !== 'undefined' && createPortal(
-        <div ref={printContainerRef} className="print-container hidden print:block">
-          {invoicesToPrint.map((invoice, index) => (
-            <Invoice
-              key={invoice.orderCode || index}
-              data={invoice}
-              storeInfo={STORE_INFO}
-              language={language}
-            />
-          ))}
+      {invoicesToPrint.length > 0 && typeof document !== 'undefined' && createPortal(
+        <div ref={printContainerRef} className="fixed inset-0 z-[9999] bg-gray-100 overflow-auto p-8">
+          <button
+            onClick={() => setInvoicesToPrint([])}
+            className="fixed top-4 left-4 z-[10000] bg-red-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-600"
+          >
+            إغلاق ✕
+          </button>
+          <div className="flex flex-col items-center gap-8">
+            {invoicesToPrint.map((invoice, index) => (
+              <Invoice
+                key={invoice.orderCode || index}
+                data={invoice}
+                storeInfo={STORE_INFO}
+                language={language}
+              />
+            ))}
+          </div>
         </div>,
         document.body
       )}
