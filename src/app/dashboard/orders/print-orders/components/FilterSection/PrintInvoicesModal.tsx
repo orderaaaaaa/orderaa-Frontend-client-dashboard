@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { LiaPrintSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
@@ -11,6 +11,12 @@ import { mapOrdersToInvoices } from '../../utils/invoiceMapper';
 import { Invoice } from '../Invoice';
 import { printOrders } from '../../services/printOrders';
 import { STORE_INFO } from '../../constants/invoiceLabels';
+import {
+  useBarcodeScanner,
+  useScannerFeedback,
+  useScannedOrders,
+} from '../../hooks';
+import { ScannedOrdersModal } from '../ScannedOrdersModal';
 
 interface PrintInvoicesModalProps {
   isOpen: boolean;
@@ -25,7 +31,74 @@ export function PrintInvoicesModal({
   const [language, setLanguage] = useState<InvoiceLanguage>('ar');
   const [isPrinting, setIsPrinting] = useState(false);
   const [invoicesToPrint, setInvoicesToPrint] = useState<InvoiceData[]>([]);
+  const [isScannedOrdersModalOpen, setIsScannedOrdersModalOpen] =
+    useState(false);
+  const [flashingCode, setFlashingCode] = useState<string | null>(null);
   const printContainerRef = useRef<HTMLDivElement>(null);
+
+  const { playSuccessSound, playErrorSound } = useScannerFeedback();
+  const {
+    scannedOrders,
+    addOrder,
+    removeOrder,
+    clearOrders,
+    searchQuery,
+    setSearchQuery,
+    filteredOrders,
+  } = useScannedOrders();
+
+  const handleScan = useCallback(
+    (barcode: string) => {
+      if (!isOpen) return;
+
+      const added = addOrder(barcode);
+      if (added) {
+        playSuccessSound();
+        setFlashingCode(barcode);
+        setTimeout(() => setFlashingCode(null), 600);
+
+        if (!isScannedOrdersModalOpen) {
+          setIsScannedOrdersModalOpen(true);
+        }
+      } else {
+        playErrorSound();
+        toast.warning('هذا الطلب تم مسحه مسبقاً');
+      }
+    },
+    [
+      isOpen,
+      addOrder,
+      playSuccessSound,
+      playErrorSound,
+      isScannedOrdersModalOpen,
+    ]
+  );
+
+  useBarcodeScanner({
+    onScan: handleScan,
+    enabled: isOpen,
+  });
+
+  const statusLabels: Record<string, string> = {
+    PREPARED: 'تم التحضير',
+    AWAITING_PACKAGING: 'فى انتظار التغليف',
+    CALL_AGAIN: 'اعادة اتصال',
+    CHANGE_PRODUCT: 'تغيير المنتج',
+  };
+
+  const handleStatusUpdate = (status: string) => {
+    if (scannedOrders.length === 0) return;
+
+    const statusLabel = statusLabels[status] || status;
+    toast.info("جاري تحديث حالة الطلبات إلى: " + statusLabel);
+    clearOrders();
+    setIsScannedOrdersModalOpen(false);
+  };
+
+  const handlePrepared = () => handleStatusUpdate('PREPARED');
+  const handleAwaitingPackaging = () => handleStatusUpdate('AWAITING_PACKAGING');
+  const handleCallAgain = () => handleStatusUpdate('CALL_AGAIN');
+  const handleChangeProduct = () => handleStatusUpdate('CHANGE_PRODUCT');
 
   const handlePrint = async () => {
     const count = parseInt(invoiceCount, 10);
@@ -73,13 +146,15 @@ export function PrintInvoicesModal({
 
   const handleClose = () => {
     handleReset();
+    clearOrders();
+    setIsScannedOrdersModalOpen(false);
     onClose();
   };
 
   return (
     <>
       <BaseModal
-        isOpen={isOpen}
+        isOpen={isOpen && !isScannedOrdersModalOpen}
         onClose={handleClose}
         title="طباعة الفواتير"
         onConfirm={handlePrint}
@@ -141,6 +216,21 @@ export function PrintInvoicesModal({
           </div>
         </div>
       </BaseModal>
+
+      <ScannedOrdersModal
+        isOpen={isScannedOrdersModalOpen}
+        scannedOrders={scannedOrders}
+        onRemoveOrder={removeOrder}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        filteredOrders={filteredOrders}
+        onPrepared={handlePrepared}
+        onAwaitingPackaging={handleAwaitingPackaging}
+        onCallAgain={handleCallAgain}
+        onChangeProduct={handleChangeProduct}
+        isLoading={false}
+        flashingCode={flashingCode}
+      />
 
       {isPrinting && typeof document !== 'undefined' && createPortal(
         <div ref={printContainerRef} className="print-container hidden print:block">

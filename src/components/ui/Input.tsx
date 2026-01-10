@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import clsx from 'clsx';
-import { LucideIcon, Eye, EyeOff } from 'lucide-react';
+import { LucideIcon, Eye, EyeOff, X } from 'lucide-react';
+import { Button } from './button';
 
 type InputProps = {
   label?: string;
@@ -16,6 +17,8 @@ type InputProps = {
   value?: string | number;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onClear?: () => void;
+  clearable?: boolean;
   disabled?: boolean;
   min?: number | string;
   max?: number | string;
@@ -38,6 +41,8 @@ export default function Input({
   value,
   onChange,
   onKeyDown,
+  onClear,
+  clearable = false,
   disabled,
   min,
   max,
@@ -47,13 +52,31 @@ export default function Input({
   ...rest
 }: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const hasIcon = Icon || type === 'password';
+  const hasValue = value !== undefined && value !== '';
+  const showClearButton = clearable && hasValue && !disabled;
+  const hasRightIcon = Icon;
+  const hasLeftIcon = type === 'password' || showClearButton;
+
   const inputClassName = clsx(
-    'w-full border border-gray-200 rounded-lg py-3 text-base focus:outline-none !bg-gray-100  focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed',
-    hasIcon ? 'px-10' : 'px-4',
+    'w-full border border-gray-200 rounded-lg py-3 text-base focus:outline-none !bg-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed',
+    hasRightIcon ? 'pr-10' : 'pr-4',
+    hasLeftIcon ? 'pl-10' : 'pl-4',
     customInputClassName
   );
+
+  const handleClear = () => {
+    if (onClear) {
+      onClear();
+    } else if (onChange && inputRef.current) {
+      const event = {
+        target: { value: '' },
+      } as React.ChangeEvent<HTMLInputElement>;
+      onChange(event);
+    }
+    inputRef.current?.focus();
+  };
 
   const inputType =
     type === 'password' ? (showPassword ? 'text' : 'password') : type;
@@ -78,7 +101,18 @@ export default function Input({
             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         )}
+        {showClearButton && type !== 'password' && (
+          <Button
+            variant="ghost"
+            onClick={handleClear}
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
+            tabIndex={-1}
+          >
+            <X size={18} />
+          </Button>
+        )}
         <input
+          ref={inputRef}
           type={inputType}
           id={inputId}
           name={name}
