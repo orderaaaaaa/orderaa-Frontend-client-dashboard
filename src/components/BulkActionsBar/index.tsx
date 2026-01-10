@@ -107,43 +107,8 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
             </SelectContent>
           </Select> */}
 
-          <Button
-            variant="outline"
-            className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
-            onClick={onPrepared}
-          >
-            <LiaCheckCircleSolid className="size-5" />
-            <span>تم التحضير</span>
-          </Button>
 
           <Button
-            variant="outline"
-            className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
-            onClick={onAwaitingPackaging}
-          >
-            <LiaBoxSolid className="size-5" />
-            <span>فى انتظار التغليف</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
-            onClick={onCallAgain}
-          >
-            <LiaPhoneVolumeSolid className="size-5" />
-            <span>اعادة اتصال</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
-            onClick={onChangeProduct}
-          >
-            <LiaExchangeAltSolid className="size-5" />
-            <span>تغيير المنتج</span>
-          </Button>
-
-          {/* <Button
             variant="outline"
             className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
             onClick={onExportExcel}
@@ -177,7 +142,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
           >
             <LiaEllipsisHSolid className="size-5" />
             <span>اخرى</span>
-          </Button> */}
+          </Button>
         </div>
       </div>
     </div>

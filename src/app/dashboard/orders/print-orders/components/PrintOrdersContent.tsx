@@ -15,12 +15,12 @@ import { Breadcrumb } from '@/components/dashboard-layout';
 import { DatePicker } from '@/components/ui/datepicker';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { Button } from '@/components/ui/button';
-import BulkActionsBar from '@/components/BulkActionsBar';
+import PrintOrdersActionsBar from './PrintOrdersActionsBar';
 import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
 import Footer from '@/components/orders/Footer';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 
-import { useOrders, useOrderStatusesQuery } from '@/services/orders';
+import { useOrders } from '@/services/orders';
 import { useOrderStatistics } from '@/hooks/orders/useOrderStatistics';
 import { useFilterOptions } from '@/hooks/orders/useFilterOptions';
 import { useFilterForm } from '@/hooks/orders/useFilterForm';
@@ -122,8 +122,6 @@ export function PrintOrdersContent() {
     refetch,
   } = useOrders(apiFilters);
 
-  const { data: statusOptions } = useOrderStatusesQuery();
-
   const { statistics } = useOrderStatistics();
   const { statistics: printStatistics, loading: statsLoading } =
     usePrintOrderStatistics();
@@ -171,26 +169,20 @@ export function PrintOrdersContent() {
     onSubmit: handleFormSubmit,
   });
 
-  const handleEditStatus = useCallback((statusKey: string) => {
-    if (!statusKey) return;
-    // TODO: Implement batch/bulk update logic
-    toast.info(`سيتم تحديث حالة الطلبات إلى ${statusKey}`);
-  }, []);
-
-  const handleExportExcel = useCallback(() => {
-    toast.info('سيتم تصدير الطلبات إلى Excel');
-  }, []);
-
-  const handleShareWhatsApp = useCallback(() => {
-    toast.info(`سيتم مشاركة ${selectedOrders.length} طلب عبر واتساب`);
+  const handlePrepared = useCallback(() => {
+    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى تم التحضير`);
   }, [selectedOrders]);
 
-  const handleShipping = useCallback(() => {
-    toast.info(`سيتم شحن ${selectedOrders.length} طلب`);
+  const handleAwaitingPackaging = useCallback(() => {
+    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى فى انتظار التغليف`);
   }, [selectedOrders]);
 
-  const handleOther = useCallback(() => {
-    toast.info(`${selectedOrders.length} طلب محدد`);
+  const handleCallAgain = useCallback(() => {
+    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى اعادة اتصال`);
+  }, [selectedOrders]);
+
+  const handleChangeProduct = useCallback(() => {
+    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى تغيير المنتج`);
   }, [selectedOrders]);
 
   useEffect(() => {
@@ -442,14 +434,12 @@ export function PrintOrdersContent() {
       />
 
       {showBulkActions && (
-        <BulkActionsBar
+        <PrintOrdersActionsBar
           selectedOrders={selectedOrders}
-          onEditStatus={handleEditStatus}
-          statusOptions={statusOptions || []}
-          onExportExcel={handleExportExcel}
-          onShareWhatsApp={handleShareWhatsApp}
-          onShipping={handleShipping}
-          onOther={handleOther}
+          onPrepared={handlePrepared}
+          onAwaitingPackaging={handleAwaitingPackaging}
+          onCallAgain={handleCallAgain}
+          onChangeProduct={handleChangeProduct}
           position="fixed"
           isAllSelected={selectAllMatchingFilters}
           totalStoreOrders={totalOrders}
