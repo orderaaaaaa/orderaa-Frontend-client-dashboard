@@ -23,4 +23,7 @@ export interface OrderCardProps {
   cancelReason?: string | null;
   cancelNotes?: string | null;
   isPrinted?: boolean;
+  disableNavigation?: boolean;
+  hideCustomerInfo?: boolean;
+  showAllItems?: boolean;
 }

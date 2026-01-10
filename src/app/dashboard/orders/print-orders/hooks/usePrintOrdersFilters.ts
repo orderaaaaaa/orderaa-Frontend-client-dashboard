@@ -1,14 +1,25 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useUrlFilters } from '@/hooks/useUrlFilters';
 import { PrintStatus } from '../types';
 
+const DEFAULT_STATUS = 'CONFIRMED';
+
 export function usePrintOrdersFilters() {
   const urlFilters = useUrlFilters();
+  const hasInitialized = useRef(false);
 
-  // TODO: Ask BE about how to send printStatus in API payload
   const [printStatus, setPrintStatusState] = useState<PrintStatus>(null);
+
+  useEffect(() => {
+    if (urlFilters.isInitialized && !hasInitialized.current) {
+      hasInitialized.current = true;
+      if (!urlFilters.filters.status) {
+        urlFilters.setStatus(DEFAULT_STATUS);
+      }
+    }
+  }, [urlFilters.isInitialized, urlFilters.filters.status, urlFilters]);
 
   const setPrintStatus = useCallback((status: PrintStatus) => {
     setPrintStatusState(status);
@@ -18,6 +29,7 @@ export function usePrintOrdersFilters() {
   const resetAllFilters = useCallback(() => {
     urlFilters.resetFilters();
     setPrintStatusState(null);
+    urlFilters.setStatus(DEFAULT_STATUS);
   }, [urlFilters]);
 
   return {

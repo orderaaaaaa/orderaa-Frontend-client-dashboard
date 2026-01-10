@@ -5,11 +5,17 @@ export function mapOrderToInvoice(
   order: Order,
   language: InvoiceLanguage = 'ar'
 ): InvoiceData {
-  const products: InvoiceProduct[] = order.order_products.map((op) => ({
-    name: op.products.name,
-    quantity: op.quantity,
-    variant: op.variant,
-  }));
+  const products: InvoiceProduct[] = order.order_products.map((op) => {
+    let variantText = op.variant;
+    if (!variantText && op.variants && op.variants.length > 0) {
+      variantText = op.variants.map((v) => v.value).join(' - ');
+    }
+    return {
+      name: op.products.name,
+      quantity: op.quantity || 1,
+      variant: variantText,
+    };
+  });
 
   const isPaid = order.paymentStatus?.toLowerCase() === 'paid';
   const isCOD = order.paymentMethod?.toLowerCase().includes('delivery') ||

@@ -39,25 +39,25 @@ export function StatisticsSection({
         icon={<LiaCheckCircleSolid className="w-8 h-8 text-primary" />}
         label="الطلبات المؤكدة"
         desc="جاهزة للطباعة"
-        value={statistics?.confirmedOrders ?? 0}
+        value={statistics?.totalConfirmedOrders ?? 0}
       />
       <StatCard
         icon={<LiaPrintSolid className="w-8 h-8 text-primary" />}
         label="الطلبات الغير مطبوعة"
-        desc='بحاجة للطباعة'
-        value={statistics?.ordersToDeliver ?? 0}
+        desc="بحاجة للطباعة"
+        value={statistics?.confirmedNotPrintedOrders ?? 0}
       />
       <StatCard
         icon={<LiaFileAltSolid className="w-8 h-8 text-primary" />}
         label="الطلبات المطبوعة"
         desc="تم الطباعة"
-        value={statistics?.rejectedOrders ?? 0}
+        value={statistics?.confirmedPrintedOrders ?? 0}
       />
       <StatCard
         icon={<LiaBoxOpenSolid className="w-8 h-8 text-primary" />}
-        label="الطلبات المغلفة"
+        label="الطلبات المحضرة"
         desc="جاهزة للشحن"
-        value={statistics?.remainingOrders ?? 0}
+        value={statistics?.totalPreparedOrders ?? 0}
       />
     </div>
   );

@@ -221,21 +221,21 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
           fontSize={0}
           margin={0}
         />
-        <span className="text-[11px] font-bold tracking-wider mt-1">{data.orderCode}</span>
+        <span className="text-sm font-bold tracking-wider mt-1">{data.orderCode}</span>
       </div>
 
       {/* Footer */}
       <div className="grid grid-cols-2 gap-4 mt-2.5 pt-2">
-        <div className=' '>
-          <div className="grid place-items-center">
+        <div>
+          <div className="grid place-items-start">
             <QRCodeSVG
               value={storeInfo.contactQRValue}
-              size={260}
+              size={150}
               level="L"
-              className='p-5 border border-black rounded-xl'
+              className='p-2 border border-black rounded-xl'
             />
           </div>
-          <p className="text-xl text-center mt-1">{labels.scanToContact}</p>
+          <p className="text-xl text-start">{labels.scanToContact}</p>
         </div>
         <div>
           <p className="text-xl mb-1">

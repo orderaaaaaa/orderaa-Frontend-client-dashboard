@@ -1,10 +1,10 @@
 import { FilterOrdersDto } from '@/types/orders';
 
 export interface PrintOrderStatistics {
-  confirmedOrders: number;
-  ordersToDeliver: number;
-  rejectedOrders: number;
-  remainingOrders: number;
+  totalConfirmedOrders: number;
+  confirmedNotPrintedOrders: number;
+  confirmedPrintedOrders: number;
+  totalPreparedOrders: number;
 }
 
 export interface PrintOrderStatisticsResponse {
