@@ -7,12 +7,13 @@ export interface Product {
   size: string;
   color: string;
   sku: string;
-  images: string;
+  images: string[];
+  image: string;
   totalOrders: number;
   extraDetails: {
-    weight: string;
-    material: string;
+    variants?: VariantItem[];
   };
+  variantOptions?: VariantOption[];
   createdAt: string;
   updatedAt: string;
 }
@@ -43,7 +44,10 @@ export interface ProductState {
   setLimit: (limit: number) => void;
 }
 
-export type VariantItem = Record<string, string>;
+export type VariantItem = {
+  label: string;
+  value: string;
+};
 
 export interface UpdateVariantsPayload {
   variants: VariantItem[];

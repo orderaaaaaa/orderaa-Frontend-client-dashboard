@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
-import { IoMdClose, IoMdTrash } from 'react-icons/io';
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { IoMdClose } from 'react-icons/io';
 import { LiaPlusSolid } from 'react-icons/lia';
 import { useUpdateProductVariants } from '../../hooks/useProduct';
 
 interface VariantRow {
-  key: string;
+  label: string;
+  value: string;
+}
+
+interface VariantItem {
+  label: string;
   value: string;
 }
 
@@ -12,27 +19,38 @@ interface ProductAddVariantsModalProps {
   productId: number;
   isOpen: boolean;
   onClose: () => void;
+  variants?: VariantItem[];
 }
 
 const ProductAddVariantsModal: React.FC<ProductAddVariantsModalProps> = ({
   productId,
   isOpen,
   onClose,
+  variants,
 }) => {
-  const [rows, setRows] = useState<VariantRow[]>([{ key: '', value: '' }]);
+  const [rows, setRows] = useState<VariantRow[]>([{ label: '', value: '' }]);
+
   const { mutate, isPending } = useUpdateProductVariants(productId);
+
+  useEffect(() => {
+    if (variants && variants.length > 0 && isOpen) {
+      setRows(variants);
+    } else if (isOpen) {
+      setRows([{ label: '', value: '' }]);
+    }
+  }, [variants, isOpen]);
 
   if (!isOpen) return null;
 
   const addRow = () => {
-    setRows((prev) => [...prev, { key: '', value: '' }]);
+    setRows((prev) => [...prev, { label: '', value: '' }]);
   };
 
   const removeRow = (index: number) => {
     if (rows.length > 1) {
       setRows((prev) => prev.filter((_, i) => i !== index));
     } else {
-      setRows([{ key: '', value: '' }]);
+      setRows([{ label: '', value: '' }]);
     }
   };
 
@@ -44,8 +62,11 @@ const ProductAddVariantsModal: React.FC<ProductAddVariantsModalProps> = ({
 
   const handleSubmit = () => {
     const variants = rows
-      .filter((r) => r.key.trim() && r.value.trim())
-      .map((r) => ({ [r.key.trim()]: r.value.trim() }));
+      .filter((r) => r.label.trim() && r.value.trim())
+      .map((r) => ({
+        label: r.label.trim(),
+        value: r.value.trim(),
+      }));
 
     if (!variants.length) return;
 
@@ -54,10 +75,15 @@ const ProductAddVariantsModal: React.FC<ProductAddVariantsModalProps> = ({
       {
         onSuccess: () => {
           onClose();
-          setRows([{ key: '', value: '' }]);
         },
       }
     );
+  };
+
+  const handleClose = () => {
+    onClose();
+    // Reset after animation completes
+    setTimeout(() => setRows([{ label: '', value: '' }]), 300);
   };
 
   return (
@@ -69,10 +95,11 @@ const ProductAddVariantsModal: React.FC<ProductAddVariantsModalProps> = ({
             إضافة خصائص المنتج
           </h3>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-1 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+            disabled={isPending}
           >
-            <IoMdClose size={24} className="text-gray-500 " />
+            <IoMdClose size={24} className="text-gray-500" />
           </button>
         </div>
 
@@ -86,22 +113,25 @@ const ProductAddVariantsModal: React.FC<ProductAddVariantsModalProps> = ({
               >
                 <div className="grid grid-cols-2 gap-3 flex-1">
                   <input
-                    placeholder="الخاصية (مثلاً: الخامة )"
-                    value={row.key}
-                    onChange={(e) => updateRow(index, 'key', e.target.value)}
-                    className="rounded-lg px-4 py-2.5 bg-gray-50 border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                    placeholder="الخاصية (مثلاً: الخامة)"
+                    value={row.label}
+                    onChange={(e) => updateRow(index, 'label', e.target.value)}
+                    disabled={isPending}
+                    className="rounded-lg px-4 py-2.5 bg-gray-50 border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                   <input
                     placeholder="القيمة (مثلاً: قماش)"
                     value={row.value}
                     onChange={(e) => updateRow(index, 'value', e.target.value)}
-                    className="rounded-lg px-4 py-2.5 bg-gray-50 border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                    disabled={isPending}
+                    className="rounded-lg px-4 py-2.5 bg-gray-50 border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </div>
 
                 <button
                   onClick={() => removeRow(index)}
-                  className="p-2.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                  disabled={isPending}
+                  className="p-2.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   title="حذف الصف"
                 >
                   <IoMdClose size={22} />
@@ -112,7 +142,8 @@ const ProductAddVariantsModal: React.FC<ProductAddVariantsModalProps> = ({
 
           <button
             onClick={addRow}
-            className="mt-4 flex items-center gap-2 text-primary font-semibold hover:bg-primary hover:text-white cursor-pointer px-4 py-2 rounded-lg transition-colors"
+            disabled={isPending}
+            className="mt-4 flex items-center gap-2 text-primary font-semibold hover:bg-primary hover:text-white cursor-pointer px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <LiaPlusSolid className="w-5 h-5" />
             <span>إضافة خاصية جديدة</span>
@@ -122,14 +153,15 @@ const ProductAddVariantsModal: React.FC<ProductAddVariantsModalProps> = ({
         {/* Footer */}
         <div className="p-5 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
           <button
-            onClick={onClose}
-            className="px-6 py-2.5 font-semibold text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
+            onClick={handleClose}
+            disabled={isPending}
+            className="px-6 py-2.5 font-semibold text-gray-600 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             إلغاء
           </button>
           <button
             onClick={handleSubmit}
-            disabled={isPending || !rows.some((r) => r.key && r.value)}
+            disabled={isPending || !rows.some((r) => r.label && r.value)}
             className="px-8 py-2.5 font-bold bg-primary hover:bg-primary/90 rounded-lg cursor-pointer text-white disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20 transition-all"
           >
             {isPending ? 'جاري الحفظ...' : 'حفظ الخصائص'}

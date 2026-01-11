@@ -8,6 +8,7 @@ import { ListChecks } from 'lucide-react';
 
 import { useGetProducts } from '../hooks/useProduct';
 import { useProductStore } from '../store/useProductStore';
+import { VariantItem } from '../types/products';
 import Input from '@/components/ui/Input';
 import ProductAddVariantsModal from './modals/productAddVariants';
 
@@ -17,7 +18,10 @@ function ProductsTable() {
 
   const [showCheckboxes, setShowCheckboxes] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [activeProductId, setActiveProductId] = useState<number | null>(null);
+  const [activeProduct, setActiveProduct] = useState<{
+    id: number;
+    variants: VariantItem[];
+  } | null>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   const toggleSelect = (id: number) => {
@@ -34,14 +38,14 @@ function ProductsTable() {
     );
   };
 
-  const openEditModal = (productId: number) => {
-    setActiveProductId(productId);
+  const openEditModal = (productId: number, variants: VariantItem[]) => {
+    setActiveProduct({ id: productId, variants });
     setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
-    setActiveProductId(null);
+    setActiveProduct(null);
   };
 
   if (isLoading) {
@@ -94,7 +98,7 @@ function ProductsTable() {
                 <th className="p-4 text-center">الاسم</th>
                 <th className="p-4 text-center">السعر</th>
                 <th className="p-4 text-center">تاريخ الإنشاء</th>
-                <th className="p-4 text-center">عدد القطع المُباعة</th>
+                <th className="p-4 text-center">عدد القطع المباعة</th>
                 <th className="p-4 text-center">تعديل</th>
                 <th className="p-4 text-center">الطلبات</th>
               </tr>
@@ -124,7 +128,8 @@ function ProductsTable() {
                   <td className="p-4 text-center">
                     <img
                       src={
-                        product.images?.[0] ||
+                        product.image ||
+                        product.images[0] ||
                         'https://placehold.net/600x600.png'
                       }
                       className="w-20 h-20 mx-auto rounded-lg object-cover border"
@@ -140,7 +145,12 @@ function ProductsTable() {
 
                   <td className="p-4 text-center">
                     <button
-                      onClick={() => openEditModal(product.id)}
+                      onClick={() =>
+                        openEditModal(
+                          product.id,
+                          product.extraDetails?.variants || []
+                        )
+                      }
                       className="text-primary flex items-center gap-1 mx-auto"
                     >
                       <LiaEditSolid className="w-5 h-5" />
@@ -159,7 +169,7 @@ function ProductsTable() {
           </table>
         </div>
 
-        {/* ===== Mobile Cards (kept for responsiveness) ===== */}
+        {/* ===== Mobile Cards ===== */}
         <div className="md:hidden flex flex-col gap-3">
           {data?.data.map((product) => (
             <div
@@ -173,7 +183,9 @@ function ProductsTable() {
               <div className="flex gap-4 items-center">
                 <img
                   src={
-                    product.images?.[0] || 'https://placehold.net/600x600.png'
+                    product.image ||
+                    product.images[0] ||
+                    'https://placehold.net/600x600.png'
                   }
                   className="w-24 h-24 rounded-lg object-cover border"
                 />
@@ -190,9 +202,17 @@ function ProductsTable() {
 
                   <div className="flex justify-between items-center mt-2">
                     <span className="text-sm text-gray-600">
-                      عدد القطع المُباعه: 0
+                      عدد القطع المباعه: 0
                     </span>
-                    <button className="text-primary text-sm flex items-center gap-1 font-medium">
+                    <button
+                      onClick={() =>
+                        openEditModal(
+                          product.id,
+                          product.extraDetails?.variants || []
+                        )
+                      }
+                      className="text-primary text-sm flex items-center gap-1 font-medium"
+                    >
                       <LiaEditSolid /> تعديل
                     </button>
                   </div>
@@ -211,9 +231,10 @@ function ProductsTable() {
         </div>
       </div>
 
-      {showModal && activeProductId !== null && (
+      {showModal && activeProduct && (
         <ProductAddVariantsModal
-          productId={activeProductId}
+          productId={activeProduct.id}
+          variants={activeProduct.variants}
           isOpen={showModal}
           onClose={closeModal}
         />
