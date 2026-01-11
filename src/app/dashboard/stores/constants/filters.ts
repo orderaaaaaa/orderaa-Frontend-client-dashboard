@@ -6,10 +6,8 @@ export const allDepartments = [
 ];
 
 export const topSellers = [
-  { key: 'top1', value: 'الأكثر مبيعاً' },
-  { key: 'seller1', value: 'البائع الأول' },
-  { key: 'seller2', value: 'البائع الثاني' },
-  { key: 'seller3', value: 'البائع الثالث' },
+  { key: 'top1', value: 'اكثر مبيعاً' },
+  { key: 'top2', value: 'اقل مبيعاً' },
 ];
 
 export const activities = [
@@ -18,20 +16,18 @@ export const activities = [
 ];
 
 export const topDeliveryRates = [
-  { key: 'highest', value: 'أعلى نسب تسليم' },
   { key: 'high', value: 'نسبة عالية' },
   { key: 'medium', value: 'نسبة متوسطة' },
   { key: 'low', value: 'نسبة منخفضة' },
 ];
 
 export const salesRates = [
-  { key: 'all', value: 'معدل البيعات' },
   { key: 'high', value: 'معدل مرتفع' },
   { key: 'medium', value: 'معدل متوسط' },
   { key: 'low', value: 'معدل منخفض' },
 ];
 
 export const searchOptions = [
-  { key: 'search', value: 'البحث' },
-  { key: 'advanced', value: 'بحث متقدم' },
+  { key: 'search', value: 'الاحدث' },
+  { key: 'advanced', value: 'الاقدم' },
 ];

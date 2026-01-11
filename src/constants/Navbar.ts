@@ -6,6 +6,7 @@ import {
   LiaIdCard,
   LiaClipboardCheckSolid,
   LiaStoreSolid,
+  LiaUsersCogSolid,
 } from 'react-icons/lia';
 import {
   House,
@@ -113,5 +114,10 @@ export const navigation: NavigationItem[] = [
     name: 'المتاجر',
     href: '/dashboard/stores',
     icon: LiaStoreSolid,
+  },
+  {
+    name: 'العملاء و الليدز',
+    href: '/dashboard/leads',
+    icon: LiaUsersCogSolid,
   },
 ];

@@ -1,13 +1,13 @@
 export interface StoreStats {
   id: string;
-  value: number;
+  value: string | number;
   statsValue: string;
 }
 
 export const STORE_DUMMY_DATA: StoreStats[] = [
   {
     id: 'total-stores',
-    value: 50,
+    value: 45,
     statsValue: '2.5%',
   },
   {
@@ -22,12 +22,12 @@ export const STORE_DUMMY_DATA: StoreStats[] = [
   },
   {
     id: 'delivery-rate',
-    value: 82,
+    value: '82%',
     statsValue: '2.5%',
   },
   {
     id: 'customer-retention',
-    value: 90,
+    value: '90%',
     statsValue: '2.5%',
   },
 ];

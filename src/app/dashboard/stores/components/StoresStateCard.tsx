@@ -2,7 +2,7 @@ import { FaArrowTrendUp, FaPlus } from 'react-icons/fa6';
 
 interface StoresStateCardProps {
   title: string;
-  value: number;
+  value: number | string;
   statsValue: string;
   Icon: React.ComponentType<{ className?: string }>;
 }

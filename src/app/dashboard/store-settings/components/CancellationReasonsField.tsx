@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import { IoMdClose } from 'react-icons/io';
 import { LiaHashtagSolid } from 'react-icons/lia';
@@ -41,17 +43,17 @@ export function CancellationReasonsField({
   const removeReason = (indexToRemove: number) => {
     setValue(
       'cancellationReasons',
-      reasons.filter((_, index) => index !== indexToRemove),
+      reasons.filter((_, i) => i !== indexToRemove),
       { shouldValidate: true }
     );
   };
 
   return (
-    <div className="w-full flex flex-col gap-4 border-b border-gray-100 pb-6">
+    <div className="w-full max-w-full flex flex-col gap-4 border-b border-gray-100 pb-6 overflow-hidden">
       {/* Header */}
       <div className="w-full flex items-start gap-2">
-        <LiaHashtagSolid className="w-6 h-6 text-primary mt-0.5" />
-        <div>
+        <LiaHashtagSolid className="w-6 h-6 text-primary mt-0.5 shrink-0" />
+        <div className="min-w-0">
           <h3 className="text-lg font-semibold leading-tight">
             اسباب الغاء الطلب
           </h3>
@@ -64,33 +66,39 @@ export function CancellationReasonsField({
       {/* Input wrapper */}
       <div
         dir="rtl"
-        className="relative border-2 border-gray-200 rounded-xl bg-gray-50 focus-within:border-primary transition-all p-2"
+        className="relative w-full max-w-full overflow-hidden
+                   border-2 border-gray-200 rounded-xl bg-gray-50
+                   focus-within:border-primary transition-all p-2"
       >
-        {/* Fixed left button (positioned) */}
+        {/* Add button */}
         <button
           type="button"
           onClick={handleAddReason}
           disabled={!inputValue.trim()}
           className="absolute left-2 top-2 bottom-2
-                     w-20 rounded-lg text-sm font-semibold
+                     w-20 h-8 rounded-lg text-sm font-semibold
                      bg-primary text-white disabled:opacity-40
-                     transition-colors h-8  "
+                     transition-colors"
         >
           إضافة
         </button>
 
         {/* Tags + input */}
-        <div className="flex flex-wrap items-center gap-2 pl-24">
+        <div className="flex flex-wrap items-center gap-2 pl-24 max-w-full overflow-hidden min-w-0">
           {reasons.map((reason, index) => (
             <div
               key={index}
-              className="flex items-center gap-2 bg-primary text-white font-semibold px-3 py-1.5 rounded-full text-sm"
+              className="flex items-center gap-2
+                         bg-primary text-white font-semibold
+                         px-3 py-1.5 rounded-full text-sm
+                         max-w-full overflow-hidden
+                         break-all whitespace-normal"
             >
-              <span>{reason}</span>
+              <span className="max-w-full break-all">{reason}</span>
               <button
                 type="button"
                 onClick={() => removeReason(index)}
-                className="hover:text-red-400 transition-colors"
+                className="shrink-0 hover:text-red-300 transition-colors"
               >
                 <IoMdClose className="w-3 h-3" />
               </button>
@@ -103,7 +111,10 @@ export function CancellationReasonsField({
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="اكتب السبب"
-            className="flex-1 min-w-[120px] bg-transparent outline-none py-1 px-2 text-sm"
+            className="flex-1 min-w-[80px] max-w-full
+                       bg-transparent outline-none
+                       py-1 px-2 text-sm
+                       break-all"
           />
         </div>
       </div>

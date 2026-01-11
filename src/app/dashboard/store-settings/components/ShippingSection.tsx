@@ -89,7 +89,7 @@ export function ShippingSection({
 
         <div
           className={`transition-all duration-300 overflow-hidden ${
-            canEditOrderValue
+            !canEditOrderValue
               ? 'max-h-40 opacity-100 mt-2'
               : 'max-h-0 opacity-0'
           }`}
