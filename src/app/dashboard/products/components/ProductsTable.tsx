@@ -159,12 +159,16 @@ function ProductsTable() {
           </table>
         </div>
 
-        {/* ================= Mobile Cards ================= */}
+        {/* ===== Mobile Cards (kept for responsiveness) ===== */}
         <div className="md:hidden flex flex-col gap-3">
           {data?.data.map((product) => (
             <div
               key={product.id}
-              className="border rounded-xl p-4 bg-white shadow-sm"
+              className={`border rounded-xl p-4 bg-white shadow-sm ${
+                selectedIds.includes(product.id)
+                  ? 'ring-2 ring-primary/30 border-primary/30'
+                  : ''
+              }`}
             >
               <div className="flex gap-4 items-center">
                 <img
@@ -173,28 +177,32 @@ function ProductsTable() {
                   }
                   className="w-24 h-24 rounded-lg object-cover border"
                 />
-
-                <div className="flex-1 text-right" dir="rtl">
-                  <h3 className="font-semibold">{product.name}</h3>
+                <div className="flex-1 space-y-1 text-right" dir="rtl">
+                  <h3 className="font-semibold text-gray-900">
+                    {product.name}
+                  </h3>
                   <p className="text-sm text-gray-600">
                     السعر: {product.price}
                   </p>
+                  <span className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-500">
+                    الطلبات: {product.totalOrders}
+                  </span>
 
-                  <button
-                    onClick={() => openEditModal(product.id)}
-                    className="text-primary flex items-center gap-1 mt-2 cursor-pointer"
-                  >
-                    <LiaEditSolid />
-                    تعديل
-                  </button>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-sm text-gray-600">
+                      عدد القطع المُباعه: 0
+                    </span>
+                    <button className="text-primary text-sm flex items-center gap-1 font-medium">
+                      <LiaEditSolid /> تعديل
+                    </button>
+                  </div>
                 </div>
-
                 {showCheckboxes && (
                   <input
                     type="checkbox"
                     checked={selectedIds.includes(product.id)}
                     onChange={() => toggleSelect(product.id)}
-                    className="w-5 h-5"
+                    className="w-5 h-5 text-primary rounded border-gray-300"
                   />
                 )}
               </div>

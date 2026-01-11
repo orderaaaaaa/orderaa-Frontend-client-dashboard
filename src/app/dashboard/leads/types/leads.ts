@@ -8,12 +8,34 @@ interface StatCardProps {
 }
 
 export interface Lead {
-  id: number;
+  id: string;
   name: string;
-  email: string;
   phone: string;
-  status: 'active' | 'oneDayRemaining' | 'threeDaysRemaining' | 'noActivity';
+  email: string;
   endDate: string;
-  clientsCount: number;
-  info: string;
+  activityStatus: 'active' | 'noActivity'; // نشط or لا يوجد نشاط
+  daysStatus?: 'oneDayRemaining' | 'threeDaysRemaining'; // Optional days remaining
+}
+
+export interface ILeadTableRow {
+  id: string;
+  name: string;
+  status?: string;
+  statusText?: string;
+  phone: string;
+  email: string;
+  source: string;
+  leadType: string;
+  time: string;
+  timeIcon?: boolean;
+  timeSince?: string;
+  action?: string;
+  actionType?: string;
+  state?: string;
+}
+
+export interface ILeadTableHeader {
+  id: string;
+  key: string;
+  label: string;
 }
