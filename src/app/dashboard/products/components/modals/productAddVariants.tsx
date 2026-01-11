@@ -82,8 +82,7 @@ const ProductAddVariantsModal: React.FC<ProductAddVariantsModalProps> = ({
 
   const handleClose = () => {
     onClose();
-    // Reset after animation completes
-    setTimeout(() => setRows([{ label: '', value: '' }]), 300);
+    setRows([{ label: '', value: '' }]);
   };
 
   return (
