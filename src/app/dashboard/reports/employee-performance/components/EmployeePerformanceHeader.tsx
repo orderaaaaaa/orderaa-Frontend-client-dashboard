@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/select';
 import { ArrowLeft, X } from 'lucide-react';
 
-interface CustomerHeaderProps {
+interface EmployeePerformanceHeaderProps {
   fromDate: Date | null;
   toDate: Date | null;
   timePeriod: string;
@@ -20,17 +20,19 @@ interface CustomerHeaderProps {
   onTimePeriodChange: (period: string) => void;
 }
 
-export default function CustomerHeader({
+export default function EmployeePerformanceHeader({
   fromDate,
   toDate,
   timePeriod,
   onFromDateChange,
   onToDateChange,
   onTimePeriodChange,
-}: CustomerHeaderProps) {
+}: EmployeePerformanceHeaderProps) {
   return (
-    <div className="flex flex-col mt-3 w-[95%] mx-auto sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-4">
-      <h1 className="text-3xl md:text-4xl mb-4 font-semibold">إداره العملاء</h1>
+    <div className="flex flex-col mt-3 mx-auto sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-4">
+      <h1 className="text-3xl md:text-4xl mb-4 font-semibold">
+        اداء الموظفين{' '}
+      </h1>
 
       <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 px-3 w-full sm:w-auto">
         <DatePicker

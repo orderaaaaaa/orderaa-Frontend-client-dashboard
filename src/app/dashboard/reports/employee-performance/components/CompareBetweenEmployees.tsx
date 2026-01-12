@@ -3,7 +3,7 @@ import {
   COMPARE_EMPLOYEES_DATA,
   COMPARE_EMPLOYEES_HEADERS,
 } from '@/constants/customer-service/CompareBetweenEmployees';
-import Table from './Table';
+import Table from '../../components/Table';
 import { Plus } from 'lucide-react';
 
 function CompareBetweenEmployees() {

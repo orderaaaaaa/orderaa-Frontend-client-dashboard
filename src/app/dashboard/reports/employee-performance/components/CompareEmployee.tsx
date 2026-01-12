@@ -1,6 +1,6 @@
 import { Plus } from 'lucide-react';
-import AreaChartComponent from './Charts/CompareEmployee';
-import { MOCK_EMPLOYEE_STATS } from '../constants/CompareEmployeeConst';
+import AreaChartComponent from '../../components/Charts/CompareEmployee';
+import { MOCK_EMPLOYEE_STATS } from '../../constants/CompareEmployeeConst';
 
 function CompareEmployees() {
   return (

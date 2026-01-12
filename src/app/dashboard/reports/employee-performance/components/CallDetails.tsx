@@ -1,6 +1,6 @@
 import React from 'react';
 import { TABLE_DATA } from '@/constants/customer-service/CompareBetweenEmployees';
-import Table from './Table';
+import Table from '../../components/Table';
 
 function CallDetails() {
   return (

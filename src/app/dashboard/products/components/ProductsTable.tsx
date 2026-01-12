@@ -151,7 +151,7 @@ function ProductsTable() {
                           product.extraDetails?.variants || []
                         )
                       }
-                      className="text-primary flex items-center gap-1 mx-auto"
+                      className="text-primary flex items-center gap-1 mx-auto cursor-pointer"
                     >
                       <LiaEditSolid className="w-5 h-5" />
                       تعديل
@@ -211,7 +211,7 @@ function ProductsTable() {
                           product.extraDetails?.variants || []
                         )
                       }
-                      className="text-primary text-sm flex items-center gap-1 font-medium"
+                      className="text-primary text-sm flex items-center gap-1 font-medium cursor-pointer"
                     >
                       <LiaEditSolid /> تعديل
                     </button>

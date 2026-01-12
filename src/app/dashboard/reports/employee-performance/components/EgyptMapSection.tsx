@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { egyptRegions } from '../constants/EgyptMapSectionConst';
+import { egyptRegions } from '../../constants/EgyptMapSectionConst';
 
 export default function EgyptMapSection() {
   return (

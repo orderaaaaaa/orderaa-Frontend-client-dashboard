@@ -9,9 +9,9 @@ import TapsCustomer from './components/TapsCustomer';
 import TotalOrdersChart from './components/Charts/TotalOrdersChart';
 import CallDistributionChart from './components/Charts/DistributionOfApplicationCases';
 import StopHours from './components/StopHours';
-import CompareBetweenEmployees from './components/CompareBetweenEmployees';
-import CallDetails from './components/CallDetails';
-import CompareCompare from './components/CompareEmployee';
+import CompareBetweenEmployees from './employee-performance/components/CompareBetweenEmployees';
+import CallDetails from './employee-performance/components/CallDetails';
+import CompareCompare from './employee-performance/components/CompareEmployee';
 import SuccessfulCallDates from './components/Charts/SuccessfulCallDatesChart';
 import SuccessCallesTimeChartMorning from './components/Charts/SuccessCallesTimeChartMorning';
 import SuccessCallesTimeChartEvening from './components/Charts/SuccessCallesTimeChartEvening';
@@ -19,10 +19,11 @@ import SuccessCallesTimeChartMidLevel from './components/Charts/SuccessCallesTim
 import OrdersDone from './components/Charts/OrdersDone';
 import ConfirmationAttempts from './components/Charts/ConfirmationAttemptsCart';
 import BestEmployeesChart from './components/Charts/BestEmployeesChart';
-import EgyptMapSection from './components/EgyptMapSection';
+import EgyptMapSection from './employee-performance/components/EgyptMapSection';
 import AverageCallDurationChart from './components/Charts/AverageCallDurationChart';
 import DistributingCallsToConfirmOrders from './components/Charts/DistributingCallsToConfirmOrders';
 import EmployeePerformance from './components/EmployeePerformance';
+import CompareEmployees from './employee-performance/components/CompareEmployee';
 
 function CustomerService() {
   return (
@@ -61,11 +62,7 @@ function CustomerService() {
       </div>
       <EmployeePerformance />
       {/* <BestEmployeesChart /> */}
-      <CompareCompare />
-      <CallDetails />
-      <CompareBetweenEmployees />
       <StopHours />
-      <EgyptMapSection />
     </>
   );
 }
