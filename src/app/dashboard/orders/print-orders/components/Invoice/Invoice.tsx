@@ -47,37 +47,37 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
 
   return (
     <div
-      className="invoice-page w-[210mm] min-h-[297mm] bg-white p-1 text-sm"
+      className="invoice-page w-[100mm] min-h-[150mm] bg-white p-1 text-[8px]"
       dir={language === 'ar' ? 'rtl' : 'ltr'}
     >
       {/* Store Name Header */}
-      <div className="text-center mb-3 pb-2">
-        <h1 className="text-3xl font-bold tracking-widest">{storeName}</h1>
+      <div className="text-center mb-1 pb-1">
+        <h1 className="text-base font-bold tracking-wide">{storeName}</h1>
       </div>
 
       {/* Recipient Details Section */}
       <div className="grid grid-cols-2 bg-black text-white">
-        <span className="py-1.5 px-2 text-sm font-bold text-start">
+        <span className="py-0.5 px-1 text-[7px] font-bold text-start">
           {labels.phoneNumber} :
         </span>
-        <span className="py-1.5 px-2 text-sm font-bold text-start">
+        <span className="py-0.5 px-1 text-[7px] font-bold text-start">
           {labels.recipientDetails}
         </span>
       </div>
-      <div className="grid grid-cols-2 border border-t-0 border-black font-bold text-sm">
-        <div className="p-2 border-e border-black">
-          <div className="grid grid-cols-[auto_auto_1fr] items-center justify-start gap-1 mb-1">
-            <LiaPhoneSolid className="size-4" />
+      <div className="grid grid-cols-2 border border-t-0 border-black font-bold text-[7px]">
+        <div className="p-1 border-e border-black">
+          <div className="grid grid-cols-[auto_auto_1fr] items-center justify-start gap-0.5 mb-0.5">
+            <LiaPhoneSolid className="size-2.5" />
             <span className="text-gray-700">{labels.number1}:</span>
             <span className="font-bold">{data.customer.phoneNumbers[0] || '-'}</span>
           </div>
-          <div className="grid grid-cols-[auto_auto_1fr] items-center gap-1">
-            <LiaPhoneSolid className="size-4" />
+          <div className="grid grid-cols-[auto_auto_1fr] items-center gap-0.5">
+            <LiaPhoneSolid className="size-2.5" />
             <span className="text-gray-700">{labels.number2}:</span>
             <span className="font-bold">{data.customer.phoneNumbers[1] || '-'}</span>
           </div>
         </div>
-        <div className="p-2">
+        <div className="p-1">
           <p className="font-bold mb-0.5 text-start">
             {data.customer.name}
           </p>
@@ -88,61 +88,61 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
       </div>
 
       {/* Address Section */}
-      <div className="grid grid-cols-[auto_1fr] border border-black mb-3 font-bold text-lg">
-        <div className="bg-black text-white py-2 px-3 grid place-items-center">
+      <div className="grid grid-cols-[auto_1fr] border border-black mb-1 font-bold text-[8px]">
+        <div className="bg-black text-white py-1 px-1.5 grid place-items-center">
           {labels.address}
         </div>
-        <p className="p-2 text-start leading-relaxed">
+        <p className="p-1 text-start leading-tight">
           {data.customer.address || '-'}
         </p>
       </div>
 
       {/* Order Barcode */}
-      <div className="grid place-items-center my-3">
+      <div className="grid place-items-center my-1">
         <div
-          className="w-full relative bg-white p-6 grid place-items-center
-            before:absolute before:top-0 before:left-0 before:h-2 before:w-full
-            before:bg-[repeating-linear-gradient(-45deg,#000_0_30px,transparent_30px_40px)]
-            after:absolute after:bottom-0 after:left-0 after:h-2 after:w-full
-            after:bg-[repeating-linear-gradient(-45deg,#000_0_30px,transparent_30px_40px)]"
+          className="w-full relative bg-white p-2 grid place-items-center
+            before:absolute before:top-0 before:left-0 before:h-1 before:w-full
+            before:bg-[repeating-linear-gradient(-45deg,#000_0_15px,transparent_15px_20px)]
+            after:absolute after:bottom-0 after:left-0 after:h-1 after:w-full
+            after:bg-[repeating-linear-gradient(-45deg,#000_0_15px,transparent_15px_20px)]"
         >
           <Barcode
             value={data.orderCode}
-            width={1.5}
-            height={45}
+            width={1}
+            height={25}
             fontSize={0}
             margin={0}
           />
-          <p className="text-lg font-bold tracking-wider mt-1">{data.orderCode}</p>
+          <p className="text-[9px] font-bold tracking-wider mt-0.5">{data.orderCode}</p>
         </div>
       </div>
 
       {/* Packaging Notes Section */}
       <div className="grid grid-cols-2 bg-black text-white">
-        <span className="py-1.5 px-2 text-sm font-bold text-start">
+        <span className="py-0.5 px-1 text-[7px] font-bold text-start">
           {labels.shipmentContents}:
         </span>
-        <span className="py-1.5 px-2 text-sm font-bold text-start">
+        <span className="py-0.5 px-1 text-[7px] font-bold text-start">
           {labels.packagingNotes}
         </span>
       </div>
       <div className="grid grid-cols-2 border border-t-0 border-black">
-        <div className="p-2 border-e border-black">
+        <div className="p-1 border-e border-black">
           {data.products.map((product, index) => (
-            <div key={index} className="grid grid-cols-[auto_1fr] gap-2 mb-0.5">
-              <span className="text-sm">
+            <div key={index} className="grid grid-cols-[auto_1fr] gap-1 mb-0.5">
+              <span className="text-[7px]">
                 {product.variant}
               </span>
-              <span className="text-sm text-start">
+              <span className="text-[7px] text-start">
                 {formatProductName(product)}
               </span>
             </div>
           ))}
         </div>
-        <div className="p-2">
-          <div className="grid grid-cols-[auto_1fr] items-start gap-1.5">
-            <LiaInfoCircleSolid className="size-5" />
-            <p className="text-sm text-start leading-relaxed">
+        <div className="p-1">
+          <div className="grid grid-cols-[auto_1fr] items-start gap-0.5">
+            <LiaInfoCircleSolid className="size-2.5" />
+            <p className="text-[7px] text-start leading-tight">
               {data.packagingNotes || labels.packagingWarning}
             </p>
           </div>
@@ -151,48 +151,48 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
 
       {/* Shipping Notes Section */}
       <div className="grid grid-cols-2 bg-black text-white">
-        <span className="py-1.5 px-2 text-sm font-bold text-start">
+        <span className="py-0.5 px-1 text-[7px] font-bold text-start">
           {labels.shippingInfo}
         </span>
-        <span className="py-1.5 px-2 text-sm font-bold text-start">
+        <span className="py-0.5 px-1 text-[7px] font-bold text-start">
           {labels.shippingNotes}
         </span>
       </div>
-      <div className="grid grid-cols-2 border border-t-0 border-black">
-        <div className="p-2 space-y-1 border-e border-black">
-          <div className="grid grid-cols-2 justify-between border-b border-gray-300 pb-1">
-            <span className="">{labels.allowOpenShipment}</span>
-            <span className="text-sm font-bold text-end">
+      <div className="grid grid-cols-2 border border-t-0 border-black text-[7px]">
+        <div className="p-1 space-y-0.5 border-e border-black">
+          <div className="grid grid-cols-2 justify-between border-b border-gray-300 pb-0.5">
+            <span>{labels.allowOpenShipment}</span>
+            <span className="font-bold text-end">
               {data.shipping.allowOpenShipment ? labels.yes : labels.no}
             </span>
           </div>
-          <div className="grid grid-cols-2 justify-between border-b border-gray-300 pb-1">
-            <span className="">{labels.paymentMethod} :</span>
-            <span className="text-sm font-bold text-end">{getPaymentMethodDisplay()}</span>
+          <div className="grid grid-cols-2 justify-between border-b border-gray-300 pb-0.5">
+            <span>{labels.paymentMethod} :</span>
+            <span className="font-bold text-end">{getPaymentMethodDisplay()}</span>
           </div>
-          <div className="grid grid-cols-2 justify-between border-b border-gray-300 pb-1">
-            <span className="">{labels.paymentStatus} :</span>
-            <span className="text-sm font-bold text-end">{getPaymentStatusDisplay()}</span>
+          <div className="grid grid-cols-2 justify-between border-b border-gray-300 pb-0.5">
+            <span>{labels.paymentStatus} :</span>
+            <span className="font-bold text-end">{getPaymentStatusDisplay()}</span>
           </div>
           <div className="grid grid-cols-2 justify-between">
-            <span className="">{labels.shipmentStatus}</span>
-            <span className="text-sm font-bold text-end">{data.shipping.shipmentStatus || '-'}</span>
+            <span>{labels.shipmentStatus}</span>
+            <span className="font-bold text-end">{data.shipping.shipmentStatus || '-'}</span>
           </div>
         </div>
         <div>
-          <div className="grid grid-cols-[auto_1fr] items-start gap-2 p-2">
-            <LiaInfoCircleSolid className="size-5" />
-            <p className="text-sm text-start leading-relaxed">
+          <div className="grid grid-cols-[auto_1fr] items-start gap-0.5 p-1">
+            <LiaInfoCircleSolid className="size-2.5" />
+            <p className="text-[7px] text-start leading-tight">
               {data.shippingNotes || labels.packagingWarning}
             </p>
           </div>
 
           <div className="grid grid-cols-2 bg-black">
-            <span className="py-1.5 px-2.5 font-bold text-sm text-white">
+            <span className="py-0.5 px-1 font-bold text-[7px] text-white">
               {labels.customerSchedule}:
             </span>
           </div>
-          <p className="py-1.5 px-2.5 text-sm font-bold text-center text-black block">
+          <p className="py-0.5 px-1 text-[7px] font-bold text-center text-black block">
             {timeDisplay}
           </p>
         </div>
@@ -200,64 +200,64 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
 
 
       {/* Total Price */}
-      <div className="bg-black py-3.5 px-4 mb-1.5">
-        <p className="text-white text-xl font-bold text-center">
+      <div className="bg-black py-1.5 px-2 mb-1">
+        <p className="text-white text-[10px] font-bold text-center">
           {labels.totalPrice}:{" "}{data.totalPrice} EGP
         </p>
       </div>
 
       {/* Non-Receipt Penalty */}
-      <p className="text-lg font-bold mb-3 border-y border-black py-2.5">
+      <p className="text-[8px] font-bold mb-1 border-y border-black py-1">
         {labels.nonReceiptMessage} {data.nonReceiptPenalty || 0} EGP.
       </p>
 
       {/* Shipping Barcode */}
-      <div className="grid place-items-center my-3">
-        <span className="font-bold text-lg">{labels.shippingBarcode}</span>
+      <div className="grid place-items-center my-1">
+        <span className="font-bold text-[8px]">{labels.shippingBarcode}</span>
         <Barcode
           value={data.orderCode}
-          width={1.5}
-          height={45}
+          width={1}
+          height={25}
           fontSize={0}
           margin={0}
         />
-        <span className="text-sm font-bold tracking-wider mt-1">{data.orderCode}</span>
+        <span className="text-[7px] font-bold tracking-wider mt-0.5">{data.orderCode}</span>
       </div>
 
       {/* Footer */}
-      <div className="grid grid-cols-2 gap-4 mt-2.5 pt-2">
+      <div className="grid grid-cols-2 gap-2 mt-1 pt-1">
         <div>
           <div className="grid place-items-start">
             <QRCodeSVG
               value={storeInfo.contactQRValue}
-              size={150}
+              size={50}
               level="L"
-              className='p-2 border border-black rounded-xl'
+              className='p-1 border border-black rounded-lg'
             />
           </div>
-          <p className="text-xl text-start">{labels.scanToContact}</p>
+          <p className="text-[7px] text-start">{labels.scanToContact}</p>
         </div>
         <div>
-          <p className="text-xl mb-1">
+          <p className="text-[7px] mb-0.5">
             {labels.contactMessage}
           </p>
 
           <hr />
 
-          <p className="text-xl mb-1">
+          <p className="text-[7px] mb-0.5">
             <span className="font-bold">{labels.senderName}: </span>
             {storeName}
           </p>
-          <p className="text-xl mb-1">
+          <p className="text-[7px] mb-0.5">
             <span>{labels.workNumbers}:</span>
           </p>
-          <div className="grid grid-cols-2 items-center gap-1 text-base font-bold">
-            <div className="grid grid-cols-[auto_auto_auto] items-center justify-start gap-2">
-              <LiaPhoneSolid className="size-4" />
+          <div className="grid grid-cols-2 items-center gap-0.5 text-[7px] font-bold">
+            <div className="grid grid-cols-[auto_auto_auto] items-center justify-start gap-1">
+              <LiaPhoneSolid className="size-2" />
               <span>{storeInfo.phoneNumbers[0] || ''}</span>
             </div>
-            <div className="grid grid-cols-[auto_auto] items-center justify-start gap-2">
-              <LiaPhoneSolid className="size-4" />
+            <div className="grid grid-cols-[auto_auto] items-center justify-start gap-1">
+              <LiaPhoneSolid className="size-2" />
               <span>{storeInfo.phoneNumbers[1] || ''}</span>
             </div>
           </div>
