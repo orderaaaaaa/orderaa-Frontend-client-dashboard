@@ -232,6 +232,7 @@ export function PrintInvoicesModal({
 
       <ScannedOrdersModal
         isOpen={isScannedOrdersModalOpen}
+        onClose={() => setIsScannedOrdersModalOpen(false)}
         scannedOrders={scannedOrders}
         onRemoveOrder={removeOrder}
         searchQuery={searchQuery}

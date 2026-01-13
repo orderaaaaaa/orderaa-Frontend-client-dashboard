@@ -2,13 +2,15 @@
 
 import React from 'react';
 import Input from '@/components/ui/Input';
-import { LiaSearchSolid } from 'react-icons/lia';
+import { LiaSearchSolid, LiaTimesSolid } from 'react-icons/lia';
 import { ScannedOrder } from '../../hooks/useScannedOrders';
 import { ScannedOrdersTable } from './ScannedOrdersTable';
 import PrintOrdersActionsBar from '../PrintOrdersActionsBar';
+import { Button } from '@/components/ui/button';
 
 interface ScannedOrdersModalProps {
   isOpen: boolean;
+  onClose: () => void;
   scannedOrders: ScannedOrder[];
   onRemoveOrder: (code: string) => void;
   searchQuery: string;
@@ -24,6 +26,7 @@ interface ScannedOrdersModalProps {
 
 export function ScannedOrdersModal({
   isOpen,
+  onClose,
   scannedOrders,
   onRemoveOrder,
   searchQuery,
@@ -43,12 +46,19 @@ export function ScannedOrdersModal({
       className="fixed inset-0 z-[99999] bg-white flex flex-col"
     >
       <div
-        className="h-[60px] flex items-center justify-center px-8 flex-shrink-0"
+        className="h-[60px] flex items-center justify-center px-8 flex-shrink-0 relative"
         style={{
           background:
             'linear-gradient(105.28deg, #FFFFFF 1.48%, #CBB5FD 182.49%, #FFFFFF 187.88%)',
         }}
       >
+        <Button
+          variant="ghost"
+          onClick={onClose}
+          className="absolute right-8 p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <LiaTimesSolid className="size-5" />
+        </Button>
         <h2 className="text-xl font-bold text-black">الطلبات الممسوحة</h2>
         <div className="absolute left-8 flex items-center gap-2 text-gray-600">
           <span className="text-sm">عدد الطلبات: {scannedOrders.length}</span>
