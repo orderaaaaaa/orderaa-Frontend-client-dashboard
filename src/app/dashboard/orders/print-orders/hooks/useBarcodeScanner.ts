@@ -17,18 +17,12 @@ interface UseBarcodeScannerReturn {
   scanCount: number;
 }
 
-const isDev = process.env.NODE_ENV === 'development';
-
 function log(...args: any[]) {
-  if (isDev) {
-    console.log('[Barcode Scanner]', ...args);
-  }
+  console.log('[Barcode Scanner]', ...args);
 }
 
 function warn(...args: any[]) {
-  if (isDev) {
-    console.warn('[Barcode Scanner]', ...args);
-  }
+  console.warn('[Barcode Scanner]', ...args);
 }
 
 export function useBarcodeScanner({
@@ -183,81 +177,81 @@ export function useBarcodeScanner({
   }, [enabled, processScan, debounceTimeout]);
 
   useEffect(() => {
-    if (isDev) {
-      (window as any).simulateBarcodeScan = (barcode: string) => {
-        log('--- SIMULATION START ---');
-        log('Simulating barcode scan for:', barcode);
-        log('Current scanner enabled state:', enabled);
+    log('Registering debug functions on window object');
 
-        if (!enabled) {
-          warn('Scanner is disabled! Open the PrintInvoicesModal first.');
-          warn('Make sure you clicked the print icon to open the modal.');
-          log('--- SIMULATION ABORTED ---');
-          return;
-        }
+    (window as any).simulateBarcodeScan = (barcode: string) => {
+      log('--- SIMULATION START ---');
+      log('Simulating barcode scan for:', barcode);
+      log('Current scanner enabled state:', enabled);
 
-        const activeEl = document.activeElement;
-        if (activeEl instanceof HTMLElement) {
-          log('Blurring active element:', activeEl.tagName);
-          activeEl.blur();
-        }
+      if (!enabled) {
+        warn('Scanner is disabled! Open the PrintInvoicesModal first.');
+        warn('Make sure you clicked the print icon to open the modal.');
+        log('--- SIMULATION ABORTED ---');
+        return;
+      }
 
-        log('Dispatching', barcode.length, 'character events + Enter');
+      const activeEl = document.activeElement;
+      if (activeEl instanceof HTMLElement) {
+        log('Blurring active element:', activeEl.tagName);
+        activeEl.blur();
+      }
 
-        barcode.split('').forEach((char, i) => {
-          setTimeout(() => {
-            log('Dispatching key:', char, 'at index:', i);
-            const event = new KeyboardEvent('keydown', {
-              key: char,
-              bubbles: true,
-              cancelable: true
-            });
-            document.dispatchEvent(event);
-          }, i * 20);
-        });
+      log('Dispatching', barcode.length, 'character events + Enter');
 
+      barcode.split('').forEach((char, i) => {
         setTimeout(() => {
-          log('Dispatching Enter key');
-          const enterEvent = new KeyboardEvent('keydown', {
-            key: 'Enter',
+          log('Dispatching key:', char, 'at index:', i);
+          const event = new KeyboardEvent('keydown', {
+            key: char,
             bubbles: true,
-            cancelable: true
+            cancelable: true,
           });
-          document.dispatchEvent(enterEvent);
-          log('--- SIMULATION COMPLETE ---');
-        }, barcode.length * 20);
-      };
+          document.dispatchEvent(event);
+        }, i * 20);
+      });
 
-      (window as any).testBarcodeScan = (barcode: string) => {
-        log('--- DIRECT TEST SCAN ---');
-        log('Directly calling onScan with barcode:', barcode);
-        log('Current scanner enabled state:', enabled);
+      setTimeout(() => {
+        log('Dispatching Enter key');
+        const enterEvent = new KeyboardEvent('keydown', {
+          key: 'Enter',
+          bubbles: true,
+          cancelable: true,
+        });
+        document.dispatchEvent(enterEvent);
+        log('--- SIMULATION COMPLETE ---');
+      }, barcode.length * 20);
+    };
 
-        if (!enabled) {
-          warn('Scanner is disabled! Open the PrintInvoicesModal first.');
-          warn('Make sure you clicked the print icon to open the modal.');
-          return;
-        }
+    (window as any).testBarcodeScan = (barcode: string) => {
+      log('--- DIRECT TEST SCAN ---');
+      log('Directly calling onScan with barcode:', barcode);
+      log('Current scanner enabled state:', enabled);
 
-        onScan(barcode);
-        log('--- DIRECT TEST COMPLETE ---');
-      };
+      if (!enabled) {
+        warn('Scanner is disabled! Open the PrintInvoicesModal first.');
+        warn('Make sure you clicked the print icon to open the modal.');
+        return;
+      }
 
-      (window as any).checkBarcodeScanner = () => {
-        console.log('--- Barcode Scanner Status ---');
-        console.log('Enabled:', enabled);
-        console.log('Last scan:', lastScan);
-        console.log('Total scan count:', scanCount);
-        console.log('Currently scanning:', isScanning);
-        console.log('Current buffer:', bufferRef.current.map((b) => b.char).join(''));
-        console.log('------------------------------');
-      };
+      onScan(barcode);
+      log('--- DIRECT TEST COMPLETE ---');
+    };
 
-      log('Debug functions registered:');
-      log('  - window.simulateBarcodeScan(code) - simulates keyboard events');
-      log('  - window.testBarcodeScan(code) - directly calls onScan callback');
-      log('  - window.checkBarcodeScanner() - shows current scanner status');
-    }
+    (window as any).checkBarcodeScanner = () => {
+      console.log('--- Barcode Scanner Status ---');
+      console.log('Enabled:', enabled);
+      console.log('Last scan:', lastScan);
+      console.log('Total scan count:', scanCount);
+      console.log('Currently scanning:', isScanning);
+      console.log('Current buffer:', bufferRef.current.map((b) => b.char).join(''));
+      console.log('------------------------------');
+    };
+
+    log('Debug functions registered:');
+    log('  - window.simulateBarcodeScan(code) - simulates keyboard events');
+    log('  - window.testBarcodeScan(code) - directly calls onScan callback');
+    log('  - window.checkBarcodeScanner() - shows current scanner status');
   }, [enabled, lastScan, scanCount, isScanning, onScan]);
 
   return { lastScan, isScanning, scanCount };
