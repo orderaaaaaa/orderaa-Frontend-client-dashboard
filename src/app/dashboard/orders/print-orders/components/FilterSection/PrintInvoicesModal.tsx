@@ -49,18 +49,31 @@ export function PrintInvoicesModal({
 
   const handleScan = useCallback(
     (barcode: string) => {
-      if (!isOpen) return;
+      console.log('[PrintInvoicesModal] handleScan called with barcode:', barcode);
+      console.log('[PrintInvoicesModal] isOpen:', isOpen);
 
+      if (!isOpen) {
+        console.log('[PrintInvoicesModal] Modal is closed, ignoring scan');
+        return;
+      }
+
+      console.log('[PrintInvoicesModal] Attempting to add order to list');
       const added = addOrder(barcode);
+      console.log('[PrintInvoicesModal] Order added result:', added);
+
       if (added) {
+        console.log('[PrintInvoicesModal] Order added successfully, playing success sound');
         playSuccessSound();
         setFlashingCode(barcode);
         setTimeout(() => setFlashingCode(null), 600);
 
+        console.log('[PrintInvoicesModal] isScannedOrdersModalOpen:', isScannedOrdersModalOpen);
         if (!isScannedOrdersModalOpen) {
+          console.log('[PrintInvoicesModal] Opening ScannedOrdersModal');
           setIsScannedOrdersModalOpen(true);
         }
       } else {
+        console.log('[PrintInvoicesModal] Order already exists, playing error sound');
         playErrorSound();
         toast.warning('هذا الطلب تم مسحه مسبقاً');
       }
