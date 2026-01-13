@@ -191,6 +191,7 @@ export function useBarcodeScanner({
 
         if (!enabled) {
           warn('Scanner is disabled! Open the PrintInvoicesModal first.');
+          warn('Make sure you clicked the print icon to open the modal.');
           log('--- SIMULATION ABORTED ---');
           return;
         }
@@ -206,15 +207,40 @@ export function useBarcodeScanner({
         barcode.split('').forEach((char, i) => {
           setTimeout(() => {
             log('Dispatching key:', char, 'at index:', i);
-            document.dispatchEvent(new KeyboardEvent('keydown', { key: char }));
+            const event = new KeyboardEvent('keydown', {
+              key: char,
+              bubbles: true,
+              cancelable: true
+            });
+            document.dispatchEvent(event);
           }, i * 20);
         });
 
         setTimeout(() => {
           log('Dispatching Enter key');
-          document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+          const enterEvent = new KeyboardEvent('keydown', {
+            key: 'Enter',
+            bubbles: true,
+            cancelable: true
+          });
+          document.dispatchEvent(enterEvent);
           log('--- SIMULATION COMPLETE ---');
         }, barcode.length * 20);
+      };
+
+      (window as any).testBarcodeScan = (barcode: string) => {
+        log('--- DIRECT TEST SCAN ---');
+        log('Directly calling onScan with barcode:', barcode);
+        log('Current scanner enabled state:', enabled);
+
+        if (!enabled) {
+          warn('Scanner is disabled! Open the PrintInvoicesModal first.');
+          warn('Make sure you clicked the print icon to open the modal.');
+          return;
+        }
+
+        onScan(barcode);
+        log('--- DIRECT TEST COMPLETE ---');
       };
 
       (window as any).checkBarcodeScanner = () => {
@@ -227,9 +253,12 @@ export function useBarcodeScanner({
         console.log('------------------------------');
       };
 
-      log('Debug functions registered: window.simulateBarcodeScan(code), window.checkBarcodeScanner()');
+      log('Debug functions registered:');
+      log('  - window.simulateBarcodeScan(code) - simulates keyboard events');
+      log('  - window.testBarcodeScan(code) - directly calls onScan callback');
+      log('  - window.checkBarcodeScanner() - shows current scanner status');
     }
-  }, [enabled, lastScan, scanCount, isScanning]);
+  }, [enabled, lastScan, scanCount, isScanning, onScan]);
 
   return { lastScan, isScanning, scanCount };
 }

@@ -47,7 +47,7 @@ export const navigation: NavigationItem[] = [
         icon: CartIcon,
       },
       {
-        name: 'طباعة الطلبات',
+        name: 'قسم التغليف',
         href: '/dashboard/orders/print-orders',
         icon: LiaClipboardCheckSolid,
       },
