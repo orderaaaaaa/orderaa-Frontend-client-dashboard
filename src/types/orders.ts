@@ -144,6 +144,7 @@ export interface Customer {
   city?: string;
   area?: string;
   totalCustomerOrders?: number;
+  isBlocked?: boolean;
 }
 
 // Product Interface

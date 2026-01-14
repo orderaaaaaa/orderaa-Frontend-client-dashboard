@@ -116,7 +116,7 @@ function LeadsTable({ data, headers }: LeadsTableProps) {
       </div>
 
       {/* --- Mobile Cards View --- */}
-      <div className="grid grid-cols-1 gap-4 mt-4 md:hidden">
+      <div className=" grid grid-cols-1 gap-4 mt-4 md:hidden">
         {data.map((row) => (
           <div
             key={row.id}
@@ -126,7 +126,7 @@ function LeadsTable({ data, headers }: LeadsTableProps) {
                 : 'border-transparent shadow-sm'
             }`}
           >
-            <div className="flex items-start gap-3">
+            <div className="relative flex items-start gap-3">
               {showCheckboxes && (
                 <input
                   type="checkbox"
@@ -136,10 +136,13 @@ function LeadsTable({ data, headers }: LeadsTableProps) {
                 />
               )}
               <div className="flex-1">
-                <div className="flex justify-between items-center mb-2">
+                <div className="flex justify-between items-start mb-2">
                   <span className="font-bold text-gray-900">{row.name}</span>
-                  {row.status &&
-                    getStatusBadge(row.status, row.statusText || '')}
+                  <div className="absolute top-1 left-1 flex flex-col gap-2">
+                    {row.status &&
+                      getStatusBadge(row.status, row.statusText || '')}
+                    {getLeadTypeBadge(row.leadType)}
+                  </div>
                 </div>
 
                 <div className="space-y-2 mb-4">
@@ -158,10 +161,7 @@ function LeadsTable({ data, headers }: LeadsTableProps) {
                     <p className="text-gray-400 mb-1">المصدر</p>
                     <p className="font-medium">{row.source}</p>
                   </div>
-                  <div>
-                    <p className="text-gray-400 mb-1">النوع</p>
-                    {getLeadTypeBadge(row.leadType)}
-                  </div>
+
                   <div>
                     <p className="text-gray-400 mb-1">التوقيت</p>
                     <p className="font-medium">{row.time}</p>

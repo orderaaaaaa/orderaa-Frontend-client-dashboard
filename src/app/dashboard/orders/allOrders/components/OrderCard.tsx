@@ -20,6 +20,7 @@ import { getStatusBadgeConfig } from '@/lib/status-badges';
 import { getRemainingTime } from '@/utils/getRemainingTime';
 import { LiaClock, LiaPrintSolid } from 'react-icons/lia';
 import { OrderCardProps } from '@/app/dashboard/orders/allOrders/types/OrderProps';
+import { MdBlock } from 'react-icons/md';
 
 export default function OrderCard({
   id,
@@ -30,6 +31,7 @@ export default function OrderCard({
   items,
   price,
   shippingId,
+  isBlocked,
   trys,
   status,
   city,
@@ -107,6 +109,7 @@ export default function OrderCard({
           <div className="flex flex-row items-center justify-between w-full">
             <div className="flex flex-row-reverse items-center gap-2">
               <span className="text-base font-medium text-black">{name}</span>
+
               <User
                 className="w-[18px] h-[18px]"
                 style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
@@ -137,6 +140,14 @@ export default function OrderCard({
               <span className="text-xs text-primary whitespace-nowrap">
                 {getTimeAgo(createdAt)}
               </span>
+              <If condition={isBlocked}>
+                <Then>
+                  <div className="flex items-center gap-1 p-1 px-3 bg-[#f4e2e2] border-2 border-[#eed0d1] rounded-sm">
+                    <MdBlock size={18} className="text-[#dc0201]" />
+                    <span className="text-[#dc0201] text-xs">محظور</span>
+                  </div>
+                </Then>
+              </If>
             </div>
           </div>
         )}

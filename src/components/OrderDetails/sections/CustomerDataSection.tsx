@@ -6,6 +6,8 @@ import { TimeRangeField } from '../fields/TimeRangeField';
 import { Order } from '@/types/orders';
 import { useUpdateCustomer } from '@/services/orders';
 import { toast } from 'react-toastify';
+import { If, Then } from 'react-if';
+import { MdBlock } from 'react-icons/md';
 
 export interface CustomerDataSectionProps {
   order: Order;
@@ -22,7 +24,10 @@ export function CustomerDataSection({
 }: CustomerDataSectionProps) {
   const updateCustomerMutation = useUpdateCustomer();
 
-  const handleTimeChange = async (availableFrom: string, availableTo: string) => {
+  const handleTimeChange = async (
+    availableFrom: string,
+    availableTo: string
+  ) => {
     await onUpdate('availableTime', { availableFrom, availableTo });
   };
 
@@ -42,7 +47,20 @@ export function CustomerDataSection({
   };
 
   return (
-    <div className={className}>
+    <div className={`relative ${className}`}>
+      <div className="absolute top-3 left-3">
+        <If condition={order.customers.isBlocked}>
+          <Then>
+            <div className="flex items-center gap-1 p-1 px-3 bg-[#f4e2e2] border-2 border-[#eed0d1] rounded-sm">
+              <MdBlock size={18} className="text-[#dc0201]" />
+              <span className="text-[#dc0201] text-sm lg:text-base font-medium">
+                {' '}
+                العميل محظور
+              </span>
+            </div>
+          </Then>
+        </If>
+      </div>
       <div className="flex justify-between items-center mb-3">
         <h2 className="text-primary font-semibold">بيانات العميل</h2>
       </div>

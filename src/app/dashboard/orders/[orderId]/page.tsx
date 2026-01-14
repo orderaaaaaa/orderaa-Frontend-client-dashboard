@@ -156,8 +156,9 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
                 onValueChange={(value) => setTimePeriod(value as TimePeriod)}
               >
                 <SelectTrigger
-                  className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${timePeriod ? 'text-primary font-bold' : ''
-                    }`}
+                  className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${
+                    timePeriod ? 'text-primary font-bold' : ''
+                  }`}
                 >
                   <SelectValue placeholder="الفترة الزمنية" />
                 </SelectTrigger>
@@ -270,8 +271,9 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
               onValueChange={(value) => setTimePeriod(value as TimePeriod)}
             >
               <SelectTrigger
-                className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${timePeriod ? 'text-primary font-bold' : ''
-                  }`}
+                className={`w-full border-[#CED4DA] rounded-lg h-10 text-[16px] ${
+                  timePeriod ? 'text-primary font-bold' : ''
+                }`}
               >
                 <SelectValue placeholder="الفترة الزمنية" />
               </SelectTrigger>

@@ -182,7 +182,7 @@ export const LEADS_TABLE_DATA: ILeadTableRow[] = [
     email: 'khalid.smith@gmail.com',
     source: 'Website',
     leadType: 'hotLeads',
-    time: '2 hours ago',
+    time: 'يوم واحد متبقي',
     timeIcon: true,
     timeSince: 'منذ ساعتين',
     action: 'منذ ساعتين',

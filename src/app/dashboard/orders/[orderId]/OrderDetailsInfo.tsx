@@ -17,6 +17,7 @@ interface OrderDetailsInfoProps {
   statusFilter?: string | null;
   isLockedByOther?: boolean;
   lockedBy?: OrderLockedBy | null;
+  isBlocked?: boolean;
   onUnlock?: () => Promise<void>;
 }
 
@@ -28,6 +29,7 @@ function OrderDetailsInfo({
   statusFilter,
   isLockedByOther,
   lockedBy,
+  isBlocked,
   onUnlock,
 }: OrderDetailsInfoProps) {
   return (

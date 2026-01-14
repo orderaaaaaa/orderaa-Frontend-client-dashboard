@@ -21,7 +21,7 @@ const LeadsList: React.FC<LeadsListProps> = ({
   return (
     <div className="mt-15">
       {/* Header */}
-      <div className="flex max-md:flex-col md:items-center justify-between mb-10">
+      <div className="flex px-1 max-md:flex-col md:items-center justify-between mb-10">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <BsClockHistory className="w-5 h-5 text-primary" />
@@ -33,8 +33,8 @@ const LeadsList: React.FC<LeadsListProps> = ({
             4 عميل باقي لهم 5 ايام او اقل - تابع معهم الان - مشاهدة المزيد
           </p>
         </div>
-        <button className="border border-gray-900 px-6 py-2 rounded-md text-primary font-semibold cursor-pointer">
-          مشاهدة المزيد{' '}
+        <button className="border w-fit border-gray-900 px-6 py-2 rounded-md text-primary font-semibold cursor-pointer max-md:self-end">
+          مشاهدة المزيد
         </button>
       </div>
 

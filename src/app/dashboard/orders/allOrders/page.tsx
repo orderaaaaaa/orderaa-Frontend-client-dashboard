@@ -615,6 +615,7 @@ function AllOrdersContent() {
                 price={order.totalCost}
                 trys={order.numberOfTriesToReach}
                 status={order.status}
+                isBlocked={order.customers.isBlocked}
                 city={
                   order.customers.area || order.customers.city || 'غير محدد'
                 }

@@ -18,7 +18,10 @@ const StatCard: React.FC<StatCardProps> = ({
   valueColor,
 }) => {
   return (
-    <div className="bg-[#fcfcfc] rounded-2xl border-2 border-[#e2d8f7] px-5 py-6">
+    <div
+      className="bg-[#fcfcfc] rounded-2xl border px-5 py-6"
+      style={{ borderColor: iconColor }}
+    >
       <div className="flex gap-5 w-full">
         <div
           className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
