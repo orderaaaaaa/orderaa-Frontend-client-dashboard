@@ -57,6 +57,11 @@ export const navigation: NavigationItem[] = [
         href: '/dashboard/orders/shipping-orders',
         icon: LiaShippingFastSolid,
       },
+      {
+        name: 'قسم الكول سنتر',
+        href: '/dashboard/orders/shipping-orders',
+        icon: LiaShippingFastSolid,
+      },
     ],
   },
   {

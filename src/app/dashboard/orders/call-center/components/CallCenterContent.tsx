@@ -1,0 +1,368 @@
+'use client';
+
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+} from 'react';
+import { toast } from 'react-toastify';
+import { ArrowUp } from 'lucide-react';
+
+import { Breadcrumb } from '@/components/dashboard-layout';
+import LoadingAnimation from '@/components/ui/loadingAnimation';
+import { Button } from '@/components/ui/button';
+import PrintOrdersActionsBar from '../../print-orders/components/PrintOrdersActionsBar';
+import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
+import Footer from '@/components/orders/Footer';
+import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
+
+import { useOrders } from '@/services/orders';
+import { useOrderStatistics } from '@/hooks/orders/useOrderStatistics';
+import { useFilterOptions } from '@/hooks/orders/useFilterOptions';
+import { useFilterForm } from '@/hooks/orders/useFilterForm';
+import { buildApiFiltersFromUrlState } from '@/hooks/orders/useUnifiedFilters';
+import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
+import { formatDateForUrl } from '@/utils/urlFilters';
+
+import { PageTabs } from '../../components/PageTabs';
+import { StatisticsSection } from '../../components/StatisticsSection';
+import { FilterSection } from '../../components/FilterSection';
+import {
+  usePrintOrdersFilters,
+  usePrintOrderStatistics,
+  usePrintOrderBulk,
+} from '../../print-orders/hooks';
+
+import { buildStatisticsCards } from '../constants/statisticsCards';
+import OrdersSelectionHeader from '../../components/OrdersSelectionHeader';
+
+export function CallCenterContent() {
+  const [selectedCustomerPhone, setSelectedCustomerPhone] = useState('');
+  const [selectedCustomerName, setSelectedCustomerName] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  const {
+    filters,
+    setStatus,
+    setPage,
+    setLimit,
+    updateLocalFilters,
+    printStatus,
+    setPrintStatus,
+  } = usePrintOrdersFilters();
+  const { statistics: printStatistics, loading: statsLoading } =
+    usePrintOrderStatistics();
+
+  const apiFilters = useMemo(() => {
+    return buildApiFiltersFromUrlState(filters);
+  }, [filters]);
+
+  const orderDetailsFilterParams = useMemo(() => {
+    const params = new URLSearchParams();
+
+    if (filters.status) params.set('status', filters.status);
+    if (filters.timePeriod) params.set('period', filters.timePeriod);
+
+    if (!filters.localFilters.executionDate) {
+      const fromStr = formatDateForUrl(filters.fromDate);
+      if (fromStr) params.set('from', fromStr);
+      const toStr = formatDateForUrl(filters.toDate);
+      if (toStr) params.set('to', toStr);
+    }
+
+    const { localFilters } = filters;
+    if (localFilters.customerName)
+      params.set('customerName', localFilters.customerName);
+    if (localFilters.phone) params.set('phone', localFilters.phone);
+    if (localFilters.governorate)
+      params.set('governorate', localFilters.governorate);
+    if (localFilters.city) params.set('city', localFilters.city);
+    if (localFilters.area) params.set('area', localFilters.area);
+    if (localFilters.productName)
+      params.set('productName', localFilters.productName);
+    if (localFilters.sizeColor) params.set('sizeColor', localFilters.sizeColor);
+    if (localFilters.shipmentCode)
+      params.set('shipmentCode', localFilters.shipmentCode);
+    if (localFilters.address) params.set('address', localFilters.address);
+
+    return params.toString();
+  }, [filters]);
+
+  const { page, limit } = filters;
+
+  const {
+    data: ordersData,
+    isLoading: loading,
+    error: queryError,
+    refetch,
+  } = useOrders(apiFilters);
+
+  const { statistics } = useOrderStatistics();
+
+  const { options } = useFilterOptions();
+
+  const orders = ordersData?.data ?? [];
+  const totalOrders = ordersData?.meta?.totalItems ?? 0;
+  const totalPages = ordersData?.meta?.totalPages ?? 1;
+  const currentPage = ordersData?.meta?.currentPage ?? 1;
+  const error = queryError?.message ?? null;
+
+  const {
+    selectMode,
+    toggleSelectMode,
+    setSelectMode,
+    selectedOrderIds,
+    selectedOrders,
+    selectAllMatchingFilters,
+    handleOrderSelect,
+    handleSelectAllToggle,
+    clearSelections,
+  } = usePrintOrderBulk({ orders });
+
+  const prevPageRef = useRef<number>(page);
+
+  useEffect(() => {
+    if (prevPageRef.current !== page) {
+      prevPageRef.current = page;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [page]);
+
+  const handleFormSubmit = useCallback(
+    (data: OrderFiltersFormData) => {
+      updateLocalFilters(data);
+    },
+    [updateLocalFilters]
+  );
+
+  const statisticsCards = useMemo(
+    () => buildStatisticsCards(printStatistics),
+    [printStatistics]
+  );
+
+  const {
+    control,
+    formState: { errors },
+    setValue,
+  } = useFilterForm({
+    onSubmit: handleFormSubmit,
+  });
+
+  const handlePrepared = useCallback(() => {
+    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى تم التحضير`);
+  }, [selectedOrders]);
+
+  const handleAwaitingPackaging = useCallback(() => {
+    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى فى انتظار التغليف`);
+  }, [selectedOrders]);
+
+  const handleCallAgain = useCallback(() => {
+    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى اعادة اتصال`);
+  }, [selectedOrders]);
+
+  const handleChangeProduct = useCallback(() => {
+    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى تغيير المنتج`);
+  }, [selectedOrders]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 500);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  const handleRepeatClick = useCallback((phone: string, name: string) => {
+    setSelectedCustomerPhone(phone);
+    setSelectedCustomerName(name);
+    setIsModalOpen(true);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedCustomerPhone('');
+    setSelectedCustomerName('');
+  }, []);
+
+  const showBulkActions =
+    (selectedOrders.length > 0 || selectAllMatchingFilters) && !isModalOpen;
+
+  useEffect(() => {
+    if (showBulkActions) {
+      document.body.style.paddingBottom = '80px';
+    } else {
+      document.body.style.paddingBottom = '0px';
+    }
+    return () => {
+      document.body.style.paddingBottom = '0px';
+    };
+  }, [showBulkActions]);
+
+  return (
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-7 w-full">
+        <Breadcrumb items={[{ title: 'الطلبات' }, { title: 'كول سنتر' }]} />
+      </div>
+      <PageTabs
+        statusCounts={statistics?.statusCounts || {}}
+        totalOrders={statistics?.totalOrders || 0}
+        onStatusChange={setStatus}
+        currentStatus={filters.status}
+      />
+      {/* //TODO: Update props to match call-center orders context */}
+      <StatisticsSection cards={statisticsCards} isLoading={statsLoading} />
+      <FilterSection
+        control={control}
+        errors={errors}
+        setValue={setValue}
+        options={{
+          productOptions: options.productNames || [],
+          sizeColorOptions: [
+            ...(options.productSizes || []),
+            ...(options.productColors || []),
+          ],
+          governorateOptions: options.governorates || [],
+          areaOptions: options.areas || [],
+        }}
+        printStatus={printStatus}
+        onPrintStatusChange={setPrintStatus}
+        printedCount={0}
+        notPrintedCount={0}
+        selectedOrders={selectedOrders}
+      />
+
+      <OrdersSelectionHeader
+        totalOrders={totalOrders}
+        selectMode={selectMode}
+        selectedOrderIds={selectedOrderIds}
+        selectAllMatchingFilters={selectAllMatchingFilters}
+        toggleSelectMode={toggleSelectMode}
+        handleSelectAllToggle={handleSelectAllToggle}
+        setSelectMode={setSelectMode}
+      />
+
+      {loading && orders.length === 0 ? (
+        <LoadingAnimation />
+      ) : error ? (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center text-red-600">
+            <p>{error}</p>
+          </div>
+        </div>
+      ) : (
+        // TODO: Create a reusable component for the orders grid
+        <>
+          <div className="grid container mx-auto grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 my-4 justify-items-center">
+            {orders.map((order) => (
+              <OrderCard
+                key={order.id}
+                select={selectMode}
+                isSelected={
+                  selectAllMatchingFilters ||
+                  selectedOrderIds.includes(order.id)
+                }
+                onSelectionChange={(checked) =>
+                  handleOrderSelect(order.id, checked)
+                }
+                id={order.id}
+                code={order.code}
+                name={order.customers.name}
+                phoneNumbers={order.customers.phone_numbers}
+                government={
+                  order.governorate || order.externalGovernorate || 'غير محدد'
+                }
+                shippingId={order.shippingId}
+                items={order.order_products.map((op: any) => {
+                  const productName = op.products?.name || 'منتج غير معروف';
+
+                  const variantDetails =
+                    op.variants && op.variants.length > 0
+                      ? op.variants.map((v: any) => v.value).join('')
+                      : '';
+
+                  return variantDetails
+                    ? `${productName} - ${variantDetails}`
+                    : productName;
+                })}
+                price={order.totalCost}
+                trys={order.numberOfTriesToReach}
+                status={order.status}
+                city={
+                  order.customers.area || order.customers.city || 'غير محدد'
+                }
+                address={order.customers.address || 'غير محدد'}
+                alert={0}
+                createdAt={order.createdAt}
+                repeatCount={order.customers.totalCustomerOrders || 0}
+                onRepeatClick={() =>
+                  handleRepeatClick(
+                    order.customers.phone_numbers?.[0],
+                    order.customers.name
+                  )
+                }
+                filterParams={orderDetailsFilterParams}
+                cancelReason={order.cancelReason}
+                cancelNotes={order.cancelNotes}
+                postponedUntil={order.postponedUntil}
+              />
+            ))}
+          </div>
+
+          {orders.length === 0 && (
+            <div className="text-center py-12 text-gray-500">لا توجد طلبات</div>
+          )}
+        </>
+      )}
+      <CustomerOrdersModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        customerPhone={selectedCustomerPhone}
+        customerName={selectedCustomerName}
+      />
+      <Footer
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalOrders}
+        hasNextPage={currentPage < totalPages}
+        hasPreviousPage={currentPage > 1}
+        onPageChange={setPage}
+        onPrevious={() => setPage(Math.max(1, currentPage - 1))}
+        onNext={() => setPage(Math.min(totalPages, currentPage + 1))}
+        currentPageSize={limit}
+        onPageSizeChange={setLimit}
+        hasSelectedOrders={showBulkActions}
+      />
+      {showBulkActions && (
+        <PrintOrdersActionsBar
+          selectedOrders={selectedOrders}
+          onPrepared={handlePrepared}
+          onAwaitingPackaging={handleAwaitingPackaging}
+          onCallAgain={handleCallAgain}
+          onChangeProduct={handleChangeProduct}
+          position="fixed"
+          isAllSelected={selectAllMatchingFilters}
+          totalStoreOrders={totalOrders}
+        />
+      )}
+      {showBackToTop && (
+        <Button
+          variant="default"
+          size="icon"
+          onClick={scrollToTop}
+          className="fixed bottom-8 left-8 z-50 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+          aria-label="العودة للأعلى"
+        >
+          <ArrowUp className="size-6" />
+        </Button>
+      )}
+    </div>
+  );
+}
