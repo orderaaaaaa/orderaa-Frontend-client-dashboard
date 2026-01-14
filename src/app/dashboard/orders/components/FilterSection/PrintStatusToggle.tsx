@@ -36,7 +36,6 @@ export function PrintStatusToggle({
         onClick={() => handleToggle('printed')}
         className={clsx(value !== 'printed' && 'text-gray-600')}
       >
-        <LiaPrintSolid className="size-4" />
         <span>طلبات تم طباعتها</span>
       </Button>
 

@@ -66,6 +66,7 @@ export interface InvoiceLabels {
   totalPrice: string;
   nonReceiptMessage: string;
   nonReceiptSuffix?: string;
+  productCount: string;
   shippingBarcode: string;
   contactMessage: string;
   senderName: string;

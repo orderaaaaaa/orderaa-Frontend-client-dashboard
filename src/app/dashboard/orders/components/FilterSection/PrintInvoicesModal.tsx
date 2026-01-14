@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { LiaPrintSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
@@ -25,7 +25,6 @@ export function PrintInvoicesModal({
   const [language, setLanguage] = useState<InvoiceLanguage>('ar');
   const [isPrinting, setIsPrinting] = useState(false);
   const [invoicesToPrint, setInvoicesToPrint] = useState<InvoiceData[]>([]);
-  const printContainerRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = async () => {
     const count = parseInt(invoiceCount, 10);
@@ -147,10 +146,7 @@ export function PrintInvoicesModal({
       {isPrinting &&
         typeof document !== 'undefined' &&
         createPortal(
-          <div
-            ref={printContainerRef}
-            className="print-container hidden print:block"
-          >
+          <div className="print-container hidden print:block">
             {invoicesToPrint.map((invoice, index) => (
               <Invoice
                 key={invoice.orderCode || index}

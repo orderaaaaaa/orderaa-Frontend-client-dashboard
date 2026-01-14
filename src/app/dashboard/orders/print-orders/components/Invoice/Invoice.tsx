@@ -50,7 +50,6 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
       className="invoice-page w-[100mm] min-h-[150mm] bg-white p-1 text-[8px]"
       dir={language === 'ar' ? 'rtl' : 'ltr'}
     >
-      
       {/* Store Name Header */}
       <div className="text-center mb-1 pb-1">
         <h1 className="text-base font-bold tracking-wide">{storeName}</h1>
@@ -109,7 +108,7 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
         >
           <Barcode
             value={data.orderCode}
-            width={1}
+            width={2}
             height={25}
             fontSize={0}
             margin={0}
@@ -202,15 +201,16 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
 
       {/* Total Price */}
       <div className="bg-black py-1.5 px-2 mb-1">
-        <p className="text-white text-[10px] font-bold text-center">
+        <p className="text-white text-base font-bold text-center">
           {labels.totalPrice}:{" "}{data.totalPrice} EGP
         </p>
       </div>
 
-      {/* Non-Receipt Penalty */}
-      <p className="text-[8px] font-bold mb-1 border-y border-black py-1">
-        {labels.nonReceiptMessage} {data.nonReceiptPenalty || 0} EGP.
-      </p>
+      {/* Non-Receipt Penalty & Product Count */}
+      <div className="grid grid-cols-2 items-center text-[8px] font-bold mb-1 border-y border-black py-1">
+        <span>{labels.nonReceiptMessage} {data.nonReceiptPenalty || 0} EGP.</span>
+        <span>{labels.productCount}: {data.products.length}</span>
+      </div>
 
       {/* Shipping Barcode */}
       {data.shippingId && (
@@ -218,7 +218,7 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
           <span className="font-bold text-[8px]">{labels.shippingBarcode}</span>
           <Barcode
             value={data.shippingId}
-            width={1}
+            width={1.6}
             height={25}
             fontSize={0}
             margin={0}
@@ -230,31 +230,31 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
       {/* Footer */}
       <div className="grid grid-cols-2 gap-2 mt-1 pt-1">
         <div>
-          <div className="grid place-items-start">
+          <div className="grid place-items-center">
             <QRCodeSVG
               value={storeInfo.contactQRValue}
-              size={50}
+              size={100}
               level="L"
               className='p-1 border border-black rounded-lg'
             />
           </div>
-          <p className="text-[7px] text-start">{labels.scanToContact}</p>
+          <p className="text-[7px] text-center">{labels.scanToContact}</p>
         </div>
-        <div>
-          <p className="text-[7px] mb-0.5">
+        <div className='grid place-content-center'>
+          <p className="text-[9px] mb-0.5">
             {labels.contactMessage}
           </p>
 
           <hr />
 
-          <p className="text-[7px] mb-0.5">
+          <p className="text-[9px] mb-0.5">
             <span className="font-bold">{labels.senderName}: </span>
             {storeName}
           </p>
-          <p className="text-[7px] mb-0.5">
+          <p className="text-[9px] mb-0.5">
             <span>{labels.workNumbers}:</span>
           </p>
-          <div className="grid grid-cols-2 items-center gap-0.5 text-[7px] font-bold">
+          <div className="grid grid-cols-2 items-center gap-0.5 text-[9px] font-bold">
             <div className="grid grid-cols-[auto_auto_auto] items-center justify-start gap-1">
               <LiaPhoneSolid className="size-2" />
               <span>{storeInfo.phoneNumbers[0] || ''}</span>
@@ -265,7 +265,6 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
             </div>
           </div>
         </div>
-
       </div>
     </div >
   );
