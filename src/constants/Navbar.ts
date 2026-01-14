@@ -7,6 +7,7 @@ import {
   LiaClipboardCheckSolid,
   LiaStoreSolid,
   LiaUsersCogSolid,
+  LiaShippingFastSolid,
 } from 'react-icons/lia';
 import {
   House,
@@ -50,6 +51,11 @@ export const navigation: NavigationItem[] = [
         name: 'قسم التغليف',
         href: '/dashboard/orders/print-orders',
         icon: LiaClipboardCheckSolid,
+      },
+      {
+        name: 'قسم الشحن',
+        href: '/dashboard/orders/shipping-orders',
+        icon: LiaShippingFastSolid,
       },
     ],
   },

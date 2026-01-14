@@ -11,8 +11,9 @@ import { toast } from 'react-toastify';
 import { ArrowUp, Scan, ScanLine, X } from 'lucide-react';
 
 import { Breadcrumb } from '@/components/dashboard-layout';
+import LoadingAnimation from '@/components/ui/loadingAnimation';
 import { Button } from '@/components/ui/button';
-import PrintOrdersActionsBar from './PrintOrdersActionsBar';
+import PrintOrdersActionsBar from '../../print-orders/components/PrintOrdersActionsBar';
 import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
 import Footer from '@/components/orders/Footer';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
@@ -25,17 +26,18 @@ import { buildApiFiltersFromUrlState } from '@/hooks/orders/useUnifiedFilters';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { formatDateForUrl } from '@/utils/urlFilters';
 
-import { PageTabs } from './PageTabs';
-import { StatisticsSection } from './StatisticsSection';
-import { FilterSection } from './FilterSection';
+import { PageTabs } from '../../print-orders/components';
+import { StatisticsSection } from '../../print-orders/components';
+import { FilterSection } from '../../print-orders/components';
 import {
   usePrintOrdersFilters,
   usePrintOrderStatistics,
   usePrintOrderBulk,
-} from '../hooks';
+} from '../../print-orders/hooks';
+
 import { buildStatisticsCards } from '../constants/statisticsCards';
 
-export function PrintOrdersContent() {
+export function ShippingOrdersContent() {
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState('');
   const [selectedCustomerName, setSelectedCustomerName] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,17 +52,10 @@ export function PrintOrdersContent() {
     printStatus,
     setPrintStatus,
   } = usePrintOrdersFilters();
-  const { statistics: printStatistics, loading: statsLoading } =
-    usePrintOrderStatistics();
 
   const apiFilters = useMemo(() => {
     return buildApiFiltersFromUrlState(filters);
   }, [filters]);
-
-  const statisticsCards = useMemo(
-    () => buildStatisticsCards(printStatistics),
-    [printStatistics]
-  );
 
   const orderDetailsFilterParams = useMemo(() => {
     const params = new URLSearchParams();
@@ -103,6 +98,8 @@ export function PrintOrdersContent() {
   } = useOrders(apiFilters);
 
   const { statistics } = useOrderStatistics();
+  const { statistics: printStatistics, loading: statsLoading } =
+    usePrintOrderStatistics();
   const { options } = useFilterOptions();
 
   const orders = ordersData?.data ?? [];
@@ -137,6 +134,11 @@ export function PrintOrdersContent() {
       updateLocalFilters(data);
     },
     [updateLocalFilters]
+  );
+
+  const statisticsCards = useMemo(
+    () => buildStatisticsCards(printStatistics),
+    [printStatistics]
   );
 
   const {
@@ -205,18 +207,15 @@ export function PrintOrdersContent() {
   return (
     <div className="w-full max-w-full overflow-x-hidden">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-7 w-full">
-        <Breadcrumb
-          items={[{ title: 'الطلبات' }, { title: 'طباعة الطلبات' }]}
-        />
+        <Breadcrumb items={[{ title: 'الطلبات' }, { title: 'شحن الطلبات' }]} />
       </div>
-
       <PageTabs
         statusCounts={statistics?.statusCounts || {}}
         totalOrders={statistics?.totalOrders || 0}
         onStatusChange={setStatus}
         currentStatus={filters.status}
       />
-
+      {/* //TODO: Update props to match shipping orders context */}
       <StatisticsSection cards={statisticsCards} isLoading={statsLoading} />
       <FilterSection
         control={control}
@@ -237,7 +236,6 @@ export function PrintOrdersContent() {
         notPrintedCount={0}
         selectedOrders={selectedOrders}
       />
-
       <div className="flex flex-col sm:flex-row justify-between gap-2 mt-10 mb-6 select-none">
         <div className="flex justify-center sm:justify-start items-center gap-4">
           <p className="text-gray-700">عدد جميع الطلبات: {totalOrders}</p>
@@ -270,16 +268,8 @@ export function PrintOrdersContent() {
           </Button>
         </div>
       </div>
-
       {loading && orders.length === 0 ? (
-        <div className="relative">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-4 text-gray-600">جاري تحميل الطلبات...</p>
-            </div>
-          </div>
-        </div>
+        <LoadingAnimation />
       ) : error ? (
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center text-red-600">
@@ -310,10 +300,12 @@ export function PrintOrdersContent() {
                 shippingId={order.shippingId}
                 items={order.order_products.map((op: any) => {
                   const productName = op.products?.name || 'منتج غير معروف';
+
                   const variantDetails =
                     op.variants && op.variants.length > 0
                       ? op.variants.map((v: any) => v.value).join('')
                       : '';
+
                   return variantDetails
                     ? `${productName} - ${variantDetails}`
                     : productName;
@@ -321,8 +313,10 @@ export function PrintOrdersContent() {
                 price={order.totalCost}
                 trys={order.numberOfTriesToReach}
                 status={order.status}
-                city=""
-                address=""
+                city={
+                  order.customers.area || order.customers.city || 'غير محدد'
+                }
+                address={order.customers.address || 'غير محدد'}
                 alert={0}
                 createdAt={order.createdAt}
                 repeatCount={order.customers.totalCustomerOrders || 0}
@@ -335,10 +329,7 @@ export function PrintOrdersContent() {
                 filterParams={orderDetailsFilterParams}
                 cancelReason={order.cancelReason}
                 cancelNotes={order.cancelNotes}
-                isPrinted={order.isPrinted}
-                disableNavigation
-                hideCustomerInfo
-                showAllItems
+                postponedUntil={order.postponedUntil}
               />
             ))}
           </div>
@@ -348,14 +339,12 @@ export function PrintOrdersContent() {
           )}
         </>
       )}
-
       <CustomerOrdersModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         customerPhone={selectedCustomerPhone}
         customerName={selectedCustomerName}
       />
-
       <Footer
         currentPage={currentPage}
         totalPages={totalPages}
@@ -369,7 +358,6 @@ export function PrintOrdersContent() {
         onPageSizeChange={setLimit}
         hasSelectedOrders={showBulkActions}
       />
-
       {showBulkActions && (
         <PrintOrdersActionsBar
           selectedOrders={selectedOrders}
@@ -382,7 +370,6 @@ export function PrintOrdersContent() {
           totalStoreOrders={totalOrders}
         />
       )}
-
       {showBackToTop && (
         <Button
           variant="default"
