@@ -50,6 +50,7 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
       className="invoice-page w-[100mm] min-h-[150mm] bg-white p-1 text-[8px]"
       dir={language === 'ar' ? 'rtl' : 'ltr'}
     >
+      
       {/* Store Name Header */}
       <div className="text-center mb-1 pb-1">
         <h1 className="text-base font-bold tracking-wide">{storeName}</h1>
