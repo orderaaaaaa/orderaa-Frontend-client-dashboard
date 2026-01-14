@@ -4,6 +4,7 @@ import React from 'react';
 import { LiaTrashAltSolid } from 'react-icons/lia';
 import { ScannedOrder } from '../../hooks/useScannedOrders';
 import { Button } from '@/components/ui/button';
+import clsx from 'clsx';
 
 interface ScannedOrdersTableProps {
   orders: ScannedOrder[];
@@ -26,39 +27,27 @@ export function ScannedOrdersTable({
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <table className="w-full">
-        <thead className="bg-gray-100 sticky top-0">
-          <tr>
-            <th className="text-right py-3 px-4 font-bold text-gray-700">
-              كود الطلب
-            </th>
-            <th className="text-center py-3 px-4 font-bold text-gray-700 w-20">
-              حذف
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders.map((order) => (
-            <tr
-              key={order.code}
-              className={`border-b border-gray-200 hover:bg-gray-50 transition-colors ${flashingCode === order.code ? 'scan-flash-success' : ''
-                }`}
+      <div className="grid grid-cols-3 gap-4">
+        {orders.map((order) => (
+          <div
+            key={order.code}
+            className={clsx(
+              'flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 hover:bg-gray-100 transition-colors',
+              flashingCode === order.code && 'scan-flash-success'
+            )}
+          >
+            <span className="text-lg font-medium">{order.code}</span>
+            <Button
+              variant="ghost"
+              onClick={() => onRemove(order.code)}
+              className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+              title="حذف الطلب"
             >
-              <td className="py-4 px-4 text-lg font-medium">{order.code}</td>
-              <td className="py-4 px-4 text-center">
-                <Button
-                  variant="ghost"
-                  onClick={() => onRemove(order.code)}
-                  className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
-                  title="حذف الطلب"
-                >
-                  <LiaTrashAltSolid className="size-5" />
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              <LiaTrashAltSolid className="size-5" />
+            </Button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
