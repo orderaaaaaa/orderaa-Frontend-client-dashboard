@@ -38,16 +38,6 @@ export function PrintStatusToggle({
       >
         <LiaPrintSolid className="size-4" />
         <span>طلبات تم طباعتها</span>
-        <span
-          className={clsx(
-            'px-2 py-0.5 rounded-full text-xs',
-            value === 'printed'
-              ? 'bg-white/20 text-white'
-              : 'bg-gray-100 text-gray-600'
-          )}
-        >
-          {printedCount}
-        </span>
       </Button>
 
       <Button
@@ -57,16 +47,6 @@ export function PrintStatusToggle({
         className={clsx(value !== 'not_printed' && 'text-gray-600')}
       >
         <span>طلبات لم يتم طباعتها</span>
-        <span
-          className={clsx(
-            'px-2 py-0.5 rounded-full text-xs',
-            value === 'not_printed'
-              ? 'bg-white/20 text-white'
-              : 'bg-gray-100 text-gray-600'
-          )}
-        >
-          {notPrintedCount}
-        </span>
       </Button>
     </div>
   );

@@ -62,8 +62,16 @@ export function PrintOrdersContent() {
     usePrintOrderStatistics();
 
   const apiFilters = useMemo(() => {
-    return buildApiFiltersFromUrlState(filters);
-  }, [filters]);
+    const baseFilters = buildApiFiltersFromUrlState(filters);
+
+    if (printStatus === 'printed') {
+      return { ...baseFilters, isPrinted: true };
+    } else if (printStatus === 'not_printed') {
+      return { ...baseFilters, isPrinted: false };
+    }
+
+    return baseFilters;
+  }, [filters, printStatus]);
 
   const statisticsCards = useMemo(
     () => buildStatisticsCards(printStatistics),
