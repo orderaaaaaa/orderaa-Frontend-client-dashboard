@@ -460,7 +460,10 @@ export function PrintOrdersContent() {
 
       <ScannedOrdersModal
         isOpen={isScannedOrdersModalOpen}
-        onClose={() => setIsScannedOrdersModalOpen(false)}
+        onClose={() => {
+          setIsScannedOrdersModalOpen(false);
+          clearOrders();
+        }}
         scannedOrders={scannedOrders}
         onRemoveOrder={removeOrder}
         searchQuery={searchQuery}
