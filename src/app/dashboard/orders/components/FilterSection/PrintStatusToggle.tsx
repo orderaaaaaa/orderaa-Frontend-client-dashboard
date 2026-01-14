@@ -2,7 +2,8 @@
 
 import React from 'react';
 import clsx from 'clsx';
-import { PrintStatus } from '../../types';
+//TODO: Move this import after moving types
+import { PrintStatus } from '../../print-orders/types';
 import { LiaPrintSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 

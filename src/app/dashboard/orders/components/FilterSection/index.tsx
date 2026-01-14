@@ -24,10 +24,15 @@ import { Button } from '@/components/ui/button';
 import BaseModal from '@/components/ui/base-modal';
 import { PrintStatusToggle } from './PrintStatusToggle';
 import { PrintInvoicesModal } from './PrintInvoicesModal';
-import { PrintStatus, InvoiceData, InvoiceLanguage } from '../../types';
-import { mapOrdersToInvoices } from '../../utils/invoiceMapper';
-import { Invoice } from '../Invoice';
-import { STORE_INFO } from '../../constants/invoiceLabels';
+//TODO: Fix these imports after moving types and utils
+import {
+  PrintStatus,
+  InvoiceData,
+  InvoiceLanguage,
+} from '../../print-orders/types';
+import { mapOrdersToInvoices } from '../../print-orders/utils';
+import { Invoice } from '../../print-orders/components/Invoice';
+import { STORE_INFO } from '../../print-orders/constants';
 
 interface FilterSectionProps {
   control: Control<OrderFiltersFormData>;
@@ -84,7 +89,8 @@ export function FilterSection({
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [showLanguagePicker, setShowLanguagePicker] = useState(false);
   const [invoicesToPrint, setInvoicesToPrint] = useState<InvoiceData[]>([]);
-  const [selectedLanguage, setSelectedLanguage] = useState<InvoiceLanguage>('ar');
+  const [selectedLanguage, setSelectedLanguage] =
+    useState<InvoiceLanguage>('ar');
 
   const hasInitializedRef = useRef(false);
 
@@ -212,11 +218,7 @@ export function FilterSection({
             </PopoverContent>
           </Popover>
 
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={handlePrintClick}
-          >
+          <Button variant="outline" size="lg" onClick={handlePrintClick}>
             <LiaPrintSolid className="size-5" />
           </Button>
         </div>

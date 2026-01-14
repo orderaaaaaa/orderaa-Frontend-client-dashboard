@@ -1,3 +1,2 @@
 export { PrintOrdersContent } from './PrintOrdersContent';
-export { PageTabs } from './PageTabs';
-export { FilterSection } from './FilterSection';
+export { PageTabs } from '../../components/PageTabs';

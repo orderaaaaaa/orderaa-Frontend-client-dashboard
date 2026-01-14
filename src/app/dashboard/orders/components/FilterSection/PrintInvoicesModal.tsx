@@ -6,17 +6,18 @@ import { LiaPrintSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
-import { InvoiceLanguage, InvoiceData } from '../../types/invoice';
-import { mapOrdersToInvoices } from '../../utils/invoiceMapper';
-import { Invoice } from '../Invoice';
-import { printOrders } from '../../services/printOrders';
-import { STORE_INFO } from '../../constants/invoiceLabels';
+// TODO: Fix these imports after moving types and utils
+import { InvoiceLanguage, InvoiceData } from '../../print-orders/types/invoice';
+import { mapOrdersToInvoices } from '../../print-orders/utils/invoiceMapper';
+import { Invoice } from '../../print-orders/components/Invoice';
+import { printOrders } from '../../print-orders/services/printOrders';
+import { STORE_INFO } from '../../print-orders/constants/invoiceLabels';
 import {
   useBarcodeScanner,
   useScannerFeedback,
   useScannedOrders,
-} from '../../hooks';
-import { ScannedOrdersModal } from '../ScannedOrdersModal';
+} from '../../print-orders/hooks';
+import { ScannedOrdersModal } from '../../print-orders/components/ScannedOrdersModal';
 
 interface PrintInvoicesModalProps {
   isOpen: boolean;
@@ -49,7 +50,10 @@ export function PrintInvoicesModal({
 
   const handleScan = useCallback(
     (barcode: string) => {
-      console.log('[PrintInvoicesModal] handleScan called with barcode:', barcode);
+      console.log(
+        '[PrintInvoicesModal] handleScan called with barcode:',
+        barcode
+      );
       console.log('[PrintInvoicesModal] isOpen:', isOpen);
 
       if (!isOpen) {
@@ -62,18 +66,25 @@ export function PrintInvoicesModal({
       console.log('[PrintInvoicesModal] Order added result:', added);
 
       if (added) {
-        console.log('[PrintInvoicesModal] Order added successfully, playing success sound');
+        console.log(
+          '[PrintInvoicesModal] Order added successfully, playing success sound'
+        );
         playSuccessSound();
         setFlashingCode(barcode);
         setTimeout(() => setFlashingCode(null), 600);
 
-        console.log('[PrintInvoicesModal] isScannedOrdersModalOpen:', isScannedOrdersModalOpen);
+        console.log(
+          '[PrintInvoicesModal] isScannedOrdersModalOpen:',
+          isScannedOrdersModalOpen
+        );
         if (!isScannedOrdersModalOpen) {
           console.log('[PrintInvoicesModal] Opening ScannedOrdersModal');
           setIsScannedOrdersModalOpen(true);
         }
       } else {
-        console.log('[PrintInvoicesModal] Order already exists, playing error sound');
+        console.log(
+          '[PrintInvoicesModal] Order already exists, playing error sound'
+        );
         playErrorSound();
         toast.warning('هذا الطلب تم مسحه مسبقاً');
       }
@@ -103,13 +114,14 @@ export function PrintInvoicesModal({
     if (scannedOrders.length === 0) return;
 
     const statusLabel = statusLabels[status] || status;
-    toast.info("جاري تحديث حالة الطلبات إلى: " + statusLabel);
+    toast.info('جاري تحديث حالة الطلبات إلى: ' + statusLabel);
     clearOrders();
     setIsScannedOrdersModalOpen(false);
   };
 
   const handlePrepared = () => handleStatusUpdate('PREPARED');
-  const handleAwaitingPackaging = () => handleStatusUpdate('AWAITING_PACKAGING');
+  const handleAwaitingPackaging = () =>
+    handleStatusUpdate('AWAITING_PACKAGING');
   const handleCallAgain = () => handleStatusUpdate('CALL_AGAIN');
   const handleChangeProduct = () => handleStatusUpdate('CHANGE_PRODUCT');
 
@@ -199,7 +211,9 @@ export function PrintInvoicesModal({
           />
 
           <div>
-            <p className="text-sm font-medium text-gray-700 mb-2">لغة الفاتورة</p>
+            <p className="text-sm font-medium text-gray-700 mb-2">
+              لغة الفاتورة
+            </p>
             <div className="grid grid-cols-2 gap-4">
               <label className="grid grid-cols-[auto_1fr] items-center gap-2 cursor-pointer">
                 <input
@@ -246,19 +260,24 @@ export function PrintInvoicesModal({
         flashingCode={flashingCode}
       />
 
-      {isPrinting && typeof document !== 'undefined' && createPortal(
-        <div ref={printContainerRef} className="print-container hidden print:block">
-          {invoicesToPrint.map((invoice, index) => (
-            <Invoice
-              key={invoice.orderCode || index}
-              data={invoice}
-              storeInfo={STORE_INFO}
-              language={language}
-            />
-          ))}
-        </div>,
-        document.body
-      )}
+      {isPrinting &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            ref={printContainerRef}
+            className="print-container hidden print:block"
+          >
+            {invoicesToPrint.map((invoice, index) => (
+              <Invoice
+                key={invoice.orderCode || index}
+                data={invoice}
+                storeInfo={STORE_INFO}
+                language={language}
+              />
+            ))}
+          </div>,
+          document.body
+        )}
     </>
   );
 }

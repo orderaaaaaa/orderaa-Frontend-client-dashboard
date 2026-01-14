@@ -26,9 +26,9 @@ import { buildApiFiltersFromUrlState } from '@/hooks/orders/useUnifiedFilters';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { formatDateForUrl } from '@/utils/urlFilters';
 
-import { PageTabs } from '../../print-orders/components';
+import { PageTabs } from '../../components/PageTabs';
 import { StatisticsSection } from '../../components/StatisticsSection';
-import { FilterSection } from '../../print-orders/components';
+import { FilterSection } from '../../components/FilterSection';
 import {
   usePrintOrdersFilters,
   usePrintOrderStatistics,
