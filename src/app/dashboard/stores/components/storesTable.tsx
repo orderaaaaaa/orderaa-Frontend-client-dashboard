@@ -27,10 +27,11 @@ const getStatusBadge = (status?: 'active' | 'inactive') => {
 
 function StoresTable({ data, headers }: StoresTableProps) {
   const tableHeaders = headers || STORES_TABLE_HEADERS;
+  const columnWidth = `${100 / tableHeaders.length}%`;
 
   return (
     <div className="mt-8">
-      {/* --- Mobile Cards View --- */}
+      {/* ---------- Mobile ---------- */}
       <div className="grid grid-cols-1 gap-4 md:hidden">
         {data.map((row) => (
           <div
@@ -47,7 +48,9 @@ function StoresTable({ data, headers }: StoresTableProps) {
 
             <div className="grid grid-cols-2 gap-y-4 gap-x-2 border-t pt-4">
               {tableHeaders
-                .filter((h) => !['storeName', 'actions'].includes(h.key))
+                .filter(
+                  (h) => !['storeName', 'actions', 'status'].includes(h.key)
+                )
                 .map((header) => (
                   <div key={header.id} className="flex flex-col">
                     <span className="text-xs text-gray-500 mb-1">
@@ -58,6 +61,11 @@ function StoresTable({ data, headers }: StoresTableProps) {
                     </span>
                   </div>
                 ))}
+
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500 mb-1">الحالة</span>
+                {getStatusBadge(row.status)}
+              </div>
 
               <div className="flex flex-col col-span-2">
                 <span className="text-xs text-gray-500 mb-1">الإجراءات</span>
@@ -76,21 +84,16 @@ function StoresTable({ data, headers }: StoresTableProps) {
         ))}
       </div>
 
-      {/* --- Desktop Table View --- */}
+      {/* ---------- Desktop ---------- */}
       <div className="hidden md:block overflow-x-auto bg-white rounded-lg p-8">
-        <table className="w-full border-collapse min-w-[1000px]">
+        <table className="w-full min-w-[1000px] border-collapse table-fixed">
           <thead>
             <tr className="bg-[#f2edfd] text-sm">
-              {tableHeaders.map((header, index) => (
+              {tableHeaders.map((header) => (
                 <th
                   key={header.id}
-                  className={`py-4 px-4 font-semibold text-gray-900 ${
-                    header.key === 'storeName'
-                      ? 'text-right rounded-r-md w-[20%]'
-                      : index === tableHeaders.length - 1
-                      ? 'text-center rounded-l-md'
-                      : 'text-center'
-                  }`}
+                  style={{ width: columnWidth }}
+                  className="py-4 px-4 font-semibold text-gray-900 text-center"
                 >
                   {header.label}
                 </th>
@@ -109,19 +112,15 @@ function StoresTable({ data, headers }: StoresTableProps) {
                 {tableHeaders.map((header) => (
                   <td
                     key={header.id}
-                    className={`py-5 px-4 text-gray-900 ${
-                      header.key === 'storeName' ? 'text-right' : 'text-center'
-                    }`}
+                    style={{ width: columnWidth }}
+                    className="py-5 px-4 text-gray-900 text-center truncate"
                   >
                     <If condition={header.key === 'storeName'}>
-                      <Then>
-                        <div className="flex items-center gap-3">
-                          {getStatusBadge(row.status)}
-                          <span className="text-gray-900 font-medium">
-                            {row.storeName}
-                          </span>
-                        </div>
-                      </Then>
+                      <Then>{row.storeName}</Then>
+                    </If>
+
+                    <If condition={header.key === 'status'}>
+                      <Then>{getStatusBadge(row.status)}</Then>
                     </If>
 
                     <If condition={header.key === 'actions'}>
@@ -139,7 +138,9 @@ function StoresTable({ data, headers }: StoresTableProps) {
                     </If>
 
                     <If
-                      condition={!['storeName', 'actions'].includes(header.key)}
+                      condition={
+                        !['storeName', 'actions', 'status'].includes(header.key)
+                      }
                     >
                       <Then>
                         {row[header.key as keyof IStoreTableRow] ?? '-'}

@@ -8,6 +8,7 @@ import {
   LEAD_SOURCE_OPTIONS,
 } from '../constants/leadsDummyData';
 import debounce from 'lodash/debounce';
+import { StatusSelect } from './ui/StatusSelect';
 
 interface LeadsSearchProps {
   onSearchChange: (search: string) => void;
@@ -123,20 +124,16 @@ export default function LeadsSearch({
                 placeholder="نوع الشارة"
                 widthClass="w-full"
                 clearable
-                triggerClassName="w-full border border-gray-300 rounded-lg py-2.5 px-3 text-sm font-semibold bg-white text-right"
+                triggerClassName="w-full border border-gray-300 rounded-lg py-2.5 px-3 !text-sm font-semibold bg-white text-right"
               />
             </div>
 
             {/* Lead Source */}
             <div className="space-y-1">
-              <SearchableSelect
+              <StatusSelect
                 value={leadSource}
                 onChange={handleLeadSourceChange}
-                options={LEAD_SOURCE_OPTIONS}
-                placeholder="جميع المصادر"
-                widthClass="w-full"
-                clearable
-                triggerClassName="w-full border border-gray-300 rounded-lg py-2.5 px-3 text-sm font-semibold bg-white text-right"
+                triggerClassName="w-full border border-gray-300 !rounded-lg !py-2 h-full px-3 !text-sm font-semibold bg-white text-right"
               />
             </div>
           </div>

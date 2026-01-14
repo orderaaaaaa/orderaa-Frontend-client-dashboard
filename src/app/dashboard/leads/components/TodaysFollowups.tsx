@@ -19,8 +19,8 @@ const TodaysFollowups: React.FC<TodaysFollowupsProps> = ({
   return (
     <div className="mt-15">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-2 mb-10">
+      <div className="flex items-center justify-between px-1">
+        <div className="flex flex-col gap-2 mb-10 ">
           <div className="flex items-center gap-2">
             <BsClock className="w-5 h-5 text-primary" />
             <h2 className="text-2xl font-bold text-gray-900">متابعات اليوم</h2>

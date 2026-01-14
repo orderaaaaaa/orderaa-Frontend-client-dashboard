@@ -1,21 +1,18 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import { X, ChevronDown } from 'lucide-react';
+import React, { useState } from 'react';
+import { X } from 'lucide-react';
 import Input from '@/components/ui/Input';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { Button } from '@/components/ui/button';
-import { LEADS_STATS_CONFIG } from '../../constants/leadsConfig';
-import clsx from 'clsx';
-
-type LeadStatusKey = string;
+import { StatusSelect } from '../ui/StatusSelect';
 
 export default function AddLeadModal({ onClose }: { onClose: () => void }) {
   const [formData, setFormData] = useState({
     clientName: '',
     mobileNumber: '',
     leadSource: 'social_media',
-    leadStatus: 'hotLeads' as LeadStatusKey,
+    leadStatus: 'hotLeads' as string,
   });
 
   const sourceOptions = [
@@ -103,73 +100,6 @@ export default function AddLeadModal({ onClose }: { onClose: () => void }) {
           </Button>
         </div>
       </div>
-    </div>
-  );
-}
-
-//TODO: MOVE
-function StatusSelect({
-  value,
-  onChange,
-}: {
-  value: LeadStatusKey;
-  onChange: (v: LeadStatusKey) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  const selected = LEADS_STATS_CONFIG.find((s) => s.key === value);
-
-  useEffect(() => {
-    const close = (e: MouseEvent) => {
-      if (!ref.current?.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', close);
-    return () => document.removeEventListener('mousedown', close);
-  }, []);
-
-  return (
-    <div ref={ref} className="relative">
-      {/* Trigger */}
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="h-14 w-full bg-gray-50 rounded-xl px-4 flex items-center justify-between cursor-pointer"
-      >
-        <div
-          className="flex items-center gap-2 font-medium"
-          style={{ color: selected?.valueColor }}
-        >
-          <span>{selected?.title}</span>
-          {selected?.icon && <selected.icon />}
-        </div>
-        <ChevronDown className="text-gray-400" />
-      </button>
-
-      {open && (
-        <div className="absolute z-[200] sm:mt-2 w-full bg-white border rounded-xl shadow-lg max-h-60 overflow-auto">
-          {LEADS_STATS_CONFIG.map((status) => (
-            <div
-              key={status.key}
-              onClick={() => {
-                onChange(status.key);
-                setOpen(false);
-              }}
-              className={clsx(
-                'px-4 py-3 rounded-lg cursor-pointer',
-                'hover:text-white hover:bg-primary'
-              )}
-            >
-              <div className="flex items-center gap-2">
-                <span>{status.title}</span>
-                <status.icon />
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

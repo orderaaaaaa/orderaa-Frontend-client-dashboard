@@ -14,7 +14,10 @@ interface LeadsTableProps {
   headers?: ILeadTableHeader[];
 }
 
-// --- Helper Components ---
+/* ---------------- Helpers ---------------- */
+
+const normalizePhone = (phone?: string) =>
+  phone ? phone.replace(/\D/g, '') : '';
 
 const getLeadTypeBadge = (leadType: string) => {
   const config = LEADS_STATS_CONFIG.find(
@@ -26,6 +29,7 @@ const getLeadTypeBadge = (leadType: string) => {
   if (!config) return null;
 
   const Icon = config.icon;
+
   return (
     <span
       className="px-3 py-1.5 rounded-full font-medium text-xs inline-flex items-center gap-1.5 border"
@@ -64,10 +68,14 @@ const getStatusBadge = (status: string, statusText: string) => {
   );
 };
 
+/* ---------------- Component ---------------- */
+
 function LeadsTable({ data, headers }: LeadsTableProps) {
   const tableHeaders = headers || LEADS_TABLE_HEADERS;
   const [showCheckboxes, setShowCheckboxes] = useState(false);
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+
+  const columnWidth = `${100 / tableHeaders.length}%`;
 
   const handleSelectAll = () => {
     if (selectedRows.size === data.length) {
@@ -78,13 +86,9 @@ function LeadsTable({ data, headers }: LeadsTableProps) {
   };
 
   const handleSelectRow = (id: string) => {
-    const newSelected = new Set(selectedRows);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-    setSelectedRows(newSelected);
+    const next = new Set(selectedRows);
+    next.has(id) ? next.delete(id) : next.add(id);
+    setSelectedRows(next);
   };
 
   return (
@@ -94,11 +98,12 @@ function LeadsTable({ data, headers }: LeadsTableProps) {
         <h3 className="text-lg md:text-xl font-bold text-gray-900">
           الليدز ( {data.length} )
         </h3>
+
         <div className="flex gap-2">
           {showCheckboxes && (
             <button
               onClick={handleSelectAll}
-              className="px-3 py-2 text-xs font-semibold border border-gray-300 rounded-lg bg-gray-50 text-gray-700"
+              className="px-3 py-2 text-xs font-semibold border rounded-lg bg-gray-50"
             >
               {selectedRows.size === data.length ? 'إلغاء الكل' : 'تحديد الكل'}
             </button>
@@ -115,8 +120,8 @@ function LeadsTable({ data, headers }: LeadsTableProps) {
         </div>
       </div>
 
-      {/* --- Mobile Cards View --- */}
-      <div className=" grid grid-cols-1 gap-4 mt-4 md:hidden">
+      {/* ---------------- Mobile ---------------- */}
+      <div className="grid grid-cols-1 gap-4 mt-4 md:hidden">
         {data.map((row) => (
           <div
             key={row.id}
@@ -135,9 +140,10 @@ function LeadsTable({ data, headers }: LeadsTableProps) {
                   className="w-5 h-5 mt-1 accent-primary"
                 />
               )}
+
               <div className="flex-1">
                 <div className="flex justify-between items-start mb-2">
-                  <span className="font-bold text-gray-900">{row.name}</span>
+                  <span className="font-bold">{row.name}</span>
                   <div className="absolute top-1 left-1 flex flex-col gap-2">
                     {row.status &&
                       getStatusBadge(row.status, row.statusText || '')}
@@ -147,31 +153,25 @@ function LeadsTable({ data, headers }: LeadsTableProps) {
 
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center gap-2 text-gray-600">
-                    <LiaWhatsapp className="text-green-600" />
-                    <span className="text-sm">{row.phone}</span>
+                    <a
+                      href={`https://wa.me/${normalizePhone(row.phone)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <LiaWhatsapp className="text-green-600" />
+                    </a>
+                    <a href={`tel:${normalizePhone(row.phone)}`}>
+                      <span className="text-sm">{row.phone}</span>
+                    </a>
                   </div>
-                  <div className="flex items-center gap-2 text-gray-600">
+
+                  <a
+                    href={`mailto:${row.email}`}
+                    className="flex items-center gap-2 text-gray-600"
+                  >
                     <GoMail className="text-blue-500" />
                     <span className="text-sm">{row.email}</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-50 text-xs">
-                  <div>
-                    <p className="text-gray-400 mb-1">المصدر</p>
-                    <p className="font-medium">{row.source}</p>
-                  </div>
-
-                  <div>
-                    <p className="text-gray-400 mb-1">التوقيت</p>
-                    <p className="font-medium">{row.time}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 mb-1">آخر تواصل</p>
-                    <div className="flex items-center gap-1 font-medium">
-                      <RiFileCheckLine /> {row.action}
-                    </div>
-                  </div>
+                  </a>
                 </div>
               </div>
             </div>
@@ -179,99 +179,117 @@ function LeadsTable({ data, headers }: LeadsTableProps) {
         ))}
       </div>
 
-      {/* --- Desktop Table View --- */}
+      {/* ---------------- Desktop ---------------- */}
       <div className="hidden md:block overflow-x-auto mt-5 bg-white p-6 rounded-lg">
-        <table className="w-full border-collapse min-w-[1200px]">
+        <table className="w-full min-w-[1200px] table-fixed border-collapse">
           <thead>
             <tr className="bg-[#f2edfd] text-sm">
               {showCheckboxes && (
-                <th className="py-4 px-4 text-center rounded-r-md w-[40px]">
+                <th className="w-[40px] px-4 py-4">
                   <input
                     type="checkbox"
                     checked={
                       selectedRows.size === data.length && data.length > 0
                     }
                     onChange={handleSelectAll}
-                    className="w-4 h-4 accent-primary cursor-pointer"
+                    className="w-4 h-4 accent-primary"
                   />
                 </th>
               )}
-              {tableHeaders.map((header, index) => (
+              {tableHeaders.map((header) => (
                 <th
                   key={header.id}
-                  className={`py-4 px-4 font-semibold text-gray-900 ${
-                    header.key === 'client' ? 'text-right' : 'text-center'
-                  } ${
-                    index === tableHeaders.length - 1 ? 'rounded-l-md' : ''
-                  } ${index === 0 && !showCheckboxes ? 'rounded-r-md' : ''}`}
+                  style={{ width: columnWidth }}
+                  className="px-4 py-4 font-semibold text-center"
                 >
                   {header.label}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white text-sm">
-            {data.map((row, index) => (
+
+          <tbody className="text-sm">
+            {data.map((row) => (
               <tr
                 key={row.id}
-                className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
+                className="border-b hover:bg-gray-50 transition-colors"
               >
                 {showCheckboxes && (
-                  <td className="py-5 px-4 text-center">
+                  <td className="px-4 py-5 text-center">
                     <input
                       type="checkbox"
                       checked={selectedRows.has(row.id)}
                       onChange={() => handleSelectRow(row.id)}
-                      className="w-4 h-4 accent-primary cursor-pointer"
+                      className="w-4 h-4 accent-primary"
                     />
                   </td>
                 )}
+
                 {tableHeaders.map((header) => (
                   <td
                     key={header.id}
-                    className={`py-5 px-4 ${
-                      header.key === 'client' ? 'text-right' : 'text-center'
-                    }`}
+                    style={{ width: columnWidth }}
+                    className="px-4 py-5 text-center truncate"
                   >
-                    {/* Reuse your existing <If/Then> logic here or switch to a cleaner switch case */}
                     <If condition={header.key === 'client'}>
                       <Then>
-                        <div className="flex items-center gap-3">
-                          {row.status &&
-                            getStatusBadge(row.status, row.statusText || '')}
-                          <span className="font-bold">{row.name}</span>
-                        </div>
+                        <span className="font-bold">{row.name}</span>
                       </Then>
                     </If>
-                    {/* ... (Repeat your specific logic for contact, source, leadType, etc. as per your original file) ... */}
+
                     <If condition={header.key === 'contact'}>
                       <Then>
-                        <div className="flex flex-col gap-1 items-start">
-                          <div className="flex items-center gap-1">
-                            <LiaWhatsapp className="text-gray-400" />{' '}
-                            {row.phone}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <GoMail className="text-gray-400" /> {row.email}
-                          </div>
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="flex items-center gap-1">
+                            <a
+                              href={`https://wa.me/${normalizePhone(
+                                row.phone
+                              )}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <LiaWhatsapp />
+                            </a>
+                            <a href={`tel:${normalizePhone(row.phone)}`}>
+                              {row.phone}
+                            </a>
+                          </span>
+
+                          <a
+                            href={`mailto:${row.email}`}
+                            className="flex items-center gap-1"
+                          >
+                            <GoMail /> {row.email}
+                          </a>
                         </div>
                       </Then>
                     </If>
-                    <If condition={header.key === 'source'}>
-                      <Then>{row.source}</Then>
+
+                    <If condition={header.key === 'status'}>
+                      <Then>
+                        {row.status &&
+                          getStatusBadge(row.status, row.statusText || '')}
+                      </Then>
                     </If>
+
                     <If condition={header.key === 'leadType'}>
                       <Then>{getLeadTypeBadge(row.leadType)}</Then>
                     </If>
+
                     <If condition={header.key === 'time'}>
                       <Then>{row.time}</Then>
                     </If>
+
                     <If condition={header.key === 'lastContact'}>
                       <Then>
                         <div className="flex justify-center items-center gap-1">
                           <RiFileCheckLine /> {row.action}
                         </div>
                       </Then>
+                    </If>
+
+                    <If condition={header.key === 'source'}>
+                      <Then>{row.source}</Then>
                     </If>
                   </td>
                 ))}

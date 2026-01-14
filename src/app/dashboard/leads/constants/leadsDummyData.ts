@@ -88,7 +88,6 @@ export const LEAD_SOURCE_OPTIONS = [
   { key: 'referral', value: 'إحالة' },
   { key: 'advertisement', value: 'إعلان' },
   { key: 'direct', value: 'مباشر' },
-  { key: 'other', value: 'أخرى' },
 ];
 
 // Leads Table Data
@@ -122,7 +121,7 @@ export const LEADS_TABLE_HEADERS: ILeadTableHeader[] = [
   { id: '4', key: 'leadType', label: 'الشارة' },
   { id: '5', key: 'time', label: 'الوقت' },
   { id: '6', key: 'lastContact', label: 'اخر اتصال' }, // Changed from 'action'
-  { id: '7', key: 'state', label: 'الحالة' },
+  { id: '7', key: 'status', label: 'الحالة' },
 ];
 
 export const LEADS_TABLE_DATA: ILeadTableRow[] = [
