@@ -1,5 +1,6 @@
 'use client';
 
+import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -53,6 +54,7 @@ export function Sidebar({
 
   return (
     <>
+      {/* Mobile overlay */}
       {open && (
         <div className="fixed inset-0 z-40 lg:hidden" onClick={onToggle} />
       )}
@@ -114,7 +116,6 @@ export function Sidebar({
 
           {/* Navigation */}
           <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto scrollbar-hide">
-            {' '}
             {navigation.map((item) => {
               const isActive = pathname === item.href;
 
@@ -129,7 +130,7 @@ export function Sidebar({
                     <button
                       onClick={() => handleDropdownClick(item.name)}
                       className={`
-                        flex items-center justify-between w-full px-3 py-3 rounded-lg
+                        flex items-center justify-between w-full px-3 py-3 rounded-lg cursor-pointer
                         ${
                           hasActiveChild
                             ? 'text-white'
@@ -155,38 +156,46 @@ export function Sidebar({
                     </button>
 
                     {!collapsed && (
-                      <div
-                        className={`overflow-hidden transition-all duration-300 ${
-                          isOpen ? 'max-h-40 mt-2' : 'max-h-0'
-                        }`}
-                      >
-                        <div className="px-4 space-y-1">
-                          {item.children.map((sub) => {
-                            const isSubActive = pathname.startsWith(sub.href);
-                            const SubIcon = sub.icon;
+                      <AnimatePresence initial={false}>
+                        {isOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="overflow-hidden mt-2"
+                          >
+                            <div className="px-4 space-y-1">
+                              {item.children.map((sub) => {
+                                const isSubActive = pathname.startsWith(
+                                  sub.href
+                                );
+                                const SubIcon = sub.icon;
 
-                            return (
-                              <Link
-                                key={sub.name}
-                                href={sub.href}
-                                className={`
-                                  flex items-center gap-3 px-3 py-2 rounded-md
-                                  ${
-                                    isSubActive
-                                      ? 'text-white'
-                                      : 'text-white/70 hover:bg-white/10 hover:text-white'
-                                  }
-                                `}
-                                style={isSubActive ? activeItemStyle : {}}
-                                onClick={onNavItemClick}
-                              >
-                                {SubIcon && <SubIcon className="h-5 w-5" />}
-                                {sub.name}
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      </div>
+                                return (
+                                  <Link
+                                    key={sub.name}
+                                    href={sub.href}
+                                    className={`
+                                      flex items-center gap-3 px-3 py-2 rounded-md
+                                      ${
+                                        isSubActive
+                                          ? 'text-white'
+                                          : 'text-white/70 hover:bg-white/10 hover:text-white'
+                                      }
+                                    `}
+                                    style={isSubActive ? activeItemStyle : {}}
+                                    onClick={onNavItemClick}
+                                  >
+                                    {SubIcon && <SubIcon className="h-5 w-5" />}
+                                    {sub.name}
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     )}
                   </div>
                 );
