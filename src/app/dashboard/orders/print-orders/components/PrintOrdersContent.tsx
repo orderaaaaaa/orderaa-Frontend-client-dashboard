@@ -151,13 +151,13 @@ export function PrintOrdersContent() {
       playSuccessSound();
       setFlashingCode(barcode);
       setTimeout(() => setFlashingCode(null), 600);
-
-      if (!isScannedOrdersModalOpen) {
-        setIsScannedOrdersModalOpen(true);
-      }
     } else {
       playErrorSound();
       toast.warning('هذا الطلب تم مسحه مسبقاً');
+    }
+
+    if (!isScannedOrdersModalOpen) {
+      setIsScannedOrdersModalOpen(true);
     }
   }, [addOrder, playSuccessSound, playErrorSound, isScannedOrdersModalOpen]);
 

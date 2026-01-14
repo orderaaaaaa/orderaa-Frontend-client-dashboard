@@ -28,9 +28,9 @@ function warn(...args: any[]) {
 export function useBarcodeScanner({
   onScan,
   enabled = true,
-  minCharLength = 3,
+  minCharLength = 6,
   maxCharLength = 50,
-  avgTimeThreshold = 50,
+  avgTimeThreshold = 30,
   debounceTimeout = 100,
 }: UseBarcodeScannerOptions): UseBarcodeScannerReturn {
   const bufferRef = useRef<{ char: string; timestamp: number }[]>([]);

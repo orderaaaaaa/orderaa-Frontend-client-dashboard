@@ -79,7 +79,7 @@ export function ScannedOrdersModal({
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden px-8 py-4">
+      <div className="flex-1 overflow-y-auto px-8 py-4">
         <ScannedOrdersTable
           orders={filteredOrders}
           onRemove={onRemoveOrder}
