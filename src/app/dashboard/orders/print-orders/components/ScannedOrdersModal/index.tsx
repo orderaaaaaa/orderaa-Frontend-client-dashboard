@@ -59,9 +59,12 @@ export function ScannedOrdersModal({
         >
           <LiaTimesSolid className="size-5" />
         </Button>
-        <h2 className="text-xl font-bold text-black">الطلبات الممسوحة</h2>
-        <div className="absolute left-8 flex items-center gap-2 text-gray-600">
-          <span className="text-sm">عدد الطلبات: {scannedOrders.length}</span>
+        <h2 className="text-xl font-bold text-black">الطلبات المحددة</h2>
+        <div className="absolute left-8 flex items-center gap-3 text-gray-700">
+          <span className="text-lg font-medium">عدد الطلبات</span>
+          <span className="inline-flex items-center justify-center min-w-[32px] h-8 px-2 rounded-full bg-primary text-white text-sm font-bold">
+            {scannedOrders.length}
+          </span>
         </div>
       </div>
 
