@@ -82,7 +82,7 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
           <p className="font-bold mb-0.5 text-start">
             {data.customer.name}
           </p>
-          <p className="text-start">
+          <p className="font-bold text-start">
             {location}
           </p>
         </div>
@@ -131,10 +131,10 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
         <div className="p-1 border-e border-black">
           {data.products.map((product, index) => (
             <div key={index} className="grid grid-cols-[auto_1fr] gap-1 mb-0.5">
-              <span className="text-[7px]">
+              <span className="text-[7px] font-bold">
                 {product.variant}
               </span>
-              <span className="text-[7px] text-start">
+              <span className="text-[7px] font-bold text-start">
                 {formatProductName(product)}
               </span>
             </div>
@@ -143,7 +143,7 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
         <div className="p-1">
           <div className="grid grid-cols-[auto_1fr] items-start gap-0.5">
             <LiaInfoCircleSolid className="size-2.5" />
-            <p className="text-[7px] text-start leading-tight">
+            <p className="text-[7px] font-bold text-start leading-tight">
               {data.packagingNotes || labels.packagingWarning}
             </p>
           </div>
@@ -183,7 +183,7 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
         <div>
           <div className="grid grid-cols-[auto_1fr] items-start gap-0.5 p-1">
             <LiaInfoCircleSolid className="size-2.5" />
-            <p className="text-[7px] text-start leading-tight">
+            <p className="text-[7px] font-bold text-start leading-tight">
               {data.shippingNotes || labels.packagingWarning}
             </p>
           </div>
@@ -213,17 +213,19 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
       </p>
 
       {/* Shipping Barcode */}
-      <div className="grid place-items-center my-1">
-        <span className="font-bold text-[8px]">{labels.shippingBarcode}</span>
-        <Barcode
-          value={data.orderCode}
-          width={1}
-          height={25}
-          fontSize={0}
-          margin={0}
-        />
-        <span className="text-[7px] font-bold tracking-wider mt-0.5">{data.orderCode}</span>
-      </div>
+      {data.shippingId && (
+        <div className="grid place-items-center my-1">
+          <span className="font-bold text-[8px]">{labels.shippingBarcode}</span>
+          <Barcode
+            value={data.shippingId}
+            width={1}
+            height={25}
+            fontSize={0}
+            margin={0}
+          />
+          <span className="text-[7px] font-bold tracking-wider mt-0.5">{data.shippingId}</span>
+        </div>
+      )}
 
       {/* Footer */}
       <div className="grid grid-cols-2 gap-2 mt-1 pt-1">

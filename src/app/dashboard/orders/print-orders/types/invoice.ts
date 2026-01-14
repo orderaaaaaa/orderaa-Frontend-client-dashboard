@@ -36,6 +36,7 @@ export interface InvoiceSchedule {
 
 export interface InvoiceData {
   orderCode: string;
+  shippingId?: string;
   customer: InvoiceCustomer;
   products: InvoiceProduct[];
   shipping: InvoiceShipping;

@@ -9,6 +9,12 @@ import React, {
 } from 'react';
 import { toast } from 'react-toastify';
 import { ArrowUp, Scan, ScanLine, X } from 'lucide-react';
+import {
+  useBarcodeScanner,
+  useScannerFeedback,
+  useScannedOrders,
+} from '../hooks';
+import { ScannedOrdersModal } from './ScannedOrdersModal';
 
 import { Breadcrumb } from '@/components/dashboard-layout';
 import { Button } from '@/components/ui/button';
@@ -40,6 +46,8 @@ export function PrintOrdersContent() {
   const [selectedCustomerName, setSelectedCustomerName] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [isScannedOrdersModalOpen, setIsScannedOrdersModalOpen] = useState(false);
+  const [flashingCode, setFlashingCode] = useState<string | null>(null);
 
   const {
     filters,
@@ -122,6 +130,61 @@ export function PrintOrdersContent() {
     handleSelectAllToggle,
     clearSelections,
   } = usePrintOrderBulk({ orders });
+
+  const { playSuccessSound, playErrorSound } = useScannerFeedback();
+  const {
+    scannedOrders,
+    addOrder,
+    removeOrder,
+    clearOrders,
+    searchQuery,
+    setSearchQuery,
+    filteredOrders,
+  } = useScannedOrders();
+
+  const handleScan = useCallback((barcode: string) => {
+    console.log('[PrintOrdersContent] Barcode scanned:', barcode);
+
+    const added = addOrder(barcode);
+
+    if (added) {
+      playSuccessSound();
+      setFlashingCode(barcode);
+      setTimeout(() => setFlashingCode(null), 600);
+
+      if (!isScannedOrdersModalOpen) {
+        setIsScannedOrdersModalOpen(true);
+      }
+    } else {
+      playErrorSound();
+      toast.warning('هذا الطلب تم مسحه مسبقاً');
+    }
+  }, [addOrder, playSuccessSound, playErrorSound, isScannedOrdersModalOpen]);
+
+  useBarcodeScanner({
+    onScan: handleScan,
+    enabled: true,
+  });
+
+  const scannerStatusLabels: Record<string, string> = {
+    PREPARED: 'تم التحضير',
+    AWAITING_PACKAGING: 'فى انتظار التغليف',
+    CALL_AGAIN: 'اعادة اتصال',
+    CHANGE_PRODUCT: 'تغيير المنتج',
+  };
+
+  const handleScannerStatusUpdate = useCallback((status: string) => {
+    if (scannedOrders.length === 0) return;
+    const statusLabel = scannerStatusLabels[status] || status;
+    toast.info('جاري تحديث حالة الطلبات إلى: ' + statusLabel);
+    clearOrders();
+    setIsScannedOrdersModalOpen(false);
+  }, [scannedOrders.length, clearOrders]);
+
+  const handleScannerPrepared = useCallback(() => handleScannerStatusUpdate('PREPARED'), [handleScannerStatusUpdate]);
+  const handleScannerAwaitingPackaging = useCallback(() => handleScannerStatusUpdate('AWAITING_PACKAGING'), [handleScannerStatusUpdate]);
+  const handleScannerCallAgain = useCallback(() => handleScannerStatusUpdate('CALL_AGAIN'), [handleScannerStatusUpdate]);
+  const handleScannerChangeProduct = useCallback(() => handleScannerStatusUpdate('CHANGE_PRODUCT'), [handleScannerStatusUpdate]);
 
   const prevPageRef = useRef<number>(page);
 
@@ -394,6 +457,22 @@ export function PrintOrdersContent() {
           <ArrowUp className="size-6" />
         </Button>
       )}
+
+      <ScannedOrdersModal
+        isOpen={isScannedOrdersModalOpen}
+        onClose={() => setIsScannedOrdersModalOpen(false)}
+        scannedOrders={scannedOrders}
+        onRemoveOrder={removeOrder}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        filteredOrders={filteredOrders}
+        onPrepared={handleScannerPrepared}
+        onAwaitingPackaging={handleScannerAwaitingPackaging}
+        onCallAgain={handleScannerCallAgain}
+        onChangeProduct={handleScannerChangeProduct}
+        isLoading={false}
+        flashingCode={flashingCode}
+      />
     </div>
   );
 }

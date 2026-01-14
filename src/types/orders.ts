@@ -205,7 +205,7 @@ export interface Order {
   city?: string;
   address?: string;
   externalGovernorate?: string;
-  shippingId: string;
+  shippingId?: string;
 
   // Product details
   material?: string;

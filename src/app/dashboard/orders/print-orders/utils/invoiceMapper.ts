@@ -23,6 +23,7 @@ export function mapOrderToInvoice(
 
   return {
     orderCode: order.code || `ORD-${order.id}`,
+    shippingId: order.shippingId || undefined,
     customer: {
       name: order.customers.name,
       governorate: order.governorate || order.customers.governorate || '',

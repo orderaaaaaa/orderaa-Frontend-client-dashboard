@@ -87,7 +87,7 @@ const OrderDetailsCardId = ({
               <Then>
                 <h3 className="flex gap-3 text-lg items-center font-semibold mb-1">
                   <Copy
-                    onClick={() => handleCopy(order.shippingId)}
+                    onClick={() => handleCopy(order.shippingId!)}
                     className="w-4 h-4 text-[#7038f3] cursor-pointer"
                     role="button"
                   />
