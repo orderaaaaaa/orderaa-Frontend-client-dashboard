@@ -26,7 +26,7 @@ import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { formatDateForUrl } from '@/utils/urlFilters';
 
 import { PageTabs } from './PageTabs';
-import { StatisticsSection } from './StatisticsSection';
+import { StatisticsSection } from '../../components/StatisticsSection';
 import { FilterSection } from './FilterSection';
 import {
   usePrintOrdersFilters,
