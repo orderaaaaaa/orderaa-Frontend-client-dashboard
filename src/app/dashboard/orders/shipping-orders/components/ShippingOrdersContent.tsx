@@ -8,7 +8,7 @@ import React, {
   useRef,
 } from 'react';
 import { toast } from 'react-toastify';
-import { ArrowUp, Scan, ScanLine, X } from 'lucide-react';
+import { ArrowUp } from 'lucide-react';
 
 import { Breadcrumb } from '@/components/dashboard-layout';
 import LoadingAnimation from '@/components/ui/loadingAnimation';
@@ -36,6 +36,7 @@ import {
 } from '../../print-orders/hooks';
 
 import { buildStatisticsCards } from '../constants/statisticsCards';
+import OrdersSelectionHeader from '../../components/OrdersSelectionHeader';
 
 export function ShippingOrdersContent() {
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState('');
@@ -52,6 +53,8 @@ export function ShippingOrdersContent() {
     printStatus,
     setPrintStatus,
   } = usePrintOrdersFilters();
+  const { statistics: printStatistics, loading: statsLoading } =
+    usePrintOrderStatistics();
 
   const apiFilters = useMemo(() => {
     return buildApiFiltersFromUrlState(filters);
@@ -98,8 +101,7 @@ export function ShippingOrdersContent() {
   } = useOrders(apiFilters);
 
   const { statistics } = useOrderStatistics();
-  const { statistics: printStatistics, loading: statsLoading } =
-    usePrintOrderStatistics();
+
   const { options } = useFilterOptions();
 
   const orders = ordersData?.data ?? [];
@@ -236,38 +238,17 @@ export function ShippingOrdersContent() {
         notPrintedCount={0}
         selectedOrders={selectedOrders}
       />
-      <div className="flex flex-col sm:flex-row justify-between gap-2 mt-10 mb-6 select-none">
-        <div className="flex justify-center sm:justify-start items-center gap-4">
-          <p className="text-gray-700">عدد جميع الطلبات: {totalOrders}</p>
-          {selectMode && (
-            <Button variant="default" size="sm" onClick={handleSelectAllToggle}>
-              {selectAllMatchingFilters ? 'إلغاء تحديد الكل' : 'تحديد الكل'}
-            </Button>
-          )}
-        </div>
 
-        <div className="flex flex-row items-center justify-center gap-3 text-white">
-          {selectMode && selectedOrderIds.length > 0 && (
-            <div className="flex flex-row items-center justify-center gap-2">
-              <X
-                onClick={() => setSelectMode(false)}
-                className="cursor-pointer text-primary h-5 w-5"
-              />
-              <span className="text-sm text-gray-600">
-                تم تحديد {selectedOrderIds.length} طلب
-              </span>
-            </div>
-          )}
-          <Button
-            variant="default"
-            onClick={toggleSelectMode}
-            className="rounded-full px-5"
-          >
-            <span>تحديد</span>
-            {selectMode ? <ScanLine /> : <Scan />}
-          </Button>
-        </div>
-      </div>
+      <OrdersSelectionHeader
+        totalOrders={totalOrders}
+        selectMode={selectMode}
+        selectedOrderIds={selectedOrderIds}
+        selectAllMatchingFilters={selectAllMatchingFilters}
+        toggleSelectMode={toggleSelectMode}
+        handleSelectAllToggle={handleSelectAllToggle}
+        setSelectMode={setSelectMode}
+      />
+
       {loading && orders.length === 0 ? (
         <LoadingAnimation />
       ) : error ? (
@@ -277,6 +258,7 @@ export function ShippingOrdersContent() {
           </div>
         </div>
       ) : (
+        // TODO: Create a reusable component for the orders grid
         <>
           <div className="grid container mx-auto grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 my-4 justify-items-center">
             {orders.map((order) => (
