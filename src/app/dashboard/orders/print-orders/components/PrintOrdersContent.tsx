@@ -40,14 +40,18 @@ import {
   usePrintOrderBulk,
 } from '../hooks';
 import { buildStatisticsCards } from '../constants/statisticsCards';
+import PageTaps from '../../components/pageTaps';
+import { useDefaultStatusByPath } from '../../hooks/useDefaultStatusByPath';
 
 export function PrintOrdersContent() {
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState('');
   const [selectedCustomerName, setSelectedCustomerName] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [isScannedOrdersModalOpen, setIsScannedOrdersModalOpen] = useState(false);
+  const [isScannedOrdersModalOpen, setIsScannedOrdersModalOpen] =
+    useState(false);
   const [flashingCode, setFlashingCode] = useState<string | null>(null);
+  const tabState = useDefaultStatusByPath();
 
   const {
     filters,
@@ -150,24 +154,27 @@ export function PrintOrdersContent() {
     filteredOrders,
   } = useScannedOrders();
 
-  const handleScan = useCallback((barcode: string) => {
-    console.log('[PrintOrdersContent] Barcode scanned:', barcode);
+  const handleScan = useCallback(
+    (barcode: string) => {
+      console.log('[PrintOrdersContent] Barcode scanned:', barcode);
 
-    const added = addOrder(barcode);
+      const added = addOrder(barcode);
 
-    if (added) {
-      playSuccessSound();
-      setFlashingCode(barcode);
-      setTimeout(() => setFlashingCode(null), 600);
-    } else {
-      playErrorSound();
-      toast.warning('هذا الطلب تم مسحه مسبقاً');
-    }
+      if (added) {
+        playSuccessSound();
+        setFlashingCode(barcode);
+        setTimeout(() => setFlashingCode(null), 600);
+      } else {
+        playErrorSound();
+        toast.warning('هذا الطلب تم مسحه مسبقاً');
+      }
 
-    if (!isScannedOrdersModalOpen) {
-      setIsScannedOrdersModalOpen(true);
-    }
-  }, [addOrder, playSuccessSound, playErrorSound, isScannedOrdersModalOpen]);
+      if (!isScannedOrdersModalOpen) {
+        setIsScannedOrdersModalOpen(true);
+      }
+    },
+    [addOrder, playSuccessSound, playErrorSound, isScannedOrdersModalOpen]
+  );
 
   useBarcodeScanner({
     onScan: handleScan,
@@ -181,18 +188,33 @@ export function PrintOrdersContent() {
     CHANGE_PRODUCT: 'تغيير المنتج',
   };
 
-  const handleScannerStatusUpdate = useCallback((status: string) => {
-    if (scannedOrders.length === 0) return;
-    const statusLabel = scannerStatusLabels[status] || status;
-    toast.info('جاري تحديث حالة الطلبات إلى: ' + statusLabel);
-    clearOrders();
-    setIsScannedOrdersModalOpen(false);
-  }, [scannedOrders.length, clearOrders]);
+  const handleScannerStatusUpdate = useCallback(
+    (status: string) => {
+      if (scannedOrders.length === 0) return;
+      const statusLabel = scannerStatusLabels[status] || status;
+      toast.info('جاري تحديث حالة الطلبات إلى: ' + statusLabel);
+      clearOrders();
+      setIsScannedOrdersModalOpen(false);
+    },
+    [scannedOrders.length, clearOrders]
+  );
 
-  const handleScannerPrepared = useCallback(() => handleScannerStatusUpdate('PREPARED'), [handleScannerStatusUpdate]);
-  const handleScannerAwaitingPackaging = useCallback(() => handleScannerStatusUpdate('AWAITING_PACKAGING'), [handleScannerStatusUpdate]);
-  const handleScannerCallAgain = useCallback(() => handleScannerStatusUpdate('CALL_AGAIN'), [handleScannerStatusUpdate]);
-  const handleScannerChangeProduct = useCallback(() => handleScannerStatusUpdate('CHANGE_PRODUCT'), [handleScannerStatusUpdate]);
+  const handleScannerPrepared = useCallback(
+    () => handleScannerStatusUpdate('PREPARED'),
+    [handleScannerStatusUpdate]
+  );
+  const handleScannerAwaitingPackaging = useCallback(
+    () => handleScannerStatusUpdate('AWAITING_PACKAGING'),
+    [handleScannerStatusUpdate]
+  );
+  const handleScannerCallAgain = useCallback(
+    () => handleScannerStatusUpdate('CALL_AGAIN'),
+    [handleScannerStatusUpdate]
+  );
+  const handleScannerChangeProduct = useCallback(
+    () => handleScannerStatusUpdate('CHANGE_PRODUCT'),
+    [handleScannerStatusUpdate]
+  );
 
   const prevPageRef = useRef<number>(page);
 
@@ -281,11 +303,11 @@ export function PrintOrdersContent() {
         />
       </div>
 
-      <PageTabs
+      <PageTaps
         statusCounts={statistics?.statusCounts || {}}
         totalOrders={statistics?.totalOrders || 0}
         onStatusChange={setStatus}
-        currentStatus={filters.status}
+        currentStatus={tabState}
       />
 
       <StatisticsSection cards={statisticsCards} isLoading={statsLoading} />

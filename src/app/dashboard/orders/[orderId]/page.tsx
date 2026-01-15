@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, Suspense } from 'react';
 import { AuthGuard } from '@/components/auth-guard';
-import PageTaps from '../allOrders/pageTaps';
+import PageTaps from '../components/pageTaps';
 import FilterSection from '../allOrders/components/FilterSection';
 import OrderDetailsInfo from './OrderDetailsInfo';
 import { useOrderStatistics } from '@/hooks/orders/useOrderStatistics';

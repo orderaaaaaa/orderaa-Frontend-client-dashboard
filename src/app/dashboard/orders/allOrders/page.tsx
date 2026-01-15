@@ -15,7 +15,7 @@ import Footer from '@/components/orders/Footer';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 import BulkActionsBar from '@/components/BulkActionsBar';
 import type { Order } from '@/types/orders';
-import PageTaps from './pageTaps';
+import PageTaps from '../components/pageTaps';
 import { buildApiFiltersFromUrlState } from '@/hooks/orders/useUnifiedFilters';
 import { useOrderStatistics } from '@/hooks/orders/useOrderStatistics';
 import { useFilterOptions } from '@/hooks/orders/useFilterOptions';

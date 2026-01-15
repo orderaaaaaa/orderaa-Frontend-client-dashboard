@@ -37,13 +37,15 @@ import {
 
 import { buildStatisticsCards } from '../constants/statisticsCards';
 import OrdersSelectionHeader from '../../components/OrdersSelectionHeader';
+import PageTaps from '../../components/pageTaps';
+import { useDefaultStatusByPath } from '../../hooks/useDefaultStatusByPath';
 
 export function CallCenterContent() {
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState('');
   const [selectedCustomerName, setSelectedCustomerName] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
-
+  const tabState = useDefaultStatusByPath();
   const {
     filters,
     setStatus,
@@ -211,11 +213,11 @@ export function CallCenterContent() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-7 w-full">
         <Breadcrumb items={[{ title: 'الطلبات' }, { title: 'كول سنتر' }]} />
       </div>
-      <PageTabs
+      <PageTaps
         statusCounts={statistics?.statusCounts || {}}
         totalOrders={statistics?.totalOrders || 0}
         onStatusChange={setStatus}
-        currentStatus={filters.status}
+        currentStatus={tabState}
       />
       {/* //TODO: Update props to match call-center orders context */}
       <StatisticsSection cards={statisticsCards} isLoading={statsLoading} />

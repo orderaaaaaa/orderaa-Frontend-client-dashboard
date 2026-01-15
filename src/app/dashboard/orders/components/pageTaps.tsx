@@ -88,7 +88,6 @@ function PageTaps({
   const { selectedStatus: storeSelectedStatus, setSelectedStatus } =
     useOrdersStore();
 
-  // Use prop if provided (URL mode), otherwise fall back to Zustand store
   const selectedStatus =
     currentStatus !== undefined ? currentStatus : storeSelectedStatus;
 
@@ -96,7 +95,6 @@ function PageTaps({
   const statuses = statusesData ?? [];
 
   const handleTabClick = (status: string | null) => {
-    // If callback is provided (URL mode), use it; otherwise fall back to Zustand
     if (onStatusChange) {
       onStatusChange(status);
     } else {

@@ -1,40 +1,49 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useUrlFilters } from '@/hooks/useUrlFilters';
 import { PrintStatus } from '../types';
-
-const DEFAULT_STATUS = 'CONFIRMED';
+import { useDefaultStatusByPath } from '../../hooks/useDefaultStatusByPath';
 
 export function usePrintOrdersFilters() {
   const urlFilters = useUrlFilters();
+  const DEFAULT_STATUS = useDefaultStatusByPath();
   const hasInitialized = useRef(false);
 
-  const [printStatus, setPrintStatusState] = useState<PrintStatus>(null);
-
   useEffect(() => {
-    if (urlFilters.isInitialized && !hasInitialized.current) {
-      hasInitialized.current = true;
-      if (!urlFilters.filters.status) {
-        urlFilters.setStatus(DEFAULT_STATUS);
-      }
-    }
-  }, [urlFilters.isInitialized, urlFilters.filters.status, urlFilters]);
+    if (!urlFilters.isInitialized || hasInitialized.current) return;
 
-  const setPrintStatus = useCallback((status: PrintStatus) => {
-    setPrintStatusState(status);
-    urlFilters.setPage(1);
-  }, [urlFilters]);
+    hasInitialized.current = true;
+
+    if (!urlFilters.filters.status && DEFAULT_STATUS) {
+      urlFilters.setStatus(DEFAULT_STATUS);
+    }
+  }, [
+    urlFilters.isInitialized,
+    urlFilters.filters.status,
+    urlFilters.setStatus,
+    DEFAULT_STATUS,
+  ]);
+
+  const setPrintStatus = useCallback(
+    (status: PrintStatus) => {
+      urlFilters.setStatus(status);
+      urlFilters.setPage(1);
+    },
+    [urlFilters]
+  );
 
   const resetAllFilters = useCallback(() => {
     urlFilters.resetFilters();
-    setPrintStatusState(null);
-    urlFilters.setStatus(DEFAULT_STATUS);
-  }, [urlFilters]);
+
+    if (DEFAULT_STATUS) {
+      urlFilters.setStatus(DEFAULT_STATUS);
+    }
+  }, [urlFilters, DEFAULT_STATUS]);
 
   return {
     ...urlFilters,
-    printStatus,
+    printStatus: urlFilters.filters.status as PrintStatus,
     setPrintStatus,
     resetAllFilters,
   };
