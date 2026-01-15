@@ -13,6 +13,7 @@ import { PackagingNotesSection } from './sections/PackagingNotesSection';
 import { OrderActionsFooter } from './actions/OrderActionsFooter';
 import { OrderActionModals } from './modals/OrderActionModals';
 import { ErrorModal } from './modals/ErrorModal';
+import { OrderActionsFooterLargeScreens } from './actions/ActionsDropdownLargeScreens';
 
 interface OrderDetailsInfoComponentProps {
   order: Order;
@@ -284,18 +285,35 @@ function OrderDetailsInfoComponent({
         />
       </div>
 
-      <OrderActionsFooter
-        orderStatus={localOrder.status}
-        lastEventStatus={lastEventStatus}
-        onConfirm={handleConfirmClick}
-        onFollowUpClick={handleFollowUpClick}
-        onActionClick={handleActionClick}
-        onWhatsappSubOptionClick={handleWhatsappSubOptionClick}
-        onNavigateNext={navigation.navigateToNext}
-        onNavigatePrevious={navigation.navigateToPrevious}
-        isNavigatingNext={navigation.isNavigatingNext}
-        isNavigatingPrevious={navigation.isNavigatingPrevious}
-      />
+      <div className="md:hidden">
+        <OrderActionsFooter
+          orderStatus={localOrder.status}
+          lastEventStatus={lastEventStatus}
+          onConfirm={handleConfirmClick}
+          onFollowUpClick={handleFollowUpClick}
+          onActionClick={handleActionClick}
+          onWhatsappSubOptionClick={handleWhatsappSubOptionClick}
+          onNavigateNext={navigation.navigateToNext}
+          onNavigatePrevious={navigation.navigateToPrevious}
+          isNavigatingNext={navigation.isNavigatingNext}
+          isNavigatingPrevious={navigation.isNavigatingPrevious}
+        />
+      </div>
+
+      <div className="hidden md:block">
+        <OrderActionsFooterLargeScreens
+          orderStatus={localOrder.status}
+          lastEventStatus={lastEventStatus}
+          onConfirm={handleConfirmClick}
+          onFollowUpClick={handleFollowUpClick}
+          onActionClick={handleActionClick}
+          onWhatsappSubOptionClick={handleWhatsappSubOptionClick}
+          onNavigateNext={navigation.navigateToNext}
+          onNavigatePrevious={navigation.navigateToPrevious}
+          isNavigatingNext={navigation.isNavigatingNext}
+          isNavigatingPrevious={navigation.isNavigatingPrevious}
+        />
+      </div>
 
       <OrderActionModals
         modals={modals}
