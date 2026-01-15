@@ -2,7 +2,7 @@ import http from '@/lib/api/http';
 import {
   ProductsResponse,
   UpdateVariantsPayload,
-  VariantsOptionsResponse,
+  VariantsCountResponse,
 } from '../types/products';
 
 export const productsApi = {
@@ -18,9 +18,9 @@ export const productsApi = {
 
   getVariantOptions: async (
     productId: number
-  ): Promise<VariantsOptionsResponse> => {
-    const response = await http.get<VariantsOptionsResponse>(
-      `/products/${productId}/variants-options`
+  ): Promise<VariantsCountResponse> => {
+    const response = await http.get<VariantsCountResponse>(
+      `/products/${productId}/variant-counts`
     );
     return response.data;
   },

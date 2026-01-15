@@ -12,6 +12,7 @@ import { VariantItem } from '../types/products';
 import Input from '@/components/ui/Input';
 import ProductAddVariantsModal from './modals/productAddVariants';
 import { getTimeAgo } from '@/utils';
+import ProductVariantCountsModal from './modals/ProductVariantCountsModal';
 
 function ProductsTable() {
   const { page, limit } = useProductStore();
@@ -24,6 +25,8 @@ function ProductsTable() {
     variants: VariantItem[];
   } | null>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [showSoldModal, setShowSoldModal] = useState(false);
+  const [soldProductId, setSoldProductId] = useState<number | null>(null);
 
   const toggleSelect = (id: number) => {
     setSelectedIds((prev) =>
@@ -37,6 +40,16 @@ function ProductsTable() {
     setSelectedIds(
       selectedIds.length === data.data.length ? [] : data.data.map((p) => p.id)
     );
+  };
+
+  const openSoldModal = (productId: number) => {
+    setSoldProductId(productId);
+    setShowSoldModal(true);
+  };
+
+  const closeSoldModal = () => {
+    setShowSoldModal(false);
+    setSoldProductId(null);
   };
 
   const openEditModal = (productId: number, variants: VariantItem[]) => {
@@ -142,8 +155,14 @@ function ProductsTable() {
                   <td className="p-4 text-center text-sm text-gray-800">
                     {getTimeAgo(product.createdAt)}
                   </td>
-                  <td className="p-4 text-center">0</td>
-
+                  <td className="p-4 text-center">
+                    <button
+                      onClick={() => openSoldModal(product.id)}
+                      className="text-gray-800 cursor-pointer font-semibold"
+                    >
+                      0{' '}
+                    </button>
+                  </td>
                   <td className="p-4 text-center">
                     <button
                       onClick={() =>
@@ -202,9 +221,13 @@ function ProductsTable() {
                   </span>
 
                   <div className="flex justify-between items-center mt-2">
-                    <span className="text-sm text-gray-600">
-                      عدد القطع المباعه: 0
-                    </span>
+                    <button
+                      onClick={() => openSoldModal(product.id)}
+                      className="text-sm text-gray-600 flex items-center gap-1 "
+                    >
+                      <span>عدد القطع المباعه:</span>
+                      <span className="font-medium ">0</span>
+                    </button>
                     <button
                       onClick={() =>
                         openEditModal(
@@ -238,6 +261,13 @@ function ProductsTable() {
           variants={activeProduct.variants}
           isOpen={showModal}
           onClose={closeModal}
+        />
+      )}
+      {showSoldModal && soldProductId && (
+        <ProductVariantCountsModal
+          productId={soldProductId}
+          isOpen={showSoldModal}
+          onClose={closeSoldModal}
         />
       )}
     </>

@@ -28,13 +28,27 @@ export interface ProductsResponse {
   data: Product[];
 }
 
+export type VariantItem = {
+  label: string;
+  value: string;
+};
+
 export interface VariantOption {
   label: string;
   values: string[];
 }
 
-export interface VariantsOptionsResponse {
-  variantOptions: VariantOption[];
+export interface VariantCountItem {
+  label: string;
+  value: string;
+  count: number;
+}
+
+export interface VariantsCountResponse {
+  productId: number;
+  productName: string;
+  variantCounts: VariantCountItem[];
+  totalOrders: number;
 }
 
 export interface ProductState {
@@ -43,11 +57,6 @@ export interface ProductState {
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
 }
-
-export type VariantItem = {
-  label: string;
-  value: string;
-};
 
 export interface UpdateVariantsPayload {
   variants: VariantItem[];

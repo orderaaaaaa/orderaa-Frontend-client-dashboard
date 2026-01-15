@@ -1,8 +1,8 @@
 import React from 'react';
 import {
-  LiaCheckCircle,
-  LiaCommentDotsSolid,
-  LiaAngleDownSolid,
+  LiaCheckSolid,
+  LiaComment,
+  LiaEllipsisHSolid,
   LiaAngleLeftSolid,
   LiaAngleRightSolid,
 } from 'react-icons/lia';
@@ -16,7 +16,11 @@ export interface OrderActionsFooterProps {
   lastEventStatus?: string;
   onConfirm: () => void;
   onFollowUpClick: (label: string, action: string) => void;
-  onActionClick: (label: string, action: string, hasSubOptions?: boolean) => void;
+  onActionClick: (
+    label: string,
+    action: string,
+    hasSubOptions?: boolean
+  ) => void;
   onWhatsappSubOptionClick: (action: string, label: string) => void;
   onNavigateNext?: () => void;
   onNavigatePrevious?: () => void;
@@ -41,115 +45,100 @@ export function OrderActionsFooter({
 
   const handleFollowUpToggle = () => {
     followUpDropdown.toggle();
-    if (actionsDropdown.isOpen) {
-      actionsDropdown.close();
-    }
+    if (actionsDropdown.isOpen) actionsDropdown.close();
   };
 
   const handleActionsToggle = () => {
     actionsDropdown.toggle();
-    if (followUpDropdown.isOpen) {
-      followUpDropdown.close();
-    }
-  };
-
-  const handleFollowUpClick = (label: string, action: string) => {
-    followUpDropdown.close();
-    onFollowUpClick(label, action);
-  };
-
-  const handleActionClick = (label: string, action: string, hasSubOptions?: boolean) => {
-    if (!hasSubOptions) {
-      actionsDropdown.close();
-    }
-    onActionClick(label, action, hasSubOptions);
-  };
-
-  const handleWhatsappSubOptionClick = (action: string, label: string) => {
-    actionsDropdown.close();
-    onWhatsappSubOptionClick(action, label);
+    if (followUpDropdown.isOpen) followUpDropdown.close();
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 py-4 px-6">
-      <div className="flex gap-2 justify-between items-center">
-        <div className="flex gap-2 items-center sm:rtl:ms-14 sm:ltr:me-14">
-          <Button
-            variant="outline"
-            onClick={onNavigatePrevious}
-            disabled={isNavigatingPrevious || !onNavigatePrevious}
-            className="w-10 h-10 p-0 rounded-full border-2 border-gray-300 hover:border-primary hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title="الطلب السابق"
-          >
-            {isNavigatingPrevious ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-            ) : (
-              <LiaAngleRightSolid className="w-5 h-5 text-gray-600" />
-            )}
-          </Button>
+    <div
+      className="fixed bottom-8 left-0 right-0 z-50 flex justify-center items-center gap-4 px-4 font-sans"
+      dir="rtl"
+    >
+      {/* Previous Arrow */}
+      <Button
+        variant="ghost"
+        onClick={onNavigatePrevious}
+        disabled={isNavigatingPrevious || !onNavigatePrevious}
+        className="w-9 h-9 rounded-full border border-gray-300 bg-white shadow-sm hover:bg-gray-50 text-purple-700"
+      >
+        <LiaAngleRightSolid className="w-6 h-6" />
+      </Button>
 
-          <Button
-            variant="outline"
-            onClick={onNavigateNext}
-            disabled={isNavigatingNext || !onNavigateNext}
-            className="w-10 h-10 p-0 rounded-full border-2 border-gray-300 hover:border-primary hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title="الطلب التالي"
+      {/* Main Action Pill */}
+      <div className="bg-[#6320EE] rounded-full px-8 h-13 flex items-center gap-8 shadow-2xl relative">
+        {/* Confirm */}
+        {orderStatus !== 'CONFIRMED' && (
+          <button
+            onClick={onConfirm}
+            className="relative top-[-6px] flex flex-col items-center gap-[2px] text-white transition-opacity"
           >
-            {isNavigatingNext ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-            ) : (
-              <LiaAngleLeftSolid className="w-5 h-5 text-gray-600" />
-            )}
-          </Button>
+            <div className="w-8 h-8 rounded-full border-3 bg-primary border-white flex items-center justify-center">
+              <LiaCheckSolid className="w-5 h-5" />
+            </div>
+            <span className="text-sm font-medium">تأكيد</span>
+          </button>
+        )}
+
+        {/* Follow Up */}
+        <div className="relative top-[-6px]" ref={followUpDropdown.ref}>
+          <button
+            onClick={handleFollowUpToggle}
+            className="flex flex-col items-center gap-[2px] text-white transition-opacity"
+          >
+            <div className="w-8 h-8 rounded-full border-3 bg-primary border-white flex items-center justify-center">
+              <LiaComment className="w-5 h-5" />
+            </div>
+            <span className="text-sm font-medium">متابعة</span>
+          </button>
+
+          <div className="absolute bottom-full mb-4 right-[-50px]">
+            <FollowUpDropdown
+              isOpen={followUpDropdown.isOpen}
+              onClick={(l, a) => {
+                followUpDropdown.close();
+                onFollowUpClick(l, a);
+              }}
+            />
+          </div>
         </div>
 
-        <div className="relative" ref={actionsDropdown.ref}>
-          <div className="flex flex-row gap-2">
-            {orderStatus !== 'CONFIRMED' && (
-              <Button
-                variant="default"
-                onClick={onConfirm}
-                className="py-2 px-10 rounded-2xl bg-primary text-white text-sm font-bold hover:bg-[#4B1BC4] transition-all duration-700 hover:scale-105 flex items-center gap-2"
-              >
-                <LiaCheckCircle className="w-5 h-5" />
-                تأكيد
-              </Button>
-            )}
-
-            <div className="relative" ref={followUpDropdown.ref}>
-              <Button
-                variant="outline"
-                onClick={handleFollowUpToggle}
-                className="py-2 px-10 border-2 rounded-2xl border-primary text-primary text-sm font-bold hover:bg-purple-50 transition-colors flex items-center gap-2"
-              >
-                <LiaCommentDotsSolid className="w-5 h-5" />
-                متابعة
-              </Button>
-
-              <FollowUpDropdown isOpen={followUpDropdown.isOpen} onClick={handleFollowUpClick} />
+        {/* Other / Actions */}
+        <div className="relative top-[-6px]" ref={actionsDropdown.ref}>
+          <button
+            onClick={handleActionsToggle}
+            className="flex flex-col items-center gap-[2px] text-white transition-opacity"
+          >
+            <div className="w-8 h-8 rounded-full border-3 bg-primary border-white flex items-center justify-center">
+              <LiaEllipsisHSolid className="w-5 h-5" />
             </div>
+            <span className="text-sm font-medium">اخري</span>
+          </button>
 
-            <Button
-              variant="ghost"
-              onClick={handleActionsToggle}
-              className="w-9 h-9 p-0 rounded-full border-2 border-primary hover:bg-purple-50 transition-colors"
-            >
-              <LiaAngleDownSolid
-                className={`w-5 h-5 text-primary transition-all ${actionsDropdown.isOpen ? 'rotate-180' : ''
-                  }`}
-              />
-            </Button>
+          <div className="absolute bottom-full mb-4 left-30">
+            <ActionsDropdown
+              isOpen={actionsDropdown.isOpen}
+              orderStatus={orderStatus}
+              lastEventStatus={lastEventStatus}
+              onActionClick={onActionClick}
+              onSubOptionClick={onWhatsappSubOptionClick}
+            />
           </div>
-
-          <ActionsDropdown
-            isOpen={actionsDropdown.isOpen}
-            orderStatus={orderStatus}
-            lastEventStatus={lastEventStatus}
-            onActionClick={handleActionClick}
-            onSubOptionClick={handleWhatsappSubOptionClick}
-          />
         </div>
       </div>
+
+      {/* Next Arrow */}
+      <Button
+        variant="ghost"
+        onClick={onNavigateNext}
+        disabled={isNavigatingNext || !onNavigateNext}
+        className="w-9 h-9 rounded-full border border-gray-300 bg-white shadow-sm hover:bg-gray-50 text-purple-700"
+      >
+        <LiaAngleLeftSolid className="w-6 h-6" />
+      </Button>
     </div>
   );
 }
