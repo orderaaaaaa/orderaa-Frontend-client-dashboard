@@ -64,6 +64,7 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
           {labels.recipientDetails}
         </span>
       </div>
+      
       <div className="grid grid-cols-2 border border-t-0 border-black font-bold text-[7px]">
         <div className="p-1 border-e border-black">
           <div className="grid grid-cols-[auto_auto_1fr] items-center justify-start gap-0.5 mb-0.5">
