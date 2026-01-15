@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import { Analytics } from '@vercel/analytics/next';
-import "react-day-picker/dist/style.css"
+import 'react-day-picker/dist/style.css';
 import './globals.css';
 import ToastifyProvider from '@/components/ToastifyProvider';
 import QueryProvider from '@/providers/QueryProvider';
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: 'Orderaa management system',
   generator: 'v0.app',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/favicon.png',
   },
 };
 
@@ -28,9 +28,7 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl">
       <body className={`${beiruti.variable} font-sans`}>
-        <QueryProvider>
-          {children}
-        </QueryProvider>
+        <QueryProvider>{children}</QueryProvider>
         <Analytics />
         <ToastifyProvider />
       </body>

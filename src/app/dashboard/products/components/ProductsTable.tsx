@@ -11,6 +11,7 @@ import { useProductStore } from '../store/useProductStore';
 import { VariantItem } from '../types/products';
 import Input from '@/components/ui/Input';
 import ProductAddVariantsModal from './modals/productAddVariants';
+import { getTimeAgo } from '@/utils';
 
 function ProductsTable() {
   const { page, limit } = useProductStore();
@@ -138,8 +139,8 @@ function ProductsTable() {
 
                   <td className="p-4 text-center">{product.name}</td>
                   <td className="p-4 text-center">{product.price}</td>
-                  <td className="p-4 text-center text-sm text-gray-500">
-                    {new Date(product.createdAt).toLocaleDateString('en-US')}
+                  <td className="p-4 text-center text-sm text-gray-800">
+                    {getTimeAgo(product.createdAt)}
                   </td>
                   <td className="p-4 text-center">0</td>
 

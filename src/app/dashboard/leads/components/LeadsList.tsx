@@ -33,9 +33,6 @@ const LeadsList: React.FC<LeadsListProps> = ({
             4 عميل باقي لهم 5 ايام او اقل - تابع معهم الان - مشاهدة المزيد
           </p>
         </div>
-        <button className="border w-fit border-gray-900 px-6 py-2 rounded-md text-primary font-semibold cursor-pointer max-md:self-end">
-          مشاهدة المزيد
-        </button>
       </div>
 
       {/* Leads Cards */}

@@ -8,6 +8,7 @@ import {
   LiaStoreSolid,
   LiaUsersCogSolid,
   LiaShippingFastSolid,
+  LiaHeadsetSolid,
 } from 'react-icons/lia';
 import {
   House,
@@ -48,18 +49,18 @@ export const navigation: NavigationItem[] = [
         icon: CartIcon,
       },
       {
+        name: 'قسم الكول سنتر',
+        href: '/dashboard/orders/call-center',
+        icon: LiaHeadsetSolid,
+      },
+      {
         name: 'قسم التغليف',
         href: '/dashboard/orders/print-orders',
-        icon: LiaClipboardCheckSolid,
+        icon: LiaBoxOpenSolid,
       },
       {
         name: 'قسم الشحن',
         href: '/dashboard/orders/shipping-orders',
-        icon: LiaShippingFastSolid,
-      },
-      {
-        name: 'قسم الكول سنتر',
-        href: '/dashboard/orders/call-center',
         icon: LiaShippingFastSolid,
       },
     ],

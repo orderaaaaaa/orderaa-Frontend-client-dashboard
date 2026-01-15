@@ -13,8 +13,8 @@ export interface Lead {
   phone: string;
   email: string;
   endDate: string;
-  activityStatus: 'active' | 'noActivity'; // نشط or لا يوجد نشاط
-  daysStatus?: 'oneDayRemaining' | 'threeDaysRemaining'; // Optional days remaining
+  activityStatus: 'active' | 'noActivity';
+  daysStatus?: 'oneDayRemaining' | 'threeDaysRemaining';
 }
 
 export interface ILeadTableRow {

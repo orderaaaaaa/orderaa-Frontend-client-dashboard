@@ -25,7 +25,7 @@ const LeadsStatsCards: React.FC<LeadsStatsCardsProps> = ({
   }, [data]);
 
   return (
-    <div className="2xl:w-[90%] mt-14">
+    <div className="mt-14">
       {/* --- Mobile View: Swiper Cards Effect --- */}
       <div className="block sm:hidden mt-6">
         <Swiper
