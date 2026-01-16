@@ -26,19 +26,19 @@ export function ShippingSection({
   return (
     <>
       {/* Phone Number */}
-      <div className="w-full flex flex-col gap-4">
-        <div className="w-full flex items-start gap-2">
-          <LiaPhoneSolid className="w-6 h-6 text-primary mt-0.5" />
-          <div>
-            <h3 className="text-lg font-semibold leading-tight">رقم الهاتف</h3>
-            <p className="text-sm text-gray-500">
+      <div className="w-full max-w-full flex flex-col gap-4 min-w-0">
+        <div className="w-full max-w-full flex items-start gap-2 min-w-0">
+          <LiaPhoneSolid className="w-6 h-6 text-primary mt-0.5 shrink-0" />
+          <div className="min-w-0 flex-1">
+            <h3 className="text-base sm:text-lg font-semibold leading-tight break-words">رقم الهاتف</h3>
+            <p className="text-xs sm:text-sm text-gray-500 break-words">
               اضف رقم للمتابعه مع شركه الشحن
             </p>
           </div>
         </div>
         <Input
           name="shippingPhoneNumber"
-          className="!px-5"
+          className="!px-5 w-full max-w-full"
           register={register}
           registerOptions={{
             setValueAs: (v: string) => (v === '' ? undefined : v),
@@ -49,12 +49,12 @@ export function ShippingSection({
       </div>
 
       {/* Open Order */}
-      <div className="flex items-start justify-between border-b border-gray-100 pb-6">
-        <div className="flex items-start gap-3">
-          <LiaBoxOpenSolid className="w-6 h-6 text-primary mt-0.5" />
-          <div>
-            <h3 className="text-lg font-semibold leading-tight">فتح الشحنة</h3>
-            <p className="text-sm text-gray-500">
+      <div className="flex items-start justify-between border-b border-gray-100 pb-6 gap-2 min-w-0 max-w-full">
+        <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
+          <LiaBoxOpenSolid className="w-6 h-6 text-primary mt-0.5 shrink-0" />
+          <div className="min-w-0 flex-1">
+            <h3 className="text-base sm:text-lg font-semibold leading-tight break-words">فتح الشحنة</h3>
+            <p className="text-xs sm:text-sm text-gray-500 break-words">
               هل تريد معاينه الشحنه من قبل العميل؟
             </p>
           </div>
@@ -67,15 +67,15 @@ export function ShippingSection({
       </div>
 
       {/* Edit Order */}
-      <div className="flex flex-col gap-4 border-b border-gray-100 pb-6">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3">
-            <LiaEditSolid className="w-6 h-6 text-primary mt-0.5" />
-            <div>
-              <h3 className="text-lg font-semibold leading-tight">
+      <div className="flex flex-col gap-4 border-b border-gray-100 pb-6 min-w-0 max-w-full">
+        <div className="flex items-start justify-between gap-2 min-w-0">
+          <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
+            <LiaEditSolid className="w-6 h-6 text-primary mt-0.5 shrink-0" />
+            <div className="min-w-0 flex-1">
+              <h3 className="text-base sm:text-lg font-semibold leading-tight break-words">
                 تعديل محتوي الشحنة
               </h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs sm:text-sm text-gray-500 break-words">
                 امكانيه تعديل محتوي الشحنه من قبل الموظف
               </p>
             </div>
@@ -88,15 +88,15 @@ export function ShippingSection({
         </div>
 
         <div
-          className={`transition-all duration-300 overflow-hidden ${
+          className={`transition-all duration-300 overflow-hidden w-full max-w-full min-w-0 ${
             !canEditOrderValue
               ? 'max-h-40 opacity-100 mt-2'
               : 'max-h-0 opacity-0'
           }`}
         >
-          <div className="flex items-center gap-2 mb-2">
-            <LiaPenSolid className="w-5 h-5 text-primary" />
-            <span className="text-base">اسم المنتج</span>
+          <div className="flex items-center gap-2 mb-2 min-w-0">
+            <LiaPenSolid className="w-5 h-5 text-primary shrink-0" />
+            <span className="text-sm sm:text-base break-words">اسم المنتج</span>
           </div>
           <Input
             name="defaultShipmentContent"
@@ -106,20 +106,20 @@ export function ShippingSection({
             }}
             placeholder="أدخل اسم المنتج"
             error={errors.defaultShipmentContent?.message}
-            className="!h-[55px] text-right w-full !px-5"
+            className="!h-[55px] text-right w-full max-w-full !px-5"
           />
         </div>
       </div>
 
       {/* Return Cost */}
-      <div className="w-full flex flex-col gap-4 border-b border-gray-100 pb-6">
-        <div className="w-full flex items-start gap-2">
-          <LiaRedoAltSolid className="w-6 h-6 text-primary mt-0.5" />
-          <div>
-            <h3 className="text-lg font-semibold leading-tight">
+      <div className="w-full max-w-full flex flex-col gap-4 border-b border-gray-100 pb-6 min-w-0">
+        <div className="w-full max-w-full flex items-start gap-2 min-w-0">
+          <LiaRedoAltSolid className="w-6 h-6 text-primary mt-0.5 shrink-0" />
+          <div className="min-w-0 flex-1">
+            <h3 className="text-base sm:text-lg font-semibold leading-tight break-words">
               تكلفة مرتجع الشحن
             </h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-xs sm:text-sm text-gray-500 break-words">
               في حاله رفض العميل استلام الشحنة يتم دفع مبلغ.
             </p>
           </div>
@@ -138,7 +138,7 @@ export function ShippingSection({
           type="number"
           step="0.01"
           placeholder="0.00"
-          className="!h-[46px] text-right w-full !px-5"
+          className="!h-[46px] text-right w-full max-w-full !px-5"
           error={errors.defaultReturnShippingCost?.message}
         />
       </div>

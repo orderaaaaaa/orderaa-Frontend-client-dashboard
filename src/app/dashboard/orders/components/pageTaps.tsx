@@ -34,6 +34,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 import { FaBoxesPacking } from 'react-icons/fa6';
 import { LuPenOff } from 'react-icons/lu';
 import { BsInboxes } from 'react-icons/bs';
+import { LiaBusinessTimeSolid, LiaCheckDoubleSolid } from 'react-icons/lia';
 
 interface PageTapsProps {
   data?: any[];
@@ -73,6 +74,8 @@ export const getIconForStatus = (statusValue: string): React.ReactNode => {
     REPORTS: <FileText className={ICON_SIZE} />,
     SHIPPING: <MdOutlineLocalShipping className={ICON_SIZE} />,
     PARTIAL_DELIVERY: <MdReceiptLong className={ICON_SIZE} />,
+    WHATSAPP_CONFIRMED: <LiaCheckDoubleSolid className={ICON_SIZE} />,
+    WAITING_FOR_APPROVAL: <LiaBusinessTimeSolid className={ICON_SIZE} />,
   };
 
   return iconMap[statusValue] || <Boxes width={18} height={18} />;

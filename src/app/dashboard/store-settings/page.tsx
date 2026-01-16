@@ -49,16 +49,16 @@ export default function OrderSettingsPage() {
   }
 
   return (
-    <div className="w-full container mx-auto px-4 py-10" dir="rtl">
+    <div className="w-full max-w-full overflow-x-hidden container mx-auto px-4 py-10" dir="rtl">
       <header className="mb-10">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-1 h-8 bg-primary rounded-full" />
-          <h1 className="text-3xl font-bold text-gray-900">اعدادات المتجر</h1>
+        <div className="flex items-center gap-3 mb-3 min-w-0">
+          <div className="w-1 h-8 bg-primary rounded-full shrink-0" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">اعدادات المتجر</h1>
         </div>
       </header>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="bg-white border border-black/8 shadow-lg rounded-lg overflow-hidden">
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-full overflow-x-hidden">
+        <div className="bg-white border border-black/8 shadow-lg rounded-lg overflow-hidden w-full max-w-full">
           <OrderSettingsFields
             register={register}
             errors={errors}
@@ -71,7 +71,7 @@ export default function OrderSettingsPage() {
           <button
             type="submit"
             disabled={isUpdating}
-            className={`px-10 py-3 bg-primary text-white rounded-full font-bold transition-all ${
+            className={`px-6 sm:px-10 py-3 bg-primary text-white rounded-full font-bold transition-all text-sm sm:text-base whitespace-nowrap ${
               isUpdating
                 ? 'opacity-50 cursor-not-allowed'
                 : 'hover:bg-[#4a1cb5]'

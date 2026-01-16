@@ -9,22 +9,22 @@ export function LanguageSelectionField({
   register,
 }: LanguageSelectionFieldProps) {
   return (
-    <div className="w-full flex flex-col gap-4 border-b border-gray-100 pb-6">
-      <div className="w-full flex items-start gap-2">
-        <div className="w-6 h-6 flex items-center justify-center">
+    <div className="w-full max-w-full flex flex-col gap-4 border-b border-gray-100 pb-6 min-w-0">
+      <div className="w-full max-w-full flex items-start gap-2 min-w-0">
+        <div className="w-6 h-6 flex items-center justify-center shrink-0">
           <span className="text-primary font-bold">A/ع</span>
         </div>
-        <div>
-          <h3 className="text-lg font-semibold leading-tight">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-base sm:text-lg font-semibold leading-tight break-words">
             لغة بوليصة الشحن
           </h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-xs sm:text-sm text-gray-500 break-words">
             اختار اللغة التي تريد طباعه بوليصة الشحن بها{' '}
           </p>
         </div>
       </div>
 
-      <div className="flex flex-row gap-6 mt-2">
+      <div className="flex flex-row gap-4 sm:gap-6 mt-2 flex-wrap">
         <label className="flex items-center gap-2 cursor-pointer group">
           <div className="relative flex items-center justify-center">
             <input

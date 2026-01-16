@@ -13,6 +13,7 @@ import {
   topSellers,
 } from '../constants/filters';
 import { useGovernoratesQuery } from '@/services/lookups';
+import { useCatigories } from '@/hooks';
 
 type ClearableSelectProps = {
   value: string;
@@ -60,6 +61,7 @@ const StoresFilters = () => {
   const [searchQuery, setSearchQuery] = React.useState('');
 
   const { data: governorates = [] } = useGovernoratesQuery();
+  const { categories, error: categoryError } = useCatigories();
 
   return (
     <div className="mt-8">
@@ -103,7 +105,7 @@ const StoresFilters = () => {
                 <SearchableSelect
                   value={departmentValue}
                   onChange={setDepartmentValue}
-                  options={allDepartments}
+                  options={categories}
                   placeholder="جميع الأقسام"
                   searchPlaceholder="بحث..."
                   className="w-full"

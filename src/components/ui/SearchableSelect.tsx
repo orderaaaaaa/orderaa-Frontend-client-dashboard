@@ -20,6 +20,7 @@ interface SearchableSelectProps {
   value?: string;
   onChange?: (v: string) => void;
   onValueChange?: (v: string) => void;
+  onClear?: () => void;
   onBlur?: () => void;
   options: OptionType[];
   placeholder?: string;
@@ -46,6 +47,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
       value = '',
       onChange,
       onValueChange,
+      onClear,
       onBlur,
       options = [],
       placeholder = 'اختر...',
@@ -69,7 +71,8 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
   ) {
     const [open, setOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [activeIdx, setActiveIdx] = useState<number>(-1);
+    const [activeIdx, setActiveIdx] = useState(-1);
+
     const internalRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -91,29 +94,39 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
       [onOpenChange]
     );
 
-    const isObjectOptions = useMemo(() => {
-      return options.length > 0 && typeof options[0] === 'object';
-    }, [options]);
+    const handleClear = useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (disabled || loading) return;
 
-    const getDisplayText = (opt: OptionType): string => {
-      if (typeof opt === 'string') return opt;
-      return opt.value || opt.label || '';
-    };
+        if (onClear) {
+          onClear();
+        } else {
+          handleChange('');
+        }
+      },
+      [onClear, handleChange, disabled, loading]
+    );
 
-    const getOptionKey = (opt: OptionType): string => {
-      if (typeof opt === 'string') return opt;
-      return opt.key;
-    };
+    const isObjectOptions = useMemo(
+      () => options.length > 0 && typeof options[0] === 'object',
+      [options]
+    );
+
+    const getDisplayText = (opt: OptionType) =>
+      typeof opt === 'string' ? opt : opt.value || opt.label || '';
+
+    const getOptionKey = (opt: OptionType) =>
+      typeof opt === 'string' ? opt : opt.key;
 
     const showSearch = options.length > searchThreshold;
 
     const filtered = useMemo(() => {
       const query = debouncedQuery.toLowerCase().trim();
-      return (options || []).filter((o) => {
-        if (!o) return false;
+      return options.filter((o) => {
         const text = getDisplayText(o);
         if (!query) return true;
-        return text && text.toLowerCase().includes(query);
+        return text.toLowerCase().includes(query);
       });
     }, [options, debouncedQuery]);
 
@@ -121,39 +134,42 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
       if (displayValue) return displayValue;
       if (!value) return '';
       if (!isObjectOptions) return value;
+
       const opt = (options as OptionObject[]).find((o) => o.key === value);
-      return opt ? opt.value || opt.label || value : value;
+      return opt?.value || opt?.label || value;
     }, [value, displayValue, options, isObjectOptions]);
 
     useEffect(() => {
       function onDocClick(e: MouseEvent) {
-        const containerRef = ref || internalRef;
-        if (typeof containerRef === 'object' && containerRef?.current) {
-          if (!containerRef.current.contains(e.target as Node)) {
-            handleOpenChange(false);
-            setActiveIdx(-1);
-            onBlur?.();
-          }
+        const container = (ref ||
+          internalRef) as React.RefObject<HTMLDivElement>;
+        if (
+          container.current &&
+          !container.current.contains(e.target as Node)
+        ) {
+          handleOpenChange(false);
+          setActiveIdx(-1);
+          onBlur?.();
         }
       }
+
       function onKey(e: KeyboardEvent) {
-        if (!open) return;
         if (e.key === 'Escape') {
           handleOpenChange(false);
           setActiveIdx(-1);
         }
       }
+
       document.addEventListener('mousedown', onDocClick);
       document.addEventListener('keydown', onKey);
       return () => {
         document.removeEventListener('mousedown', onDocClick);
         document.removeEventListener('keydown', onKey);
       };
-    }, [open, onBlur, handleOpenChange, ref]);
+    }, [handleOpenChange, onBlur, ref]);
 
     useEffect(() => {
       if (open && showSearch) {
-        setActiveIdx(-1);
         setTimeout(() => inputRef.current?.focus(), 50);
       }
       if (!open) {
@@ -168,102 +184,91 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
       setActiveIdx(-1);
     };
 
-    const handleClear = useCallback(
-      (e: React.MouseEvent) => {
-        e.stopPropagation();
-        handleChange('');
-      },
-      [handleChange]
-    );
-
-    const getEmptyStateMessage = () => {
+    const renderEmptyState = () => {
       if (loading) {
         return (
-          <div className="flex items-center justify-center gap-2 py-6 text-sm text-gray-500">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span>جاري التحميل...</span>
+          <div className="py-6 flex items-center justify-center gap-2 text-sm text-gray-500">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            جاري التحميل...
           </div>
         );
       }
-      if (options.length === 0) {
+
+      if (!options.length) {
         return (
           <div className="py-6 text-center text-sm text-gray-500">
             {emptyMessage}
           </div>
         );
       }
-      if (filtered.length === 0 && debouncedQuery.trim()) {
+
+      if (!filtered.length && debouncedQuery) {
         return (
           <div className="py-6 text-center text-sm text-gray-500">
             {noResultsMessage}
           </div>
         );
       }
+
       return null;
     };
 
     return (
       <div
-        className={cn('relative flex flex-col gap-1', widthClass, className)}
         ref={ref || internalRef}
+        className={cn('relative flex flex-col gap-1', widthClass, className)}
       >
-        {name && (
-          <input type="hidden" name={name} value={value} onChange={() => {}} />
-        )}
+        {name && <input type="hidden" name={name} value={value} />}
 
         <button
           type="button"
-          onClick={() => !disabled && !loading && handleOpenChange(!open)}
           disabled={disabled || loading}
+          onClick={() => !disabled && !loading && handleOpenChange(!open)}
           className={cn(
-            'px-3 py-2 relative rounded border font-medium truncate flex items-center justify-between',
+            'relative px-3 py-2 rounded border flex items-center justify-between truncate',
             disabled || loading
-              ? 'bg-gray-100 cursor-not-allowed text-gray-400 border-gray-200'
-              : 'cursor-pointer bg-white',
+              ? 'bg-gray-100 cursor-not-allowed text-gray-400'
+              : 'bg-white',
             error ? 'border-red-500' : 'border-gray-300',
             triggerClassName
           )}
-          aria-haspopup="listbox"
           aria-expanded={open}
+          aria-haspopup="listbox"
         >
           <span
             className={cn(
-              'text-right flex-1 truncate',
+              'flex-1 truncate text-right',
               currentDisplayValue ? 'text-gray-900' : 'text-gray-500'
             )}
           >
             {loading ? (
               <span className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" />
                 جاري التحميل...
               </span>
             ) : (
               currentDisplayValue || placeholder
             )}
           </span>
-          <div className="flex items-center gap-1 flex-shrink-0">
-            {clearable && value && !disabled && !loading && (
-              <span
-                role="button"
-                tabIndex={0}
-                onClick={handleClear}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    handleClear(e as unknown as React.MouseEvent);
-                  }
-                }}
-                className="p-0.5 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X className="h-4 w-4 text-gray-500 hover:text-gray-700" />
-              </span>
+
+          {clearable && value && !disabled && !loading && (
+            <button
+              type="button"
+              onClick={handleClear}
+              className="absolute left-10 top-1/2 -translate-y-1/2 z-20
+                         text-gray-400 hover:text-primary"
+              aria-label="Clear selection"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+
+          <ChevronDown
+            className={cn(
+              'w-5 h-5 text-gray-400 transition-transform',
+              open && 'rotate-180'
             )}
-            <ChevronDown
-              className={cn(
-                'h-5 w-5 text-gray-400 transition-transform',
-                open && 'rotate-180'
-              )}
-            />
-          </div>
+          />
         </button>
 
         <AnimatePresence>
@@ -273,42 +278,46 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.15 }}
-              className="absolute top-full left-0 right-0 z-50 mt-1 w-full max-h-60 overflow-auto rounded-md border border-gray-200 bg-white shadow-lg"
+              className="absolute top-full z-50 mt-1 w-full max-h-60 overflow-auto
+                         rounded-md border bg-white shadow-lg"
               role="listbox"
             >
               {showSearch && (
-                <div className="p-2 border-b border-gray-100">
+                <div className="p-2 border-b">
                   <input
                     ref={inputRef}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={searchPlaceholder}
-                    className="w-full px-2 py-1.5 rounded border border-gray-200 text-sm focus:outline-none focus:border-primary"
+                    className="w-full px-2 py-1.5 rounded border text-sm
+                               focus:outline-none focus:border-primary"
                   />
                 </div>
               )}
+
               <ul className="py-1">
-                {getEmptyStateMessage() ||
+                {renderEmptyState() ||
                   filtered.map((opt, idx) => {
-                    const optKey = getOptionKey(opt);
-                    const isSelected = value === optKey;
+                    const key = getOptionKey(opt);
+                    const selected = value === key;
+
                     return (
                       <li
-                        key={optKey}
+                        key={key}
+                        role="option"
+                        aria-selected={selected}
                         onMouseEnter={() => setActiveIdx(idx)}
                         onMouseLeave={() => setActiveIdx(-1)}
                         onClick={() => commitSelect(opt)}
                         className={cn(
-                          'px-3 py-2 cursor-pointer flex items-center justify-between gap-2',
+                          'px-3 py-2 flex justify-between cursor-pointer',
                           'hover:bg-primary hover:text-white',
-                          activeIdx === idx && !isSelected && 'bg-gray-100',
-                          isSelected && 'bg-primary text-white'
+                          selected && 'bg-primary text-white',
+                          activeIdx === idx && !selected && 'bg-gray-100'
                         )}
-                        role="option"
-                        aria-selected={isSelected}
                       >
                         <span>{getDisplayText(opt)}</span>
-                        {isSelected && <CheckIcon className="h-4 w-4" />}
+                        {selected && <CheckIcon className="w-4 h-4" />}
                       </li>
                     );
                   })}
@@ -316,11 +325,12 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
             </motion.div>
           )}
         </AnimatePresence>
-        {error && <span className="text-xs text-red-500 mt-1">{error}</span>}
+
+        {error && <span className="text-xs text-red-500">{error}</span>}
       </div>
     );
   }
 );
 
-export { SearchableSelect };
 export default SearchableSelect;
+export { SearchableSelect };

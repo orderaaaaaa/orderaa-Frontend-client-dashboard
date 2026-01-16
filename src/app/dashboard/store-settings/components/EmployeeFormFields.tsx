@@ -34,8 +34,8 @@ export default function OrderSettingsFields({
   }, [integrations]);
 
   return (
-    <div className="px-4 md:px-10 py-6 md:py-[34px]" dir="rtl">
-      <div className="flex lg:w-[37%] flex-col gap-8">
+    <div className="px-4 md:px-10 py-6 md:py-[34px] w-full max-w-full overflow-x-hidden" dir="rtl">
+      <div className="flex w-full lg:w-[37%] max-w-full flex-col gap-8 min-w-0">
         <LogoUploadField watch={watch} setValue={setValue} errors={errors} />
 
         <LanguageSelectionField register={register} />
