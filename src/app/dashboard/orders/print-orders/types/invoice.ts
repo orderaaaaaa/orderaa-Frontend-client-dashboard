@@ -79,3 +79,9 @@ export interface InvoiceLabels {
   cashOnDelivery: string;
   cod: string;
 }
+
+export interface InvoiceProps {
+  data: InvoiceData;
+  storeInfo: InvoiceStoreInfo;
+  language: InvoiceLanguage;
+}

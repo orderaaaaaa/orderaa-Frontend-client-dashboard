@@ -4,14 +4,8 @@ import React from 'react';
 import Barcode from 'react-barcode';
 import { QRCodeSVG } from 'qrcode.react';
 import { LiaPhoneSolid, LiaInfoCircleSolid } from 'react-icons/lia';
-import { InvoiceData, InvoiceStoreInfo, InvoiceLanguage } from '../../types/invoice';
+import { InvoiceProps } from '../../types/invoice';
 import { INVOICE_LABELS } from '../../constants/invoiceLabels';
-
-interface InvoiceProps {
-  data: InvoiceData;
-  storeInfo: InvoiceStoreInfo;
-  language: InvoiceLanguage;
-}
 
 export function Invoice({ data, storeInfo, language }: InvoiceProps) {
   const labels = INVOICE_LABELS[language];

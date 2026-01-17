@@ -18,7 +18,7 @@ import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
 import Footer from '@/components/orders/Footer';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 
-import { useOrders } from '@/services/orders';
+import { useOrders, useDepartmentStatusesQuery } from '@/services/orders';
 import { useOrderStatistics } from '@/hooks/orders/useOrderStatistics';
 import { useFilterOptions } from '@/hooks/orders/useFilterOptions';
 import { useFilterForm } from '@/hooks/orders/useFilterForm';
@@ -38,7 +38,7 @@ import {
 import { buildStatisticsCards } from '../constants/statisticsCards';
 import OrdersSelectionHeader from '../../components/OrdersSelectionHeader';
 import PageTaps from '../../components/pageTaps';
-import { useDefaultStatusByPath } from '../../hooks/useDefaultStatusByPath';
+import { useDefaultStatusByPath, useDepartment } from '../../hooks';
 
 export function ShippingOrdersContent() {
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState('');
@@ -47,7 +47,10 @@ export function ShippingOrdersContent() {
   const [showBackToTop, setShowBackToTop] = useState(false);
 
   const tabState = useDefaultStatusByPath();
-  //TODO: change the setStatus to setTabState after talk with nader
+  const department = useDepartment();
+  const { data: departmentStatuses, isLoading: isDepartmentStatusesLoading } =
+    useDepartmentStatusesQuery(department);
+
   const {
     filters,
     setStatus,
@@ -220,6 +223,9 @@ export function ShippingOrdersContent() {
         totalOrders={statistics?.totalOrders || 0}
         onStatusChange={setStatus}
         currentStatus={tabState}
+        allowedStatuses={departmentStatuses}
+        showAllOrdersTab={false}
+        isLoadingAllowedStatuses={isDepartmentStatusesLoading}
       />
       {/* //TODO: Update props to match shipping orders context */}
       <StatisticsSection cards={statisticsCards} isLoading={statsLoading} />
@@ -238,9 +244,8 @@ export function ShippingOrdersContent() {
         }}
         printStatus={printStatus}
         onPrintStatusChange={setPrintStatus}
-        printedCount={0}
-        notPrintedCount={0}
         selectedOrders={selectedOrders}
+        showPrintStatusToggle={false}
       />
 
       <OrdersSelectionHeader

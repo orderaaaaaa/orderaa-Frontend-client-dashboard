@@ -2,12 +2,11 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import type { Order } from '@/types/orders';
+import type { UsePrintOrderBulkProps, UsePrintOrderBulkReturn } from '../types';
 
-interface UsePrintOrderBulkProps {
-  orders: Order[];
-}
-
-export function usePrintOrderBulk({ orders }: UsePrintOrderBulkProps) {
+export function usePrintOrderBulk({
+  orders,
+}: UsePrintOrderBulkProps): UsePrintOrderBulkReturn {
   const [selectMode, setSelectMode] = useState(false);
   const [selectedOrderIds, setSelectedOrderIds] = useState<number[]>([]);
   const [selectAllMatchingFilters, setSelectAllMatchingFilters] = useState(false);

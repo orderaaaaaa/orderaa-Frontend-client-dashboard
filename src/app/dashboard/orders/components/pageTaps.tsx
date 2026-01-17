@@ -42,6 +42,9 @@ interface PageTapsProps {
   totalOrders?: number;
   onStatusChange?: (status: string | null) => void;
   currentStatus?: string | null;
+  allowedStatuses?: string[];
+  showAllOrdersTab?: boolean;
+  isLoadingAllowedStatuses?: boolean;
 }
 
 //TODO:Omar Move it to external constant file Later Pls
@@ -87,6 +90,9 @@ function PageTaps({
   totalOrders,
   onStatusChange,
   currentStatus,
+  allowedStatuses,
+  showAllOrdersTab = true,
+  isLoadingAllowedStatuses = false,
 }: PageTapsProps) {
   const { selectedStatus: storeSelectedStatus, setSelectedStatus } =
     useOrdersStore();
@@ -95,7 +101,11 @@ function PageTaps({
     currentStatus !== undefined ? currentStatus : storeSelectedStatus;
 
   const { data: statusesData, isLoading: loading } = useOrderStatusesQuery();
-  const statuses = statusesData ?? [];
+  const allStatuses = statusesData ?? [];
+
+  const statuses = allowedStatuses
+    ? allStatuses.filter((status) => allowedStatuses.includes(status.key))
+    : allStatuses;
 
   const handleTabClick = (status: string | null) => {
     if (onStatusChange) {
@@ -105,7 +115,7 @@ function PageTaps({
     }
   };
 
-  if (loading) {
+  if (loading || isLoadingAllowedStatuses) {
     return (
       <div className="w-full">
         <div className="flex md:grid sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 overflow-x-auto pb-2 md:overflow-x-visible scrollbar-thin -mx-1 px-1">
@@ -120,14 +130,15 @@ function PageTaps({
   return (
     <div className="w-full">
       <div className="flex md:grid sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 overflow-x-auto pb-2 md:overflow-x-visible scrollbar-hide -mx-1 px-1">
-        {' '}
-        <PageTab
-          label="جميع الطلبات"
-          count={totalOrders ?? data?.length ?? 0}
-          icon={<BsInboxes className={ICON_SIZE} />}
-          active={selectedStatus === null}
-          onClick={() => handleTabClick(null)}
-        />
+        {showAllOrdersTab && (
+          <PageTab
+            label="جميع الطلبات"
+            count={totalOrders ?? data?.length ?? 0}
+            icon={<BsInboxes className={ICON_SIZE} />}
+            active={selectedStatus === null}
+            onClick={() => handleTabClick(null)}
+          />
+        )}
         {statuses.map((status) => (
           <PageTab
             key={status.key}

@@ -52,14 +52,14 @@ export function useOrderLock({
       setLockError(null);
     }
 
-    if (hasAttemptedLock.current) return;
-
     if (lockedBy !== null && lockedBy !== undefined) {
       if (isLockedByCurrentUser) {
         setHasLock(true);
       }
       return;
     }
+
+    if (hasAttemptedLock.current) return;
 
     const acquireLock = async () => {
       hasAttemptedLock.current = true;

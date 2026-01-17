@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useUrlFilters } from '@/hooks/useUrlFilters';
 import { PrintStatus } from '../types';
 import { useDefaultStatusByPath } from '../../hooks/useDefaultStatusByPath';
@@ -9,6 +9,7 @@ export function usePrintOrdersFilters() {
   const urlFilters = useUrlFilters();
   const DEFAULT_STATUS = useDefaultStatusByPath();
   const hasInitialized = useRef(false);
+  const [printStatus, setPrintStatusState] = useState<PrintStatus>(null);
 
   useEffect(() => {
     if (!urlFilters.isInitialized || hasInitialized.current) return;
@@ -25,16 +26,14 @@ export function usePrintOrdersFilters() {
     DEFAULT_STATUS,
   ]);
 
-  const setPrintStatus = useCallback(
-    (status: PrintStatus) => {
-      urlFilters.setStatus(status);
-      urlFilters.setPage(1);
-    },
-    [urlFilters]
-  );
+  const setPrintStatus = useCallback((status: PrintStatus) => {
+    setPrintStatusState(status);
+    urlFilters.setPage(1);
+  }, [urlFilters]);
 
   const resetAllFilters = useCallback(() => {
     urlFilters.resetFilters();
+    setPrintStatusState(null);
 
     if (DEFAULT_STATUS) {
       urlFilters.setStatus(DEFAULT_STATUS);
@@ -43,7 +42,7 @@ export function usePrintOrdersFilters() {
 
   return {
     ...urlFilters,
-    printStatus: urlFilters.filters.status as PrintStatus,
+    printStatus,
     setPrintStatus,
     resetAllFilters,
   };

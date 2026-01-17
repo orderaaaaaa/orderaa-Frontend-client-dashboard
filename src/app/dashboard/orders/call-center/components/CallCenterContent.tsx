@@ -18,7 +18,7 @@ import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
 import Footer from '@/components/orders/Footer';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 
-import { useOrders } from '@/services/orders';
+import { useOrders, useDepartmentStatusesQuery } from '@/services/orders';
 import { useOrderStatistics } from '@/hooks/orders/useOrderStatistics';
 import { useFilterOptions } from '@/hooks/orders/useFilterOptions';
 import { useFilterForm } from '@/hooks/orders/useFilterForm';
@@ -27,18 +27,14 @@ import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { formatDateForUrl } from '@/utils/urlFilters';
 
 import { PageTabs } from '../../components/PageTabs';
-import { StatisticsSection } from '../../components/StatisticsSection';
 import { FilterSection } from '../../components/FilterSection';
 import {
   usePrintOrdersFilters,
-  usePrintOrderStatistics,
   usePrintOrderBulk,
 } from '../../print-orders/hooks';
-
-import { buildStatisticsCards } from '../constants/statisticsCards';
 import OrdersSelectionHeader from '../../components/OrdersSelectionHeader';
 import PageTaps from '../../components/pageTaps';
-import { useDefaultStatusByPath } from '../../hooks/useDefaultStatusByPath';
+import { useDefaultStatusByPath, useDepartment } from '../../hooks';
 
 export function CallCenterContent() {
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState('');
@@ -46,6 +42,10 @@ export function CallCenterContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const tabState = useDefaultStatusByPath();
+  const department = useDepartment();
+  const { data: departmentStatuses, isLoading: isDepartmentStatusesLoading } =
+    useDepartmentStatusesQuery(department);
+
   const {
     filters,
     setStatus,
@@ -55,8 +55,6 @@ export function CallCenterContent() {
     printStatus,
     setPrintStatus,
   } = usePrintOrdersFilters();
-  const { statistics: printStatistics, loading: statsLoading } =
-    usePrintOrderStatistics();
 
   const apiFilters = useMemo(() => {
     return buildApiFiltersFromUrlState(filters);
@@ -140,11 +138,6 @@ export function CallCenterContent() {
     [updateLocalFilters]
   );
 
-  const statisticsCards = useMemo(
-    () => buildStatisticsCards(printStatistics),
-    [printStatistics]
-  );
-
   const {
     control,
     formState: { errors },
@@ -218,9 +211,9 @@ export function CallCenterContent() {
         totalOrders={statistics?.totalOrders || 0}
         onStatusChange={setStatus}
         currentStatus={tabState}
+        allowedStatuses={departmentStatuses}
+        isLoadingAllowedStatuses={isDepartmentStatusesLoading}
       />
-      {/* //TODO: Update props to match call-center orders context */}
-      <StatisticsSection cards={statisticsCards} isLoading={statsLoading} />
       <FilterSection
         control={control}
         errors={errors}
@@ -236,9 +229,9 @@ export function CallCenterContent() {
         }}
         printStatus={printStatus}
         onPrintStatusChange={setPrintStatus}
-        printedCount={0}
-        notPrintedCount={0}
         selectedOrders={selectedOrders}
+        showPrintButton={false}
+        showPrintStatusToggle={false}
       />
 
       <OrdersSelectionHeader

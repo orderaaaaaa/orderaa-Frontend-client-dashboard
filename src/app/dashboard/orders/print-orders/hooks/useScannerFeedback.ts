@@ -1,11 +1,7 @@
 'use client';
 
 import { useCallback, useRef } from 'react';
-
-interface UseScannerFeedbackReturn {
-  playSuccessSound: () => void;
-  playErrorSound: () => void;
-}
+import type { UseScannerFeedbackReturn } from '../types';
 
 export function useScannerFeedback(): UseScannerFeedbackReturn {
   const audioContextRef = useRef<AudioContext | null>(null);

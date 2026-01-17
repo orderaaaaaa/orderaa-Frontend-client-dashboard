@@ -5,6 +5,7 @@ export const QUERY_KEYS = {
   ORDER_STATISTICS: 'order-statistics',
   ORDER_FILTER_OPTIONS: 'order-filter-options',
   ORDER_STATUSES: 'order-statuses',
+  DEPARTMENT_STATUSES: 'department-statuses',
   CUSTOMER_ORDERS: 'customer-orders',
   PRINT_ORDER_STATISTICS: 'print-order-statistics',
 

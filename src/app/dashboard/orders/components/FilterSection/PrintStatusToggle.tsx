@@ -2,23 +2,19 @@
 
 import React from 'react';
 import clsx from 'clsx';
-//TODO: Move this import after moving types
-import { PrintStatus } from '../../print-orders/types';
-import { LiaPrintSolid } from 'react-icons/lia';
+import { PrintStatus, PrintOrderStatistics } from '../../print-orders/types';
 import { Button } from '@/components/ui/button';
 
 interface PrintStatusToggleProps {
   value: PrintStatus;
   onChange: (status: PrintStatus) => void;
-  printedCount?: number;
-  notPrintedCount?: number;
+  printStatistics?: PrintOrderStatistics | null;
 }
 
 export function PrintStatusToggle({
   value,
   onChange,
-  printedCount = 0,
-  notPrintedCount = 0,
+  printStatistics,
 }: PrintStatusToggleProps) {
   const handleToggle = (status: PrintStatus) => {
     if (value === status) {
@@ -37,6 +33,9 @@ export function PrintStatusToggle({
         className={clsx(value !== 'printed' && 'text-gray-600')}
       >
         <span>طلبات تم طباعتها</span>
+        {printStatistics && (
+          <span className="bg-primary rounded-full text-white px-1.5">{printStatistics.confirmedPrintedOrders}</span>
+        )}
       </Button>
 
       <Button
@@ -46,6 +45,9 @@ export function PrintStatusToggle({
         className={clsx(value !== 'not_printed' && 'text-gray-600')}
       >
         <span>طلبات لم يتم طباعتها</span>
+        {printStatistics && (
+          <span className="bg-primary rounded-full text-white px-1.5">{printStatistics.confirmedNotPrintedOrders}</span>
+        )}
       </Button>
     </div>
   );

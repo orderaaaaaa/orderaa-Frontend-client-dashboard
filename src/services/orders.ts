@@ -92,6 +92,22 @@ export const useOrderStatusesQuery = () => {
   });
 };
 
+// Fetch department-specific statuses
+export const useDepartmentStatusesQuery = (department: string | null) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.DEPARTMENT_STATUSES, department] as QueryKey,
+    queryFn: async () => {
+      const response = await http.get<{ statuses: string[] }>(
+        '/orders/department-statuses',
+        { params: { department } }
+      );
+      return response.data.statuses;
+    },
+    enabled: !!department,
+    staleTime: Infinity,
+  });
+};
+
 // Fetch a single order by ID
 export const useOrderById = (id: number | null) => {
   return useQuery({

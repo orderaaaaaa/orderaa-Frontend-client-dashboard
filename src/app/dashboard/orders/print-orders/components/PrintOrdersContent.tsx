@@ -13,8 +13,13 @@ import {
   useBarcodeScanner,
   useScannerFeedback,
   useScannedOrders,
+  usePrepareOrders,
+  useWaitingForPackaging,
+  useCallAgainOrders,
 } from '../hooks';
+import { getOrderByCode } from '../services/printOrders';
 import { ScannedOrdersModal } from './ScannedOrdersModal';
+import { ChangeProductModal } from './ChangeProductModal';
 
 import { Breadcrumb } from '@/components/dashboard-layout';
 import { Button } from '@/components/ui/button';
@@ -23,7 +28,7 @@ import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
 import Footer from '@/components/orders/Footer';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 
-import { useOrders } from '@/services/orders';
+import { useOrders, useDepartmentStatusesQuery } from '@/services/orders';
 import { useOrderStatistics } from '@/hooks/orders/useOrderStatistics';
 import { useFilterOptions } from '@/hooks/orders/useFilterOptions';
 import { useFilterForm } from '@/hooks/orders/useFilterForm';
@@ -41,7 +46,7 @@ import {
 } from '../hooks';
 import { buildStatisticsCards } from '../constants/statisticsCards';
 import PageTaps from '../../components/pageTaps';
-import { useDefaultStatusByPath } from '../../hooks/useDefaultStatusByPath';
+import { useDefaultStatusByPath, useDepartment } from '../../hooks';
 
 export function PrintOrdersContent() {
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState('');
@@ -51,7 +56,23 @@ export function PrintOrdersContent() {
   const [isScannedOrdersModalOpen, setIsScannedOrdersModalOpen] =
     useState(false);
   const [flashingCode, setFlashingCode] = useState<string | null>(null);
+  const [isActionLoading, setIsActionLoading] = useState(false);
+  const [isScanLoading, setIsScanLoading] = useState(false);
+  const [isChangeProductModalOpen, setIsChangeProductModalOpen] =
+    useState(false);
+  const [isScannerChangeProductMode, setIsScannerChangeProductMode] =
+    useState(false);
+  const [scannerPackagingNotes, setScannerPackagingNotes] = useState<
+    Record<string, string>
+  >({});
   const tabState = useDefaultStatusByPath();
+  const department = useDepartment();
+  const { data: departmentStatuses, isLoading: isDepartmentStatusesLoading } =
+    useDepartmentStatusesQuery(department);
+
+  const { mutateAsync: prepareOrdersMutation } = usePrepareOrders();
+  const { mutateAsync: waitingMutation } = useWaitingForPackaging();
+  const { mutateAsync: callAgainMutation } = useCallAgainOrders();
 
   const {
     filters,
@@ -129,7 +150,11 @@ export function PrintOrdersContent() {
   const totalOrders = ordersData?.meta?.totalItems ?? 0;
   const totalPages = ordersData?.meta?.totalPages ?? 1;
   const currentPage = ordersData?.meta?.currentPage ?? 1;
-  const error = queryError?.message ?? null;
+  const error = useMemo(() => {
+    if (!queryError) return null;
+    const axiosError = queryError as { response?: { data?: { message?: string } } };
+    return axiosError.response?.data?.message || queryError.message;
+  }, [queryError]);
 
   const {
     selectMode,
@@ -149,72 +174,134 @@ export function PrintOrdersContent() {
     addOrder,
     removeOrder,
     clearOrders,
+    hasOrder,
     searchQuery,
     setSearchQuery,
     filteredOrders,
   } = useScannedOrders();
 
   const handleScan = useCallback(
-    (barcode: string) => {
-      console.log('[PrintOrdersContent] Barcode scanned:', barcode);
-
-      const added = addOrder(barcode);
-
-      if (added) {
-        playSuccessSound();
-        setFlashingCode(barcode);
-        setTimeout(() => setFlashingCode(null), 600);
-      } else {
-        playErrorSound();
-        toast.warning('هذا الطلب تم مسحه مسبقاً');
-      }
-
+    async (barcode: string) => {
       if (!isScannedOrdersModalOpen) {
         setIsScannedOrdersModalOpen(true);
       }
+
+      if (hasOrder(barcode)) {
+        playErrorSound();
+        toast.warning('هذا الطلب تم مسحه مسبقاً');
+        return;
+      }
+
+      setIsScanLoading(true);
+      try {
+        const order = await getOrderByCode(barcode);
+        addOrder({ id: order.id, code: barcode });
+        playSuccessSound();
+        setFlashingCode(barcode);
+        setTimeout(() => setFlashingCode(null), 600);
+      } catch (error: any) {
+        playErrorSound();
+        toast.error(error?.response?.data?.message || 'هذا الطلب غير موجود');
+      } finally {
+        setIsScanLoading(false);
+      }
     },
-    [addOrder, playSuccessSound, playErrorSound, isScannedOrdersModalOpen]
+    [addOrder, hasOrder, playSuccessSound, playErrorSound, isScannedOrdersModalOpen]
   );
 
   useBarcodeScanner({
     onScan: handleScan,
     enabled: true,
+    minCharLength: 1,
+    maxCharLength: 1000,
   });
 
-  const scannerStatusLabels: Record<string, string> = {
-    PREPARED: 'تم التحضير',
-    AWAITING_PACKAGING: 'فى انتظار التغليف',
-    CALL_AGAIN: 'اعادة اتصال',
-    CHANGE_PRODUCT: 'تغيير المنتج',
-  };
-
-  const handleScannerStatusUpdate = useCallback(
-    (status: string) => {
-      if (scannedOrders.length === 0) return;
-      const statusLabel = scannerStatusLabels[status] || status;
-      toast.info('جاري تحديث حالة الطلبات إلى: ' + statusLabel);
+  const handleScannerPrepared = useCallback(async () => {
+    if (scannedOrders.length === 0) return;
+    setIsActionLoading(true);
+    try {
+      await prepareOrdersMutation({
+        orderCodes: scannedOrders.map((o) => o.code),
+      });
+      toast.success('تم تحديث الطلبات إلى تم التحضير');
       clearOrders();
       setIsScannedOrdersModalOpen(false);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'فشل تحديث الطلبات');
+    } finally {
+      setIsActionLoading(false);
+    }
+  }, [scannedOrders, prepareOrdersMutation, clearOrders]);
+
+  const handleScannerAwaitingPackaging = useCallback(async () => {
+    if (scannedOrders.length === 0) return;
+    setIsActionLoading(true);
+    try {
+      await waitingMutation({
+        orderIds: scannedOrders.map((o) => o.id),
+      });
+      toast.success('تم تحديث الطلبات إلى فى انتظار التغليف');
+      clearOrders();
+      setIsScannedOrdersModalOpen(false);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'فشل تحديث الطلبات');
+    } finally {
+      setIsActionLoading(false);
+    }
+  }, [scannedOrders, waitingMutation, clearOrders]);
+
+  const handleScannerCallAgain = useCallback(async () => {
+    if (scannedOrders.length === 0) return;
+    setIsActionLoading(true);
+    try {
+      await callAgainMutation({
+        orders: scannedOrders.map((o) => ({ id: o.id })),
+      });
+      toast.success('تم تحديث الطلبات إلى اعادة اتصال');
+      clearOrders();
+      setIsScannedOrdersModalOpen(false);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'فشل تحديث الطلبات');
+    } finally {
+      setIsActionLoading(false);
+    }
+  }, [scannedOrders, callAgainMutation, clearOrders]);
+
+  const handleScannerChangeProduct = useCallback(() => {
+    setIsScannerChangeProductMode((prev) => !prev);
+  }, []);
+
+  const handleScannerPackagingNoteChange = useCallback(
+    (code: string, note: string) => {
+      setScannerPackagingNotes((prev) => ({
+        ...prev,
+        [code]: note,
+      }));
     },
-    [scannedOrders.length, clearOrders]
+    []
   );
 
-  const handleScannerPrepared = useCallback(
-    () => handleScannerStatusUpdate('PREPARED'),
-    [handleScannerStatusUpdate]
-  );
-  const handleScannerAwaitingPackaging = useCallback(
-    () => handleScannerStatusUpdate('AWAITING_PACKAGING'),
-    [handleScannerStatusUpdate]
-  );
-  const handleScannerCallAgain = useCallback(
-    () => handleScannerStatusUpdate('CALL_AGAIN'),
-    [handleScannerStatusUpdate]
-  );
-  const handleScannerChangeProduct = useCallback(
-    () => handleScannerStatusUpdate('CHANGE_PRODUCT'),
-    [handleScannerStatusUpdate]
-  );
+  const handleScannerChangeProductSubmit = useCallback(async () => {
+    if (scannedOrders.length === 0) return;
+    setIsActionLoading(true);
+    try {
+      await callAgainMutation({
+        orders: scannedOrders.map((o) => ({
+          id: o.id,
+          packagingNote: scannerPackagingNotes[o.code]?.trim() || '',
+        })),
+      });
+      toast.success('تم تغيير المنتج بنجاح');
+      clearOrders();
+      setScannerPackagingNotes({});
+      setIsScannerChangeProductMode(false);
+      setIsScannedOrdersModalOpen(false);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'فشل تغيير المنتج');
+    } finally {
+      setIsActionLoading(false);
+    }
+  }, [scannedOrders, callAgainMutation, clearOrders, scannerPackagingNotes]);
 
   const prevPageRef = useRef<number>(page);
 
@@ -240,21 +327,82 @@ export function PrintOrdersContent() {
     onSubmit: handleFormSubmit,
   });
 
-  const handlePrepared = useCallback(() => {
-    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى تم التحضير`);
-  }, [selectedOrders]);
+  const handlePrepared = useCallback(async () => {
+    if (selectedOrders.length === 0) return;
+    setIsActionLoading(true);
+    try {
+      await prepareOrdersMutation({
+        orderCodes: selectedOrders.map((o) => o.code),
+      });
+      toast.success('تم تحديث الطلبات إلى تم التحضير');
+      clearSelections();
+      setSelectMode(false);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'فشل تحديث الطلبات');
+    } finally {
+      setIsActionLoading(false);
+    }
+  }, [selectedOrders, prepareOrdersMutation, clearSelections, setSelectMode]);
 
-  const handleAwaitingPackaging = useCallback(() => {
-    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى فى انتظار التغليف`);
-  }, [selectedOrders]);
+  const handleAwaitingPackaging = useCallback(async () => {
+    if (selectedOrders.length === 0) return;
+    setIsActionLoading(true);
+    try {
+      await waitingMutation({
+        orderIds: selectedOrders.map((o) => o.id),
+      });
+      toast.success('تم تحديث الطلبات إلى فى انتظار التغليف');
+      clearSelections();
+      setSelectMode(false);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'فشل تحديث الطلبات');
+    } finally {
+      setIsActionLoading(false);
+    }
+  }, [selectedOrders, waitingMutation, clearSelections, setSelectMode]);
 
-  const handleCallAgain = useCallback(() => {
-    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى اعادة اتصال`);
-  }, [selectedOrders]);
+  const handleCallAgain = useCallback(async () => {
+    if (selectedOrders.length === 0) return;
+    setIsActionLoading(true);
+    try {
+      await callAgainMutation({
+        orders: selectedOrders.map((o) => ({ id: o.id })),
+      });
+      toast.success('تم تحديث الطلبات إلى اعادة اتصال');
+      clearSelections();
+      setSelectMode(false);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'فشل تحديث الطلبات');
+    } finally {
+      setIsActionLoading(false);
+    }
+  }, [selectedOrders, callAgainMutation, clearSelections, setSelectMode]);
 
   const handleChangeProduct = useCallback(() => {
-    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى تغيير المنتج`);
+    if (selectedOrders.length === 0) return;
+    setIsChangeProductModalOpen(true);
   }, [selectedOrders]);
+
+  const handleChangeProductSubmit = useCallback(
+    async (ordersWithNotes: { id: number; packagingNote: string }[]) => {
+      setIsActionLoading(true);
+      try {
+        await callAgainMutation({
+          orders: ordersWithNotes,
+        });
+        toast.success('تم تغيير المنتج بنجاح');
+        setIsChangeProductModalOpen(false);
+        clearSelections();
+        setSelectMode(false);
+      } catch (error: any) {
+        toast.error(error?.response?.data?.message || 'فشل تغيير المنتج');
+        throw error;
+      } finally {
+        setIsActionLoading(false);
+      }
+    },
+    [callAgainMutation, clearSelections, setSelectMode]
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -308,6 +456,9 @@ export function PrintOrdersContent() {
         totalOrders={statistics?.totalOrders || 0}
         onStatusChange={setStatus}
         currentStatus={tabState}
+        allowedStatuses={departmentStatuses}
+        showAllOrdersTab={false}
+        isLoadingAllowedStatuses={isDepartmentStatusesLoading}
       />
 
       <StatisticsSection cards={statisticsCards} isLoading={statsLoading} />
@@ -326,8 +477,7 @@ export function PrintOrdersContent() {
         }}
         printStatus={printStatus}
         onPrintStatusChange={setPrintStatus}
-        printedCount={0}
-        notPrintedCount={0}
+        printStatistics={printStatistics}
         selectedOrders={selectedOrders}
       />
 
@@ -473,6 +623,7 @@ export function PrintOrdersContent() {
           position="fixed"
           isAllSelected={selectAllMatchingFilters}
           totalStoreOrders={totalOrders}
+          isLoading={isActionLoading}
         />
       )}
 
@@ -492,6 +643,8 @@ export function PrintOrdersContent() {
         isOpen={isScannedOrdersModalOpen}
         onClose={() => {
           setIsScannedOrdersModalOpen(false);
+          setIsScannerChangeProductMode(false);
+          setScannerPackagingNotes({});
           clearOrders();
         }}
         scannedOrders={scannedOrders}
@@ -503,8 +656,21 @@ export function PrintOrdersContent() {
         onAwaitingPackaging={handleScannerAwaitingPackaging}
         onCallAgain={handleScannerCallAgain}
         onChangeProduct={handleScannerChangeProduct}
-        isLoading={false}
+        isLoading={isActionLoading}
+        isScanLoading={isScanLoading}
         flashingCode={flashingCode}
+        isChangeProductMode={isScannerChangeProductMode}
+        packagingNotes={scannerPackagingNotes}
+        onPackagingNoteChange={handleScannerPackagingNoteChange}
+        onChangeProductSubmit={handleScannerChangeProductSubmit}
+      />
+
+      <ChangeProductModal
+        isOpen={isChangeProductModalOpen}
+        onClose={() => setIsChangeProductModalOpen(false)}
+        orders={selectedOrders}
+        onSubmit={handleChangeProductSubmit}
+        isLoading={isActionLoading}
       />
     </div>
   );

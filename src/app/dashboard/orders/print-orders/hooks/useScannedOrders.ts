@@ -1,30 +1,13 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
+import type {
+  ScannedOrder,
+  AddOrderInput,
+  UseScannedOrdersReturn,
+} from '../types';
 
-export interface ScannedOrder {
-  code: string;
-  scannedAt: Date;
-}
-
-interface UseScannedOrdersReturn {
-  scannedOrders: ScannedOrder[];
-  addOrder: (code: string) => boolean;
-  removeOrder: (code: string) => void;
-  clearOrders: () => void;
-  hasOrder: (code: string) => boolean;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  filteredOrders: ScannedOrder[];
-}
-
-const isDev = process.env.NODE_ENV === 'development';
-
-function log(...args: any[]) {
-  if (isDev) {
-    console.log('[Scanned Orders]', ...args);
-  }
-}
+export type { ScannedOrder, AddOrderInput };
 
 export function useScannedOrders(): UseScannedOrdersReturn {
   const [scannedOrders, setScannedOrders] = useState<ScannedOrder[]>([]);
@@ -32,52 +15,37 @@ export function useScannedOrders(): UseScannedOrdersReturn {
 
   const hasOrder = useCallback(
     (code: string) => {
-      const exists = scannedOrders.some(
+      return scannedOrders.some(
         (order) => order.code.toLowerCase() === code.toLowerCase()
       );
-      log('Checking if order exists:', code, 'result:', exists);
-      return exists;
     },
     [scannedOrders]
   );
 
   const addOrder = useCallback(
-    (code: string): boolean => {
-      log('addOrder called with code:', code);
-      log('Current orders count:', scannedOrders.length);
-
-      if (hasOrder(code)) {
-        log('Order already exists, not adding:', code);
+    (order: AddOrderInput): boolean => {
+      if (hasOrder(order.code)) {
         return false;
       }
 
-      log('Adding new order:', code);
-      setScannedOrders((prev) => {
-        const newOrders = [{ code, scannedAt: new Date() }, ...prev];
-        log('Orders list updated, new count:', newOrders.length);
-        return newOrders;
-      });
+      setScannedOrders((prev) => [
+        { id: order.id, code: order.code, scannedAt: new Date() },
+        ...prev,
+      ]);
       return true;
     },
-    [hasOrder, scannedOrders.length]
+    [hasOrder]
   );
 
   const removeOrder = useCallback((code: string) => {
-    log('removeOrder called with code:', code);
-    setScannedOrders((prev) => {
-      const filtered = prev.filter(
-        (order) => order.code.toLowerCase() !== code.toLowerCase()
-      );
-      log('Order removed, new count:', filtered.length);
-      return filtered;
-    });
+    setScannedOrders((prev) =>
+      prev.filter((order) => order.code.toLowerCase() !== code.toLowerCase())
+    );
   }, []);
 
   const clearOrders = useCallback(() => {
-    log('clearOrders called, clearing all orders');
     setScannedOrders([]);
     setSearchQuery('');
-    log('All orders cleared');
   }, []);
 
   const filteredOrders = useMemo(() => {
@@ -85,11 +53,9 @@ export function useScannedOrders(): UseScannedOrdersReturn {
       return scannedOrders;
     }
     const query = searchQuery.toLowerCase();
-    const filtered = scannedOrders.filter((order) =>
+    return scannedOrders.filter((order) =>
       order.code.toLowerCase().includes(query)
     );
-    log('Filtering orders with query:', searchQuery, 'results:', filtered.length);
-    return filtered;
   }, [scannedOrders, searchQuery]);
 
   return {

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from 'clsx';
+import { toast } from 'react-toastify';
 import { Control, FieldErrors, UseFormSetValue } from 'react-hook-form';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { FilterOptions, Order } from '@/types/orders';
@@ -24,12 +25,13 @@ import { Button } from '@/components/ui/button';
 import BaseModal from '@/components/ui/base-modal';
 import { PrintStatusToggle } from './PrintStatusToggle';
 import { PrintInvoicesModal } from './PrintInvoicesModal';
-//TODO: Fix these imports after moving types and utils
 import {
   PrintStatus,
+  PrintOrderStatistics,
   InvoiceData,
   InvoiceLanguage,
 } from '../../print-orders/types';
+import { useMarkOrdersPrinted } from '../../print-orders/hooks';
 import { mapOrdersToInvoices } from '../../print-orders/utils';
 import { Invoice } from '../../print-orders/components/Invoice';
 import { STORE_INFO } from '../../print-orders/constants';
@@ -42,9 +44,10 @@ interface FilterSectionProps {
   initialFormFilters?: OrderFiltersFormData | null;
   printStatus: PrintStatus;
   onPrintStatusChange: (status: PrintStatus) => void;
-  printedCount?: number;
-  notPrintedCount?: number;
+  printStatistics?: PrintOrderStatistics | null;
   selectedOrders?: Order[];
+  showPrintButton?: boolean;
+  showPrintStatusToggle?: boolean;
 }
 
 function getActiveFiltersFromFormValues(
@@ -79,9 +82,10 @@ export function FilterSection({
   initialFormFilters,
   printStatus,
   onPrintStatusChange,
-  printedCount = 0,
-  notPrintedCount = 0,
+  printStatistics,
   selectedOrders = [],
+  showPrintButton = true,
+  showPrintStatusToggle = true,
 }: FilterSectionProps) {
   const [activeFilters, setActiveFilters] = useState<FilterKey[]>(() =>
     getActiveFiltersFromFormValues(initialFormFilters)
@@ -91,8 +95,10 @@ export function FilterSection({
   const [invoicesToPrint, setInvoicesToPrint] = useState<InvoiceData[]>([]);
   const [selectedLanguage, setSelectedLanguage] =
     useState<InvoiceLanguage>('ar');
+  const [isMarkingPrinted, setIsMarkingPrinted] = useState(false);
 
   const hasInitializedRef = useRef(false);
+  const { mutateAsync: markAsPrinted } = useMarkOrdersPrinted();
 
   useEffect(() => {
     if (!initialFormFilters) return;
@@ -150,18 +156,38 @@ export function FilterSection({
     }
   };
 
-  const handleLanguageSelect = (language: InvoiceLanguage) => {
-    setShowLanguagePicker(false);
+  const handleLanguageSelect = async (language: InvoiceLanguage) => {
     if (!selectedOrders || selectedOrders.length === 0) return;
 
-    setSelectedLanguage(language);
-    const invoices = mapOrdersToInvoices(selectedOrders, language);
-    setInvoicesToPrint(invoices);
+    const unprintedOrders = selectedOrders.filter((order) => !order.isPrinted);
 
-    setTimeout(() => {
-      window.print();
-      setTimeout(() => setInvoicesToPrint([]), 500);
-    }, 100);
+    setIsMarkingPrinted(true);
+
+    try {
+      if (unprintedOrders.length > 0) {
+        await markAsPrinted({
+          ordersIds: unprintedOrders.map((order) => order.id),
+          isPrinted: true,
+        });
+        toast.success('تم تحديث حالة الطباعة بنجاح');
+      }
+
+      setShowLanguagePicker(false);
+      setSelectedLanguage(language);
+      const invoices = mapOrdersToInvoices(selectedOrders, language);
+      setInvoicesToPrint(invoices);
+
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => setInvoicesToPrint([]), 500);
+      }, 100);
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message || 'فشل تحديث حالة الطباعة'
+      );
+    } finally {
+      setIsMarkingPrinted(false);
+    }
   };
 
   return (
@@ -218,17 +244,20 @@ export function FilterSection({
             </PopoverContent>
           </Popover>
 
-          <Button variant="outline" size="lg" onClick={handlePrintClick}>
-            <LiaPrintSolid className="size-5" />
-          </Button>
+          {showPrintButton && (
+            <Button variant="outline" size="lg" onClick={handlePrintClick}>
+              <LiaPrintSolid className="size-5" />
+            </Button>
+          )}
         </div>
 
-        <PrintStatusToggle
-          value={printStatus}
-          onChange={onPrintStatusChange}
-          printedCount={printedCount}
-          notPrintedCount={notPrintedCount}
-        />
+        {showPrintStatusToggle && (
+          <PrintStatusToggle
+            value={printStatus}
+            onChange={onPrintStatusChange}
+            printStatistics={printStatistics}
+          />
+        )}
       </div>
 
       {activeFilters.length > 0 && (
@@ -259,15 +288,29 @@ export function FilterSection({
             onClick={() => handleLanguageSelect('ar')}
             variant="outline"
             className="w-full"
+            disabled={isMarkingPrinted}
           >
-            العربية
+            {isMarkingPrinted ? (
+              <span className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
+              </span>
+            ) : (
+              'العربية'
+            )}
           </Button>
           <Button
             onClick={() => handleLanguageSelect('en')}
             variant="outline"
             className="w-full"
+            disabled={isMarkingPrinted}
           >
-            English
+            {isMarkingPrinted ? (
+              <span className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
+              </span>
+            ) : (
+              'English'
+            )}
           </Button>
         </div>
       </BaseModal>
