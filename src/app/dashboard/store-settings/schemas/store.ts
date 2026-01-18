@@ -53,6 +53,23 @@ export const orderSettingsSchema = z.object({
     if (isNaN(num)) return undefined;
     return num < 0 ? 0 : num;
   }, z.number().min(0, { message: 'يجب أن يكون الرقم 0 أو أكبر' }).optional()),
+
+  url: z
+    .string()
+    .trim()
+    .optional()
+    .refine(
+      (val) => {
+        if (!val || val === '') return true;
+        try {
+          new URL(val);
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      { message: 'يرجى إدخال رابط صحيح' }
+    ),
 });
 
 export type OrderSettingsFormData = z.infer<typeof orderSettingsSchema>;

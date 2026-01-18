@@ -1,3 +1,4 @@
+
 export type InvoiceLanguage = 'ar' | 'en';
 
 export interface InvoiceStoreInfo {
@@ -6,6 +7,7 @@ export interface InvoiceStoreInfo {
   nameEn: string;
   phoneNumbers: string[];
   contactQRValue: string;
+  defaultReturnShippingCost?: number;
 }
 
 export interface InvoiceCustomer {

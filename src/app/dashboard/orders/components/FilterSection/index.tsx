@@ -22,19 +22,22 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import BaseModal from '@/components/ui/base-modal';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 import { PrintStatusToggle } from './PrintStatusToggle';
 import { PrintInvoicesModal } from './PrintInvoicesModal';
 import {
   PrintStatus,
   PrintOrderStatistics,
   InvoiceData,
-  InvoiceLanguage,
 } from '../../print-orders/types';
-import { useMarkOrdersPrinted } from '../../print-orders/hooks';
+import { useMarkOrdersPrinted, useInvoiceSettings } from '../../print-orders/hooks';
 import { mapOrdersToInvoices } from '../../print-orders/utils';
 import { Invoice } from '../../print-orders/components/Invoice';
-import { STORE_INFO } from '../../print-orders/constants';
+
+export interface ShippingCompanyOption {
+  key: string;
+  label: string;
+}
 
 interface FilterSectionProps {
   control: Control<OrderFiltersFormData>;
@@ -48,6 +51,11 @@ interface FilterSectionProps {
   selectedOrders?: Order[];
   showPrintButton?: boolean;
   showPrintStatusToggle?: boolean;
+  shippingCompanyOptions?: ShippingCompanyOption[];
+  selectedShippingCompany?: string;
+  onShippingCompanyChange?: (value: string) => void;
+  showShippingCompanySelect?: boolean;
+  isLoadingShippingCompanies?: boolean;
 }
 
 function getActiveFiltersFromFormValues(
@@ -86,19 +94,22 @@ export function FilterSection({
   selectedOrders = [],
   showPrintButton = true,
   showPrintStatusToggle = true,
+  shippingCompanyOptions = [],
+  selectedShippingCompany = '',
+  onShippingCompanyChange,
+  showShippingCompanySelect = false,
+  isLoadingShippingCompanies = false,
 }: FilterSectionProps) {
   const [activeFilters, setActiveFilters] = useState<FilterKey[]>(() =>
     getActiveFiltersFromFormValues(initialFormFilters)
   );
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
-  const [showLanguagePicker, setShowLanguagePicker] = useState(false);
   const [invoicesToPrint, setInvoicesToPrint] = useState<InvoiceData[]>([]);
-  const [selectedLanguage, setSelectedLanguage] =
-    useState<InvoiceLanguage>('ar');
   const [isMarkingPrinted, setIsMarkingPrinted] = useState(false);
 
   const hasInitializedRef = useRef(false);
   const { mutateAsync: markAsPrinted } = useMarkOrdersPrinted();
+  const { storeInfo, language } = useInvoiceSettings();
 
   useEffect(() => {
     if (!initialFormFilters) return;
@@ -148,15 +159,15 @@ export function FilterSection({
     f.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handlePrintClick = () => {
+  const handlePrintClick = async () => {
     if (selectedOrders && selectedOrders.length > 0) {
-      setShowLanguagePicker(true);
+      await handlePrintSelectedOrders();
     } else {
       setIsPrintModalOpen(true);
     }
   };
 
-  const handleLanguageSelect = async (language: InvoiceLanguage) => {
+  const handlePrintSelectedOrders = async () => {
     if (!selectedOrders || selectedOrders.length === 0) return;
 
     const unprintedOrders = selectedOrders.filter((order) => !order.isPrinted);
@@ -172,8 +183,6 @@ export function FilterSection({
         toast.success('تم تحديث حالة الطباعة بنجاح');
       }
 
-      setShowLanguagePicker(false);
-      setSelectedLanguage(language);
       const invoices = mapOrdersToInvoices(selectedOrders, language);
       setInvoicesToPrint(invoices);
 
@@ -249,6 +258,17 @@ export function FilterSection({
               <LiaPrintSolid className="size-5" />
             </Button>
           )}
+
+          {showShippingCompanySelect && (
+            <SearchableSelect
+              value={selectedShippingCompany}
+              onChange={onShippingCompanyChange}
+              options={shippingCompanyOptions}
+              placeholder="شركة الشحن"
+              loading={isLoadingShippingCompanies}
+              widthClass="w-[180px]"
+            />
+          )}
         </div>
 
         {showPrintStatusToggle && (
@@ -276,45 +296,6 @@ export function FilterSection({
         onClose={() => setIsPrintModalOpen(false)}
       />
 
-      <BaseModal
-        isOpen={showLanguagePicker}
-        onClose={() => setShowLanguagePicker(false)}
-        title="اختر لغة الفاتورة"
-        showFooter={false}
-        maxWidth="w-[400px]"
-      >
-        <div className="flex flex-col gap-3">
-          <Button
-            onClick={() => handleLanguageSelect('ar')}
-            variant="outline"
-            className="w-full"
-            disabled={isMarkingPrinted}
-          >
-            {isMarkingPrinted ? (
-              <span className="flex items-center gap-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
-              </span>
-            ) : (
-              'العربية'
-            )}
-          </Button>
-          <Button
-            onClick={() => handleLanguageSelect('en')}
-            variant="outline"
-            className="w-full"
-            disabled={isMarkingPrinted}
-          >
-            {isMarkingPrinted ? (
-              <span className="flex items-center gap-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
-              </span>
-            ) : (
-              'English'
-            )}
-          </Button>
-        </div>
-      </BaseModal>
-
       {typeof window !== 'undefined' &&
         invoicesToPrint.length > 0 &&
         createPortal(
@@ -323,8 +304,8 @@ export function FilterSection({
               <Invoice
                 key={index}
                 data={invoice}
-                storeInfo={STORE_INFO}
-                language={selectedLanguage}
+                storeInfo={storeInfo}
+                language={language}
               />
             ))}
           </div>,

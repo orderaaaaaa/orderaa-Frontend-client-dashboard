@@ -8,6 +8,7 @@ export interface MerchantSettingsResponse {
   cancellationReasons: string[];
   autoCancelAttempts: number;
   logo: string;
+  url: string;
 }
 
 type language = 'ar' | 'en' | undefined;

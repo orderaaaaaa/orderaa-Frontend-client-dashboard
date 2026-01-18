@@ -10,4 +10,5 @@ export const ORDER_SETTINGS_DEFAULTS: OrderSettingsFormData = {
   defaultReturnShippingCost: 0,
   autoCancelAttempts: 0,
   logo: undefined,
+  url: '',
 };

@@ -9,7 +9,7 @@ import { INVOICE_LABELS } from '../../constants/invoiceLabels';
 
 export function Invoice({ data, storeInfo, language }: InvoiceProps) {
   const labels = INVOICE_LABELS[language];
-  const storeName = language === 'ar' ? storeInfo.name : storeInfo.nameEn;
+ // const storeName = language === 'ar' ? storeInfo.name : storeInfo.nameEn;
 
   const location = [data.customer.governorate, data.customer.city]
     .filter(Boolean)
@@ -44,10 +44,21 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
       className="invoice-page w-[100mm] min-h-[150mm] bg-white p-1 text-[8px]"
       dir={language === 'ar' ? 'rtl' : 'ltr'}
     >
+      {/* Logo */}
+      {storeInfo.logo && (
+        <div className="flex justify-center mb-1">
+          <img
+            src={storeInfo.logo}
+            alt="Store Logo"
+            className="h-10 max-w-[60mm] object-contain"
+          />
+        </div>
+      )}
+
       {/* Store Name Header */}
-      <div className="text-center mb-1 pb-1">
+      {/* <div className="text-center mb-1 pb-1">
         <h1 className="text-base font-bold tracking-wide">{storeName}</h1>
-      </div>
+      </div> */}
 
       {/* Recipient Details Section */}
       <div className="grid grid-cols-2 bg-black text-white">
@@ -203,7 +214,7 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
 
       {/* Non-Receipt Penalty & Product Count */}
       <div className="grid grid-cols-2 items-center text-[8px] font-bold mb-1 border-y border-black py-1">
-        <span>{labels.nonReceiptMessage} {data.nonReceiptPenalty || 0} EGP.</span>
+        <span>{labels.nonReceiptMessage} {data.nonReceiptPenalty ?? storeInfo.defaultReturnShippingCost ?? 0} EGP.</span>
         <span>{labels.productCount}: {data.products.length}</span>
       </div>
 
@@ -242,23 +253,31 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
 
           <hr />
 
-          <p className="text-[9px] mb-0.5">
+          {/* <p className="text-[9px] mb-0.5">
             <span className="font-bold">{labels.senderName}: </span>
             {storeName}
-          </p>
-          <p className="text-[9px] mb-0.5">
-            <span>{labels.workNumbers}:</span>
-          </p>
-          <div className="grid grid-cols-2 items-center gap-0.5 text-[9px] font-bold">
-            <div className="grid grid-cols-[auto_auto_auto] items-center justify-start gap-1">
-              <LiaPhoneSolid className="size-2" />
-              <span>{storeInfo.phoneNumbers[0] || ''}</span>
-            </div>
-            <div className="grid grid-cols-[auto_auto] items-center justify-start gap-1">
-              <LiaPhoneSolid className="size-2" />
-              <span>{storeInfo.phoneNumbers[1] || ''}</span>
-            </div>
-          </div>
+          </p> */}
+          {storeInfo.phoneNumbers.length > 0 && (
+            <>
+              <p className="text-[9px] mb-0.5">
+                <span>{labels.workNumbers}:</span>
+              </p>
+              <div className="grid grid-cols-2 items-center gap-0.5 text-[9px] font-bold">
+                {storeInfo.phoneNumbers[0] && (
+                  <div className="grid grid-cols-[auto_auto] items-center justify-start gap-1">
+                    <LiaPhoneSolid className="size-2" />
+                    <span>{storeInfo.phoneNumbers[0]}</span>
+                  </div>
+                )}
+                {storeInfo.phoneNumbers[1] && (
+                  <div className="grid grid-cols-[auto_auto] items-center justify-start gap-1">
+                    <LiaPhoneSolid className="size-2" />
+                    <span>{storeInfo.phoneNumbers[1]}</span>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div >

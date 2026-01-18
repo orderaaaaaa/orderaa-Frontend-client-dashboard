@@ -17,8 +17,8 @@ export const useMerchantSettings = () => {
       const formData = convertToFormData(data);
       return merchantSettingsApi.updateSettings(formData);
     },
-    onSuccess: (updatedData) => {
-      queryClient.setQueryData(['merchantSettings'], updatedData);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['merchantSettings'] });
       toast.success('تم تحديث اعدادات المتجر');
     },
     onError: (error) => {

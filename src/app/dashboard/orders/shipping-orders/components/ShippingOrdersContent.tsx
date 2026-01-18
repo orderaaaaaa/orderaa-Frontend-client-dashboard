@@ -13,8 +13,12 @@ import { ArrowUp } from 'lucide-react';
 import { Breadcrumb } from '@/components/dashboard-layout';
 import LoadingAnimation from '@/components/ui/loadingAnimation';
 import { Button } from '@/components/ui/button';
-import PrintOrdersActionsBar from '../../print-orders/components/PrintOrdersActionsBar';
 import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
+import { ShippingActionsBar } from './ShippingActionsBar';
+import { ShippingScannedOrdersModal } from './ShippingScannedOrdersModal';
+import { useBarcodeScanner, useScannerFeedback } from '../../print-orders/hooks';
+import { useShippingScannedOrders, useSubmitForApproval } from '../hooks';
+import { getOrderByCodeWithShipping } from '../services/shippingOrders';
 import Footer from '@/components/orders/Footer';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 
@@ -38,16 +42,23 @@ import {
 import { buildStatisticsCards } from '../constants/statisticsCards';
 import OrdersSelectionHeader from '../../components/OrdersSelectionHeader';
 import PageTaps from '../../components/pageTaps';
-import { useDefaultStatusByPath, useDepartment } from '../../hooks';
+import { useDepartment } from '../../hooks';
+import useShippingCompanies from '@/hooks/useShippingCompanies';
 
 export function ShippingOrdersContent() {
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState('');
   const [selectedCustomerName, setSelectedCustomerName] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [selectedShippingCompany, setSelectedShippingCompany] = useState('');
+  const [isScannedOrdersModalOpen, setIsScannedOrdersModalOpen] = useState(false);
+  const [flashingCode, setFlashingCode] = useState<string | null>(null);
+  const [isActionLoading, setIsActionLoading] = useState(false);
+  const [isScanLoading, setIsScanLoading] = useState(false);
 
-  const tabState = useDefaultStatusByPath();
   const department = useDepartment();
+  const { shippingCompanies, isLoading: isLoadingShippingCompanies } =
+    useShippingCompanies();
   const { data: departmentStatuses, isLoading: isDepartmentStatusesLoading } =
     useDepartmentStatusesQuery(department);
 
@@ -129,6 +140,149 @@ export function ShippingOrdersContent() {
     clearSelections,
   } = usePrintOrderBulk({ orders });
 
+  const { playSuccessSound, playErrorSound } = useScannerFeedback();
+  const {
+    scannedOrders,
+    addOrder,
+    removeOrder,
+    clearOrders,
+    hasOrder,
+    searchQuery,
+    setSearchQuery,
+    filteredOrders,
+  } = useShippingScannedOrders();
+  const { mutateAsync: submitForApprovalMutation } = useSubmitForApproval();
+
+  const handleScan = useCallback(
+    async (barcode: string) => {
+      if (!selectedShippingCompany) {
+        playErrorSound();
+        toast.error('يرجى اختيار شركة الشحن أولاً');
+        return;
+      }
+
+      if (!isScannedOrdersModalOpen) {
+        setIsScannedOrdersModalOpen(true);
+      }
+
+      if (hasOrder(barcode)) {
+        playErrorSound();
+        toast.warning('هذا الطلب تم مسحه مسبقاً');
+        return;
+      }
+
+      setIsScanLoading(true);
+      try {
+        const order = await getOrderByCodeWithShipping(barcode, selectedShippingCompany);
+        addOrder({
+          id: order.id,
+          code: barcode,
+          shipmentPickupCode: order.shipmentPickupCode ?? null,
+          pickupInvoice: order.pickupInvoice ?? null,
+        });
+        playSuccessSound();
+        setFlashingCode(barcode);
+        setTimeout(() => setFlashingCode(null), 600);
+      } catch (error: any) {
+        playErrorSound();
+        toast.error(error?.response?.data?.message || 'هذا الطلب غير موجود');
+      } finally {
+        setIsScanLoading(false);
+      }
+    },
+    [
+      addOrder,
+      hasOrder,
+      playSuccessSound,
+      playErrorSound,
+      isScannedOrdersModalOpen,
+      selectedShippingCompany,
+    ]
+  );
+
+  useBarcodeScanner({
+    onScan: handleScan,
+    enabled: true,
+    minCharLength: 1,
+    maxCharLength: 1000,
+  });
+
+  const handleShipScannedOrders = useCallback(async () => {
+    if (scannedOrders.length === 0) return;
+
+    const ordersWithMissingData = scannedOrders.filter(
+      (order) => !order.shipmentPickupCode || !order.pickupInvoice
+    );
+
+    if (ordersWithMissingData.length > 0) {
+      toast.error('بعض الطلبات لا تحتوي على بيانات الشحن المطلوبة');
+      return;
+    }
+
+    setIsActionLoading(true);
+    try {
+      await submitForApprovalMutation({
+        orderIds: scannedOrders.map((o) => o.id),
+        shipmentPickupCode: scannedOrders[0].shipmentPickupCode!,
+        pickupInvoice: scannedOrders[0].pickupInvoice!,
+      });
+      toast.success('تم إرسال الطلبات للشحن بنجاح');
+      clearOrders();
+      setIsScannedOrdersModalOpen(false);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'فشل إرسال الطلبات للشحن');
+    } finally {
+      setIsActionLoading(false);
+    }
+  }, [scannedOrders, submitForApprovalMutation, clearOrders]);
+
+  const handleShipSelectedOrders = useCallback(async () => {
+    if (selectedOrders.length === 0) return;
+
+    if (!selectedShippingCompany) {
+      toast.error('يرجى اختيار شركة الشحن أولاً');
+      return;
+    }
+
+    setIsActionLoading(true);
+    try {
+      const ordersWithShippingData = await Promise.all(
+        selectedOrders.map((order) =>
+          getOrderByCodeWithShipping(order.code, selectedShippingCompany)
+        )
+      );
+
+      const ordersWithMissingData = ordersWithShippingData.filter(
+        (order) => !order.shipmentPickupCode || !order.pickupInvoice
+      );
+
+      if (ordersWithMissingData.length > 0) {
+        toast.error('بعض الطلبات لا تحتوي على بيانات الشحن المطلوبة');
+        setIsActionLoading(false);
+        return;
+      }
+
+      await submitForApprovalMutation({
+        orderIds: ordersWithShippingData.map((o) => o.id),
+        shipmentPickupCode: ordersWithShippingData[0].shipmentPickupCode!,
+        pickupInvoice: ordersWithShippingData[0].pickupInvoice!,
+      });
+      toast.success('تم إرسال الطلبات للشحن بنجاح');
+      clearSelections();
+      setSelectMode(false);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'فشل إرسال الطلبات للشحن');
+    } finally {
+      setIsActionLoading(false);
+    }
+  }, [
+    selectedOrders,
+    selectedShippingCompany,
+    submitForApprovalMutation,
+    clearSelections,
+    setSelectMode,
+  ]);
+
   const prevPageRef = useRef<number>(page);
 
   useEffect(() => {
@@ -157,22 +311,6 @@ export function ShippingOrdersContent() {
   } = useFilterForm({
     onSubmit: handleFormSubmit,
   });
-
-  const handlePrepared = useCallback(() => {
-    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى تم التحضير`);
-  }, [selectedOrders]);
-
-  const handleAwaitingPackaging = useCallback(() => {
-    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى فى انتظار التغليف`);
-  }, [selectedOrders]);
-
-  const handleCallAgain = useCallback(() => {
-    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى اعادة اتصال`);
-  }, [selectedOrders]);
-
-  const handleChangeProduct = useCallback(() => {
-    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى تغيير المنتج`);
-  }, [selectedOrders]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -222,7 +360,7 @@ export function ShippingOrdersContent() {
         statusCounts={statistics?.statusCounts || {}}
         totalOrders={statistics?.totalOrders || 0}
         onStatusChange={setStatus}
-        currentStatus={tabState}
+        currentStatus={filters.status}
         allowedStatuses={departmentStatuses}
         showAllOrdersTab={false}
         isLoadingAllowedStatuses={isDepartmentStatusesLoading}
@@ -246,6 +384,11 @@ export function ShippingOrdersContent() {
         onPrintStatusChange={setPrintStatus}
         selectedOrders={selectedOrders}
         showPrintStatusToggle={false}
+        showShippingCompanySelect
+        shippingCompanyOptions={shippingCompanies}
+        selectedShippingCompany={selectedShippingCompany}
+        onShippingCompanyChange={setSelectedShippingCompany}
+        isLoadingShippingCompanies={isLoadingShippingCompanies}
       />
 
       <OrdersSelectionHeader
@@ -350,15 +493,11 @@ export function ShippingOrdersContent() {
         hasSelectedOrders={showBulkActions}
       />
       {showBulkActions && (
-        <PrintOrdersActionsBar
-          selectedOrders={selectedOrders}
-          onPrepared={handlePrepared}
-          onAwaitingPackaging={handleAwaitingPackaging}
-          onCallAgain={handleCallAgain}
-          onChangeProduct={handleChangeProduct}
+        <ShippingActionsBar
+          onShip={handleShipSelectedOrders}
           position="fixed"
-          isAllSelected={selectAllMatchingFilters}
-          totalStoreOrders={totalOrders}
+          isLoading={isActionLoading}
+          selectedCount={selectedOrders.length}
         />
       )}
       {showBackToTop && (
@@ -372,6 +511,23 @@ export function ShippingOrdersContent() {
           <ArrowUp className="size-6" />
         </Button>
       )}
+
+      <ShippingScannedOrdersModal
+        isOpen={isScannedOrdersModalOpen}
+        onClose={() => {
+          setIsScannedOrdersModalOpen(false);
+          clearOrders();
+        }}
+        scannedOrders={scannedOrders}
+        onRemoveOrder={removeOrder}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        filteredOrders={filteredOrders}
+        onShip={handleShipScannedOrders}
+        isLoading={isActionLoading}
+        isScanLoading={isScanLoading}
+        flashingCode={flashingCode}
+      />
     </div>
   );
 }

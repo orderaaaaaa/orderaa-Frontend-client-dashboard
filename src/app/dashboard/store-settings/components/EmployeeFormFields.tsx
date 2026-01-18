@@ -9,6 +9,7 @@ import { OrderSettingsFormData } from '../schemas/store';
 import { useIntegrations } from '../../integrations/hooks/useIntegrations';
 import { If, Then } from 'react-if';
 import { LogoUploadField } from './LogoUploadField';
+import { URLField } from './URLField';
 import { LanguageSelectionField } from './LanguageSelectionField';
 import { CancellationReasonsField } from './CancellationReasonsField';
 import { AutoCancelField } from './AutoCancelField';
@@ -37,6 +38,8 @@ export default function OrderSettingsFields({
     <div className="px-4 md:px-10 py-6 md:py-[34px] w-full max-w-full overflow-x-hidden" dir="rtl">
       <div className="flex w-full lg:w-[37%] max-w-full flex-col gap-8 min-w-0">
         <LogoUploadField watch={watch} setValue={setValue} errors={errors} />
+
+        <URLField register={register} errors={errors} />
 
         <LanguageSelectionField register={register} />
 

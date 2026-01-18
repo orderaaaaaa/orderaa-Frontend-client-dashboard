@@ -241,6 +241,9 @@ export interface Order {
   order_events?: OrderEvent[];
   locked_by?: OrderLockedBy | null;
   isPrinted?: boolean;
+  shipmentPickupCode?: string | null;
+  pickupInvoice?: string | null;
+  pickupCode?: string | null;
 }
 
 export interface OrderLockedBy {

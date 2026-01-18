@@ -6,11 +6,11 @@ import { LiaPrintSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
-import { InvoiceLanguage, InvoiceData } from '../../print-orders/types/invoice';
+import { InvoiceData } from '../../print-orders/types/invoice';
 import { mapOrdersToInvoices } from '../../print-orders/utils/invoiceMapper';
 import { Invoice } from '../../print-orders/components/Invoice';
 import { printOrders } from '../../print-orders/services/printOrders';
-import { STORE_INFO } from '../../print-orders/constants/invoiceLabels';
+import { useInvoiceSettings } from '../../print-orders/hooks/useInvoiceSettings';
 
 interface PrintInvoicesModalProps {
   isOpen: boolean;
@@ -22,9 +22,9 @@ export function PrintInvoicesModal({
   onClose,
 }: PrintInvoicesModalProps) {
   const [invoiceCount, setInvoiceCount] = useState<string>('');
-  const [language, setLanguage] = useState<InvoiceLanguage>('ar');
   const [isPrinting, setIsPrinting] = useState(false);
   const [invoicesToPrint, setInvoicesToPrint] = useState<InvoiceData[]>([]);
+  const { storeInfo, language } = useInvoiceSettings();
 
   const handlePrint = async () => {
     const count = parseInt(invoiceCount, 10);
@@ -67,7 +67,6 @@ export function PrintInvoicesModal({
 
   const handleReset = () => {
     setInvoiceCount('');
-    setLanguage('ar');
   };
 
   const handleClose = () => {
@@ -108,38 +107,6 @@ export function PrintInvoicesModal({
             placeholder="أدخل عدد الطلبات"
             disabled={isPrinting}
           />
-
-          <div>
-            <p className="text-sm font-medium text-gray-700 mb-2">
-              لغة الفاتورة
-            </p>
-            <div className="grid grid-cols-2 gap-4">
-              <label className="grid grid-cols-[auto_1fr] items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="language"
-                  value="ar"
-                  checked={language === 'ar'}
-                  onChange={() => setLanguage('ar')}
-                  disabled={isPrinting}
-                  className="w-4 h-4 text-primary"
-                />
-                <span>عربي</span>
-              </label>
-              <label className="grid grid-cols-[auto_1fr] items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="language"
-                  value="en"
-                  checked={language === 'en'}
-                  onChange={() => setLanguage('en')}
-                  disabled={isPrinting}
-                  className="w-4 h-4 text-primary"
-                />
-                <span>English</span>
-              </label>
-            </div>
-          </div>
         </div>
       </BaseModal>
 
@@ -151,7 +118,7 @@ export function PrintInvoicesModal({
               <Invoice
                 key={invoice.orderCode || index}
                 data={invoice}
-                storeInfo={STORE_INFO}
+                storeInfo={storeInfo}
                 language={language}
               />
             ))}

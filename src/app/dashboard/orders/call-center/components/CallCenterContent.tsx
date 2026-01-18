@@ -34,14 +34,13 @@ import {
 } from '../../print-orders/hooks';
 import OrdersSelectionHeader from '../../components/OrdersSelectionHeader';
 import PageTaps from '../../components/pageTaps';
-import { useDefaultStatusByPath, useDepartment } from '../../hooks';
+import { useDepartment } from '../../hooks';
 
 export function CallCenterContent() {
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState('');
   const [selectedCustomerName, setSelectedCustomerName] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const tabState = useDefaultStatusByPath();
   const department = useDepartment();
   const { data: departmentStatuses, isLoading: isDepartmentStatusesLoading } =
     useDepartmentStatusesQuery(department);
@@ -210,7 +209,7 @@ export function CallCenterContent() {
         statusCounts={statistics?.statusCounts || {}}
         totalOrders={statistics?.totalOrders || 0}
         onStatusChange={setStatus}
-        currentStatus={tabState}
+        currentStatus={filters.status}
         allowedStatuses={departmentStatuses}
         isLoadingAllowedStatuses={isDepartmentStatusesLoading}
       />

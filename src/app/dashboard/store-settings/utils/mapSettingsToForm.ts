@@ -13,5 +13,6 @@ export function mapSettingsToForm(
     employeeCanEditContent: settings.employeeCanEditContent ?? false,
     defaultReturnShippingCost: settings.defaultReturnShippingCost ?? 0,
     autoCancelAttempts: settings.autoCancelAttempts ?? 0,
+    url: settings.url ?? '',
   };
 }

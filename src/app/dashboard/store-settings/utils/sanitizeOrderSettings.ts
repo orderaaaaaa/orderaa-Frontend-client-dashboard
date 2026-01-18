@@ -3,6 +3,7 @@ import { OrderSettingsFormData } from '../schemas/store';
 const EMPTY_STRING_EXCLUDE_FIELDS: readonly (keyof OrderSettingsFormData)[] = [
   'shippingPhoneNumber',
   'defaultShipmentContent',
+  'url',
 ];
 
 export function sanitizeOrderSettings(

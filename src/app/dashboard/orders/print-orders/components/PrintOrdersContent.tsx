@@ -46,7 +46,7 @@ import {
 } from '../hooks';
 import { buildStatisticsCards } from '../constants/statisticsCards';
 import PageTaps from '../../components/pageTaps';
-import { useDefaultStatusByPath, useDepartment } from '../../hooks';
+import { useDepartment } from '../../hooks';
 
 export function PrintOrdersContent() {
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState('');
@@ -65,7 +65,6 @@ export function PrintOrdersContent() {
   const [scannerPackagingNotes, setScannerPackagingNotes] = useState<
     Record<string, string>
   >({});
-  const tabState = useDefaultStatusByPath();
   const department = useDepartment();
   const { data: departmentStatuses, isLoading: isDepartmentStatusesLoading } =
     useDepartmentStatusesQuery(department);
@@ -455,7 +454,7 @@ export function PrintOrdersContent() {
         statusCounts={statistics?.statusCounts || {}}
         totalOrders={statistics?.totalOrders || 0}
         onStatusChange={setStatus}
-        currentStatus={tabState}
+        currentStatus={filters.status}
         allowedStatuses={departmentStatuses}
         showAllOrdersTab={false}
         isLoadingAllowedStatuses={isDepartmentStatusesLoading}
