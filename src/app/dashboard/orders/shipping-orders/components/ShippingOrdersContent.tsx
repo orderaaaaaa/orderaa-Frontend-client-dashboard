@@ -464,6 +464,7 @@ export function ShippingOrdersContent() {
                 cancelReason={order.cancelReason}
                 cancelNotes={order.cancelNotes}
                 postponedUntil={order.postponedUntil}
+                showAllItems
               />
             ))}
           </div>

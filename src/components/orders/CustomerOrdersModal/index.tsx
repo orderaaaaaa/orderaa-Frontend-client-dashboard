@@ -284,6 +284,7 @@ export default function CustomerOrdersModal({
                     alert={0}
                     createdAt={order.createdAt}
                     repeatCount={orders.length}
+                    showAllItems
                   />
                 </div>
               ))}

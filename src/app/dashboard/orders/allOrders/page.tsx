@@ -633,6 +633,7 @@ function AllOrdersContent() {
                 cancelReason={order.cancelReason}
                 cancelNotes={order.cancelNotes}
                 postponedUntil={order.postponedUntil}
+                showAllItems
               />
             ))}
           </div>

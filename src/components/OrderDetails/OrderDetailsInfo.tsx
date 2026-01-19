@@ -77,10 +77,10 @@ function OrderDetailsInfoComponent({
     'addColorProduct',
     'rejectModification',
     'waitingPayment',
+    'whatsapp',
     'shipping',
     'packagingNotes',
     'confirmAction',
-    'whatsappFollowup',
   ]);
 
   const handleUpdate = (updatedOrder: Order) => {
@@ -149,15 +149,7 @@ function OrderDetailsInfoComponent({
     });
   };
 
-  const handleActionClick = (
-    label: string,
-    action: string,
-    hasSubOptions?: boolean
-  ) => {
-    if (hasSubOptions) {
-      return;
-    }
-
+  const handleActionClick = (label: string, action: string) => {
     switch (action) {
       case 'urgent':
         modals.urgent.open();
@@ -180,6 +172,9 @@ function OrderDetailsInfoComponent({
       case 'waiting_payment':
         modals.waitingPayment.open();
         break;
+      case 'whatsapp':
+        modals.whatsapp.open();
+        break;
       default:
         setConfirmationDialog({
           isOpen: true,
@@ -198,22 +193,6 @@ function OrderDetailsInfoComponent({
         return localOrder.shippingCompany ?? '';
     }
   }, [localOrder.shippingCompany]);
-
-  const handleWhatsappSubOptionClick = (action: string, label: string) => {
-    if (
-      action === 'send_professional_color' ||
-      action === 'send_natural_color'
-    ) {
-      modals.addColorProduct.open();
-    } else {
-      setConfirmationDialog({
-        isOpen: true,
-        title: `تأكيد ${label}`,
-        message: `هل أنت متأكد من ${label} للعميل عبر واتساب؟`,
-        action: action,
-      });
-    }
-  };
 
   const followUpActions = [
     'no_answer',
@@ -292,7 +271,6 @@ function OrderDetailsInfoComponent({
           onConfirm={handleConfirmClick}
           onFollowUpClick={handleFollowUpClick}
           onActionClick={handleActionClick}
-          onWhatsappSubOptionClick={handleWhatsappSubOptionClick}
           onNavigateNext={navigation.navigateToNext}
           onNavigatePrevious={navigation.navigateToPrevious}
           isNavigatingNext={navigation.isNavigatingNext}
@@ -307,7 +285,6 @@ function OrderDetailsInfoComponent({
           onConfirm={handleConfirmClick}
           onFollowUpClick={handleFollowUpClick}
           onActionClick={handleActionClick}
-          onWhatsappSubOptionClick={handleWhatsappSubOptionClick}
           onNavigateNext={navigation.navigateToNext}
           onNavigatePrevious={navigation.navigateToPrevious}
           isNavigatingNext={navigation.isNavigatingNext}

@@ -16,12 +16,7 @@ export interface OrderActionsFooterProps {
   lastEventStatus?: string;
   onConfirm: () => void;
   onFollowUpClick: (label: string, action: string) => void;
-  onActionClick: (
-    label: string,
-    action: string,
-    hasSubOptions?: boolean
-  ) => void;
-  onWhatsappSubOptionClick: (action: string, label: string) => void;
+  onActionClick: (label: string, action: string) => void;
   onNavigateNext?: () => void;
   onNavigatePrevious?: () => void;
   isNavigatingNext?: boolean;
@@ -34,7 +29,6 @@ export function OrderActionsFooterLargeScreens({
   onConfirm,
   onFollowUpClick,
   onActionClick,
-  onWhatsappSubOptionClick,
   onNavigateNext,
   onNavigatePrevious,
   isNavigatingNext = false,
@@ -62,20 +56,9 @@ export function OrderActionsFooterLargeScreens({
     onFollowUpClick(label, action);
   };
 
-  const handleActionClick = (
-    label: string,
-    action: string,
-    hasSubOptions?: boolean
-  ) => {
-    if (!hasSubOptions) {
-      actionsDropdown.close();
-    }
-    onActionClick(label, action, hasSubOptions);
-  };
-
-  const handleWhatsappSubOptionClick = (action: string, label: string) => {
+  const handleActionClick = (label: string, action: string) => {
     actionsDropdown.close();
-    onWhatsappSubOptionClick(action, label);
+    onActionClick(label, action);
   };
 
   return (
@@ -158,7 +141,6 @@ export function OrderActionsFooterLargeScreens({
             orderStatus={orderStatus}
             lastEventStatus={lastEventStatus}
             onActionClick={handleActionClick}
-            onSubOptionClick={handleWhatsappSubOptionClick}
           />
         </div>
       </div>

@@ -4,7 +4,6 @@ import { ModalStates } from '@/hooks/OrderDetails/useModalState';
 import { OrderActionsState } from '@/hooks/OrderDetails/useOrderActions';
 import ActionConfirmationDialog from '../ActionConfirmationDialog';
 import EditShippingModal, { ShippingData } from '../EditShippingModal';
-import SimpleConfirmationModal from '../SimpleConfirmationModal';
 import BaseModal from '@/components/ui/base-modal';
 import {
   UrgentModal,
@@ -14,6 +13,8 @@ import {
   PostponeDaysModal,
   AddColorProductModal,
   RejectModificationModal,
+  WhatsappModal,
+  WaitingPaymentModal,
 } from '../ActionModals';
 
 /**
@@ -113,12 +114,18 @@ export function OrderActionModals({
     }
   };
 
-  const handleWaitingPaymentConfirm = async () => {
-    const success = await actions.handleWaitingPayment();
-    if (!success) {
-      throw new Error('Failed to update payment status');
+  const handleWaitingPaymentConfirm = async (note?: string) => {
+    const success = await actions.handleWaitingPayment(note);
+    if (success) {
+      modals.waitingPayment.close();
     }
-    modals.waitingPayment.close();
+  };
+
+  const handleWhatsappConfirm = async (note?: string) => {
+    const success = await actions.handleWhatsapp(note);
+    if (success) {
+      modals.whatsapp.close();
+    }
   };
 
   const handleShippingSave = async (data: ShippingData) => {
@@ -208,13 +215,17 @@ export function OrderActionModals({
         onConfirm={handleRejectModificationConfirm}
       />
 
-      {/* Simple Confirmation Modals */}
-      <SimpleConfirmationModal
+      {/* Waiting Payment Modal */}
+      <WaitingPaymentModal
         isOpen={modals.waitingPayment.isOpen}
         onClose={modals.waitingPayment.close}
         onConfirm={handleWaitingPaymentConfirm}
-        title="في انتظار الدفع"
-        message="هل أنت متأكد من تحديد الطلب كـ في انتظار الدفع؟"
+      />
+
+      <WhatsappModal
+        isOpen={modals.whatsapp.isOpen}
+        onClose={modals.whatsapp.close}
+        onConfirm={handleWhatsappConfirm}
       />
 
       {/* Packaging Notes Modal */}

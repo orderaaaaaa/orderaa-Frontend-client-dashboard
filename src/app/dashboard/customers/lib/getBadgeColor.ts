@@ -4,10 +4,13 @@ const STATUS_COLORS: Record<string, string> = {
   NEW_ORDER: 'bg-[#f1f5fd] text-[#5686e1] border border-[#e5ecfb]',
   CONFIRMED: 'bg-[#f1f5fd] text-[#5686e1] border border-[#e5ecfb]',
   WHATSAPP: 'bg-purple-50 text-purple-700 border border-purple-200',
+  WHATSAPP_CONFIRMED: 'bg-[#effbeb] text-[#49c116] border border-[#d2f3c5]',
   CALL_AGAIN: 'bg-purple-50 text-purple-700 border border-purple-200',
 
   PREPARED: 'bg-[#f2edfd] text-primary border border-[#f2edfd]',
   SHIPPING: 'bg-[#f2edfd] text-primary border border-[#f2edfd]',
+  WAITING_FOR_PACKAGING: 'bg-[#fff7eb] text-[#ff9800] border border-[#ffefd8]',
+  WAITING_FOR_APPROVAL: 'bg-[#fff7eb] text-[#ff9800] border border-[#ffefd8]',
 
   DELIVERED: 'bg-[#effbeb] text-[#49c116] border border-[#d2f3c5]',
   RETURNED_DELIVERED: 'bg-[#effbeb] text-[#49c116] border border-[#d2f3c5]',

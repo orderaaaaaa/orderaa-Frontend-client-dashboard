@@ -48,6 +48,7 @@ export const STATUS_ICONS: Record<string, IconType> = {
   PREPARED: MdOutlineInventory2,
   EDIT_REJECTED: LuPenOff,
   WHATSAPP: FaWhatsapp,
+  WHATSAPP_CONFIRMED: FaWhatsapp,
   SHIPPED: MdOutlineLocalShipping,
   RETURNED: Copy,
   DELIVERED: ClipboardCheck,
@@ -57,12 +58,13 @@ export const STATUS_ICONS: Record<string, IconType> = {
   STOPPED: MdOutlineBlock,
   CALL_AGAIN: MdOutlinePhoneCallback,
   POSTPONED: MdOutlineCalendarMonth,
-  REGISTERED: MdCheckCircleOutline, // changed from FaWhatsapp
+  REGISTERED: MdCheckCircleOutline,
   ATTEMPTED: MdLoop,
   RETURNED_DELIVERED: HiOutlineReceiptRefund,
   REPORTS: FileText,
   SHIPPING: MdOutlineLocalShipping,
   PARTIAL_DELIVERY: MdReceiptLong,
+  WAITING_FOR_APPROVAL: Clock3,
 };
 
 export const getStatusBadgeConfig = (status: string): StatusBadgeConfig => {

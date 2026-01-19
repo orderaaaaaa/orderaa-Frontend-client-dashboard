@@ -42,7 +42,8 @@ export interface OrderActionsState {
     date?: Date;
   }) => Promise<boolean>;
   handleRejectModification: (notes: string) => Promise<boolean>;
-  handleWaitingPayment: () => Promise<boolean>;
+  handleWaitingPayment: (note?: string) => Promise<boolean>;
+  handleWhatsapp: (note?: string) => Promise<boolean>;
   handleConfirmAction: (action: string) => Promise<boolean>;
   handleFollowUpAction: (label: string) => Promise<boolean>;
   handleUpdateShipping: (data: ShippingData) => Promise<void>;
@@ -85,6 +86,7 @@ export function useOrderActions({
         postpone_days: 'POSTPONED',
         waiting_payment: 'WAITING_FOR_PAYMENT',
         reject_modification: 'EDIT_REJECTED',
+        whatsapp: 'WHATSAPP',
         no_answer: 'CALL_AGAIN',
         closed: 'STOPPED',
         not_collecting: 'STOPPED',
@@ -384,14 +386,39 @@ export function useOrderActions({
     [getStatusFromAction, handleStatusUpdateAndNavigate]
   );
 
-  const handleWaitingPayment = useCallback(async () => {
-    const status = getStatusFromAction('waiting_payment');
-    if (!status) {
-      toast.error('فشل في تحديد حالة الطلب. يرجى المحاولة مرة أخرى.');
-      return false;
-    }
-    return await handleStatusUpdateAndNavigate(status);
-  }, [getStatusFromAction, handleStatusUpdateAndNavigate]);
+  const handleWaitingPayment = useCallback(
+    async (note?: string) => {
+      const status = getStatusFromAction('waiting_payment');
+      if (!status) {
+        toast.error('فشل في تحديد حالة الطلب. يرجى المحاولة مرة أخرى.');
+        return false;
+      }
+
+      const updateData: Record<string, unknown> = {};
+      if (note) {
+        updateData.eventNote = note;
+      }
+      return await handleStatusUpdateAndNavigate(status, updateData);
+    },
+    [getStatusFromAction, handleStatusUpdateAndNavigate]
+  );
+
+  const handleWhatsapp = useCallback(
+    async (note?: string) => {
+      const status = getStatusFromAction('whatsapp');
+      if (!status) {
+        toast.error('فشل في تحديد حالة الطلب. يرجى المحاولة مرة أخرى.');
+        return false;
+      }
+
+      const updateData: Record<string, unknown> = {};
+      if (note) {
+        updateData.eventNote = note;
+      }
+      return await handleStatusUpdateAndNavigate(status, updateData);
+    },
+    [getStatusFromAction, handleStatusUpdateAndNavigate]
+  );
 
   const handleConfirmAction = useCallback(
     async (action: string) => {
@@ -563,6 +590,7 @@ export function useOrderActions({
     handlePostponeDays,
     handleRejectModification,
     handleWaitingPayment,
+    handleWhatsapp,
     handleConfirmAction,
     handleFollowUpAction,
     handleUpdateShipping,

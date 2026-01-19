@@ -22,6 +22,7 @@ import {
 import { ArrowLeft, X } from 'lucide-react';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import { Breadcrumb } from '@/components/dashboard-layout';
+import { OrderLockedModal } from '@/components/OrderDetails/modals/OrderLockedModal';
 
 function OrderDetailsContent({ params }: { params: { orderId: string } }) {
   const orderId = parseInt(params.orderId);
@@ -346,6 +347,14 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
           onUnlock={unlock}
         />
       </div>
+
+      {isLockedByOther && lockedBy && (
+        <OrderLockedModal
+          isOpen={true}
+          onClose={() => window.history.back()}
+          lockedBy={lockedBy}
+        />
+      )}
     </AuthGuard>
   );
 }

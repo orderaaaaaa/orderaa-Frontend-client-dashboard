@@ -16,12 +16,7 @@ export interface OrderActionsFooterProps {
   lastEventStatus?: string;
   onConfirm: () => void;
   onFollowUpClick: (label: string, action: string) => void;
-  onActionClick: (
-    label: string,
-    action: string,
-    hasSubOptions?: boolean
-  ) => void;
-  onWhatsappSubOptionClick: (action: string, label: string) => void;
+  onActionClick: (label: string, action: string) => void;
   onNavigateNext?: () => void;
   onNavigatePrevious?: () => void;
   isNavigatingNext?: boolean;
@@ -34,7 +29,6 @@ export function OrderActionsFooter({
   onConfirm,
   onFollowUpClick,
   onActionClick,
-  onWhatsappSubOptionClick,
   onNavigateNext,
   onNavigatePrevious,
   isNavigatingNext = false,
@@ -123,8 +117,10 @@ export function OrderActionsFooter({
               isOpen={actionsDropdown.isOpen}
               orderStatus={orderStatus}
               lastEventStatus={lastEventStatus}
-              onActionClick={onActionClick}
-              onSubOptionClick={onWhatsappSubOptionClick}
+              onActionClick={(label, action) => {
+                actionsDropdown.close();
+                onActionClick(label, action);
+              }}
             />
           </div>
         </div>

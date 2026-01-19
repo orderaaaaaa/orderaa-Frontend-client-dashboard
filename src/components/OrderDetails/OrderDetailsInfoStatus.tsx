@@ -1,48 +1,74 @@
 'use client';
 
 import { Order, OrderEvent } from "@/types/orders";
-import { PhoneOff, CirclePlus, History, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { getTimeAgo } from "@/utils/timeAgo";
 import { useStatusLabel } from "@/hooks/useStatusLabel";
+import { getStatusBadgeConfig } from "@/lib/status-badges";
 
 interface OrderDetailsInfoStatusProps {
   order: Order;
   isLockedByOther?: boolean;
 }
 
-const getEventIcon = (eventType?: string) => {
-  if (!eventType) {
-    return <History className="w-4 h-4 text-gray-600" />;
-  }
+interface EventCardProps {
+  eventType: string;
+  status: string;
+  note: string | null;
+  date: string;
+  time: string;
+  employee?: {
+    fullName: string;
+    department?: string;
+  } | null;
+}
 
-  switch (eventType) {
-    case 'CONFIRMED':
-    case 'DELIVERED':
-    case 'PREPARED':
-    case 'REGISTERED':
-      return <CheckCircle2 className="w-4 h-4 text-green-600" />;
-    case 'CANCELLED':
-    case 'STOPPED':
-    case 'RETURNED_DELIVERED':
-    case 'MISSING':
-      return <XCircle className="w-4 h-4 text-red-600" />;
-    case 'POSTPONED':
-    case 'WAITING_FOR_PAYMENT':
-    case 'UNCOMPLETED':
-    case 'PARTIAL_DELIVERY':
-      return <Clock className="w-4 h-4 text-orange-600" />;
-    case 'ATTEMPTED':
-    case 'CALL_AGAIN':
-    case 'WHATSAPP':
-      return <PhoneOff className="w-4 h-4 text-blue-600" />;
-    case 'SHIPPING':
-      return <History className="w-4 h-4 text-purple-600" />;
-    case 'NEW_ORDER':
-      return <History className="w-4 h-4 text-primary" />;
-    default:
-      return <History className="w-4 h-4 text-gray-600" />;
-  }
+const getIconColorFromClasses = (classes: string): string => {
+  if (classes.includes('text-[#5686e1]')) return 'text-[#5686e1]';
+  if (classes.includes('text-[#49c116]')) return 'text-[#49c116]';
+  if (classes.includes('text-[#ff0004]')) return 'text-[#ff0004]';
+  if (classes.includes('text-[#ff9800]')) return 'text-[#ff9800]';
+  if (classes.includes('text-primary')) return 'text-primary';
+  if (classes.includes('text-purple-700')) return 'text-purple-700';
+  return 'text-gray-600';
 };
+
+function EventCard({ eventType, status, note, date, time, employee }: EventCardProps) {
+  const { classes, Icon } = getStatusBadgeConfig(eventType);
+  const iconColor = getIconColorFromClasses(classes);
+
+  return (
+    <div className="flex gap-2 bg-white p-3 rounded-lg min-w-[180px] hover:shadow-md transition-shadow">
+      <Icon className={`w-4 h-4 ${iconColor}`} />
+      <div className="flex flex-col gap-1">
+        <p className="text-[14px] font-bold text-[#1F1F1F]">
+          {status}
+        </p>
+        {note && (
+          <p className="text-[12px] text-red-500">
+            {note}
+          </p>
+        )}
+        <p className="text-[12px] text-gray-600">
+          {date}
+          {time && (
+            <>
+              {" • "}
+              <span className="text-primary">{time}</span>
+            </>
+          )}
+        </p>
+        {employee && (
+          <p className="text-[11px] text-gray-500">
+            {employee?.fullName}
+            {employee?.department && (
+              <span className="text-gray-400"> ({employee.department})</span>
+            )}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
   const { getStatusLabel } = useStatusLabel();
@@ -55,13 +81,11 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
       status: statusLabel,
       date: new Date(event.createdAt).toLocaleDateString('ar-EG'),
       time: getTimeAgo(event.createdAt),
-      eventType: event.status || 'default',
-      note: event.note || statusLabel,
+      eventType: event.status || 'NEW_ORDER',
+      note: event.note || null,
       employee: event.employee,
     };
   });
-
-  const displayData = [...events];
 
   return (
     <div>
@@ -70,44 +94,22 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-lg text-primary font-bold">سجل الأحداث</h2>
             <p className="border-1 border-primary text-primary w-6 h-6 text-sm text-center rounded-full flex items-center justify-center">
-              {displayData.length}
+              {events.length}
             </p>
           </div>
-
-          {/* <CirclePlus className="w-4 h-4 text-primary cursor-pointer" /> */}
         </div>
 
         <div className="flex flex-wrap gap-3 pb-2">
-          {displayData.map((item) => (
-            <div
+          {events.map((item) => (
+            <EventCard
               key={item.id}
-              className="flex gap-2 bg-white p-3 rounded-lg min-w-[120px] hover:shadow-md transition-shadow"
-              title={item.note}
-            >
-              {getEventIcon(item.eventType)}
-              <div className="flex flex-col">
-                <p className="text-[14px] font-bold text-[#1F1F1F]">
-                  {item.note}
-                </p>
-                <p className="text-[12px] text-gray-600">
-                  {item.date}
-                  {item.time && (
-                    <>
-                      {" • "}
-                      <span className="text-primary">{item.time}</span>
-                    </>
-                  )}
-                </p>
-                {/* {item.employee && (
-                  <p className="text-[11px] text-gray-500 mt-1">
-                    بواسطة: <span className="font-medium text-primary">{item.employee.fullName}</span>
-                    {item.employee.department && (
-                      <span className="text-gray-400"> ({item.employee.department})</span>
-                    )}
-                  </p>
-                )} */}
-              </div>
-            </div>
+              eventType={item.eventType}
+              status={item.status}
+              note={item.note}
+              date={item.date}
+              time={item.time}
+              employee={item.employee}
+            />
           ))}
         </div>
       </div>

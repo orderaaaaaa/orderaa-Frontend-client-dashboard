@@ -12,10 +12,10 @@ export type ModalName =
   | 'addColorProduct'
   | 'rejectModification'
   | 'waitingPayment'
+  | 'whatsapp'
   | 'shipping'
   | 'packagingNotes'
-  | 'confirmAction'
-  | 'whatsappFollowup';
+  | 'confirmAction';
 
 /**
  * Type for modal state object
