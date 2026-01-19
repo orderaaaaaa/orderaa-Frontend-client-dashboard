@@ -43,7 +43,6 @@ export function mapOrderToInvoice(
       timeTo: order.timeTo,
     },
     totalPrice: order.totalCost,
-    nonReceiptPenalty: order.shippingCost,
     packagingNotes: order.packagingNotes,
     shippingNotes: order.notes,
   };
