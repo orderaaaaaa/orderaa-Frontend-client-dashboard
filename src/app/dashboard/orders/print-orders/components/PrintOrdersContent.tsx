@@ -581,6 +581,7 @@ export function PrintOrdersContent() {
                 disableNavigation
                 hideCustomerInfo
                 showAllItems
+                states={order.states}
               />
             ))}
           </div>

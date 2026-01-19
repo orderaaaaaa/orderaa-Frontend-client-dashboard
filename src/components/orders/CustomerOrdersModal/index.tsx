@@ -285,6 +285,7 @@ export default function CustomerOrdersModal({
                     createdAt={order.createdAt}
                     repeatCount={orders.length}
                     showAllItems
+                    states={order.states}
                   />
                 </div>
               ))}

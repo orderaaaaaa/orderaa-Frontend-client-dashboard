@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import clsx from 'clsx';
 
 import {
   orderSettingsSchema,
@@ -14,6 +15,8 @@ import { useMerchantSettings } from './hooks/useStoreSettings';
 import { sanitizeOrderSettings } from './utils/sanitizeOrderSettings';
 import { mapSettingsToForm } from './utils/mapSettingsToForm';
 import { ORDER_SETTINGS_DEFAULTS } from './schemas/store.defaults';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function OrderSettingsPage() {
   const { settings, isLoading, updateSettings, isUpdating } =
@@ -40,45 +43,97 @@ export default function OrderSettingsPage() {
     }
   }, [settings, reset]);
 
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      console.log('Form Errors:', errors);
+    }
+  }, [errors]);
+
   const onSubmit = (data: OrderSettingsFormData) => {
     updateSettings(sanitizeOrderSettings(data));
   };
 
   if (isLoading) {
-    return <div className="text-center py-20">جاري تحميل البيانات...</div>;
+    return (
+      <div className="w-full container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10" dir="rtl">
+        <div className="animate-pulse space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-1 h-8 bg-gray-200 rounded-full" />
+            <div className="h-8 bg-gray-200 rounded w-40" />
+          </div>
+          <Card>
+            <CardContent className="p-4 sm:p-6 lg:p-10">
+              <div className="space-y-6 sm:space-y-8">
+                <div className="space-y-4">
+                  <div className="h-6 bg-gray-200 rounded w-32" />
+                  <div className="h-36 bg-gray-200 rounded" />
+                </div>
+                <div className="h-px bg-gray-200" />
+                <div className="space-y-4">
+                  <div className="h-6 bg-gray-200 rounded w-28" />
+                  <div className="h-11 bg-gray-200 rounded" />
+                </div>
+                <div className="h-px bg-gray-200" />
+                <div className="space-y-4">
+                  <div className="h-6 bg-gray-200 rounded w-36" />
+                  <div className="flex gap-6">
+                    <div className="h-6 bg-gray-200 rounded w-20" />
+                    <div className="h-6 bg-gray-200 rounded w-20" />
+                  </div>
+                </div>
+                <div className="h-px bg-gray-200" />
+                <div className="space-y-4">
+                  <div className="h-6 bg-gray-200 rounded w-32" />
+                  <div className="h-14 bg-gray-200 rounded" />
+                </div>
+                <div className="h-px bg-gray-200" />
+                <div className="space-y-4">
+                  <div className="h-6 bg-gray-200 rounded w-40" />
+                  <div className="h-11 bg-gray-200 rounded max-w-xs" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden container mx-auto px-4 py-10" dir="rtl">
-      <header className="mb-10">
-        <div className="flex items-center gap-3 mb-3 min-w-0">
-          <div className="w-1 h-8 bg-primary rounded-full shrink-0" />
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">اعدادات المتجر</h1>
+    <div className="w-full container mx-auto px-4 sm:px-6 lg:px-6 py-2 sm:py-4">
+      <header className="mb-6 sm:mb-8 lg:mb-10">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-7 sm:h-8 bg-primary rounded-full shrink-0" />
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+            اعدادات المتجر
+          </h1>
         </div>
       </header>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-full overflow-x-hidden">
-        <div className="bg-white border border-black/8 shadow-lg rounded-lg overflow-hidden w-full max-w-full">
-          <OrderSettingsFields
-            register={register}
-            errors={errors}
-            watch={watch}
-            setValue={setValue}
-          />
-        </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <Card>
+          <CardContent className="p-0">
+            <OrderSettingsFields
+              register={register}
+              errors={errors}
+              watch={watch}
+              setValue={setValue}
+            />
+          </CardContent>
+        </Card>
 
-        <div className="mt-6 flex justify-start">
-          <button
+        <div className="flex justify-end">
+          <Button
             type="submit"
             disabled={isUpdating}
-            className={`px-6 sm:px-10 py-3 bg-primary text-white rounded-full font-bold transition-all text-sm sm:text-base whitespace-nowrap ${
-              isUpdating
-                ? 'opacity-50 cursor-not-allowed'
-                : 'hover:bg-[#4a1cb5]'
-            }`}
+            size="lg"
+            className={clsx(
+              'px-8 sm:px-12 py-3 rounded-full font-bold',
+              isUpdating && 'opacity-50 cursor-not-allowed'
+            )}
           >
             {isUpdating ? 'جاري الحفظ...' : 'حفظ البيانات'}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

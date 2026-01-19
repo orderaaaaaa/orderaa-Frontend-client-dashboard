@@ -9,23 +9,23 @@ export function LanguageSelectionField({
   register,
 }: LanguageSelectionFieldProps) {
   return (
-    <div className="w-full max-w-full flex flex-col gap-4 border-b border-gray-100 pb-6 min-w-0">
-      <div className="w-full max-w-full flex items-start gap-2 min-w-0">
-        <div className="w-6 h-6 flex items-center justify-center shrink-0">
-          <span className="text-primary font-bold">A/ع</span>
+    <div className="flex flex-col gap-4">
+      <div className="flex items-start gap-3">
+        <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center shrink-0">
+          <span className="text-primary font-bold text-sm sm:text-base">A/ع</span>
         </div>
-        <div className="min-w-0 flex-1">
-          <h3 className="text-base sm:text-lg font-semibold leading-tight break-words">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">
             لغة بوليصة الشحن
           </h3>
-          <p className="text-xs sm:text-sm text-gray-500 break-words">
-            اختار اللغة التي تريد طباعه بوليصة الشحن بها{' '}
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+            اختار اللغة التي تريد طباعه بوليصة الشحن بها
           </p>
         </div>
       </div>
 
-      <div className="flex flex-row gap-4 sm:gap-6 mt-2 flex-wrap">
-        <label className="flex items-center gap-2 cursor-pointer group">
+      <div className="flex flex-row gap-6 sm:gap-8">
+        <label className="flex items-center gap-2.5 cursor-pointer group">
           <div className="relative flex items-center justify-center">
             <input
               type="radio"
@@ -35,12 +35,12 @@ export function LanguageSelectionField({
             />
             <div className="absolute w-2.5 h-2.5 bg-primary rounded-full scale-0 peer-checked:scale-100 transition-transform" />
           </div>
-          <span className="text-gray-700 font-medium group-hover:text-primary transition-colors">
+          <span className="text-sm sm:text-base text-gray-700 font-medium group-hover:text-primary transition-colors">
             العربية
           </span>
         </label>
 
-        <label className="flex items-center gap-2 cursor-pointer group">
+        <label className="flex items-center gap-2.5 cursor-pointer group">
           <div className="relative flex items-center justify-center">
             <input
               type="radio"
@@ -50,7 +50,7 @@ export function LanguageSelectionField({
             />
             <div className="absolute w-2.5 h-2.5 bg-primary rounded-full scale-0 peer-checked:scale-100 transition-transform" />
           </div>
-          <span className="text-gray-700 font-medium group-hover:text-primary transition-colors">
+          <span className="text-sm sm:text-base text-gray-700 font-medium group-hover:text-primary transition-colors">
             English
           </span>
         </label>

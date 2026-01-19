@@ -1,4 +1,4 @@
-import { LuCopyX } from 'react-icons/lu';
+import { LiaBanSolid } from 'react-icons/lia';
 import Input from '@/components/ui/Input';
 import { UseFormRegister, FieldErrors } from 'react-hook-form';
 import { OrderSettingsFormData } from '../schemas/store';
@@ -10,14 +10,14 @@ interface AutoCancelFieldProps {
 
 export function AutoCancelField({ register, errors }: AutoCancelFieldProps) {
   return (
-    <div className="w-full max-w-full flex flex-col gap-4 min-w-0">
-      <div className="w-full max-w-full flex items-start gap-2 min-w-0">
-        <LuCopyX className="w-6 h-6 text-primary mt-0.5 shrink-0" />
-        <div className="min-w-0 flex-1">
-          <h3 className="text-base sm:text-lg font-semibold leading-tight break-words">
+    <div className="flex flex-col gap-4">
+      <div className="flex items-start gap-3">
+        <LiaBanSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">
             الالغاء التلقائي للطلب
           </h3>
-          <p className="text-xs sm:text-sm text-gray-500 break-words">
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
             الغاء الطلب تلقائي بعد كام محاوله؟
           </p>
         </div>
@@ -42,7 +42,7 @@ export function AutoCancelField({ register, errors }: AutoCancelFieldProps) {
         type="number"
         placeholder="مثال: 3"
         error={errors.autoCancelAttempts?.message}
-        className="!h-[46px] text-right w-full max-w-full !px-5"
+        className="w-full max-w-sm"
       />
     </div>
   );

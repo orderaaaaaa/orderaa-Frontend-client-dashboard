@@ -244,12 +244,18 @@ export interface Order {
   shipmentPickupCode?: string | null;
   pickupInvoice?: string | null;
   pickupCode?: string | null;
+  states?: OrderState[];
 }
 
 export interface OrderLockedBy {
   id: number;
   name: string;
   department: string;
+}
+
+export interface OrderState {
+  note: string;
+  createdAt: string;
 }
 
 export interface OrderEvent {

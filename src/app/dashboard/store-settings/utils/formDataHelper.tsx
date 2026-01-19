@@ -4,15 +4,29 @@ export function convertToFormData(data: Record<string, any>): FormData {
   Object.entries(data).forEach(([key, value]) => {
     if (value === undefined || value === null) return;
 
-    if (key === 'logo' && value instanceof FileList && value.length > 0) {
-      formData.append('logo', value[0]);
+    if (key === 'logo') {
+      if (value instanceof File) {
+        formData.append('logo', value);
+      } else if (value && value.length > 0 && value[0] instanceof File) {
+        formData.append('logo', value[0]);
+      }
       return;
     }
 
-    if (Array.isArray(value)) {
+    if (key === 'cancellationReasons' && Array.isArray(value)) {
       value.forEach((item) => {
-        formData.append(`${key}[]`, item);
+        formData.append('cancellationReasons[]', item);
       });
+      return;
+    }
+
+    if (typeof value === 'boolean') {
+      formData.append(key, value.toString());
+      return;
+    }
+
+    if (typeof value === 'number') {
+      formData.append(key, value.toString());
       return;
     }
 

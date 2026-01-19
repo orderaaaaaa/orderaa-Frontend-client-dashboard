@@ -2,11 +2,12 @@ import { OrderSettingsFormData } from '../schemas/store';
 import { ORDER_SETTINGS_DEFAULTS } from '../schemas/store.defaults';
 
 export function mapSettingsToForm(
-  settings: Partial<OrderSettingsFormData>
+  settings: Partial<OrderSettingsFormData> & { logo?: string }
 ): OrderSettingsFormData {
   return {
     ...ORDER_SETTINGS_DEFAULTS,
     ...settings,
+    logo: settings.logo ?? undefined,
     language: settings.language ?? 'ar',
     cancellationReasons: settings.cancellationReasons ?? [],
     canOpenShipment: settings.canOpenShipment ?? false,

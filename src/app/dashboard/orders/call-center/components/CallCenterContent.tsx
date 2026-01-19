@@ -307,6 +307,7 @@ export function CallCenterContent() {
                 cancelNotes={order.cancelNotes}
                 postponedUntil={order.postponedUntil}
                 showAllItems
+                states={order.states}
               />
             ))}
           </div>

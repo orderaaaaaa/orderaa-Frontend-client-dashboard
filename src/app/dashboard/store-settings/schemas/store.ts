@@ -13,29 +13,25 @@ export const orderSettingsSchema = z.object({
     .any()
     .optional()
     .refine(
-      (files) => {
-        if (!files || files.length === 0) return true;
-        return files[0]?.size <= MAX_FILE_SIZE;
+      (value) => {
+        if (!value || typeof value === 'string') return true;
+        if (value.length === 0) return true;
+        return value[0]?.size <= MAX_FILE_SIZE;
       },
       { message: 'حجم الصورة يجب أن يكون أقل من 5MB' }
     )
     .refine(
-      (files) => {
-        if (!files || files.length === 0) return true;
-        return ACCEPTED_IMAGE_TYPES.includes(files[0]?.type);
+      (value) => {
+        if (!value || typeof value === 'string') return true;
+        if (value.length === 0) return true;
+        return ACCEPTED_IMAGE_TYPES.includes(value[0]?.type);
       },
       { message: 'يرجى اختيار صورة بصيغة PNG أو JPG فقط' }
     ),
 
   language: z.enum(['ar', 'en']).optional(),
   cancellationReasons: z.array(z.string()).optional(),
-  shippingPhoneNumber: z
-    .string()
-    .trim()
-    .optional()
-    .refine((val) => !val || (val.length >= 11 && val.length <= 13), {
-      message: 'يجب أن يكون رقم الهاتف من 11 إلى 13 رقم',
-    }),
+  shippingPhoneNumber: z.string().trim().optional(),
 
   canOpenShipment: z.boolean().optional(),
   employeeCanEditContent: z.boolean().optional(),
@@ -52,7 +48,7 @@ export const orderSettingsSchema = z.object({
     const num = Number(val);
     if (isNaN(num)) return undefined;
     return num < 0 ? 0 : num;
-  }, z.number().min(0, { message: 'يجب أن يكون الرقم 0 أو أكبر' }).optional()),
+  }, z.number().optional()),
 
   url: z
     .string()

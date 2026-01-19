@@ -15,6 +15,7 @@ import { CancellationReasonsField } from './CancellationReasonsField';
 import { AutoCancelField } from './AutoCancelField';
 import { ShippingSection } from './ShippingSection';
 import { SectionHeader } from './SectionHeader';
+import { Separator } from '@/components/ui/separator';
 
 interface Props {
   register: UseFormRegister<OrderSettingsFormData>;
@@ -35,13 +36,19 @@ export default function OrderSettingsFields({
   }, [integrations]);
 
   return (
-    <div className="px-4 md:px-10 py-6 md:py-[34px] w-full max-w-full overflow-x-hidden" dir="rtl">
-      <div className="flex w-full lg:w-[37%] max-w-full flex-col gap-8 min-w-0">
+    <div className="p-4 sm:p-6 lg:p-8 xl:p-10 w-full" dir="rtl">
+      <div className="space-y-6 sm:space-y-8">
         <LogoUploadField watch={watch} setValue={setValue} errors={errors} />
+
+        <Separator />
 
         <URLField register={register} errors={errors} />
 
+        <Separator />
+
         <LanguageSelectionField register={register} />
+
+        <Separator />
 
         <CancellationReasonsField
           watch={watch}
@@ -49,12 +56,13 @@ export default function OrderSettingsFields({
           errors={errors}
         />
 
-        <AutoCancelField register={register} errors={errors} />
+        <Separator />
 
-        <SectionHeader />
+        <AutoCancelField register={register} errors={errors} />
 
         <If condition={isApiConnected}>
           <Then>
+            <SectionHeader />
             <ShippingSection
               register={register}
               errors={errors}

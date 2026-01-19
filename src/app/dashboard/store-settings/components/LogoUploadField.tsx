@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { IoMdClose } from 'react-icons/io';
-import { LiaCloudUploadAltSolid, LiaImageSolid } from 'react-icons/lia';
-
+import { LiaTimesSolid, LiaCloudUploadAltSolid, LiaImageSolid } from 'react-icons/lia';
 import { UseFormSetValue, UseFormWatch, FieldErrors } from 'react-hook-form';
+import clsx from 'clsx';
 import { OrderSettingsFormData } from '../schemas/store';
 import { useMerchantSettings } from '../hooks/useStoreSettings';
 
@@ -93,76 +92,77 @@ export function LogoUploadField({
   };
 
   return (
-    <div className="w-full max-w-full md:w-2/3 xl:w-1/2 flex flex-col gap-4 border-b border-gray-100 pb-6 min-w-0">
-      <div className="w-full max-w-full flex items-start gap-2 min-w-0">
-        <LiaImageSolid className="w-6 h-6 text-primary mt-0.5 shrink-0" />
-        <div className="min-w-0 flex-1">
-          <h3 className="text-base sm:text-lg font-semibold leading-tight break-words">شعار المتجر</h3>
-          <p className="text-xs sm:text-sm text-gray-500 break-words">
-            قم برفع شعار المتجر الخاص بك لكي يظهر علي بوليصةالشحن
+    <div className="flex flex-col gap-4">
+      <div className="flex items-start gap-3">
+        <LiaImageSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">
+            شعار المتجر
+          </h3>
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+            قم برفع شعار المتجر الخاص بك لكي يظهر علي بوليصة الشحن
           </p>
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row items-start gap-4 w-full max-w-full min-w-0">
-        <div
-          className={`flex-1 w-full max-w-full min-h-[120px] border-2 border-dashed rounded-lg transition-all overflow-hidden ${
-            isDragging
-              ? 'border-primary bg-primary/5'
-              : 'border-gray-300 bg-gray-50 hover:border-primary'
-          }`}
-          onDragEnter={handleDragEnter}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full p-4 sm:p-6 min-w-0">
-            {preview ? (
-              <div className="relative w-full h-full flex items-center justify-center min-w-0 max-w-full">
-                <img
-                  src={preview}
-                  alt="Preview"
-                  className="max-h-32 max-w-full object-contain rounded"
-                />
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleRemoveImage();
-                  }}
-                  className="absolute top-0 right-0 cursor-pointer bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors shrink-0"
-                >
-                  <IoMdClose className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center text-center min-w-0 max-w-full">
-                <LiaCloudUploadAltSolid className="w-10 h-10 text-gray-400 mb-2 shrink-0" />
-                <p className="text-xs sm:text-sm text-gray-600 mb-1 break-words px-2">
-                  اسحب الصورة وأفلتها هنا
-                </p>
-                <p className="text-xs text-gray-400">أو</p>
-                <span className="text-xs sm:text-sm text-primary font-medium mt-1 break-words">
-                  تصفح الملفات
-                </span>
-              </div>
-            )}
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileInputChange}
-            />
-          </label>
-        </div>
+      <div
+        className={clsx(
+          'w-full min-h-[140px] sm:min-h-[160px] border-2 border-dashed rounded-xl transition-all',
+          isDragging
+            ? 'border-primary bg-primary/5'
+            : 'border-gray-300 bg-gray-50 hover:border-primary hover:bg-gray-50/80'
+        )}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full p-4 sm:p-6">
+          {preview ? (
+            <div className="relative flex items-center justify-center">
+              <img
+                src={preview}
+                alt="Preview"
+                className="max-h-28 sm:max-h-32 max-w-full object-contain"
+              />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleRemoveImage();
+                }}
+                className="cursor-pointer absolute -top-2 -left-20 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors shadow-md"
+              >
+                <LiaTimesSolid className="w-3 h-3 sm:w-4 sm:h-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center text-center">
+              <LiaCloudUploadAltSolid className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 mb-2" />
+              <p className="text-xs sm:text-sm text-gray-600 mb-1">
+                اسحب الصورة وأفلتها هنا
+              </p>
+              <p className="text-xs text-gray-400">أو</p>
+              <span className="text-xs sm:text-sm text-primary font-medium mt-1">
+                تصفح الملفات
+              </span>
+            </div>
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileInputChange}
+          />
+        </label>
       </div>
 
-      <div className="text-xs text-gray-400">
+      <p className="text-xs text-gray-400">
         يرجى اختيار صورة بصيغة PNG أو JPG (الحد الأقصى: 5MB)
-      </div>
+      </p>
 
       {errors.logo && (
-        <p className="text-red-500 text-xs">{errors.logo.message as string}</p>
+        <p className="text-red-500 text-base">{errors.logo.message as string}</p>
       )}
     </div>
   );

@@ -1,3 +1,5 @@
+import { OrderState } from '@/types/orders';
+
 export interface OrderCardProps {
   id: number;
   code: string;
@@ -27,4 +29,5 @@ export interface OrderCardProps {
   disableNavigation?: boolean;
   hideCustomerInfo?: boolean;
   showAllItems?: boolean;
+  states?: OrderState[];
 }

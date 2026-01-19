@@ -50,6 +50,7 @@ export default function OrderCard({
   disableNavigation = false,
   hideCustomerInfo = false,
   showAllItems = false,
+  states,
 }: OrderCardProps) {
   const router = useRouter();
   const { getStatusLabel } = useStatusLabel();
@@ -256,6 +257,22 @@ export default function OrderCard({
               مواجل: {getRemainingTime(postponedUntil)}
             </p>
             <LiaClock className="w-5 h-5" />
+          </div>
+        )}
+
+        {states && states.length > 0 && (
+          <div className="flex flex-col gap-2 w-full">
+            {states.map((state, index) => (
+              <div key={index} className="flex items-start gap-2">
+                <FileText
+                  className="w-[18px] h-[18px] flex-shrink-0 mt-0.5"
+                  style={{ strokeWidth: 1.5, color: 'rgba(220,38,38,0.7)' }}
+                />
+                <span className="text-base font-medium text-red-600">
+                  {state.note}
+                </span>
+              </div>
+            ))}
           </div>
         )}
 

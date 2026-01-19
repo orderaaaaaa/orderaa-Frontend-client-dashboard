@@ -10,21 +10,21 @@ interface URLFieldProps {
 
 export function URLField({ register, errors }: URLFieldProps) {
   return (
-    <div className="w-full max-w-full flex flex-col gap-4 min-w-0">
-      <div className="w-full max-w-full flex items-start gap-2 min-w-0">
-        <LiaLinkSolid className="w-6 h-6 text-primary mt-0.5 shrink-0" />
-        <div className="min-w-0 flex-1">
-          <h3 className="text-base sm:text-lg font-semibold leading-tight break-words">
+    <div className="flex flex-col gap-4">
+      <div className="flex items-start gap-3">
+        <LiaLinkSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">
             رابط المتجر
           </h3>
-          <p className="text-xs sm:text-sm text-gray-500 break-words">
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
             أدخل رابط متجرك الإلكتروني
           </p>
         </div>
       </div>
       <Input
         name="url"
-        className="!px-5 w-full max-w-full"
+        className="w-full max-w-sm"
         register={register}
         registerOptions={{
           setValueAs: (v: string) => (v === '' ? undefined : v),
