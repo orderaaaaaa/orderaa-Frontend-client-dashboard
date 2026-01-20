@@ -55,10 +55,24 @@ export interface VariantsCountResponse {
 export interface ProductState {
   page: number;
   limit: number;
+  search: string;
+  sortBy: string;
+  sortOrder: 'asc' | 'desc';
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
+  setSearch: (search: string) => void;
+  setSortBy: (sortBy: string) => void;
+  setSortOrder: (sortOrder: 'asc' | 'desc') => void;
 }
 
 export interface UpdateVariantsPayload {
   variants: VariantItem[];
+}
+
+export interface ProductQueryParams {
+  page: number;
+  limit: number;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }

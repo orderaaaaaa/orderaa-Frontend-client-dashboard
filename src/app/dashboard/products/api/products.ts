@@ -3,31 +3,35 @@ import {
   ProductsResponse,
   UpdateVariantsPayload,
   VariantsCountResponse,
+  ProductQueryParams,
 } from '../types/products';
 
 export const productsApi = {
-  getAll: async (page: number, limit: number): Promise<ProductsResponse> => {
+  getAll: async (params: ProductQueryParams): Promise<ProductsResponse> => {
     const response = await http.get<ProductsResponse>('/products', {
       params: {
-        page,
-        limit,
+        page: params.page,
+        limit: params.limit,
+        ...(params.search && { search: params.search }),
+        ...(params.sortBy && { sortBy: params.sortBy }),
+        ...(params.sortOrder && { sortOrder: params.sortOrder }),
       },
     });
     return response.data;
   },
 
   getVariantOptions: async (
-    productId: number
+    productId: number,
   ): Promise<VariantsCountResponse> => {
     const response = await http.get<VariantsCountResponse>(
-      `/products/${productId}/variant-counts`
+      `/products/${productId}/variant-counts`,
     );
     return response.data;
   },
 
   updateVariantsOptions: async (
     productId: number,
-    payload: UpdateVariantsPayload
+    payload: UpdateVariantsPayload,
   ) => {
     await http.put(`/products/${productId}`, payload);
   },

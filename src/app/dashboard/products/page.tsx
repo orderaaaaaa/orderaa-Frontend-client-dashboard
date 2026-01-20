@@ -8,8 +8,9 @@ import { useProductStore } from './store/useProductStore';
 import { useGetProducts } from './hooks/useProduct';
 
 function ProductsPage() {
-  const { page, limit, setPage, setLimit } = useProductStore();
-  const { data } = useGetProducts(page, limit);
+  const { page, limit, search, sortBy, sortOrder, setPage, setLimit } =
+    useProductStore();
+  const { data } = useGetProducts({ page, limit, search, sortBy, sortOrder });
 
   return (
     <div className="p-4">

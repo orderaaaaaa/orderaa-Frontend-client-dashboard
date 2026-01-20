@@ -1,13 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productsApi } from '../api/products';
 import { productKeys } from './queryKeys';
-import { UpdateVariantsPayload } from '../types/products';
+import { UpdateVariantsPayload, ProductQueryParams } from '../types/products';
 import { VariantsCountResponse } from '../types/products';
 
-export const useGetProducts = (page: number, limit: number) => {
+export const useGetProducts = (params: ProductQueryParams) => {
   return useQuery({
-    queryKey: productKeys.list(page, limit),
-    queryFn: () => productsApi.getAll(page, limit),
+    queryKey: productKeys.list(params),
+    queryFn: () => productsApi.getAll(params),
     placeholderData: (previousData) => previousData,
   });
 };
@@ -46,7 +46,7 @@ export const useUpdateProductVariants = (productId: number) => {
                     variants: newPayload.variants,
                   },
                 }
-              : product
+              : product,
           ),
         };
       });

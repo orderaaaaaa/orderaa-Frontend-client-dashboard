@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { LiaEditSolid } from 'react-icons/lia';
 import { FaRegSquare } from 'react-icons/fa6';
 import { PiCheckSquareFill } from 'react-icons/pi';
-import { ListChecks } from 'lucide-react';
+import { ListChecks, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 import { useGetProducts } from '../hooks/useProduct';
 import { useProductStore } from '../store/useProductStore';
@@ -13,10 +13,27 @@ import Input from '@/components/ui/Input';
 import ProductAddVariantsModal from './modals/productAddVariants';
 import { getTimeAgo } from '@/utils';
 import ProductVariantCountsModal from './modals/ProductVariantCountsModal';
+import SearchableSelect from '@/components/ui/SearchableSelect';
+import LoadingAnimation from '@/components/ui/loadingAnimation';
 
 function ProductsTable() {
-  const { page, limit } = useProductStore();
-  const { data, isLoading } = useGetProducts(page, limit);
+  const {
+    page,
+    limit,
+    search,
+    sortBy,
+    sortOrder,
+    setSearch,
+    setSortBy,
+    setSortOrder,
+  } = useProductStore();
+  const { data, isLoading } = useGetProducts({
+    page,
+    limit,
+    search,
+    sortBy,
+    sortOrder,
+  });
 
   const [showCheckboxes, setShowCheckboxes] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -27,6 +44,41 @@ function ProductsTable() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [showSoldModal, setShowSoldModal] = useState(false);
   const [soldProductId, setSoldProductId] = useState<number | null>(null);
+
+  const sortByOptions = [
+    { key: 'createdAt', value: 'تاريخ الإنشاء' },
+    { key: 'name', value: 'الاسم' },
+    { key: 'price', value: 'السعر' },
+    { key: 'totalSold', value: 'عدد القطع المباعة' },
+    { key: 'totalOrders', value: 'عدد الطلبات' },
+  ];
+
+  const sortOrderOptions = [
+    { key: 'desc', value: 'تنازلي' },
+    { key: 'asc', value: 'تصاعدي' },
+  ];
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      // Toggle sort order if clicking the same field
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Set new field with desc as default
+      setSortBy(field);
+      setSortOrder('desc');
+    }
+  };
+
+  const getSortIcon = (field: string) => {
+    if (sortBy !== field) {
+      return <ArrowUpDown className="w-4 h-4 opacity-40" />;
+    }
+    return sortOrder === 'asc' ? (
+      <ArrowUp className="w-4 h-4" />
+    ) : (
+      <ArrowDown className="w-4 h-4" />
+    );
+  };
 
   const toggleSelect = (id: number) => {
     setSelectedIds((prev) =>
@@ -62,12 +114,21 @@ function ProductsTable() {
     setActiveProduct(null);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64 mt-10">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+  const LoadingSkeleton = () => (
+    <div className="flex flex-col gap-4">
+      {/* Header Skeleton */}
+      <div className="flex flex-col sm:flex-row gap-3 sm:justify-between items-center">
+        <div className="h-10 bg-gray-200 rounded-lg animate-pulse w-[300px]" />
+        <div className="h-10 bg-gray-200 rounded-lg animate-pulse w-[150px]" />
       </div>
-    );
+
+      {/* Loading Animation */}
+      <LoadingAnimation />
+    </div>
+  );
+
+  if (isLoading) {
+    return <LoadingSkeleton />;
   }
 
   return (
@@ -75,11 +136,15 @@ function ProductsTable() {
       <div className="flex flex-col gap-4">
         {/* Header */}
         <div className="flex flex-col sm:flex-row gap-3 sm:justify-between items-center">
-          <Input
-            name=""
-            placeholder="ابحث عن المنتج"
-            className="!px-5 min-w-[300px]"
-          />
+          <div className="flex gap-2 items-center flex-wrap">
+            <Input
+              name="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="ابحث عن المنتج"
+              className="!px-5 min-w-[300px]"
+            />
+          </div>
 
           <button
             onClick={() => setShowCheckboxes((prev) => !prev)}
@@ -109,12 +174,68 @@ function ProductsTable() {
                 </th>
 
                 <th className="p-4 text-center">صورة المنتج</th>
-                <th className="p-4 text-center">الاسم</th>
-                <th className="p-4 text-center">السعر</th>
-                <th className="p-4 text-center">تاريخ الإنشاء</th>
-                <th className="p-4 text-center">عدد القطع المباعة</th>
+
+                <th
+                  className={`p-4 text-center cursor-pointer hover:bg-gray-100 transition-colors select-none ${
+                    sortBy === 'name' ? 'text-primary' : ''
+                  }`}
+                  onClick={() => handleSort('name')}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <span>الاسم</span>
+                    {getSortIcon('name')}
+                  </div>
+                </th>
+
+                <th
+                  className={`p-4 text-center cursor-pointer hover:bg-gray-100 transition-colors select-none ${
+                    sortBy === 'price' ? 'text-primary' : ''
+                  }`}
+                  onClick={() => handleSort('price')}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <span>السعر</span>
+                    {getSortIcon('price')}
+                  </div>
+                </th>
+
+                <th
+                  className={`p-4 text-center cursor-pointer hover:bg-gray-100 transition-colors select-none ${
+                    sortBy === 'createdAt' ? 'text-primary' : ''
+                  }`}
+                  onClick={() => handleSort('createdAt')}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <span>تاريخ الإنشاء</span>
+                    {getSortIcon('createdAt')}
+                  </div>
+                </th>
+
+                <th
+                  className={`p-4 text-center cursor-pointer hover:bg-gray-100 transition-colors select-none ${
+                    sortBy === 'totalSold' ? 'text-primary' : ''
+                  }`}
+                  onClick={() => handleSort('totalSold')}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <span>عدد القطع المباعة</span>
+                    {getSortIcon('totalSold')}
+                  </div>
+                </th>
+
                 <th className="p-4 text-center">تعديل</th>
-                <th className="p-4 text-center">الطلبات</th>
+
+                <th
+                  className={`p-4 text-center cursor-pointer hover:bg-gray-100 transition-colors select-none ${
+                    sortBy === 'totalOrders' ? 'text-primary' : ''
+                  }`}
+                  onClick={() => handleSort('totalOrders')}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <span>الطلبات</span>
+                    {getSortIcon('totalOrders')}
+                  </div>
+                </th>
               </tr>
             </thead>
 
@@ -191,6 +312,38 @@ function ProductsTable() {
 
         {/* ===== Mobile Cards ===== */}
         <div className="md:hidden flex flex-col gap-3">
+          {/* Mobile Sort Controls */}
+          <div className="flex gap-2 flex-wrap">
+            <div className="flex-1 min-w-[200px]">
+              <SearchableSelect
+                value={sortBy}
+                onChange={setSortBy}
+                options={sortByOptions}
+                placeholder="اختر طريقة الترتيب"
+                searchPlaceholder="ابحث..."
+                triggerClassName="!py-2"
+                searchThreshold={10}
+              />
+            </div>
+
+            <button
+              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              className="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 flex items-center gap-2 min-w-[120px] justify-center"
+            >
+              {sortOrder === 'asc' ? (
+                <>
+                  <ArrowUp className="w-4 h-4" />
+                  <span>تصاعدي</span>
+                </>
+              ) : (
+                <>
+                  <ArrowDown className="w-4 h-4" />
+                  <span>تنازلي</span>
+                </>
+              )}
+            </button>
+          </div>
+
           {data?.data.map((product) => (
             <div
               key={product.id}
