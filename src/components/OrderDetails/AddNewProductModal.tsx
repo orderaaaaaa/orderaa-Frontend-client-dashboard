@@ -30,6 +30,7 @@ export default function AddNewProductModal({
     Record<string, string>
   >({});
   const [quantity, setQuantity] = useState(1);
+  const [isSaving, setIsSaving] = useState(false);
 
   const { data: variantOptions = [], isLoading: isLoadingVariants } =
     useProductVariantsOptions(selectedProduct?.id ?? null);
@@ -79,7 +80,8 @@ export default function AddNewProductModal({
   };
 
   const handleSave = async () => {
-    if (!selectedProduct) return;
+    if (!selectedProduct || isSaving) return;
+    setIsSaving(true);
     try {
       const variants: SelectedVariant[] = Object.entries(selectedVariants).map(
         ([label, value]) => ({ label, value })
@@ -94,6 +96,8 @@ export default function AddNewProductModal({
         error?.response?.data?.message ||
         'فشل في إضافة المنتج. يرجى المحاولة مرة أخرى.';
       toast.error(apiErrorMessage);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -249,11 +253,13 @@ export default function AddNewProductModal({
 
           <Button
             onClick={handleSave}
-            disabled={!isFormValid}
+            disabled={!isFormValid || isSaving}
             className="w-[146px] h-[37px] bg-primary border-[1.5px] border-primary rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <LiaPlusSolid className="w-5 h-5 text-white" />
-            <span className="text-lg font-bold text-white">إضافة</span>
+            <span className="text-lg font-bold text-white">
+              {isSaving ? 'جاري الإضافة...' : 'إضافة'}
+            </span>
           </Button>
         </div>
       </div>

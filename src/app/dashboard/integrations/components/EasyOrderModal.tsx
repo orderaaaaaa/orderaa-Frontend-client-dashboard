@@ -111,7 +111,7 @@ const EasyOrderModal = ({
         toast.success('تم انشاء ربط API بنجاح');
       }
       queryClient.invalidateQueries({ queryKey: ['integration-configs'] });
-      if (existingConfig?.webhookSecret) {
+      if (webhookData?.webhookSecret) {
         onClose();
       }
     } catch (err: any) {
@@ -127,7 +127,7 @@ const EasyOrderModal = ({
     setIsLoading(true);
     try {
       const finalUrl = customWebhookUrl.trim() || defaultWebhookUrl;
-      if (existingConfig) {
+      if (webhookData) {
         await webhookApi.updateConfig({
           webhookUrl: finalUrl,
           webhookSecret: webhookSecret.trim(),
@@ -141,6 +141,7 @@ const EasyOrderModal = ({
         toast.success('تم حفظ اعدادات الـ Webhook بنجاح');
       }
       setShowWebhookDropdown(false);
+      queryClient.invalidateQueries({ queryKey: ['webhook-config'] });
     } catch (err: any) {
       setError('خطأ في حفظ الـ Webhook');
     } finally {
@@ -155,7 +156,7 @@ const EasyOrderModal = ({
     }
   };
 
-  const showIsConnectWebhook = existingConfig?.webhookSecret;
+  const showIsConnectWebhook = webhookData?.webhookSecret;
 
   return (
     <>
@@ -231,7 +232,7 @@ const EasyOrderModal = ({
                   <Else>
                     <div className="absolute top-1 left-1 w-fit h-7 bg-gray-200 text-gray-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
                       <MdQuestionMark className="w-3 h-3" />
-                      قم بلربط
+                      قم بالربط
                     </div>
                   </Else>
                 </If>

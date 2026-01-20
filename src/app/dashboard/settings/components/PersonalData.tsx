@@ -51,7 +51,7 @@ export default function PersonalData() {
   const { data: cityOptions = [], isLoading: loadingCities } = useCitiesQuery(governorate || '');
 
   useEffect(() => {
-    if (!governorate) {
+    if (!governorate && city) {
       setValue('city', '');
     } else if (city) {
       const cityExists = cityOptions.some((c) => c.key === city);
