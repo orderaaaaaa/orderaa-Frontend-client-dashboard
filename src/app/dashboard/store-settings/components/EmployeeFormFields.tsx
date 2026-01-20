@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import {
   UseFormRegister,
   FieldErrors,
@@ -6,7 +5,7 @@ import {
   UseFormSetValue,
 } from 'react-hook-form';
 import { OrderSettingsFormData } from '../schemas/store';
-import { useIntegrations } from '../../integrations/hooks/useIntegrations';
+import { useShippingConfig } from '../hooks/useShippingConfig';
 import { If, Then } from 'react-if';
 import { LogoUploadField } from './LogoUploadField';
 import { URLField } from './URLField';
@@ -30,10 +29,7 @@ export default function OrderSettingsFields({
   watch,
   setValue,
 }: Props) {
-  const { integrations } = useIntegrations();
-  const isApiConnected = useMemo(() => {
-    return integrations?.some((item) => item.isActive);
-  }, [integrations]);
+  const { hasShippingConfig } = useShippingConfig();
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 xl:p-10 w-full" dir="rtl">
@@ -60,7 +56,7 @@ export default function OrderSettingsFields({
 
         <AutoCancelField register={register} errors={errors} />
 
-        <If condition={isApiConnected}>
+        <If condition={hasShippingConfig}>
           <Then>
             <SectionHeader />
             <ShippingSection

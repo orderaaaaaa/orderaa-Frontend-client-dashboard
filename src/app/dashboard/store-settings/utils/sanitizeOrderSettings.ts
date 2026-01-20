@@ -6,8 +6,17 @@ const EMPTY_STRING_EXCLUDE_FIELDS: readonly (keyof OrderSettingsFormData)[] = [
   'url',
 ];
 
+const SHIPPING_FIELDS: readonly (keyof OrderSettingsFormData)[] = [
+  'shippingPhoneNumber',
+  'canOpenShipment',
+  'employeeCanEditContent',
+  'defaultShipmentContent',
+  'defaultReturnShippingCost',
+];
+
 export function sanitizeOrderSettings(
-  data: OrderSettingsFormData
+  data: OrderSettingsFormData,
+  excludeShipping = false
 ): Partial<OrderSettingsFormData> {
   const result: Partial<OrderSettingsFormData> = {};
 
@@ -17,6 +26,10 @@ export function sanitizeOrderSettings(
     if (value === undefined || value === null) return;
 
     if (value === '' && EMPTY_STRING_EXCLUDE_FIELDS.includes(key)) {
+      return;
+    }
+
+    if (excludeShipping && SHIPPING_FIELDS.includes(key)) {
       return;
     }
 

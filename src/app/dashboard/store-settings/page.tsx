@@ -12,6 +12,7 @@ import {
 
 import OrderSettingsFields from './components/EmployeeFormFields';
 import { useMerchantSettings } from './hooks/useStoreSettings';
+import { useShippingConfig } from './hooks/useShippingConfig';
 import { sanitizeOrderSettings } from './utils/sanitizeOrderSettings';
 import { mapSettingsToForm } from './utils/mapSettingsToForm';
 import { ORDER_SETTINGS_DEFAULTS } from './schemas/store.defaults';
@@ -21,6 +22,7 @@ import { Card, CardContent } from '@/components/ui/card';
 export default function OrderSettingsPage() {
   const { settings, isLoading, updateSettings, isUpdating } =
     useMerchantSettings();
+  const { hasShippingConfig } = useShippingConfig();
 
   const initializedRef = useRef(false);
 
@@ -50,7 +52,7 @@ export default function OrderSettingsPage() {
   }, [errors]);
 
   const onSubmit = (data: OrderSettingsFormData) => {
-    updateSettings(sanitizeOrderSettings(data));
+    updateSettings(sanitizeOrderSettings(data, !hasShippingConfig));
   };
 
   if (isLoading) {
