@@ -4,6 +4,8 @@ import { Order, OrderEvent } from '@/types/orders';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
+import { getRemainingTime } from '@/utils/getRemainingTime';
+import { LiaClock } from 'react-icons/lia';
 
 interface OrderDetailsInfoStatusProps {
   order: Order;
@@ -101,7 +103,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
   return (
     <div>
       <div className="font-medium p-4 bg-gray-50 mt-8 rounded-xl">
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center">
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-lg text-primary font-bold">سجل الأحداث</h2>
             <p className="border-1 border-primary text-primary w-6 h-6 text-sm text-center rounded-full flex items-center justify-center">
