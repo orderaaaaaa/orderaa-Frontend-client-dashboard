@@ -154,6 +154,7 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
           </div>
         </div>
       </div>
+      
 
       {/* Shipping Notes Section */}
       <div className="grid grid-cols-2 bg-black text-white">
