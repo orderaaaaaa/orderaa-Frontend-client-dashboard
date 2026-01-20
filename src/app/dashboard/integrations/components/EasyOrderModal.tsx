@@ -36,7 +36,7 @@ const EasyOrderModal = ({
   existingConfig,
 }: EasyOrderModalProps) => {
   const queryClient = useQueryClient();
-
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const [webhookSecret, setWebhookSecret] = useState('');
   const [customWebhookUrl, setCustomWebhookUrl] = useState('');
   const [showSecret, setShowSecret] = useState(false);
@@ -59,6 +59,12 @@ const EasyOrderModal = ({
   const { data: webhookData } = useGetWebhookConfig();
   const { integrations, createIntegration, updateIntegration } =
     useIntegrations();
+
+  const getDefaultWebhookUrl = (merchantId?: string | number): string => {
+    if (!API_URL || merchantId == null) return '';
+
+    return `${API_URL}/webhooks/easy-orders/${merchantId}`;
+  };
 
   useEffect(() => {
     if (webhookData) {
@@ -86,9 +92,7 @@ const EasyOrderModal = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const defaultWebhookUrl = merchantId
-    ? `${process.env.NEXT_PUBLIC_API_URL}/webhooks/easy-orders/${merchantId}`
-    : `${process.env.NEXT_PUBLIC_API_URL}/webhooks/easy-orders/[MERCHANT_ID]`;
+  const defaultWebhookUrl = getDefaultWebhookUrl(merchantId);
 
   const handleApiSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
