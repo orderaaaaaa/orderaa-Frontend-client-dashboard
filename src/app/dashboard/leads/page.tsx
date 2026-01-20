@@ -21,6 +21,9 @@ function LeadsPage() {
   const handleLeadSourceChange = (source: string) => {
     console.log('Lead Source:', source);
   };
+  const handlePayStatusChange = (source: string) => {
+    console.log('Lead Source:', source);
+  };
   return (
     <div className="md:p-6">
       <LeadsHeader />
@@ -29,6 +32,7 @@ function LeadsPage() {
       <TodaysFollowups />
       <LeadsSearch
         onSearchChange={handleSearchChange}
+        onPayStatusChange={handlePayStatusChange}
         onLeadTypeChange={handleLeadTypeChange}
         onLeadSourceChange={handleLeadSourceChange}
       />

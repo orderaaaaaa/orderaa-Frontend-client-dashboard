@@ -42,6 +42,8 @@ const EasyOrderModal = ({
   const [showSecret, setShowSecret] = useState(false);
   const [showApi, setShowApi] = useState(false);
   const [copied, setCopied] = useState(false);
+  const { user } = useAuthStore();
+  const merchantId = user?.merchantId;
 
   const [apiKey, setApiKey] = useState('');
   const [existingIntegrationId, setExistingIntegrationId] = useState<
@@ -83,6 +85,10 @@ const EasyOrderModal = ({
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const defaultWebhookUrl = merchantId
+    ? `${process.env.NEXT_PUBLIC_API_URL}/webhooks/easy-orders/${merchantId}`
+    : `${process.env.NEXT_PUBLIC_API_URL}/webhooks/easy-orders/[MERCHANT_ID]`;
 
   const handleApiSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -290,7 +296,7 @@ const EasyOrderModal = ({
                       </div>
                       <input
                         type="url"
-                        value={customWebhookUrl}
+                        value={customWebhookUrl || defaultWebhookUrl}
                         onChange={(e) => setCustomWebhookUrl(e.target.value)}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-left text-sm font-mono focus:ring-2 focus:ring-primary outline-none"
                         dir="ltr"

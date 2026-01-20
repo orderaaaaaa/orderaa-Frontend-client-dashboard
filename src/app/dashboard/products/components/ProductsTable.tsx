@@ -30,7 +30,7 @@ function ProductsTable() {
 
   const toggleSelect = (id: number) => {
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
     );
   };
 
@@ -38,7 +38,7 @@ function ProductsTable() {
     if (!data?.data) return;
 
     setSelectedIds(
-      selectedIds.length === data.data.length ? [] : data.data.map((p) => p.id)
+      selectedIds.length === data.data.length ? [] : data.data.map((p) => p.id),
     );
   };
 
@@ -160,7 +160,7 @@ function ProductsTable() {
                       onClick={() => openSoldModal(product.id)}
                       className="text-gray-800 cursor-pointer font-semibold"
                     >
-                      0{' '}
+                      {product.totalSold}
                     </button>
                   </td>
                   <td className="p-4 text-center">
@@ -168,7 +168,7 @@ function ProductsTable() {
                       onClick={() =>
                         openEditModal(
                           product.id,
-                          product.extraDetails?.variants || []
+                          product.extraDetails?.variants || [],
                         )
                       }
                       className="text-primary flex items-center gap-1 mx-auto cursor-pointer"
@@ -226,13 +226,13 @@ function ProductsTable() {
                       className="text-sm text-gray-600 flex items-center gap-1 "
                     >
                       <span>عدد القطع المباعه:</span>
-                      <span className="font-medium ">0</span>
+                      <span className="font-medium ">{product.totalSold}</span>
                     </button>
                     <button
                       onClick={() =>
                         openEditModal(
                           product.id,
-                          product.extraDetails?.variants || []
+                          product.extraDetails?.variants || [],
                         )
                       }
                       className="text-primary text-sm flex items-center gap-1 font-medium cursor-pointer"

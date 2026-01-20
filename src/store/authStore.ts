@@ -3,6 +3,8 @@ import { persist } from 'zustand/middleware';
 
 //* Comment ot change this if named username
 interface User {
+  id: number;
+  phoneNumber?: string;
   sub: number;
   name: string;
   email?: string;
@@ -31,6 +33,6 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage',
       partialize: (state) => ({ token: state.token, user: state.user }),
-    }
-  )
+    },
+  ),
 );

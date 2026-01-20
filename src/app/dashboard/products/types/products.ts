@@ -10,6 +10,7 @@ export interface Product {
   images: string[];
   image: string;
   totalOrders: number;
+  totalSold: number;
   extraDetails: {
     variants?: VariantItem[];
   };

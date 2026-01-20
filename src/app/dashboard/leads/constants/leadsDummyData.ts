@@ -81,8 +81,12 @@ export const LEAD_TYPE_OPTIONS = [
   { key: 'paid', value: 'عميل مدفوع' },
 ];
 
+export const PAY_STATUS_OPTIONS = [
+  { key: 'paid', value: 'مدفوع' },
+  { key: 'unpaid', value: 'غير مدفوع' },
+];
+
 export const LEAD_SOURCE_OPTIONS = [
-  { key: 'all', value: 'جميع المصادر' },
   { key: 'website', value: 'الموقع الإلكتروني' },
   { key: 'social', value: 'وسائل التواصل الاجتماعي' },
   { key: 'referral', value: 'إحالة' },

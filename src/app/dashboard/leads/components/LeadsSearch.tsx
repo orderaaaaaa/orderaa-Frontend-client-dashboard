@@ -6,6 +6,7 @@ import SearchableSelect from '@/components/ui/SearchableSelect';
 import {
   LEAD_TYPE_OPTIONS,
   LEAD_SOURCE_OPTIONS,
+  PAY_STATUS_OPTIONS,
 } from '../constants/leadsDummyData';
 import debounce from 'lodash/debounce';
 import { StatusSelect } from './ui/StatusSelect';
@@ -14,24 +15,27 @@ interface LeadsSearchProps {
   onSearchChange: (search: string) => void;
   onLeadTypeChange: (type: string) => void;
   onLeadSourceChange: (source: string) => void;
+  onPayStatusChange: (source: string) => void;
 }
 
 export default function LeadsSearch({
   onSearchChange,
   onLeadTypeChange,
   onLeadSourceChange,
+  onPayStatusChange,
 }: LeadsSearchProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [localSearch, setLocalSearch] = useState('');
   const [leadType, setLeadType] = useState('');
   const [leadSource, setLeadSource] = useState('');
+  const [payStatus, setPayStatus] = useState('');
 
   const debouncedSearch = useMemo(
     () =>
       debounce((searchTerm: string) => {
         onSearchChange(searchTerm);
       }, 500),
-    [onSearchChange]
+    [onSearchChange],
   );
 
   const handleSearchChange = useCallback(
@@ -40,7 +44,7 @@ export default function LeadsSearch({
       setLocalSearch(value);
       debouncedSearch(value);
     },
-    [debouncedSearch]
+    [debouncedSearch],
   );
 
   const handleLeadTypeChange = useCallback(
@@ -48,7 +52,7 @@ export default function LeadsSearch({
       setLeadType(value);
       onLeadTypeChange(value);
     },
-    [onLeadTypeChange]
+    [onLeadTypeChange],
   );
 
   const handleLeadSourceChange = useCallback(
@@ -56,7 +60,14 @@ export default function LeadsSearch({
       setLeadSource(value);
       onLeadSourceChange(value);
     },
-    [onLeadSourceChange]
+    [onLeadSourceChange],
+  );
+  const handlePayStatusChange = useCallback(
+    (value: string) => {
+      setPayStatus(value);
+      onPayStatusChange(value);
+    },
+    [onPayStatusChange],
   );
 
   useEffect(() => {
@@ -114,14 +125,14 @@ export default function LeadsSearch({
       {/* Filters */}
       {isFilterOpen && (
         <div className="px-4 md:px-6 pb-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-1/2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-1/2">
             {/* Lead Type */}
             <div className="space-y-1">
               <SearchableSelect
-                value={leadType}
-                onChange={handleLeadTypeChange}
-                options={LEAD_TYPE_OPTIONS}
-                placeholder="نوع الشارة"
+                value={leadSource}
+                onChange={handleLeadSourceChange}
+                options={LEAD_SOURCE_OPTIONS}
+                placeholder="جميع المصادر"
                 widthClass="w-full"
                 clearable
                 triggerClassName="w-full border border-gray-300 rounded-lg py-2.5 px-3 !text-sm font-semibold bg-white text-right"
@@ -131,11 +142,21 @@ export default function LeadsSearch({
             {/* Lead Source */}
             <div className="space-y-1">
               <StatusSelect
-                value={leadSource}
-                onChange={handleLeadSourceChange}
+                value={leadType}
+                onChange={handleLeadTypeChange}
+                placeholder="نوع الشارة"
                 triggerClassName="w-full border border-gray-300 !rounded-lg !py-2 h-full px-3 !text-sm font-semibold bg-white text-right"
               />
             </div>
+            <SearchableSelect
+              value={payStatus}
+              onChange={handlePayStatusChange}
+              options={PAY_STATUS_OPTIONS}
+              placeholder="حالة الدفع"
+              widthClass="w-full"
+              clearable
+              triggerClassName="w-full border border-gray-300 rounded-lg py-2.5 px-3 !text-sm font-semibold bg-white text-right"
+            />
           </div>
         </div>
       )}

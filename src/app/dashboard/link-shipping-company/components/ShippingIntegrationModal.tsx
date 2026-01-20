@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { X, Truck, ChevronDown, ChevronUp, Play } from 'lucide-react';
 import { useShippingQuery } from '../hooks/useShippingQuery';
 import { Button } from '@/components/ui/button';
+import Input from '@/components/ui/Input';
 import { steps } from '../constants/steps';
-import { LiaEyeSlashSolid, LiaEyeSolid } from 'react-icons/lia';
 import { If, Then } from 'react-if';
 import { ShippingConfig } from '../types/shipping';
+import { LiaEyeSlashSolid, LiaEyeSolid } from 'react-icons/lia';
 
 interface Props {
   providerId: string;
@@ -19,45 +20,42 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
   isOpen,
   onClose,
 }) => {
-  // Pass providerId to the hook
   const { config, saveConfig, updateConfig, isSaving } =
     useShippingQuery(providerId);
-  const [jsonInput, setJsonInput] = useState('');
-  const [error, setError] = useState<string>('');
-  const [showVideo, setShowVideo] = useState(false);
+
+  const [authKey, setAuthKey] = useState('');
+  const [clientCode, setClientCode] = useState('');
   const [showAuthKey, setShowAuthKey] = useState(false);
   const [showClientCode, setShowClientCode] = useState(false);
+  const [error, setError] = useState<string>('');
+  const [showVideo, setShowVideo] = useState(false);
 
-  // Removed the setJsonInput call so the input remains empty for new data
   useEffect(() => {
     if (!isOpen) {
-      setJsonInput('');
+      setAuthKey('');
+      setClientCode('');
       setError('');
     }
   }, [isOpen]);
 
-  const validateAndParseJson = (input: string) => {
-    try {
-      const parsed = JSON.parse(input);
-      if (!parsed.authentication_key || !parsed.main_client_code) {
-        throw new Error('البيانات غير مكتملة. (authKey or clientCode missing)');
-      }
-      return parsed;
-    } catch (e) {
-      throw new Error('صيغة JSON غير صحيحة');
-    }
-  };
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async () => {
     setError('');
 
-    try {
-      const parsed = validateAndParseJson(jsonInput);
+    // Validation
+    if (!authKey.trim()) {
+      setError('يرجى إدخال مفتاح المصادقة (Authentication Key)');
+      return;
+    }
 
+    if (!clientCode.trim()) {
+      setError('يرجى إدخال رمز العميل (Client Code)');
+      return;
+    }
+
+    try {
       const basePayload = {
-        authKey: parsed.authentication_key,
-        clientCode: parsed.main_client_code?.toString(),
+        authKey: authKey.trim(),
+        clientCode: clientCode.trim(),
         isActive: true,
       };
 
@@ -73,10 +71,17 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
         });
       }
 
-      setJsonInput('');
+      setAuthKey('');
+      setClientCode('');
       onClose();
     } catch (err: any) {
       setError(err.message || 'حدث خطأ أثناء الحفظ');
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !isSaving && authKey.trim() && clientCode.trim()) {
+      handleSave();
     }
   };
 
@@ -287,35 +292,41 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
               </Then>
             </If>
 
-            {/* Form - Always empty now for new JSON input */}
-            <form onSubmit={handleSave} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  بيانات الربط (JSON)
-                </label>
-                <textarea
-                  value={jsonInput}
-                  onChange={(e) => setJsonInput(e.target.value)}
-                  placeholder='{"authentication_key": "...", "main_client_code": ...}'
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all font-mono text-sm h-48 bg-gray-50"
-                  dir="ltr"
-                  disabled={isSaving}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  قم بلصق كود JSON كاملاً هنا لتحديث البيانات
-                </p>
-              </div>
+            {/* Input fields */}
+            <div className="space-y-4">
+              <Input
+                label="مفتاح المصادقة (Authentication Key)"
+                type="text"
+                placeholder="أدخل مفتاح المصادقة"
+                value={authKey}
+                onChange={(e) => setAuthKey(e.target.value)}
+                onKeyDown={handleKeyDown}
+                disabled={isSaving}
+                clearable
+                onClear={() => setAuthKey('')}
+              />
+
+              <Input
+                label="رمز العميل (Client Code)"
+                type="text"
+                placeholder="أدخل رمز العميل"
+                value={clientCode}
+                onChange={(e) => setClientCode(e.target.value)}
+                onKeyDown={handleKeyDown}
+                disabled={isSaving}
+                clearable
+                onClear={() => setClientCode('')}
+              />
 
               <div className="flex gap-3 pt-4 border-t border-gray-100">
                 <Button
-                  type="submit"
-                  disabled={isSaving || !jsonInput.trim()}
+                  onClick={handleSave}
+                  disabled={isSaving || !authKey.trim() || !clientCode.trim()}
                   className="flex-1 bg-primary hover:bg-[#4A1CB8] h-12 text-lg"
                 >
                   {isSaving ? 'جاري التفعيل...' : 'تفعيل الربط'}
                 </Button>
                 <Button
-                  type="button"
                   variant="outline"
                   onClick={onClose}
                   className="flex-1 h-12 text-lg"
@@ -323,7 +334,7 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                   إلغاء
                 </Button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>

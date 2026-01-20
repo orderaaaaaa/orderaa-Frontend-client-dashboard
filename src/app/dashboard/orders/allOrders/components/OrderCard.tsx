@@ -291,13 +291,13 @@ export default function OrderCard({
               </div>
             )}
             {cancelNotes && (
-              <div className="flex items-start gap-2">
+              <div className="flex items-start gap-2 w-full">
                 <FileText
-                  className="w-[18px] h-[18px]"
+                  className="w-[18px] h-[18px] shrink-0"
                   style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
                 />
-                <span className="text-base font-medium text-red-600">
-                  {' '}
+
+                <span className="text-base font-medium text-red-600 min-w-0 overflow-hidden text-ellipsis line-clamp-3 break-words">
                   ملاحظات الالغاء: {cancelNotes}
                 </span>
               </div>
