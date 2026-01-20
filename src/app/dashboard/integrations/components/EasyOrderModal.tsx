@@ -85,14 +85,14 @@ const EasyOrderModal = ({
 
   if (!isOpen) return null;
 
+  const defaultWebhookUrl = getDefaultWebhookUrl(merchantId);
+
   const handleCopyUrl = () => {
-    const urlToCopy = customWebhookUrl.trim();
+    const urlToCopy = customWebhookUrl.trim() || defaultWebhookUrl;
     navigator.clipboard.writeText(urlToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
-  const defaultWebhookUrl = getDefaultWebhookUrl(merchantId);
 
   const handleApiSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,6 +111,9 @@ const EasyOrderModal = ({
         toast.success('تم انشاء ربط API بنجاح');
       }
       queryClient.invalidateQueries({ queryKey: ['integration-configs'] });
+      if (existingConfig?.webhookSecret) {
+        onClose();
+      }
     } catch (err: any) {
       setError('خطأ في حفظ مفتاح API');
     } finally {
@@ -123,19 +126,21 @@ const EasyOrderModal = ({
     setError('');
     setIsLoading(true);
     try {
-      const finalUrl = customWebhookUrl.trim();
+      const finalUrl = customWebhookUrl.trim() || defaultWebhookUrl;
       if (existingConfig) {
         await webhookApi.updateConfig({
           webhookUrl: finalUrl,
           webhookSecret: webhookSecret.trim(),
         });
+        toast.success('تم تحديث اعدادات الـ Webhook بنجاح');
       } else {
         await webhookApi.createConfig({
           webhookUrl: finalUrl,
           webhookSecret: webhookSecret.trim(),
         });
+        toast.success('تم حفظ اعدادات الـ Webhook بنجاح');
       }
-      // Success feedback
+      setShowWebhookDropdown(false);
     } catch (err: any) {
       setError('خطأ في حفظ الـ Webhook');
     } finally {
