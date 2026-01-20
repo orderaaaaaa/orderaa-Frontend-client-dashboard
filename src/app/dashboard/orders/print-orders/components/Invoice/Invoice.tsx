@@ -149,7 +149,7 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
           <div className="grid grid-cols-[auto_1fr] items-start gap-0.5">
             <LiaInfoCircleSolid className="size-2.5" />
             <p className="text-[7px] font-bold text-start leading-tight">
-              {data.packagingNotes || labels.packagingWarning}
+              {data.packagingNotes || ''}
             </p>
           </div>
         </div>
@@ -169,7 +169,7 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
           <div className="grid grid-cols-2 justify-between border-b border-gray-300 pb-0.5">
             <span>{labels.allowOpenShipment}</span>
             <span className="font-bold text-end">
-              {data.shipping.allowOpenShipment ? labels.yes : labels.no}
+              {storeInfo.canOpenShipment ? labels.yes : labels.no}
             </span>
           </div>
           <div className="grid grid-cols-2 justify-between border-b border-gray-300 pb-0.5">
@@ -189,7 +189,7 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
           <div className="grid grid-cols-[auto_1fr] items-start gap-0.5 p-1">
             <LiaInfoCircleSolid className="size-2.5" />
             <p className="text-[7px] font-bold text-start leading-tight">
-              {data.shippingNotes || labels.packagingWarning}
+              {data.shippingNotes || ''}
             </p>
           </div>
 

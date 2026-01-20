@@ -20,6 +20,7 @@ export function useInvoiceSettings() {
       : [],
     contactQRValue: settings?.url || 'https://orderaa.com',
     defaultReturnShippingCost: settings?.defaultReturnShippingCost,
+    canOpenShipment: settings?.canOpenShipment,
   };
 
   const language: InvoiceLanguage =

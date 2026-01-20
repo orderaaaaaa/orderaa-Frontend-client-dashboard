@@ -8,6 +8,7 @@ export interface InvoiceStoreInfo {
   phoneNumbers: string[];
   contactQRValue: string;
   defaultReturnShippingCost?: number;
+  canOpenShipment?: boolean;
 }
 
 export interface InvoiceCustomer {
