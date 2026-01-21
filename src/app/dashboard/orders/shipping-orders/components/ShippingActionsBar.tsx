@@ -52,7 +52,7 @@ export function ShippingActionsBar({
         <div className="pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
           <Button
             variant="outline"
-            className="grid grid-cols-[auto_1fr] items-center gap-2 px-6 py-2 rounded-3xl bg-primary border-primary text-white hover:bg-[#4B1BC4] transition-colors cursor-pointer whitespace-nowrap h-10 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="grid grid-cols-[auto_1fr] items-center gap-2 px-6 py-2 rounded-3xl bg-primary border-primary text-white hover:bg-[#4B1BC4] transition-colors cursor-pointer whitespace-nowrap h-10 disabled:opacity-50 disabled:cursor-not-allowed hover:text-white"
             onClick={onShip}
             disabled={isDisabled}
           >

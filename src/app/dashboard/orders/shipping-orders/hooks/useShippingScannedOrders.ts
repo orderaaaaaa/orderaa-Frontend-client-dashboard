@@ -6,15 +6,11 @@ export interface ShippingScannedOrder {
   id: number;
   code: string;
   scannedAt: Date;
-  shipmentPickupCode: string | null;
-  pickupInvoice: string | null;
 }
 
 export interface AddShippingOrderInput {
   id: number;
   code: string;
-  shipmentPickupCode: string | null;
-  pickupInvoice: string | null;
 }
 
 export interface UseShippingScannedOrdersReturn {
@@ -52,8 +48,6 @@ export function useShippingScannedOrders(): UseShippingScannedOrdersReturn {
           id: order.id,
           code: order.code,
           scannedAt: new Date(),
-          shipmentPickupCode: order.shipmentPickupCode,
-          pickupInvoice: order.pickupInvoice,
         },
         ...prev,
       ]);

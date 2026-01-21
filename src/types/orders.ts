@@ -295,6 +295,7 @@ export interface FilterOrdersDto {
   newFirst?: boolean;
   orderByDirection?: 'asc' | 'desc';
   isPrinted?: boolean;
+  shippingCompany?: string;
 }
 
 // Pagination Meta

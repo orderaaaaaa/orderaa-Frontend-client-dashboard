@@ -75,8 +75,12 @@ export function ShippingOrdersContent() {
     usePrintOrderStatistics();
 
   const apiFilters = useMemo(() => {
-    return buildApiFiltersFromUrlState(filters);
-  }, [filters]);
+    const baseFilters = buildApiFiltersFromUrlState(filters);
+    if (selectedShippingCompany) {
+      return { ...baseFilters, shippingCompany: selectedShippingCompany };
+    }
+    return baseFilters;
+  }, [filters, selectedShippingCompany]);
 
   const orderDetailsFilterParams = useMemo(() => {
     const params = new URLSearchParams();
@@ -177,8 +181,6 @@ export function ShippingOrdersContent() {
         addOrder({
           id: order.id,
           code: barcode,
-          shipmentPickupCode: order.shipmentPickupCode ?? null,
-          pickupInvoice: order.pickupInvoice ?? null,
         });
         playSuccessSound();
         setFlashingCode(barcode);
@@ -210,21 +212,10 @@ export function ShippingOrdersContent() {
   const handleShipScannedOrders = useCallback(async () => {
     if (scannedOrders.length === 0) return;
 
-    const ordersWithMissingData = scannedOrders.filter(
-      (order) => !order.shipmentPickupCode || !order.pickupInvoice
-    );
-
-    if (ordersWithMissingData.length > 0) {
-      toast.error('بعض الطلبات لا تحتوي على بيانات الشحن المطلوبة');
-      return;
-    }
-
     setIsActionLoading(true);
     try {
       await submitForApprovalMutation({
         orderIds: scannedOrders.map((o) => o.id),
-        shipmentPickupCode: scannedOrders[0].shipmentPickupCode!,
-        pickupInvoice: scannedOrders[0].pickupInvoice!,
       });
       toast.success('تم إرسال الطلبات للشحن بنجاح');
       clearOrders();
@@ -239,33 +230,10 @@ export function ShippingOrdersContent() {
   const handleShipSelectedOrders = useCallback(async () => {
     if (selectedOrders.length === 0) return;
 
-    if (!selectedShippingCompany) {
-      toast.error('يرجى اختيار شركة الشحن أولاً');
-      return;
-    }
-
     setIsActionLoading(true);
     try {
-      const ordersWithShippingData = await Promise.all(
-        selectedOrders.map((order) =>
-          getOrderByCodeWithShipping(order.code, selectedShippingCompany)
-        )
-      );
-
-      const ordersWithMissingData = ordersWithShippingData.filter(
-        (order) => !order.shipmentPickupCode || !order.pickupInvoice
-      );
-
-      if (ordersWithMissingData.length > 0) {
-        toast.error('بعض الطلبات لا تحتوي على بيانات الشحن المطلوبة');
-        setIsActionLoading(false);
-        return;
-      }
-
       await submitForApprovalMutation({
-        orderIds: ordersWithShippingData.map((o) => o.id),
-        shipmentPickupCode: ordersWithShippingData[0].shipmentPickupCode!,
-        pickupInvoice: ordersWithShippingData[0].pickupInvoice!,
+        orderIds: selectedOrders.map((o) => o.id),
       });
       toast.success('تم إرسال الطلبات للشحن بنجاح');
       clearSelections();
@@ -277,7 +245,6 @@ export function ShippingOrdersContent() {
     }
   }, [
     selectedOrders,
-    selectedShippingCompany,
     submitForApprovalMutation,
     clearSelections,
     setSelectMode,
@@ -499,7 +466,7 @@ export function ShippingOrdersContent() {
           onShip={handleShipSelectedOrders}
           position="fixed"
           isLoading={isActionLoading}
-          selectedCount={selectedOrders.length}
+          selectedCount={selectAllMatchingFilters ? totalOrders : selectedOrders.length}
         />
       )}
       {showBackToTop && (

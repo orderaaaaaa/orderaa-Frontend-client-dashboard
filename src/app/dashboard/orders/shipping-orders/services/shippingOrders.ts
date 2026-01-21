@@ -3,8 +3,6 @@ import { Order } from '@/types/orders';
 
 export interface SubmitForApprovalRequest {
   orderIds: number[];
-  shipmentPickupCode: string;
-  pickupInvoice: string;
 }
 
 export interface SubmitForApprovalResponse {

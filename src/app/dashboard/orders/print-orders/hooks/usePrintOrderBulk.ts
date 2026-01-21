@@ -22,7 +22,8 @@ export function usePrintOrderBulk({
         if (checked) {
           setSelectedOrderIds([orderId]);
         } else {
-          setSelectedOrderIds([]);
+          const allOrderIds = orders.map((order) => order.id);
+          setSelectedOrderIds(allOrderIds.filter((id) => id !== orderId));
         }
         return;
       }
@@ -35,7 +36,7 @@ export function usePrintOrderBulk({
         }
       });
     },
-    [selectAllMatchingFilters]
+    [selectAllMatchingFilters, orders]
   );
 
   const handleSelectAllToggle = useCallback(() => {

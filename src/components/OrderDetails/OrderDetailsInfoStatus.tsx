@@ -107,7 +107,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-lg text-primary font-bold">سجل الأحداث</h2>
             <p className="border-1 border-primary text-primary w-6 h-6 text-sm text-center rounded-full flex items-center justify-center">
-              {events.length}
+              {events.length -1}
             </p>
           </div>
         </div>

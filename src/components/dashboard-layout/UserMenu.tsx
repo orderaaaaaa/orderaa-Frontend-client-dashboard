@@ -21,11 +21,15 @@ export function UserMenu({
   variant = 'desktop',
 }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const authUser = useAuthStore((state) => state.user);
 
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   const isMobile = variant === 'mobile';
-  //* Comment ot change this if named username
   const displayText = authUser?.name || username || email || 'user';
 
   // Close dropdown when clicking outside
@@ -54,11 +58,10 @@ export function UserMenu({
     }
   };
 
-  // Show loading spinner while user data is loading
-  if (!displayText) {
+  if (!isHydrated || !authUser) {
     return (
       <div className="flex flex-row items-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto" />
+        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mx-auto" />
       </div>
     );
   }

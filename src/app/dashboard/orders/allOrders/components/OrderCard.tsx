@@ -260,7 +260,7 @@ export default function OrderCard({
           </div>
         )}
 
-        {states && states.length > 0 && (
+        {/* {states && states.length > 0 && (
           <div className="flex flex-col gap-2 w-full">
             {states.map((state, index) => (
               <div key={index} className="flex items-start gap-2">
@@ -274,7 +274,7 @@ export default function OrderCard({
               </div>
             ))}
           </div>
-        )}
+        )} */}
 
         {/* Cancel Info */}
         {status === 'CANCELLED' && (cancelReason || cancelNotes) && (
@@ -286,7 +286,7 @@ export default function OrderCard({
                   style={{ strokeWidth: 1.5, color: 'rgba(220,38,38,0.7)' }}
                 />
                 <span className="text-base font-medium text-red-600">
-                  سبب الالغاء: {cancelReason}
+                {cancelReason}
                 </span>
               </div>
             )}
