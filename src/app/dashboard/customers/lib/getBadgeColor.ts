@@ -19,7 +19,7 @@ const STATUS_COLORS: Record<string, string> = {
   WAITING_FOR_PAYMENT: 'bg-[#fff7eb] text-[#ff9800] border border-[#ffefd8]',
   POSTPONED: 'bg-[#fff7eb] text-[#ff9800] border border-[#ffefd8]',
   PARTIAL_DELIVERY: 'bg-[#fff7eb] text-[#ff9800] border border-[#ffefd8]',
-  EDIT_REJECTED: 'bg-[#fef0ef] text-[#ff0004] border border-[#fcd4d1]',
+  EDIT_REJECTED: 'bg-[#e0f7fa] text-[#0097a7] border border-[#b2ebf2]',
 
   CANCELLED: 'bg-[#fef0ef] text-[#ff0004] border border-[#fcd4d1]',
   STOPPED: 'bg-[#fef0ef] text-[#ff0004] border border-[#fcd4d1]',
