@@ -1,14 +1,16 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Menu, Search } from 'lucide-react';
-import { LiaSearchSolid, LiaTimesSolid } from 'react-icons/lia';
+import { LiaSearchSolid, LiaTimesSolid, LiaSyncSolid } from 'react-icons/lia';
 import Input from '../ui/Input';
 import { UserMenu } from './UserMenu';
 import { UserMenuKey } from '@/hooks/useSidebar';
 import { useAuthStore } from '@/store/authStore';
 import { useDebounce } from '@/utils/debounce';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import clsx from 'clsx';
 
 interface TopBarProps {
@@ -30,7 +32,9 @@ export function TopBar({
 }: TopBarProps) {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const authUser = useAuthStore((state) => state.user);
+  const queryClient = useQueryClient();
 
   // Use ref to store onSearch to avoid triggering effect when callback reference changes
   const onSearchRef = useRef(onSearch);
@@ -56,6 +60,30 @@ export function TopBar({
     setSearchQuery('');
     onClearSearch();
   };
+
+  const handleRefreshStatistics = useCallback(async () => {
+    setIsRefreshing(true);
+    await queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.ORDER_STATISTICS],
+    });
+    await queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.PRINT_ORDER_STATISTICS],
+    });
+    setIsRefreshing(false);
+  }, [queryClient]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORDER_STATISTICS],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.PRINT_ORDER_STATISTICS],
+      });
+    }, 30000);
+
+    return () => clearInterval(intervalId);
+  }, [queryClient]);
 
   // ✅ Update the browser top bar color
   useEffect(() => {
@@ -102,10 +130,21 @@ export function TopBar({
             <Search className="h-5 w-5" />
           </Button>
         </div>
-        {/* ✅ Mobile: User dropdown */}
-        <div className="lg:hidden">
+        {/* ✅ Mobile: Refresh + User dropdown */}
+        <div className="lg:hidden flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white hover:bg-white/20 h-10 w-10"
+            onClick={handleRefreshStatistics}
+            disabled={isRefreshing}
+            aria-label="تحديث الإحصائيات"
+          >
+            <LiaSyncSolid
+              className={clsx('h-5 w-5', isRefreshing && 'animate-spin')}
+            />
+          </Button>
           <UserMenu
-            //* Comment ot change this if named username
             username={authUser?.name || username}
             email={authUser?.email}
             onUserAction={onUserAction}
@@ -202,8 +241,19 @@ export function TopBar({
         </div>
 
         <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-gray-600 hover:bg-gray-100 h-10 w-10 rounded-full"
+            onClick={handleRefreshStatistics}
+            disabled={isRefreshing}
+            aria-label="تحديث الإحصائيات"
+          >
+            <LiaSyncSolid
+              className={clsx('h-5 w-5', isRefreshing && 'animate-spin')}
+            />
+          </Button>
           <UserMenu
-            //* Comment ot change this if named username
             username={authUser?.name || username}
             email={authUser?.email}
             onUserAction={onUserAction}
