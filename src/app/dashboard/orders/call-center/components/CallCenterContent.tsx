@@ -34,7 +34,7 @@ import {
 } from '../../print-orders/hooks';
 import OrdersSelectionHeader from '../../components/OrdersSelectionHeader';
 import PageTaps from '../../components/pageTaps';
-import { useDepartment } from '../../hooks';
+import { useDepartment, useDefaultStatusByPath } from '../../hooks';
 
 export function CallCenterContent() {
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState('');
@@ -42,6 +42,7 @@ export function CallCenterContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const department = useDepartment();
+  const DEFAULT_STATUS = useDefaultStatusByPath();
   const { data: departmentStatuses, isLoading: isDepartmentStatusesLoading } =
     useDepartmentStatusesQuery(department);
 
@@ -62,7 +63,8 @@ export function CallCenterContent() {
   const orderDetailsFilterParams = useMemo(() => {
     const params = new URLSearchParams();
 
-    if (filters.status) params.set('status', filters.status);
+    const statusToUse = filters.status || DEFAULT_STATUS;
+    if (statusToUse) params.set('status', statusToUse);
     if (filters.timePeriod) params.set('period', filters.timePeriod);
 
     if (!filters.localFilters.executionDate) {
@@ -88,7 +90,7 @@ export function CallCenterContent() {
     if (localFilters.address) params.set('address', localFilters.address);
 
     return params.toString();
-  }, [filters]);
+  }, [filters, DEFAULT_STATUS]);
 
   const { page, limit } = filters;
 

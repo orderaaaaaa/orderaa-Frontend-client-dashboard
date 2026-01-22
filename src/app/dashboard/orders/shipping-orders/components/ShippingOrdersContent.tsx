@@ -42,7 +42,7 @@ import {
 import { buildStatisticsCards } from '../constants/statisticsCards';
 import OrdersSelectionHeader from '../../components/OrdersSelectionHeader';
 import PageTaps from '../../components/pageTaps';
-import { useDepartment } from '../../hooks';
+import { useDepartment, useDefaultStatusByPath } from '../../hooks';
 import useShippingCompanies from '@/hooks/useShippingCompanies';
 
 export function ShippingOrdersContent() {
@@ -57,6 +57,7 @@ export function ShippingOrdersContent() {
   const [isScanLoading, setIsScanLoading] = useState(false);
 
   const department = useDepartment();
+  const DEFAULT_STATUS = useDefaultStatusByPath();
   const { shippingCompanies, isLoading: isLoadingShippingCompanies } =
     useShippingCompanies();
   const { data: departmentStatuses, isLoading: isDepartmentStatusesLoading } =
@@ -85,7 +86,8 @@ export function ShippingOrdersContent() {
   const orderDetailsFilterParams = useMemo(() => {
     const params = new URLSearchParams();
 
-    if (filters.status) params.set('status', filters.status);
+    const statusToUse = filters.status || DEFAULT_STATUS;
+    if (statusToUse) params.set('status', statusToUse);
     if (filters.timePeriod) params.set('period', filters.timePeriod);
 
     if (!filters.localFilters.executionDate) {
@@ -111,7 +113,7 @@ export function ShippingOrdersContent() {
     if (localFilters.address) params.set('address', localFilters.address);
 
     return params.toString();
-  }, [filters]);
+  }, [filters, DEFAULT_STATUS]);
 
   const { page, limit } = filters;
 
