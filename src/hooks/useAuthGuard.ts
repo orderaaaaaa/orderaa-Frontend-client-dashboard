@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 import { useAuthStore } from '@/store/authStore';
 
 export function useAuthGuard(requireAuth = true) {
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
+  const user = useAuthStore((state) => state.user);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
+  const logout = useAuthStore((state) => state.logout);
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
@@ -15,12 +18,16 @@ export function useAuthGuard(requireAuth = true) {
 
     if (requireAuth && !token) {
       router.replace('/signin');
+    } else if (requireAuth && token && !user) {
+      toast.error('انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى');
+      logout();
+      router.replace('/signin');
     } else if (!requireAuth && token) {
       router.replace('/dashboard');
     } else {
       setIsChecking(false);
     }
-  }, [token, router, requireAuth, hasHydrated]);
+  }, [token, user, router, requireAuth, hasHydrated, logout]);
 
-  return { isAuthenticated: !!token, isChecking };
+  return { isAuthenticated: !!token && !!user, isChecking };
 }
