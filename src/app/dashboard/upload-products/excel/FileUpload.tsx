@@ -91,7 +91,7 @@ const FileUpload = () => {
         results.detectedFormat
       );
 
-      const merchantId = getMerchantIdFromUser(user.sub);
+      const merchantId = user.merchantId ?? user.id;
 
       const backendResponse = await importBulkOrders({
         format: results.detectedFormat,

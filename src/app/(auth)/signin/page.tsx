@@ -34,12 +34,12 @@ export default function LoginPage() {
   const onSubmit = async (values: SignInSchema) => {
     setError('');
     try {
-      const data = (await signIn(values)) as any;
+      const data = await signIn(values);
 
       if (data?.access_token) {
         setToken(data.access_token);
 
-        const userData = (await fetchMe(data.access_token)) as any;
+        const userData = await fetchMe(data.access_token);
 
         setUser(userData);
 
@@ -47,8 +47,9 @@ export default function LoginPage() {
       } else {
         setError('خطأ في بيانات تسجيل الدخول.');
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'حدث خطأ أثناء تسجيل الدخول.');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || 'حدث خطأ أثناء تسجيل الدخول.');
     }
   };
 

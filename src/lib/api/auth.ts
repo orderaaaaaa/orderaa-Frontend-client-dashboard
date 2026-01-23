@@ -1,4 +1,5 @@
 import api from '.';
+import type { User } from '@/store/authStore';
 
 export interface SignUpPayload {
   username: string;
@@ -16,20 +17,23 @@ export interface SignInPayload {
   password: string;
 }
 
+export interface SignInResponse {
+  access_token: string;
+}
+
 export async function signUp(payload: SignUpPayload) {
   const { data } = await api.post('/auth/signup', payload);
 
   return data;
 }
 
-export async function signIn(payload: SignInPayload) {
-  const { data } = await api.post('/auth/signin', payload);
-
+export async function signIn(payload: SignInPayload): Promise<SignInResponse> {
+  const { data } = await api.post<SignInResponse>('/auth/signin', payload);
   return data;
 }
 
-export async function fetchMe(token: string) {
-  const { data } = await api.get('/auth/me', {
+export async function fetchMe(token: string): Promise<User> {
+  const { data } = await api.get<User>('/auth/me', {
     headers: {
       Authorization: `Bearer ${token}`,
     },

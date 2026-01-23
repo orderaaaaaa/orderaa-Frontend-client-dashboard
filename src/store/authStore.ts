@@ -1,17 +1,19 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-//* Comment ot change this if named username
 interface User {
   id: number;
+  entityId?: number;
+  entityType?: string;
   phoneNumber?: string;
-  sub: number;
   name: string;
   email?: string;
   role: string;
   merchantId?: number;
-  employeeId?: number;
+  employeeId?: number | null;
 }
+
+export type { User };
 
 interface AuthState {
   token: string | null;
