@@ -22,7 +22,7 @@ export function useAuthGuard(requireAuth = true) {
       toast.error('انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى');
       logout();
       router.replace('/signin');
-    } else if (!requireAuth && token) {
+    } else if (!requireAuth && token && user) {
       router.replace('/dashboard');
     } else {
       setIsChecking(false);
