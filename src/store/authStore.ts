@@ -16,9 +16,11 @@ interface User {
 interface AuthState {
   token: string | null;
   user: User | null;
+  hasHydrated: boolean;
   setToken: (token: string) => void;
   setUser: (user: User) => void;
   logout: () => void;
+  setHasHydrated: (state: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -26,13 +28,18 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       token: null,
       user: null,
+      hasHydrated: false,
       setToken: (token) => set({ token }),
       setUser: (user) => set({ user }),
       logout: () => set({ token: null, user: null }),
+      setHasHydrated: (state) => set({ hasHydrated: state }),
     }),
     {
       name: 'auth-storage',
       partialize: (state) => ({ token: state.token, user: state.user }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     },
   ),
 );

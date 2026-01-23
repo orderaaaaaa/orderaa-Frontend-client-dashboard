@@ -21,13 +21,9 @@ export function UserMenu({
   variant = 'desktop',
 }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const authUser = useAuthStore((state) => state.user);
-
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
 
   const isMobile = variant === 'mobile';
   const displayText = authUser?.name || username || email || 'user';
@@ -58,7 +54,7 @@ export function UserMenu({
     }
   };
 
-  if (!isHydrated || !authUser) {
+  if (!hasHydrated) {
     return (
       <div className="flex flex-row items-center">
         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mx-auto" />
