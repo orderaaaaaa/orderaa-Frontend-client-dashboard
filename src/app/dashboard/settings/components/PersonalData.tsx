@@ -72,14 +72,14 @@ export default function PersonalData() {
   );
   const onSubmit = async (data: PersonalDataFormData) => {
     const payload: Partial<{
-      username: string;
+      fullName: string;
       email: string;
       phoneNumber: string;
       governorate: string;
       city: string;
     }> = {};
 
-    if (data.fullName?.trim()) payload.username = data.fullName.trim();
+    if (data.fullName?.trim()) payload.fullName = data.fullName.trim();
     if (data.email?.trim()) payload.email = data.email.trim();
     if (data.phoneNumber?.trim()) payload.phoneNumber = data.phoneNumber.trim();
     if (data.governorate?.trim()) payload.governorate = data.governorate.trim();

@@ -4,7 +4,7 @@ export interface changePasswordPayload {
   confirmPassword: string;
 }
 export interface updateProfilePayload {
-  username?: string;
+  fullName?: string;
   email?: string;
   phoneNumber?: string;
   governorate?: string;
