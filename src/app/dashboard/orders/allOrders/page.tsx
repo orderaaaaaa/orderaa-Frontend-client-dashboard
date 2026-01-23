@@ -33,6 +33,8 @@ import { useBulkOrders } from './hooks/useOrderBulk';
 import { useUpdateOrdersBatch } from './hooks/useUpdateOrdersBatch';
 import { useQueryClient } from '@tanstack/react-query';
 import { useUrlFilters } from '@/hooks/useUrlFilters';
+import { useStatisticsChangeDetection } from '@/hooks/orders/useStatisticsChangeDetection';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import { formatDateForUrl } from '@/utils/urlFilters';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
@@ -177,6 +179,18 @@ function AllOrdersContent() {
   });
 
   const { statistics } = useOrderStatistics();
+
+  const handleStatisticsChange = useCallback(() => {
+    queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.ORDERS],
+    });
+  }, [queryClient]);
+
+  useStatisticsChangeDetection({
+    onStatisticsChange: handleStatisticsChange,
+    enabled: isInitialized,
+  });
+
   const { options } = useFilterOptions();
   const { fetchOrdersForExport } = useFetchOrdersForExport();
 

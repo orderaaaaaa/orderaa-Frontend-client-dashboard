@@ -18,7 +18,10 @@ import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
 import Footer from '@/components/orders/Footer';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { useOrders, useDepartmentStatusesQuery } from '@/services/orders';
+import { useStatisticsChangeDetection } from '@/hooks/orders/useStatisticsChangeDetection';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { useOrderStatistics } from '@/hooks/orders/useOrderStatistics';
 import { useFilterOptions } from '@/hooks/orders/useFilterOptions';
 import { useFilterForm } from '@/hooks/orders/useFilterForm';
@@ -42,6 +45,7 @@ export function CallCenterContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const department = useDepartment();
+  const queryClient = useQueryClient();
   const DEFAULT_STATUS = useDefaultStatusByPath();
   const { data: departmentStatuses, isLoading: isDepartmentStatusesLoading } =
     useDepartmentStatusesQuery(department);
@@ -54,6 +58,7 @@ export function CallCenterContent() {
     updateLocalFilters,
     printStatus,
     setPrintStatus,
+    isInitialized,
   } = usePrintOrdersFilters();
 
   const apiFilters = useMemo(() => {
@@ -102,6 +107,17 @@ export function CallCenterContent() {
   } = useOrders(apiFilters);
 
   const { statistics } = useOrderStatistics();
+
+  const handleStatisticsChange = useCallback(() => {
+    queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.ORDERS],
+    });
+  }, [queryClient]);
+
+  useStatisticsChangeDetection({
+    onStatisticsChange: handleStatisticsChange,
+    enabled: isInitialized,
+  });
 
   const { options } = useFilterOptions();
 
