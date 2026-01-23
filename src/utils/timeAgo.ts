@@ -1,8 +1,6 @@
 function parseDate(dateInput: string | Date): Date {
   if (typeof dateInput === 'string') {
-    // Strip timezone indicator (Z or +/-offset) to treat the date as-is from API
-    const dateWithoutTz = dateInput.replace(/Z$/, '').replace(/[+-]\d{2}:\d{2}$/, '');
-    return new Date(dateWithoutTz);
+    return new Date(dateInput);
   }
   return dateInput;
 }
