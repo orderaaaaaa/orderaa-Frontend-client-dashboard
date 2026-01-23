@@ -20,10 +20,12 @@ import { IoBriefcaseOutline } from 'react-icons/io5';
 import { useGovernoratesQuery, useCitiesQuery } from '@/services/lookups';
 import useUpdateProfile from '../hooks/useUpdateProfile';
 import { transformCityKeyForAPI } from '@/utils';
+import { useAuthStore } from '@/store/authStore';
 
 export default function PersonalData() {
   const { data: governorates = [], isLoading: loadingGovernorates } = useGovernoratesQuery();
-  const { updateProfile, isLoading: isSaving, isSuccess } = useUpdateProfile();
+  const { updateProfile, isLoading: isSaving } = useUpdateProfile();
+  const user = useAuthStore((state) => state.user);
 
   const {
     register,
@@ -35,11 +37,11 @@ export default function PersonalData() {
   } = useForm<PersonalDataFormData>({
     resolver: zodResolver(personalDataSchema),
     defaultValues: {
-      fullName: '',
-      email: '',
-      phoneNumber: '',
-      governorate: '',
-      city: '',
+      fullName: user?.name || '',
+      email: user?.email || '',
+      phoneNumber: user?.phoneNumber || '',
+      governorate: user?.governorate || '',
+      city: user?.city || '',
     },
   });
 
@@ -90,8 +92,16 @@ export default function PersonalData() {
   };
 
   useEffect(() => {
-    if (isSuccess) reset();
-  }, [isSuccess, reset]);
+    if (user) {
+      reset({
+        fullName: user.name || '',
+        email: user.email || '',
+        phoneNumber: user.phoneNumber || '',
+        governorate: user.governorate || '',
+        city: user.city || '',
+      });
+    }
+  }, [user, reset]);
 
   return (
     <div className="bg-white rounded-lg p-6" style={{ direction: 'rtl' }}>

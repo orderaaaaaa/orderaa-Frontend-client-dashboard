@@ -11,6 +11,15 @@ interface User {
   role: string;
   merchantId?: number;
   employeeId?: number | null;
+  createdAt?: string;
+  updatedAt?: string;
+  isVerified?: boolean;
+  otp?: string | null;
+  otpExpiresAt?: string | null;
+  accessLevel?: string;
+  department?: string;
+  governorate?: string | null;
+  city?: string | null;
 }
 
 export type { User };

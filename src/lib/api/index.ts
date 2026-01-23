@@ -31,9 +31,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('auth-storage');
+    const isAuthEndpoint = error.config?.url?.startsWith('/auth/');
 
+    if (error.response?.status === 401 && !isAuthEndpoint) {
+      localStorage.removeItem('auth-storage');
       window.location.href = '/signin';
     }
 
