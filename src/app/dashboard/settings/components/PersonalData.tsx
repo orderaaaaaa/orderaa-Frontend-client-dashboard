@@ -12,11 +12,10 @@ import SearchableSelect from '@/components/ui/SearchableSelect';
 import {
   LiaBuilding,
   LiaPhoneSolid,
-  LiaShieldAltSolid,
+  LiaUserSolid,
   LiaUserEditSolid,
+  LiaEnvelope,
 } from 'react-icons/lia';
-import { CiAt } from 'react-icons/ci';
-import { IoBriefcaseOutline } from 'react-icons/io5';
 import { useGovernoratesQuery, useCitiesQuery } from '@/services/lookups';
 import useUpdateProfile from '../hooks/useUpdateProfile';
 import { transformCityKeyForAPI } from '@/utils';
@@ -103,212 +102,126 @@ export default function PersonalData() {
     }
   }, [user, reset]);
 
+  const inputClassName =
+    'text-base text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-1 focus:ring-primary transition-colors';
+
+  const selectWrapperClassName =
+    '[&>div]:w-full [&>div>button]:h-12 [&>div>button]:px-4 [&>div>button]:rounded-lg [&>div>button]:bg-gray-50 [&>div>button]:border [&>div>button]:border-gray-200 [&>div>button]:text-right [&>div>button]:text-base [&>div>button]:text-gray-900 [&>div>button]:justify-between [&>div>button]:items-center [&>div>button>span]:text-right [&>div>button>span:empty]:text-gray-400 [&>div>button:hover]:border-primary [&>div>button:hover]:bg-gray-50 [&>div>button]:focus:outline-none [&>div>button]:focus:border-primary [&>div>button]:focus:ring-1 [&>div>button]:focus:ring-primary [&>div>button]:transition-colors';
+
   return (
-    <div className="bg-white rounded-lg p-6" style={{ direction: 'rtl' }}>
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
-        <div className=" p-3 bg-[#5D24E114] rounded flex items-center justify-center">
-          <LiaUserEditSolid className="w-7 h-7 text-primary" />
+    <div className="bg-white rounded-xl p-6 shadow-sm" dir="rtl">
+      <div className="flex items-center gap-3 mb-8">
+        <div className="p-3 bg-primary/10 rounded-lg">
+          <LiaUserEditSolid className="w-6 h-6 text-primary" />
         </div>
-        <h2 className="text-2xl font-medium text-right">البيانات الشخصية</h2>
+        <h2 className="text-xl font-semibold text-gray-900">البيانات الشخصية</h2>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Full Name - Right Column */}
-          <div className="flex flex-col items-end gap-4">
-            <div
-              className="w-full flex items-center gap-2"
-              style={{
-                direction: 'rtl',
-                justifyContent: 'flex-start',
-                width: '100%',
-                alignItems: 'center',
-              }}
-            >
-              <IoBriefcaseOutline className="w-6 h-6 text-primary flex-shrink-0" />
-              <span
-                className="text-base md:text-xl font-medium text-right"
-                style={{ textAlign: 'right' }}
-              >
-                أدخل الاسم الكامل
-              </span>
-            </div>
-            <div className="w-full">
-              <Input
-                label=""
-                name="fullName"
-                type="text"
-                placeholder="أدخل الاسم الكامل"
-                register={register}
-                error={errors.fullName?.message}
-                className="!h-[46px] !px-4 !py-0 rounded-sm bg-[rgba(234,234,234,0.25)] !border-black/16 text-right text-base font-normal text-black placeholder:text-black/60 placeholder:font-medium"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <LiaUserSolid className="w-5 h-5 text-primary" />
+              <span>الاسم الكامل</span>
+            </label>
+            <Input
+              label=""
+              name="fullName"
+              type="text"
+              placeholder="أدخل الاسم الكامل"
+              register={register}
+              error={errors.fullName?.message}
+              className={inputClassName}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <LiaPhoneSolid className="w-5 h-5 text-primary" />
+              <span>رقم الهاتف</span>
+            </label>
+            <Input
+              label=""
+              name="phoneNumber"
+              type="text"
+              placeholder="01xxxxxxxxx"
+              register={register}
+              error={errors.phoneNumber?.message}
+              className={inputClassName}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <LiaEnvelope className="w-5 h-5 text-primary" />
+              <span>البريد الإلكتروني</span>
+            </label>
+            <Input
+              label=""
+              name="email"
+              type="email"
+              placeholder="example@email.com"
+              register={register}
+              error={errors.email?.message}
+              className={inputClassName}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <LiaBuilding className="w-5 h-5 text-primary" />
+              <span>المحافظة</span>
+            </label>
+            <div className={selectWrapperClassName}>
+              <SearchableSelect
+                value={governorate || ''}
+                onChange={(v) => {
+                  setValue('governorate', v, { shouldValidate: true });
+                  if (v) setValue('city', '');
+                }}
+                options={governorates}
+                placeholder={loadingGovernorates ? 'جاري التحميل...' : 'اختر المحافظة'}
+                disabled={loadingGovernorates}
+                widthClass="w-full"
               />
             </div>
           </div>
 
-          {/* Phone Number - Left Column */}
-          <div className="flex flex-col items-end gap-4">
-            <div
-              className="w-full flex items-center gap-2"
-              style={{
-                direction: 'rtl',
-                justifyContent: 'flex-start',
-                width: '100%',
-                alignItems: 'center',
-              }}
-            >
-              <LiaPhoneSolid className="w-6 h-6 text-primary flex-shrink-0" />
-              <span
-                className="text-base md:text-xl font-medium text-right"
-                style={{ textAlign: 'right' }}
-              >
-                رقم الهاتف
-              </span>
-            </div>
-            <div className="w-full">
-              <Input
-                label=""
-                name="phoneNumber"
-                type="text"
-                placeholder="رقم الهاتف"
-                register={register}
-                error={errors.phoneNumber?.message}
-                className="!h-[46px] !px-4 !py-0 rounded-sm bg-[rgba(234,234,234,0.25)] !border-black/16 text-right text-base font-normal text-black placeholder:text-black/60 placeholder:font-medium"
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <LiaBuilding className="w-5 h-5 text-primary" />
+              <span>المنطقة</span>
+            </label>
+            <div className={selectWrapperClassName}>
+              <SearchableSelect
+                value={city || ''}
+                onChange={(v) => setValue('city', v, { shouldValidate: true })}
+                options={cityOptions}
+                placeholder={
+                  !governorate
+                    ? 'اختر المحافظة أولاً'
+                    : loadingCities
+                      ? 'جاري التحميل...'
+                      : 'اختر المنطقة'
+                }
+                disabled={!governorate || loadingCities}
+                widthClass="w-full"
               />
-            </div>
-          </div>
-
-          {/* Email - Right Column */}
-          <div className="flex flex-col items-end gap-2">
-            <div
-              className="w-full flex items-center gap-2"
-              style={{
-                direction: 'rtl',
-                justifyContent: 'flex-start',
-                width: '100%',
-                alignItems: 'center',
-              }}
-            >
-              <CiAt className="w-6 h-6 text-primary flex-shrink-0" />
-              <span
-                className="text-base md:text-xl font-medium text-right"
-                style={{ textAlign: 'right' }}
-              >
-                البريد الإلكتروني
-              </span>
-            </div>
-            <div className="w-full">
-              <Input
-                label=""
-                name="email"
-                type="email"
-                placeholder="البريد الإلكتروني"
-                register={register}
-                error={errors.email?.message}
-                className="!h-[46px] !px-4 !py-0 rounded-sm bg-[rgba(234,234,234,0.25)] !border-black/16 text-right text-base font-normal text-black placeholder:text-black/60 placeholder:font-medium"
-              />
-            </div>
-          </div>
-
-          {/* Governorate - Left Column */}
-          <div className="flex flex-col items-end gap-3">
-            <div
-              className="w-full flex items-center gap-2 relative"
-              style={{
-                direction: 'rtl',
-                justifyContent: 'flex-start',
-                width: '100%',
-                alignItems: 'center',
-              }}
-            >
-              <div className="relative">
-                <LiaBuilding className="w-6 h-6 text-primary flex-shrink-0" />
-              </div>
-              <span
-                className="text-base md:text-xl font-medium text-right"
-                style={{ textAlign: 'right' }}
-              >
-                المحافظة
-              </span>
-            </div>
-            <div className="w-full relative">
-              <div className="[&>div]:w-full [&>div>button]:!h-[46px] [&>div>button]:!px-4 [&>div>button]:!py-0 [&>div>button]:!rounded-sm [&>div>button]:!bg-[rgba(234,234,234,0.25)] [&>div>button]:!border-black/16 [&>div>button]:!text-right [&>div>button]:!text-base [&>div>button]:!font-normal [&>div>button]:!text-black [&>div>button]:!border [&>div>button]:!justify-between [&>div>button]:!items-center [&>div>button>span]:!text-right [&>div>button>span]:!text-black [&>div>button>span:empty]:!text-black/60 [&>div>button>span:empty]:!font-medium [&>div>button:hover]:!bg-[rgba(234,234,234,0.25)] [&>div>button]:focus:!outline-none [&>div>button]:focus:!ring-0 [&>div>button>svg]:!left-2 [&>div>button>svg]:!top-1/2 [&>div>button>svg]:!-translate-y-1/2 [&>div>button]:!truncate">
-                <SearchableSelect
-                  value={governorate || ''}
-                  onChange={(v) => {
-                    setValue('governorate', v, { shouldValidate: true });
-                    // Clear city when governorate changes
-                    if (v) {
-                      setValue('city', '');
-                    }
-                  }}
-                  options={governorates}
-                  placeholder={
-                    loadingGovernorates ? 'جاري التحميل...' : 'اختر المحافظة'
-                  }
-                  disabled={loadingGovernorates}
-                  widthClass="w-full"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* City - Right Column */}
-          <div className="flex flex-col items-end gap-3">
-            <div
-              className="w-full flex items-center gap-2 relative"
-              style={{
-                direction: 'rtl',
-                justifyContent: 'flex-start',
-                width: '100%',
-                alignItems: 'center',
-              }}
-            >
-              <div className="relative">
-                <LiaBuilding className="w-6 h-6 text-primary flex-shrink-0" />
-              </div>
-              <span
-                className="text-base md:text-xl font-medium text-right"
-                style={{ textAlign: 'right' }}
-              >
-                المنطقة
-              </span>
-            </div>
-            <div className="w-full relative">
-              <div className="[&>div]:w-full [&>div>button]:!h-[46px] [&>div>button]:!px-4 [&>div>button]:!py-0 [&>div>button]:!rounded-sm [&>div>button]:!bg-[rgba(234,234,234,0.25)] [&>div>button]:!border-black/16 [&>div>button]:!text-right [&>div>button]:!text-base [&>div>button]:!font-normal [&>div>button]:!text-black [&>div>button]:!border [&>div>button]:!justify-between [&>div>button]:!items-center [&>div>button>span]:!text-right [&>div>button>span]:!text-black [&>div>button>span:empty]:!text-black/60 [&>div>button>span:empty]:!font-medium [&>div>button:hover]:!bg-[rgba(234,234,234,0.25)] [&>div>button]:focus:!outline-none [&>div>button]:focus:!ring-0 [&>div>button>svg]:!left-2 [&>div>button>svg]:!top-1/2 [&>div>button>svg]:!-translate-y-1/2 [&>div>button]:!truncate">
-                <SearchableSelect
-                  value={city || ''}
-                  onChange={(v) =>
-                    setValue('city', v, { shouldValidate: true })
-                  }
-                  options={cityOptions}
-                  placeholder={
-                    !governorate
-                      ? 'اختر المحافظة أولاً'
-                      : loadingCities
-                        ? 'جاري التحميل...'
-                        : 'اختر المنطقة'
-                  }
-                  disabled={!governorate || loadingCities}
-                  widthClass="w-full"
-                />
-              </div>
             </div>
           </div>
         </div>
 
-        {/* Save Button */}
-        <div className="mt-6 flex justify-end">
+        <div className="mt-8 flex justify-start">
           <button
             type="submit"
             disabled={!hasAnyValue || isSaving}
-            className={`px-12 py-2 text-lg rounded-lg font-medium transition-colors ${hasAnyValue && !isSaving
-                ? 'bg-primary text-white cursor-pointer'
-                : 'bg-[#c4c4c4] text-white cursor-not-allowed'
-              }`}
+            className={`px-8 py-2.5 text-base rounded-lg font-medium transition-all duration-200 ${
+              hasAnyValue && !isSaving
+                ? 'bg-primary text-white hover:bg-primary/90 active:scale-[0.98]'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
           >
-            {isSaving ? 'جاري الحفظ...' : 'حفظ التغيرات'}
+            {isSaving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
           </button>
         </div>
       </form>

@@ -9,8 +9,7 @@ import {
 } from '@/schemas/accountSecurity.schema';
 import Input from '@/components/ui/Input';
 import PasswordStrengthIndicator from '@/components/ui/PasswordStrengthIndicator';
-import { LiaLockSolid } from 'react-icons/lia';
-import { FaShieldAlt } from 'react-icons/fa';
+import { LiaLockSolid, LiaShieldAltSolid } from 'react-icons/lia';
 import useChangePassword from '../hooks/useChangePassword';
 
 export default function AccountSecurity() {
@@ -51,129 +50,82 @@ export default function AccountSecurity() {
     if (isSuccess) reset();
   }, [isSuccess, reset]);
 
+  const inputClassName =
+    'text-base text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-1 focus:ring-primary transition-colors';
+
   return (
-    <div className="bg-white rounded-lg p-6" style={{ direction: 'rtl' }}>
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
-        <div className="p-4 bg-[#5D24E114] rounded flex items-center justify-center relative">
-          <FaShieldAlt className="w-5 h-5 text-primary" />
+    <div className="bg-white rounded-xl p-6 shadow-sm" dir="rtl">
+      <div className="flex items-center gap-3 mb-8">
+        <div className="p-3 bg-primary/10 rounded-lg">
+          <LiaShieldAltSolid className="w-6 h-6 text-primary" />
         </div>
-        <h2 className="text-2xl font-medium text-right">امان الحساب</h2>
+        <h2 className="text-xl font-semibold text-gray-900">أمان الحساب</h2>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="flex flex-col gap-6  md:w-[85%]">
-          {/* Old Password Field */}
-          <div className="flex flex-col items-end gap-4">
-            <div
-              className="w-full flex items-center gap-2"
-              style={{
-                direction: 'rtl',
-                justifyContent: 'flex-start',
-                width: '100%',
-                alignItems: 'center',
-              }}
-            >
-              <LiaLockSolid className="w-6 h-6 text-primary flex-shrink-0" />
-              <span
-                className="text-base md:text-xl font-medium text-right"
-                style={{ textAlign: 'right' }}
-              >
-                كلمة المرور القديمة
-              </span>
-            </div>
-            <div className="w-full">
-              <Input
-                label=""
-                name="oldPassword"
-                type="password"
-                placeholder="كلمة المرور القديمة"
-                register={register}
-                error={errors.oldPassword?.message}
-                className="!h-[46px] !px-4 !py-0 rounded-sm bg-[rgba(234,234,234,0.25)] !border-black/16 text-right text-base font-normal text-black placeholder:text-black/60 placeholder:font-medium"
-              />
-            </div>
+        <div className="flex flex-col gap-5 md:w-[70%]">
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <LiaLockSolid className="w-5 h-5 text-primary !cursor-pointer" />
+              <span>كلمة المرور الحالية</span>
+            </label>
+            <Input
+              label=""
+              name="oldPassword"
+              type="password"
+              placeholder="أدخل كلمة المرور الحالية"
+              register={register}
+              error={errors.oldPassword?.message}
+              className={inputClassName}
+            />
           </div>
 
-          {/* Password Field */}
-          <div className="flex flex-col items-end gap-4">
-            <div
-              className="w-full flex items-center gap-2"
-              style={{
-                direction: 'rtl',
-                justifyContent: 'flex-start',
-                width: '100%',
-                alignItems: 'center',
-              }}
-            >
-              <LiaLockSolid className="w-6 h-6 text-primary flex-shrink-0" />
-              <span
-                className="text-base md:text-xl font-medium text-right"
-                style={{ textAlign: 'right' }}
-              >
-                كلمة المرور
-              </span>
-            </div>
-            <div className="w-full">
-              <Input
-                label=""
-                name="password"
-                type="password"
-                placeholder="كلمة المرور"
-                register={register}
-                error={errors.password?.message}
-                className="!h-[46px] !px-4 !py-0 rounded-sm bg-[rgba(234,234,234,0.25)] !border-black/16 text-right text-base font-normal text-black placeholder:text-black/60 placeholder:font-medium"
-              />
-            </div>
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <LiaLockSolid className="w-5 h-5 text-primary !cursor-pointer" />
+              <span>كلمة المرور الجديدة</span>
+            </label>
+            <Input
+              label=""
+              name="password"
+              type="password"
+              placeholder="أدخل كلمة المرور الجديدة"
+              register={register}
+              error={errors.password?.message}
+              className={inputClassName}
+            />
           </div>
 
-          {/* Confirm Password Field */}
-          <div className="flex flex-col items-end gap-4">
-            <div
-              className="w-full flex items-center gap-2"
-              style={{
-                direction: 'rtl',
-                justifyContent: 'flex-start',
-                width: '100%',
-                alignItems: 'center',
-              }}
-            >
-              <LiaLockSolid className="w-6 h-6 text-primary flex-shrink-0" />
-              <span
-                className="text-base md:text-xl font-medium text-right"
-                style={{ textAlign: 'right' }}
-              >
-                تأكيد كلمة المرور
-              </span>
-            </div>
-            <div className="w-full">
-              <Input
-                label=""
-                name="confirmPassword"
-                type="password"
-                placeholder="تأكيد كلمة المرور"
-                register={register}
-                error={errors.confirmPassword?.message}
-                className="!h-[46px] !px-4 !py-0 rounded-sm bg-[rgba(234,234,234,0.25)] !border-black/16 text-right text-base font-normal text-black placeholder:text-black/60 placeholder:font-medium"
-              />
-            </div>
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <LiaLockSolid className="w-5 h-5 text-primary !cursor-pointer" />
+              <span>تأكيد كلمة المرور الجديدة</span>
+            </label>
+            <Input
+              label=""
+              name="confirmPassword"
+              type="password"
+              placeholder="أعد إدخال كلمة المرور الجديدة"
+              register={register}
+              error={errors.confirmPassword?.message}
+              className={inputClassName}
+            />
           </div>
 
-          {/* Password Strength Indicator */}
-          <div className="flex flex-col items-start gap-4">
+          <div className="pt-2">
             <PasswordStrengthIndicator password={password || ''} />
           </div>
         </div>
 
-        {/* Update Password Button */}
-        <div className="mt-6 flex justify-end">
+        <div className="mt-8 flex justify-start">
           <button
             type="submit"
             disabled={!hasAllValues || isLoading}
-            className={`px-12 py-2 text-lg rounded-lg font-medium transition-colors ${hasAllValues && !isLoading
-                ? 'bg-primary text-white cursor-pointer'
-                : 'bg-[#c4c4c4] text-white cursor-not-allowed'
-              }`}
+            className={`px-8 py-2.5 text-base rounded-lg font-medium transition-all duration-200 ${
+              hasAllValues && !isLoading
+                ? 'bg-primary text-white hover:bg-primary/90 active:scale-[0.98]'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
           >
             {isLoading ? 'جاري التحديث...' : 'تحديث كلمة المرور'}
           </button>
