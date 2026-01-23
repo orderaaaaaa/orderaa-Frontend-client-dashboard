@@ -26,7 +26,7 @@ export function UserMenu({
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
 
   const isMobile = variant === 'mobile';
-  const displayText = authUser?.name || username || email || 'user';
+  const displayName = authUser?.name || username || email;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -54,7 +54,7 @@ export function UserMenu({
     }
   };
 
-  if (!hasHydrated) {
+  if (!hasHydrated || !displayName) {
     return (
       <div className="flex flex-row items-center">
         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mx-auto" />
@@ -82,7 +82,7 @@ export function UserMenu({
             : 'font-bold text-[#1F1F1F] text-base'
         } transition-colors hover:bg-transparent`}
       >
-        <span>{displayText}</span>
+        <span>{displayName}</span>
         <LiaAngleDownSolid
           className={`w-4 h-4 transition-transform duration-200 ${
             isOpen ? 'rotate-180' : ''
