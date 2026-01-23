@@ -9,6 +9,7 @@ import {
 } from '@/schemas/personalData.schema';
 import Input from '@/components/ui/Input';
 import SearchableSelect from '@/components/ui/SearchableSelect';
+import { Button } from '@/components/ui/button';
 import {
   LiaBuilding,
   LiaPhoneSolid,
@@ -212,17 +213,13 @@ export default function PersonalData() {
         </div>
 
         <div className="mt-8 flex justify-start">
-          <button
+          <Button
             type="submit"
+            size="lg"
             disabled={!hasAnyValue || isSaving}
-            className={`px-8 py-2.5 text-base rounded-lg font-medium transition-all duration-200 ${
-              hasAnyValue && !isSaving
-                ? 'bg-primary text-white hover:bg-primary/90 active:scale-[0.98]'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-            }`}
           >
             {isSaving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

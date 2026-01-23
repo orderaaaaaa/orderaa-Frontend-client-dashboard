@@ -9,6 +9,7 @@ import {
 } from '@/schemas/accountSecurity.schema';
 import Input from '@/components/ui/Input';
 import PasswordStrengthIndicator from '@/components/ui/PasswordStrengthIndicator';
+import { Button } from '@/components/ui/button';
 import { LiaLockSolid, LiaShieldAltSolid } from 'react-icons/lia';
 import useChangePassword from '../hooks/useChangePassword';
 
@@ -118,17 +119,13 @@ export default function AccountSecurity() {
         </div>
 
         <div className="mt-8 flex justify-start">
-          <button
+          <Button
             type="submit"
+            size="lg"
             disabled={!hasAllValues || isLoading}
-            className={`px-8 py-2.5 text-base rounded-lg font-medium transition-all duration-200 ${
-              hasAllValues && !isLoading
-                ? 'bg-primary text-white hover:bg-primary/90 active:scale-[0.98]'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-            }`}
           >
             {isLoading ? 'جاري التحديث...' : 'تحديث كلمة المرور'}
-          </button>
+          </Button>
         </div>
       </form>
     </div>
