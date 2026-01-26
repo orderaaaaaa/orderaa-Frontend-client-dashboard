@@ -45,7 +45,7 @@ export function PhoneNumberList({
   });
 
   const [isPhoneDropdownOpen, setIsPhoneDropdownOpen] = useState<number | null>(null);
-  const phoneDropdownRef = useRef<HTMLDivElement>(null);
+  const phoneDropdownRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   const tagStyle =
     "flex gap-2 bg-white shadow-xs items-center py-2 px-2 rounded-[5px] font-bold text-[15px] text-[#000000]";
@@ -53,8 +53,11 @@ export function PhoneNumberList({
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (phoneDropdownRef.current && !phoneDropdownRef.current.contains(event.target as Node)) {
-        setIsPhoneDropdownOpen(null);
+      if (isPhoneDropdownOpen !== null) {
+        const activeRef = phoneDropdownRefs.current.get(isPhoneDropdownOpen);
+        if (activeRef && !activeRef.contains(event.target as Node)) {
+          setIsPhoneDropdownOpen(null);
+        }
       }
     };
 
@@ -90,7 +93,13 @@ export function PhoneNumberList({
       <p className="font-bold text-[#121212]">أرقام الهاتف</p>
       <div className="space-y-2">
         {phones.phoneNumbers.map((phone, index) => (
-          <div key={index} className="relative" ref={index === 0 ? phoneDropdownRef : null}>
+          <div key={index} className="relative" ref={(el) => {
+            if (el) {
+              phoneDropdownRefs.current.set(index, el);
+            } else {
+              phoneDropdownRefs.current.delete(index);
+            }
+          }}>
             {phones.editingIndex === index ? (
               <div className="flex gap-2 items-center w-full overflow-hidden">
                 <input
