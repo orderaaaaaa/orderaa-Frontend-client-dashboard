@@ -66,14 +66,6 @@ export const orderSettingsSchema = z.object({
       },
       { message: 'يرجى إدخال رابط صحيح' }
     ),
-}).superRefine((data, ctx) => {
-  if (data.employeeCanEditContent === false && !data.defaultShipmentContent?.trim()) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'اسم المنتج مطلوب',
-      path: ['defaultShipmentContent'],
-    });
-  }
 });
 
 export type OrderSettingsFormData = z.infer<typeof orderSettingsSchema>;
