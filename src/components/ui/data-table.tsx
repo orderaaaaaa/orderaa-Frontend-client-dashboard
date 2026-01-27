@@ -46,13 +46,13 @@ function DataTable<T extends Record<string, unknown>>({
           className,
         )}
       >
-        <Table className="table-fixed">
+        <Table className="table-fixed min-w-[600px]">
           <TableHeader>
             <TableRow className={cn('bg-[#f1eefa]', headerClassName)}>
               {columns.map((col) => (
                 <TableHead
                   key={col.key}
-                  className="px-4 py-4 font-medium text-gray-700 border-l border-gray-200 last:border-l-0"
+                  className="px-4 py-4 font-medium text-gray-700 border-l border-gray-200 last:border-l-0 whitespace-normal"
                 >
                   {col.header}
                 </TableHead>
@@ -63,7 +63,7 @@ function DataTable<T extends Record<string, unknown>>({
             {Array.from({ length: skeletonRows }).map((_, i) => (
               <TableRow key={i}>
                 {columns.map((col) => (
-                  <TableCell key={col.key} className="px-4 py-3 border-l border-gray-200 last:border-l-0">
+                  <TableCell key={col.key} className="px-4 py-3 border-l border-gray-200 last:border-l-0 whitespace-normal">
                     <div className="h-4 bg-gray-200 rounded animate-pulse w-20" />
                   </TableCell>
                 ))}
@@ -82,13 +82,13 @@ function DataTable<T extends Record<string, unknown>>({
         className,
       )}
     >
-      <Table className="table-fixed">
+      <Table className="table-fixed min-w-[600px]">
         <TableHeader>
           <TableRow className={cn('bg-[#f1eefa]', headerClassName)}>
             {columns.map((col) => (
               <TableHead
                 key={col.key}
-                className="px-4 py-4 font-bold border-l border-gray-200 last:border-l-0"
+                className="px-4 py-4 font-bold border-l border-gray-200 last:border-l-0 whitespace-normal"
               >
                 {col.header}
               </TableHead>
@@ -102,7 +102,7 @@ function DataTable<T extends Record<string, unknown>>({
                 <TableCell
                   key={col.key}
                   className={cn(
-                    'px-4 py-3 border-l border-gray-200 last:border-l-0',
+                    'px-4 py-3 border-l border-gray-200 last:border-l-0 whitespace-normal',
                     col.className,
                   )}
                 >
