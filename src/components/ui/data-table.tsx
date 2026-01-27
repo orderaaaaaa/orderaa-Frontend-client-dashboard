@@ -1,0 +1,123 @@
+'use client'
+
+import * as React from 'react'
+
+import { cn } from '@/lib/utils'
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table'
+
+interface DataTableColumn<T> {
+  key: string
+  header: string
+  render?: (value: unknown, row: T) => React.ReactNode
+  className?: string
+}
+
+interface DataTableProps<T extends Record<string, unknown>> {
+  columns: DataTableColumn<T>[]
+  data: T[]
+  keyField?: string
+  headerClassName?: string
+  isLoading?: boolean
+  skeletonRows?: number
+  className?: string
+}
+
+function DataTable<T extends Record<string, unknown>>({
+  columns,
+  data,
+  keyField = 'id',
+  headerClassName,
+  isLoading = false,
+  skeletonRows = 5,
+  className,
+}: DataTableProps<T>) {
+  if (isLoading) {
+    return (
+      <div
+        className={cn(
+          'bg-white rounded-lg border border-gray-100 shadow-md overflow-hidden',
+          className,
+        )}
+      >
+        <Table className="table-fixed">
+          <TableHeader>
+            <TableRow className={cn('bg-[#f1eefa]', headerClassName)}>
+              {columns.map((col) => (
+                <TableHead
+                  key={col.key}
+                  className="px-4 py-4 font-medium text-gray-700 border-l border-gray-200 last:border-l-0"
+                >
+                  {col.header}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: skeletonRows }).map((_, i) => (
+              <TableRow key={i}>
+                {columns.map((col) => (
+                  <TableCell key={col.key} className="px-4 py-3 border-l border-gray-200 last:border-l-0">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-20" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className={cn(
+        'bg-white rounded-lg border border-gray-100 shadow-md overflow-hidden',
+        className,
+      )}
+    >
+      <Table className="table-fixed">
+        <TableHeader>
+          <TableRow className={cn('bg-[#f1eefa]', headerClassName)}>
+            {columns.map((col) => (
+              <TableHead
+                key={col.key}
+                className="px-4 py-4 font-bold border-l border-gray-200 last:border-l-0"
+              >
+                {col.header}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((row) => (
+            <TableRow key={String(row[keyField])}>
+              {columns.map((col) => (
+                <TableCell
+                  key={col.key}
+                  className={cn(
+                    'px-4 py-3 border-l border-gray-200 last:border-l-0',
+                    col.className,
+                  )}
+                >
+                  {col.render
+                    ? col.render(row[col.key], row)
+                    : String(row[col.key] ?? '')}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  )
+}
+
+export { DataTable }
+export type { DataTableColumn, DataTableProps }

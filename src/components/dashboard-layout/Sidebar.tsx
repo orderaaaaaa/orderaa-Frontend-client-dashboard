@@ -98,9 +98,9 @@ export function Sidebar({
               onClick={onCollapseToggle}
             >
               {collapsed ? (
-                <ChevronRight className="h-5 w-5" />
-              ) : (
                 <ChevronLeft className="h-5 w-5" />
+              ) : (
+                <ChevronRight className="h-5 w-5" />
               )}
             </Button>
 

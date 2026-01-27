@@ -88,12 +88,11 @@ export default function AddSameTypeProductModal({
       dir="rtl"
     >
       <div
-        className="relative w-full max-w-[827px] mx-4 md:mx-0 min-h-[400px] bg-white rounded-[20px] shadow-xl"
+        className="relative w-full max-w-[827px] mx-4 md:mx-0 min-h-[400px] max-h-[90vh] bg-white rounded-[20px] shadow-xl flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header with gradient background */}
         <div
-          className="absolute top-0 left-0 right-0 h-[60px] rounded-t-[20px] flex items-center justify-center px-8"
+          className="flex-shrink-0 h-[60px] rounded-t-[20px] flex items-center justify-center px-8 relative"
           style={{
             background:
               'linear-gradient(105.28deg, #FFFFFF 1.48%, #CBB5FD 182.49%, #FFFFFF 187.88%)',
@@ -111,8 +110,7 @@ export default function AddSameTypeProductModal({
           </button>
         </div>
 
-        {/* Content */}
-        <div className="pt-[101px] px-8 pb-24">
+        <div className="flex-1 overflow-y-auto px-8 pt-10 pb-6">
           <div className="flex flex-col gap-4">
             {/* Product Type (Read-only) */}
             <div className="w-full">
@@ -191,8 +189,7 @@ export default function AddSameTypeProductModal({
           </div>
         </div>
 
-        {/* Footer Buttons */}
-        <div className="absolute bottom-[30px] right-8 left-8 flex justify-between">
+        <div className="flex-shrink-0 px-8 py-[30px] flex justify-between">
           <Button
             onClick={handleCancel}
             variant="outline"
