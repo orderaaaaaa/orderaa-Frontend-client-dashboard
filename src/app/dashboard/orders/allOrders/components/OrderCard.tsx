@@ -8,7 +8,6 @@ import {
   User,
   MapPinHouse,
   TriangleAlert,
-  Ban,
   FileText,
   Truck,
 } from 'lucide-react';
@@ -18,7 +17,7 @@ import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { If, Then } from 'react-if';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
 import { getRemainingTime } from '@/utils/getRemainingTime';
-import { LiaClock, LiaPrintSolid } from 'react-icons/lia';
+import { LiaClock, LiaPrintSolid, LiaBanSolid } from 'react-icons/lia';
 import { OrderCardProps } from '@/app/dashboard/orders/allOrders/types/OrderProps';
 import { MdBlock } from 'react-icons/md';
 
@@ -43,7 +42,6 @@ export default function OrderCard({
   repeatCount = 0,
   onRepeatClick,
   filterParams,
-  cancelReason,
   cancelNotes,
   postponedUntil,
   isPrinted = false,
@@ -75,11 +73,10 @@ export default function OrderCard({
   return (
     <div
       onClick={handleCardClick}
-      className={`relative w-full h-full max-w-[90%] md:max-w-[300px] bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.1)] rounded-[10px] transition-all duration-200 flex flex-col ${
-        disableNavigation
+      className={`relative w-full h-full max-w-[90%] md:max-w-[300px] bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.1)] rounded-[10px] transition-all duration-200 flex flex-col ${disableNavigation
           ? ''
           : 'cursor-pointer hover:shadow-[0px_6px_20px_rgba(93,36,225,0.15)]'
-      }`}
+        }`}
     >
       {/* Checkbox – top right */}
       <div className="flex justify-start mb-1 px-4 pt-3">
@@ -200,30 +197,30 @@ export default function OrderCard({
 
         {showAllItems
           ? items
-              ?.filter((item) => item && item !== 'غير محدد')
-              .map((item, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <Package
-                    className="w-[18px] h-[18px]"
-                    style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
-                  />
-                  <span className="text-base font-medium text-black">
-                    {item}
-                  </span>
-                </div>
-              ))
-          : items?.[0] &&
-            items[0] !== 'غير محدد' && (
-              <div className="flex items-center gap-2">
+            ?.filter((item) => item && item !== 'غير محدد')
+            .map((item, index) => (
+              <div key={index} className="flex items-center gap-2">
                 <Package
                   className="w-[18px] h-[18px]"
                   style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
                 />
                 <span className="text-base font-medium text-black">
-                  {items[0]}
+                  {item}
                 </span>
               </div>
-            )}
+            ))
+          : items?.[0] &&
+          items[0] !== 'غير محدد' && (
+            <div className="flex items-center gap-2">
+              <Package
+                className="w-[18px] h-[18px]"
+                style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
+              />
+              <span className="text-base font-medium text-black">
+                {items[0]}
+              </span>
+            </div>
+          )}
 
         {/* Price */}
         {price && (
@@ -262,7 +259,7 @@ export default function OrderCard({
 
         {states && states.length > 0 && (
           <div className="flex flex-col gap-2 w-full">
-            {states.map((state, index) => (
+            {states.filter((state) => !state.note?.startsWith('Cancelled')).map((state, index) => (
               <div key={index} className="flex items-start gap-2">
                 <FileText
                   className="w-[18px] h-[18px] flex-shrink-0 mt-0.5"
@@ -277,24 +274,12 @@ export default function OrderCard({
         )}
 
         {/* Cancel Info */}
-        {status === 'CANCELLED' && (cancelReason || cancelNotes) && (
-          <div className="flex flex-col gap-3 w-full">
-            {cancelReason && (
-              <div className="flex items-start gap-2">
-                <Ban
-                  className="w-[18px] h-[18px]"
-                  style={{ strokeWidth: 1.5, color: 'rgba(220,38,38,0.7)' }}
-                />
-                <span className="text-base font-medium text-red-600">
-                {cancelReason}
-                </span>
-              </div>
-            )}
+        {status === 'CANCELLED' && cancelNotes && (
+          <div className="flex items-center flex-col gap-3 w-full">
             {cancelNotes && (
-              <div className="flex items-start gap-2 w-full">
-                <FileText
-                  className="w-[18px] h-[18px] shrink-0"
-                  style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
+              <div className="flex items-center gap-2 w-full">
+                <LiaBanSolid
+                  className="w-[18px] h-[18px] shrink-0 opacity-30"
                 />
 
                 <span className="text-base font-medium text-red-600 min-w-0 overflow-hidden text-ellipsis line-clamp-3 break-words">

@@ -49,8 +49,7 @@ export function OrderActionsFooter({
 
   return (
     <div
-      className="fixed bottom-8 left-0 right-0 z-50 flex justify-center items-center gap-4 px-4 font-sans"
-      dir="rtl"
+      className="fixed bottom-8 left-0 right-0 z-40 flex justify-center items-center gap-4 px-4 font-sans"
     >
       {/* Previous Arrow */}
       <Button
