@@ -1,11 +1,24 @@
 import { useMemo } from 'react';
-import type { DashboardSummary, EmployeeStatusRow, CallDurationItem } from '../types';
-import { MOCK_EMPLOYEE_STATUS, CALL_DURATIONS } from '../constants';
+import type {
+  DashboardSummary,
+  EmployeeStatusRow,
+  CallDurationItem,
+  OrderStatusDistributionItem,
+  ConfirmationAttemptsData,
+} from '../types';
+import {
+  MOCK_EMPLOYEE_STATUS,
+  CALL_DURATIONS,
+  ORDER_STATUS_DISTRIBUTION,
+  CONFIRMATION_ATTEMPTS,
+} from '../constants';
 
 interface UseDashboardDataReturn {
   summary: DashboardSummary;
   employees: EmployeeStatusRow[];
   callDurations: CallDurationItem[];
+  orderStatusDistribution: OrderStatusDistributionItem[];
+  confirmationAttempts: ConfirmationAttemptsData;
   isLoading: boolean;
 }
 
@@ -28,11 +41,15 @@ export function useDashboardData(): UseDashboardDataReturn {
 
   const employees = MOCK_EMPLOYEE_STATUS;
   const callDurations = CALL_DURATIONS;
+  const orderStatusDistribution = ORDER_STATUS_DISTRIBUTION;
+  const confirmationAttempts = CONFIRMATION_ATTEMPTS;
 
   return {
     summary,
     employees,
     callDurations,
+    orderStatusDistribution,
+    confirmationAttempts,
     isLoading: false,
   };
 }

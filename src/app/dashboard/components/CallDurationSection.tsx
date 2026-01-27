@@ -1,5 +1,6 @@
 'use client';
 
+import { SplineAreaChart } from '@/components/ui/charts/SplineAreaChart';
 import type { CallDurationItem } from '../types';
 
 interface CallDurationSectionProps {
@@ -25,6 +26,7 @@ export function CallDurationSection({
                 <div className="w-32 h-4 bg-gray-200 rounded" />
                 <div className="w-16 h-6 bg-gray-200 rounded" />
               </div>
+              <div className="mt-4 h-[150px] bg-gray-100 rounded" />
             </div>
           ))}
         </div>
@@ -39,12 +41,20 @@ export function CallDurationSection({
         {items.map((item) => (
           <div
             key={item.key}
-            className="bg-white rounded-lg py-5 px-4 border border-gray-100 text-center"
+            className="bg-white rounded-lg py-5 px-4 border border-gray-100"
           >
-            <span className="text-[#000000] font-bold text-sm block mb-2">
-              {item.label}
-            </span>
-            <div className="text-xl font-bold text-gray-900">{item.value}</div>
+            <div className="text-center">
+              <span className="text-[#000000] font-bold text-sm block mb-2">
+                {item.label}
+              </span>
+              <div className="text-xl font-bold text-gray-900">
+                {item.value}
+              </div>
+            </div>
+            <SplineAreaChart
+              categories={item.chartCategories}
+              series={item.chartSeries}
+            />
           </div>
         ))}
       </div>

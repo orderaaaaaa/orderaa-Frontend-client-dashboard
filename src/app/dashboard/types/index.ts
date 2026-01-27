@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import type { SplineAreaChartSeries } from '@/components/ui/charts/SplineAreaChart';
 
 export interface DashboardSummary {
   activeNow: number;
@@ -23,6 +24,19 @@ export interface CallDurationItem {
   key: string;
   label: string;
   value: string;
+  chartCategories: string[];
+  chartSeries: SplineAreaChartSeries[];
+}
+
+export interface OrderStatusDistributionItem {
+  label: string;
+  value: number;
+  color: string;
+}
+
+export interface ConfirmationAttemptsData {
+  categories: string[];
+  values: number[];
 }
 
 export type EmployeeStatus = 'active' | 'stopped';
