@@ -149,7 +149,7 @@ export default function AddNewProductModal({
             إضافة منتج جديد للطلب
           </DialogPrimitive.Description>
 
-          <div className="flex-1 overflow-y-auto px-8 pt-10 pb-6">
+          <div className="flex-1 overflow-y-auto px-8 py-6">
             <div className="flex flex-col gap-4">
               <div className="w-full">
                 <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
@@ -163,7 +163,7 @@ export default function AddNewProductModal({
                   searchPlaceholder="ابحث عن منتج..."
                   emptyMessage="لا توجد منتجات"
                   noResultsMessage="لا توجد نتائج للبحث"
-                  triggerClassName="h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E]"
+                  triggerClassName="h-[44px] md:h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-4 md:px-6 text-right text-base md:text-lg text-[#5F5E5E]"
                   className="rounded-2xl border-[#ECECEC]"
                   searchThreshold={5}
                   clearable
@@ -175,7 +175,7 @@ export default function AddNewProductModal({
                   <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
                     الكمية
                   </label>
-                  <div className="h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-4 flex items-center justify-between">
+                  <div className="h-[44px] md:h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-3 md:px-4 flex items-center justify-between">
                     <button
                       type="button"
                       onClick={decrementQuantity}
@@ -227,7 +227,7 @@ export default function AddNewProductModal({
                           searchPlaceholder={`بحث عن ${option.label}...`}
                           emptyMessage="لا توجد خيارات متاحة"
                           noResultsMessage="لا توجد نتائج للبحث"
-                          triggerClassName="h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E]"
+                          triggerClassName="h-[44px] md:h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-4 md:px-6 text-right text-base md:text-lg text-[#5F5E5E]"
                           className="rounded-2xl border-[#ECECEC]"
                           disabled={option.values.length === 0}
                           searchThreshold={5}

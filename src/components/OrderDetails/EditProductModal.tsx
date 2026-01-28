@@ -92,7 +92,7 @@ export default function EditProductModal({
             تعديل خيارات المنتج
           </DialogPrimitive.Description>
 
-          <div className="flex-1 overflow-y-auto px-8 pt-10 pb-6">
+          <div className="flex-1 overflow-y-auto px-8 py-6">
             <div className="flex flex-col md:flex-row gap-4 justify-end flex-wrap">
               {isLoading ? (
                 <div className="w-full text-center text-gray-500">جاري التحميل...</div>
@@ -111,7 +111,7 @@ export default function EditProductModal({
                       placeholder={`اختر ${option.label}`}
                       searchPlaceholder={`بحث عن ${option.label}...`}
                       disabled={option.values.length === 0}
-                      triggerClassName="h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E]"
+                      triggerClassName="h-[44px] md:h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-4 md:px-6 text-right text-base md:text-lg text-[#5F5E5E]"
                       className="rounded-2xl border-[#ECECEC]"
                       searchThreshold={5}
                       debounceMs={300}

@@ -109,7 +109,7 @@ const StoresFilters = () => {
                   placeholder="جميع الأقسام"
                   searchPlaceholder="بحث..."
                   className="w-full"
-                  triggerClassName="h-[41px] rounded-sm bg-gray-50 font-semibold text-lg"
+                  triggerClassName="h-[36px] md:h-[41px] rounded-sm bg-gray-50 font-semibold text-base md:text-lg"
                 />
               </ClearableSelect>
 
@@ -124,7 +124,7 @@ const StoresFilters = () => {
                   placeholder="الأكثر مبيعاً"
                   searchPlaceholder="بحث..."
                   className="w-full"
-                  triggerClassName="h-[41px] rounded-sm bg-gray-50 font-semibold text-lg"
+                  triggerClassName="h-[36px] md:h-[41px] rounded-sm bg-gray-50 font-semibold text-base md:text-lg"
                 />
               </ClearableSelect>
 
@@ -139,7 +139,7 @@ const StoresFilters = () => {
                   placeholder="جميع المحافظات"
                   searchPlaceholder="بحث..."
                   className="w-full"
-                  triggerClassName="h-[41px] rounded-sm bg-gray-50 font-semibold text-lg"
+                  triggerClassName="h-[36px] md:h-[41px] rounded-sm bg-gray-50 font-semibold text-base md:text-lg"
                 />
               </ClearableSelect>
             </div>
@@ -157,7 +157,7 @@ const StoresFilters = () => {
                   placeholder="الاحدث"
                   searchPlaceholder="بحث..."
                   className="w-full"
-                  triggerClassName="h-[41px] rounded-sm bg-gray-50 font-semibold text-lg"
+                  triggerClassName="h-[36px] md:h-[41px] rounded-sm bg-gray-50 font-semibold text-base md:text-lg"
                 />
               </ClearableSelect>
 
@@ -172,7 +172,7 @@ const StoresFilters = () => {
                   placeholder="أعلى نسب تسليم"
                   searchPlaceholder="بحث..."
                   className="w-full"
-                  triggerClassName="h-[41px] rounded-sm bg-gray-50 font-semibold text-lg"
+                  triggerClassName="h-[36px] md:h-[41px] rounded-sm bg-gray-50 font-semibold text-base md:text-lg"
                 />
               </ClearableSelect>
 
@@ -187,7 +187,7 @@ const StoresFilters = () => {
                   placeholder="نشط"
                   searchPlaceholder="بحث..."
                   className="w-full"
-                  triggerClassName="h-[41px] rounded-sm bg-gray-50 font-semibold text-lg"
+                  triggerClassName="h-[36px] md:h-[41px] rounded-sm bg-gray-50 font-semibold text-base md:text-lg"
                 />
               </ClearableSelect>
 
@@ -202,7 +202,7 @@ const StoresFilters = () => {
                   placeholder="معدل البيعات"
                   searchPlaceholder="بحث..."
                   className="w-full"
-                  triggerClassName="h-[41px] rounded-sm bg-gray-50 font-semibold text-lg"
+                  triggerClassName="h-[36px] md:h-[41px] rounded-sm bg-gray-50 font-semibold text-base md:text-lg"
                 />
               </ClearableSelect>
             </div>

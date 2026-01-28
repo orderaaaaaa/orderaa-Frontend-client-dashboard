@@ -225,7 +225,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
           disabled={disabled || loading}
           onClick={() => !disabled && !loading && handleOpenChange(!open)}
           className={cn(
-            'relative px-3 py-2 rounded border flex items-center justify-between truncate',
+            'relative px-2 py-1.5 md:px-3 md:py-2 rounded border flex items-center justify-between truncate text-sm md:text-base',
             disabled || loading
               ? 'bg-gray-100 cursor-not-allowed text-gray-400'
               : 'bg-white',
@@ -265,7 +265,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
 
           <ChevronDown
             className={cn(
-              'w-5 h-5 text-gray-400 transition-transform',
+              'w-4 h-4 md:w-5 md:h-5 text-gray-400 transition-transform',
               open && 'rotate-180'
             )}
           />
@@ -278,18 +278,18 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.15 }}
-              className="absolute top-full z-50 mt-1 w-full max-h-60 overflow-auto
+              className="md:absolute md:top-full z-50 mt-1 w-full max-h-40 md:max-h-60 overflow-auto
                          rounded-md border bg-white shadow-lg"
               role="listbox"
             >
               {showSearch && (
-                <div className="p-2 border-b">
+                <div className="p-1.5 md:p-2 border-b">
                   <input
                     ref={inputRef}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={searchPlaceholder}
-                    className="w-full px-2 py-1.5 rounded border text-sm
+                    className="w-full px-2 py-1 md:py-1.5 rounded border text-xs md:text-sm
                                focus:outline-none focus:border-primary"
                   />
                 </div>
@@ -310,7 +310,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
                         onMouseLeave={() => setActiveIdx(-1)}
                         onClick={() => commitSelect(opt)}
                         className={cn(
-                          'px-3 py-2 flex justify-between cursor-pointer',
+                          'px-2 py-1.5 md:px-3 md:py-2 flex justify-between cursor-pointer text-sm md:text-base',
                           'hover:bg-primary hover:text-white',
                           selected && 'bg-primary text-white',
                           activeIdx === idx && !selected && 'bg-gray-100'

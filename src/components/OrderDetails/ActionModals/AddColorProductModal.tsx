@@ -80,7 +80,7 @@ export default function AddColorProductModal({
             searchPlaceholder="بحث عن اللون..."
             emptyMessage="لا توجد ألوان متاحة"
             noResultsMessage="لا توجد نتائج للبحث"
-            triggerClassName="h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E]"
+            triggerClassName="h-[44px] md:h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-4 md:px-6 text-right text-base md:text-lg text-[#5F5E5E]"
             className="rounded-2xl border-[#ECECEC]"
             loading={isLoading}
             searchThreshold={5}

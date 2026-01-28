@@ -101,14 +101,14 @@ export default function AddSameTypeProductModal({
             إضافة منتج من نفس النوع للطلب
           </DialogPrimitive.Description>
 
-          <div className="flex-1 overflow-y-auto px-8 pt-10 pb-6">
+          <div className="flex-1 overflow-y-auto px-8 py-6">
             <div className="flex flex-col gap-4">
               <div className="w-full">
                 <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
                   النوع
                 </label>
-                <div className="w-full h-[57px] bg-[#F5F5F5] border border-[#ECECEC] rounded-[38px] px-6 flex items-center justify-end">
-                  <span className="text-lg text-[#1F1F1F] font-bold">
+                <div className="w-full h-[44px] md:h-[57px] bg-[#F5F5F5] border border-[#ECECEC] rounded-[38px] px-4 md:px-6 flex items-center justify-end">
+                  <span className="text-base md:text-lg text-[#1F1F1F] font-bold">
                     {productType}
                   </span>
                 </div>
@@ -119,25 +119,25 @@ export default function AddSameTypeProductModal({
                   <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
                     الكمية
                   </label>
-                  <div className="h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-4 flex items-center justify-between">
+                  <div className="h-[44px] md:h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-3 md:px-4 flex items-center justify-between">
                     <button
                       type="button"
                       onClick={decrementQuantity}
                       disabled={quantity <= 1}
-                      className="w-10 h-10 rounded-full bg-[#F5F5F5] hover:bg-[#ECECEC] flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#F5F5F5] hover:bg-[#ECECEC] flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <LiaMinusSolid className="w-5 h-5 text-[#5F5E5E]" />
+                      <LiaMinusSolid className="w-4 h-4 md:w-5 md:h-5 text-[#5F5E5E]" />
                     </button>
-                    <span className="text-xl font-bold text-[#1F1F1F] min-w-[40px] text-center">
+                    <span className="text-lg md:text-xl font-bold text-[#1F1F1F] min-w-[40px] text-center">
                       {quantity}
                     </span>
                     <button
                       type="button"
                       onClick={incrementQuantity}
                       disabled={quantity >= 99}
-                      className="w-10 h-10 rounded-full bg-primary hover:bg-[#4B1BC4] flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary hover:bg-[#4B1BC4] flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <LiaPlusSolid className="w-5 h-5 text-white" />
+                      <LiaPlusSolid className="w-4 h-4 md:w-5 md:h-5 text-white" />
                     </button>
                   </div>
                 </div>
@@ -164,7 +164,7 @@ export default function AddSameTypeProductModal({
                         searchPlaceholder={`بحث عن ${option.label}...`}
                         emptyMessage="لا توجد خيارات متاحة"
                         noResultsMessage="لا توجد نتائج للبحث"
-                        triggerClassName="h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-6 text-right text-lg text-[#5F5E5E]"
+                        triggerClassName="h-[44px] md:h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-4 md:px-6 text-right text-base md:text-lg text-[#5F5E5E]"
                         className="rounded-2xl border-[#ECECEC]"
                         disabled={option.values.length === 0}
                         searchThreshold={5}
