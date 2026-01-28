@@ -1,8 +1,10 @@
 'use client';
 
 import React, { ReactNode, useState } from 'react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { LiaTimesSolid } from 'react-icons/lia';
 import { Button } from './button';
+import { cn } from '@/lib/utils';
 
 interface BaseModalProps {
   isOpen: boolean;
@@ -42,14 +44,6 @@ export default function BaseModal({
   const [internalIsLoading, setInternalIsLoading] = useState(false);
   const isLoading = externalIsLoading || internalIsLoading;
 
-  if (!isOpen) return null;
-
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget && !isLoading) {
-      onClose();
-    }
-  };
-
   const handleConfirm = async () => {
     if (onConfirm && !isLoading && !confirmDisabled) {
       try {
@@ -57,7 +51,6 @@ export default function BaseModal({
         await onConfirm();
         setInternalIsLoading(false);
       } catch (error) {
-        // If onConfirm throws error, don't close modal (user can retry)
         console.error('Confirmation action failed:', error);
         setInternalIsLoading(false);
       }
@@ -65,80 +58,90 @@ export default function BaseModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      onClick={handleBackdropClick}
-      dir="rtl"
+    <DialogPrimitive.Root
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open && !isLoading) onClose();
+      }}
     >
-      <div
-        className={`relative ${maxWidth} ${height || ''} bg-white rounded-[20px] shadow-xl flex flex-col`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header with gradient background */}
-        <div
-          className="h-[60px] rounded-t-[20px] flex items-center justify-center px-8 flex-shrink-0 relative"
-          style={{
-            background:
-              'linear-gradient(105.28deg, #FFFFFF 1.48%, #CBB5FD 182.49%, #FFFFFF 187.88%)',
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content
+          className={cn(
+            'fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2',
+            'bg-white rounded-[20px] shadow-xl flex flex-col max-h-[85vh]',
+            maxWidth,
+            height
+          )}
+          onPointerDownOutside={(e) => {
+            if (isLoading) e.preventDefault();
+          }}
+          onEscapeKeyDown={(e) => {
+            if (isLoading) e.preventDefault();
           }}
         >
-          <h2 className="text-xl font-bold text-black text-center">
-            {title}
-          </h2>
-
-          <button
-            onClick={onClose}
-            disabled={isLoading}
-            className="absolute left-8 flex items-center justify-center hover:opacity-70 transition-opacity disabled:opacity-50"
+          <div
+            className="h-[60px] rounded-t-[20px] flex items-center justify-center px-8 flex-shrink-0 relative"
+            style={{
+              background:
+                'linear-gradient(105.28deg, #FFFFFF 1.48%, #CBB5FD 182.49%, #FFFFFF 187.88%)',
+            }}
           >
-            <LiaTimesSolid className="w-4 h-4 text-black cursor-pointer" />
-          </button>
-        </div>
+            <DialogPrimitive.Title className="text-xl font-bold text-black text-center">
+              {title}
+            </DialogPrimitive.Title>
 
-        {/* Content */}
-        <div className="flex-1 px-8 py-6 overflow-y-auto">
-          {children}
-        </div>
-
-        {/* Footer */}
-        {showFooter && (
-          <div className="px-8 pb-8 flex gap-4 justify-between flex-shrink-0">
-            {/* Cancel Button */}
-            <Button
-              variant="outline"
-              onClick={onClose}
+            <DialogPrimitive.Close
               disabled={isLoading}
-              className={
-                cancelButtonClassName ||
-                'w-[146px] h-[37px] bg-white border-[1.5px] border-[#ECECEC] rounded-[28px] flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors disabled:opacity-50'
-              }
+              className="absolute left-8 flex items-center justify-center hover:opacity-70 transition-opacity disabled:opacity-50"
             >
-              <LiaTimesSolid className="w-5 h-5 text-[#5F5E5E]" />
-              <span className="text-lg font-bold text-[#5F5E5E]">
-                {cancelText}
-              </span>
-            </Button>
+              <LiaTimesSolid className="w-4 h-4 text-black cursor-pointer" />
+            </DialogPrimitive.Close>
+          </div>
 
-            {/* Confirm Button */}
-            {onConfirm && (
+          <DialogPrimitive.Description className="sr-only">
+            {title}
+          </DialogPrimitive.Description>
+
+          <div className="flex-1 px-8 py-6 overflow-y-auto">{children}</div>
+
+          {showFooter && (
+            <div className="px-8 pb-8 flex gap-4 justify-between flex-shrink-0">
               <Button
                 variant="outline"
-                onClick={handleConfirm}
-                disabled={isLoading || confirmDisabled}
+                onClick={onClose}
+                disabled={isLoading}
                 className={
-                  confirmButtonClassName ||
-                  'w-[146px] h-[37px] bg-primary border-[1.5px] border-primary rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  cancelButtonClassName ||
+                  'w-[146px] h-[37px] bg-white border-[1.5px] border-[#ECECEC] rounded-[28px] flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors disabled:opacity-50'
                 }
               >
-                {confirmIcon}
-                <span className="text-lg font-bold text-white">
-                  {isLoading ? 'جاري الحفظ...' : confirmText}
+                <LiaTimesSolid className="w-5 h-5 text-[#5F5E5E]" />
+                <span className="text-lg font-bold text-[#5F5E5E]">
+                  {cancelText}
                 </span>
               </Button>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
+
+              {onConfirm && (
+                <Button
+                  variant="outline"
+                  onClick={handleConfirm}
+                  disabled={isLoading || confirmDisabled}
+                  className={
+                    confirmButtonClassName ||
+                    'w-[146px] h-[37px] bg-primary border-[1.5px] border-primary rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  }
+                >
+                  {confirmIcon}
+                  <span className="text-lg font-bold text-white">
+                    {isLoading ? 'جاري الحفظ...' : confirmText}
+                  </span>
+                </Button>
+              )}
+            </div>
+          )}
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }

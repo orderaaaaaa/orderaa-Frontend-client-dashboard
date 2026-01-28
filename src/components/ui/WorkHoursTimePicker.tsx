@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Clock, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { LiaTimesSolid } from 'react-icons/lia';
 
 interface WorkHoursTimePickerProps {
   value?: string;
@@ -20,14 +21,10 @@ export default function WorkHoursTimePicker({
   const [tempEndHour, setTempEndHour] = useState<number | null>(null);
   const [tempEndPeriod, setTempEndPeriod] = useState<string | null>(null);
 
-  const modalRef = useRef<HTMLDivElement>(null);
-
-  // Reset temp values when modal opens
   useEffect(() => {
     if (isOpen) {
       if (value && value.includes('-')) {
         try {
-          // Parse format: "AM : 12 - PM : 10"
           const [start, end] = value.split('-').map((s) => s.trim());
           const [startP, , startH] = start.split(' ').map((s) => s.trim());
           const [endP, , endH] = end.split(' ').map((s) => s.trim());
@@ -35,28 +32,24 @@ export default function WorkHoursTimePicker({
           const parsedStartHour = parseInt(startH);
           const parsedEndHour = parseInt(endH);
 
-          // Only set if parsing was successful
           if (!isNaN(parsedStartHour) && !isNaN(parsedEndHour)) {
             setTempStartHour(parsedStartHour);
             setTempStartPeriod(startP);
             setTempEndHour(parsedEndHour);
             setTempEndPeriod(endP);
           } else {
-            // Reset to null if parsing fails
             setTempStartHour(null);
             setTempStartPeriod(null);
             setTempEndHour(null);
             setTempEndPeriod(null);
           }
         } catch (e) {
-          // Reset to null if parsing fails
           setTempStartHour(null);
           setTempStartPeriod(null);
           setTempEndHour(null);
           setTempEndPeriod(null);
         }
       } else {
-        // Clear all selections when opening with no value
         setTempStartHour(null);
         setTempStartPeriod(null);
         setTempEndHour(null);
@@ -65,28 +58,8 @@ export default function WorkHoursTimePicker({
     }
   }, [isOpen, value]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        modalRef.current &&
-        !modalRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen]);
-
   const hours = Array.from({ length: 12 }, (_, i) => i + 1);
 
-  // Check if all selections are made and are valid numbers
   const isComplete =
     tempStartHour !== null &&
     tempStartPeriod !== null &&
@@ -101,7 +74,6 @@ export default function WorkHoursTimePicker({
 
   const handleApply = () => {
     if (isComplete) {
-      // Format: AM : 12 - PM : 10 (right to left for Arabic)
       const formattedValue = `${tempStartPeriod} : ${tempStartHour} - ${tempEndPeriod} : ${tempEndHour}`;
       onChange(formattedValue);
       setIsOpen(false);
@@ -114,7 +86,6 @@ export default function WorkHoursTimePicker({
 
   return (
     <>
-      {/* Input Display */}
       <div className="w-full relative">
         <input
           type="text"
@@ -136,37 +107,35 @@ export default function WorkHoursTimePicker({
         )}
       </div>
 
-      {/* Time Picker Modal */}
-      {isOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div
-            ref={modalRef}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] overflow-auto"
-          >
-            {/* Header */}
-            <div className="sticky top-0 z-100 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-600" />
-              </button>
-              <h2 className="text-2xl font-bold text-gray-800">
+      <DialogPrimitive.Root
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!open) setIsOpen(false);
+        }}
+      >
+        <DialogPrimitive.Portal>
+          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+          <DialogPrimitive.Content className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden mx-4">
+            <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-6 flex items-center justify-between flex-shrink-0">
+              <DialogPrimitive.Title className="text-2xl font-bold text-gray-800">
                 اختر ساعات العمل
-              </h2>
+              </DialogPrimitive.Title>
+              <DialogPrimitive.Close className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                <LiaTimesSolid className="w-5 h-5 text-gray-600 cursor-pointer" />
+              </DialogPrimitive.Close>
             </div>
 
-            {/* Content */}
-            <div className="p-6">
+            <DialogPrimitive.Description className="sr-only">
+              اختيار ساعات العمل
+            </DialogPrimitive.Description>
+
+            <div className="flex-1 overflow-y-auto p-6">
               <div className="grid md:grid-cols-2 gap-8">
-                {/* Start Time */}
                 <div className="space-y-4">
                   <h3 className="text-xl font-semibold text-gray-700 text-center mb-6">
                     وقت البداية
                   </h3>
 
-                  {/* Hour Selection */}
                   <div>
                     <p className="text-sm text-gray-600 mb-3 text-center">
                       الساعة
@@ -188,7 +157,6 @@ export default function WorkHoursTimePicker({
                     </div>
                   </div>
 
-                  {/* Period Selection */}
                   <div>
                     <p className="text-sm text-gray-600 mb-3 text-center">
                       الفترة
@@ -217,7 +185,6 @@ export default function WorkHoursTimePicker({
                     </div>
                   </div>
 
-                  {/* Preview */}
                   <div className="mt-6 p-4 bg-purple-50 rounded-lg text-center">
                     <p className="text-sm text-gray-600 mb-1">الوقت المحدد</p>
                     {tempStartHour !== null &&
@@ -236,13 +203,11 @@ export default function WorkHoursTimePicker({
                   </div>
                 </div>
 
-                {/* End Time */}
                 <div className="space-y-4">
                   <h3 className="text-xl font-semibold text-gray-700 text-center mb-6">
                     وقت النهاية
                   </h3>
 
-                  {/* Hour Selection */}
                   <div>
                     <p className="text-sm text-gray-600 mb-3 text-center">
                       الساعة
@@ -264,7 +229,6 @@ export default function WorkHoursTimePicker({
                     </div>
                   </div>
 
-                  {/* Period Selection */}
                   <div>
                     <p className="text-sm text-gray-600 mb-3 text-center">
                       الفترة
@@ -293,7 +257,6 @@ export default function WorkHoursTimePicker({
                     </div>
                   </div>
 
-                  {/* Preview */}
                   <div className="mt-6 p-4 bg-purple-50 rounded-lg text-center">
                     <p className="text-sm text-gray-600 mb-1">الوقت المحدد</p>
                     {tempEndHour !== null &&
@@ -313,7 +276,6 @@ export default function WorkHoursTimePicker({
                 </div>
               </div>
 
-              {/* Final Preview */}
               <div className="mt-8 p-6 bg-gradient-to-r from-purple-100 to-blue-100 rounded-xl text-center">
                 <p className="text-sm text-gray-600 mb-2">
                   ساعات العمل النهائية
@@ -336,8 +298,7 @@ export default function WorkHoursTimePicker({
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="sticky bottom-0 bg-white border-t border-gray-200 p-6 flex gap-4 justify-center">
+            <div className="flex-shrink-0 bg-white border-t border-gray-200 p-6 flex gap-4 justify-center">
               <button
                 type="button"
                 onClick={handleCancel}
@@ -357,9 +318,9 @@ export default function WorkHoursTimePicker({
                 تطبيق
               </button>
             </div>
-          </div>
-        </div>
-      )}
+          </DialogPrimitive.Content>
+        </DialogPrimitive.Portal>
+      </DialogPrimitive.Root>
     </>
   );
 }

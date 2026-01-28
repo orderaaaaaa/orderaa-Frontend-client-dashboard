@@ -12,6 +12,7 @@ import { ScannedOrdersTable } from './ScannedOrdersTable';
 import PrintOrdersActionsBar from '../PrintOrdersActionsBar';
 import { Button } from '@/components/ui/button';
 import { ScannedOrdersModalProps } from '../../types';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 
 function ChangeProductTable({
   orders,
@@ -104,6 +105,8 @@ export function ScannedOrdersModal({
   onPackagingNoteChange,
   onChangeProductSubmit,
 }: ScannedOrdersModalProps) {
+  useBodyScrollLock(isOpen);
+
   const allFieldsFilled = useMemo(() => {
     if (!isChangeProductMode) return true;
     return scannedOrders.every(

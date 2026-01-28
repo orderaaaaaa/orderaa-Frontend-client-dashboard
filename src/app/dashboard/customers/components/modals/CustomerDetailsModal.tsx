@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { X } from 'lucide-react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { LiaTimesSolid } from 'react-icons/lia';
 import { useCustomer } from '../../hooks/useGetCustomerId';
 import OrdersTab from './CustomerModalComponents/CustomersDetailsOrders';
 import StatsTab from './CustomerModalComponents/CustomersDetailsStats';
@@ -34,29 +35,7 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
     }
   }, [isOpen, customerId, refetch]);
 
-  if (!isOpen) return null;
-
-  if (isLoading) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-        <div className="bg-white rounded-xl shadow-xl w-full max-w-6xl h-[60vh] flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (isError || !data) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-        <div className="bg-white rounded-xl shadow-xl w-full max-w-6xl p-10 text-center text-red-600">
-          حدث خطأ أثناء تحميل البيانات
-        </div>
-      </div>
-    );
-  }
-
-  const orders = data.orders || [];
+  const orders = data?.orders || [];
   const totalOrders = orders.length;
   const delivered = orders.filter((o) => o.status === 'DELIVERED').length;
   const cancelled = orders.filter((o) => o.status === 'CANCELLED').length;
@@ -72,54 +51,73 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
     totalOrders > 0 ? Math.round((returned / totalOrders) * 100) : 0;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 md:p-4"
-      dir="rtl"
+    <DialogPrimitive.Root
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
     >
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-6xl max-h-[95vh] overflow-y-auto relative">
-        <button
-          onClick={onClose}
-          className="p-2 absolute hover:bg-gray-100 rounded-lg left-3 top-3 cursor-pointer z-10"
-        >
-          <X className="w-5 h-5" />
-        </button>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-xl w-full max-w-6xl max-h-[95vh] overflow-y-auto relative mx-2 md:mx-4">
+          <DialogPrimitive.Title className="sr-only">
+            تفاصيل العميل
+          </DialogPrimitive.Title>
+          <DialogPrimitive.Description className="sr-only">
+            عرض تفاصيل العميل والطلبات والإحصائيات
+          </DialogPrimitive.Description>
 
-        <div className="p-4 md:p-8">
-          <CustomersDetailsHeader
-            isBlocked={data.isBlocked}
-            username={data.name}
-          />
+          <DialogPrimitive.Close className="p-2 absolute hover:bg-gray-100 rounded-lg left-3 top-3 cursor-pointer z-10">
+            <LiaTimesSolid className="w-5 h-5" />
+          </DialogPrimitive.Close>
 
-          <CustomersDetailsShare
-            email={data.email}
-            phoneNumbers={data.phoneNumbers}
-          />
+          {isLoading ? (
+            <div className="h-[60vh] flex items-center justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+          ) : isError || !data ? (
+            <div className="p-10 text-center text-red-600">
+              حدث خطأ أثناء تحميل البيانات
+            </div>
+          ) : (
+            <div className="p-4 md:p-8">
+              <CustomersDetailsHeader
+                isBlocked={data.isBlocked}
+                username={data.name}
+              />
 
-          <CustomersDetailsTotalStats
-            latestOrder={data.latestOrder}
-            delivered={delivered}
-            email={data.email}
-            numberOfOrders={data.numberOfOrders}
-            totalAmount={data.totalAmount}
-            returned={returned}
-            phoneNumbers={data.phoneNumbers}
-          />
+              <CustomersDetailsShare
+                email={data.email}
+                phoneNumbers={data.phoneNumbers}
+              />
 
-          <div className="mt-4">
-            <StatsTab
-              deliveryRate={deliveryRate}
-              cancellationRate={cancellationRate}
-              returnRate={returnRate}
-              totalOrders={totalOrders}
-              delivered={delivered}
-              cancelled={cancelled}
-              returned={returned}
-            />
-            <OrdersTab orders={data.orders} />
-          </div>
-        </div>
-      </div>
-    </div>
+              <CustomersDetailsTotalStats
+                latestOrder={data.latestOrder}
+                delivered={delivered}
+                email={data.email}
+                numberOfOrders={data.numberOfOrders}
+                totalAmount={data.totalAmount}
+                returned={returned}
+                phoneNumbers={data.phoneNumbers}
+              />
+
+              <div className="mt-4">
+                <StatsTab
+                  deliveryRate={deliveryRate}
+                  cancellationRate={cancellationRate}
+                  returnRate={returnRate}
+                  totalOrders={totalOrders}
+                  delivered={delivered}
+                  cancelled={cancelled}
+                  returned={returned}
+                />
+                <OrdersTab orders={data.orders} />
+              </div>
+            </div>
+          )}
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 };
 

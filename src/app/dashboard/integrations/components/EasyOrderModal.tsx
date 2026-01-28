@@ -1,23 +1,25 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
 import {
-  X,
-  ShoppingCart,
-  Copy,
-  Check,
-  Play,
-  ChevronDown,
-  ChevronUp,
-  CheckCircle2,
-} from 'lucide-react';
+  LiaTimesSolid,
+  LiaShoppingCartSolid,
+  LiaCopySolid,
+  LiaCheckSolid,
+  LiaPlaySolid,
+  LiaChevronDownSolid,
+  LiaChevronUpSolid,
+  LiaCheckCircleSolid,
+  LiaEyeSolid,
+  LiaEyeSlashSolid,
+} from 'react-icons/lia';
 import { webhookApi, WebhookConfigResponse } from '@/lib/api/webhooks';
 import { Button } from '@/components/ui/button';
 import { useGetWebhookConfig } from '../hooks/useGetWebhookConfig';
 import { useIntegrations } from '../hooks/useIntegrations';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
-import { LiaEyeSolid, LiaEyeSlashSolid } from 'react-icons/lia';
 import { integrationSteps, webhookSteps } from '../constants/steps';
 import { Else, If, Then } from 'react-if';
 import { MdQuestionMark } from 'react-icons/md';
@@ -82,8 +84,6 @@ const EasyOrderModal = ({
       }
     }
   }, [integrations]);
-
-  if (!isOpen) return null;
 
   const defaultWebhookUrl = getDefaultWebhookUrl(merchantId);
 
@@ -159,40 +159,51 @@ const EasyOrderModal = ({
   const showIsConnectWebhook = webhookData?.webhookSecret;
 
   return (
-    <>
-      <div
-        className="fixed inset-0 bg-black/50 z-40 transition-opacity"
-        onClick={handleClose}
-      />
-
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden"
-          dir="rtl"
+    <DialogPrimitive.Root
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open && !isLoading) handleClose();
+      }}
+    >
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content
+          className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden mx-4"
+          onPointerDownOutside={(e) => {
+            if (isLoading) e.preventDefault();
+          }}
+          onEscapeKeyDown={(e) => {
+            if (isLoading) e.preventDefault();
+          }}
         >
-          {/* Header */}
           <div className="bg-gray-50 border-b border-gray-200 px-6 py-4 flex items-center justify-between flex-shrink-0">
-            <h2 className="text-xl font-bold text-gray-900">ربط المتاجر</h2>
-            <Button
-              variant="ghost"
-              onClick={handleClose}
-              disabled={isLoading}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              <X className="w-6 h-6" />
-            </Button>
+            <DialogPrimitive.Title className="text-xl font-bold text-gray-900">
+              ربط المتاجر
+            </DialogPrimitive.Title>
+            <DialogPrimitive.Close asChild>
+              <Button
+                variant="ghost"
+                disabled={isLoading}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <LiaTimesSolid className="w-6 h-6" />
+              </Button>
+            </DialogPrimitive.Close>
           </div>
+
+          <DialogPrimitive.Description className="sr-only">
+            ربط المتاجر لمراقبة الطلبات تلقائياً
+          </DialogPrimitive.Description>
 
           <div className="p-6 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
             <p className="text-gray-600 text-center">
               قم بربط متجرك لمراقبة الطلبات تلقائياً
             </p>
 
-            {/* Platform Card */}
             <div className="bg-blue-50 rounded-xl flex items-center p-6 border border-[#2489E1]/20">
               <div className="flex items-center gap-4">
                 <div className="flex items-center justify-center w-16 h-16 bg-white border border-[#2489E1] shadow-sm rounded-lg">
-                  <ShoppingCart className="w-11 h-11 text-[#001A72]" />
+                  <LiaShoppingCartSolid className="w-11 h-11 text-[#001A72]" />
                 </div>
                 <div className="flex flex-col items-start gap-1">
                   <p className="text-sm text-gray-600">
@@ -205,27 +216,24 @@ const EasyOrderModal = ({
               </div>
             </div>
 
-            {/* Static Video Section (No Dropdown) */}
             <h4 className="font-semibold text-gray-900">فيديو توضيحي</h4>
             <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
               <div className="aspect-video w-full md:h-[300px] bg-gray-900 rounded-lg flex flex-col items-center justify-center text-white text-sm">
-                <Play className="w-12 h-12 mb-2 opacity-30" />
+                <LiaPlaySolid className="w-12 h-12 mb-2 opacity-30" />
                 <span className="opacity-75">سيتم إضافة الفيديو قريباً</span>
               </div>
             </div>
 
-            {/*  Webhook Dropdown */}
             <div className="bg-[#fbfdfe] rounded-xl border border-primary/30 overflow-hidden transition-all duration-300">
               <button
                 type="button"
                 onClick={() => setShowWebhookDropdown(!showWebhookDropdown)}
                 className="w-full relative py-7 px-4 cursor-pointer hover:bg-purple-100/30 transition-colors"
               >
-                {/* Absolute Badge */}
                 <If condition={showIsConnectWebhook}>
                   <Then>
                     <div className="absolute top-1 left-1 w-fit h-7 bg-green-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" />
+                      <LiaCheckCircleSolid className="w-3 h-3" />
                       متصل
                     </div>
                   </Then>
@@ -237,11 +245,10 @@ const EasyOrderModal = ({
                   </Else>
                 </If>
 
-                {/* Main Wrapper - items-end aligns the chevron with the bottom text line */}
                 <div className="flex items-end justify-between">
                   <div className="flex items-center gap-3">
                     <div className="bg-primary text-white p-2 rounded-lg">
-                      <Play className="w-5 h-5" />
+                      <LiaPlaySolid className="w-5 h-5" />
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-gray-900 leading-none mb-1">
@@ -253,12 +260,11 @@ const EasyOrderModal = ({
                     </div>
                   </div>
 
-                  {/* Chevron - pb-[2px] added to fine-tune the optical alignment with the text baseline */}
                   <div className="relative top-1 left-1">
                     {showWebhookDropdown ? (
-                      <ChevronUp className="w-6 h-6 text-primary" />
+                      <LiaChevronUpSolid className="w-6 h-6 text-primary" />
                     ) : (
-                      <ChevronDown className="w-6 h-6 text-primary" />
+                      <LiaChevronDownSolid className="w-6 h-6 text-primary" />
                     )}
                   </div>
                 </div>
@@ -297,9 +303,9 @@ const EasyOrderModal = ({
                           className="flex items-center gap-2 px-3 py-1 bg-primary text-white text-xs rounded-md hover:bg-[#4A1CB8]"
                         >
                           {copied ? (
-                            <Check className="w-3 h-3" />
+                            <LiaCheckSolid className="w-3 h-3" />
                           ) : (
-                            <Copy className="w-3 h-3" />
+                            <LiaCopySolid className="w-3 h-3" />
                           )}
                           {copied ? 'تم النسخ' : 'نسخ'}
                         </button>
@@ -367,18 +373,16 @@ const EasyOrderModal = ({
               )}
             </div>
 
-            {/*  API Key Dropdown */}
             <div className="bg-[#fbfdfe] rounded-xl border border-primary/30 overflow-hidden transition-all duration-300">
               <button
                 type="button"
                 onClick={() => setShowApiDropdown(!showApiDropdown)}
                 className="w-full relative py-7 px-4 cursor-pointer hover:bg-purple-100/30 transition-colors"
               >
-                {/* Absolute Badge */}
                 <If condition={existingIntegrationId}>
                   <Then>
                     <div className="absolute top-1 left-1 w-fit h-7 bg-green-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" />
+                      <LiaCheckCircleSolid className="w-3 h-3" />
                       متصل
                     </div>
                   </Then>
@@ -390,11 +394,10 @@ const EasyOrderModal = ({
                   </Else>
                 </If>
 
-                {/* Main Wrapper */}
                 <div className="flex items-end justify-between">
                   <div className="flex items-center gap-3">
                     <div className="bg-primary text-white p-2 rounded-lg">
-                      <ShoppingCart className="w-5 h-5" />
+                      <LiaShoppingCartSolid className="w-5 h-5" />
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-gray-900 leading-none mb-1">
@@ -406,12 +409,11 @@ const EasyOrderModal = ({
                     </div>
                   </div>
 
-                  {/* Chevron */}
                   <div className="relative top-1 left-1">
                     {showApiDropdown ? (
-                      <ChevronUp className="w-6 h-6 text-primary" />
+                      <LiaChevronUpSolid className="w-6 h-6 text-primary" />
                     ) : (
-                      <ChevronDown className="w-6 h-6 text-primary" />
+                      <LiaChevronDownSolid className="w-6 h-6 text-primary" />
                     )}
                   </div>
                 </div>
@@ -422,7 +424,6 @@ const EasyOrderModal = ({
                   onSubmit={handleApiSubmit}
                   className="p-6 pt-0 space-y-4 animate-in fade-in slide-in-from-top-2"
                 >
-                  {/* Steps Section */}
                   <div className="space-y-3 border-t border-purple-200/50 pt-4">
                     {integrationSteps.map((step, i) => (
                       <div
@@ -439,7 +440,6 @@ const EasyOrderModal = ({
                     ))}
                   </div>
 
-                  {/* Input Section */}
                   <div className="space-y-4 bg-gray-50/50 p-4 rounded-xl border border-gray-100 mt-2">
                     <div>
                       <label
@@ -475,7 +475,6 @@ const EasyOrderModal = ({
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
                   <div className="flex gap-2 pt-2">
                     <Button
                       type="submit"
@@ -502,9 +501,9 @@ const EasyOrderModal = ({
               </div>
             )}
           </div>
-        </div>
-      </div>
-    </>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 };
 

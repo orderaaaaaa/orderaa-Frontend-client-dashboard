@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import clsx from 'clsx';
 import { ShippingActionsBar } from '../ShippingActionsBar';
 import { ShippingScannedOrder } from '../../hooks/useShippingScannedOrders';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 
 interface ShippingScannedOrdersTableProps {
   orders: ShippingScannedOrder[];
@@ -104,6 +105,8 @@ export function ShippingScannedOrdersModal({
   isScanLoading = false,
   flashingCode,
 }: ShippingScannedOrdersModalProps) {
+  useBodyScrollLock(isOpen);
+
   if (!isOpen) return null;
 
   return (
