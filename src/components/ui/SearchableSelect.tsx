@@ -273,8 +273,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={searchPlaceholder}
-                    className="w-full px-2 py-1.5 rounded border text-sm
-                               focus:outline-none focus:border-primary"
+                    className="w-full px-2 py-1.5 rounded border focus:outline-none focus:border-primary"
                   />
                 </div>
               )}

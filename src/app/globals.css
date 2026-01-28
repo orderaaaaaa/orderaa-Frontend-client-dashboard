@@ -123,11 +123,10 @@
     @apply bg-background text-foreground;
   }
   /* Prevent iOS Safari zoom on form inputs (requires font-size >= 16px) */
-  /* Remove default focus outline on form inputs */
   input,
   textarea,
   select {
-    font-size: 16px;
+    font-size: 16px !important;
     outline: none;
   }
 }
