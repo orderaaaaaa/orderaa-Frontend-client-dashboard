@@ -8,8 +8,8 @@ import React, {
   forwardRef,
   useCallback,
 } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { CheckIcon, ChevronDown, Loader2, X } from 'lucide-react';
+import * as Popover from '@radix-ui/react-popover';
+import { LiaCheckSolid, LiaChevronDownSolid, LiaTimesSolid, LiaSpinnerSolid } from 'react-icons/lia';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/utils/debounce';
 
@@ -75,6 +75,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
 
     const internalRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const triggerRef = useRef<HTMLButtonElement>(null);
 
     const debouncedQuery = useDebounce(searchQuery, debounceMs);
 
@@ -90,8 +91,11 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
       (isOpen: boolean) => {
         setOpen(isOpen);
         onOpenChange?.(isOpen);
+        if (!isOpen) {
+          onBlur?.();
+        }
       },
-      [onOpenChange]
+      [onOpenChange, onBlur]
     );
 
     const handleClear = useCallback(
@@ -140,40 +144,12 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
     }, [value, displayValue, options, isObjectOptions]);
 
     useEffect(() => {
-      function onDocClick(e: MouseEvent) {
-        const container = (ref ||
-          internalRef) as React.RefObject<HTMLDivElement>;
-        if (
-          container.current &&
-          !container.current.contains(e.target as Node)
-        ) {
-          handleOpenChange(false);
-          setActiveIdx(-1);
-          onBlur?.();
-        }
-      }
-
-      function onKey(e: KeyboardEvent) {
-        if (e.key === 'Escape') {
-          handleOpenChange(false);
-          setActiveIdx(-1);
-        }
-      }
-
-      document.addEventListener('mousedown', onDocClick);
-      document.addEventListener('keydown', onKey);
-      return () => {
-        document.removeEventListener('mousedown', onDocClick);
-        document.removeEventListener('keydown', onKey);
-      };
-    }, [handleOpenChange, onBlur, ref]);
-
-    useEffect(() => {
       if (open && showSearch) {
         setTimeout(() => inputRef.current?.focus(), 50);
       }
       if (!open) {
         setSearchQuery('');
+        setActiveIdx(-1);
       }
     }, [open, showSearch]);
 
@@ -188,7 +164,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
       if (loading) {
         return (
           <div className="py-6 flex items-center justify-center gap-2 text-sm text-gray-500">
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <LiaSpinnerSolid className="w-4 h-4 animate-spin" />
             جاري التحميل...
           </div>
         );
@@ -216,74 +192,82 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
     return (
       <div
         ref={ref || internalRef}
-        className={cn('relative flex flex-col gap-1', widthClass, className)}
+        className={cn('flex flex-col gap-1', widthClass, className)}
       >
         {name && <input type="hidden" name={name} value={value} />}
 
-        <button
-          type="button"
-          disabled={disabled || loading}
-          onClick={() => !disabled && !loading && handleOpenChange(!open)}
-          className={cn(
-            'relative px-3 py-2 rounded border flex items-center justify-between truncate',
-            disabled || loading
-              ? 'bg-gray-100 cursor-not-allowed text-gray-400'
-              : 'bg-white',
-            error ? 'border-red-500' : 'border-gray-300',
-            triggerClassName
-          )}
-          aria-expanded={open}
-          aria-haspopup="listbox"
-        >
-          <span
-            className={cn(
-              'flex-1 truncate text-right',
-              currentDisplayValue ? 'text-gray-900' : 'text-gray-500'
-            )}
-          >
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                جاري التحميل...
-              </span>
-            ) : (
-              currentDisplayValue || placeholder
-            )}
-          </span>
-
-          {clearable && value && !disabled && !loading && (
+        <Popover.Root open={open} onOpenChange={handleOpenChange} modal={false}>
+          <Popover.Trigger asChild>
             <button
+              ref={triggerRef}
               type="button"
-              onClick={handleClear}
-              className="absolute left-10 top-1/2 -translate-y-1/2 z-20
-                         text-gray-400 hover:text-primary"
-              aria-label="Clear selection"
+              disabled={disabled || loading}
+              className={cn(
+                'relative px-3 py-2 rounded border flex items-center justify-between truncate',
+                disabled || loading
+                  ? 'bg-gray-100 cursor-not-allowed text-gray-400'
+                  : 'bg-white',
+                error ? 'border-red-500' : 'border-gray-300',
+                triggerClassName
+              )}
+              aria-expanded={open}
+              aria-haspopup="listbox"
             >
-              <X className="w-4 h-4" />
+              <span
+                className={cn(
+                  'flex-1 truncate text-right',
+                  currentDisplayValue ? 'text-gray-900' : 'text-gray-500'
+                )}
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <LiaSpinnerSolid className="w-4 h-4 animate-spin" />
+                    جاري التحميل...
+                  </span>
+                ) : (
+                  currentDisplayValue || placeholder
+                )}
+              </span>
+
+              {clearable && value && !disabled && !loading && (
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="absolute left-10 top-1/2 -translate-y-1/2 z-20
+                             text-gray-400 hover:text-primary"
+                  aria-label="Clear selection"
+                >
+                  <LiaTimesSolid className="w-4 h-4" />
+                </button>
+              )}
+
+              <LiaChevronDownSolid
+                className={cn(
+                  'w-5 h-5 text-gray-400 transition-transform',
+                  open && 'rotate-180'
+                )}
+              />
             </button>
-          )}
+          </Popover.Trigger>
 
-          <ChevronDown
-            className={cn(
-              'w-5 h-5 text-gray-400 transition-transform',
-              open && 'rotate-180'
-            )}
-          />
-        </button>
-
-        <AnimatePresence>
-          {open && (
-            <motion.div
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
-              className="absolute top-full z-50 mt-1 w-full max-h-60 overflow-auto
-                         rounded-md border bg-white shadow-lg"
+          <Popover.Portal>
+            <Popover.Content
+              className="z-50 w-full max-h-60 overflow-auto rounded-md border bg-white shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+              style={{
+                width: triggerRef.current?.offsetWidth,
+              }}
+              sideOffset={4}
+              align="start"
               role="listbox"
+              onOpenAutoFocus={(e) => {
+                e.preventDefault();
+                if (showSearch) {
+                  inputRef.current?.focus();
+                }
+              }}
             >
               {showSearch && (
-                <div className="p-2 border-b">
+                <div className="p-2 border-b sticky top-0 bg-white z-10">
                   <input
                     ref={inputRef}
                     value={searchQuery}
@@ -317,14 +301,14 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
                         )}
                       >
                         <span>{getDisplayText(opt)}</span>
-                        {selected && <CheckIcon className="w-4 h-4" />}
+                        {selected && <LiaCheckSolid className="w-4 h-4" />}
                       </li>
                     );
                   })}
               </ul>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </Popover.Content>
+          </Popover.Portal>
+        </Popover.Root>
 
         {error && <span className="text-xs text-red-500">{error}</span>}
       </div>
