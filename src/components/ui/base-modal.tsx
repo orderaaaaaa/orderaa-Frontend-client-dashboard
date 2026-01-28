@@ -70,6 +70,7 @@ export default function BaseModal({
           className={cn(
             'fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2',
             'bg-white rounded-[20px] shadow-xl flex flex-col max-h-[85vh]',
+            'w-[95vw] sm:w-[90vw] md:w-auto',
             maxWidth,
             height
           )}

@@ -68,7 +68,7 @@ export default function EditProductModal({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <DialogPrimitive.Content
-          className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 w-full max-w-[827px] mx-4 md:mx-0 min-h-[362px] max-h-[85vh] bg-white rounded-[20px] shadow-xl flex flex-col overflow-hidden"
+          className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 w-[95vw] sm:w-[90vw] md:w-[827px] max-w-[827px] min-h-[362px] max-h-[85vh] bg-white rounded-[20px] shadow-xl flex flex-col overflow-hidden"
         >
           <div
             className="flex-shrink-0 h-[60px] rounded-t-[20px] flex items-center justify-center px-8 relative"

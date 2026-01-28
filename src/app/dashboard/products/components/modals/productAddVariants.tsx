@@ -93,7 +93,7 @@ const ProductAddVariantsModal: React.FC<ProductAddVariantsModalProps> = ({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <DialogPrimitive.Content
-          className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl w-full max-w-xl overflow-hidden max-h-[85vh] flex flex-col mx-4"
+          className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl w-[95vw] sm:w-[90vw] md:w-auto md:max-w-xl overflow-hidden max-h-[85vh] flex flex-col"
           onPointerDownOutside={(e) => {
             if (isPending) e.preventDefault();
           }}

@@ -45,7 +45,7 @@ export default function DeleteConfirmationModal({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <DialogPrimitive.Content
-          className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 w-[827px] bg-white rounded-[20px] shadow-xl flex flex-col"
+          className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 w-[95vw] sm:w-[90vw] md:w-[827px] max-w-[827px] bg-white rounded-[20px] shadow-xl flex flex-col"
           onPointerDownOutside={(e) => {
             if (isDeleting) e.preventDefault();
           }}

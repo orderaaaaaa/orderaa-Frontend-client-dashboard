@@ -38,7 +38,7 @@ export default function AddLeadModal({ onClose }: { onClose: () => void }) {
     >
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-[100] bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content className="fixed top-[50%] left-[50%] z-[100] -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-[24px] shadow-2xl flex flex-col max-h-[85vh] mx-4">
+        <DialogPrimitive.Content className="fixed top-[50%] left-[50%] z-[100] -translate-x-1/2 -translate-y-1/2 w-[95vw] sm:w-[90vw] md:w-auto md:max-w-lg bg-white rounded-[24px] shadow-2xl flex flex-col max-h-[85vh]">
           <div className="flex items-center justify-between p-6 border-b flex-shrink-0">
             <div className="text-right">
               <DialogPrimitive.Title className="text-2xl font-bold">

@@ -119,7 +119,7 @@ export default function CustomerOrdersModal({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <DialogPrimitive.Content
-          className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col m-4"
+          className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl w-[95vw] sm:w-[90vw] md:w-auto md:max-w-7xl max-h-[90vh] flex flex-col"
         >
           <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-primary/5 to-[#682fee]/5 rounded-t-2xl">
             <div className="flex items-center gap-4">

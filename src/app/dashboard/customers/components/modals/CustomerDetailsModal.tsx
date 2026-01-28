@@ -59,7 +59,7 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
     >
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-xl w-full max-w-6xl max-h-[95vh] overflow-y-auto relative mx-2 md:mx-4">
+        <DialogPrimitive.Content className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-xl w-[95vw] sm:w-[90vw] md:w-auto md:max-w-6xl max-h-[95vh] overflow-y-auto">
           <DialogPrimitive.Title className="sr-only">
             تفاصيل العميل
           </DialogPrimitive.Title>

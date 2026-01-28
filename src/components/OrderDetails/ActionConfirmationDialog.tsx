@@ -53,7 +53,7 @@ export default function ActionConfirmationDialog({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <DialogPrimitive.Content
-          className={`fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 w-full max-w-[500px] bg-white rounded-[20px] shadow-xl transition-all duration-300 ${showSuccess ? 'scale-95 opacity-90' : 'scale-100 opacity-100'}`}
+          className={`fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 w-[95vw] sm:w-[90vw] md:w-[500px] max-w-[500px] bg-white rounded-[20px] shadow-xl transition-all duration-300 ${showSuccess ? 'scale-95 opacity-90' : 'scale-100 opacity-100'}`}
           onPointerDownOutside={(e) => {
             if (isLoading) e.preventDefault();
           }}
