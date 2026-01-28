@@ -252,7 +252,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
 
           <Popover.Portal>
             <Popover.Content
-              className="z-50 w-full max-h-60 overflow-auto rounded-md border bg-white shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+              className="z-50 w-full rounded-md border bg-white shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 overflow-hidden flex flex-col max-h-60"
               style={{
                 width: triggerRef.current?.offsetWidth,
               }}
@@ -267,7 +267,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
               }}
             >
               {showSearch && (
-                <div className="p-2 border-b sticky top-0 bg-white z-10">
+                <div className="p-2 border-b flex-shrink-0 bg-white">
                   <input
                     ref={inputRef}
                     value={searchQuery}
@@ -278,7 +278,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
                 </div>
               )}
 
-              <ul className="py-1">
+              <ul className="py-1 overflow-y-auto flex-1" style={{ WebkitOverflowScrolling: 'touch' }}>
                 {renderEmptyState() ||
                   filtered.map((opt, idx) => {
                     const key = getOptionKey(opt);
