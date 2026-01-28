@@ -31,12 +31,26 @@ export const ColumnChart = memo(function ColumnChart({
     import('apexcharts').then(({ default: ApexCharts }) => {
       if (!mounted || !chartRef.current) return;
 
+      const fixCanvasDirection = (chartCtx: ApexCharts) => {
+        const el = (chartCtx as unknown as { el: HTMLElement }).el;
+        const canvasContainer = el.querySelector<HTMLElement>('.apexcharts-canvas');
+        const isRTL = document.documentElement.dir === 'rtl';
+
+        if (canvasContainer) {
+          canvasContainer.style.setProperty('direction', isRTL ? 'rtl' : 'ltr', 'important');
+        }
+      };
+
       const options: ApexCharts.ApexOptions = {
         chart: {
           type: 'bar',
           height,
           fontFamily: 'inherit',
           toolbar: { show: false },
+          events: {
+            mounted: fixCanvasDirection,
+            updated: fixCanvasDirection,
+          },
         },
         series: series.map((s) => ({ name: s.name, data: s.data })),
         plotOptions: {

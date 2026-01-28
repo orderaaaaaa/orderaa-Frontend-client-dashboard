@@ -26,11 +26,75 @@ export const PolarAreaChart = memo(function PolarAreaChart({
     import('apexcharts').then(({ default: ApexCharts }) => {
       if (!mounted || !chartRef.current) return;
 
+      const fixLegendLayout = (chartCtx: ApexCharts) => {
+        const el = (chartCtx as unknown as { el: HTMLElement }).el;
+        const legendContainer = el.querySelector<HTMLElement>('.apexcharts-legend');
+        const canvasContainer = el.querySelector<HTMLElement>('.apexcharts-canvas');
+        const isRTL = document.documentElement.dir === 'rtl';
+
+        if (canvasContainer) {
+          canvasContainer.style.setProperty('direction', isRTL ? 'rtl' : 'ltr', 'important');
+        }
+
+        if (window.innerWidth < 640) {
+          if (legendContainer) {
+            legendContainer.style.position = 'absolute';
+            legendContainer.style.top = '150px';
+            legendContainer.style.left = '';
+            legendContainer.style.right = '';
+            legendContainer.style.display = 'flex';
+            legendContainer.style.flexDirection = 'column';
+            legendContainer.style.gap = '8px';
+            legendContainer.style.alignItems = 'flex-start';
+            legendContainer.style.width = '100%';
+            legendContainer.style.marginTop = '16px';
+          }
+
+          el.querySelectorAll<HTMLElement>('.apexcharts-legend-series').forEach(
+            (item) => {
+              item.style.display = 'flex';
+              item.style.flexDirection = 'row';
+              item.style.alignItems = 'center';
+              item.style.gap = '8px';
+              item.style.margin = '0';
+            },
+          );
+        } else {
+          if (legendContainer) {
+            legendContainer.style.position = '';
+            legendContainer.style.top = '';
+            legendContainer.style.left = '';
+            legendContainer.style.right = '';
+            legendContainer.style.display = '';
+            legendContainer.style.flexDirection = '';
+            legendContainer.style.gap = '25px';
+            legendContainer.style.alignItems = '';
+            legendContainer.style.width = '';
+            legendContainer.style.marginTop = '';
+            legendContainer.style.paddingBottom = '20px';
+          }
+
+          el.querySelectorAll<HTMLElement>('.apexcharts-legend-series').forEach(
+            (item) => {
+              item.style.display = '';
+              item.style.flexDirection = '';
+              item.style.alignItems = '';
+              item.style.gap = '5px';
+              item.style.margin = '';
+            },
+          );
+        }
+      };
+
       const options: ApexCharts.ApexOptions = {
         chart: {
           type: 'polarArea',
           height,
           fontFamily: 'inherit',
+          events: {
+            mounted: fixLegendLayout,
+            updated: fixLegendLayout,
+          },
         },
         series,
         labels,
@@ -96,6 +160,17 @@ export const PolarAreaChart = memo(function PolarAreaChart({
 
       chartInstance.current = new ApexCharts(chartRef.current, options);
       chartInstance.current.render();
+
+      const handleResize = () => {
+        if (chartInstance.current) {
+          fixLegendLayout(chartInstance.current);
+        }
+      };
+      window.addEventListener('resize', handleResize);
+
+      return () => {
+        window.removeEventListener('resize', handleResize);
+      };
     });
 
     return () => {

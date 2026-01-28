@@ -31,6 +31,16 @@ export const SplineAreaChart = memo(function SplineAreaChart({
     import('apexcharts').then(({ default: ApexCharts }) => {
       if (!mounted || !chartRef.current) return;
 
+      const fixCanvasDirection = (chartCtx: ApexCharts) => {
+        const el = (chartCtx as unknown as { el: HTMLElement }).el;
+        const canvasContainer = el.querySelector<HTMLElement>('.apexcharts-canvas');
+        const isRTL = document.documentElement.dir === 'rtl';
+
+        if (canvasContainer) {
+          canvasContainer.style.setProperty('direction', isRTL ? 'rtl' : 'ltr', 'important');
+        }
+      };
+
       const options: ApexCharts.ApexOptions = {
         chart: {
           type: 'area',
@@ -38,6 +48,10 @@ export const SplineAreaChart = memo(function SplineAreaChart({
           toolbar: { show: false },
           zoom: { enabled: false },
           fontFamily: 'inherit',
+          events: {
+            mounted: fixCanvasDirection,
+            updated: fixCanvasDirection,
+          },
         },
         stroke: {
           curve: 'smooth',
