@@ -86,6 +86,7 @@ export const ColumnChart = memo(function ColumnChart({
           axisTicks: { show: false },
         },
         yaxis: {
+          min: 0,
           max(max: number) {
             return Math.ceil(max * 1.15);
           },
