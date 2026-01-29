@@ -18,6 +18,7 @@ export interface SummaryCardConfig {
   value: number;
   icon: ReactNode;
   iconBgClassName: string;
+  onClick?: () => void;
 }
 
 export interface CallDurationItem {
@@ -47,5 +48,37 @@ export interface EmployeeStatusRow {
   status: EmployeeStatus;
   lastInactivityDuration: string;
   totalInactivityToday: number;
+  totalAttempts: number;
+}
+
+export interface EmployeeModalData {
+  [key: string]: unknown;
+  id: number;
+  name: string;
+  status: EmployeeStatus;
+  totalWorkHours: string;
+  attempts: number;
+}
+
+export interface FollowUpModalData {
+  [key: string]: unknown;
+  id: number;
+  status: string;
+  count: number;
+  percentage: string;
+}
+
+export interface StopTimeRange {
+  from: string;
+  to: string;
+}
+
+export interface EmployeeStopDetailData {
+  [key: string]: unknown;
+  id: number;
+  employeeId: number;
+  status: EmployeeStatus;
+  stopTimes: StopTimeRange[];
+  totalStopToday: string;
   totalAttempts: number;
 }

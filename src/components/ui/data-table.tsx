@@ -27,6 +27,7 @@ interface DataTableProps<T extends Record<string, unknown>> {
   isLoading?: boolean
   skeletonRows?: number
   className?: string
+  onRowClick?: (row: T) => void
 }
 
 function DataTable<T extends Record<string, unknown>>({
@@ -37,6 +38,7 @@ function DataTable<T extends Record<string, unknown>>({
   isLoading = false,
   skeletonRows = 5,
   className,
+  onRowClick,
 }: DataTableProps<T>) {
   if (isLoading) {
     return (
@@ -97,7 +99,11 @@ function DataTable<T extends Record<string, unknown>>({
         </TableHeader>
         <TableBody>
           {data.map((row) => (
-            <TableRow key={String(row[keyField])}>
+            <TableRow
+              key={String(row[keyField])}
+              onClick={() => onRowClick?.(row)}
+              className={cn(onRowClick && 'cursor-pointer hover:bg-gray-50')}
+            >
               {columns.map((col) => (
                 <TableCell
                   key={col.key}

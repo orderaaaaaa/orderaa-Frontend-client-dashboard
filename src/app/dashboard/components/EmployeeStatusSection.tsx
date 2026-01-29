@@ -1,9 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import clsx from 'clsx';
 import { DataTable } from '@/components/ui/data-table';
 import type { DataTableColumn } from '@/components/ui/data-table';
+import BaseModal from '@/components/ui/base-modal';
 import type { EmployeeStatusRow } from '../types';
+import { employeeStopDetailsData, employeeStopChartData } from '../constants';
+import { EmployeeStopDetailsModalContent } from './modals';
 
 interface EmployeeStatusSectionProps {
   employees: EmployeeStatusRow[];
@@ -56,6 +60,24 @@ export function EmployeeStatusSection({
   employees,
   isLoading,
 }: EmployeeStatusSectionProps) {
+  const [selectedEmployee, setSelectedEmployee] =
+    useState<EmployeeStatusRow | null>(null);
+
+  const handleRowClick = (row: Record<string, unknown>) => {
+    const employee = row as unknown as EmployeeStatusRow;
+    setSelectedEmployee(employee);
+  };
+
+  const closeModal = () => setSelectedEmployee(null);
+
+  const stopDetails = selectedEmployee
+    ? employeeStopDetailsData[selectedEmployee.id]
+    : undefined;
+
+  const chartData = selectedEmployee
+    ? employeeStopChartData[selectedEmployee.id]
+    : undefined;
+
   return (
     <section className="space-y-4">
       <h2 className="text-lg font-bold text-primary">حالة الموظفين</h2>
@@ -65,7 +87,24 @@ export function EmployeeStatusSection({
         keyField="id"
         isLoading={isLoading}
         skeletonRows={4}
+        onRowClick={handleRowClick}
       />
+
+      <BaseModal
+        isOpen={selectedEmployee !== null}
+        onClose={closeModal}
+        title={selectedEmployee ? `تفاصيل توقف ${selectedEmployee.name}` : ''}
+        showFooter={false}
+        maxWidth="md:max-w-[900px]"
+      >
+        {stopDetails && selectedEmployee && (
+          <EmployeeStopDetailsModalContent
+            stopDetails={stopDetails}
+            employeeName={selectedEmployee.name}
+            chartData={chartData}
+          />
+        )}
+      </BaseModal>
     </section>
   );
 }

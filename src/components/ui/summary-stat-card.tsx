@@ -8,6 +8,7 @@ interface SummaryStatCardProps {
   label: string
   value: number | string
   className?: string
+  onClick?: () => void
 }
 
 function SummaryStatCard({
@@ -16,13 +17,16 @@ function SummaryStatCard({
   label,
   value,
   className,
+  onClick,
 }: SummaryStatCardProps) {
   return (
     <div
       className={cn(
         'bg-white flex gap-4 rounded-lg py-5 px-4 items-center border border-gray-100',
+        onClick && 'cursor-pointer hover:shadow-md transition-shadow',
         className,
       )}
+      onClick={onClick}
     >
       <div
         className={cn(
