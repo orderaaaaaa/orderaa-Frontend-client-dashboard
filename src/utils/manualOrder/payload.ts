@@ -1,5 +1,13 @@
 import { ManualOrderPayload } from '@/types/manual-order';
 
+type ShippingPayment = {
+  shipping: boolean;
+  shippingCost: string;
+  includeShipping: boolean;
+  paymentMethod: string;
+  needsConfirmation: boolean;
+};
+
 export function buildManualOrderPayload(args: {
   platform: string;
   pageName: string;
@@ -14,6 +22,7 @@ export function buildManualOrderPayload(args: {
     price: string;
     variant?: { id?: number };
   }>;
+  shippingPayment?: ShippingPayment;
 }): ManualOrderPayload {
   const {
     platform,
@@ -25,6 +34,7 @@ export function buildManualOrderPayload(args: {
     address,
     notes,
     selectedProducts,
+    shippingPayment,
   } = args;
 
   return {
@@ -44,6 +54,18 @@ export function buildManualOrderPayload(args: {
       quantity: 1,
       price: Number(p.price) || 0,
     })),
+    ...(shippingPayment?.shipping && {
+      shipping: {
+        enabled: true,
+        cost: Number(shippingPayment.shippingCost) || 0,
+      },
+    }),
+    ...(shippingPayment?.includeShipping && {
+      paymentMethod: shippingPayment.paymentMethod,
+    }),
+    ...(shippingPayment?.needsConfirmation && {
+      needsConfirmation: true,
+    }),
   };
 }
 

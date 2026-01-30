@@ -3,14 +3,7 @@
 import React from 'react';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import { USER_MENU_OPTIONS } from '@/constants/dashboard-layout';
-
-type OrderProps = {
-  platform: string;
-  pageName: string;
-  onPlatformChange: (v: string) => void;
-  onPageNameChange: (v: string) => void;
-  errors?: { platform?: string; pageName?: string };
-};
+import { OrderProps } from './types';
 
 function Order({
   platform,
@@ -20,13 +13,10 @@ function Order({
   errors,
 }: OrderProps) {
   return (
-    <div
-      className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center"
-      dir="rtl"
-    >
+    <div className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center">
       <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
         <h1 className="font-bold text-[22px] mb-6">مصدر الطلب</h1>
-        <div className="grid grid-cols-2 max-sm:grid-cols-1 max-sm:gap-6 mb-8">
+        <div className="grid grid-cols-2 max-sm:grid-cols-1 gap-8 max-sm:gap-6 mb-8">
           <div className="max-w-[502px]" data-field-error="platform">
             <div className="mb-1">
               <label className="block font-medium text-[16px]">

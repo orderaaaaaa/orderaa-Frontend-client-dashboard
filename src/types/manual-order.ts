@@ -19,6 +19,12 @@ export type ManualOrderPayload = {
   pageName: string;
   customer: ManualOrderCustomer;
   products: ManualOrderProduct[];
+  shipping?: {
+    enabled: boolean;
+    cost?: number;
+  };
+  paymentMethod?: string;
+  needsConfirmation?: boolean;
 };
 
 

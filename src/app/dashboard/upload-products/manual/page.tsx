@@ -1,6 +1,14 @@
 'use client';
-import { Plus } from 'lucide-react';
+import {
+  LiaPlusSolid,
+  LiaCheckCircleSolid,
+  LiaExclamationCircleSolid,
+} from 'react-icons/lia';
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertTitle } from '@/components/ui/alert';
 import ClientInformation from './ClientInformation';
 import Order from './Order';
 import OrderDetails from './OrderDetails';
@@ -8,128 +16,84 @@ import ShippingAndPayment from './ShippingAndPayment';
 import { useProductDropdownStore } from '@/store/productDropdownStore';
 import Products from './Products';
 import { buildManualOrderPayload } from '@/utils/manualOrder/payload';
-import {
-  validateManualOrder,
-  ManualFormErrors as ManualFormErrorsType,
-} from '@/utils/manualOrder/validation';
 import { createManualOrder } from '@/lib/api/manualOrdersApi';
-
-type ManualFormErrors = ManualFormErrorsType;
+import { manualOrderSchema, ManualOrderFormData } from './schema';
 
 function Manual() {
   const selectedProducts = useProductDropdownStore(
     (state) => state.selectedProducts
   );
 
-  // Order source
-  const [orderSource, setOrderSource] = useState<{
-    platform: string;
-    pageName: string;
-  }>({
-    platform: '',
-    pageName: '',
-  });
-
-  // Client information
-  const [customer, setCustomer] = useState<{
-    customerName: string;
-    phoneNumber: string;
-    governorate: string;
-    area: string;
-    address: string;
-    notes: string;
-  }>({
-    customerName: '',
-    phoneNumber: '',
-    governorate: '',
-    area: '',
-    address: '',
-    notes: '',
-  });
-
-  const [errors, setErrors] = useState<ManualFormErrors>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-
-  // Clear error for a specific field when user starts typing
-  const clearFieldError = (field: keyof ManualFormErrors) => {
-    if (errors[field]) {
-      setErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
-    }
-  };
-
-  const handleSubmit = async () => {
-    // Clear previous errors and success message
-    setSubmitError(null);
-    setSubmitSuccess(false);
-
-    const productsMapped = selectedProducts.map((p) => ({
-      productId: p.id,
-      variantId: p.variant?.id,
-      quantity: 1,
-      price: Number(p.price) || 0,
-    }));
-
-    const nextErrors = validateManualOrder(
-      {
-        platform: orderSource.platform,
-        pageName: orderSource.pageName,
-        customerName: customer.customerName,
-        phoneNumber: customer.phoneNumber,
-        governorate: customer.governorate,
-        area: customer.area,
-        address: customer.address,
-        notes: customer.notes,
+  const {
+    handleSubmit: handleFormSubmit,
+    watch,
+    setValue,
+    formState: { errors, isSubmitting },
+    reset,
+    clearErrors,
+  } = useForm<ManualOrderFormData>({
+    resolver: zodResolver(manualOrderSchema),
+    defaultValues: {
+      orderSource: {
+        platform: '',
+        pageName: '',
       },
-      productsMapped
-    );
-    setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0) {
-      // Scroll to first error
-      const firstErrorField = Object.keys(nextErrors)[0];
-      const errorElement = document.querySelector(
-        `[data-field-error="${firstErrorField}"]`
-      );
-      errorElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const payload = buildManualOrderPayload({
-        platform: orderSource.platform,
-        pageName: orderSource.pageName,
-        customerName: customer.customerName,
-        phoneNumber: customer.phoneNumber,
-        governorate: customer.governorate,
-        area: customer.area,
-        address: customer.address,
-        notes: customer.notes,
-        selectedProducts,
-      });
-
-      await createManualOrder(payload);
-
-      // Success - reset form and show success message
-      setSubmitSuccess(true);
-      setOrderSource({ platform: '', pageName: '' });
-      setCustomer({
+      customer: {
         customerName: '',
         phoneNumber: '',
         governorate: '',
         area: '',
         address: '',
         notes: '',
-      });
-      useProductDropdownStore.getState().setSelectedProducts([]);
-      setErrors({});
+      },
+      shippingPayment: {
+        shipping: false,
+        shippingCost: '',
+        includeShipping: false,
+        paymentMethod: '',
+        needsConfirmation: false,
+      },
+    },
+  });
 
-      // Clear success message after 5 seconds
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [productsError, setProductsError] = useState<string | null>(null);
+
+  const formValues = watch();
+
+  const onSubmit = async (data: ManualOrderFormData) => {
+    setSubmitError(null);
+    setSubmitSuccess(false);
+    setProductsError(null);
+
+    if (!selectedProducts || selectedProducts.length === 0) {
+      setProductsError('يجب اختيار منتج واحد على الأقل');
+      const errorElement = document.querySelector('[data-field-error="products"]');
+      errorElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    try {
+      const payload = buildManualOrderPayload({
+        platform: data.orderSource.platform,
+        pageName: data.orderSource.pageName,
+        customerName: data.customer.customerName,
+        phoneNumber: data.customer.phoneNumber,
+        governorate: data.customer.governorate,
+        area: data.customer.area,
+        address: data.customer.address,
+        notes: data.customer.notes,
+        selectedProducts,
+        shippingPayment: data.shippingPayment,
+      });
+
+      await createManualOrder(payload);
+
+      setSubmitSuccess(true);
+      reset();
+      useProductDropdownStore.getState().setSelectedProducts([]);
+
       setTimeout(() => setSubmitSuccess(false), 5000);
     } catch (error) {
       console.error('Error creating manual order:', error);
@@ -138,100 +102,154 @@ function Manual() {
           ? error.message
           : 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.'
       );
-    } finally {
-      setIsSubmitting(false);
+    }
+  };
+
+  const handleInvalidSubmit = () => {
+    if (!selectedProducts || selectedProducts.length === 0) {
+      setProductsError('يجب اختيار منتج واحد على الأقل');
+      const errorElement = document.querySelector('[data-field-error="products"]');
+      errorElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const findFirstErrorField = (): string | null => {
+      if (errors.orderSource?.platform) return 'platform';
+      if (errors.orderSource?.pageName) return 'pageName';
+      if (errors.customer?.customerName) return 'customerName';
+      if (errors.customer?.phoneNumber) return 'phoneNumber';
+      if (errors.customer?.governorate) return 'governorate';
+      if (errors.customer?.area) return 'area';
+      if (errors.customer?.address) return 'address';
+      if (errors.customer?.notes) return 'notes';
+      if (errors.shippingPayment?.shippingCost) return 'shippingCost';
+      if (errors.shippingPayment?.paymentMethod) return 'paymentMethod';
+      return null;
+    };
+
+    const firstErrorField = findFirstErrorField();
+    if (firstErrorField) {
+      const errorElement = document.querySelector(`[data-field-error="${firstErrorField}"]`);
+      errorElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
 
   return (
-    <>
-      {/* Success Message */}
+    <form onSubmit={handleFormSubmit(onSubmit, handleInvalidSubmit)} noValidate>
       {submitSuccess && (
-        <div className="mx-6 mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg" dir="rtl">
-          <p className="font-semibold">✓ تم إنشاء الطلب بنجاح!</p>
+        <div className="mx-6 mb-4">
+          <Alert className="bg-green-50 border-green-200 text-green-700">
+            <LiaCheckCircleSolid className="text-green-600" />
+            <AlertTitle>تم إنشاء الطلب بنجاح!</AlertTitle>
+          </Alert>
         </div>
       )}
 
-      {/* Error Message */}
       {submitError && (
-        <div className="mx-6 mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg" dir="rtl">
-          <p className="font-semibold">✗ خطأ: {submitError}</p>
+        <div className="mx-6 mb-4">
+          <Alert variant="destructive">
+            <LiaExclamationCircleSolid />
+            <AlertTitle>خطأ: {submitError}</AlertTitle>
+          </Alert>
         </div>
       )}
 
       <div className="flex flex-col gap-[26px]">
         <Order
-          platform={orderSource.platform}
-          pageName={orderSource.pageName}
+          platform={formValues.orderSource.platform}
+          pageName={formValues.orderSource.pageName}
           onPlatformChange={(v) => {
-            clearFieldError('platform');
-            setOrderSource((prev) => ({ ...prev, platform: v }));
+            setValue('orderSource.platform', v);
+            clearErrors('orderSource.platform');
           }}
           onPageNameChange={(v) => {
-            clearFieldError('pageName');
-            setOrderSource((prev) => ({ ...prev, pageName: v }));
+            setValue('orderSource.pageName', v);
+            clearErrors('orderSource.pageName');
           }}
-          errors={{ platform: errors.platform, pageName: errors.pageName }}
+          errors={{
+            platform: errors.orderSource?.platform?.message,
+            pageName: errors.orderSource?.pageName?.message,
+          }}
         />
-        <OrderDetails />
-        {errors.products && (
-          <div className="px-6" dir="rtl" data-field-error="products">
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-600 text-sm font-medium">{errors.products}</p>
-            </div>
-          </div>
-        )}
+        <OrderDetails errors={{ products: productsError || undefined }} />
         {selectedProducts.length > 0 && <Products />}
 
         <ClientInformation
-          customerName={customer.customerName}
-          phoneNumber={customer.phoneNumber}
-          governorate={customer.governorate}
-          area={customer.area}
-          address={customer.address}
-          notes={customer.notes}
+          customerName={formValues.customer.customerName}
+          phoneNumber={formValues.customer.phoneNumber}
+          governorate={formValues.customer.governorate}
+          area={formValues.customer.area}
+          address={formValues.customer.address}
+          notes={formValues.customer.notes}
           onCustomerNameChange={(v) => {
-            clearFieldError('customerName');
-            setCustomer((prev) => ({ ...prev, customerName: v }));
+            setValue('customer.customerName', v);
+            clearErrors('customer.customerName');
           }}
           onPhoneNumberChange={(v) => {
-            clearFieldError('phoneNumber');
-            setCustomer((prev) => ({ ...prev, phoneNumber: v }));
+            setValue('customer.phoneNumber', v);
+            clearErrors('customer.phoneNumber');
           }}
           onGovernorateChange={(v) => {
-            clearFieldError('governorate');
-            setCustomer((prev) => ({ ...prev, governorate: v }));
+            setValue('customer.governorate', v);
+            clearErrors('customer.governorate');
           }}
           onAreaChange={(v) => {
-            clearFieldError('area');
-            setCustomer((prev) => ({ ...prev, area: v }));
+            setValue('customer.area', v);
+            clearErrors('customer.area');
           }}
           onAddressChange={(v) => {
-            clearFieldError('address');
-            setCustomer((prev) => ({ ...prev, address: v }));
+            setValue('customer.address', v);
+            clearErrors('customer.address');
           }}
           onNotesChange={(v) => {
-            clearFieldError('notes');
-            setCustomer((prev) => ({ ...prev, notes: v }));
+            setValue('customer.notes', v);
+            clearErrors('customer.notes');
           }}
           errors={{
-            customerName: errors.customerName,
-            phoneNumber: errors.phoneNumber,
-            governorate: errors.governorate,
-            area: errors.area,
-            address: errors.address,
-            notes: errors.notes,
+            customerName: errors.customer?.customerName?.message,
+            phoneNumber: errors.customer?.phoneNumber?.message,
+            governorate: errors.customer?.governorate?.message,
+            area: errors.customer?.area?.message,
+            address: errors.customer?.address?.message,
+            notes: errors.customer?.notes?.message,
           }}
         />
-        <ShippingAndPayment />
+        <ShippingAndPayment
+          shipping={formValues.shippingPayment.shipping}
+          shippingCost={formValues.shippingPayment.shippingCost}
+          includeShipping={formValues.shippingPayment.includeShipping}
+          paymentMethod={formValues.shippingPayment.paymentMethod}
+          needsConfirmation={formValues.shippingPayment.needsConfirmation}
+          onShippingChange={(v) => {
+            setValue('shippingPayment.shipping', v);
+            clearErrors('shippingPayment.shippingCost');
+          }}
+          onShippingCostChange={(v) => {
+            setValue('shippingPayment.shippingCost', v);
+            clearErrors('shippingPayment.shippingCost');
+          }}
+          onIncludeShippingChange={(v) => {
+            setValue('shippingPayment.includeShipping', v);
+            clearErrors('shippingPayment.paymentMethod');
+          }}
+          onPaymentMethodChange={(v) => {
+            setValue('shippingPayment.paymentMethod', v);
+            clearErrors('shippingPayment.paymentMethod');
+          }}
+          onNeedsConfirmationChange={(v) => {
+            setValue('shippingPayment.needsConfirmation', v);
+          }}
+          errors={{
+            shippingCost: errors.shippingPayment?.shippingCost?.message,
+            paymentMethod: errors.shippingPayment?.paymentMethod?.message,
+          }}
+        />
         <div className="flex justify-end ml-6">
-          <button
-            onClick={handleSubmit}
+          <Button
+            type="submit"
             disabled={isSubmitting}
-            className={`flex py-2 gap-2 text-md items-center text-white w-40 px-5 rounded-full font-bold transition-opacity ${isSubmitting
-                ? 'bg-gray-400 cursor-not-allowed opacity-70'
-                : 'bg-primary cursor-pointer hover:bg-[#4a1fa8]'
-              }`}
+            size="lg"
+            className="w-40 rounded-full font-bold"
           >
             {isSubmitting ? (
               <>
@@ -240,14 +258,14 @@ function Manual() {
               </>
             ) : (
               <>
-                <Plus className="font-bold w-6 h-6" />
+                <LiaPlusSolid className="w-6 h-6" />
                 إضافة طلب
               </>
             )}
-          </button>
+          </Button>
         </div>
       </div>
-    </>
+    </form>
   );
 }
 

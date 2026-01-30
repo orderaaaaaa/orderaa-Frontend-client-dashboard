@@ -9,7 +9,7 @@ import {
 import { UseFormRegister, FieldErrors, UseFormWatch } from 'react-hook-form';
 import clsx from 'clsx';
 import { OrderSettingsFormData } from '../schemas/store';
-import { ToggleSwitch } from './ToggleSwitch';
+import { FormSwitch } from '@/components/ui/form-switch';
 import { Separator } from '@/components/ui/separator';
 
 interface ShippingSectionProps {
@@ -67,7 +67,7 @@ export function ShippingSection({
             </p>
           </div>
         </div>
-        <ToggleSwitch
+        <FormSwitch
           name="canOpenShipment"
           checked={!!watch('canOpenShipment')}
           register={register}
@@ -90,7 +90,7 @@ export function ShippingSection({
               </p>
             </div>
           </div>
-          <ToggleSwitch
+          <FormSwitch
             name="employeeCanEditContent"
             checked={!!watch('employeeCanEditContent')}
             register={register}

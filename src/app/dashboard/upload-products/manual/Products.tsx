@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useProductDropdownStore } from '@/store/productDropdownStore';
-import { Pen, Plus, Trash2 } from 'lucide-react';
+import { LiaPenSolid, LiaPlusSolid, LiaTrashSolid } from 'react-icons/lia';
 
 function Products() {
   // Access the store to get selected products
@@ -27,10 +27,7 @@ function Products() {
   };
 
   return (
-    <div
-      className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center"
-      dir="rtl"
-    >
+    <div className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center">
       <div className="w-full bg-white border max-sm:p-5 border-gray-200 rounded-xl p-8 shadow-sm">
         <header>
           <h1 className="font-bold text-[22px]">المنتجات</h1>
@@ -95,14 +92,14 @@ function Products() {
                     {product.price} ج.م
                   </h2>
                   <button className="hover:text-gray-600 cursor-pointer">
-                    <Pen className="w-4 max-sm:w-3" />
+                    <LiaPenSolid className="w-4 max-sm:w-3" />
                   </button>
                 </div>
                 <button
                   onClick={() => removeProduct(product.id)}
                   className="text-red-500 absolute left-3 bottom-1 sm:bottom-[40%]  cursor-pointer hover:text-red-700"
                 >
-                  <Trash2 className="w-4" />
+                  <LiaTrashSolid className="w-4" />
                 </button>
               </div>
             ))}
@@ -119,7 +116,7 @@ function Products() {
               onClick={handleOpenProductModal}
               className="w-30 flex items-center gap-1 cursor-pointer justify-center px-3 mb-4 py-2 rounded-full bg-primary text-white hover:bg-[#4a1fa8] transition-colors"
             >
-              <Plus className="w-4 h-4 mt-1 " />
+              <LiaPlusSolid className="w-4 h-4 mt-1 " />
               <span>إضافه منتج</span>
             </button>
           </div>
