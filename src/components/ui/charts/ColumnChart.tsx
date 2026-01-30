@@ -114,9 +114,29 @@ export const ColumnChart = memo(function ColumnChart({
           {
             breakpoint: 640,
             options: {
-              chart: { height: 300 },
+              chart: {
+                height: 350,
+              },
               plotOptions: {
                 bar: { columnWidth: '70%' },
+              },
+              xaxis: {
+                labels: {
+                  style: {
+                    fontSize: '10px',
+                    fontWeight: 600,
+                  },
+                  rotate: -45,
+                  rotateAlways: true,
+                  hideOverlappingLabels: false,
+                  trim: false,
+                  offsetY: 5,
+                },
+              },
+              grid: {
+                padding: {
+                  bottom: 20,
+                },
               },
             },
           },

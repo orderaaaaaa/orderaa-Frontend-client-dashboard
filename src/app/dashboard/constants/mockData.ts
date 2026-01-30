@@ -180,20 +180,10 @@ export const stoppedEmployeesData: EmployeeModalData[] = [
 ];
 
 export const followUpOrdersData: FollowUpModalData[] = [
-  { id: 1, status: 'تأكيد', count: 156, percentage: '35%' },
-  { id: 2, status: 'متابعة', count: 89, percentage: '20%' },
   { id: 3, status: 'لا يرد', count: 34, percentage: '8%' },
   { id: 4, status: 'مغلق', count: 18, percentage: '4%' },
   { id: 5, status: 'مش بيجمع', count: 25, percentage: '6%' },
   { id: 6, status: 'فتح وقفل', count: 23, percentage: '5%' },
-  { id: 7, status: 'مستعجل', count: 15, percentage: '3%' },
-  { id: 8, status: 'الغاء', count: 42, percentage: '9%' },
-  { id: 9, status: 'رفض التعديل', count: 8, percentage: '2%' },
-  { id: 10, status: 'تأجيل ساعات', count: 28, percentage: '6%' },
-  { id: 11, status: 'تأجيل أيام', count: 22, percentage: '5%' },
-  { id: 12, status: 'متابعة واتساب', count: 38, percentage: '8%' },
-  { id: 13, status: 'وقف التشغيل', count: 12, percentage: '3%' },
-  { id: 14, status: 'في انتظار الدفع', count: 19, percentage: '4%' },
 ];
 
 export const cancelledOrdersData: FollowUpModalData[] = [
