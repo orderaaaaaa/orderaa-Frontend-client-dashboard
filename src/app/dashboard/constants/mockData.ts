@@ -6,6 +6,7 @@ import type {
   EmployeeModalData,
   FollowUpModalData,
   EmployeeStopDetailData,
+  CancelledOrderDetail,
 } from '../types';
 
 export const MOCK_EMPLOYEE_STATUS: EmployeeStatusRow[] = [
@@ -51,7 +52,6 @@ export const CALL_DURATIONS: CallDurationItem[] = [
     chartCategories: ['02:55:00', '03:00:00', '03:05:00', '03:10:00'],
     chartSeries: [
       { name: 'series1', data: [40, 42, 43, 45] },
-      { name: 'series2', data: [35, 38, 40, 42] },
     ],
   },
   {
@@ -61,7 +61,6 @@ export const CALL_DURATIONS: CallDurationItem[] = [
     chartCategories: ['02:55:00', '03:00:00', '03:05:00', '03:10:00'],
     chartSeries: [
       { name: 'series1', data: [45, 44, 42, 40] },
-      { name: 'series2', data: [42, 43, 44, 45] },
     ],
   },
   {
@@ -71,7 +70,6 @@ export const CALL_DURATIONS: CallDurationItem[] = [
     chartCategories: ['02:55:00', '03:00:00', '03:05:00', '03:10:00'],
     chartSeries: [
       { name: 'series1', data: [30, 35, 38, 42] },
-      { name: 'series2', data: [28, 30, 32, 35] },
     ],
   },
   {
@@ -81,7 +79,6 @@ export const CALL_DURATIONS: CallDurationItem[] = [
     chartCategories: ['02:55:00', '03:00:00', '03:05:00', '03:10:00'],
     chartSeries: [
       { name: 'series1', data: [38, 40, 42, 45] },
-      { name: 'series2', data: [35, 37, 39, 41] },
     ],
   },
 ];
@@ -288,3 +285,62 @@ export const employeeStopChartData: Record<number, EmployeeStopChartData> = {
     series: [{ name: 'مدة التوقف (دقيقة)', data: [10, 0, 15, 0] }],
   },
 };
+
+export const cancelledOrderDetails: CancelledOrderDetail[] = [
+  {
+    id: 1,
+    orderCode: 'ORD-2024-001',
+    customerName: 'أحمد محمد',
+    cancelReason: 'العميل غير مهتم',
+    notes: 'العميل قرر عدم الشراء بعد التفكير',
+  },
+  {
+    id: 2,
+    orderCode: 'ORD-2024-002',
+    customerName: 'فاطمة علي',
+    cancelReason: 'السعر مرتفع',
+    notes: 'طلب خصم ولم نستطع تلبية الطلب',
+  },
+  {
+    id: 3,
+    orderCode: 'ORD-2024-003',
+    customerName: 'محمود حسن',
+    cancelReason: 'تغيير رأي العميل',
+    notes: 'وجد منتج بديل من متجر آخر',
+  },
+  {
+    id: 4,
+    orderCode: 'ORD-2024-004',
+    customerName: 'نورة عبدالله',
+    cancelReason: 'طلب مكرر',
+    notes: 'تم اكتشاف أن الطلب مكرر من نفس العميل',
+  },
+  {
+    id: 5,
+    orderCode: 'ORD-2024-005',
+    customerName: 'خالد سعيد',
+    cancelReason: 'المنتج غير متوفر',
+    notes: 'نفذ المخزون قبل تأكيد الطلب',
+  },
+  {
+    id: 6,
+    orderCode: 'ORD-2024-006',
+    customerName: 'سارة إبراهيم',
+    cancelReason: 'خطأ في البيانات',
+    notes: 'عنوان الشحن غير صحيح ولم يتمكن العميل من تحديثه',
+  },
+  {
+    id: 7,
+    orderCode: 'ORD-2024-007',
+    customerName: 'يوسف أحمد',
+    cancelReason: 'رقم خاطئ',
+    notes: 'لم نتمكن من التواصل مع العميل',
+  },
+  {
+    id: 8,
+    orderCode: 'ORD-2024-008',
+    customerName: 'مريم خالد',
+    cancelReason: 'أسباب أخرى',
+    notes: 'العميل غير راض عن سياسة الاستبدال',
+  },
+];

@@ -16,11 +16,13 @@ import {
   followUpOrdersData,
   incompleteOrdersData,
   cancelledOrdersData,
+  cancelledOrderDetails,
 } from '../constants';
 import { useSummaryModal } from '../hooks';
 import {
   EmployeeListModalContent,
   OrderStatusModalContent,
+  CancelledOrdersModalContent,
 } from './modals';
 
 interface TodaySummarySectionProps {
@@ -52,7 +54,7 @@ const MODAL_CONFIG = {
   cancelled: {
     title: 'طلبات ملغاة',
     data: cancelledOrdersData,
-    type: 'order' as const,
+    type: 'cancelled' as const,
   },
 };
 
@@ -155,6 +157,12 @@ export function TodaySummarySection({
         )}
         {currentModalConfig?.type === 'order' && (
           <OrderStatusModalContent data={currentModalConfig.data} />
+        )}
+        {currentModalConfig?.type === 'cancelled' && (
+          <CancelledOrdersModalContent
+            summaryData={currentModalConfig.data}
+            orderDetails={cancelledOrderDetails}
+          />
         )}
       </BaseModal>
     </section>

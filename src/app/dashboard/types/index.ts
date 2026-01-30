@@ -82,3 +82,12 @@ export interface EmployeeStopDetailData {
   totalStopToday: string;
   totalAttempts: number;
 }
+
+export interface CancelledOrderDetail {
+  [key: string]: unknown;
+  id: number;
+  orderCode: string;
+  customerName: string;
+  cancelReason: string;
+  notes: string;
+}
