@@ -11,7 +11,7 @@ export type ManualOrderCustomer = {
   governorate: string;
   area: string;
   address: string;
-  notes: string;
+  notes?: string;
 };
 
 export type ManualOrderPayload = {
@@ -22,6 +22,7 @@ export type ManualOrderPayload = {
   shipping?: {
     enabled: boolean;
     cost?: number;
+    company?: string;
   };
   paymentMethod?: string;
   needsConfirmation?: boolean;

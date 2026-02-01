@@ -2,6 +2,7 @@ import { ManualOrderPayload } from '@/types/manual-order';
 
 type ShippingPayment = {
   shipping: boolean;
+  shippingCompany?: string;
   shippingCost: string;
   includeShipping: boolean;
   paymentMethod: string;
@@ -16,7 +17,7 @@ export function buildManualOrderPayload(args: {
   governorate: string;
   area: string;
   address: string;
-  notes: string;
+  notes?: string;
   selectedProducts: Array<{
     id: number;
     price: string;
@@ -58,6 +59,9 @@ export function buildManualOrderPayload(args: {
       shipping: {
         enabled: true,
         cost: Number(shippingPayment.shippingCost) || 0,
+        ...(shippingPayment.shippingCompany && {
+          company: shippingPayment.shippingCompany,
+        }),
       },
     }),
     ...(shippingPayment?.includeShipping && {

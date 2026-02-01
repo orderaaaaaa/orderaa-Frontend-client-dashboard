@@ -47,9 +47,6 @@ export function CallDurationSection({
               <span className="text-[#000000] font-bold text-sm block mb-2">
                 {item.label}
               </span>
-              <div className="text-xl font-bold text-gray-900">
-                {item.value}
-              </div>
             </div>
             <SplineAreaChart
               categories={item.chartCategories}

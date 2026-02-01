@@ -17,6 +17,45 @@ const STATUS_CONFIG = {
   stopped: { label: 'متوقف', dotColor: 'bg-gray-400' },
 } as const;
 
+function calculateDurationInMinutes(from: string, to: string): number {
+  const parseTime = (timeStr: string): number => {
+    const [time, period] = timeStr.split(' ');
+    const [hoursStr, minutesStr] = time.split(':');
+    let hours = parseInt(hoursStr, 10);
+    const minutes = parseInt(minutesStr, 10);
+
+    if (period?.toUpperCase() === 'PM' && hours !== 12) {
+      hours += 12;
+    } else if (period?.toUpperCase() === 'AM' && hours === 12) {
+      hours = 0;
+    }
+
+    return hours * 60 + minutes;
+  };
+
+  const fromMinutes = parseTime(from);
+  const toMinutes = parseTime(to);
+
+  return toMinutes >= fromMinutes
+    ? toMinutes - fromMinutes
+    : 24 * 60 - fromMinutes + toMinutes;
+}
+
+function formatDuration(totalMinutes: number): string {
+  if (totalMinutes < 60) {
+    return `${totalMinutes} دقيقة`;
+  }
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (minutes === 0) {
+    return `${hours} ساعة`;
+  }
+
+  return `${hours} ساعة و ${minutes} دقيقة`;
+}
+
 const columns: DataTableColumn<Record<string, unknown>>[] = [
   {
     key: 'employeeName',
@@ -44,20 +83,28 @@ const columns: DataTableColumn<Record<string, unknown>>[] = [
       const times = value as { from: string; to: string }[];
       return (
         <div className="flex flex-col">
-          {times.map((time, idx) => (
-            <div
-              key={idx}
-              className={clsx(
-                'flex',
-                idx < times.length - 1 && 'border-b border-gray-200',
-              )}
-            >
-              <span className="flex-1 px-2 text-center">{time.from}</span>
-              <span className="flex-1 px-2 text-center border-r border-gray-200">
-                {time.to}
-              </span>
-            </div>
-          ))}
+          {times.map((time, idx) => {
+            const duration = calculateDurationInMinutes(time.from, time.to);
+            return (
+              <div
+                key={idx}
+                className={clsx(
+                  'flex flex-col',
+                  idx < times.length - 1 && 'border-b border-gray-200',
+                )}
+              >
+                <div className="flex">
+                  <span className="flex-1 px-2 text-center">{time.from}</span>
+                  <span className="flex-1 px-2 text-center border-r border-gray-200">
+                    {time.to}
+                  </span>
+                </div>
+                <span className="w-full px-2 text-center text-xs text-gray-500 py-1">
+                  {formatDuration(duration)}
+                </span>
+              </div>
+            );
+          })}
         </div>
       );
     },

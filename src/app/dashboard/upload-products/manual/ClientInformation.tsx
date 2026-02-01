@@ -151,7 +151,7 @@ function ClientInformation({
           <div data-field-error="notes">
             <div className="mb-1">
               <label className="block font-medium text-[16px]">
-                ملاحظات العميل <span className="text-red-500">*</span>
+                ملاحظات العميل
               </label>
             </div>
             <Textarea

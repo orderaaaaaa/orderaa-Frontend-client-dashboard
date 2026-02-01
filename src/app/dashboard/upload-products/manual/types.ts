@@ -35,11 +35,13 @@ export type ClientInformationProps = {
 
 export type ShippingAndPaymentProps = {
   shipping: boolean;
+  shippingCompany: string;
   shippingCost: string;
   includeShipping: boolean;
   paymentMethod: string;
   needsConfirmation: boolean;
   onShippingChange: (v: boolean) => void;
+  onShippingCompanyChange: (v: string) => void;
   onShippingCostChange: (v: string) => void;
   onIncludeShippingChange: (v: boolean) => void;
   onPaymentMethodChange: (v: string) => void;

@@ -51,7 +51,7 @@ export const CALL_DURATIONS: CallDurationItem[] = [
     value: '3 دقيقه',
     chartCategories: ['02:55:00', '03:00:00', '03:05:00', '03:10:00'],
     chartSeries: [
-      { name: 'series1', data: [40, 42, 43, 45] },
+      { name: 'مكالمة مؤكدة', data: [40, 42, 43, 45] },
     ],
   },
   {
@@ -60,7 +60,7 @@ export const CALL_DURATIONS: CallDurationItem[] = [
     value: '3 دقيقه',
     chartCategories: ['02:55:00', '03:00:00', '03:05:00', '03:10:00'],
     chartSeries: [
-      { name: 'series1', data: [45, 44, 42, 40] },
+      { name: 'مكالمة ملغاه', data: [45, 44, 42, 40] },
     ],
   },
   {
@@ -69,7 +69,7 @@ export const CALL_DURATIONS: CallDurationItem[] = [
     value: '4 دقيقه',
     chartCategories: ['02:55:00', '03:00:00', '03:05:00', '03:10:00'],
     chartSeries: [
-      { name: 'series1', data: [30, 35, 38, 42] },
+      { name: 'مكالمة متابعة', data: [30, 35, 38, 42] },
     ],
   },
   {
@@ -78,7 +78,7 @@ export const CALL_DURATIONS: CallDurationItem[] = [
     value: '1 دقيقه',
     chartCategories: ['02:55:00', '03:00:00', '03:05:00', '03:10:00'],
     chartSeries: [
-      { name: 'series1', data: [38, 40, 42, 45] },
+      { name: 'مكالمة غير مكتمله', data: [38, 40, 42, 45] },
     ],
   },
 ];

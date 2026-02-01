@@ -11,10 +11,11 @@ export const manualOrderSchema = z.object({
     governorate: z.string().min(1, 'هذا الحقل مطلوب'),
     area: z.string().min(1, 'هذا الحقل مطلوب'),
     address: z.string().min(1, 'هذا الحقل مطلوب'),
-    notes: z.string().min(1, 'هذا الحقل مطلوب'),
+    notes: z.string().optional(),
   }),
   shippingPayment: z.object({
     shipping: z.boolean(),
+    shippingCompany: z.string().optional(),
     shippingCost: z.string(),
     includeShipping: z.boolean(),
     paymentMethod: z.string(),

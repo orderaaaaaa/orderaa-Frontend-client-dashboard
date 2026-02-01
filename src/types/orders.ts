@@ -296,6 +296,7 @@ export interface FilterOrdersDto {
   orderByDirection?: 'asc' | 'desc';
   isPrinted?: boolean;
   shippingCompany?: string;
+  department?: string;
 }
 
 // Pagination Meta

@@ -122,14 +122,14 @@ export const navigation: NavigationItem[] = [
     href: '/dashboard/products',
     icon: LiaBoxOpenSolid,
   },
-  {
-    name: 'المتاجر',
-    href: '/dashboard/stores',
-    icon: LiaStoreSolid,
-  },
-  {
-    name: 'العملاء و الليدز',
-    href: '/dashboard/leads',
-    icon: LiaUsersCogSolid,
-  },
+  // {
+  //   name: 'المتاجر',
+  //   href: '/dashboard/stores',
+  //   icon: LiaStoreSolid,
+  // },
+  // {
+  //   name: 'العملاء و الليدز',
+  //   href: '/dashboard/leads',
+  //   icon: LiaUsersCogSolid,
+  // },
 ];

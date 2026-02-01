@@ -17,6 +17,7 @@ interface DataTableColumn<T> {
   header: string
   render?: (value: unknown, row: T) => React.ReactNode
   className?: string
+  headerClassName?: string
 }
 
 interface DataTableProps<T extends Record<string, unknown>> {
@@ -44,17 +45,21 @@ function DataTable<T extends Record<string, unknown>>({
     return (
       <div
         className={cn(
-          'bg-white rounded-lg border border-gray-100 shadow-md overflow-hidden',
+          'bg-white rounded-lg border border-gray-100 shadow-md overflow-x-auto',
           className,
         )}
       >
-        <Table className="table-fixed min-w-[600px]">
+        <Table className="w-full min-w-0">
           <TableHeader>
             <TableRow className={cn('bg-[#f1eefa]', headerClassName)}>
               {columns.map((col) => (
                 <TableHead
                   key={col.key}
-                  className="px-4 py-4 font-medium text-gray-700 border-l border-gray-200 last:border-l-0 whitespace-normal"
+                  className={cn(
+                    'px-2 py-2 sm:px-4 sm:py-4 font-medium text-gray-700 border-l border-gray-200 last:border-l-0 whitespace-normal text-xs sm:text-sm',
+                    col.headerClassName,
+                    col.className,
+                  )}
                 >
                   {col.header}
                 </TableHead>
@@ -65,8 +70,14 @@ function DataTable<T extends Record<string, unknown>>({
             {Array.from({ length: skeletonRows }).map((_, i) => (
               <TableRow key={i}>
                 {columns.map((col) => (
-                  <TableCell key={col.key} className="px-4 py-3 border-l border-gray-200 last:border-l-0 whitespace-normal">
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-20" />
+                  <TableCell
+                    key={col.key}
+                    className={cn(
+                      'px-2 py-2 sm:px-4 sm:py-3 border-l border-gray-200 last:border-l-0 whitespace-normal',
+                      col.className,
+                    )}
+                  >
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-full max-w-20" />
                   </TableCell>
                 ))}
               </TableRow>
@@ -80,17 +91,21 @@ function DataTable<T extends Record<string, unknown>>({
   return (
     <div
       className={cn(
-        'bg-white rounded-lg border border-gray-100 shadow-md overflow-hidden',
+        'bg-white rounded-lg border border-gray-100 shadow-md overflow-x-auto',
         className,
       )}
     >
-      <Table className="table-fixed min-w-[600px]">
+      <Table className="w-full min-w-0">
         <TableHeader>
           <TableRow className={cn('bg-[#f1eefa]', headerClassName)}>
             {columns.map((col) => (
               <TableHead
                 key={col.key}
-                className="px-4 py-4 font-bold border-l border-gray-200 last:border-l-0 whitespace-normal"
+                className={cn(
+                  'px-2 py-2 sm:px-4 sm:py-4 font-bold border-l border-gray-200 last:border-l-0 whitespace-normal text-xs sm:text-sm',
+                  col.headerClassName,
+                  col.className,
+                )}
               >
                 {col.header}
               </TableHead>
@@ -108,7 +123,7 @@ function DataTable<T extends Record<string, unknown>>({
                 <TableCell
                   key={col.key}
                   className={cn(
-                    'px-4 py-3 border-l border-gray-200 last:border-l-0 whitespace-normal',
+                    'px-2 py-2 sm:px-4 sm:py-3 border-l border-gray-200 last:border-l-0 whitespace-normal text-xs sm:text-sm',
                     col.className,
                   )}
                 >

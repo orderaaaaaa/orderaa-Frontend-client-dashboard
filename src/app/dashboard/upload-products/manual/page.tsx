@@ -48,6 +48,7 @@ function Manual() {
       },
       shippingPayment: {
         shipping: false,
+        shippingCompany: '',
         shippingCost: '',
         includeShipping: false,
         paymentMethod: '',
@@ -180,7 +181,7 @@ function Manual() {
           governorate={formValues.customer.governorate}
           area={formValues.customer.area}
           address={formValues.customer.address}
-          notes={formValues.customer.notes}
+          notes={formValues.customer.notes || ''}
           onCustomerNameChange={(v) => {
             setValue('customer.customerName', v);
             clearErrors('customer.customerName');
@@ -216,13 +217,20 @@ function Manual() {
         />
         <ShippingAndPayment
           shipping={formValues.shippingPayment.shipping}
+          shippingCompany={formValues.shippingPayment.shippingCompany || ''}
           shippingCost={formValues.shippingPayment.shippingCost}
           includeShipping={formValues.shippingPayment.includeShipping}
           paymentMethod={formValues.shippingPayment.paymentMethod}
           needsConfirmation={formValues.shippingPayment.needsConfirmation}
           onShippingChange={(v) => {
             setValue('shippingPayment.shipping', v);
+            if (!v) {
+              setValue('shippingPayment.shippingCompany', '');
+            }
             clearErrors('shippingPayment.shippingCost');
+          }}
+          onShippingCompanyChange={(v) => {
+            setValue('shippingPayment.shippingCompany', v);
           }}
           onShippingCostChange={(v) => {
             setValue('shippingPayment.shippingCost', v);

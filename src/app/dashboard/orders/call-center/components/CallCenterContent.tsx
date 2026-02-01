@@ -62,8 +62,11 @@ export function CallCenterContent() {
   } = usePrintOrdersFilters();
 
   const apiFilters = useMemo(() => {
-    return buildApiFiltersFromUrlState(filters);
-  }, [filters]);
+    return {
+      ...buildApiFiltersFromUrlState(filters),
+      ...(department && { department }),
+    };
+  }, [filters, department]);
 
   const orderDetailsFilterParams = useMemo(() => {
     const params = new URLSearchParams();
