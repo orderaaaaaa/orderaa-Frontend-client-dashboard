@@ -20,7 +20,7 @@ export const providers: ShippingProvider[] = [
     name: 'Bosta',
     logo: '/Icons/bosta.png',
     description: 'بوسطة للشحن وتوصيل الطلبات للمنازل',
-    isActive: false,
+    isActive: true,
   },
   {
     id: 'shipblu',

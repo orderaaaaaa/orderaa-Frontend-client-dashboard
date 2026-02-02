@@ -9,10 +9,11 @@ import {
   LiaEyeSlashSolid,
   LiaEyeSolid,
 } from 'react-icons/lia';
+import { toast } from 'react-toastify';
 import { useShippingQuery } from '../hooks/useShippingQuery';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
-import { steps } from '../constants/steps';
+import { getStepsByProvider } from '../constants/steps';
 import { If, Then } from 'react-if';
 import { ShippingConfig } from '../types/shipping';
 
@@ -46,6 +47,29 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
     }
   }, [isOpen]);
 
+  const requiresClientCode = providerId.toLowerCase() === 'turbo';
+  const steps = getStepsByProvider(providerId);
+
+  const getProviderDisplayName = () => {
+    const provider = providerId.toLowerCase();
+    switch (provider) {
+      case 'turbo':
+        return 'Turbo Shipping';
+      case 'bosta':
+        return 'Bosta';
+      case 'aramex':
+        return 'Aramex';
+      case 'shipblu':
+        return 'ShipBlu';
+      case 'mylerz':
+        return 'Mylerz';
+      case 'jt_express':
+        return 'J&T Express';
+      default:
+        return providerId;
+    }
+  };
+
   const handleSave = async () => {
     setError('');
 
@@ -54,17 +78,20 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
       return;
     }
 
-    if (!clientCode.trim()) {
+    if (requiresClientCode && !clientCode.trim()) {
       setError('يرجى إدخال رمز العميل (Client Code)');
       return;
     }
 
     try {
-      const basePayload = {
+      const basePayload: any = {
         authKey: authKey.trim(),
-        clientCode: clientCode.trim(),
         isActive: true,
       };
+
+      if (requiresClientCode) {
+        basePayload.clientCode = clientCode.trim();
+      }
 
       if (!config?.authKey) {
         await saveConfig({
@@ -78,16 +105,19 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
         });
       }
 
+      toast.success(`تم ربط ${getProviderDisplayName()} بنجاح!`);
       setAuthKey('');
       setClientCode('');
       onClose();
     } catch (err: any) {
-      setError(err.message || 'حدث خطأ أثناء الحفظ');
+      const errorMessage = err.message || 'حدث خطأ أثناء الحفظ';
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !isSaving && authKey.trim() && clientCode.trim()) {
+    if (e.key === 'Enter' && !isSaving && authKey.trim()) {
       handleSave();
     }
   };
@@ -112,7 +142,7 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
         >
           <div className="bg-gray-50 border-b border-gray-200 px-6 py-4 flex items-center justify-between flex-shrink-0">
             <DialogPrimitive.Title className="text-xl font-bold text-gray-900">
-              إعدادات الربط مع {providerId === 'turbo' ? 'Turbo' : providerId}
+              إعدادات الربط مع {getProviderDisplayName()}
             </DialogPrimitive.Title>
             <DialogPrimitive.Close asChild>
               <Button
@@ -141,7 +171,7 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                 </div>
                 <div className="flex flex-col items-start gap-1">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    Turbo Shipping
+                    {getProviderDisplayName()}
                   </h3>
                   <p className="text-sm text-gray-600">
                     اتبع التعليمات أدناه للربط
@@ -254,33 +284,35 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                     </button>
                   </div>
 
-                  <div className="relative bg-gray-100 py-2 px-2 rounded-sm flex items-center justify-between">
-                    <div>
-                      <span className="font-bold">
-                        ال clientCode الخاص بك :
-                      </span>
-                      <span className="font-mono">
-                        {showClientCode ? config?.clientCode : '************'}
-                      </span>
+                  {requiresClientCode && config?.clientCode && (
+                    <div className="relative bg-gray-100 py-2 px-2 rounded-sm flex items-center justify-between">
+                      <div>
+                        <span className="font-bold">
+                          ال clientCode الخاص بك :
+                        </span>
+                        <span className="font-mono">
+                          {showClientCode ? config?.clientCode : '************'}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        className="ml-2 text-gray-500 hover:text-gray-700"
+                        onClick={() => setShowClientCode((prev) => !prev)}
+                      >
+                        {showClientCode ? (
+                          <LiaEyeSlashSolid
+                            size={18}
+                            className="text-primary cursor-pointer"
+                          />
+                        ) : (
+                          <LiaEyeSolid
+                            size={18}
+                            className="text-primary cursor-pointer"
+                          />
+                        )}
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      className="ml-2 text-gray-500 hover:text-gray-700"
-                      onClick={() => setShowClientCode((prev) => !prev)}
-                    >
-                      {showClientCode ? (
-                        <LiaEyeSlashSolid
-                          size={18}
-                          className="text-primary cursor-pointer"
-                        />
-                      ) : (
-                        <LiaEyeSolid
-                          size={18}
-                          className="text-primary cursor-pointer"
-                        />
-                      )}
-                    </button>
-                  </div>
+                  )}
                 </div>
               </Then>
             </If>
@@ -298,22 +330,28 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                 onClear={() => setAuthKey('')}
               />
 
-              <Input
-                label="رمز العميل (Client Code)"
-                type="text"
-                placeholder="أدخل رمز العميل"
-                value={clientCode}
-                onChange={(e) => setClientCode(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={isSaving}
-                clearable
-                onClear={() => setClientCode('')}
-              />
+              {requiresClientCode && (
+                <Input
+                  label="رمز العميل (Client Code)"
+                  type="text"
+                  placeholder="أدخل رمز العميل"
+                  value={clientCode}
+                  onChange={(e) => setClientCode(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  disabled={isSaving}
+                  clearable
+                  onClear={() => setClientCode('')}
+                />
+              )}
 
               <div className="flex gap-3 pt-4 border-t border-gray-100">
                 <Button
                   onClick={handleSave}
-                  disabled={isSaving || !authKey.trim() || !clientCode.trim()}
+                  disabled={
+                    isSaving ||
+                    !authKey.trim() ||
+                    (requiresClientCode && !clientCode.trim())
+                  }
                   className="flex-1 bg-primary hover:bg-[#4A1CB8] h-12 text-lg"
                 >
                   {isSaving ? 'جاري التفعيل...' : 'تفعيل الربط'}

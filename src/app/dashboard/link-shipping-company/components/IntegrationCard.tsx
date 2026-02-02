@@ -2,7 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { ShippingProvider } from '../types/shipping';
-import { CheckCircle2 } from 'lucide-react';
+import { LiaCheckCircleSolid } from 'react-icons/lia';
 
 interface IntegrationCardProps {
   provider: ShippingProvider;
@@ -15,14 +15,20 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
   config,
   onConnect,
 }) => {
-  // Use the passed config to determine connection status
   const isConnected = config?.isActive ?? false;
+  const canInteract = provider.isActive;
+  const isDisabled = !canInteract;
+
+  const getButtonText = () => {
+    if (!canInteract) return 'قريباً';
+    return isConnected ? 'إدارة الربط' : 'إنشاء ربط جديد';
+  };
 
   return (
-    <div className="relative bg-white rounded-2xl p-8 transition-all duration-300 border border-gray-200 hover:border-gray-300 hover:shadow-md">
-      {isConnected && (
+    <div className="relative bg-white rounded-2xl p-8 transition-all duration-300 border border-gray-200 hover:border-gray-300 hover:shadow-md flex flex-col min-h-[400px]">
+      {isConnected && canInteract && (
         <div className="absolute top-4 left-4 bg-green-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
-          <CheckCircle2 className="w-3 h-3" />
+          <LiaCheckCircleSolid className="w-3 h-3" />
           متصل
         </div>
       )}
@@ -51,22 +57,19 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
       {/* Action Button */}
       <Button
         onClick={onConnect}
-        disabled={!provider.isActive}
+        disabled={isDisabled}
         className={`
-          w-full h-12 rounded-lg font-medium text-white transition-all duration-200
-          ${provider.isActive
-            ? isConnected
-              ? 'bg-gray-600 hover:bg-gray-700'
-              : 'bg-primary hover:bg-[#4A1CB8] active:bg-[#3D17A0]'
-            : 'bg-gray-400 cursor-not-allowed'
+          w-full h-12 rounded-lg font-medium text-white transition-all duration-200 mt-auto
+          ${
+            canInteract
+              ? isConnected
+                ? 'bg-gray-600 hover:bg-gray-700'
+                : 'bg-primary hover:bg-[#4A1CB8] active:bg-[#3D17A0]'
+              : 'bg-gray-400 cursor-not-allowed'
           }
         `}
       >
-        {isConnected
-          ? 'إدارة الربط'
-          : provider.isActive
-            ? 'إنشاء ربط جديد'
-            : 'قريباً'}
+        {getButtonText()}
       </Button>
     </div>
   );

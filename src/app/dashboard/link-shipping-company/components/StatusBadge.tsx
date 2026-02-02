@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { LiaCheckCircleSolid, LiaExclamationCircleSolid } from 'react-icons/lia';
 
 interface StatusBadgeProps {
   isConnected: boolean;
@@ -16,12 +16,12 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ isConnected }) => {
     >
       {isConnected ? (
         <>
-          <CheckCircle2 className="w-4 h-4" />
+          <LiaCheckCircleSolid className="w-4 h-4" />
           <span>متصل حالياً</span>
         </>
       ) : (
         <>
-          <AlertCircle className="w-4 h-4" />
+          <LiaExclamationCircleSolid className="w-4 h-4" />
           <span>غير متصل</span>
         </>
       )}
