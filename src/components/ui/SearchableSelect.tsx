@@ -225,7 +225,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
           disabled={disabled || loading}
           onClick={() => !disabled && !loading && handleOpenChange(!open)}
           className={cn(
-            'relative px-2 py-1.5 md:px-3 md:py-2 rounded border flex items-center justify-between truncate text-sm md:text-base',
+            'relative px-2 py-1.5 md:px-3 md:py-2 rounded border flex items-center justify-between truncate text-sm md:text-base cursor-pointer',
             disabled || loading
               ? 'bg-gray-100 cursor-not-allowed text-gray-400'
               : 'bg-white',

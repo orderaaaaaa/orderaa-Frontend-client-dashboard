@@ -1,14 +1,13 @@
 'use client';
 
 import React from 'react';
-import SearchableSelect from '@/components/ui/SearchableSelect';
-import { USER_MENU_OPTIONS } from '@/constants/dashboard-layout';
+import Input from '@/components/ui/Input';
 import { OrderProps } from './types';
 
 function Order({
-  platform,
+  utmSource,
   pageName,
-  onPlatformChange,
+  onUtmSourceChange,
   onPageNameChange,
   errors,
 }: OrderProps) {
@@ -17,21 +16,20 @@ function Order({
       <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
         <h1 className="font-bold text-[22px] mb-6">مصدر الطلب</h1>
         <div className="grid grid-cols-2 max-sm:grid-cols-1 gap-8 max-sm:gap-6 mb-8">
-          <div className="max-w-[502px]" data-field-error="platform">
+          <div className="max-w-[502px]" data-field-error="utmSource">
             <div className="mb-1">
               <label className="block font-medium text-[16px]">
-                منصة <span className="text-red-500">*</span>
+                المنصة <span className="text-red-500">*</span>
               </label>
             </div>
-            <SearchableSelect
-              value={platform}
-              onChange={onPlatformChange}
-              options={USER_MENU_OPTIONS}
-              placeholder="اختر المنصة"
-              widthClass="w-full"
-              error={errors?.platform}
-              triggerClassName={`border w-full bg-[#EAEAEA40] p-1 rounded-sm ${errors?.platform ? 'border-red-500' : 'border-primary'
-                }`}
+            <Input
+              name="utmSource"
+              type="text"
+              placeholder="مثال: facebook ads"
+              className="w-full"
+              value={utmSource}
+              onChange={(e) => onUtmSourceChange(e.target.value)}
+              error={errors?.utmSource}
             />
           </div>
           <div className="max-w-[502px]" data-field-error="pageName">
@@ -40,15 +38,14 @@ function Order({
                 اسم الصفحة <span className="text-red-500">*</span>
               </label>
             </div>
-            <SearchableSelect
+            <Input
+              name="pageName"
+              type="text"
+              placeholder="مثال: product page"
+              className="w-full"
               value={pageName}
-              onChange={onPageNameChange}
-              options={USER_MENU_OPTIONS}
-              placeholder="اختر الصفحة"
-              widthClass="w-full"
+              onChange={(e) => onPageNameChange(e.target.value)}
               error={errors?.pageName}
-              triggerClassName={`border w-full bg-[#EAEAEA40] p-1 rounded-sm ${errors?.pageName ? 'border-red-500' : 'border-primary'
-                }`}
             />
           </div>
         </div>

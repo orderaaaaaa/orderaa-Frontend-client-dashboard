@@ -1,50 +1,36 @@
 import { z } from 'zod';
 
-export const manualOrderSchema = z.object({
-  orderSource: z.object({
-    platform: z.string().min(1, 'هذا الحقل مطلوب'),
-    pageName: z.string().min(1, 'هذا الحقل مطلوب'),
-  }),
-  customer: z.object({
-    customerName: z.string().min(1, 'هذا الحقل مطلوب'),
-    phoneNumber: z.string().min(1, 'هذا الحقل مطلوب'),
-    governorate: z.string().min(1, 'هذا الحقل مطلوب'),
-    area: z.string().min(1, 'هذا الحقل مطلوب'),
-    address: z.string().min(1, 'هذا الحقل مطلوب'),
-    notes: z.string().optional(),
-  }),
-  shippingPayment: z.object({
-    shipping: z.boolean(),
-    shippingCompany: z.string().optional(),
-    shippingCost: z.string(),
-    includeShipping: z.boolean(),
-    paymentMethod: z.string(),
+export const manualOrderSchema = z
+  .object({
+    orderSource: z.object({
+      utmSource: z.string().min(1, 'هذا الحقل مطلوب'),
+      pageName: z.string().min(1, 'هذا الحقل مطلوب'),
+    }),
+    customer: z.object({
+      name: z.string().min(1, 'هذا الحقل مطلوب'),
+      phoneNumber: z.string().min(1, 'هذا الحقل مطلوب'),
+      address: z.string().min(1, 'هذا الحقل مطلوب'),
+      notes: z.string().optional(),
+    }),
+    shipping: z.object({
+      shippingCompany: z.string().min(1, 'يرجى اختيار شركة الشحن'),
+      governorate: z.string().min(1, 'يرجى اختيار المحافظة'),
+      city: z.string().min(1, 'يرجى اختيار المدينة'),
+      shippingCost: z.string().min(1, 'يرجى إدخال تكلفة الشحن'),
+    }),
+    payment: z.object({
+      paymentMethod: z.string().min(1, 'يرجى اختيار طريقة الدفع'),
+    }),
     needsConfirmation: z.boolean(),
-  }),
-}).superRefine((data, ctx) => {
-  if (data.shippingPayment.shipping) {
-    if (!data.shippingPayment.shippingCost) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'يرجى إدخال تكلفة الشحن',
-        path: ['shippingPayment', 'shippingCost'],
-      });
-    } else if (isNaN(Number(data.shippingPayment.shippingCost))) {
+  })
+  .superRefine((data, ctx) => {
+    if (data.shipping.shippingCost && isNaN(Number(data.shipping.shippingCost))) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'يرجى إدخال رقم صحيح',
-        path: ['shippingPayment', 'shippingCost'],
+        path: ['shipping', 'shippingCost'],
       });
     }
-  }
-
-  if (data.shippingPayment.includeShipping && !data.shippingPayment.paymentMethod) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'يرجى اختيار طريقة الدفع',
-      path: ['shippingPayment', 'paymentMethod'],
-    });
-  }
-});
+  });
 
 export type ManualOrderFormData = z.infer<typeof manualOrderSchema>;

@@ -1,5 +1,9 @@
-import { SelectedProduct } from '@/types/orders';
-import { ChevronDown } from 'lucide-react';
+import { LiaAngleDownSolid } from 'react-icons/lia';
+
+interface SelectedProduct {
+  id: number;
+  name: string;
+}
 
 interface DropdownInputProps {
   isOpen: boolean;
@@ -17,44 +21,38 @@ interface DropdownInputProps {
 
 export const DropdownInput: React.FC<DropdownInputProps> = ({
   isOpen,
-
   selectedProducts,
   placeholder,
   placeholderClassName,
-  icon: Icon,
   onToggle,
 }) => {
   const hasSelection = selectedProducts.length > 0;
 
   return (
-    <>
-      {/* Toggle Button */}
-      <button
-        type="button"
-        onClick={onToggle}
-        className="w-full border border-primary cursor-pointer rounded-lg py-2.5 px-10 text-[18px] transition-colors text-left flex items-center justify-between"
-        aria-label="Toggle dropdown"
+    <button
+      type="button"
+      onClick={onToggle}
+      className="w-full border border-primary cursor-pointer rounded-lg py-2.5 px-10 text-[18px] transition-colors text-left flex items-center justify-between"
+      aria-label="Toggle dropdown"
+    >
+      <span
+        className={
+          hasSelection
+            ? 'text-[#111827]'
+            : placeholderClassName ?? 'text-[#878A99]'
+        }
       >
-        <span
-          className={
-            hasSelection
-              ? 'text-[#111827]'
-              : placeholderClassName ?? 'text-[#878A99]'
-          }
-        >
-          {hasSelection ? `${selectedProducts.length} منتج مختار` : placeholder}
-        </span>
+        {hasSelection ? `${selectedProducts.length} منتج مختار` : placeholder}
+      </span>
 
-        <div className="flex items-center">
-          {/* Optional Icon */}
-
-          <ChevronDown
-            size={20}
-            className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
-              }`}
-          />
-        </div>
-      </button>
-    </>
+      <div className="flex items-center">
+        <LiaAngleDownSolid
+          size={20}
+          className={`text-gray-400 transition-transform duration-200 ${
+            isOpen ? 'rotate-180' : ''
+          }`}
+        />
+      </div>
+    </button>
   );
 };

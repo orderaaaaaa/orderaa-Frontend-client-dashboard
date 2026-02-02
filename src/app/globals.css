@@ -269,6 +269,17 @@ input[type='checkbox']:checked::after {
   display: none; /* Chrome, Safari and Opera */
 }
 
+/* Fix mobile viewport height issues */
+html {
+  height: 100%;
+}
+
+@supports (-webkit-touch-callout: none) {
+  body {
+    min-height: -webkit-fill-available;
+  }
+}
+
 /* Print Styles for Invoice */
 @media print {
   @page {

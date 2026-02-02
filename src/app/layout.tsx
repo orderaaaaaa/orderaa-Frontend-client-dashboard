@@ -27,7 +27,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ar" dir="rtl">
-      <body className={`${beiruti.variable} font-sans`}>
+      <body className={`${beiruti.variable} font-sans overflow-hidden h-screen m-0`}>
         <QueryProvider>{children}</QueryProvider>
         <Analytics />
         <ToastifyProvider />

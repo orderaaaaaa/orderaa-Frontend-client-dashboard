@@ -1,20 +1,17 @@
 'use client';
-import {
-  LiaPlusSolid,
-  LiaCheckCircleSolid,
-  LiaExclamationCircleSolid,
-} from 'react-icons/lia';
+import { LiaPlusSolid } from 'react-icons/lia';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertTitle } from '@/components/ui/alert';
 import ClientInformation from './ClientInformation';
 import Order from './Order';
 import OrderDetails from './OrderDetails';
-import ShippingAndPayment from './ShippingAndPayment';
+import ShippingSection from './ShippingSection';
+import PaymentSection from './PaymentSection';
+import ConfirmationSection from './ConfirmationSection';
 import { useProductDropdownStore } from '@/store/productDropdownStore';
-import Products from './Products';
 import { buildManualOrderPayload } from '@/utils/manualOrder/payload';
 import { createManualOrder } from '@/lib/api/manualOrdersApi';
 import { manualOrderSchema, ManualOrderFormData } from './schema';
@@ -35,37 +32,33 @@ function Manual() {
     resolver: zodResolver(manualOrderSchema),
     defaultValues: {
       orderSource: {
-        platform: '',
+        utmSource: '',
         pageName: '',
       },
       customer: {
-        customerName: '',
+        name: '',
         phoneNumber: '',
-        governorate: '',
-        area: '',
         address: '',
         notes: '',
       },
-      shippingPayment: {
-        shipping: false,
+      shipping: {
         shippingCompany: '',
+        governorate: '',
+        city: '',
         shippingCost: '',
-        includeShipping: false,
-        paymentMethod: '',
-        needsConfirmation: false,
       },
+      payment: {
+        paymentMethod: '',
+      },
+      needsConfirmation: false,
     },
   });
 
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
   const [productsError, setProductsError] = useState<string | null>(null);
 
   const formValues = watch();
 
   const onSubmit = async (data: ManualOrderFormData) => {
-    setSubmitError(null);
-    setSubmitSuccess(false);
     setProductsError(null);
 
     if (!selectedProducts || selectedProducts.length === 0) {
@@ -77,32 +70,41 @@ function Manual() {
 
     try {
       const payload = buildManualOrderPayload({
-        platform: data.orderSource.platform,
+        utmSource: data.orderSource.utmSource,
         pageName: data.orderSource.pageName,
-        customerName: data.customer.customerName,
-        phoneNumber: data.customer.phoneNumber,
-        governorate: data.customer.governorate,
-        area: data.customer.area,
-        address: data.customer.address,
-        notes: data.customer.notes,
-        selectedProducts,
-        shippingPayment: data.shippingPayment,
+        customer: {
+          name: data.customer.name,
+          phoneNumber: data.customer.phoneNumber,
+          address: data.customer.address,
+          notes: data.customer.notes,
+        },
+        shipping: {
+          shippingCompany: data.shipping.shippingCompany,
+          governorate: data.shipping.governorate,
+          city: data.shipping.city,
+          shippingCost: data.shipping.shippingCost,
+        },
+        paymentMethod: data.payment.paymentMethod,
+        needsConfirmation: data.needsConfirmation,
+        selectedProducts: selectedProducts.map((p) => ({
+          id: p.id,
+          quantity: p.quantity || 1,
+          selectedVariants: p.selectedVariants || [],
+        })),
       });
 
       await createManualOrder(payload);
 
-      setSubmitSuccess(true);
+      toast.success('تم إنشاء الطلب بنجاح!');
       reset();
       useProductDropdownStore.getState().setSelectedProducts([]);
-
-      setTimeout(() => setSubmitSuccess(false), 5000);
     } catch (error) {
       console.error('Error creating manual order:', error);
-      setSubmitError(
+      const errorMessage =
         error instanceof Error
           ? error.message
-          : 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.'
-      );
+          : 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.';
+      toast.error(errorMessage);
     }
   };
 
@@ -115,16 +117,16 @@ function Manual() {
     }
 
     const findFirstErrorField = (): string | null => {
-      if (errors.orderSource?.platform) return 'platform';
+      if (errors.orderSource?.utmSource) return 'utmSource';
       if (errors.orderSource?.pageName) return 'pageName';
-      if (errors.customer?.customerName) return 'customerName';
+      if (errors.customer?.name) return 'name';
       if (errors.customer?.phoneNumber) return 'phoneNumber';
-      if (errors.customer?.governorate) return 'governorate';
-      if (errors.customer?.area) return 'area';
       if (errors.customer?.address) return 'address';
-      if (errors.customer?.notes) return 'notes';
-      if (errors.shippingPayment?.shippingCost) return 'shippingCost';
-      if (errors.shippingPayment?.paymentMethod) return 'paymentMethod';
+      if (errors.shipping?.shippingCompany) return 'shippingCompany';
+      if (errors.shipping?.governorate) return 'governorate';
+      if (errors.shipping?.city) return 'city';
+      if (errors.shipping?.shippingCost) return 'shippingCost';
+      if (errors.payment?.paymentMethod) return 'paymentMethod';
       return null;
     };
 
@@ -137,66 +139,37 @@ function Manual() {
 
   return (
     <form onSubmit={handleFormSubmit(onSubmit, handleInvalidSubmit)} noValidate>
-      {submitSuccess && (
-        <div className="mx-6 mb-4">
-          <Alert className="bg-green-50 border-green-200 text-green-700">
-            <LiaCheckCircleSolid className="text-green-600" />
-            <AlertTitle>تم إنشاء الطلب بنجاح!</AlertTitle>
-          </Alert>
-        </div>
-      )}
-
-      {submitError && (
-        <div className="mx-6 mb-4">
-          <Alert variant="destructive">
-            <LiaExclamationCircleSolid />
-            <AlertTitle>خطأ: {submitError}</AlertTitle>
-          </Alert>
-        </div>
-      )}
-
       <div className="flex flex-col gap-[26px]">
         <Order
-          platform={formValues.orderSource.platform}
+          utmSource={formValues.orderSource.utmSource}
           pageName={formValues.orderSource.pageName}
-          onPlatformChange={(v) => {
-            setValue('orderSource.platform', v);
-            clearErrors('orderSource.platform');
+          onUtmSourceChange={(v) => {
+            setValue('orderSource.utmSource', v);
+            clearErrors('orderSource.utmSource');
           }}
           onPageNameChange={(v) => {
             setValue('orderSource.pageName', v);
             clearErrors('orderSource.pageName');
           }}
           errors={{
-            platform: errors.orderSource?.platform?.message,
+            utmSource: errors.orderSource?.utmSource?.message,
             pageName: errors.orderSource?.pageName?.message,
           }}
         />
         <OrderDetails errors={{ products: productsError || undefined }} />
-        {selectedProducts.length > 0 && <Products />}
 
         <ClientInformation
-          customerName={formValues.customer.customerName}
+          name={formValues.customer.name}
           phoneNumber={formValues.customer.phoneNumber}
-          governorate={formValues.customer.governorate}
-          area={formValues.customer.area}
           address={formValues.customer.address}
           notes={formValues.customer.notes || ''}
-          onCustomerNameChange={(v) => {
-            setValue('customer.customerName', v);
-            clearErrors('customer.customerName');
+          onNameChange={(v) => {
+            setValue('customer.name', v);
+            clearErrors('customer.name');
           }}
           onPhoneNumberChange={(v) => {
             setValue('customer.phoneNumber', v);
             clearErrors('customer.phoneNumber');
-          }}
-          onGovernorateChange={(v) => {
-            setValue('customer.governorate', v);
-            clearErrors('customer.governorate');
-          }}
-          onAreaChange={(v) => {
-            setValue('customer.area', v);
-            clearErrors('customer.area');
           }}
           onAddressChange={(v) => {
             setValue('customer.address', v);
@@ -204,54 +177,61 @@ function Manual() {
           }}
           onNotesChange={(v) => {
             setValue('customer.notes', v);
-            clearErrors('customer.notes');
           }}
           errors={{
-            customerName: errors.customer?.customerName?.message,
+            name: errors.customer?.name?.message,
             phoneNumber: errors.customer?.phoneNumber?.message,
-            governorate: errors.customer?.governorate?.message,
-            area: errors.customer?.area?.message,
             address: errors.customer?.address?.message,
-            notes: errors.customer?.notes?.message,
           }}
         />
-        <ShippingAndPayment
-          shipping={formValues.shippingPayment.shipping}
-          shippingCompany={formValues.shippingPayment.shippingCompany || ''}
-          shippingCost={formValues.shippingPayment.shippingCost}
-          includeShipping={formValues.shippingPayment.includeShipping}
-          paymentMethod={formValues.shippingPayment.paymentMethod}
-          needsConfirmation={formValues.shippingPayment.needsConfirmation}
-          onShippingChange={(v) => {
-            setValue('shippingPayment.shipping', v);
-            if (!v) {
-              setValue('shippingPayment.shippingCompany', '');
-            }
-            clearErrors('shippingPayment.shippingCost');
-          }}
+
+        <ShippingSection
+          shippingCompany={formValues.shipping.shippingCompany}
+          governorate={formValues.shipping.governorate}
+          city={formValues.shipping.city}
+          shippingCost={formValues.shipping.shippingCost}
           onShippingCompanyChange={(v) => {
-            setValue('shippingPayment.shippingCompany', v);
+            setValue('shipping.shippingCompany', v);
+            clearErrors('shipping.shippingCompany');
+          }}
+          onGovernorateChange={(v) => {
+            setValue('shipping.governorate', v);
+            clearErrors('shipping.governorate');
+          }}
+          onCityChange={(v) => {
+            setValue('shipping.city', v);
+            clearErrors('shipping.city');
           }}
           onShippingCostChange={(v) => {
-            setValue('shippingPayment.shippingCost', v);
-            clearErrors('shippingPayment.shippingCost');
-          }}
-          onIncludeShippingChange={(v) => {
-            setValue('shippingPayment.includeShipping', v);
-            clearErrors('shippingPayment.paymentMethod');
-          }}
-          onPaymentMethodChange={(v) => {
-            setValue('shippingPayment.paymentMethod', v);
-            clearErrors('shippingPayment.paymentMethod');
-          }}
-          onNeedsConfirmationChange={(v) => {
-            setValue('shippingPayment.needsConfirmation', v);
+            setValue('shipping.shippingCost', v);
+            clearErrors('shipping.shippingCost');
           }}
           errors={{
-            shippingCost: errors.shippingPayment?.shippingCost?.message,
-            paymentMethod: errors.shippingPayment?.paymentMethod?.message,
+            shippingCompany: errors.shipping?.shippingCompany?.message,
+            governorate: errors.shipping?.governorate?.message,
+            city: errors.shipping?.city?.message,
+            shippingCost: errors.shipping?.shippingCost?.message,
           }}
         />
+
+        <PaymentSection
+          paymentMethod={formValues.payment.paymentMethod}
+          onPaymentMethodChange={(v) => {
+            setValue('payment.paymentMethod', v);
+            clearErrors('payment.paymentMethod');
+          }}
+          errors={{
+            paymentMethod: errors.payment?.paymentMethod?.message,
+          }}
+        />
+
+        <ConfirmationSection
+          needsConfirmation={formValues.needsConfirmation}
+          onNeedsConfirmationChange={(v) => {
+            setValue('needsConfirmation', v);
+          }}
+        />
+
         <div className="flex justify-end ml-6">
           <Button
             type="submit"
@@ -266,7 +246,7 @@ function Manual() {
               </>
             ) : (
               <>
-                <LiaPlusSolid className="w-6 h-6" />
+                <LiaPlusSolid className="w-6 h-6 text-white" />
                 إضافة طلب
               </>
             )}

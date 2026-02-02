@@ -30,11 +30,24 @@ export function FormSwitch<T extends FieldValues = FieldValues>(
   const { checked, disabled } = props;
 
   if ('register' in props && props.register) {
+    const { onChange, onBlur, name, ref } = props.register(props.name);
+
     return (
       <Switch
         checked={checked}
         disabled={disabled}
-        {...props.register(props.name)}
+        name={name}
+        ref={ref}
+        onBlur={onBlur}
+        onCheckedChange={(checkedValue) => {
+          onChange({
+            target: {
+              name,
+              checked: checkedValue,
+              type: 'checkbox',
+            },
+          } as any);
+        }}
       />
     );
   }

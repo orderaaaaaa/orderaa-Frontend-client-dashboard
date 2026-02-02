@@ -5,7 +5,7 @@ interface MainContentProps {
 
 export function MainContent({ children, className = '' }: MainContentProps) {
   return (
-    <div className={`flex-1 flex flex-col w-0 min-w-0 ${className}`}>
+    <div className={`flex-1 flex flex-col overflow-hidden w-0 min-w-0 ${className}`}>
       {children}
     </div>
   );
@@ -19,7 +19,7 @@ export function PageContent({
   className?: string;
 }) {
   return (
-    <main className={`flex-1 overflow-y-auto overflow-x-hidden p-4 w-full ${className}`}>
+    <main className={`flex-1 overflow-y-auto overflow-x-hidden p-4 w-full min-h-0 ${className}`}>
       {children}
     </main>
   );

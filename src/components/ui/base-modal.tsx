@@ -107,7 +107,7 @@ export default function BaseModal({
           <div className="flex-1 px-8 py-6 overflow-y-auto">{children}</div>
 
           {showFooter && (
-            <div className="px-8 pb-8 flex gap-4 justify-between flex-shrink-0">
+            <div className="px-8 pb-4 flex gap-4 justify-between flex-shrink-0 pt-3">
               <Button
                 variant="outline"
                 onClick={onClose}

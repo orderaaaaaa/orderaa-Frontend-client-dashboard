@@ -35,6 +35,8 @@ export interface SelectedProduct {
   variant: Variant;
   createdAt: string;
   updatedAt: string;
+  quantity?: number;
+  selectedVariants?: Array<{ label: string; value: string }>;
 }
 
 // Order Interface (for simple use cases)

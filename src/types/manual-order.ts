@@ -1,31 +1,30 @@
+export type ManualOrderProductVariant = {
+  label: string;
+  value: string;
+};
+
 export type ManualOrderProduct = {
-  productId: number;
-  variantId?: number;
+  id: number;
   quantity: number;
-  price: number;
+  variants: ManualOrderProductVariant[];
 };
 
 export type ManualOrderCustomer = {
   name: string;
   phoneNumber: string;
-  governorate: string;
-  area: string;
   address: string;
   notes?: string;
 };
 
 export type ManualOrderPayload = {
-  platform: string;
+  utmSource: string;
   pageName: string;
-  customer: ManualOrderCustomer;
   products: ManualOrderProduct[];
-  shipping?: {
-    enabled: boolean;
-    cost?: number;
-    company?: string;
-  };
-  paymentMethod?: string;
-  needsConfirmation?: boolean;
+  customer: ManualOrderCustomer;
+  shippingCost: number;
+  paymentMethod: string;
+  status: 'NEW_ORDER' | 'CONFIRMED';
+  shippingCompany: string;
+  governorate: string;
+  city: string;
 };
-
-

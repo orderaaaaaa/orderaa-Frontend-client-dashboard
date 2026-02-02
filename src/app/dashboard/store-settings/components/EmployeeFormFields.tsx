@@ -63,6 +63,7 @@ export default function OrderSettingsFields({
               register={register}
               errors={errors}
               watch={watch}
+              setValue={setValue}
             />
           </Then>
         </If>

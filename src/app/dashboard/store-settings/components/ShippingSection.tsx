@@ -6,7 +6,7 @@ import {
   LiaRedoAltSolid,
   LiaPenSolid,
 } from 'react-icons/lia';
-import { UseFormRegister, FieldErrors, UseFormWatch } from 'react-hook-form';
+import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
 import clsx from 'clsx';
 import { OrderSettingsFormData } from '../schemas/store';
 import { FormSwitch } from '@/components/ui/form-switch';
@@ -16,12 +16,14 @@ interface ShippingSectionProps {
   register: UseFormRegister<OrderSettingsFormData>;
   errors: FieldErrors<OrderSettingsFormData>;
   watch: UseFormWatch<OrderSettingsFormData>;
+  setValue: UseFormSetValue<OrderSettingsFormData>;
 }
 
 export function ShippingSection({
   register,
   errors,
   watch,
+  setValue,
 }: ShippingSectionProps) {
   const canEditOrderValue = watch('employeeCanEditContent');
 
@@ -55,7 +57,7 @@ export function ShippingSection({
       <Separator />
 
       {/* Open Order */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-4 relative">
         <div className="flex items-start gap-3 flex-1 min-w-0">
           <LiaBoxOpenSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0">
@@ -68,9 +70,8 @@ export function ShippingSection({
           </div>
         </div>
         <FormSwitch
-          name="canOpenShipment"
           checked={!!watch('canOpenShipment')}
-          register={register}
+          onCheckedChange={(checked) => setValue('canOpenShipment', checked)}
         />
       </div>
 
@@ -78,7 +79,7 @@ export function ShippingSection({
 
       {/* Edit Order */}
       <div className="flex flex-col gap-4">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start justify-between gap-4 relative">
           <div className="flex items-start gap-3 flex-1 min-w-0">
             <LiaEditSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
             <div className="flex-1 min-w-0">
@@ -91,9 +92,8 @@ export function ShippingSection({
             </div>
           </div>
           <FormSwitch
-            name="employeeCanEditContent"
             checked={!!watch('employeeCanEditContent')}
-            register={register}
+            onCheckedChange={(checked) => setValue('employeeCanEditContent', checked)}
           />
         </div>
 

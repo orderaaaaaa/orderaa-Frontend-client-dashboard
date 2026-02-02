@@ -16,7 +16,7 @@ export default function ToggleField({
   onCheckedChange,
 }: ToggleFieldProps) {
   return (
-    <div className="flex items-center justify-between mb-4">
+    <div className="flex items-center justify-between mb-4 relative">
       <div>
         <h2 className="text-[19px] text-[#1F1F1F] font-semibold mb-2">
           {label}

@@ -1,10 +1,21 @@
 'use client';
 
 import React from 'react';
-import { ProductDropdownProps } from '@/types/orders';
+import { LiaPlusSolid } from 'react-icons/lia';
 import { useProductDropdown } from './useProductDropdown';
 import { DropdownContent } from './DropdownContent';
 import { DropdownInput } from './DropdownInput';
+import BaseModal from '../ui/base-modal';
+
+interface ProductDropdownProps {
+  label?: string;
+  placeholder?: string;
+  className?: string;
+  selectClassName?: string;
+  placeholderClassName?: string;
+  placeholderStyle?: React.CSSProperties;
+  icon?: React.ComponentType<{ size?: number }>;
+}
 
 export default function ProductDropdown({
   label,
@@ -22,16 +33,13 @@ export default function ProductDropdown({
     selectedProducts,
     selectedVariants,
     expandedProductId,
-    filteredProducts,
+    products,
+    isLoading,
+    hasNextPage,
     handlers,
   } = useProductDropdown();
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Only close if clicking directly on the backdrop (not modal content)
-    if (e.target === e.currentTarget) {
-      handlers.handleToggleDropdown();
-    }
-  };
+  const pendingSelectionsCount = Object.keys(selectedVariants).length;
 
   return (
     <div ref={ref} className={`${className}`}>
@@ -53,31 +61,31 @@ export default function ProductDropdown({
           onSearchFocus={handlers.handleSearchFocus}
         />
 
-        {/* Modal Overlay and Content */}
-        {isOpen && (
-          <>
-            {/* Backdrop Overlay */}
-            <div
-              className="fixed inset-0 bg-black opacity-50 z-40"
-              onClick={handleBackdropClick}
-            />
-
-            {/* Modal Content */}
-            <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-5xl max-h-[80vh] overflow-hidden rounded-3xl">
-              <DropdownContent
-                filteredProducts={filteredProducts}
-                selectedVariants={selectedVariants}
-                expandedProductId={expandedProductId}
-                onProductClick={handlers.handleProductClick}
-                onVariantSelect={handlers.handleVariantSelect}
-                onAddProduct={handlers.handleAddProduct}
-                search={search}
-                onSearchChange={handlers.handleSearchChange}
-                onClose={handlers.handleToggleDropdown}
-              />
-            </div>
-          </>
-        )}
+        <BaseModal
+          isOpen={isOpen}
+          onClose={handlers.handleToggleDropdown}
+          title="اختر المنتجات"
+          onConfirm={handlers.handleAddProduct}
+          confirmText={`إضافة (${pendingSelectionsCount})`}
+          confirmIcon={<LiaPlusSolid className="w-5 h-5 text-white" />}
+          confirmDisabled={pendingSelectionsCount === 0}
+          maxWidth="md:max-w-5xl"
+        >
+          <DropdownContent
+            products={products}
+            selectedVariants={selectedVariants}
+            expandedProductId={expandedProductId}
+            onProductClick={handlers.handleProductClick}
+            onVariantSelect={handlers.handleVariantSelect}
+            onAddProductWithoutVariants={handlers.handleAddProductWithoutVariants}
+            onRemoveProductFromPending={handlers.handleRemoveProductFromPending}
+            search={search}
+            onSearchChange={handlers.handleSearchChange}
+            isLoading={isLoading}
+            hasNextPage={hasNextPage}
+            onLoadMore={handlers.handleLoadMore}
+          />
+        </BaseModal>
       </div>
     </div>
   );

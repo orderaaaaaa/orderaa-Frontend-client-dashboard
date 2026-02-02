@@ -1,95 +1,136 @@
-import { Product, Variant } from '@/types/orders';
+import { useState } from 'react';
 import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import type { ApiProduct } from './useProductDropdown';
+
+interface SelectedVariantValue {
+  label: string;
+  value: string;
+}
 
 interface ProductRowProps {
-  product: Product;
+  product: ApiProduct;
   isSelected: boolean;
   isExpanded: boolean;
-  selectedVariant?: Variant;
-  onProductClick: (product: Product) => void;
-  onVariantSelect: (
-    productId: number,
-    variant: Variant,
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => void;
+  selectedVariants: SelectedVariantValue[];
+  onProductClick: (product: ApiProduct) => void;
+  onVariantSelect: (productId: number, label: string, value: string) => void;
+  onAddProductWithoutVariants: (product: ApiProduct) => void;
+  onRemoveProductFromPending: (productId: number) => void;
 }
 
 export const ProductRow: React.FC<ProductRowProps> = ({
   product,
   isSelected,
   isExpanded,
-  selectedVariant,
+  selectedVariants,
   onProductClick,
   onVariantSelect,
+  onAddProductWithoutVariants,
+  onRemoveProductFromPending,
 }) => {
-  const hasVariants = product.variants?.length;
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const hasVariants = product.variantOptions && product.variantOptions.length > 0;
+
+  const getSelectedValue = (label: string): string | undefined => {
+    return selectedVariants.find((v) => v.label === label)?.value;
+  };
 
   return (
     <div
       className={`border-b mb-2 border-gray-100 rounded-sm transition-colors ${isSelected ? 'bg-gray-50' : 'bg-white'
         }`}
-      dir="rtl"
     >
-      {/* Main Product Row */}
       <div
         className="flex items-center p-3 cursor-pointer hover:bg-gray-50 transition-colors"
         onClick={() => onProductClick(product)}
       >
-        {/* Product Image */}
         <div className="w-1/4 flex justify-center">
-          <div className="relative h-12 w-12 overflow-hidden rounded-md border border-gray-200">
-            <Image
-              src={product.image as string}
-              alt={product.name}
-              fill
-              className="object-cover"
-            />
+          <div className="relative h-12 w-12 overflow-hidden rounded-md border border-gray-200 bg-gray-100">
+            {product.image ? (
+              <>
+                {!imageLoaded && (
+                  <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+                )}
+                <Image
+                  src={product.image}
+                  alt={product.name}
+                  fill
+                  className={`object-cover transition-opacity duration-200 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                  onLoad={() => setImageLoaded(true)}
+                />
+              </>
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-400 text-xs">
+                لا تورد صور
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Product Name */}
         <div className="w-1/2 text-center font-medium">{product.name}</div>
 
-        {/* Product Price */}
-        <div className="w-1/4 text-center text-gray-700">
-          {product.price} ج.م
-        </div>
+        <div className="w-1/4 text-center text-gray-700">{product.price} ج.م</div>
       </div>
 
-      {/* Variants Section */}
       {isExpanded && hasVariants && (
         <div
-          className="py-4 mr-10 border-t border-gray-200 bg-white"
+          className="py-4 px-6 border-t border-gray-200 bg-white"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="space-y-2">
-            {product.variants!.map((variant) => (
-              <label
-                key={`${product.id}-${variant.id}`}
-                className="flex items-center gap-3 cursor-pointer hover:text-primary transition-colors"
-              >
-                <input
-                  type="radio"
-                  name={`variant-${product.id}`}
-                  checked={selectedVariant?.id === variant.id}
-                  onChange={(e) => onVariantSelect(product.id, variant, e)}
-                  className="h-4 w-4 text-primary border-gray-300 focus:ring-primary accent-primary cursor-pointer"
-                />
-                <div className="flex flex-col text-sm">
-                  <span className="text-gray-600">
-                    الالوان: {variant.name} المقاسات: {variant.size}
-                  </span>
+          <div className="space-y-4">
+            {product.variantOptions.map((option) => (
+              <div key={option.label}>
+                <div className="text-sm font-medium text-gray-700 mb-2">
+                  {option.label}
                 </div>
-              </label>
+                <div className="flex flex-wrap gap-2">
+                  {option.values.map((value) => {
+                    const isValueSelected = getSelectedValue(option.label) === value;
+                    return (
+                      <Button
+                        key={`${option.label}-${value}`}
+                        type="button"
+                        variant={isValueSelected ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => onVariantSelect(product.id, option.label, value)}
+                      >
+                        {value}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Show indicator if no variants */}
       {isExpanded && !hasVariants && (
-        <div className="p-3 pr-8 border-t border-gray-200 text-sm text-gray-500 text-center">
-          لا توجد متغيرات متاحة
+        <div
+          className="p-3 border-t border-gray-200 flex justify-center"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {isSelected ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => onRemoveProductFromPending(product.id)}
+              className="text-red-500 border-red-300 hover:bg-red-50"
+            >
+              إزالة المنتج
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              onClick={() => onAddProductWithoutVariants(product)}
+            >
+              إضافة المنتج
+            </Button>
+          )}
         </div>
       )}
     </div>

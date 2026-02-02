@@ -1,9 +1,9 @@
 export type OrderProps = {
-  platform: string;
+  utmSource: string;
   pageName: string;
-  onPlatformChange: (v: string) => void;
+  onUtmSourceChange: (v: string) => void;
   onPageNameChange: (v: string) => void;
-  errors?: { platform?: string; pageName?: string };
+  errors?: { utmSource?: string; pageName?: string };
 };
 
 export type OrderDetailsProps = {
@@ -11,43 +11,46 @@ export type OrderDetailsProps = {
 };
 
 export type ClientInformationProps = {
-  customerName: string;
+  name: string;
   phoneNumber: string;
-  governorate: string;
-  area: string;
   address: string;
   notes: string;
-  onCustomerNameChange: (v: string) => void;
+  onNameChange: (v: string) => void;
   onPhoneNumberChange: (v: string) => void;
-  onGovernorateChange: (v: string) => void;
-  onAreaChange: (v: string) => void;
   onAddressChange: (v: string) => void;
   onNotesChange: (v: string) => void;
   errors?: {
-    customerName?: string;
+    name?: string;
     phoneNumber?: string;
-    governorate?: string;
-    area?: string;
     address?: string;
     notes?: string;
   };
 };
 
-export type ShippingAndPaymentProps = {
-  shipping: boolean;
+export type ShippingSectionProps = {
   shippingCompany: string;
+  governorate: string;
+  city: string;
   shippingCost: string;
-  includeShipping: boolean;
-  paymentMethod: string;
-  needsConfirmation: boolean;
-  onShippingChange: (v: boolean) => void;
   onShippingCompanyChange: (v: string) => void;
+  onGovernorateChange: (v: string) => void;
+  onCityChange: (v: string) => void;
   onShippingCostChange: (v: string) => void;
-  onIncludeShippingChange: (v: boolean) => void;
-  onPaymentMethodChange: (v: string) => void;
-  onNeedsConfirmationChange: (v: boolean) => void;
   errors?: {
+    shippingCompany?: string;
+    governorate?: string;
+    city?: string;
     shippingCost?: string;
-    paymentMethod?: string;
   };
+};
+
+export type PaymentSectionProps = {
+  paymentMethod: string;
+  onPaymentMethodChange: (v: string) => void;
+  errors?: { paymentMethod?: string };
+};
+
+export type ConfirmationSectionProps = {
+  needsConfirmation: boolean;
+  onNeedsConfirmationChange: (v: boolean) => void;
 };

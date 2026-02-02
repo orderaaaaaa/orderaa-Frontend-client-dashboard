@@ -1,76 +1,59 @@
 import { ManualOrderPayload } from '@/types/manual-order';
 
-type ShippingPayment = {
-  shipping: boolean;
-  shippingCompany?: string;
-  shippingCost: string;
-  includeShipping: boolean;
-  paymentMethod: string;
-  needsConfirmation: boolean;
-};
+interface SelectedProductWithVariants {
+  id: number;
+  quantity: number;
+  selectedVariants: Array<{ label: string; value: string }>;
+}
 
 export function buildManualOrderPayload(args: {
-  platform: string;
+  utmSource: string;
   pageName: string;
-  customerName: string;
-  phoneNumber: string;
-  governorate: string;
-  area: string;
-  address: string;
-  notes?: string;
-  selectedProducts: Array<{
-    id: number;
-    price: string;
-    variant?: { id?: number };
-  }>;
-  shippingPayment?: ShippingPayment;
+  customer: {
+    name: string;
+    phoneNumber: string;
+    address: string;
+    notes?: string;
+  };
+  shipping: {
+    shippingCompany: string;
+    governorate: string;
+    city: string;
+    shippingCost: string;
+  };
+  paymentMethod: string;
+  needsConfirmation: boolean;
+  selectedProducts: SelectedProductWithVariants[];
 }): ManualOrderPayload {
   const {
-    platform,
+    utmSource,
     pageName,
-    customerName,
-    phoneNumber,
-    governorate,
-    area,
-    address,
-    notes,
+    customer,
+    shipping,
+    paymentMethod,
+    needsConfirmation,
     selectedProducts,
-    shippingPayment,
   } = args;
 
   return {
-    platform,
+    utmSource,
     pageName,
-    customer: {
-      name: customerName,
-      phoneNumber,
-      governorate,
-      area,
-      address,
-      notes,
-    },
     products: selectedProducts.map((p) => ({
-      productId: p.id,
-      variantId: p.variant?.id,
-      quantity: 1,
-      price: Number(p.price) || 0,
+      id: p.id,
+      quantity: p.quantity,
+      variants: p.selectedVariants,
     })),
-    ...(shippingPayment?.shipping && {
-      shipping: {
-        enabled: true,
-        cost: Number(shippingPayment.shippingCost) || 0,
-        ...(shippingPayment.shippingCompany && {
-          company: shippingPayment.shippingCompany,
-        }),
-      },
-    }),
-    ...(shippingPayment?.includeShipping && {
-      paymentMethod: shippingPayment.paymentMethod,
-    }),
-    ...(shippingPayment?.needsConfirmation && {
-      needsConfirmation: true,
-    }),
+    customer: {
+      name: customer.name,
+      phoneNumber: customer.phoneNumber,
+      address: customer.address,
+      notes: customer.notes,
+    },
+    shippingCost: Number(shipping.shippingCost) || 0,
+    paymentMethod,
+    status: needsConfirmation ? 'NEW_ORDER' : 'CONFIRMED',
+    shippingCompany: shipping.shippingCompany,
+    governorate: shipping.governorate,
+    city: shipping.city,
   };
 }
-
-
