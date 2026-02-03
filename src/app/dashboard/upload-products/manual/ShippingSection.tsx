@@ -72,6 +72,7 @@ function ShippingSection({
     const fetchGovernorates = async () => {
       if (!shippingCompany) {
         setGovernorates([]);
+        setSelectedGovernorateKey('');
         return;
       }
 
@@ -90,6 +91,15 @@ function ShippingSection({
 
     fetchGovernorates();
   }, [shippingCompany]);
+
+  useEffect(() => {
+    if (governorate && governorates.length > 0) {
+      const key = governorateLabelToKey[governorate] || '';
+      if (key && key !== selectedGovernorateKey) {
+        setSelectedGovernorateKey(key);
+      }
+    }
+  }, [governorate, governorates, governorateLabelToKey, selectedGovernorateKey]);
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -126,13 +136,12 @@ function ShippingSection({
   const handleGovernorateChange = (label: string) => {
     const key = governorateLabelToKey[label] || '';
     setSelectedGovernorateKey(key);
-    onGovernorateChange(key);
+    onGovernorateChange(label);
     onCityChange('');
   };
 
   const handleCityChange = (label: string) => {
-    const cityItem = cities.find((c) => c.label === label);
-    onCityChange(cityItem?.key || '');
+    onCityChange(label);
   };
 
   return (
@@ -167,11 +176,7 @@ function ShippingSection({
               المحافظة <span className="text-red-500">*</span>
             </label>
             <SearchableSelect
-              value={
-                governorate
-                  ? governorates.find((g) => g.key === governorate)?.label || ''
-                  : ''
-              }
+              value={governorate}
               onValueChange={handleGovernorateChange}
               options={governorateOptions}
               placeholder={
@@ -199,9 +204,7 @@ function ShippingSection({
               المدينة <span className="text-red-500">*</span>
             </label>
             <SearchableSelect
-              value={
-                city ? cities.find((c) => c.key === city)?.label || '' : ''
-              }
+              value={city}
               onValueChange={handleCityChange}
               options={cityOptions}
               placeholder={
