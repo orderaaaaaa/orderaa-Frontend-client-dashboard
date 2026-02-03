@@ -91,3 +91,31 @@ export interface CancelledOrderDetail {
   cancelReason: string;
   notes: string;
 }
+
+export interface FirstAttemptData {
+  minutes: number;
+}
+
+export interface PostponedOrderContentItem {
+  [key: string]: unknown;
+  id: number;
+  variant1: string;
+  variant2: string;
+  productName: string;
+  quantity: number;
+  percentage: number;
+}
+
+export interface EmployeePerformanceMetric {
+  [key: string]: unknown;
+  id: number;
+  label: string;
+  count: number;
+  percentage: number;
+}
+
+export interface EmployeePerformanceData {
+  employeeId: number;
+  employeeName: string;
+  metrics: EmployeePerformanceMetric[];
+}

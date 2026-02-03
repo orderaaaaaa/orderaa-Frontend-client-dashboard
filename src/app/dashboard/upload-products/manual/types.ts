@@ -7,21 +7,23 @@ export type OrderProps = {
 };
 
 export type OrderDetailsProps = {
-  errors?: { products?: string };
+  total: string;
+  onTotalChange: (v: string) => void;
+  errors?: { products?: string; total?: string };
 };
 
 export type ClientInformationProps = {
   name: string;
-  phoneNumber: string;
+  phoneNumbers: string[];
   address: string;
   notes: string;
   onNameChange: (v: string) => void;
-  onPhoneNumberChange: (v: string) => void;
+  onPhoneNumbersChange: (v: string[]) => void;
   onAddressChange: (v: string) => void;
   onNotesChange: (v: string) => void;
   errors?: {
     name?: string;
-    phoneNumber?: string;
+    phoneNumbers?: string;
     address?: string;
     notes?: string;
   };

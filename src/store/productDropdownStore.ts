@@ -231,17 +231,22 @@ export const useProductDropdownStore = create<ProductDropdownState>(
       const merged = [...selectedProducts];
       for (const p of newProducts) {
         const variantKey = JSON.stringify(
-          p.selectedVariants.sort((a, b) => a.label.localeCompare(b.label))
+          [...p.selectedVariants].sort((a, b) => a.label.localeCompare(b.label))
         );
         const existingIndex = merged.findIndex(
           (m) =>
             m.id === p.id &&
             JSON.stringify(
-              m.selectedVariants.sort((a, b) => a.label.localeCompare(b.label))
+              [...m.selectedVariants].sort((a, b) => a.label.localeCompare(b.label))
             ) === variantKey
         );
         if (existingIndex === -1) {
           merged.push(p);
+        } else {
+          merged[existingIndex] = {
+            ...merged[existingIndex],
+            quantity: merged[existingIndex].quantity + 1,
+          };
         }
       }
 

@@ -4,8 +4,10 @@ import { Mail, Lock, KeyRound, ArrowRight } from 'lucide-react';
 import { useForgotPassword, useOTP } from '../hooks';
 import AuthForm from '../components/AuthForm';
 import Link from 'next/link';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 
 export default function ForgotPasswordPage() {
+  const { isChecking } = useAuthGuard(false);
   const {
     step,
     setStep,
@@ -56,6 +58,14 @@ export default function ForgotPasswordPage() {
       resetOtp();
     }
   };
+
+  if (isChecking) {
+    return (
+      <div className="flex justify-center items-center h-64 mt-10">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+      </div>
+    );
+  }
 
   // STEP 1: Request OTP via Email
   if (step === 'identify') {

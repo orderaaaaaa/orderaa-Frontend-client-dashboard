@@ -11,6 +11,7 @@ interface SelectedVariantValue {
 interface ProductRowProps {
   product: ApiProduct;
   isSelected: boolean;
+  isAlreadyInOrder: boolean;
   isExpanded: boolean;
   selectedVariants: SelectedVariantValue[];
   onProductClick: (product: ApiProduct) => void;
@@ -22,6 +23,7 @@ interface ProductRowProps {
 export const ProductRow: React.FC<ProductRowProps> = ({
   product,
   isSelected,
+  isAlreadyInOrder,
   isExpanded,
   selectedVariants,
   onProductClick,
@@ -36,11 +38,18 @@ export const ProductRow: React.FC<ProductRowProps> = ({
     return selectedVariants.find((v) => v.label === label)?.value;
   };
 
+  const getRowClassName = () => {
+    if (isAlreadyInOrder) {
+      return 'border-b mb-2 border-primary/30 rounded-sm transition-colors bg-primary/5 ring-1 ring-primary/20';
+    }
+    if (isSelected) {
+      return 'border-b mb-2 border-gray-100 rounded-sm transition-colors bg-gray-50';
+    }
+    return 'border-b mb-2 border-gray-100 rounded-sm transition-colors bg-white';
+  };
+
   return (
-    <div
-      className={`border-b mb-2 border-gray-100 rounded-sm transition-colors ${isSelected ? 'bg-gray-50' : 'bg-white'
-        }`}
-    >
+    <div className={getRowClassName()}>
       <div
         className="flex items-center p-3 cursor-pointer hover:bg-gray-50 transition-colors"
         onClick={() => onProductClick(product)}
@@ -68,7 +77,14 @@ export const ProductRow: React.FC<ProductRowProps> = ({
           </div>
         </div>
 
-        <div className="w-1/2 text-center font-medium">{product.name}</div>
+        <div className="w-1/2 text-center font-medium flex flex-col items-center gap-1">
+          <span>{product.name}</span>
+          {isAlreadyInOrder && (
+            <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+              في الطلب
+            </span>
+          )}
+        </div>
 
         <div className="w-1/4 text-center text-gray-700">{product.price} ج.م</div>
       </div>

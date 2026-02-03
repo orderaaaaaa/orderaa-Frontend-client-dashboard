@@ -17,6 +17,7 @@ export function useAuthGuard(requireAuth = true) {
     if (!hasHydrated) return;
 
     if (requireAuth && !token) {
+      toast.info('يرجى تسجيل الدخول للمتابعة');
       router.replace('/signin');
     } else if (requireAuth && token && !user) {
       toast.error('انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى');

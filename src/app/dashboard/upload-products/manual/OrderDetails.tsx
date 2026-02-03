@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useRef } from 'react';
 import ProductDropdown from '@/components/productDropdown';
 import { useProductDropdownStore } from '@/store/productDropdownStore';
 import { LiaPlusSolid, LiaMinusSolid, LiaTrashSolid } from 'react-icons/lia';
 import { DataTable, DataTableColumn } from '@/components/ui/data-table';
 import { OrderDetailsProps } from './types';
+import Input from '@/components/ui/Input';
 
 interface ProductTableRow {
   id: number;
@@ -18,7 +19,7 @@ interface ProductTableRow {
   variantKey: string;
 }
 
-function OrderDetails({ errors }: OrderDetailsProps) {
+function OrderDetails({ total, onTotalChange, errors }: OrderDetailsProps) {
   const selectedProducts = useProductDropdownStore(
     (state) => state.selectedProducts
   );
@@ -51,11 +52,25 @@ function OrderDetails({ errors }: OrderDetailsProps) {
     setSelectedProducts(updatedProducts);
   };
 
-  const totalPrice = selectedProducts.reduce((sum, product) => {
-    const price = parseInt(product.price) || 0;
-    const quantity = product.quantity || 1;
-    return sum + price * quantity;
-  }, 0);
+  const calculatedTotal = useMemo(() => {
+    return selectedProducts.reduce((sum, product) => {
+      const price = parseInt(product.price) || 0;
+      const quantity = product.quantity || 1;
+      return sum + price * quantity;
+    }, 0);
+  }, [selectedProducts]);
+
+  const onTotalChangeRef = useRef(onTotalChange);
+  onTotalChangeRef.current = onTotalChange;
+
+  const prevCalculatedTotalRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (prevCalculatedTotalRef.current !== calculatedTotal) {
+      prevCalculatedTotalRef.current = calculatedTotal;
+      onTotalChangeRef.current(String(calculatedTotal));
+    }
+  }, [calculatedTotal]);
 
   const tableData: ProductTableRow[] = useMemo(() => {
     return selectedProducts.map((product, index) => ({
@@ -214,9 +229,20 @@ function OrderDetails({ errors }: OrderDetailsProps) {
               />
             </div>
 
-            <div className="mt-6 pt-4 border-t border-gray-200 flex justify-between items-center">
-              <div className="text-lg font-semibold text-gray-700">
-                المجموع الكلي: {totalPrice} ج.م
+            <div className="mt-6 pt-4 border-t border-gray-200 flex justify-between items-center gap-4">
+              <label className="text-lg font-semibold text-gray-700 whitespace-nowrap">
+                المجموع الكلي:
+              </label>
+              <div className="flex items-center gap-2">
+                <Input
+                  name="total"
+                  type="text"
+                  value={total}
+                  onChange={(e) => onTotalChange(e.target.value)}
+                  className="w-32 text-center font-semibold"
+                  error={errors?.total}
+                />
+                <span className="text-lg font-semibold text-gray-700">ج.م</span>
               </div>
             </div>
           </>

@@ -11,7 +11,7 @@ export function buildManualOrderPayload(args: {
   pageName: string;
   customer: {
     name: string;
-    phoneNumber: string;
+    phoneNumbers: string[];
     address: string;
     notes?: string;
   };
@@ -23,6 +23,7 @@ export function buildManualOrderPayload(args: {
   };
   paymentMethod: string;
   needsConfirmation: boolean;
+  total?: string;
   selectedProducts: SelectedProductWithVariants[];
 }): ManualOrderPayload {
   const {
@@ -32,6 +33,7 @@ export function buildManualOrderPayload(args: {
     shipping,
     paymentMethod,
     needsConfirmation,
+    total,
     selectedProducts,
   } = args;
 
@@ -45,7 +47,7 @@ export function buildManualOrderPayload(args: {
     })),
     customer: {
       name: customer.name,
-      phoneNumber: customer.phoneNumber,
+      phoneNumbers: customer.phoneNumbers.filter((p) => p.trim() !== ''),
       address: customer.address,
       notes: customer.notes,
     },
@@ -55,5 +57,6 @@ export function buildManualOrderPayload(args: {
     shippingCompany: shipping.shippingCompany,
     governorate: shipping.governorate,
     city: shipping.city,
+    total: Number(total) || 0,
   };
 }

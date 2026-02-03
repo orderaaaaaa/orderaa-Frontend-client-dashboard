@@ -122,20 +122,11 @@ export const ColumnChart = memo(function ColumnChart({
               },
               xaxis: {
                 labels: {
+                  rotate: 0,
                   style: {
-                    fontSize: '10px',
+                    fontSize: '8px',
                     fontWeight: 600,
                   },
-                  rotate: -45,
-                  rotateAlways: true,
-                  hideOverlappingLabels: false,
-                  trim: false,
-                  offsetY: 5,
-                },
-              },
-              grid: {
-                padding: {
-                  bottom: 20,
                 },
               },
             },

@@ -37,7 +37,7 @@ function Manual() {
       },
       customer: {
         name: '',
-        phoneNumber: '',
+        phoneNumbers: [''],
         address: '',
         notes: '',
       },
@@ -51,6 +51,7 @@ function Manual() {
         paymentMethod: '',
       },
       needsConfirmation: false,
+      total: '',
     },
   });
 
@@ -74,7 +75,7 @@ function Manual() {
         pageName: data.orderSource.pageName,
         customer: {
           name: data.customer.name,
-          phoneNumber: data.customer.phoneNumber,
+          phoneNumbers: data.customer.phoneNumbers,
           address: data.customer.address,
           notes: data.customer.notes,
         },
@@ -82,10 +83,11 @@ function Manual() {
           shippingCompany: data.shipping.shippingCompany,
           governorate: data.shipping.governorate,
           city: data.shipping.city,
-          shippingCost: data.shipping.shippingCost,
+          shippingCost: data.shipping.shippingCost || '',
         },
         paymentMethod: data.payment.paymentMethod,
         needsConfirmation: data.needsConfirmation,
+        total: data.total,
         selectedProducts: selectedProducts.map((p) => ({
           id: p.id,
           quantity: p.quantity || 1,
@@ -120,7 +122,7 @@ function Manual() {
       if (errors.orderSource?.utmSource) return 'utmSource';
       if (errors.orderSource?.pageName) return 'pageName';
       if (errors.customer?.name) return 'name';
-      if (errors.customer?.phoneNumber) return 'phoneNumber';
+      if (errors.customer?.phoneNumbers) return 'phoneNumbers';
       if (errors.customer?.address) return 'address';
       if (errors.shipping?.shippingCompany) return 'shippingCompany';
       if (errors.shipping?.governorate) return 'governorate';
@@ -156,20 +158,27 @@ function Manual() {
             pageName: errors.orderSource?.pageName?.message,
           }}
         />
-        <OrderDetails errors={{ products: productsError || undefined }} />
+        <OrderDetails
+          total={formValues.total || ''}
+          onTotalChange={(v) => {
+            setValue('total', v);
+            clearErrors('total');
+          }}
+          errors={{ products: productsError || undefined, total: errors.total?.message }}
+        />
 
         <ClientInformation
           name={formValues.customer.name}
-          phoneNumber={formValues.customer.phoneNumber}
+          phoneNumbers={formValues.customer.phoneNumbers}
           address={formValues.customer.address}
           notes={formValues.customer.notes || ''}
           onNameChange={(v) => {
             setValue('customer.name', v);
             clearErrors('customer.name');
           }}
-          onPhoneNumberChange={(v) => {
-            setValue('customer.phoneNumber', v);
-            clearErrors('customer.phoneNumber');
+          onPhoneNumbersChange={(v) => {
+            setValue('customer.phoneNumbers', v);
+            clearErrors('customer.phoneNumbers');
           }}
           onAddressChange={(v) => {
             setValue('customer.address', v);
@@ -180,7 +189,7 @@ function Manual() {
           }}
           errors={{
             name: errors.customer?.name?.message,
-            phoneNumber: errors.customer?.phoneNumber?.message,
+            phoneNumbers: errors.customer?.phoneNumbers?.message,
             address: errors.customer?.address?.message,
           }}
         />
@@ -189,7 +198,7 @@ function Manual() {
           shippingCompany={formValues.shipping.shippingCompany}
           governorate={formValues.shipping.governorate}
           city={formValues.shipping.city}
-          shippingCost={formValues.shipping.shippingCost}
+          shippingCost={formValues.shipping.shippingCost || ''}
           onShippingCompanyChange={(v) => {
             setValue('shipping.shippingCompany', v);
             clearErrors('shipping.shippingCompany');

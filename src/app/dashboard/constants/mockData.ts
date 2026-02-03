@@ -7,6 +7,9 @@ import type {
   FollowUpModalData,
   EmployeeStopDetailData,
   CancelledOrderDetail,
+  FirstAttemptData,
+  PostponedOrderContentItem,
+  EmployeePerformanceData,
 } from '../types';
 
 export const MOCK_EMPLOYEE_STATUS: EmployeeStatusRow[] = [
@@ -344,3 +347,98 @@ export const cancelledOrderDetails: CancelledOrderDetail[] = [
     notes: 'العميل غير راض عن سياسة الاستبدال',
   },
 ];
+
+export const FIRST_ATTEMPT_DATA: FirstAttemptData = {
+  minutes: 15,
+};
+
+export const POSTPONED_ORDERS_CONTENT: PostponedOrderContentItem[] = [
+  {
+    id: 1,
+    variant1: '42',
+    variant2: 'اسود',
+    productName: 'نايك شبشب',
+    quantity: 15,
+    percentage: 30,
+  },
+  {
+    id: 2,
+    variant1: '40',
+    variant2: 'ابيض',
+    productName: 'اديداس حذاء رياضي',
+    quantity: 12,
+    percentage: 24,
+  },
+  {
+    id: 3,
+    variant1: 'L',
+    variant2: 'احمر',
+    productName: 'تيشيرت قطن',
+    quantity: 10,
+    percentage: 20,
+  },
+  {
+    id: 4,
+    variant1: 'XL',
+    variant2: 'ازرق',
+    productName: 'بنطلون جينز',
+    quantity: 8,
+    percentage: 16,
+  },
+  {
+    id: 5,
+    variant1: 'M',
+    variant2: 'رمادي',
+    productName: 'جاكيت شتوي',
+    quantity: 5,
+    percentage: 10,
+  },
+];
+
+export const EMPLOYEE_PERFORMANCE_DATA: Record<number, EmployeePerformanceData> =
+  {
+    1: {
+      employeeId: 1,
+      employeeName: 'احمد',
+      metrics: [
+        { id: 1, label: 'عدد المكالمات', count: 45, percentage: 28 },
+        { id: 2, label: 'الطلبات المؤكدة', count: 32, percentage: 35 },
+        { id: 3, label: 'طلبات المتابعة', count: 8, percentage: 22 },
+        { id: 4, label: 'الطلبات غير المكتملة', count: 3, percentage: 15 },
+        { id: 5, label: 'الطلبات الملغاة', count: 2, percentage: 12 },
+      ],
+    },
+    2: {
+      employeeId: 2,
+      employeeName: 'يارا',
+      metrics: [
+        { id: 1, label: 'عدد المكالمات', count: 38, percentage: 24 },
+        { id: 2, label: 'الطلبات المؤكدة', count: 28, percentage: 30 },
+        { id: 3, label: 'طلبات المتابعة', count: 6, percentage: 17 },
+        { id: 4, label: 'الطلبات غير المكتملة', count: 2, percentage: 10 },
+        { id: 5, label: 'الطلبات الملغاة', count: 2, percentage: 12 },
+      ],
+    },
+    3: {
+      employeeId: 3,
+      employeeName: 'علي',
+      metrics: [
+        { id: 1, label: 'عدد المكالمات', count: 42, percentage: 26 },
+        { id: 2, label: 'الطلبات المؤكدة', count: 18, percentage: 20 },
+        { id: 3, label: 'طلبات المتابعة', count: 12, percentage: 33 },
+        { id: 4, label: 'الطلبات غير المكتملة', count: 8, percentage: 40 },
+        { id: 5, label: 'الطلبات الملغاة', count: 4, percentage: 24 },
+      ],
+    },
+    4: {
+      employeeId: 4,
+      employeeName: 'محمد',
+      metrics: [
+        { id: 1, label: 'عدد المكالمات', count: 35, percentage: 22 },
+        { id: 2, label: 'الطلبات المؤكدة', count: 14, percentage: 15 },
+        { id: 3, label: 'طلبات المتابعة', count: 10, percentage: 28 },
+        { id: 4, label: 'الطلبات غير المكتملة', count: 7, percentage: 35 },
+        { id: 5, label: 'الطلبات الملغاة', count: 9, percentage: 52 },
+      ],
+    },
+  };

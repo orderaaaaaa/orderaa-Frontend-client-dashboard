@@ -11,7 +11,7 @@ export type ManualOrderProduct = {
 
 export type ManualOrderCustomer = {
   name: string;
-  phoneNumber: string;
+  phoneNumbers: string[];
   address: string;
   notes?: string;
 };
@@ -27,4 +27,5 @@ export type ManualOrderPayload = {
   shippingCompany: string;
   governorate: string;
   city: string;
+  total: number;
 };

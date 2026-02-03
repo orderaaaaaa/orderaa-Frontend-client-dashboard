@@ -74,6 +74,7 @@ export default function ProductDropdown({
           <DropdownContent
             products={products}
             selectedVariants={selectedVariants}
+            selectedProducts={selectedProducts}
             expandedProductId={expandedProductId}
             onProductClick={handlers.handleProductClick}
             onVariantSelect={handlers.handleVariantSelect}

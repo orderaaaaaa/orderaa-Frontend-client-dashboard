@@ -234,7 +234,7 @@ function ShippingSection({
           </div>
           <div>
             <label className="block font-medium text-[16px] mb-1">
-              تكلفة الشحن <span className="text-red-500">*</span>
+              تكلفة الشحن
             </label>
             <Input
               name="shippingCost"

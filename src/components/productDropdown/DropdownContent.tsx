@@ -9,9 +9,15 @@ interface SelectedVariantValue {
   value: string;
 }
 
+interface SelectedProduct {
+  id: number;
+  selectedVariants: SelectedVariantValue[];
+}
+
 interface DropdownContentProps {
   products: ApiProduct[];
   selectedVariants: Record<number, SelectedVariantValue[]>;
+  selectedProducts: SelectedProduct[];
   expandedProductId: number | null;
   onProductClick: (product: ApiProduct) => void;
   onVariantSelect: (productId: number, label: string, value: string) => void;
@@ -27,6 +33,7 @@ interface DropdownContentProps {
 export const DropdownContent: React.FC<DropdownContentProps> = ({
   products,
   selectedVariants,
+  selectedProducts,
   expandedProductId,
   onProductClick,
   onVariantSelect,
@@ -38,6 +45,9 @@ export const DropdownContent: React.FC<DropdownContentProps> = ({
   hasNextPage,
   onLoadMore,
 }) => {
+  const isProductInOrder = (productId: number) => {
+    return selectedProducts.some((p) => p.id === productId);
+  };
   return (
     <div className="flex flex-col">
       <div className="rounded-sm">
@@ -90,6 +100,7 @@ export const DropdownContent: React.FC<DropdownContentProps> = ({
                 key={product.id}
                 product={product}
                 isSelected={selectedVariants[product.id] !== undefined}
+                isAlreadyInOrder={isProductInOrder(product.id)}
                 isExpanded={expandedProductId === product.id}
                 selectedVariants={selectedVariants[product.id] || []}
                 onProductClick={onProductClick}

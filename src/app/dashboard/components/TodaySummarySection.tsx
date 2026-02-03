@@ -17,6 +17,7 @@ import {
   incompleteOrdersData,
   cancelledOrdersData,
   cancelledOrderDetails,
+  EMPLOYEE_PERFORMANCE_DATA,
 } from '../constants';
 import { useSummaryModal } from '../hooks';
 import {
@@ -153,7 +154,12 @@ export function TodaySummarySection({
         maxWidth="md:max-w-[900px]"
       >
         {currentModalConfig?.type === 'employee' && (
-          <EmployeeListModalContent data={currentModalConfig.data} />
+          <EmployeeListModalContent
+            data={currentModalConfig.data}
+            performanceData={
+              modalType === 'active' ? EMPLOYEE_PERFORMANCE_DATA : undefined
+            }
+          />
         )}
         {currentModalConfig?.type === 'order' && (
           <OrderStatusModalContent data={currentModalConfig.data} />

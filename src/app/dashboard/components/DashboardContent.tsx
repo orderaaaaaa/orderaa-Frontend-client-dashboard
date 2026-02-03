@@ -6,6 +6,8 @@ import { EmployeeStatusSection } from './EmployeeStatusSection';
 import { CallDurationSection } from './CallDurationSection';
 import { OrderStatusDistributionSection } from './OrderStatusDistributionSection';
 import { ConfirmationAttemptsSection } from './ConfirmationAttemptsSection';
+import { FirstAttemptSection } from './FirstAttemptSection';
+import { PostponedOrdersContentSection } from './PostponedOrdersContentSection';
 
 export function DashboardContent() {
   const {
@@ -14,6 +16,8 @@ export function DashboardContent() {
     callDurations,
     orderStatusDistribution,
     confirmationAttempts,
+    firstAttempt,
+    postponedOrdersContent,
     isLoading,
   } = useDashboardData();
 
@@ -28,6 +32,11 @@ export function DashboardContent() {
       />
       <ConfirmationAttemptsSection
         data={confirmationAttempts}
+        isLoading={isLoading}
+      />
+      <FirstAttemptSection data={firstAttempt} isLoading={isLoading} />
+      <PostponedOrdersContentSection
+        data={postponedOrdersContent}
         isLoading={isLoading}
       />
     </div>
