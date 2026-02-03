@@ -110,7 +110,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <AuthGuard>
       <ErrorBoundary fallback={<SidebarError />}>
-        <div className="flex h-full overflow-hidden bg-gray-50">
+        <div className="flex h-screen overflow-hidden bg-gray-50">
           <Sidebar
             open={sidebarOpen}
             collapsed={isCollapsed}
@@ -122,7 +122,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           />
 
           <MainContent>
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 pt-[env(safe-area-inset-top)]">
               <TopBar
                 onMenuToggle={handleSidebarToggle}
                 onSearch={handleSearch}
