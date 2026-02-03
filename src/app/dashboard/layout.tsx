@@ -110,7 +110,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <AuthGuard>
       <ErrorBoundary fallback={<SidebarError />}>
-        <div className="flex h-screen overflow-hidden bg-gray-50">
+        <div className="flex h-dvh overflow-hidden bg-gray-50">
           <Sidebar
             open={sidebarOpen}
             collapsed={isCollapsed}

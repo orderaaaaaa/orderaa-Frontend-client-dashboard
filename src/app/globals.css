@@ -278,6 +278,11 @@ html {
   body {
     min-height: -webkit-fill-available;
   }
+
+  /* Safari fallback for h-dvh */
+  .h-dvh {
+    height: -webkit-fill-available;
+  }
 }
 
 /* Print Styles for Invoice */
