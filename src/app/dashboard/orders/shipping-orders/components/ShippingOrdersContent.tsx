@@ -246,12 +246,13 @@ export function ShippingOrdersContent() {
   }, [scannedOrders, submitForApprovalMutation, clearOrders]);
 
   const handleShipSelectedOrders = useCallback(async () => {
-    if (selectedOrders.length === 0) return;
+    const ordersToProcess = selectAllMatchingFilters ? orders : selectedOrders;
+    if (ordersToProcess.length === 0) return;
 
     setIsActionLoading(true);
     try {
       await submitForApprovalMutation({
-        orderIds: selectedOrders.map((o) => o.id),
+        orderIds: ordersToProcess.map((o) => o.id),
       });
       toast.success('تم إرسال الطلبات للشحن بنجاح');
       clearSelections();
@@ -262,6 +263,8 @@ export function ShippingOrdersContent() {
       setIsActionLoading(false);
     }
   }, [
+    selectAllMatchingFilters,
+    orders,
     selectedOrders,
     submitForApprovalMutation,
     clearSelections,

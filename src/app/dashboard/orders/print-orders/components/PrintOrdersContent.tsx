@@ -344,11 +344,12 @@ export function PrintOrdersContent() {
   });
 
   const handlePrepared = useCallback(async () => {
-    if (selectedOrders.length === 0) return;
+    const ordersToProcess = selectAllMatchingFilters ? orders : selectedOrders;
+    if (ordersToProcess.length === 0) return;
     setIsActionLoading(true);
     try {
       await prepareOrdersMutation({
-        orderCodes: selectedOrders.map((o) => o.code),
+        orderCodes: ordersToProcess.map((o) => o.code),
       });
       toast.success('تم تحديث الطلبات إلى تم التحضير');
       clearSelections();
@@ -358,14 +359,15 @@ export function PrintOrdersContent() {
     } finally {
       setIsActionLoading(false);
     }
-  }, [selectedOrders, prepareOrdersMutation, clearSelections, setSelectMode]);
+  }, [selectAllMatchingFilters, orders, selectedOrders, prepareOrdersMutation, clearSelections, setSelectMode]);
 
   const handleAwaitingPackaging = useCallback(async () => {
-    if (selectedOrders.length === 0) return;
+    const ordersToProcess = selectAllMatchingFilters ? orders : selectedOrders;
+    if (ordersToProcess.length === 0) return;
     setIsActionLoading(true);
     try {
       await waitingMutation({
-        orderIds: selectedOrders.map((o) => o.id),
+        orderIds: ordersToProcess.map((o) => o.id),
       });
       toast.success('تم تحديث الطلبات إلى فى انتظار التغليف');
       clearSelections();
@@ -375,14 +377,15 @@ export function PrintOrdersContent() {
     } finally {
       setIsActionLoading(false);
     }
-  }, [selectedOrders, waitingMutation, clearSelections, setSelectMode]);
+  }, [selectAllMatchingFilters, orders, selectedOrders, waitingMutation, clearSelections, setSelectMode]);
 
   const handleCallAgain = useCallback(async () => {
-    if (selectedOrders.length === 0) return;
+    const ordersToProcess = selectAllMatchingFilters ? orders : selectedOrders;
+    if (ordersToProcess.length === 0) return;
     setIsActionLoading(true);
     try {
       await callAgainMutation({
-        orders: selectedOrders.map((o) => ({ id: o.id })),
+        orders: ordersToProcess.map((o) => ({ id: o.id })),
       });
       toast.success('تم تحديث الطلبات إلى اعادة اتصال');
       clearSelections();
@@ -392,12 +395,13 @@ export function PrintOrdersContent() {
     } finally {
       setIsActionLoading(false);
     }
-  }, [selectedOrders, callAgainMutation, clearSelections, setSelectMode]);
+  }, [selectAllMatchingFilters, orders, selectedOrders, callAgainMutation, clearSelections, setSelectMode]);
 
   const handleChangeProduct = useCallback(() => {
-    if (selectedOrders.length === 0) return;
+    const ordersToProcess = selectAllMatchingFilters ? orders : selectedOrders;
+    if (ordersToProcess.length === 0) return;
     setIsChangeProductModalOpen(true);
-  }, [selectedOrders]);
+  }, [selectAllMatchingFilters, orders, selectedOrders]);
 
   const handleChangeProductSubmit = useCallback(
     async (ordersWithNotes: { id: number; packagingNote: string }[]) => {
@@ -685,7 +689,7 @@ export function PrintOrdersContent() {
       <ChangeProductModal
         isOpen={isChangeProductModalOpen}
         onClose={() => setIsChangeProductModalOpen(false)}
-        orders={selectedOrders}
+        orders={selectAllMatchingFilters ? orders : selectedOrders}
         onSubmit={handleChangeProductSubmit}
         isLoading={isActionLoading}
       />
