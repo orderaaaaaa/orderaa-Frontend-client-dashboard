@@ -31,6 +31,7 @@ export const orderSettingsSchema = z.object({
 
   language: z.enum(['ar', 'en']).optional(),
   cancellationReasons: z.array(z.string()).optional(),
+  utmSources: z.array(z.string()).optional(),
   shippingPhoneNumber: z.string().trim().optional(),
 
   canOpenShipment: z.boolean().optional(),

@@ -20,6 +20,13 @@ export function convertToFormData(data: Record<string, any>): FormData {
       return;
     }
 
+    if (key === 'utmSources' && Array.isArray(value)) {
+      value.forEach((item) => {
+        formData.append('utmSources[]', item);
+      });
+      return;
+    }
+
     if (typeof value === 'boolean') {
       formData.append(key, value.toString());
       return;

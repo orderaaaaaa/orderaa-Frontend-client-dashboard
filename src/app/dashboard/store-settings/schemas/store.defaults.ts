@@ -3,6 +3,7 @@ import { OrderSettingsFormData } from './store';
 export const ORDER_SETTINGS_DEFAULTS: OrderSettingsFormData = {
   language: 'ar',
   cancellationReasons: [],
+  utmSources: [],
   canOpenShipment: false,
   employeeCanEditContent: false,
   shippingPhoneNumber: '',

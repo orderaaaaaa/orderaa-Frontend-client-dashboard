@@ -2,6 +2,8 @@
 
 import React from 'react';
 import Input from '@/components/ui/Input';
+import SearchableSelect from '@/components/ui/SearchableSelect';
+import { useUtmSourcesQuery } from '@/services/lookups';
 import { OrderProps } from './types';
 
 function Order({
@@ -11,6 +13,8 @@ function Order({
   onPageNameChange,
   errors,
 }: OrderProps) {
+  const { data: utmSources = [], isLoading } = useUtmSourcesQuery();
+
   return (
     <div className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center">
       <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
@@ -22,14 +26,15 @@ function Order({
                 المنصة <span className="text-red-500">*</span>
               </label>
             </div>
-            <Input
+            <SearchableSelect
               name="utmSource"
-              type="text"
-              placeholder="مثال: facebook ads"
-              className="w-full"
+              placeholder="اختر المنصة"
               value={utmSource}
-              onChange={(e) => onUtmSourceChange(e.target.value)}
+              onChange={onUtmSourceChange}
+              options={utmSources}
+              loading={isLoading}
               error={errors?.utmSource}
+              emptyMessage="لا توجد مصادر متاحة"
             />
           </div>
           <div className="max-w-[502px]" data-field-error="pageName">

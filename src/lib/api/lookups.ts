@@ -49,3 +49,8 @@ export async function getShippingCities(
   );
   return data;
 }
+
+export async function getUtmSources(): Promise<string[]> {
+  const { data } = await http.get<string[]>('/lookups/utm-sources');
+  return data;
+}

@@ -10,6 +10,7 @@ export function mapSettingsToForm(
     logo: settings.logo ?? undefined,
     language: settings.language ?? 'ar',
     cancellationReasons: settings.cancellationReasons ?? [],
+    utmSources: settings.utmSources ?? [],
     canOpenShipment: settings.canOpenShipment ?? false,
     employeeCanEditContent: settings.employeeCanEditContent ?? false,
     defaultReturnShippingCost: settings.defaultReturnShippingCost ?? 0,

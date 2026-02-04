@@ -6,6 +6,7 @@ export interface MerchantSettingsResponse {
   defaultReturnShippingCost: number;
   language: language;
   cancellationReasons: string[];
+  utmSources: string[];
   autoCancelAttempts: number;
   logo: string;
   url: string;
