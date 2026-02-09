@@ -62,9 +62,10 @@ export function CallCenterContent() {
   } = usePrintOrdersFilters();
 
   const apiFilters = useMemo(() => {
+    const shouldSendDepartment = !filters.status && department;
     return {
       ...buildApiFiltersFromUrlState(filters),
-      ...(department && { department }),
+      ...(shouldSendDepartment && { department }),
     };
   }, [filters, department]);
 

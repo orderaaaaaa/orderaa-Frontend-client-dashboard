@@ -6,7 +6,8 @@ import {
   SummaryStatCardSkeleton,
 } from '@/components/ui/summary-stat-card';
 import BaseModal from '@/components/ui/base-modal';
-import type { DashboardSummary } from '../types';
+import { LiaStopwatchSolid } from 'react-icons/lia';
+import type { DashboardSummary, FirstAttemptData } from '../types';
 import {
   buildActiveStoppedCards,
   buildOrderStatusCards,
@@ -28,6 +29,7 @@ import {
 
 interface TodaySummarySectionProps {
   summary: DashboardSummary;
+  firstAttempt: FirstAttemptData;
   isLoading: boolean;
 }
 
@@ -63,6 +65,7 @@ const CLICKABLE_ORDER_CARDS = ['followUp', 'incomplete', 'cancelled'];
 
 export function TodaySummarySection({
   summary,
+  firstAttempt,
   isLoading,
 }: TodaySummarySectionProps) {
   const { modalType, isOpen, openModal, closeModal } = useSummaryModal();
@@ -83,7 +86,8 @@ export function TodaySummarySection({
     return (
       <section className="space-y-4">
         <h2 className="text-lg font-bold text-primary">ملخص اليوم</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <SummaryStatCardSkeleton />
           <SummaryStatCardSkeleton />
           <SummaryStatCardSkeleton />
         </div>
@@ -104,7 +108,7 @@ export function TodaySummarySection({
     <section className="space-y-4">
       <h2 className="text-lg font-bold text-primary">ملخص اليوم</h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {activeStoppedCards.map((card) => (
           <SummaryStatCard
             key={card.key}
@@ -115,6 +119,12 @@ export function TodaySummarySection({
             onClick={() => openModal(card.key)}
           />
         ))}
+        <SummaryStatCard
+          icon={<LiaStopwatchSolid className="w-6 h-6 text-primary" />}
+          iconBgClassName="bg-purple-100"
+          label="أول محاولة تتم بعد"
+          value={`${firstAttempt.minutes} دقيقة`}
+        />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

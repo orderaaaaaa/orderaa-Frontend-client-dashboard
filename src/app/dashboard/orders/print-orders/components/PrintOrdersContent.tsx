@@ -20,6 +20,7 @@ import {
 import { getOrderByCode } from '../services/printOrders';
 import { ScannedOrdersModal } from './ScannedOrdersModal';
 import { ChangeProductModal } from './ChangeProductModal';
+import { PrintedOrdersConfirmModal } from './PrintedOrdersConfirmModal';
 
 import { Breadcrumb } from '@/components/dashboard-layout';
 import { Button } from '@/components/ui/button';
@@ -63,6 +64,9 @@ export function PrintOrdersContent() {
   const [isScanLoading, setIsScanLoading] = useState(false);
   const [isChangeProductModalOpen, setIsChangeProductModalOpen] =
     useState(false);
+  const [isPrintedConfirmModalOpen, setIsPrintedConfirmModalOpen] =
+    useState(false);
+  const pendingActionRef = useRef<(() => void | Promise<void>) | null>(null);
   const [isScannerChangeProductMode, setIsScannerChangeProductMode] =
     useState(false);
   const [scannerPackagingNotes, setScannerPackagingNotes] = useState<
@@ -89,6 +93,12 @@ export function PrintOrdersContent() {
   } = usePrintOrdersFilters();
   const { statistics: printStatistics, loading: statsLoading } =
     usePrintOrderStatistics();
+
+  useEffect(() => {
+    if (filters.status !== 'CONFIRMED') {
+      setPrintStatus(null);
+    }
+  }, [filters.status, setPrintStatus]);
 
   const apiFilters = useMemo(() => {
     const baseFilters = buildApiFiltersFromUrlState(filters);
@@ -343,7 +353,32 @@ export function PrintOrdersContent() {
     onSubmit: handleFormSubmit,
   });
 
-  const handlePrepared = useCallback(async () => {
+  const printedOrdersInSelection = useMemo(() => {
+    const ordersToProcess = selectAllMatchingFilters ? orders : selectedOrders;
+    return ordersToProcess.filter((o) => o.isPrinted);
+  }, [selectAllMatchingFilters, orders, selectedOrders]);
+
+  const withPrintedCheck = useCallback(
+    (action: () => void | Promise<void>) => {
+      if (printedOrdersInSelection.length > 0) {
+        pendingActionRef.current = action;
+        setIsPrintedConfirmModalOpen(true);
+      } else {
+        action();
+      }
+    },
+    [printedOrdersInSelection]
+  );
+
+  const handlePrintedConfirm = useCallback(() => {
+    setIsPrintedConfirmModalOpen(false);
+    if (pendingActionRef.current) {
+      pendingActionRef.current();
+      pendingActionRef.current = null;
+    }
+  }, []);
+
+  const executePrepared = useCallback(async () => {
     const ordersToProcess = selectAllMatchingFilters ? orders : selectedOrders;
     if (ordersToProcess.length === 0) return;
     setIsActionLoading(true);
@@ -361,7 +396,11 @@ export function PrintOrdersContent() {
     }
   }, [selectAllMatchingFilters, orders, selectedOrders, prepareOrdersMutation, clearSelections, setSelectMode]);
 
-  const handleAwaitingPackaging = useCallback(async () => {
+  const handlePrepared = useCallback(() => {
+    withPrintedCheck(executePrepared);
+  }, [withPrintedCheck, executePrepared]);
+
+  const executeAwaitingPackaging = useCallback(async () => {
     const ordersToProcess = selectAllMatchingFilters ? orders : selectedOrders;
     if (ordersToProcess.length === 0) return;
     setIsActionLoading(true);
@@ -379,7 +418,11 @@ export function PrintOrdersContent() {
     }
   }, [selectAllMatchingFilters, orders, selectedOrders, waitingMutation, clearSelections, setSelectMode]);
 
-  const handleCallAgain = useCallback(async () => {
+  const handleAwaitingPackaging = useCallback(() => {
+    withPrintedCheck(executeAwaitingPackaging);
+  }, [withPrintedCheck, executeAwaitingPackaging]);
+
+  const executeCallAgain = useCallback(async () => {
     const ordersToProcess = selectAllMatchingFilters ? orders : selectedOrders;
     if (ordersToProcess.length === 0) return;
     setIsActionLoading(true);
@@ -397,11 +440,19 @@ export function PrintOrdersContent() {
     }
   }, [selectAllMatchingFilters, orders, selectedOrders, callAgainMutation, clearSelections, setSelectMode]);
 
+  const handleCallAgain = useCallback(() => {
+    withPrintedCheck(executeCallAgain);
+  }, [withPrintedCheck, executeCallAgain]);
+
+  const executeChangeProduct = useCallback(() => {
+    setIsChangeProductModalOpen(true);
+  }, []);
+
   const handleChangeProduct = useCallback(() => {
     const ordersToProcess = selectAllMatchingFilters ? orders : selectedOrders;
     if (ordersToProcess.length === 0) return;
-    setIsChangeProductModalOpen(true);
-  }, [selectAllMatchingFilters, orders, selectedOrders]);
+    withPrintedCheck(executeChangeProduct);
+  }, [selectAllMatchingFilters, orders, selectedOrders, withPrintedCheck, executeChangeProduct]);
 
   const handleChangeProductSubmit = useCallback(
     async (ordersWithNotes: { id: number; packagingNote: string }[]) => {
@@ -499,6 +550,7 @@ export function PrintOrdersContent() {
         onPrintStatusChange={setPrintStatus}
         printStatistics={printStatistics}
         selectedOrders={selectedOrders}
+        showPrintStatusToggle={filters.status === 'CONFIRMED'}
       />
 
       <div className="flex flex-col sm:flex-row justify-between gap-2 mt-10 mb-6 select-none">
@@ -684,6 +736,16 @@ export function PrintOrdersContent() {
         packagingNotes={scannerPackagingNotes}
         onPackagingNoteChange={handleScannerPackagingNoteChange}
         onChangeProductSubmit={handleScannerChangeProductSubmit}
+      />
+
+      <PrintedOrdersConfirmModal
+        isOpen={isPrintedConfirmModalOpen}
+        onClose={() => {
+          setIsPrintedConfirmModalOpen(false);
+          pendingActionRef.current = null;
+        }}
+        onConfirm={handlePrintedConfirm}
+        printedOrders={printedOrdersInSelection}
       />
 
       <ChangeProductModal

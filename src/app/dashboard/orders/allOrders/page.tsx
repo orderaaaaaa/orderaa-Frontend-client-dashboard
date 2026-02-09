@@ -178,7 +178,14 @@ function AllOrdersContent() {
     },
   });
 
-  const { statistics } = useOrderStatistics();
+  const statisticsParams = useMemo(() => {
+    const from = formatDateForUrl(fromDate);
+    const to = formatDateForUrl(toDate);
+    if (!from && !to) return undefined;
+    return { from, to };
+  }, [fromDate, toDate]);
+
+  const { statistics } = useOrderStatistics(statisticsParams);
 
   const handleStatisticsChange = useCallback(() => {
     queryClient.invalidateQueries({

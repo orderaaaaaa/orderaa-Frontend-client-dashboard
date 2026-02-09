@@ -6,7 +6,6 @@ import { EmployeeStatusSection } from './EmployeeStatusSection';
 import { CallDurationSection } from './CallDurationSection';
 import { OrderStatusDistributionSection } from './OrderStatusDistributionSection';
 import { ConfirmationAttemptsSection } from './ConfirmationAttemptsSection';
-import { FirstAttemptSection } from './FirstAttemptSection';
 import { PostponedOrdersContentSection } from './PostponedOrdersContentSection';
 
 export function DashboardContent() {
@@ -23,7 +22,7 @@ export function DashboardContent() {
 
   return (
     <div className="w-full space-y-8">
-      <TodaySummarySection summary={summary} isLoading={isLoading} />
+      <TodaySummarySection summary={summary} firstAttempt={firstAttempt} isLoading={isLoading} />
       <EmployeeStatusSection employees={employees} isLoading={isLoading} />
       <CallDurationSection items={callDurations} isLoading={isLoading} />
       <OrderStatusDistributionSection
@@ -34,7 +33,6 @@ export function DashboardContent() {
         data={confirmationAttempts}
         isLoading={isLoading}
       />
-      <FirstAttemptSection data={firstAttempt} isLoading={isLoading} />
       <PostponedOrdersContentSection
         data={postponedOrdersContent}
         isLoading={isLoading}

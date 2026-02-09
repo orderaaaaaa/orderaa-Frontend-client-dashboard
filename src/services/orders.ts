@@ -55,12 +55,17 @@ export const useInfiniteOrders = (filters: Omit<FilterOrdersDto, 'page'>) => {
 };
 
 // Fetch order statistics
-export const useOrderStatisticsQuery = () => {
+export const useOrderStatisticsQuery = (params?: {
+  from?: string;
+  to?: string;
+}) => {
   return useQuery({
-    queryKey: [QUERY_KEYS.ORDER_STATISTICS] as QueryKey,
+    queryKey: [QUERY_KEYS.ORDER_STATISTICS, params?.from, params?.to] as QueryKey,
     queryFn: async () => {
-      const response =
-        await http.get<OrderStatisticsResponse>('/orders/statistics');
+      const response = await http.get<OrderStatisticsResponse>(
+        '/orders/statistics',
+        { params: { from: params?.from, to: params?.to } }
+      );
       return response.data;
     },
   });
