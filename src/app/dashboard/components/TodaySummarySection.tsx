@@ -28,6 +28,30 @@ interface TodaySummarySectionProps {
 
 const CLICKABLE_ORDER_CARDS = ['followUp', 'incomplete', 'cancelled'];
 
+function formatDuration(totalMinutes: number): string {
+  const formatMinutesPart = (m: number): string => {
+    if (m === 1) return 'دقيقة';
+    if (m === 2) return 'دقيقتين';
+    if (m >= 3 && m <= 10) return `${m} دقائق`;
+    return `${m} دقيقة`;
+  };
+
+  if (totalMinutes < 60) return formatMinutesPart(totalMinutes);
+
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = totalMinutes % 60;
+
+  let hourStr: string;
+  if (hours === 1) hourStr = 'ساعة';
+  else if (hours === 2) hourStr = 'ساعتين';
+  else if (hours >= 3 && hours <= 10) hourStr = `${hours} ساعات`;
+  else hourStr = `${hours} ساعة`;
+
+  if (mins === 0) return hourStr;
+
+  return `${hourStr} و ${formatMinutesPart(mins)}`;
+}
+
 export function TodaySummarySection({
   summary,
   firstAttempt,
@@ -137,11 +161,7 @@ export function TodaySummarySection({
           icon={<LiaStopwatchSolid className="w-6 h-6 text-primary" />}
           iconBgClassName="bg-purple-100"
           label="أول محاولة تتم بعد"
-          value={
-            firstAttempt.minutes >= 60
-              ? `${Math.floor(firstAttempt.minutes / 60)} ساعة و ${firstAttempt.minutes % 60} دقيقة`
-              : `${firstAttempt.minutes} دقيقة`
-          }
+          value={formatDuration(firstAttempt.minutes)}
         />
       </div>
 
