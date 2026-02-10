@@ -29,6 +29,7 @@ interface UseSummaryModalDataReturn {
   activeEmployeesModalData: EmployeeModalData[];
   activeEmployeesPerformance: Record<number, EmployeePerformanceData>;
   stoppedEmployeesModalData: EmployeeModalData[];
+  stoppedEmployeesPerformance: Record<number, EmployeePerformanceData>;
   isModalLoading: boolean;
 }
 
@@ -91,14 +92,27 @@ export function useSummaryModalData(
       };
     }, [employeesOnlineQuery.data, getStatusLabel]);
 
-  const stoppedEmployeesModalData = useMemo(() => {
-    if (!employeesOfflineQuery.data) return [] as EmployeeModalData[];
-    return transformEmployeesList(
-      employeesOfflineQuery.data,
-      'stopped',
-      getStatusLabel,
-    ).employees;
-  }, [employeesOfflineQuery.data, getStatusLabel]);
+  const { stoppedEmployeesModalData, stoppedEmployeesPerformance } =
+    useMemo(() => {
+      if (!employeesOfflineQuery.data) {
+        return {
+          stoppedEmployeesModalData: [] as EmployeeModalData[],
+          stoppedEmployeesPerformance: {} as Record<
+            number,
+            EmployeePerformanceData
+          >,
+        };
+      }
+      const result = transformEmployeesList(
+        employeesOfflineQuery.data,
+        'stopped',
+        getStatusLabel,
+      );
+      return {
+        stoppedEmployeesModalData: result.employees,
+        stoppedEmployeesPerformance: result.performanceData,
+      };
+    }, [employeesOfflineQuery.data, getStatusLabel]);
 
   const isModalLoading =
     (modalType === 'followUp' && attemptedQuery.isLoading) ||
@@ -115,6 +129,7 @@ export function useSummaryModalData(
     activeEmployeesModalData,
     activeEmployeesPerformance,
     stoppedEmployeesModalData,
+    stoppedEmployeesPerformance,
     isModalLoading,
   };
 }

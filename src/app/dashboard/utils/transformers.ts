@@ -176,7 +176,7 @@ export function transformAttemptConversion(
         ORDINAL_LABELS[item.attemptCount - 1] ??
         `محاولة ${item.attemptCount}`,
     ),
-    values: sorted.map((item) => item.totalOrders),
+    values: sorted.map((item) => item.confirmedOrders),
   };
 }
 

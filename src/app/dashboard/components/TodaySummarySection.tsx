@@ -43,6 +43,7 @@ export function TodaySummarySection({
     activeEmployeesModalData,
     activeEmployeesPerformance,
     stoppedEmployeesModalData,
+    stoppedEmployeesPerformance,
     isModalLoading,
   } = useSummaryModalData(modalType);
 
@@ -194,7 +195,9 @@ export function TodaySummarySection({
                 performanceData={
                   modalType === 'active'
                     ? activeEmployeesPerformance
-                    : undefined
+                    : modalType === 'stopped'
+                      ? stoppedEmployeesPerformance
+                      : undefined
                 }
               />
             )}
