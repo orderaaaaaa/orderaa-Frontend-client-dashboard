@@ -37,24 +37,28 @@ export function CallDurationSection({
   return (
     <section className="space-y-4">
       <h2 className="text-lg font-bold text-primary">متوسط مده المكالمات</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {items.map((item) => (
-          <div
-            key={item.key}
-            className="bg-white rounded-lg py-5 px-4 border border-gray-100"
-          >
-            <div className="text-center">
-              <span className="text-[#000000] font-bold text-sm block mb-2">
-                {item.label}
-              </span>
+      {items.length === 0 ? (
+        <p className="py-12 text-center text-gray-500">لا توجد بيانات</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {items.map((item) => (
+            <div
+              key={item.key}
+              className="bg-white rounded-lg py-5 px-4 border border-gray-100"
+            >
+              <div className="text-center">
+                <span className="text-[#000000] font-bold text-sm block mb-2">
+                  {item.label}
+                </span>
+              </div>
+              <SplineAreaChart
+                categories={item.chartCategories}
+                series={item.chartSeries}
+              />
             </div>
-            <SplineAreaChart
-              categories={item.chartCategories}
-              series={item.chartSeries}
-            />
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

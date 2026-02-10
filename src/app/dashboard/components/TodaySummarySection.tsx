@@ -12,15 +12,8 @@ import {
   buildActiveStoppedCards,
   buildOrderStatusCards,
   buildTotalsCards,
-  activeEmployeesData,
-  stoppedEmployeesData,
-  followUpOrdersData,
-  incompleteOrdersData,
-  cancelledOrdersData,
-  cancelledOrderDetails,
-  EMPLOYEE_PERFORMANCE_DATA,
 } from '../constants';
-import { useSummaryModal } from '../hooks';
+import { useSummaryModal, useSummaryModalData } from '../hooks';
 import {
   EmployeeListModalContent,
   OrderStatusModalContent,
@@ -33,34 +26,6 @@ interface TodaySummarySectionProps {
   isLoading: boolean;
 }
 
-const MODAL_CONFIG = {
-  active: {
-    title: 'الموظفون النشطون',
-    data: activeEmployeesData,
-    type: 'employee' as const,
-  },
-  stopped: {
-    title: 'الموظفون المتوقفون',
-    data: stoppedEmployeesData,
-    type: 'employee' as const,
-  },
-  followUp: {
-    title: 'طلبات المتابعة',
-    data: followUpOrdersData,
-    type: 'order' as const,
-  },
-  incomplete: {
-    title: 'طلبات غير مكتمله',
-    data: incompleteOrdersData,
-    type: 'order' as const,
-  },
-  cancelled: {
-    title: 'طلبات ملغاة',
-    data: cancelledOrdersData,
-    type: 'cancelled' as const,
-  },
-};
-
 const CLICKABLE_ORDER_CARDS = ['followUp', 'incomplete', 'cancelled'];
 
 export function TodaySummarySection({
@@ -69,6 +34,17 @@ export function TodaySummarySection({
   isLoading,
 }: TodaySummarySectionProps) {
   const { modalType, isOpen, openModal, closeModal } = useSummaryModal();
+
+  const {
+    followUpModalData,
+    incompleteModalData,
+    cancelledModalSummary,
+    cancelledOrderDetails,
+    activeEmployeesModalData,
+    activeEmployeesPerformance,
+    stoppedEmployeesModalData,
+    isModalLoading,
+  } = useSummaryModalData(modalType);
 
   const activeStoppedCards = useMemo(
     () => buildActiveStoppedCards(summary),
@@ -80,7 +56,44 @@ export function TodaySummarySection({
   );
   const totalsCards = useMemo(() => buildTotalsCards(summary), [summary]);
 
-  const currentModalConfig = modalType ? MODAL_CONFIG[modalType] : null;
+  const modalConfig = useMemo(
+    () => ({
+      active: {
+        title: 'الموظفون النشطون',
+        data: activeEmployeesModalData,
+        type: 'employee' as const,
+      },
+      stopped: {
+        title: 'الموظفون المتوقفون',
+        data: stoppedEmployeesModalData,
+        type: 'employee' as const,
+      },
+      followUp: {
+        title: 'طلبات المتابعة',
+        data: followUpModalData,
+        type: 'order' as const,
+      },
+      incomplete: {
+        title: 'طلبات غير مكتمله',
+        data: incompleteModalData,
+        type: 'order' as const,
+      },
+      cancelled: {
+        title: 'طلبات ملغاة',
+        data: cancelledModalSummary,
+        type: 'cancelled' as const,
+      },
+    }),
+    [
+      activeEmployeesModalData,
+      stoppedEmployeesModalData,
+      followUpModalData,
+      incompleteModalData,
+      cancelledModalSummary,
+    ],
+  );
+
+  const currentModalConfig = modalType ? modalConfig[modalType] : null;
 
   if (isLoading) {
     return (
@@ -123,7 +136,11 @@ export function TodaySummarySection({
           icon={<LiaStopwatchSolid className="w-6 h-6 text-primary" />}
           iconBgClassName="bg-purple-100"
           label="أول محاولة تتم بعد"
-          value={`${firstAttempt.minutes} دقيقة`}
+          value={
+            firstAttempt.minutes >= 60
+              ? `${Math.floor(firstAttempt.minutes / 60)} ساعة و ${firstAttempt.minutes % 60} دقيقة`
+              : `${firstAttempt.minutes} دقيقة`
+          }
         />
       </div>
 
@@ -163,22 +180,34 @@ export function TodaySummarySection({
         showFooter={false}
         maxWidth="md:max-w-[900px]"
       >
-        {currentModalConfig?.type === 'employee' && (
-          <EmployeeListModalContent
-            data={currentModalConfig.data}
-            performanceData={
-              modalType === 'active' ? EMPLOYEE_PERFORMANCE_DATA : undefined
-            }
-          />
-        )}
-        {currentModalConfig?.type === 'order' && (
-          <OrderStatusModalContent data={currentModalConfig.data} />
-        )}
-        {currentModalConfig?.type === 'cancelled' && (
-          <CancelledOrdersModalContent
-            summaryData={currentModalConfig.data}
-            orderDetails={cancelledOrderDetails}
-          />
+        {isModalLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          </div>
+        ) : currentModalConfig?.data.length === 0 ? (
+          <p className="py-12 text-center text-gray-500">لا توجد بيانات</p>
+        ) : (
+          <>
+            {currentModalConfig?.type === 'employee' && (
+              <EmployeeListModalContent
+                data={currentModalConfig.data}
+                performanceData={
+                  modalType === 'active'
+                    ? activeEmployeesPerformance
+                    : undefined
+                }
+              />
+            )}
+            {currentModalConfig?.type === 'order' && (
+              <OrderStatusModalContent data={currentModalConfig.data} />
+            )}
+            {currentModalConfig?.type === 'cancelled' && (
+              <CancelledOrdersModalContent
+                summaryData={currentModalConfig.data}
+                orderDetails={cancelledOrderDetails}
+              />
+            )}
+          </>
         )}
       </BaseModal>
     </section>

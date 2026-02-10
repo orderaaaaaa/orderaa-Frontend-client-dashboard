@@ -26,6 +26,18 @@ export const QUERY_KEYS = {
   // Cancellation Reasons
   CANCELLATION_REASONS: 'cancellation-reasons',
   TOP_CANCELLATION_REASONS: 'top-cancellation-reasons',
+
+  // Dashboard Reports
+  DASHBOARD_SUMMARY: 'dashboard-summary',
+  DASHBOARD_ATTEMPTED: 'dashboard-attempted',
+  DASHBOARD_REMAINING: 'dashboard-remaining',
+  DASHBOARD_CANCELLED: 'dashboard-cancelled',
+  DASHBOARD_HOURLY_CHART: 'dashboard-hourly-chart',
+  DASHBOARD_BY_STATUS: 'dashboard-by-status',
+  DASHBOARD_ATTEMPT_CONVERSION: 'dashboard-attempt-conversion',
+  DASHBOARD_EDIT_REJECTED_PRODUCTS: 'dashboard-edit-rejected-products',
+  DASHBOARD_EMPLOYEES_ONLINE: 'dashboard-employees-online',
+  DASHBOARD_EMPLOYEES_OFFLINE: 'dashboard-employees-offline',
 } as const;
 
 export type QueryKeyType = (typeof QUERY_KEYS)[keyof typeof QUERY_KEYS];

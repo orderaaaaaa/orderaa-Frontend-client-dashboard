@@ -30,6 +30,15 @@ export function OrderStatusDistributionSection({
     );
   }
 
+  if (items.length === 0) {
+    return (
+      <section className="space-y-4">
+        <h2 className="text-lg font-bold text-primary">توزيع حالات الطلبات</h2>
+        <p className="py-12 text-center text-gray-500">لا توجد بيانات</p>
+      </section>
+    );
+  }
+
   const series = items.map((item) => item.value);
   const labels = items.map((item) => item.label);
 
