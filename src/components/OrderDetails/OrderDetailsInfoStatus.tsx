@@ -4,8 +4,7 @@ import { Order, OrderEvent } from '@/types/orders';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
-import { getRemainingTime } from '@/utils/getRemainingTime';
-import { LiaClock } from 'react-icons/lia';
+
 
 interface OrderDetailsInfoStatusProps {
   order: Order;
@@ -97,7 +96,6 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
 
   const events = allEvents.map((event: OrderEvent, index: number) => {
     const statusLabel = event.status ? getStatusLabel(event.status) : 'حدث';
-    const isNewOrderEvent = event.status === 'NEW_ORDER';
     return {
       id: event.id || index + 1,
       status: statusLabel,
@@ -106,9 +104,13 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
       eventType: event.status || 'NEW_ORDER',
       note: event.note || null,
       employee: event.employee,
-      utmSource: isNewOrderEvent ? order.utmSource : undefined,
+      utmSource: undefined as string | undefined,
     };
   });
+
+  if (events.length > 0 && order.utmSource) {
+    events[events.length - 1].utmSource = order.utmSource;
+  }
 
   return (
     <div>
