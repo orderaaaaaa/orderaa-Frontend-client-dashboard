@@ -236,7 +236,8 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
 
       {/* Footer */}
       <div className="grid grid-cols-2 gap-2 mt-1 pt-1">
-        <div>
+        {/* TODO: re-enable QR code when ready */}
+        <div className="hidden">
           <div className="grid place-items-center">
             <QRCodeSVG
               value={storeInfo.contactQRValue}
@@ -247,7 +248,7 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
           </div>
           <p className="text-[7px] text-center">{labels.scanToContact}</p>
         </div>
-        <div className='grid place-content-center'>
+        <div className='grid place-content-center col-span-2'>
           <p className="text-[9px] mb-0.5">
             {labels.contactMessage}
           </p>
