@@ -1,29 +1,27 @@
 'use client';
 
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Employee } from '../types/employee';
+import { employeeSchema, EmployeeFormData } from '../schemas/employee';
 import Input from '@/components/ui/Input';
+import { Button } from '@/components/ui/button';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import WorkHoursTimePicker from '@/components/ui/WorkHoursTimePicker';
 import { useGovernoratesQuery } from '@/services/lookups';
 import {
-  validateEgyptianPhoneNumber,
-  getPhoneNumberErrorMessage,
-} from '@/utils/validators/phoneValidator';
-import {
-  User,
-  Phone,
-  Briefcase,
-  MapPin,
-  Mail,
-  Lock,
-  Clock,
-} from 'lucide-react';
+  LiaUserSolid,
+  LiaPhoneSolid,
+  LiaBriefcaseSolid,
+  LiaMapMarkerAltSolid,
+  LiaEnvelopeSolid,
+  LiaLockSolid,
+  LiaClockSolid,
+} from 'react-icons/lia';
 import {
   ACCESS_LEVEL_OPTIONS,
   DEPARTMENT_OPTIONS,
 } from '../../../constants/employeesFormOptions';
-import { toast } from 'react-toastify';
 
 interface EmployeeFormProps {
   employee: Employee;
@@ -43,10 +41,9 @@ export default function EmployeeForm({
     handleSubmit,
     watch,
     setValue,
-    setError,
-    clearErrors,
     formState: { errors },
-  } = useForm<Employee & { passwordConfirmation?: string }>({
+  } = useForm<EmployeeFormData>({
+    resolver: zodResolver(employeeSchema),
     defaultValues: employee,
   });
 
@@ -55,22 +52,15 @@ export default function EmployeeForm({
   const address = watch('address');
   const workingHours = watch('workingHours');
 
-  const onSubmitHandler = (data: any) => {
-    if (data.password && data.password !== data.passwordConfirmation) {
-      setError('passwordConfirmation', {
-        type: 'manual',
-        message: 'الباسورد غير متطابق',
-      });
-      toast.error('الباسورد غير متطابق');
-      return;
-    }
+  const onSubmitHandler = (data: EmployeeFormData) => {
+    const { passwordConfirmation, ...rest } = data;
 
-    clearErrors('passwordConfirmation');
-
-    const updateData = { ...data };
-
-    delete updateData.passwordConfirmation;
-    delete updateData.id;
+    const updateData: Partial<Employee> = {
+      ...rest,
+      address: rest.address ?? undefined,
+      password: rest.password ?? undefined,
+      workingHours: rest.workingHours ?? undefined,
+    };
 
     if (!updateData.password || updateData.password.trim() === '') {
       delete updateData.password;
@@ -85,12 +75,11 @@ export default function EmployeeForm({
       className="space-y-6 bg-white p-6 rounded-lg shadow"
       dir="rtl"
     >
-      {/* Access Level */}
       <div className="w-full flex flex-col items-end gap-2">
         <div className="flex items-center gap-2 mb-2 justify-start w-full">
-          <User className="w-6 h-6 text-primary" strokeWidth={1.5} />
+          <LiaUserSolid className="w-6 h-6 text-primary" />
           <span className="text-base md:text-lg font-normal">
-            صلاحية الموظف
+            صلاحية الموظف <span className="text-red-500">*</span>
           </span>
         </div>
         <SearchableSelect
@@ -102,16 +91,15 @@ export default function EmployeeForm({
           placeholder="اختر صلاحية الموظف"
           widthClass="w-full"
           error={errors?.accessLevel?.message}
-          triggerClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 text-lg ${errors?.accessLevel ? 'border-red-500' : 'border-black/16'
-            } rounded text-right`}
         />
       </div>
 
-      {/* Department */}
       <div className="w-full flex flex-col items-end gap-2">
         <div className="flex items-center gap-2 mb-2 justify-start w-full">
-          <Briefcase className="w-6 h-6 text-primary" strokeWidth={1.5} />
-          <span className="text-base md:text-lg font-normal">قسم الموظف</span>
+          <LiaBriefcaseSolid className="w-6 h-6 text-primary" />
+          <span className="text-base md:text-lg font-normal">
+            قسم الموظف <span className="text-red-500">*</span>
+          </span>
         </div>
         <SearchableSelect
           value={department || ''}
@@ -122,18 +110,15 @@ export default function EmployeeForm({
           placeholder="اختر القسم"
           widthClass="w-full"
           error={errors?.department?.message}
-          triggerClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 text-lg ${errors?.department ? 'border-red-500' : 'border-black/16'
-            } rounded text-right`}
         />
       </div>
 
-      {/* Full Name & Phone */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <User className="w-6 h-6 text-primary" strokeWidth={1.5} />
+            <LiaUserSolid className="w-6 h-6 text-primary" />
             <span className="text-base md:text-lg font-normal">
-              الاسم الكامل
+              الاسم الكامل <span className="text-red-500">*</span>
             </span>
           </div>
           <Input
@@ -142,38 +127,31 @@ export default function EmployeeForm({
             placeholder="أدخل الاسم الكامل"
             register={register}
             error={errors.fullName?.message}
-            className="!h-[46px] !px-4 bg-[rgba(234,234,234,0.25)] !border-black/16 text-right"
           />
         </div>
         <div>
           <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <Phone className="w-6 h-6 text-primary" strokeWidth={1.5} />
-            <span className="text-base md:text-lg font-normal">رقم الهاتف</span>
+            <LiaPhoneSolid className="w-6 h-6 text-primary" />
+            <span className="text-base md:text-lg font-normal">
+              رقم الهاتف <span className="text-red-500">*</span>
+            </span>
           </div>
           <Input
             name="phoneNumber"
             type="text"
             placeholder="01234567890"
             register={register}
-            registerOptions={{
-              // required: 'رقم الهاتف مطلوب',
-              validate: (val: string) =>
-                validateEgyptianPhoneNumber(val) ||
-                getPhoneNumberErrorMessage(val),
-            }}
             error={errors.phoneNumber?.message}
-            className="!h-[46px] !px-4 bg-[rgba(234,234,234,0.25)] !border-black/16 text-right"
           />
         </div>
       </div>
 
-      {/* Email & Governorate */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <Mail className="w-6 h-6 text-primary" strokeWidth={1.5} />
+            <LiaEnvelopeSolid className="w-6 h-6 text-primary" />
             <span className="text-base md:text-lg font-normal">
-              البريد الإلكتروني
+              البريد الإلكتروني <span className="text-red-500">*</span>
             </span>
           </div>
           <Input
@@ -181,20 +159,12 @@ export default function EmployeeForm({
             type="email"
             placeholder="example@domain.com"
             register={register}
-            registerOptions={{
-              required: 'البريد الإلكتروني مطلوب',
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: 'البريد الإلكتروني غير صحيح',
-              },
-            }}
             error={errors.email?.message}
-            className="!h-[46px] !px-4 bg-[rgba(234,234,234,0.25)] !border-black/16 text-right"
           />
         </div>
         <div>
           <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <MapPin className="w-6 h-6 text-primary" strokeWidth={1.5} />
+            <LiaMapMarkerAltSolid className="w-6 h-6 text-primary" />
             <span className="text-base md:text-lg font-normal">المحافظة</span>
           </div>
           <SearchableSelect
@@ -208,11 +178,10 @@ export default function EmployeeForm({
         </div>
       </div>
 
-      {/* Password */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <Lock className="w-6 h-6 text-primary" strokeWidth={1.5} />
+            <LiaLockSolid className="w-6 h-6 text-primary" />
             <span className="text-base md:text-lg font-normal">
               كلمة المرور
             </span>
@@ -223,15 +192,11 @@ export default function EmployeeForm({
             placeholder="كلمة المرور"
             register={register}
             error={errors.password?.message}
-            className="!h-[46px] !px-4 !pr-12 bg-[rgba(234,234,234,0.25)] !border-black/16 text-right"
           />
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <Lock className="w-6 h-6 text-primary" strokeWidth={1.5} />
+            <LiaLockSolid className="w-6 h-6 text-primary" />
             <span className="text-base md:text-lg font-normal">
               تاكيد كلمة المرور
             </span>
@@ -242,16 +207,14 @@ export default function EmployeeForm({
             placeholder="تأكيد كلمة المرور"
             register={register}
             error={errors.passwordConfirmation?.message}
-            className="!h-[46px] !px-4 !pr-12 bg-[rgba(234,234,234,0.25)] !border-black/16 text-right"
           />
         </div>
       </div>
 
-      {/* Working Hours */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <Clock className="w-6 h-6 text-primary" strokeWidth={1.5} />
+            <LiaClockSolid className="w-6 h-6 text-primary" />
             <span className="text-base md:text-lg font-normal">
               ساعات العمل
             </span>
@@ -267,15 +230,10 @@ export default function EmployeeForm({
         </div>
       </div>
 
-      {/* Buttons */}
       <div className="flex justify-end gap-4 pt-4">
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="px-6 py-2 bg-primary text-white rounded-md cursor-pointer disabled:opacity-50"
-        >
+        <Button type="submit" disabled={isLoading}>
           {isLoading ? 'يتم الحفظ...' : 'حفظ التغيرات'}
-        </button>
+        </Button>
       </div>
     </form>
   );
