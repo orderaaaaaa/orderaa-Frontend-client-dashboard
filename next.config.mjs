@@ -6,6 +6,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'easyorders.fra1.digitaloceanspaces.com',
       },
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
     ],
   },
 };

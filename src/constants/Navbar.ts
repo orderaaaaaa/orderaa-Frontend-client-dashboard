@@ -9,6 +9,8 @@ import {
   LiaUsersCogSolid,
   LiaShippingFastSolid,
   LiaHeadsetSolid,
+  LiaFileInvoiceDollarSolid,
+  LiaReceiptSolid,
 } from 'react-icons/lia';
 import {
   House,
@@ -62,6 +64,18 @@ export const navigation: NavigationItem[] = [
         name: 'قسم الشحن',
         href: '/dashboard/orders/shipping-orders',
         icon: LiaShippingFastSolid,
+      },
+    ],
+  },
+    {
+    name: 'مشتريات',
+    href: '/dashboard/purchases',
+    icon: LiaFileInvoiceDollarSolid,
+    children: [
+      {
+        name: 'جميع الفواتير',
+        href: '/dashboard/purchases/all-invoices',
+        icon: LiaReceiptSolid,
       },
     ],
   },
