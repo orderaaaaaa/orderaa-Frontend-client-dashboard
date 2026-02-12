@@ -1,4 +1,5 @@
 import { LiaAngleDownSolid } from 'react-icons/lia';
+import clsx from 'clsx';
 
 interface SelectedProduct {
   id: number;
@@ -23,6 +24,7 @@ export const DropdownInput: React.FC<DropdownInputProps> = ({
   isOpen,
   selectedProducts,
   placeholder,
+  selectClassName,
   placeholderClassName,
   onToggle,
 }) => {
@@ -32,7 +34,10 @@ export const DropdownInput: React.FC<DropdownInputProps> = ({
     <button
       type="button"
       onClick={onToggle}
-      className="w-full border border-primary cursor-pointer rounded-lg py-2.5 px-10 text-[18px] transition-colors text-left flex items-center justify-between"
+      className={clsx(
+        'w-full border cursor-pointer rounded-lg py-2.5 px-10 text-[18px] transition-colors text-left flex items-center justify-between',
+        selectClassName ?? 'border-primary'
+      )}
       aria-label="Toggle dropdown"
     >
       <span

@@ -210,7 +210,7 @@ function OrderDetails({ total, onTotalChange, errors }: OrderDetailsProps) {
             placeholder="ابحث عن منتج"
             className="w-full"
             selectClassName={`border-2 w-full bg-[#EAEAEA40] p-2 rounded-sm ${
-              errors?.products ? 'border-red-500' : 'border-primary'
+              errors?.products && 'border-red-500'
             }`}
           />
           {errors?.products && (

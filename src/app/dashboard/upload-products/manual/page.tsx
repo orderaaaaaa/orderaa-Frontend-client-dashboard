@@ -48,7 +48,7 @@ function Manual() {
         shippingCost: '',
       },
       payment: {
-        paymentMethod: '',
+        paymentMethod: 'CASH',
       },
       needsConfirmation: false,
       total: '',
