@@ -358,17 +358,24 @@ export function PrintOrdersContent() {
     return ordersToProcess.filter((o) => o.isPrinted);
   }, [selectAllMatchingFilters, orders, selectedOrders]);
 
+  const hasPrintedOrdersInSelection = printedOrdersInSelection.length > 0;
+
   const withPrintedCheck = useCallback(
     (action: () => void | Promise<void>) => {
-      if (printedOrdersInSelection.length > 0) {
+      if (hasPrintedOrdersInSelection) {
         pendingActionRef.current = action;
         setIsPrintedConfirmModalOpen(true);
       } else {
         action();
       }
     },
-    [printedOrdersInSelection]
+    [hasPrintedOrdersInSelection]
   );
+
+  const handlePrintedConfirmClose = useCallback(() => {
+    setIsPrintedConfirmModalOpen(false);
+    pendingActionRef.current = null;
+  }, []);
 
   const handlePrintedConfirm = useCallback(() => {
     setIsPrintedConfirmModalOpen(false);
@@ -740,10 +747,7 @@ export function PrintOrdersContent() {
 
       <PrintedOrdersConfirmModal
         isOpen={isPrintedConfirmModalOpen}
-        onClose={() => {
-          setIsPrintedConfirmModalOpen(false);
-          pendingActionRef.current = null;
-        }}
+        onClose={handlePrintedConfirmClose}
         onConfirm={handlePrintedConfirm}
         printedOrders={printedOrdersInSelection}
       />

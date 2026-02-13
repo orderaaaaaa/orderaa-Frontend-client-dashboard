@@ -5,18 +5,18 @@ import clsx from 'clsx';
 import { DataTable } from '@/components/ui/data-table';
 import type { DataTableColumn } from '@/components/ui/data-table';
 import BaseModal from '@/components/ui/base-modal';
-import type { EmployeeStatusRow } from '../types';
-import { employeeStopDetailsData, employeeStopChartData } from '../constants';
+import type { EmployeeStatusRow, EmployeeStopDetailData } from '../types';
 import { EmployeeStopDetailsModalContent } from './modals';
 
 interface EmployeeStatusSectionProps {
   employees: EmployeeStatusRow[];
+  employeeDetailMap: Record<number, EmployeeStopDetailData>;
   isLoading: boolean;
 }
 
 const STATUS_CONFIG = {
-  active: { label: 'نشط', dotColor: 'bg-green-500' },
-  stopped: { label: 'متوقف', dotColor: 'bg-gray-400' },
+  online: { label: 'نشط', dotColor: 'bg-green-500' },
+  offline: { label: 'متوقف', dotColor: 'bg-gray-400' },
 } as const;
 
 const columns: DataTableColumn<Record<string, unknown>>[] = [
@@ -40,17 +40,17 @@ const columns: DataTableColumn<Record<string, unknown>>[] = [
     },
   },
   {
-    key: 'lastInactivityDuration',
-    header: 'مدة آخر توقف',
+    key: 'totalPauseTime',
+    header: 'إجمالي وقت التوقف',
     className: 'text-gray-600',
   },
   {
-    key: 'totalInactivityToday',
+    key: 'totalPausesInDay',
     header: 'إجمالي عدد التوقفات لليوم',
     className: 'text-gray-600',
   },
   {
-    key: 'totalAttempts',
+    key: 'totalCallCenterActions',
     header: 'إجمالي المحاولات',
     className: 'font-medium text-gray-900',
   },
@@ -58,6 +58,7 @@ const columns: DataTableColumn<Record<string, unknown>>[] = [
 
 export function EmployeeStatusSection({
   employees,
+  employeeDetailMap,
   isLoading,
 }: EmployeeStatusSectionProps) {
   const [selectedEmployee, setSelectedEmployee] =
@@ -71,11 +72,7 @@ export function EmployeeStatusSection({
   const closeModal = () => setSelectedEmployee(null);
 
   const stopDetails = selectedEmployee
-    ? employeeStopDetailsData[selectedEmployee.id]
-    : undefined;
-
-  const chartData = selectedEmployee
-    ? employeeStopChartData[selectedEmployee.id]
+    ? employeeDetailMap[selectedEmployee.id]
     : undefined;
 
   return (
@@ -101,7 +98,6 @@ export function EmployeeStatusSection({
           <EmployeeStopDetailsModalContent
             stopDetails={stopDetails}
             employeeName={selectedEmployee.name}
-            chartData={chartData}
           />
         )}
       </BaseModal>

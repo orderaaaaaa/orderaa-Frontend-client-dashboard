@@ -11,6 +11,7 @@ import type {
   AttemptConversionResponse,
   EditRejectedProductsResponse,
   EmployeesListResponse,
+  EmployeeStatusResponse,
 } from '../types';
 
 const reportBaseUrl = '/reports/daily';
@@ -137,5 +138,17 @@ export const useEmployeesOfflineQuery = (enabled = true) => {
       return response.data;
     },
     enabled,
+  });
+};
+
+export const useEmployeesStatusQuery = () => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.DASHBOARD_EMPLOYEES_STATUS] as QueryKey,
+    queryFn: async () => {
+      const response = await http.get<EmployeeStatusResponse>(
+        `${reportBaseUrl}/employees/status`,
+      );
+      return response.data;
+    },
   });
 };

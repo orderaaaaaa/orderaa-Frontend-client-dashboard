@@ -91,7 +91,7 @@ const InvoiceCard = memo(
           )}
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6 px-7">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6 px-10">
           {fields.map((field) => (
             <div key={field.label} className="flex flex-col items-start sm:items-center gap-1.5">
               <span className="text-base text-gray-400">{field.label}</span>

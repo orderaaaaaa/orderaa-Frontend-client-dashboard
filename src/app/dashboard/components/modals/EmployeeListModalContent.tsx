@@ -15,8 +15,8 @@ interface EmployeeListModalContentProps {
 }
 
 const STATUS_CONFIG = {
-  active: { label: 'نشط', dotColor: 'bg-green-500' },
-  stopped: { label: 'متوقف', dotColor: 'bg-gray-400' },
+  online: { label: 'نشط', dotColor: 'bg-green-500' },
+  offline: { label: 'متوقف', dotColor: 'bg-gray-400' },
 } as const;
 
 const performanceColumns: DataTableColumn<EmployeePerformanceMetric>[] = [
@@ -58,7 +58,7 @@ export function EmployeeListModalContent({
       key: 'status',
       header: 'الحاله',
       render: (value) => {
-        const status = value as 'active' | 'stopped';
+        const status = value as 'online' | 'offline';
         const config = STATUS_CONFIG[status];
         return (
           <span className="flex items-center gap-2">

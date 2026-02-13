@@ -13,7 +13,7 @@ export const PolarAreaChart = memo(function PolarAreaChart({
   series,
   labels,
   color = '#6366f1',
-  height = 350,
+  height = 450,
 }: PolarAreaChartProps) {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<ApexCharts | null>(null);
@@ -39,7 +39,7 @@ export const PolarAreaChart = memo(function PolarAreaChart({
         if (window.innerWidth < 640) {
           if (legendContainer) {
             legendContainer.style.position = 'absolute';
-            legendContainer.style.top = '150px';
+            legendContainer.style.top = '250px';
             legendContainer.style.left = '';
             legendContainer.style.right = '';
             legendContainer.style.display = 'flex';
@@ -151,7 +151,7 @@ export const PolarAreaChart = memo(function PolarAreaChart({
           {
             breakpoint: 640,
             options: {
-              chart: { height: 300 },
+              chart: { height: 350 },
               legend: { fontSize: '11px' },
             },
           },

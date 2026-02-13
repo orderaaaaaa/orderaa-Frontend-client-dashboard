@@ -66,20 +66,27 @@ const PaginationFooter: React.FC<PaginationFooterProps> = ({
 
   const pageNumbers = getPageNumbers();
 
+  const startItem = (currentPage - 1) * currentPageSize + 1;
+  const endItem = Math.min(currentPage * currentPageSize, totalItems);
+
   return (
     <div
-      className={`flex flex-col-reverse sm:flex-row sm:items-center justify-center sm:justify-between gap-4 px-6 bg-gray-50 rounded-lg relative bottom-0 ${
+      className={`flex flex-col gap-3 px-6 bg-gray-50 rounded-lg relative bottom-0 ${
         hasSelectedItems ? 'pb-24 sm:pb-28' : 'pb-6'
       }`}
     >
-      <div className="flex">
-        <PageSizeSelector
-          currentSize={currentPageSize}
-          totalItems={totalItems}
-          onSizeChange={onPageSizeChange}
-        />
-      </div>
-      <div className="flex justify-center items-center space-x-2">
+      <div className="flex flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <PageSizeSelector
+            currentSize={currentPageSize}
+            totalItems={totalItems}
+            onSizeChange={onPageSizeChange}
+          />
+          <span className="hidden sm:inline text-sm text-gray-500">
+            عرض {startItem}-{endItem} من {totalItems}
+          </span>
+        </div>
+        <div className="flex justify-center items-center space-x-2">
         <Button
           variant="outline"
           size="sm"
@@ -121,7 +128,11 @@ const PaginationFooter: React.FC<PaginationFooterProps> = ({
         >
           <ChevronLeft className="h-4 w-4 text-[#682fee]" />
         </Button>
+        </div>
       </div>
+      <span className="sm:hidden text-sm text-gray-500 text-center">
+        عرض {startItem}-{endItem} من {totalItems}
+      </span>
     </div>
   );
 };

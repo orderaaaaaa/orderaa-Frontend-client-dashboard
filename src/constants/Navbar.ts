@@ -30,11 +30,11 @@ export type NavigationItem = {
   name: string;
   href: string;
   icon?:
-    | ForwardRefExoticComponent<
-        Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>
-      >
-    | ((props: { className?: string }) => JSX.Element)
-    | IconType;
+  | ForwardRefExoticComponent<
+    Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>
+  >
+  | ((props: { className?: string }) => JSX.Element)
+  | IconType;
   children?: NavigationItem[];
 };
 
@@ -64,18 +64,6 @@ export const navigation: NavigationItem[] = [
         name: 'قسم الشحن',
         href: '/dashboard/orders/shipping-orders',
         icon: LiaShippingFastSolid,
-      },
-    ],
-  },
-    {
-    name: 'مشتريات',
-    href: '/dashboard/purchases',
-    icon: LiaFileInvoiceDollarSolid,
-    children: [
-      {
-        name: 'جميع الفواتير',
-        href: '/dashboard/purchases/all-invoices',
-        icon: LiaReceiptSolid,
       },
     ],
   },
@@ -135,6 +123,18 @@ export const navigation: NavigationItem[] = [
     name: 'المنتجات',
     href: '/dashboard/products',
     icon: LiaBoxOpenSolid,
+  },
+  {
+    name: 'مشتريات',
+    href: '/dashboard/purchases',
+    icon: LiaFileInvoiceDollarSolid,
+    children: [
+      {
+        name: 'جميع الفواتير',
+        href: '/dashboard/purchases/all-invoices',
+        icon: LiaReceiptSolid,
+      },
+    ],
   },
   // {
   //   name: 'المتاجر',

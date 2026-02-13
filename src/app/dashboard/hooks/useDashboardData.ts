@@ -2,13 +2,13 @@ import { useMemo } from 'react';
 import type {
   DashboardSummary,
   EmployeeStatusRow,
+  EmployeeStopDetailData,
   CallDurationItem,
   OrderStatusDistributionItem,
   ConfirmationAttemptsData,
   FirstAttemptData,
   PostponedOrderContentItem,
 } from '../types';
-import { MOCK_EMPLOYEE_STATUS } from '../constants';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import {
   useDailySummaryQuery,
@@ -16,6 +16,7 @@ import {
   useByStatusQuery,
   useAttemptConversionQuery,
   useEditRejectedProductsQuery,
+  useEmployeesStatusQuery,
 } from '../services';
 import {
   transformSummary,
@@ -23,6 +24,7 @@ import {
   transformByStatus,
   transformAttemptConversion,
   transformEditRejectedProducts,
+  transformEmployeesStatus,
 } from '../utils';
 
 const DEFAULT_SUMMARY: DashboardSummary = {
@@ -42,6 +44,7 @@ interface UseDashboardDataReturn {
   summary: DashboardSummary;
   firstAttempt: FirstAttemptData;
   employees: EmployeeStatusRow[];
+  employeeDetailMap: Record<number, EmployeeStopDetailData>;
   callDurations: CallDurationItem[];
   orderStatusDistribution: OrderStatusDistributionItem[];
   confirmationAttempts: ConfirmationAttemptsData;
@@ -57,6 +60,7 @@ export function useDashboardData(): UseDashboardDataReturn {
   const byStatusQuery = useByStatusQuery();
   const attemptConversionQuery = useAttemptConversionQuery();
   const editRejectedQuery = useEditRejectedProductsQuery();
+  const employeesStatusQuery = useEmployeesStatusQuery();
 
   const { summary, firstAttempt } = useMemo(() => {
     if (!summaryQuery.data) {
@@ -97,17 +101,27 @@ export function useDashboardData(): UseDashboardDataReturn {
     [editRejectedQuery.data],
   );
 
+  const { rows: employeeRows, detailMap: employeeDetailMap } = useMemo(
+    () =>
+      employeesStatusQuery.data
+        ? transformEmployeesStatus(employeesStatusQuery.data)
+        : { rows: [], detailMap: {} },
+    [employeesStatusQuery.data],
+  );
+
   const isLoading =
     summaryQuery.isLoading ||
     hourlyChartQuery.isLoading ||
     byStatusQuery.isLoading ||
     attemptConversionQuery.isLoading ||
-    editRejectedQuery.isLoading;
+    editRejectedQuery.isLoading ||
+    employeesStatusQuery.isLoading;
 
   return {
     summary,
     firstAttempt,
-    employees: MOCK_EMPLOYEE_STATUS,
+    employees: employeeRows,
+    employeeDetailMap,
     callDurations,
     orderStatusDistribution,
     confirmationAttempts,

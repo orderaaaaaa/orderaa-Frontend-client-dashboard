@@ -38,6 +38,7 @@ export const QUERY_KEYS = {
   DASHBOARD_EDIT_REJECTED_PRODUCTS: 'dashboard-edit-rejected-products',
   DASHBOARD_EMPLOYEES_ONLINE: 'dashboard-employees-online',
   DASHBOARD_EMPLOYEES_OFFLINE: 'dashboard-employees-offline',
+  DASHBOARD_EMPLOYEES_STATUS: 'dashboard-employees-status',
 } as const;
 
 export type QueryKeyType = (typeof QUERY_KEYS)[keyof typeof QUERY_KEYS];

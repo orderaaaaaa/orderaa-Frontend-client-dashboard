@@ -95,6 +95,18 @@ export interface EditRejectedProductsResponse {
   }[];
 }
 
+export interface EmployeeStatusResponse {
+  employees: {
+    employeeId: number;
+    employeeName: string;
+    currentStatus: 'online' | 'offline';
+    totalPausesInDay: number;
+    totalCallCenterActions: number;
+    totalWorkingHoursMinutes: number;
+    totalPauseMinutesInDay: number;
+  }[];
+}
+
 export interface EmployeesListResponse {
   count: number;
   employees: {

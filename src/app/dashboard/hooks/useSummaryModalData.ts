@@ -83,7 +83,7 @@ export function useSummaryModalData(
       }
       const result = transformEmployeesList(
         employeesOnlineQuery.data,
-        'active',
+        'online',
         getStatusLabel,
       );
       return {
@@ -105,7 +105,7 @@ export function useSummaryModalData(
       }
       const result = transformEmployeesList(
         employeesOfflineQuery.data,
-        'stopped',
+        'offline',
         getStatusLabel,
       );
       return {

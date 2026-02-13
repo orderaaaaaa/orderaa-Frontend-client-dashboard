@@ -8,6 +8,7 @@ import type {
   AttemptConversionResponse,
   EditRejectedProductsResponse,
   EmployeesListResponse,
+  EmployeeStatusResponse,
 } from '../types';
 import type {
   DashboardSummary,
@@ -20,6 +21,8 @@ import type {
   PostponedOrderContentItem,
   EmployeeModalData,
   EmployeePerformanceData,
+  EmployeeStatusRow,
+  EmployeeStopDetailData,
 } from '../types';
 import {
   ORDER_STATUS_ARABIC_LABELS,
@@ -203,7 +206,7 @@ export function transformEditRejectedProducts(
   return rows;
 }
 
-function formatMinutesToArabic(totalMinutes: number): string {
+export function formatMinutesToArabic(totalMinutes: number): string {
   if (totalMinutes < 60) {
     return `${totalMinutes} دقيقه`;
   }
@@ -220,7 +223,7 @@ function formatMinutesToArabic(totalMinutes: number): string {
 
 export function transformEmployeesList(
   raw: EmployeesListResponse,
-  status: 'active' | 'stopped',
+  status: 'online' | 'offline',
   getStatusLabel?: (key: string) => string,
 ): {
   employees: EmployeeModalData[];
@@ -254,4 +257,34 @@ export function transformEmployeesList(
   }
 
   return { employees, performanceData };
+}
+
+export function transformEmployeesStatus(
+  raw: EmployeeStatusResponse,
+): { rows: EmployeeStatusRow[]; detailMap: Record<number, EmployeeStopDetailData> } {
+  const rows: EmployeeStatusRow[] = raw.employees.map((emp) => ({
+    id: emp.employeeId,
+    name: emp.employeeName,
+    status: emp.currentStatus,
+    totalPauseTime: formatMinutesToArabic(emp.totalPauseMinutesInDay),
+    totalPausesInDay: emp.totalPausesInDay,
+    totalCallCenterActions: emp.totalCallCenterActions,
+    totalWorkingHours: formatMinutesToArabic(emp.totalWorkingHoursMinutes),
+  }));
+
+  const detailMap: Record<number, EmployeeStopDetailData> = {};
+  for (const emp of raw.employees) {
+    detailMap[emp.employeeId] = {
+      id: emp.employeeId,
+      employeeId: emp.employeeId,
+      employeeName: emp.employeeName,
+      status: emp.currentStatus,
+      totalWorkingHours: formatMinutesToArabic(emp.totalWorkingHoursMinutes),
+      totalPausesInDay: emp.totalPausesInDay,
+      totalPauseTime: formatMinutesToArabic(emp.totalPauseMinutesInDay),
+      totalCallCenterActions: emp.totalCallCenterActions,
+    };
+  }
+
+  return { rows, detailMap };
 }

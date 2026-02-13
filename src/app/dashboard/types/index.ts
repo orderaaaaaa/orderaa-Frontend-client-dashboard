@@ -40,15 +40,16 @@ export interface ConfirmationAttemptsData {
   values: number[];
 }
 
-export type EmployeeStatus = 'active' | 'stopped';
+export type EmployeeStatus = 'online' | 'offline';
 
 export interface EmployeeStatusRow {
   id: number;
   name: string;
   status: EmployeeStatus;
-  lastInactivityDuration: string;
-  totalInactivityToday: number;
-  totalAttempts: number;
+  totalPauseTime: string;
+  totalPausesInDay: number;
+  totalCallCenterActions: number;
+  totalWorkingHours: string;
 }
 
 export interface EmployeeModalData {
@@ -68,19 +69,16 @@ export interface FollowUpModalData {
   percentage: string;
 }
 
-export interface StopTimeRange {
-  from: string;
-  to: string;
-}
-
 export interface EmployeeStopDetailData {
   [key: string]: unknown;
   id: number;
   employeeId: number;
+  employeeName: string;
   status: EmployeeStatus;
-  stopTimes: StopTimeRange[];
-  totalStopToday: string;
-  totalAttempts: number;
+  totalWorkingHours: string;
+  totalPausesInDay: number;
+  totalPauseTime: string;
+  totalCallCenterActions: number;
 }
 
 export interface CancelledOrderDetail {
