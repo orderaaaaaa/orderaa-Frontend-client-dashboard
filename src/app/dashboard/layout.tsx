@@ -16,6 +16,7 @@ import {
   PageContent,
   ErrorBoundary,
   SidebarError,
+  ContentError,
 } from '@/components/dashboard-layout';
 
 interface DashboardLayoutProps {
@@ -109,8 +110,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <AuthGuard>
-      <ErrorBoundary fallback={<SidebarError />}>
-        <div className="flex h-dvh overflow-hidden bg-gray-50">
+      <div className="flex h-dvh overflow-hidden bg-gray-50">
+        <ErrorBoundary
+          fallback={(reset) => <SidebarError onRetry={reset} />}
+        >
           <Sidebar
             open={sidebarOpen}
             collapsed={isCollapsed}
@@ -120,24 +123,27 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             onDropdownToggle={handleDropdownToggle}
             onNavItemClick={handleNavItemClick}
           />
+        </ErrorBoundary>
 
-          <MainContent>
-            <div className="flex-shrink-0 pt-[env(safe-area-inset-top)]">
-              <TopBar
-                onMenuToggle={handleSidebarToggle}
-                onSearch={handleSearch}
-                onClearSearch={handleClearSearch}
-                isSearching={isSearching}
-                //* Comment ot change this if named username
-                username={user?.name}
-                onUserAction={handleUserAction}
-              />
-            </div>
+        <MainContent>
+          <div className="flex-shrink-0 pt-[env(safe-area-inset-top)]">
+            <TopBar
+              onMenuToggle={handleSidebarToggle}
+              onSearch={handleSearch}
+              onClearSearch={handleClearSearch}
+              isSearching={isSearching}
+              username={user?.name}
+              onUserAction={handleUserAction}
+            />
+          </div>
 
+          <ErrorBoundary
+            fallback={(reset) => <ContentError onRetry={reset} />}
+          >
             <PageContent>{children}</PageContent>
-          </MainContent>
-        </div>
-      </ErrorBoundary>
+          </ErrorBoundary>
+        </MainContent>
+      </div>
     </AuthGuard>
   );
 }

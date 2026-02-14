@@ -8,14 +8,17 @@ export function useSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
-  // Restore collapse preference
   useEffect(() => {
-    const saved = localStorage.getItem('sidebar_collapsed');
-    if (saved === '1') setIsCollapsed(true);
+    try {
+      const saved = localStorage.getItem('sidebar_collapsed');
+      if (saved === '1') setIsCollapsed(true);
+    } catch {}
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('sidebar_collapsed', isCollapsed ? '1' : '0');
+    try {
+      localStorage.setItem('sidebar_collapsed', isCollapsed ? '1' : '0');
+    } catch {}
   }, [isCollapsed]);
 
   const handleSidebarToggle = useCallback(() => {
