@@ -22,6 +22,7 @@ interface EventCardProps {
     department?: string;
   } | null;
   utmSource?: string;
+  pageName?: string | null;
 }
 
 const getIconColorFromClasses = (classes: string): string => {
@@ -42,6 +43,7 @@ function EventCard({
   time,
   employee,
   utmSource,
+  pageName,
 }: EventCardProps) {
   const { classes, Icon } = getStatusBadgeConfig(eventType);
   const iconColor = getIconColorFromClasses(classes);
@@ -58,6 +60,12 @@ function EventCard({
         {utmSource && (
           <p className="text-[12px] text-gray-600 break-words">
             المصدر: <span className="text-primary font-medium">{utmSource}</span>
+          </p>
+        )}
+
+        {pageName && (
+          <p className="text-[12px] text-gray-600 break-words">
+            اسم الصفحة: <span className="text-primary font-medium">{pageName}</span>
           </p>
         )}
 
@@ -105,11 +113,17 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
       note: event.note || null,
       employee: event.employee,
       utmSource: undefined as string | undefined,
+      pageName: undefined as string | null | undefined,
     };
   });
 
-  if (events.length > 0 && order.utmSource) {
-    events[events.length - 1].utmSource = order.utmSource;
+  if (events.length > 0) {
+    if (order.utmSource) {
+      events[events.length - 1].utmSource = order.utmSource;
+    }
+    if (order.pageName) {
+      events[events.length - 1].pageName = order.pageName;
+    }
   }
 
   return (
@@ -135,6 +149,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
               time={item.time}
               employee={item.employee}
               utmSource={item.utmSource}
+              pageName={item.pageName}
             />
           ))}
         </div>

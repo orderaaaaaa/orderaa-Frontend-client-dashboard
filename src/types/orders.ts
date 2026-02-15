@@ -229,6 +229,7 @@ export interface Order {
   // Marketing & tracking
   utmSource?: string;
   utmCampaign?: string;
+  pageName?: string | null;
 
   // External integrations
   externalOrderId?: string;
