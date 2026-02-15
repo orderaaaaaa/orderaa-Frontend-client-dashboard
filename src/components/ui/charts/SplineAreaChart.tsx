@@ -70,13 +70,17 @@ export const SplineAreaChart = memo(function SplineAreaChart({
         series: series.map((s) => ({ name: s.name, data: s.data })),
         xaxis: {
           categories,
+          tickAmount: categories.length,
           labels: {
             style: { fontSize: '10px', colors: '#9ca3af' },
+            hideOverlappingLabels: false,
           },
           axisBorder: { show: false },
           axisTicks: { show: false },
         },
         yaxis: {
+          min: 0,
+          forceNiceScale: false,
           labels: {
             style: { fontSize: '10px', colors: '#9ca3af' },
           },

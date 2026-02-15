@@ -76,17 +76,20 @@ export const ColumnChart = memo(function ColumnChart({
         },
         xaxis: {
           categories,
+          tickAmount: categories.length,
           labels: {
             style: {
               fontSize: '12px',
               fontWeight: 600,
             },
+            hideOverlappingLabels: false,
           },
           axisBorder: { show: false },
           axisTicks: { show: false },
         },
         yaxis: {
           min: 0,
+          forceNiceScale: false,
           max(max: number) {
             return Math.ceil(max * 1.15);
           },

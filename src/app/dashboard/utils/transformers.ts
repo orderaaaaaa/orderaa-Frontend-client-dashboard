@@ -122,11 +122,10 @@ const HOURLY_CHART_CONFIG = [
 export function transformHourlyChart(
   raw: HourlyChartResponse,
 ): CallDurationItem[] {
-  const categories = Array.from({ length: 24 }, (_, i) => formatHourLabel(i));
-
   return HOURLY_CHART_CONFIG.map((config) => {
     const entries = raw[config.key];
     const total = entries.reduce((sum, e) => sum + e.count, 0);
+    const categories = entries.map((e) => formatHourLabel(e.hour));
     return {
       key: config.key,
       label: config.label,

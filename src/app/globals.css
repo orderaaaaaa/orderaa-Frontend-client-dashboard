@@ -288,8 +288,8 @@ html {
 /* Print Styles for Invoice */
 @media print {
   @page {
-    size: A4;
-    margin: 8mm;
+    size: 100mm 150mm;
+    margin: 3mm;
   }
 
   body {
