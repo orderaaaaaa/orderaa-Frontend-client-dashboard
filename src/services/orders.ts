@@ -329,20 +329,6 @@ export const useProductVariantsOptions = (productId: number | null) => {
   });
 };
 
-// Fetch orders for export (bypasses regular query cache, fetches fresh data)
-export const useFetchOrdersForExport = () => {
-  const fetchOrdersForExport = async (filters: FilterOrdersDto) => {
-    const exportFilters = { ...filters, limit: 10000, page: 1 };
-    const response = await http.get<PaginatedResponse<Order>>(
-      '/orders/all-orders',
-      { params: exportFilters }
-    );
-    return response.data;
-  };
-
-  return { fetchOrdersForExport };
-};
-
 // Get next order ID for navigation
 export const useGetNextOrderId = () => {
   const getNextOrderId = async (

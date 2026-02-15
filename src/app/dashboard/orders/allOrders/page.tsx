@@ -26,7 +26,6 @@ import { Breadcrumb } from '@/components/dashboard-layout';
 import { DatePicker } from '@/components/ui/datepicker';
 import {
   useOrders,
-  useFetchOrdersForExport,
   useOrderStatusesQuery,
 } from '@/services/orders';
 import { useBulkOrders } from './hooks/useOrderBulk';
@@ -199,7 +198,6 @@ function AllOrdersContent() {
   });
 
   const { options } = useFilterOptions();
-  const { fetchOrdersForExport } = useFetchOrdersForExport();
 
   const orders = ordersData?.data ?? [];
   const totalOrders = ordersData?.meta?.totalItems ?? 0;
@@ -295,76 +293,35 @@ function AllOrdersContent() {
     }
   }, [select]);
 
-  // Handle Excel export
-  const handleExportExcel = useCallback(async () => {
+  const handleExportExcel = useCallback(() => {
     try {
       let ordersToExport: Order[];
 
-      if (select && selectedOrderIds.length > 0) {
-        // Export only selected orders
+      if (selectAllMatchingFilters) {
+        ordersToExport = orders;
+      } else {
         ordersToExport = orders.filter((order) =>
           selectedOrderIds.includes(order.id)
         );
-
-        if (ordersToExport.length === 0) {
-          toast.warning('الرجاء تحديد طلبات للتصدير');
-          return;
-        }
-
-        const fileName = exportOrdersToExcel(
-          ordersToExport,
-          'selected_orders',
-          statusLabelsMap
-        );
-        toast.success(
-          `تم تصدير ${ordersToExport.length} طلب محدد بنجاح! \nاسم الملف: ${fileName}`
-        );
-      } else {
-        // Export all filtered orders
-        try {
-          const response = await fetchOrdersForExport(apiFilters);
-
-          if (response.data.length === 0) {
-            toast.warning('لا توجد طلبات لتصديرها');
-            return;
-          }
-
-          const fileName = exportOrdersToExcel(
-            response.data,
-            'all_orders',
-            statusLabelsMap
-          );
-          toast.success(
-            `تم تصدير ${response.data.length} طلب بنجاح! \nاسم الملف: ${fileName}`
-          );
-        } catch (apiErr) {
-          console.warn('API failed for export, using current orders');
-          if (orders.length === 0) {
-            toast.warning('لا توجد طلبات لتصديرها');
-            return;
-          }
-
-          const fileName = exportOrdersToExcel(
-            orders,
-            'all_orders',
-            statusLabelsMap
-          );
-          toast.success(
-            `تم تصدير ${orders.length} طلب بنجاح! \nاسم الملف: ${fileName}`
-          );
-        }
       }
+
+      if (ordersToExport.length === 0) {
+        toast.warning('الرجاء تحديد طلبات للتصدير');
+        return;
+      }
+
+      const fileName = exportOrdersToExcel(
+        ordersToExport,
+        selectAllMatchingFilters ? 'all_orders' : 'selected_orders',
+        statusLabelsMap
+      );
+      toast.success(
+        `تم تصدير ${ordersToExport.length} طلب بنجاح! \nاسم الملف: ${fileName}`
+      );
     } catch (error) {
       toast.error('فشل في تصدير الطلبات. الرجاء المحاولة مرة أخرى.');
     }
-  }, [
-    apiFilters,
-    select,
-    selectedOrderIds,
-    orders,
-    fetchOrdersForExport,
-    statusLabelsMap,
-  ]);
+  }, [selectAllMatchingFilters, selectedOrderIds, orders, statusLabelsMap]);
 
   // Handle Edit Status
   const handleEditStatus = useCallback(
