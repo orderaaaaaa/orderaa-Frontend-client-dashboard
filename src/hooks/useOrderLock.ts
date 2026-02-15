@@ -3,6 +3,20 @@ import { useAuthStore } from '@/store/authStore';
 import { lockOrder, unlockOrder } from '@/lib/api/order';
 import { OrderLockedBy } from '@/types/orders';
 
+let activeLockedOrderId: number | null = null;
+
+export async function unlockActiveOrder(): Promise<void> {
+  const orderId = activeLockedOrderId;
+  if (!orderId) return;
+
+  activeLockedOrderId = null;
+  try {
+    await unlockOrder(orderId);
+  } catch (error) {
+    console.error('Failed to unlock order before logout:', error);
+  }
+}
+
 interface UseOrderLockOptions {
   orderId: number | null;
   lockedBy: OrderLockedBy | null | undefined;
@@ -37,7 +51,12 @@ export function useOrderLock({
 
   useEffect(() => {
     hasLockRef.current = hasLock;
-  }, [hasLock]);
+    if (hasLock && orderId) {
+      activeLockedOrderId = orderId;
+    } else if (!hasLock) {
+      activeLockedOrderId = null;
+    }
+  }, [hasLock, orderId]);
 
   useEffect(() => {
     orderIdRef.current = orderId;
@@ -97,6 +116,8 @@ export function useOrderLock({
     return () => {
       const currentOrderId = orderIdRef.current;
       const currentHasLock = hasLockRef.current;
+
+      activeLockedOrderId = null;
 
       if (currentHasLock && currentOrderId) {
         unlockOrder(currentOrderId).catch((error) => {

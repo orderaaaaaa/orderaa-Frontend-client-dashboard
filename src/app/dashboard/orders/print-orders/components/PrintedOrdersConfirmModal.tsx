@@ -30,7 +30,7 @@ export function PrintedOrdersConfirmModal({
       confirmIcon={<LiaCheckCircleSolid className="w-5 h-5 text-white" />}
       cancelText="إلغاء"
       isLoading={isLoading}
-      maxWidth="w-[500px]"
+      maxWidth="max-w-[500px]"
       height="max-h-[70vh]"
     >
       <div className="flex flex-col gap-4">

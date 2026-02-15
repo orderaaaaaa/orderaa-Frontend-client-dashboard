@@ -29,7 +29,7 @@ export function usePrintOrdersFilters() {
   const setPrintStatus = useCallback((status: PrintStatus) => {
     setPrintStatusState(status);
     urlFilters.setPage(1);
-  }, [urlFilters]);
+  }, [urlFilters.setPage]);
 
   const resetAllFilters = useCallback(() => {
     urlFilters.resetFilters();
@@ -38,7 +38,7 @@ export function usePrintOrdersFilters() {
     if (DEFAULT_STATUS) {
       urlFilters.setStatus(DEFAULT_STATUS);
     }
-  }, [urlFilters, DEFAULT_STATUS]);
+  }, [urlFilters.resetFilters, urlFilters.setStatus, DEFAULT_STATUS]);
 
   return {
     ...urlFilters,
