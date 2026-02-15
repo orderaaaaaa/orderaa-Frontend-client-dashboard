@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import type {
   DashboardSummary,
   EmployeeStatusRow,
-  EmployeeStopDetailData,
   CallDurationItem,
   OrderStatusDistributionItem,
   ConfirmationAttemptsData,
@@ -44,7 +43,6 @@ interface UseDashboardDataReturn {
   summary: DashboardSummary;
   firstAttempt: FirstAttemptData;
   employees: EmployeeStatusRow[];
-  employeeDetailMap: Record<number, EmployeeStopDetailData>;
   callDurations: CallDurationItem[];
   orderStatusDistribution: OrderStatusDistributionItem[];
   confirmationAttempts: ConfirmationAttemptsData;
@@ -101,11 +99,11 @@ export function useDashboardData(): UseDashboardDataReturn {
     [editRejectedQuery.data],
   );
 
-  const { rows: employeeRows, detailMap: employeeDetailMap } = useMemo(
+  const employeeRows = useMemo(
     () =>
       employeesStatusQuery.data
         ? transformEmployeesStatus(employeesStatusQuery.data)
-        : { rows: [], detailMap: {} },
+        : [],
     [employeesStatusQuery.data],
   );
 
@@ -121,7 +119,6 @@ export function useDashboardData(): UseDashboardDataReturn {
     summary,
     firstAttempt,
     employees: employeeRows,
-    employeeDetailMap,
     callDurations,
     orderStatusDistribution,
     confirmationAttempts,

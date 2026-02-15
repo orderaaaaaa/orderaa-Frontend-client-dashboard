@@ -1,16 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import clsx from 'clsx';
 import { DataTable } from '@/components/ui/data-table';
 import type { DataTableColumn } from '@/components/ui/data-table';
 import BaseModal from '@/components/ui/base-modal';
-import type { EmployeeStatusRow, EmployeeStopDetailData } from '../types';
+import type { EmployeeStatusRow } from '../types';
+import { useEmployeeActivityQuery } from '../services';
+import { transformEmployeeActivity } from '../utils';
 import { EmployeeStopDetailsModalContent } from './modals';
 
 interface EmployeeStatusSectionProps {
   employees: EmployeeStatusRow[];
-  employeeDetailMap: Record<number, EmployeeStopDetailData>;
   isLoading: boolean;
 }
 
@@ -30,7 +31,7 @@ const columns: DataTableColumn<Record<string, unknown>>[] = [
     header: 'حالة الموظف',
     render: (value) => {
       const status = value as EmployeeStatusRow['status'];
-      const config = STATUS_CONFIG[status];
+      const config = STATUS_CONFIG[status] ?? STATUS_CONFIG.offline;
       return (
         <div className="flex items-center gap-2">
           <span className={clsx('w-2.5 h-2.5 rounded-full', config.dotColor)} />
@@ -58,22 +59,33 @@ const columns: DataTableColumn<Record<string, unknown>>[] = [
 
 export function EmployeeStatusSection({
   employees,
-  employeeDetailMap,
   isLoading,
 }: EmployeeStatusSectionProps) {
-  const [selectedEmployee, setSelectedEmployee] =
-    useState<EmployeeStatusRow | null>(null);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(
+    null,
+  );
+  const [selectedEmployeeName, setSelectedEmployeeName] = useState('');
+
+  const activityQuery = useEmployeeActivityQuery(selectedEmployeeId);
+
+  const activityData = useMemo(
+    () =>
+      activityQuery.data
+        ? transformEmployeeActivity(activityQuery.data)
+        : undefined,
+    [activityQuery.data],
+  );
 
   const handleRowClick = (row: Record<string, unknown>) => {
     const employee = row as unknown as EmployeeStatusRow;
-    setSelectedEmployee(employee);
+    setSelectedEmployeeId(employee.id);
+    setSelectedEmployeeName(employee.name);
   };
 
-  const closeModal = () => setSelectedEmployee(null);
-
-  const stopDetails = selectedEmployee
-    ? employeeDetailMap[selectedEmployee.id]
-    : undefined;
+  const closeModal = () => {
+    setSelectedEmployeeId(null);
+    setSelectedEmployeeName('');
+  };
 
   return (
     <section className="space-y-4">
@@ -88,18 +100,16 @@ export function EmployeeStatusSection({
       />
 
       <BaseModal
-        isOpen={selectedEmployee !== null}
+        isOpen={selectedEmployeeId !== null}
         onClose={closeModal}
-        title={selectedEmployee ? `تفاصيل توقف ${selectedEmployee.name}` : ''}
+        title={`تفاصيل توقف ${selectedEmployeeName}`}
         showFooter={false}
         maxWidth="md:max-w-[900px]"
       >
-        {stopDetails && selectedEmployee && (
-          <EmployeeStopDetailsModalContent
-            stopDetails={stopDetails}
-            employeeName={selectedEmployee.name}
-          />
-        )}
+        <EmployeeStopDetailsModalContent
+          activityData={activityData}
+          isLoading={activityQuery.isLoading}
+        />
       </BaseModal>
     </section>
   );

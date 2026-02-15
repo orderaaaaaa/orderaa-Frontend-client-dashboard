@@ -12,6 +12,7 @@ import type {
   EditRejectedProductsResponse,
   EmployeesListResponse,
   EmployeeStatusResponse,
+  EmployeeActivityResponse,
 } from '../types';
 
 const reportBaseUrl = '/reports/daily';
@@ -150,5 +151,19 @@ export const useEmployeesStatusQuery = () => {
       );
       return response.data;
     },
+  });
+};
+
+export const useEmployeeActivityQuery = (employeeId: number | null) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.DASHBOARD_EMPLOYEE_ACTIVITY, employeeId] as QueryKey,
+    queryFn: async () => {
+      const response = await http.get<EmployeeActivityResponse>(
+        `${reportBaseUrl}/employees/${employeeId}/activity`,
+      );
+      return response.data;
+    },
+    enabled: employeeId !== null,
+    staleTime: 0,
   });
 };

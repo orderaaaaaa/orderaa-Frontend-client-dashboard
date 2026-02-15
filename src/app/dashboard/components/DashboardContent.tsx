@@ -13,7 +13,6 @@ export function DashboardContent() {
     summary,
     firstAttempt,
     employees,
-    employeeDetailMap,
     callDurations,
     orderStatusDistribution,
     confirmationAttempts,
@@ -28,7 +27,7 @@ export function DashboardContent() {
         firstAttempt={firstAttempt}
         isLoading={isLoading}
       />
-      <EmployeeStatusSection employees={employees} employeeDetailMap={employeeDetailMap} isLoading={isLoading} />
+      <EmployeeStatusSection employees={employees} isLoading={isLoading} />
       <CallDurationSection items={callDurations} isLoading={isLoading} />
       <OrderStatusDistributionSection
         items={orderStatusDistribution}

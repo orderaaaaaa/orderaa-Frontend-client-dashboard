@@ -9,6 +9,7 @@ import type {
   EditRejectedProductsResponse,
   EmployeesListResponse,
   EmployeeStatusResponse,
+  EmployeeActivityResponse,
 } from '../types';
 import type {
   DashboardSummary,
@@ -261,8 +262,8 @@ export function transformEmployeesList(
 
 export function transformEmployeesStatus(
   raw: EmployeeStatusResponse,
-): { rows: EmployeeStatusRow[]; detailMap: Record<number, EmployeeStopDetailData> } {
-  const rows: EmployeeStatusRow[] = raw.employees.map((emp) => ({
+): EmployeeStatusRow[] {
+  return raw.employees.map((emp) => ({
     id: emp.employeeId,
     name: emp.employeeName,
     status: emp.currentStatus,
@@ -271,20 +272,32 @@ export function transformEmployeesStatus(
     totalCallCenterActions: emp.totalCallCenterActions,
     totalWorkingHours: formatMinutesToArabic(emp.totalWorkingHoursMinutes),
   }));
+}
 
-  const detailMap: Record<number, EmployeeStopDetailData> = {};
-  for (const emp of raw.employees) {
-    detailMap[emp.employeeId] = {
-      id: emp.employeeId,
-      employeeId: emp.employeeId,
-      employeeName: emp.employeeName,
-      status: emp.currentStatus,
-      totalWorkingHours: formatMinutesToArabic(emp.totalWorkingHoursMinutes),
-      totalPausesInDay: emp.totalPausesInDay,
-      totalPauseTime: formatMinutesToArabic(emp.totalPauseMinutesInDay),
-      totalCallCenterActions: emp.totalCallCenterActions,
-    };
-  }
+export function transformEmployeeActivity(
+  raw: EmployeeActivityResponse,
+): EmployeeStopDetailData {
+  const chartCategories = raw.hourlyPauseChart.map((entry) =>
+    formatHourLabel(entry.hour),
+  );
 
-  return { rows, detailMap };
+  const chartSeries = [
+    {
+      name: 'مدة التوقف (دقيقة)',
+      data: raw.hourlyPauseChart.map((entry) => entry.pauseMinutes),
+    },
+  ];
+
+  return {
+    id: raw.employeeId,
+    employeeId: raw.employeeId,
+    employeeName: raw.employeeName,
+    status: raw.currentStatus,
+    totalWorkingHours: formatMinutesToArabic(raw.workdayMinutes),
+    totalPausesInDay: raw.totalPauses,
+    totalPauseTime: formatMinutesToArabic(raw.totalPauseMinutes),
+    totalCallCenterActions: raw.totalActionsToday,
+    chartCategories,
+    chartSeries,
+  };
 }

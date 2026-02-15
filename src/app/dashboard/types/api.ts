@@ -95,6 +95,25 @@ export interface EditRejectedProductsResponse {
   }[];
 }
 
+export interface EmployeeActivityResponse {
+  employeeId: number;
+  employeeName: string;
+  currentStatus: 'online' | 'offline';
+  pauses: {
+    startTime: string;
+    endTime: string;
+    durationMinutes: number;
+  }[];
+  totalPauses: number;
+  totalPauseMinutes: number;
+  workdayMinutes: number;
+  totalActionsToday: number;
+  hourlyPauseChart: {
+    hour: number;
+    pauseMinutes: number;
+  }[];
+}
+
 export interface EmployeeStatusResponse {
   employees: {
     employeeId: number;

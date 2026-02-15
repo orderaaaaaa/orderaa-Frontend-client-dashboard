@@ -59,10 +59,10 @@ export function EmployeeListModalContent({
       header: 'الحاله',
       render: (value) => {
         const status = value as 'online' | 'offline';
-        const config = STATUS_CONFIG[status];
+        const config = STATUS_CONFIG[status] ?? STATUS_CONFIG.offline;
         return (
           <span className="flex items-center gap-2">
-            <span className={`w-2 h-2 rounded-full ${config.dotColor}`} />
+            <span className={clsx('w-2 h-2 rounded-full', config.dotColor)} />
             {config.label}
           </span>
         );

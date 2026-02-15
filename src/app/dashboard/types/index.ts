@@ -79,6 +79,8 @@ export interface EmployeeStopDetailData {
   totalPausesInDay: number;
   totalPauseTime: string;
   totalCallCenterActions: number;
+  chartCategories: string[];
+  chartSeries: { name: string; data: number[] }[];
 }
 
 export interface CancelledOrderDetail {
