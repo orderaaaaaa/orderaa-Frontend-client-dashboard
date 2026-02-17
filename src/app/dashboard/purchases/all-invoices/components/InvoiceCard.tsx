@@ -41,7 +41,7 @@ const InvoiceCard = memo(
       () => [
         {
           label: 'عدد الاصناف',
-          value: `عدد الاصناف ${invoice.itemsCount}`,
+          value: `عدد الاصناف: ${invoice.itemsCount}`,
           icon: LiaBoxOpenSolid,
         },
         {

@@ -1,13 +1,21 @@
 'use client';
 
 import { memo } from 'react';
+import { useRouter } from 'next/navigation';
 import { LiaPlusSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 
 const InvoicesHeader = memo(() => {
+  const router = useRouter();
+
   return (
     <div className="sm:px-8 py-2 flex flex-row-reverse justify-between items-start gap-4">
-      <Button variant="default" size="lg" className="rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm">
+      <Button
+        variant="default"
+        size="lg"
+        className="rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm"
+        onClick={() => router.push('/dashboard/purchases/add-invoice')}
+      >
         <LiaPlusSolid className="w-5 h-5 sm:w-7 sm:h-7" />
         <p>انشاء فاتورة جديدة</p>
       </Button>

@@ -29,6 +29,7 @@ interface DataTableProps<T extends Record<string, unknown>> {
   skeletonRows?: number
   className?: string
   onRowClick?: (row: T) => void
+  emptyMessage?: string
 }
 
 function DataTable<T extends Record<string, unknown>>({
@@ -40,6 +41,7 @@ function DataTable<T extends Record<string, unknown>>({
   skeletonRows = 5,
   className,
   onRowClick,
+  emptyMessage,
 }: DataTableProps<T>) {
   if (isLoading) {
     return (
@@ -113,27 +115,38 @@ function DataTable<T extends Record<string, unknown>>({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((row) => (
-            <TableRow
-              key={String(row[keyField])}
-              onClick={() => onRowClick?.(row)}
-              className={cn(onRowClick && 'cursor-pointer hover:bg-gray-50')}
-            >
-              {columns.map((col) => (
-                <TableCell
-                  key={col.key}
-                  className={cn(
-                    'px-2 py-2 sm:px-4 sm:py-3 border-l border-gray-200 last:border-l-0 whitespace-normal text-xs sm:text-sm',
-                    col.className,
-                  )}
-                >
-                  {col.render
-                    ? col.render(row[col.key], row)
-                    : String(row[col.key] ?? '')}
-                </TableCell>
-              ))}
+          {data.length === 0 && emptyMessage ? (
+            <TableRow>
+              <TableCell
+                colSpan={columns.length}
+                className="px-4 py-8 text-center text-sm text-gray-500"
+              >
+                {emptyMessage}
+              </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            data.map((row) => (
+              <TableRow
+                key={String(row[keyField])}
+                onClick={() => onRowClick?.(row)}
+                className={cn(onRowClick && 'cursor-pointer hover:bg-gray-50')}
+              >
+                {columns.map((col) => (
+                  <TableCell
+                    key={col.key}
+                    className={cn(
+                      'px-2 py-2 sm:px-4 sm:py-3 border-l border-gray-200 last:border-l-0 whitespace-normal text-xs sm:text-sm',
+                      col.className,
+                    )}
+                  >
+                    {col.render
+                      ? col.render(row[col.key], row)
+                      : String(row[col.key] ?? '')}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </div>

@@ -107,18 +107,18 @@ export default function BaseModal({
           <div className="flex-1 px-8 py-6 overflow-y-auto">{children}</div>
 
           {showFooter && (
-            <div className="px-8 pb-4 flex gap-4 justify-between flex-shrink-0 pt-3">
+            <div className="px-4 sm:px-8 pb-4 flex gap-2 sm:gap-4 justify-between flex-shrink-0 pt-3">
               <Button
                 variant="outline"
                 onClick={onClose}
                 disabled={isLoading}
                 className={
                   cancelButtonClassName ||
-                  'w-[146px] h-[37px] bg-white border-[1.5px] border-[#ECECEC] rounded-[28px] flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors disabled:opacity-50'
+                  'w-[120px] h-[33px] sm:w-[146px] sm:h-[37px] bg-white border-[1.5px] border-[#ECECEC] rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-gray-50 transition-colors disabled:opacity-50'
                 }
               >
-                <LiaTimesSolid className="w-5 h-5 text-[#5F5E5E]" />
-                <span className="text-lg font-bold text-[#5F5E5E]">
+                <LiaTimesSolid className="w-4 h-4 sm:w-5 sm:h-5 text-[#5F5E5E]" />
+                <span className="text-sm sm:text-lg font-bold text-[#5F5E5E]">
                   {cancelText}
                 </span>
               </Button>
@@ -130,11 +130,11 @@ export default function BaseModal({
                   disabled={isLoading || confirmDisabled}
                   className={
                     confirmButtonClassName ||
-                    'w-[146px] h-[37px] bg-primary border-[1.5px] border-primary rounded-[28px] flex items-center justify-center gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                    'w-[120px] h-[33px] sm:w-[146px] sm:h-[37px] bg-primary border-[1.5px] border-primary rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                   }
                 >
                   {confirmIcon}
-                  <span className="text-lg font-bold text-white">
+                  <span className="text-sm sm:text-lg font-bold text-white">
                     {isLoading ? 'جاري الحفظ...' : confirmText}
                   </span>
                 </Button>

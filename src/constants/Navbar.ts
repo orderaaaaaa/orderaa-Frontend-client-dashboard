@@ -11,6 +11,7 @@ import {
   LiaHeadsetSolid,
   LiaFileInvoiceDollarSolid,
   LiaReceiptSolid,
+  LiaPlusSolid,
 } from 'react-icons/lia';
 import {
   House,
@@ -133,6 +134,11 @@ export const navigation: NavigationItem[] = [
         name: 'جميع الفواتير',
         href: '/dashboard/purchases/all-invoices',
         icon: LiaReceiptSolid,
+      },
+      {
+        name: 'اضافة فاتورة',
+        href: '/dashboard/purchases/add-invoice',
+        icon: LiaPlusSolid,
       },
     ],
   },
