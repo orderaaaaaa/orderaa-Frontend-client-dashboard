@@ -50,10 +50,11 @@ const InvoiceItemsTable = memo(
             return (
               <Input
                 type="number"
-                value={row.quantity}
+                value={row.quantity || ''}
                 onChange={(e) =>
                   onQuantityChange(index, Number(e.target.value) || 0)
                 }
+                placeholder="الكمية"
                 className="min-w-15"
                 error={itemErrors?.[index]?.quantity?.message}
               />
@@ -69,10 +70,11 @@ const InvoiceItemsTable = memo(
               <div className="flex items-center flex-row gap-2">
                 <Input
                   type="number"
-                  value={row.pricePerItem}
+                  value={row.pricePerItem || ''}
                   onChange={(e) =>
                     onPriceChange(index, Number(e.target.value) || 0)
                   }
+                  placeholder="السعر"
                   className="min-w-15"
                   error={itemErrors?.[index]?.pricePerItem?.message}
                 />

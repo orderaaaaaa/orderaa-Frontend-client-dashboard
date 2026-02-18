@@ -12,8 +12,13 @@ const invoiceItemSchema = z.object({
   id: z.string(),
   name: z.string().min(1, 'اسم الصنف مطلوب'),
   quantity: z.preprocess(
-    (val) => (val === '' || val === null || val === undefined ? 0 : Number(val)),
-    z.number().min(1, 'الكمية يجب ان تكون اكبر من 0'),
+    (val) => {
+      if (val === '' || val === null || val === undefined) return undefined;
+      return Number(val);
+    },
+    z
+      .number({ required_error: 'الكمية مطلوبة', invalid_type_error: 'الكمية مطلوبة' })
+      .min(1, 'الكمية يجب ان تكون اكبر من 0'),
   ),
   pricePerItem: z.preprocess(
     (val) => (val === '' || val === null || val === undefined ? 0 : Number(val)),

@@ -4,8 +4,9 @@ import { useCallback, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify';
+import { LiaCheckSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
+import BaseModal from '@/components/ui/base-modal';
 import ProductSelectionModal, {
   SelectableProduct,
 } from '@/components/ui/product-selection-modal';
@@ -18,6 +19,7 @@ import { addInvoiceSchema, AddInvoiceFormData } from '../schema';
 export function AddInvoiceContent() {
   const router = useRouter();
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   const {
     control,
@@ -83,7 +85,7 @@ export function AddInvoiceContent() {
         append({
           id: String(product.id),
           name: product.name,
-          quantity: 1,
+          quantity: 0,
           pricePerItem: 0,
           total: 0,
         });
@@ -116,12 +118,9 @@ export function AddInvoiceContent() {
   const onSubmit = useCallback(
     (data: AddInvoiceFormData) => {
       console.log('Invoice Data:', data);
-      toast.success('تم إضافة فاتورة جديدة بنجاح');
-      setTimeout(() => {
-        router.push('/dashboard/purchases/all-invoices');
-      }, 500);
+      setIsSuccessModalOpen(true);
     },
-    [router],
+    [],
   );
 
   const imageFile =
@@ -191,6 +190,30 @@ export function AddInvoiceContent() {
         onConfirm={handleAddProducts}
         existingProductIds={(items ?? []).map((item) => item.id)}
       />
+
+      <BaseModal
+        isOpen={isSuccessModalOpen}
+        onClose={() => router.push('/dashboard/purchases/all-invoices')}
+        title=""
+        showFooter={false}
+      >
+        <div className="flex flex-col items-center gap-6 py-4">
+          <div className="w-24 h-24 rounded-full border-2 border-green-200 flex items-center justify-center">
+            <LiaCheckSolid className="w-12 h-12 text-green-500" />
+          </div>
+          <p className="text-lg font-bold text-gray-800">
+            تم إضافة فاتورة جديدة بنجاح
+          </p>
+          <Button
+            type="button"
+            variant="default"
+            className="rounded-full px-10"
+            onClick={() => router.push('/dashboard/purchases/all-invoices')}
+          >
+            العودة للفواتير
+          </Button>
+        </div>
+      </BaseModal>
     </div>
   );
 }
