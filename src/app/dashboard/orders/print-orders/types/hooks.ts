@@ -1,8 +1,10 @@
 import type { Order } from '@/types/orders';
-import type { ScannedOrder, AddOrderInput } from './components';
+import type { ScannedOrder, AddOrderInput, NonConfirmedGroup } from './components';
 
 export interface UseScannedOrdersReturn {
   scannedOrders: ScannedOrder[];
+  confirmedOrders: ScannedOrder[];
+  nonConfirmedGroups: NonConfirmedGroup[];
   addOrder: (order: AddOrderInput) => boolean;
   removeOrder: (code: string) => void;
   clearOrders: () => void;
@@ -10,6 +12,7 @@ export interface UseScannedOrdersReturn {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   filteredOrders: ScannedOrder[];
+  confirmedFilteredOrders: ScannedOrder[];
 }
 
 export interface UseBarcodeScannerOptions {

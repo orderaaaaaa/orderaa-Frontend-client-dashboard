@@ -4,7 +4,6 @@ import { useCallback, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { LiaCheckSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import BaseModal from '@/components/ui/base-modal';
 import ProductSelectionModal, {
@@ -119,8 +118,11 @@ export function AddInvoiceContent() {
     (data: AddInvoiceFormData) => {
       console.log('Invoice Data:', data);
       setIsSuccessModalOpen(true);
+      setTimeout(() => {
+        router.push('/dashboard/purchases/all-invoices');
+      }, 3000);
     },
-    [],
+    [router],
   );
 
   const imageFile =
@@ -198,20 +200,41 @@ export function AddInvoiceContent() {
         showFooter={false}
       >
         <div className="flex flex-col items-center gap-6 py-4">
-          <div className="w-24 h-24 rounded-full border-2 border-green-200 flex items-center justify-center">
-            <LiaCheckSolid className="w-12 h-12 text-green-500" />
-          </div>
+          <svg
+            className="w-24 h-24"
+            viewBox="0 0 96 96"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="48"
+              cy="48"
+              r="46"
+              stroke="#bbf7d0"
+              strokeWidth="2"
+              strokeLinecap="round"
+              className="animate-[draw-circle_0.6s_ease-out_forwards]"
+              style={{
+                strokeDasharray: 289,
+                strokeDashoffset: 289,
+              }}
+            />
+            <path
+              d="M28 50 L42 64 L68 34"
+              stroke="#22c55e"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="animate-[draw-check_0.4s_ease-out_0.5s_forwards]"
+              style={{
+                strokeDasharray: 80,
+                strokeDashoffset: 80,
+              }}
+            />
+          </svg>
           <p className="text-lg font-bold text-gray-800">
             تم إضافة فاتورة جديدة بنجاح
           </p>
-          <Button
-            type="button"
-            variant="default"
-            className="rounded-full px-10"
-            onClick={() => router.push('/dashboard/purchases/all-invoices')}
-          >
-            العودة للفواتير
-          </Button>
         </div>
       </BaseModal>
     </div>

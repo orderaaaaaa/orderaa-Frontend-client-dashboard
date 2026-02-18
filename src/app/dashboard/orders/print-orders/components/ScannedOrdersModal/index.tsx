@@ -11,8 +11,12 @@ import {
 import { ScannedOrdersTable } from './ScannedOrdersTable';
 import PrintOrdersActionsBar from '../PrintOrdersActionsBar';
 import { Button } from '@/components/ui/button';
-import { ScannedOrdersModalProps } from '../../types';
+import { ScannedOrdersModalProps, NonConfirmedGroup } from '../../types';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
+import {
+  ORDER_STATUS_ARABIC_LABELS,
+  ORDER_STATUS_CHART_COLORS,
+} from '../../../../constants/statusMappings';
 
 function ChangeProductTable({
   orders,
@@ -20,7 +24,7 @@ function ChangeProductTable({
   onPackagingNoteChange,
   onRemove,
 }: {
-  orders: { id: number; code: string; scannedAt: Date }[];
+  orders: { id: number; code: string; status: string; scannedAt: Date }[];
   packagingNotes: Record<string, string>;
   onPackagingNoteChange: (code: string, note: string) => void;
   onRemove: (code: string) => void;
@@ -85,14 +89,93 @@ function ChangeProductTable({
   );
 }
 
+function NonConfirmedSection({
+  groups,
+  onRemove,
+}: {
+  groups: NonConfirmedGroup[];
+  onRemove: (code: string) => void;
+}) {
+  if (groups.length === 0) return null;
+
+  return (
+    <div className="mt-6 border-t border-gray-200 pt-4">
+      <h3 className="text-base font-semibold text-gray-700 mb-4">
+        طلبات بحالات أخرى
+      </h3>
+      <div className="flex flex-wrap gap-4">
+        {groups.map((group) => {
+          const statusLabel =
+            ORDER_STATUS_ARABIC_LABELS[group.status] || group.status;
+          const statusColor =
+            ORDER_STATUS_CHART_COLORS[group.status] || '#9ca3af';
+
+          return (
+            <div
+              key={group.status}
+              className="border border-gray-200 rounded-lg overflow-hidden w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[calc(25%-0.75rem)] self-start"
+            >
+              <div
+                className="flex items-center justify-between px-4 py-2.5"
+                style={{ backgroundColor: `${statusColor}15` }}
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: statusColor }}
+                  />
+                  <span
+                    className="text-sm font-semibold"
+                    style={{ color: statusColor }}
+                  >
+                    {statusLabel}
+                  </span>
+                </div>
+                <span
+                  className="inline-flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full text-xs font-bold text-white"
+                  style={{ backgroundColor: statusColor }}
+                >
+                  {group.orders.length}
+                </span>
+              </div>
+              <div className="divide-y divide-gray-100">
+                {group.orders.map((order) => (
+                  <div
+                    key={order.code}
+                    className="flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="text-sm font-medium text-gray-800">
+                      {order.code}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      onClick={() => onRemove(order.code)}
+                      className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                      title="حذف الطلب"
+                    >
+                      <LiaTrashAltSolid className="size-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function ScannedOrdersModal({
   isOpen,
   onClose,
   scannedOrders,
+  confirmedOrders,
+  nonConfirmedGroups,
   onRemoveOrder,
   searchQuery,
   onSearchChange,
-  filteredOrders,
+  confirmedFilteredOrders,
   onPrepared,
   onAwaitingPackaging,
   onCallAgain,
@@ -109,10 +192,10 @@ export function ScannedOrdersModal({
 
   const allFieldsFilled = useMemo(() => {
     if (!isChangeProductMode) return true;
-    return scannedOrders.every(
+    return confirmedOrders.every(
       (order) => packagingNotes[order.code]?.trim().length > 0
     );
-  }, [isChangeProductMode, scannedOrders, packagingNotes]);
+  }, [isChangeProductMode, confirmedOrders, packagingNotes]);
 
   if (!isOpen) return null;
 
@@ -145,9 +228,14 @@ export function ScannedOrdersModal({
         </h2>
         <div className="absolute left-8 flex items-center gap-3 text-gray-700">
           <span className="text-lg font-medium">عدد الطلبات</span>
-          <span className="inline-flex items-center justify-center min-w-[32px] h-8 px-2 rounded-full bg-primary text-white text-sm font-bold">
+          <span className="inline-flex items-center justify-center min-w-[40px] h-10 px-3 rounded-full bg-primary text-white text-xl font-bold">
             {scannedOrders.length}
           </span>
+          {confirmedOrders.length !== scannedOrders.length && (
+            <span className="text-sm text-gray-500">
+              ({confirmedOrders.length} مؤكد)
+            </span>
+          )}
         </div>
       </div>
 
@@ -170,7 +258,7 @@ export function ScannedOrdersModal({
           </div>
           <div className="flex-1 overflow-y-auto px-8 py-4">
             <ChangeProductTable
-              orders={filteredOrders}
+              orders={confirmedFilteredOrders}
               packagingNotes={packagingNotes}
               onPackagingNoteChange={onPackagingNoteChange || (() => { })}
               onRemove={onRemoveOrder}
@@ -193,11 +281,20 @@ export function ScannedOrdersModal({
             </div>
           </div>
           <div className="flex-1 overflow-y-auto px-8 py-4">
+            {(confirmedFilteredOrders.length > 0 || isScanLoading) && (
+              <h3 className="text-base font-semibold text-gray-700 mb-4">
+                طلبات مؤكدة
+              </h3>
+            )}
             <ScannedOrdersTable
-              orders={filteredOrders}
+              orders={confirmedFilteredOrders}
               onRemove={onRemoveOrder}
               flashingCode={flashingCode}
               isScanLoading={isScanLoading}
+            />
+            <NonConfirmedSection
+              groups={nonConfirmedGroups}
+              onRemove={onRemoveOrder}
             />
           </div>
         </>
@@ -208,7 +305,7 @@ export function ScannedOrdersModal({
         position="static"
         isLoading={isLoading}
         disableActions={
-          scannedOrders.length === 0 ||
+          confirmedOrders.length === 0 ||
           (isChangeProductMode && !allFieldsFilled)
         }
         onPrepared={isChangeProductMode ? undefined : onPrepared}

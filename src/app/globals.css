@@ -345,3 +345,15 @@ html {
 .scan-flash-success {
   animation: scan-flash-green 0.6s ease-out;
 }
+
+@keyframes draw-circle {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes draw-check {
+  to {
+    stroke-dashoffset: 0;
+  }
+}

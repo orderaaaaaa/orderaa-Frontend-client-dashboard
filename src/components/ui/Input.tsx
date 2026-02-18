@@ -60,7 +60,7 @@ export default function Input({
   const hasLeftIcon = type === 'password' || showClearButton;
 
   const inputClassName = clsx(
-    'w-full border rounded-lg py-3 text-base focus:outline-none !bg-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
+    'w-full border rounded-lg py-3 text-base focus:outline-none bg-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
     error ? 'border-red-500' : 'border-gray-200',
     hasRightIcon ? 'pr-10' : 'pr-4',
     hasLeftIcon ? 'pl-10' : 'pl-4',

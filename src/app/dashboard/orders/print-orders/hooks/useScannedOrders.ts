@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
+import groupBy from 'lodash/groupBy';
 import type {
   ScannedOrder,
   AddOrderInput,
+  NonConfirmedGroup,
   UseScannedOrdersReturn,
 } from '../types';
 
@@ -29,7 +31,12 @@ export function useScannedOrders(): UseScannedOrdersReturn {
       }
 
       setScannedOrders((prev) => [
-        { id: order.id, code: order.code, scannedAt: new Date() },
+        {
+          id: order.id,
+          code: order.code,
+          status: order.status,
+          scannedAt: new Date(),
+        },
         ...prev,
       ]);
       return true;
@@ -48,6 +55,21 @@ export function useScannedOrders(): UseScannedOrdersReturn {
     setSearchQuery('');
   }, []);
 
+  const confirmedOrders = useMemo(
+    () => scannedOrders.filter((o) => o.status === 'CONFIRMED'),
+    [scannedOrders]
+  );
+
+  const nonConfirmedGroups: NonConfirmedGroup[] = useMemo(() => {
+    const nonConfirmed = scannedOrders.filter((o) => o.status !== 'CONFIRMED');
+    if (nonConfirmed.length === 0) return [];
+    const grouped = groupBy(nonConfirmed, 'status');
+    return Object.entries(grouped).map(([status, orders]) => ({
+      status,
+      orders,
+    }));
+  }, [scannedOrders]);
+
   const filteredOrders = useMemo(() => {
     if (!searchQuery.trim()) {
       return scannedOrders;
@@ -58,8 +80,15 @@ export function useScannedOrders(): UseScannedOrdersReturn {
     );
   }, [scannedOrders, searchQuery]);
 
+  const confirmedFilteredOrders = useMemo(
+    () => filteredOrders.filter((o) => o.status === 'CONFIRMED'),
+    [filteredOrders]
+  );
+
   return {
     scannedOrders,
+    confirmedOrders,
+    nonConfirmedGroups,
     addOrder,
     removeOrder,
     clearOrders,
@@ -67,5 +96,6 @@ export function useScannedOrders(): UseScannedOrdersReturn {
     searchQuery,
     setSearchQuery,
     filteredOrders,
+    confirmedFilteredOrders,
   };
 }

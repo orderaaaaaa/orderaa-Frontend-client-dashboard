@@ -1,18 +1,29 @@
 'use client';
 
 import { memo, useMemo } from 'react';
+import clsx from 'clsx';
 import { IconType } from 'react-icons';
 import {
   LiaFileInvoiceSolid,
   LiaUserTieSolid,
   LiaClockSolid,
   LiaMoneyBillWaveSolid,
-  LiaBoxOpenSolid
+  LiaBoxOpenSolid,
+  LiaExchangeAltSolid,
+  LiaUndoAltSolid,
+  LiaCheckCircleSolid,
+  LiaDollarSignSolid,
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { Invoice } from '../types';
 import { formatDate } from '../utils';
+
+const TRANSACTION_TYPE_CONFIG: Record<string, { text: string; iconColor: string; icon: IconType }> = {
+  'استبدال': { text: 'text-red-500', iconColor: 'text-red-500', icon: LiaExchangeAltSolid },
+  'مرتجع': { text: 'text-orange-500', iconColor: 'text-orange-500', icon: LiaUndoAltSolid },
+  'مدفوع': { text: 'text-green-500', iconColor: 'text-green-500', icon: LiaDollarSignSolid },
+};
 
 interface InvoiceCardProps {
   invoice: Invoice;
@@ -27,6 +38,8 @@ interface CardField {
   value: string;
   icon: IconType;
   subtitle?: string;
+  valueClassName?: string;
+  iconClassName?: string;
 }
 
 const InvoiceCard = memo(
@@ -37,6 +50,15 @@ const InvoiceCard = memo(
     onSelectionChange,
     onTitleClick,
   }: InvoiceCardProps) => {
+    const typeConfig = TRANSACTION_TYPE_CONFIG[invoice.transactionType];
+    const typeColors = typeConfig ?? {
+      text: 'text-gray-800',
+      iconColor: 'text-primary',
+      icon: LiaCheckCircleSolid,
+    };
+
+    const isNegativeAmount = invoice.transactionType === 'استبدال' || invoice.transactionType === 'مرتجع';
+
     const fields: CardField[] = useMemo(
       () => [
         {
@@ -57,11 +79,20 @@ const InvoiceCard = memo(
         },
         {
           label: 'المبلغ الاجمالي',
-          value: invoice.totalAmount.toLocaleString(),
+          value: `${isNegativeAmount ? '-' : ''}${invoice.totalAmount.toLocaleString()} جنيه`,
           icon: LiaMoneyBillWaveSolid,
+          valueClassName: typeColors.text,
+          iconClassName: typeColors.iconColor,
+        },
+        {
+          label: 'نوع الفاتورة',
+          value: invoice.transactionType,
+          icon: typeColors.icon,
+          valueClassName: typeColors.text,
+          iconClassName: typeColors.iconColor,
         },
       ],
-      [invoice]
+      [invoice, typeColors, isNegativeAmount]
     );
 
     return (
@@ -91,13 +122,13 @@ const InvoiceCard = memo(
           )}
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6 px-10">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-6 px-10">
           {fields.map((field) => (
             <div key={field.label} className="flex flex-col items-start sm:items-center gap-1.5">
               <span className="text-base text-gray-400">{field.label}</span>
               <div className="flex items-center gap-1.5">
-                <field.icon className="w-4 h-4 text-primary" />
-                <span className="text-base font-semibold text-gray-800">
+                <field.icon className={clsx('w-4 h-4', field.iconClassName ?? 'text-primary')} />
+                <span className={clsx('text-base font-semibold', field.valueClassName ?? 'text-gray-800')}>
                   {field.value}
                 </span>
               </div>

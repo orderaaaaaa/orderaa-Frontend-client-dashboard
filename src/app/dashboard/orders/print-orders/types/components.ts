@@ -3,12 +3,19 @@ import type { Order } from '@/types/orders';
 export interface ScannedOrder {
   id: number;
   code: string;
+  status: string;
   scannedAt: Date;
 }
 
 export interface AddOrderInput {
   id: number;
   code: string;
+  status: string;
+}
+
+export interface NonConfirmedGroup {
+  status: string;
+  orders: ScannedOrder[];
 }
 
 export interface OrderActionCallbacks {
@@ -43,10 +50,13 @@ export interface ScannedOrdersModalProps extends OrderActionCallbacks {
   isOpen: boolean;
   onClose: () => void;
   scannedOrders: ScannedOrder[];
+  confirmedOrders: ScannedOrder[];
+  nonConfirmedGroups: NonConfirmedGroup[];
   onRemoveOrder: (code: string) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   filteredOrders: ScannedOrder[];
+  confirmedFilteredOrders: ScannedOrder[];
   isLoading: boolean;
   isScanLoading?: boolean;
   flashingCode?: string | null;

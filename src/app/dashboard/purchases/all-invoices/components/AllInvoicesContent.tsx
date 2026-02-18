@@ -2,13 +2,18 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Scan, ScanLine, X } from 'lucide-react';
+import { LiaFileInvoiceSolid } from 'react-icons/lia';
 import InvoicesHeader from './InvoicesHeader';
+import InvoicesSearchBar from './InvoicesSearchBar';
+import DateRangeFilter from '@/components/ui/DateRangeFilter';
+import InvoicesFilterBar from './InvoicesFilterBar';
 import InvoiceCard from './InvoiceCard';
 import InvoiceDetailModal from './InvoiceDetailModal';
 import InvoicesActionsBar from './InvoicesActionsBar';
 import PaginationFooter from '@/components/ui/pagination-footer';
-import { MOCK_INVOICES, DEFAULT_PAGE_SIZE } from '../constants';
+import { DEFAULT_PAGE_SIZE } from '../constants';
 import { Invoice } from '../types';
+import { useInvoiceFilters } from '../hooks';
 
 export function AllInvoicesContent() {
   const [select, setSelect] = useState(false);
@@ -18,13 +23,30 @@ export function AllInvoicesContent() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const totalItems = MOCK_INVOICES.length;
+  const {
+    filters,
+    filteredInvoices,
+    hasActiveFilters,
+    setSearchQuery,
+    clearSearchQuery,
+    setFilter,
+    clearFilter,
+    setFromDate,
+    setToDate,
+    setTimePeriod,
+  } = useInvoiceFilters();
+
+  const totalItems = filteredInvoices.length;
   const totalPages = Math.ceil(totalItems / pageSize);
 
   const paginatedInvoices = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
-    return MOCK_INVOICES.slice(start, start + pageSize);
-  }, [currentPage, pageSize]);
+    return filteredInvoices.slice(start, start + pageSize);
+  }, [currentPage, pageSize, filteredInvoices]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filteredInvoices.length]);
 
   const showActionsBar = select && selectedIds.length > 0;
 
@@ -79,51 +101,102 @@ export function AllInvoicesContent() {
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">
+
       <InvoicesHeader />
 
-      <div className="sm:px-8 py-3 flex flex-row items-center justify-end gap-3 text-white">
-        {select && selectedIds.length > 0 && (
-          <div className="flex flex-row items-center justify-center gap-2">
-            <X
-              onClick={() => {
-                setSelectedIds([]);
-                setSelect(false);
-              }}
-              className="cursor-pointer text-primary h-5 w-5"
+      <div className="sm:px-8 py-3 flex flex-col gap-4">
+        <div className="flex flex-row items-center gap-3">
+          <div className="flex-1">
+            <InvoicesSearchBar
+              value={filters.searchQuery}
+              onChange={setSearchQuery}
+              onClear={clearSearchQuery}
             />
-            <span className="text-sm text-gray-600">
-              تم تحديد {selectedIds.length} طلب
-            </span>
           </div>
-        )}
-        <div
-          className="bg-primary flex flex-row items-center justify-center gap-3 px-5 py-2 rounded-full cursor-pointer"
-          onClick={handleToggleSelect}
-        >
-          <p>تحديد</p>
-          <div>
-            {select ? (
-              <ScanLine className="text-white w-5 h-5" />
-            ) : (
-              <Scan className="text-white w-5 h-5" />
-            )}
+          {select && selectedIds.length > 0 && (
+            <div className="flex flex-row items-center justify-center gap-2">
+              <X
+                onClick={() => {
+                  setSelectedIds([]);
+                  setSelect(false);
+                }}
+                className="cursor-pointer text-primary h-5 w-5"
+              />
+              <span className="text-sm text-gray-600 whitespace-nowrap">
+                تم تحديد {selectedIds.length} طلب
+              </span>
+            </div>
+          )}
+          <div
+            className="bg-primary flex flex-row items-center justify-center gap-3 px-5 py-2 rounded-full cursor-pointer text-white whitespace-nowrap"
+            onClick={handleToggleSelect}
+          >
+            <p>تحديد</p>
+            <div>
+              {select ? (
+                <ScanLine className="text-white w-5 h-5" />
+              ) : (
+                <Scan className="text-white w-5 h-5" />
+              )}
+            </div>
           </div>
+        </div>
+        <InvoicesFilterBar
+          filters={filters}
+          onFilterChange={setFilter}
+          onClearFilter={clearFilter}
+        />
+        <div className="flex flex-row items-center justify-start gap-4">
+          <DateRangeFilter
+            fromDate={filters.fromDate}
+            toDate={filters.toDate}
+            timePeriod={filters.timePeriod}
+            onFromDateChange={setFromDate}
+            onToDateChange={setToDate}
+            onTimePeriodChange={setTimePeriod}
+            className="px-3 sm:pe-8"
+          />
         </div>
       </div>
 
       <div className="sm:px-8 flex flex-col gap-4">
-        {paginatedInvoices.map((invoice) => (
-          <InvoiceCard
-            key={invoice.id}
-            invoice={invoice}
-            select={select}
-            isSelected={selectedIds.includes(invoice.id)}
-            onSelectionChange={(checked) =>
-              handleSelectionChange(invoice.id, checked)
-            }
-            onTitleClick={() => handleTitleClick(invoice)}
-          />
-        ))}
+        {paginatedInvoices.length > 0 ? (
+          paginatedInvoices.map((invoice) => (
+            <InvoiceCard
+              key={invoice.id}
+              invoice={invoice}
+              select={select}
+              isSelected={selectedIds.includes(invoice.id)}
+              onSelectionChange={(checked) =>
+                handleSelectionChange(invoice.id, checked)
+              }
+              onTitleClick={() => handleTitleClick(invoice)}
+            />
+          ))
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <LiaFileInvoiceSolid className="w-16 h-16 text-gray-300" />
+            {hasActiveFilters ? (
+              <>
+                <p className="text-lg font-semibold text-gray-400">
+                  لا توجد نتائج
+                </p>
+                <p className="text-sm text-gray-400">
+                  لا توجد نتائج مطابقة للبحث أو الفلاتر المحددة
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-lg font-semibold text-gray-400">
+                  لا توجد فواتير
+                </p>
+                <p className="text-sm text-gray-400">
+                  قم بانشاء فاتورة جديدة للبدء
+                </p>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="mt-6">

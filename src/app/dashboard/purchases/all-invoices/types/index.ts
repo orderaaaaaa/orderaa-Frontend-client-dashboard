@@ -9,3 +9,14 @@ export interface Invoice {
   transactionType: string;
   imageUrl?: string;
 }
+
+export interface InvoiceFilters {
+  searchQuery: string;
+  supplierName: string;
+  transactionType: string;
+  totalAmount: string;
+  employeeName: string;
+  fromDate: Date | null;
+  toDate: Date | null;
+  timePeriod: '' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+}
