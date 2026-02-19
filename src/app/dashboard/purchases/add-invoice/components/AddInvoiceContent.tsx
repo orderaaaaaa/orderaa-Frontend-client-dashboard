@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -14,11 +14,13 @@ import InvoiceDropdowns from './InvoiceDropdowns';
 import InvoiceItemsTable from './InvoiceItemsTable';
 import InvoiceImageSection from './InvoiceImageSection';
 import { addInvoiceSchema, AddInvoiceFormData } from '../schema';
+import { InvoiceMode } from '../types';
 
 export function AddInvoiceContent() {
   const router = useRouter();
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [invoiceMode, setInvoiceMode] = useState<InvoiceMode>('singular');
 
   const {
     control,
@@ -36,10 +38,13 @@ export function AddInvoiceContent() {
     },
   });
 
-  const { append, remove, update } = useFieldArray({
+  const { append, remove, update, replace } = useFieldArray({
     control,
     name: 'items',
   });
+
+  const savedSingularItems = useRef<AddInvoiceFormData['items']>([]);
+  const savedPackageItems = useRef<AddInvoiceFormData['items']>([]);
 
   const creator = watch('creator');
   const nickname = watch('nickname');
@@ -51,10 +56,13 @@ export function AddInvoiceContent() {
       const safeValue = Math.max(0, value);
       const item = items[index];
       if (!item) return;
+      const newTotal = safeValue * item.pricePerItem;
+      const pieceCount = item.pieceCount || 0;
       update(index, {
         ...item,
         quantity: safeValue,
-        total: safeValue * item.pricePerItem,
+        total: newTotal,
+        pricePerPiece: pieceCount > 0 ? newTotal / pieceCount : 0,
       });
     },
     [update, items],
@@ -65,13 +73,47 @@ export function AddInvoiceContent() {
       const safeValue = Math.max(0, value);
       const item = items[index];
       if (!item) return;
+      const newTotal = item.quantity * safeValue;
+      const pieceCount = item.pieceCount || 0;
       update(index, {
         ...item,
         pricePerItem: safeValue,
-        total: item.quantity * safeValue,
+        total: newTotal,
+        pricePerPiece: pieceCount > 0 ? newTotal / pieceCount : 0,
       });
     },
     [update, items],
+  );
+
+  const handlePieceCountChange = useCallback(
+    (index: number, value: number) => {
+      const safeValue = Math.max(0, value);
+      const item = items[index];
+      if (!item) return;
+      const total = item.quantity * item.pricePerItem;
+      update(index, {
+        ...item,
+        pieceCount: safeValue,
+        pricePerPiece: safeValue > 0 ? total / safeValue : 0,
+      });
+    },
+    [update, items],
+  );
+
+  const handleModeChange = useCallback(
+    (newMode: InvoiceMode) => {
+      if (newMode === invoiceMode) return;
+      const currentItems = items ?? [];
+      if (invoiceMode === 'singular') {
+        savedSingularItems.current = currentItems;
+        replace(savedPackageItems.current);
+      } else {
+        savedPackageItems.current = currentItems;
+        replace(savedSingularItems.current);
+      }
+      setInvoiceMode(newMode);
+    },
+    [invoiceMode, items, replace],
   );
 
   const handleOpenProductModal = useCallback(() => {
@@ -87,6 +129,8 @@ export function AddInvoiceContent() {
           quantity: 0,
           pricePerItem: 0,
           total: 0,
+          pieceCount: 0,
+          pricePerPiece: 0,
         });
       });
       setIsProductModalOpen(false);
@@ -156,11 +200,14 @@ export function AddInvoiceContent() {
 
         <InvoiceItemsTable
           items={items ?? []}
+          mode={invoiceMode}
+          onModeChange={handleModeChange}
           onQuantityChange={handleQuantityChange}
           onPriceChange={handlePriceChange}
+          onPieceCountChange={handlePieceCountChange}
           onRemoveItem={handleRemoveItem}
           onAddItemClick={handleOpenProductModal}
-          itemErrors={errors.items as Record<number, { quantity?: { message?: string }; pricePerItem?: { message?: string }; name?: { message?: string } }> | undefined}
+          itemErrors={errors.items as Record<number, { quantity?: { message?: string }; pricePerItem?: { message?: string }; pieceCount?: { message?: string }; name?: { message?: string } }> | undefined}
         />
         {errors.items?.message && (
           <p className="sm:px-8 text-red-500 text-sm -mt-6">

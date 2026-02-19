@@ -25,6 +25,11 @@ const invoiceItemSchema = z.object({
     z.number().min(0, 'السعر يجب ان يكون 0 او اكبر'),
   ),
   total: z.number(),
+  pieceCount: z.preprocess(
+    (val) => (val === '' || val === null || val === undefined ? 0 : Number(val)),
+    z.number().min(0).optional(),
+  ),
+  pricePerPiece: z.number().optional(),
 });
 
 export const addInvoiceSchema = z.object({

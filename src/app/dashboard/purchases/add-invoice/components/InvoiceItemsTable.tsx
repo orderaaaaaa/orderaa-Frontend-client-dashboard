@@ -1,22 +1,32 @@
 'use client';
 
-import { memo, useMemo } from 'react';
-import { LiaPlusSolid, LiaTrashAltSolid } from 'react-icons/lia';
+import React, { memo, useMemo } from 'react';
+import { LiaPlusSolid, LiaTrashAltSolid, LiaCubeSolid, LiaCubesSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import { DataTable, DataTableColumn } from '@/components/ui/data-table';
-import { InvoiceItem } from '../types';
+import ToggleGroup from '@/components/ui/toggle-group';
+import { InvoiceItem, InvoiceMode } from '../types';
 
 interface ItemFieldError {
   quantity?: { message?: string };
   pricePerItem?: { message?: string };
+  pieceCount?: { message?: string };
   name?: { message?: string };
 }
 
+const INVOICE_MODE_OPTIONS: { value: InvoiceMode; label: string; icon: React.ReactNode }[] = [
+  { value: 'singular', label: 'قطعة', icon: <LiaCubeSolid className="w-4 h-4" /> },
+  { value: 'package', label: 'باكدج', icon: <LiaCubesSolid className="w-4 h-4" /> },
+];
+
 interface InvoiceItemsTableProps {
   items: InvoiceItem[];
+  mode: InvoiceMode;
+  onModeChange: (mode: InvoiceMode) => void;
   onQuantityChange: (index: number, value: number) => void;
   onPriceChange: (index: number, value: number) => void;
+  onPieceCountChange: (index: number, value: number) => void;
   onRemoveItem: (index: number) => void;
   onAddItemClick: () => void;
   itemErrors?: Record<number, ItemFieldError>;
@@ -25,19 +35,24 @@ interface InvoiceItemsTableProps {
 const InvoiceItemsTable = memo(
   ({
     items,
+    mode,
+    onModeChange,
     onQuantityChange,
     onPriceChange,
+    onPieceCountChange,
     onRemoveItem,
     onAddItemClick,
     itemErrors,
   }: InvoiceItemsTableProps) => {
+    const isPackage = mode === 'package';
+
     const grandTotal = useMemo(
       () => items.reduce((sum, item) => sum + item.quantity * item.pricePerItem, 0),
       [items],
     );
 
-    const columns: DataTableColumn<InvoiceItem & Record<string, unknown>>[] = useMemo(
-      () => [
+    const columns: DataTableColumn<InvoiceItem & Record<string, unknown>>[] = useMemo(() => {
+      const cols: DataTableColumn<InvoiceItem & Record<string, unknown>>[] = [
         {
           key: 'name',
           header: 'اسم الصنف',
@@ -63,7 +78,7 @@ const InvoiceItemsTable = memo(
         },
         {
           key: 'pricePerItem',
-          header: 'سعر الصنف',
+          header: isPackage ? 'سعر الباكدج' : 'سعر الصنف',
           render: (_value: unknown, row: InvoiceItem & Record<string, unknown>) => {
             const index = items.findIndex((i) => i.id === row.id);
             return (
@@ -92,34 +107,83 @@ const InvoiceItemsTable = memo(
             </span>
           ),
         },
-        {
-          key: 'actions',
-          header: '',
-          className: 'w-12',
-          render: (_value: unknown, row: InvoiceItem & Record<string, unknown>) => {
-            const index = items.findIndex((i) => i.id === row.id);
-            return (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                onClick={() => onRemoveItem(index)}
-                className="text-red-500 hover:text-red-700 hover:bg-red-50"
-              >
-                <LiaTrashAltSolid className="w-4 h-4" />
-              </Button>
-            );
+      ];
+
+      if (isPackage) {
+        cols.push(
+          {
+            key: 'pieceCount',
+            header: 'عدد القطع',
+            render: (_value: unknown, row: InvoiceItem & Record<string, unknown>) => {
+              const index = items.findIndex((i) => i.id === row.id);
+              return (
+                <Input
+                  type="number"
+                  value={row.pieceCount || ''}
+                  onChange={(e) =>
+                    onPieceCountChange(index, Number(e.target.value) || 0)
+                  }
+                  placeholder="عدد القطع"
+                  className="min-w-15"
+                  error={itemErrors?.[index]?.pieceCount?.message}
+                />
+              );
+            },
           },
+          {
+            key: 'pricePerPiece',
+            header: 'سعر القطعة',
+            render: (_value: unknown, row: InvoiceItem & Record<string, unknown>) => {
+              const total = row.quantity * row.pricePerItem;
+              const pieceCount = row.pieceCount as number || 0;
+              const pricePerPiece = pieceCount > 0 ? total / pieceCount : 0;
+              return (
+                <span className="font-semibold">
+                  {pricePerPiece > 0 ? `${pricePerPiece.toLocaleString(undefined, { maximumFractionDigits: 2 })} جنيه` : '-'}
+                </span>
+              );
+            },
+          },
+        );
+      }
+
+      cols.push({
+        key: 'actions',
+        header: '',
+        className: 'w-12',
+        render: (_value: unknown, row: InvoiceItem & Record<string, unknown>) => {
+          const index = items.findIndex((i) => i.id === row.id);
+          return (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => onRemoveItem(index)}
+              className="text-red-500 hover:text-red-700 hover:bg-red-50"
+            >
+              <LiaTrashAltSolid className="w-4 h-4" />
+            </Button>
+          );
         },
-      ],
-      [items, onQuantityChange, onPriceChange, onRemoveItem, itemErrors],
-    );
+      });
+
+      return cols;
+    }, [items, isPackage, onQuantityChange, onPriceChange, onPieceCountChange, onRemoveItem, itemErrors]);
 
     const tableData = items as (InvoiceItem & Record<string, unknown>)[];
+    const hasItems = items.length > 0;
 
     return (
       <div className="sm:px-8 flex flex-col gap-4">
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-between">
+          <ToggleGroup
+            options={INVOICE_MODE_OPTIONS}
+            value={mode}
+            onChange={onModeChange}
+            disabled={hasItems}
+            disabledTooltip="لا يمكن تغيير النوع بعد اضافة اصناف، قم بحذف الاصناف اولا"
+          />
+
           <Button
             type="button"
             variant="default"
