@@ -132,7 +132,6 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
           {labels.packagingNotes}
         </span>
       </div>
-      
       <div className="grid grid-cols-2 border border-t-0 border-black">
         <div className="p-1 border-e border-black">
           {data.products.map((product, index) => (
