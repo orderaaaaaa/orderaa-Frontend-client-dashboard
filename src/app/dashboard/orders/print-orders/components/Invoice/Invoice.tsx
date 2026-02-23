@@ -123,7 +123,6 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
         </div>
       </div>
 
-
       {/* Packaging Notes Section */}
       <div className="grid grid-cols-2 bg-black text-white">
         <span className="py-0.5 px-1 text-[8px] font-bold text-start">
