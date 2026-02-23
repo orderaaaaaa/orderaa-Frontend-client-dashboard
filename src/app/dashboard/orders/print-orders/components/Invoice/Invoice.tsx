@@ -133,7 +133,6 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
         </span>
       </div>
       <div className="grid grid-cols-2 border border-t-0 border-black">
-        
         <div className="p-1 border-e border-black">
           {data.products.map((product, index) => (
             <div key={index} className="grid grid-cols-[auto_1fr] gap-1 mb-0.5">
