@@ -108,6 +108,8 @@ export interface OrderFilters {
   executionDate?: string;
   newFirst?: boolean;
   orderByDirection?: 'asc' | 'desc' | '';
+  productId?: string;
+  cancellationReasons?: string[];
 }
 
 export interface FilterOptions {
@@ -115,6 +117,7 @@ export interface FilterOptions {
   sizeColorOptions: string[];
   governorateOptions: string[];
   areaOptions: string[];
+  productIdOptions?: { key: string; value: string }[];
 }
 
 export interface ProductDropdownProps {
@@ -300,6 +303,8 @@ export interface FilterOrdersDto {
   isPrinted?: boolean;
   shippingCompany?: string;
   department?: string;
+  productId?: string;
+  cancellationReasons?: string[];
 }
 
 // Pagination Meta

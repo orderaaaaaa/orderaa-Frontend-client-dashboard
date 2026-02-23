@@ -80,6 +80,12 @@ export function buildApiFiltersFromUrlState(urlFilters: UrlFilterState): FilterO
     if (localFilters.orderByDirection) {
         filters.orderByDirection = localFilters.orderByDirection;
     }
+    if (localFilters.productId) {
+        filters.productId = localFilters.productId;
+    }
+    if (localFilters.cancellationReasons?.length) {
+        filters.cancellationReasons = localFilters.cancellationReasons;
+    }
 
     return filters;
 }
@@ -103,6 +109,8 @@ export function useUnifiedFilters() {
         phone: '',
         address: '',
         executionDate: '',
+        productId: '',
+        cancellationReasons: [],
     });
 
     // Pagination state
@@ -189,6 +197,14 @@ export function useUnifiedFilters() {
             filters.code = debouncedFilters.shipmentCode;
         }
 
+        if (debouncedFilters.productId) {
+            filters.productId = debouncedFilters.productId;
+        }
+
+        if (debouncedFilters.cancellationReasons?.length) {
+            filters.cancellationReasons = debouncedFilters.cancellationReasons;
+        }
+
         return filters;
     }, [selectedStatus, searchQuery, debouncedFilters, fromDate, toDate, page, limit]);
 
@@ -219,6 +235,8 @@ export function useUnifiedFilters() {
             phone: '',
             address: '',
             executionDate: '',
+            productId: '',
+            cancellationReasons: [],
         });
         setFromDateInternal(null);
         setToDateInternal(null);

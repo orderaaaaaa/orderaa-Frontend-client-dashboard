@@ -29,6 +29,8 @@ import { buildApiFiltersFromUrlState } from '@/hooks/orders/useUnifiedFilters';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { formatDateForUrl } from '@/utils/urlFilters';
 
+import { useGetProducts } from '@/app/dashboard/products/hooks/useProduct';
+import { FilterKey } from '@/app/dashboard/orders/allOrders/components/FilterSection/FilterPanelRHF';
 import { PageTabs } from '../../components/PageTabs';
 import { FilterSection } from '../../components/FilterSection';
 import {
@@ -44,6 +46,7 @@ export function CallCenterContent() {
   const [selectedCustomerName, setSelectedCustomerName] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [isProductFilterActive, setIsProductFilterActive] = useState(false);
   const department = useDepartment();
   const queryClient = useQueryClient();
   const DEFAULT_STATUS = useDefaultStatusByPath();
@@ -97,6 +100,7 @@ export function CallCenterContent() {
     if (localFilters.shipmentCode)
       params.set('shipmentCode', localFilters.shipmentCode);
     if (localFilters.address) params.set('address', localFilters.address);
+    if (localFilters.productId) params.set('productId', localFilters.productId);
 
     return params.toString();
   }, [filters, DEFAULT_STATUS]);
@@ -124,6 +128,20 @@ export function CallCenterContent() {
   });
 
   const { options } = useFilterOptions();
+
+  const { data: productsData } = useGetProducts(
+    { page: 1, limit: 9999, sortBy: 'createdAt', sortOrder: 'desc' },
+    isProductFilterActive,
+  );
+
+  const productIdOptions = useMemo(
+    () =>
+      (productsData?.data ?? []).map((p) => ({
+        key: String(p.id),
+        value: p.name,
+      })),
+    [productsData],
+  );
 
   const orders = ordersData?.data ?? [];
   const totalOrders = ordersData?.meta?.totalItems ?? 0;
@@ -158,6 +176,10 @@ export function CallCenterContent() {
     },
     [updateLocalFilters]
   );
+
+  const handleActiveFiltersChange = useCallback((activeFilters: FilterKey[]) => {
+    setIsProductFilterActive(activeFilters.includes('productId'));
+  }, []);
 
   const {
     control,
@@ -247,12 +269,14 @@ export function CallCenterContent() {
           ],
           governorateOptions: options.governorates || [],
           areaOptions: options.areas || [],
+          productIdOptions,
         }}
         printStatus={printStatus}
         onPrintStatusChange={setPrintStatus}
         selectedOrders={selectedOrders}
         showPrintButton={false}
         showPrintStatusToggle={false}
+        onActiveFiltersChange={handleActiveFiltersChange}
       />
 
       <OrdersSelectionHeader

@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Control, FieldErrors, UseFormSetValue } from 'react-hook-form';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { FilterOptions } from '@/types/orders';
 import FilterPanelRHF, { FilterKey, FILTER_DEFINITIONS } from './FilterPanelRHF';
-import { LiaSlidersHSolid, LiaFilterSolid, LiaAngleDownSolid } from 'react-icons/lia';
+import { LiaSlidersHSolid, LiaAngleDownSolid } from 'react-icons/lia';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 
@@ -15,19 +15,22 @@ type FilterSectionProps = {
   options?: FilterOptions;
   setValue?: UseFormSetValue<OrderFiltersFormData>;
   initialFormFilters?: OrderFiltersFormData | null;
+  currentStatus?: string | null;
 };
 
-// Helper to get active filter keys from form values
 function getActiveFiltersFromFormValues(formFilters: OrderFiltersFormData | null | undefined): FilterKey[] {
   if (!formFilters) return [];
 
   const activeKeys: FilterKey[] = [];
 
   for (const def of FILTER_DEFINITIONS) {
-    if (def.key === 'employeeName') continue; // Skip placeholder
+    if (def.key === 'employeeName') continue;
 
     const value = formFilters[def.key as keyof OrderFiltersFormData];
-    if (value !== undefined && value !== '' && value !== null) {
+    const isActive = Array.isArray(value)
+      ? value.length > 0
+      : value !== undefined && value !== '' && value !== null;
+    if (isActive) {
       activeKeys.push(def.key);
     }
   }
@@ -46,15 +49,14 @@ const FilterSection = React.memo(function FilterSection({
   },
   setValue,
   initialFormFilters,
+  currentStatus,
 }: FilterSectionProps) {
   const [activeFilters, setActiveFilters] = useState<FilterKey[]>(() =>
     getActiveFiltersFromFormValues(initialFormFilters)
   );
 
-  // Track if we've initialized from URL params
   const hasInitializedRef = useRef(false);
 
-  // Update active filters when initialFormFilters changes (from URL sync)
   useEffect(() => {
     if (!initialFormFilters) return;
 
@@ -62,12 +64,49 @@ const FilterSection = React.memo(function FilterSection({
     if (filtersFromUrl.length > 0 && !hasInitializedRef.current) {
       hasInitializedRef.current = true;
       setActiveFilters(prev => {
-        // Merge URL filters with any user-added filters
         const merged = new Set([...prev, ...filtersFromUrl]);
         return Array.from(merged);
       });
     }
   }, [initialFormFilters]);
+
+  const visibleDefinitions = useMemo(
+    () =>
+      FILTER_DEFINITIONS.filter((f) => {
+        if (!f.visibleStatuses) return true;
+        return currentStatus && f.visibleStatuses.includes(currentStatus);
+      }),
+    [currentStatus]
+  );
+
+  useEffect(() => {
+    const visibleKeys = new Set(visibleDefinitions.map((f) => f.key));
+    setActiveFilters((prev) => {
+      const filtersToRemove = prev.filter((key) => !visibleKeys.has(key));
+      if (filtersToRemove.length === 0) return prev;
+
+      filtersToRemove.forEach((filterKey) => {
+        if (!setValue || filterKey === 'employeeName') return;
+        const def = FILTER_DEFINITIONS.find((f) => f.key === filterKey);
+        if (def?.type === 'multiselect') {
+          setValue(filterKey as keyof OrderFiltersFormData, [] as any, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+        } else if (filterKey === 'newFirst') {
+          setValue('newFirst', undefined, { shouldDirty: true, shouldValidate: true });
+        } else {
+          setValue(filterKey as keyof OrderFiltersFormData, '', {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+        }
+      });
+
+      return prev.filter((key) => visibleKeys.has(key));
+    });
+  }, [visibleDefinitions, setValue]);
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -82,7 +121,13 @@ const FilterSection = React.memo(function FilterSection({
   const removeFilter = (filterKey: FilterKey) => {
     setActiveFilters(activeFilters.filter(f => f !== filterKey));
     if (setValue && filterKey !== 'employeeName') {
-      if (filterKey === 'newFirst') {
+      const def = FILTER_DEFINITIONS.find((f) => f.key === filterKey);
+      if (def?.type === 'multiselect') {
+        setValue(filterKey as keyof OrderFiltersFormData, [] as any, {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+      } else if (filterKey === 'newFirst') {
         setValue('newFirst', undefined, { shouldDirty: true, shouldValidate: true });
       } else {
         setValue(filterKey as keyof OrderFiltersFormData, '', {
@@ -93,7 +138,7 @@ const FilterSection = React.memo(function FilterSection({
     }
   };
 
-  const availableFilters = FILTER_DEFINITIONS.filter(f => !activeFilters.includes(f.key));
+  const availableFilters = visibleDefinitions.filter(f => !activeFilters.includes(f.key));
   const filteredOptions = availableFilters.filter(f =>
     f.label.toLowerCase().includes(searchTerm.toLowerCase())
   );

@@ -440,6 +440,7 @@ function AllOrdersContent() {
           governorateOptions: options.governorates || [],
           areaOptions: options.areas || [],
         }}
+        currentStatus={filters.status}
       />
 
       <div className="flex flex-col sm:flex-row justify-between gap-2 mt-10 mb-6 select-none">

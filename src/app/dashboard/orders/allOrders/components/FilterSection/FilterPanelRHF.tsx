@@ -5,8 +5,10 @@ import { Control, Controller, FieldErrors, useWatch, UseFormSetValue } from "rea
 import { OrderFiltersFormData } from "@/schemas/orderFilters.schema";
 import { FilterOptions } from "@/types/orders";
 import SearchableSelect from "@/components/ui/SearchableSelect";
+import MultiSelectDropdown from "@/components/ui/MultiSelectDropdown";
 import { DatePicker } from "@/components/ui/datepicker";
 import { useGovernoratesQuery, useCitiesQuery } from "@/services/lookups";
+import { useCancellationReasons } from "@/services/orders";
 import { LiaTimesSolid } from "react-icons/lia";
 
 export type FilterKey = keyof OrderFiltersFormData | 'employeeName';
@@ -14,7 +16,8 @@ export type FilterKey = keyof OrderFiltersFormData | 'employeeName';
 interface FilterDefinition {
   key: FilterKey;
   label: string;
-  type: 'text' | 'textarea' | 'select' | 'date' | 'placeholder';
+  type: 'text' | 'textarea' | 'select' | 'date' | 'placeholder' | 'multiselect';
+  visibleStatuses?: string[];
 }
 
 export const FILTER_DEFINITIONS: FilterDefinition[] = [
@@ -27,7 +30,9 @@ export const FILTER_DEFINITIONS: FilterDefinition[] = [
   { key: 'governorate', label: 'المحافظة', type: 'select' },
   { key: 'area', label: 'المنطقة', type: 'select' },
   { key: 'sizeColor', label: 'المصدر', type: 'select' },
+  { key: 'productId', label: 'المنتج', type: 'select' },
   { key: 'address', label: 'العنوان', type: 'text' },
+  { key: 'cancellationReasons', label: 'سبب الإلغاء', type: 'multiselect', visibleStatuses: ['CANCELLED'] },
   { key: 'newFirst', label: 'الأحدث', type: 'select' },
   { key: 'orderByDirection', label: 'الترتيب', type: 'select' },
 ];
@@ -85,6 +90,13 @@ export default function FilterPanel({
   // Use React Query hooks for caching
   const { data: governorates = [] } = useGovernoratesQuery();
   const { data: cities = [], isLoading: isLoadingCities } = useCitiesQuery(selectedGovernorate);
+
+  const isCancellationReasonActive = activeFilters.includes('cancellationReasons');
+  const { data: cancellationReasons = [] } = useCancellationReasons(isCancellationReasonActive);
+  const cancellationReasonOptions = React.useMemo(
+    () => cancellationReasons.map((r) => ({ key: r.reasonName, value: r.reasonName })),
+    [cancellationReasons]
+  );
 
   const governorateOptions = governorates;
   const cityOptions = cities;
@@ -232,6 +244,28 @@ export default function FilterPanel({
             />
           );
         }
+        if (key === 'productId') {
+          return (
+            <Controller
+              key={key}
+              name="productId"
+              control={control}
+              render={({ field }) => (
+                <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter}>
+                  <SearchableSelect
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    options={options.productIdOptions || []}
+                    placeholder={label}
+                    widthClass="w-full"
+                    error={errors.productId?.message}
+                  />
+                </FilterChip>
+              )}
+            />
+          );
+        }
         if (key === 'sizeColor') {
           return (
             <Controller
@@ -295,6 +329,30 @@ export default function FilterPanel({
                     onChange={field.onChange}
                     onBlur={field.onBlur}
                     options={orderByDirectionOptions}
+                    placeholder={label}
+                    widthClass="w-full"
+                  />
+                </FilterChip>
+              )}
+            />
+          );
+        }
+        return null;
+
+      case 'multiselect':
+        if (key === 'cancellationReasons') {
+          return (
+            <Controller
+              key={key}
+              name="cancellationReasons"
+              control={control}
+              render={({ field }) => (
+                <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter}>
+                  <MultiSelectDropdown
+                    value={Array.isArray(field.value) ? field.value : []}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    options={cancellationReasonOptions}
                     placeholder={label}
                     widthClass="w-full"
                   />

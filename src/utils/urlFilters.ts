@@ -35,6 +35,8 @@ export const DEFAULT_FILTER_STATE: UrlFilterState = {
     executionDate: '',
     newFirst: undefined,
     orderByDirection: undefined,
+    productId: '',
+    cancellationReasons: [],
   },
 };
 
@@ -160,6 +162,12 @@ export function serializeFiltersToUrl(state: UrlFilterState): URLSearchParams {
   if (localFilters.orderByDirection) {
     params.set('orderByDirection', localFilters.orderByDirection);
   }
+  if (localFilters.productId) {
+    params.set('productId', localFilters.productId);
+  }
+  if (localFilters.cancellationReasons?.length) {
+    params.set('cancellationReasons', localFilters.cancellationReasons.join(','));
+  }
 
   return params;
 }
@@ -217,6 +225,10 @@ export function parseFiltersFromUrl(params: URLSearchParams): UrlFilterState {
     executionDate,
     newFirst,
     orderByDirection,
+    productId: params.get('productId') || '',
+    cancellationReasons: params.get('cancellationReasons')
+      ? params.get('cancellationReasons')!.split(',')
+      : [],
   };
 
   return {
@@ -265,6 +277,10 @@ export function areFiltersEqual(a: UrlFilterState, b: UrlFilterState): boolean {
   if (aFilters.executionDate !== bFilters.executionDate) return false;
   if (aFilters.newFirst !== bFilters.newFirst) return false;
   if (aFilters.orderByDirection !== bFilters.orderByDirection) return false;
+  if (aFilters.productId !== bFilters.productId) return false;
+  const aReasons = aFilters.cancellationReasons || [];
+  const bReasons = bFilters.cancellationReasons || [];
+  if (aReasons.length !== bReasons.length || !aReasons.every((r, i) => r === bReasons[i])) return false;
 
   return true;
 }

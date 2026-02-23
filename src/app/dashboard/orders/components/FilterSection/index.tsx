@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from 'clsx';
 import { toast } from 'react-toastify';
@@ -56,6 +56,8 @@ interface FilterSectionProps {
   onShippingCompanyChange?: (value: string) => void;
   showShippingCompanySelect?: boolean;
   isLoadingShippingCompanies?: boolean;
+  onActiveFiltersChange?: (activeFilters: FilterKey[]) => void;
+  currentStatus?: string | null;
 }
 
 function getActiveFiltersFromFormValues(
@@ -69,7 +71,10 @@ function getActiveFiltersFromFormValues(
     if (def.key === 'employeeName') continue;
 
     const value = formFilters[def.key as keyof OrderFiltersFormData];
-    if (value !== undefined && value !== '' && value !== null) {
+    const isActive = Array.isArray(value)
+      ? value.length > 0
+      : value !== undefined && value !== '' && value !== null;
+    if (isActive) {
       activeKeys.push(def.key);
     }
   }
@@ -99,6 +104,8 @@ export function FilterSection({
   onShippingCompanyChange,
   showShippingCompanySelect = false,
   isLoadingShippingCompanies = false,
+  onActiveFiltersChange,
+  currentStatus,
 }: FilterSectionProps) {
   const [activeFilters, setActiveFilters] = useState<FilterKey[]>(() =>
     getActiveFiltersFromFormValues(initialFormFilters)
@@ -124,21 +131,70 @@ export function FilterSection({
     }
   }, [initialFormFilters]);
 
+  const visibleDefinitions = useMemo(
+    () =>
+      FILTER_DEFINITIONS.filter((f) => {
+        if (!f.visibleStatuses) return true;
+        return currentStatus && f.visibleStatuses.includes(currentStatus);
+      }),
+    [currentStatus]
+  );
+
+  useEffect(() => {
+    const visibleKeys = new Set(visibleDefinitions.map((f) => f.key));
+    setActiveFilters((prev) => {
+      const filtersToRemove = prev.filter((key) => !visibleKeys.has(key));
+      if (filtersToRemove.length === 0) return prev;
+
+      filtersToRemove.forEach((filterKey) => {
+        if (!setValue || filterKey === 'employeeName') return;
+        const def = FILTER_DEFINITIONS.find((f) => f.key === filterKey);
+        if (def?.type === 'multiselect') {
+          setValue(filterKey as keyof OrderFiltersFormData, [] as any, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+        } else if (filterKey === 'newFirst') {
+          setValue('newFirst', undefined, { shouldDirty: true, shouldValidate: true });
+        } else {
+          setValue(filterKey as keyof OrderFiltersFormData, '', {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+        }
+      });
+
+      const next = prev.filter((key) => visibleKeys.has(key));
+      onActiveFiltersChange?.(next);
+      return next;
+    });
+  }, [visibleDefinitions, setValue, onActiveFiltersChange]);
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   const addFilter = (filterKey: FilterKey) => {
     if (!activeFilters.includes(filterKey)) {
-      setActiveFilters([...activeFilters, filterKey]);
+      const next = [...activeFilters, filterKey];
+      setActiveFilters(next);
+      onActiveFiltersChange?.(next);
     }
     setIsDropdownOpen(false);
     setSearchTerm('');
   };
 
   const removeFilter = (filterKey: FilterKey) => {
-    setActiveFilters(activeFilters.filter((f) => f !== filterKey));
+    const next = activeFilters.filter((f) => f !== filterKey);
+    setActiveFilters(next);
+    onActiveFiltersChange?.(next);
     if (setValue && filterKey !== 'employeeName') {
-      if (filterKey === 'newFirst') {
+      const def = FILTER_DEFINITIONS.find((f) => f.key === filterKey);
+      if (def?.type === 'multiselect') {
+        setValue(filterKey as keyof OrderFiltersFormData, [] as any, {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+      } else if (filterKey === 'newFirst') {
         setValue('newFirst', undefined, {
           shouldDirty: true,
           shouldValidate: true,
@@ -152,7 +208,7 @@ export function FilterSection({
     }
   };
 
-  const availableFilters = FILTER_DEFINITIONS.filter(
+  const availableFilters = visibleDefinitions.filter(
     (f) => !activeFilters.includes(f.key)
   );
   const filteredOptions = availableFilters.filter((f) =>

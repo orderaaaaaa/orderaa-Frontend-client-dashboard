@@ -139,7 +139,7 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
               <span className="text-[8px] font-bold">
                 {product.variant}
               </span>
-              <span className="text-[8px] font-bold text-start">
+              <span className="text-[8px] font-bold text-left">
                 {formatProductName(product)}
               </span>
             </div>

@@ -4,11 +4,12 @@ import { productKeys } from './queryKeys';
 import { UpdateVariantsPayload, ProductQueryParams } from '../types/products';
 import { VariantsCountResponse } from '../types/products';
 
-export const useGetProducts = (params: ProductQueryParams) => {
+export const useGetProducts = (params: ProductQueryParams, enabled = true) => {
   return useQuery({
     queryKey: productKeys.list(params),
     queryFn: () => productsApi.getAll(params),
     placeholderData: (previousData) => previousData,
+    enabled,
   });
 };
 

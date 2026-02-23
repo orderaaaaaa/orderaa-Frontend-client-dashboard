@@ -56,12 +56,12 @@ export function Sidebar({
     <>
       {/* Mobile overlay */}
       {open && (
-        <div className="fixed inset-0 z-40 lg:hidden" onClick={onToggle} />
+        <div className="fixed inset-0 z-30 lg:hidden" onClick={onToggle} />
       )}
 
       <div
         className={`
-          fixed inset-y-0 right-0 z-[9999] transform transition-transform duration-300
+          fixed inset-y-0 right-0 z-40 transform transition-transform duration-300
           ${open ? 'translate-x-0' : 'translate-x-full'}
           lg:translate-x-0 lg:static lg:inset-0
         `}
