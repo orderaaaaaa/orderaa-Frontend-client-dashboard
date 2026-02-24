@@ -8,6 +8,7 @@
     "lint": "next lint",
     "start": "next start",
     "type-check": "tsc --noEmit",
+    "deploy": "git push && curl -s -X POST https://api.vercel.com/v1/integrations/deploy/prj_W1imHxvbQ2tiX3nbQWTpAf0zAsDy/b001navTDP",
     "prepare": "husky"
   },
   "dependencies": {
