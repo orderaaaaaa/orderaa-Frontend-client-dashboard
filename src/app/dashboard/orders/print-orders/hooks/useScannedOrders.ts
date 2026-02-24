@@ -36,6 +36,7 @@ export function useScannedOrders(): UseScannedOrdersReturn {
           code: order.code,
           status: order.status,
           scannedAt: new Date(),
+          cancelReason: order.cancelReason,
         },
         ...prev,
       ]);

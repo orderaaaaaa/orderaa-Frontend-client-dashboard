@@ -144,13 +144,20 @@ function NonConfirmedSection({
                     key={order.code}
                     className="flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors"
                   >
-                    <span className="text-sm font-medium text-gray-800">
-                      {order.code}
-                    </span>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-sm font-medium text-gray-800">
+                        {order.code}
+                      </span>
+                      {group.status === 'CANCELLED' && order.cancelReason && (
+                        <span className="text-xs text-red-500 truncate">
+                          ({order.cancelReason})
+                        </span>
+                      )}
+                    </div>
                     <Button
                       variant="ghost"
                       onClick={() => onRemove(order.code)}
-                      className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                      className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors flex-shrink-0"
                       title="حذف الطلب"
                     >
                       <LiaTrashAltSolid className="size-4" />

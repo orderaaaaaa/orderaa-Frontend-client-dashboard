@@ -1,6 +1,7 @@
 import React from 'react';
 import { LiaEditSolid } from 'react-icons/lia';
 import { ArrowUp, ArrowDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { VariantItem } from '../types/products';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import LoadingAnimation from '@/components/ui/loadingAnimation';
@@ -69,9 +70,10 @@ function ProductsTableMobile({
           />
         </div>
 
-        <button
+        <Button
+          variant="outline"
           onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-          className="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 flex items-center gap-2 min-w-[120px] justify-center"
+          className="min-w-[120px] justify-center"
         >
           {sortOrder === 'asc' ? (
             <>
@@ -84,7 +86,7 @@ function ProductsTableMobile({
               <span>تنازلي</span>
             </>
           )}
-        </button>
+        </Button>
       </div>
 
       {/* Mobile Cards Container with Loading Overlay */}
@@ -127,24 +129,28 @@ function ProductsTableMobile({
                   </span>
 
                   <div className="flex justify-between items-center mt-2">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => openSoldModal(product.id)}
-                      className="text-sm text-gray-600 flex items-center gap-1"
+                      className="text-gray-600 px-1"
                     >
                       <span>عدد القطع المباعه:</span>
                       <span className="font-medium">{product.totalSold}</span>
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() =>
                         openEditModal(
                           product.id,
                           product.extraDetails?.variants || [],
                         )
                       }
-                      className="text-primary text-sm flex items-center gap-1 font-medium cursor-pointer"
+                      className="text-primary"
                     >
                       <LiaEditSolid /> تعديل
-                    </button>
+                    </Button>
                   </div>
                 </div>
                 {showCheckboxes && (

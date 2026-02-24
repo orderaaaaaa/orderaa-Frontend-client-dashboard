@@ -3,6 +3,7 @@ import { LiaEditSolid } from 'react-icons/lia';
 import { FaRegSquare } from 'react-icons/fa6';
 import { PiCheckSquareFill } from 'react-icons/pi';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { VariantItem } from '../types/products';
 import { getTimeAgo } from '@/utils';
 import LoadingAnimation from '@/components/ui/loadingAnimation';
@@ -199,26 +200,28 @@ function ProductsTableDesktop({
                 {getTimeAgo(product.createdAt)}
               </td>
               <td className="p-4 text-center">
-                <button
+                <Button
+                  variant="ghost"
                   onClick={() => openSoldModal(product.id)}
-                  className="text-gray-800 cursor-pointer font-semibold"
+                  className="font-semibold text-gray-800"
                 >
                   {product.totalSold}
-                </button>
+                </Button>
               </td>
               <td className="p-4 text-center">
-                <button
+                <Button
+                  variant="ghost"
                   onClick={() =>
                     openEditModal(
                       product.id,
                       product.extraDetails?.variants || [],
                     )
                   }
-                  className="text-primary flex items-center gap-1 mx-auto cursor-pointer"
+                  className="text-primary mx-auto"
                 >
-                  <LiaEditSolid className="w-5 h-5" />
+                  <LiaEditSolid className="size-5" />
                   تعديل
-                </button>
+                </Button>
               </td>
 
               <td className="p-4 text-center">

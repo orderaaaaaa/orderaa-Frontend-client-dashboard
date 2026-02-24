@@ -5,12 +5,14 @@ export interface ScannedOrder {
   code: string;
   status: string;
   scannedAt: Date;
+  cancelReason?: string | null;
 }
 
 export interface AddOrderInput {
   id: number;
   code: string;
   status: string;
+  cancelReason?: string | null;
 }
 
 export interface NonConfirmedGroup {

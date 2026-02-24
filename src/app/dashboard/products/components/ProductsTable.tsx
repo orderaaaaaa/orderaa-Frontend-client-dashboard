@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ListChecks } from 'lucide-react';
+import { LiaListSolid } from 'react-icons/lia';
+import { Button } from '@/components/ui/button';
 
 import { useGetProducts } from '../hooks/useProduct';
 import { useProductStore } from '../store/useProductStore';
@@ -116,13 +117,10 @@ function ProductsTable() {
             />
           </div>
 
-          <button
-            onClick={() => setShowCheckboxes((prev) => !prev)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border bg-primary text-white border-primary hover:opacity-90"
-          >
-            <ListChecks className="w-5 h-5" />
+          <Button onClick={() => setShowCheckboxes((prev) => !prev)}>
+            <LiaListSolid className="size-5" />
             {showCheckboxes ? 'إخفاء التحديد' : 'تحديد المنتجات'}
-          </button>
+          </Button>
         </div>
 
         {/* Desktop Table */}
