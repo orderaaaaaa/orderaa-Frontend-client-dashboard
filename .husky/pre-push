@@ -1,0 +1,5 @@
+branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$branch" = "development" ]; then
+  (sleep 5 && curl -s -X POST "https://api.vercel.com/v1/integrations/deploy/prj_W1imHxvbQ2tiX3nbQWTpAf0zAsDy/b001navTDP" > /dev/null 2>&1) &
+  echo "Vercel deploy will trigger in 5 seconds..."
+fi
