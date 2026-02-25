@@ -17,7 +17,7 @@ import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { If, Then } from 'react-if';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
 import { getRemainingTime } from '@/utils/getRemainingTime';
-import { LiaClock, LiaPrintSolid, LiaBanSolid } from 'react-icons/lia';
+import { LiaClock, LiaPrintSolid, LiaBanSolid, LiaExclamationCircleSolid } from 'react-icons/lia';
 import { OrderCardProps } from '@/app/dashboard/orders/allOrders/types/OrderProps';
 import { MdBlock } from 'react-icons/md';
 
@@ -42,6 +42,7 @@ export default function OrderCard({
   repeatCount = 0,
   onRepeatClick,
   filterParams,
+  cancelReason,
   cancelNotes,
   postponedUntil,
   isPrinted = false,
@@ -273,20 +274,25 @@ export default function OrderCard({
           </div>
         )}
 
-        {/* Cancel Info */}
-        {status === 'CANCELLED' && cancelNotes && (
-          <div className="flex items-center flex-col gap-3 w-full">
-            {cancelNotes && (
-              <div className="flex items-center gap-2 w-full">
-                <LiaBanSolid
-                  className="w-[18px] h-[18px] shrink-0 opacity-30"
-                />
+        {status === 'CANCELLED' && cancelReason && (
+          <div className="flex items-center gap-2 w-full">
+            <LiaExclamationCircleSolid
+              className="w-[18px] h-[18px] shrink-0 opacity-30"
+            />
+            <span className="text-base font-medium text-red-600 min-w-0 overflow-hidden text-ellipsis line-clamp-3 break-words">
+              سبب الالغاء: {cancelReason}
+            </span>
+          </div>
+        )}
 
-                <span className="text-base font-medium text-red-600 min-w-0 overflow-hidden text-ellipsis line-clamp-3 break-words">
-                  ملاحظات الالغاء: {cancelNotes}
-                </span>
-              </div>
-            )}
+        {status === 'CANCELLED' && cancelNotes && (
+          <div className="flex items-center gap-2 w-full">
+            <LiaBanSolid
+              className="w-[18px] h-[18px] shrink-0 opacity-30"
+            />
+            <span className="text-base font-medium text-red-600 min-w-0 overflow-hidden text-ellipsis line-clamp-3 break-words">
+              ملاحظات الالغاء: {cancelNotes}
+            </span>
           </div>
         )}
       </div>

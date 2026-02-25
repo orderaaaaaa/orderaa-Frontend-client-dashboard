@@ -22,11 +22,14 @@ export function ScannedOrdersTable({
   onRemove,
   flashingCode,
   isScanLoading = false,
+  searchQuery = '',
 }: ScannedOrdersTableProps) {
   if (orders.length === 0 && !isScanLoading) {
     return (
       <div className="flex-1 flex items-center justify-center text-gray-500 text-lg">
-        لا توجد طلبات لعرضها تطابق كلمة البحث.
+        {searchQuery.trim()
+          ? 'لا توجد طلبات لعرضها تطابق كلمة البحث.'
+          : 'لا توجد طلبات مؤكدة.'}
       </div>
     );
   }

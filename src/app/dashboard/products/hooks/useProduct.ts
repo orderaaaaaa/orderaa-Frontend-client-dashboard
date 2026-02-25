@@ -1,8 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productsApi } from '../api/products';
 import { productKeys } from './queryKeys';
-import { UpdateVariantsPayload, ProductQueryParams } from '../types/products';
-import { VariantsCountResponse } from '../types/products';
+import {
+  UpdateVariantsPayload,
+  ProductQueryParams,
+  VariantsCountResponse,
+} from '../types/products';
 
 export const useGetProducts = (params: ProductQueryParams, enabled = true) => {
   return useQuery({
@@ -69,6 +72,17 @@ export const useUpdateProductVariants = (productId: number) => {
       queryClient.invalidateQueries({
         queryKey: productKeys.variants(productId),
       });
+    },
+  });
+};
+
+export const useSyncProducts = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => productsApi.sync(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
     },
   });
 };

@@ -37,6 +37,7 @@ export function useScannedOrders(): UseScannedOrdersReturn {
           status: order.status,
           scannedAt: new Date(),
           cancelReason: order.cancelReason,
+          packagingWarning: order.packagingWarning,
         },
         ...prev,
       ]);
@@ -57,12 +58,14 @@ export function useScannedOrders(): UseScannedOrdersReturn {
   }, []);
 
   const confirmedOrders = useMemo(
-    () => scannedOrders.filter((o) => o.status === 'CONFIRMED'),
+    () => scannedOrders.filter((o) => o.status === 'CONFIRMED' && !o.packagingWarning),
     [scannedOrders]
   );
 
   const nonConfirmedGroups: NonConfirmedGroup[] = useMemo(() => {
-    const nonConfirmed = scannedOrders.filter((o) => o.status !== 'CONFIRMED');
+    const nonConfirmed = scannedOrders.filter(
+      (o) => o.status !== 'CONFIRMED' || !!o.packagingWarning
+    );
     if (nonConfirmed.length === 0) return [];
     const grouped = groupBy(nonConfirmed, 'status');
     return Object.entries(grouped).map(([status, orders]) => ({
@@ -82,7 +85,7 @@ export function useScannedOrders(): UseScannedOrdersReturn {
   }, [scannedOrders, searchQuery]);
 
   const confirmedFilteredOrders = useMemo(
-    () => filteredOrders.filter((o) => o.status === 'CONFIRMED'),
+    () => filteredOrders.filter((o) => o.status === 'CONFIRMED' && !o.packagingWarning),
     [filteredOrders]
   );
 

@@ -6,6 +6,7 @@ export interface ScannedOrder {
   status: string;
   scannedAt: Date;
   cancelReason?: string | null;
+  packagingWarning?: string | null;
 }
 
 export interface AddOrderInput {
@@ -13,6 +14,7 @@ export interface AddOrderInput {
   code: string;
   status: string;
   cancelReason?: string | null;
+  packagingWarning?: string | null;
 }
 
 export interface NonConfirmedGroup {
@@ -46,6 +48,7 @@ export interface ScannedOrdersTableProps {
   onRemove: (code: string) => void;
   flashingCode?: string | null;
   isScanLoading?: boolean;
+  searchQuery?: string;
 }
 
 export interface ScannedOrdersModalProps extends OrderActionCallbacks {
