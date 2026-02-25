@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { Role, EmployeeAccessLevel } from '@/types/auth';
 
 interface User {
   id: number;
@@ -8,7 +9,7 @@ interface User {
   phoneNumber?: string;
   name: string;
   email?: string;
-  role: string;
+  role: Role;
   merchantId?: number;
   employeeId?: number | null;
   createdAt?: string;
@@ -16,7 +17,7 @@ interface User {
   isVerified?: boolean;
   otp?: string | null;
   otpExpiresAt?: string | null;
-  accessLevel?: string;
+  accessLevel?: EmployeeAccessLevel;
   department?: string;
   governorate?: string | null;
   city?: string | null;

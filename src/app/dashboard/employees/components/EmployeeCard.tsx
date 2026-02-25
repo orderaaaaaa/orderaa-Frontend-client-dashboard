@@ -19,8 +19,8 @@ import {
 import { AttendanceModal } from './AttendanceModal';
 import { EmployeeCardProps } from '../add-employee/types/employee.types';
 import Link from 'next/link';
-import { If, Then } from 'react-if';
-import { useAuthStore } from '@/store/authStore';
+import { PermissionGate } from '@/components/PermissionGate';
+import { Role } from '@/types/auth';
 
 export const EmployeeCard = memo(function EmployeeCard({
   employee,
@@ -53,22 +53,18 @@ export const EmployeeCard = memo(function EmployeeCard({
     setLeaveModalOpen(true);
   };
 
-  const { user } = useAuthStore();
-
   return (
     <div className="bg-white relative rounded-2xl shadow-sm border border-gray-100 p-4 max-w-[420px]">
       {/* Header */}
       <div className="flex flex-row-reverse items-center justify-end gap-4 mb-4">
-        <If condition={user?.role !== 'EMPLOYEE'}>
-          <Then>
-            <Link href={`employees/employee-settings/${employee.id}`}>
-              <Edit
-                size={20}
-                className="text-gray-600 absolute top-5 left-5 hover:text-gray-900 cursor-pointer"
-              />
-            </Link>
-          </Then>
-        </If>
+        <PermissionGate minRole={Role.ADMIN}>
+          <Link href={`employees/employee-settings/${employee.id}`}>
+            <Edit
+              size={20}
+              className="text-gray-600 absolute top-5 left-5 hover:text-gray-900 cursor-pointer"
+            />
+          </Link>
+        </PermissionGate>
 
         {/* Name & Department */}
         <div className="text-right">

@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { navigation } from '@/constants/Navbar';
+import type { NavigationItem } from '@/constants/Navbar';
 import { SIDEBAR_WIDTH } from '@/constants/dashboard-layout';
 import Logo from '@/assets/images/updated-logo.png';
 
@@ -20,6 +20,7 @@ interface SidebarProps {
   open: boolean;
   collapsed: boolean;
   openDropdown: string | null;
+  navigationItems: NavigationItem[];
   onToggle: () => void;
   onCollapseToggle: () => void;
   onDropdownToggle: (itemName: string) => void;
@@ -30,6 +31,7 @@ export function Sidebar({
   open,
   collapsed,
   openDropdown,
+  navigationItems,
   onToggle,
   onCollapseToggle,
   onDropdownToggle,
@@ -116,7 +118,7 @@ export function Sidebar({
 
           {/* Navigation */}
           <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto scrollbar-hide">
-            {navigation.map((item) => {
+            {navigationItems.map((item) => {
               const isActive = pathname === item.href;
 
               if (item.children) {

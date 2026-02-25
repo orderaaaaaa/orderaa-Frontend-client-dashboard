@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { IconType } from 'react-icons';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
+import type { Permission } from '@/types/auth';
 
 export type NavigationItem = {
   name: string;
@@ -37,6 +38,7 @@ export type NavigationItem = {
   | ((props: { className?: string }) => JSX.Element)
   | IconType;
   children?: NavigationItem[];
+  permission?: Permission;
 };
 
 export const navigation: NavigationItem[] = [

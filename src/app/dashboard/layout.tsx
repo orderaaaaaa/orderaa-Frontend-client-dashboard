@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { AuthGuard } from '@/components/auth-guard';
 import { useSidebar } from '@/hooks/useSidebar';
 import { useAuthActions } from '@/hooks/useAuthActions';
-import { navigation } from '@/constants/Navbar';
+import { useFilteredNavigation } from '@/hooks/useFilteredNavigation';
 import { useFetchOrdersForSearch } from '@/services/orders';
 import {
   Sidebar,
@@ -37,6 +37,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   } = useSidebar();
 
   const { user, handleUserAction } = useAuthActions();
+  const filteredNavigation = useFilteredNavigation();
   const { fetchOrdersForSearch } = useFetchOrdersForSearch();
   const pathname = usePathname();
   const router = useRouter();
@@ -91,7 +92,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // Auto-open dropdown if pathname matches a child route
   useEffect(() => {
-    navigation.forEach((item) => {
+    filteredNavigation.forEach((item) => {
       if (item.children) {
         const isChildActive = item.children.some((sub) =>
           pathname.startsWith(sub.href)
@@ -101,7 +102,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         }
       }
     });
-  }, [pathname, setOpenDropdown]);
+  }, [pathname, setOpenDropdown, filteredNavigation]);
 
   // Close sidebar on route change (mobile)
   useEffect(() => {
@@ -118,6 +119,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             open={sidebarOpen}
             collapsed={isCollapsed}
             openDropdown={openDropdown}
+            navigationItems={filteredNavigation}
             onToggle={handleSidebarToggle}
             onCollapseToggle={handleCollapseToggle}
             onDropdownToggle={handleDropdownToggle}

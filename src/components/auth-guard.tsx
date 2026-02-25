@@ -1,8 +1,11 @@
 'use client';
 
 import type React from 'react';
+import { useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuthGuard } from '@/hooks/useAuthGuard';
 import { useAuthStore } from '@/store/authStore';
+import { usePermission } from '@/hooks/usePermission';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -11,6 +14,18 @@ interface AuthGuardProps {
 export function AuthGuard({ children }: AuthGuardProps) {
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const { isAuthenticated, isChecking } = useAuthGuard(true);
+  const { checkRouteAccess } = usePermission();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const isAuthorized =
+    isAuthenticated && !isChecking && checkRouteAccess(pathname);
+
+  useEffect(() => {
+    if (isAuthenticated && !isChecking && !checkRouteAccess(pathname)) {
+      router.replace('/dashboard/unauthorized');
+    }
+  }, [isAuthenticated, isChecking, pathname, checkRouteAccess, router]);
 
   if (!hasHydrated || isChecking) {
     return (
@@ -20,7 +35,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !isAuthorized) {
     return null;
   }
 
