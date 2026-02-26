@@ -144,10 +144,15 @@ function NonConfirmedSection({
                     key={order.code}
                     className="flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors"
                   >
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0 flex-wrap">
                       <span className="text-sm font-medium text-gray-800">
                         {order.code}
                       </span>
+                      {order.packagingWarning && (
+                        <span className="text-xs text-amber-600 truncate">
+                          ({order.packagingWarning})
+                        </span>
+                      )}
                       {group.status === 'CANCELLED' && order.cancelReason && (
                         <span className="text-xs text-red-500 truncate">
                           ({order.cancelReason})
@@ -298,6 +303,7 @@ export function ScannedOrdersModal({
               onRemove={onRemoveOrder}
               flashingCode={flashingCode}
               isScanLoading={isScanLoading}
+              searchQuery={searchQuery}
             />
             <NonConfirmedSection
               groups={nonConfirmedGroups}

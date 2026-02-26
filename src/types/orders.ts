@@ -217,6 +217,7 @@ export interface Order {
   weight?: string;
   countryOfManufacture?: string;
   packagingNotes?: string;
+  packagingWarning?: string | null;
 
   // Cancel info
   cancelReason?: string | null;

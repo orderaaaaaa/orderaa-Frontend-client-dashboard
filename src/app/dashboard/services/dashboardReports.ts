@@ -47,7 +47,7 @@ export const useRemainingQuery = (enabled = true) => {
     queryKey: [QUERY_KEYS.DASHBOARD_REMAINING] as QueryKey,
     queryFn: async () => {
       const response = await http.get<RemainingResponse>(
-        `${reportBaseUrl}/remaining`,
+        `${reportBaseUrl}/not-completed`,
       );
       return response.data;
     },

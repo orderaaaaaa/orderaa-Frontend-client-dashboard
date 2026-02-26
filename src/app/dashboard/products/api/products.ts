@@ -4,6 +4,7 @@ import {
   UpdateVariantsPayload,
   VariantsCountResponse,
   ProductQueryParams,
+  SyncProductsResponse,
 } from '../types/products';
 
 export const productsApi = {
@@ -34,5 +35,10 @@ export const productsApi = {
     payload: UpdateVariantsPayload,
   ) => {
     await http.put(`/products/${productId}`, payload);
+  },
+
+  sync: async (): Promise<SyncProductsResponse> => {
+    const response = await http.post<SyncProductsResponse>('/products/sync');
+    return response.data;
   },
 };

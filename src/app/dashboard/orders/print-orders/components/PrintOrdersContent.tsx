@@ -225,7 +225,7 @@ export function PrintOrdersContent() {
       setIsScanLoading(true);
       try {
         const order = await getOrderByCode(barcode);
-        addOrder({ id: order.id, code: barcode, status: order.status, cancelReason: order.cancelReason });
+        addOrder({ id: order.id, code: barcode, status: order.status, cancelReason: order.cancelReason, packagingWarning: order.packagingWarning });
         playSuccessSound();
         setFlashingCode(barcode);
         setTimeout(() => setFlashingCode(null), 600);

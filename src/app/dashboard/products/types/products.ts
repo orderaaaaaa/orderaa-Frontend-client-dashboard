@@ -76,3 +76,16 @@ export interface ProductQueryParams {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
+
+export interface SyncFailure {
+  storeId: number;
+  provider: string;
+  error: string;
+}
+
+export interface SyncProductsResponse {
+  synced: number;
+  created: number;
+  updated: number;
+  failures: SyncFailure[];
+}

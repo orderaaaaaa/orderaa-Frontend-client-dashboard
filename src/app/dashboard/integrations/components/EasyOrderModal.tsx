@@ -1,29 +1,48 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import * as DialogPrimitive from '@radix-ui/react-dialog';
+import React, { useState, useEffect, useRef } from 'react';
 import {
-  LiaTimesSolid,
   LiaShoppingCartSolid,
   LiaCopySolid,
   LiaCheckSolid,
-  LiaPlaySolid,
-  LiaChevronDownSolid,
-  LiaChevronUpSolid,
   LiaCheckCircleSolid,
-  LiaEyeSolid,
-  LiaEyeSlashSolid,
+  LiaPlusSolid,
+  LiaLinkSolid,
+  LiaKeySolid,
 } from 'react-icons/lia';
 import { webhookApi, WebhookConfigResponse } from '@/lib/api/webhooks';
 import { Button } from '@/components/ui/button';
+import Input from '@/components/ui/Input';
+import BaseModal from '@/components/ui/base-modal';
+import { Stepper, StepContent } from '@/components/ui/stepper';
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@/components/ui/accordion';
 import { useGetWebhookConfig } from '../hooks/useGetWebhookConfig';
 import { useIntegrations } from '../hooks/useIntegrations';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
 import { integrationSteps, webhookSteps } from '../constants/steps';
-import { Else, If, Then } from 'react-if';
-import { MdQuestionMark } from 'react-icons/md';
 import { toast } from 'react-toastify';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import clsx from 'clsx';
+
+const webhookSchema = z.object({
+  webhookUrl: z.string().url('رابط غير صالح').or(z.literal('')),
+  webhookSecret: z.string().min(10, 'يجب أن يكون 10 أحرف على الأقل'),
+});
+
+const apiKeySchema = z.object({
+  apiKey: z.string().min(1, 'مفتاح API مطلوب'),
+});
+
+type WebhookFormData = z.infer<typeof webhookSchema>;
+type ApiKeyFormData = z.infer<typeof apiKeySchema>;
 
 interface EasyOrderModalProps {
   isOpen: boolean;
@@ -32,31 +51,29 @@ interface EasyOrderModalProps {
   existingConfig?: WebhookConfigResponse;
 }
 
+const STEPPER_STEPS = [
+  { label: 'إعدادات Webhook' },
+  { label: 'مفتاح API' },
+];
+
 const EasyOrderModal = ({
   isOpen,
   onClose,
-  existingConfig,
 }: EasyOrderModalProps) => {
   const queryClient = useQueryClient();
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
-  const [webhookSecret, setWebhookSecret] = useState('');
-  const [customWebhookUrl, setCustomWebhookUrl] = useState('');
-  const [showSecret, setShowSecret] = useState(false);
-  const [showApi, setShowApi] = useState(false);
-  const [copied, setCopied] = useState(false);
   const { user } = useAuthStore();
   const merchantId = user?.merchantId;
 
-  const [apiKey, setApiKey] = useState('');
+  const [copied, setCopied] = useState(false);
   const [existingIntegrationId, setExistingIntegrationId] = useState<
     number | null
   >(null);
-
-  const [showApiDropdown, setShowApiDropdown] = useState(false);
-  const [showWebhookDropdown, setShowWebhookDropdown] = useState(false);
-
+  const [showStepper, setShowStepper] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  const stepperRef = useRef<HTMLDivElement>(null);
 
   const { data: webhookData } = useGetWebhookConfig();
   const { integrations, createIntegration, updateIntegration } =
@@ -64,243 +81,235 @@ const EasyOrderModal = ({
 
   const getDefaultWebhookUrl = (merchantId?: string | number): string => {
     if (!API_URL || merchantId == null) return '';
-
     return `${API_URL}/webhooks/easy-orders/${merchantId}`;
   };
 
+  const defaultWebhookUrl = getDefaultWebhookUrl(merchantId);
+
+  const webhookForm = useForm<WebhookFormData>({
+    resolver: zodResolver(webhookSchema),
+    defaultValues: { webhookUrl: '', webhookSecret: '' },
+  });
+
+  const apiKeyForm = useForm<ApiKeyFormData>({
+    resolver: zodResolver(apiKeySchema),
+    defaultValues: { apiKey: '' },
+  });
+
   useEffect(() => {
     if (webhookData) {
-      setWebhookSecret(webhookData.webhookSecret || '');
-      setCustomWebhookUrl(webhookData.webhookUrl || '');
+      webhookForm.setValue('webhookSecret', webhookData.webhookSecret || '');
+      webhookForm.setValue('webhookUrl', webhookData.webhookUrl || '');
+    } else if (defaultWebhookUrl) {
+      webhookForm.setValue('webhookUrl', defaultWebhookUrl);
     }
-  }, [webhookData]);
+  }, [webhookData, defaultWebhookUrl]);
 
   useEffect(() => {
     if (integrations) {
       const existing = integrations.find((c) => c.provider === 'EASY_ORDERS');
       if (existing) {
-        setApiKey(existing.apiKey);
+        apiKeyForm.setValue('apiKey', existing.apiKey);
         setExistingIntegrationId(existing.id);
       }
     }
   }, [integrations]);
 
-  const defaultWebhookUrl = getDefaultWebhookUrl(merchantId);
-
   const handleCopyUrl = () => {
-    const urlToCopy = customWebhookUrl.trim() || defaultWebhookUrl;
+    const urlToCopy =
+      webhookForm.getValues('webhookUrl')?.trim() || defaultWebhookUrl;
     navigator.clipboard.writeText(urlToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleApiSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onWebhookSubmit = webhookForm.handleSubmit(async (data) => {
+    setError('');
+    setIsLoading(true);
+    try {
+      const finalUrl = data.webhookUrl.trim() || defaultWebhookUrl;
+      if (webhookData) {
+        await webhookApi.updateConfig({
+          webhookUrl: finalUrl,
+          webhookSecret: data.webhookSecret.trim(),
+        });
+        toast.success('تم تحديث اعدادات الـ Webhook بنجاح');
+      } else {
+        await webhookApi.createConfig({
+          webhookUrl: finalUrl,
+          webhookSecret: data.webhookSecret.trim(),
+        });
+        toast.success('تم حفظ اعدادات الـ Webhook بنجاح');
+      }
+      queryClient.invalidateQueries({ queryKey: ['webhook-config'] });
+      setCurrentStep(1);
+    } catch {
+      setError('خطأ في حفظ الـ Webhook');
+    } finally {
+      setIsLoading(false);
+    }
+  });
+
+  const onApiKeySubmit = apiKeyForm.handleSubmit(async (data) => {
     setError('');
     setIsLoading(true);
     try {
       if (existingIntegrationId) {
         await updateIntegration({
           provider: 'EASY_ORDERS',
-          apiKey: apiKey.trim(),
+          apiKey: data.apiKey.trim(),
         });
-
         toast.success('تم تحديث اعدادات ربط API بنجاح');
       } else {
-        await createIntegration(apiKey.trim());
+        await createIntegration(data.apiKey.trim());
         toast.success('تم انشاء ربط API بنجاح');
       }
       queryClient.invalidateQueries({ queryKey: ['integration-configs'] });
-      if (webhookData?.webhookSecret) {
-        onClose();
-      }
-    } catch (err: any) {
+      setShowStepper(false);
+      setCurrentStep(0);
+    } catch {
       setError('خطأ في حفظ مفتاح API');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleWebhookSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
-    try {
-      const finalUrl = customWebhookUrl.trim() || defaultWebhookUrl;
-      if (webhookData) {
-        await webhookApi.updateConfig({
-          webhookUrl: finalUrl,
-          webhookSecret: webhookSecret.trim(),
-        });
-        toast.success('تم تحديث اعدادات الـ Webhook بنجاح');
-      } else {
-        await webhookApi.createConfig({
-          webhookUrl: finalUrl,
-          webhookSecret: webhookSecret.trim(),
-        });
-        toast.success('تم حفظ اعدادات الـ Webhook بنجاح');
-      }
-      setShowWebhookDropdown(false);
-      queryClient.invalidateQueries({ queryKey: ['webhook-config'] });
-    } catch (err: any) {
-      setError('خطأ في حفظ الـ Webhook');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  });
 
   const handleClose = () => {
     if (!isLoading) {
       setError('');
+      setShowStepper(false);
+      setCurrentStep(0);
+      webhookForm.clearErrors();
+      apiKeyForm.clearErrors();
       onClose();
     }
   };
 
-  const showIsConnectWebhook = webhookData?.webhookSecret;
+  const handleToggleStepper = () => {
+    if (showStepper) {
+      setShowStepper(false);
+    } else {
+      setShowStepper(true);
+      setCurrentStep(0);
+      setError('');
+      webhookForm.clearErrors();
+      apiKeyForm.clearErrors();
+      setTimeout(() => {
+        stepperRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  };
+
+  const isWebhookConnected = !!webhookData?.webhookSecret;
+  const existingIntegration = integrations?.find(
+    (c) => c.provider === 'EASY_ORDERS'
+  );
+  const hasConnectedStore = isWebhookConnected || !!existingIntegration;
 
   return (
-    <DialogPrimitive.Root
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open && !isLoading) handleClose();
-      }}
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="ربط المتاجر"
+      showFooter={false}
+      isLoading={isLoading}
+      maxWidth="md:max-w-5xl"
     >
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content
-          className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl w-[95vw] sm:w-[90vw] md:w-auto md:max-w-4xl max-h-[90vh] flex flex-col overflow-hidden"
-          onPointerDownOutside={(e) => {
-            if (isLoading) e.preventDefault();
-          }}
-          onEscapeKeyDown={(e) => {
-            if (isLoading) e.preventDefault();
-          }}
-        >
-          <div className="bg-gray-50 border-b border-gray-200 px-6 py-4 flex items-center justify-between flex-shrink-0">
-            <DialogPrimitive.Title className="text-xl font-bold text-gray-900">
-              ربط المتاجر
-            </DialogPrimitive.Title>
-            <DialogPrimitive.Close asChild>
-              <Button
-                variant="ghost"
-                disabled={isLoading}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <LiaTimesSolid className="w-6 h-6" />
-              </Button>
-            </DialogPrimitive.Close>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <p className="text-gray-600">
+            قم بربط متجرك لمراقبة الطلبات تلقائياً
+          </p>
+          <Button
+            onClick={handleToggleStepper}
+            className="bg-primary text-white gap-2"
+          >
+            <LiaPlusSolid className="w-4 h-4" />
+            ربط متجر جديد
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <LiaLinkSolid className="w-5 h-5 text-primary" />
+              <h4 className="font-semibold text-gray-900">
+                خطوات ربط الـ Webhook
+              </h4>
+            </div>
+            <div className="relative">
+              <div className="absolute right-[11px] top-3 bottom-3" />
+              {webhookSteps.map((step, i) => (
+                <div
+                  key={i}
+                  className="relative flex items-start gap-3 pb-4 last:pb-0"
+                >
+                  <span className="relative z-10 flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                    {i + 1}
+                  </span>
+                  <p className="text-sm text-gray-600 leading-relaxed pt-0.5">
+                    {step}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <DialogPrimitive.Description className="sr-only">
-            ربط المتاجر لمراقبة الطلبات تلقائياً
-          </DialogPrimitive.Description>
-
-          <div className="p-6 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
-            <p className="text-gray-600 text-center">
-              قم بربط متجرك لمراقبة الطلبات تلقائياً
-            </p>
-
-            <div className="bg-blue-50 rounded-xl flex items-center p-6 border border-[#2489E1]/20">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-16 h-16 bg-white border border-[#2489E1] shadow-sm rounded-lg">
-                  <LiaShoppingCartSolid className="w-11 h-11 text-[#001A72]" />
-                </div>
-                <div className="flex flex-col items-start gap-1">
-                  <p className="text-sm text-gray-600">
-                    اتبع التعليمات ادناه للربط
-                  </p>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Easy Order
-                  </h3>
-                </div>
-              </div>
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <LiaKeySolid className="w-5 h-5 text-primary" />
+              <h4 className="font-semibold text-gray-900">
+                خطوات ربط الـ API
+              </h4>
             </div>
-
-            <h4 className="font-semibold text-gray-900">فيديو توضيحي</h4>
-            <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
-              <div className="aspect-video w-full md:h-[300px] bg-gray-900 rounded-lg flex flex-col items-center justify-center text-white text-sm">
-                <LiaPlaySolid className="w-12 h-12 mb-2 opacity-30" />
-                <span className="opacity-75">سيتم إضافة الفيديو قريباً</span>
-              </div>
-            </div>
-
-            <div className="bg-[#fbfdfe] rounded-xl border border-primary/30 overflow-hidden transition-all duration-300">
-              <button
-                type="button"
-                onClick={() => setShowWebhookDropdown(!showWebhookDropdown)}
-                className="w-full relative py-7 px-4 cursor-pointer hover:bg-purple-100/30 transition-colors"
-              >
-                <If condition={showIsConnectWebhook}>
-                  <Then>
-                    <div className="absolute top-1 left-1 w-fit h-7 bg-green-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
-                      <LiaCheckCircleSolid className="w-3 h-3" />
-                      متصل
-                    </div>
-                  </Then>
-                  <Else>
-                    <div className="absolute top-1 left-1 w-fit h-7 bg-gray-200 text-gray-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
-                      <MdQuestionMark className="w-3 h-3" />
-                      قم بالربط
-                    </div>
-                  </Else>
-                </If>
-
-                <div className="flex items-end justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-primary text-white p-2 rounded-lg">
-                      <LiaPlaySolid className="w-5 h-5" />
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-gray-900 leading-none mb-1">
-                        إعدادات الـ Webhook
-                      </p>
-                      <p className="text-sm text-gray-600 italic leading-none">
-                        مطلوب: لمراقبة الطلبات الجديدة
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="relative top-1 left-1">
-                    {showWebhookDropdown ? (
-                      <LiaChevronUpSolid className="w-6 h-6 text-primary" />
-                    ) : (
-                      <LiaChevronDownSolid className="w-6 h-6 text-primary" />
-                    )}
-                  </div>
-                </div>
-              </button>
-
-              {showWebhookDropdown && (
-                <form
-                  onSubmit={handleWebhookSubmit}
-                  className="p-6 pt-0 space-y-4 animate-in fade-in slide-in-from-top-2"
+            <div className="relative">
+              <div className="absolute right-[11px] top-3 bottom-3" />
+              {integrationSteps.map((step, i) => (
+                <div
+                  key={i}
+                  className="relative flex items-start gap-3 pb-4 last:pb-0"
                 >
-                  <div className="space-y-3 border-t border-purple-200/50 pt-4">
-                    {webhookSteps.map((step, i) => (
-                      <div
-                        key={i}
-                        className="flex flex-row items-center px-6 py-2.5 gap-2.5 bg-[rgba(93,36,225,0.02)] border border-[rgba(93,36,225,0.16)] rounded-lg"
-                      >
-                        <span className="flex-shrink-0 w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-medium">
-                          {i + 1}
-                        </span>
-                        <p className="flex-1 text-md text-right text-black">
-                          {step}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
+                  <span className="relative z-10 flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                    {i + 1}
+                  </span>
+                  <p className="text-sm text-gray-600 leading-relaxed pt-0.5">
+                    {step}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
-                  <div className="space-y-4 bg-gray-50/50 p-4 rounded-xl border border-gray-100 mt-2">
+        <div>
+          <h4 className="font-semibold text-gray-900 mb-3">فيديو توضيحي</h4>
+          <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
+            <iframe
+              src="https://drive.google.com/file/d/1aoWTPTEbKQg3fWBwI3VL0gIf82Lsdnf-/preview"
+              className="aspect-video w-full md:h-[300px] rounded-lg"
+              allow="autoplay"
+              allowFullScreen
+            />
+          </div>
+        </div>
+
+        {showStepper && (
+          <div ref={stepperRef} className="bg-gray-50/80 rounded-xl border border-primary/20 p-6">
+            <Stepper steps={STEPPER_STEPS} currentStep={currentStep}>
+              <StepContent>
+                <form onSubmit={onWebhookSubmit} className="space-y-4">
+                  <div className="space-y-4 bg-white p-5 rounded-xl border border-gray-100">
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <label className="block text-sm font-medium text-gray-700">
+                        <span className="block font-medium text-base">
                           Webhook URL
-                        </label>
-                        <button
+                        </span>
+                        <Button
                           type="button"
+                          variant="default"
+                          size="sm"
                           onClick={handleCopyUrl}
-                          className="flex items-center gap-2 px-3 py-1 bg-primary text-white text-xs rounded-md hover:bg-[#4A1CB8]"
+                          className="gap-1.5 h-7 text-xs"
                         >
                           {copied ? (
                             <LiaCheckSolid className="w-3 h-3" />
@@ -308,202 +317,214 @@ const EasyOrderModal = ({
                             <LiaCopySolid className="w-3 h-3" />
                           )}
                           {copied ? 'تم النسخ' : 'نسخ'}
-                        </button>
+                        </Button>
                       </div>
-                      <input
+                      <Input
+                        register={webhookForm.register}
+                        name="webhookUrl"
                         type="url"
-                        value={customWebhookUrl || defaultWebhookUrl}
-                        onChange={(e) => setCustomWebhookUrl(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-left text-sm font-mono focus:ring-2 focus:ring-primary outline-none"
-                        dir="ltr"
+                        inputClassName="text-sm"
                         placeholder="https://..."
+                        error={
+                          webhookForm.formState.errors.webhookUrl?.message
+                        }
                       />
                     </div>
 
-                    <div>
-                      <label
-                        className="block text-sm font-medium text-gray-700 mb-2 text-left"
-                        dir="ltr"
-                      >
-                        Webhook Secret
-                      </label>
-                      <div className="relative">
-                        <input
-                          type={showSecret ? 'text' : 'password'}
-                          value={webhookSecret}
-                          onChange={(e) => setWebhookSecret(e.target.value)}
-                          placeholder="Secret key"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg text-left focus:ring-2 focus:ring-primary pr-12 font-mono"
-                          dir="ltr"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowSecret(!showSecret)}
-                          className="absolute inset-y-0 right-2 flex items-center"
-                        >
-                          <span className="text-white rounded-md cursor-pointer p-1.5 bg-primary">
-                            {showSecret ? (
-                              <LiaEyeSlashSolid className="w-4 h-4" />
-                            ) : (
-                              <LiaEyeSolid className="w-4 h-4" />
-                            )}
-                          </span>
-                        </button>
-                      </div>
-                    </div>
+                    <Input
+                      register={webhookForm.register}
+                      name="webhookSecret"
+                      label="Webhook Secret"
+                      type="password"
+                      placeholder="Secret key (10 أحرف على الأقل)"
+                      error={
+                        webhookForm.formState.errors.webhookSecret?.message
+                      }
+                    />
                   </div>
-                  <div className="flex gap-2 pt-2">
+
+                  <div className="flex gap-3 pt-2">
                     <Button
                       type="submit"
                       disabled={isLoading}
                       className="flex-1 bg-primary text-white h-10"
                     >
-                      {existingConfig ? 'تحديث Webhook' : 'حفظ Webhook'}
+                      {isLoading ? 'جاري الحفظ...' : 'التالي'}
                     </Button>
                     <Button
                       type="button"
-                      onClick={() => setShowWebhookDropdown(false)}
-                      className="bg-gray-100 text-gray-600 h-10 px-4"
+                      variant="outline"
+                      onClick={() => setShowStepper(false)}
+                      disabled={isLoading}
+                      className="h-10 px-6"
                     >
                       إلغاء
                     </Button>
                   </div>
                 </form>
-              )}
-            </div>
+              </StepContent>
 
-            <div className="bg-[#fbfdfe] rounded-xl border border-primary/30 overflow-hidden transition-all duration-300">
-              <button
-                type="button"
-                onClick={() => setShowApiDropdown(!showApiDropdown)}
-                className="w-full relative py-7 px-4 cursor-pointer hover:bg-purple-100/30 transition-colors"
-              >
-                <If condition={existingIntegrationId}>
-                  <Then>
-                    <div className="absolute top-1 left-1 w-fit h-7 bg-green-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
-                      <LiaCheckCircleSolid className="w-3 h-3" />
-                      متصل
-                    </div>
-                  </Then>
-                  <Else>
-                    <div className="absolute top-1 left-1 w-fit h-7 bg-gray-200 text-gray-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
-                      <MdQuestionMark className="w-3 h-3" />
-                      قم بلربط
-                    </div>
-                  </Else>
-                </If>
-
-                <div className="flex items-end justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-primary text-white p-2 rounded-lg">
-                      <LiaShoppingCartSolid className="w-5 h-5" />
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-gray-900 leading-none mb-1">
-                        إعدادات الربط (API Key)
-                      </p>
-                      <p className="text-sm text-gray-600 italic leading-none">
-                        اختياري: لربط المخزون تلقائياً
-                      </p>
-                    </div>
+              <StepContent>
+                <form onSubmit={onApiKeySubmit} className="space-y-4">
+                  <div className="space-y-4 bg-white p-5 rounded-xl border border-gray-100">
+                    <Input
+                      register={apiKeyForm.register}
+                      name="apiKey"
+                      label="API Key"
+                      type="password"
+                      placeholder="Enter your API key"
+                      error={apiKeyForm.formState.errors.apiKey?.message}
+                    />
                   </div>
 
-                  <div className="relative top-1 left-1">
-                    {showApiDropdown ? (
-                      <LiaChevronUpSolid className="w-6 h-6 text-primary" />
-                    ) : (
-                      <LiaChevronDownSolid className="w-6 h-6 text-primary" />
-                    )}
-                  </div>
-                </div>
-              </button>
-
-              {showApiDropdown && (
-                <form
-                  onSubmit={handleApiSubmit}
-                  className="p-6 pt-0 space-y-4 animate-in fade-in slide-in-from-top-2"
-                >
-                  <div className="space-y-3 border-t border-purple-200/50 pt-4">
-                    {integrationSteps.map((step, i) => (
-                      <div
-                        key={i}
-                        className="flex flex-row items-center px-6 py-2.5 gap-2.5 bg-[rgba(93,36,225,0.02)] border border-[rgba(93,36,225,0.16)] rounded-lg"
-                      >
-                        <span className="flex-shrink-0 w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-medium">
-                          {i + 1}
-                        </span>
-                        <p className="flex-1 text-md text-right text-black">
-                          {step}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="space-y-4 bg-gray-50/50 p-4 rounded-xl border border-gray-100 mt-2">
-                    <div>
-                      <label
-                        className="block text-sm font-medium text-gray-700 mb-2 text-left"
-                        dir="ltr"
-                      >
-                        API Key
-                      </label>
-                      <div className="relative">
-                        <input
-                          type={showApi ? 'text' : 'password'}
-                          value={apiKey}
-                          onChange={(e) => setApiKey(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg text-left focus:ring-2 focus:ring-primary pr-12 font-mono outline-none"
-                          dir="ltr"
-                          placeholder="Enter your API key"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowApi(!showApi)}
-                          className="absolute inset-y-0 right-2 flex items-center"
-                        >
-                          <span className="text-white rounded-md cursor-pointer p-1.5 bg-primary hover:bg-[#4A1CB8] transition-colors">
-                            {showApi ? (
-                              <LiaEyeSlashSolid className="w-4 h-4" />
-                            ) : (
-                              <LiaEyeSolid className="w-4 h-4" />
-                            )}
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 pt-2">
+                  <div className="flex gap-3 pt-2">
                     <Button
                       type="submit"
                       disabled={isLoading}
                       className="flex-1 bg-primary text-white h-10"
                     >
-                      {existingIntegrationId ? 'تحديث API' : 'حفظ API'}
+                      {isLoading
+                        ? 'جاري الحفظ...'
+                        : existingIntegrationId
+                          ? 'تحديث API'
+                          : 'حفظ'}
                     </Button>
                     <Button
                       type="button"
-                      onClick={() => setShowApiDropdown(false)}
-                      className="bg-gray-100 text-gray-600 h-10 px-4"
+                      variant="outline"
+                      onClick={() => setCurrentStep(0)}
+                      disabled={isLoading}
+                      className="h-10 px-6"
                     >
-                      إلغاء
+                      رجوع
                     </Button>
                   </div>
                 </form>
-              )}
-            </div>
+              </StepContent>
+            </Stepper>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm text-center">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm text-center mt-4">
                 {error}
               </div>
             )}
           </div>
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+        )}
+
+        <div>
+          <h4 className="font-semibold text-gray-900 mb-3">
+            المتاجر المربوطة
+          </h4>
+          {hasConnectedStore ? (
+          <Accordion type="single" collapsible className="space-y-3">
+              <AccordionItem
+                value="easyorder"
+                className="bg-white rounded-xl border border-gray-200 px-4"
+              >
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-10 h-10 bg-blue-50 border border-[#2489E1]/20 rounded-lg">
+                      <LiaShoppingCartSolid className="w-6 h-6 text-[#001A72]" />
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-gray-900">Easy Order</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        {isWebhookConnected && (
+                          <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                            <LiaCheckCircleSolid className="w-3 h-3" />
+                            Webhook
+                          </span>
+                        )}
+                        {existingIntegration && (
+                          <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                            <LiaCheckCircleSolid className="w-3 h-3" />
+                            API
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-3 pt-2">
+                    {webhookData && (
+                      <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                          Webhook
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">URL</span>
+                          <span className="text-sm text-gray-800 max-w-[300px] truncate">
+                            {webhookData.webhookUrl}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">Secret</span>
+                          <span className="text-sm text-gray-800">
+                            {'•'.repeat(12)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">الحالة</span>
+                          <span
+                            className={clsx(
+                              'text-xs font-medium px-2 py-0.5 rounded-full',
+                              webhookData.isActive
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-gray-100 text-gray-600'
+                            )}
+                          >
+                            {webhookData.isActive ? 'مفعّل' : 'معطّل'}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {existingIntegration && (
+                      <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                          API Key
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">
+                            المفتاح
+                          </span>
+                          <span className="text-sm text-gray-800">
+                            {'•'.repeat(8)}
+                            {existingIntegration.apiKey.slice(-4)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">الحالة</span>
+                          <span
+                            className={clsx(
+                              'text-xs font-medium px-2 py-0.5 rounded-full',
+                              existingIntegration.isActive
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-gray-100 text-gray-600'
+                            )}
+                          >
+                            {existingIntegration.isActive ? 'مفعّل' : 'معطّل'}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+          </Accordion>
+          ) : (
+            <div className="bg-gray-50 rounded-xl border border-dashed border-gray-300 p-8 text-center">
+              <LiaLinkSolid className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500 font-medium mb-1">لا توجد متاجر مربوطة</p>
+              <p className="text-gray-400 text-sm">
+                اضغط على &quot;ربط متجر جديد&quot; لبدء ربط متجرك
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </BaseModal>
   );
 };
 
