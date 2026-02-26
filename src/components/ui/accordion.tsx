@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { LiaAngleDownSolid } from "react-icons/lia"
-import { Accordion as AccordionPrimitive } from "radix-ui"
+import * as AccordionPrimitive from "@radix-ui/react-accordion"
 
 import { cn } from "@/lib/utils"
 
