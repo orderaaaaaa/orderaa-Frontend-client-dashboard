@@ -93,14 +93,15 @@ export default function Input({
       )}
       <div className="relative">
         {type === 'password' && (
-          <button
+          <Button
+            variant="ghost"
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
             className="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 focus:outline-none"
             tabIndex={-1}
           >
             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-          </button>
+          </Button>
         )}
         {showClearButton && type !== 'password' && (
           <Button
