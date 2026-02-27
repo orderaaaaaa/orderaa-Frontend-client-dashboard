@@ -354,6 +354,7 @@ export function CallCenterContent() {
                 postponedUntil={order.postponedUntil}
                 showAllItems
                 states={order.states}
+                isBlocked={order.customers.isBlocked}
               />
             ))}
           </div>

@@ -10,6 +10,8 @@ import { DatePicker } from "@/components/ui/datepicker";
 import { useGovernoratesQuery, useCitiesQuery } from "@/services/lookups";
 import { useCancellationReasons } from "@/services/orders";
 import { LiaTimesSolid } from "react-icons/lia";
+import { Button } from "@/components/ui/button";
+import { formatDateForUrl } from "@/utils/urlFilters";
 
 export type FilterKey = keyof OrderFiltersFormData | 'employeeName';
 
@@ -52,14 +54,16 @@ const FilterChip = React.memo(function FilterChip({ filterKey, label, children, 
         <div className="flex-1 min-w-0 h-10">
           {children}
         </div>
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-sm"
           onClick={() => onRemove(filterKey)}
-          className="cursor-pointer flex-shrink-0 w-5 h-5 bg-gray-500 hover:bg-gray-700 text-white rounded-full flex items-center justify-center transition-colors"
           aria-label={`إزالة ${label}`}
+          className="flex items-center justify-center w-6 h-6 bg-gray-500 hover:bg-gray-700 text-white rounded-full hover:text-white"
         >
-          <LiaTimesSolid className="w-3 h-3" />
-        </button>
+          <LiaTimesSolid className="w-4 h-4" />
+        </Button>
       </div>
     </div>
   );
@@ -82,24 +86,23 @@ export default function FilterPanel({
   activeFilters,
   onRemoveFilter,
 }: Props) {
+  const isGovernorateActive = activeFilters.includes('governorate');
+  const isAreaActive = activeFilters.includes('area');
+  const isCancellationReasonActive = activeFilters.includes('cancellationReasons');
+
   const selectedGovernorate = useWatch({
     control,
     name: "governorate",
   });
 
-  // Use React Query hooks for caching
-  const { data: governorates = [] } = useGovernoratesQuery();
-  const { data: cities = [], isLoading: isLoadingCities } = useCitiesQuery(selectedGovernorate);
-
-  const isCancellationReasonActive = activeFilters.includes('cancellationReasons');
+  const { data: governorates = [] } = useGovernoratesQuery(isGovernorateActive || isAreaActive);
+  const { data: cities = [], isLoading: isLoadingCities } = useCitiesQuery(isAreaActive ? selectedGovernorate : undefined);
   const { data: cancellationReasons = [] } = useCancellationReasons(isCancellationReasonActive);
   const cancellationReasonOptions = React.useMemo(
     () => cancellationReasons.map((r) => ({ key: r.reasonName, value: r.reasonName })),
     [cancellationReasons]
   );
 
-  const governorateOptions = governorates;
-  const cityOptions = cities;
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -161,7 +164,7 @@ export default function FilterPanel({
               <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter}>
                 <DatePicker
                   selected={field.value && typeof field.value === 'string' ? new Date(field.value) : null}
-                  onChange={(date) => field.onChange(date ? date.toISOString().split('T')[0] : '')}
+                  onChange={(date) => field.onChange(date ? formatDateForUrl(date) : '')}
                   placeholder={label}
                   className="w-full h-full border border-gray-300 rounded bg-white"
                   isClearable
@@ -211,7 +214,7 @@ export default function FilterPanel({
                       }
                     }}
                     onBlur={field.onBlur}
-                    options={governorateOptions}
+                    options={governorates}
                     placeholder={label}
                     widthClass="w-full"
                     error={errors.governorate?.message}
@@ -233,7 +236,7 @@ export default function FilterPanel({
                     value={field.value || ''}
                     onChange={field.onChange}
                     onBlur={field.onBlur}
-                    options={cityOptions}
+                    options={cities}
                     placeholder={isLoadingCities ? "جاري التحميل..." : label}
                     widthClass="w-full"
                     error={errors.area?.message}

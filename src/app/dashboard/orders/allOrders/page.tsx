@@ -37,6 +37,7 @@ import { formatDateForUrl } from '@/utils/urlFilters';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
 
 import { Scan, ScanLine, ArrowUp, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 function AllOrdersContent() {
   const [select, setSelect] = useState(false);
@@ -448,16 +449,18 @@ function AllOrdersContent() {
           <p className="text-gray-700">عدد جميع الطلبات: {totalOrders}</p>
           {select && (
             <div className="flex flex-col gap-2">
-              <button
+              <Button
+                variant="default"
+                size="sm"
                 onClick={handleSelectAllToggle}
-                className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-[#682fee] transition-colors"
+                className="rounded-lg"
               >
                 {selectAllMatchingFilters ? (
                   'إلغاء تحديد الكل'
                 ) : (
                   <span className="flex items-center gap-2">تحديد الكل</span>
                 )}
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -612,13 +615,15 @@ function AllOrdersContent() {
 
       {/* Back to Top Button */}
       {showBackToTop && (
-        <button
+        <Button
+          variant="default"
+          size="icon-lg"
           onClick={scrollToTop}
-          className="fixed bottom-8 left-8 z-50 p-4 bg-primary text-white rounded-full shadow-lg hover:bg-[#682fee] transition-all duration-300 hover:scale-110"
           aria-label="العودة للأعلى"
+          className="fixed bottom-8 left-8 z-50 rounded-full shadow-lg hover:bg-[#682fee] hover:scale-110 transition-all duration-300"
         >
           <ArrowUp className="w-6 h-6" />
-        </button>
+        </Button>
       )}
     </div>
   );

@@ -670,6 +670,7 @@ export function PrintOrdersContent() {
                 hideCustomerInfo
                 showAllItems
                 states={order.states}
+                isBlocked={order.customers.isBlocked}
               />
             ))}
           </div>

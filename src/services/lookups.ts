@@ -13,7 +13,7 @@ interface CityData {
 }
 
 // Fetch governorates with caching
-export const useGovernoratesQuery = () => {
+export const useGovernoratesQuery = (enabled: boolean = true) => {
   return useQuery({
     queryKey: [QUERY_KEYS.GOVERNORATES] as QueryKey,
     queryFn: async () => {
@@ -21,6 +21,7 @@ export const useGovernoratesQuery = () => {
       return Array.isArray(data) ? (data as GovernorateData[]) : [];
     },
     staleTime: Infinity,
+    enabled,
   });
 };
 

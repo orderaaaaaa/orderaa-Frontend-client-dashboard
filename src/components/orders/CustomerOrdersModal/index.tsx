@@ -282,6 +282,7 @@ export default function CustomerOrdersModal({
                       repeatCount={orders.length}
                       showAllItems
                       states={order.states}
+                      isBlocked={order.customers.isBlocked}
                     />
                   </div>
                 ))}

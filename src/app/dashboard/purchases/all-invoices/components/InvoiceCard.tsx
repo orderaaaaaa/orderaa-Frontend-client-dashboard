@@ -22,7 +22,7 @@ import { formatDate } from '../utils';
 const TRANSACTION_TYPE_CONFIG: Record<string, { text: string; iconColor: string; icon: IconType }> = {
   'استبدال': { text: 'text-orange-500', iconColor: 'text-orange-500', icon: LiaExchangeAltSolid },
   'مرتجع': { text: 'text-red-500', iconColor: 'text-red-500', icon: LiaUndoAltSolid },
-  'مدفوع': { text: 'text-green-500', iconColor: 'text-green-500', icon: LiaDollarSignSolid },
+  'مشتريات': { text: 'text-green-500', iconColor: 'text-green-500', icon: LiaDollarSignSolid },
 };
 
 interface InvoiceCardProps {
@@ -62,8 +62,8 @@ const InvoiceCard = memo(
     const fields: CardField[] = useMemo(
       () => [
         {
-          label: 'عدد الاصناف',
-          value: `عدد الاصناف: ${invoice.itemsCount}`,
+          label: 'عدد القطع',
+          value: `${invoice.itemsCount}`,
           icon: LiaBoxOpenSolid,
         },
         {

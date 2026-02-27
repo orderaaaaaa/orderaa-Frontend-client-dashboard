@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ArrowLeft, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import { Breadcrumb } from '@/components/dashboard-layout';
 import { OrderLockedModal } from '@/components/OrderDetails/modals/OrderLockedModal';
@@ -114,12 +115,14 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <p className="text-red-600 text-lg mb-4">{error}</p>
-            <button
+            <Button
+              variant="default"
+              size="lg"
               onClick={() => window.history.back()}
-              className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-[#4a1db5] transition-colors"
+              className="rounded-lg hover:bg-[#4a1db5]"
             >
               العودة للطلبات
-            </button>
+            </Button>
           </div>
         </div>
       </AuthGuard>
@@ -224,12 +227,14 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <p className="text-red-600 text-lg mb-4">الطلب غير موجود</p>
-            <button
+            <Button
+              variant="default"
+              size="lg"
               onClick={() => window.history.back()}
-              className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-[#4a1db5] transition-colors"
+              className="rounded-lg hover:bg-[#4a1db5]"
             >
               العودة للطلبات
-            </button>
+            </Button>
           </div>
         </div>
       </AuthGuard>
@@ -287,16 +292,18 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
               </SelectContent>
             </Select>
             {timePeriod && (
-              <button
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 onClick={(e) => {
                   e.stopPropagation();
                   clearTimePeriod();
                 }}
-                className="absolute left-8 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors z-10"
+                className="absolute left-8 top-1/2 -translate-y-1/2 p-1 rounded-full z-10"
                 type="button"
               >
                 <X size={16} className="text-gray-500 hover:text-gray-700" />
-              </button>
+              </Button>
             )}
           </div>
         </div>

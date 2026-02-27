@@ -8,6 +8,7 @@ import FilterPanelRHF, { FilterKey, FILTER_DEFINITIONS } from './FilterPanelRHF'
 import { LiaSlidersHSolid, LiaAngleDownSolid } from 'react-icons/lia';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
+import Input from '@/components/ui/Input';
 
 type FilterSectionProps = {
   control: Control<OrderFiltersFormData>;
@@ -164,13 +165,13 @@ const FilterSection = React.memo(function FilterSection({
             className="w-[220px] p-0 border border-gray-200"
           >
             <div className="p-2 border-b border-gray-200">
-              <input
+              <Input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="بحث..."
-                className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 autoFocus
+                inputClassName="bg-white"
               />
             </div>
 

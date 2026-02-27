@@ -454,6 +454,7 @@ export function ShippingOrdersContent() {
                 postponedUntil={order.postponedUntil}
                 showAllItems
                 states={order.states}
+                isBlocked={order.customers.isBlocked}
               />
             ))}
           </div>

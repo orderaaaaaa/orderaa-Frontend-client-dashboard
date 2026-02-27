@@ -71,17 +71,17 @@ export function TodaySummarySection({
         type: 'employee' as const,
       },
       followUp: {
-        title: 'طلبات المتابعة',
+        title: 'محاولات المتابعة',
         data: followUpModalData,
         type: 'order' as const,
       },
       incomplete: {
-        title: 'طلبات غير مكتمله',
+        title: 'محاولات غير مكتمله',
         data: incompleteModalData,
         type: 'order' as const,
       },
       cancelled: {
-        title: 'طلبات ملغاة',
+        title: 'محاولات ملغاة',
         data: cancelledModalSummary,
         type: 'cancelled' as const,
       },

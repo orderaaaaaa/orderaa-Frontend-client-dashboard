@@ -109,28 +109,33 @@ export function PhoneNumberList({
                   className="flex-1 min-w-0 w-full border border-primary rounded px-2 py-1 text-base focus:outline-none focus:ring-1 focus:ring-primary"
                   autoFocus
                 />
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={phones.handleSave}
-                  className="p-1 hover:bg-green-100 rounded transition-colors flex-shrink-0 cursor-pointer"
+                  className="p-1 hover:bg-green-100 rounded flex-shrink-0"
                 >
                   <LiaCheckSolid className="w-4 h-4 text-green-600" />
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={phones.handleCancel}
-                  className="p-1 hover:bg-red-100 rounded transition-colors flex-shrink-0 cursor-pointer"
+                  className="p-1 hover:bg-red-100 rounded flex-shrink-0"
                 >
                   <LiaTimesSolid className="w-4 h-4 text-red-600" />
-                </button>
+                </Button>
               </div>
             ) : (
               <div className={`${tagStyle} relative`}>
                 <LiaPhoneSolid size={18} className="flex-shrink-0" />
-                <button
+                <Button
+                  variant="ghost"
                   onClick={() => handlePhoneCall(phone)}
-                  className="flex-1 min-w-0 text-right hover:text-primary transition-colors truncate cursor-pointer"
+                  className="flex-1 min-w-0 text-right hover:text-primary p-0 h-auto font-bold text-[15px] text-[#000000] truncate justify-start"
                 >
                   {phone}
-                </button>
+                </Button>
                 <div className="relative">
                   <Button
                     variant="ghost"
@@ -205,28 +210,33 @@ export function PhoneNumberList({
               className="flex-1 min-w-0 w-full border border-primary rounded px-2 py-1 text-base focus:outline-none focus:ring-1 focus:ring-primary"
               autoFocus
             />
-            <button
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={phones.handleSave}
-              className="p-1 hover:bg-green-100 rounded transition-colors flex-shrink-0 cursor-pointer"
+              className="p-1 hover:bg-green-100 rounded flex-shrink-0"
             >
               <LiaCheckSolid className="w-4 h-4 text-green-600" />
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={phones.handleCancel}
-              className="p-1 hover:bg-red-100 rounded transition-colors flex-shrink-0 cursor-pointer"
+              className="p-1 hover:bg-red-100 rounded flex-shrink-0"
             >
               <LiaTimesSolid className="w-4 h-4 text-red-600" />
-            </button>
+            </Button>
           </div>
         )}
         {phones.editingIndex !== phones.phoneNumbers.length && (
-          <button
+          <Button
+            variant="link"
             onClick={phones.handleAdd}
-            className="flex items-center gap-2 text-primary text-sm font-bold hover:text-[#4B1BC4] transition-colors cursor-pointer"
+            className="text-primary text-sm font-bold hover:text-[#4B1BC4] p-0 h-auto gap-2 hover:no-underline"
           >
             <LiaPlusSolid className="w-4 h-4" />
             إضافة رقم هاتف
-          </button>
+          </Button>
         )}
       </div>
     </div>

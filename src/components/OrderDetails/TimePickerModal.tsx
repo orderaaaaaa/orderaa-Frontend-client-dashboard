@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { LiaTimesSolid } from 'react-icons/lia';
+import { Button } from '@/components/ui/button';
 
 interface TimePickerModalProps {
   isOpen: boolean;
@@ -274,24 +275,23 @@ export default function TimePickerModal({
           </div>
 
           <div className="flex-shrink-0 bg-white border-t border-gray-200 p-4 sm:p-6 flex gap-3 sm:gap-4 justify-center">
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={onClose}
-              className="px-6 sm:px-8 py-2.5 sm:py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors cursor-pointer text-sm sm:text-base"
+              className="px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base"
             >
               إلغاء
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="default"
               onClick={handleApply}
               disabled={!isComplete}
-              className={`px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-medium transition-colors shadow-lg text-sm sm:text-base ${isComplete
-                  ? 'bg-primary text-white hover:bg-[#4a1cb8] cursor-pointer'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
-                }`}
+              className="px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg shadow-lg text-sm sm:text-base hover:bg-[#4a1cb8]"
             >
               تطبيق
-            </button>
+            </Button>
           </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

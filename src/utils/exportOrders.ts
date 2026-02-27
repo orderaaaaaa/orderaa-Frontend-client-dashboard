@@ -4,10 +4,10 @@ import { toast } from 'sonner';
 
 export interface ExportOrderData {
     'كود الطلب': string;
+    'كود شركة الشحن': string;
     'اسم العميل': string;
     'رقم الهاتف': string;
     'المحافظة': string;
-    'المدينة': string;
     'المنطقة': string;
     'العنوان': string;
     'المنتجات': string;
@@ -16,6 +16,8 @@ export interface ExportOrderData {
     'عدد المحاولات': number;
     'تاريخ الإنشاء': string;
     'الملاحظات': string;
+    'سبب الإلغاء': string;
+    'ملاحظات الإلغاء': string;
 }
 
 export function exportOrdersToExcel(
@@ -38,11 +40,11 @@ export function exportInArabicFormat(
 ) {
     const excelData: ExportOrderData[] = orders.map((order) => ({
         'كود الطلب': order.code,
+        'كود شركة الشحن': order.shippingId || '',
         'الحالة': statusLabels.get(order.status) || order.status,
         'اسم العميل': order.customers.name,
         'رقم الهاتف': order.customers.phone_numbers?.join(', ') || '',
-        'المحافظة': order.customers.governorate || '',
-        'المدينة': order.customers.city || '',
+        'المحافظة': order.customers.governorate || order.governorate || order.externalGovernorate || '',
         'المنطقة': order.customers.area || '',
         'العنوان': order.customers.address || '',
         'المنتجات': order.order_products
@@ -64,6 +66,8 @@ export function exportInArabicFormat(
             return `${day}-${month}-${year}`;
         })(),
         'الملاحظات': order.notes || '',
+        'سبب الإلغاء': order.cancelReason || '',
+        'ملاحظات الإلغاء': order.cancelNotes || '',
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(excelData);
@@ -71,7 +75,7 @@ export function exportInArabicFormat(
     const columnWidths = [
         { wch: 15 },
         { wch: 20 },
-        { wch: 15 },
+        { wch: 20 },
         { wch: 15 },
         { wch: 15 },
         { wch: 15 },
@@ -80,6 +84,8 @@ export function exportInArabicFormat(
         { wch: 15 },
         { wch: 20 },
         { wch: 15 },
+        { wch: 25 },
+        { wch: 30 },
         { wch: 25 },
         { wch: 30 },
     ];

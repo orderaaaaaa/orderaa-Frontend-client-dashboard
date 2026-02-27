@@ -5,6 +5,7 @@ import { OrderFilters, FilterOptions } from "@/types/orders";
 import SearchableSelect from "@/components/ui/SearchableSelect";
 import { DatePicker } from "@/components/ui/datepicker";
 import { Calendar } from "lucide-react";
+import { formatDateForUrl } from "@/utils/urlFilters";
 
 type Props = {
   filters: OrderFilters;
@@ -45,7 +46,7 @@ export default function FilterPanel({
     setExecutionDate(date);
     updateFilters({
       ...filters,
-      executionDate: date ? date.toISOString().split('T')[0] : ''
+      executionDate: date ? formatDateForUrl(date) : ''
     });
   };
 

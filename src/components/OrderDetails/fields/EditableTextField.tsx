@@ -7,6 +7,7 @@ import {
 import { IconType } from 'react-icons';
 import { z } from 'zod';
 import { useEditableField } from '@/hooks/OrderDetails/useEditableField';
+import { Button } from '@/components/ui/button';
 
 /**
  * Props for EditableTextField component
@@ -87,19 +88,23 @@ export function EditableTextField({
                 />
               )}
               <div className={`flex gap-1 ${multiline ? 'self-end' : 'flex-shrink-0'}`}>
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={field.saveEdit}
                   disabled={!!field.error}
-                  className="p-1 hover:bg-green-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-1 hover:bg-green-100 rounded"
                 >
-                  <LiaCheckSolid className="cursor-pointer w-4 h-4 text-green-600" />
-                </button>
-                <button
+                  <LiaCheckSolid className="w-4 h-4 text-green-600" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={field.cancelEdit}
-                  className="p-1 hover:bg-red-100 rounded transition-colors"
+                  className="p-1 hover:bg-red-100 rounded"
                 >
-                  <LiaTimesSolid className="cursor-pointer w-4 h-4 text-red-600" />
-                </button>
+                  <LiaTimesSolid className="w-4 h-4 text-red-600" />
+                </Button>
               </div>
             </div>
             {field.error && (
@@ -111,12 +116,14 @@ export function EditableTextField({
             <p className={`${isEmpty ? 'text-red-500' : ''} whitespace-pre-wrap break-words flex-1 min-w-0`}>
               {displayValue}
             </p>
-            <button
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={field.startEdit}
-              className="cursor-pointer p-1 hover:bg-purple-100 rounded transition-colors flex-shrink-0"
+              className="p-1 hover:bg-purple-100 rounded flex-shrink-0"
             >
               <LiaEditSolid className="w-4 h-4 text-primary" />
-            </button>
+            </Button>
           </div>
         )}
       </div>
