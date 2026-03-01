@@ -19,9 +19,7 @@ function DashboardLoading() {
 export default function DashboardPage() {
   return (
     <Suspense fallback={<DashboardLoading />}>
-      <h1 className="text-2xl font-bold mb-4">
-        hello arsanious
-      </h1>
+      <h1>hello arsanious</h1>
       <DashboardContent />
     </Suspense>
   );
