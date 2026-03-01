@@ -19,7 +19,6 @@ function DashboardLoading() {
 export default function DashboardPage() {
   return (
     <Suspense fallback={<DashboardLoading />}>
-      <h1>لوحة التحكم</h1>
       <DashboardContent />
     </Suspense>
   );
