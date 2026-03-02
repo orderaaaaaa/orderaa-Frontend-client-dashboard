@@ -84,10 +84,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // Handle clear search - navigate to all orders without search param
   const handleClearSearch = useCallback(() => {
-    if (pathname.includes('/dashboard/orders/allOrders')) {
-      router.push('/dashboard/orders/allOrders');
-    }
-  }, [pathname, router]);
+    router.push('/dashboard/orders/allOrders');
+  }, [router]);
 
   // Auto-open dropdown if pathname matches a child route
   useEffect(() => {

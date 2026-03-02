@@ -1,0 +1,125 @@
+'use client';
+
+import { memo, useMemo } from 'react';
+import clsx from 'clsx';
+import {
+  LiaUserSolid,
+  LiaPhoneSolid,
+  LiaEnvelopeSolid,
+  LiaMoneyBillWaveSolid,
+  LiaFileInvoiceSolid,
+  LiaHandHoldingUsdSolid,
+  LiaBalanceScaleSolid,
+  LiaBoxesSolid,
+} from 'react-icons/lia';
+import { Button } from '@/components/ui/button';
+import { Supplier } from '../types';
+import { formatCurrency } from '../utils';
+
+interface SupplierCardProps {
+  supplier: Supplier;
+}
+
+const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
+  const remainingLabel = useMemo(() => {
+    if (supplier.remainingAmount === 0) return { text: '0 ج.م', color: 'text-gray-500' };
+    if (supplier.remainingAmount < 0) {
+      return { text: `-${formatCurrency(supplier.remainingAmount)} مدين`, color: 'text-red-500' };
+    }
+    return { text: `+${formatCurrency(supplier.remainingAmount)} دائن`, color: 'text-green-500' };
+  }, [supplier.remainingAmount]);
+
+  return (
+    <div className="w-full bg-white border border-gray-200 rounded-xl p-5 transition-all duration-200 hover:shadow-md">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div className="flex items-center flex-col gap-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            <LiaUserSolid className="w-6 h-6 text-primary" />
+            <span className="text-lg font-bold text-gray-800">{supplier.name}</span>
+          </div>
+          <span className="text-sm text-gray-500">{supplier.contactPerson}</span>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-full font-semibold text-xs sm:text-sm flex items-center gap-1.5"
+          >
+            <LiaBoxesSolid className="w-4 h-4" />
+            المنتجات
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            className="rounded-full font-semibold text-xs sm:text-sm"
+          >
+            دفع
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6 px-4">
+        <div className="flex flex-col items-start sm:items-center gap-1.5">
+          <a
+            href={`tel:${supplier.phone}`}
+            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-primary transition-colors"
+          >
+            <LiaPhoneSolid className="w-4 h-4" />
+            <span>{supplier.phone}</span>
+          </a>
+          <a
+            href={`mailto:${supplier.email}`}
+            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-primary transition-colors"
+          >
+            <LiaEnvelopeSolid className="w-4 h-4" />
+            <span>{supplier.email}</span>
+          </a>
+        </div>
+        <div className="flex flex-col items-start sm:items-center gap-1.5">
+          <span className="text-base text-gray-400">المبلغ الاجمالي</span>
+          <div className="flex items-center gap-1.5">
+            <LiaMoneyBillWaveSolid className="w-4 h-4 text-primary" />
+            <span className="text-base font-semibold text-gray-800">
+              {formatCurrency(supplier.totalAmount)}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-start sm:items-center gap-1.5">
+          <span className="text-base text-gray-400">عدد الفواتير</span>
+          <div className="flex items-center gap-1.5">
+            <LiaFileInvoiceSolid className="w-4 h-4 text-primary" />
+            <span className="text-base font-semibold text-gray-800">
+              {supplier.invoicesCount}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-start sm:items-center gap-1.5">
+          <span className="text-base text-gray-400">مدفوع</span>
+          <div className="flex items-center gap-1.5">
+            <LiaHandHoldingUsdSolid className="w-4 h-4 text-primary" />
+            <span className="text-base font-semibold text-gray-800">
+              {formatCurrency(supplier.paidAmount)}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-start sm:items-center gap-1.5">
+          <span className="text-base text-gray-400">المتبقي</span>
+          <div className="flex items-center gap-1.5">
+            <LiaBalanceScaleSolid className={clsx('w-4 h-4', remainingLabel.color)} />
+            <span className={clsx('text-base font-semibold', remainingLabel.color)}>
+              {remainingLabel.text}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+SupplierCard.displayName = 'SupplierCard';
+
+export default SupplierCard;

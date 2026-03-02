@@ -33,6 +33,10 @@ const invoiceItemSchema = z.object({
 });
 
 export const addInvoiceSchema = z.object({
+  invoiceType: z.enum(['purchases', 'returns'], {
+    required_error: 'نوع الفاتورة مطلوب',
+    invalid_type_error: 'نوع الفاتورة مطلوب',
+  }),
   creator: z.string().min(1, 'منشئ الفاتورة مطلوب'),
   nickname: z.string().min(1, 'اللقب مطلوب'),
   items: z

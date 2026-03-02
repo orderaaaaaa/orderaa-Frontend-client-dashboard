@@ -4,9 +4,11 @@ import React, { memo, useMemo } from 'react';
 import { LiaPlusSolid, LiaTrashAltSolid, LiaCubeSolid, LiaCubesSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 import { DataTable, DataTableColumn } from '@/components/ui/data-table';
 import ToggleGroup from '@/components/ui/toggle-group';
 import { InvoiceItem, InvoiceMode } from '../types';
+import { INVOICE_TYPES } from '../constants';
 
 interface ItemFieldError {
   quantity?: { message?: string };
@@ -23,6 +25,9 @@ const INVOICE_MODE_OPTIONS: { value: InvoiceMode; label: string; icon: React.Rea
 interface InvoiceItemsTableProps {
   items: InvoiceItem[];
   mode: InvoiceMode;
+  invoiceType: string;
+  onInvoiceTypeChange: (value: string) => void;
+  invoiceTypeError?: string;
   onModeChange: (mode: InvoiceMode) => void;
   onQuantityChange: (index: number, value: number) => void;
   onPriceChange: (index: number, value: number) => void;
@@ -36,6 +41,9 @@ const InvoiceItemsTable = memo(
   ({
     items,
     mode,
+    invoiceType,
+    onInvoiceTypeChange,
+    invoiceTypeError,
     onModeChange,
     onQuantityChange,
     onPriceChange,
@@ -176,13 +184,23 @@ const InvoiceItemsTable = memo(
     return (
       <div className="sm:px-8 flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <ToggleGroup
-            options={INVOICE_MODE_OPTIONS}
-            value={mode}
-            onChange={onModeChange}
-            disabled={hasItems}
-            disabledTooltip="لا يمكن تغيير النوع بعد اضافة اصناف، قم بحذف الاصناف اولا"
-          />
+          <div className="flex items-center gap-4">
+            <ToggleGroup
+              options={INVOICE_MODE_OPTIONS}
+              value={mode}
+              onChange={onModeChange}
+              disabled={hasItems}
+              disabledTooltip="لا يمكن تغيير النوع بعد اضافة اصناف، قم بحذف الاصناف اولا"
+            />
+            <SearchableSelect
+              value={invoiceType}
+              onChange={onInvoiceTypeChange}
+              options={INVOICE_TYPES}
+              placeholder="نوع الفاتورة"
+              error={invoiceTypeError}
+              widthClass="w-40"
+            />
+          </div>
 
           <Button
             type="button"

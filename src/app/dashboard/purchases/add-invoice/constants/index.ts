@@ -1,3 +1,8 @@
+export const INVOICE_TYPES = [
+  { key: 'purchases', value: 'مشتريات' },
+  { key: 'returns', value: 'مرتجعات' },
+];
+
 export const INVOICE_CREATORS = [
   { key: 'ahmed', value: 'احمد محمود' },
   { key: 'sara', value: 'سارة احمد' },

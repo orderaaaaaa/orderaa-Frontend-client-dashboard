@@ -31,6 +31,7 @@ export function AddInvoiceContent() {
   } = useForm<AddInvoiceFormData>({
     resolver: zodResolver(addInvoiceSchema),
     defaultValues: {
+      invoiceType: undefined,
       creator: '',
       nickname: '',
       items: [],
@@ -46,6 +47,7 @@ export function AddInvoiceContent() {
   const savedSingularItems = useRef<AddInvoiceFormData['items']>([]);
   const savedPackageItems = useRef<AddInvoiceFormData['items']>([]);
 
+  const invoiceType = watch('invoiceType');
   const creator = watch('creator');
   const nickname = watch('nickname');
   const items = watch('items');
@@ -201,6 +203,11 @@ export function AddInvoiceContent() {
         <InvoiceItemsTable
           items={items ?? []}
           mode={invoiceMode}
+          invoiceType={invoiceType ?? ''}
+          onInvoiceTypeChange={(value) =>
+            setValue('invoiceType', value as 'purchases' | 'returns', { shouldValidate: true })
+          }
+          invoiceTypeError={errors.invoiceType?.message}
           onModeChange={handleModeChange}
           onQuantityChange={handleQuantityChange}
           onPriceChange={handlePriceChange}
