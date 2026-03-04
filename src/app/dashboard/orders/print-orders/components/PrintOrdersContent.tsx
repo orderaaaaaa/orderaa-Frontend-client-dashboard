@@ -713,6 +713,7 @@ export function PrintOrdersContent() {
           isAllSelected={selectAllMatchingFilters}
           totalStoreOrders={totalOrders}
           isLoading={isActionLoading}
+          hideAwaitingPackaging={filters.status === 'WAITING_FOR_PACKAGING'}
         />
       )}
 

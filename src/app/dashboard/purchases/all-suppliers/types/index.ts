@@ -13,7 +13,6 @@ export interface Supplier {
 export interface SupplierFilters {
   searchQuery: string;
   supplierName: string;
-  purchases: string;
   remainingAmount: string;
   paidAmount: string;
   invoicesCount: string;

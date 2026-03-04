@@ -1,6 +1,7 @@
 'use client';
 
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
 import {
   LiaUserSolid,
@@ -15,18 +16,21 @@ import {
 import { Button } from '@/components/ui/button';
 import { Supplier } from '../types';
 import { formatCurrency } from '../utils';
+import PaymentModal from './PaymentModal';
 
 interface SupplierCardProps {
   supplier: Supplier;
 }
 
 const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
+  const router = useRouter();
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const remainingLabel = useMemo(() => {
     if (supplier.remainingAmount === 0) return { text: '0 ج.م', color: 'text-gray-500' };
     if (supplier.remainingAmount < 0) {
-      return { text: `-${formatCurrency(supplier.remainingAmount)} مدين`, color: 'text-red-500' };
+      return { text: `-${formatCurrency(supplier.remainingAmount)} دائن`, color: 'text-red-500' };
     }
-    return { text: `+${formatCurrency(supplier.remainingAmount)} دائن`, color: 'text-green-500' };
+    return { text: `+${formatCurrency(supplier.remainingAmount)} مدين`, color: 'text-green-500' };
   }, [supplier.remainingAmount]);
 
   return (
@@ -35,7 +39,12 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
         <div className="flex items-center flex-col gap-3 flex-wrap">
           <div className="flex items-center gap-2">
             <LiaUserSolid className="w-6 h-6 text-primary" />
-            <span className="text-lg font-bold text-gray-800">{supplier.name}</span>
+            <span
+              className="text-lg font-bold text-gray-800 cursor-pointer hover:text-primary hover:underline transition-colors"
+              onClick={() => router.push(`/dashboard/purchases/all-suppliers/${supplier.id}`)}
+            >
+              {supplier.name}
+            </span>
           </div>
           <span className="text-sm text-gray-500">{supplier.contactPerson}</span>
         </div>
@@ -45,6 +54,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
             variant="outline"
             size="sm"
             className="rounded-full font-semibold text-xs sm:text-sm flex items-center gap-1.5"
+            onClick={() => router.push(`/dashboard/purchases/all-suppliers/${supplier.id}/products`)}
           >
             <LiaBoxesSolid className="w-4 h-4" />
             المنتجات
@@ -53,6 +63,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
             variant="default"
             size="sm"
             className="rounded-full font-semibold text-xs sm:text-sm"
+            onClick={() => setIsPaymentOpen(true)}
           >
             دفع
           </Button>
@@ -116,6 +127,11 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
           </div>
         </div>
       </div>
+      <PaymentModal
+        isOpen={isPaymentOpen}
+        onClose={() => setIsPaymentOpen(false)}
+        supplierName={supplier.name}
+      />
     </div>
   );
 });

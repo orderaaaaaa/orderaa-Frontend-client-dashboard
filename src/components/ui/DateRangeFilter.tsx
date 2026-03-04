@@ -50,7 +50,7 @@ const DateRangeFilter = memo(
     return (
       <div
         className={clsx(
-          'flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 w-full sm:w-auto',
+          'flex flex-wrap items-center justify-center sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto',
           className,
         )}
       >

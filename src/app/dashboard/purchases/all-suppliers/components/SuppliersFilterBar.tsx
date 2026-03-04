@@ -5,7 +5,6 @@ import SearchableSelect from '@/components/ui/SearchableSelect';
 import { SupplierFilters } from '../types';
 import {
   MOCK_SUPPLIER_NAME_OPTIONS,
-  MOCK_PURCHASES_OPTIONS,
   MOCK_REMAINING_OPTIONS,
   MOCK_PAID_OPTIONS,
   MOCK_INVOICES_COUNT_OPTIONS,
@@ -23,7 +22,7 @@ interface SuppliersFilterBarProps {
 const SuppliersFilterBar = memo(
   ({ filters, onFilterChange, onClearFilter }: SuppliersFilterBarProps) => {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <SearchableSelect
           options={MOCK_SUPPLIER_NAME_OPTIONS}
           value={filters.supplierName}
@@ -31,15 +30,6 @@ const SuppliersFilterBar = memo(
           placeholder="المورد"
           clearable
           onClear={() => onClearFilter('supplierName')}
-        />
-
-        <SearchableSelect
-          options={MOCK_PURCHASES_OPTIONS}
-          value={filters.purchases}
-          onChange={(v) => onFilterChange('purchases', v)}
-          placeholder="المشتريات"
-          clearable
-          onClear={() => onClearFilter('purchases')}
         />
 
         <SearchableSelect

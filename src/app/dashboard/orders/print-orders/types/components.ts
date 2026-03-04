@@ -41,6 +41,7 @@ export interface PrintOrdersActionsBarProps extends OrderActionCallbacks {
   forceShow?: boolean;
   disableActions?: boolean;
   isChangeProductMode?: boolean;
+  hideAwaitingPackaging?: boolean;
 }
 
 export interface ScannedOrdersTableProps {

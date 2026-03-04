@@ -273,15 +273,9 @@ export const MOCK_SUPPLIER_NAME_OPTIONS = MOCK_SUPPLIERS
   .map((s) => ({ key: s.name, value: s.name }))
   .filter((v, i, a) => a.findIndex((t) => t.key === v.key) === i);
 
-export const MOCK_PURCHASES_OPTIONS = [
-  { key: 'مشتريات', value: 'مشتريات' },
-  { key: 'مرتجعات', value: 'مرتجعات' },
-];
-
 export const MOCK_REMAINING_OPTIONS = [
-  { key: 'مدين', value: 'مدين' },
   { key: 'دائن', value: 'دائن' },
-  { key: 'لا يوجد', value: 'لا يوجد' },
+  { key: 'مدين', value: 'مدين' },
 ];
 
 export const MOCK_PAID_OPTIONS = [

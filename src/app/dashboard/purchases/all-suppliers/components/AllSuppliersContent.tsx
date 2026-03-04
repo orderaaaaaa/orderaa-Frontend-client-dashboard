@@ -56,12 +56,11 @@ export function AllSuppliersContent() {
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (filters.supplierName) count++;
-    if (filters.purchases) count++;
     if (filters.remainingAmount) count++;
     if (filters.paidAmount) count++;
     if (filters.invoicesCount) count++;
     return count;
-  }, [filters.supplierName, filters.purchases, filters.remainingAmount, filters.paidAmount, filters.invoicesCount]);
+  }, [filters.supplierName, filters.remainingAmount, filters.paidAmount, filters.invoicesCount]);
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">

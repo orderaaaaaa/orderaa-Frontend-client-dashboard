@@ -7,7 +7,6 @@ import { SupplierFilters } from '../types';
 const INITIAL_FILTERS: SupplierFilters = {
   searchQuery: '',
   supplierName: '',
-  purchases: '',
   remainingAmount: '',
   paidAmount: '',
   invoicesCount: '',
@@ -82,8 +81,8 @@ export function useSupplierFilters() {
       }
 
       if (filters.remainingAmount) {
-        if (filters.remainingAmount === 'مدين' && supplier.remainingAmount >= 0) return false;
-        if (filters.remainingAmount === 'دائن' && supplier.remainingAmount <= 0) return false;
+        if (filters.remainingAmount === 'دائن' && supplier.remainingAmount >= 0) return false;
+        if (filters.remainingAmount === 'مدين' && supplier.remainingAmount <= 0) return false;
         if (filters.remainingAmount === 'لا يوجد' && supplier.remainingAmount !== 0) return false;
       }
 
@@ -109,7 +108,6 @@ export function useSupplierFilters() {
     () =>
       !!debouncedSearchQuery ||
       !!filters.supplierName ||
-      !!filters.purchases ||
       !!filters.remainingAmount ||
       !!filters.paidAmount ||
       !!filters.invoicesCount ||

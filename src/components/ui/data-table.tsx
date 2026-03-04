@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import {
@@ -18,6 +19,7 @@ interface DataTableColumn<T> {
   render?: (value: unknown, row: T) => React.ReactNode
   className?: string
   headerClassName?: string
+  sortable?: boolean
 }
 
 interface DataTableProps<T extends Record<string, unknown>> {
@@ -30,6 +32,10 @@ interface DataTableProps<T extends Record<string, unknown>> {
   className?: string
   onRowClick?: (row: T) => void
   emptyMessage?: string
+  emptyContent?: React.ReactNode
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
+  onSort?: (field: string) => void
 }
 
 function DataTable<T extends Record<string, unknown>>({
@@ -42,7 +48,46 @@ function DataTable<T extends Record<string, unknown>>({
   className,
   onRowClick,
   emptyMessage,
+  emptyContent,
+  sortBy,
+  sortOrder,
+  onSort,
 }: DataTableProps<T>) {
+  const renderSortIcon = (col: DataTableColumn<T>) => {
+    if (!col.sortable || !onSort) return null
+    if (sortBy !== col.key) {
+      return <ArrowUpDown className="w-3.5 h-3.5 opacity-40 shrink-0" />
+    }
+    return sortOrder === 'asc' ? (
+      <ArrowUp className="w-3.5 h-3.5 shrink-0" />
+    ) : (
+      <ArrowDown className="w-3.5 h-3.5 shrink-0" />
+    )
+  }
+
+  const renderHeader = (col: DataTableColumn<T>, isSkeleton?: boolean) => {
+    const isSortable = col.sortable && onSort
+    return (
+      <TableHead
+        key={col.key}
+        className={cn(
+          'px-2 py-2 sm:px-4 sm:py-4 border-l border-gray-200 last:border-l-0 whitespace-normal text-xs sm:text-sm',
+          isSkeleton ? 'font-medium text-gray-700' : 'font-bold',
+          isSortable && 'cursor-pointer hover:bg-gray-100 transition-colors select-none',
+          isSortable && sortBy === col.key && 'text-primary',
+          col.headerClassName,
+          col.className,
+        )}
+        onClick={isSortable ? () => onSort(col.key) : undefined}
+      >
+        <div className={cn('flex items-center gap-1.5', isSortable && 'justify-center')}>
+          <span>{col.header}</span>
+          {renderSortIcon(col)}
+        </div>
+      </TableHead>
+    )
+  }
+
   if (isLoading) {
     return (
       <div
@@ -54,18 +99,7 @@ function DataTable<T extends Record<string, unknown>>({
         <Table className="w-full min-w-0">
           <TableHeader>
             <TableRow className={cn('bg-[#f1eefa]', headerClassName)}>
-              {columns.map((col) => (
-                <TableHead
-                  key={col.key}
-                  className={cn(
-                    'px-2 py-2 sm:px-4 sm:py-4 font-medium text-gray-700 border-l border-gray-200 last:border-l-0 whitespace-normal text-xs sm:text-sm',
-                    col.headerClassName,
-                    col.className,
-                  )}
-                >
-                  {col.header}
-                </TableHead>
-              ))}
+              {columns.map((col) => renderHeader(col, true))}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -100,28 +134,17 @@ function DataTable<T extends Record<string, unknown>>({
       <Table className="w-full min-w-0">
         <TableHeader>
           <TableRow className={cn('bg-[#f1eefa]', headerClassName)}>
-            {columns.map((col) => (
-              <TableHead
-                key={col.key}
-                className={cn(
-                  'px-2 py-2 sm:px-4 sm:py-4 font-bold border-l border-gray-200 last:border-l-0 whitespace-normal text-xs sm:text-sm',
-                  col.headerClassName,
-                  col.className,
-                )}
-              >
-                {col.header}
-              </TableHead>
-            ))}
+            {columns.map((col) => renderHeader(col))}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.length === 0 && emptyMessage ? (
+          {data.length === 0 && (emptyMessage || emptyContent) ? (
             <TableRow>
               <TableCell
                 colSpan={columns.length}
                 className="px-4 py-8 text-center text-sm text-gray-500"
               >
-                {emptyMessage}
+                {emptyContent ?? emptyMessage}
               </TableCell>
             </TableRow>
           ) : (
