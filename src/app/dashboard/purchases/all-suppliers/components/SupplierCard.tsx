@@ -40,7 +40,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
           <div className="flex items-center gap-2">
             <LiaUserSolid className="w-6 h-6 text-primary" />
             <span
-              className="text-lg font-bold text-gray-800 cursor-pointer hover:text-primary hover:underline transition-colors"
+              className="text-lg font-bold text-primary cursor-pointer hover:text-primary hover:underline transition-colors"
               onClick={() => router.push(`/dashboard/purchases/all-suppliers/${supplier.id}`)}
             >
               {supplier.name}
