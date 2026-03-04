@@ -116,10 +116,11 @@ export function useOrderLock({
     return () => {
       const currentOrderId = orderIdRef.current;
       const currentHasLock = hasLockRef.current;
+      const alreadyUnlocked = activeLockedOrderId === null;
 
       activeLockedOrderId = null;
 
-      if (currentHasLock && currentOrderId) {
+      if (currentHasLock && currentOrderId && !alreadyUnlocked) {
         unlockOrder(currentOrderId).catch((error) => {
           console.error('Failed to unlock order on cleanup:', error);
         });

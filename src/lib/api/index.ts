@@ -34,6 +34,17 @@ api.interceptors.response.use(
     const isAuthEndpoint = error.config?.url?.startsWith('/auth/');
 
     if (error.response?.status === 401 && !isAuthEndpoint) {
+      let hasValidToken = false;
+      try {
+        const authStorage = localStorage.getItem('auth-storage');
+        if (authStorage) {
+          const { state } = JSON.parse(authStorage);
+          hasValidToken = !!state?.token;
+        }
+      } catch {}
+
+      if (!hasValidToken) return Promise.reject(error);
+
       localStorage.removeItem('auth-storage');
       window.location.href = '/signin';
     }
