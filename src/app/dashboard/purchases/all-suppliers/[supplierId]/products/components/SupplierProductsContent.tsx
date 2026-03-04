@@ -64,7 +64,7 @@ const columns: DataTableColumn<ProductRecord>[] = [
   },
   {
     key: 'totalReturned',
-    header: 'إجمالي المؤجل',
+    header: 'إجمالي المرتجع',
     sortable: true,
     render: (val) => (val as number).toLocaleString(),
   },
