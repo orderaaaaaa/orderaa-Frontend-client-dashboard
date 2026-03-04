@@ -57,7 +57,7 @@ export default function PaymentModal({
       setShowSuccess(true);
       setTimeout(() => {
         handleClose();
-      }, 2500);
+      }, 1200);
     },
     [supplierName, handleClose],
   );

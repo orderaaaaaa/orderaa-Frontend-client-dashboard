@@ -44,7 +44,7 @@ export function AddSupplierContent() {
       setIsSuccessModalOpen(true);
       setTimeout(() => {
         router.push('/dashboard/purchases/all-suppliers');
-      }, 3000);
+      }, 2000);
     },
     [router],
   );

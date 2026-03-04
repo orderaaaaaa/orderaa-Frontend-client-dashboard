@@ -166,7 +166,7 @@ export function AddInvoiceContent() {
       setIsSuccessModalOpen(true);
       setTimeout(() => {
         router.push('/dashboard/purchases/all-invoices');
-      }, 3000);
+      }, 2000);
     },
     [router],
   );
