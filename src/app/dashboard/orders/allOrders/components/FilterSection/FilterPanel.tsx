@@ -111,12 +111,12 @@ export default function FilterPanel({
           className="max-w-62 px-3 py-2 rounded border border-gray-300 bg-white"
         />
       </div>
-      {/* {"اسم الحملة"} */}
+      {/* {"المنتج"} */}
       <SearchableSelect
         value={filters.productName}
         onChange={(v) => updateFilters({ ...filters, productName: v })}
         options={options.productOptions}
-        placeholder="اسم الحملة"
+        placeholder="المنتج"
         widthClass="max-w-62"
       />
       {/* {"المحافظه"} */}

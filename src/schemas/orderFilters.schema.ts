@@ -64,6 +64,8 @@ export const orderFiltersSchema = z.object({
 
     cancellationReasons: z.array(z.string()).optional(),
 
+    storeId: z.string().optional().or(z.literal('')),
+
     // Sorting fields
     newFirst: z.boolean().optional(),
 
@@ -91,6 +93,7 @@ export const defaultFilterValues: OrderFiltersFormData = {
     sizeColor: '',
     productId: '',
     cancellationReasons: [],
+    storeId: '',
     newFirst: undefined,
     orderByDirection: '',
 };

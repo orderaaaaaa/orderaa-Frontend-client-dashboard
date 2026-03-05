@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/accordion';
 import { useGetWebhookConfig } from '../hooks/useGetWebhookConfig';
 import { useIntegrations } from '../hooks/useIntegrations';
+import { storeApi } from '../api/Integrations';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
 import { integrationSteps, webhookSteps } from '../constants/steps';
@@ -31,6 +32,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import clsx from 'clsx';
+
+const storeInfoSchema = z.object({
+  storeName: z.string().min(1, 'اسم المتجر مطلوب'),
+  description: z.string().optional(),
+});
 
 const webhookSchema = z.object({
   webhookUrl: z.string().url('رابط غير صالح').or(z.literal('')),
@@ -41,6 +47,7 @@ const apiKeySchema = z.object({
   apiKey: z.string().min(1, 'مفتاح API مطلوب'),
 });
 
+type StoreInfoFormData = z.infer<typeof storeInfoSchema>;
 type WebhookFormData = z.infer<typeof webhookSchema>;
 type ApiKeyFormData = z.infer<typeof apiKeySchema>;
 
@@ -52,6 +59,7 @@ interface EasyOrderModalProps {
 }
 
 const STEPPER_STEPS = [
+  { label: 'اسم المتجر' },
   { label: 'إعدادات Webhook' },
   { label: 'مفتاح API' },
 ];
@@ -86,6 +94,11 @@ const EasyOrderModal = ({
 
   const defaultWebhookUrl = getDefaultWebhookUrl(merchantId);
 
+  const storeInfoForm = useForm<StoreInfoFormData>({
+    resolver: zodResolver(storeInfoSchema),
+    defaultValues: { storeName: '', description: '' },
+  });
+
   const webhookForm = useForm<WebhookFormData>({
     resolver: zodResolver(webhookSchema),
     defaultValues: { webhookUrl: '', webhookSecret: '' },
@@ -115,6 +128,25 @@ const EasyOrderModal = ({
     }
   }, [integrations]);
 
+  const onStoreInfoSubmit = storeInfoForm.handleSubmit(async (data) => {
+    setError('');
+    setIsLoading(true);
+    try {
+      const store = await storeApi.create({
+        name: data.storeName.trim(),
+        description: data.description?.trim() || undefined,
+      });
+      const webhookUrl = `${API_URL}/webhooks/easy-orders/${store.id}`;
+      webhookForm.setValue('webhookUrl', webhookUrl);
+      toast.success('تم إنشاء المتجر بنجاح');
+      setCurrentStep(1);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'خطأ في إنشاء المتجر');
+    } finally {
+      setIsLoading(false);
+    }
+  });
+
   const handleCopyUrl = () => {
     const urlToCopy =
       webhookForm.getValues('webhookUrl')?.trim() || defaultWebhookUrl;
@@ -142,7 +174,7 @@ const EasyOrderModal = ({
         toast.success('تم حفظ اعدادات الـ Webhook بنجاح');
       }
       queryClient.invalidateQueries({ queryKey: ['webhook-config'] });
-      setCurrentStep(1);
+      setCurrentStep(2);
     } catch {
       setError('خطأ في حفظ الـ Webhook');
     } finally {
@@ -179,6 +211,7 @@ const EasyOrderModal = ({
       setError('');
       setShowStepper(false);
       setCurrentStep(0);
+      storeInfoForm.clearErrors();
       webhookForm.clearErrors();
       apiKeyForm.clearErrors();
       onClose();
@@ -192,6 +225,7 @@ const EasyOrderModal = ({
       setShowStepper(true);
       setCurrentStep(0);
       setError('');
+      storeInfoForm.clearErrors();
       webhookForm.clearErrors();
       apiKeyForm.clearErrors();
       setTimeout(() => {
@@ -297,6 +331,48 @@ const EasyOrderModal = ({
           <div ref={stepperRef} className="bg-gray-50/80 rounded-xl border border-primary/20 p-6">
             <Stepper steps={STEPPER_STEPS} currentStep={currentStep}>
               <StepContent>
+                <form
+                  onSubmit={onStoreInfoSubmit}
+                  className="space-y-4"
+                >
+                  <div className="space-y-4 bg-white p-5 rounded-xl border border-gray-100">
+                    <Input
+                      register={storeInfoForm.register}
+                      name="storeName"
+                      label="اسم المتجر"
+                      placeholder="أدخل اسم المتجر..."
+                      error={storeInfoForm.formState.errors.storeName?.message}
+                    />
+                    <Input
+                      register={storeInfoForm.register}
+                      name="description"
+                      label="الوصف"
+                      placeholder="أدخل وصف المتجر (اختياري)..."
+                    />
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className="flex-1 bg-primary text-white h-10"
+                    >
+                      {isLoading ? 'جاري الإنشاء...' : 'التالي'}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowStepper(false)}
+                      disabled={isLoading}
+                      className="h-10 px-6"
+                    >
+                      إلغاء
+                    </Button>
+                  </div>
+                </form>
+              </StepContent>
+
+              <StepContent>
                 <form onSubmit={onWebhookSubmit} className="space-y-4">
                   <div className="space-y-4 bg-white p-5 rounded-xl border border-gray-100">
                     <div>
@@ -354,11 +430,11 @@ const EasyOrderModal = ({
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => setShowStepper(false)}
+                      onClick={() => setCurrentStep(0)}
                       disabled={isLoading}
                       className="h-10 px-6"
                     >
-                      إلغاء
+                      رجوع
                     </Button>
                   </div>
                 </form>
@@ -392,7 +468,7 @@ const EasyOrderModal = ({
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => setCurrentStep(0)}
+                      onClick={() => setCurrentStep(1)}
                       disabled={isLoading}
                       className="h-10 px-6"
                     >

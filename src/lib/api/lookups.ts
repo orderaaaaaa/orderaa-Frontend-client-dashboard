@@ -50,6 +50,11 @@ export async function getShippingCities(
   return data;
 }
 
+export async function getShippingTypes(): Promise<{ key: string; label: string }[]> {
+  const { data } = await http.get<{ key: string; label: string }[]>('/lookups/shipping-types');
+  return data;
+}
+
 export async function getUtmSources(): Promise<string[]> {
   const { data } = await http.get<string[]>('/lookups/utm-sources');
   return data;

@@ -109,6 +109,7 @@ export interface OrderFilters {
   newFirst?: boolean;
   orderByDirection?: 'asc' | 'desc' | '';
   productId?: string;
+  storeId?: string;
   cancellationReasons?: string[];
 }
 
@@ -306,6 +307,7 @@ export interface FilterOrdersDto {
   department?: string;
   productId?: string;
   cancellationReasons?: string[];
+  storeId?: number;
 }
 
 // Pagination Meta

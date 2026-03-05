@@ -14,3 +14,12 @@ export interface IntegrationResponse {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface StoreResponse {
+  id: number;
+  name: string;
+  description: string;
+  merchantId: number;
+  createdAt: string;
+  updatedAt: string;
+}

@@ -62,8 +62,8 @@ export function Sidebar({
       <div
         className={`
           fixed inset-y-0 right-0 z-40 transform transition-transform duration-300
-          ${open ? 'translate-x-0' : 'translate-x-full'}
-          lg:translate-x-0 lg:static lg:inset-0
+          ${open ? 'translate-x-0 pointer-events-auto' : 'translate-x-full pointer-events-none'}
+          lg:translate-x-0 lg:pointer-events-auto lg:static lg:inset-0
         `}
       >
         <div

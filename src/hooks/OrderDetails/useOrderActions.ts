@@ -307,8 +307,8 @@ export function useOrderActions({
         return false;
       }
 
-      const updateData: Partial<Order> = {
-        notes: notes,
+      const updateData = {
+        eventNote: notes,
       };
       return await handleStatusUpdateAndNavigate(status, updateData);
     },

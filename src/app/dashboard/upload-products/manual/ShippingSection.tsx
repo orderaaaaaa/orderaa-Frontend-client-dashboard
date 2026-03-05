@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import Input from '@/components/ui/Input';
-import { getShippingGovernorates, getShippingCities } from '@/lib/api/lookups';
+import { getShippingGovernorates, getShippingCities, getShippingTypes } from '@/lib/api/lookups';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import useShippingCompanies from '@/hooks/useShippingCompanies';
 import { ShippingSectionProps } from './types';
 
@@ -17,10 +19,14 @@ function ShippingSection({
   governorate,
   city,
   shippingCost,
+  shippingType,
+  returnShipmentContent,
   onShippingCompanyChange,
   onGovernorateChange,
   onCityChange,
   onShippingCostChange,
+  onShippingTypeChange,
+  onReturnShipmentContentChange,
   errors,
 }: ShippingSectionProps) {
   const [governorates, setGovernorates] = useState<LocationOption[]>([]);
@@ -31,6 +37,37 @@ function ShippingSection({
 
   const { shippingCompanies, isLoading: loadingShippingCompanies } =
     useShippingCompanies(true);
+
+  const { data: shippingTypes = [], isLoading: loadingShippingTypes } = useQuery<
+    { key: string; label: string }[]
+  >({
+    queryKey: [QUERY_KEYS.SHIPPING_TYPES],
+    queryFn: getShippingTypes,
+    staleTime: Infinity,
+  });
+
+  const shippingTypeMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    shippingTypes.forEach((t) => {
+      map[t.key] = t.label;
+    });
+    return map;
+  }, [shippingTypes]);
+
+  const shippingTypeReverseMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    shippingTypes.forEach((t) => {
+      map[t.label] = t.key;
+    });
+    return map;
+  }, [shippingTypes]);
+
+  const shippingTypeOptions = useMemo(
+    () => shippingTypes.map((t) => t.label),
+    [shippingTypes]
+  );
+
+  const requiresReturnContent = ['PARTIAL_RETURN', 'EXCHANGE', 'RETURN'].includes(shippingType);
 
   const shippingCompanyMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -246,6 +283,49 @@ function ShippingSection({
               error={errors?.shippingCost}
             />
           </div>
+
+          <div className="flex flex-col gap-2" data-field-error="shippingType">
+            <label className="font-medium text-[16px]">
+              نوع الشحنة <span className="text-red-500">*</span>
+            </label>
+            <SearchableSelect
+              value={shippingType ? shippingTypeMap[shippingType] || '' : ''}
+              onValueChange={(label) => {
+                const key = shippingTypeReverseMap[label] || '';
+                onShippingTypeChange(key);
+                if (!['PARTIAL_RETURN', 'EXCHANGE', 'RETURN'].includes(key)) {
+                  onReturnShipmentContentChange('');
+                }
+              }}
+              options={shippingTypeOptions}
+              placeholder="اختر نوع الشحنة"
+              searchPlaceholder="بحث عن نوع..."
+              emptyMessage="لا توجد أنواع متاحة"
+              noResultsMessage="لا توجد نتائج للبحث"
+              triggerClassName={`w-full rounded-lg h-12 ${errors?.shippingType ? 'border-red-500' : 'border-[#CED4DA]'}`}
+              searchThreshold={5}
+              loading={loadingShippingTypes}
+            />
+            {errors?.shippingType && (
+              <p className="text-red-500 text-sm">{errors.shippingType}</p>
+            )}
+          </div>
+
+          {requiresReturnContent && (
+            <div className="flex flex-col gap-2" data-field-error="returnShipmentContent">
+              <label className="font-medium text-[16px]">
+                محتوى شحنة الاسترجاع <span className="text-red-500">*</span>
+              </label>
+              <Input
+                name="returnShipmentContent"
+                placeholder="أدخل محتوى شحنة الاسترجاع"
+                className="w-full"
+                value={returnShipmentContent}
+                onChange={(e) => onReturnShipmentContentChange(e.target.value)}
+                error={errors?.returnShipmentContent}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

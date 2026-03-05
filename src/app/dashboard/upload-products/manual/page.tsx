@@ -46,6 +46,8 @@ function Manual() {
         governorate: '',
         city: '',
         shippingCost: '',
+        shippingType: '',
+        returnShipmentContent: '',
       },
       payment: {
         paymentMethod: 'CASH',
@@ -84,6 +86,8 @@ function Manual() {
           governorate: data.shipping.governorate,
           city: data.shipping.city,
           shippingCost: data.shipping.shippingCost || '',
+          shippingType: data.shipping.shippingType,
+          returnShipmentContent: data.shipping.returnShipmentContent,
         },
         paymentMethod: data.payment.paymentMethod,
         needsConfirmation: data.needsConfirmation,
@@ -128,6 +132,8 @@ function Manual() {
       if (errors.shipping?.governorate) return 'governorate';
       if (errors.shipping?.city) return 'city';
       if (errors.shipping?.shippingCost) return 'shippingCost';
+      if (errors.shipping?.shippingType) return 'shippingType';
+      if (errors.shipping?.returnShipmentContent) return 'returnShipmentContent';
       if (errors.payment?.paymentMethod) return 'paymentMethod';
       return null;
     };
@@ -199,6 +205,8 @@ function Manual() {
           governorate={formValues.shipping.governorate}
           city={formValues.shipping.city}
           shippingCost={formValues.shipping.shippingCost || ''}
+          shippingType={formValues.shipping.shippingType}
+          returnShipmentContent={formValues.shipping.returnShipmentContent || ''}
           onShippingCompanyChange={(v) => {
             setValue('shipping.shippingCompany', v);
             clearErrors('shipping.shippingCompany');
@@ -215,11 +223,21 @@ function Manual() {
             setValue('shipping.shippingCost', v);
             clearErrors('shipping.shippingCost');
           }}
+          onShippingTypeChange={(v) => {
+            setValue('shipping.shippingType', v);
+            clearErrors('shipping.shippingType');
+          }}
+          onReturnShipmentContentChange={(v) => {
+            setValue('shipping.returnShipmentContent', v);
+            clearErrors('shipping.returnShipmentContent');
+          }}
           errors={{
             shippingCompany: errors.shipping?.shippingCompany?.message,
             governorate: errors.shipping?.governorate?.message,
             city: errors.shipping?.city?.message,
             shippingCost: errors.shipping?.shippingCost?.message,
+            shippingType: errors.shipping?.shippingType?.message,
+            returnShipmentContent: errors.shipping?.returnShipmentContent?.message,
           }}
         />
 

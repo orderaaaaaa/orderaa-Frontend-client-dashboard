@@ -5,11 +5,13 @@ import {
   LiaAngleDownSolid,
   LiaAngleLeftSolid,
   LiaAngleRightSolid,
+  LiaStopCircleSolid,
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { useDropdownState } from '@/hooks/OrderDetails/useDropdownState';
 import { FollowUpDropdown } from './FollowUpDropdown';
 import { ActionsDropdown } from './ActionsDropdown';
+import { POST_CONFIRMED_STATUSES } from './constants';
 
 export interface OrderActionsFooterProps {
   orderStatus: string;
@@ -34,6 +36,7 @@ export function OrderActionsFooterLargeScreens({
   isNavigatingNext = false,
   isNavigatingPrevious = false,
 }: OrderActionsFooterProps) {
+  const isPostConfirmed = POST_CONFIRMED_STATUSES.has(orderStatus);
   const followUpDropdown = useDropdownState();
   const actionsDropdown = useDropdownState();
 
@@ -94,55 +97,66 @@ export function OrderActionsFooterLargeScreens({
           </Button>
         </div>
 
-        <div className="relative" ref={actionsDropdown.ref}>
-          <div className="flex flex-row gap-2">
-            {orderStatus !== 'CONFIRMED' && (
-              <Button
-                variant="default"
-                onClick={onConfirm}
-                className="py-2 px-10 rounded-2xl bg-primary text-white text-sm font-bold hover:bg-[#4B1BC4] transition-all duration-700 hover:scale-105 flex items-center gap-2"
-              >
-                <LiaCheckCircle className="w-5 h-5" />
-                تأكيد
-              </Button>
-            )}
+        {isPostConfirmed ? (
+          <Button
+            variant="default"
+            onClick={() => onActionClick('وقف التشغيل', 'stop_operation')}
+            className="py-2 px-10 rounded-2xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-all duration-700 hover:scale-105 flex items-center gap-2"
+          >
+            <LiaStopCircleSolid className="w-5 h-5" />
+            وقف التشغيل
+          </Button>
+        ) : (
+          <div className="relative" ref={actionsDropdown.ref}>
+            <div className="flex flex-row gap-2">
+              {orderStatus !== 'CONFIRMED' && (
+                <Button
+                  variant="default"
+                  onClick={onConfirm}
+                  className="py-2 px-10 rounded-2xl bg-primary text-white text-sm font-bold hover:bg-[#4B1BC4] transition-all duration-700 hover:scale-105 flex items-center gap-2"
+                >
+                  <LiaCheckCircle className="w-5 h-5" />
+                  تأكيد
+                </Button>
+              )}
 
-            <div className="relative" ref={followUpDropdown.ref}>
-              <Button
-                variant="outline"
-                onClick={handleFollowUpToggle}
-                className="py-2 px-10 border-2 rounded-2xl border-primary text-primary text-sm font-bold hover:bg-purple-50 transition-colors flex items-center gap-2"
-              >
-                <LiaCommentDotsSolid className="w-5 h-5" />
-                متابعة
-              </Button>
+              <div className="relative" ref={followUpDropdown.ref}>
+                <Button
+                  variant="outline"
+                  onClick={handleFollowUpToggle}
+                  className="py-2 px-10 border-2 rounded-2xl border-primary text-primary text-sm font-bold hover:bg-purple-50 transition-colors flex items-center gap-2"
+                >
+                  <LiaCommentDotsSolid className="w-5 h-5" />
+                  متابعة
+                </Button>
 
-              <FollowUpDropdown
-                isOpen={followUpDropdown.isOpen}
-                onClick={handleFollowUpClick}
-              />
+                <FollowUpDropdown
+                  isOpen={followUpDropdown.isOpen}
+                  onClick={handleFollowUpClick}
+                />
+              </div>
+
+              <Button
+                variant="ghost"
+                onClick={handleActionsToggle}
+                className="w-9 h-9 p-0 rounded-full border-2 border-primary hover:bg-purple-50 transition-colors"
+              >
+                <LiaAngleDownSolid
+                  className={`w-5 h-5 text-primary transition-all ${
+                    actionsDropdown.isOpen ? 'rotate-180' : ''
+                  }`}
+                />
+              </Button>
             </div>
 
-            <Button
-              variant="ghost"
-              onClick={handleActionsToggle}
-              className="w-9 h-9 p-0 rounded-full border-2 border-primary hover:bg-purple-50 transition-colors"
-            >
-              <LiaAngleDownSolid
-                className={`w-5 h-5 text-primary transition-all ${
-                  actionsDropdown.isOpen ? 'rotate-180' : ''
-                }`}
-              />
-            </Button>
+            <ActionsDropdown
+              isOpen={actionsDropdown.isOpen}
+              orderStatus={orderStatus}
+              lastEventStatus={lastEventStatus}
+              onActionClick={handleActionClick}
+            />
           </div>
-
-          <ActionsDropdown
-            isOpen={actionsDropdown.isOpen}
-            orderStatus={orderStatus}
-            lastEventStatus={lastEventStatus}
-            onActionClick={handleActionClick}
-          />
-        </div>
+        )}
       </div>
     </div>
   );

@@ -83,6 +83,9 @@ export function buildApiFiltersFromUrlState(urlFilters: UrlFilterState): FilterO
     if (localFilters.productId) {
         filters.productId = localFilters.productId;
     }
+    if (localFilters.storeId) {
+        filters.storeId = Number(localFilters.storeId);
+    }
     if (localFilters.cancellationReasons?.length) {
         filters.cancellationReasons = localFilters.cancellationReasons;
     }
@@ -110,6 +113,7 @@ export function useUnifiedFilters() {
         address: '',
         executionDate: '',
         productId: '',
+        storeId: '',
         cancellationReasons: [],
     });
 

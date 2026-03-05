@@ -1,5 +1,12 @@
 import http from '@/lib/api/http';
-import { IntegrationResponse } from '../types/apiIntegration';
+import { IntegrationResponse, StoreResponse } from '../types/apiIntegration';
+
+export const storeApi = {
+  create: async (data: { name: string; description?: string }): Promise<StoreResponse> => {
+    const response = await http.post<StoreResponse>('/stores', data);
+    return response.data;
+  },
+};
 
 export const integrationApi = {
   // GET /integration-configs

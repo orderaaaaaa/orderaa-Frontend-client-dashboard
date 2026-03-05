@@ -23,6 +23,8 @@ export const manualOrderSchema = z
       governorate: z.string().min(1, 'يرجى اختيار المحافظة'),
       city: z.string().min(1, 'يرجى اختيار المدينة'),
       shippingCost: z.string().optional(),
+      shippingType: z.string().min(1, 'يرجى اختيار نوع الشحنة'),
+      returnShipmentContent: z.string().optional(),
     }),
     payment: z.object({
       paymentMethod: z.string().min(1, 'يرجى اختيار طريقة الدفع'),
@@ -36,6 +38,16 @@ export const manualOrderSchema = z
         code: z.ZodIssueCode.custom,
         message: 'يرجى إدخال رقم صحيح',
         path: ['shipping', 'shippingCost'],
+      });
+    }
+    const requiresReturnContent = ['PARTIAL_RETURN', 'EXCHANGE', 'RETURN'].includes(
+      data.shipping.shippingType
+    );
+    if (requiresReturnContent && !data.shipping.returnShipmentContent?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'يرجى إدخال محتوى شحنة الاسترجاع',
+        path: ['shipping', 'returnShipmentContent'],
       });
     }
     if (data.total && isNaN(Number(data.total))) {

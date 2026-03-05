@@ -258,7 +258,7 @@ export function useUrlFilters(): UseUrlFiltersReturn {
       // Determine if this is a text input (should be debounced)
       const textFields = ['customerName', 'phone', 'shipmentCode', 'address', 'search'];
       const isTextInput = Object.keys(newLocalFilters).some((key) =>
-        textFields.includes(key)
+        textFields.includes(key) && !!newLocalFilters[key as keyof OrderFilters]
       );
 
       let shouldUpdate = true;

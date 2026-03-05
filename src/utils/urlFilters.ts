@@ -36,6 +36,7 @@ export const DEFAULT_FILTER_STATE: UrlFilterState = {
     newFirst: undefined,
     orderByDirection: undefined,
     productId: '',
+    storeId: '',
     cancellationReasons: [],
   },
 };
@@ -165,6 +166,9 @@ export function serializeFiltersToUrl(state: UrlFilterState): URLSearchParams {
   if (localFilters.productId) {
     params.set('productId', localFilters.productId);
   }
+  if (localFilters.storeId) {
+    params.set('storeId', localFilters.storeId);
+  }
   if (localFilters.cancellationReasons?.length) {
     params.set('cancellationReasons', localFilters.cancellationReasons.join(','));
   }
@@ -226,6 +230,7 @@ export function parseFiltersFromUrl(params: URLSearchParams): UrlFilterState {
     newFirst,
     orderByDirection,
     productId: params.get('productId') || '',
+    storeId: params.get('storeId') || '',
     cancellationReasons: params.get('cancellationReasons')
       ? params.get('cancellationReasons')!.split(',')
       : [],
@@ -278,6 +283,7 @@ export function areFiltersEqual(a: UrlFilterState, b: UrlFilterState): boolean {
   if (aFilters.newFirst !== bFilters.newFirst) return false;
   if (aFilters.orderByDirection !== bFilters.orderByDirection) return false;
   if (aFilters.productId !== bFilters.productId) return false;
+  if (aFilters.storeId !== bFilters.storeId) return false;
   const aReasons = aFilters.cancellationReasons || [];
   const bReasons = bFilters.cancellationReasons || [];
   if (aReasons.length !== bReasons.length || !aReasons.every((r, i) => r === bReasons[i])) return false;

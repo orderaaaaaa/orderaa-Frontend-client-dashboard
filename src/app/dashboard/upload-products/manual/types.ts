@@ -34,15 +34,21 @@ export type ShippingSectionProps = {
   governorate: string;
   city: string;
   shippingCost: string;
+  shippingType: string;
+  returnShipmentContent: string;
   onShippingCompanyChange: (v: string) => void;
   onGovernorateChange: (v: string) => void;
   onCityChange: (v: string) => void;
   onShippingCostChange: (v: string) => void;
+  onShippingTypeChange: (v: string) => void;
+  onReturnShipmentContentChange: (v: string) => void;
   errors?: {
     shippingCompany?: string;
     governorate?: string;
     city?: string;
     shippingCost?: string;
+    shippingType?: string;
+    returnShipmentContent?: string;
   };
 };
 

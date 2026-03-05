@@ -9,6 +9,8 @@ import MultiSelectDropdown from "@/components/ui/MultiSelectDropdown";
 import { DatePicker } from "@/components/ui/datepicker";
 import { useGovernoratesQuery, useCitiesQuery } from "@/services/lookups";
 import { useCancellationReasons } from "@/services/orders";
+import { useQuery } from "@tanstack/react-query";
+import http from "@/lib/api/http";
 import { LiaTimesSolid } from "react-icons/lia";
 import { Button } from "@/components/ui/button";
 import { formatDateForUrl } from "@/utils/urlFilters";
@@ -28,12 +30,13 @@ export const FILTER_DEFINITIONS: FilterDefinition[] = [
   { key: 'phone', label: 'رقم الهاتف', type: 'text' },
   { key: 'executionDate', label: 'تاريخ التنفيذ', type: 'date' },
   { key: 'employeeName', label: 'اسم الموظف', type: 'placeholder' },
-  { key: 'productName', label: 'اسم الحملة', type: 'select' },
+  { key: 'productName', label: 'المنتج', type: 'select' },
   { key: 'governorate', label: 'المحافظة', type: 'select' },
   { key: 'area', label: 'المنطقة', type: 'select' },
   { key: 'sizeColor', label: 'المصدر', type: 'select' },
   { key: 'productId', label: 'المنتج', type: 'select' },
   { key: 'address', label: 'العنوان', type: 'text' },
+  { key: 'storeId', label: 'اسم المتجر', type: 'select' },
   { key: 'cancellationReasons', label: 'سبب الإلغاء', type: 'multiselect', visibleStatuses: ['CANCELLED'] },
   { key: 'newFirst', label: 'الأحدث', type: 'select' },
   { key: 'orderByDirection', label: 'الترتيب', type: 'select' },
@@ -86,15 +89,27 @@ export default function FilterPanel({
   activeFilters,
   onRemoveFilter,
 }: Props) {
+  const isProductNameActive = activeFilters.includes('productName');
   const isGovernorateActive = activeFilters.includes('governorate');
   const isAreaActive = activeFilters.includes('area');
   const isCancellationReasonActive = activeFilters.includes('cancellationReasons');
+  const isStoreActive = activeFilters.includes('storeId');
 
   const selectedGovernorate = useWatch({
     control,
     name: "governorate",
   });
 
+  const { data: productOptions = [], isLoading: isLoadingProducts } = useQuery({
+    queryKey: ['products-filter-options'],
+    queryFn: async () => {
+      const response = await http.get<{ data: { id: number; name: string }[] }>('/products', {
+        params: { page: 1, limit: 100 },
+      });
+      return response.data.data.map((p) => p.name);
+    },
+    staleTime: Infinity,
+  });
   const { data: governorates = [] } = useGovernoratesQuery(isGovernorateActive || isAreaActive);
   const { data: cities = [], isLoading: isLoadingCities } = useCitiesQuery(isAreaActive ? selectedGovernorate : undefined);
   const { data: cancellationReasons = [] } = useCancellationReasons(isCancellationReasonActive);
@@ -102,6 +117,15 @@ export default function FilterPanel({
     () => cancellationReasons.map((r) => ({ key: r.reasonName, value: r.reasonName })),
     [cancellationReasons]
   );
+  const { data: storeOptions = [], isLoading: isLoadingStores } = useQuery({
+    queryKey: ['stores-filter-options'],
+    queryFn: async () => {
+      const response = await http.get<{ id: number; name: string }[]>('/stores');
+      return response.data.map((s) => ({ key: String(s.id), value: s.name }));
+    },
+    enabled: isStoreActive,
+    staleTime: Infinity,
+  });
 
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -187,9 +211,10 @@ export default function FilterPanel({
                     value={field.value || ''}
                     onChange={field.onChange}
                     onBlur={field.onBlur}
-                    options={options.productOptions}
-                    placeholder={label}
+                    options={productOptions}
+                    placeholder={isLoadingProducts ? "جاري التحميل..." : label}
                     widthClass="w-full"
+                    loading={isLoadingProducts}
                     error={errors.productName?.message}
                   />
                 </FilterChip>
@@ -284,6 +309,28 @@ export default function FilterPanel({
                     options={options.sizeColorOptions}
                     placeholder={label}
                     widthClass="w-full"
+                  />
+                </FilterChip>
+              )}
+            />
+          );
+        }
+        if (key === 'storeId') {
+          return (
+            <Controller
+              key={key}
+              name="storeId"
+              control={control}
+              render={({ field }) => (
+                <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter}>
+                  <SearchableSelect
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    options={storeOptions}
+                    placeholder={isLoadingStores ? "جاري التحميل..." : label}
+                    widthClass="w-full"
+                    loading={isLoadingStores}
                   />
                 </FilterChip>
               )}

@@ -21,6 +21,7 @@ export const QUERY_KEYS = {
   PAYMENT_METHODS: 'payment-methods',
   PAYMENT_STATUSES: 'payment-statuses',
   CATEGORIES: 'categories',
+  SHIPPING_TYPES: 'shipping-types',
   UTM_SOURCES: 'utm-sources',
 
   // Cancellation Reasons

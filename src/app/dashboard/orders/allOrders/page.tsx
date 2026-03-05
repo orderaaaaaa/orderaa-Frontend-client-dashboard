@@ -104,6 +104,7 @@ function AllOrdersContent() {
       params.set('newFirst', String(localFilters.newFirst));
     if (localFilters.orderByDirection)
       params.set('orderByDirection', localFilters.orderByDirection);
+    if (localFilters.storeId) params.set('storeId', localFilters.storeId);
 
     return params.toString();
   }, [filters]);
@@ -211,9 +212,26 @@ function AllOrdersContent() {
     control,
     formState: { errors },
     setValue,
+    reset,
   } = useFilterForm({
     onSubmit: handleFormSubmit,
   });
+
+  const hasResetFromUrl = useRef(false);
+  useEffect(() => {
+    if (isInitialized && !hasResetFromUrl.current) {
+      hasResetFromUrl.current = true;
+      const { localFilters } = filters;
+      const hasAnyFilter = Object.entries(localFilters).some(([key, value]) => {
+        if (key === 'newFirst') return value !== undefined;
+        if (key === 'cancellationReasons') return Array.isArray(value) && value.length > 0;
+        return !!value;
+      });
+      if (hasAnyFilter) {
+        reset(localFilters, { keepDefaultValues: true });
+      }
+    }
+  }, [isInitialized, filters, reset]);
 
   // Handle order selection
   const handleOrderSelect = useCallback(
@@ -441,6 +459,7 @@ function AllOrdersContent() {
           governorateOptions: options.governorates || [],
           areaOptions: options.areas || [],
         }}
+        initialFormFilters={isInitialized ? filters.localFilters : null}
         currentStatus={filters.status}
       />
 

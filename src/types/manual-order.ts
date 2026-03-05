@@ -28,4 +28,6 @@ export type ManualOrderPayload = {
   governorate: string;
   city: string;
   total: number;
+  shippingType: string;
+  returnShipmentContent?: string;
 };
