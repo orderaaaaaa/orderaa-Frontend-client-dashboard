@@ -46,7 +46,7 @@ function Manual() {
         governorate: '',
         city: '',
         shippingCost: '',
-        shippingType: '',
+        shippingType: 'DELIVERY',
         returnShipmentContent: '',
       },
       payment: {

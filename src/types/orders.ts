@@ -275,8 +275,8 @@ export interface OrderEvent {
   createdAt: string;
   employee?: {
     id: number;
-    fullName: string;
-    department: string;
+    name: string;
+    department?: string;
   } | null;
 }
 

@@ -8,6 +8,7 @@ const INITIAL_FILTERS: InvoiceFilters = {
   searchQuery: '',
   supplierName: '',
   transactionType: '',
+  acceptanceStatus: '',
   totalAmount: '',
   employeeName: '',
   fromDate: null,
@@ -82,6 +83,10 @@ export function useInvoiceFilters() {
         return false;
       }
 
+      if (filters.acceptanceStatus && invoice.acceptanceStatus !== filters.acceptanceStatus) {
+        return false;
+      }
+
       if (filters.totalAmount) {
         const amount = parseFloat(filters.totalAmount);
         if (!isNaN(amount) && invoice.totalAmount !== amount) {
@@ -108,6 +113,7 @@ export function useInvoiceFilters() {
       !!debouncedSearchQuery ||
       !!filters.supplierName ||
       !!filters.transactionType ||
+      !!filters.acceptanceStatus ||
       !!filters.totalAmount ||
       !!filters.employeeName ||
       !!filters.fromDate ||

@@ -2,6 +2,8 @@
 
 import { useCallback, useRef } from 'react';
 import type { UseScannerFeedbackReturn } from '../types';
+import errorSoundFile from '@/assets/sounds/error-sound.mp3';
+import successSoundFile from '@/assets/sounds/success.mp3';
 
 export function useScannerFeedback(): UseScannerFeedbackReturn {
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -48,11 +50,23 @@ export function useScannerFeedback(): UseScannerFeedbackReturn {
   );
 
   const playSuccessSound = useCallback(() => {
-    playBeep(800, 150);
+    try {
+      const audio = new Audio(successSoundFile);
+      audio.volume = 0.3;
+      audio.play();
+    } catch {
+      playBeep(800, 150);
+    }
   }, [playBeep]);
 
   const playErrorSound = useCallback(() => {
-    playBeep(300, 300);
+    try {
+      const audio = new Audio(errorSoundFile);
+      audio.volume = 0.3;
+      audio.play();
+    } catch {
+      playBeep(300, 300);
+    }
   }, [playBeep]);
 
   return { playSuccessSound, playErrorSound };

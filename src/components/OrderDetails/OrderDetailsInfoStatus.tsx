@@ -18,7 +18,7 @@ interface EventCardProps {
   date: string;
   time: string;
   employee?: {
-    fullName: string;
+    name: string;
     department?: string;
   } | null;
   utmSource?: string;
@@ -86,10 +86,10 @@ function EventCard({
         </p>
 
         {employee && (
-          <p className="text-[11px] text-gray-500 break-words">
-            {employee.fullName}
+          <p className="text-[11px] text-black break-words">
+            اسم الموظف: {employee.name}
             {employee.department && (
-              <span className="text-gray-400"> ({employee.department})</span>
+              <span className="text-gray-400">قسم: {employee.department}</span>
             )}
           </p>
         )}

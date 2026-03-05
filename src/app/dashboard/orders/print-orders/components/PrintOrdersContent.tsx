@@ -456,8 +456,8 @@ export function PrintOrdersContent() {
   }, [selectAllMatchingFilters, orders, selectedOrders, callAgainMutation, clearSelections, setSelectMode]);
 
   const handleCallAgain = useCallback(() => {
-    withPrintedCheck(executeCallAgain);
-  }, [withPrintedCheck, executeCallAgain]);
+    executeCallAgain();
+  }, [executeCallAgain]);
 
   const executeChangeProduct = useCallback(() => {
     setIsChangeProductModalOpen(true);
@@ -466,8 +466,8 @@ export function PrintOrdersContent() {
   const handleChangeProduct = useCallback(() => {
     const ordersToProcess = selectAllMatchingFilters ? orders : selectedOrders;
     if (ordersToProcess.length === 0) return;
-    withPrintedCheck(executeChangeProduct);
-  }, [selectAllMatchingFilters, orders, selectedOrders, withPrintedCheck, executeChangeProduct]);
+    executeChangeProduct();
+  }, [selectAllMatchingFilters, orders, selectedOrders, executeChangeProduct]);
 
   const handleChangeProductSubmit = useCallback(
     async (ordersWithNotes: { id: number; packagingNote: string }[]) => {

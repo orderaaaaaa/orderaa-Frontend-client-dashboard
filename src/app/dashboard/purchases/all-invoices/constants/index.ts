@@ -10,6 +10,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-02-10T10:30:00Z',
     totalAmount: 20000,
     transactionType: 'مدفوع',
+    acceptanceStatus: 'فواتير مقبولة',
     imageUrl: 'https://placehold.co/600x400.png',
   },
   {
@@ -21,6 +22,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-02-09T14:00:00Z',
     totalAmount: 15000,
     transactionType: 'مرتجع',
+    acceptanceStatus: 'فواتير غير مقبولة',
   },
   {
     id: 3,
@@ -31,6 +33,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-02-08T09:15:00Z',
     totalAmount: 35000,
     transactionType: 'استبدال',
+    acceptanceStatus: 'فواتير مقبولة',
   },
   {
     id: 4,
@@ -41,6 +44,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-02-07T11:45:00Z',
     totalAmount: 8500,
     transactionType: 'مدفوع',
+    acceptanceStatus: 'فواتير غير مقبولة',
   },
   {
     id: 5,
@@ -51,6 +55,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-02-06T16:20:00Z',
     totalAmount: 42000,
     transactionType: 'مرتجع',
+    acceptanceStatus: 'فواتير مقبولة',
   },
   {
     id: 6,
@@ -61,6 +66,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-02-05T08:00:00Z',
     totalAmount: 12000,
     transactionType: 'استبدال',
+    acceptanceStatus: 'فواتير غير مقبولة',
   },
   {
     id: 7,
@@ -71,6 +77,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-02-04T13:30:00Z',
     totalAmount: 27500,
     transactionType: 'مدفوع',
+    acceptanceStatus: 'فواتير مقبولة',
   },
   {
     id: 8,
@@ -81,6 +88,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-02-03T10:00:00Z',
     totalAmount: 31000,
     transactionType: 'مرتجع',
+    acceptanceStatus: 'فواتير غير مقبولة',
   },
   {
     id: 9,
@@ -91,6 +99,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-02-02T15:45:00Z',
     totalAmount: 5000,
     transactionType: 'مدفوع',
+    acceptanceStatus: 'فواتير مقبولة',
   },
   {
     id: 10,
@@ -101,6 +110,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-02-01T09:30:00Z',
     totalAmount: 38000,
     transactionType: 'استبدال',
+    acceptanceStatus: 'فواتير غير مقبولة',
   },
   {
     id: 11,
@@ -111,6 +121,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-01-31T12:00:00Z',
     totalAmount: 14500,
     transactionType: 'مدفوع',
+    acceptanceStatus: 'فواتير مقبولة',
   },
   {
     id: 12,
@@ -121,6 +132,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-01-30T17:15:00Z',
     totalAmount: 22000,
     transactionType: 'مرتجع',
+    acceptanceStatus: 'فواتير غير مقبولة',
   },
   {
     id: 13,
@@ -131,6 +143,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-01-29T08:30:00Z',
     totalAmount: 16000,
     transactionType: 'استبدال',
+    acceptanceStatus: 'فواتير مقبولة',
   },
   {
     id: 14,
@@ -141,6 +154,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-01-28T14:45:00Z',
     totalAmount: 29000,
     transactionType: 'مدفوع',
+    acceptanceStatus: 'فواتير غير مقبولة',
   },
   {
     id: 15,
@@ -151,6 +165,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-01-27T11:00:00Z',
     totalAmount: 9500,
     transactionType: 'مرتجع',
+    acceptanceStatus: 'فواتير مقبولة',
   },
   {
     id: 16,
@@ -161,6 +176,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-01-26T16:30:00Z',
     totalAmount: 33000,
     transactionType: 'مدفوع',
+    acceptanceStatus: 'فواتير غير مقبولة',
   },
   {
     id: 17,
@@ -171,6 +187,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-01-25T09:00:00Z',
     totalAmount: 11500,
     transactionType: 'استبدال',
+    acceptanceStatus: 'فواتير مقبولة',
   },
   {
     id: 18,
@@ -181,6 +198,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-01-24T13:15:00Z',
     totalAmount: 26000,
     transactionType: 'مدفوع',
+    acceptanceStatus: 'فواتير غير مقبولة',
   },
   {
     id: 19,
@@ -191,6 +209,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-01-23T10:45:00Z',
     totalAmount: 19000,
     transactionType: 'مرتجع',
+    acceptanceStatus: 'فواتير مقبولة',
   },
   {
     id: 20,
@@ -201,6 +220,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-01-22T15:30:00Z',
     totalAmount: 17500,
     transactionType: 'مدفوع',
+    acceptanceStatus: 'فواتير غير مقبولة',
   },
   {
     id: 21,
@@ -211,6 +231,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-01-21T08:15:00Z',
     totalAmount: 24000,
     transactionType: 'استبدال',
+    acceptanceStatus: 'فواتير مقبولة',
   },
   {
     id: 22,
@@ -221,6 +242,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-01-20T12:00:00Z',
     totalAmount: 7500,
     transactionType: 'مدفوع',
+    acceptanceStatus: 'فواتير غير مقبولة',
   },
   {
     id: 23,
@@ -231,6 +253,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-01-19T14:30:00Z',
     totalAmount: 41000,
     transactionType: 'مرتجع',
+    acceptanceStatus: 'فواتير مقبولة',
   },
   {
     id: 24,
@@ -241,6 +264,7 @@ export const MOCK_INVOICES: Invoice[] = [
     createdAt: '2026-01-18T09:45:00Z',
     totalAmount: 13000,
     transactionType: 'استبدال',
+    acceptanceStatus: 'فواتير غير مقبولة',
   },
 ];
 
@@ -264,4 +288,9 @@ export const MOCK_EMPLOYEE_OPTIONS = [
   { key: 'سارة احمد', value: 'سارة احمد' },
   { key: 'محمد علي', value: 'محمد علي' },
   { key: 'احمد محمود', value: 'احمد محمود' },
+];
+
+export const MOCK_ACCEPTANCE_STATUS_OPTIONS = [
+  { key: 'فواتير مقبولة', value: 'فواتير مقبولة' },
+  { key: 'فواتير غير مقبولة', value: 'فواتير غير مقبولة' },
 ];

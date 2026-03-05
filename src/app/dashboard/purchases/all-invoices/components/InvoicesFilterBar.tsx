@@ -8,6 +8,7 @@ import {
   MOCK_SUPPLIER_OPTIONS,
   MOCK_INVOICE_TYPE_OPTIONS,
   MOCK_EMPLOYEE_OPTIONS,
+  MOCK_ACCEPTANCE_STATUS_OPTIONS,
 } from '../constants';
 
 interface InvoicesFilterBarProps {
@@ -22,7 +23,7 @@ interface InvoicesFilterBarProps {
 const InvoicesFilterBar = memo(
   ({ filters, onFilterChange, onClearFilter }: InvoicesFilterBarProps) => {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         <div className="flex flex-col gap-1">
           <SearchableSelect
             options={MOCK_SUPPLIER_OPTIONS}
@@ -65,6 +66,17 @@ const InvoicesFilterBar = memo(
             placeholder="اسم الموظف"
             clearable
             onClear={() => onClearFilter('employeeName')}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <SearchableSelect
+            options={MOCK_ACCEPTANCE_STATUS_OPTIONS}
+            value={filters.acceptanceStatus}
+            onChange={(v) => onFilterChange('acceptanceStatus', v)}
+            placeholder="حالة القبول"
+            clearable
+            onClear={() => onClearFilter('acceptanceStatus')}
           />
         </div>
       </div>
