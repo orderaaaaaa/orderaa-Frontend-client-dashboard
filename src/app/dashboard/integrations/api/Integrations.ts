@@ -3,7 +3,6 @@ import {
   CreateIntegrationRequest,
   IntegrationResponse,
   StoreResponse,
-  UpdateIntegrationRequest,
 } from '../types/apiIntegration';
 
 export const storeApi = {
@@ -34,14 +33,4 @@ export const integrationApi = {
     return response.data;
   },
 
-  update: async (
-    configId: number,
-    data: UpdateIntegrationRequest
-  ): Promise<IntegrationResponse> => {
-    const response = await http.put<IntegrationResponse>(
-      `/integration-configs/${configId}`,
-      data
-    );
-    return response.data;
-  },
 };

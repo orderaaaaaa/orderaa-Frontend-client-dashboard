@@ -1,12 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import EasyOrderModal from './components/EasyOrderModal';
-import { webhookApi, WebhookConfigResponse } from '@/lib/api/webhooks';
 import { platforms } from './constants/platforms';
 import { IntegrationCard } from './components/IntegrationCard';
 import { Notification } from './components/Notification';
-import { useGetWebhookConfig } from './hooks/useGetWebhookConfig';
 import { useIntegrations } from './hooks/useIntegrations';
 
 const IntegrationsPage = () => {
@@ -17,8 +15,7 @@ const IntegrationsPage = () => {
     type: 'success' | 'error';
   } | null>(null);
 
-  const { data: easyData, isLoading: isLoadingWebHook } = useGetWebhookConfig();
-  const { integrations } = useIntegrations();
+  const { integrations, isLoading } = useIntegrations();
 
   const handleCardButtonClick = (platformId: string) => {
     if (platformId === 'easyorder') {
@@ -51,7 +48,7 @@ const IntegrationsPage = () => {
             </p>
           </div>
 
-          {isLoadingWebHook ? (
+          {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[1, 2, 3, 4].map((i) => (
                 <div
@@ -75,7 +72,6 @@ const IntegrationsPage = () => {
                   platform={platform}
                   integrations={integrations}
                   onButtonClick={handleCardButtonClick}
-                  webhookConfig={easyData}
                 />
               ))}
             </div>
@@ -87,7 +83,6 @@ const IntegrationsPage = () => {
         isOpen={isEasyOrderModalOpen}
         onClose={handleModalClose}
         onSuccess={handleModalSuccess}
-        existingConfig={easyData}
       />
 
       {notification && (

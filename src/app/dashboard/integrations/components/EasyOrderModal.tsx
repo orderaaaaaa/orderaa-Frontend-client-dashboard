@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   LiaShoppingCartSolid,
   LiaCopySolid,
@@ -10,7 +10,6 @@ import {
   LiaLinkSolid,
   LiaKeySolid,
 } from 'react-icons/lia';
-import { webhookApi, WebhookConfigResponse } from '@/lib/api/webhooks';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import BaseModal from '@/components/ui/base-modal';
@@ -21,11 +20,13 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '@/components/ui/accordion';
-import { useGetWebhookConfig } from '../hooks/useGetWebhookConfig';
 import { useIntegrations } from '../hooks/useIntegrations';
 import { storeApi } from '../api/Integrations';
-import { IntegrationProvider, IntegrationConfigType } from '../types/apiIntegration';
-import { useQueryClient } from '@tanstack/react-query';
+import {
+  IntegrationProvider,
+  IntegrationConfigType,
+  IntegrationResponse,
+} from '../types/apiIntegration';
 import { useAuthStore } from '@/store/authStore';
 import { integrationSteps, webhookSteps } from '../constants/steps';
 import { toast } from 'react-toastify';
@@ -33,6 +34,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import clsx from 'clsx';
+import groupBy from 'lodash/groupBy';
 
 const storeInfoSchema = z.object({
   storeName: z.string().min(1, 'اسم المتجر مطلوب'),
@@ -40,8 +42,8 @@ const storeInfoSchema = z.object({
 });
 
 const webhookSchema = z.object({
-  webhookUrl: z.string().url('رابط غير صالح').or(z.literal('')),
-  webhookSecret: z.string().min(10, 'يجب أن يكون 10 أحرف على الأقل'),
+  webhookUrl: z.string(),
+  webhookSecret: z.string().min(1, 'مفتاح Webhook مطلوب'),
 });
 
 const apiKeySchema = z.object({
@@ -56,7 +58,6 @@ interface EasyOrderModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  existingConfig?: WebhookConfigResponse;
 }
 
 const STEPPER_STEPS = [
@@ -69,15 +70,11 @@ const EasyOrderModal = ({
   isOpen,
   onClose,
 }: EasyOrderModalProps) => {
-  const queryClient = useQueryClient();
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const { user } = useAuthStore();
   const merchantId = user?.merchantId;
 
   const [copied, setCopied] = useState(false);
-  const [existingIntegrationId, setExistingIntegrationId] = useState<
-    number | null
-  >(null);
   const [createdStoreId, setCreatedStoreId] = useState<number | null>(null);
   const [showStepper, setShowStepper] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -85,16 +82,25 @@ const EasyOrderModal = ({
   const [error, setError] = useState<string>('');
   const stepperRef = useRef<HTMLDivElement>(null);
 
-  const { data: webhookData } = useGetWebhookConfig();
-  const { integrations, createIntegration, updateIntegration } =
-    useIntegrations();
+  const { integrations, createIntegration } = useIntegrations();
 
-  const getDefaultWebhookUrl = (merchantId?: string | number): string => {
-    if (!API_URL || merchantId == null) return '';
-    return `${API_URL}/webhooks/easy-orders/${merchantId}`;
+  const easyOrderIntegrations = useMemo(() => {
+    if (!integrations) return [];
+    return integrations.filter(
+      (c) => c.provider === IntegrationProvider.EASY_ORDERS
+    );
+  }, [integrations]);
+
+  const storeGroups = useMemo(() => {
+    return groupBy(easyOrderIntegrations, 'storeId');
+  }, [easyOrderIntegrations]);
+
+  const hasConnectedStore = easyOrderIntegrations.length > 0;
+
+  const getWebhookUrl = (storeId: number): string => {
+    if (!API_URL) return '';
+    return `${API_URL}/webhook/orders/${IntegrationProvider.EASY_ORDERS}/${storeId}`;
   };
-
-  const defaultWebhookUrl = getDefaultWebhookUrl(merchantId);
 
   const storeInfoForm = useForm<StoreInfoFormData>({
     resolver: zodResolver(storeInfoSchema),
@@ -111,25 +117,6 @@ const EasyOrderModal = ({
     defaultValues: { apiKey: '' },
   });
 
-  useEffect(() => {
-    if (webhookData) {
-      webhookForm.setValue('webhookSecret', webhookData.webhookSecret || '');
-      webhookForm.setValue('webhookUrl', webhookData.webhookUrl || '');
-    } else if (defaultWebhookUrl) {
-      webhookForm.setValue('webhookUrl', defaultWebhookUrl);
-    }
-  }, [webhookData, defaultWebhookUrl]);
-
-  useEffect(() => {
-    if (integrations) {
-      const existing = integrations.find((c) => c.provider === 'EASY_ORDERS');
-      if (existing) {
-        apiKeyForm.setValue('apiKey', existing.apiKey);
-        setExistingIntegrationId(existing.id);
-      }
-    }
-  }, [integrations]);
-
   const onStoreInfoSubmit = storeInfoForm.handleSubmit(async (data) => {
     setError('');
     setIsLoading(true);
@@ -139,8 +126,7 @@ const EasyOrderModal = ({
         description: data.description?.trim() || undefined,
       });
       setCreatedStoreId(store.id);
-      const webhookUrl = `${API_URL}/webhooks/easy-orders/${store.id}`;
-      webhookForm.setValue('webhookUrl', webhookUrl);
+      webhookForm.setValue('webhookUrl', getWebhookUrl(store.id));
       toast.success('تم إنشاء المتجر بنجاح');
       setCurrentStep(1);
     } catch (err: any) {
@@ -151,35 +137,35 @@ const EasyOrderModal = ({
   });
 
   const handleCopyUrl = () => {
-    const urlToCopy =
-      webhookForm.getValues('webhookUrl')?.trim() || defaultWebhookUrl;
-    navigator.clipboard.writeText(urlToCopy);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    const urlToCopy = webhookForm.getValues('webhookUrl')?.trim();
+    if (urlToCopy) {
+      navigator.clipboard.writeText(urlToCopy);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   const onWebhookSubmit = webhookForm.handleSubmit(async (data) => {
     setError('');
     setIsLoading(true);
     try {
-      const finalUrl = data.webhookUrl.trim() || defaultWebhookUrl;
-      if (webhookData) {
-        await webhookApi.updateConfig({
-          webhookUrl: finalUrl,
-          webhookSecret: data.webhookSecret.trim(),
-        });
-        toast.success('تم تحديث اعدادات الـ Webhook بنجاح');
-      } else {
-        await webhookApi.createConfig({
-          webhookUrl: finalUrl,
-          webhookSecret: data.webhookSecret.trim(),
-        });
-        toast.success('تم حفظ اعدادات الـ Webhook بنجاح');
+      if (!createdStoreId) {
+        setError('لم يتم تحديد المتجر');
+        setIsLoading(false);
+        return;
       }
-      queryClient.invalidateQueries({ queryKey: ['webhook-config'] });
+
+      await createIntegration({
+        storeId: createdStoreId,
+        provider: IntegrationProvider.EASY_ORDERS,
+        configType: IntegrationConfigType.WEBHOOK,
+        apiKey: data.webhookSecret.trim(),
+      });
+
+      toast.success('تم حفظ اعدادات الـ Webhook بنجاح');
       setCurrentStep(2);
-    } catch {
-      setError('خطأ في حفظ الـ Webhook');
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'خطأ في حفظ الـ Webhook');
     } finally {
       setIsLoading(false);
     }
@@ -189,52 +175,43 @@ const EasyOrderModal = ({
     setError('');
     setIsLoading(true);
     try {
-      const storeId = createdStoreId ?? existingIntegration?.storeId;
-      if (!storeId) {
+      if (!createdStoreId) {
         setError('لم يتم تحديد المتجر');
         setIsLoading(false);
         return;
       }
 
-      if (existingIntegrationId) {
-        await updateIntegration({
-          configId: existingIntegrationId,
-          data: {
-            storeId,
-            configType: IntegrationConfigType.API,
-            apiKey: data.apiKey.trim(),
-            isActive: true,
-          },
-        });
-        toast.success('تم تحديث اعدادات ربط API بنجاح');
-      } else {
-        await createIntegration({
-          storeId,
-          provider: IntegrationProvider.EASY_ORDERS,
-          configType: IntegrationConfigType.API,
-          apiKey: data.apiKey.trim(),
-        });
-        toast.success('تم انشاء ربط API بنجاح');
-      }
-      queryClient.invalidateQueries({ queryKey: ['integration-configs'] });
+      await createIntegration({
+        storeId: createdStoreId,
+        provider: IntegrationProvider.EASY_ORDERS,
+        configType: IntegrationConfigType.API,
+        apiKey: data.apiKey.trim(),
+      });
+
+      toast.success('تم انشاء ربط API بنجاح');
       setShowStepper(false);
       setCurrentStep(0);
-    } catch {
-      setError('خطأ في حفظ مفتاح API');
+      resetForms();
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'خطأ في حفظ مفتاح API');
     } finally {
       setIsLoading(false);
     }
   });
+
+  const resetForms = () => {
+    storeInfoForm.reset();
+    webhookForm.reset();
+    apiKeyForm.reset();
+    setCreatedStoreId(null);
+  };
 
   const handleClose = () => {
     if (!isLoading) {
       setError('');
       setShowStepper(false);
       setCurrentStep(0);
-      setCreatedStoreId(null);
-      storeInfoForm.clearErrors();
-      webhookForm.clearErrors();
-      apiKeyForm.clearErrors();
+      resetForms();
       onClose();
     }
   };
@@ -246,20 +223,22 @@ const EasyOrderModal = ({
       setShowStepper(true);
       setCurrentStep(0);
       setError('');
-      storeInfoForm.clearErrors();
-      webhookForm.clearErrors();
-      apiKeyForm.clearErrors();
+      resetForms();
       setTimeout(() => {
         stepperRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 100);
     }
   };
 
-  const isWebhookConnected = !!webhookData?.webhookSecret;
-  const existingIntegration = integrations?.find(
-    (c) => c.provider === 'EASY_ORDERS'
-  );
-  const hasConnectedStore = isWebhookConnected || !!existingIntegration;
+  const getStoreConfigs = (configs: IntegrationResponse[]) => {
+    const webhookConfig = configs.find(
+      (c) => c.configType === IntegrationConfigType.WEBHOOK
+    );
+    const apiConfig = configs.find(
+      (c) => c.configType === IntegrationConfigType.API
+    );
+    return { webhookConfig, apiConfig };
+  };
 
   return (
     <BaseModal
@@ -419,12 +398,9 @@ const EasyOrderModal = ({
                       <Input
                         register={webhookForm.register}
                         name="webhookUrl"
-                        type="url"
-                        inputClassName="text-sm"
+                        inputClassName="text-sm bg-gray-50"
                         placeholder="https://..."
-                        error={
-                          webhookForm.formState.errors.webhookUrl?.message
-                        }
+                        disabled
                       />
                     </div>
 
@@ -433,7 +409,7 @@ const EasyOrderModal = ({
                       name="webhookSecret"
                       label="Webhook Secret"
                       type="password"
-                      placeholder="Secret key (10 أحرف على الأقل)"
+                      placeholder="أدخل مفتاح Webhook..."
                       error={
                         webhookForm.formState.errors.webhookSecret?.message
                       }
@@ -469,7 +445,7 @@ const EasyOrderModal = ({
                       name="apiKey"
                       label="API Key"
                       type="password"
-                      placeholder="Enter your API key"
+                      placeholder="أدخل مفتاح API..."
                       error={apiKeyForm.formState.errors.apiKey?.message}
                     />
                   </div>
@@ -480,11 +456,7 @@ const EasyOrderModal = ({
                       disabled={isLoading}
                       className="flex-1 bg-primary text-white h-10"
                     >
-                      {isLoading
-                        ? 'جاري الحفظ...'
-                        : existingIntegrationId
-                          ? 'تحديث API'
-                          : 'حفظ'}
+                      {isLoading ? 'جاري الحفظ...' : 'حفظ'}
                     </Button>
                     <Button
                       type="button"
@@ -513,103 +485,106 @@ const EasyOrderModal = ({
             المتاجر المربوطة
           </h4>
           {hasConnectedStore ? (
-          <Accordion type="single" collapsible className="space-y-3 pb-5">
-              <AccordionItem
-                value="easyorder"
-                className="bg-white rounded-xl border border-gray-200 px-4"
-              >
-                <AccordionTrigger className="hover:no-underline">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-10 h-10 bg-blue-50 border border-[#2489E1]/20 rounded-lg">
-                      <LiaShoppingCartSolid className="w-6 h-6 text-[#001A72]" />
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-gray-900">Easy Order</p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        {isWebhookConnected && (
-                          <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                            <LiaCheckCircleSolid className="w-3 h-3" />
-                            Webhook
-                          </span>
-                        )}
-                        {existingIntegration && (
-                          <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                            <LiaCheckCircleSolid className="w-3 h-3" />
-                            API
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-3 pt-2">
-                    {webhookData && (
-                      <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                          Webhook
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">URL</span>
-                          <span className="text-sm text-gray-800 max-w-[300px] truncate">
-                            {webhookData.webhookUrl}
-                          </span>
+            <Accordion type="single" collapsible className="space-y-3 pb-5">
+              {Object.entries(storeGroups).map(([storeId, configs]) => {
+                const { webhookConfig, apiConfig } = getStoreConfigs(configs);
+                return (
+                  <AccordionItem
+                    key={storeId}
+                    value={`store-${storeId}`}
+                    className="bg-white rounded-xl border border-gray-200 px-4"
+                  >
+                    <AccordionTrigger className="hover:no-underline">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-10 h-10 bg-blue-50 border border-[#2489E1]/20 rounded-lg">
+                          <LiaShoppingCartSolid className="w-6 h-6 text-[#001A72]" />
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Secret</span>
-                          <span className="text-sm text-gray-800">
-                            {'•'.repeat(12)}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">الحالة</span>
-                          <span
-                            className={clsx(
-                              'text-xs font-medium px-2 py-0.5 rounded-full',
-                              webhookData.isActive
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-gray-100 text-gray-600'
+                        <div className="text-right">
+                          <p className="font-semibold text-gray-900">
+                            متجر #{storeId}
+                          </p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            {webhookConfig && (
+                              <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                                <LiaCheckCircleSolid className="w-3 h-3" />
+                                Webhook
+                              </span>
                             )}
-                          >
-                            {webhookData.isActive ? 'مفعّل' : 'معطّل'}
-                          </span>
+                            {apiConfig && (
+                              <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                                <LiaCheckCircleSolid className="w-3 h-3" />
+                                API
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    )}
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-3 pt-2">
+                        {webhookConfig && (
+                          <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                              Webhook
+                            </p>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-600">Secret</span>
+                              <span className="text-sm text-gray-800">
+                                {'•'.repeat(8)}
+                                {webhookConfig.apiKey.slice(-4)}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-600">الحالة</span>
+                              <span
+                                className={clsx(
+                                  'text-xs font-medium px-2 py-0.5 rounded-full',
+                                  webhookConfig.isActive
+                                    ? 'bg-green-100 text-green-700'
+                                    : 'bg-gray-100 text-gray-600'
+                                )}
+                              >
+                                {webhookConfig.isActive ? 'مفعّل' : 'معطّل'}
+                              </span>
+                            </div>
+                          </div>
+                        )}
 
-                    {existingIntegration && (
-                      <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                          API Key
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">
-                            المفتاح
-                          </span>
-                          <span className="text-sm text-gray-800">
-                            {'•'.repeat(8)}
-                            {existingIntegration.apiKey.slice(-4)}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">الحالة</span>
-                          <span
-                            className={clsx(
-                              'text-xs font-medium px-2 py-0.5 rounded-full',
-                              existingIntegration.isActive
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-gray-100 text-gray-600'
-                            )}
-                          >
-                            {existingIntegration.isActive ? 'مفعّل' : 'معطّل'}
-                          </span>
-                        </div>
+                        {apiConfig && (
+                          <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                              API Key
+                            </p>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-600">
+                                المفتاح
+                              </span>
+                              <span className="text-sm text-gray-800">
+                                {'•'.repeat(8)}
+                                {apiConfig.apiKey.slice(-4)}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-600">الحالة</span>
+                              <span
+                                className={clsx(
+                                  'text-xs font-medium px-2 py-0.5 rounded-full',
+                                  apiConfig.isActive
+                                    ? 'bg-green-100 text-green-700'
+                                    : 'bg-gray-100 text-gray-600'
+                                )}
+                              >
+                                {apiConfig.isActive ? 'مفعّل' : 'معطّل'}
+                              </span>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-          </Accordion>
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
+            </Accordion>
           ) : (
             <div className="bg-gray-50 rounded-xl border border-dashed border-gray-300 p-8 text-center">
               <LiaLinkSolid className="w-10 h-10 text-gray-300 mx-auto mb-3" />
