@@ -185,9 +185,26 @@ export function CallCenterContent() {
     control,
     formState: { errors },
     setValue,
+    reset,
   } = useFilterForm({
     onSubmit: handleFormSubmit,
   });
+
+  const hasResetFromUrl = useRef(false);
+  useEffect(() => {
+    if (isInitialized && !hasResetFromUrl.current) {
+      hasResetFromUrl.current = true;
+      const { localFilters } = filters;
+      const hasAnyFilter = Object.entries(localFilters).some(([key, value]) => {
+        if (key === 'newFirst') return value !== undefined;
+        if (key === 'cancellationReasons') return Array.isArray(value) && value.length > 0;
+        return !!value;
+      });
+      if (hasAnyFilter) {
+        reset(localFilters, { keepDefaultValues: true });
+      }
+    }
+  }, [isInitialized, filters, reset]);
 
   const handlePrepared = useCallback(() => {
     toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى تم التحضير`);
@@ -271,6 +288,8 @@ export function CallCenterContent() {
           areaOptions: options.areas || [],
           productIdOptions,
         }}
+        initialFormFilters={isInitialized ? filters.localFilters : null}
+        currentStatus={filters.status}
         printStatus={printStatus}
         onPrintStatusChange={setPrintStatus}
         selectedOrders={selectedOrders}
@@ -355,6 +374,7 @@ export function CallCenterContent() {
                 showAllItems
                 states={order.states}
                 isBlocked={order.customers.isBlocked}
+                customerNotes={order.customers.notes}
               />
             ))}
           </div>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import { DatePicker } from '@/components/ui/datepicker';
+import Input from '@/components/ui/Input';
 import { LiaCalendarAltSolid, LiaMoneyBillWaveSolid } from 'react-icons/lia';
 import { z } from 'zod';
 
@@ -169,27 +170,14 @@ export default function UrgentModal({
             />
           </div>
 
-          {/* Shipping Cost */}
-          <div className="flex-1 flex flex-col gap-2">
-            <label className="font-bold text-[#1F1F1F] flex items-center gap-2">
-              <LiaMoneyBillWaveSolid className="w-5 h-5" />
-              مصاريف الشحن
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={shippingCost}
-              onChange={handleShippingCostChange}
-              placeholder="0"
-              className={`w-full border rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:border-transparent ${shippingCostError
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'border-[#ECECEC] focus:ring-primary'
-                }`}
-            />
-            {shippingCostError && (
-              <span className="text-red-500 text-sm">{shippingCostError}</span>
-            )}
-          </div>
+          <Input
+            label="مصاريف الشحن"
+            value={shippingCost}
+            onChange={handleShippingCostChange}
+            placeholder="0"
+            error={shippingCostError}
+            className="flex-1"
+          />
         </div>
       </div>
     </BaseModal>

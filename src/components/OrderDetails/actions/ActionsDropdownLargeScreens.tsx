@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { useDropdownState } from '@/hooks/OrderDetails/useDropdownState';
 import { FollowUpDropdown } from './FollowUpDropdown';
 import { ActionsDropdown } from './ActionsDropdown';
-import { POST_CONFIRMED_STATUSES } from './constants';
+import { STOP_OPERATION_STATUSES } from './constants';
 
 export interface OrderActionsFooterProps {
   orderStatus: string;
@@ -36,7 +36,7 @@ export function OrderActionsFooterLargeScreens({
   isNavigatingNext = false,
   isNavigatingPrevious = false,
 }: OrderActionsFooterProps) {
-  const isPostConfirmed = POST_CONFIRMED_STATUSES.has(orderStatus);
+  const showStopOperation = STOP_OPERATION_STATUSES.has(orderStatus);
   const followUpDropdown = useDropdownState();
   const actionsDropdown = useDropdownState();
 
@@ -97,7 +97,7 @@ export function OrderActionsFooterLargeScreens({
           </Button>
         </div>
 
-        {isPostConfirmed ? (
+        {showStopOperation ? (
           <Button
             variant="default"
             onClick={() => onActionClick('وقف التشغيل', 'stop_operation')}

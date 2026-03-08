@@ -1,14 +1,33 @@
-// Types and Interfaces
-export interface IntegrationRequest {
-  provider: string;
+export enum IntegrationProvider {
+  EASY_ORDERS = 'EASY_ORDERS',
+  SHOPIFY = 'SHOPIFY',
+}
+
+export enum IntegrationConfigType {
+  API = 'API',
+  WEBHOOK = 'WEBHOOK',
+}
+
+export interface CreateIntegrationRequest {
+  storeId: number;
+  provider: IntegrationProvider;
+  configType: IntegrationConfigType;
+  apiKey: string;
+}
+
+export interface UpdateIntegrationRequest {
+  storeId: number;
+  configType: IntegrationConfigType;
   apiKey: string;
   isActive: boolean;
 }
 
 export interface IntegrationResponse {
   id: number;
+  storeId: number;
   merchantId: number;
-  provider: string;
+  provider: IntegrationProvider;
+  configType: IntegrationConfigType;
   apiKey: string;
   isActive: boolean;
   createdAt: string;

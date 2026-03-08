@@ -31,6 +31,7 @@ export const manualOrderSchema = z
     }),
     needsConfirmation: z.boolean(),
     total: z.string().optional(),
+    packagingNotes: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.shipping.shippingCost && isNaN(Number(data.shipping.shippingCost))) {

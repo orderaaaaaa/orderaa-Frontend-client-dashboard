@@ -283,6 +283,7 @@ export default function CustomerOrdersModal({
                       showAllItems
                       states={order.states}
                       isBlocked={order.customers.isBlocked}
+                      customerNotes={order.customers.notes}
                     />
                   </div>
                 ))}

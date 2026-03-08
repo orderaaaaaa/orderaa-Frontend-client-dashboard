@@ -26,6 +26,7 @@ export function buildManualOrderPayload(args: {
   paymentMethod: string;
   needsConfirmation: boolean;
   total?: string;
+  packagingNotes?: string;
   selectedProducts: SelectedProductWithVariants[];
 }): ManualOrderPayload {
   const {
@@ -36,6 +37,7 @@ export function buildManualOrderPayload(args: {
     paymentMethod,
     needsConfirmation,
     total,
+    packagingNotes,
     selectedProducts,
   } = args;
 
@@ -63,6 +65,9 @@ export function buildManualOrderPayload(args: {
     shippingType: shipping.shippingType,
     ...(shipping.returnShipmentContent?.trim() && {
       returnShipmentContent: shipping.returnShipmentContent.trim(),
+    }),
+    ...(packagingNotes?.trim() && {
+      packagingNotes: packagingNotes.trim(),
     }),
   };
 }

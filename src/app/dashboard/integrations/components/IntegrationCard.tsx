@@ -1,10 +1,10 @@
-// components/IntegrationCard.tsx
 import { Button } from '@/components/ui/button';
-import { CheckCircle2 } from 'lucide-react';
+import { LiaCheckCircleSolid } from 'react-icons/lia';
 import Image from 'next/image';
 import { Else, If, Then } from 'react-if';
 import { IntegrationCardProps } from '../types/platformAndIntegrationCard';
 import { useMemo } from 'react';
+import { IntegrationConfigType } from '../types/apiIntegration';
 
 export const IntegrationCard = ({
   platform,
@@ -15,25 +15,39 @@ export const IntegrationCard = ({
   const WebhookEasyOrderConnect =
     platform.id === 'easyorder' && webhookConfig && webhookConfig.isActive;
 
+  const isWebhookConnected = useMemo(() => {
+    return integrations?.some(
+      (item) =>
+        item.provider === platform.providerKey &&
+        item.configType === IntegrationConfigType.WEBHOOK &&
+        item.isActive
+    );
+  }, [integrations, platform.providerKey]);
+
   const isApiConnected = useMemo(() => {
     return integrations?.some(
-      (item) => item.provider === platform.providerKey && item.isActive
+      (item) =>
+        item.provider === platform.providerKey &&
+        item.configType === IntegrationConfigType.API &&
+        item.isActive
     );
-  }, [integrations]);
+  }, [integrations, platform.providerKey]);
+
+  const hasConnection = WebhookEasyOrderConnect || isWebhookConnected || isApiConnected;
 
   return (
     <div className="relative bg-white rounded-2xl p-8 transition-all duration-300 border border-gray-200 hover:border-gray-300 hover:shadow-md">
       <div className="absolute top-4 left-4 flex gap-2 items-end">
-        {WebhookEasyOrderConnect && (
+        {(WebhookEasyOrderConnect || isWebhookConnected) && (
           <div className="bg-green-100 text-green-700 text-[10px] font-medium px-2 py-1 rounded-full flex items-center gap-1">
-            <CheckCircle2 className="w-3 h-3" />
+            <LiaCheckCircleSolid className="w-3 h-3" />
             متصل Webhook
           </div>
         )}
 
         {isApiConnected && (
           <div className="bg-green-100 text-green-700 text-[10px] font-medium px-2 py-1 rounded-full flex items-center gap-1">
-            <CheckCircle2 className="w-3 h-3" />
+            <LiaCheckCircleSolid className="w-3 h-3" />
             متصل API
           </div>
         )}
@@ -62,7 +76,7 @@ export const IntegrationCard = ({
         className={`
           w-full h-12 rounded-lg font-medium text-white transition-all duration-200
           ${platform.isActive
-            ? WebhookEasyOrderConnect || isApiConnected
+            ? hasConnection
               ? 'bg-gray-600 hover:bg-gray-700'
               : 'bg-primary hover:bg-[#4A1CB8] active:bg-[#3D17A0]'
             : 'bg-gray-400 cursor-not-allowed'
@@ -72,9 +86,7 @@ export const IntegrationCard = ({
       >
         <If condition={platform.isActive}>
           <Then>
-            {WebhookEasyOrderConnect || isApiConnected
-              ? 'إدارة الربط'
-              : platform.buttonText}
+            {hasConnection ? 'إدارة الربط' : platform.buttonText}
           </Then>
           <Else>قريباً</Else>
         </If>

@@ -8,7 +8,9 @@ export type OrderProps = {
 
 export type OrderDetailsProps = {
   total: string;
+  packagingNotes: string;
   onTotalChange: (v: string) => void;
+  onPackagingNotesChange: (v: string) => void;
   errors?: { products?: string; total?: string };
 };
 

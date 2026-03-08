@@ -1,13 +1,12 @@
 import React from 'react';
 import { SvgIcon } from '@/components/ui/svg-icon';
+import { cn } from '@/lib/utils';
 
 interface StatsCardProps {
   iconSrc: string;
   label: string;
   value: string;
   subtitle?: string;
-  iconColor?: string;
-  iconBgColor?: string;
 }
 
 export const StatsCard: React.FC<StatsCardProps> = ({
@@ -16,14 +15,19 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   value,
   subtitle,
 }) => (
-  <div className="bg-white flex gap-4 rounded-lg py-5 px-4 items-start shadow-md border border-gray-100">
-    <div className="flex items-center justify-center rounded-lg p-2">
-      <SvgIcon src={iconSrc} className="w-9 h-9" alt={label} />
+  <div
+    className={cn(
+      'bg-white flex items-center gap-3 rounded-xl px-3 py-3 border border-gray-100',
+      'hover:shadow-sm transition-shadow min-w-0'
+    )}
+  >
+    <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-[#f1eefa] shrink-0">
+      <SvgIcon src={iconSrc} className="w-5 h-5" alt={label} />
     </div>
-    <div>
-      <span className="text-gray-600 text-2xl block mb-2">{label}</span>
-      <div className="text-3xl font-bold text-gray-900">{value}</div>
-      {subtitle && <div className="text-xs text-gray-500 mt-1">{subtitle}</div>}
+    <div className="min-w-0 flex-1">
+      <span className="text-gray-500 text-xs block truncate">{label}</span>
+      <div className="text-lg font-bold text-gray-900 leading-tight">{value}</div>
+      {subtitle ? <div className="text-[10px] text-gray-400 truncate">{subtitle}</div> : null}
     </div>
   </div>
 );

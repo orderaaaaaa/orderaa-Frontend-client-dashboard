@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
@@ -20,6 +20,8 @@ import { getRemainingTime } from '@/utils/getRemainingTime';
 import { LiaClock, LiaPrintSolid, LiaBanSolid, LiaExclamationCircleSolid } from 'react-icons/lia';
 import { OrderCardProps } from '@/app/dashboard/orders/allOrders/types/OrderProps';
 import { MdBlock } from 'react-icons/md';
+import BaseModal from '@/components/ui/base-modal';
+import { Button } from '@/components/ui/button';
 
 export default function OrderCard({
   id,
@@ -31,6 +33,7 @@ export default function OrderCard({
   price,
   shippingId,
   isBlocked,
+  customerNotes,
   trys,
   status,
   city,
@@ -54,6 +57,7 @@ export default function OrderCard({
   const router = useRouter();
   const { getStatusLabel } = useStatusLabel();
   const { classes, Icon } = getStatusBadgeConfig(status);
+  const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onSelectionChange?.(e.target.checked);
   };
@@ -121,9 +125,10 @@ export default function OrderCard({
                 `}
             >
               {repeatCount > 1 && (
-                <button
+                <Button
+                  variant="ghost"
                   onClick={handleRepeatClick}
-                  className="relative hover:scale-110 transition-transform"
+                  className="relative hover:scale-110 transition-transform p-0 h-auto"
                   title="عرض جميع طلبات العميل"
                 >
                   <TriangleAlert
@@ -133,7 +138,7 @@ export default function OrderCard({
                   <span className="absolute top-3 right-[-4px] w-4 h-4 text-[11px] font-bold bg-white text-red-600 rounded-full flex items-center justify-center">
                     {repeatCount}
                   </span>
-                </button>
+                </Button>
               )}
 
               <span className="text-xs text-primary whitespace-nowrap">
@@ -141,10 +146,17 @@ export default function OrderCard({
               </span>
               <If condition={isBlocked}>
                 <Then>
-                  <div className="flex items-center gap-1 p-1 px-3 bg-[#f4e2e2] border-2 border-[#eed0d1] rounded-sm">
+                  <Button
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsNotesModalOpen(true);
+                    }}
+                    className="flex items-center gap-1 p-1 px-3 h-auto bg-[#f4e2e2] border-2 border-[#eed0d1] rounded-sm hover:bg-[#f0d4d4] transition-colors"
+                  >
                     <MdBlock size={18} className="text-[#dc0201]" />
                     <span className="text-[#dc0201] text-xs">محظور</span>
-                  </div>
+                  </Button>
                 </Then>
               </If>
             </div>
@@ -337,6 +349,29 @@ export default function OrderCard({
           </Then>
         </If>
       </div>
+      <BaseModal
+        isOpen={isNotesModalOpen}
+        onClose={() => setIsNotesModalOpen(false)}
+        title="ملاحظات العميل"
+        showFooter={false}
+      >
+        <div className="flex flex-col gap-3">
+          {customerNotes && (Array.isArray(customerNotes) ? customerNotes.length > 0 : customerNotes.trim().length > 0) ? (
+            Array.isArray(customerNotes) ? (
+              customerNotes.map((note, index) => (
+                <p key={index} className="text-base text-[#1F1F1F] whitespace-pre-wrap">{note}</p>
+              ))
+            ) : (
+              <p className="text-base text-[#1F1F1F] whitespace-pre-wrap">{customerNotes}</p>
+            )
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 gap-3">
+              <MdBlock size={40} className="text-gray-300" />
+              <p className="text-base text-gray-400">لا توجد ملاحظات لهذا العميل</p>
+            </div>
+          )}
+        </div>
+      </BaseModal>
     </div>
   );
 }

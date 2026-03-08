@@ -7,6 +7,7 @@ import { LiaPlusSolid, LiaMinusSolid, LiaTrashSolid } from 'react-icons/lia';
 import { DataTable, DataTableColumn } from '@/components/ui/data-table';
 import { OrderDetailsProps } from './types';
 import Input from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/textarea';
 
 interface ProductTableRow {
   id: number;
@@ -19,7 +20,7 @@ interface ProductTableRow {
   variantKey: string;
 }
 
-function OrderDetails({ total, onTotalChange, errors }: OrderDetailsProps) {
+function OrderDetails({ total, packagingNotes, onTotalChange, onPackagingNotesChange, errors }: OrderDetailsProps) {
   const selectedProducts = useProductDropdownStore(
     (state) => state.selectedProducts
   );
@@ -209,9 +210,8 @@ function OrderDetails({ total, onTotalChange, errors }: OrderDetailsProps) {
           <ProductDropdown
             placeholder="ابحث عن منتج"
             className="w-full"
-            selectClassName={`border-2 w-full bg-[#EAEAEA40] p-2 rounded-sm ${
-              errors?.products && 'border-red-500'
-            }`}
+            selectClassName={`border-2 w-full bg-[#EAEAEA40] p-2 rounded-sm ${errors?.products && 'border-red-500'
+              }`}
           />
           {errors?.products && (
             <p className="text-red-600 text-sm mt-2">{errors.products}</p>
@@ -247,6 +247,21 @@ function OrderDetails({ total, onTotalChange, errors }: OrderDetailsProps) {
             </div>
           </>
         )}
+
+        <div className="mt-6">
+          <div className="mb-1">
+            <label className="block font-medium text-[16px]">
+              ملاحظات التغليف
+            </label>
+          </div>
+          <Textarea
+            name="packagingNotes"
+            placeholder="ملاحظات التغليف"
+            className="max-w-[1158px] h-[120px] bg-[#EAEAEA40]"
+            value={packagingNotes}
+            onChange={(e) => onPackagingNotesChange(e.target.value)}
+          />
+        </div>
       </div>
     </div>
   );

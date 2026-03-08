@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useUpdateCustomer } from '@/services/orders';
+import { toast } from 'react-toastify';
 
 /**
  * Options for usePhoneNumbers hook
@@ -83,8 +84,11 @@ export function usePhoneNumbers({
           onUpdate(updatedPhones);
         }
       } catch (error) {
-        console.error('Failed to update phone numbers:', error);
-        // Revert on error
+        const message =
+          error instanceof Error && 'response' in error
+            ? (error as any).response?.data?.message
+            : null;
+        toast.error(message || 'فشل في تحديث أرقام الهاتف');
         setPhoneNumbers(phoneNumbers);
       }
     },
@@ -121,8 +125,11 @@ export function usePhoneNumbers({
         onUpdate(updatedPhones);
       }
     } catch (error) {
-      console.error('Failed to update phone numbers:', error);
-      // Revert on error
+      const message =
+        error instanceof Error && 'response' in error
+          ? (error as any).response?.data?.message
+          : null;
+      toast.error(message || 'فشل في تحديث أرقام الهاتف');
       setPhoneNumbers(phoneNumbers);
     }
   }, [customerId, phoneNumbers, editingIndex, newPhoneNumber, onUpdate, updateCustomerMutation]);

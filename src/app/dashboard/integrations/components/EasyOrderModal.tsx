@@ -24,6 +24,7 @@ import {
 import { useGetWebhookConfig } from '../hooks/useGetWebhookConfig';
 import { useIntegrations } from '../hooks/useIntegrations';
 import { storeApi } from '../api/Integrations';
+import { IntegrationProvider, IntegrationConfigType } from '../types/apiIntegration';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
 import { integrationSteps, webhookSteps } from '../constants/steps';
@@ -77,6 +78,7 @@ const EasyOrderModal = ({
   const [existingIntegrationId, setExistingIntegrationId] = useState<
     number | null
   >(null);
+  const [createdStoreId, setCreatedStoreId] = useState<number | null>(null);
   const [showStepper, setShowStepper] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -136,6 +138,7 @@ const EasyOrderModal = ({
         name: data.storeName.trim(),
         description: data.description?.trim() || undefined,
       });
+      setCreatedStoreId(store.id);
       const webhookUrl = `${API_URL}/webhooks/easy-orders/${store.id}`;
       webhookForm.setValue('webhookUrl', webhookUrl);
       toast.success('تم إنشاء المتجر بنجاح');
@@ -186,14 +189,31 @@ const EasyOrderModal = ({
     setError('');
     setIsLoading(true);
     try {
+      const storeId = createdStoreId ?? existingIntegration?.storeId;
+      if (!storeId) {
+        setError('لم يتم تحديد المتجر');
+        setIsLoading(false);
+        return;
+      }
+
       if (existingIntegrationId) {
         await updateIntegration({
-          provider: 'EASY_ORDERS',
-          apiKey: data.apiKey.trim(),
+          configId: existingIntegrationId,
+          data: {
+            storeId,
+            configType: IntegrationConfigType.API,
+            apiKey: data.apiKey.trim(),
+            isActive: true,
+          },
         });
         toast.success('تم تحديث اعدادات ربط API بنجاح');
       } else {
-        await createIntegration(data.apiKey.trim());
+        await createIntegration({
+          storeId,
+          provider: IntegrationProvider.EASY_ORDERS,
+          configType: IntegrationConfigType.API,
+          apiKey: data.apiKey.trim(),
+        });
         toast.success('تم انشاء ربط API بنجاح');
       }
       queryClient.invalidateQueries({ queryKey: ['integration-configs'] });
@@ -211,6 +231,7 @@ const EasyOrderModal = ({
       setError('');
       setShowStepper(false);
       setCurrentStep(0);
+      setCreatedStoreId(null);
       storeInfoForm.clearErrors();
       webhookForm.clearErrors();
       apiKeyForm.clearErrors();
@@ -492,7 +513,7 @@ const EasyOrderModal = ({
             المتاجر المربوطة
           </h4>
           {hasConnectedStore ? (
-          <Accordion type="single" collapsible className="space-y-3">
+          <Accordion type="single" collapsible className="space-y-3 pb-5">
               <AccordionItem
                 value="easyorder"
                 className="bg-white rounded-xl border border-gray-200 px-4"

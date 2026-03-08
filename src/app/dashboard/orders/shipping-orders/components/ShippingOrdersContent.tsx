@@ -296,9 +296,26 @@ export function ShippingOrdersContent() {
     control,
     formState: { errors },
     setValue,
+    reset,
   } = useFilterForm({
     onSubmit: handleFormSubmit,
   });
+
+  const hasResetFromUrl = useRef(false);
+  useEffect(() => {
+    if (isInitialized && !hasResetFromUrl.current) {
+      hasResetFromUrl.current = true;
+      const { localFilters } = filters;
+      const hasAnyFilter = Object.entries(localFilters).some(([key, value]) => {
+        if (key === 'newFirst') return value !== undefined;
+        if (key === 'cancellationReasons') return Array.isArray(value) && value.length > 0;
+        return !!value;
+      });
+      if (hasAnyFilter) {
+        reset(localFilters, { keepDefaultValues: true });
+      }
+    }
+  }, [isInitialized, filters, reset]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -368,6 +385,8 @@ export function ShippingOrdersContent() {
           governorateOptions: options.governorates || [],
           areaOptions: options.areas || [],
         }}
+        initialFormFilters={isInitialized ? filters.localFilters : null}
+        currentStatus={filters.status}
         printStatus={printStatus}
         onPrintStatusChange={setPrintStatus}
         selectedOrders={selectedOrders}
@@ -455,6 +474,7 @@ export function ShippingOrdersContent() {
                 showAllItems
                 states={order.states}
                 isBlocked={order.customers.isBlocked}
+                customerNotes={order.customers.notes}
               />
             ))}
           </div>

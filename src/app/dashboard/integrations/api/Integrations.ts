@@ -1,5 +1,10 @@
 import http from '@/lib/api/http';
-import { IntegrationResponse, StoreResponse } from '../types/apiIntegration';
+import {
+  CreateIntegrationRequest,
+  IntegrationResponse,
+  StoreResponse,
+  UpdateIntegrationRequest,
+} from '../types/apiIntegration';
 
 export const storeApi = {
   create: async (data: { name: string; description?: string }): Promise<StoreResponse> => {
@@ -9,40 +14,33 @@ export const storeApi = {
 };
 
 export const integrationApi = {
-  // GET /integration-configs
   getAll: async (): Promise<IntegrationResponse[]> => {
-    const response = await http.get<IntegrationResponse[]>(
-      '/integration-configs'
+    const response = await http.get<IntegrationResponse[]>('/integration-configs');
+    return response.data;
+  },
+
+  getById: async (configId: number): Promise<IntegrationResponse> => {
+    const response = await http.get<IntegrationResponse>(
+      `/integration-configs/${configId}`
     );
     return response.data;
   },
 
-  // POST /integration-configs
-  create: async (apiKey: string): Promise<IntegrationResponse> => {
-    const payload = {
-      provider: 'EASY_ORDERS',
-      apiKey: apiKey,
-      isActive: true,
-    };
+  create: async (data: CreateIntegrationRequest): Promise<IntegrationResponse> => {
     const response = await http.post<IntegrationResponse>(
       '/integration-configs',
-      payload
+      data
     );
     return response.data;
   },
 
-  // PATCH /integration-configs/{id}
   update: async (
-    provider: string,
-    apiKey: string
+    configId: number,
+    data: UpdateIntegrationRequest
   ): Promise<IntegrationResponse> => {
-    const payload = {
-      apiKey: apiKey,
-      isActive: true,
-    };
     const response = await http.put<IntegrationResponse>(
-      `/integration-configs/${provider}`,
-      payload
+      `/integration-configs/${configId}`,
+      data
     );
     return response.data;
   },

@@ -1,13 +1,12 @@
 'use client';
 import React, { memo, useEffect, useRef, useState } from 'react';
-import { ShoppingBag } from 'lucide-react';
-import { TfiMore } from 'react-icons/tfi';
-import { LiaWhatsapp, LiaCalendarAltSolid } from 'react-icons/lia';
-import { GoMail, GoDotFill } from 'react-icons/go';
+import { LiaShoppingBagSolid, LiaWhatsapp, LiaCalendarAltSolid, LiaEllipsisVSolid } from 'react-icons/lia';
+import { LiaEnvelopeSolid, LiaCircleSolid } from 'react-icons/lia';
 import { If, Then } from 'react-if';
 import { getStatusColor } from '../lib/getBadgeColor';
 import { getActivityColor } from '../lib/getActivityColor';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
+import { Button } from '@/components/ui/button';
 import CustomerBanConfirmationModal from './modals/CustomerBanConfirmationModal';
 import { useEditCustomer } from '../hooks/useEditCustomer';
 import { toast } from 'react-toastify';
@@ -52,9 +51,7 @@ export const CustomerRow = memo(function CustomerRow({
         toast.success('تم إلغاء الحظر بنجاح');
       }
     },
-    onError: () => {
-      toast.error('حدث خطأ ما، يرجى المحاولة مرة أخرى');
-    },
+    onError: () => {},
   });
 
   useEffect(() => {
@@ -100,7 +97,7 @@ export const CustomerRow = memo(function CustomerRow({
           <div className="flex items-center gap-1">
             <If condition={customer.isBlocked}>
               <Then>
-                <GoDotFill className="text-[#f61515] w-5 h-5" />
+                <LiaCircleSolid className="text-[#f61515] w-5 h-5" />
               </Then>
             </If>
             <span className="font-semibold text-gray-900">{customer.name}</span>
@@ -131,7 +128,7 @@ export const CustomerRow = memo(function CustomerRow({
             <If condition={customer.email}>
               <Then>
                 <div className="flex items-center gap-2">
-                  <GoMail className="w-5 h-5 text-gray-600" />
+                  <LiaEnvelopeSolid className="w-5 h-5 text-gray-600" />
                   <span className="font-medium">{customer.email}</span>
                 </div>
               </Then>
@@ -141,7 +138,7 @@ export const CustomerRow = memo(function CustomerRow({
 
         <td className="px-4 py-4 text-center whitespace-nowrap">
           <div className="inline-flex items-center gap-2">
-            <ShoppingBag className="w-5 h-5 text-gray-500" />
+            <LiaShoppingBagSolid className="w-5 h-5 text-gray-500" />
             <span className="font-medium text-lg">
               {customer.numberOfOrders}
             </span>
@@ -201,29 +198,27 @@ export const CustomerRow = memo(function CustomerRow({
           onClick={(e) => e.stopPropagation()}
         >
           <div ref={menuRef} className="relative">
-            <button
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={() => setIsMenuOpen((v) => !v)}
-              className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
             >
-              <TfiMore className="w-5 h-5 text-gray-600" />
-            </button>
+              <LiaEllipsisVSolid className="w-5 h-5 text-gray-600" />
+            </Button>
             {isMenuOpen && (
               <div className="absolute left-0 mt-1 bg-white rounded-lg shadow-lg border z-10 min-w-[140px]">
-                <button
+                <Button
+                  variant="ghost"
                   onClick={handleBanClick}
                   disabled={isPending || isUpdating}
-                  className={`w-full px-6 py-2 transition-colors hover:bg-gray-50 cursor-pointer ${customer.isBlocked ? 'text-green-600' : 'text-red-600'
-                    } ${isPending || isUpdating
-                      ? 'opacity-50 cursor-not-allowed'
-                      : ''
-                    }`}
+                  className={`w-full justify-start ${customer.isBlocked ? 'text-green-600 hover:text-green-700' : 'text-red-600 hover:text-red-700'}`}
                 >
                   {isPending || isUpdating
                     ? 'جاري...'
                     : customer.isBlocked
                       ? 'إلغاء الحظر'
                       : 'حظر'}
-                </button>
+                </Button>
               </div>
             )}
           </div>

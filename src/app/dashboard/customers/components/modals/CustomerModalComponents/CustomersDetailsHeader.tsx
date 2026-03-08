@@ -1,5 +1,5 @@
 import React from 'react';
-import { ImBlocked } from 'react-icons/im';
+import { LiaBanSolid } from 'react-icons/lia';
 import { If, Then } from 'react-if';
 import { CustomersDetailsHeaderProps } from '../../../types/CustomersDetailsModal';
 
@@ -12,7 +12,7 @@ export const CustomersDetailsHeader = ({
       <div className="flex items-center gap-3">
         <If condition={isBlocked}>
           <Then>
-            <ImBlocked className="text-red-500 w-5 h-5 md:w-6 md:h-6" />
+            <LiaBanSolid className="text-red-500 w-5 h-5 md:w-6 md:h-6" />
           </Then>
         </If>
         <h1 className="text-xl md:text-2xl font-bold text-gray-900">

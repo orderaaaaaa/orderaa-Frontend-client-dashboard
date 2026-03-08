@@ -1,5 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { integrationApi } from '../api/Integrations';
+import {
+  CreateIntegrationRequest,
+  UpdateIntegrationRequest,
+} from '../types/apiIntegration';
 
 export const useIntegrations = () => {
   const queryClient = useQueryClient();
@@ -10,16 +14,20 @@ export const useIntegrations = () => {
   });
 
   const createIntegrationMutation = useMutation({
-    mutationFn: (apiKey: string) => integrationApi.create(apiKey),
+    mutationFn: (data: CreateIntegrationRequest) => integrationApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['integration-configs'] });
     },
   });
 
-  // NEW: Update mutation
   const updateIntegrationMutation = useMutation({
-    mutationFn: ({ provider, apiKey }: { provider: string; apiKey: string }) =>
-      integrationApi.update(provider, apiKey),
+    mutationFn: ({
+      configId,
+      data,
+    }: {
+      configId: number;
+      data: UpdateIntegrationRequest;
+    }) => integrationApi.update(configId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['integration-configs'] });
     },
@@ -29,7 +37,7 @@ export const useIntegrations = () => {
     integrations: integrationsQuery.data,
     isLoading: integrationsQuery.isLoading,
     createIntegration: createIntegrationMutation.mutateAsync,
-    updateIntegration: updateIntegrationMutation.mutateAsync, // Exported new hook
+    updateIntegration: updateIntegrationMutation.mutateAsync,
     isPending:
       createIntegrationMutation.isPending ||
       updateIntegrationMutation.isPending,

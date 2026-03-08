@@ -13,6 +13,7 @@ export interface OrderCardProps {
   city: string;
   address: string;
   isBlocked?: boolean;
+  customerNotes?: string | string[];
   alert: number;
   select: boolean;
   isSelected?: boolean;

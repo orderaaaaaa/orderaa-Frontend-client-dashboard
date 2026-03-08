@@ -1,7 +1,7 @@
-// useEditCustomer.ts
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { editCustomer } from '../api/editCustomer';
 import { UpdateCustomerPayload } from '../types/updateCustomerPayload';
+import { toast } from 'react-toastify';
 
 interface UseEditCustomerParams {
   customerId: number;
@@ -40,6 +40,11 @@ export function useEditCustomer(options?: {
       if (context?.previousCustomers) {
         queryClient.setQueryData(['customers'], context.previousCustomers);
       }
+      const message =
+        err instanceof Error && 'response' in err
+          ? (err as any).response?.data?.message
+          : null;
+      toast.error(message || 'فشل في تحديث بيانات العميل');
       options?.onError?.(err, variables);
     },
 

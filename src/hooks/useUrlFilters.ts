@@ -46,6 +46,9 @@ export function useUrlFilters(): UseUrlFiltersReturn {
   // Track pending URL update type (null = no pending, 'push' or 'replace')
   const pendingUrlUpdate = useRef<'push' | 'replace' | null>(null);
 
+  // Counter to force URL sync effect to run after debounced updates
+  const [urlSyncTrigger, setUrlSyncTrigger] = useState(0);
+
   // Ref to track if we're currently updating URL to prevent loops
   const isUpdatingUrl = useRef(false);
 
@@ -96,7 +99,7 @@ export function useUrlFilters(): UseUrlFiltersReturn {
     } else {
       router.push(newUrl, { scroll: false });
     }
-  }, [filters, isInitialized, pathname, router]);
+  }, [filters, isInitialized, pathname, router, urlSyncTrigger]);
 
   // Helper to schedule URL update after state change
   const scheduleUrlUpdate = useCallback((type: 'push' | 'replace') => {
@@ -107,6 +110,7 @@ export function useUrlFilters(): UseUrlFiltersReturn {
   const debouncedScheduleUrlUpdate = useDebouncedCallback(
     () => {
       scheduleUrlUpdate('replace');
+      setUrlSyncTrigger((c) => c + 1);
     },
     500
   );

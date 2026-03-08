@@ -11,7 +11,9 @@ export enum OrderStatus {
   CANCELLED = 'CANCELLED',
   UNCOMPLETED = 'UNCOMPLETED',
   CONFIRMED = 'CONFIRMED',
+  WAITING_FOR_PACKAGING = 'WAITING_FOR_PACKAGING',
   PREPARED = 'PREPARED',
+  WAITING_FOR_APPROVAL = 'WAITING_FOR_APPROVAL',
   SHIPPING = 'SHIPPING',
   RETURNED_DELIVERED = 'RETURNED_DELIVERED',
   DELIVERED = 'DELIVERED',
@@ -151,6 +153,7 @@ export interface Customer {
   area?: string;
   totalCustomerOrders?: number;
   isBlocked?: boolean;
+  notes?: string | string[];
 }
 
 // Product Interface

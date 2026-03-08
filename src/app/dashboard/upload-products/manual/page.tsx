@@ -54,6 +54,7 @@ function Manual() {
       },
       needsConfirmation: false,
       total: '',
+      packagingNotes: '',
     },
   });
 
@@ -92,6 +93,7 @@ function Manual() {
         paymentMethod: data.payment.paymentMethod,
         needsConfirmation: data.needsConfirmation,
         total: data.total,
+        packagingNotes: data.packagingNotes,
         selectedProducts: selectedProducts.map((p) => ({
           id: p.id,
           quantity: p.quantity || 1,
@@ -166,9 +168,13 @@ function Manual() {
         />
         <OrderDetails
           total={formValues.total || ''}
+          packagingNotes={formValues.packagingNotes || ''}
           onTotalChange={(v) => {
             setValue('total', v);
             clearErrors('total');
+          }}
+          onPackagingNotesChange={(v) => {
+            setValue('packagingNotes', v);
           }}
           errors={{ products: productsError || undefined, total: errors.total?.message }}
         />

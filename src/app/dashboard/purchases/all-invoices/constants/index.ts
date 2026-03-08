@@ -9,7 +9,7 @@ export const MOCK_INVOICES: Invoice[] = [
     employeeName: 'سارة احمد',
     createdAt: '2026-02-10T10:30:00Z',
     totalAmount: 20000,
-    transactionType: 'مدفوع',
+    transactionType: 'مشتريات',
     acceptanceStatus: 'فواتير مقبولة',
     imageUrl: 'https://placehold.co/600x400.png',
   },
@@ -43,7 +43,7 @@ export const MOCK_INVOICES: Invoice[] = [
     employeeName: 'احمد محمود',
     createdAt: '2026-02-07T11:45:00Z',
     totalAmount: 8500,
-    transactionType: 'مدفوع',
+    transactionType: 'مشتريات',
     acceptanceStatus: 'فواتير غير مقبولة',
   },
   {
@@ -76,7 +76,7 @@ export const MOCK_INVOICES: Invoice[] = [
     employeeName: 'احمد محمود',
     createdAt: '2026-02-04T13:30:00Z',
     totalAmount: 27500,
-    transactionType: 'مدفوع',
+    transactionType: 'مشتريات',
     acceptanceStatus: 'فواتير مقبولة',
   },
   {
@@ -98,7 +98,7 @@ export const MOCK_INVOICES: Invoice[] = [
     employeeName: 'سارة احمد',
     createdAt: '2026-02-02T15:45:00Z',
     totalAmount: 5000,
-    transactionType: 'مدفوع',
+    transactionType: 'مشتريات',
     acceptanceStatus: 'فواتير مقبولة',
   },
   {
@@ -120,7 +120,7 @@ export const MOCK_INVOICES: Invoice[] = [
     employeeName: 'محمد علي',
     createdAt: '2026-01-31T12:00:00Z',
     totalAmount: 14500,
-    transactionType: 'مدفوع',
+    transactionType: 'مشتريات',
     acceptanceStatus: 'فواتير مقبولة',
   },
   {
@@ -153,7 +153,7 @@ export const MOCK_INVOICES: Invoice[] = [
     employeeName: 'محمد علي',
     createdAt: '2026-01-28T14:45:00Z',
     totalAmount: 29000,
-    transactionType: 'مدفوع',
+    transactionType: 'مشتريات',
     acceptanceStatus: 'فواتير غير مقبولة',
   },
   {
@@ -175,7 +175,7 @@ export const MOCK_INVOICES: Invoice[] = [
     employeeName: 'احمد محمود',
     createdAt: '2026-01-26T16:30:00Z',
     totalAmount: 33000,
-    transactionType: 'مدفوع',
+    transactionType: 'مشتريات',
     acceptanceStatus: 'فواتير غير مقبولة',
   },
   {
@@ -197,7 +197,7 @@ export const MOCK_INVOICES: Invoice[] = [
     employeeName: 'سارة احمد',
     createdAt: '2026-01-24T13:15:00Z',
     totalAmount: 26000,
-    transactionType: 'مدفوع',
+    transactionType: 'مشتريات',
     acceptanceStatus: 'فواتير غير مقبولة',
   },
   {
@@ -219,7 +219,7 @@ export const MOCK_INVOICES: Invoice[] = [
     employeeName: 'محمد علي',
     createdAt: '2026-01-22T15:30:00Z',
     totalAmount: 17500,
-    transactionType: 'مدفوع',
+    transactionType: 'مشتريات',
     acceptanceStatus: 'فواتير غير مقبولة',
   },
   {
@@ -241,7 +241,7 @@ export const MOCK_INVOICES: Invoice[] = [
     employeeName: 'احمد محمود',
     createdAt: '2026-01-20T12:00:00Z',
     totalAmount: 7500,
-    transactionType: 'مدفوع',
+    transactionType: 'مشتريات',
     acceptanceStatus: 'فواتير غير مقبولة',
   },
   {
@@ -281,7 +281,7 @@ export const MOCK_SUPPLIER_OPTIONS = [
 export const MOCK_INVOICE_TYPE_OPTIONS = [
   { key: 'استبدال', value: 'استبدال' },
   { key: 'مرتجع', value: 'مرتجع' },
-  { key: 'مدفوع', value: 'مدفوع' },
+  { key: 'مشتريات', value: 'مشتريات' },
 ];
 
 export const MOCK_EMPLOYEE_OPTIONS = [

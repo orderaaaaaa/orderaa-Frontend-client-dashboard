@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LiaUserSolid } from 'react-icons/lia';
 import { EditableTextField } from '../fields/EditableTextField';
 import { PhoneNumberList } from '../fields/PhoneNumberList';
@@ -8,6 +8,7 @@ import { useUpdateCustomer } from '@/services/orders';
 import { toast } from 'react-toastify';
 import { If, Then } from 'react-if';
 import { MdBlock } from 'react-icons/md';
+import BaseModal from '@/components/ui/base-modal';
 
 export interface CustomerDataSectionProps {
   order: Order;
@@ -23,6 +24,7 @@ export function CustomerDataSection({
   className = '',
 }: CustomerDataSectionProps) {
   const updateCustomerMutation = useUpdateCustomer();
+  const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
 
   const handleTimeChange = async (
     availableFrom: string,
@@ -40,8 +42,11 @@ export function CustomerDataSection({
 
       toast.success('تم تحديث اسم العميل بنجاح');
     } catch (error) {
-      console.error('Failed to update customer name:', error);
-      toast.error('فشل في تحديث اسم العميل');
+      const message =
+        error instanceof Error && 'response' in error
+          ? (error as any).response?.data?.message
+          : null;
+      toast.error(message || 'فشل في تحديث اسم العميل');
       throw error;
     }
   };
@@ -51,13 +56,15 @@ export function CustomerDataSection({
       <div className="absolute top-3 left-3">
         <If condition={order.customers.isBlocked}>
           <Then>
-            <div className="flex items-center gap-1 p-1 px-3 bg-[#f4e2e2] border-2 border-[#eed0d1] rounded-sm">
+            <button
+              onClick={() => setIsNotesModalOpen(true)}
+              className="flex items-center gap-1 p-1 px-3 bg-[#f4e2e2] border-2 border-[#eed0d1] rounded-sm cursor-pointer hover:bg-[#f0d4d4] transition-colors"
+            >
               <MdBlock size={18} className="text-[#dc0201]" />
               <span className="text-[#dc0201] text-sm lg:text-base font-medium">
-                {' '}
                 العميل محظور
               </span>
-            </div>
+            </button>
           </Then>
         </If>
       </div>
@@ -96,6 +103,30 @@ export function CustomerDataSection({
           />
         </div>
       </div>
+
+      <BaseModal
+        isOpen={isNotesModalOpen}
+        onClose={() => setIsNotesModalOpen(false)}
+        title="ملاحظات العميل"
+        showFooter={false}
+      >
+        <div className="flex flex-col gap-3">
+          {order.customers.notes && (Array.isArray(order.customers.notes) ? order.customers.notes.length > 0 : order.customers.notes.trim().length > 0) ? (
+            Array.isArray(order.customers.notes) ? (
+              order.customers.notes.map((note, index) => (
+                <p key={index} className="text-base text-[#1F1F1F] whitespace-pre-wrap">{note}</p>
+              ))
+            ) : (
+              <p className="text-base text-[#1F1F1F] whitespace-pre-wrap">{order.customers.notes}</p>
+            )
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 gap-3">
+              <MdBlock size={40} className="text-gray-300" />
+              <p className="text-base text-gray-400">لا توجد ملاحظات لهذا العميل</p>
+            </div>
+          )}
+        </div>
+      </BaseModal>
     </div>
   );
 }

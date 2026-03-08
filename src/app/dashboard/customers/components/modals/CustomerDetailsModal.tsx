@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { LiaTimesSolid } from 'react-icons/lia';
+import BaseModal from '@/components/ui/base-modal';
+import LoadingAnimation from '@/components/ui/loadingAnimation';
 import { useCustomer } from '../../hooks/useGetCustomerId';
 import OrdersTab from './CustomerModalComponents/CustomersDetailsOrders';
 import StatsTab from './CustomerModalComponents/CustomersDetailsStats';
@@ -51,73 +51,56 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
     totalOrders > 0 ? Math.round((returned / totalOrders) * 100) : 0;
 
   return (
-    <DialogPrimitive.Root
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open) onClose();
-      }}
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="تفاصيل العميل"
+      showFooter={false}
+      maxWidth="md:max-w-6xl"
     >
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-xl w-[95vw] sm:w-[90vw] md:w-auto md:max-w-6xl max-h-[95vh] overflow-y-auto">
-          <DialogPrimitive.Title className="sr-only">
-            تفاصيل العميل
-          </DialogPrimitive.Title>
-          <DialogPrimitive.Description className="sr-only">
-            عرض تفاصيل العميل والطلبات والإحصائيات
-          </DialogPrimitive.Description>
+      {isLoading ? (
+        <LoadingAnimation />
+      ) : isError || !data ? (
+        <div className="p-10 text-center text-red-600">
+          حدث خطأ أثناء تحميل البيانات
+        </div>
+      ) : (
+        <div>
+          <CustomersDetailsHeader
+            isBlocked={data.isBlocked}
+            username={data.name}
+          />
 
-          <DialogPrimitive.Close className="p-2 absolute hover:bg-gray-100 rounded-lg left-3 top-3 cursor-pointer z-10">
-            <LiaTimesSolid className="w-5 h-5" />
-          </DialogPrimitive.Close>
+          <CustomersDetailsShare
+            email={data.email}
+            phoneNumbers={data.phoneNumbers}
+          />
 
-          {isLoading ? (
-            <div className="h-[60vh] flex items-center justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-            </div>
-          ) : isError || !data ? (
-            <div className="p-10 text-center text-red-600">
-              حدث خطأ أثناء تحميل البيانات
-            </div>
-          ) : (
-            <div className="p-4 md:p-8">
-              <CustomersDetailsHeader
-                isBlocked={data.isBlocked}
-                username={data.name}
-              />
+          <CustomersDetailsTotalStats
+            latestOrder={data.latestOrder}
+            delivered={delivered}
+            email={data.email}
+            numberOfOrders={data.numberOfOrders}
+            totalAmount={data.totalAmount}
+            returned={returned}
+            phoneNumbers={data.phoneNumbers}
+          />
 
-              <CustomersDetailsShare
-                email={data.email}
-                phoneNumbers={data.phoneNumbers}
-              />
-
-              <CustomersDetailsTotalStats
-                latestOrder={data.latestOrder}
-                delivered={delivered}
-                email={data.email}
-                numberOfOrders={data.numberOfOrders}
-                totalAmount={data.totalAmount}
-                returned={returned}
-                phoneNumbers={data.phoneNumbers}
-              />
-
-              <div className="mt-4">
-                <StatsTab
-                  deliveryRate={deliveryRate}
-                  cancellationRate={cancellationRate}
-                  returnRate={returnRate}
-                  totalOrders={totalOrders}
-                  delivered={delivered}
-                  cancelled={cancelled}
-                  returned={returned}
-                />
-                <OrdersTab orders={data.orders} />
-              </div>
-            </div>
-          )}
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+          <div className="mt-4">
+            <StatsTab
+              deliveryRate={deliveryRate}
+              cancellationRate={cancellationRate}
+              returnRate={returnRate}
+              totalOrders={totalOrders}
+              delivered={delivered}
+              cancelled={cancelled}
+              returned={returned}
+            />
+            <OrdersTab orders={data.orders} />
+          </div>
+        </div>
+      )}
+    </BaseModal>
   );
 };
 
