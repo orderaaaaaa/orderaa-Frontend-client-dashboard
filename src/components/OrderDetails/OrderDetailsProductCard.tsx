@@ -95,8 +95,9 @@ function OrderDetailsProductCard({
       });
 
       toast.success('تم تحديث المنتج بنجاح');
-    } catch (error) {
-      toast.error('فشل في تحديث المنتج');
+    } catch (error: any) {
+      const message = error?.response?.data?.message;
+      toast.error(message || 'فشل في تحديث المنتج');
     }
   };
 
