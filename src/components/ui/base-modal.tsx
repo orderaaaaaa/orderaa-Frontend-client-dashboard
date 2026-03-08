@@ -6,6 +6,10 @@ import { LiaTimesSolid } from 'react-icons/lia';
 import { Button } from './button';
 import { cn } from '@/lib/utils';
 
+export const ModalContainerContext = React.createContext<HTMLElement | null>(
+  null
+);
+
 interface BaseModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -43,6 +47,7 @@ export default function BaseModal({
 }: BaseModalProps) {
   const [internalIsLoading, setInternalIsLoading] = useState(false);
   const isLoading = externalIsLoading || internalIsLoading;
+  const [contentEl, setContentEl] = useState<HTMLElement | null>(null);
 
   const handleConfirm = async () => {
     if (onConfirm && !isLoading && !confirmDisabled) {
@@ -67,6 +72,7 @@ export default function BaseModal({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <DialogPrimitive.Content
+          ref={setContentEl}
           className={cn(
             'fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2',
             'bg-white rounded-[20px] shadow-xl flex flex-col max-h-[85vh]',
@@ -81,30 +87,31 @@ export default function BaseModal({
             if (isLoading) e.preventDefault();
           }}
         >
-          <div
-            className="h-[60px] rounded-t-[20px] flex items-center justify-center px-8 flex-shrink-0 relative"
-            style={{
-              background:
-                'linear-gradient(105.28deg, #FFFFFF 1.48%, #CBB5FD 182.49%, #FFFFFF 187.88%)',
-            }}
-          >
-            <DialogPrimitive.Title className="text-xl font-bold text-black text-center">
-              {title}
-            </DialogPrimitive.Title>
-
-            <DialogPrimitive.Close
-              disabled={isLoading}
-              className="absolute left-8 flex items-center justify-center hover:opacity-70 transition-opacity disabled:opacity-50"
+          <ModalContainerContext.Provider value={contentEl}>
+            <div
+              className="h-[60px] rounded-t-[20px] flex items-center justify-center px-8 flex-shrink-0 relative"
+              style={{
+                background:
+                  'linear-gradient(105.28deg, #FFFFFF 1.48%, #CBB5FD 182.49%, #FFFFFF 187.88%)',
+              }}
             >
-              <LiaTimesSolid className="w-4 h-4 text-black cursor-pointer" />
-            </DialogPrimitive.Close>
-          </div>
+              <DialogPrimitive.Title className="text-xl font-bold text-black text-center">
+                {title}
+              </DialogPrimitive.Title>
 
-          <DialogPrimitive.Description className="sr-only">
-            {title}
-          </DialogPrimitive.Description>
+              <DialogPrimitive.Close
+                disabled={isLoading}
+                className="absolute left-8 flex items-center justify-center hover:opacity-70 transition-opacity disabled:opacity-50"
+              >
+                <LiaTimesSolid className="w-4 h-4 text-black cursor-pointer" />
+              </DialogPrimitive.Close>
+            </div>
 
-          <div className="flex-1 px-8 py-6 overflow-y-auto">{children}</div>
+            <DialogPrimitive.Description className="sr-only">
+              {title}
+            </DialogPrimitive.Description>
+
+            <div className="flex-1 px-8 py-6 overflow-y-auto">{children}</div>
 
           {showFooter && (
             <div className="px-4 sm:px-8 pb-4 flex gap-2 sm:gap-4 justify-between flex-shrink-0 pt-3">
@@ -141,6 +148,7 @@ export default function BaseModal({
               )}
             </div>
           )}
+          </ModalContainerContext.Provider>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
