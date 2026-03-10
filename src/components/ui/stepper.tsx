@@ -11,23 +11,28 @@ interface Step {
 interface StepperProps {
   steps: Step[];
   currentStep: number;
+  onStepClick?: (step: number) => void;
   children: ReactNode;
   className?: string;
 }
 
-function Stepper({ steps, currentStep, children, className }: StepperProps) {
+function Stepper({ steps, currentStep, onStepClick, children, className }: StepperProps) {
   const childArray = Children.toArray(children);
 
   return (
     <div className={cn('space-y-6', className)}>
-      <div className="flex items-center justify-center gap-0">
+      <div className="flex items-center justify-center gap-0 w-full">
         {steps.map((step, index) => {
           const isCompleted = index < currentStep;
           const isActive = index === currentStep;
+          const isClickable = !!onStepClick;
 
           return (
             <React.Fragment key={index}>
-              <div className="flex flex-col items-center gap-2">
+              <div
+                className={cn('flex flex-col items-center gap-2', isClickable && 'cursor-pointer')}
+                onClick={isClickable ? () => onStepClick(index) : undefined}
+              >
                 <div
                   className={cn(
                     'flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-bold transition-all duration-300',
@@ -59,7 +64,7 @@ function Stepper({ steps, currentStep, children, className }: StepperProps) {
               </div>
 
               {index < steps.length - 1 && (
-                <div className="relative mb-6 h-0.5 w-16 sm:w-24 bg-gray-200">
+                <div className="relative mb-6 h-0.5 flex-1 bg-gray-200">
                   <div
                     className={cn(
                       'absolute inset-y-0 right-0 bg-primary transition-all duration-500',

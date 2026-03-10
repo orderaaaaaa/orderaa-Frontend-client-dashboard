@@ -13,6 +13,8 @@ import {
   LiaReceiptSolid,
   LiaPlusSolid,
   LiaUsersSolid,
+  LiaWarehouseSolid,
+  LiaClipboardListSolid,
 } from 'react-icons/lia';
 import {
   House,
@@ -157,6 +159,18 @@ export const navigation: NavigationItem[] = [
         name: 'اضافة مورد',
         href: '/dashboard/purchases/add-supplier',
         icon: LiaPlusSolid,
+      },
+    ],
+  },
+  {
+    name: 'المخزون',
+    href: '/dashboard/inventory',
+    icon: LiaWarehouseSolid,
+    children: [
+      {
+        name: 'إدارة الاستلامات',
+        href: '/dashboard/inventory/receipts',
+        icon: LiaClipboardListSolid,
       },
     ],
   },

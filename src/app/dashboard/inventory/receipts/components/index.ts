@@ -1,0 +1,1 @@
+export { ReceiptsContent } from './ReceiptsContent';

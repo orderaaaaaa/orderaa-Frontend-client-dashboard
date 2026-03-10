@@ -13,6 +13,7 @@ import {
   LiaUndoAltSolid,
   LiaHandHoldingUsdSolid,
 } from 'react-icons/lia';
+import { Checkbox } from '@/components/ui/checkbox';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { SupplierInvoice } from '../types';
 import { formatDate } from '../utils';
@@ -112,11 +113,10 @@ const SupplierInvoiceCard = memo(
           </div>
 
           {select && (
-            <input
-              type="checkbox"
+            <Checkbox
               checked={isSelected}
-              onChange={(e) => onSelectionChange(e.target.checked)}
-              className="w-5 h-5 border-2 border-primary rounded-[4px] cursor-pointer accent-primary mt-1"
+              onCheckedChange={(checked) => onSelectionChange(checked === true)}
+              className="mt-1"
             />
           )}
         </div>
