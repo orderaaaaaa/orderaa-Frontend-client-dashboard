@@ -103,13 +103,13 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
   const allEvents = order.order_events || [];
 
   const events = allEvents.map((event: OrderEvent, index: number) => {
-    const statusLabel = event.status ? getStatusLabel(event.status) : 'حدث';
+    const statusLabel = event.name ? getStatusLabel(event.name) : 'حدث';
     return {
       id: event.id || index + 1,
       status: statusLabel,
       date: new Date(event.createdAt).toLocaleDateString('ar-EG'),
       time: getTimeAgo(event.createdAt),
-      eventType: event.status || 'NEW_ORDER',
+      eventType: event.name || 'NEW_ORDER',
       note: event.note || null,
       employee: event.employee,
       utmSource: undefined as string | undefined,

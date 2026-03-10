@@ -124,7 +124,7 @@ function OrderDetailsInfoComponent({
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
-    return sortedEvents[0]?.status;
+    return sortedEvents[0]?.name;
   }, [localOrder.order_events]);
 
   useEffect(() => {

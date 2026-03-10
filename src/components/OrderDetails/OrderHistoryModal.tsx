@@ -65,7 +65,7 @@ export default function OrderHistoryModal({
 
   const parseEvents = (): ParsedEvent[] => {
     return events.map((event, index) => {
-      const statusLabel = event.status ? getStatusLabel(event.status) : 'حدث';
+      const statusLabel = event.name ? getStatusLabel(event.name) : 'حدث';
       const displayDate = new Date(event.createdAt).toLocaleDateString('ar-EG');
       const timeAgo = getTimeAgo(event.createdAt);
 
@@ -75,7 +75,7 @@ export default function OrderHistoryModal({
         displayDate,
         timeAgo,
         note: event.note || statusLabel,
-        eventType: event.status || 'default',
+        eventType: event.name || 'default',
       };
     });
   };

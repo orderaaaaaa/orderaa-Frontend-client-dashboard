@@ -273,7 +273,7 @@ export interface OrderEvent {
   id: number;
   orderId: number;
   employeeId?: number | null;
-  status: string;
+  name: string;
   note?: string | null;
   createdAt: string;
   employee?: {
