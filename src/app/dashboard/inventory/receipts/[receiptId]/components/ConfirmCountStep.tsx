@@ -206,7 +206,7 @@ const ConfirmCountStep = memo(({ productVariants }: ConfirmCountStepProps) => {
       },
       {
         key: 'actions',
-        header: '',
+        header: 'for testing',
         className: 'w-16',
         render: (_value: unknown, row: ConfirmVariantRow) => (
           <div className="flex items-center justify-center">
