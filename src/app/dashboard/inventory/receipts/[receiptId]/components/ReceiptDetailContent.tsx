@@ -5,20 +5,21 @@ import { Button } from '@/components/ui/button';
 import { Stepper, StepContent } from '@/components/ui/stepper';
 import ReceiptHeader from './ReceiptHeader';
 import AddVariantsStep from './AddVariantsStep';
+import PrintStep from './PrintStep';
+import ConfirmCountStep from './ConfirmCountStep';
 import { RECEIPT_STEPS } from '../constants';
+import { SelectedVariant } from '../types';
 
 interface ReceiptDetailContentProps {
   receipt: {
     invoiceNumber: string;
     companyName: string;
-    employeeName: string;
-    createdAt: string;
-    itemsCount: number;
   };
 }
 
 export function ReceiptDetailContent({ receipt }: ReceiptDetailContentProps) {
   const [currentStep, setCurrentStep] = useState(0);
+  const [productVariants, setProductVariants] = useState<Record<number, SelectedVariant[]>>({});
 
   const handleNext = useCallback(() => {
     setCurrentStep((prev) => Math.min(prev + 1, RECEIPT_STEPS.length - 1));
@@ -41,28 +42,23 @@ export function ReceiptDetailContent({ receipt }: ReceiptDetailContentProps) {
         <ReceiptHeader
           invoiceNumber={receipt.invoiceNumber}
           companyName={receipt.companyName}
-          employeeName={receipt.employeeName}
-          createdAt={receipt.createdAt}
-          itemsCount={receipt.itemsCount}
         />
 
         <Stepper steps={RECEIPT_STEPS} currentStep={currentStep} onStepClick={handleStepClick}>
           <StepContent>
-            <AddVariantsStep onNext={handleNext} />
+            <AddVariantsStep
+              onNext={handleNext}
+              productVariants={productVariants}
+              onProductVariantsChange={setProductVariants}
+            />
           </StepContent>
 
           <StepContent>
-            <div className="flex flex-col items-center justify-center py-16 gap-3">
-              <p className="text-lg font-semibold text-gray-400">مرحلة الطباعة</p>
-              <p className="text-sm text-gray-400">سيتم إضافة المحتوى لاحقاً</p>
-            </div>
+            <PrintStep productVariants={productVariants} />
           </StepContent>
 
           <StepContent>
-            <div className="flex flex-col items-center justify-center py-16 gap-3">
-              <p className="text-lg font-semibold text-gray-400">مرحلة تأكيد العدد</p>
-              <p className="text-sm text-gray-400">سيتم إضافة المحتوى لاحقاً</p>
-            </div>
+            <ConfirmCountStep productVariants={productVariants} />
           </StepContent>
 
           <StepContent>

@@ -36,6 +36,7 @@ interface DataTableProps<T extends Record<string, unknown>> {
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
   onSort?: (field: string) => void
+  renderSubRow?: (row: T) => React.ReactNode | null
 }
 
 function DataTable<T extends Record<string, unknown>>({
@@ -52,6 +53,7 @@ function DataTable<T extends Record<string, unknown>>({
   sortBy,
   sortOrder,
   onSort,
+  renderSubRow,
 }: DataTableProps<T>) {
   const renderSortIcon = (col: DataTableColumn<T>) => {
     if (!col.sortable || !onSort) return null
@@ -148,27 +150,41 @@ function DataTable<T extends Record<string, unknown>>({
               </TableCell>
             </TableRow>
           ) : (
-            data.map((row) => (
-              <TableRow
-                key={String(row[keyField])}
-                onClick={() => onRowClick?.(row)}
-                className={cn(onRowClick && 'cursor-pointer hover:bg-gray-50')}
-              >
-                {columns.map((col) => (
-                  <TableCell
-                    key={col.key}
-                    className={cn(
-                      'px-2 py-2 sm:px-4 sm:py-3 border-l border-gray-200 last:border-l-0 whitespace-normal text-xs sm:text-sm',
-                      col.className,
-                    )}
+            data.map((row) => {
+              const subRowContent = renderSubRow?.(row)
+              return (
+                <React.Fragment key={String(row[keyField])}>
+                  <TableRow
+                    onClick={() => onRowClick?.(row)}
+                    className={cn(onRowClick && 'cursor-pointer hover:bg-gray-50')}
                   >
-                    {col.render
-                      ? col.render(row[col.key], row)
-                      : String(row[col.key] ?? '')}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
+                    {columns.map((col) => (
+                      <TableCell
+                        key={col.key}
+                        className={cn(
+                          'px-2 py-2 sm:px-4 sm:py-3 border-l border-gray-200 last:border-l-0 whitespace-normal text-xs sm:text-sm',
+                          col.className,
+                        )}
+                      >
+                        {col.render
+                          ? col.render(row[col.key], row)
+                          : String(row[col.key] ?? '')}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                  {subRowContent && (
+                    <TableRow>
+                      <TableCell
+                        colSpan={columns.length}
+                        className="p-0 border-l-0"
+                      >
+                        {subRowContent}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </React.Fragment>
+              )
+            })
           )}
         </TableBody>
       </Table>

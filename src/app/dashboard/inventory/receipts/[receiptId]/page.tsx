@@ -36,9 +36,6 @@ export default function ReceiptDetailPage({
         receipt={{
           invoiceNumber: receipt.invoiceNumber,
           companyName: receipt.companyName,
-          employeeName: receipt.employeeName,
-          createdAt: receipt.createdAt,
-          itemsCount: receipt.itemsCount,
         }}
       />
     </Suspense>
