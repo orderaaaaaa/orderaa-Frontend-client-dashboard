@@ -15,23 +15,21 @@ import { useBarcodeScanner } from '@/app/dashboard/orders/print-orders/hooks/use
 import { MOCK_RECEIPT_PRODUCTS } from '../constants';
 import { SelectedVariant } from '../types';
 
-interface ConfirmCountStepProps {
+interface RejectionStepProps {
   productVariants: Record<number, SelectedVariant[]>;
   confirmedCounts: Record<string, number>;
-  onConfirmedCountsChange: (counts: Record<string, number>) => void;
+  rejectedCounts: Record<string, number>;
+  onRejectedCountsChange: (counts: Record<string, number>) => void;
 }
 
 type VariantStatus = 'incomplete' | 'complete' | 'excess';
 
-interface ConfirmVariantRow extends Record<string, unknown> {
+interface RejectionVariantRow extends Record<string, unknown> {
   id: string;
   productId: number;
-  variantId: number;
   variantName: string;
-  color: string;
-  size: string;
   image: string;
-  expectedQuantity: number;
+  confirmedQuantity: number;
 }
 
 function getVariantStatus(scanned: number, expected: number): VariantStatus {
@@ -43,50 +41,38 @@ function getVariantStatus(scanned: number, expected: number): VariantStatus {
 function getStatusLabel(status: VariantStatus) {
   switch (status) {
     case 'complete':
-      return {
-        text: 'مكتمل',
-        icon: LiaCheckCircleSolid,
-        className: 'text-green-600',
-      };
+      return { text: 'مكتمل', icon: LiaCheckCircleSolid, className: 'text-green-600' };
     case 'excess':
-      return {
-        text: 'زيادة',
-        icon: LiaTimesCircleSolid,
-        className: 'text-red-600',
-      };
+      return { text: 'زيادة', icon: LiaTimesCircleSolid, className: 'text-red-600' };
     case 'incomplete':
-      return {
-        text: 'غير مكتمل',
-        icon: LiaExclamationCircleSolid,
-        className: 'text-gray-500',
-      };
+      return { text: 'غير مكتمل', icon: LiaExclamationCircleSolid, className: 'text-gray-500' };
   }
 }
 
 function getProductStatus(
-  variants: ConfirmVariantRow[],
-  confirmedCounts: Record<string, number>
-): { status: VariantStatus; totalScanned: number; totalExpected: number } {
-  let totalScanned = 0;
-  let totalExpected = 0;
+  variants: RejectionVariantRow[],
+  rejectedCounts: Record<string, number>
+): { status: VariantStatus; totalRejected: number; totalConfirmed: number } {
+  let totalRejected = 0;
+  let totalConfirmed = 0;
   let hasExcess = false;
   let allComplete = true;
 
   for (const v of variants) {
-    const scanned = confirmedCounts[v.id] ?? 0;
-    totalScanned += scanned;
-    totalExpected += v.expectedQuantity;
+    const rejected = rejectedCounts[v.id] ?? 0;
+    totalRejected += rejected;
+    totalConfirmed += v.confirmedQuantity;
 
-    const status = getVariantStatus(scanned, v.expectedQuantity);
+    const status = getVariantStatus(rejected, v.confirmedQuantity);
     if (status === 'excess') hasExcess = true;
     if (status !== 'complete') allComplete = false;
   }
 
   const status: VariantStatus = hasExcess ? 'excess' : allComplete ? 'complete' : 'incomplete';
-  return { status, totalScanned, totalExpected };
+  return { status, totalRejected, totalConfirmed };
 }
 
-const ConfirmCountStep = memo(({ productVariants, confirmedCounts, onConfirmedCountsChange }: ConfirmCountStepProps) => {
+const RejectionStep = memo(({ productVariants, confirmedCounts, rejectedCounts, onRejectedCountsChange }: RejectionStepProps) => {
   const [lastScannedVariant, setLastScannedVariant] = useState<string | null>(null);
 
   const productsWithVariants = useMemo(() => {
@@ -94,18 +80,18 @@ const ConfirmCountStep = memo(({ productVariants, confirmedCounts, onConfirmedCo
       .filter((p) => productVariants[p.id]?.length > 0)
       .map((product) => ({
         product,
-        variants: productVariants[product.id].map((v) => ({
-          id: `${product.id}-${v.variantId}-${v.color}-${v.size}`,
-          productId: product.id,
-          variantId: v.variantId,
-          variantName: `${v.variantName} - ${v.color} - ${v.size}`,
-          color: v.color,
-          size: v.size,
-          image: product.image,
-          expectedQuantity: v.quantity,
-        } satisfies ConfirmVariantRow)),
+        variants: productVariants[product.id].map((v) => {
+          const rowId = `${product.id}-${v.variantId}-${v.color}-${v.size}`;
+          return {
+            id: rowId,
+            productId: product.id,
+            variantName: `${v.variantName} - ${v.color} - ${v.size}`,
+            image: product.image,
+            confirmedQuantity: confirmedCounts[rowId] ?? 0,
+          } satisfies RejectionVariantRow;
+        }),
       }));
-  }, [productVariants]);
+  }, [productVariants, confirmedCounts]);
 
   const variantIdByBarcode = useMemo(() => {
     const map: Record<string, string> = {};
@@ -117,21 +103,17 @@ const ConfirmCountStep = memo(({ productVariants, confirmedCounts, onConfirmedCo
     return map;
   }, [productsWithVariants]);
 
-  const incrementVariant = useCallback(
-    (variantRowId: string) => {
-      onConfirmedCountsChange({
-        ...confirmedCounts,
-        [variantRowId]: (confirmedCounts[variantRowId] ?? 0) + 1,
-      });
-      setLastScannedVariant(variantRowId);
-      setTimeout(() => setLastScannedVariant(null), 1000);
-    },
-    [confirmedCounts, onConfirmedCountsChange]
-  );
+  const incrementVariant = useCallback((variantRowId: string) => {
+    onRejectedCountsChange({
+      ...rejectedCounts,
+      [variantRowId]: (rejectedCounts[variantRowId] ?? 0) + 1,
+    });
+    setLastScannedVariant(variantRowId);
+    setTimeout(() => setLastScannedVariant(null), 1000);
+  }, [rejectedCounts, onRejectedCountsChange]);
 
   const handleScan = useCallback(
     (barcode: string) => {
-      // TODO: replace with real barcode-to-variant lookup from backend
       const variantRowId = variantIdByBarcode[barcode];
       if (variantRowId) {
         incrementVariant(variantRowId);
@@ -147,13 +129,13 @@ const ConfirmCountStep = memo(({ productVariants, confirmedCounts, onConfirmedCo
     maxCharLength: 1000,
   });
 
-  const columns: DataTableColumn<ConfirmVariantRow>[] = useMemo(
+  const columns: DataTableColumn<RejectionVariantRow>[] = useMemo(
     () => [
       {
         key: 'image',
         header: 'صورة المنتج',
         className: 'w-20',
-        render: (_value: unknown, row: ConfirmVariantRow) => (
+        render: (_value: unknown, row: RejectionVariantRow) => (
           <div className="flex items-center justify-center">
             <Image
               src={row.image}
@@ -170,20 +152,20 @@ const ConfirmCountStep = memo(({ productVariants, confirmedCounts, onConfirmedCo
         header: 'اسم المنتج',
       },
       {
-        key: 'scanned',
-        header: 'ممسوح',
+        key: 'rejected',
+        header: 'مرفوض',
         className: 'w-28',
-        render: (_value: unknown, row: ConfirmVariantRow) => {
-          const scanned = confirmedCounts[row.id] ?? 0;
+        render: (_value: unknown, row: RejectionVariantRow) => {
+          const rejected = rejectedCounts[row.id] ?? 0;
           const isFlashing = lastScannedVariant === row.id;
           return (
             <span
               className={clsx(
                 'text-sm font-bold transition-all duration-300',
-                isFlashing && 'text-primary scale-110'
+                isFlashing && 'text-red-500 scale-110'
               )}
             >
-              {scanned}/{row.expectedQuantity}
+              {rejected}/{row.confirmedQuantity}
             </span>
           );
         },
@@ -192,9 +174,9 @@ const ConfirmCountStep = memo(({ productVariants, confirmedCounts, onConfirmedCo
         key: 'status',
         header: 'الحالة',
         className: 'w-36',
-        render: (_value: unknown, row: ConfirmVariantRow) => {
-          const scanned = confirmedCounts[row.id] ?? 0;
-          const status = getVariantStatus(scanned, row.expectedQuantity);
+        render: (_value: unknown, row: RejectionVariantRow) => {
+          const rejected = rejectedCounts[row.id] ?? 0;
+          const status = getVariantStatus(rejected, row.confirmedQuantity);
           const label = getStatusLabel(status);
           const Icon = label.icon;
           return (
@@ -207,14 +189,14 @@ const ConfirmCountStep = memo(({ productVariants, confirmedCounts, onConfirmedCo
       },
       {
         key: 'actions',
-        header: 'for testing',
+        header: '',
         className: 'w-16',
-        render: (_value: unknown, row: ConfirmVariantRow) => (
+        render: (_value: unknown, row: RejectionVariantRow) => (
           <div className="flex items-center justify-center">
             <Button
               variant="ghost"
               size="icon"
-              className="text-primary hover:text-primary/80 w-8 h-8"
+              className="text-red-500 hover:text-red-400 w-8 h-8"
               onClick={() => incrementVariant(row.id)}
             >
               <LiaBarcodeSolid className="w-5 h-5" />
@@ -223,26 +205,26 @@ const ConfirmCountStep = memo(({ productVariants, confirmedCounts, onConfirmedCo
         ),
       },
     ],
-    [confirmedCounts, lastScannedVariant, incrementVariant]
+    [rejectedCounts, lastScannedVariant, incrementVariant]
   );
 
   const overallTotals = useMemo(() => {
     const allVariants = productsWithVariants.flatMap((p) => p.variants);
-    let totalScanned = 0;
-    let totalExpected = 0;
+    let totalRejected = 0;
+    let totalConfirmed = 0;
     for (const v of allVariants) {
-      totalScanned += confirmedCounts[v.id] ?? 0;
-      totalExpected += v.expectedQuantity;
+      totalRejected += rejectedCounts[v.id] ?? 0;
+      totalConfirmed += v.confirmedQuantity;
     }
-    return { totalScanned, totalExpected };
-  }, [productsWithVariants, confirmedCounts]);
+    return { totalRejected, totalConfirmed };
+  }, [productsWithVariants, rejectedCounts]);
 
   if (productsWithVariants.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3">
         <LiaBarcodeSolid className="w-16 h-16 text-gray-300" />
-        <p className="text-lg font-semibold text-gray-400">لا توجد متغيرات للتحقق</p>
-        <p className="text-sm text-gray-400">يرجى إضافة وطباعة متغيرات المنتجات أولاً</p>
+        <p className="text-lg font-semibold text-gray-400">لا توجد متغيرات للرفض</p>
+        <p className="text-sm text-gray-400">يرجى إكمال خطوة تأكيد العدد أولاً</p>
       </div>
     );
   }
@@ -250,14 +232,14 @@ const ConfirmCountStep = memo(({ productVariants, confirmedCounts, onConfirmedCo
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h2 className="text-xl font-bold text-gray-800">مرحلة المسح والتحقق</h2>
+        <h2 className="text-xl font-bold text-gray-800">مرحلة الرفض والإتلاف</h2>
         <p className="text-sm text-gray-500">
-          استخدم الماسح الضوئي لمسح الباركود على كل قطعة
+          امسح الباركود للقطع المرفوضة أو التالفة لخصمها من الكمية المؤكدة
         </p>
       </div>
 
       {productsWithVariants.map(({ product, variants }) => {
-        const productStatus = getProductStatus(variants, confirmedCounts);
+        const productStatus = getProductStatus(variants, rejectedCounts);
         const statusLabel = getStatusLabel(productStatus.status);
         const StatusIcon = statusLabel.icon;
 
@@ -273,7 +255,7 @@ const ConfirmCountStep = memo(({ productVariants, confirmedCounts, onConfirmedCo
             <div className="flex justify-end px-4">
               <span className={clsx('flex items-center gap-1.5 text-sm font-bold', statusLabel.className)}>
                 <StatusIcon className="w-5 h-5" />
-                {statusLabel.text} : {productStatus.totalScanned}/{productStatus.totalExpected}
+                {statusLabel.text} : {productStatus.totalRejected}/{productStatus.totalConfirmed}
               </span>
             </div>
           </div>
@@ -282,13 +264,13 @@ const ConfirmCountStep = memo(({ productVariants, confirmedCounts, onConfirmedCo
 
       <div className="flex flex-row items-center justify-between px-4 pt-2 border-t border-gray-200">
         <p className="text-base font-bold text-gray-800">
-          إجمالي القطع : {overallTotals.totalScanned}/{overallTotals.totalExpected}
+          إجمالي المرفوضات : {overallTotals.totalRejected}/{overallTotals.totalConfirmed}
         </p>
       </div>
     </div>
   );
 });
 
-ConfirmCountStep.displayName = 'ConfirmCountStep';
+RejectionStep.displayName = 'RejectionStep';
 
-export default ConfirmCountStep;
+export default RejectionStep;

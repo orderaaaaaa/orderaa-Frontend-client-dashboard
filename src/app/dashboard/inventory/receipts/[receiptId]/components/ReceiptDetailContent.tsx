@@ -1,13 +1,15 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { LiaSaveSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { Stepper, StepContent } from '@/components/ui/stepper';
 import ReceiptHeader from './ReceiptHeader';
 import AddVariantsStep from './AddVariantsStep';
 import PrintStep from './PrintStep';
 import ConfirmCountStep from './ConfirmCountStep';
-import { RECEIPT_STEPS } from '../constants';
+import RejectionStep from './RejectionStep';
+import { RECEIPT_STEPS, MOCK_RECEIPT_PRODUCTS } from '../constants';
 import { SelectedVariant } from '../types';
 
 interface ReceiptDetailContentProps {
@@ -20,6 +22,8 @@ interface ReceiptDetailContentProps {
 export function ReceiptDetailContent({ receipt }: ReceiptDetailContentProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [productVariants, setProductVariants] = useState<Record<number, SelectedVariant[]>>({});
+  const [confirmedCounts, setConfirmedCounts] = useState<Record<string, number>>({});
+  const [rejectedCounts, setRejectedCounts] = useState<Record<string, number>>({});
 
   const handleNext = useCallback(() => {
     setCurrentStep((prev) => Math.min(prev + 1, RECEIPT_STEPS.length - 1));
@@ -32,6 +36,45 @@ export function ReceiptDetailContent({ receipt }: ReceiptDetailContentProps) {
   const handleStepClick = useCallback((step: number) => {
     setCurrentStep(step);
   }, []);
+
+  const handleSubmit = useCallback(() => {
+    const productsWithVariants = MOCK_RECEIPT_PRODUCTS
+      .filter((p) => productVariants[p.id]?.length > 0)
+      .map((product) => ({
+        productId: product.id,
+        productName: product.name,
+        variants: productVariants[product.id].map((v) => {
+          const rowId = `${product.id}-${v.variantId}-${v.color}-${v.size}`;
+          const confirmed = confirmedCounts[rowId] ?? 0;
+          const rejected = rejectedCounts[rowId] ?? 0;
+          return {
+            variantId: v.variantId,
+            variantName: `${v.variantName} - ${v.color} - ${v.size}`,
+            color: v.color,
+            size: v.size,
+            confirmedQuantity: confirmed,
+            rejectedQuantity: rejected,
+            netQuantity: confirmed - rejected,
+          };
+        }),
+      }));
+
+    const totalConfirmed = Object.values(confirmedCounts).reduce((s, n) => s + n, 0);
+    const totalRejected = Object.values(rejectedCounts).reduce((s, n) => s + n, 0);
+
+    const payload = {
+      invoiceNumber: receipt.invoiceNumber,
+      companyName: receipt.companyName,
+      products: productsWithVariants,
+      totals: {
+        totalConfirmed,
+        totalRejected,
+        netTotal: totalConfirmed - totalRejected,
+      },
+    };
+
+    console.log('Receipt submission payload:', payload);
+  }, [productVariants, confirmedCounts, rejectedCounts, receipt]);
 
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === RECEIPT_STEPS.length - 1;
@@ -58,14 +101,20 @@ export function ReceiptDetailContent({ receipt }: ReceiptDetailContentProps) {
           </StepContent>
 
           <StepContent>
-            <ConfirmCountStep productVariants={productVariants} />
+            <ConfirmCountStep
+              productVariants={productVariants}
+              confirmedCounts={confirmedCounts}
+              onConfirmedCountsChange={setConfirmedCounts}
+            />
           </StepContent>
 
           <StepContent>
-            <div className="flex flex-col items-center justify-center py-16 gap-3">
-              <p className="text-lg font-semibold text-gray-400">مرحلة الرفض</p>
-              <p className="text-sm text-gray-400">سيتم إضافة المحتوى لاحقاً</p>
-            </div>
+            <RejectionStep
+              productVariants={productVariants}
+              confirmedCounts={confirmedCounts}
+              rejectedCounts={rejectedCounts}
+              onRejectedCountsChange={setRejectedCounts}
+            />
           </StepContent>
         </Stepper>
 
@@ -80,7 +129,17 @@ export function ReceiptDetailContent({ receipt }: ReceiptDetailContentProps) {
             >
               السابق
             </Button>
-            {!isLastStep && (
+            {isLastStep ? (
+              <Button
+                variant="default"
+                size="lg"
+                className="rounded-full font-semibold flex items-center gap-2 px-10"
+                onClick={handleSubmit}
+              >
+                <LiaSaveSolid className="w-5 h-5" />
+                تأكيد الإيصال
+              </Button>
+            ) : (
               <Button
                 variant="default"
                 size="lg"
