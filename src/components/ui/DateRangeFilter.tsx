@@ -85,7 +85,7 @@ const DateRangeFilter = memo(
             options={TIME_PERIOD_LABELS}
             placeholder="الفترة الزمنية"
             triggerClassName={clsx(
-              'w-full border-[#CED4DA] rounded-lg h-10 text-[16px]',
+              'w-full',
               timePeriod && 'text-primary font-bold',
             )}
             searchThreshold={10}

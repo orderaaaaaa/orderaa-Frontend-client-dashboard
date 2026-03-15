@@ -169,6 +169,11 @@ export const navigation: NavigationItem[] = [
     icon: LiaWarehouseSolid,
     children: [
       {
+        name: 'اضافة مخزن',
+        href: '/dashboard/inventory/add-warehouse',
+        icon: LiaPlusSolid,
+      },
+      {
         name: 'ادارة المخزن',
         href: '/dashboard/inventory/stock-management',
         icon: LiaCubesSolid,

@@ -225,11 +225,11 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
           disabled={disabled || loading}
           onClick={() => !disabled && !loading && handleOpenChange(!open)}
           className={cn(
-            'relative px-2 py-1.5 md:px-3 md:py-2 rounded border flex items-center justify-between truncate text-sm md:text-base cursor-pointer',
+            'relative px-4 py-3 rounded-lg border flex items-center justify-between truncate text-base cursor-pointer',
             disabled || loading
               ? 'bg-gray-100 cursor-not-allowed text-gray-400'
               : 'bg-white',
-            error ? 'border-red-500' : 'border-gray-300',
+            error ? 'border-red-500' : 'border-gray-200',
             triggerClassName
           )}
           aria-expanded={open}
@@ -310,7 +310,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
                         onMouseLeave={() => setActiveIdx(-1)}
                         onClick={() => commitSelect(opt)}
                         className={cn(
-                          'px-2 py-1.5 md:px-3 md:py-2 flex justify-between cursor-pointer text-sm md:text-base',
+                          'px-2 py-1.5 md:px-3 md:py-2 flex justify-between items-center cursor-pointer text-sm md:text-base',
                           'hover:bg-primary hover:text-white',
                           selected && 'bg-primary text-white',
                           activeIdx === idx && !selected && 'bg-gray-100'

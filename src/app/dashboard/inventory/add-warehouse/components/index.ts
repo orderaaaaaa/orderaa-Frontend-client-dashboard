@@ -1,0 +1,1 @@
+export { AddWarehouseContent } from './AddWarehouseContent';

@@ -101,8 +101,8 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             variant="outline"
             disabled={disabled}
             className={cn(
-              'w-full h-10 justify-start text-right font-normal',
-              'border border-[#CED4DA] rounded-[4px] bg-white',
+              'w-full h-auto py-3 px-4 justify-start text-right font-normal text-base',
+              'border border-gray-200 rounded-lg bg-white',
               'hover:bg-gray-50 focus:ring-2 focus:ring-primary focus:border-transparent',
               !selected && 'text-muted-foreground',
               className
@@ -255,8 +255,8 @@ function TimePicker({
           variant="outline"
           disabled={disabled}
           className={cn(
-            'w-full h-10 justify-start text-right font-normal',
-            'border border-[#CED4DA] rounded-[4px] bg-white',
+            'w-full h-auto py-3 px-4 justify-start text-right font-normal text-base',
+            'border border-gray-200 rounded-lg bg-white',
             'hover:bg-gray-50 focus:ring-2 focus:ring-primary focus:border-transparent',
             !selected && 'text-muted-foreground',
             className
