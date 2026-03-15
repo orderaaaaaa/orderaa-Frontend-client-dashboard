@@ -43,12 +43,18 @@ export function Sidebar({
     fontWeight: 500,
   };
 
-  const handleDropdownClick = (itemName: string) => {
+  const handleDropdownClick = (itemName: string, element: HTMLElement) => {
     if (collapsed) {
       onCollapseToggle();
       setTimeout(() => onDropdownToggle(itemName), 100);
     } else {
       onDropdownToggle(itemName);
+    }
+    const isOpening = openDropdown !== itemName;
+    if (isOpening) {
+      setTimeout(() => {
+        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 350);
     }
   };
 
@@ -128,7 +134,7 @@ export function Sidebar({
                 return (
                   <div key={item.name}>
                     <button
-                      onClick={() => handleDropdownClick(item.name)}
+                      onClick={(e) => handleDropdownClick(item.name, e.currentTarget)}
                       className={`
                         flex items-center justify-between w-full px-3 py-3 rounded-lg cursor-pointer
                         ${

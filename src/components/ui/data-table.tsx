@@ -73,7 +73,7 @@ function DataTable<T extends Record<string, unknown>>({
       <TableHead
         key={col.key}
         className={cn(
-          'px-2 py-2 sm:px-4 sm:py-4 border-l border-gray-200 last:border-l-0 whitespace-normal text-xs sm:text-sm',
+          'px-2 py-2 sm:px-4 sm:py-4 border-l border-gray-200 last:border-l-0 whitespace-normal text-xs sm:text-sm max-sm:!w-auto',
           isSkeleton ? 'font-medium text-gray-700' : 'font-bold',
           isSortable && 'cursor-pointer hover:bg-gray-100 transition-colors select-none',
           isSortable && sortBy === col.key && 'text-primary',
@@ -94,11 +94,11 @@ function DataTable<T extends Record<string, unknown>>({
     return (
       <div
         className={cn(
-          'bg-white rounded-lg border border-gray-100 shadow-md overflow-x-auto',
+          'rounded-lg border border-gray-100 shadow-md overflow-x-auto',
           className,
         )}
       >
-        <Table className="w-full min-w-0">
+        <Table className="w-full min-w-max sm:min-w-0 bg-white">
           <TableHeader>
             <TableRow className={cn('bg-[#f1eefa]', headerClassName)}>
               {columns.map((col) => renderHeader(col, true))}
@@ -111,7 +111,7 @@ function DataTable<T extends Record<string, unknown>>({
                   <TableCell
                     key={col.key}
                     className={cn(
-                      'px-2 py-2 sm:px-4 sm:py-3 border-l border-gray-200 last:border-l-0 whitespace-normal',
+                      'px-2 py-2 sm:px-4 sm:py-3 border-l border-gray-200 last:border-l-0 whitespace-normal max-sm:!w-auto',
                       col.className,
                     )}
                   >
@@ -129,11 +129,11 @@ function DataTable<T extends Record<string, unknown>>({
   return (
     <div
       className={cn(
-        'bg-white rounded-lg border border-gray-100 shadow-md overflow-x-auto',
+        'rounded-lg border border-gray-100 shadow-md overflow-x-auto',
         className,
       )}
     >
-      <Table className="w-full min-w-0">
+      <Table className="w-full min-w-max sm:min-w-0 bg-white">
         <TableHeader>
           <TableRow className={cn('bg-[#f1eefa]', headerClassName)}>
             {columns.map((col) => renderHeader(col))}
@@ -162,7 +162,7 @@ function DataTable<T extends Record<string, unknown>>({
                       <TableCell
                         key={col.key}
                         className={cn(
-                          'px-2 py-2 sm:px-4 sm:py-3 border-l border-gray-200 last:border-l-0 whitespace-normal text-xs sm:text-sm',
+                          'px-2 py-2 sm:px-4 sm:py-3 border-l border-gray-200 last:border-l-0 whitespace-normal text-xs sm:text-sm max-sm:!w-auto',
                           col.className,
                         )}
                       >

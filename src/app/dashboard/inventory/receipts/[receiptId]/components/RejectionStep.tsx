@@ -49,59 +49,50 @@ function getStatusLabel(status: VariantStatus) {
   }
 }
 
-function getProductStatus(
-  variants: RejectionVariantRow[],
-  rejectedCounts: Record<string, number>
-): { status: VariantStatus; totalRejected: number; totalConfirmed: number } {
-  let totalRejected = 0;
-  let totalConfirmed = 0;
-  let hasExcess = false;
-  let allComplete = true;
-
-  for (const v of variants) {
-    const rejected = rejectedCounts[v.id] ?? 0;
-    totalRejected += rejected;
-    totalConfirmed += v.confirmedQuantity;
-
-    const status = getVariantStatus(rejected, v.confirmedQuantity);
-    if (status === 'excess') hasExcess = true;
-    if (status !== 'complete') allComplete = false;
-  }
-
-  const status: VariantStatus = hasExcess ? 'excess' : allComplete ? 'complete' : 'incomplete';
-  return { status, totalRejected, totalConfirmed };
-}
-
 const RejectionStep = memo(({ productVariants, confirmedCounts, rejectedCounts, onRejectedCountsChange }: RejectionStepProps) => {
   const [lastScannedVariant, setLastScannedVariant] = useState<string | null>(null);
 
-  const productsWithVariants = useMemo(() => {
+  const allVariantsFlat = useMemo(() => {
     return MOCK_RECEIPT_PRODUCTS
       .filter((p) => productVariants[p.id]?.length > 0)
-      .map((product) => ({
-        product,
-        variants: productVariants[product.id].map((v) => {
+      .flatMap((product) =>
+        productVariants[product.id].map((v) => {
           const rowId = `${product.id}-${v.variantId}-${v.color}-${v.size}`;
           return {
             id: rowId,
             productId: product.id,
+            productName: product.name,
             variantName: `${v.variantName} - ${v.color} - ${v.size}`,
             image: product.image,
             confirmedQuantity: confirmedCounts[rowId] ?? 0,
-          } satisfies RejectionVariantRow;
-        }),
-      }));
+          };
+        })
+      );
   }, [productVariants, confirmedCounts]);
 
   const variantIdByBarcode = useMemo(() => {
     const map: Record<string, string> = {};
-    for (const { variants } of productsWithVariants) {
-      for (const v of variants) {
-        map[v.id] = v.id;
-      }
+    for (const v of allVariantsFlat) {
+      map[v.id] = v.id;
     }
     return map;
-  }, [productsWithVariants]);
+  }, [allVariantsFlat]);
+
+  const scannedProducts = useMemo(() => {
+    const scannedVariants = allVariantsFlat.filter((v) => (rejectedCounts[v.id] ?? 0) > 0);
+    const grouped: Record<number, { productName: string; variants: RejectionVariantRow[] }> = {};
+    for (const v of scannedVariants) {
+      if (!grouped[v.productId]) {
+        grouped[v.productId] = { productName: v.productName, variants: [] };
+      }
+      grouped[v.productId].variants.push(v);
+    }
+    return Object.entries(grouped).map(([id, data]) => ({
+      productId: Number(id),
+      productName: data.productName,
+      variants: data.variants,
+    }));
+  }, [allVariantsFlat, rejectedCounts]);
 
   const incrementVariant = useCallback((variantRowId: string) => {
     onRejectedCountsChange({
@@ -209,25 +200,16 @@ const RejectionStep = memo(({ productVariants, confirmedCounts, rejectedCounts, 
   );
 
   const overallTotals = useMemo(() => {
-    const allVariants = productsWithVariants.flatMap((p) => p.variants);
     let totalRejected = 0;
     let totalConfirmed = 0;
-    for (const v of allVariants) {
+    for (const v of allVariantsFlat) {
       totalRejected += rejectedCounts[v.id] ?? 0;
       totalConfirmed += v.confirmedQuantity;
     }
     return { totalRejected, totalConfirmed };
-  }, [productsWithVariants, rejectedCounts]);
+  }, [allVariantsFlat, rejectedCounts]);
 
-  if (productsWithVariants.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 gap-3">
-        <LiaBarcodeSolid className="w-16 h-16 text-gray-300" />
-        <p className="text-lg font-semibold text-gray-400">لا توجد متغيرات للرفض</p>
-        <p className="text-sm text-gray-400">يرجى إكمال خطوة تأكيد العدد أولاً</p>
-      </div>
-    );
-  }
+  const hasScannedItems = scannedProducts.length > 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -238,35 +220,51 @@ const RejectionStep = memo(({ productVariants, confirmedCounts, rejectedCounts, 
         </p>
       </div>
 
-      {productsWithVariants.map(({ product, variants }) => {
-        const productStatus = getProductStatus(variants, rejectedCounts);
-        const statusLabel = getStatusLabel(productStatus.status);
-        const StatusIcon = statusLabel.icon;
+      {!hasScannedItems ? (
+        <div className="flex flex-col items-center justify-center py-16 gap-3 border-2 border-dashed border-gray-200 rounded-xl">
+          <LiaBarcodeSolid className="w-16 h-16 text-gray-300" />
+          <p className="text-lg font-semibold text-gray-400">لم يتم مسح أي قطع بعد</p>
+          <p className="text-sm text-gray-400">امسح الباركود لبدء تسجيل القطع المرفوضة</p>
+        </div>
+      ) : (
+        <>
+          {scannedProducts.map(({ productId, productName, variants }) => {
+            let totalRejected = 0;
+            let totalConfirmed = 0;
+            for (const v of variants) {
+              totalRejected += rejectedCounts[v.id] ?? 0;
+              totalConfirmed += v.confirmedQuantity;
+            }
+            const status = getVariantStatus(totalRejected, totalConfirmed);
+            const statusLabel = getStatusLabel(status);
+            const StatusIcon = statusLabel.icon;
 
-        return (
-          <div key={product.id} className="flex flex-col gap-3">
-            <h3 className="text-base font-bold text-gray-800">{product.name}</h3>
-            <DataTable
-              columns={columns}
-              data={variants}
-              keyField="id"
-              emptyMessage="لا توجد متغيرات"
-            />
-            <div className="flex justify-end px-4">
-              <span className={clsx('flex items-center gap-1.5 text-sm font-bold', statusLabel.className)}>
-                <StatusIcon className="w-5 h-5" />
-                {statusLabel.text} : {productStatus.totalRejected}/{productStatus.totalConfirmed}
-              </span>
-            </div>
+            return (
+              <div key={productId} className="flex flex-col gap-3">
+                <h3 className="text-base font-bold text-gray-800">{productName}</h3>
+                <DataTable
+                  columns={columns}
+                  data={variants}
+                  keyField="id"
+                  emptyMessage="لا توجد متغيرات"
+                />
+                <div className="flex justify-end px-4">
+                  <span className={clsx('flex items-center gap-1.5 text-sm font-bold', statusLabel.className)}>
+                    <StatusIcon className="w-5 h-5" />
+                    {statusLabel.text} : {totalRejected}/{totalConfirmed}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+
+          <div className="flex flex-row items-center justify-between px-4 pt-2 border-t border-gray-200">
+            <p className="text-base font-bold text-gray-800">
+              إجمالي المرفوضات : {overallTotals.totalRejected}/{overallTotals.totalConfirmed}
+            </p>
           </div>
-        );
-      })}
-
-      <div className="flex flex-row items-center justify-between px-4 pt-2 border-t border-gray-200">
-        <p className="text-base font-bold text-gray-800">
-          إجمالي المرفوضات : {overallTotals.totalRejected}/{overallTotals.totalConfirmed}
-        </p>
-      </div>
+        </>
+      )}
     </div>
   );
 });

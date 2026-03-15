@@ -1,15 +1,16 @@
 'use client';
 
-import { memo, useMemo, useCallback, useState } from 'react';
+import { memo, useMemo, useCallback } from 'react';
 import Image from 'next/image';
-import clsx from 'clsx';
 import { LiaPrintSolid, LiaCheckDoubleSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { DataTable, DataTableColumn } from '@/components/ui/data-table';
+import { useReceiptStore } from '@/store/receiptStore';
 import { MOCK_RECEIPT_PRODUCTS } from '../constants';
 import { SelectedVariant } from '../types';
 
 interface PrintStepProps {
+  receiptId: string;
   productVariants: Record<number, SelectedVariant[]>;
 }
 
@@ -117,8 +118,9 @@ function handlePrintVariant(variantName: string, quantity: number) {
   };
 }
 
-const PrintStep = memo(({ productVariants }: PrintStepProps) => {
-  const [printedIds, setPrintedIds] = useState<Set<string>>(() => new Set());
+const PrintStep = memo(({ receiptId, productVariants }: PrintStepProps) => {
+  const printedIds = useReceiptStore((s) => s.getReceiptState(receiptId).printedIds);
+  const addPrintedId = useReceiptStore((s) => s.addPrintedId);
 
   const productsWithVariants = useMemo(() => {
     return MOCK_RECEIPT_PRODUCTS
@@ -138,8 +140,8 @@ const PrintStep = memo(({ productVariants }: PrintStepProps) => {
 
   const handlePrint = useCallback((row: PrintVariantRow) => {
     handlePrintVariant(row.variantName, row.quantity);
-    setPrintedIds((prev) => new Set(prev).add(row.id));
-  }, []);
+    addPrintedId(receiptId, row.id);
+  }, [receiptId, addPrintedId]);
 
   const columns: DataTableColumn<PrintVariantRow>[] = useMemo(
     () => [
@@ -176,7 +178,7 @@ const PrintStep = memo(({ productVariants }: PrintStepProps) => {
         header: '',
         className: 'w-40',
         render: (_value: unknown, row: PrintVariantRow) => {
-          const isPrinted = printedIds.has(row.id);
+          const isPrinted = printedIds.includes(row.id);
           return (
             <div className="flex items-center justify-start gap-2">
               <Button

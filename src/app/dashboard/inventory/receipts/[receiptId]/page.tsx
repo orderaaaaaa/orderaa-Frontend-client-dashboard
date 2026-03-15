@@ -33,6 +33,7 @@ export default function ReceiptDetailPage({
   return (
     <Suspense fallback={<ReceiptDetailLoading />}>
       <ReceiptDetailContent
+        receiptId={receiptId}
         receipt={{
           invoiceNumber: receipt.invoiceNumber,
           companyName: receipt.companyName,
