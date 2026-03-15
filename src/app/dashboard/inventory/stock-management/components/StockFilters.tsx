@@ -50,6 +50,7 @@ export function StockFilters({
         onFromDateChange={onFromDateChange}
         onToDateChange={onToDateChange}
         onTimePeriodChange={onTimePeriodChange}
+        className="!justify-start"
       />
     </div>
   );

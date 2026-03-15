@@ -9,6 +9,12 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui/table';
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipArrow,
+} from '@/components/ui/tooltip';
 import { STOCK_STATUS_CONFIG } from '../constants';
 import type { StockProduct, VariantStock } from '../types';
 
@@ -133,20 +139,43 @@ export function ProductStockTable({
                     <TableCell className="px-4 py-3 text-center text-sm font-semibold text-gray-800 border-l border-gray-200 last:border-l-0">
                       {variant.size}
                     </TableCell>
-                    {visibleColors.map((color) => (
-                      <TableCell
-                        key={color}
-                        className="px-4 py-3 border-l border-gray-200 last:border-l-0"
-                      >
-                        {variant.stocks[color] ? (
-                          <StockBadge stock={variant.stocks[color]} />
-                        ) : (
-                          <span className="block text-center text-sm text-gray-300">
-                            -
-                          </span>
-                        )}
-                      </TableCell>
-                    ))}
+                    {visibleColors.map((color) => {
+                      const stock = variant.stocks[color];
+                      const statusConfig = stock
+                        ? STOCK_STATUS_CONFIG[stock.status]
+                        : null;
+
+                      return (
+                        <TableCell
+                          key={color}
+                          className="px-4 py-3 border-l border-gray-200 last:border-l-0"
+                        >
+                          {stock ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="cursor-default">
+                                  <StockBadge stock={stock} />
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent side="top">
+                                <div className="flex flex-col gap-1 text-right">
+                                  <span className="font-bold">{product.name}</span>
+                                  <span>المقاس: {variant.size}</span>
+                                  <span>اللون: {color}</span>
+                                  <span>الكمية: {stock.quantity}</span>
+                                  <span>الحالة: {statusConfig?.label}</span>
+                                </div>
+                                <TooltipArrow />
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : (
+                            <span className="block text-center text-sm text-gray-300">
+                              -
+                            </span>
+                          )}
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
                 ))}
                 <TableRow className="bg-gray-50 border-t-2 border-gray-200">

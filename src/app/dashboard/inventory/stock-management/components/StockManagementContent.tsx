@@ -77,22 +77,22 @@ export function StockManagementContent() {
             </Button>
           </PopoverTrigger>
           <PopoverContent align="end" className="w-48 p-2">
-            <button
-              type="button"
+            <Button
+              variant="ghost"
               onClick={handleExportExcel}
-              className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+              className="flex w-full items-center justify-start gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
             >
               <LiaFileExcelSolid className="size-5 text-emerald-600" />
               تصدير Excel
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="ghost"
               onClick={handleExportPDF}
-              className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+              className="flex w-full items-center justify-start gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
             >
               <LiaFilePdfSolid className="size-5 text-red-600" />
               تصدير PDF
-            </button>
+            </Button>
           </PopoverContent>
         </Popover>
       </div>
