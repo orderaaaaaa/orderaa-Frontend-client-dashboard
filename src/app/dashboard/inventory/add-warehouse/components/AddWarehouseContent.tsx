@@ -18,6 +18,11 @@ const WAREHOUSE_TYPE_OPTIONS = [
   { key: 'damaged', value: 'مخزن هالك' },
 ];
 
+const WAREHOUSE_BRANCH_OPTIONS = [
+  { key: 'main', value: 'مخزن رئيسى' },
+  { key: 'sub', value: 'مخزن فرعي' },
+];
+
 export function AddWarehouseContent() {
   const router = useRouter();
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
@@ -35,11 +40,13 @@ export function AddWarehouseContent() {
     defaultValues: {
       name: '',
       type: '',
+      branch: '',
       governorate: '',
     },
   });
 
   const warehouseType = watch('type');
+  const branch = watch('branch');
   const governorate = watch('governorate');
 
   const onSubmit = useCallback(
@@ -92,6 +99,23 @@ export function AddWarehouseContent() {
                 placeholder="اختر نوع المخزن"
                 widthClass="w-full"
                 error={errors.type?.message}
+                clearable
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-gray-700">
+                فرع المخزن
+              </label>
+              <SearchableSelect
+                value={branch}
+                onChange={(v) =>
+                  setValue('branch', v, { shouldValidate: true })
+                }
+                options={WAREHOUSE_BRANCH_OPTIONS}
+                placeholder="اختر فرع المخزن"
+                widthClass="w-full"
+                error={errors.branch?.message}
                 clearable
               />
             </div>
