@@ -1,0 +1,1 @@
+export { StockManagementContent } from './StockManagementContent';

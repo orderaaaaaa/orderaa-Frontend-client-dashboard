@@ -57,14 +57,35 @@ export function useScannedOrders(): UseScannedOrdersReturn {
     setSearchQuery('');
   }, []);
 
+  const ACTIONABLE_STATUSES = ['CONFIRMED', 'WAITING_FOR_PACKAGING'];
+
+  const isActionableStatus = (status: string) =>
+    ACTIONABLE_STATUSES.includes(status);
+
   const confirmedOrders = useMemo(
     () => scannedOrders.filter((o) => o.status === 'CONFIRMED' && !o.packagingWarning),
     [scannedOrders]
   );
 
+  const actionableOrders = useMemo(
+    () => scannedOrders.filter((o) => isActionableStatus(o.status) && !o.packagingWarning),
+    [scannedOrders]
+  );
+
+  const actionableGroups: NonConfirmedGroup[] = useMemo(() => {
+    const actionable = scannedOrders.filter(
+      (o) => isActionableStatus(o.status) && !o.packagingWarning
+    );
+    if (actionable.length === 0) return [];
+    const grouped = groupBy(actionable, 'status');
+    return ACTIONABLE_STATUSES
+      .filter((status) => grouped[status])
+      .map((status) => ({ status, orders: grouped[status] }));
+  }, [scannedOrders]);
+
   const nonConfirmedGroups: NonConfirmedGroup[] = useMemo(() => {
     const nonConfirmed = scannedOrders.filter(
-      (o) => o.status !== 'CONFIRMED' || !!o.packagingWarning
+      (o) => !isActionableStatus(o.status) || !!o.packagingWarning
     );
     if (nonConfirmed.length === 0) return [];
     const grouped = groupBy(nonConfirmed, 'status');
@@ -89,9 +110,27 @@ export function useScannedOrders(): UseScannedOrdersReturn {
     [filteredOrders]
   );
 
+  const actionableFilteredOrders = useMemo(
+    () => filteredOrders.filter((o) => isActionableStatus(o.status) && !o.packagingWarning),
+    [filteredOrders]
+  );
+
+  const actionableFilteredGroups: NonConfirmedGroup[] = useMemo(() => {
+    const actionable = filteredOrders.filter(
+      (o) => isActionableStatus(o.status) && !o.packagingWarning
+    );
+    if (actionable.length === 0) return [];
+    const grouped = groupBy(actionable, 'status');
+    return ACTIONABLE_STATUSES
+      .filter((status) => grouped[status])
+      .map((status) => ({ status, orders: grouped[status] }));
+  }, [filteredOrders]);
+
   return {
     scannedOrders,
     confirmedOrders,
+    actionableOrders,
+    actionableGroups,
     nonConfirmedGroups,
     addOrder,
     removeOrder,
@@ -101,5 +140,7 @@ export function useScannedOrders(): UseScannedOrdersReturn {
     setSearchQuery,
     filteredOrders,
     confirmedFilteredOrders,
+    actionableFilteredOrders,
+    actionableFilteredGroups,
   };
 }

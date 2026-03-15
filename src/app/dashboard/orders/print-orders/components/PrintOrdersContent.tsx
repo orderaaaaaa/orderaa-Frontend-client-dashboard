@@ -199,6 +199,8 @@ export function PrintOrdersContent() {
   const {
     scannedOrders,
     confirmedOrders,
+    actionableOrders,
+    actionableGroups,
     nonConfirmedGroups,
     addOrder,
     removeOrder,
@@ -208,6 +210,8 @@ export function PrintOrdersContent() {
     setSearchQuery,
     filteredOrders,
     confirmedFilteredOrders,
+    actionableFilteredOrders,
+    actionableFilteredGroups,
   } = useScannedOrders();
 
   const handleScan = useCallback(
@@ -229,7 +233,7 @@ export function PrintOrdersContent() {
         playSuccessSound();
         setFlashingCode(barcode);
         setTimeout(() => setFlashingCode(null), 600);
-        if (order.status !== 'CONFIRMED') {
+        if (order.status !== 'CONFIRMED' && order.status !== 'WAITING_FOR_PACKAGING') {
           const statusLabel = ORDER_STATUS_ARABIC_LABELS[order.status] || order.status;
           toast.info(`هذا الطلب ليس مؤكد - الحالة: ${statusLabel}`);
         }
@@ -251,11 +255,11 @@ export function PrintOrdersContent() {
   });
 
   const handleScannerPrepared = useCallback(async () => {
-    if (confirmedOrders.length === 0) return;
+    if (actionableOrders.length === 0) return;
     setIsActionLoading(true);
     try {
       await prepareOrdersMutation({
-        orderCodes: confirmedOrders.map((o) => o.code),
+        orderCodes: actionableOrders.map((o) => o.code),
       });
       toast.success('تم تحديث الطلبات إلى تم التحضير');
       clearOrders();
@@ -265,14 +269,14 @@ export function PrintOrdersContent() {
     } finally {
       setIsActionLoading(false);
     }
-  }, [confirmedOrders, prepareOrdersMutation, clearOrders]);
+  }, [actionableOrders, prepareOrdersMutation, clearOrders]);
 
   const handleScannerAwaitingPackaging = useCallback(async () => {
-    if (confirmedOrders.length === 0) return;
+    if (actionableOrders.length === 0) return;
     setIsActionLoading(true);
     try {
       await waitingMutation({
-        orderIds: confirmedOrders.map((o) => o.id),
+        orderIds: actionableOrders.map((o) => o.id),
       });
       toast.success('تم تحديث الطلبات إلى فى انتظار التغليف');
       clearOrders();
@@ -282,14 +286,14 @@ export function PrintOrdersContent() {
     } finally {
       setIsActionLoading(false);
     }
-  }, [confirmedOrders, waitingMutation, clearOrders]);
+  }, [actionableOrders, waitingMutation, clearOrders]);
 
   const handleScannerCallAgain = useCallback(async () => {
-    if (confirmedOrders.length === 0) return;
+    if (actionableOrders.length === 0) return;
     setIsActionLoading(true);
     try {
       await callAgainMutation({
-        orders: confirmedOrders.map((o) => ({ id: o.id })),
+        orders: actionableOrders.map((o) => ({ id: o.id })),
       });
       toast.success('تم تحديث الطلبات إلى اعادة اتصال');
       clearOrders();
@@ -299,7 +303,7 @@ export function PrintOrdersContent() {
     } finally {
       setIsActionLoading(false);
     }
-  }, [confirmedOrders, callAgainMutation, clearOrders]);
+  }, [actionableOrders, callAgainMutation, clearOrders]);
 
   const handleScannerChangeProduct = useCallback(() => {
     setIsScannerChangeProductMode((prev) => !prev);
@@ -316,11 +320,11 @@ export function PrintOrdersContent() {
   );
 
   const handleScannerChangeProductSubmit = useCallback(async () => {
-    if (confirmedOrders.length === 0) return;
+    if (actionableOrders.length === 0) return;
     setIsActionLoading(true);
     try {
       await callAgainMutation({
-        orders: confirmedOrders.map((o) => ({
+        orders: actionableOrders.map((o) => ({
           id: o.id,
           packagingNote: scannerPackagingNotes[o.code]?.trim() || '',
         })),
@@ -335,7 +339,7 @@ export function PrintOrdersContent() {
     } finally {
       setIsActionLoading(false);
     }
-  }, [confirmedOrders, callAgainMutation, clearOrders, scannerPackagingNotes]);
+  }, [actionableOrders, callAgainMutation, clearOrders, scannerPackagingNotes]);
 
   const prevPageRef = useRef<number>(page);
 
@@ -759,12 +763,15 @@ export function PrintOrdersContent() {
         }}
         scannedOrders={scannedOrders}
         confirmedOrders={confirmedOrders}
+        actionableOrders={actionableOrders}
+        actionableFilteredGroups={actionableFilteredGroups}
         nonConfirmedGroups={nonConfirmedGroups}
         onRemoveOrder={removeOrder}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         filteredOrders={filteredOrders}
         confirmedFilteredOrders={confirmedFilteredOrders}
+        actionableFilteredOrders={actionableFilteredOrders}
         onPrepared={handleScannerPrepared}
         onAwaitingPackaging={handleScannerAwaitingPackaging}
         onCallAgain={handleScannerCallAgain}

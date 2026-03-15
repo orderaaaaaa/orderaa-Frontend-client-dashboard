@@ -15,6 +15,7 @@ import {
   LiaUsersSolid,
   LiaWarehouseSolid,
   LiaClipboardListSolid,
+  LiaCubesSolid,
 } from 'react-icons/lia';
 import {
   House,
@@ -167,6 +168,11 @@ export const navigation: NavigationItem[] = [
     href: '/dashboard/inventory',
     icon: LiaWarehouseSolid,
     children: [
+      {
+        name: 'ادارة المخزن',
+        href: '/dashboard/inventory/stock-management',
+        icon: LiaCubesSolid,
+      },
       {
         name: 'إدارة الاستلامات',
         href: '/dashboard/inventory/receipts',

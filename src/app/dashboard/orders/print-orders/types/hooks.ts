@@ -4,6 +4,8 @@ import type { ScannedOrder, AddOrderInput, NonConfirmedGroup } from './component
 export interface UseScannedOrdersReturn {
   scannedOrders: ScannedOrder[];
   confirmedOrders: ScannedOrder[];
+  actionableOrders: ScannedOrder[];
+  actionableGroups: NonConfirmedGroup[];
   nonConfirmedGroups: NonConfirmedGroup[];
   addOrder: (order: AddOrderInput) => boolean;
   removeOrder: (code: string) => void;
@@ -13,6 +15,8 @@ export interface UseScannedOrdersReturn {
   setSearchQuery: (query: string) => void;
   filteredOrders: ScannedOrder[];
   confirmedFilteredOrders: ScannedOrder[];
+  actionableFilteredOrders: ScannedOrder[];
+  actionableFilteredGroups: NonConfirmedGroup[];
 }
 
 export interface UseBarcodeScannerOptions {

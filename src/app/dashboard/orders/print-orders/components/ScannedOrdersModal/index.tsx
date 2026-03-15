@@ -183,11 +183,14 @@ export function ScannedOrdersModal({
   onClose,
   scannedOrders,
   confirmedOrders,
+  actionableOrders,
+  actionableFilteredGroups,
   nonConfirmedGroups,
   onRemoveOrder,
   searchQuery,
   onSearchChange,
   confirmedFilteredOrders,
+  actionableFilteredOrders,
   onPrepared,
   onAwaitingPackaging,
   onCallAgain,
@@ -204,10 +207,10 @@ export function ScannedOrdersModal({
 
   const allFieldsFilled = useMemo(() => {
     if (!isChangeProductMode) return true;
-    return confirmedOrders.every(
+    return actionableOrders.every(
       (order) => packagingNotes[order.code]?.trim().length > 0
     );
-  }, [isChangeProductMode, confirmedOrders, packagingNotes]);
+  }, [isChangeProductMode, actionableOrders, packagingNotes]);
 
   if (!isOpen) return null;
 
@@ -241,13 +244,11 @@ export function ScannedOrdersModal({
         <div className="absolute left-8 flex items-center gap-3 text-gray-700">
           <span className="text-lg font-medium">عدد الطلبات</span>
           <span className="inline-flex items-center justify-center min-w-[40px] h-10 px-3 rounded-full bg-primary text-white text-xl font-bold">
-            {scannedOrders.length}
+            {actionableOrders.length}
           </span>
-          {confirmedOrders.length !== scannedOrders.length && (
-            <span className="text-sm text-gray-500">
-              ({confirmedOrders.length} مؤكد)
-            </span>
-          )}
+          <span className="text-sm text-gray-500">
+            ({scannedOrders.length - actionableOrders.length} حالات أخرى)
+          </span>
         </div>
       </div>
 
@@ -270,7 +271,7 @@ export function ScannedOrdersModal({
           </div>
           <div className="flex-1 overflow-y-auto px-8 py-4">
             <ChangeProductTable
-              orders={confirmedFilteredOrders}
+              orders={actionableFilteredOrders}
               packagingNotes={packagingNotes}
               onPackagingNoteChange={onPackagingNoteChange || (() => { })}
               onRemove={onRemoveOrder}
@@ -293,18 +294,73 @@ export function ScannedOrdersModal({
             </div>
           </div>
           <div className="flex-1 overflow-y-auto px-8 py-4">
-            {(confirmedFilteredOrders.length > 0 || isScanLoading) && (
-              <h3 className="text-base font-semibold text-gray-700 mb-4">
-                طلبات مؤكدة
-              </h3>
+            <div className="flex flex-wrap gap-4">
+              {actionableFilteredGroups.map((group, index) => {
+                const statusLabel =
+                  ORDER_STATUS_ARABIC_LABELS[group.status] || group.status;
+                const statusColor =
+                  ORDER_STATUS_CHART_COLORS[group.status] || '#9ca3af';
+
+                return (
+                  <div
+                    key={group.status}
+                    className="border border-gray-200 rounded-lg overflow-hidden w-full md:w-[calc(50%-0.5rem)] self-start"
+                  >
+                    <div
+                      className="flex items-center justify-between px-4 py-2.5"
+                      style={{ backgroundColor: `${statusColor}15` }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: statusColor }}
+                        />
+                        <span
+                          className="text-sm font-semibold"
+                          style={{ color: statusColor }}
+                        >
+                          {statusLabel}
+                        </span>
+                      </div>
+                      <span
+                        className="inline-flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full text-xs font-bold text-white"
+                        style={{ backgroundColor: statusColor }}
+                      >
+                        {group.orders.length}
+                      </span>
+                    </div>
+                    <div className="divide-y divide-gray-100">
+                      {group.orders.map((order) => (
+                        <div
+                          key={order.code}
+                          className="flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors"
+                        >
+                          <span className="text-sm font-medium text-gray-800">
+                            {order.code}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            onClick={() => onRemoveOrder(order.code)}
+                            className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors flex-shrink-0"
+                            title="حذف الطلب"
+                          >
+                            <LiaTrashAltSolid className="size-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {actionableFilteredGroups.length === 0 && isScanLoading && (
+              <ScannedOrdersTable
+                orders={[]}
+                onRemove={onRemoveOrder}
+                isScanLoading={isScanLoading}
+                searchQuery={searchQuery}
+              />
             )}
-            <ScannedOrdersTable
-              orders={confirmedFilteredOrders}
-              onRemove={onRemoveOrder}
-              flashingCode={flashingCode}
-              isScanLoading={isScanLoading}
-              searchQuery={searchQuery}
-            />
             <NonConfirmedSection
               groups={nonConfirmedGroups}
               onRemove={onRemoveOrder}
@@ -318,7 +374,7 @@ export function ScannedOrdersModal({
         position="static"
         isLoading={isLoading}
         disableActions={
-          confirmedOrders.length === 0 ||
+          actionableOrders.length === 0 ||
           (isChangeProductMode && !allFieldsFilled)
         }
         onPrepared={isChangeProductMode ? undefined : onPrepared}
