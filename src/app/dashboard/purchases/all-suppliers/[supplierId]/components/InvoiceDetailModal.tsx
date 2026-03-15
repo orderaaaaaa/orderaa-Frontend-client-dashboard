@@ -25,20 +25,20 @@ export default function InvoiceDetailModal({
   invoice,
 }: InvoiceDetailModalProps) {
   const totalQuantity = useMemo(
-    () => invoice.items.reduce((sum, item) => sum + item.quantity, 0),
-    [invoice.items],
+    () => invoice.products.reduce((sum, item) => sum + item.quantity, 0),
+    [invoice.products],
   );
 
   const grandTotal = useMemo(
-    () => invoice.items.reduce((sum, item) => sum + item.total, 0),
-    [invoice.items],
+    () => invoice.products.reduce((sum, item) => sum + item.quantity * item.price, 0),
+    [invoice.products],
   );
 
   return (
     <BaseModal
       isOpen={isOpen}
       onClose={onClose}
-      title={`فاتورة رقم ${invoice.invoiceNumber}`}
+      title={`فاتورة رقم ${invoice.code}`}
       showFooter={false}
       maxWidth="md:max-w-[700px]"
     >
@@ -49,7 +49,7 @@ export default function InvoiceDetailModal({
             <div className="flex flex-col">
               <span className="text-xs text-gray-400">موظف المشتريات</span>
               <span className="text-sm font-bold text-gray-800">
-                {invoice.createdByName}
+                {invoice.createdByEmployee?.department ?? 'غير محدد'}
               </span>
             </div>
           </div>
@@ -76,9 +76,6 @@ export default function InvoiceDetailModal({
               <thead>
                 <tr className="border-b border-gray-200">
                   <th className="text-right py-3 px-2 font-semibold text-gray-500">
-                    صورة المنتج
-                  </th>
-                  <th className="text-right py-3 px-2 font-semibold text-gray-500">
                     اسم الصنف
                   </th>
                   <th className="text-center py-3 px-2 font-semibold text-gray-500">
@@ -93,26 +90,13 @@ export default function InvoiceDetailModal({
                 </tr>
               </thead>
               <tbody>
-                {invoice.items.map((item) => (
+                {invoice.products.map((item) => (
                   <tr
                     key={item.id}
                     className="border-b border-gray-100 last:border-b-0"
                   >
-                    <td className="py-3 px-2">
-                      <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden">
-                        <img
-                          src={item.productImage}
-                          alt={item.productName}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = '';
-                            (e.target as HTMLImageElement).style.display = 'none';
-                          }}
-                        />
-                      </div>
-                    </td>
                     <td className="py-3 px-2 text-gray-800 font-medium">
-                      {item.productName}
+                      {item.product.name}
                     </td>
                     <td className="py-3 px-2 text-center text-gray-800">
                       {item.quantity}
@@ -121,7 +105,7 @@ export default function InvoiceDetailModal({
                       {item.price.toFixed(1)}
                     </td>
                     <td className="py-3 px-2 text-left text-gray-800 font-medium">
-                      {item.total.toLocaleString()}
+                      {(item.quantity * item.price).toLocaleString()}
                     </td>
                   </tr>
                 ))}

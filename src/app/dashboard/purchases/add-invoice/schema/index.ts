@@ -33,12 +33,19 @@ const invoiceItemSchema = z.object({
 });
 
 export const addInvoiceSchema = z.object({
-  invoiceType: z.enum(['purchases', 'returns'], {
+  invoiceType: z.enum(['PURCHASE', 'RETURN'], {
     required_error: 'نوع الفاتورة مطلوب',
     invalid_type_error: 'نوع الفاتورة مطلوب',
   }),
-  creator: z.string().min(1, 'منشئ الفاتورة مطلوب'),
-  nickname: z.string().min(1, 'اللقب مطلوب'),
+  supplierId: z
+    .number({ required_error: 'المورد مطلوب', invalid_type_error: 'المورد مطلوب' })
+    .min(1, 'المورد مطلوب'),
+  createdByEmployeeId: z.number().optional(),
+  paymentAmount: z.preprocess(
+    (val) => (val === '' || val === null || val === undefined ? undefined : Number(val)),
+    z.number().min(0).optional(),
+  ),
+  externalInvoiceNumber: z.string().optional(),
   items: z
     .array(invoiceItemSchema)
     .min(1, 'يجب اضافة صنف واحد على الاقل'),

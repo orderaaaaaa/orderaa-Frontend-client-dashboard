@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useMemo } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -15,12 +15,24 @@ import InvoiceItemsTable from './InvoiceItemsTable';
 import InvoiceImageSection from './InvoiceImageSection';
 import { addInvoiceSchema, AddInvoiceFormData } from '../schema';
 import { InvoiceMode } from '../types';
+import { useCreateSupplierInvoiceMutation, useSuppliersQuery } from '@/services/suppliers';
 
 export function AddInvoiceContent() {
   const router = useRouter();
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [invoiceMode, setInvoiceMode] = useState<InvoiceMode>('singular');
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const createInvoiceMutation = useCreateSupplierInvoiceMutation();
+
+  const { data: suppliersData } = useSuppliersQuery({ limit: 200 });
+  const suppliers = suppliersData?.data ?? [];
+
+  const supplierOptions = useMemo(
+    () => suppliers.map((s) => ({ key: String(s.id), value: s.nickname })),
+    [suppliers],
+  );
 
   const {
     control,
@@ -32,8 +44,7 @@ export function AddInvoiceContent() {
     resolver: zodResolver(addInvoiceSchema),
     defaultValues: {
       invoiceType: undefined,
-      creator: '',
-      nickname: '',
+      supplierId: undefined,
       items: [],
       invoiceImage: undefined,
     },
@@ -48,8 +59,7 @@ export function AddInvoiceContent() {
   const savedPackageItems = useRef<AddInvoiceFormData['items']>([]);
 
   const invoiceType = watch('invoiceType');
-  const creator = watch('creator');
-  const nickname = watch('nickname');
+  const supplierId = watch('supplierId');
   const items = watch('items');
   const invoiceImage = watch('invoiceImage');
 
@@ -161,14 +171,31 @@ export function AddInvoiceContent() {
   );
 
   const onSubmit = useCallback(
-    (data: AddInvoiceFormData) => {
-      console.log('Invoice Data:', data);
-      setIsSuccessModalOpen(true);
-      setTimeout(() => {
-        router.push('/dashboard/purchases/all-invoices');
-      }, 2000);
+    async (data: AddInvoiceFormData) => {
+      setSubmitError(null);
+      try {
+        await createInvoiceMutation.mutateAsync({
+          type: data.invoiceType,
+          supplierId: data.supplierId,
+          createdByEmployeeId: data.createdByEmployeeId,
+          paymentAmount: data.paymentAmount,
+          externalInvoiceNumber: data.externalInvoiceNumber,
+          products: data.items.map((item) => ({
+            productId: Number(item.id),
+            quantity: item.quantity,
+            price: item.pricePerItem,
+          })),
+        });
+        setIsSuccessModalOpen(true);
+        setTimeout(() => {
+          router.push('/dashboard/purchases/all-invoices');
+        }, 2000);
+      } catch (err: unknown) {
+        const axiosErr = err as { response?: { data?: { message?: string } } };
+        setSubmitError(axiosErr?.response?.data?.message || 'حدث خطأ أثناء إضافة الفاتورة');
+      }
     },
-    [router],
+    [createInvoiceMutation, router],
   );
 
   const imageFile =
@@ -186,17 +213,13 @@ export function AddInvoiceContent() {
         <AddInvoiceHeader />
 
         <InvoiceDropdowns
-          creator={creator}
-          nickname={nickname}
-          onCreatorChange={(value) =>
-            setValue('creator', value, { shouldValidate: true })
+          supplierId={supplierId}
+          onSupplierChange={(value) =>
+            setValue('supplierId', value, { shouldValidate: true })
           }
-          onNicknameChange={(value) =>
-            setValue('nickname', value, { shouldValidate: true })
-          }
+          supplierOptions={supplierOptions}
           errors={{
-            creator: errors.creator?.message,
-            nickname: errors.nickname?.message,
+            supplierId: errors.supplierId?.message,
           }}
         />
 
@@ -205,7 +228,7 @@ export function AddInvoiceContent() {
           mode={invoiceMode}
           invoiceType={invoiceType ?? ''}
           onInvoiceTypeChange={(value) =>
-            setValue('invoiceType', value as 'purchases' | 'returns', { shouldValidate: true })
+            setValue('invoiceType', value as 'PURCHASE' | 'RETURN', { shouldValidate: true })
           }
           invoiceTypeError={errors.invoiceType?.message}
           onModeChange={handleModeChange}
@@ -228,11 +251,16 @@ export function AddInvoiceContent() {
           error={errors.invoiceImage?.message as string}
         />
 
+        {submitError && (
+          <p className="sm:px-8 text-red-500 text-sm">{submitError}</p>
+        )}
+
         <div className="flex items-center justify-end sm:px-8">
           <Button
             type="submit"
             variant="default"
             size="lg"
+            disabled={createInvoiceMutation.isPending}
             className="w-full sm:w-auto rounded-full font-semibold text-sm sm:text-base px-12"
           >
             حفظ الفاتورة

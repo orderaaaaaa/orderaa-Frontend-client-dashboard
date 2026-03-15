@@ -5,10 +5,9 @@ import SearchableSelect from '@/components/ui/SearchableSelect';
 import Input from '@/components/ui/Input';
 import { InvoiceFilters } from '../types';
 import {
-  MOCK_SUPPLIER_OPTIONS,
-  MOCK_INVOICE_TYPE_OPTIONS,
-  MOCK_EMPLOYEE_OPTIONS,
-  MOCK_ACCEPTANCE_STATUS_OPTIONS,
+  INVOICE_TYPE_OPTIONS,
+  EMPLOYEE_OPTIONS,
+  ACCEPTANCE_STATUS_OPTIONS,
 } from '../constants';
 
 interface InvoicesFilterBarProps {
@@ -18,15 +17,16 @@ interface InvoicesFilterBarProps {
     value: InvoiceFilters[K],
   ) => void;
   onClearFilter: (key: keyof InvoiceFilters) => void;
+  supplierOptions: { key: string; value: string }[];
 }
 
 const InvoicesFilterBar = memo(
-  ({ filters, onFilterChange, onClearFilter }: InvoicesFilterBarProps) => {
+  ({ filters, onFilterChange, onClearFilter, supplierOptions }: InvoicesFilterBarProps) => {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         <div className="flex flex-col gap-1">
           <SearchableSelect
-            options={MOCK_SUPPLIER_OPTIONS}
+            options={supplierOptions}
             value={filters.supplierName}
             onChange={(v) => onFilterChange('supplierName', v)}
             placeholder="اسم المورد"
@@ -37,7 +37,7 @@ const InvoicesFilterBar = memo(
 
         <div className="flex flex-col gap-1">
           <SearchableSelect
-            options={MOCK_INVOICE_TYPE_OPTIONS}
+            options={INVOICE_TYPE_OPTIONS}
             value={filters.transactionType}
             onChange={(v) => onFilterChange('transactionType', v)}
             placeholder="نوع الفاتورة"
@@ -60,7 +60,7 @@ const InvoicesFilterBar = memo(
 
         <div className="flex flex-col gap-1">
           <SearchableSelect
-            options={MOCK_EMPLOYEE_OPTIONS}
+            options={EMPLOYEE_OPTIONS}
             value={filters.employeeName}
             onChange={(v) => onFilterChange('employeeName', v)}
             placeholder="اسم الموظف"
@@ -71,7 +71,7 @@ const InvoicesFilterBar = memo(
 
         <div className="flex flex-col gap-1">
           <SearchableSelect
-            options={MOCK_ACCEPTANCE_STATUS_OPTIONS}
+            options={ACCEPTANCE_STATUS_OPTIONS}
             value={filters.acceptanceStatus}
             onChange={(v) => onFilterChange('acceptanceStatus', v)}
             placeholder="حالة القبول"

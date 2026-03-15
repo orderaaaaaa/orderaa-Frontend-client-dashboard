@@ -1,13 +1,17 @@
 export interface Supplier {
   id: number;
+  nickname: string;
   name: string;
-  contactPerson: string;
-  phone: string;
+  phoneNumber: string;
   email: string;
-  totalAmount: number;
-  invoicesCount: number;
+  governorate?: string;
+  totalPurchased: number;
+  totalReturned: number;
+  invoiceCount: number;
   paidAmount: number;
-  remainingAmount: number;
+  remaining: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface SupplierFilters {

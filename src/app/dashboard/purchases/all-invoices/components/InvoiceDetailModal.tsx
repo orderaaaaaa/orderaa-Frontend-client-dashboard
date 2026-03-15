@@ -7,6 +7,7 @@ import BaseModal from '@/components/ui/base-modal';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { Invoice } from '../types';
 import { formatDate } from '../utils';
+import { INVOICE_TYPE_LABEL } from '../../constants';
 
 interface InvoiceDetailModalProps {
   invoice: Invoice | null;
@@ -24,10 +25,12 @@ const InvoiceDetailModal = memo(
   ({ invoice, isOpen, onClose }: InvoiceDetailModalProps) => {
     if (!invoice) return null;
 
+    const imageUrl = invoice.files[0]?.url;
+
     const fieldRows: DetailField[][] = [
       [
-        { label: `رقم الفاتورة ${invoice.invoiceNumber}`, subtitle: invoice.companyName },
-        { label: 'نوع المعاملة', value: invoice.transactionType },
+        { label: `رقم الفاتورة ${invoice.code}`, subtitle: invoice.supplier.name },
+        { label: 'نوع المعاملة', value: INVOICE_TYPE_LABEL[invoice.type] ?? invoice.type },
       ],
       [
         { label: 'التاريخ و الوقت', value: getTimeAgo(invoice.createdAt), subtitle: formatDate(invoice.createdAt) },
@@ -67,14 +70,14 @@ const InvoiceDetailModal = memo(
             </div>
           ))}
 
-          {invoice.imageUrl && (
+          {imageUrl && (
             <div className="flex flex-col items-start gap-3 border-t border-gray-200 pt-4">
               <span className="text-base font-bold text-black">
                 صورة الفاتورة
               </span>
               <div className="w-full rounded-lg overflow-hidden flex items-center justify-center">
                 <Image
-                  src={invoice.imageUrl}
+                  src={imageUrl}
                   alt="صورة الفاتورة"
                   width={600}
                   height={800}

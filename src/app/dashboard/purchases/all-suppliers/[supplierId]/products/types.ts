@@ -1,28 +1,30 @@
 export interface SupplierProduct {
-  id: number;
-  name: string;
-  image: string;
-  purchasedQuantity: number;
-  totalPurchase: number;
-  totalReturned: number;
-  totalNet: number;
+  productId: number;
+  productName: string;
+  totalQuantityPurchased: number;
+  totalPurchaseAmount: number;
+  totalQuantityReturned: number;
+  totalReturnAmount: number;
+  netAmount: number;
 }
 
 export type SortField =
-  | 'name'
-  | 'purchasedQuantity'
-  | 'totalPurchase'
-  | 'totalReturned'
-  | 'totalNet';
+  | 'productName'
+  | 'totalQuantityPurchased'
+  | 'totalPurchaseAmount'
+  | 'totalQuantityReturned'
+  | 'netAmount';
 
 export type SortOrder = 'asc' | 'desc';
 
-export type TransactionType = 'purchase' | 'return';
+export type TransactionType = 'PURCHASE' | 'RETURN';
 
 export interface ProductTransaction {
-  id: number;
-  date: string;
+  invoiceId: number;
+  invoiceCode: string;
+  invoiceType: TransactionType;
   quantity: number;
+  price: number;
   totalPrice: number;
-  type: TransactionType;
+  createdAt: string;
 }

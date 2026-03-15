@@ -1,5 +1,5 @@
 export type InvoiceMode = 'singular' | 'package';
-export type InvoiceType = 'purchases' | 'returns';
+export type InvoiceType = 'PURCHASE' | 'RETURN';
 
 export interface InvoiceItem {
   id: string;

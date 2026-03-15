@@ -1,16 +1,17 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Scan, ScanLine, X } from 'lucide-react';
 import { LiaFileInvoiceSolid } from 'react-icons/lia';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import { Supplier } from '../../types';
+import { useSupplierInvoicesQuery } from '@/services/suppliers';
 import SupplierDetailHeader from './SupplierDetailHeader';
 import SupplierInvoiceCard from './SupplierInvoiceCard';
 import SupplierInvoicesActionsBar from './SupplierInvoicesActionsBar';
-import { MOCK_SUPPLIER_INVOICES, DEFAULT_PAGE_SIZE } from '../constants';
+import { DEFAULT_PAGE_SIZE } from '../constants';
 import { exportSupplierInvoicesToExcel } from '../utils';
 
 interface SupplierDetailContentProps {
@@ -26,15 +27,18 @@ export function SupplierDetailContent({ supplier }: SupplierDetailContentProps) 
   const [toDate, setToDate] = useState<Date | null>(null);
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('');
 
-  const invoices = MOCK_SUPPLIER_INVOICES;
+  const { data: invoicesData, isLoading } = useSupplierInvoicesQuery({
+    supplierId: supplier.id,
+    page: currentPage,
+    limit: pageSize,
+    dateFrom: fromDate?.toISOString(),
+    dateTo: toDate?.toISOString(),
+  });
 
-  const totalItems = invoices.length;
-  const totalPages = Math.ceil(totalItems / pageSize);
-
-  const paginatedInvoices = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return invoices.slice(start, start + pageSize);
-  }, [currentPage, pageSize, invoices]);
+  const invoices = invoicesData?.data ?? [];
+  const meta = invoicesData?.meta;
+  const totalItems = meta?.totalItems ?? 0;
+  const totalPages = meta?.totalPages ?? 1;
 
   const showActionsBar = select && selectedIds.length > 0;
 
@@ -76,11 +80,9 @@ export function SupplierDetailContent({ supplier }: SupplierDetailContentProps) 
   }, []);
 
   const handleExportExcel = useCallback(() => {
-    const selectedInvoices = invoices.filter((inv) =>
-      selectedIds.includes(inv.id),
-    );
-    exportSupplierInvoicesToExcel(selectedInvoices, supplier.name);
-  }, [invoices, selectedIds, supplier.name]);
+    const selectedInvoices = invoices.filter((inv) => selectedIds.includes(inv.id));
+    exportSupplierInvoicesToExcel(selectedInvoices, supplier.nickname);
+  }, [invoices, selectedIds, supplier.nickname]);
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">
@@ -130,8 +132,12 @@ export function SupplierDetailContent({ supplier }: SupplierDetailContentProps) 
       </div>
 
       <div className="px-4 sm:px-8 flex flex-col gap-4">
-        {paginatedInvoices.length > 0 ? (
-          paginatedInvoices.map((invoice) => (
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : invoices.length > 0 ? (
+          invoices.map((invoice) => (
             <SupplierInvoiceCard
               key={invoice.id}
               invoice={invoice}
@@ -160,8 +166,8 @@ export function SupplierDetailContent({ supplier }: SupplierDetailContentProps) 
           currentPage={currentPage}
           totalPages={totalPages}
           totalItems={totalItems}
-          hasNextPage={currentPage < totalPages}
-          hasPreviousPage={currentPage > 1}
+          hasNextPage={meta?.hasNextPage ?? false}
+          hasPreviousPage={meta?.hasPreviousPage ?? false}
           onPageChange={handlePageChange}
           onPrevious={() => handlePageChange(Math.max(1, currentPage - 1))}
           onNext={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
