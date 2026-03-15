@@ -23,6 +23,7 @@ interface ReceiptDetailContentProps {
 export function ReceiptDetailContent({ receiptId, receipt }: ReceiptDetailContentProps) {
   const {
     currentStep,
+    completedSteps,
     productVariants,
     confirmedCounts,
     rejectedCounts,
@@ -118,7 +119,7 @@ export function ReceiptDetailContent({ receiptId, receipt }: ReceiptDetailConten
           companyName={receipt.companyName}
         />
 
-        <Stepper steps={RECEIPT_STEPS} currentStep={currentStep} onStepClick={handleStepClick}>
+        <Stepper steps={RECEIPT_STEPS} currentStep={currentStep} completedSteps={completedSteps} onStepClick={handleStepClick}>
           <StepContent>
             <AddVariantsStep
               onNext={handleNext}
