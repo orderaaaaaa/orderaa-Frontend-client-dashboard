@@ -5,6 +5,7 @@ import { LiaSaveSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { Stepper, StepContent } from '@/components/ui/stepper';
 import { useReceiptStore } from '@/store/receiptStore';
+import { useShallow } from 'zustand/react/shallow';
 import ReceiptHeader from './ReceiptHeader';
 import AddVariantsStep from './AddVariantsStep';
 import PrintStep from './PrintStep';
@@ -27,25 +28,29 @@ export function ReceiptDetailContent({ receiptId, receipt }: ReceiptDetailConten
     productVariants,
     confirmedCounts,
     rejectedCounts,
-  } = useReceiptStore((s) => s.getReceiptState(receiptId));
+  } = useReceiptStore(useShallow((s) => s.getReceiptState(receiptId)));
 
   const setCurrentStep = useReceiptStore((s) => s.setCurrentStep);
   const setProductVariants = useReceiptStore((s) => s.setProductVariants);
   const setConfirmedCounts = useReceiptStore((s) => s.setConfirmedCounts);
   const setRejectedCounts = useReceiptStore((s) => s.setRejectedCounts);
   const clearReceipt = useReceiptStore((s) => s.clearReceipt);
+  const markStepCompleted = useReceiptStore((s) => s.markStepCompleted);
 
   const handleNext = useCallback(() => {
+    markStepCompleted(receiptId, currentStep);
     setCurrentStep(receiptId, Math.min(currentStep + 1, RECEIPT_STEPS.length - 1));
-  }, [receiptId, currentStep, setCurrentStep]);
+  }, [receiptId, currentStep, setCurrentStep, markStepCompleted]);
 
   const handlePrevious = useCallback(() => {
+    markStepCompleted(receiptId, currentStep);
     setCurrentStep(receiptId, Math.max(currentStep - 1, 0));
-  }, [receiptId, currentStep, setCurrentStep]);
+  }, [receiptId, currentStep, setCurrentStep, markStepCompleted]);
 
   const handleStepClick = useCallback((step: number) => {
+    markStepCompleted(receiptId, currentStep);
     setCurrentStep(receiptId, step);
-  }, [receiptId, setCurrentStep]);
+  }, [receiptId, currentStep, setCurrentStep, markStepCompleted]);
 
   const handleProductVariantsChange = useCallback(
     (variants: Record<number, import('../types').SelectedVariant[]>) => {

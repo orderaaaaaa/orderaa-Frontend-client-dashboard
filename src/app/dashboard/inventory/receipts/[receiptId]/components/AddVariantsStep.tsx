@@ -154,11 +154,11 @@ const AddVariantsStep = memo(({ onNext, productVariants, onProductVariantsChange
       if (!variants || variants.length === 0) return null;
 
       return (
-        <div className="bg-gray-50/80 px-4 sm:px-6 py-3 flex flex-wrap gap-2">
+        <div className="bg-gray-50/80 px-4 sm:px-6 py-3 flex flex-col sm:flex-row sm:flex-wrap items-start gap-2">
           {variants.map((v) => (
             <div
               key={`${v.variantId}-${v.color}-${v.size}`}
-              className="flex items-center gap-2 bg-white border border-primary/20 rounded-full px-3 py-1.5 text-xs"
+              className="flex items-center gap-2 bg-white border border-primary/20 rounded-full px-3 py-1.5 text-xs w-fit"
             >
               <span className="font-semibold text-gray-800">{v.variantName}</span>
               <span className="text-gray-400">|</span>

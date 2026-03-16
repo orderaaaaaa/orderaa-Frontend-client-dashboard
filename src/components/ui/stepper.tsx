@@ -39,13 +39,11 @@ function Stepper({ steps, currentStep, completedSteps, onStepClick, children, cl
                 <div
                   className={cn(
                     'flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-bold transition-all duration-300',
-                    isCompleted &&
-                      'border-primary bg-primary text-white',
-                    isActive &&
-                      'border-primary bg-primary/10 text-primary',
-                    !isCompleted &&
-                      !isActive &&
-                      'border-gray-300 bg-white text-gray-400'
+                    isCompleted
+                      ? 'border-primary bg-primary text-white'
+                      : isActive
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-gray-300 bg-white text-gray-400'
                   )}
                 >
                   {isCompleted ? (
@@ -57,9 +55,11 @@ function Stepper({ steps, currentStep, completedSteps, onStepClick, children, cl
                 <span
                   className={cn(
                     'text-xs font-medium whitespace-nowrap transition-colors duration-300',
-                    isCompleted && 'text-primary',
-                    isActive && 'text-primary font-bold',
-                    !isCompleted && !isActive && 'text-gray-400'
+                    isCompleted
+                      ? 'text-primary'
+                      : isActive
+                        ? 'text-primary font-bold'
+                        : 'text-gray-400'
                   )}
                 >
                   {step.label}

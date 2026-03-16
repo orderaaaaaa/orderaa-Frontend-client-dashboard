@@ -35,13 +35,22 @@ const DEFAULT_STATE: ReceiptStepState = {
   rejectedCounts: {},
 };
 
+function getReceipt(receipts: Record<string, ReceiptStepState>, receiptId: string): ReceiptStepState {
+  const stored = receipts[receiptId];
+  if (!stored) return DEFAULT_STATE;
+  if (stored.completedSteps === undefined) {
+    return { ...DEFAULT_STATE, ...stored };
+  }
+  return stored;
+}
+
 export const useReceiptStore = create<ReceiptStore>()(
   persist(
     (set, get) => ({
       receipts: {},
 
       getReceiptState: (receiptId: string) => {
-        return get().receipts[receiptId] ?? DEFAULT_STATE;
+        return getReceipt(get().receipts, receiptId);
       },
 
       setCurrentStep: (receiptId, step) =>
@@ -49,7 +58,7 @@ export const useReceiptStore = create<ReceiptStore>()(
           receipts: {
             ...state.receipts,
             [receiptId]: {
-              ...(state.receipts[receiptId] ?? DEFAULT_STATE),
+              ...(getReceipt(state.receipts, receiptId)),
               currentStep: step,
             },
           },
@@ -57,7 +66,7 @@ export const useReceiptStore = create<ReceiptStore>()(
 
       markStepCompleted: (receiptId, step) =>
         set((state) => {
-          const current = state.receipts[receiptId] ?? DEFAULT_STATE;
+          const current = getReceipt(state.receipts, receiptId);
           if (current.completedSteps.includes(step)) return state;
           return {
             receipts: {
@@ -72,7 +81,7 @@ export const useReceiptStore = create<ReceiptStore>()(
 
       setProductVariants: (receiptId, variants) =>
         set((state) => {
-          const current = state.receipts[receiptId] ?? DEFAULT_STATE;
+          const current = getReceipt(state.receipts, receiptId);
           const hasData = Object.values(variants).some((v) => v.length > 0);
           const completed = hasData && !current.completedSteps.includes(0)
             ? [...current.completedSteps, 0]
@@ -87,7 +96,7 @@ export const useReceiptStore = create<ReceiptStore>()(
 
       addPrintedId: (receiptId, id) =>
         set((state) => {
-          const current = state.receipts[receiptId] ?? DEFAULT_STATE;
+          const current = getReceipt(state.receipts, receiptId);
           if (current.printedIds.includes(id)) return state;
           const completed = !current.completedSteps.includes(1)
             ? [...current.completedSteps, 1]
@@ -106,7 +115,7 @@ export const useReceiptStore = create<ReceiptStore>()(
 
       setConfirmedCounts: (receiptId, counts) =>
         set((state) => {
-          const current = state.receipts[receiptId] ?? DEFAULT_STATE;
+          const current = getReceipt(state.receipts, receiptId);
           const hasData = Object.values(counts).some((v) => v > 0);
           const completed = hasData && !current.completedSteps.includes(2)
             ? [...current.completedSteps, 2]
@@ -121,7 +130,7 @@ export const useReceiptStore = create<ReceiptStore>()(
 
       setRejectedCounts: (receiptId, counts) =>
         set((state) => {
-          const current = state.receipts[receiptId] ?? DEFAULT_STATE;
+          const current = getReceipt(state.receipts, receiptId);
           const hasData = Object.values(counts).some((v) => v > 0);
           const completed = hasData && !current.completedSteps.includes(3)
             ? [...current.completedSteps, 3]
