@@ -1,4 +1,5 @@
 import { useCallback, useRef, useEffect } from 'react';
+import { formatLocalStartOfDay, formatLocalEndOfDay } from '@/utils/dateRangeUtils';
 import { toast } from 'react-toastify';
 import { Order, OrderStatusItem } from '@/types/orders';
 import { ShippingData } from '@/components/OrderDetails/EditShippingModal';
@@ -135,8 +136,8 @@ export function useOrderActions({
         toast.success(`تم تحديث حالة الطلب إلى ${statusLabel} بنجاح`);
 
         if (onNavigateToNextOrder) {
-          const fromISO = dateRange?.from?.toISOString();
-          const toISO = dateRange?.to?.toISOString();
+          const fromISO = dateRange?.from ? formatLocalStartOfDay(dateRange.from) : undefined;
+          const toISO = dateRange?.to ? formatLocalEndOfDay(dateRange.to) : undefined;
 
           try {
             const nextOrderResponse = await getNextOrderId(
@@ -237,8 +238,8 @@ export function useOrderActions({
         toast.success('تم إلغاء الطلب بنجاح');
 
         if (onNavigateToNextOrder) {
-          const fromISO = dateRange?.from?.toISOString();
-          const toISO = dateRange?.to?.toISOString();
+          const fromISO = dateRange?.from ? formatLocalStartOfDay(dateRange.from) : undefined;
+          const toISO = dateRange?.to ? formatLocalEndOfDay(dateRange.to) : undefined;
 
           try {
             const nextOrderResponse = await getNextOrderId(
@@ -454,8 +455,8 @@ export function useOrderActions({
         toast.success(`تم تسجيل المتابعة: ${label}`);
 
         if (onNavigateToNextOrder) {
-          const fromISO = dateRange?.from?.toISOString();
-          const toISO = dateRange?.to?.toISOString();
+          const fromISO = dateRange?.from ? formatLocalStartOfDay(dateRange.from) : undefined;
+          const toISO = dateRange?.to ? formatLocalEndOfDay(dateRange.to) : undefined;
 
           try {
             const nextOrderResponse = await getNextOrderId(

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
+import { formatDateToLocalDate } from '@/utils/dateRangeUtils';
 import { Scan, ScanLine, X } from 'lucide-react';
 import { LiaFileInvoiceSolid } from 'react-icons/lia';
 import InvoicesHeader from './InvoicesHeader';
@@ -62,8 +63,8 @@ export function AllInvoicesContent() {
     limit: pageSize,
     supplierId: selectedSupplier?.id,
     type: apiType,
-    dateFrom: filters.fromDate?.toISOString(),
-    dateTo: filters.toDate?.toISOString(),
+    dateFrom: formatDateToLocalDate(filters.fromDate),
+    dateTo: formatDateToLocalDate(filters.toDate),
   });
 
   const apiInvoices = (invoicesData?.data ?? []) as Invoice[];

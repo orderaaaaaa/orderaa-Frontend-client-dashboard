@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import { formatDateToLocalDate } from '@/utils/dateRangeUtils';
 import { Scan, ScanLine, X } from 'lucide-react';
 import { LiaFileInvoiceSolid } from 'react-icons/lia';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
@@ -33,8 +34,8 @@ export function SupplierDetailContent({ supplier, initialInvoicesData }: Supplie
     supplierId: supplier.id,
     page: currentPage,
     limit: pageSize,
-    dateFrom: fromDate?.toISOString(),
-    dateTo: toDate?.toISOString(),
+    dateFrom: formatDateToLocalDate(fromDate),
+    dateTo: formatDateToLocalDate(toDate),
   });
 
   const data = invoicesData ?? initialInvoicesData;

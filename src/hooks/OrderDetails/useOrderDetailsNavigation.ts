@@ -3,7 +3,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { FilterOrdersDto } from '@/types/orders';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { useFetchOrdersForSearch } from '@/services/orders';
-import { TimePeriod, calculateDateRangeFromPeriod } from '@/utils/dateRangeUtils';
+import { TimePeriod, calculateDateRangeFromPeriod, formatLocalStartOfDay, formatLocalEndOfDay } from '@/utils/dateRangeUtils';
 import { useDebounce, useDebouncedCallback } from '@/utils/debounce';
 import { toast } from 'react-toastify';
 import {
@@ -37,21 +37,6 @@ interface UseOrderDetailsNavigationReturn {
   navigateToOrder: (orderId: number) => void;
 }
 
-// Helper to format date to ISO string for API calls
-// Sets time to start of day (00:00:00) for 'from' dates
-const formatDateToISOStart = (date: Date): string => {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d.toISOString();
-};
-
-// Sets time to end of day (23:59:59.999) for 'to' dates
-const formatDateToISOEnd = (date: Date): string => {
-  const d = new Date(date);
-  d.setHours(23, 59, 59, 999);
-  return d.toISOString();
-};
-
 function buildApiFilters(
   status: string | null,
   fromDate: Date | null,
@@ -71,10 +56,10 @@ function buildApiFilters(
   } else {
     // Always set both dates if either is present for consistent filtering
     if (fromDate) {
-      filters.createdAfter = formatDateToISOStart(fromDate);
+      filters.createdAfter = formatLocalStartOfDay(fromDate);
     }
     if (toDate) {
-      filters.createdBefore = formatDateToISOEnd(toDate);
+      filters.createdBefore = formatLocalEndOfDay(toDate);
     }
   }
 

@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { formatLocalStartOfDay, formatLocalEndOfDay } from '@/utils/dateRangeUtils';
 import { toast } from 'react-toastify';
 import { OrderStatus } from '@/types/orders';
 import { useGetNextOrderId, useGetPreviousOrderId } from '@/services/orders';
@@ -45,8 +46,8 @@ export function useOrderNavigation({
 
     setIsNavigatingNext(true);
     try {
-      const fromISO = dateRange?.from?.toISOString();
-      const toISO = dateRange?.to?.toISOString();
+      const fromISO = dateRange?.from ? formatLocalStartOfDay(dateRange.from) : undefined;
+      const toISO = dateRange?.to ? formatLocalEndOfDay(dateRange.to) : undefined;
 
       const response = await getNextOrderId(
         orderId,
@@ -82,8 +83,8 @@ export function useOrderNavigation({
 
     setIsNavigatingPrevious(true);
     try {
-      const fromISO = dateRange?.from?.toISOString();
-      const toISO = dateRange?.to?.toISOString();
+      const fromISO = dateRange?.from ? formatLocalStartOfDay(dateRange.from) : undefined;
+      const toISO = dateRange?.to ? formatLocalEndOfDay(dateRange.to) : undefined;
 
       const response = await getPreviousOrderId(
         orderId,

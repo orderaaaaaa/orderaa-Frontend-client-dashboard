@@ -8,11 +8,34 @@ import {
   LiaFilePdfSolid,
 } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
+import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
 import { Button } from '@/components/ui/button';
 import { getTimeAgo } from '@/utils/timeAgo';
-import { SupplierInvoice } from '../types';
+import { SupplierInvoice, SupplierInvoiceItem } from '../types';
 import { formatDate, exportInvoiceToExcel, exportInvoiceToPDF } from '../utils';
+
+const PRODUCT_COLUMNS: DataTableColumn<SupplierInvoiceItem & Record<string, unknown>>[] = [
+  {
+    key: 'product',
+    header: 'اسم الصنف',
+    render: (_value, row) => row.product.name,
+  },
+  {
+    key: 'quantity',
+    header: 'الكمية',
+  },
+  {
+    key: 'price',
+    header: 'السعر',
+    render: (_value, row) => row.price.toFixed(1),
+  },
+  {
+    key: 'total',
+    header: 'الاجمالي',
+    render: (_value, row) => (row.quantity * row.price).toLocaleString(),
+  },
+];
 
 interface InvoiceDetailModalProps {
   isOpen: boolean;
@@ -72,47 +95,12 @@ export default function InvoiceDetailModal({
           <h3 className="text-base font-bold text-gray-800 mb-3">
             الاصناف المشتريات
           </h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-right py-3 px-2 font-semibold text-gray-500">
-                    اسم الصنف
-                  </th>
-                  <th className="text-center py-3 px-2 font-semibold text-gray-500">
-                    الكمية
-                  </th>
-                  <th className="text-center py-3 px-2 font-semibold text-gray-500">
-                    السعر
-                  </th>
-                  <th className="text-left py-3 px-2 font-semibold text-gray-500">
-                    الاجمالي
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoice.products.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="border-b border-gray-100 last:border-b-0"
-                  >
-                    <td className="py-3 px-2 text-gray-800 font-medium">
-                      {item.product.name}
-                    </td>
-                    <td className="py-3 px-2 text-center text-gray-800">
-                      {item.quantity}
-                    </td>
-                    <td className="py-3 px-2 text-center text-gray-800">
-                      {item.price.toFixed(1)}
-                    </td>
-                    <td className="py-3 px-2 text-left text-gray-800 font-medium">
-                      {(item.quantity * item.price).toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            columns={PRODUCT_COLUMNS}
+            data={invoice.products as (SupplierInvoiceItem & Record<string, unknown>)[]}
+            keyField="id"
+            emptyMessage="لا توجد اصناف"
+          />
         </div>
 
         <div className="flex flex-col gap-3 border-t border-gray-200 pt-4">

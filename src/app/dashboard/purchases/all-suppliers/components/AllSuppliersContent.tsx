@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
+import { formatDateToLocalDate } from '@/utils/dateRangeUtils';
 import { LiaUsersSolid, LiaSlidersHSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import PageLoading from '@/components/ui/page-loading';
@@ -33,12 +34,8 @@ export function AllSuppliersContent() {
     setTimePeriod,
   } = useSupplierFilters();
 
-  const dateFrom = filters.fromDate
-    ? filters.fromDate.toISOString().split('T')[0]
-    : undefined;
-  const dateTo = filters.toDate
-    ? filters.toDate.toISOString().split('T')[0]
-    : undefined;
+  const dateFrom = formatDateToLocalDate(filters.fromDate);
+  const dateTo = formatDateToLocalDate(filters.toDate);
 
   const remainingStatusMap: Record<string, 'creditor' | 'debtor' | 'zero'> = {
     'دائن': 'creditor',

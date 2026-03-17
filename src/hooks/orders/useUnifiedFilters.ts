@@ -2,23 +2,9 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { OrderFilters, FilterOrdersDto } from '@/types/orders';
 import { useOrdersStore } from '@/store/ordersStore';
 import { useDebounce } from '@/utils/debounce';
+import { formatLocalStartOfDay, formatLocalEndOfDay } from '@/utils/dateRangeUtils';
 import { toast } from 'react-toastify';
 import { UrlFilterState } from '@/utils/urlFilters';
-
-// Helper to format date to ISO string for API calls
-// Sets time to start of day (00:00:00) for 'from' dates
-const formatDateToISOStart = (date: Date): string => {
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    return d.toISOString();
-};
-
-// Sets time to end of day (23:59:59.999) for 'to' dates
-const formatDateToISOEnd = (date: Date): string => {
-    const d = new Date(date);
-    d.setHours(23, 59, 59, 999);
-    return d.toISOString();
-};
 
 // Helper function to build API filters from URL filter state
 export function buildApiFiltersFromUrlState(urlFilters: UrlFilterState): FilterOrdersDto {
@@ -43,10 +29,10 @@ export function buildApiFiltersFromUrlState(urlFilters: UrlFilterState): FilterO
     } else {
         // Always set both dates if either is present for consistent filtering
         if (urlFilters.fromDate) {
-            filters.createdAfter = formatDateToISOStart(urlFilters.fromDate);
+            filters.createdAfter = formatLocalStartOfDay(urlFilters.fromDate);
         }
         if (urlFilters.toDate) {
-            filters.createdBefore = formatDateToISOEnd(urlFilters.toDate);
+            filters.createdBefore = formatLocalEndOfDay(urlFilters.toDate);
         }
     }
 
@@ -168,8 +154,8 @@ export function useUnifiedFilters() {
         if (debouncedFilters.executionDate) {
             filters.confirmedDate = debouncedFilters.executionDate;
         } else {
-            if (fromDate) filters.createdAfter = formatDateToISOStart(fromDate);
-            if (toDate) filters.createdBefore = formatDateToISOEnd(toDate);
+            if (fromDate) filters.createdAfter = formatLocalStartOfDay(fromDate);
+            if (toDate) filters.createdBefore = formatLocalEndOfDay(toDate);
         }
 
         // Add debounced local filters
