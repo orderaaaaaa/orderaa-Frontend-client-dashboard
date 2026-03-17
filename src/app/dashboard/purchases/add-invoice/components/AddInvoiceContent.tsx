@@ -30,7 +30,7 @@ export function AddInvoiceContent() {
   const suppliers = suppliersData?.data ?? [];
 
   const supplierOptions = useMemo(
-    () => suppliers.map((s) => ({ key: String(s.id), value: s.nickname })),
+    () => suppliers.map((s) => ({ key: String(s.id), value: s.name })),
     [suppliers],
   );
 
