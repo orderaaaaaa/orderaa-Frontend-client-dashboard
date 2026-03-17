@@ -158,7 +158,7 @@ export default function SupplierProductsContent({
 
       <div className="px-4 sm:px-8 py-4 flex flex-col gap-4">
         <h1 className="text-lg sm:text-2xl font-bold text-gray-800">
-          المنتجات المشتراة من مورد {supplier.nickname}
+          المنتجات المشتراة من مورد {supplier.name}
         </h1>
 
         <Input

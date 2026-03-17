@@ -3,6 +3,7 @@
 import { memo, useMemo, useState } from 'react';
 import clsx from 'clsx';
 import { IconType } from 'react-icons';
+import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
 import {
   LiaFileInvoiceSolid,
   LiaUserTieSolid,
@@ -61,7 +62,7 @@ const SupplierInvoiceCard = memo(
       () => [
         {
           label: 'موظف مشتريات',
-          value: invoice.createdByEmployee?.department ?? 'غير محدد',
+          value: invoice.createdByEmployee ? getDepartmentLabel(invoice.createdByEmployee.department) : 'غير محدد',
           icon: LiaUserTieSolid,
         },
         {
@@ -103,7 +104,7 @@ const SupplierInvoiceCard = memo(
                 style={{ width: 24, height: 24 }}
               />
               <span
-                className="text-lg font-bold text-gray-800 cursor-pointer hover:text-primary hover:underline transition-colors"
+                className="text-lg font-bold text-primary cursor-pointer hover:text-primary hover:underline transition-colors"
                 onClick={() => setIsDetailOpen(true)}
               >
                 فاتورة رقم {invoice.code}

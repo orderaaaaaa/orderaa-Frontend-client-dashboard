@@ -43,10 +43,10 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
               className="text-lg font-bold text-primary cursor-pointer hover:text-primary hover:underline transition-colors"
               onClick={() => router.push(`/dashboard/purchases/all-suppliers/${supplier.id}`)}
             >
-              {supplier.nickname}
+              {supplier.name}
             </span>
           </div>
-          <span className="text-sm text-gray-500">{supplier.name}</span>
+          <span className="text-sm text-gray-500">{supplier.nickname}</span>
         </div>
 
         <div className="flex items-center gap-3">

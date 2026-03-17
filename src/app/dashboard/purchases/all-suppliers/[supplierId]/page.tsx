@@ -1,21 +1,20 @@
 'use client';
 
-import { Suspense } from 'react';
 import { useParams } from 'next/navigation';
-import { useSupplierByIdQuery } from '@/services/suppliers';
+import { useSupplierByIdQuery, useSupplierInvoicesQuery } from '@/services/suppliers';
 import { SupplierDetailContent } from './components';
+import { DEFAULT_PAGE_SIZE } from './constants';
 
-function SupplierDetailPage() {
+export default function SupplierDetailPage() {
   const { supplierId } = useParams<{ supplierId: string }>();
-  const { data: supplier, isLoading, isError } = useSupplierByIdQuery(Number(supplierId));
+  const { data: supplier, isLoading: supplierLoading, isError } = useSupplierByIdQuery(Number(supplierId));
+  const { data: invoicesData, isLoading: invoicesLoading } = useSupplierInvoicesQuery({
+    supplierId: Number(supplierId),
+    page: 1,
+    limit: DEFAULT_PAGE_SIZE,
+  });
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (supplierLoading || invoicesLoading) return null;
 
   if (isError || !supplier) {
     return (
@@ -27,19 +26,5 @@ function SupplierDetailPage() {
     );
   }
 
-  return <SupplierDetailContent supplier={supplier} />;
-}
-
-export default function Page() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
-      }
-    >
-      <SupplierDetailPage />
-    </Suspense>
-  );
+  return <SupplierDetailContent supplier={supplier} initialInvoicesData={invoicesData} />;
 }

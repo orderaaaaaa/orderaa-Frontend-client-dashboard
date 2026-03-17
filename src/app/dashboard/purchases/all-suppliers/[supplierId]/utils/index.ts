@@ -3,6 +3,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { SupplierInvoice } from '../types';
 import { INVOICE_TYPE_LABEL } from '../../../constants';
+import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
 
 export function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -20,7 +21,7 @@ export function exportSupplierInvoicesToExcel(
 
   const excelData = invoices.map((inv) => ({
     'رقم الفاتورة': inv.code,
-    'انشأ بواسطة': inv.createdByEmployee?.department ?? 'غير محدد',
+    'انشأ بواسطة': inv.createdByEmployee ? getDepartmentLabel(inv.createdByEmployee.department) : 'غير محدد',
     'عدد الاصناف': inv.products.length,
     'التاريخ': formatDate(inv.createdAt),
     'المبلغ': inv.totalAmount,
@@ -141,7 +142,7 @@ export async function exportInvoiceToPDF(invoice: SupplierInvoice) {
       <div class="info-row">
         <div class="info-card">
           <div class="info-label">موظف المشتريات</div>
-          <div class="info-value">${invoice.createdByEmployee?.department ?? 'غير محدد'}</div>
+          <div class="info-value">${invoice.createdByEmployee ? getDepartmentLabel(invoice.createdByEmployee.department) : 'غير محدد'}</div>
         </div>
         <div class="info-card">
           <div class="info-label">تاريخ الانشاء</div>

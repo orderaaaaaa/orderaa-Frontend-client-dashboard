@@ -60,7 +60,7 @@ const DateRangeFilter = memo(
             onChange={onFromDateChange}
             placeholder="من تاريخ"
             showIcon
-            className="flex-1 sm:flex-none sm:w-[140px]"
+            className="flex-1 sm:flex-none sm:w-[160px]"
             maxDate={toDate || undefined}
           />
 
@@ -71,12 +71,12 @@ const DateRangeFilter = memo(
             onChange={onToDateChange}
             placeholder="إلى تاريخ"
             showIcon
-            className="flex-1 sm:flex-none sm:w-[140px]"
+            className="flex-1 sm:flex-none sm:w-[160px]"
             minDate={fromDate || undefined}
           />
         </div>
 
-        <div className="w-full sm:w-[180px] flex-shrink-0">
+        <div className="w-full sm:w-[160px] flex-shrink-0">
           <SearchableSelect
             value={getLabelFromValue(timePeriod)}
             onValueChange={(label) =>

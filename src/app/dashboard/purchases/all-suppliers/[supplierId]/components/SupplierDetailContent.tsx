@@ -8,6 +8,7 @@ import PaginationFooter from '@/components/ui/pagination-footer';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import { Supplier } from '../../types';
 import { useSupplierInvoicesQuery } from '@/services/suppliers';
+import type { SupplierInvoiceApiItem, PaginationMeta } from '@/lib/api/suppliers';
 import SupplierDetailHeader from './SupplierDetailHeader';
 import SupplierInvoiceCard from './SupplierInvoiceCard';
 import SupplierInvoicesActionsBar from './SupplierInvoicesActionsBar';
@@ -16,9 +17,10 @@ import { exportSupplierInvoicesToExcel } from '../utils';
 
 interface SupplierDetailContentProps {
   supplier: Supplier;
+  initialInvoicesData?: { data: SupplierInvoiceApiItem[]; meta: PaginationMeta };
 }
 
-export function SupplierDetailContent({ supplier }: SupplierDetailContentProps) {
+export function SupplierDetailContent({ supplier, initialInvoicesData }: SupplierDetailContentProps) {
   const [select, setSelect] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,7 +29,7 @@ export function SupplierDetailContent({ supplier }: SupplierDetailContentProps) 
   const [toDate, setToDate] = useState<Date | null>(null);
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('');
 
-  const { data: invoicesData, isLoading } = useSupplierInvoicesQuery({
+  const { data: invoicesData } = useSupplierInvoicesQuery({
     supplierId: supplier.id,
     page: currentPage,
     limit: pageSize,
@@ -35,8 +37,9 @@ export function SupplierDetailContent({ supplier }: SupplierDetailContentProps) 
     dateTo: toDate?.toISOString(),
   });
 
-  const invoices = invoicesData?.data ?? [];
-  const meta = invoicesData?.meta;
+  const data = invoicesData ?? initialInvoicesData;
+  const invoices = data?.data ?? [];
+  const meta = data?.meta;
   const totalItems = meta?.totalItems ?? 0;
   const totalPages = meta?.totalPages ?? 1;
 
@@ -81,8 +84,8 @@ export function SupplierDetailContent({ supplier }: SupplierDetailContentProps) 
 
   const handleExportExcel = useCallback(() => {
     const selectedInvoices = invoices.filter((inv) => selectedIds.includes(inv.id));
-    exportSupplierInvoicesToExcel(selectedInvoices, supplier.nickname);
-  }, [invoices, selectedIds, supplier.nickname]);
+    exportSupplierInvoicesToExcel(selectedInvoices, supplier.name);
+  }, [invoices, selectedIds, supplier.name]);
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">
@@ -132,11 +135,7 @@ export function SupplierDetailContent({ supplier }: SupplierDetailContentProps) 
       </div>
 
       <div className="px-4 sm:px-8 flex flex-col gap-4">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-16">
-            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : invoices.length > 0 ? (
+        {invoices.length > 0 ? (
           invoices.map((invoice) => (
             <SupplierInvoiceCard
               key={invoice.id}

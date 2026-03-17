@@ -80,6 +80,12 @@ export interface GetSuppliersParams {
   search?: string;
   dateFrom?: string;
   dateTo?: string;
+  name?: string;
+  remainingStatus?: 'creditor' | 'debtor' | 'zero';
+  paidAmountMin?: number;
+  paidAmountMax?: number;
+  invoiceCountMin?: number;
+  invoiceCountMax?: number;
 }
 
 export interface GetSupplierInvoicesParams {

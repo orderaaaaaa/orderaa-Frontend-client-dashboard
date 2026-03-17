@@ -65,8 +65,8 @@ const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
           <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-orange-400 flex items-center justify-center shrink-0">
             <LiaUserSolid className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
           </div>
-          <h1 className="text-lg sm:text-2xl font-bold text-gray-800">
-            فواتير {supplier.nickname}
+          <h1 className="flex flex-row gap-2 text-lg sm:text-2xl font-bold text-gray-800">
+            فواتير <span>{supplier.name}</span>
           </h1>
         </div>
         <Button
@@ -82,7 +82,7 @@ const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
         isOpen={isPaymentOpen}
         onClose={() => setIsPaymentOpen(false)}
         supplierId={supplier.id}
-        supplierName={supplier.nickname}
+        supplierName={supplier.name}
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">

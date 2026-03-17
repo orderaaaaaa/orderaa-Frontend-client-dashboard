@@ -8,6 +8,7 @@ import {
   LiaFilePdfSolid,
 } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
+import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
 import { Button } from '@/components/ui/button';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { SupplierInvoice } from '../types';
@@ -47,20 +48,20 @@ export default function InvoiceDetailModal({
           <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-4">
             <LiaUserTieSolid className="w-5 h-5 text-primary shrink-0" />
             <div className="flex flex-col">
-              <span className="text-xs text-gray-400">موظف المشتريات</span>
+              <span className="text-xs text-gray-900">موظف المشتريات</span>
               <span className="text-sm font-bold text-gray-800">
-                {invoice.createdByEmployee?.department ?? 'غير محدد'}
+                {invoice.createdByEmployee ? getDepartmentLabel(invoice.createdByEmployee.department) : 'غير محدد'}
               </span>
             </div>
           </div>
           <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-4">
             <LiaClockSolid className="w-5 h-5 text-primary shrink-0" />
             <div className="flex flex-col">
-              <span className="text-xs text-gray-400">تاريخ الانشاء</span>
+              <span className="text-xs text-gray-900">تاريخ الانشاء</span>
               <span className="text-sm font-bold text-gray-800">
                 {getTimeAgo(invoice.createdAt)}
               </span>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-gray-900">
                 {formatDate(invoice.createdAt)}
               </span>
             </div>

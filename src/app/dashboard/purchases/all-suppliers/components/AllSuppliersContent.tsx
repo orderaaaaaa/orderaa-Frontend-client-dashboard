@@ -39,51 +39,51 @@ export function AllSuppliersContent() {
     ? filters.toDate.toISOString().split('T')[0]
     : undefined;
 
+  const remainingStatusMap: Record<string, 'creditor' | 'debtor' | 'zero'> = {
+    'دائن': 'creditor',
+    'مدين': 'debtor',
+    'لا يوجد': 'zero',
+  };
+
+  const parsedPaidAmount = useMemo(() => {
+    if (!filters.paidAmount) return {};
+    if (filters.paidAmount.includes('+')) {
+      return { paidAmountMin: parseFloat(filters.paidAmount) };
+    }
+    const [min, max] = filters.paidAmount.split('-').map(Number);
+    return { paidAmountMin: min, paidAmountMax: max };
+  }, [filters.paidAmount]);
+
+  const parsedInvoicesCount = useMemo(() => {
+    if (!filters.invoicesCount) return {};
+    if (filters.invoicesCount.includes('+')) {
+      return { invoiceCountMin: parseFloat(filters.invoicesCount) };
+    }
+    const [min, max] = filters.invoicesCount.split('-').map(Number);
+    return { invoiceCountMin: min, invoiceCountMax: max };
+  }, [filters.invoicesCount]);
+
   const { data: suppliersData, isLoading } = useSuppliersQuery({
     page: currentPage,
     limit: pageSize,
     search: debouncedSearchQuery || undefined,
     dateFrom,
     dateTo,
+    name: filters.supplierName || undefined,
+    remainingStatus: remainingStatusMap[filters.remainingAmount] ?? undefined,
+    ...parsedPaidAmount,
+    ...parsedInvoicesCount,
   });
 
-  const apiSuppliers = suppliersData?.data ?? [];
+  const suppliers = suppliersData?.data ?? [];
   const meta = suppliersData?.meta;
   const totalItems = meta?.totalItems ?? 0;
   const totalPages = meta?.totalPages ?? 0;
 
   const supplierOptions = useMemo(
-    () => apiSuppliers.map((s) => ({ key: s.nickname, value: s.nickname })),
-    [apiSuppliers],
+    () => suppliers.map((s) => ({ key: s.name, value: s.name })),
+    [suppliers],
   );
-
-  const filteredSuppliers = useMemo(() => {
-    return apiSuppliers.filter((supplier) => {
-      if (filters.supplierName && supplier.nickname !== filters.supplierName) return false;
-
-      if (filters.remainingAmount) {
-        if (filters.remainingAmount === 'دائن' && supplier.remaining >= 0) return false;
-        if (filters.remainingAmount === 'مدين' && supplier.remaining <= 0) return false;
-        if (filters.remainingAmount === 'لا يوجد' && supplier.remaining !== 0) return false;
-      }
-
-      if (filters.paidAmount) {
-        const [min, max] = filters.paidAmount.includes('+')
-          ? [parseFloat(filters.paidAmount), Infinity]
-          : filters.paidAmount.split('-').map(Number);
-        if (supplier.paidAmount < min || supplier.paidAmount > max) return false;
-      }
-
-      if (filters.invoicesCount) {
-        const [min, max] = filters.invoicesCount.includes('+')
-          ? [parseFloat(filters.invoicesCount), Infinity]
-          : filters.invoicesCount.split('-').map(Number);
-        if (supplier.invoiceCount < min || supplier.invoiceCount > max) return false;
-      }
-
-      return true;
-    });
-  }, [apiSuppliers, filters]);
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
@@ -94,6 +94,22 @@ export function AllSuppliersContent() {
     setPageSize(size);
     setCurrentPage(1);
   }, []);
+
+  const handleFilterChange = useCallback(
+    <K extends keyof import('../types').SupplierFilters>(key: K, value: import('../types').SupplierFilters[K]) => {
+      setFilter(key, value);
+      setCurrentPage(1);
+    },
+    [setFilter],
+  );
+
+  const handleClearFilter = useCallback(
+    (key: keyof import('../types').SupplierFilters) => {
+      clearFilter(key);
+      setCurrentPage(1);
+    },
+    [clearFilter],
+  );
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -146,8 +162,8 @@ export function AllSuppliersContent() {
           <div className={filtersOverflow ? 'overflow-visible' : 'overflow-hidden'}>
             <SuppliersFilterBar
               filters={filters}
-              onFilterChange={setFilter}
-              onClearFilter={clearFilter}
+              onFilterChange={handleFilterChange}
+              onClearFilter={handleClearFilter}
               supplierOptions={supplierOptions}
             />
           </div>
@@ -170,8 +186,8 @@ export function AllSuppliersContent() {
           <div className="flex flex-col items-center justify-center py-16 gap-3">
             <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : filteredSuppliers.length > 0 ? (
-          filteredSuppliers.map((supplier) => (
+        ) : suppliers.length > 0 ? (
+          suppliers.map((supplier) => (
             <SupplierCard key={supplier.id} supplier={supplier} />
           ))
         ) : (
