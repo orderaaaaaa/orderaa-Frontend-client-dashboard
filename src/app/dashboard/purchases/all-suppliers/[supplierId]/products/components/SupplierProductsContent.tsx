@@ -10,7 +10,8 @@ import { DataTable, DataTableColumn } from '@/components/ui/data-table';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import { Supplier } from '../../../types';
 import { SupplierProduct, SortField, SortOrder } from '../types';
-import { MOCK_SUPPLIER_PRODUCTS, DEFAULT_PAGE_SIZE } from '../constants';
+import { DEFAULT_PAGE_SIZE } from '../constants';
+import { useSupplierProductsQuery } from '@/services/suppliers';
 import ProductDetailModal from './ProductDetailModal';
 
 interface SupplierProductsContentProps {
@@ -18,58 +19,43 @@ interface SupplierProductsContentProps {
 }
 
 type ProductRecord = Record<string, unknown> & {
-  id: number;
-  name: string;
-  image: string;
-  purchasedQuantity: number;
-  totalPurchase: number;
-  totalReturned: number;
-  totalNet: number;
+  productId: number;
+  productName: string;
+  totalQuantityPurchased: number;
+  totalPurchaseAmount: number;
+  totalReturnAmount: number;
+  netAmount: number;
 };
 
 const columns: DataTableColumn<ProductRecord>[] = [
   {
-    key: 'name',
+    key: 'productName',
     header: 'المنتج',
     sortable: true,
     className: 'w-[180px]',
-    render: (_, row) => (
-      <div className="flex items-center gap-3 justify-end">
-        <span className="text-sm font-medium text-gray-800">
-          {row.name as string}
-        </span>
-        <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden shrink-0">
-          <img
-            src={row.image as string}
-            alt={row.name as string}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = 'none';
-            }}
-          />
-        </div>
-      </div>
+    render: (val) => (
+      <span className="text-sm font-medium text-gray-800">{val as string}</span>
     ),
   },
   {
-    key: 'purchasedQuantity',
+    key: 'totalQuantityPurchased',
     header: 'الكمية المشتراة',
     sortable: true,
   },
   {
-    key: 'totalPurchase',
+    key: 'totalPurchaseAmount',
     header: 'إجمالي الشراء',
     sortable: true,
     render: (val) => (val as number).toLocaleString(),
   },
   {
-    key: 'totalReturned',
+    key: 'totalReturnAmount',
     header: 'إجمالي المرتجع',
     sortable: true,
     render: (val) => (val as number).toLocaleString(),
   },
   {
-    key: 'totalNet',
+    key: 'netAmount',
     header: 'إجمالي الصافي',
     sortable: true,
     render: (val) => (val as number).toLocaleString(),
@@ -81,13 +67,15 @@ export default function SupplierProductsContent({
 }: SupplierProductsContentProps) {
   const [selectedProduct, setSelectedProduct] = useState<SupplierProduct | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<SortField>('purchasedQuantity');
+  const [sortBy, setSortBy] = useState<SortField>('totalQuantityPurchased');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [fromDate, setFromDate] = useState<Date | null>(null);
   const [toDate, setToDate] = useState<Date | null>(null);
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('');
+
+  const { data: products = [], isLoading } = useSupplierProductsQuery(supplier.id);
 
   const handleSort = useCallback(
     (field: string) => {
@@ -102,11 +90,11 @@ export default function SupplierProductsContent({
   );
 
   const filteredProducts = useMemo(() => {
-    let result = [...MOCK_SUPPLIER_PRODUCTS];
+    let result = [...products];
 
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
-      result = result.filter((p) => p.name.toLowerCase().includes(q));
+      result = result.filter((p) => p.productName.toLowerCase().includes(q));
     }
 
     result.sort((a, b) => {
@@ -123,7 +111,7 @@ export default function SupplierProductsContent({
     });
 
     return result;
-  }, [searchQuery, sortBy, sortOrder]);
+  }, [products, searchQuery, sortBy, sortOrder]);
 
   const totalItems = filteredProducts.length;
   const totalPages = Math.ceil(totalItems / pageSize);
@@ -170,7 +158,7 @@ export default function SupplierProductsContent({
 
       <div className="px-4 sm:px-8 py-4 flex flex-col gap-4">
         <h1 className="text-lg sm:text-2xl font-bold text-gray-800">
-          المنتجات المشتراة من مورد {supplier.name}
+          المنتجات المشتراة من مورد {supplier.nickname}
         </h1>
 
         <Input
@@ -191,18 +179,24 @@ export default function SupplierProductsContent({
       </div>
 
       <div className="px-4 sm:px-8">
-        <DataTable<ProductRecord>
-          columns={columns}
-          data={paginatedProducts as ProductRecord[]}
-          keyField="id"
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-          onSort={handleSort}
-          emptyContent={emptyContent}
-          onRowClick={(row) =>
-            setSelectedProduct(row as unknown as SupplierProduct)
-          }
-        />
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <DataTable<ProductRecord>
+            columns={columns}
+            data={paginatedProducts as unknown as ProductRecord[]}
+            keyField="productId"
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            onSort={handleSort}
+            emptyContent={emptyContent}
+            onRowClick={(row) =>
+              setSelectedProduct(row as unknown as SupplierProduct)
+            }
+          />
+        )}
       </div>
 
       {selectedProduct && (
@@ -210,6 +204,7 @@ export default function SupplierProductsContent({
           isOpen={!!selectedProduct}
           onClose={() => setSelectedProduct(null)}
           product={selectedProduct}
+          supplierId={supplier.id}
         />
       )}
 

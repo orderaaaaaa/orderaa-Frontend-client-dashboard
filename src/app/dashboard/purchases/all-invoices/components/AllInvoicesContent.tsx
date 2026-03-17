@@ -14,6 +14,12 @@ import PaginationFooter from '@/components/ui/pagination-footer';
 import { DEFAULT_PAGE_SIZE } from '../constants';
 import { Invoice } from '../types';
 import { useInvoiceFilters } from '../hooks';
+import { useSupplierInvoicesQuery, useSuppliersQuery } from '@/services/suppliers';
+
+const TRANSACTION_TYPE_TO_API: Record<string, 'PURCHASE' | 'RETURN'> = {
+  'مشتريات': 'PURCHASE',
+  'مرتجع': 'RETURN',
+};
 
 export function AllInvoicesContent() {
   const [select, setSelect] = useState(false);
@@ -25,8 +31,8 @@ export function AllInvoicesContent() {
 
   const {
     filters,
-    filteredInvoices,
     hasActiveFilters,
+    debouncedSearchQuery,
     setSearchQuery,
     clearSearchQuery,
     setFilter,
@@ -36,17 +42,69 @@ export function AllInvoicesContent() {
     setTimePeriod,
   } = useInvoiceFilters();
 
-  const totalItems = filteredInvoices.length;
-  const totalPages = Math.ceil(totalItems / pageSize);
+  const { data: suppliersData } = useSuppliersQuery({ limit: 200 });
+  const suppliers = suppliersData?.data ?? [];
 
-  const paginatedInvoices = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredInvoices.slice(start, start + pageSize);
-  }, [currentPage, pageSize, filteredInvoices]);
+  const supplierOptions = useMemo(
+    () => suppliers.map((s) => ({ key: s.nickname, value: s.nickname })),
+    [suppliers],
+  );
+
+  const selectedSupplier = useMemo(
+    () => filters.supplierName ? suppliers.find((s) => s.nickname === filters.supplierName) : undefined,
+    [suppliers, filters.supplierName],
+  );
+
+  const apiType = filters.transactionType ? TRANSACTION_TYPE_TO_API[filters.transactionType] : undefined;
+
+  const { data: invoicesData, isLoading } = useSupplierInvoicesQuery({
+    page: currentPage,
+    limit: pageSize,
+    supplierId: selectedSupplier?.id,
+    type: apiType,
+    dateFrom: filters.fromDate?.toISOString(),
+    dateTo: filters.toDate?.toISOString(),
+  });
+
+  const apiInvoices = (invoicesData?.data ?? []) as Invoice[];
+  const meta = invoicesData?.meta;
+
+  const invoicesToDisplay = useMemo(() => {
+    let result = apiInvoices;
+
+    if (debouncedSearchQuery) {
+      const query = debouncedSearchQuery.toLowerCase();
+      result = result.filter((inv) =>
+        inv.code.toLowerCase().includes(query) ||
+        inv.supplier.name.toLowerCase().includes(query) ||
+        inv.supplier.nickname.toLowerCase().includes(query),
+      );
+    }
+
+    if (filters.totalAmount) {
+      const amount = parseFloat(filters.totalAmount);
+      if (!isNaN(amount)) {
+        result = result.filter((inv) => inv.totalAmount === amount);
+      }
+    }
+
+    if (filters.employeeName) {
+      result = result.filter((inv) => inv.createdByEmployee?.department === filters.employeeName);
+    }
+
+    if (filters.acceptanceStatus) {
+      result = result.filter((inv) => inv.acceptanceStatus === filters.acceptanceStatus);
+    }
+
+    return result;
+  }, [apiInvoices, debouncedSearchQuery, filters.totalAmount, filters.employeeName, filters.acceptanceStatus]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filteredInvoices.length]);
+  }, [filters.supplierName, filters.transactionType, filters.fromDate, filters.toDate]);
+
+  const totalItems = meta?.totalItems ?? 0;
+  const totalPages = meta?.totalPages ?? 1;
 
   const showActionsBar = select && selectedIds.length > 0;
 
@@ -145,6 +203,7 @@ export function AllInvoicesContent() {
           filters={filters}
           onFilterChange={setFilter}
           onClearFilter={clearFilter}
+          supplierOptions={supplierOptions}
         />
         <div className="flex flex-row items-center justify-start gap-4">
           <DateRangeFilter
@@ -160,8 +219,12 @@ export function AllInvoicesContent() {
       </div>
 
       <div className="sm:px-8 flex flex-col gap-4">
-        {paginatedInvoices.length > 0 ? (
-          paginatedInvoices.map((invoice) => (
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : invoicesToDisplay.length > 0 ? (
+          invoicesToDisplay.map((invoice) => (
             <InvoiceCard
               key={invoice.id}
               invoice={invoice}
@@ -204,8 +267,8 @@ export function AllInvoicesContent() {
           currentPage={currentPage}
           totalPages={totalPages}
           totalItems={totalItems}
-          hasNextPage={currentPage < totalPages}
-          hasPreviousPage={currentPage > 1}
+          hasNextPage={meta?.hasNextPage ?? false}
+          hasPreviousPage={meta?.hasPreviousPage ?? false}
           onPageChange={handlePageChange}
           onPrevious={() => handlePageChange(Math.max(1, currentPage - 1))}
           onNext={() => handlePageChange(Math.min(totalPages, currentPage + 1))}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { LiaUsersSolid, LiaSlidersHSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import SuppliersHeader from './SuppliersHeader';
@@ -11,6 +11,7 @@ import SupplierCard from './SupplierCard';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { DEFAULT_PAGE_SIZE } from '../constants';
 import { useSupplierFilters } from '../hooks';
+import { useSuppliersQuery } from '@/services/suppliers';
 
 export function AllSuppliersContent() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -20,7 +21,7 @@ export function AllSuppliersContent() {
 
   const {
     filters,
-    filteredSuppliers,
+    debouncedSearchQuery,
     hasActiveFilters,
     setSearchQuery,
     clearSearchQuery,
@@ -31,17 +32,58 @@ export function AllSuppliersContent() {
     setTimePeriod,
   } = useSupplierFilters();
 
-  const totalItems = filteredSuppliers.length;
-  const totalPages = Math.ceil(totalItems / pageSize);
+  const dateFrom = filters.fromDate
+    ? filters.fromDate.toISOString().split('T')[0]
+    : undefined;
+  const dateTo = filters.toDate
+    ? filters.toDate.toISOString().split('T')[0]
+    : undefined;
 
-  const paginatedSuppliers = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredSuppliers.slice(start, start + pageSize);
-  }, [currentPage, pageSize, filteredSuppliers]);
+  const { data: suppliersData, isLoading } = useSuppliersQuery({
+    page: currentPage,
+    limit: pageSize,
+    search: debouncedSearchQuery || undefined,
+    dateFrom,
+    dateTo,
+  });
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filteredSuppliers.length]);
+  const apiSuppliers = suppliersData?.data ?? [];
+  const meta = suppliersData?.meta;
+  const totalItems = meta?.totalItems ?? 0;
+  const totalPages = meta?.totalPages ?? 0;
+
+  const supplierOptions = useMemo(
+    () => apiSuppliers.map((s) => ({ key: s.nickname, value: s.nickname })),
+    [apiSuppliers],
+  );
+
+  const filteredSuppliers = useMemo(() => {
+    return apiSuppliers.filter((supplier) => {
+      if (filters.supplierName && supplier.nickname !== filters.supplierName) return false;
+
+      if (filters.remainingAmount) {
+        if (filters.remainingAmount === 'دائن' && supplier.remaining >= 0) return false;
+        if (filters.remainingAmount === 'مدين' && supplier.remaining <= 0) return false;
+        if (filters.remainingAmount === 'لا يوجد' && supplier.remaining !== 0) return false;
+      }
+
+      if (filters.paidAmount) {
+        const [min, max] = filters.paidAmount.includes('+')
+          ? [parseFloat(filters.paidAmount), Infinity]
+          : filters.paidAmount.split('-').map(Number);
+        if (supplier.paidAmount < min || supplier.paidAmount > max) return false;
+      }
+
+      if (filters.invoicesCount) {
+        const [min, max] = filters.invoicesCount.includes('+')
+          ? [parseFloat(filters.invoicesCount), Infinity]
+          : filters.invoicesCount.split('-').map(Number);
+        if (supplier.invoiceCount < min || supplier.invoiceCount > max) return false;
+      }
+
+      return true;
+    });
+  }, [apiSuppliers, filters]);
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
@@ -106,6 +148,7 @@ export function AllSuppliersContent() {
               filters={filters}
               onFilterChange={setFilter}
               onClearFilter={clearFilter}
+              supplierOptions={supplierOptions}
             />
           </div>
         </div>
@@ -123,8 +166,12 @@ export function AllSuppliersContent() {
       </div>
 
       <div className="sm:px-8 flex flex-col gap-4">
-        {paginatedSuppliers.length > 0 ? (
-          paginatedSuppliers.map((supplier) => (
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : filteredSuppliers.length > 0 ? (
+          filteredSuppliers.map((supplier) => (
             <SupplierCard key={supplier.id} supplier={supplier} />
           ))
         ) : (
@@ -158,8 +205,8 @@ export function AllSuppliersContent() {
           currentPage={currentPage}
           totalPages={totalPages}
           totalItems={totalItems}
-          hasNextPage={currentPage < totalPages}
-          hasPreviousPage={currentPage > 1}
+          hasNextPage={meta?.hasNextPage ?? false}
+          hasPreviousPage={meta?.hasPreviousPage ?? false}
           onPageChange={handlePageChange}
           onPrevious={() => handlePageChange(Math.max(1, currentPage - 1))}
           onNext={() => handlePageChange(Math.min(totalPages, currentPage + 1))}

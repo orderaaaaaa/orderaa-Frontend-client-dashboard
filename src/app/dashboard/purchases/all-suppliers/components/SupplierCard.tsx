@@ -26,12 +26,12 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
   const router = useRouter();
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const remainingLabel = useMemo(() => {
-    if (supplier.remainingAmount === 0) return { text: '0 ج.م', color: 'text-gray-500' };
-    if (supplier.remainingAmount < 0) {
-      return { text: `-${formatCurrency(supplier.remainingAmount)} دائن`, color: 'text-red-500' };
+    if (supplier.remaining === 0) return { text: '0 ج.م', color: 'text-gray-500' };
+    if (supplier.remaining < 0) {
+      return { text: `-${formatCurrency(Math.abs(supplier.remaining))} دائن`, color: 'text-red-500' };
     }
-    return { text: `+${formatCurrency(supplier.remainingAmount)} مدين`, color: 'text-green-500' };
-  }, [supplier.remainingAmount]);
+    return { text: `+${formatCurrency(supplier.remaining)} مدين`, color: 'text-green-500' };
+  }, [supplier.remaining]);
 
   return (
     <div className="w-full bg-white border border-gray-200 rounded-xl p-5 transition-all duration-200 hover:shadow-md">
@@ -43,10 +43,10 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
               className="text-lg font-bold text-primary cursor-pointer hover:text-primary hover:underline transition-colors"
               onClick={() => router.push(`/dashboard/purchases/all-suppliers/${supplier.id}`)}
             >
-              {supplier.name}
+              {supplier.nickname}
             </span>
           </div>
-          <span className="text-sm text-gray-500">{supplier.contactPerson}</span>
+          <span className="text-sm text-gray-500">{supplier.name}</span>
         </div>
 
         <div className="flex items-center gap-3">
@@ -73,11 +73,11 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6 px-4">
         <div className="flex flex-col items-start sm:items-center gap-1.5">
           <a
-            href={`tel:${supplier.phone}`}
+            href={`tel:${supplier.phoneNumber}`}
             className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-primary transition-colors"
           >
             <LiaPhoneSolid className="w-4 h-4" />
-            <span>{supplier.phone}</span>
+            <span>{supplier.phoneNumber}</span>
           </a>
           <a
             href={`mailto:${supplier.email}`}
@@ -92,7 +92,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
           <div className="flex items-center gap-1.5">
             <LiaMoneyBillWaveSolid className="w-4 h-4 text-primary" />
             <span className="text-base font-semibold text-gray-800">
-              {formatCurrency(supplier.totalAmount)}
+              {formatCurrency(supplier.totalPurchased)}
             </span>
           </div>
         </div>
@@ -102,7 +102,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
           <div className="flex items-center gap-1.5">
             <LiaFileInvoiceSolid className="w-4 h-4 text-primary" />
             <span className="text-base font-semibold text-gray-800">
-              {supplier.invoicesCount}
+              {supplier.invoiceCount}
             </span>
           </div>
         </div>
@@ -130,7 +130,8 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
       <PaymentModal
         isOpen={isPaymentOpen}
         onClose={() => setIsPaymentOpen(false)}
-        supplierName={supplier.name}
+        supplierId={supplier.id}
+        supplierName={supplier.nickname}
       />
     </div>
   );

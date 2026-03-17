@@ -2,6 +2,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { SupplierInvoice } from '../types';
+import { INVOICE_TYPE_LABEL } from '../../../constants';
 
 export function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -18,20 +19,16 @@ export function exportSupplierInvoicesToExcel(
   if (invoices.length === 0) return;
 
   const excelData = invoices.map((inv) => ({
-    'رقم الفاتورة': inv.invoiceNumber,
-    'الشركة': inv.companyName,
-    'الموظف': inv.employeeName,
-    'انشأ بواسطة': inv.createdByName,
-    'عدد الاصناف': inv.itemsCount,
+    'رقم الفاتورة': inv.code,
+    'انشأ بواسطة': inv.createdByEmployee?.department ?? 'غير محدد',
+    'عدد الاصناف': inv.products.length,
     'التاريخ': formatDate(inv.createdAt),
     'المبلغ': inv.totalAmount,
-    'نوع الفاتورة': inv.transactionType,
+    'نوع الفاتورة': INVOICE_TYPE_LABEL[inv.type] ?? inv.type,
   }));
 
   const worksheet = XLSX.utils.json_to_sheet(excelData);
   worksheet['!cols'] = [
-    { wch: 18 },
-    { wch: 25 },
     { wch: 18 },
     { wch: 18 },
     { wch: 12 },
@@ -49,11 +46,11 @@ export function exportSupplierInvoicesToExcel(
 }
 
 export function exportInvoiceToExcel(invoice: SupplierInvoice) {
-  const excelData = invoice.items.map((item) => ({
-    'اسم الصنف': item.productName,
+  const excelData = invoice.products.map((item) => ({
+    'اسم الصنف': item.product.name,
     'الكمية': item.quantity,
     'السعر': item.price,
-    'الاجمالي': item.total,
+    'الاجمالي': item.quantity * item.price,
   }));
 
   const worksheet = XLSX.utils.json_to_sheet(excelData);
@@ -64,8 +61,8 @@ export function exportInvoiceToExcel(invoice: SupplierInvoice) {
     { wch: 14 },
   ];
 
-  const totalQuantity = invoice.items.reduce((s, i) => s + i.quantity, 0);
-  const grandTotal = invoice.items.reduce((s, i) => s + i.total, 0);
+  const totalQuantity = invoice.products.reduce((s, i) => s + i.quantity, 0);
+  const grandTotal = invoice.products.reduce((s, i) => s + i.quantity * i.price, 0);
   const lastRow = excelData.length + 2;
 
   XLSX.utils.sheet_add_aoa(
@@ -80,13 +77,13 @@ export function exportInvoiceToExcel(invoice: SupplierInvoice) {
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'فاتورة');
 
-  const fileName = `فاتورة_${invoice.invoiceNumber}.xlsx`;
+  const fileName = `فاتورة_${invoice.code}.xlsx`;
   XLSX.writeFile(workbook, fileName);
 }
 
 export async function exportInvoiceToPDF(invoice: SupplierInvoice) {
-  const totalQuantity = invoice.items.reduce((s, i) => s + i.quantity, 0);
-  const grandTotal = invoice.items.reduce((s, i) => s + i.total, 0);
+  const totalQuantity = invoice.products.reduce((s, i) => s + i.quantity, 0);
+  const grandTotal = invoice.products.reduce((s, i) => s + i.quantity * i.price, 0);
 
   const iframe = document.createElement('iframe');
   iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:800px;height:1200px;border:none;';
@@ -138,13 +135,13 @@ export async function exportInvoiceToPDF(invoice: SupplierInvoice) {
     </head>
     <body>
       <div class="header">
-        <h1>فاتورة رقم ${invoice.invoiceNumber}</h1>
+        <h1>فاتورة رقم ${invoice.code}</h1>
       </div>
 
       <div class="info-row">
         <div class="info-card">
           <div class="info-label">موظف المشتريات</div>
-          <div class="info-value">${invoice.createdByName}</div>
+          <div class="info-value">${invoice.createdByEmployee?.department ?? 'غير محدد'}</div>
         </div>
         <div class="info-card">
           <div class="info-label">تاريخ الانشاء</div>
@@ -164,14 +161,14 @@ export async function exportInvoiceToPDF(invoice: SupplierInvoice) {
           </tr>
         </thead>
         <tbody>
-          ${invoice.items
+          ${invoice.products
             .map(
               (item, i) => `
             <tr class="${i % 2 === 0 ? 'row-even' : 'row-odd'}">
-              <td>${item.productName}</td>
+              <td>${item.product.name}</td>
               <td>${item.quantity}</td>
               <td>${item.price.toFixed(1)}</td>
-              <td style="font-weight:600;">${item.total.toLocaleString()}</td>
+              <td style="font-weight:600;">${(item.quantity * item.price).toLocaleString()}</td>
             </tr>`,
             )
             .join('')}
@@ -212,5 +209,5 @@ export async function exportInvoiceToPDF(invoice: SupplierInvoice) {
 
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   doc.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
-  doc.save(`فاتورة_${invoice.invoiceNumber}.pdf`);
+  doc.save(`فاتورة_${invoice.code}.pdf`);
 }

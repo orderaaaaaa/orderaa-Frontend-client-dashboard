@@ -18,14 +18,15 @@ import { getTimeAgo } from '@/utils/timeAgo';
 import { SupplierInvoice } from '../types';
 import { formatDate } from '../utils';
 import InvoiceDetailModal from './InvoiceDetailModal';
+import { INVOICE_TYPE_LABEL } from '../../../constants';
 
 const TRANSACTION_TYPE_CONFIG: Record<
   string,
   { text: string; iconColor: string; icon: IconType }
 > = {
-  'مشتريات': { text: 'text-green-500', iconColor: 'text-green-500', icon: LiaDollarSignSolid },
-  'مرتجعات': { text: 'text-red-500', iconColor: 'text-red-500', icon: LiaUndoAltSolid },
-  'مدفوع': { text: 'text-blue-500', iconColor: 'text-blue-500', icon: LiaHandHoldingUsdSolid },
+  PURCHASE: { text: 'text-green-500', iconColor: 'text-green-500', icon: LiaDollarSignSolid },
+  RETURN: { text: 'text-red-500', iconColor: 'text-red-500', icon: LiaUndoAltSolid },
+  PAID: { text: 'text-blue-500', iconColor: 'text-blue-500', icon: LiaHandHoldingUsdSolid },
 };
 
 interface SupplierInvoiceCardProps {
@@ -47,26 +48,25 @@ interface CardField {
 const SupplierInvoiceCard = memo(
   ({ invoice, select, isSelected, onSelectionChange }: SupplierInvoiceCardProps) => {
     const [isDetailOpen, setIsDetailOpen] = useState(false);
-    const typeConfig = TRANSACTION_TYPE_CONFIG[invoice.transactionType];
+    const typeConfig = TRANSACTION_TYPE_CONFIG[invoice.type];
     const typeColors = typeConfig ?? {
       text: 'text-gray-800',
       iconColor: 'text-primary',
       icon: LiaDollarSignSolid,
     };
 
-    const isNegativeAmount =
-      invoice.transactionType === 'مرتجعات' || invoice.transactionType === 'مدفوع';
+    const isNegativeAmount = invoice.type === 'RETURN' || invoice.type === 'PAID';
 
     const fields: CardField[] = useMemo(
       () => [
         {
           label: 'موظف مشتريات',
-          value: invoice.createdByName,
+          value: invoice.createdByEmployee?.department ?? 'غير محدد',
           icon: LiaUserTieSolid,
         },
         {
           label: 'عدد الاصناف',
-          value: `عدد الاصناف ${invoice.itemsCount}`,
+          value: `عدد الاصناف ${invoice.products.length}`,
           icon: LiaBoxOpenSolid,
         },
         {
@@ -84,7 +84,7 @@ const SupplierInvoiceCard = memo(
         },
         {
           label: 'نوع الفاتورة',
-          value: invoice.transactionType,
+          value: INVOICE_TYPE_LABEL[invoice.type] ?? invoice.type,
           icon: typeColors.icon,
           valueClassName: typeColors.text,
           iconClassName: typeColors.iconColor,
@@ -106,10 +106,9 @@ const SupplierInvoiceCard = memo(
                 className="text-lg font-bold text-gray-800 cursor-pointer hover:text-primary hover:underline transition-colors"
                 onClick={() => setIsDetailOpen(true)}
               >
-                فاتورة رقم {invoice.invoiceNumber}
+                فاتورة رقم {invoice.code}
               </span>
             </div>
-            <span className="ps-11 text-sm">{invoice.companyName}</span>
           </div>
 
           {select && (

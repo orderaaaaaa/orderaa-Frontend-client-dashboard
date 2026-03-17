@@ -24,6 +24,16 @@ export const QUERY_KEYS = {
   SHIPPING_TYPES: 'shipping-types',
   UTM_SOURCES: 'utm-sources',
 
+  // Suppliers
+  SUPPLIERS: 'suppliers',
+  SUPPLIER_DETAIL: 'supplier-detail',
+  SUPPLIER_PRODUCTS: 'supplier-products',
+  SUPPLIER_PRODUCT_TRANSACTIONS: 'supplier-product-transactions',
+
+  // Supplier Invoices
+  SUPPLIER_INVOICES: 'supplier-invoices',
+  SUPPLIER_INVOICE_DETAIL: 'supplier-invoice-detail',
+
   // Cancellation Reasons
   CANCELLATION_REASONS: 'cancellation-reasons',
   TOP_CANCELLATION_REASONS: 'top-cancellation-reasons',

@@ -1,7 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useDebounce } from '@/utils/debounce';
 import { calculateDateRangeFromPeriod, TimePeriod } from '@/utils/dateRangeUtils';
-import { MOCK_SUPPLIERS } from '../constants';
 import { SupplierFilters } from '../types';
 
 const INITIAL_FILTERS: SupplierFilters = {
@@ -64,46 +63,6 @@ export function useSupplierFilters() {
     }));
   }, []);
 
-  const filteredSuppliers = useMemo(() => {
-    return MOCK_SUPPLIERS.filter((supplier) => {
-      if (debouncedSearchQuery) {
-        const query = debouncedSearchQuery.toLowerCase();
-        const matchesSearch =
-          supplier.name.toLowerCase().includes(query) ||
-          supplier.contactPerson.toLowerCase().includes(query) ||
-          supplier.phone.includes(query) ||
-          supplier.email.toLowerCase().includes(query);
-        if (!matchesSearch) return false;
-      }
-
-      if (filters.supplierName && supplier.name !== filters.supplierName) {
-        return false;
-      }
-
-      if (filters.remainingAmount) {
-        if (filters.remainingAmount === 'دائن' && supplier.remainingAmount >= 0) return false;
-        if (filters.remainingAmount === 'مدين' && supplier.remainingAmount <= 0) return false;
-        if (filters.remainingAmount === 'لا يوجد' && supplier.remainingAmount !== 0) return false;
-      }
-
-      if (filters.paidAmount) {
-        const [min, max] = filters.paidAmount.includes('+')
-          ? [parseFloat(filters.paidAmount), Infinity]
-          : filters.paidAmount.split('-').map(Number);
-        if (supplier.paidAmount < min || supplier.paidAmount > max) return false;
-      }
-
-      if (filters.invoicesCount) {
-        const [min, max] = filters.invoicesCount.includes('+')
-          ? [parseFloat(filters.invoicesCount), Infinity]
-          : filters.invoicesCount.split('-').map(Number);
-        if (supplier.invoicesCount < min || supplier.invoicesCount > max) return false;
-      }
-
-      return true;
-    });
-  }, [debouncedSearchQuery, filters]);
-
   const hasActiveFilters = useMemo(
     () =>
       !!debouncedSearchQuery ||
@@ -118,7 +77,7 @@ export function useSupplierFilters() {
 
   return {
     filters,
-    filteredSuppliers,
+    debouncedSearchQuery,
     hasActiveFilters,
     setSearchQuery,
     clearSearchQuery,

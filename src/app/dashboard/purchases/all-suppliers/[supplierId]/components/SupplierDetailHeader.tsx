@@ -31,7 +31,7 @@ const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
     () => [
       {
         label: 'إجمالي المشتريات',
-        value: formatCurrency(supplier.totalAmount),
+        value: formatCurrency(supplier.totalPurchased),
         icon: LiaMoneyBillWaveSolid,
       },
       {
@@ -41,17 +41,17 @@ const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
       },
       {
         label: 'المتبقي',
-        value: formatCurrency(Math.abs(supplier.remainingAmount)),
+        value: formatCurrency(Math.abs(supplier.remaining)),
         icon: LiaBalanceScaleSolid,
       },
       {
         label: 'إجمالي المرتجعات',
-        value: formatCurrency(0),
+        value: formatCurrency(supplier.totalReturned),
         icon: LiaUndoAltSolid,
       },
       {
         label: 'إجمالي الفواتير',
-        value: String(supplier.invoicesCount),
+        value: String(supplier.invoiceCount),
         icon: LiaFileInvoiceSolid,
       },
     ],
@@ -66,7 +66,7 @@ const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
             <LiaUserSolid className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
           </div>
           <h1 className="text-lg sm:text-2xl font-bold text-gray-800">
-            فواتير {supplier.name}
+            فواتير {supplier.nickname}
           </h1>
         </div>
         <Button
@@ -81,7 +81,8 @@ const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
       <PaymentModal
         isOpen={isPaymentOpen}
         onClose={() => setIsPaymentOpen(false)}
-        supplierName={supplier.name}
+        supplierId={supplier.id}
+        supplierName={supplier.nickname}
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">

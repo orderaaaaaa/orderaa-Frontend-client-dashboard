@@ -12,12 +12,15 @@ import BaseModal from '@/components/ui/base-modal';
 import AddSupplierHeader from './AddSupplierHeader';
 import { addSupplierSchema, AddSupplierFormData } from '../schema';
 import { useGovernoratesQuery } from '@/services/lookups';
+import { useCreateSupplierMutation } from '@/services/suppliers';
 
 export function AddSupplierContent() {
   const router = useRouter();
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const { data: governorates = [], isLoading: loadingGovernorates } =
     useGovernoratesQuery();
+  const createSupplierMutation = useCreateSupplierMutation();
 
   const {
     register,
@@ -39,14 +42,25 @@ export function AddSupplierContent() {
   const governorate = watch('governorate');
 
   const onSubmit = useCallback(
-    (data: AddSupplierFormData) => {
-      console.log('Supplier Data:', data);
-      setIsSuccessModalOpen(true);
-      setTimeout(() => {
-        router.push('/dashboard/purchases/all-suppliers');
-      }, 2000);
+    async (data: AddSupplierFormData) => {
+      setSubmitError(null);
+      try {
+        await createSupplierMutation.mutateAsync({
+          nickname: data.nickname,
+          name: data.officialName,
+          phoneNumber: data.phone,
+          email: data.email || undefined,
+          governorate: data.governorate || undefined,
+        });
+        setIsSuccessModalOpen(true);
+        setTimeout(() => {
+          router.push('/dashboard/purchases/all-suppliers');
+        }, 2000);
+      } catch (err: any) {
+        setSubmitError(err?.response?.data?.message || 'حدث خطأ أثناء إضافة المورد');
+      }
     },
-    [router],
+    [router, createSupplierMutation],
   );
 
   return (
@@ -138,10 +152,15 @@ export function AddSupplierContent() {
           </div>
         </div>
 
+        {submitError && (
+          <p className="sm:px-8 text-red-500 text-sm -mt-4">{submitError}</p>
+        )}
+
         <div className="flex items-center gap-3 sm:px-8 justify-end">
           <Button
             type="submit"
             variant="default"
+            disabled={createSupplierMutation.isPending}
             className="rounded-full font-semibold text-sm px-8 flex items-center gap-2"
           >
             حفظ

@@ -1,9 +1,10 @@
 'use client';
 
 import { memo } from 'react';
-import SharedInvoiceCard from '@/components/purchases/InvoiceCard';
+import SharedInvoiceCard, { InvoiceCardData } from '@/components/purchases/InvoiceCard';
 import { Invoice } from '../types';
 import { formatDate } from '../utils';
+import { INVOICE_TYPE_LABEL } from '../../constants';
 
 interface InvoiceCardProps {
   invoice: Invoice;
@@ -21,9 +22,22 @@ const InvoiceCard = memo(
     onSelectionChange,
     onTitleClick,
   }: InvoiceCardProps) => {
+    const cardData: InvoiceCardData = {
+      id: invoice.id,
+      invoiceNumber: invoice.code,
+      companyName: invoice.supplier.name,
+      itemsCount: invoice.products.length,
+      employeeName: invoice.createdByEmployee?.department ?? 'غير محدد',
+      createdAt: invoice.createdAt,
+      totalAmount: invoice.totalAmount,
+      transactionType: INVOICE_TYPE_LABEL[invoice.type] ?? invoice.type,
+      acceptanceStatus: invoice.acceptanceStatus ?? '',
+      imageUrl: invoice.files[0]?.url,
+    };
+
     return (
       <SharedInvoiceCard
-        invoice={invoice}
+        invoice={cardData}
         select={select}
         isSelected={isSelected}
         onSelectionChange={onSelectionChange}

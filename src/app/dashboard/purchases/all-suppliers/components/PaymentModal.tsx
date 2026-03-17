@@ -7,6 +7,7 @@ import { z } from 'zod';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
+import { useCreateSupplierInvoiceMutation } from '@/services/suppliers';
 
 const paymentSchema = z.object({
   amount: z
@@ -22,15 +23,19 @@ type PaymentFormValues = z.infer<typeof paymentSchema>;
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
+  supplierId: number;
   supplierName: string;
 }
 
 export default function PaymentModal({
   isOpen,
   onClose,
-  supplierName,
+  supplierId,
+  supplierName: _supplierName,
 }: PaymentModalProps) {
   const [showSuccess, setShowSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const createInvoiceMutation = useCreateSupplierInvoiceMutation();
 
   const {
     register,
@@ -45,21 +50,28 @@ export default function PaymentModal({
   const handleClose = useCallback(() => {
     reset();
     setShowSuccess(false);
+    setSubmitError(null);
     onClose();
   }, [reset, onClose]);
 
   const onSubmit = useCallback(
-    (data: PaymentFormValues) => {
-      console.log('Payment submitted:', {
-        supplierName,
-        amount: Number(data.amount),
-      });
-      setShowSuccess(true);
-      setTimeout(() => {
-        handleClose();
-      }, 1200);
+    async (data: PaymentFormValues) => {
+      setSubmitError(null);
+      try {
+        await createInvoiceMutation.mutateAsync({
+          type: 'PAID',
+          supplierId,
+          paymentAmount: Number(data.amount),
+        });
+        setShowSuccess(true);
+        setTimeout(() => {
+          handleClose();
+        }, 1200);
+      } catch (err: any) {
+        setSubmitError(err?.response?.data?.message || 'حدث خطأ أثناء تسجيل الدفع');
+      }
     },
-    [supplierName, handleClose],
+    [supplierId, handleClose, createInvoiceMutation],
   );
 
   return (
@@ -126,8 +138,13 @@ export default function PaymentModal({
               min="0"
             />
 
+            {submitError && (
+              <p className="text-red-500 text-sm">{submitError}</p>
+            )}
+
             <Button
               type="submit"
+              disabled={createInvoiceMutation.isPending}
               className="w-full sm:w-[60%] mx-auto rounded-xl font-bold text-base py-3"
             >
               دفع

@@ -1,21 +1,19 @@
 export interface SupplierInvoiceItem {
   id: number;
-  productName: string;
-  productImage: string;
+  productId: number;
   quantity: number;
   price: number;
-  total: number;
+  product: { id: number; name: string };
 }
 
 export interface SupplierInvoice {
   id: number;
-  invoiceNumber: string;
-  companyName: string;
-  employeeName: string;
-  createdByName: string;
-  itemsCount: number;
-  createdAt: string;
+  code: string;
+  type: 'PURCHASE' | 'PAID' | 'RETURN';
   totalAmount: number;
-  transactionType: string;
-  items: SupplierInvoiceItem[];
+  paymentAmount?: number;
+  externalInvoiceNumber?: string;
+  createdAt: string;
+  createdByEmployee?: { id: number; accessLevel: string; department: string };
+  products: SupplierInvoiceItem[];
 }

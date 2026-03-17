@@ -3,7 +3,6 @@
 import { useMemo, useState } from 'react';
 import clsx from 'clsx';
 import {
-  LiaBoxSolid,
   LiaMoneyBillWaveSolid,
   LiaUndoAltSolid,
   LiaBalanceScaleSolid,
@@ -15,12 +14,13 @@ import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import { SupplierProduct, ProductTransaction } from '../types';
-import { MOCK_PRODUCT_TRANSACTIONS } from '../constants';
+import { useProductTransactionsQuery } from '@/services/suppliers';
 
 interface ProductDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   product: SupplierProduct;
+  supplierId: number;
 }
 
 type TransactionRecord = Record<string, unknown> & ProductTransaction;
@@ -32,7 +32,7 @@ function formatDate(dateStr: string): string {
 
 const transactionColumns: DataTableColumn<TransactionRecord>[] = [
   {
-    key: 'date',
+    key: 'createdAt',
     header: 'التاريخ',
     render: (val) => {
       const dateStr = val as string;
@@ -54,11 +54,11 @@ const transactionColumns: DataTableColumn<TransactionRecord>[] = [
     render: (val) => (val as number).toLocaleString(),
   },
   {
-    key: 'type',
+    key: 'invoiceType',
     header: 'النوع',
     render: (val) => {
       const type = val as string;
-      const isPurchase = type === 'purchase';
+      const isPurchase = type === 'PURCHASE';
       return (
         <span
           className={clsx(
@@ -77,23 +77,26 @@ export default function ProductDetailModal({
   isOpen,
   onClose,
   product,
+  supplierId,
 }: ProductDetailModalProps) {
   const [fromDate, setFromDate] = useState<Date | null>(null);
   const [toDate, setToDate] = useState<Date | null>(null);
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('');
 
-  const allTransactions = useMemo(
-    () => (MOCK_PRODUCT_TRANSACTIONS[product.id] ?? []) as TransactionRecord[],
-    [product.id],
+  const { data: allTransactionsRaw = [], isLoading } = useProductTransactionsQuery(
+    supplierId,
+    product.productId,
   );
 
+  const allTransactions = allTransactionsRaw as TransactionRecord[];
+
   const purchases = useMemo(
-    () => allTransactions.filter((t) => t.type === 'purchase'),
+    () => allTransactions.filter((t) => t.invoiceType === 'PURCHASE'),
     [allTransactions],
   );
 
   const returns = useMemo(
-    () => allTransactions.filter((t) => t.type === 'return'),
+    () => allTransactions.filter((t) => t.invoiceType === 'RETURN'),
     [allTransactions],
   );
 
@@ -101,17 +104,17 @@ export default function ProductDetailModal({
     () => [
       {
         label: 'إجمالي المشتريات',
-        value: product.totalPurchase.toLocaleString(),
+        value: product.totalPurchaseAmount.toLocaleString(),
         icon: LiaMoneyBillWaveSolid,
       },
       {
         label: 'إجمالي المرتجعات',
-        value: product.totalReturned.toLocaleString(),
+        value: product.totalReturnAmount.toLocaleString(),
         icon: LiaUndoAltSolid,
       },
       {
         label: 'إجمالي صافي شراء',
-        value: product.totalNet.toLocaleString(),
+        value: product.netAmount.toLocaleString(),
         icon: LiaBalanceScaleSolid,
       },
     ],
@@ -142,18 +145,8 @@ export default function ProductDetailModal({
             اسم المنتج
           </span>
           <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-4">
-            <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden shrink-0">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-            </div>
             <span className="text-sm font-medium text-gray-800">
-              {product.name}
+              {product.productName}
             </span>
           </div>
         </div>
@@ -175,49 +168,55 @@ export default function ProductDetailModal({
           ))}
         </div>
 
-        <Tabs defaultValue="all" dir="rtl">
-          <TabsList>
-            <TabsTrigger value="all">
-              جميع المعاملات ({allTransactions.length})
-            </TabsTrigger>
-            <TabsTrigger value="purchases">
-              المشتريات ({purchases.length})
-            </TabsTrigger>
-            <TabsTrigger value="returns">
-              المرتجعات ({returns.length})
-            </TabsTrigger>
-          </TabsList>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <Tabs defaultValue="all" dir="rtl">
+            <TabsList>
+              <TabsTrigger value="all">
+                جميع المعاملات ({allTransactions.length})
+              </TabsTrigger>
+              <TabsTrigger value="purchases">
+                المشتريات ({purchases.length})
+              </TabsTrigger>
+              <TabsTrigger value="returns">
+                المرتجعات ({returns.length})
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="all">
-            <DataTable<TransactionRecord>
-              columns={transactionColumns}
-              data={allTransactions}
-              keyField="id"
-              emptyMessage="لا توجد معاملات"
-              className="shadow-none"
-            />
-          </TabsContent>
+            <TabsContent value="all">
+              <DataTable<TransactionRecord>
+                columns={transactionColumns}
+                data={allTransactions}
+                keyField="invoiceId"
+                emptyMessage="لا توجد معاملات"
+                className="shadow-none"
+              />
+            </TabsContent>
 
-          <TabsContent value="purchases">
-            <DataTable<TransactionRecord>
-              columns={transactionColumns}
-              data={purchases}
-              keyField="id"
-              emptyMessage="لا توجد مشتريات"
-              className="shadow-none"
-            />
-          </TabsContent>
+            <TabsContent value="purchases">
+              <DataTable<TransactionRecord>
+                columns={transactionColumns}
+                data={purchases}
+                keyField="invoiceId"
+                emptyMessage="لا توجد مشتريات"
+                className="shadow-none"
+              />
+            </TabsContent>
 
-          <TabsContent value="returns">
-            <DataTable<TransactionRecord>
-              columns={transactionColumns}
-              data={returns}
-              keyField="id"
-              emptyMessage="لا توجد مرتجعات"
-              className="shadow-none"
-            />
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="returns">
+              <DataTable<TransactionRecord>
+                columns={transactionColumns}
+                data={returns}
+                keyField="invoiceId"
+                emptyMessage="لا توجد مرتجعات"
+                className="shadow-none"
+              />
+            </TabsContent>
+          </Tabs>
+        )}
       </div>
     </BaseModal>
   );

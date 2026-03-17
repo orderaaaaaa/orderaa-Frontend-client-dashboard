@@ -1,14 +1,28 @@
+export interface InvoiceProduct {
+  id: number;
+  invoiceId: number;
+  productId: number;
+  quantity: number;
+  price: number;
+  createdAt?: string;
+  product: { id: number; name: string };
+}
+
 export interface Invoice {
   id: number;
-  invoiceNumber: string;
-  companyName: string;
-  itemsCount: number;
-  employeeName: string;
-  createdAt: string;
+  code: string;
+  type: 'PURCHASE' | 'PAID' | 'RETURN';
+  supplierId: number;
+  supplier: { id: number; name: string; nickname: string };
+  createdByEmployee?: { id: number; accessLevel: string; department: string };
   totalAmount: number;
-  transactionType: string;
-  acceptanceStatus: string;
-  imageUrl?: string;
+  paymentAmount?: number;
+  externalInvoiceNumber?: string;
+  products: InvoiceProduct[];
+  files: { url?: string }[];
+  createdAt: string;
+  updatedAt: string;
+  acceptanceStatus?: string;
 }
 
 export interface InvoiceFilters {

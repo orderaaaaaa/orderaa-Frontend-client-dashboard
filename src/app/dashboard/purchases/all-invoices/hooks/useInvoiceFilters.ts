@@ -1,7 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useDebounce } from '@/utils/debounce';
 import { calculateDateRangeFromPeriod, TimePeriod } from '@/utils/dateRangeUtils';
-import { MOCK_INVOICES } from '../constants';
 import { InvoiceFilters } from '../types';
 
 const INITIAL_FILTERS: InvoiceFilters = {
@@ -65,49 +64,6 @@ export function useInvoiceFilters() {
     }));
   }, []);
 
-  const filteredInvoices = useMemo(() => {
-    return MOCK_INVOICES.filter((invoice) => {
-      if (debouncedSearchQuery) {
-        const query = debouncedSearchQuery.toLowerCase();
-        const matchesSearch =
-          invoice.invoiceNumber.toLowerCase().includes(query) ||
-          invoice.companyName.toLowerCase().includes(query);
-        if (!matchesSearch) return false;
-      }
-
-      if (filters.supplierName && invoice.companyName !== filters.supplierName) {
-        return false;
-      }
-
-      if (filters.transactionType && invoice.transactionType !== filters.transactionType) {
-        return false;
-      }
-
-      if (filters.acceptanceStatus && invoice.acceptanceStatus !== filters.acceptanceStatus) {
-        return false;
-      }
-
-      if (filters.totalAmount) {
-        const amount = parseFloat(filters.totalAmount);
-        if (!isNaN(amount) && invoice.totalAmount !== amount) {
-          return false;
-        }
-      }
-
-      if (filters.fromDate || filters.toDate) {
-        const invoiceDate = new Date(invoice.createdAt);
-        if (filters.fromDate && invoiceDate < filters.fromDate) return false;
-        if (filters.toDate && invoiceDate > filters.toDate) return false;
-      }
-
-      if (filters.employeeName && invoice.employeeName !== filters.employeeName) {
-        return false;
-      }
-
-      return true;
-    });
-  }, [debouncedSearchQuery, filters]);
-
   const hasActiveFilters = useMemo(
     () =>
       !!debouncedSearchQuery ||
@@ -123,8 +79,8 @@ export function useInvoiceFilters() {
 
   return {
     filters,
-    filteredInvoices,
     hasActiveFilters,
+    debouncedSearchQuery,
     setSearchQuery,
     clearSearchQuery,
     setFilter,
