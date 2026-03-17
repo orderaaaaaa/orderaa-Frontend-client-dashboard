@@ -3,7 +3,8 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { formatDateToLocalDate } from '@/utils/dateRangeUtils';
 import { Scan, ScanLine, X } from 'lucide-react';
-import { LiaFileInvoiceSolid } from 'react-icons/lia';
+import { LiaFileInvoiceSolid, LiaSlidersHSolid } from 'react-icons/lia';
+import { Button } from '@/components/ui/button';
 import InvoicesHeader from './InvoicesHeader';
 import InvoicesSearchBar from './InvoicesSearchBar';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
@@ -29,6 +30,8 @@ export function AllInvoicesContent() {
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filtersOverflow, setFiltersOverflow] = useState(false);
 
   const {
     filters,
@@ -158,6 +161,16 @@ export function AllInvoicesContent() {
     setCurrentPage(1);
   }, []);
 
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (filters.supplierName) count++;
+    if (filters.transactionType) count++;
+    if (filters.totalAmount) count++;
+    if (filters.employeeName) count++;
+    if (filters.acceptanceStatus) count++;
+    return count;
+  }, [filters.supplierName, filters.transactionType, filters.totalAmount, filters.employeeName, filters.acceptanceStatus]);
+
   return (
     <div className="w-full max-w-full overflow-x-hidden">
 
@@ -172,41 +185,42 @@ export function AllInvoicesContent() {
               onClear={clearSearchQuery}
             />
           </div>
-          {select && selectedIds.length > 0 && (
-            <div className="flex flex-row items-center justify-center gap-2">
-              <X
-                onClick={() => {
-                  setSelectedIds([]);
-                  setSelect(false);
-                }}
-                className="cursor-pointer text-primary h-5 w-5"
-              />
-              <span className="text-sm text-gray-600 whitespace-nowrap">
-                تم تحديد {selectedIds.length} طلب
-              </span>
-            </div>
-          )}
-          <div
-            className="bg-primary flex flex-row items-center justify-center gap-3 px-5 py-2 rounded-full cursor-pointer text-white whitespace-nowrap"
-            onClick={handleToggleSelect}
+          <Button
+            variant="default"
+            className="rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm px-5 relative"
+            onClick={() => {
+              setShowFilters((prev) => {
+                if (prev) setFiltersOverflow(false);
+                return !prev;
+              });
+            }}
           >
-            <p>تحديد</p>
-            <div>
-              {select ? (
-                <ScanLine className="text-white w-5 h-5" />
-              ) : (
-                <Scan className="text-white w-5 h-5" />
-              )}
-            </div>
+            <LiaSlidersHSolid className="w-5 h-5" />
+            فلاتر متقدمة
+            {activeFilterCount > 0 && (
+              <span className="absolute -top-2 -left-2 bg-white text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
+                {activeFilterCount}
+              </span>
+            )}
+          </Button>
+        </div>
+        <div
+          className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+          style={{ gridTemplateRows: showFilters ? '1fr' : '0fr' }}
+          onTransitionEnd={() => {
+            if (showFilters) setFiltersOverflow(true);
+          }}
+        >
+          <div className={filtersOverflow ? 'overflow-visible' : 'overflow-hidden'}>
+            <InvoicesFilterBar
+              filters={filters}
+              onFilterChange={setFilter}
+              onClearFilter={clearFilter}
+              supplierOptions={supplierOptions}
+            />
           </div>
         </div>
-        <InvoicesFilterBar
-          filters={filters}
-          onFilterChange={setFilter}
-          onClearFilter={clearFilter}
-          supplierOptions={supplierOptions}
-        />
-        <div className="flex flex-row items-center justify-start gap-4">
+        <div className="flex flex-row flex-wrap items-center justify-between gap-3">
           <DateRangeFilter
             fromDate={filters.fromDate}
             toDate={filters.toDate}
@@ -216,6 +230,34 @@ export function AllInvoicesContent() {
             onTimePeriodChange={setTimePeriod}
             className="px-3 sm:pe-8"
           />
+          <div className="flex items-center gap-3">
+            {select && selectedIds.length > 0 && (
+              <div className="flex flex-row items-center justify-center gap-2">
+                <X
+                  onClick={() => {
+                    setSelectedIds([]);
+                    setSelect(false);
+                  }}
+                  className="cursor-pointer text-primary h-5 w-5"
+                />
+                <span className="text-sm text-gray-600 whitespace-nowrap">
+                  تم تحديد {selectedIds.length} طلب
+                </span>
+              </div>
+            )}
+            <Button
+              variant="default"
+              className="rounded-full font-semibold flex items-center gap-3 px-5"
+              onClick={handleToggleSelect}
+            >
+              تحديد
+              {select ? (
+                <ScanLine className="w-5 h-5" />
+              ) : (
+                <Scan className="w-5 h-5" />
+              )}
+            </Button>
+          </div>
         </div>
       </div>
 

@@ -2,6 +2,7 @@
 
 import { memo } from 'react';
 import SharedInvoiceCard, { InvoiceCardData } from '@/components/purchases/InvoiceCard';
+import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
 import { Invoice } from '../types';
 import { formatDate } from '../utils';
 import { INVOICE_TYPE_LABEL } from '../../constants';
@@ -27,7 +28,7 @@ const InvoiceCard = memo(
       invoiceNumber: invoice.code,
       companyName: invoice.supplier.name,
       itemsCount: invoice.products.length,
-      employeeName: invoice.createdByEmployee?.department ?? 'غير محدد',
+      employeeName: invoice.createdByEmployee ? getDepartmentLabel(invoice.createdByEmployee.department) : 'غير محدد',
       createdAt: invoice.createdAt,
       totalAmount: invoice.totalAmount,
       transactionType: INVOICE_TYPE_LABEL[invoice.type] ?? invoice.type,
