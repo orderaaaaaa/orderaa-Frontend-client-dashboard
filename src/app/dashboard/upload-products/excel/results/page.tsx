@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import PageLoading from '@/components/ui/page-loading';
 import { useRouter } from 'next/navigation';
 import { UploadResult } from '@/types/excel-upload';
 import { AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
@@ -35,14 +36,7 @@ export default function ValidationResultsPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">جاري التحميل...</p>
-        </div>
-      </div>
-    );
+    return <PageLoading message="جاري التحميل..." />;
   }
 
   if (!results) {

@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import PageLoading from '@/components/ui/page-loading';
 import Header from './(home)/Header';
 import Hero from './(home)/Hero';
 import Image from 'next/image';
@@ -30,11 +31,7 @@ const Page = () => {
   const { isChecking } = useAuthGuard(false);
 
   if (isChecking) {
-    return (
-      <div className="flex justify-center items-center h-64 mt-10">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <PageLoading className="h-64 mt-10" />;
   }
   return (
     <main className={`${zain.className} relative bg-[#040711] text-white`}>

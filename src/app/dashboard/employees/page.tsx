@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import PageLoading from '@/components/ui/page-loading';
 import { If, Then, Else } from 'react-if';
 import { useEmployeesList } from '@/app/dashboard/employees/hooks/useEmployeesList';
 import EmployeeHeader from './components/EmployeeHeader';
@@ -35,9 +36,7 @@ export default function AllEmployees() {
 
       <If condition={isLoading}>
         <Then>
-          <div className="flex justify-center items-center h-64 mt-10">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
+          <PageLoading className="h-64 mt-10" />
         </Then>
         <Else>
           <div className="mt-10">

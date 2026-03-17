@@ -1,5 +1,6 @@
 'use client';
 
+import PageLoading from '@/components/ui/page-loading';
 import React, {
   useState,
   useEffect,
@@ -514,12 +515,7 @@ function AllOrdersContent() {
 
       {loading && orders.length === 0 ? (
         <div className="relative">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-4 text-gray-600">جاري تحميل الطلبات...</p>
-            </div>
-          </div>
+          <PageLoading message="جاري تحميل الطلبات..." />
         </div>
       ) : error ? (
         <div className="flex items-center justify-center min-h-[400px]">
@@ -649,16 +645,10 @@ function AllOrdersContent() {
   );
 }
 
-// Loading fallback component
 function AllOrdersLoading() {
   return (
     <div className="w-full max-w-full overflow-x-hidden">
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">جاري تحميل الطلبات...</p>
-        </div>
-      </div>
+      <PageLoading message="جاري تحميل الطلبات..." />
     </div>
   );
 }

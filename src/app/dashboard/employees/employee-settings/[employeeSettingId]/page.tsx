@@ -1,6 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
+import PageLoading from '@/components/ui/page-loading';
 import useEmployeeById from './hooks/useEmployeeById';
 import EmployeeForm from './components/EmployeeForm';
 import useUpdateEmployee from './hooks/useUpdateEmployee';
@@ -17,12 +18,7 @@ export default function Page() {
   const { mutate: updateEmployee, isPending } = useUpdateEmployee();
 
   if (!employeeSettingId) return <p>Invalid employee ID</p>;
-  if (isLoading)
-    return (
-      <div className="flex justify-center items-center h-64 mt-10">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+  if (isLoading) return <PageLoading className="h-64 mt-10" />;
   if (isError) return <p>Error: {error?.message}</p>;
   if (!employee) return <p>No employee found</p>;
 

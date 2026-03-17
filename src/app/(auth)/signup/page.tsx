@@ -1,6 +1,7 @@
 'use client';
 
 import { useForm, Controller } from 'react-hook-form';
+import PageLoading from '@/components/ui/page-loading';
 import { Mail, User, Pen, Phone, Lock } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signUpSchema, type SignUpSchema } from './schema';
@@ -47,11 +48,7 @@ export default function SignUpForm() {
   const { categories, error: categoryError } = useCatigories();
 
   if (isChecking) {
-    return (
-      <div className="flex justify-center items-center h-64 mt-10">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <PageLoading className="h-64 mt-10" />;
   }
 
   // Merge errors from hook

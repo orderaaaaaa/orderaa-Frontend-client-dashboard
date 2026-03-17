@@ -1,6 +1,7 @@
 'use client';
 
 import { Mail, Lock, KeyRound, ArrowRight } from 'lucide-react';
+import PageLoading from '@/components/ui/page-loading';
 import { useForgotPassword, useOTP } from '../hooks';
 import AuthForm from '../components/AuthForm';
 import Link from 'next/link';
@@ -60,11 +61,7 @@ export default function ForgotPasswordPage() {
   };
 
   if (isChecking) {
-    return (
-      <div className="flex justify-center items-center h-64 mt-10">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
-      </div>
-    );
+    return <PageLoading className="h-64 mt-10" />;
   }
 
   // STEP 1: Request OTP via Email

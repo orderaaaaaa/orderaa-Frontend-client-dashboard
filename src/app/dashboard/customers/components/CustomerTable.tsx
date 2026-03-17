@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import PageLoading from '@/components/ui/page-loading';
 import { useGetCustomers } from '../hooks/useGetCustomers';
 import { useEditCustomer } from '../hooks/useEditCustomer';
 import { TABLE_HEADERS } from '../constants/CustomerHeaders';
@@ -100,11 +101,7 @@ export default function CustomerTable({
   }, [openMenuId]);
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64 mt-10">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <PageLoading className="h-64 mt-10" />;
   }
 
   if (isError) {

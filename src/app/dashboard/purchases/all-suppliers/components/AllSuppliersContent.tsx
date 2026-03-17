@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { LiaUsersSolid, LiaSlidersHSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
+import PageLoading from '@/components/ui/page-loading';
 import SuppliersHeader from './SuppliersHeader';
 import SuppliersSearchBar from './SuppliersSearchBar';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
@@ -183,9 +184,7 @@ export function AllSuppliersContent() {
 
       <div className="sm:px-8 flex flex-col gap-4">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          </div>
+          <PageLoading size="sm" className="py-16 min-h-0" />
         ) : suppliers.length > 0 ? (
           suppliers.map((supplier) => (
             <SupplierCard key={supplier.id} supplier={supplier} />

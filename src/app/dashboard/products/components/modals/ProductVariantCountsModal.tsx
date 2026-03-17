@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import PageLoading from '@/components/ui/page-loading';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { LiaTimesSolid } from 'react-icons/lia';
 import { useGetProductVariantCounts } from '../../hooks/useProduct';
@@ -45,9 +46,7 @@ export default function ProductVariantCountsModal({
           </DialogPrimitive.Close>
 
           {isLoading ? (
-            <div className="flex justify-center py-10">
-              <div className="animate-spin h-8 w-8 border-b-2 border-primary rounded-full" />
-            </div>
+            <PageLoading size="sm" className="py-10 min-h-0" />
           ) : !hasVariants ? (
             <div className="text-center py-10 text-gray-500">
               لا توجد بيانات للقطع المباعة

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import PageLoading from '@/components/ui/page-loading';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -54,11 +55,7 @@ export default function LoginPage() {
   };
 
   if (isChecking) {
-    return (
-      <div className="flex justify-center items-center h-64 mt-10">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <PageLoading className="h-64 mt-10" />;
   }
 
   return (
