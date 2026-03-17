@@ -166,7 +166,7 @@ export function TopBar({
               onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
                 e.key === 'Enter' && handleSearch()
               }
-              inputClassName="bg-[#f3f4f6] text-black placeholder:text-primary w-full placeholder:font-medium border-2 !border-primary/30 rounded-lg !pl-20"
+              inputClassName="bg-[#f3f4f6] text-black placeholder:text-primary w-full placeholder:font-medium border-2 !border-primary/30 rounded-lg !pl-20 !py-2"
             />
             <div className="absolute left-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
               {searchQuery && (
@@ -204,7 +204,7 @@ export function TopBar({
             name="search"
             placeholder="البحث"
             icon={Search}
-            inputClassName="sm:rounded-[38px] lg:rounded-[38px] bg-primary/8 border-0 !pl-24"
+            inputClassName="sm:rounded-[38px] lg:rounded-[38px] bg-primary/8 border-0 !pl-24 !py-2"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
@@ -212,7 +212,7 @@ export function TopBar({
             }
             aria-label="Search"
           />
-          <div className="absolute left-0 top-1/2 -translate-y-4 flex items-center gap-1">
+          <div className="absolute end-1 top-1/2 transform -translate-y-1/2 text-primary">
             {searchQuery && (
               <Button
                 variant="ghost"
