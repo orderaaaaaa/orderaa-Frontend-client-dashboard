@@ -74,7 +74,7 @@ export const addInvoiceSchema = z.object({
         const file = value instanceof FileList ? value[0] : value;
         return ACCEPTED_IMAGE_TYPES.includes(file?.type);
       },
-      { message: 'يرجى اختيار صورة بصيغة صحيحة (PNG, JPG, WEBP, GIF, BMP, SVG, TIFF, HEIC)' },
+      { message: 'صيغة الملف غير مدعومة، يرجى اختيار صورة' },
     ),
 });
 
