@@ -8,7 +8,8 @@ const INITIAL_FILTERS: InvoiceFilters = {
   supplierName: '',
   transactionType: '',
   acceptanceStatus: '',
-  totalAmount: '',
+  totalAmountFrom: '',
+  totalAmountTo: '',
   employeeName: '',
   fromDate: null,
   toDate: null,
@@ -70,7 +71,8 @@ export function useInvoiceFilters() {
       !!filters.supplierName ||
       !!filters.transactionType ||
       !!filters.acceptanceStatus ||
-      !!filters.totalAmount ||
+      !!filters.totalAmountFrom ||
+      !!filters.totalAmountTo ||
       !!filters.employeeName ||
       !!filters.fromDate ||
       !!filters.toDate,

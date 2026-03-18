@@ -114,6 +114,7 @@ export const useCreateSupplierInvoiceMutation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_INVOICES] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIERS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_DETAIL] });
     },
   });
 };

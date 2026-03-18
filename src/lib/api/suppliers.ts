@@ -56,6 +56,20 @@ export interface InvoiceProductApiItem {
   product: { id: number; name: string };
 }
 
+export interface InvoiceFileApiItem {
+  id: number;
+  invoiceId: number;
+  fileId: number;
+  createdAt: string;
+  file: {
+    id: number;
+    fileName: string;
+    mimeType: string;
+    size: number;
+    createdAt: string;
+  };
+}
+
 export interface SupplierInvoiceApiItem {
   id: number;
   code: string;
@@ -71,7 +85,7 @@ export interface SupplierInvoiceApiItem {
   supplier: { id: number; name: string; nickname: string };
   createdByEmployee?: { id: number; accessLevel: string; department: string };
   products: InvoiceProductApiItem[];
-  files: { url?: string }[];
+  files: InvoiceFileApiItem[];
 }
 
 export interface GetSuppliersParams {

@@ -2,10 +2,10 @@
 
 import { memo } from 'react';
 import SearchableSelect from '@/components/ui/SearchableSelect';
+import Input from '@/components/ui/Input';
 import { SupplierFilters } from '../types';
 import {
   REMAINING_AMOUNT_OPTIONS,
-  PAID_AMOUNT_OPTIONS,
   INVOICES_COUNT_OPTIONS,
 } from '../constants';
 
@@ -22,7 +22,7 @@ interface SuppliersFilterBarProps {
 const SuppliersFilterBar = memo(
   ({ filters, onFilterChange, onClearFilter, supplierOptions }: SuppliersFilterBarProps) => {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         <SearchableSelect
           options={supplierOptions}
           value={filters.supplierName}
@@ -41,13 +41,24 @@ const SuppliersFilterBar = memo(
           onClear={() => onClearFilter('remainingAmount')}
         />
 
-        <SearchableSelect
-          options={PAID_AMOUNT_OPTIONS}
-          value={filters.paidAmount}
-          onChange={(v) => onFilterChange('paidAmount', v)}
-          placeholder="المدفوع"
+        <Input
+          inputClassName="bg-white py-1.5 md:py-2 text-sm md:text-base rounded border-gray-300"
+          type="number"
+          placeholder="المدفوع من"
+          value={filters.paidAmountFrom}
+          onChange={(e) => onFilterChange('paidAmountFrom', e.target.value)}
           clearable
-          onClear={() => onClearFilter('paidAmount')}
+          onClear={() => onClearFilter('paidAmountFrom')}
+        />
+
+        <Input
+          inputClassName="bg-white py-1.5 md:py-2 text-sm md:text-base rounded border-gray-300"
+          type="number"
+          placeholder="المدفوع الى"
+          value={filters.paidAmountTo}
+          onChange={(e) => onFilterChange('paidAmountTo', e.target.value)}
+          clearable
+          onClear={() => onClearFilter('paidAmountTo')}
         />
 
         <SearchableSelect

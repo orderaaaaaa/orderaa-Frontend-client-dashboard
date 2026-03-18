@@ -6,7 +6,6 @@ import Input from '@/components/ui/Input';
 import { InvoiceFilters } from '../types';
 import {
   INVOICE_TYPE_OPTIONS,
-  EMPLOYEE_OPTIONS,
   ACCEPTANCE_STATUS_OPTIONS,
 } from '../constants';
 
@@ -18,10 +17,11 @@ interface InvoicesFilterBarProps {
   ) => void;
   onClearFilter: (key: keyof InvoiceFilters) => void;
   supplierOptions: { key: string; value: string }[];
+  employeeOptions: { key: string; value: string }[];
 }
 
 const InvoicesFilterBar = memo(
-  ({ filters, onFilterChange, onClearFilter, supplierOptions }: InvoicesFilterBarProps) => {
+  ({ filters, onFilterChange, onClearFilter, supplierOptions, employeeOptions }: InvoicesFilterBarProps) => {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         <div className="flex flex-col gap-1">
@@ -46,21 +46,30 @@ const InvoicesFilterBar = memo(
           />
         </div>
 
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-row gap-2">
           <Input
             inputClassName="bg-white py-1.5 md:py-2 text-sm md:text-base rounded border-gray-300"
             type="number"
-            placeholder="مبلغ الفاتورة"
-            value={filters.totalAmount}
-            onChange={(e) => onFilterChange('totalAmount', e.target.value)}
+            placeholder="المبلغ من"
+            value={filters.totalAmountFrom}
+            onChange={(e) => onFilterChange('totalAmountFrom', e.target.value)}
             clearable
-            onClear={() => onClearFilter('totalAmount')}
+            onClear={() => onClearFilter('totalAmountFrom')}
+          />
+          <Input
+            inputClassName="bg-white py-1.5 md:py-2 text-sm md:text-base rounded border-gray-300"
+            type="number"
+            placeholder="المبلغ الى"
+            value={filters.totalAmountTo}
+            onChange={(e) => onFilterChange('totalAmountTo', e.target.value)}
+            clearable
+            onClear={() => onClearFilter('totalAmountTo')}
           />
         </div>
 
         <div className="flex flex-col gap-1">
           <SearchableSelect
-            options={EMPLOYEE_OPTIONS}
+            options={employeeOptions}
             value={filters.employeeName}
             onChange={(v) => onFilterChange('employeeName', v)}
             placeholder="اسم الموظف"

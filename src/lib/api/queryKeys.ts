@@ -24,6 +24,9 @@ export const QUERY_KEYS = {
   SHIPPING_TYPES: 'shipping-types',
   UTM_SOURCES: 'utm-sources',
 
+  // Employees
+  EMPLOYEES: 'employees',
+
   // Suppliers
   SUPPLIERS: 'suppliers',
   SUPPLIER_DETAIL: 'supplier-detail',

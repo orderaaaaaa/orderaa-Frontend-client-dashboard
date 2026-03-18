@@ -17,11 +17,7 @@ import { DEFAULT_PAGE_SIZE } from '../constants';
 import { Invoice } from '../types';
 import { useInvoiceFilters } from '../hooks';
 import { useSupplierInvoicesQuery, useSuppliersQuery } from '@/services/suppliers';
-
-const TRANSACTION_TYPE_TO_API: Record<string, 'PURCHASE' | 'RETURN'> = {
-  'مشتريات': 'PURCHASE',
-  'مرتجع': 'RETURN',
-};
+import { useEmployeesQuery } from '@/services/employees';
 
 export function AllInvoicesContent() {
   const [select, setSelect] = useState(false);
@@ -54,12 +50,18 @@ export function AllInvoicesContent() {
     [suppliers],
   );
 
+  const { data: employeesData } = useEmployeesQuery();
+  const employeeOptions = useMemo(
+    () => (employeesData ?? []).map((e) => ({ key: String(e.id), value: e.fullName })),
+    [employeesData],
+  );
+
   const selectedSupplier = useMemo(
     () => filters.supplierName ? suppliers.find((s) => s.nickname === filters.supplierName) : undefined,
     [suppliers, filters.supplierName],
   );
 
-  const apiType = filters.transactionType ? TRANSACTION_TYPE_TO_API[filters.transactionType] : undefined;
+  const apiType = (filters.transactionType || undefined) as 'PURCHASE' | 'RETURN' | 'PAID' | undefined;
 
   const { data: invoicesData, isLoading } = useSupplierInvoicesQuery({
     page: currentPage,
@@ -85,15 +87,21 @@ export function AllInvoicesContent() {
       );
     }
 
-    if (filters.totalAmount) {
-      const amount = parseFloat(filters.totalAmount);
-      if (!isNaN(amount)) {
-        result = result.filter((inv) => inv.totalAmount === amount);
+    if (filters.totalAmountFrom) {
+      const min = parseFloat(filters.totalAmountFrom);
+      if (!isNaN(min)) {
+        result = result.filter((inv) => inv.totalAmount >= min);
+      }
+    }
+    if (filters.totalAmountTo) {
+      const max = parseFloat(filters.totalAmountTo);
+      if (!isNaN(max)) {
+        result = result.filter((inv) => inv.totalAmount <= max);
       }
     }
 
     if (filters.employeeName) {
-      result = result.filter((inv) => inv.createdByEmployee?.department === filters.employeeName);
+      result = result.filter((inv) => inv.createdByEmployee?.id === Number(filters.employeeName));
     }
 
     if (filters.acceptanceStatus) {
@@ -101,7 +109,7 @@ export function AllInvoicesContent() {
     }
 
     return result;
-  }, [apiInvoices, debouncedSearchQuery, filters.totalAmount, filters.employeeName, filters.acceptanceStatus]);
+  }, [apiInvoices, debouncedSearchQuery, filters.totalAmountFrom, filters.totalAmountTo, filters.employeeName, filters.acceptanceStatus]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -165,11 +173,11 @@ export function AllInvoicesContent() {
     let count = 0;
     if (filters.supplierName) count++;
     if (filters.transactionType) count++;
-    if (filters.totalAmount) count++;
+    if (filters.totalAmountFrom || filters.totalAmountTo) count++;
     if (filters.employeeName) count++;
     if (filters.acceptanceStatus) count++;
     return count;
-  }, [filters.supplierName, filters.transactionType, filters.totalAmount, filters.employeeName, filters.acceptanceStatus]);
+  }, [filters.supplierName, filters.transactionType, filters.totalAmountFrom, filters.totalAmountTo, filters.employeeName, filters.acceptanceStatus]);
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">
@@ -217,6 +225,7 @@ export function AllInvoicesContent() {
               onFilterChange={setFilter}
               onClearFilter={clearFilter}
               supplierOptions={supplierOptions}
+              employeeOptions={employeeOptions}
             />
           </div>
         </div>

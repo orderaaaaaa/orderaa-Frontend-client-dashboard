@@ -18,7 +18,8 @@ export interface SupplierFilters {
   searchQuery: string;
   supplierName: string;
   remainingAmount: string;
-  paidAmount: string;
+  paidAmountFrom: string;
+  paidAmountTo: string;
   invoicesCount: string;
   fromDate: Date | null;
   toDate: Date | null;

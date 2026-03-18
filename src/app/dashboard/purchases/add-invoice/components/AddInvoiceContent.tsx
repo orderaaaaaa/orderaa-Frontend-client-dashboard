@@ -10,12 +10,14 @@ import ProductSelectionModal, {
   SelectableProduct,
 } from '@/components/ui/product-selection-modal';
 import AddInvoiceHeader from './AddInvoiceHeader';
-import InvoiceDropdowns from './InvoiceDropdowns';
+import InvoiceDropdowns, { type PaymentStatus } from './InvoiceDropdowns';
 import InvoiceItemsTable from './InvoiceItemsTable';
 import InvoiceImageSection from './InvoiceImageSection';
 import { addInvoiceSchema, AddInvoiceFormData } from '../schema';
 import { InvoiceMode } from '../types';
 import { useCreateSupplierInvoiceMutation, useSuppliersQuery } from '@/services/suppliers';
+import { useEmployeesQuery } from '@/services/employees';
+import { uploadFile } from '@/lib/api/upload';
 
 export function AddInvoiceContent() {
   const router = useRouter();
@@ -23,6 +25,8 @@ export function AddInvoiceContent() {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [invoiceMode, setInvoiceMode] = useState<InvoiceMode>('singular');
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('unpaid');
+  const [partialAmount, setPartialAmount] = useState('');
 
   const createInvoiceMutation = useCreateSupplierInvoiceMutation();
 
@@ -34,6 +38,12 @@ export function AddInvoiceContent() {
     [suppliers],
   );
 
+  const { data: employeesData } = useEmployeesQuery();
+  const employeeOptions = useMemo(
+    () => (employeesData ?? []).map((e) => ({ key: String(e.id), value: e.fullName })),
+    [employeesData],
+  );
+
   const {
     control,
     setValue,
@@ -43,7 +53,7 @@ export function AddInvoiceContent() {
   } = useForm<AddInvoiceFormData>({
     resolver: zodResolver(addInvoiceSchema),
     defaultValues: {
-      invoiceType: undefined,
+      invoiceType: 'PURCHASE',
       supplierId: undefined,
       items: [],
       invoiceImage: undefined,
@@ -60,6 +70,7 @@ export function AddInvoiceContent() {
 
   const invoiceType = watch('invoiceType');
   const supplierId = watch('supplierId');
+  const createdByEmployeeId = watch('createdByEmployeeId');
   const items = watch('items');
   const invoiceImage = watch('invoiceImage');
 
@@ -174,17 +185,39 @@ export function AddInvoiceContent() {
     async (data: AddInvoiceFormData) => {
       setSubmitError(null);
       try {
+        let fileIds: number[] | undefined;
+
+        if (data.invoiceImage && data.invoiceImage.length > 0) {
+          const file = data.invoiceImage[0];
+          const uploadResponse = await uploadFile(file);
+          if (uploadResponse?.url) {
+            const uploadId = Number(uploadResponse.url.split('/').pop());
+            if (!isNaN(uploadId)) {
+              fileIds = [uploadId];
+            }
+          }
+        }
+
+        const totalAmount = data.items.reduce((sum, item) => sum + item.quantity * item.pricePerItem, 0);
+        let resolvedPaymentAmount: number | undefined;
+        if (paymentStatus === 'full') {
+          resolvedPaymentAmount = totalAmount;
+        } else if (paymentStatus === 'partial') {
+          resolvedPaymentAmount = Number(partialAmount) || undefined;
+        }
+
         await createInvoiceMutation.mutateAsync({
           type: data.invoiceType,
           supplierId: data.supplierId,
           createdByEmployeeId: data.createdByEmployeeId,
-          paymentAmount: data.paymentAmount,
+          paymentAmount: resolvedPaymentAmount,
           externalInvoiceNumber: data.externalInvoiceNumber,
           products: data.items.map((item) => ({
             productId: Number(item.id),
-            quantity: item.quantity,
-            price: item.pricePerItem,
+            quantity: invoiceMode === 'package' ? (item.pieceCount ?? 0) : item.quantity,
+            price: invoiceMode === 'package' ? (item.pricePerPiece ?? 0) : item.pricePerItem,
           })),
+          fileIds,
         });
         setIsSuccessModalOpen(true);
         setTimeout(() => {
@@ -218,6 +251,13 @@ export function AddInvoiceContent() {
             setValue('supplierId', value, { shouldValidate: true })
           }
           supplierOptions={supplierOptions}
+          employeeId={createdByEmployeeId}
+          onEmployeeChange={(value) => setValue('createdByEmployeeId', value)}
+          employeeOptions={employeeOptions}
+          paymentStatus={paymentStatus}
+          onPaymentStatusChange={setPaymentStatus}
+          partialAmount={partialAmount}
+          onPartialAmountChange={setPartialAmount}
           errors={{
             supplierId: errors.supplierId?.message,
           }}

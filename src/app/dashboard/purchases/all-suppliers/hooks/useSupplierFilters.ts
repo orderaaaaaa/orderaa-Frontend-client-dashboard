@@ -7,7 +7,8 @@ const INITIAL_FILTERS: SupplierFilters = {
   searchQuery: '',
   supplierName: '',
   remainingAmount: '',
-  paidAmount: '',
+  paidAmountFrom: '',
+  paidAmountTo: '',
   invoicesCount: '',
   fromDate: null,
   toDate: null,
@@ -68,7 +69,8 @@ export function useSupplierFilters() {
       !!debouncedSearchQuery ||
       !!filters.supplierName ||
       !!filters.remainingAmount ||
-      !!filters.paidAmount ||
+      !!filters.paidAmountFrom ||
+      !!filters.paidAmountTo ||
       !!filters.invoicesCount ||
       !!filters.fromDate ||
       !!filters.toDate,

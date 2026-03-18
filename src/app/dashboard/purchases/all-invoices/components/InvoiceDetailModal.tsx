@@ -25,7 +25,8 @@ const InvoiceDetailModal = memo(
   ({ invoice, isOpen, onClose }: InvoiceDetailModalProps) => {
     if (!invoice) return null;
 
-    const imageUrl = invoice.files[0]?.url;
+    const firstFile = invoice.files[0];
+    const imageUrl = firstFile ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/${firstFile.fileId}` : null;
 
     const fieldRows: DetailField[][] = [
       [

@@ -11,6 +11,7 @@ import {
   LiaFileInvoiceSolid,
   LiaHandHoldingUsdSolid,
   LiaBalanceScaleSolid,
+  LiaUndoAltSolid,
   LiaBoxesSolid,
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
@@ -28,9 +29,9 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
   const remainingLabel = useMemo(() => {
     if (supplier.remaining === 0) return { text: '0 ج.م', color: 'text-gray-500' };
     if (supplier.remaining < 0) {
-      return { text: `-${formatCurrency(Math.abs(supplier.remaining))} دائن`, color: 'text-red-500' };
+      return { text: `${formatCurrency(Math.abs(supplier.remaining))} عليه`, color: 'text-red-500' };
     }
-    return { text: `+${formatCurrency(supplier.remaining)} مدين`, color: 'text-green-500' };
+    return { text: `${formatCurrency(supplier.remaining)} له`, color: 'text-green-500' };
   }, [supplier.remaining]);
 
   return (
@@ -70,7 +71,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6 px-4">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mt-6 px-4">
         <div className="flex flex-col items-start sm:items-center gap-1.5">
           <a
             href={`tel:${supplier.phoneNumber}`}
@@ -113,6 +114,16 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
             <LiaHandHoldingUsdSolid className="w-4 h-4 text-primary" />
             <span className="text-base font-semibold text-gray-800">
               {formatCurrency(supplier.paidAmount)}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-start sm:items-center gap-1.5">
+          <span className="text-base text-gray-400">المرتجعات</span>
+          <div className="flex items-center gap-1.5">
+            <LiaUndoAltSolid className="w-4 h-4 text-primary" />
+            <span className="text-base font-semibold text-gray-800">
+              {formatCurrency(supplier.totalReturned)}
             </span>
           </div>
         </div>

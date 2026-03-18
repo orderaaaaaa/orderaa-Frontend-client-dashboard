@@ -33,7 +33,7 @@ const InvoiceCard = memo(
       totalAmount: invoice.totalAmount,
       transactionType: INVOICE_TYPE_LABEL[invoice.type] ?? invoice.type,
       acceptanceStatus: invoice.acceptanceStatus ?? '',
-      imageUrl: invoice.files[0]?.url,
+      imageUrl: invoice.files[0] ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/${invoice.files[0].fileId}` : undefined,
     };
 
     return (

@@ -41,7 +41,7 @@ const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
       },
       {
         label: 'المتبقي',
-        value: formatCurrency(Math.abs(supplier.remaining)),
+        value: formatCurrency(supplier.remaining),
         icon: LiaBalanceScaleSolid,
       },
       {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { LiaSaveSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { Stepper, StepContent } from '@/components/ui/stepper';
@@ -22,6 +23,7 @@ interface ReceiptDetailContentProps {
 }
 
 export function ReceiptDetailContent({ receiptId, receipt }: ReceiptDetailContentProps) {
+  const router = useRouter();
   const {
     currentStep,
     completedSteps,
@@ -111,7 +113,8 @@ export function ReceiptDetailContent({ receiptId, receipt }: ReceiptDetailConten
 
     console.log('Receipt submission payload:', payload);
     clearReceipt(receiptId);
-  }, [productVariants, confirmedCounts, rejectedCounts, receipt, receiptId, clearReceipt]);
+    router.push('/dashboard/purchases/all-invoices');
+  }, [productVariants, confirmedCounts, rejectedCounts, receipt, receiptId, clearReceipt, router]);
 
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === RECEIPT_STEPS.length - 1;

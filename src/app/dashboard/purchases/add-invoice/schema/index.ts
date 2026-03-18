@@ -6,6 +6,12 @@ const ACCEPTED_IMAGE_TYPES = [
   'image/jpg',
   'image/png',
   'image/webp',
+  'image/gif',
+  'image/bmp',
+  'image/svg+xml',
+  'image/tiff',
+  'image/heic',
+  'image/heif',
 ];
 
 const invoiceItemSchema = z.object({
@@ -68,7 +74,7 @@ export const addInvoiceSchema = z.object({
         const file = value instanceof FileList ? value[0] : value;
         return ACCEPTED_IMAGE_TYPES.includes(file?.type);
       },
-      { message: 'يرجى اختيار صورة بصيغة PNG أو JPG فقط' },
+      { message: 'يرجى اختيار صورة بصيغة صحيحة (PNG, JPG, WEBP, GIF, BMP, SVG, TIFF, HEIC)' },
     ),
 });
 

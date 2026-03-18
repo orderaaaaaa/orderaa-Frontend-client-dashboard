@@ -37,20 +37,19 @@ export function AllSuppliersContent() {
   const dateFrom = formatDateToLocalDate(filters.fromDate);
   const dateTo = formatDateToLocalDate(filters.toDate);
 
-  const remainingStatusMap: Record<string, 'creditor' | 'debtor' | 'zero'> = {
-    'دائن': 'creditor',
-    'مدين': 'debtor',
-    'لا يوجد': 'zero',
-  };
 
   const parsedPaidAmount = useMemo(() => {
-    if (!filters.paidAmount) return {};
-    if (filters.paidAmount.includes('+')) {
-      return { paidAmountMin: parseFloat(filters.paidAmount) };
+    const result: { paidAmountMin?: number; paidAmountMax?: number } = {};
+    if (filters.paidAmountFrom) {
+      const min = parseFloat(filters.paidAmountFrom);
+      if (!isNaN(min)) result.paidAmountMin = min;
     }
-    const [min, max] = filters.paidAmount.split('-').map(Number);
-    return { paidAmountMin: min, paidAmountMax: max };
-  }, [filters.paidAmount]);
+    if (filters.paidAmountTo) {
+      const max = parseFloat(filters.paidAmountTo);
+      if (!isNaN(max)) result.paidAmountMax = max;
+    }
+    return result;
+  }, [filters.paidAmountFrom, filters.paidAmountTo]);
 
   const parsedInvoicesCount = useMemo(() => {
     if (!filters.invoicesCount) return {};
@@ -68,7 +67,7 @@ export function AllSuppliersContent() {
     dateFrom,
     dateTo,
     name: filters.supplierName || undefined,
-    remainingStatus: remainingStatusMap[filters.remainingAmount] ?? undefined,
+    remainingStatus: (filters.remainingAmount || undefined) as 'creditor' | 'debtor' | 'zero' | undefined,
     ...parsedPaidAmount,
     ...parsedInvoicesCount,
   });
@@ -113,10 +112,10 @@ export function AllSuppliersContent() {
     let count = 0;
     if (filters.supplierName) count++;
     if (filters.remainingAmount) count++;
-    if (filters.paidAmount) count++;
+    if (filters.paidAmountFrom || filters.paidAmountTo) count++;
     if (filters.invoicesCount) count++;
     return count;
-  }, [filters.supplierName, filters.remainingAmount, filters.paidAmount, filters.invoicesCount]);
+  }, [filters.supplierName, filters.remainingAmount, filters.paidAmountFrom, filters.paidAmountTo, filters.invoicesCount]);
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">
