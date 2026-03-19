@@ -46,7 +46,7 @@ export function AllInvoicesContent() {
   const suppliers = suppliersData?.data ?? [];
 
   const supplierOptions = useMemo(
-    () => suppliers.map((s) => ({ key: s.nickname, value: s.nickname })),
+    () => suppliers.map((s) => ({ key: s.name, value: s.name })),
     [suppliers],
   );
 
@@ -57,7 +57,7 @@ export function AllInvoicesContent() {
   );
 
   const selectedSupplier = useMemo(
-    () => filters.supplierName ? suppliers.find((s) => s.nickname === filters.supplierName) : undefined,
+    () => filters.supplierName ? suppliers.find((s) => s.name === filters.supplierName) : undefined,
     [suppliers, filters.supplierName],
   );
 
