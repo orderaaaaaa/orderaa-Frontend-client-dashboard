@@ -142,7 +142,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
         isOpen={isPaymentOpen}
         onClose={() => setIsPaymentOpen(false)}
         supplierId={supplier.id}
-        supplierName={supplier.nickname}
+        supplierName={supplier.name}
       />
     </div>
   );
