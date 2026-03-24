@@ -15,6 +15,13 @@ export interface CreateIntegrationRequest {
   apiKey: string;
 }
 
+export interface UpdateIntegrationRequest {
+  storeId?: number;
+  configType?: IntegrationConfigType;
+  apiKey?: string;
+  isActive?: boolean;
+}
+
 
 export interface IntegrationResponse {
   id: number;

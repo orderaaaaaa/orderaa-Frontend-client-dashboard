@@ -23,18 +23,17 @@ import {
 import { useIntegrations } from '../hooks/useIntegrations';
 import { storeApi } from '../api/Integrations';
 import {
-  IntegrationProvider,
   IntegrationConfigType,
   IntegrationResponse,
 } from '../types/apiIntegration';
 import { useAuthStore } from '@/store/authStore';
-import { integrationSteps, webhookSteps } from '../constants/steps';
 import { toast } from 'react-toastify';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import clsx from 'clsx';
 import groupBy from 'lodash/groupBy';
+import { ProviderModalConfig } from '../constants/providerConfig';
 
 const storeInfoSchema = z.object({
   storeName: z.string().min(1, 'اسم المتجر مطلوب'),
@@ -54,10 +53,11 @@ type StoreInfoFormData = z.infer<typeof storeInfoSchema>;
 type WebhookFormData = z.infer<typeof webhookSchema>;
 type ApiKeyFormData = z.infer<typeof apiKeySchema>;
 
-interface EasyOrderModalProps {
+interface IntegrationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  config: ProviderModalConfig;
 }
 
 const STEPPER_STEPS = [
@@ -66,10 +66,12 @@ const STEPPER_STEPS = [
   { label: 'مفتاح API' },
 ];
 
-const EasyOrderModal = ({
+const IntegrationModal = ({
   isOpen,
   onClose,
-}: EasyOrderModalProps) => {
+  onSuccess,
+  config,
+}: IntegrationModalProps) => {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const { user } = useAuthStore();
   const merchantId = user?.merchantId;
@@ -84,22 +86,20 @@ const EasyOrderModal = ({
 
   const { integrations, createIntegration } = useIntegrations();
 
-  const easyOrderIntegrations = useMemo(() => {
+  const providerIntegrations = useMemo(() => {
     if (!integrations) return [];
-    return integrations.filter(
-      (c) => c.provider === IntegrationProvider.EASY_ORDERS
-    );
-  }, [integrations]);
+    return integrations.filter((c) => c.provider === config.provider);
+  }, [integrations, config.provider]);
 
   const storeGroups = useMemo(() => {
-    return groupBy(easyOrderIntegrations, 'storeId');
-  }, [easyOrderIntegrations]);
+    return groupBy(providerIntegrations, 'storeId');
+  }, [providerIntegrations]);
 
-  const hasConnectedStore = easyOrderIntegrations.length > 0;
+  const hasConnectedStore = providerIntegrations.length > 0;
 
   const getWebhookUrl = (storeId: number): string => {
     if (!API_URL) return '';
-    return `${API_URL}/webhook/orders/${IntegrationProvider.EASY_ORDERS}/${storeId}`;
+    return `${API_URL}/webhook/orders/${config.provider}/${storeId}`;
   };
 
   const storeInfoForm = useForm<StoreInfoFormData>({
@@ -157,7 +157,7 @@ const EasyOrderModal = ({
 
       await createIntegration({
         storeId: createdStoreId,
-        provider: IntegrationProvider.EASY_ORDERS,
+        provider: config.provider,
         configType: IntegrationConfigType.WEBHOOK,
         apiKey: data.webhookSecret.trim(),
       });
@@ -183,12 +183,13 @@ const EasyOrderModal = ({
 
       await createIntegration({
         storeId: createdStoreId,
-        provider: IntegrationProvider.EASY_ORDERS,
+        provider: config.provider,
         configType: IntegrationConfigType.API,
         apiKey: data.apiKey.trim(),
       });
 
       toast.success('تم انشاء ربط API بنجاح');
+      onSuccess();
       setShowStepper(false);
       setCurrentStep(0);
       resetForms();
@@ -244,7 +245,7 @@ const EasyOrderModal = ({
     <BaseModal
       isOpen={isOpen}
       onClose={handleClose}
-      title="ربط المتاجر"
+      title={config.modalTitle}
       showFooter={false}
       isLoading={isLoading}
       maxWidth="md:max-w-5xl"
@@ -252,7 +253,7 @@ const EasyOrderModal = ({
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <p className="text-gray-600">
-            قم بربط متجرك لمراقبة الطلبات تلقائياً
+            {config.modalDescription}
           </p>
           <Button
             onClick={handleToggleStepper}
@@ -273,7 +274,7 @@ const EasyOrderModal = ({
             </div>
             <div className="relative">
               <div className="absolute right-[11px] top-3 bottom-3" />
-              {webhookSteps.map((step, i) => (
+              {config.webhookSteps.map((step, i) => (
                 <div
                   key={i}
                   className="relative flex items-start gap-3 pb-4 last:pb-0"
@@ -298,7 +299,7 @@ const EasyOrderModal = ({
             </div>
             <div className="relative">
               <div className="absolute right-[11px] top-3 bottom-3" />
-              {integrationSteps.map((step, i) => (
+              {config.apiSteps.map((step, i) => (
                 <div
                   key={i}
                   className="relative flex items-start gap-3 pb-4 last:pb-0"
@@ -315,17 +316,19 @@ const EasyOrderModal = ({
           </div>
         </div>
 
-        <div>
-          <h4 className="font-semibold text-gray-900 mb-3">فيديو توضيحي</h4>
-          <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
-            <iframe
-              src="https://drive.google.com/file/d/1aoWTPTEbKQg3fWBwI3VL0gIf82Lsdnf-/preview"
-              className="aspect-video w-full md:h-[300px] rounded-lg"
-              allow="autoplay"
-              allowFullScreen
-            />
+        {config.videoUrl && (
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-3">فيديو توضيحي</h4>
+            <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
+              <iframe
+                src={config.videoUrl}
+                className="aspect-video w-full md:h-[300px] rounded-lg"
+                allow="autoplay"
+                allowFullScreen
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {showStepper && (
           <div ref={stepperRef} className="bg-gray-50/80 rounded-xl border border-primary/20 p-6">
@@ -480,7 +483,7 @@ const EasyOrderModal = ({
           </div>
         )}
 
-        <div>
+        <div className='pb-2'>
           <h4 className="font-semibold text-gray-900 mb-3">
             المتاجر المربوطة
           </h4>
@@ -544,7 +547,7 @@ const EasyOrderModal = ({
                                     : 'bg-gray-100 text-gray-600'
                                 )}
                               >
-                                {webhookConfig.isActive ? 'مفعّل' : 'معطّل'}
+                                {webhookConfig.isActive ? 'نشط' : 'معطّل'}
                               </span>
                             </div>
                           </div>
@@ -574,7 +577,7 @@ const EasyOrderModal = ({
                                     : 'bg-gray-100 text-gray-600'
                                 )}
                               >
-                                {apiConfig.isActive ? 'مفعّل' : 'معطّل'}
+                                {apiConfig.isActive ? 'نشط' : 'معطّل'}
                               </span>
                             </div>
                           </div>
@@ -600,4 +603,4 @@ const EasyOrderModal = ({
   );
 };
 
-export default EasyOrderModal;
+export default IntegrationModal;

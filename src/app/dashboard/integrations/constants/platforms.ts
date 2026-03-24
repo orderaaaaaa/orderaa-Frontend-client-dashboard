@@ -13,10 +13,11 @@ export const platforms: IntegrationPlatform[] = [
   {
     id: 'shopify',
     name: 'Shopify',
+    providerKey: 'SHOPIFY',
     logo: '/integrations/shopify.svg',
     description: 'ربط متجرك بمنصة Shopify',
     buttonText: 'إنشاء ربط جديد',
-    isActive: false,
+    isActive: true,
   },
   {
     id: 'wordpress',

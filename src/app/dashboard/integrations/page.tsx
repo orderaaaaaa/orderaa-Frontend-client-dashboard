@@ -1,14 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import EasyOrderModal from './components/EasyOrderModal';
+import IntegrationModal from './components/IntegrationModal';
 import { platforms } from './constants/platforms';
+import { providerConfigs } from './constants/providerConfig';
 import { IntegrationCard } from './components/IntegrationCard';
 import { Notification } from './components/Notification';
 import { useIntegrations } from './hooks/useIntegrations';
 
 const IntegrationsPage = () => {
-  const [isEasyOrderModalOpen, setIsEasyOrderModalOpen] = useState(false);
+  const [activeModal, setActiveModal] = useState<string | null>(null);
 
   const [notification, setNotification] = useState<{
     message: string;
@@ -18,13 +19,9 @@ const IntegrationsPage = () => {
   const { integrations, isLoading } = useIntegrations();
 
   const handleCardButtonClick = (platformId: string) => {
-    if (platformId === 'easyorder') {
-      setIsEasyOrderModalOpen(true);
+    if (providerConfigs[platformId]) {
+      setActiveModal(platformId);
     }
-  };
-
-  const handleModalClose = () => {
-    setIsEasyOrderModalOpen(false);
   };
 
   const handleModalSuccess = () => {
@@ -79,11 +76,14 @@ const IntegrationsPage = () => {
         </div>
       </div>
 
-      <EasyOrderModal
-        isOpen={isEasyOrderModalOpen}
-        onClose={handleModalClose}
-        onSuccess={handleModalSuccess}
-      />
+      {activeModal && providerConfigs[activeModal] && (
+        <IntegrationModal
+          isOpen={true}
+          onClose={() => setActiveModal(null)}
+          onSuccess={handleModalSuccess}
+          config={providerConfigs[activeModal]}
+        />
+      )}
 
       {notification && (
         <Notification

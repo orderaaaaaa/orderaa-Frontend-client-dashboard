@@ -37,6 +37,9 @@ export const QUERY_KEYS = {
   SUPPLIER_INVOICES: 'supplier-invoices',
   SUPPLIER_INVOICE_DETAIL: 'supplier-invoice-detail',
 
+  // Integrations
+  INTEGRATION_CONFIGS: 'integration-configs',
+
   // Cancellation Reasons
   CANCELLATION_REASONS: 'cancellation-reasons',
   TOP_CANCELLATION_REASONS: 'top-cancellation-reasons',
