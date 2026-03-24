@@ -32,7 +32,7 @@ export const IntegrationCard = ({
   const hasConnection = isWebhookConnected || isApiConnected;
 
   return (
-    <div className="relative bg-white rounded-2xl p-8 transition-all duration-300 border border-gray-200 hover:border-gray-300 hover:shadow-md">
+    <div className="relative bg-white rounded-2xl p-8 transition-all duration-300 border border-gray-200 hover:border-gray-300 hover:shadow-md flex flex-col">
       <div className="absolute top-4 left-4 flex gap-2 items-end">
         {isWebhookConnected && (
           <div className="bg-green-100 text-green-700 text-[10px] font-medium px-2 py-1 rounded-full flex items-center gap-1">
@@ -65,7 +65,7 @@ export const IntegrationCard = ({
         ربط {platform.name}
       </h3>
 
-      <p className="text-center text-gray-600 mb-6">{platform.description}</p>
+      <p className="text-center text-gray-600 mb-6 flex-1">{platform.description}</p>
 
       <Button
         onClick={() => platform.isActive && onButtonClick(platform.id)}
