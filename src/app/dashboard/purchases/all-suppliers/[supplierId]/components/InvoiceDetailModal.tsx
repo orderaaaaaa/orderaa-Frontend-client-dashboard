@@ -105,24 +105,24 @@ export default function InvoiceDetailModal({
           />
         </div>
 
-        {invoice.files?.length > 0 && (
+        {invoice.images?.length > 0 && (
           <div>
             <h3 className="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
               <LiaImageSolid className="w-5 h-5 text-primary" />
               صورة الفاتورة
             </h3>
             <div className="flex flex-wrap gap-3">
-              {invoice.files.map((f) => (
+              {invoice.images.map((url, idx) => (
                 <a
-                  key={f.id}
-                  href={`${process.env.NEXT_PUBLIC_API_URL}/uploads/${f.fileId}`}
+                  key={idx}
+                  href={url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block rounded-lg overflow-hidden border border-gray-200 hover:border-primary transition-colors"
                 >
                   <Image
-                    src={`${process.env.NEXT_PUBLIC_API_URL}/uploads/${f.fileId}`}
-                    alt={f.file.fileName}
+                    src={url}
+                    alt={`صورة الفاتورة ${idx + 1}`}
                     width={200}
                     height={200}
                     className="object-cover w-[200px] h-[200px]"

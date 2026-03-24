@@ -135,14 +135,14 @@ export const navigation: NavigationItem[] = [
     icon: LiaFileInvoiceDollarSolid,
     children: [
       {
-        name: 'جميع الفواتير',
-        href: '/dashboard/purchases/all-invoices',
-        icon: LiaReceiptSolid,
-      },
-      {
         name: 'اضافة فاتورة',
         href: '/dashboard/purchases/add-invoice',
         icon: LiaPlusSolid,
+      },
+      {
+        name: 'جميع الفواتير',
+        href: '/dashboard/purchases/all-invoices',
+        icon: LiaReceiptSolid,
       },
     ],
   },

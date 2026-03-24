@@ -28,12 +28,14 @@ const InvoiceCard = memo(
       invoiceNumber: invoice.code,
       companyName: invoice.supplier.name,
       itemsCount: invoice.products.length,
+      products: invoice.products.map((p) => ({ name: p.product.name, quantity: p.quantity, price: p.price })),
       employeeName: invoice.createdByEmployee ? getDepartmentLabel(invoice.createdByEmployee.department) : 'غير محدد',
       createdAt: invoice.createdAt,
       totalAmount: invoice.totalAmount,
+      paymentAmount: invoice.paymentAmount,
       transactionType: INVOICE_TYPE_LABEL[invoice.type] ?? invoice.type,
       acceptanceStatus: invoice.acceptanceStatus ?? '',
-      imageUrl: invoice.files[0] ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/${invoice.files[0].fileId}` : undefined,
+      imageUrl: invoice.images?.[0] ?? undefined,
     };
 
     return (

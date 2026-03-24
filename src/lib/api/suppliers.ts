@@ -56,20 +56,6 @@ export interface InvoiceProductApiItem {
   product: { id: number; name: string };
 }
 
-export interface InvoiceFileApiItem {
-  id: number;
-  invoiceId: number;
-  fileId: number;
-  createdAt: string;
-  file: {
-    id: number;
-    fileName: string;
-    mimeType: string;
-    size: number;
-    createdAt: string;
-  };
-}
-
 export interface SupplierInvoiceApiItem {
   id: number;
   code: string;
@@ -82,10 +68,10 @@ export interface SupplierInvoiceApiItem {
   externalInvoiceNumber?: string;
   createdAt: string;
   updatedAt: string;
+  images: string[];
   supplier: { id: number; name: string; nickname: string };
   createdByEmployee?: { id: number; accessLevel: string; department: string };
   products: InvoiceProductApiItem[];
-  files: InvoiceFileApiItem[];
 }
 
 export interface GetSuppliersParams {
@@ -131,6 +117,7 @@ export interface CreateInvoiceProductDto {
   productId: number;
   quantity: number;
   price: number;
+  variants?: { label: string; value: string }[];
 }
 
 export interface CreateSupplierInvoiceDto {
@@ -140,7 +127,7 @@ export interface CreateSupplierInvoiceDto {
   paymentAmount?: number;
   externalInvoiceNumber?: string;
   products?: CreateInvoiceProductDto[];
-  fileIds?: number[];
+  images?: string[];
 }
 
 export interface UpdateSupplierInvoiceDto {
@@ -148,7 +135,7 @@ export interface UpdateSupplierInvoiceDto {
   paymentAmount?: number;
   externalInvoiceNumber?: string;
   products?: CreateInvoiceProductDto[];
-  fileIds?: number[];
+  images?: string[];
 }
 
 export async function getSuppliers(

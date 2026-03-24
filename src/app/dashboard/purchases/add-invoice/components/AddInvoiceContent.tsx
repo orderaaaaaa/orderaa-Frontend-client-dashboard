@@ -146,14 +146,18 @@ export function AddInvoiceContent() {
   const handleAddProducts = useCallback(
     (products: SelectableProduct[]) => {
       products.forEach((product) => {
+        const variantSuffix = product.selectedVariants?.length
+          ? ` - ${product.selectedVariants.map((v) => v.value).join(' - ')}`
+          : '';
         append({
           id: String(product.id),
-          name: product.name,
+          name: `${product.name}${variantSuffix}`,
           quantity: 0,
           pricePerItem: 0,
           total: 0,
           pieceCount: 0,
           pricePerPiece: 0,
+          variants: product.selectedVariants ?? [],
         });
       });
       setIsProductModalOpen(false);
@@ -185,16 +189,13 @@ export function AddInvoiceContent() {
     async (data: AddInvoiceFormData) => {
       setSubmitError(null);
       try {
-        let fileIds: number[] | undefined;
+        let images: string[] | undefined;
 
         if (data.invoiceImage && data.invoiceImage.length > 0) {
           const file = data.invoiceImage[0];
           const uploadResponse = await uploadFile(file);
           if (uploadResponse?.url) {
-            const uploadId = Number(uploadResponse.url.split('/').pop());
-            if (!isNaN(uploadId)) {
-              fileIds = [uploadId];
-            }
+            images = [uploadResponse.url];
           }
         }
 
@@ -216,8 +217,9 @@ export function AddInvoiceContent() {
             productId: Number(item.id),
             quantity: invoiceMode === 'package' ? (item.pieceCount ?? 0) : item.quantity,
             price: invoiceMode === 'package' ? (item.pricePerPiece ?? 0) : item.pricePerItem,
+            ...(item.variants?.length ? { variants: item.variants } : {}),
           })),
-          fileIds,
+          images,
         });
         setIsSuccessModalOpen(true);
         setTimeout(() => {

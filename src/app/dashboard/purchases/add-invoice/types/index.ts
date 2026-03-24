@@ -9,4 +9,5 @@ export interface InvoiceItem {
   total: number;
   pieceCount?: number;
   pricePerPiece?: number;
+  variants?: { label: string; value: string }[];
 }

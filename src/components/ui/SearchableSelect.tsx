@@ -256,7 +256,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
               type="button"
               onClick={handleClear}
               className="absolute left-10 top-1/2 -translate-y-1/2 z-20
-                         text-gray-400 hover:text-primary"
+                         text-gray-400 hover:text-primary cursor-pointer"
               aria-label="Clear selection"
             >
               <X className="w-4 h-4" />
