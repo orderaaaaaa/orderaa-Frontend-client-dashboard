@@ -41,10 +41,4 @@ export const integrationApi = {
     );
     return response.data;
   },
-
-  testWebhook: async (provider: string, storeId: number): Promise<unknown> => {
-    const response = await http.get(`/webhook/orders/${provider.toLowerCase()}/${storeId}`);
-    console.log('Webhook test response:', response.data);
-    return response.data;
-  },
 };
