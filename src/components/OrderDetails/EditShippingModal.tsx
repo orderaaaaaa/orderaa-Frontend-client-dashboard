@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { LiaCheckSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
+import Input from '@/components/ui/Input';
 import { getShippingGovernorates, getShippingCities } from '@/lib/api/lookups';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useShippingCompanies } from '@/hooks';
@@ -18,6 +19,7 @@ export interface ShippingData {
   city?: string;
   address?: string;
   externalGovernorate?: string;
+  returnShippingCost?: number;
 }
 
 interface LocationOption {
@@ -88,7 +90,8 @@ export default function EditShippingModal({
       formData.shippingCompany !== initialData.shippingCompany ||
       formData.governorate !== initialData.governorate ||
       formData.city !== initialData.city ||
-      formData.address !== initialData.address
+      formData.address !== initialData.address ||
+      formData.returnShippingCost !== initialData.returnShippingCost
     );
   }, [formData, initialData]);
 
@@ -302,6 +305,23 @@ export default function EditShippingModal({
             }
             className="w-full border border-[#CED4DA] rounded-lg p-3 min-h-[120px] resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             placeholder="أدخل العنوان بالتفصيل..."
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <label className="font-bold text-[#1F1F1F]">مبلغ الإلغاء فى حالة عدم الإستلام</label>
+          <Input
+            type="number"
+            className='bg-white'
+            value={formData.returnShippingCost ?? ''}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                returnShippingCost: e.target.value ? Number(e.target.value) : undefined,
+              })
+            }
+            placeholder="أدخل مبلغ الإلغاء..."
+            min={0}
           />
         </div>
       </div>

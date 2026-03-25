@@ -8,6 +8,8 @@ import OrderCard from '../../../app/dashboard/orders/allOrders/components/OrderC
 import { Button } from '@/components/ui/button';
 import BulkActionsBar from '@/components/BulkActionsBar';
 import { exportOrdersToExcel } from '@/utils/exportOrders';
+import { useUpdateOrdersBatch } from '@/app/dashboard/orders/allOrders/hooks/useUpdateOrdersBatch';
+import type { OrderStatusKey } from '@/app/dashboard/orders/allOrders/types/Bulk';
 
 interface CustomerOrdersModalProps {
   isOpen: boolean;
@@ -34,6 +36,7 @@ export default function CustomerOrdersModal({
   const error = queryError ? 'فشل في تحميل طلبات العميل' : null;
 
   const { data: statusOptions } = useOrderStatusesQuery();
+  const { mutateAsync: batchUpdateOrders } = useUpdateOrdersBatch();
 
   const statusLabelsMap = useMemo(() => {
     if (!statusOptions) return new Map<string, string>();
@@ -89,10 +92,24 @@ export default function CustomerOrdersModal({
     }
   }, [selectedOrders, customerPhone, statusLabelsMap]);
 
-  const handleEditStatus = useCallback(() => {
-    // TODO: Implement edit status functionality
-    toast.info(`سيتم تعديل حالة ${selectedOrders.length} طلب`);
-  }, [selectedOrders]);
+  const handleEditStatus = useCallback(
+    async (statusKey: string) => {
+      if (!statusKey || selectedOrderIds.length === 0) return;
+      try {
+        await batchUpdateOrders({
+          orders: selectedOrderIds.map((id) => ({
+            id,
+            updates: { status: statusKey as OrderStatusKey },
+          })),
+        });
+        toast.success(`تم تعديل حالة ${selectedOrderIds.length} طلب بنجاح`);
+        setSelectedOrderIds([]);
+      } catch (err: any) {
+        toast.error(err?.response?.data?.message || 'فشل تعديل حالة الطلبات');
+      }
+    },
+    [selectedOrderIds, batchUpdateOrders]
+  );
 
   const handleShareWhatsApp = useCallback(() => {
     // TODO: Implement WhatsApp share functionality
@@ -236,7 +253,7 @@ export default function CustomerOrdersModal({
             ) : (
               <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 {orders.map((order: Order) => (
-                  <div key={order.id} className="flex items-start gap-3">
+                  <div key={order.id} className="flex items-start gap-3 min-w-0">
                     <input
                       type="checkbox"
                       checked={selectedOrderIds.includes(order.id)}
@@ -313,6 +330,7 @@ export default function CustomerOrdersModal({
           <BulkActionsBar
             selectedOrders={selectedOrders}
             onEditStatus={handleEditStatus}
+            statusOptions={statusOptions || []}
             onExportExcel={handleExportExcel}
             onShareWhatsApp={handleShareWhatsApp}
             onShipping={handleShipping}

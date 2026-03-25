@@ -203,6 +203,7 @@ export interface Order {
   format: OrderFormat;
   // Order details
   shippingCost?: number;
+  returnShippingCost?: number;
   shippingCompany?: string;
   paymentStatus?: string;
   paymentMethod?: string;
@@ -309,7 +310,7 @@ export interface FilterOrdersDto {
   shippingCompany?: string;
   department?: string;
   productId?: string;
-  cancellationReasons?: string[];
+  cancelReasonId?: string[];
   storeId?: number;
 }
 

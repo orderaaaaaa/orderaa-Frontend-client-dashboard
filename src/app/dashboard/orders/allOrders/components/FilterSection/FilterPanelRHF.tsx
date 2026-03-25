@@ -114,7 +114,7 @@ export default function FilterPanel({
   const { data: cities = [], isLoading: isLoadingCities } = useCitiesQuery(isAreaActive ? selectedGovernorate : undefined);
   const { data: cancellationReasons = [] } = useCancellationReasons(isCancellationReasonActive);
   const cancellationReasonOptions = React.useMemo(
-    () => cancellationReasons.map((r) => ({ key: r.reasonName, value: r.reasonName })),
+    () => cancellationReasons.map((r) => ({ key: String(r.id), value: r.reasonName })),
     [cancellationReasons]
   );
   const { data: storeOptions = [], isLoading: isLoadingStores } = useQuery({

@@ -73,7 +73,7 @@ export function buildApiFiltersFromUrlState(urlFilters: UrlFilterState): FilterO
         filters.storeId = Number(localFilters.storeId);
     }
     if (localFilters.cancellationReasons?.length) {
-        filters.cancellationReasons = localFilters.cancellationReasons;
+        filters.cancelReasonId = localFilters.cancellationReasons;
     }
 
     return filters;
@@ -192,7 +192,7 @@ export function useUnifiedFilters() {
         }
 
         if (debouncedFilters.cancellationReasons?.length) {
-            filters.cancellationReasons = debouncedFilters.cancellationReasons;
+            filters.cancelReasonId = debouncedFilters.cancellationReasons;
         }
 
         return filters;

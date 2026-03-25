@@ -523,6 +523,7 @@ export function useOrderActions({
             governorate: data.governorate,
             city: data.city,
             address: data.address,
+            returnShippingCost: data.returnShippingCost,
           },
         });
 
