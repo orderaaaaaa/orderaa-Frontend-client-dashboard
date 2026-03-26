@@ -419,7 +419,7 @@ export function ShippingOrdersContent() {
       ) : (
         // TODO: Create a reusable component for the orders grid
         <>
-          <div className="grid container mx-auto grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 my-4 justify-items-center">
+          <div className="grid container mx-auto grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 my-4 justify-items-center [&>*]:max-w-[300px]">
             {orders.map((order) => (
               <OrderCard
                 key={order.id}

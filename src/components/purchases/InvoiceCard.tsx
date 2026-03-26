@@ -187,7 +187,7 @@ const InvoiceCard = memo(
                 فاتورة رقم  {invoice.invoiceNumber}
               </span>
             </Button>
-            <span className="ps-11 text-base">{invoice.companyName}</span>
+            <span className="ps-11 text-lg font-bold">{invoice.companyName}</span>
           </div>
 
           {select && (

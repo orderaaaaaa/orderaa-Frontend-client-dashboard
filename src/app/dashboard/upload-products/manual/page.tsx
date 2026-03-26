@@ -46,6 +46,7 @@ function Manual() {
         governorate: '',
         city: '',
         shippingCost: '',
+        returnShippingCost: '',
         shippingType: 'DELIVERY',
         returnShipmentContent: '',
       },
@@ -87,6 +88,7 @@ function Manual() {
           governorate: data.shipping.governorate,
           city: data.shipping.city,
           shippingCost: data.shipping.shippingCost || '',
+          returnShippingCost: data.shipping.returnShippingCost || '',
           shippingType: data.shipping.shippingType,
           returnShipmentContent: data.shipping.returnShipmentContent,
         },
@@ -211,6 +213,7 @@ function Manual() {
           governorate={formValues.shipping.governorate}
           city={formValues.shipping.city}
           shippingCost={formValues.shipping.shippingCost || ''}
+          returnShippingCost={formValues.shipping.returnShippingCost || ''}
           shippingType={formValues.shipping.shippingType}
           returnShipmentContent={formValues.shipping.returnShipmentContent || ''}
           onShippingCompanyChange={(v) => {
@@ -229,6 +232,10 @@ function Manual() {
             setValue('shipping.shippingCost', v);
             clearErrors('shipping.shippingCost');
           }}
+          onReturnShippingCostChange={(v) => {
+            setValue('shipping.returnShippingCost', v);
+            clearErrors('shipping.returnShippingCost');
+          }}
           onShippingTypeChange={(v) => {
             setValue('shipping.shippingType', v);
             clearErrors('shipping.shippingType');
@@ -242,6 +249,7 @@ function Manual() {
             governorate: errors.shipping?.governorate?.message,
             city: errors.shipping?.city?.message,
             shippingCost: errors.shipping?.shippingCost?.message,
+            returnShippingCost: errors.shipping?.returnShippingCost?.message,
             shippingType: errors.shipping?.shippingType?.message,
             returnShipmentContent: errors.shipping?.returnShipmentContent?.message,
           }}

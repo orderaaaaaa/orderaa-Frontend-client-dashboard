@@ -230,10 +230,12 @@ export function PrintOrdersContent() {
       try {
         const order = await getOrderByCode(barcode);
         addOrder({ id: order.id, code: barcode, status: order.status, cancelReason: order.cancelReason, packagingWarning: order.packagingWarning });
-        playSuccessSound();
         setFlashingCode(barcode);
         setTimeout(() => setFlashingCode(null), 600);
-        if (order.status !== 'CONFIRMED' && order.status !== 'WAITING_FOR_PACKAGING') {
+        if (order.status === 'CONFIRMED' || order.status === 'WAITING_FOR_PACKAGING') {
+          playSuccessSound();
+        } else {
+          playErrorSound();
           const statusLabel = ORDER_STATUS_ARABIC_LABELS[order.status] || order.status;
           toast.info(`هذا الطلب ليس مؤكد - الحالة: ${statusLabel}`);
         }
@@ -641,7 +643,7 @@ export function PrintOrdersContent() {
         </div>
       ) : (
         <>
-          <div className="grid container mx-auto grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 my-4 justify-items-center">
+          <div className="grid container mx-auto grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 my-4 justify-items-center [&>*]:max-w-[300px]">
             {orders.map((order) => (
               <OrderCard
                 key={order.id}

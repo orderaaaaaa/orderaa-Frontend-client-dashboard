@@ -22,6 +22,7 @@ export type ManualOrderPayload = {
   products: ManualOrderProduct[];
   customer: ManualOrderCustomer;
   shippingCost: number;
+  returnShippingCost?: number;
   paymentMethod: string;
   status: 'NEW_ORDER' | 'CONFIRMED';
   shippingCompany: string;

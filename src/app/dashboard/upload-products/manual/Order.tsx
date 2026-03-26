@@ -48,6 +48,7 @@ function Order({
               type="text"
               placeholder="مثال: product page"
               className="w-full"
+              inputClassName="bg-white"
               value={pageName}
               onChange={(e) => onPageNameChange(e.target.value)}
               error={errors?.pageName}

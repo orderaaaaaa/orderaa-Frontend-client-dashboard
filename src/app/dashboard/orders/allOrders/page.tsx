@@ -525,7 +525,7 @@ function AllOrdersContent() {
         </div>
       ) : (
         <>
-          <div className="grid container mx-auto grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 my-4 justify-items-center">
+          <div className="grid container mx-auto grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 my-4 justify-items-center [&>*]:max-w-[300px]">
             {orders.map((order) => (
               <OrderCard
                 key={order.id}
@@ -559,6 +559,7 @@ function AllOrdersContent() {
                     : productName;
                 })}
                 price={order.totalCost}
+                shippingType={order.shippingType}
                 trys={order.numberOfTriesToReach}
                 status={order.status}
                 isBlocked={order.customers.isBlocked}

@@ -17,11 +17,19 @@ import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { If, Then } from 'react-if';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
 import { getRemainingTime } from '@/utils/getRemainingTime';
-import { LiaClock, LiaPrintSolid, LiaBanSolid, LiaExclamationCircleSolid } from 'react-icons/lia';
+import { LiaClock, LiaPrintSolid, LiaBanSolid, LiaExclamationCircleSolid, LiaExchangeAltSolid, LiaUndoAltSolid, LiaRandomSolid } from 'react-icons/lia';
 import { OrderCardProps } from '@/app/dashboard/orders/allOrders/types/OrderProps';
+import { ShippingType } from '@/types/orders';
 import { MdBlock } from 'react-icons/md';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
+import { IconType } from 'react-icons';
+
+const SHIPPING_TYPE_BADGE: Record<string, { label: string; icon: IconType; bg: string; text: string }> = {
+  [ShippingType.EXCHANGE]: { label: 'استبدال', icon: LiaExchangeAltSolid, bg: 'bg-orange-100', text: 'text-orange-600' },
+  [ShippingType.RETURN]: { label: 'مرتجع', icon: LiaUndoAltSolid, bg: 'bg-red-100', text: 'text-red-600' },
+  [ShippingType.PARTIAL_RETURN]: { label: 'مرتجع جزئي', icon: LiaRandomSolid, bg: 'bg-amber-100', text: 'text-amber-600' },
+};
 
 export default function OrderCard({
   id,
@@ -52,6 +60,7 @@ export default function OrderCard({
   disableNavigation = false,
   hideCustomerInfo = false,
   showAllItems = false,
+  shippingType,
   states,
 }: OrderCardProps) {
   const router = useRouter();
@@ -78,7 +87,7 @@ export default function OrderCard({
   return (
     <div
       onClick={handleCardClick}
-      className={`relative w-full h-full max-w-[90%] md:max-w-[300px] overflow-hidden bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.1)] rounded-[10px] transition-all duration-200 flex flex-col ${disableNavigation
+      className={`relative w-full h-full max-w-full overflow-hidden bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.1)] rounded-[10px] transition-all duration-200 flex flex-col ${disableNavigation
           ? ''
           : 'cursor-pointer hover:shadow-[0px_6px_20px_rgba(93,36,225,0.15)]'
         }`}
@@ -237,7 +246,7 @@ export default function OrderCard({
 
         {/* Price */}
         {price && (
-          <div className="flex flex-row-reverse items-center gap-2">
+          <div className="flex items-center gap-2">
             <span className="text-base font-medium text-black">
               {price} جنيه
             </span>
@@ -248,6 +257,15 @@ export default function OrderCard({
               height={18}
               className="opacity-50"
             />
+            {shippingType && SHIPPING_TYPE_BADGE[shippingType] && (() => {
+              const badge = SHIPPING_TYPE_BADGE[shippingType];
+              return (
+                <span className={`flex items-center gap-1 ${badge.bg} ${badge.text} text-xs font-semibold px-2 py-0.5 rounded-full`}>
+                  <badge.icon className="w-3.5 h-3.5" />
+                  {badge.label}
+                </span>
+              );
+            })()}
           </div>
         )}
 

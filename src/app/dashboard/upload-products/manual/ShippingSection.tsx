@@ -19,12 +19,14 @@ function ShippingSection({
   governorate,
   city,
   shippingCost,
+  returnShippingCost,
   shippingType,
   returnShipmentContent,
   onShippingCompanyChange,
   onGovernorateChange,
   onCityChange,
   onShippingCostChange,
+  onReturnShippingCostChange,
   onShippingTypeChange,
   onReturnShipmentContentChange,
   errors,
@@ -278,9 +280,26 @@ function ShippingSection({
               type="number"
               placeholder="أدخل تكلفة الشحن"
               className="w-full"
+              inputClassName="bg-white"
               value={shippingCost}
               onChange={(e) => onShippingCostChange(e.target.value)}
               error={errors?.shippingCost}
+            />
+          </div>
+          <div>
+            <label className="block font-medium text-[16px] mb-1">
+              مبلغ الإلغاء فى حالة عدم الإستلام
+            </label>
+            <Input
+              name="returnShippingCost"
+              type="number"
+              placeholder="أدخل مبلغ الإلغاء..."
+              className="w-full"
+              inputClassName="bg-white"
+              min={0}
+              value={returnShippingCost}
+              onChange={(e) => onReturnShippingCostChange(e.target.value)}
+              error={errors?.returnShippingCost}
             />
           </div>
 
@@ -320,6 +339,7 @@ function ShippingSection({
                 name="returnShipmentContent"
                 placeholder="أدخل محتوى شحنة الاسترجاع"
                 className="w-full"
+                inputClassName="bg-white"
                 value={returnShipmentContent}
                 onChange={(e) => onReturnShipmentContentChange(e.target.value)}
                 error={errors?.returnShipmentContent}

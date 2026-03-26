@@ -23,6 +23,7 @@ export const manualOrderSchema = z
       governorate: z.string().min(1, 'يرجى اختيار المحافظة'),
       city: z.string().min(1, 'يرجى اختيار المدينة'),
       shippingCost: z.string().optional(),
+      returnShippingCost: z.string().optional(),
       shippingType: z.string().min(1, 'يرجى اختيار نوع الشحنة'),
       returnShipmentContent: z.string().optional(),
     }),

@@ -4,6 +4,7 @@ import { Order, OrderEvent } from '@/types/orders';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
+import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
 
 
 interface OrderDetailsInfoStatusProps {
@@ -53,29 +54,29 @@ function EventCard({
       <Icon className={`w-4 h-4 shrink-0 ${iconColor}`} />
 
       <div className="flex flex-col gap-1 min-w-0 w-full">
-        <p className="text-[14px] font-bold text-[#1F1F1F] break-words">
+        <p className="text-sm font-bold text-[#1F1F1F] break-words">
           {status}
         </p>
 
         {utmSource && (
-          <p className="text-[12px] text-gray-600 break-words">
+          <p className="text-sm text-black break-words">
             المصدر: <span className="text-primary font-medium">{utmSource}</span>
           </p>
         )}
 
         {pageName && (
-          <p className="text-[12px] text-gray-600 break-words">
+          <p className="text-sm text-black break-words">
             اسم الصفحة: <span className="text-primary font-medium">{pageName}</span>
           </p>
         )}
 
         {note && (
-          <p className="text-[12px] text-red-500 break-words whitespace-pre-wrap">
+          <p className="text-sm text-red-500 break-words whitespace-pre-wrap">
             {note}
           </p>
         )}
 
-        <p className="text-[12px] text-gray-600 break-words">
+        <p className="text-sm text-black break-words">
           {date}
           {time && (
             <>
@@ -86,10 +87,10 @@ function EventCard({
         </p>
 
         {employee && (
-          <p className="text-[11px] text-black break-words">
+          <p className="text-sm text-black break-words">
             اسم الموظف: {employee.name}
             {employee.department && (
-              <span className="text-gray-400">قسم: {employee.department}</span>
+              <p> قسم: {getDepartmentLabel(employee.department)}</p>
             )}
           </p>
         )}
