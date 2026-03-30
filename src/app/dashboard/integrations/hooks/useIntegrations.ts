@@ -1,6 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { integrationApi } from '../api/Integrations';
-import { CreateIntegrationRequest, UpdateIntegrationRequest } from '../types/apiIntegration';
+import { integrationApi, storeApi } from '../api/Integrations';
+import {
+  CreateIntegrationRequest,
+  UpdateIntegrationRequest,
+  UpdateStoreRequest,
+} from '../types/apiIntegration';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 
 export const useIntegrations = () => {
@@ -26,6 +30,28 @@ export const useIntegrations = () => {
     },
   });
 
+  const deleteIntegrationMutation = useMutation({
+    mutationFn: (configId: number) => integrationApi.delete(configId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.INTEGRATION_CONFIGS] });
+    },
+  });
+
+  const updateStoreMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: UpdateStoreRequest }) =>
+      storeApi.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.INTEGRATION_CONFIGS] });
+    },
+  });
+
+  const deleteStoreMutation = useMutation({
+    mutationFn: (id: number) => storeApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.INTEGRATION_CONFIGS] });
+    },
+  });
+
   return {
     integrations: integrationsQuery.data,
     isLoading: integrationsQuery.isLoading,
@@ -33,5 +59,11 @@ export const useIntegrations = () => {
     isPending: createIntegrationMutation.isPending,
     updateIntegration: updateIntegrationMutation.mutateAsync,
     isUpdatePending: updateIntegrationMutation.isPending,
+    deleteIntegration: deleteIntegrationMutation.mutateAsync,
+    isDeletePending: deleteIntegrationMutation.isPending,
+    updateStore: updateStoreMutation.mutateAsync,
+    isStoreUpdatePending: updateStoreMutation.isPending,
+    deleteStore: deleteStoreMutation.mutateAsync,
+    isStoreDeletePending: deleteStoreMutation.isPending,
   };
 };

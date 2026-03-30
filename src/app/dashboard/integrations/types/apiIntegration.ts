@@ -8,11 +8,18 @@ export enum IntegrationConfigType {
   WEBHOOK = 'WEBHOOK',
 }
 
+export interface StoreInfoDto {
+  id: number;
+  name: string;
+  description?: string;
+}
+
 export interface CreateIntegrationRequest {
   storeId: number;
   provider: IntegrationProvider;
   configType: IntegrationConfigType;
   apiKey: string;
+  metadata?: Record<string, unknown>;
 }
 
 export interface UpdateIntegrationRequest {
@@ -20,8 +27,13 @@ export interface UpdateIntegrationRequest {
   configType?: IntegrationConfigType;
   apiKey?: string;
   isActive?: boolean;
+  metadata?: Record<string, unknown>;
 }
 
+export interface UpdateStoreRequest {
+  name?: string;
+  description?: string;
+}
 
 export interface IntegrationResponse {
   id: number;
@@ -33,6 +45,8 @@ export interface IntegrationResponse {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  store?: StoreInfoDto;
+  metadata?: Record<string, unknown>;
 }
 
 export interface StoreResponse {

@@ -157,14 +157,7 @@ function AllOrdersContent() {
     },
   });
 
-  const statisticsParams = useMemo(() => {
-    const from = formatDateForUrl(fromDate);
-    const to = formatDateForUrl(toDate);
-    if (!from && !to) return undefined;
-    return { from, to };
-  }, [fromDate, toDate]);
-
-  const { statistics } = useOrderStatistics(statisticsParams);
+  const { statistics } = useOrderStatistics(apiFilters);
 
   const handleStatisticsChange = useCallback(() => {
     queryClient.invalidateQueries({
@@ -548,16 +541,17 @@ function AllOrdersContent() {
                 // Updated Mapping Logic for Items and Variants
                 items={order.order_products.map((op: any) => {
                   const productName = op.products?.name || 'منتج غير معروف';
-
                   const variantDetails =
                     op.variants && op.variants.length > 0
-                      ? op.variants.map((v: any) => v.value).join('') // Use empty join for "42black"
+                      ? op.variants.map((v: any) => v.value).join('')
                       : '';
-
                   return variantDetails
                     ? `${productName} - ${variantDetails}`
                     : productName;
                 })}
+                itemSkus={order.order_products.map(
+                  (op: any) => op.sku || op.products?.sku || null
+                )}
                 price={order.totalCost}
                 shippingType={order.shippingType}
                 trys={order.numberOfTriesToReach}

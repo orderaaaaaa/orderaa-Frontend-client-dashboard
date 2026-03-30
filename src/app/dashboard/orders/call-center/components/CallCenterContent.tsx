@@ -114,7 +114,7 @@ export function CallCenterContent() {
     refetch,
   } = useOrders(apiFilters);
 
-  const { statistics } = useOrderStatistics();
+  const { statistics } = useOrderStatistics(apiFilters);
 
   const handleStatisticsChange = useCallback(() => {
     queryClient.invalidateQueries({
@@ -341,16 +341,17 @@ export function CallCenterContent() {
                 shippingId={order.shippingId}
                 items={order.order_products.map((op: any) => {
                   const productName = op.products?.name || 'منتج غير معروف';
-
                   const variantDetails =
                     op.variants && op.variants.length > 0
                       ? op.variants.map((v: any) => v.value).join('')
                       : '';
-
                   return variantDetails
                     ? `${productName} - ${variantDetails}`
                     : productName;
                 })}
+                itemSkus={order.order_products.map(
+                  (op: any) => op.sku || op.products?.sku || null
+                )}
                 price={order.totalCost}
                 trys={order.numberOfTriesToReach}
                 status={order.status}

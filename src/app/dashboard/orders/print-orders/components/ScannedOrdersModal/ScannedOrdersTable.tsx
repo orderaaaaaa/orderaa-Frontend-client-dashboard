@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { LiaTrashAltSolid } from 'react-icons/lia';
+import { LiaTrashAltSolid, LiaPrintSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import clsx from 'clsx';
 import { ScannedOrdersTableProps } from '../../types';
@@ -52,10 +52,19 @@ export function ScannedOrdersTable({
             key={order.code}
             className={clsx(
               'flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 hover:bg-gray-100 transition-colors',
-              flashingCode === order.code && 'scan-flash-success'
+              flashingCode === order.code && 'scan-flash-success',
+              order.printCount && order.printCount > 0 && 'border-amber-300 bg-amber-50/50'
             )}
           >
-            <span className="text-lg font-medium">{order.code}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-medium">{order.code}</span>
+              {order.printCount !== undefined && order.printCount > 0 && (
+                <span className="flex items-center gap-1 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                  <LiaPrintSolid className="w-3.5 h-3.5" />
+                  {order.printCount}x
+                </span>
+              )}
+            </div>
             <Button
               variant="ghost"
               onClick={() => onRemove(order.code)}

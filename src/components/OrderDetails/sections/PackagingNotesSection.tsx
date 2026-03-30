@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
  * Props for PackagingNotesSection component
  */
 export interface PackagingNotesSectionProps {
-  packagingNotes?: string;
+  packagingNotes?: string | null;
   onAddClick: () => void;
   className?: string;
 }

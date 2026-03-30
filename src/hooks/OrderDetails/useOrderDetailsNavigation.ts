@@ -52,7 +52,7 @@ function buildApiFilters(
   const hasConfirmedDate = formFilters?.executionDate;
 
   if (hasConfirmedDate) {
-    filters.confirmedDate = formFilters.executionDate;
+    filters.executionDate = formFilters.executionDate;
   } else {
     // Always set both dates if either is present for consistent filtering
     if (fromDate) {

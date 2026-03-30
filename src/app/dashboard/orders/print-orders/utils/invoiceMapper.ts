@@ -14,6 +14,7 @@ export function mapOrderToInvoice(
       name: op.products.name,
       quantity: op.quantity || 1,
       variant: variantText,
+      sku: op.sku || op.products.sku,
     };
   });
 

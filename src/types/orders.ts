@@ -1,6 +1,7 @@
 // Order Status Enum (synced with backend)
 export enum OrderStatus {
   NEW_ORDER = 'NEW_ORDER',
+  WHATSAPP_CONFIRMED = 'WHATSAPP_CONFIRMED',
   ATTEMPTED = 'ATTEMPTED',
   WAITING_FOR_PAYMENT = 'WAITING_FOR_PAYMENT',
   WHATSAPP = 'WHATSAPP',
@@ -15,6 +16,7 @@ export enum OrderStatus {
   PREPARED = 'PREPARED',
   WAITING_FOR_APPROVAL = 'WAITING_FOR_APPROVAL',
   SHIPPING = 'SHIPPING',
+  WITH_DRIVER = 'WITH_DRIVER',
   RETURNED_DELIVERED = 'RETURNED_DELIVERED',
   DELIVERED = 'DELIVERED',
   PARTIAL_DELIVERY = 'PARTIAL_DELIVERY',
@@ -169,21 +171,38 @@ export interface Customer {
   merchantId?: number;
 }
 
-// Product Interface
+export interface ProductExternalId {
+  storeId: number;
+  externalId: string;
+  externalProvider: string;
+}
+
+export interface ProductVariantOption {
+  label: string;
+  values: string[];
+}
+
 export interface Product {
   id: number;
+  merchantId?: number;
+  storeId?: number | null;
   name: string;
+  price: number;
+  sku?: string | null;
+  image?: string;
+  images?: string[];
+  extraDetails?: Record<string, unknown>;
+  assets?: unknown[];
+  externalIds?: ProductExternalId[];
+  variantOptions?: ProductVariantOption[];
+  createdAt: string;
+  updatedAt: string;
   size?: string;
   color?: string;
   material?: string;
   weight?: string;
   variants?: Variant[];
-  price: number;
-  sku?: string;
-  image?: string;
   manufactureCompany?: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 // Order Product Variant
@@ -197,12 +216,14 @@ export interface OrderProduct {
   id: number;
   orderId: number;
   productId: number;
-  quantity: number;
+  quantity?: number;
   price: number;
-  sku?: string;
+  sku?: string | null;
   variant?: string;
   variants?: OrderProductVariant[];
   products: Product;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // Merchant Interface
@@ -241,7 +262,7 @@ export interface Order {
   status: string;
   totalCost: number;
   numberOfTriesToReach: number;
-  notes?: string;
+  notes?: string | null;
   format: OrderFormat;
   storeId?: number | null;
   deletedAt?: string | null;
@@ -256,23 +277,23 @@ export interface Order {
   canOpenShipment?: boolean;
   paymentStatus?: string;
   paymentMethod?: string;
-  coupon?: string;
-  couponDiscount?: number;
+  coupon?: string | null;
+  couponDiscount?: number | null;
 
   // Shipping address
   governorate?: string;
   city?: string;
   address?: string;
-  externalGovernorate?: string;
+  externalGovernorate?: string | null;
   shippingId?: string;
   shippingNotes?: string | null;
 
   // Product details
-  material?: string;
-  weight?: string;
-  countryOfManufacture?: string;
+  material?: string | null;
+  weight?: string | null;
+  countryOfManufacture?: string | null;
   countryOfOrder?: string | null;
-  packagingNotes?: string;
+  packagingNotes?: string | null;
   packagingWarning?: string | null;
 
   // Call center
@@ -289,9 +310,9 @@ export interface Order {
   timeTo?: string;
   availableFrom?: string;
   availableTo?: string;
-  postponedUntil?: string;
+  postponedUntil?: string | null;
   urgentDate?: string | null;
-  confirmedDate?: string | null;
+  executionDate?: string | null;
 
   // Marketing & tracking
   utmSource?: string;
@@ -300,7 +321,7 @@ export interface Order {
 
   // External integrations
   externalOrderId?: string;
-  referralCode?: string;
+  referralCode?: string | null;
 
   // Lock state
   lockedById?: number | null;
@@ -322,6 +343,7 @@ export interface Order {
   order_events?: OrderEvent[];
   locked_by?: OrderLockedBy | null;
   isPrinted?: boolean;
+  printCount?: number;
   shipmentPickupCode?: string | null;
   pickupInvoice?: string | null;
   pickupCode?: string | null;
@@ -340,6 +362,26 @@ export interface OrderState {
   createdAt: string;
 }
 
+export interface OrderEventEmployee {
+  id: number;
+  name: string;
+  accessLevel?: string;
+  department?: string;
+  address?: string;
+  governorate?: string | null;
+  city?: string | null;
+  workingHours?: unknown | null;
+  merchantId?: number;
+  isOnline?: boolean;
+  lastActiveAt?: string | null;
+  performanceScore?: number;
+  performanceChange?: number;
+  workingDaysThisMonth?: number;
+  leaveDaysThisMonth?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface OrderEvent {
   id: number;
   orderId: number;
@@ -347,11 +389,7 @@ export interface OrderEvent {
   name: string;
   note?: string | null;
   createdAt: string;
-  employee?: {
-    id: number;
-    name: string;
-    department?: string;
-  } | null;
+  employee?: OrderEventEmployee | null;
 }
 
 // Filter DTO (matching backend FilterOrdersDto)
@@ -373,7 +411,7 @@ export interface FilterOrdersDto {
   numberOfTriesToReach?: string;
   createdAfter?: string;
   createdBefore?: string;
-  confirmedDate?: string;
+  executionDate?: string;
   newFirst?: boolean;
   orderByDirection?: 'asc' | 'desc';
   isPrinted?: boolean;

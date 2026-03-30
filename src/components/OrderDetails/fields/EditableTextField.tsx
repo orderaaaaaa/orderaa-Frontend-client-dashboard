@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
  */
 export interface EditableTextFieldProps {
   label: string;
-  value: string | undefined;
+  value: string | null | undefined;
   icon?: IconType;
   onSave: (value: string) => Promise<void>;
   placeholder?: string;

@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { LiaPrintSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
+import { useQueryClient } from '@tanstack/react-query';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
 import { InvoiceData } from '../../print-orders/types/invoice';
@@ -21,6 +23,7 @@ export function PrintInvoicesModal({
   isOpen,
   onClose,
 }: PrintInvoicesModalProps) {
+  const queryClient = useQueryClient();
   const [invoiceCount, setInvoiceCount] = useState<string>('');
   const [isPrinting, setIsPrinting] = useState(false);
   const [invoicesToPrint, setInvoicesToPrint] = useState<InvoiceData[]>([]);
@@ -46,6 +49,8 @@ export function PrintInvoicesModal({
           setTimeout(() => {
             setIsPrinting(false);
             setInvoicesToPrint([]);
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PRINT_ORDER_STATISTICS] });
             toast.success('تم إنشاء الفاتورة بنجاح');
             handleReset();
             onClose();

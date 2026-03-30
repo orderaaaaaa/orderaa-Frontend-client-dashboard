@@ -65,6 +65,7 @@ export default function ProductDetailsModal({
               معلومات المنتج
             </h4>
             <div className="bg-gray-50/50 rounded-xl px-4 py-2">
+              <DetailRow label="SKU" value={orderProduct?.sku || product.sku} />
               <DetailRow label="الخامة" value={product.material} />
               <DetailRow label="الوزن" value={product.weight} />
               <DetailRow

@@ -49,6 +49,7 @@ function OrderDetailsProductCard({
       product: orderProduct.products.name,
       variants: orderProduct.variants || [],
       price: orderProduct.price,
+      sku: orderProduct.sku || orderProduct.products.sku || null,
       img: orderProduct.products.image || '/wireless-headphones.png',
     })) || []
   );
@@ -61,6 +62,7 @@ function OrderDetailsProductCard({
         product: orderProduct.products.name,
         variants: orderProduct.variants || [],
         price: orderProduct.price,
+        sku: orderProduct.sku || orderProduct.products.sku || null,
         img: orderProduct.products.image || '/wireless-headphones.png',
       })) || []
     );
@@ -188,6 +190,12 @@ function OrderDetailsProductCard({
                         </p>
                       ))}
                     </div>
+                  )}
+
+                  {item.sku && (
+                    <p className="text-sm font-medium text-gray-500">
+                      SKU: {item.sku}
+                    </p>
                   )}
 
                   <p className="text-[#1E1E1E] font-bold text-lg ">

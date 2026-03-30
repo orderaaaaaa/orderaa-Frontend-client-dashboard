@@ -4,50 +4,36 @@ import Image from 'next/image';
 import { Else, If, Then } from 'react-if';
 import { IntegrationCardProps } from '../types/platformAndIntegrationCard';
 import { useMemo } from 'react';
-import { IntegrationConfigType } from '../types/apiIntegration';
+import clsx from 'clsx';
+import groupBy from 'lodash/groupBy';
 
 export const IntegrationCard = ({
   platform,
   onButtonClick,
   integrations,
 }: IntegrationCardProps) => {
-  const isWebhookConnected = useMemo(() => {
-    return integrations?.some(
-      (item) =>
-        item.provider === platform.providerKey &&
-        item.configType === IntegrationConfigType.WEBHOOK &&
-        item.isActive
-    );
+  const providerIntegrations = useMemo(() => {
+    return integrations?.filter((item) => item.provider === platform.providerKey) || [];
   }, [integrations, platform.providerKey]);
 
-  const isApiConnected = useMemo(() => {
-    return integrations?.some(
-      (item) =>
-        item.provider === platform.providerKey &&
-        item.configType === IntegrationConfigType.API &&
-        item.isActive
-    );
-  }, [integrations, platform.providerKey]);
+  const hasConnection = useMemo(() => {
+    return providerIntegrations.some((item) => item.isActive);
+  }, [providerIntegrations]);
 
-  const hasConnection = isWebhookConnected || isApiConnected;
+  const storeCount = useMemo(() => {
+    return Object.keys(groupBy(providerIntegrations, 'storeId')).length;
+  }, [providerIntegrations]);
 
   return (
     <div className="relative bg-white rounded-2xl p-8 transition-all duration-300 border border-gray-200 hover:border-gray-300 hover:shadow-md flex flex-col">
-      <div className="absolute top-4 left-4 flex gap-2 items-end">
-        {isWebhookConnected && (
-          <div className="bg-green-100 text-green-700 text-[10px] font-medium px-2 py-1 rounded-full flex items-center gap-1">
-            <LiaCheckCircleSolid className="w-3 h-3" />
-            متصل Webhook
+      {storeCount > 0 && (
+        <div className="absolute top-4 left-4">
+          <div className="bg-green-100 text-green-700 text-sm font-medium px-2 py-1 rounded-full flex items-center gap-1">
+            <LiaCheckCircleSolid className="w-4 h-4" />
+            {storeCount} {storeCount === 1 ? 'متجر متصل' : 'متاجر متصلة'}
           </div>
-        )}
-
-        {isApiConnected && (
-          <div className="bg-green-100 text-green-700 text-[10px] font-medium px-2 py-1 rounded-full flex items-center gap-1">
-            <LiaCheckCircleSolid className="w-3 h-3" />
-            متصل API
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="flex justify-center mb-6 mt-4">
         <div className="w-32 h-32 flex items-center justify-center">
@@ -69,15 +55,14 @@ export const IntegrationCard = ({
 
       <Button
         onClick={() => platform.isActive && onButtonClick(platform.id)}
-        className={`
-          w-full h-12 rounded-lg font-medium text-white transition-all duration-200
-          ${platform.isActive
+        className={clsx(
+          'w-full h-12 rounded-lg font-medium text-white transition-all duration-200',
+          platform.isActive
             ? hasConnection
               ? 'bg-gray-600 hover:bg-gray-700'
               : 'bg-primary hover:bg-[#4A1CB8] active:bg-[#3D17A0]'
             : 'bg-gray-400 cursor-not-allowed'
-          }
-        `}
+        )}
         disabled={!platform.isActive}
       >
         <If condition={platform.isActive}>

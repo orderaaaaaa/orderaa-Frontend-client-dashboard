@@ -158,7 +158,7 @@ export function PrintOrdersContent() {
     refetch,
   } = useOrders(apiFilters);
 
-  const { statistics } = useOrderStatistics();
+  const { statistics } = useOrderStatistics(apiFilters);
 
   const handleStatisticsChange = useCallback(() => {
     queryClient.invalidateQueries({
@@ -229,7 +229,7 @@ export function PrintOrdersContent() {
       setIsScanLoading(true);
       try {
         const order = await getOrderByCode(barcode);
-        addOrder({ id: order.id, code: barcode, status: order.status, cancelReason: order.cancelReason, packagingWarning: order.packagingWarning });
+        addOrder({ id: order.id, code: barcode, status: order.status, cancelReason: order.cancelReason, packagingWarning: order.packagingWarning, printCount: order.printCount });
         setFlashingCode(barcode);
         setTimeout(() => setFlashingCode(null), 600);
         if (order.status === 'CONFIRMED' || order.status === 'WAITING_FOR_PACKAGING') {
@@ -673,6 +673,9 @@ export function PrintOrdersContent() {
                     ? `${productName} - ${variantDetails}`
                     : productName;
                 })}
+                itemSkus={order.order_products.map(
+                  (op: any) => op.sku || op.products?.sku || null
+                )}
                 price={order.totalCost}
                 trys={order.numberOfTriesToReach}
                 status={order.status}
@@ -691,6 +694,7 @@ export function PrintOrdersContent() {
                 cancelReason={order.cancelReason}
                 cancelNotes={order.cancelNotes}
                 isPrinted={order.isPrinted}
+                printCount={order.printCount}
                 disableNavigation
                 hideCustomerInfo
                 showAllItems

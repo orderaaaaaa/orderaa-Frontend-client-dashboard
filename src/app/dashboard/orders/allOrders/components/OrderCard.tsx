@@ -38,6 +38,7 @@ export default function OrderCard({
   phoneNumbers,
   government,
   items,
+  itemSkus,
   price,
   shippingId,
   isBlocked,
@@ -57,6 +58,7 @@ export default function OrderCard({
   cancelNotes,
   postponedUntil,
   isPrinted = false,
+  printCount = 0,
   disableNavigation = false,
   hideCustomerInfo = false,
   showAllItems = false,
@@ -226,9 +228,16 @@ export default function OrderCard({
                   className="w-[18px] h-[18px] flex-shrink-0 mt-1"
                   style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
                 />
-                <span className="text-base font-medium text-black break-words min-w-0">
-                  {item}
-                </span>
+                <div className="flex items-center gap-2 flex-wrap min-w-0">
+                  <span className="text-base font-medium text-black break-words min-w-0">
+                    {item}
+                  </span>
+                  {itemSkus?.[index] && (
+                    <span className="text-[11px] text-gray-500 bg-gray-100 rounded px-1.5 py-0.5 font-medium flex-shrink-0">
+                      {itemSkus[index]}
+                    </span>
+                  )}
+                </div>
               </div>
             ))
           : items?.[0] &&
@@ -238,15 +247,22 @@ export default function OrderCard({
                 className="w-[18px] h-[18px] flex-shrink-0 mt-1"
                 style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
               />
-              <span className="text-base font-medium text-black break-words min-w-0">
-                {items[0]}
-              </span>
+              <div className="flex items-center gap-2 flex-wrap min-w-0">
+                <span className="text-base font-medium text-black break-words min-w-0">
+                  {items[0]}
+                </span>
+                {itemSkus?.[0] && (
+                  <span className="text-[11px] text-gray-500 bg-gray-100 rounded px-1.5 py-0.5 font-medium flex-shrink-0">
+                    {itemSkus[0]}
+                  </span>
+                )}
+              </div>
             </div>
           )}
 
         {/* Price */}
         {price && (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-row-reverse items-start gap-2 max-w-full">
             <span className="text-base font-medium text-black">
               {price} جنيه
             </span>
@@ -332,12 +348,19 @@ export default function OrderCard({
 
       <div className="flex flex-row-reverse justify-between items-center px-6 pb-4">
         {isPrinted ? (
-          <div
-            className="flex items-center gap-2 px-4 py-2 rounded-full font-medium"
-            title="تمت الطباعة"
-          >
-            <LiaPrintSolid className="w-4 h-4 text-green-600" />
-            <span className="text-xs font-medium">تمت الطباعة</span>
+          <div className="flex items-center gap-2">
+            <div
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-50 border border-green-200"
+              title="تمت الطباعة"
+            >
+              <LiaPrintSolid className="w-4 h-4 text-green-600" />
+              <span className="text-xs font-medium text-green-700">تمت الطباعة</span>
+            </div>
+            {printCount > 1 && (
+              <span className="flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full bg-amber-500 text-white text-xs font-bold">
+                {printCount}x
+              </span>
+            )}
           </div>
         ) : (
           <div

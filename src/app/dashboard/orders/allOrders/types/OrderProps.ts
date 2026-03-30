@@ -7,6 +7,7 @@ export interface OrderCardProps {
   phoneNumbers: string[];
   government: string;
   items: string[];
+  itemSkus?: (string | null)[];
   price: number;
   shippingType?: ShippingType;
   trys: number;
@@ -21,13 +22,14 @@ export interface OrderCardProps {
   shippingId?: string;
   onSelectionChange?: (checked: boolean) => void;
   createdAt?: string;
-  postponedUntil?: string;
+  postponedUntil?: string | null;
   repeatCount?: number;
   onRepeatClick?: () => void;
   filterParams?: string;
   cancelReason?: string | null;
   cancelNotes?: string | null;
   isPrinted?: boolean;
+  printCount?: number;
   disableNavigation?: boolean;
   hideCustomerInfo?: boolean;
   showAllItems?: boolean;

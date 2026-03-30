@@ -38,6 +38,7 @@ export function useScannedOrders(): UseScannedOrdersReturn {
           scannedAt: new Date(),
           cancelReason: order.cancelReason,
           packagingWarning: order.packagingWarning,
+          printCount: order.printCount,
         },
         ...prev,
       ]);

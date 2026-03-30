@@ -9,12 +9,12 @@ export interface ShippingSectionProps {
   address?: string;
   onEditClick: () => void;
   className?: string;
-  externalGovernorate?: string;
+  externalGovernorate?: string | null;
 }
 
 interface ShippingFieldProps {
   label: string;
-  value?: string;
+  value?: string | null;
   icon: React.ReactNode;
   className?: string;
   multiline?: boolean;

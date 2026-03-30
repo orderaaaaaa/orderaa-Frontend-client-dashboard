@@ -6,6 +6,14 @@ import {
   shopifyIntegrationSteps,
 } from './steps';
 
+export interface MetadataField {
+  key: string;
+  label: string;
+  placeholder: string;
+  required?: boolean;
+  type?: 'text' | 'url';
+}
+
 export interface ProviderModalConfig {
   provider: IntegrationProvider;
   modalTitle: string;
@@ -13,6 +21,7 @@ export interface ProviderModalConfig {
   webhookSteps: string[];
   apiSteps: string[];
   videoUrl?: string;
+  metadataFields?: MetadataField[];
 }
 
 export const providerConfigs: Record<string, ProviderModalConfig> = {
@@ -31,5 +40,14 @@ export const providerConfigs: Record<string, ProviderModalConfig> = {
     modalDescription: 'قم بربط متجرك لمراقبة الطلبات تلقائياً عبر Shopify',
     webhookSteps: shopifyWebhookSteps,
     apiSteps: shopifyIntegrationSteps,
+    metadataFields: [
+      {
+        key: 'shopUrl',
+        label: 'رابط المتجر',
+        placeholder: 'my-store.myshopify.com',
+        required: true,
+        type: 'url',
+      },
+    ],
   },
 };

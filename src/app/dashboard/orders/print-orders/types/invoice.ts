@@ -23,6 +23,7 @@ export interface InvoiceProduct {
   name: string;
   quantity: number;
   variant?: string;
+  sku?: string | null;
 }
 
 export interface InvoiceShipping {
@@ -46,8 +47,8 @@ export interface InvoiceData {
   schedule: InvoiceSchedule;
   totalPrice: number;
   nonReceiptPenalty?: number;
-  packagingNotes?: string;
-  shippingNotes?: string;
+  packagingNotes?: string | null;
+  shippingNotes?: string | null;
 }
 
 export interface InvoiceLabels {

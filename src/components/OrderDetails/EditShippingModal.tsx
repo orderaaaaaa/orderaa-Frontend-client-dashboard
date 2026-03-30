@@ -18,7 +18,7 @@ export interface ShippingData {
   governorate?: string;
   city?: string;
   address?: string;
-  externalGovernorate?: string;
+  externalGovernorate?: string | null;
   returnShippingCost?: number;
 }
 

@@ -23,9 +23,9 @@ export function buildApiFiltersFromUrlState(urlFilters: UrlFilterState): FilterO
         filters.search = urlFilters.search;
     }
 
-    // Date range and confirmedDate are mutually exclusive
+    // Date range and executionDate are mutually exclusive
     if (urlFilters.localFilters.executionDate) {
-        filters.confirmedDate = urlFilters.localFilters.executionDate;
+        filters.executionDate = urlFilters.localFilters.executionDate;
     } else {
         // Always set both dates if either is present for consistent filtering
         if (urlFilters.fromDate) {
@@ -149,10 +149,10 @@ export function useUnifiedFilters() {
             filters.search = searchQuery;
         }
 
-        // Date range and confirmedDate are mutually exclusive
-        // If confirmedDate (executionDate) is set, use that; otherwise use date range
+        // Date range and executionDate are mutually exclusive
+        // If executionDate (executionDate) is set, use that; otherwise use date range
         if (debouncedFilters.executionDate) {
-            filters.confirmedDate = debouncedFilters.executionDate;
+            filters.executionDate = debouncedFilters.executionDate;
         } else {
             if (fromDate) filters.createdAfter = formatLocalStartOfDay(fromDate);
             if (toDate) filters.createdBefore = formatLocalEndOfDay(toDate);
