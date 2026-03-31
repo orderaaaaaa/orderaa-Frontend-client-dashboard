@@ -524,6 +524,8 @@ export function useOrderActions({
             city: data.city,
             address: data.address,
             returnShippingCost: data.returnShippingCost,
+            ...(data.availableFrom && { availableFrom: data.availableFrom }),
+            ...(data.availableTo && { availableTo: data.availableTo }),
           },
         });
 

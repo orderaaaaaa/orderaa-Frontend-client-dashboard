@@ -116,6 +116,19 @@ export const useEditRejectedProductsQuery = () => {
   });
 };
 
+export const useConfirmedProductsReportQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.CONFIRMED_PRODUCTS_REPORT] as QueryKey,
+    queryFn: async () => {
+      const response = await http.get<EditRejectedProductsResponse>(
+        `${reportBaseUrl}/confirmed-products-report`,
+      );
+      return response.data;
+    },
+    enabled,
+  });
+};
+
 export const useEmployeesOnlineQuery = (enabled = true) => {
   return useQuery({
     queryKey: [QUERY_KEYS.DASHBOARD_EMPLOYEES_ONLINE] as QueryKey,

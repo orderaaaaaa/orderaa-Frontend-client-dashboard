@@ -328,14 +328,13 @@ const EditIntegrationModal = ({
               register={form.register}
               name="webhookApiKey"
               label="Webhook Secret (اتركه فارغاً إن لم ترد تغييره)"
-              type="password"
               placeholder="أدخل مفتاح Webhook الجديد..."
             />
 
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-600">المفتاح الحالي</span>
               <span className="text-gray-800 font-mono text-xs">
-                {'•'.repeat(8)}{webhookConfig.apiKey.slice(-4)}
+                {webhookConfig.apiKey}
               </span>
             </div>
           </div>
@@ -383,7 +382,6 @@ const EditIntegrationModal = ({
               register={form.register}
               name="newWebhookSecret"
               label="Webhook Secret"
-              type="password"
               placeholder="أدخل مفتاح Webhook..."
             />
           </div>
@@ -418,14 +416,13 @@ const EditIntegrationModal = ({
               register={form.register}
               name="apiKeyValue"
               label="API Key (اتركه فارغاً إن لم ترد تغييره)"
-              type="password"
               placeholder="أدخل مفتاح API الجديد..."
             />
 
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-600">المفتاح الحالي</span>
               <span className="text-gray-800 font-mono text-xs">
-                {'•'.repeat(8)}{apiConfig.apiKey.slice(-4)}
+                {apiConfig.apiKey}
               </span>
             </div>
 
@@ -459,7 +456,6 @@ const EditIntegrationModal = ({
               register={form.register}
               name="newApiKey"
               label="API Key"
-              type="password"
               placeholder="أدخل مفتاح API..."
             />
 

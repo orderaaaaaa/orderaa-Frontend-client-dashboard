@@ -23,8 +23,10 @@ import { ScannedOrdersModal } from './ScannedOrdersModal';
 import { ChangeProductModal } from './ChangeProductModal';
 import { PrintedOrdersConfirmModal } from './PrintedOrdersConfirmModal';
 
+import { LiaClipboardListSolid } from 'react-icons/lia';
 import { Breadcrumb } from '@/components/dashboard-layout';
 import { Button } from '@/components/ui/button';
+import { ConfirmedProductsReportModal } from './ConfirmedProductsReportModal';
 import PrintOrdersActionsBar from './PrintOrdersActionsBar';
 import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
 import Footer from '@/components/orders/Footer';
@@ -63,6 +65,7 @@ export function PrintOrdersContent() {
   const [flashingCode, setFlashingCode] = useState<string | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [isScanLoading, setIsScanLoading] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isChangeProductModalOpen, setIsChangeProductModalOpen] =
     useState(false);
   const [isPrintedConfirmModalOpen, setIsPrintedConfirmModalOpen] =
@@ -558,6 +561,14 @@ export function PrintOrdersContent() {
         <Breadcrumb
           items={[{ title: 'الطلبات' }, { title: 'طباعة الطلبات' }]}
         />
+        <Button
+          variant="outline"
+          onClick={() => setIsReportModalOpen(true)}
+          className="gap-2"
+        >
+          <LiaClipboardListSolid className="size-5" />
+          تقرير المنتجات المؤكدة
+        </Button>
       </div>
 
       <PageTaps
@@ -804,6 +815,11 @@ export function PrintOrdersContent() {
         orders={selectAllMatchingFilters ? orders : selectedOrders}
         onSubmit={handleChangeProductSubmit}
         isLoading={isActionLoading}
+      />
+
+      <ConfirmedProductsReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
       />
     </div>
   );

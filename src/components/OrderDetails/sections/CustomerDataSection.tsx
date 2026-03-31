@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { LiaUserSolid } from 'react-icons/lia';
 import { EditableTextField } from '../fields/EditableTextField';
 import { PhoneNumberList } from '../fields/PhoneNumberList';
-import { TimeRangeField } from '../fields/TimeRangeField';
 import { Order } from '@/types/orders';
 import { useUpdateCustomer } from '@/services/orders';
 import { toast } from 'react-toastify';
@@ -25,13 +24,6 @@ export function CustomerDataSection({
 }: CustomerDataSectionProps) {
   const updateCustomerMutation = useUpdateCustomer();
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
-
-  const handleTimeChange = async (
-    availableFrom: string,
-    availableTo: string
-  ) => {
-    await onUpdate('availableTime', { availableFrom, availableTo });
-  };
 
   const handleCustomerNameUpdate = async (name: string) => {
     try {
@@ -77,12 +69,6 @@ export function CustomerDataSection({
           value={order.customers.name}
           icon={LiaUserSolid}
           onSave={handleCustomerNameUpdate}
-        />
-
-        <TimeRangeField
-          timeFrom={order.availableFrom || order.timeFrom}
-          timeTo={order.availableTo || order.timeTo}
-          onTimeChange={handleTimeChange}
         />
 
         <PhoneNumberList

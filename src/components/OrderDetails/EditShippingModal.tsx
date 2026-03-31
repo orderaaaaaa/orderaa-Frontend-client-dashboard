@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { LiaCheckSolid } from 'react-icons/lia';
+import { LiaCheckSolid, LiaClockSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
 import { getShippingGovernorates, getShippingCities } from '@/lib/api/lookups';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useShippingCompanies } from '@/hooks';
+import clsx from 'clsx';
 
 interface EditShippingModalProps {
   isOpen: boolean;
@@ -20,6 +21,86 @@ export interface ShippingData {
   address?: string;
   externalGovernorate?: string | null;
   returnShippingCost?: number;
+  availableFrom?: string;
+  availableTo?: string;
+}
+
+const HOURS = Array.from({ length: 12 }, (_, i) => i + 1);
+const PERIODS = [
+  { value: 'am', label: 'AM' },
+  { value: 'pm', label: 'PM' },
+] as const;
+
+function parseTime(time?: string): { hour: number | null; period: string | null } {
+  if (!time) return { hour: null, period: null };
+  const arabicMatch = time.match(/(\d{1,2}):?\d{0,2}\s*(ص|م)/);
+  if (arabicMatch) return { hour: parseInt(arabicMatch[1]), period: arabicMatch[2] === 'ص' ? 'am' : 'pm' };
+  const englishMatch = time.match(/(\d{1,2}):?\d{0,2}\s*(am|pm)/i);
+  if (englishMatch) return { hour: parseInt(englishMatch[1]), period: englishMatch[2].toLowerCase() };
+  return { hour: null, period: null };
+}
+
+function InlineTimePicker({
+  label,
+  hour,
+  period,
+  onHourChange,
+  onPeriodChange,
+}: {
+  label: string;
+  hour: number | null;
+  period: string | null;
+  onHourChange: (h: number) => void;
+  onPeriodChange: (p: string) => void;
+}) {
+  return (
+    <div className="flex-1 space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-semibold text-gray-700">{label}</span>
+        {hour && period && (
+          <span className="text-sm font-bold text-primary">
+            {hour}:00 {period.toUpperCase()}
+          </span>
+        )}
+      </div>
+      <div className="flex gap-2 items-center">
+        <div className="flex-1 grid grid-cols-6 gap-1">
+          {HOURS.map((h) => (
+            <button
+              key={h}
+              type="button"
+              onClick={() => onHourChange(h)}
+              className={clsx(
+                'h-8 rounded-md text-sm font-medium transition-all',
+                hour === h
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
+              )}
+            >
+              {h}
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-col gap-1">
+          {PERIODS.map((p) => (
+            <button
+              key={p.value}
+              type="button"
+              onClick={() => onPeriodChange(p.value)}
+              className={clsx(
+                'h-8 px-3 rounded-md text-xs font-semibold transition-all',
+                period === p.value
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
+              )}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 interface LocationOption {
@@ -43,6 +124,14 @@ export default function EditShippingModal({
   const [selectedGovernorateKey, setSelectedGovernorateKey] = useState<string>('');
   const [fetchTrigger, setFetchTrigger] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
+  const [returnShippingCostError, setReturnShippingCostError] = useState('');
+
+  const initialFromParsed = parseTime(initialData.availableFrom);
+  const initialToParsed = parseTime(initialData.availableTo);
+  const [startHour, setStartHour] = useState<number | null>(initialFromParsed.hour);
+  const [startPeriod, setStartPeriod] = useState<string | null>(initialFromParsed.period);
+  const [endHour, setEndHour] = useState<number | null>(initialToParsed.hour);
+  const [endPeriod, setEndPeriod] = useState<string | null>(initialToParsed.period);
 
   const { shippingCompanies, isLoading: loadingShippingCompanies } = useShippingCompanies(isOpen);
 
@@ -86,14 +175,21 @@ export default function EditShippingModal({
   );
 
   const hasChanges = useMemo(() => {
+    const timeChanged =
+      startHour !== initialFromParsed.hour ||
+      startPeriod !== initialFromParsed.period ||
+      endHour !== initialToParsed.hour ||
+      endPeriod !== initialToParsed.period;
+
     return (
       formData.shippingCompany !== initialData.shippingCompany ||
       formData.governorate !== initialData.governorate ||
       formData.city !== initialData.city ||
       formData.address !== initialData.address ||
-      formData.returnShippingCost !== initialData.returnShippingCost
+      formData.returnShippingCost !== initialData.returnShippingCost ||
+      timeChanged
     );
-  }, [formData, initialData]);
+  }, [formData, initialData, startHour, startPeriod, endHour, endPeriod, initialFromParsed, initialToParsed]);
 
   useEffect(() => {
     const fetchGovernorates = async () => {
@@ -166,6 +262,12 @@ export default function EditShippingModal({
       setGovernorates([]);
       setCities([]);
       setFetchTrigger(prev => prev + 1);
+      const fromParsed = parseTime(initialData.availableFrom);
+      const toParsed = parseTime(initialData.availableTo);
+      setStartHour(fromParsed.hour);
+      setStartPeriod(fromParsed.period);
+      setEndHour(toParsed.hour);
+      setEndPeriod(toParsed.period);
     }
     wasOpenRef.current = isOpen;
   }, [isOpen, initialData]);
@@ -173,9 +275,23 @@ export default function EditShippingModal({
   const handleSave = async () => {
     if (!hasChanges || isSaving) return;
 
+    if (formData.returnShippingCost === undefined || formData.returnShippingCost === null) {
+      setReturnShippingCostError('هذا الحقل مطلوب');
+      return;
+    }
+    setReturnShippingCostError('');
+
+    const dataToSave: ShippingData = { ...formData };
+    if (startHour && startPeriod) {
+      dataToSave.availableFrom = `${startHour} ${startPeriod}`;
+    }
+    if (endHour && endPeriod) {
+      dataToSave.availableTo = `${endHour} ${endPeriod}`;
+    }
+
     setIsSaving(true);
     try {
-      await onSave(formData);
+      await onSave(dataToSave);
       onClose();
     } catch {
     } finally {
@@ -309,20 +425,58 @@ export default function EditShippingModal({
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F]">مبلغ الإلغاء فى حالة عدم الإستلام</label>
+          <label className="font-bold text-[#1F1F1F]">مبلغ الإلغاء فى حالة عدم الإستلام <span className="text-red-500">*</span></label>
           <Input
             type="number"
             className='bg-white'
             value={formData.returnShippingCost ?? ''}
-            onChange={(e) =>
+            onChange={(e) => {
+              setReturnShippingCostError('');
               setFormData({
                 ...formData,
                 returnShippingCost: e.target.value ? Number(e.target.value) : undefined,
-              })
-            }
+              });
+            }}
             placeholder="أدخل مبلغ الإلغاء..."
             min={0}
+            error={returnShippingCostError}
           />
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <LiaClockSolid className="w-5 h-5 text-primary" />
+            <label className="font-bold text-[#1F1F1F]">وقت التوصيل</label>
+          </div>
+          <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 space-y-4">
+            <div className="flex flex-col md:flex-row gap-6">
+              <InlineTimePicker
+                label="من"
+                hour={startHour}
+                period={startPeriod}
+                onHourChange={setStartHour}
+                onPeriodChange={setStartPeriod}
+              />
+              <div className="hidden md:flex items-center pt-6">
+                <div className="w-px h-full bg-gray-200" />
+              </div>
+              <InlineTimePicker
+                label="إلى"
+                hour={endHour}
+                period={endPeriod}
+                onHourChange={setEndHour}
+                onPeriodChange={setEndPeriod}
+              />
+            </div>
+            {startHour && startPeriod && endHour && endPeriod && (
+              <div className="flex items-center justify-center gap-2 py-2 bg-primary/5 rounded-lg">
+                <LiaClockSolid className="w-4 h-4 text-primary" />
+                <span className="text-sm font-bold text-primary">
+                  {startHour}:00 {startPeriod.toUpperCase()} — {endHour}:00 {endPeriod.toUpperCase()}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </BaseModal>

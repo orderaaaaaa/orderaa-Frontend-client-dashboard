@@ -66,16 +66,14 @@ function ProductsTableDesktop({
         <thead>
           <tr className="bg-gray-50 border-b text-primary">
             <th className="p-4 w-14 text-center">
-              {showCheckboxes && (
-                <button onClick={toggleSelectAll}>
-                  {selectedIds.length > 0 &&
-                  selectedIds.length === data?.data.length ? (
-                    <PiCheckSquareFill className="w-6 h-6" />
-                  ) : (
-                    <FaRegSquare className="w-5 h-5 text-gray-400" />
-                  )}
-                </button>
-              )}
+              <button onClick={toggleSelectAll}>
+                {selectedIds.length > 0 &&
+                selectedIds.length === data?.data.length ? (
+                  <PiCheckSquareFill className="w-6 h-6" />
+                ) : (
+                  <FaRegSquare className="w-5 h-5 text-gray-400" />
+                )}
+              </button>
             </th>
 
             <th className="p-4 text-center">صورة المنتج</th>
@@ -173,14 +171,12 @@ function ProductsTableDesktop({
               } ${isRefetching ? 'opacity-50 pointer-events-none' : ''}`}
             >
               <td className="p-4 text-center">
-                {showCheckboxes && (
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.includes(product.id)}
-                    onChange={() => toggleSelect(product.id)}
-                    className="w-4 h-4"
-                  />
-                )}
+                <input
+                  type="checkbox"
+                  checked={selectedIds.includes(product.id)}
+                  onChange={() => toggleSelect(product.id)}
+                  className="w-4 h-4"
+                />
               </td>
 
               <td className="p-4 text-center">

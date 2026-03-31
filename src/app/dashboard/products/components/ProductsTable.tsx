@@ -1,18 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
-import { LiaListSolid } from 'react-icons/lia';
+import React, { useState, useMemo } from 'react';
+import { LiaObjectGroupSolid, LiaEditSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
+import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 
 import { useGetProducts } from '../hooks/useProduct';
 import { useProductStore } from '../store/useProductStore';
-import { VariantItem } from '../types/products';
+import { Product, VariantItem } from '../types/products';
 import Input from '@/components/ui/Input';
 import ProductAddVariantsModal from './modals/productAddVariants';
+import MergeProductsModal from './modals/MergeProductsModal';
 import ProductVariantCountsModal from './modals/ProductVariantCountsModal';
 import LoadingAnimation from '@/components/ui/loadingAnimation';
-import ProductsTableDesktop from './ProductsTableDesktop';
 import ProductsTableMobile from './ProductsTableMobile';
+import { getTimeAgo } from '@/utils';
+
+type ProductRow = Product & Record<string, unknown>;
 
 function ProductsTable() {
   const {
@@ -34,13 +38,15 @@ function ProductsTable() {
     sortOrder,
   });
 
-  const [showCheckboxes, setShowCheckboxes] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [activeProduct, setActiveProduct] = useState<{
     id: number;
     variants: VariantItem[];
   } | null>(null);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<string | number>>(
+    new Set(),
+  );
+  const [showMergeModal, setShowMergeModal] = useState(false);
   const [showSoldModal, setShowSoldModal] = useState(false);
   const [soldProductId, setSoldProductId] = useState<number | null>(null);
 
@@ -51,19 +57,6 @@ function ProductsTable() {
       setSortBy(field);
       setSortOrder('desc');
     }
-  };
-
-  const toggleSelect = (id: number) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
-    );
-  };
-
-  const toggleSelectAll = () => {
-    if (!data?.data) return;
-    setSelectedIds(
-      selectedIds.length === data.data.length ? [] : data.data.map((p) => p.id),
-    );
   };
 
   const openSoldModal = (productId: number) => {
@@ -86,26 +79,110 @@ function ProductsTable() {
     setActiveProduct(null);
   };
 
-  const LoadingSkeleton = () => (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col sm:flex-row gap-3 sm:justify-between items-center">
-        <div className="h-10 bg-gray-200 rounded-lg animate-pulse w-[300px]" />
-        <div className="h-10 bg-gray-200 rounded-lg animate-pulse w-[150px]" />
-      </div>
-      <LoadingAnimation />
-    </div>
+  const columns = useMemo<DataTableColumn<ProductRow>[]>(
+    () => [
+      {
+        key: 'image',
+        header: 'صورة المنتج',
+        className: 'text-center',
+        render: (_val, row) => (
+          <img
+            src={
+              row.image || row.images?.[0] || 'https://placehold.net/600x600.png'
+            }
+            className="w-20 h-20 mx-auto rounded-lg object-cover border"
+          />
+        ),
+      },
+      {
+        key: 'name',
+        header: 'الاسم',
+        sortable: true,
+        className: 'text-center',
+      },
+      {
+        key: 'price',
+        header: 'السعر',
+        sortable: true,
+        className: 'text-center',
+      },
+      {
+        key: 'createdAt',
+        header: 'تاريخ الإنشاء',
+        sortable: true,
+        className: 'text-center text-sm text-gray-800',
+        render: (val) => getTimeAgo(val as string),
+      },
+      {
+        key: 'totalSold',
+        header: 'عدد القطع المباعة',
+        sortable: true,
+        className: 'text-center',
+        render: (_val, row) => (
+          <Button
+            variant="ghost"
+            onClick={() => openSoldModal(row.id as number)}
+            className="font-semibold text-gray-800"
+          >
+            {row.totalSold as number}
+          </Button>
+        ),
+      },
+      {
+        key: 'edit',
+        header: 'تعديل',
+        className: 'text-center',
+        render: (_val, row) => (
+          <Button
+            variant="ghost"
+            onClick={() =>
+              openEditModal(
+                row.id as number,
+                (row.extraDetails as { variants?: VariantItem[] })?.variants ||
+                  [],
+              )
+            }
+            className="text-primary mx-auto"
+          >
+            <LiaEditSolid className="size-5" />
+            تعديل
+          </Button>
+        ),
+      },
+      {
+        key: 'totalOrders',
+        header: 'الطلبات',
+        sortable: true,
+        className: 'text-center',
+        render: (val) => (
+          <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">
+            {val as number}
+          </span>
+        ),
+      },
+    ],
+    [],
   );
+
+  const selectedArray = useMemo(() => Array.from(selectedIds) as number[], [selectedIds]);
 
   const isRefetching = isFetching && !isLoading;
 
   if (isLoading) {
-    return <LoadingSkeleton />;
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:justify-between items-center">
+          <div className="h-10 bg-gray-200 rounded-lg animate-pulse w-[300px]" />
+          <div className="h-10 bg-gray-200 rounded-lg animate-pulse w-[150px]" />
+        </div>
+        <LoadingAnimation />
+      </div>
+    );
   }
 
   return (
     <>
       <div className="flex flex-col gap-4">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row gap-3 sm:justify-between items-center">
           <div className="flex gap-2 items-center flex-wrap">
             <Input
@@ -114,41 +191,54 @@ function ProductsTable() {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="ابحث عن المنتج"
               className="!px-5 min-w-[300px]"
+              inputClassName='bg-white'
             />
           </div>
 
-          <Button onClick={() => setShowCheckboxes((prev) => !prev)}>
-            <LiaListSolid className="size-5" />
-            {showCheckboxes ? 'إخفاء التحديد' : 'تحديد المنتجات'}
-          </Button>
+          {selectedIds.size >= 2 && (
+            <Button
+              onClick={() => setShowMergeModal(true)}
+              className="bg-primary text-white"
+            >
+              <LiaObjectGroupSolid className="size-5" />
+              دمج المنتجات ({selectedIds.size})
+            </Button>
+          )}
         </div>
 
-        {/* Desktop Table */}
-        <ProductsTableDesktop
-          data={data}
-          isRefetching={isRefetching}
-          showCheckboxes={showCheckboxes}
-          selectedIds={selectedIds}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-          handleSort={handleSort}
-          toggleSelect={toggleSelect}
-          toggleSelectAll={toggleSelectAll}
-          openSoldModal={openSoldModal}
-          openEditModal={openEditModal}
-        />
+        <div className="hidden md:block">
+          <DataTable<ProductRow>
+            columns={columns}
+            data={(data?.data as ProductRow[]) || []}
+            isLoading={isRefetching}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            onSort={handleSort}
+            selectable
+            selectedIds={selectedIds}
+            onSelectionChange={setSelectedIds}
+            emptyMessage="لا توجد منتجات"
+          />
+        </div>
 
-        {/* Mobile Table */}
         <ProductsTableMobile
           data={data}
           isRefetching={isRefetching}
-          showCheckboxes={showCheckboxes}
-          selectedIds={selectedIds}
+          showCheckboxes={true}
+          selectedIds={selectedArray}
           sortBy={sortBy}
           sortOrder={sortOrder}
           setSortBy={setSortBy}
           setSortOrder={setSortOrder}
-          toggleSelect={toggleSelect}
+          toggleSelect={(id: number) => {
+            const next = new Set(selectedIds);
+            if (next.has(id)) {
+              next.delete(id);
+            } else {
+              next.add(id);
+            }
+            setSelectedIds(next);
+          }}
           openSoldModal={openSoldModal}
           openEditModal={openEditModal}
         />
@@ -167,6 +257,16 @@ function ProductsTable() {
           productId={soldProductId}
           isOpen={showSoldModal}
           onClose={closeSoldModal}
+        />
+      )}
+      {showMergeModal && selectedIds.size >= 2 && data?.data && (
+        <MergeProductsModal
+          isOpen={showMergeModal}
+          onClose={() => setShowMergeModal(false)}
+          products={data.data.filter((p) => selectedIds.has(p.id))}
+          onSuccess={() => {
+            setSelectedIds(new Set());
+          }}
         />
       )}
     </>

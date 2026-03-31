@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Control, Controller, FieldErrors, useWatch, UseFormSetValue } from "react-hook-form";
 import { OrderFiltersFormData } from "@/schemas/orderFilters.schema";
 import { FilterOptions } from "@/types/orders";
@@ -11,6 +11,7 @@ import { useGovernoratesQuery, useCitiesQuery } from "@/services/lookups";
 import { useCancellationReasons } from "@/services/orders";
 import { useQuery } from "@tanstack/react-query";
 import http from "@/lib/api/http";
+import { useDebounce } from "@/utils/debounce";
 import { LiaTimesSolid } from "react-icons/lia";
 import { Button } from "@/components/ui/button";
 import { formatDateForUrl } from "@/utils/urlFilters";
@@ -34,7 +35,6 @@ export const FILTER_DEFINITIONS: FilterDefinition[] = [
   { key: 'governorate', label: 'المحافظة', type: 'select' },
   { key: 'area', label: 'المنطقة', type: 'select' },
   { key: 'sizeColor', label: 'المصدر', type: 'select' },
-  { key: 'productId', label: 'المنتج', type: 'select' },
   { key: 'address', label: 'العنوان', type: 'text' },
   { key: 'storeId', label: 'اسم المتجر', type: 'select' },
   { key: 'cancellationReasons', label: 'سبب الإلغاء', type: 'multiselect', visibleStatuses: ['CANCELLED'] },
@@ -100,15 +100,22 @@ export default function FilterPanel({
     name: "governorate",
   });
 
+  const [productSearch, setProductSearch] = useState('');
+  const debouncedProductSearch = useDebounce(productSearch, 300);
+
   const { data: productOptions = [], isLoading: isLoadingProducts } = useQuery({
-    queryKey: ['products-filter-options'],
+    queryKey: ['products-filter-options', debouncedProductSearch],
     queryFn: async () => {
       const response = await http.get<{ data: { id: number; name: string }[] }>('/products', {
-        params: { page: 1, limit: 100 },
+        params: {
+          page: 1,
+          limit: 50,
+          ...(debouncedProductSearch && { search: debouncedProductSearch }),
+        },
       });
       return response.data.data.map((p) => p.name);
     },
-    staleTime: Infinity,
+    enabled: isProductNameActive,
   });
   const { data: governorates = [] } = useGovernoratesQuery(isGovernorateActive || isAreaActive);
   const { data: cities = [], isLoading: isLoadingCities } = useCitiesQuery(isAreaActive ? selectedGovernorate : undefined);
@@ -216,6 +223,7 @@ export default function FilterPanel({
                     widthClass="w-full"
                     loading={isLoadingProducts}
                     error={errors.productName?.message}
+                    onSearch={setProductSearch}
                   />
                 </FilterChip>
               )}
@@ -266,28 +274,6 @@ export default function FilterPanel({
                     widthClass="w-full"
                     error={errors.area?.message}
                     disabled={!selectedGovernorate || isLoadingCities}
-                  />
-                </FilterChip>
-              )}
-            />
-          );
-        }
-        if (key === 'productId') {
-          return (
-            <Controller
-              key={key}
-              name="productId"
-              control={control}
-              render={({ field }) => (
-                <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter}>
-                  <SearchableSelect
-                    value={field.value || ''}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    options={options.productIdOptions || []}
-                    placeholder={label}
-                    widthClass="w-full"
-                    error={errors.productId?.message}
                   />
                 </FilterChip>
               )}

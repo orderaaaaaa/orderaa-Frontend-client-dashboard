@@ -430,7 +430,6 @@ const IntegrationModal = ({
                       register={webhookForm.register}
                       name="webhookSecret"
                       label="Webhook Secret"
-                      type="password"
                       placeholder="أدخل مفتاح Webhook..."
                       error={
                         webhookForm.formState.errors.webhookSecret?.message
@@ -466,7 +465,6 @@ const IntegrationModal = ({
                       register={apiKeyForm.register}
                       name="apiKey"
                       label="API Key"
-                      type="password"
                       placeholder="أدخل مفتاح API..."
                       error={apiKeyForm.formState.errors.apiKey?.message}
                     />
@@ -603,9 +601,8 @@ const IntegrationModal = ({
                             </p>
                             <div className="flex items-center justify-between">
                               <span className="text-sm text-gray-600">Secret</span>
-                              <span className="text-sm text-gray-800">
-                                {'•'.repeat(8)}
-                                {webhookConfig.apiKey.slice(-4)}
+                              <span className="text-sm text-gray-800 font-mono">
+                                {webhookConfig.apiKey}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
@@ -633,9 +630,8 @@ const IntegrationModal = ({
                               <span className="text-sm text-gray-600">
                                 المفتاح
                               </span>
-                              <span className="text-sm text-gray-800">
-                                {'•'.repeat(8)}
-                                {apiConfig.apiKey.slice(-4)}
+                              <span className="text-sm text-gray-800 font-mono">
+                                {apiConfig.apiKey}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">

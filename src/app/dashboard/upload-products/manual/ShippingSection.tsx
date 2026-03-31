@@ -288,7 +288,7 @@ function ShippingSection({
           </div>
           <div>
             <label className="block font-medium text-[16px] mb-1">
-              مبلغ الإلغاء فى حالة عدم الإستلام
+              مبلغ الإلغاء فى حالة عدم الإستلام <span className="text-red-500">*</span>
             </label>
             <Input
               name="returnShippingCost"

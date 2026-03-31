@@ -166,6 +166,8 @@ export function OrderActionModals({
           address: order.address,
           externalGovernorate: order.externalGovernorate,
           returnShippingCost: order.returnShippingCost,
+          availableFrom: order.availableFrom || order.timeFrom,
+          availableTo: order.availableTo || order.timeTo,
         }}
       />
 
