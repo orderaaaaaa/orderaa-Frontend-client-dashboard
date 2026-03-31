@@ -16,6 +16,7 @@ import type { PostponedOrderContentItem } from '@/app/dashboard/types';
 interface ConfirmedProductsReportModalProps {
   isOpen: boolean;
   onClose: () => void;
+  
 }
 
 function exportToExcel(rows: PostponedOrderContentItem[]) {
