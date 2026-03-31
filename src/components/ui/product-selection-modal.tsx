@@ -42,6 +42,7 @@ interface ProductSelectionModalProps {
   onClose: () => void;
   onConfirm: (products: SelectableProduct[]) => void;
   existingProductIds?: string[];
+  existingVariantCombos?: Map<number, SelectedVariant[][]>;
 }
 
 function isValueDisabled(
@@ -68,6 +69,7 @@ export default function ProductSelectionModal({
   onClose,
   onConfirm,
   existingProductIds = [],
+  existingVariantCombos,
 }: ProductSelectionModalProps) {
   const [search, setSearch] = useState('');
   const [products, setProducts] = useState<SelectableProduct[]>([]);
@@ -112,8 +114,13 @@ export default function ProductSelectionModal({
   useEffect(() => {
     if (isOpen) {
       setPage(1);
-      setSelectedIds(new Set());
-      setAddedCombos(new Map());
+      if (existingVariantCombos && existingVariantCombos.size > 0) {
+        setSelectedIds(new Set(existingVariantCombos.keys()));
+        setAddedCombos(new Map(existingVariantCombos));
+      } else {
+        setSelectedIds(new Set());
+        setAddedCombos(new Map());
+      }
       setCurrentSelection(new Map());
       fetchProducts(1, debouncedSearch, false);
     }
@@ -200,11 +207,24 @@ export default function ProductSelectionModal({
       .forEach((p) => {
         const combos = addedCombos.get(p.id);
         if (!combos || combos.length === 0) {
-          expanded.push({ ...p, selectedVariants: [] });
+          if (!existingProductIds.includes(String(p.id))) {
+            expanded.push({ ...p, selectedVariants: [] });
+          }
           return;
         }
+        const existingCombosForProduct = existingVariantCombos?.get(p.id) ?? [];
+        const allLabels = (p.variantOptions ?? []).map((o) => o.label);
         for (const combo of combos) {
-          expanded.push({ ...p, selectedVariants: combo });
+          const isExisting = existingCombosForProduct.some((existing) =>
+            allLabels.every(
+              (l) =>
+                existing.find((v) => v.label === l)?.value ===
+                combo.find((v) => v.label === l)?.value,
+            ),
+          );
+          if (!isExisting) {
+            expanded.push({ ...p, selectedVariants: combo });
+          }
         }
       });
 
@@ -213,7 +233,7 @@ export default function ProductSelectionModal({
     setAddedCombos(new Map());
     setCurrentSelection(new Map());
     setSearch('');
-  }, [products, selectedIds, addedCombos, onConfirm]);
+  }, [products, selectedIds, addedCombos, existingProductIds, existingVariantCombos, onConfirm]);
 
   const handleClose = useCallback(() => {
     setSelectedIds(new Set());
@@ -273,11 +293,11 @@ export default function ProductSelectionModal({
           ) : (
             <div className="pb-4">
               {products.map((product) => {
-                const isAlreadyInTable = existingProductIds.includes(
-                  String(product.id),
-                );
-                const isChecked = selectedIds.has(product.id);
                 const hasVariants = product.variantOptions && product.variantOptions.length > 0;
+                const isNoVariantInTable =
+                  !hasVariants && existingProductIds.includes(String(product.id));
+                const isAlreadyInTable = isNoVariantInTable;
+                const isChecked = selectedIds.has(product.id);
                 const productCombos = addedCombos.get(product.id) ?? [];
                 const selection = currentSelection.get(product.id) ?? {};
                 const allLabels = (product.variantOptions ?? []).map((o) => o.label);
@@ -385,27 +405,46 @@ export default function ProductSelectionModal({
                           اضافة
                         </Button>
 
-                        {productCombos.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 pt-1 border-t border-gray-100">
-                            {productCombos.map((combo, idx) => (
-                              <span
-                                key={idx}
-                                className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs font-semibold px-2.5 py-1 rounded-full"
-                              >
-                                {combo.map((v) => v.value).join(' - ')}
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon-sm"
-                                  className="h-4 w-4 p-0 hover:bg-primary/20 rounded-full"
-                                  onClick={() => handleRemoveCombo(product.id, idx)}
-                                >
-                                  <LiaTimesSolid className="w-3 h-3" />
-                                </Button>
-                              </span>
-                            ))}
-                          </div>
-                        )}
+                        {productCombos.length > 0 && (() => {
+                          const existingCombosForProduct = existingVariantCombos?.get(product.id) ?? [];
+                          return (
+                            <div className="flex flex-wrap gap-1.5 pt-1 border-t border-gray-100">
+                              {productCombos.map((combo, idx) => {
+                                const isPreExisting = existingCombosForProduct.some((existing) =>
+                                  allLabels.every(
+                                    (l) =>
+                                      existing.find((v) => v.label === l)?.value ===
+                                      combo.find((v) => v.label === l)?.value,
+                                  ),
+                                );
+                                return (
+                                  <span
+                                    key={idx}
+                                    className={clsx(
+                                      'inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full',
+                                      isPreExisting
+                                        ? 'bg-gray-100 text-gray-400'
+                                        : 'bg-primary/10 text-primary',
+                                    )}
+                                  >
+                                    {combo.map((v) => v.value).join(' - ')}
+                                    {!isPreExisting && (
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon-sm"
+                                        className="h-4 w-4 p-0 hover:bg-primary/20 rounded-full"
+                                        onClick={() => handleRemoveCombo(product.id, idx)}
+                                      >
+                                        <LiaTimesSolid className="w-3 h-3" />
+                                      </Button>
+                                    )}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>

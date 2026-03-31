@@ -3,6 +3,7 @@ export type InvoiceType = 'PURCHASE' | 'RETURN';
 
 export interface InvoiceItem {
   id: string;
+  productId: number;
   name: string;
   quantity: number;
   pricePerItem: number;

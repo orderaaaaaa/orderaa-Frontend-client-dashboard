@@ -16,6 +16,7 @@ const ACCEPTED_IMAGE_TYPES = [
 
 const invoiceItemSchema = z.object({
   id: z.string(),
+  productId: z.number(),
   name: z.string().min(1, 'اسم الصنف مطلوب'),
   quantity: z.preprocess(
     (val) => {
