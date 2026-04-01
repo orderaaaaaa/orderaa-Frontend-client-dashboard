@@ -42,11 +42,18 @@ export const providerConfigs: Record<string, ProviderModalConfig> = {
     apiSteps: shopifyIntegrationSteps,
     metadataFields: [
       {
-        key: 'shopUrl',
-        label: 'رابط المتجر',
+        key: 'shopDomain',
+        label: 'دومين المتجر',
         placeholder: 'my-store.myshopify.com',
         required: true,
         type: 'url',
+      },
+      {
+        key: 'clientId',
+        label: 'Client ID',
+        placeholder: 'أدخل Client ID...',
+        required: true,
+        type: 'text',
       },
     ],
   },

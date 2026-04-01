@@ -49,12 +49,15 @@ const webhookSchema = z.object({
 
 const URL_PATTERN = /^(https?:\/\/)?[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+/;
 
-const createApiKeySchema = (hasRequiredUrl: boolean) =>
+const createApiKeySchema = (hasRequiredUrl: boolean, hasClientId: boolean) =>
   z.object({
-    apiKey: z.string().min(1, 'مفتاح API مطلوب'),
-    shopUrl: hasRequiredUrl
-      ? z.string().min(1, 'رابط المتجر مطلوب').regex(URL_PATTERN, 'يرجى إدخال رابط صحيح')
+    apiKey: z.string().min(1, 'Client Secret مطلوب'),
+    shopDomain: hasRequiredUrl
+      ? z.string().min(1, 'دومين المتجر مطلوب').regex(URL_PATTERN, 'يرجى إدخال رابط صحيح')
       : z.string().optional().refine((val) => !val || URL_PATTERN.test(val), { message: 'يرجى إدخال رابط صحيح' }),
+    clientId: hasClientId
+      ? z.string().min(1, 'Client ID مطلوب')
+      : z.string().optional(),
   });
 
 type StoreInfoFormData = z.infer<typeof storeInfoSchema>;
@@ -73,7 +76,7 @@ interface IntegrationModalProps {
 const STEPPER_STEPS = [
   { label: 'اسم المتجر' },
   { label: 'إعدادات Webhook' },
-  { label: 'مفتاح API' },
+  { label: 'Client Keys' },
 ];
 
 const IntegrationModal = ({
@@ -125,11 +128,12 @@ const IntegrationModal = ({
   });
 
   const hasRequiredUrl = config.metadataFields?.some((f) => f.required && f.type === 'url') ?? false;
-  const apiKeySchema = useMemo(() => createApiKeySchema(hasRequiredUrl), [hasRequiredUrl]);
+  const hasClientId = config.metadataFields?.some((f) => f.key === 'clientId' && f.required) ?? false;
+  const apiKeySchema = useMemo(() => createApiKeySchema(hasRequiredUrl, hasClientId), [hasRequiredUrl, hasClientId]);
 
   const apiKeyForm = useForm<ApiKeyFormData>({
     resolver: zodResolver(apiKeySchema),
-    defaultValues: { apiKey: '', shopUrl: '' },
+    defaultValues: { apiKey: '', shopDomain: '', clientId: '' },
   });
 
   const onStoreInfoSubmit = storeInfoForm.handleSubmit(async (data) => {
@@ -197,7 +201,8 @@ const IntegrationModal = ({
       }
 
       const metadata: Record<string, unknown> = {};
-      if (data.shopUrl?.trim()) metadata.shopUrl = data.shopUrl.trim();
+      if (data.shopDomain?.trim()) metadata.shopDomain = data.shopDomain.trim();
+      if (data.clientId?.trim()) metadata.clientId = data.clientId.trim();
 
       await createIntegration({
         storeId: createdStoreId,
@@ -213,7 +218,7 @@ const IntegrationModal = ({
       setCurrentStep(0);
       resetForms();
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'خطأ في حفظ مفتاح API');
+      setError(err?.response?.data?.message || 'خطأ في حفظ Client Keys');
     } finally {
       setIsLoading(false);
     }
@@ -461,23 +466,23 @@ const IntegrationModal = ({
               <StepContent>
                 <form onSubmit={onApiKeySubmit} className="space-y-4">
                   <div className="space-y-4 bg-white p-5 rounded-xl border border-gray-100">
-                    <Input
-                      register={apiKeyForm.register}
-                      name="apiKey"
-                      label="API Key"
-                      placeholder="أدخل مفتاح API..."
-                      error={apiKeyForm.formState.errors.apiKey?.message}
-                    />
                     {config.metadataFields?.map((field) => (
                       <Input
                         key={field.key}
                         register={apiKeyForm.register}
-                        name="shopUrl"
+                        name={field.key}
                         label={`${field.label}${field.required ? ' *' : ''}`}
                         placeholder={field.placeholder}
-                        error={apiKeyForm.formState.errors.shopUrl?.message}
+                        error={(apiKeyForm.formState.errors as Record<string, { message?: string }>)[field.key]?.message}
                       />
                     ))}
+                    <Input
+                      register={apiKeyForm.register}
+                      name="apiKey"
+                      label="Client Secret"
+                      placeholder="أدخل Client Secret..."
+                      error={apiKeyForm.formState.errors.apiKey?.message}
+                    />
                   </div>
 
                   <div className="flex gap-3 pt-2">
@@ -624,11 +629,11 @@ const IntegrationModal = ({
                         {apiConfig && (
                           <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                              API Key
+                              Client Secret
                             </p>
                             <div className="flex items-center justify-between">
                               <span className="text-sm text-gray-600">
-                                المفتاح
+                                Client Secret
                               </span>
                               <span className="text-sm text-gray-800 font-mono">
                                 {apiConfig.apiKey}

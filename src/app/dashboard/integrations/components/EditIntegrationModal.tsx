@@ -23,7 +23,7 @@ import { ProviderModalConfig } from '../constants/providerConfig';
 
 const URL_PATTERN = /^(https?:\/\/)?[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+/;
 
-const createEditSchema = (hasRequiredUrl: boolean) =>
+const createEditSchema = (hasRequiredUrl: boolean, hasClientId: boolean) =>
   z.object({
     storeName: z.string().min(1, 'اسم المتجر مطلوب'),
     description: z.string().optional(),
@@ -31,9 +31,12 @@ const createEditSchema = (hasRequiredUrl: boolean) =>
     apiKeyValue: z.string().optional(),
     newWebhookSecret: z.string().optional(),
     newApiKey: z.string().optional(),
-    shopUrl: hasRequiredUrl
-      ? z.string().min(1, 'رابط المتجر مطلوب').regex(URL_PATTERN, 'يرجى إدخال رابط صحيح')
+    shopDomain: hasRequiredUrl
+      ? z.string().min(1, 'دومين المتجر مطلوب').regex(URL_PATTERN, 'يرجى إدخال رابط صحيح')
       : z.string().optional().refine((val) => !val || URL_PATTERN.test(val), { message: 'يرجى إدخال رابط صحيح' }),
+    clientId: hasClientId
+      ? z.string().min(1, 'Client ID مطلوب')
+      : z.string().optional(),
   });
 
 type EditFormData = z.infer<ReturnType<typeof createEditSchema>>;
@@ -77,15 +80,21 @@ const EditIntegrationModal = ({
   const storeDescription = (configs[0]?.store?.description as string) || '';
 
   const hasRequiredUrl = providerConfig?.metadataFields?.some((f) => f.required && f.type === 'url') ?? false;
+  const hasClientId = providerConfig?.metadataFields?.some((f) => f.key === 'clientId' && f.required) ?? false;
 
-  const editSchema = useMemo(() => createEditSchema(hasRequiredUrl), [hasRequiredUrl]);
+  const editSchema = useMemo(() => createEditSchema(hasRequiredUrl, hasClientId), [hasRequiredUrl, hasClientId]);
 
   const [webhookIsActive, setWebhookIsActive] = useState(webhookConfig?.isActive ?? true);
   const [apiIsActive, setApiIsActive] = useState(apiConfig?.isActive ?? true);
 
-  const initialShopUrl = useMemo(() => {
+  const initialShopDomain = useMemo(() => {
     const existing = configs.find((c) => c.metadata)?.metadata;
-    return (existing?.shopUrl as string) || '';
+    return (existing?.shopDomain as string) || (existing?.shopUrl as string) || '';
+  }, [configs]);
+
+  const initialClientId = useMemo(() => {
+    const existing = configs.find((c) => c.metadata)?.metadata;
+    return (existing?.clientId as string) || '';
   }, [configs]);
 
   const form = useForm<EditFormData>({
@@ -97,7 +106,8 @@ const EditIntegrationModal = ({
       apiKeyValue: '',
       newWebhookSecret: '',
       newApiKey: '',
-      shopUrl: initialShopUrl,
+      shopDomain: initialShopDomain,
+      clientId: initialClientId,
     },
   });
 
@@ -123,7 +133,9 @@ const EditIntegrationModal = ({
       ? apiIsActive !== apiConfig.isActive
       : false;
 
-    const metadataChanged = (watchedFields.shopUrl || '') !== initialShopUrl;
+    const metadataChanged =
+      (watchedFields.shopDomain || '') !== initialShopDomain ||
+      (watchedFields.clientId || '') !== initialClientId;
 
     const addingNewWebhook = showAddWebhook && !!watchedFields.newWebhookSecret?.trim();
     const addingNewApi = showAddApi && !!watchedFields.newApiKey?.trim();
@@ -146,7 +158,8 @@ const EditIntegrationModal = ({
     webhookIsActive,
     apiConfig,
     apiIsActive,
-    initialShopUrl,
+    initialShopDomain,
+    initialClientId,
     showAddWebhook,
     showAddApi,
   ]);
@@ -159,9 +172,10 @@ const EditIntegrationModal = ({
     }
   };
 
-  const buildMetadata = (shopUrl?: string) => {
+  const buildMetadata = (shopDomain?: string, clientId?: string) => {
     const meta: Record<string, unknown> = {};
-    if (shopUrl?.trim()) meta.shopUrl = shopUrl.trim();
+    if (shopDomain?.trim()) meta.shopDomain = shopDomain.trim();
+    if (clientId?.trim()) meta.clientId = clientId.trim();
     return Object.keys(meta).length > 0 ? meta : undefined;
   };
 
@@ -200,8 +214,8 @@ const EditIntegrationModal = ({
         if (data.apiKeyValue) apiUpdates.apiKey = data.apiKeyValue.trim();
         if (apiIsActive !== apiConfig.isActive) apiUpdates.isActive = apiIsActive;
 
-        if ((data.shopUrl || '') !== initialShopUrl) {
-          apiUpdates.metadata = buildMetadata(data.shopUrl);
+        if ((data.shopDomain || '') !== initialShopDomain || (data.clientId || '') !== initialClientId) {
+          apiUpdates.metadata = buildMetadata(data.shopDomain, data.clientId);
         }
 
         if (Object.keys(apiUpdates).length > 0) {
@@ -229,7 +243,7 @@ const EditIntegrationModal = ({
             provider,
             configType: IntegrationConfigType.API,
             apiKey: data.newApiKey.trim(),
-            ...(buildMetadata(data.shopUrl) && { metadata: buildMetadata(data.shopUrl) }),
+            ...(buildMetadata(data.shopDomain, data.clientId) && { metadata: buildMetadata(data.shopDomain, data.clientId) }),
           })
         );
       }
@@ -412,35 +426,35 @@ const EditIntegrationModal = ({
               </div>
             </div>
 
-            <Input
-              register={form.register}
-              name="apiKeyValue"
-              label="API Key (اتركه فارغاً إن لم ترد تغييره)"
-              placeholder="أدخل مفتاح API الجديد..."
-            />
-
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">المفتاح الحالي</span>
-              <span className="text-gray-800 font-mono text-xs">
-                {apiConfig.apiKey}
-              </span>
-            </div>
-
             {providerConfig?.metadataFields?.map((field) => (
               <Input
                 key={field.key}
                 register={form.register}
-                name="shopUrl"
+                name={field.key}
                 label={`${field.label}${field.required ? ' *' : ''}`}
                 placeholder={field.placeholder}
-                error={form.formState.errors.shopUrl?.message}
+                error={(form.formState.errors as Record<string, { message?: string }>)[field.key]?.message}
               />
             ))}
+
+            <Input
+              register={form.register}
+              name="apiKeyValue"
+              label="Client Secret (اتركه فارغاً إن لم ترد تغييره)"
+              placeholder="أدخل Client Secret الجديد..."
+            />
+
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600">Client Secret الحالي</span>
+              <span className="text-gray-800 font-mono text-xs">
+                {apiConfig.apiKey}
+              </span>
+            </div>
           </div>
         ) : showAddApi ? (
           <div className="space-y-4 bg-blue-50/50 p-5 rounded-xl border border-blue-200">
             <div className="flex items-center justify-between">
-              <h4 className="font-semibold text-gray-900 text-sm">إضافة مفتاح API</h4>
+              <h4 className="font-semibold text-gray-900 text-sm">إضافة Client Secret</h4>
               <Button
                 type="button"
                 variant="ghost"
@@ -452,23 +466,23 @@ const EditIntegrationModal = ({
               </Button>
             </div>
 
-            <Input
-              register={form.register}
-              name="newApiKey"
-              label="API Key"
-              placeholder="أدخل مفتاح API..."
-            />
-
             {providerConfig?.metadataFields?.map((field) => (
               <Input
                 key={field.key}
                 register={form.register}
-                name="shopUrl"
+                name={field.key}
                 label={`${field.label}${field.required ? ' *' : ''}`}
                 placeholder={field.placeholder}
-                error={form.formState.errors.shopUrl?.message}
+                error={(form.formState.errors as Record<string, { message?: string }>)[field.key]?.message}
               />
             ))}
+
+            <Input
+              register={form.register}
+              name="newApiKey"
+              label="Client Secret"
+              placeholder="أدخل Client Secret..."
+            />
           </div>
         ) : (
           <Button
@@ -478,7 +492,7 @@ const EditIntegrationModal = ({
             className="w-full h-10 border-dashed border-gray-300 text-gray-500 hover:text-primary hover:border-primary gap-2"
           >
             <LiaPlusSolid className="w-4 h-4" />
-            إضافة مفتاح API
+            إضافة Client Secret
           </Button>
         )}
 
