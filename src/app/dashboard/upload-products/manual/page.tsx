@@ -1,6 +1,6 @@
 'use client';
 import { LiaPlusSolid } from 'react-icons/lia';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
@@ -15,6 +15,7 @@ import { useProductDropdownStore } from '@/store/productDropdownStore';
 import { buildManualOrderPayload } from '@/utils/manualOrder/payload';
 import { createManualOrder } from '@/lib/api/manualOrdersApi';
 import { manualOrderSchema, ManualOrderFormData } from './schema';
+import { useMerchantSettings } from '@/app/dashboard/store-settings/hooks/useStoreSettings';
 
 function Manual() {
   const selectedProducts = useProductDropdownStore(
@@ -58,6 +59,14 @@ function Manual() {
       packagingNotes: '',
     },
   });
+
+  const { settings } = useMerchantSettings();
+
+  useEffect(() => {
+    if (settings?.defaultReturnShippingCost != null) {
+      setValue('shipping.returnShippingCost', String(settings.defaultReturnShippingCost));
+    }
+  }, [settings?.defaultReturnShippingCost, setValue]);
 
   const [productsError, setProductsError] = useState<string | null>(null);
 

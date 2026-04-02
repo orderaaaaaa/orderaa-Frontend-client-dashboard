@@ -12,7 +12,6 @@ import {
   useUpdateOrderProduct,
   useDeleteOrderProduct,
   useAddOrderProduct,
-  useAllProducts,
   SelectedVariant,
 } from '@/services/orders';
 import { toast } from 'react-toastify';
@@ -32,7 +31,6 @@ function OrderDetailsProductCard({
   const updateOrderProductMutation = useUpdateOrderProduct();
   const deleteOrderProductMutation = useDeleteOrderProduct();
   const addOrderProductMutation = useAddOrderProduct();
-  const { data: allProducts = [], error: productsError } = useAllProducts();
 
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [deletingProductId, setDeletingProductId] = useState<number | null>(
@@ -68,12 +66,6 @@ function OrderDetailsProductCard({
     );
   }, [order.order_products]);
 
-  useEffect(() => {
-    if (productsError) {
-      toast.error('فشل في تحميل المنتجات');
-    }
-  }, [productsError]);
-
   const handleEditClick = (productId: number) => {
     setEditingProductId(productId);
   };
@@ -105,13 +97,7 @@ function OrderDetailsProductCard({
 
   const handleConfirmDelete = async () => {
     if (!deletingProductId) return;
-
-    try {
-      await deleteOrderProductMutation.mutateAsync(deletingProductId);
-      toast.success('تم حذف المنتج بنجاح');
-    } catch (error) {
-      toast.error('فشل في حذف المنتج');
-    }
+    await deleteOrderProductMutation.mutateAsync(deletingProductId);
   };
 
   const editingProduct = productsData.find(
@@ -306,7 +292,6 @@ function OrderDetailsProductCard({
         isOpen={isAddNewProductModalOpen}
         onClose={() => setIsAddNewProductModalOpen(false)}
         onSave={handleAddNewProduct}
-        products={allProducts}
       />
 
       <ProductDetailsModal

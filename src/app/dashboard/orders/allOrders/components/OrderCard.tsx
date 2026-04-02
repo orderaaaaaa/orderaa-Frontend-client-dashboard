@@ -228,16 +228,9 @@ export default function OrderCard({
                   className="w-[18px] h-[18px] flex-shrink-0 mt-1"
                   style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
                 />
-                <div className="flex items-center gap-2 flex-wrap min-w-0">
-                  <span className="text-base font-medium text-black break-words min-w-0">
-                    {item}
-                  </span>
-                  {itemSkus?.[index] && (
-                    <span className="text-[11px] text-gray-500 bg-gray-100 rounded px-1.5 py-0.5 font-medium flex-shrink-0">
-                      {itemSkus[index]}
-                    </span>
-                  )}
-                </div>
+                <span className="text-base font-medium text-black break-words min-w-0">
+                  {item}
+                </span>
               </div>
             ))
           : items?.[0] &&
@@ -247,25 +240,32 @@ export default function OrderCard({
                 className="w-[18px] h-[18px] flex-shrink-0 mt-1"
                 style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
               />
-              <div className="flex items-center gap-2 flex-wrap min-w-0">
-                <span className="text-base font-medium text-black break-words min-w-0">
-                  {items[0]}
-                </span>
-                {itemSkus?.[0] && (
-                  <span className="text-[11px] text-gray-500 bg-gray-100 rounded px-1.5 py-0.5 font-medium flex-shrink-0">
-                    {itemSkus[0]}
-                  </span>
-                )}
-              </div>
+              <span className="text-base font-medium text-black break-words min-w-0">
+                {items[0]}
+              </span>
             </div>
           )}
 
+        {itemSkus?.some(Boolean) && (
+          <div className="flex items-start gap-2 max-w-full">
+            <CiBarcode
+              className="w-[18px] h-[18px] flex-shrink-0 mt-1"
+              style={{ color: 'rgba(0,0,0,0.5)' }}
+            />
+            <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+              <span className="text-sm font-semibold text-black">SKU:</span>
+              {itemSkus.filter(Boolean).map((sku, index) => (
+                <span key={index} className="text-sm font-medium text-black">
+                  {sku}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Price */}
         {price && (
-          <div className="flex flex-row-reverse items-start gap-2 max-w-full">
-            <span className="text-base font-medium text-black">
-              {price} جنيه
-            </span>
+          <div className="flex items-start gap-2 max-w-full">
             <Image
               src="/Icons/price.svg"
               alt="price"
@@ -273,6 +273,9 @@ export default function OrderCard({
               height={18}
               className="opacity-50"
             />
+            <span className="text-base font-medium text-black">
+              {price} جنيه
+            </span>
             {shippingType && SHIPPING_TYPE_BADGE[shippingType] && (() => {
               const badge = SHIPPING_TYPE_BADGE[shippingType];
               return (

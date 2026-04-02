@@ -175,7 +175,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
       if (open && showSearch) {
         setTimeout(() => inputRef.current?.focus(), 50);
       }
-      if (!open) {
+      if (!open && !onSearch) {
         setSearchQuery('');
       }
     }, [open, showSearch]);

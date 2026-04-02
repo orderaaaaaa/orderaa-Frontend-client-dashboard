@@ -2,10 +2,8 @@
 
 import React from 'react';
 import PageLoading from '@/components/ui/page-loading';
-import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { LiaTimesSolid } from 'react-icons/lia';
+import BaseModal from '@/components/ui/base-modal';
 import { useGetProductVariantCounts } from '../../hooks/useProduct';
-import { Button } from '@/components/ui/button';
 
 interface Props {
   productId: number;
@@ -24,62 +22,40 @@ export default function ProductVariantCountsModal({
   const totalOrders = data?.totalOrders ?? 0;
 
   return (
-    <DialogPrimitive.Root
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open) onClose();
-      }}
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="تفاصيل القطع المباعة"
+      showFooter={false}
+      maxWidth="md:max-w-lg"
     >
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl w-[95vw] sm:w-[90vw] md:w-auto md:max-w-lg shadow-lg p-6 max-h-[90vh] overflow-y-auto">
-          <DialogPrimitive.Title className="text-lg font-semibold text-gray-900 mb-4">
-            تفاصيل القطع المباعة
-          </DialogPrimitive.Title>
-
-          <DialogPrimitive.Description className="sr-only">
-            تفاصيل القطع المباعة للمنتج
-          </DialogPrimitive.Description>
-
-          <DialogPrimitive.Close className="absolute top-6 left-6 hover:opacity-70 transition-opacity">
-            <LiaTimesSolid className="w-5 h-5 text-gray-500 cursor-pointer" />
-          </DialogPrimitive.Close>
-
-          {isLoading ? (
-            <PageLoading size="sm" className="py-10 min-h-0" />
-          ) : !hasVariants ? (
-            <div className="text-center py-10 text-gray-500">
-              لا توجد بيانات للقطع المباعة
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {data.variantCounts.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex justify-between items-center border rounded-lg px-4 py-2"
-                >
-                  <div className="text-sm text-gray-700 truncate">
-                    {item.label}:{' '}
-                    <span className="font-medium">{item.value}</span>
-                  </div>
-                  <span className="font-semibold text-primary">{item.count}</span>
-                </div>
-              ))}
-
-              <div className="border-t pt-3 text-right text-sm text-gray-600">
-                إجمالي الطلبات:{' '}
-                <span className="font-semibold text-gray-900">{totalOrders}</span>
+      {isLoading ? (
+        <PageLoading size="sm" className="py-10 min-h-0" />
+      ) : !hasVariants ? (
+        <div className="text-center py-10 text-gray-500">
+          لا توجد بيانات للقطع المباعة
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {data.variantCounts.map((item, index) => (
+            <div
+              key={index}
+              className="flex justify-between items-center border rounded-lg px-4 py-2"
+            >
+              <div className="text-sm text-gray-700 truncate">
+                {item.label}:{' '}
+                <span className="font-medium">{item.value}</span>
               </div>
+              <span className="font-semibold text-primary">{item.count}</span>
             </div>
-          )}
+          ))}
 
-          <div className="mt-6 flex justify-end">
-            <Button variant="outline" onClick={onClose}>
-              إغلاق
-            </Button>
+          <div className="border-t pt-3 text-end text-sm text-gray-600">
+            إجمالي الطلبات:{' '}
+            <span className="font-semibold text-gray-900">{totalOrders}</span>
           </div>
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+        </div>
+      )}
+    </BaseModal>
   );
 }

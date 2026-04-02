@@ -3,9 +3,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { LiaPlusSolid, LiaMinusSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
+import { useQuery } from '@tanstack/react-query';
+import http from '@/lib/api/http';
 import { Product } from '@/types/orders';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useProductVariantsOptions, SelectedVariant } from '@/services/orders';
+import { useDebounce } from '@/utils/debounce';
 import { Button } from '../ui/button';
 import BaseModal from '@/components/ui/base-modal';
 
@@ -17,14 +20,12 @@ interface AddNewProductModalProps {
     variants: SelectedVariant[],
     quantity: number
   ) => Promise<void>;
-  products: Product[];
 }
 
 export default function AddNewProductModal({
   isOpen,
   onClose,
   onSave,
-  products,
 }: AddNewProductModalProps) {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedVariants, setSelectedVariants] = useState<
@@ -32,17 +33,34 @@ export default function AddNewProductModal({
   >({});
   const [quantity, setQuantity] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
+  const [productSearch, setProductSearch] = useState('');
+  const debouncedProductSearch = useDebounce(productSearch, 300);
+
+  const { data: productsData = [], isLoading: isLoadingProducts } = useQuery({
+    queryKey: ['add-product-search', debouncedProductSearch],
+    queryFn: async () => {
+      const response = await http.get<{ data: Product[] }>('/products', {
+        params: {
+          page: 1,
+          limit: 50,
+          ...(debouncedProductSearch && { search: debouncedProductSearch }),
+        },
+      });
+      return response.data.data;
+    },
+    enabled: isOpen,
+  });
 
   const { data: variantOptions = [], isLoading: isLoadingVariants } =
     useProductVariantsOptions(selectedProduct?.id ?? null);
 
-  const productOptions = useMemo(() => products.map((p) => p.name), [products]);
+  const productOptions = useMemo(() => productsData.map((p) => p.name), [productsData]);
 
   const productsByName = useMemo(() => {
     const map = new Map<string, Product>();
-    products.forEach((p) => map.set(p.name, p));
+    productsData.forEach((p) => map.set(p.name, p));
     return map;
-  }, [products]);
+  }, [productsData]);
 
   useEffect(() => {
     if (isOpen) {
@@ -128,6 +146,10 @@ export default function AddNewProductModal({
           <SearchableSelect
             value={selectedProduct?.name || ''}
             onValueChange={handleProductChange}
+            onClear={() => {
+              setSelectedProduct(null);
+              setProductSearch('');
+            }}
             options={productOptions}
             placeholder="اختر المنتج"
             searchPlaceholder="ابحث عن منتج..."
@@ -135,7 +157,8 @@ export default function AddNewProductModal({
             noResultsMessage="لا توجد نتائج للبحث"
             triggerClassName="h-[44px] md:h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-4 md:px-6 text-right text-base md:text-lg text-[#5F5E5E]"
             className="rounded-2xl border-[#ECECEC]"
-            searchThreshold={5}
+            onSearch={setProductSearch}
+            loading={isLoadingProducts}
             clearable
           />
         </div>
