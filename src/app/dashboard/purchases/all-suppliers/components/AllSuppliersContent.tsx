@@ -2,9 +2,10 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { formatDateToLocalDate } from '@/utils/dateRangeUtils';
-import { LiaUsersSolid, LiaSlidersHSolid } from 'react-icons/lia';
+import { LiaUsersSolid, LiaSlidersHSolid, LiaArrowUpSolid, LiaArrowDownSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import PageLoading from '@/components/ui/page-loading';
+import { SummaryStatCard } from '@/components/ui/summary-stat-card';
 import SuppliersHeader from './SuppliersHeader';
 import SuppliersSearchBar from './SuppliersSearchBar';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
@@ -12,6 +13,7 @@ import SuppliersFilterBar from './SuppliersFilterBar';
 import SupplierCard from './SupplierCard';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { DEFAULT_PAGE_SIZE } from '../constants';
+import { formatCurrency } from '../utils';
 import { useSupplierFilters } from '../hooks';
 import { useSuppliersQuery } from '@/services/suppliers';
 
@@ -120,6 +122,21 @@ export function AllSuppliersContent() {
   return (
     <div className="w-full max-w-full overflow-x-hidden">
       <SuppliersHeader />
+
+      <div className="sm:px-8 pt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <SummaryStatCard
+          icon={<LiaArrowUpSolid className="w-6 h-6 text-red-600" />}
+          iconBgClassName="bg-red-100"
+          label="مديون (إجمالي)"
+          value={formatCurrency(0)}
+        />
+        <SummaryStatCard
+          icon={<LiaArrowDownSolid className="w-6 h-6 text-green-600" />}
+          iconBgClassName="bg-green-100"
+          label="ليّ فلوس (إجمالي)"
+          value={formatCurrency(0)}
+        />
+      </div>
 
       <div className="sm:px-8 py-3 flex flex-col gap-4">
         <div className="flex flex-row items-center gap-3">
