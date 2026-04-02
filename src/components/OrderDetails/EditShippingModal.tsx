@@ -5,6 +5,7 @@ import Input from '@/components/ui/Input';
 import { getShippingGovernorates, getShippingCities } from '@/lib/api/lookups';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useShippingCompanies } from '@/hooks';
+import { useMerchantSettings } from '@/app/dashboard/store-settings/hooks/useStoreSettings';
 import clsx from 'clsx';
 
 interface EditShippingModalProps {
@@ -125,6 +126,7 @@ export default function EditShippingModal({
   const [fetchTrigger, setFetchTrigger] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [returnShippingCostError, setReturnShippingCostError] = useState('');
+  const [timeError, setTimeError] = useState('');
 
   const initialFromParsed = parseTime(initialData.availableFrom);
   const initialToParsed = parseTime(initialData.availableTo);
@@ -133,6 +135,7 @@ export default function EditShippingModal({
   const [endHour, setEndHour] = useState<number | null>(initialToParsed.hour);
   const [endPeriod, setEndPeriod] = useState<string | null>(initialToParsed.period);
 
+  const { settings } = useMerchantSettings();
   const { shippingCompanies, isLoading: loadingShippingCompanies } = useShippingCompanies(isOpen);
 
   const shippingCompanyMap = useMemo(() => {
@@ -251,7 +254,13 @@ export default function EditShippingModal({
 
   useEffect(() => {
     if (isOpen && !wasOpenRef.current) {
-      setFormData(initialData);
+      const defaultCost =
+        initialData.returnShippingCost != null
+          ? initialData.returnShippingCost
+          : settings?.defaultReturnShippingCost ?? undefined;
+
+      setFormData({ ...initialData, returnShippingCost: defaultCost });
+      setReturnShippingCostError('');
       if (initialData.shippingCompany) {
         setSelectedShippingCompanyKey(initialData.shippingCompany);
         setLoadingGovernorates(true);
@@ -270,16 +279,27 @@ export default function EditShippingModal({
       setEndPeriod(toParsed.period);
     }
     wasOpenRef.current = isOpen;
-  }, [isOpen, initialData]);
+  }, [isOpen, initialData, settings?.defaultReturnShippingCost]);
 
   const handleSave = async () => {
     if (!hasChanges || isSaving) return;
 
+    const isTimeComplete = startHour && startPeriod && endHour && endPeriod;
+    if (!isTimeComplete) {
+      setTimeError('يرجى اختيار وقت التوصيل');
+    } else {
+      setTimeError('');
+    }
+
     if (formData.returnShippingCost === undefined || formData.returnShippingCost === null) {
       setReturnShippingCostError('هذا الحقل مطلوب');
+    } else {
+      setReturnShippingCostError('');
+    }
+
+    if (!isTimeComplete || formData.returnShippingCost === undefined || formData.returnShippingCost === null) {
       return;
     }
-    setReturnShippingCostError('');
 
     const dataToSave: ShippingData = { ...formData };
     if (startHour && startPeriod) {
@@ -446,16 +466,16 @@ export default function EditShippingModal({
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <LiaClockSolid className="w-5 h-5 text-primary" />
-            <label className="font-bold text-[#1F1F1F]">وقت التوصيل</label>
+            <label className="font-bold text-[#1F1F1F]">وقت التوصيل <span className="text-red-500">*</span></label>
           </div>
-          <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 space-y-4">
+          <div className={clsx('bg-gray-50 rounded-xl border p-4 space-y-4', timeError ? 'border-red-400' : 'border-gray-200')}>
             <div className="flex flex-col md:flex-row gap-6">
               <InlineTimePicker
                 label="من"
                 hour={startHour}
                 period={startPeriod}
-                onHourChange={setStartHour}
-                onPeriodChange={setStartPeriod}
+                onHourChange={(h) => { setStartHour(h); setTimeError(''); }}
+                onPeriodChange={(p) => { setStartPeriod(p); setTimeError(''); }}
               />
               <div className="hidden md:flex items-center pt-6">
                 <div className="w-px h-full bg-gray-200" />
@@ -464,8 +484,8 @@ export default function EditShippingModal({
                 label="إلى"
                 hour={endHour}
                 period={endPeriod}
-                onHourChange={setEndHour}
-                onPeriodChange={setEndPeriod}
+                onHourChange={(h) => { setEndHour(h); setTimeError(''); }}
+                onPeriodChange={(p) => { setEndPeriod(p); setTimeError(''); }}
               />
             </div>
             {startHour && startPeriod && endHour && endPeriod && (
@@ -477,6 +497,9 @@ export default function EditShippingModal({
               </div>
             )}
           </div>
+          {timeError && (
+            <p className="text-sm text-red-500 mt-1">{timeError}</p>
+          )}
         </div>
       </div>
     </BaseModal>
