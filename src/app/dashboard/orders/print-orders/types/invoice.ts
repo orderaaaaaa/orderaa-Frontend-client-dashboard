@@ -49,6 +49,15 @@ export interface InvoiceData {
   nonReceiptPenalty?: number;
   packagingNotes?: string | null;
   shippingNotes?: string | null;
+  shippingCompany?: string;
+  merchantName?: string;
+  merchantGovernorate?: string;
+  merchantCity?: string;
+  area?: string;
+  shipmentContent?: string | null;
+  canOpenShipment?: boolean;
+  returnShippingCost?: number;
+  createdAt?: string;
 }
 
 export interface InvoiceLabels {
@@ -82,6 +91,21 @@ export interface InvoiceLabels {
   unpaid: string;
   cashOnDelivery: string;
   cod: string;
+  delivery: string;
+  codAmount: string;
+  nonReceiptCost: string;
+  merchant: string;
+  deliverTo: string;
+  area: string;
+  landmark: string;
+  openShipment: string;
+  pieces: string;
+  shipmentDescription: string;
+  notes: string;
+  trackingNumber: string;
+  orderReference: string;
+  returnAddress: string;
+  created: string;
 }
 
 export interface InvoiceProps {

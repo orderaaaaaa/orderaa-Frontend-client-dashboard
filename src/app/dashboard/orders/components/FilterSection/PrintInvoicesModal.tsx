@@ -10,7 +10,7 @@ import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
 import { InvoiceData } from '../../print-orders/types/invoice';
 import { mapOrdersToInvoices } from '../../print-orders/utils/invoiceMapper';
-import { Invoice } from '../../print-orders/components/Invoice';
+import { InvoiceRenderer } from '../../print-orders/components/InvoiceRenderer';
 import { printOrders } from '../../print-orders/services/printOrders';
 import { useInvoiceSettings } from '../../print-orders/hooks/useInvoiceSettings';
 
@@ -120,7 +120,7 @@ export function PrintInvoicesModal({
         createPortal(
           <div className="print-container hidden print:block">
             {invoicesToPrint.map((invoice, index) => (
-              <Invoice
+              <InvoiceRenderer
                 key={invoice.orderCode || index}
                 data={invoice}
                 storeInfo={storeInfo}

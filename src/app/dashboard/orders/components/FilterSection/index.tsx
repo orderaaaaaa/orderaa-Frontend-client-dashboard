@@ -32,7 +32,7 @@ import {
 } from '../../print-orders/types';
 import { useMarkOrdersPrinted, useInvoiceSettings } from '../../print-orders/hooks';
 import { mapOrdersToInvoices } from '../../print-orders/utils';
-import { Invoice } from '../../print-orders/components/Invoice';
+import { InvoiceRenderer } from '../../print-orders/components/InvoiceRenderer';
 
 export interface ShippingCompanyOption {
   key: string;
@@ -357,7 +357,7 @@ export function FilterSection({
         createPortal(
           <div className="print-container hidden print:block">
             {invoicesToPrint.map((invoice, index) => (
-              <Invoice
+              <InvoiceRenderer
                 key={index}
                 data={invoice}
                 storeInfo={storeInfo}
