@@ -43,11 +43,19 @@ export function BostaInvoice({ data, storeInfo, language }: InvoiceProps) {
 
   const fullWidthBarcode = useCallback((node: HTMLDivElement | null) => {
     if (!node) return;
-    const svg = node.querySelector('svg');
-    if (svg) {
-      svg.removeAttribute('width');
-      svg.style.width = '100%';
-    }
+    const apply = () => {
+      const svg = node.querySelector('svg');
+      if (svg) {
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+        svg.style.width = '100%';
+        svg.style.display = 'block';
+      }
+    };
+    apply();
+    const observer = new MutationObserver(apply);
+    observer.observe(node, { childList: true, subtree: true, attributes: true });
+    return () => observer.disconnect();
   }, []);
 
   return (
@@ -56,11 +64,11 @@ export function BostaInvoice({ data, storeInfo, language }: InvoiceProps) {
       dir={isAr ? 'rtl' : 'ltr'}
     >
       {/* 1. Top Barcode - full width */}
-      <div ref={fullWidthBarcode} className="border-b-2 border-black py-1">
+      <div ref={fullWidthBarcode} className="border-b-2 border-black py-1 px-4">
         <Barcode
-          value={data.orderCode}
+          value={data.shippingId || ''}
           height={30}
-          fontSize={7}
+          fontSize={5}
           margin={0}
           textMargin={1}
         />
@@ -114,7 +122,7 @@ export function BostaInvoice({ data, storeInfo, language }: InvoiceProps) {
             </div>
           </div>
           <div className="flex items-center justify-center min-w-[22mm] p-1.5">
-            <QRCodeSVG value={data.orderCode} size={50} level="L" />
+            <QRCodeSVG value={data.shippingId || ''} size={50} level="L" />
           </div>
         </div>
       </div>
@@ -188,7 +196,7 @@ export function BostaInvoice({ data, storeInfo, language }: InvoiceProps) {
         <div className="pt-1 flex flex-col items-center justify-center gap-0.5 min-w-[28mm]">
           <p className="text-[7px] text-black font-bold">{labels.trackingNumber}</p>
           <Barcode
-            value={data.orderCode}
+            value={data.shippingId || ''}
             width={1}
             height={25}
             fontSize={7}
@@ -203,6 +211,18 @@ export function BostaInvoice({ data, storeInfo, language }: InvoiceProps) {
       {/* 10. Footer: Created date */}
       <div className="px-2 py-0.5 text-[7px] text-black">
         <span className="font-bold">{labels.created}:</span> {createdDate}
+      </div>
+
+      {/* 11. Order Code Barcode */}
+      <div className="border-t-2 border-black py-1 grid place-items-center">
+        <Barcode
+          value={data.orderCode}
+          width={1.5}
+          height={25}
+          fontSize={7}
+          margin={0}
+          textMargin={1}
+        />
       </div>
     </div>
   );
