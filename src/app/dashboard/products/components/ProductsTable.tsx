@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { LiaObjectGroupSolid, LiaEditSolid } from 'react-icons/lia';
+import { Scan, ScanLine, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 
@@ -43,12 +44,32 @@ function ProductsTable() {
     id: number;
     variants: VariantItem[];
   } | null>(null);
+  const [select, setSelect] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string | number>>(
     new Set(),
   );
   const [showMergeModal, setShowMergeModal] = useState(false);
   const [showSoldModal, setShowSoldModal] = useState(false);
   const [soldProductId, setSoldProductId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!select) {
+      setSelectedIds(new Set());
+    }
+  }, [select]);
+
+  const showBulkActions = select && selectedIds.size >= 2;
+
+  useEffect(() => {
+    if (showBulkActions) {
+      document.body.style.paddingBottom = '80px';
+    } else {
+      document.body.style.paddingBottom = '0px';
+    }
+    return () => {
+      document.body.style.paddingBottom = '0px';
+    };
+  }, [showBulkActions]);
 
   const handleSort = (field: string) => {
     if (sortBy === field) {
@@ -195,15 +216,32 @@ function ProductsTable() {
             />
           </div>
 
-          {selectedIds.size >= 2 && (
-            <Button
-              onClick={() => setShowMergeModal(true)}
-              className="bg-primary text-white"
+          <div className="flex flex-row items-center justify-center gap-3 text-white">
+            {select && selectedIds.size > 0 && (
+              <div className="flex flex-row items-center justify-center gap-2">
+                <X
+                  onClick={() => setSelect(false)}
+                  className="cursor-pointer text-primary h-5 w-5"
+                />
+                <span className="text-sm text-gray-600">
+                  تم تحديد {selectedIds.size} منتج
+                </span>
+              </div>
+            )}
+            <div
+              className="bg-primary flex flex-row items-center justify-center gap-3 px-5 py-2 rounded-full cursor-pointer"
+              onClick={() => setSelect(!select)}
             >
-              <LiaObjectGroupSolid className="size-5" />
-              دمج المنتجات ({selectedIds.size})
-            </Button>
-          )}
+              <p>تحديد</p>
+              <div>
+                {select ? (
+                  <ScanLine className="text-white" />
+                ) : (
+                  <Scan className="text-white" />
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="hidden md:block">
@@ -214,7 +252,7 @@ function ProductsTable() {
             sortBy={sortBy}
             sortOrder={sortOrder}
             onSort={handleSort}
-            selectable
+            selectable={select}
             selectedIds={selectedIds}
             onSelectionChange={setSelectedIds}
             emptyMessage="لا توجد منتجات"
@@ -224,7 +262,7 @@ function ProductsTable() {
         <ProductsTableMobile
           data={data}
           isRefetching={isRefetching}
-          showCheckboxes={true}
+          showCheckboxes={select}
           selectedIds={selectedArray}
           sortBy={sortBy}
           sortOrder={sortOrder}
@@ -243,6 +281,23 @@ function ProductsTable() {
           openEditModal={openEditModal}
         />
       </div>
+
+      {showBulkActions && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg py-4 px-6">
+          <div className="mx-auto overflow-x-auto scrollbar-hide">
+            <div className="pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
+              <Button
+                variant="outline"
+                onClick={() => setShowMergeModal(true)}
+                className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
+              >
+                <LiaObjectGroupSolid className="size-5" />
+                <span>دمج المنتجات ({selectedIds.size})</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showModal && activeProduct && (
         <ProductAddVariantsModal
@@ -266,6 +321,7 @@ function ProductsTable() {
           products={data.data.filter((p) => selectedIds.has(p.id))}
           onSuccess={() => {
             setSelectedIds(new Set());
+            setSelect(false);
           }}
         />
       )}
