@@ -43,4 +43,18 @@ export const providers: ShippingProvider[] = [
     description: 'جي أند تي إكسبريس لخدمات الشحن العالمية',
     isActive: false,
   },
+  {
+    id: 'red',
+    name: 'Red',
+    logo: '/Icons/red-shipping-company.png',
+    description: 'شركة ريد للشحن والتوصيل',
+    isActive: true,
+  },
+  {
+    id: 'hashtag',
+    name: 'Hashtag',
+    logo: '/Icons/hashtag-shipping-company.png',
+    description: 'شركة هاشتاج للشحن والتوصيل',
+    isActive: true,
+  },
 ];

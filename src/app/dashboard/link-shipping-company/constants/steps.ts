@@ -23,6 +23,24 @@ const bostaSteps = [
   'اضغط على "تفعيل الربط" للحفظ.',
 ];
 
+const redSteps = [
+  'قم بتسجيل الدخول إلى لوحة تحكم Red.',
+  'انتقل إلى إعدادات الحساب.',
+  'انتقل إلى قسم ربط API.',
+  'انسخ مفتاح المصادقة (Authentication Key).',
+  'ألصق الكود في الحقل أدناه.',
+  'اضغط على "تفعيل الربط" للحفظ.',
+];
+
+const hashtagSteps = [
+  'قم بتسجيل الدخول إلى لوحة تحكم Hashtag.',
+  'انتقل إلى إعدادات الحساب.',
+  'انتقل إلى قسم ربط API.',
+  'انسخ مفتاح المصادقة (Authentication Key).',
+  'ألصق الكود في الحقل أدناه.',
+  'اضغط على "تفعيل الربط" للحفظ.',
+];
+
 export const getStepsByProvider = (providerId: string): string[] => {
   const provider = providerId.toLowerCase();
 
@@ -31,6 +49,10 @@ export const getStepsByProvider = (providerId: string): string[] => {
       return bostaSteps;
     case 'turbo':
       return turboSteps;
+    case 'red':
+      return redSteps;
+    case 'hashtag':
+      return hashtagSteps;
     default:
       return turboSteps;
   }
