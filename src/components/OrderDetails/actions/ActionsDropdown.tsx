@@ -8,8 +8,14 @@ import {
   LiaWhatsapp,
   LiaStopCircleSolid,
   LiaLockSolid,
+  LiaBoxOpenSolid,
+  LiaExchangeAltSolid,
+  LiaUndoAltSolid,
+  LiaRedoAltSolid,
+  LiaClockSolid,
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
+import { POST_SHIPPING_STATUSES } from '@/types/logistics';
 
 interface ActionOption {
   label: string;
@@ -28,6 +34,14 @@ const arrowOptions: ActionOption[] = [
   { label: 'في انتظار الدفع', action: 'waiting_payment', icon: <LiaLockSolid className="w-5 h-5" /> },
 ];
 
+const postShippingOptions: ActionOption[] = [
+  { label: 'تسليم جزئي', action: 'partial_delivery', icon: <LiaBoxOpenSolid className="w-5 h-5" /> },
+  { label: 'استبدال', action: 'exchange', icon: <LiaExchangeAltSolid className="w-5 h-5" /> },
+  { label: 'مرتجع', action: 'return_refund', icon: <LiaUndoAltSolid className="w-5 h-5" /> },
+  { label: 'إعادة إرسال', action: 'resend', icon: <LiaRedoAltSolid className="w-5 h-5" /> },
+  { label: 'متأخر', action: 'late', icon: <LiaClockSolid className="w-5 h-5" /> },
+];
+
 export interface ActionsDropdownProps {
   isOpen: boolean;
   orderStatus: string;
@@ -36,8 +50,10 @@ export interface ActionsDropdownProps {
 }
 
 export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, onActionClick }: ActionsDropdownProps) {
+  const isPostShipping = POST_SHIPPING_STATUSES.has(orderStatus);
+
   const filteredOptions = useMemo(() => {
-    return arrowOptions.filter((option) => {
+    const base = arrowOptions.filter((option) => {
       if (option.action === 'stop_operation') {
         return orderStatus === 'CONFIRMED';
       }
@@ -49,7 +65,13 @@ export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, onAction
       }
       return true;
     });
-  }, [orderStatus, lastEventStatus]);
+
+    if (isPostShipping) {
+      return [...base, ...postShippingOptions];
+    }
+
+    return base;
+  }, [orderStatus, lastEventStatus, isPostShipping]);
 
   if (!isOpen) return null;
 

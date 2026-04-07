@@ -15,11 +15,12 @@ import {
   RejectModificationModal,
   WhatsappModal,
   WaitingPaymentModal,
+  PartialDeliveryModal,
+  ExchangeModal,
+  ReturnRefundModal,
+  PostShippingCancelModal,
 } from '../ActionModals';
 
-/**
- * Props for OrderActionModals component
- */
 export interface OrderActionModalsProps {
   modals: ModalStates;
   order: Order;
@@ -35,13 +36,6 @@ export interface OrderActionModalsProps {
   onError?: (message: string) => void;
 }
 
-/**
- * OrderActionModals Component
- *
- * Orchestrates and renders all action modals in one place
- *
- * @param props - Component props
- */
 export function OrderActionModals({
   modals,
   order,
@@ -231,7 +225,6 @@ export function OrderActionModals({
         onConfirm={handleWhatsappConfirm}
       />
 
-      {/* Packaging Notes Modal */}
       <BaseModal
         isOpen={modals.packagingNotes.isOpen}
         onClose={() => {
@@ -255,6 +248,30 @@ export function OrderActionModals({
           </div>
         </div>
       </BaseModal>
+
+      <PartialDeliveryModal
+        isOpen={modals.partialDelivery.isOpen}
+        onClose={modals.partialDelivery.close}
+        orderProducts={order.order_products || []}
+        totalCost={order.totalCost}
+      />
+
+      <ExchangeModal
+        isOpen={modals.exchange.isOpen}
+        onClose={modals.exchange.close}
+        orderProducts={order.order_products || []}
+      />
+
+      <ReturnRefundModal
+        isOpen={modals.returnRefund.isOpen}
+        onClose={modals.returnRefund.close}
+        orderProducts={order.order_products || []}
+      />
+
+      <PostShippingCancelModal
+        isOpen={modals.postShippingCancel.isOpen}
+        onClose={modals.postShippingCancel.close}
+      />
     </>
   );
 }

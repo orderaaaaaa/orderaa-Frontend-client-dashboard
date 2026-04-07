@@ -81,6 +81,12 @@ function OrderDetailsInfoComponent({
     'shipping',
     'packagingNotes',
     'confirmAction',
+    'partialDelivery',
+    'exchange',
+    'returnRefund',
+    'postShippingCancel',
+    'resend',
+    'late',
   ]);
 
   const handleUpdate = (updatedOrder: Order) => {
@@ -174,6 +180,24 @@ function OrderDetailsInfoComponent({
         break;
       case 'whatsapp':
         modals.whatsapp.open();
+        break;
+      case 'partial_delivery':
+        modals.partialDelivery.open();
+        break;
+      case 'exchange':
+        modals.exchange.open();
+        break;
+      case 'return_refund':
+        modals.returnRefund.open();
+        break;
+      case 'cancel_post_shipping':
+        modals.postShippingCancel.open();
+        break;
+      case 'resend':
+        console.log('[Resend] action triggered for order:', localOrder.id);
+        break;
+      case 'late':
+        console.log('[Late] action triggered for order:', localOrder.id);
         break;
       default:
         setConfirmationDialog({

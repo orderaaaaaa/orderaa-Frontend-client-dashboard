@@ -5,6 +5,7 @@ import { getTimeAgo } from '@/utils/timeAgo';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
 import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
+import { POST_SHIPPING_STATUSES } from '@/types/logistics';
 
 
 interface OrderDetailsInfoStatusProps {
@@ -99,9 +100,23 @@ function EventCard({
   );
 }
 
+const LOGISTICS_DEPARTMENTS = new Set(['LOGISTICS', 'COURIER', 'SHIPPING']);
+const LOGISTICS_EVENT_NAMES = new Set(['SHIPPING', 'WITH_DRIVER', 'DELIVERED', 'RETURNED_DELIVERED']);
+
+function isLogisticsEvent(event: {
+  eventType: string;
+  employee?: { name: string; department?: string } | null;
+}): boolean {
+  if (event.employee?.department && LOGISTICS_DEPARTMENTS.has(event.employee.department)) {
+    return true;
+  }
+  return LOGISTICS_EVENT_NAMES.has(event.eventType);
+}
+
 function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
   const { getStatusLabel } = useStatusLabel();
   const allEvents = order.order_events || [];
+  const isPostShipping = POST_SHIPPING_STATUSES.has(order.status);
 
   const events = allEvents.map((event: OrderEvent, index: number) => {
     const statusLabel = event.name ? getStatusLabel(event.name) : 'حدث';
@@ -127,6 +142,13 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
     }
   }
 
+  const callCenterEvents = isPostShipping
+    ? events.filter((e) => !isLogisticsEvent(e))
+    : [];
+  const logisticsEvents = isPostShipping
+    ? events.filter((e) => isLogisticsEvent(e))
+    : [];
+
   return (
     <div>
       <div className="font-medium p-4 bg-gray-50 mt-8 rounded-xl">
@@ -134,26 +156,81 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-lg text-primary font-bold">سجل الأحداث</h2>
             <p className="border-1 border-primary text-primary w-6 h-6 text-sm text-center rounded-full flex items-center justify-center">
-              {events.length -1}
+              {events.length - 1}
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3 pb-2">
-          {events.map((item) => (
-            <EventCard
-              key={item.id}
-              eventType={item.eventType}
-              status={item.status}
-              note={item.note}
-              date={item.date}
-              time={item.time}
-              employee={item.employee}
-              utmSource={item.utmSource}
-              pageName={item.pageName}
-            />
-          ))}
-        </div>
+        {isPostShipping ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-sm font-bold text-[#1F1F1F] mb-2">
+                تحديثات مركز الاتصال
+              </h3>
+              <div className="flex flex-col gap-3">
+                {callCenterEvents.map((item) => (
+                  <EventCard
+                    key={item.id}
+                    eventType={item.eventType}
+                    status={item.status}
+                    note={item.note}
+                    date={item.date}
+                    time={item.time}
+                    employee={item.employee}
+                    utmSource={item.utmSource}
+                    pageName={item.pageName}
+                  />
+                ))}
+                {callCenterEvents.length === 0 && (
+                  <p className="text-sm text-gray-400 text-center py-4">
+                    لا توجد تحديثات
+                  </p>
+                )}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-[#1F1F1F] mb-2">
+                تحديثات اللوجستيك / المندوب
+              </h3>
+              <div className="flex flex-col gap-3">
+                {logisticsEvents.map((item) => (
+                  <EventCard
+                    key={item.id}
+                    eventType={item.eventType}
+                    status={item.status}
+                    note={item.note}
+                    date={item.date}
+                    time={item.time}
+                    employee={item.employee}
+                    utmSource={item.utmSource}
+                    pageName={item.pageName}
+                  />
+                ))}
+                {logisticsEvents.length === 0 && (
+                  <p className="text-sm text-gray-400 text-center py-4">
+                    لا توجد تحديثات
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-3 pb-2">
+            {events.map((item) => (
+              <EventCard
+                key={item.id}
+                eventType={item.eventType}
+                status={item.status}
+                note={item.note}
+                date={item.date}
+                time={item.time}
+                employee={item.employee}
+                utmSource={item.utmSource}
+                pageName={item.pageName}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

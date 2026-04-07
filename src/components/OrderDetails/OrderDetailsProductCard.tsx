@@ -1,13 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Trash2, SquarePen, PackagePlus, CirclePlus } from 'lucide-react';
+import {
+  LiaTrashAltSolid,
+  LiaBoxSolid,
+  LiaPlusCircleSolid,
+  LiaLongArrowAltLeftSolid,
+  LiaClipboardListSolid,
+} from 'react-icons/lia';
 import { Order, OrderProductVariant } from '@/types/orders';
 import EditProductModal from './EditProductModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import AddSameTypeProductModal from './AddSameTypeProductModal';
 import AddNewProductModal from './AddNewProductModal';
 import ProductDetailsModal from './ProductDetailsModal';
+import ProductActionMenu from './ProductActionMenu';
+import SwapProductModal from './ActionModals/SwapProductModal';
+import ProductChangeLogModal from './ProductChangeLogModal';
 import {
   useUpdateOrderProduct,
   useDeleteOrderProduct,
@@ -16,7 +25,6 @@ import {
 } from '@/services/orders';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
-import { LiaLongArrowAltLeftSolid } from 'react-icons/lia';
 import Image from 'next/image';
 
 interface OrderDetailsProductCardProps {
@@ -40,6 +48,8 @@ function OrderDetailsProductCard({
   const [isAddNewProductModalOpen, setIsAddNewProductModalOpen] =
     useState(false);
   const [viewingProductId, setViewingProductId] = useState<number | null>(null);
+  const [swapProductId, setSwapProductId] = useState<number | null>(null);
+  const [isChangeLogOpen, setIsChangeLogOpen] = useState(false);
   const [productsData, setProductsData] = useState(
     order.order_products?.map((orderProduct) => ({
       id: orderProduct.id,
@@ -110,6 +120,10 @@ function OrderDetailsProductCard({
 
   const viewingOrderProduct = order.order_products?.find(
     (orderProduct) => orderProduct.id === viewingProductId
+  );
+
+  const swapProduct = productsData.find(
+    (item) => item.id === swapProductId
   );
 
   const handleAddSameTypeProduct = async (
@@ -190,18 +204,14 @@ function OrderDetailsProductCard({
                 </div>
                 <div className="flex flex-col items-end ml-2">
                   <div className="flex justify-end gap-2 mb-4">
-                    <SquarePen
-                      className={`w-4 transition-colors ${isLockedByOther
-                          ? 'opacity-50 cursor-not-allowed'
-                          : 'cursor-pointer hover:text-purple-700'
-                        }`}
-                      onClick={() =>
-                        !isLockedByOther && handleEditClick(item.id)
-                      }
+                    <ProductActionMenu
+                      onModify={() => handleEditClick(item.id)}
+                      onSwap={() => setSwapProductId(item.id)}
+                      disabled={isLockedByOther}
                     />
                     {productsData.length > 1 && (
-                      <Trash2
-                        className={`w-4 text-red-600 transition-colors ${isLockedByOther
+                      <LiaTrashAltSolid
+                        className={`w-4 h-4 text-red-600 transition-colors ${isLockedByOther
                             ? 'opacity-50 cursor-not-allowed'
                             : 'cursor-pointer hover:text-red-700'
                           }`}
@@ -242,7 +252,7 @@ function OrderDetailsProductCard({
               onClick={() => setIsAddNewProductModalOpen(true)}
               className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <PackagePlus className="w-5 h-5" strokeWidth={2} />
+              <LiaBoxSolid className="w-5 h-5" />
               <span className="text-sm font-bold">إضافة منتج جديد</span>
             </Button>
 
@@ -251,8 +261,17 @@ function OrderDetailsProductCard({
               disabled={productsData.length === 0}
               className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-primary text-primary rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <CirclePlus className="w-5 h-5" strokeWidth={2} />
+              <LiaPlusCircleSolid className="w-5 h-5" />
               <span className="text-sm font-bold">إضافة منتج من نفس النوع</span>
+            </Button>
+
+            <Button
+              onClick={() => setIsChangeLogOpen(true)}
+              variant="outline"
+              className="flex items-center gap-2 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <LiaClipboardListSolid className="w-5 h-5" />
+              <span className="text-sm font-bold">سجل التغييرات</span>
             </Button>
           </div>
         </div>
@@ -298,6 +317,25 @@ function OrderDetailsProductCard({
         isOpen={viewingProductId !== null}
         onClose={() => setViewingProductId(null)}
         orderProduct={viewingOrderProduct || null}
+      />
+
+      {swapProduct && (
+        <SwapProductModal
+          isOpen={swapProductId !== null}
+          onClose={() => setSwapProductId(null)}
+          currentProduct={{
+            id: swapProduct.id,
+            name: swapProduct.product,
+            price: swapProduct.price,
+            variants: swapProduct.variants,
+          }}
+        />
+      )}
+
+      <ProductChangeLogModal
+        isOpen={isChangeLogOpen}
+        onClose={() => setIsChangeLogOpen(false)}
+        orderId={order.id}
       />
     </>
   );
