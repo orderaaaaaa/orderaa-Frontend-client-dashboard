@@ -70,6 +70,11 @@ export const navigation: NavigationItem[] = [
         href: '/dashboard/orders/shipping-orders',
         icon: LiaShippingFastSolid,
       },
+      {
+        name: 'متابعة الشحن',
+        href: '/dashboard/orders/tracking',
+        icon: LiaClipboardCheckSolid,
+      },
     ],
   },
   {

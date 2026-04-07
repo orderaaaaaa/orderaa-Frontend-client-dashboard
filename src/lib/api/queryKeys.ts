@@ -44,6 +44,13 @@ export const QUERY_KEYS = {
   CANCELLATION_REASONS: 'cancellation-reasons',
   TOP_CANCELLATION_REASONS: 'top-cancellation-reasons',
 
+  // Logistics & Tracking
+  GOVERNORATE_LOGISTICS_CONFIG: 'governorate-logistics-config',
+  TRACKING_CARDS: 'tracking-cards',
+  POST_SHIPPING_REASONS: 'post-shipping-reasons',
+  TOP_POST_SHIPPING_REASONS: 'top-post-shipping-reasons',
+  ORDER_PRODUCT_CHANGE_LOGS: 'order-product-change-logs',
+
   // Dashboard Reports
   DASHBOARD_SUMMARY: 'dashboard-summary',
   DASHBOARD_ATTEMPTED: 'dashboard-attempted',
