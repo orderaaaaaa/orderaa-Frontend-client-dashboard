@@ -23,9 +23,9 @@ import { ShippingConfig } from '../types/shipping';
 
 const createShippingSchema = (showClientCode: boolean) =>
   z.object({
-    authKey: z.string().min(1, 'يرجى إدخال كلمة المرور'),
+    authKey: z.string().min(1, 'يرجى إدخال Authentication Key'),
     clientCode: showClientCode
-      ? z.string().min(1, 'يرجى إدخال اسم المستخدم')
+      ? z.string().min(1, 'يرجى إدخال Client Code')
       : z.string().optional(),
   });
 
@@ -49,12 +49,12 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
   const [error, setError] = useState<string>('');
 
   const providerLower = providerId.toLowerCase();
-  const authOnlyProviders = ['red', 'hashtag'];
-  const isAuthOnly = authOnlyProviders.includes(providerLower);
+  const isRedOrHashtag = providerLower === 'red' || providerLower === 'hashtag';
+  const requiresClientCode = providerLower === 'turbo';
   const steps = getStepsByProvider(providerId);
 
   const isEditing = !!config?.authKey;
-  const showClientCode = true;
+  const showClientCode = requiresClientCode || isEditing;
 
   const schema = useMemo(
     () => createShippingSchema(showClientCode),
@@ -239,27 +239,52 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
           )}
 
           <div className="space-y-4">
-            {showClientCode && (
-              <Input
-                register={form.register}
-                name="clientCode"
-                label="اسم المستخدم"
-                type="text"
-                placeholder="أدخل اسم المستخدم"
-                error={form.formState.errors.clientCode?.message}
-                disabled={isSaving}
-              />
-            )}
+            {isRedOrHashtag ? (
+              <>
+                <Input
+                  register={form.register}
+                  name="clientCode"
+                  label="اسم المستخدم"
+                  type="text"
+                  placeholder="أدخل اسم المستخدم"
+                  error={form.formState.errors.clientCode?.message}
+                  disabled={isSaving}
+                />
+                <Input
+                  register={form.register}
+                  name="authKey"
+                  label="كلمة المرور"
+                  type="text"
+                  placeholder="أدخل كلمة المرور"
+                  error={form.formState.errors.authKey?.message}
+                  disabled={isSaving}
+                />
+              </>
+            ) : (
+              <>
+                <Input
+                  register={form.register}
+                  name="authKey"
+                  label="Authentication Key"
+                  type="text"
+                  placeholder="أدخل Authentication Key"
+                  error={form.formState.errors.authKey?.message}
+                  disabled={isSaving}
+                />
 
-            <Input
-              register={form.register}
-              name="authKey"
-              label="كلمة المرور"
-              type="text"
-              placeholder="أدخل كلمة المرور"
-              error={form.formState.errors.authKey?.message}
-              disabled={isSaving}
-            />
+                {showClientCode && (
+                  <Input
+                    register={form.register}
+                    name="clientCode"
+                    label="Client Code"
+                    type="text"
+                    placeholder="أدخل Client Code"
+                    error={form.formState.errors.clientCode?.message}
+                    disabled={isSaving}
+                  />
+                )}
+              </>
+            )}
 
             <div className="flex gap-3 pt-4 border-t border-gray-100">
               <Button
