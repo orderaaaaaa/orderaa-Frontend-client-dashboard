@@ -1,16 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import {
   LiaClipboardListSolid,
   LiaClockSolid,
   LiaCheckDoubleSolid,
 } from 'react-icons/lia';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import type {
-  TrackingCard as TrackingCardType,
-  UpdateTrackingCardData,
-} from '@/types/logistics';
+import type { TrackingCard as TrackingCardType } from '@/types/logistics';
 import TrackingCard from './TrackingCard';
 import TrackingEmptyState from './TrackingEmptyState';
 
@@ -117,7 +114,7 @@ const initialMockCards: TrackingCardType[] = [
 ];
 
 export default function TrackingTabs() {
-  const [cards, setCards] = useState<TrackingCardType[]>(initialMockCards);
+  const cards = initialMockCards;
 
   const pendingCards = useMemo(
     () => cards.filter((c) => c.status === 'PENDING'),
@@ -131,22 +128,6 @@ export default function TrackingTabs() {
     () => cards.filter((c) => c.status === 'COMPLETED'),
     [cards]
   );
-
-  const handleUpdate = (cardId: number, data: UpdateTrackingCardData) => {
-    setCards((prev) =>
-      prev.map((card) =>
-        card.id === cardId
-          ? {
-              ...card,
-              ...data,
-              status: 'COMPLETED' as const,
-              completedAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            }
-          : card
-      )
-    );
-  };
 
   return (
     <Tabs defaultValue="pending">
@@ -171,14 +152,13 @@ export default function TrackingTabs() {
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="pending">
+      <TabsContent value="pending" dir="rtl">
         {pendingCards.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {pendingCards.map((card) => (
               <TrackingCard
                 key={card.id}
                 card={card}
-                onUpdate={handleUpdate}
               />
             ))}
           </div>
@@ -190,14 +170,13 @@ export default function TrackingTabs() {
         )}
       </TabsContent>
 
-      <TabsContent value="overdue">
+      <TabsContent value="overdue" dir="rtl">
         {overdueCards.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {overdueCards.map((card) => (
               <TrackingCard
                 key={card.id}
                 card={card}
-                onUpdate={handleUpdate}
               />
             ))}
           </div>
@@ -209,14 +188,13 @@ export default function TrackingTabs() {
         )}
       </TabsContent>
 
-      <TabsContent value="completed">
+      <TabsContent value="completed" dir="rtl">
         {completedCards.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {completedCards.map((card) => (
               <TrackingCard
                 key={card.id}
                 card={card}
-                onUpdate={handleUpdate}
               />
             ))}
           </div>

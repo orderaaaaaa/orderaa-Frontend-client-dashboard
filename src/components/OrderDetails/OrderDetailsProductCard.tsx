@@ -246,32 +246,34 @@ function OrderDetailsProductCard({
           ))}
         </div>
 
-        <div className="mt-6 flex justify-end items-start mb-4">
-          <div className="flex gap-3">
+        <div className="mt-6 mb-4 flex flex-col gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <Button
               onClick={() => setIsAddNewProductModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <LiaBoxSolid className="w-5 h-5" />
-              <span className="text-sm font-bold">إضافة منتج جديد</span>
+              <LiaBoxSolid className="w-5 h-5 shrink-0" />
+              <span className="text-sm font-bold whitespace-nowrap">إضافة منتج جديد</span>
             </Button>
 
             <Button
               onClick={() => setIsAddSameTypeModalOpen(true)}
               disabled={productsData.length === 0}
-              className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-primary text-primary rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-white border-2 border-primary text-primary rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <LiaPlusCircleSolid className="w-5 h-5" />
-              <span className="text-sm font-bold">إضافة منتج من نفس النوع</span>
+              <LiaPlusCircleSolid className="w-5 h-5 shrink-0" />
+              <span className="text-sm font-bold whitespace-nowrap">إضافة منتج من نفس النوع</span>
             </Button>
+          </div>
 
+          <div className="flex justify-center">
             <Button
               onClick={() => setIsChangeLogOpen(true)}
               variant="outline"
               className="flex items-center gap-2 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              <LiaClipboardListSolid className="w-5 h-5" />
-              <span className="text-sm font-bold">سجل التغييرات</span>
+              <LiaClipboardListSolid className="w-5 h-5 shrink-0" />
+              <span className="text-sm font-bold whitespace-nowrap">سجل التغييرات</span>
             </Button>
           </div>
         </div>

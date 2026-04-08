@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import {
   DndContext,
@@ -28,7 +28,7 @@ import {
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
-import { Product } from '../../types/products';
+import { Product, VariantOption } from '../../types/products';
 import { useMergeProducts } from '../../hooks/useMergeProducts';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -178,8 +178,12 @@ const MergeProductsModal = ({
   products,
   onSuccess,
 }: MergeProductsModalProps) => {
-  const [targetProduct, setTargetProduct] = useState<Product | null>(null);
-  const [sourceProducts, setSourceProducts] = useState<Product[]>(products);
+  const [targetProduct, setTargetProduct] = useState<Product | null>(
+    products[0] ?? null
+  );
+  const [sourceProducts, setSourceProducts] = useState<Product[]>(
+    products.slice(1)
+  );
   const [activeId, setActiveId] = useState<number | null>(null);
   const [error, setError] = useState('');
 
@@ -188,11 +192,53 @@ const MergeProductsModal = ({
   const form = useForm<MergeFormData>({
     resolver: zodResolver(mergeSchema),
     defaultValues: {
-      name: '',
-      sku: '',
-      price: undefined,
+      name: products[0]?.name ?? '',
+      sku: products[0]?.sku ?? '',
+      price: products[0]?.price ?? undefined,
     },
   });
+
+  const mergedVariants = useMemo(() => {
+    const LABEL_ALIASES: Record<string, string> = {
+      size: 'المقاسات',
+      sizes: 'المقاسات',
+      المقاس: 'المقاسات',
+      المقاسات: 'المقاسات',
+      color: 'الألوان',
+      colors: 'الألوان',
+      اللون: 'الألوان',
+      الألوان: 'الألوان',
+      الالوان: 'الألوان',
+    };
+
+    const normalizeLabel = (label: string) => {
+      const lower = label.toLowerCase().trim();
+      return LABEL_ALIASES[lower] ?? label;
+    };
+
+    const allProducts = targetProduct
+      ? [targetProduct, ...sourceProducts]
+      : sourceProducts;
+    const variantMap = new Map<string, Set<string>>();
+
+    allProducts.forEach((p) => {
+      (p.variantOptions ?? []).forEach((v) => {
+        const normalized = normalizeLabel(v.label);
+        const existing = variantMap.get(normalized);
+        if (existing) {
+          v.values.forEach((val) => existing.add(val));
+        } else {
+          variantMap.set(normalized, new Set(v.values));
+        }
+      });
+    });
+
+    const result: VariantOption[] = [];
+    variantMap.forEach((values, label) => {
+      result.push({ label, values: Array.from(values) });
+    });
+    return result;
+  }, [targetProduct, sourceProducts]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -253,6 +299,9 @@ const MergeProductsModal = ({
           name: data.name,
           sku: data.sku || undefined,
           price: data.price,
+          image: targetProduct.image || undefined,
+          images: targetProduct.images?.length ? targetProduct.images : undefined,
+          variants: mergedVariants.length > 0 ? mergedVariants : undefined,
         },
       },
       {
@@ -367,6 +416,30 @@ const MergeProductsModal = ({
                   placeholder="أدخل السعر..."
                   error={form.formState.errors.price?.message}
                 />
+                {mergedVariants.length > 0 && (
+                  <div className="space-y-3 pt-2">
+                    <h4 className="text-sm font-semibold text-gray-900">
+                      المتغيرات بعد الدمج
+                    </h4>
+                    {mergedVariants.map((variant) => (
+                      <div key={variant.label} className="space-y-1.5">
+                        <p className="text-xs font-medium text-gray-600">
+                          {variant.label}
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {variant.values.map((val) => (
+                            <span
+                              key={val}
+                              className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                            >
+                              {val}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </>
             ) : (
               <p className="text-sm text-gray-400 text-center py-4">

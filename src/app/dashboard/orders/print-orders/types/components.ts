@@ -63,6 +63,7 @@ export interface ScannedOrdersModalProps extends OrderActionCallbacks {
   actionableFilteredGroups: NonConfirmedGroup[];
   nonConfirmedGroups: NonConfirmedGroup[];
   onRemoveOrder: (code: string) => void;
+  onForceActionable?: (orderId: number) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   filteredOrders: ScannedOrder[];

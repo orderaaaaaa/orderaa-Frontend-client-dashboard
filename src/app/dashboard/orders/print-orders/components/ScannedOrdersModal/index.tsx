@@ -92,9 +92,11 @@ function ChangeProductTable({
 function NonConfirmedSection({
   groups,
   onRemove,
+  onForceActionable,
 }: {
   groups: NonConfirmedGroup[];
   onRemove: (code: string) => void;
+  onForceActionable?: (orderId: number) => void;
 }) {
   if (groups.length === 0) return null;
 
@@ -144,10 +146,20 @@ function NonConfirmedSection({
                     key={order.code}
                     className="flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors"
                   >
-                    <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                    <div className="flex items-center gap-2 min-w-0">
                       <span className="text-sm font-medium text-gray-800">
                         {order.code}
                       </span>
+                      {onForceActionable && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onForceActionable(order.id)}
+                          className="h-7 px-2.5 text-xs font-semibold text-primary border-primary/30 hover:bg-primary/10"
+                        >
+                          نقل للتنفيذ
+                        </Button>
+                      )}
                       {order.packagingWarning && (
                         <span className="text-xs text-amber-600 truncate">
                           ({order.packagingWarning})
@@ -159,14 +171,16 @@ function NonConfirmedSection({
                         </span>
                       )}
                     </div>
-                    <Button
-                      variant="ghost"
-                      onClick={() => onRemove(order.code)}
-                      className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors flex-shrink-0"
-                      title="حذف الطلب"
-                    >
-                      <LiaTrashAltSolid className="size-4" />
-                    </Button>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <Button
+                        variant="ghost"
+                        onClick={() => onRemove(order.code)}
+                        className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                        title="حذف الطلب"
+                      >
+                        <LiaTrashAltSolid className="size-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -187,6 +201,7 @@ export function ScannedOrdersModal({
   actionableFilteredGroups,
   nonConfirmedGroups,
   onRemoveOrder,
+  onForceActionable,
   searchQuery,
   onSearchChange,
   confirmedFilteredOrders,
@@ -374,6 +389,7 @@ export function ScannedOrdersModal({
                     <NonConfirmedSection
                     groups={nonConfirmedGroups}
                     onRemove={onRemoveOrder}
+                    onForceActionable={onForceActionable}
                   />
                   </div>
                 </>

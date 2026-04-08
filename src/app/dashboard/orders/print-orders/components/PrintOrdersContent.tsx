@@ -215,6 +215,7 @@ export function PrintOrdersContent() {
     confirmedFilteredOrders,
     actionableFilteredOrders,
     actionableFilteredGroups,
+    forceActionable,
   } = useScannedOrders();
 
   const handleScan = useCallback(
@@ -784,6 +785,7 @@ export function PrintOrdersContent() {
         actionableFilteredGroups={actionableFilteredGroups}
         nonConfirmedGroups={nonConfirmedGroups}
         onRemoveOrder={removeOrder}
+        onForceActionable={forceActionable}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         filteredOrders={filteredOrders}

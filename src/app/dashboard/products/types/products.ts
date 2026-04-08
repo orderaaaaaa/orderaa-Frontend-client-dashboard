@@ -95,4 +95,7 @@ export interface MergeProductsPayload {
   name?: string;
   sku?: string;
   price?: number;
+  image?: string;
+  images?: string[];
+  variants?: VariantOption[];
 }
