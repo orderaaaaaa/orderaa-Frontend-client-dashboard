@@ -49,12 +49,12 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
   const [error, setError] = useState<string>('');
 
   const providerLower = providerId.toLowerCase();
-  const isRedOrHashtag = providerLower === 'red' || providerLower === 'hashtag';
+  const isRedOrHashtag = providerLower === 'red' || providerLower === 'hashtag' || providerLower === 'jt_express';
   const requiresClientCode = providerLower === 'turbo';
   const steps = getStepsByProvider(providerId);
 
   const isEditing = !!config?.authKey;
-  const showClientCode = requiresClientCode || isEditing;
+  const showClientCode = isRedOrHashtag || requiresClientCode || isEditing;
 
   const schema = useMemo(
     () => createShippingSchema(showClientCode),
@@ -262,16 +262,6 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
               </>
             ) : (
               <>
-                <Input
-                  register={form.register}
-                  name="authKey"
-                  label="Authentication Key"
-                  type="text"
-                  placeholder="أدخل Authentication Key"
-                  error={form.formState.errors.authKey?.message}
-                  disabled={isSaving}
-                />
-
                 {showClientCode && (
                   <Input
                     register={form.register}
@@ -283,6 +273,16 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                     disabled={isSaving}
                   />
                 )}
+
+                <Input
+                  register={form.register}
+                  name="authKey"
+                  label="Authentication Key"
+                  type="text"
+                  placeholder="أدخل Authentication Key"
+                  error={form.formState.errors.authKey?.message}
+                  disabled={isSaving}
+                />
               </>
             )}
 

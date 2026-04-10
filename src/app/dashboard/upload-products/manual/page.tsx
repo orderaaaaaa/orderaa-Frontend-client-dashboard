@@ -117,13 +117,11 @@ function Manual() {
       toast.success('تم إنشاء الطلب بنجاح!');
       reset();
       useProductDropdownStore.getState().setSelectedProducts([]);
-    } catch (error) {
-      console.error('Error creating manual order:', error);
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.';
-      toast.error(errorMessage);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      toast.error(
+        Array.isArray(msg) ? msg.join('\n') : msg || 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.'
+      );
     }
   };
 

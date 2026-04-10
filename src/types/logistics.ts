@@ -8,6 +8,7 @@ export interface GovernorateLogisticsConfig {
   governorateName: string;
   firstAttemptAfterDays: number;
   shippingCompanyCost: number;
+  nonReceiptCost: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -62,6 +63,18 @@ export interface PostShippingReason {
   id: number;
   reasonName: string;
   type: 'POST_SHIPPING';
+  isActive: boolean;
+  displayOrder: number;
+  usageCount: number;
+  lastUsedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ShippingCancellationReason {
+  id: number;
+  reasonName: string;
+  type: 'SHIPPING_CANCELLATION';
   isActive: boolean;
   displayOrder: number;
   usageCount: number;

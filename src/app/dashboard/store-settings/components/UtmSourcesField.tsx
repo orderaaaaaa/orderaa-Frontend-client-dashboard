@@ -5,6 +5,7 @@ import { LiaTimesSolid, LiaTagSolid } from 'react-icons/lia';
 import { UseFormSetValue, UseFormWatch, FieldErrors } from 'react-hook-form';
 import { OrderSettingsFormData } from '../schemas/store';
 import { Button } from '@/components/ui/button';
+import Input from '@/components/ui/Input';
 
 interface UtmSourcesFieldProps {
   watch: UseFormWatch<OrderSettingsFormData>;
@@ -94,13 +95,14 @@ export function UtmSourcesField({
             </div>
           ))}
 
-          <input
+          <Input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="اكتب المصدر"
-            className="flex-1 min-w-[80px] bg-transparent outline-none py-1 px-2 text-xs sm:text-sm"
+            className="flex-1 min-w-[80px]"
+            inputClassName="bg-transparent border-none shadow-none py-1 px-2 text-xs sm:text-sm"
           />
         </div>
       </div>

@@ -49,6 +49,7 @@ export const QUERY_KEYS = {
   TRACKING_CARDS: 'tracking-cards',
   POST_SHIPPING_REASONS: 'post-shipping-reasons',
   TOP_POST_SHIPPING_REASONS: 'top-post-shipping-reasons',
+  SHIPPING_CANCELLATION_REASONS: 'shipping-cancellation-reasons',
   ORDER_PRODUCT_CHANGE_LOGS: 'order-product-change-logs',
 
   // Dashboard Reports

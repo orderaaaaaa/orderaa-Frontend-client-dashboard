@@ -12,6 +12,7 @@ import { URLField } from './URLField';
 import { LanguageSelectionField } from './LanguageSelectionField';
 import { CancellationReasonsField } from './CancellationReasonsField';
 import { PostShippingReasonsField } from './PostShippingReasonsField';
+import { ShippingCancellationReasonsField } from './ShippingCancellationReasonsField';
 import { LogisticsSettingsSection } from './LogisticsSettingsSection';
 import { UtmSourcesField } from './UtmSourcesField';
 import { AutoCancelField } from './AutoCancelField';
@@ -58,6 +59,10 @@ export default function OrderSettingsFields({
         <Separator />
 
         <PostShippingReasonsField />
+
+        <Separator />
+
+        <ShippingCancellationReasonsField />
 
         <Separator />
 

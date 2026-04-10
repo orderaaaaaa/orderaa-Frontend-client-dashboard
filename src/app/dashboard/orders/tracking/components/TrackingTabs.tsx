@@ -1,15 +1,19 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   LiaClipboardListSolid,
   LiaClockSolid,
   LiaCheckDoubleSolid,
 } from 'react-icons/lia';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import Input from '@/components/ui/Input';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 import type { TrackingCard as TrackingCardType } from '@/types/logistics';
+import { useOrderStatusesQuery } from '@/services/orders';
 import TrackingCard from './TrackingCard';
 import TrackingEmptyState from './TrackingEmptyState';
+import { useDebounce } from '@/utils/debounce';
 
 const today = new Date().toISOString().split('T')[0];
 const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
@@ -113,23 +117,77 @@ const initialMockCards: TrackingCardType[] = [
   },
 ];
 
+function matchesSearch(card: TrackingCardType, query: string): boolean {
+  const q = query.toLowerCase();
+  return (
+    card.orderCode.toLowerCase().includes(q) ||
+    (card.order?.customers?.name as string || '').toLowerCase().includes(q) ||
+    (card.courierUpdate || '').toLowerCase().includes(q)
+  );
+}
+
 export default function TrackingTabs() {
-  const cards = initialMockCards;
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const debouncedSearch = useDebounce(searchQuery, 300);
+  const { data: orderStatuses } = useOrderStatusesQuery();
+
+  const statusOptions = useMemo(() => {
+    if (!orderStatuses) return [];
+    return orderStatuses.map((s) => ({ key: s.key, label: s.label }));
+  }, [orderStatuses]);
+
+  const filteredCards = useMemo(() => {
+    let result: TrackingCardType[] = initialMockCards;
+
+    if (statusFilter) {
+      result = result.filter((c) => c.status === statusFilter);
+    }
+
+    if (debouncedSearch.trim()) {
+      result = result.filter((c) => matchesSearch(c, debouncedSearch));
+    }
+
+    return result;
+  }, [debouncedSearch, statusFilter]);
 
   const pendingCards = useMemo(
-    () => cards.filter((c) => c.status === 'PENDING'),
-    [cards]
+    () => filteredCards.filter((c) => c.status === 'PENDING'),
+    [filteredCards]
   );
   const overdueCards = useMemo(
-    () => cards.filter((c) => c.status === 'OVERDUE'),
-    [cards]
+    () => filteredCards.filter((c) => c.status === 'OVERDUE'),
+    [filteredCards]
   );
   const completedCards = useMemo(
-    () => cards.filter((c) => c.status === 'COMPLETED'),
-    [cards]
+    () => filteredCards.filter((c) => c.status === 'COMPLETED'),
+    [filteredCards]
   );
 
   return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col sm:flex-row gap-3" dir="rtl">
+        <Input
+          type="text"
+          placeholder="بحث بكود الطلب أو اسم العميل..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onClear={() => setSearchQuery('')}
+          clearable
+          className="flex-1"
+          inputClassName="bg-white"
+        />
+        <SearchableSelect
+          value={statusFilter}
+          onChange={setStatusFilter}
+          options={statusOptions}
+          placeholder="الحالة"
+          clearable
+          onClear={() => setStatusFilter('')}
+          widthClass="sm:w-48"
+        />
+      </div>
+
     <Tabs defaultValue="pending">
       <TabsList dir="rtl">
         <TabsTrigger value="pending" className="gap-2">
@@ -206,5 +264,6 @@ export default function TrackingTabs() {
         )}
       </TabsContent>
     </Tabs>
+    </div>
   );
 }

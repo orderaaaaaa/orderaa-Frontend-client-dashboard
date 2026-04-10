@@ -41,7 +41,7 @@ export const providers: ShippingProvider[] = [
     name: 'J&T Express',
     logo: '/Icons/j&t express.png',
     description: 'جي أند تي إكسبريس لخدمات الشحن العالمية',
-    isActive: false,
+    isActive: true,
   },
   {
     id: 'red',

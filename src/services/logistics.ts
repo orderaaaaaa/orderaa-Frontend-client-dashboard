@@ -11,6 +11,7 @@ import {
   TrackingCard,
   TrackingCardsFilter,
   PostShippingReason,
+  ShippingCancellationReason,
   PartialDeliveryData,
   ExchangeData,
   ReturnRefundData,
@@ -42,6 +43,7 @@ const createMockGovernorateConfigs = (
     governorateName: name,
     firstAttemptAfterDays: 3,
     shippingCompanyCost: 45,
+    nonReceiptCost: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }));
@@ -56,6 +58,14 @@ let mockPostShippingReasons: PostShippingReason[] = [
 ];
 
 let mockReasonNextId = 7;
+
+let mockShippingCancellationReasons: ShippingCancellationReason[] = [
+  { id: 1, reasonName: 'تأخر الشحنة', type: 'SHIPPING_CANCELLATION', isActive: true, displayOrder: 1, usageCount: 10, lastUsedAt: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 2, reasonName: 'عنوان خاطئ', type: 'SHIPPING_CANCELLATION', isActive: true, displayOrder: 2, usageCount: 6, lastUsedAt: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 3, reasonName: 'العميل غير متاح', type: 'SHIPPING_CANCELLATION', isActive: true, displayOrder: 3, usageCount: 4, lastUsedAt: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+];
+
+let mockShippingCancellationNextId = 4;
 
 // ─── Governorate Logistics Config ────────────────────────────────────────────
 // TODO: Replace mock with real API when backend implements GET /logistics/governorate-config/:shippingCompanyId
@@ -85,6 +95,7 @@ export const useUpdateGovernorateLogisticsConfig = () => {
         governorateKey: string;
         firstAttemptAfterDays: number;
         shippingCompanyCost: number;
+        nonReceiptCost: number;
       }[];
     }) => {
       console.log('[useUpdateGovernorateLogisticsConfig] payload:', data);
@@ -222,6 +233,72 @@ export const useDeletePostShippingReason = () => {
       });
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.TOP_POST_SHIPPING_REASONS],
+      });
+    },
+  });
+};
+
+// ─── Shipping Cancellation Reasons ──────────────────────────────────────────
+// TODO: Replace mock with real API when backend implements GET /shipping-cancellation-reasons
+
+export const useShippingCancellationReasons = (enabled = true) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.SHIPPING_CANCELLATION_REASONS] as QueryKey,
+    queryFn: async () => {
+      await new Promise((r) => setTimeout(r, 200));
+      return [...mockShippingCancellationReasons];
+    },
+    enabled,
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
+// TODO: Replace mock with real API when backend implements POST /shipping-cancellation-reasons
+export const useCreateShippingCancellationReason = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (reasonName: string) => {
+      console.log('[useCreateShippingCancellationReason] payload:', { reasonName });
+      await new Promise((r) => setTimeout(r, 300));
+      const newReason: ShippingCancellationReason = {
+        id: mockShippingCancellationNextId++,
+        reasonName,
+        type: 'SHIPPING_CANCELLATION',
+        isActive: true,
+        displayOrder: mockShippingCancellationReasons.length + 1,
+        usageCount: 0,
+        lastUsedAt: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      mockShippingCancellationReasons.push(newReason);
+      return newReason;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.SHIPPING_CANCELLATION_REASONS],
+      });
+    },
+  });
+};
+
+// TODO: Replace mock with real API when backend implements DELETE /shipping-cancellation-reasons/:reasonId
+export const useDeleteShippingCancellationReason = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (reasonId: number) => {
+      console.log('[useDeleteShippingCancellationReason] payload:', { reasonId });
+      await new Promise((r) => setTimeout(r, 300));
+      mockShippingCancellationReasons = mockShippingCancellationReasons.filter(
+        (r) => r.id !== reasonId
+      );
+      return { success: true };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.SHIPPING_CANCELLATION_REASONS],
       });
     },
   });

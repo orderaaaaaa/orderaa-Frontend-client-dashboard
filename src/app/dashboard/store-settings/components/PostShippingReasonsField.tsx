@@ -8,6 +8,7 @@ import {
   useDeletePostShippingReason,
 } from '@/services/logistics';
 import { Button } from '@/components/ui/button';
+import Input from '@/components/ui/Input';
 import PageLoading from '@/components/ui/page-loading';
 
 export function PostShippingReasonsField() {
@@ -91,13 +92,14 @@ export function PostShippingReasonsField() {
             </div>
           ))}
 
-          <input
+          <Input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="اكتب السبب"
-            className="flex-1 min-w-[80px] bg-transparent outline-none py-1 px-2 text-xs sm:text-sm"
+            className="flex-1 min-w-[80px]"
+            inputClassName="bg-transparent border-none shadow-none py-1 px-2 text-xs sm:text-sm"
           />
         </div>
       </div>

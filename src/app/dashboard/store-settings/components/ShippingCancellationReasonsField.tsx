@@ -1,36 +1,31 @@
 'use client';
 
 import { useState } from 'react';
-import { LiaTimesSolid, LiaHashtagSolid } from 'react-icons/lia';
-import { UseFormSetValue, UseFormWatch, FieldErrors } from 'react-hook-form';
-import { OrderSettingsFormData } from '../schemas/store';
+import { LiaTimesSolid, LiaBanSolid } from 'react-icons/lia';
+import {
+  useShippingCancellationReasons,
+  useCreateShippingCancellationReason,
+  useDeleteShippingCancellationReason,
+} from '@/services/logistics';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
+import PageLoading from '@/components/ui/page-loading';
 
-interface CancellationReasonsFieldProps {
-  watch: UseFormWatch<OrderSettingsFormData>;
-  setValue: UseFormSetValue<OrderSettingsFormData>;
-  errors: FieldErrors<OrderSettingsFormData>;
-}
-
-export function CancellationReasonsField({
-  watch,
-  setValue,
-  errors,
-}: CancellationReasonsFieldProps) {
-  const reasons = watch('cancellationReasons') || [];
+export function ShippingCancellationReasonsField() {
   const [inputValue, setInputValue] = useState('');
+  const { data: reasons, isLoading } = useShippingCancellationReasons();
+  const { mutate: createReason, isPending: isCreating } =
+    useCreateShippingCancellationReason();
+  const { mutate: deleteReason } = useDeleteShippingCancellationReason();
 
   const handleAddReason = () => {
     const value = inputValue.trim();
     if (!value) return;
 
-    if (!reasons.includes(value)) {
-      setValue('cancellationReasons', [...reasons, value], {
-        shouldValidate: true,
-      });
-    }
+    const isDuplicate = reasons?.some((r) => r.reasonName === value);
+    if (isDuplicate) return;
 
+    createReason(value);
     setInputValue('');
   };
 
@@ -41,24 +36,24 @@ export function CancellationReasonsField({
     }
   };
 
-  const removeReason = (indexToRemove: number) => {
-    setValue(
-      'cancellationReasons',
-      reasons.filter((_, i) => i !== indexToRemove),
-      { shouldValidate: true }
-    );
+  const handleRemoveReason = (reasonId: number) => {
+    deleteReason(reasonId);
   };
+
+  if (isLoading) {
+    return <PageLoading size="sm" className="py-6 min-h-0" />;
+  }
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-3">
-        <LiaHashtagSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
+        <LiaBanSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
         <div className="flex-1 min-w-0">
           <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">
-            اسباب الغاء الطلب
+            اسباب الغاء الشحن
           </h3>
           <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
-            أضف الأسباب التي تظهر عند إلغاء الطلب
+            أضف الأسباب التي تظهر عند إلغاء الشحنة
           </p>
         </div>
       </div>
@@ -71,26 +66,27 @@ export function CancellationReasonsField({
           type="button"
           size="sm"
           onClick={handleAddReason}
-          disabled={!inputValue.trim()}
+          disabled={!inputValue.trim() || isCreating}
           className="absolute left-2 bottom-2 w-16 sm:w-20 h-8 rounded-lg text-xs sm:text-sm font-semibold"
         >
-          إضافة
+          {isCreating ? '...' : 'إضافة'}
         </Button>
 
         <div className="flex flex-wrap items-center gap-2 pr-0 pl-20 sm:pl-24 min-h-[32px]">
-          {reasons.map((reason, index) => (
+          {(reasons ?? []).map((reason) => (
             <div
-              key={index}
+              key={reason.id}
               className="flex items-center gap-1.5 bg-primary text-white font-medium px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm"
             >
-              <span>{reason}</span>
+              <span>{reason.reasonName}</span>
               <Button
+                type="button"
                 variant="ghost"
                 size="icon-sm"
-                onClick={() => removeReason(index)}
+                onClick={() => handleRemoveReason(reason.id)}
                 className="hover:text-red-500 transition-colors hover:bg-inherit"
               >
-                <LiaTimesSolid  />
+                <LiaTimesSolid />
               </Button>
             </div>
           ))}
@@ -106,12 +102,6 @@ export function CancellationReasonsField({
           />
         </div>
       </div>
-
-      {errors.cancellationReasons && (
-        <p className="text-red-500 text-base">
-          {errors.cancellationReasons.message}
-        </p>
-      )}
     </div>
   );
 }
