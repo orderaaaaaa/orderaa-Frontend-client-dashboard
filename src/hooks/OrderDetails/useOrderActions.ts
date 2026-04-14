@@ -169,18 +169,11 @@ export function useOrderActions({
 
         return true;
       } catch (error: any) {
-        console.error('Failed to update order:', error);
-        // Extract error message from API response
-        const apiErrorMessage =
-          error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          error?.message ||
-          'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.';
-        // Show error toast with backend message (unless skipToast is true)
+        const msg = error?.response?.data?.message;
+        const apiErrorMessage = Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.';
         if (!options.skipToast) {
           toast.error(apiErrorMessage);
         }
-        // Re-throw so callers can also handle (e.g., show ErrorModal)
         throw new Error(apiErrorMessage);
       }
     },
@@ -488,15 +481,8 @@ export function useOrderActions({
 
         return true;
       } catch (error: any) {
-        console.error('Failed to update follow-up:', error);
-        // Extract error message from API response
-        const apiErrorMessage =
-          error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          error?.message ||
-          'فشل في تسجيل المتابعة. يرجى المحاولة مرة أخرى.';
-        // Show error toast with backend message
-        toast.error(apiErrorMessage);
+        const msg = error?.response?.data?.message;
+        toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في تسجيل المتابعة. يرجى المحاولة مرة أخرى.');
         return false;
       }
     },
@@ -535,14 +521,8 @@ export function useOrderActions({
 
         toast.success('تم تحديث بيانات الشحن بنجاح');
       } catch (error: any) {
-        console.error('Failed to update shipping data:', error);
-        // Extract error message from API response
-        const apiErrorMessage =
-          error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          error?.message ||
-          'فشل في تحديث بيانات الشحن. يرجى المحاولة مرة أخرى.';
-        toast.error(apiErrorMessage);
+        const msg = error?.response?.data?.message;
+        toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في تحديث بيانات الشحن. يرجى المحاولة مرة أخرى.');
         throw error;
       }
     },
@@ -571,14 +551,8 @@ export function useOrderActions({
 
         toast.success('تم تحديث ملاحظات التغليف بنجاح');
       } catch (error: any) {
-        console.error('Failed to update packaging notes:', error);
-        // Extract error message from API response
-        const apiErrorMessage =
-          error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          error?.message ||
-          'فشل في تحديث ملاحظات التغليف. يرجى المحاولة مرة أخرى.';
-        toast.error(apiErrorMessage);
+        const msg = error?.response?.data?.message;
+        toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في تحديث ملاحظات التغليف. يرجى المحاولة مرة أخرى.');
         throw error;
       }
     },

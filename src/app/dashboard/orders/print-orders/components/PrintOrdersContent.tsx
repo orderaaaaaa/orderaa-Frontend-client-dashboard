@@ -245,7 +245,8 @@ export function PrintOrdersContent() {
         }
       } catch (error: any) {
         playErrorSound();
-        toast.error(error?.response?.data?.message || 'هذا الطلب غير موجود');
+        const msg = error?.response?.data?.message;
+        toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'هذا الطلب غير موجود');
       } finally {
         setIsScanLoading(false);
       }
@@ -271,7 +272,8 @@ export function PrintOrdersContent() {
       clearOrders();
       setIsScannedOrdersModalOpen(false);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'فشل تحديث الطلبات');
+      const msg = error?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
     } finally {
       setIsActionLoading(false);
     }
@@ -288,7 +290,8 @@ export function PrintOrdersContent() {
       clearOrders();
       setIsScannedOrdersModalOpen(false);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'فشل تحديث الطلبات');
+      const msg = error?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
     } finally {
       setIsActionLoading(false);
     }
@@ -305,7 +308,8 @@ export function PrintOrdersContent() {
       clearOrders();
       setIsScannedOrdersModalOpen(false);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'فشل تحديث الطلبات');
+      const msg = error?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
     } finally {
       setIsActionLoading(false);
     }
@@ -341,7 +345,8 @@ export function PrintOrdersContent() {
       setIsScannerChangeProductMode(false);
       setIsScannedOrdersModalOpen(false);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'فشل تغيير المنتج');
+      const msg = error?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تغيير المنتج');
     } finally {
       setIsActionLoading(false);
     }
@@ -432,7 +437,8 @@ export function PrintOrdersContent() {
       clearSelections();
       setSelectMode(false);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'فشل تحديث الطلبات');
+      const msg = error?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
     } finally {
       setIsActionLoading(false);
     }
@@ -454,7 +460,8 @@ export function PrintOrdersContent() {
       clearSelections();
       setSelectMode(false);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'فشل تحديث الطلبات');
+      const msg = error?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
     } finally {
       setIsActionLoading(false);
     }
@@ -476,7 +483,8 @@ export function PrintOrdersContent() {
       clearSelections();
       setSelectMode(false);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'فشل تحديث الطلبات');
+      const msg = error?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
     } finally {
       setIsActionLoading(false);
     }
@@ -508,7 +516,8 @@ export function PrintOrdersContent() {
         clearSelections();
         setSelectMode(false);
       } catch (error: any) {
-        toast.error(error?.response?.data?.message || 'فشل تغيير المنتج');
+        const msg = error?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تغيير المنتج');
         throw error;
       } finally {
         setIsActionLoading(false);
@@ -562,14 +571,16 @@ export function PrintOrdersContent() {
         <Breadcrumb
           items={[{ title: 'الطلبات' }, { title: 'طباعة الطلبات' }]}
         />
-        <Button
-          variant="outline"
-          onClick={() => setIsReportModalOpen(true)}
-          className="gap-2"
-        >
-          <LiaClipboardListSolid className="size-5" />
-          تقرير المنتجات المؤكدة
-        </Button>
+        {filters.status !== 'PREPARED' && (
+          <Button
+            variant="outline"
+            onClick={() => setIsReportModalOpen(true)}
+            className="gap-2"
+          >
+            <LiaClipboardListSolid className="size-5" />
+            تقرير المنتجات المؤكدة
+          </Button>
+        )}
       </div>
 
       <PageTaps
@@ -582,7 +593,9 @@ export function PrintOrdersContent() {
         isLoadingAllowedStatuses={isDepartmentStatusesLoading}
       />
 
-      <StatisticsSection cards={statisticsCards} isLoading={statsLoading} />
+      {filters.status !== 'PREPARED' && (
+        <StatisticsSection cards={statisticsCards} isLoading={statsLoading} />
+      )}
       <FilterSection
         control={control}
         errors={errors}
@@ -822,6 +835,7 @@ export function PrintOrdersContent() {
       <ConfirmedProductsReportModal
         isOpen={isReportModalOpen}
         onClose={() => setIsReportModalOpen(false)}
+        status={filters.status ?? ''}
       />
     </div>
   );

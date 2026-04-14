@@ -51,10 +51,10 @@ export function useOrderFieldUpdate(
 
         toast.success('تم تحديث البيانات بنجاح');
         return updatedOrder;
-      } catch (error) {
-        console.error('Failed to update field:', error);
-        toast.error('فشل في تحديث الحقل. يرجى المحاولة مرة أخرى.');
-        throw error;
+      } catch (err: any) {
+        const msg = err?.response?.data?.message;
+        toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في تحديث الحقل. يرجى المحاولة مرة أخرى.');
+        throw err;
       }
     },
     [orderId, onOrderUpdate, updateOrderMutation]

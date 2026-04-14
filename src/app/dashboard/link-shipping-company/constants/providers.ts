@@ -57,4 +57,11 @@ export const providers: ShippingProvider[] = [
     description: 'شركة هاشتاج للشحن والتوصيل',
     isActive: true,
   },
+  {
+    id: 'quick_connect',
+    name: 'Quick Connect',
+    logo: '/Icons/quick-connect-company.jpeg',
+    description: 'شركة كويك كونكت للشحن والتوصيل',
+    isActive: true,
+  },
 ];

@@ -26,9 +26,9 @@ export default function DeleteConfirmationModal({
       await onConfirm();
       toast.success('تم حذف المنتج بنجاح');
       onClose();
-    } catch (error) {
-      console.error('Failed to delete product:', error);
-      toast.error('فشل في حذف المنتج. يرجى المحاولة مرة أخرى.');
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في حذف المنتج. يرجى المحاولة مرة أخرى.');
     } finally {
       setIsDeleting(false);
     }

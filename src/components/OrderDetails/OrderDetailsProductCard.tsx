@@ -145,8 +145,9 @@ function OrderDetailsProductCard({
       });
 
       toast.success('تم إضافة المنتج بنجاح');
-    } catch (error) {
-      toast.error('فشل في إضافة المنتج');
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في إضافة المنتج');
     }
   };
 

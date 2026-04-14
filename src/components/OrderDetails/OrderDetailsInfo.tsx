@@ -243,10 +243,10 @@ function OrderDetailsInfoComponent({
         await actions.handleConfirmAction(action);
       }
     } catch (error: any) {
+      const msg = error?.response?.data?.message || error?.message;
       setErrorModal({
         isOpen: true,
-        message:
-          error?.message || 'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.',
+        message: Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.',
       });
     }
   };

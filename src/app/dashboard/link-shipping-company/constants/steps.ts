@@ -41,6 +41,15 @@ const hashtagSteps = [
   'اضغط على "تفعيل الربط" للحفظ.',
 ];
 
+const quickConnectSteps = [
+  'قم بتسجيل الدخول إلى لوحة تحكم Quick Connect.',
+  'انتقل إلى إعدادات الحساب.',
+  'انتقل إلى قسم ربط API.',
+  'انسخ اسم المستخدم وكلمة المرور الخاصة بالربط.',
+  'ألصق البيانات في الحقول أدناه.',
+  'اضغط على "تفعيل الربط" للحفظ.',
+];
+
 export const getStepsByProvider = (providerId: string): string[] => {
   const provider = providerId.toLowerCase();
 
@@ -53,6 +62,8 @@ export const getStepsByProvider = (providerId: string): string[] => {
       return redSteps;
     case 'hashtag':
       return hashtagSteps;
+    case 'quick_connect':
+      return quickConnectSteps;
     default:
       return turboSteps;
   }

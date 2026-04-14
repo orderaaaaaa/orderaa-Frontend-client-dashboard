@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import * as XLSX from 'xlsx';
 import { toast } from 'react-toastify';
 import { LiaFileExcelSolid, LiaFilePdfSolid } from 'react-icons/lia';
@@ -10,16 +10,23 @@ import { Button } from '@/components/ui/button';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { useConfirmedProductsReportQuery } from '@/app/dashboard/services/dashboardReports';
-import { transformEditRejectedProducts } from '@/app/dashboard/utils/transformers';
-import type { PostponedOrderContentItem } from '@/app/dashboard/types';
+import {
+  usePackagingInventoryQuery,
+  usePackagingInventoryCheckMutation,
+} from '@/app/dashboard/services/dashboardReports';
+import type { PackagingInventoryItem } from '@/app/dashboard/types';
 
 interface ConfirmedProductsReportModalProps {
   isOpen: boolean;
   onClose: () => void;
+  status: string;
 }
 
-function exportToExcel(rows: PostponedOrderContentItem[], warehouseName: string) {
+function getItemKey(item: PackagingInventoryItem): string {
+  return `${item.productId}-${item.variants.map((v) => v.value).join('-')}`;
+}
+
+function exportToExcel(rows: PackagingInventoryItem[], warehouseName: string) {
   if (rows.length === 0) {
     toast.error('لا توجد بيانات لتصديرها');
     return;
@@ -27,8 +34,8 @@ function exportToExcel(rows: PostponedOrderContentItem[], warehouseName: string)
 
   const excelData = rows.map((row) => ({
     'المخزن': warehouseName,
-    'الكمية': row.quantity,
-    'المتغير': [row.variant1, row.variant2].filter(Boolean).join(' - '),
+    'الكمية': row.totalCount,
+    'المتغير': row.variants.map((v) => v.value).join(' - ') || '-',
     'المنتج': row.productName,
   }));
 
@@ -48,14 +55,14 @@ function exportToExcel(rows: PostponedOrderContentItem[], warehouseName: string)
   toast.success('تم تصدير التقرير بنجاح');
 }
 
-function handleExportToPDF(rows: PostponedOrderContentItem[], warehouseName: string) {
+function handleExportToPDF(rows: PackagingInventoryItem[], warehouseName: string) {
   exportTableToPDF({
     title: `تقرير منتجات الطلبات المؤكدة - ${warehouseName}`,
     headers: ['المخزن', 'الكمية', 'المتغير', 'المنتج'],
     rows: rows.map((row) => [
       warehouseName,
-      String(row.quantity),
-      [row.variant1, row.variant2].filter(Boolean).join(' - ') || '-',
+      String(row.totalCount),
+      row.variants.map((v) => v.value).join(' - ') || '-',
       row.productName,
     ]),
     fileName: `تقرير_المنتجات_المؤكدة_${warehouseName}`,
@@ -66,61 +73,67 @@ function WarehouseTab({
   rows,
   isLoading,
   warehouseName,
-  checkedIds,
-  toggleChecked,
+  loadingKeys,
+  onCheck,
 }: {
-  rows: PostponedOrderContentItem[];
+  rows: PackagingInventoryItem[];
   isLoading: boolean;
   warehouseName: string;
-  checkedIds: Set<number>;
-  toggleChecked: (id: number) => void;
+  loadingKeys: Set<string>;
+  onCheck: (item: PackagingInventoryItem) => void;
 }) {
-  const columns: DataTableColumn<PostponedOrderContentItem>[] = [
+  const columns: DataTableColumn<PackagingInventoryItem>[] = [
     {
-      key: 'percentage',
+      key: 'checkedCount',
       header: 'اختيار',
       className: 'text-center w-16',
       headerClassName: '[&>div]:justify-center',
       render: (_value, row) => {
-        const item = row as unknown as PostponedOrderContentItem;
+        const item = row as unknown as PackagingInventoryItem;
+        const key = getItemKey(item);
+        const isItemLoading = loadingKeys.has(key);
         return (
           <div className="flex justify-center">
-            <Checkbox
-              checked={checkedIds.has(item.id)}
-              onCheckedChange={() => toggleChecked(item.id)}
-            />
+            {isItemLoading ? (
+              <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Checkbox
+                checked={item.checkedCount > 0}
+                onCheckedChange={() => onCheck(item)}
+              />
+            )}
           </div>
         );
       },
     },
     {
-      key: 'id',
+      key: 'productName',
       header: 'المنتج',
       className: 'text-center',
       headerClassName: '[&>div]:justify-center',
       render: (_value, row) => {
-        const item = row as unknown as PostponedOrderContentItem;
+        const item = row as unknown as PackagingInventoryItem;
         return <span className="font-medium">{item.productName}</span>;
       },
     },
     {
-      key: 'variant1',
+      key: 'variants',
       header: 'المتغير',
       className: 'text-center',
       headerClassName: '[&>div]:justify-center',
       render: (_value, row) => {
-        const item = row as unknown as PostponedOrderContentItem;
-        return [item.variant1, item.variant2].filter(Boolean).join(' - ') || '-';
+        const item = row as unknown as PackagingInventoryItem;
+        return item.variants.map((v) => v.value).join(' - ') || '-';
       },
     },
     {
-      key: 'quantity',
+      key: 'totalCount',
       header: 'الكمية',
       className: 'text-center',
       headerClassName: '[&>div]:justify-center',
     },
     {
-      key: 'productName',
+      key: 'productId',
       header: 'المخزن',
       className: 'text-center',
       headerClassName: '[&>div]:justify-center',
@@ -156,7 +169,7 @@ function WarehouseTab({
       {!isLoading && rows.length === 0 ? (
         <p className="py-12 text-center text-gray-500">لا توجد بيانات</p>
       ) : (
-        <DataTable columns={columns} data={rows} isLoading={isLoading} />
+        <DataTable columns={columns} data={rows} isLoading={isLoading} keyField="productId" />
       )}
     </div>
   );
@@ -165,43 +178,39 @@ function WarehouseTab({
 export function ConfirmedProductsReportModal({
   isOpen,
   onClose,
+  status,
 }: ConfirmedProductsReportModalProps) {
-  const { data, isLoading } = useConfirmedProductsReportQuery(isOpen);
-  const [mainCheckedIds, setMainCheckedIds] = useState<Set<number>>(new Set());
-  const [subCheckedIds, setSubCheckedIds] = useState<Set<number>>(new Set());
+  const { data, isLoading } = usePackagingInventoryQuery(status, isOpen);
+  const checkMutation = usePackagingInventoryCheckMutation();
+  const [loadingKeys, setLoadingKeys] = useState<Set<string>>(new Set());
 
-  const rows = useMemo(() => {
-    if (!data) return [];
-    return transformEditRejectedProducts(data);
-  }, [data]);
+  const items = data?.items ?? [];
 
-  const mainRows = useMemo(() => {
-    const half = Math.ceil(rows.length / 2);
-    return rows.slice(0, half);
-  }, [rows]);
+  const handleCheck = useCallback(
+    async (item: PackagingInventoryItem) => {
+      const key = getItemKey(item);
 
-  const subRows = useMemo(() => {
-    const half = Math.ceil(rows.length / 2);
-    return rows.slice(half);
-  }, [rows]);
+      setLoadingKeys((prev) => {
+        const next = new Set(prev);
+        next.add(key);
+        return next;
+      });
 
-  const toggleMainChecked = useCallback((id: number) => {
-    setMainCheckedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
-
-  const toggleSubChecked = useCallback((id: number) => {
-    setSubCheckedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
+      try {
+        await checkMutation.mutateAsync(item.productId);
+      } catch (err: any) {
+        const msg = err?.response?.data?.message;
+        toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث العنصر');
+      } finally {
+        setLoadingKeys((prev) => {
+          const next = new Set(prev);
+          next.delete(key);
+          return next;
+        });
+      }
+    },
+    [checkMutation],
+  );
 
   return (
     <BaseModal
@@ -219,21 +228,21 @@ export function ConfirmedProductsReportModal({
 
         <TabsContent value="main">
           <WarehouseTab
-            rows={mainRows}
+            rows={items}
             isLoading={isLoading}
             warehouseName="المخزن الرئيسي"
-            checkedIds={mainCheckedIds}
-            toggleChecked={toggleMainChecked}
+            loadingKeys={loadingKeys}
+            onCheck={handleCheck}
           />
         </TabsContent>
 
         <TabsContent value="sub">
           <WarehouseTab
-            rows={subRows}
+            rows={items}
             isLoading={isLoading}
             warehouseName="المخزن الفرعي"
-            checkedIds={subCheckedIds}
-            toggleChecked={toggleSubChecked}
+            loadingKeys={loadingKeys}
+            onCheck={handleCheck}
           />
         </TabsContent>
       </Tabs>

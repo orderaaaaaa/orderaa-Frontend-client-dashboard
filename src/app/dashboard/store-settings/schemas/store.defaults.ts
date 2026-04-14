@@ -5,7 +5,7 @@ export const ORDER_SETTINGS_DEFAULTS: OrderSettingsFormData = {
   cancellationReasons: [],
   utmSources: [],
   canOpenShipment: false,
-  employeeCanEditContent: false,
+  employeeCanEditContent: true,
   shippingPhoneNumber: '',
   defaultShipmentContent: '',
   defaultReturnShippingCost: 0,

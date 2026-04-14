@@ -126,6 +126,22 @@ export interface EmployeeStatusResponse {
   }[];
 }
 
+export interface PackagingInventoryItem {
+  [key: string]: unknown;
+  productId: number;
+  productName: string;
+  variants: { label: string; value: string }[];
+  totalCount: number;
+  checkedCount: number;
+  uncheckedCount: number;
+}
+
+export interface PackagingInventoryResponse {
+  totalOrders: number;
+  totalItems: number;
+  items: PackagingInventoryItem[];
+}
+
 export interface EmployeesListResponse {
   count: number;
   employees: {

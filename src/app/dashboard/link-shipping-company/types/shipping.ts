@@ -6,7 +6,8 @@ export type ShippingProviderId =
   | 'jt_express'
   | 'turbo'
   | 'red'
-  | 'hashtag';
+  | 'hashtag'
+  | 'quick_connect';
 
 export interface ShippingConfig {
   id?: string;

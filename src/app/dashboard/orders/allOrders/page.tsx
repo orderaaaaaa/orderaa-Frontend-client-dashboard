@@ -138,7 +138,8 @@ function AllOrdersContent() {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
     onError: (err: any) => {
-      toast.error(err.response?.data?.message || 'فشل تحديث حالة الطلبات');
+      const msg = err?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث حالة الطلبات');
     },
   });
 
@@ -153,7 +154,8 @@ function AllOrdersContent() {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
     onError: (err: any) => {
-      toast.error(err.response?.data?.message || 'فشل تحديث حالة الطلبات');
+      const msg = err?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث حالة الطلبات');
     },
   });
 
