@@ -2,6 +2,14 @@ import React, { useMemo, useState } from 'react';
 import { LiaTruckSolid } from 'react-icons/lia';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useShippingTypes } from '@/hooks';
+import { ShippingType } from '@/types/orders';
+
+const SHIPPING_TYPE_FALLBACK: Record<string, string> = {
+  [ShippingType.DELIVERY]: 'توصيل',
+  [ShippingType.EXCHANGE]: 'استبدال',
+  [ShippingType.RETURN]: 'مرتجع',
+  [ShippingType.PARTIAL_RETURN]: 'مرتجع جزئي',
+};
 
 export interface ShippingTypeSelectProps {
   value: string | undefined;
@@ -39,7 +47,7 @@ export function ShippingTypeSelect({
     return map;
   }, [shippingTypes]);
 
-  const displayValue = value ? typeMap[value] || value : '';
+  const displayValue = value ? typeMap[value] || SHIPPING_TYPE_FALLBACK[value] || value : '';
 
   const handleChange = (label: string) => {
     const key = reverseMap[label] || label;
@@ -49,9 +57,9 @@ export function ShippingTypeSelect({
   const options = shippingTypes.map((type) => type.label);
 
   return (
-    <div className={`flex flex-col gap-1 min-w-0 overflow-hidden ${className}`}>
+    <div className={`flex flex-col gap-1 min-w-0 ${className}`}>
       <p className="font-bold text-[#121212]">نوع الشحنة</p>
-      <div className="flex gap-2 bg-white shadow-xs items-center py-1 px-2 rounded-[5px] overflow-hidden">
+      <div className="flex gap-2 bg-white shadow-xs items-center py-1 px-2 rounded-[5px]">
         <LiaTruckSolid size={18} className="flex-shrink-0" />
         <SearchableSelect
           value={displayValue}

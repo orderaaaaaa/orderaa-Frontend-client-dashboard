@@ -148,7 +148,6 @@ export const useUpdateTrackingCard = () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.TRACKING_CARDS],
       });
-      toast.success('تم تحديث الكارت بنجاح');
     },
   });
 };

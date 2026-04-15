@@ -39,6 +39,8 @@ export interface TrackingCard {
   scheduledDate: string;
   status: TrackingCardStatus;
   courierUpdate?: string | null;
+  courierName?: string | null;
+  courierPhone?: string | null;
   agentStatus?: TrackingAgentStatus | null;
   agentFlag?: AgentFlag | null;
   agentNote?: string | null;
@@ -125,6 +127,13 @@ export interface UpdateTrackingCardData {
   agentFlag?: AgentFlag;
   agentNote?: string;
   postponedUntil?: string;
+  courierUpdate?: string;
+  action?: string;
+  actionNote?: string;
+  deliveryDate?: string;
+  cancelReasonId?: number;
+  newProductId?: number;
+  newVariants?: { label: string; value: string }[];
 }
 
 export const POST_SHIPPING_STATUSES = new Set([
