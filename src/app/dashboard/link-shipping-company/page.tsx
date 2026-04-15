@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import PageLoading from '@/components/ui/page-loading';
 import { IntegrationCard } from './components/IntegrationCard';
 import { ShippingIntegrationModal } from './components/ShippingIntegrationModal';
@@ -9,6 +9,26 @@ import { useShippingQuery } from './hooks/useShippingQuery';
 export default function ShippingIntegrationsPage() {
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
   const { configs, isLoading } = useShippingQuery();
+
+  const sortedProviders = useMemo(() => {
+    return [...providers].sort((a, b) => {
+      const aConfig = configs.find(
+        (c: any) => c.shippingCompany?.toUpperCase() === a.id.toUpperCase()
+      );
+      const bConfig = configs.find(
+        (c: any) => c.shippingCompany?.toUpperCase() === b.id.toUpperCase()
+      );
+
+      const aConnected = aConfig?.isActive ? 1 : 0;
+      const bConnected = bConfig?.isActive ? 1 : 0;
+
+      if (aConnected !== bConnected) return bConnected - aConnected;
+
+      if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
+
+      return 0;
+    });
+  }, [configs]);
 
   return (
     <div className="p-8 container mx-auto bg-gray-50 min-h-screen" dir="rtl">
@@ -26,8 +46,7 @@ export default function ShippingIntegrationsPage() {
         <PageLoading className="h-64 mt-10" />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {providers.map((provider) => {
-            // Find config for this specific provider
+          {sortedProviders.map((provider) => {
             const providerConfig = configs.find(
               (c: any) =>
                 c.shippingCompany?.toUpperCase() === provider.id.toUpperCase()
@@ -37,7 +56,7 @@ export default function ShippingIntegrationsPage() {
               <IntegrationCard
                 key={provider.id}
                 provider={provider}
-                config={providerConfig} // Pass the found config
+                config={providerConfig}
                 onConnect={() => setSelectedProvider(provider.id)}
               />
             );

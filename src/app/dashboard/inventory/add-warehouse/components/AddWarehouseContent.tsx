@@ -23,6 +23,13 @@ const WAREHOUSE_BRANCH_OPTIONS = [
   { key: 'sub', value: 'مخزن فرعي' },
 ];
 
+// TODO: replace with API data when warehouse endpoint is available
+const MAIN_WAREHOUSE_OPTIONS = [
+  { key: '1', value: 'مخزن القاهرة الرئيسى' },
+  { key: '2', value: 'مخزن الاسكندرية الرئيسى' },
+  { key: '3', value: 'مخزن المنصورة الرئيسى' },
+];
+
 export function AddWarehouseContent() {
   const router = useRouter();
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
@@ -41,12 +48,14 @@ export function AddWarehouseContent() {
       name: '',
       type: '',
       branch: '',
+      parentWarehouseId: '',
       governorate: '',
     },
   });
 
   const warehouseType = watch('type');
   const branch = watch('branch');
+  const parentWarehouseId = watch('parentWarehouseId');
   const governorate = watch('governorate');
 
   const onSubmit = useCallback(
@@ -109,9 +118,10 @@ export function AddWarehouseContent() {
               </label>
               <SearchableSelect
                 value={branch}
-                onChange={(v) =>
-                  setValue('branch', v, { shouldValidate: true })
-                }
+                onChange={(v) => {
+                  setValue('branch', v, { shouldValidate: true });
+                  if (v !== 'sub') setValue('parentWarehouseId', '');
+                }}
                 options={WAREHOUSE_BRANCH_OPTIONS}
                 placeholder="اختر فرع المخزن"
                 widthClass="w-full"
@@ -119,6 +129,25 @@ export function AddWarehouseContent() {
                 clearable
               />
             </div>
+
+            {branch === 'sub' && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium text-gray-700">
+                  المخزن الرئيسى
+                </label>
+                <SearchableSelect
+                  value={parentWarehouseId ?? ''}
+                  onChange={(v) =>
+                    setValue('parentWarehouseId', v, { shouldValidate: true })
+                  }
+                  options={MAIN_WAREHOUSE_OPTIONS}
+                  placeholder="اختر المخزن الرئيسى"
+                  widthClass="w-full"
+                  error={errors.parentWarehouseId?.message}
+                  clearable
+                />
+              </div>
+            )}
 
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-gray-700">

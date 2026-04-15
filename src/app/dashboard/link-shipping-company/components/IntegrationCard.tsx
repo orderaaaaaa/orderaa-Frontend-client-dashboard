@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import clsx from 'clsx';
 import { Button } from '@/components/ui/button';
 import { ShippingProvider } from '../types/shipping';
 import { LiaCheckCircleSolid } from 'react-icons/lia';
@@ -58,16 +59,14 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
       <Button
         onClick={onConnect}
         disabled={isDisabled}
-        className={`
-          w-full h-12 rounded-lg font-medium text-white transition-all duration-200 mt-auto
-          ${
-            canInteract
-              ? isConnected
-                ? 'bg-gray-600 hover:bg-gray-700'
-                : 'bg-primary hover:bg-[#4A1CB8] active:bg-[#3D17A0]'
-              : 'bg-gray-400 cursor-not-allowed'
-          }
-        `}
+        className={clsx(
+          'w-full h-12 rounded-lg font-medium text-white transition-all duration-200 mt-auto',
+          canInteract
+            ? isConnected
+              ? 'bg-gray-600 hover:bg-gray-700'
+              : 'bg-primary hover:bg-[#4A1CB8] active:bg-[#3D17A0]'
+            : 'bg-gray-400 cursor-not-allowed'
+        )}
       >
         {getButtonText()}
       </Button>

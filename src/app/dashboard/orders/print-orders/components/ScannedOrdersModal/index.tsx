@@ -92,14 +92,16 @@ function ChangeProductTable({
 function NonConfirmedSection({
   groups,
   onRemove,
+  onForceActionable,
 }: {
   groups: NonConfirmedGroup[];
   onRemove: (code: string) => void;
+  onForceActionable?: (orderId: number) => void;
 }) {
   if (groups.length === 0) return null;
 
   return (
-    <div className="mt-6 border-t border-gray-200 pt-4">
+    <div>
       <h3 className="text-base font-semibold text-gray-700 mb-4">
         طلبات بحالات أخرى
       </h3>
@@ -113,7 +115,7 @@ function NonConfirmedSection({
           return (
             <div
               key={group.status}
-              className="border border-gray-200 rounded-lg overflow-hidden w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[calc(25%-0.75rem)] self-start"
+              className="border border-gray-200 rounded-lg overflow-hidden w-full self-start"
             >
               <div
                 className="flex items-center justify-between px-4 py-2.5"
@@ -144,10 +146,20 @@ function NonConfirmedSection({
                     key={order.code}
                     className="flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors"
                   >
-                    <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                    <div className="flex items-center gap-2 min-w-0">
                       <span className="text-sm font-medium text-gray-800">
                         {order.code}
                       </span>
+                      {onForceActionable && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onForceActionable(order.id)}
+                          className="h-7 px-2.5 text-xs font-semibold text-primary border-primary/30 hover:bg-primary/10"
+                        >
+                          نقل للتنفيذ
+                        </Button>
+                      )}
                       {order.packagingWarning && (
                         <span className="text-xs text-amber-600 truncate">
                           ({order.packagingWarning})
@@ -159,14 +171,16 @@ function NonConfirmedSection({
                         </span>
                       )}
                     </div>
-                    <Button
-                      variant="ghost"
-                      onClick={() => onRemove(order.code)}
-                      className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors flex-shrink-0"
-                      title="حذف الطلب"
-                    >
-                      <LiaTrashAltSolid className="size-4" />
-                    </Button>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <Button
+                        variant="ghost"
+                        onClick={() => onRemove(order.code)}
+                        className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                        title="حذف الطلب"
+                      >
+                        <LiaTrashAltSolid className="size-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -187,6 +201,7 @@ export function ScannedOrdersModal({
   actionableFilteredGroups,
   nonConfirmedGroups,
   onRemoveOrder,
+  onForceActionable,
   searchQuery,
   onSearchChange,
   confirmedFilteredOrders,
@@ -294,77 +309,92 @@ export function ScannedOrdersModal({
             </div>
           </div>
           <div className="flex-1 overflow-y-auto px-8 py-4">
-            <div className="flex flex-wrap gap-4">
-              {actionableFilteredGroups.map((group, index) => {
-                const statusLabel =
-                  ORDER_STATUS_ARABIC_LABELS[group.status] || group.status;
-                const statusColor =
-                  ORDER_STATUS_CHART_COLORS[group.status] || '#9ca3af';
+            <div className="flex flex-col lg:flex-row lg:items-stretch gap-6 h-full">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-semibold text-gray-700 mb-4">
+                  طلبات جاهزة للتنفيذ
+                </h3>
+                <div className="flex flex-wrap gap-4">
+                  {actionableFilteredGroups.map((group) => {
+                    const statusLabel =
+                      ORDER_STATUS_ARABIC_LABELS[group.status] || group.status;
+                    const statusColor =
+                      ORDER_STATUS_CHART_COLORS[group.status] || '#9ca3af';
 
-                return (
-                  <div
-                    key={group.status}
-                    className="border border-gray-200 rounded-lg overflow-hidden w-full md:w-[calc(50%-0.5rem)] self-start"
-                  >
-                    <div
-                      className="flex items-center justify-between px-4 py-2.5"
-                      style={{ backgroundColor: `${statusColor}15` }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: statusColor }}
-                        />
-                        <span
-                          className="text-sm font-semibold"
-                          style={{ color: statusColor }}
-                        >
-                          {statusLabel}
-                        </span>
-                      </div>
-                      <span
-                        className="inline-flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full text-xs font-bold text-white"
-                        style={{ backgroundColor: statusColor }}
+                    return (
+                      <div
+                        key={group.status}
+                        className="border border-gray-200 rounded-lg overflow-hidden w-full self-start"
                       >
-                        {group.orders.length}
-                      </span>
-                    </div>
-                    <div className="divide-y divide-gray-100">
-                      {group.orders.map((order) => (
                         <div
-                          key={order.code}
-                          className="flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors"
+                          className="flex items-center justify-between px-4 py-2.5"
+                          style={{ backgroundColor: `${statusColor}15` }}
                         >
-                          <span className="text-sm font-medium text-gray-800">
-                            {order.code}
-                          </span>
-                          <Button
-                            variant="ghost"
-                            onClick={() => onRemoveOrder(order.code)}
-                            className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors flex-shrink-0"
-                            title="حذف الطلب"
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: statusColor }}
+                            />
+                            <span
+                              className="text-sm font-semibold"
+                              style={{ color: statusColor }}
+                            >
+                              {statusLabel}
+                            </span>
+                          </div>
+                          <span
+                            className="inline-flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full text-xs font-bold text-white"
+                            style={{ backgroundColor: statusColor }}
                           >
-                            <LiaTrashAltSolid className="size-4" />
-                          </Button>
+                            {group.orders.length}
+                          </span>
                         </div>
-                      ))}
-                    </div>
+                        <div className="divide-y divide-gray-100">
+                          {group.orders.map((order) => (
+                            <div
+                              key={order.code}
+                              className="flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors"
+                            >
+                              <span className="text-sm font-medium text-gray-800">
+                                {order.code}
+                              </span>
+                              <Button
+                                variant="ghost"
+                                onClick={() => onRemoveOrder(order.code)}
+                                className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors flex-shrink-0"
+                                title="حذف الطلب"
+                              >
+                                <LiaTrashAltSolid className="size-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {actionableFilteredGroups.length === 0 && isScanLoading && (
+                  <ScannedOrdersTable
+                    orders={[]}
+                    onRemove={onRemoveOrder}
+                    isScanLoading={isScanLoading}
+                    searchQuery={searchQuery}
+                  />
+                )}
+              </div>
+              {nonConfirmedGroups.length > 0 && (
+                <>
+                  <div className="hidden lg:block w-px bg-gray-200 flex-shrink-0" />
+                  <div className="border-t border-gray-200 pt-4 lg:border-t-0 lg:pt-0 flex-1 min-w-0">
+                    <NonConfirmedSection
+                    groups={nonConfirmedGroups}
+                    onRemove={onRemoveOrder}
+                    onForceActionable={onForceActionable}
+                  />
                   </div>
-                );
-              })}
+                </>
+              )}
             </div>
-            {actionableFilteredGroups.length === 0 && isScanLoading && (
-              <ScannedOrdersTable
-                orders={[]}
-                onRemove={onRemoveOrder}
-                isScanLoading={isScanLoading}
-                searchQuery={searchQuery}
-              />
-            )}
-            <NonConfirmedSection
-              groups={nonConfirmedGroups}
-              onRemove={onRemoveOrder}
-            />
           </div>
         </>
       )}

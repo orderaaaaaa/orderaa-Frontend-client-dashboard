@@ -8,18 +8,6 @@ export interface InvoiceProduct {
   product: { id: number; name: string };
 }
 
-export interface InvoiceFile {
-  id: number;
-  invoiceId: number;
-  fileId: number;
-  file: {
-    id: number;
-    fileName: string;
-    mimeType: string;
-    size: number;
-  };
-}
-
 export interface Invoice {
   id: number;
   code: string;
@@ -31,7 +19,7 @@ export interface Invoice {
   paymentAmount?: number;
   externalInvoiceNumber?: string;
   products: InvoiceProduct[];
-  files: InvoiceFile[];
+  images: string[];
   createdAt: string;
   updatedAt: string;
   acceptanceStatus?: string;

@@ -71,8 +71,9 @@ const EditCustomerModal: React.FC<EditCustomerModalProps> = ({
       await onSave(formData);
       toast.success('تم تحديث بيانات العميل بنجاح');
       onClose();
-    } catch (error) {
-      toast.error('فشل في تحديث بيانات العميل');
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في تحديث بيانات العميل');
     } finally {
       setIsSubmitting(false);
     }

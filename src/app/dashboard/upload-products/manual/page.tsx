@@ -1,6 +1,6 @@
 'use client';
 import { LiaPlusSolid } from 'react-icons/lia';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
@@ -15,6 +15,7 @@ import { useProductDropdownStore } from '@/store/productDropdownStore';
 import { buildManualOrderPayload } from '@/utils/manualOrder/payload';
 import { createManualOrder } from '@/lib/api/manualOrdersApi';
 import { manualOrderSchema, ManualOrderFormData } from './schema';
+import { useMerchantSettings } from '@/app/dashboard/store-settings/hooks/useStoreSettings';
 
 function Manual() {
   const selectedProducts = useProductDropdownStore(
@@ -46,6 +47,7 @@ function Manual() {
         governorate: '',
         city: '',
         shippingCost: '',
+        returnShippingCost: '',
         shippingType: 'DELIVERY',
         returnShipmentContent: '',
       },
@@ -57,6 +59,14 @@ function Manual() {
       packagingNotes: '',
     },
   });
+
+  const { settings } = useMerchantSettings();
+
+  useEffect(() => {
+    if (settings?.defaultReturnShippingCost != null) {
+      setValue('shipping.returnShippingCost', String(settings.defaultReturnShippingCost));
+    }
+  }, [settings?.defaultReturnShippingCost, setValue]);
 
   const [productsError, setProductsError] = useState<string | null>(null);
 
@@ -87,6 +97,7 @@ function Manual() {
           governorate: data.shipping.governorate,
           city: data.shipping.city,
           shippingCost: data.shipping.shippingCost || '',
+          returnShippingCost: data.shipping.returnShippingCost || '',
           shippingType: data.shipping.shippingType,
           returnShipmentContent: data.shipping.returnShipmentContent,
         },
@@ -106,13 +117,11 @@ function Manual() {
       toast.success('تم إنشاء الطلب بنجاح!');
       reset();
       useProductDropdownStore.getState().setSelectedProducts([]);
-    } catch (error) {
-      console.error('Error creating manual order:', error);
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.';
-      toast.error(errorMessage);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      toast.error(
+        Array.isArray(msg) ? msg.join('\n') : msg || 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.'
+      );
     }
   };
 
@@ -211,6 +220,7 @@ function Manual() {
           governorate={formValues.shipping.governorate}
           city={formValues.shipping.city}
           shippingCost={formValues.shipping.shippingCost || ''}
+          returnShippingCost={formValues.shipping.returnShippingCost || ''}
           shippingType={formValues.shipping.shippingType}
           returnShipmentContent={formValues.shipping.returnShipmentContent || ''}
           onShippingCompanyChange={(v) => {
@@ -229,6 +239,10 @@ function Manual() {
             setValue('shipping.shippingCost', v);
             clearErrors('shipping.shippingCost');
           }}
+          onReturnShippingCostChange={(v) => {
+            setValue('shipping.returnShippingCost', v);
+            clearErrors('shipping.returnShippingCost');
+          }}
           onShippingTypeChange={(v) => {
             setValue('shipping.shippingType', v);
             clearErrors('shipping.shippingType');
@@ -242,6 +256,7 @@ function Manual() {
             governorate: errors.shipping?.governorate?.message,
             city: errors.shipping?.city?.message,
             shippingCost: errors.shipping?.shippingCost?.message,
+            returnShippingCost: errors.shipping?.returnShippingCost?.message,
             shippingType: errors.shipping?.shippingType?.message,
             returnShipmentContent: errors.shipping?.returnShipmentContent?.message,
           }}

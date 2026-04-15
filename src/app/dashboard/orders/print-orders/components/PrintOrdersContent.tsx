@@ -23,8 +23,10 @@ import { ScannedOrdersModal } from './ScannedOrdersModal';
 import { ChangeProductModal } from './ChangeProductModal';
 import { PrintedOrdersConfirmModal } from './PrintedOrdersConfirmModal';
 
+import { LiaClipboardListSolid } from 'react-icons/lia';
 import { Breadcrumb } from '@/components/dashboard-layout';
 import { Button } from '@/components/ui/button';
+import { ConfirmedProductsReportModal } from './ConfirmedProductsReportModal';
 import PrintOrdersActionsBar from './PrintOrdersActionsBar';
 import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
 import Footer from '@/components/orders/Footer';
@@ -63,6 +65,7 @@ export function PrintOrdersContent() {
   const [flashingCode, setFlashingCode] = useState<string | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [isScanLoading, setIsScanLoading] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isChangeProductModalOpen, setIsChangeProductModalOpen] =
     useState(false);
   const [isPrintedConfirmModalOpen, setIsPrintedConfirmModalOpen] =
@@ -158,7 +161,7 @@ export function PrintOrdersContent() {
     refetch,
   } = useOrders(apiFilters);
 
-  const { statistics } = useOrderStatistics();
+  const { statistics } = useOrderStatistics(apiFilters);
 
   const handleStatisticsChange = useCallback(() => {
     queryClient.invalidateQueries({
@@ -212,6 +215,7 @@ export function PrintOrdersContent() {
     confirmedFilteredOrders,
     actionableFilteredOrders,
     actionableFilteredGroups,
+    forceActionable,
   } = useScannedOrders();
 
   const handleScan = useCallback(
@@ -229,17 +233,20 @@ export function PrintOrdersContent() {
       setIsScanLoading(true);
       try {
         const order = await getOrderByCode(barcode);
-        addOrder({ id: order.id, code: barcode, status: order.status, cancelReason: order.cancelReason, packagingWarning: order.packagingWarning });
-        playSuccessSound();
+        addOrder({ id: order.id, code: barcode, status: order.status, cancelReason: order.cancelReason, packagingWarning: order.packagingWarning, printCount: order.printCount });
         setFlashingCode(barcode);
         setTimeout(() => setFlashingCode(null), 600);
-        if (order.status !== 'CONFIRMED' && order.status !== 'WAITING_FOR_PACKAGING') {
+        if (order.status === 'CONFIRMED' || order.status === 'WAITING_FOR_PACKAGING') {
+          playSuccessSound();
+        } else {
+          playErrorSound();
           const statusLabel = ORDER_STATUS_ARABIC_LABELS[order.status] || order.status;
           toast.info(`هذا الطلب ليس مؤكد - الحالة: ${statusLabel}`);
         }
       } catch (error: any) {
         playErrorSound();
-        toast.error(error?.response?.data?.message || 'هذا الطلب غير موجود');
+        const msg = error?.response?.data?.message;
+        toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'هذا الطلب غير موجود');
       } finally {
         setIsScanLoading(false);
       }
@@ -265,7 +272,8 @@ export function PrintOrdersContent() {
       clearOrders();
       setIsScannedOrdersModalOpen(false);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'فشل تحديث الطلبات');
+      const msg = error?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
     } finally {
       setIsActionLoading(false);
     }
@@ -282,7 +290,8 @@ export function PrintOrdersContent() {
       clearOrders();
       setIsScannedOrdersModalOpen(false);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'فشل تحديث الطلبات');
+      const msg = error?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
     } finally {
       setIsActionLoading(false);
     }
@@ -299,7 +308,8 @@ export function PrintOrdersContent() {
       clearOrders();
       setIsScannedOrdersModalOpen(false);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'فشل تحديث الطلبات');
+      const msg = error?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
     } finally {
       setIsActionLoading(false);
     }
@@ -335,7 +345,8 @@ export function PrintOrdersContent() {
       setIsScannerChangeProductMode(false);
       setIsScannedOrdersModalOpen(false);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'فشل تغيير المنتج');
+      const msg = error?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تغيير المنتج');
     } finally {
       setIsActionLoading(false);
     }
@@ -426,7 +437,8 @@ export function PrintOrdersContent() {
       clearSelections();
       setSelectMode(false);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'فشل تحديث الطلبات');
+      const msg = error?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
     } finally {
       setIsActionLoading(false);
     }
@@ -448,7 +460,8 @@ export function PrintOrdersContent() {
       clearSelections();
       setSelectMode(false);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'فشل تحديث الطلبات');
+      const msg = error?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
     } finally {
       setIsActionLoading(false);
     }
@@ -470,7 +483,8 @@ export function PrintOrdersContent() {
       clearSelections();
       setSelectMode(false);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'فشل تحديث الطلبات');
+      const msg = error?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
     } finally {
       setIsActionLoading(false);
     }
@@ -502,7 +516,8 @@ export function PrintOrdersContent() {
         clearSelections();
         setSelectMode(false);
       } catch (error: any) {
-        toast.error(error?.response?.data?.message || 'فشل تغيير المنتج');
+        const msg = error?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تغيير المنتج');
         throw error;
       } finally {
         setIsActionLoading(false);
@@ -556,6 +571,16 @@ export function PrintOrdersContent() {
         <Breadcrumb
           items={[{ title: 'الطلبات' }, { title: 'طباعة الطلبات' }]}
         />
+        {filters.status !== 'PREPARED' && (
+          <Button
+            variant="outline"
+            onClick={() => setIsReportModalOpen(true)}
+            className="gap-2"
+          >
+            <LiaClipboardListSolid className="size-5" />
+            تقرير المنتجات المؤكدة
+          </Button>
+        )}
       </div>
 
       <PageTaps
@@ -568,7 +593,9 @@ export function PrintOrdersContent() {
         isLoadingAllowedStatuses={isDepartmentStatusesLoading}
       />
 
-      <StatisticsSection cards={statisticsCards} isLoading={statsLoading} />
+      {filters.status !== 'PREPARED' && (
+        <StatisticsSection cards={statisticsCards} isLoading={statsLoading} />
+      )}
       <FilterSection
         control={control}
         errors={errors}
@@ -641,7 +668,7 @@ export function PrintOrdersContent() {
         </div>
       ) : (
         <>
-          <div className="grid container mx-auto grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 my-4 justify-items-center">
+          <div className="grid container mx-auto grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 my-4 justify-items-center [&>*]:max-w-[300px]">
             {orders.map((order) => (
               <OrderCard
                 key={order.id}
@@ -671,6 +698,9 @@ export function PrintOrdersContent() {
                     ? `${productName} - ${variantDetails}`
                     : productName;
                 })}
+                itemSkus={order.order_products.map(
+                  (op: any) => op.sku || op.products?.sku || null
+                )}
                 price={order.totalCost}
                 trys={order.numberOfTriesToReach}
                 status={order.status}
@@ -689,6 +719,7 @@ export function PrintOrdersContent() {
                 cancelReason={order.cancelReason}
                 cancelNotes={order.cancelNotes}
                 isPrinted={order.isPrinted}
+                printCount={order.printCount}
                 disableNavigation
                 hideCustomerInfo
                 showAllItems
@@ -767,6 +798,7 @@ export function PrintOrdersContent() {
         actionableFilteredGroups={actionableFilteredGroups}
         nonConfirmedGroups={nonConfirmedGroups}
         onRemoveOrder={removeOrder}
+        onForceActionable={forceActionable}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         filteredOrders={filteredOrders}
@@ -798,6 +830,12 @@ export function PrintOrdersContent() {
         orders={selectAllMatchingFilters ? orders : selectedOrders}
         onSubmit={handleChangeProductSubmit}
         isLoading={isActionLoading}
+      />
+
+      <ConfirmedProductsReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        status={filters.status ?? ''}
       />
     </div>
   );

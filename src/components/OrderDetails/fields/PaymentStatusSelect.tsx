@@ -54,9 +54,9 @@ export function PaymentStatusSelect({
   const options = paymentStatuses.map((status) => status.label);
 
   return (
-    <div className={`flex flex-col gap-1 min-w-0 overflow-hidden ${className}`}>
+    <div className={`flex flex-col gap-1 min-w-0 ${className}`}>
       <p className="font-bold text-[#121212]">حالة الدفع</p>
-      <div className="flex gap-2 bg-white shadow-xs items-center py-1 px-2 rounded-[5px] overflow-hidden">
+      <div className="flex gap-2 bg-white shadow-xs items-center py-1 px-2 rounded-[5px]">
         <LiaMoneyBillWaveSolid size={18} className="flex-shrink-0" />
         <SearchableSelect
           value={displayValue}

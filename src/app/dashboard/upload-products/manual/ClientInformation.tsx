@@ -1,11 +1,14 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import Input from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/textarea';
 import { ClientInformationProps } from './types';
-import { LiaPlusSolid, LiaTrashSolid } from 'react-icons/lia';
+import { LiaPlusSolid, LiaTrashSolid, LiaExclamationTriangleSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
+import { useDebounce } from '@/utils/debounce';
+import { useCustomerOrders } from '@/services/orders';
+import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 
 function ClientInformation({
   name,
@@ -18,6 +21,20 @@ function ClientInformation({
   onNotesChange,
   errors,
 }: ClientInformationProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const firstPhone = useMemo(
+    () => phoneNumbers.find((p) => p.trim().length >= 8) || '',
+    [phoneNumbers]
+  );
+  const debouncedPhone = useDebounce(firstPhone, 500);
+
+  const { data: ordersData } = useCustomerOrders(debouncedPhone, {
+    enabled: !!debouncedPhone,
+  });
+
+  const existingOrdersCount = ordersData?.data?.length ?? 0;
+
   const handlePhoneChange = (index: number, value: string) => {
     const updated = [...phoneNumbers];
     updated[index] = value;
@@ -51,6 +68,7 @@ function ClientInformation({
               type="text"
               placeholder="أدخل الاسم الكامل للعميل"
               className="max-w-[502px]"
+              inputClassName="bg-white"
               value={name}
               onChange={(e) => onNameChange(e.target.value)}
               error={errors?.name}
@@ -82,6 +100,7 @@ function ClientInformation({
                     type="text"
                     placeholder="أدخل رقم الهاتف"
                     className="max-w-[502px] flex-1"
+                    inputClassName="bg-white"
                     value={phone}
                     onChange={(e) => handlePhoneChange(index, e.target.value)}
                     error={index === 0 ? errors?.phoneNumbers : undefined}
@@ -99,6 +118,24 @@ function ClientInformation({
                   )}
                 </div>
               ))}
+
+              {existingOrdersCount > 0 && (
+                <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 max-w-[502px]">
+                  <LiaExclamationTriangleSolid className="w-5 h-5 text-amber-600 shrink-0" />
+                  <span className="text-sm text-amber-700 font-medium">
+                    هذا العميل لديه {existingOrdersCount} طلب سابق
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsModalOpen(true)}
+                    className="text-primary hover:text-[#4B1BC4] hover:bg-purple-50 px-2 py-0.5 h-auto text-sm font-bold me-auto"
+                  >
+                    عرض الطلبات
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -112,7 +149,7 @@ function ClientInformation({
             <Textarea
               name="address"
               placeholder="اسم الشارع، رقم المبنى، الشقة، إلخ"
-              className="max-w-[1158px] h-[162px] bg-[#EAEAEA40]"
+              className="max-w-[1158px] h-[162px] bg-white"
               value={address}
               onChange={(e) => onAddressChange(e.target.value)}
               error={errors?.address}
@@ -127,7 +164,7 @@ function ClientInformation({
             <Textarea
               name="notes"
               placeholder="ملاحظات إضافية (اختياري)"
-              className="max-w-[1158px] h-[162px] bg-[#EAEAEA40] mb-10"
+              className="max-w-[1158px] h-[162px] bg-white mb-10"
               value={notes}
               onChange={(e) => onNotesChange(e.target.value)}
               error={errors?.notes}
@@ -135,6 +172,13 @@ function ClientInformation({
           </div>
         </div>
       </div>
+
+      <CustomerOrdersModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        customerPhone={debouncedPhone}
+        customerName={name}
+      />
     </div>
   );
 }

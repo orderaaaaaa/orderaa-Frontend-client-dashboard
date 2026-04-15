@@ -138,7 +138,8 @@ function AllOrdersContent() {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
     onError: (err: any) => {
-      toast.error(err.response?.data?.message || 'فشل تحديث حالة الطلبات');
+      const msg = err?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث حالة الطلبات');
     },
   });
 
@@ -153,18 +154,12 @@ function AllOrdersContent() {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
     onError: (err: any) => {
-      toast.error(err.response?.data?.message || 'فشل تحديث حالة الطلبات');
+      const msg = err?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث حالة الطلبات');
     },
   });
 
-  const statisticsParams = useMemo(() => {
-    const from = formatDateForUrl(fromDate);
-    const to = formatDateForUrl(toDate);
-    if (!from && !to) return undefined;
-    return { from, to };
-  }, [fromDate, toDate]);
-
-  const { statistics } = useOrderStatistics(statisticsParams);
+  const { statistics } = useOrderStatistics(apiFilters);
 
   const handleStatisticsChange = useCallback(() => {
     queryClient.invalidateQueries({
@@ -525,7 +520,7 @@ function AllOrdersContent() {
         </div>
       ) : (
         <>
-          <div className="grid container mx-auto grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 my-4 justify-items-center">
+          <div className="grid container mx-auto grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 my-4 justify-items-center [&>*]:max-w-[300px]">
             {orders.map((order) => (
               <OrderCard
                 key={order.id}
@@ -548,17 +543,19 @@ function AllOrdersContent() {
                 // Updated Mapping Logic for Items and Variants
                 items={order.order_products.map((op: any) => {
                   const productName = op.products?.name || 'منتج غير معروف';
-
                   const variantDetails =
                     op.variants && op.variants.length > 0
-                      ? op.variants.map((v: any) => v.value).join('') // Use empty join for "42black"
+                      ? op.variants.map((v: any) => v.value).join('')
                       : '';
-
                   return variantDetails
                     ? `${productName} - ${variantDetails}`
                     : productName;
                 })}
+                itemSkus={order.order_products.map(
+                  (op: any) => op.sku || op.products?.sku || null
+                )}
                 price={order.totalCost}
+                shippingType={order.shippingType}
                 trys={order.numberOfTriesToReach}
                 status={order.status}
                 isBlocked={order.customers.isBlocked}

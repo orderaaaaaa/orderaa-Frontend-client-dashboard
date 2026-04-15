@@ -71,7 +71,7 @@ export function buildTotalsCards(
   return [
     {
       key: 'executed',
-      label: 'إجمالي الطلبات المنفذة',
+      label: 'إجمالي المحاولات المنفذة',
       value: data?.executedOrders ?? 0,
       icon: <LiaCheckSquareSolid className="w-6 h-6 text-green-600" />,
       iconBgClassName: 'bg-green-100',

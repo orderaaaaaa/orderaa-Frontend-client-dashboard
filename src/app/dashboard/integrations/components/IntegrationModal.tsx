@@ -9,6 +9,8 @@ import {
   LiaPlusSolid,
   LiaLinkSolid,
   LiaKeySolid,
+  LiaEditSolid,
+  LiaTrashAltSolid,
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
@@ -23,18 +25,17 @@ import {
 import { useIntegrations } from '../hooks/useIntegrations';
 import { storeApi } from '../api/Integrations';
 import {
-  IntegrationProvider,
   IntegrationConfigType,
   IntegrationResponse,
 } from '../types/apiIntegration';
 import { useAuthStore } from '@/store/authStore';
-import { integrationSteps, webhookSteps } from '../constants/steps';
 import { toast } from 'react-toastify';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import clsx from 'clsx';
 import groupBy from 'lodash/groupBy';
+import { ProviderModalConfig } from '../constants/providerConfig';
 
 const storeInfoSchema = z.object({
   storeName: z.string().min(1, 'اسم المتجر مطلوب'),
@@ -46,30 +47,46 @@ const webhookSchema = z.object({
   webhookSecret: z.string().min(1, 'مفتاح Webhook مطلوب'),
 });
 
-const apiKeySchema = z.object({
-  apiKey: z.string().min(1, 'مفتاح API مطلوب'),
-});
+const URL_PATTERN = /^(https?:\/\/)?[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+/;
+
+const createApiKeySchema = (hasRequiredUrl: boolean, hasClientId: boolean) =>
+  z.object({
+    apiKey: z.string().min(1, 'Client Secret مطلوب'),
+    shopDomain: hasRequiredUrl
+      ? z.string().min(1, 'دومين المتجر مطلوب').regex(URL_PATTERN, 'يرجى إدخال رابط صحيح')
+      : z.string().optional().refine((val) => !val || URL_PATTERN.test(val), { message: 'يرجى إدخال رابط صحيح' }),
+    clientId: hasClientId
+      ? z.string().min(1, 'Client ID مطلوب')
+      : z.string().optional(),
+  });
 
 type StoreInfoFormData = z.infer<typeof storeInfoSchema>;
 type WebhookFormData = z.infer<typeof webhookSchema>;
-type ApiKeyFormData = z.infer<typeof apiKeySchema>;
+type ApiKeyFormData = z.infer<ReturnType<typeof createApiKeySchema>>;
 
-interface EasyOrderModalProps {
+interface IntegrationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  config: ProviderModalConfig;
+  onEditStore?: (storeId: number, configs: IntegrationResponse[]) => void;
+  onDeleteStore?: (storeId: number, storeName: string) => void;
 }
 
 const STEPPER_STEPS = [
   { label: 'اسم المتجر' },
   { label: 'إعدادات Webhook' },
-  { label: 'مفتاح API' },
+  { label: 'Client Keys' },
 ];
 
-const EasyOrderModal = ({
+const IntegrationModal = ({
   isOpen,
   onClose,
-}: EasyOrderModalProps) => {
+  onSuccess,
+  config,
+  onEditStore,
+  onDeleteStore,
+}: IntegrationModalProps) => {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const { user } = useAuthStore();
   const merchantId = user?.merchantId;
@@ -84,22 +101,20 @@ const EasyOrderModal = ({
 
   const { integrations, createIntegration } = useIntegrations();
 
-  const easyOrderIntegrations = useMemo(() => {
+  const providerIntegrations = useMemo(() => {
     if (!integrations) return [];
-    return integrations.filter(
-      (c) => c.provider === IntegrationProvider.EASY_ORDERS
-    );
-  }, [integrations]);
+    return integrations.filter((c) => c.provider === config.provider);
+  }, [integrations, config.provider]);
 
   const storeGroups = useMemo(() => {
-    return groupBy(easyOrderIntegrations, 'storeId');
-  }, [easyOrderIntegrations]);
+    return groupBy(providerIntegrations, 'storeId');
+  }, [providerIntegrations]);
 
-  const hasConnectedStore = easyOrderIntegrations.length > 0;
+  const hasConnectedStore = providerIntegrations.length > 0;
 
   const getWebhookUrl = (storeId: number): string => {
     if (!API_URL) return '';
-    return `${API_URL}/webhook/orders/${IntegrationProvider.EASY_ORDERS}/${storeId}`;
+    return `${API_URL}/webhook/orders/${config.provider}/${storeId}`;
   };
 
   const storeInfoForm = useForm<StoreInfoFormData>({
@@ -112,9 +127,13 @@ const EasyOrderModal = ({
     defaultValues: { webhookUrl: '', webhookSecret: '' },
   });
 
+  const hasRequiredUrl = config.metadataFields?.some((f) => f.required && f.type === 'url') ?? false;
+  const hasClientId = config.metadataFields?.some((f) => f.key === 'clientId' && f.required) ?? false;
+  const apiKeySchema = useMemo(() => createApiKeySchema(hasRequiredUrl, hasClientId), [hasRequiredUrl, hasClientId]);
+
   const apiKeyForm = useForm<ApiKeyFormData>({
     resolver: zodResolver(apiKeySchema),
-    defaultValues: { apiKey: '' },
+    defaultValues: { apiKey: '', shopDomain: '', clientId: '' },
   });
 
   const onStoreInfoSubmit = storeInfoForm.handleSubmit(async (data) => {
@@ -157,7 +176,7 @@ const EasyOrderModal = ({
 
       await createIntegration({
         storeId: createdStoreId,
-        provider: IntegrationProvider.EASY_ORDERS,
+        provider: config.provider,
         configType: IntegrationConfigType.WEBHOOK,
         apiKey: data.webhookSecret.trim(),
       });
@@ -181,19 +200,25 @@ const EasyOrderModal = ({
         return;
       }
 
+      const metadata: Record<string, unknown> = {};
+      if (data.shopDomain?.trim()) metadata.shopDomain = data.shopDomain.trim();
+      if (data.clientId?.trim()) metadata.clientId = data.clientId.trim();
+
       await createIntegration({
         storeId: createdStoreId,
-        provider: IntegrationProvider.EASY_ORDERS,
+        provider: config.provider,
         configType: IntegrationConfigType.API,
         apiKey: data.apiKey.trim(),
+        ...(Object.keys(metadata).length > 0 && { metadata }),
       });
 
       toast.success('تم انشاء ربط API بنجاح');
+      onSuccess();
       setShowStepper(false);
       setCurrentStep(0);
       resetForms();
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'خطأ في حفظ مفتاح API');
+      setError(err?.response?.data?.message || 'خطأ في حفظ Client Keys');
     } finally {
       setIsLoading(false);
     }
@@ -244,7 +269,7 @@ const EasyOrderModal = ({
     <BaseModal
       isOpen={isOpen}
       onClose={handleClose}
-      title="ربط المتاجر"
+      title={config.modalTitle}
       showFooter={false}
       isLoading={isLoading}
       maxWidth="md:max-w-5xl"
@@ -252,7 +277,7 @@ const EasyOrderModal = ({
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <p className="text-gray-600">
-            قم بربط متجرك لمراقبة الطلبات تلقائياً
+            {config.modalDescription}
           </p>
           <Button
             onClick={handleToggleStepper}
@@ -273,7 +298,7 @@ const EasyOrderModal = ({
             </div>
             <div className="relative">
               <div className="absolute right-[11px] top-3 bottom-3" />
-              {webhookSteps.map((step, i) => (
+              {config.webhookSteps.map((step, i) => (
                 <div
                   key={i}
                   className="relative flex items-start gap-3 pb-4 last:pb-0"
@@ -298,7 +323,7 @@ const EasyOrderModal = ({
             </div>
             <div className="relative">
               <div className="absolute right-[11px] top-3 bottom-3" />
-              {integrationSteps.map((step, i) => (
+              {config.apiSteps.map((step, i) => (
                 <div
                   key={i}
                   className="relative flex items-start gap-3 pb-4 last:pb-0"
@@ -315,17 +340,19 @@ const EasyOrderModal = ({
           </div>
         </div>
 
-        <div>
-          <h4 className="font-semibold text-gray-900 mb-3">فيديو توضيحي</h4>
-          <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
-            <iframe
-              src="https://drive.google.com/file/d/1aoWTPTEbKQg3fWBwI3VL0gIf82Lsdnf-/preview"
-              className="aspect-video w-full md:h-[300px] rounded-lg"
-              allow="autoplay"
-              allowFullScreen
-            />
+        {config.videoUrl && (
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-3">فيديو توضيحي</h4>
+            <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
+              <iframe
+                src={config.videoUrl}
+                className="aspect-video w-full md:h-[300px] rounded-lg"
+                allow="autoplay"
+                allowFullScreen
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {showStepper && (
           <div ref={stepperRef} className="bg-gray-50/80 rounded-xl border border-primary/20 p-6">
@@ -408,7 +435,6 @@ const EasyOrderModal = ({
                       register={webhookForm.register}
                       name="webhookSecret"
                       label="Webhook Secret"
-                      type="password"
                       placeholder="أدخل مفتاح Webhook..."
                       error={
                         webhookForm.formState.errors.webhookSecret?.message
@@ -440,12 +466,21 @@ const EasyOrderModal = ({
               <StepContent>
                 <form onSubmit={onApiKeySubmit} className="space-y-4">
                   <div className="space-y-4 bg-white p-5 rounded-xl border border-gray-100">
+                    {config.metadataFields?.map((field) => (
+                      <Input
+                        key={field.key}
+                        register={apiKeyForm.register}
+                        name={field.key}
+                        label={`${field.label}${field.required ? ' *' : ''}`}
+                        placeholder={field.placeholder}
+                        error={(apiKeyForm.formState.errors as Record<string, { message?: string }>)[field.key]?.message}
+                      />
+                    ))}
                     <Input
                       register={apiKeyForm.register}
                       name="apiKey"
-                      label="API Key"
-                      type="password"
-                      placeholder="أدخل مفتاح API..."
+                      label="Client Secret"
+                      placeholder="أدخل Client Secret..."
                       error={apiKeyForm.formState.errors.apiKey?.message}
                     />
                   </div>
@@ -480,7 +515,7 @@ const EasyOrderModal = ({
           </div>
         )}
 
-        <div>
+        <div className='pb-2'>
           <h4 className="font-semibold text-gray-900 mb-3">
             المتاجر المربوطة
           </h4>
@@ -495,28 +530,70 @@ const EasyOrderModal = ({
                     className="bg-white rounded-xl border border-gray-200 px-4"
                   >
                     <AccordionTrigger className="hover:no-underline">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center w-10 h-10 bg-blue-50 border border-[#2489E1]/20 rounded-lg">
-                          <LiaShoppingCartSolid className="w-6 h-6 text-[#001A72]" />
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-gray-900">
-                            متجر #{storeId}
-                          </p>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            {webhookConfig && (
-                              <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                                <LiaCheckCircleSolid className="w-3 h-3" />
-                                Webhook
-                              </span>
-                            )}
-                            {apiConfig && (
-                              <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                                <LiaCheckCircleSolid className="w-3 h-3" />
-                                API
-                              </span>
-                            )}
+                      <div className="flex items-center justify-between w-full pe-2">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center w-10 h-10 bg-blue-50 border border-[#2489E1]/20 rounded-lg">
+                            <LiaShoppingCartSolid className="w-6 h-6 text-[#001A72]" />
                           </div>
+                          <div className="flex flex-col justify-start items-start gap-1">
+                            <p className="font-semibold text-gray-900">
+                              <span className="text-sm">اسم المتجر: </span>
+                              {configs[0]?.store?.name || `متجر #${storeId}`}
+                            </p>
+                            {configs[0]?.store?.description && (
+                              <p className="text-sm">
+                                <span>الوصف: </span>
+                                {configs[0].store.description as string}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-2 mt-0.5">
+                              {webhookConfig && (
+                                <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                                  <LiaCheckCircleSolid className="w-3 h-3" />
+                                  Webhook
+                                </span>
+                              )}
+                              {apiConfig && (
+                                <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                                  <LiaCheckCircleSolid className="w-3 h-3" />
+                                  API
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {onEditStore && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onEditStore(Number(storeId), configs);
+                              }}
+                              className="h-8 w-8 text-gray-400 hover:text-primary hover:bg-primary/5"
+                            >
+                              <LiaEditSolid className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {onDeleteStore && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDeleteStore(
+                                  Number(storeId),
+                                  configs[0]?.store?.name || `متجر #${storeId}`
+                                );
+                              }}
+                              className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                            >
+                              <LiaTrashAltSolid className="w-4 h-4" />
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </AccordionTrigger>
@@ -529,9 +606,8 @@ const EasyOrderModal = ({
                             </p>
                             <div className="flex items-center justify-between">
                               <span className="text-sm text-gray-600">Secret</span>
-                              <span className="text-sm text-gray-800">
-                                {'•'.repeat(8)}
-                                {webhookConfig.apiKey.slice(-4)}
+                              <span className="text-sm text-gray-800 font-mono">
+                                {webhookConfig.apiKey}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
@@ -544,7 +620,7 @@ const EasyOrderModal = ({
                                     : 'bg-gray-100 text-gray-600'
                                 )}
                               >
-                                {webhookConfig.isActive ? 'مفعّل' : 'معطّل'}
+                                {webhookConfig.isActive ? 'نشط' : 'معطّل'}
                               </span>
                             </div>
                           </div>
@@ -553,15 +629,14 @@ const EasyOrderModal = ({
                         {apiConfig && (
                           <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                              API Key
+                              Client Secret
                             </p>
                             <div className="flex items-center justify-between">
                               <span className="text-sm text-gray-600">
-                                المفتاح
+                                Client Secret
                               </span>
-                              <span className="text-sm text-gray-800">
-                                {'•'.repeat(8)}
-                                {apiConfig.apiKey.slice(-4)}
+                              <span className="text-sm text-gray-800 font-mono">
+                                {apiConfig.apiKey}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
@@ -574,7 +649,7 @@ const EasyOrderModal = ({
                                     : 'bg-gray-100 text-gray-600'
                                 )}
                               >
-                                {apiConfig.isActive ? 'مفعّل' : 'معطّل'}
+                                {apiConfig.isActive ? 'نشط' : 'معطّل'}
                               </span>
                             </div>
                           </div>
@@ -600,4 +675,4 @@ const EasyOrderModal = ({
   );
 };
 
-export default EasyOrderModal;
+export default IntegrationModal;

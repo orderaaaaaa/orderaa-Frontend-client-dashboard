@@ -70,6 +70,11 @@ export const navigation: NavigationItem[] = [
         href: '/dashboard/orders/shipping-orders',
         icon: LiaShippingFastSolid,
       },
+      {
+        name: 'متابعة الشحن',
+        href: '/dashboard/orders/tracking',
+        icon: LiaClipboardCheckSolid,
+      },
     ],
   },
   {
@@ -135,14 +140,14 @@ export const navigation: NavigationItem[] = [
     icon: LiaFileInvoiceDollarSolid,
     children: [
       {
-        name: 'جميع الفواتير',
-        href: '/dashboard/purchases/all-invoices',
-        icon: LiaReceiptSolid,
-      },
-      {
         name: 'اضافة فاتورة',
         href: '/dashboard/purchases/add-invoice',
         icon: LiaPlusSolid,
+      },
+      {
+        name: 'جميع الفواتير',
+        href: '/dashboard/purchases/all-invoices',
+        icon: LiaReceiptSolid,
       },
     ],
   },

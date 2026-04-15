@@ -41,6 +41,27 @@ export const providers: ShippingProvider[] = [
     name: 'J&T Express',
     logo: '/Icons/j&t express.png',
     description: 'جي أند تي إكسبريس لخدمات الشحن العالمية',
-    isActive: false,
+    isActive: true,
+  },
+  {
+    id: 'red',
+    name: 'Red',
+    logo: '/Icons/red-shipping-company.png',
+    description: 'شركة ريد للشحن والتوصيل',
+    isActive: true,
+  },
+  {
+    id: 'hashtag',
+    name: 'Hashtag',
+    logo: '/Icons/hashtag-shipping-company.png',
+    description: 'شركة هاشتاج للشحن والتوصيل',
+    isActive: true,
+  },
+  {
+    id: 'quick_connect',
+    name: 'Quick Connect',
+    logo: '/Icons/quick-connect-company.jpeg',
+    description: 'شركة كويك كونكت للشحن والتوصيل',
+    isActive: true,
   },
 ];

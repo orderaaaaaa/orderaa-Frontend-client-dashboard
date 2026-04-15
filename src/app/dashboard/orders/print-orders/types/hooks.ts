@@ -17,6 +17,7 @@ export interface UseScannedOrdersReturn {
   confirmedFilteredOrders: ScannedOrder[];
   actionableFilteredOrders: ScannedOrder[];
   actionableFilteredGroups: NonConfirmedGroup[];
+  forceActionable: (orderId: number) => void;
 }
 
 export interface UseBarcodeScannerOptions {

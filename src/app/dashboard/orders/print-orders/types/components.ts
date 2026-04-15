@@ -7,6 +7,7 @@ export interface ScannedOrder {
   scannedAt: Date;
   cancelReason?: string | null;
   packagingWarning?: string | null;
+  printCount?: number;
 }
 
 export interface AddOrderInput {
@@ -15,6 +16,7 @@ export interface AddOrderInput {
   status: string;
   cancelReason?: string | null;
   packagingWarning?: string | null;
+  printCount?: number;
 }
 
 export interface NonConfirmedGroup {
@@ -61,6 +63,7 @@ export interface ScannedOrdersModalProps extends OrderActionCallbacks {
   actionableFilteredGroups: NonConfirmedGroup[];
   nonConfirmedGroups: NonConfirmedGroup[];
   onRemoveOrder: (code: string) => void;
+  onForceActionable?: (orderId: number) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   filteredOrders: ScannedOrder[];

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import BaseModal from '@/components/ui/base-modal';
 import ProductSelectionModal, {
   SelectableProduct,
+  SelectedVariant,
 } from '@/components/ui/product-selection-modal';
 import AddInvoiceHeader from './AddInvoiceHeader';
 import InvoiceDropdowns, { type PaymentStatus } from './InvoiceDropdowns';
@@ -146,14 +147,25 @@ export function AddInvoiceContent() {
   const handleAddProducts = useCallback(
     (products: SelectableProduct[]) => {
       products.forEach((product) => {
+        const variantSuffix = product.selectedVariants?.length
+          ? ` - ${product.selectedVariants.map((v) => v.value).join(' - ')}`
+          : '';
+        const variantKey = product.selectedVariants?.length
+          ? product.selectedVariants.map((v) => v.value).join('_')
+          : '';
+        const uniqueId = variantKey
+          ? `${product.id}_${variantKey}`
+          : `${product.id}_${Date.now()}`;
         append({
-          id: String(product.id),
-          name: product.name,
+          id: uniqueId,
+          productId: product.id,
+          name: `${product.name}${variantSuffix}`,
           quantity: 0,
           pricePerItem: 0,
           total: 0,
           pieceCount: 0,
           pricePerPiece: 0,
+          variants: product.selectedVariants ?? [],
         });
       });
       setIsProductModalOpen(false);
@@ -185,16 +197,13 @@ export function AddInvoiceContent() {
     async (data: AddInvoiceFormData) => {
       setSubmitError(null);
       try {
-        let fileIds: number[] | undefined;
+        let images: string[] | undefined;
 
         if (data.invoiceImage && data.invoiceImage.length > 0) {
           const file = data.invoiceImage[0];
           const uploadResponse = await uploadFile(file);
           if (uploadResponse?.url) {
-            const uploadId = Number(uploadResponse.url.split('/').pop());
-            if (!isNaN(uploadId)) {
-              fileIds = [uploadId];
-            }
+            images = [uploadResponse.url];
           }
         }
 
@@ -213,11 +222,12 @@ export function AddInvoiceContent() {
           paymentAmount: resolvedPaymentAmount,
           externalInvoiceNumber: data.externalInvoiceNumber,
           products: data.items.map((item) => ({
-            productId: Number(item.id),
+            productId: item.productId,
             quantity: invoiceMode === 'package' ? (item.pieceCount ?? 0) : item.quantity,
             price: invoiceMode === 'package' ? (item.pricePerPiece ?? 0) : item.pricePerItem,
+            ...(item.variants?.length ? { variants: item.variants } : {}),
           })),
-          fileIds,
+          images,
         });
         setIsSuccessModalOpen(true);
         setTimeout(() => {
@@ -235,6 +245,26 @@ export function AddInvoiceContent() {
     invoiceImage && invoiceImage instanceof FileList && invoiceImage.length > 0
       ? invoiceImage[0]
       : null;
+
+  const existingVariantCombos = useMemo(() => {
+    const map = new Map<number, SelectedVariant[][]>();
+    for (const item of items ?? []) {
+      if (item.variants?.length) {
+        const existing = map.get(item.productId) ?? [];
+        existing.push(item.variants);
+        map.set(item.productId, existing);
+      }
+    }
+    return map;
+  }, [items]);
+
+  const existingNoVariantProductIds = useMemo(
+    () =>
+      (items ?? [])
+        .filter((item) => !item.variants?.length)
+        .map((item) => String(item.productId)),
+    [items],
+  );
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">
@@ -312,7 +342,8 @@ export function AddInvoiceContent() {
         isOpen={isProductModalOpen}
         onClose={() => setIsProductModalOpen(false)}
         onConfirm={handleAddProducts}
-        existingProductIds={(items ?? []).map((item) => item.id)}
+        existingProductIds={existingNoVariantProductIds}
+        existingVariantCombos={existingVariantCombos}
       />
 
       <BaseModal

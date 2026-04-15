@@ -20,6 +20,7 @@ export function buildManualOrderPayload(args: {
     governorate: string;
     city: string;
     shippingCost: string;
+    returnShippingCost?: string;
     shippingType: string;
     returnShipmentContent?: string;
   };
@@ -56,6 +57,9 @@ export function buildManualOrderPayload(args: {
       notes: customer.notes,
     },
     shippingCost: Number(shipping.shippingCost) || 0,
+    ...(shipping.returnShippingCost?.trim() && {
+      returnShippingCost: Number(shipping.returnShippingCost),
+    }),
     paymentMethod,
     status: needsConfirmation ? 'NEW_ORDER' : 'CONFIRMED',
     shippingCompany: shipping.shippingCompany,

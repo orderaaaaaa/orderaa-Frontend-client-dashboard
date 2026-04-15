@@ -309,6 +309,11 @@ html {
     width: 100%;
   }
 
+  @page bosta {
+    size: 100mm 150mm;
+    margin: 0;
+  }
+
   .invoice-page {
     page-break-after: always;
     page-break-inside: avoid;
@@ -320,6 +325,12 @@ html {
 
   .invoice-page:last-child {
     page-break-after: auto;
+  }
+
+  .bosta-invoice-page {
+    page: bosta;
+    width: 100mm !important;
+    height: 150mm !important;
   }
 
   .no-print {

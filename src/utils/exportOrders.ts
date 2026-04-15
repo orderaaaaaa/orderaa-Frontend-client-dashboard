@@ -50,10 +50,12 @@ export function exportInArabicFormat(
         'المنتجات': order.order_products
             .map((op: any) => {
                 const product = `${op.products.name}`;
+                const sku = op.sku || op.products.sku;
+                const skuText = sku ? ` [SKU: ${sku}]` : '';
                 const size = op.products.size ? ` - ${op.products.size}` : '';
                 const color = op.products.color ? ` - ${op.products.color}` : '';
                 const quantity = op.quantity ? ` (×${op.quantity})` : '';
-                return `${product}${size}${color}${quantity}`;
+                return `${product}${skuText}${size}${color}${quantity}`;
             })
             .join(', '),
         'السعر الإجمالي': order.totalCost,

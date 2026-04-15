@@ -39,6 +39,7 @@ interface SearchableSelectProps {
   debounceMs?: number;
   clearable?: boolean;
   onOpenChange?: (open: boolean) => void;
+  onSearch?: (query: string) => void;
 }
 
 const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
@@ -66,6 +67,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
       debounceMs = 300,
       clearable = false,
       onOpenChange,
+      onSearch,
     },
     ref
   ) {
@@ -119,16 +121,17 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
     const getOptionKey = (opt: OptionType) =>
       typeof opt === 'string' ? opt : opt.key;
 
-    const showSearch = options.length > searchThreshold;
+    const showSearch = !!onSearch || options.length > searchThreshold;
 
     const filtered = useMemo(() => {
+      if (onSearch) return options;
       const query = debouncedQuery.toLowerCase().trim();
       return options.filter((o) => {
         const text = getDisplayText(o);
         if (!query) return true;
         return text.toLowerCase().includes(query);
       });
-    }, [options, debouncedQuery]);
+    }, [options, debouncedQuery, onSearch]);
 
     const currentDisplayValue = useMemo(() => {
       if (displayValue) return displayValue;
@@ -172,7 +175,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
       if (open && showSearch) {
         setTimeout(() => inputRef.current?.focus(), 50);
       }
-      if (!open) {
+      if (!open && !onSearch) {
         setSearchQuery('');
       }
     }, [open, showSearch]);
@@ -256,7 +259,7 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
               type="button"
               onClick={handleClear}
               className="absolute left-10 top-1/2 -translate-y-1/2 z-20
-                         text-gray-400 hover:text-primary"
+                         text-gray-400 hover:text-primary cursor-pointer"
               aria-label="Clear selection"
             >
               <X className="w-4 h-4" />
@@ -287,7 +290,10 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
                   <input
                     ref={inputRef}
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      onSearch?.(e.target.value);
+                    }}
                     placeholder={searchPlaceholder}
                     className="w-full px-2 py-1 md:py-1.5 rounded border text-xs md:text-sm
                                focus:outline-none focus:border-primary"

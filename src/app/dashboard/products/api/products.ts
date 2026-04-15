@@ -5,6 +5,7 @@ import {
   VariantsCountResponse,
   ProductQueryParams,
   SyncProductsResponse,
+  MergeProductsPayload,
 } from '../types/products';
 
 export const productsApi = {
@@ -39,6 +40,11 @@ export const productsApi = {
 
   sync: async (): Promise<SyncProductsResponse> => {
     const response = await http.post<SyncProductsResponse>('/products/sync');
+    return response.data;
+  },
+
+  merge: async (targetProductId: number, payload: MergeProductsPayload) => {
+    const response = await http.post(`/products/${targetProductId}/merge`, payload);
     return response.data;
   },
 };

@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { z } from 'zod';
 
 export interface UseEditableFieldOptions {
-  initialValue: string | undefined;
+  initialValue: string | null | undefined;
   onSave: (value: string) => Promise<void>;
   validationSchema?: z.ZodSchema<string>;
 }

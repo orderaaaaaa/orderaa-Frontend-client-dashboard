@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { EditableTextField } from '../fields/EditableTextField';
 import { PaymentMethodSelect } from '../fields/PaymentMethodSelect';
 import { PaymentStatusSelect } from '../fields/PaymentStatusSelect';
+import { ShippingTypeSelect } from '../fields/ShippingTypeSelect';
 import { Order } from '@/types/orders';
 
 // Validation schema for price fields - only numbers allowed
@@ -32,7 +33,7 @@ export function PricingSection({ order, onUpdate, className = '' }: PricingSecti
   return (
     <div className={`flex flex-col justify-start gap-2 ${className}`}>
       <h2 className="text-primary font-semibold">السعر و الدفع</h2>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <EditableTextField
           label="السعر"
           value={String(order.totalCost)}
@@ -51,6 +52,12 @@ export function PricingSection({ order, onUpdate, className = '' }: PricingSecti
           validationSchema={priceSchema}
           onSave={async (value) => {
             await onUpdate('shippingCost', Number(value));
+          }}
+        />
+        <ShippingTypeSelect
+          value={order.shippingType}
+          onChange={async (value) => {
+            await onUpdate('shippingType', value);
           }}
         />
         <PaymentMethodSelect

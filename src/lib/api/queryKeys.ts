@@ -37,9 +37,20 @@ export const QUERY_KEYS = {
   SUPPLIER_INVOICES: 'supplier-invoices',
   SUPPLIER_INVOICE_DETAIL: 'supplier-invoice-detail',
 
+  // Integrations
+  INTEGRATION_CONFIGS: 'integration-configs',
+
   // Cancellation Reasons
   CANCELLATION_REASONS: 'cancellation-reasons',
   TOP_CANCELLATION_REASONS: 'top-cancellation-reasons',
+
+  // Logistics & Tracking
+  GOVERNORATE_LOGISTICS_CONFIG: 'governorate-logistics-config',
+  TRACKING_CARDS: 'tracking-cards',
+  POST_SHIPPING_REASONS: 'post-shipping-reasons',
+  TOP_POST_SHIPPING_REASONS: 'top-post-shipping-reasons',
+  SHIPPING_CANCELLATION_REASONS: 'shipping-cancellation-reasons',
+  ORDER_PRODUCT_CHANGE_LOGS: 'order-product-change-logs',
 
   // Dashboard Reports
   DASHBOARD_SUMMARY: 'dashboard-summary',
@@ -54,6 +65,8 @@ export const QUERY_KEYS = {
   DASHBOARD_EMPLOYEES_OFFLINE: 'dashboard-employees-offline',
   DASHBOARD_EMPLOYEES_STATUS: 'dashboard-employees-status',
   DASHBOARD_EMPLOYEE_ACTIVITY: 'dashboard-employee-activity',
+  CONFIRMED_PRODUCTS_REPORT: 'confirmed-products-report',
+  PACKAGING_INVENTORY: 'packaging-inventory',
 } as const;
 
 export type QueryKeyType = (typeof QUERY_KEYS)[keyof typeof QUERY_KEYS];

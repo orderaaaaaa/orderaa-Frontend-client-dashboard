@@ -89,3 +89,13 @@ export interface SyncProductsResponse {
   updated: number;
   failures: SyncFailure[];
 }
+
+export interface MergeProductsPayload {
+  sourceProductId: number[];
+  name?: string;
+  sku?: string;
+  price?: number;
+  image?: string;
+  images?: string[];
+  variants?: VariantOption[];
+}

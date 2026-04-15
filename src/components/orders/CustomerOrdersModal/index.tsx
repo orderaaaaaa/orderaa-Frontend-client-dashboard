@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { LiaTimesSolid } from 'react-icons/lia';
+import { LiaExclamationTriangleSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
 import type { Order } from '@/types/orders';
 import { useCustomerOrders, useOrderStatusesQuery } from '@/services/orders';
@@ -8,6 +7,10 @@ import OrderCard from '../../../app/dashboard/orders/allOrders/components/OrderC
 import { Button } from '@/components/ui/button';
 import BulkActionsBar from '@/components/BulkActionsBar';
 import { exportOrdersToExcel } from '@/utils/exportOrders';
+import { useUpdateOrdersBatch } from '@/app/dashboard/orders/allOrders/hooks/useUpdateOrdersBatch';
+import type { OrderStatusKey } from '@/app/dashboard/orders/allOrders/types/Bulk';
+import BaseModal from '@/components/ui/base-modal';
+import PageLoading from '@/components/ui/page-loading';
 
 interface CustomerOrdersModalProps {
   isOpen: boolean;
@@ -34,6 +37,7 @@ export default function CustomerOrdersModal({
   const error = queryError ? 'فشل في تحميل طلبات العميل' : null;
 
   const { data: statusOptions } = useOrderStatusesQuery();
+  const { mutateAsync: batchUpdateOrders } = useUpdateOrdersBatch();
 
   const statusLabelsMap = useMemo(() => {
     if (!statusOptions) return new Map<string, string>();
@@ -89,239 +93,157 @@ export default function CustomerOrdersModal({
     }
   }, [selectedOrders, customerPhone, statusLabelsMap]);
 
-  const handleEditStatus = useCallback(() => {
-    // TODO: Implement edit status functionality
-    toast.info(`سيتم تعديل حالة ${selectedOrders.length} طلب`);
-  }, [selectedOrders]);
+  const handleEditStatus = useCallback(
+    async (statusKey: string) => {
+      if (!statusKey || selectedOrderIds.length === 0) return;
+      try {
+        await batchUpdateOrders({
+          orders: selectedOrderIds.map((id) => ({
+            id,
+            updates: { status: statusKey as OrderStatusKey },
+          })),
+        });
+        toast.success(`تم تعديل حالة ${selectedOrderIds.length} طلب بنجاح`);
+        setSelectedOrderIds([]);
+      } catch (err: any) {
+        toast.error(err?.response?.data?.message || 'فشل تعديل حالة الطلبات');
+      }
+    },
+    [selectedOrderIds, batchUpdateOrders]
+  );
 
   const handleShareWhatsApp = useCallback(() => {
-    // TODO: Implement WhatsApp share functionality
     toast.info(`سيتم مشاركة ${selectedOrders.length} طلب عبر واتساب`);
   }, [selectedOrders]);
 
   const handleShipping = useCallback(() => {
-    // TODO: Implement shipping functionality
     toast.info(`سيتم شحن ${selectedOrders.length} طلب`);
   }, [selectedOrders]);
 
   const handleOther = useCallback(() => {
-    // TODO: Implement other functionality
     toast.info(`${selectedOrders.length} طلب محدد`);
   }, [selectedOrders]);
 
+  const modalTitle = useMemo(() => {
+    const nameText = customerName && customerName !== 'غير محدد' ? `${customerName} - ` : '';
+    return `جميع طلبات العميل (${nameText}${customerPhone})`;
+  }, [customerName, customerPhone]);
+
   return (
-    <DialogPrimitive.Root
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open) onClose();
-      }}
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={modalTitle}
+      showFooter={false}
+      maxWidth="md:max-w-6xl"
     >
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content
-          className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl w-[95vw] sm:w-[90vw] md:w-auto md:max-w-7xl max-h-[90vh] flex flex-col"
-        >
-          <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-primary/5 to-[#682fee]/5 rounded-t-2xl">
-            <div className="flex items-center gap-4">
-              <div className="relative flex items-center justify-center">
-                <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 28 28"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M14 4L24 21H4L14 4Z"
-                    fill="#DC2626"
-                    stroke="#DC2626"
-                    strokeWidth="2"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M14 11V15"
-                    stroke="white"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                  <circle cx="14" cy="18" r="1" fill="white" />
-                </svg>
-                <div className="absolute -top-1 -right-1 w-6 h-6 bg-red-600 rounded-full flex items-center justify-center border-2 border-white">
-                  <span className="text-xs font-bold text-white">
-                    {orders.length}
-                  </span>
-                </div>
+      <div className="relative">
+        {orders.length > 0 && !loading && !error && (
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 text-red-600">
+                <LiaExclamationTriangleSolid className="w-5 h-5" />
+                <span className="text-sm font-bold">
+                  إجمالي الطلبات: {orders.length}
+                </span>
               </div>
-              <div className="text-right">
-                <DialogPrimitive.Title className="test-lg sm:text-2xl font-bold text-gray-800">
-                  جميع طلبات العميل
-                </DialogPrimitive.Title>
-                <p className="text-sm text-gray-600 mt-1">
-                  {customerName && customerName !== 'غير محدد'
-                    ? customerName + ' - '
-                    : ''}
-                  <span dir="ltr" className="inline-block">
-                    {customerPhone}
-                  </span>
-                </p>
-              </div>
-            </div>
-
-            <DialogPrimitive.Close
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <LiaTimesSolid className="cursor-pointer w-6 h-6 text-gray-600" />
-            </DialogPrimitive.Close>
-          </div>
-
-          <DialogPrimitive.Description className="sr-only">
-            جميع طلبات العميل {customerName}
-          </DialogPrimitive.Description>
-
-          {orders.length > 0 && !loading && !error && (
-            <div className="flex items-center justify-between px-8 py-3 bg-gray-50 border-b border-gray-200">
-              <div className="flex items-center gap-3">
-                <Button
-                  onClick={handleSelectAllToggle}
-                  className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-[#682fee] transition-colors"
-                >
-                  {selectedOrderIds.length === orders.length &&
-                  orders.length > 0 ? (
-                    'إلغاء تحديد الكل'
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      تحديد الكل
-                      <span className="bg-white text-primary rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
-                        {orders.length}
-                      </span>
+              <Button
+                type="button"
+                onClick={handleSelectAllToggle}
+                size="sm"
+                className="px-4 py-1.5 text-sm bg-primary text-white rounded-lg hover:bg-[#682fee] transition-colors"
+              >
+                {selectedOrderIds.length === orders.length && orders.length > 0 ? (
+                  'إلغاء تحديد الكل'
+                ) : (
+                  <span className="flex items-center gap-2">
+                    تحديد الكل
+                    <span className="bg-white text-primary rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                      {orders.length}
                     </span>
-                  )}
-                </Button>
-                {selectedOrderIds.length > 0 && (
-                  <span className="text-sm text-gray-600">
-                    تم تحديد {selectedOrderIds.length} طلب
                   </span>
                 )}
-              </div>
-            </div>
-          )}
-
-          <div className="flex-1 overflow-y-auto p-8">
-            {loading ? (
-              <div className="flex items-center justify-center min-h-[400px]">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary mx-auto"></div>
-                  <p className="mt-4 text-gray-600 text-lg">
-                    جاري تحميل الطلبات...
-                  </p>
-                </div>
-              </div>
-            ) : error ? (
-              <div className="flex items-center justify-center min-h-[400px]">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <LiaTimesSolid className="w-8 h-8 text-red-600" />
-                  </div>
-                  <p className="text-red-600 text-lg">{error}</p>
-                </div>
-              </div>
-            ) : orders.length === 0 ? (
-              <div className="flex items-center justify-center min-h-[400px]">
-                <div className="text-center">
-                  <p className="text-gray-500 text-lg">
-                    لا توجد طلبات لهذا العميل
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {orders.map((order: Order) => (
-                  <div key={order.id} className="flex items-start gap-3">
-                    <input
-                      type="checkbox"
-                      checked={selectedOrderIds.includes(order.id)}
-                      onChange={(e) =>
-                        handleCheckboxChange(order.id, e.target.checked)
-                      }
-                      onClick={(e) => e.stopPropagation()}
-                      className="relative right-9 top-[-2px] z-100 w-4 h-4 mt-2 border-2 border-primary rounded-[4px] cursor-pointer accent-primary flex-shrink-0"
-                    />
-                    <OrderCard
-                      id={order.id}
-                      select={false}
-                      isSelected={false}
-                      code={order.code}
-                      name={order.customers.name}
-                      phoneNumbers={order.customers.phone_numbers}
-                      government={
-                        order.governorate ||
-                        order.externalGovernorate ||
-                        'غير محدد'
-                      }
-                      items={order.order_products.map((op: any) => {
-                        const productName = op.products?.name || 'منتج غير معروف';
-
-                        const variantDetails =
-                          op.variants && op.variants.length > 0
-                            ? op.variants.map((v: any) => v.value).join('')
-                            : '';
-
-                        return variantDetails
-                          ? `${productName} - ${variantDetails}`
-                          : productName;
-                      })}
-                      price={order.totalCost}
-                      trys={order.numberOfTriesToReach}
-                      status={order.status}
-                      city={
-                        order.customers.area || order.customers.city || 'غير محدد'
-                      }
-                      address={order.customers.address || 'غير محدد'}
-                      alert={0}
-                      createdAt={order.createdAt}
-                      repeatCount={orders.length}
-                      showAllItems
-                      states={order.states}
-                      isBlocked={order.customers.isBlocked}
-                      customerNotes={order.customers.notes}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div
-            className={`px-8 py-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl ${
-              selectedOrders.length > 0 ? 'pb-20' : ''
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <Button
-                onClick={onClose}
-                className="px-6 py-2.5 bg-primary text-white rounded-full hover:bg-[#682fee] transition-colors font-medium"
-              >
-                إغلاق
               </Button>
-              <p className="text-sm text-gray-600">
-                إجمالي الطلبات:{' '}
-                <span className="font-bold text-primary">{orders.length}</span>
-              </p>
+              {selectedOrderIds.length > 0 && (
+                <span className="text-sm text-gray-600">
+                  تم تحديد {selectedOrderIds.length} طلب
+                </span>
+              )}
             </div>
           </div>
+        )}
 
-          <BulkActionsBar
-            selectedOrders={selectedOrders}
-            onEditStatus={handleEditStatus}
-            onExportExcel={handleExportExcel}
-            onShareWhatsApp={handleShareWhatsApp}
-            onShipping={handleShipping}
-            onOther={handleOther}
-            position="absolute"
-            className="rounded-b-2xl"
-          />
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+        {loading ? (
+          <PageLoading message="جاري تحميل الطلبات..." size="sm" className="py-16 min-h-0" />
+        ) : error ? (
+          <div className="flex items-center justify-center py-16">
+            <p className="text-red-600 text-lg">{error}</p>
+          </div>
+        ) : orders.length === 0 ? (
+          <div className="flex items-center justify-center py-16">
+            <p className="text-gray-500 text-lg">لا توجد طلبات لهذا العميل</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {orders.map((order: Order) => (
+              <OrderCard
+                key={order.id}
+                id={order.id}
+                select={true}
+                isSelected={selectedOrderIds.includes(order.id)}
+                onSelectionChange={(checked) =>
+                  handleCheckboxChange(order.id, checked)
+                }
+                code={order.code}
+                name={order.customers.name}
+                phoneNumbers={order.customers.phone_numbers}
+                government={
+                  order.governorate ||
+                  order.externalGovernorate ||
+                  'غير محدد'
+                }
+                items={order.order_products.map((op: any) => {
+                  const productName = op.products?.name || 'منتج غير معروف';
+                  const variantDetails =
+                    op.variants && op.variants.length > 0
+                      ? op.variants.map((v: any) => v.value).join('')
+                      : '';
+                  return variantDetails
+                    ? `${productName} - ${variantDetails}`
+                    : productName;
+                })}
+                price={order.totalCost}
+                shippingType={order.shippingType}
+                trys={order.numberOfTriesToReach}
+                status={order.status}
+                city={
+                  order.customers.area || order.customers.city || 'غير محدد'
+                }
+                address={order.customers.address || 'غير محدد'}
+                alert={0}
+                createdAt={order.createdAt}
+                repeatCount={orders.length}
+                showAllItems
+                states={order.states}
+                isBlocked={order.customers.isBlocked}
+                customerNotes={order.customers.notes}
+                hideCustomerInfo
+              />
+            ))}
+          </div>
+        )}
+
+        <BulkActionsBar
+          selectedOrders={selectedOrders}
+          onEditStatus={handleEditStatus}
+          statusOptions={statusOptions || []}
+          onExportExcel={handleExportExcel}
+          onShareWhatsApp={handleShareWhatsApp}
+          onShipping={handleShipping}
+          onOther={handleOther}
+          position="absolute"
+        />
+      </div>
+    </BaseModal>
   );
 }

@@ -137,13 +137,20 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
       <div className="grid grid-cols-2 border border-t-0 border-black">
         <div className="p-1 border-e border-black">
           {data.products.map((product, index) => (
-            <div key={index} className="grid grid-cols-[auto_1fr] gap-1 mb-0.5">
-              <span className="text-[8px] font-bold">
-                {product.variant}
-              </span>
-              <span className="text-[8px] font-bold text-left">
-                {formatProductName(product)}
-              </span>
+            <div key={index} className="mb-0.5">
+              <div className="grid grid-cols-[auto_1fr] gap-1">
+                <span className="text-[8px] font-bold">
+                  {product.variant}
+                </span>
+                <span className="text-[8px] font-bold text-left">
+                  {formatProductName(product)}
+                </span>
+              </div>
+              {product.sku && (
+                <span className="text-[7px] text-black">
+                  SKU: {product.sku}
+                </span>
+              )}
             </div>
           ))}
         </div>

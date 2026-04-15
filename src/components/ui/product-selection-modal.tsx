@@ -2,19 +2,32 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { LiaPlusSolid } from 'react-icons/lia';
+import { LiaPlusSolid, LiaTimesSolid } from 'react-icons/lia';
 import clsx from 'clsx';
 import BaseModal from './base-modal';
 import Input from './Input';
 import { Button } from './button';
+import { Checkbox } from './checkbox';
 import { useDebounce } from '@/utils/debounce';
 import api from '@/lib/api';
+
+export interface VariantOption {
+  label: string;
+  values: string[];
+}
+
+export interface SelectedVariant {
+  label: string;
+  value: string;
+}
 
 export interface SelectableProduct {
   id: number;
   name: string;
   price: number;
   image?: string;
+  variantOptions?: VariantOption[];
+  selectedVariants?: SelectedVariant[];
 }
 
 interface ProductsApiResponse {
@@ -29,6 +42,26 @@ interface ProductSelectionModalProps {
   onClose: () => void;
   onConfirm: (products: SelectableProduct[]) => void;
   existingProductIds?: string[];
+  existingVariantCombos?: Map<number, SelectedVariant[][]>;
+}
+
+function isValueDisabled(
+  label: string,
+  value: string,
+  currentSelection: Record<string, string>,
+  addedCombos: SelectedVariant[][],
+  allLabels: string[],
+): boolean {
+  if (addedCombos.length === 0) return false;
+
+  const hypothetical = { ...currentSelection, [label]: value };
+
+  const filledLabels = allLabels.filter((l) => hypothetical[l]);
+  if (filledLabels.length < allLabels.length) return false;
+
+  return addedCombos.some((combo) =>
+    allLabels.every((l) => combo.find((v) => v.label === l)?.value === hypothetical[l]),
+  );
 }
 
 export default function ProductSelectionModal({
@@ -36,6 +69,7 @@ export default function ProductSelectionModal({
   onClose,
   onConfirm,
   existingProductIds = [],
+  existingVariantCombos,
 }: ProductSelectionModalProps) {
   const [search, setSearch] = useState('');
   const [products, setProducts] = useState<SelectableProduct[]>([]);
@@ -43,6 +77,8 @@ export default function ProductSelectionModal({
   const [page, setPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [addedCombos, setAddedCombos] = useState<Map<number, SelectedVariant[][]>>(new Map());
+  const [currentSelection, setCurrentSelection] = useState<Map<number, Record<string, string>>>(new Map());
 
   const debouncedSearch = useDebounce(search, 300);
 
@@ -78,7 +114,14 @@ export default function ProductSelectionModal({
   useEffect(() => {
     if (isOpen) {
       setPage(1);
-      setSelectedIds(new Set());
+      if (existingVariantCombos && existingVariantCombos.size > 0) {
+        setSelectedIds(new Set(existingVariantCombos.keys()));
+        setAddedCombos(new Map(existingVariantCombos));
+      } else {
+        setSelectedIds(new Set());
+        setAddedCombos(new Map());
+      }
+      setCurrentSelection(new Map());
       fetchProducts(1, debouncedSearch, false);
     }
   }, [isOpen, debouncedSearch, fetchProducts]);
@@ -94,6 +137,8 @@ export default function ProductSelectionModal({
       const next = new Set(prev);
       if (next.has(productId)) {
         next.delete(productId);
+        setAddedCombos((p) => { const n = new Map(p); n.delete(productId); return n; });
+        setCurrentSelection((p) => { const n = new Map(p); n.delete(productId); return n; });
       } else {
         next.add(productId);
       }
@@ -101,15 +146,99 @@ export default function ProductSelectionModal({
     });
   }, []);
 
+  const handleVariantSelect = useCallback(
+    (productId: number, label: string, value: string) => {
+      setCurrentSelection((prev) => {
+        const next = new Map(prev);
+        const current = { ...(next.get(productId) ?? {}) };
+        current[label] = current[label] === value ? '' : value;
+        next.set(productId, current);
+        return next;
+      });
+    },
+    [],
+  );
+
+  const handleAddCombo = useCallback(
+    (productId: number, labels: string[]) => {
+      const selection = currentSelection.get(productId);
+      if (!selection) return;
+
+      const combo: SelectedVariant[] = labels
+        .filter((l) => selection[l])
+        .map((l) => ({ label: l, value: selection[l] }));
+
+      if (combo.length !== labels.length) return;
+
+      setAddedCombos((prev) => {
+        const next = new Map(prev);
+        const existing = next.get(productId) ?? [];
+        next.set(productId, [...existing, combo]);
+        return next;
+      });
+
+      setCurrentSelection((prev) => {
+        const next = new Map(prev);
+        next.set(productId, {});
+        return next;
+      });
+    },
+    [currentSelection],
+  );
+
+  const handleRemoveCombo = useCallback(
+    (productId: number, comboIndex: number) => {
+      setAddedCombos((prev) => {
+        const next = new Map(prev);
+        const existing = [...(next.get(productId) ?? [])];
+        existing.splice(comboIndex, 1);
+        next.set(productId, existing);
+        return next;
+      });
+    },
+    [],
+  );
+
   const handleConfirm = useCallback(() => {
-    const selected = products.filter((p) => selectedIds.has(p.id));
-    onConfirm(selected);
+    const expanded: SelectableProduct[] = [];
+
+    products
+      .filter((p) => selectedIds.has(p.id))
+      .forEach((p) => {
+        const combos = addedCombos.get(p.id);
+        if (!combos || combos.length === 0) {
+          if (!existingProductIds.includes(String(p.id))) {
+            expanded.push({ ...p, selectedVariants: [] });
+          }
+          return;
+        }
+        const existingCombosForProduct = existingVariantCombos?.get(p.id) ?? [];
+        const allLabels = (p.variantOptions ?? []).map((o) => o.label);
+        for (const combo of combos) {
+          const isExisting = existingCombosForProduct.some((existing) =>
+            allLabels.every(
+              (l) =>
+                existing.find((v) => v.label === l)?.value ===
+                combo.find((v) => v.label === l)?.value,
+            ),
+          );
+          if (!isExisting) {
+            expanded.push({ ...p, selectedVariants: combo });
+          }
+        }
+      });
+
+    onConfirm(expanded);
     setSelectedIds(new Set());
+    setAddedCombos(new Map());
+    setCurrentSelection(new Map());
     setSearch('');
-  }, [products, selectedIds, onConfirm]);
+  }, [products, selectedIds, addedCombos, existingProductIds, existingVariantCombos, onConfirm]);
 
   const handleClose = useCallback(() => {
     setSelectedIds(new Set());
+    setAddedCombos(new Map());
+    setCurrentSelection(new Map());
     setSearch('');
     onClose();
   }, [onClose]);
@@ -164,60 +293,161 @@ export default function ProductSelectionModal({
           ) : (
             <div className="pb-4">
               {products.map((product) => {
-                const isAlreadyInTable = existingProductIds.includes(
-                  String(product.id),
-                );
+                const hasVariants = product.variantOptions && product.variantOptions.length > 0;
+                const isNoVariantInTable =
+                  !hasVariants && existingProductIds.includes(String(product.id));
+                const isAlreadyInTable = isNoVariantInTable;
                 const isChecked = selectedIds.has(product.id);
+                const productCombos = addedCombos.get(product.id) ?? [];
+                const selection = currentSelection.get(product.id) ?? {};
+                const allLabels = (product.variantOptions ?? []).map((o) => o.label);
+                const allLabelsFilled = allLabels.length > 0 && allLabels.every((l) => selection[l]);
 
                 return (
-                  <label
+                  <div
                     key={product.id}
                     className={clsx(
-                      'flex items-center p-3 border-b mb-2 border-gray-100 rounded-sm transition-colors',
+                      'border-b mb-2 border-gray-100 rounded-sm transition-colors',
                       isAlreadyInTable
-                        ? 'bg-primary/5 opacity-60 cursor-not-allowed'
+                        ? 'bg-primary/5 opacity-60'
                         : isChecked
-                          ? 'bg-gray-50 cursor-pointer'
-                          : 'bg-white hover:bg-gray-50 cursor-pointer',
+                          ? 'bg-gray-50'
+                          : 'bg-white hover:bg-gray-50',
                     )}
                   >
-                    <input
-                      type="checkbox"
-                      checked={isChecked || isAlreadyInTable}
-                      onChange={() => handleToggle(product.id)}
-                      disabled={isAlreadyInTable}
+                    <label
                       className={clsx(
-                        'w-4 h-4 accent-primary shrink-0',
+                        'flex items-center p-3',
                         isAlreadyInTable ? 'cursor-not-allowed' : 'cursor-pointer',
                       )}
-                    />
+                    >
+                      <Checkbox
+                        checked={isChecked || isAlreadyInTable}
+                        onCheckedChange={() => handleToggle(product.id)}
+                        disabled={isAlreadyInTable}
+                        className="shrink-0"
+                      />
 
-                    <div className="w-1/2 flex justify-center">
-                      <div className="relative h-12 w-12 overflow-hidden rounded-md border border-gray-200 bg-gray-100">
-                        {product.image ? (
-                          <Image
-                            src={product.image}
-                            alt={product.name}
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center h-full text-gray-400 text-xs">
-                            لا توجد صورة
-                          </div>
+                      <div className="w-1/2 flex justify-center">
+                        <div className="relative h-12 w-12 overflow-hidden rounded-md border border-gray-200 bg-gray-100">
+                          {product.image ? (
+                            <Image
+                              src={product.image}
+                              alt={product.name}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center h-full text-gray-400 text-xs">
+                              لا توجد صورة
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="w-1/2 text-center font-medium flex flex-col items-center gap-1">
+                        <span>{product.name}</span>
+                        {isAlreadyInTable && (
+                          <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                            في الفاتورة
+                          </span>
                         )}
                       </div>
-                    </div>
+                    </label>
 
-                    <div className="w-1/2 text-center font-medium flex flex-col items-center gap-1">
-                      <span>{product.name}</span>
-                      {isAlreadyInTable && (
-                        <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                          في الفاتورة
-                        </span>
-                      )}
-                    </div>
-                  </label>
+                    {isChecked && hasVariants && (
+                      <div className="px-4 pb-3 flex flex-col gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                        {product.variantOptions!.map((option) => (
+                          <div key={option.label} className="flex flex-wrap items-center gap-2">
+                            <span className="text-xs font-semibold text-gray-500 min-w-16">
+                              {option.label}:
+                            </span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {option.values.map((value) => {
+                                const isSelected = selection[option.label] === value;
+                                const disabled = isValueDisabled(
+                                  option.label,
+                                  value,
+                                  selection,
+                                  productCombos,
+                                  allLabels,
+                                );
+                                return (
+                                  <Button
+                                    key={value}
+                                    type="button"
+                                    variant={isSelected ? 'default' : 'outline'}
+                                    size="sm"
+                                    disabled={disabled}
+                                    className={clsx(
+                                      'rounded-full text-xs h-7 px-3',
+                                      !isSelected && !disabled && 'border-gray-300 text-gray-600 hover:border-primary hover:text-primary',
+                                    )}
+                                    onClick={() => handleVariantSelect(product.id, option.label, value)}
+                                  >
+                                    {value}
+                                  </Button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
+
+                        <Button
+                          type="button"
+                          variant="default"
+                          size="sm"
+                          disabled={!allLabelsFilled}
+                          className="rounded-full text-xs h-7 px-4 w-fit self-end"
+                          onClick={() => handleAddCombo(product.id, allLabels)}
+                        >
+                          <LiaPlusSolid className="w-4 h-4" />
+                          اضافة
+                        </Button>
+
+                        {productCombos.length > 0 && (() => {
+                          const existingCombosForProduct = existingVariantCombos?.get(product.id) ?? [];
+                          return (
+                            <div className="flex flex-wrap gap-1.5 pt-1 border-t border-gray-100">
+                              {productCombos.map((combo, idx) => {
+                                const isPreExisting = existingCombosForProduct.some((existing) =>
+                                  allLabels.every(
+                                    (l) =>
+                                      existing.find((v) => v.label === l)?.value ===
+                                      combo.find((v) => v.label === l)?.value,
+                                  ),
+                                );
+                                return (
+                                  <span
+                                    key={idx}
+                                    className={clsx(
+                                      'inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full',
+                                      isPreExisting
+                                        ? 'bg-gray-100 text-gray-400'
+                                        : 'bg-primary/10 text-primary',
+                                    )}
+                                  >
+                                    {combo.map((v) => v.value).join(' - ')}
+                                    {!isPreExisting && (
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon-sm"
+                                        className="h-4 w-4 p-0 hover:bg-primary/20 rounded-full"
+                                        onClick={() => handleRemoveCombo(product.id, idx)}
+                                      >
+                                        <LiaTimesSolid className="w-3 h-3" />
+                                      </Button>
+                                    )}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    )}
+                  </div>
                 );
               })}
 

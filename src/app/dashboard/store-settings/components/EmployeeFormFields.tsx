@@ -11,6 +11,9 @@ import { LogoUploadField } from './LogoUploadField';
 import { URLField } from './URLField';
 import { LanguageSelectionField } from './LanguageSelectionField';
 import { CancellationReasonsField } from './CancellationReasonsField';
+import { PostShippingReasonsField } from './PostShippingReasonsField';
+import { ShippingCancellationReasonsField } from './ShippingCancellationReasonsField';
+import { LogisticsSettingsSection } from './LogisticsSettingsSection';
 import { UtmSourcesField } from './UtmSourcesField';
 import { AutoCancelField } from './AutoCancelField';
 import { ShippingSection } from './ShippingSection';
@@ -52,6 +55,18 @@ export default function OrderSettingsFields({
           setValue={setValue}
           errors={errors}
         />
+
+        <Separator />
+
+        <PostShippingReasonsField />
+
+        <Separator />
+
+        <ShippingCancellationReasonsField />
+
+        <Separator />
+
+        <LogisticsSettingsSection />
 
         <Separator />
 

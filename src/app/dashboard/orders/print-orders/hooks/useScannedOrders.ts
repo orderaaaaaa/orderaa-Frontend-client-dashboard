@@ -38,6 +38,7 @@ export function useScannedOrders(): UseScannedOrdersReturn {
           scannedAt: new Date(),
           cancelReason: order.cancelReason,
           packagingWarning: order.packagingWarning,
+          printCount: order.printCount,
         },
         ...prev,
       ]);
@@ -57,10 +58,23 @@ export function useScannedOrders(): UseScannedOrdersReturn {
     setSearchQuery('');
   }, []);
 
+  const [forcedActionableIds, setForcedActionableIds] = useState<Set<number>>(new Set());
+
   const ACTIONABLE_STATUSES = ['CONFIRMED', 'WAITING_FOR_PACKAGING'];
 
   const isActionableStatus = (status: string) =>
     ACTIONABLE_STATUSES.includes(status);
+
+  const isActionable = useCallback(
+    (order: ScannedOrder) =>
+      forcedActionableIds.has(order.id) ||
+      (isActionableStatus(order.status) && !order.packagingWarning),
+    [forcedActionableIds]
+  );
+
+  const forceActionable = useCallback((orderId: number) => {
+    setForcedActionableIds((prev) => new Set(prev).add(orderId));
+  }, []);
 
   const confirmedOrders = useMemo(
     () => scannedOrders.filter((o) => o.status === 'CONFIRMED' && !o.packagingWarning),
@@ -68,32 +82,27 @@ export function useScannedOrders(): UseScannedOrdersReturn {
   );
 
   const actionableOrders = useMemo(
-    () => scannedOrders.filter((o) => isActionableStatus(o.status) && !o.packagingWarning),
-    [scannedOrders]
+    () => scannedOrders.filter(isActionable),
+    [scannedOrders, isActionable]
   );
 
   const actionableGroups: NonConfirmedGroup[] = useMemo(() => {
-    const actionable = scannedOrders.filter(
-      (o) => isActionableStatus(o.status) && !o.packagingWarning
-    );
+    const actionable = scannedOrders.filter(isActionable);
     if (actionable.length === 0) return [];
     const grouped = groupBy(actionable, 'status');
-    return ACTIONABLE_STATUSES
-      .filter((status) => grouped[status])
-      .map((status) => ({ status, orders: grouped[status] }));
-  }, [scannedOrders]);
+    const statuses = Object.keys(grouped);
+    return statuses.map((status) => ({ status, orders: grouped[status] }));
+  }, [scannedOrders, isActionable]);
 
   const nonConfirmedGroups: NonConfirmedGroup[] = useMemo(() => {
-    const nonConfirmed = scannedOrders.filter(
-      (o) => !isActionableStatus(o.status) || !!o.packagingWarning
-    );
+    const nonConfirmed = scannedOrders.filter((o) => !isActionable(o));
     if (nonConfirmed.length === 0) return [];
     const grouped = groupBy(nonConfirmed, 'status');
     return Object.entries(grouped).map(([status, orders]) => ({
       status,
       orders,
     }));
-  }, [scannedOrders]);
+  }, [scannedOrders, isActionable]);
 
   const filteredOrders = useMemo(() => {
     if (!searchQuery.trim()) {
@@ -111,20 +120,17 @@ export function useScannedOrders(): UseScannedOrdersReturn {
   );
 
   const actionableFilteredOrders = useMemo(
-    () => filteredOrders.filter((o) => isActionableStatus(o.status) && !o.packagingWarning),
-    [filteredOrders]
+    () => filteredOrders.filter(isActionable),
+    [filteredOrders, isActionable]
   );
 
   const actionableFilteredGroups: NonConfirmedGroup[] = useMemo(() => {
-    const actionable = filteredOrders.filter(
-      (o) => isActionableStatus(o.status) && !o.packagingWarning
-    );
+    const actionable = filteredOrders.filter(isActionable);
     if (actionable.length === 0) return [];
     const grouped = groupBy(actionable, 'status');
-    return ACTIONABLE_STATUSES
-      .filter((status) => grouped[status])
-      .map((status) => ({ status, orders: grouped[status] }));
-  }, [filteredOrders]);
+    const statuses = Object.keys(grouped);
+    return statuses.map((status) => ({ status, orders: grouped[status] }));
+  }, [filteredOrders, isActionable]);
 
   return {
     scannedOrders,
@@ -142,5 +148,6 @@ export function useScannedOrders(): UseScannedOrdersReturn {
     confirmedFilteredOrders,
     actionableFilteredOrders,
     actionableFilteredGroups,
+    forceActionable,
   };
 }

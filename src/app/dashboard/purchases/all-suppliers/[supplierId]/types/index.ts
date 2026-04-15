@@ -6,17 +6,6 @@ export interface SupplierInvoiceItem {
   product: { id: number; name: string };
 }
 
-export interface InvoiceFile {
-  id: number;
-  fileId: number;
-  file: {
-    id: number;
-    fileName: string;
-    mimeType: string;
-    size: number;
-  };
-}
-
 export interface SupplierInvoice {
   id: number;
   code: string;
@@ -27,5 +16,5 @@ export interface SupplierInvoice {
   createdAt: string;
   createdByEmployee?: { id: number; accessLevel: string; department: string };
   products: SupplierInvoiceItem[];
-  files: InvoiceFile[];
+  images: string[];
 }

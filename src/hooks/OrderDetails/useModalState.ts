@@ -15,7 +15,15 @@ export type ModalName =
   | 'whatsapp'
   | 'shipping'
   | 'packagingNotes'
-  | 'confirmAction';
+  | 'confirmAction'
+  | 'partialDelivery'
+  | 'exchange'
+  | 'returnRefund'
+  | 'postShippingCancel'
+  | 'resend'
+  | 'late'
+  | 'changeProduct'
+  | 'modifyProduct';
 
 /**
  * Type for modal state object

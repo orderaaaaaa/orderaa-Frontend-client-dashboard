@@ -1,23 +1,30 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Trash2, SquarePen, PackagePlus, CirclePlus } from 'lucide-react';
+import {
+  LiaTrashAltSolid,
+  LiaBoxSolid,
+  LiaPlusCircleSolid,
+  LiaLongArrowAltLeftSolid,
+  LiaClipboardListSolid,
+} from 'react-icons/lia';
 import { Order, OrderProductVariant } from '@/types/orders';
 import EditProductModal from './EditProductModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import AddSameTypeProductModal from './AddSameTypeProductModal';
 import AddNewProductModal from './AddNewProductModal';
 import ProductDetailsModal from './ProductDetailsModal';
+import ProductActionMenu from './ProductActionMenu';
+import SwapProductModal from './ActionModals/SwapProductModal';
+import ProductChangeLogModal from './ProductChangeLogModal';
 import {
   useUpdateOrderProduct,
   useDeleteOrderProduct,
   useAddOrderProduct,
-  useAllProducts,
   SelectedVariant,
 } from '@/services/orders';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
-import { LiaLongArrowAltLeftSolid } from 'react-icons/lia';
 import Image from 'next/image';
 
 interface OrderDetailsProductCardProps {
@@ -32,7 +39,6 @@ function OrderDetailsProductCard({
   const updateOrderProductMutation = useUpdateOrderProduct();
   const deleteOrderProductMutation = useDeleteOrderProduct();
   const addOrderProductMutation = useAddOrderProduct();
-  const { data: allProducts = [], error: productsError } = useAllProducts();
 
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [deletingProductId, setDeletingProductId] = useState<number | null>(
@@ -42,6 +48,8 @@ function OrderDetailsProductCard({
   const [isAddNewProductModalOpen, setIsAddNewProductModalOpen] =
     useState(false);
   const [viewingProductId, setViewingProductId] = useState<number | null>(null);
+  const [swapProductId, setSwapProductId] = useState<number | null>(null);
+  const [isChangeLogOpen, setIsChangeLogOpen] = useState(false);
   const [productsData, setProductsData] = useState(
     order.order_products?.map((orderProduct) => ({
       id: orderProduct.id,
@@ -49,6 +57,7 @@ function OrderDetailsProductCard({
       product: orderProduct.products.name,
       variants: orderProduct.variants || [],
       price: orderProduct.price,
+      sku: orderProduct.sku || orderProduct.products.sku || null,
       img: orderProduct.products.image || '/wireless-headphones.png',
     })) || []
   );
@@ -61,16 +70,11 @@ function OrderDetailsProductCard({
         product: orderProduct.products.name,
         variants: orderProduct.variants || [],
         price: orderProduct.price,
+        sku: orderProduct.sku || orderProduct.products.sku || null,
         img: orderProduct.products.image || '/wireless-headphones.png',
       })) || []
     );
   }, [order.order_products]);
-
-  useEffect(() => {
-    if (productsError) {
-      toast.error('فشل في تحميل المنتجات');
-    }
-  }, [productsError]);
 
   const handleEditClick = (productId: number) => {
     setEditingProductId(productId);
@@ -103,13 +107,7 @@ function OrderDetailsProductCard({
 
   const handleConfirmDelete = async () => {
     if (!deletingProductId) return;
-
-    try {
-      await deleteOrderProductMutation.mutateAsync(deletingProductId);
-      toast.success('تم حذف المنتج بنجاح');
-    } catch (error) {
-      toast.error('فشل في حذف المنتج');
-    }
+    await deleteOrderProductMutation.mutateAsync(deletingProductId);
   };
 
   const editingProduct = productsData.find(
@@ -122,6 +120,10 @@ function OrderDetailsProductCard({
 
   const viewingOrderProduct = order.order_products?.find(
     (orderProduct) => orderProduct.id === viewingProductId
+  );
+
+  const swapProduct = productsData.find(
+    (item) => item.id === swapProductId
   );
 
   const handleAddSameTypeProduct = async (
@@ -143,8 +145,9 @@ function OrderDetailsProductCard({
       });
 
       toast.success('تم إضافة المنتج بنجاح');
-    } catch (error) {
-      toast.error('فشل في إضافة المنتج');
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في إضافة المنتج');
     }
   };
 
@@ -190,24 +193,26 @@ function OrderDetailsProductCard({
                     </div>
                   )}
 
+                  {item.sku && (
+                    <p className="text-sm font-medium text-gray-500">
+                      SKU: {item.sku}
+                    </p>
+                  )}
+
                   <p className="text-[#1E1E1E] font-bold text-lg ">
                     {item.price} جنيه
                   </p>
                 </div>
                 <div className="flex flex-col items-end ml-2">
                   <div className="flex justify-end gap-2 mb-4">
-                    <SquarePen
-                      className={`w-4 transition-colors ${isLockedByOther
-                          ? 'opacity-50 cursor-not-allowed'
-                          : 'cursor-pointer hover:text-purple-700'
-                        }`}
-                      onClick={() =>
-                        !isLockedByOther && handleEditClick(item.id)
-                      }
+                    <ProductActionMenu
+                      onModify={() => handleEditClick(item.id)}
+                      onSwap={() => setSwapProductId(item.id)}
+                      disabled={isLockedByOther}
                     />
                     {productsData.length > 1 && (
-                      <Trash2
-                        className={`w-4 text-red-600 transition-colors ${isLockedByOther
+                      <LiaTrashAltSolid
+                        className={`w-4 h-4 text-red-600 transition-colors ${isLockedByOther
                             ? 'opacity-50 cursor-not-allowed'
                             : 'cursor-pointer hover:text-red-700'
                           }`}
@@ -242,23 +247,34 @@ function OrderDetailsProductCard({
           ))}
         </div>
 
-        <div className="mt-6 flex justify-end items-start mb-4">
-          <div className="flex gap-3">
+        <div className="mt-6 mb-4 flex flex-col gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <Button
               onClick={() => setIsAddNewProductModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <PackagePlus className="w-5 h-5" strokeWidth={2} />
-              <span className="text-sm font-bold">إضافة منتج جديد</span>
+              <LiaBoxSolid className="w-5 h-5 shrink-0" />
+              <span className="text-sm font-bold whitespace-nowrap">إضافة منتج جديد</span>
             </Button>
 
             <Button
               onClick={() => setIsAddSameTypeModalOpen(true)}
               disabled={productsData.length === 0}
-              className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-primary text-primary rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-white border-2 border-primary text-primary rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <CirclePlus className="w-5 h-5" strokeWidth={2} />
-              <span className="text-sm font-bold">إضافة منتج من نفس النوع</span>
+              <LiaPlusCircleSolid className="w-5 h-5 shrink-0" />
+              <span className="text-sm font-bold whitespace-nowrap">إضافة منتج من نفس النوع</span>
+            </Button>
+          </div>
+
+          <div className="flex justify-center">
+            <Button
+              onClick={() => setIsChangeLogOpen(true)}
+              variant="outline"
+              className="flex items-center gap-2 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <LiaClipboardListSolid className="w-5 h-5 shrink-0" />
+              <span className="text-sm font-bold whitespace-nowrap">سجل التغييرات</span>
             </Button>
           </div>
         </div>
@@ -298,13 +314,31 @@ function OrderDetailsProductCard({
         isOpen={isAddNewProductModalOpen}
         onClose={() => setIsAddNewProductModalOpen(false)}
         onSave={handleAddNewProduct}
-        products={allProducts}
       />
 
       <ProductDetailsModal
         isOpen={viewingProductId !== null}
         onClose={() => setViewingProductId(null)}
         orderProduct={viewingOrderProduct || null}
+      />
+
+      {swapProduct && (
+        <SwapProductModal
+          isOpen={swapProductId !== null}
+          onClose={() => setSwapProductId(null)}
+          currentProduct={{
+            id: swapProduct.id,
+            name: swapProduct.product,
+            price: swapProduct.price,
+            variants: swapProduct.variants,
+          }}
+        />
+      )}
+
+      <ProductChangeLogModal
+        isOpen={isChangeLogOpen}
+        onClose={() => setIsChangeLogOpen(false)}
+        orderId={order.id}
       />
     </>
   );

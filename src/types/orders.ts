@@ -1,6 +1,7 @@
 // Order Status Enum (synced with backend)
 export enum OrderStatus {
   NEW_ORDER = 'NEW_ORDER',
+  WHATSAPP_CONFIRMED = 'WHATSAPP_CONFIRMED',
   ATTEMPTED = 'ATTEMPTED',
   WAITING_FOR_PAYMENT = 'WAITING_FOR_PAYMENT',
   WHATSAPP = 'WHATSAPP',
@@ -15,6 +16,7 @@ export enum OrderStatus {
   PREPARED = 'PREPARED',
   WAITING_FOR_APPROVAL = 'WAITING_FOR_APPROVAL',
   SHIPPING = 'SHIPPING',
+  WITH_DRIVER = 'WITH_DRIVER',
   RETURNED_DELIVERED = 'RETURNED_DELIVERED',
   DELIVERED = 'DELIVERED',
   PARTIAL_DELIVERY = 'PARTIAL_DELIVERY',
@@ -112,6 +114,7 @@ export interface OrderFilters {
   orderByDirection?: 'asc' | 'desc' | '';
   productId?: string;
   storeId?: string;
+  shippingCompany?: string;
   cancellationReasons?: string[];
 }
 
@@ -136,6 +139,14 @@ export interface ProductDropdownProps {
   onAddProductClick?: (selectedProducts: SelectedProduct[]) => void;
 }
 
+// Shipping Type Enum
+export enum ShippingType {
+  DELIVERY = 'DELIVERY',
+  EXCHANGE = 'EXCHANGE',
+  RETURN = 'RETURN',
+  PARTIAL_RETURN = 'PARTIAL_RETURN',
+}
+
 // Order Format Enum
 export enum OrderFormat {
   APP = 'APP',
@@ -147,30 +158,52 @@ export interface Customer {
   id: number;
   name: string;
   phone_numbers: string[];
+  email?: string | null;
   address?: string;
   governorate?: string;
   city?: string;
   area?: string;
   totalCustomerOrders?: number;
   isBlocked?: boolean;
+  blockedUntil?: string | null;
   notes?: string | string[];
+  createdAt?: string;
+  updatedAt?: string;
+  merchantId?: number;
 }
 
-// Product Interface
+export interface ProductExternalId {
+  storeId: number;
+  externalId: string;
+  externalProvider: string;
+}
+
+export interface ProductVariantOption {
+  label: string;
+  values: string[];
+}
+
 export interface Product {
   id: number;
+  merchantId?: number;
+  storeId?: number | null;
   name: string;
+  price: number;
+  sku?: string | null;
+  image?: string;
+  images?: string[];
+  extraDetails?: Record<string, unknown>;
+  assets?: unknown[];
+  externalIds?: ProductExternalId[];
+  variantOptions?: ProductVariantOption[];
+  createdAt: string;
+  updatedAt: string;
   size?: string;
   color?: string;
   material?: string;
   weight?: string;
   variants?: Variant[];
-  price: number;
-  sku?: string;
-  image?: string;
   manufactureCompany?: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 // Order Product Variant
@@ -184,12 +217,43 @@ export interface OrderProduct {
   id: number;
   orderId: number;
   productId: number;
-  quantity: number;
+  quantity?: number;
   price: number;
-  sku?: string;
+  sku?: string | null;
   variant?: string;
   variants?: OrderProductVariant[];
   products: Product;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// Merchant Interface
+export interface Merchant {
+  id: number;
+  merchantName: string;
+  email: string;
+  phoneNumber: string;
+  city: string;
+  governorate: string;
+  createdAt: string;
+  updatedAt: string;
+  category?: string;
+  shippingPhoneNumber?: string;
+  canOpenShipment?: boolean;
+  employeeCanEditContent?: boolean;
+  defaultShipmentContent?: string | null;
+  defaultReturnShippingCost?: number;
+  language?: string;
+  autoCancelAttempts?: number;
+  url?: string | null;
+  utmSources?: string[];
+}
+
+// WhatsApp Template
+export interface WhatsappTemplate {
+  type: string;
+  label: string;
+  url: string;
 }
 
 // Order Interface
@@ -199,40 +263,57 @@ export interface Order {
   status: string;
   totalCost: number;
   numberOfTriesToReach: number;
-  notes?: string;
+  notes?: string | null;
   format: OrderFormat;
+  storeId?: number | null;
+  deletedAt?: string | null;
+
   // Order details
   shippingCost?: number;
+  returnShippingCost?: number;
+  shippingType?: ShippingType;
+  returnShipmentContent?: string | null;
   shippingCompany?: string;
+  shipmentContent?: string | null;
+  canOpenShipment?: boolean;
   paymentStatus?: string;
   paymentMethod?: string;
-  coupon?: string;
-  couponDiscount?: number;
+  coupon?: string | null;
+  couponDiscount?: number | null;
 
   // Shipping address
   governorate?: string;
   city?: string;
   address?: string;
-  externalGovernorate?: string;
+  externalGovernorate?: string | null;
   shippingId?: string;
+  shippingNotes?: string | null;
 
   // Product details
-  material?: string;
-  weight?: string;
-  countryOfManufacture?: string;
-  packagingNotes?: string;
+  material?: string | null;
+  weight?: string | null;
+  countryOfManufacture?: string | null;
+  countryOfOrder?: string | null;
+  packagingNotes?: string | null;
   packagingWarning?: string | null;
+
+  // Call center
+  callCenterNotes?: string | null;
 
   // Cancel info
   cancelReason?: string | null;
   cancelNotes?: string | null;
+  cancelReasonId?: number | null;
+  cancelledByEmployeeId?: number | null;
 
   // Time preferences
   timeFrom?: string;
   timeTo?: string;
   availableFrom?: string;
   availableTo?: string;
-  postponedUntil?: string;
+  postponedUntil?: string | null;
+  urgentDate?: string | null;
+  executionDate?: string | null;
 
   // Marketing & tracking
   utmSource?: string;
@@ -241,21 +322,34 @@ export interface Order {
 
   // External integrations
   externalOrderId?: string;
-  referralCode?: string;
+  referralCode?: string | null;
+
+  // Lock state
+  lockedById?: number | null;
+  lockedAt?: string | null;
+
+  // Flags
+  isNew?: boolean;
+  isShadowed?: boolean;
+  shadowedAt?: string | null;
+  editRejectedNote?: string | null;
 
   createdAt: string;
   updatedAt: string;
   merchantId: number;
   customerId: number;
   customers: Customer;
+  merchants?: Merchant;
   order_products: OrderProduct[];
   order_events?: OrderEvent[];
   locked_by?: OrderLockedBy | null;
   isPrinted?: boolean;
+  printCount?: number;
   shipmentPickupCode?: string | null;
   pickupInvoice?: string | null;
   pickupCode?: string | null;
   states?: OrderState[];
+  whatsappTemplates?: WhatsappTemplate[];
 }
 
 export interface OrderLockedBy {
@@ -269,6 +363,26 @@ export interface OrderState {
   createdAt: string;
 }
 
+export interface OrderEventEmployee {
+  id: number;
+  name: string;
+  accessLevel?: string;
+  department?: string;
+  address?: string;
+  governorate?: string | null;
+  city?: string | null;
+  workingHours?: unknown | null;
+  merchantId?: number;
+  isOnline?: boolean;
+  lastActiveAt?: string | null;
+  performanceScore?: number;
+  performanceChange?: number;
+  workingDaysThisMonth?: number;
+  leaveDaysThisMonth?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface OrderEvent {
   id: number;
   orderId: number;
@@ -276,11 +390,7 @@ export interface OrderEvent {
   name: string;
   note?: string | null;
   createdAt: string;
-  employee?: {
-    id: number;
-    name: string;
-    department?: string;
-  } | null;
+  employee?: OrderEventEmployee | null;
 }
 
 // Filter DTO (matching backend FilterOrdersDto)
@@ -302,14 +412,14 @@ export interface FilterOrdersDto {
   numberOfTriesToReach?: string;
   createdAfter?: string;
   createdBefore?: string;
-  confirmedDate?: string;
+  executionDate?: string;
   newFirst?: boolean;
   orderByDirection?: 'asc' | 'desc';
   isPrinted?: boolean;
   shippingCompany?: string;
   department?: string;
   productId?: string;
-  cancellationReasons?: string[];
+  cancelReasonId?: string[];
   storeId?: number;
 }
 
@@ -327,6 +437,7 @@ export interface PaginationMeta {
 export interface PaginatedResponse<T> {
   data: T[];
   meta: PaginationMeta;
+  hasShadowedOrders?: boolean;
 }
 
 // Filter Options Response (from backend)

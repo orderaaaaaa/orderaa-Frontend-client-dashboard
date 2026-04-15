@@ -1,4 +1,4 @@
-import { useQuery, type QueryKey } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type QueryKey } from '@tanstack/react-query';
 import http from '@/lib/api/http';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import type {
@@ -10,6 +10,7 @@ import type {
   ByStatusResponse,
   AttemptConversionResponse,
   EditRejectedProductsResponse,
+  PackagingInventoryResponse,
   EmployeesListResponse,
   EmployeeStatusResponse,
   EmployeeActivityResponse,
@@ -112,6 +113,48 @@ export const useEditRejectedProductsQuery = () => {
         `${reportBaseUrl}/edit-rejected-products`,
       );
       return response.data;
+    },
+  });
+};
+
+export const useConfirmedProductsReportQuery = (enabled = true) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.CONFIRMED_PRODUCTS_REPORT] as QueryKey,
+    queryFn: async () => {
+      const response = await http.get<EditRejectedProductsResponse>(
+        `${reportBaseUrl}/confirmed-products-report`,
+      );
+      return response.data;
+    },
+    enabled,
+  });
+};
+
+export const usePackagingInventoryQuery = (status: string, enabled = true) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.PACKAGING_INVENTORY, status] as QueryKey,
+    queryFn: async () => {
+      const response = await http.get<PackagingInventoryResponse>(
+        '/packaging-inventory',
+        { params: { status } },
+      );
+      return response.data;
+    },
+    enabled,
+  });
+};
+
+export const usePackagingInventoryCheckMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, number>({
+    mutationFn: async (id: number) => {
+      await http.put('/packaging-inventory/check', { id });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.PACKAGING_INVENTORY],
+      });
     },
   });
 };

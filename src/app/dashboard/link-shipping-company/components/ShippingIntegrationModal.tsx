@@ -1,21 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import * as DialogPrimitive from '@radix-ui/react-dialog';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
-  LiaTimesSolid,
   LiaTruckSolid,
-  LiaChevronDownSolid,
-  LiaChevronUpSolid,
   LiaPlaySolid,
-  LiaEyeSlashSolid,
-  LiaEyeSolid,
+  LiaExclamationCircleSolid,
 } from 'react-icons/lia';
 import { toast } from 'react-toastify';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useShippingQuery } from '../hooks/useShippingQuery';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
+import BaseModal from '@/components/ui/base-modal';
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@/components/ui/accordion';
 import { getStepsByProvider } from '../constants/steps';
-import { If, Then } from 'react-if';
 import { ShippingConfig } from '../types/shipping';
+
+const createShippingSchema = (showClientCode: boolean) =>
+  z.object({
+    authKey: z.string().min(1, 'يرجى إدخال Authentication Key'),
+    clientCode: showClientCode
+      ? z.string().min(1, 'يرجى إدخال Client Code')
+      : z.string().optional(),
+  });
+
+type ShippingFormData = z.infer<ReturnType<typeof createShippingSchema>>;
 
 interface Props {
   providerId: string;
@@ -32,23 +46,39 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
   const { config, saveConfig, updateConfig, isSaving } =
     useShippingQuery(providerId);
 
-  const [authKey, setAuthKey] = useState('');
-  const [clientCode, setClientCode] = useState('');
-  const [showAuthKey, setShowAuthKey] = useState(false);
-  const [showClientCode, setShowClientCode] = useState(false);
   const [error, setError] = useState<string>('');
-  const [showVideo, setShowVideo] = useState(false);
+
+  const providerLower = providerId.toLowerCase();
+  const isRedOrHashtag = providerLower === 'red' || providerLower === 'hashtag' || providerLower === 'jt_express' || providerLower === 'quick_connect';
+  const requiresClientCode = providerLower === 'turbo';
+  const steps = getStepsByProvider(providerId);
+
+  const isEditing = !!config?.authKey;
+  const showClientCode = isRedOrHashtag || requiresClientCode || isEditing;
+
+  const schema = useMemo(
+    () => createShippingSchema(showClientCode),
+    [showClientCode]
+  );
+
+  const form = useForm<ShippingFormData>({
+    resolver: zodResolver(schema),
+    defaultValues: { authKey: '', clientCode: '' },
+    mode: 'onChange',
+  });
 
   useEffect(() => {
-    if (!isOpen) {
-      setAuthKey('');
-      setClientCode('');
-      setError('');
+    if (!isOpen) return;
+    if (config) {
+      form.reset({
+        authKey: config.authKey || '',
+        clientCode: config.clientCode || '',
+      });
+    } else {
+      form.reset({ authKey: '', clientCode: '' });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
-
-  const requiresClientCode = providerId.toLowerCase() === 'turbo';
-  const steps = getStepsByProvider(providerId);
 
   const getProviderDisplayName = () => {
     const provider = providerId.toLowerCase();
@@ -65,32 +95,36 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
         return 'Mylerz';
       case 'jt_express':
         return 'J&T Express';
+      case 'red':
+        return 'Red';
+      case 'hashtag':
+        return 'Hashtag';
+      case 'quick_connect':
+        return 'Quick Connect';
       default:
         return providerId;
     }
   };
 
-  const handleSave = async () => {
+  const handleClose = () => {
+    if (!isSaving) {
+      form.reset();
+      setError('');
+      onClose();
+    }
+  };
+
+  const onSubmit = form.handleSubmit(async (data) => {
     setError('');
 
-    if (!authKey.trim()) {
-      setError('يرجى إدخال مفتاح المصادقة (Authentication Key)');
-      return;
-    }
-
-    if (requiresClientCode && !clientCode.trim()) {
-      setError('يرجى إدخال رمز العميل (Client Code)');
-      return;
-    }
-
     try {
-      const basePayload: any = {
-        authKey: authKey.trim(),
+      const basePayload: Record<string, unknown> = {
+        authKey: data.authKey.trim(),
         isActive: true,
       };
 
-      if (requiresClientCode) {
-        basePayload.clientCode = clientCode.trim();
+      if (showClientCode && data.clientCode?.trim()) {
+        basePayload.clientCode = data.clientCode.trim();
       }
 
       if (!config?.authKey) {
@@ -106,109 +140,69 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
       }
 
       toast.success(`تم ربط ${getProviderDisplayName()} بنجاح!`);
-      setAuthKey('');
-      setClientCode('');
+      form.reset();
       onClose();
     } catch (err: any) {
       const errorMessage = err.message || 'حدث خطأ أثناء الحفظ';
       setError(errorMessage);
       toast.error(errorMessage);
     }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !isSaving && authKey.trim()) {
-      handleSave();
-    }
-  };
+  });
 
   return (
-    <DialogPrimitive.Root
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open && !isSaving) onClose();
-      }}
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={`إعدادات الربط مع ${getProviderDisplayName()}`}
+      showFooter={false}
+      isLoading={isSaving}
+      maxWidth="md:max-w-4xl"
     >
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content
-          className="fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl w-[95vw] sm:w-[90vw] md:w-auto md:max-w-4xl max-h-[90vh] flex flex-col overflow-hidden"
-          onPointerDownOutside={(e) => {
-            if (isSaving) e.preventDefault();
-          }}
-          onEscapeKeyDown={(e) => {
-            if (isSaving) e.preventDefault();
-          }}
-        >
-          <div className="bg-gray-50 border-b border-gray-200 px-6 py-4 flex items-center justify-between flex-shrink-0">
-            <DialogPrimitive.Title className="text-xl font-bold text-gray-900">
-              إعدادات الربط مع {getProviderDisplayName()}
-            </DialogPrimitive.Title>
-            <DialogPrimitive.Close asChild>
-              <Button
-                variant="ghost"
-                disabled={isSaving}
-                className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
-              >
-                <LiaTimesSolid className="w-6 h-6" />
-              </Button>
-            </DialogPrimitive.Close>
-          </div>
+      <form onSubmit={onSubmit}>
+        <div className="space-y-6">
+          <p className="text-gray-600 text-center">
+            قم بربط متجرك لتفعيل خدمات الشحن تلقائياً
+          </p>
 
-          <DialogPrimitive.Description className="sr-only">
-            إعدادات الربط مع شركة الشحن
-          </DialogPrimitive.Description>
-
-          <div className="p-6 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
-            <p className="text-gray-600 text-center">
-              قم بربط متجرك لتفعيل خدمات الشحن تلقائياً
-            </p>
-
-            <div className="bg-blue-50 rounded-xl flex items-center p-6">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-16 h-16 bg-white border border-[#2489E1] shadow-sm rounded-lg">
-                  <LiaTruckSolid className="w-8 h-8 text-[#001A72]" />
-                </div>
-                <div className="flex flex-col items-start gap-1">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {getProviderDisplayName()}
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    اتبع التعليمات أدناه للربط
-                  </p>
-                </div>
+          <div className="bg-blue-50 rounded-xl flex items-center p-6">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center w-16 h-16 bg-white border border-[#2489E1] shadow-sm rounded-lg">
+                <LiaTruckSolid className="w-8 h-8 text-[#001A72]" />
+              </div>
+              <div className="flex flex-col items-start gap-1">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {getProviderDisplayName()}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  اتبع التعليمات أدناه للربط
+                </p>
               </div>
             </div>
+          </div>
 
-            <h4 className="font-semibold text-gray-900">فيديو توضيحي</h4>
-            <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-              <button
-                onClick={() => setShowVideo(!showVideo)}
-                className="w-full p-4 flex items-center justify-between hover:bg-gray-100 transition-colors"
-                type="button"
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">فيديو توضيحي</h4>
+            <Accordion type="single" collapsible>
+              <AccordionItem
+                value="video"
+                className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden"
               >
-                <div className="flex items-start gap-3">
-                  <div className="bg-primary text-white p-2 rounded-lg flex-shrink-0">
-                    <LiaPlaySolid className="w-5 h-5" />
+                <AccordionTrigger className="p-4 hover:no-underline hover:bg-gray-100 transition-colors">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-primary text-white p-2 rounded-lg flex-shrink-0">
+                      <LiaPlaySolid className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 text-right">
+                      <p className="font-semibold text-gray-900 mb-1">
+                        فيديو تعليمي
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        شاهد كيفية استخراج بيانات الربط
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1 text-right">
-                    <p className="font-semibold text-gray-900 mb-1">
-                      فيديو تعليمي
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      شاهد كيفية استخراج بيانات الربط
-                    </p>
-                  </div>
-                </div>
-                {showVideo ? (
-                  <LiaChevronUpSolid className="w-5 h-5 text-gray-500" />
-                ) : (
-                  <LiaChevronDownSolid className="w-5 h-5 text-gray-500" />
-                )}
-              </button>
-
-              {showVideo && (
-                <div className="p-4 pt-0 border-t border-gray-200">
+                </AccordionTrigger>
+                <AccordionContent className="p-4 pt-0 border-t border-gray-200">
                   <div className="aspect-video bg-gray-900 rounded-lg flex items-center justify-center">
                     <div className="text-center text-white">
                       <LiaPlaySolid className="w-16 h-16 mx-auto mb-2 opacity-50" />
@@ -217,157 +211,103 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                       </p>
                     </div>
                   </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="font-semibold text-gray-900">خطوات التفعيل</h4>
+            <div className="space-y-3">
+              {steps.map((step, index) => (
+                <div
+                  key={index}
+                  className="flex items-center px-4 py-3 gap-3 bg-gray-50 border border-gray-100 rounded-lg"
+                >
+                  <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold">
+                    {index + 1}
+                  </span>
+                  <p className="flex-1 text-gray-700 text-sm">{step}</p>
                 </div>
-              )}
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="font-semibold text-gray-900">خطوات التفعيل</h4>
-              <div className="space-y-3">
-                {steps.map((step, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center px-4 py-3 gap-3 bg-gray-50 border border-gray-100 rounded-lg"
-                  >
-                    <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold">
-                      {index + 1}
-                    </span>
-                    <p className="flex-1 text-gray-700 text-sm">{step}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3 text-red-700 text-sm">
-                <svg
-                  className="w-5 h-5 flex-shrink-0"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                {error}
-              </div>
-            )}
-
-            <If condition={!!config?.isActive}>
-              <Then>
-                <div className="flex flex-col gap-2">
-                  <div className="relative bg-gray-100 py-2 px-2 rounded-sm flex items-center justify-between">
-                    <div>
-                      <span className="font-bold">ال api الخاص بك : </span>
-                      <span className="font-mono">
-                        {showAuthKey ? config?.authKey : '************'}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      className="ml-2 text-gray-500 hover:text-gray-700"
-                      onClick={() => setShowAuthKey((prev) => !prev)}
-                    >
-                      {showAuthKey ? (
-                        <LiaEyeSlashSolid
-                          size={18}
-                          className="text-primary cursor-pointer"
-                        />
-                      ) : (
-                        <LiaEyeSolid
-                          size={18}
-                          className="text-primary cursor-pointer"
-                        />
-                      )}
-                    </button>
-                  </div>
-
-                  {requiresClientCode && config?.clientCode && (
-                    <div className="relative bg-gray-100 py-2 px-2 rounded-sm flex items-center justify-between">
-                      <div>
-                        <span className="font-bold">
-                          ال clientCode الخاص بك :
-                        </span>
-                        <span className="font-mono">
-                          {showClientCode ? config?.clientCode : '************'}
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        className="ml-2 text-gray-500 hover:text-gray-700"
-                        onClick={() => setShowClientCode((prev) => !prev)}
-                      >
-                        {showClientCode ? (
-                          <LiaEyeSlashSolid
-                            size={18}
-                            className="text-primary cursor-pointer"
-                          />
-                        ) : (
-                          <LiaEyeSolid
-                            size={18}
-                            className="text-primary cursor-pointer"
-                          />
-                        )}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </Then>
-            </If>
-
-            <div className="space-y-4">
-              <Input
-                label="مفتاح المصادقة (Authentication Key)"
-                type="text"
-                placeholder="أدخل مفتاح المصادقة"
-                value={authKey}
-                onChange={(e) => setAuthKey(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={isSaving}
-                clearable
-                onClear={() => setAuthKey('')}
-              />
-
-              {requiresClientCode && (
-                <Input
-                  label="رمز العميل (Client Code)"
-                  type="text"
-                  placeholder="أدخل رمز العميل"
-                  value={clientCode}
-                  onChange={(e) => setClientCode(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  disabled={isSaving}
-                  clearable
-                  onClear={() => setClientCode('')}
-                />
-              )}
-
-              <div className="flex gap-3 pt-4 border-t border-gray-100">
-                <Button
-                  onClick={handleSave}
-                  disabled={
-                    isSaving ||
-                    !authKey.trim() ||
-                    (requiresClientCode && !clientCode.trim())
-                  }
-                  className="flex-1 bg-primary hover:bg-[#4A1CB8] h-12 text-lg"
-                >
-                  {isSaving ? 'جاري التفعيل...' : 'تفعيل الربط'}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={onClose}
-                  className="flex-1 h-12 text-lg"
-                >
-                  إلغاء
-                </Button>
-              </div>
+              ))}
             </div>
           </div>
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3 text-red-700 text-sm">
+              <LiaExclamationCircleSolid className="w-5 h-5 flex-shrink-0" />
+              {error}
+            </div>
+          )}
+
+          <div className="space-y-4">
+            {isRedOrHashtag ? (
+              <>
+                <Input
+                  register={form.register}
+                  name="clientCode"
+                  label="اسم المستخدم"
+                  type="text"
+                  placeholder="أدخل اسم المستخدم"
+                  error={form.formState.errors.clientCode?.message}
+                  disabled={isSaving}
+                />
+                <Input
+                  register={form.register}
+                  name="authKey"
+                  label="كلمة المرور"
+                  type="text"
+                  placeholder="أدخل كلمة المرور"
+                  error={form.formState.errors.authKey?.message}
+                  disabled={isSaving}
+                />
+              </>
+            ) : (
+              <>
+                {showClientCode && (
+                  <Input
+                    register={form.register}
+                    name="clientCode"
+                    label="Client Code"
+                    type="text"
+                    placeholder="أدخل Client Code"
+                    error={form.formState.errors.clientCode?.message}
+                    disabled={isSaving}
+                  />
+                )}
+
+                <Input
+                  register={form.register}
+                  name="authKey"
+                  label="Authentication Key"
+                  type="text"
+                  placeholder="أدخل Authentication Key"
+                  error={form.formState.errors.authKey?.message}
+                  disabled={isSaving}
+                />
+              </>
+            )}
+
+            <div className="flex gap-3 pt-4 border-t border-gray-100">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                className="flex-1 h-12 text-lg"
+              >
+                إلغاء
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSaving || !form.formState.isValid}
+                className="flex-1 bg-primary hover:bg-[#4A1CB8] h-12 text-lg"
+              >
+                {isSaving ? 'جاري الحفظ...' : isEditing ? 'تحديث الربط' : 'تفعيل الربط'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </BaseModal>
   );
 };

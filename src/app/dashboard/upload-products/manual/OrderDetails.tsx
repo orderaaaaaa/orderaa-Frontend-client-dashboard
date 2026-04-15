@@ -210,7 +210,7 @@ function OrderDetails({ total, packagingNotes, onTotalChange, onPackagingNotesCh
           <ProductDropdown
             placeholder="ابحث عن منتج"
             className="w-full"
-            selectClassName={`border-2 w-full bg-[#EAEAEA40] p-2 rounded-sm ${errors?.products && 'border-red-500'
+            selectClassName={`border-2 w-full bg-white p-2 rounded-sm ${errors?.products && 'border-red-500'
               }`}
           />
           {errors?.products && (
@@ -240,6 +240,7 @@ function OrderDetails({ total, packagingNotes, onTotalChange, onPackagingNotesCh
                   value={total}
                   onChange={(e) => onTotalChange(e.target.value)}
                   className="w-32 text-center font-semibold"
+                  inputClassName="bg-white"
                   error={errors?.total}
                 />
                 <span className="text-lg font-semibold text-gray-700">ج.م</span>
@@ -257,7 +258,7 @@ function OrderDetails({ total, packagingNotes, onTotalChange, onPackagingNotesCh
           <Textarea
             name="packagingNotes"
             placeholder="ملاحظات التغليف"
-            className="max-w-[1158px] h-[120px] bg-[#EAEAEA40]"
+            className="max-w-[1158px] h-[120px] bg-white"
             value={packagingNotes}
             onChange={(e) => onPackagingNotesChange(e.target.value)}
           />

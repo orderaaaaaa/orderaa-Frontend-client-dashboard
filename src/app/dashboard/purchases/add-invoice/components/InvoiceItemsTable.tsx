@@ -183,7 +183,7 @@ const InvoiceItemsTable = memo(
 
     return (
       <div className="sm:px-8 flex flex-col gap-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center flex-col sm:flex-row justify-between gap-2">
           <div className="flex items-center gap-4">
             <ToggleGroup
               options={INVOICE_MODE_OPTIONS}
@@ -205,7 +205,7 @@ const InvoiceItemsTable = memo(
           <Button
             type="button"
             variant="default"
-            className="w-fit flex items-center gap-2 rounded-full font-semibold text-xs sm:text-sm"
+            className="w-fit self-end sm:self-auto flex items-center gap-2 rounded-full font-semibold text-xs sm:text-sm"
             onClick={onAddItemClick}
           >
             <LiaPlusSolid className="w-5 h-5" />

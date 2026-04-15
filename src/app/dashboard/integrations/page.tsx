@@ -1,30 +1,47 @@
 'use client';
 
 import React, { useState } from 'react';
-import EasyOrderModal from './components/EasyOrderModal';
+import IntegrationModal from './components/IntegrationModal';
+import EditIntegrationModal from './components/EditIntegrationModal';
+import DeleteConfirmationModal from './components/DeleteConfirmationModal';
 import { platforms } from './constants/platforms';
+import { providerConfigs } from './constants/providerConfig';
 import { IntegrationCard } from './components/IntegrationCard';
 import { Notification } from './components/Notification';
 import { useIntegrations } from './hooks/useIntegrations';
+import { IntegrationResponse } from './types/apiIntegration';
+import { toast } from 'react-toastify';
 
 const IntegrationsPage = () => {
-  const [isEasyOrderModalOpen, setIsEasyOrderModalOpen] = useState(false);
+  const [activeModal, setActiveModal] = useState<string | null>(null);
 
   const [notification, setNotification] = useState<{
     message: string;
     type: 'success' | 'error';
   } | null>(null);
 
-  const { integrations, isLoading } = useIntegrations();
+  const [editingStore, setEditingStore] = useState<{
+    storeId: number;
+    configs: IntegrationResponse[];
+  } | null>(null);
+
+  const [deletingStore, setDeletingStore] = useState<{
+    storeId: number;
+    storeName: string;
+  } | null>(null);
+
+  const {
+    integrations,
+    isLoading,
+    deleteIntegration,
+    deleteStore,
+    isStoreDeletePending,
+  } = useIntegrations();
 
   const handleCardButtonClick = (platformId: string) => {
-    if (platformId === 'easyorder') {
-      setIsEasyOrderModalOpen(true);
+    if (providerConfigs[platformId]) {
+      setActiveModal(platformId);
     }
-  };
-
-  const handleModalClose = () => {
-    setIsEasyOrderModalOpen(false);
   };
 
   const handleModalSuccess = () => {
@@ -32,6 +49,39 @@ const IntegrationsPage = () => {
       message: 'تم إنشاء الربط بنجاح! سيتم استقبال الطلبات تلقائياً الآن.',
       type: 'success',
     });
+  };
+
+  const handleEditStore = (storeId: number, configs: IntegrationResponse[]) => {
+    setEditingStore({ storeId, configs });
+  };
+
+  const handleDeleteStore = (storeId: number, storeName: string) => {
+    setDeletingStore({ storeId, storeName });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingStore) return;
+
+    try {
+      const storeConfigs = integrations?.filter(
+        (c) => c.storeId === deletingStore.storeId
+      ) || [];
+
+      for (const config of storeConfigs) {
+        await deleteIntegration(config.id);
+      }
+
+      await deleteStore(deletingStore.storeId);
+      toast.success('تم حذف المتجر بنجاح');
+      setDeletingStore(null);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'حدث خطأ أثناء الحذف');
+    }
+  };
+
+  const getProviderConfigForStore = (configs: IntegrationResponse[]) => {
+    const provider = configs[0]?.provider;
+    return Object.values(providerConfigs).find((c) => c.provider === provider);
   };
 
   return (
@@ -79,11 +129,36 @@ const IntegrationsPage = () => {
         </div>
       </div>
 
-      <EasyOrderModal
-        isOpen={isEasyOrderModalOpen}
-        onClose={handleModalClose}
-        onSuccess={handleModalSuccess}
-      />
+      {activeModal && providerConfigs[activeModal] && (
+        <IntegrationModal
+          isOpen={true}
+          onClose={() => setActiveModal(null)}
+          onSuccess={handleModalSuccess}
+          config={providerConfigs[activeModal]}
+          onEditStore={handleEditStore}
+          onDeleteStore={handleDeleteStore}
+        />
+      )}
+
+      {editingStore && (
+        <EditIntegrationModal
+          isOpen={true}
+          onClose={() => setEditingStore(null)}
+          storeId={editingStore.storeId}
+          configs={editingStore.configs}
+          providerConfig={getProviderConfigForStore(editingStore.configs)}
+        />
+      )}
+
+      {deletingStore && (
+        <DeleteConfirmationModal
+          isOpen={true}
+          onClose={() => setDeletingStore(null)}
+          onConfirm={handleConfirmDelete}
+          storeName={deletingStore.storeName}
+          isLoading={isStoreDeletePending}
+        />
+      )}
 
       {notification && (
         <Notification

@@ -1,4 +1,4 @@
-import { OrderState } from '@/types/orders';
+import { OrderState, ShippingType } from '@/types/orders';
 
 export interface OrderCardProps {
   id: number;
@@ -7,7 +7,9 @@ export interface OrderCardProps {
   phoneNumbers: string[];
   government: string;
   items: string[];
+  itemSkus?: (string | null)[];
   price: number;
+  shippingType?: ShippingType;
   trys: number;
   status: string;
   city: string;
@@ -20,13 +22,14 @@ export interface OrderCardProps {
   shippingId?: string;
   onSelectionChange?: (checked: boolean) => void;
   createdAt?: string;
-  postponedUntil?: string;
+  postponedUntil?: string | null;
   repeatCount?: number;
   onRepeatClick?: () => void;
   filterParams?: string;
   cancelReason?: string | null;
   cancelNotes?: string | null;
   isPrinted?: boolean;
+  printCount?: number;
   disableNavigation?: boolean;
   hideCustomerInfo?: boolean;
   showAllItems?: boolean;

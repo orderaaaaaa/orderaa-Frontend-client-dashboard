@@ -21,8 +21,9 @@ export const useMerchantSettings = () => {
       queryClient.invalidateQueries({ queryKey: ['merchantSettings'] });
       toast.success('تم تحديث اعدادات المتجر');
     },
-    onError: (error) => {
-      console.error('Failed to update settings:', error);
+    onError: (error: any) => {
+      const msg = error?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث اعدادات المتجر');
     },
   });
 

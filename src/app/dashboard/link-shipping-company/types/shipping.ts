@@ -4,7 +4,10 @@ export type ShippingProviderId =
   | 'mylerz'
   | 'bosta'
   | 'jt_express'
-  | 'turbo';
+  | 'turbo'
+  | 'red'
+  | 'hashtag'
+  | 'quick_connect';
 
 export interface ShippingConfig {
   id?: string;

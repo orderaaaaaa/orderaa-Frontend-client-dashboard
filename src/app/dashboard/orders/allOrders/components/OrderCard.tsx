@@ -17,11 +17,19 @@ import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { If, Then } from 'react-if';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
 import { getRemainingTime } from '@/utils/getRemainingTime';
-import { LiaClock, LiaPrintSolid, LiaBanSolid, LiaExclamationCircleSolid } from 'react-icons/lia';
+import { LiaClock, LiaPrintSolid, LiaBanSolid, LiaExclamationCircleSolid, LiaExchangeAltSolid, LiaUndoAltSolid, LiaRandomSolid } from 'react-icons/lia';
 import { OrderCardProps } from '@/app/dashboard/orders/allOrders/types/OrderProps';
+import { ShippingType } from '@/types/orders';
 import { MdBlock } from 'react-icons/md';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
+import { IconType } from 'react-icons';
+
+const SHIPPING_TYPE_BADGE: Record<string, { label: string; icon: IconType; bg: string; text: string }> = {
+  [ShippingType.EXCHANGE]: { label: 'استبدال', icon: LiaExchangeAltSolid, bg: 'bg-orange-100', text: 'text-orange-600' },
+  [ShippingType.RETURN]: { label: 'مرتجع', icon: LiaUndoAltSolid, bg: 'bg-red-100', text: 'text-red-600' },
+  [ShippingType.PARTIAL_RETURN]: { label: 'مرتجع جزئي', icon: LiaRandomSolid, bg: 'bg-amber-100', text: 'text-amber-600' },
+};
 
 export default function OrderCard({
   id,
@@ -30,6 +38,7 @@ export default function OrderCard({
   phoneNumbers,
   government,
   items,
+  itemSkus,
   price,
   shippingId,
   isBlocked,
@@ -49,9 +58,11 @@ export default function OrderCard({
   cancelNotes,
   postponedUntil,
   isPrinted = false,
+  printCount = 0,
   disableNavigation = false,
   hideCustomerInfo = false,
   showAllItems = false,
+  shippingType,
   states,
 }: OrderCardProps) {
   const router = useRouter();
@@ -78,7 +89,7 @@ export default function OrderCard({
   return (
     <div
       onClick={handleCardClick}
-      className={`relative w-full h-full max-w-[90%] md:max-w-[300px] bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.1)] rounded-[10px] transition-all duration-200 flex flex-col ${disableNavigation
+      className={`relative w-full h-full max-w-full overflow-hidden bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.1)] rounded-[10px] transition-all duration-200 flex flex-col ${disableNavigation
           ? ''
           : 'cursor-pointer hover:shadow-[0px_6px_20px_rgba(93,36,225,0.15)]'
         }`}
@@ -97,24 +108,24 @@ export default function OrderCard({
       </div>
 
       {/* Content */}
-      <div className="flex flex-col items-start px-6 gap-3 flex-grow">
+      <div className="flex flex-col items-start px-6 gap-3 flex-grow min-w-0 w-full">
         {/* Code */}
         {code && code !== 'غير محدد' && (
-          <div className="flex flex-row-reverse items-center gap-2">
-            <span className="text-base font-medium text-black">{code}</span>
-            <span className="text-base font-normal text-black">الكود :</span>
-            <CiBarcode className="opacity-50 w-4 h-4" />
+          <div className="flex flex-row-reverse items-start gap-2 max-w-full">
+            <span className="text-base font-medium text-black break-words min-w-0">{code}</span>
+            <span className="text-base font-normal text-black flex-shrink-0">الكود :</span>
+            <CiBarcode className="opacity-50 w-4 h-4 flex-shrink-0 mt-1" />
           </div>
         )}
 
         {/* Name + Alert + Time */}
         {!hideCustomerInfo && name && name !== 'غير محدد' && (
           <div className="flex flex-row items-center justify-between w-full">
-            <div className="flex flex-row-reverse items-center gap-2">
-              <span className="text-base font-medium text-black">{name}</span>
+            <div className="flex flex-row-reverse items-start gap-2 min-w-0">
+              <span className="text-base font-medium text-black break-words min-w-0">{name}</span>
 
               <User
-                className="w-[18px] h-[18px]"
+                className="w-[18px] h-[18px] flex-shrink-0 mt-1"
                 style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
               />
             </div>
@@ -170,13 +181,13 @@ export default function OrderCard({
             .map((phone, index) => (
               <div
                 key={index}
-                className="flex flex-row-reverse items-center gap-2"
+                className="flex flex-row-reverse items-start gap-2 max-w-full"
               >
-                <span className="text-base font-medium text-black" dir="ltr">
+                <span className="text-base font-medium text-black break-words min-w-0" dir="ltr">
                   {phone}
                 </span>
                 <Phone
-                  className="w-[18px] h-[18px]"
+                  className="w-[18px] h-[18px] flex-shrink-0 mt-1"
                   style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
                 />
               </div>
@@ -184,14 +195,14 @@ export default function OrderCard({
 
         {/* Location */}
         {(government || city) && (
-          <div className="flex flex-row-reverse items-center gap-2">
-            <span className="text-base font-medium text-black">
+          <div className="flex flex-row-reverse items-start gap-2 max-w-full">
+            <span className="text-base font-medium text-black break-words min-w-0">
               {[government, city]
                 .filter((v) => v && v !== 'غير محدد')
                 .join(' - ')}
             </span>
             <MapPin
-              className="w-[18px] h-[18px]"
+              className="w-[18px] h-[18px] flex-shrink-0 mt-1"
               style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
             />
           </div>
@@ -199,10 +210,10 @@ export default function OrderCard({
 
         {/* Address */}
         {!hideCustomerInfo && (
-          <div className="flex flex-row-reverse items-center gap-2">
-            <span className="text-base font-medium text-black">{address}</span>
+          <div className="flex flex-row-reverse items-start gap-2 max-w-full">
+            <span className="text-base font-medium text-black break-words min-w-0">{address}</span>
             <MapPinHouse
-              className="w-[18px] h-[18px]"
+              className="w-[18px] h-[18px] flex-shrink-0 mt-1"
               style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
             />
           </div>
@@ -212,35 +223,49 @@ export default function OrderCard({
           ? items
             ?.filter((item) => item && item !== 'غير محدد')
             .map((item, index) => (
-              <div key={index} className="flex items-center gap-2">
+              <div key={index} className="flex items-start gap-2 max-w-full">
                 <Package
-                  className="w-[18px] h-[18px]"
+                  className="w-[18px] h-[18px] flex-shrink-0 mt-1"
                   style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
                 />
-                <span className="text-base font-medium text-black">
+                <span className="text-base font-medium text-black break-words min-w-0">
                   {item}
                 </span>
               </div>
             ))
           : items?.[0] &&
           items[0] !== 'غير محدد' && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-start gap-2 max-w-full">
               <Package
-                className="w-[18px] h-[18px]"
+                className="w-[18px] h-[18px] flex-shrink-0 mt-1"
                 style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
               />
-              <span className="text-base font-medium text-black">
+              <span className="text-base font-medium text-black break-words min-w-0">
                 {items[0]}
               </span>
             </div>
           )}
 
+        {itemSkus?.some(Boolean) && (
+          <div className="flex items-start gap-2 max-w-full">
+            <CiBarcode
+              className="w-[18px] h-[18px] flex-shrink-0 mt-1"
+              style={{ color: 'rgba(0,0,0,0.5)' }}
+            />
+            <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+              <span className="text-sm font-semibold text-black">SKU:</span>
+              {itemSkus.filter(Boolean).map((sku, index) => (
+                <span key={index} className="text-sm font-medium text-black">
+                  {sku}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Price */}
         {price && (
-          <div className="flex flex-row-reverse items-center gap-2">
-            <span className="text-base font-medium text-black">
-              {price} جنيه
-            </span>
+          <div className="flex items-start gap-2 max-w-full">
             <Image
               src="/Icons/price.svg"
               alt="price"
@@ -248,25 +273,37 @@ export default function OrderCard({
               height={18}
               className="opacity-50"
             />
+            <span className="text-base font-medium text-black">
+              {price} جنيه
+            </span>
+            {shippingType && SHIPPING_TYPE_BADGE[shippingType] && (() => {
+              const badge = SHIPPING_TYPE_BADGE[shippingType];
+              return (
+                <span className={`flex items-center gap-1 ${badge.bg} ${badge.text} text-xs font-semibold px-2 py-0.5 rounded-full`}>
+                  <badge.icon className="w-3.5 h-3.5" />
+                  {badge.label}
+                </span>
+              );
+            })()}
           </div>
         )}
 
         {/* Shipping */}
         {shippingId && (
-          <div className="flex flex-row-reverse items-center gap-2">
-            <span className="text-base font-medium text-black">
+          <div className="flex flex-row-reverse items-start gap-2 max-w-full">
+            <span className="text-base font-medium text-black break-words min-w-0">
               {shippingId}
             </span>
-            <Truck className="opacity-30" height={18} />
+            <Truck className="opacity-30 flex-shrink-0 mt-1" height={18} />
           </div>
         )}
 
         {postponedUntil && (
-          <div className="flex flex-row-reverse items-center gap-2 text-amber-400 ">
-            <p className="text-base font-medium ">
+          <div className="flex flex-row-reverse items-start gap-2 text-amber-400 max-w-full">
+            <p className="text-base font-medium break-words min-w-0">
               مواجل: {getRemainingTime(postponedUntil)}
             </p>
-            <LiaClock className="w-5 h-5" />
+            <LiaClock className="w-5 h-5 flex-shrink-0 mt-1" />
           </div>
         )}
 
@@ -278,7 +315,7 @@ export default function OrderCard({
                   className="w-[18px] h-[18px] flex-shrink-0 mt-0.5"
                   style={{ strokeWidth: 1.5, color: 'rgba(220,38,38,0.7)' }}
                 />
-                <span className="text-base font-medium text-red-600">
+                <span className="text-base font-medium text-red-600 break-words min-w-0">
                   {state.note}
                 </span>
               </div>
@@ -314,12 +351,19 @@ export default function OrderCard({
 
       <div className="flex flex-row-reverse justify-between items-center px-6 pb-4">
         {isPrinted ? (
-          <div
-            className="flex items-center gap-2 px-4 py-2 rounded-full font-medium"
-            title="تمت الطباعة"
-          >
-            <LiaPrintSolid className="w-4 h-4 text-green-600" />
-            <span className="text-xs font-medium">تمت الطباعة</span>
+          <div className="flex items-center gap-2">
+            <div
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-50 border border-green-200"
+              title="تمت الطباعة"
+            >
+              <LiaPrintSolid className="w-4 h-4 text-green-600" />
+              <span className="text-xs font-medium text-green-700">تمت الطباعة</span>
+            </div>
+            {printCount > 1 && (
+              <span className="flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full bg-amber-500 text-white text-xs font-bold">
+                {printCount}x
+              </span>
+            )}
           </div>
         ) : (
           <div

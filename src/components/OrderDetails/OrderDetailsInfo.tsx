@@ -81,6 +81,12 @@ function OrderDetailsInfoComponent({
     'shipping',
     'packagingNotes',
     'confirmAction',
+    'partialDelivery',
+    'exchange',
+    'returnRefund',
+    'postShippingCancel',
+    'resend',
+    'late',
   ]);
 
   const handleUpdate = (updatedOrder: Order) => {
@@ -175,6 +181,24 @@ function OrderDetailsInfoComponent({
       case 'whatsapp':
         modals.whatsapp.open();
         break;
+      case 'partial_delivery':
+        modals.partialDelivery.open();
+        break;
+      case 'exchange':
+        modals.exchange.open();
+        break;
+      case 'return_refund':
+        modals.returnRefund.open();
+        break;
+      case 'cancel_post_shipping':
+        modals.postShippingCancel.open();
+        break;
+      case 'resend':
+        console.log('[Resend] action triggered for order:', localOrder.id);
+        break;
+      case 'late':
+        console.log('[Late] action triggered for order:', localOrder.id);
+        break;
       default:
         setConfirmationDialog({
           isOpen: true,
@@ -219,10 +243,10 @@ function OrderDetailsInfoComponent({
         await actions.handleConfirmAction(action);
       }
     } catch (error: any) {
+      const msg = error?.response?.data?.message || error?.message;
       setErrorModal({
         isOpen: true,
-        message:
-          error?.message || 'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.',
+        message: Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.',
       });
     }
   };

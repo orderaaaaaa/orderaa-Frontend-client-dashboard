@@ -14,6 +14,7 @@ export function mapOrderToInvoice(
       name: op.products.name,
       quantity: op.quantity || 1,
       variant: variantText,
+      sku: op.sku || op.products.sku,
     };
   });
 
@@ -45,6 +46,15 @@ export function mapOrderToInvoice(
     totalPrice: order.totalCost,
     packagingNotes: order.packagingNotes,
     shippingNotes: order.notes,
+    shippingCompany: order.shippingCompany,
+    merchantName: order.merchants?.merchantName,
+    merchantGovernorate: order.merchants?.governorate,
+    merchantCity: order.merchants?.city,
+    area: order.customers?.area,
+    shipmentContent: order.shipmentContent,
+    canOpenShipment: order.canOpenShipment,
+    returnShippingCost: order.returnShippingCost,
+    createdAt: order.createdAt,
   };
 }
 
