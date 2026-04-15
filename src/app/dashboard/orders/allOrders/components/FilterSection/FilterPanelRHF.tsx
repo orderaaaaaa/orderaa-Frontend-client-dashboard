@@ -9,6 +9,7 @@ import MultiSelectDropdown from "@/components/ui/MultiSelectDropdown";
 import { DatePicker } from "@/components/ui/datepicker";
 import { useGovernoratesQuery, useCitiesQuery } from "@/services/lookups";
 import { useCancellationReasons } from "@/services/orders";
+import useShippingCompanies from "@/hooks/useShippingCompanies";
 import { useQuery } from "@tanstack/react-query";
 import http from "@/lib/api/http";
 import { useDebounce } from "@/utils/debounce";
@@ -37,6 +38,7 @@ export const FILTER_DEFINITIONS: FilterDefinition[] = [
   { key: 'sizeColor', label: 'المصدر', type: 'select' },
   { key: 'address', label: 'العنوان', type: 'text' },
   { key: 'storeId', label: 'اسم المتجر', type: 'select' },
+  { key: 'shippingCompany', label: 'شركة الشحن', type: 'select' },
   { key: 'cancellationReasons', label: 'سبب الإلغاء', type: 'multiselect', visibleStatuses: ['CANCELLED'] },
   { key: 'newFirst', label: 'الأحدث', type: 'select' },
   { key: 'orderByDirection', label: 'الترتيب', type: 'select' },
@@ -94,6 +96,7 @@ export default function FilterPanel({
   const isAreaActive = activeFilters.includes('area');
   const isCancellationReasonActive = activeFilters.includes('cancellationReasons');
   const isStoreActive = activeFilters.includes('storeId');
+  const isShippingCompanyActive = activeFilters.includes('shippingCompany');
 
   const selectedGovernorate = useWatch({
     control,
@@ -133,7 +136,7 @@ export default function FilterPanel({
     enabled: isStoreActive,
     staleTime: Infinity,
   });
-
+  const { shippingCompanies, isLoading: isLoadingShippingCompanies } = useShippingCompanies(isShippingCompanyActive);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -317,6 +320,28 @@ export default function FilterPanel({
                     placeholder={isLoadingStores ? "جاري التحميل..." : label}
                     widthClass="w-full"
                     loading={isLoadingStores}
+                  />
+                </FilterChip>
+              )}
+            />
+          );
+        }
+        if (key === 'shippingCompany') {
+          return (
+            <Controller
+              key={key}
+              name="shippingCompany"
+              control={control}
+              render={({ field }) => (
+                <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter}>
+                  <SearchableSelect
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    options={shippingCompanies}
+                    placeholder={isLoadingShippingCompanies ? "جاري التحميل..." : label}
+                    widthClass="w-full"
+                    loading={isLoadingShippingCompanies}
                   />
                 </FilterChip>
               )}

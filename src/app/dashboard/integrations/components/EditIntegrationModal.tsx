@@ -23,20 +23,16 @@ import { ProviderModalConfig } from '../constants/providerConfig';
 
 const URL_PATTERN = /^(https?:\/\/)?[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+/;
 
-const createEditSchema = (hasRequiredUrl: boolean, hasClientId: boolean) =>
+const createEditSchema = () =>
   z.object({
-    storeName: z.string().min(1, 'اسم المتجر مطلوب'),
+    storeName: z.string().optional(),
     description: z.string().optional(),
     webhookApiKey: z.string().optional(),
     apiKeyValue: z.string().optional(),
     newWebhookSecret: z.string().optional(),
     newApiKey: z.string().optional(),
-    shopDomain: hasRequiredUrl
-      ? z.string().min(1, 'دومين المتجر مطلوب').regex(URL_PATTERN, 'يرجى إدخال رابط صحيح')
-      : z.string().optional().refine((val) => !val || URL_PATTERN.test(val), { message: 'يرجى إدخال رابط صحيح' }),
-    clientId: hasClientId
-      ? z.string().min(1, 'Client ID مطلوب')
-      : z.string().optional(),
+    shopDomain: z.string().optional().refine((val) => !val || URL_PATTERN.test(val), { message: 'يرجى إدخال رابط صحيح' }),
+    clientId: z.string().optional(),
   });
 
 type EditFormData = z.infer<ReturnType<typeof createEditSchema>>;
@@ -79,10 +75,7 @@ const EditIntegrationModal = ({
   const storeName = configs[0]?.store?.name || '';
   const storeDescription = (configs[0]?.store?.description as string) || '';
 
-  const hasRequiredUrl = providerConfig?.metadataFields?.some((f) => f.required && f.type === 'url') ?? false;
-  const hasClientId = providerConfig?.metadataFields?.some((f) => f.key === 'clientId' && f.required) ?? false;
-
-  const editSchema = useMemo(() => createEditSchema(hasRequiredUrl, hasClientId), [hasRequiredUrl, hasClientId]);
+  const editSchema = useMemo(() => createEditSchema(), []);
 
   const [webhookIsActive, setWebhookIsActive] = useState(webhookConfig?.isActive ?? true);
   const [apiIsActive, setApiIsActive] = useState(apiConfig?.isActive ?? true);
@@ -185,16 +178,13 @@ const EditIntegrationModal = ({
     try {
       const promises: Promise<unknown>[] = [];
 
-      if (data.storeName !== storeName || data.description !== storeDescription) {
-        promises.push(
-          updateStore({
-            id: storeId,
-            data: {
-              name: data.storeName.trim(),
-              description: data.description?.trim() || undefined,
-            },
-          })
-        );
+      const nameChanged = data.storeName && data.storeName !== storeName;
+      const descChanged = (data.description || '') !== storeDescription;
+      if (nameChanged || descChanged) {
+        const storeData: Record<string, unknown> = {};
+        if (nameChanged) storeData.name = data.storeName!.trim();
+        if (descChanged) storeData.description = data.description?.trim() || undefined;
+        promises.push(updateStore({ id: storeId, data: storeData }));
       }
 
       if (webhookConfig) {

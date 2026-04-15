@@ -114,6 +114,7 @@ export interface OrderFilters {
   orderByDirection?: 'asc' | 'desc' | '';
   productId?: string;
   storeId?: string;
+  shippingCompany?: string;
   cancellationReasons?: string[];
 }
 
