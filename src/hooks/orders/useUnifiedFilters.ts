@@ -75,6 +75,9 @@ export function buildApiFiltersFromUrlState(urlFilters: UrlFilterState): FilterO
     if (localFilters.shippingCompany) {
         filters.shippingCompany = localFilters.shippingCompany;
     }
+    if (localFilters.employeeName) {
+        filters.employeeName = localFilters.employeeName;
+    }
     if (localFilters.cancellationReasons?.length) {
         filters.cancelReasonId = localFilters.cancellationReasons;
     }

@@ -32,7 +32,7 @@ interface UseUrlFiltersReturn {
   isInitialized: boolean;
 }
 
-export function useUrlFilters(): UseUrlFiltersReturn {
+export function useUrlFilters(storageKey?: string): UseUrlFiltersReturn {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -55,6 +55,38 @@ export function useUrlFilters(): UseUrlFiltersReturn {
   // Ref to store the previous URL params string for comparison
   const prevParamsString = useRef<string>('');
 
+  const saveToStorage = useCallback((state: UrlFilterState) => {
+    if (!storageKey) return;
+    try {
+      const persistable = {
+        status: state.status,
+        fromDate: state.fromDate?.toISOString() ?? null,
+        toDate: state.toDate?.toISOString() ?? null,
+        timePeriod: state.timePeriod,
+        localFilters: state.localFilters,
+      };
+      localStorage.setItem(storageKey, JSON.stringify(persistable));
+    } catch {}
+  }, [storageKey]);
+
+  const loadFromStorage = useCallback((): Partial<UrlFilterState> | null => {
+    if (!storageKey) return null;
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return {
+        status: parsed.status ?? null,
+        fromDate: parsed.fromDate ? new Date(parsed.fromDate) : null,
+        toDate: parsed.toDate ? new Date(parsed.toDate) : null,
+        timePeriod: parsed.timePeriod ?? '',
+        localFilters: { ...DEFAULT_FILTER_STATE.localFilters, ...parsed.localFilters },
+      };
+    } catch {
+      return null;
+    }
+  }, [storageKey]);
+
   // Initialize from URL on mount
   useEffect(() => {
     if (!searchParams) return;
@@ -76,9 +108,23 @@ export function useUrlFilters(): UseUrlFiltersReturn {
     }
 
     if (!isInitialized) {
+      const hasUrlFilters = searchParams.toString().length > 0;
+      if (!hasUrlFilters) {
+        const stored = loadFromStorage();
+        if (stored) {
+          setFilters((prev) => ({ ...prev, ...stored }));
+          pendingUrlUpdate.current = 'replace';
+          setUrlSyncTrigger((c) => c + 1);
+        }
+      }
       setIsInitialized(true);
     }
-  }, [searchParams, isInitialized]);
+  }, [searchParams, isInitialized, loadFromStorage]);
+
+  useEffect(() => {
+    if (!isInitialized || !storageKey) return;
+    saveToStorage(filters);
+  }, [filters, isInitialized, storageKey, saveToStorage]);
 
   // Sync URL with state changes - runs AFTER state update
   useEffect(() => {
@@ -323,8 +369,11 @@ export function useUrlFilters(): UseUrlFiltersReturn {
   // Reset all filters
   const resetFilters = useCallback(() => {
     setFilters({ ...DEFAULT_FILTER_STATE });
+    if (storageKey) {
+      try { localStorage.removeItem(storageKey); } catch {}
+    }
     scheduleUrlUpdate('push');
-  }, [scheduleUrlUpdate]);
+  }, [scheduleUrlUpdate, storageKey]);
 
   return {
     filters,

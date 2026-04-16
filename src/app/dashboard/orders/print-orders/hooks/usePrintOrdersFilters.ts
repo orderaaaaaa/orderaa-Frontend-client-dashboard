@@ -5,8 +5,8 @@ import { useUrlFilters } from '@/hooks/useUrlFilters';
 import { PrintStatus } from '../types';
 import { useDefaultStatusByPath } from '../../hooks/useDefaultStatusByPath';
 
-export function usePrintOrdersFilters() {
-  const urlFilters = useUrlFilters();
+export function usePrintOrdersFilters(storageKey?: string) {
+  const urlFilters = useUrlFilters(storageKey);
   const DEFAULT_STATUS = useDefaultStatusByPath();
   const hasInitialized = useRef(false);
   const [printStatus, setPrintStatusState] = useState<PrintStatus>(null);

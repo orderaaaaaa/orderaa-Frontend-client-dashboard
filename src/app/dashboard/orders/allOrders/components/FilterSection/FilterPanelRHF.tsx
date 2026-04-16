@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Control, Controller, FieldErrors, useWatch, UseFormSetValue } from "react-hook-form";
 import { OrderFiltersFormData } from "@/schemas/orderFilters.schema";
 import { FilterOptions } from "@/types/orders";
@@ -12,12 +12,12 @@ import { useCancellationReasons } from "@/services/orders";
 import useShippingCompanies from "@/hooks/useShippingCompanies";
 import { useQuery } from "@tanstack/react-query";
 import http from "@/lib/api/http";
-import { useDebounce } from "@/utils/debounce";
+import { useDebounce, useDebouncedCallback } from "@/utils/debounce";
 import { LiaTimesSolid } from "react-icons/lia";
 import { Button } from "@/components/ui/button";
 import { formatDateForUrl } from "@/utils/urlFilters";
 
-export type FilterKey = keyof OrderFiltersFormData | 'employeeName';
+export type FilterKey = keyof OrderFiltersFormData;
 
 interface FilterDefinition {
   key: FilterKey;
@@ -31,7 +31,7 @@ export const FILTER_DEFINITIONS: FilterDefinition[] = [
   { key: 'customerName', label: 'اسم العميل', type: 'text' },
   { key: 'phone', label: 'رقم الهاتف', type: 'text' },
   { key: 'executionDate', label: 'تاريخ التنفيذ', type: 'date' },
-  { key: 'employeeName', label: 'اسم الموظف', type: 'placeholder' },
+  { key: 'employeeName', label: 'اسم الموظف', type: 'text' },
   { key: 'productName', label: 'المنتج', type: 'select' },
   { key: 'governorate', label: 'المحافظة', type: 'select' },
   { key: 'area', label: 'المنطقة', type: 'select' },
@@ -41,8 +41,42 @@ export const FILTER_DEFINITIONS: FilterDefinition[] = [
   { key: 'shippingCompany', label: 'شركة الشحن', type: 'select' },
   { key: 'cancellationReasons', label: 'سبب الإلغاء', type: 'multiselect', visibleStatuses: ['CANCELLED'] },
   { key: 'newFirst', label: 'الأحدث', type: 'select' },
-  { key: 'orderByDirection', label: 'الترتيب', type: 'select' },
+  { key: 'orderByDirection', label: 'طلبات جديدة', type: 'select' },
 ];
+
+function DebouncedInput({
+  value: externalValue,
+  onChange,
+  placeholder,
+  className,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  className?: string;
+}) {
+  const [localValue, setLocalValue] = useState(externalValue);
+  const debouncedOnChange = useDebouncedCallback(onChange, 500);
+
+  useEffect(() => {
+    setLocalValue(externalValue);
+  }, [externalValue]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalValue(e.target.value);
+    debouncedOnChange(e.target.value);
+  };
+
+  return (
+    <input
+      type="text"
+      value={localValue}
+      onChange={handleChange}
+      placeholder={placeholder}
+      className={className}
+    />
+  );
+}
 
 interface FilterChipProps {
   filterKey: FilterKey;
@@ -169,6 +203,25 @@ export default function FilterPanel({
         );
 
       case 'text':
+        if (key === 'employeeName') {
+          return (
+            <Controller
+              key={key}
+              name="employeeName"
+              control={control}
+              render={({ field }) => (
+                <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter}>
+                  <DebouncedInput
+                    value={String(field.value ?? '')}
+                    onChange={field.onChange}
+                    placeholder={label}
+                    className={`w-full h-full px-3 rounded border bg-white ${errors.employeeName ? 'border-red-500' : 'border-gray-300'}`}
+                  />
+                </FilterChip>
+              )}
+            />
+          );
+        }
         return (
           <Controller
             key={key}

@@ -17,6 +17,7 @@ type FilterSectionProps = {
   setValue?: UseFormSetValue<OrderFiltersFormData>;
   initialFormFilters?: OrderFiltersFormData | null;
   currentStatus?: string | null;
+  hiddenFilters?: FilterKey[];
 };
 
 function getActiveFiltersFromFormValues(formFilters: OrderFiltersFormData | null | undefined): FilterKey[] {
@@ -25,8 +26,6 @@ function getActiveFiltersFromFormValues(formFilters: OrderFiltersFormData | null
   const activeKeys: FilterKey[] = [];
 
   for (const def of FILTER_DEFINITIONS) {
-    if (def.key === 'employeeName') continue;
-
     const value = formFilters[def.key as keyof OrderFiltersFormData];
     const isActive = Array.isArray(value)
       ? value.length > 0
@@ -51,6 +50,7 @@ const FilterSection = React.memo(function FilterSection({
   setValue,
   initialFormFilters,
   currentStatus,
+  hiddenFilters = [],
 }: FilterSectionProps) {
   const [activeFilters, setActiveFilters] = useState<FilterKey[]>(() =>
     getActiveFiltersFromFormValues(initialFormFilters)
@@ -74,10 +74,11 @@ const FilterSection = React.memo(function FilterSection({
   const visibleDefinitions = useMemo(
     () =>
       FILTER_DEFINITIONS.filter((f) => {
+        if (hiddenFilters.includes(f.key)) return false;
         if (!f.visibleStatuses) return true;
         return currentStatus && f.visibleStatuses.includes(currentStatus);
       }),
-    [currentStatus]
+    [currentStatus, hiddenFilters]
   );
 
   useEffect(() => {
@@ -87,7 +88,7 @@ const FilterSection = React.memo(function FilterSection({
       if (filtersToRemove.length === 0) return prev;
 
       filtersToRemove.forEach((filterKey) => {
-        if (!setValue || filterKey === 'employeeName') return;
+        if (!setValue) return;
         const def = FILTER_DEFINITIONS.find((f) => f.key === filterKey);
         if (def?.type === 'multiselect') {
           setValue(filterKey as keyof OrderFiltersFormData, [] as any, {
@@ -121,7 +122,7 @@ const FilterSection = React.memo(function FilterSection({
 
   const removeFilter = (filterKey: FilterKey) => {
     setActiveFilters(activeFilters.filter(f => f !== filterKey));
-    if (setValue && filterKey !== 'employeeName') {
+    if (setValue) {
       const def = FILTER_DEFINITIONS.find((f) => f.key === filterKey);
       if (def?.type === 'multiselect') {
         setValue(filterKey as keyof OrderFiltersFormData, [] as any, {

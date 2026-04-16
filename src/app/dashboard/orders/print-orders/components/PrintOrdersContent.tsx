@@ -94,7 +94,7 @@ export function PrintOrdersContent() {
     printStatus,
     setPrintStatus,
     isInitialized,
-  } = usePrintOrdersFilters();
+  } = usePrintOrdersFilters('orderFilters');
   const { statistics: printStatistics, loading: statsLoading } =
     usePrintOrderStatistics();
 

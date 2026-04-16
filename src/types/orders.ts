@@ -115,6 +115,7 @@ export interface OrderFilters {
   productId?: string;
   storeId?: string;
   shippingCompany?: string;
+  employeeName?: string;
   cancellationReasons?: string[];
 }
 
@@ -421,6 +422,7 @@ export interface FilterOrdersDto {
   productId?: string;
   cancelReasonId?: string[];
   storeId?: number;
+  employeeName?: string;
 }
 
 // Pagination Meta

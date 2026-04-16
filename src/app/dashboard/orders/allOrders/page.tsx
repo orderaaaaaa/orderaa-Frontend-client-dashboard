@@ -64,7 +64,7 @@ function AllOrdersContent() {
     updateLocalFilters,
     resetFilters,
     isInitialized,
-  } = useUrlFilters();
+  } = useUrlFilters('orderFilters');
 
   // Build API filters from URL state
   const apiFilters = useMemo(() => {
@@ -457,6 +457,7 @@ function AllOrdersContent() {
         }}
         initialFormFilters={isInitialized ? filters.localFilters : null}
         currentStatus={filters.status}
+        hiddenFilters={['orderByDirection']}
       />
 
       <div className="flex flex-col sm:flex-row justify-between gap-2 mt-10 mb-6 select-none">

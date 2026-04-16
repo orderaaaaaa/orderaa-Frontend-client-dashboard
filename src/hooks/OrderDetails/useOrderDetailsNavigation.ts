@@ -86,6 +86,8 @@ export function useOrderDetailsNavigation({
   const router = useRouter();
   const pathname = usePathname();
 
+  const STORAGE_KEY = 'orderFilters';
+
   const hasMounted = useRef(false);
   const isUserInitiated = useRef(false);
   const isUpdatingUrl = useRef(false);
@@ -96,6 +98,35 @@ export function useOrderDetailsNavigation({
   const [targetOrderId, setTargetOrderId] = useState<number | null>(null);
   const [isEmpty, setIsEmpty] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+
+  const saveToStorage = useCallback((s: string | null, fd: Date | null, td: Date | null, tp: TimePeriod, ff: OrderFiltersFormData | null) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        status: s,
+        fromDate: fd?.toISOString() ?? null,
+        toDate: td?.toISOString() ?? null,
+        timePeriod: tp,
+        formFilters: ff,
+      }));
+    } catch {}
+  }, []);
+
+  const loadFromStorage = useCallback(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return {
+        status: parsed.status ?? null,
+        fromDate: parsed.fromDate ? new Date(parsed.fromDate) : null,
+        toDate: parsed.toDate ? new Date(parsed.toDate) : null,
+        timePeriod: (parsed.timePeriod ?? '') as TimePeriod,
+        formFilters: parsed.formFilters ?? null,
+      };
+    } catch {
+      return null;
+    }
+  }, []);
 
   const getInitialState = useCallback(() => {
     if (!searchParams) {
@@ -142,7 +173,14 @@ export function useOrderDetailsNavigation({
     };
   }, [searchParams]);
 
-  const initialState = getInitialState();
+  const initialState = (() => {
+    const urlState = getInitialState();
+    const hasUrlFilters = searchParams && searchParams.toString().length > 0;
+    if (hasUrlFilters) return urlState;
+    const stored = loadFromStorage();
+    if (stored) return stored;
+    return urlState;
+  })();
 
   const [status, setStatusInternal] = useState<string | null>(initialState.status);
   const [fromDate, setFromDateInternal] = useState<Date | null>(initialState.fromDate);
@@ -153,6 +191,12 @@ export function useOrderDetailsNavigation({
   const debouncedFormFilters = useDebounce(formFilters, 500);
 
   const [triggerVersion, setTriggerVersion] = useState(0);
+
+  useEffect(() => {
+    if (hasMounted.current) {
+      saveToStorage(status, fromDate, toDate, timePeriod, formFilters);
+    }
+  }, [status, fromDate, toDate, timePeriod, formFilters, saveToStorage]);
 
   useEffect(() => {
     hasMounted.current = true;
