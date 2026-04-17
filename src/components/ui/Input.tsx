@@ -5,6 +5,7 @@ import { Button } from './button';
 
 type InputProps = {
   label?: string;
+  required?: boolean;
   name?: string;
   type?: string;
   placeholder?: string;
@@ -29,6 +30,7 @@ type InputProps = {
 
 export default function Input({
   label,
+  required = false,
   name,
   type = 'text',
   placeholder,
@@ -89,6 +91,7 @@ export default function Input({
       {label && (
         <label htmlFor={inputId} className="block font-medium text-base mb-2">
           {label}
+          {required && <span className="text-red-500 mr-1">*</span>}
         </label>
       )}
       <div className="relative">

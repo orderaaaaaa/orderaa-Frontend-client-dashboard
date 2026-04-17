@@ -15,10 +15,12 @@ import LoadingAnimation from '@/components/ui/loadingAnimation';
 import { Button } from '@/components/ui/button';
 import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
 import { ShippingActionsBar } from './ShippingActionsBar';
-import { ShippingScannedOrdersModal } from './ShippingScannedOrdersModal';
+import { ScannedOrdersModal } from '../../components/ScannedOrdersModal';
 import { useBarcodeScanner, useScannerFeedback } from '../../print-orders/hooks';
-import { useShippingScannedOrders, useSubmitForApproval } from '../hooks';
+import { useScannedOrders } from '../../hooks';
+import { useSubmitForApproval } from '../hooks';
 import { getOrderByCodeWithShipping } from '../services/shippingOrders';
+import { ORDER_STATUS_ARABIC_LABELS } from '../../../constants/statusMappings';
 import Footer from '@/components/orders/Footer';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 
@@ -165,14 +167,18 @@ export function ShippingOrdersContent() {
   const { playSuccessSound, playErrorSound } = useScannerFeedback();
   const {
     scannedOrders,
+    actionableOrders,
+    actionableFilteredGroups,
+    actionableFilteredOrders,
+    nonConfirmedGroups,
     addOrder,
     removeOrder,
     clearOrders,
     hasOrder,
+    forceActionable,
     searchQuery,
     setSearchQuery,
-    filteredOrders,
-  } = useShippingScannedOrders();
+  } = useScannedOrders();
   const { mutateAsync: submitForApprovalMutation } = useSubmitForApproval();
 
   const handleScan = useCallback(
@@ -195,17 +201,37 @@ export function ShippingOrdersContent() {
 
       setIsScanLoading(true);
       try {
-        const order = await getOrderByCodeWithShipping(barcode, selectedShippingCompany);
+        const order = await getOrderByCodeWithShipping(
+          barcode,
+          selectedShippingCompany
+        );
         addOrder({
           id: order.id,
           code: barcode,
+          status: order.status,
+          cancelReason: order.cancelReason,
+          packagingWarning: order.packagingWarning,
+          printCount: order.printCount,
         });
-        playSuccessSound();
         setFlashingCode(barcode);
         setTimeout(() => setFlashingCode(null), 600);
+        if (
+          order.status === 'CONFIRMED' ||
+          order.status === 'WAITING_FOR_PACKAGING'
+        ) {
+          playSuccessSound();
+        } else {
+          playErrorSound();
+          const statusLabel =
+            ORDER_STATUS_ARABIC_LABELS[order.status] || order.status;
+          toast.info(`هذا الطلب ليس مؤكد - الحالة: ${statusLabel}`);
+        }
       } catch (error: any) {
         playErrorSound();
-        toast.error(error?.response?.data?.message || 'هذا الطلب غير موجود');
+        const msg = error?.response?.data?.message;
+        toast.error(
+          Array.isArray(msg) ? msg.join('\n') : msg || 'هذا الطلب غير موجود'
+        );
       } finally {
         setIsScanLoading(false);
       }
@@ -228,22 +254,25 @@ export function ShippingOrdersContent() {
   });
 
   const handleShipScannedOrders = useCallback(async () => {
-    if (scannedOrders.length === 0) return;
+    if (actionableOrders.length === 0) return;
 
     setIsActionLoading(true);
     try {
       await submitForApprovalMutation({
-        orderIds: scannedOrders.map((o) => o.id),
+        orderIds: actionableOrders.map((o) => o.id),
       });
       toast.success('تم إرسال الطلبات للشحن بنجاح');
       clearOrders();
       setIsScannedOrdersModalOpen(false);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'فشل إرسال الطلبات للشحن');
+      const msg = error?.response?.data?.message;
+      toast.error(
+        Array.isArray(msg) ? msg.join('\n') : msg || 'فشل إرسال الطلبات للشحن'
+      );
     } finally {
       setIsActionLoading(false);
     }
-  }, [scannedOrders, submitForApprovalMutation, clearOrders]);
+  }, [actionableOrders, submitForApprovalMutation, clearOrders]);
 
   const handleShipSelectedOrders = useCallback(async () => {
     const ordersToProcess = selectAllMatchingFilters ? orders : selectedOrders;
@@ -524,21 +553,34 @@ export function ShippingOrdersContent() {
         </Button>
       )}
 
-      <ShippingScannedOrdersModal
+      <ScannedOrdersModal
         isOpen={isScannedOrdersModalOpen}
         onClose={() => {
           setIsScannedOrdersModalOpen(false);
           clearOrders();
         }}
+        title="الطلبات للشحن"
         scannedOrders={scannedOrders}
+        actionableOrders={actionableOrders}
+        actionableFilteredGroups={actionableFilteredGroups}
+        actionableFilteredOrders={actionableFilteredOrders}
+        nonConfirmedGroups={nonConfirmedGroups}
         onRemoveOrder={removeOrder}
+        onForceActionable={forceActionable}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        filteredOrders={filteredOrders}
-        onShip={handleShipScannedOrders}
-        isLoading={isActionLoading}
         isScanLoading={isScanLoading}
         flashingCode={flashingCode}
+        actionsBar={
+          <ShippingActionsBar
+            forceShow
+            position="static"
+            isLoading={isActionLoading}
+            disableActions={actionableOrders.length === 0}
+            onShip={handleShipScannedOrders}
+            selectedCount={actionableOrders.length}
+          />
+        }
       />
     </div>
   );

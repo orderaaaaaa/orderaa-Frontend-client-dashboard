@@ -7,6 +7,7 @@ import {
   LiaPlusCircleSolid,
   LiaLongArrowAltLeftSolid,
   LiaClipboardListSolid,
+  LiaEditSolid,
 } from 'react-icons/lia';
 import { Order, OrderProductVariant } from '@/types/orders';
 import EditProductModal from './EditProductModal';
@@ -14,8 +15,6 @@ import DeleteConfirmationModal from './DeleteConfirmationModal';
 import AddSameTypeProductModal from './AddSameTypeProductModal';
 import AddNewProductModal from './AddNewProductModal';
 import ProductDetailsModal from './ProductDetailsModal';
-import ProductActionMenu from './ProductActionMenu';
-import SwapProductModal from './ActionModals/SwapProductModal';
 import ProductChangeLogModal from './ProductChangeLogModal';
 import {
   useUpdateOrderProduct,
@@ -48,7 +47,6 @@ function OrderDetailsProductCard({
   const [isAddNewProductModalOpen, setIsAddNewProductModalOpen] =
     useState(false);
   const [viewingProductId, setViewingProductId] = useState<number | null>(null);
-  const [swapProductId, setSwapProductId] = useState<number | null>(null);
   const [isChangeLogOpen, setIsChangeLogOpen] = useState(false);
   const [productsData, setProductsData] = useState(
     order.order_products?.map((orderProduct) => ({
@@ -120,10 +118,6 @@ function OrderDetailsProductCard({
 
   const viewingOrderProduct = order.order_products?.find(
     (orderProduct) => orderProduct.id === viewingProductId
-  );
-
-  const swapProduct = productsData.find(
-    (item) => item.id === swapProductId
   );
 
   const handleAddSameTypeProduct = async (
@@ -205,10 +199,14 @@ function OrderDetailsProductCard({
                 </div>
                 <div className="flex flex-col items-end ml-2">
                   <div className="flex justify-end gap-2 mb-4">
-                    <ProductActionMenu
-                      onModify={() => handleEditClick(item.id)}
-                      onSwap={() => setSwapProductId(item.id)}
-                      disabled={isLockedByOther}
+                    <LiaEditSolid
+                      className={`w-4 h-4 transition-colors ${isLockedByOther
+                          ? 'opacity-50 cursor-not-allowed'
+                          : 'cursor-pointer hover:text-purple-700'
+                        }`}
+                      onClick={() =>
+                        !isLockedByOther && handleEditClick(item.id)
+                      }
                     />
                     {productsData.length > 1 && (
                       <LiaTrashAltSolid
@@ -321,19 +319,6 @@ function OrderDetailsProductCard({
         onClose={() => setViewingProductId(null)}
         orderProduct={viewingOrderProduct || null}
       />
-
-      {swapProduct && (
-        <SwapProductModal
-          isOpen={swapProductId !== null}
-          onClose={() => setSwapProductId(null)}
-          currentProduct={{
-            id: swapProduct.id,
-            name: swapProduct.product,
-            price: swapProduct.price,
-            variants: swapProduct.variants,
-          }}
-        />
-      )}
 
       <ProductChangeLogModal
         isOpen={isChangeLogOpen}

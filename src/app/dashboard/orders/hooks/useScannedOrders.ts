@@ -7,13 +7,18 @@ import type {
   AddOrderInput,
   NonConfirmedGroup,
   UseScannedOrdersReturn,
-} from '../types';
+} from '../types/scannedOrders';
 
 export type { ScannedOrder, AddOrderInput };
+
+const ACTIONABLE_STATUSES = ['CONFIRMED', 'WAITING_FOR_PACKAGING'];
 
 export function useScannedOrders(): UseScannedOrdersReturn {
   const [scannedOrders, setScannedOrders] = useState<ScannedOrder[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [forcedActionableIds, setForcedActionableIds] = useState<Set<number>>(
+    new Set()
+  );
 
   const hasOrder = useCallback(
     (code: string) => {
@@ -56,11 +61,8 @@ export function useScannedOrders(): UseScannedOrdersReturn {
   const clearOrders = useCallback(() => {
     setScannedOrders([]);
     setSearchQuery('');
+    setForcedActionableIds(new Set());
   }, []);
-
-  const [forcedActionableIds, setForcedActionableIds] = useState<Set<number>>(new Set());
-
-  const ACTIONABLE_STATUSES = ['CONFIRMED', 'WAITING_FOR_PACKAGING'];
 
   const isActionableStatus = (status: string) =>
     ACTIONABLE_STATUSES.includes(status);
@@ -77,7 +79,10 @@ export function useScannedOrders(): UseScannedOrdersReturn {
   }, []);
 
   const confirmedOrders = useMemo(
-    () => scannedOrders.filter((o) => o.status === 'CONFIRMED' && !o.packagingWarning),
+    () =>
+      scannedOrders.filter(
+        (o) => o.status === 'CONFIRMED' && !o.packagingWarning
+      ),
     [scannedOrders]
   );
 
@@ -115,7 +120,10 @@ export function useScannedOrders(): UseScannedOrdersReturn {
   }, [scannedOrders, searchQuery]);
 
   const confirmedFilteredOrders = useMemo(
-    () => filteredOrders.filter((o) => o.status === 'CONFIRMED' && !o.packagingWarning),
+    () =>
+      filteredOrders.filter(
+        (o) => o.status === 'CONFIRMED' && !o.packagingWarning
+      ),
     [filteredOrders]
   );
 

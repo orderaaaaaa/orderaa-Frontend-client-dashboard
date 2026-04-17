@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import Input from '@/components/ui/Input';
 import {
   LiaSearchSolid,
@@ -9,14 +9,17 @@ import {
   LiaArrowRightSolid,
 } from 'react-icons/lia';
 import { ScannedOrdersTable } from './ScannedOrdersTable';
-import PrintOrdersActionsBar from '../PrintOrdersActionsBar';
 import { Button } from '@/components/ui/button';
-import { ScannedOrdersModalProps, NonConfirmedGroup } from '../../types';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import {
   ORDER_STATUS_ARABIC_LABELS,
   ORDER_STATUS_CHART_COLORS,
-} from '../../../../constants/statusMappings';
+} from '../../../constants/statusMappings';
+import type {
+  ScannedOrder,
+  NonConfirmedGroup,
+  ScannedOrdersModalProps,
+} from '../../types/scannedOrders';
 
 function ChangeProductTable({
   orders,
@@ -24,7 +27,7 @@ function ChangeProductTable({
   onPackagingNoteChange,
   onRemove,
 }: {
-  orders: { id: number; code: string; status: string; scannedAt: Date }[];
+  orders: ScannedOrder[];
   packagingNotes: Record<string, string>;
   onPackagingNoteChange: (code: string, note: string) => void;
   onRemove: (code: string) => void;
@@ -195,47 +198,30 @@ function NonConfirmedSection({
 export function ScannedOrdersModal({
   isOpen,
   onClose,
+  title = 'الطلبات المحددة',
   scannedOrders,
-  confirmedOrders,
   actionableOrders,
   actionableFilteredGroups,
+  actionableFilteredOrders,
   nonConfirmedGroups,
   onRemoveOrder,
   onForceActionable,
   searchQuery,
   onSearchChange,
-  confirmedFilteredOrders,
-  actionableFilteredOrders,
-  onPrepared,
-  onAwaitingPackaging,
-  onCallAgain,
-  onChangeProduct,
-  isLoading,
   isScanLoading = false,
   flashingCode,
+  actionsBar,
+  showChangeProductMode = false,
   isChangeProductMode = false,
+  onChangeProductBack,
   packagingNotes = {},
   onPackagingNoteChange,
-  onChangeProductSubmit,
 }: ScannedOrdersModalProps) {
   useBodyScrollLock(isOpen);
 
-  const allFieldsFilled = useMemo(() => {
-    if (!isChangeProductMode) return true;
-    return actionableOrders.every(
-      (order) => packagingNotes[order.code]?.trim().length > 0
-    );
-  }, [isChangeProductMode, actionableOrders, packagingNotes]);
-
   if (!isOpen) return null;
 
-  const handleChangeProductClick = () => {
-    if (isChangeProductMode) {
-      onChangeProductSubmit?.();
-    } else {
-      onChangeProduct?.();
-    }
-  };
+  const inChangeProductMode = showChangeProductMode && isChangeProductMode;
 
   return (
     <div className="fixed inset-0 z-[99999] bg-white flex flex-col">
@@ -254,7 +240,7 @@ export function ScannedOrdersModal({
           <LiaTimesSolid className="size-5" />
         </Button>
         <h2 className="text-xl font-bold text-black">
-          {isChangeProductMode ? 'تغيير المنتج' : 'الطلبات المحددة'}
+          {inChangeProductMode ? 'تغيير المنتج' : title}
         </h2>
         <div className="absolute left-8 flex items-center gap-3 text-gray-700">
           <span className="text-lg font-medium">عدد الطلبات</span>
@@ -267,13 +253,13 @@ export function ScannedOrdersModal({
         </div>
       </div>
 
-      {isChangeProductMode ? (
+      {inChangeProductMode ? (
         <>
           <div className="px-8 py-4 border-b border-gray-200">
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
-                onClick={onChangeProduct}
+                onClick={onChangeProductBack}
                 className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
                 title="رجوع"
               >
@@ -288,7 +274,7 @@ export function ScannedOrdersModal({
             <ChangeProductTable
               orders={actionableFilteredOrders}
               packagingNotes={packagingNotes}
-              onPackagingNoteChange={onPackagingNoteChange || (() => { })}
+              onPackagingNoteChange={onPackagingNoteChange || (() => {})}
               onRemove={onRemoveOrder}
             />
           </div>
@@ -387,10 +373,10 @@ export function ScannedOrdersModal({
                   <div className="hidden lg:block w-px bg-gray-200 flex-shrink-0" />
                   <div className="border-t border-gray-200 pt-4 lg:border-t-0 lg:pt-0 flex-1 min-w-0">
                     <NonConfirmedSection
-                    groups={nonConfirmedGroups}
-                    onRemove={onRemoveOrder}
-                    onForceActionable={onForceActionable}
-                  />
+                      groups={nonConfirmedGroups}
+                      onRemove={onRemoveOrder}
+                      onForceActionable={onForceActionable}
+                    />
                   </div>
                 </>
               )}
@@ -399,21 +385,7 @@ export function ScannedOrdersModal({
         </>
       )}
 
-      <PrintOrdersActionsBar
-        forceShow
-        position="static"
-        isLoading={isLoading}
-        disableActions={
-          actionableOrders.length === 0 ||
-          (isChangeProductMode && !allFieldsFilled)
-        }
-        onPrepared={isChangeProductMode ? undefined : onPrepared}
-        onAwaitingPackaging={isChangeProductMode ? undefined : onAwaitingPackaging}
-        onCallAgain={isChangeProductMode ? undefined : onCallAgain}
-        onChangeProduct={handleChangeProductClick}
-        className="flex-shrink-0"
-        isChangeProductMode={isChangeProductMode}
-      />
+      <div className="flex-shrink-0">{actionsBar}</div>
     </div>
   );
 }

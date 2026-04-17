@@ -4,7 +4,7 @@ import React from 'react';
 import { LiaTrashAltSolid, LiaPrintSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import clsx from 'clsx';
-import { ScannedOrdersTableProps } from '../../types';
+import type { ScannedOrdersTableProps } from '../../types/scannedOrders';
 
 function LoadingCard() {
   return (

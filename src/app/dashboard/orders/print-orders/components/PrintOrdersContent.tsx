@@ -12,14 +12,14 @@ import { ArrowUp, Scan, ScanLine, X } from 'lucide-react';
 import {
   useBarcodeScanner,
   useScannerFeedback,
-  useScannedOrders,
   usePrepareOrders,
   useWaitingForPackaging,
   useCallAgainOrders,
 } from '../hooks';
+import { useScannedOrders } from '../../hooks';
 import { getOrderByCode } from '../services/printOrders';
 import { ORDER_STATUS_ARABIC_LABELS } from '../../../constants/statusMappings';
-import { ScannedOrdersModal } from './ScannedOrdersModal';
+import { ScannedOrdersModal } from '../../components/ScannedOrdersModal';
 import { ChangeProductModal } from './ChangeProductModal';
 import { PrintedOrdersConfirmModal } from './PrintedOrdersConfirmModal';
 
@@ -793,28 +793,52 @@ export function PrintOrdersContent() {
           clearOrders();
         }}
         scannedOrders={scannedOrders}
-        confirmedOrders={confirmedOrders}
         actionableOrders={actionableOrders}
         actionableFilteredGroups={actionableFilteredGroups}
+        actionableFilteredOrders={actionableFilteredOrders}
         nonConfirmedGroups={nonConfirmedGroups}
         onRemoveOrder={removeOrder}
         onForceActionable={forceActionable}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        filteredOrders={filteredOrders}
-        confirmedFilteredOrders={confirmedFilteredOrders}
-        actionableFilteredOrders={actionableFilteredOrders}
-        onPrepared={handleScannerPrepared}
-        onAwaitingPackaging={handleScannerAwaitingPackaging}
-        onCallAgain={handleScannerCallAgain}
-        onChangeProduct={handleScannerChangeProduct}
-        isLoading={isActionLoading}
         isScanLoading={isScanLoading}
         flashingCode={flashingCode}
+        showChangeProductMode
         isChangeProductMode={isScannerChangeProductMode}
+        onChangeProductBack={handleScannerChangeProduct}
         packagingNotes={scannerPackagingNotes}
         onPackagingNoteChange={handleScannerPackagingNoteChange}
-        onChangeProductSubmit={handleScannerChangeProductSubmit}
+        actionsBar={
+          <PrintOrdersActionsBar
+            forceShow
+            position="static"
+            isLoading={isActionLoading}
+            disableActions={
+              actionableOrders.length === 0 ||
+              (isScannerChangeProductMode &&
+                !actionableOrders.every(
+                  (o) => scannerPackagingNotes[o.code]?.trim().length > 0
+                ))
+            }
+            onPrepared={
+              isScannerChangeProductMode ? undefined : handleScannerPrepared
+            }
+            onAwaitingPackaging={
+              isScannerChangeProductMode
+                ? undefined
+                : handleScannerAwaitingPackaging
+            }
+            onCallAgain={
+              isScannerChangeProductMode ? undefined : handleScannerCallAgain
+            }
+            onChangeProduct={
+              isScannerChangeProductMode
+                ? handleScannerChangeProductSubmit
+                : handleScannerChangeProduct
+            }
+            isChangeProductMode={isScannerChangeProductMode}
+          />
+        }
       />
 
       <PrintedOrdersConfirmModal
