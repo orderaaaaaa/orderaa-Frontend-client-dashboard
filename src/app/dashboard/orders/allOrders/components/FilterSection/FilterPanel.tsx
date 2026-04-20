@@ -113,9 +113,9 @@ export default function FilterPanel({
       </div>
       {/* {"المنتج"} */}
       <SearchableSelect
-        value={filters.productName}
-        onChange={(v) => updateFilters({ ...filters, productName: v })}
-        options={options.productOptions}
+        value={filters.productId || ''}
+        onChange={(v) => updateFilters({ ...filters, productId: v })}
+        options={options.productIdOptions || []}
         placeholder="المنتج"
         widthClass="max-w-62"
       />

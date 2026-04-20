@@ -1,9 +1,8 @@
 'use client';
 
 import React from 'react';
-import Input from '@/components/ui/Input';
 import SearchableSelect from '@/components/ui/SearchableSelect';
-import { useUtmSourcesQuery } from '@/services/lookups';
+import { usePageNamesQuery, useUtmSourcesQuery } from '@/services/lookups';
 import { OrderProps } from './types';
 
 function Order({
@@ -14,6 +13,7 @@ function Order({
   errors,
 }: OrderProps) {
   const { data: utmSources = [], isLoading } = useUtmSourcesQuery();
+  const { data: pageNames = [], isLoading: isLoadingPageNames } = usePageNamesQuery();
 
   return (
     <div className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center">
@@ -43,15 +43,15 @@ function Order({
                 اسم الصفحة <span className="text-red-500">*</span>
               </label>
             </div>
-            <Input
+            <SearchableSelect
               name="pageName"
-              type="text"
-              placeholder="مثال: product page"
-              className="w-full"
-              inputClassName="bg-white"
+              placeholder="اختر اسم الصفحة"
               value={pageName}
-              onChange={(e) => onPageNameChange(e.target.value)}
+              onChange={onPageNameChange}
+              options={pageNames}
+              loading={isLoadingPageNames}
               error={errors?.pageName}
+              emptyMessage="لا توجد صفحات متاحة"
             />
           </div>
         </div>

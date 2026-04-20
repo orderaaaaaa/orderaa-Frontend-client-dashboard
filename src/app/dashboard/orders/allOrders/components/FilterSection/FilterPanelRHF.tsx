@@ -22,7 +22,7 @@ export type FilterKey = keyof OrderFiltersFormData | 'employeeName';
 interface FilterDefinition {
   key: FilterKey;
   label: string;
-  type: 'text' | 'textarea' | 'select' | 'date' | 'placeholder' | 'multiselect';
+  type: 'text' | 'textarea' | 'select' | 'date' | 'placeholder' | 'multiselect' | 'toggle';
   visibleStatuses?: string[];
 }
 
@@ -32,7 +32,7 @@ export const FILTER_DEFINITIONS: FilterDefinition[] = [
   { key: 'phone', label: 'رقم الهاتف', type: 'text' },
   { key: 'executionDate', label: 'تاريخ التنفيذ', type: 'date' },
   { key: 'employeeName', label: 'اسم الموظف', type: 'placeholder' },
-  { key: 'productName', label: 'المنتج', type: 'select' },
+  { key: 'productId', label: 'المنتج', type: 'select' },
   { key: 'governorate', label: 'المحافظة', type: 'select' },
   { key: 'area', label: 'المنطقة', type: 'select' },
   { key: 'sizeColor', label: 'المصدر', type: 'select' },
@@ -40,7 +40,7 @@ export const FILTER_DEFINITIONS: FilterDefinition[] = [
   { key: 'storeId', label: 'اسم المتجر', type: 'select' },
   { key: 'shippingCompany', label: 'شركة الشحن', type: 'select' },
   { key: 'cancellationReasons', label: 'سبب الإلغاء', type: 'multiselect', visibleStatuses: ['CANCELLED'] },
-  { key: 'newFirst', label: 'الأحدث', type: 'select' },
+  { key: 'skipFilters', label: 'طلبات جديدة', type: 'toggle' },
   { key: 'orderByDirection', label: 'الترتيب', type: 'select' },
 ];
 
@@ -91,7 +91,7 @@ export default function FilterPanel({
   activeFilters,
   onRemoveFilter,
 }: Props) {
-  const isProductNameActive = activeFilters.includes('productName');
+  const isProductActive = activeFilters.includes('productId');
   const isGovernorateActive = activeFilters.includes('governorate');
   const isAreaActive = activeFilters.includes('area');
   const isCancellationReasonActive = activeFilters.includes('cancellationReasons');
@@ -106,6 +106,8 @@ export default function FilterPanel({
   const [productSearch, setProductSearch] = useState('');
   const debouncedProductSearch = useDebounce(productSearch, 300);
 
+  const selectedProductId = useWatch({ control, name: 'productId' });
+
   const { data: productOptions = [], isLoading: isLoadingProducts } = useQuery({
     queryKey: ['products-filter-options', debouncedProductSearch],
     queryFn: async () => {
@@ -116,9 +118,21 @@ export default function FilterPanel({
           ...(debouncedProductSearch && { search: debouncedProductSearch }),
         },
       });
-      return response.data.data.map((p) => p.name);
+      return response.data.data.map((p) => ({ key: String(p.id), value: p.name }));
     },
-    enabled: isProductNameActive,
+    enabled: isProductActive,
+  });
+
+  const { data: selectedProductName } = useQuery({
+    queryKey: ['product-name', selectedProductId],
+    queryFn: async () => {
+      const response = await http.get<{ data: { id: number; name: string } }>(
+        `/products/${selectedProductId}`
+      );
+      return response.data.data.name;
+    },
+    enabled: isProductActive && !!selectedProductId,
+    staleTime: 5 * 60 * 1000,
   });
   const { data: governorates = [] } = useGovernoratesQuery(isGovernorateActive || isAreaActive);
   const { data: cities = [], isLoading: isLoadingCities } = useCitiesQuery(isAreaActive ? selectedGovernorate : undefined);
@@ -209,11 +223,11 @@ export default function FilterPanel({
         );
 
       case 'select':
-        if (key === 'productName') {
+        if (key === 'productId') {
           return (
             <Controller
               key={key}
-              name="productName"
+              name="productId"
               control={control}
               render={({ field }) => (
                 <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter}>
@@ -222,11 +236,13 @@ export default function FilterPanel({
                     onChange={field.onChange}
                     onBlur={field.onBlur}
                     options={productOptions}
+                    displayValue={selectedProductName}
                     placeholder={isLoadingProducts ? "جاري التحميل..." : label}
                     widthClass="w-full"
                     loading={isLoadingProducts}
-                    error={errors.productName?.message}
+                    error={errors.productId?.message}
                     onSearch={setProductSearch}
+                    clearable
                   />
                 </FilterChip>
               )}
@@ -254,6 +270,7 @@ export default function FilterPanel({
                     placeholder={label}
                     widthClass="w-full"
                     error={errors.governorate?.message}
+                    clearable
                   />
                 </FilterChip>
               )}
@@ -277,6 +294,7 @@ export default function FilterPanel({
                     widthClass="w-full"
                     error={errors.area?.message}
                     disabled={!selectedGovernorate || isLoadingCities}
+                    clearable
                   />
                 </FilterChip>
               )}
@@ -298,6 +316,7 @@ export default function FilterPanel({
                     options={options.sizeColorOptions}
                     placeholder={label}
                     widthClass="w-full"
+                    clearable
                   />
                 </FilterChip>
               )}
@@ -320,6 +339,7 @@ export default function FilterPanel({
                     placeholder={isLoadingStores ? "جاري التحميل..." : label}
                     widthClass="w-full"
                     loading={isLoadingStores}
+                    clearable
                   />
                 </FilterChip>
               )}
@@ -342,31 +362,7 @@ export default function FilterPanel({
                     placeholder={isLoadingShippingCompanies ? "جاري التحميل..." : label}
                     widthClass="w-full"
                     loading={isLoadingShippingCompanies}
-                  />
-                </FilterChip>
-              )}
-            />
-          );
-        }
-        if (key === 'newFirst') {
-          const newFirstOptions = [
-            { key: 'true', value: 'الأجدد' },
-            { key: 'false', value: 'الأقدم' },
-          ];
-          return (
-            <Controller
-              key={key}
-              name="newFirst"
-              control={control}
-              render={({ field }) => (
-                <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter}>
-                  <SearchableSelect
-                    value={field.value === true ? 'true' : field.value === false ? 'false' : ''}
-                    onChange={(value) => field.onChange(value === 'true')}
-                    onBlur={field.onBlur}
-                    options={newFirstOptions}
-                    placeholder={label}
-                    widthClass="w-full"
+                    clearable
                   />
                 </FilterChip>
               )}
@@ -392,6 +388,7 @@ export default function FilterPanel({
                     options={orderByDirectionOptions}
                     placeholder={label}
                     widthClass="w-full"
+                    clearable
                   />
                 </FilterChip>
               )}
@@ -433,6 +430,15 @@ export default function FilterPanel({
               className="w-full h-full px-3 rounded border border-gray-300 bg-white"
               disabled
             />
+          </FilterChip>
+        );
+
+      case 'toggle':
+        return (
+          <FilterChip key={key} filterKey={key} label={label} onRemove={onRemoveFilter}>
+            <div className="flex items-center w-full h-full px-3 rounded border border-gray-300 bg-white">
+              <span className="text-base text-gray-700">{label}</span>
+            </div>
           </FilterChip>
         );
 

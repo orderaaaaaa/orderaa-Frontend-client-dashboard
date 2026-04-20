@@ -94,8 +94,8 @@ const FilterSection = React.memo(function FilterSection({
             shouldDirty: true,
             shouldValidate: true,
           });
-        } else if (filterKey === 'newFirst') {
-          setValue('newFirst', undefined, { shouldDirty: true, shouldValidate: true });
+        } else if (filterKey === 'skipFilters') {
+          setValue('skipFilters', undefined, { shouldDirty: true, shouldValidate: true });
         } else {
           setValue(filterKey as keyof OrderFiltersFormData, '', {
             shouldDirty: true,
@@ -114,6 +114,9 @@ const FilterSection = React.memo(function FilterSection({
   const addFilter = (filterKey: FilterKey) => {
     if (!activeFilters.includes(filterKey)) {
       setActiveFilters([...activeFilters, filterKey]);
+      if (setValue && filterKey === 'skipFilters') {
+        setValue('skipFilters', true, { shouldDirty: true, shouldValidate: true });
+      }
     }
     setIsDropdownOpen(false);
     setSearchTerm('');
@@ -128,8 +131,8 @@ const FilterSection = React.memo(function FilterSection({
           shouldDirty: true,
           shouldValidate: true,
         });
-      } else if (filterKey === 'newFirst') {
-        setValue('newFirst', undefined, { shouldDirty: true, shouldValidate: true });
+      } else if (filterKey === 'skipFilters') {
+        setValue('skipFilters', undefined, { shouldDirty: true, shouldValidate: true });
       } else {
         setValue(filterKey as keyof OrderFiltersFormData, '', {
           shouldDirty: true,

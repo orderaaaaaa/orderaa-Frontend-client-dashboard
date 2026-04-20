@@ -154,8 +154,8 @@ export function FilterSection({
             shouldDirty: true,
             shouldValidate: true,
           });
-        } else if (filterKey === 'newFirst') {
-          setValue('newFirst', undefined, { shouldDirty: true, shouldValidate: true });
+        } else if (filterKey === 'skipFilters') {
+          setValue('skipFilters', undefined, { shouldDirty: true, shouldValidate: true });
         } else {
           setValue(filterKey as keyof OrderFiltersFormData, '', {
             shouldDirty: true,
@@ -178,6 +178,9 @@ export function FilterSection({
       const next = [...activeFilters, filterKey];
       setActiveFilters(next);
       onActiveFiltersChange?.(next);
+      if (setValue && filterKey === 'skipFilters') {
+        setValue('skipFilters', true, { shouldDirty: true, shouldValidate: true });
+      }
     }
     setIsDropdownOpen(false);
     setSearchTerm('');
@@ -194,8 +197,8 @@ export function FilterSection({
           shouldDirty: true,
           shouldValidate: true,
         });
-      } else if (filterKey === 'newFirst') {
-        setValue('newFirst', undefined, {
+      } else if (filterKey === 'skipFilters') {
+        setValue('skipFilters', undefined, {
           shouldDirty: true,
           shouldValidate: true,
         });

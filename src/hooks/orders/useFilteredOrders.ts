@@ -26,9 +26,9 @@ export function useFilteredOrders(
         return false;
       }
 
-      if (filters.productName) {
-        const hasMatchingProduct = order.order_products.some((op) =>
-          op.products.name.toLowerCase().includes(filters.productName.toLowerCase())
+      if (filters.productId) {
+        const hasMatchingProduct = order.order_products.some(
+          (op) => String(op.products.id) === filters.productId
         );
         if (!hasMatchingProduct) {
           return false;

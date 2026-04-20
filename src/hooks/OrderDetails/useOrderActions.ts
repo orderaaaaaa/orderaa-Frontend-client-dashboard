@@ -1,7 +1,7 @@
 import { useCallback, useRef, useEffect } from 'react';
 import { formatLocalStartOfDay, formatLocalEndOfDay } from '@/utils/dateRangeUtils';
 import { toast } from 'react-toastify';
-import { Order, OrderStatusItem } from '@/types/orders';
+import { FilterOrdersDto, Order, OrderStatusItem } from '@/types/orders';
 import { ShippingData } from '@/components/OrderDetails/EditShippingModal';
 import {
   useUpdateOrder,
@@ -20,7 +20,23 @@ export interface UseOrderActionsOptions {
     to: Date | null;
   };
   statusFilter?: string | null;
+  navigationFilters?: FilterOrdersDto;
   availableStatuses: OrderStatusItem[];
+}
+
+function buildNavFilters(
+  navigationFilters: FilterOrdersDto | undefined,
+  statusFilter: string | null | undefined,
+  dateRange: { from: Date | null; to: Date | null } | undefined
+): FilterOrdersDto {
+  if (navigationFilters) {
+    return navigationFilters;
+  }
+  const filters: FilterOrdersDto = {};
+  if (statusFilter) filters.status = statusFilter;
+  if (dateRange?.from) filters.createdAfter = formatLocalStartOfDay(dateRange.from);
+  if (dateRange?.to) filters.createdBefore = formatLocalEndOfDay(dateRange.to);
+  return filters;
 }
 
 export interface OrderActionsState {
@@ -59,6 +75,7 @@ export function useOrderActions({
   onUnlock,
   dateRange,
   statusFilter,
+  navigationFilters,
   availableStatuses,
 }: UseOrderActionsOptions): OrderActionsState {
   const updateOrderMutation = useUpdateOrder();
@@ -136,15 +153,10 @@ export function useOrderActions({
         toast.success(`تم تحديث حالة الطلب إلى ${statusLabel} بنجاح`);
 
         if (onNavigateToNextOrder) {
-          const fromISO = dateRange?.from ? formatLocalStartOfDay(dateRange.from) : undefined;
-          const toISO = dateRange?.to ? formatLocalEndOfDay(dateRange.to) : undefined;
-
           try {
             const nextOrderResponse = await getNextOrderId(
               order.id,
-              statusFilter || undefined,
-              fromISO,
-              toISO
+              buildNavFilters(navigationFilters, statusFilter, dateRange)
             );
 
             if (nextOrderResponse?.id) {
@@ -184,6 +196,7 @@ export function useOrderActions({
       onNoOrdersFound,
       dateRange,
       statusFilter,
+      navigationFilters,
       availableStatuses,
       updateOrderMutation,
       getNextOrderId,
@@ -231,15 +244,10 @@ export function useOrderActions({
         toast.success('تم إلغاء الطلب بنجاح');
 
         if (onNavigateToNextOrder) {
-          const fromISO = dateRange?.from ? formatLocalStartOfDay(dateRange.from) : undefined;
-          const toISO = dateRange?.to ? formatLocalEndOfDay(dateRange.to) : undefined;
-
           try {
             const nextOrderResponse = await getNextOrderId(
               order.id,
-              statusFilter || undefined,
-              fromISO,
-              toISO
+              buildNavFilters(navigationFilters, statusFilter, dateRange)
             );
 
             if (nextOrderResponse?.id) {
@@ -288,6 +296,7 @@ export function useOrderActions({
       onNoOrdersFound,
       dateRange,
       statusFilter,
+      navigationFilters,
       cancelOrderMutation,
       getNextOrderId,
     ]
@@ -448,15 +457,10 @@ export function useOrderActions({
         toast.success(`تم تسجيل المتابعة: ${label}`);
 
         if (onNavigateToNextOrder) {
-          const fromISO = dateRange?.from ? formatLocalStartOfDay(dateRange.from) : undefined;
-          const toISO = dateRange?.to ? formatLocalEndOfDay(dateRange.to) : undefined;
-
           try {
             const nextOrderResponse = await getNextOrderId(
               order.id,
-              statusFilter || undefined,
-              fromISO,
-              toISO
+              buildNavFilters(navigationFilters, statusFilter, dateRange)
             );
 
             if (nextOrderResponse?.id) {
@@ -493,6 +497,7 @@ export function useOrderActions({
       onNoOrdersFound,
       dateRange,
       statusFilter,
+      navigationFilters,
       updateOrderMutation,
       getNextOrderId,
     ]

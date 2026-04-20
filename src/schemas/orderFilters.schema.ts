@@ -50,8 +50,6 @@ export const orderFiltersSchema = z.object({
         ),
 
     // Dropdown fields - optional strings
-    productName: z.string().optional().or(z.literal('')),
-
     governorate: z.string().optional().or(z.literal('')),
 
     city: z.string().optional().or(z.literal('')),
@@ -69,7 +67,7 @@ export const orderFiltersSchema = z.object({
     shippingCompany: z.string().optional().or(z.literal('')),
 
     // Sorting fields
-    newFirst: z.boolean().optional(),
+    skipFilters: z.boolean().optional(),
 
     orderByDirection: z.enum(['asc', 'desc']).optional().or(z.literal('')),
 });
@@ -88,7 +86,6 @@ export const defaultFilterValues: OrderFiltersFormData = {
     phone: '',
     address: '',
     executionDate: '',
-    productName: '',
     governorate: '',
     city: '',
     area: '',
@@ -97,7 +94,7 @@ export const defaultFilterValues: OrderFiltersFormData = {
     cancellationReasons: [],
     storeId: '',
     shippingCompany: '',
-    newFirst: undefined,
+    skipFilters: undefined,
     orderByDirection: '',
 };
 

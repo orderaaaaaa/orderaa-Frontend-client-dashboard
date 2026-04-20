@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Order, OrderStatus, OrderStatusItem } from '@/types/orders';
+import { Order, OrderStatus, OrderStatusItem, FilterOrdersDto } from '@/types/orders';
 import { useOrderStatusesQuery } from '@/services/orders';
 import { useModalState } from '@/hooks/OrderDetails/useModalState';
 import { useOrderActions } from '@/hooks/OrderDetails/useOrderActions';
@@ -26,6 +26,7 @@ interface OrderDetailsInfoComponentProps {
     to: Date | null;
   };
   statusFilter?: string | null;
+  navigationFilters?: FilterOrdersDto;
   onUnlock?: () => Promise<void>;
 }
 
@@ -37,6 +38,7 @@ function OrderDetailsInfoComponent({
   onNoOrdersFound,
   dateRange,
   statusFilter,
+  navigationFilters,
   onUnlock,
 }: OrderDetailsInfoComponentProps) {
   const [localOrder, setLocalOrder] = useState(order);
@@ -107,6 +109,7 @@ function OrderDetailsInfoComponent({
     onUnlock,
     dateRange,
     statusFilter,
+    navigationFilters,
     availableStatuses,
   });
 
@@ -116,6 +119,7 @@ function OrderDetailsInfoComponent({
     onNoOrdersFound,
     dateRange,
     statusFilter,
+    navigationFilters,
   });
 
   const updateField = useOrderFieldUpdate(localOrder.id, handleUpdate);

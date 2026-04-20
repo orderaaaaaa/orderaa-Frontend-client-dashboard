@@ -63,6 +63,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
     formFilters,
     handleFilterFormChange,
     navigateToOrder,
+    apiFilters,
   } = useOrderDetailsNavigation({
     initialOrderId: orderId,
   });
@@ -345,6 +346,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
             to: toDate,
           }}
           statusFilter={status}
+          navigationFilters={apiFilters}
           isLockedByOther={isLockedByOther}
           lockedBy={lockedBy}
           onUnlock={unlock}

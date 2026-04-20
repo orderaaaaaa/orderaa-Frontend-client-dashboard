@@ -83,16 +83,74 @@ const OrderDetailsCardId = ({
                 </p>
               </Then>
             </If>
-            <If condition={order.shippingId}>
+            <If condition={(order.shipping_ids?.length ?? 0) > 0 || !!order.shippingId}>
               <Then>
-                <h3 className="flex gap-3 text-lg items-center font-semibold mb-1">
-                  <Copy
-                    onClick={() => handleCopy(order.shippingId!)}
-                    className="w-4 h-4 text-[#7038f3] cursor-pointer"
-                    role="button"
-                  />
-                  كود الشحن: {order.shippingId}
-                </h3>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {order.shipping_ids && order.shipping_ids.length > 0 ? (
+                    order.shipping_ids.map((entry) => (
+                      <div
+                        key={entry.id}
+                        className={
+                          entry.isActive
+                            ? 'flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 shadow-sm'
+                            : 'flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5'
+                        }
+                      >
+                        <Copy
+                          onClick={() => handleCopy(entry.shippingId)}
+                          className={
+                            entry.isActive
+                              ? 'w-3.5 h-3.5 text-emerald-700 cursor-pointer shrink-0'
+                              : 'w-3.5 h-3.5 text-gray-500 cursor-pointer shrink-0'
+                          }
+                          role="button"
+                        />
+                        <div className="flex flex-col leading-tight">
+                          <span className="text-sm">كود الشحن</span>
+                          <span
+                            className={
+                              entry.isActive
+                                ? 'text-sm font-bold text-emerald-800'
+                                : 'text-sm font-semibold text-gray-700'
+                            }
+                          >
+                            {entry.shippingId}
+                          </span>
+                        </div>
+                        <span
+                          className={
+                            entry.isActive
+                              ? 'inline-flex items-center gap-1 rounded-full bg-emerald-600 text-white text-[10px] font-medium px-2 py-0.5'
+                              : 'inline-flex items-center gap-1 rounded-full bg-gray-200 text-gray-600 text-[10px] font-medium px-2 py-0.5'
+                          }
+                        >
+                          <span
+                            className={
+                              entry.isActive
+                                ? 'w-1.5 h-1.5 rounded-full bg-white'
+                                : 'w-1.5 h-1.5 rounded-full bg-gray-400'
+                            }
+                          />
+                          {entry.isActive ? 'نشط' : 'غير نشط'}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-1.5">
+                      <Copy
+                        onClick={() => handleCopy(order.shippingId!)}
+                        className="w-3.5 h-3.5 text-[#7038f3] cursor-pointer shrink-0"
+                        role="button"
+                      />
+                      <div className="flex flex-col leading-tight">
+                        <span className="text-[10px] text-gray-500">كود الشحن</span>
+                        <span className="text-sm font-semibold text-gray-800">
+                          {order.shippingId}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </Then>
             </If>
           </div>

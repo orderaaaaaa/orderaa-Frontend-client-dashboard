@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { FilterOrdersDto } from '@/types/orders';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
@@ -35,6 +35,7 @@ interface UseOrderDetailsNavigationReturn {
   formFilters: OrderFiltersFormData | null;
   handleFilterFormChange: (data: OrderFiltersFormData) => void;
   navigateToOrder: (orderId: number) => void;
+  apiFilters: FilterOrdersDto;
 }
 
 function buildApiFilters(
@@ -69,9 +70,9 @@ function buildApiFilters(
     if (formFilters.governorate) filters.governorate = formFilters.governorate;
     if (formFilters.city) filters.city = formFilters.city;
     if (formFilters.area) filters.area = formFilters.area;
-    if (formFilters.productName) filters.productName = formFilters.productName;
+    if (formFilters.productId) filters.productId = formFilters.productId;
     if (formFilters.shipmentCode) filters.code = formFilters.shipmentCode;
-    if (formFilters.newFirst !== undefined) filters.newFirst = formFilters.newFirst;
+    if (formFilters.skipFilters !== undefined) filters.skipFilters = formFilters.skipFilters;
     if (formFilters.orderByDirection) filters.orderByDirection = formFilters.orderByDirection;
   }
 
@@ -109,8 +110,8 @@ export function useOrderDetailsNavigation({
     const fromDate = parseDateFromUrl(searchParams.get('from'));
     const toDate = parseDateFromUrl(searchParams.get('to'));
 
-    const newFirstParam = searchParams.get('newFirst');
-    const newFirst = newFirstParam === 'true' ? true : newFirstParam === 'false' ? false : undefined;
+    const skipFiltersParam = searchParams.get('skipFilters');
+    const skipFilters = skipFiltersParam === 'true' ? true : skipFiltersParam === 'false' ? false : undefined;
     const orderByDirectionParam = searchParams.get('orderByDirection');
     const orderByDirection = (orderByDirectionParam === 'asc' || orderByDirectionParam === 'desc')
       ? orderByDirectionParam
@@ -122,12 +123,12 @@ export function useOrderDetailsNavigation({
       governorate: searchParams.get('governorate') || '',
       city: searchParams.get('city') || '',
       area: searchParams.get('area') || '',
-      productName: searchParams.get('productName') || '',
+      productId: searchParams.get('productId') || '',
       sizeColor: searchParams.get('sizeColor') || '',
       shipmentCode: searchParams.get('shipmentCode') || '',
       address: searchParams.get('address') || '',
       executionDate: searchParams.get('executionDate') || '',
-      newFirst,
+      skipFilters,
       orderByDirection,
     };
 
@@ -151,6 +152,11 @@ export function useOrderDetailsNavigation({
   const [formFilters, setFormFilters] = useState<OrderFiltersFormData | null>(initialState.formFilters);
 
   const debouncedFormFilters = useDebounce(formFilters, 500);
+
+  const apiFilters = useMemo(
+    () => buildApiFilters(status, fromDate, toDate, formFilters),
+    [status, fromDate, toDate, formFilters]
+  );
 
   const [triggerVersion, setTriggerVersion] = useState(0);
 
@@ -223,12 +229,12 @@ export function useOrderDetailsNavigation({
         if (formFilters.governorate) params.set('governorate', formFilters.governorate);
         if (formFilters.city) params.set('city', formFilters.city);
         if (formFilters.area) params.set('area', formFilters.area);
-        if (formFilters.productName) params.set('productName', formFilters.productName);
+        if (formFilters.productId) params.set('productId', formFilters.productId);
         if (formFilters.sizeColor) params.set('sizeColor', formFilters.sizeColor);
         if (formFilters.shipmentCode) params.set('shipmentCode', formFilters.shipmentCode);
         if (formFilters.address) params.set('address', formFilters.address);
         if (formFilters.executionDate) params.set('executionDate', formFilters.executionDate);
-        if (formFilters.newFirst !== undefined) params.set('newFirst', String(formFilters.newFirst));
+        if (formFilters.skipFilters !== undefined) params.set('skipFilters', String(formFilters.skipFilters));
         if (formFilters.orderByDirection) params.set('orderByDirection', formFilters.orderByDirection);
       }
 
@@ -354,12 +360,12 @@ export function useOrderDetailsNavigation({
       if (formFilters.governorate) params.set('governorate', formFilters.governorate);
       if (formFilters.city) params.set('city', formFilters.city);
       if (formFilters.area) params.set('area', formFilters.area);
-      if (formFilters.productName) params.set('productName', formFilters.productName);
+      if (formFilters.productId) params.set('productId', formFilters.productId);
       if (formFilters.sizeColor) params.set('sizeColor', formFilters.sizeColor);
       if (formFilters.shipmentCode) params.set('shipmentCode', formFilters.shipmentCode);
       if (formFilters.address) params.set('address', formFilters.address);
       if (formFilters.executionDate) params.set('executionDate', formFilters.executionDate);
-      if (formFilters.newFirst !== undefined) params.set('newFirst', String(formFilters.newFirst));
+      if (formFilters.skipFilters !== undefined) params.set('skipFilters', String(formFilters.skipFilters));
       if (formFilters.orderByDirection) params.set('orderByDirection', formFilters.orderByDirection);
     }
 
@@ -476,5 +482,6 @@ export function useOrderDetailsNavigation({
     formFilters,
     handleFilterFormChange,
     navigateToOrder,
+    apiFilters,
   };
 }

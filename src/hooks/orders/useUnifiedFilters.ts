@@ -54,14 +54,11 @@ export function buildApiFiltersFromUrlState(urlFilters: UrlFilterState): FilterO
     if (localFilters.area) {
         filters.area = localFilters.area;
     }
-    if (localFilters.productName) {
-        filters.productName = localFilters.productName;
-    }
     if (localFilters.shipmentCode) {
         filters.code = localFilters.shipmentCode;
     }
-    if (localFilters.newFirst !== undefined) {
-        filters.newFirst = localFilters.newFirst;
+    if (localFilters.skipFilters !== undefined) {
+        filters.skipFilters = localFilters.skipFilters;
     }
     if (localFilters.orderByDirection) {
         filters.orderByDirection = localFilters.orderByDirection;
@@ -91,7 +88,6 @@ export function useUnifiedFilters() {
 
     // Local filters from FilterSection
     const [localFilters, setLocalFilters] = useState<OrderFilters>({
-        productName: '',
         sizeColor: '',
         governorate: '',
         city: '',
@@ -182,10 +178,6 @@ export function useUnifiedFilters() {
             filters.area = debouncedFilters.area;
         }
 
-        if (debouncedFilters.productName) {
-            filters.productName = debouncedFilters.productName;
-        }
-
         if (debouncedFilters.shipmentCode) {
             filters.code = debouncedFilters.shipmentCode;
         }
@@ -218,7 +210,6 @@ export function useUnifiedFilters() {
 
     const resetFilters = useCallback(() => {
         setLocalFilters({
-            productName: '',
             sizeColor: '',
             governorate: '',
             city: '',

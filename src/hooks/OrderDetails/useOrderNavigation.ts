@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { formatLocalStartOfDay, formatLocalEndOfDay } from '@/utils/dateRangeUtils';
 import { toast } from 'react-toastify';
-import { OrderStatus } from '@/types/orders';
+import { FilterOrdersDto, OrderStatus } from '@/types/orders';
 import { useGetNextOrderId, useGetPreviousOrderId } from '@/services/orders';
 
 export interface UseOrderNavigationOptions {
@@ -13,6 +13,22 @@ export interface UseOrderNavigationOptions {
     to: Date | null;
   };
   statusFilter?: string | null;
+  navigationFilters?: FilterOrdersDto;
+}
+
+function buildNavFilters(
+  navigationFilters: FilterOrdersDto | undefined,
+  statusFilter: string | null | undefined,
+  dateRange: { from: Date | null; to: Date | null } | undefined
+): FilterOrdersDto {
+  if (navigationFilters) {
+    return navigationFilters;
+  }
+  const filters: FilterOrdersDto = {};
+  if (statusFilter) filters.status = statusFilter;
+  if (dateRange?.from) filters.createdAfter = formatLocalStartOfDay(dateRange.from);
+  if (dateRange?.to) filters.createdBefore = formatLocalEndOfDay(dateRange.to);
+  return filters;
 }
 
 export interface UseOrderNavigationReturn {
@@ -28,6 +44,7 @@ export function useOrderNavigation({
   onNoOrdersFound,
   dateRange,
   statusFilter,
+  navigationFilters,
 }: UseOrderNavigationOptions): UseOrderNavigationReturn {
   const { getNextOrderId } = useGetNextOrderId();
   const { getPreviousOrderId } = useGetPreviousOrderId();
@@ -46,15 +63,8 @@ export function useOrderNavigation({
 
     setIsNavigatingNext(true);
     try {
-      const fromISO = dateRange?.from ? formatLocalStartOfDay(dateRange.from) : undefined;
-      const toISO = dateRange?.to ? formatLocalEndOfDay(dateRange.to) : undefined;
-
-      const response = await getNextOrderId(
-        orderId,
-        statusFilter || undefined,
-        fromISO,
-        toISO
-      );
+      const filters = buildNavFilters(navigationFilters, statusFilter, dateRange);
+      const response = await getNextOrderId(orderId, filters);
 
       if (response?.id) {
         onNavigate(response.id);
@@ -76,22 +86,15 @@ export function useOrderNavigation({
     } finally {
       setIsNavigatingNext(false);
     }
-  }, [orderId, onNavigate, dateRange, statusFilter, getNextOrderId]);
+  }, [orderId, onNavigate, dateRange, statusFilter, navigationFilters, getNextOrderId]);
 
   const navigateToPrevious = useCallback(async () => {
     if (!onNavigate) return;
 
     setIsNavigatingPrevious(true);
     try {
-      const fromISO = dateRange?.from ? formatLocalStartOfDay(dateRange.from) : undefined;
-      const toISO = dateRange?.to ? formatLocalEndOfDay(dateRange.to) : undefined;
-
-      const response = await getPreviousOrderId(
-        orderId,
-        statusFilter || undefined,
-        fromISO,
-        toISO
-      );
+      const filters = buildNavFilters(navigationFilters, statusFilter, dateRange);
+      const response = await getPreviousOrderId(orderId, filters);
 
       if (response?.id) {
         onNavigate(response.id);
@@ -113,7 +116,7 @@ export function useOrderNavigation({
     } finally {
       setIsNavigatingPrevious(false);
     }
-  }, [orderId, onNavigate, dateRange, statusFilter, getPreviousOrderId]);
+  }, [orderId, onNavigate, dateRange, statusFilter, navigationFilters, getPreviousOrderId]);
 
   return {
     navigateToNext,

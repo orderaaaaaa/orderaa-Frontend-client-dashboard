@@ -23,6 +23,7 @@ export const QUERY_KEYS = {
   CATEGORIES: 'categories',
   SHIPPING_TYPES: 'shipping-types',
   UTM_SOURCES: 'utm-sources',
+  PAGE_NAMES: 'page-names',
 
   // Employees
   EMPLOYEES: 'employees',

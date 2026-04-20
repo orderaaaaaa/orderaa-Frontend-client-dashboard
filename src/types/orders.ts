@@ -100,7 +100,6 @@ export interface PaginatedResponse<T> {
 
 // Legacy filters (for FilterSection component)
 export interface OrderFilters {
-  productName: string;
   sizeColor: string;
   governorate: string;
   city: string;
@@ -110,7 +109,7 @@ export interface OrderFilters {
   phone: string;
   address: string;
   executionDate?: string;
-  newFirst?: boolean;
+  skipFilters?: boolean;
   orderByDirection?: 'asc' | 'desc' | '';
   productId?: string;
   storeId?: string;
@@ -256,6 +255,16 @@ export interface WhatsappTemplate {
   url: string;
 }
 
+// Shipping ID entry (one per attempted shipment)
+export interface OrderShippingId {
+  id: number;
+  orderId: number;
+  shippingId: string;
+  shippingCompany?: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
 // Order Interface
 export interface Order {
   id: number;
@@ -287,6 +296,7 @@ export interface Order {
   address?: string;
   externalGovernorate?: string | null;
   shippingId?: string;
+  shipping_ids?: OrderShippingId[];
   shippingNotes?: string | null;
 
   // Product details
@@ -402,7 +412,6 @@ export interface FilterOrdersDto {
   governorate?: string;
   city?: string;
   area?: string;
-  productName?: string;
   page?: number;
   limit?: number;
   merchantId?: string;
@@ -413,7 +422,7 @@ export interface FilterOrdersDto {
   createdAfter?: string;
   createdBefore?: string;
   executionDate?: string;
-  newFirst?: boolean;
+  skipFilters?: boolean;
   orderByDirection?: 'asc' | 'desc';
   isPrinted?: boolean;
   shippingCompany?: string;

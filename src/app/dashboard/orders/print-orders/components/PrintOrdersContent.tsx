@@ -142,8 +142,7 @@ export function PrintOrdersContent() {
       params.set('governorate', localFilters.governorate);
     if (localFilters.city) params.set('city', localFilters.city);
     if (localFilters.area) params.set('area', localFilters.area);
-    if (localFilters.productName)
-      params.set('productName', localFilters.productName);
+    if (localFilters.productId) params.set('productId', localFilters.productId);
     if (localFilters.sizeColor) params.set('sizeColor', localFilters.sizeColor);
     if (localFilters.shipmentCode)
       params.set('shipmentCode', localFilters.shipmentCode);
@@ -383,7 +382,7 @@ export function PrintOrdersContent() {
       hasResetFromUrl.current = true;
       const { localFilters } = filters;
       const hasAnyFilter = Object.entries(localFilters).some(([key, value]) => {
-        if (key === 'newFirst') return value !== undefined;
+        if (key === 'skipFilters') return value !== undefined;
         if (key === 'cancellationReasons') return Array.isArray(value) && value.length > 0;
         return !!value;
       });

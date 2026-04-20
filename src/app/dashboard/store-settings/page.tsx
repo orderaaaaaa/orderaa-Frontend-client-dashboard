@@ -13,6 +13,7 @@ import {
 import OrderSettingsFields from './components/EmployeeFormFields';
 import { useMerchantSettings } from './hooks/useStoreSettings';
 import { useShippingConfig } from './hooks/useShippingConfig';
+import { usePageNamesQuery } from '@/services/lookups';
 import { sanitizeOrderSettings } from './utils/sanitizeOrderSettings';
 import { mapSettingsToForm } from './utils/mapSettingsToForm';
 import { ORDER_SETTINGS_DEFAULTS } from './schemas/store.defaults';
@@ -23,6 +24,7 @@ export default function OrderSettingsPage() {
   const { settings, isLoading, updateSettings, isUpdating } =
     useMerchantSettings();
   const { hasShippingConfig } = useShippingConfig();
+  const { data: pageNames } = usePageNamesQuery();
 
   const initializedRef = useRef(false);
 
@@ -39,11 +41,11 @@ export default function OrderSettingsPage() {
   });
 
   useEffect(() => {
-    if (settings && !initializedRef.current) {
-      reset(mapSettingsToForm(settings));
+    if (settings && pageNames !== undefined && !initializedRef.current) {
+      reset(mapSettingsToForm({ ...settings, pageNames }));
       initializedRef.current = true;
     }
-  }, [settings, reset]);
+  }, [settings, pageNames, reset]);
 
   useEffect(() => {
     if (Object.keys(errors).length > 0) {

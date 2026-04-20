@@ -144,19 +144,13 @@ export async function updateOrder(
 
 export async function getNextOrderId(
   orderId: number,
-  status?: string,
-  from?: string,
-  to?: string
+  filters: Partial<FilterOrdersDto> = {}
 ): Promise<{ id: number }> {
   try {
-    const params: any = {};
-    if (status) params.status = status;
-    if (from) params.from = from;
-    if (to) params.to = to;
-
+    const { page, limit, ...rest } = filters;
     const response = await api.get<{ id: number }>(
       `/orders/${orderId}/next`,
-      { params }
+      { params: rest }
     );
     return response.data;
   } catch (error) {

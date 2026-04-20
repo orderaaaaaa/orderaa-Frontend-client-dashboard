@@ -4,7 +4,6 @@ import { useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import clsx from 'clsx';
 import {
-  LiaHandPaperSolid,
   LiaPhoneVolumeSolid,
   LiaCalendarAltSolid,
   LiaExchangeAltSolid,
@@ -29,7 +28,6 @@ import { useShippingCancellationReasons } from '@/services/logistics';
 import type { TrackingAgentStatus, UpdateTrackingCardData } from '@/types/logistics';
 
 type ActionType =
-  | 'AVAILABLE_TO_RECEIVE'
   | 'FOLLOW_UP'
   | 'POSTPONE'
   | 'CHANGE_PRODUCT'
@@ -44,7 +42,6 @@ const ACTION_OPTIONS: {
   color: string;
   activeColor: string;
 }[] = [
-  { value: 'AVAILABLE_TO_RECEIVE', label: 'متاح يستلم', icon: LiaHandPaperSolid, color: 'text-emerald-600', activeColor: 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-200' },
   { value: 'FOLLOW_UP', label: 'متابعة', icon: LiaPhoneVolumeSolid, color: 'text-blue-600', activeColor: 'border-blue-500 bg-blue-50 ring-1 ring-blue-200' },
   { value: 'POSTPONE', label: 'تأجيل', icon: LiaCalendarAltSolid, color: 'text-amber-600', activeColor: 'border-amber-500 bg-amber-50 ring-1 ring-amber-200' },
   { value: 'CHANGE_PRODUCT', label: 'تغيير منتج', icon: LiaExchangeAltSolid, color: 'text-violet-600', activeColor: 'border-violet-500 bg-violet-50 ring-1 ring-violet-200' },
@@ -80,7 +77,6 @@ export default function AgentStatusUpdateModal({
 
   const [selectedAction, setSelectedAction] = useState<ActionType | null>(null);
   const [followUpStatus, setFollowUpStatus] = useState<TrackingAgentStatus | null>(null);
-  const [deliveryDate, setDeliveryDate] = useState<Date | null>(null);
   const [postponeDate, setPostponeDate] = useState<Date | null>(null);
   const [cancelReasonId, setCancelReasonId] = useState('');
   const [notes, setNotes] = useState('');
@@ -91,7 +87,6 @@ export default function AgentStatusUpdateModal({
   const resetForm = useCallback(() => {
     setSelectedAction(null);
     setFollowUpStatus(null);
-    setDeliveryDate(null);
     setPostponeDate(null);
     setCancelReasonId('');
     setNotes('');
@@ -106,7 +101,6 @@ export default function AgentStatusUpdateModal({
   const handleSelectAction = useCallback((action: ActionType) => {
     setSelectedAction((prev) => (prev === action ? null : action));
     setFollowUpStatus(null);
-    setDeliveryDate(null);
     setPostponeDate(null);
     setCancelReasonId('');
     setNotes('');
@@ -116,8 +110,6 @@ export default function AgentStatusUpdateModal({
   const isConfirmDisabled = useCallback(() => {
     if (!selectedAction) return true;
     switch (selectedAction) {
-      case 'AVAILABLE_TO_RECEIVE':
-        return !deliveryDate;
       case 'FOLLOW_UP':
         return !followUpStatus;
       case 'POSTPONE':
@@ -129,16 +121,14 @@ export default function AgentStatusUpdateModal({
       case 'LATE':
         return !notes.trim();
       case 'RESEND':
-        return false;
+        return !notes.trim();
       default:
         return true;
     }
-  }, [selectedAction, deliveryDate, followUpStatus, postponeDate, selectedProduct, cancelReasonId, notes]);
+  }, [selectedAction, followUpStatus, postponeDate, selectedProduct, cancelReasonId, notes]);
 
   const buildPayload = useCallback((): UpdateTrackingCardData => {
     switch (selectedAction) {
-      case 'AVAILABLE_TO_RECEIVE':
-        return { action: 'AVAILABLE_TO_RECEIVE', deliveryDate: deliveryDate?.toISOString() };
       case 'FOLLOW_UP':
         return { agentStatus: followUpStatus! };
       case 'POSTPONE':
@@ -150,7 +140,7 @@ export default function AgentStatusUpdateModal({
           newVariants: selectedProduct!.selectedVariants?.map((v) => ({ label: v.label, value: v.value })),
         };
       case 'RESEND':
-        return { action: 'RESEND' };
+        return { action: 'RESEND', actionNote: notes };
       case 'CANCEL':
         return { action: 'CANCEL', cancelReasonId: Number(cancelReasonId), actionNote: notes || undefined };
       case 'LATE':
@@ -158,7 +148,7 @@ export default function AgentStatusUpdateModal({
       default:
         return {};
     }
-  }, [selectedAction, deliveryDate, followUpStatus, postponeDate, selectedProduct, cancelReasonId, notes]);
+  }, [selectedAction, followUpStatus, postponeDate, selectedProduct, cancelReasonId, notes]);
 
   const handleConfirm = useCallback(async () => {
     setIsSubmitting(true);
@@ -189,19 +179,6 @@ export default function AgentStatusUpdateModal({
     if (!selectedAction) return null;
 
     switch (selectedAction) {
-      case 'AVAILABLE_TO_RECEIVE':
-        return (
-          <div className="flex flex-col gap-3 p-4 bg-emerald-50/50 rounded-xl border border-emerald-100">
-            <p className="text-sm font-semibold text-emerald-800">حدد معاد التسليم</p>
-            <DatePicker
-              selected={deliveryDate}
-              onChange={setDeliveryDate}
-              placeholder="اختر التاريخ"
-              minDate={new Date()}
-            />
-          </div>
-        );
-
       case 'FOLLOW_UP':
         return (
           <div className="grid grid-cols-2 gap-2">
@@ -276,11 +253,15 @@ export default function AgentStatusUpdateModal({
 
       case 'RESEND':
         return (
-          <div className="flex items-center gap-3 p-4 bg-cyan-50/50 rounded-xl border border-cyan-100">
-            <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center shrink-0">
-              <LiaRedoAltSolid className="size-5 text-cyan-600" />
-            </div>
-            <p className="text-sm font-medium text-cyan-800">سيتم إعادة إرسال الطلب للمندوب</p>
+          <div className="flex flex-col gap-3 p-4 bg-cyan-50/50 rounded-xl border border-cyan-100">
+            <p className="text-sm font-semibold text-cyan-800">سبب إعادة الإرسال</p>
+            <Textarea
+              name="resendReason"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="اكتب سبب إعادة الإرسال..."
+              className="min-h-[80px] text-sm bg-white"
+            />
           </div>
         );
 

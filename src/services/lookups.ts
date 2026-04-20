@@ -1,6 +1,6 @@
 import { useQuery, QueryKey } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
-import { getGovernorates, getCities, getPaymentMethods, getPaymentStatuses, getUtmSources } from '@/lib/api/lookups';
+import { getGovernorates, getCities, getPaymentMethods, getPaymentStatuses, getUtmSources, getPageNames } from '@/lib/api/lookups';
 
 interface GovernorateData {
   key: string;
@@ -79,6 +79,19 @@ export const useUtmSourcesQuery = () => {
     queryKey: [QUERY_KEYS.UTM_SOURCES] as QueryKey,
     queryFn: async () => {
       const data = await getUtmSources();
+      return Array.isArray(data) ? data : [];
+    },
+    staleTime: 0,
+    refetchOnMount: true,
+  });
+};
+
+// Fetch page names - refetch on mount to get latest names from settings
+export const usePageNamesQuery = () => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.PAGE_NAMES] as QueryKey,
+    queryFn: async () => {
+      const data = await getPageNames();
       return Array.isArray(data) ? data : [];
     },
     staleTime: 0,
