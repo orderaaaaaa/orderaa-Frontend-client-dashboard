@@ -1,4 +1,5 @@
 import { ShippingProvider } from '../types/shipping';
+import rmExpressLogo from '@/assets/images/RM_EXPRESS.jpeg';
 
 export const providers: ShippingProvider[] = [
   {
@@ -62,6 +63,13 @@ export const providers: ShippingProvider[] = [
     name: 'Quick Connect',
     logo: '/Icons/quick-connect-company.jpeg',
     description: 'شركة كويك كونكت للشحن والتوصيل',
+    isActive: true,
+  },
+  {
+    id: 'rm_express',
+    name: 'RM Express',
+    logo: rmExpressLogo.src,
+    description: 'شركة ار ام اكسبريس للشحن والتوصيل',
     isActive: true,
   },
 ];

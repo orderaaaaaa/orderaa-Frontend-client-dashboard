@@ -7,7 +7,8 @@ export type ShippingProviderId =
   | 'turbo'
   | 'red'
   | 'hashtag'
-  | 'quick_connect';
+  | 'quick_connect'
+  | 'rm_express';
 
 export interface ShippingConfig {
   id?: string;

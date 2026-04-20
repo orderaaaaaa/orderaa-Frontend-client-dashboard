@@ -49,7 +49,7 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
   const [error, setError] = useState<string>('');
 
   const providerLower = providerId.toLowerCase();
-  const isRedOrHashtag = providerLower === 'red' || providerLower === 'hashtag' || providerLower === 'jt_express' || providerLower === 'quick_connect';
+  const isRedOrHashtag = providerLower === 'red' || providerLower === 'hashtag' || providerLower === 'jt_express' || providerLower === 'quick_connect' || providerLower === 'rm_express';
   const requiresClientCode = providerLower === 'turbo';
   const steps = getStepsByProvider(providerId);
 
@@ -101,6 +101,8 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
         return 'Hashtag';
       case 'quick_connect':
         return 'Quick Connect';
+      case 'rm_express':
+        return 'RM Express';
       default:
         return providerId;
     }
