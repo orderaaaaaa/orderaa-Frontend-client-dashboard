@@ -68,6 +68,10 @@ export const QUERY_KEYS = {
   DASHBOARD_EMPLOYEE_ACTIVITY: 'dashboard-employee-activity',
   CONFIRMED_PRODUCTS_REPORT: 'confirmed-products-report',
   PACKAGING_INVENTORY: 'packaging-inventory',
+
+  // Returns Receiving
+  RETURNS_RECEIVING_SESSION: 'returns-receiving-session',
+  RETURNS_RECEIVING_SHIPPING_COUNT: 'returns-receiving-shipping-count',
 } as const;
 
 export type QueryKeyType = (typeof QUERY_KEYS)[keyof typeof QUERY_KEYS];

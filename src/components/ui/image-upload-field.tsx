@@ -12,6 +12,7 @@ interface ImageUploadFieldProps {
   description?: string;
   accept?: string;
   maxSizeLabel?: string;
+  required?: boolean;
 }
 
 function getFileFromValue(value?: File | FileList | string | null): File | null {
@@ -38,6 +39,7 @@ export function ImageUploadField({
   description = 'قم برفع الصورة المطلوبة',
   accept = 'image/*',
   maxSizeLabel = '5MB',
+  required = false,
 }: ImageUploadFieldProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -116,6 +118,7 @@ export function ImageUploadField({
         <div className="flex-1 min-w-0">
           <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">
             {title}
+            {required && <span className="text-red-500 ms-1">*</span>}
           </h3>
           <p className="text-xs sm:text-sm text-gray-500 mt-0.5">{description}</p>
         </div>
@@ -124,9 +127,11 @@ export function ImageUploadField({
       <div
         className={clsx(
           'w-full min-h-[140px] sm:min-h-[160px] border-2 border-dashed rounded-xl transition-all',
-          isDragging
-            ? 'border-primary bg-primary/5'
-            : 'border-gray-300 bg-gray-50 hover:border-primary hover:bg-gray-50/80',
+          error
+            ? 'border-red-500 bg-red-50/30'
+            : isDragging
+              ? 'border-primary bg-primary/5'
+              : 'border-gray-300 bg-gray-50 hover:border-primary hover:bg-gray-50/80',
         )}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}

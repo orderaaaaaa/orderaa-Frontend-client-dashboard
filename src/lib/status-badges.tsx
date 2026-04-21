@@ -30,6 +30,11 @@ import { HiOutlineReceiptRefund } from 'react-icons/hi';
 // Import the original color function
 import { getStatusColor } from '@/app/dashboard/customers/lib/getBadgeColor';
 import { LuPenOff } from 'react-icons/lu';
+import {
+  LiaBanSolid,
+  LiaRedoAltSolid,
+  LiaWarehouseSolid,
+} from 'react-icons/lia';
 
 interface StatusBadgeConfig {
   classes: string;
@@ -65,6 +70,9 @@ export const STATUS_ICONS: Record<string, IconType> = {
   SHIPPING: MdOutlineLocalShipping,
   PARTIAL_DELIVERY: MdReceiptLong,
   WAITING_FOR_APPROVAL: Clock3,
+  FINAL_RETURN: LiaBanSolid,
+  RETURN_RESEND_PENDING: LiaRedoAltSolid,
+  RETURN_WAREHOUSE: LiaWarehouseSolid,
 };
 
 export const getStatusBadgeConfig = (status: string): StatusBadgeConfig => {

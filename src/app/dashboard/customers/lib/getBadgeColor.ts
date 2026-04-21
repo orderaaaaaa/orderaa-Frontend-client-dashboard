@@ -25,6 +25,10 @@ const STATUS_COLORS: Record<string, string> = {
   STOPPED: 'bg-[#fef0ef] text-[#ff0004] border border-[#fcd4d1]',
   UNCOMPLETED: 'bg-[#fef0ef] text-[#ff0004] border border-[#fcd4d1]',
   MISSING: 'bg-[#fef0ef] text-[#ff0004] border border-[#fcd4d1]',
+
+  FINAL_RETURN: 'bg-[#ffe4e6] text-[#e11d48] border border-[#fecdd3]',
+  RETURN_RESEND_PENDING: 'bg-[#fff7eb] text-[#f59e0b] border border-[#fde68a]',
+  RETURN_WAREHOUSE: 'bg-[#eef2ff] text-[#6366f1] border border-[#c7d2fe]',
 };
 
 export const getStatusColor = (status?: string): string => {

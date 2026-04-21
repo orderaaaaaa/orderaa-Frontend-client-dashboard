@@ -1,10 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, forwardRef } from 'react';
 import clsx from 'clsx';
 import { LucideIcon, Eye, EyeOff, X } from 'lucide-react';
 import { Button } from './button';
 
 type InputProps = {
   label?: string;
+  required?: boolean;
   name?: string;
   type?: string;
   placeholder?: string;
@@ -17,6 +18,7 @@ type InputProps = {
   value?: string | number;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   onClear?: () => void;
   clearable?: boolean;
   disabled?: boolean;
@@ -27,32 +29,46 @@ type InputProps = {
   id?: string;
 };
 
-export default function Input({
-  label,
-  name,
-  type = 'text',
-  placeholder,
-  error,
-  register,
-  registerOptions,
-  icon: Icon,
-  className,
-  inputClassName: customInputClassName,
-  value,
-  onChange,
-  onKeyDown,
-  onClear,
-  clearable = false,
-  disabled,
-  min,
-  max,
-  step,
-  autoFocus,
-  id,
-  ...rest
-}: InputProps) {
+const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
+  {
+    label,
+    required = false,
+    name,
+    type = 'text',
+    placeholder,
+    error,
+    register,
+    registerOptions,
+    icon: Icon,
+    className,
+    inputClassName: customInputClassName,
+    value,
+    onChange,
+    onKeyDown,
+    onBlur,
+    onClear,
+    clearable = false,
+    disabled,
+    min,
+    max,
+    step,
+    autoFocus,
+    id,
+    ...rest
+  },
+  forwardedRef,
+) {
   const [showPassword, setShowPassword] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const setInputRef = (node: HTMLInputElement | null) => {
+    (inputRef as React.MutableRefObject<HTMLInputElement | null>).current = node;
+    if (typeof forwardedRef === 'function') {
+      forwardedRef(node);
+    } else if (forwardedRef) {
+      (forwardedRef as React.MutableRefObject<HTMLInputElement | null>).current = node;
+    }
+  };
 
   const hasValue = value !== undefined && value !== '';
   const showClearButton = clearable && hasValue && !disabled;
@@ -89,6 +105,7 @@ export default function Input({
       {label && (
         <label htmlFor={inputId} className="block font-medium text-base mb-2">
           {label}
+          {required && <span className="text-red-500 mr-1">*</span>}
         </label>
       )}
       <div className="relative">
@@ -114,7 +131,7 @@ export default function Input({
           </Button>
         )}
         <input
-          ref={inputRef}
+          ref={setInputRef}
           type={inputType}
           id={inputId}
           name={name}
@@ -123,6 +140,7 @@ export default function Input({
           value={value}
           onChange={onChange}
           onKeyDown={onKeyDown}
+          onBlur={onBlur}
           disabled={disabled}
           min={min}
           max={max}
@@ -140,4 +158,8 @@ export default function Input({
       {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </div>
   );
-}
+});
+
+Input.displayName = 'Input';
+
+export default Input;
