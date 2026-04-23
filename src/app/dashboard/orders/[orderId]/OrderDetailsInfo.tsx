@@ -1,5 +1,5 @@
 import React from 'react';
-import { Order, OrderStatus, OrderLockedBy } from '@/types/orders';
+import { Order, OrderStatus, OrderLockedBy, FilterOrdersDto } from '@/types/orders';
 
 import OrderDetailsCardId from '@/components/OrderDetails/OrderDetailsCardId';
 import OrderDetailsInfoStatus from '@/components/OrderDetails/OrderDetailsInfoStatus';
@@ -15,6 +15,7 @@ interface OrderDetailsInfoProps {
     to: Date | null;
   };
   statusFilter?: string | null;
+  navigationFilters?: FilterOrdersDto;
   isLockedByOther?: boolean;
   lockedBy?: OrderLockedBy | null;
   isBlocked?: boolean;
@@ -27,6 +28,7 @@ function OrderDetailsInfo({
   onNoOrdersFound,
   dateRange,
   statusFilter,
+  navigationFilters,
   isLockedByOther,
   lockedBy,
   isBlocked,
@@ -50,6 +52,7 @@ function OrderDetailsInfo({
         onNoOrdersFound={onNoOrdersFound}
         dateRange={dateRange}
         statusFilter={statusFilter}
+        navigationFilters={navigationFilters}
         onUnlock={onUnlock}
       />
     </section>

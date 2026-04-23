@@ -56,7 +56,7 @@ export const useInfiniteOrders = (filters: Omit<FilterOrdersDto, 'page'>) => {
 
 // Fetch order statistics
 export const useOrderStatisticsQuery = (filters?: FilterOrdersDto) => {
-  const { page, limit, newFirst, orderByDirection, ...statisticsFilters } =
+  const { page, limit, skipFilters, orderByDirection, ...statisticsFilters } =
     filters ?? {};
 
   return useQuery({
@@ -333,18 +333,12 @@ export const useProductVariantsOptions = (productId: number | null) => {
 export const useGetNextOrderId = () => {
   const getNextOrderId = async (
     orderId: number,
-    status?: string,
-    from?: string,
-    to?: string
+    filters: Partial<FilterOrdersDto> = {}
   ) => {
-    const params: Record<string, string> = {};
-    if (status) params.status = status;
-    if (from) params.from = from;
-    if (to) params.to = to;
-
+    const { page, limit, ...rest } = filters;
     const response = await http.get<{ id: number }>(
       `/orders/${orderId}/next`,
-      { params }
+      { params: rest }
     );
     return response.data;
   };
@@ -356,18 +350,12 @@ export const useGetNextOrderId = () => {
 export const useGetPreviousOrderId = () => {
   const getPreviousOrderId = async (
     orderId: number,
-    status?: string,
-    from?: string,
-    to?: string
+    filters: Partial<FilterOrdersDto> = {}
   ) => {
-    const params: Record<string, string> = {};
-    if (status) params.status = status;
-    if (from) params.from = from;
-    if (to) params.to = to;
-
+    const { page, limit, ...rest } = filters;
     const response = await http.get<{ id: number }>(
       `/orders/${orderId}/previous`,
-      { params }
+      { params: rest }
     );
     return response.data;
   };

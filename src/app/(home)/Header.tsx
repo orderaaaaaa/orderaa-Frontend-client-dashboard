@@ -27,6 +27,7 @@ function Header() {
           <Link href="#">الصفحة الرئيسية</Link>
           <Link href="#pricing">الباقات</Link>
           <Link href="#features">الخدمات</Link>
+          <Link href="#contact">تواصل معنا</Link>
         </nav>
 
         {/* Desktop Buttons */}

@@ -23,7 +23,6 @@ export const DEFAULT_FILTER_STATE: UrlFilterState = {
   page: 1,
   limit: 10,
   localFilters: {
-    productName: '',
     sizeColor: '',
     governorate: '',
     city: '',
@@ -33,7 +32,7 @@ export const DEFAULT_FILTER_STATE: UrlFilterState = {
     phone: '',
     address: '',
     executionDate: '',
-    newFirst: undefined,
+    skipFilters: undefined,
     orderByDirection: undefined,
     productId: '',
     storeId: '',
@@ -142,9 +141,6 @@ export function serializeFiltersToUrl(state: UrlFilterState): URLSearchParams {
   if (localFilters.area) {
     params.set('area', localFilters.area);
   }
-  if (localFilters.productName) {
-    params.set('productName', localFilters.productName);
-  }
   if (localFilters.sizeColor) {
     params.set('sizeColor', localFilters.sizeColor);
   }
@@ -157,8 +153,8 @@ export function serializeFiltersToUrl(state: UrlFilterState): URLSearchParams {
   if (localFilters.executionDate) {
     params.set('executionDate', localFilters.executionDate);
   }
-  if (localFilters.newFirst !== undefined) {
-    params.set('newFirst', String(localFilters.newFirst));
+  if (localFilters.skipFilters !== undefined) {
+    params.set('skipFilters', String(localFilters.skipFilters));
   }
   if (localFilters.orderByDirection) {
     params.set('orderByDirection', localFilters.orderByDirection);
@@ -205,9 +201,9 @@ export function parseFiltersFromUrl(params: URLSearchParams): UrlFilterState {
   const page = parseNumber(params.get('page'), 1, 1);
   const limit = parseNumber(params.get('limit'), 10, 1);
 
-  // Parse newFirst (boolean)
-  const newFirstParam = params.get('newFirst');
-  const newFirst = newFirstParam === 'true' ? true : newFirstParam === 'false' ? false : undefined;
+  // Parse skipFilters (boolean)
+  const skipFiltersParam = params.get('skipFilters');
+  const skipFilters = skipFiltersParam === 'true' ? true : skipFiltersParam === 'false' ? false : undefined;
 
   // Parse orderByDirection
   const orderByDirectionParam = params.get('orderByDirection');
@@ -217,7 +213,6 @@ export function parseFiltersFromUrl(params: URLSearchParams): UrlFilterState {
 
   // Local filters
   const localFilters: OrderFilters = {
-    productName: params.get('productName') || '',
     sizeColor: params.get('sizeColor') || '',
     governorate: params.get('governorate') || '',
     city: params.get('city') || '',
@@ -227,7 +222,7 @@ export function parseFiltersFromUrl(params: URLSearchParams): UrlFilterState {
     phone: params.get('phone') || '',
     address: params.get('address') || '',
     executionDate,
-    newFirst,
+    skipFilters,
     orderByDirection,
     productId: params.get('productId') || '',
     storeId: params.get('storeId') || '',
@@ -270,7 +265,6 @@ export function areFiltersEqual(a: UrlFilterState, b: UrlFilterState): boolean {
   const aFilters = a.localFilters;
   const bFilters = b.localFilters;
 
-  if (aFilters.productName !== bFilters.productName) return false;
   if (aFilters.sizeColor !== bFilters.sizeColor) return false;
   if (aFilters.governorate !== bFilters.governorate) return false;
   if (aFilters.city !== bFilters.city) return false;
@@ -280,7 +274,7 @@ export function areFiltersEqual(a: UrlFilterState, b: UrlFilterState): boolean {
   if (aFilters.phone !== bFilters.phone) return false;
   if (aFilters.address !== bFilters.address) return false;
   if (aFilters.executionDate !== bFilters.executionDate) return false;
-  if (aFilters.newFirst !== bFilters.newFirst) return false;
+  if (aFilters.skipFilters !== bFilters.skipFilters) return false;
   if (aFilters.orderByDirection !== bFilters.orderByDirection) return false;
   if (aFilters.productId !== bFilters.productId) return false;
   if (aFilters.storeId !== bFilters.storeId) return false;

@@ -16,6 +16,7 @@ import {
   LiaWarehouseSolid,
   LiaClipboardListSolid,
   LiaCubesSolid,
+  LiaUndoAltSolid,
 } from 'react-icons/lia';
 import {
   House,
@@ -74,6 +75,11 @@ export const navigation: NavigationItem[] = [
         name: 'متابعة الشحن',
         href: '/dashboard/orders/tracking',
         icon: LiaClipboardCheckSolid,
+      },
+      {
+        name: 'استلامات المرتجعات',
+        href: '/dashboard/orders/returns-receiving',
+        icon: LiaUndoAltSolid,
       },
     ],
   },

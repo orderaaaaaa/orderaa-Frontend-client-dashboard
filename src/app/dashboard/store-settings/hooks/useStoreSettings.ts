@@ -3,6 +3,7 @@ import { merchantSettingsApi } from '../api/storeApi';
 import { OrderSettingsFormData } from '../schemas/store';
 import { toast } from 'react-toastify';
 import { convertToFormData } from '../utils/formDataHelper';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
 
 export const useMerchantSettings = () => {
   const queryClient = useQueryClient();
@@ -19,6 +20,7 @@ export const useMerchantSettings = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['merchantSettings'] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PAGE_NAMES] });
       toast.success('تم تحديث اعدادات المتجر');
     },
     onError: (error: any) => {

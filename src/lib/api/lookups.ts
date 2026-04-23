@@ -59,3 +59,11 @@ export async function getUtmSources(): Promise<string[]> {
   const { data } = await http.get<string[]>('/lookups/utm-sources');
   return data;
 }
+
+export async function getPageNames(): Promise<string[]> {
+  const { data } = await http.get<string[] | { pageNames?: string[] }>(
+    '/lookups/page-names'
+  );
+  if (Array.isArray(data)) return data;
+  return data?.pageNames ?? [];
+}

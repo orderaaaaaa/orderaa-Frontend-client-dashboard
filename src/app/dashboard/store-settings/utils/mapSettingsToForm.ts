@@ -11,6 +11,7 @@ export function mapSettingsToForm(
     language: settings.language ?? 'ar',
     cancellationReasons: settings.cancellationReasons ?? [],
     utmSources: settings.utmSources ?? [],
+    pageNames: settings.pageNames ?? [],
     canOpenShipment: settings.canOpenShipment ?? false,
     employeeCanEditContent: settings.employeeCanEditContent ?? false,
     defaultReturnShippingCost: settings.defaultReturnShippingCost ?? 0,

@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { FilterOptions, OrderFilters } from '@/types/orders';
 
 export const defaultEmptyFilters: OrderFilters = {
-  productName: '',
   sizeColor: '',
   governorate: '',
   city: '',

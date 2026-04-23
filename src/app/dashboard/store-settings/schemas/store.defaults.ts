@@ -4,6 +4,7 @@ export const ORDER_SETTINGS_DEFAULTS: OrderSettingsFormData = {
   language: 'ar',
   cancellationReasons: [],
   utmSources: [],
+  pageNames: [],
   canOpenShipment: false,
   employeeCanEditContent: true,
   shippingPhoneNumber: '',

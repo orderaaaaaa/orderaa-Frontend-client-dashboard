@@ -19,6 +19,9 @@ export const ORDER_STATUS_ARABIC_LABELS: Record<string, string> = {
   DELIVERED: 'تم التسليم',
   PARTIAL_DELIVERY: 'تسليم جزئي',
   MISSING: 'مفقود',
+  FINAL_RETURN: 'مرتجع نهائي',
+  RETURN_RESEND_PENDING: 'إعادة إرسال',
+  RETURN_WAREHOUSE: 'مرتجع مسلم',
 };
 
 export const ORDER_STATUS_CHART_COLORS: Record<string, string> = {
@@ -42,4 +45,7 @@ export const ORDER_STATUS_CHART_COLORS: Record<string, string> = {
   DELIVERED: '#059669',
   PARTIAL_DELIVERY: '#d97706',
   MISSING: '#dc2626',
+  FINAL_RETURN: '#e11d48',
+  RETURN_RESEND_PENDING: '#f59e0b',
+  RETURN_WAREHOUSE: '#6366f1',
 };

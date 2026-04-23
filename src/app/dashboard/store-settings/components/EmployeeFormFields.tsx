@@ -15,6 +15,7 @@ import { PostShippingReasonsField } from './PostShippingReasonsField';
 import { ShippingCancellationReasonsField } from './ShippingCancellationReasonsField';
 import { LogisticsSettingsSection } from './LogisticsSettingsSection';
 import { UtmSourcesField } from './UtmSourcesField';
+import { PageNamesField } from './PageNamesField';
 import { AutoCancelField } from './AutoCancelField';
 import { ShippingSection } from './ShippingSection';
 import { SectionHeader } from './SectionHeader';
@@ -71,6 +72,14 @@ export default function OrderSettingsFields({
         <Separator />
 
         <UtmSourcesField
+          watch={watch}
+          setValue={setValue}
+          errors={errors}
+        />
+
+        <Separator />
+
+        <PageNamesField
           watch={watch}
           setValue={setValue}
           errors={errors}

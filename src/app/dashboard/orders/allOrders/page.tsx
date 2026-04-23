@@ -93,16 +93,15 @@ function AllOrdersContent() {
       params.set('governorate', localFilters.governorate);
     if (localFilters.city) params.set('city', localFilters.city);
     if (localFilters.area) params.set('area', localFilters.area);
-    if (localFilters.productName)
-      params.set('productName', localFilters.productName);
+    if (localFilters.productId) params.set('productId', localFilters.productId);
     if (localFilters.sizeColor) params.set('sizeColor', localFilters.sizeColor);
     if (localFilters.shipmentCode)
       params.set('shipmentCode', localFilters.shipmentCode);
     if (localFilters.address) params.set('address', localFilters.address);
     if (localFilters.executionDate)
       params.set('executionDate', localFilters.executionDate);
-    if (localFilters.newFirst !== undefined)
-      params.set('newFirst', String(localFilters.newFirst));
+    if (localFilters.skipFilters !== undefined)
+      params.set('skipFilters', String(localFilters.skipFilters));
     if (localFilters.orderByDirection)
       params.set('orderByDirection', localFilters.orderByDirection);
     if (localFilters.storeId) params.set('storeId', localFilters.storeId);
@@ -219,7 +218,7 @@ function AllOrdersContent() {
       hasResetFromUrl.current = true;
       const { localFilters } = filters;
       const hasAnyFilter = Object.entries(localFilters).some(([key, value]) => {
-        if (key === 'newFirst') return value !== undefined;
+        if (key === 'skipFilters') return value !== undefined;
         if (key === 'cancellationReasons') return Array.isArray(value) && value.length > 0;
         return !!value;
       });

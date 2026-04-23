@@ -27,6 +27,13 @@ export function convertToFormData(data: Record<string, any>): FormData {
       return;
     }
 
+    if (key === 'pageNames' && Array.isArray(value)) {
+      value.forEach((item) => {
+        formData.append('pageNames[]', item);
+      });
+      return;
+    }
+
     if (typeof value === 'boolean') {
       formData.append(key, value.toString());
       return;
