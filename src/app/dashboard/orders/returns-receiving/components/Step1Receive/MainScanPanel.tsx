@@ -19,9 +19,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { OrderStatus } from '@/types/orders';
 import { useFocusedBarcodeScanner } from '../../hooks/useFocusedBarcodeScanner';
-import { mockResolveScan } from '../../services';
-import type { MockReturnOrder } from '../../types';
+import { getReturnOrderByCode } from '../../services';
+import { getCustomerDisplay, type ReturnOrder } from '../../types';
 import { ScanCountChip } from './ScanCountChip';
 
 interface MainScanPanelProps {
@@ -88,9 +89,7 @@ export function MainScanPanel({
     },
   });
 
-  const [orderCache, setOrderCache] = useState<Record<string, MockReturnOrder>>(
-    {},
-  );
+  const [orderCache, setOrderCache] = useState<Record<string, ReturnOrder>>({});
   const [flashingCode, setFlashingCode] = useState<string | null>(null);
   const [isResolving, setIsResolving] = useState(false);
 
@@ -121,19 +120,24 @@ export function MainScanPanel({
 
       setIsResolving(true);
       try {
-        const res = await mockResolveScan(code);
-        if (!res.ok) {
-          if (res.reason === 'UNKNOWN') {
-            toast.error(`كود غير معروف: ${code}`);
-          } else if (res.reason === 'ALREADY_FINAL_RETURN') {
-            toast.warn(`تم تحويل الطلب ${code} لمرتجع نهائي مسبقاً`);
-          } else {
-            toast.error(`تعذر إضافة الكود ${code}`);
-          }
+        const order = await getReturnOrderByCode(code);
+        if (order.status === OrderStatus.FINAL_RETURN) {
+          toast.warn(`تم تحويل الطلب ${code} لمرتجع نهائي مسبقاً`);
           return;
         }
         addMainScanCode(code);
-        setOrderCache((prev) => ({ ...prev, [code]: res.order }));
+        setOrderCache((prev) => ({ ...prev, [code]: order }));
+      } catch (err) {
+        const anyErr = err as {
+          response?: { status?: number; data?: { message?: string } };
+        };
+        if (anyErr?.response?.status === 404) {
+          toast.error(`كود غير معروف: ${code}`);
+        } else {
+          toast.error(
+            anyErr?.response?.data?.message ?? `تعذر إضافة الكود ${code}`,
+          );
+        }
       } finally {
         setIsResolving(false);
       }
@@ -267,6 +271,7 @@ export function MainScanPanel({
                 {mainScanCodes.map((code) => {
                   const order = orderCache[code];
                   const flashing = flashingCode === code;
+                  const display = order ? getCustomerDisplay(order) : null;
                   return (
                     <li
                       key={code}
@@ -279,9 +284,9 @@ export function MainScanPanel({
                         <span className="font-mono text-sm font-semibold text-gray-900">
                           {code}
                         </span>
-                        {order && (
+                        {order && display && (
                           <span className="text-xs text-gray-500 truncate">
-                            {order.customerName} · {order.governorate}
+                            {display.name} · {order.governorate}
                           </span>
                         )}
                       </div>

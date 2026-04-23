@@ -1,25 +1,20 @@
+import type { Customer, OrderStatus } from '@/types/orders';
+
 export type CategoryBucket = 'RESEND' | 'FINAL_RETURN' | 'WAREHOUSE';
 
-export interface MockReturnOrder {
+export interface ReturnOrder {
   id: number;
   code: string;
-  customerName: string;
-  customerPhone: string;
-  governorate: string;
+  status: OrderStatus | string;
   totalCost: number;
-  currentStatus: string;
+  governorate?: string;
+  city?: string;
+  address?: string;
+  customers: Pick<Customer, 'id' | 'name' | 'phone_numbers'> &
+    Partial<Pick<Customer, 'governorate' | 'city' | 'address'>>;
+  createdAt: string;
+  updatedAt: string;
 }
-
-export type ReturnScanResolution =
-  | { ok: true; order: MockReturnOrder }
-  | {
-      ok: false;
-      reason:
-        | 'UNKNOWN'
-        | 'DUPLICATE'
-        | 'ALREADY_FINAL_RETURN'
-        | 'ALREADY_CATEGORIZED';
-    };
 
 export interface CategorizeCommitPayload {
   sessionId: string;
@@ -35,11 +30,34 @@ export interface GeneratedResendCode {
 }
 
 export interface UploadReceiptProofPayload {
+  sessionId?: string;
   receipt: File;
   codeSheets: File[];
 }
 
 export interface UploadReceiptProofResult {
+  sessionId: string;
   receiptUrl: string;
   sheetUrls: string[];
+}
+
+export interface BulkUpdateResponse {
+  updatedCount: number;
+  message: string;
+}
+
+export interface ShippingCompanyCountResponse {
+  count: number;
+}
+
+export interface ReturnOrderCustomerDisplay {
+  name: string;
+  phone: string;
+}
+
+export function getCustomerDisplay(order: ReturnOrder): ReturnOrderCustomerDisplay {
+  return {
+    name: order.customers?.name ?? '',
+    phone: order.customers?.phone_numbers?.[0] ?? '',
+  };
 }

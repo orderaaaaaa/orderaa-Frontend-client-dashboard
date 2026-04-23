@@ -4,6 +4,7 @@ import {
   LiaAngleLeftSolid,
   LiaAngleRightSolid,
   LiaCheckSolid,
+  LiaSpinnerSolid,
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 
@@ -11,15 +12,19 @@ interface WizardFooterProps {
   totalSteps: number;
   currentStep: number;
   isStep1Valid: boolean;
+  canFinish: boolean;
+  isFinishing: boolean;
   onNext: () => void;
   onPrev: () => void;
-  onFinish?: () => void;
+  onFinish: () => void;
 }
 
 export function WizardFooter({
   totalSteps,
   currentStep,
   isStep1Valid,
+  canFinish,
+  isFinishing,
   onNext,
   onPrev,
   onFinish,
@@ -28,6 +33,8 @@ export function WizardFooter({
   const isLast = currentStep === totalSteps - 1;
 
   const nextDisabled = isFirst && !isStep1Valid;
+  const prevDisabled = isFirst || isFinishing;
+  const finishDisabled = !canFinish || isFinishing;
 
   return (
     <div className="sticky bottom-0 -mx-4 -mb-4 sm:-mx-6 sm:-mb-6 bg-white border rounded-lg border-gray-200 py-3 px-4 sm:px-6 flex items-center justify-between gap-2 mt-auto">
@@ -35,7 +42,7 @@ export function WizardFooter({
         variant="outline"
         size="lg"
         onClick={onPrev}
-        disabled={isFirst}
+        disabled={prevDisabled}
         className="min-w-[110px]"
       >
         <LiaAngleRightSolid className="w-4 h-4" />
@@ -47,11 +54,15 @@ export function WizardFooter({
           type="button"
           size="lg"
           onClick={onFinish}
+          disabled={finishDisabled}
           className="min-w-[160px]"
-          disabled
         >
-          <LiaCheckSolid className="w-4 h-4" />
-          إنهاء التقسيم
+          {isFinishing ? (
+            <LiaSpinnerSolid className="w-4 h-4 animate-spin" />
+          ) : (
+            <LiaCheckSolid className="w-4 h-4" />
+          )}
+          {isFinishing ? 'جاري الإنهاء...' : 'إنهاء التقسيم'}
         </Button>
       ) : (
         <Button

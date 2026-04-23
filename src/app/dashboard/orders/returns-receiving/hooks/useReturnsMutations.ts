@@ -3,10 +3,10 @@
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import {
-  mockCommitFinalReturns,
-  mockUploadReceiptProof,
-  mockUpdateReturnCategories,
-  mockGenerateResendCodes,
+  bulkCommitFinalReturns,
+  bulkUpdateReturnCategories,
+  generateReturnResendCodes,
+  uploadReturnsReceiptProof,
 } from '../services';
 import type {
   CategorizeCommitPayload,
@@ -19,16 +19,14 @@ function pickErrorMessage(err: unknown, fallback: string): string {
       response?: { data?: { message?: string } };
       message?: string;
     };
-    return (
-      anyErr.response?.data?.message ?? anyErr.message ?? fallback
-    );
+    return anyErr.response?.data?.message ?? anyErr.message ?? fallback;
   }
   return fallback;
 }
 
 export function useCommitFinalReturnsMutation() {
   return useMutation({
-    mutationFn: (codes: string[]) => mockCommitFinalReturns(codes),
+    mutationFn: (codes: string[]) => bulkCommitFinalReturns(codes),
     onError: (err) => {
       toast.error(pickErrorMessage(err, 'تعذر تحديث المرتجعات النهائية'));
     },
@@ -38,7 +36,7 @@ export function useCommitFinalReturnsMutation() {
 export function useUploadReceiptProofMutation() {
   return useMutation({
     mutationFn: (payload: UploadReceiptProofPayload) =>
-      mockUploadReceiptProof(payload),
+      uploadReturnsReceiptProof(payload),
     onError: (err) => {
       toast.error(pickErrorMessage(err, 'تعذر رفع صور الإثبات'));
     },
@@ -48,7 +46,7 @@ export function useUploadReceiptProofMutation() {
 export function useUpdateReturnCategoriesMutation() {
   return useMutation({
     mutationFn: (payload: CategorizeCommitPayload) =>
-      mockUpdateReturnCategories(payload),
+      bulkUpdateReturnCategories(payload),
     onError: (err) => {
       toast.error(pickErrorMessage(err, 'تعذر إتمام عملية التقسيم'));
     },
@@ -57,9 +55,10 @@ export function useUpdateReturnCategoriesMutation() {
 
 export function useGenerateResendCodesMutation() {
   return useMutation({
-    mutationFn: (orderCodes: string[]) => mockGenerateResendCodes(orderCodes),
+    mutationFn: (orderCodes: string[]) => generateReturnResendCodes(orderCodes),
     onError: (err) => {
       toast.error(pickErrorMessage(err, 'تعذر توليد أكواد إعادة الإرسال'));
     },
   });
 }
+

@@ -20,8 +20,8 @@ import {
 } from '@/components/ui/accordion';
 import { useFocusedBarcodeScanner } from '../../hooks/useFocusedBarcodeScanner';
 import { useCommitFinalReturnsMutation } from '../../hooks/useReturnsMutations';
-import { mockResolveScan } from '../../services';
-import type { MockReturnOrder } from '../../types';
+import { getReturnOrderByCode } from '../../services';
+import { getCustomerDisplay, type ReturnOrder } from '../../types';
 
 interface FinalReturnPanelProps {
   enabled: boolean;
@@ -44,9 +44,7 @@ export function FinalReturnPanel({
   finalReturnPanelLocked,
   setFinalReturnPanelLocked,
 }: FinalReturnPanelProps) {
-  const [orderCache, setOrderCache] = useState<Record<string, MockReturnOrder>>(
-    {},
-  );
+  const [orderCache, setOrderCache] = useState<Record<string, ReturnOrder>>({});
   const [isResolving, setIsResolving] = useState(false);
 
   const commitMutation = useCommitFinalReturnsMutation();
@@ -67,13 +65,16 @@ export function FinalReturnPanel({
 
       setIsResolving(true);
       try {
-        const res = await mockResolveScan(code);
-        if (!res.ok) {
-          toast.error(`تعذر إضافة الكود ${code}`);
-          return;
-        }
+        const order = await getReturnOrderByCode(code);
         addFinalReturnCode(code);
-        setOrderCache((prev) => ({ ...prev, [code]: res.order }));
+        setOrderCache((prev) => ({ ...prev, [code]: order }));
+      } catch (err) {
+        const anyErr = err as {
+          response?: { data?: { message?: string } };
+        };
+        toast.error(
+          anyErr?.response?.data?.message ?? `تعذر إضافة الكود ${code}`,
+        );
       } finally {
         setIsResolving(false);
       }
@@ -185,6 +186,7 @@ export function FinalReturnPanel({
               <ul className="divide-y divide-gray-100 max-h-60 overflow-y-auto">
                 {finalReturnCodes.map((code) => {
                   const order = orderCache[code];
+                  const display = order ? getCustomerDisplay(order) : null;
                   return (
                     <li
                       key={code}
@@ -194,9 +196,9 @@ export function FinalReturnPanel({
                         <span className="font-mono text-sm font-semibold text-gray-900">
                           {code}
                         </span>
-                        {order && (
+                        {order && display && (
                           <span className="text-xs text-gray-500 truncate">
-                            {order.customerName} · {order.governorate}
+                            {display.name} · {order.governorate}
                           </span>
                         )}
                       </div>
