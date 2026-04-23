@@ -207,7 +207,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
             }}
             initialFormFilters={formFilters}
             setValue={setValue}
-            hiddenFilters={['newFirst']}
+            hiddenFilters={['skipFilters']}
           />
         </div>
         <div className="flex items-center justify-center min-h-[400px]">
@@ -327,7 +327,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
           }}
           initialFormFilters={formFilters}
           setValue={setValue}
-          hiddenFilters={['newFirst']}
+          hiddenFilters={['skipFilters']}
         />
       </div>
       <div className="relative">

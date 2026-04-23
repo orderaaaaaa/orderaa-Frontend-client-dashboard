@@ -96,6 +96,7 @@ export const defaultFilterValues: OrderFiltersFormData = {
     cancellationReasons: [],
     storeId: '',
     shippingCompany: '',
+    employeeName: '',
     skipFilters: undefined,
     orderByDirection: '',
 };
