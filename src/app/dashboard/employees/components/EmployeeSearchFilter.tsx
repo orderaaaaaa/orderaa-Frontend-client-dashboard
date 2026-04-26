@@ -4,12 +4,12 @@ import React, { useState, useEffect } from 'react';
 import { Search, SlidersVertical, X } from 'lucide-react';
 import {
   ACCESS_LEVEL_OPTIONS,
-  DEPARTMENT_OPTIONS,
   PERFORMANCE_OPTIONS,
   FILTER_ALL,
 } from '../constants/employeesFilterOptions';
 import { useDebounce } from '@/utils/debounce';
 import { useEmployeesStore } from '@/app/dashboard/employees/store/employeesStore';
+import { useDepartmentsQuery } from '@/services/lookups';
 
 interface EmployeeSearchFilterProps {
   placeholder?: string;
@@ -39,6 +39,12 @@ export function EmployeeSearchFilter({
   const setAccessLevel = useEmployeesStore((state) => state.setAccessLevel);
   const setDepartment = useEmployeesStore((state) => state.setDepartment);
   const setPerformance = useEmployeesStore((state) => state.setPerformance);
+
+  const { data: departments = [] } = useDepartmentsQuery();
+  const departmentOptions = [
+    { value: FILTER_ALL, label: 'جميع الأقسام' },
+    ...departments,
+  ];
 
   const debouncedSearchQuery = useDebounce(searchInput, 500);
 
@@ -141,7 +147,7 @@ export function EmployeeSearchFilter({
                     القسم
                   </label>
                   <div className="space-y-1">
-                    {DEPARTMENT_OPTIONS.map((option) => (
+                    {departmentOptions.map((option) => (
                       <button
                         key={option.value}
                         type="button"

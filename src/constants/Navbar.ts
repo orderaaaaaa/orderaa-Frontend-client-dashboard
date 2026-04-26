@@ -83,11 +83,11 @@ export const navigation: NavigationItem[] = [
       },
     ],
   },
-  {
-    name: 'التقارير',
-    href: '/dashboard/reports',
-    icon: ChartNoAxesCombined,
-  },
+  // {
+  //   name: 'التقارير',
+  //   href: '/dashboard/reports',
+  //   icon: ChartNoAxesCombined,
+  // },
   {
     name: 'العملاء',
     href: '/dashboard/customers',

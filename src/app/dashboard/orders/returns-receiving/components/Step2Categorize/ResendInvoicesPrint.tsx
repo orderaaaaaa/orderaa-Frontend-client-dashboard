@@ -59,13 +59,7 @@ export function ResendInvoicesPrint({
   return (
     <>
       <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div className="flex items-center gap-1.5 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-2 py-1">
-            <LiaExclamationTriangleSolid className="w-4 h-4 shrink-0" />
-            <span className="font-semibold">
-              وضع تجريبي — الأكواد مولّدة محلياً
-            </span>
-          </div>
+        <div className="flex items-center justify-end gap-2 flex-wrap">
           <Button
             type="button"
             size="sm"

@@ -39,25 +39,67 @@ const buttonVariants = cva(
   }
 )
 
-const Button = React.forwardRef<
-  HTMLButtonElement,
-  React.ComponentProps<"button"> &
-    VariantProps<typeof buttonVariants> & {
-      asChild?: boolean
-    }
->(({ className, variant, size, asChild = false, ...props }, ref) => {
-  const Comp = asChild ? Slot : "button"
+type ButtonProps = React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean
+    loading?: boolean
+    loadingText?: string
+  }
 
-  return (
-    <Comp
-      ref={ref}
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }), "cursor-pointer")}
-      {...props}
-    />
-  )
-})
+const Spinner = () => (
+  <span
+    aria-hidden
+    className="size-4 rounded-full border-2 border-current border-t-transparent animate-spin"
+  />
+)
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    {
+      className,
+      variant,
+      size,
+      asChild = false,
+      loading = false,
+      loadingText,
+      children,
+      ...props
+    },
+    ref,
+  ) => {
+    const isDisabled = (props.disabled ?? false) || loading
+
+    if (asChild) {
+      return (
+        <Slot
+          ref={ref}
+          data-slot="button"
+          className={cn(buttonVariants({ variant, size, className }), "cursor-pointer")}
+          {...props}
+          aria-disabled={isDisabled || undefined}
+        >
+          {children}
+        </Slot>
+      )
+    }
+
+    return (
+      <button
+        ref={ref}
+        data-slot="button"
+        className={cn(buttonVariants({ variant, size, className }), "cursor-pointer")}
+        {...props}
+        disabled={isDisabled}
+        aria-busy={loading || undefined}
+      >
+        {loading && <Spinner />}
+        {loading && loadingText ? loadingText : children}
+      </button>
+    )
+  },
+)
 
 Button.displayName = "Button"
 
 export { Button, buttonVariants }
+export type { ButtonProps }

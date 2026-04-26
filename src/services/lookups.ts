@@ -1,6 +1,6 @@
 import { useQuery, QueryKey } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
-import { getGovernorates, getCities, getPaymentMethods, getPaymentStatuses, getUtmSources, getPageNames } from '@/lib/api/lookups';
+import { getGovernorates, getCities, getPaymentMethods, getPaymentStatuses, getUtmSources, getPageNames, getDepartments } from '@/lib/api/lookups';
 
 interface GovernorateData {
   key: string;
@@ -83,6 +83,16 @@ export const useUtmSourcesQuery = () => {
     },
     staleTime: 0,
     refetchOnMount: true,
+  });
+};
+
+// Fetch departments with caching
+export const useDepartmentsQuery = (enabled: boolean = true) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.DEPARTMENTS] as QueryKey,
+    queryFn: getDepartments,
+    staleTime: Infinity,
+    enabled,
   });
 };
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import clsx from 'clsx';
@@ -11,7 +11,6 @@ import {
   LiaLockSolid,
 } from 'react-icons/lia';
 import { ImageUploadField } from '@/components/ui/image-upload-field';
-import { MultiImageUploadField } from '@/components/ui/multi-image-upload-field';
 import { Button } from '@/components/ui/button';
 import {
   AccordionContent,
@@ -25,8 +24,6 @@ interface ProofUploadPanelProps {
   onComplete: () => void;
   receiptImage: File | null;
   setReceiptImage: (file: File | null) => void;
-  codeSheetImages: File[];
-  setCodeSheetImages: (files: File[]) => void;
   proofUploaded: boolean;
   setProofUploaded: (uploaded: boolean) => void;
 }
@@ -35,9 +32,6 @@ const proofSchema = z.object({
   receiptImage: z.custom<File>((v) => v instanceof File, {
     message: 'يرجى رفع صورة الإيصال المستلم من مندوب الشحن',
   }),
-  codeSheetImages: z
-    .array(z.custom<File>((v) => v instanceof File))
-    .min(1, 'يجب رفع صورة واحدة على الأقل من شيت الأكواد المطبوع'),
 });
 
 type ProofFormValues = z.infer<typeof proofSchema>;
@@ -47,8 +41,6 @@ export function ProofUploadPanel({
   onComplete,
   receiptImage,
   setReceiptImage,
-  codeSheetImages,
-  setCodeSheetImages,
   proofUploaded,
   setProofUploaded,
 }: ProofUploadPanelProps) {
@@ -58,21 +50,23 @@ export function ProofUploadPanel({
     resolver: zodResolver(proofSchema),
     defaultValues: {
       receiptImage: receiptImage as File,
-      codeSheetImages: codeSheetImages,
     },
+    mode: 'onChange',
+    reValidateMode: 'onChange',
   });
+
+  const watchedReceipt = useWatch({ control, name: 'receiptImage' });
+  const hasReceipt = watchedReceipt instanceof File;
 
   useEffect(() => {
     reset({
       receiptImage: receiptImage as File,
-      codeSheetImages: codeSheetImages,
     });
-  }, [receiptImage, codeSheetImages, reset]);
+  }, [receiptImage, reset]);
 
   const onSubmit = async (values: ProofFormValues) => {
     await uploadMutation.mutateAsync({
       receipt: values.receiptImage,
-      codeSheets: values.codeSheetImages,
     });
     setProofUploaded(true);
     onComplete();
@@ -101,11 +95,9 @@ export function ProofUploadPanel({
           <div className="flex items-center gap-3 w-full text-start text-gray-400">
             <LiaLockSolid className="w-5 h-5 shrink-0" />
             <div className="flex flex-col">
-              <h3 className="font-bold">
-                3- رفع الاستلام (الإيصال + شيت الأكواد)
-              </h3>
+              <h3 className="font-bold">2- رفع الاستلام (الإيصال)</h3>
               <p className="text-xs">
-                يفتح هذا القسم بعد الانتهاء من المرتجعات النهائية
+                يفتح هذا القسم بعد الانتهاء من المسح الرئيسي
               </p>
             </div>
           </div>
@@ -117,18 +109,17 @@ export function ProofUploadPanel({
                 تم رفع الاستلام
               </h3>
               <p className="text-xs text-emerald-700">
-                الإيصال ({receiptImage?.name || 'ملف محفوظ'}) +{' '}
-                {codeSheetImages.length} صورة من شيت الأكواد
+                الإيصال ({receiptImage?.name || 'ملف محفوظ'})
               </p>
             </div>
           </div>
         ) : (
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4 w-full text-start pe-2">
             <h3 className="text-base sm:text-lg font-bold text-gray-900">
-              3- رفع الاستلام
+              2- رفع الاستلام
             </h3>
             <span className="text-xs text-gray-500">
-              صورة الإيصال + شيت الأكواد المطبوع من مندوب الشحن
+              صورة الإيصال المستلم من مندوب الشحن
             </span>
           </div>
         )}
@@ -153,28 +144,10 @@ export function ProofUploadPanel({
             )}
           />
 
-          <Controller
-            control={control}
-            name="codeSheetImages"
-            render={({ field, fieldState }) => (
-              <MultiImageUploadField
-                value={field.value}
-                onChange={(files) => {
-                  field.onChange(files);
-                  setCodeSheetImages(files);
-                }}
-                title="شيت الأكواد"
-                description="صور متعددة من الشيت المطبوع بالأكواد"
-                error={fieldState.error?.message}
-                required
-              />
-            )}
-          />
-
           <div className="flex justify-end">
             <Button
               type="submit"
-              disabled={uploadMutation.isPending}
+              disabled={uploadMutation.isPending || !hasReceipt}
               size="lg"
               className="min-w-[160px]"
             >

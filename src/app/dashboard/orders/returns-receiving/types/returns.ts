@@ -32,13 +32,11 @@ export interface GeneratedResendCode {
 export interface UploadReceiptProofPayload {
   sessionId?: string;
   receipt: File;
-  codeSheets: File[];
 }
 
 export interface UploadReceiptProofResult {
   sessionId: string;
   receiptUrl: string;
-  sheetUrls: string[];
 }
 
 export interface BulkUpdateResponse {

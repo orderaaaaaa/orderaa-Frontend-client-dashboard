@@ -8,7 +8,7 @@ import Input from '@/components/ui/Input';
 import { Button } from '@/components/ui/button';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import WorkHoursTimePicker from '@/components/ui/WorkHoursTimePicker';
-import { useGovernoratesQuery } from '@/services/lookups';
+import { useGovernoratesQuery, useDepartmentsQuery } from '@/services/lookups';
 import {
   LiaUserSolid,
   LiaPhoneSolid,
@@ -18,10 +18,7 @@ import {
   LiaLockSolid,
   LiaClockSolid,
 } from 'react-icons/lia';
-import {
-  ACCESS_LEVEL_OPTIONS,
-  DEPARTMENT_OPTIONS,
-} from '../../../constants/employeesFormOptions';
+import { ACCESS_LEVEL_OPTIONS } from '../../../constants/employeesFormOptions';
 
 interface EmployeeFormProps {
   employee: Employee;
@@ -35,6 +32,11 @@ export default function EmployeeForm({
   isLoading,
 }: EmployeeFormProps) {
   const { data: governorates = [] } = useGovernoratesQuery();
+  const { data: departments = [] } = useDepartmentsQuery();
+  const departmentOptions = departments.map((d) => ({
+    key: d.value,
+    value: d.label,
+  }));
 
   const {
     register,
@@ -106,7 +108,7 @@ export default function EmployeeForm({
           onChange={(value) =>
             setValue('department', value, { shouldValidate: true })
           }
-          options={DEPARTMENT_OPTIONS}
+          options={departmentOptions}
           placeholder="اختر القسم"
           widthClass="w-full"
           error={errors?.department?.message}

@@ -65,27 +65,6 @@ export async function getShippingCompanyExpectedCount(): Promise<ShippingCompany
   return { count };
 }
 
-export async function bulkCommitFinalReturns(
-  orderCodes: string[],
-): Promise<BulkUpdateResponse> {
-  await randomDelay();
-  let updated = 0;
-  const timestamp = nowIso();
-  orderCodes.forEach((code) => {
-    const key = code.trim().toUpperCase();
-    const order = byCode.get(key);
-    if (order) {
-      statusByCode.set(key, OrderStatus.FINAL_RETURN);
-      byCode.set(key, { ...order, status: OrderStatus.FINAL_RETURN, updatedAt: timestamp });
-      updated += 1;
-    }
-  });
-  return {
-    updatedCount: updated,
-    message: 'تم تحديث حالة الطلبات بنجاح',
-  };
-}
-
 export async function uploadReturnsReceiptProof(
   payload: UploadReceiptProofPayload,
 ): Promise<UploadReceiptProofResult> {
@@ -94,7 +73,6 @@ export async function uploadReturnsReceiptProof(
   return {
     sessionId,
     receiptUrl: `mock://receipts/${payload.receipt.name}`,
-    sheetUrls: payload.codeSheets.map((f) => `mock://sheets/${f.name}`),
   };
 }
 

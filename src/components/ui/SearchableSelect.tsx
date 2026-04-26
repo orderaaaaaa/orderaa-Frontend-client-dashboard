@@ -10,6 +10,7 @@ import React, {
 } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CheckIcon, ChevronDown, Loader2, X } from 'lucide-react';
+import { Controller, type Control } from 'react-hook-form';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/utils/debounce';
 
@@ -17,6 +18,7 @@ type OptionObject = { key: string; value?: string; label?: string };
 type OptionType = string | OptionObject;
 
 interface SearchableSelectProps {
+  control?: Control<any>;
   value?: string;
   onChange?: (v: string) => void;
   onValueChange?: (v: string) => void;
@@ -42,8 +44,8 @@ interface SearchableSelectProps {
   onSearch?: (query: string) => void;
 }
 
-const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
-  function SearchableSelect(
+const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
+  function SearchableSelectCore(
     {
       value = '',
       onChange,
@@ -337,6 +339,56 @@ const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
     );
   }
 );
+
+SearchableSelectCore.displayName = 'SearchableSelectCore';
+
+const SearchableSelect = forwardRef<HTMLDivElement, SearchableSelectProps>(
+  function SearchableSelect(props, ref) {
+    const { control, name, error, onChange, onValueChange, onBlur, ...rest } =
+      props;
+
+    if (control && name) {
+      return (
+        <Controller
+          control={control}
+          name={name}
+          render={({ field, fieldState }) => (
+            <SearchableSelectCore
+              {...rest}
+              ref={ref}
+              name={field.name}
+              value={(field.value ?? '') as string}
+              onChange={(v) => {
+                field.onChange(v);
+                onChange?.(v);
+                onValueChange?.(v);
+              }}
+              onBlur={() => {
+                field.onBlur();
+                onBlur?.();
+              }}
+              error={error ?? fieldState.error?.message}
+            />
+          )}
+        />
+      );
+    }
+
+    return (
+      <SearchableSelectCore
+        {...rest}
+        ref={ref}
+        name={name}
+        error={error}
+        onChange={onChange}
+        onValueChange={onValueChange}
+        onBlur={onBlur}
+      />
+    );
+  },
+);
+
+SearchableSelect.displayName = 'SearchableSelect';
 
 export default SearchableSelect;
 export { SearchableSelect };

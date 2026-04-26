@@ -3,7 +3,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import {
-  bulkCommitFinalReturns,
   bulkUpdateReturnCategories,
   generateReturnResendCodes,
   uploadReturnsReceiptProof,
@@ -22,15 +21,6 @@ function pickErrorMessage(err: unknown, fallback: string): string {
     return anyErr.response?.data?.message ?? anyErr.message ?? fallback;
   }
   return fallback;
-}
-
-export function useCommitFinalReturnsMutation() {
-  return useMutation({
-    mutationFn: (codes: string[]) => bulkCommitFinalReturns(codes),
-    onError: (err) => {
-      toast.error(pickErrorMessage(err, 'تعذر تحديث المرتجعات النهائية'));
-    },
-  });
 }
 
 export function useUploadReceiptProofMutation() {

@@ -1,6 +1,7 @@
 import React, { useState, useRef, forwardRef } from 'react';
 import clsx from 'clsx';
 import { LucideIcon, Eye, EyeOff, X } from 'lucide-react';
+import { Controller, type Control } from 'react-hook-form';
 import { Button } from './button';
 
 type InputProps = {
@@ -12,6 +13,7 @@ type InputProps = {
   error?: string;
   register?: any;
   registerOptions?: any;
+  control?: Control<any>;
   icon?: LucideIcon;
   className?: string;
   inputClassName?: string;
@@ -29,7 +31,9 @@ type InputProps = {
   id?: string;
 };
 
-const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
+type InputCoreProps = Omit<InputProps, 'control'>;
+
+const InputCore = forwardRef<HTMLInputElement, InputCoreProps>(function InputCore(
   {
     label,
     required = false,
@@ -158,6 +162,41 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </div>
   );
+});
+
+InputCore.displayName = 'InputCore';
+
+const Input = forwardRef<HTMLInputElement, InputProps>(function Input(props, ref) {
+  const { control, name, error, onKeyDown, ...rest } = props;
+
+  if (control && name) {
+    return (
+      <Controller
+        control={control}
+        name={name}
+        render={({ field, fieldState }) => (
+          <InputCore
+            {...rest}
+            name={field.name}
+            value={(field.value ?? '') as string | number}
+            onChange={(e) => field.onChange(e.target.value)}
+            onBlur={field.onBlur}
+            onKeyDown={onKeyDown}
+            error={error ?? fieldState.error?.message}
+            ref={(node) => {
+              field.ref(node);
+              if (typeof ref === 'function') ref(node);
+              else if (ref)
+                (ref as React.MutableRefObject<HTMLInputElement | null>).current =
+                  node;
+            }}
+          />
+        )}
+      />
+    );
+  }
+
+  return <InputCore {...rest} name={name} error={error} onKeyDown={onKeyDown} ref={ref} />;
 });
 
 Input.displayName = 'Input';

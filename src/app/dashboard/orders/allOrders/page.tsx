@@ -563,7 +563,7 @@ function AllOrdersContent() {
                 city={
                   order.customers.area || order.customers.city || 'غير محدد'
                 }
-                address={order.customers.address || 'غير محدد'}
+                address={order.address || 'غير محدد'}
                 alert={0}
                 createdAt={order.createdAt}
                 repeatCount={order.customers.totalCustomerOrders || 0}

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import PageLoading from '@/components/ui/page-loading';
 import { If, Then, Else } from 'react-if';
 import { useEmployeesList } from '@/app/dashboard/employees/hooks/useEmployeesList';
@@ -11,6 +11,7 @@ import { EmployeeCard } from './components/EmployeeCard';
 import { Pagination } from '../../../components/Pagination';
 import { useEmployeesStore } from '@/app/dashboard/employees/store/employeesStore';
 import { LimitSelector } from './components/LimitSelector';
+import { useDepartmentsQuery } from '@/services/lookups';
 
 export default function AllEmployees() {
   const { employees, totalItems, paginationProps, isLoading, isError } =
@@ -19,6 +20,14 @@ export default function AllEmployees() {
   const setCurrentPage = useEmployeesStore((state) => state.setCurrentPage);
   const limit = useEmployeesStore((state) => state.filterSelections.limit);
   const setLimit = useEmployeesStore((state) => state.setLimit);
+
+  const { data: departments } = useDepartmentsQuery();
+
+  useEffect(() => {
+    if (departments !== undefined) {
+      console.log('GET /lookups/departments response:', departments);
+    }
+  }, [departments]);
 
   if (isError) {
     return (

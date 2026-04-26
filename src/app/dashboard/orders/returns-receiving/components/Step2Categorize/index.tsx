@@ -1,6 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { toast } from 'react-toastify';
 import clsx from 'clsx';
 import type { LucideIcon } from 'lucide-react';
@@ -15,7 +18,6 @@ import {
 import Input from '@/components/ui/Input';
 import { Button } from '@/components/ui/button';
 import { OrderStatus } from '@/types/orders';
-import { useFocusedBarcodeScanner } from '../../hooks/useFocusedBarcodeScanner';
 import { getReturnOrderByCode } from '../../services';
 import {
   getCustomerDisplay,
@@ -42,6 +44,12 @@ interface Step2CategorizeProps {
 
 const normalize = (code: string) => code.trim().toUpperCase();
 
+const scanFormSchema = z.object({
+  barcode: z.string(),
+});
+
+type ScanFormValues = z.infer<typeof scanFormSchema>;
+
 export function Step2Categorize({
   categorizationScans,
   setCategorizationScans,
@@ -52,6 +60,13 @@ export function Step2Categorize({
 }: Step2CategorizeProps) {
   const [flashingCode, setFlashingCode] = useState<string | null>(null);
   const [isResolving, setIsResolving] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const { control, getValues, setValue } = useForm<ScanFormValues>({
+    resolver: zodResolver(scanFormSchema),
+    defaultValues: { barcode: '' },
+    mode: 'onChange',
+  });
 
   const handleScan = useCallback(
     async (rawCode: string) => {
@@ -93,15 +108,18 @@ export function Step2Categorize({
     [categorizationScans, setCategorizationScans, setOrderCache],
   );
 
-  const { inputRef, value, onChange, onKeyDown, focus } =
-    useFocusedBarcodeScanner({
-      onScan: handleScan,
-      enabled: !isResolving,
-    });
-
-  useEffect(() => {
-    focus();
-  }, [focus]);
+  const handleBarcodeKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      if (isResolving) return;
+      const code = (getValues('barcode') ?? '').trim();
+      if (!code) return;
+      handleScan(code);
+      setValue('barcode', '', { shouldValidate: false });
+    },
+    [getValues, setValue, handleScan, isResolving],
+  );
 
   const assignBucket = useCallback(
     (code: string, bucket: CategoryBucket) => {
@@ -177,14 +195,13 @@ export function Step2Categorize({
         </div>
 
         <Input
-          ref={inputRef as React.RefObject<HTMLInputElement>}
+          control={control}
+          name="barcode"
+          ref={inputRef}
           label="كود الطلب"
           required
           icon={LiaBarcodeSolid as unknown as LucideIcon}
-          value={value}
-          onChange={onChange}
-          onKeyDown={onKeyDown}
-          autoFocus
+          onKeyDown={handleBarcodeKeyDown}
           placeholder="امسح الكود ثم اضغط Enter"
           disabled={isResolving}
         />

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -20,7 +20,6 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { OrderStatus } from '@/types/orders';
-import { useFocusedBarcodeScanner } from '../../hooks/useFocusedBarcodeScanner';
 import { getReturnOrderByCode } from '../../services';
 import { getCustomerDisplay, type ReturnOrder } from '../../types';
 import { ScanCountChip } from './ScanCountChip';
@@ -39,6 +38,7 @@ interface MainScanPanelProps {
 
 const mainScanSchema = z
   .object({
+    barcode: z.string(),
     expectedCount: z
       .number({
         required_error: 'يرجى إدخال العدد المتوقع من شركة الشحن',
@@ -77,13 +77,15 @@ export function MainScanPanel({
     control,
     handleSubmit,
     setValue,
+    getValues,
     watch,
     trigger,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isDirty },
   } = useForm<MainScanFormValues>({
     resolver: zodResolver(mainScanSchema),
     mode: 'onChange',
     defaultValues: {
+      barcode: '',
       expectedCount: expectedCount ?? (undefined as unknown as number),
       scanCount: mainScanCodes.length,
     },
@@ -92,9 +94,14 @@ export function MainScanPanel({
   const [orderCache, setOrderCache] = useState<Record<string, ReturnOrder>>({});
   const [flashingCode, setFlashingCode] = useState<string | null>(null);
   const [isResolving, setIsResolving] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const isFirstScanCountSyncRef = useRef(true);
 
   useEffect(() => {
-    setValue('scanCount', mainScanCodes.length, { shouldValidate: true });
+    setValue('scanCount', mainScanCodes.length, {
+      shouldValidate: !isFirstScanCountSyncRef.current,
+    });
+    isFirstScanCountSyncRef.current = false;
   }, [mainScanCodes.length, setValue]);
 
   const watchedExpectedCount = watch('expectedCount');
@@ -145,24 +152,25 @@ export function MainScanPanel({
     [mainScanCodes, addMainScanCode],
   );
 
-  const { inputRef, value, onChange, onKeyDown, focus } =
-    useFocusedBarcodeScanner({
-      onScan: handleScan,
-      enabled: !mainPanelLocked,
-    });
+  const handleBarcodeKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (mainPanelLocked || isResolving) return;
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      const code = (getValues('barcode') ?? '').trim();
+      if (!code) return;
+      handleScan(code);
+      setValue('barcode', '', { shouldValidate: false });
+    },
+    [mainPanelLocked, isResolving, getValues, setValue, handleScan],
+  );
 
   useEffect(() => {
     const el = inputRef.current;
     if (el && scanInputRef) {
       (scanInputRef as { current: HTMLInputElement | null }).current = el;
     }
-  }, [inputRef, scanInputRef]);
-
-  useEffect(() => {
-    if (!mainPanelLocked) {
-      focus();
-    }
-  }, [mainPanelLocked, focus]);
+  }, [scanInputRef]);
 
   const scanned = mainScanCodes.length;
 
@@ -210,18 +218,19 @@ export function MainScanPanel({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="flex flex-col gap-1">
               <Input
-                ref={inputRef as React.RefObject<HTMLInputElement>}
+                control={control}
+                name="barcode"
+                ref={inputRef}
                 label="كود الطلب"
                 required
                 icon={LiaBarcodeSolid as unknown as LucideIcon}
-                value={value}
-                onChange={onChange}
-                onKeyDown={onKeyDown}
-                onBlur={() => trigger('scanCount')}
-                autoFocus
+                onKeyDown={handleBarcodeKeyDown}
+                onBlur={() => {
+                  if (isDirty) trigger('scanCount');
+                }}
                 placeholder="امسح الكود ثم اضغط Enter"
-                disabled={isResolving}
-                error={errors.scanCount?.message}
+                disabled={isResolving || mainPanelLocked}
+                error={isDirty ? errors.scanCount?.message : undefined}
               />
             </div>
 
@@ -244,7 +253,7 @@ export function MainScanPanel({
                     }}
                     onBlur={field.onBlur}
                     placeholder="أدخل العدد المتوقع"
-                    error={fieldState.error?.message}
+                    error={isDirty ? fieldState.error?.message : undefined}
                   />
                 )}
               />
