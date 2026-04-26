@@ -424,6 +424,7 @@ export function ShippingOrdersContent() {
         selectedShippingCompany={selectedShippingCompany}
         onShippingCompanyChange={setSelectedShippingCompany}
         isLoadingShippingCompanies={isLoadingShippingCompanies}
+        hiddenFilters={['skipFilters']}
       />
 
       <OrdersSelectionHeader

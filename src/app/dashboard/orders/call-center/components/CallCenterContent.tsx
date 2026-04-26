@@ -294,6 +294,7 @@ export function CallCenterContent() {
         showPrintButton={false}
         showPrintStatusToggle={false}
         onActiveFiltersChange={handleActiveFiltersChange}
+        hiddenFilters={['skipFilters']}
       />
 
       <OrdersSelectionHeader

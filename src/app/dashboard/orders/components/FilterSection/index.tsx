@@ -58,10 +58,12 @@ interface FilterSectionProps {
   isLoadingShippingCompanies?: boolean;
   onActiveFiltersChange?: (activeFilters: FilterKey[]) => void;
   currentStatus?: string | null;
+  hiddenFilters?: FilterKey[];
 }
 
 function getActiveFiltersFromFormValues(
-  formFilters: OrderFiltersFormData | null | undefined
+  formFilters: OrderFiltersFormData | null | undefined,
+  hiddenFilters: FilterKey[] = []
 ): FilterKey[] {
   if (!formFilters) return [];
 
@@ -69,6 +71,7 @@ function getActiveFiltersFromFormValues(
 
   for (const def of FILTER_DEFINITIONS) {
     if (def.key === 'employeeName') continue;
+    if (hiddenFilters.includes(def.key)) continue;
 
     const value = formFilters[def.key as keyof OrderFiltersFormData];
     const isActive = Array.isArray(value)
@@ -106,9 +109,10 @@ export function FilterSection({
   isLoadingShippingCompanies = false,
   onActiveFiltersChange,
   currentStatus,
+  hiddenFilters = [],
 }: FilterSectionProps) {
   const [activeFilters, setActiveFilters] = useState<FilterKey[]>(() =>
-    getActiveFiltersFromFormValues(initialFormFilters)
+    getActiveFiltersFromFormValues(initialFormFilters, hiddenFilters)
   );
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [invoicesToPrint, setInvoicesToPrint] = useState<InvoiceData[]>([]);
@@ -121,7 +125,10 @@ export function FilterSection({
   useEffect(() => {
     if (!initialFormFilters) return;
 
-    const filtersFromUrl = getActiveFiltersFromFormValues(initialFormFilters);
+    const filtersFromUrl = getActiveFiltersFromFormValues(
+      initialFormFilters,
+      hiddenFilters
+    );
     if (filtersFromUrl.length > 0 && !hasInitializedRef.current) {
       hasInitializedRef.current = true;
       setActiveFilters((prev) => {
@@ -129,15 +136,16 @@ export function FilterSection({
         return Array.from(merged);
       });
     }
-  }, [initialFormFilters]);
+  }, [initialFormFilters, hiddenFilters]);
 
   const visibleDefinitions = useMemo(
     () =>
       FILTER_DEFINITIONS.filter((f) => {
+        if (hiddenFilters.includes(f.key)) return false;
         if (!f.visibleStatuses) return true;
         return currentStatus && f.visibleStatuses.includes(currentStatus);
       }),
-    [currentStatus]
+    [currentStatus, hiddenFilters]
   );
 
   useEffect(() => {
