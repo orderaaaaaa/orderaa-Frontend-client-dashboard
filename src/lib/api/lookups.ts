@@ -60,6 +60,11 @@ export async function getUtmSources(): Promise<string[]> {
   return data;
 }
 
+export async function getShippingEvents(): Promise<string[]> {
+  const { data } = await http.get<string[]>('/lookups/shipping-events');
+  return Array.isArray(data) ? data : [];
+}
+
 export async function getDepartments(): Promise<{ value: string; label: string }[]> {
   const { data } = await http.get<{ value: string; label: string }[]>('/lookups/departments');
   return Array.isArray(data) ? data : [];

@@ -11,6 +11,7 @@ import {
   LiaPhoneSolid,
   LiaUserSolid,
   LiaPlusSolid,
+  LiaSpinnerSolid,
 } from 'react-icons/lia';
 import { toast } from 'react-toastify';
 import clsx from 'clsx';
@@ -18,31 +19,19 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { useUpdateTrackingCard } from '@/services/logistics';
-import type { TrackingCard as TrackingCardType, AgentFlag } from '@/types/logistics';
+import { useRecordFollowupEventPointMutation } from '@/services/followup';
+import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
+import { getStatusColor } from '@/app/dashboard/customers/lib/getBadgeColor';
+import type { TrackingCard as TrackingCardType, ShippingPointType } from '@/types/logistics';
 import AgentStatusUpdateModal from './AgentStatusUpdateModal';
 
-const TRACKING_STATUS_LABELS: Record<string, string> = {
-  PENDING: 'في الانتظار',
-  COMPLETED: 'مكتمل',
-  OVERDUE: 'متأخر',
-  PAUSED: 'متوقف',
-  CANCELLED: 'ملغى',
-};
-
-const TRACKING_STATUS_COLORS: Record<string, string> = {
-  PENDING: '#f59e0b',
-  COMPLETED: '#22c55e',
-  OVERDUE: '#ef4444',
-  PAUSED: '#6b7280',
-  CANCELLED: '#ef4444',
-};
-
 const AGENT_STATUS_LABELS: Record<string, string> = {
-  CLOSED: 'مغلق',
-  NO_ANSWER: 'مش بيرد',
-  NOT_COLLECTING: 'مش بيجمع',
-  BUSY: 'مشغول',
-  POSTPONE: 'تأجيل',
+  ATTEMPTED: 'تم المحاولة',
+  POSTPONED: 'تم التأجيل',
+  CHANGE_PRODUCTS: 'تم تغيير المنتجات',
+  SEND_AGAIN: 'إعادة إرسال',
+  CANCELLED: 'تم الإلغاء',
+  OVERDUE: 'متأخر',
 };
 
 const FLAG_LABELS: Record<string, { label: string; color: string }> = {
@@ -55,17 +44,20 @@ interface TrackingCardProps {
 }
 
 export default function TrackingCard({ card }: TrackingCardProps) {
-  const statusLabel = TRACKING_STATUS_LABELS[card.status] || card.status;
-  const statusColor = TRACKING_STATUS_COLORS[card.status] || '#9ca3af';
+  const orderStatus = card.order?.status;
+  const statusLabel = (orderStatus && ORDER_STATUS_ARABIC_LABELS[orderStatus]) || orderStatus || '';
+  const statusBadgeClasses = getStatusColor(orderStatus);
 
   const updateMutation = useUpdateTrackingCard();
+  const recordEventPointMutation = useRecordFollowupEventPointMutation();
 
   const [showAddUpdate, setShowAddUpdate] = useState(false);
   const [newCourierUpdate, setNewCourierUpdate] = useState('');
   const [isSavingUpdate, setIsSavingUpdate] = useState(false);
 
   const [showFlagButtons, setShowFlagButtons] = useState(false);
-  const [isFlagging, setIsFlagging] = useState(false);
+  const isFlagging = recordEventPointMutation.isPending;
+  const pendingPointType = recordEventPointMutation.variables?.pointType;
 
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
 
@@ -92,22 +84,24 @@ export default function TrackingCard({ card }: TrackingCardProps) {
     }
   }, [card.id, newCourierUpdate, updateMutation]);
 
-  const handleFlag = useCallback(async (flag: AgentFlag) => {
-    setIsFlagging(true);
+  const handleFlag = useCallback(async (pointType: ShippingPointType) => {
+    if (!card.shippingEventId) {
+      toast.error('لا يوجد حدث شحن متاح للتقييم');
+      return;
+    }
     try {
-      await updateMutation.mutateAsync({
-        cardId: card.id,
-        update: { agentFlag: flag },
+      await recordEventPointMutation.mutateAsync({
+        orderId: card.orderId,
+        eventId: card.shippingEventId,
+        pointType,
       });
       toast.success('تم تحديث حالة المندوب بنجاح');
       setShowFlagButtons(false);
     } catch (err: any) {
       const msg = err?.response?.data?.message;
       toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الحالة');
-    } finally {
-      setIsFlagging(false);
     }
-  }, [card.id, updateMutation]);
+  }, [card.orderId, card.shippingEventId, recordEventPointMutation]);
 
   return (
     <>
@@ -118,7 +112,7 @@ export default function TrackingCard({ card }: TrackingCardProps) {
               href={`/dashboard/orders/${card.orderId}`}
               className="font-semibold text-base text-primary hover:underline"
             >
-              الطلب #{card.orderCode}
+              الطلب {card.orderCode}
             </Link>
           </div>
 
@@ -132,13 +126,15 @@ export default function TrackingCard({ card }: TrackingCardProps) {
               </a>
             )}
             {!card.courierName && !card.courierPhone && (
-              <span className="text-xs text-gray-400">لا يوجد بيانات المندوب</span>
+              <span className="text-xs text-gray-400">لا يوجد بيانات للمندوب</span>
             )}
           </div>
 
           <span
-            className="inline-flex items-center justify-self-end px-3 py-1 rounded-full text-xs font-medium border"
-            style={{ color: statusColor, backgroundColor: `${statusColor}15`, borderColor: `${statusColor}30` }}
+            className={clsx(
+              'inline-flex items-center justify-self-end px-3 py-1 rounded-full text-xs font-medium',
+              statusBadgeClasses
+            )}
           >
             {statusLabel}
           </span>
@@ -265,7 +261,11 @@ export default function TrackingCard({ card }: TrackingCardProps) {
                         onClick={() => handleFlag('CORRECT')}
                         disabled={isFlagging}
                       >
-                        <LiaCheckCircleSolid className="size-4" />
+                        {isFlagging && pendingPointType === 'CORRECT' ? (
+                          <LiaSpinnerSolid className="size-4 animate-spin" />
+                        ) : (
+                          <LiaCheckCircleSolid className="size-4" />
+                        )}
                       </Button>
                       <Button
                         variant="outline"
@@ -274,7 +274,11 @@ export default function TrackingCard({ card }: TrackingCardProps) {
                         onClick={() => handleFlag('FAKE')}
                         disabled={isFlagging}
                       >
-                        <LiaTimesCircleSolid className="size-4" />
+                        {isFlagging && pendingPointType === 'FAKE' ? (
+                          <LiaSpinnerSolid className="size-4 animate-spin" />
+                        ) : (
+                          <LiaTimesCircleSolid className="size-4" />
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -299,17 +303,27 @@ export default function TrackingCard({ card }: TrackingCardProps) {
             </div>
 
             {card.agentStatus ? (
-              <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 space-y-1">
-                <p className="text-sm font-medium text-primary">
-                  {AGENT_STATUS_LABELS[card.agentStatus] || card.agentStatus}
-                </p>
-                {card.agentStatus === 'POSTPONE' && card.postponedUntil && (
+              <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 space-y-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-medium text-primary">
+                    {AGENT_STATUS_LABELS[card.agentStatus] || card.agentStatus}
+                  </p>
+                  {card.employeeName && (
+                    <span className="text-xs text-gray-500">{card.employeeName}</span>
+                  )}
+                </div>
+                {card.agentNote && (
+                  <p className="text-sm text-gray-700">{card.agentNote}</p>
+                )}
+                {card.agentStatus === 'POSTPONED' && card.postponedUntil && (
                   <p className="text-xs text-gray-500">
                     تأجيل إلى: {new Date(card.postponedUntil).toLocaleDateString('ar-EG')}
                   </p>
                 )}
-                {card.agentNote && (
-                  <p className="text-xs text-gray-500">{card.agentNote}</p>
+                {card.agentEventAt && (
+                  <p className="text-xs text-gray-400">
+                    {new Date(card.agentEventAt).toLocaleString('ar-EG')}
+                  </p>
                 )}
               </div>
             ) : (
@@ -330,7 +344,7 @@ export default function TrackingCard({ card }: TrackingCardProps) {
       <AgentStatusUpdateModal
         isOpen={isStatusModalOpen}
         onClose={() => setIsStatusModalOpen(false)}
-        cardId={card.id}
+        orderId={card.orderId}
       />
     </>
   );

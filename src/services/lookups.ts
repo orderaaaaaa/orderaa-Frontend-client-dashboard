@@ -1,6 +1,6 @@
 import { useQuery, QueryKey } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
-import { getGovernorates, getCities, getPaymentMethods, getPaymentStatuses, getUtmSources, getPageNames, getDepartments } from '@/lib/api/lookups';
+import { getGovernorates, getCities, getPaymentMethods, getPaymentStatuses, getUtmSources, getPageNames, getDepartments, getShippingEvents } from '@/lib/api/lookups';
 
 interface GovernorateData {
   key: string;
@@ -93,6 +93,17 @@ export const useDepartmentsQuery = (enabled: boolean = true) => {
     queryFn: getDepartments,
     staleTime: Infinity,
     enabled,
+  });
+};
+
+export const useShippingEventsQuery = () => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.SHIPPING_EVENTS] as QueryKey,
+    queryFn: async () => {
+      const data = await getShippingEvents();
+      return Array.isArray(data) ? data : [];
+    },
+    staleTime: Infinity,
   });
 };
 

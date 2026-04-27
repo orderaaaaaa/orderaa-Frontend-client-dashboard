@@ -1,4 +1,4 @@
-import { Order, OrderProduct } from './orders';
+import { Order, OrderEvent, OrderProduct } from './orders';
 
 export interface GovernorateLogisticsConfig {
   id: number;
@@ -31,6 +31,8 @@ export type TrackingAgentStatus =
 
 export type AgentFlag = 'CORRECT' | 'FAKE';
 
+export type ShippingPointType = 'CORRECT' | 'FAKE';
+
 export interface TrackingCard {
   id: number;
   orderId: number;
@@ -41,13 +43,15 @@ export interface TrackingCard {
   courierUpdate?: string | null;
   courierName?: string | null;
   courierPhone?: string | null;
-  agentStatus?: TrackingAgentStatus | null;
+  agentStatus?: string | null;
   agentFlag?: AgentFlag | null;
   agentNote?: string | null;
+  agentEventAt?: string | null;
   postponedUntil?: string | null;
   completedAt?: string | null;
   employeeId?: number | null;
   employeeName?: string | null;
+  shippingEventId?: number | null;
   createdAt: string;
   updatedAt: string;
   order?: Partial<Order>;
@@ -134,6 +138,48 @@ export interface UpdateTrackingCardData {
   cancelReasonId?: number;
   newProductId?: number;
   newVariants?: { label: string; value: string }[];
+}
+
+export type FollowupEventType = 'FOLLOWUP' | 'SHIPPING_WEBHOOK' | 'SYSTEM';
+
+export type FollowupStatusName =
+  | 'ATTEMPTED'
+  | 'POSTPONED'
+  | 'CHANGE_PRODUCTS'
+  | 'SEND_AGAIN'
+  | 'CANCELLED'
+  | 'OVERDUE';
+
+export interface FollowupOrderEvent extends OrderEvent {
+  type?: FollowupEventType;
+}
+
+export interface FollowupOrder extends Order {
+  shippingEvents?: FollowupOrderEvent[];
+  followupEvents?: FollowupOrderEvent[];
+  firstAttemptAt?: string | null;
+  delegateName?: string | null;
+  delegatePhone?: string | null;
+}
+
+export type FollowupTab = 'NEW_ORDERS' | 'OVERDUE' | 'EXECUTED';
+
+export interface FollowupFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  orderByDirection?: 'asc' | 'desc';
+  newFirst?: boolean;
+  shippingCompany?: string;
+  governorate?: string;
+  city?: string;
+  code?: string;
+  createdAfter?: string;
+  createdBefore?: string;
+  customerName?: string;
+  customerPhone?: string;
+  productName?: string;
+  shippingStatuses?: string[];
 }
 
 export const POST_SHIPPING_STATUSES = new Set([

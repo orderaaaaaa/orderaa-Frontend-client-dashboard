@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   LiaClipboardListSolid,
   LiaClockSolid,
@@ -9,291 +9,353 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import Input from '@/components/ui/Input';
 import SearchableSelect from '@/components/ui/SearchableSelect';
-import type { TrackingCard as TrackingCardType } from '@/types/logistics';
-import { useOrderStatusesQuery } from '@/services/orders';
+import LoadingAnimation from '@/components/ui/loadingAnimation';
+import PaginationFooter from '@/components/ui/pagination-footer';
+import type { TrackingCard as TrackingCardType, FollowupOrder, FollowupFilters } from '@/types/logistics';
+import { useShippingEventsQuery } from '@/services/lookups';
+import {
+  useFollowupNewOrdersQuery,
+  useFollowupOverdueQuery,
+  useFollowupExecutedQuery,
+} from '@/services/followup';
 import TrackingCard from './TrackingCard';
 import TrackingEmptyState from './TrackingEmptyState';
 import { useDebounce } from '@/utils/debounce';
 
-const today = new Date().toISOString().split('T')[0];
-const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-const now = new Date().toISOString();
+function mapFollowupOrderToCard(
+  order: FollowupOrder,
+  uiStatus: 'PENDING' | 'OVERDUE' | 'COMPLETED'
+): TrackingCardType {
+  const latestShipping = order.shippingEvents?.[0];
+  const latestFollowup = order.followupEvents?.[0];
 
-const initialMockCards: TrackingCardType[] = [
-  {
-    id: 1,
-    orderId: 101,
-    orderCode: 'ORD-001',
+  return {
+    id: order.id,
+    orderId: order.id,
+    orderCode: order.code,
     type: 'COURIER',
-    scheduledDate: today,
-    status: 'PENDING',
-    courierUpdate: 'العميل مش موجود في العنوان',
-    courierName: 'محمد السائق',
-    courierPhone: '01012345678',
-    agentStatus: null,
+    scheduledDate: order.firstAttemptAt ?? order.createdAt,
+    status: uiStatus,
+    courierUpdate: latestShipping?.note ?? latestShipping?.name ?? null,
+    courierName: order.delegateName ?? null,
+    courierPhone: order.delegatePhone ?? null,
+    agentStatus: latestFollowup?.name ?? null,
     agentFlag: null,
-    agentNote: null,
-    postponedUntil: null,
-    completedAt: null,
-    employeeId: null,
-    employeeName: null,
-    createdAt: now,
-    updatedAt: now,
-    order: {
-      customers: { name: 'أحمد محمد', phone_numbers: ['01098765432'] } as any,
-      totalCost: 350,
-      order_products: [{ products: { name: 'صندل اديداس' }, variants: [{ label: 'اللون', value: 'أسود' }, { label: 'المقاس', value: '42' }] }] as any,
-    },
-  },
-  {
-    id: 2,
-    orderId: 102,
-    orderCode: 'ORD-002',
-    type: 'COURIER',
-    scheduledDate: today,
-    status: 'PENDING',
-    courierUpdate: 'تم الاتصال ولا يرد',
-    courierName: 'أحمد المندوب',
-    courierPhone: '01112223344',
-    agentStatus: null,
-    agentFlag: null,
-    agentNote: null,
-    postponedUntil: null,
-    completedAt: null,
-    employeeId: null,
-    employeeName: null,
-    createdAt: now,
-    updatedAt: now,
-    order: {
-      customers: { name: 'سارة علي', phone_numbers: ['01055566677'] } as any,
-      totalCost: 500,
-      order_products: [{ products: { name: 'حذاء نايك' }, variants: [{ label: 'اللون', value: 'أبيض' }, { label: 'المقاس', value: '38' }] }] as any,
-    },
-  },
-  {
-    id: 3,
-    orderId: 103,
-    orderCode: 'ORD-003',
-    type: 'COURIER',
-    scheduledDate: yesterday,
-    status: 'OVERDUE',
-    courierUpdate: 'العميل رفض الاستلام',
-    courierName: null,
-    courierPhone: null,
-    agentStatus: null,
-    agentFlag: null,
-    agentNote: null,
-    postponedUntil: null,
-    completedAt: null,
-    employeeId: null,
-    employeeName: null,
-    createdAt: now,
-    updatedAt: now,
-    order: {
-      customers: { name: 'محمد حسن', phone_numbers: ['01099988877'] } as any,
-      totalCost: 275,
-      order_products: [{ products: { name: 'شنطة يد' }, variants: [{ label: 'اللون', value: 'بني' }] }] as any,
-    },
-  },
-  {
-    id: 4,
-    orderId: 104,
-    orderCode: 'ORD-004',
-    type: 'COURIER',
-    scheduledDate: today,
-    status: 'COMPLETED',
-    courierUpdate: 'تم التسليم بنجاح',
-    courierName: 'خالد التوصيل',
-    courierPhone: '01234567890',
-    agentStatus: 'CLOSED',
-    agentFlag: 'CORRECT',
-    agentNote: null,
-    postponedUntil: null,
-    completedAt: now,
-    employeeId: null,
-    employeeName: null,
-    createdAt: now,
-    updatedAt: now,
-    order: {
-      customers: { name: 'فاطمة أحمد', phone_numbers: ['01011122233'] } as any,
-      totalCost: 180,
-      order_products: [{ products: { name: 'تيشيرت قطن' }, variants: [{ label: 'اللون', value: 'أزرق' }, { label: 'المقاس', value: 'L' }] }] as any,
-    },
-  },
-  {
-    id: 5,
-    orderId: 105,
-    orderCode: 'ORD-005',
-    type: 'COURIER',
-    scheduledDate: today,
-    status: 'PENDING',
-    courierUpdate: null,
-    courierName: 'علي المندوب',
-    courierPhone: '01555666777',
-    agentStatus: null,
-    agentFlag: null,
-    agentNote: null,
-    postponedUntil: null,
-    completedAt: null,
-    employeeId: null,
-    employeeName: null,
-    createdAt: now,
-    updatedAt: now,
-    order: {
-      customers: { name: 'عمر خالد', phone_numbers: ['01077788899'] } as any,
-      totalCost: 420,
-      order_products: [{ products: { name: 'ساعة كاسيو' }, variants: [] }] as any,
-    },
-  },
-];
+    agentNote: latestFollowup?.note ?? null,
+    agentEventAt: latestFollowup?.createdAt ?? null,
+    postponedUntil: order.postponedUntil ?? null,
+    completedAt: uiStatus === 'COMPLETED' ? (latestFollowup?.createdAt ?? order.updatedAt) : null,
+    employeeId: latestFollowup?.employeeId ?? null,
+    employeeName: latestFollowup?.employee?.name ?? null,
+    shippingEventId: latestShipping?.id ?? null,
+    createdAt: order.createdAt,
+    updatedAt: order.updatedAt,
+    order,
+  };
+}
 
-function matchesSearch(card: TrackingCardType, query: string): boolean {
-  const q = query.toLowerCase();
+function buildFollowupFilters(
+  debouncedSearch: string,
+  shippingEvent: string,
+  pageSize: number,
+  page: number,
+  extras: Partial<FollowupFilters> = {}
+): FollowupFilters {
+  const next: FollowupFilters = { ...extras, limit: pageSize, page };
+  const trimmed = debouncedSearch.trim();
+  if (trimmed) next.search = trimmed;
+  if (shippingEvent) next.shippingStatuses = [shippingEvent];
+  return next;
+}
+
+interface TrackingFiltersBarProps {
+  search: string;
+  onSearchChange: (value: string) => void;
+  shippingEvent: string;
+  onShippingEventChange: (value: string) => void;
+  shippingEventOptions: string[];
+  isLoadingShippingEvents: boolean;
+}
+
+function TrackingFiltersBar({
+  search,
+  onSearchChange,
+  shippingEvent,
+  onShippingEventChange,
+  shippingEventOptions,
+  isLoadingShippingEvents,
+}: TrackingFiltersBarProps) {
   return (
-    card.orderCode.toLowerCase().includes(q) ||
-    (card.order?.customers?.name as string || '').toLowerCase().includes(q) ||
-    (card.courierUpdate || '').toLowerCase().includes(q)
+    <div className="flex flex-col sm:flex-row gap-3 mt-4" dir="rtl">
+      <Input
+        type="text"
+        placeholder="بحث بكود الطلب أو اسم العميل..."
+        value={search}
+        onChange={(e) => onSearchChange(e.target.value)}
+        onClear={() => onSearchChange('')}
+        clearable
+        className="flex-1"
+        inputClassName="bg-white"
+      />
+      <SearchableSelect
+        value={shippingEvent}
+        onChange={onShippingEventChange}
+        options={shippingEventOptions}
+        placeholder="حدد حالة الشحنة..."
+        loading={isLoadingShippingEvents}
+        clearable
+        onClear={() => onShippingEventChange('')}
+        widthClass="sm:w-48"
+      />
+    </div>
   );
 }
 
+type FollowupTabValue = 'pending' | 'overdue' | 'completed';
+
+const DEFAULT_PAGE_SIZE = 20;
+
 export default function TrackingTabs() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const debouncedSearch = useDebounce(searchQuery, 300);
-  const { data: orderStatuses } = useOrderStatusesQuery();
+  const [activeTab, setActiveTab] = useState<FollowupTabValue>('pending');
+  const [visitedTabs, setVisitedTabs] = useState<Set<FollowupTabValue>>(() => new Set(['pending']));
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
 
-  const statusOptions = useMemo(() => {
-    if (!orderStatuses) return [];
-    return orderStatuses.map((s) => ({ key: s.key, label: s.label }));
-  }, [orderStatuses]);
+  const [pendingSearch, setPendingSearch] = useState('');
+  const [pendingShippingEvent, setPendingShippingEvent] = useState('');
+  const [pendingPage, setPendingPage] = useState(1);
+  const [pendingExtras] = useState<Partial<FollowupFilters>>({});
 
-  const filteredCards = useMemo(() => {
-    let result: TrackingCardType[] = initialMockCards;
+  const [overdueSearch, setOverdueSearch] = useState('');
+  const [overdueShippingEvent, setOverdueShippingEvent] = useState('');
+  const [overduePage, setOverduePage] = useState(1);
+  const [overdueExtras] = useState<Partial<FollowupFilters>>({});
 
-    if (statusFilter) {
-      result = result.filter((c) => c.status === statusFilter);
-    }
+  const [executedSearch, setExecutedSearch] = useState('');
+  const [executedShippingEvent, setExecutedShippingEvent] = useState('');
+  const [executedPage, setExecutedPage] = useState(1);
+  const [executedExtras] = useState<Partial<FollowupFilters>>({});
 
-    if (debouncedSearch.trim()) {
-      result = result.filter((c) => matchesSearch(c, debouncedSearch));
-    }
+  const debouncedPendingSearch = useDebounce(pendingSearch, 300);
+  const debouncedOverdueSearch = useDebounce(overdueSearch, 300);
+  const debouncedExecutedSearch = useDebounce(executedSearch, 300);
 
-    return result;
-  }, [debouncedSearch, statusFilter]);
+  const { data: shippingEvents, isLoading: isLoadingShippingEvents } = useShippingEventsQuery();
+  const shippingEventOptions = useMemo(() => shippingEvents ?? [], [shippingEvents]);
+
+  const handleTabChange = (value: string) => {
+    const next = value as FollowupTabValue;
+    setActiveTab(next);
+    setVisitedTabs((prev) => {
+      if (prev.has(next)) return prev;
+      const updated = new Set(prev);
+      updated.add(next);
+      return updated;
+    });
+  };
+
+  useEffect(() => {
+    setPendingPage(1);
+  }, [debouncedPendingSearch, pendingShippingEvent, pageSize]);
+
+  useEffect(() => {
+    setOverduePage(1);
+  }, [debouncedOverdueSearch, overdueShippingEvent, pageSize]);
+
+  useEffect(() => {
+    setExecutedPage(1);
+  }, [debouncedExecutedSearch, executedShippingEvent, pageSize]);
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+  };
+
+  const pendingFilters = useMemo<FollowupFilters>(
+    () => buildFollowupFilters(debouncedPendingSearch, pendingShippingEvent, pageSize, pendingPage, pendingExtras),
+    [debouncedPendingSearch, pendingShippingEvent, pageSize, pendingPage, pendingExtras]
+  );
+  const overdueFilters = useMemo<FollowupFilters>(
+    () => buildFollowupFilters(debouncedOverdueSearch, overdueShippingEvent, pageSize, overduePage, overdueExtras),
+    [debouncedOverdueSearch, overdueShippingEvent, pageSize, overduePage, overdueExtras]
+  );
+  const executedFilters = useMemo<FollowupFilters>(
+    () => buildFollowupFilters(debouncedExecutedSearch, executedShippingEvent, pageSize, executedPage, executedExtras),
+    [debouncedExecutedSearch, executedShippingEvent, pageSize, executedPage, executedExtras]
+  );
+
+  const newOrdersQuery = useFollowupNewOrdersQuery(pendingFilters, visitedTabs.has('pending'));
+  const overdueQuery = useFollowupOverdueQuery(overdueFilters, visitedTabs.has('overdue'));
+  const executedQuery = useFollowupExecutedQuery(executedFilters, visitedTabs.has('completed'));
 
   const pendingCards = useMemo(
-    () => filteredCards.filter((c) => c.status === 'PENDING'),
-    [filteredCards]
+    () => (newOrdersQuery.data?.data ?? []).map((o) => mapFollowupOrderToCard(o, 'PENDING')),
+    [newOrdersQuery.data]
   );
   const overdueCards = useMemo(
-    () => filteredCards.filter((c) => c.status === 'OVERDUE'),
-    [filteredCards]
+    () => (overdueQuery.data?.data ?? []).map((o) => mapFollowupOrderToCard(o, 'OVERDUE')),
+    [overdueQuery.data]
   );
   const completedCards = useMemo(
-    () => filteredCards.filter((c) => c.status === 'COMPLETED'),
-    [filteredCards]
+    () => (executedQuery.data?.data ?? []).map((o) => mapFollowupOrderToCard(o, 'COMPLETED')),
+    [executedQuery.data]
   );
 
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col sm:flex-row gap-3" dir="rtl">
-        <Input
-          type="text"
-          placeholder="بحث بكود الطلب أو اسم العميل..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onClear={() => setSearchQuery('')}
-          clearable
-          className="flex-1"
-          inputClassName="bg-white"
-        />
-        <SearchableSelect
-          value={statusFilter}
-          onChange={setStatusFilter}
-          options={statusOptions}
-          placeholder="الحالة"
-          clearable
-          onClear={() => setStatusFilter('')}
-          widthClass="sm:w-48"
-        />
-      </div>
+  const pendingMeta = newOrdersQuery.data?.meta;
+  const overdueMeta = overdueQuery.data?.meta;
+  const executedMeta = executedQuery.data?.meta;
 
-    <Tabs defaultValue="pending">
+  const pendingCount = pendingMeta?.total ?? pendingCards.length;
+  const overdueCount = overdueMeta?.total ?? overdueCards.length;
+  const completedCount = executedMeta?.total ?? completedCards.length;
+
+  const pendingHasFilters = Boolean(debouncedPendingSearch.trim() || pendingShippingEvent);
+  const overdueHasFilters = Boolean(debouncedOverdueSearch.trim() || overdueShippingEvent);
+  const executedHasFilters = Boolean(debouncedExecutedSearch.trim() || executedShippingEvent);
+
+  return (
+    <Tabs value={activeTab} onValueChange={handleTabChange}>
       <TabsList dir="rtl">
         <TabsTrigger value="pending" className="gap-2">
           طلبات جديدة
           <span className="inline-flex items-center justify-center rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold min-w-[24px]">
-            {pendingCards.length}
+            {pendingCount}
           </span>
         </TabsTrigger>
         <TabsTrigger value="overdue" className="gap-2">
           طلبات متأخرة
           <span className="inline-flex items-center justify-center rounded-full bg-red-100 text-red-700 px-2 py-0.5 text-xs font-bold min-w-[24px] data-[state=active]:bg-white/20 data-[state=active]:text-white">
-            {overdueCards.length}
+            {overdueCount}
           </span>
         </TabsTrigger>
         <TabsTrigger value="completed" className="gap-2">
           طلبات منفذة
           <span className="inline-flex items-center justify-center rounded-full bg-green-100 text-green-700 px-2 py-0.5 text-xs font-bold min-w-[24px] data-[state=active]:bg-white/20 data-[state=active]:text-white">
-            {completedCards.length}
+            {completedCount}
           </span>
         </TabsTrigger>
       </TabsList>
 
       <TabsContent value="pending" dir="rtl">
-        {pendingCards.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {pendingCards.map((card) => (
-              <TrackingCard
-                key={card.id}
-                card={card}
+        <TrackingFiltersBar
+          search={pendingSearch}
+          onSearchChange={setPendingSearch}
+          shippingEvent={pendingShippingEvent}
+          onShippingEventChange={setPendingShippingEvent}
+          shippingEventOptions={shippingEventOptions}
+          isLoadingShippingEvents={isLoadingShippingEvents}
+        />
+        {newOrdersQuery.isLoading ? (
+          <LoadingAnimation />
+        ) : pendingCards.length > 0 ? (
+          <div className="flex flex-col gap-4 mt-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {pendingCards.map((card) => (
+                <TrackingCard key={card.id} card={card} />
+              ))}
+            </div>
+            {pendingMeta && pendingMeta.totalPages > 1 && (
+              <PaginationFooter
+                currentPage={pendingMeta.page}
+                totalPages={pendingMeta.totalPages}
+                totalItems={pendingMeta.total}
+                hasNextPage={pendingMeta.page < pendingMeta.totalPages}
+                hasPreviousPage={pendingMeta.page > 1}
+                onPageChange={setPendingPage}
+                onPrevious={() => setPendingPage((p) => Math.max(1, p - 1))}
+                onNext={() => setPendingPage((p) => Math.min(pendingMeta.totalPages, p + 1))}
+                currentPageSize={pageSize}
+                onPageSizeChange={handlePageSizeChange}
               />
-            ))}
+            )}
           </div>
         ) : (
           <TrackingEmptyState
-            message="تم إنهاء جميع مهام المتابعة لليوم"
+            message={pendingHasFilters ? 'لا توجد نتائج مطابقة، جرّب تعديل البحث أو الفلاتر' : 'تم إنهاء جميع مهام المتابعة لليوم'}
             icon={<LiaClipboardListSolid />}
           />
         )}
       </TabsContent>
 
       <TabsContent value="overdue" dir="rtl">
-        {overdueCards.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {overdueCards.map((card) => (
-              <TrackingCard
-                key={card.id}
-                card={card}
+        <TrackingFiltersBar
+          search={overdueSearch}
+          onSearchChange={setOverdueSearch}
+          shippingEvent={overdueShippingEvent}
+          onShippingEventChange={setOverdueShippingEvent}
+          shippingEventOptions={shippingEventOptions}
+          isLoadingShippingEvents={isLoadingShippingEvents}
+        />
+        {overdueQuery.isLoading ? (
+          <LoadingAnimation />
+        ) : overdueCards.length > 0 ? (
+          <div className="flex flex-col gap-4 mt-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {overdueCards.map((card) => (
+                <TrackingCard key={card.id} card={card} />
+              ))}
+            </div>
+            {overdueMeta && overdueMeta.totalPages > 1 && (
+              <PaginationFooter
+                currentPage={overdueMeta.page}
+                totalPages={overdueMeta.totalPages}
+                totalItems={overdueMeta.total}
+                hasNextPage={overdueMeta.page < overdueMeta.totalPages}
+                hasPreviousPage={overdueMeta.page > 1}
+                onPageChange={setOverduePage}
+                onPrevious={() => setOverduePage((p) => Math.max(1, p - 1))}
+                onNext={() => setOverduePage((p) => Math.min(overdueMeta.totalPages, p + 1))}
+                currentPageSize={pageSize}
+                onPageSizeChange={handlePageSizeChange}
               />
-            ))}
+            )}
           </div>
         ) : (
           <TrackingEmptyState
-            message="لا توجد طلبات متأخرة"
+            message={overdueHasFilters ? 'لا توجد نتائج مطابقة، جرّب تعديل البحث أو الفلاتر' : 'لا توجد طلبات متأخرة'}
             icon={<LiaClockSolid />}
           />
         )}
       </TabsContent>
 
       <TabsContent value="completed" dir="rtl">
-        {completedCards.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {completedCards.map((card) => (
-              <TrackingCard
-                key={card.id}
-                card={card}
+        <TrackingFiltersBar
+          search={executedSearch}
+          onSearchChange={setExecutedSearch}
+          shippingEvent={executedShippingEvent}
+          onShippingEventChange={setExecutedShippingEvent}
+          shippingEventOptions={shippingEventOptions}
+          isLoadingShippingEvents={isLoadingShippingEvents}
+        />
+        {executedQuery.isLoading ? (
+          <LoadingAnimation />
+        ) : completedCards.length > 0 ? (
+          <div className="flex flex-col gap-4 mt-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {completedCards.map((card) => (
+                <TrackingCard key={card.id} card={card} />
+              ))}
+            </div>
+            {executedMeta && executedMeta.totalPages > 1 && (
+              <PaginationFooter
+                currentPage={executedMeta.page}
+                totalPages={executedMeta.totalPages}
+                totalItems={executedMeta.total}
+                hasNextPage={executedMeta.page < executedMeta.totalPages}
+                hasPreviousPage={executedMeta.page > 1}
+                onPageChange={setExecutedPage}
+                onPrevious={() => setExecutedPage((p) => Math.max(1, p - 1))}
+                onNext={() => setExecutedPage((p) => Math.min(executedMeta.totalPages, p + 1))}
+                currentPageSize={pageSize}
+                onPageSizeChange={handlePageSizeChange}
               />
-            ))}
+            )}
           </div>
         ) : (
           <TrackingEmptyState
-            message="لم يتم إكمال أي مهام بعد اليوم"
+            message={executedHasFilters ? 'لا توجد نتائج مطابقة، جرّب تعديل البحث أو الفلاتر' : 'لم يتم إكمال أي مهام بعد اليوم'}
             icon={<LiaCheckDoubleSolid />}
           />
         )}
       </TabsContent>
     </Tabs>
-    </div>
   );
 }

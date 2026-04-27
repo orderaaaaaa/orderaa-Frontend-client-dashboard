@@ -25,6 +25,7 @@ export const QUERY_KEYS = {
   UTM_SOURCES: 'utm-sources',
   PAGE_NAMES: 'page-names',
   DEPARTMENTS: 'departments',
+  SHIPPING_EVENTS: 'shipping-events',
 
   // Employees
   EMPLOYEES: 'employees',
@@ -49,6 +50,9 @@ export const QUERY_KEYS = {
   // Logistics & Tracking
   GOVERNORATE_LOGISTICS_CONFIG: 'governorate-logistics-config',
   TRACKING_CARDS: 'tracking-cards',
+  FOLLOWUP_NEW_ORDERS: 'followup-new-orders',
+  FOLLOWUP_OVERDUE: 'followup-overdue',
+  FOLLOWUP_EXECUTED: 'followup-executed',
   POST_SHIPPING_REASONS: 'post-shipping-reasons',
   TOP_POST_SHIPPING_REASONS: 'top-post-shipping-reasons',
   SHIPPING_CANCELLATION_REASONS: 'shipping-cancellation-reasons',

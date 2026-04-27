@@ -23,9 +23,15 @@ import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import ProductSelectionModal, {
   type SelectableProduct,
 } from '@/components/ui/product-selection-modal';
-import { useUpdateTrackingCard } from '@/services/logistics';
-import { useShippingCancellationReasons } from '@/services/logistics';
-import type { TrackingAgentStatus, UpdateTrackingCardData } from '@/types/logistics';
+import {
+  useFollowupAttemptedMutation,
+  useFollowupPostponedMutation,
+  useFollowupChangeProductsMutation,
+  useFollowupSendAgainMutation,
+  useFollowupCancelledMutation,
+  useFollowupOverdueMutation,
+} from '@/services/followup';
+import { useCancellationReasons } from '@/services/orders';
 
 type ActionType =
   | 'FOLLOW_UP'
@@ -34,6 +40,8 @@ type ActionType =
   | 'RESEND'
   | 'CANCEL'
   | 'LATE';
+
+type FollowUpSubStatus = 'CLOSED' | 'NO_ANSWER' | 'NOT_COLLECTING' | 'BUSY';
 
 const ACTION_OPTIONS: {
   value: ActionType;
@@ -51,7 +59,7 @@ const ACTION_OPTIONS: {
 ];
 
 const FOLLOW_UP_OPTIONS: {
-  value: TrackingAgentStatus;
+  value: FollowUpSubStatus;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
 }[] = [
@@ -61,28 +69,48 @@ const FOLLOW_UP_OPTIONS: {
   { value: 'BUSY', label: 'مشغول', icon: LiaSpinnerSolid },
 ];
 
+const FOLLOW_UP_NOTE_LABELS: Record<FollowUpSubStatus, string> = {
+  CLOSED: 'مغلق',
+  NO_ANSWER: 'مش بيرد',
+  NOT_COLLECTING: 'مش بيجمع',
+  BUSY: 'مشغول',
+};
+
 interface AgentStatusUpdateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  cardId: number;
+  orderId: number;
 }
 
 export default function AgentStatusUpdateModal({
   isOpen,
   onClose,
-  cardId,
+  orderId,
 }: AgentStatusUpdateModalProps) {
-  const updateMutation = useUpdateTrackingCard();
-  const { data: cancellationReasons } = useShippingCancellationReasons(isOpen);
+  const attemptedMutation = useFollowupAttemptedMutation();
+  const postponedMutation = useFollowupPostponedMutation();
+  const changeProductsMutation = useFollowupChangeProductsMutation();
+  const sendAgainMutation = useFollowupSendAgainMutation();
+  const cancelledMutation = useFollowupCancelledMutation();
+  const overdueMutation = useFollowupOverdueMutation();
+
+  const { data: cancellationReasons, isLoading: isLoadingCancellationReasons } = useCancellationReasons(isOpen);
 
   const [selectedAction, setSelectedAction] = useState<ActionType | null>(null);
-  const [followUpStatus, setFollowUpStatus] = useState<TrackingAgentStatus | null>(null);
+  const [followUpStatus, setFollowUpStatus] = useState<FollowUpSubStatus | null>(null);
   const [postponeDate, setPostponeDate] = useState<Date | null>(null);
   const [cancelReasonId, setCancelReasonId] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<SelectableProduct | null>(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isSubmitting =
+    attemptedMutation.isPending ||
+    postponedMutation.isPending ||
+    changeProductsMutation.isPending ||
+    sendAgainMutation.isPending ||
+    cancelledMutation.isPending ||
+    overdueMutation.isPending;
 
   const resetForm = useCallback(() => {
     setSelectedAction(null);
@@ -127,45 +155,90 @@ export default function AgentStatusUpdateModal({
     }
   }, [selectedAction, followUpStatus, postponeDate, selectedProduct, cancelReasonId, notes]);
 
-  const buildPayload = useCallback((): UpdateTrackingCardData => {
-    switch (selectedAction) {
-      case 'FOLLOW_UP':
-        return { agentStatus: followUpStatus! };
-      case 'POSTPONE':
-        return { agentStatus: 'POSTPONE', postponedUntil: postponeDate?.toISOString() };
-      case 'CHANGE_PRODUCT':
-        return {
-          action: 'CHANGE_PRODUCT',
-          newProductId: selectedProduct!.id,
-          newVariants: selectedProduct!.selectedVariants?.map((v) => ({ label: v.label, value: v.value })),
-        };
-      case 'RESEND':
-        return { action: 'RESEND', actionNote: notes };
-      case 'CANCEL':
-        return { action: 'CANCEL', cancelReasonId: Number(cancelReasonId), actionNote: notes || undefined };
-      case 'LATE':
-        return { action: 'LATE', actionNote: notes };
-      default:
-        return {};
-    }
-  }, [selectedAction, followUpStatus, postponeDate, selectedProduct, cancelReasonId, notes]);
-
   const handleConfirm = useCallback(async () => {
-    setIsSubmitting(true);
+    if (!selectedAction) return;
+
     try {
-      await updateMutation.mutateAsync({
-        cardId,
-        update: buildPayload(),
-      });
+      switch (selectedAction) {
+        case 'FOLLOW_UP':
+          if (!followUpStatus) return;
+          await attemptedMutation.mutateAsync({
+            orderId,
+            note: FOLLOW_UP_NOTE_LABELS[followUpStatus],
+          });
+          break;
+        case 'POSTPONE':
+          if (!postponeDate) return;
+          await postponedMutation.mutateAsync({
+            orderId,
+            date: postponeDate.toISOString(),
+          });
+          break;
+        case 'CHANGE_PRODUCT': {
+          if (!selectedProduct) return;
+          const selectedVariants = selectedProduct.selectedVariants ?? [];
+          const products = selectedVariants.length > 0
+            ? selectedVariants.map((v) => ({
+                productId: selectedProduct.id,
+                quantity: 1,
+                variants: [{ label: v.label, value: v.value }],
+              }))
+            : [{ productId: selectedProduct.id, quantity: 1, variants: [] }];
+          await changeProductsMutation.mutateAsync({ orderId, products });
+          break;
+        }
+        case 'RESEND':
+          if (!notes.trim()) return;
+          await sendAgainMutation.mutateAsync({
+            orderId,
+            reason: notes.trim(),
+          });
+          break;
+        case 'CANCEL': {
+          if (!cancelReasonId) return;
+          const reasonObj = cancellationReasons?.find((r) => String(r.id) === cancelReasonId);
+          if (!reasonObj) {
+            toast.error('سبب الإلغاء غير موجود');
+            return;
+          }
+          await cancelledMutation.mutateAsync({
+            orderId,
+            reason: reasonObj.reasonName,
+            cancellationNotes: notes.trim() || undefined,
+          });
+          break;
+        }
+        case 'LATE':
+          if (!notes.trim()) return;
+          await overdueMutation.mutateAsync({
+            orderId,
+            lateNotes: notes.trim(),
+          });
+          break;
+      }
       toast.success('تم تحديث الحالة بنجاح');
       handleClose();
     } catch (err: any) {
       const msg = err?.response?.data?.message;
       toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الحالة');
-    } finally {
-      setIsSubmitting(false);
     }
-  }, [cardId, buildPayload, updateMutation, handleClose]);
+  }, [
+    selectedAction,
+    followUpStatus,
+    postponeDate,
+    selectedProduct,
+    cancelReasonId,
+    cancellationReasons,
+    notes,
+    orderId,
+    attemptedMutation,
+    postponedMutation,
+    changeProductsMutation,
+    sendAgainMutation,
+    cancelledMutation,
+    overdueMutation,
+    handleClose,
+  ]);
 
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -190,11 +263,13 @@ export default function AgentStatusUpdateModal({
                   key={opt.value}
                   type="button"
                   onClick={() => setFollowUpStatus(opt.value)}
+                  disabled={isSubmitting}
                   className={clsx(
                     'flex items-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 cursor-pointer',
                     isSelected
                       ? 'border-blue-500 bg-blue-50 shadow-sm'
                       : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/30',
+                    isSubmitting && 'opacity-60 cursor-not-allowed',
                   )}
                 >
                   <div className={clsx(
@@ -275,6 +350,8 @@ export default function AgentStatusUpdateModal({
               placeholder="اختر سبب الالغاء"
               searchPlaceholder="بحث..."
               emptyMessage="لا توجد أسباب متاحة"
+              loading={isLoadingCancellationReasons}
+              disabled={isSubmitting}
             />
             <Textarea
               name="cancelNotes"
@@ -327,11 +404,13 @@ export default function AgentStatusUpdateModal({
                   key={action.value}
                   type="button"
                   onClick={() => handleSelectAction(action.value)}
+                  disabled={isSubmitting}
                   className={clsx(
                     'flex flex-col items-center justify-center gap-1.5 py-3 px-3 min-w-[75px] shrink-0 md:flex-1 md:min-w-0 rounded-xl border-2 transition-all duration-200 cursor-pointer',
                     isSelected
                       ? action.activeColor
                       : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm',
+                    isSubmitting && 'opacity-60 cursor-not-allowed',
                   )}
                 >
                   <div className={clsx(
