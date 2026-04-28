@@ -11,6 +11,7 @@ import {
   LiaLockSolid,
 } from 'react-icons/lia';
 import { ImageUploadField } from '@/components/ui/image-upload-field';
+import { MultiImageUploadField } from '@/components/ui/multi-image-upload-field';
 import { Button } from '@/components/ui/button';
 import {
   AccordionContent,
@@ -24,6 +25,8 @@ interface ProofUploadPanelProps {
   onComplete: () => void;
   receiptImage: File | null;
   setReceiptImage: (file: File | null) => void;
+  codeSheetImages: File[];
+  setCodeSheetImages: (files: File[]) => void;
   proofUploaded: boolean;
   setProofUploaded: (uploaded: boolean) => void;
 }
@@ -32,6 +35,10 @@ const proofSchema = z.object({
   receiptImage: z.custom<File>((v) => v instanceof File, {
     message: 'يرجى رفع صورة الإيصال المستلم من مندوب الشحن',
   }),
+  codeSheetImages: z
+    .array(z.custom<File>((v) => v instanceof File))
+    .optional()
+    .default([]),
 });
 
 type ProofFormValues = z.infer<typeof proofSchema>;
@@ -41,6 +48,8 @@ export function ProofUploadPanel({
   onComplete,
   receiptImage,
   setReceiptImage,
+  codeSheetImages,
+  setCodeSheetImages,
   proofUploaded,
   setProofUploaded,
 }: ProofUploadPanelProps) {
@@ -50,6 +59,7 @@ export function ProofUploadPanel({
     resolver: zodResolver(proofSchema),
     defaultValues: {
       receiptImage: receiptImage as File,
+      codeSheetImages: codeSheetImages,
     },
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -61,12 +71,16 @@ export function ProofUploadPanel({
   useEffect(() => {
     reset({
       receiptImage: receiptImage as File,
+      codeSheetImages: codeSheetImages,
     });
-  }, [receiptImage, reset]);
+  }, [receiptImage, codeSheetImages, reset]);
 
   const onSubmit = async (values: ProofFormValues) => {
     await uploadMutation.mutateAsync({
       receipt: values.receiptImage,
+      codeSheets: values.codeSheetImages?.length
+        ? values.codeSheetImages
+        : undefined,
     });
     setProofUploaded(true);
     onComplete();
@@ -95,7 +109,9 @@ export function ProofUploadPanel({
           <div className="flex items-center gap-3 w-full text-start text-gray-400">
             <LiaLockSolid className="w-5 h-5 shrink-0" />
             <div className="flex flex-col">
-              <h3 className="font-bold">2- رفع الاستلام (الإيصال)</h3>
+              <h3 className="font-bold">
+                2- رفع الاستلام (الإيصال + شيت الأكواد)
+              </h3>
               <p className="text-xs">
                 يفتح هذا القسم بعد الانتهاء من المسح الرئيسي
               </p>
@@ -110,6 +126,9 @@ export function ProofUploadPanel({
               </h3>
               <p className="text-xs text-emerald-700">
                 الإيصال ({receiptImage?.name || 'ملف محفوظ'})
+                {codeSheetImages.length > 0
+                  ? ` + ${codeSheetImages.length} صورة من شيت الأكواد`
+                  : ''}
               </p>
             </div>
           </div>
@@ -119,7 +138,7 @@ export function ProofUploadPanel({
               2- رفع الاستلام
             </h3>
             <span className="text-xs text-gray-500">
-              صورة الإيصال المستلم من مندوب الشحن
+              صورة الإيصال + شيت الأكواد المطبوع (اختياري)
             </span>
           </div>
         )}
@@ -140,6 +159,23 @@ export function ProofUploadPanel({
                 description="صورة واحدة للإيصال المستلم من مندوب الشحن"
                 error={fieldState.error?.message}
                 required
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="codeSheetImages"
+            render={({ field, fieldState }) => (
+              <MultiImageUploadField
+                value={field.value}
+                onChange={(files) => {
+                  field.onChange(files);
+                  setCodeSheetImages(files);
+                }}
+                title="شيت الأكواد"
+                description="صور متعددة من الشيت المطبوع بالأكواد"
+                error={fieldState.error?.message}
               />
             )}
           />

@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { Breadcrumb } from '@/components/dashboard-layout/Breadcrumb';
 import { Stepper, StepContent } from '@/components/ui/stepper';
-import BaseModal from '@/components/ui/base-modal';
 import { Step1Receive } from './Step1Receive';
 import { Step2Categorize } from './Step2Categorize';
 import { WizardFooter } from './WizardFooter';
@@ -29,12 +28,6 @@ export function ReturnsReceivingContent() {
   const [orderCache, setOrderCache] = useState<
     Record<string, ReturnOrder>
   >({});
-  const [categorizedOrders, setCategorizedOrders] = useState<
-    Record<string, CategoryBucket>
-  >({});
-
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [uncategorizedCount, setUncategorizedCount] = useState(0);
 
   const updateCategories = useUpdateReturnCategoriesMutation();
 
@@ -66,21 +59,24 @@ export function ReturnsReceivingContent() {
     if (currentStep > 0) setCurrentStep(currentStep - 1);
   };
 
-  const isStep2Valid = Object.keys(categorizedOrders).length > 0;
+  const isStep2Valid = categorizationScans.length > 0;
 
-  const commitCategorization = useCallback(async () => {
-    const entries = Object.entries(categorizedOrders);
+  const handleFinish = useCallback(async () => {
+    const grouped = categorizationScans.reduce<
+      Record<CategoryBucket, string[]>
+    >(
+      (acc, code) => {
+        const bucket = orderCache[code]?.bucket;
+        if (bucket) acc[bucket].push(code);
+        return acc;
+      },
+      { RESEND: [], FINAL_RETURN: [], WAREHOUSE: [] },
+    );
     const payload: CategorizeCommitPayload = {
       sessionId: `session-${Date.now()}`,
-      resendCodes: entries
-        .filter(([, b]) => b === 'RESEND')
-        .map(([c]) => c),
-      finalReturnCodes: entries
-        .filter(([, b]) => b === 'FINAL_RETURN')
-        .map(([c]) => c),
-      warehouseCodes: entries
-        .filter(([, b]) => b === 'WAREHOUSE')
-        .map(([c]) => c),
+      resendCodes: grouped.RESEND,
+      finalReturnCodes: grouped.FINAL_RETURN,
+      warehouseCodes: grouped.WAREHOUSE,
     };
     try {
       await updateCategories.mutateAsync(payload);
@@ -89,24 +85,7 @@ export function ReturnsReceivingContent() {
     } catch {
       /* error toast handled by the mutation's onError */
     }
-  }, [categorizedOrders, updateCategories, router]);
-
-  const handleFinish = useCallback(() => {
-    const uncategorized = categorizationScans.filter(
-      (code) => !categorizedOrders[code],
-    );
-    if (uncategorized.length > 0) {
-      setUncategorizedCount(uncategorized.length);
-      setConfirmOpen(true);
-      return;
-    }
-    void commitCategorization();
-  }, [categorizationScans, categorizedOrders, commitCategorization]);
-
-  const handleConfirmFinish = useCallback(async () => {
-    await commitCategorization();
-    setConfirmOpen(false);
-  }, [commitCategorization]);
+  }, [categorizationScans, orderCache, updateCategories, router]);
 
   const step2Props = useMemo(
     () => ({
@@ -114,10 +93,8 @@ export function ReturnsReceivingContent() {
       setCategorizationScans,
       orderCache,
       setOrderCache,
-      categorizedOrders,
-      setCategorizedOrders,
     }),
-    [categorizationScans, orderCache, categorizedOrders],
+    [categorizationScans, orderCache],
   );
 
   return (
@@ -152,27 +129,6 @@ export function ReturnsReceivingContent() {
           onFinish={handleFinish}
         />
       </div>
-
-      <BaseModal
-        isOpen={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
-        title="تأكيد إنهاء التقسيم"
-        confirmText="إنهاء على أي حال"
-        cancelText="إلغاء"
-        onConfirm={handleConfirmFinish}
-        isLoading={updateCategories.isPending}
-        maxWidth="md:max-w-[480px]"
-      >
-        <div className="flex flex-col gap-2 text-center py-2">
-          <p className="text-sm text-gray-900">
-            يوجد <span className="font-bold">{uncategorizedCount}</span> طلب لم
-            يتم تصنيفه بعد.
-          </p>
-          <p className="text-xs text-gray-500">
-            هل تريد إنهاء التقسيم على أي حال؟ لن يتم تحديث حالة هذه الطلبات.
-          </p>
-        </div>
-      </BaseModal>
     </div>
   );
 }

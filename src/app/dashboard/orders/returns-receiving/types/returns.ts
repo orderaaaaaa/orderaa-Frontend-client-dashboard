@@ -6,6 +6,7 @@ export interface ReturnOrder {
   id: number;
   code: string;
   status: OrderStatus | string;
+  bucket: CategoryBucket;
   totalCost: number;
   governorate?: string;
   city?: string;
@@ -32,11 +33,13 @@ export interface GeneratedResendCode {
 export interface UploadReceiptProofPayload {
   sessionId?: string;
   receipt: File;
+  codeSheets?: File[];
 }
 
 export interface UploadReceiptProofResult {
   sessionId: string;
   receiptUrl: string;
+  codeSheetUrls?: string[];
 }
 
 export interface BulkUpdateResponse {

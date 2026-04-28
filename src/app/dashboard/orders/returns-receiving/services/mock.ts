@@ -73,6 +73,9 @@ export async function uploadReturnsReceiptProof(
   return {
     sessionId,
     receiptUrl: `mock://receipts/${payload.receipt.name}`,
+    codeSheetUrls: payload.codeSheets?.map(
+      (f) => `mock://code-sheets/${f.name}`,
+    ),
   };
 }
 

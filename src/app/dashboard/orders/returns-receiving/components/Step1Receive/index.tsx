@@ -20,6 +20,7 @@ export function Step1Receive({ onValidityChange }: Step1ReceiveProps) {
   const [mainScanCodes, setMainScanCodes] = useState<string[]>([]);
   const [mainPanelLocked, setMainPanelLocked] = useState(false);
   const [receiptImage, setReceiptImage] = useState<File | null>(null);
+  const [codeSheetImages, setCodeSheetImages] = useState<File[]>([]);
   const [proofUploaded, setProofUploaded] = useState(false);
 
   const proofEnabled = mainPanelLocked;
@@ -82,6 +83,8 @@ export function Step1Receive({ onValidityChange }: Step1ReceiveProps) {
           onComplete={() => handleComplete('proof')}
           receiptImage={receiptImage}
           setReceiptImage={setReceiptImage}
+          codeSheetImages={codeSheetImages}
+          setCodeSheetImages={setCodeSheetImages}
           proofUploaded={proofUploaded}
           setProofUploaded={setProofUploaded}
         />
