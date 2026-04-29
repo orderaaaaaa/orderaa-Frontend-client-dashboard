@@ -164,6 +164,7 @@ export function ShippingOrdersContent() {
   } = usePrintOrderBulk({ orders });
 
   const { playSuccessSound, playErrorSound } = useScannerFeedback();
+  const shippingActionableStatuses = useMemo(() => ['PREPARED'], []);
   const {
     scannedOrders,
     actionableOrders,
@@ -177,7 +178,7 @@ export function ShippingOrdersContent() {
     forceActionable,
     searchQuery,
     setSearchQuery,
-  } = useScannedOrders();
+  } = useScannedOrders(shippingActionableStatuses);
   const { mutateAsync: submitForApprovalMutation } = useSubmitForApproval();
 
   const handleScan = useCallback(
@@ -214,16 +215,13 @@ export function ShippingOrdersContent() {
         });
         setFlashingCode(barcode);
         setTimeout(() => setFlashingCode(null), 600);
-        if (
-          order.status === 'CONFIRMED' ||
-          order.status === 'WAITING_FOR_PACKAGING'
-        ) {
+        if (order.status === 'PREPARED') {
           playSuccessSound();
         } else {
           playErrorSound();
           const statusLabel =
             ORDER_STATUS_ARABIC_LABELS[order.status] || order.status;
-          toast.info(`هذا الطلب ليس مؤكد - الحالة: ${statusLabel}`);
+          toast.info(`هذا الطلب ليس جاهزاً للشحن - الحالة: ${statusLabel}`);
         }
       } catch (error: any) {
         playErrorSound();
