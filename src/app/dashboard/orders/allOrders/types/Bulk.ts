@@ -39,7 +39,7 @@ export interface BulkRequest {
   postponedUntil?: string;
   cancelReason?: string;
   cancelNotes?: string;
-  ids?: number[];
+  ordersIds?: number[];
   filters?: FilterOrdersDto;
   excludeIds?: number[];
 }

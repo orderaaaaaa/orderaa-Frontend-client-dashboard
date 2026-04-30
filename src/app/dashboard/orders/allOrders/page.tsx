@@ -323,7 +323,7 @@ function AllOrdersContent() {
         bulkUpdateOrders({
           payload: {
             status: statusKey as OrderStatusKey,
-            ids: selectedOrderIds,
+            ordersIds: selectedOrderIds,
           },
         });
       }

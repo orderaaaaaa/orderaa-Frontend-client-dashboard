@@ -100,7 +100,7 @@ export default function CustomerOrdersModal({
         await bulkUpdateOrders({
           payload: {
             status: statusKey as OrderStatusKey,
-            ids: selectedOrderIds,
+            ordersIds: selectedOrderIds,
           },
         });
         toast.success(`تم تعديل حالة ${selectedOrderIds.length} طلب بنجاح`);
