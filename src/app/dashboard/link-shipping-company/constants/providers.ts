@@ -1,6 +1,4 @@
 import { ShippingProvider } from '../types/shipping';
-import rmExpressLogo from '@/assets/images/RM_EXPRESS.jpeg';
-import torodLogo from '@/assets/images/TOROD.png';
 
 export const providers: ShippingProvider[] = [
   {
@@ -69,14 +67,14 @@ export const providers: ShippingProvider[] = [
   {
     id: 'rm_express',
     name: 'RM Express',
-    logo: rmExpressLogo.src,
+    logo: '/Icons/rm-express.jpeg',
     description: 'شركة ار ام اكسبريس للشحن والتوصيل',
     isActive: true,
   },
   {
     id: 'torod',
     name: 'TOROD',
-    logo: torodLogo.src,
+    logo: '/Icons/torod.png',
     description: 'شركة طرود للشحن والتوصيل',
     isActive: true,
   },

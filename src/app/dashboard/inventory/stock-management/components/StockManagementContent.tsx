@@ -150,6 +150,7 @@ export function StockManagementContent() {
         </div>
       </div>
 
+
       <SummaryCards
         totalProducts={totalProducts}
         totalQuantity={totalQuantity}
