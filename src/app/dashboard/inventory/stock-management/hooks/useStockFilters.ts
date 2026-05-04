@@ -159,6 +159,7 @@ export function useStockFilters() {
 
     isLoading: productsQuery.isLoading,
     isFetching: productsQuery.isFetching,
+    isAnalysisLoading: analysisQuery.isLoading,
     isError: productsQuery.isError || analysisQuery.isError,
     error: productsQuery.error || analysisQuery.error,
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   LiaBoxOpenSolid,
   LiaSearchSolid,
@@ -17,11 +17,14 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from '@/components/ui/popover';
-import PageLoading from '@/components/ui/page-loading';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { StockFilters } from './StockFilters';
 import { SummaryCards } from './SummaryCards';
 import { ProductStockTable } from './ProductStockTable';
+import {
+  StockListSkeleton,
+  SummaryCardsSkeleton,
+} from './StockManagementSkeleton';
 import { useStockFilters } from '../hooks/useStockFilters';
 import { exportStockToExcel, exportStockToPDF } from '../utils/exportStock';
 
@@ -48,7 +51,8 @@ export function StockManagementContent() {
     totalItems,
     hasNextPage,
     hasPreviousPage,
-    isLoading,
+    isFetching,
+    isAnalysisLoading,
     isError,
     error,
     colorOptions,
@@ -60,6 +64,38 @@ export function StockManagementContent() {
   const [filtersOverflow, setFiltersOverflow] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const pendingScrollRef = useRef(false);
+
+  const scrollToTop = useCallback(() => {
+    const scrollTarget =
+      containerRef.current?.closest('main') ?? document.scrollingElement;
+    scrollTarget?.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  useEffect(() => {
+    if (!pendingScrollRef.current) return;
+    if (isFetching || isError) return;
+    pendingScrollRef.current = false;
+    scrollToTop();
+  }, [isFetching, isError, scrollToTop]);
+
+  const goToPage = useCallback(
+    (next: number) => {
+      pendingScrollRef.current = true;
+      setPage(next);
+    },
+    [setPage]
+  );
+
+  const handlePageSizeChange = useCallback(
+    (size: number) => {
+      pendingScrollRef.current = true;
+      setPageSize(size);
+      setPage(1);
+    },
+    [setPage, setPageSize]
+  );
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -101,7 +137,10 @@ export function StockManagementContent() {
       ?.message || 'تعذر تحميل بيانات المخزن';
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden space-y-6">
+    <div
+      ref={containerRef}
+      className="w-full max-w-full overflow-x-hidden space-y-6"
+    >
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">
           {user?.name || 'ادارة المخزن'}
@@ -194,14 +233,18 @@ export function StockManagementContent() {
         </div>
       </div>
 
-      <SummaryCards
-        totalProducts={totalProducts}
-        totalQuantity={totalQuantity}
-        lowStockCount={lowStockCount}
-      />
+      {isAnalysisLoading ? (
+        <SummaryCardsSkeleton />
+      ) : (
+        <SummaryCards
+          totalProducts={totalProducts}
+          totalQuantity={totalQuantity}
+          lowStockCount={lowStockCount}
+        />
+      )}
 
-      {isLoading ? (
-        <PageLoading message="جاري تحميل المخزن..." />
+      {isFetching ? (
+        <StockListSkeleton count={pageSize} />
       ) : isError ? (
         <div className="flex flex-col items-center justify-center py-20 text-gray-400">
           <LiaBoxOpenSolid className="size-16 mb-4 text-red-300" />
@@ -243,21 +286,18 @@ export function StockManagementContent() {
         </div>
       )}
 
-      {!isLoading && !isError && totalPages > 0 && (
+      {!isFetching && !isError && totalPages > 0 && (
         <PaginationFooter
           currentPage={currentPage}
           totalPages={totalPages}
           totalItems={totalItems}
           hasNextPage={hasNextPage}
           hasPreviousPage={hasPreviousPage}
-          onPageChange={setPage}
-          onPrevious={() => setPage(Math.max(1, currentPage - 1))}
-          onNext={() => setPage(Math.min(totalPages, currentPage + 1))}
+          onPageChange={goToPage}
+          onPrevious={() => goToPage(Math.max(1, currentPage - 1))}
+          onNext={() => goToPage(Math.min(totalPages, currentPage + 1))}
           currentPageSize={pageSize}
-          onPageSizeChange={(size) => {
-            setPageSize(size);
-            setPage(1);
-          }}
+          onPageSizeChange={handlePageSizeChange}
         />
       )}
     </div>

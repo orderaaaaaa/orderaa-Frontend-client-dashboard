@@ -89,11 +89,11 @@ export function ProductStockTable({
   return (
     <div className="rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden">
       <div className="flex items-center gap-4 border-b border-gray-100 px-5 py-4">
-        <div className="size-12 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+        <div className="size-12 rounded-lg bg-gray-50 border border-gray-100 overflow-hidden flex-shrink-0">
           <img
             src={product.image}
             alt={product.name}
-            className="size-10 object-contain"
+            className="size-full object-cover"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
             }}
