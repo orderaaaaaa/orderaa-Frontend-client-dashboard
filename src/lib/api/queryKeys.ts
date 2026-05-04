@@ -13,6 +13,11 @@ export const QUERY_KEYS = {
   PRODUCTS: 'products',
   PRODUCT_VARIANTS_OPTIONS: 'product-variants-options',
 
+  // Stock
+  STOCK_ANALYSIS: 'stock-analysis',
+  STOCK_PRODUCTS: 'stock-products',
+  STOCK_FILTER_OPTIONS: 'stock-filter-options',
+
   // Lookups
   GOVERNORATES: 'governorates',
   CITIES: 'cities',

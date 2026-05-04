@@ -2,72 +2,112 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { toast } from 'react-toastify';
+import {
+  fetchAllStockProducts,
+  type StockFiltersDto,
+} from '@/services/stock';
 import type { StockProduct } from '../types';
 import { STOCK_STATUS_CONFIG } from '../constants';
+import { apiListToStockProducts } from './transformStock';
 
-export function exportStockToExcel(products: StockProduct[]) {
+async function loadAllProducts(
+  filters: Omit<StockFiltersDto, 'page' | 'limit'>
+): Promise<StockProduct[]> {
+  try {
+    const apiList = await fetchAllStockProducts(filters);
+    return apiListToStockProducts(apiList);
+  } catch (err) {
+    const message =
+      (err as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || 'تعذر تحميل المنتجات للتصدير';
+    toast.error(message);
+    return [];
+  }
+}
+
+interface FlatStockRow {
+  'اسم المنتج': string;
+  SKU: string;
+  المقاس: string;
+  اللون: string;
+  الكمية: number;
+  الحالة: string;
+}
+
+function flattenProducts(products: StockProduct[]): FlatStockRow[] {
+  const rows: FlatStockRow[] = [];
+  for (const product of products) {
+    for (const variant of product.variants) {
+      for (const color of product.colors) {
+        const stock = variant.stocks[color];
+        if (!stock) continue;
+        rows.push({
+          'اسم المنتج': product.name,
+          SKU: product.sku,
+          المقاس: variant.size,
+          اللون: color,
+          الكمية: stock.quantity,
+          الحالة: STOCK_STATUS_CONFIG[stock.status].label,
+        });
+      }
+    }
+  }
+  return rows;
+}
+
+export async function exportStockToExcel(
+  filters: Omit<StockFiltersDto, 'page' | 'limit'>
+) {
+  const products = await loadAllProducts(filters);
   if (products.length === 0) {
     toast.error('لا توجد منتجات لتصديرها');
     return;
   }
 
+  const rows = flattenProducts(products);
+  if (rows.length === 0) {
+    toast.error('لا توجد بيانات لتصديرها');
+    return;
+  }
+
   const workbook = XLSX.utils.book_new();
-
-  products.forEach((product) => {
-    const rows = product.variants.map((variant) => {
-      const row: Record<string, string | number> = { 'المقاس': variant.size };
-      product.colors.forEach((color) => {
-        const stock = variant.stocks[color];
-        row[color] = stock ? stock.quantity : 0;
-      });
-      return row;
-    });
-
-    const totalsRow: Record<string, string | number> = { 'المقاس': 'الإجمالي' };
-    product.colors.forEach((color) => {
-      totalsRow[color] = product.variants.reduce(
-        (sum, v) => sum + (v.stocks[color]?.quantity ?? 0),
-        0
-      );
-    });
-    rows.push(totalsRow);
-
-    const worksheet = XLSX.utils.json_to_sheet(rows);
-    worksheet['!cols'] = [
-      { wch: 12 },
-      ...product.colors.map(() => ({ wch: 14 })),
-    ];
-
-    const sheetName = product.name.slice(0, 31);
-    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+  const worksheet = XLSX.utils.json_to_sheet(rows, {
+    header: ['اسم المنتج', 'SKU', 'المقاس', 'اللون', 'الكمية', 'الحالة'],
   });
+
+  worksheet['!cols'] = [
+    { wch: 32 },
+    { wch: 18 },
+    { wch: 10 },
+    { wch: 16 },
+    { wch: 10 },
+    { wch: 12 },
+  ];
+
+  if (!worksheet['!views']) worksheet['!views'] = [{}];
+  worksheet['!views'][0] = { ...worksheet['!views'][0], RTL: true };
+
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'المخزن');
 
   const timestamp = new Date().toISOString().split('T')[0];
   XLSX.writeFile(workbook, `تقرير_المخزن_${timestamp}.xlsx`);
   toast.success('تم تصدير التقرير بنجاح');
 }
 
-export async function exportStockToPDF(products: StockProduct[]) {
-  if (products.length === 0) {
-    toast.error('لا توجد منتجات لتصديرها');
-    return;
-  }
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
-  const iframe = document.createElement('iframe');
-  iframe.style.cssText =
-    'position:fixed;left:-9999px;top:0;width:900px;height:1200px;border:none;';
-  document.body.appendChild(iframe);
-
-  const iframeDoc = iframe.contentDocument ?? iframe.contentWindow?.document;
-  if (!iframeDoc) {
-    document.body.removeChild(iframe);
-    return;
-  }
-
-  const tablesHtml = products
+function buildProductsHtml(products: StockProduct[]): string {
+  return products
     .map((product) => {
       const headerCells = ['المقاس', ...product.colors]
-        .map((h) => `<th>${h}</th>`)
+        .map((h) => `<th>${escapeHtml(h)}</th>`)
         .join('');
 
       const bodyRows = product.variants
@@ -77,10 +117,18 @@ export async function exportStockToPDF(products: StockProduct[]) {
               const stock = variant.stocks[color];
               if (!stock) return '<td>-</td>';
               const config = STOCK_STATUS_CONFIG[stock.status];
-              return `<td>${stock.quantity} <span class="badge" style="color:${stock.status === 'out_of_stock' ? '#6b7280' : stock.status === 'high' ? '#047857' : stock.status === 'medium' ? '#b45309' : '#b91c1c'}">(${config.label})</span></td>`;
+              const badgeColor =
+                stock.status === 'out_of_stock'
+                  ? '#6b7280'
+                  : stock.status === 'high'
+                    ? '#047857'
+                    : stock.status === 'medium'
+                      ? '#b45309'
+                      : '#b91c1c';
+              return `<td>${stock.quantity} <span class="badge" style="color:${badgeColor}">(${escapeHtml(config.label)})</span></td>`;
             })
             .join('');
-          return `<tr class="${i % 2 === 0 ? 'row-even' : 'row-odd'}"><td class="size-cell">${variant.size}</td>${cells}</tr>`;
+          return `<tr class="${i % 2 === 0 ? 'row-even' : 'row-odd'}"><td class="size-cell">${escapeHtml(variant.size)}</td>${cells}</tr>`;
         })
         .join('');
 
@@ -97,8 +145,8 @@ export async function exportStockToPDF(products: StockProduct[]) {
       return `
         <div class="product-section">
           <div class="product-header">
-            <div class="product-name">${product.name}</div>
-            <div class="product-sku">SKU: ${product.sku}</div>
+            <div class="product-name">${escapeHtml(product.name)}</div>
+            <div class="product-sku">SKU: ${escapeHtml(product.sku)}</div>
           </div>
           <table>
             <thead><tr>${headerCells}</tr></thead>
@@ -111,91 +159,228 @@ export async function exportStockToPDF(products: StockProduct[]) {
       `;
     })
     .join('');
+}
 
-  iframeDoc.open();
-  iframeDoc.write(`
-    <!DOCTYPE html>
-    <html lang="ar" dir="rtl">
-    <head>
-      <meta charset="UTF-8">
-      <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-          font-family: 'Cairo', Tahoma, Arial, sans-serif;
-          direction: rtl;
-          background: #fff;
-          color: #1f2937;
-          padding: 40px;
-          width: 800px;
-        }
-        .header { text-align: center; margin-bottom: 32px; }
-        .header h1 { font-size: 22px; font-weight: bold; }
-        .header p { font-size: 12px; color: #9ca3af; margin-top: 4px; }
-        .product-section { margin-bottom: 32px; }
-        .product-header { margin-bottom: 12px; }
-        .product-name { font-size: 16px; font-weight: bold; }
-        .product-sku { font-size: 11px; color: #9ca3af; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        thead tr { background: #5B21B6; color: #fff; }
-        th, td { padding: 8px 10px; text-align: center; }
-        .size-cell { font-weight: 600; }
-        .row-even { background: #fff; }
-        .row-odd { background: #f9fafb; }
-        tbody tr { border-bottom: 1px solid #e5e7eb; }
-        .total-row { background: #f3f4f6; border-top: 2px solid #d1d5db; }
-        .total-cell { font-weight: bold; }
-        .badge { font-size: 10px; }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>تقرير المخزن</h1>
-        <p>${new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-      </div>
-      ${tablesHtml}
-    </body>
-    </html>
-  `);
-  iframeDoc.close();
+const PDF_REPORT_STYLES = `
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    background: #ffffff;
+    color: #1f2937;
+  }
+  body {
+    font-family: Tahoma, Arial, sans-serif;
+    direction: rtl;
+    padding: 40px;
+    width: 800px;
+  }
+  .header { text-align: center; margin-bottom: 32px; }
+  .header h1 { font-size: 22px; font-weight: bold; color: #111827; }
+  .header p { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+  .product-section { margin-bottom: 32px; page-break-inside: avoid; }
+  .product-header { margin-bottom: 12px; }
+  .product-name { font-size: 16px; font-weight: bold; color: #111827; }
+  .product-sku { font-size: 11px; color: #9ca3af; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; color: #1f2937; }
+  thead tr { background: #5B21B6; color: #ffffff; }
+  th, td { padding: 8px 10px; text-align: center; border: 1px solid #e5e7eb; }
+  .size-cell { font-weight: 600; }
+  .row-even { background: #ffffff; }
+  .row-odd { background: #f9fafb; }
+  .total-row { background: #f3f4f6; }
+  .total-cell { font-weight: bold; }
+  .badge { font-size: 10px; }
+`;
 
-  await new Promise((resolve) => {
-    iframe.onload = resolve;
-    setTimeout(resolve, 1500);
+function buildChunkHtml(bodyHtml: string): string {
+  return `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<style>${PDF_REPORT_STYLES}</style>
+</head>
+<body>
+${bodyHtml}
+</body>
+</html>`;
+}
+
+function buildHeaderHtml(): string {
+  const today = new Date().toLocaleDateString('ar-EG', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+  return `<div class="header">
+  <h1>تقرير المخزن</h1>
+  <p>${escapeHtml(today)}</p>
+</div>`;
+}
+
+async function waitTwoFrames(win: Window) {
+  await new Promise<void>((resolve) => {
+    win.requestAnimationFrame(() =>
+      win.requestAnimationFrame(() => resolve())
+    );
+  });
+}
+
+const CHUNK_SIZE = 15;
+const CAPTURE_SCALE = 2;
+const SAFE_CANVAS_PIXELS = 14000;
+
+async function loadIframeWithHtml(
+  iframe: HTMLIFrameElement,
+  html: string
+): Promise<{ win: Window; doc: Document } | null> {
+  await new Promise<void>((resolve) => {
+    const onLoad = () => resolve();
+    iframe.addEventListener('load', onLoad, { once: true });
+    iframe.srcdoc = html;
+    window.setTimeout(() => resolve(), 4000);
   });
 
-  const canvas = await html2canvas(iframeDoc.body, {
-    scale: 2,
-    useCORS: true,
-    backgroundColor: '#ffffff',
-  });
+  const win = iframe.contentWindow;
+  const doc = iframe.contentDocument;
+  if (!win || !doc?.body) return null;
 
-  document.body.removeChild(iframe);
-
-  const imgData = canvas.toDataURL('image/png');
-  const imgWidth = 190;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-  const pageHeight = 277;
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-  let position = 10;
-  let remainingHeight = imgHeight;
-
-  if (imgHeight <= pageHeight) {
-    doc.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
-  } else {
-    while (remainingHeight > 0) {
-      doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-      remainingHeight -= pageHeight;
-      if (remainingHeight > 0) {
-        doc.addPage();
-        position = -(imgHeight - remainingHeight) + 10;
-      }
+  if (doc.fonts?.ready) {
+    try {
+      await doc.fonts.ready;
+    } catch {
+      // ignore font readiness failures
     }
   }
+  await waitTwoFrames(win);
+  return { win, doc };
+}
 
-  const timestamp = new Date().toISOString().split('T')[0];
-  doc.save(`تقرير_المخزن_${timestamp}.pdf`);
-  toast.success('تم تصدير التقرير بنجاح');
+async function captureChunkAsImage(
+  iframe: HTMLIFrameElement,
+  bodyHtml: string
+): Promise<{ dataUrl: string; widthPx: number; heightPx: number } | null> {
+  const loaded = await loadIframeWithHtml(iframe, buildChunkHtml(bodyHtml));
+  if (!loaded) return null;
+
+  const target = loaded.doc.body;
+  const width = Math.max(target.scrollWidth, 800);
+  const height = Math.max(target.scrollHeight, 1);
+
+  let scale = CAPTURE_SCALE;
+  if (Math.max(width, height) * scale > SAFE_CANVAS_PIXELS) {
+    scale = Math.max(1, SAFE_CANVAS_PIXELS / Math.max(width, height));
+  }
+
+  const canvas = await html2canvas(target, {
+    scale,
+    useCORS: true,
+    backgroundColor: '#ffffff',
+    width,
+    height,
+    windowWidth: width,
+    windowHeight: height,
+  });
+
+  if (!canvas.width || !canvas.height) return null;
+  const dataUrl = canvas.toDataURL('image/png');
+  if (!dataUrl.startsWith('data:image/png')) return null;
+  return { dataUrl, widthPx: canvas.width, heightPx: canvas.height };
+}
+
+function chunkProducts<T>(items: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    out.push(items.slice(i, i + size));
+  }
+  return out;
+}
+
+export async function exportStockToPDF(
+  filters: Omit<StockFiltersDto, 'page' | 'limit'>
+) {
+  const products = await loadAllProducts(filters);
+  if (products.length === 0) {
+    toast.error('لا توجد منتجات لتصديرها');
+    return;
+  }
+
+  const iframe = document.createElement('iframe');
+  iframe.setAttribute('aria-hidden', 'true');
+  iframe.style.cssText =
+    'position:fixed;left:-10000px;top:0;width:900px;height:1500px;border:0;visibility:hidden;';
+  document.body.appendChild(iframe);
+
+  const cleanup = () => {
+    if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+  };
+
+  try {
+    const chunks = chunkProducts(products, CHUNK_SIZE);
+    const pageWidth = 190;
+    const pageHeight = 277;
+    const margin = 10;
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    });
+
+    let isFirstChunk = true;
+
+    for (let i = 0; i < chunks.length; i++) {
+      const isFirst = i === 0;
+      const bodyHtml =
+        (isFirst ? buildHeaderHtml() : '') + buildProductsHtml(chunks[i]);
+      const captured = await captureChunkAsImage(iframe, bodyHtml);
+
+      if (!captured) {
+        toast.error('تعذر إنشاء صورة التقرير');
+        return;
+      }
+
+      const imgWidth = pageWidth;
+      const imgHeight = (captured.heightPx * imgWidth) / captured.widthPx;
+
+      if (!isFirstChunk) doc.addPage();
+      isFirstChunk = false;
+
+      if (imgHeight <= pageHeight) {
+        doc.addImage(
+          captured.dataUrl,
+          'PNG',
+          margin,
+          margin,
+          imgWidth,
+          imgHeight
+        );
+      } else {
+        let position = margin;
+        let remainingHeight = imgHeight;
+        while (remainingHeight > 0) {
+          doc.addImage(
+            captured.dataUrl,
+            'PNG',
+            margin,
+            position,
+            imgWidth,
+            imgHeight
+          );
+          remainingHeight -= pageHeight;
+          if (remainingHeight > 0) {
+            doc.addPage();
+            position = -(imgHeight - remainingHeight) + margin;
+          }
+        }
+      }
+    }
+
+    const timestamp = new Date().toISOString().split('T')[0];
+    doc.save(`تقرير_المخزن_${timestamp}.pdf`);
+    toast.success('تم تصدير التقرير بنجاح');
+  } catch (err) {
+    const message =
+      (err as { message?: string })?.message || 'تعذر تصدير التقرير';
+    toast.error(message);
+  } finally {
+    cleanup();
+  }
 }

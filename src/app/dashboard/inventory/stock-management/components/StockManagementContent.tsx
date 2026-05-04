@@ -17,6 +17,8 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from '@/components/ui/popover';
+import PageLoading from '@/components/ui/page-loading';
+import PaginationFooter from '@/components/ui/pagination-footer';
 import { StockFilters } from './StockFilters';
 import { SummaryCards } from './SummaryCards';
 import { ProductStockTable } from './ProductStockTable';
@@ -38,11 +40,26 @@ export function StockManagementContent() {
     setFromDate,
     setToDate,
     setTimePeriod,
+    pageSize,
+    setPage,
+    setPageSize,
+    currentPage,
+    totalPages,
+    totalItems,
+    hasNextPage,
+    hasPreviousPage,
+    isLoading,
+    isError,
+    error,
+    colorOptions,
+    sizeOptions,
+    filterDtoBase,
   } = useStockFilters();
 
   const [showFilters, setShowFilters] = useState(false);
   const [filtersOverflow, setFiltersOverflow] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -51,17 +68,37 @@ export function StockManagementContent() {
     if (filters.fromDate || filters.toDate) count++;
     if (filters.timePeriod) count++;
     return count;
-  }, [filters.color, filters.size, filters.fromDate, filters.toDate, filters.timePeriod]);
+  }, [
+    filters.color,
+    filters.size,
+    filters.fromDate,
+    filters.toDate,
+    filters.timePeriod,
+  ]);
 
-  const handleExportExcel = useCallback(() => {
-    exportStockToExcel(filteredProducts);
-    setExportOpen(false);
-  }, [filteredProducts]);
+  const handleExportExcel = useCallback(async () => {
+    setIsExporting(true);
+    try {
+      await exportStockToExcel(filterDtoBase);
+    } finally {
+      setIsExporting(false);
+      setExportOpen(false);
+    }
+  }, [filterDtoBase]);
 
-  const handleExportPDF = useCallback(() => {
-    exportStockToPDF(filteredProducts);
-    setExportOpen(false);
-  }, [filteredProducts]);
+  const handleExportPDF = useCallback(async () => {
+    setIsExporting(true);
+    try {
+      await exportStockToPDF(filterDtoBase);
+    } finally {
+      setIsExporting(false);
+      setExportOpen(false);
+    }
+  }, [filterDtoBase]);
+
+  const errorMessage =
+    (error as { response?: { data?: { message?: string } } })?.response?.data
+      ?.message || 'تعذر تحميل بيانات المخزن';
 
   return (
     <div className="w-full max-w-full overflow-x-hidden space-y-6">
@@ -71,15 +108,19 @@ export function StockManagementContent() {
         </h1>
         <Popover open={exportOpen} onOpenChange={setExportOpen}>
           <PopoverTrigger asChild>
-            <Button className="gap-2 whitespace-nowrap bg-primary hover:bg-primary/90 text-white px-5">
+            <Button
+              disabled={isExporting}
+              className="gap-2 whitespace-nowrap bg-primary hover:bg-primary/90 text-white px-5"
+            >
               <LiaFileDownloadSolid className="size-5" />
-              تصدير التقرير
+              {isExporting ? 'جاري التصدير...' : 'تصدير التقرير'}
             </Button>
           </PopoverTrigger>
           <PopoverContent align="end" className="w-48 p-2">
             <Button
               variant="ghost"
               onClick={handleExportExcel}
+              disabled={isExporting}
               className="flex w-full items-center justify-start gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
             >
               <LiaFileExcelSolid className="size-5 text-emerald-600" />
@@ -88,6 +129,7 @@ export function StockManagementContent() {
             <Button
               variant="ghost"
               onClick={handleExportPDF}
+              disabled={isExporting}
               className="flex w-full items-center justify-start gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
             >
               <LiaFilePdfSolid className="size-5 text-red-600" />
@@ -140,6 +182,8 @@ export function StockManagementContent() {
           <div className={filtersOverflow ? 'overflow-visible' : 'overflow-hidden'}>
             <StockFilters
               filters={filters}
+              colorOptions={colorOptions}
+              sizeOptions={sizeOptions}
               onFilterChange={setFilter}
               onClearFilter={clearFilter}
               onFromDateChange={setFromDate}
@@ -156,7 +200,14 @@ export function StockManagementContent() {
         lowStockCount={lowStockCount}
       />
 
-      {filteredProducts.length === 0 ? (
+      {isLoading ? (
+        <PageLoading message="جاري تحميل المخزن..." />
+      ) : isError ? (
+        <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+          <LiaBoxOpenSolid className="size-16 mb-4 text-red-300" />
+          <p className="text-lg font-medium text-red-500">{errorMessage}</p>
+        </div>
+      ) : filteredProducts.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-gray-400">
           <LiaBoxOpenSolid className="size-16 mb-4" />
           {hasActiveFilters ? (
@@ -190,6 +241,24 @@ export function StockManagementContent() {
             />
           ))}
         </div>
+      )}
+
+      {!isLoading && !isError && totalPages > 0 && (
+        <PaginationFooter
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          hasNextPage={hasNextPage}
+          hasPreviousPage={hasPreviousPage}
+          onPageChange={setPage}
+          onPrevious={() => setPage(Math.max(1, currentPage - 1))}
+          onNext={() => setPage(Math.min(totalPages, currentPage + 1))}
+          currentPageSize={pageSize}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1);
+          }}
+        />
       )}
     </div>
   );

@@ -1,9 +1,15 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useDebounce } from '@/utils/debounce';
 import { calculateDateRangeFromPeriod, TimePeriod } from '@/utils/dateRangeUtils';
-import { MOCK_PRODUCTS, LOW_STOCK_THRESHOLD } from '../constants';
+import {
+  useStockAnalysis,
+  useStockProducts,
+  useStockFilterOptions,
+  type StockFiltersDto,
+} from '@/services/stock';
+import { apiListToStockProducts } from '../utils/transformStock';
 import type { StockFilters, StockProduct } from '../types';
 
 const INITIAL_FILTERS: StockFilters = {
@@ -15,8 +21,19 @@ const INITIAL_FILTERS: StockFilters = {
   timePeriod: '',
 };
 
+const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE_SIZE = 10;
+
+function dateToIsoOrUndefined(date: Date | null): string | undefined {
+  if (!date) return undefined;
+  return date.toISOString();
+}
+
 export function useStockFilters() {
   const [filters, setFilters] = useState<StockFilters>(INITIAL_FILTERS);
+  const [page, setPage] = useState<number>(DEFAULT_PAGE);
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
+
   const debouncedSearchQuery = useDebounce(filters.searchQuery, 300);
 
   const setSearchQuery = useCallback((query: string) => {
@@ -44,7 +61,12 @@ export function useStockFilters() {
 
   const setTimePeriod = useCallback((period: TimePeriod | '') => {
     if (!period) {
-      setFilters((prev) => ({ ...prev, timePeriod: '', fromDate: null, toDate: null }));
+      setFilters((prev) => ({
+        ...prev,
+        timePeriod: '',
+        fromDate: null,
+        toDate: null,
+      }));
       return;
     }
     const range = calculateDateRangeFromPeriod(period);
@@ -56,68 +78,53 @@ export function useStockFilters() {
     }));
   }, []);
 
+  const filterDtoBase = useMemo<Omit<StockFiltersDto, 'page' | 'limit'>>(
+    () => ({
+      search: debouncedSearchQuery.trim() || undefined,
+      color: filters.color || undefined,
+      size: filters.size || undefined,
+      fromDate: dateToIsoOrUndefined(filters.fromDate),
+      toDate: dateToIsoOrUndefined(filters.toDate),
+    }),
+    [
+      debouncedSearchQuery,
+      filters.color,
+      filters.size,
+      filters.fromDate,
+      filters.toDate,
+    ]
+  );
+
+  const isFirstFilterRender = useRef(true);
+  useEffect(() => {
+    if (isFirstFilterRender.current) {
+      isFirstFilterRender.current = false;
+      return;
+    }
+    setPage(DEFAULT_PAGE);
+  }, [filterDtoBase]);
+
+  const productsQuery = useStockProducts({
+    ...filterDtoBase,
+    page,
+    limit: pageSize,
+  });
+
+  const analysisQuery = useStockAnalysis({
+    fromDate: filterDtoBase.fromDate,
+    toDate: filterDtoBase.toDate,
+  });
+
+  const filterOptionsQuery = useStockFilterOptions();
+
   const filteredProducts: StockProduct[] = useMemo(() => {
-    let products = MOCK_PRODUCTS;
+    if (!productsQuery.data) return [];
+    return apiListToStockProducts(productsQuery.data.data);
+  }, [productsQuery.data]);
 
-    if (debouncedSearchQuery.trim()) {
-      const query = debouncedSearchQuery.toLowerCase();
-      products = products.filter(
-        (p) =>
-          p.name.toLowerCase().includes(query) ||
-          p.sku.toLowerCase().includes(query)
-      );
-    }
-
-    if (filters.color) {
-      products = products.filter((p) => p.colors.includes(filters.color));
-    }
-
-    if (filters.size) {
-      products = products.filter((p) => p.sizes.includes(filters.size));
-    }
-
-    return products;
-  }, [debouncedSearchQuery, filters.color, filters.size]);
-
-  const totalProducts = filteredProducts.length;
-
-  const totalQuantity = useMemo(
-    () =>
-      filteredProducts.reduce(
-        (sum, product) =>
-          sum +
-          product.variants.reduce(
-            (vSum, variant) =>
-              vSum +
-              Object.values(variant.stocks).reduce(
-                (sSum, stock) => sSum + stock.quantity,
-                0
-              ),
-            0
-          ),
-        0
-      ),
-    [filteredProducts]
-  );
-
-  const lowStockCount = useMemo(
-    () =>
-      filteredProducts.reduce(
-        (count, product) =>
-          count +
-          product.variants.reduce(
-            (vCount, variant) =>
-              vCount +
-              Object.values(variant.stocks).filter(
-                (s) =>
-                  s.quantity > 0 && s.quantity < LOW_STOCK_THRESHOLD
-              ).length,
-            0
-          ),
-        0
-      ),
-    [filteredProducts]
-  );
+  const totalProducts = analysisQuery.data?.totalProducts ?? 0;
+  const totalQuantity = analysisQuery.data?.totalAvailableCount ?? 0;
+  const lowStockCount = analysisQuery.data?.productsBelowMinStockCount ?? 0;
 
   const hasActiveFilters =
     !!debouncedSearchQuery.trim() ||
@@ -139,5 +146,25 @@ export function useStockFilters() {
     setFromDate,
     setToDate,
     setTimePeriod,
+
+    page,
+    pageSize,
+    setPage,
+    setPageSize,
+    currentPage: productsQuery.data?.currentPage ?? page,
+    totalPages: productsQuery.data?.totalPages ?? 0,
+    totalItems: productsQuery.data?.totalItems ?? 0,
+    hasNextPage: productsQuery.data?.hasNextPage ?? false,
+    hasPreviousPage: productsQuery.data?.hasPreviousPage ?? false,
+
+    isLoading: productsQuery.isLoading,
+    isFetching: productsQuery.isFetching,
+    isError: productsQuery.isError || analysisQuery.isError,
+    error: productsQuery.error || analysisQuery.error,
+
+    colorOptions: filterOptionsQuery.data?.colors ?? [],
+    sizeOptions: filterOptionsQuery.data?.sizes ?? [],
+
+    filterDtoBase,
   };
 }
