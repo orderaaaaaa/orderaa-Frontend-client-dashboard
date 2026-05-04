@@ -59,6 +59,15 @@ const rmExpressSteps = [
   'اضغط على "تفعيل الربط" للحفظ.',
 ];
 
+const torodSteps = [
+  'قم بتسجيل الدخول إلى لوحة تحكم TOROD.',
+  'انتقل إلى إعدادات الحساب.',
+  'انتقل إلى قسم ربط API.',
+  'انسخ اسم المستخدم وكلمة المرور الخاصة بالربط.',
+  'ألصق البيانات في الحقول أدناه.',
+  'اضغط على "تفعيل الربط" للحفظ.',
+];
+
 export const getStepsByProvider = (providerId: string): string[] => {
   const provider = providerId.toLowerCase();
 
@@ -75,6 +84,8 @@ export const getStepsByProvider = (providerId: string): string[] => {
       return quickConnectSteps;
     case 'rm_express':
       return rmExpressSteps;
+    case 'torod':
+      return torodSteps;
     default:
       return turboSteps;
   }
