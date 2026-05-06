@@ -32,7 +32,15 @@ interface UseUrlFiltersReturn {
   isInitialized: boolean;
 }
 
-export function useUrlFilters(storageKey?: string): UseUrlFiltersReturn {
+interface UseUrlFiltersOptions {
+  ignoreDateRange?: boolean;
+}
+
+export function useUrlFilters(
+  storageKey?: string,
+  options: UseUrlFiltersOptions = {},
+): UseUrlFiltersReturn {
+  const { ignoreDateRange = false } = options;
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -58,16 +66,35 @@ export function useUrlFilters(storageKey?: string): UseUrlFiltersReturn {
   const saveToStorage = useCallback((state: UrlFilterState) => {
     if (!storageKey) return;
     try {
+      let existingDates: { fromDate: string | null; toDate: string | null; timePeriod: TimePeriod } | null = null;
+      if (ignoreDateRange) {
+        try {
+          const raw = localStorage.getItem(storageKey);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            existingDates = {
+              fromDate: parsed.fromDate ?? null,
+              toDate: parsed.toDate ?? null,
+              timePeriod: parsed.timePeriod ?? '',
+            };
+          }
+        } catch {}
+      }
+
       const persistable = {
         status: state.status,
-        fromDate: state.fromDate?.toISOString() ?? null,
-        toDate: state.toDate?.toISOString() ?? null,
-        timePeriod: state.timePeriod,
+        fromDate: ignoreDateRange
+          ? existingDates?.fromDate ?? null
+          : state.fromDate?.toISOString() ?? null,
+        toDate: ignoreDateRange
+          ? existingDates?.toDate ?? null
+          : state.toDate?.toISOString() ?? null,
+        timePeriod: ignoreDateRange ? existingDates?.timePeriod ?? '' : state.timePeriod,
         localFilters: state.localFilters,
       };
       localStorage.setItem(storageKey, JSON.stringify(persistable));
     } catch {}
-  }, [storageKey]);
+  }, [storageKey, ignoreDateRange]);
 
   const loadFromStorage = useCallback((): Partial<UrlFilterState> | null => {
     if (!storageKey) return null;
@@ -77,15 +104,15 @@ export function useUrlFilters(storageKey?: string): UseUrlFiltersReturn {
       const parsed = JSON.parse(raw);
       return {
         status: parsed.status ?? null,
-        fromDate: parsed.fromDate ? new Date(parsed.fromDate) : null,
-        toDate: parsed.toDate ? new Date(parsed.toDate) : null,
-        timePeriod: parsed.timePeriod ?? '',
+        fromDate: ignoreDateRange ? null : parsed.fromDate ? new Date(parsed.fromDate) : null,
+        toDate: ignoreDateRange ? null : parsed.toDate ? new Date(parsed.toDate) : null,
+        timePeriod: ignoreDateRange ? '' : parsed.timePeriod ?? '',
         localFilters: { ...DEFAULT_FILTER_STATE.localFilters, ...parsed.localFilters },
       };
     } catch {
       return null;
     }
-  }, [storageKey]);
+  }, [storageKey, ignoreDateRange]);
 
   // Initialize from URL on mount
   useEffect(() => {
@@ -104,6 +131,11 @@ export function useUrlFilters(storageKey?: string): UseUrlFiltersReturn {
       }
 
       const parsed = parseFiltersFromUrl(searchParams);
+      if (ignoreDateRange) {
+        parsed.fromDate = null;
+        parsed.toDate = null;
+        parsed.timePeriod = '';
+      }
       setFilters(parsed);
     }
 
@@ -131,6 +163,11 @@ export function useUrlFilters(storageKey?: string): UseUrlFiltersReturn {
     if (!isInitialized || pendingUrlUpdate.current === null) return;
 
     const params = serializeFiltersToUrl(filters);
+    if (ignoreDateRange) {
+      params.delete('from');
+      params.delete('to');
+      params.delete('period');
+    }
     const newParamsString = params.toString();
     const newUrl = newParamsString ? `${pathname}?${newParamsString}` : pathname;
 

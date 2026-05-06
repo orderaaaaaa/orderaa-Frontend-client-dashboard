@@ -62,7 +62,7 @@ export function CallCenterContent() {
     printStatus,
     setPrintStatus,
     isInitialized,
-  } = usePrintOrdersFilters('orderFilters');
+  } = usePrintOrdersFilters('orderFilters', { ignoreDateRange: true });
 
   const apiFilters = useMemo(() => {
     const shouldSendDepartment = !filters.status && department;
