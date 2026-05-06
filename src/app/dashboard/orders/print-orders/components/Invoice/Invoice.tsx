@@ -8,10 +8,17 @@ import { InvoiceProps } from '../../types/invoice';
 import { INVOICE_LABELS } from '../../constants/invoiceLabels';
 import { providers } from '@/app/dashboard/link-shipping-company/constants/providers';
 
+const normalizeShippingKey = (s: string) => s.toUpperCase().replace(/[^A-Z0-9]/g, '');
+
 const getShippingCompanyLogo = (shippingCompany?: string) => {
   if (!shippingCompany) return undefined;
-  const key = shippingCompany.toUpperCase();
-  return providers.find((p) => p.id.toUpperCase() === key)?.logo;
+  const key = normalizeShippingKey(shippingCompany);
+  if (!key) return undefined;
+  return providers.find(
+    (p) =>
+      normalizeShippingKey(p.id) === key ||
+      normalizeShippingKey(p.name) === key,
+  )?.logo;
 };
 
 export function Invoice({ data, storeInfo, language }: InvoiceProps) {
@@ -203,22 +210,22 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
             <span className="font-bold text-end">{data.shipping.shipmentStatus || '-'}</span>
           </div>
         </div>
-        <div>
-          <div className="grid grid-cols-[auto_1fr] items-start gap-0.5 p-1">
-            <LiaInfoCircleSolid className="size-2.5" />
+        <div className="flex flex-col h-full">
+          <div className="grid grid-cols-[auto_1fr] items-start gap-0.5 p-1 flex-1">
+            <LiaInfoCircleSolid className="size-2.5 mt-0.5" />
             <p className="text-[8px] font-bold text-start leading-tight">
               {data.shippingNotes || ''}
             </p>
           </div>
 
-          <div className="grid grid-cols-2 bg-black">
-            <span className="py-0.5 px-1 font-bold text-[8px] text-white">
+          <div className="grid grid-cols-[auto_1fr] items-center gap-1 bg-black px-1 py-0.5">
+            <span className="font-bold text-[8px] text-white">
               {labels.customerSchedule}:
             </span>
+            <span className="text-[8px] font-bold text-white text-center">
+              {timeDisplay}
+            </span>
           </div>
-          <p className="py-0.5 px-1 text-[8px] font-bold text-center text-black block">
-            {timeDisplay}
-          </p>
         </div>
       </div>
 
@@ -237,30 +244,38 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
       </div>
 
       {/* Shipping Barcode + Shipping Company Logo */}
-      {data.shippingId && (
+      {(data.shippingId || data.shippingCompany) && (
         <div className="grid grid-cols-2 items-center my-1 border-y border-black py-2">
           <div className="flex flex-col items-center justify-center px-2 border-e border-black">
-            <span className="font-bold text-[9px]">{labels.shippingBarcode}</span>
-            <Barcode
-              value={data.shippingId}
-              width={1.6}
-              height={25}
-              fontSize={0}
-              margin={0}
-            />
-            <span className="text-[8px] font-bold tracking-wider mt-0.5">{data.shippingId}</span>
+            {data.shippingId ? (
+              <>
+                <span className="font-bold text-[9px]">{labels.shippingBarcode}</span>
+                <Barcode
+                  value={data.shippingId}
+                  width={1.6}
+                  height={25}
+                  fontSize={0}
+                  margin={0}
+                />
+                <span className="text-[8px] font-bold tracking-wider mt-0.5">{data.shippingId}</span>
+              </>
+            ) : (
+              <span className="text-[9px] font-bold text-gray-500">-</span>
+            )}
           </div>
-          {shippingCompanyLogo ? (
-            <div className="flex items-center justify-center px-2">
+          <div className="flex items-center justify-center px-2">
+            {shippingCompanyLogo ? (
               <img
                 src={shippingCompanyLogo}
                 alt={data.shippingCompany || 'Shipping Company'}
                 className="h-12 max-w-[30mm] object-contain"
               />
-            </div>
-          ) : (
-            <div />
-          )}
+            ) : (
+              <span className="font-bold text-[10px] text-black uppercase tracking-wider">
+                {data.shippingCompany || '-'}
+              </span>
+            )}
+          </div>
         </div>
       )}
 

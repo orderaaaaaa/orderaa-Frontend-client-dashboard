@@ -25,7 +25,10 @@ const addProductSchema = z.object({
   sku: z.string().optional(),
   category: z.string().optional(),
   description: z.string().optional(),
-  images: z.array(z.instanceof(File)).optional().default([]),
+  images: z
+    .array(z.instanceof(File))
+    .min(1, 'يجب رفع صورة واحدة على الأقل')
+    .default([]),
   variantOptions: z.array(
     z.object({
       label: z.string(),
@@ -150,6 +153,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
               error={fieldState.error?.message}
               title="صور المنتج"
               description="قم برفع صور المنتج (يمكنك اختيار أكثر من صورة)"
+              required
             />
           )}
         />
