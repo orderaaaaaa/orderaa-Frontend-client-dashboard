@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { LiaPrintSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
@@ -10,6 +10,10 @@ import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
 import { InvoiceData } from '../../print-orders/types/invoice';
 import { mapOrdersToInvoices } from '../../print-orders/utils/invoiceMapper';
+import {
+  preloadShippingLogos,
+  waitForImagesInContainer,
+} from '../../print-orders/utils/printAssets';
 import { InvoiceRenderer } from '../../print-orders/components/InvoiceRenderer';
 import { printOrders } from '../../print-orders/services/printOrders';
 import { useInvoiceSettings } from '../../print-orders/hooks/useInvoiceSettings';
@@ -29,6 +33,10 @@ export function PrintInvoicesModal({
   const [invoicesToPrint, setInvoicesToPrint] = useState<InvoiceData[]>([]);
   const { storeInfo, language } = useInvoiceSettings();
 
+  useEffect(() => {
+    preloadShippingLogos();
+  }, []);
+
   const handlePrint = async () => {
     const count = parseInt(invoiceCount, 10);
     if (count > 0) {
@@ -44,7 +52,11 @@ export function PrintInvoicesModal({
         const invoices = mapOrdersToInvoices(orders, language);
         setInvoicesToPrint(invoices);
 
-        setTimeout(() => {
+        setTimeout(async () => {
+          const container = document.querySelector(
+            '.print-container',
+          ) as HTMLElement | null;
+          await waitForImagesInContainer(container);
           window.print();
           setTimeout(() => {
             setIsPrinting(false);

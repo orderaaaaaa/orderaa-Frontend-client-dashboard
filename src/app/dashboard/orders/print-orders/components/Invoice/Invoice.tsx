@@ -218,12 +218,12 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
             </p>
           </div>
 
-          <div className="grid grid-cols-[auto_1fr] items-center gap-1 bg-black px-1 py-0.5">
+          <div className="grid grid-cols-[auto_1fr] items-center gap-1 bg-black px-1 py-1 min-h-[18px]">
             <span className="font-bold text-[8px] text-white">
               {labels.customerSchedule}:
             </span>
             <span className="text-[8px] font-bold text-white text-center">
-              {timeDisplay}
+              {timeDisplay || '-'}
             </span>
           </div>
         </div>
