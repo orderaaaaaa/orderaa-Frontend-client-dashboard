@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { LiaPlusSolid, LiaTimesSolid } from 'react-icons/lia';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'react-toastify';
@@ -10,6 +10,7 @@ import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/textarea';
+import { MultiImageUploadField } from '@/components/ui/multi-image-upload-field';
 
 interface AddProductModalProps {
   isOpen: boolean;
@@ -24,7 +25,7 @@ const addProductSchema = z.object({
   sku: z.string().optional(),
   category: z.string().optional(),
   description: z.string().optional(),
-  images: z.array(z.object({ url: z.string() })),
+  images: z.array(z.instanceof(File)).optional().default([]),
   variantOptions: z.array(
     z.object({
       label: z.string(),
@@ -41,7 +42,7 @@ const emptyDefaults: AddProductFormData = {
   sku: '',
   category: '',
   description: '',
-  images: [{ url: '' }],
+  images: [],
   variantOptions: [],
 };
 
@@ -60,15 +61,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
     name: 'variantOptions',
   });
 
-  const {
-    fields: imageFields,
-    append: appendImage,
-    remove: removeImage,
-  } = useFieldArray({
-    control: form.control,
-    name: 'images',
-  });
-
   useEffect(() => {
     if (!isOpen) {
       form.reset(emptyDefaults);
@@ -76,9 +68,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
   }, [isOpen, form]);
 
   const onSubmit = form.handleSubmit((data) => {
-    const images = data.images
-      .map((i) => i.url.trim())
-      .filter(Boolean);
+    const images = data.images ?? [];
 
     const payload = {
       name: data.name.trim(),
@@ -150,44 +140,19 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
           error={form.formState.errors.category?.message}
         />
 
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <label className="text-[18px]">روابط الصور</label>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => appendImage({ url: '' })}
-              className="h-auto p-0 text-sm font-semibold text-primary hover:bg-transparent hover:underline hover:text-primary"
-            >
-              + إضافة صورة أخرى
-            </Button>
-          </div>
-          <div className="space-y-2">
-            {imageFields.map((field, index) => (
-              <div key={field.id} className="flex gap-3 items-start">
-                <div className="flex-1">
-                  <Input
-                    register={form.register}
-                    name={`images.${index}.url`}
-                    placeholder="https://..."
-                  />
-                </div>
-                {imageFields.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeImage(index)}
-                    className="text-red-500 hover:bg-red-50"
-                  >
-                    <LiaTimesSolid className="w-5 h-5" />
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+        <Controller
+          control={form.control}
+          name="images"
+          render={({ field, fieldState }) => (
+            <MultiImageUploadField
+              value={field.value}
+              onChange={field.onChange}
+              error={fieldState.error?.message}
+              title="صور المنتج"
+              description="قم برفع صور المنتج (يمكنك اختيار أكثر من صورة)"
+            />
+          )}
+        />
 
         <Textarea
           register={form.register}

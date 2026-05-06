@@ -6,9 +6,17 @@ import { QRCodeSVG } from 'qrcode.react';
 import { LiaPhoneSolid, LiaInfoCircleSolid } from 'react-icons/lia';
 import { InvoiceProps } from '../../types/invoice';
 import { INVOICE_LABELS } from '../../constants/invoiceLabels';
+import { providers } from '@/app/dashboard/link-shipping-company/constants/providers';
+
+const getShippingCompanyLogo = (shippingCompany?: string) => {
+  if (!shippingCompany) return undefined;
+  const key = shippingCompany.toUpperCase();
+  return providers.find((p) => p.id.toUpperCase() === key)?.logo;
+};
 
 export function Invoice({ data, storeInfo, language }: InvoiceProps) {
   const labels = INVOICE_LABELS[language];
+  const shippingCompanyLogo = getShippingCompanyLogo(data.shippingCompany);
  // const storeName = language === 'ar' ? storeInfo.name : storeInfo.nameEn;
 
   const location = [data.customer.governorate, data.customer.city]
@@ -228,18 +236,31 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
         <span>{labels.productCount}: {data.products.length}</span>
       </div>
 
-      {/* Shipping Barcode */}
+      {/* Shipping Barcode + Shipping Company Logo */}
       {data.shippingId && (
-        <div className="grid place-items-center my-1">
-          <span className="font-bold text-[9px]">{labels.shippingBarcode}</span>
-          <Barcode
-            value={data.shippingId}
-            width={1.6}
-            height={25}
-            fontSize={0}
-            margin={0}
-          />
-          <span className="text-[8px] font-bold tracking-wider mt-0.5">{data.shippingId}</span>
+        <div className="grid grid-cols-2 items-center my-1 border-y border-black py-2">
+          <div className="flex flex-col items-center justify-center px-2 border-e border-black">
+            <span className="font-bold text-[9px]">{labels.shippingBarcode}</span>
+            <Barcode
+              value={data.shippingId}
+              width={1.6}
+              height={25}
+              fontSize={0}
+              margin={0}
+            />
+            <span className="text-[8px] font-bold tracking-wider mt-0.5">{data.shippingId}</span>
+          </div>
+          {shippingCompanyLogo ? (
+            <div className="flex items-center justify-center px-2">
+              <img
+                src={shippingCompanyLogo}
+                alt={data.shippingCompany || 'Shipping Company'}
+                className="h-12 max-w-[30mm] object-contain"
+              />
+            </div>
+          ) : (
+            <div />
+          )}
         </div>
       )}
 

@@ -22,9 +22,13 @@ export function mapOrderToInvoice(
   const isCOD = order.paymentMethod?.toLowerCase().includes('delivery') ||
                 order.paymentMethod?.toLowerCase() === 'cod';
 
+  const activeShipping = order.shipping_ids?.find((s) => s.isActive) ?? order.shipping_ids?.[0];
+  const resolvedShippingId = order.shippingId || activeShipping?.shippingId || undefined;
+  const resolvedShippingCompany = order.shippingCompany || activeShipping?.shippingCompany || undefined;
+
   return {
     orderCode: order.code || `ORD-${order.id}`,
-    shippingId: order.shippingId || undefined,
+    shippingId: resolvedShippingId,
     customer: {
       name: order.customers.name,
       governorate: order.governorate || order.customers.governorate || '',
@@ -46,7 +50,7 @@ export function mapOrderToInvoice(
     totalPrice: order.totalCost,
     packagingNotes: order.packagingNotes,
     shippingNotes: order.notes,
-    shippingCompany: order.shippingCompany,
+    shippingCompany: resolvedShippingCompany,
     merchantName: order.merchants?.merchantName,
     merchantGovernorate: order.merchants?.governorate,
     merchantCity: order.merchants?.city,
