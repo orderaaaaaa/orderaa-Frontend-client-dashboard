@@ -218,13 +218,13 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
             </p>
           </div>
 
-          <div className="bg-black px-1 py-1.5 min-h-[28px] flex items-center">
-            <span className="font-bold text-[8px] text-white shrink-0">
+          <div className="bg-black px-1 py-0.5">
+            <span className="font-bold text-[8px] text-white">
               {labels.customerSchedule}:
             </span>
-            <span className="text-[8px] font-bold text-white text-center flex-1 min-h-[12px]">
-              {timeDisplay || ' '}
-            </span>
+          </div>
+          <div className="px-1 py-1 text-[8px] font-bold text-center text-black min-h-[16px] bg-white">
+            {timeDisplay || ' '}
           </div>
         </div>
       </div>
