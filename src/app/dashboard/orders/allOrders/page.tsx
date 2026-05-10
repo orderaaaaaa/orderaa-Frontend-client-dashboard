@@ -437,7 +437,7 @@ function AllOrdersContent() {
         }}
         initialFormFilters={isInitialized ? filters.localFilters : null}
         currentStatus={filters.status}
-        hiddenFilters={['skipFilters']}
+        hiddenFilters={[]}
       />
 
       <div className="flex flex-col sm:flex-row justify-between gap-2 mt-10 mb-6 select-none">
