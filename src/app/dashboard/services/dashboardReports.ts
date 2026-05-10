@@ -144,12 +144,23 @@ export const usePackagingInventoryQuery = (status: string, enabled = true) => {
   });
 };
 
+export interface PackagingInventoryCheckItem {
+  productId: number;
+  variants: { label: string; value: string }[];
+  count: number;
+}
+
+export interface PackagingInventoryCheckPayload {
+  status: string;
+  item: PackagingInventoryCheckItem;
+}
+
 export const usePackagingInventoryCheckMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<void, Error, number>({
-    mutationFn: async (id: number) => {
-      await http.put('/packaging-inventory/check', { id });
+  return useMutation<void, Error, PackagingInventoryCheckPayload>({
+    mutationFn: async ({ status, item }) => {
+      await http.put(`/packaging-inventory/${status}/check`, item);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

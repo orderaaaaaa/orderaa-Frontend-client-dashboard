@@ -55,6 +55,16 @@ import { buildStatisticsCards } from '../constants/statisticsCards';
 import PageTaps from '../../components/pageTaps';
 import { useDepartment } from '../../hooks';
 
+const REPORT_BUTTON_TEXT_BY_STATUS: Record<string, string> = {
+  CONFIRMED: 'تقرير المنتجات المؤكدة',
+  WAITING_FOR_PACKAGING: 'تقرير منتجات في انتظار التغليف',
+};
+
+const getReportButtonText = (status: string | null | undefined) => {
+  if (!status) return 'تقرير المنتجات';
+  return REPORT_BUTTON_TEXT_BY_STATUS[status] ?? 'تقرير المنتجات';
+};
+
 export function PrintOrdersContent() {
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState('');
   const [selectedCustomerName, setSelectedCustomerName] = useState('');
@@ -577,7 +587,7 @@ export function PrintOrdersContent() {
             className="gap-2"
           >
             <LiaClipboardListSolid className="size-5" />
-            تقرير المنتجات المؤكدة
+            {getReportButtonText(filters.status)}
           </Button>
         )}
       </div>

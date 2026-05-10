@@ -197,7 +197,14 @@ export function ConfirmedProductsReportModal({
       });
 
       try {
-        await checkMutation.mutateAsync(item.productId);
+        await checkMutation.mutateAsync({
+          status,
+          item: {
+            productId: item.productId,
+            variants: item.variants,
+            count: item.totalCount,
+          },
+        });
       } catch (err: any) {
         const msg = err?.response?.data?.message;
         toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث العنصر');
