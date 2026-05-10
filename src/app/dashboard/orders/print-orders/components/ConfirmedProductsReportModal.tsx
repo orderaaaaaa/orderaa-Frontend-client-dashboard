@@ -199,11 +199,12 @@ export function ConfirmedProductsReportModal({
       try {
         await checkMutation.mutateAsync({
           status,
-          item: {
-            productId: item.productId,
-            variants: item.variants,
-            count: item.totalCount,
-          },
+          items: [
+            {
+              productId: item.productId,
+              variants: item.variants,
+            },
+          ],
         });
       } catch (err: any) {
         const msg = err?.response?.data?.message;
