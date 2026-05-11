@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import * as XLSX from 'xlsx';
 import { toast } from 'react-toastify';
-import { LiaFileExcelSolid, LiaFilePdfSolid } from 'react-icons/lia';
+import { LiaFileExcelSolid, LiaFilePdfSolid, LiaCheckCircleSolid } from 'react-icons/lia';
 import { exportTableToPDF } from '@/utils/exportTableToPDF';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
@@ -73,35 +73,36 @@ function WarehouseTab({
   rows,
   isLoading,
   warehouseName,
-  loadingKeys,
-  onCheck,
+  selectedKeys,
+  onToggle,
+  onToggleAll,
 }: {
   rows: PackagingInventoryItem[];
   isLoading: boolean;
   warehouseName: string;
-  loadingKeys: Set<string>;
-  onCheck: (item: PackagingInventoryItem) => void;
+  selectedKeys: Set<string>;
+  onToggle: (item: PackagingInventoryItem) => void;
+  onToggleAll: (checked: boolean) => void;
 }) {
+  const allKeys = rows.map(getItemKey);
+  const allChecked = allKeys.length > 0 && allKeys.every((k) => selectedKeys.has(k));
+  const someChecked = allKeys.some((k) => selectedKeys.has(k));
+
   const columns: DataTableColumn<PackagingInventoryItem>[] = [
     {
       key: 'checkedCount',
-      header: 'اختيار',
+      header: '',
       className: 'text-center w-16',
       headerClassName: '[&>div]:justify-center',
       render: (_value, row) => {
         const item = row as unknown as PackagingInventoryItem;
         const key = getItemKey(item);
-        const isItemLoading = loadingKeys.has(key);
         return (
           <div className="flex justify-center">
-            {isItemLoading ? (
-              <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Checkbox
-                checked={item.checkedCount > 0}
-                onCheckedChange={() => onCheck(item)}
-              />
-            )}
+            <Checkbox
+              checked={selectedKeys.has(key)}
+              onCheckedChange={() => onToggle(item)}
+            />
           </div>
         );
       },
@@ -151,33 +152,51 @@ function WarehouseTab({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-end gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => exportToExcel(rows, warehouseName)}
-          disabled={rows.length === 0}
-          className="gap-1.5"
-        >
-          <LiaFileExcelSolid className="w-4 h-4 text-green-600" />
-          Excel
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handleExportToPDF(rows, warehouseName)}
-          disabled={rows.length === 0}
-          className="gap-1.5"
-        >
-          <LiaFilePdfSolid className="w-4 h-4 text-red-600" />
-          PDF
-        </Button>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        {rows.length > 0 ? (
+          <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+            <Checkbox
+              checked={allChecked ? true : someChecked ? 'indeterminate' : false}
+              onCheckedChange={(checked) => onToggleAll(!!checked && checked !== 'indeterminate' ? true : !someChecked)}
+            />
+            <span>تحديد الكل ({rows.length})</span>
+          </label>
+        ) : (
+          <span />
+        )}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => exportToExcel(rows, warehouseName)}
+            disabled={rows.length === 0}
+            className="gap-1.5"
+          >
+            <LiaFileExcelSolid className="w-4 h-4 text-green-600" />
+            Excel
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleExportToPDF(rows, warehouseName)}
+            disabled={rows.length === 0}
+            className="gap-1.5"
+          >
+            <LiaFilePdfSolid className="w-4 h-4 text-red-600" />
+            PDF
+          </Button>
+        </div>
       </div>
 
       {!isLoading && rows.length === 0 ? (
         <p className="py-12 text-center text-gray-500">لا توجد بيانات</p>
       ) : (
-        <DataTable columns={columns} data={rows} isLoading={isLoading} keyField="productId" />
+        <DataTable
+          columns={columns}
+          data={rows.map((row) => ({ ...row, _rowKey: getItemKey(row) }))}
+          isLoading={isLoading}
+          keyField="_rowKey"
+        />
       )}
     </div>
   );
@@ -190,50 +209,74 @@ export function ConfirmedProductsReportModal({
 }: ConfirmedProductsReportModalProps) {
   const { data, isLoading } = usePackagingInventoryQuery(status, isOpen);
   const checkMutation = usePackagingInventoryCheckMutation();
-  const [loadingKeys, setLoadingKeys] = useState<Set<string>>(new Set());
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
 
   const items = data?.items ?? [];
 
-  const handleCheck = useCallback(
-    async (item: PackagingInventoryItem) => {
-      const key = getItemKey(item);
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedKeys(new Set());
+    }
+  }, [isOpen]);
 
-      setLoadingKeys((prev) => {
-        const next = new Set(prev);
+  const handleToggle = useCallback((item: PackagingInventoryItem) => {
+    const key = getItemKey(item);
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
         next.add(key);
-        return next;
-      });
-
-      try {
-        await checkMutation.mutateAsync({
-          status,
-          items: [
-            {
-              productId: item.productId,
-              variants: item.variants,
-            },
-          ],
-        });
-      } catch (err: any) {
-        const msg = err?.response?.data?.message;
-        toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث العنصر');
-      } finally {
-        setLoadingKeys((prev) => {
-          const next = new Set(prev);
-          next.delete(key);
-          return next;
-        });
       }
+      return next;
+    });
+  }, []);
+
+  const handleToggleAll = useCallback(
+    (checked: boolean) => {
+      setSelectedKeys(() => {
+        if (!checked) return new Set();
+        return new Set(items.map(getItemKey));
+      });
     },
-    [checkMutation],
+    [items],
   );
+
+  const handleConfirm = useCallback(async () => {
+    if (selectedKeys.size === 0) return;
+    const itemsByKey = new Map(items.map((item) => [getItemKey(item), item]));
+    const selectedItems = Array.from(selectedKeys)
+      .map((key) => itemsByKey.get(key))
+      .filter((item): item is PackagingInventoryItem => !!item);
+
+    try {
+      await checkMutation.mutateAsync({
+        status,
+        items: selectedItems.map((item) => ({
+          productId: item.productId,
+          variants: item.variants,
+        })),
+      });
+      toast.success(`تم تأكيد ${selectedItems.length} منتج`);
+      setSelectedKeys(new Set());
+      onClose();
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث العناصر');
+    }
+  }, [selectedKeys, items, checkMutation, status, onClose]);
 
   return (
     <BaseModal
       isOpen={isOpen}
       onClose={onClose}
       title="تقرير منتجات الطلبات المؤكدة"
-      showFooter={false}
+      showFooter={selectedKeys.size > 0}
+      onConfirm={handleConfirm}
+      confirmText={`تأكيد (${selectedKeys.size})`}
+      confirmIcon={<LiaCheckCircleSolid className="w-5 h-5 text-white" />}
+      confirmDisabled={selectedKeys.size === 0}
+      isLoading={checkMutation.isPending}
       maxWidth="md:max-w-4xl"
     >
       <Tabs defaultValue="main">
@@ -247,8 +290,9 @@ export function ConfirmedProductsReportModal({
             rows={items}
             isLoading={isLoading}
             warehouseName="المخزن الرئيسي"
-            loadingKeys={loadingKeys}
-            onCheck={handleCheck}
+            selectedKeys={selectedKeys}
+            onToggle={handleToggle}
+            onToggleAll={handleToggleAll}
           />
         </TabsContent>
 
@@ -257,8 +301,9 @@ export function ConfirmedProductsReportModal({
             rows={items}
             isLoading={isLoading}
             warehouseName="المخزن الفرعي"
-            loadingKeys={loadingKeys}
-            onCheck={handleCheck}
+            selectedKeys={selectedKeys}
+            onToggle={handleToggle}
+            onToggleAll={handleToggleAll}
           />
         </TabsContent>
       </Tabs>
