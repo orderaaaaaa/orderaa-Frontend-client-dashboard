@@ -327,7 +327,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
           }}
           initialFormFilters={formFilters}
           setValue={setValue}
-          hiddenFilters={['skipFilters']}
+          hiddenFilters={[]}
         />
       </div>
       <div className="relative">

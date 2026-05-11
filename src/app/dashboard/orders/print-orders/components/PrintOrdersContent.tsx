@@ -625,7 +625,7 @@ export function PrintOrdersContent() {
         printStatistics={printStatistics}
         selectedOrders={selectedOrders}
         showPrintStatusToggle={filters.status === 'CONFIRMED'}
-        hiddenFilters={['skipFilters']}
+        hiddenFilters={[]}
       />
 
       <div className="flex flex-col sm:flex-row justify-between gap-2 mt-10 mb-6 select-none">
