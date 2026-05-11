@@ -39,10 +39,10 @@ export function PrintedOrdersConfirmModal({
         </p>
 
         <div className="border border-gray-200 rounded-lg overflow-hidden">
-          <table className="w-full">
+          <table className="w-full table-fixed">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-600">
+                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-600 w-16">
                   #
                 </th>
                 <th className="px-4 py-3 text-right text-sm font-semibold text-gray-600">
@@ -59,7 +59,7 @@ export function PrintedOrdersConfirmModal({
                   <td className="px-4 py-3 text-sm text-gray-500">
                     {index + 1}
                   </td>
-                  <td className="px-4 py-3 text-sm font-medium text-gray-800">
+                  <td className="px-4 py-3 text-sm font-medium text-gray-800 break-words whitespace-normal">
                     {order.code}
                   </td>
                 </tr>

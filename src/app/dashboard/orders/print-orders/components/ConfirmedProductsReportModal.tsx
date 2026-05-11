@@ -109,21 +109,29 @@ function WarehouseTab({
     {
       key: 'productName',
       header: 'المنتج',
-      className: 'text-center',
+      className: 'text-center break-words whitespace-normal max-w-[200px]',
       headerClassName: '[&>div]:justify-center',
       render: (_value, row) => {
         const item = row as unknown as PackagingInventoryItem;
-        return <span className="font-medium">{item.productName}</span>;
+        return (
+          <span className="font-medium break-words whitespace-normal leading-snug inline-block">
+            {item.productName}
+          </span>
+        );
       },
     },
     {
       key: 'variants',
       header: 'المتغير',
-      className: 'text-center',
+      className: 'text-center break-words whitespace-normal max-w-[150px]',
       headerClassName: '[&>div]:justify-center',
       render: (_value, row) => {
         const item = row as unknown as PackagingInventoryItem;
-        return item.variants.map((v) => v.value).join(' - ') || '-';
+        return (
+          <span className="break-words whitespace-normal leading-snug inline-block">
+            {item.variants.map((v) => v.value).join(' - ') || '-'}
+          </span>
+        );
       },
     },
     {
