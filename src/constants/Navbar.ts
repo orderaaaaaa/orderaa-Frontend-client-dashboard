@@ -17,6 +17,7 @@ import {
   LiaClipboardListSolid,
   LiaCubesSolid,
   LiaUndoAltSolid,
+  LiaRobotSolid,
 } from 'react-icons/lia';
 import {
   House,
@@ -124,6 +125,11 @@ export const navigation: NavigationItem[] = [
     name: 'الربط مع شركة الشحن',
     href: '/dashboard/link-shipping-company',
     icon: LiaTruckSolid,
+  },
+  {
+    name: 'الربط مع شركات التاكيد الالي',
+    href: '/dashboard/link-auto-confirmation',
+    icon: LiaRobotSolid,
   },
   {
     name: 'اعدادات المتجر',
