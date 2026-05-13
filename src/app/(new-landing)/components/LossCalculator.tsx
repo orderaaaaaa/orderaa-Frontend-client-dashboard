@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
 import { LiaCoinsSolid, LiaCalendarSolid, LiaCalendarAltSolid } from 'react-icons/lia';
 import { RevealOnScroll } from './primitives/RevealOnScroll';
 import { copy } from '../content/copy';
@@ -11,7 +10,6 @@ function formatCurrency(n: number) {
 }
 
 export function LossCalculator() {
-  const reduced = useReducedMotion();
   const { ordersPerDay, failRate, profitPerOrder } = copy.loss.inputs;
   const [orders, setOrders] = useState<number>(ordersPerDay.default);
   const [rate, setRate] = useState<number>(failRate.default);
@@ -96,25 +94,21 @@ export function LossCalculator() {
 
           <RevealOnScroll delay={0.15} className="relative">
             <div className="relative h-full overflow-hidden rounded-3xl border border-[#EF4444]/20 bg-gradient-to-br from-[#1A0E15] via-[#0A0E1E] to-[#0A0E1E] p-6 md:p-8">
-              {!reduced &&
-                particles.map((p) => (
-                  <motion.span
-                    key={p.id}
-                    aria-hidden
-                    className="absolute select-none font-bold text-[#EF4444]/30"
-                    style={{ left: `${p.x}%`, fontSize: p.size }}
-                    initial={{ y: -20, opacity: 0 }}
-                    animate={{ y: ['0%', '110%'], opacity: [0, 0.7, 0.4, 0] }}
-                    transition={{
-                      duration: p.dur,
-                      delay: p.delay,
-                      repeat: Infinity,
-                      ease: 'linear',
-                    }}
-                  >
-                    ج.م
-                  </motion.span>
-                ))}
+              {particles.map((p) => (
+                <span
+                  key={p.id}
+                  aria-hidden
+                  className="absolute select-none font-bold text-[#EF4444]/30 nl-anim-fall"
+                  style={{
+                    left: `${p.x}%`,
+                    fontSize: p.size,
+                    animationDuration: `${p.dur}s`,
+                    animationDelay: `${p.delay}s`,
+                  }}
+                >
+                  ج.م
+                </span>
+              ))}
 
               <div className="relative z-10 flex h-full flex-col">
                 <div className="flex items-center justify-between">
@@ -238,11 +232,7 @@ function LossLine({
           {label}
         </span>
       </div>
-      <motion.div
-        key={value}
-        initial={{ opacity: 0.4, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25 }}
+      <div
         className={`flex items-baseline gap-1.5 font-mono font-bold tabular-nums ${size === 'xl'
           ? 'text-3xl text-[#FF6B6B] md:text-5xl'
           : 'text-xl text-[var(--nl-text)] md:text-2xl'
@@ -252,7 +242,7 @@ function LossLine({
         <span className="text-[11px] font-normal text-[var(--nl-text-mute)] md:text-sm">
           {copy.loss.currency}
         </span>
-      </motion.div>
+      </div>
     </div>
   );
 }

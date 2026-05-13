@@ -1,9 +1,9 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import clsx from 'clsx';
 import { LiaCheckSolid, LiaStarSolid } from 'react-icons/lia';
 import { RevealOnScroll } from './primitives/RevealOnScroll';
+import { RevealItem } from './primitives/RevealItem';
 import { MagneticButton } from './primitives/MagneticButton';
 import { copy } from '../content/copy';
 
@@ -29,12 +29,9 @@ export function PricingTiers() {
 
         <div className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {copy.pricing.tiers.map((t, i) => (
-            <motion.div
+            <RevealItem
               key={t.name}
-              initial={{ y: 14 }}
-              whileInView={{ y: 0 }}
-              viewport={{ once: true, amount: 0.05, margin: '0px 0px 300px 0px' }}
-              transition={{ duration: 0.4, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
+              delay={i * 0.05}
               className={clsx(
                 'relative flex flex-col',
                 t.popular && 'lg:scale-105 lg:-translate-y-2 lg:z-10',
@@ -102,7 +99,7 @@ export function PricingTiers() {
                   </MagneticButton>
                 </div>
               </div>
-            </motion.div>
+            </RevealItem>
           ))}
         </div>
       </div>

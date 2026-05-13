@@ -1,6 +1,5 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
 import {
   LiaShoppingBagSolid,
   LiaBullhornSolid,
@@ -9,6 +8,7 @@ import {
   LiaConciergeBellSolid,
 } from 'react-icons/lia';
 import { RevealOnScroll } from './primitives/RevealOnScroll';
+import { RevealItem } from './primitives/RevealItem';
 import { copy } from '../content/copy';
 
 const pillarIcons = [
@@ -20,7 +20,6 @@ const pillarIcons = [
 ];
 
 export function EcosystemDiagram() {
-  const reduced = useReducedMotion();
   return (
     <section
       id="vision"
@@ -45,41 +44,24 @@ export function EcosystemDiagram() {
 
         <div className="relative mt-16">
           <div className="mx-auto flex max-w-md justify-center">
-            <motion.div
-              initial={{ scale: 0.85, opacity: 0 }}
-              whileInView={{ scale: 1, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              className="relative grid h-32 w-32 place-items-center rounded-3xl border border-[#7B2CFF]/40 bg-gradient-to-br from-[#1B0F3D] to-[#0A0E1E] shadow-[0_0_60px_-10px_rgba(123,44,255,0.6)]"
-            >
-              <motion.span
+            <div className="relative grid h-32 w-32 place-items-center rounded-3xl border border-[#7B2CFF]/40 bg-gradient-to-br from-[#1B0F3D] to-[#0A0E1E] shadow-[0_0_60px_-10px_rgba(123,44,255,0.6)] nl-anim-scale-in">
+              <span
                 aria-hidden
-                className="absolute inset-0 rounded-3xl bg-[#7B2CFF]/20 blur-xl"
-                animate={reduced ? undefined : { opacity: [0.4, 0.8, 0.4] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute inset-0 rounded-3xl bg-[#7B2CFF]/20 blur-xl animate-pulse"
               />
               <span className="relative text-2xl font-bold text-[var(--nl-text)]">
                 Orderaa
               </span>
-            </motion.div>
+            </div>
           </div>
 
           <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {copy.vision.pillars.map((p, i) => {
               const Icon = pillarIcons[i];
               return (
-                <motion.div
+                <RevealItem
                   key={p.title}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-60px' }}
-                  transition={{
-                    duration: 0.55,
-                    delay: i * 0.08,
-                    type: 'spring',
-                    stiffness: 100,
-                    damping: 14,
-                  }}
+                  delay={i * 0.08}
                   className="group relative overflow-hidden rounded-3xl border border-white/[0.07] bg-white/[0.025] p-5 backdrop-blur-sm transition-colors hover:border-[#7B2CFF]/40"
                 >
                   <div className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-[#7B2CFF]/25 to-[#3A0CA3]/15 text-[#C8A6FF] ring-1 ring-[#7B2CFF]/30">
@@ -92,7 +74,7 @@ export function EcosystemDiagram() {
                     {p.body}
                   </p>
                   <span className="absolute inset-x-5 bottom-0 h-px scale-x-0 bg-gradient-to-l from-transparent via-[#7B2CFF] to-transparent transition-transform duration-500 group-hover:scale-x-100" />
-                </motion.div>
+                </RevealItem>
               );
             })}
           </div>

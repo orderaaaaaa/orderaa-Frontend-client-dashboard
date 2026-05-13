@@ -1,7 +1,5 @@
 'use client';
 
-import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
 import {
   LiaArrowLeftSolid,
   LiaPlaySolid,
@@ -13,77 +11,71 @@ import {
 import { AuroraBackground } from './AuroraBackground';
 import { MagneticButton } from './primitives/MagneticButton';
 import { CountUp } from './primitives/CountUp';
+import { RevealItem } from './primitives/RevealItem';
 import { copy } from '../content/copy';
 
 const pillIcons = [LiaTruckMovingSolid, LiaStoreSolid, LiaWarehouseSolid];
 
 export function Hero() {
-  const reduced = useReducedMotion();
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start start', 'end start'],
-  });
-  const y = useTransform(scrollYProgress, [0, 1], [0, reduced ? 0 : -80]);
-  const dashY = useTransform(scrollYProgress, [0, 1], [0, reduced ? 0 : 120]);
-  const dashRot = useTransform(scrollYProgress, [0, 1], [0, reduced ? 0 : -3]);
-
   return (
     <section
-      ref={ref}
       id="hero"
       className="relative overflow-hidden pb-20 pt-32 md:pb-32 md:pt-40"
     >
       <AuroraBackground variant="hero" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-5">
-        <motion.div style={{ y }} className="mx-auto max-w-4xl text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-xs text-[var(--nl-text-mute)] backdrop-blur-md"
+        <div className="mx-auto max-w-4xl text-center">
+          <div
+            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-xs text-[var(--nl-text-mute)] backdrop-blur-md nl-anim-fade-in-up"
           >
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#7B2CFF] opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-[#7B2CFF]" />
             </span>
             {copy.hero.eyebrow}
-          </motion.div>
+          </div>
 
           <h1 className="mt-7 text-4xl font-bold leading-[1.15] tracking-tight text-[var(--nl-text)] md:text-6xl lg:text-7xl">
-            <RevealText delay={0.05}>{copy.hero.headlinePre}</RevealText>{' '}
-            <RevealText delay={0.18}>
+            <span
+              className="inline-block nl-anim-fade-in-up"
+              style={{ animationDelay: '0.05s' }}
+            >
+              {copy.hero.headlinePre}
+            </span>{' '}
+            <span
+              className="inline-block nl-anim-fade-in-up"
+              style={{ animationDelay: '0.18s' }}
+            >
               <span className="relative inline-block">
                 <span className="bg-gradient-to-l from-[#9D4EDD] via-[#7B2CFF] to-[#5d24e1] bg-clip-text text-transparent">
                   {copy.hero.headlineHighlight}
                 </span>
-                <motion.span
+                <span
                   aria-hidden
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ delay: 0.6, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                  className="absolute inset-x-0 -bottom-1 h-[3px] origin-right rounded-full bg-gradient-to-l from-[#9D4EDD] via-[#7B2CFF] to-[#5d24e1]"
+                  className="absolute inset-x-0 -bottom-1 h-[3px] rounded-full bg-gradient-to-l from-[#9D4EDD] via-[#7B2CFF] to-[#5d24e1] nl-anim-scale-x-in"
+                  style={{ animationDelay: '0.6s' }}
                 />
               </span>
-            </RevealText>{' '}
-            <RevealText delay={0.32}>{copy.hero.headlinePost}</RevealText>
+            </span>{' '}
+            <span
+              className="inline-block nl-anim-fade-in-up"
+              style={{ animationDelay: '0.32s' }}
+            >
+              {copy.hero.headlinePost}
+            </span>
           </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.6 }}
-            className="mx-auto mt-7 max-w-2xl text-base leading-relaxed text-[var(--nl-text-mute)] md:text-lg"
+          <p
+            className="mx-auto mt-7 max-w-2xl text-base leading-relaxed text-[var(--nl-text-mute)] md:text-lg nl-anim-fade-in-up"
+            style={{ animationDelay: '0.5s' }}
           >
             {copy.hero.sub}
-          </motion.p>
+          </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.65, duration: 0.6 }}
-            className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
+          <div
+            className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row nl-anim-fade-in-up"
+            style={{ animationDelay: '0.65s' }}
           >
             <MagneticButton variant="primary">
               {copy.hero.ctaPrimary}
@@ -93,13 +85,11 @@ export function Hero() {
               <LiaPlaySolid />
               {copy.hero.ctaSecondary}
             </MagneticButton>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.85, duration: 0.6 }}
-            className="mt-12 grid grid-cols-3 gap-3 sm:gap-6"
+          <div
+            className="mt-12 grid grid-cols-3 gap-3 sm:gap-6 nl-anim-fade-in"
+            style={{ animationDelay: '0.85s' }}
           >
             {copy.hero.stats.map((s, i) => (
               <div
@@ -114,26 +104,17 @@ export function Hero() {
                 </div>
               </div>
             ))}
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
-        <motion.div
-          style={{ y: dashY, rotateZ: dashRot }}
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 1, ease: [0.22, 1, 0.36, 1] }}
-          className="relative mx-auto mt-16 max-w-5xl"
+        <div
+          className="relative mx-auto mt-16 max-w-5xl nl-anim-fade-in-up"
+          style={{ animationDelay: '0.7s', animationDuration: '1s' }}
         >
           <DashboardMock />
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-100px' }}
-          transition={{ duration: 0.7 }}
-          className="mt-32 grid grid-cols-1 gap-3 md:grid-cols-3"
-        >
+        <RevealItem className="mt-32 grid grid-cols-1 gap-3 md:grid-cols-3">
           {copy.hero.pills.map((p, i) => {
             const Icon = pillIcons[i];
             return (
@@ -158,22 +139,9 @@ export function Hero() {
               </div>
             );
           })}
-        </motion.div>
+        </RevealItem>
       </div>
     </section>
-  );
-}
-
-function RevealText({ children, delay }: { children: React.ReactNode; delay: number }) {
-  return (
-    <motion.span
-      className="inline-block"
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
-    </motion.span>
   );
 }
 

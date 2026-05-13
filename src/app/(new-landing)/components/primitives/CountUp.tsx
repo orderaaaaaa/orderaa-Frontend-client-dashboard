@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { useInView, useReducedMotion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { useInView } from './useInView';
 
 type CountUpProps = {
   to: number;
@@ -22,29 +22,33 @@ export function CountUp({
   className,
   triggerOnView = true,
 }: CountUpProps) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-50px' });
-  const reduced = useReducedMotion();
+  const { ref, inView } = useInView<HTMLSpanElement>({
+    rootMargin: '0px 0px -50px 0px',
+  });
   const [value, setValue] = useState(0);
 
   useEffect(() => {
     if (triggerOnView && !inView) return;
-    if (reduced) {
+
+    if (
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
       setValue(to);
       return;
     }
+
     let raf = 0;
     const start = performance.now();
-    const from = 0;
     const tick = (t: number) => {
       const p = Math.min(1, (t - start) / (duration * 1000));
       const eased = 1 - Math.pow(1 - p, 3);
-      setValue(from + (to - from) * eased);
+      setValue(to * eased);
       if (p < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [inView, to, duration, reduced, triggerOnView]);
+  }, [inView, to, duration, triggerOnView]);
 
   const formatted = value.toLocaleString('en-US', {
     minimumFractionDigits: decimals,

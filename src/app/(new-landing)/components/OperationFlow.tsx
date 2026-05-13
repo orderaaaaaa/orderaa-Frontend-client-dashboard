@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import {
   LiaStoreAltSolid,
@@ -20,6 +19,7 @@ import {
   LiaDownloadSolid,
 } from 'react-icons/lia';
 import { RevealOnScroll } from './primitives/RevealOnScroll';
+import { useInView } from './primitives/useInView';
 import { copy } from '../content/copy';
 
 const AUTOPLAY_MS = 4500;
@@ -117,17 +117,12 @@ export function OperationFlow() {
           {copy.flow.steps.map((s, i) => {
             const isActive = active === i;
             return (
-              <motion.li
+              <FlowStep
                 key={s.num}
-                ref={(el) => {
+                index={i}
+                refSetter={(el) => {
                   stepsRef.current[i] = el;
                 }}
-                data-idx={i}
-                initial={{ y: 18 }}
-                whileInView={{ y: 0 }}
-                viewport={{ once: true, amount: 0.05, margin: '0px 0px 300px 0px' }}
-                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_1.15fr] lg:items-center lg:gap-12"
               >
                 <div
                   className={clsx(
@@ -191,7 +186,7 @@ export function OperationFlow() {
                 </div>
 
                 <InlineScene idx={i} title={s.title} isActive={isActive} />
-              </motion.li>
+              </FlowStep>
             );
           })}
         </ol>
@@ -304,22 +299,13 @@ function SceneConnect() {
 
       <div className="rounded-xl border border-[#7B2CFF]/20 bg-[#7B2CFF]/[0.06] p-3.5">
         <div className="flex items-center gap-2">
-          <motion.span
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-            className="text-[#C8A6FF]"
-          >
+          <span className="text-[#C8A6FF] animate-spin">
             <LiaSyncAltSolid size={16} />
-          </motion.span>
+          </span>
           <span className="text-sm text-[var(--nl-text)]">جاري المزامنة — 234 طلب جديد</span>
         </div>
         <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.04]">
-          <motion.div
-            className="h-full rounded-full bg-gradient-to-l from-[#9D4EDD] to-[#7B2CFF]"
-            initial={{ width: '20%' }}
-            animate={{ width: ['20%', '85%', '20%'] }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-          />
+          <div className="h-full rounded-full bg-gradient-to-l from-[#9D4EDD] to-[#7B2CFF] nl-anim-bar-loop" />
         </div>
       </div>
 
@@ -342,11 +328,7 @@ function SceneCall() {
         <div className="mt-3 text-base font-semibold text-[var(--nl-text)]">محمد علي</div>
         <div className="font-mono text-xs text-[var(--nl-text-mute)]">+20 100 234 5678</div>
         <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/[0.04] px-3 py-1 text-xs">
-          <motion.span
-            className="h-1.5 w-1.5 rounded-full bg-[#EF4444]"
-            animate={{ opacity: [1, 0.3, 1] }}
-            transition={{ duration: 1.2, repeat: Infinity }}
-          />
+          <span className="h-1.5 w-1.5 rounded-full bg-[#EF4444] nl-anim-blink" />
           <span className="text-[var(--nl-text)]">REC</span>
           <span className="font-mono text-[var(--nl-text-mute)]">00:42</span>
         </div>
@@ -433,12 +415,7 @@ function ScenePackage() {
           </span>
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.04]">
-          <motion.div
-            className="h-full rounded-full bg-gradient-to-l from-[#22C55E] via-[#7B2CFF] to-[#3A0CA3]"
-            initial={{ width: '0%' }}
-            animate={{ width: '76%' }}
-            transition={{ duration: 1.2, ease: 'easeOut' }}
-          />
+          <div className="h-full rounded-full bg-gradient-to-l from-[#22C55E] via-[#7B2CFF] to-[#3A0CA3] nl-anim-bar-fill-76" />
         </div>
         <div className="mt-1 text-[11px] text-[var(--nl-text-mute)]">76% — متبقي 13 طلب</div>
       </div>
@@ -460,13 +437,9 @@ function ScenePackage() {
       </div>
 
       <div className="flex items-center gap-3 rounded-xl border border-[#7B2CFF]/25 bg-[#7B2CFF]/[0.05] p-3">
-        <motion.div
-          className="grid h-9 w-9 place-items-center rounded-lg bg-[#7B2CFF]/15 text-[#C8A6FF]"
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 1.4, repeat: Infinity }}
-        >
+        <div className="grid h-9 w-9 place-items-center rounded-lg bg-[#7B2CFF]/15 text-[#C8A6FF] nl-anim-pulse-scale">
           <LiaBarcodeSolid size={20} />
-        </motion.div>
+        </div>
         <div className="min-w-0 flex-1">
           <div className="text-xs text-[var(--nl-text-mute)]">جاري المسح</div>
           <div className="truncate font-mono text-sm font-semibold text-[var(--nl-text)]">
@@ -551,17 +524,15 @@ function SceneTracking() {
         <div className="flex items-center justify-between">
           {milestones.map((m, i) => (
             <div key={m.label} className="flex flex-col items-center">
-              <motion.span
+              <span
                 className={clsx(
                   'h-3 w-3 rounded-full',
                   m.state === 'done'
                     ? 'bg-[#22C55E]'
                     : m.state === 'active'
-                      ? 'bg-[#FEBC2E]'
+                      ? 'bg-[#FEBC2E] nl-anim-pulse-scale-strong'
                       : 'border-2 border-white/15',
                 )}
-                animate={m.state === 'active' ? { scale: [1, 1.3, 1] } : undefined}
-                transition={{ duration: 1.4, repeat: Infinity }}
               />
               <span className="mt-1.5 text-[10px] text-[var(--nl-text-mute)]">{m.label}</span>
               {i < milestones.length - 1 && (
@@ -571,12 +542,7 @@ function SceneTracking() {
           ))}
         </div>
         <div className="relative mt-[-22px] h-px w-full bg-white/[0.06]">
-          <motion.div
-            className="absolute right-0 top-0 h-full bg-gradient-to-l from-[#FEBC2E] via-[#22C55E] to-[#22C55E]"
-            initial={{ width: '0%' }}
-            animate={{ width: '65%' }}
-            transition={{ duration: 1.2, ease: 'easeOut' }}
-          />
+          <div className="absolute right-0 top-0 h-full bg-gradient-to-l from-[#FEBC2E] via-[#22C55E] to-[#22C55E] nl-anim-bar-fill-65" />
         </div>
         <div className="mt-6 text-center text-[10px] text-[var(--nl-text-mute)]">
           API webhook · آخر تحديث منذ 2 دقيقة
@@ -686,13 +652,9 @@ function SceneTransfer() {
           <div className="font-mono text-[10px] text-[var(--nl-text-mute)]">Cairo</div>
         </div>
 
-        <motion.div
-          animate={{ x: [-6, 6, -6] }}
-          transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-          className="grid h-10 w-10 place-items-center rounded-full border border-[#7B2CFF]/40 bg-[#0A0E1E] text-[#C8A6FF] shadow-[0_0_24px_-6px_rgba(123,44,255,0.6)]"
-        >
+        <div className="grid h-10 w-10 place-items-center rounded-full border border-[#7B2CFF]/40 bg-[#0A0E1E] text-[#C8A6FF] shadow-[0_0_24px_-6px_rgba(123,44,255,0.6)] nl-anim-slide-x">
           <LiaArrowLeftSolid size={18} />
-        </motion.div>
+        </div>
 
         <div className="rounded-2xl border border-[#7B2CFF]/30 bg-[#7B2CFF]/[0.08] p-3.5 text-center">
           <LiaWarehouseSolid size={26} className="mx-auto text-[#C8A6FF]" />
@@ -728,5 +690,32 @@ function SceneTransfer() {
         طباعة فاتورة الانتقال
       </button>
     </div>
+  );
+}
+
+function FlowStep({
+  index,
+  refSetter,
+  children,
+}: {
+  index: number;
+  refSetter: (el: HTMLLIElement | null) => void;
+  children: ReactNode;
+}) {
+  const { ref, inView } = useInView<HTMLLIElement>();
+  return (
+    <li
+      ref={(el) => {
+        ref.current = el;
+        refSetter(el);
+      }}
+      data-idx={index}
+      className={clsx(
+        'nl-reveal grid grid-cols-1 gap-5 lg:grid-cols-[1fr_1.15fr] lg:items-center lg:gap-12',
+        inView && 'is-visible',
+      )}
+    >
+      {children}
+    </li>
   );
 }

@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -90,13 +89,12 @@ export function NewNav() {
                     : 'text-[var(--nl-text-mute)] hover:text-[var(--nl-text)]',
                 )}
               >
-                {isActive && (
-                  <motion.span
-                    layoutId="nav-active-bg"
-                    className="absolute inset-0 -z-10 rounded-full bg-white/[0.06] ring-1 ring-white/10"
-                    transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                  />
-                )}
+                <span
+                  className={clsx(
+                    'absolute inset-0 -z-10 rounded-full bg-white/[0.06] ring-1 ring-white/10 transition-opacity duration-300',
+                    isActive ? 'opacity-100' : 'opacity-0',
+                  )}
+                />
                 {l.label}
                 <span
                   className={clsx(
@@ -134,52 +132,44 @@ export function NewNav() {
         </button>
       </div>
 
-      <AnimatePresence>
-        {mobile && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25 }}
-            className="mx-auto mt-2 max-w-7xl rounded-3xl border border-white/10 bg-[#0A0E1E]/95 p-4 backdrop-blur-xl md:hidden"
-          >
-            <div className="flex flex-col gap-1">
-              {copy.nav.links.map((l) => {
-                const isActive = activeHref === l.href;
-                return (
-                  <a
-                    key={l.href}
-                    href={l.href}
-                    onClick={() => setMobile(false)}
-                    className={clsx(
-                      'rounded-2xl px-4 py-3.5 text-lg font-medium transition-colors',
-                      isActive
-                        ? 'bg-gradient-to-l from-[#7B2CFF]/20 to-transparent text-[var(--nl-text)] ring-1 ring-[#7B2CFF]/30'
-                        : 'text-[var(--nl-text)] hover:bg-white/[0.04]',
-                    )}
-                  >
-                    {l.label}
-                  </a>
-                );
-              })}
-              <div className="mt-2 flex items-center gap-2 border-t border-white/10 pt-3">
-                <Link
-                  href="/signin"
-                  className="flex-1 rounded-full border border-white/10 px-4 py-3 text-center text-base font-medium text-[var(--nl-text)]"
+      {mobile && (
+        <div className="mx-auto mt-2 max-w-7xl rounded-3xl border border-white/10 bg-[#0A0E1E]/95 p-4 backdrop-blur-xl md:hidden nl-anim-slide-down">
+          <div className="flex flex-col gap-1">
+            {copy.nav.links.map((l) => {
+              const isActive = activeHref === l.href;
+              return (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setMobile(false)}
+                  className={clsx(
+                    'rounded-2xl px-4 py-3.5 text-lg font-medium transition-colors',
+                    isActive
+                      ? 'bg-gradient-to-l from-[#7B2CFF]/20 to-transparent text-[var(--nl-text)] ring-1 ring-[#7B2CFF]/30'
+                      : 'text-[var(--nl-text)] hover:bg-white/[0.04]',
+                  )}
                 >
-                  {copy.nav.signin}
-                </Link>
-                <Link
-                  href="/signup"
-                  className="flex-1 rounded-full bg-gradient-to-l from-[#7B2CFF] to-[#3A0CA3] px-4 py-3 text-center text-base font-semibold text-white"
-                >
-                  {copy.nav.cta}
-                </Link>
-              </div>
+                  {l.label}
+                </a>
+              );
+            })}
+            <div className="mt-2 flex items-center gap-2 border-t border-white/10 pt-3">
+              <Link
+                href="/signin"
+                className="flex-1 rounded-full border border-white/10 px-4 py-3 text-center text-base font-medium text-[var(--nl-text)]"
+              >
+                {copy.nav.signin}
+              </Link>
+              <Link
+                href="/signup"
+                className="flex-1 rounded-full bg-gradient-to-l from-[#7B2CFF] to-[#3A0CA3] px-4 py-3 text-center text-base font-semibold text-white"
+              >
+                {copy.nav.cta}
+              </Link>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

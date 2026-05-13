@@ -1,6 +1,5 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
 import clsx from 'clsx';
 
 type AuroraBackgroundProps = {
@@ -9,8 +8,6 @@ type AuroraBackgroundProps = {
 };
 
 export function AuroraBackground({ className, variant = 'hero' }: AuroraBackgroundProps) {
-  const reduced = useReducedMotion();
-
   const orbs =
     variant === 'cta'
       ? [
@@ -37,9 +34,9 @@ export function AuroraBackground({ className, variant = 'hero' }: AuroraBackgrou
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(91,32,168,0.18),transparent_60%)]" />
 
       {orbs.map((o, i) => (
-        <motion.div
+        <div
           key={i}
-          className="absolute rounded-full mix-blend-screen"
+          className="nl-aurora-orb absolute rounded-full mix-blend-screen"
           style={{
             width: o.size,
             height: o.size,
@@ -48,20 +45,8 @@ export function AuroraBackground({ className, variant = 'hero' }: AuroraBackgrou
             transform: 'translate(-50%, -50%)',
             background: `radial-gradient(circle, ${o.color}AA 0%, ${o.color}33 35%, transparent 70%)`,
             filter: 'blur(60px)',
-          }}
-          animate={
-            reduced
-              ? undefined
-              : {
-                  x: [0, 40, -30, 0],
-                  y: [0, -30, 25, 0],
-                  scale: [1, 1.08, 0.95, 1],
-                }
-          }
-          transition={{
-            duration: o.dur,
-            repeat: Infinity,
-            ease: 'easeInOut',
+            animationDuration: `${o.dur}s`,
+            animationDelay: `${-i * 2}s`,
           }}
         />
       ))}

@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import {
   LiaListAltSolid,
   LiaHeadsetSolid,
@@ -17,6 +16,7 @@ import {
 } from 'react-icons/lia';
 import { GlowCard } from './primitives/GlowCard';
 import { RevealOnScroll } from './primitives/RevealOnScroll';
+import { RevealItem } from './primitives/RevealItem';
 import { copy } from '../content/copy';
 
 const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
@@ -60,12 +60,9 @@ export function FeatureBento() {
           {copy.features.tiles.map((t, i) => {
             const Icon = iconMap[t.icon];
             return (
-              <motion.div
+              <RevealItem
                 key={t.title}
-                initial={{ y: 14 }}
-                whileInView={{ y: 0 }}
-                viewport={{ once: true, amount: 0.05, margin: '0px 0px 300px 0px' }}
-                transition={{ duration: 0.4, delay: (i % 4) * 0.04, ease: [0.22, 1, 0.36, 1] }}
+                delay={(i % 4) * 0.04}
                 className={sizeClasses[t.size]}
               >
                 <GlowCard className="h-full">
@@ -82,7 +79,7 @@ export function FeatureBento() {
                     {t.size === 'lg' && <BentoBigArt variant={t.icon} />}
                   </div>
                 </GlowCard>
-              </motion.div>
+              </RevealItem>
             );
           })}
         </div>

@@ -1,29 +1,19 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
 import { RevealOnScroll } from './primitives/RevealOnScroll';
 import { copy } from '../content/copy';
 
 export function SolutionBanner() {
-  const reduced = useReducedMotion();
   return (
     <section className="relative overflow-hidden border-y border-white/[0.05] bg-gradient-to-b from-[#0A0E1E] via-[#11162B] to-[#0A0E1E] py-24 md:py-32">
       <div className="pointer-events-none absolute inset-0">
-        <motion.div
+        <div
           aria-hidden
-          className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-l from-[#7B2CFF]/15 via-[#3A0CA3]/10 to-transparent blur-2xl"
-          initial={{ x: '-30%' }}
-          whileInView={reduced ? undefined : { x: '0%' }}
-          transition={{ duration: 1.4, ease: 'easeOut' }}
-          viewport={{ once: true }}
+          className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-l from-[#7B2CFF]/15 via-[#3A0CA3]/10 to-transparent blur-2xl nl-anim-slide-in-x-rev"
         />
-        <motion.div
+        <div
           aria-hidden
-          className="absolute inset-y-0 right-0 w-1/2 bg-gradient-to-r from-[#9D4EDD]/15 via-[#3A0CA3]/10 to-transparent blur-2xl"
-          initial={{ x: '30%' }}
-          whileInView={reduced ? undefined : { x: '0%' }}
-          transition={{ duration: 1.4, ease: 'easeOut' }}
-          viewport={{ once: true }}
+          className="absolute inset-y-0 right-0 w-1/2 bg-gradient-to-r from-[#9D4EDD]/15 via-[#3A0CA3]/10 to-transparent blur-2xl nl-anim-slide-in-x"
         />
       </div>
 
