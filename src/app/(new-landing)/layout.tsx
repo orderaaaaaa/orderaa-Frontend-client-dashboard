@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './new-landing.css';
+import { WhatsAppFloat } from './components/WhatsAppFloat';
 
 export const metadata: Metadata = {
   title: 'Orderaa — نظام تشغيل التجارة الإلكترونية',
@@ -8,5 +9,10 @@ export const metadata: Metadata = {
 };
 
 export default function NewLandingLayout({ children }: { children: React.ReactNode }) {
-  return <div className="nl-root">{children}</div>;
+  return (
+    <div className="nl-root">
+      {children}
+      <WhatsAppFloat />
+    </div>
+  );
 }

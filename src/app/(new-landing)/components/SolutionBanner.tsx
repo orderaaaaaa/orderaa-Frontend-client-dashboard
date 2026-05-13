@@ -29,7 +29,7 @@ export function SolutionBanner() {
 
       <div className="relative z-10 mx-auto max-w-5xl px-5 text-center">
         <RevealOnScroll>
-          <span className="font-mono text-xs uppercase tracking-[0.3em] text-[#9D4EDD]">
+          <span className="font-mono text-lg uppercase tracking-[0.3em] text-[#9D4EDD]">
             {copy.solution.eyebrow}
           </span>
         </RevealOnScroll>

@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import Link from 'next/link';
 import Image from 'next/image';
 import { LiaTimesSolid, LiaBarsSolid } from 'react-icons/lia';
-import OrderaaLogo from '@/assets/icons/Orderaa.svg';
+import OrderaaLogo from '@/assets/images/IMG_5307.png';
 import { copy } from '../content/copy';
 import { MagneticButton } from './primitives/MagneticButton';
 
@@ -64,7 +64,7 @@ export function NewNav() {
         )}
       >
         <Link
-          href="/new-landing"
+          href="/"
           aria-label={copy.brand.name}
           className="flex shrink-0 items-center text-[var(--nl-text)]"
         >
@@ -72,7 +72,7 @@ export function NewNav() {
             src={OrderaaLogo}
             alt={copy.brand.name}
             priority
-            className="h-10 w-auto md:h-11"
+            className="h-auto w-36 max-h-16 object-contain md:w-60 md:max-h-20"
           />
         </Link>
 

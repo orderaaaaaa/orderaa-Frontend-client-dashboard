@@ -43,7 +43,7 @@ export function LossCalculator() {
 
       <div className="relative z-10 mx-auto max-w-7xl px-5">
         <RevealOnScroll className="mx-auto max-w-3xl text-center">
-          <span className="font-mono text-xs uppercase tracking-[0.3em] text-[#9D4EDD]">
+          <span className="font-mono text-lg uppercase tracking-[0.3em] text-[#9D4EDD]">
             {copy.loss.eyebrow}
           </span>
           <h2 className="mt-4 text-4xl font-bold leading-tight text-[var(--nl-text)] md:text-5xl">
@@ -227,9 +227,8 @@ function LossLine({
 }) {
   return (
     <div
-      className={`mt-5 flex items-baseline justify-between border-b border-white/[0.06] pb-5 last:border-b-0 ${
-        emphasis ? 'rounded-2xl border-x border-t border-[#EF4444]/20 bg-[#EF4444]/[0.04] px-4 py-5' : ''
-      }`}
+      className={`mt-5 flex items-baseline justify-between border-b border-white/[0.06] pb-5 last:border-b-0 ${emphasis ? 'rounded-2xl border-x border-t border-[#EF4444]/20 bg-[#EF4444]/[0.04] px-4 py-5' : ''
+        }`}
     >
       <div className="flex items-center gap-3 text-[var(--nl-text-mute)]">
         <span className={emphasis ? 'text-[#FF6B6B]' : 'text-[var(--nl-text-mute)]'}>
@@ -244,11 +243,10 @@ function LossLine({
         initial={{ opacity: 0.4, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25 }}
-        className={`flex items-baseline gap-1.5 font-mono font-bold tabular-nums ${
-          size === 'xl'
-            ? 'text-3xl text-[#FF6B6B] md:text-5xl'
-            : 'text-xl text-[var(--nl-text)] md:text-2xl'
-        }`}
+        className={`flex items-baseline gap-1.5 font-mono font-bold tabular-nums ${size === 'xl'
+          ? 'text-3xl text-[#FF6B6B] md:text-5xl'
+          : 'text-xl text-[var(--nl-text)] md:text-2xl'
+          }`}
       >
         <span>{formatCurrency(value)}</span>
         <span className="text-[11px] font-normal text-[var(--nl-text-mute)] md:text-sm">

@@ -16,7 +16,7 @@ export function CompetitorMatrix() {
 
       <div className="mx-auto max-w-7xl px-5">
         <RevealOnScroll className="mx-auto max-w-3xl text-center">
-          <span className="font-mono text-xs uppercase tracking-[0.3em] text-[#9D4EDD]">
+          <span className="font-mono text-lg uppercase tracking-[0.3em] text-[#9D4EDD]">
             {copy.compare.eyebrow}
           </span>
           <h2 className="mt-4 text-4xl font-bold leading-tight text-[var(--nl-text)] md:text-5xl">
@@ -29,30 +29,31 @@ export function CompetitorMatrix() {
 
         <RevealOnScroll delay={0.1} className="mt-14">
           <div className="relative overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-b from-[#0A0E1E] to-[#11162B] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)]">
-            <div className="relative overflow-x-auto overflow-y-hidden">
-              <table className="w-full min-w-[760px] border-collapse">
+            <div className="relative">
+              <table className="w-full table-fixed border-collapse">
                 <thead>
                   <tr>
-                    <th className="sticky right-0 z-10 w-[34%] border-b border-white/[0.06] bg-[#0A0E1E] px-5 py-5 text-right text-xs font-medium uppercase tracking-[0.2em] text-[var(--nl-text-mute)]">
+                    <th className="w-[28%] border-b border-white/[0.06] px-2 py-3 text-right text-xs font-medium uppercase tracking-[0.18em] text-[var(--nl-text-mute)] sm:px-4 sm:py-5 sm:text-sm sm:tracking-[0.2em]">
                       الميزة
                     </th>
                     {copy.compare.columns.map((c, i) => (
                       <th
                         key={c}
                         className={clsx(
-                          'border-b border-white/[0.06] px-5 py-5 text-center text-sm font-semibold',
+                          'border-b border-white/[0.06] px-2 py-3 text-center text-sm font-semibold sm:px-4 sm:py-5 sm:text-lg',
                           tone(i) === 'orderaa'
                             ? 'relative text-[var(--nl-text)]'
                             : 'text-[var(--nl-text-mute)]',
                         )}
                       >
                         {tone(i) === 'orderaa' && (
-                          <span className="absolute inset-x-3 inset-y-2 -z-10 rounded-2xl bg-gradient-to-b from-[#7B2CFF]/20 via-[#7B2CFF]/10 to-transparent ring-1 ring-[#7B2CFF]/30" />
+                          <span className="absolute inset-x-1 inset-y-2 -z-10 rounded-xl bg-gradient-to-b from-[#7B2CFF]/20 via-[#7B2CFF]/10 to-transparent ring-1 ring-[#7B2CFF]/30 sm:inset-x-3 sm:rounded-2xl" />
                         )}
                         <span
                           className={clsx(
+                            'break-words',
                             tone(i) === 'orderaa' &&
-                              'bg-gradient-to-l from-[#9D4EDD] to-[#7B2CFF] bg-clip-text text-transparent',
+                            'bg-gradient-to-l from-[#9D4EDD] to-[#7B2CFF] bg-clip-text text-transparent',
                           )}
                         >
                           {c}
@@ -71,22 +72,22 @@ export function CompetitorMatrix() {
                       transition={{ duration: 0.4, delay: ri * 0.04 }}
                       className="group"
                     >
-                      <td className="sticky right-0 z-10 border-b border-white/[0.04] bg-[#0A0E1E] px-5 py-4 text-right text-sm font-medium text-[var(--nl-text)] group-hover:bg-white/[0.02]">
+                      <td className="border-b border-white/[0.04] px-2 py-3 text-right text-xs font-medium leading-snug text-[var(--nl-text)] break-words transition-colors group-hover:bg-white/[0.03] sm:px-4 sm:py-4 sm:text-sm">
                         {row.feature}
                       </td>
                       {row.values.map((v, ci) => (
                         <td
                           key={ci}
                           className={clsx(
-                            'border-b border-white/[0.04] px-5 py-4 text-center text-sm transition-colors',
+                            'border-b border-white/[0.04] px-2 py-3 text-center text-[11px] leading-snug transition-colors break-words sm:px-4 sm:py-4 sm:text-sm',
                             tone(ci) === 'orderaa'
                               ? 'relative font-medium text-[var(--nl-text)]'
                               : 'text-[var(--nl-text-mute)]',
-                            'group-hover:bg-white/[0.015]',
+                            'group-hover:bg-white/[0.03]',
                           )}
                         >
                           {tone(ci) === 'orderaa' && (
-                            <span className="absolute inset-x-3 inset-y-1 -z-10 rounded-xl bg-[#7B2CFF]/[0.06]" />
+                            <span className="absolute inset-x-1 inset-y-1 -z-10 rounded-lg bg-[#7B2CFF]/[0.06] sm:inset-x-3 sm:rounded-xl" />
                           )}
                           {v}
                         </td>

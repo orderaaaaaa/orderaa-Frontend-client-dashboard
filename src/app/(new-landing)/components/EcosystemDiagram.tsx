@@ -32,7 +32,7 @@ export function EcosystemDiagram() {
 
       <div className="relative z-10 mx-auto max-w-7xl px-5">
         <RevealOnScroll className="mx-auto max-w-3xl text-center">
-          <span className="font-mono text-xs uppercase tracking-[0.3em] text-[#9D4EDD]">
+          <span className="font-mono text-lg uppercase tracking-[0.3em] text-[#9D4EDD]">
             {copy.vision.eyebrow}
           </span>
           <h2 className="mt-4 text-4xl font-bold leading-tight text-[var(--nl-text)] md:text-5xl">
