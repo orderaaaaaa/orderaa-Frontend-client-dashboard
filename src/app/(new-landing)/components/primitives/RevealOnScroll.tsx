@@ -15,7 +15,7 @@ type RevealOnScrollProps = {
 export function RevealOnScroll({
   children,
   delay = 0,
-  y = 20,
+  y = 16,
   className,
   as = 'div',
 }: RevealOnScrollProps) {
@@ -27,11 +27,10 @@ export function RevealOnScroll({
   }
 
   const variants: Variants = {
-    hidden: { opacity: 0, y },
+    hidden: { y },
     visible: {
-      opacity: 1,
       y: 0,
-      transition: { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] },
+      transition: { duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] },
     },
   };
 
@@ -40,7 +39,7 @@ export function RevealOnScroll({
       className={clsx(className)}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, amount: 0.1, margin: '0px 0px 200px 0px' }}
+      viewport={{ once: true, amount: 0.05, margin: '0px 0px 300px 0px' }}
       variants={variants}
     >
       {children}

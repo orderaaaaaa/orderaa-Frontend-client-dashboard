@@ -123,10 +123,10 @@ export function OperationFlow() {
                   stepsRef.current[i] = el;
                 }}
                 data-idx={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.1, margin: '0px 0px 200px 0px' }}
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                initial={{ y: 18 }}
+                whileInView={{ y: 0 }}
+                viewport={{ once: true, amount: 0.05, margin: '0px 0px 300px 0px' }}
+                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                 className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_1.15fr] lg:items-center lg:gap-12"
               >
                 <div

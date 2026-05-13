@@ -56,10 +56,10 @@ export function ProblemMatrix() {
             return (
               <motion.div
                 key={c.title}
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.1, margin: '0px 0px 200px 0px' }}
-                transition={{ duration: 0.5, delay: (i % 3) * 0.07, ease: [0.22, 1, 0.36, 1] }}
+                initial={{ y: 16 }}
+                whileInView={{ y: 0 }}
+                viewport={{ once: true, amount: 0.05, margin: '0px 0px 300px 0px' }}
+                transition={{ duration: 0.45, delay: (i % 3) * 0.06, ease: [0.22, 1, 0.36, 1] }}
                 className={`group relative overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-b from-white/[0.03] to-white/[0.01] p-7 transition-all hover:-translate-y-1 hover:border-[#EF4444]/30 md:p-8 ${
                   isWide ? 'md:col-span-2 lg:col-span-1' : ''
                 }`}

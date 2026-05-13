@@ -62,10 +62,10 @@ export function FeatureBento() {
             return (
               <motion.div
                 key={t.title}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.1, margin: '0px 0px 200px 0px' }}
-                transition={{ duration: 0.45, delay: (i % 4) * 0.05, ease: [0.22, 1, 0.36, 1] }}
+                initial={{ y: 14 }}
+                whileInView={{ y: 0 }}
+                viewport={{ once: true, amount: 0.05, margin: '0px 0px 300px 0px' }}
+                transition={{ duration: 0.4, delay: (i % 4) * 0.04, ease: [0.22, 1, 0.36, 1] }}
                 className={sizeClasses[t.size]}
               >
                 <GlowCard className="h-full">
