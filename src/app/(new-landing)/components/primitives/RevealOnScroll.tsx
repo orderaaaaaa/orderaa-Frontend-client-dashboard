@@ -15,30 +15,32 @@ type RevealOnScrollProps = {
 export function RevealOnScroll({
   children,
   delay = 0,
-  y = 40,
+  y = 20,
   className,
   as = 'div',
 }: RevealOnScrollProps) {
   const reduced = useReducedMotion();
   const MotionTag = motion[as] as typeof motion.div;
 
-  const variants: Variants = reduced
-    ? { hidden: { opacity: 0 }, visible: { opacity: 1 } }
-    : {
-        hidden: { opacity: 0, y },
-        visible: {
-          opacity: 1,
-          y: 0,
-          transition: { duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] },
-        },
-      };
+  if (reduced) {
+    return <MotionTag className={clsx(className)}>{children}</MotionTag>;
+  }
+
+  const variants: Variants = {
+    hidden: { opacity: 0, y },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] },
+    },
+  };
 
   return (
     <MotionTag
       className={clsx(className)}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: '-80px' }}
+      viewport={{ once: true, amount: 0.1, margin: '0px 0px 200px 0px' }}
       variants={variants}
     >
       {children}

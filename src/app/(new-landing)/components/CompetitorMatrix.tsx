@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import clsx from 'clsx';
 import { RevealOnScroll } from './primitives/RevealOnScroll';
 import { copy } from '../content/copy';
@@ -63,15 +62,8 @@ export function CompetitorMatrix() {
                   </tr>
                 </thead>
                 <tbody>
-                  {copy.compare.rows.map((row, ri) => (
-                    <motion.tr
-                      key={row.feature}
-                      initial={{ opacity: 0, y: 14 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, margin: '-40px' }}
-                      transition={{ duration: 0.4, delay: ri * 0.04 }}
-                      className="group"
-                    >
+                  {copy.compare.rows.map((row) => (
+                    <tr key={row.feature} className="group">
                       <td className="border-b border-white/[0.04] px-2 py-3 text-right text-xs font-medium leading-snug text-[var(--nl-text)] break-words transition-colors group-hover:bg-white/[0.03] sm:px-4 sm:py-4 sm:text-sm">
                         {row.feature}
                       </td>
@@ -92,7 +84,7 @@ export function CompetitorMatrix() {
                           {v}
                         </td>
                       ))}
-                    </motion.tr>
+                    </tr>
                   ))}
                 </tbody>
               </table>

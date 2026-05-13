@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   LiaTruckLoadingSolid,
   LiaChartLineSolid,
@@ -20,7 +20,6 @@ const clusterIcons = [
 ];
 
 export function ProblemMatrix() {
-  const reduced = useReducedMotion();
   return (
     <section className="relative overflow-hidden py-28 md:py-36">
       <div className="pointer-events-none absolute inset-0">
@@ -34,25 +33,15 @@ export function ProblemMatrix() {
           </span>
           <h2 className="mt-4 text-4xl font-bold leading-tight text-[var(--nl-text)] md:text-5xl">
             {copy.problem.headline}{' '}
-            <motion.span
-              className="relative inline-block font-mono"
-              initial={{ opacity: 0.4 }}
-              whileInView={reduced ? { opacity: 1 } : { opacity: [0.4, 1, 0.85, 1] }}
-              transition={{ duration: 1.4, delay: 0.2 }}
-              viewport={{ once: true }}
-            >
+            <span className="relative inline-block font-mono">
               <span className="relative bg-gradient-to-l from-[#FF6B6B] to-[#EF4444] bg-clip-text text-transparent">
                 {copy.problem.headlineStat}
               </span>
-              <motion.span
+              <span
                 aria-hidden
                 className="absolute -inset-x-2 -inset-y-1 -z-10 rounded-lg bg-[#EF4444]/20 blur-xl"
-                initial={{ scale: 0.6, opacity: 0 }}
-                whileInView={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.8 }}
-                viewport={{ once: true }}
               />
-            </motion.span>{' '}
+            </span>{' '}
             {copy.problem.headlineTail}
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-[var(--nl-text-mute)] md:text-lg">
@@ -67,10 +56,10 @@ export function ProblemMatrix() {
             return (
               <motion.div
                 key={c.title}
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-80px' }}
-                transition={{ duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                viewport={{ once: true, amount: 0.1, margin: '0px 0px 200px 0px' }}
+                transition={{ duration: 0.5, delay: (i % 3) * 0.07, ease: [0.22, 1, 0.36, 1] }}
                 className={`group relative overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-b from-white/[0.03] to-white/[0.01] p-7 transition-all hover:-translate-y-1 hover:border-[#EF4444]/30 md:p-8 ${
                   isWide ? 'md:col-span-2 lg:col-span-1' : ''
                 }`}

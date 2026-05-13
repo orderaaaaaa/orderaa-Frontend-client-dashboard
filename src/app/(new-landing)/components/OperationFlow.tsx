@@ -123,10 +123,10 @@ export function OperationFlow() {
                   stepsRef.current[i] = el;
                 }}
                 data-idx={i}
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-60px' }}
-                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                viewport={{ once: true, amount: 0.1, margin: '0px 0px 200px 0px' }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_1.15fr] lg:items-center lg:gap-12"
               >
                 <div
@@ -210,13 +210,7 @@ function InlineScene({
   isActive: boolean;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.94 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true, margin: '-80px' }}
-      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-      className="relative"
-    >
+    <div className="relative">
       <div
         className={clsx(
           'pointer-events-none absolute -inset-2 rounded-[28px] bg-gradient-to-br from-[#7B2CFF]/30 via-transparent to-[#3A0CA3]/30 blur-xl transition-opacity duration-500',
@@ -244,7 +238,7 @@ function InlineScene({
           <Scene idx={idx} />
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
