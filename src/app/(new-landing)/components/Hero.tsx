@@ -132,7 +132,7 @@ export function Hero() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-100px' }}
           transition={{ duration: 0.7 }}
-          className="mt-20 grid grid-cols-1 gap-3 md:grid-cols-3"
+          className="mt-32 grid grid-cols-1 gap-3 md:grid-cols-3"
         >
           {copy.hero.pills.map((p, i) => {
             const Icon = pillIcons[i];
