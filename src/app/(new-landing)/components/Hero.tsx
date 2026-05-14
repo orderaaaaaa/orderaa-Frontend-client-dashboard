@@ -27,7 +27,7 @@ export function Hero() {
       <div className="relative z-10 mx-auto max-w-7xl px-5">
         <div className="mx-auto max-w-4xl text-center">
           <div
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-xs text-[var(--nl-text-mute)] backdrop-blur-md nl-anim-fade-in-up"
+            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-base text-[var(--nl-text-mute)] backdrop-blur-md nl-anim-fade-in-up"
           >
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#7B2CFF] opacity-75" />
@@ -99,7 +99,7 @@ export function Hero() {
                 <div className="font-mono text-2xl font-bold text-[var(--nl-text)] sm:text-3xl">
                   <CountUp to={s.value} suffix={s.suffix} />
                 </div>
-                <div className="mt-1 text-[11px] text-[var(--nl-text-mute)] sm:text-xs">
+                <div className="mt-1 text-base text-[var(--nl-text-mute)] sm:text-base">
                   {s.label}
                 </div>
               </div>
@@ -131,7 +131,7 @@ export function Hero() {
                     <h3 className="text-base font-semibold text-[var(--nl-text)]">
                       {p.title}
                     </h3>
-                    <p className="mt-1.5 text-sm leading-relaxed text-[var(--nl-text-mute)]">
+                    <p className="mt-1.5 text-base leading-relaxed text-[var(--nl-text-mute)]">
                       {p.body}
                     </p>
                   </div>
@@ -155,8 +155,8 @@ function DashboardMock() {
           <span className="h-2.5 w-2.5 rounded-full bg-[#FF5F57]" />
           <span className="h-2.5 w-2.5 rounded-full bg-[#FEBC2E]" />
           <span className="h-2.5 w-2.5 rounded-full bg-[#28C840]" />
-          <span className="mx-auto rounded-md bg-white/[0.04] px-3 py-0.5 text-[11px] text-[var(--nl-text-mute)]">
-            orderaa.com / dashboard
+          <span className="mx-auto rounded-md bg-white/[0.04] px-3 py-0.5 text-base text-[var(--nl-text-mute)]">
+            أورديرا · لوحة التحكم
           </span>
         </div>
         <div className="grid grid-cols-1 gap-3 p-3 md:grid-cols-[200px_1fr]">
@@ -174,7 +174,7 @@ function DashboardMock() {
               ].map((l, i) => (
                 <div
                   key={l}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-[11px] ${
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-base ${
                     i === 1
                       ? 'bg-[#7B2CFF]/15 text-[var(--nl-text)]'
                       : 'text-[var(--nl-text-mute)]'
@@ -198,7 +198,7 @@ function DashboardMock() {
                   key={k.label}
                   className="rounded-xl border border-white/5 bg-white/[0.025] p-3"
                 >
-                  <div className="text-[10px] text-[var(--nl-text-mute)]">{k.label}</div>
+                  <div className="text-base text-[var(--nl-text-mute)]">{k.label}</div>
                   <div className="mt-0.5 font-mono text-lg font-bold text-[var(--nl-text)]">
                     {k.value}
                   </div>
@@ -216,8 +216,8 @@ function DashboardMock() {
             </div>
             <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs text-[var(--nl-text)]">أداء شركات الشحن (آخر 30 يوم)</span>
-                <span className="text-[10px] text-[var(--nl-text-mute)]">RTL</span>
+                <span className="text-base text-[var(--nl-text)]">أداء شركات الشحن (آخر 30 يوم)</span>
+                <span className="text-base text-[var(--nl-text-mute)]">آخر 30 يوم</span>
               </div>
               <svg viewBox="0 0 320 90" className="h-20 w-full">
                 <defs>
@@ -239,16 +239,16 @@ function DashboardMock() {
               </svg>
             </div>
             <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-              <div className="mb-2 text-xs text-[var(--nl-text)]">آخر الأوردرات</div>
+              <div className="mb-2 text-base text-[var(--nl-text)]">آخر الأوردرات</div>
               <div className="space-y-1.5">
                 {[
-                  { id: '#ORD-2841', name: 'محمد علي', city: 'القاهرة', state: 'تم الشحن', color: '#7B2CFF' },
-                  { id: '#ORD-2840', name: 'سارة محمود', city: 'الإسكندرية', state: 'مؤكد', color: '#22C55E' },
-                  { id: '#ORD-2839', name: 'أحمد سيد', city: 'الجيزة', state: 'قيد المراجعة', color: '#FEBC2E' },
+                  { id: '#طلب-2841', name: 'محمد علي', city: 'القاهرة', state: 'تم الشحن', color: '#7B2CFF' },
+                  { id: '#طلب-2840', name: 'سارة محمود', city: 'الإسكندرية', state: 'مؤكد', color: '#22C55E' },
+                  { id: '#طلب-2839', name: 'أحمد سيد', city: 'الجيزة', state: 'قيد المراجعة', color: '#FEBC2E' },
                 ].map((r) => (
                   <div
                     key={r.id}
-                    className="flex items-center justify-between rounded-lg bg-white/[0.02] px-3 py-2 text-[11px]"
+                    className="flex items-center justify-between rounded-lg bg-white/[0.02] px-3 py-2 text-base"
                   >
                     <div className="flex items-center gap-2 text-[var(--nl-text-mute)]">
                       <LiaCheckCircleSolid style={{ color: r.color }} />
@@ -258,7 +258,7 @@ function DashboardMock() {
                       <span className="opacity-60">— {r.city}</span>
                     </div>
                     <span
-                      className="rounded-full px-2 py-0.5 text-[10px]"
+                      className="rounded-full px-2 py-0.5 text-base"
                       style={{ background: r.color + '22', color: r.color }}
                     >
                       {r.state}

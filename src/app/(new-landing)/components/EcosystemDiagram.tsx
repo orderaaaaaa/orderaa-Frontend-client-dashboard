@@ -70,7 +70,7 @@ export function EcosystemDiagram() {
                   <h3 className="mt-4 text-base font-semibold text-[var(--nl-text)]">
                     {p.title}
                   </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-[var(--nl-text-mute)]">
+                  <p className="mt-2 text-base leading-relaxed text-[var(--nl-text-mute)]">
                     {p.body}
                   </p>
                   <span className="absolute inset-x-5 bottom-0 h-px scale-x-0 bg-gradient-to-l from-transparent via-[#7B2CFF] to-transparent transition-transform duration-500 group-hover:scale-x-100" />

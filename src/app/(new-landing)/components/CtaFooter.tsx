@@ -15,11 +15,13 @@ import { RevealOnScroll } from './primitives/RevealOnScroll';
 import { copy } from '../content/copy';
 
 const socials = [
-  { Icon: LiaWhatsapp, href: '#' },
+  { Icon: LiaWhatsapp, href: 'https://wa.me/201283337434' },
   { Icon: LiaFacebookF, href: '#' },
   { Icon: LiaLinkedinIn, href: '#' },
   { Icon: LiaInstagram, href: '#' },
 ];
+
+const isExternal = (href: string) => /^https?:\/\//.test(href);
 
 export function CtaFooter() {
   return (
@@ -58,13 +60,13 @@ export function CtaFooter() {
             <div className="col-span-2">
               <div className="flex items-center gap-2">
                 <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-[#7B2CFF] to-[#3A0CA3] text-white shadow-[0_4px_20px_-2px_rgba(123,44,255,0.6)]">
-                  <span className="text-base tracking-tight">O</span>
+                  <span className="text-base tracking-tight">أ</span>
                 </span>
                 <span className="text-xl tracking-tight text-[var(--nl-text)]">
                   {copy.brand.name}
                 </span>
               </div>
-              <p className="mt-4 max-w-sm text-sm leading-relaxed text-[var(--nl-text-mute)]">
+              <p className="mt-4 max-w-sm text-base leading-relaxed text-[var(--nl-text-mute)]">
                 {copy.brand.tagline} — منظومة موحّدة لإدارة الأوردرات والكول سنتر والشحن والمخزون في مكان واحد.
               </p>
               <div className="mt-5 flex items-center gap-2">
@@ -73,6 +75,8 @@ export function CtaFooter() {
                     key={i}
                     href={href}
                     aria-label="social"
+                    target={isExternal(href) ? '_blank' : undefined}
+                    rel={isExternal(href) ? 'noopener noreferrer' : undefined}
                     className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[0.03] text-[var(--nl-text-mute)] transition-colors hover:border-[#7B2CFF]/40 hover:text-[var(--nl-text)]"
                   >
                     <Icon size={16} />
@@ -83,13 +87,15 @@ export function CtaFooter() {
 
             {copy.ctaFooter.footer.columns.map((c) => (
               <div key={c.title}>
-                <h4 className="text-sm font-semibold text-[var(--nl-text)]">{c.title}</h4>
+                <h4 className="text-base font-semibold text-[var(--nl-text)]">{c.title}</h4>
                 <ul className="mt-4 space-y-2.5">
                   {c.links.map((l) => (
                     <li key={l.label}>
                       <Link
                         href={l.href}
-                        className="text-sm text-[var(--nl-text-mute)] transition-colors hover:text-[var(--nl-text)]"
+                        target={isExternal(l.href) ? '_blank' : undefined}
+                        rel={isExternal(l.href) ? 'noopener noreferrer' : undefined}
+                        className="text-base text-[var(--nl-text-mute)] transition-colors hover:text-[var(--nl-text)]"
                       >
                         {l.label}
                       </Link>
@@ -100,9 +106,9 @@ export function CtaFooter() {
             ))}
           </div>
 
-          <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/[0.06] pt-6 text-xs text-[var(--nl-text-mute)] md:flex-row">
+          <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/[0.06] pt-6 text-base text-[var(--nl-text-mute)] md:flex-row">
             <span>{copy.ctaFooter.footer.copyright}</span>
-            <span className="font-mono">Made in Egypt</span>
+            <span>صنع في مصر</span>
           </div>
         </div>
       </div>

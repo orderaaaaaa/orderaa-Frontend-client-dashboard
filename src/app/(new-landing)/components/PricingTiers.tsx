@@ -47,23 +47,23 @@ export function PricingTiers() {
                 )}
               >
                 {t.popular && (
-                  <div className="absolute right-5 top-5 inline-flex items-center gap-1 rounded-full bg-gradient-to-l from-[#9D4EDD] to-[#7B2CFF] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-[0_4px_20px_-2px_rgba(123,44,255,0.5)]">
+                  <div className="absolute right-5 top-5 inline-flex items-center gap-1 rounded-full bg-gradient-to-l from-[#9D4EDD] to-[#7B2CFF] px-3 py-1 text-base font-bold uppercase tracking-wider text-white shadow-[0_4px_20px_-2px_rgba(123,44,255,0.5)]">
                     <LiaStarSolid />
                     الأكثر طلباً
                   </div>
                 )}
 
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-sm font-medium text-[var(--nl-text-mute)]">{t.name}</span>
+                  <span className="text-base font-medium text-[var(--nl-text-mute)]">{t.name}</span>
                 </div>
-                <div className="mt-1 text-xs text-[var(--nl-text-mute)]">{t.orders}</div>
+                <div className="mt-1 text-base text-[var(--nl-text-mute)]">{t.orders}</div>
 
                 <div className="mt-5 flex items-baseline gap-2">
                   <span className="font-mono text-4xl font-bold text-[var(--nl-text)] md:text-5xl">
                     {t.price === 0 ? 'مجاناً' : t.price.toLocaleString('en-US')}
                   </span>
                   {t.price !== 0 && (
-                    <span className="text-xs text-[var(--nl-text-mute)]">
+                    <span className="text-base text-[var(--nl-text-mute)]">
                       {copy.pricing.currency}
                     </span>
                   )}
@@ -73,7 +73,7 @@ export function PricingTiers() {
                   {t.perks.map((p) => (
                     <li
                       key={p}
-                      className="flex items-start gap-2.5 text-sm leading-relaxed text-[var(--nl-text-mute)]"
+                      className="flex items-start gap-2.5 text-base leading-relaxed text-[var(--nl-text-mute)]"
                     >
                       <span
                         className={clsx(
@@ -93,7 +93,7 @@ export function PricingTiers() {
                     variant={t.popular ? 'primary' : 'outline'}
                     fullWidth
                     strength={10}
-                    className="!py-3 !text-sm"
+                    className="!py-3 !text-base"
                   >
                     {t.cta}
                   </MagneticButton>

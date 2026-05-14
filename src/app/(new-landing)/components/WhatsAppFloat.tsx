@@ -26,7 +26,7 @@ export function WhatsAppFloat() {
 
       <LiaWhatsapp className="h-6 w-6 shrink-0 sm:h-7 sm:w-7" />
 
-      <span className="grid grid-cols-[0fr] overflow-hidden whitespace-nowrap text-sm font-medium opacity-0 transition-all duration-300 group-hover:grid-cols-[1fr] group-hover:pl-2 group-hover:opacity-100">
+      <span className="grid grid-cols-[0fr] overflow-hidden whitespace-nowrap text-base font-medium opacity-0 transition-all duration-300 group-hover:grid-cols-[1fr] group-hover:pl-2 group-hover:opacity-100">
         <span className="min-w-0">تواصل واتساب</span>
       </span>
     </a>

@@ -42,7 +42,7 @@ export function SolutionBanner() {
             {copy.solution.pills.map((p) => (
               <span
                 key={p}
-                className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-sm text-[var(--nl-text)] backdrop-blur-sm"
+                className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-base text-[var(--nl-text)] backdrop-blur-sm"
               >
                 {p}
               </span>

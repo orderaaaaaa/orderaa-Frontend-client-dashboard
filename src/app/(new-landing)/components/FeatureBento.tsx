@@ -73,7 +73,7 @@ export function FeatureBento() {
                     <h3 className="mt-5 text-lg font-semibold text-[var(--nl-text)] md:text-xl">
                       {t.title}
                     </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-[var(--nl-text-mute)] md:text-[15px]">
+                    <p className="mt-2 text-base leading-relaxed text-[var(--nl-text-mute)] md:text-base">
                       {t.body}
                     </p>
                     {t.size === 'lg' && <BentoBigArt variant={t.icon} />}
@@ -90,33 +90,57 @@ export function FeatureBento() {
 
 function BentoBigArt({ variant }: { variant: string }) {
   if (variant === 'orders') return <CancellationsArt />;
-  return <StatusArt />;
+  if (variant === 'analytics') return <ShippingPerformanceArt />;
+  return null;
 }
 
-function StatusArt() {
+function ShippingPerformanceArt() {
+  const companies = [
+    { name: 'بوسطة', region: 'القاهرة', rate: 78, c: '#22C55E' },
+    { name: 'أرامكس', region: 'الجيزة', rate: 71, c: '#22C55E' },
+    { name: 'J&T', region: 'الإسكندرية', rate: 64, c: '#FEBC2E' },
+    { name: 'ريد', region: 'المنصورة', rate: 52, c: '#FEBC2E' },
+    { name: 'هاشتاج', region: 'طنطا', rate: 38, c: '#EF4444' },
+  ];
+
   return (
     <div className="mt-auto pt-6">
-      <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3">
-        <div className="flex items-center justify-between text-[10px] text-[var(--nl-text-mute)]">
-          <span>الحالات اللحظية</span>
-          <span className="font-mono">LIVE</span>
+      <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3.5">
+        <div className="flex items-center justify-between text-base text-[var(--nl-text-mute)]">
+          <span>أداء شركات الشحن بالمحافظة</span>
+          <span className="font-mono">نسبة التسليم</span>
         </div>
-        <div className="mt-2.5 grid grid-cols-5 gap-1">
-          {[
-            { l: 'جديد', c: '#7B2CFF', v: 60 },
-            { l: 'تم المحاوله اليوم', c: '#9D4EDD', v: 80 },
-            { l: 'مؤكد', c: '#22C55E', v: 100 },
-            { l: 'تأجيل', c: '#FEBC2E', v: 45 },
-            { l: 'إلغاء', c: '#EF4444', v: 30 },
-          ].map((b) => (
-            <div key={b.l} className="flex flex-col items-center gap-1">
-              <div className="flex h-16 w-full items-end overflow-hidden rounded-md bg-white/[0.03]">
+
+        <div className="mt-3 space-y-2.5">
+          {companies.map((c) => (
+            <div key={c.name} className="flex items-center gap-2.5">
+              <div className="flex w-24 shrink-0 items-baseline justify-between gap-1">
+                <span className="text-base font-medium text-[var(--nl-text)]">
+                  {c.name}
+                </span>
+                <span className="text-[9px] text-[var(--nl-text-mute)]">
+                  {c.region}
+                </span>
+              </div>
+              <div
+                className="relative h-2 flex-1 overflow-hidden rounded-full bg-white/[0.04]"
+                dir="ltr"
+              >
                 <div
-                  className="w-full"
-                  style={{ height: `${b.v}%`, background: b.c, opacity: 0.85 }}
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${c.rate}%`,
+                    background: `linear-gradient(90deg, ${c.c}, ${c.c}cc)`,
+                    boxShadow: `0 0 10px -2px ${c.c}80`,
+                  }}
                 />
               </div>
-              <span className="text-[10px] text-[var(--nl-text-mute)]">{b.l}</span>
+              <span
+                className="w-10 shrink-0 text-left font-mono text-base tabular-nums"
+                style={{ color: c.c }}
+              >
+                {c.rate}%
+              </span>
             </div>
           ))}
         </div>
@@ -137,7 +161,7 @@ function CancellationsArt() {
   return (
     <div className="mt-auto pt-6">
       <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3">
-        <div className="flex items-center justify-between text-[10px] text-[var(--nl-text-mute)]">
+        <div className="flex items-center justify-between text-base text-[var(--nl-text-mute)]">
           <span>تحليل أسباب الإلغاء</span>
           <span className="font-mono">آخر 30 يوم</span>
         </div>
@@ -150,7 +174,7 @@ function CancellationsArt() {
                   style={{ height: `${b.v}%`, background: b.c, opacity: 0.85 }}
                 />
               </div>
-              <span className="line-clamp-2 text-center text-[10px] leading-tight text-[var(--nl-text-mute)]">
+              <span className="line-clamp-2 text-center text-base leading-tight text-[var(--nl-text-mute)]">
                 {b.l}
               </span>
             </div>

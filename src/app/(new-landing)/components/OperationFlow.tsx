@@ -13,6 +13,8 @@ import {
   LiaWarehouseSolid,
   LiaSyncAltSolid,
   LiaBarcodeSolid,
+  LiaPrintSolid,
+  LiaCheckSolid,
   LiaUserCircleSolid,
   LiaPlaySolid,
   LiaArrowLeftSolid,
@@ -154,16 +156,16 @@ export function OperationFlow() {
                         {s.title}
                       </h3>
                       {isActive && (
-                        <span className="hidden items-center gap-1 rounded-full bg-[#7B2CFF]/15 px-2 py-0.5 text-[10px] uppercase tracking-wider text-[#C8A6FF] lg:inline-flex">
+                        <span className="hidden items-center gap-1 rounded-full bg-[#7B2CFF]/15 px-2 py-0.5 text-base uppercase tracking-wider text-[#C8A6FF] lg:inline-flex">
                           <span className="relative flex h-1.5 w-1.5">
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#C8A6FF] opacity-75" />
                             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#C8A6FF]" />
                           </span>
-                          Active
+                          نشط
                         </span>
                       )}
                     </div>
-                    <p className="mt-2 text-[15px] leading-relaxed text-[var(--nl-text-mute)] md:text-base">
+                    <p className="mt-2 text-base leading-relaxed text-[var(--nl-text-mute)] md:text-base">
                       {s.body}
                     </p>
 
@@ -172,7 +174,7 @@ export function OperationFlow() {
                         <li
                           key={h}
                           className={clsx(
-                            'rounded-full border px-2.5 py-1 text-[11px] transition-colors md:text-xs',
+                            'rounded-full border px-2.5 py-1 text-base transition-colors md:text-base',
                             isActive
                               ? 'border-[#7B2CFF]/30 bg-[#7B2CFF]/[0.08] text-[var(--nl-text)]'
                               : 'border-white/[0.06] bg-white/[0.02] text-[var(--nl-text-mute)]',
@@ -222,10 +224,10 @@ function InlineScene({
           <span className="h-2.5 w-2.5 rounded-full bg-[#FF5F57]" />
           <span className="h-2.5 w-2.5 rounded-full bg-[#FEBC2E]" />
           <span className="h-2.5 w-2.5 rounded-full bg-[#28C840]" />
-          <span className="mx-auto truncate rounded-md bg-white/[0.04] px-3 py-0.5 text-[11px] text-[var(--nl-text-mute)]">
-            orderaa.com / {title}
+          <span className="mx-auto truncate rounded-md bg-white/[0.04] px-3 py-0.5 text-base text-[var(--nl-text-mute)]">
+            أورديرا · {title}
           </span>
-          <span className="font-mono text-[10px] text-[var(--nl-text-mute)]/60">
+          <span className="font-mono text-base text-[var(--nl-text-mute)]/60">
             {String(idx + 1).padStart(2, '0')} / 08
           </span>
         </div>
@@ -264,7 +266,7 @@ function SceneHeader({ Icon, label }: { Icon: React.ComponentType<{ size?: numbe
   return (
     <div className="flex items-center gap-2 text-[var(--nl-text-mute)]">
       <Icon size={16} />
-      <span className="font-mono text-[10px] uppercase tracking-[0.25em]">{label}</span>
+      <span className="font-mono text-base uppercase tracking-[0.25em]">{label}</span>
     </div>
   );
 }
@@ -276,20 +278,20 @@ function SceneConnect() {
   ];
   return (
     <div className="space-y-4">
-      <SceneHeader Icon={LiaStoreAltSolid} label="Integrations" />
+      <SceneHeader Icon={LiaStoreAltSolid} label="ربط المتاجر" />
       <div className="grid grid-cols-2 gap-3">
         {stores.map((s) => (
           <div key={s.name} className="rounded-xl border border-white/5 bg-white/[0.025] p-3.5">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-[var(--nl-text)]">{s.name}</span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-[#22C55E]/15 px-2 py-0.5 text-[10px] text-[#22C55E]">
+              <span className="text-base font-semibold text-[var(--nl-text)]">{s.name}</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#22C55E]/15 px-2 py-0.5 text-base text-[#22C55E]">
                 <LiaCheckCircleSolid size={12} /> متصل
               </span>
             </div>
             <div className="mt-3 font-mono text-2xl font-bold text-[var(--nl-text)]">
               {s.orders.toLocaleString('en-US')}
             </div>
-            <div className="text-[11px] text-[var(--nl-text-mute)]">طلب هذا الشهر</div>
+            <div className="text-base text-[var(--nl-text-mute)]">طلب هذا الشهر</div>
             <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-white/[0.04]">
               <div className="h-full rounded-full" style={{ width: '72%', background: s.color }} />
             </div>
@@ -302,14 +304,14 @@ function SceneConnect() {
           <span className="text-[#C8A6FF] animate-spin">
             <LiaSyncAltSolid size={16} />
           </span>
-          <span className="text-sm text-[var(--nl-text)]">جاري المزامنة — 234 طلب جديد</span>
+          <span className="text-base text-[var(--nl-text)]">جاري المزامنة — 234 طلب جديد</span>
         </div>
         <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.04]">
           <div className="h-full rounded-full bg-gradient-to-l from-[#9D4EDD] to-[#7B2CFF] nl-anim-bar-loop" />
         </div>
       </div>
 
-      <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-2.5 text-sm text-[var(--nl-text-mute)] transition-colors hover:border-[#7B2CFF]/40 hover:text-[var(--nl-text)]">
+      <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-2.5 text-base text-[var(--nl-text-mute)] transition-colors hover:border-[#7B2CFF]/40 hover:text-[var(--nl-text)]">
         + ربط متجر جديد
       </button>
     </div>
@@ -319,38 +321,38 @@ function SceneConnect() {
 function SceneCall() {
   return (
     <div className="space-y-4">
-      <SceneHeader Icon={LiaPhoneVolumeSolid} label="Live Call · #ORD-1284" />
+      <SceneHeader Icon={LiaPhoneVolumeSolid} label="مكالمة مباشرة · #طلب-1284" />
 
       <div className="rounded-2xl border border-[#22C55E]/20 bg-[#22C55E]/[0.04] p-5 text-center">
         <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br from-[#22C55E]/30 to-[#22C55E]/5 text-[#22C55E]">
           <LiaUserCircleSolid size={36} />
         </div>
         <div className="mt-3 text-base font-semibold text-[var(--nl-text)]">محمد علي</div>
-        <div className="font-mono text-xs text-[var(--nl-text-mute)]">+20 100 234 5678</div>
-        <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/[0.04] px-3 py-1 text-xs">
+        <div className="font-mono text-base text-[var(--nl-text-mute)]">+20 100 234 5678</div>
+        <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/[0.04] px-3 py-1 text-base">
           <span className="h-1.5 w-1.5 rounded-full bg-[#EF4444] nl-anim-blink" />
-          <span className="text-[var(--nl-text)]">REC</span>
+          <span className="text-[var(--nl-text)]">تسجيل</span>
           <span className="font-mono text-[var(--nl-text-mute)]">00:42</span>
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-2">
-        <button className="cursor-pointer rounded-xl border border-[#22C55E]/30 bg-[#22C55E]/[0.08] px-3 py-2.5 text-xs font-semibold text-[#22C55E] hover:bg-[#22C55E]/[0.14]">
+        <button className="cursor-pointer rounded-xl border border-[#22C55E]/30 bg-[#22C55E]/[0.08] px-3 py-2.5 text-base font-semibold text-[#22C55E] hover:bg-[#22C55E]/[0.14]">
           ✓ تأكيد
         </button>
-        <button className="cursor-pointer rounded-xl border border-[#FEBC2E]/30 bg-[#FEBC2E]/[0.08] px-3 py-2.5 text-xs font-semibold text-[#FEBC2E] hover:bg-[#FEBC2E]/[0.14]">
+        <button className="cursor-pointer rounded-xl border border-[#FEBC2E]/30 bg-[#FEBC2E]/[0.08] px-3 py-2.5 text-base font-semibold text-[#FEBC2E] hover:bg-[#FEBC2E]/[0.14]">
           ⏸ تأجيل
         </button>
-        <button className="cursor-pointer rounded-xl border border-[#EF4444]/30 bg-[#EF4444]/[0.08] px-3 py-2.5 text-xs font-semibold text-[#EF4444] hover:bg-[#EF4444]/[0.14]">
+        <button className="cursor-pointer rounded-xl border border-[#EF4444]/30 bg-[#EF4444]/[0.08] px-3 py-2.5 text-base font-semibold text-[#EF4444] hover:bg-[#EF4444]/[0.14]">
           ✗ إلغاء
         </button>
       </div>
 
       <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-        <div className="font-mono text-[10px] uppercase tracking-wider text-[var(--nl-text-mute)]">
+        <div className="font-mono text-base uppercase tracking-wider text-[var(--nl-text-mute)]">
           ملاحظة
         </div>
-        <div className="mt-1 text-xs leading-relaxed text-[var(--nl-text)]">
+        <div className="mt-1 text-base leading-relaxed text-[var(--nl-text)]">
           العميل يريد التسليم يوم الأحد بعد الظهر — تم التأكيد على الكاش 845 جنيه.
         </div>
       </div>
@@ -361,17 +363,17 @@ function SceneCall() {
 function SceneConfirm() {
   return (
     <div className="space-y-4">
-      <SceneHeader Icon={LiaCheckCircleSolid} label="Confirm · #ORD-1284" />
+      <SceneHeader Icon={LiaCheckCircleSolid} label="تأكيد · #طلب-1284" />
 
       <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4">
         <div className="flex items-baseline justify-between">
-          <span className="text-sm text-[var(--nl-text-mute)]">العميل</span>
-          <span className="text-sm font-semibold text-[var(--nl-text)]">محمد علي</span>
+          <span className="text-base text-[var(--nl-text-mute)]">العميل</span>
+          <span className="text-base font-semibold text-[var(--nl-text)]">محمد علي</span>
         </div>
         <div className="mt-2 flex items-baseline justify-between border-t border-white/5 pt-2">
-          <span className="text-sm text-[var(--nl-text-mute)]">الإجمالي</span>
+          <span className="text-base text-[var(--nl-text-mute)]">الإجمالي</span>
           <span className="font-mono text-lg font-bold text-[var(--nl-text)]">
-            845 <span className="text-[10px] font-normal text-[var(--nl-text-mute)]">جنيه</span>
+            845 <span className="text-base font-normal text-[var(--nl-text-mute)]">جنيه</span>
           </span>
         </div>
       </div>
@@ -382,7 +384,7 @@ function SceneConfirm() {
         <SelectRow label="المنطقة" value="مدينة نصر" />
       </div>
 
-      <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-[#7B2CFF] to-[#3A0CA3] px-4 py-3 text-sm font-bold text-white shadow-[0_8px_24px_-8px_rgba(123,44,255,0.6)] hover:shadow-[0_12px_32px_-8px_rgba(123,44,255,0.8)]">
+      <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-[#7B2CFF] to-[#3A0CA3] px-4 py-3 text-base font-bold text-white shadow-[0_8px_24px_-8px_rgba(123,44,255,0.6)] hover:shadow-[0_12px_32px_-8px_rgba(123,44,255,0.8)]">
         تأكيد الطلب
         <LiaArrowLeftSolid />
       </button>
@@ -393,9 +395,9 @@ function SceneConfirm() {
 function SelectRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5">
-      <span className="text-xs text-[var(--nl-text-mute)]">{label}</span>
+      <span className="text-base text-[var(--nl-text-mute)]">{label}</span>
       <div className="flex items-center gap-2">
-        <span className="text-sm text-[var(--nl-text)]">{value}</span>
+        <span className="text-base text-[var(--nl-text)]">{value}</span>
         <span className="text-[var(--nl-text-mute)]/60">▾</span>
       </div>
     </div>
@@ -405,49 +407,145 @@ function SelectRow({ label, value }: { label: string; value: string }) {
 function ScenePackage() {
   return (
     <div className="space-y-4">
-      <SceneHeader Icon={LiaBoxSolid} label="Batch Packing · 52 orders" />
+      <SceneHeader Icon={LiaBoxSolid} label="تغليف جماعي · 3 خطوات" />
 
-      <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4">
-        <div className="mb-2 flex items-baseline justify-between">
-          <span className="text-sm text-[var(--nl-text)]">التقدم</span>
-          <span className="font-mono text-2xl font-bold text-[var(--nl-text)]">
-            39<span className="text-sm text-[var(--nl-text-mute)]"> / 52</span>
+      <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-stretch gap-1.5">
+        <StepCard
+          n={1}
+          state="done"
+          Icon={LiaPrintSolid}
+          label="طباعة"
+          sub="52 بوليصة"
+          accent="#22C55E"
+        />
+        <StepArrow done />
+        <StepCard
+          n={2}
+          state="active"
+          Icon={LiaBarcodeSolid}
+          label="اسكان"
+          sub="39 / 52 ممسوح"
+          accent="#7B2CFF"
+        />
+        <StepArrow />
+        <StepCard
+          n={3}
+          state="pending"
+          Icon={LiaCheckSolid}
+          label="ضغطة زر"
+          sub='"تم التغليف"'
+          accent="#3A0CA3"
+        />
+      </div>
+
+      <div className="rounded-2xl border border-[#7B2CFF]/25 bg-[#7B2CFF]/[0.06] p-3">
+        <div className="flex items-center gap-3">
+          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#7B2CFF]/15 text-[#C8A6FF] nl-anim-pulse-scale">
+            <LiaBarcodeSolid size={20} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-base uppercase tracking-wider text-[var(--nl-text-mute)]">
+              جاري المسح الآن
+            </div>
+            <div className="truncate font-mono text-base font-semibold text-[var(--nl-text)]">
+              #طلب-2941 — بواسطة أحمد سيد
+            </div>
+          </div>
+          <span className="rounded-full bg-[#22C55E]/15 px-2.5 py-1 text-base font-semibold text-[#22C55E]">
+            ✓ ٣٩
           </span>
         </div>
-        <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.04]">
-          <div className="h-full rounded-full bg-gradient-to-l from-[#22C55E] via-[#7B2CFF] to-[#3A0CA3] nl-anim-bar-fill-76" />
+        <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.04]">
+          <div className="h-full rounded-full bg-gradient-to-l from-[#22C55E] to-[#7B2CFF] nl-anim-bar-fill-76" />
         </div>
-        <div className="mt-1 text-[11px] text-[var(--nl-text-mute)]">76% — متبقي 13 طلب</div>
       </div>
 
-      <div className="grid grid-cols-8 gap-1.5">
-        {Array.from({ length: 32 }).map((_, i) => (
-          <div
-            key={i}
-            className={clsx(
-              'aspect-square rounded',
-              i < 24
-                ? 'bg-[#22C55E]/40 ring-1 ring-[#22C55E]/30'
-                : i < 28
-                  ? 'bg-[#7B2CFF]/30 ring-1 ring-[#7B2CFF]/40'
-                  : 'bg-white/[0.04] ring-1 ring-white/5',
-            )}
-          />
-        ))}
-      </div>
+      <button
+        type="button"
+        className="group flex w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.03] px-4 py-3 text-base font-semibold text-[var(--nl-text-mute)] transition-all hover:border-[#22C55E]/40 hover:bg-[#22C55E]/[0.06] hover:text-[#22C55E]"
+        disabled
+      >
+        <LiaCheckSolid />
+        اضغط زر واحد لتأكيد &quot;تم التغليف&quot;
+        <span className="rounded bg-white/[0.05] px-1.5 py-0.5 font-mono text-base text-[var(--nl-text-mute)]">
+          بعد إكمال المسح
+        </span>
+      </button>
+    </div>
+  );
+}
 
-      <div className="flex items-center gap-3 rounded-xl border border-[#7B2CFF]/25 bg-[#7B2CFF]/[0.05] p-3">
-        <div className="grid h-9 w-9 place-items-center rounded-lg bg-[#7B2CFF]/15 text-[#C8A6FF] nl-anim-pulse-scale">
-          <LiaBarcodeSolid size={20} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="text-xs text-[var(--nl-text-mute)]">جاري المسح</div>
-          <div className="truncate font-mono text-sm font-semibold text-[var(--nl-text)]">
-            #ORD-2941
-          </div>
-        </div>
-        <span className="text-[11px] text-[var(--nl-text-mute)]">بواسطة أحمد سيد</span>
+function StepCard({
+  n,
+  state,
+  Icon,
+  label,
+  sub,
+  accent,
+}: {
+  n: number;
+  state: 'done' | 'active' | 'pending';
+  Icon: React.ComponentType<{ size?: number; className?: string }>;
+  label: string;
+  sub: string;
+  accent: string;
+}) {
+  const isDone = state === 'done';
+  const isActive = state === 'active';
+  return (
+    <div
+      className={clsx(
+        'relative flex flex-col items-center justify-center gap-1.5 rounded-xl border p-3 text-center transition-colors',
+        isDone && 'border-[#22C55E]/30 bg-[#22C55E]/[0.06]',
+        isActive && 'border-[#7B2CFF]/40 bg-[#7B2CFF]/[0.08] shadow-[0_0_24px_-6px_rgba(123,44,255,0.6)]',
+        !isDone && !isActive && 'border-white/[0.07] bg-white/[0.02]',
+      )}
+    >
+      <span
+        className={clsx(
+          'absolute -top-2 right-2 grid h-5 w-5 place-items-center rounded-full text-base font-bold ring-2 ring-[#0A0E1E]',
+          isDone && 'bg-[#22C55E] text-white',
+          isActive && 'bg-[#7B2CFF] text-white nl-anim-pulse-scale-strong',
+          !isDone && !isActive && 'bg-white/[0.06] text-[var(--nl-text-mute)]',
+        )}
+      >
+        {isDone ? '✓' : n}
+      </span>
+      <div
+        className={clsx(
+          'grid h-9 w-9 place-items-center rounded-lg',
+          isDone && 'bg-[#22C55E]/15 text-[#22C55E]',
+          isActive && 'bg-[#7B2CFF]/15 text-[#C8A6FF]',
+          !isDone && !isActive && 'bg-white/[0.04] text-[var(--nl-text-mute)]',
+        )}
+        style={!isDone && !isActive ? { color: accent + 'aa' } : undefined}
+      >
+        <Icon size={18} />
       </div>
+      <div
+        className={clsx(
+          'text-base font-semibold',
+          isDone || isActive ? 'text-[var(--nl-text)]' : 'text-[var(--nl-text-mute)]',
+        )}
+      >
+        {label}
+      </div>
+      <div className="font-mono text-base text-[var(--nl-text-mute)]">{sub}</div>
+    </div>
+  );
+}
+
+function StepArrow({ done }: { done?: boolean }) {
+  return (
+    <div className="flex items-center justify-center pb-3">
+      <span
+        className={clsx(
+          'text-lg',
+          done ? 'text-[#22C55E]' : 'text-[var(--nl-text-mute)]/40',
+        )}
+      >
+        ←
+      </span>
     </div>
   );
 }
@@ -455,15 +553,15 @@ function ScenePackage() {
 function SceneShipping() {
   return (
     <div className="space-y-4">
-      <SceneHeader Icon={LiaTruckSolid} label="Shipping · Waybill" />
+      <SceneHeader Icon={LiaTruckSolid} label="الشحن · بوليصة" />
 
       <div className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.04] p-4">
         <div className="flex items-center justify-between">
-          <span className="rounded-md bg-[#7B2CFF]/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#C8A6FF]">
+          <span className="rounded-md bg-[#7B2CFF]/20 px-2 py-0.5 text-base font-bold uppercase tracking-wider text-[#C8A6FF]">
             Bosta
           </span>
-          <span className="font-mono text-[10px] text-[var(--nl-text-mute)]">
-            AWB-9847203451
+          <span className="font-mono text-base text-[var(--nl-text-mute)]">
+            بوليصة-9847203451
           </span>
         </div>
 
@@ -480,13 +578,13 @@ function SceneShipping() {
           ))}
         </div>
 
-        <div className="grid grid-cols-2 gap-2 text-xs">
+        <div className="grid grid-cols-2 gap-2 text-base">
           <div className="rounded-lg bg-white/[0.04] px-3 py-2">
-            <div className="text-[10px] text-[var(--nl-text-mute)]">الطلب</div>
-            <div className="font-mono font-semibold text-[var(--nl-text)]">#ORD-1284</div>
+            <div className="text-base text-[var(--nl-text-mute)]">الطلب</div>
+            <div className="font-mono font-semibold text-[var(--nl-text)]">#طلب-1284</div>
           </div>
           <div className="rounded-lg bg-white/[0.04] px-3 py-2">
-            <div className="text-[10px] text-[var(--nl-text-mute)]">المبلغ</div>
+            <div className="text-base text-[var(--nl-text-mute)]">المبلغ</div>
             <div className="font-mono font-semibold text-[var(--nl-text)]">845 جنيه</div>
           </div>
         </div>
@@ -494,8 +592,8 @@ function SceneShipping() {
 
       <div className="flex items-center gap-3 rounded-xl border border-[#22C55E]/25 bg-[#22C55E]/[0.06] p-3">
         <LiaCheckCircleSolid size={20} className="text-[#22C55E]" />
-        <span className="text-sm text-[var(--nl-text)]">تم تسليم الشحنة للمندوب</span>
-        <span className="mr-auto font-mono text-[11px] text-[var(--nl-text-mute)]">
+        <span className="text-base text-[var(--nl-text)]">تم تسليم الشحنة للمندوب</span>
+        <span className="mr-auto font-mono text-base text-[var(--nl-text-mute)]">
           47 شحنة جاهزة
         </span>
       </div>
@@ -511,14 +609,14 @@ function SceneTracking() {
     { label: 'تسليم', state: 'todo' },
   ];
   const rows = [
-    { id: '#ORD-1284', cust: 'محمد علي', state: 'في الطريق', color: '#FEBC2E' },
-    { id: '#ORD-1285', cust: 'سارة محمود', state: 'تم التسليم', color: '#22C55E' },
-    { id: '#ORD-1286', cust: 'أحمد سيد', state: 'لم يتم الرد', color: '#EF4444' },
-    { id: '#ORD-1287', cust: 'منى السيد', state: 'تم التسليم', color: '#22C55E' },
+    { id: '#طلب-1284', cust: 'محمد علي', state: 'في الطريق', color: '#FEBC2E' },
+    { id: '#طلب-1285', cust: 'سارة محمود', state: 'تم التسليم', color: '#22C55E' },
+    { id: '#طلب-1286', cust: 'أحمد سيد', state: 'لم يتم الرد', color: '#EF4444' },
+    { id: '#طلب-1287', cust: 'منى السيد', state: 'تم التسليم', color: '#22C55E' },
   ];
   return (
     <div className="space-y-4">
-      <SceneHeader Icon={LiaMapMarkedAltSolid} label="Tracking · Live" />
+      <SceneHeader Icon={LiaMapMarkedAltSolid} label="تتبع · مباشر" />
 
       <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4">
         <div className="flex items-center justify-between">
@@ -534,7 +632,7 @@ function SceneTracking() {
                       : 'border-2 border-white/15',
                 )}
               />
-              <span className="mt-1.5 text-[10px] text-[var(--nl-text-mute)]">{m.label}</span>
+              <span className="mt-1.5 text-base text-[var(--nl-text-mute)]">{m.label}</span>
               {i < milestones.length - 1 && (
                 <span className="absolute" />
               )}
@@ -544,8 +642,8 @@ function SceneTracking() {
         <div className="relative mt-[-22px] h-px w-full bg-white/[0.06]">
           <div className="absolute right-0 top-0 h-full bg-gradient-to-l from-[#FEBC2E] via-[#22C55E] to-[#22C55E] nl-anim-bar-fill-65" />
         </div>
-        <div className="mt-6 text-center text-[10px] text-[var(--nl-text-mute)]">
-          API webhook · آخر تحديث منذ 2 دقيقة
+        <div className="mt-6 text-center text-base text-[var(--nl-text-mute)]">
+          تحديث تلقائي من شركة الشحن · آخر تحديث منذ دقيقتين
         </div>
       </div>
 
@@ -553,7 +651,7 @@ function SceneTracking() {
         {rows.map((r) => (
           <div
             key={r.id}
-            className="flex items-center justify-between rounded-lg bg-white/[0.02] px-3 py-2 text-[11px]"
+            className="flex items-center justify-between rounded-lg bg-white/[0.02] px-3 py-2 text-base"
           >
             <div className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full" style={{ background: r.color }} />
@@ -561,7 +659,7 @@ function SceneTracking() {
               <span className="text-[var(--nl-text-mute)]">{r.cust}</span>
             </div>
             <span
-              className="rounded-full px-2 py-0.5 text-[10px]"
+              className="rounded-full px-2 py-0.5 text-base"
               style={{ background: r.color + '22', color: r.color }}
             >
               {r.state}
@@ -575,29 +673,29 @@ function SceneTracking() {
 
 function SceneInvoice() {
   const items = [
-    { name: 'T-Shirt M', qty: 20, price: 80 },
-    { name: 'T-Shirt L', qty: 15, price: 80 },
-    { name: 'Hoodie', qty: 10, price: 220 },
+    { name: 'تي شيرت — مقاس M', qty: 20, price: 80 },
+    { name: 'تي شيرت — مقاس L', qty: 15, price: 80 },
+    { name: 'هودي', qty: 10, price: 220 },
   ];
   const total = items.reduce((s, it) => s + it.qty * it.price, 0);
   return (
     <div className="space-y-4">
-      <SceneHeader Icon={LiaFileInvoiceDollarSolid} label="Invoice · #PO-1042" />
+      <SceneHeader Icon={LiaFileInvoiceDollarSolid} label="فاتورة شراء · #فاتورة-1042" />
 
       <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4">
-        <div className="flex items-center justify-between text-xs">
+        <div className="flex items-center justify-between text-base">
           <div>
-            <div className="text-[10px] text-[var(--nl-text-mute)]">المورد</div>
-            <div className="text-sm font-semibold text-[var(--nl-text)]">شركة الأنوار</div>
+            <div className="text-base text-[var(--nl-text-mute)]">المورد</div>
+            <div className="text-base font-semibold text-[var(--nl-text)]">شركة الأنوار</div>
           </div>
           <div className="text-left">
-            <div className="text-[10px] text-[var(--nl-text-mute)]">التاريخ</div>
-            <div className="font-mono text-sm text-[var(--nl-text)]">2026-05-11</div>
+            <div className="text-base text-[var(--nl-text-mute)]">التاريخ</div>
+            <div className="font-mono text-base text-[var(--nl-text)]">2026-05-11</div>
           </div>
         </div>
 
         <div className="mt-4 overflow-hidden rounded-xl border border-white/5">
-          <div className="grid grid-cols-[1fr_auto_auto] gap-3 border-b border-white/5 bg-white/[0.02] px-3 py-2 text-[10px] uppercase tracking-wider text-[var(--nl-text-mute)]">
+          <div className="grid grid-cols-[1fr_auto_auto] gap-3 border-b border-white/5 bg-white/[0.02] px-3 py-2 text-base uppercase tracking-wider text-[var(--nl-text-mute)]">
             <span>المنتج</span>
             <span>العدد</span>
             <span>السعر</span>
@@ -606,7 +704,7 @@ function SceneInvoice() {
             <div
               key={it.name}
               className={clsx(
-                'grid grid-cols-[1fr_auto_auto] items-center gap-3 px-3 py-2 text-xs',
+                'grid grid-cols-[1fr_auto_auto] items-center gap-3 px-3 py-2 text-base',
                 i % 2 === 0 ? 'bg-white/[0.01]' : '',
               )}
             >
@@ -618,15 +716,15 @@ function SceneInvoice() {
         </div>
 
         <div className="mt-3 flex items-baseline justify-between border-t border-white/10 pt-3">
-          <span className="text-sm text-[var(--nl-text-mute)]">الإجمالي</span>
+          <span className="text-base text-[var(--nl-text-mute)]">الإجمالي</span>
           <span className="font-mono text-2xl font-bold text-[var(--nl-text)]">
             {total.toLocaleString('en-US')}{' '}
-            <span className="text-xs font-normal text-[var(--nl-text-mute)]">جنيه</span>
+            <span className="text-base font-normal text-[var(--nl-text-mute)]">جنيه</span>
           </span>
         </div>
       </div>
 
-      <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-[#7B2CFF] to-[#3A0CA3] px-4 py-3 text-sm font-bold text-white shadow-[0_8px_24px_-8px_rgba(123,44,255,0.6)]">
+      <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-[#7B2CFF] to-[#3A0CA3] px-4 py-3 text-base font-bold text-white shadow-[0_8px_24px_-8px_rgba(123,44,255,0.6)]">
         <LiaDownloadSolid />
         حفظ الفاتورة
       </button>
@@ -636,20 +734,20 @@ function SceneInvoice() {
 
 function SceneTransfer() {
   const items = [
-    { name: 'T-Shirt M', qty: 12 },
-    { name: 'Hoodie', qty: 8 },
-    { name: 'Cap', qty: 20 },
+    { name: 'تي شيرت — مقاس M', qty: 12 },
+    { name: 'هودي', qty: 8 },
+    { name: 'كاب', qty: 20 },
   ];
   return (
     <div className="space-y-4">
-      <SceneHeader Icon={LiaWarehouseSolid} label="Inventory Transfer · #TR-088" />
+      <SceneHeader Icon={LiaWarehouseSolid} label="نقل مخزون · #نقل-088" />
 
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
         <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-3.5 text-center">
           <LiaWarehouseSolid size={26} className="mx-auto text-[var(--nl-text-mute)]" />
-          <div className="mt-1.5 text-[10px] uppercase tracking-wider text-[var(--nl-text-mute)]">من</div>
-          <div className="text-sm font-semibold text-[var(--nl-text)]">مخزن A</div>
-          <div className="font-mono text-[10px] text-[var(--nl-text-mute)]">Cairo</div>
+          <div className="mt-1.5 text-base uppercase tracking-wider text-[var(--nl-text-mute)]">من</div>
+          <div className="text-base font-semibold text-[var(--nl-text)]">مخزن A</div>
+          <div className="font-mono text-base text-[var(--nl-text-mute)]">القاهرة</div>
         </div>
 
         <div className="grid h-10 w-10 place-items-center rounded-full border border-[#7B2CFF]/40 bg-[#0A0E1E] text-[#C8A6FF] shadow-[0_0_24px_-6px_rgba(123,44,255,0.6)] nl-anim-slide-x">
@@ -658,22 +756,22 @@ function SceneTransfer() {
 
         <div className="rounded-2xl border border-[#7B2CFF]/30 bg-[#7B2CFF]/[0.08] p-3.5 text-center">
           <LiaWarehouseSolid size={26} className="mx-auto text-[#C8A6FF]" />
-          <div className="mt-1.5 text-[10px] uppercase tracking-wider text-[var(--nl-text-mute)]">إلى</div>
-          <div className="text-sm font-semibold text-[var(--nl-text)]">مخزن B</div>
-          <div className="font-mono text-[10px] text-[var(--nl-text-mute)]">Giza</div>
+          <div className="mt-1.5 text-base uppercase tracking-wider text-[var(--nl-text-mute)]">إلى</div>
+          <div className="text-base font-semibold text-[var(--nl-text)]">مخزن B</div>
+          <div className="font-mono text-base text-[var(--nl-text-mute)]">الجيزة</div>
         </div>
       </div>
 
       <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3.5">
         <div className="mb-2 flex items-baseline justify-between">
-          <span className="text-xs text-[var(--nl-text-mute)]">عناصر التحويل</span>
-          <span className="font-mono text-xs text-[var(--nl-text-mute)]">3 منتجات · 40 قطعة</span>
+          <span className="text-base text-[var(--nl-text-mute)]">عناصر التحويل</span>
+          <span className="font-mono text-base text-[var(--nl-text-mute)]">3 منتجات · 40 قطعة</span>
         </div>
         <div className="space-y-1.5">
           {items.map((it) => (
             <div
               key={it.name}
-              className="flex items-center justify-between rounded-lg bg-white/[0.02] px-3 py-2 text-xs"
+              className="flex items-center justify-between rounded-lg bg-white/[0.02] px-3 py-2 text-base"
             >
               <div className="flex items-center gap-2 text-[var(--nl-text)]">
                 <LiaBoxSolid size={14} className="text-[var(--nl-text-mute)]" />
@@ -685,7 +783,7 @@ function SceneTransfer() {
         </div>
       </div>
 
-      <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-[var(--nl-text)] hover:border-[#7B2CFF]/40">
+      <button className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-base font-semibold text-[var(--nl-text)] hover:border-[#7B2CFF]/40">
         <LiaPlaySolid />
         طباعة فاتورة الانتقال
       </button>

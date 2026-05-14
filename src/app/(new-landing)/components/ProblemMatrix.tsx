@@ -28,7 +28,7 @@ export function ProblemMatrix() {
 
       <div className="relative z-10 mx-auto max-w-7xl px-5">
         <RevealOnScroll className="mx-auto max-w-3xl text-center">
-          <span className="font-mono text-sm uppercase tracking-[0.3em] text-[#EF4444]/80">
+          <span className="font-mono text-base uppercase tracking-[0.3em] text-[#EF4444]/80">
             {copy.problem.eyebrow}
           </span>
           <h2 className="mt-4 text-4xl font-bold leading-tight text-[var(--nl-text)] md:text-5xl">
@@ -76,7 +76,7 @@ export function ProblemMatrix() {
                     {c.items.map((it) => (
                       <li
                         key={it}
-                        className="flex items-start gap-3 text-[15px] leading-relaxed text-[var(--nl-text-mute)] md:text-base"
+                        className="flex items-start gap-3 text-base leading-relaxed text-[var(--nl-text-mute)] md:text-base"
                       >
                         <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#EF4444] ring-2 ring-[#EF4444]/20" />
                         <span>{it}</span>

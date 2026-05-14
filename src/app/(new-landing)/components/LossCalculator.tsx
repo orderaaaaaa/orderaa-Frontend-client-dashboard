@@ -87,7 +87,7 @@ export function LossCalculator() {
                 accent="#9D4EDD"
               />
             </div>
-            <p className="mt-7 rounded-2xl border border-[#7B2CFF]/20 bg-[#7B2CFF]/[0.06] p-4 text-sm leading-relaxed text-[var(--nl-text)]">
+            <p className="mt-7 rounded-2xl border border-[#7B2CFF]/20 bg-[#7B2CFF]/[0.06] p-4 text-base leading-relaxed text-[var(--nl-text)]">
               {copy.loss.footnote}
             </p>
           </RevealOnScroll>
@@ -112,10 +112,10 @@ export function LossCalculator() {
 
               <div className="relative z-10 flex h-full flex-col">
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-[#EF4444]/80">
-                    ESTIMATED LOSS
+                  <span className="font-mono text-base uppercase tracking-[0.25em] text-[#EF4444]/80">
+                    الخسارة المتوقعة
                   </span>
-                  <span className="rounded-full border border-[#EF4444]/30 bg-[#EF4444]/[0.08] px-3 py-0.5 text-[11px] text-[#FF6B6B]">
+                  <span className="rounded-full border border-[#EF4444]/30 bg-[#EF4444]/[0.08] px-3 py-0.5 text-base text-[#FF6B6B]">
                     خسارة بدون Orderaa
                   </span>
                 </div>
@@ -171,9 +171,9 @@ function Slider({
   return (
     <div>
       <div className="mb-2.5 flex items-center justify-between">
-        <span className="text-sm text-[var(--nl-text-mute)]">{label}</span>
+        <span className="text-base text-[var(--nl-text-mute)]">{label}</span>
         <span
-          className="rounded-full px-3 py-0.5 font-mono text-sm font-semibold"
+          className="rounded-full px-3 py-0.5 font-mono text-base font-semibold"
           style={{ background: accent + '18', color: accent }}
         >
           {value}
@@ -228,7 +228,7 @@ function LossLine({
         <span className={emphasis ? 'text-[#FF6B6B]' : 'text-[var(--nl-text-mute)]'}>
           {icon}
         </span>
-        <span className={emphasis ? 'text-base font-medium text-[var(--nl-text)]' : 'text-sm'}>
+        <span className={emphasis ? 'text-base font-medium text-[var(--nl-text)]' : 'text-base'}>
           {label}
         </span>
       </div>
@@ -239,7 +239,7 @@ function LossLine({
           }`}
       >
         <span>{formatCurrency(value)}</span>
-        <span className="text-[11px] font-normal text-[var(--nl-text-mute)] md:text-sm">
+        <span className="text-base font-normal text-[var(--nl-text-mute)] md:text-base">
           {copy.loss.currency}
         </span>
       </div>

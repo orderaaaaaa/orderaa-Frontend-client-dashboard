@@ -32,14 +32,14 @@ export function CompetitorMatrix() {
               <table className="w-full table-fixed border-collapse">
                 <thead>
                   <tr>
-                    <th className="w-[28%] border-b border-white/[0.06] px-2 py-3 text-right text-xs font-medium uppercase tracking-[0.18em] text-[var(--nl-text-mute)] sm:px-4 sm:py-5 sm:text-sm sm:tracking-[0.2em]">
+                    <th className="w-[28%] border-b border-white/[0.06] px-2 py-3 text-right text-base font-medium uppercase tracking-[0.18em] text-[var(--nl-text-mute)] sm:px-4 sm:py-5 sm:text-base sm:tracking-[0.2em]">
                       الميزة
                     </th>
                     {copy.compare.columns.map((c, i) => (
                       <th
                         key={c}
                         className={clsx(
-                          'border-b border-white/[0.06] px-2 py-3 text-center text-sm font-semibold sm:px-4 sm:py-5 sm:text-lg',
+                          'border-b border-white/[0.06] px-2 py-3 text-center text-base font-semibold sm:px-4 sm:py-5 sm:text-lg',
                           tone(i) === 'orderaa'
                             ? 'relative text-[var(--nl-text)]'
                             : 'text-[var(--nl-text-mute)]',
@@ -64,14 +64,14 @@ export function CompetitorMatrix() {
                 <tbody>
                   {copy.compare.rows.map((row) => (
                     <tr key={row.feature} className="group">
-                      <td className="border-b border-white/[0.04] px-2 py-3 text-right text-xs font-medium leading-snug text-[var(--nl-text)] break-words transition-colors group-hover:bg-white/[0.03] sm:px-4 sm:py-4 sm:text-sm">
+                      <td className="border-b border-white/[0.04] px-2 py-3 text-right text-base font-medium leading-snug text-[var(--nl-text)] break-words transition-colors group-hover:bg-white/[0.03] sm:px-4 sm:py-4 sm:text-base">
                         {row.feature}
                       </td>
                       {row.values.map((v, ci) => (
                         <td
                           key={ci}
                           className={clsx(
-                            'border-b border-white/[0.04] px-2 py-3 text-center text-[11px] leading-snug transition-colors break-words sm:px-4 sm:py-4 sm:text-sm',
+                            'border-b border-white/[0.04] px-2 py-3 text-center text-base leading-snug transition-colors break-words sm:px-4 sm:py-4 sm:text-base',
                             tone(ci) === 'orderaa'
                               ? 'relative font-medium text-[var(--nl-text)]'
                               : 'text-[var(--nl-text-mute)]',
