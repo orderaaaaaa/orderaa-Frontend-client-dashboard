@@ -17,10 +17,16 @@
 
   background: var(--nl-bg);
   color: var(--nl-text);
-  min-height: 100vh;
+  min-height: 100dvh;
   position: relative;
-  isolation: isolate;
   scroll-behavior: smooth;
+  overscroll-behavior: none;
+}
+
+html:has(.nl-root),
+html:has(.nl-root) body {
+  background-color: #040711;
+  overscroll-behavior: none;
 }
 
 html:has(.nl-root) {
@@ -74,7 +80,6 @@ html:has(.nl-root) {
 .nl-reveal {
   translate: 0 16px;
   transition: translate 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: translate;
 }
 
 .nl-reveal.is-visible {
@@ -288,4 +293,29 @@ html:has(.nl-root) {
   }
   .nl-anim-bar-fill-76 { width: 76%; }
   .nl-anim-bar-fill-65 { width: 65%; }
+}
+
+@media (max-width: 768px) {
+  .nl-root .nl-aurora-orb {
+    animation: none !important;
+    mix-blend-mode: normal !important;
+    filter: blur(30px) !important;
+    opacity: 0.55;
+  }
+
+  .nl-root header [class*='backdrop-blur'] {
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+  }
+
+  .nl-root [class*='backdrop-blur-xl'],
+  .nl-root [class*='backdrop-blur-md'] {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .nl-root .nl-anim-fall {
+    animation: none;
+    opacity: 0;
+  }
 }
