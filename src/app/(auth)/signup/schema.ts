@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isValidPhoneNumber } from 'libphonenumber-js/mobile';
 
 export const signUpSchema = z
   .object({
@@ -7,7 +8,11 @@ export const signUpSchema = z
     email: z.string().email('من فضلك أدخل بريدًا إلكترونيًا صحيحًا.'),
     phoneNumber: z
       .string()
-      .regex(/^\d{10,15}$/, 'رقم الموبايل يجب أن يكون من 10 إلى 15 رقمًا.'),
+      .min(1, 'من فضلك أدخل رقم الموبايل')
+      .refine(
+        (val) => isValidPhoneNumber(val, 'EG'),
+        'رقم الموبايل غير صحيح. مثال: 01012345678'
+      ),
     password: z.string().min(8, 'كلمة المرور يجب أن تكون 8 حروف على الأقل.'),
     confirmPassword: z.string().min(1, 'من فضلك أكد كلمة المرور'),
     category: z.string().min(1, 'من فضلك اختر نوع النشاط'),

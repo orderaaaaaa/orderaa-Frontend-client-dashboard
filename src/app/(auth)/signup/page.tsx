@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Mail, User, Pen, Phone, Lock } from 'lucide-react';
+import { parsePhoneNumberFromString } from 'libphonenumber-js/mobile';
 import {
   LiaCheckCircleSolid,
   LiaShieldAltSolid,
@@ -73,7 +74,10 @@ export default function SignUpForm() {
   const onSubmit = async (values: SignUpSchema) => {
     setError('');
     try {
-      const data = await signUp(values);
+      const phoneE164 =
+        parsePhoneNumberFromString(values.phoneNumber, 'EG')?.number ??
+        values.phoneNumber;
+      const data = await signUp({ ...values, phoneNumber: phoneE164 });
       if (data) router.push('/signin');
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
