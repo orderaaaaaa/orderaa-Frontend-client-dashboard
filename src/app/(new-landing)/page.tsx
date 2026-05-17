@@ -6,6 +6,7 @@ import { ProblemMatrix } from './components/ProblemMatrix';
 import { LossCalculator } from './components/LossCalculator';
 import { SolutionBanner } from './components/SolutionBanner';
 import { FeatureBento } from './components/FeatureBento';
+import { DuplicateOrderSpotlight } from './components/DuplicateOrderSpotlight';
 import { OperationFlow } from './components/OperationFlow';
 import { CompetitorMatrix } from './components/CompetitorMatrix';
 import { PricingTiers } from './components/PricingTiers';
@@ -21,6 +22,7 @@ export default function NewLandingPage() {
       <LossCalculator />
       <SolutionBanner />
       <FeatureBento />
+      <DuplicateOrderSpotlight />
       <OperationFlow />
       <CompetitorMatrix />
       <PricingTiers />
