@@ -8,7 +8,8 @@ export type ShippingProviderId =
   | 'red'
   | 'hashtag'
   | 'quick_connect'
-  | 'rm_express';
+  | 'rm_express'
+  | 'torod';
 
 export interface ShippingConfig {
   id?: string;

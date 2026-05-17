@@ -31,7 +31,11 @@ import {
   InvoiceData,
 } from '../../print-orders/types';
 import { useMarkOrdersPrinted, useInvoiceSettings } from '../../print-orders/hooks';
-import { mapOrdersToInvoices } from '../../print-orders/utils';
+import {
+  mapOrdersToInvoices,
+  preloadShippingLogos,
+  waitForImagesInContainer,
+} from '../../print-orders/utils';
 import { InvoiceRenderer } from '../../print-orders/components/InvoiceRenderer';
 
 export interface ShippingCompanyOption {
@@ -121,6 +125,10 @@ export function FilterSection({
   const hasInitializedRef = useRef(false);
   const { mutateAsync: markAsPrinted } = useMarkOrdersPrinted();
   const { storeInfo, language } = useInvoiceSettings();
+
+  useEffect(() => {
+    preloadShippingLogos();
+  }, []);
 
   useEffect(() => {
     if (!initialFormFilters) return;
@@ -253,7 +261,11 @@ export function FilterSection({
       const invoices = mapOrdersToInvoices(selectedOrders, language);
       setInvoicesToPrint(invoices);
 
-      setTimeout(() => {
+      setTimeout(async () => {
+        const container = document.querySelector(
+          '.print-container',
+        ) as HTMLElement | null;
+        await waitForImagesInContainer(container);
         window.print();
         setTimeout(() => setInvoicesToPrint([]), 500);
       }, 100);

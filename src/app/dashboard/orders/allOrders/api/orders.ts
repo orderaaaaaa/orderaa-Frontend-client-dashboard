@@ -1,10 +1,5 @@
 import http from '@/lib/api/http';
-import {
-  BulkRequest,
-  BulkUpdateResponse,
-  OrdersBatchRequest,
-  OrdersBatchResponse,
-} from '../types/Bulk';
+import { BulkRequest, BulkUpdateResponse } from '../types/Bulk';
 
 export async function bulkOrders(
   payload: BulkRequest,
@@ -21,14 +16,3 @@ export async function bulkOrders(
 
   return data;
 }
-
-export const updateOrdersBatch = async (
-  payload: OrdersBatchRequest
-): Promise<OrdersBatchResponse> => {
-  const { data } = await http.patch<OrdersBatchResponse>(
-    '/orders/batch',
-    payload
-  );
-
-  return data;
-};

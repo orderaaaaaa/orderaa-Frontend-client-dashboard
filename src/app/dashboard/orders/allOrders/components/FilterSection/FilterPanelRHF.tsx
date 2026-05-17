@@ -13,7 +13,7 @@ import useShippingCompanies from "@/hooks/useShippingCompanies";
 import { useQuery } from "@tanstack/react-query";
 import http from "@/lib/api/http";
 import { useDebounce, useDebouncedCallback } from "@/utils/debounce";
-import { LiaTimesSolid } from "react-icons/lia";
+import { LiaTimesSolid, LiaCheckSolid } from "react-icons/lia";
 import { Button } from "@/components/ui/button";
 import { formatDateForUrl } from "@/utils/urlFilters";
 
@@ -489,8 +489,9 @@ export default function FilterPanel({
       case 'toggle':
         return (
           <FilterChip key={key} filterKey={key} label={label} onRemove={onRemoveFilter}>
-            <div className="flex items-center w-full h-full px-3 rounded border border-gray-300 bg-white">
-              <span className="text-base text-gray-700">{label}</span>
+            <div className="flex items-center gap-2 w-full h-full px-3 rounded border border-primary bg-primary/5">
+              <LiaCheckSolid className="size-4 text-primary shrink-0" />
+              <span className="text-base font-semibold text-primary">{label}</span>
             </div>
           </FilterChip>
         );

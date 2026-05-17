@@ -301,7 +301,7 @@ const MergeProductsModal = ({
           price: data.price,
           image: targetProduct.image || undefined,
           images: targetProduct.images?.length ? targetProduct.images : undefined,
-          variants: mergedVariants.length > 0 ? mergedVariants : undefined,
+          //variants: mergedVariants.length > 0 ? mergedVariants : undefined,
         },
       },
       {

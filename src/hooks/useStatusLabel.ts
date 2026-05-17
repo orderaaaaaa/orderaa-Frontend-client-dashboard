@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { useOrderStatusesQuery } from '@/services/orders';
+import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
 
 export function useStatusLabel() {
   const { data: statuses, isLoading } = useOrderStatusesQuery();
@@ -13,7 +14,7 @@ export function useStatusLabel() {
 
   const getStatusLabel = (statusKey: string | null | undefined): string => {
     if (!statusKey) return '';
-    return statusMap.get(statusKey) || statusKey;
+    return statusMap.get(statusKey) || ORDER_STATUS_ARABIC_LABELS[statusKey] || statusKey;
   };
 
   return { getStatusLabel, isLoading, statuses };

@@ -314,6 +314,11 @@ html {
     margin: 0;
   }
 
+  @page generic-invoice {
+    size: 100mm 150mm;
+    margin: 0;
+  }
+
   .invoice-page {
     page-break-after: always;
     page-break-inside: avoid;
@@ -325,6 +330,13 @@ html {
 
   .invoice-page:last-child {
     page-break-after: auto;
+  }
+
+  .invoice-page:not(.bosta-invoice-page) {
+    page: generic-invoice;
+    width: 100mm !important;
+    height: 150mm !important;
+    overflow: hidden;
   }
 
   .bosta-invoice-page {

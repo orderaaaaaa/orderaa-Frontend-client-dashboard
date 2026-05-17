@@ -62,7 +62,7 @@ export function CallCenterContent() {
     printStatus,
     setPrintStatus,
     isInitialized,
-  } = usePrintOrdersFilters('orderFilters');
+  } = usePrintOrdersFilters('orderFilters', { ignoreDateRange: true });
 
   const apiFilters = useMemo(() => {
     const shouldSendDepartment = !filters.status && department;
@@ -294,7 +294,7 @@ export function CallCenterContent() {
         showPrintButton={false}
         showPrintStatusToggle={false}
         onActiveFiltersChange={handleActiveFiltersChange}
-        hiddenFilters={['skipFilters']}
+        hiddenFilters={[]}
       />
 
       <OrdersSelectionHeader

@@ -55,6 +55,16 @@ import { buildStatisticsCards } from '../constants/statisticsCards';
 import PageTaps from '../../components/pageTaps';
 import { useDepartment } from '../../hooks';
 
+const REPORT_BUTTON_TEXT_BY_STATUS: Record<string, string> = {
+  CONFIRMED: 'تقرير المنتجات المؤكدة',
+  WAITING_FOR_PACKAGING: 'تقرير منتجات في انتظار التغليف',
+};
+
+const getReportButtonText = (status: string | null | undefined) => {
+  if (!status) return 'تقرير المنتجات';
+  return REPORT_BUTTON_TEXT_BY_STATUS[status] ?? 'تقرير المنتجات';
+};
+
 export function PrintOrdersContent() {
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState('');
   const [selectedCustomerName, setSelectedCustomerName] = useState('');
@@ -71,6 +81,9 @@ export function PrintOrdersContent() {
   const [isPrintedConfirmModalOpen, setIsPrintedConfirmModalOpen] =
     useState(false);
   const pendingActionRef = useRef<(() => void | Promise<void>) | null>(null);
+  const [excludedPrintedIds, setExcludedPrintedIds] = useState<Set<number>>(
+    new Set(),
+  );
   const [isScannerChangeProductMode, setIsScannerChangeProductMode] =
     useState(false);
   const [scannerPackagingNotes, setScannerPackagingNotes] = useState<
@@ -94,7 +107,7 @@ export function PrintOrdersContent() {
     printStatus,
     setPrintStatus,
     isInitialized,
-  } = usePrintOrdersFilters('orderFilters');
+  } = usePrintOrdersFilters('orderFilters', { ignoreDateRange: true });
   const { statistics: printStatistics, loading: statsLoading } =
     usePrintOrderStatistics();
 
@@ -414,19 +427,35 @@ export function PrintOrdersContent() {
   const handlePrintedConfirmClose = useCallback(() => {
     setIsPrintedConfirmModalOpen(false);
     pendingActionRef.current = null;
+    setExcludedPrintedIds(new Set());
   }, []);
 
-  const handlePrintedConfirm = useCallback(() => {
-    setIsPrintedConfirmModalOpen(false);
-    if (pendingActionRef.current) {
-      pendingActionRef.current();
-      pendingActionRef.current = null;
-    }
-  }, []);
+  const handlePrintedConfirm = useCallback(
+    (selectedPrintedIds: number[]) => {
+      const included = new Set(selectedPrintedIds);
+      const excluded = new Set<number>();
+      for (const o of printedOrdersInSelection) {
+        if (!included.has(o.id)) excluded.add(o.id);
+      }
+      setExcludedPrintedIds(excluded);
+      setIsPrintedConfirmModalOpen(false);
+      if (pendingActionRef.current) {
+        pendingActionRef.current();
+        pendingActionRef.current = null;
+      }
+    },
+    [printedOrdersInSelection],
+  );
 
   const executePrepared = useCallback(async () => {
-    const ordersToProcess = selectAllMatchingFilters ? orders : selectedOrders;
-    if (ordersToProcess.length === 0) return;
+    const baseOrders = selectAllMatchingFilters ? orders : selectedOrders;
+    const ordersToProcess = baseOrders.filter(
+      (o) => !excludedPrintedIds.has(o.id),
+    );
+    if (ordersToProcess.length === 0) {
+      setExcludedPrintedIds(new Set());
+      return;
+    }
     setIsActionLoading(true);
     try {
       await prepareOrdersMutation({
@@ -440,16 +469,23 @@ export function PrintOrdersContent() {
       toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
     } finally {
       setIsActionLoading(false);
+      setExcludedPrintedIds(new Set());
     }
-  }, [selectAllMatchingFilters, orders, selectedOrders, prepareOrdersMutation, clearSelections, setSelectMode]);
+  }, [selectAllMatchingFilters, orders, selectedOrders, excludedPrintedIds, prepareOrdersMutation, clearSelections, setSelectMode]);
 
   const handlePrepared = useCallback(() => {
     withPrintedCheck(executePrepared);
   }, [withPrintedCheck, executePrepared]);
 
   const executeAwaitingPackaging = useCallback(async () => {
-    const ordersToProcess = selectAllMatchingFilters ? orders : selectedOrders;
-    if (ordersToProcess.length === 0) return;
+    const baseOrders = selectAllMatchingFilters ? orders : selectedOrders;
+    const ordersToProcess = baseOrders.filter(
+      (o) => !excludedPrintedIds.has(o.id),
+    );
+    if (ordersToProcess.length === 0) {
+      setExcludedPrintedIds(new Set());
+      return;
+    }
     setIsActionLoading(true);
     try {
       await waitingMutation({
@@ -463,8 +499,9 @@ export function PrintOrdersContent() {
       toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
     } finally {
       setIsActionLoading(false);
+      setExcludedPrintedIds(new Set());
     }
-  }, [selectAllMatchingFilters, orders, selectedOrders, waitingMutation, clearSelections, setSelectMode]);
+  }, [selectAllMatchingFilters, orders, selectedOrders, excludedPrintedIds, waitingMutation, clearSelections, setSelectMode]);
 
   const handleAwaitingPackaging = useCallback(() => {
     withPrintedCheck(executeAwaitingPackaging);
@@ -577,7 +614,7 @@ export function PrintOrdersContent() {
             className="gap-2"
           >
             <LiaClipboardListSolid className="size-5" />
-            تقرير المنتجات المؤكدة
+            {getReportButtonText(filters.status)}
           </Button>
         )}
       </div>
@@ -615,7 +652,7 @@ export function PrintOrdersContent() {
         printStatistics={printStatistics}
         selectedOrders={selectedOrders}
         showPrintStatusToggle={filters.status === 'CONFIRMED'}
-        hiddenFilters={['skipFilters']}
+        hiddenFilters={[]}
       />
 
       <div className="flex flex-col sm:flex-row justify-between gap-2 mt-10 mb-6 select-none">

@@ -1,0 +1,72 @@
+import React from 'react';
+import Image from 'next/image';
+import clsx from 'clsx';
+import { LiaCheckCircleSolid } from 'react-icons/lia';
+import { Button } from '@/components/ui/button';
+import { AutoConfirmationProvider } from '../types/autoConfirmation';
+
+interface ProviderCardProps {
+  provider: AutoConfirmationProvider;
+  isConnected: boolean;
+  onConnect: () => void;
+}
+
+export const ProviderCard: React.FC<ProviderCardProps> = ({
+  provider,
+  isConnected,
+  onConnect,
+}) => {
+  const canInteract = provider.isActive;
+  const isDisabled = !canInteract;
+
+  const buttonText = !canInteract
+    ? 'قريباً'
+    : isConnected
+      ? 'إدارة الربط'
+      : 'إنشاء ربط جديد';
+
+  return (
+    <div className="relative bg-white rounded-2xl p-8 transition-all duration-300 border border-gray-200 hover:border-gray-300 hover:shadow-md flex flex-col min-h-[400px]">
+      {isConnected && canInteract && (
+        <div className="absolute top-4 left-4 bg-green-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
+          <LiaCheckCircleSolid className="w-3 h-3" />
+          متصل
+        </div>
+      )}
+
+      <div className="flex justify-center mb-6 mt-2">
+        <div className="w-32 h-32 flex items-center justify-center rounded-2xl overflow-hidden bg-gray-50">
+          <Image
+            src={provider.logo}
+            alt={provider.name}
+            width={128}
+            height={128}
+            className="object-contain"
+            unoptimized
+          />
+        </div>
+      </div>
+
+      <h3 className="text-xl font-semibold text-center text-gray-900 mb-2">
+        ربط {provider.name}
+      </h3>
+
+      <p className="text-center text-gray-600 mb-6">{provider.description}</p>
+
+      <Button
+        onClick={onConnect}
+        disabled={isDisabled}
+        className={clsx(
+          'w-full h-12 rounded-lg font-medium text-white transition-all duration-200 mt-auto',
+          canInteract
+            ? isConnected
+              ? 'bg-gray-600 hover:bg-gray-700'
+              : 'bg-primary hover:bg-[#4A1CB8] active:bg-[#3D17A0]'
+            : 'bg-gray-400 cursor-not-allowed'
+        )}
+      >
+        {buttonText}
+      </Button>
+    </div>
+  );
+};

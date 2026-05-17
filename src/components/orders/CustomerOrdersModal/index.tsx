@@ -7,7 +7,7 @@ import OrderCard from '../../../app/dashboard/orders/allOrders/components/OrderC
 import { Button } from '@/components/ui/button';
 import BulkActionsBar from '@/components/BulkActionsBar';
 import { exportOrdersToExcel } from '@/utils/exportOrders';
-import { useUpdateOrdersBatch } from '@/app/dashboard/orders/allOrders/hooks/useUpdateOrdersBatch';
+import { useBulkOrders } from '@/app/dashboard/orders/allOrders/hooks/useOrderBulk';
 import type { OrderStatusKey } from '@/app/dashboard/orders/allOrders/types/Bulk';
 import BaseModal from '@/components/ui/base-modal';
 import PageLoading from '@/components/ui/page-loading';
@@ -37,7 +37,7 @@ export default function CustomerOrdersModal({
   const error = queryError ? 'فشل في تحميل طلبات العميل' : null;
 
   const { data: statusOptions } = useOrderStatusesQuery();
-  const { mutateAsync: batchUpdateOrders } = useUpdateOrdersBatch();
+  const { mutateAsync: bulkUpdateOrders } = useBulkOrders();
 
   const statusLabelsMap = useMemo(() => {
     if (!statusOptions) return new Map<string, string>();
@@ -97,11 +97,11 @@ export default function CustomerOrdersModal({
     async (statusKey: string) => {
       if (!statusKey || selectedOrderIds.length === 0) return;
       try {
-        await batchUpdateOrders({
-          orders: selectedOrderIds.map((id) => ({
-            id,
-            updates: { status: statusKey as OrderStatusKey },
-          })),
+        await bulkUpdateOrders({
+          payload: {
+            status: statusKey as OrderStatusKey,
+            ordersIds: selectedOrderIds,
+          },
         });
         toast.success(`تم تعديل حالة ${selectedOrderIds.length} طلب بنجاح`);
         setSelectedOrderIds([]);
@@ -109,7 +109,7 @@ export default function CustomerOrdersModal({
         toast.error(err?.response?.data?.message || 'فشل تعديل حالة الطلبات');
       }
     },
-    [selectedOrderIds, batchUpdateOrders]
+    [selectedOrderIds, bulkUpdateOrders]
   );
 
   const handleShareWhatsApp = useCallback(() => {

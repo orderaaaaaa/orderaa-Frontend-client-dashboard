@@ -233,6 +233,7 @@ export function StockManagementContent() {
         </div>
       </div>
 
+
       {isAnalysisLoading ? (
         <SummaryCardsSkeleton />
       ) : (

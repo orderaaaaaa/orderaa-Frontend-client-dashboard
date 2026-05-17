@@ -6,7 +6,6 @@ import { formatLocalStartOfDay, formatLocalEndOfDay } from '@/utils/dateRangeUti
 import { toast } from 'react-toastify';
 import { UrlFilterState } from '@/utils/urlFilters';
 
-// Helper function to build API filters from URL filter state
 export function buildApiFiltersFromUrlState(urlFilters: UrlFilterState): FilterOrdersDto {
     const filters: FilterOrdersDto = {
         page: urlFilters.page,
@@ -27,7 +26,6 @@ export function buildApiFiltersFromUrlState(urlFilters: UrlFilterState): FilterO
     if (urlFilters.localFilters.executionDate) {
         filters.executionDate = urlFilters.localFilters.executionDate;
     } else {
-        // Always set both dates if either is present for consistent filtering
         if (urlFilters.fromDate) {
             filters.createdAfter = formatLocalStartOfDay(urlFilters.fromDate);
         }

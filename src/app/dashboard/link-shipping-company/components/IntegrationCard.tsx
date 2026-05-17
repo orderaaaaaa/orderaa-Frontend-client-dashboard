@@ -43,6 +43,7 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
             width={128}
             height={128}
             className="object-contain"
+            unoptimized
           />
         </div>
       </div>

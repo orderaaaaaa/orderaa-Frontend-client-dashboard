@@ -11,9 +11,11 @@ import type {
 
 export type { ScannedOrder, AddOrderInput };
 
-const ACTIONABLE_STATUSES = ['CONFIRMED', 'WAITING_FOR_PACKAGING'];
+const DEFAULT_ACTIONABLE_STATUSES = ['CONFIRMED', 'WAITING_FOR_PACKAGING'];
 
-export function useScannedOrders(): UseScannedOrdersReturn {
+export function useScannedOrders(
+  actionableStatuses: string[] = DEFAULT_ACTIONABLE_STATUSES
+): UseScannedOrdersReturn {
   const [scannedOrders, setScannedOrders] = useState<ScannedOrder[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [forcedActionableIds, setForcedActionableIds] = useState<Set<number>>(
@@ -64,14 +66,11 @@ export function useScannedOrders(): UseScannedOrdersReturn {
     setForcedActionableIds(new Set());
   }, []);
 
-  const isActionableStatus = (status: string) =>
-    ACTIONABLE_STATUSES.includes(status);
-
   const isActionable = useCallback(
     (order: ScannedOrder) =>
       forcedActionableIds.has(order.id) ||
-      (isActionableStatus(order.status) && !order.packagingWarning),
-    [forcedActionableIds]
+      (actionableStatuses.includes(order.status) && !order.packagingWarning),
+    [forcedActionableIds, actionableStatuses]
   );
 
   const forceActionable = useCallback((orderId: number) => {

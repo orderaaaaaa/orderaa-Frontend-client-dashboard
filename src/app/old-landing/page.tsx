@@ -1,24 +1,24 @@
 'use client';
 import React from 'react';
 import PageLoading from '@/components/ui/page-loading';
-import Header from './(home)/Header';
-import Hero from './(home)/Hero';
+import Header from '../(home)/Header';
+import Hero from '../(home)/Hero';
 import Image from 'next/image';
 import { Zain } from 'next/font/google';
-import Features from './(home)/Features';
-import Pricing from './(home)/Pricing';
-import FaqSection from './(home)/FaqSection';
-import Footer from './(home)/Footer';
-import SmartMarketing from './(home)/SmartMarketing';
-import Departments from './(home)/Departments';
-import InventorySection from './(home)/InventorySection';
-import AIDepartments from './(home)/AIDepartments';
-import VideoSection from './(home)/VideoSection';
-import TeamManagementSection from './(home)/TeamManagementSection';
-import SmartAccountsAndSuppliers from './(home)/SmartAccountsAndSuppliers';
-import DepartmentsFinanceAndOps from './(home)/DepartmentsFinanceAndOps';
-import FullControlSection from './(home)/FullControlSection';
-import SmartReportsSection from './(home)/SmartReportsSection';
+import Features from '../(home)/Features';
+import Pricing from '../(home)/Pricing';
+import FaqSection from '../(home)/FaqSection';
+import Footer from '../(home)/Footer';
+import SmartMarketing from '../(home)/SmartMarketing';
+import Departments from '../(home)/Departments';
+import InventorySection from '../(home)/InventorySection';
+import AIDepartments from '../(home)/AIDepartments';
+import VideoSection from '../(home)/VideoSection';
+import TeamManagementSection from '../(home)/TeamManagementSection';
+import SmartAccountsAndSuppliers from '../(home)/SmartAccountsAndSuppliers';
+import DepartmentsFinanceAndOps from '../(home)/DepartmentsFinanceAndOps';
+import FullControlSection from '../(home)/FullControlSection';
+import SmartReportsSection from '../(home)/SmartReportsSection';
 import { useAuthGuard } from '@/hooks/useAuthGuard';
 
 const zain = Zain({
@@ -35,7 +35,6 @@ const Page = () => {
   }
   return (
     <main className={`${zain.className} relative bg-[#040711] text-white`}>
-      {/* Background Images - Hidden on mobile */}
       <div className="absolute inset-0 z-0 pointer-events-none hidden md:block">
         <Image
           src="/Icons/group.svg"
@@ -59,7 +58,6 @@ const Page = () => {
           className="absolute top-[-40px] left-0 w-full max-w-[806px]"
         />
       </div>
-      {/* Foreground Content */}
       <div className="relative z-10">
         <Header />
         <Hero />

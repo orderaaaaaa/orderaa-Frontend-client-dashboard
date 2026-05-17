@@ -1,8 +1,16 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { LiaPlusSolid, LiaTimesSolid } from 'react-icons/lia';
-import { useForm, useFieldArray } from 'react-hook-form';
+import {
+  useForm,
+  useFieldArray,
+  Controller,
+  useWatch,
+  Control,
+  UseFormSetValue,
+  UseFormRegister,
+} from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'react-toastify';
@@ -10,6 +18,7 @@ import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/textarea';
+import { MultiImageUploadField } from '@/components/ui/multi-image-upload-field';
 
 interface AddProductModalProps {
   isOpen: boolean;
@@ -24,13 +33,20 @@ const addProductSchema = z.object({
   sku: z.string().optional(),
   category: z.string().optional(),
   description: z.string().optional(),
-  images: z.array(z.object({ url: z.string() })),
-  variantOptions: z.array(
-    z.object({
-      label: z.string(),
-      values: z.string(),
-    })
-  ),
+  images: z
+    .array(z.instanceof(File))
+    .min(1, 'يجب رفع صورة واحدة على الأقل')
+    .default([]),
+  variantOptions: z
+    .array(
+      z.object({
+        label: z.string().min(1, 'اسم المتغير مطلوب'),
+        values: z
+          .array(z.string().min(1))
+          .min(1, 'يجب إضافة قيمة واحدة على الأقل'),
+      }),
+    )
+    .default([]),
 });
 
 type AddProductFormData = z.infer<typeof addProductSchema>;
@@ -41,9 +57,146 @@ const emptyDefaults: AddProductFormData = {
   sku: '',
   category: '',
   description: '',
-  images: [{ url: '' }],
+  images: [],
   variantOptions: [],
 };
+
+interface VariantEditorProps {
+  index: number;
+  control: Control<AddProductFormData>;
+  setValue: UseFormSetValue<AddProductFormData>;
+  register: UseFormRegister<AddProductFormData>;
+  labelError?: string;
+  valuesError?: string;
+  onRemove: () => void;
+}
+
+function VariantEditor({
+  index,
+  control,
+  setValue,
+  register,
+  labelError,
+  valuesError,
+  onRemove,
+}: VariantEditorProps) {
+  const values = useWatch({
+    control,
+    name: `variantOptions.${index}.values`,
+  }) as string[] | undefined;
+  const currentValues = values ?? [];
+  const [draft, setDraft] = useState('');
+  const [isAdding, setIsAdding] = useState(false);
+
+  const addValue = () => {
+    const trimmed = draft.trim();
+    if (!trimmed) return;
+    if (currentValues.includes(trimmed)) {
+      setDraft('');
+      return;
+    }
+    setValue(`variantOptions.${index}.values`, [...currentValues, trimmed], {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    setDraft('');
+  };
+
+  const removeValue = (valueIndex: number) => {
+    setValue(
+      `variantOptions.${index}.values`,
+      currentValues.filter((_, i) => i !== valueIndex),
+      { shouldDirty: true, shouldValidate: true },
+    );
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addValue();
+    } else if (e.key === 'Backspace' && draft === '' && currentValues.length > 0) {
+      e.preventDefault();
+      removeValue(currentValues.length - 1);
+    }
+  };
+
+  return (
+    <div className="relative bg-white rounded-lg border border-gray-200 hover:border-primary/40 transition-colors">
+      <span
+        aria-hidden
+        className="absolute inset-y-0 start-0 w-1 bg-primary rounded-s-lg"
+      />
+      <div className="ps-5 pe-2 py-3">
+        <div className="flex items-center gap-2 mb-2">
+          <input
+            {...register(`variantOptions.${index}.label`)}
+            placeholder="اسم المتغير (مثلاً: المقاس)"
+            className="flex-1 text-base font-semibold bg-transparent border-0 border-b border-transparent focus:border-primary focus:outline-none px-0 py-1 placeholder:font-normal placeholder:text-gray-400"
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onRemove}
+            className="text-red-500 hover:bg-red-50 shrink-0"
+            aria-label="حذف المتغير"
+          >
+            <LiaTimesSolid className="w-5 h-5" />
+          </Button>
+        </div>
+        {labelError && <p className="text-red-500 text-xs mb-2">{labelError}</p>}
+
+        <div className="flex flex-wrap items-center gap-2">
+          {currentValues.map((value, valueIndex) => (
+            <span
+              key={`${value}-${valueIndex}`}
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary px-3 py-1 text-sm font-medium"
+            >
+              <span>{value}</span>
+              <button
+                type="button"
+                onClick={() => removeValue(valueIndex)}
+                className="text-primary/70 hover:text-primary cursor-pointer"
+                aria-label={`حذف ${value}`}
+              >
+                <LiaTimesSolid className="w-3.5 h-3.5" />
+              </button>
+            </span>
+          ))}
+
+          {isAdding ? (
+            <input
+              autoFocus
+              type="text"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onBlur={() => {
+                addValue();
+                setIsAdding(false);
+              }}
+              placeholder="اكتب القيمة..."
+              className="h-8 rounded-full border border-primary/40 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 w-40"
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsAdding(true)}
+              className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-gray-400 text-gray-600 hover:border-primary hover:text-primary px-3 py-1 text-sm cursor-pointer transition-colors"
+            >
+              <LiaPlusSolid className="w-3.5 h-3.5" />
+              إضافة قيمة
+            </button>
+          )}
+        </div>
+
+        {valuesError && (
+          <p className="text-red-500 text-xs mt-2">{valuesError}</p>
+        )}
+      </div>
+    </div>
+  );
+}
 
 const AddProductModal: React.FC<AddProductModalProps> = ({
   isOpen,
@@ -60,15 +213,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
     name: 'variantOptions',
   });
 
-  const {
-    fields: imageFields,
-    append: appendImage,
-    remove: removeImage,
-  } = useFieldArray({
-    control: form.control,
-    name: 'images',
-  });
-
   useEffect(() => {
     if (!isOpen) {
       form.reset(emptyDefaults);
@@ -76,9 +220,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
   }, [isOpen, form]);
 
   const onSubmit = form.handleSubmit((data) => {
-    const images = data.images
-      .map((i) => i.url.trim())
-      .filter(Boolean);
+    const images = data.images ?? [];
 
     const payload = {
       name: data.name.trim(),
@@ -91,10 +233,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
       variantOptions: data.variantOptions
         .map((v) => ({
           label: v.label.trim(),
-          values: v.values
-            .split(',')
-            .map((s) => s.trim())
-            .filter(Boolean),
+          values: v.values.map((s) => s.trim()).filter(Boolean),
         }))
         .filter((v) => v.label && v.values.length > 0),
     };
@@ -150,44 +289,20 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
           error={form.formState.errors.category?.message}
         />
 
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <label className="text-[18px]">روابط الصور</label>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => appendImage({ url: '' })}
-              className="h-auto p-0 text-sm font-semibold text-primary hover:bg-transparent hover:underline hover:text-primary"
-            >
-              + إضافة صورة أخرى
-            </Button>
-          </div>
-          <div className="space-y-2">
-            {imageFields.map((field, index) => (
-              <div key={field.id} className="flex gap-3 items-start">
-                <div className="flex-1">
-                  <Input
-                    register={form.register}
-                    name={`images.${index}.url`}
-                    placeholder="https://..."
-                  />
-                </div>
-                {imageFields.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeImage(index)}
-                    className="text-red-500 hover:bg-red-50"
-                  >
-                    <LiaTimesSolid className="w-5 h-5" />
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+        <Controller
+          control={form.control}
+          name="images"
+          render={({ field, fieldState }) => (
+            <MultiImageUploadField
+              value={field.value}
+              onChange={field.onChange}
+              error={fieldState.error?.message}
+              title="صور المنتج"
+              description="قم برفع صور المنتج (يمكنك اختيار أكثر من صورة)"
+              required
+            />
+          )}
+        />
 
         <Textarea
           register={form.register}
@@ -203,7 +318,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => append({ label: '', values: '' })}
+              onClick={() => append({ label: '', values: [] })}
               className="text-primary font-semibold hover:bg-primary hover:text-white"
             >
               <LiaPlusSolid className="w-4 h-4" />
@@ -216,31 +331,24 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
               لم يتم إضافة أي متغيرات بعد
             </p>
           ) : (
-            fields.map((field, index) => (
-              <div key={field.id} className="flex gap-3 items-start">
-                <div className="grid grid-cols-[1fr_2fr] gap-3 flex-1">
-                  <Input
-                    register={form.register}
-                    name={`variantOptions.${index}.label`}
-                    placeholder="الاسم (مثلاً: المقاس)"
-                  />
-                  <Input
-                    register={form.register}
-                    name={`variantOptions.${index}.values`}
-                    placeholder="القيم مفصولة بفاصلة (S, M, L)"
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => remove(index)}
-                  className="text-red-500 hover:bg-red-50 mt-1"
-                >
-                  <LiaTimesSolid className="w-5 h-5" />
-                </Button>
-              </div>
-            ))
+            <div className="space-y-2">
+              {fields.map((field, index) => (
+                <VariantEditor
+                  key={field.id}
+                  index={index}
+                  control={form.control}
+                  setValue={form.setValue}
+                  register={form.register}
+                  labelError={
+                    form.formState.errors.variantOptions?.[index]?.label?.message
+                  }
+                  valuesError={
+                    form.formState.errors.variantOptions?.[index]?.values?.message
+                  }
+                  onRemove={() => remove(index)}
+                />
+              ))}
+            </div>
           )}
         </div>
 

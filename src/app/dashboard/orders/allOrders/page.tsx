@@ -29,7 +29,7 @@ import {
   useOrderStatusesQuery,
 } from '@/services/orders';
 import { useBulkOrders } from './hooks/useOrderBulk';
-import { useUpdateOrdersBatch } from './hooks/useUpdateOrdersBatch';
+import type { OrderStatusKey } from './types/Bulk';
 import { useQueryClient } from '@tanstack/react-query';
 import { useUrlFilters } from '@/hooks/useUrlFilters';
 import { useStatisticsChangeDetection } from '@/hooks/orders/useStatisticsChangeDetection';
@@ -127,21 +127,6 @@ function AllOrdersContent() {
     return new Map(statusOptions.map((s) => [s.key, s.label]));
   }, [statusOptions]);
 
-  // Batch update mutation (for specific IDs)
-  const { mutate: batchUpdateOrders } = useUpdateOrdersBatch({
-    onSuccess: (data) => {
-      toast.success(data.message || 'تم تحديث حالة الطلبات بنجاح');
-      setSelectedOrderIds([]);
-      setSelect(false);
-      refetch();
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
-    },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message;
-      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث حالة الطلبات');
-    },
-  });
-
   const { mutate: bulkUpdateOrders } = useBulkOrders({
     onSuccess: (data) => {
       toast.success(data.message || 'تم تحديث حالة الطلبات بنجاح');
@@ -149,7 +134,6 @@ function AllOrdersContent() {
       setSelectAllMatchingFilters(false);
       setSelect(false);
       refetch();
-      // Invalidate stats to update counts
       queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
     onError: (err: any) => {
@@ -329,21 +313,19 @@ function AllOrdersContent() {
 
         bulkUpdateOrders({
           payload: {
-            status: statusKey as any,
+            status: statusKey as OrderStatusKey,
           },
           currentStatus: currentStatusFilter,
         });
       } else {
         if (selectedOrderIds.length === 0) return;
 
-        const batchPayload = {
-          orders: selectedOrderIds.map((id) => ({
-            id,
-            updates: { status: statusKey as any },
-          })),
-        };
-
-        batchUpdateOrders(batchPayload);
+        bulkUpdateOrders({
+          payload: {
+            status: statusKey as OrderStatusKey,
+            ordersIds: selectedOrderIds,
+          },
+        });
       }
     },
     [
@@ -351,7 +333,6 @@ function AllOrdersContent() {
       filters.status,
       selectedOrderIds,
       bulkUpdateOrders,
-      batchUpdateOrders,
     ]
   );
 
@@ -456,7 +437,7 @@ function AllOrdersContent() {
         }}
         initialFormFilters={isInitialized ? filters.localFilters : null}
         currentStatus={filters.status}
-        hiddenFilters={['skipFilters']}
+        hiddenFilters={[]}
       />
 
       <div className="flex flex-col sm:flex-row justify-between gap-2 mt-10 mb-6 select-none">

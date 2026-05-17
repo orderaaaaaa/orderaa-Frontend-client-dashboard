@@ -5,8 +5,11 @@ import { useUrlFilters } from '@/hooks/useUrlFilters';
 import { PrintStatus } from '../types';
 import { useDefaultStatusByPath } from '../../hooks/useDefaultStatusByPath';
 
-export function usePrintOrdersFilters(storageKey?: string) {
-  const urlFilters = useUrlFilters(storageKey);
+export function usePrintOrdersFilters(
+  storageKey?: string,
+  options: { ignoreDateRange?: boolean } = {},
+) {
+  const urlFilters = useUrlFilters(storageKey, options);
   const DEFAULT_STATUS = useDefaultStatusByPath();
   const hasInitialized = useRef(false);
   const [printStatus, setPrintStatusState] = useState<PrintStatus>(null);
