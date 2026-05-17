@@ -37,6 +37,17 @@ html:has(.nl-root) {
   scroll-margin-top: 1rem;
 }
 
+.nl-root > main > section,
+.nl-root section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 800px;
+}
+
+.nl-root #hero,
+.nl-root header {
+  content-visibility: visible;
+}
+
 .nl-root ::selection {
   background: rgba(123, 44, 255, 0.4);
   color: #fff;
@@ -314,8 +325,37 @@ html:has(.nl-root) {
     -webkit-backdrop-filter: blur(4px);
   }
 
+  .nl-root [class*='backdrop-blur-sm'] {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .nl-root [class*='blur-3xl'],
+  .nl-root [class*='blur-2xl'] {
+    filter: blur(24px);
+    opacity: 0.5;
+  }
+
+  .nl-root [class*='blur-[100px]'],
+  .nl-root [class*='blur-[120px]'],
+  .nl-root [class*='blur-[140px]'] {
+    filter: blur(28px);
+    opacity: 0.5;
+  }
+
   .nl-root .nl-anim-fall {
     animation: none;
     opacity: 0;
+  }
+
+  .nl-root .nl-anim-fade-in-up,
+  .nl-root .nl-anim-fade-in,
+  .nl-root .nl-anim-scale-in {
+    animation-duration: 0.25s !important;
+    animation-delay: 0s !important;
+  }
+
+  .nl-root section {
+    contain-intrinsic-size: auto 500px;
   }
 }
