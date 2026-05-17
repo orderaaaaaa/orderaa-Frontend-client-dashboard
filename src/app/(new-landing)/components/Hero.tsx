@@ -82,8 +82,8 @@ export function Hero() {
               <LiaArrowLeftSolid />
             </MagneticButton>
             <MagneticButton variant="outline" strength={8}>
-              <LiaPlaySolid />
               {copy.hero.ctaSecondary}
+              <LiaPlaySolid />
             </MagneticButton>
           </div>
 
