@@ -7,6 +7,7 @@ import { LiaPhoneSolid, LiaInfoCircleSolid } from 'react-icons/lia';
 import { InvoiceProps } from '../../types/invoice';
 import { INVOICE_LABELS } from '../../constants/invoiceLabels';
 import { providers } from '@/app/dashboard/link-shipping-company/constants/providers';
+import { ShippingType } from '@/types/orders';
 
 const normalizeShippingKey = (s: string) => s.toUpperCase().replace(/[^A-Z0-9]/g, '');
 
@@ -53,6 +54,15 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
   const timeDisplay = [data.schedule.timeFrom, data.schedule.timeTo]
     .filter(Boolean)
     .join(' | ');
+
+  const shippingTypeLabel = (() => {
+    switch (data.shippingType) {
+      case ShippingType.EXCHANGE: return labels.exchange;
+      case ShippingType.RETURN: return labels.return;
+      case ShippingType.PARTIAL_RETURN: return labels.partialReturn;
+      default: return null;
+    }
+  })();
 
   return (
     <div
@@ -205,9 +215,15 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
             <span>{labels.paymentStatus} :</span>
             <span className="font-bold text-end">{getPaymentStatusDisplay()}</span>
           </div>
-          <div className="grid grid-cols-2 justify-between">
+          <div className="grid grid-cols-2 justify-between items-center">
             <span>{labels.shipmentStatus}</span>
-            <span className="font-bold text-end">{data.shipping.shipmentStatus || '-'}</span>
+            {shippingTypeLabel ? (
+              <span className="block w-full bg-black text-white text-[9px] font-extrabold tracking-widest px-1 py-0.5 rounded-sm uppercase leading-none text-center whitespace-nowrap">
+                {shippingTypeLabel}
+              </span>
+            ) : (
+              <span className="font-bold text-end">{data.shipping.shipmentStatus || '-'}</span>
+            )}
           </div>
         </div>
         <div className="flex flex-col h-full">
@@ -305,25 +321,21 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
             {storeName}
           </p> */}
           {storeInfo.phoneNumbers.length > 0 && (
-            <>
-              <p className="text-[10px] mb-0.5">
-                <span>{labels.workNumbers}:</span>
-              </p>
-              <div className="grid grid-cols-2 items-center gap-0.5 text-[10px] font-bold">
-                {storeInfo.phoneNumbers[0] && (
-                  <div className="grid grid-cols-[auto_auto] items-center justify-start gap-1">
-                    <LiaPhoneSolid className="size-2" />
-                    <span>{storeInfo.phoneNumbers[0]}</span>
-                  </div>
-                )}
-                {storeInfo.phoneNumbers[1] && (
-                  <div className="grid grid-cols-[auto_auto] items-center justify-start gap-1">
-                    <LiaPhoneSolid className="size-2" />
-                    <span>{storeInfo.phoneNumbers[1]}</span>
-                  </div>
-                )}
-              </div>
-            </>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] mb-0.5">
+              <span>{labels.workNumbers}:</span>
+              {storeInfo.phoneNumbers[0] && (
+                <span className="inline-flex items-center gap-1 font-bold">
+                  <LiaPhoneSolid className="size-2" />
+                  {storeInfo.phoneNumbers[0]}
+                </span>
+              )}
+              {storeInfo.phoneNumbers[1] && (
+                <span className="inline-flex items-center gap-1 font-bold">
+                  <LiaPhoneSolid className="size-2" />
+                  {storeInfo.phoneNumbers[1]}
+                </span>
+              )}
+            </div>
           )}
         </div>
       </div>

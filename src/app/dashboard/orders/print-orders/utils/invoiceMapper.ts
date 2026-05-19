@@ -59,6 +59,7 @@ export function mapOrderToInvoice(
     canOpenShipment: order.canOpenShipment,
     returnShippingCost: order.returnShippingCost,
     createdAt: order.createdAt,
+    shippingType: order.shippingType,
   };
 }
 

@@ -324,8 +324,9 @@ html {
     page-break-inside: avoid;
     width: 100% !important;
     min-height: auto !important;
-    padding: 0 !important;
+    padding: 2mm 3mm 2mm 2mm !important;
     margin: 0 !important;
+    box-sizing: border-box;
   }
 
   .invoice-page:last-child {

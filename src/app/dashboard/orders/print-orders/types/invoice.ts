@@ -1,3 +1,4 @@
+import { ShippingType } from '@/types/orders';
 
 export type InvoiceLanguage = 'ar' | 'en';
 
@@ -58,6 +59,7 @@ export interface InvoiceData {
   canOpenShipment?: boolean;
   returnShippingCost?: number;
   createdAt?: string;
+  shippingType?: ShippingType;
 }
 
 export interface InvoiceLabels {
@@ -106,6 +108,9 @@ export interface InvoiceLabels {
   orderReference: string;
   returnAddress: string;
   created: string;
+  exchange: string;
+  return: string;
+  partialReturn: string;
 }
 
 export interface InvoiceProps {

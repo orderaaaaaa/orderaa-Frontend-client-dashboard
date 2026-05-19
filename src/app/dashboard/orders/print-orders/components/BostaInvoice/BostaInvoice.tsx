@@ -5,6 +5,7 @@ import Barcode from 'react-barcode';
 import { QRCodeSVG } from 'qrcode.react';
 import { InvoiceProps } from '../../types/invoice';
 import { INVOICE_LABELS } from '../../constants/invoiceLabels';
+import { ShippingType } from '@/types/orders';
 
 export function BostaInvoice({ data, storeInfo, language }: InvoiceProps) {
   const labels = INVOICE_LABELS[language];
@@ -40,6 +41,15 @@ export function BostaInvoice({ data, storeInfo, language }: InvoiceProps) {
     : '-';
 
   const customerNotes = data.shippingNotes || 'no notes';
+
+  const shippingTypeLabel = (() => {
+    switch (data.shippingType) {
+      case ShippingType.EXCHANGE: return labels.exchange;
+      case ShippingType.RETURN: return labels.return;
+      case ShippingType.PARTIAL_RETURN: return labels.partialReturn;
+      default: return null;
+    }
+  })();
 
   const fullWidthBarcode = useCallback((node: HTMLDivElement | null) => {
     if (!node) return;
@@ -77,7 +87,13 @@ export function BostaInvoice({ data, storeInfo, language }: InvoiceProps) {
       {/* 2. Header: توصيل (start/right) | hub (center) | bosta logo (end/left) */}
       <div className="grid grid-cols-3 items-center border-b-2 border-black px-2 py-0.5">
         <div>
-          <span className="text-[10px] font-bold">{labels.delivery}</span>
+          {shippingTypeLabel ? (
+            <span className="inline-block bg-black text-white text-[10px] font-extrabold tracking-wider px-1.5 py-0.5 rounded-sm uppercase">
+              {shippingTypeLabel}
+            </span>
+          ) : (
+            <span className="text-[10px] font-bold">{labels.delivery}</span>
+          )}
         </div>
         <div className="text-center text-[7px] text-black">-</div>
         <div className="text-end">
