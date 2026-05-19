@@ -324,7 +324,7 @@ html {
     page-break-inside: avoid;
     width: 100% !important;
     min-height: auto !important;
-    padding: 2mm 3mm 2mm 2mm !important;
+    padding: 0 3mm 0 0 !important;
     margin: 0 !important;
     box-sizing: border-box;
   }
