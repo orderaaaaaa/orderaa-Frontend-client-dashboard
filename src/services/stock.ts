@@ -11,16 +11,40 @@ export interface StockAnalysisResponse {
   productsAboveMaxStockCount?: number;
 }
 
-export interface StockVariantOption {
-  variantOptionId: number;
-  groupLabel: string;
-  value: string;
-  code: string;
+export interface StockAttributeRef {
+  id: number;
+  name: string;
+}
+
+export interface StockOptionRef {
+  id: number;
+  name: string;
+}
+
+export interface StockVariantOptionPair {
+  attribute: StockAttributeRef;
+  option: StockOptionRef;
+}
+
+export interface StockVariantCombination {
+  id: number;
+  combinationKey: string;
   availableCount: number;
   reservedCount: number;
-  processedCount: number;
-  shippedCount: number;
-  deliveredCount: number;
+  options: StockVariantOptionPair[];
+}
+
+export interface StockAttributeOption {
+  id: number;
+  attributeId: number;
+  name: string;
+}
+
+export interface StockAttribute {
+  id: number;
+  productId: number;
+  name: string;
+  options: StockAttributeOption[];
 }
 
 export interface StockProductApi {
@@ -30,7 +54,8 @@ export interface StockProductApi {
   price: number;
   image: string;
   totalAvailableCount: number;
-  variants: StockVariantOption[];
+  variants: StockVariantCombination[];
+  attributes: StockAttribute[];
 }
 
 export interface StockListResponseFlat {

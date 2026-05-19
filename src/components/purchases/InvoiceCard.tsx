@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useMemo, useState } from 'react';
+import Link from 'next/link';
 import clsx from 'clsx';
 import { IconType } from 'react-icons';
 import {
@@ -97,7 +98,8 @@ interface InvoiceCardProps {
   select: boolean;
   isSelected: boolean;
   onSelectionChange: (checked: boolean) => void;
-  onTitleClick: () => void;
+  onTitleClick?: () => void;
+  titleHref?: string;
   formatDate: (dateStr: string) => string;
 }
 
@@ -108,6 +110,7 @@ const InvoiceCard = memo(
     isSelected,
     onSelectionChange,
     onTitleClick,
+    titleHref,
     formatDate,
   }: InvoiceCardProps) => {
     const [isProductsModalOpen, setIsProductsModalOpen] = useState(false);
@@ -177,16 +180,28 @@ const InvoiceCard = memo(
 
         <div className="flex items-start justify-between">
           <div className="flex flex-col items-start gap-1">
-            <Button
-              variant="ghost"
-              className="flex items-center gap-2 p-0 h-auto hover:bg-transparent hover:text-primary hover:underline"
-              onClick={onTitleClick}
-            >
-              <LiaFileInvoiceSolid className="text-primary shrink-0" style={{ width: 24, height: 24 }} />
-              <span className="text-lg font-bold text-primary">
-                فاتورة رقم  {invoice.invoiceNumber}
-              </span>
-            </Button>
+            {titleHref ? (
+              <Link
+                href={titleHref}
+                className="flex items-center gap-2 p-0 h-auto hover:text-primary hover:underline"
+              >
+                <LiaFileInvoiceSolid className="text-primary shrink-0" style={{ width: 24, height: 24 }} />
+                <span className="text-lg font-bold text-primary">
+                  فاتورة رقم  {invoice.invoiceNumber}
+                </span>
+              </Link>
+            ) : (
+              <Button
+                variant="ghost"
+                className="flex items-center gap-2 p-0 h-auto hover:bg-transparent hover:text-primary hover:underline"
+                onClick={onTitleClick}
+              >
+                <LiaFileInvoiceSolid className="text-primary shrink-0" style={{ width: 24, height: 24 }} />
+                <span className="text-lg font-bold text-primary">
+                  فاتورة رقم  {invoice.invoiceNumber}
+                </span>
+              </Button>
+            )}
             <span className="ps-11 text-lg font-bold">{invoice.companyName}</span>
           </div>
 

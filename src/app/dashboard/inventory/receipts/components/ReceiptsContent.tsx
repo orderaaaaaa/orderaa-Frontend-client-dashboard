@@ -1,24 +1,51 @@
 'use client';
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { Scan, ScanLine, X } from 'lucide-react';
 import { LiaFileInvoiceSolid, LiaSlidersHSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
+import SharedInvoiceCard, { InvoiceCardData } from '@/components/purchases/InvoiceCard';
+import PaginationFooter from '@/components/ui/pagination-footer';
+import PageLoading from '@/components/ui/page-loading';
+import { formatDateToLocalDate } from '@/utils/dateRangeUtils';
+import { useSupplierInvoicesQuery, useSuppliersQuery } from '@/services/suppliers';
+import { useEmployeesQuery } from '@/services/employees';
+import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
+import { INVOICE_TYPE_LABEL } from '@/app/dashboard/purchases/constants';
 import ReceiptsHeader from './ReceiptsHeader';
 import ReceiptsSearchBar from './ReceiptsSearchBar';
 import ReceiptsFilterBar from './ReceiptsFilterBar';
 import ReceiptsActionsBar from './ReceiptsActionsBar';
-import SharedInvoiceCard from '@/components/purchases/InvoiceCard';
-import PaginationFooter from '@/components/ui/pagination-footer';
 import { DEFAULT_PAGE_SIZE } from '../constants';
 import { Receipt } from '../types';
 import { useReceiptFilters } from '../hooks';
 import { formatDate } from '../utils';
 
+function toCardData(receipt: Receipt): InvoiceCardData {
+  return {
+    id: receipt.id,
+    invoiceNumber: receipt.code,
+    companyName: receipt.supplier.name,
+    itemsCount: receipt.products.length,
+    products: receipt.products.map((p) => ({
+      name: p.product.name,
+      quantity: p.quantity,
+      price: p.price,
+    })),
+    employeeName: receipt.createdByEmployee
+      ? getDepartmentLabel(receipt.createdByEmployee.department)
+      : 'غير محدد',
+    createdAt: receipt.createdAt,
+    totalAmount: receipt.totalAmount,
+    paymentAmount: receipt.paymentAmount,
+    transactionType: INVOICE_TYPE_LABEL[receipt.type] ?? receipt.type,
+    acceptanceStatus: '',
+    imageUrl: receipt.images?.[0] ?? undefined,
+  };
+}
+
 export function ReceiptsContent() {
-  const router = useRouter();
   const [select, setSelect] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -28,8 +55,8 @@ export function ReceiptsContent() {
 
   const {
     filters,
-    filteredReceipts,
     hasActiveFilters,
+    debouncedSearchQuery,
     setSearchQuery,
     clearSearchQuery,
     setFilter,
@@ -39,17 +66,62 @@ export function ReceiptsContent() {
     setTimePeriod,
   } = useReceiptFilters();
 
-  const totalItems = filteredReceipts.length;
-  const totalPages = Math.ceil(totalItems / pageSize);
+  const { data: suppliersData } = useSuppliersQuery({ limit: 200 });
+  const suppliers = suppliersData?.data ?? [];
 
-  const paginatedReceipts = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredReceipts.slice(start, start + pageSize);
-  }, [currentPage, pageSize, filteredReceipts]);
+  const supplierOptions = useMemo(
+    () => suppliers.map((s) => ({ key: s.name, value: s.name })),
+    [suppliers],
+  );
+
+  const { data: employeesData } = useEmployeesQuery();
+  const employeeOptions = useMemo(
+    () => (employeesData ?? []).map((e) => ({ key: String(e.id), value: e.fullName })),
+    [employeesData],
+  );
+
+  const selectedSupplier = useMemo(
+    () => filters.supplierName ? suppliers.find((s) => s.name === filters.supplierName) : undefined,
+    [suppliers, filters.supplierName],
+  );
+
+  const apiType = (filters.transactionType || undefined) as 'PURCHASE' | 'RETURN' | 'PAID' | undefined;
+
+  const totalAmountMin = filters.totalAmountFrom ? Number(filters.totalAmountFrom) : undefined;
+  const totalAmountMax = filters.totalAmountTo ? Number(filters.totalAmountTo) : undefined;
+  const employeeId = filters.employeeName ? Number(filters.employeeName) : undefined;
+
+  const { data: invoicesData, isLoading } = useSupplierInvoicesQuery({
+    page: currentPage,
+    limit: pageSize,
+    supplierId: selectedSupplier?.id,
+    type: apiType,
+    dateFrom: formatDateToLocalDate(filters.fromDate),
+    dateTo: formatDateToLocalDate(filters.toDate),
+    search: debouncedSearchQuery || undefined,
+    totalAmountMin: !isNaN(totalAmountMin as number) ? totalAmountMin : undefined,
+    totalAmountMax: !isNaN(totalAmountMax as number) ? totalAmountMax : undefined,
+    createdByEmployeeId: !isNaN(employeeId as number) ? employeeId : undefined,
+  });
+
+  const receipts = (invoicesData?.data ?? []) as Receipt[];
+  const meta = invoicesData?.meta;
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filteredReceipts.length]);
+  }, [
+    debouncedSearchQuery,
+    filters.supplierName,
+    filters.transactionType,
+    filters.totalAmountFrom,
+    filters.totalAmountTo,
+    filters.employeeName,
+    filters.fromDate,
+    filters.toDate,
+  ]);
+
+  const totalItems = meta?.totalItems ?? 0;
+  const totalPages = meta?.totalPages ?? 1;
 
   const showActionsBar = select && selectedIds.length > 0;
 
@@ -82,10 +154,6 @@ export function ReceiptsContent() {
     []
   );
 
-  const handleTitleClick = useCallback((receipt: Receipt) => {
-    router.push(`/dashboard/inventory/receipts/${receipt.id}`);
-  }, [router]);
-
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -99,11 +167,11 @@ export function ReceiptsContent() {
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (filters.supplierName) count++;
-    if (filters.fromDate) count++;
-    if (filters.itemsCount) count++;
+    if (filters.transactionType) count++;
+    if (filters.totalAmountFrom || filters.totalAmountTo) count++;
     if (filters.employeeName) count++;
     return count;
-  }, [filters.supplierName, filters.fromDate, filters.itemsCount, filters.employeeName]);
+  }, [filters.supplierName, filters.transactionType, filters.totalAmountFrom, filters.totalAmountTo, filters.employeeName]);
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">
@@ -150,7 +218,8 @@ export function ReceiptsContent() {
               filters={filters}
               onFilterChange={setFilter}
               onClearFilter={clearFilter}
-              onFromDateChange={setFromDate}
+              supplierOptions={supplierOptions}
+              employeeOptions={employeeOptions}
             />
           </div>
         </div>
@@ -197,17 +266,19 @@ export function ReceiptsContent() {
       </div>
 
       <div className="sm:px-8 flex flex-col gap-4">
-        {paginatedReceipts.length > 0 ? (
-          paginatedReceipts.map((receipt) => (
+        {isLoading ? (
+          <PageLoading message="جاري تحميل الاستلامات..." />
+        ) : receipts.length > 0 ? (
+          receipts.map((receipt) => (
             <SharedInvoiceCard
               key={receipt.id}
-              invoice={receipt}
+              invoice={toCardData(receipt)}
               select={select}
               isSelected={selectedIds.includes(receipt.id)}
               onSelectionChange={(checked) =>
                 handleSelectionChange(receipt.id, checked)
               }
-              onTitleClick={() => handleTitleClick(receipt)}
+              titleHref={`/dashboard/inventory/receipts/${receipt.id}`}
               formatDate={formatDate}
             />
           ))
@@ -242,8 +313,8 @@ export function ReceiptsContent() {
           currentPage={currentPage}
           totalPages={totalPages}
           totalItems={totalItems}
-          hasNextPage={currentPage < totalPages}
-          hasPreviousPage={currentPage > 1}
+          hasNextPage={meta?.hasNextPage ?? false}
+          hasPreviousPage={meta?.hasPreviousPage ?? false}
           onPageChange={handlePageChange}
           onPrevious={() => handlePageChange(Math.max(1, currentPage - 1))}
           onNext={() => handlePageChange(Math.min(totalPages, currentPage + 1))}

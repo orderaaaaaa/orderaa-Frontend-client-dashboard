@@ -50,6 +50,7 @@ export interface InvoiceProductApiItem {
   id: number;
   invoiceId: number;
   productId: number;
+  variantId?: number | null;
   quantity: number;
   price: number;
   createdAt: string;
@@ -95,6 +96,10 @@ export interface GetSupplierInvoicesParams {
   supplierId?: number;
   dateFrom?: string;
   dateTo?: string;
+  search?: string;
+  totalAmountMin?: number;
+  totalAmountMax?: number;
+  createdByEmployeeId?: number;
 }
 
 export interface CreateSupplierDto {
@@ -136,6 +141,21 @@ export interface UpdateSupplierInvoiceDto {
   externalInvoiceNumber?: string;
   products?: CreateInvoiceProductDto[];
   images?: string[];
+}
+
+export interface ApproveSupplierInvoiceVariantDto {
+  attributeOptionIds: number[];
+  approvedCount: number;
+  rejectedCount: number;
+}
+
+export interface ApproveSupplierInvoiceProductDto {
+  invoiceProductId: number;
+  variants: ApproveSupplierInvoiceVariantDto[];
+}
+
+export interface ApproveSupplierInvoiceDto {
+  products: ApproveSupplierInvoiceProductDto[];
 }
 
 export async function getSuppliers(
@@ -204,4 +224,12 @@ export async function updateSupplierInvoice(
 
 export async function deleteSupplierInvoice(id: number): Promise<void> {
   await api.delete(`/supplier-invoices/${id}`);
+}
+
+export async function approveSupplierInvoice(
+  id: number,
+  body: ApproveSupplierInvoiceDto,
+): Promise<SupplierInvoiceApiItem> {
+  const response = await api.post(`/supplier-invoices/${id}/approve`, body);
+  return response.data as SupplierInvoiceApiItem;
 }

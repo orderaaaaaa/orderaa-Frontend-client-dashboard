@@ -1,22 +1,23 @@
-import uniq from 'lodash/uniq';
-import type { StockProductApi, StockVariantOption } from '@/services/stock';
+import type {
+  StockAttribute,
+  StockProductApi,
+  StockVariantCombination,
+} from '@/services/stock';
 import { LOW_STOCK_THRESHOLD } from '../constants';
 import type {
+  ProductVariantRow,
   StockProduct,
   StockStatus,
-  ProductVariantRow,
   VariantStock,
 } from '../types';
 
-const SIZE_GROUP_PATTERN = /مقاس|size/i;
-const COLOR_GROUP_PATTERN = /لون|color/i;
+const SIZE_ATTR_PATTERN = /مقاس|size/i;
+const COLOR_ATTR_PATTERN = /لون|لوان|color/i;
 
 const PLACEHOLDER_SIZE = '-';
 const PLACEHOLDER_COLOR = '-';
 
-function normalizeGroupLabel(label: string): string {
-  return label.trim();
-}
+type Axis = 'size' | 'color' | null;
 
 function statusFromQuantity(quantity: number): StockStatus {
   if (quantity <= 0) return 'out_of_stock';
@@ -25,54 +26,108 @@ function statusFromQuantity(quantity: number): StockStatus {
   return 'high';
 }
 
-function groupVariants(variants: StockVariantOption[]) {
-  const sizeOptions: StockVariantOption[] = [];
-  const colorOptions: StockVariantOption[] = [];
+function classifyAttribute(name: string | undefined | null): Axis {
+  const trimmed = typeof name === 'string' ? name.trim() : '';
+  if (!trimmed) return null;
+  if (SIZE_ATTR_PATTERN.test(trimmed)) return 'size';
+  if (COLOR_ATTR_PATTERN.test(trimmed)) return 'color';
+  return null;
+}
 
-  for (const variant of variants) {
-    const label = normalizeGroupLabel(variant.groupLabel);
-    if (SIZE_GROUP_PATTERN.test(label)) {
-      sizeOptions.push(variant);
-    } else if (COLOR_GROUP_PATTERN.test(label)) {
-      colorOptions.push(variant);
+interface AxisIndex {
+  optionIdToName: Map<number, string>;
+  names: string[];
+}
+
+function emptyAxis(): AxisIndex {
+  return { optionIdToName: new Map(), names: [] };
+}
+
+function buildAxes(attributes: StockAttribute[] | undefined | null) {
+  const sizeAxis = emptyAxis();
+  const colorAxis = emptyAxis();
+  const sizeSeen = new Set<string>();
+  const colorSeen = new Set<string>();
+
+  for (const attr of attributes ?? []) {
+    const axis = classifyAttribute(attr?.name);
+    if (!axis) continue;
+    const target = axis === 'size' ? sizeAxis : colorAxis;
+    const seen = axis === 'size' ? sizeSeen : colorSeen;
+    for (const opt of attr.options ?? []) {
+      const name = typeof opt?.name === 'string' ? opt.name.trim() : '';
+      if (!name || typeof opt?.id !== 'number') continue;
+      target.optionIdToName.set(opt.id, name);
+      if (!seen.has(name)) {
+        seen.add(name);
+        target.names.push(name);
+      }
     }
   }
 
-  return { sizeOptions, colorOptions };
+  return { sizeAxis, colorAxis };
+}
+
+function resolveVariantAxisValues(
+  variant: StockVariantCombination,
+  sizeAxis: AxisIndex,
+  colorAxis: AxisIndex
+): { size: string | null; color: string | null } {
+  let size: string | null = null;
+  let color: string | null = null;
+  for (const pair of variant?.options ?? []) {
+    const optionId = pair?.option?.id;
+    if (typeof optionId !== 'number') continue;
+    if (size == null && sizeAxis.optionIdToName.has(optionId)) {
+      size = sizeAxis.optionIdToName.get(optionId) ?? null;
+    }
+    if (color == null && colorAxis.optionIdToName.has(optionId)) {
+      color = colorAxis.optionIdToName.get(optionId) ?? null;
+    }
+  }
+  return { size, color };
 }
 
 function buildVariantRows(
-  sizeOptions: StockVariantOption[],
-  colorOptions: StockVariantOption[]
-): ProductVariantRow[] {
-  const sizes =
-    sizeOptions.length > 0
-      ? uniq(sizeOptions.map((o) => o.value))
-      : [PLACEHOLDER_SIZE];
+  variants: StockVariantCombination[] | undefined | null,
+  sizeAxis: AxisIndex,
+  colorAxis: AxisIndex
+): { rows: ProductVariantRow[]; sizes: string[]; colors: string[] } {
+  const sizes = sizeAxis.names.length > 0 ? [...sizeAxis.names] : [PLACEHOLDER_SIZE];
   const colors =
-    colorOptions.length > 0
-      ? uniq(colorOptions.map((o) => o.value))
-      : [PLACEHOLDER_COLOR];
+    colorAxis.names.length > 0 ? [...colorAxis.names] : [PLACEHOLDER_COLOR];
 
-  return sizes.map((size) => {
-    const sizeOption =
-      size === PLACEHOLDER_SIZE
-        ? null
-        : sizeOptions.find((o) => o.value === size) ?? null;
-
-    const cellQuantity = sizeOption ? sizeOption.availableCount : 0;
-    const cellStatus = statusFromQuantity(cellQuantity);
-
-    const stocks: Record<string, VariantStock> = {};
+  const stocksBySize = new Map<string, Record<string, VariantStock>>();
+  for (const size of sizes) {
+    const row: Record<string, VariantStock> = {};
     for (const color of colors) {
-      stocks[color] = {
-        quantity: cellQuantity,
-        status: cellStatus,
-      };
+      row[color] = { quantity: 0, status: 'out_of_stock' };
     }
+    stocksBySize.set(size, row);
+  }
 
-    return { size, stocks };
-  });
+  for (const variant of variants ?? []) {
+    const { size, color } = resolveVariantAxisValues(variant, sizeAxis, colorAxis);
+    const sizeKey = size ?? (sizeAxis.names.length === 0 ? PLACEHOLDER_SIZE : null);
+    const colorKey =
+      color ?? (colorAxis.names.length === 0 ? PLACEHOLDER_COLOR : null);
+    if (!sizeKey || !colorKey) continue;
+
+    const row = stocksBySize.get(sizeKey);
+    if (!row || !(colorKey in row)) continue;
+
+    const quantity = typeof variant.availableCount === 'number'
+      ? variant.availableCount
+      : 0;
+    row[colorKey] = { quantity, status: statusFromQuantity(quantity) };
+  }
+
+  const rows: ProductVariantRow[] = sizes.map((size) => ({
+    size,
+    stocks: stocksBySize.get(size) ?? {},
+  }));
+
+  return { rows, sizes, colors };
 }
 
 export function apiSkuOrEmpty(api: StockProductApi): string {
@@ -80,16 +135,12 @@ export function apiSkuOrEmpty(api: StockProductApi): string {
 }
 
 export function apiToStockProduct(api: StockProductApi): StockProduct {
-  const { sizeOptions, colorOptions } = groupVariants(api.variants ?? []);
-
-  const sizes =
-    sizeOptions.length > 0
-      ? uniq(sizeOptions.map((o) => o.value))
-      : [PLACEHOLDER_SIZE];
-  const colors =
-    colorOptions.length > 0
-      ? uniq(colorOptions.map((o) => o.value))
-      : [PLACEHOLDER_COLOR];
+  const { sizeAxis, colorAxis } = buildAxes(api.attributes);
+  const { rows, sizes, colors } = buildVariantRows(
+    api.variants,
+    sizeAxis,
+    colorAxis
+  );
 
   return {
     id: api.id,
@@ -98,7 +149,7 @@ export function apiToStockProduct(api: StockProductApi): StockProduct {
     image: api.image,
     colors,
     sizes,
-    variants: buildVariantRows(sizeOptions, colorOptions),
+    variants: rows,
   };
 }
 

@@ -12,6 +12,7 @@ export const QUERY_KEYS = {
   // Products
   PRODUCTS: 'products',
   PRODUCT_VARIANTS_OPTIONS: 'product-variants-options',
+  PRODUCT_ATTRIBUTE_OPTIONS: 'product-attribute-options',
 
   // Stock
   STOCK_ANALYSIS: 'stock-analysis',

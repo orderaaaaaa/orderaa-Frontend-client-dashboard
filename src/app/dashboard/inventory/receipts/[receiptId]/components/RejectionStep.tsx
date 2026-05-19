@@ -57,12 +57,12 @@ const RejectionStep = memo(({ productVariants, confirmedCounts, rejectedCounts, 
       .filter((p) => productVariants[p.id]?.length > 0)
       .flatMap((product) =>
         productVariants[product.id].map((v) => {
-          const rowId = `${product.id}-${v.variantId}-${v.color}-${v.size}`;
+          const rowId = `${product.id}-${v.variantId ?? 0}-${v.color ?? ''}-${v.size ?? ''}`;
           return {
             id: rowId,
             productId: product.id,
             productName: product.name,
-            variantName: `${v.variantName} - ${v.color} - ${v.size}`,
+            variantName: `${v.variantName ?? ''} - ${v.color ?? ''} - ${v.size ?? ''}`,
             image: product.image,
             confirmedQuantity: confirmedCounts[rowId] ?? 0,
           };

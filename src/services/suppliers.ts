@@ -13,12 +13,14 @@ import {
   createSupplierInvoice,
   updateSupplierInvoice,
   deleteSupplierInvoice,
+  approveSupplierInvoice,
   GetSuppliersParams,
   GetSupplierInvoicesParams,
   CreateSupplierDto,
   UpdateSupplierDto,
   CreateSupplierInvoiceDto,
   UpdateSupplierInvoiceDto,
+  ApproveSupplierInvoiceDto,
 } from '@/lib/api/suppliers';
 
 export const useSuppliersQuery = (params?: GetSuppliersParams) => {
@@ -136,6 +138,18 @@ export const useDeleteSupplierInvoiceMutation = () => {
     mutationFn: (id: number) => deleteSupplierInvoice(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_INVOICES] });
+    },
+  });
+};
+
+export const useApproveSupplierInvoiceMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: number; body: ApproveSupplierInvoiceDto }) =>
+      approveSupplierInvoice(id, body),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_INVOICES] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_INVOICE_DETAIL, variables.id] });
     },
   });
 };

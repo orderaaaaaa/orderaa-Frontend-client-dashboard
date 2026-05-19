@@ -95,12 +95,12 @@ const ConfirmCountStep = memo(({ productVariants, confirmedCounts, onConfirmedCo
       .map((product) => ({
         product,
         variants: productVariants[product.id].map((v) => ({
-          id: `${product.id}-${v.variantId}-${v.color}-${v.size}`,
+          id: `${product.id}-${v.variantId ?? 0}-${v.color ?? ''}-${v.size ?? ''}`,
           productId: product.id,
-          variantId: v.variantId,
-          variantName: `${v.variantName} - ${v.color} - ${v.size}`,
-          color: v.color,
-          size: v.size,
+          variantId: v.variantId ?? 0,
+          variantName: `${v.variantName ?? ''} - ${v.color ?? ''} - ${v.size ?? ''}`,
+          color: v.color ?? '',
+          size: v.size ?? '',
           image: product.image,
           expectedQuantity: v.quantity,
         } satisfies ConfirmVariantRow)),

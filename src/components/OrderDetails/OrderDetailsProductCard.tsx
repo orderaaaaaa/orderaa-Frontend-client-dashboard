@@ -9,7 +9,7 @@ import {
   LiaClipboardListSolid,
   LiaEditSolid,
 } from 'react-icons/lia';
-import { Order, OrderProductVariant } from '@/types/orders';
+import { Order } from '@/types/orders';
 import EditProductModal from './EditProductModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import AddSameTypeProductModal from './AddSameTypeProductModal';
@@ -48,30 +48,30 @@ function OrderDetailsProductCard({
     useState(false);
   const [viewingProductId, setViewingProductId] = useState<number | null>(null);
   const [isChangeLogOpen, setIsChangeLogOpen] = useState(false);
-  const [productsData, setProductsData] = useState(
-    order.order_products?.map((orderProduct) => ({
-      id: orderProduct.id,
-      productId: orderProduct.productId,
-      product: orderProduct.products.name,
-      variants: orderProduct.variants || [],
-      price: orderProduct.price,
-      sku: orderProduct.sku || orderProduct.products.sku || null,
-      img: orderProduct.products.image || '/wireless-headphones.png',
-    })) || []
-  );
-
-  useEffect(() => {
-    setProductsData(
-      order.order_products?.map((orderProduct) => ({
+  const buildProductsData = (orderArg: Order) =>
+    orderArg.order_products?.map((orderProduct) => {
+      const extra = orderProduct.products.extraDetails;
+      const variants = extra?.variants ?? [];
+      const fullVariant = extra?.fullVariants?.find(
+        (fv) => fv.productId === orderProduct.productId
+      );
+      const optionLabels = fullVariant?.variantOptions?.map((o) => o.label) ?? [];
+      return {
         id: orderProduct.id,
         productId: orderProduct.productId,
         product: orderProduct.products.name,
-        variants: orderProduct.variants || [],
+        variants,
+        optionLabels,
         price: orderProduct.price,
         sku: orderProduct.sku || orderProduct.products.sku || null,
         img: orderProduct.products.image || '/wireless-headphones.png',
-      })) || []
-    );
+      };
+    }) || [];
+
+  const [productsData, setProductsData] = useState(buildProductsData(order));
+
+  useEffect(() => {
+    setProductsData(buildProductsData(order));
   }, [order.order_products]);
 
   const handleEditClick = (productId: number) => {
@@ -179,9 +179,12 @@ function OrderDetailsProductCard({
 
                   {item.variants.length > 0 && (
                     <div className="flex flex-col gap-1">
-                      {item.variants.map((variant, idx) => (
-                        <p key={idx} className="text-base font-bold text-black">
-                          {variant.label}: {variant.value}
+                      {item.variants.map((variant) => (
+                        <p
+                          key={variant.id}
+                          className="text-base font-bold text-black"
+                        >
+                          {variant.title}
                         </p>
                       ))}
                     </div>
@@ -284,10 +287,16 @@ function OrderDetailsProductCard({
           onClose={() => setEditingProductId(null)}
           onSave={(variants) => handleSaveEdit(editingProduct.id, variants)}
           productId={editingProduct.productId}
-          currentVariants={editingProduct.variants.reduce(
-            (acc, v) => ({ ...acc, [v.label]: v.value }),
-            {} as Record<string, string>
-          )}
+          currentVariants={(() => {
+            const v = editingProduct.variants[0];
+            if (!v) return {};
+            const labels = editingProduct.optionLabels;
+            const result: Record<string, string> = {};
+            if (labels[0] && v.option1) result[labels[0]] = v.option1;
+            if (labels[1] && v.option2) result[labels[1]] = v.option2;
+            if (labels[2] && v.option3) result[labels[2]] = v.option3;
+            return result;
+          })()}
         />
       )}
 

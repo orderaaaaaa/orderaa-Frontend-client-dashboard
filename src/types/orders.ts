@@ -186,6 +186,34 @@ export interface ProductVariantOption {
   values: string[];
 }
 
+export interface ProductExtraDetailsVariant {
+  id: string;
+  sku?: string | null;
+  price: string;
+  title: string;
+  option1: string | null;
+  option2: string | null;
+  option3: string | null;
+  inventory_quantity?: number;
+}
+
+export interface ProductFullVariant {
+  name: string;
+  productId: number;
+  updatedAt?: string;
+  variantOptions: ProductVariantOption[];
+}
+
+export interface ProductExtraDetails {
+  tags?: string;
+  status?: string;
+  vendor?: string;
+  product_type?: string;
+  variants?: ProductExtraDetailsVariant[];
+  fullVariants?: ProductFullVariant[];
+  [key: string]: unknown;
+}
+
 export interface Product {
   id: number;
   merchantId?: number;
@@ -195,7 +223,7 @@ export interface Product {
   sku?: string | null;
   image?: string;
   images?: string[];
-  extraDetails?: Record<string, unknown>;
+  extraDetails?: ProductExtraDetails;
   assets?: unknown[];
   externalIds?: ProductExternalId[];
   variantOptions?: ProductVariantOption[];
