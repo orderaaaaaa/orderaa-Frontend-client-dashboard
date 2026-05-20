@@ -25,6 +25,7 @@ import { exportStockToExcel, exportStockToPDF } from '../utils/exportStock';
 
 export function StockManagementContent() {
   const { user } = useAuthStore();
+  
   const {
     filters,
     filteredProducts,
