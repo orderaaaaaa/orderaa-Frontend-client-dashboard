@@ -195,7 +195,7 @@ export function BostaInvoice({ data, storeInfo, language }: InvoiceProps) {
       {/* 9. Bottom block: Notes/Ref/Return (start/right) + Tracking (end/left) */}
       <div className="grid grid-cols-[1fr_auto] border-b-2 border-black">
         {/* Start (RIGHT in RTL): Notes, Order Ref, Return Address */}
-        <div className="border-e-2 border-black py-1.5 text-[8px] flex flex-col justify-between">
+        <div className="py-1.5 text-[8px] flex flex-col justify-between">
           <div className="px-2 h-full flex flex-col justify-between">
             <p>
               <span className="font-bold">{labels.notes}</span>

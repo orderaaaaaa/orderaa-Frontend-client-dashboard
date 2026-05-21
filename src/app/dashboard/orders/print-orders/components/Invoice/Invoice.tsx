@@ -269,7 +269,7 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
       {/* Shipping Barcode + Shipping Company Logo */}
       {(data.shippingId || data.shippingCompany) && (
         <div className="grid grid-cols-2 items-center my-1 border-y border-black py-2">
-          <div className="flex flex-col items-center justify-center px-2 border-e border-black">
+          <div className="flex flex-col items-center justify-center px-2">
             {data.shippingId ? (
               <>
                 <span className="font-bold text-[9px]">{labels.shippingBarcode}</span>
