@@ -24,7 +24,7 @@ import ProductSelectionModal, {
   type SelectableProduct,
 } from '@/components/ui/product-selection-modal';
 import { useUpdateTrackingCard } from '@/services/logistics';
-import { useShippingCancellationReasons } from '@/services/logistics';
+import { useCancellationReasons } from '@/services/orders';
 import type { TrackingAgentStatus, UpdateTrackingCardData } from '@/types/logistics';
 
 type ActionType =
@@ -61,6 +61,14 @@ const FOLLOW_UP_OPTIONS: {
   { value: 'BUSY', label: 'مشغول', icon: LiaSpinnerSolid },
 ];
 
+const MOCK_NON_RECEIPT_REASONS: { id: number; reasonName: string }[] = [
+  { id: 1, reasonName: 'العنوان غير صحيح' },
+  { id: 2, reasonName: 'العميل غير متواجد' },
+  { id: 3, reasonName: 'رفض الاستلام' },
+  { id: 4, reasonName: 'لم يرد على الهاتف' },
+  { id: 5, reasonName: 'تغيير رأي العميل' },
+];
+
 interface AgentStatusUpdateModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -73,12 +81,13 @@ export default function AgentStatusUpdateModal({
   cardId,
 }: AgentStatusUpdateModalProps) {
   const updateMutation = useUpdateTrackingCard();
-  const { data: cancellationReasons } = useShippingCancellationReasons(isOpen);
+  const { data: cancellationReasons } = useCancellationReasons(isOpen);
 
   const [selectedAction, setSelectedAction] = useState<ActionType | null>(null);
   const [followUpStatus, setFollowUpStatus] = useState<TrackingAgentStatus | null>(null);
   const [postponeDate, setPostponeDate] = useState<Date | null>(null);
   const [cancelReasonId, setCancelReasonId] = useState('');
+  const [nonReceiptReasonId, setNonReceiptReasonId] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<SelectableProduct | null>(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -89,6 +98,7 @@ export default function AgentStatusUpdateModal({
     setFollowUpStatus(null);
     setPostponeDate(null);
     setCancelReasonId('');
+    setNonReceiptReasonId('');
     setNotes('');
     setSelectedProduct(null);
   }, []);
@@ -103,6 +113,7 @@ export default function AgentStatusUpdateModal({
     setFollowUpStatus(null);
     setPostponeDate(null);
     setCancelReasonId('');
+    setNonReceiptReasonId('');
     setNotes('');
     setSelectedProduct(null);
   }, []);
@@ -117,7 +128,7 @@ export default function AgentStatusUpdateModal({
       case 'CHANGE_PRODUCT':
         return !selectedProduct;
       case 'CANCEL':
-        return !cancelReasonId;
+        return !cancelReasonId && !nonReceiptReasonId;
       case 'LATE':
         return !notes.trim();
       case 'RESEND':
@@ -125,7 +136,7 @@ export default function AgentStatusUpdateModal({
       default:
         return true;
     }
-  }, [selectedAction, followUpStatus, postponeDate, selectedProduct, cancelReasonId, notes]);
+  }, [selectedAction, followUpStatus, postponeDate, selectedProduct, cancelReasonId, nonReceiptReasonId, notes]);
 
   const buildPayload = useCallback((): UpdateTrackingCardData => {
     switch (selectedAction) {
@@ -142,13 +153,19 @@ export default function AgentStatusUpdateModal({
       case 'RESEND':
         return { action: 'RESEND', actionNote: notes };
       case 'CANCEL':
-        return { action: 'CANCEL', cancelReasonId: Number(cancelReasonId), actionNote: notes || undefined };
+        return {
+          action: 'CANCEL',
+          ...(cancelReasonId
+            ? { cancelReasonId: Number(cancelReasonId) }
+            : { nonReceiptReasonId: Number(nonReceiptReasonId) }),
+          actionNote: notes || undefined,
+        };
       case 'LATE':
         return { action: 'LATE', actionNote: notes };
       default:
         return {};
     }
-  }, [selectedAction, followUpStatus, postponeDate, selectedProduct, cancelReasonId, notes]);
+  }, [selectedAction, followUpStatus, postponeDate, selectedProduct, cancelReasonId, nonReceiptReasonId, notes]);
 
   const handleConfirm = useCallback(async () => {
     setIsSubmitting(true);
@@ -174,6 +191,21 @@ export default function AgentStatusUpdateModal({
     key: String(r.id),
     label: r.reasonName,
   }));
+
+  const nonReceiptOptions = MOCK_NON_RECEIPT_REASONS.map((r) => ({
+    key: String(r.id),
+    label: r.reasonName,
+  }));
+
+  const handleCancelReasonChange = (value: string) => {
+    setCancelReasonId(value);
+    if (value) setNonReceiptReasonId('');
+  };
+
+  const handleNonReceiptReasonChange = (value: string) => {
+    setNonReceiptReasonId(value);
+    if (value) setCancelReasonId('');
+  };
 
   const renderSubContent = () => {
     if (!selectedAction) return null;
@@ -270,11 +302,28 @@ export default function AgentStatusUpdateModal({
           <div className="flex flex-col gap-3 p-4 bg-red-50/50 rounded-xl border border-red-100">
             <SearchableSelect
               value={cancelReasonId}
-              onChange={setCancelReasonId}
+              onChange={handleCancelReasonChange}
               options={cancellationOptions}
               placeholder="اختر سبب الالغاء"
               searchPlaceholder="بحث..."
               emptyMessage="لا توجد أسباب متاحة"
+              disabled={!!nonReceiptReasonId}
+              clearable
+            />
+            <div className="flex items-center gap-2 text-[11px] font-semibold text-red-700/60">
+              <span className="flex-1 h-px bg-red-200" />
+              <span>أو</span>
+              <span className="flex-1 h-px bg-red-200" />
+            </div>
+            <SearchableSelect
+              value={nonReceiptReasonId}
+              onChange={handleNonReceiptReasonChange}
+              options={nonReceiptOptions}
+              placeholder="اختر سبب عدم الأستلام"
+              searchPlaceholder="بحث..."
+              emptyMessage="لا توجد أسباب متاحة"
+              disabled={!!cancelReasonId}
+              clearable
             />
             <Textarea
               name="cancelNotes"

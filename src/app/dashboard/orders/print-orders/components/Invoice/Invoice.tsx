@@ -69,6 +69,13 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
       className="invoice-page w-[100mm] min-h-[150mm] bg-white p-1 text-[9px]"
       dir={language === 'ar' ? 'rtl' : 'ltr'}
     >
+      {/* Resend Banner - shown when order is a resend */}
+      {data.isResend && (
+        <div className="bg-amber-500 text-black text-center py-1 px-2 mb-1 font-extrabold text-[12px] tracking-wider uppercase border-2 border-black">
+          {labels.resend}
+        </div>
+      )}
+
       {/* Logo */}
       {storeInfo.logo && (
         <div className="flex justify-center mb-1">

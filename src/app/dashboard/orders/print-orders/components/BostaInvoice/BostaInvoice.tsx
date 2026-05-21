@@ -73,6 +73,13 @@ export function BostaInvoice({ data, storeInfo, language }: InvoiceProps) {
       className="invoice-page bosta-invoice-page w-[100mm] bg-white text-[9px] text-black border-2 border-black rounded-lg overflow-hidden flex flex-col"
       dir={isAr ? 'rtl' : 'ltr'}
     >
+      {/* 0. Resend Banner - shown when order is a resend */}
+      {data.isResend && (
+        <div className="bg-amber-500 text-black border-b-2 border-black text-center py-1 px-2 font-extrabold text-[12px] tracking-wider uppercase">
+          {labels.resend}
+        </div>
+      )}
+
       {/* 1. Top Barcode - full width */}
       <div ref={fullWidthBarcode} className="border-b-2 border-black py-1 px-4">
         <Barcode

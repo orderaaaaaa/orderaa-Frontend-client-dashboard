@@ -1,4 +1,4 @@
-import { Order } from '@/types/orders';
+import { Order, OrderStatus } from '@/types/orders';
 import { InvoiceData, InvoiceLanguage, InvoiceProduct } from '../types/invoice';
 
 export function mapOrderToInvoice(
@@ -60,6 +60,7 @@ export function mapOrderToInvoice(
     returnShippingCost: order.returnShippingCost,
     createdAt: order.createdAt,
     shippingType: order.shippingType,
+    isResend: order.status === OrderStatus.RETURN_RESEND_PENDING,
   };
 }
 

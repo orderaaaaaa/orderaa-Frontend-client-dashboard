@@ -49,15 +49,6 @@ export function ResendInvoice({ order, generated }: ResendInvoiceProps) {
         <Row label="المحافظة" value={order.governorate ?? '-'} />
       </div>
 
-      <div className="grid grid-cols-2 bg-black text-white mt-1">
-        <span className="py-1 px-2 text-[10px] font-bold text-start">
-          الإجمالي
-        </span>
-        <span className="py-1 px-2 text-[11px] font-bold text-end">
-          {order.totalCost.toLocaleString('ar-EG')} ج.م
-        </span>
-      </div>
-
       <div className="flex items-center justify-center gap-1.5 border border-dashed border-amber-600 bg-amber-50 text-amber-800 rounded-md py-1 px-2 mt-1">
         <LiaExclamationTriangleSolid className="w-4 h-4" />
         <span className="text-[10px] font-bold">

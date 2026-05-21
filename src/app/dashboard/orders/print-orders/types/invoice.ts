@@ -60,6 +60,7 @@ export interface InvoiceData {
   returnShippingCost?: number;
   createdAt?: string;
   shippingType?: ShippingType;
+  isResend?: boolean;
 }
 
 export interface InvoiceLabels {
@@ -111,6 +112,7 @@ export interface InvoiceLabels {
   exchange: string;
   return: string;
   partialReturn: string;
+  resend: string;
 }
 
 export interface InvoiceProps {

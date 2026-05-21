@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -36,6 +37,7 @@ export function Sidebar({
   onNavItemClick,
 }: SidebarProps) {
   const pathname = usePathname();
+  const [openSubDropdown, setOpenSubDropdown] = useState<string | null>(null);
 
   const activeItemStyle: React.CSSProperties = {
     backgroundColor: '#2C028F',
@@ -173,10 +175,88 @@ export function Sidebar({
                           >
                             <div className="px-4 space-y-1">
                               {item.children.map((sub) => {
-                                const isSubActive = pathname.startsWith(
-                                  sub.href
-                                );
                                 const SubIcon = sub.icon;
+
+                                if (sub.children) {
+                                  const isSubOpen = openSubDropdown === sub.name;
+                                  const hasActiveLeaf = sub.children.some((leaf) =>
+                                    pathname.startsWith(leaf.href)
+                                  );
+
+                                  return (
+                                    <div key={sub.name}>
+                                      <button
+                                        onClick={() =>
+                                          setOpenSubDropdown((prev) =>
+                                            prev === sub.name ? null : sub.name
+                                          )
+                                        }
+                                        className={`
+                                          flex items-center justify-between w-full px-3 py-2 rounded-md cursor-pointer
+                                          ${
+                                            hasActiveLeaf
+                                              ? 'text-white'
+                                              : 'text-white/70 hover:bg-white/10 hover:text-white'
+                                          }
+                                        `}
+                                        style={{
+                                          direction: 'rtl',
+                                          ...(hasActiveLeaf ? activeItemStyle : {}),
+                                        }}
+                                      >
+                                        <span className="flex items-center gap-3">
+                                          {SubIcon && <SubIcon className="h-5 w-5" />}
+                                          {sub.name}
+                                        </span>
+                                        {isSubOpen ? (
+                                          <ChevronUp className="h-4 w-4" />
+                                        ) : (
+                                          <ChevronDown className="h-4 w-4" />
+                                        )}
+                                      </button>
+
+                                      <AnimatePresence initial={false}>
+                                        {isSubOpen && (
+                                          <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            transition={{ duration: 0.25 }}
+                                            className="overflow-hidden mt-1"
+                                          >
+                                            <div className="ps-4 space-y-1">
+                                              {sub.children.map((leaf) => {
+                                                const isLeafActive = pathname.startsWith(leaf.href);
+                                                const LeafIcon = leaf.icon;
+                                                return (
+                                                  <Link
+                                                    key={leaf.name}
+                                                    href={leaf.href}
+                                                    className={`
+                                                      flex items-center gap-3 px-3 py-2 rounded-md
+                                                      ${
+                                                        isLeafActive
+                                                          ? 'text-white'
+                                                          : 'text-white/70 hover:bg-white/10 hover:text-white'
+                                                      }
+                                                    `}
+                                                    style={isLeafActive ? activeItemStyle : {}}
+                                                    onClick={onNavItemClick}
+                                                  >
+                                                    {LeafIcon && <LeafIcon className="h-5 w-5" />}
+                                                    {leaf.name}
+                                                  </Link>
+                                                );
+                                              })}
+                                            </div>
+                                          </motion.div>
+                                        )}
+                                      </AnimatePresence>
+                                    </div>
+                                  );
+                                }
+
+                                const isSubActive = pathname.startsWith(sub.href);
 
                                 return (
                                   <Link

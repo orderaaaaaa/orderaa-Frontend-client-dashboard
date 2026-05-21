@@ -1,4 +1,4 @@
-import { Order, OrderProduct } from './orders';
+import { Order, OrderProduct, ShippingType } from './orders';
 
 export interface GovernorateLogisticsConfig {
   id: number;
@@ -20,7 +20,8 @@ export type TrackingCardStatus =
   | 'COMPLETED'
   | 'OVERDUE'
   | 'PAUSED'
-  | 'CANCELLED';
+  | 'CANCELLED'
+  | 'RETURNED';
 
 export type TrackingAgentStatus =
   | 'CLOSED'
@@ -132,8 +133,13 @@ export interface UpdateTrackingCardData {
   actionNote?: string;
   deliveryDate?: string;
   cancelReasonId?: number;
+  nonReceiptReasonId?: number;
   newProductId?: number;
   newVariants?: { label: string; value: string }[];
+  shippingType?: ShippingType;
+  returnProductIds?: number[];
+  customerPaymentAmount?: number;
+  returnShipmentContent?: string;
 }
 
 export const POST_SHIPPING_STATUSES = new Set([

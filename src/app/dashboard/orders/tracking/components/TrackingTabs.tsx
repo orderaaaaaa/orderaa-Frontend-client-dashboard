@@ -5,6 +5,7 @@ import {
   LiaClipboardListSolid,
   LiaClockSolid,
   LiaCheckDoubleSolid,
+  LiaUndoAltSolid,
 } from 'react-icons/lia';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import Input from '@/components/ui/Input';
@@ -43,6 +44,7 @@ const initialMockCards: TrackingCardType[] = [
       customers: { name: 'أحمد محمد', phone_numbers: ['01098765432'] } as any,
       totalCost: 350,
       order_products: [{ products: { name: 'صندل اديداس' }, variants: [{ label: 'اللون', value: 'أسود' }, { label: 'المقاس', value: '42' }] }] as any,
+      shippingId: 'BST-1029384756',
     },
   },
   {
@@ -68,6 +70,7 @@ const initialMockCards: TrackingCardType[] = [
       customers: { name: 'سارة علي', phone_numbers: ['01055566677'] } as any,
       totalCost: 500,
       order_products: [{ products: { name: 'حذاء نايك' }, variants: [{ label: 'اللون', value: 'أبيض' }, { label: 'المقاس', value: '38' }] }] as any,
+      shippingId: 'ARX-2938475610',
     },
   },
   {
@@ -93,6 +96,7 @@ const initialMockCards: TrackingCardType[] = [
       customers: { name: 'محمد حسن', phone_numbers: ['01099988877'] } as any,
       totalCost: 275,
       order_products: [{ products: { name: 'شنطة يد' }, variants: [{ label: 'اللون', value: 'بني' }] }] as any,
+      shippingId: 'MYL-3847561029',
     },
   },
   {
@@ -118,6 +122,7 @@ const initialMockCards: TrackingCardType[] = [
       customers: { name: 'فاطمة أحمد', phone_numbers: ['01011122233'] } as any,
       totalCost: 180,
       order_products: [{ products: { name: 'تيشيرت قطن' }, variants: [{ label: 'اللون', value: 'أزرق' }, { label: 'المقاس', value: 'L' }] }] as any,
+      shippingId: 'BST-4756102938',
     },
   },
   {
@@ -143,6 +148,33 @@ const initialMockCards: TrackingCardType[] = [
       customers: { name: 'عمر خالد', phone_numbers: ['01077788899'] } as any,
       totalCost: 420,
       order_products: [{ products: { name: 'ساعة كاسيو' }, variants: [] }] as any,
+      shippingId: 'ARX-5610293847',
+    },
+  },
+  {
+    id: 6,
+    orderId: 106,
+    orderCode: 'ORD-006',
+    type: 'COURIER',
+    scheduledDate: yesterday,
+    status: 'RETURNED',
+    courierUpdate: 'تم إرجاع الشحنة للمخزن',
+    courierName: 'حسن المرتجعات',
+    courierPhone: '01244455566',
+    agentStatus: null,
+    agentFlag: null,
+    agentNote: null,
+    postponedUntil: null,
+    completedAt: null,
+    employeeId: null,
+    employeeName: null,
+    createdAt: now,
+    updatedAt: now,
+    order: {
+      customers: { name: 'ليلى محمود', phone_numbers: ['01066677788'] } as any,
+      totalCost: 310,
+      order_products: [{ products: { name: 'فستان صيفي' }, variants: [{ label: 'اللون', value: 'وردي' }, { label: 'المقاس', value: 'M' }] }] as any,
+      shippingId: 'MYL-6102938475',
     },
   },
 ];
@@ -193,6 +225,10 @@ export default function TrackingTabs() {
     () => filteredCards.filter((c) => c.status === 'COMPLETED'),
     [filteredCards]
   );
+  const returnedCards = useMemo(
+    () => filteredCards.filter((c) => c.status === 'RETURNED'),
+    [filteredCards]
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -221,7 +257,7 @@ export default function TrackingTabs() {
     <Tabs defaultValue="pending">
       <TabsList dir="rtl">
         <TabsTrigger value="pending" className="gap-2">
-          طلبات جديدة
+          في الشحن
           <span className="inline-flex items-center justify-center rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold min-w-[24px]">
             {pendingCards.length}
           </span>
@@ -236,6 +272,12 @@ export default function TrackingTabs() {
           طلبات منفذة
           <span className="inline-flex items-center justify-center rounded-full bg-green-100 text-green-700 px-2 py-0.5 text-xs font-bold min-w-[24px] data-[state=active]:bg-white/20 data-[state=active]:text-white">
             {completedCards.length}
+          </span>
+        </TabsTrigger>
+        <TabsTrigger value="returned" className="gap-2">
+          مرتجعات
+          <span className="inline-flex items-center justify-center rounded-full bg-amber-100 text-amber-700 px-2 py-0.5 text-xs font-bold min-w-[24px] data-[state=active]:bg-white/20 data-[state=active]:text-white">
+            {returnedCards.length}
           </span>
         </TabsTrigger>
       </TabsList>
@@ -290,6 +332,24 @@ export default function TrackingTabs() {
           <TrackingEmptyState
             message="لم يتم إكمال أي مهام بعد اليوم"
             icon={<LiaCheckDoubleSolid />}
+          />
+        )}
+      </TabsContent>
+
+      <TabsContent value="returned" dir="rtl">
+        {returnedCards.length > 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {returnedCards.map((card) => (
+              <TrackingCard
+                key={card.id}
+                card={card}
+              />
+            ))}
+          </div>
+        ) : (
+          <TrackingEmptyState
+            message="لا توجد مرتجعات"
+            icon={<LiaUndoAltSolid />}
           />
         )}
       </TabsContent>

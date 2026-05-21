@@ -44,9 +44,9 @@ export function exportInArabicFormat(
         'الحالة': statusLabels.get(order.status) || order.status,
         'اسم العميل': order.customers.name,
         'رقم الهاتف': order.customers.phone_numbers?.join(', ') || '',
-        'المحافظة': order.customers.governorate || order.governorate || order.externalGovernorate || '',
-        'المنطقة': order.customers.area || '',
-        'العنوان': order.customers.address || '',
+        'المحافظة': order.governorate || order.customers.governorate || order.externalGovernorate || '',
+        'المنطقة': order.city || order.customers.area || order.customers.city || '',
+        'العنوان': order.address || order.customers.address || '',
         'المنتجات': order.order_products
             .map((op: any) => {
                 const product = `${op.products.name}`;

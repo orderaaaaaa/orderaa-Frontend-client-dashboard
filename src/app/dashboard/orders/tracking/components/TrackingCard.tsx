@@ -11,6 +11,10 @@ import {
   LiaPhoneSolid,
   LiaUserSolid,
   LiaPlusSolid,
+  LiaExchangeAltSolid,
+  LiaUndoAltSolid,
+  LiaBoxOpenSolid,
+  LiaBoxSolid,
 } from 'react-icons/lia';
 import { toast } from 'react-toastify';
 import clsx from 'clsx';
@@ -19,7 +23,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { useUpdateTrackingCard } from '@/services/logistics';
 import type { TrackingCard as TrackingCardType, AgentFlag } from '@/types/logistics';
+import { ShippingType } from '@/types/orders';
 import AgentStatusUpdateModal from './AgentStatusUpdateModal';
+import ReturnDetailsModal, { ReturnDetailsData } from './ReturnDetailsModal';
 
 const TRACKING_STATUS_LABELS: Record<string, string> = {
   PENDING: 'في الانتظار',
@@ -50,6 +56,43 @@ const FLAG_LABELS: Record<string, { label: string; color: string }> = {
   FAKE: { label: 'تحديث خاطئ', color: 'text-red-600 bg-red-50 border-red-200' },
 };
 
+const SHIPPING_TYPE_OPTIONS: {
+  value: ShippingType;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  activeClass: string;
+  iconClass: string;
+}[] = [
+  {
+    value: ShippingType.DELIVERY,
+    label: 'تسليم',
+    icon: LiaBoxSolid,
+    activeClass: 'bg-green-50 text-green-700 ring-1 ring-green-200',
+    iconClass: 'text-green-600',
+  },
+  {
+    value: ShippingType.PARTIAL_RETURN,
+    label: 'جزئي',
+    icon: LiaBoxOpenSolid,
+    activeClass: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200',
+    iconClass: 'text-amber-600',
+  },
+  {
+    value: ShippingType.EXCHANGE,
+    label: 'استبدال',
+    icon: LiaExchangeAltSolid,
+    activeClass: 'bg-violet-50 text-violet-700 ring-1 ring-violet-200',
+    iconClass: 'text-violet-600',
+  },
+  {
+    value: ShippingType.RETURN,
+    label: 'استرجاع',
+    icon: LiaUndoAltSolid,
+    activeClass: 'bg-red-50 text-red-700 ring-1 ring-red-200',
+    iconClass: 'text-red-600',
+  },
+];
+
 interface TrackingCardProps {
   card: TrackingCardType;
 }
@@ -69,9 +112,24 @@ export default function TrackingCard({ card }: TrackingCardProps) {
 
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
 
+  const [shippingType, setShippingType] = useState<ShippingType>(
+    (card.order?.shippingType as ShippingType) || ShippingType.DELIVERY,
+  );
+  const [pendingShippingType, setPendingShippingType] = useState<ShippingType | null>(null);
+  const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
+  const [isSavingShippingType, setIsSavingShippingType] = useState(false);
+
   const customerPhone = (card.order?.customers as any)?.phone_numbers?.[0];
   const customerName = (card.order?.customers as any)?.name;
   const orderProducts = (card.order as any)?.order_products as any[] | undefined;
+
+  const returnProductOptions = (orderProducts || []).map((op: any, idx: number) => ({
+    id: op.id ?? op.productId ?? idx,
+    name: op.products?.name || op.productName || 'منتج',
+    variantText: op.variants?.length
+      ? op.variants.map((v: any) => v.value).join(' - ')
+      : undefined,
+  }));
 
   const handleSaveCourierUpdate = useCallback(async () => {
     if (!newCourierUpdate.trim()) return;
@@ -91,6 +149,60 @@ export default function TrackingCard({ card }: TrackingCardProps) {
       setIsSavingUpdate(false);
     }
   }, [card.id, newCourierUpdate, updateMutation]);
+
+  const handleShippingTypeChange = useCallback(
+    async (next: ShippingType) => {
+      if (next === shippingType) return;
+      if (next === ShippingType.DELIVERY) {
+        setIsSavingShippingType(true);
+        try {
+          await updateMutation.mutateAsync({
+            cardId: card.id,
+            update: { shippingType: next },
+          });
+          setShippingType(next);
+          toast.success('تم تحديث حالة الشحنة');
+        } catch (err: any) {
+          const msg = err?.response?.data?.message;
+          toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث حالة الشحنة');
+        } finally {
+          setIsSavingShippingType(false);
+        }
+        return;
+      }
+      setPendingShippingType(next);
+      setIsReturnModalOpen(true);
+    },
+    [card.id, shippingType, updateMutation],
+  );
+
+  const handleConfirmReturnDetails = useCallback(
+    async (data: ReturnDetailsData) => {
+      if (!pendingShippingType) return;
+      setIsSavingShippingType(true);
+      try {
+        await updateMutation.mutateAsync({
+          cardId: card.id,
+          update: {
+            shippingType: pendingShippingType,
+            returnProductIds: data.returnProductIds,
+            customerPaymentAmount: data.customerPaymentAmount,
+            returnShipmentContent: data.returnShipmentContent,
+          },
+        });
+        setShippingType(pendingShippingType);
+        setPendingShippingType(null);
+        setIsReturnModalOpen(false);
+        toast.success('تم تحديث حالة الشحنة');
+      } catch (err: any) {
+        const msg = err?.response?.data?.message;
+        toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث حالة الشحنة');
+      } finally {
+        setIsSavingShippingType(false);
+      }
+    },
+    [card.id, pendingShippingType, updateMutation],
+  );
 
   const handleFlag = useCallback(async (flag: AgentFlag) => {
     setIsFlagging(true);
@@ -120,6 +232,11 @@ export default function TrackingCard({ card }: TrackingCardProps) {
             >
               الطلب #{card.orderCode}
             </Link>
+            {card.order?.shippingId && (
+              <span className="font-mono text-xs text-gray-500">
+                رقم الشحن: {card.order.shippingId}
+              </span>
+            )}
           </div>
 
           <div className="flex flex-col items-center gap-0.5 text-sm text-gray-500">
@@ -182,6 +299,45 @@ export default function TrackingCard({ card }: TrackingCardProps) {
         )}
 
         <CardContent className="p-4 space-y-4" dir="rtl">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <LiaBoxSolid className="w-4 h-4 text-primary" />
+              <p className="text-xs font-semibold text-gray-500">حالة الشحنة</p>
+            </div>
+            <div
+              className={clsx(
+                'grid grid-cols-4 gap-1 p-1 rounded-xl border border-gray-200 bg-gray-50',
+                isSavingShippingType && 'opacity-60 pointer-events-none',
+              )}
+              role="radiogroup"
+              aria-label="حالة الشحنة"
+            >
+              {SHIPPING_TYPE_OPTIONS.map((opt) => {
+                const Icon = opt.icon;
+                const isActive = shippingType === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={isActive}
+                    onClick={() => handleShippingTypeChange(opt.value)}
+                    disabled={isSavingShippingType}
+                    className={clsx(
+                      'flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer',
+                      isActive
+                        ? `${opt.activeClass} shadow-sm`
+                        : 'text-gray-500 hover:bg-white hover:text-gray-700',
+                    )}
+                  >
+                    <Icon className={clsx('w-4 h-4', isActive ? opt.iconClass : 'text-gray-400')} />
+                    <span>{opt.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <LiaTruckSolid className="w-4 h-4 text-red-600" />
@@ -332,6 +488,21 @@ export default function TrackingCard({ card }: TrackingCardProps) {
         onClose={() => setIsStatusModalOpen(false)}
         cardId={card.id}
       />
+
+      {pendingShippingType && (
+        <ReturnDetailsModal
+          isOpen={isReturnModalOpen}
+          onClose={() => {
+            if (isSavingShippingType) return;
+            setIsReturnModalOpen(false);
+            setPendingShippingType(null);
+          }}
+          onConfirm={handleConfirmReturnDetails}
+          shippingType={pendingShippingType as Exclude<ShippingType, ShippingType.DELIVERY>}
+          products={returnProductOptions}
+          isSubmitting={isSavingShippingType}
+        />
+      )}
     </>
   );
 }
