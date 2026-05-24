@@ -159,12 +159,14 @@ export default function FilterPanel({
   const { data: selectedProductName } = useQuery({
     queryKey: ['product-name', selectedProductId],
     queryFn: async () => {
-      const response = await http.get<{ data: { id: number; name: string } }>(
-        `/products/${selectedProductId}`
-      );
-      return response.data.data.name;
+      const response = await http.get<{
+        data?: { id: number; name: string };
+        name?: string;
+      }>(`/products/${selectedProductId}`);
+      const product = response.data?.data ?? response.data;
+      return product?.name;
     },
-    enabled: isProductActive && !!selectedProductId,
+    enabled: !!selectedProductId,
     staleTime: 5 * 60 * 1000,
   });
   const { data: governorates = [] } = useGovernoratesQuery(isGovernorateActive || isAreaActive);
