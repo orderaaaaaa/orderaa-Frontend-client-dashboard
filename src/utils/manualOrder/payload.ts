@@ -3,7 +3,7 @@ import { ManualOrderPayload } from '@/types/manual-order';
 interface SelectedProductWithVariants {
   id: number;
   quantity: number;
-  selectedVariants: Array<{ label: string; value: string }>;
+  attributeOptionIds: number[];
 }
 
 export function buildManualOrderPayload(args: {
@@ -48,7 +48,7 @@ export function buildManualOrderPayload(args: {
     products: selectedProducts.map((p) => ({
       id: p.id,
       quantity: p.quantity,
-      variants: p.selectedVariants,
+      attributeOptionIds: p.attributeOptionIds,
     })),
     customer: {
       name: customer.name,

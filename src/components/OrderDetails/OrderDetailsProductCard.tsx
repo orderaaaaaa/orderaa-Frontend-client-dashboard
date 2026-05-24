@@ -20,7 +20,6 @@ import {
   useUpdateOrderProduct,
   useDeleteOrderProduct,
   useAddOrderProduct,
-  SelectedVariant,
 } from '@/services/orders';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
@@ -56,12 +55,20 @@ function OrderDetailsProductCard({
         (fv) => fv.productId === orderProduct.productId
       );
       const optionLabels = fullVariant?.variantOptions?.map((o) => o.label) ?? [];
+      const attributes = (orderProduct.attributes ?? [])
+        .filter((attr) => attr?.name && attr?.options?.name)
+        .map((attr) => ({
+          id: attr.id,
+          name: attr.name,
+          value: attr.options.name,
+        }));
       return {
         id: orderProduct.id,
         productId: orderProduct.productId,
         product: orderProduct.products.name,
         variants,
         optionLabels,
+        attributes,
         price: orderProduct.price,
         sku: orderProduct.sku || orderProduct.products.sku || null,
         img: orderProduct.products.image || '/wireless-headphones.png',
@@ -88,12 +95,12 @@ function OrderDetailsProductCard({
 
   const handleSaveEdit = async (
     productId: number,
-    variants: SelectedVariant[]
+    attributeOptionIds: number[]
   ) => {
     try {
       await updateOrderProductMutation.mutateAsync({
         orderProductId: productId,
-        variants,
+        attributeOptionIds,
       });
 
       toast.success('تم تحديث المنتج بنجاح');
@@ -121,7 +128,7 @@ function OrderDetailsProductCard({
   );
 
   const handleAddSameTypeProduct = async (
-    variants: SelectedVariant[],
+    attributeOptionIds: number[],
     quantity: number
   ) => {
     try {
@@ -134,7 +141,7 @@ function OrderDetailsProductCard({
       await addOrderProductMutation.mutateAsync({
         orderId: order.id,
         productId: referenceProduct.productId,
-        variants,
+        attributeOptionIds,
         quantity,
       });
 
@@ -147,13 +154,13 @@ function OrderDetailsProductCard({
 
   const handleAddNewProduct = async (
     productId: number,
-    variants: SelectedVariant[],
+    attributeOptionIds: number[],
     quantity: number
   ) => {
     await addOrderProductMutation.mutateAsync({
       orderId: order.id,
       productId,
-      variants,
+      attributeOptionIds,
       quantity,
     });
   };
@@ -177,17 +184,30 @@ function OrderDetailsProductCard({
                     {item.product}
                   </h3>
 
-                  {item.variants.length > 0 && (
+                  {item.attributes.length > 0 ? (
                     <div className="flex flex-col gap-1">
-                      {item.variants.map((variant) => (
+                      {item.attributes.map((attr) => (
                         <p
-                          key={variant.id}
+                          key={attr.id}
                           className="text-base font-bold text-black"
                         >
-                          {variant.title}
+                          {attr.name}: {attr.value}
                         </p>
                       ))}
                     </div>
+                  ) : (
+                    item.variants.length > 0 && (
+                      <div className="flex flex-col gap-1">
+                        {item.variants.map((variant) => (
+                          <p
+                            key={variant.id}
+                            className="text-base font-bold text-black"
+                          >
+                            {variant.title}
+                          </p>
+                        ))}
+                      </div>
+                    )
                   )}
 
                   {item.sku && (
@@ -285,7 +305,9 @@ function OrderDetailsProductCard({
         <EditProductModal
           isOpen={editingProductId !== null}
           onClose={() => setEditingProductId(null)}
-          onSave={(variants) => handleSaveEdit(editingProduct.id, variants)}
+          onSave={(attributeOptionIds) =>
+            handleSaveEdit(editingProduct.id, attributeOptionIds)
+          }
           productId={editingProduct.productId}
           currentVariants={(() => {
             const v = editingProduct.variants[0];

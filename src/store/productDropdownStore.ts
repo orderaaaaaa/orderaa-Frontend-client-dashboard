@@ -5,12 +5,19 @@ interface VariantOption {
   values: string[];
 }
 
+interface ProductAttribute {
+  id: number;
+  name: string;
+  options: Array<{ id: number; name: string }>;
+}
+
 interface ApiProduct {
   id: number;
   name: string;
   price: number;
   image?: string;
   variantOptions: VariantOption[];
+  attributes?: ProductAttribute[];
 }
 
 interface SelectedVariantValue {
@@ -30,6 +37,7 @@ export interface SelectedProduct {
   image: string;
   quantity: number;
   selectedVariants: SelectedVariantValue[];
+  attributeOptionIds: number[];
 }
 
 interface ProductDropdownState {
@@ -59,6 +67,19 @@ interface ProductDropdownState {
   confirmSelections: () => SelectedProduct[];
   reset: () => void;
 }
+
+const resolveAttributeOptionIds = (
+  product: ApiProduct,
+  selectedVariants: SelectedVariantValue[]
+): number[] => {
+  const attributes = product.attributes ?? [];
+  return selectedVariants.reduce<number[]>((ids, variant) => {
+    const attribute = attributes.find((a) => a.name === variant.label);
+    const option = attribute?.options.find((o) => o.name === variant.value);
+    if (option) ids.push(option.id);
+    return ids;
+  }, []);
+};
 
 const initialState = {
   isOpen: false,
@@ -225,6 +246,10 @@ export const useProductDropdownStore = create<ProductDropdownState>(
           image: selection.product.image || '',
           quantity: 1,
           selectedVariants: selection.selectedVariants,
+          attributeOptionIds: resolveAttributeOptionIds(
+            selection.product,
+            selection.selectedVariants
+          ),
         })
       );
 
@@ -254,8 +279,6 @@ export const useProductDropdownStore = create<ProductDropdownState>(
         selectedProducts: merged,
         pendingSelections: {},
         selectedVariants: {},
-        isOpen: false,
-        expandedProductId: null,
       });
 
       return merged;

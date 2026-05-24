@@ -108,7 +108,7 @@ function Manual() {
         selectedProducts: selectedProducts.map((p) => ({
           id: p.id,
           quantity: p.quantity || 1,
-          selectedVariants: p.selectedVariants || [],
+          attributeOptionIds: p.attributeOptionIds || [],
         })),
       });
 

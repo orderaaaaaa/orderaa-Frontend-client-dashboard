@@ -243,6 +243,16 @@ export interface OrderProductVariant {
   value: string;
 }
 
+// Order Product Attribute (from API: name + selected option)
+export interface OrderProductAttribute {
+  id: number;
+  name: string;
+  options: {
+    id: number;
+    name: string;
+  };
+}
+
 // Order Product Interface
 export interface OrderProduct {
   id: number;
@@ -253,6 +263,7 @@ export interface OrderProduct {
   sku?: string | null;
   variant?: string;
   variants?: OrderProductVariant[];
+  attributes?: OrderProductAttribute[];
   products: Product;
   createdAt?: string;
   updatedAt?: string;
