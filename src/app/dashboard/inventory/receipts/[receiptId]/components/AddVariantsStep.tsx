@@ -3,7 +3,7 @@
 import { memo, useMemo, useState, useCallback } from 'react';
 import Image from 'next/image';
 import { IconType } from 'react-icons';
-import { LiaPlusSolid, LiaTimesSolid, LiaEditSolid } from 'react-icons/lia';
+import { LiaPlusSolid, LiaTimesSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import { DataTable, DataTableColumn } from '@/components/ui/data-table';
@@ -61,9 +61,14 @@ const AddVariantsStep = memo(
     const handleSaveVariants = useCallback(
       (variants: SelectedVariant[]) => {
         if (!selectedProduct) return;
+        const current = productVariants[selectedProduct.id] ?? [];
+        const byKey = new Map(current.map((v) => [variantKey(v), v]));
+        for (const v of variants) {
+          if (!byKey.has(variantKey(v))) byKey.set(variantKey(v), v);
+        }
         onProductVariantsChange({
           ...productVariants,
-          [selectedProduct.id]: variants,
+          [selectedProduct.id]: Array.from(byKey.values()),
         });
       },
       [selectedProduct, productVariants, onProductVariantsChange],
@@ -132,21 +137,8 @@ const AddVariantsStep = memo(
           className: 'w-44',
           render: (_value: unknown, row: ProductRow) => {
             const variants = productVariants[row.id as number];
-            const hasVariants = variants && variants.length > 0;
-            return hasVariants ? (
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-full text-xs font-semibold flex items-center gap-1.5 border-primary text-primary hover:bg-primary hover:text-white"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleAddVariant(row as InvoiceProductRow);
-                }}
-              >
-                <LiaEditSolid className="w-4 h-4" />
-                تعديل ({variants.length})
-              </Button>
-            ) : (
+            const count = variants?.length ?? 0;
+            return (
               <Button
                 variant="default"
                 size="sm"
@@ -157,7 +149,7 @@ const AddVariantsStep = memo(
                 }}
               >
                 <LiaPlusSolid className="w-4 h-4" />
-                إضافة متغير
+                إضافة متغير{count > 0 ? ` (${count})` : ''}
               </Button>
             );
           },
