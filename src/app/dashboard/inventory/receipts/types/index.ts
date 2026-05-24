@@ -14,7 +14,7 @@ export interface Receipt {
   type: 'PURCHASE' | 'PAID' | 'RETURN';
   supplierId: number;
   supplier: { id: number; name: string; nickname: string };
-  createdByEmployee?: { id: number; accessLevel: string; department: string };
+  createdByEmployee?: { id: number; accessLevel: string; department: string; fullName: string };
   totalAmount: number;
   paymentAmount?: number | null;
   paymentStatus?: 'PAID' | 'PARTIALLY_PAID' | 'NOT_PAID';

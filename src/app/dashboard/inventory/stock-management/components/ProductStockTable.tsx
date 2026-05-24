@@ -141,9 +141,6 @@ export function ProductStockTable({
                     </TableCell>
                     {visibleColors.map((color) => {
                       const stock = variant.stocks[color];
-                      const statusConfig = stock
-                        ? STOCK_STATUS_CONFIG[stock.status]
-                        : null;
 
                       return (
                         <TableCell
@@ -158,12 +155,10 @@ export function ProductStockTable({
                                 </div>
                               </TooltipTrigger>
                               <TooltipContent side="top">
-                                <div className="flex flex-col gap-1 text-right">
-                                  <span className="font-bold">{product.name}</span>
-                                  <span>المقاس: {variant.size}</span>
-                                  <span>اللون: {color}</span>
-                                  <span>الكمية: {stock.quantity}</span>
-                                  <span>الحالة: {statusConfig?.label}</span>
+                                <div className="flex flex-row items-center gap-2 font-semibold whitespace-nowrap">
+                                  <span>{stock.quantity}</span>
+                                  <span>{color}</span>
+                                  <span>{variant.size}</span>
                                 </div>
                                 <TooltipArrow />
                               </TooltipContent>

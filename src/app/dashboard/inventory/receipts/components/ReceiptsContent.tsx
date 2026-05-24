@@ -11,7 +11,6 @@ import PageLoading from '@/components/ui/page-loading';
 import { formatDateToLocalDate } from '@/utils/dateRangeUtils';
 import { useSupplierInvoicesQuery, useSuppliersQuery } from '@/services/suppliers';
 import { useEmployeesQuery } from '@/services/employees';
-import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
 import { INVOICE_TYPE_LABEL } from '@/app/dashboard/purchases/constants';
 import ReceiptsHeader from './ReceiptsHeader';
 import ReceiptsSearchBar from './ReceiptsSearchBar';
@@ -33,9 +32,7 @@ function toCardData(receipt: Receipt): InvoiceCardData {
       quantity: p.quantity,
       price: p.price,
     })),
-    employeeName: receipt.createdByEmployee
-      ? getDepartmentLabel(receipt.createdByEmployee.department)
-      : 'غير محدد',
+    employeeName: receipt.createdByEmployee?.fullName ?? 'غير محدد',
     createdAt: receipt.createdAt,
     totalAmount: receipt.totalAmount,
     paymentAmount: receipt.paymentAmount,
@@ -92,6 +89,7 @@ export function ReceiptsContent() {
   const employeeId = filters.employeeName ? Number(filters.employeeName) : undefined;
 
   const { data: invoicesData, isLoading } = useSupplierInvoicesQuery({
+    approved: false,
     page: currentPage,
     limit: pageSize,
     supplierId: selectedSupplier?.id,

@@ -86,7 +86,7 @@ export function AddInvoiceContent() {
         ...item,
         quantity: safeValue,
         total: newTotal,
-        pricePerPiece: pieceCount > 0 ? newTotal / pieceCount : 0,
+        pricePerPiece: pieceCount > 0 ? item.pricePerItem / pieceCount : 0,
       });
     },
     [update, items],
@@ -103,7 +103,7 @@ export function AddInvoiceContent() {
         ...item,
         pricePerItem: safeValue,
         total: newTotal,
-        pricePerPiece: pieceCount > 0 ? newTotal / pieceCount : 0,
+        pricePerPiece: pieceCount > 0 ? safeValue / pieceCount : 0,
       });
     },
     [update, items],
@@ -114,11 +114,10 @@ export function AddInvoiceContent() {
       const safeValue = Math.max(0, value);
       const item = items[index];
       if (!item) return;
-      const total = item.quantity * item.pricePerItem;
       update(index, {
         ...item,
         pieceCount: safeValue,
-        pricePerPiece: safeValue > 0 ? total / safeValue : 0,
+        pricePerPiece: safeValue > 0 ? item.pricePerItem / safeValue : 0,
       });
     },
     [update, items],

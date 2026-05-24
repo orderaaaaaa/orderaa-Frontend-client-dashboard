@@ -208,6 +208,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
             initialFormFilters={formFilters}
             setValue={setValue}
             hiddenFilters={['orderByDirection']}
+            showNewOrdersToggle
           />
         </div>
         <div className="flex items-center justify-center min-h-[400px]">
@@ -328,6 +329,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
           initialFormFilters={formFilters}
           setValue={setValue}
           hiddenFilters={[]}
+          showNewOrdersToggle
         />
       </div>
       <div className="relative">

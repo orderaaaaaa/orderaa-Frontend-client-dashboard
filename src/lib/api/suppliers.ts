@@ -100,6 +100,7 @@ export interface GetSupplierInvoicesParams {
   totalAmountMin?: number;
   totalAmountMax?: number;
   createdByEmployeeId?: number;
+  approved?: boolean;
 }
 
 export interface CreateSupplierDto {

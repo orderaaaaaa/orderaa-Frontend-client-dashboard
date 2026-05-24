@@ -1,13 +1,15 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Control, FieldErrors, UseFormSetValue } from 'react-hook-form';
+import clsx from 'clsx';
+import { Control, FieldErrors, UseFormSetValue, useWatch } from 'react-hook-form';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
 import { FilterOptions } from '@/types/orders';
 import FilterPanelRHF, { FilterKey, FILTER_DEFINITIONS } from './FilterPanelRHF';
 import { LiaSlidersHSolid, LiaAngleDownSolid } from 'react-icons/lia';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import Input from '@/components/ui/Input';
 
 type FilterSectionProps = {
@@ -18,6 +20,7 @@ type FilterSectionProps = {
   initialFormFilters?: OrderFiltersFormData | null;
   currentStatus?: string | null;
   hiddenFilters?: FilterKey[];
+  showNewOrdersToggle?: boolean;
 };
 
 function getActiveFiltersFromFormValues(formFilters: OrderFiltersFormData | null | undefined): FilterKey[] {
@@ -51,10 +54,22 @@ const FilterSection = React.memo(function FilterSection({
   initialFormFilters,
   currentStatus,
   hiddenFilters = [],
+  showNewOrdersToggle = false,
 }: FilterSectionProps) {
   const [activeFilters, setActiveFilters] = useState<FilterKey[]>(() =>
     getActiveFiltersFromFormValues(initialFormFilters)
   );
+
+  const skipFilters = useWatch({ control, name: 'skipFilters' });
+  const isNewOrdersActive = skipFilters === true;
+
+  const handleToggleNewOrders = (checked: boolean) => {
+    if (!setValue) return;
+    setValue('skipFilters', checked ? true : undefined, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
 
   const hasInitializedRef = useRef(false);
 
@@ -150,7 +165,7 @@ const FilterSection = React.memo(function FilterSection({
 
   return (
     <div className="bg-white rounded-xl py-[3px] mt-6 shadow-sm">
-      <div className="flex items-center justify-start px-4 py-2">
+      <div className="flex items-center justify-start gap-5 px-4 py-2">
         <Popover open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <PopoverTrigger asChild>
             <Button
@@ -198,6 +213,24 @@ const FilterSection = React.memo(function FilterSection({
             </ul>
           </PopoverContent>
         </Popover>
+
+        {showNewOrdersToggle && (
+          <label className="flex flex-col items-center gap-1 cursor-pointer select-none">
+            <span
+              className={clsx(
+                'text-base font-medium transition-colors',
+                isNewOrdersActive ? 'text-primary' : 'text-gray-600'
+              )}
+            >
+              طلبات جديدة
+            </span>
+            <Switch
+              checked={isNewOrdersActive}
+              onCheckedChange={handleToggleNewOrders}
+              aria-label="طلبات جديدة"
+            />
+          </label>
+        )}
       </div>
 
       {activeFilters.length > 0 && (

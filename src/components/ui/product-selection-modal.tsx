@@ -30,11 +30,31 @@ export interface SelectableProduct {
   selectedVariants?: SelectedVariant[];
 }
 
+interface ProductAttribute {
+  id: number;
+  name: string;
+  options: { id: number; name: string }[];
+}
+
+interface RawApiProduct extends SelectableProduct {
+  attributes?: ProductAttribute[];
+}
+
 interface ProductsApiResponse {
-  data: SelectableProduct[];
+  data: RawApiProduct[];
   currentPage: number;
   totalPages: number;
   hasNextPage: boolean;
+}
+
+function mapProductVariantOptions(product: RawApiProduct): SelectableProduct {
+  return {
+    ...product,
+    variantOptions: (product.attributes ?? []).map((attribute) => ({
+      label: attribute.name,
+      values: (attribute.options ?? []).map((option) => option.name),
+    })),
+  };
 }
 
 interface ProductSelectionModalProps {
@@ -95,10 +115,11 @@ export default function ProductSelectionModal({
         });
 
         const data = response.data;
+        const mappedProducts = data.data.map(mapProductVariantOptions);
         if (append) {
-          setProducts((prev) => [...prev, ...data.data]);
+          setProducts((prev) => [...prev, ...mappedProducts]);
         } else {
-          setProducts(data.data);
+          setProducts(mappedProducts);
         }
         setHasNextPage(data.hasNextPage);
         setPage(data.currentPage);
@@ -112,18 +133,21 @@ export default function ProductSelectionModal({
   );
 
   useEffect(() => {
-    if (isOpen) {
-      setPage(1);
-      if (existingVariantCombos && existingVariantCombos.size > 0) {
-        setSelectedIds(new Set(existingVariantCombos.keys()));
-        setAddedCombos(new Map(existingVariantCombos));
-      } else {
-        setSelectedIds(new Set());
-        setAddedCombos(new Map());
-      }
-      setCurrentSelection(new Map());
-      fetchProducts(1, debouncedSearch, false);
+    if (!isOpen) return;
+    if (existingVariantCombos && existingVariantCombos.size > 0) {
+      setSelectedIds(new Set(existingVariantCombos.keys()));
+      setAddedCombos(new Map(existingVariantCombos));
+    } else {
+      setSelectedIds(new Set());
+      setAddedCombos(new Map());
     }
+    setCurrentSelection(new Map());
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setPage(1);
+    fetchProducts(1, debouncedSearch, false);
   }, [isOpen, debouncedSearch, fetchProducts]);
 
   const handleLoadMore = useCallback(() => {
@@ -259,6 +283,8 @@ export default function ProductSelectionModal({
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          onClear={() => setSearch('')}
+          clearable
           placeholder="ابحث عن المنتج.."
         />
 

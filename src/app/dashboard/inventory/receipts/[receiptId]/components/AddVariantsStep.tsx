@@ -2,8 +2,9 @@
 
 import { memo, useMemo, useState, useCallback } from 'react';
 import Image from 'next/image';
+import clsx from 'clsx';
 import { IconType } from 'react-icons';
-import { LiaPlusSolid, LiaTimesSolid } from 'react-icons/lia';
+import { LiaPlusSolid, LiaTimesSolid, LiaExclamationCircleSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import { DataTable, DataTableColumn } from '@/components/ui/data-table';
@@ -103,6 +104,22 @@ const AddVariantsStep = memo(
     const totalItems = useMemo(
       () => products.reduce((sum, p) => sum + p.quantity, 0),
       [products],
+    );
+
+    const enteredByProduct = useCallback(
+      (productId: number) =>
+        (productVariants[productId] ?? []).reduce((sum, v) => sum + (v.quantity || 0), 0),
+      [productVariants],
+    );
+
+    const totalEntered = useMemo(
+      () => products.reduce((sum, p) => sum + enteredByProduct(p.id), 0),
+      [products, enteredByProduct],
+    );
+
+    const isCountComplete = useMemo(
+      () => products.length > 0 && products.every((p) => enteredByProduct(p.id) === p.quantity),
+      [products, enteredByProduct],
     );
 
     const columns: DataTableColumn<ProductRow>[] = useMemo(
@@ -219,7 +236,14 @@ const AddVariantsStep = memo(
 
         <div className="flex flex-row items-center justify-between px-4">
           <p className="text-base font-bold text-gray-800">إجمالي المنتجات {totalProducts}</p>
-          <p className="text-base font-bold text-gray-800">إجمالي عدد القطع {totalItems} قطعة</p>
+          <p
+            className={clsx(
+              'text-base font-bold',
+              isCountComplete ? 'text-gray-800' : 'text-red-600',
+            )}
+          >
+            إجمالي عدد القطع المُدخلة {totalEntered} / {totalItems} قطعة
+          </p>
         </div>
 
         <div className="flex justify-end">
@@ -228,7 +252,7 @@ const AddVariantsStep = memo(
             size="lg"
             className="rounded-full font-semibold flex items-center gap-2 px-12"
             onClick={onNext}
-            disabled={nextDisabled}
+            disabled={nextDisabled || !isCountComplete}
           >
             {NextIcon && <NextIcon className="w-5 h-5" />}
             {nextLabel ?? 'التالي'}

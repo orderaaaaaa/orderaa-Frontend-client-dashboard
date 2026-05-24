@@ -142,9 +142,8 @@ const InvoiceItemsTable = memo(
             key: 'pricePerPiece',
             header: 'سعر القطعة',
             render: (_value: unknown, row: InvoiceItem & Record<string, unknown>) => {
-              const total = row.quantity * row.pricePerItem;
               const pieceCount = row.pieceCount as number || 0;
-              const pricePerPiece = pieceCount > 0 ? total / pieceCount : 0;
+              const pricePerPiece = pieceCount > 0 ? row.pricePerItem / pieceCount : 0;
               return (
                 <span className="font-semibold">
                   {pricePerPiece > 0 ? `${pricePerPiece.toLocaleString(undefined, { maximumFractionDigits: 2 })} جنيه` : '-'}
