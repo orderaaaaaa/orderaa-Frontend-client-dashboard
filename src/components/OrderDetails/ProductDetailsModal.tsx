@@ -16,6 +16,8 @@ export default function ProductDetailsModal({
   orderProduct,
 }: ProductDetailsModalProps) {
   const product = orderProduct?.products;
+  const variants = orderProduct?.variants ?? [];
+  const price = orderProduct?.price ?? product?.price;
 
   const DetailRow = ({
     label,
@@ -60,12 +62,33 @@ export default function ProductDetailsModal({
             </h3>
           </div>
 
+          {variants.length > 0 && (
+            <div className="w-full mb-4">
+              <h4 className="text-base font-bold text-primary mb-2 text-center">
+                الخصائص
+              </h4>
+              <div className="bg-gray-50/50 rounded-xl px-4 py-2">
+                {variants.map((variant, idx) => (
+                  <DetailRow
+                    key={idx}
+                    label={variant.label}
+                    value={variant.value}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="w-full">
             <h4 className="text-base font-bold text-primary mb-2 text-center">
               معلومات المنتج
             </h4>
             <div className="bg-gray-50/50 rounded-xl px-4 py-2">
               <DetailRow label="SKU" value={orderProduct?.sku || product.sku} />
+              <DetailRow
+                label="السعر"
+                value={price != null ? `${price} جنيه` : undefined}
+              />
               <DetailRow label="الخامة" value={product.material} />
               <DetailRow label="الوزن" value={product.weight} />
               <DetailRow

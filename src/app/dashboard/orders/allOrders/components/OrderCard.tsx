@@ -41,6 +41,7 @@ export default function OrderCard({
   itemSkus,
   price,
   shippingId,
+  shippingCompany,
   isBlocked,
   customerNotes,
   trys,
@@ -90,8 +91,8 @@ export default function OrderCard({
     <div
       onClick={handleCardClick}
       className={`relative w-full h-full max-w-full overflow-hidden bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.1)] rounded-[10px] transition-all duration-200 flex flex-col ${disableNavigation
-          ? ''
-          : 'cursor-pointer hover:shadow-[0px_6px_20px_rgba(93,36,225,0.15)]'
+        ? ''
+        : 'cursor-pointer hover:shadow-[0px_6px_20px_rgba(93,36,225,0.15)]'
         }`}
     >
       {/* Checkbox – top right */}
@@ -290,11 +291,16 @@ export default function OrderCard({
 
         {/* Shipping */}
         {shippingId && (
-          <div className="flex flex-row-reverse items-start gap-2 max-w-full">
+          <div className="flex flex-row items-center gap-2 max-w-full flex-wrap">
+            <Truck className="opacity-30 flex-shrink-0" height={18} />
             <span className="text-base font-medium text-black break-words min-w-0">
               {shippingId}
             </span>
-            <Truck className="opacity-30 flex-shrink-0 mt-1" height={18} />
+            {shippingCompany && (
+              <span className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs font-semibold px-2 py-0.5 rounded-full break-words">
+                {shippingCompany}
+              </span>
+            )}
           </div>
         )}
 

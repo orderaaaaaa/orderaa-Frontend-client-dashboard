@@ -116,6 +116,11 @@ const OrderDetailsCardId = ({
                           >
                             {entry.shippingId}
                           </span>
+                          {entry.shippingCompany && (
+                            <span className="text-[11px] font-normal text-gray-500">
+                              {entry.shippingCompany}
+                            </span>
+                          )}
                         </div>
                         <span
                           className={
@@ -147,6 +152,11 @@ const OrderDetailsCardId = ({
                         <span className="text-sm font-semibold text-gray-800">
                           {order.shippingId}
                         </span>
+                        {order.shippingCompany && (
+                          <span className="text-[11px] font-normal text-gray-500">
+                            {order.shippingCompany}
+                          </span>
+                        )}
                       </div>
                     </div>
                   )}

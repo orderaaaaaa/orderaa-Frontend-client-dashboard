@@ -466,6 +466,7 @@ export function ShippingOrdersContent() {
                   order.governorate || order.externalGovernorate || 'غير محدد'
                 }
                 shippingId={order.shippingId}
+                shippingCompany={order.shippingCompany}
                 items={order.order_products.map((op: any) => {
                   const productName = op.products?.name || 'منتج غير معروف';
                   const variantDetails =

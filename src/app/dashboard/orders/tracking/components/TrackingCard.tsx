@@ -237,6 +237,9 @@ export default function TrackingCard({ card }: TrackingCardProps) {
                 رقم الشحن: {card.order.shippingId}
               </span>
             )}
+            {card.order?.shippingCompany && (
+              <span className="text-xs text-gray-500">{card.order.shippingCompany}</span>
+            )}
           </div>
 
           <div className="flex flex-col items-center gap-0.5 text-sm text-gray-500">

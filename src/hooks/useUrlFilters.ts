@@ -148,6 +148,25 @@ export function useUrlFilters(
           pendingUrlUpdate.current = 'replace';
           setUrlSyncTrigger((c) => c + 1);
         }
+      } else if (!ignoreDateRange) {
+        const hasDateInUrl =
+          searchParams.has('from') ||
+          searchParams.has('to') ||
+          searchParams.has('period') ||
+          searchParams.has('executionDate');
+        if (!hasDateInUrl) {
+          const stored = loadFromStorage();
+          if (stored && (stored.fromDate || stored.toDate || stored.timePeriod)) {
+            setFilters((prev) => ({
+              ...prev,
+              fromDate: stored.fromDate ?? null,
+              toDate: stored.toDate ?? null,
+              timePeriod: stored.timePeriod ?? '',
+            }));
+            pendingUrlUpdate.current = 'replace';
+            setUrlSyncTrigger((c) => c + 1);
+          }
+        }
       }
       setIsInitialized(true);
     }

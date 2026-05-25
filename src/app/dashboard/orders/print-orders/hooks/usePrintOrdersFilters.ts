@@ -7,8 +7,9 @@ import { useDefaultStatusByPath } from '../../hooks/useDefaultStatusByPath';
 
 export function usePrintOrdersFilters(
   storageKey?: string,
-  options: { ignoreDateRange?: boolean } = {},
+  options: { ignoreDateRange?: boolean; forceDefaultStatus?: boolean } = {},
 ) {
+  const { forceDefaultStatus = false } = options;
   const urlFilters = useUrlFilters(storageKey, options);
   const DEFAULT_STATUS = useDefaultStatusByPath();
   const hasInitialized = useRef(false);
@@ -19,7 +20,10 @@ export function usePrintOrdersFilters(
 
     hasInitialized.current = true;
 
-    if (!urlFilters.filters.status && DEFAULT_STATUS) {
+    if (!DEFAULT_STATUS) return;
+
+    const shouldApplyDefault = forceDefaultStatus || !urlFilters.filters.status;
+    if (shouldApplyDefault && urlFilters.filters.status !== DEFAULT_STATUS) {
       urlFilters.setStatus(DEFAULT_STATUS);
     }
   }, [
@@ -27,6 +31,7 @@ export function usePrintOrdersFilters(
     urlFilters.filters.status,
     urlFilters.setStatus,
     DEFAULT_STATUS,
+    forceDefaultStatus,
   ]);
 
   const setPrintStatus = useCallback((status: PrintStatus) => {

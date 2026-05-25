@@ -186,6 +186,9 @@ const MergeProductsModal = ({
   );
   const [activeId, setActiveId] = useState<number | null>(null);
   const [error, setError] = useState('');
+  const [removedVariantValues, setRemovedVariantValues] = useState<Set<string>>(
+    new Set(),
+  );
 
   const { mutate, isPending } = useMergeProducts();
 
@@ -239,6 +242,25 @@ const MergeProductsModal = ({
     });
     return result;
   }, [targetProduct, sourceProducts]);
+
+  const displayVariants = useMemo(() => {
+    return mergedVariants
+      .map((variant) => ({
+        label: variant.label,
+        values: variant.values.filter(
+          (val) => !removedVariantValues.has(`${variant.label}::${val}`),
+        ),
+      }))
+      .filter((variant) => variant.values.length > 0);
+  }, [mergedVariants, removedVariantValues]);
+
+  const handleRemoveVariantValue = (label: string, value: string) => {
+    setRemovedVariantValues((prev) => {
+      const next = new Set(prev);
+      next.add(`${label}::${value}`);
+      return next;
+    });
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -301,7 +323,7 @@ const MergeProductsModal = ({
           price: data.price,
           image: targetProduct.image || undefined,
           images: targetProduct.images?.length ? targetProduct.images : undefined,
-          //variants: mergedVariants.length > 0 ? mergedVariants : undefined,
+          //variants: displayVariants.length > 0 ? displayVariants : undefined,
         },
       },
       {
@@ -416,12 +438,12 @@ const MergeProductsModal = ({
                   placeholder="أدخل السعر..."
                   error={form.formState.errors.price?.message}
                 />
-                {mergedVariants.length > 0 && (
+                {displayVariants.length > 0 && (
                   <div className="space-y-3 pt-2">
                     <h4 className="text-sm font-semibold text-gray-900">
                       المتغيرات بعد الدمج
                     </h4>
-                    {mergedVariants.map((variant) => (
+                    {displayVariants.map((variant) => (
                       <div key={variant.label} className="space-y-1.5">
                         <p className="text-xs font-medium text-gray-600">
                           {variant.label}
@@ -430,9 +452,19 @@ const MergeProductsModal = ({
                           {variant.values.map((val) => (
                             <span
                               key={val}
-                              className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20"
                             >
                               {val}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleRemoveVariantValue(variant.label, val)
+                                }
+                                className="text-primary/60 hover:text-red-500 transition-colors"
+                                aria-label={`إزالة ${val}`}
+                              >
+                                <LiaTimesSolid className="w-3 h-3" />
+                              </button>
                             </span>
                           ))}
                         </div>

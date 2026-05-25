@@ -107,7 +107,10 @@ export function PrintOrdersContent() {
     printStatus,
     setPrintStatus,
     isInitialized,
-  } = usePrintOrdersFilters('orderFilters', { ignoreDateRange: true });
+  } = usePrintOrdersFilters('orderFilters', {
+    ignoreDateRange: true,
+    forceDefaultStatus: true,
+  });
   const { statistics: printStatistics, loading: statsLoading } =
     usePrintOrderStatistics();
 
@@ -725,6 +728,7 @@ export function PrintOrdersContent() {
                   order.governorate || order.externalGovernorate || 'غير محدد'
                 }
                 shippingId={order.shippingId}
+                shippingCompany={order.shippingCompany}
                 items={order.order_products.map((op: any) => {
                   const productName = op.products?.name || 'منتج غير معروف';
                   const variantDetails =
