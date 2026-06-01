@@ -289,6 +289,7 @@ export default function OrderCard({
           </div>
         )}
 
+
         {/* Shipping */}
         {shippingId && (
           <div className="flex flex-row items-center gap-2 max-w-full flex-wrap">
