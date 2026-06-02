@@ -278,6 +278,7 @@ export function ReceiptsContent() {
               }
               titleHref={`/dashboard/inventory/receipts/${receipt.id}`}
               formatDate={formatDate}
+              showAmount={false}
             />
           ))
         ) : (

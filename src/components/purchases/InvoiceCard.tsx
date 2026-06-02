@@ -101,6 +101,7 @@ interface InvoiceCardProps {
   onTitleClick?: () => void;
   titleHref?: string;
   formatDate: (dateStr: string) => string;
+  showAmount?: boolean;
 }
 
 const InvoiceCard = memo(
@@ -112,6 +113,7 @@ const InvoiceCard = memo(
     onTitleClick,
     titleHref,
     formatDate,
+    showAmount = true,
   }: InvoiceCardProps) => {
     const [isProductsModalOpen, setIsProductsModalOpen] = useState(false);
 
@@ -155,13 +157,17 @@ const InvoiceCard = memo(
           valueClassName: typeColors.text,
           iconClassName: typeColors.iconColor,
         },
-        {
-          label: 'المبلغ الإجمالي',
-          value: `${invoice.totalAmount.toLocaleString()} جنيه`,
-          icon: LiaMoneyBillWaveSolid,
-        },
+        ...(showAmount
+          ? [
+              {
+                label: 'المبلغ الإجمالي',
+                value: `${invoice.totalAmount.toLocaleString()} جنيه`,
+                icon: LiaMoneyBillWaveSolid,
+              },
+            ]
+          : []),
       ],
-      [invoice, typeColors, isNegativeAmount, formatDate]
+      [invoice, typeColors, isNegativeAmount, formatDate, showAmount]
     );
 
     return (
@@ -214,7 +220,12 @@ const InvoiceCard = memo(
           )}
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-6 px-10">
+        <div
+          className={clsx(
+            'grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 px-10',
+            fields.length === 5 ? 'lg:grid-cols-5' : 'lg:grid-cols-4',
+          )}
+        >
           {fields.map((field) =>
             field.onClick ? (
               <button

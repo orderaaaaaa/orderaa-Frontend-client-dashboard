@@ -8,6 +8,8 @@ import React, {
   useRef,
 } from 'react';
 import { toast } from 'react-toastify';
+import uniq from 'lodash/uniq';
+import uniqBy from 'lodash/uniqBy';
 import { ArrowUp, Scan, ScanLine, X } from 'lucide-react';
 import {
   useBarcodeScanner,
@@ -245,10 +247,22 @@ export function PrintOrdersContent() {
       setIsScanLoading(true);
       try {
         const order = await getOrderByCode(barcode);
-        addOrder({ id: order.id, code: barcode, status: order.status, cancelReason: order.cancelReason, packagingWarning: order.packagingWarning, printCount: order.printCount });
+        const added = addOrder({ id: order.id, code: barcode, status: order.status, cancelReason: order.cancelReason, packagingWarning: order.packagingWarning, printCount: order.printCount });
+        if (!added) {
+          playErrorSound();
+          toast.warning('هذا الطلب تم مسحه مسبقاً');
+          return;
+        }
         setFlashingCode(barcode);
         setTimeout(() => setFlashingCode(null), 600);
-        if (order.status === 'CONFIRMED' || order.status === 'WAITING_FOR_PACKAGING') {
+        if (order.packagingWarning) {
+          playErrorSound();
+          toast.error(
+            order.packagingWarning.trim()
+              ? order.packagingWarning
+              : 'هذا الطلب يحتوي على تحذير في التغليف'
+          );
+        } else if (order.status === 'CONFIRMED' || order.status === 'WAITING_FOR_PACKAGING') {
           playSuccessSound();
         } else {
           playErrorSound();
@@ -278,7 +292,7 @@ export function PrintOrdersContent() {
     setIsActionLoading(true);
     try {
       await prepareOrdersMutation({
-        orderCodes: actionableOrders.map((o) => o.code),
+        orderCodes: uniq(actionableOrders.map((o) => o.code)),
       });
       toast.success('تم تحديث الطلبات إلى تم التحضير');
       clearOrders();
@@ -296,7 +310,7 @@ export function PrintOrdersContent() {
     setIsActionLoading(true);
     try {
       await waitingMutation({
-        orderIds: actionableOrders.map((o) => o.id),
+        orderIds: uniq(actionableOrders.map((o) => o.id)),
       });
       toast.success('تم تحديث الطلبات إلى فى انتظار التغليف');
       clearOrders();
@@ -314,7 +328,7 @@ export function PrintOrdersContent() {
     setIsActionLoading(true);
     try {
       await callAgainMutation({
-        orders: actionableOrders.map((o) => ({ id: o.id })),
+        orders: uniqBy(actionableOrders, 'id').map((o) => ({ id: o.id })),
       });
       toast.success('تم تحديث الطلبات إلى اعادة اتصال');
       clearOrders();
@@ -346,7 +360,7 @@ export function PrintOrdersContent() {
     setIsActionLoading(true);
     try {
       await callAgainMutation({
-        orders: actionableOrders.map((o) => ({
+        orders: uniqBy(actionableOrders, 'id').map((o) => ({
           id: o.id,
           packagingNote: scannerPackagingNotes[o.code]?.trim() || '',
         })),
@@ -459,7 +473,7 @@ export function PrintOrdersContent() {
     setIsActionLoading(true);
     try {
       await prepareOrdersMutation({
-        orderCodes: ordersToProcess.map((o) => o.code),
+        orderCodes: uniq(ordersToProcess.map((o) => o.code)),
       });
       toast.success('تم تحديث الطلبات إلى تم التحضير');
       clearSelections();
@@ -489,7 +503,7 @@ export function PrintOrdersContent() {
     setIsActionLoading(true);
     try {
       await waitingMutation({
-        orderIds: ordersToProcess.map((o) => o.id),
+        orderIds: uniq(ordersToProcess.map((o) => o.id)),
       });
       toast.success('تم تحديث الطلبات إلى فى انتظار التغليف');
       clearSelections();
@@ -513,7 +527,7 @@ export function PrintOrdersContent() {
     setIsActionLoading(true);
     try {
       await callAgainMutation({
-        orders: ordersToProcess.map((o) => ({ id: o.id })),
+        orders: uniqBy(ordersToProcess, 'id').map((o) => ({ id: o.id })),
       });
       toast.success('تم تحديث الطلبات إلى اعادة اتصال');
       clearSelections();
@@ -545,7 +559,7 @@ export function PrintOrdersContent() {
       setIsActionLoading(true);
       try {
         await callAgainMutation({
-          orders: ordersWithNotes,
+          orders: uniqBy(ordersWithNotes, 'id'),
         });
         toast.success('تم تغيير المنتج بنجاح');
         setIsChangeProductModalOpen(false);

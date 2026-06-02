@@ -14,11 +14,13 @@ import api from '@/lib/api';
 export interface VariantOption {
   label: string;
   values: string[];
+  options: { id: number; name: string }[];
 }
 
 export interface SelectedVariant {
   label: string;
   value: string;
+  attributeOptionId: number;
 }
 
 export interface SelectableProduct {
@@ -53,6 +55,7 @@ function mapProductVariantOptions(product: RawApiProduct): SelectableProduct {
     variantOptions: (product.attributes ?? []).map((attribute) => ({
       label: attribute.name,
       values: (attribute.options ?? []).map((option) => option.name),
+      options: (attribute.options ?? []).map((option) => ({ id: option.id, name: option.name })),
     })),
   };
 }
@@ -63,6 +66,7 @@ interface ProductSelectionModalProps {
   onConfirm: (products: SelectableProduct[]) => void;
   existingProductIds?: string[];
   existingVariantCombos?: Map<number, SelectedVariant[][]>;
+  allowVariants?: boolean;
 }
 
 function isValueDisabled(
@@ -90,6 +94,7 @@ export default function ProductSelectionModal({
   onConfirm,
   existingProductIds = [],
   existingVariantCombos,
+  allowVariants = true,
 }: ProductSelectionModalProps) {
   const [search, setSearch] = useState('');
   const [products, setProducts] = useState<SelectableProduct[]>([]);
@@ -188,9 +193,15 @@ export default function ProductSelectionModal({
       const selection = currentSelection.get(productId);
       if (!selection) return;
 
+      const product = products.find((p) => p.id === productId);
+
       const combo: SelectedVariant[] = labels
         .filter((l) => selection[l])
-        .map((l) => ({ label: l, value: selection[l] }));
+        .map((l) => {
+          const group = product?.variantOptions?.find((o) => o.label === l);
+          const option = group?.options.find((o) => o.name === selection[l]);
+          return { label: l, value: selection[l], attributeOptionId: option?.id ?? 0 };
+        });
 
       if (combo.length !== labels.length) return;
 
@@ -207,7 +218,7 @@ export default function ProductSelectionModal({
         return next;
       });
     },
-    [currentSelection],
+    [currentSelection, products],
   );
 
   const handleRemoveCombo = useCallback(
@@ -319,7 +330,8 @@ export default function ProductSelectionModal({
           ) : (
             <div className="pb-4">
               {products.map((product) => {
-                const hasVariants = product.variantOptions && product.variantOptions.length > 0;
+                const hasVariants =
+                  allowVariants && product.variantOptions && product.variantOptions.length > 0;
                 const isNoVariantInTable =
                   !hasVariants && existingProductIds.includes(String(product.id));
                 const isAlreadyInTable = isNoVariantInTable;

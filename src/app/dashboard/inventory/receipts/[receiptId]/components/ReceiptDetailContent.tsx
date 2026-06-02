@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { notFound, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { LiaSaveSolid } from 'react-icons/lia';
@@ -64,6 +64,33 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
     [apiReceipt],
   );
 
+  const seededRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!apiReceipt) return;
+    if (seededRef.current === receiptId) return;
+    seededRef.current = receiptId;
+
+    const seed: Record<number, SelectedVariant[]> = {};
+    for (const p of apiReceipt.products) {
+      const ids = p.attributeOptionIds ?? p.variant?.attributeOptions?.map((o) => o.id) ?? [];
+      if (ids.length === 0) continue;
+      seed[p.id] = [
+        {
+          attributeOptionIds: ids,
+          attributeLabels: p.variant?.attributeOptions?.map((o) => o.name) ?? [],
+          quantity: 0,
+          variantId: p.variantId ?? undefined,
+          variantName: p.variant?.name,
+        },
+      ];
+    }
+
+    if (Object.keys(seed).length === 0) return;
+    if (Object.keys(productVariants).length > 0) return;
+    setProductVariants(receiptId, seed);
+  }, [apiReceipt, receiptId, productVariants, setProductVariants]);
+
   const handleNext = useCallback(() => {
     markStepCompleted(receiptId, currentStep);
     setCurrentStep(receiptId, Math.min(currentStep + 1, RECEIPT_STEPS.length - 1));
@@ -104,18 +131,20 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
     if (!apiReceipt) return;
 
     const productsPayload = invoiceProducts
-      .filter((p) => (productVariants[p.id]?.length ?? 0) > 0)
       .map((p) => ({
         invoiceProductId: p.id,
-        variants: productVariants[p.id].map((v) => ({
-          attributeOptionIds: v.attributeOptionIds,
-          approvedCount: Math.max(0, v.quantity),
-          rejectedCount: 0,
-        })),
-      }));
+        variants: (productVariants[p.id] ?? [])
+          .filter((v) => v.quantity > 0)
+          .map((v) => ({
+            attributeOptionIds: v.attributeOptionIds,
+            approvedCount: v.quantity,
+            rejectedCount: 0,
+          })),
+      }))
+      .filter((p) => p.variants.length > 0);
 
     if (productsPayload.length === 0) {
-      toast.error('يرجى إضافة متغيرات لمنتج واحد على الأقل');
+      toast.error('يرجى إدخال الكمية المستلمة لمنتج واحد على الأقل');
       return;
     }
 

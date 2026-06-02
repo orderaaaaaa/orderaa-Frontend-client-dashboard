@@ -46,11 +46,24 @@ export interface ProductTransactionApiItem {
   createdAt: string;
 }
 
+export interface InvoiceProductVariantOption {
+  id: number;
+  name: string;
+}
+
+export interface InvoiceProductVariantDetail {
+  id: number;
+  name?: string;
+  attributeOptions?: InvoiceProductVariantOption[];
+}
+
 export interface InvoiceProductApiItem {
   id: number;
   invoiceId: number;
   productId: number;
   variantId?: number | null;
+  attributeOptionIds?: number[];
+  variant?: InvoiceProductVariantDetail | null;
   quantity: number;
   price: number;
   createdAt: string;
@@ -123,7 +136,7 @@ export interface CreateInvoiceProductDto {
   productId: number;
   quantity: number;
   price: number;
-  variants?: { label: string; value: string }[];
+  attributeOptionIds?: number[];
 }
 
 export interface CreateSupplierInvoiceDto {

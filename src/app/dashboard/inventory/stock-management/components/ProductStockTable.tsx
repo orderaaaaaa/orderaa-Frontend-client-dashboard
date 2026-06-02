@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import clsx from 'clsx';
 import {
   Table,
@@ -15,8 +16,16 @@ import {
   TooltipContent,
   TooltipArrow,
 } from '@/components/ui/tooltip';
+import BaseModal from '@/components/ui/base-modal';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { STOCK_STATUS_CONFIG } from '../constants';
-import type { StockProduct, VariantStock } from '../types';
+import type { StockProduct, VariantStock, ProductVariantRow } from '../types';
+
+interface SelectedCell {
+  stock: VariantStock;
+  color: string;
+  size: string;
+}
 
 function StockBadge({ stock }: { stock: VariantStock }) {
   const config = STOCK_STATUS_CONFIG[stock.status];
@@ -71,6 +80,9 @@ export function ProductStockTable({
   filterColor,
   filterSize,
 }: ProductStockTableProps) {
+  const isMobile = useIsMobile();
+  const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
+
   const visibleColors = filterColor
     ? product.colors.filter((c) => c === filterColor)
     : product.colors;
@@ -85,6 +97,14 @@ export function ProductStockTable({
       0
     )
   );
+
+  const rowTotal = (variant: ProductVariantRow) =>
+    visibleColors.reduce(
+      (sum, color) => sum + (variant.stocks[color]?.quantity ?? 0),
+      0
+    );
+
+  const grandTotal = columnTotals.reduce((sum, total) => sum + total, 0);
 
   return (
     <div className="rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden">
@@ -120,13 +140,16 @@ export function ProductStockTable({
                   {color}
                 </TableHead>
               ))}
+              <TableHead className="px-4 py-3 text-sm font-bold text-gray-700 border-l border-gray-200 last:border-l-0 text-center">
+                الإجمالي
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {visibleVariants.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={visibleColors.length + 1}
+                  colSpan={visibleColors.length + 2}
                   className="px-4 py-8 text-center text-sm text-gray-500"
                 >
                   لا توجد متغيرات مطابقة
@@ -148,21 +171,33 @@ export function ProductStockTable({
                           className="px-4 py-3 border-l border-gray-200 last:border-l-0"
                         >
                           {stock ? (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="cursor-default">
-                                  <StockBadge stock={stock} />
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent side="top">
-                                <div className="flex flex-row items-center gap-2 font-semibold whitespace-nowrap">
-                                  <span>{stock.quantity}</span>
-                                  <span>{color}</span>
-                                  <span>{variant.size}</span>
-                                </div>
-                                <TooltipArrow />
-                              </TooltipContent>
-                            </Tooltip>
+                            isMobile ? (
+                              <button
+                                type="button"
+                                className="w-full cursor-pointer"
+                                onClick={() =>
+                                  setSelectedCell({ stock, color, size: variant.size })
+                                }
+                              >
+                                <StockBadge stock={stock} />
+                              </button>
+                            ) : (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="cursor-default">
+                                    <StockBadge stock={stock} />
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                  <div className="flex flex-row items-center gap-2 font-semibold whitespace-nowrap">
+                                    <span>{stock.quantity}</span>
+                                    <span>{color}</span>
+                                    <span>{variant.size}</span>
+                                  </div>
+                                  <TooltipArrow />
+                                </TooltipContent>
+                              </Tooltip>
+                            )
                           ) : (
                             <span className="block text-center text-sm text-gray-300">
                               -
@@ -171,6 +206,9 @@ export function ProductStockTable({
                         </TableCell>
                       );
                     })}
+                    <TableCell className="px-4 py-3 text-center text-sm font-bold text-gray-800 border-l border-gray-200 last:border-l-0">
+                      {rowTotal(variant)}
+                    </TableCell>
                   </TableRow>
                 ))}
                 <TableRow className="bg-gray-50 border-t-2 border-gray-200">
@@ -185,12 +223,61 @@ export function ProductStockTable({
                       {total}
                     </TableCell>
                   ))}
+                  <TableCell className="px-4 py-3 text-center text-sm font-bold text-primary border-l border-gray-200 last:border-l-0">
+                    {grandTotal}
+                  </TableCell>
                 </TableRow>
               </>
             )}
           </TableBody>
         </Table>
       </div>
+
+      <BaseModal
+        isOpen={!!selectedCell}
+        onClose={() => setSelectedCell(null)}
+        title="تفاصيل المخزون"
+        showFooter={false}
+      >
+        {selectedCell && (
+          <div className="flex flex-col gap-3 text-sm">
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-gray-500">المنتج</span>
+              <span className="font-semibold text-gray-800">{product.name}</span>
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-gray-500">المتغير</span>
+              <span className="font-semibold text-gray-800">{selectedCell.size}</span>
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-gray-500">اللون</span>
+              <span className="font-semibold text-gray-800">{selectedCell.color}</span>
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-gray-500">الكمية</span>
+              <span className="font-semibold text-gray-800">{selectedCell.stock.quantity}</span>
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-gray-500">الحالة</span>
+              <span
+                className={clsx(
+                  'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
+                  STOCK_STATUS_CONFIG[selectedCell.stock.status].bgColor,
+                  STOCK_STATUS_CONFIG[selectedCell.stock.status].color
+                )}
+              >
+                <span
+                  className={clsx(
+                    'size-1.5 rounded-full',
+                    STOCK_STATUS_CONFIG[selectedCell.stock.status].dotColor
+                  )}
+                />
+                {STOCK_STATUS_CONFIG[selectedCell.stock.status].label}
+              </span>
+            </div>
+          </div>
+        )}
+      </BaseModal>
     </div>
   );
 }

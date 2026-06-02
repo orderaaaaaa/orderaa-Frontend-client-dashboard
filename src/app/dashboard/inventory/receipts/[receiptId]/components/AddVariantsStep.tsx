@@ -62,9 +62,22 @@ const AddVariantsStep = memo(
     const handleSaveVariants = useCallback(
       (variants: SelectedVariant[]) => {
         if (!selectedProduct) return;
-        const current = productVariants[selectedProduct.id] ?? [];
+        const incomingReal = variants.filter((v) => v.attributeOptionIds.length > 0);
+
+        if (incomingReal.length === 0) {
+          const existingQty = (productVariants[selectedProduct.id] ?? [])[0]?.quantity ?? variants[0]?.quantity ?? 0;
+          onProductVariantsChange({
+            ...productVariants,
+            [selectedProduct.id]: [{ attributeOptionIds: [], attributeLabels: [], quantity: existingQty }],
+          });
+          return;
+        }
+
+        const current = (productVariants[selectedProduct.id] ?? []).filter(
+          (v) => v.attributeOptionIds.length > 0,
+        );
         const byKey = new Map(current.map((v) => [variantKey(v), v]));
-        for (const v of variants) {
+        for (const v of incomingReal) {
           if (!byKey.has(variantKey(v))) byKey.set(variantKey(v), v);
         }
         onProductVariantsChange({
@@ -73,6 +86,21 @@ const AddVariantsStep = memo(
         });
       },
       [selectedProduct, productVariants, onProductVariantsChange],
+    );
+
+    const handleRowReceivedChange = useCallback(
+      (invoiceProductId: number, value: string) => {
+        const num = parseInt(value, 10);
+        const qty = isNaN(num) ? 0 : Math.max(0, num);
+        const current = productVariants[invoiceProductId] ?? [];
+        if (current.length > 1) return;
+        const base = current[0] ?? { attributeOptionIds: [], attributeLabels: [], quantity: 0 };
+        onProductVariantsChange({
+          ...productVariants,
+          [invoiceProductId]: [{ ...base, quantity: qty }],
+        });
+      },
+      [productVariants, onProductVariantsChange],
     );
 
     const handleRemoveVariant = useCallback(
@@ -149,12 +177,40 @@ const AddVariantsStep = memo(
           header: 'عدد القطع',
         },
         {
+          key: 'received',
+          header: 'الكمية المستلمة',
+          className: 'w-40',
+          render: (_value: unknown, row: ProductRow) => {
+            const variants = productVariants[row.id as number] ?? [];
+            const isMulti = variants.length > 1;
+            const value = isMulti
+              ? variants.reduce((sum, v) => sum + (v.quantity || 0), 0)
+              : (variants[0]?.quantity ?? '');
+            return (
+              <span
+                className="inline-block"
+                title={isMulti ? 'حدد الكمية لكل متغير بالأسفل' : undefined}
+              >
+                <Input
+                  type="number"
+                  value={value}
+                  onChange={(e) => handleRowReceivedChange(row.id as number, e.target.value)}
+                  min={0}
+                  disabled={isMulti}
+                  placeholder="0"
+                  className="w-28"
+                />
+              </span>
+            );
+          },
+        },
+        {
           key: 'actions',
           header: '',
           className: 'w-44',
           render: (_value: unknown, row: ProductRow) => {
-            const variants = productVariants[row.id as number];
-            const count = variants?.length ?? 0;
+            const variants = productVariants[row.id as number] ?? [];
+            const count = variants.filter((v) => v.attributeOptionIds.length > 0).length;
             return (
               <Button
                 variant="default"
@@ -172,34 +228,45 @@ const AddVariantsStep = memo(
           },
         },
       ],
-      [handleAddVariant, productVariants],
+      [handleAddVariant, handleRowReceivedChange, productVariants],
     );
 
     const renderSubRow = useCallback(
       (row: ProductRow) => {
-        const variants = productVariants[row.id as number];
-        if (!variants || variants.length === 0) return null;
+        const variants = (productVariants[row.id as number] ?? []).filter(
+          (v) => v.attributeOptionIds.length > 0,
+        );
+        if (variants.length === 0) return null;
+
+        const showPerVariantQty = variants.length > 1;
 
         return (
           <div className="bg-gray-50/80 px-4 sm:px-6 py-3 flex flex-col sm:flex-row sm:flex-wrap items-start gap-2">
             {variants.map((v) => {
               const key = variantKey(v);
-              const displayLabel = v.attributeLabels.length > 0 ? v.attributeLabels.join(' | ') : 'بدون متغير';
+              const displayLabel =
+                v.attributeLabels.length > 0
+                  ? v.attributeLabels.join(' | ')
+                  : v.variantName ?? 'متغير';
               return (
                 <div
                   key={key}
                   className="flex items-center gap-2 bg-white border border-primary/20 rounded-full px-3 py-1.5 text-xs w-fit"
                 >
                   <span className="text-primary font-medium">{displayLabel}</span>
-                  <span className="text-gray-400">|</span>
-                  <Input
-                    type="number"
-                    value={v.quantity}
-                    onChange={(e) => handleQuantityChange(row.id as number, key, e.target.value)}
-                    min={0}
-                    className="w-16"
-                    inputClassName="!py-0.5 !px-1.5 text-center text-xs !rounded-full !bg-white"
-                  />
+                  {showPerVariantQty && (
+                    <>
+                      <span className="text-gray-400">|</span>
+                      <Input
+                        type="number"
+                        value={v.quantity}
+                        onChange={(e) => handleQuantityChange(row.id as number, key, e.target.value)}
+                        min={0}
+                        className="w-16"
+                        inputClassName="!py-0.5 !px-1.5 text-center text-xs !rounded-full !bg-white"
+                      />
+                    </>
+                  )}
                   <Button
                     variant="ghost"
                     size="icon"

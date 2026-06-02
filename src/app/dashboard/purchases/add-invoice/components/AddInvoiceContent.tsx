@@ -25,6 +25,7 @@ export function AddInvoiceContent() {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [invoiceMode, setInvoiceMode] = useState<InvoiceMode>('singular');
+  const [withVariants, setWithVariants] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('unpaid');
   const [partialAmount, setPartialAmount] = useState('');
@@ -224,7 +225,7 @@ export function AddInvoiceContent() {
             productId: item.productId,
             quantity: invoiceMode === 'package' ? (item.pieceCount ?? 0) : item.quantity,
             price: invoiceMode === 'package' ? (item.pricePerPiece ?? 0) : item.pricePerItem,
-            ...(item.variants?.length ? { variants: item.variants } : {}),
+            attributeOptionIds: (item.variants ?? []).map((v) => v.attributeOptionId),
           })),
           images,
         });
@@ -300,6 +301,8 @@ export function AddInvoiceContent() {
             setValue('invoiceType', value as 'PURCHASE' | 'RETURN', { shouldValidate: true })
           }
           invoiceTypeError={errors.invoiceType?.message}
+          withVariants={withVariants}
+          onWithVariantsChange={setWithVariants}
           onModeChange={handleModeChange}
           onQuantityChange={handleQuantityChange}
           onPriceChange={handlePriceChange}
@@ -343,6 +346,7 @@ export function AddInvoiceContent() {
         onConfirm={handleAddProducts}
         existingProductIds={existingNoVariantProductIds}
         existingVariantCombos={existingVariantCombos}
+        allowVariants={withVariants}
       />
 
       <BaseModal
