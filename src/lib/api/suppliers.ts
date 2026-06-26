@@ -158,7 +158,7 @@ export interface UpdateSupplierInvoiceDto {
 }
 
 export interface ApproveSupplierInvoiceVariantDto {
-  attributeOptionIds: number[];
+  attributeOptionIds?: number[];
   approvedCount: number;
   rejectedCount: number;
 }

@@ -20,6 +20,7 @@ import ConfirmCountStep from './ConfirmCountStep';
 import RejectionStep from './RejectionStep';
 import { RECEIPT_STEPS } from '../constants';
 import { SelectedVariant } from '../types';
+import type { ApproveSupplierInvoiceVariantDto } from '@/lib/api/suppliers';
 
 const SINGLE_STEP_MODE = true;
 
@@ -135,11 +136,16 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
         invoiceProductId: p.id,
         variants: (productVariants[p.id] ?? [])
           .filter((v) => v.quantity > 0)
-          .map((v) => ({
-            attributeOptionIds: v.attributeOptionIds,
-            approvedCount: v.quantity,
-            rejectedCount: 0,
-          })),
+          .map((v) => {
+            const variant: ApproveSupplierInvoiceVariantDto = {
+              approvedCount: v.quantity,
+              rejectedCount: 0,
+            };
+            if (v.attributeOptionIds.length > 0) {
+              variant.attributeOptionIds = v.attributeOptionIds;
+            }
+            return variant;
+          }),
       }))
       .filter((p) => p.variants.length > 0);
 
