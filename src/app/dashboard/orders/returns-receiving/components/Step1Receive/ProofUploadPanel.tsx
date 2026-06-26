@@ -29,6 +29,7 @@ interface ProofUploadPanelProps {
   setCodeSheetImages: (files: File[]) => void;
   proofUploaded: boolean;
   setProofUploaded: (uploaded: boolean) => void;
+  onUploadComplete: (imageUrl: string) => void;
 }
 
 const proofSchema = z.object({
@@ -52,6 +53,7 @@ export function ProofUploadPanel({
   setCodeSheetImages,
   proofUploaded,
   setProofUploaded,
+  onUploadComplete,
 }: ProofUploadPanelProps) {
   const uploadMutation = useUploadReceiptProofMutation();
 
@@ -76,12 +78,8 @@ export function ProofUploadPanel({
   }, [receiptImage, codeSheetImages, reset]);
 
   const onSubmit = async (values: ProofFormValues) => {
-    await uploadMutation.mutateAsync({
-      receipt: values.receiptImage,
-      codeSheets: values.codeSheetImages?.length
-        ? values.codeSheetImages
-        : undefined,
-    });
+    const result = await uploadMutation.mutateAsync(values.receiptImage);
+    onUploadComplete(result.url);
     setProofUploaded(true);
     onComplete();
   };
@@ -110,7 +108,7 @@ export function ProofUploadPanel({
             <LiaLockSolid className="w-5 h-5 shrink-0" />
             <div className="flex flex-col">
               <h3 className="font-bold">
-                2- رفع الاستلام (الإيصال + شيت الأكواد)
+                2- رفع الاستلام
               </h3>
               <p className="text-xs">
                 يفتح هذا القسم بعد الانتهاء من المسح الرئيسي
@@ -126,9 +124,6 @@ export function ProofUploadPanel({
               </h3>
               <p className="text-xs text-emerald-700">
                 الإيصال ({receiptImage?.name || 'ملف محفوظ'})
-                {codeSheetImages.length > 0
-                  ? ` + ${codeSheetImages.length} صورة من شيت الأكواد`
-                  : ''}
               </p>
             </div>
           </div>
@@ -138,7 +133,7 @@ export function ProofUploadPanel({
               2- رفع الاستلام
             </h3>
             <span className="text-xs text-gray-500">
-              صورة الإيصال + شيت الأكواد المطبوع (اختياري)
+              صورة الإيصال المستلم من مندوب الشحن
             </span>
           </div>
         )}
@@ -163,22 +158,25 @@ export function ProofUploadPanel({
             )}
           />
 
-          <Controller
-            control={control}
-            name="codeSheetImages"
-            render={({ field, fieldState }) => (
-              <MultiImageUploadField
-                value={field.value}
-                onChange={(files) => {
-                  field.onChange(files);
-                  setCodeSheetImages(files);
-                }}
-                title="شيت الأكواد"
-                description="صور متعددة من الشيت المطبوع بالأكواد"
-                error={fieldState.error?.message}
-              />
-            )}
-          />
+          {/*
+            HIDDEN: شيت الأكواد upload — keep for future, not ready for release
+            <Controller
+              control={control}
+              name="codeSheetImages"
+              render={({ field, fieldState }) => (
+                <MultiImageUploadField
+                  value={field.value}
+                  onChange={(files) => {
+                    field.onChange(files);
+                    setCodeSheetImages(files);
+                  }}
+                  title="شيت الأكواد"
+                  description="صور متعددة من الشيت المطبوع بالأكواد"
+                  error={fieldState.error?.message}
+                />
+              )}
+            />
+          */}
 
           <div className="flex justify-end">
             <Button

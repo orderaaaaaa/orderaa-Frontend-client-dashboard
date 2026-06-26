@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, type Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'react-toastify';
@@ -20,7 +20,8 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { OrderStatus } from '@/types/orders';
-import { getReturnOrderByCode } from '../../services';
+import { getReturnOrderByCode } from '@/lib/api/returns-receiving';
+import { useBarcodeScanner, useScannerFeedback } from '@/app/dashboard/orders/print-orders/hooks';
 import { getCustomerDisplay, type ReturnOrder } from '../../types';
 import { ScanCountChip } from './ScanCountChip';
 
@@ -97,6 +98,8 @@ export function MainScanPanel({
   const inputRef = useRef<HTMLInputElement>(null);
   const isFirstScanCountSyncRef = useRef(true);
 
+  const { playSuccessSound, playErrorSound } = useScannerFeedback();
+
   useEffect(() => {
     setValue('scanCount', mainScanCodes.length, {
       shouldValidate: !isFirstScanCountSyncRef.current,
@@ -119,6 +122,7 @@ export function MainScanPanel({
       const code = rawCode.toUpperCase();
 
       if (mainScanCodes.includes(code)) {
+        playErrorSound();
         toast.warn(`تم مسح الكود ${code} من قبل`);
         setFlashingCode(code);
         setTimeout(() => setFlashingCode(null), 900);
@@ -129,12 +133,15 @@ export function MainScanPanel({
       try {
         const order = await getReturnOrderByCode(code);
         if (order.status === OrderStatus.FINAL_RETURN) {
+          playErrorSound();
           toast.warn(`تم تحويل الطلب ${code} لمرتجع نهائي مسبقاً`);
           return;
         }
+        playSuccessSound();
         addMainScanCode(code);
         setOrderCache((prev) => ({ ...prev, [code]: order }));
       } catch (err) {
+        playErrorSound();
         const anyErr = err as {
           response?: { status?: number; data?: { message?: string } };
         };
@@ -149,7 +156,7 @@ export function MainScanPanel({
         setIsResolving(false);
       }
     },
-    [mainScanCodes, addMainScanCode],
+    [mainScanCodes, addMainScanCode, playSuccessSound, playErrorSound],
   );
 
   const handleBarcodeKeyDown = useCallback(
@@ -164,6 +171,16 @@ export function MainScanPanel({
     },
     [mainPanelLocked, isResolving, getValues, setValue, handleScan],
   );
+
+  const handleScanRef = useRef(handleScan);
+  useEffect(() => { handleScanRef.current = handleScan; }, [handleScan]);
+
+  useBarcodeScanner({
+    onScan: (code: string) => { handleScanRef.current(code); },
+    enabled: !mainPanelLocked && !isResolving,
+    minCharLength: 1,
+    maxCharLength: 1000,
+  });
 
   useEffect(() => {
     const el = inputRef.current;
@@ -218,7 +235,7 @@ export function MainScanPanel({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="flex flex-col gap-1">
               <Input
-                control={control}
+                control={control as Control<any>}
                 name="barcode"
                 ref={inputRef}
                 label="كود الطلب"

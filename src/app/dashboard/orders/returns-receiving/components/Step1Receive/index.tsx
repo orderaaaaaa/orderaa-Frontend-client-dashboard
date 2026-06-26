@@ -9,11 +9,17 @@ type PanelKey = 'main' | 'proof';
 
 interface Step1ReceiveProps {
   onValidityChange: (valid: boolean) => void;
+  onScanCodesChange?: (codes: string[]) => void;
+  onImageUrlChange?: (url: string | null) => void;
 }
 
 const normalize = (code: string) => code.trim().toUpperCase();
 
-export function Step1Receive({ onValidityChange }: Step1ReceiveProps) {
+export function Step1Receive({
+  onValidityChange,
+  onScanCodesChange,
+  onImageUrlChange,
+}: Step1ReceiveProps) {
   const mainScanInputRef = useRef<HTMLInputElement | null>(null);
 
   const [expectedCount, setExpectedCount] = useState<number | null>(null);
@@ -31,6 +37,10 @@ export function Step1Receive({ onValidityChange }: Step1ReceiveProps) {
   useEffect(() => {
     onValidityChange(isStep1Valid);
   }, [isStep1Valid, onValidityChange]);
+
+  useEffect(() => {
+    onScanCodesChange?.(mainScanCodes);
+  }, [mainScanCodes, onScanCodesChange]);
 
   useEffect(() => {
     if (receiptImage === null && proofUploaded) {
@@ -87,6 +97,7 @@ export function Step1Receive({ onValidityChange }: Step1ReceiveProps) {
           setCodeSheetImages={setCodeSheetImages}
           proofUploaded={proofUploaded}
           setProofUploaded={setProofUploaded}
+          onUploadComplete={(url) => onImageUrlChange?.(url)}
         />
       </Accordion>
     </div>

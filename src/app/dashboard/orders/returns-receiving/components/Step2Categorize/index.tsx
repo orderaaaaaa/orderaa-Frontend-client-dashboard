@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'react-toastify';
@@ -149,7 +149,7 @@ export function Step2Categorize({
         </div>
 
         <Input
-          control={control}
+          control={control as Control<any>}
           name="barcode"
           ref={inputRef}
           label="كود الطلب"

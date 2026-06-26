@@ -51,6 +51,18 @@ export interface ShippingCompanyCountResponse {
   count: number;
 }
 
+export interface SubmitReturnReceiptsPayload {
+  orderCodes: string[];
+  imageUrl: string;
+}
+
+export interface SubmitReturnReceiptsResponse {
+  success: boolean;
+  receiptId: number;
+  receivedCount: number;
+  receivedOrderCodes: string[];
+}
+
 export interface ReturnOrderCustomerDisplay {
   name: string;
   phone: string;

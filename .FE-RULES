@@ -1,0 +1,10 @@
+# Frontend learned rules
+
+Auto-appended by agent when user states general pattern/constraint during chat.
+
+- Always follow existing frontend structure. Before creating new: check if functionality exists, if it can be extended, and if it's readable. Never create new paths when existing patterns suffice.
+- Follow UI/UX identity of existing pages. Match component patterns, styling conventions, layout structures, and user flow patterns.
+- Keep frontend UX validation even when backend doesn't require it — user tracking/awareness features are valuable (e.g., expected count matching).
+- Infer API endpoint structure from backend code (controllers, DTOs, services) instead of accessing swagger/web pages.
+- Don't redesign or delete working code when backend doesn't support it yet — preserve for future use.
+
