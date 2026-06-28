@@ -4,6 +4,7 @@ import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import type { StockFilters as Filters } from '../types';
+import { LOCATION_TYPE_OPTIONS } from '../constants';
 
 interface StockFilterOption {
   key: string;
@@ -19,6 +20,7 @@ interface StockFiltersProps {
   onFromDateChange: (date: Date | null) => void;
   onToDateChange: (date: Date | null) => void;
   onTimePeriodChange: (period: TimePeriod | '') => void;
+  onLocationTypeChange?: (value: string) => void;
 }
 
 export function StockFilters({
@@ -30,6 +32,7 @@ export function StockFilters({
   onFromDateChange,
   onToDateChange,
   onTimePeriodChange,
+  onLocationTypeChange,
 }: StockFiltersProps) {
   return (
     <div className="flex flex-col gap-3">
@@ -48,6 +51,14 @@ export function StockFilters({
           onChange={(val) => onFilterChange('size', val)}
           onClear={() => onClearFilter('size')}
           placeholder="المقاس"
+          clearable
+        />
+        <SearchableSelect
+          options={LOCATION_TYPE_OPTIONS}
+          value={filters.locationType}
+          onChange={(val) => onLocationTypeChange?.(val)}
+          onClear={() => onLocationTypeChange?.('')}
+          placeholder="نوع المخزون"
           clearable
         />
       </div>

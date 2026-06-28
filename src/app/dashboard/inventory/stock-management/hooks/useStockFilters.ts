@@ -16,6 +16,7 @@ const INITIAL_FILTERS: StockFilters = {
   searchQuery: '',
   color: '',
   size: '',
+  locationType: '',
   fromDate: null,
   toDate: null,
   timePeriod: '',
@@ -46,6 +47,10 @@ export function useStockFilters() {
     },
     []
   );
+
+  const setLocationType = useCallback((value: string) => {
+    setFilters((prev) => ({ ...prev, locationType: value }));
+  }, []);
 
   const clearFilter = useCallback((key: keyof StockFilters) => {
     setFilters((prev) => ({ ...prev, [key]: INITIAL_FILTERS[key] }));
@@ -83,6 +88,7 @@ export function useStockFilters() {
       search: debouncedSearchQuery.trim() || undefined,
       color: filters.color || undefined,
       size: filters.size || undefined,
+      locationType: filters.locationType || undefined,
       fromDate: dateToIsoOrUndefined(filters.fromDate),
       toDate: dateToIsoOrUndefined(filters.toDate),
     }),
@@ -90,6 +96,7 @@ export function useStockFilters() {
       debouncedSearchQuery,
       filters.color,
       filters.size,
+      filters.locationType,
       filters.fromDate,
       filters.toDate,
     ]
@@ -130,6 +137,7 @@ export function useStockFilters() {
     !!debouncedSearchQuery.trim() ||
     !!filters.color ||
     !!filters.size ||
+    !!filters.locationType ||
     !!filters.fromDate ||
     !!filters.toDate;
 
@@ -143,6 +151,7 @@ export function useStockFilters() {
     setSearchQuery,
     setFilter,
     clearFilter,
+    setLocationType,
     setFromDate,
     setToDate,
     setTimePeriod,
