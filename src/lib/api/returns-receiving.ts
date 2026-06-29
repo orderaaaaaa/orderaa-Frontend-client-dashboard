@@ -10,7 +10,8 @@ export async function getReturnOrderByCode(
 
 export interface SubmitReturnReceiptsRequest {
   orderCodes: string[];
-  imageUrl: string;
+  receiptImageUrl: string;
+  codeSheetImageUrls?: string[];
 }
 
 export interface SubmitReturnReceiptsResponse {

@@ -53,7 +53,8 @@ export interface ShippingCompanyCountResponse {
 
 export interface SubmitReturnReceiptsPayload {
   orderCodes: string[];
-  imageUrl: string;
+  receiptImageUrl: string;
+  codeSheetImageUrls?: string[];
 }
 
 export interface SubmitReturnReceiptsResponse {
