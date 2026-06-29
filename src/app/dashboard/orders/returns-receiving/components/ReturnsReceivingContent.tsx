@@ -11,7 +11,8 @@ export function ReturnsReceivingContent() {
   const router = useRouter();
 
   const [mainScanCodes, setMainScanCodes] = useState<string[]>([]);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [receiptImageUrl, setReceiptImageUrl] = useState<string | null>(null);
+  const [codeSheetImageUrls, setCodeSheetImageUrls] = useState<string[]>([]);
   const [isStep1Valid, setIsStep1Valid] = useState(false);
 
   const submitMutation = useSubmitReturnReceiptsMutation();
@@ -21,17 +22,18 @@ export function ReturnsReceivingContent() {
   }, []);
 
   const handleSubmit = useCallback(async () => {
-    if (!imageUrl || mainScanCodes.length === 0) return;
+    if (!receiptImageUrl || mainScanCodes.length === 0) return;
     try {
       await submitMutation.mutateAsync({
         orderCodes: mainScanCodes,
-        imageUrl,
+        receiptImageUrl,
+        codeSheetImageUrls: codeSheetImageUrls.length > 0 ? codeSheetImageUrls : undefined,
       });
       router.replace('/dashboard/orders/allOrders');
     } catch {
       /* error toast handled by mutation onError */
     }
-  }, [mainScanCodes, imageUrl, submitMutation, router]);
+  }, [mainScanCodes, receiptImageUrl, codeSheetImageUrls, submitMutation, router]);
 
   return (
     <div className="flex flex-col p-4 sm:p-6 max-w-5xl mx-auto w-full min-h-full">
@@ -42,7 +44,8 @@ export function ReturnsReceivingContent() {
       <Step1Receive
         onValidityChange={handleValidityChange}
         onScanCodesChange={setMainScanCodes}
-        onImageUrlChange={setImageUrl}
+        onImageUrlChange={setReceiptImageUrl}
+        onCodeSheetUrlsChange={setCodeSheetImageUrls}
       />
 
       <div className="p-4 sm:p-6">

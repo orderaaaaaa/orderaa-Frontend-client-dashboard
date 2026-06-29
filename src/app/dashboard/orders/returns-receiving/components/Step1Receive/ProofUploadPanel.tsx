@@ -29,7 +29,8 @@ interface ProofUploadPanelProps {
   setCodeSheetImages: (files: File[]) => void;
   proofUploaded: boolean;
   setProofUploaded: (uploaded: boolean) => void;
-  onUploadComplete: (imageUrl: string) => void;
+  onUploadComplete: (receiptImageUrl: string) => void;
+  onCodeSheetUploadComplete?: (urls: string[]) => void;
 }
 
 const proofSchema = z.object({
@@ -54,6 +55,7 @@ export function ProofUploadPanel({
   proofUploaded,
   setProofUploaded,
   onUploadComplete,
+  onCodeSheetUploadComplete,
 }: ProofUploadPanelProps) {
   const uploadMutation = useUploadReceiptProofMutation();
 
@@ -78,8 +80,16 @@ export function ProofUploadPanel({
   }, [receiptImage, codeSheetImages, reset]);
 
   const onSubmit = async (values: ProofFormValues) => {
-    const result = await uploadMutation.mutateAsync(values.receiptImage);
-    onUploadComplete(result.url);
+    const codeSheetFiles = values.codeSheetImages ?? [];
+
+    const allUploads = await Promise.all([
+      uploadMutation.mutateAsync(values.receiptImage),
+      ...codeSheetFiles.map((file) => uploadMutation.mutateAsync(file)),
+    ]);
+
+    onUploadComplete(allUploads[0].url);
+    onCodeSheetUploadComplete?.(allUploads.slice(1).map((u) => u.url));
+
     setProofUploaded(true);
     onComplete();
   };
@@ -158,25 +168,22 @@ export function ProofUploadPanel({
             )}
           />
 
-          {/*
-            HIDDEN: شيت الأكواد upload — keep for future, not ready for release
-            <Controller
-              control={control}
-              name="codeSheetImages"
-              render={({ field, fieldState }) => (
-                <MultiImageUploadField
-                  value={field.value}
-                  onChange={(files) => {
-                    field.onChange(files);
-                    setCodeSheetImages(files);
-                  }}
-                  title="شيت الأكواد"
-                  description="صور متعددة من الشيت المطبوع بالأكواد"
-                  error={fieldState.error?.message}
-                />
-              )}
-            />
-          */}
+          <Controller
+            control={control}
+            name="codeSheetImages"
+            render={({ field, fieldState }) => (
+              <MultiImageUploadField
+                value={field.value}
+                onChange={(files) => {
+                  field.onChange(files);
+                  setCodeSheetImages(files);
+                }}
+                title="شيت الأكواد"
+                description="صور متعددة من الشيت المطبوع بالأكواد"
+                error={fieldState.error?.message}
+              />
+            )}
+          />
 
           <div className="flex justify-end">
             <Button

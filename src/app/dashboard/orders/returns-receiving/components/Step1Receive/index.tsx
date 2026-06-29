@@ -11,6 +11,7 @@ interface Step1ReceiveProps {
   onValidityChange: (valid: boolean) => void;
   onScanCodesChange?: (codes: string[]) => void;
   onImageUrlChange?: (url: string | null) => void;
+  onCodeSheetUrlsChange?: (urls: string[]) => void;
 }
 
 const normalize = (code: string) => code.trim().toUpperCase();
@@ -19,6 +20,7 @@ export function Step1Receive({
   onValidityChange,
   onScanCodesChange,
   onImageUrlChange,
+  onCodeSheetUrlsChange,
 }: Step1ReceiveProps) {
   const mainScanInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -98,6 +100,7 @@ export function Step1Receive({
           proofUploaded={proofUploaded}
           setProofUploaded={setProofUploaded}
           onUploadComplete={(url) => onImageUrlChange?.(url)}
+          onCodeSheetUploadComplete={(urls) => onCodeSheetUrlsChange?.(urls)}
         />
       </Accordion>
     </div>
