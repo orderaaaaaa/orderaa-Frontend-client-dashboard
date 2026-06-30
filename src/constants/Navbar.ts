@@ -77,6 +77,11 @@ export const navigation: NavigationItem[] = [
         href: '/dashboard/orders/tracking',
         icon: LiaClipboardCheckSolid,
       },
+      {
+        name: 'استلامات المرتجعات',
+        href: '/dashboard/orders/returns-receiving',
+        icon: LiaUndoAltSolid,
+      },
     ],
   },
   // {
@@ -194,18 +199,6 @@ export const navigation: NavigationItem[] = [
         name: 'إدارة الاستلامات',
         href: '/dashboard/inventory/receipts',
         icon: LiaClipboardListSolid,
-        children: [
-          {
-            name: 'الاستلامات',
-            href: '/dashboard/inventory/receipts',
-            icon: LiaClipboardListSolid,
-          },
-          {
-            name: 'قسم الفرز',
-            href: '/dashboard/orders/returns-receiving',
-            icon: LiaUndoAltSolid,
-          },
-        ],
       },
     ],
   },
