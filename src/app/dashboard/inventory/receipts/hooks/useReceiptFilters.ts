@@ -1,13 +1,14 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useDebounce } from '@/utils/debounce';
 import { calculateDateRangeFromPeriod, TimePeriod } from '@/utils/dateRangeUtils';
-import { MOCK_RECEIPTS } from '../constants';
 import { ReceiptFilters } from '../types';
 
 const INITIAL_FILTERS: ReceiptFilters = {
   searchQuery: '',
   supplierName: '',
-  itemsCount: '',
+  transactionType: '',
+  totalAmountFrom: '',
+  totalAmountTo: '',
   employeeName: '',
   fromDate: null,
   toDate: null,
@@ -63,46 +64,13 @@ export function useReceiptFilters() {
     }));
   }, []);
 
-  const filteredReceipts = useMemo(() => {
-    return MOCK_RECEIPTS.filter((receipt) => {
-      if (debouncedSearchQuery) {
-        const query = debouncedSearchQuery.toLowerCase();
-        const matchesSearch =
-          receipt.invoiceNumber.toLowerCase().includes(query) ||
-          receipt.companyName.toLowerCase().includes(query);
-        if (!matchesSearch) return false;
-      }
-
-      if (filters.supplierName && receipt.companyName !== filters.supplierName) {
-        return false;
-      }
-
-      if (filters.itemsCount) {
-        const count = parseInt(filters.itemsCount, 10);
-        if (!isNaN(count) && receipt.itemsCount !== count) {
-          return false;
-        }
-      }
-
-      if (filters.employeeName && receipt.employeeName !== filters.employeeName) {
-        return false;
-      }
-
-      if (filters.fromDate || filters.toDate) {
-        const receiptDate = new Date(receipt.createdAt);
-        if (filters.fromDate && receiptDate < filters.fromDate) return false;
-        if (filters.toDate && receiptDate > filters.toDate) return false;
-      }
-
-      return true;
-    });
-  }, [debouncedSearchQuery, filters]);
-
   const hasActiveFilters = useMemo(
     () =>
       !!debouncedSearchQuery ||
       !!filters.supplierName ||
-      !!filters.itemsCount ||
+      !!filters.transactionType ||
+      !!filters.totalAmountFrom ||
+      !!filters.totalAmountTo ||
       !!filters.employeeName ||
       !!filters.fromDate ||
       !!filters.toDate,
@@ -111,8 +79,8 @@ export function useReceiptFilters() {
 
   return {
     filters,
-    filteredReceipts,
     hasActiveFilters,
+    debouncedSearchQuery,
     setSearchQuery,
     clearSearchQuery,
     setFilter,

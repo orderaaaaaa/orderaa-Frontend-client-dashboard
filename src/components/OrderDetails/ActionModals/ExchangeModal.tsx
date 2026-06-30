@@ -93,11 +93,14 @@ export default function ExchangeModal({
                   )}>
                     {op.products.name}
                   </span>
-                  {op.variants && op.variants.length > 0 && (
-                    <span className="text-xs text-gray-500">
-                      {op.variants.map((v) => `${v.label}: ${v.value}`).join(' • ')}
-                    </span>
-                  )}
+                  {op.products.extraDetails?.variants &&
+                    op.products.extraDetails.variants.length > 0 && (
+                      <span className="text-xs text-gray-500">
+                        {op.products.extraDetails.variants
+                          .map((v) => v.title)
+                          .join(' • ')}
+                      </span>
+                    )}
                 </div>
                 <span className="text-sm font-bold text-[#1F1F1F] shrink-0">
                   {op.price} ج.م

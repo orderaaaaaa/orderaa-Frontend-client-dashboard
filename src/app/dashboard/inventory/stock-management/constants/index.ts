@@ -101,3 +101,13 @@ export const MOCK_ALL_SIZES = [
 ];
 
 export const LOW_STOCK_THRESHOLD = 10;
+
+export const LOCATION_TYPE_OPTIONS = [
+  { key: '', value: 'الكل (المخزون المتاح)' },
+  { key: 'AVAILABLE', value: 'المخزون المتاح' },
+  { key: 'RESERVED', value: 'المخزون المحجوز' },
+  { key: 'PROCESSING', value: 'قيد التجهيز' },
+  { key: 'DELIVERED', value: 'تم التوصيل' },
+  { key: 'RETURNED_WITH_COMPANY', value: 'مرتجع لدى الشركة' },
+  { key: 'DAMAGED', value: 'تالف' },
+];

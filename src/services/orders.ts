@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import http from '@/lib/api/http';
+import { getProductAttributeOptions } from '@/lib/api/products';
 import {
   Order,
   FilterOrdersDto,
@@ -185,13 +186,13 @@ export const useUpdateOrderProduct = () => {
   return useMutation({
     mutationFn: async ({
       orderProductId,
-      variants,
+      attributeOptionIds,
     }: {
       orderProductId: number;
-      variants: { label: string; value: string }[];
+      attributeOptionIds: number[];
     }) => {
       const response = await http.patch(`/orders/order-product/${orderProductId}`, {
-        variants,
+        attributeOptionIds,
       });
       return response.data;
     },
@@ -228,17 +229,17 @@ export const useAddOrderProduct = () => {
     mutationFn: async ({
       orderId,
       productId,
-      variants,
+      attributeOptionIds,
       quantity,
     }: {
       orderId: number;
       productId: number;
-      variants: { label: string; value: string }[];
+      attributeOptionIds: number[];
       quantity: number;
     }) => {
       const response = await http.post(`/orders/${orderId}/products`, {
         productId,
-        variants,
+        attributeOptionIds,
         quantity,
       });
       return response.data;
@@ -294,6 +295,7 @@ export const useAllProducts = () => {
 export interface VariantOption {
   label: string;
   values: string[];
+  options: { id: number; name: string }[];
 }
 
 // Selected variant for API payload
@@ -302,27 +304,33 @@ export interface SelectedVariant {
   value: string;
 }
 
-// API response structure for variant options
-interface VariantOptionsApiResponse {
-  variantOptions: Array<{
-    label?: string;
-    values: string[];
-  }>;
-}
+export const resolveAttributeOptionIds = (
+  variantOptions: VariantOption[],
+  selectedVariants: Record<string, string>
+): number[] => {
+  return Object.entries(selectedVariants).reduce<number[]>(
+    (ids, [label, value]) => {
+      const group = variantOptions.find((o) => o.label === label);
+      const option = group?.options.find((o) => o.name === value);
+      if (option) ids.push(option.id);
+      return ids;
+    },
+    []
+  );
+};
 
-// Fetch product variant options
 export const useProductVariantsOptions = (productId: number | null) => {
   return useQuery({
     queryKey: [QUERY_KEYS.PRODUCT_VARIANTS_OPTIONS, productId] as QueryKey,
     queryFn: async () => {
-      const response = await http.get<VariantOptionsApiResponse>(
-        `/products/${productId}/variants-options`
-      );
-      // Extract variantOptions array from response and add default labels if missing
-      const variantOptions = response.data.variantOptions || [];
-      return variantOptions.map((option, index) => ({
-        label: option.label || `variant_${index}`,
-        values: option.values,
+      const { attributeOptions } = await getProductAttributeOptions(productId!);
+      return (attributeOptions || []).map((attribute, index) => ({
+        label: attribute.name || `attribute_${index}`,
+        values: (attribute.options || []).map((option) => option.name),
+        options: (attribute.options || []).map((option) => ({
+          id: option.id,
+          name: option.name,
+        })),
       })) as VariantOption[];
     },
     enabled: !!productId,

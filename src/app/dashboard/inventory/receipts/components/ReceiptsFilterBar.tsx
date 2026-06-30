@@ -3,12 +3,8 @@
 import { memo } from 'react';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import Input from '@/components/ui/Input';
-import { DatePicker } from '@/components/ui/datepicker';
 import { ReceiptFilters } from '../types';
-import {
-  MOCK_SUPPLIER_OPTIONS,
-  MOCK_EMPLOYEE_OPTIONS,
-} from '../constants';
+import { INVOICE_TYPE_OPTIONS } from '../constants';
 
 interface ReceiptsFilterBarProps {
   filters: ReceiptFilters;
@@ -17,7 +13,8 @@ interface ReceiptsFilterBarProps {
     value: ReceiptFilters[K],
   ) => void;
   onClearFilter: (key: keyof ReceiptFilters) => void;
-  onFromDateChange: (date: Date | null) => void;
+  supplierOptions: { key: string; value: string }[];
+  employeeOptions: { key: string; value: string }[];
 }
 
 const ReceiptsFilterBar = memo(
@@ -25,13 +22,14 @@ const ReceiptsFilterBar = memo(
     filters,
     onFilterChange,
     onClearFilter,
-    onFromDateChange,
+    supplierOptions,
+    employeeOptions,
   }: ReceiptsFilterBarProps) => {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="flex flex-col gap-1">
           <SearchableSelect
-            options={MOCK_SUPPLIER_OPTIONS}
+            options={supplierOptions}
             value={filters.supplierName}
             onChange={(v) => onFilterChange('supplierName', v)}
             placeholder="اسم المورد"
@@ -41,29 +39,40 @@ const ReceiptsFilterBar = memo(
         </div>
 
         <div className="flex flex-col gap-1">
-          <DatePicker
-            selected={filters.fromDate}
-            onChange={onFromDateChange}
-            placeholder="تاريخ الانشاء"
-            isClearable
+          <SearchableSelect
+            options={INVOICE_TYPE_OPTIONS}
+            value={filters.transactionType}
+            onChange={(v) => onFilterChange('transactionType', v)}
+            placeholder="نوع الفاتورة"
+            clearable
+            onClear={() => onClearFilter('transactionType')}
           />
         </div>
 
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-row gap-2">
           <Input
             inputClassName="bg-white py-1.5 md:py-2 text-sm md:text-base rounded border-gray-300"
             type="number"
-            placeholder="عدد القطع"
-            value={filters.itemsCount}
-            onChange={(e) => onFilterChange('itemsCount', e.target.value)}
+            placeholder="المبلغ من"
+            value={filters.totalAmountFrom}
+            onChange={(e) => onFilterChange('totalAmountFrom', e.target.value)}
             clearable
-            onClear={() => onClearFilter('itemsCount')}
+            onClear={() => onClearFilter('totalAmountFrom')}
+          />
+          <Input
+            inputClassName="bg-white py-1.5 md:py-2 text-sm md:text-base rounded border-gray-300"
+            type="number"
+            placeholder="المبلغ الى"
+            value={filters.totalAmountTo}
+            onChange={(e) => onFilterChange('totalAmountTo', e.target.value)}
+            clearable
+            onClear={() => onClearFilter('totalAmountTo')}
           />
         </div>
 
         <div className="flex flex-col gap-1">
           <SearchableSelect
-            options={MOCK_EMPLOYEE_OPTIONS}
+            options={employeeOptions}
             value={filters.employeeName}
             onChange={(v) => onFilterChange('employeeName', v)}
             placeholder="اسم الموظف"

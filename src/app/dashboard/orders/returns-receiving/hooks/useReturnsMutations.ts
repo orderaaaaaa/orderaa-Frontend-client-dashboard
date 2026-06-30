@@ -2,14 +2,15 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
+import { uploadFile } from '@/lib/api/upload';
+import { submitReturnReceipts } from '@/lib/api/returns-receiving';
 import {
   bulkUpdateReturnCategories,
   generateReturnResendCodes,
-  uploadReturnsReceiptProof,
 } from '../services';
 import type {
   CategorizeCommitPayload,
-  UploadReceiptProofPayload,
+  SubmitReturnReceiptsPayload,
 } from '../types';
 
 function pickErrorMessage(err: unknown, fallback: string): string {
@@ -25,10 +26,22 @@ function pickErrorMessage(err: unknown, fallback: string): string {
 
 export function useUploadReceiptProofMutation() {
   return useMutation({
-    mutationFn: (payload: UploadReceiptProofPayload) =>
-      uploadReturnsReceiptProof(payload),
+    mutationFn: (file: File) => uploadFile(file),
     onError: (err) => {
       toast.error(pickErrorMessage(err, 'تعذر رفع صور الإثبات'));
+    },
+  });
+}
+
+export function useSubmitReturnReceiptsMutation() {
+  return useMutation({
+    mutationFn: (payload: SubmitReturnReceiptsPayload) =>
+      submitReturnReceipts(payload),
+    onSuccess: () => {
+      toast.success('تم إتمام استلام المرتجعات بنجاح');
+    },
+    onError: (err) => {
+      toast.error(pickErrorMessage(err, 'تعذر إتمام استلام المرتجعات'));
     },
   });
 }

@@ -8,6 +8,12 @@ export interface VariantOption {
   values: string[];
 }
 
+export interface ProductAttribute {
+  id: number;
+  name: string;
+  options: Array<{ id: number; name: string }>;
+}
+
 export interface ApiProduct {
   id: number;
   name: string;
@@ -15,14 +21,19 @@ export interface ApiProduct {
   image?: string;
   images: string[];
   variantOptions: VariantOption[];
+  attributes?: ProductAttribute[];
   createdAt: string;
   updatedAt: string;
   totalOrders: number;
   totalSold: number;
 }
 
+interface RawApiProduct extends Omit<ApiProduct, 'variantOptions'> {
+  variantOptions?: VariantOption[];
+}
+
 interface ProductsApiResponse {
-  data: ApiProduct[];
+  data: RawApiProduct[];
   currentPage: number;
   totalPages: number;
   itemsPerPage: number;
@@ -30,6 +41,14 @@ interface ProductsApiResponse {
   hasNextPage: boolean;
   hasPreviousPage: boolean;
 }
+
+const mapProductVariantOptions = (product: RawApiProduct): ApiProduct => ({
+  ...product,
+  variantOptions: (product.attributes ?? []).map((attribute) => ({
+    label: attribute.name,
+    values: (attribute.options ?? []).map((option) => option.name),
+  })),
+});
 
 export const useProductDropdown = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -70,10 +89,11 @@ export const useProductDropdown = () => {
       });
 
       const data = response.data;
+      const mappedProducts = data.data.map(mapProductVariantOptions);
       if (append) {
-        setProducts((prev) => [...prev, ...data.data]);
+        setProducts((prev) => [...prev, ...mappedProducts]);
       } else {
-        setProducts(data.data);
+        setProducts(mappedProducts);
       }
       setHasNextPage(data.hasNextPage);
       setTotalItems(data.totalItems);
@@ -136,7 +156,6 @@ export const useProductDropdown = () => {
 
   const handleAddProduct = () => {
     confirmSelections();
-    useProductDropdownStore.setState({ isOpen: false });
   };
 
   const handleAddProductWithoutVariants = (product: ApiProduct) => {

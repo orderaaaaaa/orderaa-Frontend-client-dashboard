@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { LiaObjectGroupSolid, LiaEditSolid } from 'react-icons/lia';
 import { Scan, ScanLine, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -48,6 +48,9 @@ function ProductsTable() {
   const [selectedIds, setSelectedIds] = useState<Set<string | number>>(
     new Set(),
   );
+  const [selectedProductsMap, setSelectedProductsMap] = useState<
+    Map<number, Product>
+  >(new Map());
   const [showMergeModal, setShowMergeModal] = useState(false);
   const [showSoldModal, setShowSoldModal] = useState(false);
   const [soldProductId, setSoldProductId] = useState<number | null>(null);
@@ -55,8 +58,30 @@ function ProductsTable() {
   useEffect(() => {
     if (!select) {
       setSelectedIds(new Set());
+      setSelectedProductsMap(new Map());
     }
   }, [select]);
+
+  const handleSelectionChange = useCallback(
+    (ids: Set<string | number>) => {
+      setSelectedIds(ids);
+      setSelectedProductsMap((prev) => {
+        const next = new Map(prev);
+        for (const key of next.keys()) {
+          if (!ids.has(key)) next.delete(key);
+        }
+        for (const id of ids) {
+          const numericId = Number(id);
+          if (!next.has(numericId)) {
+            const product = (data?.data ?? []).find((p) => p.id === numericId);
+            if (product) next.set(numericId, product as Product);
+          }
+        }
+        return next;
+      });
+    },
+    [data],
+  );
 
   const showBulkActions = select && selectedIds.size >= 2;
 
@@ -254,7 +279,7 @@ function ProductsTable() {
             onSort={handleSort}
             selectable={select}
             selectedIds={selectedIds}
-            onSelectionChange={setSelectedIds}
+            onSelectionChange={handleSelectionChange}
             emptyMessage="لا توجد منتجات"
           />
         </div>
@@ -275,7 +300,7 @@ function ProductsTable() {
             } else {
               next.add(id);
             }
-            setSelectedIds(next);
+            handleSelectionChange(next);
           }}
           openSoldModal={openSoldModal}
           openEditModal={openEditModal}
@@ -314,13 +339,14 @@ function ProductsTable() {
           onClose={closeSoldModal}
         />
       )}
-      {showMergeModal && selectedIds.size >= 2 && data?.data && (
+      {showMergeModal && selectedProductsMap.size >= 2 && (
         <MergeProductsModal
           isOpen={showMergeModal}
           onClose={() => setShowMergeModal(false)}
-          products={data.data.filter((p) => selectedIds.has(p.id))}
+          products={Array.from(selectedProductsMap.values())}
           onSuccess={() => {
             setSelectedIds(new Set());
+            setSelectedProductsMap(new Map());
             setSelect(false);
           }}
         />

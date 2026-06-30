@@ -2,14 +2,17 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { LiaCheckSolid } from 'react-icons/lia';
-import { useProductVariantsOptions, SelectedVariant } from '@/services/orders';
+import {
+  useProductVariantsOptions,
+  resolveAttributeOptionIds,
+} from '@/services/orders';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import BaseModal from '@/components/ui/base-modal';
 
 interface EditProductModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (variants: SelectedVariant[]) => void;
+  onSave: (attributeOptionIds: number[]) => void;
   productId: number;
   currentVariants: Record<string, string>;
 }
@@ -47,11 +50,12 @@ export default function EditProductModal({
   const handleSave = () => {
     if (!hasChanges) return;
 
-    const variants: SelectedVariant[] = Object.entries(selectedValues).map(
-      ([label, value]) => ({ label, value })
+    const attributeOptionIds = resolveAttributeOptionIds(
+      variantOptions,
+      selectedValues
     );
 
-    onSave(variants);
+    onSave(attributeOptionIds);
     onClose();
   };
 

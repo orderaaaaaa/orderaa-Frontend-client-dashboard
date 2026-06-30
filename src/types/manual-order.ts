@@ -1,12 +1,7 @@
-export type ManualOrderProductVariant = {
-  label: string;
-  value: string;
-};
-
 export type ManualOrderProduct = {
   id: number;
   quantity: number;
-  variants: ManualOrderProductVariant[];
+  attributeOptionIds: number[];
 };
 
 export type ManualOrderCustomer = {

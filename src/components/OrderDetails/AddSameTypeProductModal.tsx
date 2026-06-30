@@ -3,14 +3,17 @@
 import { useState, useEffect, useMemo } from 'react';
 import { LiaPlusSolid, LiaMinusSolid } from 'react-icons/lia';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
-import { useProductVariantsOptions, SelectedVariant } from '@/services/orders';
+import {
+  useProductVariantsOptions,
+  resolveAttributeOptionIds,
+} from '@/services/orders';
 import { Button } from '../ui/button';
 import BaseModal from '@/components/ui/base-modal';
 
 interface AddSameTypeProductModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (variants: SelectedVariant[], quantity: number) => void;
+  onSave: (attributeOptionIds: number[], quantity: number) => void;
   productType: string;
   productId: number | null;
 }
@@ -51,11 +54,12 @@ export default function AddSameTypeProductModal({
   const handleSave = () => {
     if (!isFormValid) return;
 
-    const variants: SelectedVariant[] = Object.entries(selectedVariants).map(
-      ([label, value]) => ({ label, value })
+    const attributeOptionIds = resolveAttributeOptionIds(
+      variantOptions,
+      selectedVariants
     );
 
-    onSave(variants, quantity);
+    onSave(attributeOptionIds, quantity);
     onClose();
   };
 

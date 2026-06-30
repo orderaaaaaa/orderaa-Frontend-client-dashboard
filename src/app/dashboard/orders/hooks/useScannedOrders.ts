@@ -31,13 +31,19 @@ export function useScannedOrders(
     [scannedOrders]
   );
 
-  const addOrder = useCallback(
-    (order: AddOrderInput): boolean => {
-      if (hasOrder(order.code)) {
-        return false;
+  const addOrder = useCallback((order: AddOrderInput): boolean => {
+    let added = false;
+    setScannedOrders((prev) => {
+      const isDuplicate = prev.some(
+        (o) =>
+          o.id === order.id ||
+          o.code.toLowerCase() === order.code.toLowerCase()
+      );
+      if (isDuplicate) {
+        return prev;
       }
-
-      setScannedOrders((prev) => [
+      added = true;
+      return [
         {
           id: order.id,
           code: order.code,
@@ -48,11 +54,10 @@ export function useScannedOrders(
           printCount: order.printCount,
         },
         ...prev,
-      ]);
-      return true;
-    },
-    [hasOrder]
-  );
+      ];
+    });
+    return added;
+  }, []);
 
   const removeOrder = useCallback((code: string) => {
     setScannedOrders((prev) =>

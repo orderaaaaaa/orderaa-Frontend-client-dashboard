@@ -13,7 +13,7 @@ import useShippingCompanies from "@/hooks/useShippingCompanies";
 import { useQuery } from "@tanstack/react-query";
 import http from "@/lib/api/http";
 import { useDebounce, useDebouncedCallback } from "@/utils/debounce";
-import { LiaTimesSolid, LiaCheckSolid } from "react-icons/lia";
+import { LiaTimesSolid } from "react-icons/lia";
 import { Button } from "@/components/ui/button";
 import { formatDateForUrl } from "@/utils/urlFilters";
 
@@ -40,7 +40,6 @@ export const FILTER_DEFINITIONS: FilterDefinition[] = [
   { key: 'storeId', label: 'اسم المتجر', type: 'select' },
   { key: 'shippingCompany', label: 'شركة الشحن', type: 'select' },
   { key: 'cancellationReasons', label: 'سبب الإلغاء', type: 'multiselect', visibleStatuses: ['CANCELLED'] },
-  { key: 'skipFilters', label: 'طلبات جديدة', type: 'toggle' },
   { key: 'orderByDirection', label: 'الترتيب', type: 'select' },
 ];
 
@@ -160,12 +159,14 @@ export default function FilterPanel({
   const { data: selectedProductName } = useQuery({
     queryKey: ['product-name', selectedProductId],
     queryFn: async () => {
-      const response = await http.get<{ data: { id: number; name: string } }>(
-        `/products/${selectedProductId}`
-      );
-      return response.data.data.name;
+      const response = await http.get<{
+        data?: { id: number; name: string };
+        name?: string;
+      }>(`/products/${selectedProductId}`);
+      const product = response.data?.data ?? response.data;
+      return product?.name;
     },
-    enabled: isProductActive && !!selectedProductId,
+    enabled: !!selectedProductId,
     staleTime: 5 * 60 * 1000,
   });
   const { data: governorates = [] } = useGovernoratesQuery(isGovernorateActive || isAreaActive);
@@ -483,16 +484,6 @@ export default function FilterPanel({
               className="w-full h-full px-3 rounded border border-gray-300 bg-white"
               disabled
             />
-          </FilterChip>
-        );
-
-      case 'toggle':
-        return (
-          <FilterChip key={key} filterKey={key} label={label} onRemove={onRemoveFilter}>
-            <div className="flex items-center gap-2 w-full h-full px-3 rounded border border-primary bg-primary/5">
-              <LiaCheckSolid className="size-4 text-primary shrink-0" />
-              <span className="text-base font-semibold text-primary">{label}</span>
-            </div>
           </FilterChip>
         );
 

@@ -38,7 +38,13 @@ const invoiceItemSchema = z.object({
   ),
   pricePerPiece: z.number().optional(),
   variants: z
-    .array(z.object({ label: z.string(), value: z.string() }))
+    .array(
+      z.object({
+        label: z.string(),
+        value: z.string(),
+        attributeOptionId: z.number(),
+      }),
+    )
     .optional(),
 });
 

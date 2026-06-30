@@ -7,6 +7,7 @@ import Input from '@/components/ui/Input';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import { DataTable, DataTableColumn } from '@/components/ui/data-table';
 import ToggleGroup from '@/components/ui/toggle-group';
+import { Switch } from '@/components/ui/switch';
 import { InvoiceItem, InvoiceMode } from '../types';
 import { INVOICE_TYPES } from '../constants';
 
@@ -28,6 +29,8 @@ interface InvoiceItemsTableProps {
   invoiceType: string;
   onInvoiceTypeChange: (value: string) => void;
   invoiceTypeError?: string;
+  withVariants: boolean;
+  onWithVariantsChange: (value: boolean) => void;
   onModeChange: (mode: InvoiceMode) => void;
   onQuantityChange: (index: number, value: number) => void;
   onPriceChange: (index: number, value: number) => void;
@@ -44,6 +47,8 @@ const InvoiceItemsTable = memo(
     invoiceType,
     onInvoiceTypeChange,
     invoiceTypeError,
+    withVariants,
+    onWithVariantsChange,
     onModeChange,
     onQuantityChange,
     onPriceChange,
@@ -142,9 +147,8 @@ const InvoiceItemsTable = memo(
             key: 'pricePerPiece',
             header: 'سعر القطعة',
             render: (_value: unknown, row: InvoiceItem & Record<string, unknown>) => {
-              const total = row.quantity * row.pricePerItem;
               const pieceCount = row.pieceCount as number || 0;
-              const pricePerPiece = pieceCount > 0 ? total / pieceCount : 0;
+              const pricePerPiece = pieceCount > 0 ? row.pricePerItem / pieceCount : 0;
               return (
                 <span className="font-semibold">
                   {pricePerPiece > 0 ? `${pricePerPiece.toLocaleString(undefined, { maximumFractionDigits: 2 })} جنيه` : '-'}
@@ -200,6 +204,18 @@ const InvoiceItemsTable = memo(
               error={invoiceTypeError}
               widthClass="w-40"
             />
+
+            <label
+              className="flex items-center gap-2"
+              title={hasItems ? 'لا يمكن تغيير النوع بعد اضافة اصناف، قم بحذف الاصناف اولا' : undefined}
+            >
+              <span className="text-sm font-semibold text-gray-700">إضافة متغيرات</span>
+              <Switch
+                checked={withVariants}
+                onCheckedChange={onWithVariantsChange}
+                disabled={hasItems}
+              />
+            </label>
           </div>
 
           <Button

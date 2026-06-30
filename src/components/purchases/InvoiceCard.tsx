@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useMemo, useState } from 'react';
+import Link from 'next/link';
 import clsx from 'clsx';
 import { IconType } from 'react-icons';
 import {
@@ -97,8 +98,10 @@ interface InvoiceCardProps {
   select: boolean;
   isSelected: boolean;
   onSelectionChange: (checked: boolean) => void;
-  onTitleClick: () => void;
+  onTitleClick?: () => void;
+  titleHref?: string;
   formatDate: (dateStr: string) => string;
+  showAmount?: boolean;
 }
 
 const InvoiceCard = memo(
@@ -108,7 +111,9 @@ const InvoiceCard = memo(
     isSelected,
     onSelectionChange,
     onTitleClick,
+    titleHref,
     formatDate,
+    showAmount = true,
   }: InvoiceCardProps) => {
     const [isProductsModalOpen, setIsProductsModalOpen] = useState(false);
 
@@ -152,13 +157,17 @@ const InvoiceCard = memo(
           valueClassName: typeColors.text,
           iconClassName: typeColors.iconColor,
         },
-        {
-          label: 'المبلغ الإجمالي',
-          value: `${invoice.totalAmount.toLocaleString()} جنيه`,
-          icon: LiaMoneyBillWaveSolid,
-        },
+        ...(showAmount
+          ? [
+              {
+                label: 'المبلغ الإجمالي',
+                value: `${invoice.totalAmount.toLocaleString()} جنيه`,
+                icon: LiaMoneyBillWaveSolid,
+              },
+            ]
+          : []),
       ],
-      [invoice, typeColors, isNegativeAmount, formatDate]
+      [invoice, typeColors, isNegativeAmount, formatDate, showAmount]
     );
 
     return (
@@ -177,16 +186,28 @@ const InvoiceCard = memo(
 
         <div className="flex items-start justify-between">
           <div className="flex flex-col items-start gap-1">
-            <Button
-              variant="ghost"
-              className="flex items-center gap-2 p-0 h-auto hover:bg-transparent hover:text-primary hover:underline"
-              onClick={onTitleClick}
-            >
-              <LiaFileInvoiceSolid className="text-primary shrink-0" style={{ width: 24, height: 24 }} />
-              <span className="text-lg font-bold text-primary">
-                فاتورة رقم  {invoice.invoiceNumber}
-              </span>
-            </Button>
+            {titleHref ? (
+              <Link
+                href={titleHref}
+                className="flex items-center gap-2 p-0 h-auto hover:text-primary hover:underline"
+              >
+                <LiaFileInvoiceSolid className="text-primary shrink-0" style={{ width: 24, height: 24 }} />
+                <span className="text-lg font-bold text-primary">
+                  فاتورة رقم  {invoice.invoiceNumber}
+                </span>
+              </Link>
+            ) : (
+              <Button
+                variant="ghost"
+                className="flex items-center gap-2 p-0 h-auto hover:bg-transparent hover:text-primary hover:underline"
+                onClick={onTitleClick}
+              >
+                <LiaFileInvoiceSolid className="text-primary shrink-0" style={{ width: 24, height: 24 }} />
+                <span className="text-lg font-bold text-primary">
+                  فاتورة رقم  {invoice.invoiceNumber}
+                </span>
+              </Button>
+            )}
             <span className="ps-11 text-lg font-bold">{invoice.companyName}</span>
           </div>
 
@@ -199,7 +220,12 @@ const InvoiceCard = memo(
           )}
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-6 px-10">
+        <div
+          className={clsx(
+            'grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 px-10',
+            fields.length === 5 ? 'lg:grid-cols-5' : 'lg:grid-cols-4',
+          )}
+        >
           {fields.map((field) =>
             field.onClick ? (
               <button

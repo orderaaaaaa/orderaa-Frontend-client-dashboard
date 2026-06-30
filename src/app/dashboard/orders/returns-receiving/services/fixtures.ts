@@ -9,6 +9,7 @@ export const MOCK_RETURN_ORDERS: ReturnOrder[] = [
     id: 10234,
     code: 'OR-10234',
     status: OrderStatus.SHIPPING,
+    bucket: 'RESEND',
     totalCost: 450,
     governorate: 'القاهرة',
     city: 'مدينة نصر',
@@ -27,6 +28,7 @@ export const MOCK_RETURN_ORDERS: ReturnOrder[] = [
     id: 10235,
     code: 'OR-10235',
     status: OrderStatus.SHIPPING,
+    bucket: 'WAREHOUSE',
     totalCost: 320,
     governorate: 'الإسكندرية',
     customers: {
@@ -42,6 +44,7 @@ export const MOCK_RETURN_ORDERS: ReturnOrder[] = [
     id: 10236,
     code: 'OR-10236',
     status: OrderStatus.SHIPPING,
+    bucket: 'RESEND',
     totalCost: 780,
     governorate: 'الجيزة',
     customers: {
@@ -57,6 +60,7 @@ export const MOCK_RETURN_ORDERS: ReturnOrder[] = [
     id: 10237,
     code: 'OR-10237',
     status: OrderStatus.SHIPPING,
+    bucket: 'FINAL_RETURN',
     totalCost: 590,
     governorate: 'القاهرة',
     customers: {
@@ -72,6 +76,7 @@ export const MOCK_RETURN_ORDERS: ReturnOrder[] = [
     id: 10238,
     code: 'OR-10238',
     status: OrderStatus.SHIPPING,
+    bucket: 'RESEND',
     totalCost: 210,
     governorate: 'الدقهلية',
     customers: {
@@ -88,6 +93,7 @@ export const MOCK_RETURN_ORDERS: ReturnOrder[] = [
     id: 10239,
     code: 'OR-10239',
     status: OrderStatus.SHIPPING,
+    bucket: 'WAREHOUSE',
     totalCost: 640,
     governorate: 'الغربية',
     customers: {
@@ -104,6 +110,7 @@ export const MOCK_RETURN_ORDERS: ReturnOrder[] = [
     id: 10240,
     code: 'OR-10240',
     status: OrderStatus.SHIPPING,
+    bucket: 'RESEND',
     totalCost: 820,
     governorate: 'الإسكندرية',
     customers: {
@@ -119,6 +126,7 @@ export const MOCK_RETURN_ORDERS: ReturnOrder[] = [
     id: 10241,
     code: 'OR-10241',
     status: OrderStatus.SHIPPING,
+    bucket: 'FINAL_RETURN',
     totalCost: 390,
     governorate: 'القاهرة',
     customers: {
@@ -134,6 +142,7 @@ export const MOCK_RETURN_ORDERS: ReturnOrder[] = [
     id: 10242,
     code: 'OR-10242',
     status: OrderStatus.SHIPPING,
+    bucket: 'WAREHOUSE',
     totalCost: 1250,
     governorate: 'الجيزة',
     customers: {
@@ -149,6 +158,7 @@ export const MOCK_RETURN_ORDERS: ReturnOrder[] = [
     id: 10243,
     code: 'OR-10243',
     status: OrderStatus.SHIPPING,
+    bucket: 'RESEND',
     totalCost: 475,
     governorate: 'القاهرة',
     customers: {
@@ -164,6 +174,7 @@ export const MOCK_RETURN_ORDERS: ReturnOrder[] = [
     id: 10244,
     code: 'OR-10244',
     status: OrderStatus.SHIPPING,
+    bucket: 'FINAL_RETURN',
     totalCost: 360,
     governorate: 'أسوان',
     customers: {
@@ -179,6 +190,7 @@ export const MOCK_RETURN_ORDERS: ReturnOrder[] = [
     id: 10245,
     code: 'OR-10245',
     status: OrderStatus.FINAL_RETURN,
+    bucket: 'FINAL_RETURN',
     totalCost: 910,
     governorate: 'الإسكندرية',
     customers: {

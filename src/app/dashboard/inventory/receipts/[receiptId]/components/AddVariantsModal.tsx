@@ -1,14 +1,19 @@
 'use client';
 
-import { memo, useState, useCallback, useMemo } from 'react';
-import Image from 'next/image';
+import { memo, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import clsx from 'clsx';
-import { LiaPlusSolid, LiaSearchSolid } from 'react-icons/lia';
+import { LiaPlusSolid, LiaTimesSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
-import Input from '@/components/ui/Input';
-import { MOCK_PRODUCT_VARIANTS, MOCK_PRODUCT_VARIANT_MAP } from '../constants';
-import { ProductVariant, SelectedVariant } from '../types';
+import PageLoading from '@/components/ui/page-loading';
+import { useProductAttributeOptionsQuery } from '@/services/products';
+import { AttributeOptionGroup, SelectedVariant } from '../types';
+
+const EMPTY_VARIANTS: SelectedVariant[] = [];
+
+function displayGroupName(name: string): string {
+  return name.trim().toLowerCase() === 'variant' ? 'متغير' : name;
+}
 
 interface AddVariantsModalProps {
   isOpen: boolean;
@@ -19,212 +24,232 @@ interface AddVariantsModalProps {
   onSave: (variants: SelectedVariant[]) => void;
 }
 
-interface VariantSelection {
-  variantId: number;
-  color: string | null;
-  size: string | null;
+interface VariantCombo {
+  attributeOptionIds: number[];
+  attributeLabels: string[];
+}
+
+function sortedKey(ids: number[]): string {
+  return [...ids].sort((a, b) => a - b).join('-');
+}
+
+function buildCombo(
+  pickedPerGroup: Record<number, number | null>,
+  groups: AttributeOptionGroup[],
+): VariantCombo | null {
+  if (groups.length === 0) return null;
+
+  const attributeOptionIds: number[] = [];
+  const attributeLabels: string[] = [];
+  for (const group of groups) {
+    const pickedId = pickedPerGroup[group.id];
+    if (pickedId == null) return null;
+    const option = group.options.find((o) => o.id === pickedId);
+    if (!option) return null;
+    attributeOptionIds.push(pickedId);
+    attributeLabels.push(option.name);
+  }
+
+  return { attributeOptionIds, attributeLabels };
 }
 
 const AddVariantsModal = memo(
-  ({ isOpen, onClose, productId, productName, existingVariants = [], onSave }: AddVariantsModalProps) => {
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selections, setSelections] = useState<VariantSelection[]>(() =>
-      existingVariants.map((v) => ({
-        variantId: v.variantId,
-        color: v.color,
-        size: v.size,
-      }))
-    );
-    const [expandedVariantId, setExpandedVariantId] = useState<number | null>(null);
-
-    const productVariantIds = MOCK_PRODUCT_VARIANT_MAP[productId] ?? [];
-    const productVariants = useMemo(
-      () => MOCK_PRODUCT_VARIANTS.filter((v) => productVariantIds.includes(v.id)),
-      [productVariantIds]
+  ({ isOpen, onClose, productId, productName, existingVariants = EMPTY_VARIANTS, onSave }: AddVariantsModalProps) => {
+    const { data, isLoading } = useProductAttributeOptionsQuery(isOpen ? productId : undefined);
+    const groups = useMemo(
+      () =>
+        (data?.attributeOptions ?? [])
+          .map((g) => ({ ...g, options: g.options ?? [] }))
+          .filter((g) => g.options.length > 0),
+      [data],
     );
 
-    const filteredVariants = useMemo(() => {
-      if (!searchQuery.trim()) return productVariants;
-      const q = searchQuery.trim().toLowerCase();
-      return productVariants.filter((v) =>
-        v.name.toLowerCase().includes(q)
-      );
-    }, [searchQuery, productVariants]);
+    const [pickedPerGroup, setPickedPerGroup] = useState<Record<number, number | null>>({});
+    const [staged, setStaged] = useState<SelectedVariant[]>([]);
+    const [noAttrsQuantity, setNoAttrsQuantity] = useState<number>(1);
 
-    const isVariantSelected = useCallback(
-      (variantId: number, color: string, size: string) =>
-        selections.some(
-          (s) => s.variantId === variantId && s.color === color && s.size === size
-        ),
-      [selections]
-    );
+    const existingVariantsRef = useRef(existingVariants);
+    existingVariantsRef.current = existingVariants;
+    const seededRef = useRef(false);
 
-    const hasAnySelection = useCallback(
-      (variantId: number) => selections.some((s) => s.variantId === variantId),
-      [selections]
-    );
+    useEffect(() => {
+      if (!isOpen) {
+        seededRef.current = false;
+        return;
+      }
+      if (isLoading) return;
+      if (seededRef.current) return;
+      seededRef.current = true;
 
-    const getSelectedColor = useCallback(
-      (variantId: number) => {
-        const sel = selections.find((s) => s.variantId === variantId);
-        return sel?.color ?? null;
-      },
-      [selections]
-    );
+      const seedExisting = existingVariantsRef.current;
 
-    const getSelectedSizes = useCallback(
-      (variantId: number, color: string) =>
-        selections
-          .filter((s) => s.variantId === variantId && s.color === color)
-          .map((s) => s.size)
-          .filter(Boolean) as string[],
-      [selections]
-    );
+      if (groups.length === 0) {
+        const existing = seedExisting.find((v) => v.attributeOptionIds.length === 0);
+        setNoAttrsQuantity(existing?.quantity ?? 1);
+        return;
+      }
 
-    const handleColorSelect = useCallback(
-      (variantId: number, color: string) => {
-        setSelections((prev) => {
-          const withoutVariantColor = prev.filter(
-            (s) => !(s.variantId === variantId)
-          );
-          return [...withoutVariantColor, { variantId, color, size: null }];
-        });
-      },
-      []
-    );
+      setPickedPerGroup({});
+      setStaged([]);
+    }, [isOpen, isLoading, groups]);
 
-    const handleSizeToggle = useCallback(
-      (variantId: number, color: string, size: string) => {
-        setSelections((prev) => {
-          const exists = prev.some(
-            (s) => s.variantId === variantId && s.color === color && s.size === size
-          );
-          if (exists) {
-            const filtered = prev.filter(
-              (s) => !(s.variantId === variantId && s.color === color && s.size === size)
-            );
-            const hasOtherSizes = filtered.some(
-              (s) => s.variantId === variantId && s.color === color && s.size !== null
-            );
-            if (!hasOtherSizes) {
-              return filtered.filter(
-                (s) => !(s.variantId === variantId && s.color === color && s.size === null)
-              );
-            }
-            return filtered;
-          }
-          const withoutPlaceholder = prev.filter(
-            (s) => !(s.variantId === variantId && s.color === color && s.size === null)
-          );
-          return [...withoutPlaceholder, { variantId, color, size }];
-        });
-      },
-      []
-    );
-
-    const handleToggleExpand = useCallback((variantId: number) => {
-      setExpandedVariantId((prev) => (prev === variantId ? null : variantId));
+    const handlePick = useCallback((groupId: number, optionId: number) => {
+      setPickedPerGroup((prev) => ({
+        ...prev,
+        [groupId]: prev[groupId] === optionId ? null : optionId,
+      }));
     }, []);
 
-    const totalSelectedCount = useMemo(
-      () => selections.filter((s) => s.size !== null).length,
-      [selections]
+    const combo = useMemo(() => buildCombo(pickedPerGroup, groups), [pickedPerGroup, groups]);
+
+    const existingKeys = useMemo(
+      () => new Set(existingVariants.map((v) => sortedKey(v.attributeOptionIds))),
+      [existingVariants],
     );
 
+    const isComboAdded = useMemo(() => {
+      if (!combo) return false;
+      const key = sortedKey(combo.attributeOptionIds);
+      return existingKeys.has(key) || staged.some((v) => sortedKey(v.attributeOptionIds) === key);
+    }, [combo, staged, existingKeys]);
+
+    const handleAddCombo = useCallback(() => {
+      if (!combo || isComboAdded) return;
+      setStaged((prev) => [
+        ...prev,
+        { attributeOptionIds: combo.attributeOptionIds, attributeLabels: combo.attributeLabels, quantity: 1 },
+      ]);
+      setPickedPerGroup({});
+    }, [combo, isComboAdded]);
+
+    const handleRemoveStaged = useCallback((key: string) => {
+      setStaged((prev) => prev.filter((v) => sortedKey(v.attributeOptionIds) !== key));
+    }, []);
+
+    const totalSelectedCount = groups.length === 0 ? (noAttrsQuantity > 0 ? 1 : 0) : staged.length;
+
     const handleSave = useCallback(() => {
-      const validSelections: SelectedVariant[] = selections
-        .filter((s): s is VariantSelection & { color: string; size: string } =>
-          s.color !== null && s.size !== null
-        )
-        .map((s) => {
-          const variant = productVariants.find((v) => v.id === s.variantId);
-          const existing = existingVariants.find(
-            (ev) => ev.variantId === s.variantId && ev.color === s.color && ev.size === s.size
-          );
-          return {
-            variantId: s.variantId,
-            variantName: variant?.name ?? '',
-            color: s.color,
-            size: s.size,
-            quantity: existing?.quantity ?? 1,
-          };
-        });
-      onSave(validSelections);
+      if (groups.length === 0) {
+        onSave([
+          {
+            attributeOptionIds: [],
+            attributeLabels: [],
+            quantity: Math.max(1, noAttrsQuantity),
+          },
+        ]);
+        onClose();
+        return;
+      }
+
+      if (staged.length === 0) return;
+      onSave(staged);
       onClose();
-    }, [selections, existingVariants, productVariants, onSave, onClose]);
+    }, [groups, staged, onSave, onClose, noAttrsQuantity]);
 
     const handleClose = useCallback(() => {
-      setSearchQuery('');
-      setSelections(
-        existingVariants.map((v) => ({
-          variantId: v.variantId,
-          color: v.color,
-          size: v.size,
-        }))
-      );
-      setExpandedVariantId(null);
+      setPickedPerGroup({});
+      setStaged([]);
       onClose();
-    }, [existingVariants, onClose]);
+    }, [onClose]);
 
     return (
-      <BaseModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        title="اختر المتغيرات"
-        showFooter={false}
-      >
+      <BaseModal isOpen={isOpen} onClose={handleClose} title={`اختر المتغيرات - ${productName}`} showFooter={false}>
         <div className="flex flex-col gap-4">
-          <Input
-            placeholder="ابحث عن المنتج.."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            icon={LiaSearchSolid as any}
-            clearable
-            onClear={() => setSearchQuery('')}
-          />
-
-          <div className="border border-gray-200 rounded-lg overflow-hidden">
-            <div className="grid grid-cols-[auto_1fr] bg-[#f1eefa] px-4 py-3">
-              <span className="text-sm font-bold text-gray-700">صور المنتج</span>
-              <span className="text-sm font-bold text-gray-700 text-left">الاسم</span>
+          {isLoading ? (
+            <PageLoading size="sm" className="py-10 min-h-0" />
+          ) : groups.length === 0 ? (
+            <div className="flex flex-col gap-3 py-4">
+              <p className="text-sm text-gray-500">
+                لا توجد متغيرات لهذا المنتج. أدخل الكمية لإضافته كمتغير واحد.
+              </p>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-gray-700">الكمية:</span>
+                <input
+                  type="number"
+                  min={1}
+                  value={noAttrsQuantity}
+                  onChange={(e) => setNoAttrsQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                  className="w-24 rounded-full border border-gray-300 bg-white px-3 py-1.5 text-center text-sm"
+                />
+              </div>
             </div>
-
-            <div className="divide-y divide-gray-100 max-h-[400px] overflow-y-auto">
-              {filteredVariants.length === 0 ? (
-                <div className="flex items-center justify-center py-8">
-                  <p className="text-sm text-gray-400">لا توجد نتائج</p>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {groups.map((group) => (
+                <div key={group.id} className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-semibold text-gray-600 shrink-0">{displayGroupName(group.name)} :</span>
+                  {group.options.map((option) => {
+                    const isPicked = pickedPerGroup[group.id] === option.id;
+                    return (
+                      <Button
+                        key={option.id}
+                        variant="outline"
+                        size="sm"
+                        className={clsx(
+                          'px-4 py-1.5 rounded-lg text-sm font-medium transition-colors',
+                          isPicked
+                            ? 'bg-primary text-white border-primary hover:bg-primary/90 hover:text-white'
+                            : 'bg-white text-gray-700 border-gray-300 hover:border-primary hover:text-primary',
+                        )}
+                        onClick={() => handlePick(group.id, option.id)}
+                      >
+                        {option.name}
+                      </Button>
+                    );
+                  })}
                 </div>
-              ) : (
-                filteredVariants.map((variant) => (
-                  <VariantRow
-                    key={variant.id}
-                    variant={variant}
-                    isExpanded={expandedVariantId === variant.id}
-                    isSelected={hasAnySelection(variant.id)}
-                    selectedColor={getSelectedColor(variant.id)}
-                    getSelectedSizes={getSelectedSizes}
-                    onToggleExpand={handleToggleExpand}
-                    onColorSelect={handleColorSelect}
-                    onSizeToggle={handleSizeToggle}
-                  />
-                ))
+              ))}
+
+              <div className="flex justify-start">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full font-semibold flex items-center gap-2 px-5 border-primary text-primary hover:bg-primary hover:text-white"
+                  onClick={handleAddCombo}
+                  disabled={!combo || isComboAdded}
+                >
+                  <LiaPlusSolid className="w-4 h-4" />
+                  {isComboAdded ? 'تمت إضافته' : 'أضف المتغير'}
+                </Button>
+              </div>
+
+              {staged.length > 0 && (
+                <div className="flex flex-col gap-2 border-t border-gray-100 pt-3">
+                  <span className="text-sm font-semibold text-gray-600">المتغيرات المختارة:</span>
+                  <div className="flex flex-wrap gap-2">
+                    {staged.map((variant) => {
+                      const key = sortedKey(variant.attributeOptionIds);
+                      return (
+                        <span
+                          key={key}
+                          className="flex items-center gap-2 rounded-full bg-primary/10 text-primary text-sm font-medium px-3 py-1.5"
+                        >
+                          {variant.attributeLabels.join(' / ')}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveStaged(key)}
+                            className="flex items-center justify-center rounded-full hover:bg-primary/20 p-0.5 cursor-pointer"
+                          >
+                            <LiaTimesSolid className="w-3.5 h-3.5" />
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
               )}
             </div>
-          </div>
+          )}
 
           <div className="flex justify-end gap-3 pt-2">
-            <Button
-              variant="outline"
-              className="rounded-full font-semibold px-6"
-              onClick={handleClose}
-            >
+            <Button variant="outline" className="rounded-full font-semibold px-6" onClick={handleClose}>
               إلغاء
             </Button>
             <Button
               variant="default"
               className="rounded-full font-semibold flex items-center gap-2 px-6"
               onClick={handleSave}
-              disabled={totalSelectedCount === 0}
+              disabled={isLoading || totalSelectedCount === 0}
             >
               <LiaPlusSolid className="w-4 h-4" />
               إضافة ({totalSelectedCount})
@@ -233,113 +258,9 @@ const AddVariantsModal = memo(
         </div>
       </BaseModal>
     );
-  }
+  },
 );
 
 AddVariantsModal.displayName = 'AddVariantsModal';
-
-interface VariantRowProps {
-  variant: ProductVariant;
-  isExpanded: boolean;
-  isSelected: boolean;
-  selectedColor: string | null;
-  getSelectedSizes: (variantId: number, color: string) => string[];
-  onToggleExpand: (variantId: number) => void;
-  onColorSelect: (variantId: number, color: string) => void;
-  onSizeToggle: (variantId: number, color: string, size: string) => void;
-}
-
-const VariantRow = memo(
-  ({
-    variant,
-    isExpanded,
-    isSelected,
-    selectedColor,
-    getSelectedSizes,
-    onToggleExpand,
-    onColorSelect,
-    onSizeToggle,
-  }: VariantRowProps) => {
-    const selectedSizes = selectedColor
-      ? getSelectedSizes(variant.id, selectedColor)
-      : [];
-
-    return (
-      <div
-        className={clsx(
-          'transition-colors',
-          isSelected && 'bg-primary/5'
-        )}
-      >
-        <div
-          className="grid grid-cols-[auto_1fr] items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
-          onClick={() => onToggleExpand(variant.id)}
-        >
-          <div className="w-14 h-14 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-            <Image
-              src={variant.image}
-              alt={variant.name}
-              width={56}
-              height={56}
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <span className="text-sm font-medium text-gray-800">{variant.name}</span>
-        </div>
-
-        {isExpanded && (
-          <div className="px-4 pb-4 flex flex-col gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-semibold text-gray-600 shrink-0">الالوان :</span>
-              {variant.colors.map((color) => (
-                <Button
-                  key={color}
-                  variant="outline"
-                  size="sm"
-                  className={clsx(
-                    'px-4 py-1.5 rounded-lg text-sm font-medium transition-colors',
-                    selectedColor === color
-                      ? 'bg-primary text-white border-primary hover:bg-primary/90 hover:text-white'
-                      : 'bg-white text-gray-700 border-gray-300 hover:border-primary hover:text-primary'
-                  )}
-                  onClick={() => onColorSelect(variant.id, color)}
-                >
-                  {color}
-                </Button>
-              ))}
-            </div>
-
-            {selectedColor && (
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-semibold text-gray-600 shrink-0">المقاسات :</span>
-                {variant.sizes.map((size) => {
-                  const isSizeSelected = selectedSizes.includes(size);
-                  return (
-                    <Button
-                      key={size}
-                      variant="outline"
-                      size="icon"
-                      className={clsx(
-                        'w-10 h-10 rounded-lg text-sm font-medium transition-colors',
-                        isSizeSelected
-                          ? 'bg-primary text-white border-primary hover:bg-primary/90 hover:text-white'
-                          : 'bg-white text-gray-700 border-gray-300 hover:border-primary hover:text-primary'
-                      )}
-                      onClick={() => onSizeToggle(variant.id, selectedColor, size)}
-                    >
-                      {size}
-                    </Button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    );
-  }
-);
-
-VariantRow.displayName = 'VariantRow';
 
 export default AddVariantsModal;

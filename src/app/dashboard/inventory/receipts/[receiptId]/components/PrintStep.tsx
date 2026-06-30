@@ -128,10 +128,10 @@ const PrintStep = memo(({ receiptId, productVariants }: PrintStepProps) => {
       .map((product) => ({
         product,
         variants: productVariants[product.id].map((v) => ({
-          id: `${product.id}-${v.variantId}-${v.color}-${v.size}`,
-          variantName: `${v.variantName} - ${v.color} - ${v.size}`,
-          color: v.color,
-          size: v.size,
+          id: `${product.id}-${v.variantId ?? 0}-${v.color ?? ''}-${v.size ?? ''}`,
+          variantName: `${v.variantName ?? ''} - ${v.color ?? ''} - ${v.size ?? ''}`,
+          color: v.color ?? '',
+          size: v.size ?? '',
           image: product.image,
           quantity: v.quantity,
         } satisfies PrintVariantRow)),

@@ -24,4 +24,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-*.md
+# worktrees
+.temp-worktree-parallel-tasks/

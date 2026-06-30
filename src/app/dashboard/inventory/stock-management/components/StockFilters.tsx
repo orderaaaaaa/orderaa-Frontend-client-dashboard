@@ -3,31 +3,42 @@
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import { TimePeriod } from '@/utils/dateRangeUtils';
-import { MOCK_ALL_COLORS, MOCK_ALL_SIZES } from '../constants';
 import type { StockFilters as Filters } from '../types';
+import { LOCATION_TYPE_OPTIONS } from '../constants';
+
+interface StockFilterOption {
+  key: string;
+  value: string;
+}
 
 interface StockFiltersProps {
   filters: Filters;
+  colorOptions: StockFilterOption[];
+  sizeOptions: StockFilterOption[];
   onFilterChange: <K extends keyof Filters>(key: K, value: Filters[K]) => void;
   onClearFilter: (key: keyof Filters) => void;
   onFromDateChange: (date: Date | null) => void;
   onToDateChange: (date: Date | null) => void;
   onTimePeriodChange: (period: TimePeriod | '') => void;
+  onLocationTypeChange?: (value: string) => void;
 }
 
 export function StockFilters({
   filters,
+  colorOptions,
+  sizeOptions,
   onFilterChange,
   onClearFilter,
   onFromDateChange,
   onToDateChange,
   onTimePeriodChange,
+  onLocationTypeChange,
 }: StockFiltersProps) {
   return (
     <div className="flex flex-col gap-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <SearchableSelect
-          options={MOCK_ALL_COLORS}
+          options={colorOptions}
           value={filters.color}
           onChange={(val) => onFilterChange('color', val)}
           onClear={() => onClearFilter('color')}
@@ -35,11 +46,19 @@ export function StockFilters({
           clearable
         />
         <SearchableSelect
-          options={MOCK_ALL_SIZES}
+          options={sizeOptions}
           value={filters.size}
           onChange={(val) => onFilterChange('size', val)}
           onClear={() => onClearFilter('size')}
           placeholder="المقاس"
+          clearable
+        />
+        <SearchableSelect
+          options={LOCATION_TYPE_OPTIONS}
+          value={filters.locationType}
+          onChange={(val) => onLocationTypeChange?.(val)}
+          onClear={() => onLocationTypeChange?.('')}
+          placeholder="نوع المخزون"
           clearable
         />
       </div>

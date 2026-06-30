@@ -25,6 +25,7 @@ export function AddInvoiceContent() {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [invoiceMode, setInvoiceMode] = useState<InvoiceMode>('singular');
+  const [withVariants, setWithVariants] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('unpaid');
   const [partialAmount, setPartialAmount] = useState('');
@@ -86,7 +87,7 @@ export function AddInvoiceContent() {
         ...item,
         quantity: safeValue,
         total: newTotal,
-        pricePerPiece: pieceCount > 0 ? newTotal / pieceCount : 0,
+        pricePerPiece: pieceCount > 0 ? item.pricePerItem / pieceCount : 0,
       });
     },
     [update, items],
@@ -103,7 +104,7 @@ export function AddInvoiceContent() {
         ...item,
         pricePerItem: safeValue,
         total: newTotal,
-        pricePerPiece: pieceCount > 0 ? newTotal / pieceCount : 0,
+        pricePerPiece: pieceCount > 0 ? safeValue / pieceCount : 0,
       });
     },
     [update, items],
@@ -114,11 +115,10 @@ export function AddInvoiceContent() {
       const safeValue = Math.max(0, value);
       const item = items[index];
       if (!item) return;
-      const total = item.quantity * item.pricePerItem;
       update(index, {
         ...item,
         pieceCount: safeValue,
-        pricePerPiece: safeValue > 0 ? total / safeValue : 0,
+        pricePerPiece: safeValue > 0 ? item.pricePerItem / safeValue : 0,
       });
     },
     [update, items],
@@ -225,7 +225,7 @@ export function AddInvoiceContent() {
             productId: item.productId,
             quantity: invoiceMode === 'package' ? (item.pieceCount ?? 0) : item.quantity,
             price: invoiceMode === 'package' ? (item.pricePerPiece ?? 0) : item.pricePerItem,
-            ...(item.variants?.length ? { variants: item.variants } : {}),
+            attributeOptionIds: (item.variants ?? []).map((v) => v.attributeOptionId),
           })),
           images,
         });
@@ -301,6 +301,8 @@ export function AddInvoiceContent() {
             setValue('invoiceType', value as 'PURCHASE' | 'RETURN', { shouldValidate: true })
           }
           invoiceTypeError={errors.invoiceType?.message}
+          withVariants={withVariants}
+          onWithVariantsChange={setWithVariants}
           onModeChange={handleModeChange}
           onQuantityChange={handleQuantityChange}
           onPriceChange={handlePriceChange}
@@ -344,6 +346,7 @@ export function AddInvoiceContent() {
         onConfirm={handleAddProducts}
         existingProductIds={existingNoVariantProductIds}
         existingVariantCombos={existingVariantCombos}
+        allowVariants={withVariants}
       />
 
       <BaseModal

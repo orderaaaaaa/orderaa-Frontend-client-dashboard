@@ -7,7 +7,10 @@ import { useQuery } from '@tanstack/react-query';
 import http from '@/lib/api/http';
 import { Product } from '@/types/orders';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
-import { useProductVariantsOptions, SelectedVariant } from '@/services/orders';
+import {
+  useProductVariantsOptions,
+  resolveAttributeOptionIds,
+} from '@/services/orders';
 import { useDebounce } from '@/utils/debounce';
 import { Button } from '../ui/button';
 import BaseModal from '@/components/ui/base-modal';
@@ -17,7 +20,7 @@ interface AddNewProductModalProps {
   onClose: () => void;
   onSave: (
     productId: number,
-    variants: SelectedVariant[],
+    attributeOptionIds: number[],
     quantity: number
   ) => Promise<void>;
 }
@@ -100,11 +103,12 @@ export default function AddNewProductModal({
     if (!selectedProduct || isSaving) return;
     setIsSaving(true);
     try {
-      const variants: SelectedVariant[] = Object.entries(selectedVariants).map(
-        ([label, value]) => ({ label, value })
+      const attributeOptionIds = resolveAttributeOptionIds(
+        variantOptions,
+        selectedVariants
       );
 
-      await onSave(selectedProduct.id, variants, quantity);
+      await onSave(selectedProduct.id, attributeOptionIds, quantity);
       toast.success('تم إضافة المنتج بنجاح');
       onClose();
     } catch (error: any) {

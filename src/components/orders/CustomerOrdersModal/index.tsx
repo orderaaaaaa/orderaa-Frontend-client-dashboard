@@ -129,6 +129,7 @@ export default function CustomerOrdersModal({
     return `جميع طلبات العميل (${nameText}${customerPhone})`;
   }, [customerName, customerPhone]);
 
+  
   return (
     <BaseModal
       isOpen={isOpen}
