@@ -73,6 +73,16 @@ export const QUERY_KEYS = {
   // Returns Receiving
   RETURNS_RECEIVING_SESSION: 'returns-receiving-session',
   RETURNS_RECEIVING_SHIPPING_COUNT: 'returns-receiving-shipping-count',
+
+  // Wallet & Billing
+  WALLET_BALANCE: 'wallet-balance',
+  WALLET_TRANSACTIONS: 'wallet-transactions',
+  WALLET_BILLING_INFO: 'wallet-billing-info',
+  WALLET_CHARGE_OPTIONS: 'wallet-charge-options',
+
+  // Plans & Subscriptions
+  PLANS: 'plans',
+  ACTIVE_SUBSCRIPTION: 'active-subscription',
 } as const;
 
 export type QueryKeyType = (typeof QUERY_KEYS)[keyof typeof QUERY_KEYS];
