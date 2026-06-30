@@ -129,16 +129,16 @@ function SubscriptionPlans() {
                 relative rounded-2xl p-6 border min-h-[420px] flex flex-col transition-all duration-300 hover:scale-105 overflow-hidden text-right
                 ${
                   isEconomical
-                    ? 'bg-gradient-to-br from-purple-600 via-purple-700 to-purple-900 border-transparent text-white shadow-xl shadow-purple-500/25'
+                    ? 'bg-gradient-to-br from-purple-600 via-purple-700 to-purple-900 border-purple-900 text-white shadow-xl shadow-purple-500/25'
                     : isActive
-                    ? 'bg-green-50 border-green-200 text-gray-800 shadow-xl shadow-green-500/10'
-                    : 'bg-white border-gray-100 shadow-xl text-gray-800'
+                    ? 'bg-purple-50 border-purple-200 text-gray-800 shadow-lg'
+                    : 'bg-white border-purple-100 shadow-lg text-gray-800'
                 }
               `}
             >
               {isActive && (
                 <div className="absolute top-3 left-3 z-10">
-                  <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
                     مشترك حالياً
                   </Badge>
                 </div>
@@ -146,7 +146,7 @@ function SubscriptionPlans() {
 
               {isEconomical && !isActive && (
                 <div className="absolute top-3 left-3 z-10">
-                  <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-200">
+                  <Badge className="bg-yellow-300 text-yellow-900 border-yellow-400">
                     <LiaGem className="w-3 h-3 ml-1" />
                     الأفضل قيمة
                   </Badge>
@@ -154,10 +154,10 @@ function SubscriptionPlans() {
               )}
 
               <div className="flex items-center gap-3 mb-6">
-                <div className={isEconomical ? 'text-yellow-200' : isActive ? 'text-green-600' : 'text-purple-600'}>
+                <div className={isEconomical ? 'text-yellow-200' : isActive ? 'text-purple-600' : 'text-purple-600'}>
                   <LiaGem className="w-7 h-7" />
                 </div>
-                <h3 className="text-2xl font-medium">{plan.title}</h3>
+                <h3 className={`text-2xl font-medium ${isEconomical ? 'text-white' : 'text-gray-800'}`}>{plan.title}</h3>
               </div>
 
               <div className="relative z-10 flex flex-col gap-6 flex-1">
@@ -165,7 +165,7 @@ function SubscriptionPlans() {
                   <span
                     className={`
                       text-4xl font-bold
-                      ${isEconomical ? 'text-white' : isActive ? 'text-green-700' : 'text-purple-700'}
+                      ${isEconomical ? 'text-white' : isActive ? 'text-purple-700' : 'text-purple-700'}
                     `}
                   >
                     {plan.type === 'UNLIMITED' ? plan.subscriptionPrice : plan.pricePerOrder}
@@ -173,7 +173,7 @@ function SubscriptionPlans() {
                   <p
                     className={`
                       text-xl font-medium
-                      ${isEconomical ? 'text-purple-100' : isActive ? 'text-green-600' : 'text-gray-900'}
+                      ${isEconomical ? 'text-purple-100' : isActive ? 'text-purple-600' : 'text-gray-900'}
                     `}
                   >
                     {plan.type === 'UNLIMITED' ? ` ${plan.currency} / شهرياً` : ` ${plan.currency} / لكل طلب`}
@@ -183,8 +183,8 @@ function SubscriptionPlans() {
                 <Badge
                   variant="outline"
                   className={`
-                    text-sm px-3 py-1
-                    ${plan.type === 'UNLIMITED' ? 'border-purple-300 text-purple-700' : 'border-orange-300 text-orange-700'}
+                    text-sm px-3 py-1 w-fit
+                    ${plan.type === 'UNLIMITED' ? 'border-purple-300 text-purple-700 bg-purple-50/50' : 'border-purple-300 text-purple-700 bg-purple-50/50'}
                   `}
                 >
                   {getTypeLabel(plan.type)}
@@ -196,61 +196,28 @@ function SubscriptionPlans() {
                   <p className={isEconomical ? 'text-purple-100' : 'text-gray-600'}>{plan.description}</p>
                 )}
 
-                <ul className="space-y-4 mt-4">
-                  {plan.type === 'UNLIMITED' ? (
-                    <>
-                      <li className="flex justify-start items-center gap-3">
-                        <span className={isEconomical ? 'text-yellow-200' : 'text-green-500'}>
+                {plan.benefits && plan.benefits.length > 0 && (
+                  <ul className="space-y-4 mt-4">
+                    {plan.benefits.map((benefit, idx) => (
+                      <li key={idx} className="flex justify-start items-center gap-3">
+                        <span className={isEconomical ? 'text-yellow-200' : 'text-purple-500'}>
                           <LiaCheckCircle className="w-6 h-6" />
                         </span>
-                        <span className="text-base font-medium">عدد غير محدود من الطلبات</span>
+                        <span className="text-base font-medium">{benefit}</span>
                       </li>
-                      <li className="flex justify-start items-center gap-3">
-                        <span className={isEconomical ? 'text-yellow-200' : 'text-green-500'}>
-                          <LiaCheckCircle className="w-6 h-6" />
-                        </span>
-                        <span className="text-base font-medium">سعر ثابت شهرياً</span>
-                      </li>
-                      <li className="flex justify-start items-center gap-3">
-                        <span className={isEconomical ? 'text-yellow-200' : 'text-green-500'}>
-                          <LiaCheckCircle className="w-6 h-6" />
-                        </span>
-                        <span className="text-base font-medium">لا توجد رسوم إضافية لكل طلب</span>
-                      </li>
-                    </>
-                  ) : (
-                    <>
-                      <li className="flex justify-start items-center gap-3">
-                        <span className={isEconomical ? 'text-yellow-200' : 'text-green-500'}>
-                          <LiaCheckCircle className="w-6 h-6" />
-                        </span>
-                        <span className="text-base font-medium">دفع لكل طلب فقط</span>
-                      </li>
-                      <li className="flex justify-start items-center gap-3">
-                        <span className={isEconomical ? 'text-yellow-200' : 'text-green-500'}>
-                          <LiaCheckCircle className="w-6 h-6" />
-                        </span>
-                        <span className="text-base font-medium">لا يوجد التزام شهري</span>
-                      </li>
-                      <li className="flex justify-start items-center gap-3">
-                        <span className={isEconomical ? 'text-yellow-200' : 'text-green-500'}>
-                          <LiaCheckCircle className="w-6 h-6" />
-                        </span>
-                        <span className="text-base font-medium">مناسب للأحجام الصغيرة</span>
-                      </li>
-                    </>
-                  )}
-                </ul>
+                    ))}
+                  </ul>
+                )}
               </div>
 
               <Button
                 className={`
                   w-full mt-auto py-3 rounded-full font-bold transition text-lg
                   ${isActive
-                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    ? 'bg-purple-100 text-purple-400 cursor-not-allowed border-0'
                     : isEconomical
-                    ? 'bg-white text-purple-700 hover:bg-gray-100'
-                    : 'bg-white border border-purple-600 text-purple-600 hover:bg-purple-50 hover:text-purple-700'}
+                    ? 'bg-white text-purple-700 hover:bg-gray-100 border-0'
+                    : 'bg-purple-600 text-white hover:bg-purple-700 border-0 shadow-sm'}
                 `}
                 onClick={() => !isActive && handleSubscribe(plan.id)}
                 disabled={isActive || subscribeMutation.isPending}

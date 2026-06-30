@@ -125,8 +125,8 @@ function WalletTransactionLog() {
     );
   }
 
-  const startItem = meta ? (meta.currentPage - 1) * meta.limit + 1 : 0;
-  const endItem = meta ? Math.min(meta.currentPage * meta.limit, meta.totalItems) : 0;
+  const startItem = meta ? (meta.currentPage - 1) * meta.itemsPerPage + 1 : 0;
+  const endItem = meta ? Math.min(meta.currentPage * meta.itemsPerPage, meta.totalItems) : 0;
   const totalItems = meta?.totalItems ?? 0;
 
   return (
@@ -196,7 +196,7 @@ function WalletTransactionLog() {
             onPageChange={handlePageChange}
             onPrevious={handlePrevious}
             onNext={handleNext}
-            currentPageSize={meta.limit}
+            currentPageSize={meta.itemsPerPage}
             onPageSizeChange={handlePageSizeChange}
           />
         )}

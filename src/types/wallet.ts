@@ -20,13 +20,12 @@ export interface WalletTransaction {
 }
 
 export interface PaginationMeta {
-  page: number;
-  limit: number;
-  totalItems: number;
+  currentPage: number;
   totalPages: number;
+  itemsPerPage: number;
+  totalItems: number;
   hasNextPage: boolean;
   hasPreviousPage: boolean;
-  currentPage: number;
 }
 
 export interface PaginatedResponse<T> {
@@ -82,6 +81,7 @@ export interface Plan {
   subscriptionPrice: string | null;
   pricePerOrder: string | null;
   durationDays: number;
+  benefits: string[];
   isActive: boolean;
 }
 
