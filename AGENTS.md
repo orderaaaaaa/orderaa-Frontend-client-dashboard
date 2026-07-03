@@ -110,6 +110,82 @@ Uses `@import 'tailwindcss'` syntax (not legacy `@tailwind` directives). `@tailw
 - iOS Safari zoom fix: `font-size: 16px !important` on form inputs
 - Safe area inset: `pt-[env(safe-area-inset-top)]` in dashboard layout
 
+## Business UX Flows
+
+### Order Management Flow
+
+Order list at `/dashboard/orders` uses infinite scroll via `useInfiniteOrders` in `services/orders.ts`. Filters: status dropdown (`All`, `Pending`, `Confirmed`, `Processing`, `Shipped`, `Delivered`, etc.), date range picker, carrier filter, search by order ID or customer name. Selection via checkboxes, bulk actions bar appears on selection: bulk print invoices, bulk export shipping data, bulk assign carrier. Order detail page at `/dashboard/orders/[id]` shows timeline with status badges, order line items with images, customer info, shipping address, COD collection status, and action buttons (confirm, mark shipped, mark delivered).
+
+### Returns Flow
+
+2-step stepper at `/dashboard/orders/returns/receive`: Step 1 `الاستلام` (receive) for scanning returned items via barcode scanner keyboard-wedge, uploading receipt image (required) and code sheet images (optional) via `Promise.all` for atomic uploads. Step 2 `التقسيم` (categorize) sorts returned items into disposition categories (re-stock, damage, repair). Receipt upload uses image preview before submit. Code sheet multi-upload restored per `restore-codes-sheet-return-receipt` feature.
+
+### Shipping Flow
+
+Barcode scanner on shipping pages uses a 30ms debounce threshold with `AudioContext` beep feedback on successful scan. Carrier selection from dropdown (Bosta, Turbo, Accurate, MEGA, RED, Hashtag, QuickConnect, RmExpress, Torod, JT). Scanned orders accumulate in a list with visual feedback. Approve/ship action triggers bulk status update. Shipping carrier assignment available from bulk actions and individual order detail.
+
+### Invoice/Print Flow
+
+Print orders sub-module handles invoice generation. Two print formats: A4 for standard office printers and 100mm x 150mm thermal for Bosta shipping labels. PDF generation via `jspdf` + `jspdf-autotable` + `html2canvas`. Bulk print queue processes multiple invoices sequentially. Print styles defined per format type (A4, bosta, generic-invoice). `react-day-picker` for date range filtering on print selection.
+
+### Auth Flow
+
+Signin page at `/signin` sends credentials, server returns JWT, persisted to `localStorage('auth-storage')` via Zustand persist middleware. Forgot password is a 3-step flow: identify account (phone/email) -> verify OTP -> reset password. Signup at `/signup` uses cascading governorate/city selects (data from lookups API, endpoint structure inferred from backend). Axios interceptor reads token from localStorage directly. 401 response clears storage and redirects to `/signin`.
+
+### Wallet Flow
+
+Wallet balance displayed in dashboard header and wallet page at `/dashboard/wallet`. Charge options modal (not credit card forms) shows predefined amounts. Kashier payment popup triggered on charge selection, result polled via background requests. Transaction history with pagination and type filter (credit/debit). Data from `billing-info` endpoint for current balance and usage. No credit card storage on frontend.
+
+### Subscription Flow
+
+Subscription plans fetched dynamically from API (`plans` endpoint). Plan `benefits` array from `plans` database table displayed as bullet list. Current plan displayed on billing page with status badge (active/expired/cancelled). Upgrade/downgrade flows redirect to charge process. PER_ORDER and UNLIMITED plan types.
+
+### Reports Flow
+
+Reports dashboard at `/dashboard/reports` with 12+ chart types: call distribution bar chart, monthly orders line chart, employee performance metrics. Date range picker for all report filters. Export buttons for each report. Charts via `apexcharts` + `recharts`. Data from reports backend module (28 CQRS query handlers).
+
+## Navigation Tree
+
+2-level nested sidebar structure with 17+ items. Main dashboard layout wraps all authenticated routes:
+
+```
+/dashboard/
+├── orders/                    ← Primary domain
+│   ├── (list)                ← Infinite scroll order list
+│   ├── [id]/                 ← Order detail
+│   ├── shipping/             ← Barcode scanner, carrier assign, ship approval
+│   ├── returns/receive/      ← Returns 2-step stepper
+│   ├── tracking/             ← Carrier tracking lookup
+│   └── print/                ← Invoice/print queue
+├── reports/                   ← Charts, metrics, exports
+├── customers/                 ← Customer list and detail
+├── products/                  ← Product catalog management
+├── wallet/                    ← Balance, charge, transactions
+├── settings/                  ← Merchant profile, preferences
+├── billing/                   ← Subscription plans, current plan
+└── (auth routes: /signin, /signup, /forgot-password)
+```
+
+Each leaf route maps to a business domain. Sidebar highlights active section. Breadcrumb component shows current path.
+
+## Standardized UI States
+
+All pages follow consistent state patterns:
+
+- **Error states**: Consistent error component with retry button. React Query error states mapped to `ErrorState` component. Network errors show descriptive message in Arabic.
+- **Empty states**: Per-page empty illustrations with contextual message (no orders, no customers, no results for filter, etc.). Consistent empty state component reused across pages.
+- **Loading states**: Skeleton loaders matching content shape (table row skeletons, card skeletons, chart skeleton). React Query `isLoading`/`isFetching` control visibility. Full-page spinner for initial load.
+- **Error boundary**: Wrapped at dashboard-layout level. Catches unhandled render errors. Shows fallback UI with retry option. Prevent entire app crash from isolated component failure.
+
+## Key UX Deviations
+
+Specific UX decisions that differ from typical patterns:
+
+- **Two toast libraries coexisting**: `react-toastify` is used in auth guard hooks and established flows. `sonner` is installed but verify usage before using. For new auth flows, prefer `react-toastify` for consistency.
+- **Custom RTL date input styling**: `input[type='date']` uses hidden text with positioned picker to handle RTL layout correctly. Standard date inputs break in Arabic.
+- **iOS Safari zoom fix**: All form inputs use `font-size: 16px !important` to prevent iOS Safari auto-zoom on focus. Without this, the browser zooms into inputs on tap.
+- **Safe area insets**: Dashboard layout uses `pt-[env(safe-area-inset-top)]` for notch/camera cutout on modern mobile devices.
+
 ## Required Analysis Tools
 
 Frontend is Next.js 14.2. Use these tools before and during code changes:
