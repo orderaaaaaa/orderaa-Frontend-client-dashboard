@@ -190,6 +190,10 @@ Specific UX decisions that differ from typical patterns:
 
 Frontend is Next.js 14.2. Use these tools before and during code changes:
 
+**CodeGraph** (preferred for code discovery) — symbol index with blast radius. Indexed: 780 files, 6,420 nodes, 13,028 edges. Use `codegraph explore "<query>"` or MCP `codegraph_explore` tool to find components, hooks, types, and trace their callers faster than grep.
+
+**codebase-memory-mcp** — persistent knowledge graph (tree-sitter AST + hybrid LSP, 4,797 nodes, 10,552 edges). Faster than grep for finding symbols, tracing call paths, and reading source. Use MCP tools in priority order: `search_graph` → `trace_path` → `get_code_snippet` → `query_graph` → `get_architecture`. Project name: `Volumes-Data-code-orderaa-orderaa-web-frontend`.
+
 **Serena MCP** — code analysis, symbol search, find references, find implementations, diagnostics, rename. Essential before deleting/refactoring/renaming components, hooks, stores, or types.
 
 **Next.js MCP** — Next.js-specific tools:
@@ -223,6 +227,7 @@ Before editing any code, create isolated worktree:
 4. Create worktree: `git worktree add .temp-worktree-parallel-tasks/<slug>/frontend <slug>`
 5. Work inside worktree: `cd .temp-worktree-parallel-tasks/<slug>/frontend`
 6. Install deps: `npm install`
+7. Initialize CodeGraph index: `codegraph init`
 
 Read-only tasks (analysis, docs, no code changes) skip this step.
 
