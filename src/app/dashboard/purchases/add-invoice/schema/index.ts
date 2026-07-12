@@ -40,9 +40,9 @@ const invoiceItemSchema = z.object({
   variants: z
     .array(
       z.object({
-        label: z.string(),
-        value: z.string(),
-        attributeOptionId: z.number(),
+        attribute: z.string(),
+        option: z.string(),
+        attributeOptionId: z.number().optional(),
       }),
     )
     .optional(),

@@ -12,15 +12,15 @@ import { useDebounce } from '@/utils/debounce';
 import api from '@/lib/api';
 
 export interface VariantOption {
-  label: string;
-  values: string[];
-  options: { id: number; name: string }[];
+  attribute: string;
+  options: string[];
+  optionDetails: { id: number; name: string }[];
 }
 
 export interface SelectedVariant {
-  label: string;
-  value: string;
-  attributeOptionId: number;
+  attribute: string;
+  option: string;
+  attributeOptionId?: number;
 }
 
 export interface SelectableProduct {
@@ -53,9 +53,9 @@ function mapProductVariantOptions(product: RawApiProduct): SelectableProduct {
   return {
     ...product,
     variantOptions: (product.attributes ?? []).map((attribute) => ({
-      label: attribute.name,
-      values: (attribute.options ?? []).map((option) => option.name),
-      options: (attribute.options ?? []).map((option) => ({ id: option.id, name: option.name })),
+      attribute: attribute.name,
+      options: (attribute.options ?? []).map((option) => option.name),
+      optionDetails: (attribute.options ?? []).map((option) => ({ id: option.id, name: option.name })),
     })),
   };
 }
@@ -70,21 +70,21 @@ interface ProductSelectionModalProps {
 }
 
 function isValueDisabled(
-  label: string,
-  value: string,
+  attribute: string,
+  option: string,
   currentSelection: Record<string, string>,
   addedCombos: SelectedVariant[][],
-  allLabels: string[],
+  allAttributes: string[],
 ): boolean {
   if (addedCombos.length === 0) return false;
 
-  const hypothetical = { ...currentSelection, [label]: value };
+  const hypothetical = { ...currentSelection, [attribute]: option };
 
-  const filledLabels = allLabels.filter((l) => hypothetical[l]);
-  if (filledLabels.length < allLabels.length) return false;
+  const filledAttributes = allAttributes.filter((l) => hypothetical[l]);
+  if (filledAttributes.length < allAttributes.length) return false;
 
   return addedCombos.some((combo) =>
-    allLabels.every((l) => combo.find((v) => v.label === l)?.value === hypothetical[l]),
+    allAttributes.every((l) => combo.find((v) => v.attribute === l)?.option === hypothetical[l]),
   );
 }
 
@@ -176,11 +176,11 @@ export default function ProductSelectionModal({
   }, []);
 
   const handleVariantSelect = useCallback(
-    (productId: number, label: string, value: string) => {
+    (productId: number, attribute: string, option: string) => {
       setCurrentSelection((prev) => {
         const next = new Map(prev);
         const current = { ...(next.get(productId) ?? {}) };
-        current[label] = current[label] === value ? '' : value;
+        current[attribute] = current[attribute] === option ? '' : option;
         next.set(productId, current);
         return next;
       });
@@ -189,21 +189,21 @@ export default function ProductSelectionModal({
   );
 
   const handleAddCombo = useCallback(
-    (productId: number, labels: string[]) => {
+    (productId: number, attributes: string[]) => {
       const selection = currentSelection.get(productId);
       if (!selection) return;
 
       const product = products.find((p) => p.id === productId);
 
-      const combo: SelectedVariant[] = labels
+      const combo: SelectedVariant[] = attributes
         .filter((l) => selection[l])
         .map((l) => {
-          const group = product?.variantOptions?.find((o) => o.label === l);
-          const option = group?.options.find((o) => o.name === selection[l]);
-          return { label: l, value: selection[l], attributeOptionId: option?.id ?? 0 };
+          const group = product?.variantOptions?.find((o) => o.attribute === l);
+          const opt = group?.optionDetails.find((o) => o.name === selection[l]);
+          return { attribute: l, option: selection[l], attributeOptionId: opt?.id ?? 0 };
         });
 
-      if (combo.length !== labels.length) return;
+      if (combo.length !== attributes.length) return;
 
       setAddedCombos((prev) => {
         const next = new Map(prev);
@@ -248,13 +248,13 @@ export default function ProductSelectionModal({
           return;
         }
         const existingCombosForProduct = existingVariantCombos?.get(p.id) ?? [];
-        const allLabels = (p.variantOptions ?? []).map((o) => o.label);
+        const allAttributes = (p.variantOptions ?? []).map((o) => o.attribute);
         for (const combo of combos) {
           const isExisting = existingCombosForProduct.some((existing) =>
-            allLabels.every(
+            allAttributes.every(
               (l) =>
-                existing.find((v) => v.label === l)?.value ===
-                combo.find((v) => v.label === l)?.value,
+                existing.find((v) => v.attribute === l)?.option ===
+                combo.find((v) => v.attribute === l)?.option,
             ),
           );
           if (!isExisting) {
@@ -338,8 +338,8 @@ export default function ProductSelectionModal({
                 const isChecked = selectedIds.has(product.id);
                 const productCombos = addedCombos.get(product.id) ?? [];
                 const selection = currentSelection.get(product.id) ?? {};
-                const allLabels = (product.variantOptions ?? []).map((o) => o.label);
-                const allLabelsFilled = allLabels.length > 0 && allLabels.every((l) => selection[l]);
+                const allAttributes = (product.variantOptions ?? []).map((o) => o.attribute);
+                const allAttributesFilled = allAttributes.length > 0 && allAttributes.every((l) => selection[l]);
 
                 return (
                   <div
@@ -396,19 +396,19 @@ export default function ProductSelectionModal({
                     {isChecked && hasVariants && (
                       <div className="px-4 pb-3 flex flex-col gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
                         {product.variantOptions!.map((option) => (
-                          <div key={option.label} className="flex flex-wrap items-center gap-2">
+                          <div key={option.attribute} className="flex flex-wrap items-center gap-2">
                             <span className="text-xs font-semibold text-gray-500 min-w-16">
-                              {option.label}:
+                              {option.attribute}:
                             </span>
                             <div className="flex flex-wrap gap-1.5">
-                              {option.values.map((value) => {
-                                const isSelected = selection[option.label] === value;
+                              {option.options.map((value) => {
+                                const isSelected = selection[option.attribute] === value;
                                 const disabled = isValueDisabled(
-                                  option.label,
+                                  option.attribute,
                                   value,
                                   selection,
                                   productCombos,
-                                  allLabels,
+                                  allAttributes,
                                 );
                                 return (
                                   <Button
@@ -421,7 +421,7 @@ export default function ProductSelectionModal({
                                       'rounded-full text-xs h-7 px-3',
                                       !isSelected && !disabled && 'border-gray-300 text-gray-600 hover:border-primary hover:text-primary',
                                     )}
-                                    onClick={() => handleVariantSelect(product.id, option.label, value)}
+                                    onClick={() => handleVariantSelect(product.id, option.attribute, value)}
                                   >
                                     {value}
                                   </Button>
@@ -435,9 +435,9 @@ export default function ProductSelectionModal({
                           type="button"
                           variant="default"
                           size="sm"
-                          disabled={!allLabelsFilled}
+                          disabled={!allAttributesFilled}
                           className="rounded-full text-xs h-7 px-4 w-fit self-end"
-                          onClick={() => handleAddCombo(product.id, allLabels)}
+                          onClick={() => handleAddCombo(product.id, allAttributes)}
                         >
                           <LiaPlusSolid className="w-4 h-4" />
                           اضافة
@@ -449,10 +449,10 @@ export default function ProductSelectionModal({
                             <div className="flex flex-wrap gap-1.5 pt-1 border-t border-gray-100">
                               {productCombos.map((combo, idx) => {
                                 const isPreExisting = existingCombosForProduct.some((existing) =>
-                                  allLabels.every(
+                                  allAttributes.every(
                                     (l) =>
-                                      existing.find((v) => v.label === l)?.value ===
-                                      combo.find((v) => v.label === l)?.value,
+                                      existing.find((v) => v.attribute === l)?.option ===
+                                      combo.find((v) => v.attribute === l)?.option,
                                   ),
                                 );
                                 return (
@@ -465,7 +465,7 @@ export default function ProductSelectionModal({
                                         : 'bg-primary/10 text-primary',
                                     )}
                                   >
-                                    {combo.map((v) => v.value).join(' - ')}
+                                    {combo.map((v) => v.option).join(' - ')}
                                     {!isPreExisting && (
                                       <Button
                                         type="button"

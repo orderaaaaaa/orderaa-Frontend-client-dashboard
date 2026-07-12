@@ -54,7 +54,7 @@ export interface InvoiceProductVariantOption {
 export interface InvoiceProductVariantDetail {
   id: number;
   name?: string;
-  attributeOptions?: InvoiceProductVariantOption[];
+  options?: InvoiceProductVariantOption[];
 }
 
 export interface InvoiceProductApiItem {

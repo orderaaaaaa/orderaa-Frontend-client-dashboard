@@ -40,8 +40,8 @@ const addProductSchema = z.object({
   variantOptions: z
     .array(
       z.object({
-        label: z.string().min(1, 'اسم المتغير مطلوب'),
-        values: z
+        attribute: z.string().min(1, 'اسم المتغير مطلوب'),
+        options: z
           .array(z.string().min(1))
           .min(1, 'يجب إضافة قيمة واحدة على الأقل'),
       }),
@@ -82,7 +82,7 @@ function VariantEditor({
 }: VariantEditorProps) {
   const values = useWatch({
     control,
-    name: `variantOptions.${index}.values`,
+    name: `variantOptions.${index}.options`,
   }) as string[] | undefined;
   const currentValues = values ?? [];
   const [draft, setDraft] = useState('');
@@ -95,7 +95,7 @@ function VariantEditor({
       setDraft('');
       return;
     }
-    setValue(`variantOptions.${index}.values`, [...currentValues, trimmed], {
+    setValue(`variantOptions.${index}.options`, [...currentValues, trimmed], {
       shouldDirty: true,
       shouldValidate: true,
     });
@@ -104,7 +104,7 @@ function VariantEditor({
 
   const removeValue = (valueIndex: number) => {
     setValue(
-      `variantOptions.${index}.values`,
+      `variantOptions.${index}.options`,
       currentValues.filter((_, i) => i !== valueIndex),
       { shouldDirty: true, shouldValidate: true },
     );
@@ -129,7 +129,7 @@ function VariantEditor({
       <div className="ps-5 pe-2 py-3">
         <div className="flex items-center gap-2 mb-2">
           <input
-            {...register(`variantOptions.${index}.label`)}
+            {...register(`variantOptions.${index}.attribute`)}
             placeholder="اسم المتغير (مثلاً: المقاس)"
             className="flex-1 text-base font-semibold bg-transparent border-0 border-b border-transparent focus:border-primary focus:outline-none px-0 py-1 placeholder:font-normal placeholder:text-gray-400"
           />
@@ -232,10 +232,10 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
       images: images.length > 0 ? images : undefined,
       variantOptions: data.variantOptions
         .map((v) => ({
-          label: v.label.trim(),
-          values: v.values.map((s) => s.trim()).filter(Boolean),
+          attribute: v.attribute.trim(),
+          options: v.options.map((s) => s.trim()).filter(Boolean),
         }))
-        .filter((v) => v.label && v.values.length > 0),
+        .filter((v) => v.attribute && v.options.length > 0),
     };
 
     console.log('New product:', payload);
@@ -318,7 +318,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => append({ label: '', values: [] })}
+              onClick={() => append({ attribute: '', options: [] })}
               className="text-primary font-semibold hover:bg-primary hover:text-white"
             >
               <LiaPlusSolid className="w-4 h-4" />
@@ -340,10 +340,10 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                   setValue={form.setValue}
                   register={form.register}
                   labelError={
-                    form.formState.errors.variantOptions?.[index]?.label?.message
+                    form.formState.errors.variantOptions?.[index]?.attribute?.message
                   }
                   valuesError={
-                    form.formState.errors.variantOptions?.[index]?.values?.message
+                    form.formState.errors.variantOptions?.[index]?.options?.message
                   }
                   onRemove={() => remove(index)}
                 />

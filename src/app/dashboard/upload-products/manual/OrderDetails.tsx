@@ -16,7 +16,7 @@ interface ProductTableRow {
   image: string;
   price: string;
   quantity: number;
-  selectedVariants: Array<{ label: string; value: string }>;
+  selectedVariants: Array<{ attribute: string; option: string }>;
   variantKey: string;
 }
 
@@ -30,7 +30,7 @@ function OrderDetails({ total, packagingNotes, onTotalChange, onPackagingNotesCh
 
   const getVariantKey = (product: (typeof selectedProducts)[0]) => {
     return JSON.stringify(
-      [...product.selectedVariants].sort((a, b) => a.label.localeCompare(b.label))
+      [...product.selectedVariants].sort((a, b) => a.attribute.localeCompare(b.attribute))
     );
   };
 
@@ -113,10 +113,10 @@ function OrderDetails({ total, packagingNotes, onTotalChange, onPackagingNotesCh
                 <span className="font-semibold text-xs sm:text-sm">{row.name}</span>
                 {row.selectedVariants.map((variant) => (
                   <span
-                    key={variant.label}
+                    key={variant.attribute}
                     className="text-gray-500 text-[10px] sm:text-xs"
                   >
-                    {variant.label}: {variant.value}
+                    {variant.attribute}: {variant.option}
                   </span>
                 ))}
               </div>

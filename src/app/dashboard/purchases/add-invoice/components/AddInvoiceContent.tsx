@@ -148,10 +148,10 @@ export function AddInvoiceContent() {
     (products: SelectableProduct[]) => {
       products.forEach((product) => {
         const variantSuffix = product.selectedVariants?.length
-          ? ` - ${product.selectedVariants.map((v) => v.value).join(' - ')}`
+          ? ` - ${product.selectedVariants.map((v) => v.option).join(' - ')}`
           : '';
         const variantKey = product.selectedVariants?.length
-          ? product.selectedVariants.map((v) => v.value).join('_')
+          ? product.selectedVariants.map((v) => v.option).join('_')
           : '';
         const uniqueId = variantKey
           ? `${product.id}_${variantKey}`
@@ -225,7 +225,7 @@ export function AddInvoiceContent() {
             productId: item.productId,
             quantity: invoiceMode === 'package' ? (item.pieceCount ?? 0) : item.quantity,
             price: invoiceMode === 'package' ? (item.pricePerPiece ?? 0) : item.pricePerItem,
-            attributeOptionIds: (item.variants ?? []).map((v) => v.attributeOptionId),
+            attributeOptionIds: (item.variants ?? []).map((v) => v.attributeOptionId).filter((id): id is number => id !== undefined),
           })),
           images,
         });

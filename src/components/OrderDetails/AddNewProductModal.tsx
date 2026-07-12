@@ -92,10 +92,10 @@ export default function AddNewProductModal({
     setSelectedProduct(product);
   };
 
-  const handleVariantChange = (label: string, value: string) => {
+  const handleVariantChange = (attribute: string, optionValue: string) => {
     setSelectedVariants((prev) => ({
       ...prev,
-      [label]: value,
+      [attribute]: optionValue,
     }));
   };
 
@@ -212,23 +212,23 @@ export default function AddNewProductModal({
               </div>
             ) : (
               variantOptions.map((option) => (
-                <div key={option.label} className="flex-1 min-w-[200px]">
+                <div key={option.attribute} className="flex-1 min-w-[200px]">
                   <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
-                    {option.label}
+                    {option.attribute}
                   </label>
                   <SearchableSelect
-                    value={selectedVariants[option.label] || ''}
+                    value={selectedVariants[option.attribute] || ''}
                     onValueChange={(value) =>
-                      handleVariantChange(option.label, value)
+                      handleVariantChange(option.attribute, value)
                     }
-                    options={option.values}
-                    placeholder={`اختر ${option.label}`}
-                    searchPlaceholder={`بحث عن ${option.label}...`}
+                    options={option.options.map((o) => o.name)}
+                    placeholder={`اختر ${option.attribute}`}
+                    searchPlaceholder={`بحث عن ${option.attribute}...`}
                     emptyMessage="لا توجد خيارات متاحة"
                     noResultsMessage="لا توجد نتائج للبحث"
                     triggerClassName="h-[44px] md:h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-4 md:px-6 text-right text-base md:text-lg text-[#5F5E5E]"
                     className="rounded-2xl border-[#ECECEC]"
-                    disabled={option.values.length === 0}
+                    disabled={option.options.length === 0}
                     searchThreshold={5}
                   />
                 </div>

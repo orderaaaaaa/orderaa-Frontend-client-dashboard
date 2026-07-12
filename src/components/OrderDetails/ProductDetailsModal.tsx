@@ -71,8 +71,8 @@ export default function ProductDetailsModal({
                 {variants.map((variant, idx) => (
                   <DetailRow
                     key={idx}
-                    label={variant.label}
-                    value={variant.value}
+                    label={variant.attribute}
+                    value={variant.option}
                   />
                 ))}
               </div>

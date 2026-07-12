@@ -40,10 +40,10 @@ export default function EditProductModal({
     );
   }, [selectedValues, currentVariants]);
 
-  const handleValueChange = (label: string, value: string) => {
+  const handleValueChange = (attribute: string, optionValue: string) => {
     setSelectedValues((prev) => ({
       ...prev,
-      [label]: value,
+      [attribute]: optionValue,
     }));
   };
 
@@ -76,17 +76,17 @@ export default function EditProductModal({
           <div className="w-full text-center text-gray-500">لا توجد خيارات متاحة</div>
         ) : (
           variantOptions.map((option) => (
-            <div key={option.label} className="w-full md:w-[374px]">
+            <div key={option.attribute} className="w-full md:w-[374px]">
               <label className="block text-lg font-bold text-[#1F1F1F] mb-3 text-right">
-                {option.label}
+                {option.attribute}
               </label>
               <SearchableSelect
-                value={selectedValues[option.label] || ''}
-                onValueChange={(value) => handleValueChange(option.label, value)}
-                options={option.values}
-                placeholder={`اختر ${option.label}`}
-                searchPlaceholder={`بحث عن ${option.label}...`}
-                disabled={option.values.length === 0}
+                value={selectedValues[option.attribute] || ''}
+                onValueChange={(value) => handleValueChange(option.attribute, value)}
+                options={option.options.map((o) => o.name)}
+                placeholder={`اختر ${option.attribute}`}
+                searchPlaceholder={`بحث عن ${option.attribute}...`}
+                disabled={option.options.length === 0}
                 triggerClassName="h-[44px] md:h-[57px] bg-white border border-[#ECECEC] rounded-[38px] px-4 md:px-6 text-right text-base md:text-lg text-[#5F5E5E]"
                 className="rounded-2xl border-[#ECECEC]"
                 searchThreshold={5}

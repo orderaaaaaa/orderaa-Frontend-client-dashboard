@@ -43,7 +43,7 @@ export interface SelectedProduct {
   createdAt: string;
   updatedAt: string;
   quantity?: number;
-  selectedVariants?: Array<{ label: string; value: string }>;
+  selectedVariants?: Array<{ attribute: string; option: string }>;
 }
 
 // Order Interface (for simple use cases)
@@ -182,8 +182,8 @@ export interface ProductExternalId {
 }
 
 export interface ProductVariantOption {
-  label: string;
-  values: string[];
+  attribute: string;
+  options: string[];
 }
 
 export interface ProductExtraDetailsVariant {
@@ -239,8 +239,8 @@ export interface Product {
 
 // Order Product Variant
 export interface OrderProductVariant {
-  label: string;
-  value: string;
+  attribute: string;
+  option: string;
 }
 
 // Order Product Attribute (from API: name + selected option)

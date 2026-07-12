@@ -181,7 +181,7 @@ export default function AgentStatusUpdateModal({
             ? selectedVariants.map((v) => ({
                 productId: selectedProduct.id,
                 quantity: 1,
-                variants: [{ label: v.label, value: v.value }],
+                variants: [{ attribute: v.attribute, option: v.option }],
               }))
             : [{ productId: selectedProduct.id, quantity: 1, variants: [] }];
           await changeProductsMutation.mutateAsync({ orderId, products });
@@ -318,7 +318,7 @@ export default function AgentStatusUpdateModal({
               <div className="flex flex-wrap gap-1.5">
                 {selectedProduct.selectedVariants.map((v, i) => (
                   <span key={i} className="text-xs bg-violet-100 text-violet-700 px-2.5 py-1 rounded-full font-medium">
-                    {v.label}: {v.value}
+                    {v.attribute}: {v.option}
                   </span>
                 ))}
               </div>

@@ -17,7 +17,7 @@ export function mapOrderToInvoice(
         .join(' - ');
     }
     if (!variantText && op.variants && op.variants.length > 0) {
-      variantText = op.variants.map((v) => v.value).join(' - ');
+      variantText = op.variants.map((v) => v.option).join(' - ');
     }
     return {
       name: op.products.name,

@@ -226,19 +226,19 @@ const MergeProductsModal = ({
 
     allProducts.forEach((p) => {
       (p.variantOptions ?? []).forEach((v) => {
-        const normalized = normalizeLabel(v.label);
+        const normalized = normalizeLabel(v.attribute);
         const existing = variantMap.get(normalized);
         if (existing) {
-          v.values.forEach((val) => existing.add(val));
+          v.options.forEach((val) => existing.add(val));
         } else {
-          variantMap.set(normalized, new Set(v.values));
+          variantMap.set(normalized, new Set(v.options));
         }
       });
     });
 
     const result: VariantOption[] = [];
     variantMap.forEach((values, label) => {
-      result.push({ label, values: Array.from(values) });
+      result.push({ attribute: label, options: Array.from(values) });
     });
     return result;
   }, [targetProduct, sourceProducts]);
@@ -246,18 +246,18 @@ const MergeProductsModal = ({
   const displayVariants = useMemo(() => {
     return mergedVariants
       .map((variant) => ({
-        label: variant.label,
-        values: variant.values.filter(
-          (val) => !removedVariantValues.has(`${variant.label}::${val}`),
+        attribute: variant.attribute,
+        options: variant.options.filter(
+          (val) => !removedVariantValues.has(`${variant.attribute}::${val}`),
         ),
       }))
-      .filter((variant) => variant.values.length > 0);
+      .filter((variant) => variant.options.length > 0);
   }, [mergedVariants, removedVariantValues]);
 
-  const handleRemoveVariantValue = (label: string, value: string) => {
+  const handleRemoveVariantValue = (attribute: string, option: string) => {
     setRemovedVariantValues((prev) => {
       const next = new Set(prev);
-      next.add(`${label}::${value}`);
+      next.add(`${attribute}::${option}`);
       return next;
     });
   };
@@ -444,12 +444,12 @@ const MergeProductsModal = ({
                       المتغيرات بعد الدمج
                     </h4>
                     {displayVariants.map((variant) => (
-                      <div key={variant.label} className="space-y-1.5">
+                      <div key={variant.attribute} className="space-y-1.5">
                         <p className="text-xs font-medium text-gray-600">
-                          {variant.label}
+                          {variant.attribute}
                         </p>
                         <div className="flex flex-wrap gap-1.5">
-                          {variant.values.map((val) => (
+                          {variant.options.map((val) => (
                             <span
                               key={val}
                               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20"
@@ -458,7 +458,7 @@ const MergeProductsModal = ({
                               <button
                                 type="button"
                                 onClick={() =>
-                                  handleRemoveVariantValue(variant.label, val)
+                                  handleRemoveVariantValue(variant.attribute, val)
                                 }
                                 className="text-primary/60 hover:text-red-500 transition-colors"
                                 aria-label={`إزالة ${val}`}

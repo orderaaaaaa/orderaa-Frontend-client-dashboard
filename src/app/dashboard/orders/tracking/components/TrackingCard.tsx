@@ -169,7 +169,7 @@ export default function TrackingCard({ card }: TrackingCardProps) {
                 {op.products?.name || op.productName}
                 {op.variants?.length > 0 && (
                   <span className="text-gray-400 mr-1">
-                    ({op.variants.map((v: any) => v.value).join(' - ')})
+                    ({op.variants.map((v: any) => v.option).join(' - ')})
                   </span>
                 )}
               </span>

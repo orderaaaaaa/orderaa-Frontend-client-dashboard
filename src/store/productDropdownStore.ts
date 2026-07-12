@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 
 interface VariantOption {
-  label: string;
-  values: string[];
+  attribute: string;
+  options: string[];
 }
 
 interface ProductAttribute {
@@ -21,8 +21,8 @@ interface ApiProduct {
 }
 
 interface SelectedVariantValue {
-  label: string;
-  value: string;
+  attribute: string;
+  option: string;
 }
 
 interface PendingProduct {
@@ -56,13 +56,13 @@ interface ProductDropdownState {
   toggleProductExpansion: (productId: number) => void;
   selectVariant: (
     productId: number,
-    label: string,
-    value: string,
+    attribute: string,
+    option: string,
     product: ApiProduct
   ) => void;
   addProductWithoutVariants: (product: ApiProduct) => void;
   removeProductFromPending: (productId: number) => void;
-  deselectVariant: (productId: number, label: string) => void;
+  deselectVariant: (productId: number, attribute: string) => void;
   clearPendingSelections: () => void;
   confirmSelections: () => SelectedProduct[];
   reset: () => void;
@@ -74,9 +74,9 @@ const resolveAttributeOptionIds = (
 ): number[] => {
   const attributes = product.attributes ?? [];
   return selectedVariants.reduce<number[]>((ids, variant) => {
-    const attribute = attributes.find((a) => a.name === variant.label);
-    const option = attribute?.options.find((o) => o.name === variant.value);
-    if (option) ids.push(option.id);
+    const attr = attributes.find((a) => a.name === variant.attribute);
+    const opt = attr?.options.find((o) => o.name === variant.option);
+    if (opt) ids.push(opt.id);
     return ids;
   }, []);
 };
@@ -122,23 +122,23 @@ export const useProductDropdownStore = create<ProductDropdownState>(
       });
     },
 
-    selectVariant: (productId, label, value, product) => {
+    selectVariant: (productId, attribute, option, product) => {
       const { pendingSelections, selectedVariants } = get();
 
       const currentSelections = pendingSelections[productId]?.selectedVariants || [];
-      const existingIndex = currentSelections.findIndex((v) => v.label === label);
+      const existingIndex = currentSelections.findIndex((v) => v.attribute === attribute);
 
       let newSelections: SelectedVariantValue[];
       if (existingIndex >= 0) {
-        if (currentSelections[existingIndex].value === value) {
-          newSelections = currentSelections.filter((v) => v.label !== label);
+        if (currentSelections[existingIndex].option === option) {
+          newSelections = currentSelections.filter((v) => v.attribute !== attribute);
         } else {
           newSelections = currentSelections.map((v) =>
-            v.label === label ? { label, value } : v
+            v.attribute === attribute ? { attribute, option } : v
           );
         }
       } else {
-        newSelections = [...currentSelections, { label, value }];
+        newSelections = [...currentSelections, { attribute, option }];
       }
 
       if (newSelections.length === 0) {
@@ -197,10 +197,10 @@ export const useProductDropdownStore = create<ProductDropdownState>(
       });
     },
 
-    deselectVariant: (productId, label) => {
+    deselectVariant: (productId, attribute) => {
       const { pendingSelections, selectedVariants } = get();
       const currentSelections = pendingSelections[productId]?.selectedVariants || [];
-      const newSelections = currentSelections.filter((v) => v.label !== label);
+      const newSelections = currentSelections.filter((v) => v.attribute !== attribute);
 
       if (newSelections.length === 0) {
         const newPendingSelections = { ...pendingSelections };
@@ -256,13 +256,13 @@ export const useProductDropdownStore = create<ProductDropdownState>(
       const merged = [...selectedProducts];
       for (const p of newProducts) {
         const variantKey = JSON.stringify(
-          [...p.selectedVariants].sort((a, b) => a.label.localeCompare(b.label))
+          [...p.selectedVariants].sort((a, b) => a.attribute.localeCompare(b.attribute))
         );
         const existingIndex = merged.findIndex(
           (m) =>
             m.id === p.id &&
             JSON.stringify(
-              [...m.selectedVariants].sort((a, b) => a.label.localeCompare(b.label))
+              [...m.selectedVariants].sort((a, b) => a.attribute.localeCompare(b.attribute))
             ) === variantKey
         );
         if (existingIndex === -1) {

@@ -11,8 +11,8 @@ import BaseModal from '@/components/ui/base-modal';
 import { useUpdateProductVariants } from '../../hooks/useProduct';
 
 interface VariantItem {
-  label: string;
-  value: string;
+  attribute: string;
+  option: string;
 }
 
 interface ProductAddVariantsModalProps {
@@ -26,11 +26,11 @@ const variantSchema = z.object({
   rows: z
     .array(
       z.object({
-        label: z.string(),
-        value: z.string(),
+        attribute: z.string(),
+        option: z.string(),
       })
     )
-    .refine((rows) => rows.some((r) => r.label.trim() && r.value.trim()), {
+    .refine((rows) => rows.some((r) => r.attribute.trim() && r.option.trim()), {
       message: 'يجب إضافة خاصية واحدة على الأقل',
     }),
 });
@@ -47,7 +47,7 @@ const ProductAddVariantsModal: React.FC<ProductAddVariantsModalProps> = ({
 
   const form = useForm<VariantFormData>({
     resolver: zodResolver(variantSchema),
-    defaultValues: { rows: [{ label: '', value: '' }] },
+    defaultValues: { rows: [{ attribute: '', option: '' }] },
     mode: 'onChange',
   });
 
@@ -61,30 +61,29 @@ const ProductAddVariantsModal: React.FC<ProductAddVariantsModalProps> = ({
     if (variants && variants.length > 0) {
       replace(variants);
     } else {
-      replace([{ label: '', value: '' }]);
+      replace([{ attribute: '', option: '' }]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const handleRemoveRow = (index: number) => {
     if (fields.length > 1) {
       remove(index);
     } else {
-      replace([{ label: '', value: '' }]);
+      replace([{ attribute: '', option: '' }]);
     }
   };
 
   const handleClose = () => {
     if (!isPending) {
-      form.reset({ rows: [{ label: '', value: '' }] });
+      form.reset({ rows: [{ attribute: '', option: '' }] });
       onClose();
     }
   };
 
   const onSubmit = form.handleSubmit((data) => {
     const filtered = data.rows
-      .filter((r) => r.label.trim() && r.value.trim())
-      .map((r) => ({ label: r.label.trim(), value: r.value.trim() }));
+      .filter((r) => r.attribute.trim() && r.option.trim())
+      .map((r) => ({ attribute: r.attribute.trim(), option: r.option.trim() }));
 
     if (!filtered.length) return;
 
@@ -95,7 +94,7 @@ const ProductAddVariantsModal: React.FC<ProductAddVariantsModalProps> = ({
   });
 
   const rows = form.watch('rows') ?? [];
-  const hasValidRow = rows.some((r) => r.label?.trim() && r.value?.trim());
+  const hasValidRow = rows.some((r) => r.attribute?.trim() && r.option?.trim());
 
   return (
     <BaseModal
@@ -113,13 +112,13 @@ const ProductAddVariantsModal: React.FC<ProductAddVariantsModalProps> = ({
               <div className="grid grid-cols-2 gap-3 flex-1">
                 <Input
                   register={form.register}
-                  name={`rows.${index}.label`}
+                  name={`rows.${index}.attribute`}
                   placeholder="الخاصية (مثلاً: الخامة)"
                   disabled={isPending}
                 />
                 <Input
                   register={form.register}
-                  name={`rows.${index}.value`}
+                  name={`rows.${index}.option`}
                   placeholder="القيمة (مثلاً: قماش)"
                   disabled={isPending}
                 />
@@ -140,7 +139,7 @@ const ProductAddVariantsModal: React.FC<ProductAddVariantsModalProps> = ({
           <Button
             type="button"
             variant="ghost"
-            onClick={() => append({ label: '', value: '' })}
+            onClick={() => append({ attribute: '', option: '' })}
             disabled={isPending}
             className="text-primary font-semibold hover:bg-primary hover:text-white"
           >

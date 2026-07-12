@@ -5,8 +5,8 @@ import type { ApiProduct } from './useProductDropdown';
 import { Button } from '../ui/button';
 
 interface SelectedVariantValue {
-  label: string;
-  value: string;
+  attribute: string;
+  option: string;
 }
 
 interface SelectedProduct {
@@ -20,7 +20,7 @@ interface DropdownContentProps {
   selectedProducts: SelectedProduct[];
   expandedProductId: number | null;
   onProductClick: (product: ApiProduct) => void;
-  onVariantSelect: (productId: number, label: string, value: string) => void;
+  onVariantSelect: (productId: number, attribute: string, option: string) => void;
   onAddProductWithoutVariants: (product: ApiProduct) => void;
   onRemoveProductFromPending: (productId: number) => void;
   search: string;

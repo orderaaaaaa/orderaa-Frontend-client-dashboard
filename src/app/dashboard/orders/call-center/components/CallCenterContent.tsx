@@ -343,7 +343,7 @@ export function CallCenterContent() {
                   const productName = op.products?.name || 'منتج غير معروف';
                   const variantDetails =
                     op.variants && op.variants.length > 0
-                      ? op.variants.map((v: any) => v.value).join('')
+                      ? op.variants.map((v: any) => v.option).join('')
                       : '';
                   return variantDetails
                     ? `${productName} - ${variantDetails}`

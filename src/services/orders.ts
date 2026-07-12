@@ -293,15 +293,14 @@ export const useAllProducts = () => {
 
 // Variant option from API
 export interface VariantOption {
-  label: string;
-  values: string[];
+  attribute: string;
   options: { id: number; name: string }[];
 }
 
 // Selected variant for API payload
 export interface SelectedVariant {
-  label: string;
-  value: string;
+  attribute: string;
+  option: string;
 }
 
 export const resolveAttributeOptionIds = (
@@ -309,9 +308,9 @@ export const resolveAttributeOptionIds = (
   selectedVariants: Record<string, string>
 ): number[] => {
   return Object.entries(selectedVariants).reduce<number[]>(
-    (ids, [label, value]) => {
-      const group = variantOptions.find((o) => o.label === label);
-      const option = group?.options.find((o) => o.name === value);
+    (ids, [attribute, optionValue]) => {
+      const group = variantOptions.find((o) => o.attribute === attribute);
+      const option = group?.options.find((o) => o.name === optionValue);
       if (option) ids.push(option.id);
       return ids;
     },
@@ -323,10 +322,9 @@ export const useProductVariantsOptions = (productId: number | null) => {
   return useQuery({
     queryKey: [QUERY_KEYS.PRODUCT_VARIANTS_OPTIONS, productId] as QueryKey,
     queryFn: async () => {
-      const { attributeOptions } = await getProductAttributeOptions(productId!);
+      const { options: attributeOptions } = await getProductAttributeOptions(productId!);
       return (attributeOptions || []).map((attribute, index) => ({
-        label: attribute.name || `attribute_${index}`,
-        values: (attribute.options || []).map((option) => option.name),
+        attribute: attribute.name || `attribute_${index}`,
         options: (attribute.options || []).map((option) => ({
           id: option.id,
           name: option.name,

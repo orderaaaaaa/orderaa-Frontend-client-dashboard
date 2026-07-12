@@ -43,8 +43,8 @@ export default function ProductVariantCountsModal({
               className="flex justify-between items-center border rounded-lg px-4 py-2"
             >
               <div className="text-sm text-gray-700 truncate">
-                {item.label}:{' '}
-                <span className="font-medium">{item.value}</span>
+                {item.attribute}:{' '}
+                <span className="font-medium">{item.option}</span>
               </div>
               <span className="font-semibold text-primary">{item.count}</span>
             </div>

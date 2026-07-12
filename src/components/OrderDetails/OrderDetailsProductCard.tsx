@@ -54,7 +54,7 @@ function OrderDetailsProductCard({
       const fullVariant = extra?.fullVariants?.find(
         (fv) => fv.productId === orderProduct.productId
       );
-      const optionLabels = fullVariant?.variantOptions?.map((o) => o.label) ?? [];
+      const optionLabels = fullVariant?.variantOptions?.map((o) => o.attribute) ?? [];
       const attributes = (orderProduct.attributes ?? [])
         .filter((attr) => attr?.name && attr?.options?.name)
         .map((attr) => ({

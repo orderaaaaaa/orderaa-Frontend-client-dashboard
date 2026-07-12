@@ -74,12 +74,12 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
 
     const seed: Record<number, SelectedVariant[]> = {};
     for (const p of apiReceipt.products) {
-      const ids = p.attributeOptionIds ?? p.variant?.attributeOptions?.map((o) => o.id) ?? [];
+      const ids = p.attributeOptionIds ?? p.variant?.options?.map((o) => o.id) ?? [];
       if (ids.length === 0) continue;
       seed[p.id] = [
         {
           attributeOptionIds: ids,
-          attributeLabels: p.variant?.attributeOptions?.map((o) => o.name) ?? [],
+          attributeLabels: p.variant?.options?.map((o) => o.name) ?? [],
           quantity: 0,
           variantId: p.variantId ?? undefined,
           variantName: p.variant?.name,

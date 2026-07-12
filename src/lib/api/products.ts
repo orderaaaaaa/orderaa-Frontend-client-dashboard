@@ -12,7 +12,7 @@ export interface AttributeOptionGroup {
 }
 
 export interface GetProductAttributeOptionsResponse {
-  attributeOptions: AttributeOptionGroup[];
+  options: AttributeOptionGroup[];
 }
 
 export async function getProductAttributeOptions(

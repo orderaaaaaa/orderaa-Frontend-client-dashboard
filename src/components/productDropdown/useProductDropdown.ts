@@ -4,8 +4,8 @@ import { useDebounce } from '@/utils/debounce';
 import api from '@/lib/api';
 
 export interface VariantOption {
-  label: string;
-  values: string[];
+  attribute: string;
+  options: string[];
 }
 
 export interface ProductAttribute {
@@ -45,8 +45,8 @@ interface ProductsApiResponse {
 const mapProductVariantOptions = (product: RawApiProduct): ApiProduct => ({
   ...product,
   variantOptions: (product.attributes ?? []).map((attribute) => ({
-    label: attribute.name,
-    values: (attribute.options ?? []).map((option) => option.name),
+    attribute: attribute.name,
+    options: (attribute.options ?? []).map((option) => option.name),
   })),
 });
 
@@ -145,13 +145,13 @@ export const useProductDropdown = () => {
 
   const handleVariantSelect = (
     productId: number,
-    label: string,
-    value: string
+    attribute: string,
+    option: string
   ) => {
     const product = products.find((p) => p.id === productId);
     if (!product) return;
 
-    selectVariant(productId, label, value, product);
+    selectVariant(productId, attribute, option, product);
   };
 
   const handleAddProduct = () => {

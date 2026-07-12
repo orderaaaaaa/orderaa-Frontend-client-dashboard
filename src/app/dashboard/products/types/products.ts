@@ -30,18 +30,18 @@ export interface ProductsResponse {
 }
 
 export type VariantItem = {
-  label: string;
-  value: string;
+  attribute: string;
+  option: string;
 };
 
 export interface VariantOption {
-  label: string;
-  values: string[];
+  attribute: string;
+  options: string[];
 }
 
 export interface VariantCountItem {
-  label: string;
-  value: string;
+  attribute: string;
+  option: string;
   count: number;
 }
 

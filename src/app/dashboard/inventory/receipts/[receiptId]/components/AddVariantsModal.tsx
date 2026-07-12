@@ -58,7 +58,7 @@ const AddVariantsModal = memo(
     const { data, isLoading } = useProductAttributeOptionsQuery(isOpen ? productId : undefined);
     const groups = useMemo(
       () =>
-        (data?.attributeOptions ?? [])
+        (data?.options ?? [])
           .map((g) => ({ ...g, options: g.options ?? [] }))
           .filter((g) => g.options.length > 0),
       [data],
