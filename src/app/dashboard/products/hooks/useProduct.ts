@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 import { productsApi } from '../api/products';
 import { productKeys } from './queryKeys';
+import { useJobStore } from '@/store/useJobStore';
 import {
   UpdateVariantsPayload,
   ProductQueryParams,
@@ -77,12 +79,11 @@ export const useUpdateProductVariants = (productId: number) => {
 };
 
 export const useSyncProducts = () => {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: () => productsApi.sync(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productKeys.all });
+    onSuccess: (data) => {
+      toast.info('تم بدء مزامنة المنتجات...', { autoClose: 2000 });
+      useJobStore.getState().addJob({ jobId: data.jobId, type: 'SYNC', label: 'مزامنة المنتجات' });
     },
   });
 };

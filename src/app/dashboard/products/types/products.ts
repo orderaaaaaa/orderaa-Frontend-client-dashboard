@@ -99,3 +99,48 @@ export interface MergeProductsPayload {
   images?: string[];
   variants?: VariantOption[];
 }
+
+export interface JobAcceptedResponse {
+  message: string;
+  jobId: string;
+}
+
+export type JobStatus = 'QUEUED' | 'RUNNING' | 'DONE' | 'FAILED';
+
+// NOTE: the Prisma `sequential_jobs` table has `type`/`payload` columns, but the
+// backend `GET /jobs/:jobId` response (sequential-job-queue.service.ts getStatus) does
+// NOT return them. `type`/`payload` below are optional and will be undefined from the API;
+// the job `type` used for toast branching must come from the Zustand store's ActiveJob.type.
+export interface JobPollResponse {
+  jobId: string;
+  status: JobStatus;
+  enqueuedAt: number;
+  startedAt?: number;
+  finishedAt?: number;
+  result?: unknown;
+  error?: string;
+  type?: string;
+  payload?: unknown;
+}
+
+// Sync job `result` shape. WARNING: path-dependent.
+// - Aggregate path (syncAllForMerchant): { synced, created, updated, failures[] }
+// - Per-store path (syncProducts):       { synced, created, updated }  (NO failures)
+export interface SyncJobResult {
+  synced: number;
+  created: number;
+  updated: number;
+  failures?: { storeId: number | null; provider: string; error: string }[];
+}
+
+// formatCounts MUST tolerate a missing `failures` (per-store sync returns none).
+export const formatCounts = (result: unknown): string => {
+  const r = (result ?? {}) as Partial<SyncJobResult>;
+  const synced = r.synced ?? 0;
+  const created = r.created ?? 0;
+  const updated = r.updated ?? 0;
+  const failures = r.failures?.length ?? 0;
+  let msg = `تمت المزامنة: ${synced} منتج (${created} جديد، ${updated} محدث)`;
+  if (failures > 0) msg += ` — ${failures} أخطاء`;
+  return msg;
+};

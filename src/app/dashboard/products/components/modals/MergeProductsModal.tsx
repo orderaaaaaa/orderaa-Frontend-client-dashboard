@@ -34,6 +34,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'react-toastify';
+import { useJobStore } from '@/store/useJobStore';
 import clsx from 'clsx';
 
 const mergeSchema = z.object({
@@ -323,12 +324,12 @@ const MergeProductsModal = ({
           price: data.price,
           image: targetProduct.image || undefined,
           images: targetProduct.images?.length ? targetProduct.images : undefined,
-          //variants: displayVariants.length > 0 ? displayVariants : undefined,
         },
       },
       {
-        onSuccess: () => {
-          toast.success('تم دمج المنتجات بنجاح');
+        onSuccess: (data) => {
+          toast.info('تم بدء دمج المنتجات...', { autoClose: 2000 });
+          useJobStore.getState().addJob({ jobId: data.jobId, type: 'MERGE', label: 'دمج المنتجات' });
           onSuccess();
           onClose();
         },

@@ -58,4 +58,5 @@ export const OrdersSelectionHeader: React.FC<OrdersSelectionHeaderProps> =
     )
   );
 
+OrdersSelectionHeader.displayName = 'OrdersSelectionHeader';
 export default OrdersSelectionHeader;

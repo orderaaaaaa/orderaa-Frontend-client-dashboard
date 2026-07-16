@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 
 /**
  * Type for modal names
@@ -53,33 +53,25 @@ export function useModalState(modalNames: ModalName[]): ModalStates {
   // Create a single state object for all modals
   const [openModals, setOpenModals] = useState<Set<ModalName>>(new Set());
 
-  // Create memoized functions for each modal
-  const modalStates = {} as ModalStates;
+  // Build modal state object, memoized by modalNames identity and openModals state
+  const modalStates = useMemo(() => {
+    const states = {} as ModalStates;
 
-  modalNames.forEach((modalName) => {
-    // Check if modal is open
-    const isOpen = openModals.has(modalName);
+    modalNames.forEach((modalName) => {
+      states[modalName] = {
+        isOpen: openModals.has(modalName),
+        open: () => setOpenModals((prev) => new Set(prev).add(modalName)),
+        close: () =>
+          setOpenModals((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(modalName);
+            return newSet;
+          }),
+      };
+    });
 
-    // Open modal function
-    const open = useCallback(() => {
-      setOpenModals((prev) => new Set(prev).add(modalName));
-    }, [modalName]);
-
-    // Close modal function
-    const close = useCallback(() => {
-      setOpenModals((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(modalName);
-        return newSet;
-      });
-    }, [modalName]);
-
-    modalStates[modalName] = {
-      isOpen,
-      open,
-      close,
-    };
-  });
+    return states;
+  }, [modalNames, openModals]);
 
   return modalStates;
 }

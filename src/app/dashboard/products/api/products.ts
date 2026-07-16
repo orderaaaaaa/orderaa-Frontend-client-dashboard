@@ -6,6 +6,7 @@ import {
   ProductQueryParams,
   SyncProductsResponse,
   MergeProductsPayload,
+  JobAcceptedResponse,
 } from '../types/products';
 
 export const productsApi = {
@@ -38,13 +39,13 @@ export const productsApi = {
     await http.put(`/products/${productId}`, payload);
   },
 
-  sync: async (): Promise<SyncProductsResponse> => {
-    const response = await http.post<SyncProductsResponse>('/products/sync');
+  sync: async (): Promise<JobAcceptedResponse> => {
+    const response = await http.post<JobAcceptedResponse>('/products/sync');
     return response.data;
   },
 
-  merge: async (targetProductId: number, payload: MergeProductsPayload) => {
-    const response = await http.post(`/products/${targetProductId}/merge`, payload);
+  merge: async (targetProductId: number, payload: MergeProductsPayload): Promise<JobAcceptedResponse> => {
+    const response = await http.post<JobAcceptedResponse>(`/products/${targetProductId}/merge`, payload);
     return response.data;
   },
 };

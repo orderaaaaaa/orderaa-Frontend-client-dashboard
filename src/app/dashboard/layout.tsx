@@ -18,6 +18,7 @@ import {
   SidebarError,
   ContentError,
 } from '@/components/dashboard-layout';
+import { ActiveJobIndicator } from '@/components/dashboard-layout/ActiveJobIndicator';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -133,6 +134,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               username={user?.name}
               onUserAction={handleUserAction}
             />
+          </div>
+
+          <div className="flex-shrink-0 px-4 py-1">
+            <ActiveJobIndicator />
           </div>
 
           <ErrorBoundary

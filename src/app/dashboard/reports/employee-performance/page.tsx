@@ -8,7 +8,7 @@ import CompareBetweenEmployees from './components/CompareBetweenEmployees';
 import EgyptMapSection from './components/EgyptMapSection';
 import CompareEmployees from './components/CompareEmployee';
 
-function page() {
+function Page() {
   const [fromDate, setFromDate] = useState<Date | null>(null);
   const [toDate, setToDate] = useState<Date | null>(null);
   const [timePeriod, setTimePeriod] = useState('');
@@ -45,4 +45,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;
