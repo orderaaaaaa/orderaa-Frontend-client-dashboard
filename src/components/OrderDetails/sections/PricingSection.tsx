@@ -5,7 +5,13 @@ import { EditableTextField } from '../fields/EditableTextField';
 import { PaymentMethodSelect } from '../fields/PaymentMethodSelect';
 import { PaymentStatusSelect } from '../fields/PaymentStatusSelect';
 import { ShippingTypeSelect } from '../fields/ShippingTypeSelect';
-import { Order } from '@/types/orders';
+import { Order, ShippingType } from '@/types/orders';
+
+const RETURN_CONTENT_TYPES: ShippingType[] = [
+  ShippingType.EXCHANGE,
+  ShippingType.RETURN,
+  ShippingType.PARTIAL_RETURN,
+];
 
 // Validation schema for price fields - only numbers allowed
 const priceSchema = z.string().refine(
@@ -30,6 +36,21 @@ export interface PricingSectionProps {
  * @param props - Component props
  */
 export function PricingSection({ order, onUpdate, className = '' }: PricingSectionProps) {
+  const requiresReturnContent =
+    !!order.shippingType && RETURN_CONTENT_TYPES.includes(order.shippingType);
+
+  const handleShippingTypeChange = async (value: string) => {
+    await onUpdate('shippingType', value);
+    // Mirror add-page behavior: clear return content when switching to DELIVERY
+    if (value === ShippingType.DELIVERY && order.returnShipmentContent) {
+      try {
+        await onUpdate('returnShipmentContent', '');
+      } catch {
+        // backend enforcement handles failure; keep UI consistent
+      }
+    }
+  };
+
   return (
     <div className={`flex flex-col justify-start gap-2 ${className}`}>
       <h2 className="text-primary font-semibold">السعر و الدفع</h2>
@@ -56,9 +77,7 @@ export function PricingSection({ order, onUpdate, className = '' }: PricingSecti
         />
         <ShippingTypeSelect
           value={order.shippingType}
-          onChange={async (value) => {
-            await onUpdate('shippingType', value);
-          }}
+          onChange={handleShippingTypeChange}
         />
         <PaymentMethodSelect
           value={order.paymentMethod}
@@ -73,6 +92,19 @@ export function PricingSection({ order, onUpdate, className = '' }: PricingSecti
           }}
         />
       </div>
+
+      {requiresReturnContent && (
+        <EditableTextField
+          label="محتوى شحنة الاسترجاع"
+          value={order.returnShipmentContent}
+          icon={LiaTruckSolid}
+          multiline
+          placeholder="أدخل محتوى شحنة الاسترجاع"
+          onSave={async (value) => {
+            await onUpdate('returnShipmentContent', value.trim());
+          }}
+        />
+      )}
     </div>
   );
 }
