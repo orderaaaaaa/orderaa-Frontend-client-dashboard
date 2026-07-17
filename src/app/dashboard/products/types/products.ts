@@ -39,6 +39,24 @@ export interface VariantOption {
   options: string[];
 }
 
+// Grouped id-aware attribute shape for the Edit Product Attributes modal.
+// Mirrors the backend `AttributeManualDto`: attribute/option ids are present
+// so the backend can rename/remove by id (no fuzzy merge).
+export interface AttributeOptionManual {
+  id?: number;
+  name: string;
+}
+
+export interface AttributeManual {
+  id?: number;
+  name: string;
+  options: AttributeOptionManual[];
+}
+
+export interface UpdateAttributesPayload {
+  attributes: AttributeManual[];
+}
+
 export interface VariantCountItem {
   attribute: string;
   option: string;

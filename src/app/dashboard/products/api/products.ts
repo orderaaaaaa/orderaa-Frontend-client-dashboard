@@ -7,6 +7,8 @@ import {
   SyncProductsResponse,
   MergeProductsPayload,
   JobAcceptedResponse,
+  UpdateAttributesPayload,
+  AttributeManual,
 } from '../types/products';
 
 export const productsApi = {
@@ -32,9 +34,25 @@ export const productsApi = {
     return response.data;
   },
 
+  getAttributeOptions: async (
+    productId: number,
+  ): Promise<AttributeManual[]> => {
+    const response = await http.get<{ options: AttributeManual[] }>(
+      `/products/${productId}/attribute-options`,
+    );
+    return response.data.options ?? [];
+  },
+
   updateVariantsOptions: async (
     productId: number,
     payload: UpdateVariantsPayload,
+  ) => {
+    await http.put(`/products/${productId}`, payload);
+  },
+
+  updateProductAttributes: async (
+    productId: number,
+    payload: UpdateAttributesPayload,
   ) => {
     await http.put(`/products/${productId}`, payload);
   },

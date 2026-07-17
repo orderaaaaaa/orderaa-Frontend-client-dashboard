@@ -8,11 +8,13 @@ import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 
 import { useGetProducts } from '../hooks/useProduct';
 import { useProductStore } from '../store/useProductStore';
-import { Product, VariantItem } from '../types/products';
+import { Product, VariantItem, AttributeManual } from '../types/products';
 import Input from '@/components/ui/Input';
 import ProductAddVariantsModal from './modals/productAddVariants';
 import MergeProductsModal from './modals/MergeProductsModal';
 import ProductVariantCountsModal from './modals/ProductVariantCountsModal';
+import EditProductAttributesModal from './modals/EditProductAttributesModal';
+import { productsApi } from '../api/products';
 import LoadingAnimation from '@/components/ui/loadingAnimation';
 import ProductsTableMobile from './ProductsTableMobile';
 import { getTimeAgo } from '@/utils';
@@ -54,6 +56,11 @@ function ProductsTable() {
   const [showMergeModal, setShowMergeModal] = useState(false);
   const [showSoldModal, setShowSoldModal] = useState(false);
   const [soldProductId, setSoldProductId] = useState<number | null>(null);
+  const [showEditAttrsModal, setShowEditAttrsModal] = useState(false);
+  const [activeAttrsProduct, setActiveAttrsProduct] = useState<{
+    id: number;
+    attributes: AttributeManual[];
+  } | null>(null);
 
   useEffect(() => {
     if (!select) {
@@ -125,6 +132,23 @@ function ProductsTable() {
     setActiveProduct(null);
   };
 
+  const openEditAttrsModal = async (productId: number) => {
+    try {
+      const attributes = await productsApi.getAttributeOptions(productId);
+      setActiveAttrsProduct({ id: productId, attributes });
+      setShowEditAttrsModal(true);
+    } catch {
+      // If fetch fails, open with empty attributes so the user can still add
+      setActiveAttrsProduct({ id: productId, attributes: [] });
+      setShowEditAttrsModal(true);
+    }
+  };
+
+  const closeEditAttrsModal = () => {
+    setShowEditAttrsModal(false);
+    setActiveAttrsProduct(null);
+  };
+
   const columns = useMemo<DataTableColumn<ProductRow>[]>(
     () => [
       {
@@ -136,7 +160,8 @@ function ProductsTable() {
             src={
               row.image || row.images?.[0] || 'https://placehold.net/600x600.png'
             }
-            className="w-20 h-20 mx-auto rounded-lg object-cover border"
+            onClick={() => openEditAttrsModal(row.id as number)}
+            className="w-20 h-20 mx-auto rounded-lg object-cover border cursor-pointer hover:opacity-80 transition-opacity"
           />
         ),
       },
@@ -145,6 +170,15 @@ function ProductsTable() {
         header: 'الاسم',
         sortable: true,
         className: 'text-center',
+        render: (_val, row) => (
+          <button
+            type="button"
+            onClick={() => openEditAttrsModal(row.id as number)}
+            className="text-primary font-semibold hover:underline cursor-pointer"
+          >
+            {row.name as string}
+          </button>
+        ),
       },
       {
         key: 'price',
@@ -349,6 +383,15 @@ function ProductsTable() {
             setSelectedProductsMap(new Map());
             setSelect(false);
           }}
+        />
+      )}
+
+      {showEditAttrsModal && activeAttrsProduct && (
+        <EditProductAttributesModal
+          productId={activeAttrsProduct.id}
+          attributes={activeAttrsProduct.attributes}
+          isOpen={showEditAttrsModal}
+          onClose={closeEditAttrsModal}
         />
       )}
     </>

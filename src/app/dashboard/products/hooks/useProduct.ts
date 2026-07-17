@@ -5,6 +5,7 @@ import { productKeys } from './queryKeys';
 import { useJobStore } from '@/store/useJobStore';
 import {
   UpdateVariantsPayload,
+  UpdateAttributesPayload,
   ProductQueryParams,
   VariantsCountResponse,
 } from '../types/products';
@@ -50,6 +51,62 @@ export const useUpdateProductVariants = (productId: number) => {
                   extraDetails: {
                     ...product.extraDetails,
                     variants: newPayload.variants,
+                  },
+                }
+              : product,
+          ),
+        };
+      });
+
+      return { previousProducts };
+    },
+
+    onError: (_err, _payload, context) => {
+      if (context?.previousProducts) {
+        queryClient.setQueryData(productKeys.all, context.previousProducts);
+      }
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: productKeys.all,
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: productKeys.variants(productId),
+      });
+    },
+  });
+};
+
+export const useUpdateProductAttributes = (productId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: UpdateAttributesPayload) =>
+      productsApi.updateProductAttributes(productId, payload),
+
+    onMutate: async (newPayload) => {
+      await queryClient.cancelQueries({ queryKey: productKeys.all });
+
+      const previousProducts = queryClient.getQueryData(productKeys.all);
+
+      queryClient.setQueriesData({ queryKey: productKeys.all }, (old: any) => {
+        if (!old || !old.data) return old;
+
+        const flatVariants = newPayload.attributes.flatMap((attr) =>
+          attr.options.map((opt) => ({ attribute: attr.name, option: opt.name })),
+        );
+
+        return {
+          ...old,
+          data: old.data.map((product: any) =>
+            product.id === productId
+              ? {
+                  ...product,
+                  extraDetails: {
+                    ...product.extraDetails,
+                    variants: flatVariants,
                   },
                 }
               : product,
