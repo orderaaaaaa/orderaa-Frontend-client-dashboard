@@ -47,8 +47,10 @@ export interface ProductTransactionApiItem {
 }
 
 export interface InvoiceProductVariantOption {
-  id: number;
-  name: string;
+  attributeOptionId?: number;
+  attribute_option?: { id: number; name: string; attributeId: number };
+  id?: number;
+  name?: string;
 }
 
 export interface InvoiceProductVariantDetail {
