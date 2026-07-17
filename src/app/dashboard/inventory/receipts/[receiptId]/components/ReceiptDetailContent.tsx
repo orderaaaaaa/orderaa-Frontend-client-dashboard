@@ -82,7 +82,7 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
         {
           attributeOptionIds: ids,
           attributeLabels: labels,
-          quantity: 0,
+          quantity: '',
           variantId: p.variantId ?? undefined,
           variantName: p.variant?.name,
         },
@@ -137,10 +137,10 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
       .map((p) => ({
         invoiceProductId: p.id,
         variants: (productVariants[p.id] ?? [])
-          .filter((v) => v.quantity > 0)
+          .filter((v) => typeof v.quantity === 'number' && v.quantity > 0)
           .map((v) => {
             const variant: ApproveSupplierInvoiceVariantDto = {
-              approvedCount: v.quantity,
+              approvedCount: typeof v.quantity === 'number' ? v.quantity : 0,
               rejectedCount: 0,
             };
             if (v.attributeOptionIds.length > 0) {

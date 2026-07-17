@@ -102,7 +102,7 @@ const ConfirmCountStep = memo(({ productVariants, confirmedCounts, onConfirmedCo
           color: v.color ?? '',
           size: v.size ?? '',
           image: product.image,
-          expectedQuantity: v.quantity,
+          expectedQuantity: typeof v.quantity === 'number' ? v.quantity : 0,
         } satisfies ConfirmVariantRow)),
       }));
   }, [productVariants]);

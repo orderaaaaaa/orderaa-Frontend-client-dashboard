@@ -21,6 +21,7 @@ type InputProps = {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
   onClear?: () => void;
   clearable?: boolean;
   disabled?: boolean;
@@ -50,6 +51,7 @@ const InputCore = forwardRef<HTMLInputElement, InputCoreProps>(function InputCor
     onChange,
     onKeyDown,
     onBlur,
+    onFocus,
     onClear,
     clearable = false,
     disabled,
@@ -145,6 +147,7 @@ const InputCore = forwardRef<HTMLInputElement, InputCoreProps>(function InputCor
           onChange={onChange}
           onKeyDown={onKeyDown}
           onBlur={onBlur}
+          onFocus={onFocus}
           disabled={disabled}
           min={min}
           max={max}

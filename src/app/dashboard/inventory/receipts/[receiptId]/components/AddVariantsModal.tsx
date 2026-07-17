@@ -85,7 +85,7 @@ const AddVariantsModal = memo(
 
       if (groups.length === 0) {
         const existing = seedExisting.find((v) => v.attributeOptionIds.length === 0);
-        setNoAttrsQuantity(existing?.quantity ?? 1);
+        setNoAttrsQuantity(typeof existing?.quantity === 'number' ? existing.quantity : 1);
         return;
       }
 

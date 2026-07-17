@@ -90,11 +90,11 @@ const AddVariantsStep = memo(
 
     const handleRowReceivedChange = useCallback(
       (invoiceProductId: number, value: string) => {
-        const num = parseInt(value, 10);
-        const qty = isNaN(num) ? 0 : Math.max(0, num);
+        const trimmed = value.trim();
+        const qty: number | '' = trimmed === '' ? '' : Math.max(0, parseInt(trimmed, 10) || 0);
         const current = productVariants[invoiceProductId] ?? [];
         if (current.length > 1) return;
-        const base = current[0] ?? { attributeOptionIds: [], attributeLabels: [], quantity: 0 };
+        const base = current[0] ?? { attributeOptionIds: [], attributeLabels: [], quantity: '' };
         onProductVariantsChange({
           ...productVariants,
           [invoiceProductId]: [{ ...base, quantity: qty }],
@@ -119,8 +119,8 @@ const AddVariantsStep = memo(
 
     const handleQuantityChange = useCallback(
       (invoiceProductId: number, key: string, value: string) => {
-        const num = parseInt(value, 10);
-        const qty = isNaN(num) ? 0 : Math.max(0, num);
+        const trimmed = value.trim();
+        const qty: number | '' = trimmed === '' ? '' : Math.max(0, parseInt(trimmed, 10) || 0);
         const current = productVariants[invoiceProductId] ?? [];
         const updated = current.map((v) => (variantKey(v) === key ? { ...v, quantity: qty } : v));
         onProductVariantsChange({ ...productVariants, [invoiceProductId]: updated });
@@ -184,7 +184,7 @@ const AddVariantsStep = memo(
             const variants = productVariants[row.id as number] ?? [];
             const isMulti = variants.length > 1;
             const value = isMulti
-              ? variants.reduce((sum, v) => sum + (v.quantity || 0), 0)
+              ? variants.reduce((sum, v) => sum + (typeof v.quantity === 'number' ? v.quantity : 0), 0)
               : (variants[0]?.quantity ?? '');
             return (
               <span
@@ -195,7 +195,10 @@ const AddVariantsStep = memo(
                   type="number"
                   value={value}
                   onChange={(e) => handleRowReceivedChange(row.id as number, e.target.value)}
+                  onFocus={(e) => e.currentTarget.select()}
+                  onClear={() => handleRowReceivedChange(row.id as number, '')}
                   min={0}
+                  clearable
                   disabled={isMulti}
                   placeholder="0"
                   className="w-28"
@@ -254,19 +257,22 @@ const AddVariantsStep = memo(
                   className="flex items-center gap-2 bg-white border border-primary/20 rounded-full px-3 py-1.5 text-xs w-fit"
                 >
                   <span className="text-primary font-medium">{displayLabel}</span>
-                  {showPerVariantQty && (
-                    <>
-                      <span className="text-gray-400">|</span>
-                      <Input
-                        type="number"
-                        value={v.quantity}
-                        onChange={(e) => handleQuantityChange(row.id as number, key, e.target.value)}
-                        min={0}
-                        className="w-16"
-                        inputClassName="!py-0.5 !px-1.5 text-center text-xs !rounded-full !bg-white"
-                      />
-                    </>
-                  )}
+                   {showPerVariantQty && (
+                     <>
+                       <span className="text-gray-400">|</span>
+                       <Input
+                         type="number"
+                         value={v.quantity}
+                         onChange={(e) => handleQuantityChange(row.id as number, key, e.target.value)}
+                         onFocus={(e) => e.currentTarget.select()}
+                         onClear={() => handleQuantityChange(row.id as number, key, '')}
+                         min={0}
+                         clearable
+                         className="w-16"
+                         inputClassName="!py-0.5 !px-1.5 text-center text-xs !rounded-full !bg-white"
+                       />
+                     </>
+                   )}
                   <Button
                     variant="ghost"
                     size="icon"

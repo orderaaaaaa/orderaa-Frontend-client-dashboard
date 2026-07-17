@@ -133,7 +133,7 @@ const PrintStep = memo(({ receiptId, productVariants }: PrintStepProps) => {
           color: v.color ?? '',
           size: v.size ?? '',
           image: product.image,
-          quantity: v.quantity,
+          quantity: typeof v.quantity === 'number' ? v.quantity : 0,
         } satisfies PrintVariantRow)),
       }));
   }, [productVariants]);
@@ -206,7 +206,7 @@ const PrintStep = memo(({ receiptId, productVariants }: PrintStepProps) => {
   const totalItems = useMemo(
     () =>
       productsWithVariants.reduce(
-        (sum, p) => sum + p.variants.reduce((s, v) => s + v.quantity, 0),
+        (sum, p) => sum + p.variants.reduce((s, v) => s + (typeof v.quantity === 'number' ? v.quantity : 0), 0),
         0
       ),
     [productsWithVariants]
@@ -242,7 +242,7 @@ const PrintStep = memo(({ receiptId, productVariants }: PrintStepProps) => {
           />
           <div className="flex justify-end px-4">
             <p className="text-sm font-bold text-gray-800">
-              إجمالي العدد: {variants.reduce((s, v) => s + v.quantity, 0)}
+               إجمالي العدد: {variants.reduce((s, v) => s + (typeof v.quantity === 'number' ? v.quantity : 0), 0)}
             </p>
           </div>
         </div>

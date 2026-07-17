@@ -20,7 +20,7 @@ export interface ProductVariant {
 export interface SelectedVariant {
   attributeOptionIds: number[];
   attributeLabels: string[];
-  quantity: number;
+  quantity: number | '';
   variantId?: number;
   variantName?: string;
   color?: string;
