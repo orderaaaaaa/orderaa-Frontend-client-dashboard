@@ -60,5 +60,40 @@ export function useOrderFieldUpdate(
     [orderId, onOrderUpdate, updateOrderMutation]
   );
 
-  return updateField;
+  const updateFields = useCallback(
+    async (data: Record<string, unknown>) => {
+      try {
+        // Filter out undefined values — only include defined keys in the payload
+        const updateData: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(data)) {
+          if (value !== undefined) {
+            updateData[key] = value;
+          }
+        }
+
+        if (Object.keys(updateData).length === 0) {
+          throw new Error('No fields to update');
+        }
+
+        const updatedOrder = await updateOrderMutation.mutateAsync({
+          orderId,
+          data: updateData,
+        });
+
+        if (onOrderUpdate) {
+          onOrderUpdate(updatedOrder);
+        }
+
+        toast.success('تم تحديث البيانات بنجاح');
+        return updatedOrder;
+      } catch (err: any) {
+        const msg = err?.response?.data?.message;
+        toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في تحديث الحقل. يرجى المحاولة مرة أخرى.');
+        throw err;
+      }
+    },
+    [orderId, onOrderUpdate, updateOrderMutation]
+  );
+
+  return { updateField, updateFields };
 }

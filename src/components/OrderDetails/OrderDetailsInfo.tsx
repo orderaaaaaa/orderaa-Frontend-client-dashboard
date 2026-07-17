@@ -61,6 +61,11 @@ function OrderDetailsInfoComponent({
     message: '',
   });
 
+  // Pending shipping-type change that requires returnShipmentContent.
+  // When set (non-DELIVERY), the content editor appears under the shipping-type
+  // selector in PricingSection and the type is NOT saved until the content is approved.
+  const [pendingShippingType, setPendingShippingType] = useState<string | null>(null);
+
   const { data: statusesData, error: statusesError } = useOrderStatusesQuery();
   const availableStatuses = statusesData ?? [];
 
@@ -122,7 +127,7 @@ function OrderDetailsInfoComponent({
     navigationFilters,
   });
 
-  const updateField = useOrderFieldUpdate(localOrder.id, handleUpdate);
+  const { updateField, updateFields } = useOrderFieldUpdate(localOrder.id, handleUpdate);
 
   // Get the last event status from order events
   const lastEventStatus = useMemo(() => {
@@ -266,6 +271,36 @@ function OrderDetailsInfoComponent({
     handleUpdate(updatedOrder);
   };
 
+  // User picked a shipping type. DELIVERY saves immediately (backend clears
+  // returnShipmentContent). Any other type is staged pending until the
+  // returnShipmentContent is approved — this avoids the backend 400 that would
+  // otherwise leave the UI stuck (type changed but field never shown).
+  const handleShippingTypeSelect = (value: string) => {
+    if (value === 'DELIVERY') {
+      setPendingShippingType(null);
+      updateField('shippingType', value);
+      return;
+    }
+    setPendingShippingType(value);
+  };
+
+  // Save returnShipmentContent + pending shippingType in a SINGLE PATCH.
+  // Two sequential PATCHes fail because the second (shippingType alone) triggers
+  // backend validation: !returnShipmentContent → 400.
+  // When there's no pending type (order already has non-DELIVERY), just save content.
+  const handleSaveReturnContent = async (content: string) => {
+    if (pendingShippingType && pendingShippingType !== 'DELIVERY') {
+      await updateFields({
+        shippingType: pendingShippingType,
+        returnShipmentContent: content.trim(),
+      });
+    } else {
+      // Order already has non-DELIVERY type, just update content directly
+      await updateField('returnShipmentContent', content.trim());
+    }
+    setPendingShippingType(null);
+  };
+
   return (
     <>
       <div className="flex flex-col gap-4 font-medium p-4 bg-gray-50 mt-8 rounded-xl mb-24 w-full max-w-full">
@@ -275,7 +310,13 @@ function OrderDetailsInfoComponent({
           onPhoneUpdate={handlePhoneUpdate}
         />
 
-        <PricingSection order={localOrder} onUpdate={updateField} />
+        <PricingSection
+          order={localOrder}
+          onUpdate={updateField}
+          onShippingTypeSelect={handleShippingTypeSelect}
+          pendingShippingType={pendingShippingType}
+          onSaveReturnContent={handleSaveReturnContent}
+        />
 
         <ShippingSection
           shippingCompany={shippingLabel}
