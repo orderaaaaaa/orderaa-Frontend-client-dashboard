@@ -66,6 +66,8 @@ export const STATUS_ICONS: Record<string, IconType> = {
   REGISTERED: MdCheckCircleOutline,
   ATTEMPTED: MdLoop,
   RETURNED_DELIVERED: HiOutlineReceiptRefund,
+  RETURNED_SETTLED: HiOutlineReceiptRefund,
+  RETURNED_FINAL: LiaBanSolid,
   REPORTS: FileText,
   SHIPPING: MdOutlineLocalShipping,
   PARTIAL_DELIVERY: MdReceiptLong,

@@ -526,3 +526,29 @@ export interface OrderStatusItem {
   key: string;
   label: string;
 }
+
+// Settlement types
+export interface SettlementRow {
+  orderCode?: string;
+  shippingCompanyCode?: string;
+  settlementAmount: number;
+  targetStatus: 'COLLECTED' | 'RETURNED_SETTLED';
+}
+
+export interface UploadSettlementResponse {
+  success: string[];
+  failed: { row: number; reason: string }[];
+}
+
+export interface ShortfallSettlement {
+  id: number;
+  code: string;
+  settlementAmount: string;
+  status: string;
+  settlementResolved: boolean;
+}
+
+export interface AdjustSettlementPayload {
+  orderId: number;
+  amount: number;
+}

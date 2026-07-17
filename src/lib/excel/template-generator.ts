@@ -69,6 +69,34 @@ export function generateAppFormatTemplate(): Blob {
 }
 
 /**
+ * Generate Settlement template for bulk settlement uploads
+ */
+export function generateSettlementTemplate(): Blob {
+  const headers = [
+    'orderCode',
+    'shippingCompanyCode',
+    'settlementAmount',
+    'targetStatus',
+  ];
+
+  const sampleData = [
+    ['ORD-123', '', '-15', 'COLLECTED'],
+    ['', 'SHIP-ABC-999', '120.50', 'RETURNED_SETTLED'],
+  ];
+
+  const worksheet = XLSX.utils.aoa_to_sheet([headers, ...sampleData]);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Settlement');
+
+  // Set column widths
+  const colWidths = headers.map(() => ({ wch: 22 }));
+  worksheet['!cols'] = colWidths;
+
+  const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  return new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+}
+
+/**
  * Generate EasyOrder Format Excel template
  */
 export function generateEasyOrderFormatTemplate(): Blob {

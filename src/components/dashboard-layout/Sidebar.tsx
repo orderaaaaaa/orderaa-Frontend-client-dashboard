@@ -9,13 +9,17 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronUp,
+  Upload,
+  FileOutput,
   X,
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { navigation } from '@/constants/Navbar';
+import { useMemo } from 'react';
+import { navigation, NavigationItem } from '@/constants/Navbar';
 import { SIDEBAR_WIDTH } from '@/constants/dashboard-layout';
 import Logo from '@/assets/images/updated-logo.png';
+import { useAuthStore } from '@/store/authStore';
 
 interface SidebarProps {
   open: boolean;
@@ -37,7 +41,36 @@ export function Sidebar({
   onNavItemClick,
 }: SidebarProps) {
   const pathname = usePathname();
+  const user = useAuthStore((s) => s.user);
   const [openSubDropdown, setOpenSubDropdown] = useState<string | null>(null);
+
+  const isMerchant = !!user?.merchantId;
+  const isEmployee = !!user?.employeeId;
+
+  const filteredNavigation = useMemo(() => {
+    const extraOrderChildren: NavigationItem[] = [];
+    if (isMerchant) {
+      extraOrderChildren.push({
+        name: 'رفع شيت التحصيل',
+        href: '/dashboard/orders/settlement/upload',
+        icon: Upload,
+      });
+    }
+    if (isEmployee) {
+      extraOrderChildren.push({
+        name: 'تحصيل ناقص',
+        href: '/dashboard/orders/settlement/shortfall',
+        icon: FileOutput,
+      });
+    }
+    if (extraOrderChildren.length === 0) return navigation;
+    return navigation.map((item) => {
+      if (item.name === 'الطلبات' && item.children) {
+        return { ...item, children: [...item.children, ...extraOrderChildren] };
+      }
+      return item;
+    });
+  }, [isMerchant, isEmployee]);
 
   const activeItemStyle: React.CSSProperties = {
     backgroundColor: '#2C028F',
@@ -124,7 +157,7 @@ export function Sidebar({
 
           {/* Navigation */}
           <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto scrollbar-hide">
-            {navigation.map((item) => {
+            {filteredNavigation.map((item) => {
               const isActive = pathname === item.href;
 
               if (item.children) {
