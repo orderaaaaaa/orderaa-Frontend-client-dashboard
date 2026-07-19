@@ -9,4 +9,5 @@ Auto-appended by agent when user states general pattern/constraint during chat.
 - Don't redesign or delete working code when backend doesn't support it yet — preserve for future use.
 - Worktree isolation MANDATORY before any code edit. Before first edit: invoke `using-git-worktrees` skill → create branch from HEAD → create worktree → cd into worktree → install deps. If `using-git-worktrees` skill unavailable, manually execute steps per AGENTS.md Session Isolation section. Never edit code in main checkout.
 - Always use pnpm (not npm) in the frontend repo. User override of AGENTS.md default.
+- Design frontend components, hooks, and utilities to be reusable. If a pattern is likely to be used in multiple places, make it a general-purpose abstraction with well-defined props/parameters rather than a one-off.
 
