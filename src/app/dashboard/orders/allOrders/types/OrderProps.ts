@@ -1,4 +1,4 @@
-import { OrderState, ShippingType } from '@/types/orders';
+import { OrderState, OrderProductVariantInfo, ShippingType } from '@/types/orders';
 
 export interface OrderCardProps {
   id: number;
@@ -6,8 +6,9 @@ export interface OrderCardProps {
   name: string;
   phoneNumbers: string[];
   government: string;
-  items: string[];
+  items?: string[];
   itemSkus?: (string | null)[];
+  productVariants?: OrderProductVariantInfo[];
   price: number;
   shippingType?: ShippingType;
   trys: number;

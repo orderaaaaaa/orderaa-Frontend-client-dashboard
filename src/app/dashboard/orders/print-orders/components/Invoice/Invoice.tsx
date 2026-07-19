@@ -47,7 +47,7 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
     return data.shipping.paymentMethod || labels.cashOnDelivery;
   };
 
-  const formatProductName = (product: { name: string; quantity: number; variant?: string }) => {
+  const formatProductName = (product: { name: string; quantity: number }) => {
     return product.name || 'Product';
   };
 
@@ -172,7 +172,10 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
             <div key={index} className="mb-0.5">
               <div className="grid grid-cols-[auto_1fr] gap-1">
                 <span className="text-[8px] font-bold">
-                  {product.variant}
+                  {[
+                    ...(product.attributes ?? []).map((a) => `${a.name}: ${a.value}`),
+                    ...(product.customVariants ?? []).map((c) => `${c.label}: ${c.value}`),
+                  ].join(' / ') || '-'}
                 </span>
                 <span className="text-[8px] font-bold text-left">
                   {formatProductName(product)}

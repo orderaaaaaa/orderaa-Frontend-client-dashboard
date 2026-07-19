@@ -176,14 +176,14 @@ export default function AgentStatusUpdateModal({
           break;
         case 'CHANGE_PRODUCT': {
           if (!selectedProduct) return;
-          const selectedVariants = selectedProduct.selectedVariants ?? [];
-          const products = selectedVariants.length > 0
-            ? selectedVariants.map((v) => ({
-                productId: selectedProduct.id,
-                quantity: 1,
-                variants: [{ attribute: v.attribute, option: v.option }],
-              }))
-            : [{ productId: selectedProduct.id, quantity: 1, variants: [] }];
+          const attributeOptionIds = (selectedProduct.selectedVariants ?? [])
+            .map((v) => v.attributeOptionId)
+            .filter((id): id is number => id != null);
+          const products = [{
+            productId: selectedProduct.id,
+            quantity: 1,
+            attributeOptionIds,
+          }];
           await changeProductsMutation.mutateAsync({ orderId, products });
           break;
         }

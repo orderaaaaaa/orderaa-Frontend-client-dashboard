@@ -16,6 +16,7 @@ import Footer from '@/components/orders/Footer';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 import BulkActionsBar from '@/components/BulkActionsBar';
 import type { Order } from '@/types/orders';
+import { mapOrderProductToVariantInfo } from '@/types/orders';
 import PageTaps from '../components/pageTaps';
 import { buildApiFiltersFromUrlState } from '@/hooks/orders/useUnifiedFilters';
 import { useOrderStatistics } from '@/hooks/orders/useOrderStatistics';
@@ -522,20 +523,7 @@ function AllOrdersContent() {
                 }
                 shippingId={order.shippingId}
                 shippingCompany={order.shippingCompany}
-                // Updated Mapping Logic for Items and Variants
-                items={order.order_products.map((op: any) => {
-                  const productName = op.products?.name || 'منتج غير معروف';
-                  const variantDetails =
-                    op.variants && op.variants.length > 0
-                      ? op.variants.map((v: any) => v.option).join('')
-                      : '';
-                  return variantDetails
-                    ? `${productName} - ${variantDetails}`
-                    : productName;
-                })}
-                itemSkus={order.order_products.map(
-                  (op: any) => op.sku || op.products?.sku || null
-                )}
+                productVariants={order.order_products.map((op) => mapOrderProductToVariantInfo(op))}
                 price={order.totalCost}
                 shippingType={order.shippingType}
                 trys={order.numberOfTriesToReach}

@@ -3,7 +3,7 @@
 import React, { useCallback } from 'react';
 import Barcode from 'react-barcode';
 import { QRCodeSVG } from 'qrcode.react';
-import { InvoiceProps } from '../../types/invoice';
+import { InvoiceProps, InvoiceProduct } from '../../types/invoice';
 import { INVOICE_LABELS } from '../../constants/invoiceLabels';
 import { ShippingType } from '@/types/orders';
 
@@ -20,10 +20,15 @@ export function BostaInvoice({ data, storeInfo, language }: InvoiceProps) {
     .filter(Boolean)
     .join(' - ') || '-';
 
+  const describe = (p: InvoiceProduct) => {
+    const attrs = [
+      ...(p.attributes ?? []).map((a) => `${a.name}: ${a.value}`),
+      ...(p.customVariants ?? []).map((c) => `${c.label}: ${c.value}`),
+    ].join(' / ');
+    return `${p.name}${attrs ? ` - ${attrs}` : ''} X ${p.quantity}`;
+  };
   const productDescription = data.shipmentContent ||
-    data.products
-      .map((p) => `${p.name}${p.variant ? ` - ${p.variant}` : ''} X ${p.quantity}`)
-      .join(', ');
+    data.products.map(describe).join(', ');
 
   const totalPieces = data.products.reduce((sum, p) => sum + p.quantity, 0);
 

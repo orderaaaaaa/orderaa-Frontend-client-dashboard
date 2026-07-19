@@ -237,12 +237,6 @@ export interface Product {
   manufactureCompany?: string;
 }
 
-// Order Product Variant
-export interface OrderProductVariant {
-  attribute: string;
-  option: string;
-}
-
 // Order Product Attribute (from API: name + selected option)
 export interface OrderProductAttribute {
   id: number;
@@ -261,12 +255,52 @@ export interface OrderProduct {
   quantity?: number;
   price: number;
   sku?: string | null;
-  variant?: string;
-  variants?: OrderProductVariant[];
   attributes?: OrderProductAttribute[];
+  variant?: {
+    options?: Array<{
+      attribute_option: { id: number; name: string; attribute: { id: number; name: string } };
+    }>;
+  };
+  customVariants?: { label: string; value: string }[];
   products: Product;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface OrderProductVariantInfo {
+  productName: string;
+  attributes: { id: number; name: string; value: string }[];
+  customVariants?: { label: string; value: string }[];
+  sku?: string | null;
+  quantity?: number;
+}
+
+export function mapOrderProductToVariantInfo(op: OrderProduct): OrderProductVariantInfo {
+  const attrs = (op.attributes && op.attributes.length > 0)
+    ? op.attributes
+    : (op.variant?.options ?? [])
+        .filter((o) => o?.attribute_option?.attribute && o?.attribute_option)
+        .map((o) => ({
+          id: o.attribute_option.attribute.id,
+          name: o.attribute_option.attribute.name,
+          options: { id: o.attribute_option.id, name: o.attribute_option.name },
+        }));
+  return {
+    productName: op.products?.name || 'منتج غير معروف',
+    attributes: attrs
+      .filter((a: OrderProductAttribute) => a?.name && a?.options?.name)
+      .map((a: OrderProductAttribute) => ({ id: a.id, name: a.name, value: a.options.name })),
+    customVariants: op.customVariants ?? undefined,
+    sku: op.sku || op.products?.sku || null,
+    quantity: op.quantity,
+  };
+}
+
+export function formatOrderProductVariant(op: OrderProduct): string {
+  return (op?.attributes ?? [])
+    .filter((a: OrderProductAttribute) => a?.name && a?.options?.name)
+    .map((a: OrderProductAttribute) => `${a.name}: ${a.options.name}`)
+    .join(' / ');
 }
 
 // Merchant Interface

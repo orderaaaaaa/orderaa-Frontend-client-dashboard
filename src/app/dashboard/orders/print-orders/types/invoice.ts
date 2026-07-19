@@ -23,7 +23,8 @@ export interface InvoiceCustomer {
 export interface InvoiceProduct {
   name: string;
   quantity: number;
-  variant?: string;
+  attributes?: { id: number; name: string; value: string }[];
+  customVariants?: { label: string; value: string }[];
   sku?: string | null;
 }
 

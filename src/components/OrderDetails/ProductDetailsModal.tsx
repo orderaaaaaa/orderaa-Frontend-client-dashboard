@@ -16,7 +16,9 @@ export default function ProductDetailsModal({
   orderProduct,
 }: ProductDetailsModalProps) {
   const product = orderProduct?.products;
-  const variants = orderProduct?.variants ?? [];
+  const attributes = (orderProduct?.attributes ?? []).filter(
+    (a) => a?.name && a?.options?.name,
+  );
   const price = orderProduct?.price ?? product?.price;
 
   const DetailRow = ({
@@ -62,17 +64,17 @@ export default function ProductDetailsModal({
             </h3>
           </div>
 
-          {variants.length > 0 && (
+          {attributes.length > 0 && (
             <div className="w-full mb-4">
               <h4 className="text-base font-bold text-primary mb-2 text-center">
                 الخصائص
               </h4>
               <div className="bg-gray-50/50 rounded-xl px-4 py-2">
-                {variants.map((variant, idx) => (
+                {attributes.map((attr, idx) => (
                   <DetailRow
                     key={idx}
-                    label={variant.attribute}
-                    value={variant.option}
+                    label={attr.name}
+                    value={attr.options.name}
                   />
                 ))}
               </div>

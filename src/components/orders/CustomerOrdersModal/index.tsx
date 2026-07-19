@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { LiaExclamationTriangleSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
 import type { Order } from '@/types/orders';
+import { mapOrderProductToVariantInfo } from '@/types/orders';
 import { useCustomerOrders, useOrderStatusesQuery } from '@/services/orders';
 import OrderCard from '../../../app/dashboard/orders/allOrders/components/OrderCard';
 import { Button } from '@/components/ui/button';
@@ -203,16 +204,7 @@ export default function CustomerOrdersModal({
                   order.externalGovernorate ||
                   'غير محدد'
                 }
-                items={order.order_products.map((op: any) => {
-                  const productName = op.products?.name || 'منتج غير معروف';
-                  const variantDetails =
-                    op.variants && op.variants.length > 0
-                      ? op.variants.map((v: any) => v.option).join('')
-                      : '';
-                  return variantDetails
-                    ? `${productName} - ${variantDetails}`
-                    : productName;
-                })}
+                productVariants={order.order_products.map((op) => mapOrderProductToVariantInfo(op))}
                 price={order.totalCost}
                 shippingType={order.shippingType}
                 trys={order.numberOfTriesToReach}

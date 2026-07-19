@@ -61,9 +61,9 @@ export default function TrackingCard({ card }: TrackingCardProps) {
 
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
 
-  const customerPhone = (card.order?.customers as any)?.phone_numbers?.[0];
-  const customerName = (card.order?.customers as any)?.name;
-  const orderProducts = (card.order as any)?.order_products as any[] | undefined;
+  const customerPhone = card.order?.customers?.phone_numbers?.[0];
+  const customerName = card.order?.customers?.name;
+  const orderProducts = card.order?.order_products;
 
   const handleSaveCourierUpdate = useCallback(async () => {
     if (!newCourierUpdate.trim()) return;
@@ -164,16 +164,24 @@ export default function TrackingCard({ card }: TrackingCardProps) {
                 السعر: {card.order.totalCost} ج.م
               </span>
             )}
-            {orderProducts?.map((op: any, idx: number) => (
-              <span key={idx} className="text-gray-500">
-                {op.products?.name || op.productName}
-                {op.variants?.length > 0 && (
-                  <span className="text-gray-400 mr-1">
-                    ({op.variants.map((v: any) => v.option).join(' - ')})
-                  </span>
-                )}
-              </span>
-            ))}
+            {orderProducts?.map((op, idx) => {
+              const attrs = (op.attributes ?? []).filter((a) => a?.name && a?.options?.name);
+              const customVariants = Array.isArray(op.customVariants) ? op.customVariants : [];
+              const parts = [
+                ...attrs.map((a) => `${a.name}: ${a.options.name}`),
+                ...customVariants.map((cv) => `${cv.label}: ${cv.value}`),
+              ];
+              return (
+                <span key={idx} className="text-gray-500">
+                  {op.products?.name}
+                  {parts.length > 0 && (
+                    <span className="text-gray-400 mr-1">
+                      ({parts.join(' - ')})
+                    </span>
+                  )}
+                </span>
+              );
+            })}
           </div>
         )}
 

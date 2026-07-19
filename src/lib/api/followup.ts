@@ -92,7 +92,7 @@ export async function markFollowupPostponed(orderId: number, date: string): Prom
 export interface FollowupChangeProductInput {
   productId: number;
   quantity: number;
-  variants?: { attribute: string; option: string }[];
+  attributeOptionIds: number[];
 }
 
 export interface FollowupChangeProductsResponse {

@@ -93,14 +93,22 @@ export default function ExchangeModal({
                   )}>
                     {op.products.name}
                   </span>
-                  {op.products.extraDetails?.variants &&
-                    op.products.extraDetails.variants.length > 0 && (
-                      <span className="text-xs text-gray-500">
-                        {op.products.extraDetails.variants
-                          .map((v) => v.title)
-                          .join(' • ')}
-                      </span>
-                    )}
+                  {(() => {
+                    const attrs = (op.attributes ?? []).filter(
+                      (a) => a?.name && a?.options?.name,
+                    );
+                    const text =
+                      attrs.length > 0
+                        ? attrs
+                            .map((a) => `${a.name}: ${a.options.name}`)
+                            .join(' • ')
+                        : (op.products.extraDetails?.variants ?? [])
+                            .map((v) => v.title)
+                            .join(' • ');
+                    return text ? (
+                      <span className="text-xs text-gray-500">{text}</span>
+                    ) : null;
+                  })()}
                 </div>
                 <span className="text-sm font-bold text-[#1F1F1F] shrink-0">
                   {op.price} ج.م

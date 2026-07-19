@@ -20,7 +20,7 @@ const mockData: InvoiceData = {
     {
       name: 'Patek Philippe Leather Strap',
       quantity: 1,
-      variant: 'White / Black',
+      attributes: [{ id: 0, name: 'Color', value: 'White / Black' }],
     },
   ],
   shipping: {

@@ -17,6 +17,7 @@ import PrintOrdersActionsBar from '../../print-orders/components/PrintOrdersActi
 import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
 import Footer from '@/components/orders/Footer';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
+import { mapOrderProductToVariantInfo } from '@/types/orders';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useOrders, useDepartmentStatusesQuery } from '@/services/orders';
@@ -339,19 +340,7 @@ export function CallCenterContent() {
                 }
                 shippingId={order.shippingId}
                 shippingCompany={order.shippingCompany}
-                items={order.order_products.map((op: any) => {
-                  const productName = op.products?.name || 'منتج غير معروف';
-                  const variantDetails =
-                    op.variants && op.variants.length > 0
-                      ? op.variants.map((v: any) => v.option).join('')
-                      : '';
-                  return variantDetails
-                    ? `${productName} - ${variantDetails}`
-                    : productName;
-                })}
-                itemSkus={order.order_products.map(
-                  (op: any) => op.sku || op.products?.sku || null
-                )}
+                productVariants={order.order_products.map((op) => mapOrderProductToVariantInfo(op))}
                 price={order.totalCost}
                 trys={order.numberOfTriesToReach}
                 status={order.status}

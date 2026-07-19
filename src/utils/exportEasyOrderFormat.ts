@@ -1,4 +1,4 @@
-import { Order } from '@/types/orders';
+import { Order, formatOrderProductVariant } from '@/types/orders';
 import * as XLSX from 'xlsx';
 
 /**
@@ -63,7 +63,7 @@ export function exportEasyOrderFormat(orders: Order[], filename: string = 'easyo
             'Coupon': order.coupon || '',
             'Coupon Discount': order.couponDiscount || 0,
             'Product Name': firstProduct?.products.name || '',
-            'Variant': firstProduct?.variant || formatVariant(firstProduct?.products),
+            'Variant': formatOrderProductVariant(firstProduct) || formatVariant(firstProduct?.products),
             'Quantity': firstProduct?.quantity || 1,
             'SKU': firstProduct?.sku || generateSKU(firstProduct?.products.name, firstProduct?.products.size, firstProduct?.products.color),
             'Item Price': firstProduct?.price || 0,

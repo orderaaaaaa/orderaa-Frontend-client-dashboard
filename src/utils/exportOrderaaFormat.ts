@@ -1,4 +1,4 @@
-import { Order } from '@/types/orders';
+import { Order, formatOrderProductVariant } from '@/types/orders';
 import * as XLSX from 'xlsx';
 
 /**
@@ -45,13 +45,13 @@ export function exportOrderaaFormat(orders: Order[], filename: string = 'orderaa
             'Utm Campaign': order.utmCampaign || '',
             'Payment Status': order.paymentStatus || '',
             'Product Name 1': products[0]?.products.name || '',
-            'Variant 1': products[0]?.variant || formatVariant(products[0]?.products),
+            'Variant 1': formatOrderProductVariant(products[0]) || formatVariant(products[0]?.products),
         };
 
         // Add second product if exists (template only supports 2 products)
         if (products[1]) {
             data['Product Name 2'] = products[1].products.name;
-            data['Variant 2'] = products[1].variant || formatVariant(products[1].products);
+            data['Variant 2'] = formatOrderProductVariant(products[1]) || formatVariant(products[1].products);
         }
 
         return data;

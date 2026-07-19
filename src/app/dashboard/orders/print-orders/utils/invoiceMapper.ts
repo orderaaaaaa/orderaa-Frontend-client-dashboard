@@ -6,23 +6,20 @@ export function mapOrderToInvoice(
   language: InvoiceLanguage = 'ar'
 ): InvoiceData {
   const products: InvoiceProduct[] = order.order_products.map((op) => {
-    const rawVariant = op.variant as unknown;
-    let variantText: string | undefined;
-    if (typeof rawVariant === 'string' && rawVariant.trim()) {
-      variantText = rawVariant;
-    } else if (rawVariant && typeof rawVariant === 'object' && Array.isArray((rawVariant as any).options)) {
-      variantText = (rawVariant as { options: { value?: unknown }[] }).options
-        .map((o) => String(o?.value ?? ''))
-        .filter(Boolean)
-        .join(' - ');
-    }
-    if (!variantText && op.variants && op.variants.length > 0) {
-      variantText = op.variants.map((v) => v.option).join(' - ');
-    }
+    const attributes = (op.attributes ?? [])
+      .filter((a: any) => a?.name && a?.options?.name)
+      .map((a: any) => ({ id: a.id, name: a.name, value: a.options.name }));
+
+    const customVariants =
+      Array.isArray(op.customVariants) && op.customVariants.length > 0
+        ? op.customVariants
+        : undefined;
+
     return {
       name: op.products.name,
       quantity: op.quantity || 1,
-      variant: variantText,
+      attributes: attributes.length > 0 ? attributes : undefined,
+      customVariants,
       sku: op.sku || op.products.sku,
     };
   });

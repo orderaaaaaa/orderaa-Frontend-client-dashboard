@@ -39,6 +39,7 @@ export default function OrderCard({
   government,
   items,
   itemSkus,
+  productVariants,
   price,
   shippingId,
   shippingCompany,
@@ -220,49 +221,83 @@ export default function OrderCard({
           </div>
         )}
 
-        {showAllItems
-          ? items
-            ?.filter((item) => item && item !== 'غير محدد')
-            .map((item, index) => (
+        {productVariants && productVariants.length > 0
+          ? productVariants.map((pv, index) => (
               <div key={index} className="flex items-start gap-2 max-w-full">
                 <Package
                   className="w-[18px] h-[18px] flex-shrink-0 mt-1"
                   style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
                 />
                 <span className="text-base font-medium text-black break-words min-w-0">
-                  {item}
+                  {pv.productName}
+                  {/* Intentional: compact card shows attribute VALUE only (e.g. "XL"), not "name: value", to save horizontal space. Detail/PDF views show the full "name: value" form. */}
+                  {pv.attributes.length > 0 && ` - ${pv.attributes.map((a) => a.value).join(' ')}`}
+                  {pv.quantity ? ` × ${pv.quantity}` : ''}
                 </span>
               </div>
             ))
-          : items?.[0] &&
-          items[0] !== 'غير محدد' && (
+          : items
+            ? showAllItems
+              ? items
+                ?.filter((item) => item && item !== 'غير محدد')
+                .map((item, index) => (
+                  <div key={index} className="flex items-start gap-2 max-w-full">
+                    <Package
+                      className="w-[18px] h-[18px] flex-shrink-0 mt-1"
+                      style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
+                    />
+                    <span className="text-base font-medium text-black break-words min-w-0">
+                      {item}
+                    </span>
+                  </div>
+                ))
+              : items?.[0] &&
+              items[0] !== 'غير محدد' && (
+                <div className="flex items-start gap-2 max-w-full">
+                  <Package
+                    className="w-[18px] h-[18px] flex-shrink-0 mt-1"
+                    style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
+                  />
+                  <span className="text-base font-medium text-black break-words min-w-0">
+                    {items[0]}
+                  </span>
+                </div>
+              )
+            : null}
+
+        {productVariants && productVariants.length > 0
+          ? productVariants.some((pv) => pv.sku) && (
+              <div className="flex items-start gap-2 max-w-full">
+                <CiBarcode
+                  className="w-[18px] h-[18px] flex-shrink-0 mt-1"
+                  style={{ color: 'rgba(0,0,0,0.5)' }}
+                />
+                <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                  <span className="text-sm font-semibold text-black">SKU:</span>
+                  {productVariants.filter((pv) => pv.sku).map((pv, index) => (
+                    <span key={index} className="text-sm font-medium text-black">
+                      {pv.sku}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )
+          : itemSkus?.some(Boolean) && (
             <div className="flex items-start gap-2 max-w-full">
-              <Package
+              <CiBarcode
                 className="w-[18px] h-[18px] flex-shrink-0 mt-1"
-                style={{ strokeWidth: 1.5, color: 'rgba(0,0,0,0.5)' }}
+                style={{ color: 'rgba(0,0,0,0.5)' }}
               />
-              <span className="text-base font-medium text-black break-words min-w-0">
-                {items[0]}
-              </span>
+              <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                <span className="text-sm font-semibold text-black">SKU:</span>
+                {itemSkus.filter(Boolean).map((sku, index) => (
+                  <span key={index} className="text-sm font-medium text-black">
+                    {sku}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
-
-        {itemSkus?.some(Boolean) && (
-          <div className="flex items-start gap-2 max-w-full">
-            <CiBarcode
-              className="w-[18px] h-[18px] flex-shrink-0 mt-1"
-              style={{ color: 'rgba(0,0,0,0.5)' }}
-            />
-            <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-              <span className="text-sm font-semibold text-black">SKU:</span>
-              {itemSkus.filter(Boolean).map((sku, index) => (
-                <span key={index} className="text-sm font-medium text-black">
-                  {sku}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Price */}
         {price && (
