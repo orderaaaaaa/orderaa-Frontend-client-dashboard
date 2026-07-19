@@ -26,12 +26,12 @@ export interface PrintOrdersResponse {
 
 export interface MarkOrdersPrintedRequest {
   ordersIds: number[];
-  isPrinted: boolean;
 }
 
 export interface MarkOrdersPrintedResponse {
-  updatedCount: number;
-  message: string;
+  success: boolean;
+  printedCount: number;
+  orders: Order[];
 }
 
 export interface PrepareOrdersRequest {

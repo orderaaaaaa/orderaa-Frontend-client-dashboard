@@ -37,10 +37,9 @@ export async function printOrders(count: number): Promise<PrintOrdersResponse> {
 export async function markOrdersAsPrinted(
   payload: MarkOrdersPrintedRequest
 ): Promise<MarkOrdersPrintedResponse> {
-  const response = await http.patch<MarkOrdersPrintedResponse>(
-    '/orders/bulk',
-    payload,
-    { params: { status: 'CONFIRMED' } }
+  const response = await http.put<MarkOrdersPrintedResponse>(
+    '/orders/print/mark',
+    { ordersIds: payload.ordersIds }
   );
   return response.data;
 }

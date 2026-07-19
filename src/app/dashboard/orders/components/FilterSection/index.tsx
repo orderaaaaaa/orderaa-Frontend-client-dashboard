@@ -253,7 +253,6 @@ export function FilterSection({
       if (unprintedOrders.length > 0) {
         await markAsPrinted({
           ordersIds: unprintedOrders.map((order) => order.id),
-          isPrinted: true,
         });
         toast.success('تم تحديث حالة الطباعة بنجاح');
       }
