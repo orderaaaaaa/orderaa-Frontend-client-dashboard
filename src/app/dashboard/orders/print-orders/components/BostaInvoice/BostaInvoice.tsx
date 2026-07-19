@@ -22,7 +22,7 @@ export function BostaInvoice({ data, storeInfo, language }: InvoiceProps) {
 
   const describe = (p: InvoiceProduct) => {
     const attrs = [
-      ...(p.attributes ?? []).map((a) => `${a.name}: ${a.value}`),
+      ...(p.attributes ?? []).map((a) => a.value),
       ...(p.customVariants ?? []).map((c) => `${c.label}: ${c.value}`),
     ].join(' / ');
     return `${p.name}${attrs ? ` - ${attrs}` : ''} X ${p.quantity}`;

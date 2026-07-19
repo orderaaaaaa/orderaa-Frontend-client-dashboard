@@ -173,7 +173,7 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
               <div className="grid grid-cols-[auto_1fr] gap-1">
                 <span className="text-[8px] font-bold">
                   {[
-                    ...(product.attributes ?? []).map((a) => `${a.name}: ${a.value}`),
+                    ...(product.attributes ?? []).map((a) => a.value),
                     ...(product.customVariants ?? []).map((c) => `${c.label}: ${c.value}`),
                   ].join(' / ') || '-'}
                 </span>
