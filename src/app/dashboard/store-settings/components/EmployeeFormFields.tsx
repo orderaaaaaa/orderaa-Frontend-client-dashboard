@@ -18,8 +18,8 @@ import { UtmSourcesField } from './UtmSourcesField';
 import { PageNamesField } from './PageNamesField';
 import { AutoCancelField } from './AutoCancelField';
 import { ShippingSection } from './ShippingSection';
-import { SectionHeader } from './SectionHeader';
-import { Separator } from '@/components/ui/separator';
+import { GroupSection } from './SectionHeader';
+import { ReservationSettingsSection } from './ReservationSettingsSection';
 
 interface Props {
   register: UseFormRegister<OrderSettingsFormData>;
@@ -39,67 +39,71 @@ export default function OrderSettingsFields({
   return (
     <div className="p-4 sm:p-6 lg:p-8 xl:p-10 w-full" dir="rtl">
       <div className="space-y-6 sm:space-y-8">
-        <LogoUploadField watch={watch} setValue={setValue} errors={errors} />
+        {/* 1. الملف الشخصي / Profile */}
+        <GroupSection title="الملف الشخصي">
+          <LogoUploadField watch={watch} setValue={setValue} errors={errors} />
+          <URLField register={register} errors={errors} />
+        </GroupSection>
 
-        <Separator />
+        {/* 2. اللغة والتوطين / Language */}
+        <GroupSection title="اللغة والتوطين">
+          <LanguageSelectionField register={register} />
+        </GroupSection>
 
-        <URLField register={register} errors={errors} />
+        {/* 3. أسباب الإلغاء والمرتجعات / Cancellation & Returns */}
+        <GroupSection title="أسباب الإلغاء والمرتجعات">
+          <CancellationReasonsField
+            watch={watch}
+            setValue={setValue}
+            errors={errors}
+          />
+          <PostShippingReasonsField />
+          <ShippingCancellationReasonsField />
+        </GroupSection>
 
-        <Separator />
+        {/* 4. اللوجستيات والشحن / Logistics & Shipping */}
+        <GroupSection title="اللوجستيات والشحن">
+          <LogisticsSettingsSection />
+          <If condition={hasShippingConfig}>
+            <Then>
+              <ShippingSection
+                register={register}
+                errors={errors}
+                watch={watch}
+                setValue={setValue}
+              />
+            </Then>
+          </If>
+        </GroupSection>
 
-        <LanguageSelectionField register={register} />
+        {/* 5. التسويق / Marketing */}
+        <GroupSection title="التسويق">
+          <UtmSourcesField
+            watch={watch}
+            setValue={setValue}
+            errors={errors}
+          />
+          <PageNamesField
+            watch={watch}
+            setValue={setValue}
+            errors={errors}
+          />
+        </GroupSection>
 
-        <Separator />
+        {/* 6. الإعدادات التلقائية / Automation */}
+        <GroupSection title="الإعدادات التلقائية">
+          <AutoCancelField register={register} errors={errors} />
+        </GroupSection>
 
-        <CancellationReasonsField
-          watch={watch}
-          setValue={setValue}
-          errors={errors}
-        />
-
-        <Separator />
-
-        <PostShippingReasonsField />
-
-        <Separator />
-
-        <ShippingCancellationReasonsField />
-
-        <Separator />
-
-        <LogisticsSettingsSection />
-
-        <Separator />
-
-        <UtmSourcesField
-          watch={watch}
-          setValue={setValue}
-          errors={errors}
-        />
-
-        <Separator />
-
-        <PageNamesField
-          watch={watch}
-          setValue={setValue}
-          errors={errors}
-        />
-
-        <Separator />
-
-        <AutoCancelField register={register} errors={errors} />
-
-        <If condition={hasShippingConfig}>
-          <Then>
-            <SectionHeader />
-            <ShippingSection
-              register={register}
-              errors={errors}
-              watch={watch}
-              setValue={setValue}
-            />
-          </Then>
-        </If>
+        {/* 7. الجرد والحجز / Inventory & Reservation */}
+        <GroupSection title="الجرد والحجز">
+          <ReservationSettingsSection
+            register={register}
+            watch={watch}
+            setValue={setValue}
+            errors={errors}
+          />
+        </GroupSection>
       </div>
     </div>
   );
