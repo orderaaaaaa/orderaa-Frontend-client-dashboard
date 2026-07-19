@@ -68,6 +68,11 @@ export const orderSettingsSchema = z.object({
       },
       { message: 'يرجى إدخال رابط صحيح' }
     ),
+
+  reservationType: z.enum(['ON_CREATION', 'ON_CONFIRMED']).optional(),
+  allowNegativeReservation: z.boolean().optional(),
+  minStockLevel: z.number().int().min(0).nullable().optional(),
+  maxStockLevel: z.number().int().min(0).nullable().optional(),
 });
 
 export type OrderSettingsFormData = z.infer<typeof orderSettingsSchema>;

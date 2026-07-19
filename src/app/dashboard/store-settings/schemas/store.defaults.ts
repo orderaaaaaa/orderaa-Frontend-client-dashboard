@@ -13,4 +13,8 @@ export const ORDER_SETTINGS_DEFAULTS: OrderSettingsFormData = {
   autoCancelAttempts: 0,
   logo: undefined,
   url: '',
+  reservationType: 'ON_CONFIRMED',
+  allowNegativeReservation: false,
+  minStockLevel: null,
+  maxStockLevel: null,
 };
