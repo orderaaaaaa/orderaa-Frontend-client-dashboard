@@ -1,4 +1,4 @@
-import { Order, OrderStatus } from '@/types/orders';
+import { Order, OrderStatus, mapOrderProductToVariantInfo } from '@/types/orders';
 import { InvoiceData, InvoiceLanguage, InvoiceProduct } from '../types/invoice';
 
 export function mapOrderToInvoice(
@@ -6,21 +6,13 @@ export function mapOrderToInvoice(
   language: InvoiceLanguage = 'ar'
 ): InvoiceData {
   const products: InvoiceProduct[] = order.order_products.map((op) => {
-    const attributes = (op.attributes ?? [])
-      .filter((a: any) => a?.name && a?.options?.name)
-      .map((a: any) => ({ id: a.id, name: a.name, value: a.options.name }));
-
-    const customVariants =
-      Array.isArray(op.customVariants) && op.customVariants.length > 0
-        ? op.customVariants
-        : undefined;
-
+    const info = mapOrderProductToVariantInfo(op);
     return {
-      name: op.products.name,
-      quantity: op.quantity || 1,
-      attributes: attributes.length > 0 ? attributes : undefined,
-      customVariants,
-      sku: op.sku || op.products.sku,
+      name: info.productName,
+      quantity: info.quantity || 1,
+      attributes: info.attributes.length > 0 ? info.attributes : undefined,
+      customVariants: info.customVariants,
+      sku: info.sku,
     };
   });
 
