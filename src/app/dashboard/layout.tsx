@@ -109,7 +109,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <AuthGuard>
-      <div className="flex h-dvh overflow-hidden bg-gray-50">
+      <div className="flex min-h-dvh bg-gray-50">
         <ErrorBoundary
           fallback={(reset) => <SidebarError onRetry={reset} />}
         >
@@ -125,19 +125,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </ErrorBoundary>
 
         <MainContent>
-          <div className="flex-shrink-0 pt-[env(safe-area-inset-top)]">
-            <TopBar
-              onMenuToggle={handleSidebarToggle}
-              onSearch={handleSearch}
-              onClearSearch={handleClearSearch}
-              isSearching={isSearching}
-              username={user?.name}
-              onUserAction={handleUserAction}
-            />
-          </div>
+          <div className="sticky top-0 z-10 bg-gray-50">
+            <div className="flex-shrink-0 pt-[env(safe-area-inset-top)]">
+              <TopBar
+                onMenuToggle={handleSidebarToggle}
+                onSearch={handleSearch}
+                onClearSearch={handleClearSearch}
+                isSearching={isSearching}
+                username={user?.name}
+                onUserAction={handleUserAction}
+              />
+            </div>
 
-          <div className="flex-shrink-0 px-4 py-1">
-            <ActiveJobIndicator />
+            <div className="flex-shrink-0 px-4 py-1">
+              <ActiveJobIndicator />
+            </div>
           </div>
 
           <ErrorBoundary
