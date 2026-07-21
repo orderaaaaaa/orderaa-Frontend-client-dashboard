@@ -23,6 +23,7 @@ import { OrderStatus } from '@/types/orders';
 import { getReturnOrderByCode } from '@/lib/api/returns-receiving';
 import { useBarcodeScanner, useScannerFeedback } from '@/app/dashboard/orders/print-orders/hooks';
 import { getCustomerDisplay, type ReturnOrder } from '../../types';
+import { getOrderWarning } from '../../../utils/getOrderWarning';
 import { ScanCountChip } from './ScanCountChip';
 
 interface MainScanPanelProps {
@@ -132,14 +133,19 @@ export function MainScanPanel({
       setIsResolving(true);
       try {
         const order = await getReturnOrderByCode(code);
-        if (order.status === OrderStatus.FINAL_RETURN) {
+        const warning = getOrderWarning(order);
+        if (warning) {
+          playErrorSound();
+          toast.error(warning);
+        } else if (order.status === OrderStatus.FINAL_RETURN) {
           playErrorSound();
           toast.warn(`تم تحويل الطلب ${code} لمرتجع نهائي مسبقاً`);
           return;
+        } else {
+          playSuccessSound();
+          addMainScanCode(code);
+          setOrderCache((prev) => ({ ...prev, [code]: order }));
         }
-        playSuccessSound();
-        addMainScanCode(code);
-        setOrderCache((prev) => ({ ...prev, [code]: order }));
       } catch (err) {
         playErrorSound();
         const anyErr = err as {

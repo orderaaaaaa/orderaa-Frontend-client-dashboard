@@ -24,6 +24,7 @@ import { ORDER_STATUS_ARABIC_LABELS } from '../../../constants/statusMappings';
 import Footer from '@/components/orders/Footer';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 import { mapOrderProductToVariantInfo } from '@/types/orders';
+import { getOrderWarning } from '../../utils/getOrderWarning';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useOrders, useDepartmentStatusesQuery } from '@/services/orders';
@@ -213,10 +214,16 @@ export function ShippingOrdersContent() {
           cancelReason: order.cancelReason,
           packagingWarning: order.packagingWarning,
           printCount: order.printCount,
+          editRejectedNote: order.editRejectedNote,
+          isShadowed: order.isShadowed,
         });
         setFlashingCode(barcode);
         setTimeout(() => setFlashingCode(null), 600);
-        if (order.status === 'PREPARED') {
+        const warning = getOrderWarning(order);
+        if (warning) {
+          playErrorSound();
+          toast.error(warning);
+        } else if (order.status === 'PREPARED') {
           playSuccessSound();
         } else {
           playErrorSound();

@@ -13,6 +13,10 @@ export interface ReturnOrder {
   address?: string;
   customers: Pick<Customer, 'id' | 'name' | 'phone_numbers'> &
     Partial<Pick<Customer, 'governorate' | 'city' | 'address'>>;
+  packagingWarning?: string | null;
+  editRejectedNote?: string | null;
+  isShadowed?: boolean;
+  cancelReason?: string | null;
   createdAt: string;
   updatedAt: string;
 }

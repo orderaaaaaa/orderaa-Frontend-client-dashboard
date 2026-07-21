@@ -7,6 +7,8 @@ export interface ScannedOrder {
   scannedAt: Date;
   cancelReason?: string | null;
   packagingWarning?: string | null;
+  editRejectedNote?: string | null;
+  isShadowed?: boolean;
   printCount?: number;
 }
 
@@ -16,6 +18,8 @@ export interface AddOrderInput {
   status: string;
   cancelReason?: string | null;
   packagingWarning?: string | null;
+  editRejectedNote?: string | null;
+  isShadowed?: boolean;
   printCount?: number;
 }
 

@@ -34,6 +34,7 @@ import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
 import Footer from '@/components/orders/Footer';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 import { mapOrderProductToVariantInfo } from '@/types/orders';
+import { getOrderWarning } from '../../utils/getOrderWarning';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useOrders, useDepartmentStatusesQuery } from '@/services/orders';
@@ -251,7 +252,7 @@ export function PrintOrdersContent() {
       setIsScanLoading(true);
       try {
         const order = await getOrderByCode(barcode);
-        const added = addOrder({ id: order.id, code: barcode, status: order.status, cancelReason: order.cancelReason, packagingWarning: order.packagingWarning, printCount: order.printCount });
+        const added = addOrder({ id: order.id, code: barcode, status: order.status, cancelReason: order.cancelReason, packagingWarning: order.packagingWarning, editRejectedNote: order.editRejectedNote, isShadowed: order.isShadowed, printCount: order.printCount });
         if (!added) {
           playErrorSound();
           toast.warning('هذا الطلب تم مسحه مسبقاً');
@@ -259,13 +260,10 @@ export function PrintOrdersContent() {
         }
         setFlashingCode(barcode);
         setTimeout(() => setFlashingCode(null), 600);
-        if (order.packagingWarning) {
+        const warning = getOrderWarning(order);
+        if (warning) {
           playErrorSound();
-          toast.error(
-            order.packagingWarning.trim()
-              ? order.packagingWarning
-              : 'هذا الطلب يحتوي على تحذير في التغليف'
-          );
+          toast.error(warning);
         } else if (order.status === 'CONFIRMED' || order.status === 'WAITING_FOR_PACKAGING') {
           playSuccessSound();
         } else {
