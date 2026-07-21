@@ -309,16 +309,10 @@ function OrderDetailsProductCard({
             handleSaveEdit(editingProduct.id, attributeOptionIds)
           }
           productId={editingProduct.productId}
-          currentVariants={(() => {
-            const v = editingProduct.variants[0];
-            if (!v) return {};
-            const labels = editingProduct.optionLabels;
-            const result: Record<string, string> = {};
-            if (labels[0] && v.option1) result[labels[0]] = v.option1;
-            if (labels[1] && v.option2) result[labels[1]] = v.option2;
-            if (labels[2] && v.option3) result[labels[2]] = v.option3;
-            return result;
-          })()}
+          currentVariants={editingProduct.attributes.reduce<Record<string,string>>((acc, attr) => {
+            if (attr.name && attr.value) acc[attr.name] = attr.value;
+            return acc;
+          }, {})}
         />
       )}
 
