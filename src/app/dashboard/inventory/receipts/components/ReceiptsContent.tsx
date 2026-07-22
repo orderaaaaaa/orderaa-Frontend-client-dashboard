@@ -31,6 +31,8 @@ function toCardData(receipt: Receipt): InvoiceCardData {
       name: p.product.name,
       quantity: p.quantity,
       price: p.price,
+      packageCount: p.packageCount,
+      piecesPerPackage: p.piecesPerPackage,
     })),
     employeeName: receipt.createdByEmployee?.fullName ?? 'غير محدد',
     createdAt: receipt.createdAt,

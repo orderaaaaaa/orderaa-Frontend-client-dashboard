@@ -151,6 +151,7 @@ export interface CreateSupplierInvoiceDto {
   createdByEmployeeId?: number;
   paymentAmount?: number;
   externalInvoiceNumber?: string;
+  entryMode?: 'SINGULAR' | 'PACKAGE';
   products?: CreateInvoiceProductDto[];
   images?: string[];
 }

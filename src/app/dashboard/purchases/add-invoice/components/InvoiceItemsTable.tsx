@@ -12,9 +12,9 @@ import { InvoiceItem, InvoiceMode } from '../types';
 import { INVOICE_TYPES } from '../constants';
 
 interface ItemFieldError {
-  quantity?: { message?: string };
-  pricePerItem?: { message?: string };
-  pieceCount?: { message?: string };
+  count?: { message?: string };
+  unitPrice?: { message?: string };
+  piecesPerPackage?: { message?: string };
   name?: { message?: string };
 }
 
@@ -60,7 +60,7 @@ const InvoiceItemsTable = memo(
     const isPackage = mode === 'package';
 
     const grandTotal = useMemo(
-      () => items.reduce((sum, item) => sum + item.quantity * item.pricePerItem, 0),
+      () => items.reduce((sum, item) => sum + item.count * item.unitPrice, 0),
       [items],
     );
 
@@ -71,40 +71,40 @@ const InvoiceItemsTable = memo(
           header: 'اسم الصنف',
         },
         {
-          key: 'quantity',
-          header: 'الكمية',
+          key: 'count',
+          header: isPackage ? 'عدد الطرود' : 'العدد',
           render: (_value: unknown, row: InvoiceItem & Record<string, unknown>) => {
             const index = items.findIndex((i) => i.id === row.id);
             return (
               <Input
                 type="number"
-                value={row.quantity || ''}
+                value={row.count || ''}
                 onChange={(e) =>
                   onQuantityChange(index, Number(e.target.value) || 0)
                 }
-                placeholder="الكمية"
+                placeholder={isPackage ? 'عدد الطرود' : 'العدد'}
                 className="min-w-15"
-                error={itemErrors?.[index]?.quantity?.message}
+                error={itemErrors?.[index]?.count?.message}
               />
             );
           },
         },
         {
-          key: 'pricePerItem',
-          header: isPackage ? 'سعر الباكدج' : 'سعر الصنف',
+          key: 'unitPrice',
+          header: isPackage ? 'سعر الطرد' : 'سعر الصنف',
           render: (_value: unknown, row: InvoiceItem & Record<string, unknown>) => {
             const index = items.findIndex((i) => i.id === row.id);
             return (
               <div className="flex items-center flex-row gap-2">
                 <Input
                   type="number"
-                  value={row.pricePerItem || ''}
+                  value={row.unitPrice || ''}
                   onChange={(e) =>
                     onPriceChange(index, Number(e.target.value) || 0)
                   }
                   placeholder="السعر"
                   className="min-w-15"
-                  error={itemErrors?.[index]?.pricePerItem?.message}
+                  error={itemErrors?.[index]?.unitPrice?.message}
                 />
                 جنيه
               </div>
@@ -113,10 +113,10 @@ const InvoiceItemsTable = memo(
         },
         {
           key: 'total',
-          header: 'الاجمالي',
+          header: 'الإجمالي',
           render: (_value: unknown, row: InvoiceItem & Record<string, unknown>) => (
             <span className="font-semibold">
-              {(row.quantity * row.pricePerItem).toLocaleString()} جنيه
+              {(row.count * row.unitPrice).toLocaleString()} جنيه
             </span>
           ),
         },
@@ -125,33 +125,33 @@ const InvoiceItemsTable = memo(
       if (isPackage) {
         cols.push(
           {
-            key: 'pieceCount',
-            header: 'عدد القطع',
+            key: 'piecesPerPackage',
+            header: 'عدد القطع في الطرد',
             render: (_value: unknown, row: InvoiceItem & Record<string, unknown>) => {
               const index = items.findIndex((i) => i.id === row.id);
               return (
                 <Input
                   type="number"
-                  value={row.pieceCount || ''}
+                  value={row.piecesPerPackage || ''}
                   onChange={(e) =>
                     onPieceCountChange(index, Number(e.target.value) || 0)
                   }
-                  placeholder="عدد القطع"
+                  placeholder="عدد القطع في الطرد"
                   className="min-w-15"
-                  error={itemErrors?.[index]?.pieceCount?.message}
+                  error={itemErrors?.[index]?.piecesPerPackage?.message}
                 />
               );
             },
           },
           {
-            key: 'pricePerPiece',
+            key: 'piecePrice',
             header: 'سعر القطعة',
             render: (_value: unknown, row: InvoiceItem & Record<string, unknown>) => {
-              const pieceCount = row.pieceCount as number || 0;
-              const pricePerPiece = pieceCount > 0 ? row.pricePerItem / pieceCount : 0;
+              const piecesPerPackage = row.piecesPerPackage as number || 0;
+              const piecePrice = piecesPerPackage > 0 ? row.unitPrice / piecesPerPackage : 0;
               return (
                 <span className="font-semibold">
-                  {pricePerPiece > 0 ? `${pricePerPiece.toLocaleString(undefined, { maximumFractionDigits: 2 })} جنيه` : '-'}
+                  {piecePrice > 0 ? `${piecePrice.toLocaleString(undefined, { maximumFractionDigits: 2 })} جنيه` : '-'}
                 </span>
               );
             },

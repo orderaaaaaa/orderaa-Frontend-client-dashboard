@@ -5,10 +5,10 @@ export interface InvoiceItem {
   id: string;
   productId: number;
   name: string;
-  quantity: number;
-  pricePerItem: number;
+  count: number;
+  unitPrice: number;
   total: number;
-  pieceCount?: number;
-  pricePerPiece?: number;
+  piecesPerPackage?: number;
+  piecePrice?: number;
   variants?: { attribute: string; option: string; attributeOptionId?: number }[];
 }

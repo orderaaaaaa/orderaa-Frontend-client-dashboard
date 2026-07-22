@@ -81,13 +81,13 @@ export function AddInvoiceContent() {
       const safeValue = Math.max(0, value);
       const item = items[index];
       if (!item) return;
-      const newTotal = safeValue * item.pricePerItem;
-      const pieceCount = item.pieceCount || 0;
+      const newTotal = safeValue * item.unitPrice;
+      const piecesPerPackage = item.piecesPerPackage || 0;
       update(index, {
         ...item,
-        quantity: safeValue,
+        count: safeValue,
         total: newTotal,
-        pricePerPiece: pieceCount > 0 ? item.pricePerItem / pieceCount : 0,
+        piecePrice: piecesPerPackage > 0 ? item.unitPrice / piecesPerPackage : 0,
       });
     },
     [update, items],
@@ -98,13 +98,13 @@ export function AddInvoiceContent() {
       const safeValue = Math.max(0, value);
       const item = items[index];
       if (!item) return;
-      const newTotal = item.quantity * safeValue;
-      const pieceCount = item.pieceCount || 0;
+      const newTotal = item.count * safeValue;
+      const piecesPerPackage = item.piecesPerPackage || 0;
       update(index, {
         ...item,
-        pricePerItem: safeValue,
+        unitPrice: safeValue,
         total: newTotal,
-        pricePerPiece: pieceCount > 0 ? safeValue / pieceCount : 0,
+        piecePrice: piecesPerPackage > 0 ? safeValue / piecesPerPackage : 0,
       });
     },
     [update, items],
@@ -117,8 +117,8 @@ export function AddInvoiceContent() {
       if (!item) return;
       update(index, {
         ...item,
-        pieceCount: safeValue,
-        pricePerPiece: safeValue > 0 ? item.pricePerItem / safeValue : 0,
+        piecesPerPackage: safeValue,
+        piecePrice: safeValue > 0 ? item.unitPrice / safeValue : 0,
       });
     },
     [update, items],
@@ -160,11 +160,11 @@ export function AddInvoiceContent() {
           id: uniqueId,
           productId: product.id,
           name: `${product.name}${variantSuffix}`,
-          quantity: 0,
-          pricePerItem: 0,
+          count: 0,
+          unitPrice: 0,
           total: 0,
-          pieceCount: 0,
-          pricePerPiece: 0,
+          piecesPerPackage: 0,
+          piecePrice: 0,
           variants: product.selectedVariants ?? [],
         });
       });
@@ -207,7 +207,7 @@ export function AddInvoiceContent() {
           }
         }
 
-        const totalAmount = data.items.reduce((sum, item) => sum + item.quantity * item.pricePerItem, 0);
+        const totalAmount = data.items.reduce((sum, item) => sum + item.count * item.unitPrice, 0);
         let resolvedPaymentAmount: number | undefined;
         if (paymentStatus === 'full') {
           resolvedPaymentAmount = totalAmount;
@@ -221,12 +221,13 @@ export function AddInvoiceContent() {
           createdByEmployeeId: data.createdByEmployeeId,
           paymentAmount: resolvedPaymentAmount,
           externalInvoiceNumber: data.externalInvoiceNumber,
+          entryMode: invoiceMode === 'package' ? 'PACKAGE' : 'SINGULAR',
           products: data.items.map((item) => ({
             productId: item.productId,
-            quantity: invoiceMode === 'package' ? (item.quantity ?? 0) * (item.pieceCount ?? 0) : item.quantity,
-            price: invoiceMode === 'package' ? (item.pricePerPiece ?? 0) : item.pricePerItem,
-            packageCount: invoiceMode === 'package' ? item.quantity : undefined,
-            piecesPerPackage: invoiceMode === 'package' ? item.pieceCount : undefined,
+            quantity: invoiceMode === 'package' ? (item.count ?? 0) * (item.piecesPerPackage ?? 0) : item.count,
+            price: invoiceMode === 'package' ? (item.piecePrice ?? 0) : item.unitPrice,
+            packageCount: invoiceMode === 'package' ? item.count : undefined,
+            piecesPerPackage: invoiceMode === 'package' ? item.piecesPerPackage : undefined,
             attributeOptionIds: (item.variants ?? []).map((v) => v.attributeOptionId).filter((id): id is number => id !== undefined),
           })),
           images,
@@ -311,7 +312,7 @@ export function AddInvoiceContent() {
           onPieceCountChange={handlePieceCountChange}
           onRemoveItem={handleRemoveItem}
           onAddItemClick={handleOpenProductModal}
-          itemErrors={errors.items as Record<number, { quantity?: { message?: string }; pricePerItem?: { message?: string }; pieceCount?: { message?: string }; name?: { message?: string } }> | undefined}
+          itemErrors={errors.items as Record<number, { count?: { message?: string }; unitPrice?: { message?: string }; piecesPerPackage?: { message?: string }; name?: { message?: string } }> | undefined}
         />
         {errors.items?.message && (
           <p className="sm:px-8 text-red-500 text-sm -mt-6">

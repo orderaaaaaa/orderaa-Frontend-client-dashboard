@@ -18,7 +18,7 @@ const invoiceItemSchema = z.object({
   id: z.string(),
   productId: z.number(),
   name: z.string().min(1, 'اسم الصنف مطلوب'),
-  quantity: z.preprocess(
+  count: z.preprocess(
     (val) => {
       if (val === '' || val === null || val === undefined) return undefined;
       return Number(val);
@@ -27,16 +27,16 @@ const invoiceItemSchema = z.object({
       .number({ required_error: 'الكمية مطلوبة', invalid_type_error: 'الكمية مطلوبة' })
       .min(1, 'الكمية يجب ان تكون اكبر من 0'),
   ),
-  pricePerItem: z.preprocess(
+  unitPrice: z.preprocess(
     (val) => (val === '' || val === null || val === undefined ? 0 : Number(val)),
     z.number().min(0, 'السعر يجب ان يكون 0 او اكبر'),
   ),
   total: z.number(),
-  pieceCount: z.preprocess(
+  piecesPerPackage: z.preprocess(
     (val) => (val === '' || val === null || val === undefined ? 0 : Number(val)),
     z.number().min(0).optional(),
   ),
-  pricePerPiece: z.number().optional(),
+  piecePrice: z.number().optional(),
   variants: z
     .array(
       z.object({
