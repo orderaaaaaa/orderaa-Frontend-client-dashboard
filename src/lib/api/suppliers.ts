@@ -68,6 +68,8 @@ export interface InvoiceProductApiItem {
   variant?: InvoiceProductVariantDetail | null;
   quantity: number;
   price: number;
+  packageCount?: number;
+  piecesPerPackage?: number;
   createdAt: string;
   product: { id: number; name: string };
 }
@@ -138,6 +140,8 @@ export interface CreateInvoiceProductDto {
   productId: number;
   quantity: number;
   price: number;
+  packageCount?: number;
+  piecesPerPackage?: number;
   attributeOptionIds?: number[];
 }
 

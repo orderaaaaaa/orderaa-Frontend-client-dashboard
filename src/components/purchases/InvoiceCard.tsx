@@ -41,6 +41,8 @@ export interface InvoiceCardProduct {
   name: string;
   quantity: number;
   price: number;
+  packageCount?: number;
+  piecesPerPackage?: number;
 }
 
 export interface InvoiceCardData {
@@ -68,30 +70,53 @@ interface CardField {
   onClick?: () => void;
 }
 
-type ProductRow = InvoiceCardProduct & Record<string, unknown>;
+function buildProductColumns(
+  products: InvoiceCardProduct[] | undefined,
+): DataTableColumn<InvoiceCardProduct & Record<string, unknown>>[] {
+  const hasPackageColumns = (products ?? []).some(
+    (p) => p.packageCount != null || p.piecesPerPackage != null,
+  );
 
-const productColumns: DataTableColumn<ProductRow>[] = [
-  { key: 'name', header: 'اسم الصنف' },
-  {
-    key: 'quantity',
-    header: 'الكمية',
-    render: (value) => <span>{(value as number).toLocaleString()}</span>,
-  },
-  {
-    key: 'price',
-    header: 'السعر',
-    render: (value) => <span>{(value as number).toLocaleString()} جنيه</span>,
-  },
-  {
-    key: 'total',
-    header: 'الإجمالي',
-    render: (_value, row) => (
-      <span className="font-semibold">
-        {(row.quantity * row.price).toLocaleString()} جنيه
-      </span>
-    ),
-  },
-];
+  const cols: DataTableColumn<InvoiceCardProduct & Record<string, unknown>>[] = [
+    { key: 'name', header: 'اسم الصنف' },
+    {
+      key: 'quantity',
+      header: 'إجمالي عدد القطع',
+      render: (value) => <span>{(value as number).toLocaleString()}</span>,
+    },
+    ...(hasPackageColumns
+      ? [
+          {
+            key: 'packageCount',
+            header: 'عدد الطرود',
+            render: (value: unknown) =>
+              value != null ? <span>{(value as number).toLocaleString()}</span> : null,
+          } as DataTableColumn<InvoiceCardProduct & Record<string, unknown>>,
+          {
+            key: 'piecesPerPackage',
+            header: 'عدد القطع في الطرد',
+            render: (value: unknown) =>
+              value != null ? <span>{(value as number).toLocaleString()}</span> : null,
+          } as DataTableColumn<InvoiceCardProduct & Record<string, unknown>>,
+        ]
+      : []),
+    {
+      key: 'price',
+      header: 'السعر',
+      render: (value) => <span>{(value as number).toLocaleString()} جنيه</span>,
+    },
+    {
+      key: 'total',
+      header: 'الإجمالي',
+      render: (_value, row) => (
+        <span className="font-semibold">
+          {(row.quantity * row.price).toLocaleString()} جنيه
+        </span>
+      ),
+    },
+  ];
+  return cols;
+}
 
 interface InvoiceCardProps {
   invoice: InvoiceCardData;
@@ -131,6 +156,11 @@ const InvoiceCard = memo(
       [invoice.totalAmount, invoice.paymentAmount],
     );
 
+    const productColumns = useMemo(
+      () => buildProductColumns(invoice.products),
+      [invoice.products],
+    );
+
     const fields: CardField[] = useMemo(
       () => [
         {
@@ -167,7 +197,7 @@ const InvoiceCard = memo(
             ]
           : []),
       ],
-      [invoice, typeColors, isNegativeAmount, formatDate, showAmount]
+      [invoice, typeColors, formatDate, showAmount]
     );
 
     return (

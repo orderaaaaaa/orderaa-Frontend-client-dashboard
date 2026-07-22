@@ -17,27 +17,39 @@ import { getTimeAgo } from '@/utils/timeAgo';
 import { SupplierInvoice, SupplierInvoiceItem } from '../types';
 import { formatDate, exportInvoiceToExcel, exportInvoiceToPDF } from '../utils';
 
-const PRODUCT_COLUMNS: DataTableColumn<SupplierInvoiceItem & Record<string, unknown>>[] = [
-  {
-    key: 'product',
-    header: 'اسم الصنف',
-    render: (_value, row) => row.product.name,
-  },
-  {
-    key: 'quantity',
-    header: 'الكمية',
-  },
-  {
-    key: 'price',
-    header: 'السعر',
-    render: (_value, row) => row.price.toFixed(1),
-  },
-  {
-    key: 'total',
-    header: 'الاجمالي',
-    render: (_value, row) => (row.quantity * row.price).toLocaleString(),
-  },
-];
+function buildProductColumns(
+  products: SupplierInvoiceItem[],
+): DataTableColumn<SupplierInvoiceItem & Record<string, unknown>>[] {
+  const hasPackageColumns = products.some(
+    (p) => p.packageCount != null || p.piecesPerPackage != null,
+  );
+
+  const cols: DataTableColumn<SupplierInvoiceItem & Record<string, unknown>>[] = [
+    { key: 'product', header: 'اسم الصنف', render: (_value, row) => row.product.name },
+    { key: 'quantity', header: 'إجمالي عدد القطع' },
+    ...(hasPackageColumns
+      ? [
+          {
+            key: 'packageCount',
+            header: 'عدد الطرود',
+            render: (value: unknown) => (value != null ? String(value) : null),
+          } as DataTableColumn<SupplierInvoiceItem & Record<string, unknown>>,
+          {
+            key: 'piecesPerPackage',
+            header: 'عدد القطع في الطرد',
+            render: (value: unknown) => (value != null ? String(value) : null),
+          } as DataTableColumn<SupplierInvoiceItem & Record<string, unknown>>,
+        ]
+      : []),
+    { key: 'price', header: 'السعر', render: (value, row) => (value as number).toLocaleString() + ' جنيه' },
+    {
+      key: 'total',
+      header: 'الاجمالي',
+      render: (_value, row) => (row.quantity * row.price).toLocaleString(),
+    },
+  ];
+  return cols;
+}
 
 interface InvoiceDetailModalProps {
   isOpen: boolean;
@@ -50,6 +62,11 @@ export default function InvoiceDetailModal({
   onClose,
   invoice,
 }: InvoiceDetailModalProps) {
+  const columns = useMemo(
+    () => buildProductColumns(invoice.products),
+    [invoice.products],
+  );
+
   const totalQuantity = useMemo(
     () => invoice.products.reduce((sum, item) => sum + item.quantity, 0),
     [invoice.products],
@@ -98,7 +115,7 @@ export default function InvoiceDetailModal({
             الاصناف المشتريات
           </h3>
           <DataTable
-            columns={PRODUCT_COLUMNS}
+            columns={columns}
             data={invoice.products as (SupplierInvoiceItem & Record<string, unknown>)[]}
             keyField="id"
             emptyMessage="لا توجد اصناف"

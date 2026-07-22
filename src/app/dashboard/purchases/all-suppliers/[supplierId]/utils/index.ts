@@ -5,6 +5,16 @@ import { SupplierInvoice } from '../types';
 import { INVOICE_TYPE_LABEL } from '../../../constants';
 import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
 
+function sanitizeHtml(value: unknown): string {
+  const str = value == null ? '' : String(value);
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
   const day = date.getDate();
@@ -47,31 +57,51 @@ export function exportSupplierInvoicesToExcel(
 }
 
 export function exportInvoiceToExcel(invoice: SupplierInvoice) {
+  const hasPackageFields = invoice.products.some(
+    (item) => item.packageCount != null || item.piecesPerPackage != null,
+  );
+
   const excelData = invoice.products.map((item) => ({
     'اسم الصنف': item.product.name,
-    'الكمية': item.quantity,
+    'إجمالي عدد القطع': item.quantity,
+    ...(hasPackageFields ? { 'عدد الطرود': item.packageCount ?? '' } : {}),
+    ...(hasPackageFields ? { 'عدد القطع في الطرد': item.piecesPerPackage ?? '' } : {}),
     'السعر': item.price,
     'الاجمالي': item.quantity * item.price,
   }));
 
   const worksheet = XLSX.utils.json_to_sheet(excelData);
-  worksheet['!cols'] = [
-    { wch: 30 },
-    { wch: 12 },
-    { wch: 12 },
-    { wch: 14 },
-  ];
+  worksheet['!cols'] = hasPackageFields
+    ? [
+        { wch: 30 },
+        { wch: 14 },
+        { wch: 12 },
+        { wch: 14 },
+        { wch: 12 },
+        { wch: 14 },
+      ]
+    : [
+        { wch: 30 },
+        { wch: 14 },
+        { wch: 12 },
+        { wch: 14 },
+      ];
 
   const totalQuantity = invoice.products.reduce((s, i) => s + i.quantity, 0);
   const grandTotal = invoice.products.reduce((s, i) => s + i.quantity * i.price, 0);
   const lastRow = excelData.length + 2;
 
+  const totalsHeaders = hasPackageFields
+    ? ['إجمالي عدد القطع', totalQuantity, '', '', '', '']
+    : ['إجمالي عدد القطع', totalQuantity, '', ''];
+
+  const totalsGrand = hasPackageFields
+    ? ['المبلغ الاجمالي', '', '', '', '', grandTotal]
+    : ['المبلغ الاجمالي', '', '', grandTotal];
+
   XLSX.utils.sheet_add_aoa(
     worksheet,
-    [
-      ['إجمالي عدد القطع', totalQuantity, '', ''],
-      ['المبلغ الاجمالي', '', '', grandTotal],
-    ],
+    [totalsHeaders, totalsGrand],
     { origin: `A${lastRow}` },
   );
 
@@ -85,6 +115,9 @@ export function exportInvoiceToExcel(invoice: SupplierInvoice) {
 export async function exportInvoiceToPDF(invoice: SupplierInvoice) {
   const totalQuantity = invoice.products.reduce((s, i) => s + i.quantity, 0);
   const grandTotal = invoice.products.reduce((s, i) => s + i.quantity * i.price, 0);
+  const hasPackageFields = invoice.products.some(
+    (item) => item.packageCount != null || item.piecesPerPackage != null,
+  );
 
   const iframe = document.createElement('iframe');
   iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:800px;height:1200px;border:none;';
@@ -136,17 +169,17 @@ export async function exportInvoiceToPDF(invoice: SupplierInvoice) {
     </head>
     <body>
       <div class="header">
-        <h1>فاتورة رقم ${invoice.code}</h1>
+        <h1>فاتورة رقم ${sanitizeHtml(invoice.code)}</h1>
       </div>
 
       <div class="info-row">
         <div class="info-card">
           <div class="info-label">موظف المشتريات</div>
-          <div class="info-value">${invoice.createdByEmployee ? getDepartmentLabel(invoice.createdByEmployee.department) : 'غير محدد'}</div>
+          <div class="info-value">${sanitizeHtml(invoice.createdByEmployee ? getDepartmentLabel(invoice.createdByEmployee.department) : 'غير محدد')}</div>
         </div>
         <div class="info-card">
           <div class="info-label">تاريخ الانشاء</div>
-          <div class="info-value">${formatDate(invoice.createdAt)}</div>
+          <div class="info-value">${sanitizeHtml(formatDate(invoice.createdAt))}</div>
         </div>
       </div>
 
@@ -156,7 +189,8 @@ export async function exportInvoiceToPDF(invoice: SupplierInvoice) {
         <thead>
           <tr>
             <th>اسم الصنف</th>
-            <th>الكمية</th>
+            <th>إجمالي عدد القطع</th>
+            ${hasPackageFields ? '<th>عدد الطرود</th><th>عدد القطع في الطرد</th>' : ''}
             <th>السعر</th>
             <th>الاجمالي</th>
           </tr>
@@ -166,10 +200,11 @@ export async function exportInvoiceToPDF(invoice: SupplierInvoice) {
             .map(
               (item, i) => `
             <tr class="${i % 2 === 0 ? 'row-even' : 'row-odd'}">
-              <td>${item.product.name}</td>
-              <td>${item.quantity}</td>
-              <td>${item.price.toFixed(1)}</td>
-              <td style="font-weight:600;">${(item.quantity * item.price).toLocaleString()}</td>
+              <td>${sanitizeHtml(item.product.name)}</td>
+              <td>${sanitizeHtml(item.quantity)}</td>
+              ${hasPackageFields ? `<td>${sanitizeHtml(item.packageCount ?? '')}</td><td>${sanitizeHtml(item.piecesPerPackage ?? '')}</td>` : ''}
+              <td>${sanitizeHtml(item.price.toFixed(1))}</td>
+              <td style="font-weight:600;">${sanitizeHtml((item.quantity * item.price).toLocaleString())}</td>
             </tr>`,
             )
             .join('')}
@@ -179,11 +214,11 @@ export async function exportInvoiceToPDF(invoice: SupplierInvoice) {
       <div class="totals">
         <div class="total-row">
           <span>إجمالي عدد القطع</span>
-          <span>${totalQuantity}</span>
+          <span>${sanitizeHtml(totalQuantity)}</span>
         </div>
         <div class="total-row">
           <span>المبلغ الاجمالي</span>
-          <span>${grandTotal.toFixed(2)}</span>
+          <span>${sanitizeHtml(grandTotal.toFixed(2))}</span>
         </div>
       </div>
     </body>

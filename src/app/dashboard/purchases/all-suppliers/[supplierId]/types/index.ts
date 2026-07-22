@@ -3,6 +3,8 @@ export interface SupplierInvoiceItem {
   productId: number;
   quantity: number;
   price: number;
+  packageCount?: number;
+  piecesPerPackage?: number;
   product: { id: number; name: string };
 }
 

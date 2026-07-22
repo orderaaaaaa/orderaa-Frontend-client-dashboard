@@ -223,8 +223,10 @@ export function AddInvoiceContent() {
           externalInvoiceNumber: data.externalInvoiceNumber,
           products: data.items.map((item) => ({
             productId: item.productId,
-            quantity: invoiceMode === 'package' ? (item.pieceCount ?? 0) : item.quantity,
+            quantity: invoiceMode === 'package' ? (item.quantity ?? 0) * (item.pieceCount ?? 0) : item.quantity,
             price: invoiceMode === 'package' ? (item.pricePerPiece ?? 0) : item.pricePerItem,
+            packageCount: invoiceMode === 'package' ? item.quantity : undefined,
+            piecesPerPackage: invoiceMode === 'package' ? item.pieceCount : undefined,
             attributeOptionIds: (item.variants ?? []).map((v) => v.attributeOptionId).filter((id): id is number => id !== undefined),
           })),
           images,

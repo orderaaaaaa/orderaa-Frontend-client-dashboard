@@ -4,6 +4,8 @@ export interface InvoiceProduct {
   productId: number;
   quantity: number;
   price: number;
+  packageCount?: number;
+  piecesPerPackage?: number;
   createdAt?: string;
   product: { id: number; name: string };
 }
