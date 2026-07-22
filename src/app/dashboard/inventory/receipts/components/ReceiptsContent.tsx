@@ -27,6 +27,7 @@ function toCardData(receipt: Receipt): InvoiceCardData {
     invoiceNumber: receipt.code,
     companyName: receipt.supplier.name,
     itemsCount: receipt.products.length,
+    totalPieces: receipt.products.reduce((sum, p) => sum + (p.quantity || 0), 0),
     products: receipt.products.map((p) => ({
       name: p.product.name,
       quantity: p.quantity,

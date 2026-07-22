@@ -50,6 +50,7 @@ export interface InvoiceCardData {
   invoiceNumber: string;
   companyName: string;
   itemsCount: number;
+  totalPieces: number;
   products?: InvoiceCardProduct[];
   employeeName: string;
   createdAt: string;
@@ -169,8 +170,14 @@ const InvoiceCard = memo(
           icon: LiaUserTieSolid,
         },
         {
-          label: 'عدد القطع',
-          value: `عدد القطع ${invoice.itemsCount}`,
+          label: 'عدد الأصناف',
+          value: `عدد الأصناف ${invoice.itemsCount}`,
+          icon: LiaBoxOpenSolid,
+          onClick: invoice.products?.length ? () => setIsProductsModalOpen(true) : undefined,
+        },
+        {
+          label: 'إجمالي عدد القطع',
+          value: `${invoice.totalPieces.toLocaleString()}`,
           icon: LiaBoxOpenSolid,
           onClick: invoice.products?.length ? () => setIsProductsModalOpen(true) : undefined,
         },
@@ -253,7 +260,7 @@ const InvoiceCard = memo(
         <div
           className={clsx(
             'grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 px-10',
-            fields.length === 5 ? 'lg:grid-cols-5' : 'lg:grid-cols-4',
+            fields.length === 5 ? 'lg:grid-cols-5' : fields.length === 6 ? 'lg:grid-cols-6' : 'lg:grid-cols-4',
           )}
         >
           {fields.map((field) =>

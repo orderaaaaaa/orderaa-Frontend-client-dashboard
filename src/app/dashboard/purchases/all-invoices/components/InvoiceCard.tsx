@@ -28,6 +28,7 @@ const InvoiceCard = memo(
       invoiceNumber: invoice.code,
       companyName: invoice.supplier.name,
       itemsCount: invoice.products.length,
+      totalPieces: invoice.products.reduce((sum, p) => sum + (p.quantity || 0), 0),
       products: invoice.products.map((p) => ({
         name: p.product.name,
         quantity: p.quantity,
