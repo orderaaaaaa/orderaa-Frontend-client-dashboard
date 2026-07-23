@@ -19,7 +19,9 @@ export function LogisticsSettingsSection() {
 
   const isLoading = isLoadingConfigs || isLoadingCompanies;
 
-  const activeConfigs = (shippingConfigs ?? []).filter((c) => c.isActive);
+  const activeConfigs = (shippingConfigs ?? [])
+    .filter((c) => c.isActive)
+    .filter((c, i, arr) => arr.findIndex((x) => x.shippingCompany === c.shippingCompany) === i);
 
   const getCompanyLabel = (companyKey: string) => {
     const company = shippingCompanies.find((c) => c.key === companyKey);
