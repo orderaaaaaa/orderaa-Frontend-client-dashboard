@@ -562,17 +562,7 @@ export interface OrderStatusItem {
 }
 
 // Settlement types
-export interface SettlementRow {
-  orderCode?: string;
-  shippingCompanyCode?: string;
-  settlementAmount: number;
-  targetStatus: 'COLLECTED' | 'RETURNED_SETTLED';
-}
-
-export interface UploadSettlementResponse {
-  success: string[];
-  failed: { row: number; reason: string }[];
-}
+export type { SettlementRow, UploadSettlementResponse, SettlementSuccessItem, SettlementFailedItem } from '@/lib/api/settlement';
 
 export interface ShortfallSettlement {
   id: number;

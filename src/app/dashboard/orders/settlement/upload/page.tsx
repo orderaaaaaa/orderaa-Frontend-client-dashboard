@@ -266,13 +266,21 @@ export default function SettlementUploadPage() {
                       <tr>
                         <th className="px-4 py-2 text-right font-medium">#</th>
                         <th className="px-4 py-2 text-right font-medium">كود الطلب</th>
+                        <th className="px-4 py-2 text-right font-medium">كود الشحن</th>
+                        <th className="px-4 py-2 text-right font-medium">المبلغ</th>
+                        <th className="px-4 py-2 text-right font-medium">الحالة الحالية</th>
+                        <th className="px-4 py-2 text-right font-medium">الحالة الجديدة</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {results.success.map((code, i) => (
+                      {results.success.map((item, i) => (
                         <tr key={i} className="border-t">
                           <td className="px-4 py-2 text-muted-foreground">{i + 1}</td>
-                          <td className="px-4 py-2 font-mono">{code}</td>
+                          <td className="px-4 py-2 font-mono">{item.orderCode}</td>
+                          <td className="px-4 py-2 font-mono">{item.shippingCode ?? "—"}</td>
+                          <td className="px-4 py-2">{item.amount}</td>
+                          <td className="px-4 py-2">{item.currentStatus}</td>
+                          <td className="px-4 py-2">{item.newStatus}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -292,14 +300,24 @@ export default function SettlementUploadPage() {
                   <table className="w-full text-sm">
                     <thead className="bg-muted">
                       <tr>
-                        <th className="px-4 py-2 text-right font-medium">صف</th>
-                        <th className="px-4 py-2 text-right font-medium">السبب</th>
+                        <th className="px-4 py-2 text-right font-medium">#</th>
+                        <th className="px-4 py-2 text-right font-medium">كود الطلب</th>
+                        <th className="px-4 py-2 text-right font-medium">كود الشحن</th>
+                        <th className="px-4 py-2 text-right font-medium">المبلغ</th>
+                        <th className="px-4 py-2 text-right font-medium">الحالة الحالية</th>
+                        <th className="px-4 py-2 text-right font-medium">الحالة المطلوبة</th>
+                        <th className="px-4 py-2 text-right font-medium">رسالة الخطأ</th>
                       </tr>
                     </thead>
                     <tbody>
                       {results.failed.map((item, i) => (
                         <tr key={i} className="border-t">
                           <td className="px-4 py-2 text-muted-foreground">{item.row}</td>
+                          <td className="px-4 py-2 font-mono">{item.orderCode ?? "—"}</td>
+                          <td className="px-4 py-2 font-mono">{item.shippingCode ?? "—"}</td>
+                          <td className="px-4 py-2">{item.amount ?? "—"}</td>
+                          <td className="px-4 py-2">{item.currentStatus ?? "—"}</td>
+                          <td className="px-4 py-2">{item.targetStatus ?? "—"}</td>
                           <td className="px-4 py-2 text-red-600">{item.reason}</td>
                         </tr>
                       ))}

@@ -7,9 +7,27 @@ export interface SettlementRow {
   targetStatus: 'COLLECTED' | 'RETURNED_SETTLED';
 }
 
+export interface SettlementSuccessItem {
+  orderCode: string;
+  shippingCode: string | null;
+  amount: number;
+  currentStatus: string;
+  newStatus: string;
+}
+
+export interface SettlementFailedItem {
+  row: number;
+  orderCode: string | null;
+  shippingCode: string | null;
+  amount: number | null;
+  currentStatus: string | null;
+  targetStatus: string | null;
+  reason: string;
+}
+
 export interface UploadSettlementResponse {
-  success: string[];
-  failed: { row: number; reason: string }[];
+  success: SettlementSuccessItem[];
+  failed: SettlementFailedItem[];
 }
 
 export interface ShortfallSettlement {
