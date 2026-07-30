@@ -34,7 +34,7 @@ export interface UseScannedOrdersReturn {
   actionableOrders: ScannedOrder[];
   actionableGroups: NonConfirmedGroup[];
   nonConfirmedGroups: NonConfirmedGroup[];
-  addOrder: (order: AddOrderInput) => boolean;
+  addOrder: (order: AddOrderInput) => void;
   removeOrder: (code: string) => void;
   clearOrders: () => void;
   hasOrder: (code: string) => boolean;

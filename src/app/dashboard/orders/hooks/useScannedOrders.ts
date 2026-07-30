@@ -31,8 +31,7 @@ export function useScannedOrders(
     [scannedOrders]
   );
 
-  const addOrder = useCallback((order: AddOrderInput): boolean => {
-    let added = false;
+  const addOrder = useCallback((order: AddOrderInput): void => {
     setScannedOrders((prev) => {
       const isDuplicate = prev.some(
         (o) =>
@@ -42,7 +41,7 @@ export function useScannedOrders(
       if (isDuplicate) {
         return prev;
       }
-      added = true;
+      
       return [
         {
           id: order.id,
@@ -56,7 +55,7 @@ export function useScannedOrders(
         ...prev,
       ];
     });
-    return added;
+    
   }, []);
 
   const removeOrder = useCallback((code: string) => {

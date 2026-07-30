@@ -252,12 +252,7 @@ export function PrintOrdersContent() {
       setIsScanLoading(true);
       try {
         const order = await getOrderByCode(barcode);
-        const added = addOrder({ id: order.id, code: barcode, status: order.status, cancelReason: order.cancelReason, packagingWarning: order.packagingWarning, editRejectedNote: order.editRejectedNote, isShadowed: order.isShadowed, printCount: order.printCount });
-        if (!added) {
-          playErrorSound();
-          toast.warning('هذا الطلب تم مسحه مسبقاً');
-          return;
-        }
+        addOrder({ id: order.id, code: barcode, status: order.status, cancelReason: order.cancelReason, packagingWarning: order.packagingWarning, editRejectedNote: order.editRejectedNote, isShadowed: order.isShadowed, printCount: order.printCount });
         setFlashingCode(barcode);
         setTimeout(() => setFlashingCode(null), 600);
         const warning = getOrderWarning(order);
