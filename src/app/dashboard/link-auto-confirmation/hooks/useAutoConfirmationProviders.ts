@@ -1,30 +1,11 @@
 'use client';
 
-import { useCallback, useSyncExternalStore } from 'react';
+import { useCallback } from 'react';
 import {
   AutoConfirmationConfig,
   AutoConfirmationProviderId,
 } from '../types/autoConfirmation';
-
-let configs: AutoConfirmationConfig[] = [];
-const listeners = new Set<() => void>();
-
-const subscribe = (listener: () => void) => {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
-};
-
-const emit = () => {
-  listeners.forEach((listener) => listener());
-};
-
-const getSnapshot = () => configs;
-const getServerSnapshot = () => configs;
-
-const wait = (ms: number) =>
-  new Promise<void>((resolve) => setTimeout(resolve, ms));
+import { useAutoConfirmationConfigs } from './useAutoConfirmationConfigs';
 
 export interface AutoConfirmationConfigInput {
   provider: AutoConfirmationProviderId;
@@ -33,58 +14,75 @@ export interface AutoConfirmationConfigInput {
   isActive: boolean;
 }
 
+const getApiConfig = (
+  configs: AutoConfirmationConfig[] | undefined,
+  provider: AutoConfirmationProviderId | null | undefined
+): AutoConfirmationConfig | undefined => {
+  if (!provider) return undefined;
+  return configs?.find(
+    (config) => config.provider === provider && config.configType === 'API'
+  );
+};
+
 export const useAutoConfirmationProviders = () => {
-  const data = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const {
+    configs,
+    isLoading,
+    isError,
+    createConfig,
+    updateConfig,
+    deleteConfig: deleteConfigMutation,
+  } = useAutoConfirmationConfigs();
 
   const findByProvider = useCallback(
-    (provider: AutoConfirmationProviderId | null | undefined) => {
-      if (!provider) return undefined;
-      return data.find((config) => config.provider === provider);
-    },
-    [data]
+    (provider: AutoConfirmationProviderId | null | undefined) =>
+      getApiConfig(configs, provider),
+    [configs]
   );
 
-  const saveConfig = useCallback(async (input: AutoConfirmationConfigInput) => {
-    await wait(400);
-    const existing = configs.find((c) => c.provider === input.provider);
-    if (existing) {
-      configs = configs.map((c) =>
-        c.provider === input.provider
-          ? {
-              ...c,
-              apiKey: input.apiKey,
-              accountId: input.accountId,
-              isActive: input.isActive,
-            }
-          : c
-      );
-    } else {
-      const next: AutoConfirmationConfig = {
-        id: `${input.provider}-${Date.now()}`,
-        provider: input.provider,
-        apiKey: input.apiKey,
-        accountId: input.accountId,
-        isActive: input.isActive,
-      };
-      configs = [...configs, next];
-    }
-    emit();
-  }, []);
+  const saveConfig = useCallback(
+    async (input: AutoConfirmationConfigInput) => {
+      const existing = getApiConfig(configs, input.provider);
+      const metadata = input.accountId
+        ? { merchant_id: input.accountId }
+        : {};
+      if (existing) {
+        await updateConfig({
+          configId: existing.id,
+          data: {
+            apiKey: input.apiKey,
+            isActive: input.isActive,
+            metadata,
+          },
+        });
+      } else {
+        await createConfig({
+          provider: input.provider,
+          configType: 'API',
+          apiKey: input.apiKey,
+          isActive: input.isActive,
+          metadata: input.accountId ? { merchant_id: input.accountId } : undefined,
+        });
+      }
+    },
+    [configs, createConfig, updateConfig]
+  );
 
   const deleteConfig = useCallback(
     async (provider: AutoConfirmationProviderId) => {
-      await wait(300);
-      configs = configs.filter((c) => c.provider !== provider);
-      emit();
+      const existing = getApiConfig(configs, provider);
+      if (!existing) return;
+      await deleteConfigMutation(existing.id);
     },
-    []
+    [configs, deleteConfigMutation]
   );
 
   return {
-    configs: data,
+    configs,
     findByProvider,
     saveConfig,
     deleteConfig,
-    isLoading: false,
+    isLoading,
+    isError,
   };
 };

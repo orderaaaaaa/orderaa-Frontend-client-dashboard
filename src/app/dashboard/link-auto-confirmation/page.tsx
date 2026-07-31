@@ -17,7 +17,8 @@ import { AutoConfirmationProviderId } from './types/autoConfirmation';
 export default function AutoConfirmationPage() {
   const [selectedProvider, setSelectedProvider] =
     useState<AutoConfirmationProviderId | null>(null);
-  const { configs, findByProvider, isLoading } = useAutoConfirmationProviders();
+  const { configs, findByProvider, isLoading, isError } =
+    useAutoConfirmationProviders();
 
   const sortedProviders = useMemo(() => {
     return [...autoConfirmationProviders].sort((a, b) => {
@@ -96,6 +97,10 @@ export default function AutoConfirmationPage() {
 
       {isLoading ? (
         <PageLoading className="h-64 mt-10" />
+      ) : isError ? (
+        <div className="p-4 bg-red-50 text-red-700 rounded-lg">
+          حدث خطأ أثناء تحميل شركات التأكيد الآلي
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {sortedProviders.map((provider) => {

@@ -29,8 +29,10 @@ import { autoConfirmationSetupSteps } from '../constants/providers';
 import {
   AutoConfirmationProvider,
   AutoConfirmationConfig,
+  getAccountIdFromMetadata,
 } from '../types/autoConfirmation';
 import { useAutoConfirmationProviders } from '../hooks/useAutoConfirmationProviders';
+import { getAutomationConfigErrorMessage } from '../api/automation';
 
 interface AutoConfirmationModalProps {
   isOpen: boolean;
@@ -70,8 +72,8 @@ export const AutoConfirmationModal: React.FC<AutoConfirmationModalProps> = ({
     setConfirmDelete(false);
     if (existingConfig) {
       form.reset({
-        apiKey: existingConfig.apiKey,
-        accountId: existingConfig.accountId ?? '',
+        apiKey: existingConfig.apiKey ?? '',
+        accountId: getAccountIdFromMetadata(existingConfig.metadata) ?? '',
         isActive: existingConfig.isActive,
       });
     } else {
@@ -105,8 +107,10 @@ export const AutoConfirmationModal: React.FC<AutoConfirmationModalProps> = ({
       );
       handleClose();
     } catch (err: unknown) {
-      const message =
-        (err as { message?: string })?.message || 'حدث خطأ أثناء الحفظ';
+      const message = getAutomationConfigErrorMessage(
+        err,
+        'حدث خطأ أثناء الحفظ'
+      );
       setError(message);
       toast.error(message);
     } finally {
@@ -122,8 +126,10 @@ export const AutoConfirmationModal: React.FC<AutoConfirmationModalProps> = ({
       toast.success(`تم إلغاء ربط ${provider.name}`);
       handleClose();
     } catch (err: unknown) {
-      const message =
-        (err as { message?: string })?.message || 'حدث خطأ أثناء الحذف';
+      const message = getAutomationConfigErrorMessage(
+        err,
+        'حدث خطأ أثناء الحذف'
+      );
       setError(message);
       toast.error(message);
     } finally {

@@ -49,6 +49,10 @@ export const QUERY_KEYS = {
   // Integrations
   INTEGRATION_CONFIGS: 'integration-configs',
 
+  // Automation
+  AUTOMATION_CONFIGS: 'automation-configs',
+  AUTOMATION_PROVIDERS: 'automation-providers',
+
   // Cancellation Reasons
   CANCELLATION_REASONS: 'cancellation-reasons',
   TOP_CANCELLATION_REASONS: 'top-cancellation-reasons',
