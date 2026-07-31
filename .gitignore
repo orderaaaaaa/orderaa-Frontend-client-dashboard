@@ -26,3 +26,5 @@ next-env.d.ts
 
 # worktrees
 .temp-worktree-parallel-tasks/
+
+.omo
