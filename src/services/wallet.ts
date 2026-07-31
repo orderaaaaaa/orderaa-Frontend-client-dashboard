@@ -16,7 +16,7 @@ import {
 // Fetch billing info (balance + subscription + order capacity)
 export const useBillingInfo = () => {
   return useQuery({
-    queryKey: [QUERY_KEYS.WALLET_BILLING_INFO] as QueryKey,
+    queryKey: [QUERY_KEYS.BILLING_INFO] as QueryKey,
     queryFn: async () => {
       return walletApi.getBillingInfo();
     },
@@ -57,7 +57,7 @@ export const useTopUp = () => {
     onSuccess: () => {
       // Invalidate balance + billing info — will refetch after payment completes
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.WALLET_BILLING_INFO],
+        queryKey: [QUERY_KEYS.BILLING_INFO],
       });
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.WALLET_BALANCE],

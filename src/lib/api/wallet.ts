@@ -31,7 +31,7 @@ export const walletApi = {
     http.post<TopUpSession>('/wallet/topup', payload).then((res) => res.data),
 
   getBillingInfo: () =>
-    http.get<BillingInfo>('/wallet/billing-info').then((res) => res.data),
+    http.get<BillingInfo>('/billing/info').then((res) => res.data),
 
   getChargeOptions: () =>
     http

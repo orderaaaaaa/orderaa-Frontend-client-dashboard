@@ -87,7 +87,7 @@ export const QUERY_KEYS = {
   // Wallet & Billing
   WALLET_BALANCE: 'wallet-balance',
   WALLET_TRANSACTIONS: 'wallet-transactions',
-  WALLET_BILLING_INFO: 'wallet-billing-info',
+  BILLING_INFO: 'billing-info',
   WALLET_CHARGE_OPTIONS: 'wallet-charge-options',
 
   // Plans & Subscriptions

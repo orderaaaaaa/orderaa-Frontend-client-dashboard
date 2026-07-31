@@ -43,7 +43,7 @@ export const useSubscribe = () => {
         queryKey: [QUERY_KEYS.ACTIVE_SUBSCRIPTION],
       });
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.WALLET_BILLING_INFO],
+        queryKey: [QUERY_KEYS.BILLING_INFO],
       });
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.WALLET_BALANCE],
