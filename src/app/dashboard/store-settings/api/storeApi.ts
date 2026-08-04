@@ -10,16 +10,11 @@ export const merchantSettingsApi = {
   },
 
   updateSettings: async (
-    formData: FormData
+    payload: Record<string, unknown>
   ): Promise<MerchantSettingsResponse> => {
     const response = await http.put<MerchantSettingsResponse>(
       '/merchants/settings',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
+      payload
     );
     return response.data;
   },

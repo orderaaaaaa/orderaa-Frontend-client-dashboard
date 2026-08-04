@@ -17,6 +17,7 @@ export interface ReturnOrder {
   editRejectedNote?: string | null;
   isShadowed?: boolean;
   cancelReason?: string | null;
+  pickupInvoice?: string | null;
   createdAt: string;
   updatedAt: string;
 }

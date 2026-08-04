@@ -28,7 +28,7 @@ function getStringFromValue(value?: File | FileList | string | null): string | n
   if (!value || typeof value !== 'string') return null;
   if (value.startsWith('data:image')) return value;
   if (value.startsWith('http://') || value.startsWith('https://')) return value;
-  return `data:image/png;base64,${value}`;
+  return null;
 }
 
 export function ImageUploadField({

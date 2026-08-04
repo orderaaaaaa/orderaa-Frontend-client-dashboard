@@ -2,11 +2,20 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { merchantSettingsApi } from '../api/storeApi';
 import { OrderSettingsFormData } from '../schemas/store';
 import { toast } from 'react-toastify';
-import { convertToFormData } from '../utils/formDataHelper';
+import { useUploadFileMutation } from '@/services/upload';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 
 export const useMerchantSettings = () => {
   const queryClient = useQueryClient();
+  const uploadMutation = useUploadFileMutation();
+
+  const getLogoFile = (logo: OrderSettingsFormData['logo']): File | null => {
+    if (logo instanceof File) return logo;
+    if (logo && typeof logo === 'object' && 'length' in logo && logo.length > 0) {
+      return (logo as FileList)[0] ?? null;
+    }
+    return null;
+  };
 
   const settingsQuery = useQuery({
     queryKey: ['merchantSettings'],
@@ -14,9 +23,23 @@ export const useMerchantSettings = () => {
   });
 
   const updateSettingsMutation = useMutation({
-    mutationFn: (data: OrderSettingsFormData) => {
-      const formData = convertToFormData(data);
-      return merchantSettingsApi.updateSettings(formData);
+    mutationFn: async (data: OrderSettingsFormData) => {
+      const payload: Record<string, unknown> = {};
+      (Object.keys(data) as (keyof OrderSettingsFormData)[]).forEach((key) => {
+        if (key === 'logo') return;
+        const value = data[key];
+        if (value !== undefined && value !== null) {
+          payload[key] = value;
+        }
+      });
+
+      const logoFile = getLogoFile(data.logo);
+      if (logoFile) {
+        const uploadResult = await uploadMutation.mutateAsync(logoFile);
+        payload.logoUrl = uploadResult.url;
+      }
+
+      return merchantSettingsApi.updateSettings(payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['merchantSettings'] });

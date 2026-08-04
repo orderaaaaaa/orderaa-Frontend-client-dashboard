@@ -7,7 +7,9 @@ export interface SubmitForApprovalRequest {
 
 export interface SubmitForApprovalResponse {
   success: boolean;
-  message: string;
+  submittedCount: number;
+  submittedOrderIds: number[];
+  pickupCode: string;
 }
 
 export async function getOrderByCodeWithShipping(
