@@ -177,6 +177,8 @@ export interface ApproveSupplierInvoiceProductDto {
 
 export interface ApproveSupplierInvoiceDto {
   products: ApproveSupplierInvoiceProductDto[];
+  /** destination warehouse for the approved stock */
+  warehouseId?: number;
 }
 
 export async function getSuppliers(

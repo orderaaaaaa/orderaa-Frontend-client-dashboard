@@ -10,8 +10,6 @@ export interface MerchantSettingsResponse {
   autoCancelAttempts: number;
   logo: string;
   url: string;
-  reservationType: 'ON_CREATION' | 'ON_CONFIRMED';
-  allowNegativeReservation: boolean;
   minStockLevel: number | null;
   maxStockLevel: number | null;
   pageNames: string[];

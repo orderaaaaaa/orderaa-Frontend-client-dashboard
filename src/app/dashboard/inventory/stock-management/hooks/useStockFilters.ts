@@ -16,7 +16,7 @@ const INITIAL_FILTERS: StockFilters = {
   searchQuery: '',
   color: '',
   size: '',
-  locationType: '',
+  warehouseId: '',
   fromDate: null,
   toDate: null,
   timePeriod: '',
@@ -48,8 +48,8 @@ export function useStockFilters() {
     []
   );
 
-  const setLocationType = useCallback((value: string) => {
-    setFilters((prev) => ({ ...prev, locationType: value }));
+  const setWarehouseId = useCallback((value: string) => {
+    setFilters((prev) => ({ ...prev, warehouseId: value }));
   }, []);
 
   const clearFilter = useCallback((key: keyof StockFilters) => {
@@ -88,7 +88,7 @@ export function useStockFilters() {
       search: debouncedSearchQuery.trim() || undefined,
       color: filters.color || undefined,
       size: filters.size || undefined,
-      locationType: filters.locationType || undefined,
+      warehouseId: filters.warehouseId || undefined,
       fromDate: dateToIsoOrUndefined(filters.fromDate),
       toDate: dateToIsoOrUndefined(filters.toDate),
     }),
@@ -96,7 +96,7 @@ export function useStockFilters() {
       debouncedSearchQuery,
       filters.color,
       filters.size,
-      filters.locationType,
+      filters.warehouseId,
       filters.fromDate,
       filters.toDate,
     ]
@@ -137,7 +137,7 @@ export function useStockFilters() {
     !!debouncedSearchQuery.trim() ||
     !!filters.color ||
     !!filters.size ||
-    !!filters.locationType ||
+    !!filters.warehouseId ||
     !!filters.fromDate ||
     !!filters.toDate;
 
@@ -151,7 +151,7 @@ export function useStockFilters() {
     setSearchQuery,
     setFilter,
     clearFilter,
-    setLocationType,
+    setWarehouseId,
     setFromDate,
     setToDate,
     setTimePeriod,

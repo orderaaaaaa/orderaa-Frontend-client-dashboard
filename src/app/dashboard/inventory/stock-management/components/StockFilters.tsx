@@ -4,7 +4,8 @@ import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import type { StockFilters as Filters } from '../types';
-import { LOCATION_TYPE_OPTIONS } from '../constants';
+import { ALL_WAREHOUSES_OPTION } from '@/constants/warehouses';
+import { useWarehouseOptions } from '@/services/warehouses';
 
 interface StockFilterOption {
   key: string;
@@ -20,7 +21,7 @@ interface StockFiltersProps {
   onFromDateChange: (date: Date | null) => void;
   onToDateChange: (date: Date | null) => void;
   onTimePeriodChange: (period: TimePeriod | '') => void;
-  onLocationTypeChange?: (value: string) => void;
+  onWarehouseChange?: (value: string) => void;
 }
 
 export function StockFilters({
@@ -32,8 +33,10 @@ export function StockFilters({
   onFromDateChange,
   onToDateChange,
   onTimePeriodChange,
-  onLocationTypeChange,
+  onWarehouseChange,
 }: StockFiltersProps) {
+  const { options: warehouseOptions } = useWarehouseOptions();
+
   return (
     <div className="flex flex-col gap-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -54,12 +57,10 @@ export function StockFilters({
           clearable
         />
         <SearchableSelect
-          options={LOCATION_TYPE_OPTIONS}
-          value={filters.locationType}
-          onChange={(val) => onLocationTypeChange?.(val)}
-          onClear={() => onLocationTypeChange?.('')}
-          placeholder="نوع المخزون"
-          clearable
+          options={[ALL_WAREHOUSES_OPTION, ...warehouseOptions]}
+          value={filters.warehouseId}
+          onChange={(val) => onWarehouseChange?.(val)}
+          placeholder="المخزن"
         />
       </div>
       <DateRangeFilter

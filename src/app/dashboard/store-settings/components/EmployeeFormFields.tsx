@@ -97,12 +97,7 @@ export default function OrderSettingsFields({
 
         {/* 7. الجرد والحجز / Inventory & Reservation */}
         <GroupSection title="الجرد والحجز">
-          <ReservationSettingsSection
-            register={register}
-            watch={watch}
-            setValue={setValue}
-            errors={errors}
-          />
+          <ReservationSettingsSection register={register} errors={errors} />
         </GroupSection>
       </div>
     </div>

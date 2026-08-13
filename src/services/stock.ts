@@ -95,7 +95,7 @@ export interface StockFiltersDto {
   search?: string;
   color?: string;
   size?: string;
-  locationType?: string;
+  warehouseId?: string;
   fromDate?: string;
   toDate?: string;
 }
@@ -147,7 +147,7 @@ function buildStockParams(filters: StockFiltersDto) {
   if (filters.search?.trim()) params.search = filters.search.trim();
   if (filters.color) params.color = filters.color;
   if (filters.size) params.size = filters.size;
-  if (filters.locationType) params.locationType = filters.locationType;
+  if (filters.warehouseId) params.warehouseId = filters.warehouseId;
   if (filters.fromDate) params.fromDate = filters.fromDate;
   if (filters.toDate) params.toDate = filters.toDate;
   return params;

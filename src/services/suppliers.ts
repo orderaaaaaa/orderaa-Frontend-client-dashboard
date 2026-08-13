@@ -150,6 +150,11 @@ export const useApproveSupplierInvoiceMutation = () => {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_INVOICES] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_INVOICE_DETAIL, variables.id] });
+      // Approval records INBOUND stock movements into the chosen warehouse.
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.WAREHOUSE_STOCK] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCK_MOVEMENTS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCK_PRODUCTS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCK_ANALYSIS] });
     },
   });
 };
