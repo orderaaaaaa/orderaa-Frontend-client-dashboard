@@ -44,7 +44,7 @@ export function StockManagementContent() {
     setFromDate,
     setToDate,
     setTimePeriod,
-    setLocationType,
+    setWarehouseId,
     pageSize,
     setPage,
     setPageSize,
@@ -103,14 +103,14 @@ export function StockManagementContent() {
     let count = 0;
     if (filters.color) count++;
     if (filters.size) count++;
-    if (filters.locationType) count++;
+    if (filters.warehouseId) count++;
     if (filters.fromDate || filters.toDate) count++;
     if (filters.timePeriod) count++;
     return count;
   }, [
     filters.color,
     filters.size,
-    filters.locationType,
+    filters.warehouseId,
     filters.fromDate,
     filters.toDate,
     filters.timePeriod,
@@ -232,7 +232,7 @@ export function StockManagementContent() {
               onFromDateChange={setFromDate}
               onToDateChange={setToDate}
               onTimePeriodChange={setTimePeriod}
-              onLocationTypeChange={setLocationType}
+              onWarehouseChange={setWarehouseId}
             />
           </div>
         </div>

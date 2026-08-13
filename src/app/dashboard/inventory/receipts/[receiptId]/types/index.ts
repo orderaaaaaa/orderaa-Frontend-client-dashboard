@@ -9,14 +9,6 @@ export interface AttributeOptionGroup {
   options: AttributeOption[];
 }
 
-export interface ProductVariant {
-  id: number;
-  name: string;
-  image: string;
-  colors: string[];
-  sizes: string[];
-}
-
 export interface SelectedVariant {
   attributeOptionIds: number[];
   attributeLabels: string[];
@@ -27,11 +19,3 @@ export interface SelectedVariant {
   size?: string;
 }
 
-export interface ReceiptProduct {
-  id: number;
-  name: string;
-  image: string;
-  itemsCount: number;
-  variantsCount: number;
-  selectedVariants?: SelectedVariant[];
-}

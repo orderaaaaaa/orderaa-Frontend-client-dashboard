@@ -46,6 +46,13 @@ export const QUERY_KEYS = {
   SUPPLIER_INVOICES: 'supplier-invoices',
   SUPPLIER_INVOICE_DETAIL: 'supplier-invoice-detail',
 
+  // Warehouses & Stock Movements
+  WAREHOUSES: 'warehouses',
+  WAREHOUSE_DETAIL: 'warehouse-detail',
+  WAREHOUSE_STOCK: 'warehouse-stock',
+  STOCK_WORKFLOWS: 'stock-workflows',
+  STOCK_MOVEMENTS: 'stock-movements',
+
   // Integrations
   INTEGRATION_CONFIGS: 'integration-configs',
 

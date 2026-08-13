@@ -24,7 +24,7 @@ export interface StockFilters {
   searchQuery: string;
   color: string;
   size: string;
-  locationType: string;
+  warehouseId: string;
   fromDate: Date | null;
   toDate: Date | null;
   timePeriod: '' | 'day' | 'week' | 'month' | 'quarter' | 'year';

@@ -1,21 +1,9 @@
-'use client';
+import { redirect } from 'next/navigation';
 
-import { Suspense } from 'react';
-import PageLoading from '@/components/ui/page-loading';
-import { AddWarehouseContent } from './components';
-
-function AddWarehouseLoading() {
-  return (
-    <div className="w-full max-w-full overflow-x-hidden">
-      <PageLoading message="جاري التحميل..." />
-    </div>
-  );
-}
-
+/**
+ * Warehouse creation now lives inside the warehouse-management page, which
+ * also owns the hierarchy, stock-workflow rules and the movements ledger.
+ */
 export default function AddWarehousePage() {
-  return (
-    <Suspense fallback={<AddWarehouseLoading />}>
-      <AddWarehouseContent />
-    </Suspense>
-  );
+  redirect('/dashboard/inventory/warehouses');
 }

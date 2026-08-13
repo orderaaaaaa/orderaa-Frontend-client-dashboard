@@ -2,43 +2,37 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { SelectedVariant } from '@/app/dashboard/inventory/receipts/[receiptId]/types';
 
-interface ReceiptStepState {
-  currentStep: number;
-  completedSteps: number[];
+/**
+ * The receipt flow is a single step (variant quantities) since the mock
+ * barcode steps were removed — only the in-progress variant selections
+ * survive a page refresh.
+ */
+interface ReceiptState {
   productVariants: Record<number, SelectedVariant[]>;
-  printedIds: string[];
-  confirmedCounts: Record<string, number>;
-  rejectedCounts: Record<string, number>;
 }
 
 interface ReceiptStore {
-  receipts: Record<string, ReceiptStepState>;
+  receipts: Record<string, ReceiptState>;
 
-  getReceiptState: (receiptId: string) => ReceiptStepState;
-
-  setCurrentStep: (receiptId: string, step: number) => void;
-  markStepCompleted: (receiptId: string, step: number) => void;
-  setProductVariants: (receiptId: string, variants: Record<number, SelectedVariant[]>) => void;
-  addPrintedId: (receiptId: string, id: string) => void;
-  setConfirmedCounts: (receiptId: string, counts: Record<string, number>) => void;
-  setRejectedCounts: (receiptId: string, counts: Record<string, number>) => void;
-
+  getReceiptState: (receiptId: string) => ReceiptState;
+  setProductVariants: (
+    receiptId: string,
+    variants: Record<number, SelectedVariant[]>
+  ) => void;
   clearReceipt: (receiptId: string) => void;
 }
 
-const DEFAULT_STATE: ReceiptStepState = {
-  currentStep: 0,
-  completedSteps: [],
+const DEFAULT_STATE: ReceiptState = {
   productVariants: {},
-  printedIds: [],
-  confirmedCounts: {},
-  rejectedCounts: {},
 };
 
-function getReceipt(receipts: Record<string, ReceiptStepState>, receiptId: string): ReceiptStepState {
+function getReceipt(
+  receipts: Record<string, ReceiptState>,
+  receiptId: string
+): ReceiptState {
   const stored = receipts[receiptId];
-  if (!stored) return DEFAULT_STATE;
-  if (stored.completedSteps === undefined) {
+  if (!stored || stored.productVariants === undefined) {
+    // Persisted entries from the old multi-step shape merge safely.
     return { ...DEFAULT_STATE, ...stored };
   }
   return stored;
@@ -53,95 +47,16 @@ export const useReceiptStore = create<ReceiptStore>()(
         return getReceipt(get().receipts, receiptId);
       },
 
-      setCurrentStep: (receiptId, step) =>
+      setProductVariants: (receiptId, variants) =>
         set((state) => ({
           receipts: {
             ...state.receipts,
             [receiptId]: {
-              ...(getReceipt(state.receipts, receiptId)),
-              currentStep: step,
+              ...getReceipt(state.receipts, receiptId),
+              productVariants: variants,
             },
           },
         })),
-
-      markStepCompleted: (receiptId, step) =>
-        set((state) => {
-          const current = getReceipt(state.receipts, receiptId);
-          if (current.completedSteps.includes(step)) return state;
-          return {
-            receipts: {
-              ...state.receipts,
-              [receiptId]: {
-                ...current,
-                completedSteps: [...current.completedSteps, step],
-              },
-            },
-          };
-        }),
-
-      setProductVariants: (receiptId, variants) =>
-        set((state) => {
-          const current = getReceipt(state.receipts, receiptId);
-          const hasData = Object.values(variants).some((v) => v.length > 0);
-          const completed = hasData && !current.completedSteps.includes(0)
-            ? [...current.completedSteps, 0]
-            : current.completedSteps;
-          return {
-            receipts: {
-              ...state.receipts,
-              [receiptId]: { ...current, productVariants: variants, completedSteps: completed },
-            },
-          };
-        }),
-
-      addPrintedId: (receiptId, id) =>
-        set((state) => {
-          const current = getReceipt(state.receipts, receiptId);
-          if (current.printedIds.includes(id)) return state;
-          const completed = !current.completedSteps.includes(1)
-            ? [...current.completedSteps, 1]
-            : current.completedSteps;
-          return {
-            receipts: {
-              ...state.receipts,
-              [receiptId]: {
-                ...current,
-                printedIds: [...current.printedIds, id],
-                completedSteps: completed,
-              },
-            },
-          };
-        }),
-
-      setConfirmedCounts: (receiptId, counts) =>
-        set((state) => {
-          const current = getReceipt(state.receipts, receiptId);
-          const hasData = Object.values(counts).some((v) => v > 0);
-          const completed = hasData && !current.completedSteps.includes(2)
-            ? [...current.completedSteps, 2]
-            : current.completedSteps;
-          return {
-            receipts: {
-              ...state.receipts,
-              [receiptId]: { ...current, confirmedCounts: counts, completedSteps: completed },
-            },
-          };
-        }),
-
-      setRejectedCounts: (receiptId, counts) =>
-        set((state) => {
-          const current = getReceipt(state.receipts, receiptId);
-          const hasData = Object.values(counts).some((v) => v > 0);
-          const completed = hasData && !current.completedSteps.includes(3)
-            ? [...current.completedSteps, 3]
-            : current.completedSteps;
-          return {
-            receipts: {
-              ...state.receipts,
-              [receiptId]: { ...current, rejectedCounts: counts, completedSteps: completed },
-            },
-          };
-        }),
 
       clearReceipt: (receiptId) =>
         set((state) => {
@@ -151,6 +66,17 @@ export const useReceiptStore = create<ReceiptStore>()(
     }),
     {
       name: 'receipt-storage',
+      version: 1,
+      // v0 entries carried multi-step state (currentStep, printedIds, …);
+      // strip everything but the variant selections.
+      migrate: (persisted) => {
+        const state = persisted as { receipts?: Record<string, ReceiptState> };
+        const receipts: Record<string, ReceiptState> = {};
+        Object.entries(state?.receipts ?? {}).forEach(([id, entry]) => {
+          receipts[id] = { productVariants: entry?.productVariants ?? {} };
+        });
+        return { receipts };
+      },
     }
   )
 );

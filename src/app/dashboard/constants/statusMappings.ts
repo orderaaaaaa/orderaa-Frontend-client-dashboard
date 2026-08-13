@@ -18,6 +18,8 @@ export const ORDER_STATUS_ARABIC_LABELS: Record<string, string> = {
   WITH_DRIVER: 'مع المندوب',
   DELIVERED: 'تم التسليم',
   RETURNED_DELIVERED: 'مرتجع في الشركه',
+  RETURNED_COLLECTED: 'مرتجع مستلم بالمخزن',
+  COLLECTED: 'تم التحصيل',
   RETURNED_SETTLED: 'مرتجع تم التحصيل',
   RETURNED_FINAL: 'مرتجع نهائي',
   PARTIAL_DELIVERY: 'تسليم جزئي',
