@@ -74,8 +74,11 @@ export const getIconForStatus = (statusValue: string): React.ReactNode => {
     REGISTERED: <MdCheckCircleOutline className={ICON_SIZE} />,
     ATTEMPTED: <MdLoop className={ICON_SIZE} />,
     RETURNED_DELIVERED: <HiOutlineReceiptRefund className={ICON_SIZE} />,
+    RETURNED_COLLECTED: <HiOutlineReceiptRefund className={ICON_SIZE} />,
     REPORTS: <FileText className={ICON_SIZE} />,
     SHIPPING: <MdOutlineLocalShipping className={ICON_SIZE} />,
+    WITH_DRIVER: <MdOutlineLocalShipping className={ICON_SIZE} />,
+    COLLECTED: <CircleDollarSign className={ICON_SIZE} />,
     PARTIAL_DELIVERY: <MdReceiptLong className={ICON_SIZE} />,
     WHATSAPP_CONFIRMED: <LiaCheckDoubleSolid className={ICON_SIZE} />,
     WAITING_FOR_APPROVAL: <LiaBusinessTimeSolid className={ICON_SIZE} />,
@@ -101,11 +104,13 @@ function PageTaps({
     currentStatus !== undefined ? currentStatus : storeSelectedStatus;
 
   const { data: statusesData, isLoading: loading } = useOrderStatusesQuery();
-  const allStatuses = statusesData ?? [];
+  // Tabs must stay permission-scoped — never the full `allStatuses` dictionary,
+  // which would show tabs for statuses this employee cannot work with.
+  const permittedStatuses = statusesData?.statuses ?? [];
 
   const statuses = allowedStatuses
-    ? allStatuses.filter((status) => allowedStatuses.includes(status.key))
-    : allStatuses;
+    ? permittedStatuses.filter((status) => allowedStatuses.includes(status.key))
+    : permittedStatuses;
 
   const handleTabClick = (status: string | null) => {
     if (onStatusChange) {

@@ -565,6 +565,23 @@ export interface OrderStatusItem {
   label: string;
 }
 
+/**
+ * Response shape of GET /lookups/order-statuses.
+ *
+ * `statuses` is the caller's status window, filtered by
+ * `orders:status:<STATUS>` — it drives tabs, filters and status actions. Note
+ * that this is a visibility window: `orders:setStatus:<STATUS>` is a separate
+ * permission family, so a status appearing here is not proof the caller may
+ * move an order into it.
+ *
+ * `allStatuses` is the complete label dictionary and is display-only: never use
+ * it to decide what a user may filter by or set.
+ */
+export interface OrderStatusesResponse {
+  statuses: OrderStatusItem[];
+  allStatuses: OrderStatusItem[];
+}
+
 // Settlement types
 export type { SettlementRow, UploadSettlementResponse, SettlementSuccessItem, SettlementFailedItem } from '@/lib/api/settlement';
 

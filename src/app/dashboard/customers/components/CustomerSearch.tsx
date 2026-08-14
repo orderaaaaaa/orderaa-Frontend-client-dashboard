@@ -44,7 +44,8 @@ export default function CustomerSearch({
   const orderStatusOptions = useMemo(() => {
     const baseOption = { key: 'all', value: 'جميع الحالات' };
     if (!statusesData) return [baseOption];
-    const dynamicOptions = statusesData.map((status) => ({
+    // Filter options stay permission-scoped — not the full label dictionary.
+    const dynamicOptions = statusesData.statuses.map((status) => ({
       key: status.key,
       value: status.label,
     }));

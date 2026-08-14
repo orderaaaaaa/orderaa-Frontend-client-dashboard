@@ -66,12 +66,17 @@ export const STATUS_ICONS: Record<string, IconType> = {
   REGISTERED: MdCheckCircleOutline,
   ATTEMPTED: MdLoop,
   RETURNED_DELIVERED: HiOutlineReceiptRefund,
+  RETURNED_COLLECTED: HiOutlineReceiptRefund,
   RETURNED_SETTLED: HiOutlineReceiptRefund,
   RETURNED_FINAL: LiaBanSolid,
   REPORTS: FileText,
   SHIPPING: MdOutlineLocalShipping,
-  PARTIAL_DELIVERY: MdReceiptLong,
+  WITH_DRIVER: MdOutlineLocalShipping,
+  COLLECTED: CircleDollarSign,
   WAITING_FOR_APPROVAL: Clock3,
+
+  // Frontend-only legacy keys — not OrderStatus members.
+  PARTIAL_DELIVERY: MdReceiptLong,
   FINAL_RETURN: LiaBanSolid,
   RETURN_RESEND_PENDING: LiaRedoAltSolid,
   RETURN_WAREHOUSE: LiaWarehouseSolid,

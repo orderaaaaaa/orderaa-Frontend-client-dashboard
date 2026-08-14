@@ -67,7 +67,8 @@ function OrderDetailsInfoComponent({
   const [pendingShippingType, setPendingShippingType] = useState<string | null>(null);
 
   const { data: statusesData, error: statusesError } = useOrderStatusesQuery();
-  const availableStatuses = statusesData ?? [];
+  // Permission-scoped on purpose — these become the status actions offered.
+  const availableStatuses = statusesData?.statuses ?? [];
 
   useEffect(() => {
     if (statusesError) {

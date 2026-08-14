@@ -14,7 +14,7 @@ import {
   PaginatedResponse,
   FilterOptionsResponse,
   OrderStatisticsResponse,
-  OrderStatusItem,
+  OrderStatusesResponse,
   Product,
 } from '@/types/orders';
 
@@ -91,8 +91,12 @@ export const useOrderStatusesQuery = () => {
   return useQuery({
     queryKey: [QUERY_KEYS.ORDER_STATUSES] as QueryKey,
     queryFn: async () => {
-      const response = await http.get<{ statuses: OrderStatusItem[] }>('/lookups/order-statuses');
-      return response.data.statuses;
+      const response =
+        await http.get<OrderStatusesResponse>('/lookups/order-statuses');
+      // Read `allStatuses` defensively: staleTime is Infinity, so a session
+      // opened before the backend deploy still holds the old response shape.
+      const statuses = response.data.statuses ?? [];
+      return { statuses, allStatuses: response.data.allStatuses ?? statuses };
     },
     staleTime: Infinity,
   });

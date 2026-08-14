@@ -120,13 +120,20 @@ function AllOrdersContent() {
     refetch,
   } = useOrders(apiFilters);
 
-  const { data: statusOptions } = useOrderStatusesQuery();
+  const { data: orderStatuses } = useOrderStatusesQuery();
 
-  // Create status labels map for export
+  // The caller's own status window, filtered by `orders:status:<STATUS>`.
+  // That is a visibility window, not `orders:setStatus:<STATUS>` — holding a
+  // status here does not by itself mean the caller may move an order into it.
+  // Passed through unchanged from before T10.
+  const statusOptions = orderStatuses?.statuses;
+
+  // Labels for export come from the complete dictionary, so an order sitting in
+  // a status outside this employee's window still exports a translated label.
   const statusLabelsMap = useMemo(() => {
-    if (!statusOptions) return new Map<string, string>();
-    return new Map(statusOptions.map((s) => [s.key, s.label]));
-  }, [statusOptions]);
+    if (!orderStatuses) return new Map<string, string>();
+    return new Map(orderStatuses.allStatuses.map((s) => [s.key, s.label]));
+  }, [orderStatuses]);
 
   const { mutate: bulkUpdateOrders } = useBulkOrders({
     onSuccess: (data) => {

@@ -41,7 +41,8 @@ export function PageTabs({
   currentStatus,
 }: PageTabsProps) {
   const { data: statusesData, isLoading: loading } = useOrderStatusesQuery();
-  const statuses = statusesData ?? [];
+  // Permission-scoped on purpose — tabs, not the full label dictionary.
+  const statuses = statusesData?.statuses ?? [];
 
   const handleTabClick = (status: string | null) => {
     if (onStatusChange) {
