@@ -42,10 +42,14 @@ export default function Page() {
   // Roles live on their own endpoint (PUT /employees/:id/roles) and are only
   // sent when they actually changed; the profile PATCH runs afterwards because
   // it redirects away on success.
-  const handleSubmit = async (data: Partial<Employee>, roleIds: number[]) => {
+  const handleSubmit = async (
+    data: Partial<Employee>,
+    roleIds: number[],
+    rolesDirty: boolean,
+  ) => {
     const currentRoleIds = employee.roles?.map((role) => role.id) ?? [];
 
-    if (canAssignRoles && !sameRoleSet(currentRoleIds, roleIds)) {
+    if (canAssignRoles && rolesDirty && !sameRoleSet(currentRoleIds, roleIds)) {
       try {
         await replaceRoles.mutateAsync({
           employeeId: Number(employeeSettingId),

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Employee } from '../types/employee';
@@ -27,8 +27,16 @@ import { ACCESS_LEVEL_OPTIONS } from '../../../constants/employeesFormOptions';
 
 interface EmployeeFormProps {
   employee: Employee;
-  /** `roleIds` is the full desired set — the page sends it to PUT /employees/:id/roles. */
-  onSubmit: (data: Partial<Employee>, roleIds: number[]) => void;
+  /**
+   * `roleIds` is the full desired set — the page sends it to
+   * PUT /employees/:id/roles, but ONLY when `rolesDirty` is true. A
+   * full-replace PUT built from untouched state can wipe an employee's roles.
+   */
+  onSubmit: (
+    data: Partial<Employee>,
+    roleIds: number[],
+    rolesDirty: boolean,
+  ) => void;
   isLoading?: boolean;
 }
 
@@ -59,6 +67,26 @@ export default function EmployeeForm({
   const [roleIds, setRoleIds] = useState<string[]>(
     () => employee.roles?.map((role) => String(role.id)) ?? []
   );
+  // Only a real user interaction may trigger the full-replace roles PUT.
+  const rolesDirtyRef = useRef(false);
+
+  const serverRoleIds = employee.roles?.map((role) => String(role.id)) ?? [];
+  const serverRoleKey = [...serverRoleIds].sort().join(',');
+
+  // The cached employee can arrive without `roles` (the profile PATCH response
+  // omits them) and be replaced by the refetched row moments later — resync
+  // until the user touches the field, so we never diff against stale state.
+  useEffect(() => {
+    if (!rolesDirtyRef.current) {
+      setRoleIds(serverRoleIds);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serverRoleKey]);
+
+  const handleRolesChange = (next: string[]) => {
+    rolesDirtyRef.current = true;
+    setRoleIds(next);
+  };
 
   const {
     register,
@@ -90,7 +118,7 @@ export default function EmployeeForm({
       delete updateData.password;
     }
 
-    onSubmit(updateData, roleIds.map(Number));
+    onSubmit(updateData, roleIds.map(Number), rolesDirtyRef.current);
   };
 
   return (
@@ -109,7 +137,7 @@ export default function EmployeeForm({
           </div>
           <MultiSelectDropdown
             value={roleIds}
-            onChange={setRoleIds}
+            onChange={handleRolesChange}
             options={roleOptions}
             loading={isRolesLoading}
             placeholder="اختر أدوار الموظف"
