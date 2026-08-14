@@ -4,6 +4,7 @@ import { useCallback, useMemo } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { fetchMe } from '@/lib/api/auth';
 import {
+  PERMISSIONS,
   hasAllPermissionCodes,
   hasAnyPermissionCode,
   hasPermissionCode,
@@ -60,6 +61,17 @@ export function usePermissionCheck() {
 export function useHasPermission(code: PermissionCode): boolean {
   const permissions = usePermissions();
   return hasPermissionCode(permissions, code);
+}
+
+/**
+ * Whether the signed-in user can hand roles to an employee. Needs BOTH codes:
+ * `roles:read` to list the roles at all, `roles:assign` for the backend to
+ * accept them. Used to decide if a roles field is rendered — and therefore
+ * whether picking a role can be required (see `buildCreateEmployeeSchema`).
+ */
+export function useCanAssignRoles(): boolean {
+  const { hasAllPermissions } = usePermissionCheck();
+  return hasAllPermissions([PERMISSIONS.ROLES_READ, PERMISSIONS.ROLES_ASSIGN]);
 }
 
 /**

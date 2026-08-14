@@ -4,15 +4,24 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import {
-  employeeSchema,
+  buildCreateEmployeeSchema,
   type EmployeeFormData,
 } from '@/schemas/employee.schema';
+import { useCanAssignRoles } from '@/hooks/usePermissions';
 import { useCreateEmployee } from './hooks/useCreateEmployee';
 import EmployeeFormHeader from './components/EmployeeFormHeader';
 import EmployeeFormFields from './components/EmployeeFormFields';
 import { useRouter } from 'next/navigation';
 
 export default function EmployeesPage() {
+  // The roles field is only rendered when the creator can assign roles; it is
+  // required exactly in that case (see `buildCreateEmployeeSchema`).
+  const canAssignRoles = useCanAssignRoles();
+  const schema = React.useMemo(
+    () => buildCreateEmployeeSchema(canAssignRoles),
+    [canAssignRoles]
+  );
+
   const {
     register,
     handleSubmit,
@@ -21,7 +30,7 @@ export default function EmployeesPage() {
     watch,
     setValue,
   } = useForm<EmployeeFormData>({
-    resolver: zodResolver(employeeSchema),
+    resolver: zodResolver(schema),
   });
 
   const createEmployee = useCreateEmployee();

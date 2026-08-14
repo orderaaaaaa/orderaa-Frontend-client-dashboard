@@ -76,6 +76,32 @@ export type EmployeeFormData = z.infer<typeof employeeFormSchema>;
 // Export alias for compatibility
 export const employeeSchema = employeeFormSchema;
 
+/**
+ * Create-form schema. Under ABAC an employee with zero roles can sign in but
+ * gets a 403 on every request, so the create form must not produce one.
+ *
+ * `requireRoles` mirrors whether the roles multi-select is actually rendered
+ * (the creator holds `roles:read` + `roles:assign`):
+ * - `true`  → at least one role must be picked before submitting.
+ * - `false` → the field is hidden, so the requirement cannot be satisfied here;
+ *   the form shows a notice that an admin has to assign roles instead.
+ *
+ * The edit flow keeps its own schema
+ * (`employees/employee-settings/[employeeSettingId]/schemas/employee.ts`) and is
+ * untouched — roles there are managed by `PUT /employees/:id/roles`, so an
+ * untouched roles field is legitimate.
+ */
+export const buildCreateEmployeeSchema = (requireRoles: boolean) =>
+  employeeFormSchema.superRefine((data, ctx) => {
+    if (requireRoles && (data.roleIds?.length ?? 0) === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['roleIds'],
+        message: 'يجب اختيار دور واحد على الأقل للموظف',
+      });
+    }
+  });
+
 // Employee response type
 export interface Employee {
   id: number;
