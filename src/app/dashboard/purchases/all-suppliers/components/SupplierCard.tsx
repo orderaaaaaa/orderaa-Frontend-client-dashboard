@@ -13,11 +13,15 @@ import {
   LiaBalanceScaleSolid,
   LiaUndoAltSolid,
   LiaBoxesSolid,
+  LiaEditSolid,
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
+import { Can } from '@/components/Can';
+import { PERMISSIONS } from '@/lib/permissions';
 import { Supplier } from '../types';
 import { formatCurrency } from '../utils';
 import PaymentModal from './PaymentModal';
+import EditSupplierModal from './EditSupplierModal';
 
 interface SupplierCardProps {
   supplier: Supplier;
@@ -26,6 +30,7 @@ interface SupplierCardProps {
 const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
   const router = useRouter();
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const remainingLabel = useMemo(() => {
     if (supplier.remaining === 0) return { text: '0 ج.م', color: 'text-gray-500' };
     if (supplier.remaining < 0) {
@@ -51,6 +56,19 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* suppliers:update is in MANAGER_EXCLUDED_CODES, so an ungated
+              button would 403 for Managers. */}
+          <Can code={PERMISSIONS.SUPPLIERS_UPDATE}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full font-semibold text-xs sm:text-sm flex items-center gap-1.5"
+              onClick={() => setIsEditOpen(true)}
+            >
+              <LiaEditSolid className="w-4 h-4" />
+              تعديل
+            </Button>
+          </Can>
           <Button
             variant="outline"
             size="sm"
@@ -143,6 +161,11 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
         onClose={() => setIsPaymentOpen(false)}
         supplierId={supplier.id}
         supplierName={supplier.name}
+      />
+      <EditSupplierModal
+        supplier={supplier}
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
       />
     </div>
   );

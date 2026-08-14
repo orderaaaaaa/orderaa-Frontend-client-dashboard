@@ -20,6 +20,10 @@ export const PERMISSIONS = {
   EMPLOYEES_CREATE: 'employees:create',
   EMPLOYEES_UPDATE: 'employees:update',
   EMPLOYEES_DELETE: 'employees:delete',
+  SUPPLIERS_READ: 'suppliers:read',
+  SUPPLIERS_CREATE: 'suppliers:create',
+  SUPPLIERS_UPDATE: 'suppliers:update',
+  SUPPLIERS_DELETE: 'suppliers:delete',
 } as const;
 
 export type PermissionCode = string;
