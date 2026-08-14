@@ -1,3 +1,5 @@
+import type { EmployeeRoleRef } from '@/lib/api/authorization';
+
 export interface Employee {
   id: string;
   accessLevel: string;
@@ -19,4 +21,7 @@ export interface Employee {
   performanceChange?: number;
   workingDaysThisMonth?: number;
   leaveDaysThisMonth?: number;
+  /** Assigned ABAC roles, embedded by `GET /employees/:id`. Replaced through
+   *  `PUT /employees/:id/roles`, never through `PATCH /employees/:id`. */
+  roles?: EmployeeRoleRef[];
 }

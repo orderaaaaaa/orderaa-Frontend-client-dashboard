@@ -1,8 +1,12 @@
 import React from 'react';
 import Input from '@/components/ui/Input';
 import SearchableSelect from '@/components/ui/SearchableSelect';
+import MultiSelectDropdown from '@/components/ui/MultiSelectDropdown';
 import WorkHoursTimePicker from '@/components/ui/WorkHoursTimePicker';
 import { useGovernoratesQuery } from '@/services/lookups';
+import { useRolesQuery } from '@/services/authorization';
+import { usePermissionCheck } from '@/hooks/usePermissions';
+import { PERMISSIONS } from '@/lib/permissions';
 import {
   validateEgyptianPhoneNumber,
   getPhoneNumberErrorMessage,
@@ -15,6 +19,7 @@ import {
   Mail,
   Lock,
   Clock,
+  ShieldCheck,
 } from 'lucide-react';
 
 import {
@@ -34,7 +39,21 @@ export default function EmployeeFormFields({
   const department = watch('department');
   const address = watch('address');
   const workingHours = watch('workingHours');
+  const roleIds = watch('roleIds');
   const { data: governorates = [] } = useGovernoratesQuery();
+
+  const { hasAllPermissions } = usePermissionCheck();
+  const canAssignRoles = hasAllPermissions([
+    PERMISSIONS.ROLES_READ,
+    PERMISSIONS.ROLES_ASSIGN,
+  ]);
+  const { data: roles = [], isLoading: isRolesLoading } =
+    useRolesQuery(canAssignRoles);
+
+  const roleOptions = roles.map((role) => ({
+    key: String(role.id),
+    value: role.name,
+  }));
 
   return (
     <div
@@ -43,47 +62,28 @@ export default function EmployeeFormFields({
     >
       {/* Main Grid Container */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
-        {/*  Employee Access (Full Width) */}
-        <div className="md:col-span-2 flex flex-col gap-4">
-          <Label
-            icon={<User className="w-6 h-6 text-primary" />}
-            text="صلاحية الموظف"
-          />
-          <SearchableSelect
-            value={accessLevel || ''}
-            onChange={(v) =>
-              setValue('accessLevel', v, { shouldValidate: true })
-            }
-            options={ACCESS_LEVEL_OPTIONS}
-            placeholder="اختر صلاحية الموظف"
-            widthClass="w-full"
-            error={errors?.accessLevel?.message}
-            triggerClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 text-lg ${
-              errors?.accessLevel ? 'border-red-500' : 'border-black/16'
-            } rounded text-right`}
-          />
-        </div>
-
-        {/*  Employee Department (Full Width) */}
-        <div className="md:col-span-2 flex flex-col gap-4">
-          <Label
-            icon={<User className="w-6 h-6 text-primary" />}
-            text="قسم الموظف"
-          />
-          <SearchableSelect
-            value={department || ''}
-            onChange={(v) =>
-              setValue('department', v, { shouldValidate: true })
-            }
-            options={DEPARTMENT_OPTIONS}
-            placeholder="اختر القسم"
-            widthClass="w-full"
-            error={errors?.department?.message}
-            triggerClassName={`w-full bg-[rgba(234,234,234,0.25)] border px-3 py-2 text-lg ${
-              errors?.department ? 'border-red-500' : 'border-black/16'
-            } rounded text-right`}
-          />
-        </div>
+        {/*  Roles — the only thing that actually grants access */}
+        {canAssignRoles && (
+          <div className="md:col-span-2 flex flex-col gap-4">
+            <Label
+              icon={<ShieldCheck className="w-6 h-6 text-primary" />}
+              text="أدوار الموظف"
+            />
+            <MultiSelectDropdown
+              value={roleIds ?? []}
+              onChange={(v) => setValue('roleIds', v, { shouldValidate: true })}
+              options={roleOptions}
+              loading={isRolesLoading}
+              placeholder="اختر أدوار الموظف"
+              emptyMessage="لا توجد أدوار — أنشئ دورًا من صفحة الأدوار والصلاحيات"
+              widthClass="w-full"
+            />
+            <p className="text-sm text-gray-500">
+              الأدوار هي ما يحدد صلاحيات الموظف داخل النظام. يمكنك تعديلها لاحقًا
+              من صفحة بيانات الموظف.
+            </p>
+          </div>
+        )}
 
         {/*  Name & Phone */}
         <div className="flex flex-col gap-4">
@@ -195,6 +195,52 @@ export default function EmployeeFormFields({
             error={errors.workingHours?.message}
             placeholder="9 : AM - 5 : PM"
           />
+        </div>
+
+        {/*  Organisational data — kept because the API still accepts it, but
+             it no longer decides what the employee can do. */}
+        <div className="md:col-span-2 rounded-lg border border-gray-200 bg-gray-50/60 p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <User className="w-5 h-5 text-gray-400" />
+            <div>
+              <h4 className="text-sm font-semibold text-gray-700">
+                بيانات تنظيمية
+              </h4>
+              <p className="text-xs text-gray-400">
+                للتصنيف والتقارير فقط — الصلاحيات تُحدَّد من الأدوار.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
+              <span className="text-sm text-gray-600">مستوى الوظيفة</span>
+              <SearchableSelect
+                value={accessLevel || ''}
+                onChange={(v) =>
+                  setValue('accessLevel', v, { shouldValidate: true })
+                }
+                options={ACCESS_LEVEL_OPTIONS}
+                placeholder="اختر مستوى الوظيفة"
+                widthClass="w-full"
+                error={errors?.accessLevel?.message}
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <span className="text-sm text-gray-600">قسم الموظف</span>
+              <SearchableSelect
+                value={department || ''}
+                onChange={(v) =>
+                  setValue('department', v, { shouldValidate: true })
+                }
+                options={DEPARTMENT_OPTIONS}
+                placeholder="اختر القسم"
+                widthClass="w-full"
+                error={errors?.department?.message}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -19,8 +19,8 @@ import {
 import { AttendanceModal } from './AttendanceModal';
 import { EmployeeCardProps } from '../add-employee/types/employee.types';
 import Link from 'next/link';
-import { If, Then } from 'react-if';
-import { useAuthStore } from '@/store/authStore';
+import { Can } from '@/components/Can';
+import { PERMISSIONS } from '@/lib/permissions';
 
 export const EmployeeCard = memo(function EmployeeCard({
   employee,
@@ -53,33 +53,46 @@ export const EmployeeCard = memo(function EmployeeCard({
     setLeaveModalOpen(true);
   };
 
-  const { user } = useAuthStore();
+  const roles = employee.roles ?? [];
 
   return (
     <div className="bg-white relative rounded-2xl shadow-sm border border-gray-100 p-4 max-w-[420px]">
       {/* Header */}
       <div className="flex flex-row-reverse items-center justify-end gap-4 mb-4">
-        <If condition={user?.role !== 'EMPLOYEE'}>
-          <Then>
-            <Link href={`employees/employee-settings/${employee.id}`}>
-              <Edit
-                size={20}
-                className="text-gray-600 absolute top-5 left-5 hover:text-gray-900 cursor-pointer"
-              />
-            </Link>
-          </Then>
-        </If>
+        <Can code={PERMISSIONS.EMPLOYEES_UPDATE}>
+          <Link href={`employees/employee-settings/${employee.id}`}>
+            <Edit
+              size={20}
+              className="text-gray-600 absolute top-5 left-5 hover:text-gray-900 cursor-pointer"
+            />
+          </Link>
+        </Can>
 
-        {/* Name & Department */}
+        {/* Name, roles & organisational chips */}
         <div className="text-right">
           <h3 className="text-2xl font-bold text-gray-900 my-2">
             {employee.fullName}
           </h3>
-          <div className="flex gap-2 justify-start">
-            <span className="inline-block border text-gray-700 px-2 lg:px-4 py-1 rounded-full text-sm">
+
+          {/* Roles decide access — show them first and highlighted. */}
+          {roles.length > 0 && (
+            <div className="flex flex-wrap gap-2 justify-start mb-2">
+              {roles.map((role) => (
+                <span
+                  key={role.id}
+                  className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium"
+                >
+                  {role.name}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-2 justify-start">
+            <span className="inline-block border text-gray-500 px-2 lg:px-4 py-1 rounded-full text-xs">
               {getDepartmentLabel(employee.department)}
             </span>
-            <span className="inline-block border text-gray-700 px-4 py-1 rounded-full text-sm">
+            <span className="inline-block border text-gray-500 px-4 py-1 rounded-full text-xs">
               {getAccessLevelLabel(employee.accessLevel)}
             </span>
           </div>

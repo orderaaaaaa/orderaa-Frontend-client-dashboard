@@ -1,4 +1,14 @@
 import axios from 'axios';
+import { toast } from 'react-toastify';
+
+/** Fallback copy when the backend sends no message with a 403. */
+const FORBIDDEN_FALLBACK_MESSAGE = 'ليس لديك صلاحية للقيام بهذا الإجراء';
+
+function extractMessage(data: unknown): string | undefined {
+  const message = (data as { message?: string | string[] } | undefined)?.message;
+  if (Array.isArray(message)) return message.length ? message.join('\n') : undefined;
+  return typeof message === 'string' && message.trim() ? message : undefined;
+}
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -59,6 +69,22 @@ api.interceptors.response.use(
 
       localStorage.removeItem('auth-storage');
       window.location.href = '/signin';
+      return Promise.reject(error);
+    }
+
+    // ABAC: the backend PermissionGuard answers 403 when the caller's roles
+    // don't grant the endpoint. Surface it once, in Arabic, without touching
+    // the 401 sign-out path above. Callers may still catch and handle it.
+    if (
+      error.response?.status === 403 &&
+      !isAuthEndpoint &&
+      typeof window !== 'undefined'
+    ) {
+      const message =
+        extractMessage(error.response?.data) ?? FORBIDDEN_FALLBACK_MESSAGE;
+      // Same toastId for identical copy → a burst of parallel denied requests
+      // (a dashboard fanning out queries) shows one toast, not ten.
+      toast.error(message, { toastId: `forbidden:${message}` });
     }
 
     return Promise.reject(error);

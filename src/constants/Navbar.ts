@@ -18,6 +18,7 @@ import {
   LiaCubesSolid,
   LiaUndoAltSolid,
   LiaRobotSolid,
+  LiaUserShieldSolid,
 } from 'react-icons/lia';
 import {
   House,
@@ -43,6 +44,12 @@ export type NavigationItem = {
   | ((props: { className?: string }) => JSX.Element)
   | IconType;
   children?: NavigationItem[];
+  /**
+   * ABAC permission code required to see this entry (e.g. `roles:read`).
+   * Omit for entries every authenticated user may reach. The Sidebar drops
+   * hidden entries — and any parent left without visible children.
+   */
+  permission?: string;
 };
 
 export const navigation: NavigationItem[] = [
@@ -98,6 +105,12 @@ export const navigation: NavigationItem[] = [
     name: 'الموظفين',
     href: '/dashboard/employees',
     icon: LiaIdCard,
+  },
+  {
+    name: 'الأدوار والصلاحيات',
+    href: '/dashboard/settings/roles',
+    icon: LiaUserShieldSolid,
+    permission: 'roles:read',
   },
   {
     name: 'إضافه طلب جديد',

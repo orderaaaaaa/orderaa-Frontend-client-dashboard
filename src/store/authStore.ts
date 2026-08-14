@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { EmployeeRoleRef } from '@/lib/api/authorization';
 
+/**
+ * Mirrors the merchant branch of `GET /auth/me`
+ * (`orderaa-backend/src/auth/auth.controller.ts` → `me()`): the spread `users`
+ * row plus merchant/employee context, and — since ABAC — the caller's assigned
+ * roles and the flat list of permission codes derived from them.
+ */
 interface User {
   id: number;
   entityId?: number;
@@ -20,6 +27,14 @@ interface User {
   department?: string;
   governorate?: string | null;
   city?: string | null;
+  /** Roles assigned to the signed-in employee. */
+  roles?: EmployeeRoleRef[];
+  /**
+   * Permission codes granted by those roles (e.g. `roles:read`,
+   * `orders:setStatus:CONFIRMED`). Undefined only for sessions persisted
+   * before ABAC shipped — see `hasPermissionCode` in `@/lib/permissions`.
+   */
+  permissions?: string[];
 }
 
 export type { User };

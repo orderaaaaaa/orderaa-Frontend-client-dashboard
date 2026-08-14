@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { validateEgyptianPhoneNumber } from '@/utils/validators/phoneValidator';
+import type { EmployeeRoleRef } from '@/lib/api/authorization';
 
 // Employee role enum - matching backend: SUPER_ADMIN, ADMIN, MANAGER
 export const EmployeeRole = z.enum(['SUPER_ADMIN', 'ADMIN', 'MANAGER']);
@@ -51,6 +52,11 @@ export const employeeFormSchema = z
       .transform((val) => (val === '' ? undefined : val)),
     // Work schedule
     workingHours: z.string().optional(),
+
+    // ABAC roles — role ids as strings so the shared MultiSelectDropdown can
+    // drive them; `employeesApi.create` converts them to the numeric
+    // `roleIds[]` the backend CreateEmployeeDto expects.
+    roleIds: z.array(z.string()).optional(),
   })
   .refine(
     (data) => {
@@ -87,6 +93,11 @@ export interface Employee {
   leaveDaysThisMonth?: number;
   createdAt: string;
   updatedAt: string;
+  /**
+   * Roles assigned to the employee. Added by ABAC — `EmployeesService.findAll`
+   * / `findOne` / `findFiltered` all embed `roles: { id, name }[]`.
+   */
+  roles?: EmployeeRoleRef[];
 }
 
 export interface EmployeesResponse {

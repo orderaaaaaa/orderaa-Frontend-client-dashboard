@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Employee } from '../types/employee';
@@ -7,22 +8,27 @@ import { employeeSchema, EmployeeFormData } from '../schemas/employee';
 import Input from '@/components/ui/Input';
 import { Button } from '@/components/ui/button';
 import SearchableSelect from '@/components/ui/SearchableSelect';
+import MultiSelectDropdown from '@/components/ui/MultiSelectDropdown';
 import WorkHoursTimePicker from '@/components/ui/WorkHoursTimePicker';
 import { useGovernoratesQuery, useDepartmentsQuery } from '@/services/lookups';
+import { useRolesQuery } from '@/services/authorization';
+import { usePermissionCheck } from '@/hooks/usePermissions';
+import { PERMISSIONS } from '@/lib/permissions';
 import {
   LiaUserSolid,
   LiaPhoneSolid,
-  LiaBriefcaseSolid,
   LiaMapMarkerAltSolid,
   LiaEnvelopeSolid,
   LiaLockSolid,
   LiaClockSolid,
+  LiaUserShieldSolid,
 } from 'react-icons/lia';
 import { ACCESS_LEVEL_OPTIONS } from '../../../constants/employeesFormOptions';
 
 interface EmployeeFormProps {
   employee: Employee;
-  onSubmit: (data: Partial<Employee>) => void;
+  /** `roleIds` is the full desired set — the page sends it to PUT /employees/:id/roles. */
+  onSubmit: (data: Partial<Employee>, roleIds: number[]) => void;
   isLoading?: boolean;
 }
 
@@ -37,6 +43,22 @@ export default function EmployeeForm({
     key: d.value,
     value: d.label,
   }));
+
+  const { hasAllPermissions } = usePermissionCheck();
+  const canAssignRoles = hasAllPermissions([
+    PERMISSIONS.ROLES_READ,
+    PERMISSIONS.ROLES_ASSIGN,
+  ]);
+  const { data: roles = [], isLoading: isRolesLoading } =
+    useRolesQuery(canAssignRoles);
+  const roleOptions = roles.map((role) => ({
+    key: String(role.id),
+    value: role.name,
+  }));
+
+  const [roleIds, setRoleIds] = useState<string[]>(
+    () => employee.roles?.map((role) => String(role.id)) ?? []
+  );
 
   const {
     register,
@@ -68,7 +90,7 @@ export default function EmployeeForm({
       delete updateData.password;
     }
 
-    onSubmit(updateData);
+    onSubmit(updateData, roleIds.map(Number));
   };
 
   return (
@@ -77,43 +99,50 @@ export default function EmployeeForm({
       className="space-y-6 bg-white p-6 rounded-lg shadow"
       dir="rtl"
     >
-      <div className="w-full flex flex-col items-end gap-2">
-        <div className="flex items-center gap-2 mb-2 justify-start w-full">
-          <LiaUserSolid className="w-6 h-6 text-primary" />
-          <span className="text-base md:text-lg font-normal">
-            صلاحية الموظف <span className="text-red-500">*</span>
-          </span>
+      {canAssignRoles && (
+        <div className="w-full flex flex-col items-end gap-2">
+          <div className="flex items-center gap-2 mb-2 justify-start w-full">
+            <LiaUserShieldSolid className="w-6 h-6 text-primary" />
+            <span className="text-base md:text-lg font-normal">
+              أدوار الموظف
+            </span>
+          </div>
+          <MultiSelectDropdown
+            value={roleIds}
+            onChange={setRoleIds}
+            options={roleOptions}
+            loading={isRolesLoading}
+            placeholder="اختر أدوار الموظف"
+            emptyMessage="لا توجد أدوار — أنشئ دورًا من صفحة الأدوار والصلاحيات"
+            widthClass="w-full"
+          />
+          <p className="w-full text-sm text-gray-500">
+            الأدوار هي ما يحدد صلاحيات الموظف داخل النظام.
+          </p>
         </div>
-        <SearchableSelect
-          value={accessLevel || ''}
-          onChange={(value) =>
-            setValue('accessLevel', value, { shouldValidate: true })
-          }
-          options={ACCESS_LEVEL_OPTIONS}
-          placeholder="اختر صلاحية الموظف"
-          widthClass="w-full"
-          error={errors?.accessLevel?.message}
-        />
-      </div>
+      )}
 
-      <div className="w-full flex flex-col items-end gap-2">
-        <div className="flex items-center gap-2 mb-2 justify-start w-full">
-          <LiaBriefcaseSolid className="w-6 h-6 text-primary" />
-          <span className="text-base md:text-lg font-normal">
-            قسم الموظف <span className="text-red-500">*</span>
-          </span>
+      {/* Without roles:assign the roles are still worth showing — read-only. */}
+      {!canAssignRoles && (employee.roles?.length ?? 0) > 0 && (
+        <div className="w-full flex flex-col items-end gap-2">
+          <div className="flex items-center gap-2 mb-2 justify-start w-full">
+            <LiaUserShieldSolid className="w-6 h-6 text-primary" />
+            <span className="text-base md:text-lg font-normal">
+              أدوار الموظف
+            </span>
+          </div>
+          <div className="flex w-full flex-wrap justify-start gap-2">
+            {employee.roles?.map((role) => (
+              <span
+                key={role.id}
+                className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary"
+              >
+                {role.name}
+              </span>
+            ))}
+          </div>
         </div>
-        <SearchableSelect
-          value={department || ''}
-          onChange={(value) =>
-            setValue('department', value, { shouldValidate: true })
-          }
-          options={departmentOptions}
-          placeholder="اختر القسم"
-          widthClass="w-full"
-          error={errors?.department?.message}
-        />
-      </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
@@ -229,6 +258,56 @@ export default function EmployeeForm({
             error={errors.workingHours?.message}
             placeholder="9 : AM - 5 : PM"
           />
+        </div>
+      </div>
+
+      {/* Organisational data — the API still accepts these, but since ABAC they
+          are classification/reporting only and no longer grant access. */}
+      <div className="rounded-lg border border-gray-200 bg-gray-50/60 p-4">
+        <div className="mb-3 flex items-center gap-2">
+          <LiaUserSolid className="w-5 h-5 text-gray-400" />
+          <div>
+            <h4 className="text-sm font-semibold text-gray-700">
+              بيانات تنظيمية
+            </h4>
+            <p className="text-xs text-gray-400">
+              للتصنيف والتقارير فقط — الصلاحيات تُحدَّد من الأدوار.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-2">
+            <span className="text-sm text-gray-600">
+              مستوى الوظيفة <span className="text-red-500">*</span>
+            </span>
+            <SearchableSelect
+              value={accessLevel || ''}
+              onChange={(value) =>
+                setValue('accessLevel', value, { shouldValidate: true })
+              }
+              options={ACCESS_LEVEL_OPTIONS}
+              placeholder="اختر مستوى الوظيفة"
+              widthClass="w-full"
+              error={errors?.accessLevel?.message}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <span className="text-sm text-gray-600">
+              قسم الموظف <span className="text-red-500">*</span>
+            </span>
+            <SearchableSelect
+              value={department || ''}
+              onChange={(value) =>
+                setValue('department', value, { shouldValidate: true })
+              }
+              options={departmentOptions}
+              placeholder="اختر القسم"
+              widthClass="w-full"
+              error={errors?.department?.message}
+            />
+          </div>
         </div>
       </div>
 

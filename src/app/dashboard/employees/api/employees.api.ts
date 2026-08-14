@@ -28,13 +28,19 @@ export const employeesApi = {
   getById: (id: number) =>
     Http.get<Employee>(`/employees/${id}`).then((res) => res.data),
   create: (data: EmployeeFormData) => {
-    // Remove confirmPassword before sending to API
-    const { confirmPassword, ...apiData } = data;
-    return Http.post<Employee>('/employees', apiData).then((res) => res.data);
+    // Remove confirmPassword before sending to API; `roleIds` are held as
+    // strings in the form and sent as the numeric ids CreateEmployeeDto expects.
+    const { confirmPassword, roleIds, ...apiData } = data;
+    return Http.post<Employee>('/employees', {
+      ...apiData,
+      ...(roleIds?.length ? { roleIds: roleIds.map(Number) } : {}),
+    }).then((res) => res.data);
   },
   update: (id: number, data: Partial<EmployeeFormData>) => {
-    // Remove confirmPassword if it exists before sending to API
-    const { confirmPassword, ...apiData } = data;
+    // Remove confirmPassword if it exists before sending to API.
+    // Roles are NOT part of PATCH /employees/:id — they go through
+    // PUT /employees/:id/roles (see services/authorization.ts).
+    const { confirmPassword, roleIds, ...apiData } = data;
     return Http.patch<Employee>(`/employees/${id}`, apiData).then(
       (res) => res.data
     );

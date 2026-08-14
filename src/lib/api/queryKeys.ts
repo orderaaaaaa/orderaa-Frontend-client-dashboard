@@ -36,6 +36,13 @@ export const QUERY_KEYS = {
   // Employees
   EMPLOYEES: 'employees',
 
+  // Authorization (ABAC roles + permission catalog)
+  AUTH_ME: 'auth-me',
+  PERMISSION_CATALOG: 'permission-catalog',
+  ROLES: 'roles',
+  ROLE_DETAIL: 'role-detail',
+  EMPLOYEE_ROLES: 'employee-roles',
+
   // Suppliers
   SUPPLIERS: 'suppliers',
   SUPPLIER_DETAIL: 'supplier-detail',

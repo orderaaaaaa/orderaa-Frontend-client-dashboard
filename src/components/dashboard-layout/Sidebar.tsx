@@ -20,6 +20,8 @@ import { navigation, NavigationItem } from '@/constants/Navbar';
 import { SIDEBAR_WIDTH } from '@/constants/dashboard-layout';
 import Logo from '@/assets/images/updated-logo.png';
 import { useAuthStore } from '@/store/authStore';
+import { usePermissions } from '@/hooks/usePermissions';
+import { hasPermissionCode } from '@/lib/permissions';
 
 interface SidebarProps {
   open: boolean;
@@ -46,6 +48,7 @@ export function Sidebar({
 
   const isMerchant = !!user?.merchantId;
   const isEmployee = !!user?.employeeId;
+  const permissions = usePermissions();
 
   const filteredNavigation = useMemo(() => {
     const extraOrderChildren: NavigationItem[] = [];
@@ -63,14 +66,36 @@ export function Sidebar({
         icon: FileOutput,
       });
     }
-    if (extraOrderChildren.length === 0) return navigation;
-    return navigation.map((item) => {
-      if (item.name === 'الطلبات' && item.children) {
-        return { ...item, children: [...item.children, ...extraOrderChildren] };
+    const withExtras =
+      extraOrderChildren.length === 0
+        ? navigation
+        : navigation.map((item) => {
+            if (item.name === 'الطلبات' && item.children) {
+              return {
+                ...item,
+                children: [...item.children, ...extraOrderChildren],
+              };
+            }
+            return item;
+          });
+
+    // ABAC: drop entries the caller has no permission for, then drop parents
+    // whose children all disappeared. Entries without `permission` stay.
+    const allowed = (item: NavigationItem) =>
+      !item.permission || hasPermissionCode(permissions, item.permission);
+
+    return withExtras.reduce<NavigationItem[]>((acc, item) => {
+      if (!allowed(item)) return acc;
+      if (!item.children) {
+        acc.push(item);
+        return acc;
       }
-      return item;
-    });
-  }, [isMerchant, isEmployee]);
+      const children = item.children.filter(allowed);
+      if (children.length === 0) return acc;
+      acc.push({ ...item, children });
+      return acc;
+    }, []);
+  }, [isMerchant, isEmployee, permissions]);
 
   const activeItemStyle: React.CSSProperties = {
     backgroundColor: '#2C028F',
