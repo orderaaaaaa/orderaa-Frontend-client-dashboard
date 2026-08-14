@@ -16,6 +16,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import { ShortfallSettlement } from '@/types/orders';
+import { useHasPermission } from '@/hooks/usePermissions';
 import {
   getShortfallSettlements,
   adjustSettlement,
@@ -24,6 +25,8 @@ import {
 type FilterValue = 'all' | 'pending' | 'finished';
 
 export default function ShortfallSettlementPage() {
+  // Adjusting a settlement hits PATCH /orders/settlement/:orderId/adjust.
+  const canManageSettlement = useHasPermission('orders:settlement:manage');
   const [filter, setFilter] = useState<FilterValue>('all');
   const [data, setData] = useState<ShortfallSettlement[]>([]);
   const [loading, setLoading] = useState(true);
@@ -133,7 +136,7 @@ export default function ShortfallSettlementPage() {
                     <TableHead>كود الطلب</TableHead>
                     <TableHead>مبلغ التحصيل</TableHead>
                     <TableHead>الحالة</TableHead>
-                    <TableHead>تعديل</TableHead>
+                    {canManageSettlement && <TableHead>تعديل</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -154,6 +157,7 @@ export default function ShortfallSettlementPage() {
                           {row.settlementResolved ? 'منتهي' : 'معلق'}
                         </span>
                       </TableCell>
+                      {canManageSettlement && (
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Input
@@ -180,6 +184,7 @@ export default function ShortfallSettlementPage() {
                           </Button>
                         </div>
                       </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>

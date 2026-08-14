@@ -22,6 +22,11 @@ export interface EditableTextFieldProps {
   multiline?: boolean;
   inputType?: 'text' | 'number';
   validationSchema?: z.ZodSchema<string>;
+  /**
+   * When false the value is rendered read-only (no edit affordance). Callers
+   * pass the result of the ABAC permission check that gates the save endpoint.
+   */
+  canEdit?: boolean;
 }
 
 /**
@@ -41,6 +46,7 @@ export function EditableTextField({
   multiline = false,
   inputType = 'text',
   validationSchema,
+  canEdit = true,
 }: EditableTextFieldProps) {
   const field = useEditableField({
     initialValue: value,
@@ -59,7 +65,7 @@ export function EditableTextField({
       <p className="font-bold text-[#121212]">{label}</p>
       <div className={`${tagStyle} relative w-full overflow-hidden`}>
         {Icon && <Icon size={18} className="flex-shrink-0 self-start mt-1" />}
-        {field.isEditing ? (
+        {field.isEditing && canEdit ? (
           <div className={`flex ${multiline ? 'flex-col' : 'flex-col'} gap-1 flex-1 min-w-0 w-full overflow-hidden`}>
             <div className={`flex ${multiline ? 'flex-col' : 'items-center'} gap-1`}>
               {multiline ? (
@@ -116,14 +122,16 @@ export function EditableTextField({
             <p className={`${isEmpty ? 'text-red-500' : ''} whitespace-pre-wrap break-words flex-1 min-w-0`}>
               {displayValue}
             </p>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={field.startEdit}
-              className="p-1 hover:bg-purple-100 rounded flex-shrink-0"
-            >
-              <LiaEditSolid className="w-4 h-4 text-primary" />
-            </Button>
+            {canEdit && (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={field.startEdit}
+                className="p-1 hover:bg-purple-100 rounded flex-shrink-0"
+              >
+                <LiaEditSolid className="w-4 h-4 text-primary" />
+              </Button>
+            )}
           </div>
         )}
       </div>

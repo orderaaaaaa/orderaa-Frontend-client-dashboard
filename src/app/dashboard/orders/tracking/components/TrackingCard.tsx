@@ -20,6 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { useUpdateTrackingCard } from '@/services/logistics';
 import { useRecordFollowupEventPointMutation } from '@/services/followup';
+import { useHasPermission } from '@/hooks/usePermissions';
 import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
 import { getStatusColor } from '@/app/dashboard/customers/lib/getBadgeColor';
 import type { TrackingCard as TrackingCardType, ShippingPointType } from '@/types/logistics';
@@ -50,6 +51,9 @@ export default function TrackingCard({ card }: TrackingCardProps) {
 
   const updateMutation = useUpdateTrackingCard();
   const recordEventPointMutation = useRecordFollowupEventPointMutation();
+  // Flagging a courier update and the agent-status modal both post to
+  // /orders/followup/* , which the backend guards with `followup:manage`.
+  const canManageFollowup = useHasPermission('followup:manage');
 
   const [showAddUpdate, setShowAddUpdate] = useState(false);
   const [newCourierUpdate, setNewCourierUpdate] = useState('');
@@ -251,44 +255,48 @@ export default function TrackingCard({ card }: TrackingCardProps) {
                 ) : (
                   <div className="flex flex-wrap items-center gap-1.5">
                     <p className="text-sm text-gray-800">{card.courierUpdate}</p>
-                    <button
-                      type="button"
-                      onClick={() => setShowFlagButtons(!showFlagButtons)}
-                      className="p-1 rounded-md hover:bg-gray-200 cursor-pointer"
-                    >
-                      <LiaChevronLeftSolid className={clsx('size-4 text-gray-400 transition-transform duration-300', showFlagButtons && 'rotate-180')} />
-                    </button>
-                    <div className={clsx(
-                      'flex items-center gap-1.5 transition-all duration-300 ease-in-out overflow-hidden',
-                      showFlagButtons ? 'max-w-[80px] opacity-100' : 'max-w-0 opacity-0',
-                    )}>
-                      <Button
-                        variant="outline"
-                        size="icon-xs"
-                        className="border-green-300 text-green-600 hover:bg-green-50"
-                        onClick={() => handleFlag('CORRECT')}
-                        disabled={isFlagging}
-                      >
-                        {isFlagging && pendingPointType === 'CORRECT' ? (
-                          <LiaSpinnerSolid className="size-4 animate-spin" />
-                        ) : (
-                          <LiaCheckCircleSolid className="size-4" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon-xs"
-                        className="border-red-300 text-red-600 hover:bg-red-50"
-                        onClick={() => handleFlag('FAKE')}
-                        disabled={isFlagging}
-                      >
-                        {isFlagging && pendingPointType === 'FAKE' ? (
-                          <LiaSpinnerSolid className="size-4 animate-spin" />
-                        ) : (
-                          <LiaTimesCircleSolid className="size-4" />
-                        )}
-                      </Button>
-                    </div>
+                    {canManageFollowup && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setShowFlagButtons(!showFlagButtons)}
+                          className="p-1 rounded-md hover:bg-gray-200 cursor-pointer"
+                        >
+                          <LiaChevronLeftSolid className={clsx('size-4 text-gray-400 transition-transform duration-300', showFlagButtons && 'rotate-180')} />
+                        </button>
+                        <div className={clsx(
+                          'flex items-center gap-1.5 transition-all duration-300 ease-in-out overflow-hidden',
+                          showFlagButtons ? 'max-w-[80px] opacity-100' : 'max-w-0 opacity-0',
+                        )}>
+                          <Button
+                            variant="outline"
+                            size="icon-xs"
+                            className="border-green-300 text-green-600 hover:bg-green-50"
+                            onClick={() => handleFlag('CORRECT')}
+                            disabled={isFlagging}
+                          >
+                            {isFlagging && pendingPointType === 'CORRECT' ? (
+                              <LiaSpinnerSolid className="size-4 animate-spin" />
+                            ) : (
+                              <LiaCheckCircleSolid className="size-4" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon-xs"
+                            className="border-red-300 text-red-600 hover:bg-red-50"
+                            onClick={() => handleFlag('FAKE')}
+                            disabled={isFlagging}
+                          >
+                            {isFlagging && pendingPointType === 'FAKE' ? (
+                              <LiaSpinnerSolid className="size-4 animate-spin" />
+                            ) : (
+                              <LiaTimesCircleSolid className="size-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -301,13 +309,15 @@ export default function TrackingCard({ card }: TrackingCardProps) {
                 <LiaHeadsetSolid className="w-4 h-4 text-primary" />
                 <p className="text-xs font-semibold text-gray-500">حالة موظف المتابعة</p>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsStatusModalOpen(true)}
-              >
-                تحديث الحالة
-              </Button>
+              {canManageFollowup && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsStatusModalOpen(true)}
+                >
+                  تحديث الحالة
+                </Button>
+              )}
             </div>
 
             {card.agentStatus ? (

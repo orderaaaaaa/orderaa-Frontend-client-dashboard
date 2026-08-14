@@ -21,6 +21,11 @@ export interface PhoneNumberListProps {
   phoneNumbers: string[];
   onUpdate?: (phoneNumbers: string[]) => void;
   className?: string;
+  /**
+   * When false only the read-only affordances (call, copy) are offered —
+   * add / edit / remove are hidden. Callers pass the `customers:update` check.
+   */
+  canEdit?: boolean;
 }
 
 /**
@@ -36,6 +41,7 @@ export function PhoneNumberList({
   phoneNumbers: initialPhoneNumbers,
   onUpdate,
   className = '',
+  canEdit = true,
 }: PhoneNumberListProps) {
   const phones = usePhoneNumbers({
     customerId,
@@ -172,15 +178,17 @@ export function PhoneNumberList({
                         <LiaCopySolid className="w-4 h-4" />
                         نسخ
                       </Button>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleEditClick(index)}
-                        className="w-full px-4 py-2 text-right text-sm hover:bg-purple-50 transition-colors flex items-center gap-2 justify-start"
-                      >
-                        <LiaEditSolid className="w-4 h-4" />
-                        تعديل
-                      </Button>
-                      {phones.phoneNumbers.length > 1 && (
+                      {canEdit && (
+                        <Button
+                          variant="ghost"
+                          onClick={() => handleEditClick(index)}
+                          className="w-full px-4 py-2 text-right text-sm hover:bg-purple-50 transition-colors flex items-center gap-2 justify-start"
+                        >
+                          <LiaEditSolid className="w-4 h-4" />
+                          تعديل
+                        </Button>
+                      )}
+                      {canEdit && phones.phoneNumbers.length > 1 && (
                         <Button
                           variant="ghost"
                           onClick={() => {
@@ -228,7 +236,7 @@ export function PhoneNumberList({
             </Button>
           </div>
         )}
-        {phones.editingIndex !== phones.phoneNumbers.length && (
+        {canEdit && phones.editingIndex !== phones.phoneNumbers.length && (
           <Button
             variant="link"
             onClick={phones.handleAdd}

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { processExcelFile } from '@/lib/excel/processor';
 import { importBulkOrders, transformToApiFormat, getMerchantIdFromUser } from '@/lib/api/bulk-import';
 import { useAuthStore } from '@/store/authStore';
+import { Can } from '@/components/Can';
 
 const FileUpload = () => {
   const [isDragging, setIsDragging] = useState(false);
@@ -211,6 +212,8 @@ const FileUpload = () => {
               />
             </div>
 
+            {/* Analysis posts to /orders/bulk-validate + /orders/bulk-import. */}
+            <Can code="orders:import">
             <div className="flex gap-4 max-sm:gap-1 justify-center relative max-sm:left-5">
               <button
                 onClick={handleUpload}
@@ -240,6 +243,7 @@ const FileUpload = () => {
                 </button>
               ) : null}
             </div>
+            </Can>
           </div>
         </div>
       </div>

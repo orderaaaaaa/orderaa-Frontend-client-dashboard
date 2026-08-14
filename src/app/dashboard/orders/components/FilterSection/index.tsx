@@ -22,6 +22,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
+import { Can } from '@/components/Can';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import { PrintStatusToggle } from './PrintStatusToggle';
 import { PrintInvoicesModal } from './PrintInvoicesModal';
@@ -332,9 +333,11 @@ export function FilterSection({
           </Popover>
 
           {showPrintButton && (
-            <Button variant="outline" size="lg" onClick={handlePrintClick}>
-              <LiaPrintSolid className="size-5" />
-            </Button>
+            <Can code="orders:print">
+              <Button variant="outline" size="lg" onClick={handlePrintClick}>
+                <LiaPrintSolid className="size-5" />
+              </Button>
+            </Can>
           )}
 
           {showShippingCompanySelect && (

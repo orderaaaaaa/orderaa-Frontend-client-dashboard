@@ -15,12 +15,15 @@ export interface ShippingTypeSelectProps {
   value: string | undefined;
   onChange: (value: string) => void;
   className?: string;
+  /** When false the value is shown read-only (no selectable dropdown). */
+  canEdit?: boolean;
 }
 
 export function ShippingTypeSelect({
   value,
   onChange,
   className = '',
+  canEdit = true,
 }: ShippingTypeSelectProps) {
   const [hasBeenOpened, setHasBeenOpened] = useState(false);
   const { shippingTypes, isLoading } = useShippingTypes(hasBeenOpened);
@@ -61,19 +64,25 @@ export function ShippingTypeSelect({
       <p className="font-bold text-[#121212]">نوع الشحنة</p>
       <div className="flex gap-2 bg-white shadow-xs items-center py-1 px-2 rounded-[5px]">
         <LiaTruckSolid size={18} className="flex-shrink-0" />
-        <SearchableSelect
-          value={displayValue}
-          onValueChange={handleChange}
-          options={options}
-          placeholder="اختر نوع الشحنة"
-          searchPlaceholder="بحث..."
-          emptyMessage="لا توجد أنواع شحن متاحة"
-          noResultsMessage="لا توجد نتائج للبحث"
-          triggerClassName="flex-1 border-none shadow-none h-auto p-0 bg-transparent font-bold text-[15px] text-[#000000]"
-          searchThreshold={5}
-          loading={isLoading}
-          onOpenChange={handleOpenChange}
-        />
+        {!canEdit ? (
+          <p className="flex-1 py-1 font-bold text-[15px] text-[#000000] truncate">
+            {displayValue || '-'}
+          </p>
+        ) : (
+          <SearchableSelect
+            value={displayValue}
+            onValueChange={handleChange}
+            options={options}
+            placeholder="اختر نوع الشحنة"
+            searchPlaceholder="بحث..."
+            emptyMessage="لا توجد أنواع شحن متاحة"
+            noResultsMessage="لا توجد نتائج للبحث"
+            triggerClassName="flex-1 border-none shadow-none h-auto p-0 bg-transparent font-bold text-[15px] text-[#000000]"
+            searchThreshold={5}
+            loading={isLoading}
+            onOpenChange={handleOpenChange}
+          />
+        )}
       </div>
     </div>
   );

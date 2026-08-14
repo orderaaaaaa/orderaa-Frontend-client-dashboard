@@ -1,6 +1,7 @@
 import React from 'react';
 import { LiaBoxSolid, LiaPlusSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
+import { Can } from '@/components/Can';
 
 /**
  * Props for PackagingNotesSection component
@@ -30,14 +31,16 @@ export function PackagingNotesSection({
     <div className={`flex flex-col gap-2 mt-6 ${className}`}>
       <div className="flex justify-between items-center">
         <h2 className="text-primary font-bold text-lg">ملاحظات التغليف</h2>
-        <Button
-          variant="ghost"
-          onClick={onAddClick}
-          className="flex items-center gap-2 px-4 py-2 bg-white text-primary rounded-lg hover:bg-purple-50 transition-colors font-bold"
-        >
-          <LiaPlusSolid className="w-4 h-4" />
-          إضافة ملاحظة
-        </Button>
+        <Can code="orders:update">
+          <Button
+            variant="ghost"
+            onClick={onAddClick}
+            className="flex items-center gap-2 px-4 py-2 bg-white text-primary rounded-lg hover:bg-purple-50 transition-colors font-bold"
+          >
+            <LiaPlusSolid className="w-4 h-4" />
+            إضافة ملاحظة
+          </Button>
+        </Can>
       </div>
       {packagingNotes && (
         <div className={`${tagStyle} min-h-[60px]`}>

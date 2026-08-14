@@ -16,6 +16,7 @@ import {
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { POST_SHIPPING_STATUSES } from '@/types/logistics';
+import { usePermissionCheck } from '@/hooks/usePermissions';
 
 interface ActionOption {
   label: string;
@@ -51,9 +52,19 @@ export interface ActionsDropdownProps {
 
 export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, onActionClick }: ActionsDropdownProps) {
   const isPostShipping = POST_SHIPPING_STATUSES.has(orderStatus);
+  // `cancel` posts to /orders/:id/cancel, every other action patches the order.
+  const { hasPermission } = usePermissionCheck();
+  const canCancel = hasPermission('orders:cancel');
+  const canUpdate = hasPermission('orders:update');
 
   const filteredOptions = useMemo(() => {
     const base = arrowOptions.filter((option) => {
+      if (option.action === 'cancel') {
+        return canCancel;
+      }
+      if (!canUpdate) {
+        return false;
+      }
       if (option.action === 'stop_operation') {
         return orderStatus === 'CONFIRMED';
       }
@@ -66,14 +77,14 @@ export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, onAction
       return true;
     });
 
-    if (isPostShipping) {
+    if (isPostShipping && canUpdate) {
       return [...base, ...postShippingOptions];
     }
 
     return base;
-  }, [orderStatus, lastEventStatus, isPostShipping]);
+  }, [orderStatus, lastEventStatus, isPostShipping, canCancel, canUpdate]);
 
-  if (!isOpen) return null;
+  if (!isOpen || filteredOptions.length === 0) return null;
 
   return (
     <div

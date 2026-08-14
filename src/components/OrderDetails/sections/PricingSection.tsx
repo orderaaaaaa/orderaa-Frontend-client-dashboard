@@ -6,6 +6,7 @@ import { PaymentMethodSelect } from '../fields/PaymentMethodSelect';
 import { PaymentStatusSelect } from '../fields/PaymentStatusSelect';
 import { ShippingTypeSelect } from '../fields/ShippingTypeSelect';
 import { Order } from '@/types/orders';
+import { usePermissionCheck } from '@/hooks/usePermissions';
 
 // Validation schema for price fields - only numbers allowed
 const priceSchema = z.string().refine(
@@ -40,6 +41,10 @@ export function PricingSection({
   onSaveReturnContent,
   className = '',
 }: PricingSectionProps) {
+  // Every field here saves through PATCH /orders/:id (`orders:update`).
+  const { hasPermission } = usePermissionCheck();
+  const canEdit = hasPermission('orders:update');
+
   return (
     <div className={`flex flex-col justify-start gap-2 ${className}`}>
       <h2 className="text-primary font-semibold">السعر و الدفع</h2>
@@ -53,6 +58,7 @@ export function PricingSection({
           onSave={async (value) => {
             await onUpdate('totalCost', Number(value));
           }}
+          canEdit={canEdit}
         />
         <EditableTextField
           label="سعر الشحن"
@@ -63,6 +69,7 @@ export function PricingSection({
           onSave={async (value) => {
             await onUpdate('shippingCost', Number(value));
           }}
+          canEdit={canEdit}
         />
         <ShippingTypeSelect
           value={pendingShippingType || order.shippingType}
@@ -73,6 +80,7 @@ export function PricingSection({
               onUpdate('shippingType', value);
             }
           }}
+          canEdit={canEdit}
         />
         {(() => {
           const effectiveType = pendingShippingType ?? order.shippingType;
@@ -89,6 +97,7 @@ export function PricingSection({
                 await onUpdate('returnShipmentContent', value);
               }
             }}
+            canEdit={canEdit}
           />
         )}
         <PaymentMethodSelect
@@ -96,12 +105,14 @@ export function PricingSection({
           onChange={async (value) => {
             await onUpdate('paymentMethod', value);
           }}
+          canEdit={canEdit}
         />
         <PaymentStatusSelect
           value={order.paymentStatus}
           onChange={async (value) => {
             await onUpdate('paymentStatus', value);
           }}
+          canEdit={canEdit}
         />
       </div>
     </div>

@@ -9,6 +9,7 @@ import {
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { useDropdownState } from '@/hooks/OrderDetails/useDropdownState';
+import { usePermissionCheck } from '@/hooks/usePermissions';
 import { FollowUpDropdown } from './FollowUpDropdown';
 import { ActionsDropdown } from './ActionsDropdown';
 import { STOP_OPERATION_STATUSES } from './constants';
@@ -36,7 +37,14 @@ export function OrderActionsFooterLargeScreens({
   isNavigatingNext = false,
   isNavigatingPrevious = false,
 }: OrderActionsFooterProps) {
-  const showStopOperation = STOP_OPERATION_STATUSES.has(orderStatus);
+  // Confirm / follow-up / the actions menu all mutate the order: everything but
+  // `cancel` patches it (`orders:update`), cancel posts to /cancel.
+  const { hasPermission } = usePermissionCheck();
+  const canUpdate = hasPermission('orders:update');
+  const canCancel = hasPermission('orders:cancel');
+  const showActionsMenu = canUpdate || canCancel;
+
+  const showStopOperation = STOP_OPERATION_STATUSES.has(orderStatus) && canUpdate;
   const followUpDropdown = useDropdownState();
   const actionsDropdown = useDropdownState();
 
@@ -106,10 +114,10 @@ export function OrderActionsFooterLargeScreens({
             <LiaStopCircleSolid className="w-5 h-5" />
             وقف التشغيل
           </Button>
-        ) : (
+        ) : showActionsMenu ? (
           <div className="relative" ref={actionsDropdown.ref}>
             <div className="flex flex-row gap-2">
-              {orderStatus !== 'CONFIRMED' && (
+              {canUpdate && orderStatus !== 'CONFIRMED' && (
                 <Button
                   variant="default"
                   onClick={onConfirm}
@@ -120,21 +128,23 @@ export function OrderActionsFooterLargeScreens({
                 </Button>
               )}
 
-              <div className="relative" ref={followUpDropdown.ref}>
-                <Button
-                  variant="outline"
-                  onClick={handleFollowUpToggle}
-                  className="py-2 px-10 border-2 rounded-2xl border-primary text-primary text-sm font-bold hover:bg-purple-50 transition-colors flex items-center gap-2"
-                >
-                  <LiaCommentDotsSolid className="w-5 h-5" />
-                  متابعة
-                </Button>
+              {canUpdate && (
+                <div className="relative" ref={followUpDropdown.ref}>
+                  <Button
+                    variant="outline"
+                    onClick={handleFollowUpToggle}
+                    className="py-2 px-10 border-2 rounded-2xl border-primary text-primary text-sm font-bold hover:bg-purple-50 transition-colors flex items-center gap-2"
+                  >
+                    <LiaCommentDotsSolid className="w-5 h-5" />
+                    متابعة
+                  </Button>
 
-                <FollowUpDropdown
-                  isOpen={followUpDropdown.isOpen}
-                  onClick={handleFollowUpClick}
-                />
-              </div>
+                  <FollowUpDropdown
+                    isOpen={followUpDropdown.isOpen}
+                    onClick={handleFollowUpClick}
+                  />
+                </div>
+              )}
 
               <Button
                 variant="ghost"
@@ -156,7 +166,7 @@ export function OrderActionsFooterLargeScreens({
               onActionClick={handleActionClick}
             />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

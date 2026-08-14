@@ -4,6 +4,7 @@ import { EditableTextField } from '../fields/EditableTextField';
 import { PhoneNumberList } from '../fields/PhoneNumberList';
 import { Order } from '@/types/orders';
 import { useUpdateCustomer } from '@/services/orders';
+import { usePermissionCheck } from '@/hooks/usePermissions';
 import { toast } from 'react-toastify';
 import { If, Then } from 'react-if';
 import { MdBlock } from 'react-icons/md';
@@ -23,6 +24,11 @@ export function CustomerDataSection({
   className = '',
 }: CustomerDataSectionProps) {
   const updateCustomerMutation = useUpdateCustomer();
+  const { hasPermission } = usePermissionCheck();
+  // Customer name / phones go to PATCH /customers/:id (`customers:update`),
+  // the order note goes to PATCH /orders/:id (`orders:update`).
+  const canUpdateCustomer = hasPermission('customers:update');
+  const canUpdateOrder = hasPermission('orders:update');
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
 
   const handleCustomerNameUpdate = async (name: string) => {
@@ -69,6 +75,7 @@ export function CustomerDataSection({
           value={order.customers.name}
           icon={LiaUserSolid}
           onSave={handleCustomerNameUpdate}
+          canEdit={canUpdateCustomer}
         />
 
         <PhoneNumberList
@@ -76,6 +83,7 @@ export function CustomerDataSection({
           orderId={order.id}
           phoneNumbers={order.customers.phone_numbers}
           onUpdate={onPhoneUpdate}
+          canEdit={canUpdateCustomer}
         />
 
         <div className="md:col-span-4">
@@ -86,6 +94,7 @@ export function CustomerDataSection({
               await onUpdate('notes', value);
             }}
             multiline
+            canEdit={canUpdateOrder}
           />
         </div>
       </div>

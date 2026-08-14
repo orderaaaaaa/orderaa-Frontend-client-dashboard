@@ -9,6 +9,7 @@ import {
   LiaExchangeAltSolid,
 } from 'react-icons/lia';
 import { PrintOrdersActionsBarProps } from '../../types';
+import { usePermissionCheck } from '@/hooks/usePermissions';
 
 function Spinner() {
   return (
@@ -31,7 +32,21 @@ const PrintOrdersActionsBar: React.FC<PrintOrdersActionsBarProps> = ({
   isChangeProductMode = false,
   hideAwaitingPackaging = false,
 }) => {
+  // Each button maps to the endpoint that backs it:
+  // تم التحضير → POST /orders/prepare, فى انتظار التغليف → POST /orders/waiting-for-packaging,
+  // اعادة اتصال / تغيير المنتج → POST /orders/call-again.
+  const { hasPermission } = usePermissionCheck();
+  const canPrepare = hasPermission('orders:prepare');
+  const canAwaitPackaging =
+    !hideAwaitingPackaging && hasPermission('orders:waiting-for-packaging');
+  const canCallAgain = hasPermission('orders:call-again');
+  const hasAnyAction = canPrepare || canAwaitPackaging || canCallAgain;
+
   if (!forceShow && selectedOrders.length === 0 && !isAllSelected) {
+    return null;
+  }
+
+  if (isChangeProductMode ? !canCallAgain : !hasAnyAction) {
     return null;
   }
 
@@ -76,17 +91,19 @@ const PrintOrdersActionsBar: React.FC<PrintOrdersActionsBarProps> = ({
     >
       <div className="mx-auto overflow-x-auto scrollbar-hide">
         <div className="pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
-          <Button
-            variant="outline"
-            className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={onPrepared}
-            disabled={isDisabled}
-          >
-            {isLoading ? <Spinner /> : <LiaCheckCircleSolid className="size-5" />}
-            <span>تم التحضير</span>
-          </Button>
+          {canPrepare && (
+            <Button
+              variant="outline"
+              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={onPrepared}
+              disabled={isDisabled}
+            >
+              {isLoading ? <Spinner /> : <LiaCheckCircleSolid className="size-5" />}
+              <span>تم التحضير</span>
+            </Button>
+          )}
 
-          {!hideAwaitingPackaging && (
+          {canAwaitPackaging && (
             <Button
               variant="outline"
               className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -98,25 +115,29 @@ const PrintOrdersActionsBar: React.FC<PrintOrdersActionsBarProps> = ({
             </Button>
           )}
 
-          <Button
-            variant="outline"
-            className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={onCallAgain}
-            disabled={isDisabled}
-          >
-            {isLoading ? <Spinner /> : <LiaPhoneVolumeSolid className="size-5" />}
-            <span>اعادة اتصال</span>
-          </Button>
+          {canCallAgain && (
+            <Button
+              variant="outline"
+              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={onCallAgain}
+              disabled={isDisabled}
+            >
+              {isLoading ? <Spinner /> : <LiaPhoneVolumeSolid className="size-5" />}
+              <span>اعادة اتصال</span>
+            </Button>
+          )}
 
-          <Button
-            variant="outline"
-            className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={onChangeProduct}
-            disabled={isDisabled}
-          >
-            {isLoading ? <Spinner /> : <LiaExchangeAltSolid className="size-5" />}
-            <span>تغيير المنتج</span>
-          </Button>
+          {canCallAgain && (
+            <Button
+              variant="outline"
+              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={onChangeProduct}
+              disabled={isDisabled}
+            >
+              {isLoading ? <Spinner /> : <LiaExchangeAltSolid className="size-5" />}
+              <span>تغيير المنتج</span>
+            </Button>
+          )}
         </div>
       </div>
     </div>

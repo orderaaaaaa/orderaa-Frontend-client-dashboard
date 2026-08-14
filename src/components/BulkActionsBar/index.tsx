@@ -19,6 +19,7 @@ import {
   SelectTrigger,
 } from '@/components/ui/select';
 import { OrderStatusItem } from '@/types/orders';
+import { Can } from '@/components/Can';
 
 interface BulkActionsBarProps {
   selectedOrders: Order[];
@@ -81,31 +82,33 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
     >
       <div className="mx-auto overflow-x-auto scrollbar-hide">
         <div className="pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
-          <Select onValueChange={handleStatusSelect}>
-            <SelectTrigger className="group flex items-center gap-2 px-4 pl-10 py-2 rounded-3xl bg-white border-primary !text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap w-auto h-10 focus:ring-0 focus:ring-offset-0 ring-offset-0">
-              <LiaEditSolid className="size-5 shrink-0 group-hover:text-white" />
-              <span className="group-hover:text-white">
-                تعديل الحالة ({selectedCount})
-              </span>
-            </SelectTrigger>
-            <SelectContent align="end" side="top" className="max-h-[300px] min-w-[180px]">
-              {statusOptions.length > 0 ? (
-                statusOptions.map((status) => (
-                  <SelectItem
-                    key={status.key}
-                    value={status.key}
-                    className="cursor-pointer justify-end hover:!text-white hover:!bg-primary"
-                  >
-                    {status.label}
-                  </SelectItem>
-                ))
-              ) : (
-                <div className="p-2 text-center text-sm">
-                  لا توجد حالات متاحة
-                </div>
-              )}
-            </SelectContent>
-          </Select>
+          <Can code="orders:bulk-update">
+            <Select onValueChange={handleStatusSelect}>
+              <SelectTrigger className="group flex items-center gap-2 px-4 pl-10 py-2 rounded-3xl bg-white border-primary !text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap w-auto h-10 focus:ring-0 focus:ring-offset-0 ring-offset-0">
+                <LiaEditSolid className="size-5 shrink-0 group-hover:text-white" />
+                <span className="group-hover:text-white">
+                  تعديل الحالة ({selectedCount})
+                </span>
+              </SelectTrigger>
+              <SelectContent align="end" side="top" className="max-h-[300px] min-w-[180px]">
+                {statusOptions.length > 0 ? (
+                  statusOptions.map((status) => (
+                    <SelectItem
+                      key={status.key}
+                      value={status.key}
+                      className="cursor-pointer justify-end hover:!text-white hover:!bg-primary"
+                    >
+                      {status.label}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="p-2 text-center text-sm">
+                    لا توجد حالات متاحة
+                  </div>
+                )}
+              </SelectContent>
+            </Select>
+          </Can>
 
 
           <Button

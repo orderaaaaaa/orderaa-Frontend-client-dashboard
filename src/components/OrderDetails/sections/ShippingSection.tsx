@@ -1,6 +1,7 @@
 import React from 'react';
 import { LiaTruckSolid, LiaMapMarkerAltSolid, LiaEditSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
+import { Can } from '@/components/Can';
 
 export interface ShippingSectionProps {
   shippingCompany?: string;
@@ -50,14 +51,16 @@ export function ShippingSection({
     <div className={`flex flex-col justify-start gap-2 ${className}`}>
       <div className="flex justify-between items-center">
         <h2 className="text-primary font-semibold">بيانات الشحن</h2>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={onEditClick}
-          className="p-1 hover:bg-purple-100 rounded"
-        >
-          <LiaEditSolid className="w-4 h-4 text-primary" />
-        </Button>
+        <Can code="orders:update">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onEditClick}
+            className="p-1 hover:bg-purple-100 rounded"
+          >
+            <LiaEditSolid className="w-4 h-4 text-primary" />
+          </Button>
+        </Can>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 overflow-hidden">
         <ShippingField

@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Breadcrumb } from '@/components/dashboard-layout';
+import { useHasPermission } from '@/hooks/usePermissions';
 import { generateSettlementTemplate } from '@/lib/excel/template-generator';
 import {
   uploadSettlementRows,
@@ -101,6 +102,8 @@ function handleDownloadTemplate() {
 }
 
 export default function SettlementUploadPage() {
+  // Uploading a collection sheet hits POST /orders/settlement/upload.
+  const canManageSettlement = useHasPermission('orders:settlement:manage');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [parsedRows, setParsedRows] = useState<SettlementRow[]>([]);
@@ -187,7 +190,8 @@ export default function SettlementUploadPage() {
         </CardContent>
       </Card>
 
-      {/* Upload Section */}
+      {/* Upload Section — POST /orders/settlement/upload */}
+      {canManageSettlement && (
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
@@ -245,6 +249,7 @@ export default function SettlementUploadPage() {
           )}
         </CardContent>
       </Card>
+      )}
 
       {/* Results Section */}
       {results && (

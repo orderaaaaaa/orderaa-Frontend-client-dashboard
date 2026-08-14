@@ -23,6 +23,7 @@ import {
 } from '@/services/orders';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
+import { usePermissionCheck } from '@/hooks/usePermissions';
 import Image from 'next/image';
 
 interface OrderDetailsProductCardProps {
@@ -37,6 +38,9 @@ function OrderDetailsProductCard({
   const updateOrderProductMutation = useUpdateOrderProduct();
   const deleteOrderProductMutation = useDeleteOrderProduct();
   const addOrderProductMutation = useAddOrderProduct();
+  // Add / edit / delete of order products all sit behind `orders:products:manage`.
+  const { hasPermission } = usePermissionCheck();
+  const canManageProducts = hasPermission('orders:products:manage');
 
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [deletingProductId, setDeletingProductId] = useState<number | null>(
@@ -222,16 +226,18 @@ function OrderDetailsProductCard({
                 </div>
                 <div className="flex flex-col items-end ml-2">
                   <div className="flex justify-end gap-2 mb-4">
-                    <LiaEditSolid
-                      className={`w-4 h-4 transition-colors ${isLockedByOther
-                          ? 'opacity-50 cursor-not-allowed'
-                          : 'cursor-pointer hover:text-purple-700'
-                        }`}
-                      onClick={() =>
-                        !isLockedByOther && handleEditClick(item.id)
-                      }
-                    />
-                    {productsData.length > 1 && (
+                    {canManageProducts && (
+                      <LiaEditSolid
+                        className={`w-4 h-4 transition-colors ${isLockedByOther
+                            ? 'opacity-50 cursor-not-allowed'
+                            : 'cursor-pointer hover:text-purple-700'
+                          }`}
+                        onClick={() =>
+                          !isLockedByOther && handleEditClick(item.id)
+                        }
+                      />
+                    )}
+                    {canManageProducts && productsData.length > 1 && (
                       <LiaTrashAltSolid
                         className={`w-4 h-4 text-red-600 transition-colors ${isLockedByOther
                             ? 'opacity-50 cursor-not-allowed'
@@ -269,24 +275,26 @@ function OrderDetailsProductCard({
         </div>
 
         <div className="mt-6 mb-4 flex flex-col gap-3">
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              onClick={() => setIsAddNewProductModalOpen(true)}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <LiaBoxSolid className="w-5 h-5 shrink-0" />
-              <span className="text-sm font-bold whitespace-nowrap">إضافة منتج جديد</span>
-            </Button>
+          {canManageProducts && (
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                onClick={() => setIsAddNewProductModalOpen(true)}
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <LiaBoxSolid className="w-5 h-5 shrink-0" />
+                <span className="text-sm font-bold whitespace-nowrap">إضافة منتج جديد</span>
+              </Button>
 
-            <Button
-              onClick={() => setIsAddSameTypeModalOpen(true)}
-              disabled={productsData.length === 0}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-white border-2 border-primary text-primary rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <LiaPlusCircleSolid className="w-5 h-5 shrink-0" />
-              <span className="text-sm font-bold whitespace-nowrap">إضافة منتج من نفس النوع</span>
-            </Button>
-          </div>
+              <Button
+                onClick={() => setIsAddSameTypeModalOpen(true)}
+                disabled={productsData.length === 0}
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-white border-2 border-primary text-primary rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <LiaPlusCircleSolid className="w-5 h-5 shrink-0" />
+                <span className="text-sm font-bold whitespace-nowrap">إضافة منتج من نفس النوع</span>
+              </Button>
+            </div>
+          )}
 
           <div className="flex justify-center">
             <Button
