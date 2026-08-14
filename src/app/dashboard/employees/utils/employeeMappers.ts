@@ -9,6 +9,9 @@ export const getAccessLevelLabel = (accessLevel: string): string => {
   return labels[accessLevel] || accessLevel;
 };
 
+export const getActivationLabel = (isActive: boolean): string =>
+  isActive ? 'نشط' : 'غير نشط';
+
 export const getDepartmentLabel = (department: string): string => {
   const labels: Record<string, string> = {
     CALL_CENTER: 'خدمة العملاء',

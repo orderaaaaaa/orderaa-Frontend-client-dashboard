@@ -141,15 +141,34 @@ export const useUpdateEmployeeAttendance = () => {
   });
 };
 
-// Delete employee
-export const useDeleteEmployee = () => {
+// Activate / deactivate an employee account. Replaces the old delete mutation:
+// hard deletion nulled order_events.employeeId and destroyed history
+// attribution, so DELETE /employees/:id no longer exists.
+export const useSetEmployeeActivation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (id: number) => {
-      await employeesApi.delete(id);
+    mutationFn: async ({
+      id,
+      isActive,
+    }: {
+      id: number;
+      isActive: boolean;
+    }) => {
+      return await employeesApi.setActivation(id, isActive);
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      toast.success(
+        variables.isActive
+          ? 'تم تنشيط حساب الموظف بنجاح'
+          : 'تم إيقاف حساب الموظف بنجاح'
+      );
+      // The ['employees'] prefix also covers the filtered list and the summary.
       queryClient.invalidateQueries({ queryKey: ['employees'] });
+    },
+    onError: (error: any) => {
+      toast.error(
+        error?.response?.data?.message || 'حدث خطأ أثناء تحديث حالة الحساب'
+      );
     },
   });
 };

@@ -5,6 +5,8 @@ type FilterSelections = {
   accessLevel: string;
   department: string;
   performance: string;
+  /** FILTER_ALL | 'ACTIVE' | 'INACTIVE' — defaults to FILTER_ALL (T17). */
+  activation: string;
   limit: number;
 };
 
@@ -18,6 +20,7 @@ interface EmployeesStore {
   setAccessLevel: (level: string) => void;
   setDepartment: (department: string) => void;
   setPerformance: (performance: string) => void;
+  setActivation: (activation: string) => void;
   setLimit: (limit: number) => void;
 
   // Pagination
@@ -32,6 +35,8 @@ const initialFilterSelections: FilterSelections = {
   accessLevel: FILTER_ALL,
   department: FILTER_ALL,
   performance: FILTER_ALL,
+  // Inactive employees stay listed by default, or they could never be reactivated.
+  activation: FILTER_ALL,
   limit: 10,
 };
 
@@ -51,6 +56,10 @@ export const useEmployeesStore = create<EmployeesStore>((set) => ({
   setPerformance: (performance) =>
     set((state) => ({
       filterSelections: { ...state.filterSelections, performance },
+    })),
+  setActivation: (activation) =>
+    set((state) => ({
+      filterSelections: { ...state.filterSelections, activation },
     })),
   setLimit: (limit) =>
     set((state) => ({

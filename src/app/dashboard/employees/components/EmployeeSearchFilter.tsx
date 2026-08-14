@@ -5,6 +5,7 @@ import { Search, SlidersVertical, X } from 'lucide-react';
 import {
   ACCESS_LEVEL_OPTIONS,
   PERFORMANCE_OPTIONS,
+  ACTIVATION_OPTIONS,
   FILTER_ALL,
 } from '../constants/employeesFilterOptions';
 import { useDebounce } from '@/utils/debounce';
@@ -32,6 +33,9 @@ export function EmployeeSearchFilter({
   const selectedPerformance = useEmployeesStore(
     (state) => state.filterSelections.performance
   );
+  const selectedActivation = useEmployeesStore(
+    (state) => state.filterSelections.activation
+  );
 
   const setDebouncedSearchQuery = useEmployeesStore(
     (state) => state.setDebouncedSearchQuery
@@ -39,6 +43,7 @@ export function EmployeeSearchFilter({
   const setAccessLevel = useEmployeesStore((state) => state.setAccessLevel);
   const setDepartment = useEmployeesStore((state) => state.setDepartment);
   const setPerformance = useEmployeesStore((state) => state.setPerformance);
+  const setActivation = useEmployeesStore((state) => state.setActivation);
 
   const { data: departments = [] } = useDepartmentsQuery();
   const departmentOptions = [
@@ -181,6 +186,31 @@ export function EmployeeSearchFilter({
                         }}
                         className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${
                           selectedPerformance === option.value
+                            ? 'bg-primary text-white font-medium'
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Account state filter (T17) */}
+                <div className="p-4">
+                  <label className="block text-xs sm:text-sm max-sm:text-center font-bold text-gray-700 mb-2">
+                    حالة الحساب
+                  </label>
+                  <div className="space-y-1">
+                    {ACTIVATION_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => {
+                          setActivation(option.value);
+                        }}
+                        className={`w-full text-right px-3 py-2 text-sm rounded-md transition-colors ${
+                          selectedActivation === option.value
                             ? 'bg-primary text-white font-medium'
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}

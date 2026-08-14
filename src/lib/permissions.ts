@@ -19,6 +19,7 @@ export const PERMISSIONS = {
   EMPLOYEES_READ: 'employees:read',
   EMPLOYEES_CREATE: 'employees:create',
   EMPLOYEES_UPDATE: 'employees:update',
+  EMPLOYEES_ACTIVATE: 'employees:activate',
   EMPLOYEES_DELETE: 'employees:delete',
   SUPPLIERS_READ: 'suppliers:read',
   SUPPLIERS_CREATE: 'suppliers:create',

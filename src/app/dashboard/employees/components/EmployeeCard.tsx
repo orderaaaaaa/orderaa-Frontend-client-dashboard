@@ -10,12 +10,16 @@ import {
   CalendarDays,
   Mail,
   Edit,
+  UserX,
+  UserCheck,
 } from 'lucide-react';
 // Removed useUpdateEmployeeStatus import
 import {
   getAccessLevelLabel,
+  getActivationLabel,
   getDepartmentLabel,
 } from '../utils/employeeMappers';
+import { useSetEmployeeActivation } from '../hooks/useEmployees';
 import { AttendanceModal } from './AttendanceModal';
 import { EmployeeCardProps } from '../add-employee/types/employee.types';
 import Link from 'next/link';
@@ -29,7 +33,30 @@ export const EmployeeCard = memo(function EmployeeCard({
   const [attendanceModalOpen, setAttendanceModalOpen] = useState(false);
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
 
+  const [confirmDeactivateOpen, setConfirmDeactivateOpen] = useState(false);
+  const setActivationMutation = useSetEmployeeActivation();
+
   const isOnline = employee.isOnline ?? false;
+  // Absent only on a client cached before this field existed; treat as active so
+  // an employee never silently reads as retired.
+  const isActive = employee.isActive ?? true;
+
+  // Reactivating is harmless, so it applies immediately. Deactivating stops the
+  // account on its next request and releases its order locks, so it confirms.
+  const handleActivationToggle = () => {
+    if (isActive) {
+      setConfirmDeactivateOpen(true);
+      return;
+    }
+    setActivationMutation.mutate({ id: employee.id, isActive: true });
+  };
+
+  const confirmDeactivate = () => {
+    setActivationMutation.mutate(
+      { id: employee.id, isActive: false },
+      { onSuccess: () => setConfirmDeactivateOpen(false) },
+    );
+  };
 
   const statusColor = isOnline ? '#3cc900' : '#9ca3af';
   const borderColor = isOnline ? '#3cc900' : '#9ca3af';
@@ -56,7 +83,11 @@ export const EmployeeCard = memo(function EmployeeCard({
   const roles = employee.roles ?? [];
 
   return (
-    <div className="bg-white relative rounded-2xl shadow-sm border border-gray-100 p-4 max-w-[420px]">
+    <div
+      className={`bg-white relative rounded-2xl shadow-sm border border-gray-100 p-4 max-w-[420px] ${
+        isActive ? '' : 'opacity-60 grayscale'
+      }`}
+    >
       {/* Header */}
       <div className="flex flex-row-reverse items-center justify-end gap-4 mb-4">
         <Can code={PERMISSIONS.EMPLOYEES_UPDATE}>
@@ -94,6 +125,15 @@ export const EmployeeCard = memo(function EmployeeCard({
             </span>
             <span className="inline-block border text-gray-500 px-4 py-1 rounded-full text-xs">
               {getAccessLevelLabel(employee.accessLevel)}
+            </span>
+            <span
+              className={`inline-block px-4 py-1 rounded-full text-xs font-medium ${
+                isActive
+                  ? 'bg-green-50 text-green-700 border border-green-200'
+                  : 'bg-gray-100 text-gray-600 border border-gray-300'
+              }`}
+            >
+              {getActivationLabel(isActive)}
             </span>
           </div>
         </div>
@@ -215,7 +255,61 @@ export const EmployeeCard = memo(function EmployeeCard({
           <span className="text-xl">WhatsApp</span>
           <MessageCircle size={25} />
         </a>
+
+        {/* Account state (T17). Hidden without employees:activate, which the
+            Manager template deliberately excludes. */}
+        <Can code={PERMISSIONS.EMPLOYEES_ACTIVATE}>
+          <button
+            type="button"
+            onClick={handleActivationToggle}
+            disabled={setActivationMutation.isPending}
+            className={`col-span-2 rounded-2xl py-3 px-5 flex items-center justify-center gap-2 transition-colors font-medium border-2 disabled:opacity-60 ${
+              isActive
+                ? 'bg-white border-red-500 text-red-600 hover:bg-red-50'
+                : 'bg-white border-green-600 text-green-700 hover:bg-green-50'
+            }`}
+          >
+            {isActive ? <UserX size={22} /> : <UserCheck size={22} />}
+            <span>{isActive ? 'إيقاف الحساب' : 'تنشيط الحساب'}</span>
+          </button>
+        </Can>
       </div>
+
+      {/* Deactivation confirmation — states both consequences, per T17 §7. */}
+      {confirmDeactivateOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div
+            dir="rtl"
+            className="bg-white rounded-2xl p-6 max-w-[420px] w-full text-right shadow-xl"
+          >
+            <h4 className="text-lg font-bold text-gray-900 mb-3">
+              إيقاف حساب {employee.fullName}؟
+            </h4>
+            <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+              لن يتمكن الموظف من استخدام النظام مباشرةً، وسيتم إلغاء قفل الطلبات
+              التي يعمل عليها ليتمكن الموظفون الآخرون من متابعتها. يمكنك تنشيط
+              الحساب مرة أخرى في أي وقت.
+            </p>
+            <div className="flex items-center gap-3 justify-start">
+              <button
+                type="button"
+                onClick={confirmDeactivate}
+                disabled={setActivationMutation.isPending}
+                className="bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-xl py-2.5 px-6 font-medium transition-colors"
+              >
+                إيقاف الحساب
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDeactivateOpen(false)}
+                className="border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-xl py-2.5 px-6 font-medium transition-colors"
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Attendance Modals */}
       <AttendanceModal

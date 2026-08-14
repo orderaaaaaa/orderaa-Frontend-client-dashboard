@@ -27,6 +27,10 @@ export function useEmployeeFilters() {
       ...(filterSelections.performance !== FILTER_ALL && {
         performance: filterSelections.performance as 'LOW' | 'HIGH',
       }),
+      // FILTER_ALL omits the parameter, which the backend reads as both states.
+      ...(filterSelections.activation !== FILTER_ALL && {
+        isActive: filterSelections.activation === 'ACTIVE',
+      }),
     };
 
     if (!query) {
@@ -51,7 +55,8 @@ export function useEmployeeFilters() {
     const hasSelectFilters =
       filterSelections.accessLevel !== FILTER_ALL ||
       filterSelections.department !== FILTER_ALL ||
-      filterSelections.performance !== FILTER_ALL;
+      filterSelections.performance !== FILTER_ALL ||
+      filterSelections.activation !== FILTER_ALL;
 
     return hasSearch || hasSelectFilters;
   }, [debouncedSearchQuery, filterSelections]);

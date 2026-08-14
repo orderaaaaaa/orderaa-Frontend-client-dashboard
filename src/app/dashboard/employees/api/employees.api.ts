@@ -18,6 +18,9 @@ export const employeesApi = {
     if (filters.accessLevel) params.append('accessLevel', filters.accessLevel);
     if (filters.department) params.append('department', filters.department);
     if (filters.performance) params.append('performance', filters.performance);
+    // Omitted means both states, so only send it when explicitly narrowed.
+    if (filters.isActive !== undefined)
+      params.append('isActive', String(filters.isActive));
     if (filters.page) params.append('page', filters.page.toString());
     if (filters.limit) params.append('limit', filters.limit.toString());
 
@@ -66,7 +69,13 @@ export const employeesApi = {
       (res) => res.data
     );
   },
-  delete: (id: number) => Http.delete(`/employees/${id}`),
+  // `/activation`, not `/status` — the latter is the online-presence route.
+  setActivation: (id: number, isActive: boolean) => {
+    return Http.patch<{ message: string; employee: Employee }>(
+      `/employees/${id}/activation`,
+      { isActive }
+    ).then((res) => res.data);
+  },
   getAttendance: (id: number, month: string) => {
     return Http.get<EmployeeAttendanceResponse>(
       `/employees/${id}/attendance?month=${month}`

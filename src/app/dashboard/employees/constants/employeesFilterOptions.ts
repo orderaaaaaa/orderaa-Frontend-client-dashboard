@@ -20,3 +20,11 @@ export const PERFORMANCE_OPTIONS = [
   { value: 'HIGH', label: 'أداء عالي' },
   { value: 'LOW', label: 'أداء منخفض' },
 ];
+
+// Defaults to ALL: inactive employees must stay visible or they could never be
+// reactivated.
+export const ACTIVATION_OPTIONS = [
+  { value: FILTER_ALL, label: 'الحسابات النشطة وغير النشطة' },
+  { value: 'ACTIVE', label: 'نشط' },
+  { value: 'INACTIVE', label: 'غير نشط' },
+];

@@ -113,6 +113,11 @@ export interface Employee {
   email?: string;
   workingHours?: string;
   isOnline?: boolean;
+  /**
+   * Account state. An inactive employee is refused on their next request.
+   * Distinct from `isOnline`, which is presence tracking.
+   */
+  isActive?: boolean;
   performanceScore?: number;
   performanceChange?: number;
   workingDaysThisMonth?: number;
@@ -158,6 +163,8 @@ export interface EmployeeFilters {
   accessLevel?: string;
   department?: string;
   performance?: 'LOW' | 'HIGH' | 'ALL';
+  /** Omit for both states; `true`/`false` narrows to active/inactive. */
+  isActive?: boolean;
   page?: number;
   limit?: number;
 }
