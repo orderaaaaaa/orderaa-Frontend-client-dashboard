@@ -31,6 +31,11 @@ interface ProductsTableMobileProps {
   toggleSelect: (id: number) => void;
   openSoldModal: (productId: number) => void;
   openEditModal: (productId: number, variants: VariantItem[]) => void;
+  /**
+   * Opens the "تعديل خصائص المنتج والخيارات" popup. The parent owns the
+   * attribute-options fetch and its error fallback — never fetch here.
+   */
+  openEditAttrsModal: (productId: number) => void;
 }
 
 function ProductsTableMobile({
@@ -45,6 +50,7 @@ function ProductsTableMobile({
   toggleSelect,
   openSoldModal,
   openEditModal,
+  openEditAttrsModal,
 }: ProductsTableMobileProps) {
   const sortByOptions = [
     { key: 'createdAt', value: 'تاريخ الإنشاء' },
@@ -99,71 +105,118 @@ function ProductsTableMobile({
         )}
 
         <div className={isRefetching ? 'opacity-50 pointer-events-none' : ''}>
-          {data?.data.map((product) => (
-            <div
-              key={product.id}
-              className={`border rounded-xl p-4 bg-white shadow-sm mb-3 ${
-                selectedIds.includes(product.id)
-                  ? 'ring-2 ring-primary/30 border-primary/30'
-                  : ''
-              }`}
-            >
-              <div className="flex gap-4 items-center">
-                <img
-                  src={
-                    product.image ||
-                    product.images[0] ||
-                    'https://placehold.net/600x600.png'
-                  }
-                  className="w-24 h-24 rounded-lg object-cover border"
-                />
-                <div className="flex-1 space-y-1 text-right" dir="rtl">
-                  <h3 className="font-semibold text-gray-900">
-                    {product.name}
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    السعر: {product.price}
-                  </p>
-                  <span className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-500">
-                    الطلبات: {product.totalOrders}
-                  </span>
+          {data?.data.map((product) => {
+            // The whole box is the tap target: below md the desktop table —
+            // and with it the image/name triggers for this popup — is hidden,
+            // so the card is the only way to reach it on a phone (T19).
+            // Select mode wins: while picking products to merge, a tap ticks
+            // the box instead of opening the popup.
+            const handleCardActivate = () => {
+              if (showCheckboxes) {
+                toggleSelect(product.id);
+                return;
+              }
+              openEditAttrsModal(product.id);
+            };
 
-                  <div className="flex justify-between items-center mt-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => openSoldModal(product.id)}
-                      className="text-gray-600 px-1"
-                    >
-                      <span>عدد القطع المباعه:</span>
-                      <span className="font-medium">{product.totalSold}</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        openEditModal(
-                          product.id,
-                          product.extraDetails?.variants || [],
-                        )
-                      }
-                      className="text-primary"
-                    >
-                      <LiaEditSolid /> تعديل
-                    </Button>
-                  </div>
-                </div>
-                {showCheckboxes && (
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.includes(product.id)}
-                    onChange={() => toggleSelect(product.id)}
-                    className="w-5 h-5 text-primary rounded border-gray-300"
+            return (
+              <div
+                key={product.id}
+                role="button"
+                tabIndex={0}
+                aria-label={
+                  showCheckboxes
+                    ? `تحديد ${product.name}`
+                    : `تعديل خصائص ${product.name}`
+                }
+                onClick={handleCardActivate}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleCardActivate();
+                  }
+                }}
+                className={`border rounded-xl p-4 bg-white shadow-sm mb-3 cursor-pointer ${
+                  selectedIds.includes(product.id)
+                    ? 'ring-2 ring-primary/30 border-primary/30'
+                    : ''
+                }`}
+              >
+                <div className="flex gap-4 items-center">
+                  <img
+                    src={
+                      product.image ||
+                      product.images[0] ||
+                      'https://placehold.net/600x600.png'
+                    }
+                    className="w-24 h-24 rounded-lg object-cover border"
                   />
+                  <div className="flex-1 space-y-1 text-right" dir="rtl">
+                    <h3 className="font-semibold text-gray-900">
+                      {product.name}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      السعر: {product.price}
+                    </p>
+                    <span className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-500">
+                      الطلبات: {product.totalOrders}
+                    </span>
+
+                    <div className="flex justify-between items-center mt-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                          e.stopPropagation();
+                          openSoldModal(product.id);
+                        }}
+                        className="text-gray-600 px-1"
+                      >
+                        <span>عدد القطع المباعه:</span>
+                        <span className="font-medium">{product.totalSold}</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                          e.stopPropagation();
+                          openEditModal(
+                            product.id,
+                            product.extraDetails?.variants || [],
+                          );
+                        }}
+                        className="text-primary"
+                      >
+                        <LiaEditSolid /> تعديل
+                      </Button>
+                    </div>
+                  </div>
+                  {showCheckboxes && (
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(product.id)}
+                      onChange={() => toggleSelect(product.id)}
+                      // onChange does not bubble, but the click that triggers it
+                      // does — without this the card handler would toggle the
+                      // selection a second time and cancel it out.
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-5 h-5 text-primary rounded border-gray-300"
+                    />
+                  )}
+                </div>
+
+                {/* Hint that the box itself is tappable. Not a button — it has no
+                    handler of its own and must never be the only tap target.
+                    Hidden in select mode, where a tap selects instead. */}
+                {!showCheckboxes && (
+                  <div className="mt-2 flex items-center justify-end gap-1 text-xs text-primary/70">
+                    <LiaEditSolid className="w-3.5 h-3.5" />
+                    <span>الخصائص</span>
+                  </div>
                 )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

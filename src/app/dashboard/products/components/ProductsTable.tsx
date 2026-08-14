@@ -338,6 +338,7 @@ function ProductsTable() {
           }}
           openSoldModal={openSoldModal}
           openEditModal={openEditModal}
+          openEditAttrsModal={openEditAttrsModal}
         />
       </div>
 
