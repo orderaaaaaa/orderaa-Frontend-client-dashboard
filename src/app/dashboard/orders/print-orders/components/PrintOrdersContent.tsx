@@ -161,7 +161,6 @@ export function PrintOrdersContent() {
     if (localFilters.governorate)
       params.set('governorate', localFilters.governorate);
     if (localFilters.city) params.set('city', localFilters.city);
-    if (localFilters.area) params.set('area', localFilters.area);
     if (localFilters.productId) params.set('productId', localFilters.productId);
     if (localFilters.sizeColor) params.set('sizeColor', localFilters.sizeColor);
     if (localFilters.shipmentCode)

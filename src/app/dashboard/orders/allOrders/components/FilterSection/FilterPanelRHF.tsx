@@ -34,7 +34,9 @@ export const FILTER_DEFINITIONS: FilterDefinition[] = [
   { key: 'employeeName', label: 'اسم الموظف', type: 'placeholder' },
   { key: 'productId', label: 'المنتج', type: 'select' },
   { key: 'governorate', label: 'المحافظة', type: 'select' },
-  { key: 'area', label: 'المنطقة', type: 'select' },
+  // المنطقة is populated from the cities lookup, so it submits `city`. It used
+  // to submit `area`, a different column that is empty on every order.
+  { key: 'city', label: 'المنطقة', type: 'select' },
   { key: 'sizeColor', label: 'المصدر', type: 'select' },
   { key: 'address', label: 'العنوان', type: 'text' },
   { key: 'storeId', label: 'اسم المتجر', type: 'select' },
@@ -126,7 +128,7 @@ export default function FilterPanel({
 }: Props) {
   const isProductActive = activeFilters.includes('productId');
   const isGovernorateActive = activeFilters.includes('governorate');
-  const isAreaActive = activeFilters.includes('area');
+  const isCityActive = activeFilters.includes('city');
   const isCancellationReasonActive = activeFilters.includes('cancellationReasons');
   const isStoreActive = activeFilters.includes('storeId');
   const isShippingCompanyActive = activeFilters.includes('shippingCompany');
@@ -169,8 +171,8 @@ export default function FilterPanel({
     enabled: !!selectedProductId,
     staleTime: 5 * 60 * 1000,
   });
-  const { data: governorates = [] } = useGovernoratesQuery(isGovernorateActive || isAreaActive);
-  const { data: cities = [], isLoading: isLoadingCities } = useCitiesQuery(isAreaActive ? selectedGovernorate : undefined);
+  const { data: governorates = [] } = useGovernoratesQuery(isGovernorateActive || isCityActive);
+  const { data: cities = [], isLoading: isLoadingCities } = useCitiesQuery(isCityActive ? selectedGovernorate : undefined);
   const { data: cancellationReasons = [] } = useCancellationReasons(isCancellationReasonActive);
   const cancellationReasonOptions = React.useMemo(
     () => cancellationReasons.map((r) => ({ key: String(r.id), value: r.reasonName })),
@@ -316,7 +318,7 @@ export default function FilterPanel({
                     onChange={(value) => {
                       field.onChange(value);
                       if (setValue) {
-                        setValue('area', '');
+                        setValue('city', '');
                       }
                     }}
                     onBlur={field.onBlur}
@@ -331,11 +333,11 @@ export default function FilterPanel({
             />
           );
         }
-        if (key === 'area') {
+        if (key === 'city') {
           return (
             <Controller
               key={key}
-              name="area"
+              name="city"
               control={control}
               render={({ field }) => (
                 <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter}>
@@ -346,7 +348,7 @@ export default function FilterPanel({
                     options={cities}
                     placeholder={isLoadingCities ? "جاري التحميل..." : label}
                     widthClass="w-full"
-                    error={errors.area?.message}
+                    error={errors.city?.message}
                     disabled={!selectedGovernorate || isLoadingCities}
                     clearable
                   />
