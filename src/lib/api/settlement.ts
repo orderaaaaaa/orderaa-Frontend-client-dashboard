@@ -93,6 +93,53 @@ export async function uploadSettlementRows(
   return data;
 }
 
+export interface SettlementBatchListItem extends SettlementBatch {
+  actorName: string | null;
+}
+
+export interface SettlementBatchOrder {
+  orderId: number;
+  orderCode: string;
+  shippingCode: string | null;
+  /** What THIS collection settled — not the order's current amount. */
+  amount: string;
+  targetStatus: string;
+  currentStatus: string;
+  settledAt: string;
+  customerName: string | null;
+  isDeleted: boolean;
+}
+
+export interface Paginated<T> {
+  data: T[];
+  page: number;
+  limit: number;
+  total: number;
+}
+
+export async function listSettlementBatches(params: {
+  status?: 'OPEN' | 'CONFIRMED';
+  page?: number;
+  limit?: number;
+}): Promise<Paginated<SettlementBatchListItem>> {
+  const { data } = await api.get<Paginated<SettlementBatchListItem>>(
+    '/orders/settlement/batches',
+    { params },
+  );
+  return data;
+}
+
+export async function listSettlementBatchOrders(
+  batchId: string,
+  params: { page?: number; limit?: number } = {},
+): Promise<Paginated<SettlementBatchOrder>> {
+  const { data } = await api.get<Paginated<SettlementBatchOrder>>(
+    `/orders/settlement/batches/${batchId}/orders`,
+    { params },
+  );
+  return data;
+}
+
 /** The caller's open collection, or null. This is what makes it resumable. */
 export async function getCurrentSettlementBatch(): Promise<SettlementBatch | null> {
   const { data } = await api.get<SettlementBatch | null>(

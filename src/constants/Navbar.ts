@@ -145,6 +145,11 @@ export const navigation: NavigationItem[] = [
     icon: LiaTruckSolid,
   },
   {
+    name: 'جميع التحصيلات',
+    href: '/dashboard/orders/settlement/collections',
+    icon: LiaTruckSolid,
+  },
+  {
     name: 'الربط مع شركات التاكيد الالي',
     href: '/dashboard/link-auto-confirmation',
     icon: LiaRobotSolid,
