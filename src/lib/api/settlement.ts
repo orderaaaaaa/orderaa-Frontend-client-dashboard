@@ -28,6 +28,8 @@ export interface SettlementFailedItem {
 export interface UploadSettlementResponse {
   success: SettlementSuccessItem[];
   failed: SettlementFailedItem[];
+  /** The collection these rows landed in, with its running totals. */
+  batch: SettlementBatch;
 }
 
 export interface ShortfallSettlement {
@@ -43,12 +45,46 @@ export interface AdjustSettlementPayload {
   amount: number;
 }
 
+/**
+ * T3 — one collection (تحصيل) groups the rows of every sheet in a session.
+ * Totals are derived server-side and arrive as decimal STRINGS; never parse
+ * them into numbers to add them up.
+ */
+export interface SettlementBatch {
+  id: string;
+  code: string;
+  status: 'OPEN' | 'CONFIRMED';
+  totalAmount: string;
+  ordersCount: number;
+  createdAt: string;
+  confirmedAt: string | null;
+}
+
 export async function uploadSettlementRows(
   rows: SettlementRow[],
+  batchId?: string,
 ): Promise<UploadSettlementResponse> {
   const { data } = await api.post<UploadSettlementResponse>(
     '/orders/settlement/upload',
-    { rows },
+    { rows, ...(batchId ? { batchId } : {}) },
+  );
+  return data;
+}
+
+/** The caller's open collection, or null. This is what makes it resumable. */
+export async function getCurrentSettlementBatch(): Promise<SettlementBatch | null> {
+  const { data } = await api.get<SettlementBatch | null>(
+    '/orders/settlement/batches/current',
+  );
+  return data ?? null;
+}
+
+/** Final: a confirmed collection is never reopened and takes no more rows. */
+export async function confirmSettlementBatch(
+  batchId: string,
+): Promise<SettlementBatch> {
+  const { data } = await api.post<SettlementBatch>(
+    `/orders/settlement/batches/${batchId}/confirm`,
   );
   return data;
 }

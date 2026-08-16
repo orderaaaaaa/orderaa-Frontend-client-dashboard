@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import * as XLSX from 'xlsx';
 import { Download, Upload, FileSpreadsheet, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -11,6 +11,9 @@ import { useHasPermission } from '@/hooks/usePermissions';
 import { generateSettlementTemplate } from '@/lib/excel/template-generator';
 import {
   uploadSettlementRows,
+  getCurrentSettlementBatch,
+  confirmSettlementBatch,
+  type SettlementBatch,
   type SettlementRow,
   type UploadSettlementResponse,
 } from '@/lib/api/settlement';
@@ -110,6 +113,32 @@ export default function SettlementUploadPage() {
   const [isParsing, setIsParsing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [results, setResults] = useState<UploadSettlementResponse | null>(null);
+  const [batch, setBatch] = useState<SettlementBatch | null>(null);
+  const [isConfirming, setIsConfirming] = useState(false);
+
+  // The collection lives on the server, so a closed browser does not lose it —
+  // reopening the page picks the session back up.
+  useEffect(() => {
+    getCurrentSettlementBatch()
+      .then(setBatch)
+      .catch(() => setBatch(null));
+  }, []);
+
+  const handleConfirm = useCallback(async () => {
+    if (!batch) return;
+    setIsConfirming(true);
+    try {
+      const confirmed = await confirmSettlementBatch(batch.id);
+      setBatch(confirmed);
+      toast.success(
+        `تم إغلاق التحصيل ${confirmed.code} — الإجمالي ${confirmed.totalAmount} جنيه عن ${confirmed.ordersCount} طلب`,
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'تعذر إغلاق التحصيل');
+    } finally {
+      setIsConfirming(false);
+    }
+  }, [batch]);
 
   const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -136,8 +165,11 @@ export default function SettlementUploadPage() {
 
     setIsUploading(true);
     try {
-      const response = await uploadSettlementRows(parsedRows);
+      // Continue the collection already on screen, so a second sheet joins the
+      // same running total instead of starting a fresh one.
+      const response = await uploadSettlementRows(parsedRows, batch?.id);
       setResults(response);
+      setBatch(response.batch);
 
       if (response.failed.length === 0) {
         toast.success(`تم رفع ${response.success.length} صف بنجاح`);
@@ -249,6 +281,51 @@ export default function SettlementUploadPage() {
           )}
         </CardContent>
       </Card>
+      )}
+
+      {/* T3 — the running collection. Shown whether or not a sheet has just been
+          uploaded, so a resumed session is obvious on arrival. */}
+      {batch && (
+        <Card>
+          <CardContent className="py-4 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-6">
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs text-muted-foreground">
+                  {batch.status === 'OPEN' ? 'تحصيل مفتوح' : 'تحصيل مغلق'}
+                </span>
+                <span className="font-bold">{batch.code}</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs text-muted-foreground">الإجمالي</span>
+                {/* A decimal string, rendered as-is. */}
+                <span className="text-lg font-bold text-primary">
+                  {batch.totalAmount} جنيه
+                </span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs text-muted-foreground">عدد الطلبات</span>
+                <span className="text-lg font-bold">{batch.ordersCount}</span>
+              </div>
+            </div>
+
+            {batch.status === 'OPEN' ? (
+              <div className="flex flex-col items-end gap-1">
+                <Button onClick={handleConfirm} disabled={isConfirming}>
+                  {isConfirming ? 'جاري الإغلاق...' : 'تأكيد وإغلاق التحصيل'}
+                </Button>
+                {/* Rows settle on upload, not on confirmation. Saying so stops
+                    anyone believing this button is what commits the money. */}
+                <span className="text-[11px] text-muted-foreground max-w-xs text-left">
+                  تم تسوية الصفوف بالفعل عند رفعها؛ التأكيد يغلق التحصيل ويثبّت إجماليه فقط
+                </span>
+              </div>
+            ) : (
+              <span className="text-sm font-semibold text-green-700">
+                تم التأكيد — لا يمكن إضافة صفوف أخرى
+              </span>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       {/* Results Section */}
