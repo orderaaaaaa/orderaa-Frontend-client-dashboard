@@ -5,10 +5,41 @@ import { PhoneNumberList } from '../fields/PhoneNumberList';
 import { Order } from '@/types/orders';
 import { useUpdateCustomer } from '@/services/orders';
 import { usePermissionCheck } from '@/hooks/usePermissions';
+import { PERMISSIONS } from '@/lib/permissions';
 import { toast } from 'react-toastify';
 import { If, Then } from 'react-if';
 import { MdBlock } from 'react-icons/md';
 import BaseModal from '@/components/ui/base-modal';
+import CustomerMergeModal from '../CustomerMergeModal';
+import {
+  MergeableCustomer,
+  PhoneConflictDetails,
+} from '@/app/dashboard/customers/types/merge';
+
+/**
+ * `order.customers` (the currently-edited customer) → the shape the shared
+ * merge popup renders. `notes` on `Order['customers']` can be a single
+ * string (legacy) or the real `string[]` the backend actually returns —
+ * normalise both into an array.
+ */
+function toMergeableCustomer(customer: Order['customers']): MergeableCustomer {
+  const notes = Array.isArray(customer.notes)
+    ? customer.notes
+    : customer.notes
+      ? [customer.notes]
+      : [];
+
+  return {
+    id: customer.id,
+    name: customer.name,
+    email: customer.email ?? undefined,
+    phoneNumbers: customer.phone_numbers ?? [],
+    notes,
+    isBlocked: customer.isBlocked ?? false,
+    blockedUntil: customer.blockedUntil ?? null,
+    ordersCount: customer.totalCustomerOrders ?? 0,
+  };
+}
 
 export interface CustomerDataSectionProps {
   order: Order;
@@ -29,7 +60,23 @@ export function CustomerDataSection({
   // the order note goes to PATCH /orders/:id (`orders:update`).
   const canUpdateCustomer = hasPermission('customers:update');
   const canUpdateOrder = hasPermission('orders:update');
+  const canMergeCustomers = hasPermission(PERMISSIONS.CUSTOMERS_MERGE);
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
+  const [mergeConflict, setMergeConflict] = useState<PhoneConflictDetails | null>(
+    null
+  );
+
+  // A phone edit hit a duplicate on another customer (T4). Without
+  // `customers:merge` there is nothing the user could do with a merge popup
+  // — the backend would 403 the merge anyway — so fall back to the original
+  // toast instead of opening a dead-end dialog.
+  const handlePhoneConflict = (conflict: PhoneConflictDetails) => {
+    if (canMergeCustomers) {
+      setMergeConflict(conflict);
+    } else {
+      toast.error('رقم الهاتف مستخدم بالفعل من قبل عميل آخر');
+    }
+  };
 
   const handleCustomerNameUpdate = async (name: string) => {
     try {
@@ -84,6 +131,7 @@ export function CustomerDataSection({
           phoneNumbers={order.customers.phone_numbers}
           onUpdate={onPhoneUpdate}
           canEdit={canUpdateCustomer}
+          onConflict={handlePhoneConflict}
         />
 
         <div className="md:col-span-4">
@@ -122,6 +170,16 @@ export function CustomerDataSection({
           )}
         </div>
       </BaseModal>
+
+      {mergeConflict && (
+        <CustomerMergeModal
+          isOpen={!!mergeConflict}
+          onClose={() => setMergeConflict(null)}
+          customerA={toMergeableCustomer(order.customers)}
+          customerB={mergeConflict.customer}
+          onSuccess={() => setMergeConflict(null)}
+        />
+      )}
     </div>
   );
 }

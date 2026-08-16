@@ -16,6 +16,7 @@ import { getStatusColor } from '../lib/getBadgeColor';
 import { getActivityColor } from '../lib/getActivityColor';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import CustomerBanConfirmationModal from './modals/CustomerBanConfirmationModal';
 
 interface CustomerCardProps {
@@ -27,6 +28,10 @@ interface CustomerCardProps {
   ) => void;
   isPending: boolean;
   onRowClick: (customerId: number) => void;
+  /** Selection mode for the merge flow (T4) — تحديد toggle on the page header. */
+  selectionMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (customerId: number) => void;
 }
 
 const toWhatsAppNumber = (phone: string) => {
@@ -42,6 +47,9 @@ export function CustomerCard({
   onToggleBlock,
   isPending,
   onRowClick,
+  selectionMode = false,
+  isSelected = false,
+  onToggleSelect,
 }: CustomerCardProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
@@ -73,13 +81,23 @@ export function CustomerCard({
   return (
     <>
       <div
-        onClick={() => onRowClick(customer.id)}
+        onClick={() =>
+          selectionMode ? onToggleSelect?.(customer.id) : onRowClick(customer.id)
+        }
         className="bg-white rounded-2xl shadow-sm relative cursor-pointer hover:shadow-md transition-shadow"
         dir="rtl"
       >
         {/* Header Badge */}
         <div className="flex justify-between items-center px-4 py-3">
-          <div>
+          <div className="flex items-center gap-2">
+            {selectionMode && (
+              <div onClick={(e) => e.stopPropagation()}>
+                <Checkbox
+                  checked={isSelected}
+                  onCheckedChange={() => onToggleSelect?.(customer.id)}
+                />
+              </div>
+            )}
             <If condition={customer.isBlocked}>
               <Then>
                 <div className="flex items-center gap-1 p-1 px-3 bg-[#f4e2e2] border-2 border-[#eed0d1] rounded-sm">

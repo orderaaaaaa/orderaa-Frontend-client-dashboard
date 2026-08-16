@@ -1,6 +1,31 @@
 import { useState, useCallback } from 'react';
 import { useUpdateCustomer } from '@/services/orders';
 import { toast } from 'react-toastify';
+import { getApiErrorMessage } from '@/utils/apiError';
+import { PhoneConflictDetails } from '@/app/dashboard/customers/types/merge';
+
+/** Narrow shape of the 409 body `PATCH /customers/:id` throws on a duplicate phone. */
+interface PhoneConflictResponse {
+  response?: {
+    status?: number;
+    data?: {
+      code?: string;
+      conflict?: PhoneConflictDetails;
+    };
+  };
+}
+
+function getPhoneConflict(error: unknown): PhoneConflictDetails | undefined {
+  const response = (error as PhoneConflictResponse)?.response;
+  if (
+    response?.status === 409 &&
+    response.data?.code === 'PHONE_NUMBER_ALREADY_EXISTS' &&
+    response.data?.conflict
+  ) {
+    return response.data.conflict;
+  }
+  return undefined;
+}
 
 /**
  * Options for usePhoneNumbers hook
@@ -10,6 +35,12 @@ export interface UsePhoneNumbersOptions {
   orderId: number;
   initialPhones: string[];
   onUpdate?: (phoneNumbers: string[]) => void;
+  /**
+   * Called instead of the error toast when the new number already belongs to
+   * another customer (T4). When omitted, the conflict falls back to the
+   * plain toast — same behaviour as before this feature existed.
+   */
+  onConflict?: (conflict: PhoneConflictDetails) => void;
 }
 
 /**
@@ -47,6 +78,7 @@ export function usePhoneNumbers({
   orderId,
   initialPhones,
   onUpdate,
+  onConflict,
 }: UsePhoneNumbersOptions): PhoneNumbersState {
   const updateCustomerMutation = useUpdateCustomer();
 
@@ -84,15 +116,16 @@ export function usePhoneNumbers({
           onUpdate(updatedPhones);
         }
       } catch (error) {
-        const message =
-          error instanceof Error && 'response' in error
-            ? (error as any).response?.data?.message
-            : null;
-        toast.error(message || 'فشل في تحديث أرقام الهاتف');
+        const conflict = getPhoneConflict(error);
+        if (conflict && onConflict) {
+          onConflict(conflict);
+        } else {
+          toast.error(getApiErrorMessage(error, 'فشل في تحديث أرقام الهاتف'));
+        }
         setPhoneNumbers(phoneNumbers);
       }
     },
-    [customerId, phoneNumbers, onUpdate, updateCustomerMutation]
+    [customerId, phoneNumbers, onUpdate, onConflict, updateCustomerMutation]
   );
 
   const handleSave = useCallback(async () => {
@@ -125,14 +158,15 @@ export function usePhoneNumbers({
         onUpdate(updatedPhones);
       }
     } catch (error) {
-      const message =
-        error instanceof Error && 'response' in error
-          ? (error as any).response?.data?.message
-          : null;
-      toast.error(message || 'فشل في تحديث أرقام الهاتف');
+      const conflict = getPhoneConflict(error);
+      if (conflict && onConflict) {
+        onConflict(conflict);
+      } else {
+        toast.error(getApiErrorMessage(error, 'فشل في تحديث أرقام الهاتف'));
+      }
       setPhoneNumbers(phoneNumbers);
     }
-  }, [customerId, phoneNumbers, editingIndex, newPhoneNumber, onUpdate, updateCustomerMutation]);
+  }, [customerId, phoneNumbers, editingIndex, newPhoneNumber, onUpdate, onConflict, updateCustomerMutation]);
 
   const handleCancel = useCallback(() => {
     setEditingIndex(null);

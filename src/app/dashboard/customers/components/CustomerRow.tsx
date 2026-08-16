@@ -7,6 +7,7 @@ import { getStatusColor } from '../lib/getBadgeColor';
 import { getActivityColor } from '../lib/getActivityColor';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import CustomerBanConfirmationModal from './modals/CustomerBanConfirmationModal';
 import { useEditCustomer } from '../hooks/useEditCustomer';
 import { toast } from 'react-toastify';
@@ -21,6 +22,10 @@ interface CustomerRowProps {
   isPending: boolean;
   onRowClick: (customerId: number) => void;
   showNotesColumn: boolean;
+  /** Selection mode for the merge flow (T4) — تحديد toggle on the page header. */
+  selectionMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (customerId: number) => void;
 }
 
 const toWhatsAppNumber = (phone: string) => {
@@ -36,6 +41,9 @@ export const CustomerRow = memo(function CustomerRow({
   isPending,
   onRowClick,
   showNotesColumn,
+  selectionMode = false,
+  isSelected = false,
+  onToggleSelect,
 }: CustomerRowProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
@@ -90,9 +98,22 @@ export const CustomerRow = memo(function CustomerRow({
   return (
     <>
       <tr
-        onClick={() => onRowClick(customer.id)}
+        onClick={() =>
+          selectionMode ? onToggleSelect?.(customer.id) : onRowClick(customer.id)
+        }
         className="hover:bg-gray-50 transition-colors cursor-pointer"
       >
+        {selectionMode && (
+          <td
+            className="px-4 py-4 whitespace-nowrap"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={() => onToggleSelect?.(customer.id)}
+            />
+          </td>
+        )}
         <td className="px-4 py-4 whitespace-nowrap">
           <div className="flex items-center gap-1">
             <If condition={customer.isBlocked}>

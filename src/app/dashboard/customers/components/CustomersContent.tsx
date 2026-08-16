@@ -1,7 +1,12 @@
 'use client';
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { LiaUsersSolid, LiaSlidersHSolid } from 'react-icons/lia';
+import {
+  LiaUsersSolid,
+  LiaSlidersHSolid,
+  LiaObjectGroupSolid,
+} from 'react-icons/lia';
+import { Scan, ScanLine, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Breadcrumb } from '@/components/dashboard-layout';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
@@ -17,6 +22,31 @@ import { TABLE_HEADERS } from '../constants';
 import { useGetCustomers, useEditCustomer } from '../hooks';
 import { useDebounce } from '@/utils/debounce';
 import { TimePeriod } from '@/utils/dateRangeUtils';
+import { Can } from '@/components/Can';
+import { PERMISSIONS } from '@/lib/permissions';
+import { Customer } from '../types/customer';
+import { MergeableCustomer } from '../types/merge';
+import CustomerMergeModal from '@/components/OrderDetails/CustomerMergeModal';
+
+/** List-page `Customer` → the shape the shared merge popup renders. */
+function toMergeableCustomer(customer: Customer): MergeableCustomer {
+  const notes = Array.isArray(customer.notes)
+    ? customer.notes
+    : customer.notes
+      ? [customer.notes]
+      : [];
+
+  return {
+    id: customer.id,
+    name: customer.name,
+    email: customer.email,
+    phoneNumbers: customer.phoneNumbers,
+    notes,
+    isBlocked: customer.isBlocked,
+    blockedUntil: customer.blockedUntil ?? null,
+    ordersCount: customer.numberOfOrders,
+  };
+}
 
 interface CustomerFilters {
   clientStatus: string;
@@ -36,6 +66,12 @@ export function CustomersContent() {
   const [timePeriod, setTimePeriod] = useState<TimePeriod | ''>('');
   const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+
+  // Selection mode for merging duplicate customers (T4) — modelled on the
+  // products page's تحديد toggle. Merge is only offered for exactly two.
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [showMergeModal, setShowMergeModal] = useState(false);
 
   const [filters, setFilters] = useState<CustomerFilters>({
     clientStatus: '',
@@ -99,6 +135,41 @@ export function CustomersContent() {
     setSelectedCustomerId(customerId);
     setIsDetailsModalOpen(true);
   }, []);
+
+  const handleToggleSelectMode = useCallback(() => {
+    setSelectMode((prev) => {
+      if (prev) setSelectedIds(new Set());
+      return !prev;
+    });
+  }, []);
+
+  const handleToggleSelect = useCallback((customerId: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(customerId)) {
+        next.delete(customerId);
+      } else {
+        next.add(customerId);
+      }
+      return next;
+    });
+  }, []);
+
+  // The two selected customers, in list order — merge is only offered when
+  // exactly two are selected (spec §3 non-goals: no 3-way merge from the UI).
+  const selectedCustomers = useMemo(() => {
+    if (selectedIds.size !== 2 || !data?.data) return [];
+    return data.data.filter((customer: Customer) => selectedIds.has(customer.id));
+  }, [selectedIds, data]);
+
+  const showBulkActions = selectMode && selectedIds.size === 2;
+
+  useEffect(() => {
+    document.body.style.paddingBottom = showBulkActions ? '80px' : '0px';
+    return () => {
+      document.body.style.paddingBottom = '0px';
+    };
+  }, [showBulkActions]);
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
@@ -176,7 +247,33 @@ export function CustomersContent() {
               </span>
             )}
           </Button>
+
+          <Can code={PERMISSIONS.CUSTOMERS_MERGE}>
+            <div
+              className="bg-primary flex flex-row items-center justify-center gap-2 px-5 py-2 rounded-full cursor-pointer text-white text-xs sm:text-sm flex-shrink-0"
+              onClick={handleToggleSelectMode}
+            >
+              <p>تحديد</p>
+              {selectMode ? (
+                <ScanLine className="w-5 h-5" />
+              ) : (
+                <Scan className="w-5 h-5" />
+              )}
+            </div>
+          </Can>
         </div>
+
+        {selectMode && (
+          <div className="flex flex-row items-center gap-2">
+            <X
+              onClick={handleToggleSelectMode}
+              className="cursor-pointer text-primary h-5 w-5"
+            />
+            <span className="text-sm text-gray-600">
+              تم تحديد {selectedIds.size} عميل (اختر عميلين للدمج)
+            </span>
+          </div>
+        )}
 
         <div
           className="grid transition-[grid-template-rows] duration-300 ease-in-out"
@@ -222,6 +319,7 @@ export function CustomersContent() {
               <table className="w-full" dir="rtl">
                 <thead>
                   <tr className="bg-[#f1eefa]">
+                    {selectMode && <th className="px-4 py-4 w-10" />}
                     {activeHeaders.map((header, index) => (
                       <th
                         key={index}
@@ -241,6 +339,9 @@ export function CustomersContent() {
                       onRowClick={handleRowClick}
                       isPending={editCustomerMutation.isPending}
                       showNotesColumn={hasBlockedCustomers}
+                      selectionMode={selectMode}
+                      isSelected={selectedIds.has(customer.id)}
+                      onToggleSelect={handleToggleSelect}
                     />
                   ))}
                 </tbody>
@@ -257,6 +358,9 @@ export function CustomersContent() {
                     onToggleBlock={handleToggleBlock}
                     onRowClick={handleRowClick}
                     isPending={editCustomerMutation.isPending}
+                    selectionMode={selectMode}
+                    isSelected={selectedIds.has(customer.id)}
+                    onToggleSelect={handleToggleSelect}
                   />
                 </div>
               ))}
@@ -290,6 +394,37 @@ export function CustomersContent() {
           setSelectedCustomerId(null);
         }}
       />
+
+      {showBulkActions && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg py-4 px-6">
+          <div className="mx-auto overflow-x-auto scrollbar-hide">
+            <div className="pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
+              <Button
+                variant="outline"
+                onClick={() => setShowMergeModal(true)}
+                className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
+              >
+                <LiaObjectGroupSolid className="size-5" />
+                <span>دمج العملاء (2)</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showMergeModal && selectedCustomers.length === 2 && (
+        <CustomerMergeModal
+          isOpen={showMergeModal}
+          onClose={() => setShowMergeModal(false)}
+          customerA={toMergeableCustomer(selectedCustomers[0])}
+          customerB={toMergeableCustomer(selectedCustomers[1])}
+          onSuccess={() => {
+            setShowMergeModal(false);
+            setSelectedIds(new Set());
+            setSelectMode(false);
+          }}
+        />
+      )}
 
       <div className="mt-6">
         <PaginationFooter

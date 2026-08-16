@@ -21,6 +21,8 @@ export interface Customer {
   totalAmount: number;
   notes: string;
   isBlocked: boolean;
+  /** Mirrors `CustomerResponseDto.blockedUntil` — only meaningful with isBlocked. */
+  blockedUntil?: string | null;
 
   governorate: string | null;
   city: string | null;

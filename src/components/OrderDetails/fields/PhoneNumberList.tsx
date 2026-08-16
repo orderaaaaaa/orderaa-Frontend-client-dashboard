@@ -11,6 +11,7 @@ import {
 import { usePhoneNumbers } from '@/hooks/OrderDetails/usePhoneNumbers';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
+import { PhoneConflictDetails } from '@/app/dashboard/customers/types/merge';
 
 /**
  * Props for PhoneNumberList component
@@ -26,6 +27,12 @@ export interface PhoneNumberListProps {
    * add / edit / remove are hidden. Callers pass the `customers:update` check.
    */
   canEdit?: boolean;
+  /**
+   * When the new number already belongs to another customer (409), this
+   * fires instead of the error toast so the caller can open the merge popup
+   * (T4). Omit to keep the plain toast behaviour.
+   */
+  onConflict?: (conflict: PhoneConflictDetails) => void;
 }
 
 /**
@@ -42,12 +49,14 @@ export function PhoneNumberList({
   onUpdate,
   className = '',
   canEdit = true,
+  onConflict,
 }: PhoneNumberListProps) {
   const phones = usePhoneNumbers({
     customerId,
     orderId,
     initialPhones: initialPhoneNumbers,
     onUpdate,
+    onConflict,
   });
 
   const [isPhoneDropdownOpen, setIsPhoneDropdownOpen] = useState<number | null>(null);

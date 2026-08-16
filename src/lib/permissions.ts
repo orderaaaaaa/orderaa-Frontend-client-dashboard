@@ -25,6 +25,9 @@ export const PERMISSIONS = {
   SUPPLIERS_CREATE: 'suppliers:create',
   SUPPLIERS_UPDATE: 'suppliers:update',
   SUPPLIERS_DELETE: 'suppliers:delete',
+  CUSTOMERS_READ: 'customers:read',
+  CUSTOMERS_UPDATE: 'customers:update',
+  CUSTOMERS_MERGE: 'customers:merge',
 } as const;
 
 export type PermissionCode = string;
