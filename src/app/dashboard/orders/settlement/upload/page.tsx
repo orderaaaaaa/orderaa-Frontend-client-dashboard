@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as XLSX from 'xlsx';
-import { Download, Upload, FileSpreadsheet, CheckCircle2, XCircle } from 'lucide-react';
+import { Download, Upload, FileSpreadsheet, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -171,12 +171,24 @@ export default function SettlementUploadPage() {
       setResults(response);
       setBatch(response.batch);
 
-      if (response.failed.length === 0) {
+      if (response.success.length > 0) {
         toast.success(`تم رفع ${response.success.length} صف بنجاح`);
-      } else if (response.success.length > 0) {
-        toast.success(`تم رفع ${response.success.length} صف بنجاح`);
+      }
+      // Already-collected rows get their own warning: lumping them into
+      // toast.error was what made a duplicate read as a failure.
+      if (response.alreadyCollected.length > 0) {
+        toast.warning(
+          `${response.alreadyCollected.length} صف تم تحصيله مسبقاً`,
+        );
+      }
+      if (response.failed.length > 0) {
         toast.error(`فشل ${response.failed.length} صف`);
-      } else {
+      }
+      if (
+        response.success.length === 0 &&
+        response.alreadyCollected.length === 0 &&
+        response.failed.length > 0
+      ) {
         toast.error('فشل رفع جميع الصفوف');
       }
     } catch (err) {
@@ -365,6 +377,71 @@ export default function SettlementUploadPage() {
                           <td className="px-4 py-2">{item.newStatus}</td>
                         </tr>
                       ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* T5 — already collected: information, not an error. Amber, so it
+                reads as neither نجح nor فشل. */}
+            {results.alreadyCollected.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-amber-700 flex items-center gap-2 mb-3">
+                  <AlertTriangle className="w-4 h-4" />
+                  تم تحصيلها مسبقاً ({results.alreadyCollected.length})
+                </h3>
+                <div className="rounded-md border border-amber-200 overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-amber-50">
+                      <tr>
+                        <th className="px-4 py-2 text-right font-medium">#</th>
+                        <th className="px-4 py-2 text-right font-medium">كود الطلب</th>
+                        <th className="px-4 py-2 text-right font-medium">كود الشحن</th>
+                        <th className="px-4 py-2 text-right font-medium">المبلغ في الشيت</th>
+                        <th className="px-4 py-2 text-right font-medium">المبلغ المحصل مسبقاً</th>
+                        <th className="px-4 py-2 text-right font-medium">تاريخ التحصيل</th>
+                        <th className="px-4 py-2 text-right font-medium">التحصيل السابق</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {results.alreadyCollected.map((item, i) => {
+                        // Compared by VALUE, not string equality: "300" and
+                        // "300.00" are the same amount. A repeat with a
+                        // matching figure is a harmless duplicate; a differing
+                        // one means someone has the wrong number.
+                        const differs =
+                          Number(item.sheetAmount) !== Number(item.collectedAmount);
+                        return (
+                          <tr
+                            key={i}
+                            className={`border-t ${differs ? 'bg-amber-100/70' : ''}`}
+                          >
+                            <td className="px-4 py-2 text-muted-foreground">{item.row + 1}</td>
+                            <td className="px-4 py-2 font-mono">{item.orderCode}</td>
+                            <td className="px-4 py-2 font-mono">{item.shippingCode ?? '—'}</td>
+                            <td className={`px-4 py-2 ${differs ? 'font-bold text-amber-800' : ''}`}>
+                              {item.sheetAmount}
+                            </td>
+                            <td className={`px-4 py-2 ${differs ? 'font-bold text-amber-800' : ''}`}>
+                              {item.collectedAmount}
+                            </td>
+                            <td className="px-4 py-2">
+                              {item.collectedAt
+                                ? new Date(item.collectedAt).toLocaleDateString('ar-EG')
+                                : '—'}
+                            </td>
+                            <td className="px-4 py-2">
+                              {/* Null batch is expected for adjust-only and
+                                  pre-collection rows — show the source so the
+                                  cell does not look broken. */}
+                              {item.batch
+                                ? `${item.batch.code}${item.batch.actorName ? ` — ${item.batch.actorName}` : ''}`
+                                : (item.source ?? '—')}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

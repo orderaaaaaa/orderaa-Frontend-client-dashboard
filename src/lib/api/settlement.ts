@@ -25,9 +25,31 @@ export interface SettlementFailedItem {
   reason: string;
 }
 
+/**
+ * T5 — an order already collected is NOT a failure. `sheetAmount` and
+ * `collectedAmount` are deliberately separate: comparing them is the point.
+ * `batch` is legitimately null for adjust-only and pre-collection rows.
+ */
+export interface AlreadyCollectedItem {
+  row: number;
+  orderCode: string;
+  shippingCode: string | null;
+  sheetAmount: string;
+  collectedAmount: string;
+  collectedAt: string | null;
+  source: string | null;
+  batch: {
+    id: string;
+    code: string;
+    createdAt: string;
+    actorName: string | null;
+  } | null;
+}
+
 export interface UploadSettlementResponse {
   success: SettlementSuccessItem[];
   failed: SettlementFailedItem[];
+  alreadyCollected: AlreadyCollectedItem[];
   /** The collection these rows landed in, with its running totals. */
   batch: SettlementBatch;
 }
