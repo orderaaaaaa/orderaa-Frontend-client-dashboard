@@ -2,9 +2,12 @@ import { useQuery, QueryKey } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { getGovernorates, getCities, getPaymentMethods, getPaymentStatuses, getUtmSources, getPageNames, getDepartments, getShippingEvents } from '@/lib/api/lookups';
 
+// `GET /lookups/governorates` returns `{ key, label }` — the enum key plus the
+// canonical Arabic label. This was declared as `value` and never matched the
+// wire (.FE-RULES: frontend types mirror the real response shape).
 interface GovernorateData {
   key: string;
-  value: string;
+  label: string;
 }
 
 interface CityData {

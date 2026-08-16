@@ -8,6 +8,7 @@ import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import http from '@/lib/api/http';
 import {
   GovernorateLogisticsConfig,
+  GovernorateLogisticsConfigRow,
   TrackingCard,
   TrackingCardsFilter,
   PostShippingReason,
@@ -22,31 +23,11 @@ import { PaginatedResponse } from '@/types/orders';
 import { toast } from 'react-toastify';
 
 // ─── Mock Data (UI preview until backend is ready) ───────────────────────────
-
-const MOCK_GOVERNORATES = [
-  'القاهرة', 'الجيزة', 'الإسكندرية', 'الدقهلية', 'البحيرة',
-  'الشرقية', 'المنوفية', 'الغربية', 'كفر الشيخ', 'القليوبية',
-  'بورسعيد', 'الإسماعيلية', 'السويس', 'دمياط', 'المنيا',
-  'أسيوط', 'سوهاج', 'قنا', 'الأقصر', 'أسوان',
-  'الفيوم', 'بني سويف', 'شمال سيناء', 'جنوب سيناء', 'مطروح',
-  'البحر الأحمر', 'الوادي الجديد', 'الأقصر',
-];
-
-const createMockGovernorateConfigs = (
-  shippingCompanyId: number
-): GovernorateLogisticsConfig[] =>
-  MOCK_GOVERNORATES.map((name, index) => ({
-    id: shippingCompanyId * 100 + index + 1,
-    shippingCompanyId,
-    shippingCompanyName: '',
-    governorateKey: name.replace(/\s/g, '_'),
-    governorateName: name,
-    firstAttemptAfterDays: 3,
-    shippingCompanyCost: 45,
-    nonReceiptCost: 0,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }));
+// The governorate logistics config is no longer mocked — it calls
+// /shipping/governorate-settings. The mock governorate list was also removed
+// deliberately: it spelled labels as 'القاهرة' while the canonical lookup
+// emits 'القاهره', which is exactly the mismatch that keeps these settings
+// from ever matching an order. Governorates now come from /lookups/governorates.
 
 let mockPostShippingReasons: PostShippingReason[] = [
   { id: 1, reasonName: 'العميل رفض المعاينة', type: 'POST_SHIPPING', isActive: true, displayOrder: 1, usageCount: 12, lastUsedAt: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
@@ -68,48 +49,57 @@ let mockShippingCancellationReasons: ShippingCancellationReason[] = [
 let mockShippingCancellationNextId = 4;
 
 // ─── Governorate Logistics Config ────────────────────────────────────────────
-// TODO: Replace mock with real API when backend implements GET /logistics/governorate-config/:shippingCompanyId
 
-export const useGovernorateLogisticsConfig = (shippingCompanyId?: number) => {
+export const useGovernorateLogisticsConfig = (shippingCompany?: string) => {
   return useQuery({
     queryKey: [
       QUERY_KEYS.GOVERNORATE_LOGISTICS_CONFIG,
-      shippingCompanyId,
+      shippingCompany,
     ] as QueryKey,
     queryFn: async () => {
-      await new Promise((r) => setTimeout(r, 300));
-      return createMockGovernorateConfigs(shippingCompanyId!);
+      const { data } = await http.get<GovernorateLogisticsConfig[]>(
+        '/shipping/governorate-settings',
+        { params: { shippingCompany } }
+      );
+      return data;
     },
-    enabled: !!shippingCompanyId,
+    enabled: !!shippingCompany,
   });
 };
 
-// TODO: Replace mock with real API when backend implements PATCH /logistics/governorate-config/:shippingCompanyId
+/**
+ * Replaces one carrier's rows. The backend upserts what is sent and deletes
+ * only the governorates left out, so a carrier's accumulated shipping event
+ * points survive. `confirmEmpty` is required to submit no rows at all.
+ */
 export const useUpdateGovernorateLogisticsConfig = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: {
-      shippingCompanyId: number;
-      configs: {
-        governorateKey: string;
-        firstAttemptAfterDays: number;
-        shippingCompanyCost: number;
-        nonReceiptCost: number;
-      }[];
+    mutationFn: async (payload: {
+      shippingCompany: string;
+      rows: GovernorateLogisticsConfigRow[];
+      confirmEmpty?: boolean;
     }) => {
-      console.log('[useUpdateGovernorateLogisticsConfig] payload:', data);
-      await new Promise((r) => setTimeout(r, 500));
-      return { success: true };
+      const { data } = await http.put<GovernorateLogisticsConfig[]>(
+        `/shipping/governorate-settings/${payload.shippingCompany}`,
+        { rows: payload.rows, confirmEmpty: payload.confirmEmpty }
+      );
+      return data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: [
           QUERY_KEYS.GOVERNORATE_LOGISTICS_CONFIG,
-          variables.shippingCompanyId,
+          variables.shippingCompany,
         ],
       });
       toast.success('تم حفظ إعدادات المحافظات بنجاح');
+    },
+    onError: (err: any) => {
+      toast.error(
+        err?.response?.data?.message ?? 'تعذر حفظ إعدادات المحافظات'
+      );
     },
   });
 };

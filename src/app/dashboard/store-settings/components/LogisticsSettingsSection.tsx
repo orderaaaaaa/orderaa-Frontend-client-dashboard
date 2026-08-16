@@ -19,20 +19,23 @@ export function LogisticsSettingsSection() {
 
   const isLoading = isLoadingConfigs || isLoadingCompanies;
 
-  const activeConfigs = (shippingConfigs ?? [])
-    .filter((c) => c.isActive)
-    .filter((c, i, arr) => arr.findIndex((x) => x.shippingCompany === c.shippingCompany) === i);
-
-  const getCompanyLabel = (companyKey: string) => {
-    const company = shippingCompanies.find((c) => c.key === companyKey);
-    return company?.label ?? companyKey;
-  };
+  // Driven by the company lookup, which now returns one entry per company.
+  // It used to map over raw shipping configs and de-duplicate them here — that
+  // band-aid is gone (T23), and this list cannot repeat a carrier by
+  // construction. OTHERS is dropped because the follow-up delay query excludes
+  // it outright, so configuring it could never have an effect.
+  const configuredCompanies = new Set(
+    (shippingConfigs ?? []).filter((c) => c.isActive).map((c) => c.shippingCompany)
+  );
+  const activeCompanies = shippingCompanies.filter(
+    (company) => company.key !== 'OTHERS' && configuredCompanies.has(company.key)
+  );
 
   if (isLoading) {
     return <PageLoading size="sm" className="py-6 min-h-0" />;
   }
 
-  if (activeConfigs.length === 0) {
+  if (activeCompanies.length === 0) {
     return (
       <div className="flex flex-col gap-3">
         <div className="flex items-start gap-3">
@@ -65,22 +68,22 @@ export function LogisticsSettingsSection() {
       </div>
 
       <Accordion type="single" collapsible className="w-full">
-        {activeConfigs.map((config) => (
+        {activeCompanies.map((company) => (
           <AccordionItem
-            key={config.id}
-            value={config.shippingCompany}
+            key={company.key}
+            value={company.key}
             className="border border-gray-200 rounded-lg mb-3 last:mb-0 overflow-hidden"
           >
             <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
               <div className="flex items-center gap-3">
                 <LiaTruckSolid className="w-5 h-5 text-primary" />
                 <span className="font-semibold text-gray-900">
-                  {getCompanyLabel(config.shippingCompany)}
+                  {company.label}
                 </span>
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-2 pb-2">
-              <GovernorateConfigTable shippingCompanyId={config.id} />
+              <GovernorateConfigTable shippingCompany={company.key} />
             </AccordionContent>
           </AccordionItem>
         ))}

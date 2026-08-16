@@ -1,16 +1,22 @@
 import { Order, OrderEvent, OrderProduct } from './orders';
 
+/** Mirrors the backend GovernorateSettingResponseDto. */
 export interface GovernorateLogisticsConfig {
   id: number;
-  shippingCompanyId: number;
-  shippingCompanyName: string;
-  governorateKey: string;
-  governorateName: string;
-  firstAttemptAfterDays: number;
-  shippingCompanyCost: number;
-  nonReceiptCost: number;
-  createdAt: string;
-  updatedAt: string;
+  shippingCompany: string;
+  /** Canonical Arabic label, exactly as GET /lookups/governorates returns it. */
+  governorate: string;
+  firstAttemptDelay: number;
+  /** Decimal strings on the wire — never parse into a float. */
+  shippingCost: string;
+  nonReceiptCost: string;
+}
+
+export interface GovernorateLogisticsConfigRow {
+  governorate: string;
+  firstAttemptDelay: number;
+  shippingCost: string;
+  nonReceiptCost: string;
 }
 
 export type TrackingCardType = 'COURIER' | 'CALL_CENTER';
