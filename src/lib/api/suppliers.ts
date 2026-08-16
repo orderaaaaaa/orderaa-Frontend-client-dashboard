@@ -179,6 +179,12 @@ export interface ApproveSupplierInvoiceDto {
   products: ApproveSupplierInvoiceProductDto[];
   /** destination warehouse for the approved stock */
   warehouseId?: number;
+  /**
+   * Confirms that the invoiced quantity and the invoice's total amount may be
+   * rewritten to match the counted totals. Without it the server rejects a
+   * mismatch with 409 `INVOICE_QUANTITY_MISMATCH`. Per-request only.
+   */
+  acknowledgeQuantityChange?: boolean;
 }
 
 export async function getSuppliers(

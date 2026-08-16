@@ -18,6 +18,10 @@ const invoiceItemSchema = z.object({
   id: z.string(),
   productId: z.number(),
   name: z.string().min(1, 'اسم الصنف مطلوب'),
+  // Zero is allowed in the table: "add all variants" deliberately creates rows
+  // at zero for the user to fill, and rows still at zero are dropped on submit
+  // rather than persisted as phantom lines. At least one row must carry a
+  // quantity — enforced on the items array below.
   count: z.preprocess(
     (val) => {
       if (val === '' || val === null || val === undefined) return undefined;
@@ -25,7 +29,7 @@ const invoiceItemSchema = z.object({
     },
     z
       .number({ required_error: 'الكمية مطلوبة', invalid_type_error: 'الكمية مطلوبة' })
-      .min(1, 'الكمية يجب ان تكون اكبر من 0'),
+      .min(0, 'الكمية لا يمكن ان تكون سالبة'),
   ),
   unitPrice: z.preprocess(
     (val) => (val === '' || val === null || val === undefined ? 0 : Number(val)),
@@ -64,7 +68,10 @@ export const addInvoiceSchema = z.object({
   externalInvoiceNumber: z.string().optional(),
   items: z
     .array(invoiceItemSchema)
-    .min(1, 'يجب اضافة صنف واحد على الاقل'),
+    .min(1, 'يجب اضافة صنف واحد على الاقل')
+    .refine((items) => items.some((item) => (item.count ?? 0) > 0), {
+      message: 'يجب ادخال كمية لصنف واحد على الاقل',
+    }),
   invoiceImage: z
     .any()
     .optional()

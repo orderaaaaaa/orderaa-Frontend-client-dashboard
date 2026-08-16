@@ -208,6 +208,32 @@ const AddVariantsStep = memo(
           },
         },
         {
+          key: 'difference',
+          header: 'الفرق',
+          className: 'w-32',
+          // The per-product reconciliation: invoiced vs counted, live as it is
+          // typed, so a mismatch is visible here rather than a surprise at
+          // submit time — approving one rewrites the invoice's total amount.
+          render: (_value: unknown, row: ProductRow) => {
+            const entered = enteredByProduct(row.id as number);
+            const invoiced = row.quantity as number;
+            const difference = entered - invoiced;
+            return (
+              <span
+                className={clsx(
+                  'text-xs font-semibold whitespace-nowrap',
+                  difference === 0 ? 'text-green-600' : 'text-amber-600',
+                )}
+                title={`المفوتر ${invoiced} — المُدخل ${entered}`}
+              >
+                {difference === 0
+                  ? 'مطابق'
+                  : `${difference > 0 ? '+' : ''}${difference}`}
+              </span>
+            );
+          },
+        },
+        {
           key: 'actions',
           header: '',
           className: 'w-44',
@@ -231,7 +257,7 @@ const AddVariantsStep = memo(
           },
         },
       ],
-      [handleAddVariant, handleRowReceivedChange, productVariants],
+      [handleAddVariant, handleRowReceivedChange, productVariants, enteredByProduct],
     );
 
     const renderSubRow = useCallback(
@@ -319,13 +345,21 @@ const AddVariantsStep = memo(
           </p>
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3">
+          {/* A supplier really can ship a different amount, so a mismatch is
+              allowed through — it is confirmed at submit, not blocked here. */}
+          {!isCountComplete && totalEntered > 0 && (
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-amber-600">
+              <LiaExclamationCircleSolid className="w-4 h-4 shrink-0" />
+              الكميات المُدخلة لا تطابق المفوتر — سيُطلب تأكيد قبل الحفظ
+            </span>
+          )}
           <Button
             variant="default"
             size="lg"
             className="rounded-full font-semibold flex items-center gap-2 px-12"
             onClick={onNext}
-            disabled={nextDisabled || !isCountComplete}
+            disabled={nextDisabled || totalEntered === 0}
           >
             {NextIcon && <NextIcon className="w-5 h-5" />}
             {nextLabel ?? 'التالي'}

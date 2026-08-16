@@ -122,6 +122,44 @@ const AddVariantsModal = memo(
       setPickedPerGroup({});
     }, [combo, isComboAdded]);
 
+    /**
+     * Stages every combination the product has, so counting a full delivery is
+     * one action instead of one pick per size and colour. Combos already staged
+     * or already on the receipt are skipped, so pressing it twice is safe.
+     *
+     * Quantities start at zero — the counts almost always differ per variant,
+     * so filling them is the user's job, not something to guess by splitting.
+     */
+    const handleAddAllVariants = useCallback(() => {
+      if (groups.length === 0) return;
+
+      const combos = groups.reduce<VariantCombo[]>(
+        (acc, group) =>
+          acc.flatMap((combo) =>
+            group.options.map((option) => ({
+              attributeOptionIds: [...combo.attributeOptionIds, option.id],
+              attributeLabels: [...combo.attributeLabels, option.name],
+            })),
+          ),
+        [{ attributeOptionIds: [], attributeLabels: [] }],
+      );
+
+      setStaged((prev) => {
+        const taken = new Set([
+          ...existingKeys,
+          ...prev.map((v) => sortedKey(v.attributeOptionIds)),
+        ]);
+
+        const additions = combos
+          .filter((c) => !taken.has(sortedKey(c.attributeOptionIds)))
+          .map((c) => ({ ...c, quantity: 0 as number | '' }));
+
+        return [...prev, ...additions];
+      });
+
+      setPickedPerGroup({});
+    }, [groups, existingKeys]);
+
     const handleRemoveStaged = useCallback((key: string) => {
       setStaged((prev) => prev.filter((v) => sortedKey(v.attributeOptionIds) !== key));
     }, []);
@@ -200,7 +238,7 @@ const AddVariantsModal = memo(
                 </div>
               ))}
 
-              <div className="flex justify-start">
+              <div className="flex justify-start gap-2">
                 <Button
                   variant="outline"
                   size="sm"
@@ -210,6 +248,16 @@ const AddVariantsModal = memo(
                 >
                   <LiaPlusSolid className="w-4 h-4" />
                   {isComboAdded ? 'تمت إضافته' : 'أضف المتغير'}
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full font-semibold flex items-center gap-2 px-5"
+                  onClick={handleAddAllVariants}
+                >
+                  <LiaPlusSolid className="w-4 h-4" />
+                  إضافة كل المتغيرات
                 </Button>
               </div>
 

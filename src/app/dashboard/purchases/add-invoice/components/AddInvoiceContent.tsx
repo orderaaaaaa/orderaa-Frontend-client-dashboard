@@ -222,7 +222,12 @@ export function AddInvoiceContent() {
           paymentAmount: resolvedPaymentAmount,
           externalInvoiceNumber: data.externalInvoiceNumber,
           entryMode: invoiceMode === 'package' ? 'PACKAGE' : 'SINGULAR',
-          products: data.items.map((item) => ({
+          // Rows left at zero are dropped, never sent: "add all variants"
+          // creates a row per variant and the user fills only the ones the
+          // supplier actually shipped.
+          products: data.items
+            .filter((item) => (item.count ?? 0) > 0)
+            .map((item) => ({
             productId: item.productId,
             quantity: invoiceMode === 'package' ? (item.count ?? 0) * (item.piecesPerPackage ?? 0) : item.count,
             price: invoiceMode === 'package' ? (item.piecePrice ?? 0) : item.unitPrice,

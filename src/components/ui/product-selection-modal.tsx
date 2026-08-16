@@ -221,6 +221,63 @@ export default function ProductSelectionModal({
     [currentSelection, products],
   );
 
+  /**
+   * Adds every combination of the product's attribute options at once — buying
+   * from a supplier usually means taking every size and colour, and picking
+   * them one pair at a time is the tedium this removes.
+   *
+   * Combos already staged are skipped, so pressing it twice is safe; combos
+   * already on the invoice are filtered again by `handleConfirm`.
+   */
+  const handleAddAllVariants = useCallback(
+    (productId: number) => {
+      const product = products.find((p) => p.id === productId);
+      const groups = product?.variantOptions ?? [];
+      if (!groups.length) return;
+
+      // Cartesian product across the attributes, in attribute order.
+      const combos = groups.reduce<SelectedVariant[][]>(
+        (acc, group) =>
+          acc.flatMap((combo) =>
+            group.optionDetails.map((option) => [
+              ...combo,
+              {
+                attribute: group.attribute,
+                option: option.name,
+                attributeOptionId: option.id,
+              },
+            ]),
+          ),
+        [[]],
+      );
+
+      const attributes = groups.map((g) => g.attribute);
+      const sameCombo = (a: SelectedVariant[], b: SelectedVariant[]) =>
+        attributes.every(
+          (attr) =>
+            a.find((v) => v.attribute === attr)?.option ===
+            b.find((v) => v.attribute === attr)?.option,
+        );
+
+      setAddedCombos((prev) => {
+        const next = new Map(prev);
+        const existing = next.get(productId) ?? [];
+        const missing = combos.filter(
+          (combo) => !existing.some((staged) => sameCombo(staged, combo)),
+        );
+        next.set(productId, [...existing, ...missing]);
+        return next;
+      });
+
+      setCurrentSelection((prev) => {
+        const next = new Map(prev);
+        next.set(productId, {});
+        return next;
+      });
+    },
+    [products],
+  );
+
   const handleRemoveCombo = useCallback(
     (productId: number, comboIndex: number) => {
       setAddedCombos((prev) => {
@@ -431,17 +488,30 @@ export default function ProductSelectionModal({
                           </div>
                         ))}
 
-                        <Button
-                          type="button"
-                          variant="default"
-                          size="sm"
-                          disabled={!allAttributesFilled}
-                          className="rounded-full text-xs h-7 px-4 w-fit self-end"
-                          onClick={() => handleAddCombo(product.id, allAttributes)}
-                        >
-                          <LiaPlusSolid className="w-4 h-4" />
-                          اضافة
-                        </Button>
+                        <div className="flex items-center gap-2 w-fit self-end">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="rounded-full text-xs h-7 px-4"
+                            onClick={() => handleAddAllVariants(product.id)}
+                          >
+                            <LiaPlusSolid className="w-4 h-4" />
+                            إضافة كل المتغيرات
+                          </Button>
+
+                          <Button
+                            type="button"
+                            variant="default"
+                            size="sm"
+                            disabled={!allAttributesFilled}
+                            className="rounded-full text-xs h-7 px-4"
+                            onClick={() => handleAddCombo(product.id, allAttributes)}
+                          >
+                            <LiaPlusSolid className="w-4 h-4" />
+                            اضافة
+                          </Button>
+                        </div>
 
                         {productCombos.length > 0 && (() => {
                           const existingCombosForProduct = existingVariantCombos?.get(product.id) ?? [];
