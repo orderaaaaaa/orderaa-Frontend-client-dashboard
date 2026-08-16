@@ -160,6 +160,11 @@ export const navigation: NavigationItem[] = [
     icon: LiaTruckSolid,
   },
   {
+    name: 'بيك اب',
+    href: '/dashboard/orders/pickups',
+    icon: LiaTruckSolid,
+  },
+  {
     name: 'الربط مع شركات التاكيد الالي',
     href: '/dashboard/link-auto-confirmation',
     icon: LiaRobotSolid,
