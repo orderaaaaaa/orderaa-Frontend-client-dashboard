@@ -140,6 +140,11 @@ export const navigation: NavigationItem[] = [
     icon: LiaTruckSolid,
   },
   {
+    name: 'مناديب الشحن وشركات الشحن',
+    href: '/dashboard/shipping-providers',
+    icon: LiaTruckSolid,
+  },
+  {
     name: 'الربط مع شركات التاكيد الالي',
     href: '/dashboard/link-auto-confirmation',
     icon: LiaRobotSolid,
