@@ -754,6 +754,9 @@ export function PrintOrdersContent() {
                 filterParams={orderDetailsFilterParams}
                 cancelReason={order.cancelReason}
                 cancelNotes={order.cancelNotes}
+                collectedAmount={order.collectedAmount}
+                isCollected={order.isCollected}
+                isPartiallyPaid={order.isPartiallyPaid}
                 isPrinted={order.isPrinted}
                 printCount={order.printCount}
                 disableNavigation

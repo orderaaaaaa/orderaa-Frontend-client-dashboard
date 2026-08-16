@@ -531,6 +531,9 @@ function AllOrdersContent() {
                 shippingCompany={order.shippingCompany}
                 productVariants={order.order_products.map((op) => mapOrderProductToVariantInfo(op))}
                 price={order.totalCost}
+                collectedAmount={order.collectedAmount}
+                isCollected={order.isCollected}
+                isPartiallyPaid={order.isPartiallyPaid}
                 shippingType={order.shippingType}
                 trys={order.numberOfTriesToReach}
                 status={order.status}

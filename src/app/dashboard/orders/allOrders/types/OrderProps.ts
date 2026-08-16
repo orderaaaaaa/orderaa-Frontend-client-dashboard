@@ -30,6 +30,10 @@ export interface OrderCardProps {
   filterParams?: string;
   cancelReason?: string | null;
   cancelNotes?: string | null;
+  /** T8: decimal strings from the API, shown as-is. */
+  collectedAmount?: string | null;
+  isCollected?: boolean;
+  isPartiallyPaid?: boolean;
   isPrinted?: boolean;
   printCount?: number;
   disableNavigation?: boolean;

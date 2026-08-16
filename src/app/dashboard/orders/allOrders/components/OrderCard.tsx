@@ -59,6 +59,9 @@ export default function OrderCard({
   cancelReason,
   cancelNotes,
   postponedUntil,
+  collectedAmount,
+  isCollected = false,
+  isPartiallyPaid = false,
   isPrinted = false,
   printCount = 0,
   disableNavigation = false,
@@ -312,6 +315,19 @@ export default function OrderCard({
             <span className="text-base font-medium text-black">
               {price} جنيه
             </span>
+            {/* T8. Absence is the common case and the card is already dense,
+                so an uncollected order shows nothing at all. مدفوع جزئياً is
+                visually distinct from محصل so staff keep chasing the balance. */}
+            {isPartiallyPaid ? (
+              <span className="flex items-center gap-1 bg-amber-100 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                <LiaExclamationCircleSolid className="w-3.5 h-3.5" />
+                مدفوع جزئياً{collectedAmount ? ` ${collectedAmount}` : ''}
+              </span>
+            ) : isCollected ? (
+              <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                محصل{collectedAmount ? ` ${collectedAmount} جنيه` : ''}
+              </span>
+            ) : null}
             {shippingType && SHIPPING_TYPE_BADGE[shippingType] && (() => {
               const badge = SHIPPING_TYPE_BADGE[shippingType];
               return (

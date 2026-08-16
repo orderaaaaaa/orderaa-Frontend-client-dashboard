@@ -45,9 +45,44 @@ export function PricingSection({
   const { hasPermission } = usePermissionCheck();
   const canEdit = hasPermission('orders:update');
 
+  // T8. Every amount is a decimal string from the API and is rendered as-is —
+  // parsing it into a number to do arithmetic here would put money through a
+  // float, and would also let this page disagree with the order card.
+  const shippingDeduction = order.shippingCost ? String(order.shippingCost) : '0';
+
   return (
     <div className={`flex flex-col justify-start gap-2 ${className}`}>
       <h2 className="text-primary font-semibold">السعر و الدفع</h2>
+
+      {order.isCollected && (
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-gray-200 bg-gray-50/70 px-4 py-3">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-xs text-gray-500">المبلغ المحصل</span>
+            <span className="text-sm font-bold text-gray-900">
+              {order.collectedAmount} جنيه
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-0.5">
+            <span className="text-xs text-gray-500">المبلغ المورد</span>
+            <span className="text-sm font-bold text-green-700">
+              {order.suppliedAmount} جنيه
+            </span>
+            {/* The 900 → 800 arithmetic stays legible instead of being a bare
+                number. A zero deduction is stated rather than implied. */}
+            <span className="text-[11px] text-gray-500">
+              {order.collectedAmount} − {shippingDeduction} (شحن)
+            </span>
+          </div>
+
+          {order.isPartiallyPaid && (
+            <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+              مدفوع جزئياً — ما زال هناك مبلغ مستحق
+            </span>
+          )}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <EditableTextField
           label="السعر"

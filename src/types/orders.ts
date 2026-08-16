@@ -372,6 +372,19 @@ export interface Order {
   coupon?: string | null;
   couponDiscount?: number | null;
 
+  /* T8 — the order's money state. Every amount is a decimal STRING; never
+     parse them into numbers to do arithmetic. `collectedAmount`,
+     `suppliedAmount`, `isCollected` and `isPartiallyPaid` are derived
+     server-side so the card and the details page cannot disagree. */
+  settlementAmount?: string | null;
+  settlementRecordedAt?: string | null;
+  settlementResolved?: boolean;
+  prepaidAmount?: string | null;
+  collectedAmount?: string | null;
+  suppliedAmount?: string | null;
+  isCollected?: boolean;
+  isPartiallyPaid?: boolean;
+
   // Shipping address
   governorate?: string;
   city?: string;
