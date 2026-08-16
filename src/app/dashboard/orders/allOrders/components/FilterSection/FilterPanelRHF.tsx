@@ -9,6 +9,7 @@ import MultiSelectDropdown from "@/components/ui/MultiSelectDropdown";
 import { DatePicker } from "@/components/ui/datepicker";
 import { useGovernoratesQuery, useCitiesQuery } from "@/services/lookups";
 import { useCancellationReasons } from "@/services/orders";
+import { useProductAttributeOptionsQuery } from "@/services/products";
 import useShippingCompanies from "@/hooks/useShippingCompanies";
 import { useQuery } from "@tanstack/react-query";
 import http from "@/lib/api/http";
@@ -33,6 +34,9 @@ export const FILTER_DEFINITIONS: FilterDefinition[] = [
   { key: 'executionDate', label: 'تاريخ التنفيذ', type: 'date' },
   { key: 'employeeName', label: 'اسم الموظف', type: 'placeholder' },
   { key: 'productId', label: 'المنتج', type: 'select' },
+  // Depends on a chosen product: option ids belong to one, so the control
+  // stays disabled until المنتج is set, and clears when it changes.
+  { key: 'variantOptionIds', label: 'المتغيرات', type: 'select' },
   { key: 'governorate', label: 'المحافظة', type: 'select' },
   // المنطقة is populated from the cities lookup, so it submits `city`. It used
   // to submit `area`, a different column that is empty on every order.
@@ -127,6 +131,7 @@ export default function FilterPanel({
   onRemoveFilter,
 }: Props) {
   const isProductActive = activeFilters.includes('productId');
+  const isVariantActive = activeFilters.includes('variantOptionIds');
   const isGovernorateActive = activeFilters.includes('governorate');
   const isCityActive = activeFilters.includes('city');
   const isCancellationReasonActive = activeFilters.includes('cancellationReasons');
@@ -171,6 +176,18 @@ export default function FilterPanel({
     enabled: !!selectedProductId,
     staleTime: 5 * 60 * 1000,
   });
+
+  // The product's attribute options — the same endpoint the products page's
+  // variant popup uses. Soft-deleted options are excluded by the endpoint, so
+  // a discontinued colour is not offered while historic orders still match it.
+  const { data: attributeOptions, isLoading: isLoadingVariantOptions } =
+    useProductAttributeOptionsQuery(
+      isVariantActive && selectedProductId ? Number(selectedProductId) : undefined,
+    );
+  const variantGroups = React.useMemo(
+    () => (attributeOptions?.options ?? []).filter((g) => (g.options ?? []).length > 0),
+    [attributeOptions],
+  );
   const { data: governorates = [] } = useGovernoratesQuery(isGovernorateActive || isCityActive);
   const { data: cities = [], isLoading: isLoadingCities } = useCitiesQuery(isCityActive ? selectedGovernorate : undefined);
   const { data: cancellationReasons = [] } = useCancellationReasons(isCancellationReasonActive);
@@ -289,7 +306,14 @@ export default function FilterPanel({
                 <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter}>
                   <SearchableSelect
                     value={field.value || ''}
-                    onChange={field.onChange}
+                    onChange={(value) => {
+                      field.onChange(value);
+                      // Options belong to the product that was chosen, so a
+                      // different product invalidates them.
+                      if (setValue) {
+                        setValue('variantOptionIds', []);
+                      }
+                    }}
                     onBlur={field.onBlur}
                     options={productOptions}
                     displayValue={selectedProductName}
@@ -302,6 +326,82 @@ export default function FilterPanel({
                   />
                 </FilterChip>
               )}
+            />
+          );
+        }
+        if (key === 'variantOptionIds') {
+          return (
+            <Controller
+              key={key}
+              name="variantOptionIds"
+              control={control}
+              // Typed explicitly: react-hook-form's own types do not resolve in
+              // this project, so an inferred `field` would land as `any`.
+              render={({
+                field,
+              }: {
+                field: { value: number[] | undefined; onChange: (v: number[]) => void };
+              }) => {
+                const selected: number[] = Array.isArray(field.value) ? field.value : [];
+                const toggle = (optionId: number) =>
+                  field.onChange(
+                    selected.includes(optionId)
+                      ? selected.filter((id) => id !== optionId)
+                      : [...selected, optionId],
+                  );
+
+                return (
+                  <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter}>
+                    {!selectedProductId ? (
+                      <span className="text-xs text-gray-500 py-2 block">
+                        اختر منتجًا أولاً لعرض متغيراته
+                      </span>
+                    ) : isLoadingVariantOptions ? (
+                      <span className="text-xs text-gray-500 py-2 block">جاري التحميل...</span>
+                    ) : variantGroups.length === 0 ? (
+                      <span className="text-xs text-gray-500 py-2 block">
+                        لا توجد متغيرات لهذا المنتج
+                      </span>
+                    ) : (
+                      <div className="flex flex-col gap-2 py-1">
+                        {variantGroups.map((group) => (
+                          <div key={group.id} className="flex flex-wrap items-center gap-1.5">
+                            <span className="text-xs font-semibold text-gray-500 min-w-14">
+                              {group.name}:
+                            </span>
+                            {group.options.map((option) => {
+                              const isSelected = selected.includes(option.id);
+                              return (
+                                <button
+                                  key={option.id}
+                                  type="button"
+                                  onClick={() => toggle(option.id)}
+                                  className={
+                                    isSelected
+                                      ? 'rounded-full text-xs px-3 py-1 bg-primary text-white font-medium'
+                                      : 'rounded-full text-xs px-3 py-1 border border-gray-300 text-gray-600 hover:border-primary hover:text-primary'
+                                  }
+                                >
+                                  {option.name}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        ))}
+                        {selected.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => field.onChange([])}
+                            className="self-start text-xs text-red-600 hover:underline"
+                          >
+                            مسح كل المتغيرات ({selected.length})
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </FilterChip>
+                );
+              }}
             />
           );
         }

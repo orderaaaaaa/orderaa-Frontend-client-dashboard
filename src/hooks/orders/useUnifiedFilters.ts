@@ -63,6 +63,10 @@ export function buildApiFiltersFromUrlState(urlFilters: UrlFilterState): FilterO
     }
     if (localFilters.productId) {
         filters.productId = localFilters.productId;
+        // Only meaningful alongside a product; the API ignores them otherwise.
+        if (localFilters.variantOptionIds?.length) {
+            filters.variantOptionIds = localFilters.variantOptionIds;
+        }
     }
     if (localFilters.storeId) {
         filters.storeId = Number(localFilters.storeId);
@@ -99,6 +103,7 @@ export function useUnifiedFilters() {
         address: '',
         executionDate: '',
         productId: '',
+            variantOptionIds: [],
         storeId: '',
         cancellationReasons: [],
     });
@@ -185,6 +190,9 @@ export function useUnifiedFilters() {
 
         if (debouncedFilters.productId) {
             filters.productId = debouncedFilters.productId;
+            if (debouncedFilters.variantOptionIds?.length) {
+                filters.variantOptionIds = debouncedFilters.variantOptionIds;
+            }
         }
 
         if (debouncedFilters.cancellationReasons?.length) {
@@ -221,6 +229,7 @@ export function useUnifiedFilters() {
             address: '',
             executionDate: '',
             productId: '',
+            variantOptionIds: [],
             cancellationReasons: [],
         });
         setFromDateInternal(null);
