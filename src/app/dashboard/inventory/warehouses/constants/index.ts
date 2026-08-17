@@ -88,3 +88,43 @@ export const WAREHOUSE_TABS = {
   WORKFLOWS: 'workflows',
   MOVEMENTS: 'movements',
 } as const;
+
+/**
+ * T28 — the transitions T14 seeded a default restock rule for: a packaged order
+ * bouncing back to the call centre.
+ *
+ * These are called out by name in the coverage panel because they are the ones
+ * with real inventory consequences. A product or variant that takes over its
+ * own scope stops inheriting the global restock rule entirely, and if nothing in
+ * its own scope covers these, stock silently stays out of the warehouse — the
+ * exact failure T14 existed to fix.
+ *
+ * CONFIRMED is a valid SOURCE but not a restock TARGET: it is where packaging
+ * begins, so an order back at CONFIRMED is still with packaging (T14 decision 2).
+ */
+export const RESTOCK_SOURCE_STATUSES: OrderStatus[] = [
+  OrderStatus.CONFIRMED,
+  OrderStatus.WAITING_FOR_PACKAGING,
+  OrderStatus.PREPARED,
+  OrderStatus.WAITING_FOR_APPROVAL,
+];
+
+export const RESTOCK_TARGET_STATUSES: OrderStatus[] = [
+  OrderStatus.NEW_ORDER,
+  OrderStatus.WHATSAPP_CONFIRMED,
+  OrderStatus.ATTEMPTED,
+  OrderStatus.WAITING_FOR_PAYMENT,
+  OrderStatus.WHATSAPP,
+  OrderStatus.CALL_AGAIN,
+  OrderStatus.EDIT_REJECTED,
+  OrderStatus.POSTPONED,
+  OrderStatus.STOPPED,
+  OrderStatus.CANCELLED,
+  OrderStatus.UNCOMPLETED,
+];
+
+export const RULE_SCOPE_OPTIONS = [
+  { key: 'GLOBAL', value: 'كل المنتجات' },
+  { key: 'PRODUCT', value: 'منتج محدد' },
+  { key: 'VARIANT', value: 'متغير محدد' },
+];

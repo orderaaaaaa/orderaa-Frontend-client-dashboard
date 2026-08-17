@@ -29,6 +29,11 @@ import {
   INSUFFICIENT_STOCK_OPTIONS,
   WORKFLOW_ORDER_STATUSES,
 } from '../constants';
+import { StockRuleCoverageNotice } from './StockRuleCoverageNotice';
+import {
+  StockRuleScopeSelector,
+  type ScopeSelection,
+} from './StockRuleScopeSelector';
 
 interface RuleRow {
   /** undefined for rows that have not been saved yet */
@@ -90,7 +95,22 @@ const fromStatusOptions = [
 ];
 
 export function StockWorkflowsTab() {
-  const { data, isLoading, isError } = useStockWorkflowsQuery();
+  // T28 — the screen edits ONE scope at a time. The query filter is exact, so
+  // what is listed is exactly what governs this scope: the global rules are not
+  // mixed in, because whether this scope has rules of its own is precisely what
+  // decides whether the global ones apply to it at all.
+  const [scope, setScope] = useState<ScopeSelection>({ scope: 'GLOBAL' });
+
+  const scopeIsReady =
+    scope.scope === 'GLOBAL' ||
+    (scope.scope === 'PRODUCT' && scope.productId != null) ||
+    (scope.scope === 'VARIANT' && scope.variantId != null);
+
+  const { data, isLoading, isError } = useStockWorkflowsQuery(
+    scope.scope === 'GLOBAL'
+      ? undefined
+      : { productId: scope.productId, variantId: scope.variantId }
+  );
   const { options: warehouseOptions } = useWarehouseOptions();
 
   const createMutation = useCreateStockWorkflowMutation();
@@ -101,20 +121,56 @@ export function StockWorkflowsTab() {
   const [pendingDelete, setPendingDelete] = useState<number | null>(null);
   const [savingKey, setSavingKey] = useState<string | null>(null);
 
+  /**
+   * Narrow to EXACTLY this scope's rules.
+   *
+   * The server filter already does this for a product or variant, but an
+   * unfiltered request returns every rule the merchant has — including the
+   * scoped ones — so the global view has to exclude them here. Showing a
+   * product's rule under "كل المنتجات" would suggest it applies everywhere,
+   * which is the opposite of what it does.
+   */
+  const scopedRules = useMemo(() => {
+    if (!data) return [];
+    if (scope.scope === 'GLOBAL') {
+      return data.filter(
+        (rule) => rule.productId === null && rule.variantId === null
+      );
+    }
+    if (scope.scope === 'PRODUCT') {
+      return scope.productId == null
+        ? []
+        : data.filter((rule) => rule.productId === scope.productId);
+    }
+    return scope.variantId == null
+      ? []
+      : data.filter((rule) => rule.variantId === scope.variantId);
+  }, [data, scope]);
+
+  const scopeKey = `${scope.scope}:${scope.productId ?? ''}:${scope.variantId ?? ''}`;
+
+  // Switching scope discards in-progress rows: an unsaved row carries the old
+  // scope's meaning, and silently re-parenting it to the new scope would create
+  // a rule the user never asked for.
+  useEffect(() => {
+    setRows([]);
+  }, [scopeKey]);
+
   // Reconcile server rules into local rows WITHOUT discarding work in progress:
   // a refetch (triggered by every save/delete) must not wipe unsaved rows or
   // dirty edits the user is still typing.
   useEffect(() => {
-    if (!data) return;
     setRows((current) => {
       const dirtyById = new Map(
         current.filter((row) => row.dirty && row.id).map((row) => [row.id, row])
       );
       const unsaved = current.filter((row) => !row.id);
-      const serverRows = data.map((rule) => dirtyById.get(rule.id) ?? toRow(rule));
+      const serverRows = scopedRules.map(
+        (rule) => dirtyById.get(rule.id) ?? toRow(rule)
+      );
       return [...serverRows, ...unsaved];
     });
-  }, [data]);
+  }, [scopedRules]);
 
   // Flag only the SECOND and later occurrences: the already-saved first row
   // must not turn red because someone started typing a clashing new row.
@@ -183,6 +239,7 @@ export function StockWorkflowsTab() {
     setSavingKey(rowKey);
     try {
       if (row.id) {
+        // Scope is fixed at creation, so an update never carries it.
         await updateMutation.mutateAsync({ id: row.id, body });
         // Clear dirty so the merge effect stops preferring the local copy
         // and the Save button confirms the write landed.
@@ -192,7 +249,12 @@ export function StockWorkflowsTab() {
           )
         );
       } else {
-        const created = await createMutation.mutateAsync(body);
+        const created = await createMutation.mutateAsync({
+          ...body,
+          // The new rule belongs to whichever scope the screen is editing.
+          ...(scope.scope === 'PRODUCT' ? { productId: scope.productId } : {}),
+          ...(scope.scope === 'VARIANT' ? { variantId: scope.variantId } : {}),
+        });
         // Adopt the server row (with its id) — otherwise the refetch brings
         // the rule back as a NEW row while the id-less local row survives
         // the merge, leaving a duplicate ghost flagged as a conflict.
@@ -228,9 +290,12 @@ export function StockWorkflowsTab() {
     }
   };
 
-  if (isLoading) {
-    return <PageLoading size="sm" className="min-h-0 py-10" />;
-  }
+  const scopeLabel =
+    scope.scope === 'GLOBAL'
+      ? 'كل المنتجات'
+      : scope.scope === 'PRODUCT'
+        ? 'منتج محدد'
+        : 'متغير محدد';
 
   if (isError) {
     return (
@@ -240,12 +305,49 @@ export function StockWorkflowsTab() {
     );
   }
 
+  const scopePicker = (
+    <StockRuleScopeSelector value={scope} onChange={setScope} />
+  );
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {scopePicker}
+        <PageLoading size="sm" className="min-h-0 py-10" />
+      </div>
+    );
+  }
+
+  // A half-chosen scope must not fall back to the global list — the rules shown
+  // would not be the rules being edited.
+  if (!scopeIsReady) {
+    return (
+      <div className="space-y-4">
+        {scopePicker}
+        <p className="py-8 text-center text-sm text-gray-500">
+          {scope.scope === 'PRODUCT'
+            ? 'اختر منتجًا لعرض قواعده الخاصة.'
+            : 'اختر منتجًا ثم متغيرًا لعرض قواعده الخاصة.'}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <p className="text-sm text-gray-500">
         حدد حركة المخزون التلقائية عند تغيير حالة الطلب. القواعد غير المعرفة لا
         تحرك المخزون.
       </p>
+
+      {scopePicker}
+
+      {scope.scope !== 'GLOBAL' && (
+        <StockRuleCoverageNotice
+          rules={scopedRules}
+          scopeLabel={scopeLabel}
+        />
+      )}
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm" dir="rtl">
@@ -428,7 +530,9 @@ export function StockWorkflowsTab() {
 
       {rows.length === 0 && (
         <p className="py-8 text-center text-sm text-gray-500">
-          لا توجد قواعد بعد — لن يتحرك المخزون تلقائيًا عند تغيير حالات الطلبات.
+          {scope.scope === 'GLOBAL'
+            ? 'لا توجد قواعد بعد — لن يتحرك المخزون تلقائيًا عند تغيير حالات الطلبات.'
+            : 'لا توجد قواعد خاصة بهذا النطاق — تُطبق عليه القواعد العامة. بإضافة أول قاعدة هنا ستتوقف القواعد العامة عنه تمامًا.'}
         </p>
       )}
 

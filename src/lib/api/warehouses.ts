@@ -116,6 +116,13 @@ export interface StockWorkflowApiItem {
    */
   fromStatuses: OrderStatus[];
   toStatuses: OrderStatus[];
+  /**
+   * T28 — SCOPE, derived from these two rather than sent as an enum:
+   * both null = global, productId = product-scoped, variantId = variant-scoped.
+   * Both set is impossible (400, plus a database CHECK constraint).
+   */
+  productId: number | null;
+  variantId: number | null;
   fromWarehouseId: number;
   toWarehouseId: number;
   allowNegative: boolean;
@@ -124,24 +131,45 @@ export interface StockWorkflowApiItem {
   updatedAt: string;
   fromWarehouse: WarehouseRef;
   toWarehouse: WarehouseRef;
+  product: { id: number; name: string } | null;
+  variant: {
+    id: number;
+    combinationKey: string;
+    productId: number;
+    product?: { id: number; name: string };
+  } | null;
 }
 
 export interface GetStockWorkflowsParams {
   toStatus?: OrderStatus;
   warehouseId?: number;
+  /**
+   * EXACT scope filters — asking for a product's rules returns only that
+   * product's, never the global ones. That is what lets the screen show whether
+   * a scope has rules of its own, which is what decides whether the global
+   * rules apply to it at all.
+   */
+  productId?: number;
+  variantId?: number;
 }
 
 export interface CreateStockWorkflowDto {
   /** Empty or omitted = creation rule. */
   fromStatuses?: OrderStatus[];
   toStatuses: OrderStatus[];
+  /** T28 scope — send at most one; neither means a global rule. */
+  productId?: number;
+  variantId?: number;
   fromWarehouseId: number;
   toWarehouseId: number;
   allowNegative?: boolean;
   onInsufficient?: InsufficientStockBehavior;
 }
 
-export type UpdateStockWorkflowDto = Partial<CreateStockWorkflowDto>;
+/** Scope is fixed at creation — delete and recreate to move a rule's scope. */
+export type UpdateStockWorkflowDto = Partial<
+  Omit<CreateStockWorkflowDto, 'productId' | 'variantId'>
+>;
 
 export interface StockMovementVariantRef {
   id: number;
