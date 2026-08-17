@@ -1,6 +1,6 @@
 'use client';
 
-import { LiaExclamationTriangleSolid } from 'react-icons/lia';
+import { LiaBanSolid, LiaExclamationCircleSolid } from 'react-icons/lia';
 import type { VariantAvailability } from '@/lib/api/warehouses';
 
 interface Props {
@@ -66,9 +66,17 @@ export function VariantAvailabilityList({ variants, selected }: Props) {
                   : 'border-emerald-200 bg-emerald-50 text-emerald-800',
               ].join(' ')}
             >
-              {unavailable && (
-                <LiaExclamationTriangleSolid className="size-3.5 shrink-0" />
-              )}
+              {/* Two distinct states, deliberately not one warning glyph: a
+                  BAN reads as "you cannot pick this" (the product forbids it),
+                  while a plain alert reads as "none left, but you may still
+                  pick it". Using the same icon for both hid the difference
+                  that decides whether the agent can proceed. */}
+              {unavailable &&
+                (variant.selectable ? (
+                  <LiaExclamationCircleSolid className="size-3.5 shrink-0" />
+                ) : (
+                  <LiaBanSolid className="size-3.5 shrink-0" />
+                ))}
               <span>
                 {variant.variantLabel}: {variant.available}
               </span>

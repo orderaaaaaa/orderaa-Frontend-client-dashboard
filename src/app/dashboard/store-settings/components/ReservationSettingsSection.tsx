@@ -1,4 +1,8 @@
-import { LiaWarehouseSolid, LiaExclamationTriangleSolid } from 'react-icons/lia';
+import {
+  LiaWarehouseSolid,
+  LiaLockOpenSolid,
+  LiaLockSolid,
+} from 'react-icons/lia';
 import { UseFormRegister, FieldErrors } from 'react-hook-form';
 import { OrderSettingsFormData } from '../schemas/store';
 import Input from '@/components/ui/Input';
@@ -97,7 +101,15 @@ export function ReservationSettingsSection({
       {/* T27 — the store-level confirmation rule. A product can override it. */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3 flex-1 min-w-0">
-          <LiaExclamationTriangleSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
+          {/* The icon tracks the switch: an open padlock when confirming
+              out-of-stock is permitted, a closed one when it is blocked. A
+              static warning triangle described neither state and read as if
+              the setting itself were dangerous. */}
+          {allowConfirmOutOfStock ? (
+            <LiaLockOpenSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
+          ) : (
+            <LiaLockSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
+          )}
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-medium text-gray-700">
               السماح بتأكيد الطلبات غير المتوفرة بالمخزون

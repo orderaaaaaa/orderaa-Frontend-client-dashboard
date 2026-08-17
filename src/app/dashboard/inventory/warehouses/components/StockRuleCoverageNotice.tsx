@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { LiaExclamationTriangleSolid } from 'react-icons/lia';
+import { LiaUnlinkSolid } from 'react-icons/lia';
 import { OrderStatus } from '@/types/orders';
 import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
 import type { StockWorkflowApiItem } from '@/lib/api/warehouses';
@@ -68,7 +68,11 @@ export function StockRuleCoverageNotice({ rules, scopeLabel }: Props) {
       dir="rtl"
     >
       <div className="flex items-start gap-2">
-        <LiaExclamationTriangleSolid className="mt-0.5 size-4 shrink-0" />
+        {/* A broken link, not a warning triangle: the message is that this
+            scope has SEVERED its inheritance from the rules above it. A hazard
+            glyph says "something is wrong"; nothing is wrong, the merchant
+            chose this — what they need to see is that the chain is cut. */}
+        <LiaUnlinkSolid className="mt-0.5 size-4 shrink-0" />
         <div className="space-y-2 text-xs leading-5">
           <p className="font-semibold">
             هذا النطاق ({scopeLabel}) له قواعده الخاصة، لذلك لا تُطبق عليه
