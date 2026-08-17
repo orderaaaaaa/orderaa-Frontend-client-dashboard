@@ -19,6 +19,15 @@ import {
   LiaUndoAltSolid,
   LiaRobotSolid,
   LiaUserShieldSolid,
+  LiaTruckMovingSolid,
+  LiaHandHoldingUsdSolid,
+  LiaHourglassEndSolid,
+  LiaFileInvoiceSolid,
+  LiaTruckLoadingSolid,
+  LiaTagsSolid,
+  LiaBoxesSolid,
+  LiaUserPlusSolid,
+  LiaIndustrySolid,
 } from 'react-icons/lia';
 import {
   House,
@@ -142,27 +151,27 @@ export const navigation: NavigationItem[] = [
   {
     name: 'مناديب الشحن وشركات الشحن',
     href: '/dashboard/shipping-providers',
-    icon: LiaTruckSolid,
+    icon: LiaTruckMovingSolid,
   },
   {
     name: 'جميع التحصيلات',
     href: '/dashboard/orders/settlement/collections',
-    icon: LiaTruckSolid,
+    icon: LiaHandHoldingUsdSolid,
   },
   {
     name: 'الطلبات المتأخرة',
     href: '/dashboard/orders/delayed',
-    icon: LiaTruckSolid,
+    icon: LiaHourglassEndSolid,
   },
   {
     name: 'استلامات المرتجعات',
     href: '/dashboard/orders/returns-receiving/receipts',
-    icon: LiaTruckSolid,
+    icon: LiaFileInvoiceSolid,
   },
   {
     name: 'بيك اب',
     href: '/dashboard/orders/pickups',
-    icon: LiaTruckSolid,
+    icon: LiaTruckLoadingSolid,
   },
   {
     name: 'الربط مع شركات التاكيد الالي',
@@ -182,7 +191,7 @@ export const navigation: NavigationItem[] = [
   {
     name: 'المنتجات',
     href: '/dashboard/products',
-    icon: LiaBoxOpenSolid,
+    icon: LiaTagsSolid,
   },
   {
     name: 'مشتريات',
@@ -204,7 +213,7 @@ export const navigation: NavigationItem[] = [
   {
     name: 'الموردين',
     href: '/dashboard/purchases/all-suppliers',
-    icon: LiaUsersSolid,
+    icon: LiaIndustrySolid,
     children: [
       {
         name: 'جميع الموردين',
@@ -214,14 +223,14 @@ export const navigation: NavigationItem[] = [
       {
         name: 'اضافة مورد',
         href: '/dashboard/purchases/add-supplier',
-        icon: LiaPlusSolid,
+        icon: LiaUserPlusSolid,
       },
     ],
   },
   {
     name: 'المخزون',
     href: '/dashboard/inventory',
-    icon: LiaWarehouseSolid,
+    icon: LiaBoxesSolid,
     children: [
       {
         name: 'إدارة المخازن',
