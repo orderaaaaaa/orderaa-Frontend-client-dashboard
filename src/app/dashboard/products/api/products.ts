@@ -43,11 +43,26 @@ export const productsApi = {
     return response.data.options ?? [];
   },
 
-  updateVariantsOptions: async (
+  /**
+   * T22 — المواصفات, product-wide key/value facts. This used to PUT
+   * /products/:id with a `variants` body, which shared an endpoint with the
+   * variants popup and silently overwrote it. It now has its own route and
+   * its own table, so the two concepts cannot collide.
+   */
+  updateProductSpecifications: async (
     productId: number,
-    payload: UpdateVariantsPayload,
+    specifications: { name: string; value: string }[],
   ) => {
-    await http.put(`/products/${productId}`, payload);
+    await http.put(`/products/${productId}/specifications`, {
+      specifications,
+    });
+  },
+
+  getProductSpecifications: async (productId: number) => {
+    const response = await http.get<
+      { id: number; name: string; value: string; position: number }[]
+    >(`/products/${productId}/specifications`);
+    return response.data ?? [];
   },
 
   updateProductAttributes: async (

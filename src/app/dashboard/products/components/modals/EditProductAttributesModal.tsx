@@ -133,7 +133,7 @@ const EditProductAttributesModal: React.FC<EditProductAttributesModalProps> = ({
     <BaseModal
       isOpen={isOpen}
       onClose={handleClose}
-      title="تعديل خصائص المنتج والخيارات"
+      title="تعديل متغيرات المنتج"
       showFooter={false}
       isLoading={isPending}
       maxWidth="md:max-w-2xl"
@@ -147,12 +147,12 @@ const EditProductAttributesModal: React.FC<EditProductAttributesModalProps> = ({
             <div className="flex gap-3 items-start mb-3">
               <div className="flex-1">
                 <label className="block text-xs text-gray-500 mb-1">
-                  الخاصية
+                  المتغير
                 </label>
                 <Input
                   value={attr.name}
                   onChange={(e) => updateAttrName(attrIdx, e.target.value)}
-                  placeholder="الخاصية (مثلاً: الخامة)"
+                  placeholder="المتغير (مثلاً: اللون)"
                   disabled={isPending}
                 />
               </div>
@@ -179,7 +179,7 @@ const EditProductAttributesModal: React.FC<EditProductAttributesModalProps> = ({
                     onChange={(e) =>
                       updateOptionName(attrIdx, optIdx, e.target.value)
                     }
-                    placeholder="القيمة (مثلاً: قطن)"
+                    placeholder="القيمة (مثلاً: أسود)"
                     disabled={isPending}
                     className="flex-1"
                   />

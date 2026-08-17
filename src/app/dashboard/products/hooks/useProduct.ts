@@ -27,41 +27,28 @@ export const useGetProductVariantCounts = (productId: number) => {
   });
 };
 
-export const useUpdateProductVariants = (productId: number) => {
+/**
+ * T22 — saves المواصفات (specifications) through their own endpoint.
+ *
+ * The optimistic patch of `extraDetails.variants` is deliberately gone: that
+ * key no longer exists, and writing it was half of the collision that let one
+ * popup silently wipe the other. Specifications now round-trip through
+ * `product_specifications` instead.
+ */
+export const useUpdateProductSpecifications = (productId: number) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (payload: UpdateVariantsPayload) =>
-      productsApi.updateVariantsOptions(productId, payload),
+      productsApi.updateProductSpecifications(
+        productId,
+        payload.variants.map((item) => ({
+          name: item.attribute,
+          value: item.option,
+        })),
+      ),
 
-    onMutate: async (newPayload) => {
-      await queryClient.cancelQueries({ queryKey: productKeys.all });
-
-      const previousProducts = queryClient.getQueryData(productKeys.all);
-
-      queryClient.setQueriesData({ queryKey: productKeys.all }, (old: any) => {
-        if (!old || !old.data) return old;
-
-        return {
-          ...old,
-          data: old.data.map((product: any) =>
-            product.id === productId
-              ? {
-                  ...product,
-                  extraDetails: {
-                    ...product.extraDetails,
-                    variants: newPayload.variants,
-                  },
-                }
-              : product,
-          ),
-        };
-      });
-
-      return { previousProducts };
-    },
-
-    onError: (_err, _payload, context) => {
+    onError: (_err, _payload, context: any) => {
       if (context?.previousProducts) {
         queryClient.setQueryData(productKeys.all, context.previousProducts);
       }

@@ -73,6 +73,8 @@ function OrderDetailsProductCard({
         variants,
         optionLabels,
         attributes,
+        // T22: the specifications snapshot taken when the order was placed.
+        specifications: orderProduct.specifications ?? [],
         price: orderProduct.price,
         sku: orderProduct.sku || orderProduct.products.sku || null,
         img: orderProduct.products.image || '/wireless-headphones.png',
@@ -187,6 +189,23 @@ function OrderDetailsProductCard({
                   <h3 className="text-[#1E1E1E] font-bold text-lg ">
                     {item.product}
                   </h3>
+
+                  {/* T22 — المواصفات: product-wide facts recorded at order
+                      time. Distinct from the variant lines below, and absent
+                      specs render NOTHING rather than an empty block, which is
+                      the normal case for most products. */}
+                  {item.specifications.length > 0 && (
+                    <div className="flex flex-col gap-0.5">
+                      {item.specifications.map((spec) => (
+                        <p
+                          key={spec.name}
+                          className="text-sm text-gray-600"
+                        >
+                          {spec.name}: {spec.value}
+                        </p>
+                      ))}
+                    </div>
+                  )}
 
                   {item.attributes.length > 0 ? (
                     <div className="flex flex-col gap-1">

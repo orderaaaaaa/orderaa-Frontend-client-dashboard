@@ -8,7 +8,9 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import BaseModal from '@/components/ui/base-modal';
-import { useUpdateProductVariants } from '../../hooks/useProduct';
+// T22: this popup is the SPECIFICATIONS editor (المواصفات) — product-wide
+// key/value facts, not variants. The file name is legacy; the concept is not.
+import { useUpdateProductSpecifications } from '../../hooks/useProduct';
 
 interface VariantItem {
   attribute: string;
@@ -43,7 +45,7 @@ const ProductAddVariantsModal: React.FC<ProductAddVariantsModalProps> = ({
   onClose,
   variants,
 }) => {
-  const { mutate, isPending } = useUpdateProductVariants(productId);
+  const { mutate, isPending } = useUpdateProductSpecifications(productId);
 
   const form = useForm<VariantFormData>({
     resolver: zodResolver(variantSchema),
@@ -100,7 +102,7 @@ const ProductAddVariantsModal: React.FC<ProductAddVariantsModalProps> = ({
     <BaseModal
       isOpen={isOpen}
       onClose={handleClose}
-      title="إضافة خصائص المنتج"
+      title="مواصفات المنتج"
       showFooter={false}
       isLoading={isPending}
       maxWidth="md:max-w-xl"
@@ -113,13 +115,13 @@ const ProductAddVariantsModal: React.FC<ProductAddVariantsModalProps> = ({
                 <Input
                   register={form.register}
                   name={`rows.${index}.attribute`}
-                  placeholder="الخاصية (مثلاً: الخامة)"
+                  placeholder="المواصفة (مثلاً: الخامة)"
                   disabled={isPending}
                 />
                 <Input
                   register={form.register}
                   name={`rows.${index}.option`}
-                  placeholder="القيمة (مثلاً: قماش)"
+                  placeholder="القيمة (مثلاً: قطن)"
                   disabled={isPending}
                 />
               </div>
@@ -162,7 +164,7 @@ const ProductAddVariantsModal: React.FC<ProductAddVariantsModalProps> = ({
             disabled={isPending || !hasValidRow}
             className="bg-primary hover:bg-primary/90"
           >
-            {isPending ? 'جاري الحفظ...' : 'حفظ الخصائص'}
+            {isPending ? 'جاري الحفظ...' : 'حفظ المواصفات'}
           </Button>
         </div>
       </form>

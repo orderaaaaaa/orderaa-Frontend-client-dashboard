@@ -261,6 +261,12 @@ export interface OrderProduct {
   price: number;
   sku?: string | null;
   attributes?: OrderProductAttribute[];
+  /**
+   * T22 — المواصفات as they were WHEN THE ORDER WAS PLACED. A snapshot, so
+   * editing the product later never rewrites past orders. Orders placed before
+   * T22 have none, which is normal and renders nothing.
+   */
+  specifications?: { name: string; value: string }[] | null;
   variant?: {
     options?: Array<{
       attribute_option: { id: number; name: string; attribute: { id: number; name: string } };
