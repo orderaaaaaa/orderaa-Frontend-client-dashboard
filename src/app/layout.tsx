@@ -5,6 +5,7 @@ import 'react-day-picker/dist/style.css';
 import './globals.css';
 import ToastifyProvider from '@/components/ToastifyProvider';
 import QueryProvider from '@/providers/QueryProvider';
+import { I18nProvider } from '@/i18n/I18nProvider';
 
 export const metadata: Metadata = {
   title: 'Orderaa Dashboard',
@@ -32,9 +33,14 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
+    // Arabic stays the server-rendered default; `I18nProvider` rewrites both
+    // attributes on the client once it has read the stored preference. Hardcoded
+    // here rather than derived, because a server component cannot see it.
     <html lang="ar" dir="rtl">
       <body className={`${beiruti.variable} font-sans m-0`}>
-        <QueryProvider>{children}</QueryProvider>
+        <I18nProvider>
+          <QueryProvider>{children}</QueryProvider>
+        </I18nProvider>
         <Analytics />
         <ToastifyProvider />
       </body>

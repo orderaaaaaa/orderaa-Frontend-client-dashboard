@@ -5,6 +5,7 @@ import {
 } from 'react-icons/lia';
 import { UseFormRegister, FieldErrors } from 'react-hook-form';
 import { OrderSettingsFormData } from '../schemas/store';
+import { useI18n } from '@/i18n/I18nProvider';
 import Input from '@/components/ui/Input';
 import { FormSwitch } from '@/components/ui/form-switch';
 import { Separator } from '@/components/ui/separator';
@@ -26,6 +27,10 @@ export function ReservationSettingsSection({
   allowConfirmOutOfStock,
   onAllowConfirmOutOfStockChange,
 }: ReservationSettingsSectionProps) {
+  // Only the confirm-out-of-stock block below is on the catalogue; the min/max
+  // stock copy above it belongs to the un-migrated bulk of the dashboard.
+  const { t } = useI18n();
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-3">
@@ -112,12 +117,12 @@ export function ReservationSettingsSection({
           )}
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-medium text-gray-700">
-              السماح بتأكيد الطلبات غير المتوفرة بالمخزون
+              {t('storeSettings.confirmOutOfStock.title')}
             </h3>
             <p className="text-xs text-gray-500 mt-0.5">
               {allowConfirmOutOfStock
-                ? 'يمكن لموظف خدمة العملاء تأكيد الطلب حتى لو كان المنتج غير متوفر. يمكن منع ذلك لمنتج بعينه من صفحة المنتجات.'
-                : 'لن يتمكن الموظف من تأكيد طلب يحتوي على منتج غير متوفر — سيُطلب منه اختيار منتج آخر. يمكن استثناء منتج بعينه من صفحة المنتجات.'}
+                ? t('storeSettings.confirmOutOfStock.allowedDescription')
+                : t('storeSettings.confirmOutOfStock.blockedDescription')}
             </p>
           </div>
         </div>

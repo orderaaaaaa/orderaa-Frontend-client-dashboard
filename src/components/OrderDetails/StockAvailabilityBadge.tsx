@@ -1,6 +1,7 @@
 'use client';
 
 import { LiaExclamationTriangleSolid, LiaBoxSolid } from 'react-icons/lia';
+import { useI18n } from '@/i18n/I18nProvider';
 import type { AvailabilityLine } from '@/lib/api/warehouses';
 
 interface Props {
@@ -20,6 +21,9 @@ interface Props {
  * ignore it, and then it is worth nothing on the moves that do fail.
  */
 export function StockAvailabilityBadge({ line }: Props) {
+  // Above the `!line` bail-out: hooks cannot sit behind an early return.
+  const { t } = useI18n();
+
   if (!line) return null;
 
   // No rule matched, so no stock will move for this line. The number is the
@@ -29,7 +33,9 @@ export function StockAvailabilityBadge({ line }: Props) {
     return (
       <p className="flex items-center gap-1 text-sm text-gray-500">
         <LiaBoxSolid className="size-4 shrink-0" />
-        <span>المتاح: {line.available}</span>
+        <span>
+          {t('orderDetails.stock.available', { count: line.available })}
+        </span>
       </p>
     );
   }
@@ -38,9 +44,16 @@ export function StockAvailabilityBadge({ line }: Props) {
     return (
       <p className="flex items-center gap-1 text-sm text-gray-600">
         <LiaBoxSolid className="size-4 shrink-0" />
+        {/* Two complete templates rather than one plus an appended tail: the
+            parenthetical carries a leading space and a fixed position, both of
+            which are the template's business, not this component's. */}
         <span>
-          المتاح: {line.available}
-          {line.required > 1 && ` (المطلوب: ${line.required})`}
+          {line.required > 1
+            ? t('orderDetails.stock.availableWithRequired', {
+                available: line.available,
+                required: line.required,
+              })
+            : t('orderDetails.stock.available', { count: line.available })}
         </span>
       </p>
     );
@@ -51,14 +64,18 @@ export function StockAvailabilityBadge({ line }: Props) {
       <p className="flex items-center gap-1 text-sm font-semibold text-red-600">
         <LiaExclamationTriangleSolid className="size-4 shrink-0" />
         <span>
-          غير متوفر بالمخزون — المتاح {line.available} والمطلوب {line.required}
+          {t('orderDetails.stock.unavailable', {
+            available: line.available,
+            required: line.required,
+          })}
         </span>
       </p>
       {line.blocked && (
         // The settings refuse confirmation for this product, so the agent must
         // be told to pick something else rather than discovering it on submit.
-        <p className="pr-5 text-xs text-red-500">
-          لا يمكن تأكيد الطلب بهذا المنتج — اختر منتجًا آخر
+        // `ps-5` keeps the indent under the icon on both sides.
+        <p className="ps-5 text-xs text-red-500">
+          {t('orderDetails.stock.blocked')}
         </p>
       )}
     </div>

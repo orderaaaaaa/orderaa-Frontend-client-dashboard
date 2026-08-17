@@ -7,6 +7,7 @@ import { Menu, Search } from 'lucide-react';
 import { LiaSearchSolid, LiaTimesSolid, LiaSyncSolid } from 'react-icons/lia';
 import Input from '../ui/Input';
 import { UserMenu } from './UserMenu';
+import { LanguageSwitcher } from '@/i18n/LanguageSwitcher';
 import { UserMenuKey } from '@/hooks/useSidebar';
 import { useAuthStore } from '@/store/authStore';
 import { useDebounce } from '@/utils/debounce';
@@ -130,8 +131,12 @@ export function TopBar({
             <Search className="h-5 w-5" />
           </Button>
         </div>
-        {/* ✅ Mobile: Refresh + User dropdown */}
+        {/* ✅ Mobile: Language + Refresh + User dropdown */}
         <div className="lg:hidden flex items-center gap-1">
+          <LanguageSwitcher
+            compact
+            className="text-white hover:bg-white/20 h-10 px-2"
+          />
           <Button
             variant="ghost"
             size="icon"
@@ -241,6 +246,7 @@ export function TopBar({
         </div>
 
         <div className="flex items-center gap-3">
+          <LanguageSwitcher className="[&_button]:px-3 [&_button]:py-1.5" />
           <Button
             variant="ghost"
             size="icon"

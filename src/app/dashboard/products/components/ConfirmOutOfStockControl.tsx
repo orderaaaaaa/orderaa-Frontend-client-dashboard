@@ -2,13 +2,14 @@
 
 import { toast } from 'react-toastify';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
+import { useI18n } from '@/i18n/I18nProvider';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { useUpdateProductConfirmOutOfStock } from '../hooks/useProduct';
 
 interface Props {
   productId: number;
   value: boolean | null;
-  /** the store-level rule, so "اتبع المتجر" can say what it resolves to */
+  /** the store-level rule, so "follow the store" can say what it resolves to */
   storeDefault: boolean;
 }
 
@@ -42,17 +43,24 @@ export function ConfirmOutOfStockControl({
   value,
   storeDefault,
 }: Props) {
+  const { t } = useI18n();
   const { mutate, isPending } = useUpdateProductConfirmOutOfStock(productId);
 
   const options = [
     {
       key: 'INHERIT',
       // Spelling out what inheriting currently resolves to — otherwise nobody
-      // can tell what "follow the store" actually means for this product.
-      value: `اتبع المتجر (${storeDefault ? 'مسموح' : 'ممنوع'})`,
+      // can tell what "follow the store" actually means for this product. The
+      // resolved word is a parameter rather than a concatenation because it
+      // sits inside the sentence, and each language places it differently.
+      value: t('products.confirmOutOfStock.inherit', {
+        value: storeDefault
+          ? t('products.confirmOutOfStock.allow')
+          : t('products.confirmOutOfStock.forbid'),
+      }),
     },
-    { key: 'ALLOW', value: 'مسموح' },
-    { key: 'FORBID', value: 'ممنوع' },
+    { key: 'ALLOW', value: t('products.confirmOutOfStock.allow') },
+    { key: 'FORBID', value: t('products.confirmOutOfStock.forbid') },
   ];
 
   return (
@@ -62,12 +70,18 @@ export function ConfirmOutOfStockControl({
       disabled={isPending}
       onValueChange={(next) =>
         mutate(fromChoice(next as ScopeChoice), {
-          onSuccess: () => toast.success('تم حفظ إعداد التأكيد'),
+          onSuccess: () =>
+            toast.success(t('products.confirmOutOfStock.saved')),
           onError: (error: unknown) =>
-            toast.error(getApiErrorMessage(error, 'تعذر حفظ الإعداد')),
+            toast.error(
+              getApiErrorMessage(
+                error,
+                t('products.confirmOutOfStock.saveFailed')
+              )
+            ),
         })
       }
-      placeholder="تأكيد بدون مخزون"
+      placeholder={t('products.confirmOutOfStock.placeholder')}
       triggerClassName="h-9 text-xs"
     />
   );

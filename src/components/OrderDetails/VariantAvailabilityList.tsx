@@ -1,6 +1,7 @@
 'use client';
 
 import { LiaBanSolid, LiaExclamationCircleSolid } from 'react-icons/lia';
+import { useI18n } from '@/i18n/I18nProvider';
 import type { VariantAvailability } from '@/lib/api/warehouses';
 
 interface Props {
@@ -39,12 +40,15 @@ export const matchVariant = (
 };
 
 export function VariantAvailabilityList({ variants, selected }: Props) {
+  // Above the empty bail-out: hooks cannot sit behind an early return.
+  const { t, dir } = useI18n();
+
   if (variants.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-[#ECECEC] bg-white p-3" dir="rtl">
+    <div className="rounded-2xl border border-[#ECECEC] bg-white p-3" dir={dir}>
       <p className="mb-2 text-sm font-bold text-[#1F1F1F]">
-        المتاح بالمخزون
+        {t('orderDetails.variants.title')}
       </p>
       <div className="flex flex-wrap gap-2">
         {variants.map((variant) => {
@@ -87,8 +91,7 @@ export function VariantAvailabilityList({ variants, selected }: Props) {
 
       {selected && !selected.selectable && (
         <p className="mt-2 text-xs font-semibold text-red-600">
-          هذا الاختيار غير متوفر بالمخزون وإعدادات المنتج تمنع إضافته — اختر
-          حاجة تانية
+          {t('orderDetails.variants.blockedSelection')}
         </p>
       )}
     </div>

@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
-
-/** Fallback copy when the backend sends no message with a 403. */
-const FORBIDDEN_FALLBACK_MESSAGE = 'ليس لديك صلاحية للقيام بهذا الإجراء';
+import { readStoredLocale } from '@/i18n/locale';
+import { translate } from '@/i18n/translate';
 
 function extractMessage(data: unknown): string | undefined {
   const message = (data as { message?: string | string[] } | undefined)?.message;
@@ -12,10 +11,13 @@ function extractMessage(data: unknown): string | undefined {
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
+  // `Accept-Language` is deliberately absent: it is stamped per request by the
+  // interceptor below. Baking it in here would freeze whatever locale was
+  // stored when this module first evaluated, so every request after a switch
+  // would still ask the backend for the old language.
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
-    'Accept-Language': 'ar',
   },
   paramsSerializer: (params) => {
     const parts: string[] = [];
@@ -32,6 +34,14 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
+  // Read from storage rather than from a React store, matching the token read
+  // below: interceptors run outside the component tree and must not depend on
+  // a provider having mounted. Keeps backend validation and error copy in the
+  // same language the UI is currently showing.
+  if (config.headers) {
+    config.headers['Accept-Language'] = readStoredLocale();
+  }
+
   if (typeof window !== 'undefined') {
     const authStorage = localStorage.getItem('auth-storage');
 
@@ -81,7 +91,10 @@ api.interceptors.response.use(
       typeof window !== 'undefined'
     ) {
       const message =
-        extractMessage(error.response?.data) ?? FORBIDDEN_FALLBACK_MESSAGE;
+        extractMessage(error.response?.data) ??
+        // Only reached when the backend sends a bodyless 403; its own copy
+        // already arrives in the locale the request asked for.
+        translate(readStoredLocale(), 'common.errors.forbidden');
       // Same toastId for identical copy → a burst of parallel denied requests
       // (a dashboard fanning out queries) shows one toast, not ten.
       toast.error(message, { toastId: `forbidden:${message}` });

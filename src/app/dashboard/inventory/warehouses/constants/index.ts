@@ -1,4 +1,5 @@
 import { OrderStatus } from '@/types/orders';
+import type { TranslationKey } from '@/i18n/translate';
 import type {
   InsufficientStockBehavior,
   StockMovementSource,
@@ -123,8 +124,15 @@ export const RESTOCK_TARGET_STATUSES: OrderStatus[] = [
   OrderStatus.UNCOMPLETED,
 ];
 
-export const RULE_SCOPE_OPTIONS = [
-  { key: 'GLOBAL', value: 'كل المنتجات' },
-  { key: 'PRODUCT', value: 'منتج محدد' },
-  { key: 'VARIANT', value: 'متغير محدد' },
-];
+/**
+ * Scope key → catalogue key, in the order the picker lists them.
+ *
+ * Label keys rather than labels: the selector resolves them through `t()`, and
+ * `RuleScope` is derived from this object's keys so the union and the picker
+ * cannot fall out of step.
+ */
+export const RULE_SCOPE_LABEL_KEYS = {
+  GLOBAL: 'stockRules.scope.global',
+  PRODUCT: 'stockRules.scope.product',
+  VARIANT: 'stockRules.scope.variant',
+} as const satisfies Record<string, TranslationKey>;

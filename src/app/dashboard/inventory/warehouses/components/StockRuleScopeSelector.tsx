@@ -2,10 +2,14 @@
 
 import { useMemo, useState } from 'react';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
+import { useI18n } from '@/i18n/I18nProvider';
 import { useStockProducts } from '@/services/stock';
-import { RULE_SCOPE_OPTIONS } from '../constants';
+import { RULE_SCOPE_LABEL_KEYS } from '../constants';
 
-export type RuleScope = 'GLOBAL' | 'PRODUCT' | 'VARIANT';
+/** Derived from the label map so a new scope cannot be added to only one side. */
+export type RuleScope = keyof typeof RULE_SCOPE_LABEL_KEYS;
+
+const SCOPE_KEYS = Object.keys(RULE_SCOPE_LABEL_KEYS) as RuleScope[];
 
 export interface ScopeSelection {
   scope: RuleScope;
@@ -30,6 +34,7 @@ interface Props {
  * scoped to the variant alone, not to the pair.
  */
 export function StockRuleScopeSelector({ value, onChange }: Props) {
+  const { t, dir } = useI18n();
   const [search, setSearch] = useState('');
 
   const needsProducts = value.scope !== 'GLOBAL';
@@ -47,6 +52,15 @@ export function StockRuleScopeSelector({ value, onChange }: Props) {
   const productOptions = useMemo(
     () => products.map((product) => ({ key: String(product.id), value: product.name })),
     [products]
+  );
+
+  const scopeOptions = useMemo(
+    () =>
+      SCOPE_KEYS.map((scope) => ({
+        key: scope,
+        value: t(RULE_SCOPE_LABEL_KEYS[scope]),
+      })),
+    [t]
   );
 
   // For VARIANT scope the product picker is a NAVIGATION aid — the rule stores
@@ -76,27 +90,27 @@ export function StockRuleScopeSelector({ value, onChange }: Props) {
   }, [products, activeProductId]);
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-gray-50 p-3" dir="rtl">
+    <div className="rounded-lg border border-gray-200 bg-gray-50 p-3" dir={dir}>
       <div className="flex flex-wrap items-end gap-3">
         <div className="min-w-[180px]">
           <label className="mb-1 block text-xs font-medium text-gray-600">
-            نطاق القواعد
+            {t('stockRules.scope.label')}
           </label>
           <SearchableSelect
-            options={RULE_SCOPE_OPTIONS}
+            options={scopeOptions}
             value={value.scope}
             onValueChange={(next) => {
               setVariantProductId(undefined);
               onChange({ scope: next as RuleScope });
             }}
-            placeholder="نطاق القواعد"
+            placeholder={t('stockRules.scope.label')}
           />
         </div>
 
         {needsProducts && (
           <div className="min-w-[220px]">
             <label className="mb-1 block text-xs font-medium text-gray-600">
-              المنتج
+              {t('stockRules.scope.productLabel')}
             </label>
             <SearchableSelect
               options={productOptions}
@@ -113,7 +127,11 @@ export function StockRuleScopeSelector({ value, onChange }: Props) {
                 }
               }}
               onSearch={setSearch}
-              placeholder={isLoading ? 'جارٍ التحميل…' : 'اختر المنتج'}
+              placeholder={
+                isLoading
+                  ? t('common.loading')
+                  : t('stockRules.scope.productPlaceholder')
+              }
             />
           </div>
         )}
@@ -121,7 +139,7 @@ export function StockRuleScopeSelector({ value, onChange }: Props) {
         {value.scope === 'VARIANT' && (
           <div className="min-w-[220px]">
             <label className="mb-1 block text-xs font-medium text-gray-600">
-              المتغير
+              {t('stockRules.scope.variantLabel')}
             </label>
             <SearchableSelect
               options={variantOptions}
@@ -130,7 +148,9 @@ export function StockRuleScopeSelector({ value, onChange }: Props) {
                 onChange({ scope: 'VARIANT', variantId: Number(next) })
               }
               placeholder={
-                activeProductId ? 'اختر المتغير' : 'اختر المنتج أولًا'
+                activeProductId
+                  ? t('stockRules.scope.variantPlaceholder')
+                  : t('stockRules.scope.variantNeedsProduct')
               }
               disabled={!activeProductId}
             />
@@ -140,8 +160,8 @@ export function StockRuleScopeSelector({ value, onChange }: Props) {
 
       <p className="mt-2 text-[11px] leading-4 text-gray-500">
         {value.scope === 'GLOBAL'
-          ? 'القواعد العامة تُطبق على كل منتج ليس له قواعد خاصة به.'
-          : 'بمجرد إضافة قاعدة واحدة لهذا النطاق، لن تُطبق القواعد الأعلى منه على الإطلاق — حتى التحويلات التي لا تغطيها قواعد هذا النطاق.'}
+          ? t('stockRules.scope.globalHint')
+          : t('stockRules.scope.overrideHint')}
       </p>
     </div>
   );
