@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import MultiSelectDropdown from '@/components/ui/MultiSelectDropdown';
 import { toast } from 'react-toastify';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { LiaPlusSolid, LiaTrashSolid, LiaSaveSolid } from 'react-icons/lia';
@@ -32,9 +33,17 @@ import {
 interface RuleRow {
   /** undefined for rows that have not been saved yet */
   id?: number;
-  /** '' is the view-model sentinel for "on order creation" (wire: null) */
-  fromStatus: OrderStatus | '';
-  toStatus: OrderStatus | '';
+  /**
+   * T14 — SETS, not single statuses.
+   *
+   * An EMPTY `fromStatuses` means "on order creation" (the wire meaning too).
+   * It does NOT mean "any source": that is the fully expanded list, offered as
+   * its own button. Conflating the two would re-create the collision the
+   * backend design exists to prevent, so the UI keeps them visually distinct.
+   */
+  isCreation: boolean;
+  fromStatuses: OrderStatus[];
+  toStatuses: OrderStatus[];
   fromWarehouseId: string;
   toWarehouseId: string;
   allowNegative: boolean;
@@ -45,8 +54,9 @@ interface RuleRow {
 
 const toRow = (rule: StockWorkflowApiItem): RuleRow => ({
   id: rule.id,
-  fromStatus: rule.fromStatus ?? CREATION_RULE_KEY,
-  toStatus: rule.toStatus,
+  isCreation: rule.fromStatuses.length === 0,
+  fromStatuses: rule.fromStatuses,
+  toStatuses: rule.toStatuses,
   fromWarehouseId: String(rule.fromWarehouseId),
   toWarehouseId: String(rule.toWarehouseId),
   allowNegative: rule.allowNegative,
@@ -56,8 +66,9 @@ const toRow = (rule: StockWorkflowApiItem): RuleRow => ({
 });
 
 const emptyRow = (): RuleRow => ({
-  fromStatus: CREATION_RULE_KEY,
-  toStatus: '',
+  isCreation: true,
+  fromStatuses: [],
+  toStatuses: [],
   fromWarehouseId: '',
   toWarehouseId: '',
   allowNegative: false,
@@ -111,8 +122,10 @@ export function StockWorkflowsTab() {
     const seen = new Set<string>();
     const dupes = new Set<number>();
     rows.forEach((row, index) => {
-      if (!row.toStatus) return;
-      const key = `${row.fromStatus}→${row.toStatus}`;
+      if (row.toStatuses.length === 0 && !row.isCreation) return;
+      // Same-specificity duplicates only; a broader rule alongside a narrower
+      // one is legal and resolved by precedence server-side.
+      const key = `${[...row.fromStatuses].sort().join(',')}→${[...row.toStatuses].sort().join(',')}`;
       if (seen.has(key)) dupes.add(index);
       seen.add(key);
     });
@@ -128,9 +141,19 @@ export function StockWorkflowsTab() {
   };
 
   const rowError = (row: RuleRow, index: number): string | null => {
-    if (!row.toStatus) return 'اختر الحالة الهدف';
-    if (row.fromStatus === row.toStatus)
-      return 'لا يمكن أن تكون الحالتان متطابقتين';
+    // A creation rule must name exactly one target — the backend and its
+    // partial unique index both enforce this.
+    if (row.isCreation && row.toStatuses.length !== 1)
+      return 'قاعدة الإنشاء يجب أن تحدد حالة هدف واحدة فقط';
+    if (!row.isCreation && row.fromStatuses.length === 0)
+      return 'اختر حالات المصدر';
+    if (!row.isCreation && row.toStatuses.length === 0)
+      return 'اختر حالات الهدف';
+    if (
+      !row.isCreation &&
+      row.fromStatuses.some((status) => row.toStatuses.includes(status))
+    )
+      return 'لا يمكن أن تظهر نفس الحالة في الجانبين';
     if (!row.fromWarehouseId || !row.toWarehouseId) return 'اختر المخزنين';
     if (row.fromWarehouseId === row.toWarehouseId)
       return 'يجب أن يختلف مخزن المصدر عن مخزن الوجهة';
@@ -147,9 +170,9 @@ export function StockWorkflowsTab() {
     }
 
     const body = {
-      fromStatus:
-        row.fromStatus === CREATION_RULE_KEY ? null : (row.fromStatus as OrderStatus),
-      toStatus: row.toStatus as OrderStatus,
+      // Empty = creation rule. "Any source" is sent as the full list instead.
+      fromStatuses: row.isCreation ? [] : row.fromStatuses,
+      toStatuses: row.toStatuses,
       fromWarehouseId: Number(row.fromWarehouseId),
       toWarehouseId: Number(row.toWarehouseId),
       allowNegative: row.allowNegative,
@@ -259,24 +282,62 @@ export function StockWorkflowsTab() {
                   key={row.id ?? `new-${index}`}
                   className="border-b border-gray-100 align-top"
                 >
-                  <td className="py-2.5 px-3 min-w-[170px]">
-                    <SearchableSelect
-                      options={fromStatusOptions}
-                      value={row.fromStatus}
-                      onValueChange={(next) =>
-                        patchRow(index, { fromStatus: next as OrderStatus | '' })
-                      }
-                      placeholder="من الحالة"
-                    />
+                  <td className="py-2.5 px-3 min-w-[220px]">
+                    {/* "عند إنشاء الطلب" and "كل الحالات" are DIFFERENT things
+                        and are kept visually distinct on purpose: an empty
+                        from-side means creation, while "any source" is the
+                        fully expanded list. */}
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            patchRow(index, { isCreation: true, fromStatuses: [] })
+                          }
+                          className={`text-[11px] px-2 py-1 rounded-full border ${
+                            row.isCreation
+                              ? 'bg-primary text-white border-primary'
+                              : 'border-gray-300 text-gray-600'
+                          }`}
+                        >
+                          {CREATION_RULE_LABEL}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            patchRow(index, {
+                              isCreation: false,
+                              fromStatuses: [...WORKFLOW_ORDER_STATUSES],
+                            })
+                          }
+                          className="text-[11px] px-2 py-1 rounded-full border border-gray-300 text-gray-600"
+                        >
+                          كل الحالات
+                        </button>
+                      </div>
+                      {!row.isCreation && (
+                        <MultiSelectDropdown
+                          options={statusOptions}
+                          value={row.fromStatuses}
+                          onChange={(next) =>
+                            patchRow(index, {
+                              isCreation: false,
+                              fromStatuses: next as OrderStatus[],
+                            })
+                          }
+                          placeholder="من الحالات"
+                        />
+                      )}
+                    </div>
                   </td>
-                  <td className="py-2.5 px-3 min-w-[170px]">
-                    <SearchableSelect
+                  <td className="py-2.5 px-3 min-w-[220px]">
+                    <MultiSelectDropdown
                       options={statusOptions}
-                      value={row.toStatus}
-                      onValueChange={(next) =>
-                        patchRow(index, { toStatus: next as OrderStatus })
+                      value={row.toStatuses}
+                      onChange={(next) =>
+                        patchRow(index, { toStatuses: next as OrderStatus[] })
                       }
-                      placeholder="إلى الحالة"
+                      placeholder="إلى الحالات"
                     />
                   </td>
                   <td className="py-2.5 px-3 min-w-[160px]">

@@ -109,9 +109,13 @@ export interface WarehouseRef {
 export interface StockWorkflowApiItem {
   id: number;
   merchantId: number;
-  /** null = the rule applies on order creation */
-  fromStatus: OrderStatus | null;
-  toStatus: OrderStatus;
+  /**
+   * T14 — status SETS. An EMPTY `fromStatuses` means the rule applies on order
+   * creation; it does NOT mean "any source", which is sent as the fully
+   * expanded list. An empty `toStatuses` DOES mean any target.
+   */
+  fromStatuses: OrderStatus[];
+  toStatuses: OrderStatus[];
   fromWarehouseId: number;
   toWarehouseId: number;
   allowNegative: boolean;
@@ -128,8 +132,9 @@ export interface GetStockWorkflowsParams {
 }
 
 export interface CreateStockWorkflowDto {
-  fromStatus?: OrderStatus | null;
-  toStatus: OrderStatus;
+  /** Empty or omitted = creation rule. */
+  fromStatuses?: OrderStatus[];
+  toStatuses: OrderStatus[];
   fromWarehouseId: number;
   toWarehouseId: number;
   allowNegative?: boolean;
