@@ -18,6 +18,11 @@ export function mapSettingsToForm(
     autoCancelAttempts: settings.autoCancelAttempts ?? 0,
     url: settings.url ?? '',
     minStockLevel: settings.minStockLevel ?? ORDER_SETTINGS_DEFAULTS.minStockLevel,
+    // `??`, not `||`: a merchant who set this to false must not be shown the
+    // default `true` on reload.
+    allowConfirmOutOfStock:
+      settings.allowConfirmOutOfStock ??
+      ORDER_SETTINGS_DEFAULTS.allowConfirmOutOfStock,
     maxStockLevel: settings.maxStockLevel ?? ORDER_SETTINGS_DEFAULTS.maxStockLevel,
   };
 }

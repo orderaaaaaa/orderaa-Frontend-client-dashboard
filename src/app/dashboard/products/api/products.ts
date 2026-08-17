@@ -72,6 +72,18 @@ export const productsApi = {
     await http.put(`/products/${productId}`, payload);
   },
 
+  /**
+   * T27 — the product's confirm-out-of-stock override. `null` is a MEANINGFUL
+   * value here ("inherit the store"), so it is sent explicitly rather than
+   * omitted; the backend distinguishes `null` from an absent key.
+   */
+  updateConfirmOutOfStock: async (
+    productId: number,
+    allowConfirmOutOfStock: boolean | null,
+  ) => {
+    await http.put(`/products/${productId}`, { allowConfirmOutOfStock });
+  },
+
   sync: async (): Promise<JobAcceptedResponse> => {
     const response = await http.post<JobAcceptedResponse>('/products/sync');
     return response.data;

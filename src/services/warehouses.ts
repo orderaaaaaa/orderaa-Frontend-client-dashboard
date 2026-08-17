@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import type { WarehouseApiItem } from '@/lib/api/warehouses';
+import type { OrderStatus } from '@/types/orders';
 import {
   getWarehouses,
   getWarehouseById,
@@ -21,6 +22,8 @@ import {
   getStockMovements,
   adjustStock,
   transferStock,
+  getOrderStockAvailability,
+  getProductVariantAvailability,
   GetWarehousesParams,
   GetWarehouseStockParams,
   GetStockWorkflowsParams,
@@ -261,4 +264,53 @@ export const useWarehouseOptions = () => {
     isLoading,
     isError,
   };
+};
+
+// ---------------------------------------------------------------------------
+// T27 — stock availability
+// ---------------------------------------------------------------------------
+
+/**
+ * Availability for every line of an order against a pending status change.
+ *
+ * `staleTime: 0` deliberately: stock moves constantly, and a cached figure is
+ * exactly the thing this feature exists to avoid showing an agent.
+ */
+export const useOrderStockAvailabilityQuery = (
+  orderId: number | undefined,
+  targetStatus?: OrderStatus
+) => {
+  return useQuery({
+    queryKey: [
+      QUERY_KEYS.ORDER_STOCK_AVAILABILITY,
+      orderId,
+      targetStatus ?? null,
+    ] as QueryKey,
+    queryFn: () => getOrderStockAvailability(orderId as number, targetStatus),
+    enabled: typeof orderId === 'number',
+    staleTime: 0,
+  });
+};
+
+export const useProductVariantAvailabilityQuery = (
+  productId: number | undefined,
+  orderId: number | undefined,
+  targetStatus?: OrderStatus
+) => {
+  return useQuery({
+    queryKey: [
+      QUERY_KEYS.PRODUCT_VARIANT_AVAILABILITY,
+      productId,
+      orderId,
+      targetStatus ?? null,
+    ] as QueryKey,
+    queryFn: () =>
+      getProductVariantAvailability(
+        productId as number,
+        orderId as number,
+        targetStatus
+      ),
+    enabled: typeof productId === 'number' && typeof orderId === 'number',
+    staleTime: 0,
+  });
 };

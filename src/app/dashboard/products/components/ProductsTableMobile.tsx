@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { VariantItem } from '../types/products';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import LoadingAnimation from '@/components/ui/loadingAnimation';
+import { ConfirmOutOfStockControl } from './ConfirmOutOfStockControl';
+import { useStoreConfirmOutOfStock } from '../hooks/useProduct';
 
 interface Product {
   id: number;
@@ -14,6 +16,8 @@ interface Product {
   images: string[];
   totalSold: number;
   totalOrders: number;
+  /** T27: true allow / false forbid / null inherit the store. Never a plain boolean. */
+  allowConfirmOutOfStock: boolean | null;
   extraDetails?: {
     variants?: VariantItem[];
   };
@@ -52,6 +56,9 @@ function ProductsTableMobile({
   openEditModal,
   openEditAttrsModal,
 }: ProductsTableMobileProps) {
+  // T27: what "اتبع المتجر" resolves to for every card on this page.
+  const storeAllowsConfirmOutOfStock = useStoreConfirmOutOfStock();
+
   const sortByOptions = [
     { key: 'createdAt', value: 'تاريخ الإنشاء' },
     { key: 'name', value: 'الاسم' },
@@ -189,6 +196,24 @@ function ProductsTableMobile({
                       >
                         <LiaEditSolid /> تعديل
                       </Button>
+                    </div>
+
+                    {/* T27 — the per-product override, same control as desktop.
+                        Stops click-through so choosing it never opens the card. */}
+                    <div
+                      className="mt-2 max-w-[220px]"
+                      onClick={(e: React.MouseEvent<HTMLDivElement>) =>
+                        e.stopPropagation()
+                      }
+                    >
+                      <p className="mb-1 text-xs text-gray-500">
+                        تأكيد بدون مخزون
+                      </p>
+                      <ConfirmOutOfStockControl
+                        productId={product.id}
+                        value={product.allowConfirmOutOfStock}
+                        storeDefault={storeAllowsConfirmOutOfStock}
+                      />
                     </div>
                   </div>
                   {showCheckboxes && (

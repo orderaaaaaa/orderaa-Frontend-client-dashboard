@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
+import { merchantSettingsApi } from '@/app/dashboard/store-settings/api/storeApi';
 import { productsApi } from '../api/products';
 import { productKeys } from './queryKeys';
 import { useJobStore } from '@/store/useJobStore';
@@ -118,6 +119,37 @@ export const useUpdateProductAttributes = (productId: number) => {
       queryClient.invalidateQueries({
         queryKey: productKeys.variants(productId),
       });
+    },
+  });
+};
+
+/**
+ * T27 — the STORE-level rule, read so the per-product "اتبع المتجر" option can
+ * say what it currently resolves to. Same query key as the store-settings
+ * screen, so React Query serves both from one fetch.
+ */
+export const useStoreConfirmOutOfStock = () => {
+  const { data } = useQuery({
+    queryKey: ['merchantSettings'],
+    queryFn: merchantSettingsApi.getSettings,
+  });
+
+  // `!== false`, not `!!`: undefined while loading must read as the shipped
+  // default (allow), not as "forbid".
+  return data?.allowConfirmOutOfStock !== false;
+};
+
+export const useUpdateProductConfirmOutOfStock = (productId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    // `boolean | null`, not `boolean` — null means "inherit the store setting"
+    // and is a value the user can actively choose.
+    mutationFn: (allowConfirmOutOfStock: boolean | null) =>
+      productsApi.updateConfirmOutOfStock(productId, allowConfirmOutOfStock),
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
     },
   });
 };

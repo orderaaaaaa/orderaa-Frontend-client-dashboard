@@ -14,6 +14,14 @@ export interface Product {
   extraDetails: {
     variants?: VariantItem[];
   };
+  /**
+   * T27 — THREE states, and they must stay distinguishable:
+   *   true  = allow confirming this product out of stock
+   *   false = forbid it, even where the store allows it
+   *   null  = inherit the store setting
+   * Never model this as `boolean`, and never resolve it with `||`.
+   */
+  allowConfirmOutOfStock: boolean | null;
   variantOptions?: VariantOption[];
   createdAt: string;
   updatedAt: string;

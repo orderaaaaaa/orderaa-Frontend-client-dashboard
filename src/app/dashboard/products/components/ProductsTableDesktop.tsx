@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { VariantItem } from '../types/products';
 import { getTimeAgo } from '@/utils';
 import LoadingAnimation from '@/components/ui/loadingAnimation';
+import { ConfirmOutOfStockControl } from './ConfirmOutOfStockControl';
+import { useStoreConfirmOutOfStock } from '../hooks/useProduct';
 
 interface Product {
   id: number;
@@ -20,6 +22,8 @@ interface Product {
   extraDetails?: {
     variants?: VariantItem[];
   };
+  /** T27: true allow / false forbid / null inherit the store. Never a plain boolean. */
+  allowConfirmOutOfStock: boolean | null;
 }
 
 interface ProductsTableDesktopProps {
@@ -49,6 +53,9 @@ function ProductsTableDesktop({
   openSoldModal,
   openEditModal,
 }: ProductsTableDesktopProps) {
+  // T27: what "اتبع المتجر" resolves to for every row on this page.
+  const storeAllowsConfirmOutOfStock = useStoreConfirmOutOfStock();
+
   const getSortIcon = (field: string) => {
     if (sortBy !== field) {
       return <ArrowUpDown className="w-4 h-4 opacity-40" />;
@@ -126,6 +133,9 @@ function ProductsTableDesktop({
               </div>
             </th>
 
+            {/* T27 — the per-product override of the store's rule. */}
+            <th className="p-4 text-center">تأكيد بدون مخزون</th>
+
             <th className="p-4 text-center">تعديل</th>
 
             <th
@@ -146,7 +156,7 @@ function ProductsTableDesktop({
           {/* Loading Overlay */}
           {isRefetching && (
             <tr>
-              <td colSpan={8} className="relative p-0">
+              <td colSpan={9} className="relative p-0">
                 <div className="absolute inset-0 z-20 flex items-center justify-center min-h-[200px]">
                   <LoadingAnimation />
                 </div>
@@ -158,7 +168,7 @@ function ProductsTableDesktop({
             className={isRefetching ? 'opacity-50 pointer-events-none' : ''}
             style={{ display: isRefetching ? 'none' : 'table-row' }}
           >
-            <td colSpan={8} className="p-0"></td>
+            <td colSpan={9} className="p-0"></td>
           </tr>
 
           {data?.data.map((product) => (
@@ -204,6 +214,14 @@ function ProductsTableDesktop({
                   {product.totalSold}
                 </Button>
               </td>
+              <td className="p-4 text-center min-w-[170px]">
+                <ConfirmOutOfStockControl
+                  productId={product.id}
+                  value={product.allowConfirmOutOfStock}
+                  storeDefault={storeAllowsConfirmOutOfStock}
+                />
+              </td>
+
               <td className="p-4 text-center">
                 <Button
                   variant="ghost"

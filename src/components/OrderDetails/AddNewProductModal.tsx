@@ -12,12 +12,20 @@ import {
   resolveAttributeOptionIds,
 } from '@/services/orders';
 import { useDebounce } from '@/utils/debounce';
+import { useProductVariantAvailabilityQuery } from '@/services/warehouses';
+import {
+  VariantAvailabilityList,
+  matchVariant,
+} from './VariantAvailabilityList';
 import { Button } from '../ui/button';
 import BaseModal from '@/components/ui/base-modal';
 
 interface AddNewProductModalProps {
   isOpen: boolean;
   onClose: () => void;
+  /** T27: availability is resolved through THIS order, so the picker's numbers
+   *  match the order cards' — same rule, same source warehouse. */
+  orderId?: number;
   onSave: (
     productId: number,
     attributeOptionIds: number[],
@@ -28,6 +36,7 @@ interface AddNewProductModalProps {
 export default function AddNewProductModal({
   isOpen,
   onClose,
+  orderId,
   onSave,
 }: AddNewProductModalProps) {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -57,6 +66,16 @@ export default function AddNewProductModal({
   const { data: variantOptions = [], isLoading: isLoadingVariants } =
     useProductVariantsOptions(selectedProduct?.id ?? null);
 
+  // T27 — availability beside each size and colour.
+  const { data: variantAvailability = [] } = useProductVariantAvailabilityQuery(
+    selectedProduct?.id,
+    orderId
+  );
+  const selectedVariantAvailability = useMemo(
+    () => matchVariant(variantAvailability, selectedVariants),
+    [variantAvailability, selectedVariants]
+  );
+
   const productOptions = useMemo(() => productsData.map((p) => p.name), [productsData]);
 
   const productsByName = useMemo(() => {
@@ -84,8 +103,25 @@ export default function AddNewProductModal({
       variantOptions.length === 0 ||
       Object.keys(selectedVariants).length === variantOptions.length;
 
-    return hasProduct && variantsReady && allVariantsSelected && quantity > 0;
-  }, [selectedProduct, variantOptions, selectedVariants, isLoadingVariants, quantity]);
+    // T27: a variant the product's settings refuse cannot be added. `!== false`
+    // so an unresolved or still-loading match never blocks the form.
+    const stockAllows = selectedVariantAvailability?.selectable !== false;
+
+    return (
+      hasProduct &&
+      variantsReady &&
+      allVariantsSelected &&
+      stockAllows &&
+      quantity > 0
+    );
+  }, [
+    selectedProduct,
+    variantOptions,
+    selectedVariants,
+    isLoadingVariants,
+    selectedVariantAvailability,
+    quantity,
+  ]);
 
   const handleProductChange = (productName: string) => {
     const product = productsByName.get(productName) || null;
@@ -235,6 +271,13 @@ export default function AddNewProductModal({
               ))
             ))}
         </div>
+
+        {/* T27 — availability beside each size and colour, resolved through
+            THIS order so the numbers match the order cards'. */}
+        <VariantAvailabilityList
+          variants={variantAvailability}
+          selected={selectedVariantAvailability}
+        />
       </div>
     </BaseModal>
   );

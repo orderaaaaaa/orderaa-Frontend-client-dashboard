@@ -97,7 +97,19 @@ export default function OrderSettingsFields({
 
         {/* 7. الجرد والحجز / Inventory & Reservation */}
         <GroupSection title="الجرد والحجز">
-          <ReservationSettingsSection register={register} errors={errors} />
+          <ReservationSettingsSection
+            register={register}
+            errors={errors}
+            // `!== false`, not `!!`: the value is legitimately false (forbid)
+            // and is undefined while the form hydrates — treating undefined as
+            // false would flash "forbid" at every merchant.
+            allowConfirmOutOfStock={watch('allowConfirmOutOfStock') !== false}
+            onAllowConfirmOutOfStockChange={(checked) =>
+              setValue('allowConfirmOutOfStock', checked, {
+                shouldDirty: true,
+              })
+            }
+          />
         </GroupSection>
       </div>
     </div>

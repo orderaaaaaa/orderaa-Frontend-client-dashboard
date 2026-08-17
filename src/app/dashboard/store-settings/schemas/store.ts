@@ -70,6 +70,7 @@ export const orderSettingsSchema = z.object({
     ),
 
   minStockLevel: z.number().int().min(0).nullable().optional(),
+  allowConfirmOutOfStock: z.boolean().optional(),
   maxStockLevel: z.number().int().min(0).nullable().optional(),
 });
 

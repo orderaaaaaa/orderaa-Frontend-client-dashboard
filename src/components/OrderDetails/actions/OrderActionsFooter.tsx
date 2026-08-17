@@ -24,6 +24,14 @@ export interface OrderActionsFooterProps {
   onNavigatePrevious?: () => void;
   isNavigatingNext?: boolean;
   isNavigatingPrevious?: boolean;
+  /**
+   * T27: false when a line is short AND its product forbids confirming out of
+   * stock. Disabling here is a courtesy — the server refuses independently with
+   * a 409, because stock can change between this render and the click.
+   */
+  canConfirmStock?: boolean;
+  /** Which products block it, for the tooltip. */
+  stockBlockReason?: string;
 }
 
 export function OrderActionsFooter({
@@ -36,6 +44,8 @@ export function OrderActionsFooter({
   onNavigatePrevious,
   isNavigatingNext = false,
   isNavigatingPrevious = false,
+  canConfirmStock = true,
+  stockBlockReason,
 }: OrderActionsFooterProps) {
   // Confirm / follow-up / the actions menu all mutate the order: everything but
   // `cancel` patches it (`orders:update`), cancel posts to /cancel.
@@ -86,7 +96,9 @@ export function OrderActionsFooter({
             <Button
               variant="ghost"
               onClick={onConfirm}
-              className="relative top-[-6px] flex flex-col items-center gap-[2px] text-white transition-opacity h-auto p-0 hover:bg-transparent"
+              disabled={!canConfirmStock}
+              title={canConfirmStock ? undefined : stockBlockReason}
+              className="relative top-[-6px] flex flex-col items-center gap-[2px] text-white transition-opacity h-auto p-0 hover:bg-transparent disabled:opacity-40"
             >
               <div className="w-8 h-8 rounded-full border-3 bg-primary border-white flex items-center justify-center">
                 <LiaCheckSolid className="w-5 h-5" />

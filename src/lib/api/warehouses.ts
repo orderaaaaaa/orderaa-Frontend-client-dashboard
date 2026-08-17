@@ -344,3 +344,87 @@ export async function transferStock(
   const response = await api.post('/stock-movements/transfers', body);
   return response.data as StockBatchResult;
 }
+
+// ---------------------------------------------------------------------------
+// T27 — stock availability
+// ---------------------------------------------------------------------------
+
+export interface AvailabilityLine {
+  orderProductId: number;
+  variantId: number;
+  productId: number;
+  productName: string;
+  variantLabel: string;
+  /** true when this line resolved a rule, i.e. stock would actually move */
+  movesStock: boolean;
+  /**
+   * The SOURCE warehouse of THIS line's rule. Per line, never per order — two
+   * lines can resolve different scopes and therefore different warehouses.
+   */
+  fromWarehouseId: number | null;
+  /** the order's aggregated quantity for this variant, not this line's count */
+  required: number;
+  available: number;
+  shortfall: number;
+  /**
+   * false only when the move would genuinely fail. A shortage the rule permits
+   * (allowNegative, onInsufficient=SKIP) is reported without the warning.
+   */
+  safe: boolean;
+  /** short AND this product's settings forbid confirming — blocks the order */
+  blocked: boolean;
+}
+
+export interface OrderStockAvailability {
+  orderId: number;
+  targetStatus: OrderStatus;
+  lines: AvailabilityLine[];
+  canConfirm: boolean;
+  blockingLines: number[];
+}
+
+export interface VariantAvailability {
+  variantId: number;
+  variantLabel: string;
+  available: number;
+  movesStock: boolean;
+  fromWarehouseId: number | null;
+  safe: boolean;
+  /** false when the product forbids picking an unavailable variant */
+  selectable: boolean;
+}
+
+/** The 409 body the confirm path returns when the settings refuse. */
+export interface OutOfStockConfirmationBlocked {
+  code: 'OUT_OF_STOCK_CONFIRMATION_BLOCKED';
+  message: string;
+  lines: {
+    orderProductId: number;
+    productName: string;
+    variantLabel: string;
+    required: number;
+    available: number;
+  }[];
+}
+
+export async function getOrderStockAvailability(
+  orderId: number,
+  targetStatus?: OrderStatus
+): Promise<OrderStockAvailability> {
+  const response = await api.get(`/orders/${orderId}/stock-availability`, {
+    params: targetStatus ? { targetStatus } : undefined,
+  });
+  return response.data as OrderStockAvailability;
+}
+
+export async function getProductVariantAvailability(
+  productId: number,
+  orderId: number,
+  targetStatus?: OrderStatus
+): Promise<VariantAvailability[]> {
+  const response = await api.get(
+    `/products/${productId}/variants/availability`,
+    { params: { orderId, ...(targetStatus ? { targetStatus } : {}) } }
+  );
+  return response.data as VariantAvailability[];
+}

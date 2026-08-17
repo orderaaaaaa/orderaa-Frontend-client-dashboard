@@ -24,6 +24,13 @@ export interface OrderActionsFooterProps {
   onNavigatePrevious?: () => void;
   isNavigatingNext?: boolean;
   isNavigatingPrevious?: boolean;
+  /**
+   * T27: false when a line is short AND its product forbids confirming out of
+   * stock. The server refuses independently with a 409 — stock can change
+   * between this render and the click — so this is a courtesy, not the guard.
+   */
+  canConfirmStock?: boolean;
+  stockBlockReason?: string;
 }
 
 export function OrderActionsFooterLargeScreens({
@@ -36,6 +43,8 @@ export function OrderActionsFooterLargeScreens({
   onNavigatePrevious,
   isNavigatingNext = false,
   isNavigatingPrevious = false,
+  canConfirmStock = true,
+  stockBlockReason,
 }: OrderActionsFooterProps) {
   // Confirm / follow-up / the actions menu all mutate the order: everything but
   // `cancel` patches it (`orders:update`), cancel posts to /cancel.
@@ -121,7 +130,9 @@ export function OrderActionsFooterLargeScreens({
                 <Button
                   variant="default"
                   onClick={onConfirm}
-                  className="py-2 px-10 rounded-2xl bg-primary text-white text-sm font-bold hover:bg-[#4B1BC4] transition-all duration-700 hover:scale-105 flex items-center gap-2"
+                  disabled={!canConfirmStock}
+                  title={canConfirmStock ? undefined : stockBlockReason}
+                  className="py-2 px-10 rounded-2xl bg-primary text-white text-sm font-bold hover:bg-[#4B1BC4] transition-all duration-700 hover:scale-105 flex items-center gap-2 disabled:opacity-40 disabled:hover:scale-100"
                 >
                   <LiaCheckCircle className="w-5 h-5" />
                   تأكيد

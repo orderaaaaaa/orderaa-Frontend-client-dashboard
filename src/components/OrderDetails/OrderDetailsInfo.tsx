@@ -5,6 +5,7 @@ import { useModalState } from '@/hooks/OrderDetails/useModalState';
 import { useOrderActions } from '@/hooks/OrderDetails/useOrderActions';
 import { useOrderFieldUpdate } from '@/hooks/OrderDetails/useOrderFieldUpdate';
 import { useOrderNavigation } from '@/hooks/OrderDetails/useOrderNavigation';
+import { useOrderStockAvailabilityQuery } from '@/services/warehouses';
 import { toast } from 'react-toastify';
 import { CustomerDataSection } from './sections/CustomerDataSection';
 import { PricingSection } from './sections/PricingSection';
@@ -129,6 +130,31 @@ function OrderDetailsInfoComponent({
   });
 
   const { updateField, updateFields } = useOrderFieldUpdate(localOrder.id, handleUpdate);
+
+  /**
+   * T27 — the out-of-stock confirmation gate, mirrored into the UI.
+   *
+   * Disabling the button is a courtesy so the agent sees the problem before
+   * clicking; the server refuses independently with a 409, because stock can
+   * change between this render and the click. Never rely on the disabled state.
+   */
+  const { data: stockAvailability } = useOrderStockAvailabilityQuery(
+    localOrder.id
+  );
+  const stockGate = useMemo(() => {
+    // Undefined while loading — do NOT block on that, or the confirm button is
+    // dead on every first paint.
+    if (!stockAvailability || stockAvailability.canConfirm) {
+      return { canConfirm: true, reason: undefined as string | undefined };
+    }
+    const blocking = stockAvailability.lines.filter((line) => line.blocked);
+    return {
+      canConfirm: false,
+      reason: `غير متوفر بالمخزون: ${blocking
+        .map((line) => `${line.productName} (${line.variantLabel})`)
+        .join('، ')} — اختر منتجًا آخر`,
+    };
+  }, [stockAvailability]);
 
   // Get the last event status from order events
   const lastEventStatus = useMemo(() => {
@@ -345,6 +371,8 @@ function OrderDetailsInfoComponent({
           onNavigatePrevious={navigation.navigateToPrevious}
           isNavigatingNext={navigation.isNavigatingNext}
           isNavigatingPrevious={navigation.isNavigatingPrevious}
+          canConfirmStock={stockGate.canConfirm}
+          stockBlockReason={stockGate.reason}
         />
       </div>
 
@@ -359,6 +387,8 @@ function OrderDetailsInfoComponent({
           onNavigatePrevious={navigation.navigateToPrevious}
           isNavigatingNext={navigation.isNavigatingNext}
           isNavigatingPrevious={navigation.isNavigatingPrevious}
+          canConfirmStock={stockGate.canConfirm}
+          stockBlockReason={stockGate.reason}
         />
       </div>
 

@@ -1,6 +1,7 @@
 import { useCallback, useRef, useEffect } from 'react';
 import { formatLocalStartOfDay, formatLocalEndOfDay } from '@/utils/dateRangeUtils';
 import { toast } from 'react-toastify';
+import { getOutOfStockBlock } from '@/utils/apiError';
 import { FilterOrdersDto, Order, OrderStatusItem } from '@/types/orders';
 import { ShippingData } from '@/components/OrderDetails/EditShippingModal';
 import {
@@ -181,8 +182,15 @@ export function useOrderActions({
 
         return true;
       } catch (error: any) {
+        // T27: a 409 refusing an out-of-stock confirmation names every blocking
+        // product, so surface those rather than a generic failure.
+        const outOfStock = getOutOfStockBlock(error);
         const msg = error?.response?.data?.message;
-        const apiErrorMessage = Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.';
+        const apiErrorMessage =
+          outOfStock?.message ??
+          (Array.isArray(msg)
+            ? msg.join('\n')
+            : msg || 'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.');
         if (!options.skipToast) {
           toast.error(apiErrorMessage);
         }

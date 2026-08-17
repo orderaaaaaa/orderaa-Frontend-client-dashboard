@@ -24,6 +24,8 @@ import {
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { usePermissionCheck } from '@/hooks/usePermissions';
+import { useOrderStockAvailabilityQuery } from '@/services/warehouses';
+import { StockAvailabilityBadge } from './StockAvailabilityBadge';
 import Image from 'next/image';
 
 interface OrderDetailsProductCardProps {
@@ -41,6 +43,14 @@ function OrderDetailsProductCard({
   // Add / edit / delete of order products all sit behind `orders:products:manage`.
   const { hasPermission } = usePermissionCheck();
   const canManageProducts = hasPermission('orders:products:manage');
+
+  // T27: availability against CONFIRMED — the transition an agent on this
+  // screen is about to make. Keyed by orderProductId because each LINE resolves
+  // its own rule and therefore its own source warehouse.
+  const { data: availability } = useOrderStockAvailabilityQuery(order.id);
+  const availabilityByLine = new Map(
+    (availability?.lines ?? []).map((line) => [line.orderProductId, line])
+  );
 
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [deletingProductId, setDeletingProductId] = useState<number | null>(
@@ -239,6 +249,10 @@ function OrderDetailsProductCard({
                     </p>
                   )}
 
+                  <StockAvailabilityBadge
+                    line={availabilityByLine.get(item.id)}
+                  />
+
                   <p className="text-[#1E1E1E] font-bold text-lg ">
                     {item.price} جنيه
                   </p>
@@ -362,6 +376,7 @@ function OrderDetailsProductCard({
 
       <AddNewProductModal
         isOpen={isAddNewProductModalOpen}
+        orderId={order.id}
         onClose={() => setIsAddNewProductModalOpen(false)}
         onSave={handleAddNewProduct}
       />

@@ -1,17 +1,26 @@
-import { LiaWarehouseSolid } from 'react-icons/lia';
+import { LiaWarehouseSolid, LiaExclamationTriangleSolid } from 'react-icons/lia';
 import { UseFormRegister, FieldErrors } from 'react-hook-form';
 import { OrderSettingsFormData } from '../schemas/store';
 import Input from '@/components/ui/Input';
+import { FormSwitch } from '@/components/ui/form-switch';
 import { Separator } from '@/components/ui/separator';
 
 interface ReservationSettingsSectionProps {
   register: UseFormRegister<OrderSettingsFormData>;
   errors: FieldErrors<OrderSettingsFormData>;
+  /**
+   * T27 — passed as a plain value and setter rather than the form's `watch` /
+   * `setValue`: this section needs one boolean, not the whole form API.
+   */
+  allowConfirmOutOfStock: boolean;
+  onAllowConfirmOutOfStockChange: (value: boolean) => void;
 }
 
 export function ReservationSettingsSection({
   register,
   errors,
+  allowConfirmOutOfStock,
+  onAllowConfirmOutOfStockChange,
 }: ReservationSettingsSectionProps) {
   return (
     <div className="flex flex-col gap-4">
@@ -81,6 +90,29 @@ export function ReservationSettingsSection({
         <p className="text-xs text-gray-500">
           تنبيه عند تجاوز المخزون هذا الحد
         </p>
+      </div>
+
+      <Separator />
+
+      {/* T27 — the store-level confirmation rule. A product can override it. */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-3 flex-1 min-w-0">
+          <LiaExclamationTriangleSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-medium text-gray-700">
+              السماح بتأكيد الطلبات غير المتوفرة بالمخزون
+            </h3>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {allowConfirmOutOfStock
+                ? 'يمكن لموظف خدمة العملاء تأكيد الطلب حتى لو كان المنتج غير متوفر. يمكن منع ذلك لمنتج بعينه من صفحة المنتجات.'
+                : 'لن يتمكن الموظف من تأكيد طلب يحتوي على منتج غير متوفر — سيُطلب منه اختيار منتج آخر. يمكن استثناء منتج بعينه من صفحة المنتجات.'}
+            </p>
+          </div>
+        </div>
+        <FormSwitch
+          checked={allowConfirmOutOfStock}
+          onCheckedChange={onAllowConfirmOutOfStockChange}
+        />
       </div>
     </div>
   );
