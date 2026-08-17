@@ -19,7 +19,34 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+
+      // DO NOT REMOVE — without these, `pnpm build` fails its type-check phase
+      // with three errors in src/store/*:
+      //   StateCreator<S, [], [["zustand/persist", ...]]> is not assignable to
+      //   StateCreator<S, [], [never, unknown][]>
+      //
+      // zustand ships dual types, and under "moduleResolution": "bundler" its
+      // own entrypoints disagree about which copy they mean. `--traceResolution`
+      // shows `zustand/vanilla` resolving to BOTH esm/vanilla.d.mts (reached
+      // from esm/index.d.mts, where `create` comes from) and vanilla.d.ts
+      // (reached from middleware/persist.d.ts via its relative
+      // `declare module '../vanilla'`). That augmentation registers the
+      // 'zustand/persist' mutator on the CJS StoreMutators interface, while
+      // `create` is typed against the ESM one — so the mutator is invisible and
+      // every persisted store fails to type.
+      //
+      // Pinning every zustand entrypoint to the CJS declarations gives the graph
+      // one identity, so the augmentation and `create` meet. This is types-only:
+      // webpack resolves through package.json "exports" as before (verified —
+      // zustand's runtime code and the auth-storage key are both in the client
+      // bundle). Removable once zustand augments a bare specifier upstream.
+      "zustand": ["./node_modules/zustand/index.d.ts"],
+      "zustand/vanilla": ["./node_modules/zustand/vanilla.d.ts"],
+      "zustand/react": ["./node_modules/zustand/react.d.ts"],
+      "zustand/middleware": ["./node_modules/zustand/middleware.d.ts"],
+      "zustand/shallow": ["./node_modules/zustand/shallow.d.ts"],
+      "zustand/react/shallow": ["./node_modules/zustand/react/shallow.d.ts"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
