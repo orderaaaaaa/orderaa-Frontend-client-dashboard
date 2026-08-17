@@ -294,7 +294,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                onClick={(e) => {
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                   e.stopPropagation();
                   clearTimePeriod();
                 }}

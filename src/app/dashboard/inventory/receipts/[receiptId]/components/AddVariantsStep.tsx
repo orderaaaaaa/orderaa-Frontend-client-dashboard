@@ -245,7 +245,7 @@ const AddVariantsStep = memo(
                 variant="default"
                 size="sm"
                 className="rounded-full text-xs font-semibold flex items-center gap-1.5"
-                onClick={(e) => {
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                   e.stopPropagation();
                   handleAddVariant(row as InvoiceProductRow);
                 }}

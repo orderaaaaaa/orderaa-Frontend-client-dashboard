@@ -164,7 +164,7 @@ export default function OrderCard({
                 <Then>
                   <Button
                     variant="ghost"
-                    onClick={(e) => {
+                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                       e.stopPropagation();
                       setIsNotesModalOpen(true);
                     }}

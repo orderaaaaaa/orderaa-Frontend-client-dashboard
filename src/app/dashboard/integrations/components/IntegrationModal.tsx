@@ -568,7 +568,7 @@ const IntegrationModal = ({
                               type="button"
                               variant="ghost"
                               size="icon"
-                              onClick={(e) => {
+                              onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                                 e.stopPropagation();
                                 onEditStore(Number(storeId), configs);
                               }}
@@ -582,7 +582,7 @@ const IntegrationModal = ({
                               type="button"
                               variant="ghost"
                               size="icon"
-                              onClick={(e) => {
+                              onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                                 e.stopPropagation();
                                 onDeleteStore(
                                   Number(storeId),

@@ -204,7 +204,7 @@ export function CustomerCard({
             <Button
               variant="ghost"
               size="icon-sm"
-              onClick={(e) => {
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                 e.stopPropagation();
                 setIsMenuOpen(!isMenuOpen);
               }}
@@ -216,7 +216,7 @@ export function CustomerCard({
               <div className="absolute left-[-10px] bottom-full mb-2 bg-white shadow-xl rounded-lg border z-20 min-w-[120px]">
                 <Button
                   variant="ghost"
-                  onClick={(e) => {
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                     e.stopPropagation();
                     setShowBanModal(true);
                     setIsMenuOpen(false);
