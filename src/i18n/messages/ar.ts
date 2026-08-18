@@ -61,6 +61,8 @@ const ar = {
   'stockRules.selection.any': 'كل الحالات',
   'stockRules.selection.range': 'نطاق',
   'stockRules.selection.specific': 'حالات محددة',
+  'stockRules.selection.selectAll': 'تحديد الكل',
+  'stockRules.selection.clearAll': 'إلغاء التحديد',
   'stockRules.selection.anyFromHint':
     'تنطبق القاعدة على أي حالة مصدر — لا حاجة لاختيار حالات.',
   'stockRules.selection.anyToHint':

@@ -38,6 +38,8 @@ interface MultiSelectDropdownProps {
    * "everything except a couple" is a real use case (e.g. status pickers).
    */
   showSelectAll?: boolean;
+  selectAllLabel?: string;
+  clearAllLabel?: string;
 }
 
 const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>(
@@ -59,6 +61,8 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
       searchThreshold = 5,
       debounceMs = 300,
       showSelectAll = false,
+      selectAllLabel = 'تحديد الكل',
+      clearAllLabel = 'إلغاء التحديد',
     },
     ref
   ) {
@@ -247,7 +251,7 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
                     onClick={toggleSelectAll}
                     className="text-xs md:text-sm font-medium text-primary hover:underline"
                   >
-                    {allFilteredSelected ? 'إلغاء التحديد' : 'تحديد الكل'}
+                    {allFilteredSelected ? clearAllLabel : selectAllLabel}
                   </button>
                 </div>
               )}

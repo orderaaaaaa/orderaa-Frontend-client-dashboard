@@ -52,6 +52,8 @@ const en: Record<keyof typeof ar, string> = {
   'stockRules.selection.any': 'All statuses',
   'stockRules.selection.range': 'Range',
   'stockRules.selection.specific': 'Specific statuses',
+  'stockRules.selection.selectAll': 'Select all',
+  'stockRules.selection.clearAll': 'Clear selection',
   'stockRules.selection.anyFromHint':
     'The rule applies to any source status — no need to choose statuses.',
   'stockRules.selection.anyToHint':

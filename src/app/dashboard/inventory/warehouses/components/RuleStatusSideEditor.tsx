@@ -111,6 +111,8 @@ export function RuleStatusSideEditor({
           value={statuses}
           onChange={(next) => onPatch({ statuses: next as OrderStatus[] })}
           showSelectAll
+          selectAllLabel={t('stockRules.selection.selectAll')}
+          clearAllLabel={t('stockRules.selection.clearAll')}
         />
       )}
     </div>
