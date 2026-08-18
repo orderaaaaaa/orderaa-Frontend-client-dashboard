@@ -2,6 +2,7 @@ import React from 'react';
 import { LiaBoxSolid, LiaPlusSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { Can } from '@/components/Can';
+import { PERMISSION_CODES } from '@/lib/permissions';
 
 /**
  * Props for PackagingNotesSection component
@@ -31,7 +32,7 @@ export function PackagingNotesSection({
     <div className={`flex flex-col gap-2 mt-6 ${className}`}>
       <div className="flex justify-between items-center">
         <h2 className="text-primary font-bold text-lg">ملاحظات التغليف</h2>
-        <Can code="orders:update">
+        <Can code={PERMISSION_CODES.ORDERS_UPDATE}>
           <Button
             variant="ghost"
             onClick={onAddClick}

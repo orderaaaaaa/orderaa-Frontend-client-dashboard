@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { IconType } from 'react-icons';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
+import { PERMISSION_CODES, type PermissionCode } from '@/lib/permissions';
 
 export type NavigationItem = {
   name: string;
@@ -58,7 +59,7 @@ export type NavigationItem = {
    * Omit for entries every authenticated user may reach. The Sidebar drops
    * hidden entries — and any parent left without visible children.
    */
-  permission?: string;
+  permission?: PermissionCode;
 };
 
 export const navigation: NavigationItem[] = [
@@ -119,7 +120,7 @@ export const navigation: NavigationItem[] = [
     name: 'الأدوار والصلاحيات',
     href: '/dashboard/settings/roles',
     icon: LiaUserShieldSolid,
-    permission: 'roles:read',
+    permission: PERMISSION_CODES.ROLES_READ,
   },
   {
     name: 'إضافه طلب جديد',

@@ -5,7 +5,7 @@ import { PhoneNumberList } from '../fields/PhoneNumberList';
 import { Order } from '@/types/orders';
 import { useUpdateCustomer } from '@/services/orders';
 import { usePermissionCheck } from '@/hooks/usePermissions';
-import { PERMISSIONS } from '@/lib/permissions';
+import { PERMISSION_CODES, PERMISSIONS } from '@/lib/permissions';
 import { toast } from 'react-toastify';
 import { If, Then } from 'react-if';
 import { MdBlock } from 'react-icons/md';
@@ -58,8 +58,8 @@ export function CustomerDataSection({
   const { hasPermission } = usePermissionCheck();
   // Customer name / phones go to PATCH /customers/:id (`customers:update`),
   // the order note goes to PATCH /orders/:id (`orders:update`).
-  const canUpdateCustomer = hasPermission('customers:update');
-  const canUpdateOrder = hasPermission('orders:update');
+  const canUpdateCustomer = hasPermission(PERMISSION_CODES.CUSTOMERS_UPDATE);
+  const canUpdateOrder = hasPermission(PERMISSION_CODES.ORDERS_UPDATE);
   const canMergeCustomers = hasPermission(PERMISSIONS.CUSTOMERS_MERGE);
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
   const [mergeConflict, setMergeConflict] = useState<PhoneConflictDetails | null>(

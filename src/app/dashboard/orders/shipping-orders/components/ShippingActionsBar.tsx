@@ -4,6 +4,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { LiaTruckSolid } from 'react-icons/lia';
 import { useHasPermission } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 
 function Spinner() {
   return (
@@ -33,7 +34,7 @@ export function ShippingActionsBar({
   selectedCount = 0,
 }: ShippingActionsBarProps) {
   // "شحن" posts to /orders/submit-for-approval.
-  const canSubmitForApproval = useHasPermission('orders:submit-for-approval');
+  const canSubmitForApproval = useHasPermission(PERMISSION_CODES.ORDERS_SUBMIT_FOR_APPROVAL);
 
   if (!canSubmitForApproval) {
     return null;

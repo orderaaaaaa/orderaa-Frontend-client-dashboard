@@ -2,40 +2,39 @@
  * Permission-code helpers for the ABAC authorization model.
  *
  * Codes are the stable wire format produced by the backend permission catalog
- * (`orderaa-backend/src/authorization/permission-catalog.ts`) and returned as a
- * flat `permissions: string[]` on `GET /auth/me`.
+ * and returned as a flat `permissions: string[]` on `GET /auth/me`. The codes
+ * themselves live in `@/lib/generated/permission-codes` — a file GENERATED
+ * from the backend catalog (`cd backend && bun run generate:permissions-contract`),
+ * so a typo'd code is a compile error, not silently hidden UI.
  *
  * These are pure functions so they can be used outside React (interceptors,
  * route helpers). Inside components use `@/hooks/usePermissions` or `<Can />`.
  */
+import {
+  ORDER_STATUS_READ_PREFIX,
+  ORDER_STATUS_SET_PREFIX,
+  type PermissionCode,
+} from '@/lib/generated/permission-codes';
 
-/** Codes referenced from UI gating. Extend as more screens adopt gating. */
-export const PERMISSIONS = {
-  ROLES_READ: 'roles:read',
-  ROLES_CREATE: 'roles:create',
-  ROLES_UPDATE: 'roles:update',
-  ROLES_DELETE: 'roles:delete',
-  ROLES_ASSIGN: 'roles:assign',
-  EMPLOYEES_READ: 'employees:read',
-  EMPLOYEES_CREATE: 'employees:create',
-  EMPLOYEES_UPDATE: 'employees:update',
-  EMPLOYEES_ACTIVATE: 'employees:activate',
-  EMPLOYEES_DELETE: 'employees:delete',
-  SUPPLIERS_READ: 'suppliers:read',
-  SUPPLIERS_CREATE: 'suppliers:create',
-  SUPPLIERS_UPDATE: 'suppliers:update',
-  SUPPLIERS_DELETE: 'suppliers:delete',
-  CUSTOMERS_READ: 'customers:read',
-  CUSTOMERS_UPDATE: 'customers:update',
-  CUSTOMERS_MERGE: 'customers:merge',
-} as const;
+export {
+  ORDER_STATUSES,
+  ORDER_STATUS_READ_PREFIX,
+  ORDER_STATUS_SET_PREFIX,
+  PERMISSION_CODES,
+  // Back-compat alias — existing call sites read `PERMISSIONS.X`.
+  PERMISSION_CODES as PERMISSIONS,
+} from '@/lib/generated/permission-codes';
+export type {
+  ActionPermissionCode,
+  OrderStatusKey,
+  OrderStatusReadCode,
+  OrderStatusSetCode,
+  PermissionCode,
+} from '@/lib/generated/permission-codes';
 
-export type PermissionCode = string;
-
-/** `orders:status:<STATUS>` — which statuses a role may see / work on. */
-export const ORDER_STATUS_READ_PREFIX = 'orders:status:';
-/** `orders:setStatus:<STATUS>` — which statuses a role may move an order into. */
-export const ORDER_STATUS_SET_PREFIX = 'orders:setStatus:';
+// The classifiers below take `string`, not `PermissionCode`, on purpose: they
+// classify SERVER-SENT catalog entries (`PermissionCatalogEntry.code`) in the
+// roles editor, and wire data is not compile-time-known.
 
 export const isOrderStatusReadCode = (code: string) =>
   code.startsWith(ORDER_STATUS_READ_PREFIX);

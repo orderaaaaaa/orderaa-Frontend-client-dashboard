@@ -21,6 +21,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useUpdateTrackingCard } from '@/services/logistics';
 import { useRecordFollowupEventPointMutation } from '@/services/followup';
 import { useHasPermission } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
 import { getStatusColor } from '@/app/dashboard/customers/lib/getBadgeColor';
 import type { TrackingCard as TrackingCardType, ShippingPointType } from '@/types/logistics';
@@ -53,7 +54,7 @@ export default function TrackingCard({ card }: TrackingCardProps) {
   const recordEventPointMutation = useRecordFollowupEventPointMutation();
   // Flagging a courier update and the agent-status modal both post to
   // /orders/followup/* , which the backend guards with `followup:manage`.
-  const canManageFollowup = useHasPermission('followup:manage');
+  const canManageFollowup = useHasPermission(PERMISSION_CODES.FOLLOWUP_MANAGE);
 
   const [showAddUpdate, setShowAddUpdate] = useState(false);
   const [newCourierUpdate, setNewCourierUpdate] = useState('');

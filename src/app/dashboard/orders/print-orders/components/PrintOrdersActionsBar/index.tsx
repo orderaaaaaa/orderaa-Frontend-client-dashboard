@@ -10,6 +10,7 @@ import {
 } from 'react-icons/lia';
 import { PrintOrdersActionsBarProps } from '../../types';
 import { usePermissionCheck } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 
 function Spinner() {
   return (
@@ -36,10 +37,10 @@ const PrintOrdersActionsBar: React.FC<PrintOrdersActionsBarProps> = ({
   // تم التحضير → POST /orders/prepare, فى انتظار التغليف → POST /orders/waiting-for-packaging,
   // اعادة اتصال / تغيير المنتج → POST /orders/call-again.
   const { hasPermission } = usePermissionCheck();
-  const canPrepare = hasPermission('orders:prepare');
+  const canPrepare = hasPermission(PERMISSION_CODES.ORDERS_PREPARE);
   const canAwaitPackaging =
-    !hideAwaitingPackaging && hasPermission('orders:waiting-for-packaging');
-  const canCallAgain = hasPermission('orders:call-again');
+    !hideAwaitingPackaging && hasPermission(PERMISSION_CODES.ORDERS_WAITING_FOR_PACKAGING);
+  const canCallAgain = hasPermission(PERMISSION_CODES.ORDERS_CALL_AGAIN);
   const hasAnyAction = canPrepare || canAwaitPackaging || canCallAgain;
 
   if (!forceShow && selectedOrders.length === 0 && !isAllSelected) {

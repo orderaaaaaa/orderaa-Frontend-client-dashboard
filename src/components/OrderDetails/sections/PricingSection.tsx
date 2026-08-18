@@ -7,6 +7,7 @@ import { PaymentStatusSelect } from '../fields/PaymentStatusSelect';
 import { ShippingTypeSelect } from '../fields/ShippingTypeSelect';
 import { Order } from '@/types/orders';
 import { usePermissionCheck } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 
 // Validation schema for price fields - only numbers allowed
 const priceSchema = z.string().refine(
@@ -43,7 +44,7 @@ export function PricingSection({
 }: PricingSectionProps) {
   // Every field here saves through PATCH /orders/:id (`orders:update`).
   const { hasPermission } = usePermissionCheck();
-  const canEdit = hasPermission('orders:update');
+  const canEdit = hasPermission(PERMISSION_CODES.ORDERS_UPDATE);
 
   // T8. Every amount is a decimal string from the API and is rendered as-is —
   // parsing it into a number to do arithmetic here would put money through a

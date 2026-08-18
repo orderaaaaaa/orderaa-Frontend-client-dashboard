@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Can } from '@/components/Can';
+import { PERMISSION_CODES } from '@/lib/permissions';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import { PrintStatusToggle } from './PrintStatusToggle';
 import { PrintInvoicesModal } from './PrintInvoicesModal';
@@ -333,7 +334,7 @@ export function FilterSection({
           </Popover>
 
           {showPrintButton && (
-            <Can code="orders:print">
+            <Can code={PERMISSION_CODES.ORDERS_PRINT}>
               <Button variant="outline" size="lg" onClick={handlePrintClick}>
                 <LiaPrintSolid className="size-5" />
               </Button>

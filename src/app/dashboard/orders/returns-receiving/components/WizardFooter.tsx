@@ -6,6 +6,7 @@ import {
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { useHasPermission } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 
 interface WizardFooterProps {
   isStep1Valid: boolean;
@@ -19,7 +20,7 @@ export function WizardFooter({
   onSubmit,
 }: WizardFooterProps) {
   // Submitting receipts hits POST /orders/return-receipts.
-  const canCreateReturnReceipts = useHasPermission('orders:return-receipts:create');
+  const canCreateReturnReceipts = useHasPermission(PERMISSION_CODES.ORDERS_RETURN_RECEIPTS_CREATE);
 
   if (!canCreateReturnReceipts) {
     return null;

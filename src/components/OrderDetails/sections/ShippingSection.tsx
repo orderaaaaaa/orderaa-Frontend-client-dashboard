@@ -2,6 +2,7 @@ import React from 'react';
 import { LiaTruckSolid, LiaMapMarkerAltSolid, LiaEditSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { Can } from '@/components/Can';
+import { PERMISSION_CODES } from '@/lib/permissions';
 
 export interface ShippingSectionProps {
   shippingCompany?: string;
@@ -51,7 +52,7 @@ export function ShippingSection({
     <div className={`flex flex-col justify-start gap-2 ${className}`}>
       <div className="flex justify-between items-center">
         <h2 className="text-primary font-semibold">بيانات الشحن</h2>
-        <Can code="orders:update">
+        <Can code={PERMISSION_CODES.ORDERS_UPDATE}>
           <Button
             variant="ghost"
             size="icon-sm"

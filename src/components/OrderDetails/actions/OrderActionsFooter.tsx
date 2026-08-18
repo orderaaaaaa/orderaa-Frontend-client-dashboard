@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useDropdownState } from '@/hooks/OrderDetails/useDropdownState';
 import { usePermissionCheck } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 import { FollowUpDropdown } from './FollowUpDropdown';
 import { ActionsDropdown } from './ActionsDropdown';
 import { STOP_OPERATION_STATUSES } from './constants';
@@ -50,8 +51,8 @@ export function OrderActionsFooter({
   // Confirm / follow-up / the actions menu all mutate the order: everything but
   // `cancel` patches it (`orders:update`), cancel posts to /cancel.
   const { hasPermission } = usePermissionCheck();
-  const canUpdate = hasPermission('orders:update');
-  const canCancel = hasPermission('orders:cancel');
+  const canUpdate = hasPermission(PERMISSION_CODES.ORDERS_UPDATE);
+  const canCancel = hasPermission(PERMISSION_CODES.ORDERS_CANCEL);
   const showActionsMenu = canUpdate || canCancel;
 
   const showStopOperation = STOP_OPERATION_STATUSES.has(orderStatus) && canUpdate;

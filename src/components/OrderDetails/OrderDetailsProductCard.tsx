@@ -24,6 +24,7 @@ import {
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { usePermissionCheck } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 import { useOrderStockAvailabilityQuery } from '@/services/warehouses';
 import { StockAvailabilityBadge } from './StockAvailabilityBadge';
 import Image from 'next/image';
@@ -42,7 +43,7 @@ function OrderDetailsProductCard({
   const addOrderProductMutation = useAddOrderProduct();
   // Add / edit / delete of order products all sit behind `orders:products:manage`.
   const { hasPermission } = usePermissionCheck();
-  const canManageProducts = hasPermission('orders:products:manage');
+  const canManageProducts = hasPermission(PERMISSION_CODES.ORDERS_PRODUCTS_MANAGE);
 
   // T27: availability against CONFIRMED — the transition an agent on this
   // screen is about to make. Keyed by orderProductId because each LINE resolves

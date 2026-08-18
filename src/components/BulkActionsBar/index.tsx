@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/select';
 import { OrderStatusItem } from '@/types/orders';
 import { Can } from '@/components/Can';
+import { PERMISSION_CODES } from '@/lib/permissions';
 
 interface BulkActionsBarProps {
   selectedOrders: Order[];
@@ -82,7 +83,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
     >
       <div className="mx-auto overflow-x-auto scrollbar-hide">
         <div className="pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
-          <Can code="orders:bulk-update">
+          <Can code={PERMISSION_CODES.ORDERS_BULK_UPDATE}>
             <Select onValueChange={handleStatusSelect}>
               <SelectTrigger className="group flex items-center gap-2 px-4 pl-10 py-2 rounded-3xl bg-white border-primary !text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap w-auto h-10 focus:ring-0 focus:ring-offset-0 ring-offset-0">
                 <LiaEditSolid className="size-5 shrink-0 group-hover:text-white" />

@@ -5,6 +5,7 @@ import { processExcelFile } from '@/lib/excel/processor';
 import { importBulkOrders, transformToApiFormat, getMerchantIdFromUser } from '@/lib/api/bulk-import';
 import { useAuthStore } from '@/store/authStore';
 import { Can } from '@/components/Can';
+import { PERMISSION_CODES } from '@/lib/permissions';
 
 const FileUpload = () => {
   const [isDragging, setIsDragging] = useState(false);
@@ -213,7 +214,7 @@ const FileUpload = () => {
             </div>
 
             {/* Analysis posts to /orders/bulk-validate + /orders/bulk-import. */}
-            <Can code="orders:import">
+            <Can code={PERMISSION_CODES.ORDERS_IMPORT}>
             <div className="flex gap-4 max-sm:gap-1 justify-center relative max-sm:left-5">
               <button
                 onClick={handleUpload}

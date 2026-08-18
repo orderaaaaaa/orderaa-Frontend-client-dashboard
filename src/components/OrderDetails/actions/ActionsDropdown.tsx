@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { POST_SHIPPING_STATUSES } from '@/types/logistics';
 import { usePermissionCheck } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 
 interface ActionOption {
   label: string;
@@ -54,8 +55,8 @@ export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, onAction
   const isPostShipping = POST_SHIPPING_STATUSES.has(orderStatus);
   // `cancel` posts to /orders/:id/cancel, every other action patches the order.
   const { hasPermission } = usePermissionCheck();
-  const canCancel = hasPermission('orders:cancel');
-  const canUpdate = hasPermission('orders:update');
+  const canCancel = hasPermission(PERMISSION_CODES.ORDERS_CANCEL);
+  const canUpdate = hasPermission(PERMISSION_CODES.ORDERS_UPDATE);
 
   const filteredOptions = useMemo(() => {
     const base = arrowOptions.filter((option) => {

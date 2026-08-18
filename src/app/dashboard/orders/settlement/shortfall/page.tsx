@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import { ShortfallSettlement } from '@/types/orders';
 import { useHasPermission } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 import {
   getShortfallSettlements,
   adjustSettlement,
@@ -26,7 +27,7 @@ type FilterValue = 'all' | 'pending' | 'finished';
 
 export default function ShortfallSettlementPage() {
   // Adjusting a settlement hits PATCH /orders/settlement/:orderId/adjust.
-  const canManageSettlement = useHasPermission('orders:settlement:manage');
+  const canManageSettlement = useHasPermission(PERMISSION_CODES.ORDERS_SETTLEMENT_MANAGE);
   const [filter, setFilter] = useState<FilterValue>('all');
   const [data, setData] = useState<ShortfallSettlement[]>([]);
   const [loading, setLoading] = useState(true);

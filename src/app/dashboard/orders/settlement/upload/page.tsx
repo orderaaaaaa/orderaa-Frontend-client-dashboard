@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Breadcrumb } from '@/components/dashboard-layout';
 import { useHasPermission } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 import { generateSettlementTemplate } from '@/lib/excel/template-generator';
 import {
   uploadSettlementRows,
@@ -106,7 +107,7 @@ function handleDownloadTemplate() {
 
 export default function SettlementUploadPage() {
   // Uploading a collection sheet hits POST /orders/settlement/upload.
-  const canManageSettlement = useHasPermission('orders:settlement:manage');
+  const canManageSettlement = useHasPermission(PERMISSION_CODES.ORDERS_SETTLEMENT_MANAGE);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [parsedRows, setParsedRows] = useState<SettlementRow[]>([]);
