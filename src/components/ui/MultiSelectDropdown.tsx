@@ -32,6 +32,12 @@ interface MultiSelectDropdownProps {
   loading?: boolean;
   searchThreshold?: number;
   debounceMs?: number;
+  /**
+   * Pins a select-all/clear row above the option list. Off by default so
+   * every existing usage renders exactly as before; opt in for lists where
+   * "everything except a couple" is a real use case (e.g. status pickers).
+   */
+  showSelectAll?: boolean;
 }
 
 const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>(
@@ -52,6 +58,7 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
       loading = false,
       searchThreshold = 5,
       debounceMs = 300,
+      showSelectAll = false,
     },
     ref
   ) {
@@ -137,6 +144,26 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
       [value, onChange]
     );
 
+    // Respects the active search filter on purpose: "select all" over a
+    // narrowed-down list should only touch what's visible, not the full
+    // option set hiding behind the query.
+    const filteredKeys = useMemo(
+      () => filtered.map((opt) => getOptionKey(opt)),
+      [filtered]
+    );
+
+    const allFilteredSelected =
+      filteredKeys.length > 0 &&
+      filteredKeys.every((key) => value.includes(key));
+
+    const toggleSelectAll = useCallback(() => {
+      if (allFilteredSelected) {
+        onChange?.(value.filter((v) => !filteredKeys.includes(v)));
+      } else {
+        onChange?.(Array.from(new Set([...value, ...filteredKeys])));
+      }
+    }, [allFilteredSelected, filteredKeys, value, onChange]);
+
     return (
       <div
         ref={ref || internalRef}
@@ -210,6 +237,18 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
                     placeholder={searchPlaceholder}
                     className="w-full px-2 py-1 md:py-1.5 rounded border text-xs md:text-sm focus:outline-none focus:border-primary"
                   />
+                </div>
+              )}
+
+              {showSelectAll && filteredKeys.length > 0 && (
+                <div className="sticky top-0 z-10 border-b bg-white px-2 py-1.5 md:px-3 md:py-2">
+                  <button
+                    type="button"
+                    onClick={toggleSelectAll}
+                    className="text-xs md:text-sm font-medium text-primary hover:underline"
+                  >
+                    {allFilteredSelected ? 'إلغاء التحديد' : 'تحديد الكل'}
+                  </button>
                 </div>
               )}
 

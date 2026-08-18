@@ -48,6 +48,45 @@ const ar = {
   'stockRules.coverage.addRestockRule':
     'أضف قاعدة إرجاع لهذا النطاق إذا كنت تريد إعادة المخزون في هذه الحالات.',
 
+  // T29 — the typed status-selection rule builder (event type + per-side
+  // ANY/RANGE/SPECIFIC). Additive only for now: nothing renders these keys
+  // yet, they land ahead of the StockWorkflowsTab wire-shape flip.
+  'stockRules.intro':
+    'حدد حركة المخزون التلقائية عند إنشاء الطلب أو عند انتقاله بين الحالات. القواعد غير المعرفة لا تحرك المخزون.',
+  'stockRules.event.label': 'نوع الحدث',
+  'stockRules.event.creation': 'عند إنشاء الطلب',
+  'stockRules.event.transition': 'انتقال بين الحالات',
+  'stockRules.side.from': 'من الحالة',
+  'stockRules.side.to': 'إلى الحالة',
+  'stockRules.selection.any': 'كل الحالات',
+  'stockRules.selection.range': 'نطاق',
+  'stockRules.selection.specific': 'حالات محددة',
+  'stockRules.selection.anyFromHint':
+    'تنطبق القاعدة على أي حالة مصدر — لا حاجة لاختيار حالات.',
+  'stockRules.selection.anyToHint':
+    'تنطبق القاعدة على أي حالة هدف — لا حاجة لاختيار حالات.',
+  'stockRules.range.start': 'بداية النطاق',
+  'stockRules.range.end': 'نهاية النطاق',
+  'stockRules.range.previewLabel': 'الحالات المشمولة ({count})',
+  // The dynamic-range note: a status added later between the endpoints joins
+  // automatically — spelled out because it is not obvious from the picker.
+  'stockRules.range.futureNote':
+    'النطاق ديناميكي: أي حالة تُضاف مستقبلًا بين البداية والنهاية تدخل ضمن هذه القاعدة تلقائيًا.',
+  'stockRules.errors.fromSpecificEmpty': 'اختر حالات المصدر',
+  'stockRules.errors.toSpecificEmpty': 'اختر حالات الهدف',
+  'stockRules.errors.rangeIncomplete': 'اختر بداية ونهاية النطاق',
+  'stockRules.errors.rangeInverted':
+    'يجب أن تسبق حالة البداية حالة النهاية في ترتيب الحالات',
+  'stockRules.errors.sameStatusBothSides':
+    'لا يمكن أن تظهر نفس الحالة في الجانبين',
+  'stockRules.errors.warehousesRequired': 'اختر المخزنين',
+  'stockRules.errors.sameWarehouse':
+    'يجب أن يختلف مخزن المصدر عن مخزن الوجهة',
+  'stockRules.errors.duplicateRule': 'قاعدة مكررة لنفس التحويل',
+  'stockRules.errors.creationTargetRequired': 'اختر حالة الهدف عند إنشاء الطلب',
+  'stockRules.saveSuccess': 'تم حفظ القاعدة بنجاح',
+  'stockRules.saveFailed': 'تعذر حفظ القاعدة',
+
   'products.confirmOutOfStock.inherit': 'اتبع المتجر ({value})',
   'products.confirmOutOfStock.allow': 'مسموح',
   'products.confirmOutOfStock.forbid': 'ممنوع',

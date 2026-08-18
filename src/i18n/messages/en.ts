@@ -42,6 +42,41 @@ const en: Record<keyof typeof ar, string> = {
   'stockRules.coverage.addRestockRule':
     'Add a restock rule to this scope if you want the stock returned in these cases.',
 
+  'stockRules.intro':
+    'Set the automatic stock movement for order creation or a status transition. Rules that are not defined do not move stock.',
+  'stockRules.event.label': 'Event type',
+  'stockRules.event.creation': 'On order creation',
+  'stockRules.event.transition': 'Status transition',
+  'stockRules.side.from': 'From status',
+  'stockRules.side.to': 'To status',
+  'stockRules.selection.any': 'All statuses',
+  'stockRules.selection.range': 'Range',
+  'stockRules.selection.specific': 'Specific statuses',
+  'stockRules.selection.anyFromHint':
+    'The rule applies to any source status — no need to choose statuses.',
+  'stockRules.selection.anyToHint':
+    'The rule applies to any target status — no need to choose statuses.',
+  'stockRules.range.start': 'Range start',
+  'stockRules.range.end': 'Range end',
+  'stockRules.range.previewLabel': 'Statuses covered ({count})',
+  'stockRules.range.futureNote':
+    'The range is dynamic: any status added later between the start and end automatically joins this rule.',
+  'stockRules.errors.fromSpecificEmpty': 'Choose the source statuses',
+  'stockRules.errors.toSpecificEmpty': 'Choose the target statuses',
+  'stockRules.errors.rangeIncomplete': 'Choose a range start and end',
+  'stockRules.errors.rangeInverted':
+    'The start status must come before the end status in the status order',
+  'stockRules.errors.sameStatusBothSides':
+    'The same status cannot appear on both sides',
+  'stockRules.errors.warehousesRequired': 'Choose both warehouses',
+  'stockRules.errors.sameWarehouse':
+    'The source and destination warehouses must be different',
+  'stockRules.errors.duplicateRule': 'Duplicate rule for the same transition',
+  'stockRules.errors.creationTargetRequired':
+    'Choose the target status for order creation',
+  'stockRules.saveSuccess': 'Rule saved successfully',
+  'stockRules.saveFailed': 'Could not save the rule',
+
   'products.confirmOutOfStock.inherit': 'Follow the store ({value})',
   'products.confirmOutOfStock.allow': 'Allowed',
   'products.confirmOutOfStock.forbid': 'Forbidden',
