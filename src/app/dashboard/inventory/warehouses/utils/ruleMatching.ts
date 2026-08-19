@@ -1,18 +1,16 @@
 import { OrderStatus } from '@/types/orders';
+import type { StatusSelectionType } from '@/lib/api/warehouses';
 import { WORKFLOW_ORDER_STATUSES } from '../constants';
 
 /**
  * T29 — the three ways one side (source or target) of a stock-workflow rule
  * can match a status.
  *
- * Declared LOCALLY: the backend wire DTO these mirror
- * (`fromSelection`/`toSelection`, T29 backend task 2) does not exist in
- * `lib/api/warehouses.ts` yet. The task that wires the rule builder into
- * `StockWorkflowsTab` re-exports/reconciles this against the real wire type
- * instead of this file inventing one — until then this is additive and
- * nothing consumes it.
+ * Re-exported from the wire types rather than declared here: the rule builder
+ * and this matcher must speak the SAME union the API stores, or a selection
+ * could round-trip into a type the matcher does not know.
  */
-export type StatusSelectionType = 'ANY' | 'RANGE' | 'SPECIFIC';
+export type { StatusSelectionType };
 
 export type RuleSide = 'from' | 'to';
 
@@ -32,6 +30,48 @@ export interface StatusRuleSides {
   fromRangeEnd?: OrderStatus;
   toRangeStart?: OrderStatus;
   toRangeEnd?: OrderStatus;
+}
+
+/**
+ * The same triple in WIRE spelling — `fromSelection`/`toSelection`, and `null`
+ * rather than `undefined` for the absent endpoints.
+ *
+ * Structural, not `StockWorkflowApiItem`, so a saved record and anything else
+ * carrying the wire fields both work.
+ */
+export interface WireRuleSides {
+  fromSelection: StatusSelectionType | null;
+  toSelection: StatusSelectionType | null;
+  fromStatuses: OrderStatus[];
+  toStatuses: OrderStatus[];
+  fromRangeStart: OrderStatus | null;
+  fromRangeEnd: OrderStatus | null;
+  toRangeStart: OrderStatus | null;
+  toRangeEnd: OrderStatus | null;
+}
+
+/**
+ * Wire record → the shape `sideCoversStatus` reads.
+ *
+ * Lives here rather than in the coverage panel so the panel and the rule
+ * builder cannot end up reading a stored rule two different ways.
+ *
+ * A null selection (CREATION/INBOUND, which carry no selections at all) falls
+ * back to SPECIFIC: over a from-side that is empty by construction that
+ * matches NOTHING, which is exactly right — a creation rule covers no
+ * transition. Callers still filter by `eventType` first; this is the belt.
+ */
+export function toStatusRuleSides(rule: WireRuleSides): StatusRuleSides {
+  return {
+    fromType: rule.fromSelection ?? 'SPECIFIC',
+    toType: rule.toSelection ?? 'SPECIFIC',
+    fromStatuses: rule.fromStatuses,
+    toStatuses: rule.toStatuses,
+    fromRangeStart: rule.fromRangeStart ?? undefined,
+    fromRangeEnd: rule.fromRangeEnd ?? undefined,
+    toRangeStart: rule.toRangeStart ?? undefined,
+    toRangeEnd: rule.toRangeEnd ?? undefined,
+  };
 }
 
 /**

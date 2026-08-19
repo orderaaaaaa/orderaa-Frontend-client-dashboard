@@ -2,10 +2,12 @@
 
 import MultiSelectDropdown from '@/components/ui/MultiSelectDropdown';
 import { useI18n } from '@/i18n/I18nProvider';
-import type { TranslationKey } from '@/i18n/translate';
 import { OrderStatus } from '@/types/orders';
 import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
-import { WORKFLOW_ORDER_STATUSES } from '../constants';
+import {
+  SELECTION_TYPE_LABEL_KEYS,
+  WORKFLOW_ORDER_STATUSES,
+} from '../constants';
 import type { StatusSelectionType } from '../utils/ruleMatching';
 import { StatusRangePicker } from './StatusRangePicker';
 
@@ -17,13 +19,11 @@ const statusOptions = WORKFLOW_ORDER_STATUSES.map((status) => ({
   value: ORDER_STATUS_ARABIC_LABELS[status] ?? status,
 }));
 
-const SELECTION_TYPES: StatusSelectionType[] = ['ANY', 'RANGE', 'SPECIFIC'];
-
-const SELECTION_LABEL_KEYS: Record<StatusSelectionType, TranslationKey> = {
-  ANY: 'stockRules.selection.any',
-  RANGE: 'stockRules.selection.range',
-  SPECIFIC: 'stockRules.selection.specific',
-};
+// Derived from the label map so a selection type can never exist in the union
+// without a pill, or get a pill without a translated label.
+const SELECTION_TYPES = Object.keys(
+  SELECTION_TYPE_LABEL_KEYS
+) as StatusSelectionType[];
 
 /** Patch shape `onPatch` receives — only the fields that changed. */
 export interface RuleStatusSidePatch {
@@ -48,9 +48,14 @@ export interface RuleStatusSideEditorProps {
  * Reused for both sides — `side` only picks the hint copy, the rest of the
  * behaviour is identical.
  *
- * Not wired into `StockWorkflowsTab` yet. The wiring task constructs
- * `RuleRow`s with `fromType`/`toType` etc. and renders one of these per side;
- * until then this component has no caller.
+ * Switching type deliberately does NOT clear the other types' fields, so a
+ * merchant who taps RANGE and taps back still has their list. The corollary is
+ * on the caller: `StockWorkflowsTab` builds the save payload from the ACTIVE
+ * type only, and never ships the fields left behind.
+ *
+ * There is no `error` prop: per-side errors are rendered by the caller below
+ * this block. The one exception is an inverted range, which `StatusRangePicker`
+ * shows itself, right under the endpoints that caused it.
  */
 export function RuleStatusSideEditor({
   side,
@@ -80,7 +85,7 @@ export function RuleStatusSideEditor({
                 : 'border-gray-300 text-gray-600'
             }`}
           >
-            {t(SELECTION_LABEL_KEYS[option])}
+            {t(SELECTION_TYPE_LABEL_KEYS[option])}
           </button>
         ))}
       </div>

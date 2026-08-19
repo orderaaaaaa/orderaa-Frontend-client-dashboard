@@ -27,8 +27,8 @@ export interface StatusRangePickerProps {
 
 /**
  * T29 — start/end pickers for a RANGE-type rule side, over the single valid
- * status order (`WORKFLOW_ORDER_STATUSES`). Not wired into the rule builder
- * yet; `RuleStatusSideEditor` renders it once the wiring task lands.
+ * status order (`WORKFLOW_ORDER_STATUSES`). Rendered by
+ * `RuleStatusSideEditor` whenever that side's type is RANGE.
  *
  * Inverted ranges (start after end) are reported inline, never silently
  * swapped — an auto-swap would change which statuses a merchant just

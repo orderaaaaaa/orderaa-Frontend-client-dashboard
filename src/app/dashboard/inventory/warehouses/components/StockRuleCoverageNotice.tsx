@@ -10,6 +10,7 @@ import {
   RESTOCK_SOURCE_STATUSES,
   RESTOCK_TARGET_STATUSES,
 } from '../constants';
+import { sideCoversStatus, toStatusRuleSides } from '../utils/ruleMatching';
 
 interface Props {
   /** Rules belonging to THIS scope only — never the inherited ones. */
@@ -39,14 +40,19 @@ export function StockRuleCoverageNotice({ rules, scopeLabel }: Props) {
   const { t, dir } = useI18n();
 
   const uncoveredRestock = useMemo(() => {
-    const transitionRules = rules.filter((rule) => rule.fromStatuses.length > 0);
+    // T29 — the event type says what a rule fires on; an empty `fromStatuses`
+    // no longer does. Coverage is then read through the SHARED matcher, so an
+    // ANY or RANGE rule is credited for the statuses it actually covers
+    // instead of being reported as a phantom gap.
+    const transitionSides = rules
+      .filter((rule) => rule.eventType === 'TRANSITION')
+      .map(toStatusRuleSides);
 
     const covers = (from: OrderStatus, to: OrderStatus) =>
-      transitionRules.some(
-        (rule) =>
-          rule.fromStatuses.includes(from) &&
-          // An empty target set means "any target".
-          (rule.toStatuses.length === 0 || rule.toStatuses.includes(to))
+      transitionSides.some(
+        (sides) =>
+          sideCoversStatus(sides, 'from', from) &&
+          sideCoversStatus(sides, 'to', to)
       );
 
     const gaps: string[] = [];
@@ -69,7 +75,7 @@ export function StockRuleCoverageNotice({ rules, scopeLabel }: Props) {
     return gaps;
   }, [rules, t]);
 
-  const hasCreationRule = rules.some((rule) => rule.fromStatuses.length === 0);
+  const hasCreationRule = rules.some((rule) => rule.eventType === 'CREATION');
 
   // No rules at all means the scope is not governing anything yet, so the
   // global rules still apply and there is nothing to warn about.

@@ -14,6 +14,25 @@ export type StockMovementSource =
 
 export type InsufficientStockBehavior = 'THROW' | 'SKIP';
 
+/**
+ * T29 — what makes a rule fire.
+ *
+ * `INBOUND` exists in the enum because the wire carries it; T29's backend
+ * REJECTS creating one and the rule builder offers no affordance for it —
+ * T30 owns that surface.
+ */
+export type StockWorkflowEventType = 'CREATION' | 'TRANSITION' | 'INBOUND';
+
+/**
+ * T29 — how ONE side (source or target) of a transition rule matches a status.
+ *
+ * `ANY` and `RANGE` match DYNAMICALLY against the status enum: a status added
+ * later inside a range (or anywhere, for ANY) joins the rule automatically.
+ * That is the point of storing the type rather than an expanded list — a
+ * hand-picked full list stays frozen, and the two are now told apart on reload.
+ */
+export type StatusSelectionType = 'ANY' | 'RANGE' | 'SPECIFIC';
+
 export interface WarehouseApiItem {
   id: number;
   merchantId: number;
@@ -110,12 +129,28 @@ export interface StockWorkflowApiItem {
   id: number;
   merchantId: number;
   /**
-   * T14 — status SETS. An EMPTY `fromStatuses` means the rule applies on order
-   * creation; it does NOT mean "any source", which is sent as the fully
-   * expanded list. An empty `toStatuses` DOES mean any target.
+   * T29 — what fires the rule, explicit instead of inferred from an empty
+   * `fromStatuses` (T14's marker). Immutable after creation.
+   */
+  eventType: StockWorkflowEventType;
+  /**
+   * The per-side match TYPE. Non-null only on `TRANSITION` rules — selection
+   * typing is a transition concept, so CREATION and INBOUND send null.
+   */
+  fromSelection: StatusSelectionType | null;
+  toSelection: StatusSelectionType | null;
+  /**
+   * Non-empty only for a `SPECIFIC` side — with ONE carve-out: a CREATION rule
+   * keeps its single target status here (with `toSelection` null), which is
+   * what the backend's partial unique index is keyed on.
    */
   fromStatuses: OrderStatus[];
   toStatuses: OrderStatus[];
+  /** Inclusive endpoints, set only on a `RANGE` side. */
+  fromRangeStart: OrderStatus | null;
+  fromRangeEnd: OrderStatus | null;
+  toRangeStart: OrderStatus | null;
+  toRangeEnd: OrderStatus | null;
   /**
    * T28 — SCOPE, derived from these two rather than sent as an enum:
    * both null = global, productId = product-scoped, variantId = variant-scoped.
@@ -123,13 +158,15 @@ export interface StockWorkflowApiItem {
    */
   productId: number | null;
   variantId: number | null;
-  fromWarehouseId: number;
+  /** null ONLY for an INBOUND rule, which has no source warehouse (T30). */
+  fromWarehouseId: number | null;
   toWarehouseId: number;
   allowNegative: boolean;
   onInsufficient: InsufficientStockBehavior;
   createdAt: string;
   updatedAt: string;
-  fromWarehouse: WarehouseRef;
+  /** null exactly when `fromWarehouseId` is. */
+  fromWarehouse: WarehouseRef | null;
   toWarehouse: WarehouseRef;
   product: { id: number; name: string } | null;
   variant: {
@@ -143,6 +180,8 @@ export interface StockWorkflowApiItem {
 export interface GetStockWorkflowsParams {
   toStatus?: OrderStatus;
   warehouseId?: number;
+  /** T29 — narrow to one kind of rule (creation, transition, inbound). */
+  eventType?: StockWorkflowEventType;
   /**
    * EXACT scope filters — asking for a product's rules returns only that
    * product's, never the global ones. That is what lets the screen show whether
@@ -153,22 +192,46 @@ export interface GetStockWorkflowsParams {
   variantId?: number;
 }
 
+/**
+ * T29 — send ONLY the fields the chosen event and selection types use:
+ *
+ * - `CREATION`: exactly one status in `toStatuses`, no selections, no ranges.
+ * - `TRANSITION`: both selections, and per side either the statuses (SPECIFIC)
+ *   or the two endpoints (RANGE) or nothing at all (ANY).
+ *
+ * Anything else is a 400 — the backend CHECK constraints reject hybrid rows,
+ * so a stale range left over from a type switch must never be shipped.
+ */
 export interface CreateStockWorkflowDto {
-  /** Empty or omitted = creation rule. */
+  /** Required, no default — explicitness is the point (T29 decision 10). */
+  eventType: StockWorkflowEventType;
+  fromSelection?: StatusSelectionType;
+  toSelection?: StatusSelectionType;
   fromStatuses?: OrderStatus[];
-  toStatuses: OrderStatus[];
+  /** Required for CREATION (single target) and for a SPECIFIC to-side. */
+  toStatuses?: OrderStatus[];
+  fromRangeStart?: OrderStatus;
+  fromRangeEnd?: OrderStatus;
+  toRangeStart?: OrderStatus;
+  toRangeEnd?: OrderStatus;
   /** T28 scope — send at most one; neither means a global rule. */
   productId?: number;
   variantId?: number;
-  fromWarehouseId: number;
+  /** Omitted ONLY for an INBOUND rule, which has no source warehouse (T30). */
+  fromWarehouseId?: number;
   toWarehouseId: number;
   allowNegative?: boolean;
   onInsufficient?: InsufficientStockBehavior;
 }
 
-/** Scope is fixed at creation — delete and recreate to move a rule's scope. */
+/**
+ * Scope AND event type are fixed at creation — delete and recreate to change
+ * either. A side is merged wholesale: sending `fromSelection` replaces the
+ * whole from-side (selection + statuses + range), so a partial side patch is
+ * not a thing the API offers.
+ */
 export type UpdateStockWorkflowDto = Partial<
-  Omit<CreateStockWorkflowDto, 'productId' | 'variantId'>
+  Omit<CreateStockWorkflowDto, 'eventType' | 'productId' | 'variantId'>
 >;
 
 export interface StockMovementVariantRef {

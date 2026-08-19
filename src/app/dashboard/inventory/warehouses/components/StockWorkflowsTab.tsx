@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import MultiSelectDropdown from '@/components/ui/MultiSelectDropdown';
 import { toast } from 'react-toastify';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { LiaPlusSolid, LiaTrashSolid, LiaSaveSolid } from 'react-icons/lia';
@@ -10,6 +9,8 @@ import BaseModal from '@/components/ui/base-modal';
 import PageLoading from '@/components/ui/page-loading';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { FormSwitch } from '@/components/ui/form-switch';
+import { useI18n } from '@/i18n/I18nProvider';
+import type { TranslationKey } from '@/i18n/translate';
 import { OrderStatus } from '@/types/orders';
 import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
 import {
@@ -20,35 +21,53 @@ import {
   useWarehouseOptions,
 } from '@/services/warehouses';
 import type {
+  CreateStockWorkflowDto,
   InsufficientStockBehavior,
   StockWorkflowApiItem,
+  StockWorkflowEventType,
 } from '@/lib/api/warehouses';
 import {
-  CREATION_RULE_KEY,
-  CREATION_RULE_LABEL,
+  EVENT_TYPE_LABEL_KEYS,
   INSUFFICIENT_STOCK_OPTIONS,
+  RULE_SCOPE_LABEL_KEYS,
   WORKFLOW_ORDER_STATUSES,
 } from '../constants';
+import {
+  sideKey,
+  type RuleSide,
+  type StatusRuleSides,
+} from '../utils/ruleMatching';
+import {
+  RuleStatusSideEditor,
+  type RuleStatusSidePatch,
+} from './RuleStatusSideEditor';
 import { StockRuleCoverageNotice } from './StockRuleCoverageNotice';
 import {
   StockRuleScopeSelector,
   type ScopeSelection,
 } from './StockRuleScopeSelector';
 
-interface RuleRow {
+/**
+ * T29 — one rule card's local state.
+ *
+ * The stored selection TYPES live here, not a re-derivation of them: that is
+ * the whole round-trip requirement. A rule saved as RANGE reopens as a range
+ * and an ANY side reopens as ANY, instead of coming back as whatever list they
+ * happened to expand to at save time.
+ *
+ * It EXTENDS `StatusRuleSides` rather than restating those fields, so a card
+ * can be handed straight to the shared matcher and the two cannot drift.
+ *
+ * The per-side statuses and range endpoints it inherits are meaningful only
+ * for the side's ACTIVE type — with the CREATION carve-out: a creation rule
+ * keeps its single target status in `toStatuses`. Values left behind by a type
+ * switch are kept on purpose (the merchant may switch back), so nothing there
+ * may be shipped without checking the active type first (`buildShapeBody`).
+ */
+interface RuleRow extends StatusRuleSides {
   /** undefined for rows that have not been saved yet */
   id?: number;
-  /**
-   * T14 — SETS, not single statuses.
-   *
-   * An EMPTY `fromStatuses` means "on order creation" (the wire meaning too).
-   * It does NOT mean "any source": that is the fully expanded list, offered as
-   * its own button. Conflating the two would re-create the collision the
-   * backend design exists to prevent, so the UI keeps them visually distinct.
-   */
-  isCreation: boolean;
-  fromStatuses: OrderStatus[];
-  toStatuses: OrderStatus[];
+  eventType: StockWorkflowEventType;
   fromWarehouseId: string;
   toWarehouseId: string;
   allowNegative: boolean;
@@ -57,12 +76,48 @@ interface RuleRow {
   touched: boolean;
 }
 
+/** The status half of the payload — the only part that varies by event type. */
+type RuleShapeBody = Pick<
+  CreateStockWorkflowDto,
+  | 'fromSelection'
+  | 'toSelection'
+  | 'fromStatuses'
+  | 'toStatuses'
+  | 'fromRangeStart'
+  | 'fromRangeEnd'
+  | 'toRangeStart'
+  | 'toRangeEnd'
+>;
+
+/** The events this builder can author. `INBOUND` is T30's — see the constant. */
+type EditableEventType = keyof typeof EVENT_TYPE_LABEL_KEYS;
+
+const EVENT_TYPES = Object.keys(EVENT_TYPE_LABEL_KEYS) as EditableEventType[];
+
+const RULE_SIDES: RuleSide[] = ['from', 'to'];
+
+const statusOptions = WORKFLOW_ORDER_STATUSES.map((status) => ({
+  key: status,
+  value: ORDER_STATUS_ARABIC_LABELS[status] ?? status,
+}));
+
 const toRow = (rule: StockWorkflowApiItem): RuleRow => ({
   id: rule.id,
-  isCreation: rule.fromStatuses.length === 0,
+  eventType: rule.eventType,
+  // CREATION and INBOUND carry no selections at all; SPECIFIC over the arrays
+  // they do carry is the reading that keeps the card harmless if the event is
+  // ever switched on a fresh row.
+  fromType: rule.fromSelection ?? 'SPECIFIC',
+  toType: rule.toSelection ?? 'SPECIFIC',
   fromStatuses: rule.fromStatuses,
   toStatuses: rule.toStatuses,
-  fromWarehouseId: String(rule.fromWarehouseId),
+  fromRangeStart: rule.fromRangeStart ?? undefined,
+  fromRangeEnd: rule.fromRangeEnd ?? undefined,
+  toRangeStart: rule.toRangeStart ?? undefined,
+  toRangeEnd: rule.toRangeEnd ?? undefined,
+  // null source warehouse is legal only for an INBOUND rule (T30).
+  fromWarehouseId:
+    rule.fromWarehouseId == null ? '' : String(rule.fromWarehouseId),
   toWarehouseId: String(rule.toWarehouseId),
   allowNegative: rule.allowNegative,
   onInsufficient: rule.onInsufficient,
@@ -70,8 +125,17 @@ const toRow = (rule: StockWorkflowApiItem): RuleRow => ({
   touched: false,
 });
 
+/**
+ * A new card starts as a TRANSITION with both sides SPECIFIC and empty.
+ *
+ * Not ANY: "every status" is the widest rule the system can hold, and it must
+ * not be the thing a merchant gets by adding a card and saving it — it has to
+ * be chosen.
+ */
 const emptyRow = (): RuleRow => ({
-  isCreation: true,
+  eventType: 'TRANSITION',
+  fromType: 'SPECIFIC',
+  toType: 'SPECIFIC',
   fromStatuses: [],
   toStatuses: [],
   fromWarehouseId: '',
@@ -79,22 +143,198 @@ const emptyRow = (): RuleRow => ({
   allowNegative: false,
   onInsufficient: 'THROW',
   // `dirty` enables Save; `touched` gates inline errors so a freshly added
-  // row isn't red before the user has typed anything.
+  // card isn't red before the user has typed anything.
   dirty: true,
   touched: false,
 });
 
-const statusOptions = WORKFLOW_ORDER_STATUSES.map((status) => ({
-  key: status,
-  value: ORDER_STATUS_ARABIC_LABELS[status] ?? status,
-}));
+const rangeOf = (row: RuleRow, side: RuleSide) =>
+  side === 'from'
+    ? { start: row.fromRangeStart, end: row.fromRangeEnd }
+    : { start: row.toRangeStart, end: row.toRangeEnd };
 
-const fromStatusOptions = [
-  { key: CREATION_RULE_KEY, value: CREATION_RULE_LABEL },
-  ...statusOptions,
-];
+/**
+ * What is wrong with ONE side of a transition, if anything.
+ *
+ * ANY needs nothing, SPECIFIC needs a non-empty list, RANGE needs two
+ * endpoints in the enum's order. Every index goes through
+ * `WORKFLOW_ORDER_STATUSES.indexOf` with a `< 0` guard: the frontend
+ * `OrderStatus` enum carries 4 legacy values the rules API rejects.
+ */
+const sideError = (row: RuleRow, side: RuleSide): TranslationKey | null => {
+  if (row.eventType !== 'TRANSITION') return null;
+
+  const type = side === 'from' ? row.fromType : row.toType;
+  if (type === 'ANY') return null;
+
+  if (type === 'SPECIFIC') {
+    const statuses = side === 'from' ? row.fromStatuses : row.toStatuses;
+    if (statuses.length > 0) return null;
+    return side === 'from'
+      ? 'stockRules.errors.fromSpecificEmpty'
+      : 'stockRules.errors.toSpecificEmpty';
+  }
+
+  const { start, end } = rangeOf(row, side);
+  if (!start || !end) return 'stockRules.errors.rangeIncomplete';
+  const startIndex = WORKFLOW_ORDER_STATUSES.indexOf(start);
+  const endIndex = WORKFLOW_ORDER_STATUSES.indexOf(end);
+  if (startIndex < 0 || endIndex < 0) return 'stockRules.errors.rangeIncomplete';
+  // No silent auto-swap: swapping would change which statuses the merchant
+  // just configured without them asking.
+  if (startIndex > endIndex) return 'stockRules.errors.rangeInverted';
+  return null;
+};
+
+/**
+ * Client-side duplicate key, or null for a card too incomplete to compare.
+ *
+ * Type-prefixed through `sideKey`, so an ANY side and a hand-picked full list
+ * are NOT duplicates of each other — they are different rules that happen to
+ * cover the same statuses today. Semantic overlap between different shapes is
+ * the SERVER's 409 to raise; re-implementing precedence policy here would only
+ * give two answers to one question.
+ */
+const dedupeKey = (row: RuleRow): string | null => {
+  if (row.eventType === 'CREATION') {
+    return row.toStatuses.length === 1
+      ? `CREATION:${row.toStatuses[0]}`
+      : null;
+  }
+  if (row.eventType !== 'TRANSITION') return null;
+  if (sideError(row, 'from') || sideError(row, 'to')) return null;
+  const from = sideKey(
+    row.fromType,
+    row.fromStatuses,
+    row.fromRangeStart,
+    row.fromRangeEnd
+  );
+  const to = sideKey(
+    row.toType,
+    row.toStatuses,
+    row.toRangeStart,
+    row.toRangeEnd
+  );
+  return `TRANSITION:${from}→${to}`;
+};
+
+/**
+ * What is wrong with the card as a WHOLE — everything that has no side of its
+ * own to be shown under. Kept separate from `sideError` so the footer does not
+ * repeat a message already sitting under the editor that caused it.
+ */
+const cardError = (row: RuleRow, duplicate: boolean): TranslationKey | null => {
+  if (row.eventType === 'CREATION') {
+    // Exactly one target — the backend's partial unique index is keyed on it.
+    if (row.toStatuses.length !== 1)
+      return 'stockRules.errors.creationTargetRequired';
+  } else if (row.eventType === 'TRANSITION') {
+    // SPECIFIC × SPECIFIC only. ANY and RANGE sides are allowed to overlap:
+    // the engine's compare-and-set makes an X→X transition unreachable
+    // anyway, and rejecting intersections would make "any source → CANCELLED"
+    // impossible to create.
+    if (
+      row.fromType === 'SPECIFIC' &&
+      row.toType === 'SPECIFIC' &&
+      row.fromStatuses.some((status) => row.toStatuses.includes(status))
+    )
+      return 'stockRules.errors.sameStatusBothSides';
+  }
+
+  // Both events above move stock between two warehouses. (An INBOUND rule has
+  // no source warehouse, but this builder cannot author one — see
+  // `buildShapeBody`.)
+  if (!row.fromWarehouseId || !row.toWarehouseId)
+    return 'stockRules.errors.warehousesRequired';
+  if (row.fromWarehouseId === row.toWarehouseId)
+    return 'stockRules.errors.sameWarehouse';
+  if (duplicate) return 'stockRules.errors.duplicateRule';
+  return null;
+};
+
+/** Everything `cardError` covers PLUS the sides — what blocks a save. */
+const rowError = (row: RuleRow, duplicate: boolean): TranslationKey | null => {
+  const from = sideError(row, 'from');
+  if (from) return from;
+  const to = sideError(row, 'to');
+  if (to) return to;
+  return cardError(row, duplicate);
+};
+
+/**
+ * The event-specific half of the payload: ONLY the fields the active event and
+ * selection types use.
+ *
+ * This is why a stale range left behind by a type switch is harmless — a
+ * SPECIFIC side ships its statuses and nothing else, a RANGE side its two
+ * endpoints and nothing else, and an ANY side the selection alone. The backend
+ * CHECK constraints reject hybrid rows, so shipping the leftovers would be a
+ * 400 on a card that looks perfectly valid.
+ *
+ * null for INBOUND: T29's backend rejects creating one and no pill produces
+ * it — T30 adds both the affordance and the payload.
+ */
+const buildShapeBody = (row: RuleRow): RuleShapeBody | null => {
+  if (row.eventType === 'CREATION') {
+    // The single target lives in `toStatuses`, with no selections at all.
+    return { toStatuses: row.toStatuses };
+  }
+  if (row.eventType !== 'TRANSITION') return null;
+
+  return {
+    ...(row.fromType === 'ANY'
+      ? { fromSelection: 'ANY' as const }
+      : row.fromType === 'RANGE'
+        ? {
+            fromSelection: 'RANGE' as const,
+            fromRangeStart: row.fromRangeStart,
+            fromRangeEnd: row.fromRangeEnd,
+          }
+        : {
+            fromSelection: 'SPECIFIC' as const,
+            fromStatuses: row.fromStatuses,
+          }),
+    ...(row.toType === 'ANY'
+      ? { toSelection: 'ANY' as const }
+      : row.toType === 'RANGE'
+        ? {
+            toSelection: 'RANGE' as const,
+            toRangeStart: row.toRangeStart,
+            toRangeEnd: row.toRangeEnd,
+          }
+        : { toSelection: 'SPECIFIC' as const, toStatuses: row.toStatuses }),
+  };
+};
+
+/**
+ * Side-agnostic editor patch → side-prefixed row patch.
+ *
+ * Keyed on PRESENCE (`in`), not on the value being defined: clearing a range
+ * endpoint arrives as an explicit `undefined` and has to land as `undefined`,
+ * which an "only copy defined values" merge would silently drop — leaving the
+ * old endpoint in place and the picker showing a range the merchant cleared.
+ */
+const toRowPatch = (
+  side: RuleSide,
+  patch: RuleStatusSidePatch
+): Partial<RuleRow> =>
+  side === 'from'
+    ? {
+        ...('type' in patch ? { fromType: patch.type } : {}),
+        ...('statuses' in patch ? { fromStatuses: patch.statuses } : {}),
+        ...('rangeStart' in patch ? { fromRangeStart: patch.rangeStart } : {}),
+        ...('rangeEnd' in patch ? { fromRangeEnd: patch.rangeEnd } : {}),
+      }
+    : {
+        ...('type' in patch ? { toType: patch.type } : {}),
+        ...('statuses' in patch ? { toStatuses: patch.statuses } : {}),
+        ...('rangeStart' in patch ? { toRangeStart: patch.rangeStart } : {}),
+        ...('rangeEnd' in patch ? { toRangeEnd: patch.rangeEnd } : {}),
+      };
 
 export function StockWorkflowsTab() {
+  const { t, dir } = useI18n();
+
   // T28 — the screen edits ONE scope at a time. The query filter is exact, so
   // what is listed is exactly what governs this scope: the global rules are not
   // mixed in, because whether this scope has rules of its own is precisely what
@@ -149,7 +389,7 @@ export function StockWorkflowsTab() {
 
   const scopeKey = `${scope.scope}:${scope.productId ?? ''}:${scope.variantId ?? ''}`;
 
-  // Switching scope discards in-progress rows: an unsaved row carries the old
+  // Switching scope discards in-progress cards: an unsaved card carries the old
   // scope's meaning, and silently re-parenting it to the new scope would create
   // a rule the user never asked for.
   useEffect(() => {
@@ -157,7 +397,7 @@ export function StockWorkflowsTab() {
   }, [scopeKey]);
 
   // Reconcile server rules into local rows WITHOUT discarding work in progress:
-  // a refetch (triggered by every save/delete) must not wipe unsaved rows or
+  // a refetch (triggered by every save/delete) must not wipe unsaved cards or
   // dirty edits the user is still typing.
   useEffect(() => {
     setRows((current) => {
@@ -172,16 +412,14 @@ export function StockWorkflowsTab() {
     });
   }, [scopedRules]);
 
-  // Flag only the SECOND and later occurrences: the already-saved first row
-  // must not turn red because someone started typing a clashing new row.
+  // Flag only the SECOND and later occurrences: the already-saved first card
+  // must not turn red because someone started typing a clashing new one.
   const duplicateRowIndexes = useMemo(() => {
     const seen = new Set<string>();
     const dupes = new Set<number>();
     rows.forEach((row, index) => {
-      if (row.toStatuses.length === 0 && !row.isCreation) return;
-      // Same-specificity duplicates only; a broader rule alongside a narrower
-      // one is legal and resolved by precedence server-side.
-      const key = `${[...row.fromStatuses].sort().join(',')}→${[...row.toStatuses].sort().join(',')}`;
+      const key = dedupeKey(row);
+      if (key === null) return;
       if (seen.has(key)) dupes.add(index);
       seen.add(key);
     });
@@ -191,44 +429,34 @@ export function StockWorkflowsTab() {
   const patchRow = (index: number, patch: Partial<RuleRow>) => {
     setRows((current) =>
       current.map((row, i) =>
+        // Plain spread: an explicit `undefined` in the patch has to win, so a
+        // cleared range endpoint actually clears.
         i === index ? { ...row, ...patch, dirty: true, touched: true } : row
       )
     );
   };
 
-  const rowError = (row: RuleRow, index: number): string | null => {
-    // A creation rule must name exactly one target — the backend and its
-    // partial unique index both enforce this.
-    if (row.isCreation && row.toStatuses.length !== 1)
-      return 'قاعدة الإنشاء يجب أن تحدد حالة هدف واحدة فقط';
-    if (!row.isCreation && row.fromStatuses.length === 0)
-      return 'اختر حالات المصدر';
-    if (!row.isCreation && row.toStatuses.length === 0)
-      return 'اختر حالات الهدف';
-    if (
-      !row.isCreation &&
-      row.fromStatuses.some((status) => row.toStatuses.includes(status))
-    )
-      return 'لا يمكن أن تظهر نفس الحالة في الجانبين';
-    if (!row.fromWarehouseId || !row.toWarehouseId) return 'اختر المخزنين';
-    if (row.fromWarehouseId === row.toWarehouseId)
-      return 'يجب أن يختلف مخزن المصدر عن مخزن الوجهة';
-    if (duplicateRowIndexes.has(index)) return 'قاعدة مكررة لنفس التحويل';
-    return null;
-  };
+  const patchSide = (
+    index: number,
+    side: RuleSide,
+    patch: RuleStatusSidePatch
+  ) => patchRow(index, toRowPatch(side, patch));
 
   const saveRow = async (index: number) => {
     const row = rows[index];
-    const error = rowError(row, index);
+    const error = rowError(row, duplicateRowIndexes.has(index));
     if (error) {
-      toast.error(error);
+      toast.error(t(error));
       return;
     }
 
-    const body = {
-      // Empty = creation rule. "Any source" is sent as the full list instead.
-      fromStatuses: row.isCreation ? [] : row.fromStatuses,
-      toStatuses: row.toStatuses,
+    const shape = buildShapeBody(row);
+    if (!shape) {
+      toast.error(t('stockRules.saveFailed'));
+      return;
+    }
+
+    const settings = {
       fromWarehouseId: Number(row.fromWarehouseId),
       toWarehouseId: Number(row.toWarehouseId),
       allowNegative: row.allowNegative,
@@ -239,8 +467,12 @@ export function StockWorkflowsTab() {
     setSavingKey(rowKey);
     try {
       if (row.id) {
-        // Scope is fixed at creation, so an update never carries it.
-        await updateMutation.mutateAsync({ id: row.id, body });
+        // Scope AND event type are fixed at creation, so an update carries
+        // neither. Every side is sent whole — the API merges a side wholesale.
+        await updateMutation.mutateAsync({
+          id: row.id,
+          body: { ...shape, ...settings },
+        });
         // Clear dirty so the merge effect stops preferring the local copy
         // and the Save button confirms the write landed.
         setRows((current) =>
@@ -250,21 +482,26 @@ export function StockWorkflowsTab() {
         );
       } else {
         const created = await createMutation.mutateAsync({
-          ...body,
+          eventType: row.eventType,
+          ...shape,
+          ...settings,
           // The new rule belongs to whichever scope the screen is editing.
           ...(scope.scope === 'PRODUCT' ? { productId: scope.productId } : {}),
           ...(scope.scope === 'VARIANT' ? { variantId: scope.variantId } : {}),
         });
         // Adopt the server row (with its id) — otherwise the refetch brings
-        // the rule back as a NEW row while the id-less local row survives
+        // the rule back as a NEW card while the id-less local row survives
         // the merge, leaving a duplicate ghost flagged as a conflict.
         setRows((current) =>
           current.map((r, i) => (i === index ? toRow(created) : r))
         );
       }
-      toast.success('تم حفظ القاعدة بنجاح');
+      toast.success(t('stockRules.saveSuccess'));
     } catch (err: unknown) {
-      toast.error(getApiErrorMessage(err, 'تعذر حفظ القاعدة'));
+      // A rule that semantically overlaps an existing one comes back as a 409
+      // from the server, which owns precedence policy — the client does not
+      // second-guess it, it just shows what came back.
+      toast.error(getApiErrorMessage(err, t('stockRules.saveFailed')));
     } finally {
       setSavingKey(null);
     }
@@ -290,12 +527,7 @@ export function StockWorkflowsTab() {
     }
   };
 
-  const scopeLabel =
-    scope.scope === 'GLOBAL'
-      ? 'كل المنتجات'
-      : scope.scope === 'PRODUCT'
-        ? 'منتج محدد'
-        : 'متغير محدد';
+  const scopeLabel = t(RULE_SCOPE_LABEL_KEYS[scope.scope]);
 
   if (isError) {
     return (
@@ -334,198 +566,214 @@ export function StockWorkflowsTab() {
   }
 
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-gray-500">
-        حدد حركة المخزون التلقائية عند تغيير حالة الطلب. القواعد غير المعرفة لا
-        تحرك المخزون.
-      </p>
+    <div className="space-y-4" dir={dir}>
+      <p className="text-sm text-gray-500">{t('stockRules.intro')}</p>
 
       {scopePicker}
 
       {scope.scope !== 'GLOBAL' && (
-        <StockRuleCoverageNotice
-          rules={scopedRules}
-          scopeLabel={scopeLabel}
-        />
+        <StockRuleCoverageNotice rules={scopedRules} scopeLabel={scopeLabel} />
       )}
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm" dir="rtl">
-          <thead>
-            <tr className="border-b border-gray-200 bg-gray-50">
-              <th className="py-3 px-3 text-right font-semibold text-gray-700">
-                من الحالة
-              </th>
-              <th className="py-3 px-3 text-right font-semibold text-gray-700">
-                إلى الحالة
-              </th>
-              <th className="py-3 px-3 text-right font-semibold text-gray-700">
-                من مخزن
-              </th>
-              <th className="py-3 px-3 text-right font-semibold text-gray-700">
-                إلى مخزن
-              </th>
-              <th className="py-3 px-3 text-right font-semibold text-gray-700">
-                السماح بالسالب
-              </th>
-              <th className="py-3 px-3 text-right font-semibold text-gray-700">
-                عند عدم الكفاية
-              </th>
-              <th className="py-3 px-3 text-right font-semibold text-gray-700">
-                إجراءات
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, index) => {
-              const error = row.touched ? rowError(row, index) : null;
-              return (
-                <tr
-                  key={row.id ?? `new-${index}`}
-                  className="border-b border-gray-100 align-top"
-                >
-                  <td className="py-2.5 px-3 min-w-[220px]">
-                    {/* "عند إنشاء الطلب" and "كل الحالات" are DIFFERENT things
-                        and are kept visually distinct on purpose: an empty
-                        from-side means creation, while "any source" is the
-                        fully expanded list. */}
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex gap-1.5">
+      <div className="space-y-4">
+        {rows.map((row, index) => {
+          const rowKey = row.id ? `rule-${row.id}` : `new-${index}`;
+          const isSaving = savingKey === rowKey;
+          // Card-level only: the side errors are rendered under their own
+          // editors, so repeating them next to Save would say each twice.
+          const error = row.touched
+            ? cardError(row, duplicateRowIndexes.has(index))
+            : null;
+          const eventLabelKey =
+            row.eventType in EVENT_TYPE_LABEL_KEYS
+              ? EVENT_TYPE_LABEL_KEYS[row.eventType as EditableEventType]
+              : null;
+          // The creation target is a single status kept in `toStatuses`; a
+          // leftover multi-selection from a TRANSITION card reads as "not
+          // chosen yet" rather than silently picking its first entry.
+          const creationTarget =
+            row.toStatuses.length === 1 ? row.toStatuses[0] : '';
+
+          return (
+            <div
+              key={rowKey}
+              className="space-y-4 rounded-lg border border-gray-200 bg-white p-4"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="space-y-1.5">
+                  <span className="block text-xs font-medium text-gray-600">
+                    {t('stockRules.event.label')}
+                  </span>
+                  {row.id ? (
+                    // The event type is fixed at creation — what fires a rule
+                    // is what the rule IS. Changing it means a new rule, so a
+                    // saved card shows it rather than offering it.
+                    <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-[11px] text-primary">
+                      {eventLabelKey ? t(eventLabelKey) : row.eventType}
+                    </span>
+                  ) : (
+                    <div className="flex gap-1.5">
+                      {EVENT_TYPES.map((event) => (
                         <button
+                          key={event}
                           type="button"
-                          onClick={() =>
-                            patchRow(index, { isCreation: true, fromStatuses: [] })
-                          }
-                          className={`text-[11px] px-2 py-1 rounded-full border ${
-                            row.isCreation
-                              ? 'bg-primary text-white border-primary'
+                          onClick={() => patchRow(index, { eventType: event })}
+                          className={`rounded-full border px-2 py-1 text-[11px] ${
+                            row.eventType === event
+                              ? 'border-primary bg-primary text-white'
                               : 'border-gray-300 text-gray-600'
                           }`}
                         >
-                          {CREATION_RULE_LABEL}
+                          {t(EVENT_TYPE_LABEL_KEYS[event])}
                         </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            patchRow(index, {
-                              isCreation: false,
-                              fromStatuses: [...WORKFLOW_ORDER_STATUSES],
-                            })
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-red-600 hover:bg-red-50"
+                  onClick={() => removeRow(index)}
+                >
+                  <LiaTrashSolid className="size-4" />
+                </Button>
+              </div>
+
+              {row.eventType === 'CREATION' && (
+                <div className="max-w-sm space-y-1.5">
+                  <label className="block text-xs font-medium text-gray-600">
+                    {t('stockRules.side.to')}
+                  </label>
+                  <SearchableSelect
+                    options={statusOptions}
+                    value={creationTarget}
+                    onValueChange={(next) =>
+                      patchRow(index, {
+                        toStatuses: next ? [next as OrderStatus] : [],
+                      })
+                    }
+                    placeholder={t('stockRules.side.to')}
+                  />
+                </div>
+              )}
+
+              {row.eventType === 'TRANSITION' && (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {RULE_SIDES.map((side) => {
+                    const key = row.touched ? sideError(row, side) : null;
+                    // An inverted range is reported by `StatusRangePicker`
+                    // itself, directly under the endpoints that caused it —
+                    // repeating it here would just say it twice.
+                    const shown =
+                      key === 'stockRules.errors.rangeInverted' ? null : key;
+                    const range = rangeOf(row, side);
+
+                    return (
+                      <div key={side} className="space-y-1">
+                        <RuleStatusSideEditor
+                          side={side}
+                          type={side === 'from' ? row.fromType : row.toType}
+                          statuses={
+                            side === 'from' ? row.fromStatuses : row.toStatuses
                           }
-                          className="text-[11px] px-2 py-1 rounded-full border border-gray-300 text-gray-600"
-                        >
-                          كل الحالات
-                        </button>
-                      </div>
-                      {!row.isCreation && (
-                        <MultiSelectDropdown
-                          options={statusOptions}
-                          value={row.fromStatuses}
-                          onChange={(next) =>
-                            patchRow(index, {
-                              isCreation: false,
-                              fromStatuses: next as OrderStatus[],
-                            })
-                          }
-                          placeholder="من الحالات"
+                          rangeStart={range.start}
+                          rangeEnd={range.end}
+                          onPatch={(patch) => patchSide(index, side, patch)}
                         />
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-2.5 px-3 min-w-[220px]">
-                    <MultiSelectDropdown
-                      options={statusOptions}
-                      value={row.toStatuses}
-                      onChange={(next) =>
-                        patchRow(index, { toStatuses: next as OrderStatus[] })
-                      }
-                      placeholder="إلى الحالات"
-                    />
-                  </td>
-                  <td className="py-2.5 px-3 min-w-[160px]">
-                    <SearchableSelect
-                      options={warehouseOptions}
-                      value={row.fromWarehouseId}
-                      onValueChange={(next) =>
-                        patchRow(index, { fromWarehouseId: next })
-                      }
-                      placeholder="من مخزن"
-                    />
-                  </td>
-                  <td className="py-2.5 px-3 min-w-[160px]">
-                    <SearchableSelect
-                      options={warehouseOptions}
-                      value={row.toWarehouseId}
-                      onValueChange={(next) =>
-                        patchRow(index, { toWarehouseId: next })
-                      }
-                      placeholder="إلى مخزن"
-                    />
-                  </td>
-                  <td className="py-2.5 px-3">
-                    <FormSwitch
-                      checked={row.allowNegative}
-                      onCheckedChange={(checked) =>
-                        patchRow(index, { allowNegative: checked })
-                      }
-                    />
-                  </td>
-                  <td className="py-2.5 px-3 min-w-[150px]">
-                    <SearchableSelect
-                      options={INSUFFICIENT_STOCK_OPTIONS}
-                      value={row.onInsufficient}
-                      onValueChange={(next) =>
-                        patchRow(index, {
-                          onInsufficient: next as InsufficientStockBehavior,
-                        })
-                      }
-                      placeholder="عند عدم الكفاية"
-                      disabled={row.allowNegative}
-                    />
-                    <p className="mt-1 text-[11px] leading-4 text-gray-400">
-                      {row.allowNegative
-                        ? 'يتم تنفيذ الحركة حتى لو كانت الكمية غير كافية'
-                        : row.onInsufficient === 'THROW'
-                          ? 'يُمنع تغيير حالة الطلب عند نقص المخزون'
-                          : 'يتم تخطي الحركة وتستمر حالة الطلب'}
-                    </p>
-                  </td>
-                  <td className="py-2.5 px-3">
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => saveRow(index)}
-                        disabled={
-                          !row.dirty ||
-                          savingKey ===
-                            (row.id ? `rule-${row.id}` : `new-${index}`)
-                        }
-                        loading={
-                          savingKey ===
-                          (row.id ? `rule-${row.id}` : `new-${index}`)
-                        }
-                      >
-                        <LiaSaveSolid className="ml-1 size-4" />
-                        حفظ
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-red-600 hover:bg-red-50"
-                        onClick={() => removeRow(index)}
-                      >
-                        <LiaTrashSolid className="size-4" />
-                      </Button>
-                    </div>
-                    {error && (
-                      <p className="mt-1 text-[11px] text-red-500">{error}</p>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                        {shown && (
+                          <p className="text-[11px] text-red-500">{t(shown)}</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-gray-600">
+                    من مخزن
+                  </label>
+                  <SearchableSelect
+                    options={warehouseOptions}
+                    value={row.fromWarehouseId}
+                    onValueChange={(next) =>
+                      patchRow(index, { fromWarehouseId: next })
+                    }
+                    placeholder="من مخزن"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-gray-600">
+                    إلى مخزن
+                  </label>
+                  <SearchableSelect
+                    options={warehouseOptions}
+                    value={row.toWarehouseId}
+                    onValueChange={(next) =>
+                      patchRow(index, { toWarehouseId: next })
+                    }
+                    placeholder="إلى مخزن"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-gray-600">
+                    السماح بالسالب
+                  </label>
+                  <FormSwitch
+                    checked={row.allowNegative}
+                    onCheckedChange={(checked) =>
+                      patchRow(index, { allowNegative: checked })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-gray-600">
+                    عند عدم الكفاية
+                  </label>
+                  <SearchableSelect
+                    options={INSUFFICIENT_STOCK_OPTIONS}
+                    value={row.onInsufficient}
+                    onValueChange={(next) =>
+                      patchRow(index, {
+                        onInsufficient: next as InsufficientStockBehavior,
+                      })
+                    }
+                    placeholder="عند عدم الكفاية"
+                    disabled={row.allowNegative}
+                  />
+                  <p className="text-[11px] leading-4 text-gray-400">
+                    {row.allowNegative
+                      ? 'يتم تنفيذ الحركة حتى لو كانت الكمية غير كافية'
+                      : row.onInsufficient === 'THROW'
+                        ? 'يُمنع تغيير حالة الطلب عند نقص المخزون'
+                        : 'يتم تخطي الحركة وتستمر حالة الطلب'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 border-t border-gray-100 pt-3">
+                <Button
+                  size="sm"
+                  onClick={() => saveRow(index)}
+                  disabled={!row.dirty || isSaving}
+                  loading={isSaving}
+                >
+                  <LiaSaveSolid className="me-1 size-4" />
+                  حفظ
+                </Button>
+                {error && (
+                  <p className="text-[11px] text-red-500">{t(error)}</p>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {rows.length === 0 && (
@@ -541,7 +789,7 @@ export function StockWorkflowsTab() {
         className="rounded-full"
         onClick={() => setRows((current) => [...current, emptyRow()])}
       >
-        <LiaPlusSolid className="ml-1 size-4" />
+        <LiaPlusSolid className="me-1 size-4" />
         إضافة قاعدة
       </Button>
 

@@ -2,7 +2,9 @@ import { OrderStatus } from '@/types/orders';
 import type { TranslationKey } from '@/i18n/translate';
 import type {
   InsufficientStockBehavior,
+  StatusSelectionType,
   StockMovementSource,
+  StockWorkflowEventType,
 } from '@/lib/api/warehouses';
 
 /**
@@ -42,9 +44,6 @@ export const WAREHOUSE_BRANCH_OPTIONS = [
   { key: 'main', value: 'مخزن رئيسي' },
   { key: 'sub', value: 'مخزن فرعي' },
 ];
-
-export const CREATION_RULE_KEY = '';
-export const CREATION_RULE_LABEL = 'عند إنشاء الطلب';
 
 export const INSUFFICIENT_STOCK_OPTIONS: {
   key: InsufficientStockBehavior;
@@ -136,3 +135,23 @@ export const RULE_SCOPE_LABEL_KEYS = {
   PRODUCT: 'stockRules.scope.product',
   VARIANT: 'stockRules.scope.variant',
 } as const satisfies Record<string, TranslationKey>;
+
+/**
+ * T29 — the event types the rule builder can CREATE, in pill order.
+ *
+ * `Partial<Record<...>>` on purpose: `INBOUND` is a real wire value with no
+ * entry here because T29's backend rejects creating one and the builder offers
+ * no affordance for it — T30 adds both. Keying the pills off this object's
+ * keys means adding the entry is the only step needed then.
+ */
+export const EVENT_TYPE_LABEL_KEYS = {
+  CREATION: 'stockRules.event.creation',
+  TRANSITION: 'stockRules.event.transition',
+} as const satisfies Partial<Record<StockWorkflowEventType, TranslationKey>>;
+
+/** Every way one side of a transition rule can match — the segmented control. */
+export const SELECTION_TYPE_LABEL_KEYS = {
+  ANY: 'stockRules.selection.any',
+  RANGE: 'stockRules.selection.range',
+  SPECIFIC: 'stockRules.selection.specific',
+} as const satisfies Record<StatusSelectionType, TranslationKey>;
