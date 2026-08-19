@@ -56,6 +56,7 @@ const ar = {
   'stockRules.event.label': 'نوع الحدث',
   'stockRules.event.creation': 'عند إنشاء الطلب',
   'stockRules.event.transition': 'انتقال بين الحالات',
+  'stockRules.event.inbound': 'استلام من مورد',
   'stockRules.side.from': 'من الحالة',
   'stockRules.side.to': 'إلى الحالة',
   'stockRules.selection.any': 'كل الحالات',
@@ -89,6 +90,31 @@ const ar = {
   'stockRules.errors.creationTargetRequired': 'اختر حالة الهدف عند إنشاء الطلب',
   'stockRules.saveSuccess': 'تم حفظ القاعدة بنجاح',
   'stockRules.saveFailed': 'تعذر حفظ القاعدة',
+
+  // T30 — the inbound (supplier receiving) destination panel: one rule per
+  // scope, separate from the transition rule cards above. Additive only for
+  // now; nothing renders these keys yet.
+  'stockRules.inbound.title': 'وجهة الاستلام من الموردين',
+  'stockRules.inbound.hint':
+    'قبول الكميات المعتمدة عند تأكيد إيصالات الاستلام لهذا النطاق.',
+  'stockRules.inbound.placeholder': 'اختر مخزن الاستلام',
+  'stockRules.inbound.missingGlobal':
+    'لم يتم تحديد مخزن لاستلام الوارد من الموردين — لن يتم قبول أي كمية معتمدة حتى يتم ضبط ذلك.',
+  'stockRules.inbound.inheritsHint':
+    'يتبع هذا النطاق وجهة الاستلام الأعلى منه.',
+  'stockRules.inbound.saved': 'تم حفظ وجهة الاستلام بنجاح',
+  'stockRules.inbound.deleted': 'تم حذف وجهة الاستلام',
+  // Appended to a warehouse's display label wherever a picker still needs to
+  // show it (e.g. a rule saved against a warehouse that was later deactivated).
+  'stockRules.warehouseInactiveSuffix': ' (موقوف)',
+  'stockRules.errors.inactiveWarehouse': 'لا يمكن استخدام مخزن موقوف في القاعدة',
+
+  'warehouses.deactivateHint':
+    'لا يمكن إيقاف المخزن طالما أن قواعد المخزون تعتمد عليه.',
+
+  'receipts.warehouseAuto': 'تلقائي حسب قواعد الاستلام',
+  'receipts.noInboundWarning':
+    'لم يتم تحديد مخزن استلام افتراضي بعد — لن يمكن تأكيد الإيصالات حتى يتم ضبط ذلك.',
 
   'products.confirmOutOfStock.inherit': 'اتبع المتجر ({value})',
   'products.confirmOutOfStock.allow': 'مسموح',

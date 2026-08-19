@@ -13,7 +13,12 @@ import { CheckIcon, ChevronDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/utils/debounce';
 
-type OptionObject = { key: string; value?: string; label?: string };
+type OptionObject = {
+  key: string;
+  value?: string;
+  label?: string;
+  disabled?: boolean;
+};
 type OptionType = string | OptionObject;
 
 interface MultiSelectDropdownProps {
@@ -80,6 +85,9 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
     const getOptionKey = (opt: OptionType) =>
       typeof opt === 'string' ? opt : opt.key;
 
+    const isOptionDisabled = (opt: OptionType) =>
+      typeof opt === 'string' ? false : !!opt.disabled;
+
     const showSearch = options.length > searchThreshold;
 
     const filtered = useMemo(() => {
@@ -131,7 +139,11 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
     }, [open, showSearch]);
 
     const toggleOption = useCallback(
-      (optKey: string) => {
+      (opt: OptionType) => {
+        // Guards every selection path — click today, keyboard whenever it's
+        // added — so a disabled option can never be toggled into the value.
+        if (isOptionDisabled(opt)) return;
+        const optKey = getOptionKey(opt);
         const next = value.includes(optKey)
           ? value.filter((v) => v !== optKey)
           : [...value, optKey];
@@ -150,9 +162,11 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
 
     // Respects the active search filter on purpose: "select all" over a
     // narrowed-down list should only touch what's visible, not the full
-    // option set hiding behind the query.
+    // option set hiding behind the query. Disabled options are excluded
+    // entirely — select-all can neither add nor count them.
     const filteredKeys = useMemo(
-      () => filtered.map((opt) => getOptionKey(opt)),
+      () =>
+        filtered.filter((opt) => !isOptionDisabled(opt)).map(getOptionKey),
       [filtered]
     );
 
@@ -269,17 +283,21 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
                   filtered.map((opt) => {
                     const key = getOptionKey(opt);
                     const selected = value.includes(key);
+                    const optionDisabled = isOptionDisabled(opt);
 
                     return (
                       <li
                         key={key}
                         role="option"
                         aria-selected={selected}
-                        onClick={() => toggleOption(key)}
+                        aria-disabled={optionDisabled || undefined}
+                        onClick={() => toggleOption(opt)}
                         className={cn(
-                          'px-2 py-1.5 md:px-3 md:py-2 flex items-center gap-2 cursor-pointer text-sm md:text-base',
-                          'hover:bg-gray-100',
-                          selected && 'bg-primary/5'
+                          'px-2 py-1.5 md:px-3 md:py-2 flex items-center gap-2 text-sm md:text-base',
+                          optionDisabled
+                            ? 'text-gray-400 cursor-not-allowed'
+                            : 'cursor-pointer hover:bg-gray-100',
+                          selected && !optionDisabled && 'bg-primary/5'
                         )}
                       >
                         <span

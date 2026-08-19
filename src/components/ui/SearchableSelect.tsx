@@ -14,7 +14,12 @@ import { Controller, type Control } from 'react-hook-form';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/utils/debounce';
 
-type OptionObject = { key: string; value?: string; label?: string };
+type OptionObject = {
+  key: string;
+  value?: string;
+  label?: string;
+  disabled?: boolean;
+};
 type OptionType = string | OptionObject;
 
 interface SearchableSelectProps {
@@ -123,6 +128,9 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
     const getOptionKey = (opt: OptionType) =>
       typeof opt === 'string' ? opt : opt.key;
 
+    const isOptionDisabled = (opt: OptionType) =>
+      typeof opt === 'string' ? false : !!opt.disabled;
+
     const showSearch = !!onSearch || options.length > searchThreshold;
 
     const filtered = useMemo(() => {
@@ -183,6 +191,9 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
     }, [open, showSearch]);
 
     const commitSelect = (opt: OptionType) => {
+      // Guards every selection path — click today, keyboard whenever it's
+      // added — so a disabled option can never be the one that commits.
+      if (isOptionDisabled(opt)) return;
       handleChange(getOptionKey(opt));
       setSearchQuery('');
       handleOpenChange(false);
@@ -308,20 +319,29 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
                   filtered.map((opt, idx) => {
                     const key = getOptionKey(opt);
                     const selected = value === key;
+                    const optionDisabled = isOptionDisabled(opt);
 
                     return (
                       <li
                         key={key}
                         role="option"
                         aria-selected={selected}
-                        onMouseEnter={() => setActiveIdx(idx)}
+                        aria-disabled={optionDisabled || undefined}
+                        onMouseEnter={() =>
+                          !optionDisabled && setActiveIdx(idx)
+                        }
                         onMouseLeave={() => setActiveIdx(-1)}
                         onClick={() => commitSelect(opt)}
                         className={cn(
-                          'px-2 py-1.5 md:px-3 md:py-2 flex justify-between items-center cursor-pointer text-sm md:text-base',
-                          'hover:bg-primary hover:text-white',
-                          selected && 'bg-primary text-white',
-                          activeIdx === idx && !selected && 'bg-gray-100'
+                          'px-2 py-1.5 md:px-3 md:py-2 flex justify-between items-center text-sm md:text-base',
+                          optionDisabled
+                            ? 'text-gray-400 cursor-not-allowed'
+                            : 'cursor-pointer hover:bg-primary hover:text-white',
+                          selected && !optionDisabled && 'bg-primary text-white',
+                          activeIdx === idx &&
+                            !selected &&
+                            !optionDisabled &&
+                            'bg-gray-100'
                         )}
                       >
                         <span>{getDisplayText(opt)}</span>

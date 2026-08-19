@@ -47,6 +47,7 @@ const en: Record<keyof typeof ar, string> = {
   'stockRules.event.label': 'Event type',
   'stockRules.event.creation': 'On order creation',
   'stockRules.event.transition': 'Status transition',
+  'stockRules.event.inbound': 'Receiving from a supplier',
   'stockRules.side.from': 'From status',
   'stockRules.side.to': 'To status',
   'stockRules.selection.any': 'All statuses',
@@ -80,6 +81,27 @@ const en: Record<keyof typeof ar, string> = {
     'Choose the target status for order creation',
   'stockRules.saveSuccess': 'Rule saved successfully',
   'stockRules.saveFailed': 'Could not save the rule',
+
+  'stockRules.inbound.title': 'Supplier receiving destination',
+  'stockRules.inbound.hint':
+    'Approved quantities are received into this destination when a receiving receipt in this scope is confirmed.',
+  'stockRules.inbound.placeholder': 'Select the receiving warehouse',
+  'stockRules.inbound.missingGlobal':
+    'No destination is set for supplier receiving — approved quantities will not be accepted until this is configured.',
+  'stockRules.inbound.inheritsHint':
+    'This scope follows the receiving destination above it.',
+  'stockRules.inbound.saved': 'Receiving destination saved successfully',
+  'stockRules.inbound.deleted': 'Receiving destination deleted',
+  'stockRules.warehouseInactiveSuffix': ' (inactive)',
+  'stockRules.errors.inactiveWarehouse':
+    'An inactive warehouse cannot be used in the rule',
+
+  'warehouses.deactivateHint':
+    'The warehouse cannot be deactivated while stock rules depend on it.',
+
+  'receipts.warehouseAuto': 'Automatic, based on receiving rules',
+  'receipts.noInboundWarning':
+    'No default receiving warehouse is set yet — receipts cannot be confirmed until this is configured.',
 
   'products.confirmOutOfStock.inherit': 'Follow the store ({value})',
   'products.confirmOutOfStock.allow': 'Allowed',
