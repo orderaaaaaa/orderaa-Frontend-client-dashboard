@@ -74,6 +74,8 @@ const en: Record<keyof typeof ar, string> = {
   'stockRules.errors.sameWarehouse':
     'The source and destination warehouses must be different',
   'stockRules.errors.duplicateRule': 'Duplicate rule for the same transition',
+  'stockRules.errors.duplicateCreationRule':
+    'Duplicate creation rule for the same target status',
   'stockRules.errors.creationTargetRequired':
     'Choose the target status for order creation',
   'stockRules.saveSuccess': 'Rule saved successfully',

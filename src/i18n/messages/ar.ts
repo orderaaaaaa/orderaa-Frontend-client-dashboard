@@ -85,6 +85,7 @@ const ar = {
   'stockRules.errors.sameWarehouse':
     'يجب أن يختلف مخزن المصدر عن مخزن الوجهة',
   'stockRules.errors.duplicateRule': 'قاعدة مكررة لنفس التحويل',
+  'stockRules.errors.duplicateCreationRule': 'قاعدة إنشاء مكررة لنفس الحالة الهدف',
   'stockRules.errors.creationTargetRequired': 'اختر حالة الهدف عند إنشاء الطلب',
   'stockRules.saveSuccess': 'تم حفظ القاعدة بنجاح',
   'stockRules.saveFailed': 'تعذر حفظ القاعدة',

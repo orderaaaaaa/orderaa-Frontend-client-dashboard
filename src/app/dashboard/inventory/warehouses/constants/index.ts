@@ -12,6 +12,16 @@ import type {
  * The frontend enum carries extra legacy values (PARTIAL_DELIVERY,
  * FINAL_RETURN, RETURN_RESEND_PENDING, RETURN_WAREHOUSE) that the rules API
  * rejects with a 400 — never derive workflow options from Object.values().
+ *
+ * ORDER MATTERS: since T29 this list must match the backend OrderStatus enum
+ * DECLARATION ORDER exactly, not just its membership — it is not just display
+ * order. RANGE/ANY rules match dynamically against declaration order (range
+ * previews, inversion checks, coverage credit, dedupe keys all derive their
+ * position from this ordering). Reordering or misordering entries here will
+ * silently corrupt those computations even though every status is still
+ * present. Update this list in the same change as any backend OrderStatus
+ * enum addition (see the NOTE above `enum OrderStatus` in
+ * backend/prisma/schema.prisma).
  */
 export const WORKFLOW_ORDER_STATUSES: OrderStatus[] = [
   OrderStatus.NEW_ORDER,

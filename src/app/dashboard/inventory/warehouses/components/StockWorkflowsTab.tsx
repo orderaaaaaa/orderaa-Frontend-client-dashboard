@@ -248,7 +248,11 @@ const cardError = (row: RuleRow, duplicate: boolean): TranslationKey | null => {
     return 'stockRules.errors.warehousesRequired';
   if (row.fromWarehouseId === row.toWarehouseId)
     return 'stockRules.errors.sameWarehouse';
-  if (duplicate) return 'stockRules.errors.duplicateRule';
+  if (duplicate) {
+    return row.eventType === 'CREATION'
+      ? 'stockRules.errors.duplicateCreationRule'
+      : 'stockRules.errors.duplicateRule';
+  }
   return null;
 };
 
