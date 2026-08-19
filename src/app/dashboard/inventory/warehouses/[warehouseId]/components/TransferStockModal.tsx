@@ -35,7 +35,10 @@ export function TransferStockModal({
   const [quantities, setQuantities] = useState<Record<number, string>>({});
   const [note, setNote] = useState('');
 
-  const { options } = useWarehouseOptions();
+  // A transfer PUTS stock somewhere, so an inactive warehouse is not a valid
+  // destination — it stays listed (disabled) rather than vanishing, so the list
+  // still matches the warehouses screen the user just came from.
+  const { pickerOptions } = useWarehouseOptions();
   const transferMutation = useTransferStockMutation();
 
   useEffect(() => {
@@ -45,7 +48,7 @@ export function TransferStockModal({
     setNote('');
   }, [isOpen]);
 
-  const destinationOptions = options.filter(
+  const destinationOptions = pickerOptions.filter(
     (option) => option.key !== String(fromWarehouseId)
   );
 

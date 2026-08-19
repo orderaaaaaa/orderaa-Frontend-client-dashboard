@@ -12,6 +12,8 @@ import type ar from './ar';
 const en: Record<keyof typeof ar, string> = {
   'common.language': 'Language',
   'common.loading': 'Loading…',
+  'common.save': 'Save',
+  'common.delete': 'Delete',
   'common.errors.forbidden':
     'You do not have permission to perform this action',
 

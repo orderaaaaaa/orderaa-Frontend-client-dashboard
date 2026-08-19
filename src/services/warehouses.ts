@@ -6,6 +6,7 @@ import {
   QueryKey,
 } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { useI18n } from '@/i18n/I18nProvider';
 import type { WarehouseApiItem } from '@/lib/api/warehouses';
 import type { OrderStatus } from '@/types/orders';
 import {
@@ -197,6 +198,8 @@ export const useTransferStockMutation = () => {
 export interface WarehouseOption {
   key: string;
   value: string;
+  /** T30 — set only by `pickerOptions`: listed, labelled, but unselectable. */
+  disabled?: boolean;
 }
 
 /**
@@ -207,22 +210,26 @@ export interface WarehouseOption {
  * dedupe by id while keeping children rendered under their parent.
  */
 export const useWarehouseOptions = () => {
+  const { t } = useI18n();
   // Pickers need the full tree; 1000 comfortably covers any real merchant.
   const { data, isLoading, isError } = useWarehousesQuery({ limit: 1000 });
 
   const warehouses = useMemo<WarehouseApiItem[]>(() => data?.data ?? [], [data]);
 
-  const options = useMemo<WarehouseOption[]>(() => {
-    const flattened: WarehouseOption[] = [];
+  /**
+   * The tree walk itself — done ONCE, so the two option lists below can never
+   * drift in ordering or membership, only in how they label and gate an entry.
+   */
+  const flattened = useMemo<
+    { warehouse: WarehouseApiItem; isChild: boolean }[]
+  >(() => {
+    const rows: { warehouse: WarehouseApiItem; isChild: boolean }[] = [];
     const seen = new Set<number>();
 
     const push = (warehouse: WarehouseApiItem, isChild: boolean) => {
       if (seen.has(warehouse.id)) return;
       seen.add(warehouse.id);
-      flattened.push({
-        key: String(warehouse.id),
-        value: isChild ? `— ${warehouse.name}` : warehouse.name,
-      });
+      rows.push({ warehouse, isChild });
     };
 
     warehouses
@@ -237,8 +244,51 @@ export const useWarehouseOptions = () => {
       push(warehouse, warehouse.parentWarehouseId !== null)
     );
 
-    return flattened;
+    return rows;
   }, [warehouses]);
+
+  const label = (warehouse: WarehouseApiItem, isChild: boolean) =>
+    isChild ? `— ${warehouse.name}` : warehouse.name;
+
+  /**
+   * Every warehouse, selectable — including the inactive ones.
+   *
+   * This is the list the movement ledger and the stock views filter by: history
+   * that happened in a warehouse the merchant has since deactivated must stay
+   * reachable, so those filters keep this list rather than `pickerOptions`.
+   */
+  const options = useMemo<WarehouseOption[]>(
+    () =>
+      flattened.map(({ warehouse, isChild }) => ({
+        key: String(warehouse.id),
+        value: label(warehouse, isChild),
+      })),
+    [flattened]
+  );
+
+  /**
+   * T30 — the list for pickers that WRITE a warehouse into something durable
+   * (rule cards, the inbound destination, transfers).
+   *
+   * Inactive warehouses are marked disabled, not filtered out: a rule saved
+   * against a warehouse that was deactivated afterwards still has to re-display
+   * its stored destination, which an option that no longer exists cannot do.
+   * The suffix says why the entry cannot be chosen.
+   */
+  const pickerOptions = useMemo<WarehouseOption[]>(
+    () =>
+      flattened.map(({ warehouse, isChild }) => {
+        const name = label(warehouse, isChild);
+        return warehouse.isActive
+          ? { key: String(warehouse.id), value: name }
+          : {
+              key: String(warehouse.id),
+              value: `${name}${t('stockRules.warehouseInactiveSuffix')}`,
+              disabled: true,
+            };
+      }),
+    [flattened, t]
+  );
 
   const rootOptions = useMemo<WarehouseOption[]>(
     () =>
@@ -251,16 +301,11 @@ export const useWarehouseOptions = () => {
     [warehouses]
   );
 
-  const defaultWarehouseId = useMemo<number | undefined>(
-    () => warehouses.find((warehouse) => warehouse.isDefault)?.id,
-    [warehouses]
-  );
-
   return {
     warehouses,
     options,
+    pickerOptions,
     rootOptions,
-    defaultWarehouseId,
     isLoading,
     isError,
   };

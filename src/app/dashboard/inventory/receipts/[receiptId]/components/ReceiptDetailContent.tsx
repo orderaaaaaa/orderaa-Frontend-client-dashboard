@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { notFound, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { getApiErrorMessage } from '@/utils/apiError';
@@ -15,7 +16,11 @@ import {
   useSupplierInvoiceByIdQuery,
   useApproveSupplierInvoiceMutation,
 } from '@/services/suppliers';
-import { useWarehouseOptions } from '@/services/warehouses';
+import {
+  useStockWorkflowsQuery,
+  useWarehouseOptions,
+} from '@/services/warehouses';
+import { useI18n } from '@/i18n/I18nProvider';
 import ReceiptHeader from './ReceiptHeader';
 import AddVariantsStep, { InvoiceProductRow } from './AddVariantsStep';
 import { SelectedVariant } from '../types';
@@ -35,6 +40,7 @@ interface QuantityMismatch {
 }
 
 export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
+  const { t } = useI18n();
   const router = useRouter();
   const numericId = Number(receiptId);
   const isValidId = Number.isFinite(numericId);
@@ -52,19 +58,44 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
 
   const approveMutation = useApproveSupplierInvoiceMutation();
 
-  const { options: warehouseOptions, defaultWarehouseId } =
-    useWarehouseOptions();
+  const { pickerOptions: warehouseOptions } = useWarehouseOptions();
+  /**
+   * T30 — an OVERRIDE, not the destination.
+   *
+   * Empty is the normal case: the backend routes each line through the inbound
+   * rules (variant scope, then product, then global), which is the only thing
+   * that can route two lines of one receipt to two different warehouses. It
+   * used to be seeded from the merchant's `isDefault` warehouse — the flag T30
+   * replaces with those rules — and seeding a value here would silently force
+   * every line into one warehouse, defeating the rules just configured.
+   */
   const [warehouseId, setWarehouseId] = useState('');
   const [pendingMismatches, setPendingMismatches] = useState<
     QuantityMismatch[] | null
   >(null);
 
-  // Seed the receiving warehouse with the merchant default, once it loads.
-  useEffect(() => {
-    if (warehouseId) return;
-    if (defaultWarehouseId == null) return;
-    setWarehouseId(String(defaultWarehouseId));
-  }, [defaultWarehouseId, warehouseId]);
+  /**
+   * Whether a GLOBAL inbound destination exists at all.
+   *
+   * Unparameterised on purpose — the same query key the rules screen uses for
+   * its global view, so this page reads from that cache instead of adding a
+   * request of its own. The scoped rules come back in the same payload, hence
+   * the explicit both-null filter: a product-scoped destination does not save
+   * a receipt whose other lines have none.
+   */
+  const { data: stockWorkflows, isLoading: rulesLoading } =
+    useStockWorkflowsQuery();
+
+  const hasGlobalInboundRule = useMemo(
+    () =>
+      (stockWorkflows ?? []).some(
+        (rule) =>
+          rule.eventType === 'INBOUND' &&
+          rule.productId === null &&
+          rule.variantId === null
+      ),
+    [stockWorkflows]
+  );
 
   const invoiceProducts: InvoiceProductRow[] = useMemo(
     () =>
@@ -169,7 +200,10 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
           id: apiReceipt.id,
           body: {
             products: productsPayload,
-            warehouseId: Number(warehouseId),
+            // Omitted unless the user actually overrode it — sending a value
+            // is what STOPS the backend from routing per line via the inbound
+            // rules, so an empty pick must not become `Number('') === 0`.
+            ...(warehouseId ? { warehouseId: Number(warehouseId) } : {}),
             // Sent only when the user has just confirmed. Never sticky.
             ...(acknowledgeQuantityChange
               ? { acknowledgeQuantityChange: true }
@@ -220,18 +254,18 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
   const handleSubmit = useCallback(async () => {
     if (!apiReceipt) return;
 
-    if (!warehouseId) {
-      toast.error('يرجى اختيار مخزن الاستلام');
-      return;
-    }
-
+    // No warehouse check: the destination is optional now. When it is left
+    // empty the backend resolves it per line, and refuses with a localized 400
+    // if it cannot — which is surfaced through `getApiErrorMessage` in
+    // `approve`, rather than second-guessed here against rules this page does
+    // not evaluate.
     if (mismatches.length > 0) {
       setPendingMismatches(mismatches);
       return;
     }
 
     await approve(false);
-  }, [apiReceipt, warehouseId, mismatches, approve]);
+  }, [apiReceipt, mismatches, approve]);
 
   if (!isValidId) {
     notFound();
@@ -259,18 +293,32 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
 
         <div className="flex flex-col gap-2 max-w-sm">
           <label className="text-sm font-medium text-gray-700">
-            مخزن الاستلام <span className="text-red-500">*</span>
+            مخزن الاستلام
           </label>
+          {/* Clearable: leaving it empty is the normal path, so there has to
+              be a way back to it after picking a warehouse by mistake. */}
           <SearchableSelect
             options={warehouseOptions}
             value={warehouseId}
             onValueChange={setWarehouseId}
-            placeholder="اختر مخزن الاستلام"
+            onClear={() => setWarehouseId('')}
+            clearable
+            placeholder={t('receipts.warehouseAuto')}
             emptyMessage="لا توجد مخازن — أنشئ مخزنًا أولًا"
           />
-          <p className="text-xs text-gray-500">
-            سيتم إضافة الكميات المعتمدة إلى هذا المخزن
-          </p>
+          {/* Only while no override is chosen: with one, the missing global
+              rule no longer stops this receipt from being confirmed. */}
+          {!rulesLoading && !hasGlobalInboundRule && !warehouseId && (
+            <p className="rounded-md border border-amber-200 bg-amber-50 p-2 text-xs leading-5 text-amber-900">
+              {t('receipts.noInboundWarning')}{' '}
+              <Link
+                href="/dashboard/inventory/warehouses?tab=workflows"
+                className="font-semibold underline"
+              >
+                {t('stockRules.inbound.title')}
+              </Link>
+            </p>
+          )}
         </div>
 
         <AddVariantsStep

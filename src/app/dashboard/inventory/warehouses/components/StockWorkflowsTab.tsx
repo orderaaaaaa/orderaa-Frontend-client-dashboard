@@ -24,7 +24,6 @@ import type {
   CreateStockWorkflowDto,
   InsufficientStockBehavior,
   StockWorkflowApiItem,
-  StockWorkflowEventType,
 } from '@/lib/api/warehouses';
 import {
   EVENT_TYPE_LABEL_KEYS,
@@ -42,6 +41,7 @@ import {
   type RuleStatusSidePatch,
 } from './RuleStatusSideEditor';
 import { StockRuleCoverageNotice } from './StockRuleCoverageNotice';
+import { InboundDestinationSection } from './InboundDestinationSection';
 import {
   StockRuleScopeSelector,
   type ScopeSelection,
@@ -67,7 +67,12 @@ import {
 interface RuleRow extends StatusRuleSides {
   /** undefined for rows that have not been saved yet */
   id?: number;
-  eventType: StockWorkflowEventType;
+  /**
+   * NOT the full wire union: T30's `INBOUND` has its own panel and never
+   * becomes a card, so the narrower type makes that unreachable by
+   * construction rather than by convention (`isCardRule` is the only door in).
+   */
+  eventType: EditableEventType;
   fromWarehouseId: string;
   toWarehouseId: string;
   allowNegative: boolean;
@@ -89,10 +94,27 @@ type RuleShapeBody = Pick<
   | 'toRangeEnd'
 >;
 
-/** The events this builder can author. `INBOUND` is T30's — see the constant. */
+/**
+ * The events this builder can author — everything except `INBOUND`, which
+ * T30 gives its own panel (`InboundDestinationSection`).
+ */
 type EditableEventType = keyof typeof EVENT_TYPE_LABEL_KEYS;
 
 const EVENT_TYPES = Object.keys(EVENT_TYPE_LABEL_KEYS) as EditableEventType[];
+
+/** A server rule this builder can actually render as a card. */
+type CardRule = StockWorkflowApiItem & { eventType: EditableEventType };
+
+/**
+ * The ONLY way a server rule becomes a card.
+ *
+ * An INBOUND rule has no source warehouse and no statuses, so a card built from
+ * one would open showing an empty "من مخزن" and an inline "اختر المخزنين"
+ * error on a rule that is perfectly valid — and saving it would ship fields the
+ * API rejects. It belongs to the panel above, not here.
+ */
+const isCardRule = (rule: StockWorkflowApiItem): rule is CardRule =>
+  rule.eventType !== 'INBOUND';
 
 const RULE_SIDES: RuleSide[] = ['from', 'to'];
 
@@ -101,12 +123,12 @@ const statusOptions = WORKFLOW_ORDER_STATUSES.map((status) => ({
   value: ORDER_STATUS_ARABIC_LABELS[status] ?? status,
 }));
 
-const toRow = (rule: StockWorkflowApiItem): RuleRow => ({
+const toRow = (rule: CardRule): RuleRow => ({
   id: rule.id,
   eventType: rule.eventType,
-  // CREATION and INBOUND carry no selections at all; SPECIFIC over the arrays
-  // they do carry is the reading that keeps the card harmless if the event is
-  // ever switched on a fresh row.
+  // CREATION carries no selections at all; SPECIFIC over the arrays it does
+  // carry is the reading that keeps the card harmless if the event is ever
+  // switched on a fresh row.
   fromType: rule.fromSelection ?? 'SPECIFIC',
   toType: rule.toSelection ?? 'SPECIFIC',
   fromStatuses: rule.fromStatuses,
@@ -115,7 +137,9 @@ const toRow = (rule: StockWorkflowApiItem): RuleRow => ({
   fromRangeEnd: rule.fromRangeEnd ?? undefined,
   toRangeStart: rule.toRangeStart ?? undefined,
   toRangeEnd: rule.toRangeEnd ?? undefined,
-  // null source warehouse is legal only for an INBOUND rule (T30).
+  // Still guarded even though a card rule always has one: the wire type allows
+  // null (an INBOUND rule has no source), and `String(null)` would put the text
+  // "null" in the picker rather than leaving it unset.
   fromWarehouseId:
     rule.fromWarehouseId == null ? '' : String(rule.fromWarehouseId),
   toWarehouseId: String(rule.toWarehouseId),
@@ -241,9 +265,9 @@ const cardError = (row: RuleRow, duplicate: boolean): TranslationKey | null => {
       return 'stockRules.errors.sameStatusBothSides';
   }
 
-  // Both events above move stock between two warehouses. (An INBOUND rule has
-  // no source warehouse, but this builder cannot author one — see
-  // `buildShapeBody`.)
+  // Both events above move stock between two warehouses. The one event that
+  // does not — INBOUND, which has a destination and nothing else — cannot
+  // reach this function: `RuleRow.eventType` excludes it by type.
   if (!row.fromWarehouseId || !row.toWarehouseId)
     return 'stockRules.errors.warehousesRequired';
   if (row.fromWarehouseId === row.toWarehouseId)
@@ -275,8 +299,9 @@ const rowError = (row: RuleRow, duplicate: boolean): TranslationKey | null => {
  * CHECK constraints reject hybrid rows, so shipping the leftovers would be a
  * 400 on a card that looks perfectly valid.
  *
- * null for INBOUND: T29's backend rejects creating one and no pill produces
- * it — T30 adds both the affordance and the payload.
+ * The null return is now unreachable — `RuleRow.eventType` is CREATION or
+ * TRANSITION and nothing else — and stays only as the caller's belt-and-braces
+ * against a third editable event being added without a payload shape.
  */
 const buildShapeBody = (row: RuleRow): RuleShapeBody | null => {
   if (row.eventType === 'CREATION') {
@@ -355,7 +380,11 @@ export function StockWorkflowsTab() {
       ? undefined
       : { productId: scope.productId, variantId: scope.variantId }
   );
-  const { options: warehouseOptions } = useWarehouseOptions();
+  // `pickerOptions`, not `options`: a rule WRITES a warehouse id, and an
+  // inactive warehouse must not be the one it writes. It still renders (marked
+  // disabled) so a rule saved before the deactivation re-displays its warehouse
+  // instead of coming back blank.
+  const { pickerOptions: warehouseOptions } = useWarehouseOptions();
 
   const createMutation = useCreateStockWorkflowMutation();
   const updateMutation = useUpdateStockWorkflowMutation();
@@ -391,6 +420,19 @@ export function StockWorkflowsTab() {
       : data.filter((rule) => rule.variantId === scope.variantId);
   }, [data, scope]);
 
+  /**
+   * T30 — the same fetch feeds two surfaces, split by event type.
+   *
+   * At most one INBOUND rule can exist per scope (the backend enforces it), so
+   * `find` is the whole story; everything else is a card.
+   */
+  const inboundRule = useMemo(
+    () => scopedRules.find((rule) => rule.eventType === 'INBOUND'),
+    [scopedRules]
+  );
+
+  const cardRules = useMemo(() => scopedRules.filter(isCardRule), [scopedRules]);
+
   const scopeKey = `${scope.scope}:${scope.productId ?? ''}:${scope.variantId ?? ''}`;
 
   // Switching scope discards in-progress cards: an unsaved card carries the old
@@ -409,12 +451,12 @@ export function StockWorkflowsTab() {
         current.filter((row) => row.dirty && row.id).map((row) => [row.id, row])
       );
       const unsaved = current.filter((row) => !row.id);
-      const serverRows = scopedRules.map(
+      const serverRows = cardRules.map(
         (rule) => dirtyById.get(rule.id) ?? toRow(rule)
       );
       return [...serverRows, ...unsaved];
     });
-  }, [scopedRules]);
+  }, [cardRules]);
 
   // Flag only the SECOND and later occurrences: the already-saved first card
   // must not turn red because someone started typing a clashing new one.
@@ -496,9 +538,14 @@ export function StockWorkflowsTab() {
         // Adopt the server row (with its id) — otherwise the refetch brings
         // the rule back as a NEW card while the id-less local row survives
         // the merge, leaving a duplicate ghost flagged as a conflict.
-        setRows((current) =>
-          current.map((r, i) => (i === index ? toRow(created) : r))
-        );
+        //
+        // The response echoes the event type just sent, which is a card event
+        // by construction; the guard is only how that reaches the type system.
+        if (isCardRule(created)) {
+          setRows((current) =>
+            current.map((r, i) => (i === index ? toRow(created) : r))
+          );
+        }
       }
       toast.success(t('stockRules.saveSuccess'));
     } catch (err: unknown) {
@@ -575,9 +622,18 @@ export function StockWorkflowsTab() {
 
       {scopePicker}
 
+      {/* Coverage is about the TRANSITION/CREATION rules only — an inbound
+          destination neither fills nor causes a restock gap, so it is not in
+          the list this panel reasons over. */}
       {scope.scope !== 'GLOBAL' && (
-        <StockRuleCoverageNotice rules={scopedRules} scopeLabel={scopeLabel} />
+        <StockRuleCoverageNotice rules={cardRules} scopeLabel={scopeLabel} />
       )}
+
+      <InboundDestinationSection
+        scope={scope}
+        scopeKey={scopeKey}
+        inboundRule={inboundRule}
+      />
 
       <div className="space-y-4">
         {rows.map((row, index) => {
@@ -588,10 +644,7 @@ export function StockWorkflowsTab() {
           const error = row.touched
             ? cardError(row, duplicateRowIndexes.has(index))
             : null;
-          const eventLabelKey =
-            row.eventType in EVENT_TYPE_LABEL_KEYS
-              ? EVENT_TYPE_LABEL_KEYS[row.eventType as EditableEventType]
-              : null;
+          const eventLabelKey = EVENT_TYPE_LABEL_KEYS[row.eventType];
           // The creation target is a single status kept in `toStatuses`; a
           // leftover multi-selection from a TRANSITION card reads as "not
           // chosen yet" rather than silently picking its first entry.
@@ -613,7 +666,7 @@ export function StockWorkflowsTab() {
                     // is what the rule IS. Changing it means a new rule, so a
                     // saved card shows it rather than offering it.
                     <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-[11px] text-primary">
-                      {eventLabelKey ? t(eventLabelKey) : row.eventType}
+                      {t(eventLabelKey)}
                     </span>
                   ) : (
                     <div className="flex gap-1.5">
