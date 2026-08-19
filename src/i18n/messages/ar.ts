@@ -98,10 +98,10 @@ const ar = {
   // InboundDestinationSection and the receipts detail page.
   'stockRules.inbound.title': 'وجهة الاستلام من الموردين',
   'stockRules.inbound.hint':
-    'قبول الكميات المعتمدة عند تأكيد إيصالات الاستلام لهذا النطاق.',
+    'يتم استلام الكميات المعتمدة في هذا المخزن عند تأكيد إيصالات الاستلام لهذا النطاق.',
   'stockRules.inbound.placeholder': 'اختر مخزن الاستلام',
   'stockRules.inbound.missingGlobal':
-    'لم يتم تحديد مخزن لاستلام الوارد من الموردين — لن يتم قبول أي كمية معتمدة حتى يتم ضبط ذلك.',
+    'لم يتم تحديد مخزن لاستلام الوارد من الموردين — الإيصالات التي لا تغطيها قاعدة استلام أخرى سيتعذر اعتمادها حتى يتم تحديد وجهة.',
   'stockRules.inbound.inheritsHint':
     'يتبع هذا النطاق وجهة الاستلام الأعلى منه.',
   'stockRules.inbound.saved': 'تم حفظ وجهة الاستلام بنجاح',
@@ -115,7 +115,7 @@ const ar = {
 
   'receipts.warehouseAuto': 'تلقائي حسب قواعد الاستلام',
   'receipts.noInboundWarning':
-    'لم يتم تحديد مخزن استلام افتراضي بعد — لن يمكن تأكيد الإيصالات حتى يتم ضبط ذلك.',
+    'لم يتم تحديد وجهة استلام عامة من الموردين — الإيصالات التي لا تغطيها قواعد استلام أخرى سيتعذر اعتمادها حتى يتم تحديد وجهة.',
 
   'products.confirmOutOfStock.inherit': 'اتبع المتجر ({value})',
   'products.confirmOutOfStock.allow': 'مسموح',

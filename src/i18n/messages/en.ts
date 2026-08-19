@@ -85,10 +85,10 @@ const en: Record<keyof typeof ar, string> = {
 
   'stockRules.inbound.title': 'Supplier receiving destination',
   'stockRules.inbound.hint':
-    'Approved quantities are received into this destination when a receiving receipt in this scope is confirmed.',
+    'Approved quantities are received into this destination when receiving receipts in this scope are confirmed.',
   'stockRules.inbound.placeholder': 'Select the receiving warehouse',
   'stockRules.inbound.missingGlobal':
-    'No destination is set for supplier receiving — approved quantities will not be accepted until this is configured.',
+    'No destination is set for supplier receiving — receipts not covered by another inbound rule cannot be approved until a destination is set.',
   'stockRules.inbound.inheritsHint':
     'This scope follows the receiving destination above it.',
   'stockRules.inbound.saved': 'Receiving destination saved successfully',
@@ -100,7 +100,7 @@ const en: Record<keyof typeof ar, string> = {
 
   'receipts.warehouseAuto': 'Automatic, based on receiving rules',
   'receipts.noInboundWarning':
-    'No default receiving warehouse is set yet — receipts cannot be confirmed until this is configured.',
+    'No general supplier-receiving destination is set — receipts not covered by another receiving rule cannot be approved until a destination is set.',
 
   'products.confirmOutOfStock.inherit': 'Follow the store ({value})',
   'products.confirmOutOfStock.allow': 'Allowed',

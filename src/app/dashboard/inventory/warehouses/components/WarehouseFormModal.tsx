@@ -129,7 +129,11 @@ export function WarehouseFormModal({
     } catch (err: unknown) {
       const message = getApiErrorMessage(err, 'تعذر حفظ المخزن');
       toast.error(message);
-      if (isEdit) setDeactivateError(message);
+      // Only a deactivation attempt renders inline under the نشط switch —
+      // an unrelated rejection (e.g. a parent-cycle 400) already has its own
+      // field-level error and shouldn't also surface here. The toast above
+      // still carries every error regardless.
+      if (isEdit && values.isActive === false) setDeactivateError(message);
     }
   });
 
