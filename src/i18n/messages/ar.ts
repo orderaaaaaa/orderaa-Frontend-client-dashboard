@@ -59,7 +59,6 @@ const ar = {
   'stockRules.event.label': 'نوع الحدث',
   'stockRules.event.creation': 'عند إنشاء الطلب',
   'stockRules.event.transition': 'انتقال بين الحالات',
-  'stockRules.event.inbound': 'استلام من مورد',
   'stockRules.side.from': 'من الحالة',
   'stockRules.side.to': 'إلى الحالة',
   'stockRules.selection.any': 'كل الحالات',
@@ -95,8 +94,8 @@ const ar = {
   'stockRules.saveFailed': 'تعذر حفظ القاعدة',
 
   // T30 — the inbound (supplier receiving) destination panel: one rule per
-  // scope, separate from the transition rule cards above. Additive only for
-  // now; nothing renders these keys yet.
+  // scope, separate from the transition rule cards above. Rendered by
+  // InboundDestinationSection and the receipts detail page.
   'stockRules.inbound.title': 'وجهة الاستلام من الموردين',
   'stockRules.inbound.hint':
     'قبول الكميات المعتمدة عند تأكيد إيصالات الاستلام لهذا النطاق.',
@@ -110,7 +109,6 @@ const ar = {
   // Appended to a warehouse's display label wherever a picker still needs to
   // show it (e.g. a rule saved against a warehouse that was later deactivated).
   'stockRules.warehouseInactiveSuffix': ' (موقوف)',
-  'stockRules.errors.inactiveWarehouse': 'لا يمكن استخدام مخزن موقوف في القاعدة',
 
   'warehouses.deactivateHint':
     'لا يمكن إيقاف المخزن طالما أن قواعد المخزون تعتمد عليه.',

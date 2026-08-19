@@ -35,9 +35,10 @@ interface Props {
  * would offer six controls the API rejects and a "+ add" affordance for a
  * second rule the backend refuses to create.
  *
- * The panel is also the successor to the warehouse `isDefault` flag: receiving
- * used to go to whichever warehouse carried that flag, which said nothing about
- * WHY and could not vary per product. This says it in one place, per scope.
+ * The panel is also the successor to the warehouse's old default-warehouse
+ * flag: receiving used to go to whichever warehouse carried that flag, which
+ * said nothing about WHY and could not vary per product. This says it in one
+ * place, per scope.
  */
 export function InboundDestinationSection({
   scope,

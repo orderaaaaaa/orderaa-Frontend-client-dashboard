@@ -49,7 +49,6 @@ const en: Record<keyof typeof ar, string> = {
   'stockRules.event.label': 'Event type',
   'stockRules.event.creation': 'On order creation',
   'stockRules.event.transition': 'Status transition',
-  'stockRules.event.inbound': 'Receiving from a supplier',
   'stockRules.side.from': 'From status',
   'stockRules.side.to': 'To status',
   'stockRules.selection.any': 'All statuses',
@@ -95,8 +94,6 @@ const en: Record<keyof typeof ar, string> = {
   'stockRules.inbound.saved': 'Receiving destination saved successfully',
   'stockRules.inbound.deleted': 'Receiving destination deleted',
   'stockRules.warehouseInactiveSuffix': ' (inactive)',
-  'stockRules.errors.inactiveWarehouse':
-    'An inactive warehouse cannot be used in the rule',
 
   'warehouses.deactivateHint':
     'The warehouse cannot be deactivated while stock rules depend on it.',

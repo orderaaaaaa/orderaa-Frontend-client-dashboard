@@ -39,9 +39,6 @@ export interface WarehouseApiItem {
   name: string;
   address: string | null;
   isActive: boolean;
-  isDefault: boolean;
-  /** whether this warehouse counts towards available-stock totals */
-  countsAsAvailable: boolean;
   parentWarehouseId: number | null;
   createdAt: string;
   updatedAt: string;
@@ -69,8 +66,6 @@ export interface CreateWarehouseDto {
   name: string;
   address?: string;
   isActive?: boolean;
-  isDefault?: boolean;
-  countsAsAvailable?: boolean;
   parentWarehouseId?: number;
 }
 
@@ -78,8 +73,6 @@ export interface UpdateWarehouseDto {
   name?: string;
   address?: string;
   isActive?: boolean;
-  isDefault?: boolean;
-  countsAsAvailable?: boolean;
   /** null detaches the warehouse from its parent */
   parentWarehouseId?: number | null;
 }

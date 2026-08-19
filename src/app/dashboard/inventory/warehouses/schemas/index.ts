@@ -11,9 +11,7 @@ export const warehouseFormSchema = z
     branch: z.enum(['main', 'sub'], { message: 'فرع المخزن مطلوب' }),
     parentWarehouseId: z.string().optional(),
     address: z.string().optional(),
-    isDefault: z.boolean(),
     isActive: z.boolean(),
-    countsAsAvailable: z.boolean(),
   })
   .refine(
     (data) =>

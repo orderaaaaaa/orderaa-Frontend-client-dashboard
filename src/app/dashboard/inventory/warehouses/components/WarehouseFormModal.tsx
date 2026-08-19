@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { useI18n } from '@/i18n/I18nProvider';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
@@ -34,9 +35,7 @@ const emptyValues: WarehouseFormData = {
   branch: WAREHOUSE_BRANCH.MAIN,
   parentWarehouseId: '',
   address: '',
-  isDefault: false,
   isActive: true,
-  countsAsAvailable: true,
 };
 
 export function WarehouseFormModal({
@@ -46,6 +45,7 @@ export function WarehouseFormModal({
   rootOptions,
 }: WarehouseFormModalProps) {
   const isEdit = !!warehouse;
+  const { t } = useI18n();
 
   const {
     register,
@@ -61,16 +61,17 @@ export function WarehouseFormModal({
 
   const createMutation = useCreateWarehouseMutation();
   const updateMutation = useUpdateWarehouseMutation();
+  const [deactivateError, setDeactivateError] = useState<string | null>(null);
 
   const branch = watch('branch');
   const parentWarehouseId = watch('parentWarehouseId');
-  const isDefault = watch('isDefault');
   const isActive = watch('isActive');
-  const countsAsAvailable = watch('countsAsAvailable');
   const isSub = branch === WAREHOUSE_BRANCH.SUB;
 
   useEffect(() => {
     if (!isOpen) return;
+
+    setDeactivateError(null);
 
     if (warehouse) {
       reset({
@@ -82,9 +83,7 @@ export function WarehouseFormModal({
           ? String(warehouse.parentWarehouseId)
           : '',
         address: warehouse.address ?? '',
-        isDefault: warehouse.isDefault,
         isActive: warehouse.isActive,
-        countsAsAvailable: warehouse.countsAsAvailable,
       });
     } else {
       reset(emptyValues);
@@ -101,6 +100,8 @@ export function WarehouseFormModal({
         ? Number(values.parentWarehouseId)
         : null;
 
+    setDeactivateError(null);
+
     try {
       if (isEdit && warehouse) {
         await updateMutation.mutateAsync({
@@ -111,8 +112,6 @@ export function WarehouseFormModal({
             // undefined means "leave unchanged" on the backend.
             address: values.address ?? '',
             isActive: values.isActive,
-            isDefault: parentId ? false : values.isDefault,
-            countsAsAvailable: values.countsAsAvailable,
             parentWarehouseId: parentId,
           },
         });
@@ -122,15 +121,15 @@ export function WarehouseFormModal({
           name: values.name,
           address: values.address ? values.address : undefined,
           isActive: values.isActive,
-          isDefault: parentId ? false : values.isDefault,
-          countsAsAvailable: values.countsAsAvailable,
           parentWarehouseId: parentId ?? undefined,
         });
         toast.success('تم إنشاء المخزن بنجاح');
       }
       onClose();
     } catch (err: unknown) {
-      toast.error(getApiErrorMessage(err, 'تعذر حفظ المخزن'));
+      const message = getApiErrorMessage(err, 'تعذر حفظ المخزن');
+      toast.error(message);
+      if (isEdit) setDeactivateError(message);
     }
   });
 
@@ -169,8 +168,6 @@ export function WarehouseFormModal({
               });
               if (next === WAREHOUSE_BRANCH.MAIN) {
                 setValue('parentWarehouseId', '', { shouldValidate: true });
-              } else {
-                setValue('isDefault', false);
               }
             }}
             placeholder="اختر نوع الفرع"
@@ -204,48 +201,21 @@ export function WarehouseFormModal({
           placeholder="عنوان المخزن (اختياري)"
         />
 
-        {!isSub && (
-          <div className="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3">
-            <div>
-              <p className="text-sm font-medium text-gray-700">
-                المخزن الافتراضي
-              </p>
-              <p className="text-xs text-gray-400">
-                يستقبل الوارد من الموردين عند عدم تحديد مخزن
-              </p>
-            </div>
-            <FormSwitch
-              checked={isDefault}
-              onCheckedChange={(checked) => setValue('isDefault', checked)}
-            />
-          </div>
-        )}
-
-        <div className="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3">
-          <div>
-            <p className="text-sm font-medium text-gray-700">
-              يُحتسب ضمن المخزون المتاح
-            </p>
-            <p className="text-xs text-gray-400">
-              أوقفه لمخازن المُسلَّم والمرتجعات حتى لا تُحتسب كمياتها ضمن
-              المخزون القابل للبيع
-            </p>
-          </div>
-          <FormSwitch
-            checked={countsAsAvailable}
-            onCheckedChange={(checked) =>
-              setValue('countsAsAvailable', checked)
-            }
-          />
-        </div>
-
         {isEdit && (
-          <div className="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3">
-            <p className="text-sm font-medium text-gray-700">نشط</p>
-            <FormSwitch
-              checked={isActive}
-              onCheckedChange={(checked) => setValue('isActive', checked)}
-            />
+          <div className="rounded-lg border border-gray-200 px-4 py-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-gray-700">نشط</p>
+              <FormSwitch
+                checked={isActive}
+                onCheckedChange={(checked) => setValue('isActive', checked)}
+              />
+            </div>
+            <p className="mt-1.5 text-xs text-gray-400">
+              {t('warehouses.deactivateHint')}
+            </p>
+            {deactivateError && (
+              <p className="mt-1.5 text-xs text-red-600">{deactivateError}</p>
+            )}
           </div>
         )}
       </div>

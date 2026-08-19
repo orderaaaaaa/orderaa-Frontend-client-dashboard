@@ -76,9 +76,6 @@ export function WarehouseTable({
               النوع
             </th>
             <th className="py-3 px-4 text-right font-semibold text-gray-700">
-              افتراضي
-            </th>
-            <th className="py-3 px-4 text-right font-semibold text-gray-700">
               الحالة
             </th>
             <th className="py-3 px-4 text-right font-semibold text-gray-700">
@@ -107,13 +104,6 @@ export function WarehouseTable({
                   <Badge className="bg-blue-100 text-blue-700">
                     مخزن رئيسي
                   </Badge>
-                )}
-              </td>
-              <td className="py-2.5 px-4">
-                {warehouse.isDefault ? (
-                  <Badge className="bg-amber-100 text-amber-700">افتراضي</Badge>
-                ) : (
-                  <span className="text-gray-300">—</span>
                 )}
               </td>
               <td className="py-2.5 px-4">

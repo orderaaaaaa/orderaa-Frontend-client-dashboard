@@ -65,8 +65,8 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
    * Empty is the normal case: the backend routes each line through the inbound
    * rules (variant scope, then product, then global), which is the only thing
    * that can route two lines of one receipt to two different warehouses. It
-   * used to be seeded from the merchant's `isDefault` warehouse — the flag T30
-   * replaces with those rules — and seeding a value here would silently force
+   * used to be seeded from the merchant's default-flagged warehouse — the flag
+   * T30 replaces with those rules — and seeding a value here would silently force
    * every line into one warehouse, defeating the rules just configured.
    */
   const [warehouseId, setWarehouseId] = useState('');
