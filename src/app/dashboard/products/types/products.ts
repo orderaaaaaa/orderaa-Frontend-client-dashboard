@@ -1,3 +1,13 @@
+export const PRODUCT_CONFIRM_OUT_OF_STOCK_MODES = {
+  INHERIT: 'INHERIT',
+  FOLLOW_WORKFLOW: 'FOLLOW_WORKFLOW',
+  ALLOW: 'ALLOW',
+  FORBID: 'FORBID',
+} as const;
+
+export type ProductConfirmOutOfStockMode =
+  (typeof PRODUCT_CONFIRM_OUT_OF_STOCK_MODES)[keyof typeof PRODUCT_CONFIRM_OUT_OF_STOCK_MODES];
+
 export interface Product {
   id: number;
   name: string;
@@ -14,14 +24,7 @@ export interface Product {
   extraDetails: {
     variants?: VariantItem[];
   };
-  /**
-   * T27 — THREE states, and they must stay distinguishable:
-   *   true  = allow confirming this product out of stock
-   *   false = forbid it, even where the store allows it
-   *   null  = inherit the store setting
-   * Never model this as `boolean`, and never resolve it with `||`.
-   */
-  allowConfirmOutOfStock: boolean | null;
+  confirmOutOfStockMode: ProductConfirmOutOfStockMode;
   variantOptions?: VariantOption[];
   createdAt: string;
   updatedAt: string;

@@ -118,8 +118,11 @@ const ar = {
     'لم يتم تحديد وجهة استلام عامة من الموردين — الإيصالات التي لا تغطيها قواعد استلام أخرى سيتعذر اعتمادها حتى يتم تحديد وجهة.',
 
   'products.confirmOutOfStock.inherit': 'اتبع المتجر ({value})',
-  'products.confirmOutOfStock.allow': 'مسموح',
-  'products.confirmOutOfStock.forbid': 'ممنوع',
+  'products.confirmOutOfStock.followWorkflow': 'اتبع النظام',
+  'products.confirmOutOfStock.followWorkflowHint':
+    'قواعد حركة المخزون تحدد ما يحدث لهذا المنتج مهما كان إعداد المتجر.',
+  'products.confirmOutOfStock.allowNegative': 'السماح بالسالب',
+  'products.confirmOutOfStock.forbid': 'منع',
   'products.confirmOutOfStock.placeholder': 'تأكيد بدون مخزون',
   'products.confirmOutOfStock.saved': 'تم حفظ إعداد التأكيد',
   'products.confirmOutOfStock.saveFailed': 'تعذر حفظ الإعداد',

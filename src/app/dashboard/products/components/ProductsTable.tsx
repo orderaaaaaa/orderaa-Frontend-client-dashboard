@@ -6,7 +6,12 @@ import { Scan, ScanLine, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 
-import { useGetProducts } from '../hooks/useProduct';
+import {
+  useGetProducts,
+  useStoreConfirmOutOfStock,
+  useUpdateProductConfirmOutOfStock,
+} from '../hooks/useProduct';
+import { ConfirmOutOfStockControl } from './ConfirmOutOfStockControl';
 import { useProductStore } from '../store/useProductStore';
 import { Product, VariantItem, AttributeManual } from '../types/products';
 import Input from '@/components/ui/Input';
@@ -40,6 +45,13 @@ function ProductsTable() {
     sortBy,
     sortOrder,
   });
+
+  const storeConfirmMode = useStoreConfirmOutOfStock();
+  const confirmOutOfStockMutation = useUpdateProductConfirmOutOfStock();
+  const { mutate: saveConfirmOutOfStock } = confirmOutOfStockMutation;
+  const savingConfirmProductId = confirmOutOfStockMutation.isPending
+    ? confirmOutOfStockMutation.variables?.productId
+    : undefined;
 
   const [showModal, setShowModal] = useState(false);
   const [activeProduct, setActiveProduct] = useState<{
@@ -209,6 +221,31 @@ function ProductsTable() {
         ),
       },
       {
+        key: 'confirmOutOfStock',
+        header: 'تأكيد بدون مخزون',
+        className: 'text-center',
+        render: (_val, row) => (
+          <div
+            className="mx-auto w-[200px] text-right"
+            onClick={(e: React.MouseEvent<HTMLDivElement>) =>
+              e.stopPropagation()
+            }
+          >
+            <ConfirmOutOfStockControl
+              value={row.confirmOutOfStockMode}
+              storeMode={storeConfirmMode}
+              disabled={savingConfirmProductId === row.id}
+              onChange={(confirmOutOfStockMode) =>
+                saveConfirmOutOfStock({
+                  productId: row.id,
+                  confirmOutOfStockMode,
+                })
+              }
+            />
+          </div>
+        ),
+      },
+      {
         key: 'edit',
         header: 'تعديل',
         className: 'text-center',
@@ -241,7 +278,7 @@ function ProductsTable() {
         ),
       },
     ],
-    [],
+    [storeConfirmMode, savingConfirmProductId, saveConfirmOutOfStock],
   );
 
   const selectedArray = useMemo(() => Array.from(selectedIds) as number[], [selectedIds]);

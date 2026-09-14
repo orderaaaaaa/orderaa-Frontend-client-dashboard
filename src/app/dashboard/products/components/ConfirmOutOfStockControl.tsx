@@ -1,88 +1,77 @@
 'use client';
 
-import { toast } from 'react-toastify';
+import { useMemo } from 'react';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useI18n } from '@/i18n/I18nProvider';
-import { getApiErrorMessage } from '@/utils/apiError';
-import { useUpdateProductConfirmOutOfStock } from '../hooks/useProduct';
+import type { StoreConfirmOutOfStock } from '@/utils/storeConfirmMode';
+import {
+  PRODUCT_CONFIRM_OUT_OF_STOCK_MODES,
+  type ProductConfirmOutOfStockMode,
+} from '../types/products';
 
 interface Props {
-  productId: number;
-  value: boolean | null;
-  /** the store-level rule, so "follow the store" can say what it resolves to */
-  storeDefault: boolean;
+  value: ProductConfirmOutOfStockMode;
+  storeMode: StoreConfirmOutOfStock;
+  onChange: (mode: ProductConfirmOutOfStockMode) => void;
+  disabled?: boolean;
 }
 
-/**
- * T27 — the product's confirm-out-of-stock override.
- *
- * THREE states, encoded as strings only because a select needs them to be:
- *   'INHERIT' → null   follow the store (the default)
- *   'ALLOW'   → true
- *   'FORBID'  → false
- *
- * `false` and `null` are DIFFERENT and must never be conflated — `false` forbids
- * even where the store allows, `null` follows whatever the store says. Any code
- * that treats them alike (`||`, a truthiness check, a plain boolean type) turns
- * "forbid" into "inherit" and the setting quietly stops working.
- */
-type ScopeChoice = 'INHERIT' | 'ALLOW' | 'FORBID';
+const MODE_ORDER: ProductConfirmOutOfStockMode[] = [
+  PRODUCT_CONFIRM_OUT_OF_STOCK_MODES.INHERIT,
+  PRODUCT_CONFIRM_OUT_OF_STOCK_MODES.FOLLOW_WORKFLOW,
+  PRODUCT_CONFIRM_OUT_OF_STOCK_MODES.ALLOW,
+  PRODUCT_CONFIRM_OUT_OF_STOCK_MODES.FORBID,
+];
 
-const toChoice = (value: boolean | null): ScopeChoice =>
-  value === null || value === undefined
-    ? 'INHERIT'
-    : value
-      ? 'ALLOW'
-      : 'FORBID';
-
-const fromChoice = (choice: ScopeChoice): boolean | null =>
-  choice === 'INHERIT' ? null : choice === 'ALLOW';
+const isProductConfirmMode = (
+  value: string
+): value is ProductConfirmOutOfStockMode =>
+  MODE_ORDER.some((mode) => mode === value);
 
 export function ConfirmOutOfStockControl({
-  productId,
   value,
-  storeDefault,
+  storeMode,
+  onChange,
+  disabled = false,
 }: Props) {
   const { t } = useI18n();
-  const { mutate, isPending } = useUpdateProductConfirmOutOfStock(productId);
 
-  const options = [
-    {
-      key: 'INHERIT',
-      // Spelling out what inheriting currently resolves to — otherwise nobody
-      // can tell what "follow the store" actually means for this product. The
-      // resolved word is a parameter rather than a concatenation because it
-      // sits inside the sentence, and each language places it differently.
-      value: t('products.confirmOutOfStock.inherit', {
-        value: storeDefault
-          ? t('products.confirmOutOfStock.allow')
-          : t('products.confirmOutOfStock.forbid'),
-      }),
-    },
-    { key: 'ALLOW', value: t('products.confirmOutOfStock.allow') },
-    { key: 'FORBID', value: t('products.confirmOutOfStock.forbid') },
-  ];
+  const options = useMemo(() => {
+    const storeLabel =
+      storeMode === null
+        ? t('products.confirmOutOfStock.followWorkflow')
+        : storeMode
+          ? t('products.confirmOutOfStock.allowNegative')
+          : t('products.confirmOutOfStock.forbid');
+
+    const labels: Record<ProductConfirmOutOfStockMode, string> = {
+      INHERIT: t('products.confirmOutOfStock.inherit', { value: storeLabel }),
+      FOLLOW_WORKFLOW: t('products.confirmOutOfStock.followWorkflow'),
+      ALLOW: t('products.confirmOutOfStock.allowNegative'),
+      FORBID: t('products.confirmOutOfStock.forbid'),
+    };
+
+    return MODE_ORDER.map((mode) => ({ key: mode, value: labels[mode] }));
+  }, [storeMode, t]);
 
   return (
-    <SearchableSelect
-      options={options}
-      value={toChoice(value)}
-      disabled={isPending}
-      onValueChange={(next) =>
-        mutate(fromChoice(next as ScopeChoice), {
-          onSuccess: () =>
-            toast.success(t('products.confirmOutOfStock.saved')),
-          onError: (error: unknown) =>
-            toast.error(
-              getApiErrorMessage(
-                error,
-                t('products.confirmOutOfStock.saveFailed')
-              )
-            ),
-        })
-      }
-      placeholder={t('products.confirmOutOfStock.placeholder')}
-      triggerClassName="h-9 text-xs"
-    />
+    <div className="flex flex-col gap-1">
+      <SearchableSelect
+        options={options}
+        value={value}
+        disabled={disabled}
+        searchThreshold={10}
+        onValueChange={(next) => {
+          if (isProductConfirmMode(next) && next !== value) onChange(next);
+        }}
+        placeholder={t('products.confirmOutOfStock.placeholder')}
+        triggerClassName="h-9 text-xs"
+      />
+      {value === PRODUCT_CONFIRM_OUT_OF_STOCK_MODES.FOLLOW_WORKFLOW && (
+        <p className="text-[11px] leading-4 text-gray-500">
+          {t('products.confirmOutOfStock.followWorkflowHint')}
+        </p>
+      )}
+    </div>
   );
 }

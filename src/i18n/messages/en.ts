@@ -103,8 +103,11 @@ const en: Record<keyof typeof ar, string> = {
     'No general supplier-receiving destination is set — receipts not covered by another receiving rule cannot be approved until a destination is set.',
 
   'products.confirmOutOfStock.inherit': 'Follow the store ({value})',
-  'products.confirmOutOfStock.allow': 'Allowed',
-  'products.confirmOutOfStock.forbid': 'Forbidden',
+  'products.confirmOutOfStock.followWorkflow': 'Follow the system',
+  'products.confirmOutOfStock.followWorkflowHint':
+    'The stock movement rules decide what happens to this product, whatever the store setting.',
+  'products.confirmOutOfStock.allowNegative': 'Allow negative stock',
+  'products.confirmOutOfStock.forbid': 'Forbid',
   'products.confirmOutOfStock.placeholder': 'Confirm without stock',
   'products.confirmOutOfStock.saved': 'Confirmation setting saved',
   'products.confirmOutOfStock.saveFailed': 'Could not save the setting',

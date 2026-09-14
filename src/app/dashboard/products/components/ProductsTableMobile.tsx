@@ -2,11 +2,14 @@ import React from 'react';
 import { LiaEditSolid } from 'react-icons/lia';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { VariantItem } from '../types/products';
+import { ProductConfirmOutOfStockMode, VariantItem } from '../types/products';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import LoadingAnimation from '@/components/ui/loadingAnimation';
 import { ConfirmOutOfStockControl } from './ConfirmOutOfStockControl';
-import { useStoreConfirmOutOfStock } from '../hooks/useProduct';
+import {
+  useStoreConfirmOutOfStock,
+  useUpdateProductConfirmOutOfStock,
+} from '../hooks/useProduct';
 
 interface Product {
   id: number;
@@ -16,8 +19,7 @@ interface Product {
   images: string[];
   totalSold: number;
   totalOrders: number;
-  /** T27: true allow / false forbid / null inherit the store. Never a plain boolean. */
-  allowConfirmOutOfStock: boolean | null;
+  confirmOutOfStockMode: ProductConfirmOutOfStockMode;
   extraDetails?: {
     variants?: VariantItem[];
   };
@@ -56,8 +58,8 @@ function ProductsTableMobile({
   openEditModal,
   openEditAttrsModal,
 }: ProductsTableMobileProps) {
-  // T27: what "اتبع المتجر" resolves to for every card on this page.
-  const storeAllowsConfirmOutOfStock = useStoreConfirmOutOfStock();
+  const storeConfirmMode = useStoreConfirmOutOfStock();
+  const confirmOutOfStockMutation = useUpdateProductConfirmOutOfStock();
 
   const sortByOptions = [
     { key: 'createdAt', value: 'تاريخ الإنشاء' },
@@ -210,9 +212,19 @@ function ProductsTableMobile({
                         تأكيد بدون مخزون
                       </p>
                       <ConfirmOutOfStockControl
-                        productId={product.id}
-                        value={product.allowConfirmOutOfStock}
-                        storeDefault={storeAllowsConfirmOutOfStock}
+                        value={product.confirmOutOfStockMode}
+                        storeMode={storeConfirmMode}
+                        disabled={
+                          confirmOutOfStockMutation.isPending &&
+                          confirmOutOfStockMutation.variables?.productId ===
+                            product.id
+                        }
+                        onChange={(confirmOutOfStockMode) =>
+                          confirmOutOfStockMutation.mutate({
+                            productId: product.id,
+                            confirmOutOfStockMode,
+                          })
+                        }
                       />
                     </div>
                   </div>

@@ -4,7 +4,11 @@ import { merchantSettingsApi } from '@/app/dashboard/store-settings/api/storeApi
 import { productsApi } from '../api/products';
 import { productKeys } from './queryKeys';
 import { useJobStore } from '@/store/useJobStore';
+import { useI18n } from '@/i18n/I18nProvider';
+import { getApiErrorMessage } from '@/utils/apiError';
+import type { StoreConfirmOutOfStock } from '@/utils/storeConfirmMode';
 import {
+  ProductConfirmOutOfStockMode,
   UpdateVariantsPayload,
   UpdateAttributesPayload,
   ProductQueryParams,
@@ -123,31 +127,38 @@ export const useUpdateProductAttributes = (productId: number) => {
   });
 };
 
-/**
- * T27 — the STORE-level rule, read so the per-product "اتبع المتجر" option can
- * say what it currently resolves to. Same query key as the store-settings
- * screen, so React Query serves both from one fetch.
- */
-export const useStoreConfirmOutOfStock = () => {
+export const useStoreConfirmOutOfStock = (): StoreConfirmOutOfStock => {
   const { data } = useQuery({
     queryKey: ['merchantSettings'],
     queryFn: merchantSettingsApi.getSettings,
   });
 
-  // `!== false`, not `!!`: undefined while loading must read as the shipped
-  // default (allow), not as "forbid".
-  return data?.allowConfirmOutOfStock !== false;
+  return data?.allowConfirmOutOfStock ?? null;
 };
 
-export const useUpdateProductConfirmOutOfStock = (productId: number) => {
+export interface UpdateProductConfirmOutOfStockVariables {
+  productId: number;
+  confirmOutOfStockMode: ProductConfirmOutOfStockMode;
+}
+
+export const useUpdateProductConfirmOutOfStock = () => {
   const queryClient = useQueryClient();
+  const { t } = useI18n();
 
   return useMutation({
-    // `boolean | null`, not `boolean` — null means "inherit the store setting"
-    // and is a value the user can actively choose.
-    mutationFn: (allowConfirmOutOfStock: boolean | null) =>
-      productsApi.updateConfirmOutOfStock(productId, allowConfirmOutOfStock),
-
+    mutationFn: ({
+      productId,
+      confirmOutOfStockMode,
+    }: UpdateProductConfirmOutOfStockVariables) =>
+      productsApi.updateConfirmOutOfStock(productId, confirmOutOfStockMode),
+    onSuccess: () => {
+      toast.success(t('products.confirmOutOfStock.saved'));
+    },
+    onError: (error: unknown) => {
+      toast.error(
+        getApiErrorMessage(error, t('products.confirmOutOfStock.saveFailed')),
+      );
+    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.all });
     },
