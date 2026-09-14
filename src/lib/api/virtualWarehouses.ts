@@ -91,40 +91,8 @@ export interface VirtualWarehousePreview {
   terms: VirtualWarehousePreviewTerm[];
 }
 
-export interface VirtualWarehouseStockOption {
-  attribute: { id: number; name: string };
-  option: { id: number; name: string };
-}
-
-export interface VirtualWarehouseStockRow {
-  variantId: number;
-  productId: number;
-  productName: string;
-  sku: string | null;
-  combinationKey: string;
-  options: VirtualWarehouseStockOption[];
-  quantity: number;
-}
-
-export interface VirtualWarehouseStockResponse {
-  data: VirtualWarehouseStockRow[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-  totalQuantity: number;
-  shortfallUnits: number;
-}
-
 export interface GetVirtualWarehousesParams {
   isActive?: boolean;
-}
-
-export interface GetVirtualWarehouseStockParams {
-  page?: number;
-  limit?: number;
-  search?: string;
-  shortfallOnly?: boolean;
 }
 
 export interface CreateVirtualWarehouseDto {
@@ -177,16 +145,6 @@ export async function getVirtualWarehouseById(
 ): Promise<VirtualWarehouse> {
   const response = await api.get(`/virtual-warehouses/${id}`);
   return response.data as VirtualWarehouse;
-}
-
-export async function getVirtualWarehouseStock(
-  id: number,
-  params?: GetVirtualWarehouseStockParams
-): Promise<VirtualWarehouseStockResponse> {
-  const response = await api.get(`/virtual-warehouses/${id}/stock`, {
-    params,
-  });
-  return response.data as VirtualWarehouseStockResponse;
 }
 
 export async function createVirtualWarehouse(

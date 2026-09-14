@@ -113,18 +113,6 @@ export interface GetWarehouseStockParams {
   search?: string;
 }
 
-export interface PerWarehouseStock {
-  warehouseId: number;
-  warehouseName: string;
-  quantity: number;
-}
-
-export interface VariantWarehouseDistribution {
-  totalAvailable: number;
-  managedQuantity: number;
-  perWarehouse: PerWarehouseStock[];
-}
-
 export interface WarehouseSummaryCard {
   id: number;
   name: string;
@@ -363,15 +351,6 @@ export async function deleteWarehouse(id: number): Promise<void> {
 export async function getWarehouseSummary(): Promise<WarehouseSummaryCard[]> {
   const response = await api.get('/warehouses/summary');
   return response.data as WarehouseSummaryCard[];
-}
-
-export async function getVariantWarehouseDistribution(
-  variantId: number
-): Promise<VariantWarehouseDistribution> {
-  const response = await api.get(
-    `/warehouses/variants/${variantId}/distribution`
-  );
-  return response.data as VariantWarehouseDistribution;
 }
 
 export async function getWarehouseStock(

@@ -11,7 +11,6 @@ import {
   getVirtualWarehouseById,
   getVirtualWarehousePresets,
   getVirtualWarehouses,
-  getVirtualWarehouseStock,
   getVirtualWarehouseSummary,
   previewVirtualWarehouse,
   updateVirtualWarehouse,
@@ -19,7 +18,6 @@ import {
 import type {
   CreateVirtualWarehouseDto,
   GetVirtualWarehousesParams,
-  GetVirtualWarehouseStockParams,
   PreviewVirtualWarehouseDto,
   UpdateVirtualWarehouseDto,
 } from '@/lib/api/virtualWarehouses';
@@ -69,19 +67,6 @@ export const useVirtualWarehousePresetsQuery = (options?: QueryToggle) => {
     queryFn: getVirtualWarehousePresets,
     enabled: options?.enabled ?? true,
     staleTime: Infinity,
-  });
-};
-
-export const useVirtualWarehouseStockQuery = (
-  id: number | undefined,
-  params?: GetVirtualWarehouseStockParams
-) => {
-  return useQuery({
-    queryKey: [QUERY_KEYS.VIRTUAL_WAREHOUSES, 'stock', id, params] as QueryKey,
-    queryFn: () => getVirtualWarehouseStock(id as number, params),
-    enabled: typeof id === 'number',
-    placeholderData: (previous) => previous,
-    staleTime: STALE_TIME,
   });
 };
 
