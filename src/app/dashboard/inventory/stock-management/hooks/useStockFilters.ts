@@ -31,6 +31,13 @@ function dateToIsoOrUndefined(date: Date | null): string | undefined {
   return date.toISOString();
 }
 
+function endOfDayIsoOrUndefined(date: Date | null): string | undefined {
+  if (!date) return undefined;
+  const end = new Date(date);
+  end.setHours(23, 59, 59, 999);
+  return end.toISOString();
+}
+
 export function useStockFilters(scope: StockScope) {
   const [filters, setFilters] = useState<StockFilters>(INITIAL_FILTERS);
   const [outOfStockOnly, setOutOfStockOnly] = useState(false);
@@ -103,7 +110,7 @@ export function useStockFilters(scope: StockScope) {
         scopeKind === STOCK_SCOPE_KINDS.VIRTUAL ? String(scopeId) : undefined,
       outOfStockOnly: outOfStockOnly || undefined,
       fromDate: dateToIsoOrUndefined(filters.fromDate),
-      toDate: dateToIsoOrUndefined(filters.toDate),
+      toDate: endOfDayIsoOrUndefined(filters.toDate),
     }),
     [
       debouncedSearchQuery,
