@@ -150,13 +150,7 @@ export function useStockFilters(scope: StockScope) {
     { enabled: isScopeReadable }
   );
 
-  const analysisQuery = useStockAnalysis(
-    {
-      fromDate: filterDtoBase.fromDate,
-      toDate: filterDtoBase.toDate,
-    },
-    { enabled: isAllScope }
-  );
+  const analysisQuery = useStockAnalysis({ enabled: isAllScope });
 
   const filterOptionsQuery = useStockFilterOptions();
 

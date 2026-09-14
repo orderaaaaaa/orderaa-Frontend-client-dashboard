@@ -158,17 +158,13 @@ function buildStockParams(filters: StockFiltersDto) {
   return params;
 }
 
-export const useStockAnalysis = (
-  filters?: Pick<StockFiltersDto, 'fromDate' | 'toDate'>,
-  options?: { enabled?: boolean }
-) => {
+export const useStockAnalysis = (options?: { enabled?: boolean }) => {
   return useQuery({
-    queryKey: [QUERY_KEYS.STOCK_ANALYSIS, filters ?? {}] as QueryKey,
+    queryKey: [QUERY_KEYS.STOCK_ANALYSIS] as QueryKey,
     enabled: options?.enabled ?? true,
     queryFn: async () => {
       const response = await http.get<StockAnalysisResponse>(
-        STOCK_ANALYSIS_URL,
-        { params: buildStockParams(filters ?? {}) }
+        STOCK_ANALYSIS_URL
       );
       return response.data;
     },
