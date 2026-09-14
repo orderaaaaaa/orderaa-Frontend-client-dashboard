@@ -2,6 +2,8 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useDebounce } from '@/utils/debounce';
+import { useHasPermission } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 import { calculateDateRangeFromPeriod, TimePeriod } from '@/utils/dateRangeUtils';
 import {
   useStockAnalysis,
@@ -44,6 +46,11 @@ export function useStockFilters(scope: StockScope) {
   const scopeKind = scope.kind;
   const scopeId = scope.kind === STOCK_SCOPE_KINDS.ALL ? null : scope.id;
   const isAllScope = scopeKind === STOCK_SCOPE_KINDS.ALL;
+  const canReadVirtual = useHasPermission(
+    PERMISSION_CODES.VIRTUAL_WAREHOUSES_READ
+  );
+  const isScopeReadable =
+    scopeKind !== STOCK_SCOPE_KINDS.VIRTUAL || canReadVirtual;
   const [page, setPage] = useState<number>(DEFAULT_PAGE);
   const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
 
@@ -134,11 +141,14 @@ export function useStockFilters(scope: StockScope) {
     setPage(DEFAULT_PAGE);
   }, [filterDtoBase]);
 
-  const productsQuery = useStockProducts({
-    ...filterDtoBase,
-    page,
-    limit: pageSize,
-  });
+  const productsQuery = useStockProducts(
+    {
+      ...filterDtoBase,
+      page,
+      limit: pageSize,
+    },
+    { enabled: isScopeReadable }
+  );
 
   const analysisQuery = useStockAnalysis(
     {

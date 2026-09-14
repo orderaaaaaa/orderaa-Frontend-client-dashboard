@@ -156,9 +156,10 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
       ?.message || 'تعذر تحميل بيانات المخزن';
 
   const scopeNotFound =
-    !isAllScope &&
-    (productsError as { response?: { status?: number } } | null)?.response
-      ?.status === 404;
+    scopeSummary.notFound ||
+    (!isAllScope &&
+      (productsError as { response?: { status?: number } } | null)?.response
+        ?.status === 404);
 
   if (scopeNotFound) {
     return <StockScopeNotFound />;

@@ -175,9 +175,13 @@ export const useStockAnalysis = (
   });
 };
 
-export const useStockProducts = (filters: StockFiltersDto) => {
+export const useStockProducts = (
+  filters: StockFiltersDto,
+  options?: { enabled?: boolean }
+) => {
   return useQuery({
     queryKey: [QUERY_KEYS.STOCK_PRODUCTS, filters] as QueryKey,
+    enabled: options?.enabled ?? true,
     queryFn: async () => {
       const response = await http.get<StockListResponse>(STOCK_BASE_URL, {
         params: buildStockParams(filters),

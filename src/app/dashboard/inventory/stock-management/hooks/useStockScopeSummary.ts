@@ -17,6 +17,7 @@ import type { StockScope } from '../types';
 
 interface StockScopeSummary {
   name: string | null;
+  notFound: boolean;
   items: SummaryCardItem[] | null;
   isLoading: boolean;
 }
@@ -42,6 +43,7 @@ export function useStockScopeSummary(scope: StockScope): StockScopeSummary {
     const card = physicalSummary.data?.find((item) => item.id === scopeId);
     return {
       name: card?.name ?? null,
+      notFound: false,
       isLoading: physicalSummary.isLoading,
       items: card
         ? [
@@ -76,8 +78,12 @@ export function useStockScopeSummary(scope: StockScope): StockScopeSummary {
 
   if (isVirtual) {
     const card = virtualSummary.data?.find((item) => item.id === scopeId);
+    const detailStatus = (
+      virtualWarehouse.error as { response?: { status?: number } } | null
+    )?.response?.status;
     return {
       name: virtualWarehouse.data?.name ?? card?.name ?? null,
+      notFound: !canReadVirtual || detailStatus === 404,
       isLoading: virtualSummary.isLoading || virtualWarehouse.isLoading,
       items: card
         ? [
@@ -110,5 +116,5 @@ export function useStockScopeSummary(scope: StockScope): StockScopeSummary {
     };
   }
 
-  return { name: null, items: null, isLoading: false };
+  return { name: null, notFound: false, items: null, isLoading: false };
 }
