@@ -23,6 +23,7 @@ import {
 } from '@/services/virtualWarehouses';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { formatVirtualFormula } from '../utils/formatVirtualFormula';
+import { VirtualWarehouseFormModal } from './VirtualWarehouseFormModal';
 
 type VirtualWarehouseRow = VirtualWarehouse & Record<string, unknown>;
 
@@ -190,6 +191,12 @@ export function VirtualWarehousesTab() {
           />
         </div>
       )}
+
+      <VirtualWarehouseFormModal
+        isOpen={formState.isOpen}
+        onClose={() => setFormState({ isOpen: false, warehouse: null })}
+        warehouse={formState.warehouse}
+      />
 
       <BaseModal
         isOpen={!!pendingDelete}
