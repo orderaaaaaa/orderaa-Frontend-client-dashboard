@@ -23,8 +23,7 @@ interface VariantGroup {
   rows: OrderProduct[];
 }
 
-const groupKey = (op: OrderProduct) =>
-  op.variantId !== undefined ? `v${op.variantId}` : `op${op.id}`;
+const groupKey = (op: OrderProduct) => `v${op.variantId}`;
 
 const variantLabelOf = (op: OrderProduct) => {
   const attrs = (op.attributes ?? []).filter(
