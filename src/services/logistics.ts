@@ -23,6 +23,7 @@ import { PaginatedResponse } from '@/types/orders';
 import { toast } from 'react-toastify';
 import { recordPartialDelivery } from '@/lib/api/order';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { invalidateStockViews } from '@/services/warehouses';
 
 // ─── Mock Data (UI preview until backend is ready) ───────────────────────────
 // The governorate logistics config is no longer mocked — it calls
@@ -307,7 +308,11 @@ export const usePartialDelivery = () => {
         queryKey: [QUERY_KEYS.ORDER_DETAILS, variables.orderId],
       });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCK_PRODUCTS] });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORDER_STATISTICS],
+      });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CUSTOMER_ORDERS] });
+      invalidateStockViews(queryClient);
       toast.success(`تم إنشاء طلب المرتجع ${result.returnOrder.code}`);
     },
     onError: (error: unknown) => {

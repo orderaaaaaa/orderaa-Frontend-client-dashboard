@@ -176,7 +176,7 @@ export const useStockMovementsQuery = (params?: GetStockMovementsParams) => {
 };
 
 /** Stock writes touch warehouse stock, the ledger and every product-stock view. */
-const invalidateStockViews = (
+export const invalidateStockViews = (
   queryClient: ReturnType<typeof useQueryClient>
 ) => {
   queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.WAREHOUSE_STOCK] });
