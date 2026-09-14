@@ -138,6 +138,9 @@ const ar = {
   'orderDetails.variants.blockedSelection':
     'هذا الاختيار غير متوفر بالمخزون وإعدادات المنتج تمنع إضافته — اختر حاجة تانية',
 
+  'stock.filters.movementDateHint':
+    'يعرض المنتجات التي حدثت لها حركة مخزون في الفترة المحددة',
+
   'storeSettings.confirmOutOfStock.title': 'تأكيد الطلبات غير المتوفرة بالمخزون',
   'storeSettings.confirmOutOfStock.followWorkflow': 'اتبع النظام',
   'storeSettings.confirmOutOfStock.allowNegative': 'السماح بالسالب',

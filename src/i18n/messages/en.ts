@@ -124,6 +124,9 @@ const en: Record<keyof typeof ar, string> = {
   'orderDetails.variants.blockedSelection':
     'This option is out of stock and the product settings block adding it — pick something else',
 
+  'stock.filters.movementDateHint':
+    'Shows products that had a stock movement in the selected period',
+
   'storeSettings.confirmOutOfStock.title': 'Confirming orders that are out of stock',
   'storeSettings.confirmOutOfStock.followWorkflow': 'Follow the system',
   'storeSettings.confirmOutOfStock.allowNegative': 'Allow negative stock',

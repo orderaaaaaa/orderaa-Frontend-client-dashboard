@@ -6,6 +6,7 @@ import { TimePeriod } from '@/utils/dateRangeUtils';
 import type { StockFilters as Filters } from '../types';
 import { ALL_WAREHOUSES_OPTION } from '@/constants/warehouses';
 import { useWarehouseOptions } from '@/services/warehouses';
+import { useI18n } from '@/i18n/I18nProvider';
 
 interface StockFilterOption {
   key: string;
@@ -37,6 +38,7 @@ export function StockFilters({
   onWarehouseChange,
   showWarehouseFilter = true,
 }: StockFiltersProps) {
+  const { t } = useI18n();
   const { options: warehouseOptions } = useWarehouseOptions();
 
   return (
@@ -76,6 +78,9 @@ export function StockFilters({
         onTimePeriodChange={onTimePeriodChange}
         className="!justify-start"
       />
+      <p className="text-xs text-gray-500">
+        {t('stock.filters.movementDateHint')}
+      </p>
     </div>
   );
 }
