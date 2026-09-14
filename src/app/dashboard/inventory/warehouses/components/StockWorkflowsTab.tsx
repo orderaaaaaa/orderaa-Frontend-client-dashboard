@@ -13,6 +13,7 @@ import { useI18n } from '@/i18n/I18nProvider';
 import type { TranslationKey } from '@/i18n/translate';
 import { OrderStatus } from '@/types/orders';
 import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
+import { withReferencedWarehouseOptions } from '../utils/withReferencedWarehouseOptions';
 import {
   useStockWorkflowsQuery,
   useCreateStockWorkflowMutation,
@@ -384,7 +385,15 @@ export function StockWorkflowsTab() {
   // inactive warehouse must not be the one it writes. It still renders (marked
   // disabled) so a rule saved before the deactivation re-displays its warehouse
   // instead of coming back blank.
-  const { pickerOptions: warehouseOptions } = useWarehouseOptions();
+  const { pickerOptions } = useWarehouseOptions();
+  const warehouseOptions = useMemo(
+    () =>
+      withReferencedWarehouseOptions(
+        pickerOptions,
+        (data ?? []).flatMap((rule) => [rule.fromWarehouse, rule.toWarehouse])
+      ),
+    [pickerOptions, data]
+  );
 
   const createMutation = useCreateStockWorkflowMutation();
   const updateMutation = useUpdateStockWorkflowMutation();

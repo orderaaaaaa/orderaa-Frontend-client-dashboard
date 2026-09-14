@@ -97,6 +97,7 @@ export const WAREHOUSE_TABS = {
   WAREHOUSES: 'warehouses',
   WORKFLOWS: 'workflows',
   MOVEMENTS: 'movements',
+  VIRTUAL: 'virtual',
 } as const;
 
 /**

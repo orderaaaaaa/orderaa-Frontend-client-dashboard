@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import { LiaSaveSolid, LiaTrashSolid } from 'react-icons/lia';
 import { getApiErrorMessage } from '@/utils/apiError';
@@ -16,6 +16,7 @@ import {
 } from '@/services/warehouses';
 import type { StockWorkflowApiItem } from '@/lib/api/warehouses';
 import type { ScopeSelection } from './StockRuleScopeSelector';
+import { withReferencedWarehouseOptions } from '../utils/withReferencedWarehouseOptions';
 
 interface Props {
   /** The scope the page is editing — the panel has no scope UI of its own. */
@@ -46,7 +47,12 @@ export function InboundDestinationSection({
   inboundRule,
 }: Props) {
   const { t, dir } = useI18n();
-  const { pickerOptions } = useWarehouseOptions();
+  const { pickerOptions: visibleOptions } = useWarehouseOptions();
+  const pickerOptions = useMemo(
+    () =>
+      withReferencedWarehouseOptions(visibleOptions, [inboundRule?.toWarehouse]),
+    [visibleOptions, inboundRule]
+  );
 
   const createMutation = useCreateStockWorkflowMutation();
   const updateMutation = useUpdateStockWorkflowMutation();

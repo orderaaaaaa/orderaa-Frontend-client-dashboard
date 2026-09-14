@@ -1,21 +1,37 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WarehousesTab } from './WarehousesTab';
 import { StockWorkflowsTab } from './StockWorkflowsTab';
 import { StockMovementsTab } from './StockMovementsTab';
+import { VirtualWarehousesTab } from './VirtualWarehousesTab';
 import { WAREHOUSE_TABS } from '../constants';
+import { usePermissionCheck } from '@/hooks/usePermissions';
+import { PERMISSION_CODES, type PermissionCode } from '@/lib/permissions';
 
-const TABS = [
+type WarehouseTab = (typeof WAREHOUSE_TABS)[keyof typeof WAREHOUSE_TABS];
+
+const ALL_TABS: {
+  value: WarehouseTab;
+  label: string;
+  permission?: PermissionCode;
+}[] = [
   { value: WAREHOUSE_TABS.WAREHOUSES, label: 'المخازن' },
-  { value: WAREHOUSE_TABS.WORKFLOWS, label: 'قواعد حركة المخزون' },
+  {
+    value: WAREHOUSE_TABS.WORKFLOWS,
+    label: 'قواعد حركة المخزون',
+    permission: PERMISSION_CODES.STOCK_WORKFLOWS_READ,
+  },
+  {
+    value: WAREHOUSE_TABS.VIRTUAL,
+    label: 'المخازن الافتراضية',
+    permission: PERMISSION_CODES.VIRTUAL_WAREHOUSES_READ,
+  },
   { value: WAREHOUSE_TABS.MOVEMENTS, label: 'سجل حركات المخزون' },
 ];
-
-const VALID_TABS: string[] = Object.values(WAREHOUSE_TABS);
 
 export function WarehouseManagementContent() {
   // Tab lives in the URL so the ledger/rules views are deep-linkable and a
@@ -24,10 +40,21 @@ export function WarehouseManagementContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  const { hasPermission } = usePermissionCheck();
+  const tabs = useMemo(
+    () =>
+      ALL_TABS.filter(
+        (item) => !item.permission || hasPermission(item.permission)
+      ),
+    [hasPermission]
+  );
+  const visibleTabs = useMemo(
+    () => new Set<string>(tabs.map((item) => item.value)),
+    [tabs]
+  );
+
   const requested = searchParams.get('tab') ?? '';
-  const tab = VALID_TABS.includes(requested)
-    ? requested
-    : WAREHOUSE_TABS.WAREHOUSES;
+  const tab = visibleTabs.has(requested) ? requested : tabs[0].value;
 
   const setTab = useCallback(
     (next: string) => {
@@ -52,7 +79,7 @@ export function WarehouseManagementContent() {
         <CardContent className="pt-6">
           <Tabs value={tab} onValueChange={setTab}>
             <TabsList className="mb-4">
-              {TABS.map((item) => (
+              {tabs.map((item) => (
                 <TabsTrigger key={item.value} value={item.value}>
                   {item.label}
                 </TabsTrigger>
@@ -64,13 +91,20 @@ export function WarehouseManagementContent() {
             </TabsContent>
             {/* forceMount: the rules grid holds unsaved rows — Radix unmounts
                 inactive tab content, which would silently discard them. */}
-            <TabsContent
-              value={WAREHOUSE_TABS.WORKFLOWS}
-              forceMount
-              className="data-[state=inactive]:hidden"
-            >
-              <StockWorkflowsTab />
-            </TabsContent>
+            {visibleTabs.has(WAREHOUSE_TABS.WORKFLOWS) && (
+              <TabsContent
+                value={WAREHOUSE_TABS.WORKFLOWS}
+                forceMount
+                className="data-[state=inactive]:hidden"
+              >
+                <StockWorkflowsTab />
+              </TabsContent>
+            )}
+            {visibleTabs.has(WAREHOUSE_TABS.VIRTUAL) && (
+              <TabsContent value={WAREHOUSE_TABS.VIRTUAL}>
+                <VirtualWarehousesTab />
+              </TabsContent>
+            )}
             <TabsContent value={WAREHOUSE_TABS.MOVEMENTS}>
               <StockMovementsTab />
             </TabsContent>
