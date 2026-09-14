@@ -90,6 +90,17 @@ function ScopeCard({
   );
 }
 
+function SectionError({ error, fallback }: { error: unknown; fallback: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center rounded-xl border border-red-100 bg-red-50/40 py-8 text-gray-400">
+      <LiaBoxOpenSolid className="mb-2 size-10 text-red-300" />
+      <p className="text-sm font-medium text-red-500">
+        {getApiErrorMessage(error, fallback)}
+      </p>
+    </div>
+  );
+}
+
 export function StockScopeCards() {
   const canReadVirtual = useHasPermission(
     PERMISSION_CODES.VIRTUAL_WAREHOUSES_READ
@@ -97,30 +108,12 @@ export function StockScopeCards() {
   const physical = useWarehouseSummaryQuery();
   const virtual = useVirtualWarehouseSummaryQuery({ enabled: canReadVirtual });
 
-  const isLoading = physical.isLoading || (canReadVirtual && virtual.isLoading);
-  const failed = physical.isError
-    ? physical.error
-    : canReadVirtual && virtual.isError
-      ? virtual.error
-      : null;
-
-  if (isLoading) {
-    return <StockScopeCardsSkeleton />;
-  }
-
-  if (failed) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-        <LiaBoxOpenSolid className="mb-4 size-16 text-red-300" />
-        <p className="text-lg font-medium text-red-500">
-          {getApiErrorMessage(failed, 'تعذر تحميل المخازن')}
-        </p>
-      </div>
-    );
-  }
-
   const physicalCards = physical.data ?? [];
   const virtualCards = canReadVirtual ? (virtual.data ?? []) : [];
+  const isEmpty =
+    physical.isSuccess &&
+    physicalCards.length === 0 &&
+    (!canReadVirtual || (virtual.isSuccess && virtualCards.length === 0));
 
   return (
     <div className="space-y-4">
@@ -157,34 +150,53 @@ export function StockScopeCards() {
             ]}
           />
         ))}
-        {virtualCards.map((card) => (
-          <ScopeCard
-            key={`virtual-${card.id}`}
-            href={stockScopeHref({
-              kind: STOCK_SCOPE_KINDS.VIRTUAL,
-              id: card.id,
-            })}
-            title={card.name}
-            badge="افتراضي"
-            icon={LiaLayerGroupSolid}
-            metrics={[
-              { label: 'الكمية الكلية', value: card.totalQuantity },
-              {
-                label: 'غير متوفر',
-                value: card.outOfStockVariantCount,
-                tone: 'warning',
-              },
-              {
-                label: 'العجز',
-                value: card.shortfallUnits,
-                tone: card.shortfallUnits > 0 ? 'danger' : 'default',
-              },
-            ]}
-          />
-        ))}
       </div>
 
-      {physicalCards.length === 0 && virtualCards.length === 0 && (
+      {physical.isLoading && <StockScopeCardsSkeleton count={3} />}
+      {physical.isError && (
+        <SectionError error={physical.error} fallback="تعذر تحميل المخازن" />
+      )}
+
+      {canReadVirtual && virtual.isLoading && (
+        <StockScopeCardsSkeleton count={3} />
+      )}
+      {canReadVirtual && virtual.isError && (
+        <SectionError
+          error={virtual.error}
+          fallback="تعذر تحميل المخازن الافتراضية"
+        />
+      )}
+      {virtualCards.length > 0 && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {virtualCards.map((card) => (
+            <ScopeCard
+              key={`virtual-${card.id}`}
+              href={stockScopeHref({
+                kind: STOCK_SCOPE_KINDS.VIRTUAL,
+                id: card.id,
+              })}
+              title={card.name}
+              badge="افتراضي"
+              icon={LiaLayerGroupSolid}
+              metrics={[
+                { label: 'الكمية الكلية', value: card.totalQuantity },
+                {
+                  label: 'غير متوفر',
+                  value: card.outOfStockVariantCount,
+                  tone: 'warning',
+                },
+                {
+                  label: 'العجز',
+                  value: card.shortfallUnits,
+                  tone: card.shortfallUnits > 0 ? 'danger' : 'default',
+                },
+              ]}
+            />
+          ))}
+        </div>
+      )}
+
+      {isEmpty && (
         <div className="flex flex-col items-center justify-center py-12 text-gray-400">
           <LiaWarehouseSolid className="mb-4 size-14" />
           <p className="text-lg font-medium text-gray-500">لا توجد مخازن ظاهرة</p>
