@@ -40,6 +40,7 @@ import {
   emptyWarehouseTerm,
   formTermToInput,
   presetToFormTerms,
+  savedWarehouseRef,
   termToFormData,
   virtualWarehouseFormSchema,
   virtualWarehouseTermsSchema,
@@ -446,10 +447,9 @@ function VirtualWarehousePreviewPanel({
               ? Number(terms[entry.position].warehouseId)
               : null,
             warehouseName:
-              terms[entry.position].warehouseName ??
               warehouseOptions.find(
                 (option) => option.key === terms[entry.position].warehouseId
-              )?.value,
+              )?.value ?? savedWarehouseRef(terms[entry.position])?.name,
             rangeStart: terms[entry.position].rangeStart ?? null,
             rangeEnd: terms[entry.position].rangeEnd ?? null,
           },

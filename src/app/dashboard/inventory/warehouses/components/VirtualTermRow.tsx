@@ -13,7 +13,10 @@ import {
 import type { WarehouseOption } from '@/services/warehouses';
 import { OrderStatus } from '@/types/orders';
 import { StatusRangePicker } from './StatusRangePicker';
-import type { VirtualWarehouseTermFormData } from '../schemas/virtualWarehouse';
+import {
+  savedWarehouseRef,
+  type VirtualWarehouseTermFormData,
+} from '../schemas/virtualWarehouse';
 import { expandRange } from '../utils/ruleMatching';
 import { withReferencedWarehouseOptions } from '../utils/withReferencedWarehouseOptions';
 import { VIRTUAL_TERM_SIGN_SYMBOLS } from '../utils/formatVirtualFormula';
@@ -59,14 +62,18 @@ export function VirtualTermRow({
 }: VirtualTermRowProps) {
   const isWarehouse = term.kind === VIRTUAL_WAREHOUSE_TERM_KINDS.WAREHOUSE;
 
+  const savedRef = savedWarehouseRef(term);
+  const savedRefId = savedRef?.id;
+  const savedRefName = savedRef?.name;
+
   const options = useMemo(
     () =>
-      term.warehouseId && term.warehouseName
+      savedRefId !== undefined && savedRefName !== undefined
         ? withReferencedWarehouseOptions(warehouseOptions, [
-            { id: Number(term.warehouseId), name: term.warehouseName },
+            { id: savedRefId, name: savedRefName },
           ])
         : warehouseOptions,
-    [warehouseOptions, term.warehouseId, term.warehouseName]
+    [warehouseOptions, savedRefId, savedRefName]
   );
 
   const rangeStatuses = useMemo(

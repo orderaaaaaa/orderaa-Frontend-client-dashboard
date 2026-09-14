@@ -20,6 +20,7 @@ export const virtualWarehouseTermSchema = z
     ]),
     warehouseId: z.string(),
     warehouseName: z.string().optional(),
+    savedWarehouseId: z.string().optional(),
     rangeStart: z.nativeEnum(OrderStatus).optional(),
     rangeEnd: z.nativeEnum(OrderStatus).optional(),
     excludedStatuses: z.array(z.nativeEnum(OrderStatus)),
@@ -128,6 +129,8 @@ export const termToFormData = (
   kind: term.kind,
   warehouseId: term.warehouseId === null ? '' : String(term.warehouseId),
   warehouseName: term.warehouseName,
+  savedWarehouseId:
+    term.warehouseId === null ? undefined : String(term.warehouseId),
   rangeStart: term.rangeStart ?? undefined,
   rangeEnd: term.rangeEnd ?? undefined,
   excludedStatuses: term.excludedStatuses ?? [],
@@ -136,6 +139,15 @@ export const termToFormData = (
 export const presetToFormTerms = (
   preset: VirtualWarehousePreset
 ): VirtualWarehouseTermFormData[] => preset.terms.map(termToFormData);
+
+export const savedWarehouseRef = (
+  term: VirtualWarehouseTermFormData
+): { id: number; name: string } | null =>
+  term.warehouseId &&
+  term.warehouseName &&
+  term.warehouseId === term.savedWarehouseId
+    ? { id: Number(term.warehouseId), name: term.warehouseName }
+    : null;
 
 export const formTermToInput = (
   term: VirtualWarehouseTermFormData
