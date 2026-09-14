@@ -90,6 +90,9 @@ export const useCreateWarehouseMutation = () => {
     mutationFn: (body: CreateWarehouseDto) => createWarehouse(body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.WAREHOUSES] });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.WAREHOUSE_SUMMARY],
+      });
     },
   });
 };
@@ -101,6 +104,9 @@ export const useUpdateWarehouseMutation = () => {
       updateWarehouse(id, body),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.WAREHOUSES] });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.WAREHOUSE_SUMMARY],
+      });
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.WAREHOUSE_DETAIL, variables.id],
       });
@@ -114,6 +120,9 @@ export const useDeleteWarehouseMutation = () => {
     mutationFn: (id: number) => deleteWarehouse(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.WAREHOUSES] });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.WAREHOUSE_SUMMARY],
+      });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.WAREHOUSE_DETAIL] });
     },
   });
