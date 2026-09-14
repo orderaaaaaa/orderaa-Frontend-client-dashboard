@@ -28,7 +28,10 @@ export const useMerchantSettings = () => {
       (Object.keys(data) as (keyof OrderSettingsFormData)[]).forEach((key) => {
         if (key === 'logo') return;
         const value = data[key];
-        if (value !== undefined && value !== null) {
+        if (
+          value !== undefined &&
+          (value !== null || key === 'allowConfirmOutOfStock')
+        ) {
           payload[key] = value;
         }
       });

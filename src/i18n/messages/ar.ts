@@ -135,12 +135,16 @@ const ar = {
   'orderDetails.variants.blockedSelection':
     'هذا الاختيار غير متوفر بالمخزون وإعدادات المنتج تمنع إضافته — اختر حاجة تانية',
 
-  'storeSettings.confirmOutOfStock.title':
-    'السماح بتأكيد الطلبات غير المتوفرة بالمخزون',
-  'storeSettings.confirmOutOfStock.allowedDescription':
-    'يمكن لموظف خدمة العملاء تأكيد الطلب حتى لو كان المنتج غير متوفر. يمكن منع ذلك لمنتج بعينه من صفحة المنتجات.',
-  'storeSettings.confirmOutOfStock.blockedDescription':
-    'لن يتمكن الموظف من تأكيد طلب يحتوي على منتج غير متوفر — سيُطلب منه اختيار منتج آخر. يمكن استثناء منتج بعينه من صفحة المنتجات.',
+  'storeSettings.confirmOutOfStock.title': 'تأكيد الطلبات غير المتوفرة بالمخزون',
+  'storeSettings.confirmOutOfStock.followWorkflow': 'اتبع النظام',
+  'storeSettings.confirmOutOfStock.allowNegative': 'السماح بالسالب',
+  'storeSettings.confirmOutOfStock.forbid': 'منع',
+  'storeSettings.confirmOutOfStock.followWorkflowDescription':
+    'قواعد حركة المخزون تحدد ما يحدث عند تأكيد طلب غير متوفر.',
+  'storeSettings.confirmOutOfStock.allowNegativeDescription':
+    'يتم تأكيد الطلب ويصبح رصيد المخزن سالبًا عند عدم التوفر.',
+  'storeSettings.confirmOutOfStock.forbidDescription':
+    'لا يمكن تأكيد طلب يحتوي على منتج غير متوفر.',
 } as const;
 
 export default ar;

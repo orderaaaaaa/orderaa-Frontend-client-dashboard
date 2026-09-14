@@ -6,6 +6,10 @@ const EMPTY_STRING_EXCLUDE_FIELDS: readonly (keyof OrderSettingsFormData)[] = [
   'url',
 ];
 
+const NULLABLE_FIELDS: readonly (keyof OrderSettingsFormData)[] = [
+  'allowConfirmOutOfStock',
+];
+
 const SHIPPING_FIELDS: readonly (keyof OrderSettingsFormData)[] = [
   'shippingPhoneNumber',
   'canOpenShipment',
@@ -23,7 +27,8 @@ export function sanitizeOrderSettings(
   (Object.keys(data) as (keyof OrderSettingsFormData)[]).forEach((key) => {
     const value = data[key];
 
-    if (value === undefined || value === null) return;
+    if (value === undefined) return;
+    if (value === null && !NULLABLE_FIELDS.includes(key)) return;
 
     if (value === '' && EMPTY_STRING_EXCLUDE_FIELDS.includes(key)) {
       return;

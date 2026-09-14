@@ -121,12 +121,16 @@ const en: Record<keyof typeof ar, string> = {
   'orderDetails.variants.blockedSelection':
     'This option is out of stock and the product settings block adding it — pick something else',
 
-  'storeSettings.confirmOutOfStock.title':
-    'Allow confirming orders that are out of stock',
-  'storeSettings.confirmOutOfStock.allowedDescription':
-    'A call centre agent can confirm the order even when the product is out of stock. This can be blocked for a specific product from the products page.',
-  'storeSettings.confirmOutOfStock.blockedDescription':
-    'An agent will not be able to confirm an order containing an out-of-stock product — they will be asked to choose another one. A specific product can be excepted from the products page.',
+  'storeSettings.confirmOutOfStock.title': 'Confirming orders that are out of stock',
+  'storeSettings.confirmOutOfStock.followWorkflow': 'Follow the system',
+  'storeSettings.confirmOutOfStock.allowNegative': 'Allow negative stock',
+  'storeSettings.confirmOutOfStock.forbid': 'Forbid',
+  'storeSettings.confirmOutOfStock.followWorkflowDescription':
+    'The stock movement rules decide what happens when an out-of-stock order is confirmed.',
+  'storeSettings.confirmOutOfStock.allowNegativeDescription':
+    'The order is confirmed and the warehouse balance goes negative when stock is short.',
+  'storeSettings.confirmOutOfStock.forbidDescription':
+    'An order containing an out-of-stock product cannot be confirmed.',
 };
 
 export default en;

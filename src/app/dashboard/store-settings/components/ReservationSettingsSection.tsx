@@ -1,25 +1,56 @@
+import { useMemo } from 'react';
+import type { IconType } from 'react-icons';
 import {
   LiaWarehouseSolid,
   LiaLockOpenSolid,
   LiaLockSolid,
+  LiaRandomSolid,
 } from 'react-icons/lia';
 import { UseFormRegister, FieldErrors } from 'react-hook-form';
 import { OrderSettingsFormData } from '../schemas/store';
 import { useI18n } from '@/i18n/I18nProvider';
 import Input from '@/components/ui/Input';
-import { FormSwitch } from '@/components/ui/form-switch';
+import SearchableSelect from '@/components/ui/SearchableSelect';
+import { CONFIRM_MODES, type ConfirmMode } from '@/lib/api/warehouses';
+import {
+  confirmModeToStoreValue,
+  isConfirmMode,
+  storeValueToConfirmMode,
+  type StoreConfirmOutOfStock,
+} from '@/utils/storeConfirmMode';
 import { Separator } from '@/components/ui/separator';
 
 interface ReservationSettingsSectionProps {
   register: UseFormRegister<OrderSettingsFormData>;
   errors: FieldErrors<OrderSettingsFormData>;
-  /**
-   * T27 — passed as a plain value and setter rather than the form's `watch` /
-   * `setValue`: this section needs one boolean, not the whole form API.
-   */
-  allowConfirmOutOfStock: boolean;
-  onAllowConfirmOutOfStockChange: (value: boolean) => void;
+  allowConfirmOutOfStock: StoreConfirmOutOfStock;
+  onAllowConfirmOutOfStockChange: (value: StoreConfirmOutOfStock) => void;
 }
+
+const MODE_ICONS: Record<ConfirmMode, IconType> = {
+  [CONFIRM_MODES.FOLLOW_WORKFLOW]: LiaRandomSolid,
+  [CONFIRM_MODES.ALLOW]: LiaLockOpenSolid,
+  [CONFIRM_MODES.FORBID]: LiaLockSolid,
+};
+
+const MODE_LABEL_KEYS = {
+  [CONFIRM_MODES.FOLLOW_WORKFLOW]: 'storeSettings.confirmOutOfStock.followWorkflow',
+  [CONFIRM_MODES.ALLOW]: 'storeSettings.confirmOutOfStock.allowNegative',
+  [CONFIRM_MODES.FORBID]: 'storeSettings.confirmOutOfStock.forbid',
+} as const;
+
+const MODE_DESCRIPTION_KEYS = {
+  [CONFIRM_MODES.FOLLOW_WORKFLOW]:
+    'storeSettings.confirmOutOfStock.followWorkflowDescription',
+  [CONFIRM_MODES.ALLOW]: 'storeSettings.confirmOutOfStock.allowNegativeDescription',
+  [CONFIRM_MODES.FORBID]: 'storeSettings.confirmOutOfStock.forbidDescription',
+} as const;
+
+const MODE_ORDER: ConfirmMode[] = [
+  CONFIRM_MODES.FOLLOW_WORKFLOW,
+  CONFIRM_MODES.ALLOW,
+  CONFIRM_MODES.FORBID,
+];
 
 export function ReservationSettingsSection({
   register,
@@ -30,6 +61,13 @@ export function ReservationSettingsSection({
   // Only the confirm-out-of-stock block below is on the catalogue; the min/max
   // stock copy above it belongs to the un-migrated bulk of the dashboard.
   const { t } = useI18n();
+  const mode = storeValueToConfirmMode(allowConfirmOutOfStock);
+  const ModeIcon = MODE_ICONS[mode];
+  const options = useMemo(
+    () =>
+      MODE_ORDER.map((key) => ({ key, value: t(MODE_LABEL_KEYS[key]) })),
+    [t]
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -103,32 +141,28 @@ export function ReservationSettingsSection({
 
       <Separator />
 
-      {/* T27 — the store-level confirmation rule. A product can override it. */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="flex items-start gap-3 flex-1 min-w-0">
-          {/* The icon tracks the switch: an open padlock when confirming
-              out-of-stock is permitted, a closed one when it is blocked. A
-              static warning triangle described neither state and read as if
-              the setting itself were dangerous. */}
-          {allowConfirmOutOfStock ? (
-            <LiaLockOpenSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
-          ) : (
-            <LiaLockSolid className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
-          )}
+          <ModeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-primary mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-medium text-gray-700">
               {t('storeSettings.confirmOutOfStock.title')}
             </h3>
             <p className="text-xs text-gray-500 mt-0.5">
-              {allowConfirmOutOfStock
-                ? t('storeSettings.confirmOutOfStock.allowedDescription')
-                : t('storeSettings.confirmOutOfStock.blockedDescription')}
+              {t(MODE_DESCRIPTION_KEYS[mode])}
             </p>
           </div>
         </div>
-        <FormSwitch
-          checked={allowConfirmOutOfStock}
-          onCheckedChange={onAllowConfirmOutOfStockChange}
+        <SearchableSelect
+          value={mode}
+          options={options}
+          widthClass="w-full sm:w-56"
+          searchThreshold={10}
+          onChange={(key) => {
+            if (isConfirmMode(key)) {
+              onAllowConfirmOutOfStockChange(confirmModeToStoreValue(key));
+            }
+          }}
         />
       </div>
     </div>

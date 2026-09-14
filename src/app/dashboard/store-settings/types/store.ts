@@ -12,7 +12,7 @@ export interface MerchantSettingsResponse {
   url: string;
   minStockLevel: number | null;
   /** T27: may an agent confirm an order whose variants are out of stock? */
-  allowConfirmOutOfStock: boolean;
+  allowConfirmOutOfStock: boolean | null;
   maxStockLevel: number | null;
   pageNames: string[];
 }

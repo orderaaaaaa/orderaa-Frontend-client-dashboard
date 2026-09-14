@@ -14,7 +14,6 @@ export const ORDER_SETTINGS_DEFAULTS: OrderSettingsFormData = {
   logo: undefined,
   url: '',
   minStockLevel: null,
-  // Matches the backend column default: today's behaviour is to allow.
-  allowConfirmOutOfStock: true,
+  allowConfirmOutOfStock: null,
   maxStockLevel: null,
 };
