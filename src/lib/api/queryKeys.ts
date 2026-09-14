@@ -61,6 +61,9 @@ export const QUERY_KEYS = {
   ORDER_STOCK_AVAILABILITY: 'order-stock-availability',
   PRODUCT_VARIANT_AVAILABILITY: 'product-variant-availability',
   STOCK_MOVEMENTS: 'stock-movements',
+  WAREHOUSE_SUMMARY: 'warehouse-summary',
+  VIRTUAL_WAREHOUSES: 'virtual-warehouses',
+  VIRTUAL_WAREHOUSE_SUMMARY: 'virtual-warehouse-summary',
 
   // Integrations
   INTEGRATION_CONFIGS: 'integration-configs',

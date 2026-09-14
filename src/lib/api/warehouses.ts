@@ -113,6 +113,28 @@ export interface GetWarehouseStockParams {
   search?: string;
 }
 
+export interface PerWarehouseStock {
+  warehouseId: number;
+  warehouseName: string;
+  quantity: number;
+}
+
+export interface VariantWarehouseDistribution {
+  totalAvailable: number;
+  managedQuantity: number;
+  perWarehouse: PerWarehouseStock[];
+}
+
+export interface WarehouseSummaryCard {
+  id: number;
+  name: string;
+  parentWarehouseId: number | null;
+  isActive: boolean;
+  totalQuantity: number;
+  lowStockVariantCount: number;
+  outOfStockVariantCount: number;
+}
+
 export interface WarehouseRef {
   id: number;
   name: string;
@@ -338,6 +360,20 @@ export async function deleteWarehouse(id: number): Promise<void> {
   await api.delete(`/warehouses/${id}`);
 }
 
+export async function getWarehouseSummary(): Promise<WarehouseSummaryCard[]> {
+  const response = await api.get('/warehouses/summary');
+  return response.data as WarehouseSummaryCard[];
+}
+
+export async function getVariantWarehouseDistribution(
+  variantId: number
+): Promise<VariantWarehouseDistribution> {
+  const response = await api.get(
+    `/warehouses/variants/${variantId}/distribution`
+  );
+  return response.data as VariantWarehouseDistribution;
+}
+
 export async function getWarehouseStock(
   id: number,
   params?: GetWarehouseStockParams
@@ -405,6 +441,14 @@ export async function transferStock(
 // T27 — stock availability
 // ---------------------------------------------------------------------------
 
+export const CONFIRM_MODES = {
+  ALLOW: 'ALLOW',
+  FORBID: 'FORBID',
+  FOLLOW_WORKFLOW: 'FOLLOW_WORKFLOW',
+} as const;
+
+export type ConfirmMode = (typeof CONFIRM_MODES)[keyof typeof CONFIRM_MODES];
+
 export interface AvailabilityLine {
   orderProductId: number;
   variantId: number;
@@ -429,6 +473,7 @@ export interface AvailabilityLine {
   safe: boolean;
   /** short AND this product's settings forbid confirming — blocks the order */
   blocked: boolean;
+  confirmMode: ConfirmMode;
 }
 
 export interface OrderStockAvailability {
@@ -448,6 +493,7 @@ export interface VariantAvailability {
   safe: boolean;
   /** false when the product forbids picking an unavailable variant */
   selectable: boolean;
+  confirmMode: ConfirmMode;
 }
 
 /** The 409 body the confirm path returns when the settings refuse. */

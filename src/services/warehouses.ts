@@ -16,6 +16,7 @@ import {
   updateWarehouse,
   deleteWarehouse,
   getWarehouseStock,
+  getWarehouseSummary,
   getStockWorkflows,
   createStockWorkflow,
   updateStockWorkflow,
@@ -70,6 +71,14 @@ export const useWarehouseStockQuery = (
     queryFn: () => getWarehouseStock(id!, params),
     enabled: !!id,
     placeholderData: (previous) => previous,
+    staleTime: STALE_TIME,
+  });
+};
+
+export const useWarehouseSummaryQuery = () => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.WAREHOUSE_SUMMARY] as QueryKey,
+    queryFn: getWarehouseSummary,
     staleTime: STALE_TIME,
   });
 };
@@ -173,6 +182,10 @@ const invalidateStockViews = (
   queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCK_MOVEMENTS] });
   queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCK_PRODUCTS] });
   queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCK_ANALYSIS] });
+  queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.WAREHOUSE_SUMMARY] });
+  queryClient.invalidateQueries({
+    queryKey: [QUERY_KEYS.VIRTUAL_WAREHOUSE_SUMMARY],
+  });
 };
 
 export const useAdjustStockMutation = () => {

@@ -1,4 +1,4 @@
-import { Order, OrderEvent, OrderProduct } from './orders';
+import { Order, OrderEvent, OrderProduct, OrderStatus } from './orders';
 
 /** Mirrors the backend GovernorateSettingResponseDto. */
 export interface GovernorateLogisticsConfig {
@@ -98,7 +98,20 @@ export interface ShippingCancellationReason {
 export interface PartialDeliveryData {
   orderId: number;
   returnedOrderProductIds: number[];
-  adjustedTotalCost: number;
+  adjustedTotalCost?: number;
+}
+
+export interface PartialDeliveryOrderSummary {
+  id: number;
+  code: string;
+  status: OrderStatus;
+  totalCost: number;
+}
+
+export interface PartialDeliveryResponse {
+  baseOrder: PartialDeliveryOrderSummary;
+  returnOrder: PartialDeliveryOrderSummary;
+  movedOrderProductIds: number[];
 }
 
 export interface ExchangeData {

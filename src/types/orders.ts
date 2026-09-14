@@ -461,6 +461,20 @@ export interface Order {
   pickupCode?: string | null;
   states?: OrderState[];
   whatsappTemplates?: WhatsappTemplate[];
+  returnOfOrderId?: number | null;
+  returnOf?: OrderReturnOfRef | null;
+  partialReturns?: OrderPartialReturnRef[];
+}
+
+export interface OrderReturnOfRef {
+  id: number;
+  code: string;
+}
+
+export interface OrderPartialReturnRef {
+  id: number;
+  code: string;
+  status: OrderStatus;
 }
 
 export interface OrderLockedBy {
