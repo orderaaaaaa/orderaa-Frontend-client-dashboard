@@ -1,4 +1,19 @@
-import type { StockProduct, StockStatus } from '../types';
+import type { StockProduct, StockScope, StockStatus } from '../types';
+
+export const STOCK_MANAGEMENT_BASE_PATH = '/dashboard/inventory/stock-management';
+
+export const STOCK_SCOPE_KINDS = {
+  ALL: 'all',
+  PHYSICAL: 'physical',
+  VIRTUAL: 'virtual',
+} as const;
+
+export function stockScopeHref(scope: StockScope): string {
+  if (scope.kind === STOCK_SCOPE_KINDS.ALL) {
+    return `${STOCK_MANAGEMENT_BASE_PATH}/${STOCK_SCOPE_KINDS.ALL}`;
+  }
+  return `${STOCK_MANAGEMENT_BASE_PATH}/${scope.kind}/${scope.id}`;
+}
 
 export const STOCK_STATUS_CONFIG: Record<
   StockStatus,

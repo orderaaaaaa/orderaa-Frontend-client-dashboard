@@ -1,5 +1,12 @@
 export type StockStatus = 'high' | 'medium' | 'low' | 'out_of_stock';
 
+export type StockScope =
+  | { kind: 'all' }
+  | { kind: 'physical'; id: number }
+  | { kind: 'virtual'; id: number };
+
+export type StockScopeKind = StockScope['kind'];
+
 export interface VariantStock {
   quantity: number;
   status: StockStatus;
