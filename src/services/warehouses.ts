@@ -75,10 +75,11 @@ export const useWarehouseStockQuery = (
   });
 };
 
-export const useWarehouseSummaryQuery = () => {
+export const useWarehouseSummaryQuery = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: [QUERY_KEYS.WAREHOUSE_SUMMARY] as QueryKey,
     queryFn: getWarehouseSummary,
+    enabled: options?.enabled ?? true,
     staleTime: STALE_TIME,
   });
 };

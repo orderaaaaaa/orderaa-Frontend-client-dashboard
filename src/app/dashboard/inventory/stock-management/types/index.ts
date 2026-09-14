@@ -1,4 +1,4 @@
-export type StockStatus = 'high' | 'medium' | 'low' | 'out_of_stock';
+export type StockStatus = 'high' | 'medium' | 'low' | 'out_of_stock' | 'shortage';
 
 export type StockScope =
   | { kind: 'all' }
@@ -14,7 +14,7 @@ export interface VariantStock {
 
 export interface ProductVariantRow {
   size: string;
-  stocks: Record<string, VariantStock>;
+  stocks: Record<string, VariantStock | null>;
 }
 
 export interface StockProduct {

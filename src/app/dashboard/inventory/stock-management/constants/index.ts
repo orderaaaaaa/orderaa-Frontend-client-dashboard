@@ -43,6 +43,12 @@ export const STOCK_STATUS_CONFIG: Record<
     bgColor: 'bg-gray-100',
     dotColor: 'bg-red-500',
   },
+  shortage: {
+    label: 'عجز',
+    color: 'text-red-700',
+    bgColor: 'bg-red-100',
+    dotColor: 'bg-red-600',
+  },
 };
 
 function generateVariants(

@@ -30,6 +30,26 @@ interface SelectedCell {
 function StockBadge({ stock }: { stock: VariantStock }) {
   const config = STOCK_STATUS_CONFIG[stock.status];
 
+  if (stock.status === 'shortage') {
+    return (
+      <div className="flex items-center justify-center gap-2">
+        <span className="text-sm font-semibold text-red-600" dir="ltr">
+          {stock.quantity}
+        </span>
+        <span
+          className={clsx(
+            'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
+            config.bgColor,
+            config.color
+          )}
+        >
+          <span className={clsx('size-1.5 rounded-full', config.dotColor)} />
+          {config.label}
+        </span>
+      </div>
+    );
+  }
+
   if (stock.status === 'out_of_stock') {
     return (
       <div className="flex items-center justify-center gap-2">
@@ -198,7 +218,7 @@ export function ProductStockTable({
                                 </TooltipContent>
                               </Tooltip>
                             )
-                          ) : (
+                          ) : stock === null ? null : (
                             <span className="block text-center text-sm text-gray-300">
                               -
                             </span>

@@ -10,7 +10,8 @@ import {
   type StockFiltersDto,
 } from '@/services/stock';
 import { apiListToStockProducts } from '../utils/transformStock';
-import type { StockFilters, StockProduct } from '../types';
+import { STOCK_SCOPE_KINDS } from '../constants';
+import type { StockFilters, StockProduct, StockScope } from '../types';
 
 const INITIAL_FILTERS: StockFilters = {
   searchQuery: '',
@@ -30,8 +31,12 @@ function dateToIsoOrUndefined(date: Date | null): string | undefined {
   return date.toISOString();
 }
 
-export function useStockFilters() {
+export function useStockFilters(scope: StockScope) {
   const [filters, setFilters] = useState<StockFilters>(INITIAL_FILTERS);
+  const [outOfStockOnly, setOutOfStockOnly] = useState(false);
+  const scopeKind = scope.kind;
+  const scopeId = scope.kind === STOCK_SCOPE_KINDS.ALL ? null : scope.id;
+  const isAllScope = scopeKind === STOCK_SCOPE_KINDS.ALL;
   const [page, setPage] = useState<number>(DEFAULT_PAGE);
   const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
 
@@ -88,7 +93,15 @@ export function useStockFilters() {
       search: debouncedSearchQuery.trim() || undefined,
       color: filters.color || undefined,
       size: filters.size || undefined,
-      warehouseId: filters.warehouseId || undefined,
+      warehouseId:
+        scopeKind === STOCK_SCOPE_KINDS.PHYSICAL
+          ? String(scopeId)
+          : scopeKind === STOCK_SCOPE_KINDS.ALL
+            ? filters.warehouseId || undefined
+            : undefined,
+      virtualWarehouseId:
+        scopeKind === STOCK_SCOPE_KINDS.VIRTUAL ? String(scopeId) : undefined,
+      outOfStockOnly: outOfStockOnly || undefined,
       fromDate: dateToIsoOrUndefined(filters.fromDate),
       toDate: dateToIsoOrUndefined(filters.toDate),
     }),
@@ -99,6 +112,9 @@ export function useStockFilters() {
       filters.warehouseId,
       filters.fromDate,
       filters.toDate,
+      scopeKind,
+      scopeId,
+      outOfStockOnly,
     ]
   );
 
@@ -117,17 +133,22 @@ export function useStockFilters() {
     limit: pageSize,
   });
 
-  const analysisQuery = useStockAnalysis({
-    fromDate: filterDtoBase.fromDate,
-    toDate: filterDtoBase.toDate,
-  });
+  const analysisQuery = useStockAnalysis(
+    {
+      fromDate: filterDtoBase.fromDate,
+      toDate: filterDtoBase.toDate,
+    },
+    { enabled: isAllScope }
+  );
 
   const filterOptionsQuery = useStockFilterOptions();
 
   const filteredProducts: StockProduct[] = useMemo(() => {
     if (!productsQuery.data) return [];
-    return apiListToStockProducts(productsQuery.data.data);
-  }, [productsQuery.data]);
+    return apiListToStockProducts(productsQuery.data.data, {
+      onlyReturnedVariants: filterDtoBase.outOfStockOnly === true,
+    });
+  }, [productsQuery.data, filterDtoBase.outOfStockOnly]);
 
   const totalProducts = analysisQuery.data?.totalProducts ?? 0;
   const totalQuantity = analysisQuery.data?.totalAvailableCount ?? 0;
@@ -137,7 +158,8 @@ export function useStockFilters() {
     !!debouncedSearchQuery.trim() ||
     !!filters.color ||
     !!filters.size ||
-    !!filters.warehouseId ||
+    (isAllScope && !!filters.warehouseId) ||
+    outOfStockOnly ||
     !!filters.fromDate ||
     !!filters.toDate;
 
@@ -155,6 +177,8 @@ export function useStockFilters() {
     setFromDate,
     setToDate,
     setTimePeriod,
+    outOfStockOnly,
+    setOutOfStockOnly,
 
     page,
     pageSize,
@@ -168,9 +192,10 @@ export function useStockFilters() {
 
     isLoading: productsQuery.isLoading,
     isFetching: productsQuery.isFetching,
-    isAnalysisLoading: analysisQuery.isLoading,
-    isError: productsQuery.isError || analysisQuery.isError,
-    error: productsQuery.error || analysisQuery.error,
+    isAnalysisLoading: isAllScope && analysisQuery.isLoading,
+    isError: productsQuery.isError || (isAllScope && analysisQuery.isError),
+    error: productsQuery.error || (isAllScope ? analysisQuery.error : null),
+    productsError: productsQuery.error,
 
     colorOptions: filterOptionsQuery.data?.colors ?? [],
     sizeOptions: filterOptionsQuery.data?.sizes ?? [],

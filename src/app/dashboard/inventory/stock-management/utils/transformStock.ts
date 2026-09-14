@@ -20,7 +20,8 @@ const PLACEHOLDER_COLOR = '-';
 type Axis = 'size' | 'color' | null;
 
 function statusFromQuantity(quantity: number): StockStatus {
-  if (quantity <= 0) return 'out_of_stock';
+  if (quantity < 0) return 'shortage';
+  if (quantity === 0) return 'out_of_stock';
   if (quantity < LOW_STOCK_THRESHOLD) return 'low';
   if (quantity < LOW_STOCK_THRESHOLD * 2) return 'medium';
   return 'high';
@@ -88,20 +89,27 @@ function resolveVariantAxisValues(
   return { size, color };
 }
 
+export interface StockTransformOptions {
+  onlyReturnedVariants?: boolean;
+}
+
 function buildVariantRows(
   variants: StockVariantCombination[] | undefined | null,
   sizeAxis: AxisIndex,
-  colorAxis: AxisIndex
+  colorAxis: AxisIndex,
+  options: StockTransformOptions
 ): { rows: ProductVariantRow[]; sizes: string[]; colors: string[] } {
   const sizes = sizeAxis.names.length > 0 ? [...sizeAxis.names] : [PLACEHOLDER_SIZE];
   const colors =
     colorAxis.names.length > 0 ? [...colorAxis.names] : [PLACEHOLDER_COLOR];
 
-  const stocksBySize = new Map<string, Record<string, VariantStock>>();
+  const stocksBySize = new Map<string, Record<string, VariantStock | null>>();
   for (const size of sizes) {
-    const row: Record<string, VariantStock> = {};
+    const row: Record<string, VariantStock | null> = {};
     for (const color of colors) {
-      row[color] = { quantity: 0, status: 'out_of_stock' };
+      row[color] = options.onlyReturnedVariants
+        ? null
+        : { quantity: 0, status: 'out_of_stock' };
     }
     stocksBySize.set(size, row);
   }
@@ -134,12 +142,16 @@ export function apiSkuOrEmpty(api: StockProductApi): string {
   return typeof api.sku === 'string' ? api.sku : '';
 }
 
-export function apiToStockProduct(api: StockProductApi): StockProduct {
+export function apiToStockProduct(
+  api: StockProductApi,
+  options: StockTransformOptions = {}
+): StockProduct {
   const { sizeAxis, colorAxis } = buildAxes(api.attributes);
   const { rows, sizes, colors } = buildVariantRows(
     api.variants,
     sizeAxis,
-    colorAxis
+    colorAxis,
+    options
   );
 
   return {
@@ -154,7 +166,8 @@ export function apiToStockProduct(api: StockProductApi): StockProduct {
 }
 
 export function apiListToStockProducts(
-  list: StockProductApi[]
+  list: StockProductApi[],
+  options: StockTransformOptions = {}
 ): StockProduct[] {
-  return list.map(apiToStockProduct);
+  return list.map((api) => apiToStockProduct(api, options));
 }

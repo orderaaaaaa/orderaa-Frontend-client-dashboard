@@ -1,5 +1,6 @@
 'use client';
 
+import type { IconType } from 'react-icons';
 import {
   LiaBoxesSolid,
   LiaCubesSolid,
@@ -7,44 +8,64 @@ import {
 } from 'react-icons/lia';
 import { LOW_STOCK_THRESHOLD } from '../constants';
 
+export interface SummaryCardItem {
+  key: string;
+  label: string;
+  value: number;
+  icon: IconType;
+  color: string;
+  bgColor: string;
+  suffix?: string;
+}
+
 interface SummaryCardsProps {
+  items: SummaryCardItem[];
+}
+
+interface StockAnalysisCardsInput {
   totalProducts: number;
   totalQuantity: number;
   lowStockCount: number;
 }
 
-const cards = [
-  {
-    key: 'products',
-    label: 'إجمالي المنتجات',
-    icon: LiaCubesSolid,
-    color: 'text-primary',
-    bgColor: 'bg-primary/10',
-    getValue: (p: SummaryCardsProps) => p.totalProducts,
-  },
-  {
-    key: 'quantity',
-    label: 'الكمية الكلية',
-    icon: LiaBoxesSolid,
-    color: 'text-emerald-600',
-    bgColor: 'bg-emerald-50',
-    getValue: (p: SummaryCardsProps) => p.totalQuantity,
-  },
-  {
-    key: 'lowStock',
-    label: 'مخزون منخفض',
-    icon: LiaExclamationTriangleSolid,
-    color: 'text-red-600',
-    bgColor: 'bg-red-50',
-    getValue: (p: SummaryCardsProps) => p.lowStockCount,
-    suffix: `(<${LOW_STOCK_THRESHOLD})`,
-  },
-] as const;
+export function buildStockAnalysisCards({
+  totalProducts,
+  totalQuantity,
+  lowStockCount,
+}: StockAnalysisCardsInput): SummaryCardItem[] {
+  return [
+    {
+      key: 'products',
+      label: 'إجمالي المنتجات',
+      icon: LiaCubesSolid,
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
+      value: totalProducts,
+    },
+    {
+      key: 'quantity',
+      label: 'الكمية الكلية',
+      icon: LiaBoxesSolid,
+      color: 'text-emerald-600',
+      bgColor: 'bg-emerald-50',
+      value: totalQuantity,
+    },
+    {
+      key: 'lowStock',
+      label: 'مخزون منخفض',
+      icon: LiaExclamationTriangleSolid,
+      color: 'text-red-600',
+      bgColor: 'bg-red-50',
+      value: lowStockCount,
+      suffix: `(<${LOW_STOCK_THRESHOLD})`,
+    },
+  ];
+}
 
-export function SummaryCards(props: SummaryCardsProps) {
+export function SummaryCards({ items }: SummaryCardsProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      {cards.map((card) => {
+      {items.map((card) => {
         const Icon = card.icon;
         return (
           <div
@@ -57,8 +78,12 @@ export function SummaryCards(props: SummaryCardsProps) {
             <div>
               <p className="text-sm text-gray-500">{card.label}</p>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-2xl font-bold text-gray-900">
-                  {card.getValue(props).toLocaleString('ar-EG')}
+                <span
+                  className={`text-2xl font-bold ${
+                    card.value < 0 ? 'text-red-600' : 'text-gray-900'
+                  }`}
+                >
+                  {card.value.toLocaleString('ar-EG')}
                 </span>
               </div>
             </div>

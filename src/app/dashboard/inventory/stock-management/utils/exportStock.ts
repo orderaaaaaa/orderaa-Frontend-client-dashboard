@@ -6,7 +6,7 @@ import {
   fetchAllStockProducts,
   type StockFiltersDto,
 } from '@/services/stock';
-import type { StockProduct } from '../types';
+import type { StockProduct, StockStatus } from '../types';
 import { STOCK_STATUS_CONFIG } from '../constants';
 import { apiListToStockProducts } from './transformStock';
 
@@ -15,7 +15,9 @@ async function loadAllProducts(
 ): Promise<StockProduct[]> {
   try {
     const apiList = await fetchAllStockProducts(filters);
-    return apiListToStockProducts(apiList);
+    return apiListToStockProducts(apiList, {
+      onlyReturnedVariants: filters.outOfStockOnly === true,
+    });
   } catch (err) {
     const message =
       (err as { response?: { data?: { message?: string } } })?.response?.data
@@ -103,6 +105,14 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#039;');
 }
 
+const PDF_BADGE_COLORS: Record<StockStatus, string> = {
+  high: '#047857',
+  medium: '#b45309',
+  low: '#b91c1c',
+  out_of_stock: '#6b7280',
+  shortage: '#dc2626',
+};
+
 function buildProductsHtml(products: StockProduct[]): string {
   return products
     .map((product) => {
@@ -115,16 +125,10 @@ function buildProductsHtml(products: StockProduct[]): string {
           const cells = product.colors
             .map((color) => {
               const stock = variant.stocks[color];
+              if (stock === null) return '<td></td>';
               if (!stock) return '<td>-</td>';
               const config = STOCK_STATUS_CONFIG[stock.status];
-              const badgeColor =
-                stock.status === 'out_of_stock'
-                  ? '#6b7280'
-                  : stock.status === 'high'
-                    ? '#047857'
-                    : stock.status === 'medium'
-                      ? '#b45309'
-                      : '#b91c1c';
+              const badgeColor = PDF_BADGE_COLORS[stock.status];
               return `<td>${stock.quantity} <span class="badge" style="color:${badgeColor}">(${escapeHtml(config.label)})</span></td>`;
             })
             .join('');

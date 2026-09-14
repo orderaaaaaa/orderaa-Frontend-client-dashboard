@@ -1,7 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import {
+  LiaArrowRightSolid,
   LiaBoxOpenSolid,
   LiaSearchSolid,
   LiaSlidersHSolid,
@@ -9,7 +11,6 @@ import {
   LiaFileExcelSolid,
   LiaFilePdfSolid,
 } from 'react-icons/lia';
-import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import {
@@ -18,19 +19,29 @@ import {
   PopoverContent,
 } from '@/components/ui/popover';
 import PaginationFooter from '@/components/ui/pagination-footer';
+import { FormSwitch } from '@/components/ui/form-switch';
 import { StockFilters } from './StockFilters';
-import { SummaryCards } from './SummaryCards';
+import { SummaryCards, buildStockAnalysisCards } from './SummaryCards';
+import { StockScopeNotFound } from './StockScopeNotFound';
 import { ProductStockTable } from './ProductStockTable';
 import {
   StockListSkeleton,
   SummaryCardsSkeleton,
 } from './StockManagementSkeleton';
 import { useStockFilters } from '../hooks/useStockFilters';
+import { useStockScopeSummary } from '../hooks/useStockScopeSummary';
 import { exportStockToExcel, exportStockToPDF } from '../utils/exportStock';
+import { STOCK_MANAGEMENT_BASE_PATH, STOCK_SCOPE_KINDS } from '../constants';
+import type { StockScope } from '../types';
 
-export function StockManagementContent() {
-  const { user } = useAuthStore();
-  
+interface StockManagementContentProps {
+  scope: StockScope;
+}
+
+export function StockManagementContent({ scope }: StockManagementContentProps) {
+  const isAllScope = scope.kind === STOCK_SCOPE_KINDS.ALL;
+  const scopeSummary = useStockScopeSummary(scope);
+
   const {
     filters,
     filteredProducts,
@@ -45,6 +56,8 @@ export function StockManagementContent() {
     setToDate,
     setTimePeriod,
     setWarehouseId,
+    outOfStockOnly,
+    setOutOfStockOnly,
     pageSize,
     setPage,
     setPageSize,
@@ -57,10 +70,11 @@ export function StockManagementContent() {
     isAnalysisLoading,
     isError,
     error,
+    productsError,
     colorOptions,
     sizeOptions,
     filterDtoBase,
-  } = useStockFilters();
+  } = useStockFilters(scope);
 
   const [showFilters, setShowFilters] = useState(false);
   const [filtersOverflow, setFiltersOverflow] = useState(false);
@@ -103,11 +117,12 @@ export function StockManagementContent() {
     let count = 0;
     if (filters.color) count++;
     if (filters.size) count++;
-    if (filters.warehouseId) count++;
+    if (isAllScope && filters.warehouseId) count++;
     if (filters.fromDate || filters.toDate) count++;
     if (filters.timePeriod) count++;
     return count;
   }, [
+    isAllScope,
     filters.color,
     filters.size,
     filters.warehouseId,
@@ -140,15 +155,35 @@ export function StockManagementContent() {
     (error as { response?: { data?: { message?: string } } })?.response?.data
       ?.message || 'تعذر تحميل بيانات المخزن';
 
+  const scopeNotFound =
+    !isAllScope &&
+    (productsError as { response?: { status?: number } } | null)?.response
+      ?.status === 404;
+
+  if (scopeNotFound) {
+    return <StockScopeNotFound />;
+  }
+
+  const title = isAllScope ? 'كل المخازن' : (scopeSummary.name ?? '');
+
   return (
     <div
       ref={containerRef}
       className="w-full max-w-full overflow-x-hidden space-y-6"
     >
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">
-          {user?.name || 'ادارة المخزن'}
-        </h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <Link
+            href={STOCK_MANAGEMENT_BASE_PATH}
+            className="mb-1 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+          >
+            <LiaArrowRightSolid className="size-4" />
+            كل المخازن
+          </Link>
+          <h1 className="truncate text-2xl font-bold text-gray-900">
+            {title}
+          </h1>
+        </div>
         <Popover open={exportOpen} onOpenChange={setExportOpen}>
           <PopoverTrigger asChild>
             <Button
@@ -195,6 +230,13 @@ export function StockManagementContent() {
               inputClassName="pr-10 bg-white"
             />
           </div>
+          <label className="flex shrink-0 items-center gap-2 text-sm font-medium text-gray-700">
+            <FormSwitch
+              checked={outOfStockOnly}
+              onCheckedChange={setOutOfStockOnly}
+            />
+            غير المتوفر فقط
+          </label>
           <Button
             variant="default"
             className="rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm px-5 relative"
@@ -233,21 +275,30 @@ export function StockManagementContent() {
               onToDateChange={setToDate}
               onTimePeriodChange={setTimePeriod}
               onWarehouseChange={setWarehouseId}
+              showWarehouseFilter={isAllScope}
             />
           </div>
         </div>
       </div>
 
 
-      {isAnalysisLoading ? (
+      {isAllScope ? (
+        isAnalysisLoading ? (
+          <SummaryCardsSkeleton />
+        ) : (
+          <SummaryCards
+            items={buildStockAnalysisCards({
+              totalProducts,
+              totalQuantity,
+              lowStockCount,
+            })}
+          />
+        )
+      ) : scopeSummary.isLoading ? (
         <SummaryCardsSkeleton />
-      ) : (
-        <SummaryCards
-          totalProducts={totalProducts}
-          totalQuantity={totalQuantity}
-          lowStockCount={lowStockCount}
-        />
-      )}
+      ) : scopeSummary.items ? (
+        <SummaryCards items={scopeSummary.items} />
+      ) : null}
 
       {isFetching ? (
         <StockListSkeleton count={pageSize} />

@@ -22,6 +22,7 @@ interface StockFiltersProps {
   onToDateChange: (date: Date | null) => void;
   onTimePeriodChange: (period: TimePeriod | '') => void;
   onWarehouseChange?: (value: string) => void;
+  showWarehouseFilter?: boolean;
 }
 
 export function StockFilters({
@@ -34,6 +35,7 @@ export function StockFilters({
   onToDateChange,
   onTimePeriodChange,
   onWarehouseChange,
+  showWarehouseFilter = true,
 }: StockFiltersProps) {
   const { options: warehouseOptions } = useWarehouseOptions();
 
@@ -56,12 +58,14 @@ export function StockFilters({
           placeholder="المقاس"
           clearable
         />
-        <SearchableSelect
-          options={[ALL_WAREHOUSES_OPTION, ...warehouseOptions]}
-          value={filters.warehouseId}
-          onChange={(val) => onWarehouseChange?.(val)}
-          placeholder="المخزن"
-        />
+        {showWarehouseFilter && (
+          <SearchableSelect
+            options={[ALL_WAREHOUSES_OPTION, ...warehouseOptions]}
+            value={filters.warehouseId}
+            onChange={(val) => onWarehouseChange?.(val)}
+            placeholder="المخزن"
+          />
+        )}
       </div>
       <DateRangeFilter
         fromDate={filters.fromDate}
