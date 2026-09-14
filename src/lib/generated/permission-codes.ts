@@ -108,6 +108,8 @@ export const PERMISSION_CODES = {
   STOCK_WORKFLOWS_CREATE: 'stock-workflows:create',
   STOCK_WORKFLOWS_UPDATE: 'stock-workflows:update',
   STOCK_WORKFLOWS_DELETE: 'stock-workflows:delete',
+  VIRTUAL_WAREHOUSES_READ: 'virtual-warehouses:read',
+  VIRTUAL_WAREHOUSES_MANAGE: 'virtual-warehouses:manage',
   MERCHANT_SETTINGS_READ: 'merchant-settings:read',
   MERCHANT_SETTINGS_UPDATE: 'merchant-settings:update',
   STORES_READ: 'stores:read',
@@ -139,6 +141,8 @@ export const PERMISSION_CODES = {
   PLATFORM_MERCHANTS_READ: 'platform:merchants:read',
   PLATFORM_PLANS_MANAGE: 'platform:plans:manage',
   PLATFORM_CHARGE_OPTIONS_MANAGE: 'platform:charge-options:manage',
+  PLATFORM_WAREHOUSES_READ: 'platform:warehouses:read',
+  PLATFORM_WAREHOUSES_MANAGE: 'platform:warehouses:manage',
 } as const;
 
 export type ActionPermissionCode =
