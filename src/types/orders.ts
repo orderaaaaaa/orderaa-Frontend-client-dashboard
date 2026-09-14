@@ -257,6 +257,7 @@ export interface OrderProduct {
   id: number;
   orderId: number;
   productId: number;
+  variantId?: number;
   quantity?: number;
   price: number;
   sku?: string | null;

@@ -1,5 +1,6 @@
 import api from './index';
 import { Order, FilterOrdersDto, PaginatedResponse, FilterOptionsResponse, OrderStatisticsResponse } from '@/types/orders';
+import type { PartialDeliveryData, PartialDeliveryResponse } from '@/types/logistics';
 
 export async function getOrders(
   filters?: FilterOrdersDto
@@ -213,4 +214,14 @@ export async function unlockOrder(orderId: number): Promise<void> {
   } catch (error) {
     throw error;
   }
+}
+export async function recordPartialDelivery({
+  orderId,
+  ...body
+}: PartialDeliveryData): Promise<PartialDeliveryResponse> {
+  const response = await api.post<PartialDeliveryResponse>(
+    `/orders/${orderId}/partial-delivery`,
+    body
+  );
+  return response.data;
 }

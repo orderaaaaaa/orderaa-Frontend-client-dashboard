@@ -44,6 +44,8 @@ const postShippingOptions: ActionOption[] = [
   { label: 'متأخر', action: 'late', icon: <LiaClockSolid className="w-5 h-5" /> },
 ];
 
+const PARTIAL_DELIVERY_STATUSES = new Set(['WITH_DRIVER', 'DELIVERED']);
+
 export interface ActionsDropdownProps {
   isOpen: boolean;
   orderStatus: string;
@@ -79,7 +81,14 @@ export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, onAction
     });
 
     if (isPostShipping && canUpdate) {
-      return [...base, ...postShippingOptions];
+      return [
+        ...base,
+        ...postShippingOptions.filter(
+          (option) =>
+            option.action !== 'partial_delivery' ||
+            PARTIAL_DELIVERY_STATUSES.has(orderStatus)
+        ),
+      ];
     }
 
     return base;

@@ -21,6 +21,8 @@ import {
 } from '@/types/logistics';
 import { PaginatedResponse } from '@/types/orders';
 import { toast } from 'react-toastify';
+import { recordPartialDelivery } from '@/lib/api/order';
+import { getApiErrorMessage } from '@/utils/apiError';
 
 // ─── Mock Data (UI preview until backend is ready) ───────────────────────────
 // The governorate logistics config is no longer mocked — it calls
@@ -294,20 +296,22 @@ export const useDeleteShippingCancellationReason = () => {
 };
 
 // ─── Order Actions (Partial Delivery, Exchange, Return) ──────────────────────
-// TODO: Replace mock with real API when backend implements POST /orders/:orderId/partial-delivery
 
 export const usePartialDelivery = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: PartialDeliveryData) => {
-      console.log('[usePartialDelivery] payload:', data);
-      await new Promise((r) => setTimeout(r, 500));
-      return { success: true };
-    },
-    onSuccess: () => {
+    mutationFn: (data: PartialDeliveryData) => recordPartialDelivery(data),
+    onSuccess: (result, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORDER_DETAILS, variables.orderId],
+      });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
-      toast.success('تم تأكيد التسليم الجزئي بنجاح');
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCK_PRODUCTS] });
+      toast.success(`تم إنشاء طلب المرتجع ${result.returnOrder.code}`);
+    },
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, 'تعذر تنفيذ التسليم الجزئي'));
     },
   });
 };

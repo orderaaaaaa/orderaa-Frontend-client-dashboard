@@ -15,6 +15,7 @@ import { OrderActionsFooter } from './actions/OrderActionsFooter';
 import { OrderActionModals } from './modals/OrderActionModals';
 import { ErrorModal } from './modals/ErrorModal';
 import { OrderActionsFooterLargeScreens } from './actions/ActionsDropdownLargeScreens';
+import { PartialReturnLinks } from './PartialReturnLinks';
 
 interface OrderDetailsInfoComponentProps {
   order: Order;
@@ -331,6 +332,8 @@ function OrderDetailsInfoComponent({
   return (
     <>
       <div className="flex flex-col gap-4 font-medium p-4 bg-gray-50 mt-8 rounded-xl mb-24 w-full max-w-full">
+        <PartialReturnLinks order={localOrder} />
+
         <CustomerDataSection
           order={localOrder}
           onUpdate={updateField}

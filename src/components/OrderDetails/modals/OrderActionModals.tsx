@@ -252,6 +252,8 @@ export function OrderActionModals({
       <PartialDeliveryModal
         isOpen={modals.partialDelivery.isOpen}
         onClose={modals.partialDelivery.close}
+        orderId={order.id}
+        orderStatus={order.status}
         orderProducts={order.order_products || []}
         totalCost={order.totalCost}
       />
