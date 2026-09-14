@@ -208,6 +208,7 @@ export default function DelayedOrdersPage() {
                 collectedAmount={order.collectedAmount}
                 isCollected={order.isCollected}
                 isPartiallyPaid={order.isPartiallyPaid}
+                shippingType={order.shippingType}
                 disableNavigation={false}
               />
             </div>

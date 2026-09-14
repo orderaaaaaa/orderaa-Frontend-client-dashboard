@@ -738,6 +738,7 @@ export function PrintOrdersContent() {
                 shippingCompany={order.shippingCompany}
                 productVariants={order.order_products.map((op) => mapOrderProductToVariantInfo(op))}
                 price={order.totalCost}
+                shippingType={order.shippingType}
                 trys={order.numberOfTriesToReach}
                 status={order.status}
                 city=""

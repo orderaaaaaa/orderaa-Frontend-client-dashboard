@@ -28,7 +28,7 @@ import { IconType } from 'react-icons';
 const SHIPPING_TYPE_BADGE: Record<string, { label: string; icon: IconType; bg: string; text: string }> = {
   [ShippingType.EXCHANGE]: { label: 'استبدال', icon: LiaExchangeAltSolid, bg: 'bg-orange-100', text: 'text-orange-600' },
   [ShippingType.RETURN]: { label: 'مرتجع', icon: LiaUndoAltSolid, bg: 'bg-red-100', text: 'text-red-600' },
-  [ShippingType.PARTIAL_RETURN]: { label: 'مرتجع جزئي', icon: LiaRandomSolid, bg: 'bg-amber-100', text: 'text-amber-600' },
+  [ShippingType.PARTIAL_RETURN]: { label: 'تسليم جزئي', icon: LiaRandomSolid, bg: 'bg-amber-100', text: 'text-amber-600' },
 };
 
 export default function OrderCard({

@@ -8,7 +8,7 @@ const SHIPPING_TYPE_FALLBACK: Record<string, string> = {
   [ShippingType.DELIVERY]: 'توصيل',
   [ShippingType.EXCHANGE]: 'استبدال',
   [ShippingType.RETURN]: 'مرتجع',
-  [ShippingType.PARTIAL_RETURN]: 'مرتجع جزئي',
+  [ShippingType.PARTIAL_RETURN]: 'تسليم جزئي',
 };
 
 export interface ShippingTypeSelectProps {

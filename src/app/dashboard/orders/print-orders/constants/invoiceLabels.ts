@@ -48,7 +48,7 @@ export const INVOICE_LABELS: Record<'ar' | 'en', InvoiceLabels> = {
     created: 'Created',
     exchange: 'استبدال',
     return: 'مرتجع',
-    partialReturn: 'مرتجع جزئي',
+    partialReturn: 'تسليم جزئي',
     resend: 'إعادة إرسال',
   },
   en: {
@@ -99,7 +99,7 @@ export const INVOICE_LABELS: Record<'ar' | 'en', InvoiceLabels> = {
     created: 'Created',
     exchange: 'EXCHANGE',
     return: 'RETURN',
-    partialReturn: 'PARTIAL RETURN',
+    partialReturn: 'PARTIAL DELIVERY',
     resend: 'RESEND',
   },
 };
