@@ -14,6 +14,7 @@ import { PERMISSION_CODES } from '@/lib/permissions';
 import { FollowUpDropdown } from './FollowUpDropdown';
 import { ActionsDropdown } from './ActionsDropdown';
 import { STOP_OPERATION_STATUSES } from './constants';
+import { FIXED_BOTTOM_BAR_CLASS } from '@/constants/dashboard-layout';
 
 export interface OrderActionsFooterProps {
   orderStatus: string;
@@ -83,7 +84,9 @@ export function OrderActionsFooterLargeScreens({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 py-4 px-6">
+    <div
+      className={`${FIXED_BOTTOM_BAR_CLASS} bg-white border-t border-gray-200 shadow-lg py-4 px-6`}
+    >
       <div className="flex gap-2 justify-between items-center">
         <div className="flex gap-2 items-center sm:rtl:ms-14 sm:ltr:me-14">
           <Button

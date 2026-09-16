@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { LiaTruckSolid } from 'react-icons/lia';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
+import { FIXED_BOTTOM_BAR_CLASS } from '@/constants/dashboard-layout';
 
 function Spinner() {
   return (
@@ -47,7 +48,7 @@ export function ShippingActionsBar({
   const isDisabled = isLoading || disableActions;
 
   const positionClasses = {
-    fixed: 'fixed bottom-0 left-0 right-0 z-50',
+    fixed: FIXED_BOTTOM_BAR_CLASS,
     sticky: 'sticky bottom-0 z-10',
     absolute: 'absolute bottom-0 left-0 right-0 z-10',
     static: '',

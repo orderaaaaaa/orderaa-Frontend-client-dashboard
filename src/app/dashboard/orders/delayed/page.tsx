@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PageLoading from '@/components/ui/page-loading';
@@ -9,6 +9,7 @@ import { mapOrderProductToVariantInfo } from '@/types/orders';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { useOrderStatusesQuery } from '@/services/orders';
 import {
+  isRenderableDelayedOrder,
   useDelayedOrdersQuery,
   useMarkDelayedOrder,
   type DelayedMarksMode,
@@ -16,9 +17,9 @@ import {
 import { DelaySettingsModal } from './components/DelaySettingsModal';
 
 const MARK_MODES: { value: DelayedMarksMode; label: string }[] = [
+  { value: 'notFollowedUp', label: 'بدون متابعة' },
   { value: 'default', label: 'النشطة' },
   { value: 'followedUp', label: 'تمت متابعتها' },
-  { value: 'notFollowedUp', label: 'بدون متابعة' },
   { value: 'withDone', label: 'الكل (شامل المنتهية)' },
 ];
 
@@ -42,7 +43,7 @@ const describeElapsed = (minutes: number) => {
 export default function DelayedOrdersPage() {
   const [status, setStatus] = useState('');
   const [minMinutes, setMinMinutes] = useState('');
-  const [marks, setMarks] = useState<DelayedMarksMode>('default');
+  const [marks, setMarks] = useState<DelayedMarksMode>('notFollowedUp');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const { getStatusLabel } = useStatusLabel();
@@ -57,7 +58,24 @@ export default function DelayedOrdersPage() {
     limit: 50,
   });
 
-  const orders = data?.data ?? [];
+  const orders = useMemo(() => {
+    if (data === undefined) return [];
+    const raw = data?.data;
+    if (!Array.isArray(raw)) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('delayed orders: unexpected payload', data);
+      }
+      return [];
+    }
+    const renderable = raw.filter(isRenderableDelayedOrder);
+    if (
+      renderable.length !== raw.length &&
+      process.env.NODE_ENV !== 'production'
+    ) {
+      console.warn('delayed orders: unexpected payload', data);
+    }
+    return renderable;
+  }, [data]);
 
   return (
     <div className="w-full max-w-full overflow-x-hidden sm:px-8 py-4 flex flex-col gap-5">
@@ -137,16 +155,18 @@ export default function DelayedOrdersPage() {
           {orders.map((order) => (
             <div key={order.id} className="flex flex-col gap-2">
               <div className="flex flex-wrap items-center gap-2 text-xs">
-                <span className="bg-amber-100 text-amber-700 font-semibold px-2.5 py-1 rounded-full">
-                  متأخر {describeElapsed(order.delayedMinutes)} في{' '}
-                  {getStatusLabel(order.delayedInStatus)}
-                </span>
-                {order.marks.followedUp && (
+                {typeof order.delayedMinutes === 'number' && (
+                  <span className="bg-amber-100 text-amber-700 font-semibold px-2.5 py-1 rounded-full">
+                    متأخر {describeElapsed(order.delayedMinutes)} في{' '}
+                    {getStatusLabel(order.delayedInStatus ?? order.status)}
+                  </span>
+                )}
+                {order.marks?.followedUp && (
                   <span className="bg-blue-100 text-blue-700 font-semibold px-2.5 py-1 rounded-full">
                     تمت المتابعة
                   </span>
                 )}
-                {order.marks.done && (
+                {order.marks?.done && (
                   <span className="bg-gray-100 text-gray-600 font-semibold px-2.5 py-1 rounded-full">
                     منتهي
                   </span>
@@ -155,31 +175,31 @@ export default function DelayedOrdersPage() {
                 <div className="flex gap-2 mr-auto">
                   <Button
                     size="sm"
-                    variant={order.marks.followedUp ? 'outline' : 'default'}
+                    variant={order.marks?.followedUp ? 'outline' : 'default'}
                     className="rounded-full text-xs px-4"
                     onClick={() =>
                       mark({
                         orderId: order.id,
                         kind: 'FOLLOWED_UP',
-                        undo: !!order.marks.followedUp,
+                        undo: !!order.marks?.followedUp,
                       })
                     }
                   >
-                    {order.marks.followedUp ? 'إلغاء المتابعة' : 'متابعة'}
+                    {order.marks?.followedUp ? 'إلغاء المتابعة' : 'متابعة'}
                   </Button>
                   <Button
                     size="sm"
-                    variant={order.marks.done ? 'outline' : 'default'}
+                    variant={order.marks?.done ? 'outline' : 'default'}
                     className="rounded-full text-xs px-4"
                     onClick={() =>
                       mark({
                         orderId: order.id,
                         kind: 'DONE',
-                        undo: !!order.marks.done,
+                        undo: !!order.marks?.done,
                       })
                     }
                   >
-                    {order.marks.done ? 'إلغاء الإنهاء' : 'انتهاء'}
+                    {order.marks?.done ? 'إلغاء الإنهاء' : 'انتهاء'}
                   </Button>
                 </div>
               </div>

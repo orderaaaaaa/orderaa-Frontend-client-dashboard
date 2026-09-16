@@ -39,6 +39,14 @@ export interface DelayedOrdersPage {
 
 const KEY = 'delayed-orders';
 
+export const isRenderableDelayedOrder = (
+  value: unknown,
+): value is DelayedOrder =>
+  typeof value === 'object' &&
+  value !== null &&
+  typeof (value as Record<string, unknown>).id === 'number' &&
+  typeof (value as Record<string, unknown>).code === 'string';
+
 export const useDelaySettingsQuery = () =>
   useQuery({
     queryKey: [KEY, 'settings'],

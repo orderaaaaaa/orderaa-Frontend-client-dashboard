@@ -18,13 +18,13 @@ import {
 type ReviewFilter = 'ALL' | 'REVIEWED' | 'PENDING';
 
 const FILTERS: { value: ReviewFilter; label: string }[] = [
-  { value: 'ALL', label: 'الكل' },
   { value: 'PENDING', label: 'بانتظار المراجعة' },
   { value: 'REVIEWED', label: 'تمت مراجعتها' },
+  { value: 'ALL', label: 'الكل' },
 ];
 
 export default function PickupsPage() {
-  const [filter, setFilter] = useState<ReviewFilter>('ALL');
+  const [filter, setFilter] = useState<ReviewFilter>('PENDING');
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [image, setImage] = useState<string | null>(null);
 

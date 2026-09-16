@@ -95,9 +95,26 @@ export const navigation: NavigationItem[] = [
         icon: LiaClipboardCheckSolid,
       },
       {
+        name: 'الطلبات المتأخرة',
+        href: '/dashboard/orders/delayed',
+        icon: LiaHourglassEndSolid,
+      },
+    ],
+  },
+  {
+    name: 'المرتجعات',
+    href: '/dashboard/orders/returns-receiving',
+    icon: LiaUndoAltSolid,
+    children: [
+      {
         name: 'استلامات المرتجعات',
         href: '/dashboard/orders/returns-receiving',
         icon: LiaUndoAltSolid,
+      },
+      {
+        name: 'إيصالات المرتجعات',
+        href: '/dashboard/orders/returns-receiving/receipts',
+        icon: LiaFileInvoiceSolid,
       },
     ],
   },
@@ -158,16 +175,6 @@ export const navigation: NavigationItem[] = [
     name: 'جميع التحصيلات',
     href: '/dashboard/orders/settlement/collections',
     icon: LiaHandHoldingUsdSolid,
-  },
-  {
-    name: 'الطلبات المتأخرة',
-    href: '/dashboard/orders/delayed',
-    icon: LiaHourglassEndSolid,
-  },
-  {
-    name: 'استلامات المرتجعات',
-    href: '/dashboard/orders/returns-receiving/receipts',
-    icon: LiaFileInvoiceSolid,
   },
   {
     name: 'بيك اب',

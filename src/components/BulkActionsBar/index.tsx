@@ -21,6 +21,7 @@ import {
 import { OrderStatusItem } from '@/types/orders';
 import { Can } from '@/components/Can';
 import { PERMISSION_CODES } from '@/lib/permissions';
+import { FIXED_BOTTOM_BAR_CLASS } from '@/constants/dashboard-layout';
 
 interface BulkActionsBarProps {
   selectedOrders: Order[];
@@ -62,7 +63,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
   }
 
   const positionClasses = {
-    fixed: 'fixed bottom-0 left-0 right-0 z-50',
+    fixed: FIXED_BOTTOM_BAR_CLASS,
     sticky: 'sticky bottom-0 z-10',
     absolute: 'absolute bottom-0 left-0 right-0 z-10',
   }[position];

@@ -9,3 +9,5 @@ export {
 export { transformCityKeyForAPI } from './cityUtils';
 
 export { getTimeAgo, getTimeAgoShort } from './timeAgo';
+
+export { collectLeafHrefs, findActiveHref, containsHref } from './navigation';

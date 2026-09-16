@@ -17,13 +17,13 @@ import {
 type StatusFilter = 'ALL' | 'OPEN' | 'CONFIRMED';
 
 const FILTERS: { value: StatusFilter; label: string }[] = [
-  { value: 'ALL', label: 'الكل' },
   { value: 'OPEN', label: 'مفتوح' },
   { value: 'CONFIRMED', label: 'مكتمل' },
+  { value: 'ALL', label: 'الكل' },
 ];
 
 export default function CollectionsPage() {
-  const [status, setStatus] = useState<StatusFilter>('ALL');
+  const [status, setStatus] = useState<StatusFilter>('OPEN');
   const [batches, setBatches] = useState<SettlementBatchListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

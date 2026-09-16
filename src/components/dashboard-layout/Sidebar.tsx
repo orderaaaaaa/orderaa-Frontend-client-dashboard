@@ -18,6 +18,7 @@ import Image from 'next/image';
 import { useMemo } from 'react';
 import { navigation, NavigationItem } from '@/constants/Navbar';
 import { SIDEBAR_WIDTH } from '@/constants/dashboard-layout';
+import { findActiveHref, containsHref } from '@/utils/navigation';
 import Logo from '@/assets/images/updated-logo.png';
 import { useAuthStore } from '@/store/authStore';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -96,6 +97,11 @@ export function Sidebar({
       return acc;
     }, []);
   }, [isMerchant, isEmployee, permissions]);
+
+  const activeHref = useMemo(
+    () => findActiveHref(filteredNavigation, pathname),
+    [filteredNavigation, pathname],
+  );
 
   const activeItemStyle: React.CSSProperties = {
     backgroundColor: '#2C028F',
@@ -183,13 +189,11 @@ export function Sidebar({
           {/* Navigation */}
           <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto scrollbar-hide">
             {filteredNavigation.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = item.href === activeHref;
 
               if (item.children) {
                 const isOpen = openDropdown === item.name;
-                const hasActiveChild = item.children.some((sub) =>
-                  pathname.startsWith(sub.href)
-                );
+                const hasActiveChild = containsHref(item, activeHref);
 
                 return (
                   <div key={item.name}>
@@ -237,9 +241,7 @@ export function Sidebar({
 
                                 if (sub.children) {
                                   const isSubOpen = openSubDropdown === sub.name;
-                                  const hasActiveLeaf = sub.children.some((leaf) =>
-                                    pathname.startsWith(leaf.href)
-                                  );
+                                  const hasActiveLeaf = containsHref(sub, activeHref);
 
                                   return (
                                     <div key={sub.name}>
@@ -284,7 +286,7 @@ export function Sidebar({
                                           >
                                             <div className="ps-4 space-y-1">
                                               {sub.children.map((leaf) => {
-                                                const isLeafActive = pathname.startsWith(leaf.href);
+                                                const isLeafActive = leaf.href === activeHref;
                                                 const LeafIcon = leaf.icon;
                                                 return (
                                                   <Link
@@ -314,7 +316,7 @@ export function Sidebar({
                                   );
                                 }
 
-                                const isSubActive = pathname.startsWith(sub.href);
+                                const isSubActive = sub.href === activeHref;
 
                                 return (
                                   <Link
@@ -362,7 +364,7 @@ export function Sidebar({
                     ...(isActive ? activeItemStyle : {}),
                   }}
                   onClick={(e) => {
-                    if (isActive) {
+                    if (pathname === item.href) {
                       e.preventDefault();
                       return;
                     }

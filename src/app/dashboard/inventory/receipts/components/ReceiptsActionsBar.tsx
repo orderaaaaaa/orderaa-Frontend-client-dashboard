@@ -3,6 +3,7 @@
 import { memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { LiaFileExcelSolid, LiaFilePdfSolid } from 'react-icons/lia';
+import { FIXED_BOTTOM_BAR_CLASS } from '@/constants/dashboard-layout';
 
 interface ReceiptsActionsBarProps {
   selectedCount: number;
@@ -14,7 +15,9 @@ const ReceiptsActionsBar = memo(
     if (!isVisible || selectedCount === 0) return null;
 
     return (
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg py-4 px-6">
+      <div
+        className={`${FIXED_BOTTOM_BAR_CLASS} bg-white border-t border-gray-200 shadow-lg py-4 px-6`}
+      >
         <div className="mx-auto overflow-x-auto scrollbar-hide">
           <div className="pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
             <Button

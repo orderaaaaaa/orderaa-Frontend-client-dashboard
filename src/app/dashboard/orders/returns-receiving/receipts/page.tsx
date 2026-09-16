@@ -18,15 +18,13 @@ import {
 type ReviewFilter = 'ALL' | 'REVIEWED' | 'PENDING';
 
 const FILTERS: { value: ReviewFilter; label: string }[] = [
-  // Defaults to ALL: hiding reviewed receipts would make the page look empty
-  // and lose the audit value.
-  { value: 'ALL', label: 'الكل' },
   { value: 'PENDING', label: 'بانتظار المراجعة' },
   { value: 'REVIEWED', label: 'تمت مراجعتها' },
+  { value: 'ALL', label: 'الكل' },
 ];
 
 export default function ReturnReceiptsPage() {
-  const [filter, setFilter] = useState<ReviewFilter>('ALL');
+  const [filter, setFilter] = useState<ReviewFilter>('PENDING');
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [gallery, setGallery] = useState<{ title: string; images: string[] } | null>(
     null,
@@ -63,7 +61,7 @@ export default function ReturnReceiptsPage() {
     );
 
   if (isLoading) {
-    return <PageLoading message="جاري تحميل استلامات المرتجعات..." />;
+    return <PageLoading message="جاري تحميل إيصالات المرتجعات..." />;
   }
 
   return (
@@ -71,7 +69,7 @@ export default function ReturnReceiptsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-lg sm:text-xl font-bold text-gray-900">
-            استلامات المرتجعات
+            إيصالات المرتجعات
           </h1>
           <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
             إيصالات المرتجعات المستلمة، بصورها وطلباتها وحالة مراجعتها

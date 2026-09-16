@@ -8,6 +8,8 @@ import { AuthGuard } from '@/components/auth-guard';
 import { useSidebar } from '@/hooks/useSidebar';
 import { useAuthActions } from '@/hooks/useAuthActions';
 import { navigation } from '@/constants/Navbar';
+import { findActiveHref, containsHref } from '@/utils/navigation';
+import { SIDEBAR_WIDTH } from '@/constants/dashboard-layout';
 import { useFetchOrdersForSearch } from '@/services/orders';
 import {
   Sidebar,
@@ -90,14 +92,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // Auto-open dropdown if pathname matches a child route
   useEffect(() => {
+    const activeHref = findActiveHref(navigation, pathname);
     navigation.forEach((item) => {
-      if (item.children) {
-        const isChildActive = item.children.some((sub) =>
-          pathname.startsWith(sub.href)
-        );
-        if (isChildActive) {
-          setOpenDropdown(item.name);
-        }
+      if (item.children && containsHref(item, activeHref)) {
+        setOpenDropdown(item.name);
       }
     });
   }, [pathname, setOpenDropdown]);
@@ -109,7 +107,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <AuthGuard>
-      <div className="flex min-h-dvh bg-gray-50">
+      <div
+        className="flex min-h-dvh bg-gray-50"
+        style={
+          {
+            '--sidebar-w': isCollapsed
+              ? SIDEBAR_WIDTH.COLLAPSED_CSS
+              : SIDEBAR_WIDTH.EXPANDED_CSS,
+          } as React.CSSProperties
+        }
+      >
         <ErrorBoundary
           fallback={(reset) => <SidebarError onRetry={reset} />}
         >
