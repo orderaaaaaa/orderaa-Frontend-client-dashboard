@@ -40,6 +40,10 @@ export function RolesContent() {
   const { data: catalog = [], isLoading: isCatalogLoading } =
     usePermissionCatalogQuery(canReadRoles);
   const deleteMutation = useDeleteRoleMutation();
+  const customRolesWithoutLock = roles.filter(
+    (role) =>
+      !role.isSystem && !role.permissionCodes.includes(PERMISSIONS.ORDERS_LOCK_ACQUIRE)
+  );
 
   const openCreate = () => {
     setEditing(null);
@@ -142,6 +146,21 @@ export function RolesContent() {
                   </Button>
                 </Can>
               </div>
+
+              {customRolesWithoutLock.length > 0 && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800">
+                  <p>
+                    صلاحية «قفل الطلب عند فتحه» جديدة. الأدوار المخصصة لا تحصل
+                    عليها تلقائيًا، لذلك لن يقفل موظفوها الطلبات حتى تفعّلها
+                    لهم.
+                  </p>
+                  <p className="mt-1 text-sm">
+                    {customRolesWithoutLock
+                      .map((role) => role.name)
+                      .join('، ')}
+                  </p>
+                </div>
+              )}
 
               {roles.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-gray-400">

@@ -64,6 +64,7 @@ export const PERMISSION_CODES = {
   ORDERS_SETTLEMENT_MANAGE: 'orders:settlement:manage',
   ORDERS_STATISTICS_READ: 'orders:statistics:read',
   ORDERS_BYPASS_LOCK: 'orders:bypass-lock',
+  ORDERS_LOCK_ACQUIRE: 'orders:lock:acquire',
   FOLLOWUP_READ: 'followup:read',
   FOLLOWUP_MANAGE: 'followup:manage',
   CUSTOMERS_READ: 'customers:read',

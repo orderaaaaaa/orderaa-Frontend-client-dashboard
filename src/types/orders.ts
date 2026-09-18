@@ -495,7 +495,7 @@ export interface LockOrderSkippedResponse {
   orderId: number;
   message: string;
   skipped: true;
-  reason?: 'BYPASS_LOCK' | 'NO_ACQUIRE_PERMISSION';
+  reason: 'BYPASS_LOCK' | 'NO_ACQUIRE_PERMISSION';
 }
 
 export type LockOrderResponse =

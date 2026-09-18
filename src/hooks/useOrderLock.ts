@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/authStore';
 import { lockOrder, unlockOrder } from '@/lib/api/order';
 import { OrderLockedBy, LockOrderResponse, LockOrderSkippedResponse } from '@/types/orders';
 import { PERMISSION_CODES } from '@/lib/generated/permission-codes';
+import { hasPermissionCode } from '@/lib/permissions';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 
 let activeLockedOrderId: number | null = null;
@@ -63,6 +64,10 @@ export function useOrderLock({
   const isLockedByCurrentUser = lockedBy?.id === currentEmployeeId;
   const lockedByOther = lockedBy !== null && lockedBy !== undefined && !isLockedByCurrentUser;
   const canBypassLock = user?.permissions?.includes(PERMISSION_CODES.ORDERS_BYPASS_LOCK) === true;
+  const canAcquireLock = hasPermissionCode(
+    user?.permissions,
+    PERMISSION_CODES.ORDERS_LOCK_ACQUIRE
+  );
   const isLockedByOther = lockedByOther && !canBypassLock;
   const bypassedLockedBy = lockedByOther && canBypassLock ? (lockedBy ?? null) : null;
 
@@ -95,6 +100,8 @@ export function useOrderLock({
 
     if (hasAttemptedLock.current) return;
 
+    if (!canAcquireLock) return;
+
     const acquireLock = async () => {
       hasAttemptedLock.current = true;
       setIsLocking(true);
@@ -113,7 +120,7 @@ export function useOrderLock({
     };
 
     acquireLock();
-  }, [enabled, orderId, lockedBy, isLockedByCurrentUser]);
+  }, [enabled, orderId, lockedBy, isLockedByCurrentUser, canAcquireLock]);
 
   const unlock = useCallback(async () => {
     if (!orderId || !hasLockRef.current) return;
@@ -136,7 +143,11 @@ export function useOrderLock({
         queryKey: [QUERY_KEYS.ORDER_DETAILS, orderId],
       });
       if (response.released === false) {
-        toast.info('تغيّر حامل القفل، تم تحديث بيانات القفل');
+        if (response.previousLockedById === null) {
+          toast.info('الطلب غير مقفل بالفعل، تم تحديث بيانات القفل');
+        } else {
+          toast.info('تغيّر حامل القفل، تم تحديث بيانات القفل');
+        }
       } else {
         toast.success('تم فك قفل الطلب');
       }
