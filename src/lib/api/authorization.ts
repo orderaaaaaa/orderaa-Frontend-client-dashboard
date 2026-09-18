@@ -41,6 +41,7 @@ export interface MerchantRole {
   createdAt: string;
   updatedAt: string;
   permissionCodes: string[];
+  templateKey: string | null;
 }
 
 export interface MerchantRoleSummary extends MerchantRole {
@@ -74,6 +75,21 @@ export type UpdateRoleBody = Partial<CreateRoleBody>;
 export interface DeleteRoleResponse {
   success: boolean;
   message: string;
+}
+
+export interface ResetNameConflict {
+  roleId: number;
+  roleName: string;
+  templateName: string;
+  conflictingRoleId: number;
+  conflictingRoleName: string;
+}
+
+export interface ResetAllRolesResponse {
+  resetRoleIds: number[];
+  createdRoleIds: number[];
+  skippedRoleIds: number[];
+  nameConflicts: ResetNameConflict[];
 }
 
 export async function getPermissionCatalog(): Promise<PermissionCatalogGroup[]> {
@@ -115,6 +131,16 @@ export async function deleteRole(
   const { data } = await api.delete<DeleteRoleResponse>(
     `/roles/${id}${force ? '?force=true' : ''}`
   );
+  return data;
+}
+
+export async function resetRoleToTemplate(id: number): Promise<MerchantRole> {
+  const { data } = await api.post<MerchantRole>(`/roles/${id}/reset-to-template`);
+  return data;
+}
+
+export async function resetAllRolesToTemplates(): Promise<ResetAllRolesResponse> {
+  const { data } = await api.post<ResetAllRolesResponse>('/roles/reset-all');
   return data;
 }
 

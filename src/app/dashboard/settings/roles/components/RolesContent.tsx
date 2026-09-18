@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { toast } from 'react-toastify';
-import { LiaPlusSolid, LiaUserShieldSolid } from 'react-icons/lia';
+import { LiaPlusSolid, LiaUndoSolid, LiaUserShieldSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import BaseModal from '@/components/ui/base-modal';
@@ -15,6 +15,8 @@ import type { MerchantRoleSummary } from '@/lib/api/authorization';
 import {
   useDeleteRoleMutation,
   usePermissionCatalogQuery,
+  useResetAllRolesMutation,
+  useResetRoleToTemplateMutation,
   useRolesQuery,
 } from '@/services/authorization';
 import { RolesTable } from './RolesTable';
@@ -31,6 +33,10 @@ export function RolesContent() {
   /** Flipped by a 409 from the backend: the role is still assigned. */
   const [forceDelete, setForceDelete] = useState(false);
   const [conflictMessage, setConflictMessage] = useState<string | null>(null);
+  const [pendingReset, setPendingReset] = useState<MerchantRoleSummary | null>(
+    null
+  );
+  const [isResetAllOpen, setIsResetAllOpen] = useState(false);
 
   const {
     data: roles = [],
@@ -40,9 +46,13 @@ export function RolesContent() {
   const { data: catalog = [], isLoading: isCatalogLoading } =
     usePermissionCatalogQuery(canReadRoles);
   const deleteMutation = useDeleteRoleMutation();
+  const resetMutation = useResetRoleToTemplateMutation();
+  const resetAllMutation = useResetAllRolesMutation();
   const customRolesWithoutLock = roles.filter(
     (role) =>
-      !role.isSystem && !role.permissionCodes.includes(PERMISSIONS.ORDERS_LOCK_ACQUIRE)
+      !role.isSystem &&
+      role.templateKey === null &&
+      !role.permissionCodes.includes(PERMISSIONS.ORDERS_LOCK_ACQUIRE)
   );
 
   const openCreate = () => {
@@ -94,6 +104,43 @@ export function RolesContent() {
     }
   };
 
+  const confirmReset = async () => {
+    if (!pendingReset) return;
+    try {
+      await resetMutation.mutateAsync(pendingReset.id);
+      toast.success('تمت إعادة الدور للقالب');
+      setPendingReset(null);
+    } catch (err: unknown) {
+      toast.error(getApiErrorMessage(err, 'تعذرت إعادة التعيين'));
+    }
+  };
+
+  const confirmResetAll = async () => {
+    try {
+      const result = await resetAllMutation.mutateAsync();
+      toast.success(
+        `تمت إعادة تعيين ${result.resetRoleIds.length} دور وإنشاء ${result.createdRoleIds.length} دور`
+      );
+      if (result.skippedRoleIds.length > 0) {
+        toast.warn('بعض الأدوار لم تتم إعادتها لأن قوالبها لم تعد متاحة');
+      }
+      if (result.nameConflicts.length > 0) {
+        const list = result.nameConflicts
+          .map(
+            (conflict) =>
+              `${conflict.roleName} («${conflict.conflictingRoleName}»)`
+          )
+          .join('، ');
+        toast.warn(
+          `لم تتم إعادة ${result.nameConflicts.length} دور لأن أسماء قوالبها مستخدمة: ${list}`
+        );
+      }
+      setIsResetAllOpen(false);
+    } catch (err: unknown) {
+      toast.error(getApiErrorMessage(err, 'تعذرت إعادة التعيين'));
+    }
+  };
+
   if (!canReadRoles) {
     return (
       <div className="w-full max-w-full overflow-x-hidden p-4">
@@ -139,12 +186,26 @@ export function RolesContent() {
                 <p className="text-sm text-gray-500">
                   {roles.length ? `${roles.length} دور` : 'لا توجد أدوار بعد'}
                 </p>
-                <Can code={PERMISSIONS.ROLES_CREATE}>
-                  <Button className="rounded-full" onClick={openCreate}>
-                    <LiaPlusSolid className="ml-1 size-4" />
-                    إضافة دور
-                  </Button>
-                </Can>
+                <div className="flex items-center gap-2">
+                  <Can code={PERMISSIONS.ROLES_CREATE}>
+                    <Button className="rounded-full" onClick={openCreate}>
+                      <LiaPlusSolid className="ml-1 size-4" />
+                      إضافة دور
+                    </Button>
+                  </Can>
+                  {roles.length > 0 && (
+                    <Can code={PERMISSIONS.ROLES_UPDATE}>
+                      <Button
+                        variant="outline"
+                        className="rounded-full"
+                        onClick={() => setIsResetAllOpen(true)}
+                      >
+                        <LiaUndoSolid className="ml-1 size-4" />
+                        إعادة تعيين الكل
+                      </Button>
+                    </Can>
+                  )}
+                </div>
               </div>
 
               {customRolesWithoutLock.length > 0 && (
@@ -183,6 +244,7 @@ export function RolesContent() {
                   roles={roles}
                   onEdit={openEdit}
                   onDelete={openDelete}
+                  onReset={setPendingReset}
                 />
               )}
             </div>
@@ -234,6 +296,41 @@ export function RolesContent() {
             )
           )}
         </div>
+      </BaseModal>
+
+      <BaseModal
+        isOpen={!!pendingReset}
+        onClose={() => setPendingReset(null)}
+        title="إعادة الدور للقالب"
+        confirmText="إعادة للقالب"
+        onConfirm={confirmReset}
+        isLoading={resetMutation.isPending}
+        maxWidth="md:max-w-[460px]"
+      >
+        <p className="text-sm text-gray-600">
+          سيتم استبدال اسم الدور{' '}
+          <span className="font-semibold text-gray-900">
+            {pendingReset?.name}
+          </span>{' '}
+          ووصفه وصلاحياته بما في القالب الأصلي. سيتم فقدان أي تعديل قمت به على
+          هذا الدور.
+        </p>
+      </BaseModal>
+
+      <BaseModal
+        isOpen={isResetAllOpen}
+        onClose={() => setIsResetAllOpen(false)}
+        title="إعادة تعيين كل الأدوار"
+        confirmText="إعادة تعيين الكل"
+        onConfirm={confirmResetAll}
+        isLoading={resetAllMutation.isPending}
+        maxWidth="md:max-w-[460px]"
+      >
+        <p className="text-sm text-gray-600">
+          سيتم إرجاع اسم ووصف وصلاحيات كل الأدوار المأخوذة من القوالب إلى
+          القالب، وإعادة إنشاء الأدوار الافتراضية المحذوفة. الأدوار المخصصة لن
+          تتغير.
+        </p>
       </BaseModal>
     </div>
   );

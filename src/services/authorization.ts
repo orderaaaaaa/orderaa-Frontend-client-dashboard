@@ -14,6 +14,8 @@ import {
   getRole,
   getRoles,
   replaceEmployeeRoles,
+  resetAllRolesToTemplates,
+  resetRoleToTemplate,
   updateRole,
   type CreateRoleBody,
   type UpdateRoleBody,
@@ -89,6 +91,22 @@ export const useUpdateRoleMutation = () => {
   return useMutation({
     mutationFn: ({ id, body }: { id: number; body: UpdateRoleBody }) =>
       updateRole(id, body),
+    onSuccess: invalidate,
+  });
+};
+
+export const useResetRoleToTemplateMutation = () => {
+  const invalidate = useRolesInvalidation();
+  return useMutation({
+    mutationFn: (id: number) => resetRoleToTemplate(id),
+    onSuccess: invalidate,
+  });
+};
+
+export const useResetAllRolesMutation = () => {
+  const invalidate = useRolesInvalidation();
+  return useMutation({
+    mutationFn: () => resetAllRolesToTemplates(),
     onSuccess: invalidate,
   });
 };

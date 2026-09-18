@@ -1,6 +1,6 @@
 'use client';
 
-import { LiaEditSolid, LiaEyeSolid, LiaLockSolid, LiaTrashSolid } from 'react-icons/lia';
+import { LiaEditSolid, LiaEyeSolid, LiaLockSolid, LiaTrashSolid, LiaUndoSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { Can } from '@/components/Can';
 import { PERMISSIONS } from '@/lib/permissions';
@@ -10,6 +10,7 @@ interface RolesTableProps {
   roles: MerchantRoleSummary[];
   onEdit: (role: MerchantRoleSummary) => void;
   onDelete: (role: MerchantRoleSummary) => void;
+  onReset: (role: MerchantRoleSummary) => void;
 }
 
 const Badge = ({
@@ -26,7 +27,7 @@ const Badge = ({
   </span>
 );
 
-export function RolesTable({ roles, onEdit, onDelete }: RolesTableProps) {
+export function RolesTable({ roles, onEdit, onDelete, onReset }: RolesTableProps) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm" dir="rtl">
@@ -76,6 +77,10 @@ export function RolesTable({ roles, onEdit, onDelete }: RolesTableProps) {
                     <LiaLockSolid className="size-3" />
                     دور أساسي
                   </Badge>
+                ) : role.templateKey !== null ? (
+                  <Badge className="bg-purple-100 text-purple-700">
+                    من قالب
+                  </Badge>
                 ) : (
                   <Badge className="bg-blue-100 text-blue-700">دور مخصص</Badge>
                 )}
@@ -105,6 +110,18 @@ export function RolesTable({ roles, onEdit, onDelete }: RolesTableProps) {
                           تعديل
                         </Button>
                       </Can>
+                      {role.templateKey !== null && (
+                        <Can code={PERMISSIONS.ROLES_UPDATE}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => onReset(role)}
+                          >
+                            <LiaUndoSolid className="ml-1 size-4" />
+                            إعادة للقالب
+                          </Button>
+                        </Can>
+                      )}
                       <Can code={PERMISSIONS.ROLES_DELETE}>
                         <Button
                           size="sm"
