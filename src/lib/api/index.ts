@@ -2,6 +2,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { readStoredLocale } from '@/i18n/locale';
 import { translate } from '@/i18n/translate';
+import { refreshPermissions, syncPermissionsVersion } from './permissionsVersion';
 
 function extractMessage(data: unknown): string | undefined {
   const message = (data as { message?: string | string[] } | undefined)?.message;
@@ -61,7 +62,10 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    syncPermissionsVersion(api, response.headers['x-permissions-version']);
+    return response;
+  },
   (error) => {
     const isAuthEndpoint = error.config?.url?.startsWith('/auth/');
 
@@ -82,6 +86,8 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    syncPermissionsVersion(api, error.response?.headers?.['x-permissions-version']);
+
     // ABAC: the backend PermissionGuard answers 403 when the caller's roles
     // don't grant the endpoint. Surface it once, in Arabic, without touching
     // the 401 sign-out path above. Callers may still catch and handle it.
@@ -98,6 +104,7 @@ api.interceptors.response.use(
       // Same toastId for identical copy → a burst of parallel denied requests
       // (a dashboard fanning out queries) shows one toast, not ten.
       toast.error(message, { toastId: `forbidden:${message}` });
+      refreshPermissions(api);
     }
 
     return Promise.reject(error);

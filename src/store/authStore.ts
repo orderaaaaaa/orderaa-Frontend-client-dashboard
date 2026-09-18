@@ -35,6 +35,7 @@ interface User {
    * before ABAC shipped — see `hasPermissionCode` in `@/lib/permissions`.
    */
   permissions?: string[];
+  permissionsVersion?: number;
 }
 
 export type { User };
