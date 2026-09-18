@@ -18,6 +18,9 @@ interface OrderDetailsInfoProps {
   navigationFilters?: FilterOrdersDto;
   isLockedByOther?: boolean;
   lockedBy?: OrderLockedBy | null;
+  bypassedLockedBy?: OrderLockedBy | null;
+  onForceUnlock?: () => void;
+  isForceUnlocking?: boolean;
   isBlocked?: boolean;
   onUnlock?: () => Promise<void>;
 }
@@ -31,6 +34,9 @@ function OrderDetailsInfo({
   navigationFilters,
   isLockedByOther,
   lockedBy,
+  bypassedLockedBy,
+  onForceUnlock,
+  isForceUnlocking,
   isBlocked,
   onUnlock,
 }: OrderDetailsInfoProps) {
@@ -40,6 +46,9 @@ function OrderDetailsInfo({
         order={order}
         isLockedByOther={isLockedByOther}
         lockedBy={lockedBy}
+        bypassedLockedBy={bypassedLockedBy}
+        onForceUnlock={onForceUnlock}
+        isForceUnlocking={isForceUnlocking}
       />
       <OrderDetailsInfoStatus order={order} isLockedByOther={isLockedByOther} />
       <OrderDetailsProductCard

@@ -484,6 +484,31 @@ export interface OrderLockedBy {
   department: string;
 }
 
+export interface LockOrderAcquiredResponse {
+  orderId: number;
+  lockedBy: { id: number; department: string } | null;
+  lockedAt: string | null;
+  message: string;
+}
+
+export interface LockOrderSkippedResponse {
+  orderId: number;
+  message: string;
+  skipped: true;
+  reason?: 'BYPASS_LOCK' | 'NO_ACQUIRE_PERMISSION';
+}
+
+export type LockOrderResponse =
+  | LockOrderAcquiredResponse
+  | LockOrderSkippedResponse;
+
+export interface UnlockOrderResponse {
+  orderId: number;
+  message: string;
+  released?: boolean;
+  previousLockedById?: number | null;
+}
+
 export interface OrderState {
   note: string;
   createdAt: string;

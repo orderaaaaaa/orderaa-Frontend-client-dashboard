@@ -1,7 +1,11 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 import { useAuthStore } from '@/store/authStore';
 import { lockOrder, unlockOrder } from '@/lib/api/order';
-import { OrderLockedBy } from '@/types/orders';
+import { OrderLockedBy, LockOrderResponse, LockOrderSkippedResponse } from '@/types/orders';
+import { PERMISSION_CODES } from '@/lib/generated/permission-codes';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
 
 let activeLockedOrderId: number | null = null;
 
@@ -17,6 +21,11 @@ export async function unlockActiveOrder(): Promise<void> {
   }
 }
 
+const isLockSkipped = (
+  response: LockOrderResponse
+): response is LockOrderSkippedResponse =>
+  'skipped' in response && response.skipped === true;
+
 interface UseOrderLockOptions {
   orderId: number | null;
   lockedBy: OrderLockedBy | null | undefined;
@@ -26,9 +35,12 @@ interface UseOrderLockOptions {
 interface UseOrderLockResult {
   isLockedByOther: boolean;
   lockedBy: OrderLockedBy | null;
+  bypassedLockedBy: OrderLockedBy | null;
   isLocking: boolean;
   lockError: string | null;
   unlock: () => Promise<void>;
+  forceUnlock: () => Promise<void>;
+  isForceUnlocking: boolean;
 }
 
 export function useOrderLock({
@@ -39,7 +51,9 @@ export function useOrderLock({
   const [isLocking, setIsLocking] = useState(false);
   const [lockError, setLockError] = useState<string | null>(null);
   const [hasLock, setHasLock] = useState(false);
+  const [isForceUnlocking, setIsForceUnlocking] = useState(false);
   const user = useAuthStore((state) => state.user);
+  const queryClient = useQueryClient();
 
   const hasLockRef = useRef(false);
   const orderIdRef = useRef<number | null>(null);
@@ -47,7 +61,10 @@ export function useOrderLock({
 
   const currentEmployeeId = user?.employeeId;
   const isLockedByCurrentUser = lockedBy?.id === currentEmployeeId;
-  const isLockedByOther = lockedBy !== null && lockedBy !== undefined && !isLockedByCurrentUser;
+  const lockedByOther = lockedBy !== null && lockedBy !== undefined && !isLockedByCurrentUser;
+  const canBypassLock = user?.permissions?.includes(PERMISSION_CODES.ORDERS_BYPASS_LOCK) === true;
+  const isLockedByOther = lockedByOther && !canBypassLock;
+  const bypassedLockedBy = lockedByOther && canBypassLock ? (lockedBy ?? null) : null;
 
   useEffect(() => {
     hasLockRef.current = hasLock;
@@ -72,9 +89,7 @@ export function useOrderLock({
     }
 
     if (lockedBy !== null && lockedBy !== undefined) {
-      if (isLockedByCurrentUser) {
-        setHasLock(true);
-      }
+      setHasLock(isLockedByCurrentUser);
       return;
     }
 
@@ -86,7 +101,8 @@ export function useOrderLock({
       setLockError(null);
 
       try {
-        await lockOrder(orderId);
+        const response = await lockOrder(orderId);
+        if (isLockSkipped(response)) return;
         setHasLock(true);
       } catch (error: any) {
         console.error('Failed to lock order:', error);
@@ -100,7 +116,7 @@ export function useOrderLock({
   }, [enabled, orderId, lockedBy, isLockedByCurrentUser]);
 
   const unlock = useCallback(async () => {
-    if (!orderId || isLockedByOther) return;
+    if (!orderId || !hasLockRef.current) return;
 
     try {
       await unlockOrder(orderId);
@@ -108,7 +124,26 @@ export function useOrderLock({
     } catch (error) {
       console.error('Failed to unlock order:', error);
     }
-  }, [orderId, isLockedByOther]);
+  }, [orderId]);
+
+  const forceUnlock = useCallback(async () => {
+    if (!orderId) return;
+
+    setIsForceUnlocking(true);
+    try {
+      const response = await unlockOrder(orderId);
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORDER_DETAILS, orderId],
+      });
+      if (response.released === false) {
+        toast.info('تغيّر حامل القفل، تم تحديث بيانات القفل');
+      } else {
+        toast.success('تم فك قفل الطلب');
+      }
+    } finally {
+      setIsForceUnlocking(false);
+    }
+  }, [orderId, queryClient]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -133,8 +168,11 @@ export function useOrderLock({
   return {
     isLockedByOther,
     lockedBy: lockedBy ?? null,
+    bypassedLockedBy,
     isLocking,
     lockError,
     unlock,
+    forceUnlock,
+    isForceUnlocking,
   };
 }

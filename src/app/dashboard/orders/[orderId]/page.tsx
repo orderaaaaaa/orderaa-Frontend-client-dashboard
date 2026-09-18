@@ -25,6 +25,8 @@ import { Button } from '@/components/ui/button';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import { Breadcrumb } from '@/components/dashboard-layout';
 import { OrderLockedModal } from '@/components/OrderDetails/modals/OrderLockedModal';
+import { toast } from 'react-toastify';
+import { getApiErrorMessage } from '@/utils/apiError';
 
 function OrderDetailsContent({ params }: { params: { orderId: string } }) {
   const orderId = parseInt(params.orderId);
@@ -37,11 +39,20 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
 
   const error = queryError ? 'فشل في تحميل بيانات الطلب' : null;
 
-  const { isLockedByOther, lockedBy, unlock } = useOrderLock({
-    orderId: order?.id ?? null,
-    lockedBy: order?.locked_by,
-    enabled: !!order,
-  });
+  const { isLockedByOther, lockedBy, bypassedLockedBy, unlock, forceUnlock, isForceUnlocking } =
+    useOrderLock({
+      orderId: order?.id ?? null,
+      lockedBy: order?.locked_by,
+      enabled: !!order,
+    });
+
+  const handleForceUnlock = async () => {
+    try {
+      await forceUnlock();
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, 'تعذر فك قفل الطلب'));
+    }
+  };
 
   const { statistics } = useOrderStatistics();
   const { options } = useFilterOptions();
@@ -353,6 +364,9 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
           navigationFilters={apiFilters}
           isLockedByOther={isLockedByOther}
           lockedBy={lockedBy}
+          bypassedLockedBy={bypassedLockedBy}
+          onForceUnlock={handleForceUnlock}
+          isForceUnlocking={isForceUnlocking}
           onUnlock={unlock}
         />
       </div>

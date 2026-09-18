@@ -1,5 +1,5 @@
 import api from './index';
-import { Order, FilterOrdersDto, PaginatedResponse, FilterOptionsResponse, OrderStatisticsResponse } from '@/types/orders';
+import { Order, FilterOrdersDto, PaginatedResponse, FilterOptionsResponse, OrderStatisticsResponse, LockOrderResponse, UnlockOrderResponse } from '@/types/orders';
 import type { PartialDeliveryData, PartialDeliveryResponse } from '@/types/logistics';
 
 export async function getOrders(
@@ -200,20 +200,14 @@ export async function cancelOrder(
   }
 }
 
-export async function lockOrder(orderId: number): Promise<void> {
-  try {
-    await api.post(`/orders/${orderId}/lock`);
-  } catch (error) {
-    throw error;
-  }
+export async function lockOrder(orderId: number): Promise<LockOrderResponse> {
+  const response = await api.post<LockOrderResponse>(`/orders/${orderId}/lock`);
+  return response.data;
 }
 
-export async function unlockOrder(orderId: number): Promise<void> {
-  try {
-    await api.post(`/orders/${orderId}/unlock`);
-  } catch (error) {
-    throw error;
-  }
+export async function unlockOrder(orderId: number): Promise<UnlockOrderResponse> {
+  const response = await api.post<UnlockOrderResponse>(`/orders/${orderId}/unlock`);
+  return response.data;
 }
 export async function recordPartialDelivery({
   orderId,

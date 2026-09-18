@@ -13,12 +13,18 @@ interface OrderDetailsCardIdProps {
   order: Order;
   isLockedByOther?: boolean;
   lockedBy?: OrderLockedBy | null;
+  bypassedLockedBy?: OrderLockedBy | null;
+  onForceUnlock?: () => void;
+  isForceUnlocking?: boolean;
 }
 
 const OrderDetailsCardId = ({
   order,
   isLockedByOther,
   lockedBy,
+  bypassedLockedBy,
+  onForceUnlock,
+  isForceUnlocking,
 }: OrderDetailsCardIdProps) => {
   const [copied, setCopied] = useState(false);
   const [isCustomerOrdersModalOpen, setIsCustomerOrdersModalOpen] =
@@ -168,6 +174,14 @@ const OrderDetailsCardId = ({
             <div className="flex flex-col sm:flex-row xl:flex-row gap-2 sm:px-5">
               {isLockedByOther && lockedBy && (
                 <OrderLockedBanner lockedBy={lockedBy} />
+              )}
+              {bypassedLockedBy && (
+                <OrderLockedBanner
+                  lockedBy={bypassedLockedBy}
+                  bypass
+                  onForceUnlock={onForceUnlock}
+                  isUnlocking={isForceUnlocking}
+                />
               )}
               {(order?.customers?.totalCustomerOrders ?? 0) > 1 && (
                 <button
