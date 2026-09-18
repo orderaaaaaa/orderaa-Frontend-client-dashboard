@@ -67,6 +67,10 @@ export const QUERY_KEYS = {
 
   // Integrations
   INTEGRATION_CONFIGS: 'integration-configs',
+  INTEGRATION_STOCK_PUSH_LOG: 'integration-stock-push-log',
+  INTEGRATION_STOCK_UNLINKED: 'integration-stock-unlinked',
+  INTEGRATION_STOCK_POLICY_LOG: 'integration-stock-policy-log',
+  INTEGRATION_SHOPIFY_LOCATIONS: 'integration-shopify-locations',
 
   // Automation
   AUTOMATION_CONFIGS: 'automation-configs',

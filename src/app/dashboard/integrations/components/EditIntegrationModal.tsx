@@ -20,6 +20,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ProviderModalConfig } from '../constants/providerConfig';
+import StockSyncSection from './StockSyncSection';
 
 const URL_PATTERN = /^(https?:\/\/)?[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+/;
 
@@ -485,6 +486,8 @@ const EditIntegrationModal = ({
             إضافة Client Secret
           </Button>
         )}
+
+        {apiConfig && <StockSyncSection config={apiConfig} />}
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm text-center">
