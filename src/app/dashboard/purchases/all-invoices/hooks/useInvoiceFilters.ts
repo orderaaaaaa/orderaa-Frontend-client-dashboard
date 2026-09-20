@@ -2,12 +2,13 @@ import { useState, useCallback, useMemo } from 'react';
 import { useDebounce } from '@/utils/debounce';
 import { calculateDateRangeFromPeriod, TimePeriod } from '@/utils/dateRangeUtils';
 import { InvoiceFilters } from '../types';
+import { DEFAULT_RECEIVING_STATUS, ReceivingStatus } from '@/components/purchases/receivingStatus';
 
 const INITIAL_FILTERS: InvoiceFilters = {
   searchQuery: '',
   supplierName: '',
   transactionType: '',
-  acceptanceStatus: '',
+  receivingStatus: DEFAULT_RECEIVING_STATUS,
   totalAmountFrom: '',
   totalAmountTo: '',
   employeeName: '',
@@ -39,8 +40,17 @@ export function useInvoiceFilters() {
   const clearFilter = useCallback((key: keyof InvoiceFilters) => {
     setFilters((prev) => ({
       ...prev,
-      [key]: key === 'fromDate' || key === 'toDate' ? null : '',
+      [key]:
+        key === 'fromDate' || key === 'toDate'
+          ? null
+          : key === 'receivingStatus'
+            ? DEFAULT_RECEIVING_STATUS
+            : '',
     }));
+  }, []);
+
+  const setReceivingStatus = useCallback((status: ReceivingStatus) => {
+    setFilters((prev) => ({ ...prev, receivingStatus: status }));
   }, []);
 
   const setFromDate = useCallback((date: Date | null) => {
@@ -70,7 +80,6 @@ export function useInvoiceFilters() {
       !!debouncedSearchQuery ||
       !!filters.supplierName ||
       !!filters.transactionType ||
-      !!filters.acceptanceStatus ||
       !!filters.totalAmountFrom ||
       !!filters.totalAmountTo ||
       !!filters.employeeName ||
@@ -90,5 +99,6 @@ export function useInvoiceFilters() {
     setFromDate,
     setToDate,
     setTimePeriod,
+    setReceivingStatus,
   };
 }

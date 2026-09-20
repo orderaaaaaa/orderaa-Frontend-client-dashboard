@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import InvoicesHeader from './InvoicesHeader';
 import InvoicesSearchBar from './InvoicesSearchBar';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
+import ToggleGroup from '@/components/ui/toggle-group';
 import InvoicesFilterBar from './InvoicesFilterBar';
 import InvoiceCard from './InvoiceCard';
 import InvoiceDetailModal from './InvoiceDetailModal';
@@ -18,6 +19,7 @@ import { Invoice } from '../types';
 import { useInvoiceFilters } from '../hooks';
 import { useSupplierInvoicesQuery, useSuppliersQuery } from '@/services/suppliers';
 import { useEmployeesQuery } from '@/services/employees';
+import { RECEIVING_STATUS_OPTIONS, receivingStatusToApproved } from '@/components/purchases/receivingStatus';
 
 export function AllInvoicesContent() {
   const [select, setSelect] = useState(false);
@@ -40,6 +42,7 @@ export function AllInvoicesContent() {
     setFromDate,
     setToDate,
     setTimePeriod,
+    setReceivingStatus,
   } = useInvoiceFilters();
 
   const { data: suppliersData } = useSuppliersQuery({ limit: 200 });
@@ -63,6 +66,10 @@ export function AllInvoicesContent() {
 
   const apiType = (filters.transactionType || undefined) as 'PURCHASE' | 'RETURN' | 'PAID' | undefined;
 
+  const totalAmountMin = filters.totalAmountFrom ? Number(filters.totalAmountFrom) : undefined;
+  const totalAmountMax = filters.totalAmountTo ? Number(filters.totalAmountTo) : undefined;
+  const employeeId = filters.employeeName ? Number(filters.employeeName) : undefined;
+
   const { data: invoicesData, isLoading } = useSupplierInvoicesQuery({
     page: currentPage,
     limit: pageSize,
@@ -70,50 +77,29 @@ export function AllInvoicesContent() {
     type: apiType,
     dateFrom: formatDateToLocalDate(filters.fromDate),
     dateTo: formatDateToLocalDate(filters.toDate),
+    approved: receivingStatusToApproved(filters.receivingStatus),
+    search: debouncedSearchQuery || undefined,
+    totalAmountMin: !isNaN(totalAmountMin as number) ? totalAmountMin : undefined,
+    totalAmountMax: !isNaN(totalAmountMax as number) ? totalAmountMax : undefined,
+    createdByEmployeeId: !isNaN(employeeId as number) ? employeeId : undefined,
   });
 
   const apiInvoices = (invoicesData?.data ?? []) as Invoice[];
   const meta = invoicesData?.meta;
 
-  const invoicesToDisplay = useMemo(() => {
-    let result = apiInvoices;
-
-    if (debouncedSearchQuery) {
-      const query = debouncedSearchQuery.toLowerCase();
-      result = result.filter((inv) =>
-        inv.code.toLowerCase().includes(query) ||
-        inv.supplier.name.toLowerCase().includes(query) ||
-        inv.supplier.nickname.toLowerCase().includes(query),
-      );
-    }
-
-    if (filters.totalAmountFrom) {
-      const min = parseFloat(filters.totalAmountFrom);
-      if (!isNaN(min)) {
-        result = result.filter((inv) => inv.totalAmount >= min);
-      }
-    }
-    if (filters.totalAmountTo) {
-      const max = parseFloat(filters.totalAmountTo);
-      if (!isNaN(max)) {
-        result = result.filter((inv) => inv.totalAmount <= max);
-      }
-    }
-
-    if (filters.employeeName) {
-      result = result.filter((inv) => inv.createdByEmployee?.id === Number(filters.employeeName));
-    }
-
-    if (filters.acceptanceStatus) {
-      result = result.filter((inv) => inv.acceptanceStatus === filters.acceptanceStatus);
-    }
-
-    return result;
-  }, [apiInvoices, debouncedSearchQuery, filters.totalAmountFrom, filters.totalAmountTo, filters.employeeName, filters.acceptanceStatus]);
-
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters.supplierName, filters.transactionType, filters.fromDate, filters.toDate]);
+  }, [
+    debouncedSearchQuery,
+    filters.receivingStatus,
+    filters.supplierName,
+    filters.transactionType,
+    filters.totalAmountFrom,
+    filters.totalAmountTo,
+    filters.employeeName,
+    filters.fromDate,
+    filters.toDate,
+  ]);
 
   const totalItems = meta?.totalItems ?? 0;
   const totalPages = meta?.totalPages ?? 1;
@@ -175,9 +161,8 @@ export function AllInvoicesContent() {
     if (filters.transactionType) count++;
     if (filters.totalAmountFrom || filters.totalAmountTo) count++;
     if (filters.employeeName) count++;
-    if (filters.acceptanceStatus) count++;
     return count;
-  }, [filters.supplierName, filters.transactionType, filters.totalAmountFrom, filters.totalAmountTo, filters.employeeName, filters.acceptanceStatus]);
+  }, [filters.supplierName, filters.transactionType, filters.totalAmountFrom, filters.totalAmountTo, filters.employeeName]);
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">
@@ -230,6 +215,11 @@ export function AllInvoicesContent() {
           </div>
         </div>
         <div className="flex flex-row flex-wrap items-center justify-between gap-3">
+          <ToggleGroup
+            options={RECEIVING_STATUS_OPTIONS}
+            value={filters.receivingStatus}
+            onChange={setReceivingStatus}
+          />
           <DateRangeFilter
             fromDate={filters.fromDate}
             toDate={filters.toDate}
@@ -275,8 +265,8 @@ export function AllInvoicesContent() {
           <div className="flex items-center justify-center py-16">
             <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : invoicesToDisplay.length > 0 ? (
-          invoicesToDisplay.map((invoice) => (
+        ) : apiInvoices.length > 0 ? (
+          apiInvoices.map((invoice) => (
             <InvoiceCard
               key={invoice.id}
               invoice={invoice}
@@ -303,7 +293,11 @@ export function AllInvoicesContent() {
             ) : (
               <>
                 <p className="text-lg font-semibold text-gray-400">
-                  لا توجد فواتير
+                  {filters.receivingStatus === 'pending'
+                    ? 'لا توجد فواتير قيد الاستلام'
+                    : filters.receivingStatus === 'received'
+                      ? 'لا توجد فواتير مستلمة'
+                      : 'لا توجد فواتير'}
                 </p>
                 <p className="text-sm text-gray-400">
                   قم بانشاء فاتورة جديدة للبدء

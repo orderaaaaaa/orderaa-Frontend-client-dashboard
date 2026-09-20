@@ -1,5 +1,5 @@
 import React from 'react';
-import { LiaEditSolid } from 'react-icons/lia';
+import { LiaEditSolid, LiaListUlSolid } from 'react-icons/lia';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProductConfirmOutOfStockMode, VariantItem } from '../types/products';
@@ -37,10 +37,6 @@ interface ProductsTableMobileProps {
   toggleSelect: (id: number) => void;
   openSoldModal: (productId: number) => void;
   openEditModal: (productId: number, variants: VariantItem[]) => void;
-  /**
-   * Opens the "تعديل خصائص المنتج والخيارات" popup. The parent owns the
-   * attribute-options fetch and its error fallback — never fetch here.
-   */
   openEditAttrsModal: (productId: number) => void;
 }
 
@@ -115,37 +111,17 @@ function ProductsTableMobile({
 
         <div className={isRefetching ? 'opacity-50 pointer-events-none' : ''}>
           {data?.data.map((product) => {
-            // The whole box is the tap target: below md the desktop table —
-            // and with it the image/name triggers for this popup — is hidden,
-            // so the card is the only way to reach it on a phone (T19).
-            // Select mode wins: while picking products to merge, a tap ticks
-            // the box instead of opening the popup.
-            const handleCardActivate = () => {
-              if (showCheckboxes) {
-                toggleSelect(product.id);
-                return;
-              }
-              openEditAttrsModal(product.id);
+            const handleCardTap = () => {
+              toggleSelect(product.id);
             };
 
             return (
               <div
                 key={product.id}
-                role="button"
-                tabIndex={0}
-                aria-label={
-                  showCheckboxes
-                    ? `تحديد ${product.name}`
-                    : `تعديل خصائص ${product.name}`
-                }
-                onClick={handleCardActivate}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleCardActivate();
-                  }
-                }}
-                className={`border rounded-xl p-4 bg-white shadow-sm mb-3 cursor-pointer ${
+                {...(showCheckboxes ? { onClick: handleCardTap } : {})}
+                className={`border rounded-xl p-4 bg-white shadow-sm mb-3 ${
+                  showCheckboxes ? 'cursor-pointer' : ''
+                } ${
                   selectedIds.includes(product.id)
                     ? 'ring-2 ring-primary/30 border-primary/30'
                     : ''
@@ -171,7 +147,7 @@ function ProductsTableMobile({
                       الطلبات: {product.totalOrders}
                     </span>
 
-                    <div className="flex justify-between items-center mt-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mt-2">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -189,14 +165,25 @@ function ProductsTableMobile({
                         size="sm"
                         onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                           e.stopPropagation();
+                          openEditAttrsModal(product.id);
+                        }}
+                        className="text-primary min-h-10"
+                      >
+                        <LiaEditSolid /> تعديل المتغيرات
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                          e.stopPropagation();
                           openEditModal(
                             product.id,
                             product.extraDetails?.variants || [],
                           );
                         }}
-                        className="text-primary"
+                        className="min-h-10"
                       >
-                        <LiaEditSolid /> تعديل
+                        <LiaListUlSolid /> المواصفات
                       </Button>
                     </div>
 
@@ -241,16 +228,6 @@ function ProductsTableMobile({
                     />
                   )}
                 </div>
-
-                {/* Hint that the box itself is tappable. Not a button — it has no
-                    handler of its own and must never be the only tap target.
-                    Hidden in select mode, where a tap selects instead. */}
-                {!showCheckboxes && (
-                  <div className="mt-2 flex items-center justify-end gap-1 text-xs text-primary/70">
-                    <LiaEditSolid className="w-3.5 h-3.5" />
-                    <span>الخصائص</span>
-                  </div>
-                )}
               </div>
             );
           })}

@@ -5,11 +5,12 @@ import Link from 'next/link';
 import { notFound, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { getApiErrorMessage } from '@/utils/apiError';
-import { LiaSaveSolid } from 'react-icons/lia';
+import { LiaSaveSolid, LiaCheckCircleSolid } from 'react-icons/lia';
 import PageLoading from '@/components/ui/page-loading';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
+import { DataTable, DataTableColumn } from '@/components/ui/data-table';
 import { useReceiptStore } from '@/store/receiptStore';
 import { useShallow } from 'zustand/react/shallow';
 import {
@@ -24,7 +25,10 @@ import { useI18n } from '@/i18n/I18nProvider';
 import ReceiptHeader from './ReceiptHeader';
 import AddVariantsStep, { InvoiceProductRow } from './AddVariantsStep';
 import { SelectedVariant } from '../types';
+import { formatDate } from '../../utils';
 import type { ApproveSupplierInvoiceVariantDto } from '@/lib/api/suppliers';
+
+type ReceivedLineRow = InvoiceProductRow & Record<string, unknown>;
 
 interface ReceiptDetailContentProps {
   receiptId: string;
@@ -281,6 +285,46 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
 
   if (isError || !apiReceipt) {
     notFound();
+  }
+
+  const isReceived = apiReceipt.isApproved;
+
+  if (isReceived) {
+    const receivedColumns: DataTableColumn<ReceivedLineRow>[] = [
+      { key: 'name', header: 'المنتج' },
+      { key: 'quantity', header: 'الكمية' },
+    ];
+
+    return (
+      <div className="w-full max-w-full overflow-x-hidden">
+        <div className="sm:px-8 py-3 flex flex-col gap-6">
+          <ReceiptHeader
+            invoiceNumber={apiReceipt.code}
+            companyName={apiReceipt.supplier.name}
+          />
+
+          <div className="rounded-md border border-primary/20 bg-primary/5 p-3">
+            <div className="flex items-center gap-2">
+              <LiaCheckCircleSolid className="text-primary" />
+              <span className="font-semibold text-primary">
+                تم استلام هذه الفاتورة
+              </span>
+            </div>
+            {apiReceipt.approvedAt !== null && (
+              <p className="mt-1 text-sm text-gray-600">
+                تاريخ الاستلام: {formatDate(apiReceipt.approvedAt)}
+              </p>
+            )}
+          </div>
+
+          <DataTable<ReceivedLineRow>
+            columns={receivedColumns}
+            data={invoiceProducts as ReceivedLineRow[]}
+            emptyMessage="لا توجد منتجات"
+          />
+        </div>
+      </div>
+    );
   }
 
   return (

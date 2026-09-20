@@ -41,7 +41,7 @@ const InvoiceCard = memo(
       totalAmount: invoice.totalAmount,
       paymentAmount: invoice.paymentAmount,
       transactionType: INVOICE_TYPE_LABEL[invoice.type] ?? invoice.type,
-      acceptanceStatus: invoice.acceptanceStatus ?? '',
+      isApproved: invoice.isApproved,
       imageUrl: invoice.images?.[0] ?? undefined,
     };
 

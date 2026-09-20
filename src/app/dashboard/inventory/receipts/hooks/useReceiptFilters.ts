@@ -2,11 +2,13 @@ import { useState, useCallback, useMemo } from 'react';
 import { useDebounce } from '@/utils/debounce';
 import { calculateDateRangeFromPeriod, TimePeriod } from '@/utils/dateRangeUtils';
 import { ReceiptFilters } from '../types';
+import { DEFAULT_RECEIVING_STATUS, ReceivingStatus } from '@/components/purchases/receivingStatus';
 
 const INITIAL_FILTERS: ReceiptFilters = {
   searchQuery: '',
   supplierName: '',
   transactionType: '',
+  receivingStatus: DEFAULT_RECEIVING_STATUS,
   totalAmountFrom: '',
   totalAmountTo: '',
   employeeName: '',
@@ -38,8 +40,17 @@ export function useReceiptFilters() {
   const clearFilter = useCallback((key: keyof ReceiptFilters) => {
     setFilters((prev) => ({
       ...prev,
-      [key]: key === 'fromDate' || key === 'toDate' ? null : '',
+      [key]:
+        key === 'fromDate' || key === 'toDate'
+          ? null
+          : key === 'receivingStatus'
+            ? DEFAULT_RECEIVING_STATUS
+            : '',
     }));
+  }, []);
+
+  const setReceivingStatus = useCallback((status: ReceivingStatus) => {
+    setFilters((prev) => ({ ...prev, receivingStatus: status }));
   }, []);
 
   const setFromDate = useCallback((date: Date | null) => {
@@ -88,5 +99,6 @@ export function useReceiptFilters() {
     setFromDate,
     setToDate,
     setTimePeriod,
+    setReceivingStatus,
   };
 }

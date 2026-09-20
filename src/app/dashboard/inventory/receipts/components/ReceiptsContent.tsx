@@ -5,6 +5,7 @@ import { Scan, ScanLine, X } from 'lucide-react';
 import { LiaFileInvoiceSolid, LiaSlidersHSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
+import ToggleGroup from '@/components/ui/toggle-group';
 import SharedInvoiceCard, { InvoiceCardData } from '@/components/purchases/InvoiceCard';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import PageLoading from '@/components/ui/page-loading';
@@ -20,6 +21,7 @@ import { DEFAULT_PAGE_SIZE } from '../constants';
 import { Receipt } from '../types';
 import { useReceiptFilters } from '../hooks';
 import { formatDate } from '../utils';
+import { RECEIVING_STATUS_OPTIONS, receivingStatusToApproved } from '@/components/purchases/receivingStatus';
 
 function toCardData(receipt: Receipt): InvoiceCardData {
   return {
@@ -40,7 +42,7 @@ function toCardData(receipt: Receipt): InvoiceCardData {
     totalAmount: receipt.totalAmount,
     paymentAmount: receipt.paymentAmount,
     transactionType: INVOICE_TYPE_LABEL[receipt.type] ?? receipt.type,
-    acceptanceStatus: '',
+    isApproved: receipt.isApproved,
     imageUrl: receipt.images?.[0] ?? undefined,
   };
 }
@@ -64,6 +66,7 @@ export function ReceiptsContent() {
     setFromDate,
     setToDate,
     setTimePeriod,
+    setReceivingStatus,
   } = useReceiptFilters();
 
   const { data: suppliersData } = useSuppliersQuery({ limit: 200 });
@@ -92,7 +95,7 @@ export function ReceiptsContent() {
   const employeeId = filters.employeeName ? Number(filters.employeeName) : undefined;
 
   const { data: invoicesData, isLoading } = useSupplierInvoicesQuery({
-    approved: false,
+    approved: receivingStatusToApproved(filters.receivingStatus),
     page: currentPage,
     limit: pageSize,
     supplierId: selectedSupplier?.id,
@@ -112,6 +115,7 @@ export function ReceiptsContent() {
     setCurrentPage(1);
   }, [
     debouncedSearchQuery,
+    filters.receivingStatus,
     filters.supplierName,
     filters.transactionType,
     filters.totalAmountFrom,
@@ -225,6 +229,11 @@ export function ReceiptsContent() {
           </div>
         </div>
         <div className="flex flex-row items-center justify-between gap-4">
+          <ToggleGroup
+            options={RECEIVING_STATUS_OPTIONS}
+            value={filters.receivingStatus}
+            onChange={setReceivingStatus}
+          />
           <DateRangeFilter
             fromDate={filters.fromDate}
             toDate={filters.toDate}
@@ -299,7 +308,11 @@ export function ReceiptsContent() {
             ) : (
               <>
                 <p className="text-lg font-semibold text-gray-400">
-                  لا توجد استلامات
+                  {filters.receivingStatus === 'pending'
+                    ? 'لا توجد استلامات قيد الانتظار'
+                    : filters.receivingStatus === 'received'
+                      ? 'لا توجد استلامات مستلمة'
+                      : 'لا توجد استلامات'}
                 </p>
                 <p className="text-sm text-gray-400">
                   لا توجد استلامات حالياً

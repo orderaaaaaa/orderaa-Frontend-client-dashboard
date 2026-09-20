@@ -1,3 +1,5 @@
+import { ReceivingStatus } from '@/components/purchases/receivingStatus';
+
 export interface InvoiceProduct {
   id: number;
   invoiceId: number;
@@ -24,14 +26,15 @@ export interface Invoice {
   images: string[];
   createdAt: string;
   updatedAt: string;
-  acceptanceStatus?: string;
+  isApproved: boolean;
+  approvedAt: string | null;
 }
 
 export interface InvoiceFilters {
   searchQuery: string;
   supplierName: string;
   transactionType: string;
-  acceptanceStatus: string;
+  receivingStatus: ReceivingStatus;
   totalAmountFrom: string;
   totalAmountTo: string;
   employeeName: string;

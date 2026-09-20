@@ -4,10 +4,7 @@ import { memo } from 'react';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import Input from '@/components/ui/Input';
 import { InvoiceFilters } from '../types';
-import {
-  INVOICE_TYPE_OPTIONS,
-  ACCEPTANCE_STATUS_OPTIONS,
-} from '../constants';
+import { INVOICE_TYPE_OPTIONS } from '../constants';
 
 interface InvoicesFilterBarProps {
   filters: InvoiceFilters;
@@ -23,7 +20,7 @@ interface InvoicesFilterBarProps {
 const InvoicesFilterBar = memo(
   ({ filters, onFilterChange, onClearFilter, supplierOptions, employeeOptions }: InvoicesFilterBarProps) => {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="flex flex-col gap-1">
           <SearchableSelect
             options={supplierOptions}
@@ -75,17 +72,6 @@ const InvoicesFilterBar = memo(
             placeholder="اسم الموظف"
             clearable
             onClear={() => onClearFilter('employeeName')}
-          />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <SearchableSelect
-            options={ACCEPTANCE_STATUS_OPTIONS}
-            value={filters.acceptanceStatus}
-            onChange={(v) => onFilterChange('acceptanceStatus', v)}
-            placeholder="حالة القبول"
-            clearable
-            onClear={() => onClearFilter('acceptanceStatus')}
           />
         </div>
       </div>

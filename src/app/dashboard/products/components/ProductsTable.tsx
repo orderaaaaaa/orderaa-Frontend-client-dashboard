@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { LiaObjectGroupSolid, LiaEditSolid } from 'react-icons/lia';
+import { LiaObjectGroupSolid, LiaEditSolid, LiaListUlSolid } from 'react-icons/lia';
 import { Scan, ScanLine, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
@@ -173,8 +173,8 @@ function ProductsTable() {
             src={
               row.image || row.images?.[0] || 'https://placehold.net/600x600.png'
             }
-            onClick={() => openEditAttrsModal(row.id as number)}
-            className="w-20 h-20 mx-auto rounded-lg object-cover border cursor-pointer hover:opacity-80 transition-opacity"
+            alt={row.name as string}
+            className="w-20 h-20 mx-auto rounded-lg object-cover border"
           />
         ),
       },
@@ -184,13 +184,9 @@ function ProductsTable() {
         sortable: true,
         className: 'text-center',
         render: (_val, row) => (
-          <button
-            type="button"
-            onClick={() => openEditAttrsModal(row.id as number)}
-            className="text-primary font-semibold hover:underline cursor-pointer"
-          >
+          <span className="font-semibold text-foreground">
             {row.name as string}
-          </button>
+          </span>
         ),
       },
       {
@@ -247,24 +243,33 @@ function ProductsTable() {
         ),
       },
       {
-        key: 'edit',
-        header: 'تعديل',
+        key: 'actions',
+        header: 'الإجراءات',
         className: 'text-center',
         render: (_val, row) => (
-          <Button
-            variant="ghost"
-            onClick={() =>
-              openEditModal(
-                row.id as number,
-                (row.extraDetails as { variants?: VariantItem[] })?.variants ||
-                  [],
-              )
-            }
-            className="text-primary mx-auto"
-          >
-            <LiaEditSolid className="size-5" />
-            تعديل
-          </Button>
+          <div className="flex items-center justify-center gap-1">
+            <Button
+              variant="ghost"
+              onClick={() => openEditAttrsModal(row.id as number)}
+              className="text-primary"
+            >
+              <LiaEditSolid className="size-5" />
+              تعديل المتغيرات
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() =>
+                openEditModal(
+                  row.id as number,
+                  (row.extraDetails as { variants?: VariantItem[] })?.variants ||
+                    [],
+                )
+              }
+            >
+              <LiaListUlSolid className="size-5" />
+              المواصفات
+            </Button>
+          </div>
         ),
       },
       {

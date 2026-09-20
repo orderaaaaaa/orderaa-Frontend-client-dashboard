@@ -90,6 +90,8 @@ export interface SupplierInvoiceApiItem {
   supplier: { id: number; name: string; nickname: string };
   createdByEmployee?: { id: number; accessLevel: string; department: string };
   products: InvoiceProductApiItem[];
+  isApproved: boolean;
+  approvedAt: string | null;
 }
 
 export interface GetSuppliersParams {

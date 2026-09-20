@@ -20,6 +20,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import BaseModal from '@/components/ui/base-modal';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { getTimeAgo } from '@/utils/timeAgo';
+import { receivedBadgeLabel } from './receivingStatus';
 
 const TRANSACTION_TYPE_CONFIG: Record<string, { text: string; iconColor: string; icon: IconType }> = {
   'استبدال': { text: 'text-orange-500', iconColor: 'text-orange-500', icon: LiaExchangeAltSolid },
@@ -57,7 +58,7 @@ export interface InvoiceCardData {
   totalAmount: number;
   paymentAmount?: number | null;
   transactionType: string;
-  acceptanceStatus: string;
+  isApproved: boolean;
   imageUrl?: string;
 }
 
@@ -245,7 +246,12 @@ const InvoiceCard = memo(
                 </span>
               </Button>
             )}
-            <span className="ps-11 text-lg font-bold">{invoice.companyName}</span>
+            <div className="ps-11 flex items-center gap-2">
+              <span className="text-lg font-bold">{invoice.companyName}</span>
+              <span className={clsx('rounded-full px-2.5 py-0.5 text-xs font-semibold', invoice.isApproved ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground')}>
+                {receivedBadgeLabel(invoice.isApproved)}
+              </span>
+            </div>
           </div>
 
           {select && (
