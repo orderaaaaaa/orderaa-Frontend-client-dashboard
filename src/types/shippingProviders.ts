@@ -28,6 +28,7 @@ export interface CarrierStats {
   /** NULL — never 0 — when nothing has finished yet. */
   deliveryRate: number | null;
   returnRate: number | null;
+  inProcessNetAmount: string;
 }
 
 export interface LocationStats {
@@ -52,4 +53,13 @@ export interface ProviderShipment {
 export interface StatsRange {
   from?: string;
   to?: string;
+}
+
+export type ShipmentStatusFilter = 'IN_PROCESS' | 'DELIVERED' | 'RETURNED' | 'ALL';
+
+export interface ProviderShipmentsPage {
+  data: ProviderShipment[];
+  page: number;
+  limit: number;
+  total: number;
 }

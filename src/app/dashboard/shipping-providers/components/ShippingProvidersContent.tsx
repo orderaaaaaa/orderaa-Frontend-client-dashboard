@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import clsx from 'clsx';
+import { useRouter } from 'next/navigation';
 import { LiaPlusSolid, LiaTruckSolid, LiaUserSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
@@ -13,6 +14,7 @@ import {
 import type { CarrierStats } from '@/types/shippingProviders';
 import { AddProviderModal } from './AddProviderModal';
 import { CarrierDetail } from './CarrierDetail';
+import { formatNumber } from './formatNumber';
 import { RateBadge } from './RateBadge';
 
 type TypeFilter = 'ALL' | 'COMPANY' | 'DELEGATE';
@@ -24,6 +26,7 @@ const TYPE_FILTERS: { value: TypeFilter; label: string }[] = [
 ];
 
 export function ShippingProvidersContent() {
+  const router = useRouter();
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('ALL');
@@ -52,6 +55,16 @@ export function ShippingProvidersContent() {
   const retire = (carrier: CarrierStats, isActive: boolean) => {
     const id = Number(carrier.key.split(':')[1]);
     updateProvider({ id, isActive });
+  };
+
+  const goToInProcess = (carrier: CarrierStats) => {
+    const query = new URLSearchParams();
+    if (from) query.set('from', from);
+    if (to) query.set('to', to);
+    const qs = query.toString();
+    router.push(
+      `/dashboard/shipping-providers/${encodeURIComponent(carrier.key)}/in-process${qs ? `?${qs}` : ''}`,
+    );
   };
 
   return (
@@ -176,6 +189,13 @@ export function ShippingProvidersContent() {
                     </span>
                   </div>
 
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xs text-gray-500">صافي الشحنات الحالية</span>
+                    <span className="text-lg font-bold text-gray-900">
+                      {formatNumber(carrier.inProcessNetAmount, 2)} جنيه
+                    </span>
+                  </div>
+
                   <div className="flex gap-4 border-t border-gray-100 pt-2">
                     <RateBadge
                       label="تسليم"
@@ -207,6 +227,19 @@ export function ShippingProvidersContent() {
                       {carrier.isActive ? 'إيقاف' : 'إعادة تفعيل'}
                     </button>
                   )}
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      goToInProcess(carrier);
+                    }}
+                  >
+                    الشحنات الحالية
+                  </Button>
                 </div>
               );
             })}

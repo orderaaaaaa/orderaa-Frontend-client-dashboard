@@ -1,10 +1,16 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import http from '@/lib/api/http';
 import type {
   CarrierStats,
   LocationStats,
-  ProviderShipment,
+  ProviderShipmentsPage,
+  ShipmentStatusFilter,
   ShippingProvider,
   ShippingProviderType,
   StatsRange,
@@ -58,18 +64,23 @@ export const useCarrierLocationStatsQuery = (
 
 export const useCarrierShipmentsQuery = (
   carrierKey: string | undefined,
-  range: StatsRange,
+  params: StatsRange & {
+    status: ShipmentStatusFilter;
+    page: number;
+    limit: number;
+  },
 ) =>
   useQuery({
-    queryKey: [KEY, carrierKey, 'shipments', range],
+    queryKey: [KEY, carrierKey, 'shipments', params],
     queryFn: async () => {
-      const { data } = await http.get<ProviderShipment[]>(
+      const { data } = await http.get<ProviderShipmentsPage>(
         `${BASE}/${encodeURIComponent(carrierKey!)}/shipments`,
-        { params: range },
+        { params },
       );
       return data;
     },
     enabled: !!carrierKey,
+    placeholderData: keepPreviousData,
   });
 
 export const useCreateShippingProvider = () => {

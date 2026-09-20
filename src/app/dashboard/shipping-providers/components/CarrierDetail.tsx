@@ -5,10 +5,7 @@ import clsx from 'clsx';
 import { LiaTimesSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import PageLoading from '@/components/ui/page-loading';
-import {
-  useCarrierLocationStatsQuery,
-  useCarrierShipmentsQuery,
-} from '@/services/shippingProviders';
+import { useCarrierLocationStatsQuery } from '@/services/shippingProviders';
 import type { CarrierStats, StatsRange } from '@/types/shippingProviders';
 import { RateBadge } from './RateBadge';
 
@@ -18,23 +15,19 @@ interface CarrierDetailProps {
   onClose: () => void;
 }
 
-type Tab = 'shipments' | 'governorates' | 'regions';
+type Tab = 'governorates' | 'regions';
 
 const TABS: { value: Tab; label: string }[] = [
-  { value: 'shipments', label: 'الشحنات' },
   { value: 'governorates', label: 'المحافظات' },
   { value: 'regions', label: 'المناطق' },
 ];
 
 export function CarrierDetail({ carrier, range, onClose }: CarrierDetailProps) {
-  const [tab, setTab] = useState<Tab>('shipments');
-
-  const { data: shipments = [], isLoading: loadingShipments } =
-    useCarrierShipmentsQuery(tab === 'shipments' ? carrier.key : undefined, range);
+  const [tab, setTab] = useState<Tab>('governorates');
 
   const { data: locations = [], isLoading: loadingLocations } =
     useCarrierLocationStatsQuery(
-      tab === 'shipments' ? undefined : carrier.key,
+      carrier.key,
       tab === 'governorates' ? 'governorates' : 'regions',
       range,
     );
@@ -107,47 +100,7 @@ export function CarrierDetail({ carrier, range, onClose }: CarrierDetailProps) {
       </div>
 
       <div className="px-2 sm:px-4 py-3 overflow-x-auto">
-        {tab === 'shipments' ? (
-          loadingShipments ? (
-            <PageLoading size="sm" className="py-6 min-h-0" />
-          ) : shipments.length === 0 ? (
-            <p className="text-sm text-gray-500 text-center py-6">
-              لا توجد شحنات في هذه الفترة
-            </p>
-          ) : (
-            <table className="w-full text-sm" dir="rtl">
-              <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="text-right py-2 px-3 font-semibold text-gray-700">الكود</th>
-                  <th className="text-right py-2 px-3 font-semibold text-gray-700">تاريخ الاستلام</th>
-                  <th className="text-right py-2 px-3 font-semibold text-gray-700">الحالة</th>
-                  <th className="text-right py-2 px-3 font-semibold text-gray-700">المحافظة</th>
-                  <th className="text-right py-2 px-3 font-semibold text-gray-700">المنطقة</th>
-                  <th className="text-right py-2 px-3 font-semibold text-gray-700">الإجمالي</th>
-                </tr>
-              </thead>
-              <tbody>
-                {shipments.map((s) => (
-                  <tr key={s.id} className="border-b border-gray-100">
-                    <td className="py-2 px-3 font-medium text-gray-900">{s.code}</td>
-                    <td className="py-2 px-3 text-gray-600">
-                      {/* Derived from the shipping event, not the order date. */}
-                      {s.takenAt
-                        ? new Date(s.takenAt).toLocaleDateString('ar-EG')
-                        : '—'}
-                    </td>
-                    <td className="py-2 px-3 text-gray-600">{s.status}</td>
-                    <td className="py-2 px-3 text-gray-600">{s.governorate ?? '—'}</td>
-                    <td className="py-2 px-3 text-gray-600">{s.city ?? '—'}</td>
-                    <td className="py-2 px-3 text-gray-600">
-                      {s.totalCost === null ? '—' : `${s.totalCost.toLocaleString()} جنيه`}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )
-        ) : loadingLocations ? (
+        {loadingLocations ? (
           <PageLoading size="sm" className="py-6 min-h-0" />
         ) : locations.length === 0 ? (
           <p className="text-sm text-gray-500 text-center py-6">
