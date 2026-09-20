@@ -39,6 +39,8 @@ import {
   Link2,
   ChartNoAxesCombined,
   HousePlus,
+  Upload,
+  FileOutput,
 } from 'lucide-react';
 import { IconType } from 'react-icons';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
@@ -172,9 +174,29 @@ export const navigation: NavigationItem[] = [
     icon: LiaTruckMovingSolid,
   },
   {
-    name: 'جميع التحصيلات',
-    href: '/dashboard/orders/settlement/collections',
+    name: 'التحصيلات',
+    href: '/dashboard/orders/settlement',
     icon: LiaHandHoldingUsdSolid,
+    children: [
+      {
+        name: 'رفع شيت التحصيل',
+        href: '/dashboard/orders/settlement/upload',
+        icon: Upload,
+        permission: PERMISSION_CODES.ORDERS_SETTLEMENT_MANAGE,
+      },
+      {
+        name: 'جميع التحصيلات',
+        href: '/dashboard/orders/settlement/collections',
+        icon: LiaHandHoldingUsdSolid,
+        permission: PERMISSION_CODES.ORDERS_SETTLEMENT_MANAGE,
+      },
+      {
+        name: 'تحصيل ناقص',
+        href: '/dashboard/orders/settlement/shortfall',
+        icon: FileOutput,
+        permission: PERMISSION_CODES.ORDERS_SETTLEMENT_MANAGE,
+      },
+    ],
   },
   {
     name: 'بيك اب',

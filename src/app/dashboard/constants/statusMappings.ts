@@ -44,6 +44,7 @@ export const ORDER_STATUS_ARABIC_LABELS: Record<string, string> = {
   // Took over the wording RETURNED_COLLECTED vacated: 'مرتجع مسلم' now belongs
   // to RETURNED_COLLECTED alone, and this key describes exactly this text.
   RETURN_WAREHOUSE: 'مرتجع مستلم بالمخزن',
+  SETTLEMENT_UPDATED: 'تعديل التحصيل',
 };
 
 export const ORDER_STATUS_CHART_COLORS: Record<string, string> = {

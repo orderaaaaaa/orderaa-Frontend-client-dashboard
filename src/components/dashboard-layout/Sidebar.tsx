@@ -9,8 +9,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronUp,
-  Upload,
-  FileOutput,
   X,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -20,7 +18,6 @@ import { navigation, NavigationItem } from '@/constants/Navbar';
 import { SIDEBAR_WIDTH } from '@/constants/dashboard-layout';
 import { findActiveHref, containsHref } from '@/utils/navigation';
 import Logo from '@/assets/images/updated-logo.png';
-import { useAuthStore } from '@/store/authStore';
 import { usePermissions } from '@/hooks/usePermissions';
 import { hasPermissionCode } from '@/lib/permissions';
 
@@ -44,48 +41,17 @@ export function Sidebar({
   onNavItemClick,
 }: SidebarProps) {
   const pathname = usePathname();
-  const user = useAuthStore((s) => s.user);
   const [openSubDropdown, setOpenSubDropdown] = useState<string | null>(null);
 
-  const isMerchant = !!user?.merchantId;
-  const isEmployee = !!user?.employeeId;
   const permissions = usePermissions();
 
   const filteredNavigation = useMemo(() => {
-    const extraOrderChildren: NavigationItem[] = [];
-    if (isMerchant) {
-      extraOrderChildren.push({
-        name: 'رفع شيت التحصيل',
-        href: '/dashboard/orders/settlement/upload',
-        icon: Upload,
-      });
-    }
-    if (isEmployee) {
-      extraOrderChildren.push({
-        name: 'تحصيل ناقص',
-        href: '/dashboard/orders/settlement/shortfall',
-        icon: FileOutput,
-      });
-    }
-    const withExtras =
-      extraOrderChildren.length === 0
-        ? navigation
-        : navigation.map((item) => {
-            if (item.name === 'الطلبات' && item.children) {
-              return {
-                ...item,
-                children: [...item.children, ...extraOrderChildren],
-              };
-            }
-            return item;
-          });
-
     // ABAC: drop entries the caller has no permission for, then drop parents
     // whose children all disappeared. Entries without `permission` stay.
     const allowed = (item: NavigationItem) =>
       !item.permission || hasPermissionCode(permissions, item.permission);
 
-    return withExtras.reduce<NavigationItem[]>((acc, item) => {
+    return navigation.reduce<NavigationItem[]>((acc, item) => {
       if (!allowed(item)) return acc;
       if (!item.children) {
         acc.push(item);
@@ -96,7 +62,7 @@ export function Sidebar({
       acc.push({ ...item, children });
       return acc;
     }, []);
-  }, [isMerchant, isEmployee, permissions]);
+  }, [permissions]);
 
   const activeHref = useMemo(
     () => findActiveHref(filteredNavigation, pathname),

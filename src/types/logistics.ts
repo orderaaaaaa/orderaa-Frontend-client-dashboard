@@ -8,15 +8,15 @@ export interface GovernorateLogisticsConfig {
   governorate: string;
   firstAttemptDelay: number;
   /** Decimal strings on the wire — never parse into a float. */
-  shippingCost: string;
-  nonReceiptCost: string;
+  shippingCost: string | null;
+  nonReceiptCost: string | null;
 }
 
 export interface GovernorateLogisticsConfigRow {
   governorate: string;
   firstAttemptDelay: number;
-  shippingCost: string;
-  nonReceiptCost: string;
+  shippingCost: string | null;
+  nonReceiptCost: string | null;
 }
 
 export type TrackingCardType = 'COURIER' | 'CALL_CENTER';

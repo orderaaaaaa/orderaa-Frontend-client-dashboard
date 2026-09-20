@@ -6,7 +6,17 @@ import { toast } from 'react-toastify';
 import { ChevronLeft, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Breadcrumb } from '@/components/dashboard-layout';
 import PageLoading from '@/components/ui/page-loading';
+import CopyButton from '@/components/ui/copy-button';
+import { useStatusLabel } from '@/hooks/useStatusLabel';
+import {
+  SettlementShippingColumnHeaders,
+  SettlementShippingColumnCells,
+} from '@/app/dashboard/orders/settlement/components/SettlementShippingColumns';
+import RemoveSettlementOrderDialog from '@/app/dashboard/orders/settlement/components/RemoveSettlementOrderDialog';
+import EditSettlementAmountDialog from '@/app/dashboard/orders/settlement/components/EditSettlementAmountDialog';
+import AddSettlementOrdersDialog from '@/app/dashboard/orders/settlement/components/AddSettlementOrdersDialog';
 import {
   listSettlementBatches,
   listSettlementBatchOrders,
@@ -27,9 +37,13 @@ export default function CollectionsPage() {
   const [batches, setBatches] = useState<SettlementBatchListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const { getStatusLabel } = useStatusLabel();
   const [selected, setSelected] = useState<SettlementBatchListItem | null>(null);
   const [orders, setOrders] = useState<SettlementBatchOrder[]>([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+  const [removeTarget, setRemoveTarget] = useState<SettlementBatchOrder | null>(null);
+  const [editTarget, setEditTarget] = useState<SettlementBatchOrder | null>(null);
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
@@ -56,12 +70,31 @@ export default function CollectionsPage() {
     }
   }, []);
 
+  const reloadAfterEdit = useCallback(async () => {
+    if (!selected) return;
+    try {
+      const [ordersResult, batchesResult] = await Promise.all([
+        listSettlementBatchOrders(selected.id, { limit: 100 }),
+        listSettlementBatches({ status: status === 'ALL' ? undefined : status, limit: 50 }),
+      ]);
+      setOrders(ordersResult.data);
+      setBatches(batchesResult.data);
+      const updatedSelected = batchesResult.data.find((b) => b.id === selected.id);
+      if (updatedSelected) setSelected(updatedSelected);
+      toast.success('تم تحديث التحصيل');
+    } catch {
+      toast.error('تعذر تحميل طلبات التحصيل');
+    }
+  }, [selected, status]);
+
   if (isLoading) {
     return <PageLoading message="جاري تحميل التحصيلات..." />;
   }
 
   return (
     <div className="w-full max-w-full overflow-x-hidden sm:px-8 py-4 flex flex-col gap-5">
+      <Breadcrumb items={[{ title: 'التحصيلات' }, { title: 'جميع التحصيلات' }]} />
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-lg sm:text-xl font-bold text-gray-900">
@@ -109,6 +142,7 @@ export default function CollectionsPage() {
                   <span className="font-bold text-gray-900 truncate">
                     {batch.code}
                   </span>
+                  <CopyButton value={batch.code} label="نسخ كود التحصيل" />
                 </div>
                 <span
                   className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${
@@ -165,13 +199,19 @@ export default function CollectionsPage() {
       {selected && (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3">
-            <CardTitle className="text-base">
-              طلبات التحصيل {selected.code} — {selected.totalAmount} جنيه عن{' '}
-              {selected.ordersCount} طلب
+            <CardTitle className="text-base flex items-center gap-1.5">
+              طلبات التحصيل {selected.code}
+              <CopyButton value={selected.code} label="نسخ كود التحصيل" />
+              — {selected.totalAmount} جنيه عن {selected.ordersCount} طلب
             </CardTitle>
-            <Button variant="ghost" size="sm" onClick={() => setSelected(null)}>
-              إغلاق
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => setIsAddOpen(true)}>
+                إضافة طلبات
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setSelected(null)}>
+                إغلاق
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             {isLoadingOrders ? (
@@ -191,6 +231,8 @@ export default function CollectionsPage() {
                       <th className="px-4 py-2 text-right font-medium">المبلغ في هذا التحصيل</th>
                       <th className="px-4 py-2 text-right font-medium">الحالة وقتها</th>
                       <th className="px-4 py-2 text-right font-medium">الحالة الآن</th>
+                      <SettlementShippingColumnHeaders />
+                      <th className="px-4 py-2 text-right font-medium">إجراءات</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -218,13 +260,34 @@ export default function CollectionsPage() {
                           </td>
                           <td className="px-4 py-2">{row.customerName ?? '—'}</td>
                           <td className="px-4 py-2 font-semibold">{row.amount}</td>
-                          <td className="px-4 py-2">{row.targetStatus}</td>
+                          <td className="px-4 py-2">{getStatusLabel(row.targetStatus)}</td>
                           <td
                             className={`px-4 py-2 ${moved ? 'text-amber-700 font-semibold' : ''}`}
                           >
-                            {row.currentStatus}
+                            {getStatusLabel(row.currentStatus)}
                             {moved && (
                               <ChevronLeft className="inline w-3 h-3 mr-1" />
+                            )}
+                          </td>
+                          <SettlementShippingColumnCells shipping={row.shipping} />
+                          <td className="px-4 py-2">
+                            {!row.isDeleted && (
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setEditTarget(row)}
+                                >
+                                  تعديل المبلغ
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setRemoveTarget(row)}
+                                >
+                                  إزالة
+                                </Button>
+                              </div>
                             )}
                           </td>
                         </tr>
@@ -237,6 +300,39 @@ export default function CollectionsPage() {
           </CardContent>
         </Card>
       )}
+
+      <RemoveSettlementOrderDialog
+        isOpen={removeTarget !== null}
+        onClose={() => setRemoveTarget(null)}
+        batchId={selected?.id ?? ''}
+        orderId={removeTarget?.orderId ?? 0}
+        orderStatus={removeTarget?.currentStatus ?? ''}
+        onSuccess={() => {
+          setRemoveTarget(null);
+          reloadAfterEdit();
+        }}
+      />
+
+      <EditSettlementAmountDialog
+        isOpen={editTarget !== null}
+        onClose={() => setEditTarget(null)}
+        batchId={selected?.id ?? ''}
+        orderId={editTarget?.orderId ?? 0}
+        currentAmount={editTarget?.amount ?? '0.00'}
+        onSuccess={() => {
+          setEditTarget(null);
+          reloadAfterEdit();
+        }}
+      />
+
+      <AddSettlementOrdersDialog
+        isOpen={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        batchId={selected?.id ?? ''}
+        onSuccess={() => {
+          reloadAfterEdit();
+        }}
+      />
     </div>
   );
 }

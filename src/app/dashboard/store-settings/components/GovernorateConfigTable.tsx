@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -13,31 +13,35 @@ import {
 import { useGovernoratesQuery } from '@/services/lookups';
 import PageLoading from '@/components/ui/page-loading';
 
-// Money stays a string end to end: the column is Decimal(12,2) and the wire
-// contract is a decimal string, so parsing to a float here would be the one
-// place precision could quietly be lost.
 const decimalString = (label: string) =>
   z
     .string()
-    .trim()
-    .min(1, `${label} مطلوبة`)
-    .regex(/^\d+(\.\d{1,2})?$/, `${label} يجب أن تكون رقمًا موجبًا`);
+    .refine((val) => val === '' || /^\d+(\.\d{1,2})?$/.test(val), `${label} يجب أن تكون رقمًا موجبًا`);
+
+const nonNegativeIntegerString = z
+  .string()
+  .refine((val) => val === '' || /^\d+$/.test(val), 'يجب أن يكون عددًا صحيحًا');
+
+const governorateConfigRowSchema = z
+  .object({
+    governorate: z.string().min(1),
+    firstAttemptDelay: nonNegativeIntegerString,
+    shippingCost: decimalString('تكلفة الشحن'),
+    nonReceiptCost: decimalString('تكلفة عدم الاستلام'),
+  })
+  .superRefine((row, ctx) => {
+    const hasCost = row.shippingCost !== '' || row.nonReceiptCost !== '';
+    if (hasCost && row.firstAttemptDelay === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'أدخل عدد الأيام',
+        path: ['firstAttemptDelay'],
+      });
+    }
+  });
 
 const governorateConfigSchema = z.object({
-  configs: z.array(
-    z.object({
-      governorate: z.string().min(1),
-      firstAttemptDelay: z.preprocess(
-        (val) => (val === '' ? 0 : Number(val)),
-        z
-          .number({ invalid_type_error: 'أدخل عدد الأيام' })
-          .int('يجب أن يكون عددًا صحيحًا')
-          .min(0, 'لا يمكن أن تكون القيمة سالبة')
-      ),
-      shippingCost: decimalString('تكلفة الشحن'),
-      nonReceiptCost: decimalString('تكلفة عدم الاستلام'),
-    })
-  ),
+  configs: z.array(governorateConfigRowSchema),
 });
 
 type GovernorateConfigFormData = z.infer<typeof governorateConfigSchema>;
@@ -57,101 +61,83 @@ interface GovernorateConfigTableProps {
 export function GovernorateConfigTable({
   shippingCompany,
 }: GovernorateConfigTableProps) {
-  const { data: configs, isLoading } =
+  const { data: configs, isLoading: isConfigsLoading } =
     useGovernorateLogisticsConfig(shippingCompany);
   const { mutate: updateConfig, isPending: isSaving } =
     useUpdateGovernorateLogisticsConfig();
-  const { data: governorates = [] } = useGovernoratesQuery(true);
+  const {
+    data: governorates = [],
+    isLoading: isGovernoratesLoading,
+    isError: isGovernoratesError,
+  } = useGovernoratesQuery(true);
 
-  const [governorateToAdd, setGovernorateToAdd] = useState('');
+  const [savedGovernorates, setSavedGovernorates] = useState<Set<string>>(new Set());
 
   const {
     register,
     handleSubmit,
     control,
     reset,
+    watch,
     formState: { errors, isDirty },
   } = useForm<GovernorateConfigFormData>({
     resolver: zodResolver(governorateConfigSchema),
     defaultValues: { configs: [] },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields } = useFieldArray({
     control,
     name: 'configs',
   });
 
-  useEffect(() => {
-    if (!configs) return;
-    reset({
-      configs: configs.map((c) => ({
-        governorate: c.governorate,
-        firstAttemptDelay: c.firstAttemptDelay,
-        shippingCost: c.shippingCost,
-        nonReceiptCost: c.nonReceiptCost,
-      })),
-    });
-  }, [configs, reset]);
+  const watchedConfigs = watch('configs');
 
-  const configured = new Set(
-    (fields as GovernorateConfigField[]).map((f) => f.governorate)
-  );
-  // Governorate rows come from the lookup, never free text — a hand-typed
-  // label would not match what orders store and the delay would never fire.
-  const available = useMemo(
-    () => governorates.filter((g) => !configured.has(g.label)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [governorates, fields]
-  );
+  useEffect(() => {
+    if (isConfigsLoading || isGovernoratesLoading) return;
+    const configByGovernorate = new Map((configs ?? []).map((c) => [c.governorate, c]));
+    reset({
+      configs: governorates.map((g) => {
+        const existing = configByGovernorate.get(g.label);
+        return {
+          governorate: g.label,
+          firstAttemptDelay: existing ? String(existing.firstAttemptDelay) : '',
+          shippingCost: existing?.shippingCost ?? '',
+          nonReceiptCost: existing?.nonReceiptCost ?? '',
+        };
+      }),
+    });
+    setSavedGovernorates(new Set((configs ?? []).map((c) => c.governorate)));
+  }, [configs, governorates, isConfigsLoading, isGovernoratesLoading, reset]);
 
   const onSubmit = (data: GovernorateConfigFormData) => {
+    const kept = data.configs.filter(
+      (row) => row.firstAttemptDelay !== '' || row.shippingCost !== '' || row.nonReceiptCost !== '',
+    );
     updateConfig({
       shippingCompany,
-      rows: data.configs,
-      // Clearing every row wipes this carrier's settings, so it is opt-in.
-      confirmEmpty: data.configs.length === 0 ? true : undefined,
+      rows: kept.map((row) => ({
+        governorate: row.governorate,
+        firstAttemptDelay: Number(row.firstAttemptDelay),
+        shippingCost: row.shippingCost === '' ? null : row.shippingCost,
+        nonReceiptCost: row.nonReceiptCost === '' ? null : row.nonReceiptCost,
+      })),
+      confirmEmpty: kept.length === 0 ? true : undefined,
     });
   };
 
-  const addGovernorate = () => {
-    if (!governorateToAdd) return;
-    append({
-      governorate: governorateToAdd,
-      firstAttemptDelay: 3,
-      shippingCost: '0.00',
-      nonReceiptCost: '0.00',
-    });
-    setGovernorateToAdd('');
-  };
-
-  if (isLoading) {
+  if (isConfigsLoading || isGovernoratesLoading) {
     return <PageLoading size="sm" className="py-6 min-h-0" />;
+  }
+
+  if (isGovernoratesError) {
+    return (
+      <p className="text-sm text-red-600 text-center py-6">تعذر تحميل المحافظات</p>
+    );
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="flex flex-wrap items-center gap-2 px-1">
-        <select
-          value={governorateToAdd}
-          onChange={(e) => setGovernorateToAdd(e.target.value)}
-          className="border border-gray-200 rounded-md px-3 py-2 text-sm bg-white min-w-[180px] focus:border-primary focus:ring-1 focus:ring-primary/20"
-        >
-          <option value="">اختر محافظة لإضافتها</option>
-          {available.map((g) => (
-            <option key={g.key} value={g.label}>
-              {g.label}
-            </option>
-          ))}
-        </select>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={addGovernorate}
-          disabled={!governorateToAdd}
-        >
-          إضافة محافظة
-        </Button>
         {isDirty && (
           <span className="text-xs text-amber-600 font-medium">
             لديك تغييرات غير محفوظة
@@ -161,82 +147,86 @@ export function GovernorateConfigTable({
 
       {!fields.length ? (
         <div className="text-center py-8 text-gray-500 text-sm">
-          لا توجد محافظات مضافة لهذه الشركة — لن يتم تطبيق مدة أول محاولة حتى
-          تضيف محافظة وتحفظ الإعدادات.
+          لا توجد محافظات متاحة حاليًا.
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm" dir="rtl">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-right py-3 px-4 font-semibold text-gray-700 w-[28%]">
+                <th className="text-right py-3 px-4 font-semibold text-gray-700 w-[30%]">
                   المحافظة
                 </th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700 w-[21%]">
+                <th className="text-right py-3 px-4 font-semibold text-gray-700 w-[23%]">
                   أول محاولة بعد (أيام)
                 </th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700 w-[21%]">
+                <th className="text-right py-3 px-4 font-semibold text-gray-700 w-[23%]">
                   تكلفة الشحن
                 </th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700 w-[22%]">
+                <th className="text-right py-3 px-4 font-semibold text-gray-700 w-[24%]">
                   تكلفة عدم الاستلام
                 </th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700 w-[8%]" />
               </tr>
             </thead>
             <tbody>
-              {(fields as GovernorateConfigField[]).map((field, index) => (
-                <tr
-                  key={field.id}
-                  className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
-                >
-                  <td className="py-2.5 px-4 text-gray-900 font-medium">
-                    {field.governorate}
-                    <input
-                      type="hidden"
-                      {...register(`configs.${index}.governorate`)}
-                    />
-                  </td>
-                  <td className="py-2.5 px-4">
-                    <Input
-                      type="number"
-                      min={0}
-                      name={`configs.${index}.firstAttemptDelay`}
-                      register={register}
-                      registerOptions={{ valueAsNumber: true }}
-                      error={errors.configs?.[index]?.firstAttemptDelay?.message}
-                      inputClassName="border-gray-200 px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors"
-                    />
-                  </td>
-                  <td className="py-2.5 px-4">
-                    <Input
-                      type="text"
-                      name={`configs.${index}.shippingCost`}
-                      register={register}
-                      error={errors.configs?.[index]?.shippingCost?.message}
-                      inputClassName="border-gray-200 px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors"
-                    />
-                  </td>
-                  <td className="py-2.5 px-4">
-                    <Input
-                      type="text"
-                      name={`configs.${index}.nonReceiptCost`}
-                      register={register}
-                      error={errors.configs?.[index]?.nonReceiptCost?.message}
-                      inputClassName="border-gray-200 px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors"
-                    />
-                  </td>
-                  <td className="py-2.5 px-4 text-left">
-                    <button
-                      type="button"
-                      onClick={() => remove(index)}
-                      className="text-xs text-red-600 hover:text-red-700 hover:underline"
-                    >
-                      حذف
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {(fields as GovernorateConfigField[]).map((field, index) => {
+                const rowValues = watchedConfigs?.[index];
+                const isAllBlank =
+                  savedGovernorates.has(field.governorate) &&
+                  (rowValues?.firstAttemptDelay ?? '') === '' &&
+                  (rowValues?.shippingCost ?? '') === '' &&
+                  (rowValues?.nonReceiptCost ?? '') === '';
+                return (
+                  <Fragment key={field.id}>
+                    <tr className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
+                      <td className="py-2.5 px-4 text-gray-900 font-medium">
+                        {field.governorate}
+                        <input
+                          type="hidden"
+                          {...register(`configs.${index}.governorate`)}
+                        />
+                      </td>
+                      <td className="py-2.5 px-4">
+                        <Input
+                          type="number"
+                          min={0}
+                          name={`configs.${index}.firstAttemptDelay`}
+                          register={register}
+                          error={errors.configs?.[index]?.firstAttemptDelay?.message}
+                          inputClassName="border-gray-200 px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors"
+                        />
+                      </td>
+                      <td className="py-2.5 px-4">
+                        <Input
+                          type="text"
+                          placeholder="غير محدد"
+                          name={`configs.${index}.shippingCost`}
+                          register={register}
+                          error={errors.configs?.[index]?.shippingCost?.message}
+                          inputClassName="border-gray-200 px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors"
+                        />
+                      </td>
+                      <td className="py-2.5 px-4">
+                        <Input
+                          type="text"
+                          placeholder="غير محدد"
+                          name={`configs.${index}.nonReceiptCost`}
+                          register={register}
+                          error={errors.configs?.[index]?.nonReceiptCost?.message}
+                          inputClassName="border-gray-200 px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors"
+                        />
+                      </td>
+                    </tr>
+                    {isAllBlank && (
+                      <tr className="border-b border-gray-100">
+                        <td colSpan={4} className="px-4 pb-2 text-xs text-amber-600">
+                          سيتم حذف إعدادات هذه المحافظة عند الحفظ
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                );
+              })}
             </tbody>
           </table>
         </div>

@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import * as XLSX from 'xlsx';
 import { Download, Upload, FileSpreadsheet, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
@@ -10,88 +9,24 @@ import { Breadcrumb } from '@/components/dashboard-layout';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { generateSettlementTemplate } from '@/lib/excel/template-generator';
+import { parseSettlementFile } from '@/lib/excel/parse-settlement-file';
+import CopyButton from '@/components/ui/copy-button';
+import { useStatusLabel } from '@/hooks/useStatusLabel';
+import { getApiErrorMessage } from '@/utils/apiError';
+import {
+  SettlementShippingColumnHeaders,
+  SettlementShippingColumnCells,
+} from '@/app/dashboard/orders/settlement/components/SettlementShippingColumns';
+import ForceSettlementDialog from '@/app/dashboard/orders/settlement/components/ForceSettlementDialog';
 import {
   uploadSettlementRows,
+  addSettlementBatchOrders,
   getCurrentSettlementBatch,
   confirmSettlementBatch,
   type SettlementBatch,
   type SettlementRow,
   type UploadSettlementResponse,
 } from '@/lib/api/settlement';
-
-function parseSettlementFile(file: File): Promise<SettlementRow[]> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = e.target?.result;
-        if (!data) {
-          reject(new Error('فشل في قراءة الملف'));
-          return;
-        }
-
-        const workbook = XLSX.read(data, { type: 'binary' });
-        const sheetName = workbook.SheetNames[0];
-        if (!sheetName) {
-          reject(new Error('الملف لا يحتوي على أي صفحات عمل'));
-          return;
-        }
-
-        const rows = XLSX.utils.sheet_to_json<Record<string, string>>(
-          workbook.Sheets[sheetName],
-          { defval: '' },
-        );
-
-        if (rows.length === 0) {
-          reject(new Error('الملف فارغ أو لا يحتوي على بيانات'));
-          return;
-        }
-
-        const validStatuses = ['COLLECTED', 'RETURNED_SETTLED'] as const;
-        const result: SettlementRow[] = [];
-
-        for (const row of rows) {
-          const orderCode = String(row.orderCode ?? '').trim();
-          const shippingCompanyCode = String(row.shippingCompanyCode ?? '').trim();
-
-          if (!orderCode && !shippingCompanyCode) continue;
-
-          const rawAmount = row.settlementAmount;
-          const settlementAmount =
-            typeof rawAmount === 'number' ? rawAmount : Number(rawAmount);
-          if (Number.isNaN(settlementAmount)) continue;
-
-          const targetStatus = String(row.targetStatus ?? '').trim() as
-            | (typeof validStatuses)[number]
-            | '';
-          if (!validStatuses.includes(targetStatus as (typeof validStatuses)[number])) continue;
-
-          result.push({
-            orderCode: orderCode || undefined,
-            shippingCompanyCode: shippingCompanyCode || undefined,
-            settlementAmount,
-            targetStatus: targetStatus as (typeof validStatuses)[number],
-          });
-        }
-
-        if (result.length === 0) {
-          reject(new Error('لا توجد صفوف صالحة في الملف'));
-          return;
-        }
-
-        resolve(result);
-      } catch (err) {
-        reject(
-          new Error(
-            `فشل في قراءة الملف: ${err instanceof Error ? err.message : 'خطأ غير معروف'}`,
-          ),
-        );
-      }
-    };
-    reader.onerror = () => reject(new Error('فشل في قراءة الملف'));
-    reader.readAsBinaryString(file);
-  });
-}
 
 function handleDownloadTemplate() {
   const blob = generateSettlementTemplate();
@@ -116,6 +51,14 @@ export default function SettlementUploadPage() {
   const [results, setResults] = useState<UploadSettlementResponse | null>(null);
   const [batch, setBatch] = useState<SettlementBatch | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [selectedForceRows, setSelectedForceRows] = useState<Set<number>>(new Set());
+  const [isForcingSelected, setIsForcingSelected] = useState(false);
+  const [forcingTarget, setForcingTarget] = useState<
+    | { source: 'failed'; row: number }
+    | { source: 'alreadyCollected'; row: number }
+    | null
+  >(null);
+  const { getStatusLabel } = useStatusLabel();
 
   // The collection lives on the server, so a closed browser does not lose it —
   // reopening the page picks the session back up.
@@ -135,7 +78,7 @@ export default function SettlementUploadPage() {
         `تم إغلاق التحصيل ${confirmed.code} — الإجمالي ${confirmed.totalAmount} جنيه عن ${confirmed.ordersCount} طلب`,
       );
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'تعذر إغلاق التحصيل');
+      toast.error(getApiErrorMessage(err, 'تعذر إغلاق التحصيل'));
     } finally {
       setIsConfirming(false);
     }
@@ -193,16 +136,94 @@ export default function SettlementUploadPage() {
         toast.error('فشل رفع جميع الصفوف');
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'خطأ في رفع البيانات');
+      toast.error(getApiErrorMessage(err, 'خطأ في رفع البيانات'));
     } finally {
       setIsUploading(false);
     }
-  }, [parsedRows]);
+  }, [parsedRows, batch]);
+
+  const forceRows = useCallback(
+    async (rowIndices: number[]) => {
+      if (!batch || rowIndices.length === 0) return;
+
+      const sentRowIndices: number[] = [];
+      const rows: SettlementRow[] = [];
+      for (const idx of rowIndices) {
+        const row = parsedRows[idx];
+        if (!row) continue;
+        sentRowIndices.push(idx);
+        rows.push({ ...row, force: true });
+      }
+
+      if (rows.length === 0) return;
+
+      const response = await addSettlementBatchOrders(batch.id, rows);
+      const forcedSet = new Set(sentRowIndices);
+      const renumber = <T extends { row: number }>(items: T[]): T[] =>
+        items.map((item) => ({ ...item, row: sentRowIndices[item.row] ?? item.row }));
+
+      setResults((prev) =>
+        prev
+          ? {
+              success: [...prev.success, ...renumber(response.success)],
+              failed: [
+                ...prev.failed.filter((item) => !forcedSet.has(item.row)),
+                ...renumber(response.failed),
+              ],
+              alreadyCollected: [
+                ...prev.alreadyCollected.filter((item) => !forcedSet.has(item.row)),
+                ...renumber(response.alreadyCollected),
+              ],
+              batch: response.batch,
+            }
+          : prev,
+      );
+      setBatch(response.batch);
+    },
+    [batch, parsedRows],
+  );
+
+  const handleForceSelected = useCallback(async () => {
+    if (selectedForceRows.size === 0) return;
+    setIsForcingSelected(true);
+    try {
+      await forceRows(Array.from(selectedForceRows));
+      setSelectedForceRows(new Set());
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, 'تعذر إضافة الصفوف المحددة رغم الأخطاء'));
+    } finally {
+      setIsForcingSelected(false);
+    }
+  }, [forceRows, selectedForceRows]);
+
+  const handleConfirmForceTarget = useCallback(async () => {
+    if (!forcingTarget) return;
+    try {
+      await forceRows([forcingTarget.row]);
+      setForcingTarget(null);
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, 'تعذر إضافة الطلب رغم الخطأ'));
+      throw err;
+    }
+  }, [forceRows, forcingTarget]);
+
+  const toggleForceRowSelection = useCallback((row: number) => {
+    setSelectedForceRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(row)) {
+        next.delete(row);
+      } else {
+        next.add(row);
+      }
+      return next;
+    });
+  }, []);
 
   const handleReset = useCallback(() => {
     setSelectedFile(null);
     setParsedRows([]);
     setResults(null);
+    setSelectedForceRows(new Set());
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -211,7 +232,7 @@ export default function SettlementUploadPage() {
   return (
     <div className="flex flex-col p-4 sm:p-6 max-w-5xl mx-auto w-full min-h-full">
       <Breadcrumb
-        items={[{ title: 'الطلبات' }, { title: 'رفع شيت التحصيل' }]}
+        items={[{ title: 'التحصيلات' }, { title: 'رفع شيت التحصيل' }]}
       />
 
       <h1 className="text-2xl font-bold mb-6">رفع شيت التحصيل</h1>
@@ -306,7 +327,10 @@ export default function SettlementUploadPage() {
                 <span className="text-xs text-muted-foreground">
                   {batch.status === 'OPEN' ? 'تحصيل مفتوح' : 'تحصيل مغلق'}
                 </span>
-                <span className="font-bold">{batch.code}</span>
+                <span className="font-bold flex items-center gap-1.5">
+                  {batch.code}
+                  <CopyButton value={batch.code} label="نسخ كود التحصيل" />
+                </span>
               </div>
               <div className="flex flex-col gap-0.5">
                 <span className="text-xs text-muted-foreground">الإجمالي</span>
@@ -365,17 +389,19 @@ export default function SettlementUploadPage() {
                         <th className="px-4 py-2 text-right font-medium">المبلغ</th>
                         <th className="px-4 py-2 text-right font-medium">الحالة الحالية</th>
                         <th className="px-4 py-2 text-right font-medium">الحالة الجديدة</th>
+                        <SettlementShippingColumnHeaders />
                       </tr>
                     </thead>
                     <tbody>
-                      {results.success.map((item, i) => (
-                        <tr key={i} className="border-t">
-                          <td className="px-4 py-2 text-muted-foreground">{i + 1}</td>
+                      {results.success.map((item) => (
+                        <tr key={item.row} className="border-t">
+                          <td className="px-4 py-2 text-muted-foreground">{item.row + 1}</td>
                           <td className="px-4 py-2 font-mono">{item.orderCode}</td>
                           <td className="px-4 py-2 font-mono">{item.shippingCode ?? "—"}</td>
                           <td className="px-4 py-2">{item.amount}</td>
-                          <td className="px-4 py-2">{item.currentStatus}</td>
-                          <td className="px-4 py-2">{item.newStatus}</td>
+                          <td className="px-4 py-2">{getStatusLabel(item.currentStatus)}</td>
+                          <td className="px-4 py-2">{getStatusLabel(item.newStatus)}</td>
+                          <SettlementShippingColumnCells shipping={item.shipping} />
                         </tr>
                       ))}
                     </tbody>
@@ -403,6 +429,8 @@ export default function SettlementUploadPage() {
                         <th className="px-4 py-2 text-right font-medium">المبلغ المحصل مسبقاً</th>
                         <th className="px-4 py-2 text-right font-medium">تاريخ التحصيل</th>
                         <th className="px-4 py-2 text-right font-medium">التحصيل السابق</th>
+                        <SettlementShippingColumnHeaders />
+                        <th className="px-4 py-2 text-right font-medium"></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -440,6 +468,20 @@ export default function SettlementUploadPage() {
                                 ? `${item.batch.code}${item.batch.actorName ? ` — ${item.batch.actorName}` : ''}`
                                 : (item.source ?? '—')}
                             </td>
+                            <SettlementShippingColumnCells shipping={item.shipping} />
+                            <td className="px-4 py-2">
+                              {item.bypassable && !item.sameBatch && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    setForcingTarget({ source: 'alreadyCollected', row: item.row })
+                                  }
+                                >
+                                  نقل إلى هذا التحصيل
+                                </Button>
+                              )}
+                            </td>
                           </tr>
                         );
                       })}
@@ -452,33 +494,91 @@ export default function SettlementUploadPage() {
             {/* Failed rows */}
             {results.failed.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold text-red-700 flex items-center gap-2 mb-3">
-                  <XCircle className="w-4 h-4" />
-                  فشل ({results.failed.length})
-                </h3>
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <h3 className="text-sm font-semibold text-red-700 flex items-center gap-2">
+                    <XCircle className="w-4 h-4" />
+                    فشل ({results.failed.length})
+                  </h3>
+                  {results.failed.some((item) => item.bypassable) && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={selectedForceRows.size === 0 || isForcingSelected}
+                      onClick={handleForceSelected}
+                    >
+                      {isForcingSelected ? 'جاري الإضافة...' : 'إضافة المحدد رغم الأخطاء'}
+                    </Button>
+                  )}
+                </div>
                 <div className="rounded-md border overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-muted">
                       <tr>
+                        <th className="px-4 py-2 text-right font-medium">
+                          <input
+                            type="checkbox"
+                            checked={
+                              results.failed.some((item) => item.bypassable) &&
+                              results.failed
+                                .filter((item) => item.bypassable)
+                                .every((item) => selectedForceRows.has(item.row))
+                            }
+                            onChange={(e) => {
+                              const bypassableRows = results.failed
+                                .filter((item) => item.bypassable)
+                                .map((item) => item.row);
+                              setSelectedForceRows(
+                                e.target.checked ? new Set(bypassableRows) : new Set(),
+                              );
+                            }}
+                          />
+                        </th>
                         <th className="px-4 py-2 text-right font-medium">#</th>
                         <th className="px-4 py-2 text-right font-medium">كود الطلب</th>
                         <th className="px-4 py-2 text-right font-medium">كود الشحن</th>
                         <th className="px-4 py-2 text-right font-medium">المبلغ</th>
                         <th className="px-4 py-2 text-right font-medium">الحالة الحالية</th>
                         <th className="px-4 py-2 text-right font-medium">الحالة المطلوبة</th>
+                        <SettlementShippingColumnHeaders />
                         <th className="px-4 py-2 text-right font-medium">رسالة الخطأ</th>
+                        <th className="px-4 py-2 text-right font-medium"></th>
                       </tr>
                     </thead>
                     <tbody>
                       {results.failed.map((item, i) => (
                         <tr key={i} className="border-t">
-                          <td className="px-4 py-2 text-muted-foreground">{item.row}</td>
+                          <td className="px-4 py-2">
+                            {item.bypassable && (
+                              <input
+                                type="checkbox"
+                                checked={selectedForceRows.has(item.row)}
+                                onChange={() => toggleForceRowSelection(item.row)}
+                              />
+                            )}
+                          </td>
+                          <td className="px-4 py-2 text-muted-foreground">{item.row + 1}</td>
                           <td className="px-4 py-2 font-mono">{item.orderCode ?? "—"}</td>
                           <td className="px-4 py-2 font-mono">{item.shippingCode ?? "—"}</td>
                           <td className="px-4 py-2">{item.amount ?? "—"}</td>
-                          <td className="px-4 py-2">{item.currentStatus ?? "—"}</td>
-                          <td className="px-4 py-2">{item.targetStatus ?? "—"}</td>
+                          <td className="px-4 py-2">
+                            {item.currentStatus ? getStatusLabel(item.currentStatus) : '—'}
+                          </td>
+                          <td className="px-4 py-2">
+                            {item.targetStatus ? getStatusLabel(item.targetStatus) : '—'}
+                          </td>
+                          <SettlementShippingColumnCells shipping={item.shipping} />
                           <td className="px-4 py-2 text-red-600">{item.reason}</td>
+                          <td className="px-4 py-2">
+                            {item.bypassable && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setForcingTarget({ source: 'failed', row: item.row })}
+                              >
+                                إضافة رغم الخطأ
+                              </Button>
+                            )}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -489,6 +589,28 @@ export default function SettlementUploadPage() {
           </CardContent>
         </Card>
       )}
+
+      <ForceSettlementDialog
+        isOpen={forcingTarget !== null}
+        onClose={() => setForcingTarget(null)}
+        onConfirm={handleConfirmForceTarget}
+        reason={
+          (forcingTarget?.source === 'failed'
+            ? results?.failed.find((item) => item.row === forcingTarget.row)?.reason
+            : undefined) ?? ''
+        }
+        hopPath={
+          forcingTarget?.source === 'failed'
+            ? (results?.failed.find((item) => item.row === forcingTarget.row)?.forcePath ?? null)
+            : null
+        }
+        moveFromBatchCode={
+          forcingTarget?.source === 'alreadyCollected'
+            ? (results?.alreadyCollected.find((item) => item.row === forcingTarget.row)?.batch
+                ?.code ?? null)
+            : null
+        }
+      />
     </div>
   );
 }

@@ -1,28 +1,72 @@
 import api from './index';
 
+export type ShippingMatch = 'MATCH' | 'MISMATCH' | 'UNKNOWN';
+
+export interface SettlementShippingInfo {
+  governorate: string | null;
+  totalCost: string;
+  sheetShippingCost: string;
+  expectedShippingCost: string | null;
+  shippingMatch: ShippingMatch;
+}
+
+export type SettlementRowCode =
+  | 'SETTLEMENT_ORDER_NOT_FOUND'
+  | 'SETTLEMENT_STATUS_NOT_SETTLEABLE'
+  | 'SETTLEMENT_NO_FORWARD_PATH'
+  | 'SETTLEMENT_ORDER_SHADOWED'
+  | 'SETTLEMENT_FORCE_RULE_REPEATS'
+  | 'SETTLEMENT_TRANSITION_FAILED'
+  | 'SETTLEMENT_UNEXPECTED'
+  | 'SETTLEMENT_BATCH_NOT_FOUND'
+  | 'SETTLEMENT_BATCH_CONFIRMED'
+  | 'SETTLEMENT_ORDER_NOT_IN_BATCH'
+  | 'SETTLEMENT_REMOVAL_MODE_NOT_ALLOWED'
+  | 'SETTLEMENT_REVERT_NOT_ALLOWED'
+  | 'SETTLEMENT_STATUS_CHANGED'
+  | 'SETTLEMENT_REVERT_LEDGER_MISMATCH'
+  | 'SETTLEMENT_REVERT_WAREHOUSE_MISSING'
+  | 'SETTLEMENT_ORDER_DELETED'
+  | 'SETTLEMENT_ORDER_NOT_SETTLED'
+  | 'SETTLEMENT_AMOUNT_UNCHANGED'
+  | 'SETTLEMENT_BATCH_ALREADY_CONFIRMED'
+  | 'SETTLEMENT_BATCH_CREATE_FAILED'
+  | 'OUT_OF_STOCK_CONFIRMATION_BLOCKED';
+
 export interface SettlementRow {
   orderCode?: string;
   shippingCompanyCode?: string;
   settlementAmount: number;
   targetStatus: 'COLLECTED' | 'RETURNED_SETTLED';
+  force?: boolean;
 }
 
 export interface SettlementSuccessItem {
+  row: number;
+  orderId: number;
   orderCode: string;
   shippingCode: string | null;
   amount: number;
   currentStatus: string;
   newStatus: string;
+  forcedPath: string[] | null;
+  shipping: SettlementShippingInfo;
 }
 
 export interface SettlementFailedItem {
   row: number;
+  orderId: number | null;
   orderCode: string | null;
   shippingCode: string | null;
   amount: number | null;
   currentStatus: string | null;
   targetStatus: string | null;
+  code: SettlementRowCode;
+  params: Record<string, unknown>;
   reason: string;
+  bypassable: boolean;
+  forcePath: string[] | null;
+  shipping: SettlementShippingInfo | null;
 }
 
 /**
@@ -32,6 +76,7 @@ export interface SettlementFailedItem {
  */
 export interface AlreadyCollectedItem {
   row: number;
+  orderId: number;
   orderCode: string;
   shippingCode: string | null;
   sheetAmount: string;
@@ -44,6 +89,9 @@ export interface AlreadyCollectedItem {
     createdAt: string;
     actorName: string | null;
   } | null;
+  bypassable: boolean;
+  sameBatch: boolean;
+  shipping: SettlementShippingInfo;
 }
 
 export interface UploadSettlementResponse {
@@ -108,6 +156,7 @@ export interface SettlementBatchOrder {
   settledAt: string;
   customerName: string | null;
   isDeleted: boolean;
+  shipping: SettlementShippingInfo;
 }
 
 export interface Paginated<T> {
@@ -173,4 +222,61 @@ export async function adjustSettlement(
   amount: number,
 ): Promise<void> {
   await api.patch(`/orders/settlement/${orderId}/adjust`, { amount });
+}
+
+export const SETTLEMENT_REMOVAL_MODES = ['REVERT', 'CLEAR', 'DETACH'] as const;
+
+export type SettlementRemovalMode = (typeof SETTLEMENT_REMOVAL_MODES)[number];
+
+export const SETTLEMENT_REMOVAL_MODE_LABELS: Record<SettlementRemovalMode, string> = {
+  REVERT: 'إرجاع الحالة',
+  CLEAR: 'مسح مبلغ التحصيل مع إبقاء الحالة',
+  DETACH: 'إزالة من التحصيل فقط',
+};
+
+export interface SettlementEditOrder {
+  id: number;
+  code: string;
+  status: string;
+  settlementAmount: string | null;
+}
+
+export interface SettlementEditResponse {
+  batch: SettlementBatch;
+  order: SettlementEditOrder | null;
+}
+
+export async function addSettlementBatchOrders(
+  batchId: string,
+  rows: SettlementRow[],
+): Promise<UploadSettlementResponse> {
+  const { data } = await api.post<UploadSettlementResponse>(
+    `/orders/settlement/batches/${batchId}/orders`,
+    { rows },
+  );
+  return data;
+}
+
+export async function removeSettlementBatchOrder(
+  batchId: string,
+  orderId: number,
+  mode: SettlementRemovalMode,
+): Promise<SettlementEditResponse> {
+  const { data } = await api.delete<SettlementEditResponse>(
+    `/orders/settlement/batches/${batchId}/orders/${orderId}`,
+    { params: { mode } },
+  );
+  return data;
+}
+
+export async function updateSettlementBatchOrderAmount(
+  batchId: string,
+  orderId: number,
+  amount: number,
+): Promise<SettlementEditResponse> {
+  const { data } = await api.patch<SettlementEditResponse>(
+    `/orders/settlement/batches/${batchId}/orders/${orderId}`,
+    { amount },
+  );
+  return data;
 }

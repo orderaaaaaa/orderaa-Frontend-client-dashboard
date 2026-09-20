@@ -98,7 +98,7 @@ export default function ShortfallSettlementPage() {
     <div className="flex flex-col p-4 sm:p-6 max-w-5xl mx-auto w-full min-h-full">
       <Breadcrumb
         items={[
-          { title: 'الطلبات' },
+          { title: 'التحصيلات' },
           { title: 'تحصيل ناقص' },
         ]}
       />
