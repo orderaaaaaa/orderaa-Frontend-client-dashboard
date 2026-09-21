@@ -120,6 +120,9 @@ export const QUERY_KEYS = {
   // Plans & Subscriptions
   PLANS: 'plans',
   ACTIVE_SUBSCRIPTION: 'active-subscription',
+
+  SALES_STATISTICS: 'sales-statistics',
+  SALES_STATISTICS_FILTER_OPTIONS: 'sales-statistics-filter-options',
 } as const;
 
 export type QueryKeyType = (typeof QUERY_KEYS)[keyof typeof QUERY_KEYS];

@@ -32,7 +32,7 @@ export function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
           'text-primary font-bold text-xl md:text-3xl transition-all hover:opacity-80';
 
         const secondaryItemClasses =
-          'font-normal text-lg md:text-xl text-[#1F1F1F] transition-all hover:text-primary';
+          'font-normal text-lg md:text-xl text-foreground-heading transition-all hover:text-primary';
 
         return (
           <div key={index} className="flex items-center gap-2">
@@ -57,8 +57,8 @@ export function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
             {/* The Arrow: Always show if not last item */}
             {!isLast && (
               <ArrowLeft
-                className="h-4 w-4 shrink-0"
-                color="#292D32"
+                className="h-4 w-4 shrink-0 text-icon-neutral"
+                color="currentColor"
                 width={15}
                 height={15}
               />

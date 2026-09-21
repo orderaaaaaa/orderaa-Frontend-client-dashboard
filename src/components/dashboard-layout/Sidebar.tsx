@@ -70,7 +70,7 @@ export function Sidebar({
   );
 
   const activeItemStyle: React.CSSProperties = {
-    backgroundColor: '#2C028F',
+    backgroundColor: 'var(--brand-active)',
     boxShadow: '0px 2px 4px 0px #00000080 inset',
     fontWeight: 500,
   };
@@ -108,11 +108,11 @@ export function Sidebar({
           className={`
             relative flex flex-col h-full transition-[width] duration-300
             ${collapsed ? SIDEBAR_WIDTH.COLLAPSED : SIDEBAR_WIDTH.EXPANDED}
-            border border-gray-700 overflow-hidden
+            border border-white/10 overflow-hidden
             shadow-[0_2px_4px_-1px_rgba(0,0,0,0.06),_0_4px_6px_-1px_rgba(0,0,0,0.10)]
           `}
           style={{
-            background: 'linear-gradient(180deg, #5D24E1 0%, #33147B 100%)',
+            background: 'linear-gradient(180deg, var(--primary) 0%, var(--brand-deep) 100%)',
           }}
         >
           {/* Header */}

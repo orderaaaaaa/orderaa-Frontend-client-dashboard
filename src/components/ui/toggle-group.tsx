@@ -29,7 +29,7 @@ function ToggleGroupInner<T extends string>({
   className,
 }: ToggleGroupProps<T>) {
   const content = (
-    <div className={clsx('flex items-center gap-1 rounded-full bg-gray-100 p-1', disabled && 'opacity-60 cursor-not-allowed', className)}>
+    <div className={clsx('flex items-center gap-1 rounded-full bg-muted p-1', disabled && 'opacity-60 cursor-not-allowed', className)}>
       {options.map((option) => (
         <Button
           key={option.value}
@@ -42,7 +42,7 @@ function ToggleGroupInner<T extends string>({
             'rounded-full px-4 py-2 text-sm font-medium transition-colors',
             value === option.value
               ? 'shadow-sm'
-              : 'text-gray-600 hover:text-gray-800 hover:bg-transparent',
+              : 'text-foreground-muted hover:text-foreground-emphasis hover:bg-transparent',
             disabled && 'pointer-events-none',
           )}
         >
@@ -64,10 +64,10 @@ function ToggleGroupInner<T extends string>({
             <Tooltip.Content
               side="bottom"
               sideOffset={6}
-              className="z-[9999] rounded-lg bg-gray-800 px-3 py-2 text-sm text-white shadow-lg animate-in fade-in-0 zoom-in-95"
+              className="z-[9999] rounded-lg bg-surface-contrast px-3 py-2 text-sm text-white shadow-lg animate-in fade-in-0 zoom-in-95"
             >
               {disabledTooltip}
-              <Tooltip.Arrow className="fill-gray-800" />
+              <Tooltip.Arrow className="fill-surface-contrast" />
             </Tooltip.Content>
           </Tooltip.Portal>
         </Tooltip.Root>

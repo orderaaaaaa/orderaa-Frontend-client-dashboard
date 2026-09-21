@@ -130,6 +130,7 @@ export const PERMISSION_CODES = {
   SUBSCRIPTIONS_SUBSCRIBE: 'subscriptions:subscribe',
   REPORTS_READ: 'reports:read',
   REPORTS_EMPLOYEES_READ: 'reports:employees:read',
+  REPORTS_SALES_READ: 'reports:sales:read',
   PACKAGING_INVENTORY_READ: 'packaging-inventory:read',
   PACKAGING_INVENTORY_CHECK: 'packaging-inventory:check',
   CANCELLATION_REASONS_READ: 'cancellation-reasons:read',

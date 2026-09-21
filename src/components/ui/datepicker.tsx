@@ -102,14 +102,14 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             disabled={disabled}
             className={cn(
               'w-full !h-auto py-3 px-4 justify-start text-right font-normal !text-base !leading-normal',
-              'border border-gray-200 rounded-lg bg-white',
-              'hover:bg-gray-50 focus:ring-2 focus:ring-primary focus:border-transparent',
+              'border border-surface-strong rounded-lg bg-card',
+              'hover:bg-surface-subtle focus:ring-2 focus:ring-primary focus:border-transparent',
               !selected && 'text-muted-foreground',
               className
             )}
           >
             {showIcon && (
-              <Icon className="ml-2 h-4 w-4 text-gray-400 shrink-0" />
+              <Icon className="ml-2 h-4 w-4 text-foreground-subtle shrink-0" />
             )}
             <span className="flex-1 text-right truncate">
               {selected ? formatDisplayDate(selected) : placeholder}
@@ -120,12 +120,12 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
                 tabIndex={0}
                 onClick={handleClear}
                 onKeyDown={(e) => e.key === 'Enter' && handleClear(e as any)}
-                className="mr-1 p-0.5 rounded-full hover:bg-gray-200 transition-colors"
+                className="mr-1 p-0.5 rounded-full hover:bg-surface-hover transition-colors"
               >
-                <X className="h-4 w-4 text-gray-500 hover:text-gray-700" />
+                <X className="h-4 w-4 text-foreground-secondary hover:text-foreground-strong" />
               </span>
             ) : !showIcon ? (
-              <CalendarIcon className="mr-auto h-4 w-4 text-gray-400 shrink-0" />
+              <CalendarIcon className="mr-auto h-4 w-4 text-foreground-subtle shrink-0" />
             ) : null}
           </Button>
         </PopoverTrigger>
@@ -256,13 +256,13 @@ function TimePicker({
           disabled={disabled}
           className={cn(
             'w-full !h-auto py-3 px-4 justify-start text-right font-normal !text-base !leading-normal',
-            'border border-gray-200 rounded-lg bg-white',
-            'hover:bg-gray-50 focus:ring-2 focus:ring-primary focus:border-transparent',
+            'border border-surface-strong rounded-lg bg-card',
+            'hover:bg-surface-subtle focus:ring-2 focus:ring-primary focus:border-transparent',
             !selected && 'text-muted-foreground',
             className
           )}
         >
-          {showIcon && <Icon className="ml-2 h-4 w-4 text-gray-400 shrink-0" />}
+          {showIcon && <Icon className="ml-2 h-4 w-4 text-foreground-subtle shrink-0" />}
           <span className="flex-1 text-right truncate">
             {selected ? formatDisplayTime(selected) : placeholder}
           </span>
@@ -272,9 +272,9 @@ function TimePicker({
               tabIndex={0}
               onClick={handleClear}
               onKeyDown={(e) => e.key === 'Enter' && handleClear(e as any)}
-              className="mr-1 p-0.5 rounded-full hover:bg-gray-200 transition-colors"
+              className="mr-1 p-0.5 rounded-full hover:bg-surface-hover transition-colors"
             >
-              <X className="h-4 w-4 text-gray-500 hover:text-gray-700" />
+              <X className="h-4 w-4 text-foreground-secondary hover:text-foreground-strong" />
             </span>
           )}
         </Button>
@@ -301,8 +301,8 @@ function TimePicker({
               className={cn(
                 'w-full px-4 py-2 text-right text-sm hover:bg-accent transition-colors cursor-pointer',
                 selected && format(selected, 'HH:mm') === option.value
-                  ? 'bg-primary text-white hover:bg-[#4a1db5]' // Use your purple here
-                  : 'text-gray-700'
+                  ? 'bg-primary text-white hover:bg-brand-hover'
+                  : 'text-foreground-strong'
               )}
             >
               {option.label}

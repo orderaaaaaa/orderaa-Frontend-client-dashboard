@@ -203,7 +203,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
     const renderEmptyState = () => {
       if (loading) {
         return (
-          <div className="py-6 flex items-center justify-center gap-2 text-sm text-gray-500">
+          <div className="py-6 flex items-center justify-center gap-2 text-sm text-foreground-secondary">
             <Loader2 className="w-4 h-4 animate-spin" />
             جاري التحميل...
           </div>
@@ -212,7 +212,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
 
       if (!options.length) {
         return (
-          <div className="py-6 text-center text-sm text-gray-500">
+          <div className="py-6 text-center text-sm text-foreground-secondary">
             {emptyMessage}
           </div>
         );
@@ -220,7 +220,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
 
       if (!filtered.length && debouncedQuery) {
         return (
-          <div className="py-6 text-center text-sm text-gray-500">
+          <div className="py-6 text-center text-sm text-foreground-secondary">
             {noResultsMessage}
           </div>
         );
@@ -243,9 +243,9 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
           className={cn(
             'relative px-4 py-3 rounded-lg border flex items-center justify-between truncate text-base cursor-pointer',
             disabled || loading
-              ? 'bg-gray-100 cursor-not-allowed text-gray-400'
-              : 'bg-white',
-            error ? 'border-red-500' : 'border-gray-200',
+              ? 'bg-muted cursor-not-allowed text-foreground-subtle'
+              : 'bg-card',
+            error ? 'border-red-500' : 'border-surface-strong',
             triggerClassName
           )}
           aria-expanded={open}
@@ -254,7 +254,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
           <span
             className={cn(
               'flex-1 truncate text-right',
-              currentDisplayValue ? 'text-gray-900' : 'text-gray-500'
+              currentDisplayValue ? 'text-foreground-body' : 'text-foreground-secondary'
             )}
           >
             {loading ? (
@@ -272,7 +272,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
               type="button"
               onClick={handleClear}
               className="absolute left-10 top-1/2 -translate-y-1/2 z-20
-                         text-gray-400 hover:text-primary cursor-pointer"
+                         text-foreground-subtle hover:text-primary cursor-pointer"
               aria-label="Clear selection"
             >
               <X className="w-4 h-4" />
@@ -281,7 +281,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
 
           <ChevronDown
             className={cn(
-              'w-4 h-4 md:w-5 md:h-5 text-gray-400 transition-transform',
+              'w-4 h-4 md:w-5 md:h-5 text-foreground-subtle transition-transform',
               open && 'rotate-180'
             )}
           />
@@ -295,7 +295,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.15 }}
               className="md:absolute md:top-full z-50 mt-1 w-full max-h-40 md:max-h-60 overflow-auto
-                         rounded-md border bg-white shadow-lg"
+                         rounded-md border bg-popover text-popover-foreground shadow-lg"
               role="listbox"
             >
               {showSearch && (
@@ -335,13 +335,13 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
                         className={cn(
                           'px-2 py-1.5 md:px-3 md:py-2 flex justify-between items-center text-sm md:text-base',
                           optionDisabled
-                            ? 'text-gray-400 cursor-not-allowed'
+                            ? 'text-foreground-subtle cursor-not-allowed'
                             : 'cursor-pointer hover:bg-primary hover:text-white',
                           selected && !optionDisabled && 'bg-primary text-white',
                           activeIdx === idx &&
                             !selected &&
                             !optionDisabled &&
-                            'bg-gray-100'
+                            'bg-accent'
                         )}
                       >
                         <span>{getDisplayText(opt)}</span>

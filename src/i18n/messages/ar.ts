@@ -14,6 +14,7 @@
  */
 const ar = {
   'common.language': 'اللغة',
+  'common.theme.toggle': 'تبديل الوضع الداكن',
   'common.loading': 'جارٍ التحميل…',
   // Verbatim from the rule-card buttons this page already renders raw.
   'common.save': 'حفظ',

@@ -41,6 +41,7 @@ import {
   HousePlus,
   Upload,
   FileOutput,
+  TrendingUp,
 } from 'lucide-react';
 import { IconType } from 'react-icons';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
@@ -66,6 +67,19 @@ export type NavigationItem = {
 
 export const navigation: NavigationItem[] = [
   { name: ' الرئيسية', href: '/dashboard', icon: House },
+  {
+    name: 'الإحصائيات',
+    href: '/dashboard/statistics',
+    icon: ChartNoAxesCombined,
+    children: [
+      {
+        name: 'إحصائيات المبيعات',
+        href: '/dashboard/statistics/sales',
+        icon: TrendingUp,
+        permission: PERMISSION_CODES.REPORTS_SALES_READ,
+      },
+    ],
+  },
   {
     name: 'الطلبات',
     href: '/dashboard/orders',

@@ -2,5 +2,6 @@ export { Sidebar } from './Sidebar';
 export { TopBar } from './TopBar';
 export { Breadcrumb } from './Breadcrumb';
 export { UserMenu } from './UserMenu';
+export { ThemeToggle } from './ThemeToggle';
 export { MainContent, PageContent } from './MainContent';
 export { ErrorBoundary, SidebarError, ContentError } from './ErrorBoundary';

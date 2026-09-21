@@ -68,7 +68,7 @@ export function UserMenu({
         className={
           isMobile
             ? 'font-normal text-white text-[16px]'
-            : 'font-bold text-[#1F1F1F] text-base'
+            : 'font-bold text-foreground-heading text-base'
         }
       >
         اهلا يا
@@ -79,7 +79,7 @@ export function UserMenu({
         className={`flex items-center !p-1  cursor-pointer ${
           isMobile
             ? 'font-normal text-white text-[16px] hover:text-white'
-            : 'font-bold text-[#1F1F1F] text-base'
+            : 'font-bold text-foreground-heading text-base'
         } transition-colors hover:bg-transparent`}
       >
         <span>{displayName}</span>
@@ -91,11 +91,11 @@ export function UserMenu({
       </Button>
 
       {isOpen && (
-        <ul className="absolute z-50 top-full mt-1 left-0 min-w-[150px] bg-white rounded-lg max-h-48 overflow-y-auto shadow-lg">
+        <ul className="absolute z-50 top-full mt-1 left-0 min-w-[150px] bg-popover text-popover-foreground dark:border dark:border-border rounded-lg max-h-48 overflow-y-auto shadow-lg">
           {USER_MENU_OPTIONS.map((option) => (
             <li
               key={option.key}
-              className="px-3 py-2 cursor-pointer text-[#111827] hover:bg-primary hover:text-white"
+              className="px-3 py-2 cursor-pointer text-foreground-body hover:bg-primary hover:text-white"
               style={{ direction: 'rtl' }}
               onClick={() => handleOptionClick(option.key)}
             >

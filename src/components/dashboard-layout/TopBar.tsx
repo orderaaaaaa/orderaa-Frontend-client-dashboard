@@ -7,6 +7,7 @@ import { Menu, Search } from 'lucide-react';
 import { LiaSearchSolid, LiaTimesSolid, LiaSyncSolid } from 'react-icons/lia';
 import Input from '../ui/Input';
 import { UserMenu } from './UserMenu';
+import { ThemeToggle } from './ThemeToggle';
 import { LanguageSwitcher } from '@/i18n/LanguageSwitcher';
 import { UserMenuKey } from '@/hooks/useSidebar';
 import { useAuthStore } from '@/store/authStore';
@@ -104,7 +105,7 @@ export function TopBar({
       className={clsx(
         'flex flex-col lg:flex-row justify-between items-center',
         'px-4 lg:px-6 py-3 lg:py-0',
-        'max-lg:bg-gradient-to-b from-primary to-[#33147B] max-sm:text-white border-b',
+        'max-lg:bg-gradient-to-b from-primary to-brand-deep max-sm:text-white border-b',
         'relative'
       )}
       style={{ boxShadow: '0px 4px 12px 0px #00000014' }}
@@ -133,6 +134,7 @@ export function TopBar({
         </div>
         {/* ✅ Mobile: Language + Refresh + User dropdown */}
         <div className="lg:hidden flex items-center gap-1">
+          <ThemeToggle className="text-white hover:bg-white/20 h-10 w-10" />
           <LanguageSwitcher
             compact
             className="text-white hover:bg-white/20 h-10 px-2"
@@ -171,14 +173,14 @@ export function TopBar({
               onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
                 e.key === 'Enter' && handleSearch()
               }
-              inputClassName="bg-[#f3f4f6] text-black placeholder:text-primary w-full placeholder:font-medium border-2 !border-primary/30 rounded-lg !pl-20 !py-2"
+              inputClassName="bg-muted text-foreground-contrast placeholder:text-primary w-full placeholder:font-medium border-2 !border-primary/30 rounded-lg !pl-20 !py-2"
             />
             <div className="absolute left-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
               {searchQuery && (
                 <Button
                   type="button"
                   onClick={handleClear}
-                  className="p-1 text-gray-400 hover:text-gray-600"
+                  className="p-1 text-foreground-subtle hover:text-foreground-muted"
                   aria-label="مسح البحث"
                 >
                   <LiaTimesSolid className="h-4 w-4" />
@@ -188,7 +190,7 @@ export function TopBar({
                 type="button"
                 onClick={handleSearch}
                 disabled={isSearching}
-                className="p-1.5 bg-primary hover:bg-[#4a1db8] text-white rounded-md disabled:opacity-70"
+                className="p-1.5 bg-primary hover:bg-brand-hover text-white rounded-md disabled:opacity-70"
                 aria-label="بحث"
               >
                 {isSearching ? (
@@ -223,7 +225,7 @@ export function TopBar({
                 variant="ghost"
                 type="button"
                 onClick={handleClear}
-                className="p-1.5 text-gray-400 hover:text-gray-600"
+                className="p-1.5 text-foreground-subtle hover:text-foreground-muted"
                 aria-label="مسح البحث"
               >
                 <LiaTimesSolid className="h-4 w-4" />
@@ -233,7 +235,7 @@ export function TopBar({
               type="button"
               onClick={handleSearch}
               disabled={isSearching}
-              className="p-2 bg-primary hover:bg-[#4a1db8] text-white rounded-full disabled:opacity-70"
+              className="p-2 bg-primary hover:bg-brand-hover text-white rounded-full disabled:opacity-70"
               aria-label="بحث"
             >
               {isSearching ? (
@@ -246,11 +248,12 @@ export function TopBar({
         </div>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle className="text-foreground-muted hover:bg-muted h-10 w-10 rounded-full" />
           <LanguageSwitcher className="[&_button]:px-3 [&_button]:py-1.5" />
           <Button
             variant="ghost"
             size="icon"
-            className="text-gray-600 hover:bg-gray-100 h-10 w-10 rounded-full"
+            className="text-foreground-muted hover:bg-muted h-10 w-10 rounded-full"
             onClick={handleRefreshStatistics}
             disabled={isRefreshing}
             aria-label="تحديث الإحصائيات"

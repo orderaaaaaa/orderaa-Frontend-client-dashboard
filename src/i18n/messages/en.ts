@@ -11,6 +11,7 @@ import type ar from './ar';
  */
 const en: Record<keyof typeof ar, string> = {
   'common.language': 'Language',
+  'common.theme.toggle': 'Toggle dark mode',
   'common.loading': 'Loading…',
   'common.save': 'Save',
   'common.delete': 'Delete',

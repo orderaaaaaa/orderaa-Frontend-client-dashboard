@@ -108,7 +108,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <AuthGuard>
       <div
-        className="flex min-h-dvh bg-gray-50"
+        className="flex min-h-dvh bg-surface-subtle"
         style={
           {
             '--sidebar-w': isCollapsed
@@ -132,7 +132,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </ErrorBoundary>
 
         <MainContent>
-          <div className="sticky top-0 z-10 bg-gray-50">
+          <div className="sticky top-0 z-10 bg-surface-subtle">
             <div className="flex-shrink-0 pt-[env(safe-area-inset-top)]">
               <TopBar
                 onMenuToggle={handleSidebarToggle}

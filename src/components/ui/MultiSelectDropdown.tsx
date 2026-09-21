@@ -194,9 +194,9 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
           className={cn(
             'relative px-2 py-1.5 md:px-3 md:py-2 rounded border flex items-center justify-between text-sm md:text-base cursor-pointer min-h-[40px]',
             disabled || loading
-              ? 'bg-gray-100 cursor-not-allowed text-gray-400'
-              : 'bg-white',
-            error ? 'border-red-500' : 'border-gray-300'
+              ? 'bg-muted cursor-not-allowed text-foreground-subtle'
+              : 'bg-card',
+            error ? 'border-red-500' : 'border-border-strong'
           )}
           aria-expanded={open}
           aria-haspopup="listbox"
@@ -204,7 +204,7 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
           <span
             className={cn(
               'flex-1 text-right',
-              value.length > 0 ? 'text-gray-900' : 'text-gray-500'
+              value.length > 0 ? 'text-foreground-body' : 'text-foreground-secondary'
             )}
           >
             {value.length > 0 ? (
@@ -229,7 +229,7 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
 
           <ChevronDown
             className={cn(
-              'w-4 h-4 md:w-5 md:h-5 text-gray-400 transition-transform flex-shrink-0 ms-1',
+              'w-4 h-4 md:w-5 md:h-5 text-foreground-subtle transition-transform flex-shrink-0 ms-1',
               open && 'rotate-180'
             )}
           />
@@ -242,7 +242,7 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.15 }}
-              className="md:absolute md:top-full z-50 mt-1 w-full max-h-40 md:max-h-60 overflow-auto rounded-md border bg-white shadow-lg"
+              className="md:absolute md:top-full z-50 mt-1 w-full max-h-40 md:max-h-60 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-lg"
               role="listbox"
               aria-multiselectable="true"
             >
@@ -259,7 +259,7 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
               )}
 
               {showSelectAll && filteredKeys.length > 0 && (
-                <div className="sticky top-0 z-10 border-b bg-white px-2 py-1.5 md:px-3 md:py-2">
+                <div className="sticky top-0 z-10 border-b bg-popover px-2 py-1.5 md:px-3 md:py-2">
                   <button
                     type="button"
                     onClick={toggleSelectAll}
@@ -272,11 +272,11 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
 
               <ul className="py-1">
                 {!options.length ? (
-                  <li className="py-6 text-center text-sm text-gray-500">
+                  <li className="py-6 text-center text-sm text-foreground-secondary">
                     {emptyMessage}
                   </li>
                 ) : !filtered.length && debouncedQuery ? (
-                  <li className="py-6 text-center text-sm text-gray-500">
+                  <li className="py-6 text-center text-sm text-foreground-secondary">
                     {noResultsMessage}
                   </li>
                 ) : (
@@ -295,8 +295,8 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
                         className={cn(
                           'px-2 py-1.5 md:px-3 md:py-2 flex items-center gap-2 text-sm md:text-base',
                           optionDisabled
-                            ? 'text-gray-400 cursor-not-allowed'
-                            : 'cursor-pointer hover:bg-gray-100',
+                            ? 'text-foreground-subtle cursor-not-allowed'
+                            : 'cursor-pointer hover:bg-accent',
                           selected && !optionDisabled && 'bg-primary/5'
                         )}
                       >
@@ -305,7 +305,7 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
                             'w-4 h-4 rounded border flex items-center justify-center flex-shrink-0',
                             selected
                               ? 'bg-primary border-primary'
-                              : 'border-gray-300'
+                              : 'border-border-strong'
                           )}
                         >
                           {selected && (
