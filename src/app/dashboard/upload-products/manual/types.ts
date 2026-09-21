@@ -12,6 +12,7 @@ export type OrderDetailsProps = {
   onTotalChange: (v: string) => void;
   onPackagingNotesChange: (v: string) => void;
   errors?: { products?: string; total?: string };
+  failingProductIndex?: number | null;
 };
 
 export type ClientInformationProps = {

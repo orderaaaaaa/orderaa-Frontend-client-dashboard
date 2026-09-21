@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const manualOrderSchema = z
+export const manualOrderBaseSchema = z
   .object({
     orderSource: z.object({
       utmSource: z.string().min(1, 'هذا الحقل مطلوب'),
@@ -33,8 +33,9 @@ export const manualOrderSchema = z
     needsConfirmation: z.boolean(),
     total: z.string().optional(),
     packagingNotes: z.string().optional(),
-  })
-  .superRefine((data, ctx) => {
+  });
+
+export const manualOrderSchema = manualOrderBaseSchema.superRefine((data, ctx) => {
     if (data.shipping.shippingCost && isNaN(Number(data.shipping.shippingCost))) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

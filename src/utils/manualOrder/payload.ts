@@ -71,7 +71,7 @@ export function buildManualOrderPayload(args: {
       returnShipmentContent: shipping.returnShipmentContent.trim(),
     }),
     ...(packagingNotes?.trim() && {
-      packagingNotes: packagingNotes.trim(),
+      packagingNote: packagingNotes.trim(),
     }),
   };
 }

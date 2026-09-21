@@ -68,6 +68,13 @@ function Manual() {
     }
   }, [settings?.defaultReturnShippingCost, setValue]);
 
+  useEffect(() => {
+    useProductDropdownStore.getState().setSelectedProducts([]);
+    return () => {
+      useProductDropdownStore.getState().setSelectedProducts([]);
+    };
+  }, []);
+
   const [productsError, setProductsError] = useState<string | null>(null);
 
   const formValues = watch();

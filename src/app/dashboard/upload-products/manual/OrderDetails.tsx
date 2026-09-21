@@ -20,7 +20,14 @@ interface ProductTableRow {
   variantKey: string;
 }
 
-function OrderDetails({ total, packagingNotes, onTotalChange, onPackagingNotesChange, errors }: OrderDetailsProps) {
+function OrderDetails({
+  total,
+  packagingNotes,
+  onTotalChange,
+  onPackagingNotesChange,
+  errors,
+  failingProductIndex = null,
+}: OrderDetailsProps) {
   const selectedProducts = useProductDropdownStore(
     (state) => state.selectedProducts
   );
@@ -94,32 +101,44 @@ function OrderDetails({ total, packagingNotes, onTotalChange, onPackagingNotesCh
         className: 'min-w-[120px]',
         render: (_, rowData) => {
           const row = rowData as unknown as ProductTableRow;
+          const isFailing = failingProductIndex === row.index;
           return (
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="relative w-10 h-10 sm:w-14 sm:h-14 overflow-hidden rounded border border-gray-200 bg-gray-100 flex-shrink-0">
-                {row.image ? (
-                  <img
-                    src={row.image}
-                    alt={row.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-400 text-[8px] sm:text-[10px]">
-                    لا صورة
-                  </div>
-                )}
+            <div
+              className={
+                isFailing
+                  ? 'border-2 border-red-500 rounded-lg p-2'
+                  : undefined
+              }
+            >
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="relative w-10 h-10 sm:w-14 sm:h-14 overflow-hidden rounded border border-gray-200 bg-gray-100 flex-shrink-0">
+                  {row.image ? (
+                    <img
+                      src={row.image}
+                      alt={row.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-400 text-[8px] sm:text-[10px]">
+                      لا صورة
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-semibold text-xs sm:text-sm">{row.name}</span>
+                  {row.selectedVariants.map((variant) => (
+                    <span
+                      key={variant.attribute}
+                      className="text-gray-500 text-[10px] sm:text-xs"
+                    >
+                      {variant.attribute}: {variant.option}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <div className="flex flex-col gap-0.5">
-                <span className="font-semibold text-xs sm:text-sm">{row.name}</span>
-                {row.selectedVariants.map((variant) => (
-                  <span
-                    key={variant.attribute}
-                    className="text-gray-500 text-[10px] sm:text-xs"
-                  >
-                    {variant.attribute}: {variant.option}
-                  </span>
-                ))}
-              </div>
+              {isFailing && (
+                <p className="text-red-600 text-xs mt-1">اختر خيارات هذا المنتج</p>
+              )}
             </div>
           );
         },
@@ -194,7 +213,7 @@ function OrderDetails({ total, packagingNotes, onTotalChange, onPackagingNotesCh
         },
       },
     ],
-    [updateQuantity, removeProduct]
+    [updateQuantity, removeProduct, failingProductIndex]
   );
 
   return (

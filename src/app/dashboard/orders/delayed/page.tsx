@@ -14,6 +14,7 @@ import {
   useMarkDelayedOrder,
   type DelayedMarksMode,
 } from '@/services/delayedOrders';
+import { describeElapsed } from '@/utils/elapsed';
 import { DelaySettingsModal } from './components/DelaySettingsModal';
 
 const MARK_MODES: { value: DelayedMarksMode; label: string }[] = [
@@ -30,15 +31,6 @@ const DAY_OPTIONS = [
   { value: '4320', label: '٣ أيام' },
   { value: '10080', label: 'أسبوع' },
 ];
-
-const describeElapsed = (minutes: number) => {
-  const days = Math.floor(minutes / 1440);
-  if (days >= 1) return `${days} يوم`;
-  const hours = Math.floor(minutes / 60);
-  if (hours >= 1) return `${hours} ساعة`;
-
-  return `${minutes} دقيقة`;
-};
 
 export default function DelayedOrdersPage() {
   const [status, setStatus] = useState('');

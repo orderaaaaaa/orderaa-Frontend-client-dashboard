@@ -28,6 +28,7 @@ import {
   LiaBoxesSolid,
   LiaUserPlusSolid,
   LiaIndustrySolid,
+  LiaSearchSolid,
 } from 'react-icons/lia';
 import {
   House,
@@ -114,6 +115,12 @@ export const navigation: NavigationItem[] = [
         name: 'الطلبات المتأخرة',
         href: '/dashboard/orders/delayed',
         icon: LiaHourglassEndSolid,
+      },
+      {
+        name: 'قائمة المفقودات',
+        href: '/dashboard/orders/missing',
+        icon: LiaSearchSolid,
+        permission: PERMISSION_CODES.ORDERS_MISSING_READ,
       },
     ],
   },

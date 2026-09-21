@@ -26,5 +26,5 @@ export type ManualOrderPayload = {
   total: number;
   shippingType: string;
   returnShipmentContent?: string;
-  packagingNotes?: string;
+  packagingNote?: string;
 };
