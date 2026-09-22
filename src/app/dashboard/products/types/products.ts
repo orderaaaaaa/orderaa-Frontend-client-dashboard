@@ -56,11 +56,13 @@ export interface VariantOption {
 export interface AttributeOptionManual {
   id?: number;
   name: string;
+  displayName?: string;
 }
 
 export interface AttributeManual {
   id?: number;
   name: string;
+  displayName?: string;
   options: AttributeOptionManual[];
 }
 
