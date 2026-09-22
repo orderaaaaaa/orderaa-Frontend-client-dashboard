@@ -135,6 +135,8 @@ export const PERMISSION_CODES = {
   REPORTS_SALES_READ: 'reports:sales:read',
   PACKAGING_INVENTORY_READ: 'packaging-inventory:read',
   PACKAGING_INVENTORY_CHECK: 'packaging-inventory:check',
+  CANONICAL_NAMES_READ: 'canonical-names:read',
+  CANONICAL_NAMES_MANAGE: 'canonical-names:manage',
   CANCELLATION_REASONS_READ: 'cancellation-reasons:read',
   UPLOADS_CREATE: 'uploads:create',
   PLATFORM_TEMPLATES_READ: 'platform:templates:read',

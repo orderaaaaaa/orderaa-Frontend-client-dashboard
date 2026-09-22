@@ -12,17 +12,21 @@ export interface ShippingSectionProps {
   onEditClick: () => void;
   className?: string;
   externalGovernorate?: string | null;
+  externalCity?: string | null;
+  sourceGovernorate?: string | null;
+  sourceCity?: string | null;
 }
 
 interface ShippingFieldProps {
   label: string;
   value?: string | null;
+  sourceValue?: string | null;
   icon: React.ReactNode;
   className?: string;
   multiline?: boolean;
 }
 
-function ShippingField({ label, value, icon, className = '', multiline = false }: ShippingFieldProps) {
+function ShippingField({ label, value, sourceValue, icon, className = '', multiline = false }: ShippingFieldProps) {
   const isEmpty = !value;
   const displayValue = isEmpty ? '-' : value;
 
@@ -35,6 +39,12 @@ function ShippingField({ label, value, icon, className = '', multiline = false }
           {displayValue}
         </p>
       </div>
+      {sourceValue && (
+        <p className="text-xs text-gray-400">
+          الاسم الأصلي المخزّن:{' '}
+          <span className="font-medium text-gray-500">{sourceValue}</span>
+        </p>
+      )}
     </div>
   );
 }
@@ -47,6 +57,9 @@ export function ShippingSection({
   onEditClick,
   className = '',
   externalGovernorate,
+  externalCity,
+  sourceGovernorate,
+  sourceCity,
 }: ShippingSectionProps) {
   return (
     <div className={`flex flex-col justify-start gap-2 ${className}`}>
@@ -73,12 +86,14 @@ export function ShippingSection({
         <ShippingField
           label="المحافظة"
           value={governorate || externalGovernorate}
+          sourceValue={sourceGovernorate}
           icon={<LiaMapMarkerAltSolid size={18} />}
         />
 
         <ShippingField
           label="المنطقة"
-          value={city}
+          value={city || externalCity}
+          sourceValue={sourceCity}
           icon={<LiaMapMarkerAltSolid size={18} />}
         />
 

@@ -397,6 +397,9 @@ export interface Order {
   city?: string;
   address?: string;
   externalGovernorate?: string | null;
+  externalCity?: string | null;
+  sourceGovernorate?: string | null;
+  sourceCity?: string | null;
   shippingId?: string;
   shipping_ids?: OrderShippingId[];
   shippingNotes?: string | null;
