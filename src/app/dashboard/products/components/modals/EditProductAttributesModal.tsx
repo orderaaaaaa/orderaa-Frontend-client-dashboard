@@ -35,7 +35,12 @@ const EditProductAttributesModal: React.FC<EditProductAttributesModalProps> = ({
         attributes.map((a) => ({
           id: a.id,
           name: a.name,
-          options: a.options.map((o) => ({ id: o.id, name: o.name })),
+          displayName: a.displayName,
+          options: a.options.map((o) => ({
+            id: o.id,
+            name: o.name,
+            displayName: o.displayName,
+          })),
         })),
       );
     } else {
@@ -155,6 +160,14 @@ const EditProductAttributesModal: React.FC<EditProductAttributesModalProps> = ({
                   placeholder="المتغير (مثلاً: اللون)"
                   disabled={isPending}
                 />
+                {attr.displayName && attr.displayName !== attr.name && (
+                  <p className="mt-1 text-xs text-gray-400">
+                    مرتبط بالاسم الموحد:{' '}
+                    <span className="font-medium text-gray-500">
+                      {attr.displayName}
+                    </span>
+                  </p>
+                )}
               </div>
               <Button
                 type="button"
@@ -173,26 +186,36 @@ const EditProductAttributesModal: React.FC<EditProductAttributesModalProps> = ({
                 الخيارات
               </label>
               {attr.options.map((opt, optIdx) => (
-                <div key={optIdx} className="flex gap-2 items-center">
-                  <Input
-                    value={opt.name}
-                    onChange={(e) =>
-                      updateOptionName(attrIdx, optIdx, e.target.value)
-                    }
-                    placeholder="القيمة (مثلاً: أسود)"
-                    disabled={isPending}
-                    className="flex-1"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeOption(attrIdx, optIdx)}
-                    disabled={isPending}
-                    className="text-red-500 hover:bg-red-50"
-                  >
-                    <LiaTimesSolid className="w-4 h-4" />
-                  </Button>
+                <div key={optIdx} className="flex flex-col gap-1">
+                  <div className="flex gap-2 items-center">
+                    <Input
+                      value={opt.name}
+                      onChange={(e) =>
+                        updateOptionName(attrIdx, optIdx, e.target.value)
+                      }
+                      placeholder="القيمة (مثلاً: أسود)"
+                      disabled={isPending}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeOption(attrIdx, optIdx)}
+                      disabled={isPending}
+                      className="text-red-500 hover:bg-red-50"
+                    >
+                      <LiaTimesSolid className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  {opt.displayName && opt.displayName !== opt.name && (
+                    <p className="text-xs text-gray-400">
+                      مرتبط بالاسم الموحد:{' '}
+                      <span className="font-medium text-gray-500">
+                        {opt.displayName}
+                      </span>
+                    </p>
+                  )}
                 </div>
               ))}
               <Button
