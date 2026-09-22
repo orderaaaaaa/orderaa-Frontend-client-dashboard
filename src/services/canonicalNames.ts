@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import http from '@/lib/api/http';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { getApiErrorMessage } from '@/utils/apiError';
 import {
   CANONICAL_NAME_DOMAINS,
   type ApplyLinksRequest,
@@ -22,33 +23,6 @@ import {
   type SuggestRequest,
   type SuggestionResult,
 } from '@/types/canonicalNames';
-
-const CANONICAL_NAME_ERROR_MESSAGES: Record<string, string> = {
-  GOVERNORATE_IS_CLOSED: 'قائمة المحافظات ثابتة ولا يمكن إضافة محافظة جديدة',
-  SYSTEM_CANONICAL: 'هذا اسم نظامي ولا يمكن إعادة تسميته أو حذفه',
-  PARENT_REQUIRED: 'اسم المدينة يحتاج إلى محافظة أصل',
-  PARENT_DOMAIN_MISMATCH: 'يجب أن ينتمي الاسم الأصل إلى نطاق المحافظات',
-  PARENT_NOT_ALLOWED: 'هذا النطاق لا يقبل اسما أصلا',
-  SCOPE_REQUIRED: 'يلزم تحديد نطاق المحافظة لاسم المدينة',
-  SCOPE_NOT_APPLICABLE: 'هذا النطاق لا يقبل نطاقا غير 0',
-  DOMAIN_NOT_APPLICABLE: 'هذه النقطة لا تنطبق على هذا النطاق',
-  CANONICAL_NAME_EXISTS: 'يوجد اسم بهذا الإملاء بالفعل',
-  SPELLING_IS_CANONICAL_NAME: 'هذا الإملاء اسم موحد بالفعل',
-  CANONICAL_NAME_NOT_FOUND: 'الاسم الموحد غير موجود',
-  NORMALIZED_TEXT_REQUIRED: 'يلزم تحديد نص مطابق',
-  CANONICAL_SCOPE_MISMATCH: 'النطاق المحدد لا يطابق نطاق الاسم الموحد',
-  UNSCOPED_GROUP: 'هذه المجموعة تحتاج إلى تحديد نطاق قبل الربط',
-};
-
-const extractErrorMessage = (err: any): string => {
-  const code = err?.response?.data?.code;
-  if (typeof code === 'string' && CANONICAL_NAME_ERROR_MESSAGES[code]) {
-    return CANONICAL_NAME_ERROR_MESSAGES[code];
-  }
-  const message = err?.response?.data?.message;
-  if (typeof message === 'string' && message.trim()) return message;
-  return 'حدث خطأ غير متوقع';
-};
 
 const invalidateDomainQueries = (
   queryClient: ReturnType<typeof useQueryClient>,
@@ -147,7 +121,7 @@ export const useLinkSuggestionsMutation = (domain: CanonicalNameDomain) =>
       return data;
     },
     onError: (err: any) => {
-      toast.error(extractErrorMessage(err));
+      toast.error(getApiErrorMessage(err, 'تعذر توليد الاقتراحات'));
     },
   });
 
@@ -185,7 +159,7 @@ export const useCreateCanonicalName = (domain: CanonicalNameDomain) => {
       toast.success('تم إنشاء الاسم الموحد');
     },
     onError: (err: any) => {
-      toast.error(extractErrorMessage(err));
+      toast.error(getApiErrorMessage(err, 'تعذر إنشاء الاسم الموحد'));
     },
   });
 };
@@ -206,7 +180,7 @@ export const useRenameCanonicalName = (domain: CanonicalNameDomain) => {
       toast.success(`تم تغيير الاسم الظاهر في ${result.impact.rowCount} عنصر`);
     },
     onError: (err: any) => {
-      toast.error(extractErrorMessage(err));
+      toast.error(getApiErrorMessage(err, 'تعذر تغيير الاسم'));
     },
   });
 };
@@ -226,7 +200,7 @@ export const useDeleteCanonicalName = (domain: CanonicalNameDomain) => {
       toast.success('تم حذف الاسم الموحد');
     },
     onError: (err: any) => {
-      toast.error(extractErrorMessage(err));
+      toast.error(getApiErrorMessage(err, 'تعذر حذف الاسم الموحد'));
     },
   });
 };
@@ -252,7 +226,7 @@ export const useApplyLinks = (domain: CanonicalNameDomain) => {
       }
     },
     onError: (err: any) => {
-      toast.error(extractErrorMessage(err));
+      toast.error(getApiErrorMessage(err, 'تعذر تنفيذ الربط'));
     },
   });
 };
