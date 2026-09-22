@@ -355,6 +355,9 @@ function OrderDetailsInfoComponent({
           address={localOrder.address}
           onEditClick={modals.shipping.open}
           externalGovernorate={localOrder.externalGovernorate}
+          externalCity={localOrder.externalCity}
+          sourceGovernorate={localOrder.sourceGovernorate}
+          sourceCity={localOrder.sourceCity}
         />
 
         <PackagingNotesSection
