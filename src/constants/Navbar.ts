@@ -43,6 +43,11 @@ import {
   Upload,
   FileOutput,
   TrendingUp,
+  SpellCheck,
+  Tag,
+  Tags,
+  Map,
+  MapPin,
 } from 'lucide-react';
 import { IconType } from 'react-icons';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
@@ -243,6 +248,37 @@ export const navigation: NavigationItem[] = [
     name: 'المنتجات',
     href: '/dashboard/products',
     icon: LiaTagsSolid,
+  },
+  {
+    name: 'التسميات الموحدة',
+    href: '/dashboard/canonical-names',
+    icon: SpellCheck,
+    children: [
+      {
+        name: 'أسماء الخصائص',
+        href: '/dashboard/canonical-names/attribute-names',
+        icon: Tag,
+        permission: PERMISSION_CODES.CANONICAL_NAMES_READ,
+      },
+      {
+        name: 'قيم الخصائص',
+        href: '/dashboard/canonical-names/attribute-options',
+        icon: Tags,
+        permission: PERMISSION_CODES.CANONICAL_NAMES_READ,
+      },
+      {
+        name: 'المحافظات',
+        href: '/dashboard/canonical-names/governorates',
+        icon: Map,
+        permission: PERMISSION_CODES.CANONICAL_NAMES_READ,
+      },
+      {
+        name: 'المدن',
+        href: '/dashboard/canonical-names/cities',
+        icon: MapPin,
+        permission: PERMISSION_CODES.CANONICAL_NAMES_READ,
+      },
+    ],
   },
   {
     name: 'مشتريات',
