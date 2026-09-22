@@ -191,11 +191,6 @@ export interface SuggestionProposedName {
   members: SuggestionProposedNameMember[];
 }
 
-export interface SuggestionGroupKey {
-  scopeId: number;
-  normalizedText: string;
-}
-
 export interface SuggestRequest {
   scopeId?: number;
 }
@@ -203,8 +198,8 @@ export interface SuggestRequest {
 export interface SuggestionResult {
   proposedLinks: SuggestionProposedLink[];
   proposedNames: SuggestionProposedName[];
-  ambiguous: SuggestionGroupKey[];
-  unmatched: SuggestionGroupKey[];
+  ambiguous: number;
+  unmatched: number;
   truncated: boolean;
 }
 
