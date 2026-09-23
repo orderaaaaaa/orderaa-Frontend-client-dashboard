@@ -448,6 +448,7 @@ export interface Order {
   isShadowed?: boolean;
   shadowedAt?: string | null;
   editRejectedNote?: string | null;
+  parkedAt: string | null;
 
   createdAt: string;
   updatedAt: string;

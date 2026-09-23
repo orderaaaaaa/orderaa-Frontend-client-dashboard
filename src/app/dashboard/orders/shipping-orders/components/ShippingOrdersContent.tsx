@@ -480,6 +480,7 @@ export function ShippingOrdersContent() {
                 isCollected={order.isCollected}
                 isPartiallyPaid={order.isPartiallyPaid}
                 shippingType={order.shippingType}
+                parkedAt={order.parkedAt}
                 trys={order.numberOfTriesToReach}
                 status={order.status}
                 city={
