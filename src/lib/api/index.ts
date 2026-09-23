@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 import { readStoredLocale } from '@/i18n/locale';
 import { translate } from '@/i18n/translate';
 import { refreshPermissions, syncPermissionsVersion } from './permissionsVersion';
+import { API_ERROR_CODES } from './errorCodes';
 
 function extractMessage(data: unknown): string | undefined {
   const message = (data as { message?: string | string[] } | undefined)?.message;
@@ -67,6 +68,16 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    if (
+      error.response?.status === 403 &&
+      error.response?.data?.error === API_ERROR_CODES.MERCHANT_PAUSED &&
+      error.config?.url !== '/auth/signin'
+    ) {
+      localStorage.removeItem('auth-storage');
+      window.location.href = '/paused';
+      return Promise.reject(error);
+    }
+
     const isAuthEndpoint = error.config?.url?.startsWith('/auth/');
 
     if (error.response?.status === 401 && !isAuthEndpoint) {

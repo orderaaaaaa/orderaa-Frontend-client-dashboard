@@ -145,10 +145,19 @@ export const PERMISSION_CODES = {
   PLATFORM_ADMINS_MANAGE: 'platform:admins:manage',
   PLATFORM_PERMISSIONS_READ: 'platform:permissions:read',
   PLATFORM_MERCHANTS_READ: 'platform:merchants:read',
+  PLATFORM_MERCHANTS_MANAGE: 'platform:merchants:manage',
   PLATFORM_PLANS_MANAGE: 'platform:plans:manage',
   PLATFORM_CHARGE_OPTIONS_MANAGE: 'platform:charge-options:manage',
   PLATFORM_WAREHOUSES_READ: 'platform:warehouses:read',
   PLATFORM_WAREHOUSES_MANAGE: 'platform:warehouses:manage',
+  PLATFORM_STOCK_WORKFLOWS_READ: 'platform:stock-workflows:read',
+  PLATFORM_STOCK_WORKFLOWS_MANAGE: 'platform:stock-workflows:manage',
+  PLATFORM_STOCK_PRESETS_READ: 'platform:stock-presets:read',
+  PLATFORM_STOCK_PRESETS_MANAGE: 'platform:stock-presets:manage',
+  PLATFORM_BILLING_READ: 'platform:billing:read',
+  PLATFORM_ROLES_READ: 'platform:roles:read',
+  PLATFORM_ROLES_MANAGE: 'platform:roles:manage',
+  PLATFORM_AUDIT_READ: 'platform:audit:read',
 } as const;
 
 export type ActionPermissionCode =

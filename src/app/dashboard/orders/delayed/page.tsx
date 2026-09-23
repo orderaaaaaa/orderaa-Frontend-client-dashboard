@@ -221,6 +221,7 @@ export default function DelayedOrdersPage() {
                 isCollected={order.isCollected}
                 isPartiallyPaid={order.isPartiallyPaid}
                 shippingType={order.shippingType}
+                parkedAt={order.parkedAt}
                 disableNavigation={false}
               />
             </div>
