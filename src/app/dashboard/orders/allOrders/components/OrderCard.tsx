@@ -17,7 +17,7 @@ import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { If, Then } from 'react-if';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
 import { getRemainingTime } from '@/utils/getRemainingTime';
-import { LiaClock, LiaPrintSolid, LiaBanSolid, LiaExclamationCircleSolid, LiaExchangeAltSolid, LiaUndoAltSolid, LiaRandomSolid } from 'react-icons/lia';
+import { LiaClock, LiaPrintSolid, LiaBanSolid, LiaExclamationCircleSolid, LiaExchangeAltSolid, LiaUndoAltSolid, LiaRandomSolid, LiaPauseCircleSolid } from 'react-icons/lia';
 import { OrderCardProps } from '@/app/dashboard/orders/allOrders/types/OrderProps';
 import { ShippingType } from '@/types/orders';
 import { MdBlock } from 'react-icons/md';
@@ -69,6 +69,7 @@ export default function OrderCard({
   showAllItems = false,
   shippingType,
   states,
+  parkedAt,
 }: OrderCardProps) {
   const router = useRouter();
   const { getStatusLabel } = useStatusLabel();
@@ -337,6 +338,12 @@ export default function OrderCard({
                 </span>
               );
             })()}
+            {parkedAt && (
+              <span className="flex items-center gap-1 bg-amber-100 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                <LiaPauseCircleSolid className="w-3.5 h-3.5" />
+                معلّق
+              </span>
+            )}
           </div>
         )}
 
