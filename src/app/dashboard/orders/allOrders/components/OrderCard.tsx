@@ -338,15 +338,17 @@ export default function OrderCard({
                 </span>
               );
             })()}
-            {parkedAt && (
-              <span className="flex items-center gap-1 bg-amber-100 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded-full">
-                <LiaPauseCircleSolid className="w-3.5 h-3.5" />
-                معلّق
-              </span>
-            )}
           </div>
         )}
 
+        {parkedAt && (
+          <div className="flex items-start gap-2 max-w-full">
+            <span className="flex items-center gap-1 bg-amber-100 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+              <LiaPauseCircleSolid className="w-3.5 h-3.5" />
+              معلّق
+            </span>
+          </div>
+        )}
 
         {/* Shipping */}
         {shippingId && (

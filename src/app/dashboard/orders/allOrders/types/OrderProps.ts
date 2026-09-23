@@ -40,5 +40,5 @@ export interface OrderCardProps {
   hideCustomerInfo?: boolean;
   showAllItems?: boolean;
   states?: OrderState[];
-  parkedAt?: string | null;
+  parkedAt: string | null;
 }
