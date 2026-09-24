@@ -158,6 +158,8 @@ export const PERMISSION_CODES = {
   PLATFORM_ROLES_READ: 'platform:roles:read',
   PLATFORM_ROLES_MANAGE: 'platform:roles:manage',
   PLATFORM_AUDIT_READ: 'platform:audit:read',
+  PLATFORM_MERCHANT_USERS_READ: 'platform:merchant-users:read',
+  PLATFORM_MERCHANT_USERS_MANAGE: 'platform:merchant-users:manage',
 } as const;
 
 export type ActionPermissionCode =

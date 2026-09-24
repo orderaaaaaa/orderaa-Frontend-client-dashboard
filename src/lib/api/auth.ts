@@ -52,17 +52,3 @@ export async function verifyOTP(email: string, otp: string) {
 
   return data;
 }
-
-export async function resetPassword(
-  email: string,
-  newPassword: string,
-  confirmPassword: string
-) {
-  const { data } = await api.post('/auth/reset-password', {
-    email,
-    newPassword,
-    confirmPassword,
-  });
-
-  return data;
-}
