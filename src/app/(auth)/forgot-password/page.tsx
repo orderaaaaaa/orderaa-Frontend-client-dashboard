@@ -4,14 +4,15 @@ import Link from 'next/link';
 import { LiaLockSolid } from 'react-icons/lia';
 import PageLoading from '@/components/ui/page-loading';
 import AuthHeader from '../components/AuthHeader';
-import { useForgotPassword } from '../hooks';
 import { useAuthGuard } from '@/hooks/useAuthGuard';
+
+const CONTACT_SUPPORT_MESSAGE =
+  'إعادة تعيين كلمة المرور غير متاحة حاليًا. تواصل مع الدعم لتعيين كلمة مرور جديدة.';
 
 export default function ForgotPasswordPage() {
   const { isChecking } = useAuthGuard(false);
-  const { message, isLoading } = useForgotPassword();
 
-  if (isChecking || isLoading) {
+  if (isChecking) {
     return <PageLoading className="h-64 mt-10" />;
   }
 
@@ -31,7 +32,9 @@ export default function ForgotPasswordPage() {
             <LiaLockSolid className="w-9 h-9" />
           </div>
 
-          <p className="text-center text-base text-[#878A99]">{message}</p>
+          <p className="text-center text-base text-[#878A99]">
+            {CONTACT_SUPPORT_MESSAGE}
+          </p>
 
           <Link
             href="/signin"
