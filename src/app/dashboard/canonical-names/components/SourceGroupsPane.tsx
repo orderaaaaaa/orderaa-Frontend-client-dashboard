@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import PageLoading from '@/components/ui/page-loading';
@@ -18,7 +17,7 @@ import type {
   SourceGroup,
 } from '@/types/canonicalNames';
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
-import SourceGroupRow, { VisualizedSpelling } from './SourceGroupRow';
+import SourceGroupRow from './SourceGroupRow';
 
 const STATE_TABS: { value: GroupStateFilter; label: string }[] = [
   { value: 'all', label: 'الكل' },
@@ -213,32 +212,6 @@ export default function SourceGroupsPane({
               canManage={canManage}
             />
           ))}
-
-          {domain === CANONICAL_NAME_DOMAINS.CITY &&
-            (data.unscoped.length ?? 0) > 0 && (
-              <div className="mt-4 rounded-md border border-dashed p-3">
-                <p className="text-xs font-medium text-gray-500 mb-1">
-                  مدن بمحافظة غير معروفة
-                </p>
-                <p className="text-xs text-gray-400 mb-2">
-                  لا يمكن ربط المدينة قبل التعرف على المحافظة
-                </p>
-                <ul className="flex flex-col gap-1">
-                  {data.unscoped.map((bucket) => (
-                    <li
-                      key={`${bucket.parentText}:${bucket.normalizedText}`}
-                      className="flex items-center justify-between text-sm"
-                    >
-                      <span>
-                        <VisualizedSpelling text={bucket.normalizedText} /> (
-                        {bucket.parentText})
-                      </span>
-                      <Badge variant="outline">{bucket.rowCount}</Badge>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
 
           <PaginationFooter
             currentPage={data.page}

@@ -53,10 +53,90 @@ export const CANONICAL_NAME_ERROR_CODES = {
   CANONICAL_SCOPE_MISMATCH: 'CANONICAL_SCOPE_MISMATCH',
   UNSCOPED_GROUP: 'UNSCOPED_GROUP',
   LINK_TARGET_INVALID: 'LINK_TARGET_INVALID',
+  ROW_IDS_REQUIRED: 'ROW_IDS_REQUIRED',
+  ROW_NOT_FOUND: 'ROW_NOT_FOUND',
+  DUPLICATE_SOURCE_IN_REQUEST: 'DUPLICATE_SOURCE_IN_REQUEST',
+  SOURCE_ALREADY_LINKED: 'SOURCE_ALREADY_LINKED',
+  CHILD_ROWS_LINKED: 'CHILD_ROWS_LINKED',
+  NAME_HAS_LINKED_ROWS: 'NAME_HAS_LINKED_ROWS',
 } as const;
 
 export type CanonicalNameErrorCode =
   (typeof CANONICAL_NAME_ERROR_CODES)[keyof typeof CANONICAL_NAME_ERROR_CODES];
+
+export const LOCATION_SOURCES = {
+  SYSTEM: 'SYSTEM',
+  TURBO: 'TURBO',
+  BOSTA: 'BOSTA',
+  HASHTAG: 'HASHTAG',
+  QUICK_CONNECT: 'QUICK_CONNECT',
+  RED: 'RED',
+  RM_EXPRESS: 'RM_EXPRESS',
+  JT_EXPRESS: 'JT_EXPRESS',
+} as const;
+
+export type LocationSource =
+  (typeof LOCATION_SOURCES)[keyof typeof LOCATION_SOURCES];
+
+export const LOCATION_REFRESH_ERROR_CODES = {
+  GOVERNORATES_FAILED: 'GOVERNORATES_FAILED',
+  CITIES_PARTIAL: 'CITIES_PARTIAL',
+  TIMEOUT: 'TIMEOUT',
+  NO_CREDENTIALS: 'NO_CREDENTIALS',
+  WRITE_FAILED: 'WRITE_FAILED',
+} as const;
+
+export type LocationRefreshErrorCode =
+  (typeof LOCATION_REFRESH_ERROR_CODES)[keyof typeof LOCATION_REFRESH_ERROR_CODES];
+
+export interface RowNotFoundErrorDetails {
+  rowIds: number[];
+}
+
+export interface DuplicateSourceErrorDetails {
+  source: LocationSource;
+  rowIds: number[];
+}
+
+export interface SourceAlreadyLinkedErrorDetails {
+  source: LocationSource;
+  rowId: number;
+}
+
+export interface LinkedChildRow {
+  id: number;
+  source: LocationSource;
+  label: string;
+  parentRowId: number;
+  canonicalNameId: number;
+}
+
+export interface ChildRowsLinkedErrorDetails {
+  rows: LinkedChildRow[];
+}
+
+export interface NameHasLinkedRowsErrorDetails {
+  rowIds: number[];
+  cityNameIds: number[];
+}
+
+export interface CanonicalNameErrorDetails {
+  ROW_NOT_FOUND: RowNotFoundErrorDetails;
+  DUPLICATE_SOURCE_IN_REQUEST: DuplicateSourceErrorDetails;
+  SOURCE_ALREADY_LINKED: SourceAlreadyLinkedErrorDetails;
+  CHILD_ROWS_LINKED: ChildRowsLinkedErrorDetails;
+  NAME_HAS_LINKED_ROWS: NameHasLinkedRowsErrorDetails;
+}
+
+export type CanonicalNameError = {
+  [C in CanonicalNameErrorCode]: {
+    code: C;
+    message: string;
+    details?: C extends keyof CanonicalNameErrorDetails
+      ? CanonicalNameErrorDetails[C]
+      : undefined;
+  };
+}[CanonicalNameErrorCode];
 
 export interface CanonicalName {
   id: number;
@@ -98,6 +178,15 @@ export interface GroupImplicitName {
   name: string;
 }
 
+export interface SourceRow {
+  id: number;
+  source: LocationSource;
+  sourceKey: string;
+  label: string;
+  canonicalNameId: number | null;
+  stale: boolean;
+}
+
 export interface SourceGroup {
   scopeId: number;
   normalizedText: string;
@@ -109,16 +198,19 @@ export interface SourceGroup {
   linkedName: { id: number; name: string } | null;
   implicitName: GroupImplicitName | null;
   attributeContexts: GroupAttributeContext[];
+  sourceRows: SourceRow[];
 }
 
-export interface UnscopedCityBucket {
-  parentText: string;
-  normalizedText: string;
-  rowCount: number;
+export interface UnscopedParent {
+  parentRowId: number;
+  parentSource: LocationSource;
+  parentLabel: string;
+  cityCount: number;
 }
 
 export interface ListGroupsParams {
   scopeId?: number;
+  parentRowId?: number;
   state?: GroupStateFilter;
   search?: string;
   page: number;
@@ -130,7 +222,7 @@ export interface SourceGroupPage {
   page: number;
   limit: number;
   total: number;
-  unscoped: UnscopedCityBucket[];
+  unscopedParents: UnscopedParent[];
 }
 
 export interface GroupMemberRow {
@@ -260,7 +352,8 @@ export interface DeleteNameResult {
 
 export interface LinkItem {
   scopeId: number;
-  normalizedText: string;
+  normalizedText?: string;
+  rowIds?: number[];
   canonicalNameId?: number;
   catalogKey?: string;
   newName?: string;
@@ -271,14 +364,51 @@ export interface ApplyLinksRequest {
   items: LinkItem[];
 }
 
+export interface AliasSpelling {
+  spelling: string;
+  normalizedText: string;
+  source: LocationSource;
+  rowId: number;
+}
+
+export interface SkippedAliasSpelling extends AliasSpelling {
+  resolvesToCanonicalNameId: number | null;
+}
+
 export interface LinkResult {
   scopeId: number;
-  normalizedText: string;
+  normalizedText?: string;
   canonicalNameId: number | null;
   rowsLinked: number;
   rowsUnlinked: number;
+  aliasesWritten: AliasSpelling[];
+  aliasesSkipped: SkippedAliasSpelling[];
 }
 
 export interface ApplyLinksResponse {
   data: LinkResult[];
+}
+
+export const REFRESH_REQUEST_STATUSES = {
+  STARTED: 'STARTED',
+  ALREADY_RUNNING: 'ALREADY_RUNNING',
+} as const;
+
+export interface RefreshRequestStatus {
+  status: (typeof REFRESH_REQUEST_STATUSES)[keyof typeof REFRESH_REQUEST_STATUSES];
+}
+
+export interface LocationSourceStatus {
+  source: LocationSource;
+  lastAttemptAt: string;
+  lastSuccessAt: string | null;
+  lastErrorCode: LocationRefreshErrorCode | null;
+  failedGovernorateKeys: string[];
+  governorateCount: number;
+  cityCount: number;
+}
+
+export interface LocationSourcesStatus {
+  running: boolean;
+  sources: LocationSourceStatus[];
 }

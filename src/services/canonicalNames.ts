@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import http from '@/lib/api/http';
@@ -5,6 +6,7 @@ import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { getApiErrorMessage } from '@/utils/apiError';
 import {
   CANONICAL_NAME_DOMAINS,
+  REFRESH_REQUEST_STATUSES,
   type ApplyLinksRequest,
   type ApplyLinksResponse,
   type CanonicalName,
@@ -17,7 +19,9 @@ import {
   type ListGroupMembersParams,
   type ListGroupsParams,
   type ListNamesParams,
+  type LocationSourcesStatus,
   type NameImpact,
+  type RefreshRequestStatus,
   type RenameNameResult,
   type SourceGroupPage,
   type SuggestRequest,
@@ -227,6 +231,66 @@ export const useApplyLinks = (domain: CanonicalNameDomain) => {
     },
     onError: (err: any) => {
       toast.error(getApiErrorMessage(err, 'تعذر تنفيذ الربط'));
+    },
+  });
+};
+
+export const useLocationSourcesStatus = (enabled: boolean) => {
+  const queryClient = useQueryClient();
+  const query = useQuery({
+    queryKey: [QUERY_KEYS.CANONICAL_NAME_SOURCES_STATUS],
+    queryFn: async () => {
+      const { data } = await http.get<LocationSourcesStatus>(
+        '/canonical-names/location-sources/status',
+      );
+      return data;
+    },
+    enabled,
+    refetchInterval: (current) => (current.state.data?.running ? 5000 : false),
+  });
+
+  const running = query.data?.running;
+  const wasRunning = useRef(false);
+
+  useEffect(() => {
+    if (running === undefined) return;
+    if (wasRunning.current && !running) {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.CANONICAL_NAME_GROUPS, CANONICAL_NAME_DOMAINS.GOVERNORATE],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.CANONICAL_NAME_GROUPS, CANONICAL_NAME_DOMAINS.CITY],
+      });
+    }
+    wasRunning.current = running;
+  }, [running, queryClient]);
+
+  return query;
+};
+
+export const useRefreshLocationSources = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: [QUERY_KEYS.CANONICAL_NAME_SOURCES_REFRESH],
+    mutationFn: async () => {
+      const { data } = await http.post<RefreshRequestStatus>(
+        '/canonical-names/location-sources/refresh',
+      );
+      return data;
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.CANONICAL_NAME_SOURCES_STATUS],
+      });
+      if (result.status === REFRESH_REQUEST_STATUSES.ALREADY_RUNNING) {
+        toast.info('التحديث قيد التشغيل بالفعل');
+      } else {
+        toast.success('بدأ تحديث القوائم');
+      }
+    },
+    onError: (err: any) => {
+      toast.error(getApiErrorMessage(err, 'تعذر بدء تحديث القوائم'));
     },
   });
 };
