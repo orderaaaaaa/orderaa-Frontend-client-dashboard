@@ -12,7 +12,7 @@ interface GovernorateData {
 
 interface CityData {
   key: string;
-  value: string;
+  label: string;
 }
 
 // Fetch governorates with caching

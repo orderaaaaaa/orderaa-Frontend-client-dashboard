@@ -101,14 +101,23 @@ export default function EmployeeForm({
 
   const accessLevel = watch('accessLevel');
   const department = watch('department');
-  const address = watch('address');
+  const governorate = watch('governorate');
   const workingHours = watch('workingHours');
 
   const onSubmitHandler = (data: EmployeeFormData) => {
-    const { passwordConfirmation, ...rest } = data;
+    const { passwordConfirmation, governorate: pickedGovernorate, ...rest } =
+      data;
+
+    const governorateUpdate: Pick<Partial<Employee>, 'governorate'> =
+      pickedGovernorate
+        ? { governorate: pickedGovernorate }
+        : employee.governorate
+          ? { governorate: null }
+          : {};
 
     const updateData: Partial<Employee> = {
       ...rest,
+      ...governorateUpdate,
       address: rest.address ?? undefined,
       password: rest.password ?? undefined,
       workingHours: rest.workingHours ?? undefined,
@@ -227,12 +236,15 @@ export default function EmployeeForm({
             <span className="text-base md:text-lg font-normal">المحافظة</span>
           </div>
           <SearchableSelect
-            value={address || ''}
-            onChange={(v) => setValue('address', v, { shouldValidate: true })}
+            value={governorate || ''}
+            onChange={(v) =>
+              setValue('governorate', v, { shouldValidate: true })
+            }
             options={governorates}
             placeholder="اختر المحافظة"
             widthClass="w-full"
-            error={errors.address?.message}
+            clearable
+            error={errors.governorate?.message}
           />
         </div>
       </div>

@@ -18,6 +18,7 @@ export const employeeSchema = z
       .min(1, 'البريد الإلكتروني مطلوب')
       .email('البريد الإلكتروني غير صحيح'),
     address: z.string().nullish(),
+    governorate: z.string().nullish(),
     password: z.string().nullish(),
     passwordConfirmation: z.string().nullish(),
     workingHours: z.string().nullish(),
