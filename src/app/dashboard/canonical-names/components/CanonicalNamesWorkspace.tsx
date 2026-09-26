@@ -21,6 +21,7 @@ import {
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import {
+  isLocationDomain,
   useApplyLinks,
   useCanonicalNamesQuery,
   useCreateCanonicalName,
@@ -132,11 +133,26 @@ export default function CanonicalNamesWorkspace({
     const dragData = active.data.current as
       | {
           scopeId?: number;
+          rowId?: number;
           normalizedText?: string;
           attributeContexts?: GroupAttributeContext[];
         }
       | undefined;
-    if (!dropData?.nameId || !dragData?.normalizedText) return;
+    if (!dropData?.nameId) return;
+    if (isLocationDomain(domain)) {
+      if (!dragData?.rowId) return;
+      applyLinks.mutate({
+        items: [
+          {
+            scopeId: dragData.scopeId ?? 0,
+            rowIds: [dragData.rowId],
+            canonicalNameId: dropData.nameId,
+          },
+        ],
+      });
+      return;
+    }
+    if (!dragData?.normalizedText) return;
     const item: LinkItem = {
       scopeId: dragData.scopeId ?? 0,
       normalizedText: dragData.normalizedText,

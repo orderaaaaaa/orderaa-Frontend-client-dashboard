@@ -14,6 +14,7 @@ interface CandidatesPopoverProps {
   domain: CanonicalNameDomain;
   scopeId: number;
   normalizedText: string;
+  disabled?: boolean;
   onSelect: (candidate: LinkCandidate) => void;
 }
 
@@ -21,6 +22,7 @@ export default function CandidatesPopover({
   domain,
   scopeId,
   normalizedText,
+  disabled,
   onSelect,
 }: CandidatesPopoverProps) {
   const [open, setOpen] = useState(false);
@@ -33,7 +35,7 @@ export default function CandidatesPopover({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" disabled={disabled}>
           اقتراحات
         </Button>
       </PopoverTrigger>

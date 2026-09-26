@@ -5,6 +5,11 @@ import http from '@/lib/api/http';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { getApiErrorMessage } from '@/utils/apiError';
 import {
+  isRowNotFoundError,
+  locationLinkErrorMessage,
+  skippedAliasesMessage,
+} from '@/app/dashboard/canonical-names/utils/linkFeedback';
+import {
   CANONICAL_NAME_DOMAINS,
   REFRESH_REQUEST_STATUSES,
   type ApplyLinksRequest,
@@ -51,6 +56,10 @@ const invalidateDomainQueries = (
     });
   }
 };
+
+export const isLocationDomain = (domain: CanonicalNameDomain) =>
+  domain === CANONICAL_NAME_DOMAINS.GOVERNORATE ||
+  domain === CANONICAL_NAME_DOMAINS.CITY;
 
 export const useCanonicalNamesQuery = (
   domain: CanonicalNameDomain,
@@ -228,9 +237,22 @@ export const useApplyLinks = (domain: CanonicalNameDomain) => {
       } else {
         toast.success('تم تحديث الربط');
       }
+      if (!isLocationDomain(domain)) return;
+      const names = queryClient
+        .getQueriesData<CanonicalName[]>({
+          queryKey: [QUERY_KEYS.CANONICAL_NAMES, domain],
+        })
+        .flatMap(([, data]) => data ?? []);
+      const skipped = skippedAliasesMessage(result.data, names);
+      if (skipped) toast.info(skipped);
     },
     onError: (err: any) => {
-      toast.error(getApiErrorMessage(err, 'تعذر تنفيذ الربط'));
+      if (!isLocationDomain(domain)) {
+        toast.error(getApiErrorMessage(err, 'تعذر تنفيذ الربط'));
+        return;
+      }
+      if (isRowNotFoundError(err)) invalidateDomainQueries(queryClient, domain);
+      toast.error(locationLinkErrorMessage(err));
     },
   });
 };
