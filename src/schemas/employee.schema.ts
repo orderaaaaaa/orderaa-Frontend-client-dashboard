@@ -110,7 +110,9 @@ export interface Employee {
   department: string;
   fullName: string;
   phoneNumber: string;
-  address: string;
+  address: string | null;
+  governorate?: string | null;
+  city?: string | null;
   email?: string;
   workingHours?: string;
   isOnline?: boolean;
