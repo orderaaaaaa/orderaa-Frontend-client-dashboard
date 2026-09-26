@@ -22,6 +22,8 @@ export const QUERY_KEYS = {
   // Lookups
   GOVERNORATES: 'governorates',
   CITIES: 'cities',
+  LOCATION_OPTION_GOVERNORATES: 'location-option-governorates',
+  LOCATION_OPTION_CITIES: 'location-option-cities',
   AREAS: 'areas',
   SHIPPING_COMPANIES: 'shipping-companies',
   PAYMENT_METHODS: 'payment-methods',

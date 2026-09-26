@@ -1,6 +1,6 @@
 import { useQuery, QueryKey } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
-import { getGovernorates, getCities, getPaymentMethods, getPaymentStatuses, getUtmSources, getPageNames, getDepartments, getShippingEvents } from '@/lib/api/lookups';
+import { getGovernorates, getCities, getPaymentMethods, getPaymentStatuses, getUtmSources, getPageNames, getDepartments, getShippingEvents, getLocationOptionGovernorates, getLocationOptionCities } from '@/lib/api/lookups';
 
 // `GET /lookups/governorates` returns `{ key, label }` — the enum key plus the
 // canonical Arabic label. This was declared as `value` and never matched the
@@ -122,3 +122,33 @@ export const usePageNamesQuery = () => {
     refetchOnMount: true,
   });
 };
+
+const retryUnlessClientError = (failureCount: number, error: unknown) => {
+  const status = (error as { response?: { status?: number } })?.response?.status;
+  if (status !== undefined && status >= 400 && status < 500) return false;
+  return failureCount < 2;
+};
+
+export const useLocationOptionGovernorates = (provider: string | undefined) =>
+  useQuery({
+    queryKey: [QUERY_KEYS.LOCATION_OPTION_GOVERNORATES, provider] as QueryKey,
+    queryFn: () => getLocationOptionGovernorates(provider as string),
+    enabled: !!provider,
+    retry: retryUnlessClientError,
+  });
+
+export const useLocationOptionCities = (
+  provider: string | undefined,
+  governorateOption: string | undefined
+) =>
+  useQuery({
+    queryKey: [
+      QUERY_KEYS.LOCATION_OPTION_CITIES,
+      provider,
+      governorateOption,
+    ] as QueryKey,
+    queryFn: () =>
+      getLocationOptionCities(provider as string, governorateOption as string),
+    enabled: !!provider && !!governorateOption,
+    retry: retryUnlessClientError,
+  });
