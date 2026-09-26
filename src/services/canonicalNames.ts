@@ -221,7 +221,7 @@ export const useDeleteCanonicalName = (domain: CanonicalNameDomain) => {
       invalidateDomainQueries(queryClient, domain);
       toast.success('تم حذف الاسم الموحد');
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       const error = getCanonicalNameError(err);
       if (error?.code === CANONICAL_NAME_ERROR_CODES.NAME_HAS_LINKED_ROWS) {
         const withCities = (error.details?.cityNameIds ?? []).length > 0;
@@ -266,7 +266,7 @@ export const useApplyLinks = (domain: CanonicalNameDomain) => {
       const skipped = skippedAliasesMessage(result.data, names);
       if (skipped) toast.info(skipped);
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       if (!isLocationDomain(domain)) {
         toast.error(getApiErrorMessage(err, 'تعذر تنفيذ الربط'));
         return;
@@ -387,7 +387,7 @@ export const useRefreshLocationSources = () => {
         toast.success('بدأ تحديث القوائم');
       }
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(getApiErrorMessage(err, 'تعذر بدء تحديث القوائم'));
     },
   });
