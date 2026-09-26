@@ -168,8 +168,8 @@ interface SourceGroupRowProps {
   nameOptions: CanonicalName[];
   selected: boolean;
   onToggleSelect: (checked: boolean) => void;
-  onRequestLink: (item: LinkItem, group: SourceGroup) => void;
-  onDirectLink: (item: LinkItem) => void;
+  onRequestLink: (item: LinkItem, group: SourceGroup, onLinked?: () => void) => void;
+  onDirectLink: (item: LinkItem, onLinked?: () => void) => void;
   onUnlink: () => void;
   onViewMembers?: () => void;
   canManage: boolean;
@@ -239,9 +239,12 @@ export default function SourceGroupRow({
     if (!isLocation) {
       return { scopeId: group.scopeId, normalizedText: group.normalizedText, ...target };
     }
-    setCheckedBySource(new Map());
     return { scopeId: group.scopeId, rowIds: checkedRowIds, ...target };
   };
+
+  const clearCheckedRows = isLocation
+    ? () => setCheckedBySource(new Map())
+    : undefined;
 
   return (
     <div
@@ -350,7 +353,11 @@ export default function SourceGroupRow({
               onChange={(next) => {
                 const target = nameOptions.find((n) => String(n.id) === next);
                 if (!target) return;
-                onRequestLink(linkTarget({ canonicalNameId: target.id }), group);
+                onRequestLink(
+                  linkTarget({ canonicalNameId: target.id }),
+                  group,
+                  clearCheckedRows,
+                );
               }}
             />
           </div>
@@ -366,6 +373,7 @@ export default function SourceGroupRow({
                   catalogKey: candidate.catalogKey ?? undefined,
                 }),
                 group,
+                clearCheckedRows,
               )
             }
           />
@@ -378,7 +386,9 @@ export default function SourceGroupRow({
             variant="outline"
             size="sm"
             disabled={linkDisabled}
-            onClick={() => onDirectLink(linkTarget({ newName: primarySpelling }))}
+            onClick={() =>
+              onDirectLink(linkTarget({ newName: primarySpelling }), clearCheckedRows)
+            }
           >
             إنشاء اسم من هذه القيمة
           </Button>

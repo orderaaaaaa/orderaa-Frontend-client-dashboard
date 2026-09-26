@@ -43,8 +43,12 @@ interface SourceGroupsPaneProps {
   nameOptions: CanonicalName[];
   initialSearch?: string;
   sourcesRunning?: boolean;
-  onRequestLink: (items: LinkItem[], groups: SourceGroup[]) => void;
-  onDirectLink: (item: LinkItem) => void;
+  onRequestLink: (
+    items: LinkItem[],
+    groups: SourceGroup[],
+    onLinked?: () => void,
+  ) => void;
+  onDirectLink: (item: LinkItem, onLinked?: () => void) => void;
   onViewMembers: (scopeId: number, normalizedText: string) => void;
 }
 
@@ -211,8 +215,8 @@ export default function SourceGroupsPane({
               onToggleSelect={(checked) =>
                 toggleSelected(groupKey(group), checked)
               }
-              onRequestLink={(item, sourceGroup) =>
-                onRequestLink([item], [sourceGroup])
+              onRequestLink={(item, sourceGroup, onLinked) =>
+                onRequestLink([item], [sourceGroup], onLinked)
               }
               onDirectLink={onDirectLink}
               onUnlink={() =>

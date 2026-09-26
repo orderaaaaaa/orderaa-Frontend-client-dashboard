@@ -58,7 +58,11 @@ type ImpactDialogState =
 
 type MembersDrawerState = { scopeId: number; normalizedText: string };
 
-type LinkWarningState = { items: LinkItem[]; rows: LinkContextRow[] };
+type LinkWarningState = {
+  items: LinkItem[];
+  rows: LinkContextRow[];
+  onLinked?: () => void;
+};
 
 interface LinkContextRow {
   spellingLabel: string;
@@ -119,21 +123,25 @@ export default function CanonicalNamesWorkspace({
     useSensor(KeyboardSensor),
   );
 
-  const requestLink = (items: LinkItem[], groups: SourceGroup[]) => {
+  const requestLink = (
+    items: LinkItem[],
+    groups: SourceGroup[],
+    onLinked?: () => void,
+  ) => {
     const rows = groups.map(describeGroup);
     const warnRows = rows.filter((row) => row.contexts.length >= 2);
     if (
       domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION &&
       warnRows.length > 0
     ) {
-      setLinkWarning({ items, rows: warnRows });
+      setLinkWarning({ items, rows: warnRows, onLinked });
       return;
     }
-    applyLinks.mutate({ items });
+    applyLinks.mutate({ items }, { onSuccess: () => onLinked?.() });
   };
 
-  const directLink = (item: LinkItem) => {
-    applyLinks.mutate({ items: [item] });
+  const directLink = (item: LinkItem, onLinked?: () => void) => {
+    applyLinks.mutate({ items: [item] }, { onSuccess: () => onLinked?.() });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -384,7 +392,10 @@ export default function CanonicalNamesWorkspace({
               </Button>
               <Button
                 onClick={() => {
-                  applyLinks.mutate({ items: linkWarning.items });
+                  applyLinks.mutate(
+                    { items: linkWarning.items },
+                    { onSuccess: () => linkWarning.onLinked?.() },
+                  );
                   setLinkWarning(null);
                 }}
               >
