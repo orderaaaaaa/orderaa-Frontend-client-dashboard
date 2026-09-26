@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import PageLoading from '@/components/ui/page-loading';
@@ -18,6 +18,7 @@ import type {
   CanonicalNameDomain,
   GroupStateFilter,
   LinkItem,
+  LocationSourcesStatus,
   SourceGroup,
 } from '@/types/canonicalNames';
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
@@ -43,6 +44,8 @@ interface SourceGroupsPaneProps {
   nameOptions: CanonicalName[];
   initialSearch?: string;
   sourcesRunning?: boolean;
+  sourcesStatus?: LocationSourcesStatus;
+  refreshToken?: number;
   onRequestLink: (
     items: LinkItem[],
     groups: SourceGroup[],
@@ -60,6 +63,8 @@ export default function SourceGroupsPane({
   nameOptions,
   initialSearch,
   sourcesRunning,
+  sourcesStatus,
+  refreshToken = 0,
   onRequestLink,
   onDirectLink,
   onViewMembers,
@@ -88,6 +93,19 @@ export default function SourceGroupsPane({
   useEffect(() => {
     if (locationPageEmpty) recheckSourcesStatus();
   }, [locationPageEmpty, data, recheckSourcesStatus]);
+
+  const reloadedForToken = useRef<number | null>(null);
+  const sourcesReady =
+    sourcesStatus !== undefined &&
+    !sourcesStatus.running &&
+    sourcesStatus.sources.length > 0;
+
+  useEffect(() => {
+    if (!locationPageEmpty || !sourcesReady) return;
+    if (reloadedForToken.current === refreshToken) return;
+    reloadedForToken.current = refreshToken;
+    refetch();
+  }, [locationPageEmpty, sourcesReady, refreshToken, refetch]);
 
   const groupsByKey = useMemo(() => {
     const map = new Map<string, SourceGroup>();

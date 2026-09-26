@@ -293,6 +293,8 @@ export default function CanonicalNamesWorkspace({
             nameOptions={nameOptionsList}
             initialSearch={initialSearch}
             sourcesRunning={isLocation && sourcesRunning}
+            sourcesStatus={isLocation ? sourcesStatus : undefined}
+            refreshToken={refreshSources.submittedAt}
             onRequestLink={requestLink}
             onDirectLink={directLink}
             onViewMembers={(scopeId, normalizedText) =>
