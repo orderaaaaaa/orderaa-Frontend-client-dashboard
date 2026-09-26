@@ -212,6 +212,14 @@ export default function CanonicalNamesWorkspace({
               value={governorateScopeId}
               onChange={setGovernorateScopeId}
             />
+            {canManage && (
+              <SuggestionsPanel
+                domain={domain}
+                scopeId={undefined}
+                onApply={(items) => applyLinks.mutate({ items })}
+                applying={applyLinks.isPending}
+              />
+            )}
             {refreshButton}
           </div>
         </div>

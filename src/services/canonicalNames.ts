@@ -85,6 +85,7 @@ export const useCanonicalNamesQuery = (
 export const useSourceGroupsQuery = (
   domain: CanonicalNameDomain,
   params: ListGroupsParams,
+  enabled = true,
 ) =>
   useQuery({
     queryKey: [QUERY_KEYS.CANONICAL_NAME_GROUPS, domain, params],
@@ -95,6 +96,7 @@ export const useSourceGroupsQuery = (
       );
       return data;
     },
+    enabled,
   });
 
 export const useGroupMembersQuery = (
