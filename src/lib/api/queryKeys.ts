@@ -129,6 +129,8 @@ export const QUERY_KEYS = {
   CANONICAL_NAME_GROUP_MEMBERS: 'canonical-name-group-members',
   CANONICAL_NAME_CANDIDATES: 'canonical-name-candidates',
   CANONICAL_NAME_IMPACT: 'canonical-name-impact',
+  CANONICAL_NAME_SOURCES_STATUS: 'canonical-name-sources-status',
+  CANONICAL_NAME_SOURCES_REFRESH: 'canonical-name-sources-refresh',
 } as const;
 
 export type QueryKeyType = (typeof QUERY_KEYS)[keyof typeof QUERY_KEYS];
