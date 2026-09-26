@@ -31,7 +31,8 @@ export const employeeFormSchema = z
       }),
 
     // Location
-    address: z.string().min(3, { message: 'العنوان مطلوب' }),
+    address: z.string().optional(),
+    governorate: z.string().optional(),
     email: z
       .string()
       .email({ message: 'البريد الإلكتروني غير صحيح' })
