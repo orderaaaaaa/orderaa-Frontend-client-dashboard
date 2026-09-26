@@ -5,6 +5,11 @@ import { getOutOfStockBlock } from '@/utils/apiError';
 import { FilterOrdersDto, Order, OrderStatusItem } from '@/types/orders';
 import { ShippingData } from '@/components/OrderDetails/EditShippingModal';
 import {
+  LOCATION_OPTION_ERROR_MESSAGES,
+  locationOptionErrorCodeOf,
+  shippingCompanyPayloadOf,
+} from '@/types/locationOptions';
+import {
   useUpdateOrder,
   useGetNextOrderId,
   useCancelOrder,
@@ -513,14 +518,20 @@ export function useOrderActions({
 
   const handleUpdateShipping = useCallback(
     async (data: ShippingData) => {
+      const pickChanged =
+        (data.governorateOption ?? null) !== (order.governorateOption ?? null) ||
+        (data.cityOption ?? null) !== (order.cityOption ?? null);
+      const sendPick = pickChanged && !!data.governorateOption;
+
       try {
-        // Send flat object (not nested in customers)
         const updatedOrder = await updateOrderMutation.mutateAsync({
           orderId: order.id,
           data: {
-            shippingCompany: data.shippingCompany,
-            governorate: data.governorate,
-            city: data.city,
+            ...(data.shippingCompany && shippingCompanyPayloadOf(data.shippingCompany)),
+            ...(sendPick && {
+              governorateOption: data.governorateOption,
+              ...(data.cityOption && { cityOption: data.cityOption }),
+            }),
             address: data.address,
             returnShippingCost: data.returnShippingCost,
             ...(data.availableFrom && { availableFrom: data.availableFrom }),
@@ -529,17 +540,29 @@ export function useOrderActions({
         });
 
         if (onOrderUpdate) {
-          onOrderUpdate(updatedOrder);
+          onOrderUpdate({
+            ...updatedOrder,
+            governorateOption: data.governorateOption ?? null,
+            cityOption: data.cityOption ?? null,
+          });
         }
 
         toast.success('تم تحديث بيانات الشحن بنجاح');
-      } catch (error: any) {
-        const msg = error?.response?.data?.message;
-        toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في تحديث بيانات الشحن. يرجى المحاولة مرة أخرى.');
+      } catch (error: unknown) {
+        const code = locationOptionErrorCodeOf(error);
+        const msg = (error as { response?: { data?: { message?: string | string[] } } })
+          ?.response?.data?.message;
+        toast.error(
+          code
+            ? LOCATION_OPTION_ERROR_MESSAGES[code]
+            : Array.isArray(msg)
+              ? msg.join('\n')
+              : msg || 'فشل في تحديث بيانات الشحن. يرجى المحاولة مرة أخرى.'
+        );
         throw error;
       }
     },
-    [order.id, onOrderUpdate, updateOrderMutation]
+    [order.id, order.governorateOption, order.cityOption, onOrderUpdate, updateOrderMutation]
   );
 
   const handleAddPackagingNote = useCallback(

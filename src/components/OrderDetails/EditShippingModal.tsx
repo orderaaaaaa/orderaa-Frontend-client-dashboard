@@ -1,10 +1,21 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import { LiaCheckSolid, LiaClockSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
-import { getShippingGovernorates, getShippingCities } from '@/lib/api/lookups';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useShippingCompanies } from '@/hooks';
+import { useHasPermission } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
+import {
+  useLocationOptionCities,
+  useLocationOptionGovernorates,
+} from '@/services/lookups';
+import {
+  LOCATION_OPTION_ERROR_MESSAGES,
+  locationOptionErrorCodeOf,
+  type LocationOption,
+} from '@/types/locationOptions';
 import { useMerchantSettings } from '@/app/dashboard/store-settings/hooks/useStoreSettings';
 import clsx from 'clsx';
 
@@ -19,6 +30,8 @@ export interface ShippingData {
   shippingCompany?: string;
   governorate?: string;
   city?: string;
+  governorateOption?: string | null;
+  cityOption?: string | null;
   address?: string;
   externalGovernorate?: string | null;
   returnShippingCost?: number;
@@ -104,10 +117,18 @@ function InlineTimePicker({
   );
 }
 
-interface LocationOption {
-  key: string;
-  label: string;
-}
+const STALE_OPTION_HINT = 'لم يعد في قائمة الشركة';
+
+const toSelectOptions = (options: LocationOption[]) =>
+  options.map((option) => ({
+    key: option.value,
+    label: option.stale ? `${option.label} (${STALE_OPTION_HINT})` : option.label,
+  }));
+
+const optionsErrorText = (error: unknown, fallback: string) => {
+  const code = locationOptionErrorCodeOf(error);
+  return code ? LOCATION_OPTION_ERROR_MESSAGES[code] : fallback;
+};
 
 export default function EditShippingModal({
   isOpen,
@@ -116,14 +137,8 @@ export default function EditShippingModal({
   initialData,
 }: EditShippingModalProps) {
   const [formData, setFormData] = useState<ShippingData>(initialData);
-  const [governorates, setGovernorates] = useState<LocationOption[]>([]);
-  const [cities, setCities] = useState<LocationOption[]>([]);
-  const [loadingGovernorates, setLoadingGovernorates] = useState(false);
-  const [loadingCities, setLoadingCities] = useState(false);
 
   const [selectedShippingCompanyKey, setSelectedShippingCompanyKey] = useState<string>('');
-  const [selectedGovernorateKey, setSelectedGovernorateKey] = useState<string>('');
-  const [fetchTrigger, setFetchTrigger] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [returnShippingCostError, setReturnShippingCostError] = useState('');
 
@@ -136,6 +151,19 @@ export default function EditShippingModal({
 
   const { settings } = useMerchantSettings();
   const { shippingCompanies, isLoading: loadingShippingCompanies } = useShippingCompanies(isOpen);
+  const canReadCanonicalNames = useHasPermission(PERMISSION_CODES.CANONICAL_NAMES_READ);
+
+  const selectedGovernorateOption = formData.governorateOption || undefined;
+  const governoratesQuery = useLocationOptionGovernorates(
+    isOpen && selectedShippingCompanyKey ? selectedShippingCompanyKey : undefined
+  );
+  const citiesQuery = useLocationOptionCities(
+    isOpen && selectedShippingCompanyKey ? selectedShippingCompanyKey : undefined,
+    selectedGovernorateOption
+  );
+  const loadingGovernorates = governoratesQuery.isLoading;
+  const loadingCities = citiesQuery.isLoading;
+  const noGovernorateList = governoratesQuery.data?.sourceHasRows === false;
 
   const shippingCompanyMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -158,23 +186,32 @@ export default function EditShippingModal({
     [shippingCompanies]
   );
 
-  const governorateLabelToKey = useMemo(() => {
-    const map: Record<string, string> = {};
-    governorates.forEach((gov) => {
-      map[gov.label] = gov.key;
-    });
-    return map;
-  }, [governorates]);
-
   const governorateOptions = useMemo(
-    () => governorates.map((gov) => gov.label),
-    [governorates]
+    () => toSelectOptions(governoratesQuery.data?.options ?? []),
+    [governoratesQuery.data]
   );
 
   const cityOptions = useMemo(
-    () => cities.map((city) => city.label),
-    [cities]
+    () => toSelectOptions(citiesQuery.data?.options ?? []),
+    [citiesQuery.data]
   );
+
+  const governorateDisplay =
+    governorateOptions.find((option) => option.key === formData.governorateOption)?.label ??
+    (formData.governorateOption && formData.governorateOption === initialData.governorateOption
+      ? initialData.governorate
+      : undefined);
+
+  const cityDisplay =
+    cityOptions.find((option) => option.key === formData.cityOption)?.label ??
+    (formData.cityOption && formData.cityOption === initialData.cityOption
+      ? initialData.city
+      : undefined);
+
+  const storedGovernorateText = initialData.governorateOption
+    ? ''
+    : initialData.governorate || initialData.externalGovernorate || '';
+  const storedCityText = initialData.cityOption ? '' : initialData.city || '';
 
   const hasChanges = useMemo(() => {
     const timeChanged =
@@ -185,69 +222,13 @@ export default function EditShippingModal({
 
     return (
       formData.shippingCompany !== initialData.shippingCompany ||
-      formData.governorate !== initialData.governorate ||
-      formData.city !== initialData.city ||
+      (formData.governorateOption ?? null) !== (initialData.governorateOption ?? null) ||
+      (formData.cityOption ?? null) !== (initialData.cityOption ?? null) ||
       formData.address !== initialData.address ||
       formData.returnShippingCost !== initialData.returnShippingCost ||
       timeChanged
     );
   }, [formData, initialData, startHour, startPeriod, endHour, endPeriod, initialFromParsed, initialToParsed]);
-
-  useEffect(() => {
-    const fetchGovernorates = async () => {
-      if (!selectedShippingCompanyKey) {
-        setGovernorates([]);
-        return;
-      }
-
-      try {
-        setLoadingGovernorates(true);
-        const data = await getShippingGovernorates(selectedShippingCompanyKey) as LocationOption[];
-        setGovernorates(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error('Failed to load governorates:', error);
-        setGovernorates([]);
-      } finally {
-        setLoadingGovernorates(false);
-      }
-    };
-
-    fetchGovernorates();
-  }, [selectedShippingCompanyKey, fetchTrigger]);
-
-  useEffect(() => {
-    const fetchCities = async () => {
-      if (!selectedShippingCompanyKey || !selectedGovernorateKey) {
-        setCities([]);
-        return;
-      }
-
-      try {
-        setLoadingCities(true);
-        const data = await getShippingCities(
-          selectedShippingCompanyKey,
-          selectedGovernorateKey
-        ) as LocationOption[];
-        setCities(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error('Failed to load cities:', error);
-        setCities([]);
-      } finally {
-        setLoadingCities(false);
-      }
-    };
-
-    fetchCities();
-  }, [selectedShippingCompanyKey, selectedGovernorateKey]);
-
-  useEffect(() => {
-    if (governorates.length > 0 && formData.governorate && !selectedGovernorateKey) {
-      const matchingGov = governorates.find(gov => gov.label === formData.governorate);
-      if (matchingGov) {
-        setSelectedGovernorateKey(matchingGov.key);
-      }
-    }
-  }, [governorates, formData.governorate, selectedGovernorateKey]);
 
   const wasOpenRef = React.useRef(false);
 
@@ -260,16 +241,7 @@ export default function EditShippingModal({
 
       setFormData({ ...initialData, returnShippingCost: defaultCost });
       setReturnShippingCostError('');
-      if (initialData.shippingCompany) {
-        setSelectedShippingCompanyKey(initialData.shippingCompany);
-        setLoadingGovernorates(true);
-      } else {
-        setSelectedShippingCompanyKey('');
-      }
-      setSelectedGovernorateKey('');
-      setGovernorates([]);
-      setCities([]);
-      setFetchTrigger(prev => prev + 1);
+      setSelectedShippingCompanyKey(initialData.shippingCompany || '');
       const fromParsed = parseTime(initialData.availableFrom);
       const toParsed = parseTime(initialData.availableTo);
       setStartHour(fromParsed.hour);
@@ -311,29 +283,29 @@ export default function EditShippingModal({
   const handleShippingCompanyChange = (label: string) => {
     const key = shippingCompanyReverseMap[label] || '';
     setSelectedShippingCompanyKey(key);
-    setSelectedGovernorateKey('');
     setFormData({
       ...formData,
       shippingCompany: key,
       governorate: '',
       city: '',
+      governorateOption: null,
+      cityOption: null,
     });
   };
 
-  const handleGovernorateChange = (label: string) => {
-    const key = governorateLabelToKey[label] || '';
-    setSelectedGovernorateKey(key);
+  const handleGovernorateChange = (value: string) => {
+    if (value === formData.governorateOption) return;
     setFormData({
       ...formData,
-      governorate: label,
-      city: '',
+      governorateOption: value || null,
+      cityOption: null,
     });
   };
 
-  const handleCityChange = (label: string) => {
+  const handleCityChange = (value: string) => {
     setFormData({
       ...formData,
-      city: label,
+      cityOption: value || null,
     });
   };
 
@@ -369,38 +341,66 @@ export default function EditShippingModal({
           <div className="flex flex-col gap-2">
             <label className="font-bold text-[#1F1F1F]">المحافظة</label>
             <SearchableSelect
-              value={formData.governorate || ''}
+              value={formData.governorateOption || ''}
+              displayValue={governorateDisplay}
               onValueChange={handleGovernorateChange}
               options={governorateOptions}
               placeholder={
-                !selectedShippingCompanyKey
-                  ? 'اختر الشركة أولاً'
-                  : initialData.governorate || initialData.externalGovernorate || 'اختر المحافظة'
+                !selectedShippingCompanyKey ? 'اختر الشركة أولاً' : 'اختر المحافظة'
               }
               searchPlaceholder="بحث عن محافظة..."
               emptyMessage={
                 !selectedShippingCompanyKey
                   ? 'اختر الشركة أولاً'
-                  : 'لا توجد محافظات متاحة'
+                  : noGovernorateList
+                    ? 'لا توجد قائمة محافظات لهذه الشركة بعد'
+                    : 'لا توجد محافظات متاحة'
               }
               noResultsMessage="لا توجد نتائج للبحث"
               triggerClassName="w-full border-[#CED4DA] rounded-lg h-12"
-              loading={loadingGovernorates || (!!selectedShippingCompanyKey && governorateOptions.length === 0)}
-              disabled={!selectedShippingCompanyKey}
+              loading={loadingGovernorates}
+              disabled={!selectedShippingCompanyKey || noGovernorateList || governoratesQuery.isError}
               searchThreshold={5}
             />
+            {noGovernorateList && (
+              <p className="text-xs text-gray-500">
+                لا توجد قائمة محافظات لهذه الشركة بعد
+                {canReadCanonicalNames && (
+                  <>
+                    {' '}
+                    <Link
+                      href="/dashboard/canonical-names/governorates"
+                      className="text-primary underline"
+                    >
+                      المحافظات الموحدة
+                    </Link>
+                  </>
+                )}
+              </p>
+            )}
+            {governoratesQuery.isError && (
+              <p className="text-xs text-red-500">
+                {optionsErrorText(governoratesQuery.error, 'تعذر تحميل المحافظات')}
+              </p>
+            )}
+            {storedGovernorateText && !formData.governorateOption && (
+              <p className="text-xs text-gray-500">
+                المحفوظ حاليا: {storedGovernorateText}
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
             <label className="font-bold text-[#1F1F1F]">المنطقة</label>
             <SearchableSelect
-              value={formData.city || ''}
+              value={formData.cityOption || ''}
+              displayValue={cityDisplay}
               onValueChange={handleCityChange}
               options={cityOptions}
               placeholder={
                 !selectedShippingCompanyKey
                   ? 'اختر الشركة أولاً'
-                  : !selectedGovernorateKey
+                  : !selectedGovernorateOption
                     ? 'اختر المحافظة أولاً'
                     : 'اختر المنطقة'
               }
@@ -408,16 +408,24 @@ export default function EditShippingModal({
               emptyMessage={
                 !selectedShippingCompanyKey
                   ? 'اختر الشركة أولاً'
-                  : !selectedGovernorateKey
+                  : !selectedGovernorateOption
                     ? 'اختر المحافظة أولاً'
                     : 'لا توجد مناطق متاحة'
               }
               noResultsMessage="لا توجد نتائج للبحث"
               triggerClassName="w-full border-[#CED4DA] rounded-lg h-12"
               loading={loadingCities}
-              disabled={!selectedShippingCompanyKey || !selectedGovernorateKey}
+              disabled={!selectedShippingCompanyKey || !selectedGovernorateOption}
               searchThreshold={5}
             />
+            {citiesQuery.isError && (
+              <p className="text-xs text-red-500">
+                {optionsErrorText(citiesQuery.error, 'تعذر تحميل المناطق')}
+              </p>
+            )}
+            {storedCityText && !formData.cityOption && (
+              <p className="text-xs text-gray-500">المحفوظ حاليا: {storedCityText}</p>
+            )}
           </div>
         </div>
 
