@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import PageLoading from '@/components/ui/page-loading';
-import { useNameImpactQuery } from '@/services/canonicalNames';
+import { isLocationDomain, useNameImpactQuery } from '@/services/canonicalNames';
 import type { CanonicalNameDomain } from '@/types/canonicalNames';
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
 import { VisualizedSpelling } from './SourceGroupRow';
@@ -46,6 +46,11 @@ export default function NameImpactDialog({
   );
   const isAttributeOption = domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION;
   const isGovernorate = domain === CANONICAL_NAME_DOMAINS.GOVERNORATE;
+  const isLocation = isLocationDomain(domain);
+  const deleteBlocked =
+    mode === 'confirm-delete' &&
+    isLocation &&
+    (!impact || impact.rowCount > 0);
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -64,10 +69,20 @@ export default function NameImpactDialog({
           <PageLoading size="sm" />
         ) : (
           <div className="flex flex-col gap-4">
-            <p className="text-sm text-gray-700">
-              سيتغير الاسم الظاهر في {impact.rowCount} عنصر داخل{' '}
-              {impact.productCount} منتج
-            </p>
+            {isLocation ? (
+              <p className="text-sm text-gray-700">
+                مرتبط بـ {impact.rowCount} صف من شركات الشحن
+              </p>
+            ) : (
+              <p className="text-sm text-gray-700">
+                سيتغير الاسم الظاهر في {impact.rowCount} عنصر داخل{' '}
+                {impact.productCount} منتج
+              </p>
+            )}
+
+            {mode === 'confirm-delete' && isLocation && impact.rowCount > 0 && (
+              <p className="text-sm text-red-600">ألغ ربط الصفوف أولا</p>
+            )}
 
             {impact.aliases.length > 0 && (
               <div>
@@ -159,7 +174,7 @@ export default function NameImpactDialog({
               <Button variant="outline" onClick={onClose}>
                 إلغاء
               </Button>
-              <Button onClick={onConfirm} disabled={confirming}>
+              <Button onClick={onConfirm} disabled={confirming || deleteBlocked}>
                 تأكيد
               </Button>
             </>

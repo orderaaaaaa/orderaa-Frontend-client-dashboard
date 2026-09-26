@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import http from '@/lib/api/http';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { getCanonicalNameError } from '@/app/dashboard/canonical-names/utils/canonicalNameErrors';
 import {
   isRowNotFoundError,
   locationLinkErrorMessage,
@@ -11,6 +12,7 @@ import {
 } from '@/app/dashboard/canonical-names/utils/linkFeedback';
 import {
   CANONICAL_NAME_DOMAINS,
+  CANONICAL_NAME_ERROR_CODES,
   REFRESH_REQUEST_STATUSES,
   type ApplyLinksRequest,
   type ApplyLinksResponse,
@@ -44,6 +46,11 @@ const invalidateDomainQueries = (
   queryClient.invalidateQueries({
     queryKey: [QUERY_KEYS.CANONICAL_NAME_IMPACT, domain],
   });
+  if (domain === CANONICAL_NAME_DOMAINS.GOVERNORATE) {
+    queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.CANONICAL_NAME_GROUPS, CANONICAL_NAME_DOMAINS.CITY],
+    });
+  }
   if (domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_NAME) {
     queryClient.invalidateQueries({
       queryKey: [QUERY_KEYS.CANONICAL_NAMES, CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION],
@@ -213,6 +220,17 @@ export const useDeleteCanonicalName = (domain: CanonicalNameDomain) => {
       toast.success('تم حذف الاسم الموحد');
     },
     onError: (err: any) => {
+      const error = getCanonicalNameError(err);
+      if (error?.code === CANONICAL_NAME_ERROR_CODES.NAME_HAS_LINKED_ROWS) {
+        const withCities = (error.details?.cityNameIds ?? []).length > 0;
+        toast.error(
+          withCities
+            ? 'لا يمكن حذف الاسم لأنه مرتبط بصفوف من شركات الشحن ومدن تابعة، ألغ ربطها أولا'
+            : 'لا يمكن حذف الاسم لأنه مرتبط بصفوف من شركات الشحن، ألغ ربطها أولا',
+        );
+        invalidateDomainQueries(queryClient, domain);
+        return;
+      }
       toast.error(getApiErrorMessage(err, 'تعذر حذف الاسم الموحد'));
     },
   });

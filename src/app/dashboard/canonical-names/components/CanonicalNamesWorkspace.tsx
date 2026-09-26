@@ -71,12 +71,14 @@ interface CanonicalNamesWorkspaceProps {
   domain: CanonicalNameDomain;
   title: string;
   scopeSelector: 'none' | 'governorate';
+  initialSearch?: string;
 }
 
 export default function CanonicalNamesWorkspace({
   domain,
   title,
   scopeSelector,
+  initialSearch,
 }: CanonicalNamesWorkspaceProps) {
   const canManage = useHasPermission(PERMISSION_CODES.CANONICAL_NAMES_MANAGE);
   const [governorateScopeId, setGovernorateScopeId] = useState<number>();
@@ -243,6 +245,7 @@ export default function CanonicalNamesWorkspace({
             scopeReady={scopeReady}
             canManage={canManage}
             nameOptions={nameOptionsList}
+            initialSearch={initialSearch}
             onRequestLink={requestLink}
             onDirectLink={directLink}
             onViewMembers={(scopeId, normalizedText) =>

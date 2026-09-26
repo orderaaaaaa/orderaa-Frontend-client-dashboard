@@ -18,6 +18,7 @@ import type {
 } from '@/types/canonicalNames';
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
 import SourceGroupRow from './SourceGroupRow';
+import UnscopedParentsPanel from './UnscopedParentsPanel';
 
 const STATE_TABS: { value: GroupStateFilter; label: string }[] = [
   { value: 'all', label: 'الكل' },
@@ -36,6 +37,7 @@ interface SourceGroupsPaneProps {
   scopeReady: boolean;
   canManage: boolean;
   nameOptions: CanonicalName[];
+  initialSearch?: string;
   onRequestLink: (items: LinkItem[], groups: SourceGroup[]) => void;
   onDirectLink: (item: LinkItem) => void;
   onViewMembers: (scopeId: number, normalizedText: string) => void;
@@ -47,11 +49,12 @@ export default function SourceGroupsPane({
   scopeReady,
   canManage,
   nameOptions,
+  initialSearch,
   onRequestLink,
   onDirectLink,
   onViewMembers,
 }: SourceGroupsPaneProps) {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch ?? '');
   const [stateFilter, setStateFilter] = useState<GroupStateFilter>('all');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(50);
@@ -230,6 +233,14 @@ export default function SourceGroupsPane({
           />
         </div>
       )}
+
+      {domain === CANONICAL_NAME_DOMAINS.CITY &&
+        (data?.unscopedParents ?? []).length > 0 && (
+          <UnscopedParentsPanel
+            scopeId={scopeId}
+            parents={data?.unscopedParents ?? []}
+          />
+        )}
     </div>
   );
 }
