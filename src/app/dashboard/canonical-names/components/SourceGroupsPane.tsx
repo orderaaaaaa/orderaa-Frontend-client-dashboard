@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import PageLoading from '@/components/ui/page-loading';
@@ -8,7 +8,11 @@ import PaginationFooter from '@/components/ui/pagination-footer';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import Skeleton from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useSourceGroupsQuery } from '@/services/canonicalNames';
+import {
+  isLocationDomain,
+  useRecheckLocationSourcesStatus,
+  useSourceGroupsQuery,
+} from '@/services/canonicalNames';
 import type {
   CanonicalName,
   CanonicalNameDomain,
@@ -72,6 +76,14 @@ export default function SourceGroupsPane({
       limit,
     },
   );
+
+  const recheckSourcesStatus = useRecheckLocationSourcesStatus();
+  const locationPageEmpty =
+    isLocationDomain(domain) && data !== undefined && data.total === 0;
+
+  useEffect(() => {
+    if (locationPageEmpty) recheckSourcesStatus();
+  }, [locationPageEmpty, data, recheckSourcesStatus]);
 
   const groupsByKey = useMemo(() => {
     const map = new Map<string, SourceGroup>();

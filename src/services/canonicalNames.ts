@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import http from '@/lib/api/http';
@@ -277,8 +277,35 @@ export const useApplyLinks = (domain: CanonicalNameDomain) => {
   });
 };
 
+const STATUS_POLL_MS = 5000;
+const STATUS_WATCH_MS = 60000;
+
+let statusWatchUntil = 0;
+
+const extendStatusWatch = () => {
+  statusWatchUntil = Date.now() + STATUS_WATCH_MS;
+};
+
+const latestAttemptOf = (status: LocationSourcesStatus) =>
+  status.sources.reduce(
+    (latest, source) => Math.max(latest, Date.parse(source.lastAttemptAt) || 0),
+    0,
+  );
+
+interface SeenSourcesStatus {
+  running: boolean;
+  latestAttempt: number;
+  sourceCount: number;
+  changed: boolean;
+}
+
 export const useLocationSourcesStatus = (enabled: boolean) => {
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (enabled) extendStatusWatch();
+  }, [enabled]);
+
   const query = useQuery({
     queryKey: [QUERY_KEYS.CANONICAL_NAME_SOURCES_STATUS],
     queryFn: async () => {
@@ -288,26 +315,54 @@ export const useLocationSourcesStatus = (enabled: boolean) => {
       return data;
     },
     enabled,
-    refetchInterval: (current) => (current.state.data?.running ? 5000 : false),
+    refetchInterval: (current) => {
+      const data = current.state.data;
+      if (!data) return false;
+      if (data.running) return STATUS_POLL_MS;
+      return data.sources.length === 0 && Date.now() < statusWatchUntil
+        ? STATUS_POLL_MS
+        : false;
+    },
   });
 
-  const running = query.data?.running;
-  const wasRunning = useRef(false);
+  const data = query.data;
+  const seen = useRef<SeenSourcesStatus | null>(null);
 
   useEffect(() => {
-    if (running === undefined) return;
-    if (wasRunning.current && !running) {
+    if (!data) return;
+    const latestAttempt = latestAttemptOf(data);
+    const sourceCount = data.sources.length;
+    const previous = seen.current;
+    const changed =
+      previous !== null &&
+      (previous.changed ||
+        previous.running ||
+        latestAttempt > previous.latestAttempt ||
+        (previous.sourceCount === 0 && sourceCount > 0));
+
+    if (changed && !data.running) {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.CANONICAL_NAME_GROUPS, CANONICAL_NAME_DOMAINS.GOVERNORATE],
       });
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.CANONICAL_NAME_GROUPS, CANONICAL_NAME_DOMAINS.CITY],
       });
+      seen.current = { running: false, latestAttempt, sourceCount, changed: false };
+      return;
     }
-    wasRunning.current = running;
-  }, [running, queryClient]);
+    seen.current = { running: data.running, latestAttempt, sourceCount, changed };
+  }, [data, queryClient]);
 
   return query;
+};
+
+export const useRecheckLocationSourcesStatus = () => {
+  const queryClient = useQueryClient();
+  return useCallback(() => {
+    queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.CANONICAL_NAME_SOURCES_STATUS],
+    });
+  }, [queryClient]);
 };
 
 export const useRefreshLocationSources = () => {
@@ -322,6 +377,7 @@ export const useRefreshLocationSources = () => {
       return data;
     },
     onSuccess: (result) => {
+      extendStatusWatch();
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.CANONICAL_NAME_SOURCES_STATUS],
       });
