@@ -26,6 +26,8 @@ import {
   useCanonicalNamesQuery,
   useCreateCanonicalName,
   useDeleteCanonicalName,
+  useLocationSourcesStatus,
+  useRefreshLocationSources,
   useRenameCanonicalName,
 } from '@/services/canonicalNames';
 import type {
@@ -37,6 +39,7 @@ import type {
 } from '@/types/canonicalNames';
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
 import GroupMembersDrawer from './GroupMembersDrawer';
+import LocationSourcesStatusStrip from './LocationSourcesStatusStrip';
 import NameFormDialog from './NameFormDialog';
 import NameImpactDialog from './NameImpactDialog';
 import NamesPane from './NamesPane';
@@ -100,6 +103,11 @@ export default function CanonicalNamesWorkspace({
   const { data: nameOptions } = useCanonicalNamesQuery(domain, {
     scopeId: effectiveScopeId,
   });
+
+  const isLocation = isLocationDomain(domain);
+  const { data: sourcesStatus } = useLocationSourcesStatus(isLocation);
+  const refreshSources = useRefreshLocationSources();
+  const sourcesRunning = sourcesStatus?.running ?? false;
 
   const applyLinks = useApplyLinks(domain);
   const createName = useCreateCanonicalName(domain);
@@ -179,16 +187,35 @@ export default function CanonicalNamesWorkspace({
 
   const nameOptionsList = useMemo(() => nameOptions ?? [], [nameOptions]);
 
+  const refreshButton =
+    isLocation && canManage ? (
+      <Button
+        variant="outline"
+        onClick={() => refreshSources.mutate()}
+        disabled={refreshSources.isPending || sourcesRunning}
+      >
+        تحديث القوائم
+      </Button>
+    ) : null;
+
+  const statusStrip = isLocation ? (
+    <LocationSourcesStatusStrip status={sourcesStatus} />
+  ) : null;
+
   if (domain === CANONICAL_NAME_DOMAINS.CITY && governorateScopeId === undefined) {
     return (
       <div className="w-full max-w-full overflow-x-hidden sm:px-8 py-4 flex flex-col gap-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h1 className="text-lg sm:text-xl font-bold text-gray-900">{title}</h1>
-          <ScopeSelector
-            value={governorateScopeId}
-            onChange={setGovernorateScopeId}
-          />
+          <div className="flex items-center gap-2">
+            <ScopeSelector
+              value={governorateScopeId}
+              onChange={setGovernorateScopeId}
+            />
+            {refreshButton}
+          </div>
         </div>
+        {statusStrip}
         <p className="text-sm text-gray-500 text-center py-12">
           اختر المحافظة لعرض المدن
         </p>
@@ -219,8 +246,11 @@ export default function CanonicalNamesWorkspace({
               applying={applyLinks.isPending}
             />
           )}
+          {refreshButton}
         </div>
       </div>
+
+      {statusStrip}
 
       <DndContext
         sensors={sensors}
@@ -246,6 +276,7 @@ export default function CanonicalNamesWorkspace({
             canManage={canManage}
             nameOptions={nameOptionsList}
             initialSearch={initialSearch}
+            sourcesRunning={isLocation && sourcesRunning}
             onRequestLink={requestLink}
             onDirectLink={directLink}
             onViewMembers={(scopeId, normalizedText) =>

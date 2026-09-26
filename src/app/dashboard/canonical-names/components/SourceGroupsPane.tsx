@@ -38,6 +38,7 @@ interface SourceGroupsPaneProps {
   canManage: boolean;
   nameOptions: CanonicalName[];
   initialSearch?: string;
+  sourcesRunning?: boolean;
   onRequestLink: (items: LinkItem[], groups: SourceGroup[]) => void;
   onDirectLink: (item: LinkItem) => void;
   onViewMembers: (scopeId: number, normalizedText: string) => void;
@@ -50,6 +51,7 @@ export default function SourceGroupsPane({
   canManage,
   nameOptions,
   initialSearch,
+  sourcesRunning,
   onRequestLink,
   onDirectLink,
   onViewMembers,
@@ -172,7 +174,9 @@ export default function SourceGroupsPane({
 
       {!isLoading && !isError && (data?.data.length ?? 0) === 0 && (
         <p className="text-sm text-gray-500 text-center py-8">
-          لا توجد أسماء مسجلة لهذا القسم بعد.
+          {sourcesRunning
+            ? 'جاري تحميل القوائم لأول مرة…'
+            : 'لا توجد أسماء مسجلة لهذا القسم بعد.'}
         </p>
       )}
 
