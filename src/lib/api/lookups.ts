@@ -34,23 +34,6 @@ export async function getShippingCompanies() {
   return data;
 }
 
-export async function getShippingGovernorates(shippingCompanyKey: string) {
-  const { data } = await http.get(
-    `/shipping-locations/${shippingCompanyKey}/governorates`
-  );
-  return data;
-}
-
-export async function getShippingCities(
-  shippingCompanyKey: string,
-  governorateKey: string
-) {
-  const { data } = await http.get(
-    `/shipping-locations/${shippingCompanyKey}/governorates/${governorateKey}/cities`
-  );
-  return data;
-}
-
 export async function getLocationOptionGovernorates(provider: string) {
   const { data } = await http.get<LocationOptionsResponse>(
     `/shipping-locations/${encodeURIComponent(provider)}/location-options/governorates`

@@ -142,7 +142,7 @@ export const useLinkSuggestionsMutation = (domain: CanonicalNameDomain) =>
       );
       return data;
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(getApiErrorMessage(err, 'تعذر توليد الاقتراحات'));
     },
   });
@@ -180,7 +180,7 @@ export const useCreateCanonicalName = (domain: CanonicalNameDomain) => {
       invalidateDomainQueries(queryClient, domain);
       toast.success('تم إنشاء الاسم الموحد');
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(getApiErrorMessage(err, 'تعذر إنشاء الاسم الموحد'));
     },
   });
@@ -201,7 +201,7 @@ export const useRenameCanonicalName = (domain: CanonicalNameDomain) => {
       invalidateDomainQueries(queryClient, domain);
       toast.success(`تم تغيير الاسم الظاهر في ${result.impact.rowCount} عنصر`);
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(getApiErrorMessage(err, 'تعذر تغيير الاسم'));
     },
   });
