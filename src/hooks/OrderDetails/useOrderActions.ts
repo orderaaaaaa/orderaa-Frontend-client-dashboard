@@ -6,6 +6,7 @@ import { FilterOrdersDto, Order, OrderStatusItem } from '@/types/orders';
 import { ShippingData } from '@/components/OrderDetails/EditShippingModal';
 import {
   locationSaveErrorTextOf,
+  shippingCompanyKeyOfOrder,
   shippingCompanyPayloadOf,
 } from '@/types/locationOptions';
 import {
@@ -520,7 +521,10 @@ export function useOrderActions({
       const pickChanged =
         (data.governorateOption ?? null) !== (order.governorateOption ?? null) ||
         (data.cityOption ?? null) !== (order.cityOption ?? null);
-      const sendPick = pickChanged && !!data.governorateOption;
+      const companyChanged =
+        (data.shippingCompany || null) !==
+        (shippingCompanyKeyOfOrder(order.shippingCompany, order.shippingProviderId) || null);
+      const sendPick = (pickChanged || companyChanged) && !!data.governorateOption;
 
       try {
         const updatedOrder = await updateOrderMutation.mutateAsync({
@@ -557,7 +561,15 @@ export function useOrderActions({
         throw error;
       }
     },
-    [order.id, order.governorateOption, order.cityOption, onOrderUpdate, updateOrderMutation]
+    [
+      order.id,
+      order.shippingCompany,
+      order.shippingProviderId,
+      order.governorateOption,
+      order.cityOption,
+      onOrderUpdate,
+      updateOrderMutation,
+    ]
   );
 
   const handleAddPackagingNote = useCallback(
