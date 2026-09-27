@@ -14,6 +14,7 @@ import ShippingSection from '@/app/dashboard/upload-products/manual/ShippingSect
 import ConfirmationSection from '@/app/dashboard/upload-products/manual/ConfirmationSection';
 import { useProductDropdownStore } from '@/store/productDropdownStore';
 import { buildManualOrderPayload } from '@/utils/manualOrder/payload';
+import { locationSaveErrorTextOf } from '@/types/locationOptions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useRecoverMissingOrder } from '@/services/missingOrders';
 import type {
@@ -104,8 +105,8 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
       },
       shipping: {
         shippingCompany: data.shipping.shippingCompany,
-        governorate: data.shipping.governorate,
-        city: data.shipping.city,
+        governorateOption: data.shipping.governorateOption,
+        cityOption: data.shipping.cityOption,
         shippingCost: data.shipping.shippingCost || '',
         returnShippingCost: data.shipping.returnShippingCost || '',
         shippingType: data.shipping.shippingType,
@@ -146,11 +147,8 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
         return;
       }
 
-      const message = isMissingOrderErrorBody(body) ? body.message : undefined;
       toast.error(
-        Array.isArray(message)
-          ? message.join('\n')
-          : message || 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.',
+        locationSaveErrorTextOf(err, 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.'),
       );
 
       if (status === 500) {
@@ -224,8 +222,8 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
 
         <ShippingSection
           shippingCompany={formValues.shipping.shippingCompany}
-          governorate={formValues.shipping.governorate}
-          city={formValues.shipping.city}
+          governorateOption={formValues.shipping.governorateOption}
+          cityOption={formValues.shipping.cityOption}
           shippingCost={formValues.shipping.shippingCost || ''}
           returnShippingCost={formValues.shipping.returnShippingCost || ''}
           shippingType={formValues.shipping.shippingType}
@@ -234,13 +232,13 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
             setValue('shipping.shippingCompany', v);
             clearErrors('shipping.shippingCompany');
           }}
-          onGovernorateChange={(v) => {
-            setValue('shipping.governorate', v);
-            clearErrors('shipping.governorate');
+          onGovernorateOptionChange={(v) => {
+            setValue('shipping.governorateOption', v);
+            clearErrors('shipping.governorateOption');
           }}
-          onCityChange={(v) => {
-            setValue('shipping.city', v);
-            clearErrors('shipping.city');
+          onCityOptionChange={(v) => {
+            setValue('shipping.cityOption', v);
+            clearErrors('shipping.cityOption');
           }}
           onShippingCostChange={(v) => {
             setValue('shipping.shippingCost', v);
@@ -260,8 +258,8 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
           }}
           errors={{
             shippingCompany: errors.shipping?.shippingCompany?.message,
-            governorate: errors.shipping?.governorate?.message,
-            city: errors.shipping?.city?.message,
+            governorateOption: errors.shipping?.governorateOption?.message,
+            cityOption: errors.shipping?.cityOption?.message,
             shippingCost: errors.shipping?.shippingCost?.message,
             returnShippingCost: errors.shipping?.returnShippingCost?.message,
             shippingType: errors.shipping?.shippingType?.message,

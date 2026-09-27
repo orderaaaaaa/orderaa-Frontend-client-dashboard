@@ -12,9 +12,8 @@ import {
   useLocationOptionGovernorates,
 } from '@/services/lookups';
 import {
-  LOCATION_OPTION_ERROR_MESSAGES,
-  locationOptionErrorCodeOf,
-  type LocationOption,
+  locationOptionsErrorTextOf,
+  locationSelectOptionsOf,
 } from '@/types/locationOptions';
 import { useMerchantSettings } from '@/app/dashboard/store-settings/hooks/useStoreSettings';
 import clsx from 'clsx';
@@ -117,19 +116,6 @@ function InlineTimePicker({
   );
 }
 
-const STALE_OPTION_HINT = 'لم يعد في قائمة الشركة';
-
-const toSelectOptions = (options: LocationOption[]) =>
-  options.map((option) => ({
-    key: option.value,
-    label: option.stale ? `${option.label} (${STALE_OPTION_HINT})` : option.label,
-  }));
-
-const optionsErrorText = (error: unknown, fallback: string) => {
-  const code = locationOptionErrorCodeOf(error);
-  return code ? LOCATION_OPTION_ERROR_MESSAGES[code] : fallback;
-};
-
 export default function EditShippingModal({
   isOpen,
   onClose,
@@ -187,12 +173,12 @@ export default function EditShippingModal({
   );
 
   const governorateOptions = useMemo(
-    () => toSelectOptions(governoratesQuery.data?.options ?? []),
+    () => locationSelectOptionsOf(governoratesQuery.data?.options ?? []),
     [governoratesQuery.data]
   );
 
   const cityOptions = useMemo(
-    () => toSelectOptions(citiesQuery.data?.options ?? []),
+    () => locationSelectOptionsOf(citiesQuery.data?.options ?? []),
     [citiesQuery.data]
   );
 
@@ -380,7 +366,7 @@ export default function EditShippingModal({
             )}
             {governoratesQuery.isError && (
               <p className="text-xs text-red-500">
-                {optionsErrorText(governoratesQuery.error, 'تعذر تحميل المحافظات')}
+                {locationOptionsErrorTextOf(governoratesQuery.error, 'تعذر تحميل المحافظات')}
               </p>
             )}
             {storedGovernorateText && !formData.governorateOption && (
@@ -420,7 +406,7 @@ export default function EditShippingModal({
             />
             {citiesQuery.isError && (
               <p className="text-xs text-red-500">
-                {optionsErrorText(citiesQuery.error, 'تعذر تحميل المناطق')}
+                {locationOptionsErrorTextOf(citiesQuery.error, 'تعذر تحميل المناطق')}
               </p>
             )}
             {storedCityText && !formData.cityOption && (

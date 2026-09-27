@@ -5,8 +5,7 @@ import { getOutOfStockBlock } from '@/utils/apiError';
 import { FilterOrdersDto, Order, OrderStatusItem } from '@/types/orders';
 import { ShippingData } from '@/components/OrderDetails/EditShippingModal';
 import {
-  LOCATION_OPTION_ERROR_MESSAGES,
-  locationOptionErrorCodeOf,
+  locationSaveErrorTextOf,
   shippingCompanyPayloadOf,
 } from '@/types/locationOptions';
 import {
@@ -549,15 +548,11 @@ export function useOrderActions({
 
         toast.success('تم تحديث بيانات الشحن بنجاح');
       } catch (error: unknown) {
-        const code = locationOptionErrorCodeOf(error);
-        const msg = (error as { response?: { data?: { message?: string | string[] } } })
-          ?.response?.data?.message;
         toast.error(
-          code
-            ? LOCATION_OPTION_ERROR_MESSAGES[code]
-            : Array.isArray(msg)
-              ? msg.join('\n')
-              : msg || 'فشل في تحديث بيانات الشحن. يرجى المحاولة مرة أخرى.'
+          locationSaveErrorTextOf(
+            error,
+            'فشل في تحديث بيانات الشحن. يرجى المحاولة مرة أخرى.'
+          )
         );
         throw error;
       }

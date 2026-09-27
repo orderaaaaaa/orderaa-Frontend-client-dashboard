@@ -77,3 +77,27 @@ export const shippingCompanyPayloadOf = (shippingCompanyKey: string) => {
     ? { shippingCompany: OTHERS_SHIPPING_COMPANY, shippingProviderId: courierId }
     : { shippingCompany: shippingCompanyKey, shippingProviderId: null };
 };
+
+export const LOCATION_OPTION_STALE_HINT = 'لم يعد في قائمة الشركة';
+
+export const locationSelectOptionsOf = (options: LocationOption[]) =>
+  options.map((option) => ({
+    key: option.value,
+    label: option.stale
+      ? `${option.label} (${LOCATION_OPTION_STALE_HINT})`
+      : option.label,
+  }));
+
+export const locationOptionsErrorTextOf = (error: unknown, fallback: string) => {
+  const code = locationOptionErrorCodeOf(error);
+  return code ? LOCATION_OPTION_ERROR_MESSAGES[code] : fallback;
+};
+
+export const locationSaveErrorTextOf = (error: unknown, fallback: string) => {
+  const code = locationOptionErrorCodeOf(error);
+  if (code) return LOCATION_OPTION_ERROR_MESSAGES[code];
+  const message = (error as { response?: { data?: { message?: unknown } } })
+    ?.response?.data?.message;
+  if (Array.isArray(message)) return message.join('\n');
+  return typeof message === 'string' && message ? message : fallback;
+};
