@@ -50,8 +50,8 @@ export function buildMissingOrderPrefill(
     },
     shipping: {
       shippingCompany: '',
-      governorate: '',
-      city: '',
+      governorateOption: '',
+      cityOption: '',
       shippingCost: '',
       returnShippingCost: '',
       shippingType: '',
@@ -93,8 +93,11 @@ export function buildMissingOrderPrefill(
     { path: 'customer.name', value: defaultValues.customer.name },
     { path: 'customer.address', value: defaultValues.customer.address },
     { path: 'shipping.shippingCompany', value: defaultValues.shipping.shippingCompany },
-    { path: 'shipping.governorate', value: defaultValues.shipping.governorate },
-    { path: 'shipping.city', value: defaultValues.shipping.city },
+    {
+      path: 'shipping.governorateOption',
+      value: defaultValues.shipping.governorateOption,
+    },
+    { path: 'shipping.cityOption', value: defaultValues.shipping.cityOption },
     {
       path: 'shipping.returnShippingCost',
       value: defaultValues.shipping.returnShippingCost ?? '',

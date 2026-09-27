@@ -1,44 +1,52 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
+import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import Input from '@/components/ui/Input';
-import { getShippingGovernorates, getShippingCities, getShippingTypes } from '@/lib/api/lookups';
+import { getShippingTypes } from '@/lib/api/lookups';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import useShippingCompanies from '@/hooks/useShippingCompanies';
+import { useHasPermission } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
+import {
+  useLocationOptionCities,
+  useLocationOptionGovernorates,
+} from '@/services/lookups';
+import {
+  locationOptionsErrorTextOf,
+  locationSelectOptionsOf,
+} from '@/types/locationOptions';
 import { ShippingSectionProps } from './types';
-
-interface LocationOption {
-  key: string;
-  label: string;
-}
 
 function ShippingSection({
   shippingCompany,
-  governorate,
-  city,
+  governorateOption,
+  cityOption,
   shippingCost,
   returnShippingCost,
   shippingType,
   returnShipmentContent,
   onShippingCompanyChange,
-  onGovernorateChange,
-  onCityChange,
+  onGovernorateOptionChange,
+  onCityOptionChange,
   onShippingCostChange,
   onReturnShippingCostChange,
   onShippingTypeChange,
   onReturnShipmentContentChange,
   errors,
 }: ShippingSectionProps) {
-  const [governorates, setGovernorates] = useState<LocationOption[]>([]);
-  const [cities, setCities] = useState<LocationOption[]>([]);
-  const [loadingGovernorates, setLoadingGovernorates] = useState(false);
-  const [loadingCities, setLoadingCities] = useState(false);
-  const [selectedGovernorateKey, setSelectedGovernorateKey] = useState('');
-
   const { shippingCompanies, isLoading: loadingShippingCompanies } =
     useShippingCompanies(true);
+  const canReadCanonicalNames = useHasPermission(PERMISSION_CODES.CANONICAL_NAMES_READ);
+
+  const governoratesQuery = useLocationOptionGovernorates(shippingCompany || undefined);
+  const citiesQuery = useLocationOptionCities(
+    shippingCompany || undefined,
+    governorateOption || undefined
+  );
+  const noGovernorateList = governoratesQuery.data?.sourceHasRows === false;
 
   const { data: shippingTypes = [], isLoading: loadingShippingTypes } = useQuery<
     { key: string; label: string }[]
@@ -92,95 +100,28 @@ function ShippingSection({
     [shippingCompanies]
   );
 
-  const governorateLabelToKey = useMemo(() => {
-    const map: Record<string, string> = {};
-    governorates.forEach((gov) => {
-      map[gov.label] = gov.key;
-    });
-    return map;
-  }, [governorates]);
-
   const governorateOptions = useMemo(
-    () => governorates.map((gov) => gov.label),
-    [governorates]
+    () => locationSelectOptionsOf(governoratesQuery.data?.options ?? []),
+    [governoratesQuery.data]
   );
 
-  const cityOptions = useMemo(() => cities.map((c) => c.label), [cities]);
-
-  useEffect(() => {
-    const fetchGovernorates = async () => {
-      if (!shippingCompany) {
-        setGovernorates([]);
-        setSelectedGovernorateKey('');
-        return;
-      }
-
-      try {
-        setLoadingGovernorates(true);
-        const data = (await getShippingGovernorates(
-          shippingCompany
-        )) as LocationOption[];
-        setGovernorates(Array.isArray(data) ? data : []);
-      } catch (error) {
-        setGovernorates([]);
-      } finally {
-        setLoadingGovernorates(false);
-      }
-    };
-
-    fetchGovernorates();
-  }, [shippingCompany]);
-
-  useEffect(() => {
-    if (governorate && governorates.length > 0) {
-      const key = governorateLabelToKey[governorate] || '';
-      if (key && key !== selectedGovernorateKey) {
-        setSelectedGovernorateKey(key);
-      }
-    }
-  }, [governorate, governorates, governorateLabelToKey, selectedGovernorateKey]);
-
-  useEffect(() => {
-    const fetchCities = async () => {
-      if (!shippingCompany || !selectedGovernorateKey) {
-        setCities([]);
-        return;
-      }
-
-      try {
-        setLoadingCities(true);
-        const data = (await getShippingCities(
-          shippingCompany,
-          selectedGovernorateKey
-        )) as LocationOption[];
-        setCities(Array.isArray(data) ? data : []);
-      } catch (error) {
-        setCities([]);
-      } finally {
-        setLoadingCities(false);
-      }
-    };
-
-    fetchCities();
-  }, [shippingCompany, selectedGovernorateKey]);
+  const cityOptions = useMemo(
+    () => locationSelectOptionsOf(citiesQuery.data?.options ?? []),
+    [citiesQuery.data]
+  );
 
   const handleShippingCompanyChange = (label: string) => {
     const key = shippingCompanyReverseMap[label] || '';
+    if (key === shippingCompany) return;
     onShippingCompanyChange(key);
-    onGovernorateChange('');
-    onCityChange('');
-    setSelectedGovernorateKey('');
+    onGovernorateOptionChange('');
+    onCityOptionChange('');
   };
 
-  const handleGovernorateChange = (label: string) => {
-    const key = governorateLabelToKey[label] || '';
-    setSelectedGovernorateKey(key);
-    onGovernorateChange(label);
-    onCityChange('');
-  };
-
-  const handleCityChange = (label: string) => {
-    onCityChange(label);
+  const handleGovernorateChange = (value: string) => {
+    if (value === governorateOption) return;
+    onGovernorateOptionChange(value);
+    onCityOptionChange('');
   };
 
   return (
@@ -215,7 +156,7 @@ function ShippingSection({
               المحافظة <span className="text-red-500">*</span>
             </label>
             <SearchableSelect
-              value={governorate}
+              value={governorateOption}
               onValueChange={handleGovernorateChange}
               options={governorateOptions}
               placeholder={
@@ -225,16 +166,39 @@ function ShippingSection({
               emptyMessage={
                 !shippingCompany
                   ? 'اختر شركة الشحن أولاً'
-                  : 'لا توجد محافظات متاحة'
+                  : noGovernorateList
+                    ? 'لا توجد قائمة محافظات لهذه الشركة بعد'
+                    : 'لا توجد محافظات متاحة'
               }
               noResultsMessage="لا توجد نتائج للبحث"
-              triggerClassName={`w-full rounded-lg h-12 ${errors?.governorate ? 'border-red-500' : 'border-[#CED4DA]'}`}
-              loading={loadingGovernorates}
-              disabled={!shippingCompany}
+              triggerClassName={`w-full rounded-lg h-12 ${errors?.governorateOption ? 'border-red-500' : 'border-[#CED4DA]'}`}
+              loading={governoratesQuery.isLoading}
+              disabled={!shippingCompany || noGovernorateList || governoratesQuery.isError}
               searchThreshold={5}
             />
-            {errors?.governorate && (
-              <p className="text-red-500 text-sm">{errors.governorate}</p>
+            {noGovernorateList && (
+              <p className="text-xs text-gray-500">
+                لا توجد قائمة محافظات لهذه الشركة بعد
+                {canReadCanonicalNames && (
+                  <>
+                    {' '}
+                    <Link
+                      href="/dashboard/canonical-names/governorates"
+                      className="text-primary underline"
+                    >
+                      المحافظات الموحدة
+                    </Link>
+                  </>
+                )}
+              </p>
+            )}
+            {governoratesQuery.isError && (
+              <p className="text-xs text-red-500">
+                {locationOptionsErrorTextOf(governoratesQuery.error, 'تعذر تحميل المحافظات')}
+              </p>
+            )}
+            {errors?.governorateOption && (
+              <p className="text-red-500 text-sm">{errors.governorateOption}</p>
             )}
           </div>
 
@@ -243,13 +207,13 @@ function ShippingSection({
               المدينة <span className="text-red-500">*</span>
             </label>
             <SearchableSelect
-              value={city}
-              onValueChange={handleCityChange}
+              value={cityOption}
+              onValueChange={onCityOptionChange}
               options={cityOptions}
               placeholder={
                 !shippingCompany
                   ? 'اختر شركة الشحن أولاً'
-                  : !selectedGovernorateKey
+                  : !governorateOption
                     ? 'اختر المحافظة أولاً'
                     : 'اختر المدينة'
               }
@@ -257,18 +221,23 @@ function ShippingSection({
               emptyMessage={
                 !shippingCompany
                   ? 'اختر شركة الشحن أولاً'
-                  : !selectedGovernorateKey
+                  : !governorateOption
                     ? 'اختر المحافظة أولاً'
                     : 'لا توجد مدن متاحة'
               }
               noResultsMessage="لا توجد نتائج للبحث"
-              triggerClassName={`w-full rounded-lg h-12 ${errors?.city ? 'border-red-500' : 'border-[#CED4DA]'}`}
-              loading={loadingCities}
-              disabled={!shippingCompany || !selectedGovernorateKey}
+              triggerClassName={`w-full rounded-lg h-12 ${errors?.cityOption ? 'border-red-500' : 'border-[#CED4DA]'}`}
+              loading={citiesQuery.isLoading}
+              disabled={!shippingCompany || !governorateOption}
               searchThreshold={5}
             />
-            {errors?.city && (
-              <p className="text-red-500 text-sm">{errors.city}</p>
+            {citiesQuery.isError && (
+              <p className="text-xs text-red-500">
+                {locationOptionsErrorTextOf(citiesQuery.error, 'تعذر تحميل المدن')}
+              </p>
+            )}
+            {errors?.cityOption && (
+              <p className="text-red-500 text-sm">{errors.cityOption}</p>
             )}
           </div>
           <div>

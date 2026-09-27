@@ -1,4 +1,5 @@
 import http from './http';
+import type { LocationOptionsResponse } from '@/types/locationOptions';
 
 export async function getCategories() {
   const { data } = await http.get('/lookups/categories');
@@ -46,6 +47,23 @@ export async function getShippingCities(
 ) {
   const { data } = await http.get(
     `/shipping-locations/${shippingCompanyKey}/governorates/${governorateKey}/cities`
+  );
+  return data;
+}
+
+export async function getLocationOptionGovernorates(provider: string) {
+  const { data } = await http.get<LocationOptionsResponse>(
+    `/shipping-locations/${encodeURIComponent(provider)}/location-options/governorates`
+  );
+  return data;
+}
+
+export async function getLocationOptionCities(
+  provider: string,
+  governorateOption: string
+) {
+  const { data } = await http.get<LocationOptionsResponse>(
+    `/shipping-locations/${encodeURIComponent(provider)}/location-options/governorates/${encodeURIComponent(governorateOption)}/cities`
   );
   return data;
 }

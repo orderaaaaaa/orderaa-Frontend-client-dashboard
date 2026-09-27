@@ -34,23 +34,23 @@ export type ClientInformationProps = {
 
 export type ShippingSectionProps = {
   shippingCompany: string;
-  governorate: string;
-  city: string;
+  governorateOption: string;
+  cityOption: string;
   shippingCost: string;
   returnShippingCost: string;
   shippingType: string;
   returnShipmentContent: string;
   onShippingCompanyChange: (v: string) => void;
-  onGovernorateChange: (v: string) => void;
-  onCityChange: (v: string) => void;
+  onGovernorateOptionChange: (v: string) => void;
+  onCityOptionChange: (v: string) => void;
   onShippingCostChange: (v: string) => void;
   onReturnShippingCostChange: (v: string) => void;
   onShippingTypeChange: (v: string) => void;
   onReturnShipmentContentChange: (v: string) => void;
   errors?: {
     shippingCompany?: string;
-    governorate?: string;
-    city?: string;
+    governorateOption?: string;
+    cityOption?: string;
     shippingCost?: string;
     returnShippingCost?: string;
     shippingType?: string;
