@@ -527,6 +527,7 @@ export function useOrderActions({
       const sendPick = (pickChanged || companyChanged) && !!data.governorateOption;
 
       try {
+        // Send flat object (not nested in customers)
         const updatedOrder = await updateOrderMutation.mutateAsync({
           orderId: order.id,
           data: {
