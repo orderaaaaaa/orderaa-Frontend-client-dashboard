@@ -530,7 +530,9 @@ export function useOrderActions({
         const updatedOrder = await updateOrderMutation.mutateAsync({
           orderId: order.id,
           data: {
-            ...(data.shippingCompany && shippingCompanyPayloadOf(data.shippingCompany)),
+            ...(companyChanged &&
+              data.shippingCompany &&
+              shippingCompanyPayloadOf(data.shippingCompany)),
             ...(sendPick && {
               governorateOption: data.governorateOption,
               ...(data.cityOption && { cityOption: data.cityOption }),
