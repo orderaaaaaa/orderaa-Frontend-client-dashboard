@@ -13,6 +13,9 @@ import {
   UpdateAttributesPayload,
   ProductQueryParams,
   VariantsCountResponse,
+  CreateProductPayload,
+  ProductCreateErrorBody,
+  PRODUCT_CREATE_ERROR_CODES,
 } from '../types/products';
 
 export const useGetProducts = (params: ProductQueryParams, enabled = true) => {
@@ -171,6 +174,70 @@ export const useSyncProducts = () => {
     onSuccess: (data) => {
       toast.info('تم بدء مزامنة المنتجات...', { autoClose: 2000 });
       useJobStore.getState().addJob({ jobId: data.jobId, type: 'SYNC', label: 'مزامنة المنتجات' });
+    },
+  });
+};
+
+const joinValues = (values?: string[]) =>
+  values && values.length > 0 ? `: ${values.join('، ')}` : '';
+
+const productCreateErrorBody = (
+  error: unknown,
+): ProductCreateErrorBody | null => {
+  const data = (error as { response?: { data?: Partial<ProductCreateErrorBody> } })
+    ?.response?.data;
+  const code = data?.code;
+  if (!code || !PRODUCT_CREATE_ERROR_CODES.includes(code)) return null;
+  return { code, message: data.message ?? '', details: data.details };
+};
+
+export const getProductCreateErrorMessage = (error: unknown): string => {
+  const body = productCreateErrorBody(error);
+  if (!body) return getApiErrorMessage(error, 'تعذر حفظ المنتج، حاول مرة أخرى');
+  const details = body.details ?? {};
+  switch (body.code) {
+    case 'DUPLICATE_ATTRIBUTE_NAME':
+      return `يوجد متغيران بنفس الاسم${joinValues(details.names)}`;
+    case 'DUPLICATE_OPTION_NAME':
+      return `توجد قيمتان متكررتان في المتغير ${details.attribute ?? ''}${joinValues(details.names)}`;
+    case 'VARIANT_OPTIONS_INVALID':
+      return 'أحد صفوف المتغيرات لا يطابق قيم المتغيرات، راجع الصفوف وحاول مرة أخرى';
+    case 'DUPLICATE_VARIANT_COMBINATION':
+      return 'يوجد صفان بنفس مجموعة القيم';
+    case 'VARIANT_COMBINATIONS_INCOMPLETE':
+      return 'يجب إضافة صف لكل مجموعة من قيم المتغيرات';
+    case 'TOO_MANY_VARIANTS':
+      return `الحد الأقصى لعدد صفوف المتغيرات هو ${details.limit ?? 100}`;
+    case 'TOO_MANY_ATTRIBUTES':
+      return `الحد الأقصى لعدد المتغيرات هو ${details.limit ?? 10}`;
+    case 'TOO_MANY_OPTIONS':
+      return `الحد الأقصى لقيم المتغير ${details.attribute ?? ''} هو ${details.limit ?? 100}`;
+    case 'IMAGE_URL_INVALID':
+      return 'تعذر استخدام إحدى الصور، أعد رفعها وحاول مرة أخرى';
+    case 'DUPLICATE_SKU_IN_REQUEST':
+      return `رمز SKU مكرر بين صفوف المتغيرات${joinValues(details.values)}`;
+    case 'DUPLICATE_BARCODE_IN_REQUEST':
+      return `الباركود مكرر بين صفوف المتغيرات${joinValues(details.values)}`;
+    case 'SKU_TAKEN':
+      return `رمز SKU مستخدم بالفعل${joinValues(details.values)}`;
+    case 'BARCODE_TAKEN':
+      return `الباركود مستخدم بالفعل${joinValues(details.values)}`;
+  }
+};
+
+export const useCreateProduct = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: CreateProductPayload) => productsApi.create(payload),
+    onSuccess: () => {
+      toast.success('تم إضافة المنتج بنجاح');
+    },
+    onError: (error: unknown) => {
+      toast.error(getProductCreateErrorMessage(error));
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
     },
   });
 };
