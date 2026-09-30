@@ -30,6 +30,8 @@ import {
   repeatedValues,
   variantCombinations,
   variantRowKey,
+  editVariantRowPrice,
+  variantRowPricePlaceholder,
   type VariantRowEdit,
 } from '../../utils/manualProduct';
 
@@ -314,14 +316,11 @@ function VariantRows({ control, edits, onEdit }: VariantRowsProps) {
             <Input
               type="number"
               min={0}
-              placeholder="السعر"
-              value={
-                edit.price ??
-                (Number.isFinite(productPrice) && productPrice > 0
-                  ? String(productPrice)
-                  : '')
+              placeholder={variantRowPricePlaceholder(productPrice, 'السعر')}
+              value={edit.price ?? ''}
+              onChange={(e) =>
+                onEdit(key, editVariantRowPrice(edit, e.target.value))
               }
-              onChange={(e) => onEdit(key, { ...edit, price: e.target.value })}
             />
           </div>
         );

@@ -99,6 +99,22 @@ export function variantRowPrice(
   return typed === undefined ? productPrice : Number(typed);
 }
 
+export function editVariantRowPrice(
+  edit: VariantRowEdit,
+  typed: string,
+): VariantRowEdit {
+  return { ...edit, price: presentText(typed) === undefined ? undefined : typed };
+}
+
+export function variantRowPricePlaceholder(
+  productPrice: number,
+  fallback: string,
+): string {
+  return Number.isFinite(productPrice) && productPrice > 0
+    ? String(productPrice)
+    : fallback;
+}
+
 export function buildCreateProductPayload(
   form: ManualProductForm,
   edits: Record<string, VariantRowEdit>,
