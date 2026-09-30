@@ -6,6 +6,7 @@ import type {
 
 export function duplicateNameKey(name: string): string {
   return name
+    .normalize('NFKC')
     .trim()
     .replace(/\s+/g, ' ')
     .toLowerCase()
@@ -16,7 +17,9 @@ export function duplicateNameKey(name: string): string {
     .replace(/ى/g, 'ي')
     .replace(/ة/g, 'ه')
     .replace(/ی/g, 'ي')
-    .replace(/ک/g, 'ك');
+    .replace(/ک/g, 'ك')
+    .replace(/[٠-٩]/g, (digit) => String(digit.charCodeAt(0) - 0x0660))
+    .replace(/[۰-۹]/g, (digit) => String(digit.charCodeAt(0) - 0x06f0));
 }
 
 export function duplicateNames(names: string[]): string[] {
