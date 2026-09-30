@@ -1,7 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { Badge } from '@/components/ui/badge';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import PageLoading from '@/components/ui/page-loading';
@@ -9,16 +8,22 @@ import PaginationFooter from '@/components/ui/pagination-footer';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import Skeleton from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useSourceGroupsQuery } from '@/services/canonicalNames';
+import {
+  isLocationDomain,
+  useRecheckLocationSourcesStatus,
+  useSourceGroupsQuery,
+} from '@/services/canonicalNames';
 import type {
   CanonicalName,
   CanonicalNameDomain,
   GroupStateFilter,
   LinkItem,
+  LocationSourcesStatus,
   SourceGroup,
 } from '@/types/canonicalNames';
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
-import SourceGroupRow, { VisualizedSpelling } from './SourceGroupRow';
+import SourceGroupRow from './SourceGroupRow';
+import UnscopedParentsPanel from './UnscopedParentsPanel';
 
 const STATE_TABS: { value: GroupStateFilter; label: string }[] = [
   { value: 'all', label: 'الكل' },
@@ -37,8 +42,16 @@ interface SourceGroupsPaneProps {
   scopeReady: boolean;
   canManage: boolean;
   nameOptions: CanonicalName[];
-  onRequestLink: (items: LinkItem[], groups: SourceGroup[]) => void;
-  onDirectLink: (item: LinkItem) => void;
+  initialSearch?: string;
+  sourcesRunning?: boolean;
+  sourcesStatus?: LocationSourcesStatus;
+  refreshToken?: number;
+  onRequestLink: (
+    items: LinkItem[],
+    groups: SourceGroup[],
+    onLinked?: () => void,
+  ) => void;
+  onDirectLink: (item: LinkItem, onLinked?: () => void) => void;
   onViewMembers: (scopeId: number, normalizedText: string) => void;
 }
 
@@ -48,11 +61,15 @@ export default function SourceGroupsPane({
   scopeReady,
   canManage,
   nameOptions,
+  initialSearch,
+  sourcesRunning,
+  sourcesStatus,
+  refreshToken = 0,
   onRequestLink,
   onDirectLink,
   onViewMembers,
 }: SourceGroupsPaneProps) {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch ?? '');
   const [stateFilter, setStateFilter] = useState<GroupStateFilter>('all');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(50);
@@ -68,6 +85,27 @@ export default function SourceGroupsPane({
       limit,
     },
   );
+
+  const recheckSourcesStatus = useRecheckLocationSourcesStatus();
+  const locationPageEmpty =
+    isLocationDomain(domain) && data !== undefined && data.total === 0;
+
+  useEffect(() => {
+    if (locationPageEmpty) recheckSourcesStatus();
+  }, [locationPageEmpty, data, recheckSourcesStatus]);
+
+  const reloadedForToken = useRef<number | null>(null);
+  const sourcesReady =
+    sourcesStatus !== undefined &&
+    !sourcesStatus.running &&
+    sourcesStatus.sources.length > 0;
+
+  useEffect(() => {
+    if (!locationPageEmpty || !sourcesReady) return;
+    if (reloadedForToken.current === refreshToken) return;
+    reloadedForToken.current = refreshToken;
+    refetch();
+  }, [locationPageEmpty, sourcesReady, refreshToken, refetch]);
 
   const groupsByKey = useMemo(() => {
     const map = new Map<string, SourceGroup>();
@@ -170,7 +208,9 @@ export default function SourceGroupsPane({
 
       {!isLoading && !isError && (data?.data.length ?? 0) === 0 && (
         <p className="text-sm text-gray-500 text-center py-8">
-          لا توجد أسماء مسجلة لهذا القسم بعد.
+          {sourcesRunning
+            ? 'جاري تحميل القوائم لأول مرة…'
+            : 'لا توجد أسماء مسجلة لهذا القسم بعد.'}
         </p>
       )}
 
@@ -193,8 +233,8 @@ export default function SourceGroupsPane({
               onToggleSelect={(checked) =>
                 toggleSelected(groupKey(group), checked)
               }
-              onRequestLink={(item, sourceGroup) =>
-                onRequestLink([item], [sourceGroup])
+              onRequestLink={(item, sourceGroup, onLinked) =>
+                onRequestLink([item], [sourceGroup], onLinked)
               }
               onDirectLink={onDirectLink}
               onUnlink={() =>
@@ -214,32 +254,6 @@ export default function SourceGroupsPane({
             />
           ))}
 
-          {domain === CANONICAL_NAME_DOMAINS.CITY &&
-            (data.unscoped.length ?? 0) > 0 && (
-              <div className="mt-4 rounded-md border border-dashed p-3">
-                <p className="text-xs font-medium text-gray-500 mb-1">
-                  مدن بمحافظة غير معروفة
-                </p>
-                <p className="text-xs text-gray-400 mb-2">
-                  لا يمكن ربط المدينة قبل التعرف على المحافظة
-                </p>
-                <ul className="flex flex-col gap-1">
-                  {data.unscoped.map((bucket) => (
-                    <li
-                      key={`${bucket.parentText}:${bucket.normalizedText}`}
-                      className="flex items-center justify-between text-sm"
-                    >
-                      <span>
-                        <VisualizedSpelling text={bucket.normalizedText} /> (
-                        {bucket.parentText})
-                      </span>
-                      <Badge variant="outline">{bucket.rowCount}</Badge>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
           <PaginationFooter
             currentPage={data.page}
             totalPages={Math.max(1, Math.ceil(data.total / data.limit))}
@@ -257,6 +271,14 @@ export default function SourceGroupsPane({
           />
         </div>
       )}
+
+      {domain === CANONICAL_NAME_DOMAINS.CITY &&
+        (data?.unscopedParents ?? []).length > 0 && (
+          <UnscopedParentsPanel
+            scopeId={scopeId}
+            parents={data?.unscopedParents ?? []}
+          />
+        )}
     </div>
   );
 }

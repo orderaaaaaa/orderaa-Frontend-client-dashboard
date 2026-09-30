@@ -37,7 +37,7 @@ export default function EmployeeFormFields({
 }: EmployeeFormFieldsProps) {
   const accessLevel = watch('accessLevel');
   const department = watch('department');
-  const address = watch('address');
+  const governorate = watch('governorate');
   const workingHours = watch('workingHours');
   const roleIds = watch('roleIds');
   const { data: governorates = [] } = useGovernoratesQuery();
@@ -152,15 +152,18 @@ export default function EmployeeFormFields({
         <div className="flex flex-col gap-4 mr-3">
           <Label
             icon={<MapPin className="w-6 h-6 text-primary" />}
-            text="العنوان"
+            text="المحافظة"
           />
           <SearchableSelect
-            value={address || ''}
-            onChange={(v) => setValue('address', v, { shouldValidate: true })}
+            value={governorate || ''}
+            onChange={(v) =>
+              setValue('governorate', v, { shouldValidate: true })
+            }
             options={governorates}
             placeholder="المحافظة"
             widthClass="!w-[99%]"
-            error={errors.address?.message}
+            clearable
+            error={errors.governorate?.message}
           />
         </div>
 

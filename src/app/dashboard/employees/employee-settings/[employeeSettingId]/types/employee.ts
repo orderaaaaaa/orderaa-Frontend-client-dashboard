@@ -7,7 +7,9 @@ export interface Employee {
   fullName: string;
   phoneNumber: string;
   email: string;
-  address: string;
+  address: string | null;
+  governorate: string | null;
+  city: string | null;
   password: string;
   workingHours: string;
   createdAt?: string;

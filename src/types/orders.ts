@@ -372,6 +372,7 @@ export interface Order {
   shippingType?: ShippingType;
   returnShipmentContent?: string | null;
   shippingCompany?: string;
+  shippingProviderId?: number | null;
   shipmentContent?: string | null;
   canOpenShipment?: boolean;
   paymentStatus?: string;
@@ -400,6 +401,10 @@ export interface Order {
   externalCity?: string | null;
   sourceGovernorate?: string | null;
   sourceCity?: string | null;
+  governorateSourceRowId?: number | null;
+  citySourceRowId?: number | null;
+  governorateOption?: string | null;
+  cityOption?: string | null;
   shippingId?: string;
   shipping_ids?: OrderShippingId[];
   shippingNotes?: string | null;

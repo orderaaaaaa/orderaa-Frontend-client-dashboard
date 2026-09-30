@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import http from '@/lib/api/http';
+import { getApiErrorMessage } from '@/utils/apiError';
 import type {
   CarrierStats,
   LocationStats,
@@ -99,8 +100,8 @@ export const useCreateShippingProvider = () => {
       queryClient.invalidateQueries({ queryKey: [KEY] });
       toast.success('تمت إضافة جهة الشحن بنجاح');
     },
-    onError: (err: any) => {
-      toast.error(err?.response?.data?.message ?? 'تعذر إضافة جهة الشحن');
+    onError: (err: unknown) => {
+      toast.error(getApiErrorMessage(err, 'تعذر إضافة جهة الشحن'));
     },
   });
 };
@@ -127,8 +128,8 @@ export const useUpdateShippingProvider = () => {
       queryClient.invalidateQueries({ queryKey: [KEY] });
       toast.success('تم حفظ التعديل');
     },
-    onError: (err: any) => {
-      toast.error(err?.response?.data?.message ?? 'تعذر حفظ التعديل');
+    onError: (err: unknown) => {
+      toast.error(getApiErrorMessage(err, 'تعذر حفظ التعديل'));
     },
   });
 };

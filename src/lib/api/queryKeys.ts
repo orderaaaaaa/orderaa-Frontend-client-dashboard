@@ -22,6 +22,8 @@ export const QUERY_KEYS = {
   // Lookups
   GOVERNORATES: 'governorates',
   CITIES: 'cities',
+  LOCATION_OPTION_GOVERNORATES: 'location-option-governorates',
+  LOCATION_OPTION_CITIES: 'location-option-cities',
   AREAS: 'areas',
   SHIPPING_COMPANIES: 'shipping-companies',
   PAYMENT_METHODS: 'payment-methods',
@@ -129,6 +131,8 @@ export const QUERY_KEYS = {
   CANONICAL_NAME_GROUP_MEMBERS: 'canonical-name-group-members',
   CANONICAL_NAME_CANDIDATES: 'canonical-name-candidates',
   CANONICAL_NAME_IMPACT: 'canonical-name-impact',
+  CANONICAL_NAME_SOURCES_STATUS: 'canonical-name-sources-status',
+  CANONICAL_NAME_SOURCES_REFRESH: 'canonical-name-sources-refresh',
 } as const;
 
 export type QueryKeyType = (typeof QUERY_KEYS)[keyof typeof QUERY_KEYS];

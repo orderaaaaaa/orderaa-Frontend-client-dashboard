@@ -1,4 +1,5 @@
 import { ManualOrderPayload } from '@/types/manual-order';
+import { shippingCompanyPayloadOf } from '@/types/locationOptions';
 
 interface SelectedProductWithVariants {
   id: number;
@@ -17,8 +18,8 @@ export function buildManualOrderPayload(args: {
   };
   shipping: {
     shippingCompany: string;
-    governorate: string;
-    city: string;
+    governorateOption: string;
+    cityOption: string;
     shippingCost: string;
     returnShippingCost?: string;
     shippingType: string;
@@ -62,9 +63,9 @@ export function buildManualOrderPayload(args: {
     }),
     paymentMethod,
     status: needsConfirmation ? 'NEW_ORDER' : 'CONFIRMED',
-    shippingCompany: shipping.shippingCompany,
-    governorate: shipping.governorate,
-    city: shipping.city,
+    ...shippingCompanyPayloadOf(shipping.shippingCompany),
+    governorateOption: shipping.governorateOption,
+    cityOption: shipping.cityOption,
     total: Number(total) || 0,
     shippingType: shipping.shippingType,
     ...(shipping.returnShipmentContent?.trim() && {

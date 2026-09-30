@@ -94,7 +94,7 @@ export default function NamesPane({
   const [search, setSearch] = useState('');
   const { data: names, isLoading, isFetching, isError, refetch } =
     useCanonicalNamesQuery(domain, { scopeId, search: search || undefined });
-  const canCreate = canManage && domain !== CANONICAL_NAME_DOMAINS.GOVERNORATE;
+  const canCreate = canManage;
 
   return (
     <div className="flex-1 min-w-0 flex flex-col gap-3">

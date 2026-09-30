@@ -1,10 +1,19 @@
+import { useCallback, useEffect, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import http from '@/lib/api/http';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { getCanonicalNameError } from '@/app/dashboard/canonical-names/utils/canonicalNameErrors';
+import {
+  isRowNotFoundError,
+  locationLinkErrorMessage,
+  skippedAliasesMessage,
+} from '@/app/dashboard/canonical-names/utils/linkFeedback';
 import {
   CANONICAL_NAME_DOMAINS,
+  CANONICAL_NAME_ERROR_CODES,
+  REFRESH_REQUEST_STATUSES,
   type ApplyLinksRequest,
   type ApplyLinksResponse,
   type CanonicalName,
@@ -17,7 +26,9 @@ import {
   type ListGroupMembersParams,
   type ListGroupsParams,
   type ListNamesParams,
+  type LocationSourcesStatus,
   type NameImpact,
+  type RefreshRequestStatus,
   type RenameNameResult,
   type SourceGroupPage,
   type SuggestRequest,
@@ -35,6 +46,11 @@ const invalidateDomainQueries = (
   queryClient.invalidateQueries({
     queryKey: [QUERY_KEYS.CANONICAL_NAME_IMPACT, domain],
   });
+  if (domain === CANONICAL_NAME_DOMAINS.GOVERNORATE) {
+    queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.CANONICAL_NAME_GROUPS, CANONICAL_NAME_DOMAINS.CITY],
+    });
+  }
   if (domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_NAME) {
     queryClient.invalidateQueries({
       queryKey: [QUERY_KEYS.CANONICAL_NAMES, CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION],
@@ -47,6 +63,10 @@ const invalidateDomainQueries = (
     });
   }
 };
+
+export const isLocationDomain = (domain: CanonicalNameDomain) =>
+  domain === CANONICAL_NAME_DOMAINS.GOVERNORATE ||
+  domain === CANONICAL_NAME_DOMAINS.CITY;
 
 export const useCanonicalNamesQuery = (
   domain: CanonicalNameDomain,
@@ -65,6 +85,7 @@ export const useCanonicalNamesQuery = (
 export const useSourceGroupsQuery = (
   domain: CanonicalNameDomain,
   params: ListGroupsParams,
+  enabled = true,
 ) =>
   useQuery({
     queryKey: [QUERY_KEYS.CANONICAL_NAME_GROUPS, domain, params],
@@ -75,6 +96,7 @@ export const useSourceGroupsQuery = (
       );
       return data;
     },
+    enabled,
   });
 
 export const useGroupMembersQuery = (
@@ -120,7 +142,7 @@ export const useLinkSuggestionsMutation = (domain: CanonicalNameDomain) =>
       );
       return data;
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(getApiErrorMessage(err, 'تعذر توليد الاقتراحات'));
     },
   });
@@ -158,7 +180,7 @@ export const useCreateCanonicalName = (domain: CanonicalNameDomain) => {
       invalidateDomainQueries(queryClient, domain);
       toast.success('تم إنشاء الاسم الموحد');
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(getApiErrorMessage(err, 'تعذر إنشاء الاسم الموحد'));
     },
   });
@@ -179,7 +201,7 @@ export const useRenameCanonicalName = (domain: CanonicalNameDomain) => {
       invalidateDomainQueries(queryClient, domain);
       toast.success(`تم تغيير الاسم الظاهر في ${result.impact.rowCount} عنصر`);
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(getApiErrorMessage(err, 'تعذر تغيير الاسم'));
     },
   });
@@ -199,7 +221,18 @@ export const useDeleteCanonicalName = (domain: CanonicalNameDomain) => {
       invalidateDomainQueries(queryClient, domain);
       toast.success('تم حذف الاسم الموحد');
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
+      const error = getCanonicalNameError(err);
+      if (error?.code === CANONICAL_NAME_ERROR_CODES.NAME_HAS_LINKED_ROWS) {
+        const withCities = (error.details?.cityNameIds ?? []).length > 0;
+        toast.error(
+          withCities
+            ? 'لا يمكن حذف الاسم لأنه مرتبط بصفوف من شركات الشحن ومدن تابعة، ألغ ربطها أولا'
+            : 'لا يمكن حذف الاسم لأنه مرتبط بصفوف من شركات الشحن، ألغ ربطها أولا',
+        );
+        invalidateDomainQueries(queryClient, domain);
+        return;
+      }
       toast.error(getApiErrorMessage(err, 'تعذر حذف الاسم الموحد'));
     },
   });
@@ -224,9 +257,138 @@ export const useApplyLinks = (domain: CanonicalNameDomain) => {
       } else {
         toast.success('تم تحديث الربط');
       }
+      if (!isLocationDomain(domain)) return;
+      const names = queryClient
+        .getQueriesData<CanonicalName[]>({
+          queryKey: [QUERY_KEYS.CANONICAL_NAMES, domain],
+        })
+        .flatMap(([, data]) => data ?? []);
+      const skipped = skippedAliasesMessage(result.data, names);
+      if (skipped) toast.info(skipped);
     },
-    onError: (err: any) => {
-      toast.error(getApiErrorMessage(err, 'تعذر تنفيذ الربط'));
+    onError: (err: unknown) => {
+      if (!isLocationDomain(domain)) {
+        toast.error(getApiErrorMessage(err, 'تعذر تنفيذ الربط'));
+        return;
+      }
+      if (isRowNotFoundError(err)) invalidateDomainQueries(queryClient, domain);
+      toast.error(locationLinkErrorMessage(err));
+    },
+  });
+};
+
+const STATUS_POLL_MS = 5000;
+const STATUS_WATCH_MS = 60000;
+
+let statusWatchUntil = 0;
+
+const extendStatusWatch = () => {
+  statusWatchUntil = Date.now() + STATUS_WATCH_MS;
+};
+
+const latestAttemptOf = (status: LocationSourcesStatus) =>
+  status.sources.reduce(
+    (latest, source) => Math.max(latest, Date.parse(source.lastAttemptAt) || 0),
+    0,
+  );
+
+interface SeenSourcesStatus {
+  running: boolean;
+  latestAttempt: number;
+  sourceCount: number;
+  changed: boolean;
+}
+
+export const useLocationSourcesStatus = (enabled: boolean) => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (enabled) extendStatusWatch();
+  }, [enabled]);
+
+  const query = useQuery({
+    queryKey: [QUERY_KEYS.CANONICAL_NAME_SOURCES_STATUS],
+    queryFn: async () => {
+      const { data } = await http.get<LocationSourcesStatus>(
+        '/canonical-names/location-sources/status',
+      );
+      return data;
+    },
+    enabled,
+    refetchInterval: (current) => {
+      const data = current.state.data;
+      if (!data) return false;
+      if (data.running) return STATUS_POLL_MS;
+      return data.sources.length === 0 && Date.now() < statusWatchUntil
+        ? STATUS_POLL_MS
+        : false;
+    },
+  });
+
+  const data = query.data;
+  const seen = useRef<SeenSourcesStatus | null>(null);
+
+  useEffect(() => {
+    if (!data) return;
+    const latestAttempt = latestAttemptOf(data);
+    const sourceCount = data.sources.length;
+    const previous = seen.current;
+    const changed =
+      previous !== null &&
+      (previous.changed ||
+        previous.running ||
+        latestAttempt > previous.latestAttempt ||
+        (previous.sourceCount === 0 && sourceCount > 0));
+
+    if (changed && !data.running) {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.CANONICAL_NAME_GROUPS, CANONICAL_NAME_DOMAINS.GOVERNORATE],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.CANONICAL_NAME_GROUPS, CANONICAL_NAME_DOMAINS.CITY],
+      });
+      seen.current = { running: false, latestAttempt, sourceCount, changed: false };
+      return;
+    }
+    seen.current = { running: data.running, latestAttempt, sourceCount, changed };
+  }, [data, queryClient]);
+
+  return query;
+};
+
+export const useRecheckLocationSourcesStatus = () => {
+  const queryClient = useQueryClient();
+  return useCallback(() => {
+    queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.CANONICAL_NAME_SOURCES_STATUS],
+    });
+  }, [queryClient]);
+};
+
+export const useRefreshLocationSources = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: [QUERY_KEYS.CANONICAL_NAME_SOURCES_REFRESH],
+    mutationFn: async () => {
+      const { data } = await http.post<RefreshRequestStatus>(
+        '/canonical-names/location-sources/refresh',
+      );
+      return data;
+    },
+    onSuccess: (result) => {
+      extendStatusWatch();
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.CANONICAL_NAME_SOURCES_STATUS],
+      });
+      if (result.status === REFRESH_REQUEST_STATUSES.ALREADY_RUNNING) {
+        toast.info('التحديث قيد التشغيل بالفعل');
+      } else {
+        toast.success('بدأ تحديث القوائم');
+      }
+    },
+    onError: (err: unknown) => {
+      toast.error(getApiErrorMessage(err, 'تعذر بدء تحديث القوائم'));
     },
   });
 };

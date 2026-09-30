@@ -5,6 +5,7 @@ import { OrderActionsState } from '@/hooks/OrderDetails/useOrderActions';
 import ActionConfirmationDialog from '../ActionConfirmationDialog';
 import EditShippingModal, { ShippingData } from '../EditShippingModal';
 import BaseModal from '@/components/ui/base-modal';
+import { shippingCompanyKeyOfOrder } from '@/types/locationOptions';
 import {
   UrgentModal,
   CancelOrderModal,
@@ -154,9 +155,14 @@ export function OrderActionModals({
         onClose={modals.shipping.close}
         onSave={handleShippingSave}
         initialData={{
-          shippingCompany: order.shippingCompany,
+          shippingCompany: shippingCompanyKeyOfOrder(
+            order.shippingCompany,
+            order.shippingProviderId
+          ),
           governorate: order.governorate,
           city: order.city,
+          governorateOption: order.governorateOption ?? null,
+          cityOption: order.cityOption ?? null,
           address: order.address,
           externalGovernorate: order.externalGovernorate,
           returnShippingCost: order.returnShippingCost,

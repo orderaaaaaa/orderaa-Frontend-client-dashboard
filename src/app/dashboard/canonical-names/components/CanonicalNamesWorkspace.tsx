@@ -21,10 +21,13 @@ import {
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import {
+  isLocationDomain,
   useApplyLinks,
   useCanonicalNamesQuery,
   useCreateCanonicalName,
   useDeleteCanonicalName,
+  useLocationSourcesStatus,
+  useRefreshLocationSources,
   useRenameCanonicalName,
 } from '@/services/canonicalNames';
 import type {
@@ -36,6 +39,7 @@ import type {
 } from '@/types/canonicalNames';
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
 import GroupMembersDrawer from './GroupMembersDrawer';
+import LocationSourcesStatusStrip from './LocationSourcesStatusStrip';
 import NameFormDialog from './NameFormDialog';
 import NameImpactDialog from './NameImpactDialog';
 import NamesPane from './NamesPane';
@@ -54,7 +58,11 @@ type ImpactDialogState =
 
 type MembersDrawerState = { scopeId: number; normalizedText: string };
 
-type LinkWarningState = { items: LinkItem[]; rows: LinkContextRow[] };
+type LinkWarningState = {
+  items: LinkItem[];
+  rows: LinkContextRow[];
+  onLinked?: () => void;
+};
 
 interface LinkContextRow {
   spellingLabel: string;
@@ -70,12 +78,14 @@ interface CanonicalNamesWorkspaceProps {
   domain: CanonicalNameDomain;
   title: string;
   scopeSelector: 'none' | 'governorate';
+  initialSearch?: string;
 }
 
 export default function CanonicalNamesWorkspace({
   domain,
   title,
   scopeSelector,
+  initialSearch,
 }: CanonicalNamesWorkspaceProps) {
   const canManage = useHasPermission(PERMISSION_CODES.CANONICAL_NAMES_MANAGE);
   const [governorateScopeId, setGovernorateScopeId] = useState<number>();
@@ -98,6 +108,11 @@ export default function CanonicalNamesWorkspace({
     scopeId: effectiveScopeId,
   });
 
+  const isLocation = isLocationDomain(domain);
+  const { data: sourcesStatus } = useLocationSourcesStatus(isLocation);
+  const refreshSources = useRefreshLocationSources();
+  const sourcesRunning = sourcesStatus?.running ?? false;
+
   const applyLinks = useApplyLinks(domain);
   const createName = useCreateCanonicalName(domain);
   const renameName = useRenameCanonicalName(domain);
@@ -108,21 +123,25 @@ export default function CanonicalNamesWorkspace({
     useSensor(KeyboardSensor),
   );
 
-  const requestLink = (items: LinkItem[], groups: SourceGroup[]) => {
+  const requestLink = (
+    items: LinkItem[],
+    groups: SourceGroup[],
+    onLinked?: () => void,
+  ) => {
     const rows = groups.map(describeGroup);
     const warnRows = rows.filter((row) => row.contexts.length >= 2);
     if (
       domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION &&
       warnRows.length > 0
     ) {
-      setLinkWarning({ items, rows: warnRows });
+      setLinkWarning({ items, rows: warnRows, onLinked });
       return;
     }
-    applyLinks.mutate({ items });
+    applyLinks.mutate({ items }, { onSuccess: () => onLinked?.() });
   };
 
-  const directLink = (item: LinkItem) => {
-    applyLinks.mutate({ items: [item] });
+  const directLink = (item: LinkItem, onLinked?: () => void) => {
+    applyLinks.mutate({ items: [item] }, { onSuccess: () => onLinked?.() });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -132,11 +151,26 @@ export default function CanonicalNamesWorkspace({
     const dragData = active.data.current as
       | {
           scopeId?: number;
+          rowId?: number;
           normalizedText?: string;
           attributeContexts?: GroupAttributeContext[];
         }
       | undefined;
-    if (!dropData?.nameId || !dragData?.normalizedText) return;
+    if (!dropData?.nameId) return;
+    if (isLocationDomain(domain)) {
+      if (!dragData?.rowId) return;
+      applyLinks.mutate({
+        items: [
+          {
+            scopeId: dragData.scopeId ?? 0,
+            rowIds: [dragData.rowId],
+            canonicalNameId: dropData.nameId,
+          },
+        ],
+      });
+      return;
+    }
+    if (!dragData?.normalizedText) return;
     const item: LinkItem = {
       scopeId: dragData.scopeId ?? 0,
       normalizedText: dragData.normalizedText,
@@ -161,16 +195,43 @@ export default function CanonicalNamesWorkspace({
 
   const nameOptionsList = useMemo(() => nameOptions ?? [], [nameOptions]);
 
+  const refreshButton =
+    isLocation && canManage ? (
+      <Button
+        variant="outline"
+        onClick={() => refreshSources.mutate()}
+        disabled={refreshSources.isPending || sourcesRunning}
+      >
+        تحديث القوائم
+      </Button>
+    ) : null;
+
+  const statusStrip = isLocation ? (
+    <LocationSourcesStatusStrip status={sourcesStatus} />
+  ) : null;
+
   if (domain === CANONICAL_NAME_DOMAINS.CITY && governorateScopeId === undefined) {
     return (
       <div className="w-full max-w-full overflow-x-hidden sm:px-8 py-4 flex flex-col gap-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h1 className="text-lg sm:text-xl font-bold text-gray-900">{title}</h1>
-          <ScopeSelector
-            value={governorateScopeId}
-            onChange={setGovernorateScopeId}
-          />
+          <div className="flex items-center gap-2">
+            <ScopeSelector
+              value={governorateScopeId}
+              onChange={setGovernorateScopeId}
+            />
+            {canManage && (
+              <SuggestionsPanel
+                domain={domain}
+                scopeId={undefined}
+                onApply={(items) => applyLinks.mutate({ items })}
+                applying={applyLinks.isPending}
+              />
+            )}
+            {refreshButton}
+          </div>
         </div>
+        {statusStrip}
         <p className="text-sm text-gray-500 text-center py-12">
           اختر المحافظة لعرض المدن
         </p>
@@ -201,8 +262,11 @@ export default function CanonicalNamesWorkspace({
               applying={applyLinks.isPending}
             />
           )}
+          {refreshButton}
         </div>
       </div>
+
+      {statusStrip}
 
       <DndContext
         sensors={sensors}
@@ -227,6 +291,10 @@ export default function CanonicalNamesWorkspace({
             scopeReady={scopeReady}
             canManage={canManage}
             nameOptions={nameOptionsList}
+            initialSearch={initialSearch}
+            sourcesRunning={isLocation && sourcesRunning}
+            sourcesStatus={isLocation ? sourcesStatus : undefined}
+            refreshToken={refreshSources.submittedAt}
             onRequestLink={requestLink}
             onDirectLink={directLink}
             onViewMembers={(scopeId, normalizedText) =>
@@ -326,7 +394,10 @@ export default function CanonicalNamesWorkspace({
               </Button>
               <Button
                 onClick={() => {
-                  applyLinks.mutate({ items: linkWarning.items });
+                  applyLinks.mutate(
+                    { items: linkWarning.items },
+                    { onSuccess: () => linkWarning.onLinked?.() },
+                  );
                   setLinkWarning(null);
                 }}
               >

@@ -31,7 +31,8 @@ export const employeeFormSchema = z
       }),
 
     // Location
-    address: z.string().min(3, { message: 'العنوان مطلوب' }),
+    address: z.string().optional(),
+    governorate: z.string().optional(),
     email: z
       .string()
       .email({ message: 'البريد الإلكتروني غير صحيح' })
@@ -109,7 +110,9 @@ export interface Employee {
   department: string;
   fullName: string;
   phoneNumber: string;
-  address: string;
+  address: string | null;
+  governorate?: string | null;
+  city?: string | null;
   email?: string;
   workingHours?: string;
   isOnline?: boolean;

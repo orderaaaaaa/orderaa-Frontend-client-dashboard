@@ -14,6 +14,7 @@ import ConfirmationSection from './ConfirmationSection';
 import { useProductDropdownStore } from '@/store/productDropdownStore';
 import { buildManualOrderPayload } from '@/utils/manualOrder/payload';
 import { createManualOrder } from '@/lib/api/manualOrdersApi';
+import { locationSaveErrorTextOf } from '@/types/locationOptions';
 import { manualOrderSchema, ManualOrderFormData } from './schema';
 import { useMerchantSettings } from '@/app/dashboard/store-settings/hooks/useStoreSettings';
 
@@ -44,8 +45,8 @@ function Manual() {
       },
       shipping: {
         shippingCompany: '',
-        governorate: '',
-        city: '',
+        governorateOption: '',
+        cityOption: '',
         shippingCost: '',
         returnShippingCost: '',
         shippingType: 'DELIVERY',
@@ -101,8 +102,8 @@ function Manual() {
         },
         shipping: {
           shippingCompany: data.shipping.shippingCompany,
-          governorate: data.shipping.governorate,
-          city: data.shipping.city,
+          governorateOption: data.shipping.governorateOption,
+          cityOption: data.shipping.cityOption,
           shippingCost: data.shipping.shippingCost || '',
           returnShippingCost: data.shipping.returnShippingCost || '',
           shippingType: data.shipping.shippingType,
@@ -124,10 +125,9 @@ function Manual() {
       toast.success('تم إنشاء الطلب بنجاح!');
       reset();
       useProductDropdownStore.getState().setSelectedProducts([]);
-    } catch (err: any) {
-      const msg = err?.response?.data?.message;
+    } catch (err: unknown) {
       toast.error(
-        Array.isArray(msg) ? msg.join('\n') : msg || 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.'
+        locationSaveErrorTextOf(err, 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.')
       );
     }
   };
@@ -147,8 +147,8 @@ function Manual() {
       if (errors.customer?.phoneNumbers) return 'phoneNumbers';
       if (errors.customer?.address) return 'address';
       if (errors.shipping?.shippingCompany) return 'shippingCompany';
-      if (errors.shipping?.governorate) return 'governorate';
-      if (errors.shipping?.city) return 'city';
+      if (errors.shipping?.governorateOption) return 'governorate';
+      if (errors.shipping?.cityOption) return 'city';
       if (errors.shipping?.shippingCost) return 'shippingCost';
       if (errors.shipping?.shippingType) return 'shippingType';
       if (errors.shipping?.returnShipmentContent) return 'returnShipmentContent';
@@ -224,8 +224,8 @@ function Manual() {
 
         <ShippingSection
           shippingCompany={formValues.shipping.shippingCompany}
-          governorate={formValues.shipping.governorate}
-          city={formValues.shipping.city}
+          governorateOption={formValues.shipping.governorateOption}
+          cityOption={formValues.shipping.cityOption}
           shippingCost={formValues.shipping.shippingCost || ''}
           returnShippingCost={formValues.shipping.returnShippingCost || ''}
           shippingType={formValues.shipping.shippingType}
@@ -234,13 +234,13 @@ function Manual() {
             setValue('shipping.shippingCompany', v);
             clearErrors('shipping.shippingCompany');
           }}
-          onGovernorateChange={(v) => {
-            setValue('shipping.governorate', v);
-            clearErrors('shipping.governorate');
+          onGovernorateOptionChange={(v) => {
+            setValue('shipping.governorateOption', v);
+            clearErrors('shipping.governorateOption');
           }}
-          onCityChange={(v) => {
-            setValue('shipping.city', v);
-            clearErrors('shipping.city');
+          onCityOptionChange={(v) => {
+            setValue('shipping.cityOption', v);
+            clearErrors('shipping.cityOption');
           }}
           onShippingCostChange={(v) => {
             setValue('shipping.shippingCost', v);
@@ -260,8 +260,8 @@ function Manual() {
           }}
           errors={{
             shippingCompany: errors.shipping?.shippingCompany?.message,
-            governorate: errors.shipping?.governorate?.message,
-            city: errors.shipping?.city?.message,
+            governorateOption: errors.shipping?.governorateOption?.message,
+            cityOption: errors.shipping?.cityOption?.message,
             shippingCost: errors.shipping?.shippingCost?.message,
             returnShippingCost: errors.shipping?.returnShippingCost?.message,
             shippingType: errors.shipping?.shippingType?.message,

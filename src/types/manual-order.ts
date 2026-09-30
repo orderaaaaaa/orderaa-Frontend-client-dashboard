@@ -21,8 +21,9 @@ export type ManualOrderPayload = {
   paymentMethod: string;
   status: 'NEW_ORDER' | 'CONFIRMED';
   shippingCompany: string;
-  governorate: string;
-  city: string;
+  shippingProviderId: number | null;
+  governorateOption: string;
+  cityOption: string;
   total: number;
   shippingType: string;
   returnShipmentContent?: string;

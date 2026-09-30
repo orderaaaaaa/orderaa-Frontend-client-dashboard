@@ -17,7 +17,7 @@ export async function updateEmpByID(
     fullName: updates.fullName,
     phoneNumber: updates.phoneNumber,
     email: updates.email,
-    address: updates.address,
+    governorate: updates.governorate,
     password: updates.password,
     workingHours: updates.workingHours,
   };
