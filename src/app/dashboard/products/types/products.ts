@@ -175,3 +175,101 @@ export const formatCounts = (result: unknown): string => {
   if (failures > 0) msg += ` — ${failures} أخطاء`;
   return msg;
 };
+
+export interface CreateProductAttribute {
+  name: string;
+  options: string[];
+}
+
+export interface CreateProductVariantOption {
+  attribute: string;
+  option: string;
+}
+
+export interface CreateProductVariant {
+  options: CreateProductVariantOption[];
+  sku?: string;
+  barcode?: string;
+  price?: number;
+}
+
+export interface CreateProductPayload {
+  name: string;
+  price: number;
+  sku?: string;
+  images?: string[];
+  attributes: CreateProductAttribute[];
+  variants: CreateProductVariant[];
+}
+
+export interface CreatedProductOption {
+  id: number;
+  name: string;
+  displayName: string;
+}
+
+export interface CreatedProductAttribute {
+  id: number;
+  name: string;
+  displayName: string;
+  options: CreatedProductOption[];
+}
+
+export interface CreatedProductVariant {
+  id: number;
+  combinationKey: string;
+  sku: string | null;
+  barcode: string | null;
+  price: number;
+  optionIds: number[];
+}
+
+export interface CreateProductResponse {
+  id: number;
+  name: string;
+  sku: string | null;
+  price: number;
+  image: string | null;
+  images: string[];
+  storeId: null;
+  attributes: CreatedProductAttribute[];
+  variants: CreatedProductVariant[];
+}
+
+export const PRODUCT_CREATE_LIMITS = {
+  attributes: 10,
+  optionsPerAttribute: 100,
+  variants: 100,
+} as const;
+
+export const PRODUCT_CREATE_ERROR_CODES = [
+  'DUPLICATE_ATTRIBUTE_NAME',
+  'DUPLICATE_OPTION_NAME',
+  'VARIANT_OPTIONS_INVALID',
+  'DUPLICATE_VARIANT_COMBINATION',
+  'VARIANT_COMBINATIONS_INCOMPLETE',
+  'TOO_MANY_VARIANTS',
+  'TOO_MANY_ATTRIBUTES',
+  'TOO_MANY_OPTIONS',
+  'IMAGE_URL_INVALID',
+  'DUPLICATE_SKU_IN_REQUEST',
+  'DUPLICATE_BARCODE_IN_REQUEST',
+  'SKU_TAKEN',
+  'BARCODE_TAKEN',
+] as const;
+
+export type ProductCreateErrorCode = (typeof PRODUCT_CREATE_ERROR_CODES)[number];
+
+export interface ProductCreateErrorBody {
+  code: ProductCreateErrorCode;
+  message: string;
+  details?: {
+    names?: string[];
+    attribute?: string;
+    values?: string[];
+    variantIndex?: number;
+    variantIndexes?: number[];
+    missing?: string[][];
+    limit?: number;
+  };
+}
