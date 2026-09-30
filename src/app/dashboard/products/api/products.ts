@@ -10,6 +10,8 @@ import {
   UpdateAttributesPayload,
   AttributeManual,
   ProductConfirmOutOfStockMode,
+  CreateProductPayload,
+  CreateProductResponse,
 } from '../types/products';
 
 export const productsApi = {
@@ -78,6 +80,16 @@ export const productsApi = {
     confirmOutOfStockMode: ProductConfirmOutOfStockMode,
   ) => {
     await http.put(`/products/${productId}`, { confirmOutOfStockMode });
+  },
+
+  create: async (
+    payload: CreateProductPayload,
+  ): Promise<CreateProductResponse> => {
+    const response = await http.post<CreateProductResponse>(
+      '/products',
+      payload,
+    );
+    return response.data;
   },
 
   sync: async (): Promise<JobAcceptedResponse> => {

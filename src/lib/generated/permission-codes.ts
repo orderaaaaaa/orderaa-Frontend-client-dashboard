@@ -73,6 +73,7 @@ export const PERMISSION_CODES = {
   CUSTOMERS_UPDATE: 'customers:update',
   CUSTOMERS_MERGE: 'customers:merge',
   PRODUCTS_READ: 'products:read',
+  PRODUCTS_CREATE: 'products:create',
   PRODUCTS_UPDATE: 'products:update',
   PRODUCTS_SYNC: 'products:sync',
   PRODUCTS_MERGE: 'products:merge',

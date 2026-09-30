@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { LiaPlusSolid, LiaTimesSolid } from 'react-icons/lia';
 import {
   useForm,
@@ -17,8 +17,23 @@ import { toast } from 'react-toastify';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/textarea';
 import { MultiImageUploadField } from '@/components/ui/multi-image-upload-field';
+import { uploadFile } from '@/lib/api/upload';
+import { useCreateProduct } from '../../hooks/useProduct';
+import { PRODUCT_CREATE_LIMITS } from '../../types/products';
+import {
+  buildCreateProductPayload,
+  cleanAttributes,
+  combinationCount,
+  duplicateNameKey,
+  duplicateNames,
+  repeatedValues,
+  variantCombinations,
+  variantRowKey,
+  editVariantRowPrice,
+  variantRowPricePlaceholder,
+  type VariantRowEdit,
+} from '../../utils/manualProduct';
 
 interface AddProductModalProps {
   isOpen: boolean;
@@ -26,27 +41,60 @@ interface AddProductModalProps {
 }
 
 const addProductSchema = z.object({
-  name: z.string().min(1, 'اسم المنتج مطلوب'),
+  name: z.string().trim().min(1, 'اسم المنتج مطلوب'),
   price: z.coerce
     .number({ invalid_type_error: 'السعر مطلوب' })
     .positive('السعر مطلوب ويجب أن يكون أكبر من 0'),
   sku: z.string().optional(),
-  category: z.string().optional(),
-  description: z.string().optional(),
-  images: z
-    .array(z.instanceof(File))
-    .min(1, 'يجب رفع صورة واحدة على الأقل')
-    .default([]),
-  variantOptions: z
+  images: z.array(z.instanceof(File)).default([]),
+  attributes: z
     .array(
       z.object({
-        attribute: z.string().min(1, 'اسم المتغير مطلوب'),
+        name: z.string().trim().min(1, 'اسم المتغير مطلوب'),
         options: z
-          .array(z.string().min(1))
-          .min(1, 'يجب إضافة قيمة واحدة على الأقل'),
+          .array(z.string().trim().min(1))
+          .min(1, 'يجب إضافة قيمة واحدة على الأقل')
+          .max(
+            PRODUCT_CREATE_LIMITS.optionsPerAttribute,
+            `الحد الأقصى ${PRODUCT_CREATE_LIMITS.optionsPerAttribute} قيمة لكل متغير`,
+          ),
       }),
     )
-    .default([]),
+    .max(
+      PRODUCT_CREATE_LIMITS.attributes,
+      `الحد الأقصى ${PRODUCT_CREATE_LIMITS.attributes} متغيرات`,
+    )
+    .default([])
+    .superRefine((attributes, ctx) => {
+      const repeated = new Set(
+        duplicateNames(attributes.map((attribute) => attribute.name)).map(
+          duplicateNameKey,
+        ),
+      );
+      attributes.forEach((attribute, index) => {
+        if (repeated.has(duplicateNameKey(attribute.name))) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [index, 'name'],
+            message: 'اسم المتغير مكرر',
+          });
+        }
+        const repeatedOptions = duplicateNames(attribute.options);
+        if (repeatedOptions.length > 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [index, 'options'],
+            message: `قيم مكررة: ${repeatedOptions.join('، ')}`,
+          });
+        }
+      });
+      if (combinationCount(attributes) > PRODUCT_CREATE_LIMITS.variants) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `الحد الأقصى ${PRODUCT_CREATE_LIMITS.variants} صف متغيرات`,
+        });
+      }
+    }),
 });
 
 type AddProductFormData = z.infer<typeof addProductSchema>;
@@ -55,13 +103,11 @@ const emptyDefaults: AddProductFormData = {
   name: '',
   price: undefined as unknown as number,
   sku: '',
-  category: '',
-  description: '',
   images: [],
-  variantOptions: [],
+  attributes: [],
 };
 
-interface VariantEditorProps {
+interface AttributeEditorProps {
   index: number;
   control: Control<AddProductFormData>;
   setValue: UseFormSetValue<AddProductFormData>;
@@ -71,7 +117,7 @@ interface VariantEditorProps {
   onRemove: () => void;
 }
 
-function VariantEditor({
+function AttributeEditor({
   index,
   control,
   setValue,
@@ -79,23 +125,33 @@ function VariantEditor({
   labelError,
   valuesError,
   onRemove,
-}: VariantEditorProps) {
+}: AttributeEditorProps) {
   const values = useWatch({
     control,
-    name: `variantOptions.${index}.options`,
+    name: `attributes.${index}.options`,
   }) as string[] | undefined;
   const currentValues = values ?? [];
   const [draft, setDraft] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [draftError, setDraftError] = useState<string | null>(null);
 
   const addValue = () => {
     const trimmed = draft.trim();
     if (!trimmed) return;
-    if (currentValues.includes(trimmed)) {
+    const key = duplicateNameKey(trimmed);
+    if (currentValues.some((value) => duplicateNameKey(value) === key)) {
+      setDraftError(`القيمة "${trimmed}" موجودة بالفعل`);
       setDraft('');
       return;
     }
-    setValue(`variantOptions.${index}.options`, [...currentValues, trimmed], {
+    if (currentValues.length >= PRODUCT_CREATE_LIMITS.optionsPerAttribute) {
+      setDraftError(
+        `الحد الأقصى ${PRODUCT_CREATE_LIMITS.optionsPerAttribute} قيمة لكل متغير`,
+      );
+      return;
+    }
+    setDraftError(null);
+    setValue(`attributes.${index}.options`, [...currentValues, trimmed], {
       shouldDirty: true,
       shouldValidate: true,
     });
@@ -103,8 +159,9 @@ function VariantEditor({
   };
 
   const removeValue = (valueIndex: number) => {
+    setDraftError(null);
     setValue(
-      `variantOptions.${index}.options`,
+      `attributes.${index}.options`,
       currentValues.filter((_, i) => i !== valueIndex),
       { shouldDirty: true, shouldValidate: true },
     );
@@ -129,7 +186,7 @@ function VariantEditor({
       <div className="ps-5 pe-2 py-3">
         <div className="flex items-center gap-2 mb-2">
           <input
-            {...register(`variantOptions.${index}.attribute`)}
+            {...register(`attributes.${index}.name`)}
             placeholder="اسم المتغير (مثلاً: المقاس)"
             className="flex-1 text-base font-semibold bg-transparent border-0 border-b border-transparent focus:border-primary focus:outline-none px-0 py-1 placeholder:font-normal placeholder:text-gray-400"
           />
@@ -190,10 +247,84 @@ function VariantEditor({
           )}
         </div>
 
-        {valuesError && (
-          <p className="text-red-500 text-xs mt-2">{valuesError}</p>
+        {(draftError || valuesError) && (
+          <p className="text-red-500 text-xs mt-2">{draftError ?? valuesError}</p>
         )}
       </div>
+    </div>
+  );
+}
+
+interface VariantRowsProps {
+  control: Control<AddProductFormData>;
+  edits: Record<string, VariantRowEdit>;
+  onEdit: (key: string, edit: VariantRowEdit) => void;
+}
+
+function VariantRows({ control, edits, onEdit }: VariantRowsProps) {
+  const watchedAttributes = useWatch({ control, name: 'attributes' });
+  const watchedPrice = useWatch({ control, name: 'price' });
+  const productPrice = Number(watchedPrice);
+
+  const attributes = useMemo(
+    () =>
+      cleanAttributes(watchedAttributes ?? []).filter(
+        (attribute) => attribute.name !== '' && attribute.options.length > 0,
+      ),
+    [watchedAttributes],
+  );
+  const count = combinationCount(attributes);
+  const rows = useMemo(
+    () =>
+      count > PRODUCT_CREATE_LIMITS.variants ? [] : variantCombinations(attributes),
+    [attributes, count],
+  );
+
+  if (count > PRODUCT_CREATE_LIMITS.variants) {
+    return (
+      <p className="text-red-500 text-sm">
+        {`عدد صفوف المتغيرات ${count} أكبر من الحد الأقصى ${PRODUCT_CREATE_LIMITS.variants}، قلل عدد القيم`}
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {rows.map((options) => {
+        const key = variantRowKey(options);
+        const edit = edits[key] ?? {};
+        const label =
+          options.length === 0
+            ? 'المنتج بدون متغيرات'
+            : options.map((pair) => pair.option).join(' / ');
+        return (
+          <div
+            key={key}
+            className="grid grid-cols-1 sm:grid-cols-4 gap-2 items-center rounded-lg border border-gray-200 bg-white p-3"
+          >
+            <span className="text-sm font-semibold text-gray-800">{label}</span>
+            <Input
+              placeholder="SKU"
+              value={edit.sku ?? ''}
+              onChange={(e) => onEdit(key, { ...edit, sku: e.target.value })}
+            />
+            <Input
+              placeholder="الباركود"
+              value={edit.barcode ?? ''}
+              onChange={(e) => onEdit(key, { ...edit, barcode: e.target.value })}
+            />
+            <Input
+              type="number"
+              min={0}
+              placeholder={variantRowPricePlaceholder(productPrice, 'السعر')}
+              value={edit.price ?? ''}
+              onChange={(e) =>
+                onEdit(key, editVariantRowPrice(edit, e.target.value))
+              }
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -207,41 +338,76 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
     defaultValues: emptyDefaults,
     mode: 'onChange',
   });
+  const [rowEdits, setRowEdits] = useState<Record<string, VariantRowEdit>>({});
+  const [isSaving, setIsSaving] = useState(false);
+  const createProduct = useCreateProduct();
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: 'variantOptions',
+    name: 'attributes',
   });
 
   useEffect(() => {
     if (!isOpen) {
       form.reset(emptyDefaults);
+      setRowEdits({});
     }
   }, [isOpen, form]);
 
-  const onSubmit = form.handleSubmit((data) => {
-    const images = data.images ?? [];
+  const onSubmit = form.handleSubmit(async (data) => {
+    const draftPayload = buildCreateProductPayload(data, rowEdits, []);
 
-    const payload = {
-      name: data.name.trim(),
-      price: data.price,
-      sku: data.sku?.trim() || undefined,
-      category: data.category?.trim() || undefined,
-      description: data.description?.trim() || undefined,
-      image: images[0],
-      images: images.length > 0 ? images : undefined,
-      variantOptions: data.variantOptions
-        .map((v) => ({
-          attribute: v.attribute.trim(),
-          options: v.options.map((s) => s.trim()).filter(Boolean),
-        }))
-        .filter((v) => v.attribute && v.options.length > 0),
-    };
+    const badPrice = draftPayload.variants.find(
+      (variant) =>
+        variant.price === undefined ||
+        !Number.isFinite(variant.price) ||
+        variant.price < 0,
+    );
+    if (badPrice) {
+      toast.error('سعر المتغير يجب أن يكون رقماً أكبر من أو يساوي 0');
+      return;
+    }
+    const repeatedSkus = repeatedValues(
+      draftPayload.variants.map((variant) => variant.sku),
+    );
+    if (repeatedSkus.length > 0) {
+      toast.error(`رمز SKU مكرر بين صفوف المتغيرات: ${repeatedSkus.join('، ')}`);
+      return;
+    }
+    const repeatedBarcodes = repeatedValues(
+      draftPayload.variants.map((variant) => variant.barcode),
+    );
+    if (repeatedBarcodes.length > 0) {
+      toast.error(
+        `الباركود مكرر بين صفوف المتغيرات: ${repeatedBarcodes.join('، ')}`,
+      );
+      return;
+    }
 
-    console.log('New product:', payload);
-    toast.success('تم حفظ المنتج (وضع المعاينة - لا يوجد خادم)');
-    onClose();
+    setIsSaving(true);
+    try {
+      let imageUrls: string[];
+      try {
+        const uploads = await Promise.all(data.images.map(uploadFile));
+        imageUrls = uploads.map((upload) => upload.url);
+      } catch {
+        toast.error('تعذر رفع الصور، حاول مرة أخرى');
+        return;
+      }
+      await createProduct.mutateAsync(
+        buildCreateProductPayload(data, rowEdits, imageUrls),
+      );
+      onClose();
+    } catch {
+      return;
+    } finally {
+      setIsSaving(false);
+    }
   });
+
+  const attributesError = form.formState.errors.attributes;
+  const listError =
+    attributesError?.message ?? attributesError?.root?.message ?? undefined;
 
   return (
     <BaseModal
@@ -249,7 +415,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
       onClose={onClose}
       title="إضافة منتج يدوياً"
       showFooter={false}
-      maxWidth="md:max-w-2xl"
+      maxWidth="md:max-w-3xl"
     >
       <form onSubmit={onSubmit} className="space-y-4">
         <Input
@@ -281,14 +447,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
           />
         </div>
 
-        <Input
-          register={form.register}
-          name="category"
-          label="الفئة"
-          placeholder="أدخل فئة المنتج..."
-          error={form.formState.errors.category?.message}
-        />
-
         <Controller
           control={form.control}
           name="images"
@@ -298,17 +456,9 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
               onChange={field.onChange}
               error={fieldState.error?.message}
               title="صور المنتج"
-              description="قم برفع صور المنتج (يمكنك اختيار أكثر من صورة)"
-              required
+              description="قم برفع صور المنتج (اختياري، يمكنك اختيار أكثر من صورة)"
             />
           )}
-        />
-
-        <Textarea
-          register={form.register}
-          name="description"
-          label="الوصف"
-          placeholder="أدخل وصف المنتج..."
         />
 
         <div className="space-y-3 pt-2 border-t border-gray-100">
@@ -318,7 +468,8 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => append({ attribute: '', options: [] })}
+              disabled={fields.length >= PRODUCT_CREATE_LIMITS.attributes}
+              onClick={() => append({ name: '', options: [] })}
               className="text-primary font-semibold hover:bg-primary hover:text-white"
             >
               <LiaPlusSolid className="w-4 h-4" />
@@ -333,31 +484,48 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
           ) : (
             <div className="space-y-2">
               {fields.map((field, index) => (
-                <VariantEditor
+                <AttributeEditor
                   key={field.id}
                   index={index}
                   control={form.control}
                   setValue={form.setValue}
                   register={form.register}
-                  labelError={
-                    form.formState.errors.variantOptions?.[index]?.attribute?.message
-                  }
-                  valuesError={
-                    form.formState.errors.variantOptions?.[index]?.options?.message
-                  }
+                  labelError={attributesError?.[index]?.name?.message}
+                  valuesError={attributesError?.[index]?.options?.message}
                   onRemove={() => remove(index)}
                 />
               ))}
             </div>
           )}
+          {listError && <p className="text-red-500 text-sm">{listError}</p>}
+        </div>
+
+        <div className="space-y-3 pt-2 border-t border-gray-100">
+          <div className="pt-3">
+            <label className="text-[18px]">تفاصيل المتغيرات</label>
+            <p className="text-sm text-gray-500 mt-1">
+              صف لكل مجموعة من القيم، السعر يبدأ بسعر المنتج ويمكن تعديله
+            </p>
+          </div>
+          <VariantRows
+            control={form.control}
+            edits={rowEdits}
+            onEdit={(key, edit) =>
+              setRowEdits((current) => ({ ...current, [key]: edit }))
+            }
+          />
         </div>
 
         <div className="flex justify-end gap-3 pt-5 mt-2 border-t border-gray-100">
           <Button type="button" variant="outline" onClick={onClose}>
             إلغاء
           </Button>
-          <Button type="submit" className="bg-primary hover:bg-primary/90">
-            حفظ المنتج
+          <Button
+            type="submit"
+            className="bg-primary hover:bg-primary/90"
+            disabled={isSaving}
+          >
+            {isSaving ? 'جارٍ الحفظ...' : 'حفظ المنتج'}
           </Button>
         </div>
       </form>
@@ -366,3 +534,4 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
 };
 
 export default AddProductModal;
+

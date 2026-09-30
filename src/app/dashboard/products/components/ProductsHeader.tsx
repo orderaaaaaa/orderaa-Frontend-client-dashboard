@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { LiaFileImportSolid, LiaPlusSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
+import { Can } from '@/components/Can';
+import { PERMISSIONS } from '@/lib/permissions';
 import { useSyncProducts } from '../hooks/useProduct';
 import AddProductModal from './modals/AddProductModal';
 
@@ -18,13 +20,15 @@ function ProductsHeader() {
           <h1 className="text-3xl font-bold text-gray-900">صفحة المنتجات</h1>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setIsAddProductModalOpen(true)}
-          >
-            <LiaPlusSolid className="size-5" />
-            إضافة منتج يدوياً
-          </Button>
+          <Can code={PERMISSIONS.PRODUCTS_CREATE}>
+            <Button
+              variant="outline"
+              onClick={() => setIsAddProductModalOpen(true)}
+            >
+              <LiaPlusSolid className="size-5" />
+              إضافة منتج يدوياً
+            </Button>
+          </Can>
           <Button onClick={() => syncProducts()} disabled={isPending}>
             {isPending ? (
               <div className="size-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
