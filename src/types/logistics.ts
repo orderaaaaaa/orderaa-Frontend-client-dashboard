@@ -6,6 +6,7 @@ export interface GovernorateLogisticsConfig {
   shippingCompany: string;
   /** Canonical Arabic label, exactly as GET /lookups/governorates returns it. */
   governorate: string;
+  governorateKey: string | null;
   firstAttemptDelay: number;
   /** Decimal strings on the wire — never parse into a float. */
   shippingCost: string | null;

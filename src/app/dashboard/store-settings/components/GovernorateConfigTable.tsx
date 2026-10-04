@@ -94,20 +94,26 @@ export function GovernorateConfigTable({
 
   useEffect(() => {
     if (isConfigsLoading || isGovernoratesLoading) return;
-    const configByGovernorate = new Map((configs ?? []).map((c) => [c.governorate, c]));
+    const configByGovernorate = new Map(
+      (configs ?? []).flatMap((c) => (c.governorateKey ? [[c.governorateKey, c] as const] : []))
+    );
     reset({
       configs: governorates.map((g) => {
-        const existing = configByGovernorate.get(g.label);
+        const existing = configByGovernorate.get(g.key);
         return {
-          governorate: g.label,
+          governorate: g.key,
           firstAttemptDelay: existing ? String(existing.firstAttemptDelay) : '',
           shippingCost: existing?.shippingCost ?? '',
           nonReceiptCost: existing?.nonReceiptCost ?? '',
         };
       }),
     });
-    setSavedGovernorates(new Set((configs ?? []).map((c) => c.governorate)));
+    setSavedGovernorates(
+      new Set((configs ?? []).flatMap((c) => (c.governorateKey ? [c.governorateKey] : [])))
+    );
   }, [configs, governorates, isConfigsLoading, isGovernoratesLoading, reset]);
+
+  const labelByKey = new Map(governorates.map((g) => [g.key, g.label]));
 
   const onSubmit = (data: GovernorateConfigFormData) => {
     const kept = data.configs.filter(
@@ -136,7 +142,14 @@ export function GovernorateConfigTable({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <div
+      className="space-y-4"
+      onKeyDown={(event) => {
+        if (event.key !== 'Enter' || !(event.target instanceof HTMLInputElement)) return;
+        event.preventDefault();
+        void handleSubmit(onSubmit)();
+      }}
+    >
       <div className="flex flex-wrap items-center gap-2 px-1">
         {isDirty && (
           <span className="text-xs text-amber-600 font-medium">
@@ -180,7 +193,7 @@ export function GovernorateConfigTable({
                   <Fragment key={field.id}>
                     <tr className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
                       <td className="py-2.5 px-4 text-gray-900 font-medium">
-                        {field.governorate}
+                        {labelByKey.get(field.governorate) ?? field.governorate}
                         <input
                           type="hidden"
                           {...register(`configs.${index}.governorate`)}
@@ -233,10 +246,10 @@ export function GovernorateConfigTable({
       )}
 
       <div className="flex justify-end pt-2">
-        <Button type="submit" disabled={isSaving} size="sm">
+        <Button type="button" onClick={handleSubmit(onSubmit)} disabled={isSaving} size="sm">
           {isSaving ? 'جاري الحفظ...' : 'حفظ الإعدادات'}
         </Button>
       </div>
-    </form>
+    </div>
   );
 }
