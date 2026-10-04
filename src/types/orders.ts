@@ -1,3 +1,4 @@
+import type { ShippingCompanyRef } from '@/types/shippingCompanies';
 // Order Status Enum (synced with backend)
 export enum OrderStatus {
   NEW_ORDER = 'NEW_ORDER',
@@ -121,7 +122,7 @@ export interface OrderFilters {
   productId?: string;
   variantOptionIds?: number[];
   storeId?: string;
-  shippingCompany?: string;
+  shippingCompanyId?: string;
   employeeName?: string;
   cancellationReasons?: string[];
 }
@@ -350,6 +351,7 @@ export interface OrderShippingId {
   orderId: number;
   shippingId: string;
   shippingCompany?: string | null;
+  shippingCompanyId?: number | null;
   isActive: boolean;
   createdAt: string;
 }
@@ -371,8 +373,8 @@ export interface Order {
   returnShippingCost?: number;
   shippingType?: ShippingType;
   returnShipmentContent?: string | null;
-  shippingCompany?: string;
-  shippingProviderId?: number | null;
+  shippingCompanyId?: number | null;
+  shippingCompanyRef?: ShippingCompanyRef | null;
   shipmentContent?: string | null;
   canOpenShipment?: boolean;
   paymentStatus?: string;
@@ -575,7 +577,7 @@ export interface FilterOrdersDto {
   skipFilters?: boolean;
   orderByDirection?: 'asc' | 'desc';
   isPrinted?: boolean;
-  shippingCompany?: string;
+  shippingCompanyId?: string;
   department?: string;
   productId?: string;
   /** Ignored by the API unless productId is also set. */

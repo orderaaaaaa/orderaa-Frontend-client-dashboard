@@ -51,6 +51,10 @@ import OrdersSelectionHeader from '../../components/OrdersSelectionHeader';
 import PageTaps from '../../components/pageTaps';
 import { useDepartment, useDefaultStatusByPath } from '../../hooks';
 import useShippingCompanies from '@/hooks/useShippingCompanies';
+import {
+  shippingCompanyNameOf,
+  shippingCompanySelectOptionsOf,
+} from '@/lib/shippingCompanies';
 
 export function ShippingOrdersContent() {
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState('');
@@ -68,6 +72,10 @@ export function ShippingOrdersContent() {
   const DEFAULT_STATUS = useDefaultStatusByPath();
   const { shippingCompanies, isLoading: isLoadingShippingCompanies } =
     useShippingCompanies();
+  const shippingCompanyOptions = useMemo(
+    () => shippingCompanySelectOptionsOf(shippingCompanies),
+    [shippingCompanies]
+  );
   const { data: departmentStatuses, isLoading: isDepartmentStatusesLoading } =
     useDepartmentStatusesQuery(department);
 
@@ -87,7 +95,7 @@ export function ShippingOrdersContent() {
   const apiFilters = useMemo(() => {
     const baseFilters = buildApiFiltersFromUrlState(filters);
     if (selectedShippingCompany) {
-      return { ...baseFilters, shippingCompany: selectedShippingCompany };
+      return { ...baseFilters, shippingCompanyId: selectedShippingCompany };
     }
     return baseFilters;
   }, [filters, selectedShippingCompany]);
@@ -425,7 +433,7 @@ export function ShippingOrdersContent() {
         selectedOrders={selectedOrders}
         showPrintStatusToggle={false}
         showShippingCompanySelect
-        shippingCompanyOptions={shippingCompanies}
+        shippingCompanyOptions={shippingCompanyOptions}
         selectedShippingCompany={selectedShippingCompany}
         onShippingCompanyChange={setSelectedShippingCompany}
         isLoadingShippingCompanies={isLoadingShippingCompanies}
@@ -473,7 +481,7 @@ export function ShippingOrdersContent() {
                   order.governorate || order.externalGovernorate || 'غير محدد'
                 }
                 shippingId={order.shippingId}
-                shippingCompany={order.shippingCompany}
+                shippingCompanyName={shippingCompanyNameOf(order.shippingCompanyRef)}
                 productVariants={order.order_products.map((op) => mapOrderProductToVariantInfo(op))}
                 price={order.totalCost}
                 collectedAmount={order.collectedAmount}

@@ -1,11 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getShippingCompanies } from '@/lib/api/lookups';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
-
-export interface ShippingCompanyOption {
-  key: string;
-  label: string;
-}
+import type { ShippingCompanyRef } from '@/types/shippingCompanies';
 
 export default function useShippingCompanies(enabled: boolean = true) {
   const {
@@ -13,18 +9,15 @@ export default function useShippingCompanies(enabled: boolean = true) {
     error,
     isLoading,
     isFetching,
-  } = useQuery<ShippingCompanyOption[]>({
+  } = useQuery<ShippingCompanyRef[]>({
     queryKey: [QUERY_KEYS.SHIPPING_COMPANIES],
-    queryFn: async () => {
-      const data = await getShippingCompanies();
-      return data as ShippingCompanyOption[];
-    },
+    queryFn: getShippingCompanies,
     staleTime: 5 * 60 * 1000,
     retry: 1,
     enabled,
   });
 
-  const shippingCompanies: ShippingCompanyOption[] = data ?? [];
+  const shippingCompanies: ShippingCompanyRef[] = data ?? [];
 
   return {
     shippingCompanies,

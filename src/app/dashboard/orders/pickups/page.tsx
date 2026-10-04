@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PageLoading from '@/components/ui/page-loading';
 import { ImageGalleryModal } from '@/components/receipts/ImageGalleryModal';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
+import { shippingCompanyNameOf } from '@/lib/shippingCompanies';
 import {
   usePickupQuery,
   usePickupsQuery,
@@ -243,7 +244,7 @@ export default function PickupsPage() {
                             {getStatusLabel(order.status ?? '') || '—'}
                           </td>
                           <td className="px-4 py-2">
-                            {order.shippingCompany ?? '—'}
+                            {shippingCompanyNameOf(order.shippingCompanyRef) || '—'}
                           </td>
                           <td className="px-4 py-2">{order.governorate ?? '—'}</td>
                           <td className="px-4 py-2">

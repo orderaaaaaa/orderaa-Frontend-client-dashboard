@@ -11,6 +11,7 @@ import { useGovernoratesQuery, useCitiesQuery } from "@/services/lookups";
 import { useCancellationReasons } from "@/services/orders";
 import { useProductAttributeOptionsQuery } from "@/services/products";
 import useShippingCompanies from "@/hooks/useShippingCompanies";
+import { shippingCompanyFilterOptionsOf } from "@/lib/shippingCompanies";
 import { useQuery } from "@tanstack/react-query";
 import http from "@/lib/api/http";
 import { useDebounce, useDebouncedCallback } from "@/utils/debounce";
@@ -44,7 +45,7 @@ export const FILTER_DEFINITIONS: FilterDefinition[] = [
   { key: 'sizeColor', label: 'المصدر', type: 'select' },
   { key: 'address', label: 'العنوان', type: 'text' },
   { key: 'storeId', label: 'اسم المتجر', type: 'select' },
-  { key: 'shippingCompany', label: 'شركة الشحن', type: 'select' },
+  { key: 'shippingCompanyId', label: 'شركة الشحن', type: 'select' },
   { key: 'cancellationReasons', label: 'سبب الإلغاء', type: 'multiselect', visibleStatuses: ['CANCELLED'] },
   { key: 'orderByDirection', label: 'الترتيب', type: 'select' },
 ];
@@ -136,7 +137,7 @@ export default function FilterPanel({
   const isCityActive = activeFilters.includes('city');
   const isCancellationReasonActive = activeFilters.includes('cancellationReasons');
   const isStoreActive = activeFilters.includes('storeId');
-  const isShippingCompanyActive = activeFilters.includes('shippingCompany');
+  const isShippingCompanyActive = activeFilters.includes('shippingCompanyId');
 
   const selectedGovernorate = useWatch({
     control,
@@ -205,6 +206,10 @@ export default function FilterPanel({
     staleTime: Infinity,
   });
   const { shippingCompanies, isLoading: isLoadingShippingCompanies } = useShippingCompanies(isShippingCompanyActive);
+  const shippingCompanyFilterOptions = React.useMemo(
+    () => shippingCompanyFilterOptionsOf(shippingCompanies),
+    [shippingCompanies]
+  );
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -502,11 +507,11 @@ export default function FilterPanel({
             />
           );
         }
-        if (key === 'shippingCompany') {
+        if (key === 'shippingCompanyId') {
           return (
             <Controller
               key={key}
-              name="shippingCompany"
+              name="shippingCompanyId"
               control={control}
               render={({ field }) => (
                 <FilterChip filterKey={key} label={label} onRemove={onRemoveFilter}>
@@ -514,7 +519,7 @@ export default function FilterPanel({
                     value={field.value || ''}
                     onChange={field.onChange}
                     onBlur={field.onBlur}
-                    options={shippingCompanies}
+                    options={shippingCompanyFilterOptions}
                     placeholder={isLoadingShippingCompanies ? "جاري التحميل..." : label}
                     widthClass="w-full"
                     loading={isLoadingShippingCompanies}

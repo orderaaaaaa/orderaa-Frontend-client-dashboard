@@ -6,25 +6,12 @@ import { QRCodeSVG } from 'qrcode.react';
 import { LiaPhoneSolid, LiaInfoCircleSolid } from 'react-icons/lia';
 import { InvoiceProps } from '../../types/invoice';
 import { INVOICE_LABELS } from '../../constants/invoiceLabels';
-import { providers } from '@/app/dashboard/link-shipping-company/constants/providers';
+import { integrationLogoOf } from '@/lib/shippingCompanies';
 import { ShippingType } from '@/types/orders';
-
-const normalizeShippingKey = (s: string) => s.toUpperCase().replace(/[^A-Z0-9]/g, '');
-
-const getShippingCompanyLogo = (shippingCompany?: string) => {
-  if (!shippingCompany) return undefined;
-  const key = normalizeShippingKey(shippingCompany);
-  if (!key) return undefined;
-  return providers.find(
-    (p) =>
-      normalizeShippingKey(p.id) === key ||
-      normalizeShippingKey(p.name) === key,
-  )?.logo;
-};
 
 export function Invoice({ data, storeInfo, language }: InvoiceProps) {
   const labels = INVOICE_LABELS[language];
-  const shippingCompanyLogo = getShippingCompanyLogo(data.shippingCompany);
+  const shippingCompanyLogo = integrationLogoOf(data.shippingCompanyCode);
  // const storeName = language === 'ar' ? storeInfo.name : storeInfo.nameEn;
 
   const location = [data.customer.governorate, data.customer.city]
@@ -270,7 +257,7 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
       </div>
 
       {/* Shipping Barcode + Shipping Company Logo */}
-      {(data.shippingId || data.shippingCompany) && (
+      {(data.shippingId || data.shippingCompanyName) && (
         <div className="grid grid-cols-2 items-center my-1 border-y border-black py-2">
           <div className="flex flex-col items-center justify-center px-2">
             {data.shippingId ? (
@@ -293,12 +280,12 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
             {shippingCompanyLogo ? (
               <img
                 src={shippingCompanyLogo}
-                alt={data.shippingCompany || 'Shipping Company'}
+                alt={data.shippingCompanyName || 'Shipping Company'}
                 className="h-12 max-w-[30mm] object-contain"
               />
             ) : (
               <span className="font-bold text-[10px] text-black uppercase tracking-wider">
-                {data.shippingCompany || '-'}
+                {data.shippingCompanyName || '-'}
               </span>
             )}
           </div>

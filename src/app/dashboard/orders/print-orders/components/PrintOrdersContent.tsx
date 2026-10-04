@@ -58,6 +58,7 @@ import {
 import { buildStatisticsCards } from '../constants/statisticsCards';
 import PageTaps from '../../components/pageTaps';
 import { useDepartment } from '../../hooks';
+import { shippingCompanyNameOf } from '@/lib/shippingCompanies';
 
 const REPORT_BUTTON_TEXT_BY_STATUS: Record<string, string> = {
   CONFIRMED: 'تقرير المنتجات المؤكدة',
@@ -735,7 +736,7 @@ export function PrintOrdersContent() {
                   order.governorate || order.externalGovernorate || 'غير محدد'
                 }
                 shippingId={order.shippingId}
-                shippingCompany={order.shippingCompany}
+                shippingCompanyName={shippingCompanyNameOf(order.shippingCompanyRef)}
                 productVariants={order.order_products.map((op) => mapOrderProductToVariantInfo(op))}
                 price={order.totalCost}
                 shippingType={order.shippingType}

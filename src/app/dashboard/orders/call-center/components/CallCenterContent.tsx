@@ -41,6 +41,7 @@ import {
 import OrdersSelectionHeader from '../../components/OrdersSelectionHeader';
 import PageTaps from '../../components/pageTaps';
 import { useDepartment, useDefaultStatusByPath } from '../../hooks';
+import { shippingCompanyNameOf } from '@/lib/shippingCompanies';
 
 export function CallCenterContent() {
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState('');
@@ -338,7 +339,7 @@ export function CallCenterContent() {
                   order.governorate || order.externalGovernorate || 'غير محدد'
                 }
                 shippingId={order.shippingId}
-                shippingCompany={order.shippingCompany}
+                shippingCompanyName={shippingCompanyNameOf(order.shippingCompanyRef)}
                 productVariants={order.order_products.map((op) => mapOrderProductToVariantInfo(op))}
                 price={order.totalCost}
                 collectedAmount={order.collectedAmount}

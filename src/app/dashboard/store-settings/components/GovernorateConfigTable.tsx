@@ -54,15 +54,14 @@ type GovernorateConfigField = GovernorateConfigFormData['configs'][number] & {
 };
 
 interface GovernorateConfigTableProps {
-  /** The ShippingCompany enum value, e.g. BOSTA. */
-  shippingCompany: string;
+  shippingCompanyId: number;
 }
 
 export function GovernorateConfigTable({
-  shippingCompany,
+  shippingCompanyId,
 }: GovernorateConfigTableProps) {
   const { data: configs, isLoading: isConfigsLoading } =
-    useGovernorateLogisticsConfig(shippingCompany);
+    useGovernorateLogisticsConfig(shippingCompanyId);
   const { mutate: updateConfig, isPending: isSaving } =
     useUpdateGovernorateLogisticsConfig();
   const {
@@ -120,7 +119,7 @@ export function GovernorateConfigTable({
       (row) => row.firstAttemptDelay !== '' || row.shippingCost !== '' || row.nonReceiptCost !== '',
     );
     updateConfig({
-      shippingCompany,
+      shippingCompanyId,
       rows: kept.map((row) => ({
         governorate: row.governorate,
         firstAttemptDelay: Number(row.firstAttemptDelay),

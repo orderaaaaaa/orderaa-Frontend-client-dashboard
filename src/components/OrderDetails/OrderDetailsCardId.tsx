@@ -8,6 +8,11 @@ import OrderLockedBanner from './OrderLockedBanner';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { If, Then } from 'react-if';
 import { getRemainingTime } from '@/utils/getRemainingTime';
+import useShippingCompanies from '@/hooks/useShippingCompanies';
+import {
+  shippingCompanyNameOf,
+  shippingIdCompanyNameOf,
+} from '@/lib/shippingCompanies';
 
 interface OrderDetailsCardIdProps {
   order: Order;
@@ -30,6 +35,8 @@ const OrderDetailsCardId = ({
   const [isCustomerOrdersModalOpen, setIsCustomerOrdersModalOpen] =
     useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const { shippingCompanies } = useShippingCompanies();
+  const orderCompanyName = shippingCompanyNameOf(order.shippingCompanyRef);
 
   const createdDate = new Date(order.createdAt);
   const timeAgo = getTimeAgo(order.createdAt);
@@ -122,9 +129,17 @@ const OrderDetailsCardId = ({
                           >
                             {entry.shippingId}
                           </span>
-                          {entry.shippingCompany && (
+                          {shippingIdCompanyNameOf(
+                            entry,
+                            order.shippingCompanyRef,
+                            shippingCompanies
+                          ) && (
                             <span className="text-[11px] font-normal text-gray-500">
-                              {entry.shippingCompany}
+                              {shippingIdCompanyNameOf(
+                                entry,
+                                order.shippingCompanyRef,
+                                shippingCompanies
+                              )}
                             </span>
                           )}
                         </div>
@@ -158,9 +173,9 @@ const OrderDetailsCardId = ({
                         <span className="text-sm font-semibold text-gray-800">
                           {order.shippingId}
                         </span>
-                        {order.shippingCompany && (
+                        {orderCompanyName && (
                           <span className="text-[11px] font-normal text-gray-500">
-                            {order.shippingCompany}
+                            {orderCompanyName}
                           </span>
                         )}
                       </div>

@@ -21,7 +21,7 @@ export interface OrderCardProps {
   select: boolean;
   isSelected?: boolean;
   shippingId?: string;
-  shippingCompany?: string;
+  shippingCompanyName?: string;
   onSelectionChange?: (checked: boolean) => void;
   createdAt?: string;
   postponedUntil?: string | null;

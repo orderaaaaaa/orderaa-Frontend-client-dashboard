@@ -129,26 +129,28 @@ const retryUnlessClientError = (failureCount: number, error: unknown) => {
   return failureCount < 2;
 };
 
-export const useLocationOptionGovernorates = (provider: string | undefined) =>
+export const useLocationOptionGovernorates = (
+  shippingCompanyId: number | null | undefined
+) =>
   useQuery({
-    queryKey: [QUERY_KEYS.LOCATION_OPTION_GOVERNORATES, provider] as QueryKey,
-    queryFn: () => getLocationOptionGovernorates(provider as string),
-    enabled: !!provider,
+    queryKey: [QUERY_KEYS.LOCATION_OPTION_GOVERNORATES, shippingCompanyId] as QueryKey,
+    queryFn: () => getLocationOptionGovernorates(shippingCompanyId as number),
+    enabled: !!shippingCompanyId,
     retry: retryUnlessClientError,
   });
 
 export const useLocationOptionCities = (
-  provider: string | undefined,
+  shippingCompanyId: number | null | undefined,
   governorateOption: string | undefined
 ) =>
   useQuery({
     queryKey: [
       QUERY_KEYS.LOCATION_OPTION_CITIES,
-      provider,
+      shippingCompanyId,
       governorateOption,
     ] as QueryKey,
     queryFn: () =>
-      getLocationOptionCities(provider as string, governorateOption as string),
-    enabled: !!provider && !!governorateOption,
+      getLocationOptionCities(shippingCompanyId as number, governorateOption as string),
+    enabled: !!shippingCompanyId && !!governorateOption,
     retry: retryUnlessClientError,
   });

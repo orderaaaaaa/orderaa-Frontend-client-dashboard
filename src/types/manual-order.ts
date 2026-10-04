@@ -20,8 +20,7 @@ export type ManualOrderPayload = {
   returnShippingCost?: number;
   paymentMethod: string;
   status: 'NEW_ORDER' | 'CONFIRMED';
-  shippingCompany: string;
-  shippingProviderId: number | null;
+  shippingCompanyId: number | null;
   governorateOption: string;
   cityOption: string;
   total: number;

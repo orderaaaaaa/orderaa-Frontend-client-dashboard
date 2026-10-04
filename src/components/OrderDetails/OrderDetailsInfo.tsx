@@ -16,6 +16,7 @@ import { OrderActionModals } from './modals/OrderActionModals';
 import { ErrorModal } from './modals/ErrorModal';
 import { OrderActionsFooterLargeScreens } from './actions/ActionsDropdownLargeScreens';
 import { PartialReturnLinks } from './PartialReturnLinks';
+import { shippingCompanyNameOf } from '@/lib/shippingCompanies';
 
 interface OrderDetailsInfoComponentProps {
   order: Order;
@@ -246,14 +247,7 @@ function OrderDetailsInfoComponent({
     }
   };
 
-  const shippingLabel = useMemo(() => {
-    switch (localOrder.shippingCompany) {
-      case 'TURBO':
-        return 'تربو';
-      default:
-        return localOrder.shippingCompany ?? '';
-    }
-  }, [localOrder.shippingCompany]);
+  const shippingLabel = shippingCompanyNameOf(localOrder.shippingCompanyRef);
 
   const followUpActions = [
     'no_answer',
@@ -349,7 +343,7 @@ function OrderDetailsInfoComponent({
         />
 
         <ShippingSection
-          shippingCompany={shippingLabel}
+          shippingCompanyName={shippingLabel}
           governorate={localOrder.governorate}
           city={localOrder.city}
           address={localOrder.address}

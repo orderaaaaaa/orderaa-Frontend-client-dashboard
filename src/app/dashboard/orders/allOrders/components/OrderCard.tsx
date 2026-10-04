@@ -42,7 +42,7 @@ export default function OrderCard({
   productVariants,
   price,
   shippingId,
-  shippingCompany,
+  shippingCompanyName,
   isBlocked,
   customerNotes,
   trys,
@@ -357,9 +357,9 @@ export default function OrderCard({
             <span className="text-base font-medium text-black break-words min-w-0">
               {shippingId}
             </span>
-            {shippingCompany && (
+            {shippingCompanyName && (
               <span className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs font-semibold px-2 py-0.5 rounded-full break-words">
-                {shippingCompany}
+                {shippingCompanyName}
               </span>
             )}
           </div>

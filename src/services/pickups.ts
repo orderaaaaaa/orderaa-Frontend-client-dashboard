@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import http from '@/lib/api/http';
+import type { ShippingCompanyRef } from '@/types/shippingCompanies';
 
 /** Mirrors the backend pickup read DTOs (T12). */
 export interface PickupCard {
@@ -26,7 +27,8 @@ export interface PickupOrder {
   totalCost: number | null;
   governorate: string | null;
   city: string | null;
-  shippingCompany: string | null;
+  shippingCompanyId: number | null;
+  shippingCompanyRef: ShippingCompanyRef | null;
   isDeleted: boolean;
 }
 

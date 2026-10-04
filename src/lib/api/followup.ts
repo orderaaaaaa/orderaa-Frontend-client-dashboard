@@ -20,7 +20,7 @@ function buildParams(filters: FollowupFilters): Record<string, unknown> {
   if (filters.search) params.search = filters.search;
   if (filters.orderByDirection) params.orderByDirection = filters.orderByDirection;
   if (filters.newFirst != null) params.newFirst = filters.newFirst;
-  if (filters.shippingCompany) params.shippingCompany = filters.shippingCompany;
+  if (filters.shippingCompanyId) params.shippingCompanyId = filters.shippingCompanyId;
   if (filters.governorate) params.governorate = filters.governorate;
   if (filters.city) params.city = filters.city;
   if (filters.code) params.code = filters.code;

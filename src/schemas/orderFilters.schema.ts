@@ -68,7 +68,7 @@ export const orderFiltersSchema = z.object({
 
     storeId: z.string().optional().or(z.literal('')),
 
-    shippingCompany: z.string().optional().or(z.literal('')),
+    shippingCompanyId: z.string().optional().or(z.literal('')),
 
     employeeName: z.string().trim().optional().or(z.literal('')),
 
@@ -100,7 +100,7 @@ export const defaultFilterValues: OrderFiltersFormData = {
     variantOptionIds: [],
     cancellationReasons: [],
     storeId: '',
-    shippingCompany: '',
+    shippingCompanyId: '',
     employeeName: '',
     skipFilters: undefined,
     orderByDirection: '',

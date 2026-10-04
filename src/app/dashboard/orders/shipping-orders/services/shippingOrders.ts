@@ -14,10 +14,10 @@ export interface SubmitForApprovalResponse {
 
 export async function getOrderByCodeWithShipping(
   code: string,
-  shippingCompanyKey: string
+  shippingCompanyId: string
 ): Promise<Order> {
   const response = await http.get<Order>(`/orders/by-code/${code}`, {
-    params: { shippingCompany: shippingCompanyKey },
+    params: { shippingCompanyId },
   });
   return response.data;
 }

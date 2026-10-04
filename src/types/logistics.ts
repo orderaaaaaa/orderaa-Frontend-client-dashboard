@@ -3,7 +3,7 @@ import { Order, OrderEvent, OrderProduct, OrderStatus } from './orders';
 /** Mirrors the backend GovernorateSettingResponseDto. */
 export interface GovernorateLogisticsConfig {
   id: number;
-  shippingCompany: string;
+  shippingCompanyId: number;
   /** Canonical Arabic label, exactly as GET /lookups/governorates returns it. */
   governorate: string;
   governorateKey: string | null;
@@ -190,7 +190,7 @@ export interface FollowupFilters {
   search?: string;
   orderByDirection?: 'asc' | 'desc';
   newFirst?: boolean;
-  shippingCompany?: string;
+  shippingCompanyId?: string;
   governorate?: string;
   city?: string;
   code?: string;

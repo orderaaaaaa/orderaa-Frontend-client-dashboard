@@ -50,34 +50,6 @@ export const locationOptionErrorCodeOf = (
     : null;
 };
 
-export const OTHERS_SHIPPING_COMPANY = 'OTHERS';
-
-const COURIER_KEY_PREFIX = 'provider:';
-
-export const courierKeyOf = (shippingProviderId: number) =>
-  `${COURIER_KEY_PREFIX}${shippingProviderId}`;
-
-export const courierIdOf = (shippingCompanyKey: string): number | null => {
-  if (!shippingCompanyKey.startsWith(COURIER_KEY_PREFIX)) return null;
-  const id = Number(shippingCompanyKey.slice(COURIER_KEY_PREFIX.length));
-  return Number.isInteger(id) && id > 0 ? id : null;
-};
-
-export const shippingCompanyKeyOfOrder = (
-  shippingCompany: string | null | undefined,
-  shippingProviderId: number | null | undefined,
-) =>
-  shippingProviderId != null
-    ? courierKeyOf(shippingProviderId)
-    : (shippingCompany ?? undefined);
-
-export const shippingCompanyPayloadOf = (shippingCompanyKey: string) => {
-  const courierId = courierIdOf(shippingCompanyKey);
-  return courierId !== null
-    ? { shippingCompany: OTHERS_SHIPPING_COMPANY, shippingProviderId: courierId }
-    : { shippingCompany: shippingCompanyKey, shippingProviderId: null };
-};
-
 export const LOCATION_OPTION_STALE_HINT = 'لم يعد في قائمة الشركة';
 
 export const locationSelectOptionsOf = (options: LocationOption[]) =>

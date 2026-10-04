@@ -22,7 +22,7 @@ export function mapOrderToInvoice(
 
   const activeShipping = order.shipping_ids?.find((s) => s.isActive) ?? order.shipping_ids?.[0];
   const resolvedShippingId = order.shippingId || activeShipping?.shippingId || undefined;
-  const resolvedShippingCompany = order.shippingCompany || activeShipping?.shippingCompany || undefined;
+  const resolvedShippingCompany = order.shippingCompanyRef?.name || undefined;
 
   return {
     orderCode: order.code || `ORD-${order.id}`,
@@ -48,7 +48,8 @@ export function mapOrderToInvoice(
     totalPrice: order.totalCost,
     packagingNotes: order.packagingNotes,
     shippingNotes: order.notes,
-    shippingCompany: resolvedShippingCompany,
+    shippingCompanyName: resolvedShippingCompany,
+    shippingCompanyCode: order.shippingCompanyRef?.code ?? null,
     merchantName: order.merchants?.merchantName,
     merchantGovernorate: order.merchants?.governorate,
     merchantCity: order.merchants?.city,

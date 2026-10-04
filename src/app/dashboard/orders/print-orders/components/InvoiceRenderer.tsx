@@ -6,7 +6,7 @@ import { Invoice } from './Invoice';
 import { BostaInvoice } from './BostaInvoice';
 
 export function InvoiceRenderer(props: InvoiceProps) {
-  if (props.data.shippingCompany === 'BOSTA') {
+  if (props.data.shippingCompanyCode === 'BOSTA') {
     return <BostaInvoice {...props} />;
   }
   return <Invoice {...props} />;

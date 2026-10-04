@@ -44,7 +44,7 @@ function Manual() {
         notes: '',
       },
       shipping: {
-        shippingCompany: '',
+        shippingCompanyId: '',
         governorateOption: '',
         cityOption: '',
         shippingCost: '',
@@ -101,7 +101,7 @@ function Manual() {
           notes: data.customer.notes,
         },
         shipping: {
-          shippingCompany: data.shipping.shippingCompany,
+          shippingCompanyId: data.shipping.shippingCompanyId,
           governorateOption: data.shipping.governorateOption,
           cityOption: data.shipping.cityOption,
           shippingCost: data.shipping.shippingCost || '',
@@ -146,7 +146,7 @@ function Manual() {
       if (errors.customer?.name) return 'name';
       if (errors.customer?.phoneNumbers) return 'phoneNumbers';
       if (errors.customer?.address) return 'address';
-      if (errors.shipping?.shippingCompany) return 'shippingCompany';
+      if (errors.shipping?.shippingCompanyId) return 'shippingCompanyId';
       if (errors.shipping?.governorateOption) return 'governorate';
       if (errors.shipping?.cityOption) return 'city';
       if (errors.shipping?.shippingCost) return 'shippingCost';
@@ -223,7 +223,7 @@ function Manual() {
         />
 
         <ShippingSection
-          shippingCompany={formValues.shipping.shippingCompany}
+          shippingCompanyId={formValues.shipping.shippingCompanyId}
           governorateOption={formValues.shipping.governorateOption}
           cityOption={formValues.shipping.cityOption}
           shippingCost={formValues.shipping.shippingCost || ''}
@@ -231,8 +231,8 @@ function Manual() {
           shippingType={formValues.shipping.shippingType}
           returnShipmentContent={formValues.shipping.returnShipmentContent || ''}
           onShippingCompanyChange={(v) => {
-            setValue('shipping.shippingCompany', v);
-            clearErrors('shipping.shippingCompany');
+            setValue('shipping.shippingCompanyId', v);
+            clearErrors('shipping.shippingCompanyId');
           }}
           onGovernorateOptionChange={(v) => {
             setValue('shipping.governorateOption', v);
@@ -259,7 +259,7 @@ function Manual() {
             clearErrors('shipping.returnShipmentContent');
           }}
           errors={{
-            shippingCompany: errors.shipping?.shippingCompany?.message,
+            shippingCompanyId: errors.shipping?.shippingCompanyId?.message,
             governorateOption: errors.shipping?.governorateOption?.message,
             cityOption: errors.shipping?.cityOption?.message,
             shippingCost: errors.shipping?.shippingCost?.message,

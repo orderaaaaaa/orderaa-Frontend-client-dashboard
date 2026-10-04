@@ -5,7 +5,7 @@ import { Can } from '@/components/Can';
 import { PERMISSION_CODES } from '@/lib/permissions';
 
 export interface ShippingSectionProps {
-  shippingCompany?: string;
+  shippingCompanyName?: string;
   governorate?: string;
   city?: string;
   address?: string;
@@ -50,7 +50,7 @@ function ShippingField({ label, value, sourceValue, icon, className = '', multil
 }
 
 export function ShippingSection({
-  shippingCompany,
+  shippingCompanyName,
   governorate,
   city,
   address,
@@ -79,7 +79,7 @@ export function ShippingSection({
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 overflow-hidden">
         <ShippingField
           label="الشركة"
-          value={shippingCompany}
+          value={shippingCompanyName}
           icon={<LiaTruckSolid size={18} />}
         />
 

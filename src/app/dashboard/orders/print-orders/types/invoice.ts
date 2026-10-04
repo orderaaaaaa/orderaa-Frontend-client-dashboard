@@ -51,7 +51,8 @@ export interface InvoiceData {
   nonReceiptPenalty?: number;
   packagingNotes?: string | null;
   shippingNotes?: string | null;
-  shippingCompany?: string;
+  shippingCompanyName?: string;
+  shippingCompanyCode?: string | null;
   merchantName?: string;
   merchantGovernorate?: string;
   merchantCity?: string;

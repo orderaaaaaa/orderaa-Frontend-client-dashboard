@@ -18,10 +18,14 @@ import {
   locationOptionsErrorTextOf,
   locationSelectOptionsOf,
 } from '@/types/locationOptions';
+import {
+  shippingCompanyIdOf,
+  shippingCompanySelectOptionsOf,
+} from '@/lib/shippingCompanies';
 import { ShippingSectionProps } from './types';
 
 function ShippingSection({
-  shippingCompany,
+  shippingCompanyId,
   governorateOption,
   cityOption,
   shippingCost,
@@ -41,9 +45,10 @@ function ShippingSection({
     useShippingCompanies(true);
   const canReadCanonicalNames = useHasPermission(PERMISSION_CODES.CANONICAL_NAMES_READ);
 
-  const governoratesQuery = useLocationOptionGovernorates(shippingCompany || undefined);
+  const selectedCompanyId = shippingCompanyIdOf(shippingCompanyId);
+  const governoratesQuery = useLocationOptionGovernorates(selectedCompanyId);
   const citiesQuery = useLocationOptionCities(
-    shippingCompany || undefined,
+    selectedCompanyId,
     governorateOption || undefined
   );
   const noGovernorateList = governoratesQuery.data?.sourceHasRows === false;
@@ -79,26 +84,14 @@ function ShippingSection({
 
   const requiresReturnContent = ['PARTIAL_RETURN', 'EXCHANGE', 'RETURN'].includes(shippingType);
 
-  const shippingCompanyMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    shippingCompanies.forEach((company) => {
-      map[company.key] = company.label;
-    });
-    return map;
-  }, [shippingCompanies]);
-
-  const shippingCompanyReverseMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    shippingCompanies.forEach((company) => {
-      map[company.label] = company.key;
-    });
-    return map;
-  }, [shippingCompanies]);
-
   const shippingCompanyOptions = useMemo(
-    () => shippingCompanies.map((company) => company.label),
+    () => shippingCompanySelectOptionsOf(shippingCompanies),
     [shippingCompanies]
   );
+
+  const shippingCompanyDisplay = shippingCompanyOptions.find(
+    (option) => option.key === shippingCompanyId
+  )?.label;
 
   const governorateOptions = useMemo(
     () => locationSelectOptionsOf(governoratesQuery.data?.options ?? []),
@@ -110,9 +103,8 @@ function ShippingSection({
     [citiesQuery.data]
   );
 
-  const handleShippingCompanyChange = (label: string) => {
-    const key = shippingCompanyReverseMap[label] || '';
-    if (key === shippingCompany) return;
+  const handleShippingCompanyChange = (key: string) => {
+    if (key === shippingCompanyId) return;
     onShippingCompanyChange(key);
     onGovernorateOptionChange('');
     onCityOptionChange('');
@@ -130,24 +122,25 @@ function ShippingSection({
         <h1 className="font-bold text-[22px] mb-6">الشحن</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="flex flex-col gap-2" data-field-error="shippingCompany">
+          <div className="flex flex-col gap-2" data-field-error="shippingCompanyId">
             <label className="font-medium text-[16px]">
               شركة الشحن <span className="text-red-500">*</span>
             </label>
             <SearchableSelect
-              value={shippingCompany ? shippingCompanyMap[shippingCompany] || '' : ''}
+              value={shippingCompanyDisplay ? shippingCompanyId : ''}
+              displayValue={shippingCompanyDisplay}
               onValueChange={handleShippingCompanyChange}
               options={shippingCompanyOptions}
               placeholder="اختر شركة الشحن"
               searchPlaceholder="بحث عن شركة..."
               emptyMessage="لا توجد شركات متاحة"
               noResultsMessage="لا توجد نتائج للبحث"
-              triggerClassName={`w-full rounded-lg h-12 ${errors?.shippingCompany ? 'border-red-500' : 'border-[#CED4DA]'}`}
+              triggerClassName={`w-full rounded-lg h-12 ${errors?.shippingCompanyId ? 'border-red-500' : 'border-[#CED4DA]'}`}
               searchThreshold={5}
               loading={loadingShippingCompanies}
             />
-            {errors?.shippingCompany && (
-              <p className="text-red-500 text-sm">{errors.shippingCompany}</p>
+            {errors?.shippingCompanyId && (
+              <p className="text-red-500 text-sm">{errors.shippingCompanyId}</p>
             )}
           </div>
 
@@ -160,11 +153,11 @@ function ShippingSection({
               onValueChange={handleGovernorateChange}
               options={governorateOptions}
               placeholder={
-                !shippingCompany ? 'اختر شركة الشحن أولاً' : 'اختر المحافظة'
+                !selectedCompanyId ? 'اختر شركة الشحن أولاً' : 'اختر المحافظة'
               }
               searchPlaceholder="بحث عن محافظة..."
               emptyMessage={
-                !shippingCompany
+                !selectedCompanyId
                   ? 'اختر شركة الشحن أولاً'
                   : noGovernorateList
                     ? 'لا توجد قائمة محافظات لهذه الشركة بعد'
@@ -173,7 +166,7 @@ function ShippingSection({
               noResultsMessage="لا توجد نتائج للبحث"
               triggerClassName={`w-full rounded-lg h-12 ${errors?.governorateOption ? 'border-red-500' : 'border-[#CED4DA]'}`}
               loading={governoratesQuery.isLoading}
-              disabled={!shippingCompany || noGovernorateList || governoratesQuery.isError}
+              disabled={!selectedCompanyId || noGovernorateList || governoratesQuery.isError}
               searchThreshold={5}
             />
             {noGovernorateList && (
@@ -211,7 +204,7 @@ function ShippingSection({
               onValueChange={onCityOptionChange}
               options={cityOptions}
               placeholder={
-                !shippingCompany
+                !selectedCompanyId
                   ? 'اختر شركة الشحن أولاً'
                   : !governorateOption
                     ? 'اختر المحافظة أولاً'
@@ -219,7 +212,7 @@ function ShippingSection({
               }
               searchPlaceholder="بحث عن مدينة..."
               emptyMessage={
-                !shippingCompany
+                !selectedCompanyId
                   ? 'اختر شركة الشحن أولاً'
                   : !governorateOption
                     ? 'اختر المحافظة أولاً'
@@ -228,7 +221,7 @@ function ShippingSection({
               noResultsMessage="لا توجد نتائج للبحث"
               triggerClassName={`w-full rounded-lg h-12 ${errors?.cityOption ? 'border-red-500' : 'border-[#CED4DA]'}`}
               loading={citiesQuery.isLoading}
-              disabled={!shippingCompany || !governorateOption}
+              disabled={!selectedCompanyId || !governorateOption}
               searchThreshold={5}
             />
             {citiesQuery.isError && (

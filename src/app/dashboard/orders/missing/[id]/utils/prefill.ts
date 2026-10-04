@@ -49,7 +49,7 @@ export function buildMissingOrderPrefill(
       notes: row.notes ?? '',
     },
     shipping: {
-      shippingCompany: '',
+      shippingCompanyId: '',
       governorateOption: '',
       cityOption: '',
       shippingCost: '',
@@ -92,7 +92,7 @@ export function buildMissingOrderPrefill(
   const requiredPaths: { path: string; value: string }[] = [
     { path: 'customer.name', value: defaultValues.customer.name },
     { path: 'customer.address', value: defaultValues.customer.address },
-    { path: 'shipping.shippingCompany', value: defaultValues.shipping.shippingCompany },
+    { path: 'shipping.shippingCompanyId', value: defaultValues.shipping.shippingCompanyId },
     {
       path: 'shipping.governorateOption',
       value: defaultValues.shipping.governorateOption,

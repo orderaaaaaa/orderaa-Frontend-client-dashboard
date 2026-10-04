@@ -4,11 +4,8 @@ import { toast } from 'react-toastify';
 import { getOutOfStockBlock } from '@/utils/apiError';
 import { FilterOrdersDto, Order, OrderStatusItem } from '@/types/orders';
 import { ShippingData } from '@/components/OrderDetails/EditShippingModal';
-import {
-  locationSaveErrorTextOf,
-  shippingCompanyKeyOfOrder,
-  shippingCompanyPayloadOf,
-} from '@/types/locationOptions';
+import { locationSaveErrorTextOf } from '@/types/locationOptions';
+import { SHIPPING_COMPANY_REQUIRED_MESSAGE } from '@/types/shippingCompanies';
 import {
   useUpdateOrder,
   useGetNextOrderId,
@@ -137,6 +134,16 @@ export function useOrderActions({
       updateData: Partial<Order> | Record<string, any> = {},
       options: { skipToast?: boolean } = {}
     ): Promise<boolean> => {
+      if (
+        status === 'CONFIRMED' &&
+        (order.shippingCompanyId ?? null) === null &&
+        !('shippingCompanyId' in updateData && updateData.shippingCompanyId != null)
+      ) {
+        if (!options.skipToast) {
+          toast.error(SHIPPING_COMPANY_REQUIRED_MESSAGE);
+        }
+        throw new Error(SHIPPING_COMPANY_REQUIRED_MESSAGE);
+      }
       try {
         const updatedOrder = await updateOrderMutation.mutateAsync({
           orderId: order.id,
@@ -204,6 +211,7 @@ export function useOrderActions({
     },
     [
       order.id,
+      order.shippingCompanyId,
       onOrderUpdate,
       onNavigateToNextOrder,
       onNoOrdersFound,
@@ -522,8 +530,7 @@ export function useOrderActions({
         (data.governorateOption ?? null) !== (order.governorateOption ?? null) ||
         (data.cityOption ?? null) !== (order.cityOption ?? null);
       const companyChanged =
-        (data.shippingCompany || null) !==
-        (shippingCompanyKeyOfOrder(order.shippingCompany, order.shippingProviderId) || null);
+        (data.shippingCompanyId ?? null) !== (order.shippingCompanyId ?? null);
       const sendPick = (pickChanged || companyChanged) && !!data.governorateOption;
 
       try {
@@ -531,9 +538,7 @@ export function useOrderActions({
         const updatedOrder = await updateOrderMutation.mutateAsync({
           orderId: order.id,
           data: {
-            ...(companyChanged &&
-              data.shippingCompany &&
-              shippingCompanyPayloadOf(data.shippingCompany)),
+            ...(companyChanged && { shippingCompanyId: data.shippingCompanyId ?? null }),
             ...(sendPick && {
               governorateOption: data.governorateOption,
               ...(data.cityOption && { cityOption: data.cityOption }),
@@ -566,8 +571,7 @@ export function useOrderActions({
     },
     [
       order.id,
-      order.shippingCompany,
-      order.shippingProviderId,
+      order.shippingCompanyId,
       order.governorateOption,
       order.cityOption,
       onOrderUpdate,

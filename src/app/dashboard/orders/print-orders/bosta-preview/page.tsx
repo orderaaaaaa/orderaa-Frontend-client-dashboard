@@ -6,7 +6,8 @@ import { InvoiceData, InvoiceStoreInfo } from '../types/invoice';
 const mockData: InvoiceData = {
   orderCode: '58374407',
   shippingId: '58374407',
-  shippingCompany: 'BOSTA',
+  shippingCompanyName: 'بوسطة',
+  shippingCompanyCode: 'BOSTA',
   customer: {
     name: 'عمر أمين',
     governorate: 'القاهرة',

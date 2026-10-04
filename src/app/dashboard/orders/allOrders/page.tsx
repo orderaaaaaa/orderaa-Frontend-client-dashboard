@@ -40,6 +40,7 @@ import DateRangeFilter from '@/components/ui/DateRangeFilter';
 
 import { Scan, ScanLine, ArrowUp, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { shippingCompanyNameOf } from '@/lib/shippingCompanies';
 
 function AllOrdersContent() {
   const [select, setSelect] = useState(false);
@@ -528,7 +529,7 @@ function AllOrdersContent() {
                   order.governorate || order.externalGovernorate || 'غير محدد'
                 }
                 shippingId={order.shippingId}
-                shippingCompany={order.shippingCompany}
+                shippingCompanyName={shippingCompanyNameOf(order.shippingCompanyRef)}
                 productVariants={order.order_products.map((op) => mapOrderProductToVariantInfo(op))}
                 price={order.totalCost}
                 collectedAmount={order.collectedAmount}

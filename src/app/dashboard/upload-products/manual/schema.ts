@@ -19,7 +19,7 @@ export const manualOrderBaseSchema = z
       notes: z.string().optional(),
     }),
     shipping: z.object({
-      shippingCompany: z.string().min(1, 'يرجى اختيار شركة الشحن'),
+      shippingCompanyId: z.string().min(1, 'يرجى اختيار شركة الشحن'),
       governorateOption: z.string().min(1, 'يرجى اختيار المحافظة'),
       cityOption: z.string().min(1, 'يرجى اختيار المدينة'),
       shippingCost: z.string().optional(),

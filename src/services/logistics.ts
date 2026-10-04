@@ -53,20 +53,20 @@ let mockShippingCancellationNextId = 4;
 
 // ─── Governorate Logistics Config ────────────────────────────────────────────
 
-export const useGovernorateLogisticsConfig = (shippingCompany?: string) => {
+export const useGovernorateLogisticsConfig = (shippingCompanyId?: number) => {
   return useQuery({
     queryKey: [
       QUERY_KEYS.GOVERNORATE_LOGISTICS_CONFIG,
-      shippingCompany,
+      shippingCompanyId,
     ] as QueryKey,
     queryFn: async () => {
       const { data } = await http.get<GovernorateLogisticsConfig[]>(
         '/shipping/governorate-settings',
-        { params: { shippingCompany } }
+        { params: { shippingCompanyId } }
       );
       return data;
     },
-    enabled: !!shippingCompany,
+    enabled: !!shippingCompanyId,
   });
 };
 
@@ -80,12 +80,12 @@ export const useUpdateGovernorateLogisticsConfig = () => {
 
   return useMutation({
     mutationFn: async (payload: {
-      shippingCompany: string;
+      shippingCompanyId: number;
       rows: GovernorateLogisticsConfigRow[];
       confirmEmpty?: boolean;
     }) => {
       const { data } = await http.put<GovernorateLogisticsConfig[]>(
-        `/shipping/governorate-settings/${payload.shippingCompany}`,
+        `/shipping/governorate-settings/${payload.shippingCompanyId}`,
         { rows: payload.rows, confirmEmpty: payload.confirmEmpty }
       );
       return data;
@@ -94,7 +94,7 @@ export const useUpdateGovernorateLogisticsConfig = () => {
       queryClient.invalidateQueries({
         queryKey: [
           QUERY_KEYS.GOVERNORATE_LOGISTICS_CONFIG,
-          variables.shippingCompany,
+          variables.shippingCompanyId,
         ],
       });
       toast.success('تم حفظ إعدادات المحافظات بنجاح');

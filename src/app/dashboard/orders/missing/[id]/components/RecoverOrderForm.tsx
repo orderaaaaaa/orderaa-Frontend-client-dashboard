@@ -104,7 +104,7 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
         notes: data.customer.notes,
       },
       shipping: {
-        shippingCompany: data.shipping.shippingCompany,
+        shippingCompanyId: data.shipping.shippingCompanyId,
         governorateOption: data.shipping.governorateOption,
         cityOption: data.shipping.cityOption,
         shippingCost: data.shipping.shippingCost || '',
@@ -221,7 +221,7 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
         />
 
         <ShippingSection
-          shippingCompany={formValues.shipping.shippingCompany}
+          shippingCompanyId={formValues.shipping.shippingCompanyId}
           governorateOption={formValues.shipping.governorateOption}
           cityOption={formValues.shipping.cityOption}
           shippingCost={formValues.shipping.shippingCost || ''}
@@ -229,8 +229,8 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
           shippingType={formValues.shipping.shippingType}
           returnShipmentContent={formValues.shipping.returnShipmentContent || ''}
           onShippingCompanyChange={(v) => {
-            setValue('shipping.shippingCompany', v);
-            clearErrors('shipping.shippingCompany');
+            setValue('shipping.shippingCompanyId', v);
+            clearErrors('shipping.shippingCompanyId');
           }}
           onGovernorateOptionChange={(v) => {
             setValue('shipping.governorateOption', v);
@@ -257,7 +257,7 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
             clearErrors('shipping.returnShipmentContent');
           }}
           errors={{
-            shippingCompany: errors.shipping?.shippingCompany?.message,
+            shippingCompanyId: errors.shipping?.shippingCompanyId?.message,
             governorateOption: errors.shipping?.governorateOption?.message,
             cityOption: errors.shipping?.cityOption?.message,
             shippingCost: errors.shipping?.shippingCost?.message,

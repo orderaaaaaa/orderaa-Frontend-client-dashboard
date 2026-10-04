@@ -1,5 +1,6 @@
 import http from './http';
 import type { LocationOptionsResponse } from '@/types/locationOptions';
+import type { ShippingCompanyRef } from '@/types/shippingCompanies';
 
 export async function getCategories() {
   const { data } = await http.get('/lookups/categories');
@@ -30,23 +31,23 @@ export async function getPaymentMethods() {
 }
 
 export async function getShippingCompanies() {
-  const { data } = await http.get('/lookups/shipping-companies');
+  const { data } = await http.get<ShippingCompanyRef[]>('/lookups/shipping-companies');
   return data;
 }
 
-export async function getLocationOptionGovernorates(provider: string) {
+export async function getLocationOptionGovernorates(shippingCompanyId: number) {
   const { data } = await http.get<LocationOptionsResponse>(
-    `/shipping-locations/${encodeURIComponent(provider)}/location-options/governorates`
+    `/shipping-locations/${shippingCompanyId}/location-options/governorates`
   );
   return data;
 }
 
 export async function getLocationOptionCities(
-  provider: string,
+  shippingCompanyId: number,
   governorateOption: string
 ) {
   const { data } = await http.get<LocationOptionsResponse>(
-    `/shipping-locations/${encodeURIComponent(provider)}/location-options/governorates/${encodeURIComponent(governorateOption)}/cities`
+    `/shipping-locations/${shippingCompanyId}/location-options/governorates/${encodeURIComponent(governorateOption)}/cities`
   );
   return data;
 }
