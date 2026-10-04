@@ -9,6 +9,7 @@ import Input from '@/components/ui/Input';
 import PageLoading from '@/components/ui/page-loading';
 import {
   useCarrierStatsQuery,
+  useShippingProvidersQuery,
   useUpdateShippingProvider,
 } from '@/services/shippingProviders';
 import type { CarrierStats } from '@/types/shippingProviders';
@@ -32,7 +33,7 @@ export function ShippingProvidersContent() {
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('ALL');
   const [showInactive, setShowInactive] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const range = useMemo(
     () => ({ from: from || undefined, to: to || undefined }),
@@ -40,6 +41,7 @@ export function ShippingProvidersContent() {
   );
 
   const { data: carriers = [], isLoading } = useCarrierStatsQuery(range);
+  const { data: providers = [] } = useShippingProvidersQuery();
   const { mutate: updateProvider } = useUpdateShippingProvider();
 
   const visible = carriers.filter((c) => {
@@ -50,11 +52,14 @@ export function ShippingProvidersContent() {
     return true;
   });
 
-  const selected = carriers.find((c) => c.key === selectedKey) ?? null;
+  const selected = carriers.find((c) => c.shippingCompanyId === selectedId) ?? null;
 
   const retire = (carrier: CarrierStats, isActive: boolean) => {
-    const id = Number(carrier.key.split(':')[1]);
-    updateProvider({ id, isActive });
+    const provider = providers.find(
+      (p) => p.shippingCompanyId === carrier.shippingCompanyId,
+    );
+    if (!provider) return;
+    updateProvider({ id: provider.id, isActive });
   };
 
   const goToInProcess = (carrier: CarrierStats) => {
@@ -63,7 +68,7 @@ export function ShippingProvidersContent() {
     if (to) query.set('to', to);
     const qs = query.toString();
     router.push(
-      `/dashboard/shipping-providers/${encodeURIComponent(carrier.key)}/in-process${qs ? `?${qs}` : ''}`,
+      `/dashboard/shipping-providers/${carrier.shippingCompanyId}/in-process${qs ? `?${qs}` : ''}`,
     );
   };
 
@@ -142,21 +147,23 @@ export function ShippingProvidersContent() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {visible.map((carrier) => {
               const finished = carrier.deliveredCount + carrier.returnedCount;
-              const isProvider = carrier.key.startsWith('provider:');
+              const isProvider = carrier.kind !== 'INTEGRATION';
 
               return (
                 <div
-                  key={carrier.key}
+                  key={carrier.shippingCompanyId}
                   className={clsx(
                     'border rounded-xl p-4 flex flex-col gap-3 bg-white transition-colors cursor-pointer',
-                    selectedKey === carrier.key
+                    selectedId === carrier.shippingCompanyId
                       ? 'border-primary'
                       : 'border-gray-200 hover:border-primary/40',
                     !carrier.isActive && 'opacity-60',
                   )}
                   onClick={() =>
-                    setSelectedKey(
-                      selectedKey === carrier.key ? null : carrier.key,
+                    setSelectedId(
+                      selectedId === carrier.shippingCompanyId
+                        ? null
+                        : carrier.shippingCompanyId,
                     )
                   }
                 >
@@ -213,8 +220,6 @@ export function ShippingProvidersContent() {
                     />
                   </div>
 
-                  {/* Integrated carriers come from the enum, not the table, so
-                      they cannot be edited or retired. */}
                   {isProvider && (
                     <button
                       type="button"
@@ -250,7 +255,7 @@ export function ShippingProvidersContent() {
           <CarrierDetail
             carrier={selected}
             range={range}
-            onClose={() => setSelectedKey(null)}
+            onClose={() => setSelectedId(null)}
           />
         )}
       </div>

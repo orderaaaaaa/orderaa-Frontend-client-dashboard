@@ -27,7 +27,7 @@ export function CarrierDetail({ carrier, range, onClose }: CarrierDetailProps) {
 
   const { data: locations = [], isLoading: loadingLocations } =
     useCarrierLocationStatsQuery(
-      carrier.key,
+      carrier.shippingCompanyId,
       tab === 'governorates' ? 'governorates' : 'regions',
       range,
     );

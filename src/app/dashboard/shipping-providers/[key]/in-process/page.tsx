@@ -3,6 +3,7 @@
 import { Suspense } from 'react';
 import { useParams } from 'next/navigation';
 import PageLoading from '@/components/ui/page-loading';
+import { shippingCompanyIdOf } from '@/lib/shippingCompanies';
 import { InProcessShipmentsContent } from '../../components/InProcessShipmentsContent';
 
 function InProcessShipmentsLoading() {
@@ -15,9 +16,12 @@ function InProcessShipmentsLoading() {
 
 function InProcessShipmentsPage() {
   const { key } = useParams<{ key: string }>();
-  const carrierKey = decodeURIComponent(key);
 
-  return <InProcessShipmentsContent carrierKey={carrierKey} />;
+  return (
+    <InProcessShipmentsContent
+      shippingCompanyId={shippingCompanyIdOf(decodeURIComponent(key)) ?? undefined}
+    />
+  );
 }
 
 export default function Page() {

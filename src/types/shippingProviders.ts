@@ -1,22 +1,25 @@
+import type {
+  ShippingCompanyKind,
+  ShippingImplementation,
+} from '@/types/shippingCompanies';
+
 /** Mirrors the backend shipping-provider DTOs (T16). */
 
 export type ShippingProviderType = 'COMPANY' | 'DELEGATE';
 
 export interface ShippingProvider {
   id: number;
+  shippingCompanyId: number;
   type: ShippingProviderType;
   name: string;
   phone: string | null;
   isActive: boolean;
 }
 
-/**
- * A row covers both key spaces: a merchant-defined provider (`provider:12`)
- * and an integrated carrier (`company:BOSTA`). Integrated carriers come from
- * the enum, not the table, so they have no phone and no type.
- */
 export interface CarrierStats {
-  key: string;
+  shippingCompanyId: number;
+  kind: ShippingCompanyKind;
+  implementation: ShippingImplementation;
   type: ShippingProviderType | null;
   name: string;
   phone: string | null;

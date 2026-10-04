@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import http from '@/lib/api/http';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { getApiErrorMessage } from '@/utils/apiError';
 import type {
   CarrierStats,
@@ -45,26 +46,25 @@ export const useCarrierStatsQuery = (range: StatsRange) =>
     },
   });
 
-/** `carrierKey` is `provider:<id>` or `company:<SHIPPING_COMPANY>`. */
 export const useCarrierLocationStatsQuery = (
-  carrierKey: string | undefined,
+  shippingCompanyId: number | undefined,
   scope: 'governorates' | 'regions',
   range: StatsRange,
 ) =>
   useQuery({
-    queryKey: [KEY, carrierKey, scope, range],
+    queryKey: [KEY, shippingCompanyId, scope, range],
     queryFn: async () => {
       const { data } = await http.get<LocationStats[]>(
-        `${BASE}/${encodeURIComponent(carrierKey!)}/stats/${scope}`,
+        `${BASE}/${shippingCompanyId}/stats/${scope}`,
         { params: range },
       );
       return data;
     },
-    enabled: !!carrierKey,
+    enabled: !!shippingCompanyId,
   });
 
 export const useCarrierShipmentsQuery = (
-  carrierKey: string | undefined,
+  shippingCompanyId: number | undefined,
   params: StatsRange & {
     status: ShipmentStatusFilter;
     page: number;
@@ -72,15 +72,15 @@ export const useCarrierShipmentsQuery = (
   },
 ) =>
   useQuery({
-    queryKey: [KEY, carrierKey, 'shipments', params],
+    queryKey: [KEY, shippingCompanyId, 'shipments', params],
     queryFn: async () => {
       const { data } = await http.get<ProviderShipmentsPage>(
-        `${BASE}/${encodeURIComponent(carrierKey!)}/shipments`,
+        `${BASE}/${shippingCompanyId}/shipments`,
         { params },
       );
       return data;
     },
-    enabled: !!carrierKey,
+    enabled: !!shippingCompanyId,
     placeholderData: keepPreviousData,
   });
 
@@ -98,6 +98,7 @@ export const useCreateShippingProvider = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [KEY] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SHIPPING_COMPANIES] });
       toast.success('تمت إضافة جهة الشحن بنجاح');
     },
     onError: (err: unknown) => {
@@ -126,6 +127,7 @@ export const useUpdateShippingProvider = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [KEY] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SHIPPING_COMPANIES] });
       toast.success('تم حفظ التعديل');
     },
     onError: (err: unknown) => {

@@ -17,11 +17,11 @@ const MIN_PAGE_SIZE = 1;
 const MAX_PAGE_SIZE = 100;
 
 interface InProcessShipmentsContentProps {
-  carrierKey: string;
+  shippingCompanyId: number | undefined;
 }
 
 export function InProcessShipmentsContent({
-  carrierKey,
+  shippingCompanyId,
 }: InProcessShipmentsContentProps) {
   const searchParams = useSearchParams();
   const from = searchParams.get('from') || undefined;
@@ -31,7 +31,7 @@ export function InProcessShipmentsContent({
   const [limit, setLimit] = useState(25);
 
   const { data: carriers = [] } = useCarrierStatsQuery({ from, to });
-  const carrier = carriers.find((c) => c.key === carrierKey);
+  const carrier = carriers.find((c) => c.shippingCompanyId === shippingCompanyId);
 
   const {
     data: shipmentsPage,
@@ -39,7 +39,7 @@ export function InProcessShipmentsContent({
     isError,
     isSuccess,
     refetch,
-  } = useCarrierShipmentsQuery(carrierKey, {
+  } = useCarrierShipmentsQuery(shippingCompanyId, {
     from,
     to,
     status: 'IN_PROCESS',
@@ -69,7 +69,7 @@ export function InProcessShipmentsContent({
           </Link>
           <div>
             <h1 className="text-lg sm:text-xl font-bold text-gray-900">
-              الشحنات الحالية - {carrier ? carrier.name : carrierKey}
+              الشحنات الحالية - {carrier?.name ?? ''}
             </h1>
             <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
               طلبات لدى جهة الشحن لم تُسلَّم ولم تُرتجع بعد
