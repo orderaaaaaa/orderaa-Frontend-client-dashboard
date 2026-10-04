@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { shippingApi } from '../api/shippingApi';
 import { ShippingConfig } from '../types/shipping';
 
@@ -28,6 +29,7 @@ export const useShippingQuery = (providerId?: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shipping-configs'] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SHIPPING_COMPANIES] });
     },
   });
 
@@ -43,6 +45,7 @@ export const useShippingQuery = (providerId?: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shipping-configs'] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SHIPPING_COMPANIES] });
     },
   });
 
