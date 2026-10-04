@@ -35,19 +35,25 @@ export async function getShippingCompanies() {
   return data;
 }
 
-export async function getLocationOptionGovernorates(shippingCompanyId: number) {
+export async function getLocationOptionGovernorates(
+  shippingCompanyId: number,
+  orderId?: number
+) {
   const { data } = await http.get<LocationOptionsResponse>(
-    `/shipping-locations/${shippingCompanyId}/location-options/governorates`
+    `/shipping-locations/${shippingCompanyId}/location-options/governorates`,
+    { params: orderId !== undefined ? { orderId } : undefined }
   );
   return data;
 }
 
 export async function getLocationOptionCities(
   shippingCompanyId: number,
-  governorateOption: string
+  governorateOption: string,
+  orderId?: number
 ) {
   const { data } = await http.get<LocationOptionsResponse>(
-    `/shipping-locations/${shippingCompanyId}/location-options/governorates/${encodeURIComponent(governorateOption)}/cities`
+    `/shipping-locations/${shippingCompanyId}/location-options/governorates/${encodeURIComponent(governorateOption)}/cities`,
+    { params: orderId !== undefined ? { orderId } : undefined }
   );
   return data;
 }

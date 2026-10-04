@@ -29,6 +29,7 @@ interface EditShippingModalProps {
   onSave: (data: ShippingData) => Promise<void>;
   initialData: ShippingData;
   requireCompany?: boolean;
+  orderId?: number;
 }
 
 export interface ShippingData {
@@ -129,6 +130,7 @@ export default function EditShippingModal({
   onSave,
   initialData,
   requireCompany = false,
+  orderId,
 }: EditShippingModalProps) {
   const [formData, setFormData] = useState<ShippingData>(initialData);
 
@@ -150,11 +152,13 @@ export default function EditShippingModal({
   const selectedShippingCompanyId = formData.shippingCompanyId ?? null;
   const selectedGovernorateOption = formData.governorateOption || undefined;
   const governoratesQuery = useLocationOptionGovernorates(
-    isOpen ? selectedShippingCompanyId : null
+    isOpen ? selectedShippingCompanyId : null,
+    orderId
   );
   const citiesQuery = useLocationOptionCities(
     isOpen ? selectedShippingCompanyId : null,
-    selectedGovernorateOption
+    selectedGovernorateOption,
+    orderId
   );
   const loadingGovernorates = governoratesQuery.isLoading;
   const loadingCities = citiesQuery.isLoading;

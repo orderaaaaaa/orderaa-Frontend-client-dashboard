@@ -154,6 +154,7 @@ export function OrderActionModals({
         onClose={modals.shipping.close}
         onSave={handleShippingSave}
         requireCompany={order.status === 'CONFIRMED'}
+        orderId={order.id}
         initialData={{
           shippingCompanyId: order.shippingCompanyId ?? null,
           shippingCompanyName: order.shippingCompanyRef?.name,
