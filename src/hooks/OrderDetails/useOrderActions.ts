@@ -255,7 +255,13 @@ export function useOrderActions({
         });
 
         if (onOrderUpdate) {
-          onOrderUpdate(updatedOrder);
+          onOrderUpdate({
+            ...updatedOrder,
+            shippingCompanyRef:
+              updatedOrder.shippingCompanyRef === undefined
+                ? order.shippingCompanyRef
+                : updatedOrder.shippingCompanyRef,
+          });
         }
 
         if (onUnlockRef.current) {
@@ -312,6 +318,7 @@ export function useOrderActions({
     },
     [
       order.id,
+      order.shippingCompanyRef,
       onOrderUpdate,
       onNavigateToNextOrder,
       onNoOrdersFound,

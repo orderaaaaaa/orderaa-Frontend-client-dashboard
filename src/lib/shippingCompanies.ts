@@ -44,10 +44,15 @@ export const shippingCompanyIdOf = (key: string | null | undefined) => {
 };
 
 export const shippingIdCompanyNameOf = (
-  entry: { shippingCompanyId?: number | null; shippingCompany?: string | null },
+  entry: {
+    shippingCompanyId?: number | null;
+    shippingCompany?: string | null;
+    shippingCompanyRef?: ShippingCompanyRef | null;
+  },
   orderCompany: ShippingCompanyRef | null | undefined,
   companies: Pick<ShippingCompanyRef, 'id' | 'name'>[]
 ) => {
+  if (entry.shippingCompanyRef) return entry.shippingCompanyRef.name;
   const id = entry.shippingCompanyId ?? null;
   if (id !== null && orderCompany?.id === id) return orderCompany.name;
   const listed = id !== null ? companies.find((company) => company.id === id) : undefined;

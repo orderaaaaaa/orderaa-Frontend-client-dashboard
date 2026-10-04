@@ -17,7 +17,7 @@ const MIN_PAGE_SIZE = 1;
 const MAX_PAGE_SIZE = 100;
 
 interface InProcessShipmentsContentProps {
-  shippingCompanyId: number | undefined;
+  shippingCompanyId: number;
 }
 
 export function InProcessShipmentsContent({

@@ -2,7 +2,8 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useAuthStore } from '@/store/authStore';
 
 interface QueryProviderProps {
   children: React.ReactNode;
@@ -23,6 +24,16 @@ export default function QueryProvider({ children }: QueryProviderProps) {
           },
         },
       })
+  );
+
+  useEffect(
+    () =>
+      useAuthStore.subscribe((state, previous) => {
+        if (previous.token !== null && state.token !== previous.token) {
+          queryClient.clear();
+        }
+      }),
+    [queryClient]
   );
 
   return (

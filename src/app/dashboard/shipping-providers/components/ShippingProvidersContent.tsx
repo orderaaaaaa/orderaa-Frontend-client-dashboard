@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import clsx from 'clsx';
+import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import { LiaPlusSolid, LiaTruckSolid, LiaUserSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
@@ -41,7 +42,7 @@ export function ShippingProvidersContent() {
   );
 
   const { data: carriers = [], isLoading } = useCarrierStatsQuery(range);
-  const { data: providers = [] } = useShippingProvidersQuery();
+  const { data: providers, isSuccess: providersReady } = useShippingProvidersQuery();
   const { mutate: updateProvider } = useUpdateShippingProvider();
 
   const visible = carriers.filter((c) => {
@@ -55,10 +56,13 @@ export function ShippingProvidersContent() {
   const selected = carriers.find((c) => c.shippingCompanyId === selectedId) ?? null;
 
   const retire = (carrier: CarrierStats, isActive: boolean) => {
-    const provider = providers.find(
+    const provider = providers?.find(
       (p) => p.shippingCompanyId === carrier.shippingCompanyId,
     );
-    if (!provider) return;
+    if (!provider) {
+      toast.error('تعذر العثور على جهة الشحن، أعد تحميل الصفحة وحاول مرة أخرى');
+      return;
+    }
     updateProvider({ id: provider.id, isActive });
   };
 
@@ -223,7 +227,8 @@ export function ShippingProvidersContent() {
                   {isProvider && (
                     <button
                       type="button"
-                      className="self-start text-xs text-gray-500 hover:text-red-600 hover:underline"
+                      className="self-start text-xs text-gray-500 hover:text-red-600 hover:underline disabled:opacity-50 disabled:pointer-events-none"
+                      disabled={!providersReady}
                       onClick={(e) => {
                         e.stopPropagation();
                         retire(carrier, !carrier.isActive);

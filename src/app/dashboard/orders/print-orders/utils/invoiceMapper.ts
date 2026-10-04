@@ -1,5 +1,6 @@
 import { Order, OrderStatus, mapOrderProductToVariantInfo } from '@/types/orders';
 import { InvoiceData, InvoiceLanguage, InvoiceProduct } from '../types/invoice';
+import { integrationLabelOf } from '@/lib/shippingCompanies';
 
 export function mapOrderToInvoice(
   order: Order,
@@ -22,7 +23,14 @@ export function mapOrderToInvoice(
 
   const activeShipping = order.shipping_ids?.find((s) => s.isActive) ?? order.shipping_ids?.[0];
   const resolvedShippingId = order.shippingId || activeShipping?.shippingId || undefined;
-  const resolvedShippingCompany = order.shippingCompanyRef?.name || undefined;
+  const resolvedShippingCompanyCode =
+    order.shippingCompanyRef === undefined
+      ? (integrationLabelOf(order.shippingCompany) ? order.shippingCompany : null)
+      : (order.shippingCompanyRef?.code ?? null);
+  const resolvedShippingCompany =
+    order.shippingCompanyRef === undefined
+      ? integrationLabelOf(order.shippingCompany)
+      : order.shippingCompanyRef?.name || undefined;
 
   return {
     orderCode: order.code || `ORD-${order.id}`,
@@ -49,7 +57,7 @@ export function mapOrderToInvoice(
     packagingNotes: order.packagingNotes,
     shippingNotes: order.notes,
     shippingCompanyName: resolvedShippingCompany,
-    shippingCompanyCode: order.shippingCompanyRef?.code ?? null,
+    shippingCompanyCode: resolvedShippingCompanyCode,
     merchantName: order.merchants?.merchantName,
     merchantGovernorate: order.merchants?.governorate,
     merchantCity: order.merchants?.city,
