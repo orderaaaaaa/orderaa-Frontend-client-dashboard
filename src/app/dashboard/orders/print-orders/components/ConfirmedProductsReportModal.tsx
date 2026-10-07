@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as XLSX from 'xlsx';
 import { toast } from 'react-toastify';
 import { LiaFileExcelSolid, LiaFilePdfSolid, LiaCheckCircleSolid } from 'react-icons/lia';
@@ -220,7 +220,7 @@ export function ConfirmedProductsReportModal({
   const checkMutation = usePackagingInventoryCheckMutation();
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
 
-  const items = data?.items ?? [];
+  const items = useMemo(() => data?.items ?? [], [data]);
 
   useEffect(() => {
     if (!isOpen) {
