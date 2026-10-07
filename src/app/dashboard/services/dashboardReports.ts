@@ -135,8 +135,7 @@ export const usePackagingInventoryQuery = (status: string, enabled = true) => {
     queryKey: [QUERY_KEYS.PACKAGING_INVENTORY, status] as QueryKey,
     queryFn: async () => {
       const response = await http.get<PackagingInventoryResponse>(
-        '/packaging-inventory',
-        { params: { status } },
+        `/packaging-inventory/${status}`,
       );
       return response.data;
     },
