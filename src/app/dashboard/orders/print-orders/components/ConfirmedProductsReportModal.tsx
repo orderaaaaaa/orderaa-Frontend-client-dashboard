@@ -23,7 +23,15 @@ interface ConfirmedProductsReportModalProps {
 }
 
 function getItemKey(item: PackagingInventoryItem): string {
-  return `${item.productId}-${item.variants.map((v) => v.value).join('-')}`;
+  return `${item.productId}::${item.variants.map((v) => `${v.name}:${v.optionName}`).join(':')}`;
+}
+
+function getVariantLabel(item: PackagingInventoryItem): string {
+  return item.variants.map((v) => v.optionName).join(' - ') || '-';
+}
+
+function getRemainingCount(item: PackagingInventoryItem): number {
+  return item.rows.find((r) => r.type === 'remaining')?.count ?? 0;
 }
 
 function exportToExcel(rows: PackagingInventoryItem[], warehouseName: string) {
@@ -35,7 +43,7 @@ function exportToExcel(rows: PackagingInventoryItem[], warehouseName: string) {
   const excelData = rows.map((row) => ({
     'المخزن': warehouseName,
     'الكمية': row.totalCount,
-    'المتغير': row.variants.map((v) => v.value).join(' - ') || '-',
+    'المتغير': getVariantLabel(row),
     'المنتج': row.productName,
   }));
 
@@ -62,7 +70,7 @@ function handleExportToPDF(rows: PackagingInventoryItem[], warehouseName: string
     rows: rows.map((row) => [
       warehouseName,
       String(row.totalCount),
-      row.variants.map((v) => v.value).join(' - ') || '-',
+      getVariantLabel(row),
       row.productName,
     ]),
     fileName: `تقرير_المنتجات_المؤكدة_${warehouseName}`,
@@ -84,13 +92,13 @@ function WarehouseTab({
   onToggle: (item: PackagingInventoryItem) => void;
   onToggleAll: (checked: boolean) => void;
 }) {
-  const allKeys = rows.map(getItemKey);
+  const allKeys = rows.filter((row) => getRemainingCount(row) > 0).map(getItemKey);
   const allChecked = allKeys.length > 0 && allKeys.every((k) => selectedKeys.has(k));
   const someChecked = allKeys.some((k) => selectedKeys.has(k));
 
   const columns: DataTableColumn<PackagingInventoryItem>[] = [
     {
-      key: 'checkedCount',
+      key: 'select',
       header: '',
       className: 'text-center w-16',
       headerClassName: '[&>div]:justify-center',
@@ -101,6 +109,7 @@ function WarehouseTab({
           <div className="flex justify-center">
             <Checkbox
               checked={selectedKeys.has(key)}
+              disabled={getRemainingCount(item) === 0}
               onCheckedChange={() => onToggle(item)}
             />
           </div>
@@ -130,7 +139,7 @@ function WarehouseTab({
         const item = row as unknown as PackagingInventoryItem;
         return (
           <span className="break-words whitespace-normal leading-snug inline-block">
-            {item.variants.map((v) => v.value).join(' - ') || '-'}
+            {getVariantLabel(item)}
           </span>
         );
       },
@@ -236,7 +245,7 @@ export function ConfirmedProductsReportModal({
     (checked: boolean) => {
       setSelectedKeys(() => {
         if (!checked) return new Set();
-        return new Set(items.map(getItemKey));
+        return new Set(items.filter((item) => getRemainingCount(item) > 0).map(getItemKey));
       });
     },
     [items],
@@ -247,14 +256,16 @@ export function ConfirmedProductsReportModal({
     const itemsByKey = new Map(items.map((item) => [getItemKey(item), item]));
     const selectedItems = Array.from(selectedKeys)
       .map((key) => itemsByKey.get(key))
-      .filter((item): item is PackagingInventoryItem => !!item);
+      .filter((item): item is PackagingInventoryItem => !!item && getRemainingCount(item) > 0);
+    if (selectedItems.length === 0) return;
 
     try {
       await checkMutation.mutateAsync({
         status,
         items: selectedItems.map((item) => ({
           productId: item.productId,
-          variants: item.variants,
+          variants: item.variants.map(({ name, optionName }) => ({ name, optionName })),
+          count: getRemainingCount(item),
         })),
       });
       toast.success(`تم تأكيد ${selectedItems.length} منتج`);

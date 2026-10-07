@@ -145,7 +145,8 @@ export const usePackagingInventoryQuery = (status: string, enabled = true) => {
 
 export interface PackagingInventoryCheckItem {
   productId: number;
-  variants: { label: string; value: string }[];
+  variants: { name: string; optionName: string }[];
+  count: number;
 }
 
 export interface PackagingInventoryCheckPayload {

@@ -126,14 +126,22 @@ export interface EmployeeStatusResponse {
   }[];
 }
 
+export interface PackagingInventoryVariant {
+  name: string;
+  optionName: string;
+}
+
+export type PackagingInventoryRow =
+  | { type: 'checked'; id: number; count: number; createdAt: string }
+  | { type: 'remaining'; count: number };
+
 export interface PackagingInventoryItem {
   [key: string]: unknown;
   productId: number;
   productName: string;
-  variants: { label: string; value: string }[];
+  variants: PackagingInventoryVariant[];
   totalCount: number;
-  checkedCount: number;
-  uncheckedCount: number;
+  rows: PackagingInventoryRow[];
 }
 
 export interface PackagingInventoryResponse {
