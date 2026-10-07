@@ -27,6 +27,7 @@ import AddVariantsStep, { InvoiceProductRow } from './AddVariantsStep';
 import { SelectedVariant } from '../types';
 import { formatDate } from '../../utils';
 import type { ApproveSupplierInvoiceVariantDto } from '@/lib/api/suppliers';
+import { WAREHOUSES_PAGE_ENABLED } from '@/constants/warehouses';
 
 type ReceivedLineRow = InvoiceProductRow & Record<string, unknown>;
 
@@ -354,13 +355,18 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
               rule no longer stops this receipt from being confirmed. */}
           {!rulesLoading && !hasGlobalInboundRule && !warehouseId && (
             <p className="rounded-md border border-amber-200 bg-amber-50 p-2 text-xs leading-5 text-amber-900">
-              {t('receipts.noInboundWarning')}{' '}
-              <Link
-                href="/dashboard/inventory/warehouses?tab=workflows"
-                className="font-semibold underline"
-              >
-                {t('stockRules.inbound.title')}
-              </Link>
+              {t('receipts.noInboundWarning')}
+              {WAREHOUSES_PAGE_ENABLED && (
+                <>
+                  {' '}
+                  <Link
+                    href="/dashboard/inventory/warehouses?tab=workflows"
+                    className="font-semibold underline"
+                  >
+                    {t('stockRules.inbound.title')}
+                  </Link>
+                </>
+              )}
             </p>
           )}
         </div>

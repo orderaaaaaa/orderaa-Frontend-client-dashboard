@@ -52,6 +52,7 @@ import {
 import { IconType } from 'react-icons';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
 import { PERMISSION_CODES, type PermissionCode } from '@/lib/permissions';
+import { WAREHOUSES_PAGE_ENABLED } from '@/constants/warehouses';
 
 export type NavigationItem = {
   name: string;
@@ -319,11 +320,15 @@ export const navigation: NavigationItem[] = [
     href: '/dashboard/inventory',
     icon: LiaBoxesSolid,
     children: [
-      {
-        name: 'إدارة المخازن',
-        href: '/dashboard/inventory/warehouses',
-        icon: LiaWarehouseSolid,
-      },
+      ...(WAREHOUSES_PAGE_ENABLED
+        ? [
+          {
+            name: 'إدارة المخازن',
+            href: '/dashboard/inventory/warehouses',
+            icon: LiaWarehouseSolid,
+          },
+        ]
+        : []),
       {
         name: 'ادارة المخزن',
         href: '/dashboard/inventory/stock-management',
