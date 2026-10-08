@@ -38,6 +38,7 @@ export interface SelectedProduct {
   quantity: number;
   selectedVariants: SelectedVariantValue[];
   attributeOptionIds: number[];
+  sourceIndex?: number;
 }
 
 interface ProductDropdownState {

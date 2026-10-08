@@ -20,6 +20,15 @@ export const platforms: IntegrationPlatform[] = [
     isActive: true,
   },
   {
+    id: 'lightfunnels',
+    name: 'Lightfunnels',
+    providerKey: 'LIGHTFUNNELS',
+    logo: '/integrations/lightfunnels.svg',
+    description: 'ربط متجرك بمنصة Lightfunnels',
+    buttonText: 'إنشاء ربط جديد',
+    isActive: true,
+  },
+  {
     id: 'wordpress',
     name: 'WordPress',
     logo: '/integrations/wordpress.svg',

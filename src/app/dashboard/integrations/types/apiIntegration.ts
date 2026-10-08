@@ -1,6 +1,7 @@
 export enum IntegrationProvider {
   EASY_ORDERS = 'EASY_ORDERS',
   SHOPIFY = 'SHOPIFY',
+  LIGHTFUNNELS = 'LIGHTFUNNELS',
 }
 
 export enum IntegrationConfigType {

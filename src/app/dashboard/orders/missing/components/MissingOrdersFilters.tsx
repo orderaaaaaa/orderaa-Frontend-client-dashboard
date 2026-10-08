@@ -5,15 +5,18 @@ import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import { calculateDateRangeFromPeriod, type TimePeriod } from '@/utils/dateRangeUtils';
 import { MISSING_ORDER_SOURCE_OPTIONS, MISSING_ORDER_STATUS_FILTER_TABS } from '@/constants/missingOrders';
-import type { MissingOrderStatusFilter } from '@/types/missing-orders';
+import type {
+  MissingOrderSourceFormat,
+  MissingOrderStatusFilter,
+} from '@/types/missing-orders';
 
 const SOURCE_LABEL_ALL = 'الكل';
 
 interface MissingOrdersFiltersProps {
   status: MissingOrderStatusFilter;
   onStatusChange: (status: MissingOrderStatusFilter) => void;
-  format: 'EASYORDER' | 'SHOPIFY' | undefined;
-  onFormatChange: (format: 'EASYORDER' | 'SHOPIFY' | undefined) => void;
+  format: MissingOrderSourceFormat | undefined;
+  onFormatChange: (format: MissingOrderSourceFormat | undefined) => void;
   fromDate: Date | null;
   toDate: Date | null;
   onFromDateChange: (date: Date | null) => void;

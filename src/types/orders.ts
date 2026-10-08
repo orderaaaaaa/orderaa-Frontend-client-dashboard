@@ -160,6 +160,8 @@ export enum ShippingType {
 export enum OrderFormat {
   APP = 'APP',
   EASYORDER = 'EASYORDER',
+  SHOPIFY = 'SHOPIFY',
+  LIGHTFUNNELS = 'LIGHTFUNNELS',
 }
 
 // Customer Interface
