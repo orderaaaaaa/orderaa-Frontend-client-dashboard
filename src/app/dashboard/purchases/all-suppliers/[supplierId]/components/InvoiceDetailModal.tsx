@@ -72,10 +72,8 @@ export default function InvoiceDetailModal({
     [invoice.products],
   );
 
-  const grandTotal = useMemo(
-    () => invoice.products.reduce((sum, item) => sum + item.quantity * item.price, 0),
-    [invoice.products],
-  );
+  const grandTotal = invoice.totalAmount;
+  const isPayment = invoice.type === 'PAID';
 
   return (
     <BaseModal
@@ -110,17 +108,19 @@ export default function InvoiceDetailModal({
           </div>
         </div>
 
-        <div>
-          <h3 className="text-base font-bold text-gray-800 mb-3">
-            الاصناف المشتريات
-          </h3>
-          <DataTable
-            columns={columns}
-            data={invoice.products as (SupplierInvoiceItem & Record<string, unknown>)[]}
-            keyField="id"
-            emptyMessage="لا توجد اصناف"
-          />
-        </div>
+        {!isPayment && (
+          <div>
+            <h3 className="text-base font-bold text-gray-800 mb-3">
+              الاصناف المشتريات
+            </h3>
+            <DataTable
+              columns={columns}
+              data={invoice.products as (SupplierInvoiceItem & Record<string, unknown>)[]}
+              keyField="id"
+              emptyMessage="لا توجد اصناف"
+            />
+          </div>
+        )}
 
         {invoice.images?.length > 0 && (
           <div>
@@ -151,17 +151,19 @@ export default function InvoiceDetailModal({
         )}
 
         <div className="flex flex-col gap-3 border-t border-gray-200 pt-4">
+          {!isPayment && (
+            <div className="flex items-center justify-between bg-secondary p-3 rounded-lg">
+              <span className="text-base font-bold text-gray-800">
+                إجمالي عدد القطع
+              </span>
+              <span className="text-base font-bold text-gray-800">
+                {totalQuantity} قطعة
+              </span>
+            </div>
+          )}
           <div className="flex items-center justify-between bg-secondary p-3 rounded-lg">
             <span className="text-base font-bold text-gray-800">
-              إجمالي عدد القطع
-            </span>
-            <span className="text-base font-bold text-gray-800">
-              {totalQuantity} قطعة
-            </span>
-          </div>
-          <div className="flex items-center justify-between bg-secondary p-3 rounded-lg">
-            <span className="text-base font-bold text-gray-800">
-              المبلغ الاجمالي
+              {isPayment ? 'المبلغ المدفوع' : 'المبلغ الاجمالي'}
             </span>
             <span className="text-base font-bold text-gray-800">
               {grandTotal.toFixed(2)} جنيه
