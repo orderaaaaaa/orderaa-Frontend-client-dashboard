@@ -1,5 +1,6 @@
 import type {
   MissingOrderFailureCode,
+  MissingOrderSourceFormat,
   MissingOrderStatus,
   MissingOrderStatusFilter,
   OrderPaymentStatus,
@@ -50,7 +51,8 @@ export const ORDER_PAYMENT_STATUS_LABELS: Record<OrderPaymentStatus, string> = {
   PARTIALLY_PAID: 'مدفوع جزئياً',
 };
 
-export const MISSING_ORDER_SOURCE_OPTIONS: { value: 'EASYORDER' | 'SHOPIFY'; label: string }[] = [
+export const MISSING_ORDER_SOURCE_OPTIONS: { value: MissingOrderSourceFormat; label: string }[] = [
   { value: 'EASYORDER', label: 'EasyOrders' },
   { value: 'SHOPIFY', label: 'Shopify' },
+  { value: 'LIGHTFUNNELS', label: 'Lightfunnels' },
 ];
