@@ -10,7 +10,8 @@ export type StockMovementSource =
   | 'INBOUND'
   | 'WORKFLOW'
   | 'ADJUSTMENT'
-  | 'TRANSFER';
+  | 'TRANSFER'
+  | 'OUTBOUND';
 
 export type InsufficientStockBehavior = 'THROW' | 'SKIP';
 

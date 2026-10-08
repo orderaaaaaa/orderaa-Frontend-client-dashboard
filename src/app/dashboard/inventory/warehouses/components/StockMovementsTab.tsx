@@ -37,6 +37,7 @@ const signedQuantity = (
   // ADJUSTMENT quantities arrive already signed AND negative ones carry
   // fromWarehouseId — negating again would render a write-off as a gain.
   if (movement.source === 'ADJUSTMENT') return movement.quantity;
+  if (movement.source === 'OUTBOUND') return -movement.quantity;
   if (warehouseId == null) return movement.quantity;
   if (movement.fromWarehouseId === warehouseId) return -movement.quantity;
   return movement.quantity;

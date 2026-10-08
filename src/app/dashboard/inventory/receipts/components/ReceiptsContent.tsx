@@ -40,7 +40,8 @@ function toCardData(receipt: Receipt): InvoiceCardData {
     employeeName: receipt.createdByEmployee?.fullName ?? 'غير محدد',
     createdAt: receipt.createdAt,
     totalAmount: receipt.totalAmount,
-    paymentAmount: receipt.paymentAmount,
+    invoiceType: receipt.type,
+    paymentStatus: receipt.paymentStatus,
     transactionType: INVOICE_TYPE_LABEL[receipt.type] ?? receipt.type,
     isApproved: receipt.isApproved,
     imageUrl: receipt.images?.[0] ?? undefined,
@@ -96,6 +97,7 @@ export function ReceiptsContent() {
 
   const { data: invoicesData, isLoading } = useSupplierInvoicesQuery({
     approved: receivingStatusToApproved(filters.receivingStatus),
+    receivable: true,
     page: currentPage,
     limit: pageSize,
     supplierId: selectedSupplier?.id,

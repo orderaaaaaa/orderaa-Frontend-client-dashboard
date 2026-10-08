@@ -65,7 +65,7 @@ const SuppliersFilterBar = memo(
           options={INVOICES_COUNT_OPTIONS}
           value={filters.invoicesCount}
           onChange={(v) => onFilterChange('invoicesCount', v)}
-          placeholder="عدد الفواتير"
+          placeholder="عدد فواتير الشراء"
           clearable
           onClear={() => onClearFilter('invoicesCount')}
         />

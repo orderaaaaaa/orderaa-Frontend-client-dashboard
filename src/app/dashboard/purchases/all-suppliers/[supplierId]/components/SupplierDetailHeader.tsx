@@ -12,7 +12,7 @@ import {
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { Supplier } from '../../types';
-import { formatCurrency } from '../../utils';
+import { formatCurrency, formatSupplierBalance } from '../../utils';
 import PaymentModal from '../../components/PaymentModal';
 
 interface SupplierDetailHeaderProps {
@@ -23,6 +23,7 @@ interface StatCard {
   label: string;
   value: string;
   icon: React.ComponentType<{ className?: string }>;
+  className?: string;
 }
 
 const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
@@ -41,8 +42,9 @@ const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
       },
       {
         label: 'المتبقي',
-        value: formatCurrency(supplier.remaining),
+        value: formatSupplierBalance(supplier.remaining).text,
         icon: LiaBalanceScaleSolid,
+        className: formatSupplierBalance(supplier.remaining).color,
       },
       {
         label: 'إجمالي المرتجعات',
@@ -50,7 +52,7 @@ const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
         icon: LiaUndoAltSolid,
       },
       {
-        label: 'إجمالي الفواتير',
+        label: 'فواتير الشراء',
         value: String(supplier.invoiceCount),
         icon: LiaFileInvoiceSolid,
       },
@@ -83,6 +85,7 @@ const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
         onClose={() => setIsPaymentOpen(false)}
         supplierId={supplier.id}
         supplierName={supplier.name}
+        remaining={supplier.remaining}
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
@@ -96,8 +99,8 @@ const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
           >
             <span className="text-xs sm:text-sm text-gray-400">{stat.label}</span>
             <div className="flex items-center gap-1.5">
-              <stat.icon className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-              <span className="text-base sm:text-lg font-bold text-gray-800">{stat.value}</span>
+              <stat.icon className={clsx('w-4 h-4 sm:w-5 sm:h-5', stat.className ?? 'text-primary')} />
+              <span className={clsx('text-base sm:text-lg font-bold', stat.className ?? 'text-gray-800')}>{stat.value}</span>
             </div>
           </div>
         ))}
