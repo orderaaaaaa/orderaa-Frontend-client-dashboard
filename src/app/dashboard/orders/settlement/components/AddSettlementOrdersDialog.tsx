@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { parseSettlementFile } from '@/lib/excel/parse-settlement-file';
 import ForceSettlementDialog from './ForceSettlementDialog';
+import SettlementAcceptedStatusesNote from './SettlementAcceptedStatusesNote';
 import {
   addSettlementBatchOrders,
   type SettlementRow,
@@ -262,6 +263,7 @@ export default function AddSettlementOrdersDialog({
               </select>
             </div>
           </div>
+          <SettlementAcceptedStatusesNote />
           {draftError && <p className="text-xs text-red-600">{draftError}</p>}
           <Button size="sm" disabled={isUploading} onClick={handleAddSingleRow}>
             {isUploading ? 'جاري الإضافة...' : 'إضافة الطلب'}

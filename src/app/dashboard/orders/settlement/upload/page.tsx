@@ -18,6 +18,7 @@ import {
   SettlementShippingColumnCells,
 } from '@/app/dashboard/orders/settlement/components/SettlementShippingColumns';
 import ForceSettlementDialog from '@/app/dashboard/orders/settlement/components/ForceSettlementDialog';
+import SettlementAcceptedStatusesNote from '@/app/dashboard/orders/settlement/components/SettlementAcceptedStatusesNote';
 import {
   uploadSettlementRows,
   addSettlementBatchOrders,
@@ -253,6 +254,7 @@ export default function SettlementUploadPage() {
             <Download className="w-4 h-4 ml-2" />
             تحميل القالب
           </Button>
+          <SettlementAcceptedStatusesNote className="mt-4" />
         </CardContent>
       </Card>
 

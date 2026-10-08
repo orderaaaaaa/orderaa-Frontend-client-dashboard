@@ -1,4 +1,5 @@
 import api from './index';
+import { OrderStatus } from '@/types/orders';
 
 export type ShippingMatch = 'MATCH' | 'MISMATCH' | 'UNKNOWN';
 
@@ -41,6 +42,19 @@ export interface SettlementRow {
   targetStatus: 'COLLECTED' | 'RETURNED_SETTLED';
   force?: boolean;
 }
+
+export const SETTLEMENT_DIRECT_SOURCE_STATUSES: Record<
+  SettlementRow['targetStatus'],
+  readonly OrderStatus[]
+> = {
+  COLLECTED: [
+    OrderStatus.WAITING_FOR_APPROVAL,
+    OrderStatus.SHIPPING,
+    OrderStatus.WITH_DRIVER,
+    OrderStatus.DELIVERED,
+  ],
+  RETURNED_SETTLED: [OrderStatus.RETURNED_DELIVERED, OrderStatus.RETURNED_COLLECTED],
+};
 
 export interface SettlementSuccessItem {
   row: number;
