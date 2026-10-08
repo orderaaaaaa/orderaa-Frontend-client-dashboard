@@ -78,6 +78,7 @@ export function AllInvoicesContent() {
     dateFrom: formatDateToLocalDate(filters.fromDate),
     dateTo: formatDateToLocalDate(filters.toDate),
     approved: receivingStatusToApproved(filters.receivingStatus),
+    receivable: filters.receivingStatus !== 'all' || undefined,
     search: debouncedSearchQuery || undefined,
     totalAmountMin: !isNaN(totalAmountMin as number) ? totalAmountMin : undefined,
     totalAmountMax: !isNaN(totalAmountMax as number) ? totalAmountMax : undefined,

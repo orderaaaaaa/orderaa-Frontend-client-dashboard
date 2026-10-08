@@ -20,6 +20,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import BaseModal from '@/components/ui/base-modal';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { getTimeAgo } from '@/utils/timeAgo';
+import type { InvoicePaymentStatus } from '@/lib/api/suppliers';
 import { receivedBadgeLabel } from './receivingStatus';
 
 const TRANSACTION_TYPE_CONFIG: Record<string, { text: string; iconColor: string; icon: IconType }> = {
@@ -28,15 +29,11 @@ const TRANSACTION_TYPE_CONFIG: Record<string, { text: string; iconColor: string;
   'مشتريات': { text: 'text-green-500', iconColor: 'text-green-500', icon: LiaDollarSignSolid },
 };
 
-function getPaymentStatus(totalAmount: number, paymentAmount?: number | null): { label: string; bgClass: string; textClass: string } {
-  if (!paymentAmount || paymentAmount === 0) {
-    return { label: 'غير مدفوع', bgClass: 'bg-red-500', textClass: 'text-white' };
-  }
-  if (paymentAmount >= totalAmount) {
-    return { label: 'مدفوع بالكامل', bgClass: 'bg-green-500', textClass: 'text-white' };
-  }
-  return { label: 'مدفوع جزئياً', bgClass: 'bg-yellow-500', textClass: 'text-white' };
-}
+const PAYMENT_STATUS_RIBBON: Record<InvoicePaymentStatus, { label: string; bgClass: string; textClass: string }> = {
+  NOT_PAID: { label: 'غير مدفوع', bgClass: 'bg-red-500', textClass: 'text-white' },
+  PARTIALLY_PAID: { label: 'مدفوع جزئياً', bgClass: 'bg-yellow-500', textClass: 'text-white' },
+  PAID: { label: 'مدفوع بالكامل', bgClass: 'bg-green-500', textClass: 'text-white' },
+};
 
 export interface InvoiceCardProduct {
   name: string;
@@ -56,7 +53,8 @@ export interface InvoiceCardData {
   employeeName: string;
   createdAt: string;
   totalAmount: number;
-  paymentAmount?: number | null;
+  invoiceType: 'PURCHASE' | 'PAID' | 'RETURN';
+  paymentStatus: InvoicePaymentStatus;
   transactionType: string;
   isApproved: boolean;
   imageUrl?: string;
@@ -153,10 +151,7 @@ const InvoiceCard = memo(
 
     const isNegativeAmount = invoice.transactionType === 'استبدال' || invoice.transactionType === 'مرتجع';
 
-    const paymentStatus = useMemo(
-      () => getPaymentStatus(invoice.totalAmount, invoice.paymentAmount),
-      [invoice.totalAmount, invoice.paymentAmount],
-    );
+    const paymentStatus = PAYMENT_STATUS_RIBBON[invoice.paymentStatus];
 
     const productColumns = useMemo(
       () => buildProductColumns(invoice.products),
@@ -210,17 +205,19 @@ const InvoiceCard = memo(
 
     return (
       <div className="relative w-full bg-white border border-gray-200 rounded-xl p-5 transition-all duration-200 hover:shadow-md overflow-hidden">
-        <div className="absolute top-0 end-0 w-28 h-28 overflow-hidden pointer-events-none">
-          <div
-            className={clsx(
-              'absolute top-5 -end-10 w-40 text-center text-base font-bold py-1 shadow-sm rotate-45 rtl:-rotate-45',
-              paymentStatus.bgClass,
-              paymentStatus.textClass,
-            )}
-          >
-            {paymentStatus.label}
+        {invoice.invoiceType !== 'RETURN' && (
+          <div className="absolute top-0 end-0 w-28 h-28 overflow-hidden pointer-events-none">
+            <div
+              className={clsx(
+                'absolute top-5 -end-10 w-40 text-center text-base font-bold py-1 shadow-sm rotate-45 rtl:-rotate-45',
+                paymentStatus.bgClass,
+                paymentStatus.textClass,
+              )}
+            >
+              {paymentStatus.label}
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="flex items-start justify-between">
           <div className="flex flex-col items-start gap-1">
@@ -248,9 +245,11 @@ const InvoiceCard = memo(
             )}
             <div className="ps-11 flex items-center gap-2">
               <span className="text-lg font-bold">{invoice.companyName}</span>
-              <span className={clsx('rounded-full px-2.5 py-0.5 text-xs font-semibold', invoice.isApproved ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground')}>
-                {receivedBadgeLabel(invoice.isApproved)}
-              </span>
+              {invoice.invoiceType !== 'PAID' && (
+                <span className={clsx('rounded-full px-2.5 py-0.5 text-xs font-semibold', invoice.isApproved ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground')}>
+                  {receivedBadgeLabel(invoice.isApproved)}
+                </span>
+              )}
             </div>
           </div>
 

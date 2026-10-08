@@ -74,6 +74,8 @@ export interface InvoiceProductApiItem {
   product: { id: number; name: string };
 }
 
+export type InvoicePaymentStatus = 'NOT_PAID' | 'PARTIALLY_PAID' | 'PAID';
+
 export interface SupplierInvoiceApiItem {
   id: number;
   code: string;
@@ -83,6 +85,7 @@ export interface SupplierInvoiceApiItem {
   createdByEmployeeId?: number;
   totalAmount: number;
   paymentAmount?: number;
+  paymentStatus: InvoicePaymentStatus;
   externalInvoiceNumber?: string;
   createdAt: string;
   updatedAt: string;
@@ -120,6 +123,7 @@ export interface GetSupplierInvoicesParams {
   totalAmountMax?: number;
   createdByEmployeeId?: number;
   approved?: boolean;
+  receivable?: boolean;
 }
 
 export interface CreateSupplierDto {
