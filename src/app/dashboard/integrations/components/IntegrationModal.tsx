@@ -35,7 +35,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import clsx from 'clsx';
 import groupBy from 'lodash/groupBy';
-import { ProviderModalConfig } from '../constants/providerConfig';
+import {
+  PROVIDER_CONNECTION_MODE,
+  ProviderModalConfig,
+} from '../constants/providerConfig';
+import { buildWebhookUrl, generateWebhookToken } from '../utils/webhookToken';
 
 const storeInfoSchema = z.object({
   storeName: z.string().min(1, 'اسم المتجر مطلوب'),
@@ -73,9 +77,13 @@ interface IntegrationModalProps {
   onDeleteStore?: (storeId: number, storeName: string) => void;
 }
 
-const STEPPER_STEPS = [
+const WEBHOOK_ONLY_STEPPER_STEPS = [
   { label: 'اسم المتجر' },
   { label: 'إعدادات Webhook' },
+];
+
+const STEPPER_STEPS = [
+  ...WEBHOOK_ONLY_STEPPER_STEPS,
   { label: 'Client Keys' },
 ];
 
@@ -112,10 +120,11 @@ const IntegrationModal = ({
 
   const hasConnectedStore = providerIntegrations.length > 0;
 
-  const getWebhookUrl = (storeId: number): string => {
-    if (!API_URL) return '';
-    return `${API_URL}/webhook/orders/${config.provider}/${storeId}`;
-  };
+  const isWebhookOnly =
+    config.connectionMode === PROVIDER_CONNECTION_MODE.WEBHOOK_ONLY;
+
+  const getWebhookUrl = (storeId: number, token?: string): string =>
+    buildWebhookUrl(API_URL, config.provider, storeId, token);
 
   const storeInfoForm = useForm<StoreInfoFormData>({
     resolver: zodResolver(storeInfoSchema),
@@ -145,7 +154,13 @@ const IntegrationModal = ({
         description: data.description?.trim() || undefined,
       });
       setCreatedStoreId(store.id);
-      webhookForm.setValue('webhookUrl', getWebhookUrl(store.id));
+      if (isWebhookOnly) {
+        const token = generateWebhookToken();
+        webhookForm.setValue('webhookUrl', getWebhookUrl(store.id, token));
+        webhookForm.setValue('webhookSecret', token);
+      } else {
+        webhookForm.setValue('webhookUrl', getWebhookUrl(store.id));
+      }
       toast.success('تم إنشاء المتجر بنجاح');
       setCurrentStep(1);
     } catch (err: any) {
@@ -182,7 +197,14 @@ const IntegrationModal = ({
       });
 
       toast.success('تم حفظ اعدادات الـ Webhook بنجاح');
-      setCurrentStep(2);
+      if (isWebhookOnly) {
+        onSuccess();
+        setShowStepper(false);
+        setCurrentStep(0);
+        resetForms();
+      } else {
+        setCurrentStep(2);
+      }
     } catch (err: any) {
       setError(err?.response?.data?.message || 'خطأ في حفظ الـ Webhook');
     } finally {
@@ -288,7 +310,12 @@ const IntegrationModal = ({
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div
+          className={clsx(
+            'grid grid-cols-1 gap-8',
+            !isWebhookOnly && 'md:grid-cols-2'
+          )}
+        >
           <div>
             <div className="flex items-center gap-2 mb-4">
               <LiaLinkSolid className="w-5 h-5 text-primary" />
@@ -314,6 +341,7 @@ const IntegrationModal = ({
             </div>
           </div>
 
+          {!isWebhookOnly && (
           <div>
             <div className="flex items-center gap-2 mb-4">
               <LiaKeySolid className="w-5 h-5 text-primary" />
@@ -338,6 +366,7 @@ const IntegrationModal = ({
               ))}
             </div>
           </div>
+          )}
         </div>
 
         {config.videoUrl && (
@@ -356,7 +385,10 @@ const IntegrationModal = ({
 
         {showStepper && (
           <div ref={stepperRef} className="bg-gray-50/80 rounded-xl border border-primary/20 p-6">
-            <Stepper steps={STEPPER_STEPS} currentStep={currentStep}>
+            <Stepper
+              steps={isWebhookOnly ? WEBHOOK_ONLY_STEPPER_STEPS : STEPPER_STEPS}
+              currentStep={currentStep}
+            >
               <StepContent>
                 <form
                   onSubmit={onStoreInfoSubmit}
@@ -431,15 +463,17 @@ const IntegrationModal = ({
                       />
                     </div>
 
-                    <Input
-                      register={webhookForm.register}
-                      name="webhookSecret"
-                      label="Webhook Secret"
-                      placeholder="أدخل مفتاح Webhook..."
-                      error={
-                        webhookForm.formState.errors.webhookSecret?.message
-                      }
-                    />
+                    {!isWebhookOnly && (
+                      <Input
+                        register={webhookForm.register}
+                        name="webhookSecret"
+                        label="Webhook Secret"
+                        placeholder="أدخل مفتاح Webhook..."
+                        error={
+                          webhookForm.formState.errors.webhookSecret?.message
+                        }
+                      />
+                    )}
                   </div>
 
                   <div className="flex gap-3 pt-2">
@@ -448,7 +482,11 @@ const IntegrationModal = ({
                       disabled={isLoading}
                       className="flex-1 bg-primary text-white h-10"
                     >
-                      {isLoading ? 'جاري الحفظ...' : 'التالي'}
+                      {isLoading
+                        ? 'جاري الحفظ...'
+                        : isWebhookOnly
+                          ? 'حفظ'
+                          : 'التالي'}
                     </Button>
                     <Button
                       type="button"
@@ -463,6 +501,7 @@ const IntegrationModal = ({
                 </form>
               </StepContent>
 
+              {!isWebhookOnly && (
               <StepContent>
                 <form onSubmit={onApiKeySubmit} className="space-y-4">
                   <div className="space-y-4 bg-white p-5 rounded-xl border border-gray-100">
@@ -505,6 +544,7 @@ const IntegrationModal = ({
                   </div>
                 </form>
               </StepContent>
+              )}
             </Stepper>
 
             {error && (
@@ -604,12 +644,14 @@ const IntegrationModal = ({
                             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                               Webhook
                             </p>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600">Secret</span>
-                              <span className="text-sm text-gray-800 font-mono">
-                                {webhookConfig.apiKey}
-                              </span>
-                            </div>
+                            {!isWebhookOnly && (
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-600">Secret</span>
+                                <span className="text-sm text-gray-800 font-mono">
+                                  {webhookConfig.apiKey}
+                                </span>
+                              </div>
+                            )}
                             <div className="flex items-center justify-between">
                               <span className="text-sm text-gray-600">الحالة</span>
                               <span
