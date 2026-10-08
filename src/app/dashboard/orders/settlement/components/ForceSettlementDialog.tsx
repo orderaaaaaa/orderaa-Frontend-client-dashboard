@@ -34,7 +34,7 @@ export default function ForceSettlementDialog({
       maxWidth="md:max-w-lg"
     >
       <div className="space-y-3 text-sm">
-        <p className="text-red-700 font-medium">{reason}</p>
+        <p className="whitespace-pre-line text-red-700 font-medium">{reason}</p>
 
         {hopLabels && <p className="text-muted-foreground">{hopLabels}</p>}
 

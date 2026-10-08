@@ -303,7 +303,7 @@ export default function AddSettlementOrdersDialog({
                       <tr key={item.row} className="border-t">
                         <td className="px-3 py-2 text-muted-foreground">{item.row + 1}</td>
                         <td className="px-3 py-2 font-mono">{item.orderCode ?? '—'}</td>
-                        <td className="px-3 py-2 text-red-700">{item.reason}</td>
+                        <td className="whitespace-pre-line px-3 py-2 text-red-700">{item.reason}</td>
                         <td className="px-3 py-2">
                           {item.bypassable && (
                             <Button

@@ -90,7 +90,9 @@ export function AdjustStockModal({
       onSuccess();
       onClose();
     } catch (err: unknown) {
-      toast.error(getApiErrorMessage(err, 'تعذر حفظ التسوية'));
+      toast.error(getApiErrorMessage(err, 'تعذر حفظ التسوية'), {
+        autoClose: 8000,
+      });
     }
   };
 
