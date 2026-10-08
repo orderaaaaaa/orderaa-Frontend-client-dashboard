@@ -41,6 +41,8 @@ export interface WarehouseApiItem {
   address: string | null;
   isActive: boolean;
   parentWarehouseId: number | null;
+  presetKey: string | null;
+  displayPosition: number | null;
   createdAt: string;
   updatedAt: string;
   children?: WarehouseApiItem[];
@@ -119,6 +121,7 @@ export interface WarehouseSummaryCard {
   name: string;
   parentWarehouseId: number | null;
   isActive: boolean;
+  displayPosition: number | null;
   totalQuantity: number;
   lowStockVariantCount: number;
   outOfStockVariantCount: number;
@@ -167,6 +170,7 @@ export interface StockWorkflowApiItem {
   toWarehouseId: number;
   allowNegative: boolean;
   onInsufficient: InsufficientStockBehavior;
+  presetKey: string | null;
   createdAt: string;
   updatedAt: string;
   /** null exactly when `fromWarehouseId` is. */

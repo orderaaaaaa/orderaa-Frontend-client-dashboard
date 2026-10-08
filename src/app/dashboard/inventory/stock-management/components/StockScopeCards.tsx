@@ -15,6 +15,7 @@ import { useVirtualWarehouseSummaryQuery } from '@/services/virtualWarehouses';
 import { useWarehouseSummaryQuery } from '@/services/warehouses';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { STOCK_SCOPE_KINDS, stockScopeHref } from '../constants';
+import { sortScopeEntries } from '../utils/scopeOrder';
 import { StockScopeCardsSkeleton } from './StockScopeCardsSkeleton';
 
 interface CardMetric {
@@ -110,6 +111,7 @@ export function StockScopeCards() {
 
   const physicalCards = physical.data ?? [];
   const virtualCards = canReadVirtual ? (virtual.data ?? []) : [];
+  const entries = sortScopeEntries(physicalCards, virtualCards);
   const isEmpty =
     physical.isSuccess &&
     physicalCards.length === 0 &&
@@ -125,31 +127,57 @@ export function StockScopeCards() {
           icon={LiaStoreAltSolid}
           metrics={[]}
         />
-        {physicalCards.map((card) => (
-          <ScopeCard
-            key={`physical-${card.id}`}
-            href={stockScopeHref({
-              kind: STOCK_SCOPE_KINDS.PHYSICAL,
-              id: card.id,
-            })}
-            title={card.name}
-            description={card.isActive ? undefined : 'غير نشط'}
-            icon={LiaWarehouseSolid}
-            metrics={[
-              { label: 'الكمية الكلية', value: card.totalQuantity },
-              {
-                label: 'مخزون منخفض',
-                value: card.lowStockVariantCount,
-                tone: 'warning',
-              },
-              {
-                label: 'غير متوفر',
-                value: card.outOfStockVariantCount,
-                tone: 'danger',
-              },
-            ]}
-          />
-        ))}
+        {entries.map((entry) =>
+          entry.kind === STOCK_SCOPE_KINDS.PHYSICAL ? (
+            <ScopeCard
+              key={`physical-${entry.card.id}`}
+              href={stockScopeHref({
+                kind: STOCK_SCOPE_KINDS.PHYSICAL,
+                id: entry.card.id,
+              })}
+              title={entry.card.name}
+              description={entry.card.isActive ? undefined : 'غير نشط'}
+              icon={LiaWarehouseSolid}
+              metrics={[
+                { label: 'الكمية الكلية', value: entry.card.totalQuantity },
+                {
+                  label: 'مخزون منخفض',
+                  value: entry.card.lowStockVariantCount,
+                  tone: 'warning',
+                },
+                {
+                  label: 'غير متوفر',
+                  value: entry.card.outOfStockVariantCount,
+                  tone: 'danger',
+                },
+              ]}
+            />
+          ) : (
+            <ScopeCard
+              key={`virtual-${entry.card.id}`}
+              href={stockScopeHref({
+                kind: STOCK_SCOPE_KINDS.VIRTUAL,
+                id: entry.card.id,
+              })}
+              title={entry.card.name}
+              badge="افتراضي"
+              icon={LiaLayerGroupSolid}
+              metrics={[
+                { label: 'الكمية الكلية', value: entry.card.totalQuantity },
+                {
+                  label: 'غير متوفر',
+                  value: entry.card.outOfStockVariantCount,
+                  tone: 'warning',
+                },
+                {
+                  label: 'العجز',
+                  value: entry.card.shortfallUnits,
+                  tone: entry.card.shortfallUnits > 0 ? 'danger' : 'default',
+                },
+              ]}
+            />
+          )
+        )}
       </div>
 
       {physical.isLoading && <StockScopeCardsSkeleton count={3} />}
@@ -166,36 +194,6 @@ export function StockScopeCards() {
           fallback="تعذر تحميل المخازن الافتراضية"
         />
       )}
-      {virtualCards.length > 0 && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {virtualCards.map((card) => (
-            <ScopeCard
-              key={`virtual-${card.id}`}
-              href={stockScopeHref({
-                kind: STOCK_SCOPE_KINDS.VIRTUAL,
-                id: card.id,
-              })}
-              title={card.name}
-              badge="افتراضي"
-              icon={LiaLayerGroupSolid}
-              metrics={[
-                { label: 'الكمية الكلية', value: card.totalQuantity },
-                {
-                  label: 'غير متوفر',
-                  value: card.outOfStockVariantCount,
-                  tone: 'warning',
-                },
-                {
-                  label: 'العجز',
-                  value: card.shortfallUnits,
-                  tone: card.shortfallUnits > 0 ? 'danger' : 'default',
-                },
-              ]}
-            />
-          ))}
-        </div>
-      )}
-
       {isEmpty && (
         <div className="flex flex-col items-center justify-center py-12 text-gray-400">
           <LiaWarehouseSolid className="mb-4 size-14" />

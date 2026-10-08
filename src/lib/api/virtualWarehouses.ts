@@ -59,12 +59,16 @@ export interface VirtualWarehouse {
   id: number;
   name: string;
   isActive: boolean;
+  presetKey: string | null;
+  displayPosition: number | null;
   terms: VirtualWarehouseTermView[];
 }
 
 export interface VirtualWarehouseSummaryCard {
   id: number;
   name: string;
+  presetKey: string | null;
+  displayPosition: number | null;
   totalQuantity: number;
   outOfStockVariantCount: number;
   shortfallVariantCount: number;
