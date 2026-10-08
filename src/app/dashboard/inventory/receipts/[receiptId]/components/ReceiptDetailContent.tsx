@@ -25,7 +25,7 @@ import { useI18n } from '@/i18n/I18nProvider';
 import ReceiptHeader from './ReceiptHeader';
 import AddVariantsStep, { InvoiceProductRow } from './AddVariantsStep';
 import { SelectedVariant } from '../types';
-import { formatDate } from '../../utils';
+import { formatDate, isEveryLineCounted } from '../../utils';
 import type { ApproveSupplierInvoiceVariantDto } from '@/lib/api/suppliers';
 import { WAREHOUSES_PAGE_ENABLED } from '@/constants/warehouses';
 
@@ -62,6 +62,7 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
   const clearReceipt = useReceiptStore((s) => s.clearReceipt);
 
   const approveMutation = useApproveSupplierInvoiceMutation();
+  const isReturn = apiReceipt?.type === 'RETURN';
 
   const { pickerOptions: warehouseOptions } = useWarehouseOptions();
   /**
@@ -169,36 +170,33 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
           countedTotal: countedFor(p.id),
           difference: countedFor(p.id) - p.quantity,
         }))
-        .filter((m) => m.countedTotal > 0 && m.difference !== 0),
+        .filter((m) => m.difference !== 0),
     [invoiceProducts, countedFor],
   );
 
   const approve = useCallback(
     async (acknowledgeQuantityChange: boolean) => {
       if (!apiReceipt) return;
+      if (!isEveryLineCounted(invoiceProducts.map((p) => p.id), productVariants)) return;
 
-      const productsPayload = invoiceProducts
-        .map((p) => ({
+      const productsPayload = invoiceProducts.map((p) => {
+        const variants = (productVariants[p.id] ?? [])
+          .filter((v) => typeof v.quantity === 'number' && v.quantity > 0)
+          .map((v) => {
+            const variant: ApproveSupplierInvoiceVariantDto = {
+              approvedCount: typeof v.quantity === 'number' ? v.quantity : 0,
+              rejectedCount: 0,
+            };
+            if (v.attributeOptionIds.length > 0) {
+              variant.attributeOptionIds = v.attributeOptionIds;
+            }
+            return variant;
+          });
+        return {
           invoiceProductId: p.id,
-          variants: (productVariants[p.id] ?? [])
-            .filter((v) => typeof v.quantity === 'number' && v.quantity > 0)
-            .map((v) => {
-              const variant: ApproveSupplierInvoiceVariantDto = {
-                approvedCount: typeof v.quantity === 'number' ? v.quantity : 0,
-                rejectedCount: 0,
-              };
-              if (v.attributeOptionIds.length > 0) {
-                variant.attributeOptionIds = v.attributeOptionIds;
-              }
-              return variant;
-            }),
-        }))
-        .filter((p) => p.variants.length > 0);
-
-      if (productsPayload.length === 0) {
-        toast.error('يرجى إدخال الكمية المستلمة لمنتج واحد على الأقل');
-        return;
-      }
+          variants: variants.length > 0 ? variants : [{ approvedCount: 0, rejectedCount: 0 }],
+        };
+      });
 
       try {
         await approveMutation.mutateAsync({
@@ -215,7 +213,11 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
               : {}),
           },
         });
-        toast.success('تم تأكيد الإيصال بنجاح');
+        toast.success(
+          isReturn
+            ? 'تم تأكيد تسليم المرتجع وخصم الكميات من المخزن'
+            : 'تم تأكيد الإيصال بنجاح',
+        );
         setPendingMismatches(null);
         clearReceipt(receiptId);
         router.push('/dashboard/inventory/receipts');
@@ -246,6 +248,7 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
     },
     [
       apiReceipt,
+      isReturn,
       warehouseId,
       invoiceProducts,
       productVariants,
@@ -308,12 +311,12 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
             <div className="flex items-center gap-2">
               <LiaCheckCircleSolid className="text-primary" />
               <span className="font-semibold text-primary">
-                تم استلام هذه الفاتورة
+                {isReturn ? 'تم تسليم هذا المرتجع' : 'تم استلام هذه الفاتورة'}
               </span>
             </div>
             {apiReceipt.approvedAt !== null && (
               <p className="mt-1 text-sm text-gray-600">
-                تاريخ الاستلام: {formatDate(apiReceipt.approvedAt)}
+                {isReturn ? 'تاريخ التسليم:' : 'تاريخ الاستلام:'} {formatDate(apiReceipt.approvedAt)}
               </p>
             )}
           </div>
@@ -338,7 +341,7 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
 
         <div className="flex flex-col gap-2 max-w-sm">
           <label className="text-sm font-medium text-gray-700">
-            مخزن الاستلام
+            {isReturn ? 'مخزن صرف المرتجع' : 'مخزن الاستلام'}
           </label>
           {/* Clearable: leaving it empty is the normal path, so there has to
               be a way back to it after picking a warehouse by mistake. */}
@@ -351,6 +354,11 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
             placeholder={t('receipts.warehouseAuto')}
             emptyMessage="لا توجد مخازن — أنشئ مخزنًا أولًا"
           />
+          {isReturn && (
+            <p className="text-xs leading-5 text-gray-600">
+              تأكيد هذا المرتجع يخصم الكميات المُسلّمة للمورد من المخزن.
+            </p>
+          )}
           {/* Only while no override is chosen: with one, the missing global
               rule no longer stops this receipt from being confirmed. */}
           {!rulesLoading && !hasGlobalInboundRule && !warehouseId && (
@@ -374,7 +382,7 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
         <AddVariantsStep
           products={invoiceProducts}
           onNext={handleSubmit}
-          nextLabel="تأكيد الإيصال"
+          nextLabel={isReturn ? 'تأكيد تسليم المرتجع' : 'تأكيد الإيصال'}
           nextIcon={LiaSaveSolid}
           nextDisabled={approveMutation.isPending}
           productVariants={productVariants}
