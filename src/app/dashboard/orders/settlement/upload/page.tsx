@@ -567,7 +567,7 @@ export default function SettlementUploadPage() {
                             {item.targetStatus ? getStatusLabel(item.targetStatus) : '—'}
                           </td>
                           <SettlementShippingColumnCells shipping={item.shipping} />
-                          <td className="px-4 py-2 text-red-600">{item.reason}</td>
+                          <td className="whitespace-pre-line px-4 py-2 text-red-600">{item.reason}</td>
                           <td className="px-4 py-2">
                             {item.bypassable && (
                               <Button

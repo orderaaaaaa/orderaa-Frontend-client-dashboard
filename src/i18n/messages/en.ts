@@ -138,6 +138,12 @@ const en: Record<keyof typeof ar, string> = {
     'The order is confirmed and the warehouse balance goes negative when stock is short.',
   'storeSettings.confirmOutOfStock.forbidDescription':
     'An order containing an out-of-stock product cannot be confirmed.',
+  'stockShortage.line': '{product} - {variant}: required {required}, available {available}',
+  'stockShortage.lineNoVariant': '{product}: required {required}, available {available}',
+  'stockShortage.confirmBlocked':
+    'Cannot confirm: the following products are out of stock and their settings forbid it, choose another product:',
+  'stockShortage.transferOverAvailable':
+    'The quantity to transfer exceeds what is available in the warehouse:',
 };
 
 export default en;

@@ -7,6 +7,9 @@ import { useOrderFieldUpdate } from '@/hooks/OrderDetails/useOrderFieldUpdate';
 import { useOrderNavigation } from '@/hooks/OrderDetails/useOrderNavigation';
 import { useOrderStockAvailabilityQuery } from '@/services/warehouses';
 import { toast } from 'react-toastify';
+import { formatStockShortageLines } from '@/utils/apiError';
+import { readStoredLocale } from '@/i18n/locale';
+import { translate } from '@/i18n/translate';
 import { CustomerDataSection } from './sections/CustomerDataSection';
 import { PricingSection } from './sections/PricingSection';
 import { ShippingSection } from './sections/ShippingSection';
@@ -152,9 +155,7 @@ function OrderDetailsInfoComponent({
     const blocking = stockAvailability.lines.filter((line) => line.blocked);
     return {
       canConfirm: false,
-      reason: `غير متوفر بالمخزون: ${blocking
-        .map((line) => `${line.productName} (${line.variantLabel})`)
-        .join('، ')} — اختر منتجًا آخر`,
+      reason: `${translate(readStoredLocale(), 'stockShortage.confirmBlocked')}\n${formatStockShortageLines(blocking)}`,
     };
   }, [stockAvailability]);
 

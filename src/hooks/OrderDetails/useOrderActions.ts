@@ -204,7 +204,10 @@ export function useOrderActions({
             ? msg.join('\n')
             : msg || 'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.');
         if (!options.skipToast) {
-          toast.error(apiErrorMessage);
+          toast.error(
+            apiErrorMessage,
+            outOfStock ? { autoClose: 8000 } : undefined
+          );
         }
         throw new Error(apiErrorMessage);
       }

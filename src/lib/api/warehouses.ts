@@ -481,6 +481,7 @@ export interface OutOfStockConfirmationBlocked {
   message: string;
   lines: {
     orderProductId: number;
+    variantId: number;
     productName: string;
     variantLabel: string;
     required: number;

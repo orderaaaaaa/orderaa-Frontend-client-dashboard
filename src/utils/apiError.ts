@@ -1,3 +1,6 @@
+import { readStoredLocale } from '@/i18n/locale';
+import { translate } from '@/i18n/translate';
+
 /**
  * NestJS class-validator failures return `message` as a string array
  * (e.g. ["delta must not be equal to 0"]), while thrown HttpExceptions
@@ -29,10 +32,44 @@ export function getApiErrorMessage(err: unknown, fallback: string): string {
  */
 export interface OutOfStockBlockedLine {
   orderProductId: number;
+  variantId: number;
   productName: string;
   variantLabel: string;
   required: number;
   available: number;
+}
+
+export interface StockShortageLineInput {
+  variantId: number;
+  productName: string;
+  variantLabel: string;
+  required: number;
+  available: number;
+}
+
+export function formatStockShortageLines(
+  lines: StockShortageLineInput[]
+): string {
+  const locale = readStoredLocale();
+  const seen = new Set<number>();
+  const rendered: string[] = [];
+  for (const line of lines) {
+    if (seen.has(line.variantId)) continue;
+    seen.add(line.variantId);
+    rendered.push(
+      translate(
+        locale,
+        line.variantLabel ? 'stockShortage.line' : 'stockShortage.lineNoVariant',
+        {
+          product: line.productName,
+          variant: line.variantLabel,
+          required: line.required,
+          available: Math.max(0, line.available),
+        }
+      )
+    );
+  }
+  return rendered.join('\n');
 }
 
 export function getOutOfStockBlock(
@@ -52,18 +89,10 @@ export function getOutOfStockBlock(
 
   if (data?.code !== 'OUT_OF_STOCK_CONFIRMATION_BLOCKED') return null;
 
-  const lines = data.lines ?? [];
-  const detail = lines
-    .map(
-      (line) =>
-        `${line.productName} (${line.variantLabel}) — المتاح ${line.available} والمطلوب ${line.required}`
-    )
-    .join('\n');
-
   return {
-    message: detail
-      ? `لا يمكن تأكيد الطلب — اختر منتجًا آخر:\n${detail}`
-      : (data.message ?? 'لا يمكن تأكيد الطلب — اختر منتجًا آخر'),
-    lines,
+    message:
+      data.message ??
+      translate(readStoredLocale(), 'stockShortage.confirmBlocked'),
+    lines: data.lines ?? [],
   };
 }
