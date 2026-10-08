@@ -24,6 +24,9 @@ interface InvoiceDropdownsProps {
   onPaymentStatusChange: (status: PaymentStatus) => void;
   partialAmount: string;
   onPartialAmountChange: (value: string) => void;
+  partialError?: string | null;
+  showPayment: boolean;
+  invoiceTotal: number;
   errors?: { supplierId?: string };
 }
 
@@ -39,6 +42,9 @@ const InvoiceDropdowns = memo(
     onPaymentStatusChange,
     partialAmount,
     onPartialAmountChange,
+    partialError,
+    showPayment,
+    invoiceTotal,
     errors,
   }: InvoiceDropdownsProps) => {
     return (
@@ -68,19 +74,21 @@ const InvoiceDropdowns = memo(
             placeholder="اختر الموظف"
           />
         </div>
-        <div className="flex flex-col gap-2">
-          <label className="flex items-center gap-2 text-base font-normal">
-            <LiaMoneyBillWaveSolid className="w-6 h-6 text-primary" />
-            <span>حالة الدفع</span>
-          </label>
-          <SearchableSelect
-            value={paymentStatus}
-            onChange={(val) => onPaymentStatusChange(val as PaymentStatus)}
-            options={PAYMENT_STATUS_OPTIONS}
-            placeholder="اختر حالة الدفع"
-          />
-        </div>
-        {paymentStatus === 'partial' && (
+        {showPayment && (
+          <div className="flex flex-col gap-2">
+            <label className="flex items-center gap-2 text-base font-normal">
+              <LiaMoneyBillWaveSolid className="w-6 h-6 text-primary" />
+              <span>حالة الدفع</span>
+            </label>
+            <SearchableSelect
+              value={paymentStatus}
+              onChange={(val) => onPaymentStatusChange(val as PaymentStatus)}
+              options={PAYMENT_STATUS_OPTIONS}
+              placeholder="اختر حالة الدفع"
+            />
+          </div>
+        )}
+        {showPayment && paymentStatus === 'partial' && (
           <div className="flex flex-col gap-2">
             <label className="flex items-center gap-2 text-base font-normal">
               <LiaMoneyBillWaveSolid className="w-6 h-6 text-primary" />
@@ -90,7 +98,8 @@ const InvoiceDropdowns = memo(
               type="number"
               value={partialAmount}
               onChange={(e) => onPartialAmountChange(e.target.value)}
-              placeholder="ادخل المبلغ المدفوع"
+              placeholder={`ادخل المبلغ المدفوع (الإجمالي ${invoiceTotal.toLocaleString()} ج.م)`}
+              error={partialError ?? undefined}
             />
           </div>
         )}

@@ -16,6 +16,8 @@ import InvoiceItemsTable from './InvoiceItemsTable';
 import InvoiceImageSection from './InvoiceImageSection';
 import { addInvoiceSchema, AddInvoiceFormData } from '../schema';
 import { InvoiceMode } from '../types';
+import { buildProductsPayload, payloadTotal } from '../utils';
+import { moneyCents } from '@/utils/money';
 import { useCreateSupplierInvoiceMutation, useSuppliersQuery } from '@/services/suppliers';
 import { useEmployeesQuery } from '@/services/employees';
 import { uploadFile } from '@/lib/api/upload';
@@ -29,6 +31,7 @@ export function AddInvoiceContent() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('unpaid');
   const [partialAmount, setPartialAmount] = useState('');
+  const [partialError, setPartialError] = useState<string | null>(null);
 
   const createInvoiceMutation = useCreateSupplierInvoiceMutation();
 
@@ -75,6 +78,33 @@ export function AddInvoiceContent() {
   const createdByEmployeeId = watch('createdByEmployeeId');
   const items = watch('items');
   const invoiceImage = watch('invoiceImage');
+
+  const invoiceTotal = useMemo(
+    () => payloadTotal(buildProductsPayload(items ?? [], invoiceMode)),
+    [items, invoiceMode],
+  );
+
+  const handleInvoiceTypeChange = useCallback(
+    (value: string) => {
+      setValue('invoiceType', value as 'PURCHASE' | 'RETURN', { shouldValidate: true });
+      if (value === 'RETURN') {
+        setPaymentStatus('unpaid');
+        setPartialAmount('');
+        setPartialError(null);
+      }
+    },
+    [setValue],
+  );
+
+  const handlePaymentStatusChange = useCallback((status: PaymentStatus) => {
+    setPaymentStatus(status);
+    setPartialError(null);
+  }, []);
+
+  const handlePartialAmountChange = useCallback((value: string) => {
+    setPartialAmount(value);
+    setPartialError(null);
+  }, []);
 
   const handleQuantityChange = useCallback(
     (index: number, value: number) => {
@@ -196,6 +226,26 @@ export function AddInvoiceContent() {
   const onSubmit = useCallback(
     async (data: AddInvoiceFormData) => {
       setSubmitError(null);
+      const products = buildProductsPayload(data.items, invoiceMode);
+      const totalAmount = payloadTotal(products);
+      let resolvedPaymentAmount: number | undefined;
+      if (data.invoiceType === 'PURCHASE') {
+        if (paymentStatus === 'full') {
+          resolvedPaymentAmount = totalAmount;
+        } else if (paymentStatus === 'partial') {
+          const partialCents = moneyCents(Number(partialAmount) || 0);
+          if (partialCents <= 0) {
+            setPartialError('أدخل المبلغ المدفوع');
+            return;
+          }
+          if (partialCents > moneyCents(totalAmount)) {
+            setPartialError(`المبلغ المدفوع لا يمكن أن يتجاوز إجمالي الفاتورة (${totalAmount.toLocaleString()} ج.م)`);
+            return;
+          }
+          resolvedPaymentAmount = Number(partialAmount);
+        }
+      }
+
       try {
         let images: string[] | undefined;
 
@@ -207,14 +257,6 @@ export function AddInvoiceContent() {
           }
         }
 
-        const totalAmount = data.items.reduce((sum, item) => sum + item.count * item.unitPrice, 0);
-        let resolvedPaymentAmount: number | undefined;
-        if (paymentStatus === 'full') {
-          resolvedPaymentAmount = totalAmount;
-        } else if (paymentStatus === 'partial') {
-          resolvedPaymentAmount = Number(partialAmount) || undefined;
-        }
-
         await createInvoiceMutation.mutateAsync({
           type: data.invoiceType,
           supplierId: data.supplierId,
@@ -222,19 +264,7 @@ export function AddInvoiceContent() {
           paymentAmount: resolvedPaymentAmount,
           externalInvoiceNumber: data.externalInvoiceNumber,
           entryMode: invoiceMode === 'package' ? 'PACKAGE' : 'SINGULAR',
-          // Rows left at zero are dropped, never sent: "add all variants"
-          // creates a row per variant and the user fills only the ones the
-          // supplier actually shipped.
-          products: data.items
-            .filter((item) => (item.count ?? 0) > 0)
-            .map((item) => ({
-            productId: item.productId,
-            quantity: invoiceMode === 'package' ? (item.count ?? 0) * (item.piecesPerPackage ?? 0) : item.count,
-            price: invoiceMode === 'package' ? (item.piecePrice ?? 0) : item.unitPrice,
-            packageCount: invoiceMode === 'package' ? item.count : undefined,
-            piecesPerPackage: invoiceMode === 'package' ? item.piecesPerPackage : undefined,
-            attributeOptionIds: (item.variants ?? []).map((v) => v.attributeOptionId).filter((id): id is number => id !== undefined),
-          })),
+          products,
           images,
         });
         setIsSuccessModalOpen(true);
@@ -246,7 +276,7 @@ export function AddInvoiceContent() {
         setSubmitError(axiosErr?.response?.data?.message || 'حدث خطأ أثناء إضافة الفاتورة');
       }
     },
-    [createInvoiceMutation, router],
+    [createInvoiceMutation, router, paymentStatus, partialAmount, invoiceMode],
   );
 
   const imageFile =
@@ -292,10 +322,13 @@ export function AddInvoiceContent() {
           employeeId={createdByEmployeeId}
           onEmployeeChange={(value) => setValue('createdByEmployeeId', value)}
           employeeOptions={employeeOptions}
+          showPayment={invoiceType === 'PURCHASE'}
+          invoiceTotal={invoiceTotal}
           paymentStatus={paymentStatus}
-          onPaymentStatusChange={setPaymentStatus}
+          onPaymentStatusChange={handlePaymentStatusChange}
           partialAmount={partialAmount}
-          onPartialAmountChange={setPartialAmount}
+          onPartialAmountChange={handlePartialAmountChange}
+          partialError={partialError}
           errors={{
             supplierId: errors.supplierId?.message,
           }}
@@ -305,9 +338,7 @@ export function AddInvoiceContent() {
           items={items ?? []}
           mode={invoiceMode}
           invoiceType={invoiceType ?? ''}
-          onInvoiceTypeChange={(value) =>
-            setValue('invoiceType', value as 'PURCHASE' | 'RETURN', { shouldValidate: true })
-          }
+          onInvoiceTypeChange={handleInvoiceTypeChange}
           invoiceTypeError={errors.invoiceType?.message}
           withVariants={withVariants}
           onWithVariantsChange={setWithVariants}
