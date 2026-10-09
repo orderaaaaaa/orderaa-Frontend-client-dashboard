@@ -2,6 +2,7 @@ export type ManualOrderProduct = {
   id: number;
   quantity: number;
   attributeOptionIds: number[];
+  sourceIndex?: number;
 };
 
 export type ManualOrderCustomer = {

@@ -10,7 +10,10 @@ import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useMissingOrdersQuery } from '@/services/missingOrders';
 import { formatDateToISO } from '@/utils/dateRangeUtils';
-import type { MissingOrderStatusFilter } from '@/types/missing-orders';
+import type {
+  MissingOrderSourceFormat,
+  MissingOrderStatusFilter,
+} from '@/types/missing-orders';
 import { MissingOrdersFilters } from './components/MissingOrdersFilters';
 import { MissingOrdersTable } from './components/MissingOrdersTable';
 
@@ -21,8 +24,8 @@ function readStatus(value: string | null): MissingOrderStatusFilter {
   return 'OPEN';
 }
 
-function readFormat(value: string | null): 'EASYORDER' | 'SHOPIFY' | undefined {
-  if (value === 'EASYORDER' || value === 'SHOPIFY') return value;
+function readFormat(value: string | null): MissingOrderSourceFormat | undefined {
+  if (value === 'EASYORDER' || value === 'SHOPIFY' || value === 'LIGHTFUNNELS') return value;
   return undefined;
 }
 

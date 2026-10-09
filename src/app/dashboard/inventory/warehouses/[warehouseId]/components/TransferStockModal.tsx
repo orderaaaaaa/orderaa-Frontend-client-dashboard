@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { getApiErrorMessage } from '@/utils/apiError';
+import { formatStockShortageLines, getApiErrorMessage } from '@/utils/apiError';
+import { readStoredLocale } from '@/i18n/locale';
+import { translate } from '@/i18n/translate';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
@@ -56,7 +58,13 @@ export function TransferStockModal({
     .map((item) => {
       const raw = quantities[item.variantId];
       const quantity = raw ? Number(raw) : 0;
-      return { variantId: item.variantId, quantity, available: item.quantity };
+      return {
+        variantId: item.variantId,
+        quantity,
+        available: item.quantity,
+        productName: item.productName,
+        variantLabel: variantLabel(item),
+      };
     })
     .filter((entry) => entry.quantity > 0);
 
@@ -89,7 +97,18 @@ export function TransferStockModal({
       return;
     }
     if (overAvailable.length > 0) {
-      toast.error('الكمية المنقولة أكبر من المتاح في المخزن');
+      toast.error(
+        `${translate(readStoredLocale(), 'stockShortage.transferOverAvailable')}\n${formatStockShortageLines(
+          overAvailable.map((entry) => ({
+            variantId: entry.variantId,
+            productName: entry.productName,
+            variantLabel: entry.variantLabel,
+            required: entry.quantity,
+            available: entry.available,
+          }))
+        )}`,
+        { autoClose: 8000 }
+      );
       return;
     }
 
@@ -107,7 +126,9 @@ export function TransferStockModal({
       onSuccess();
       onClose();
     } catch (err: unknown) {
-      toast.error(getApiErrorMessage(err, 'تعذر نقل المخزون'));
+      toast.error(getApiErrorMessage(err, 'تعذر نقل المخزون'), {
+        autoClose: 8000,
+      });
     }
   };
 

@@ -1,4 +1,5 @@
 import { ReceivingStatus } from '@/components/purchases/receivingStatus';
+import type { InvoicePaymentStatus } from '@/lib/api/suppliers';
 
 export interface InvoiceProduct {
   id: number;
@@ -21,6 +22,7 @@ export interface Invoice {
   createdByEmployee?: { id: number; accessLevel: string; department: string };
   totalAmount: number;
   paymentAmount?: number;
+  paymentStatus: InvoicePaymentStatus;
   externalInvoiceNumber?: string;
   products: InvoiceProduct[];
   images: string[];

@@ -41,3 +41,13 @@ export const shopifyIntegrationSteps = [
   'سيظهر لك مفتاح الـ Admin API access token مرة واحدة فقط — انسخه فوراً واحفظه في مكان آمن.',
   'الصق المفتاح في الحقل أدناه لإتمام الربط.',
 ];
+
+export const lightfunnelsWebhookSteps = [
+  'قم بتسجيل الدخول إلى لوحة تحكم Lightfunnels.',
+  'انتقل إلى الإعدادات (Settings) ثم اختر Webhooks.',
+  'اضغط على "Add new Webhook".',
+  'اختر نوع الحدث "order/confirmed".',
+  'انسخ الرابط أدناه (يحتوي على رمز الحماية) وألصقه في حقل URL.',
+  'احفظ الـ Webhook في Lightfunnels.',
+  'اضغط "حفظ" هنا لإتمام الربط.',
+];

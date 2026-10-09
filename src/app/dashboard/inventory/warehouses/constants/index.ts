@@ -68,6 +68,7 @@ export const MOVEMENT_SOURCE_LABELS: Record<StockMovementSource, string> = {
   WORKFLOW: 'حركة حالة طلب',
   ADJUSTMENT: 'تسوية',
   TRANSFER: 'نقل',
+  OUTBOUND: 'صادر لمورد',
 };
 
 export const MOVEMENT_SOURCE_CLASSES: Record<StockMovementSource, string> = {
@@ -75,6 +76,7 @@ export const MOVEMENT_SOURCE_CLASSES: Record<StockMovementSource, string> = {
   WORKFLOW: 'bg-blue-100 text-blue-700',
   ADJUSTMENT: 'bg-amber-100 text-amber-700',
   TRANSFER: 'bg-purple-100 text-purple-700',
+  OUTBOUND: 'bg-red-100 text-red-700',
 };
 
 /** Ledger `referenceType` values emitted by the backend. */

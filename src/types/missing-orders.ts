@@ -5,7 +5,9 @@ export type MissingOrderStatus = 'OPEN' | 'RECOVERED' | 'DISMISSED';
 
 export type MissingOrderStatusFilter = MissingOrderStatus | 'ALL';
 
-export type MissingOrderFormat = 'APP' | 'EASYORDER' | 'SHOPIFY';
+export type MissingOrderFormat = 'APP' | 'EASYORDER' | 'SHOPIFY' | 'LIGHTFUNNELS';
+
+export type MissingOrderSourceFormat = Exclude<MissingOrderFormat, 'APP'>;
 
 export type MissingOrderFailureCode =
   | 'INVALID_PAYLOAD'
@@ -97,7 +99,7 @@ export interface MissingOrdersPage {
 
 export interface MissingOrdersListFilters {
   status?: MissingOrderStatusFilter;
-  format?: 'EASYORDER' | 'SHOPIFY';
+  format?: MissingOrderSourceFormat;
   from?: string;
   to?: string;
   page?: number;

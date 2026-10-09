@@ -152,6 +152,12 @@ const ar = {
     'يتم تأكيد الطلب ويصبح رصيد المخزن سالبًا عند عدم التوفر.',
   'storeSettings.confirmOutOfStock.forbidDescription':
     'لا يمكن تأكيد طلب يحتوي على منتج غير متوفر.',
+  'stockShortage.line': '{product} - {variant}: المطلوب {required}، المتاح {available}',
+  'stockShortage.lineNoVariant': '{product}: المطلوب {required}، المتاح {available}',
+  'stockShortage.confirmBlocked':
+    'لا يمكن تأكيد الطلب لأن المنتجات التالية غير متوفرة بالمخزون وإعداداتها تمنع التأكيد، اختر منتجًا آخر:',
+  'stockShortage.transferOverAvailable':
+    'الكمية المنقولة أكبر من المتاح في المخزن:',
 } as const;
 
 export default ar;

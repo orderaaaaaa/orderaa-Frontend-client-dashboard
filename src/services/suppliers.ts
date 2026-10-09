@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient, QueryKey } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, QueryKey, type QueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import {
   getSuppliers,
@@ -109,6 +109,13 @@ export const useDeleteSupplierMutation = () => {
   });
 };
 
+const invalidateSupplierFigures = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIERS] });
+  queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_DETAIL] });
+  queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_PRODUCTS] });
+  queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_PRODUCT_TRANSACTIONS] });
+};
+
 export const useCreateSupplierInvoiceMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -128,6 +135,7 @@ export const useUpdateSupplierInvoiceMutation = (id: number) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_INVOICES] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_INVOICE_DETAIL, id] });
+      invalidateSupplierFigures(queryClient);
     },
   });
 };
@@ -138,6 +146,7 @@ export const useDeleteSupplierInvoiceMutation = () => {
     mutationFn: (id: number) => deleteSupplierInvoice(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_INVOICES] });
+      invalidateSupplierFigures(queryClient);
     },
   });
 };
@@ -150,6 +159,7 @@ export const useApproveSupplierInvoiceMutation = () => {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_INVOICES] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_INVOICE_DETAIL, variables.id] });
+      invalidateSupplierFigures(queryClient);
       // Approval records INBOUND stock movements into the chosen warehouse.
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.WAREHOUSE_STOCK] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCK_MOVEMENTS] });

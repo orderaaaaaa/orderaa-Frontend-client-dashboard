@@ -188,7 +188,7 @@ const InvoiceItemsTable = memo(
     return (
       <div className="sm:px-8 flex flex-col gap-4">
         <div className="flex items-center flex-col sm:flex-row justify-between gap-2">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 w-full sm:w-auto">
             <ToggleGroup
               options={INVOICE_MODE_OPTIONS}
               value={mode}

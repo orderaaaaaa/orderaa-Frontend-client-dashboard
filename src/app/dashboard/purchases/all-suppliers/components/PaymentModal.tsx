@@ -8,6 +8,8 @@ import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import { useCreateSupplierInvoiceMutation } from '@/services/suppliers';
+import { moneyCents } from '@/utils/money';
+import { formatSupplierBalance } from '../utils';
 
 const paymentSchema = z.object({
   amount: z
@@ -25,6 +27,7 @@ interface PaymentModalProps {
   onClose: () => void;
   supplierId: number;
   supplierName: string;
+  remaining: number;
 }
 
 export default function PaymentModal({
@@ -32,8 +35,10 @@ export default function PaymentModal({
   onClose,
   supplierId,
   supplierName: _supplierName,
+  remaining,
 }: PaymentModalProps) {
   const [showSuccess, setShowSuccess] = useState(false);
+  const [pendingAmount, setPendingAmount] = useState<number | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const createInvoiceMutation = useCreateSupplierInvoiceMutation();
 
@@ -50,19 +55,21 @@ export default function PaymentModal({
   const handleClose = useCallback(() => {
     reset();
     setShowSuccess(false);
+    setPendingAmount(null);
     setSubmitError(null);
     onClose();
   }, [reset, onClose]);
 
-  const onSubmit = useCallback(
-    async (data: PaymentFormValues) => {
+  const submitPayment = useCallback(
+    async (amount: number) => {
       setSubmitError(null);
       try {
         await createInvoiceMutation.mutateAsync({
           type: 'PAID',
           supplierId,
-          paymentAmount: Number(data.amount),
+          paymentAmount: amount,
         });
+        setPendingAmount(null);
         setShowSuccess(true);
         setTimeout(() => {
           handleClose();
@@ -74,11 +81,24 @@ export default function PaymentModal({
     [supplierId, handleClose, createInvoiceMutation],
   );
 
+  const onSubmit = useCallback(
+    async (data: PaymentFormValues) => {
+      const amount = Number(data.amount);
+      if (moneyCents(amount) > moneyCents(Math.max(remaining, 0))) {
+        setSubmitError(null);
+        setPendingAmount(amount);
+        return;
+      }
+      await submitPayment(amount);
+    },
+    [remaining, submitPayment],
+  );
+
   return (
     <BaseModal
       isOpen={isOpen}
       onClose={handleClose}
-      title={showSuccess ? '' : 'إضافة معاملة جديدة'}
+      title={showSuccess ? '' : pendingAmount !== null ? 'المبلغ أكبر من المتبقي' : 'إضافة معاملة جديدة'}
       showFooter={false}
       maxWidth="md:max-w-[500px]"
     >
@@ -119,6 +139,38 @@ export default function PaymentModal({
           <p className="text-lg font-bold text-gray-800">
             تم تسجيل الدفع بنجاح
           </p>
+        </div>
+      ) : pendingAmount !== null ? (
+        <div className="flex flex-col gap-6">
+          <p className="text-base leading-7 text-gray-700">
+            المبلغ ({pendingAmount.toLocaleString()} ج.م) أكبر من المتبقي للمورد ({formatSupplierBalance(remaining).text}). بعد الدفع سيصبح الرصيد {formatSupplierBalance(remaining - pendingAmount).text}. هل تريد المتابعة؟
+          </p>
+
+          {submitError && (
+            <p className="text-red-500 text-sm">{submitError}</p>
+          )}
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button
+              type="button"
+              disabled={createInvoiceMutation.isPending}
+              className="rounded-xl font-bold text-base py-3 px-8"
+              onClick={() => submitPayment(pendingAmount)}
+            >
+              تأكيد الدفع
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-xl font-bold text-base py-3 px-8"
+              onClick={() => {
+                setSubmitError(null);
+                setPendingAmount(null);
+              }}
+            >
+              تعديل المبلغ
+            </Button>
+          </div>
         </div>
       ) : (
         <>

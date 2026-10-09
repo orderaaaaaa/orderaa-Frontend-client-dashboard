@@ -88,7 +88,7 @@ export function exportInvoiceToExcel(invoice: SupplierInvoice) {
       ];
 
   const totalQuantity = invoice.products.reduce((s, i) => s + i.quantity, 0);
-  const grandTotal = invoice.products.reduce((s, i) => s + i.quantity * i.price, 0);
+  const grandTotal = invoice.totalAmount;
   const lastRow = excelData.length + 2;
 
   const totalsHeaders = hasPackageFields
@@ -114,7 +114,7 @@ export function exportInvoiceToExcel(invoice: SupplierInvoice) {
 
 export async function exportInvoiceToPDF(invoice: SupplierInvoice) {
   const totalQuantity = invoice.products.reduce((s, i) => s + i.quantity, 0);
-  const grandTotal = invoice.products.reduce((s, i) => s + i.quantity * i.price, 0);
+  const grandTotal = invoice.totalAmount;
   const hasPackageFields = invoice.products.some(
     (item) => item.packageCount != null || item.piecesPerPackage != null,
   );

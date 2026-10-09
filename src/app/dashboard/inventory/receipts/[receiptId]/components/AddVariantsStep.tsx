@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import { DataTable, DataTableColumn } from '@/components/ui/data-table';
 import { SelectedVariant } from '../types';
+import { isEveryLineCounted } from '../../utils';
 import AddVariantsModal from './AddVariantsModal';
 
 export interface InvoiceProductRow {
@@ -143,6 +144,11 @@ const AddVariantsStep = memo(
     const totalEntered = useMemo(
       () => products.reduce((sum, p) => sum + enteredByProduct(p.id), 0),
       [products, enteredByProduct],
+    );
+
+    const everyLineCounted = useMemo(
+      () => isEveryLineCounted(products.map((p) => p.id), productVariants),
+      [products, productVariants],
     );
 
     const isCountComplete = useMemo(
@@ -354,12 +360,24 @@ const AddVariantsStep = memo(
               الكميات المُدخلة لا تطابق المفوتر — سيُطلب تأكيد قبل الحفظ
             </span>
           )}
+          {!everyLineCounted && (
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-amber-600">
+              <LiaExclamationCircleSolid className="w-4 h-4 shrink-0" />
+              أدخل الكمية المستلمة لكل الأصناف — اكتب 0 للصنف الذي لم يُستلم
+            </span>
+          )}
+          {everyLineCounted && totalEntered === 0 && (
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-amber-600">
+              <LiaExclamationCircleSolid className="w-4 h-4 shrink-0" />
+              لا يمكن تأكيد إيصال كل كمياته صفر
+            </span>
+          )}
           <Button
             variant="default"
             size="lg"
             className="rounded-full font-semibold flex items-center gap-2 px-12"
             onClick={onNext}
-            disabled={nextDisabled || totalEntered === 0}
+            disabled={nextDisabled || !everyLineCounted || totalEntered === 0}
           >
             {NextIcon && <NextIcon className="w-5 h-5" />}
             {nextLabel ?? 'التالي'}

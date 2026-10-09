@@ -5,6 +5,7 @@ interface SelectedProductWithVariants {
   id: number;
   quantity: number;
   attributeOptionIds: number[];
+  sourceIndex?: number;
 }
 
 export function buildManualOrderPayload(args: {
@@ -50,6 +51,7 @@ export function buildManualOrderPayload(args: {
       id: p.id,
       quantity: p.quantity,
       attributeOptionIds: p.attributeOptionIds,
+      ...(p.sourceIndex !== undefined && { sourceIndex: p.sourceIndex }),
     })),
     customer: {
       name: customer.name,

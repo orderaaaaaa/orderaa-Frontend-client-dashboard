@@ -46,7 +46,9 @@ const IntegrationsPage = () => {
 
   const handleModalSuccess = () => {
     setNotification({
-      message: 'تم إنشاء الربط بنجاح! سيتم استقبال الطلبات تلقائياً الآن.',
+      message:
+        (activeModal && providerConfigs[activeModal]?.successMessage) ||
+        'تم إنشاء الربط بنجاح! سيتم استقبال الطلبات تلقائياً الآن.',
       type: 'success',
     });
   };

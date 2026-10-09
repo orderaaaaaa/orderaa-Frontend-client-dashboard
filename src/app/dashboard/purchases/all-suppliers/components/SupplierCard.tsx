@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Can } from '@/components/Can';
 import { PERMISSIONS } from '@/lib/permissions';
 import { Supplier } from '../types';
-import { formatCurrency } from '../utils';
+import { formatCurrency, formatSupplierBalance } from '../utils';
 import PaymentModal from './PaymentModal';
 import EditSupplierModal from './EditSupplierModal';
 
@@ -31,13 +31,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
   const router = useRouter();
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const remainingLabel = useMemo(() => {
-    if (supplier.remaining === 0) return { text: '0 ج.م', color: 'text-gray-500' };
-    if (supplier.remaining < 0) {
-      return { text: `${formatCurrency(Math.abs(supplier.remaining))} عليه`, color: 'text-red-500' };
-    }
-    return { text: `${formatCurrency(supplier.remaining)} له`, color: 'text-green-500' };
-  }, [supplier.remaining]);
+  const remainingLabel = useMemo(() => formatSupplierBalance(supplier.remaining), [supplier.remaining]);
 
   return (
     <div className="w-full bg-white border border-gray-200 rounded-xl p-5 transition-all duration-200 hover:shadow-md">
@@ -117,7 +111,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
         </div>
 
         <div className="flex flex-col items-start sm:items-center gap-1.5">
-          <span className="text-base text-gray-400">عدد الفواتير</span>
+          <span className="text-base text-gray-400">فواتير الشراء</span>
           <div className="flex items-center gap-1.5">
             <LiaFileInvoiceSolid className="w-4 h-4 text-primary" />
             <span className="text-base font-semibold text-gray-800">
@@ -161,6 +155,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
         onClose={() => setIsPaymentOpen(false)}
         supplierId={supplier.id}
         supplierName={supplier.name}
+        remaining={supplier.remaining}
       />
       <EditSupplierModal
         supplier={supplier}

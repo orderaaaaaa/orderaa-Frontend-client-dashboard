@@ -8,9 +8,10 @@ export interface MissingOrderPrefillResult {
   highlightFields: string[];
 }
 
-const PAYLOAD_TOTAL_FIELD_BY_FORMAT: Partial<Record<MissingOrderFormat, string>> = {
-  SHOPIFY: 'total_price',
-  EASYORDER: 'total_cost',
+const PAYLOAD_TOTAL_PATH_BY_FORMAT: Partial<Record<MissingOrderFormat, string[]>> = {
+  SHOPIFY: ['total_price'],
+  EASYORDER: ['total_cost'],
+  LIGHTFUNNELS: ['node', 'total'],
 };
 
 export function extractPayloadTotal(
@@ -20,10 +21,14 @@ export function extractPayloadTotal(
   if (!rawPayload || typeof rawPayload !== 'object') return '';
   if (format === null) return '';
 
-  const key = PAYLOAD_TOTAL_FIELD_BY_FORMAT[format];
-  if (!key) return '';
+  const path = PAYLOAD_TOTAL_PATH_BY_FORMAT[format];
+  if (!path) return '';
 
-  const field = (rawPayload as Record<string, unknown>)[key];
+  let field: unknown = rawPayload;
+  for (const key of path) {
+    if (typeof field !== 'object' || field === null) return '';
+    field = (field as Record<string, unknown>)[key];
+  }
   if (typeof field !== 'string' && typeof field !== 'number') return '';
 
   const parsed = Number(field);
@@ -87,6 +92,7 @@ export function buildMissingOrderPrefill(
             }))
         : [],
       attributeOptionIds: product.attributeOptionIds ?? [],
+      sourceIndex: product.index,
     }));
 
   const requiredPaths: { path: string; value: string }[] = [

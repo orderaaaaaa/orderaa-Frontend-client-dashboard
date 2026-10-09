@@ -19,7 +19,11 @@ import { toast } from 'react-toastify';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ProviderModalConfig } from '../constants/providerConfig';
+import {
+  PROVIDER_CONNECTION_MODE,
+  ProviderModalConfig,
+} from '../constants/providerConfig';
+import { buildWebhookUrl, generateWebhookToken } from '../utils/webhookToken';
 import StockSyncSection from './StockSyncSection';
 
 const URL_PATTERN = /^(https?:\/\/)?[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+/;
@@ -61,6 +65,8 @@ const EditIntegrationModal = ({
   const [copied, setCopied] = useState(false);
   const [showAddWebhook, setShowAddWebhook] = useState(false);
   const [showAddApi, setShowAddApi] = useState(false);
+  const [tokenOverride, setTokenOverride] = useState<string | null>(null);
+  const [confirmRegenerate, setConfirmRegenerate] = useState(false);
 
   const webhookConfig = useMemo(
     () => configs.find((c) => c.configType === IntegrationConfigType.WEBHOOK),
@@ -105,10 +111,20 @@ const EditIntegrationModal = ({
     },
   });
 
+  const isWebhookOnly =
+    providerConfig?.connectionMode === PROVIDER_CONNECTION_MODE.WEBHOOK_ONLY;
+
+  const currentToken = tokenOverride ?? webhookConfig?.apiKey;
+
   const webhookUrl = useMemo(() => {
-    if (!API_URL || !provider) return '';
-    return `${API_URL}/webhook/orders/${provider}/${storeId}`;
-  }, [API_URL, provider, storeId]);
+    if (!provider) return '';
+    return buildWebhookUrl(
+      API_URL,
+      provider,
+      storeId,
+      isWebhookOnly ? currentToken : undefined
+    );
+  }, [API_URL, provider, storeId, isWebhookOnly, currentToken]);
 
   const watchedFields = form.watch();
 
@@ -131,7 +147,9 @@ const EditIntegrationModal = ({
       (watchedFields.shopDomain || '') !== initialShopDomain ||
       (watchedFields.clientId || '') !== initialClientId;
 
-    const addingNewWebhook = showAddWebhook && !!watchedFields.newWebhookSecret?.trim();
+    const addingNewWebhook =
+      showAddWebhook &&
+      (isWebhookOnly || !!watchedFields.newWebhookSecret?.trim());
     const addingNewApi = showAddApi && !!watchedFields.newApiKey?.trim();
 
     return (
@@ -156,6 +174,7 @@ const EditIntegrationModal = ({
     initialClientId,
     showAddWebhook,
     showAddApi,
+    isWebhookOnly,
   ]);
 
   const handleCopyUrl = () => {
@@ -163,6 +182,26 @@ const EditIntegrationModal = ({
       navigator.clipboard.writeText(webhookUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleRegenerate = async () => {
+    if (!webhookConfig) return;
+    setError('');
+    setIsLoading(true);
+    try {
+      const token = generateWebhookToken();
+      await updateIntegration({
+        configId: webhookConfig.id,
+        data: { apiKey: token },
+      });
+      setTokenOverride(token);
+      setConfirmRegenerate(false);
+      toast.success('تم توليد رابط جديد، انسخه وحدّثه في Lightfunnels');
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'تعذر إعادة توليد الرابط');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -216,15 +255,20 @@ const EditIntegrationModal = ({
         }
       }
 
-      if (!webhookConfig && showAddWebhook && data.newWebhookSecret?.trim()) {
-        promises.push(
-          createIntegration({
-            storeId,
-            provider,
-            configType: IntegrationConfigType.WEBHOOK,
-            apiKey: data.newWebhookSecret.trim(),
-          })
-        );
+      if (!webhookConfig && showAddWebhook) {
+        const newKey = isWebhookOnly
+          ? generateWebhookToken()
+          : data.newWebhookSecret?.trim();
+        if (newKey) {
+          promises.push(
+            createIntegration({
+              storeId,
+              provider,
+              configType: IntegrationConfigType.WEBHOOK,
+              apiKey: newKey,
+            })
+          );
+        }
       }
 
       if (!apiConfig && showAddApi && data.newApiKey?.trim()) {
@@ -329,19 +373,65 @@ const EditIntegrationModal = ({
               />
             </div>
 
-            <Input
-              register={form.register}
-              name="webhookApiKey"
-              label="Webhook Secret (اتركه فارغاً إن لم ترد تغييره)"
-              placeholder="أدخل مفتاح Webhook الجديد..."
-            />
+            {isWebhookOnly ? (
+              <div className="space-y-2">
+                {confirmRegenerate ? (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-3">
+                    <p className="text-sm text-amber-800">
+                      الرابط القديم سيتوقف عن العمل. هل تريد إعادة توليد الرابط؟
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={handleRegenerate}
+                        disabled={isLoading}
+                        className="h-8 text-xs"
+                      >
+                        تأكيد
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setConfirmRegenerate(false)}
+                        disabled={isLoading}
+                        className="h-8 text-xs"
+                      >
+                        إلغاء
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setConfirmRegenerate(true)}
+                    disabled={isLoading}
+                    className="h-8 text-xs"
+                  >
+                    إعادة توليد الرابط
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <>
+                <Input
+                  register={form.register}
+                  name="webhookApiKey"
+                  label="Webhook Secret (اتركه فارغاً إن لم ترد تغييره)"
+                  placeholder="أدخل مفتاح Webhook الجديد..."
+                />
 
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">المفتاح الحالي</span>
-              <span className="text-gray-800 font-mono text-xs">
-                {webhookConfig.apiKey}
-              </span>
-            </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">المفتاح الحالي</span>
+                  <span className="text-gray-800 font-mono text-xs">
+                    {webhookConfig.apiKey}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         ) : showAddWebhook ? (
           <div className="space-y-4 bg-blue-50/50 p-5 rounded-xl border border-blue-200">
@@ -383,12 +473,18 @@ const EditIntegrationModal = ({
               />
             </div>
 
-            <Input
-              register={form.register}
-              name="newWebhookSecret"
-              label="Webhook Secret"
-              placeholder="أدخل مفتاح Webhook..."
-            />
+            {isWebhookOnly ? (
+              <p className="text-sm text-gray-600">
+                سيتم توليد رابط يحتوي على رمز الحماية عند الحفظ.
+              </p>
+            ) : (
+              <Input
+                register={form.register}
+                name="newWebhookSecret"
+                label="Webhook Secret"
+                placeholder="أدخل مفتاح Webhook..."
+              />
+            )}
           </div>
         ) : (
           <Button
@@ -402,6 +498,8 @@ const EditIntegrationModal = ({
           </Button>
         )}
 
+        {!isWebhookOnly && (
+          <>
         {apiConfig ? (
           <div className="space-y-4 bg-gray-50 p-5 rounded-xl border border-gray-100">
             <div className="flex items-center justify-between">
@@ -487,7 +585,10 @@ const EditIntegrationModal = ({
           </Button>
         )}
 
-        {apiConfig && <StockSyncSection config={apiConfig} />}
+          </>
+        )}
+
+        {!isWebhookOnly && apiConfig && <StockSyncSection config={apiConfig} />}
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm text-center">

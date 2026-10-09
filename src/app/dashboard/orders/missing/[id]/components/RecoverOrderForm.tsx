@@ -120,6 +120,7 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
         id: p.id,
         quantity: p.quantity || 1,
         attributeOptionIds: p.attributeOptionIds || [],
+        sourceIndex: p.sourceIndex,
       })),
     });
 
@@ -144,6 +145,15 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
       ) {
         toast.success(`تم إنشاء هذا الطلب بالفعل — ${body.orderCode ?? ''}`);
         router.back();
+        return;
+      }
+
+      if (
+        status === 409 &&
+        isMissingOrderErrorBody(body) &&
+        typeof body.message === 'string'
+      ) {
+        toast.error(body.message);
         return;
       }
 
