@@ -5,6 +5,7 @@ import OrderDetailsCardId from '@/components/OrderDetails/OrderDetailsCardId';
 import OrderDetailsInfoStatus from '@/components/OrderDetails/OrderDetailsInfoStatus';
 import OrderDetailsProductCard from '@/components/OrderDetails/OrderDetailsProductCard';
 import OrderDetailsInfoComponent from '@/components/OrderDetails/OrderDetailsInfo';
+import OrderSystemFailuresPanel from '@/components/OrderDetails/SystemFailures/OrderSystemFailuresPanel';
 
 interface OrderDetailsInfoProps {
   order: Order;
@@ -51,6 +52,7 @@ function OrderDetailsInfo({
         isForceUnlocking={isForceUnlocking}
       />
       <OrderDetailsInfoStatus order={order} isLockedByOther={isLockedByOther} />
+      <OrderSystemFailuresPanel order={order} />
       <OrderDetailsProductCard
         order={order}
         isLockedByOther={isLockedByOther}
