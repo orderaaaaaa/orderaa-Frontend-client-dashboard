@@ -3,7 +3,6 @@ import type {
   MissingOrderSourceFormat,
   MissingOrderStatus,
   MissingOrderStatusFilter,
-  OrderPaymentStatus,
 } from '@/types/missing-orders';
 
 export const MISSING_ORDER_STATUS_LABELS: Record<MissingOrderStatus, string> = {
@@ -44,12 +43,6 @@ export const MISSING_ORDER_FAILURE_LABELS: Record<
 
 export const INTERNAL_CLASS_FAILURE_CODES: readonly MissingOrderFailureCode[] =
   ['INTERNAL', 'TIMEOUT', 'TRANSIENT_EXHAUSTED', 'STALE_RUNNING', 'STALE_PENDING'];
-
-export const ORDER_PAYMENT_STATUS_LABELS: Record<OrderPaymentStatus, string> = {
-  PAID: 'مدفوع',
-  CASH_ON_DELIVERY: 'الدفع عند الاستلام',
-  PARTIALLY_PAID: 'مدفوع جزئياً',
-};
 
 export const MISSING_ORDER_SOURCE_OPTIONS: { value: MissingOrderSourceFormat; label: string }[] = [
   { value: 'EASYORDER', label: 'EasyOrders' },

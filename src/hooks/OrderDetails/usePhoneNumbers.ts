@@ -107,6 +107,7 @@ export function usePhoneNumbers({
       try {
         await updateCustomerMutation.mutateAsync({
           customerId,
+          orderId,
           data: {
             phoneNumbers: updatedPhones,
           },
@@ -125,7 +126,7 @@ export function usePhoneNumbers({
         setPhoneNumbers(phoneNumbers);
       }
     },
-    [customerId, phoneNumbers, onUpdate, onConflict, updateCustomerMutation]
+    [customerId, orderId, phoneNumbers, onUpdate, onConflict, updateCustomerMutation]
   );
 
   const handleSave = useCallback(async () => {
@@ -149,6 +150,7 @@ export function usePhoneNumbers({
     try {
       await updateCustomerMutation.mutateAsync({
         customerId,
+        orderId,
         data: {
           phoneNumbers: updatedPhones,
         },
@@ -166,7 +168,7 @@ export function usePhoneNumbers({
       }
       setPhoneNumbers(phoneNumbers);
     }
-  }, [customerId, phoneNumbers, editingIndex, newPhoneNumber, onUpdate, onConflict, updateCustomerMutation]);
+  }, [customerId, orderId, phoneNumbers, editingIndex, newPhoneNumber, onUpdate, onConflict, updateCustomerMutation]);
 
   const handleCancel = useCallback(() => {
     setEditingIndex(null);

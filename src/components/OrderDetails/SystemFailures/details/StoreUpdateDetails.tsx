@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
-import { ORDER_PAYMENT_STATUS_LABELS } from '@/constants/missingOrders';
+import { ORDER_PAYMENT_STATUS_LABELS, orderFieldLabelOf } from '@/constants/orderFieldLabels';
 import { mapOrderProductToVariantInfo, type Order } from '@/types/orders';
 import type {
   FailureMoney,
@@ -105,8 +105,8 @@ function ReasonSummary({ reason }: { reason: StoreUpdateNotAppliedReason }) {
         <span className="text-sm">البيانات التي تم تعديلها على الطلب بعد إنشائه:</span>
         <div className="flex flex-wrap gap-1">
           {reason.differences.map((field) => (
-            <span key={field} dir="ltr" className="px-2 py-0.5 rounded-full bg-gray-100 text-xs text-gray-700">
-              {field}
+            <span key={field} className="px-2 py-0.5 rounded-full bg-gray-100 text-xs text-gray-700">
+              {orderFieldLabelOf(field)}
             </span>
           ))}
         </div>

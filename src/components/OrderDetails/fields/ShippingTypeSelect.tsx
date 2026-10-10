@@ -2,14 +2,9 @@ import React, { useMemo, useState } from 'react';
 import { LiaTruckSolid } from 'react-icons/lia';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useShippingTypes } from '@/hooks';
-import { ShippingType } from '@/types/orders';
+import { ORDER_SHIPPING_TYPE_LABELS } from '@/constants/orderFieldLabels';
 
-const SHIPPING_TYPE_FALLBACK: Record<string, string> = {
-  [ShippingType.DELIVERY]: 'توصيل',
-  [ShippingType.EXCHANGE]: 'استبدال',
-  [ShippingType.RETURN]: 'مرتجع',
-  [ShippingType.PARTIAL_RETURN]: 'تسليم جزئي',
-};
+const SHIPPING_TYPE_FALLBACK: Record<string, string> = ORDER_SHIPPING_TYPE_LABELS;
 
 export interface ShippingTypeSelectProps {
   value: string | undefined;

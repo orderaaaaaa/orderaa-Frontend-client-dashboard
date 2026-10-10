@@ -82,6 +82,7 @@ export function CustomerDataSection({
     try {
       await updateCustomerMutation.mutateAsync({
         customerId: order.customers.id,
+        orderId: order.id,
         data: { name },
       });
 
