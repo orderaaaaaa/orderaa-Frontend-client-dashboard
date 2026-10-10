@@ -18,7 +18,7 @@ import { StoreUpdateDetails } from './StoreUpdateDetails';
 
 const labelOf = <K extends string>(labels: Record<K, string>, value: K) => labels[value] ?? value;
 
-const SWITCH_DEACTIVATED_NOTE = 'تم إيقاف الإرسال التلقائي للشحن لهذا الطلب';
+const SWITCH_DEACTIVATED_NOTE = 'كان الطلب قيد التحويل لشركة شحن أخرى، فتم إلغاء تفعيل الشحنة السابقة';
 
 export function FailureDetails({
   failure,

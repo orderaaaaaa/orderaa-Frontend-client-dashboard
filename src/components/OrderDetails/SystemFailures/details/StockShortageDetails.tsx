@@ -1,7 +1,23 @@
 import { STOCK_SHORTAGE_CODE_LABELS } from '@/constants/orderSystemFailures';
+import { useHasPermission } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
+import { useWarehousesQuery } from '@/services/warehouses';
 import type { FailureStockShortage } from '@/types/orderSystemFailures';
 
 export function StockShortageDetails({ shortage }: { shortage: FailureStockShortage }) {
+  const canReadWarehouses = useHasPermission(PERMISSION_CODES.WAREHOUSES_READ);
+  const hasWarehouseBlock = shortage.blocks.some((block) => block.warehouseId !== null);
+  const { data: warehouses } = useWarehousesQuery(
+    { limit: 1000 },
+    { enabled: canReadWarehouses && hasWarehouseBlock }
+  );
+
+  const warehouseLabelOf = (warehouseId: number | null) => {
+    if (warehouseId === null) return 'بدون مخزن محدد';
+    const name = warehouses?.data?.find((warehouse) => warehouse.id === warehouseId)?.name;
+    return name ?? `المخزن رقم ${warehouseId}`;
+  };
+
   return (
     <div className="flex flex-col gap-3">
       <p className="text-sm text-red-700 font-medium">
@@ -10,7 +26,7 @@ export function StockShortageDetails({ shortage }: { shortage: FailureStockShort
       {shortage.blocks.map((block, blockIndex) => (
         <div key={`${block.warehouseId ?? 'none'}-${blockIndex}`} className="flex flex-col gap-1">
           <span className="text-xs font-semibold text-gray-600">
-            {block.warehouseId === null ? 'بدون مخزن محدد' : `المخزن رقم ${block.warehouseId}`}
+            {warehouseLabelOf(block.warehouseId)}
           </span>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

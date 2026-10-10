@@ -44,12 +44,16 @@ const STALE_TIME = 30 * 1000;
 // Warehouses
 // ---------------------------------------------------------------------------
 
-export const useWarehousesQuery = (params?: GetWarehousesParams) => {
+export const useWarehousesQuery = (
+  params?: GetWarehousesParams,
+  options?: { enabled?: boolean }
+) => {
   return useQuery({
     queryKey: [QUERY_KEYS.WAREHOUSES, params] as QueryKey,
     queryFn: () => getWarehouses(params),
     placeholderData: (previous) => previous,
     staleTime: STALE_TIME,
+    enabled: options?.enabled ?? true,
   });
 };
 
