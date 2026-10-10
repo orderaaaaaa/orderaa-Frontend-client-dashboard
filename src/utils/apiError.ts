@@ -18,6 +18,10 @@ export function getApiErrorMessage(err: unknown, fallback: string): string {
   return message || fallback;
 }
 
+export function getApiErrorStatus(err: unknown): number | undefined {
+  return (err as { response?: { status?: number } })?.response?.status;
+}
+
 /**
  * T27 — the out-of-stock confirmation refusal.
  *

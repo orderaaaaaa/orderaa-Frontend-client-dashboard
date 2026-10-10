@@ -537,6 +537,7 @@ function AllOrdersContent() {
                 isPartiallyPaid={order.isPartiallyPaid}
                 shippingType={order.shippingType}
                 parkedAt={order.parkedAt}
+                unseenSystemFailureCount={order.unseenSystemFailureCount}
                 trys={order.numberOfTriesToReach}
                 status={order.status}
                 isBlocked={order.customers.isBlocked}

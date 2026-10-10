@@ -222,6 +222,7 @@ export default function DelayedOrdersPage() {
                 isPartiallyPaid={order.isPartiallyPaid}
                 shippingType={order.shippingType}
                 parkedAt={order.parkedAt}
+                unseenSystemFailureCount={order.unseenSystemFailureCount}
                 disableNavigation={false}
               />
             </div>
