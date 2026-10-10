@@ -6,6 +6,7 @@ import OrderDetailsInfoStatus from '@/components/OrderDetails/OrderDetailsInfoSt
 import OrderDetailsProductCard from '@/components/OrderDetails/OrderDetailsProductCard';
 import OrderDetailsInfoComponent from '@/components/OrderDetails/OrderDetailsInfo';
 import OrderSystemFailuresPanel from '@/components/OrderDetails/SystemFailures/OrderSystemFailuresPanel';
+import OrderChangeHistoryCard from '@/components/OrderDetails/ChangeHistory/OrderChangeHistoryCard';
 
 interface OrderDetailsInfoProps {
   order: Order;
@@ -53,6 +54,7 @@ function OrderDetailsInfo({
       />
       <OrderDetailsInfoStatus order={order} isLockedByOther={isLockedByOther} />
       <OrderSystemFailuresPanel order={order} />
+      <OrderChangeHistoryCard orderId={order.id} />
       <OrderDetailsProductCard
         order={order}
         isLockedByOther={isLockedByOther}
