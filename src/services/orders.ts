@@ -262,9 +262,11 @@ export const useUpdateCustomer = () => {
   return useMutation({
     mutationFn: async ({
       customerId,
+      orderId,
       data,
     }: {
       customerId: number;
+      orderId?: number;
       data: {
         name?: string;
         phoneNumbers?: string[];
@@ -273,7 +275,9 @@ export const useUpdateCustomer = () => {
         address?: string;
       };
     }) => {
-      const response = await http.patch(`/customers/${customerId}`, data);
+      const response = await http.patch(`/customers/${customerId}`, data, {
+        params: orderId === undefined ? undefined : { orderId },
+      });
       return response.data;
     },
     onSuccess: () => {

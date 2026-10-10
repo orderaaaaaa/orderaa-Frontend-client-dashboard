@@ -74,6 +74,9 @@ Module imports from **7 react-icon families** (not just `lucide-react`): Boxes (
 - **Customer info** — name, phone numbers, governorate/city/address with call history if available.
 - **Shipping info** — carrier name, tracking number, shipping address, COD collection status.
 - **Navigation** — next/previous order navigation from the list context.
+- **Change history card «سجل التعديلات»** (T14) — `components/OrderDetails/ChangeHistory/`, placed after the system-failures panel. Reads `GET /orders/:id/change-history` through `useOrderChangeHistory` (`services/orderChangeHistory.ts`, key `[ORDER_DETAILS, orderId, 'change-history']`, so every detail invalidation refreshes it). Values are formatted by the entry's `valueType`; REF values show their label snapshot, statuses go through `useStatusLabel`. Hidden on 403/404.
+- **Field labels** — `constants/orderFieldLabels.ts` is the single map of order field keys (catalog keys, `lines`, `line.*`, `customer.*`), change origins and order enum values (payment method/status, shipping type, settlement source). Use `orderFieldLabelOf` (falls back to the raw key). Actor-type labels stay in `constants/orderSystemFailures.ts`.
+- **Customer edits from the order page** pass `orderId` to `useUpdateCustomer`, which sends `PATCH /customers/:id?orderId=<id>` so the edit is recorded in that order's history.
 
 ## Invoice Printing UX
 

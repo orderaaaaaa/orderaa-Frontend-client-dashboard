@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import Input from '@/components/ui/Input';
 import usePaymentMethods from '@/hooks/usePaymentMethods';
-import { ORDER_PAYMENT_STATUS_LABELS } from '@/constants/missingOrders';
+import { ORDER_PAYMENT_STATUS_LABELS } from '@/constants/orderFieldLabels';
 import type { OrderPaymentStatus } from '@/types/missing-orders';
 
 const PAYMENT_STATUS_OPTIONS: OrderPaymentStatus[] = [
