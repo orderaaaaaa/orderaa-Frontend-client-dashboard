@@ -460,6 +460,7 @@ export interface Order {
   shadowedAt?: string | null;
   editRejectedNote?: string | null;
   parkedAt: string | null;
+  unseenSystemFailureCount?: number;
 
   createdAt: string;
   updatedAt: string;
