@@ -54,7 +54,7 @@ function OrderDetailsInfo({
       />
       <OrderDetailsInfoStatus order={order} isLockedByOther={isLockedByOther} />
       <OrderSystemFailuresPanel order={order} />
-      <OrderChangeHistoryCard orderId={order.id} />
+      <OrderChangeHistoryCard order={order} />
       <OrderDetailsProductCard
         order={order}
         isLockedByOther={isLockedByOther}

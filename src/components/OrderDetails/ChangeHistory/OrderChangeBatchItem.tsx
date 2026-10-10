@@ -30,13 +30,20 @@ function LineMembershipEntry({ entry }: { entry: OrderChangeEntry }) {
 function FieldEntry({
   entry,
   getStatusLabel,
+  lineProductNames,
 }: {
   entry: OrderChangeEntry;
   getStatusLabel: (status: string) => string;
+  lineProductNames: ReadonlyMap<number, string>;
 }) {
+  const productName =
+    entry.kind === 'LINE_CHANGED' && entry.lineId !== null ? lineProductNames.get(entry.lineId) : undefined;
+  const label = productName
+    ? `${orderFieldLabelOf(entry.field)} (${productName})`
+    : orderFieldLabelOf(entry.field);
   return (
     <li className="text-sm break-words">
-      <span className="text-gray-600">{orderFieldLabelOf(entry.field)}:</span>{' '}
+      <span className="text-gray-600">{label}:</span>{' '}
       <OrderChangeValue
         valueType={entry.valueType}
         value={entry.oldValue}
@@ -57,9 +64,10 @@ function FieldEntry({
 export interface OrderChangeBatchItemProps {
   batch: OrderChangeBatch;
   getStatusLabel: (status: string) => string;
+  lineProductNames: ReadonlyMap<number, string>;
 }
 
-export function OrderChangeBatchItem({ batch, getStatusLabel }: OrderChangeBatchItemProps) {
+export function OrderChangeBatchItem({ batch, getStatusLabel, lineProductNames }: OrderChangeBatchItemProps) {
   const actorLabel = batch.actorName ?? actorTypeLabelOf(batch.actorType) ?? batch.actorType;
 
   return (
@@ -81,7 +89,12 @@ export function OrderChangeBatchItem({ batch, getStatusLabel }: OrderChangeBatch
           entry.kind === 'LINE_ADDED' || entry.kind === 'LINE_REMOVED' ? (
             <LineMembershipEntry key={entry.id} entry={entry} />
           ) : (
-            <FieldEntry key={entry.id} entry={entry} getStatusLabel={getStatusLabel} />
+            <FieldEntry
+              key={entry.id}
+              entry={entry}
+              getStatusLabel={getStatusLabel}
+              lineProductNames={lineProductNames}
+            />
           )
         )}
       </ul>

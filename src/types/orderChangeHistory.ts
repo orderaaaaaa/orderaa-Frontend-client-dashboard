@@ -17,6 +17,76 @@ export type OrderChangeValueType =
   | 'ENUM_SHIPPING_TYPE'
   | 'ENUM_SETTLEMENT_RECORD_TYPE';
 
+export type OrderTrackedField =
+  | 'status'
+  | 'code'
+  | 'customerId'
+  | 'address'
+  | 'governorate'
+  | 'city'
+  | 'area'
+  | 'externalGovernorate'
+  | 'externalCity'
+  | 'totalCost'
+  | 'shippingCost'
+  | 'couponDiscount'
+  | 'returnShippingCost'
+  | 'prepaidAmount'
+  | 'coupon'
+  | 'paymentMethod'
+  | 'paymentStatus'
+  | 'settlementAmount'
+  | 'settlementSource'
+  | 'settlementResolved'
+  | 'notes'
+  | 'shippingNotes'
+  | 'packagingNotes'
+  | 'callCenterNotes'
+  | 'cancelReason'
+  | 'cancelNotes'
+  | 'shippingCompanyId'
+  | 'shippingType'
+  | 'canOpenShipment'
+  | 'shipmentContent'
+  | 'returnShipmentContent'
+  | 'material'
+  | 'weight'
+  | 'countryOfManufacture'
+  | 'countryOfOrder'
+  | 'shipmentPickupCode'
+  | 'pickupInvoice'
+  | 'urgentDate'
+  | 'availableFrom'
+  | 'availableTo'
+  | 'postponedUntil'
+  | 'webhookShippingStatus'
+  | 'delegateName'
+  | 'delegatePhone'
+  | 'isPrinted'
+  | 'isShadowed'
+  | 'parkedAt';
+
+export type OrderLineChangeField =
+  | 'lines'
+  | 'line.variant'
+  | 'line.price'
+  | 'line.sku'
+  | 'line.customVariants';
+
+export type OrderCustomerRecordField =
+  | 'customer.name'
+  | 'customer.email'
+  | 'customer.phoneNumbers'
+  | 'customer.notes'
+  | 'customer.isBlocked'
+  | 'customer.blockedUntil';
+
+export type OrderChangeField = OrderTrackedField | OrderLineChangeField | OrderCustomerRecordField;
+
+export type OrderPaymentMethod = 'CASH' | 'VISA_CARD' | 'INSTAPAY' | 'WALLET';
+
+export type OrderSettlementRecordType = 'EXCEL' | 'ADJUST' | 'EDIT';
+
 export type OrderChangeOrigin =
   | 'ORDER_EDIT'
   | 'LINE_EDIT'

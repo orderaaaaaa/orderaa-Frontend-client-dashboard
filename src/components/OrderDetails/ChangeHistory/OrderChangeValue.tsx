@@ -36,7 +36,7 @@ export const isLineValue = (value: OrderChangeJsonValue): value is OrderChangeLi
 
 const formatNumber = (value: OrderChangeJsonValue) => {
   const parsed = typeof value === 'number' ? value : Number(value);
-  return Number.isFinite(parsed) ? parsed.toLocaleString('ar-EG') : String(value);
+  return Number.isFinite(parsed) ? parsed.toLocaleString('en-US') : String(value);
 };
 
 const formatDate = (value: OrderChangeJsonValue, withTime: boolean) => {
@@ -56,6 +56,7 @@ export const customVariantsText = (value: OrderChangeJsonValue) => {
 };
 
 const jsonText = (value: OrderChangeJsonValue) => {
+  if (Array.isArray(value) && value.length === 0) return EMPTY_CHANGE_VALUE;
   const variants = customVariantsText(value);
   if (variants) return variants;
   if (typeof value === 'string' || typeof value === 'number') return String(value);

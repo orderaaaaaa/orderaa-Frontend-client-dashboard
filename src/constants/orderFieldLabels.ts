@@ -1,8 +1,13 @@
 import type { OrderPaymentStatus } from '@/types/missing-orders';
-import type { OrderChangeOrigin } from '@/types/orderChangeHistory';
+import type {
+  OrderChangeField,
+  OrderChangeOrigin,
+  OrderPaymentMethod,
+  OrderSettlementRecordType,
+} from '@/types/orderChangeHistory';
 import { ShippingType } from '@/types/orders';
 
-export const ORDER_FIELD_LABELS: Record<string, string> = {
+export const ORDER_FIELD_LABELS: Record<OrderChangeField, string> = {
   status: 'حالة الطلب',
   code: 'كود الطلب',
   customerId: 'العميل',
@@ -48,8 +53,8 @@ export const ORDER_FIELD_LABELS: Record<string, string> = {
   delegateName: 'اسم المندوب',
   delegatePhone: 'هاتف المندوب',
   isPrinted: 'تمت الطباعة',
-  isShadowed: 'معلق (فوترة)',
-  parkedAt: 'تاريخ الإيقاف',
+  isShadowed: 'محجوب (رصيد غير كافٍ)',
+  parkedAt: 'تاريخ التعليق',
   lines: 'المنتجات',
   'line.variant': 'خيار المنتج',
   'line.price': 'سعر المنتج',
@@ -64,7 +69,9 @@ export const ORDER_FIELD_LABELS: Record<string, string> = {
 };
 
 export const orderFieldLabelOf = (field: string) =>
-  Object.prototype.hasOwnProperty.call(ORDER_FIELD_LABELS, field) ? ORDER_FIELD_LABELS[field] : field;
+  Object.prototype.hasOwnProperty.call(ORDER_FIELD_LABELS, field)
+    ? ORDER_FIELD_LABELS[field as OrderChangeField]
+    : field;
 
 export const ORDER_CHANGE_ORIGIN_LABELS: Record<OrderChangeOrigin, string> = {
   ORDER_EDIT: 'تعديل الطلب',
@@ -84,7 +91,7 @@ export const ORDER_CHANGE_ORIGIN_LABELS: Record<OrderChangeOrigin, string> = {
   PARTIAL_DELIVERY: 'تسليم جزئي',
   FOLLOWUP_CHANGE_PRODUCTS: 'متابعة: تغيير المنتجات',
   FOLLOWUP_CANCEL: 'متابعة: إلغاء',
-  PARKED_RELEASE: 'إطلاق طلب موقوف',
+  PARKED_RELEASE: 'إطلاق طلب معلّق',
   BILLING_ACTIVATION: 'تفعيل بالفوترة',
   CUSTOMER_EDIT: 'تعديل العميل',
   CUSTOMER_MERGE: 'دمج العملاء',
@@ -107,7 +114,7 @@ export const ORDER_PAYMENT_STATUS_LABELS: Record<OrderPaymentStatus, string> = {
   PARTIALLY_PAID: 'مدفوع جزئياً',
 };
 
-export const ORDER_PAYMENT_METHOD_LABELS: Record<string, string> = {
+export const ORDER_PAYMENT_METHOD_LABELS: Record<OrderPaymentMethod, string> = {
   CASH: 'كاش',
   VISA_CARD: 'بطاقة ائتمان',
   INSTAPAY: 'انستا باي',
@@ -121,7 +128,7 @@ export const ORDER_SHIPPING_TYPE_LABELS: Record<ShippingType, string> = {
   [ShippingType.PARTIAL_RETURN]: 'تسليم جزئي',
 };
 
-export const SETTLEMENT_RECORD_TYPE_LABELS: Record<string, string> = {
+export const SETTLEMENT_RECORD_TYPE_LABELS: Record<OrderSettlementRecordType, string> = {
   EXCEL: 'ملف إكسل',
   ADJUST: 'تسوية يدوية',
   EDIT: 'تعديل المبلغ',

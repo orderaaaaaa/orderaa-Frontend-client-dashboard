@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { useOrderChangeHistory } from '@/services/orderChangeHistory';
+import type { Order } from '@/types/orders';
 import { getApiErrorStatus } from '@/utils/apiError';
 import { OrderChangeBatchItem } from './OrderChangeBatchItem';
 
@@ -20,11 +21,21 @@ function HistoryCard({ children }: { children: React.ReactNode }) {
 }
 
 export interface OrderChangeHistoryCardProps {
-  orderId: number;
+  order: Order;
 }
 
-function OrderChangeHistoryCard({ orderId }: OrderChangeHistoryCardProps) {
+function OrderChangeHistoryCard({ order }: OrderChangeHistoryCardProps) {
   const { getStatusLabel } = useStatusLabel();
+  const orderProducts = order.order_products;
+  const lineProductNames = useMemo(
+    () =>
+      new Map(
+        (orderProducts ?? []).flatMap((line) =>
+          line.products?.name ? [[line.id, line.products.name] as const] : []
+        )
+      ),
+    [orderProducts]
+  );
   const {
     data,
     error,
@@ -35,7 +46,7 @@ function OrderChangeHistoryCard({ orderId }: OrderChangeHistoryCardProps) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useOrderChangeHistory(orderId);
+  } = useOrderChangeHistory(order.id);
 
   if (isError) {
     const status = getApiErrorStatus(error);
@@ -80,7 +91,12 @@ function OrderChangeHistoryCard({ orderId }: OrderChangeHistoryCardProps) {
       ) : (
         <div className="flex flex-col gap-3">
           {batches.map((batch) => (
-            <OrderChangeBatchItem key={batch.id} batch={batch} getStatusLabel={getStatusLabel} />
+            <OrderChangeBatchItem
+              key={batch.id}
+              batch={batch}
+              getStatusLabel={getStatusLabel}
+              lineProductNames={lineProductNames}
+            />
           ))}
           {hasNextPage && (
             <Button
