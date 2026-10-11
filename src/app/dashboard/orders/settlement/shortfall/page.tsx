@@ -206,7 +206,7 @@ export default function ShortfallSettlementPage() {
                             onChange={(e) =>
                               handleAdjustAmountChange(row.id, e.target.value)
                             }
-                            className="w-28 border border-gray-200 rounded-md px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 disabled:opacity-50"
+                            className="w-28 border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 disabled:opacity-50"
                             disabled={adjustingId === row.id}
                           />
                           <Button

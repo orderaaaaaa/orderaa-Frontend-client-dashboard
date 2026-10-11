@@ -25,6 +25,7 @@ function ChargeModal({ open, onOpenChange }: ChargeModalProps) {
   const queryClient = useQueryClient();
   const [blockedSessionUrl, setBlockedSessionUrl] = useState<string | null>(null);
   const safetyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sessionCreatedRef = useRef(false);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -74,6 +75,7 @@ function ChargeModal({ open, onOpenChange }: ChargeModalProps) {
 
     try {
       const session = await topUpMutation.mutateAsync(optionId);
+      sessionCreatedRef.current = true;
 
       // Open Kashier payment page in popup
       const popup = window.open(
@@ -128,6 +130,10 @@ function ChargeModal({ open, onOpenChange }: ChargeModalProps) {
       setStatusMessage(null);
       setBlockedSessionUrl(null);
       stopPopupCheck();
+      if (sessionCreatedRef.current) {
+        sessionCreatedRef.current = false;
+        refreshWalletData();
+      }
     }
     onOpenChange(newOpen);
   };

@@ -158,7 +158,14 @@ export function GovernorateConfigTable({
   }
 
   return (
-    <div className="space-y-4">
+    <div
+      className="space-y-4"
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' && event.target instanceof HTMLInputElement) {
+          event.preventDefault();
+        }
+      }}
+    >
       {!fields.length ? (
         <div className="text-center py-8 text-gray-500 text-sm">
           لا توجد محافظات متاحة حاليًا.
