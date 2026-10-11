@@ -27,6 +27,8 @@ import { storeApi } from '../api/Integrations';
 import {
   IntegrationConfigType,
   IntegrationResponse,
+  LIGHTFUNNELS_WEBHOOK_MODE,
+  type LightfunnelsWebhookMode,
 } from '../types/apiIntegration';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from 'react-toastify';
@@ -45,6 +47,9 @@ import { buildWebhookUrl, generateWebhookToken } from '../utils/webhookToken';
 import { useLightfunnelsConnections } from '../hooks/useLightfunnelsConnections';
 import LightfunnelsConnectForm from './LightfunnelsConnectForm';
 import LightfunnelsConnectionBadge from './LightfunnelsConnectionBadge';
+import LightfunnelsWebhookModeSelect, {
+  LIGHTFUNNELS_WEBHOOK_MODE_LABEL,
+} from './LightfunnelsWebhookModeSelect';
 
 const storeInfoSchema = z.object({
   storeName: z.string().min(1, 'اسم المتجر مطلوب'),
@@ -110,6 +115,10 @@ const IntegrationModal = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  const [webhookMode, setWebhookMode] = useState<LightfunnelsWebhookMode>(
+    LIGHTFUNNELS_WEBHOOK_MODE.MANUAL
+  );
+  const [webhookSaved, setWebhookSaved] = useState(false);
   const stepperRef = useRef<HTMLDivElement>(null);
 
   const { integrations, createIntegration } = useIntegrations();
@@ -130,6 +139,12 @@ const IntegrationModal = ({
   const hasGeneratedToken = usesGeneratedWebhookToken(config);
 
   const { findConnection } = useLightfunnelsConnections({ enabled: isOAuthConnect });
+
+  const isAutomaticWizard =
+    isOAuthConnect && webhookMode === LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC;
+  const automaticGuideSteps =
+    showStepper && isAutomaticWizard ? config.automaticWebhookSteps : undefined;
+  const guideWebhookSteps = automaticGuideSteps ?? config.webhookSteps;
 
   const getWebhookUrl = (storeId: number, token?: string): string =>
     buildWebhookUrl(API_URL, config.provider, storeId, token);
@@ -197,14 +212,16 @@ const IntegrationModal = ({
         return;
       }
 
-      await createIntegration({
-        storeId: createdStoreId,
-        provider: config.provider,
-        configType: IntegrationConfigType.WEBHOOK,
-        apiKey: data.webhookSecret.trim(),
-      });
-
-      toast.success('تم حفظ اعدادات الـ Webhook بنجاح');
+      if (!webhookSaved) {
+        await createIntegration({
+          storeId: createdStoreId,
+          provider: config.provider,
+          configType: IntegrationConfigType.WEBHOOK,
+          apiKey: data.webhookSecret.trim(),
+        });
+        setWebhookSaved(true);
+        toast.success('تم حفظ اعدادات الـ Webhook بنجاح');
+      }
       if (isWebhookOnly) {
         onSuccess();
         setShowStepper(false);
@@ -261,11 +278,19 @@ const IntegrationModal = ({
     resetForms();
   };
 
+  const handleSkipAutomatic = () => {
+    setError('');
+    setWebhookMode(LIGHTFUNNELS_WEBHOOK_MODE.MANUAL);
+    setCurrentStep(1);
+  };
+
   const resetForms = () => {
     storeInfoForm.reset();
     webhookForm.reset();
     apiKeyForm.reset();
     setCreatedStoreId(null);
+    setWebhookMode(LIGHTFUNNELS_WEBHOOK_MODE.MANUAL);
+    setWebhookSaved(false);
   };
 
   const handleClose = () => {
@@ -335,12 +360,14 @@ const IntegrationModal = ({
             <div className="flex items-center gap-2 mb-4">
               <LiaLinkSolid className="w-5 h-5 text-primary" />
               <h4 className="font-semibold text-gray-900">
-                خطوات ربط الـ Webhook
+                {automaticGuideSteps
+                  ? 'خطوات الربط التلقائي'
+                  : 'خطوات ربط الـ Webhook'}
               </h4>
             </div>
             <div className="relative">
               <div className="absolute right-[11px] top-3 bottom-3" />
-              {config.webhookSteps.map((step, i) => (
+              {guideWebhookSteps.map((step, i) => (
                 <div
                   key={i}
                   className="relative flex items-start gap-3 pb-4 last:pb-0"
@@ -449,6 +476,20 @@ const IntegrationModal = ({
               <StepContent>
                 <form onSubmit={onWebhookSubmit} className="space-y-4">
                   <div className="space-y-4 bg-white p-5 rounded-xl border border-gray-100">
+                    {isOAuthConnect && (
+                      <LightfunnelsWebhookModeSelect
+                        value={webhookMode}
+                        onChange={setWebhookMode}
+                        disabled={isLoading}
+                        showOrdersConsentHint
+                      />
+                    )}
+
+                    {isAutomaticWizard ? (
+                      <p className="text-sm text-gray-600 bg-gray-50 border border-gray-100 rounded-lg p-3">
+                        لا حاجة لنسخ رابط. في الخطوة التالية أدخل Client ID وClient Secret ووافق على الصلاحيات، ثم نسجّل الـ Webhooks في Lightfunnels تلقائياً.
+                      </p>
+                    ) : (
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="block font-medium text-base">
@@ -477,6 +518,7 @@ const IntegrationModal = ({
                         disabled
                       />
                     </div>
+                    )}
 
                     {!hasGeneratedToken && (
                       <Input
@@ -503,15 +545,27 @@ const IntegrationModal = ({
                           ? 'حفظ'
                           : 'التالي'}
                     </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setCurrentStep(0)}
-                      disabled={isLoading}
-                      className="h-10 px-6"
-                    >
-                      رجوع
-                    </Button>
+                    {webhookSaved ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleSkipApi}
+                        disabled={isLoading}
+                        className="h-10 px-6"
+                      >
+                        إنهاء
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setCurrentStep(0)}
+                        disabled={isLoading}
+                        className="h-10 px-6"
+                      >
+                        رجوع
+                      </Button>
+                    )}
                   </div>
                 </form>
               </StepContent>
@@ -522,8 +576,11 @@ const IntegrationModal = ({
                   <LightfunnelsConnectForm
                     storeId={createdStoreId}
                     submitLabel="ربط Lightfunnels"
-                    onCancel={handleSkipApi}
-                    cancelLabel="تخطي الآن"
+                    webhookMode={webhookMode}
+                    onCancel={isAutomaticWizard ? handleSkipAutomatic : handleSkipApi}
+                    cancelLabel={
+                      isAutomaticWizard ? 'تخطي واستخدام الربط اليدوي' : 'تخطي الآن'
+                    }
                   />
                 )}
               </StepContent>
@@ -713,6 +770,12 @@ const IntegrationModal = ({
                             <div className="flex items-center justify-between">
                               <span className="text-sm text-gray-600">حالة الربط</span>
                               <LightfunnelsConnectionBadge status={lfConnection.status} />
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-600">استقبال الطلبات</span>
+                              <span className="text-sm text-gray-800">
+                                {LIGHTFUNNELS_WEBHOOK_MODE_LABEL[lfConnection.webhookMode]}
+                              </span>
                             </div>
                           </div>
                         )}

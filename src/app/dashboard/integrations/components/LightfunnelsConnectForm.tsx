@@ -12,7 +12,11 @@ import {
   useLightfunnelsConnections,
   useLightfunnelsRedirectUri,
 } from '../hooks/useLightfunnelsConnections';
-import type { LightfunnelsConnection } from '../types/apiIntegration';
+import {
+  LIGHTFUNNELS_WEBHOOK_MODE,
+  type LightfunnelsConnection,
+  type LightfunnelsWebhookMode,
+} from '../types/apiIntegration';
 
 const CONNECT_FALLBACK_ERROR = 'تعذر بدء الربط مع Lightfunnels';
 const CLIENT_SECRET_REQUIRED = 'أدخل Client Secret الخاص بتطبيقك في Lightfunnels';
@@ -53,6 +57,7 @@ interface LightfunnelsConnectFormProps {
   onCancel?: () => void;
   cancelLabel?: string;
   disabled?: boolean;
+  webhookMode?: LightfunnelsWebhookMode;
 }
 
 export default function LightfunnelsConnectForm({
@@ -62,6 +67,7 @@ export default function LightfunnelsConnectForm({
   onCancel,
   cancelLabel,
   disabled = false,
+  webhookMode,
 }: LightfunnelsConnectFormProps) {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
@@ -80,6 +86,12 @@ export default function LightfunnelsConnectForm({
   const watchedClientId = form.watch('clientId');
   const secretRequired = isLightfunnelsSecretRequired(connection, watchedClientId ?? '');
   const isBusy = disabled || isConnecting || isRedirecting;
+  const consentMode =
+    webhookMode ?? connection?.webhookMode ?? LIGHTFUNNELS_WEBHOOK_MODE.MANUAL;
+  const requiredScopes =
+    consentMode === LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC
+      ? redirect.automaticScopes
+      : redirect.scopes;
 
   const handleCopy = () => {
     if (!redirect.redirectUri) return;
@@ -96,6 +108,7 @@ export default function LightfunnelsConnectForm({
         storeId,
         clientId: data.clientId.trim(),
         ...(clientSecret !== '' && { clientSecret }),
+        ...(webhookMode && { webhookMode }),
       });
       setIsRedirecting(true);
       window.location.assign(authorizeUrl);
@@ -143,9 +156,9 @@ export default function LightfunnelsConnectForm({
             }
             disabled
           />
-          {redirect.scopes && (
+          {requiredScopes && (
             <p className="text-xs text-gray-500 mt-2">
-              الصلاحية المطلوبة: <span className="font-mono">{redirect.scopes}</span>
+              الصلاحية المطلوبة: <span className="font-mono">{requiredScopes}</span>
             </p>
           )}
         </div>
