@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import AuthHeader from './AuthHeader';
 import AuthSwitch from './AuthSwitch';
@@ -46,13 +47,15 @@ export default function AuthForm({
             </Alert>
           )}
           {children}
-          <button
+          <Button
             type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-primary text-white py-2.5 rounded-lg transition disabled:opacity-60"
+            size="xl"
+            loading={isSubmitting}
+            loadingText={submitButtonLoadingText}
+            className="w-full"
           >
-            {isSubmitting ? submitButtonLoadingText : submitButtonText}
-          </button>
+            {submitButtonText}
+          </Button>
         </form>
 
         {showSwitch && <AuthSwitch goTo={switchGoTo} />}

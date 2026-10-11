@@ -16,7 +16,6 @@ This directory contains all authentication-related pages and components using Ne
 │   ├── index.ts       # Barrel export for all hooks
 │   ├── useAuthData.ts # Loads categories and governorates
 │   ├── useCities.ts   # Loads cities based on governorate
-│   └── useOTP.ts      # OTP input handling
 ├── signin/
 │   ├── page.tsx       # Sign in page
 │   └── schema.ts      # Zod validation schema
@@ -98,24 +97,6 @@ Loads cities dynamically based on selected governorate.
 **Returns:**
 - `cities`: Array of city options
 - `loadingCities`: Loading state
-
-### useOTP
-
-Handles OTP input with:
-- Auto-focus on next input
-- Backspace navigation
-- Arrow key navigation
-- Paste support
-
-**Parameters:**
-- `length`: Number of OTP digits (default: 6)
-
-**Returns:**
-- `otp`: Array of OTP values
-- `handleOtpChange()`: Handle input change
-- `handleOtpKeyDown()`: Handle keyboard navigation
-- `handleOtpPaste()`: Handle paste
-- `resetOtp()`: Reset all OTP inputs
 
 ## File Colocation
 
