@@ -7,7 +7,7 @@ import {
   queryOptions,
   QueryKey,
 } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import {
   invalidateAndWait,
@@ -150,13 +150,43 @@ export const useOrderById = (id: number | null) => {
     ...orderDetailsQueryOptions(id),
     enabled: !!id,
   });
+  const arrivalRef = useRef<{
+    id: number | null;
+    at: number;
+    prefetchedAt: number | undefined;
+  } | null>(null);
+  if (arrivalRef.current === null || arrivalRef.current.id !== id) {
+    arrivalRef.current = {
+      id,
+      at: Date.now(),
+      prefetchedAt:
+        navigationPrefetch?.id === id
+          ? navigationPrefetch.dataUpdatedAt
+          : undefined,
+    };
+  }
+  const arrival = arrivalRef.current;
+  useEffect(() => {
+    if (navigationPrefetch?.id === id) {
+      navigationPrefetch = null;
+    }
+  }, [id]);
+  const isDisplayable =
+    query.data !== undefined &&
+    (query.dataUpdatedAt >= arrival.at ||
+      query.dataUpdatedAt === arrival.prefetchedAt);
   const data = useHeldUntilSettled(
-    query.data,
+    isDisplayable ? query.data : undefined,
     query.dataUpdatedAt,
     [[QUERY_KEYS.ORDER_STATISTICS]],
     id
   );
-  return { ...query, data };
+  return {
+    ...query,
+    data,
+    isLoading: data === undefined && (query.isLoading || query.isFetching),
+    liveData: query.data,
+  };
 };
 
 const ORDER_DETAILS_GC_TIME = 60 * 1000;
@@ -172,12 +202,27 @@ export const orderDetailsQueryOptions = (id: number | null) =>
     gcTime: ORDER_DETAILS_GC_TIME,
   });
 
+let navigationPrefetch: { id: number; dataUpdatedAt: number } | null = null;
+
 export const usePrefetchOrderDetails = () => {
   const queryClient = useQueryClient();
-  return useCallback(
+  const prefetchOrderDetails = useCallback(
     (id: number) => queryClient.prefetchQuery(orderDetailsQueryOptions(id)),
     [queryClient]
   );
+  const claimPrefetchedOrderDetails = useCallback(
+    (id: number) => {
+      const state = queryClient.getQueryState<Order>(
+        orderDetailsQueryOptions(id).queryKey
+      );
+      navigationPrefetch =
+        state?.data !== undefined
+          ? { id, dataUpdatedAt: state.dataUpdatedAt }
+          : null;
+    },
+    [queryClient]
+  );
+  return { prefetchOrderDetails, claimPrefetchedOrderDetails };
 };
 
 // Fetch customer orders by phone number

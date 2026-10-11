@@ -29,7 +29,7 @@ const isLockSkipped = (
 ): response is LockOrderSkippedResponse =>
   'skipped' in response && response.skipped === true;
 
-const LOCK_REFUSAL_STATUSES = new Set([400, 409]);
+const LOCK_REFUSAL_STATUSES = new Set([400]);
 const MAX_LOCK_ATTEMPTS = 2;
 
 const isLockRefusal = (error: unknown) =>
@@ -144,7 +144,9 @@ export function useOrderLock({
     canAcquireLock &&
     (wantsAcquire ||
       phase === 'acquiring' ||
-      (phase === 'refused' && !isFresh));
+      (phase === 'refused' &&
+        (!isFresh ||
+          (!freshLockedByOther && attempts < MAX_LOCK_ATTEMPTS))));
 
   const hasLock = phase === 'held';
 

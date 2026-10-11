@@ -33,6 +33,7 @@ interface OrderDetailsInfoComponentProps {
   navigationFilters?: FilterOrdersDto;
   onUnlock?: () => Promise<void>;
   isLockPending?: boolean;
+  isLockedByOther?: boolean;
 }
 
 const ACTION_NOT_APPLIED = 'ACTION_NOT_APPLIED';
@@ -46,7 +47,11 @@ function OrderDetailsInfoComponent({
   navigationFilters,
   onUnlock,
   isLockPending = false,
+  isLockedByOther = false,
 }: OrderDetailsInfoComponentProps) {
+  const [deferredIntent, setDeferredIntent] = useState<(() => void) | null>(
+    null
+  );
   const [confirmationDialog, setConfirmationDialog] = useState<{
     isOpen: boolean;
     title: string;
@@ -123,7 +128,23 @@ function OrderDetailsInfoComponent({
   });
 
   const { updateField, updateFields } = useOrderFieldUpdate(order.id);
-  const isInteractionBlocked = isLockPending || actions.isTransitioning;
+
+  const runWhenLockSettles = (intent: () => void) => {
+    if (actions.isTransitioning) return;
+    if (isLockPending) {
+      setDeferredIntent(() => intent);
+      return;
+    }
+    intent();
+  };
+
+  useEffect(() => {
+    if (isLockPending || deferredIntent === null) return;
+    setDeferredIntent(null);
+    if (!isLockedByOther) {
+      deferredIntent();
+    }
+  }, [isLockPending, isLockedByOther, deferredIntent]);
 
   /**
    * T27 — the out-of-stock confirmation gate, mirrored into the UI.
@@ -161,28 +182,30 @@ function OrderDetailsInfoComponent({
     return sortedEvents[0]?.name;
   }, [order.order_events]);
 
-  const handleConfirmClick = () => {
-    if (isInteractionBlocked) return;
-    setConfirmationDialog({
-      isOpen: true,
-      title: 'تأكيد الطلب',
-      message: 'هل أنت متأكد من تأكيد هذا الطلب؟',
-      action: 'confirm',
-    });
-  };
+  const handleConfirmClick = () =>
+    runWhenLockSettles(() =>
+      setConfirmationDialog({
+        isOpen: true,
+        title: 'تأكيد الطلب',
+        message: 'هل أنت متأكد من تأكيد هذا الطلب؟',
+        action: 'confirm',
+      })
+    );
 
-  const handleFollowUpClick = (label: string, action: string) => {
-    if (isInteractionBlocked) return;
-    setConfirmationDialog({
-      isOpen: true,
-      title: `تأكيد ${label}`,
-      message: `هل أنت متأكد من ${label} لهذا الطلب؟`,
-      action: action,
-    });
-  };
+  const handleFollowUpClick = (label: string, action: string) =>
+    runWhenLockSettles(() =>
+      setConfirmationDialog({
+        isOpen: true,
+        title: `تأكيد ${label}`,
+        message: `هل أنت متأكد من ${label} لهذا الطلب؟`,
+        action: action,
+      })
+    );
 
-  const handleActionClick = (label: string, action: string) => {
-    if (isInteractionBlocked) return;
+  const handleActionClick = (label: string, action: string) =>
+    runWhenLockSettles(() => openAction(label, action));
+
+  const openAction = (label: string, action: string) => {
     switch (action) {
       case 'urgent':
         modals.urgent.open();

@@ -77,7 +77,15 @@ function buildApiFilters(
 
 export function useOrderDetailsNavigation(): UseOrderDetailsNavigationReturn {
   const { fetchOrdersForSearch } = useFetchOrdersForSearch();
-  const prefetchOrderDetails = usePrefetchOrderDetails();
+  const { prefetchOrderDetails, claimPrefetchedOrderDetails } =
+    usePrefetchOrderDetails();
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
   const pendingNavigationRef = useRef<{ url: string; done: Promise<void> } | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -424,6 +432,8 @@ export function useOrderDetailsNavigation(): UseOrderDetailsNavigationReturn {
     }
     router.prefetch(url);
     const done = prefetchOrderDetails(orderId).then(() => {
+      if (!isMountedRef.current) return;
+      claimPrefetchedOrderDetails(orderId);
       router.push(url);
     });
     pendingNavigationRef.current = { url, done };
@@ -432,7 +442,7 @@ export function useOrderDetailsNavigation(): UseOrderDetailsNavigationReturn {
         pendingNavigationRef.current = null;
       }
     });
-  }, [buildCurrentUrlParams, router, prefetchOrderDetails]);
+  }, [buildCurrentUrlParams, router, prefetchOrderDetails, claimPrefetchedOrderDetails]);
 
   const handleFilterFormChange = useCallback((data: OrderFiltersFormData) => {
     // Skip updates when syncing from URL to prevent loops

@@ -74,6 +74,7 @@ function OrderDetailsInfo({
         navigationFilters={navigationFilters}
         onUnlock={onUnlock}
         isLockPending={isLockPending}
+        isLockedByOther={isLockedByOther}
       />
     </section>
   );

@@ -34,6 +34,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
 
   const {
     data: order,
+    liveData,
     dataUpdatedAt,
     isLoading: loading,
     error: queryError,
@@ -51,7 +52,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
     isForceUnlocking,
   } = useOrderLock({
     orderId,
-    lockedBy: order?.locked_by,
+    lockedBy: liveData?.locked_by,
     lockedByUpdatedAt: dataUpdatedAt,
     enabled: !!order,
   });
