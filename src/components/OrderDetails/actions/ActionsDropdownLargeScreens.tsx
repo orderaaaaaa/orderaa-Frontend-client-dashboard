@@ -33,6 +33,7 @@ export interface OrderActionsFooterProps {
    */
   canConfirmStock?: boolean;
   stockBlockReason?: string;
+  isBusy?: boolean;
 }
 
 export function OrderActionsFooterLargeScreens({
@@ -47,6 +48,7 @@ export function OrderActionsFooterLargeScreens({
   isNavigatingPrevious = false,
   canConfirmStock = true,
   stockBlockReason,
+  isBusy = false,
 }: OrderActionsFooterProps) {
   // Confirm / follow-up / the actions menu all mutate the order: everything but
   // `cancel` patches it (`orders:update`), cancel posts to /cancel.
@@ -92,7 +94,7 @@ export function OrderActionsFooterLargeScreens({
           <Button
             variant="outline"
             onClick={onNavigatePrevious}
-            disabled={isNavigatingPrevious || !onNavigatePrevious}
+            disabled={isBusy || isNavigatingPrevious || !onNavigatePrevious}
             className="w-10 h-10 p-0 rounded-full border-2 border-gray-300 hover:border-primary hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             title="الطلب السابق"
           >
@@ -106,7 +108,7 @@ export function OrderActionsFooterLargeScreens({
           <Button
             variant="outline"
             onClick={onNavigateNext}
-            disabled={isNavigatingNext || !onNavigateNext}
+            disabled={isBusy || isNavigatingNext || !onNavigateNext}
             className="w-10 h-10 p-0 rounded-full border-2 border-gray-300 hover:border-primary hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             title="الطلب التالي"
           >
@@ -122,6 +124,7 @@ export function OrderActionsFooterLargeScreens({
           <Button
             variant="default"
             onClick={() => onActionClick('وقف التشغيل', 'stop_operation')}
+            loading={isBusy}
             className="py-2 px-10 rounded-2xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-all duration-700 hover:scale-105 flex items-center gap-2"
           >
             <LiaStopCircleSolid className="w-5 h-5" />
@@ -135,6 +138,7 @@ export function OrderActionsFooterLargeScreens({
                   variant="default"
                   onClick={onConfirm}
                   disabled={!canConfirmStock}
+                  loading={isBusy}
                   title={canConfirmStock ? undefined : stockBlockReason}
                   className="py-2 px-10 rounded-2xl bg-primary text-white text-sm font-bold hover:bg-[#4B1BC4] transition-all duration-700 hover:scale-105 flex items-center gap-2 disabled:opacity-40 disabled:hover:scale-100"
                 >
@@ -148,6 +152,7 @@ export function OrderActionsFooterLargeScreens({
                   <Button
                     variant="outline"
                     onClick={handleFollowUpToggle}
+                    disabled={isBusy}
                     className="py-2 px-10 border-2 rounded-2xl border-primary text-primary text-sm font-bold hover:bg-purple-50 transition-colors flex items-center gap-2"
                   >
                     <LiaCommentDotsSolid className="w-5 h-5" />
@@ -164,6 +169,7 @@ export function OrderActionsFooterLargeScreens({
               <Button
                 variant="ghost"
                 onClick={handleActionsToggle}
+                disabled={isBusy}
                 className="w-9 h-9 p-0 rounded-full border-2 border-primary hover:bg-purple-50 transition-colors"
               >
                 <LiaAngleDownSolid

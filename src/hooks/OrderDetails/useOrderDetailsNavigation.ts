@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { FilterOrdersDto } from '@/types/orders';
 import { OrderFiltersFormData } from '@/schemas/orderFilters.schema';
-import { useFetchOrdersForSearch } from '@/services/orders';
+import { useFetchOrdersForSearch, usePrefetchOrderDetails } from '@/services/orders';
 import { TimePeriod, calculateDateRangeFromPeriod, formatLocalStartOfDay, formatLocalEndOfDay } from '@/utils/dateRangeUtils';
 import { useDebounce, useDebouncedCallback } from '@/utils/debounce';
 import { toast } from 'react-toastify';
@@ -11,10 +11,6 @@ import {
   formatDateForUrl,
   parseDateFromUrl,
 } from '@/utils/urlFilters';
-
-interface UseOrderDetailsNavigationOptions {
-  initialOrderId: number;
-}
 
 interface UseOrderDetailsNavigationReturn {
   status: string | null;
@@ -34,7 +30,7 @@ interface UseOrderDetailsNavigationReturn {
 
   formFilters: OrderFiltersFormData | null;
   handleFilterFormChange: (data: OrderFiltersFormData) => void;
-  navigateToOrder: (orderId: number) => void;
+  navigateToOrder: (orderId: number) => Promise<void>;
   apiFilters: FilterOrdersDto;
 }
 
@@ -79,10 +75,18 @@ function buildApiFilters(
   return filters;
 }
 
-export function useOrderDetailsNavigation({
-  initialOrderId,
-}: UseOrderDetailsNavigationOptions): UseOrderDetailsNavigationReturn {
+export function useOrderDetailsNavigation(): UseOrderDetailsNavigationReturn {
   const { fetchOrdersForSearch } = useFetchOrdersForSearch();
+  const { prefetchOrderDetails, claimPrefetchedOrderDetails } =
+    usePrefetchOrderDetails();
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+  const pendingNavigationRef = useRef<{ url: string; done: Promise<void> } | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -423,8 +427,23 @@ export function useOrderDetailsNavigation({
     const url = paramsString
       ? `/dashboard/orders/${orderId}?${paramsString}`
       : `/dashboard/orders/${orderId}`;
-    router.push(url);
-  }, [buildCurrentUrlParams, router]);
+    if (pendingNavigationRef.current?.url === url) {
+      return pendingNavigationRef.current.done;
+    }
+    router.prefetch(url);
+    const prefetchStartedAt = Date.now();
+    const done = prefetchOrderDetails(orderId).then(() => {
+      if (!isMountedRef.current) return;
+      claimPrefetchedOrderDetails(orderId, prefetchStartedAt);
+      router.push(url);
+    });
+    pendingNavigationRef.current = { url, done };
+    return done.finally(() => {
+      if (pendingNavigationRef.current?.done === done) {
+        pendingNavigationRef.current = null;
+      }
+    });
+  }, [buildCurrentUrlParams, router, prefetchOrderDetails, claimPrefetchedOrderDetails]);
 
   const handleFilterFormChange = useCallback((data: OrderFiltersFormData) => {
     // Skip updates when syncing from URL to prevent loops

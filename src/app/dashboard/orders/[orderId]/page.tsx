@@ -29,22 +29,33 @@ import { toast } from 'react-toastify';
 import { getApiErrorMessage } from '@/utils/apiError';
 
 function OrderDetailsContent({ params }: { params: { orderId: string } }) {
-  const orderId = parseInt(params.orderId);
+  const parsedOrderId = parseInt(params.orderId);
+  const orderId = Number.isFinite(parsedOrderId) ? parsedOrderId : null;
 
   const {
     data: order,
+    liveData,
+    dataUpdatedAt,
     isLoading: loading,
     error: queryError,
   } = useOrderById(orderId);
 
   const error = queryError ? 'فشل في تحميل بيانات الطلب' : null;
 
-  const { isLockedByOther, lockedBy, bypassedLockedBy, unlock, forceUnlock, isForceUnlocking } =
-    useOrderLock({
-      orderId: order?.id ?? null,
-      lockedBy: order?.locked_by,
-      enabled: !!order,
-    });
+  const {
+    isLockedByOther,
+    lockedBy,
+    bypassedLockedBy,
+    isLockPending,
+    unlock,
+    forceUnlock,
+    isForceUnlocking,
+  } = useOrderLock({
+    orderId,
+    lockedBy: liveData?.locked_by,
+    lockedByUpdatedAt: dataUpdatedAt,
+    enabled: !!order,
+  });
 
   const handleForceUnlock = async () => {
     try {
@@ -75,9 +86,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
     handleFilterFormChange,
     navigateToOrder,
     apiFilters,
-  } = useOrderDetailsNavigation({
-    initialOrderId: orderId,
-  });
+  } = useOrderDetailsNavigation();
 
   const {
     control,
@@ -368,6 +377,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
           onForceUnlock={handleForceUnlock}
           isForceUnlocking={isForceUnlocking}
           onUnlock={unlock}
+          isLockPending={isLockPending}
         />
       </div>
 

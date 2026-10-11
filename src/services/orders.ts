@@ -4,8 +4,10 @@ import {
   useInfiniteQuery,
   useQueryClient,
   keepPreviousData,
+  queryOptions,
   QueryKey,
 } from '@tanstack/react-query';
+import { useCallback, useEffect, useRef } from 'react';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import {
   invalidateAndWait,
@@ -145,22 +147,82 @@ export const useDepartmentStatusesQuery = (department: string | null) => {
 // Fetch a single order by ID
 export const useOrderById = (id: number | null) => {
   const query = useQuery({
+    ...orderDetailsQueryOptions(id),
+    enabled: !!id,
+  });
+  const arrivalRef = useRef<{
+    id: number | null;
+    at: number;
+    prefetchedAt: number | undefined;
+  } | null>(null);
+  if (arrivalRef.current === null || arrivalRef.current.id !== id) {
+    arrivalRef.current = {
+      id,
+      at: Date.now(),
+      prefetchedAt:
+        navigationPrefetch?.id === id
+          ? navigationPrefetch.dataUpdatedAt
+          : undefined,
+    };
+  }
+  const arrival = arrivalRef.current;
+  useEffect(() => {
+    if (navigationPrefetch?.id === id) {
+      navigationPrefetch = null;
+    }
+  }, [id]);
+  const isDisplayable =
+    query.data !== undefined &&
+    (query.dataUpdatedAt >= arrival.at ||
+      query.dataUpdatedAt === arrival.prefetchedAt);
+  const data = useHeldUntilSettled(
+    isDisplayable ? query.data : undefined,
+    query.dataUpdatedAt,
+    [[QUERY_KEYS.ORDER_STATISTICS]],
+    id
+  );
+  return {
+    ...query,
+    data,
+    isLoading: data === undefined && (query.isLoading || query.isFetching),
+    liveData: query.data,
+  };
+};
+
+const ORDER_DETAILS_GC_TIME = 60 * 1000;
+
+export const orderDetailsQueryOptions = (id: number | null) =>
+  queryOptions({
     queryKey: [QUERY_KEYS.ORDER_DETAILS, id] as QueryKey,
     queryFn: async () => {
       const response = await http.get<Order>(`/orders/${id}`);
       return response.data;
     },
-    enabled: !!id,
     staleTime: 0,
-    gcTime: 0,
+    gcTime: ORDER_DETAILS_GC_TIME,
   });
-  const data = useHeldUntilSettled(
-    query.data,
-    query.dataUpdatedAt,
-    [[QUERY_KEYS.ORDER_STATISTICS]],
-    id
+
+let navigationPrefetch: { id: number; dataUpdatedAt: number } | null = null;
+
+export const usePrefetchOrderDetails = () => {
+  const queryClient = useQueryClient();
+  const prefetchOrderDetails = useCallback(
+    (id: number) => queryClient.prefetchQuery(orderDetailsQueryOptions(id)),
+    [queryClient]
   );
-  return { ...query, data };
+  const claimPrefetchedOrderDetails = useCallback(
+    (id: number, fetchedSince: number) => {
+      const state = queryClient.getQueryState<Order>(
+        orderDetailsQueryOptions(id).queryKey
+      );
+      navigationPrefetch =
+        state?.data !== undefined && state.dataUpdatedAt >= fetchedSince
+          ? { id, dataUpdatedAt: state.dataUpdatedAt }
+          : null;
+    },
+    [queryClient]
+  );
+  return { prefetchOrderDetails, claimPrefetchedOrderDetails };
 };
 
 // Fetch customer orders by phone number
@@ -229,10 +291,11 @@ export const useUpdateOrderProduct = () => {
       });
       return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDER_DETAILS] });
-    },
+    onSuccess: () =>
+      invalidateAndWait(queryClient, [
+        [QUERY_KEYS.ORDER_DETAILS],
+        [QUERY_KEYS.ORDERS],
+      ]),
   });
 };
 
@@ -247,10 +310,11 @@ export const useDeleteOrderProduct = () => {
       );
       return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDER_DETAILS] });
-    },
+    onSuccess: () =>
+      invalidateAndWait(queryClient, [
+        [QUERY_KEYS.ORDER_DETAILS],
+        [QUERY_KEYS.ORDERS],
+      ]),
   });
 };
 
@@ -277,10 +341,11 @@ export const useAddOrderProduct = () => {
       });
       return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDER_DETAILS] });
-    },
+    onSuccess: () =>
+      invalidateAndWait(queryClient, [
+        [QUERY_KEYS.ORDER_DETAILS],
+        [QUERY_KEYS.ORDERS],
+      ]),
   });
 };
 
@@ -309,11 +374,12 @@ export const useUpdateCustomer = () => {
       });
       return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDER_DETAILS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CUSTOMER_ORDERS] });
-    },
+    onSuccess: () =>
+      invalidateAndWait(queryClient, [
+        [QUERY_KEYS.ORDER_DETAILS],
+        [QUERY_KEYS.ORDERS],
+        [QUERY_KEYS.CUSTOMER_ORDERS],
+      ]),
   });
 };
 
