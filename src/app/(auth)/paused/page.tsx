@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { LiaPauseCircleSolid } from 'react-icons/lia';
 import AuthHeader from '../components/AuthHeader';
+import SupportWhatsAppButton from '../components/SupportWhatsAppButton';
 
 export default function PausedPage() {
   return (
@@ -19,6 +20,8 @@ export default function PausedPage() {
           <p className="text-center text-base text-[#878A99]">
             تم إيقاف المتجر مؤقتًا. تواصل مع الدعم.
           </p>
+
+          <SupportWhatsAppButton message="أحتاج مساعدة في: الحساب موقوف" />
 
           <Link
             href="/signin"

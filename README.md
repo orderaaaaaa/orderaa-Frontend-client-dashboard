@@ -28,3 +28,7 @@ Continue building your app on:
 2. Deploy your chats from the v0 interface
 3. Changes are automatically pushed to this repository
 4. Vercel deploys the latest version from this repository
+## Environment variables
+
+- `NEXT_PUBLIC_API_URL`: base URL of the backend API.
+- `NEXT_PUBLIC_SUPPORT_WHATSAPP`: support WhatsApp number in international format, digits only (for example `201283337434`). The «تواصل مع الدعم» button on the forgot-password and paused pages is shown only when it is set.

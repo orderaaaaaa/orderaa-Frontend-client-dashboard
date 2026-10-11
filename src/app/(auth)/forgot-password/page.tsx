@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { LiaLockSolid } from 'react-icons/lia';
 import PageLoading from '@/components/ui/page-loading';
 import AuthHeader from '../components/AuthHeader';
+import SupportWhatsAppButton from '../components/SupportWhatsAppButton';
 import { useAuthGuard } from '@/hooks/useAuthGuard';
 
 const CONTACT_SUPPORT_MESSAGE =
@@ -35,6 +36,8 @@ export default function ForgotPasswordPage() {
           <p className="text-center text-base text-[#878A99]">
             {CONTACT_SUPPORT_MESSAGE}
           </p>
+
+          <SupportWhatsAppButton message="أحتاج مساعدة في: استعادة كلمة المرور" />
 
           <Link
             href="/signin"

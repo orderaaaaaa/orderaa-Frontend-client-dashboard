@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
+import { toast } from 'react-toastify';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -62,9 +63,13 @@ export default function SignUpForm() {
   const { errors, isSubmitting } = formState;
   const selectedGovernorate = watch('governorate');
 
-  const { data: governorates = [] } = useGovernoratesQuery();
-  const { data: cities = [], isLoading: loadingCities } =
-    useCitiesQuery(selectedGovernorate);
+  const { data: governorates = [], isError: governoratesError } =
+    useGovernoratesQuery();
+  const {
+    data: cities = [],
+    isLoading: loadingCities,
+    isError: citiesError,
+  } = useCitiesQuery(selectedGovernorate);
   const { categories } = useCatigories();
 
   if (isChecking) {
@@ -78,7 +83,10 @@ export default function SignUpForm() {
         parsePhoneNumberFromString(values.phoneNumber, 'EG')?.number ??
         values.phoneNumber;
       const data = await signUp({ ...values, phoneNumber: phoneE164 });
-      if (data) router.push('/signin');
+      if (data) {
+        toast.success('تم إنشاء الحساب بنجاح، سجّل دخولك للمتابعة');
+        router.push('/signin');
+      }
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
       setError(e.response?.data?.message || 'حدث خطأ أثناء إنشاء الحساب.');
@@ -235,7 +243,10 @@ export default function SignUpForm() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FieldWrapper
                     label="المحافظة"
-                    error={errors.governorate?.message}
+                    error={
+                      errors.governorate?.message ||
+                      (governoratesError ? 'تعذر تحميل المحافظات' : undefined)
+                    }
                   >
                     <Controller
                       name="governorate"
@@ -257,7 +268,13 @@ export default function SignUpForm() {
                     />
                   </FieldWrapper>
 
-                  <FieldWrapper label="المدينة" error={errors.city?.message}>
+                  <FieldWrapper
+                    label="المدينة"
+                    error={
+                      errors.city?.message ||
+                      (citiesError ? 'تعذر تحميل المدن' : undefined)
+                    }
+                  >
                     <Controller
                       name="city"
                       control={control}
@@ -318,7 +335,7 @@ export default function SignUpForm() {
                 type="submit"
                 size="xl"
                 loading={isSubmitting}
-                loadingText="جار إنشاء الحساب..."
+                loadingText="جاري إنشاء الحساب..."
                 className="w-full"
               >
                 إنشاء حساب
@@ -373,11 +390,18 @@ function FieldWrapper({
   error?: string;
   children: React.ReactNode;
 }) {
+  const labelId = useId();
   return (
-    <div className="flex flex-col gap-1">
-      <label className="block font-medium text-base mb-2">{label}</label>
+    <div className="flex flex-col gap-1" role="group" aria-labelledby={labelId}>
+      <span id={labelId} className="block font-medium text-base mb-2">
+        {label}
+      </span>
       {children}
-      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+      {error && (
+        <p role="alert" className="text-xs text-red-500 mt-1">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
