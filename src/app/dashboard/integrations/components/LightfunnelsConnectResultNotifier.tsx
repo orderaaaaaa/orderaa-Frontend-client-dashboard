@@ -11,7 +11,7 @@ import {
 } from '../types/apiIntegration';
 import { useInvalidateLightfunnelsState } from '../hooks/useLightfunnelsConnections';
 
-type ToastKind = 'success' | 'info' | 'error';
+type ToastKind = 'success' | 'info' | 'warning' | 'error';
 
 export const LIGHTFUNNELS_CONNECT_RESULT_MESSAGE: Record<
   LightfunnelsConnectResult,
@@ -46,6 +46,18 @@ export const LIGHTFUNNELS_CONNECT_RESULT_MESSAGE: Record<
     kind: 'error',
     message: 'حدث خطأ أثناء ربط Lightfunnels، أعد المحاولة',
   },
+  WEBHOOK_REGISTRATION_FAILED: {
+    kind: 'warning',
+    message: 'تم الربط، لكن تعذر تسجيل الـ Webhooks تلقائياً. الربط يعمل يدوياً',
+  },
+  WEBHOOK_SWITCH_IN_PROGRESS: {
+    kind: 'info',
+    message: 'تم الربط، وعملية تبديل أخرى جارية',
+  },
+  WEBHOOK_SHARED_APP: {
+    kind: 'warning',
+    message: 'تم الربط، لكن نفس التطبيق مستخدم تلقائياً في متجر آخر',
+  },
 };
 
 const isConnectResult = (value: string): value is LightfunnelsConnectResult =>
@@ -54,6 +66,7 @@ const isConnectResult = (value: string): value is LightfunnelsConnectResult =>
 const showToast = (kind: ToastKind, message: string) => {
   if (kind === 'success') toast.success(message);
   else if (kind === 'info') toast.info(message);
+  else if (kind === 'warning') toast.warning(message);
   else toast.error(message);
 };
 

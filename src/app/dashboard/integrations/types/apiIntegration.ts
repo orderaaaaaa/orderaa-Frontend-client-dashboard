@@ -210,6 +210,39 @@ export const LIGHTFUNNELS_CONNECTION_STATUS = {
 export type LightfunnelsConnectionStatus =
   (typeof LIGHTFUNNELS_CONNECTION_STATUS)[keyof typeof LIGHTFUNNELS_CONNECTION_STATUS];
 
+export const LIGHTFUNNELS_WEBHOOK_MODE = {
+  MANUAL: 'MANUAL',
+  AUTOMATIC: 'AUTOMATIC',
+} as const;
+
+export type LightfunnelsWebhookMode =
+  (typeof LIGHTFUNNELS_WEBHOOK_MODE)[keyof typeof LIGHTFUNNELS_WEBHOOK_MODE];
+
+export const LIGHTFUNNELS_WEBHOOK_STATE = {
+  NONE: 'NONE',
+  SWITCHING: 'SWITCHING',
+  ACTIVE: 'ACTIVE',
+  FAILED: 'FAILED',
+  NEEDS_REREGISTER: 'NEEDS_REREGISTER',
+} as const;
+
+export type LightfunnelsWebhookState =
+  (typeof LIGHTFUNNELS_WEBHOOK_STATE)[keyof typeof LIGHTFUNNELS_WEBHOOK_STATE];
+
+export const LIGHTFUNNELS_WEBHOOK_ERROR_CODE = {
+  CONNECT_FIRST: 'LIGHTFUNNELS_CONNECT_FIRST',
+  RECONNECT_REQUIRED: 'LIGHTFUNNELS_RECONNECT_REQUIRED',
+  NOT_CONFIGURED: 'LIGHTFUNNELS_NOT_CONFIGURED',
+  SWITCH_IN_PROGRESS: 'LIGHTFUNNELS_WEBHOOK_SWITCH_IN_PROGRESS',
+  REGISTRATION_FAILED: 'LIGHTFUNNELS_WEBHOOK_REGISTRATION_FAILED',
+  ORDERS_SCOPE_MISSING: 'LIGHTFUNNELS_ORDERS_SCOPE_MISSING',
+  DELETE_FAILED: 'LIGHTFUNNELS_WEBHOOK_DELETE_FAILED',
+  AUTOMATIC_SHARED_APP: 'LIGHTFUNNELS_AUTOMATIC_SHARED_APP',
+} as const;
+
+export type LightfunnelsWebhookErrorCode =
+  (typeof LIGHTFUNNELS_WEBHOOK_ERROR_CODE)[keyof typeof LIGHTFUNNELS_WEBHOOK_ERROR_CODE];
+
 export interface LightfunnelsConnection {
   storeId: number;
   integrationConfigId: number | null;
@@ -219,12 +252,30 @@ export interface LightfunnelsConnection {
   connectedAt: string | null;
   accessTokenExpiresAt: string | null;
   lastErrorCode: string | null;
+  webhookMode: LightfunnelsWebhookMode;
+  webhookState: LightfunnelsWebhookState;
+  webhookLastErrorCode: string | null;
+  ordersConsentGranted: boolean;
+  registeredTopics: string[];
+  pendingDeletes: number;
+  abandonedDeletes: number;
 }
 
 export interface ConnectLightfunnelsRequest {
   storeId: number;
   clientId: string;
   clientSecret?: string;
+  webhookMode?: LightfunnelsWebhookMode;
+}
+
+export interface SetLightfunnelsWebhookModeRequest {
+  mode: LightfunnelsWebhookMode;
+}
+
+export interface SetLightfunnelsWebhookModeResponse {
+  consentRequired: boolean;
+  authorizeUrl: string | null;
+  connection: LightfunnelsConnection | null;
 }
 
 export interface LightfunnelsAuthorizeResponse {
@@ -234,6 +285,7 @@ export interface LightfunnelsAuthorizeResponse {
 export interface LightfunnelsRedirectUriResponse {
   redirectUri: string;
   scopes: string;
+  automaticScopes: string;
 }
 
 export const LIGHTFUNNELS_CONNECT_RESULT = {
@@ -244,6 +296,9 @@ export const LIGHTFUNNELS_CONNECT_RESULT = {
   EXCHANGE_FAILED: 'EXCHANGE_FAILED',
   SCOPE_MISSING: 'SCOPE_MISSING',
   FAILED: 'FAILED',
+  WEBHOOK_REGISTRATION_FAILED: 'WEBHOOK_REGISTRATION_FAILED',
+  WEBHOOK_SWITCH_IN_PROGRESS: 'WEBHOOK_SWITCH_IN_PROGRESS',
+  WEBHOOK_SHARED_APP: 'WEBHOOK_SHARED_APP',
 } as const;
 
 export type LightfunnelsConnectResult =

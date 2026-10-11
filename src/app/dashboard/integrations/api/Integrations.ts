@@ -17,6 +17,8 @@ import {
   ConnectLightfunnelsRequest,
   LightfunnelsAuthorizeResponse,
   LightfunnelsRedirectUriResponse,
+  SetLightfunnelsWebhookModeRequest,
+  SetLightfunnelsWebhookModeResponse,
 } from '../types/apiIntegration';
 
 export const storeApi = {
@@ -168,6 +170,17 @@ export const lightfunnelsApi = {
   ): Promise<LightfunnelsAuthorizeResponse> => {
     const response = await http.post<LightfunnelsAuthorizeResponse>(
       '/integrations/lightfunnels/connect',
+      data
+    );
+    return response.data;
+  },
+
+  setWebhookMode: async (
+    storeId: number,
+    data: SetLightfunnelsWebhookModeRequest
+  ): Promise<SetLightfunnelsWebhookModeResponse> => {
+    const response = await http.put<SetLightfunnelsWebhookModeResponse>(
+      `/integrations/lightfunnels/connections/${storeId}/webhook-mode`,
       data
     );
     return response.data;
