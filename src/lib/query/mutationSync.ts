@@ -17,8 +17,8 @@ export const invalidateAndWait = async (
 };
 
 export const orderStatusKeys = (orderId?: number): QueryKey[] => [
-  [QUERY_KEYS.ORDERS],
   [QUERY_KEYS.ORDER_STATISTICS],
+  [QUERY_KEYS.ORDERS],
   [QUERY_KEYS.PRINT_ORDER_STATISTICS],
   [QUERY_KEYS.CUSTOMER_ORDERS],
   orderId === undefined
@@ -41,7 +41,8 @@ export const readFreshQueryData = <T>(
 export function useHeldUntilSettled<T>(
   value: T,
   updatedAt: number,
-  counterpartKeys: QueryKey[]
+  counterpartKeys: QueryKey[],
+  scope?: unknown
 ): T {
   const pendingCounterparts = useIsFetching({
     predicate: (query) =>
@@ -49,8 +50,14 @@ export function useHeldUntilSettled<T>(
       counterpartKeys.some((key) => partialMatchKey(query.queryKey, key)),
   });
   const heldRef = useRef(value);
-  if (pendingCounterparts === 0 || heldRef.current === undefined) {
+  const scopeRef = useRef(scope);
+  if (
+    pendingCounterparts === 0 ||
+    heldRef.current === undefined ||
+    !Object.is(scopeRef.current, scope)
+  ) {
     heldRef.current = value;
+    scopeRef.current = scope;
   }
   return heldRef.current;
 }

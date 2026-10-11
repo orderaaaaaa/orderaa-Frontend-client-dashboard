@@ -27,22 +27,29 @@ export function useStatisticsChangeDetection({
 
     const queryCache = queryClient.getQueryCache();
 
-    const hasOrdersOlderThan = (startedAt: number) =>
+    const isStaleSince = (startedAt: number) =>
       queryCache
         .findAll({ queryKey: [QUERY_KEYS.ORDERS], type: 'active' })
-        .some(
-          (query) =>
-            query.state.fetchStatus === 'idle' &&
-            query.state.dataUpdatedAt < startedAt
+        .some((query) =>
+          query.state.fetchStatus === 'idle'
+            ? query.state.dataUpdatedAt < startedAt
+            : (fetchStartedAtRef.current.get(query.queryHash) ?? 0) <
+              startedAt
         );
 
     const unsubscribe = queryCache.subscribe((event) => {
-      if (
-        event.type !== 'updated' ||
-        event.query.queryKey[0] !== QUERY_KEYS.ORDER_STATISTICS
-      ) {
+      if (event.type !== 'updated') return;
+
+      const root = event.query.queryKey[0];
+
+      if (root === QUERY_KEYS.ORDERS) {
+        if (event.action.type === 'fetch') {
+          fetchStartedAtRef.current.set(event.query.queryHash, Date.now());
+        }
         return;
       }
+
+      if (root !== QUERY_KEYS.ORDER_STATISTICS) return;
 
       const { queryHash } = event.query;
 
@@ -70,7 +77,7 @@ export function useStatisticsChangeDetection({
       const startedAt =
         fetchStartedAtRef.current.get(queryHash) ??
         event.query.state.dataUpdatedAt;
-      if (hasOrdersOlderThan(startedAt)) {
+      if (isStaleSince(startedAt)) {
         onStatisticsChangeRef.current?.();
       }
     });

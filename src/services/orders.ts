@@ -144,7 +144,7 @@ export const useDepartmentStatusesQuery = (department: string | null) => {
 
 // Fetch a single order by ID
 export const useOrderById = (id: number | null) => {
-  return useQuery({
+  const query = useQuery({
     queryKey: [QUERY_KEYS.ORDER_DETAILS, id] as QueryKey,
     queryFn: async () => {
       const response = await http.get<Order>(`/orders/${id}`);
@@ -154,6 +154,13 @@ export const useOrderById = (id: number | null) => {
     staleTime: 0,
     gcTime: 0,
   });
+  const data = useHeldUntilSettled(
+    query.data,
+    query.dataUpdatedAt,
+    [[QUERY_KEYS.ORDER_STATISTICS]],
+    id
+  );
+  return { ...query, data };
 };
 
 // Fetch customer orders by phone number
