@@ -30,3 +30,23 @@ export function sortScopeEntries(
     return a.card.id - b.card.id;
   });
 }
+
+export function resolveParentNames(entries: ScopeEntry[]): Map<number, string> {
+  const namesById = new Map<number, string>();
+  for (const entry of entries) {
+    if (entry.kind === STOCK_SCOPE_KINDS.PHYSICAL) {
+      namesById.set(entry.card.id, entry.card.name);
+    }
+  }
+  const parentNames = new Map<number, string>();
+  for (const entry of entries) {
+    if (
+      entry.kind === STOCK_SCOPE_KINDS.PHYSICAL &&
+      entry.card.parentWarehouseId !== null
+    ) {
+      const parentName = namesById.get(entry.card.parentWarehouseId);
+      if (parentName) parentNames.set(entry.card.id, parentName);
+    }
+  }
+  return parentNames;
+}

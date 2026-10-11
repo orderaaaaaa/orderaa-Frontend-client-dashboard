@@ -19,6 +19,7 @@ import {
 import BaseModal from '@/components/ui/base-modal';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { STOCK_STATUS_CONFIG } from '../constants';
+import { formatStockNumber } from '../utils/formatNumber';
 import type { StockProduct, VariantStock, ProductVariantRow } from '../types';
 
 interface SelectedCell {
@@ -34,7 +35,7 @@ function StockBadge({ stock }: { stock: VariantStock }) {
     return (
       <div className="flex items-center justify-center gap-2">
         <span className="text-sm font-semibold text-red-600" dir="ltr">
-          {stock.quantity}
+          {formatStockNumber(stock.quantity)}
         </span>
         <span
           className={clsx(
@@ -54,7 +55,7 @@ function StockBadge({ stock }: { stock: VariantStock }) {
     return (
       <div className="flex items-center justify-center gap-2">
         <span className="text-sm font-semibold text-gray-400 line-through">
-          0
+          {formatStockNumber(0)}
         </span>
         <span
           className={clsx(
@@ -73,7 +74,7 @@ function StockBadge({ stock }: { stock: VariantStock }) {
   return (
     <div className="flex items-center justify-center gap-2">
       <span className="text-sm font-semibold text-gray-800">
-        {stock.quantity}
+        {formatStockNumber(stock.quantity)}
       </span>
       <span
         className={clsx(
@@ -149,7 +150,7 @@ export function ProductStockTable({
         <Table>
           <TableHeader>
             <TableRow className="bg-[#f1eefa]">
-              <TableHead className="px-4 py-3 text-sm font-bold text-gray-700 border-l border-gray-200 last:border-l-0 w-24 text-center">
+              <TableHead className="sticky start-0 z-[1] bg-[#f1eefa] px-4 py-3 text-sm font-bold text-gray-700 border-l border-gray-200 last:border-l-0 w-24 text-center">
                 المتغير
               </TableHead>
               {visibleColors.map((color) => (
@@ -179,7 +180,7 @@ export function ProductStockTable({
               <>
                 {visibleVariants.map((variant) => (
                   <TableRow key={variant.size} className="hover:bg-gray-50/50">
-                    <TableCell className="px-4 py-3 text-center text-sm font-semibold text-gray-800 border-l border-gray-200 last:border-l-0">
+                    <TableCell className="sticky start-0 z-[1] bg-white px-4 py-3 text-center text-sm font-semibold text-gray-800 border-l border-gray-200 last:border-l-0">
                       {variant.size}
                     </TableCell>
                     {visibleColors.map((color) => {
@@ -210,7 +211,7 @@ export function ProductStockTable({
                                 </TooltipTrigger>
                                 <TooltipContent side="top">
                                   <div className="flex flex-row items-center gap-2 font-semibold whitespace-nowrap">
-                                    <span>{stock.quantity}</span>
+                                    <span>{formatStockNumber(stock.quantity)}</span>
                                     <span>{color}</span>
                                     <span>{variant.size}</span>
                                   </div>
@@ -227,12 +228,12 @@ export function ProductStockTable({
                       );
                     })}
                     <TableCell className="px-4 py-3 text-center text-sm font-bold text-gray-800 border-l border-gray-200 last:border-l-0">
-                      {rowTotal(variant)}
+                      {formatStockNumber(rowTotal(variant))}
                     </TableCell>
                   </TableRow>
                 ))}
                 <TableRow className="bg-gray-50 border-t-2 border-gray-200">
-                  <TableCell className="px-4 py-3 text-center text-xs font-bold text-gray-600 border-l border-gray-200 last:border-l-0">
+                  <TableCell className="sticky start-0 z-[1] bg-gray-50 px-4 py-3 text-center text-xs font-bold text-gray-600 border-l border-gray-200 last:border-l-0">
                     عدد الإجمالي لكل متغير
                   </TableCell>
                   {columnTotals.map((total, idx) => (
@@ -240,11 +241,11 @@ export function ProductStockTable({
                       key={visibleColors[idx]}
                       className="px-4 py-3 text-center text-sm font-bold text-gray-800 border-l border-gray-200 last:border-l-0"
                     >
-                      {total}
+                      {formatStockNumber(total)}
                     </TableCell>
                   ))}
                   <TableCell className="px-4 py-3 text-center text-sm font-bold text-primary border-l border-gray-200 last:border-l-0">
-                    {grandTotal}
+                    {formatStockNumber(grandTotal)}
                   </TableCell>
                 </TableRow>
               </>
@@ -275,7 +276,7 @@ export function ProductStockTable({
             </div>
             <div className="flex items-center justify-between gap-4">
               <span className="text-gray-500">الكمية</span>
-              <span className="font-semibold text-gray-800">{selectedCell.stock.quantity}</span>
+              <span className="font-semibold text-gray-800">{formatStockNumber(selectedCell.stock.quantity)}</span>
             </div>
             <div className="flex items-center justify-between gap-4">
               <span className="text-gray-500">الحالة</span>

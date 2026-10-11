@@ -7,6 +7,7 @@ import {
   LiaExclamationTriangleSolid,
 } from 'react-icons/lia';
 import { LOW_STOCK_THRESHOLD } from '../constants';
+import { formatStockNumber } from '../utils/formatNumber';
 
 export interface SummaryCardItem {
   key: string;
@@ -83,7 +84,7 @@ export function SummaryCards({ items }: SummaryCardsProps) {
                     card.value < 0 ? 'text-red-600' : 'text-gray-900'
                   }`}
                 >
-                  {card.value.toLocaleString('ar-EG')}
+                  {formatStockNumber(card.value)}
                 </span>
               </div>
             </div>
