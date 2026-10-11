@@ -91,7 +91,7 @@ export const useOrderStatisticsQuery = (filters?: FilterOrdersDto) => {
   });
   const data = useHeldUntilSettled(query.data, query.dataUpdatedAt, [
     [QUERY_KEYS.ORDERS],
-    [QUERY_KEYS.ORDER_DETAILS],
+    { queryKey: [QUERY_KEYS.ORDER_DETAILS], keyLength: 2 },
   ]);
   return { ...query, data };
 };

@@ -38,16 +38,32 @@ export const readFreshQueryData = <T>(
     : fallback;
 };
 
+export type QueryCounterpart =
+  | QueryKey
+  | { queryKey: QueryKey; keyLength: number };
+
+const matchesCounterpart = (
+  queryKey: QueryKey,
+  counterpart: QueryCounterpart
+) =>
+  Array.isArray(counterpart)
+    ? partialMatchKey(queryKey, counterpart)
+    : 'keyLength' in counterpart &&
+      queryKey.length === counterpart.keyLength &&
+      partialMatchKey(queryKey, counterpart.queryKey);
+
 export function useHeldUntilSettled<T>(
   value: T,
   updatedAt: number,
-  counterpartKeys: QueryKey[],
+  counterparts: QueryCounterpart[],
   scope?: unknown
 ): T {
   const pendingCounterparts = useIsFetching({
     predicate: (query) =>
       query.state.dataUpdatedAt < updatedAt &&
-      counterpartKeys.some((key) => partialMatchKey(query.queryKey, key)),
+      counterparts.some((counterpart) =>
+        matchesCounterpart(query.queryKey, counterpart)
+      ),
   });
   const heldRef = useRef(value);
   const scopeRef = useRef(scope);
