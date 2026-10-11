@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { lightfunnelsApi } from '../api/Integrations';
@@ -11,21 +11,30 @@ import {
 } from '../types/apiIntegration';
 
 const SWITCHING_POLL_INTERVAL_MS = 5000;
+const SWITCHING_POLL_WINDOW_MS = 15 * 60 * 1000;
 
 export const useLightfunnelsConnections = (options?: { enabled?: boolean }) => {
   const enabled = options?.enabled ?? true;
   const queryClient = useQueryClient();
+  const switchingSinceRef = useRef<number | null>(null);
 
   const connectionsQuery = useQuery({
     queryKey: [QUERY_KEYS.LIGHTFUNNELS_CONNECTIONS],
     queryFn: lightfunnelsApi.getConnections,
     enabled,
-    refetchInterval: (query) =>
-      query.state.data?.some(
+    refetchInterval: (query) => {
+      const switching = query.state.data?.some(
         (connection) => connection.webhookState === LIGHTFUNNELS_WEBHOOK_STATE.SWITCHING
-      )
+      );
+      if (!switching) {
+        switchingSinceRef.current = null;
+        return false;
+      }
+      switchingSinceRef.current ??= Date.now();
+      return Date.now() - switchingSinceRef.current < SWITCHING_POLL_WINDOW_MS
         ? SWITCHING_POLL_INTERVAL_MS
-        : false,
+        : false;
+    },
   });
 
   const invalidateConnectionState = useCallback(() => {

@@ -23,8 +23,27 @@ const TONE_CLASS: Record<StatusTone, string> = {
   warning: 'bg-amber-50 border-amber-200 text-amber-800',
 };
 
-export const LIGHTFUNNELS_LEFTOVER_WEBHOOKS_TEXT =
+const LIGHTFUNNELS_LEFTOVER_WEBHOOKS_TEXT =
   'احذفها يدوياً من إعدادات Lightfunnels ← Webhooks';
+
+export const isLightfunnelsRegistrationFailed = (
+  connection: LightfunnelsConnection
+): boolean =>
+  connection.webhookState === LIGHTFUNNELS_WEBHOOK_STATE.FAILED &&
+  connection.webhookLastErrorCode !== LIGHTFUNNELS_WEBHOOK_ERROR_CODE.DELETE_FAILED;
+
+const registrationFailedText = (connection: LightfunnelsConnection): string => {
+  const scopeMissing =
+    connection.webhookLastErrorCode === LIGHTFUNNELS_WEBHOOK_ERROR_CODE.ORDERS_SCOPE_MISSING;
+  if (connection.webhookMode === LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC) {
+    return scopeMissing
+      ? 'تعذر تسجيل الـ Webhooks تلقائياً لأن تطبيقك لم يمنح صلاحية orders. لكي لا تفوتك الطلبات ألصق الرابط اليدوي في Lightfunnels، أو فعّل الصلاحية ثم اضغط «إعادة محاولة التسجيل التلقائي»'
+      : 'تعذر تسجيل الـ Webhooks تلقائياً. لكي لا تفوتك الطلبات ألصق الرابط اليدوي في Lightfunnels أو أعد المحاولة';
+  }
+  return scopeMissing
+    ? 'تعذر تسجيل الـ Webhooks تلقائياً لأن تطبيقك لم يمنح صلاحية orders، فعّلها في Lightfunnels ثم اختر «تلقائي» مرة أخرى. الربط يعمل يدوياً'
+    : 'تعذر تسجيل الـ Webhooks تلقائياً، الربط يعمل يدوياً';
+};
 
 export function getLightfunnelsWebhookStatusLines(
   connection: LightfunnelsConnection
@@ -55,17 +74,11 @@ export function getLightfunnelsWebhookStatusLines(
     });
   }
 
-  if (
-    state === LIGHTFUNNELS_WEBHOOK_STATE.FAILED &&
-    connection.webhookLastErrorCode !== LIGHTFUNNELS_WEBHOOK_ERROR_CODE.DELETE_FAILED
-  ) {
+  if (isLightfunnelsRegistrationFailed(connection)) {
     lines.push({
       key: 'registration-failed',
       tone: 'warning',
-      text:
-        connection.webhookLastErrorCode === LIGHTFUNNELS_WEBHOOK_ERROR_CODE.ORDERS_SCOPE_MISSING
-          ? 'تعذر تسجيل الـ Webhooks تلقائياً لأن تطبيقك لم يمنح صلاحية orders، فعّلها في Lightfunnels ثم اختر «تلقائي» مرة أخرى. الربط يعمل يدوياً'
-          : 'تعذر تسجيل الـ Webhooks تلقائياً، الربط يعمل يدوياً',
+      text: registrationFailedText(connection),
       topics: isAutomatic ? connection.registeredTopics : undefined,
     });
   }

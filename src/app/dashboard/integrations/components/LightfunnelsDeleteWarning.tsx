@@ -2,7 +2,6 @@ import {
   LIGHTFUNNELS_WEBHOOK_MODE,
   type LightfunnelsConnection,
 } from '../types/apiIntegration';
-import { LIGHTFUNNELS_LEFTOVER_WEBHOOKS_TEXT } from './LightfunnelsWebhookStatus';
 
 export const needsLightfunnelsDeleteWarning = (
   connection: LightfunnelsConnection | undefined
@@ -25,8 +24,7 @@ export default function LightfunnelsDeleteWarning({
         <p>سيتم إيقاف الاستقبال التلقائي وحذف الـ Webhooks من Lightfunnels.</p>
       )}
       <p>
-        أي Webhook لا يُحذف خلال 20 ثانية أو تعذر حذفه سابقاً سيبقى في Lightfunnels،{' '}
-        {LIGHTFUNNELS_LEFTOVER_WEBHOOKS_TEXT}.
+        الـ Webhooks التي لا تُحذف خلال 20 ثانية، أو تعذر حذفها سابقاً، ستبقى في Lightfunnels، احذفها يدوياً من إعدادات Lightfunnels ← Webhooks
       </p>
     </div>
   );

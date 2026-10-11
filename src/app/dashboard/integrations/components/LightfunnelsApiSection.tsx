@@ -11,7 +11,6 @@ import { getApiErrorMessage } from '@/utils/apiError';
 import {
   LIGHTFUNNELS_CONNECTION_STATUS,
   LIGHTFUNNELS_WEBHOOK_MODE,
-  LIGHTFUNNELS_WEBHOOK_STATE,
   type IntegrationResponse,
   type LightfunnelsConnection,
   type LightfunnelsWebhookMode,
@@ -23,7 +22,9 @@ import LightfunnelsWebhookModeSelect, {
   LIGHTFUNNELS_SWITCHING_TEXT,
   LIGHTFUNNELS_WEBHOOK_MODE_LABEL,
 } from './LightfunnelsWebhookModeSelect';
-import LightfunnelsWebhookStatus from './LightfunnelsWebhookStatus';
+import LightfunnelsWebhookStatus, {
+  isLightfunnelsRegistrationFailed,
+} from './LightfunnelsWebhookStatus';
 import CopyableUrlField from './CopyableUrlField';
 
 const RECONNECT_REQUIRED_MESSAGE = 'انتهت صلاحية ربط Lightfunnels، أعد الربط';
@@ -73,12 +74,13 @@ export default function LightfunnelsApiSection({
     useLightfunnelsConnections();
   const connection = findConnection(storeId);
 
-  const isSwitching =
-    isSettingWebhookMode ||
-    isRedirecting ||
-    connection?.webhookState === LIGHTFUNNELS_WEBHOOK_STATE.SWITCHING;
+  const isSwitching = isSettingWebhookMode || isRedirecting;
   const isConnected = connection?.status === LIGHTFUNNELS_CONNECTION_STATUS.CONNECTED;
   const modeDisabled = disabled || isSwitching || !isConnected;
+  const canRetryAutomatic =
+    !!connection &&
+    connection.webhookMode === LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC &&
+    isLightfunnelsRegistrationFailed(connection);
   const modeDisabledTooltip = isSwitching
     ? LIGHTFUNNELS_SWITCHING_TEXT
     : !isConnected
@@ -240,6 +242,22 @@ export default function LightfunnelsApiSection({
           )}
 
           <LightfunnelsWebhookStatus connection={connection} />
+
+          {canRetryAutomatic && (
+            <Can code={PERMISSION_CODES.INTEGRATION_CONFIG_MANAGE}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => applyMode(LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC)}
+                disabled={modeDisabled || confirmManual}
+                loading={isSettingWebhookMode}
+                className="h-8 text-xs"
+              >
+                إعادة محاولة التسجيل التلقائي
+              </Button>
+            </Can>
+          )}
         </div>
       )}
 

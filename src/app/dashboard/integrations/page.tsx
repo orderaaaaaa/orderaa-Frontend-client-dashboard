@@ -51,7 +51,10 @@ const IntegrationsPage = () => {
         config.storeId === deletingStore.storeId &&
         config.provider === IntegrationProvider.LIGHTFUNNELS
     );
-  const { findConnection: findLightfunnelsConnection } = useLightfunnelsConnections({
+  const {
+    findConnection: findLightfunnelsConnection,
+    isLoading: isLightfunnelsConnectionsLoading,
+  } = useLightfunnelsConnections({
     enabled: isDeletingLightfunnelsStore,
   });
   const deletingLightfunnelsConnection =
@@ -186,7 +189,11 @@ const IntegrationsPage = () => {
           onClose={() => setDeletingStore(null)}
           onConfirm={handleConfirmDelete}
           storeName={deletingStore.storeName}
-          isLoading={isStoreDeletePending || isDeletePending}
+          isLoading={
+            isStoreDeletePending ||
+            isDeletePending ||
+            (isDeletingLightfunnelsStore && isLightfunnelsConnectionsLoading)
+          }
         >
           {needsLightfunnelsDeleteWarning(deletingLightfunnelsConnection) && (
             <LightfunnelsDeleteWarning connection={deletingLightfunnelsConnection} />

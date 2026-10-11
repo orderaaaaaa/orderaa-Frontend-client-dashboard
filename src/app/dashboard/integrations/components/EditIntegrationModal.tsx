@@ -15,6 +15,7 @@ import {
   IntegrationConfigType,
   IntegrationResponse,
   LIGHTFUNNELS_WEBHOOK_MODE,
+  LIGHTFUNNELS_WEBHOOK_STATE,
 } from '../types/apiIntegration';
 import { toast } from 'react-toastify';
 import { useForm } from 'react-hook-form';
@@ -124,9 +125,10 @@ const EditIntegrationModal = ({
   const hasGeneratedToken = usesGeneratedWebhookToken(providerConfig);
 
   const { findConnection } = useLightfunnelsConnections({ enabled: isOAuthConnect });
+  const lightfunnelsConnection = isOAuthConnect ? findConnection(storeId) : undefined;
   const isAutomaticWebhook =
-    isOAuthConnect &&
-    findConnection(storeId)?.webhookMode === LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC;
+    lightfunnelsConnection?.webhookMode === LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC &&
+    lightfunnelsConnection.webhookState === LIGHTFUNNELS_WEBHOOK_STATE.ACTIVE;
 
   const currentToken = tokenOverride ?? webhookConfig?.apiKey;
 
