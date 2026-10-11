@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'react-toastify';
 import {
@@ -10,6 +10,7 @@ import {
   type LightfunnelsConnectResult,
 } from '../types/apiIntegration';
 import { useInvalidateLightfunnelsState } from '../hooks/useLightfunnelsConnections';
+import LightfunnelsCleanupFlow from './LightfunnelsCleanupFlow';
 
 type ToastKind = 'success' | 'info' | 'warning' | 'error';
 
@@ -54,9 +55,10 @@ export const LIGHTFUNNELS_CONNECT_RESULT_MESSAGE: Record<
     kind: 'info',
     message: 'تم الربط، وعملية تبديل أخرى جارية',
   },
-  WEBHOOK_SHARED_APP: {
-    kind: 'warning',
-    message: 'تم الربط، لكن نفس التطبيق مستخدم تلقائياً في متجر آخر',
+  WEBHOOK_CLEANUP_REQUIRED: {
+    kind: 'info',
+    message:
+      'تم الربط. وجدنا روابط Webhook قديمة على نطاقنا في Lightfunnels، راجعها وأكد حذفها لإكمال التسجيل التلقائي',
   },
 };
 
@@ -84,6 +86,8 @@ export default function LightfunnelsConnectResultNotifier({
   const pathname = usePathname();
   const invalidate = useInvalidateLightfunnelsState();
   const handledRef = useRef<string | null>(null);
+  const [cleanupStoreId, setCleanupStoreId] = useState<number | null>(null);
+  const endCleanupFlow = useCallback(() => setCleanupStoreId(null), []);
 
   const rawResult = searchParams.get(LIGHTFUNNELS_CONNECT_QUERY_KEY.RESULT);
   const rawStoreId = searchParams.get(LIGHTFUNNELS_CONNECT_QUERY_KEY.STORE);
@@ -105,8 +109,23 @@ export default function LightfunnelsConnectResultNotifier({
 
     showToast(kind, storeName ? `${storeName}: ${message}` : message);
     invalidate();
+    if (
+      result === LIGHTFUNNELS_CONNECT_RESULT.WEBHOOK_CLEANUP_REQUIRED &&
+      Number.isInteger(storeId) &&
+      storeId > 0
+    ) {
+      setCleanupStoreId(storeId);
+    }
     router.replace(pathname);
   }, [rawResult, rawStoreId, isLoading, integrations, invalidate, router, pathname]);
 
-  return null;
+  if (cleanupStoreId === null) return null;
+
+  return (
+    <LightfunnelsCleanupFlow
+      key={cleanupStoreId}
+      storeId={cleanupStoreId}
+      onDone={endCleanupFlow}
+    />
+  );
 }

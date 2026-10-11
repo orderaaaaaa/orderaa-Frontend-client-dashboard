@@ -237,26 +237,59 @@ export const LIGHTFUNNELS_WEBHOOK_ERROR_CODE = {
   REGISTRATION_FAILED: 'LIGHTFUNNELS_WEBHOOK_REGISTRATION_FAILED',
   ORDERS_SCOPE_MISSING: 'LIGHTFUNNELS_ORDERS_SCOPE_MISSING',
   DELETE_FAILED: 'LIGHTFUNNELS_WEBHOOK_DELETE_FAILED',
-  AUTOMATIC_SHARED_APP: 'LIGHTFUNNELS_AUTOMATIC_SHARED_APP',
 } as const;
 
 export type LightfunnelsWebhookErrorCode =
   (typeof LIGHTFUNNELS_WEBHOOK_ERROR_CODE)[keyof typeof LIGHTFUNNELS_WEBHOOK_ERROR_CODE];
 
-export const LIGHTFUNNELS_SHARED_APP_REASON = {
-  PEER_AUTOMATIC: 'PEER_AUTOMATIC',
-  PEER_PENDING_DELETES: 'PEER_PENDING_DELETES',
+export const LIGHTFUNNELS_CLEANUP_LISTING = {
+  LISTED: 'LISTED',
+  UNAVAILABLE: 'UNAVAILABLE',
 } as const;
 
-export type LightfunnelsSharedAppReason =
-  (typeof LIGHTFUNNELS_SHARED_APP_REASON)[keyof typeof LIGHTFUNNELS_SHARED_APP_REASON];
+export type LightfunnelsCleanupListing =
+  (typeof LIGHTFUNNELS_CLEANUP_LISTING)[keyof typeof LIGHTFUNNELS_CLEANUP_LISTING];
 
-export interface LightfunnelsSharedAppError {
+export const LIGHTFUNNELS_CLEANUP_KIND = {
+  MANUAL_LINK: 'MANUAL_LINK',
+  AUTOMATIC_LEFTOVER: 'AUTOMATIC_LEFTOVER',
+  UNKNOWN: 'UNKNOWN',
+} as const;
+
+export type LightfunnelsCleanupKind =
+  (typeof LIGHTFUNNELS_CLEANUP_KIND)[keyof typeof LIGHTFUNNELS_CLEANUP_KIND];
+
+export const LIGHTFUNNELS_CLEANUP_TOPIC = {
+  ORDER_CREATED: 'order/created',
+  ORDER_CONFIRMED: 'order/confirmed',
+} as const;
+
+export type LightfunnelsCleanupTopic =
+  (typeof LIGHTFUNNELS_CLEANUP_TOPIC)[keyof typeof LIGHTFUNNELS_CLEANUP_TOPIC];
+
+export interface LightfunnelsCleanupWebhook {
+  id: string;
+  topic: LightfunnelsCleanupTopic;
+  url: string;
+  storeId: number | null;
+  kind: LightfunnelsCleanupKind;
+}
+
+export interface LightfunnelsWebhookCleanup {
+  listing: LightfunnelsCleanupListing;
+  domain: string;
+  webhooks: LightfunnelsCleanupWebhook[];
+  truncated: boolean;
+  removed: number;
+  failed: number;
+  abandoned: number;
+}
+
+export interface LightfunnelsModeSwitchErrorBody {
   statusCode: number;
   message: string;
-  code: typeof LIGHTFUNNELS_WEBHOOK_ERROR_CODE.AUTOMATIC_SHARED_APP;
-  reason: LightfunnelsSharedAppReason;
-  peerStoreId: number | null;
+  code: LightfunnelsWebhookErrorCode;
+  cleanup?: LightfunnelsWebhookCleanup;
 }
 
 export interface LightfunnelsConnection {
@@ -286,11 +319,14 @@ export interface ConnectLightfunnelsRequest {
 
 export interface SetLightfunnelsWebhookModeRequest {
   mode: LightfunnelsWebhookMode;
+  confirmedCleanupIds?: string[];
 }
 
 export interface SetLightfunnelsWebhookModeResponse {
   consentRequired: boolean;
   authorizeUrl: string | null;
+  cleanupRequired: boolean;
+  cleanup: LightfunnelsWebhookCleanup | null;
   connection: LightfunnelsConnection | null;
 }
 
@@ -301,7 +337,6 @@ export interface LightfunnelsAuthorizeResponse {
 export interface LightfunnelsRedirectUriResponse {
   redirectUri: string;
   scopes: string;
-  automaticScopes: string;
 }
 
 export const LIGHTFUNNELS_CONNECT_RESULT = {
@@ -314,7 +349,7 @@ export const LIGHTFUNNELS_CONNECT_RESULT = {
   FAILED: 'FAILED',
   WEBHOOK_REGISTRATION_FAILED: 'WEBHOOK_REGISTRATION_FAILED',
   WEBHOOK_SWITCH_IN_PROGRESS: 'WEBHOOK_SWITCH_IN_PROGRESS',
-  WEBHOOK_SHARED_APP: 'WEBHOOK_SHARED_APP',
+  WEBHOOK_CLEANUP_REQUIRED: 'WEBHOOK_CLEANUP_REQUIRED',
 } as const;
 
 export type LightfunnelsConnectResult =

@@ -13,7 +13,6 @@ import {
   useLightfunnelsRedirectUri,
 } from '../hooks/useLightfunnelsConnections';
 import {
-  LIGHTFUNNELS_WEBHOOK_MODE,
   type LightfunnelsConnection,
   type LightfunnelsWebhookMode,
 } from '../types/apiIntegration';
@@ -86,12 +85,7 @@ export default function LightfunnelsConnectForm({
   const watchedClientId = form.watch('clientId');
   const secretRequired = isLightfunnelsSecretRequired(connection, watchedClientId ?? '');
   const isBusy = disabled || isConnecting || isRedirecting;
-  const consentMode =
-    webhookMode ?? connection?.webhookMode ?? LIGHTFUNNELS_WEBHOOK_MODE.MANUAL;
-  const requiredScopes =
-    consentMode === LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC
-      ? redirect.automaticScopes
-      : redirect.scopes;
+  const requiredScopes = redirect.scopes;
 
   const handleCopy = () => {
     if (!redirect.redirectUri) return;
@@ -158,7 +152,7 @@ export default function LightfunnelsConnectForm({
           />
           {requiredScopes && (
             <p className="text-xs text-gray-500 mt-2">
-              الصلاحية المطلوبة: <span className="font-mono">{requiredScopes}</span>
+              الصلاحيات المطلوبة: <span className="font-mono">{requiredScopes}</span>
             </p>
           )}
         </div>
