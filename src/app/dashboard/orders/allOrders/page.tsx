@@ -117,7 +117,6 @@ function AllOrdersContent() {
     data: ordersData,
     isLoading: loading,
     error: queryError,
-    refetch,
   } = useOrders(apiFilters);
 
   const { data: orderStatuses } = useOrderStatusesQuery();
@@ -141,8 +140,6 @@ function AllOrdersContent() {
       setSelectedOrderIds([]);
       setSelectAllMatchingFilters(false);
       setSelect(false);
-      refetch();
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.message;

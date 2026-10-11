@@ -3,9 +3,16 @@ import {
   useMutation,
   useInfiniteQuery,
   useQueryClient,
+  keepPreviousData,
   QueryKey,
 } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import {
+  invalidateAndWait,
+  orderStatusKeys,
+  readFreshQueryData,
+  useHeldUntilSettled,
+} from '@/lib/query/mutationSync';
 import http from '@/lib/api/http';
 import { getProductAttributeOptions } from '@/lib/api/products';
 import {
@@ -20,7 +27,7 @@ import {
 
 // Fetch orders with filters and pagination
 export const useOrders = (filters: FilterOrdersDto) => {
-  return useQuery({
+  const query = useQuery({
     queryKey: [QUERY_KEYS.ORDERS, filters] as QueryKey,
     queryFn: async () => {
       const response = await http.get<PaginatedResponse<Order>>(
@@ -29,7 +36,12 @@ export const useOrders = (filters: FilterOrdersDto) => {
       );
       return response.data;
     },
+    placeholderData: keepPreviousData,
   });
+  const data = useHeldUntilSettled(query.data, query.dataUpdatedAt, [
+    [QUERY_KEYS.ORDER_STATISTICS],
+  ]);
+  return { ...query, data };
 };
 
 // Infinite scroll query for orders
@@ -57,10 +69,16 @@ export const useInfiniteOrders = (filters: Omit<FilterOrdersDto, 'page'>) => {
 
 // Fetch order statistics
 export const useOrderStatisticsQuery = (filters?: FilterOrdersDto) => {
-  const { page, limit, skipFilters, orderByDirection, ...statisticsFilters } =
-    filters ?? {};
+  const {
+    page,
+    limit,
+    skipFilters,
+    orderByDirection,
+    status,
+    ...statisticsFilters
+  } = filters ?? {};
 
-  return useQuery({
+  const query = useQuery({
     queryKey: [QUERY_KEYS.ORDER_STATISTICS, statisticsFilters] as QueryKey,
     queryFn: async () => {
       const response = await http.get<OrderStatisticsResponse>(
@@ -69,7 +87,13 @@ export const useOrderStatisticsQuery = (filters?: FilterOrdersDto) => {
       );
       return response.data;
     },
+    placeholderData: keepPreviousData,
   });
+  const data = useHeldUntilSettled(query.data, query.dataUpdatedAt, [
+    [QUERY_KEYS.ORDERS],
+    [QUERY_KEYS.ORDER_DETAILS],
+  ]);
+  return { ...query, data };
 };
 
 // Fetch filter options (governorates, cities, products, etc.)
@@ -169,16 +193,14 @@ export const useUpdateOrder = () => {
       data: Partial<Order> | Record<string, unknown>;
     }) => {
       const response = await http.patch<Order>(`/orders/${orderId}`, data);
-      return response.data;
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.ORDER_DETAILS, variables.orderId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.ORDER_STATISTICS],
-      });
+      const respondedAt = Date.now();
+      await invalidateAndWait(queryClient, orderStatusKeys(orderId));
+      return readFreshQueryData(
+        queryClient,
+        [QUERY_KEYS.ORDER_DETAILS, orderId],
+        respondedAt,
+        response.data
+      );
     },
   });
 };
@@ -445,16 +467,14 @@ export const useCancelOrder = () => {
         cancelReasonId: reasonId,
         cancelNotes: notes,
       });
-      return response.data;
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.ORDER_DETAILS, variables.orderId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.ORDER_STATISTICS],
-      });
+      const respondedAt = Date.now();
+      await invalidateAndWait(queryClient, orderStatusKeys(orderId));
+      return readFreshQueryData(
+        queryClient,
+        [QUERY_KEYS.ORDER_DETAILS, orderId],
+        respondedAt,
+        response.data
+      );
     },
   });
 };

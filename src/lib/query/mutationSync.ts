@@ -1,0 +1,56 @@
+import { useRef } from 'react';
+import {
+  partialMatchKey,
+  useIsFetching,
+  type QueryClient,
+  type QueryKey,
+} from '@tanstack/react-query';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
+
+export const invalidateAndWait = async (
+  queryClient: QueryClient,
+  keys: QueryKey[]
+) => {
+  await Promise.all(
+    keys.map((queryKey) => queryClient.invalidateQueries({ queryKey }))
+  );
+};
+
+export const orderStatusKeys = (orderId?: number): QueryKey[] => [
+  [QUERY_KEYS.ORDERS],
+  [QUERY_KEYS.ORDER_STATISTICS],
+  [QUERY_KEYS.PRINT_ORDER_STATISTICS],
+  [QUERY_KEYS.CUSTOMER_ORDERS],
+  orderId === undefined
+    ? [QUERY_KEYS.ORDER_DETAILS]
+    : [QUERY_KEYS.ORDER_DETAILS, orderId],
+];
+
+export const readFreshQueryData = <T>(
+  queryClient: QueryClient,
+  queryKey: QueryKey,
+  since: number,
+  fallback: T
+): T => {
+  const state = queryClient.getQueryState<T>(queryKey);
+  return state?.data !== undefined && state.dataUpdatedAt >= since
+    ? state.data
+    : fallback;
+};
+
+export function useHeldUntilSettled<T>(
+  value: T,
+  updatedAt: number,
+  counterpartKeys: QueryKey[]
+): T {
+  const pendingCounterparts = useIsFetching({
+    predicate: (query) =>
+      query.state.dataUpdatedAt < updatedAt &&
+      counterpartKeys.some((key) => partialMatchKey(query.queryKey, key)),
+  });
+  const heldRef = useRef(value);
+  if (pendingCounterparts === 0 || heldRef.current === undefined) {
+    heldRef.current = value;
+  }
+  return heldRef.current;
+}
