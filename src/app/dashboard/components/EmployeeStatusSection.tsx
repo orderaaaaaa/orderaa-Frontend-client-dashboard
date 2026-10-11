@@ -5,6 +5,8 @@ import clsx from 'clsx';
 import { DataTable } from '@/components/ui/data-table';
 import type { DataTableColumn } from '@/components/ui/data-table';
 import BaseModal from '@/components/ui/base-modal';
+import { ErrorState } from '@/components/ui/state-panels';
+import type { QuerySectionState } from '../hooks';
 import type { EmployeeStatusRow } from '../types';
 import { useEmployeeActivityQuery } from '../services';
 import { transformEmployeeActivity } from '../utils';
@@ -13,6 +15,7 @@ import { EmployeeStopDetailsModalContent } from './modals';
 interface EmployeeStatusSectionProps {
   employees: EmployeeStatusRow[];
   isLoading: boolean;
+  error?: QuerySectionState;
 }
 
 const STATUS_CONFIG = {
@@ -60,6 +63,7 @@ const columns: DataTableColumn<Record<string, unknown>>[] = [
 export function EmployeeStatusSection({
   employees,
   isLoading,
+  error,
 }: EmployeeStatusSectionProps) {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(
     null,
@@ -90,14 +94,22 @@ export function EmployeeStatusSection({
   return (
     <section className="space-y-4">
       <h2 className="text-lg font-bold text-primary">حالة الموظفين</h2>
-      <DataTable
-        columns={columns}
-        data={employees as unknown as Record<string, unknown>[]}
-        keyField="id"
-        isLoading={isLoading}
-        skeletonRows={4}
-        onRowClick={handleRowClick}
-      />
+      {error?.isError ? (
+        <ErrorState
+          error={error.error}
+          fallback="تعذّر تحميل حالة الموظفين"
+          onRetry={error.refetch}
+        />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={employees as unknown as Record<string, unknown>[]}
+          keyField="id"
+          isLoading={isLoading}
+          skeletonRows={4}
+          onRowClick={handleRowClick}
+        />
+      )}
 
       <BaseModal
         isOpen={selectedEmployeeId !== null}
@@ -109,6 +121,10 @@ export function EmployeeStatusSection({
         <EmployeeStopDetailsModalContent
           activityData={activityData}
           isLoading={activityQuery.isLoading}
+          error={activityQuery.isError ? activityQuery.error : null}
+          onRetry={() => {
+            activityQuery.refetch();
+          }}
         />
       </BaseModal>
     </section>

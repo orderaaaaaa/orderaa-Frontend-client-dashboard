@@ -2,12 +2,15 @@
 
 import clsx from 'clsx';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
+import { ErrorState } from '@/components/ui/state-panels';
 import { SplineAreaChart } from '@/components/ui/charts/SplineAreaChart';
 import type { EmployeeStopDetailData } from '../../types';
 
 interface EmployeeStopDetailsModalContentProps {
   activityData?: EmployeeStopDetailData;
   isLoading: boolean;
+  error?: unknown;
+  onRetry?: () => void;
 }
 
 const STATUS_CONFIG = {
@@ -56,6 +59,8 @@ const columns: DataTableColumn<Record<string, unknown>>[] = [
 export function EmployeeStopDetailsModalContent({
   activityData,
   isLoading,
+  error,
+  onRetry,
 }: EmployeeStopDetailsModalContentProps) {
   if (isLoading) {
     return (
@@ -70,6 +75,16 @@ export function EmployeeStopDetailsModalContent({
         />
         <div className="h-[300px] bg-gray-100 animate-pulse rounded-lg" />
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <ErrorState
+        error={error}
+        fallback="تعذّر تحميل تفاصيل التوقف"
+        onRetry={onRetry}
+      />
     );
   }
 

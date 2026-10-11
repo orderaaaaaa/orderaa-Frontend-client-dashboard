@@ -53,6 +53,15 @@ export function EmployeeListModalContent({
     {
       key: 'name',
       header: 'الموظف',
+      render: (value, row) => (
+        <span
+          className={clsx(
+            selectedEmployeeId === row.id && 'font-bold text-primary',
+          )}
+        >
+          {String(value ?? '')}
+        </span>
+      ),
     },
     {
       key: 'status',
@@ -80,47 +89,13 @@ export function EmployeeListModalContent({
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-lg border border-gray-100 shadow-md overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-[#E5E5E5]">
-              {columns.map((col) => (
-                <th
-                  key={col.key}
-                  className="px-2 py-2 sm:px-4 sm:py-4 font-bold text-start border-l border-gray-200 last:border-l-0 whitespace-normal text-xs sm:text-sm"
-                >
-                  {col.header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((row) => (
-              <tr
-                key={row.id}
-                onClick={() => handleRowClick(row)}
-                className={clsx(
-                  'cursor-pointer border-b transition-colors',
-                  selectedEmployeeId === row.id
-                    ? 'bg-primary/10 hover:bg-primary/15'
-                    : 'hover:bg-gray-50',
-                )}
-              >
-                {columns.map((col) => (
-                  <td
-                    key={col.key}
-                    className="px-2 py-2 sm:px-4 sm:py-3 border-l border-gray-200 last:border-l-0 whitespace-normal text-xs sm:text-sm"
-                  >
-                    {col.render
-                      ? col.render(row[col.key], row)
-                      : String(row[col.key] ?? '')}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={columns}
+        data={data}
+        keyField="id"
+        headerClassName="bg-[#E5E5E5]"
+        onRowClick={handleRowClick}
+      />
 
       {selectedPerformance && (
         <div className="space-y-3">

@@ -118,7 +118,7 @@ export const ColumnChart = memo(function ColumnChart({
             breakpoint: 640,
             options: {
               chart: {
-                height: 350,
+                height,
               },
               plotOptions: {
                 bar: { columnWidth: '70%' },
@@ -127,7 +127,7 @@ export const ColumnChart = memo(function ColumnChart({
                 labels: {
                   rotate: 0,
                   style: {
-                    fontSize: '8px',
+                    fontSize: '10px',
                     fontWeight: 600,
                   },
                 },

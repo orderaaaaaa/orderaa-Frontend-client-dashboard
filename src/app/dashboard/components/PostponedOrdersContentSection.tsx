@@ -2,10 +2,13 @@
 
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import type { PostponedOrderContentItem } from '../types';
+import { ErrorState } from '@/components/ui/state-panels';
+import type { QuerySectionState } from '../hooks';
 
 interface PostponedOrdersContentSectionProps {
   data: PostponedOrderContentItem[];
   isLoading: boolean;
+  error?: QuerySectionState;
 }
 
 const columns: DataTableColumn<PostponedOrderContentItem>[] = [
@@ -36,7 +39,21 @@ const columns: DataTableColumn<PostponedOrderContentItem>[] = [
 export function PostponedOrdersContentSection({
   data,
   isLoading,
+  error,
 }: PostponedOrdersContentSectionProps) {
+  if (error?.isError) {
+    return (
+      <section className="space-y-4">
+        <h2 className="text-lg font-bold text-primary">محتوي الطلبات المؤجلة</h2>
+        <ErrorState
+          error={error.error}
+          fallback="تعذّر تحميل محتوى الطلبات المؤجلة"
+          onRetry={error.refetch}
+        />
+      </section>
+    );
+  }
+
   if (!isLoading && data.length === 0) {
     return (
       <section className="space-y-4">
