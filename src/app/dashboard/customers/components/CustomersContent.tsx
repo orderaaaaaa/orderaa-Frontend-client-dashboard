@@ -201,6 +201,10 @@ export function CustomersContent() {
     setCurrentPage(1);
   }, [debouncedSearch, filters.clientStatus, filters.orderStatus]);
 
+  useEffect(() => {
+    setSelectedIds((prev) => (prev.size === 0 ? prev : new Set()));
+  }, [currentPage, pageSize, debouncedSearch, filters]);
+
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (filters.clientStatus) count++;
@@ -272,6 +276,9 @@ export function CustomersContent() {
             />
             <span className="text-sm text-gray-600">
               تم تحديد {selectedIds.size} عميل (اختر عميلين للدمج)
+            </span>
+            <span className="text-xs text-amber-600">
+              التحديد يقتصر على الصفحة الحالية
             </span>
           </div>
         )}

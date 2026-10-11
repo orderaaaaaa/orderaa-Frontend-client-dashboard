@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import clsx from 'clsx';
@@ -21,12 +21,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function OrderSettingsPage() {
-  const { settings, isLoading, updateSettings, isUpdating } =
+  const { settings, isLoading, isError, refetch, updateSettings, isUpdating } =
     useMerchantSettings();
   const { hasShippingConfig } = useShippingConfig();
-  const { data: pageNames } = usePageNamesQuery();
+  const {
+    data: pageNames,
+    isError: isPageNamesError,
+    refetch: refetchPageNames,
+  } = usePageNamesQuery();
 
-  const initializedRef = useRef(false);
+  const [initialized, setInitialized] = useState(false);
 
   const {
     register,
@@ -41,23 +45,45 @@ export default function OrderSettingsPage() {
   });
 
   useEffect(() => {
-    if (settings && pageNames !== undefined && !initializedRef.current) {
+    if (settings && pageNames !== undefined && !initialized) {
       reset(mapSettingsToForm({ ...settings, pageNames }));
-      initializedRef.current = true;
+      setInitialized(true);
     }
-  }, [settings, pageNames, reset]);
-
-  useEffect(() => {
-    if (Object.keys(errors).length > 0) {
-      console.log('Form Errors:', errors);
-    }
-  }, [errors]);
+  }, [settings, pageNames, reset, initialized]);
 
   const onSubmit = (data: OrderSettingsFormData) => {
     updateSettings(sanitizeOrderSettings(data, !hasShippingConfig));
   };
 
-  if (isLoading) {
+  const loadFailed = (isError || isPageNamesError) && !initialized;
+
+  if (loadFailed) {
+    return (
+      <div className="w-full container mx-auto px-4 sm:px-6 lg:px-6 py-6" dir="rtl">
+        <Card>
+          <CardContent className="p-6 flex flex-col items-center gap-4 text-center">
+            <p className="text-lg font-bold text-gray-900">
+              تعذّر تحميل إعدادات المتجر
+            </p>
+            <p className="text-sm text-gray-600">
+              لم نحفظ أي شيء. أعد المحاولة قبل تعديل الإعدادات حتى لا تُستبدل إعداداتك الحالية.
+            </p>
+            <Button
+              type="button"
+              onClick={() => {
+                if (isError) refetch();
+                if (isPageNamesError) refetchPageNames();
+              }}
+            >
+              إعادة المحاولة
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isLoading || !initialized) {
     return (
       <div className="w-full container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10" dir="rtl">
         <div className="animate-pulse space-y-6">

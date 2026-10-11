@@ -14,6 +14,12 @@ import {
 
 const SETTLED_STATUSES = new Set(['COLLECTED', 'RETURNED_SETTLED', 'RETURNED_FINAL']);
 
+const REMOVAL_MODE_EFFECTS: Record<SettlementRemovalMode, string> = {
+  REVERT: 'تُعكس حركة التحصيل وتعود حالة الطلب خطوة واحدة للخلف',
+  CLEAR: 'تُصفَّر بيانات التحصيل وتبقى حالة الطلب كما هي',
+  DETACH: 'يخرج الطلب من هذا التحصيل فقط دون تغيير حالته',
+};
+
 function removalModeDisabledHint(mode: SettlementRemovalMode, status: string): string | null {
   switch (mode) {
     case 'CLEAR':
@@ -76,6 +82,7 @@ export default function RemoveSettlementOrderDialog({
       maxWidth="md:max-w-md"
     >
       <div className="space-y-3">
+        <p className="text-sm text-amber-700">اختر ما سيحدث للطلب عند إزالته من التحصيل</p>
         {SETTLEMENT_REMOVAL_MODES.map((candidate) => {
           const hint = removalModeDisabledHint(candidate, orderStatus);
           return (
@@ -96,7 +103,10 @@ export default function RemoveSettlementOrderDialog({
               />
               <span>
                 <span className="block font-medium text-gray-900">
-                  {SETTLEMENT_REMOVAL_MODE_LABELS[candidate]}
+                  {SETTLEMENT_REMOVAL_MODE_LABELS[candidate]} ({candidate})
+                </span>
+                <span className="block text-xs text-muted-foreground">
+                  {REMOVAL_MODE_EFFECTS[candidate]}
                 </span>
                 {hint && <span className="block text-xs text-amber-600">{hint}</span>}
               </span>

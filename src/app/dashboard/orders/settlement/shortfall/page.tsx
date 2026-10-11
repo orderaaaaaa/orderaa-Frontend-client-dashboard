@@ -14,7 +14,8 @@ import {
 } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import Input from '@/components/ui/Input';
+import BaseModal from '@/components/ui/base-modal';
+import { getApiErrorMessage } from '@/utils/apiError';
 import { ShortfallSettlement } from '@/types/orders';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
@@ -25,6 +26,17 @@ import {
 
 type FilterValue = 'all' | 'pending' | 'finished';
 
+const AMOUNT_PATTERN = /^-?\d+(\.\d{1,2})?$/;
+
+interface PendingAdjust {
+  row: ShortfallSettlement;
+  delta: number;
+}
+
+function formatMoney(value: number): string {
+  return (Math.round(value * 100) / 100).toFixed(2);
+}
+
 export default function ShortfallSettlementPage() {
   // Adjusting a settlement hits PATCH /orders/settlement/:orderId/adjust.
   const canManageSettlement = useHasPermission(PERMISSION_CODES.ORDERS_SETTLEMENT_MANAGE);
@@ -33,14 +45,19 @@ export default function ShortfallSettlementPage() {
   const [loading, setLoading] = useState(true);
   const [adjustAmounts, setAdjustAmounts] = useState<Record<number, string>>({});
   const [adjustingId, setAdjustingId] = useState<number | null>(null);
+  const [pendingAdjust, setPendingAdjust] = useState<PendingAdjust | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const fetchData = useCallback(async (currentFilter: FilterValue) => {
     setLoading(true);
+    setLoadFailed(false);
     try {
       const result = await getShortfallSettlements(currentFilter);
       setData(result);
-    } catch {
-      toast.error('فشل في تحميل بيانات التحصيل');
+    } catch (err) {
+      setData([]);
+      setLoadFailed(true);
+      toast.error(getApiErrorMessage(err, 'فشل في تحميل بيانات التحصيل'));
     } finally {
       setLoading(false);
     }
@@ -58,31 +75,40 @@ export default function ShortfallSettlementPage() {
     setAdjustAmounts((prev) => ({ ...prev, [orderId]: value }));
   };
 
-  const handleAdjust = async (orderId: number) => {
-    const amountStr = adjustAmounts[orderId];
-    if (!amountStr || amountStr.trim() === '') {
+  const requestAdjust = (row: ShortfallSettlement) => {
+    const amountStr = (adjustAmounts[row.id] ?? '').trim();
+    if (amountStr === '') {
       toast.error('يرجى إدخال المبلغ');
       return;
     }
-
-    const amount = Number(amountStr);
-    if (Number.isNaN(amount)) {
-      toast.error('يرجى إدخال رقم صحيح');
+    if (!AMOUNT_PATTERN.test(amountStr)) {
+      toast.error('أدخل مبلغًا صحيحًا بحد أقصى رقمين عشريين');
       return;
     }
+    const delta = Number(amountStr);
+    if (delta === 0) {
+      toast.error('التعديل لا يمكن أن يساوي صفرًا');
+      return;
+    }
+    setPendingAdjust({ row, delta });
+  };
 
-    setAdjustingId(orderId);
+  const handleAdjust = async () => {
+    if (!pendingAdjust) return;
+    const { row, delta } = pendingAdjust;
+    setAdjustingId(row.id);
     try {
-      await adjustSettlement(orderId, amount);
+      await adjustSettlement(row.id, delta);
       toast.success('تم تعديل التحصيل بنجاح');
       setAdjustAmounts((prev) => {
         const next = { ...prev };
-        delete next[orderId];
+        delete next[row.id];
         return next;
       });
+      setPendingAdjust(null);
       await fetchData(filter);
-    } catch {
-      toast.error('فشل في تعديل التحصيل');
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, 'فشل في تعديل التحصيل'));
     } finally {
       setAdjustingId(null);
     }
@@ -124,6 +150,15 @@ export default function ShortfallSettlementPage() {
                   جاري التحميل...
                 </p>
               </div>
+            ) : loadFailed ? (
+              <div className="flex flex-col items-center justify-center gap-3 py-12">
+                <p className="text-red-700 text-sm font-semibold">
+                  تعذّر تحميل بيانات التحصيل
+                </p>
+                <Button variant="outline" size="sm" onClick={() => fetchData(filter)}>
+                  إعادة المحاولة
+                </Button>
+              </div>
             ) : data.length === 0 ? (
               <div className="flex items-center justify-center py-12">
                 <p className="text-muted-foreground text-sm">
@@ -137,7 +172,7 @@ export default function ShortfallSettlementPage() {
                     <TableHead>كود الطلب</TableHead>
                     <TableHead>مبلغ التحصيل</TableHead>
                     <TableHead>الحالة</TableHead>
-                    {canManageSettlement && <TableHead>تعديل</TableHead>}
+                    {canManageSettlement && <TableHead>تعديل (+/−)</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -161,19 +196,22 @@ export default function ShortfallSettlementPage() {
                       {canManageSettlement && (
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Input
-                            type="number"
-                            placeholder="المبلغ"
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            dir="ltr"
+                            aria-label={`تعديل (+/−) للطلب ${row.code}`}
+                            placeholder="± المبلغ"
                             value={adjustAmounts[row.id] ?? ''}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            onChange={(e) =>
                               handleAdjustAmountChange(row.id, e.target.value)
                             }
-                            className="w-28"
+                            className="w-28 border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 disabled:opacity-50"
                             disabled={adjustingId === row.id}
                           />
                           <Button
                             size="sm"
-                            onClick={() => handleAdjust(row.id)}
+                            onClick={() => requestAdjust(row)}
                             disabled={
                               adjustingId === row.id ||
                               !adjustAmounts[row.id] ||
@@ -194,6 +232,33 @@ export default function ShortfallSettlementPage() {
           </Tabs>
         </CardContent>
       </Card>
+
+      <BaseModal
+        isOpen={pendingAdjust !== null}
+        onClose={() => setPendingAdjust(null)}
+        onConfirm={handleAdjust}
+        title="تأكيد تعديل التحصيل"
+        confirmText="تأكيد التعديل"
+        isLoading={adjustingId !== null}
+        maxWidth="md:max-w-md"
+      >
+        {pendingAdjust && (
+          <div className="space-y-3 text-sm">
+            <p className="font-medium">الطلب {pendingAdjust.row.code}</p>
+            <p dir="rtl">
+              التحصيل الحالي {formatMoney(Number(pendingAdjust.row.settlementAmount))} + التعديل{' '}
+              <span dir="ltr">{formatMoney(pendingAdjust.delta)}</span> ={' '}
+              <b>
+                {formatMoney(
+                  Number(pendingAdjust.row.settlementAmount) + pendingAdjust.delta,
+                )}{' '}
+                جنيه
+              </b>
+            </p>
+            <p className="text-amber-700">التعديل يُضاف إلى التحصيل الحالي ولا يستبدله</p>
+          </div>
+        )}
+      </BaseModal>
     </div>
   );
 }

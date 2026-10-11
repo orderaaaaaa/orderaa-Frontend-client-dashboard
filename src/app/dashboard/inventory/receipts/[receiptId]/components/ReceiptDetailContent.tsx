@@ -76,6 +76,7 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
    * every line into one warehouse, defeating the rules just configured.
    */
   const [warehouseId, setWarehouseId] = useState('');
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [pendingMismatches, setPendingMismatches] = useState<
     QuantityMismatch[] | null
   >(null);
@@ -261,19 +262,28 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
 
   const handleSubmit = useCallback(async () => {
     if (!apiReceipt) return;
+    if (!isEveryLineCounted(invoiceProducts.map((p) => p.id), productVariants)) return;
+    setIsConfirmOpen(true);
+  }, [apiReceipt, invoiceProducts, productVariants]);
 
-    // No warehouse check: the destination is optional now. When it is left
-    // empty the backend resolves it per line, and refuses with a localized 400
-    // if it cannot — which is surfaced through `getApiErrorMessage` in
-    // `approve`, rather than second-guessed here against rules this page does
-    // not evaluate.
+  const totalApprovedPieces = useMemo(
+    () => invoiceProducts.reduce((sum, p) => sum + countedFor(p.id), 0),
+    [invoiceProducts, countedFor],
+  );
+
+  const selectedWarehouseLabel = useMemo(
+    () => warehouseOptions.find((o) => o.key === warehouseId)?.value ?? null,
+    [warehouseOptions, warehouseId],
+  );
+
+  const handleConfirmApprove = useCallback(async () => {
+    setIsConfirmOpen(false);
     if (mismatches.length > 0) {
       setPendingMismatches(mismatches);
       return;
     }
-
     await approve(false);
-  }, [apiReceipt, mismatches, approve]);
+  }, [mismatches, approve]);
 
   if (!isValidId) {
     notFound();
@@ -389,6 +399,35 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
           onProductVariantsChange={handleProductVariantsChange}
         />
       </div>
+
+      <BaseModal
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmApprove}
+        title={isReturn ? 'تأكيد تسليم المرتجع' : 'تأكيد الإيصال'}
+        confirmText={isReturn ? 'تأكيد التسليم' : 'تأكيد الإيصال'}
+        isLoading={approveMutation.isPending}
+        maxWidth="md:max-w-lg"
+      >
+        <div className="flex flex-col gap-2 text-sm text-gray-800">
+          <p>
+            إجمالي القطع: <b>{totalApprovedPieces}</b>
+          </p>
+          <p>
+            عدد المنتجات: <b>{invoiceProducts.length}</b>
+          </p>
+          <p>
+            {selectedWarehouseLabel
+              ? `إلى ${selectedWarehouseLabel}`
+              : 'تُوزّع حسب قواعد المخزون'}
+          </p>
+          <p className="text-xs text-amber-700">
+            {isReturn
+              ? 'سيتم خصم الكميات من المخزن ولا يمكن التراجع بعد التأكيد'
+              : 'لا يمكن التراجع بعد التأكيد'}
+          </p>
+        </div>
+      </BaseModal>
 
       <BaseModal
         isOpen={pendingMismatches !== null}

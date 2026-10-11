@@ -34,6 +34,7 @@ export function AddInvoiceContent() {
   const [partialError, setPartialError] = useState<string | null>(null);
 
   const createInvoiceMutation = useCreateSupplierInvoiceMutation();
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const { data: suppliersData } = useSuppliersQuery({ limit: 200 });
   const suppliers = suppliersData?.data ?? [];
@@ -54,7 +55,7 @@ export function AddInvoiceContent() {
     setValue,
     watch,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<AddInvoiceFormData>({
     resolver: zodResolver(addInvoiceSchema),
     defaultValues: {
@@ -251,7 +252,13 @@ export function AddInvoiceContent() {
 
         if (data.invoiceImage && data.invoiceImage.length > 0) {
           const file = data.invoiceImage[0];
-          const uploadResponse = await uploadFile(file);
+          setIsUploadingImage(true);
+          let uploadResponse;
+          try {
+            uploadResponse = await uploadFile(file);
+          } finally {
+            setIsUploadingImage(false);
+          }
           if (uploadResponse?.url) {
             images = [uploadResponse.url];
           }
@@ -371,10 +378,10 @@ export function AddInvoiceContent() {
             type="submit"
             variant="default"
             size="lg"
-            disabled={createInvoiceMutation.isPending}
+            disabled={isSubmitting || createInvoiceMutation.isPending || isSuccessModalOpen}
             className="w-full sm:w-auto rounded-full font-semibold text-sm sm:text-base px-12"
           >
-            حفظ الفاتورة
+            {isUploadingImage ? 'جارٍ رفع الصورة…' : 'حفظ الفاتورة'}
           </Button>
         </div>
       </form>

@@ -5,6 +5,23 @@ import { toast } from 'react-toastify';
 import { useUploadFileMutation } from '@/services/upload';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 
+const SETTINGS_ERROR_AR: Record<string, string> = {
+  'defaultShipmentContent is required when employeeCanEditContent is false':
+    'محتوى الشحنة الافتراضي مطلوب عند منع الموظف من تعديل المحتوى',
+  'logoUrl must be a valid upload URL': 'رابط الشعار غير صالح، أعد رفع الصورة',
+};
+
+const hasArabic = (text: string) => /[\u0600-\u06FF]/.test(text);
+
+const toArabicSettingsError = (msg: unknown): string => {
+  const fallback = 'فشل تحديث اعدادات المتجر';
+  const parts = Array.isArray(msg) ? msg : [msg];
+  const mapped = parts
+    .filter((m): m is string => typeof m === 'string' && m.length > 0)
+    .map((m) => SETTINGS_ERROR_AR[m] ?? (hasArabic(m) ? m : fallback));
+  return mapped.length > 0 ? Array.from(new Set(mapped)).join('\n') : fallback;
+};
+
 export const useMerchantSettings = () => {
   const queryClient = useQueryClient();
   const uploadMutation = useUploadFileMutation();
@@ -50,8 +67,7 @@ export const useMerchantSettings = () => {
       toast.success('تم تحديث اعدادات المتجر');
     },
     onError: (error: any) => {
-      const msg = error?.response?.data?.message;
-      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث اعدادات المتجر');
+      toast.error(toArabicSettingsError(error?.response?.data?.message));
     },
   });
 
@@ -60,6 +76,7 @@ export const useMerchantSettings = () => {
     isLoading: settingsQuery.isLoading,
     isError: settingsQuery.isError,
     error: settingsQuery.error,
+    refetch: settingsQuery.refetch,
     updateSettings: updateSettingsMutation.mutate,
     isUpdating: updateSettingsMutation.isPending,
   };

@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Breadcrumb } from '@/components/dashboard-layout';
 import PageLoading from '@/components/ui/page-loading';
 import CopyButton from '@/components/ui/copy-button';
+import { getApiErrorMessage } from '@/utils/apiError';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import {
   SettlementShippingColumnHeaders,
@@ -36,6 +37,9 @@ export default function CollectionsPage() {
   const [status, setStatus] = useState<StatusFilter>('OPEN');
   const [batches, setBatches] = useState<SettlementBatchListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   const { getStatusLabel } = useStatusLabel();
   const [selected, setSelected] = useState<SettlementBatchListItem | null>(null);
@@ -46,15 +50,30 @@ export default function CollectionsPage() {
   const [isAddOpen, setIsAddOpen] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     setIsLoading(true);
+    setLoadFailed(false);
     listSettlementBatches({
       status: status === 'ALL' ? undefined : status,
       limit: 50,
     })
-      .then((result) => setBatches(result.data))
-      .catch(() => toast.error('تعذر تحميل التحصيلات'))
-      .finally(() => setIsLoading(false));
-  }, [status]);
+      .then((result) => {
+        if (cancelled) return;
+        setBatches(result.data);
+        setHasLoadedOnce(true);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setLoadFailed(true);
+        toast.error(getApiErrorMessage(err, 'تعذر تحميل التحصيلات'));
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [status, reloadKey]);
 
   const openBatch = useCallback(async (batch: SettlementBatchListItem) => {
     setSelected(batch);
@@ -87,7 +106,7 @@ export default function CollectionsPage() {
     }
   }, [selected, status]);
 
-  if (isLoading) {
+  if (isLoading && !hasLoadedOnce) {
     return <PageLoading message="جاري تحميل التحصيلات..." />;
   }
 
@@ -120,7 +139,16 @@ export default function CollectionsPage() {
         </div>
       </div>
 
-      {batches.length === 0 ? (
+      {loadFailed ? (
+        <div className="flex flex-col items-center gap-3 py-12 text-center">
+          <p className="text-sm font-semibold text-red-700">تعذّر تحميل التحصيلات</p>
+          <Button variant="outline" size="sm" onClick={() => setReloadKey((k) => k + 1)}>
+            إعادة المحاولة
+          </Button>
+        </div>
+      ) : isLoading ? (
+        <PageLoading size="sm" message="جاري تحميل التحصيلات..." className="py-12 min-h-0" />
+      ) : batches.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-12">
           لا توجد تحصيلات بعد — ارفع شيت تحصيل للبدء
         </p>
@@ -129,8 +157,18 @@ export default function CollectionsPage() {
           {batches.map((batch) => (
             <div
               key={batch.id}
+              role="button"
+              tabIndex={0}
+              aria-pressed={selected?.id === batch.id}
               onClick={() => openBatch(batch)}
-              className={`border rounded-xl p-4 flex flex-col gap-3 bg-white cursor-pointer transition-colors ${
+              onKeyDown={(e) => {
+                if (e.target !== e.currentTarget) return;
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  openBatch(batch);
+                }
+              }}
+              className={`border rounded-xl p-4 flex flex-col gap-3 bg-white cursor-pointer text-right transition-colors ${
                 selected?.id === batch.id
                   ? 'border-primary'
                   : 'border-gray-200 hover:border-primary/40'
