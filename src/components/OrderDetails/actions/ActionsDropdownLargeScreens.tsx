@@ -124,8 +124,7 @@ export function OrderActionsFooterLargeScreens({
           <Button
             variant="default"
             onClick={() => onActionClick('وقف التشغيل', 'stop_operation')}
-            disabled={isBusy}
-            aria-busy={isBusy}
+            loading={isBusy}
             className="py-2 px-10 rounded-2xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-all duration-700 hover:scale-105 flex items-center gap-2"
           >
             <LiaStopCircleSolid className="w-5 h-5" />
@@ -138,8 +137,8 @@ export function OrderActionsFooterLargeScreens({
                 <Button
                   variant="default"
                   onClick={onConfirm}
-                  disabled={isBusy || !canConfirmStock}
-                  aria-busy={isBusy}
+                  disabled={!canConfirmStock}
+                  loading={isBusy}
                   title={canConfirmStock ? undefined : stockBlockReason}
                   className="py-2 px-10 rounded-2xl bg-primary text-white text-sm font-bold hover:bg-[#4B1BC4] transition-all duration-700 hover:scale-105 flex items-center gap-2 disabled:opacity-40 disabled:hover:scale-100"
                 >

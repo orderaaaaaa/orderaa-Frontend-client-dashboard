@@ -89,7 +89,6 @@ export function OrderActionsFooter({
           variant="default"
           onClick={() => onActionClick('وقف التشغيل', 'stop_operation')}
           disabled={isBusy}
-          aria-busy={isBusy}
           className="bg-red-600 rounded-full px-8 h-13 shadow-2xl text-white text-sm font-bold hover:bg-red-700 transition-colors flex items-center gap-3"
         >
           <LiaStopCircleSolid className="w-5 h-5" />
@@ -102,7 +101,6 @@ export function OrderActionsFooter({
               variant="ghost"
               onClick={onConfirm}
               disabled={isBusy || !canConfirmStock}
-              aria-busy={isBusy}
               title={canConfirmStock ? undefined : stockBlockReason}
               className="relative top-[-6px] flex flex-col items-center gap-[2px] text-white transition-opacity h-auto p-0 hover:bg-transparent disabled:opacity-40"
             >
