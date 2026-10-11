@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { LiaTrashAltSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 
@@ -10,6 +10,7 @@ interface DeleteConfirmationModalProps {
   onConfirm: () => void | Promise<void>;
   storeName: string;
   isLoading?: boolean;
+  children?: ReactNode;
 }
 
 const DeleteConfirmationModal = ({
@@ -18,6 +19,7 @@ const DeleteConfirmationModal = ({
   onConfirm,
   storeName,
   isLoading = false,
+  children,
 }: DeleteConfirmationModalProps) => {
   return (
     <BaseModal
@@ -44,6 +46,7 @@ const DeleteConfirmationModal = ({
         <p className="text-gray-500 text-sm">
           سيتم حذف المتجر وجميع إعدادات الربط المرتبطة به. لا يمكن التراجع عن هذا الإجراء.
         </p>
+        {children}
       </div>
     </BaseModal>
   );
