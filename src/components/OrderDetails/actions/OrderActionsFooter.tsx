@@ -33,6 +33,7 @@ export interface OrderActionsFooterProps {
   canConfirmStock?: boolean;
   /** Which products block it, for the tooltip. */
   stockBlockReason?: string;
+  isBusy?: boolean;
 }
 
 export function OrderActionsFooter({
@@ -47,6 +48,7 @@ export function OrderActionsFooter({
   isNavigatingPrevious = false,
   canConfirmStock = true,
   stockBlockReason,
+  isBusy = false,
 }: OrderActionsFooterProps) {
   // Confirm / follow-up / the actions menu all mutate the order: everything but
   // `cancel` patches it (`orders:update`), cancel posts to /cancel.
@@ -76,7 +78,7 @@ export function OrderActionsFooter({
       <Button
         variant="ghost"
         onClick={onNavigatePrevious}
-        disabled={isNavigatingPrevious || !onNavigatePrevious}
+        disabled={isBusy || isNavigatingPrevious || !onNavigatePrevious}
         className="w-9 h-9 rounded-full border border-gray-300 bg-white shadow-sm hover:bg-gray-50 text-purple-700"
       >
         <LiaAngleRightSolid className="w-6 h-6" />
@@ -86,6 +88,8 @@ export function OrderActionsFooter({
         <Button
           variant="default"
           onClick={() => onActionClick('وقف التشغيل', 'stop_operation')}
+          disabled={isBusy}
+          aria-busy={isBusy}
           className="bg-red-600 rounded-full px-8 h-13 shadow-2xl text-white text-sm font-bold hover:bg-red-700 transition-colors flex items-center gap-3"
         >
           <LiaStopCircleSolid className="w-5 h-5" />
@@ -97,7 +101,8 @@ export function OrderActionsFooter({
             <Button
               variant="ghost"
               onClick={onConfirm}
-              disabled={!canConfirmStock}
+              disabled={isBusy || !canConfirmStock}
+              aria-busy={isBusy}
               title={canConfirmStock ? undefined : stockBlockReason}
               className="relative top-[-6px] flex flex-col items-center gap-[2px] text-white transition-opacity h-auto p-0 hover:bg-transparent disabled:opacity-40"
             >
@@ -113,6 +118,7 @@ export function OrderActionsFooter({
               <Button
                 variant="ghost"
                 onClick={handleFollowUpToggle}
+                disabled={isBusy}
                 className="flex flex-col items-center gap-[2px] text-white transition-opacity h-auto p-0 hover:bg-transparent"
               >
                 <div className="w-8 h-8 rounded-full border-3 bg-primary border-white flex items-center justify-center">
@@ -137,6 +143,7 @@ export function OrderActionsFooter({
             <Button
               variant="ghost"
               onClick={handleActionsToggle}
+              disabled={isBusy}
               className="flex flex-col items-center gap-[2px] text-white transition-opacity h-auto p-0 hover:bg-transparent"
             >
               <div className="w-8 h-8 rounded-full border-3 bg-primary border-white flex items-center justify-center">
@@ -163,7 +170,7 @@ export function OrderActionsFooter({
       <Button
         variant="ghost"
         onClick={onNavigateNext}
-        disabled={isNavigatingNext || !onNavigateNext}
+        disabled={isBusy || isNavigatingNext || !onNavigateNext}
         className="w-9 h-9 rounded-full border border-gray-300 bg-white shadow-sm hover:bg-gray-50 text-purple-700"
       >
         <LiaAngleLeftSolid className="w-6 h-6" />

@@ -6,7 +6,7 @@ import { useGetNextOrderId, useGetPreviousOrderId } from '@/services/orders';
 
 export interface UseOrderNavigationOptions {
   orderId: number;
-  onNavigate?: (targetOrderId: number) => void;
+  onNavigate?: (targetOrderId: number) => void | Promise<void>;
   onNoOrdersFound?: () => void;
   dateRange?: {
     from: Date | null;
@@ -67,7 +67,7 @@ export function useOrderNavigation({
       const response = await getNextOrderId(orderId, filters);
 
       if (response?.id) {
-        onNavigate(response.id);
+        await onNavigate(response.id);
       } else if (onNoOrdersFoundRef.current) {
         onNoOrdersFoundRef.current();
       } else {
@@ -97,7 +97,7 @@ export function useOrderNavigation({
       const response = await getPreviousOrderId(orderId, filters);
 
       if (response?.id) {
-        onNavigate(response.id);
+        await onNavigate(response.id);
       } else if (onNoOrdersFoundRef.current) {
         onNoOrdersFoundRef.current();
       } else {

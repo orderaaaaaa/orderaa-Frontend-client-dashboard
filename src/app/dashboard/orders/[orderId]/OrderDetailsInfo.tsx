@@ -1,5 +1,5 @@
 import React from 'react';
-import { Order, OrderStatus, OrderLockedBy, FilterOrdersDto } from '@/types/orders';
+import { Order, OrderLockedBy, FilterOrdersDto } from '@/types/orders';
 
 import OrderDetailsCardId from '@/components/OrderDetails/OrderDetailsCardId';
 import OrderDetailsInfoStatus from '@/components/OrderDetails/OrderDetailsInfoStatus';
@@ -12,7 +12,7 @@ import { PERMISSION_CODES } from '@/lib/permissions';
 
 interface OrderDetailsInfoProps {
   order: Order;
-  onNavigateToNextOrder?: (nextOrderId: number) => void;
+  onNavigateToNextOrder?: (nextOrderId: number) => void | Promise<void>;
   onNoOrdersFound?: () => void;
   dateRange?: {
     from: Date | null;
@@ -27,6 +27,7 @@ interface OrderDetailsInfoProps {
   isForceUnlocking?: boolean;
   isBlocked?: boolean;
   onUnlock?: () => Promise<void>;
+  isLockPending?: boolean;
 }
 
 function OrderDetailsInfo({
@@ -43,6 +44,7 @@ function OrderDetailsInfo({
   isForceUnlocking,
   isBlocked,
   onUnlock,
+  isLockPending,
 }: OrderDetailsInfoProps) {
   const canReadHistory = useHasPermission(PERMISSION_CODES.ORDERS_HISTORY_READ);
 
@@ -71,6 +73,7 @@ function OrderDetailsInfo({
         statusFilter={statusFilter}
         navigationFilters={navigationFilters}
         onUnlock={onUnlock}
+        isLockPending={isLockPending}
       />
     </section>
   );

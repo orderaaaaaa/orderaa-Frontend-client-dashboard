@@ -1,7 +1,7 @@
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useRef, useEffect, useState } from 'react';
 import { formatLocalStartOfDay, formatLocalEndOfDay } from '@/utils/dateRangeUtils';
 import { toast } from 'react-toastify';
-import { getOutOfStockBlock } from '@/utils/apiError';
+import { getApiErrorMessage, getOutOfStockBlock } from '@/utils/apiError';
 import { FilterOrdersDto, Order, OrderStatusItem } from '@/types/orders';
 import { ShippingData } from '@/components/OrderDetails/EditShippingModal';
 import { locationSaveErrorTextOf } from '@/types/locationOptions';
@@ -12,10 +12,11 @@ import {
   useCancelOrder,
 } from '@/services/orders';
 
+export type OrderUpdatePayload = Partial<Order> | Record<string, unknown>;
+
 export interface UseOrderActionsOptions {
   order: Order;
-  onOrderUpdate?: (updatedOrder: Order) => void;
-  onNavigateToNextOrder?: (nextOrderId: number) => void;
+  onNavigateToNextOrder?: (nextOrderId: number) => void | Promise<void>;
   onNoOrdersFound?: () => void;
   onUnlock?: () => Promise<void>;
   dateRange?: {
@@ -42,10 +43,31 @@ function buildNavFilters(
   return filters;
 }
 
+const NO_MATCHING_ORDERS_MESSAGE = 'لا يوجد طلبات أخرى مطابقة للفلاتر';
+const UPDATE_FAILED_MESSAGE = 'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.';
+
+const cancelErrorMessageOf = (error: unknown) => {
+  const data = (
+    error as {
+      response?: { data?: { message?: string | string[]; error?: string } };
+    }
+  )?.response?.data;
+  if (Array.isArray(data?.message)) {
+    return data.message.join(', ');
+  }
+  return (
+    data?.message ||
+    data?.error ||
+    (error instanceof Error ? error.message : '') ||
+    'فشل في إلغاء الطلب. يرجى المحاولة مرة أخرى.'
+  );
+};
+
 export interface OrderActionsState {
+  isTransitioning: boolean;
   handleStatusUpdateAndNavigate: (
     status: string,
-    updateData?: Partial<Order> | Record<string, any>
+    updateData?: OrderUpdatePayload
   ) => Promise<boolean>;
   handleUrgent: (data: {
     shippingCost?: number;
@@ -72,7 +94,6 @@ export interface OrderActionsState {
 
 export function useOrderActions({
   order,
-  onOrderUpdate,
   onNavigateToNextOrder,
   onNoOrdersFound,
   onUnlock,
@@ -84,6 +105,7 @@ export function useOrderActions({
   const updateOrderMutation = useUpdateOrder();
   const cancelOrderMutation = useCancelOrder();
   const { getNextOrderId } = useGetNextOrderId();
+  const [transitionCount, setTransitionCount] = useState(0);
 
   // Use ref to always have access to the latest callback in async operations
   const onNoOrdersFoundRef = useRef(onNoOrdersFound);
@@ -95,6 +117,71 @@ export function useOrderActions({
   useEffect(() => {
     onUnlockRef.current = onUnlock;
   }, [onUnlock]);
+
+  const beginTransition = useCallback(() => {
+    let ended = false;
+    setTransitionCount((count) => count + 1);
+    return () => {
+      if (ended) return;
+      ended = true;
+      setTransitionCount((count) => count - 1);
+    };
+  }, []);
+
+  const runTransition = useCallback(
+    async <T,>(work: () => Promise<T>): Promise<T> => {
+      const endTransition = beginTransition();
+      try {
+        return await work();
+      } finally {
+        endTransition();
+      }
+    },
+    [beginTransition]
+  );
+
+  const advanceToNextOrder = useCallback(async () => {
+    if (!onNavigateToNextOrder) return;
+    try {
+      const nextOrderResponse = await getNextOrderId(
+        order.id,
+        buildNavFilters(navigationFilters, statusFilter, dateRange)
+      );
+
+      if (nextOrderResponse?.id) {
+        await onNavigateToNextOrder(nextOrderResponse.id);
+      } else if (onNoOrdersFoundRef.current) {
+        onNoOrdersFoundRef.current();
+      } else {
+        toast.info(NO_MATCHING_ORDERS_MESSAGE);
+      }
+    } catch (nextErr: unknown) {
+      console.error('Failed to get next order:', nextErr);
+      if (onNoOrdersFoundRef.current) {
+        onNoOrdersFoundRef.current();
+      } else {
+        toast.info(getApiErrorMessage(nextErr, NO_MATCHING_ORDERS_MESSAGE));
+      }
+    }
+  }, [
+    order.id,
+    onNavigateToNextOrder,
+    dateRange,
+    statusFilter,
+    navigationFilters,
+    getNextOrderId,
+  ]);
+
+  const completeAndAdvance = useCallback(
+    async (successMessage: string) => {
+      if (onUnlockRef.current) {
+        await onUnlockRef.current();
+      }
+      toast.success(successMessage);
+      await advanceToNextOrder();
+    },
+    [advanceToNextOrder]
+  );
 
   const getStatusFromAction = useCallback(
     (action: string): string | null => {
@@ -131,7 +218,7 @@ export function useOrderActions({
   const handleStatusUpdateAndNavigate = useCallback(
     async (
       status: string,
-      updateData: Partial<Order> | Record<string, any> = {},
+      updateData: OrderUpdatePayload = {},
       options: { skipToast?: boolean } = {}
     ): Promise<boolean> => {
       if (
@@ -144,86 +231,48 @@ export function useOrderActions({
         }
         throw new Error(SHIPPING_COMPANY_REQUIRED_MESSAGE);
       }
+      const endTransition = beginTransition();
       try {
-        const updatedOrder = await updateOrderMutation.mutateAsync({
+        await updateOrderMutation.mutateAsync({
           orderId: order.id,
           data: {
             ...updateData,
             status: status,
           },
         });
-
-        if (onOrderUpdate) {
-          onOrderUpdate(updatedOrder);
-        }
-
-        if (onUnlockRef.current) {
-          await onUnlockRef.current();
-        }
-
-        const statusLabel =
-          availableStatuses.find((s) => s.key === status)?.label || status;
-        toast.success(`تم تحديث حالة الطلب إلى ${statusLabel} بنجاح`);
-
-        if (onNavigateToNextOrder) {
-          try {
-            const nextOrderResponse = await getNextOrderId(
-              order.id,
-              buildNavFilters(navigationFilters, statusFilter, dateRange)
-            );
-
-            if (nextOrderResponse?.id) {
-              onNavigateToNextOrder(nextOrderResponse.id);
-            } else if (onNoOrdersFoundRef.current) {
-              onNoOrdersFoundRef.current();
-            } else {
-              toast.info('لا يوجد طلبات أخرى مطابقة للفلاتر');
-            }
-          } catch (nextErr: any) {
-            console.error('Failed to get next order:', nextErr);
-            if (onNoOrdersFoundRef.current) {
-              onNoOrdersFoundRef.current();
-            } else {
-              const errorMessage =
-                nextErr?.response?.data?.message ||
-                'لا يوجد طلبات أخرى مطابقة للفلاتر';
-              toast.info(errorMessage);
-            }
-          }
-        }
-
-        return true;
-      } catch (error: any) {
+      } catch (error: unknown) {
         // T27: a 409 refusing an out-of-stock confirmation names every blocking
         // product, so surface those rather than a generic failure.
         const outOfStock = getOutOfStockBlock(error);
-        const msg = error?.response?.data?.message;
         const apiErrorMessage =
           outOfStock?.message ??
-          (Array.isArray(msg)
-            ? msg.join('\n')
-            : msg || 'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.');
+          getApiErrorMessage(error, UPDATE_FAILED_MESSAGE);
         if (!options.skipToast) {
           toast.error(
             apiErrorMessage,
             outOfStock ? { autoClose: 8000 } : undefined
           );
         }
+        endTransition();
         throw new Error(apiErrorMessage);
+      }
+
+      try {
+        const statusLabel =
+          availableStatuses.find((s) => s.key === status)?.label || status;
+        await completeAndAdvance(`تم تحديث حالة الطلب إلى ${statusLabel} بنجاح`);
+        return true;
+      } finally {
+        endTransition();
       }
     },
     [
       order.id,
       order.shippingCompanyId,
-      onOrderUpdate,
-      onNavigateToNextOrder,
-      onNoOrdersFound,
-      dateRange,
-      statusFilter,
-      navigationFilters,
       availableStatuses,
       updateOrderMutation,
-      getNextOrderId,
+      beginTransition,
+      completeAndAdvance,
     ]
   );
 
@@ -235,7 +284,7 @@ export function useOrderActions({
         return false;
       }
 
-      const updateData: any = {
+      const updateData: Record<string, unknown> = {
         urgentDate: data.urgentDate,
       };
       if (data.shippingCost !== undefined) {
@@ -249,88 +298,24 @@ export function useOrderActions({
   );
 
   const handleCancel = useCallback(
-    async (data: { reasonId: number; notes: string }) => {
-      try {
-        const updatedOrder = await cancelOrderMutation.mutateAsync({
-          orderId: order.id,
-          reasonId: data.reasonId,
-          notes: data.notes || undefined,
-        });
-
-        if (onOrderUpdate) {
-          onOrderUpdate({
-            ...updatedOrder,
-            shippingCompanyRef:
-              updatedOrder.shippingCompanyRef === undefined
-                ? order.shippingCompanyRef
-                : updatedOrder.shippingCompanyRef,
+    async (data: { reasonId: number; notes: string }) =>
+      runTransition(async () => {
+        try {
+          await cancelOrderMutation.mutateAsync({
+            orderId: order.id,
+            reasonId: data.reasonId,
+            notes: data.notes || undefined,
           });
+        } catch (error: unknown) {
+          console.error('Failed to cancel order:', error);
+          toast.error(cancelErrorMessageOf(error));
+          return false;
         }
 
-        if (onUnlockRef.current) {
-          await onUnlockRef.current();
-        }
-
-        toast.success('تم إلغاء الطلب بنجاح');
-
-        if (onNavigateToNextOrder) {
-          try {
-            const nextOrderResponse = await getNextOrderId(
-              order.id,
-              buildNavFilters(navigationFilters, statusFilter, dateRange)
-            );
-
-            if (nextOrderResponse?.id) {
-              onNavigateToNextOrder(nextOrderResponse.id);
-            } else if (onNoOrdersFoundRef.current) {
-              onNoOrdersFoundRef.current();
-            } else {
-              toast.info('لا يوجد طلبات أخرى مطابقة للفلاتر');
-            }
-          } catch (nextErr: any) {
-            console.error('Failed to get next order:', nextErr);
-            if (onNoOrdersFoundRef.current) {
-              onNoOrdersFoundRef.current();
-            } else {
-              const errorMessage =
-                nextErr?.response?.data?.message ||
-                'لا يوجد طلبات أخرى مطابقة للفلاتر';
-              toast.info(errorMessage);
-            }
-          }
-        }
-
+        await completeAndAdvance('تم إلغاء الطلب بنجاح');
         return true;
-      } catch (error: any) {
-        console.error('Failed to cancel order:', error);
-        // Extract error message from API response (handle both string and array formats)
-        const responseMessage = error?.response?.data?.message;
-        let apiErrorMessage: string;
-        if (Array.isArray(responseMessage)) {
-          apiErrorMessage = responseMessage.join(', ');
-        } else {
-          apiErrorMessage =
-            responseMessage ||
-            error?.response?.data?.error ||
-            error?.message ||
-            'فشل في إلغاء الطلب. يرجى المحاولة مرة أخرى.';
-        }
-        toast.error(apiErrorMessage);
-        return false;
-      }
-    },
-    [
-      order.id,
-      order.shippingCompanyRef,
-      onOrderUpdate,
-      onNavigateToNextOrder,
-      onNoOrdersFound,
-      dateRange,
-      statusFilter,
-      navigationFilters,
-      cancelOrderMutation,
-      getNextOrderId,
-    ]
+      }),
+    [order.id, cancelOrderMutation, runTransition, completeAndAdvance]
   );
 
   const handleStopOperation = useCallback(
@@ -467,71 +452,30 @@ export function useOrderActions({
   );
 
   const handleFollowUpAction = useCallback(
-    async (label: string): Promise<boolean> => {
-      try {
-        const updatedOrder = await updateOrderMutation.mutateAsync({
-          orderId: order.id,
-          data: {
-            status: 'ATTEMPTED',
-            eventNote: label,
-          },
-        });
-
-        if (onOrderUpdate) {
-          onOrderUpdate(updatedOrder);
+    async (label: string): Promise<boolean> =>
+      runTransition(async () => {
+        try {
+          await updateOrderMutation.mutateAsync({
+            orderId: order.id,
+            data: {
+              status: 'ATTEMPTED',
+              eventNote: label,
+            },
+          });
+        } catch (error: unknown) {
+          toast.error(
+            getApiErrorMessage(
+              error,
+              'فشل في تسجيل المتابعة. يرجى المحاولة مرة أخرى.'
+            )
+          );
+          return false;
         }
 
-        if (onUnlockRef.current) {
-          await onUnlockRef.current();
-        }
-
-        toast.success(`تم تسجيل المتابعة: ${label}`);
-
-        if (onNavigateToNextOrder) {
-          try {
-            const nextOrderResponse = await getNextOrderId(
-              order.id,
-              buildNavFilters(navigationFilters, statusFilter, dateRange)
-            );
-
-            if (nextOrderResponse?.id) {
-              onNavigateToNextOrder(nextOrderResponse.id);
-            } else if (onNoOrdersFoundRef.current) {
-              onNoOrdersFoundRef.current();
-            } else {
-              toast.info('لا يوجد طلبات أخرى مطابقة للفلاتر');
-            }
-          } catch (nextErr: any) {
-            console.error('Failed to get next order:', nextErr);
-            if (onNoOrdersFoundRef.current) {
-              onNoOrdersFoundRef.current();
-            } else {
-              const errorMessage =
-                nextErr?.response?.data?.message ||
-                'لا يوجد طلبات أخرى مطابقة للفلاتر';
-              toast.info(errorMessage);
-            }
-          }
-        }
-
+        await completeAndAdvance(`تم تسجيل المتابعة: ${label}`);
         return true;
-      } catch (error: any) {
-        const msg = error?.response?.data?.message;
-        toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في تسجيل المتابعة. يرجى المحاولة مرة أخرى.');
-        return false;
-      }
-    },
-    [
-      order.id,
-      onOrderUpdate,
-      onNavigateToNextOrder,
-      onNoOrdersFound,
-      dateRange,
-      statusFilter,
-      navigationFilters,
-      updateOrderMutation,
-      getNextOrderId,
-    ]
+      }),
+    [order.id, updateOrderMutation, runTransition, completeAndAdvance]
   );
 
   const handleUpdateShipping = useCallback(
@@ -545,7 +489,7 @@ export function useOrderActions({
 
       try {
         // Send flat object (not nested in customers)
-        const updatedOrder = await updateOrderMutation.mutateAsync({
+        await updateOrderMutation.mutateAsync({
           orderId: order.id,
           data: {
             ...(companyChanged && { shippingCompanyId: data.shippingCompanyId ?? null }),
@@ -559,14 +503,6 @@ export function useOrderActions({
             ...(data.availableTo && { availableTo: data.availableTo }),
           },
         });
-
-        if (onOrderUpdate) {
-          onOrderUpdate({
-            ...updatedOrder,
-            governorateOption: data.governorateOption ?? null,
-            cityOption: data.cityOption ?? null,
-          });
-        }
 
         toast.success('تم تحديث بيانات الشحن بنجاح');
       } catch (error: unknown) {
@@ -584,7 +520,6 @@ export function useOrderActions({
       order.shippingCompanyId,
       order.governorateOption,
       order.cityOption,
-      onOrderUpdate,
       updateOrderMutation,
     ]
   );
@@ -598,28 +533,29 @@ export function useOrderActions({
           ? `${order.packagingNotes}\n${note}`
           : note;
 
-        const updatedOrder = await updateOrderMutation.mutateAsync({
+        await updateOrderMutation.mutateAsync({
           orderId: order.id,
           data: {
             packagingNotes: updatedNotes,
           },
         });
 
-        if (onOrderUpdate) {
-          onOrderUpdate(updatedOrder);
-        }
-
         toast.success('تم تحديث ملاحظات التغليف بنجاح');
-      } catch (error: any) {
-        const msg = error?.response?.data?.message;
-        toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في تحديث ملاحظات التغليف. يرجى المحاولة مرة أخرى.');
+      } catch (error: unknown) {
+        toast.error(
+          getApiErrorMessage(
+            error,
+            'فشل في تحديث ملاحظات التغليف. يرجى المحاولة مرة أخرى.'
+          )
+        );
         throw error;
       }
     },
-    [order.id, order.packagingNotes, onOrderUpdate, updateOrderMutation]
+    [order.id, order.packagingNotes, updateOrderMutation]
   );
 
   return {
+    isTransitioning: transitionCount > 0,
     handleStatusUpdateAndNavigate,
     handleUrgent,
     handleCancel,

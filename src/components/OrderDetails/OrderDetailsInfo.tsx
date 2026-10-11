@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Order, OrderStatus, OrderStatusItem, FilterOrdersDto } from '@/types/orders';
+import { Order, FilterOrdersDto } from '@/types/orders';
 import { useOrderStatusesQuery } from '@/services/orders';
 import { useModalState } from '@/hooks/OrderDetails/useModalState';
 import { useOrderActions } from '@/hooks/OrderDetails/useOrderActions';
@@ -7,7 +7,7 @@ import { useOrderFieldUpdate } from '@/hooks/OrderDetails/useOrderFieldUpdate';
 import { useOrderNavigation } from '@/hooks/OrderDetails/useOrderNavigation';
 import { useOrderStockAvailabilityQuery } from '@/services/warehouses';
 import { toast } from 'react-toastify';
-import { formatStockShortageLines } from '@/utils/apiError';
+import { formatStockShortageLines, getApiErrorMessage } from '@/utils/apiError';
 import { readStoredLocale } from '@/i18n/locale';
 import { translate } from '@/i18n/translate';
 import { CustomerDataSection } from './sections/CustomerDataSection';
@@ -23,9 +23,7 @@ import { shippingCompanyNameOf } from '@/lib/shippingCompanies';
 
 interface OrderDetailsInfoComponentProps {
   order: Order;
-  onCustomerUpdate?: (updatedOrder: Order) => void;
-  onOrderUpdate?: (updatedOrder: Order) => void;
-  onNavigateToNextOrder?: (nextOrderId: number) => void;
+  onNavigateToNextOrder?: (nextOrderId: number) => void | Promise<void>;
   onNoOrdersFound?: () => void;
   dateRange?: {
     from: Date | null;
@@ -34,20 +32,21 @@ interface OrderDetailsInfoComponentProps {
   statusFilter?: string | null;
   navigationFilters?: FilterOrdersDto;
   onUnlock?: () => Promise<void>;
+  isLockPending?: boolean;
 }
+
+const ACTION_NOT_APPLIED = 'ACTION_NOT_APPLIED';
 
 function OrderDetailsInfoComponent({
   order,
-  onCustomerUpdate,
-  onOrderUpdate,
   onNavigateToNextOrder,
   onNoOrdersFound,
   dateRange,
   statusFilter,
   navigationFilters,
   onUnlock,
+  isLockPending = false,
 }: OrderDetailsInfoComponentProps) {
-  const [localOrder, setLocalOrder] = useState(order);
   const [confirmationDialog, setConfirmationDialog] = useState<{
     isOpen: boolean;
     title: string;
@@ -103,19 +102,8 @@ function OrderDetailsInfoComponent({
     'late',
   ]);
 
-  const handleUpdate = (updatedOrder: Order) => {
-    setLocalOrder(updatedOrder);
-    if (onOrderUpdate) {
-      onOrderUpdate(updatedOrder);
-    }
-    if (onCustomerUpdate) {
-      onCustomerUpdate(updatedOrder);
-    }
-  };
-
   const actions = useOrderActions({
-    order: localOrder,
-    onOrderUpdate: handleUpdate,
+    order,
     onNavigateToNextOrder,
     onNoOrdersFound,
     onUnlock,
@@ -134,7 +122,8 @@ function OrderDetailsInfoComponent({
     navigationFilters,
   });
 
-  const { updateField, updateFields } = useOrderFieldUpdate(localOrder.id, handleUpdate);
+  const { updateField, updateFields } = useOrderFieldUpdate(order.id);
+  const isInteractionBlocked = isLockPending || actions.isTransitioning;
 
   /**
    * T27 — the out-of-stock confirmation gate, mirrored into the UI.
@@ -144,7 +133,7 @@ function OrderDetailsInfoComponent({
    * change between this render and the click. Never rely on the disabled state.
    */
   const { data: stockAvailability } = useOrderStockAvailabilityQuery(
-    localOrder.id
+    order.id
   );
   const stockGate = useMemo(() => {
     // Undefined while loading — do NOT block on that, or the confirm button is
@@ -161,22 +150,19 @@ function OrderDetailsInfoComponent({
 
   // Get the last event status from order events
   const lastEventStatus = useMemo(() => {
-    if (!localOrder.order_events || localOrder.order_events.length === 0) {
+    if (!order.order_events || order.order_events.length === 0) {
       return undefined;
     }
     // Sort by createdAt descending and get the first (most recent) event
-    const sortedEvents = [...localOrder.order_events].sort(
+    const sortedEvents = [...order.order_events].sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
     return sortedEvents[0]?.name;
-  }, [localOrder.order_events]);
-
-  useEffect(() => {
-    setLocalOrder(order);
-  }, [order]);
+  }, [order.order_events]);
 
   const handleConfirmClick = () => {
+    if (isInteractionBlocked) return;
     setConfirmationDialog({
       isOpen: true,
       title: 'تأكيد الطلب',
@@ -186,6 +172,7 @@ function OrderDetailsInfoComponent({
   };
 
   const handleFollowUpClick = (label: string, action: string) => {
+    if (isInteractionBlocked) return;
     setConfirmationDialog({
       isOpen: true,
       title: `تأكيد ${label}`,
@@ -195,6 +182,7 @@ function OrderDetailsInfoComponent({
   };
 
   const handleActionClick = (label: string, action: string) => {
+    if (isInteractionBlocked) return;
     switch (action) {
       case 'urgent':
         modals.urgent.open();
@@ -233,10 +221,10 @@ function OrderDetailsInfoComponent({
         modals.postShippingCancel.open();
         break;
       case 'resend':
-        console.log('[Resend] action triggered for order:', localOrder.id);
+        console.log('[Resend] action triggered for order:', order.id);
         break;
       case 'late':
-        console.log('[Late] action triggered for order:', localOrder.id);
+        console.log('[Late] action triggered for order:', order.id);
         break;
       default:
         setConfirmationDialog({
@@ -248,7 +236,7 @@ function OrderDetailsInfoComponent({
     }
   };
 
-  const shippingLabel = shippingCompanyNameOf(localOrder.shippingCompanyRef);
+  const shippingLabel = shippingCompanyNameOf(order.shippingCompanyRef);
 
   const followUpActions = [
     'no_answer',
@@ -266,32 +254,29 @@ function OrderDetailsInfoComponent({
 
   const handleConfirmAction = async () => {
     const action = confirmationDialog.action;
+    let succeeded = false;
 
     try {
       if (followUpActions.includes(action)) {
         const label = followUpActionLabels[action] || action;
-        await actions.handleFollowUpAction(label);
+        succeeded = await actions.handleFollowUpAction(label);
       } else {
-        await actions.handleConfirmAction(action);
+        succeeded = await actions.handleConfirmAction(action);
       }
-    } catch (error: any) {
-      const msg = error?.response?.data?.message || error?.message;
+    } catch (error: unknown) {
       setErrorModal({
         isOpen: true,
-        message: Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.',
+        message: getApiErrorMessage(
+          error,
+          (error instanceof Error && error.message) ||
+            'فشل في تحديث الطلب. يرجى المحاولة مرة أخرى.'
+        ),
       });
     }
-  };
 
-  const handlePhoneUpdate = (phoneNumbers: string[]) => {
-    const updatedOrder = {
-      ...localOrder,
-      customers: {
-        ...localOrder.customers,
-        phone_numbers: phoneNumbers,
-      },
-    };
-    handleUpdate(updatedOrder);
+    if (!succeeded) {
+      throw new Error(ACTION_NOT_APPLIED);
+    }
   };
 
   // User picked a shipping type. DELIVERY saves immediately (backend clears
@@ -327,16 +312,15 @@ function OrderDetailsInfoComponent({
   return (
     <>
       <div className="flex flex-col gap-4 font-medium p-4 bg-gray-50 mt-8 rounded-xl mb-24 w-full max-w-full">
-        <PartialReturnLinks order={localOrder} />
+        <PartialReturnLinks order={order} />
 
         <CustomerDataSection
-          order={localOrder}
+          order={order}
           onUpdate={updateField}
-          onPhoneUpdate={handlePhoneUpdate}
         />
 
         <PricingSection
-          order={localOrder}
+          order={order}
           onUpdate={updateField}
           onShippingTypeSelect={handleShippingTypeSelect}
           pendingShippingType={pendingShippingType}
@@ -345,25 +329,25 @@ function OrderDetailsInfoComponent({
 
         <ShippingSection
           shippingCompanyName={shippingLabel}
-          governorate={localOrder.governorate}
-          city={localOrder.city}
-          address={localOrder.address}
+          governorate={order.governorate}
+          city={order.city}
+          address={order.address}
           onEditClick={modals.shipping.open}
-          externalGovernorate={localOrder.externalGovernorate}
-          externalCity={localOrder.externalCity}
-          sourceGovernorate={localOrder.sourceGovernorate}
-          sourceCity={localOrder.sourceCity}
+          externalGovernorate={order.externalGovernorate}
+          externalCity={order.externalCity}
+          sourceGovernorate={order.sourceGovernorate}
+          sourceCity={order.sourceCity}
         />
 
         <PackagingNotesSection
-          packagingNotes={localOrder.packagingNotes}
+          packagingNotes={order.packagingNotes}
           onAddClick={modals.packagingNotes.open}
         />
       </div>
 
       <div className="md:hidden">
         <OrderActionsFooter
-          orderStatus={localOrder.status}
+          orderStatus={order.status}
           lastEventStatus={lastEventStatus}
           onConfirm={handleConfirmClick}
           onFollowUpClick={handleFollowUpClick}
@@ -374,12 +358,13 @@ function OrderDetailsInfoComponent({
           isNavigatingPrevious={navigation.isNavigatingPrevious}
           canConfirmStock={stockGate.canConfirm}
           stockBlockReason={stockGate.reason}
+          isBusy={actions.isTransitioning}
         />
       </div>
 
       <div className="hidden md:block">
         <OrderActionsFooterLargeScreens
-          orderStatus={localOrder.status}
+          orderStatus={order.status}
           lastEventStatus={lastEventStatus}
           onConfirm={handleConfirmClick}
           onFollowUpClick={handleFollowUpClick}
@@ -390,12 +375,13 @@ function OrderDetailsInfoComponent({
           isNavigatingPrevious={navigation.isNavigatingPrevious}
           canConfirmStock={stockGate.canConfirm}
           stockBlockReason={stockGate.reason}
+          isBusy={actions.isTransitioning}
         />
       </div>
 
       <OrderActionModals
         modals={modals}
-        order={localOrder}
+        order={order}
         actions={actions}
         confirmationDialog={confirmationDialog}
         onCloseConfirmation={() =>

@@ -4,8 +4,10 @@ import {
   useInfiniteQuery,
   useQueryClient,
   keepPreviousData,
+  queryOptions,
   QueryKey,
 } from '@tanstack/react-query';
+import { useCallback } from 'react';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import {
   invalidateAndWait,
@@ -145,14 +147,8 @@ export const useDepartmentStatusesQuery = (department: string | null) => {
 // Fetch a single order by ID
 export const useOrderById = (id: number | null) => {
   const query = useQuery({
-    queryKey: [QUERY_KEYS.ORDER_DETAILS, id] as QueryKey,
-    queryFn: async () => {
-      const response = await http.get<Order>(`/orders/${id}`);
-      return response.data;
-    },
+    ...orderDetailsQueryOptions(id),
     enabled: !!id,
-    staleTime: 0,
-    gcTime: 0,
   });
   const data = useHeldUntilSettled(
     query.data,
@@ -161,6 +157,27 @@ export const useOrderById = (id: number | null) => {
     id
   );
   return { ...query, data };
+};
+
+const ORDER_DETAILS_GC_TIME = 60 * 1000;
+
+export const orderDetailsQueryOptions = (id: number | null) =>
+  queryOptions({
+    queryKey: [QUERY_KEYS.ORDER_DETAILS, id] as QueryKey,
+    queryFn: async () => {
+      const response = await http.get<Order>(`/orders/${id}`);
+      return response.data;
+    },
+    staleTime: 0,
+    gcTime: ORDER_DETAILS_GC_TIME,
+  });
+
+export const usePrefetchOrderDetails = () => {
+  const queryClient = useQueryClient();
+  return useCallback(
+    (id: number) => queryClient.prefetchQuery(orderDetailsQueryOptions(id)),
+    [queryClient]
+  );
 };
 
 // Fetch customer orders by phone number
@@ -229,10 +246,11 @@ export const useUpdateOrderProduct = () => {
       });
       return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDER_DETAILS] });
-    },
+    onSuccess: () =>
+      invalidateAndWait(queryClient, [
+        [QUERY_KEYS.ORDER_DETAILS],
+        [QUERY_KEYS.ORDERS],
+      ]),
   });
 };
 
@@ -247,10 +265,11 @@ export const useDeleteOrderProduct = () => {
       );
       return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDER_DETAILS] });
-    },
+    onSuccess: () =>
+      invalidateAndWait(queryClient, [
+        [QUERY_KEYS.ORDER_DETAILS],
+        [QUERY_KEYS.ORDERS],
+      ]),
   });
 };
 
@@ -277,10 +296,11 @@ export const useAddOrderProduct = () => {
       });
       return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDER_DETAILS] });
-    },
+    onSuccess: () =>
+      invalidateAndWait(queryClient, [
+        [QUERY_KEYS.ORDER_DETAILS],
+        [QUERY_KEYS.ORDERS],
+      ]),
   });
 };
 
@@ -309,11 +329,12 @@ export const useUpdateCustomer = () => {
       });
       return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDER_DETAILS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CUSTOMER_ORDERS] });
-    },
+    onSuccess: () =>
+      invalidateAndWait(queryClient, [
+        [QUERY_KEYS.ORDER_DETAILS],
+        [QUERY_KEYS.ORDERS],
+        [QUERY_KEYS.CUSTOMER_ORDERS],
+      ]),
   });
 };
 
