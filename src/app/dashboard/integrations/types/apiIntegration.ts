@@ -285,12 +285,10 @@ export interface LightfunnelsWebhookCleanup {
   abandoned: number;
 }
 
-export interface LightfunnelsRegistrationFailedError {
+export interface LightfunnelsModeSwitchErrorBody {
   statusCode: number;
   message: string;
-  code:
-    | typeof LIGHTFUNNELS_WEBHOOK_ERROR_CODE.REGISTRATION_FAILED
-    | typeof LIGHTFUNNELS_WEBHOOK_ERROR_CODE.ORDERS_SCOPE_MISSING;
+  code: LightfunnelsWebhookErrorCode;
   cleanup?: LightfunnelsWebhookCleanup;
 }
 

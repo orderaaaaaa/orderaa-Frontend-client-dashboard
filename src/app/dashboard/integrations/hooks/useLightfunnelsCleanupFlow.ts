@@ -2,10 +2,10 @@ import { useCallback, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { getApiErrorMessage } from '@/utils/apiError';
 import {
+  LIGHTFUNNELS_CLEANUP_KIND,
   LIGHTFUNNELS_CLEANUP_LISTING,
-  LIGHTFUNNELS_WEBHOOK_ERROR_CODE,
   LIGHTFUNNELS_WEBHOOK_MODE,
-  type LightfunnelsRegistrationFailedError,
+  type LightfunnelsModeSwitchErrorBody,
   type LightfunnelsWebhookCleanup,
   type SetLightfunnelsWebhookModeResponse,
 } from '../types/apiIntegration';
@@ -27,41 +27,71 @@ const cleanupFailedMessage = (count: number) =>
 const cleanupRemovedMessage = (count: number) =>
   `تم حذف ${count} من الروابط القديمة وتسجيل الـ Webhooks تلقائياً`;
 
-const REGISTRATION_FAILED_CODES: ReadonlyArray<string> = [
-  LIGHTFUNNELS_WEBHOOK_ERROR_CODE.REGISTRATION_FAILED,
-  LIGHTFUNNELS_WEBHOOK_ERROR_CODE.ORDERS_SCOPE_MISSING,
-];
-
 const MANUAL_LINKS_KEPT_MESSAGE = 'لم نحذف أي رابط يدوي، فالرابط اليدوي ما زال يعمل.';
 
-export const getRegistrationFailureCleanup = (
-  err: unknown
-): LightfunnelsWebhookCleanup | null => {
-  const data = (err as { response?: { data?: Partial<LightfunnelsRegistrationFailedError> } })
-    ?.response?.data;
-  if (!data?.code || !REGISTRATION_FAILED_CODES.includes(data.code)) return null;
-  return data.cleanup ?? null;
+const isCleanupReport = (value: unknown): value is LightfunnelsWebhookCleanup => {
+  if (typeof value !== 'object' || value === null) return false;
+  const report = value as Partial<Record<keyof LightfunnelsWebhookCleanup, unknown>>;
+  return (
+    typeof report.removed === 'number' &&
+    typeof report.failed === 'number' &&
+    typeof report.abandoned === 'number' &&
+    Array.isArray(report.webhooks)
+  );
 };
 
-const registrationFailureCleanupMessage = (cleanup: LightfunnelsWebhookCleanup) => {
+export const getModeSwitchErrorCleanup = (err: unknown): LightfunnelsWebhookCleanup | null => {
+  const cleanup = (err as { response?: { data?: Partial<LightfunnelsModeSwitchErrorBody> } })
+    ?.response?.data?.cleanup;
+  return isCleanupReport(cleanup) ? cleanup : null;
+};
+
+const modeSwitchErrorCleanupMessage = (
+  cleanup: LightfunnelsWebhookCleanup,
+  storeId: number
+) => {
   const parts: string[] = [];
-  if (cleanup.removed > 0) {
+  const ownLeftovers = cleanup.webhooks.filter(
+    (webhook) =>
+      webhook.kind === LIGHTFUNNELS_CLEANUP_KIND.AUTOMATIC_LEFTOVER && webhook.storeId === storeId
+  ).length;
+  const manualLinks = cleanup.webhooks.filter(
+    (webhook) => webhook.kind === LIGHTFUNNELS_CLEANUP_KIND.MANUAL_LINK
+  ).length;
+  const otherRemoved = cleanup.webhooks.length - ownLeftovers - manualLinks;
+  if (ownLeftovers > 0) {
     parts.push(
-      `حذفنا ${cleanup.removed} من التسجيلات التلقائية القديمة لهذا المتجر قبل تعذر التسجيل.`
+      `حذفنا ${ownLeftovers} من التسجيلات التلقائية القديمة لهذا المتجر قبل تعذر التسجيل.`
     );
+  }
+  if (otherRemoved > 0) {
+    parts.push(`وحذفنا ${otherRemoved} من الروابط القديمة الأخرى.`);
   }
   const notRemoved = cleanup.failed + cleanup.abandoned;
   if (notRemoved > 0) {
     parts.push(`تعذر حذف ${notRemoved} منها، وستظهر حالتها أدناه.`);
   }
-  parts.push(MANUAL_LINKS_KEPT_MESSAGE);
+  parts.push(
+    manualLinks > 0
+      ? `حُذف ${manualLinks} من الروابط اليدوية قبل تعذر التسجيل، فأعد لصق الرابط اليدوي في Lightfunnels أو أعد محاولة التبديل إلى التلقائي.`
+      : MANUAL_LINKS_KEPT_MESSAGE
+  );
   return parts.join(' ');
 };
 
-export const showModeSwitchError = (err: unknown) => {
+export const showModeSwitchError = (err: unknown, storeId: number) => {
   toast.error(getApiErrorMessage(err, MODE_SWITCH_FALLBACK_ERROR));
-  const cleanup = getRegistrationFailureCleanup(err);
-  if (cleanup) toast.info(registrationFailureCleanupMessage(cleanup));
+  const cleanup = getModeSwitchErrorCleanup(err);
+  if (!cleanup) return;
+  const message = modeSwitchErrorCleanupMessage(cleanup, storeId);
+  const manualLinkRemoved = cleanup.webhooks.some(
+    (webhook) => webhook.kind === LIGHTFUNNELS_CLEANUP_KIND.MANUAL_LINK
+  );
+  if (manualLinkRemoved) {
+    toast.warning(message);
+    return;
+  }
+  toast.info(message);
 };
 
 export const showAutomaticSwitchToast = (cleanup: LightfunnelsWebhookCleanup | null) => {
@@ -130,7 +160,7 @@ export const useLightfunnelsCleanupFlow = (
         onSettled?.();
         return response;
       } catch (err) {
-        showModeSwitchError(err);
+        showModeSwitchError(err, storeId);
         onSettled?.();
         return null;
       }
@@ -164,7 +194,7 @@ export const useLightfunnelsCleanupFlow = (
         showAutomaticSwitchToast(response.cleanup);
         close();
       } catch (err) {
-        showModeSwitchError(err);
+        showModeSwitchError(err, storeId);
         close();
       }
     },
