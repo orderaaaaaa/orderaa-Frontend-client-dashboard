@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import IntegrationModal from './components/IntegrationModal';
 import EditIntegrationModal from './components/EditIntegrationModal';
 import DeleteConfirmationModal from './components/DeleteConfirmationModal';
@@ -8,6 +8,7 @@ import { platforms } from './constants/platforms';
 import { providerConfigs } from './constants/providerConfig';
 import { IntegrationCard } from './components/IntegrationCard';
 import { Notification } from './components/Notification';
+import LightfunnelsConnectResultNotifier from './components/LightfunnelsConnectResultNotifier';
 import { useIntegrations } from './hooks/useIntegrations';
 import { IntegrationResponse } from './types/apiIntegration';
 import { toast } from 'react-toastify';
@@ -88,6 +89,13 @@ const IntegrationsPage = () => {
 
   return (
     <>
+      <Suspense fallback={null}>
+        <LightfunnelsConnectResultNotifier
+          integrations={integrations}
+          isLoading={isLoading}
+        />
+      </Suspense>
+
       <div className="bg-gray-50 min-h-screen" dir="rtl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">

@@ -29,6 +29,14 @@ export const STOCK_PUSH_ERROR_LABEL: Record<StockPushErrorCode, string> = {
   MISSING_TAAGER_CODE: 'لا يوجد كود تاجر',
   MISSING_INVENTORY_ITEM: 'لا يوجد عنصر مخزون',
   INTERRUPTED: 'توقف الدفع قبل اكتماله',
+  LIGHTFUNNELS_RECONNECT_REQUIRED: 'انتهت صلاحية ربط Lightfunnels، أعد الربط',
+  LIGHTFUNNELS_NOT_CONFIGURED: 'ربط Lightfunnels عبر API غير مكتمل',
+  LIGHTFUNNELS_PRODUCT_NOT_FOUND: 'المنتج غير موجود في Lightfunnels',
+  LIGHTFUNNELS_VARIANT_NOT_FOUND: 'المتغير غير موجود في منتج Lightfunnels',
+  LIGHTFUNNELS_UPDATE_FAILED: 'رفض Lightfunnels تحديث المنتج',
+  LIGHTFUNNELS_QUANTITY_NOT_APPLIED: 'لم يحفظ Lightfunnels الكمية الجديدة',
+  LIGHTFUNNELS_INVENTORY_LIMIT_OFF:
+    '«حد المخزون» متوقف لهذا المنتج في Lightfunnels، فعّله ثم أعد المحاولة',
 };
 
 export const isStockPushErrorCode = (
@@ -45,6 +53,7 @@ export const UNLINKED_REASON_LABEL: Record<UnlinkedVariantReason, string> = {
   NO_MAPPING: 'غير مرتبط',
   MISSING_TAAGER_CODE: 'لا يوجد كود تاجر',
   MISSING_INVENTORY_ITEM: 'لا يوجد عنصر مخزون',
+  MISSING_LIGHTFUNNELS_PRODUCT: 'لا يوجد معرّف منتج Lightfunnels',
 };
 
 function formatTimestamp(value: string): string {

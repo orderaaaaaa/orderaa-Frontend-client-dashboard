@@ -13,6 +13,10 @@ import {
   StockPushLogPage,
   StockPolicyLogPage,
   UnlinkedVariantPage,
+  LightfunnelsConnection,
+  ConnectLightfunnelsRequest,
+  LightfunnelsAuthorizeResponse,
+  LightfunnelsRedirectUriResponse,
 } from '../types/apiIntegration';
 
 export const storeApi = {
@@ -139,6 +143,32 @@ export const stockSyncApi = {
   retryPolicy: async (configId: number): Promise<QueuedResponse> => {
     const response = await http.post<QueuedResponse>(
       `/integration-configs/${configId}/stock-policy/retry`
+    );
+    return response.data;
+  },
+};
+
+export const lightfunnelsApi = {
+  getRedirectUri: async (): Promise<LightfunnelsRedirectUriResponse> => {
+    const response = await http.get<LightfunnelsRedirectUriResponse>(
+      '/integrations/lightfunnels/redirect-uri'
+    );
+    return response.data;
+  },
+
+  getConnections: async (): Promise<LightfunnelsConnection[]> => {
+    const response = await http.get<LightfunnelsConnection[]>(
+      '/integrations/lightfunnels/connections'
+    );
+    return response.data;
+  },
+
+  connect: async (
+    data: ConnectLightfunnelsRequest
+  ): Promise<LightfunnelsAuthorizeResponse> => {
+    const response = await http.post<LightfunnelsAuthorizeResponse>(
+      '/integrations/lightfunnels/connect',
+      data
     );
     return response.data;
   },

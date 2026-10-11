@@ -73,6 +73,8 @@ export const QUERY_KEYS = {
   INTEGRATION_STOCK_UNLINKED: 'integration-stock-unlinked',
   INTEGRATION_STOCK_POLICY_LOG: 'integration-stock-policy-log',
   INTEGRATION_SHOPIFY_LOCATIONS: 'integration-shopify-locations',
+  LIGHTFUNNELS_CONNECTIONS: 'lightfunnels-connections',
+  LIGHTFUNNELS_REDIRECT_URI: 'lightfunnels-redirect-uri',
 
   // Automation
   AUTOMATION_CONFIGS: 'automation-configs',

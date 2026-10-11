@@ -99,6 +99,13 @@ export const STOCK_PUSH_ERROR_CODE = {
   MISSING_TAAGER_CODE: 'MISSING_TAAGER_CODE',
   MISSING_INVENTORY_ITEM: 'MISSING_INVENTORY_ITEM',
   INTERRUPTED: 'INTERRUPTED',
+  LIGHTFUNNELS_RECONNECT_REQUIRED: 'LIGHTFUNNELS_RECONNECT_REQUIRED',
+  LIGHTFUNNELS_NOT_CONFIGURED: 'LIGHTFUNNELS_NOT_CONFIGURED',
+  LIGHTFUNNELS_PRODUCT_NOT_FOUND: 'LIGHTFUNNELS_PRODUCT_NOT_FOUND',
+  LIGHTFUNNELS_VARIANT_NOT_FOUND: 'LIGHTFUNNELS_VARIANT_NOT_FOUND',
+  LIGHTFUNNELS_UPDATE_FAILED: 'LIGHTFUNNELS_UPDATE_FAILED',
+  LIGHTFUNNELS_QUANTITY_NOT_APPLIED: 'LIGHTFUNNELS_QUANTITY_NOT_APPLIED',
+  LIGHTFUNNELS_INVENTORY_LIMIT_OFF: 'LIGHTFUNNELS_INVENTORY_LIMIT_OFF',
 } as const;
 
 export type StockPushErrorCode =
@@ -108,6 +115,7 @@ export const UNLINKED_REASON = {
   NO_MAPPING: 'NO_MAPPING',
   MISSING_TAAGER_CODE: 'MISSING_TAAGER_CODE',
   MISSING_INVENTORY_ITEM: 'MISSING_INVENTORY_ITEM',
+  MISSING_LIGHTFUNNELS_PRODUCT: 'MISSING_LIGHTFUNNELS_PRODUCT',
 } as const;
 
 export type UnlinkedVariantReason =
@@ -192,3 +200,56 @@ export interface UnlinkedVariantPage {
   limit: number;
   totalPages: number;
 }
+
+export const LIGHTFUNNELS_CONNECTION_STATUS = {
+  PENDING_CONSENT: 'PENDING_CONSENT',
+  CONNECTED: 'CONNECTED',
+  NEEDS_RECONNECT: 'NEEDS_RECONNECT',
+} as const;
+
+export type LightfunnelsConnectionStatus =
+  (typeof LIGHTFUNNELS_CONNECTION_STATUS)[keyof typeof LIGHTFUNNELS_CONNECTION_STATUS];
+
+export interface LightfunnelsConnection {
+  storeId: number;
+  integrationConfigId: number | null;
+  status: LightfunnelsConnectionStatus;
+  clientId: string | null;
+  hasClientSecret: boolean;
+  connectedAt: string | null;
+  accessTokenExpiresAt: string | null;
+  lastErrorCode: string | null;
+}
+
+export interface ConnectLightfunnelsRequest {
+  storeId: number;
+  clientId: string;
+  clientSecret?: string;
+}
+
+export interface LightfunnelsAuthorizeResponse {
+  authorizeUrl: string;
+}
+
+export interface LightfunnelsRedirectUriResponse {
+  redirectUri: string;
+  scopes: string;
+}
+
+export const LIGHTFUNNELS_CONNECT_RESULT = {
+  CONNECTED: 'CONNECTED',
+  DENIED: 'DENIED',
+  STATE_INVALID: 'STATE_INVALID',
+  STATE_EXPIRED: 'STATE_EXPIRED',
+  EXCHANGE_FAILED: 'EXCHANGE_FAILED',
+  SCOPE_MISSING: 'SCOPE_MISSING',
+  FAILED: 'FAILED',
+} as const;
+
+export type LightfunnelsConnectResult =
+  (typeof LIGHTFUNNELS_CONNECT_RESULT)[keyof typeof LIGHTFUNNELS_CONNECT_RESULT];
+
+export const LIGHTFUNNELS_CONNECT_QUERY_KEY = {
+  RESULT: 'lightfunnels',
+  STORE: 'storeId',
+} as const;
