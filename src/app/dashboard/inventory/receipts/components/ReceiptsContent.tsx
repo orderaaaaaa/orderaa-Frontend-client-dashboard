@@ -9,6 +9,7 @@ import ToggleGroup from '@/components/ui/toggle-group';
 import SharedInvoiceCard, { InvoiceCardData } from '@/components/purchases/InvoiceCard';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import PageLoading from '@/components/ui/page-loading';
+import { ErrorState } from '@/components/ui/state-panels';
 import { formatDateToLocalDate } from '@/utils/dateRangeUtils';
 import { useSupplierInvoicesQuery, useSuppliersQuery } from '@/services/suppliers';
 import { useEmployeesQuery } from '@/services/employees';
@@ -95,7 +96,13 @@ export function ReceiptsContent() {
   const totalAmountMax = filters.totalAmountTo ? Number(filters.totalAmountTo) : undefined;
   const employeeId = filters.employeeName ? Number(filters.employeeName) : undefined;
 
-  const { data: invoicesData, isLoading } = useSupplierInvoicesQuery({
+  const {
+    data: invoicesData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useSupplierInvoicesQuery({
     approved: receivingStatusToApproved(filters.receivingStatus),
     receivable: true,
     page: currentPage,
@@ -280,6 +287,14 @@ export function ReceiptsContent() {
       <div className="sm:px-8 flex flex-col gap-4">
         {isLoading ? (
           <PageLoading message="جاري تحميل الاستلامات..." />
+        ) : isError ? (
+          <ErrorState
+            error={error}
+            fallback="تعذّر تحميل الاستلامات"
+            onRetry={() => {
+              refetch();
+            }}
+          />
         ) : receipts.length > 0 ? (
           receipts.map((receipt) => (
             <SharedInvoiceCard
