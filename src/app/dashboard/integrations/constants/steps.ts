@@ -60,3 +60,11 @@ export const lightfunnelsApiSteps = [
   'انسخ Client ID وClient Secret من تبويب Configurations وألصقهما أدناه',
   'اضغط «ربط Lightfunnels» ووافق على الصلاحيات',
 ];
+
+export const lightfunnelsAutomaticSteps = [
+  'اختر «تلقائي» في خطوة إعدادات Webhook ثم اضغط «التالي»',
+  'سجّل الدخول إلى partners.lightfunnels.com وأنشئ تطبيقاً كما في خطوات ربط الـ API',
+  'فعّل صلاحية orders في تطبيقك إن وُجدت قائمة صلاحيات',
+  'أدخل Client ID وClient Secret في الخطوة التالية ووافق على الصلاحيات في Lightfunnels',
+  'بعد الموافقة نسجّل الـ Webhooks في Lightfunnels تلقائياً، ولا تحتاج إلى نسخ أي رابط',
+];

@@ -6,6 +6,7 @@ import {
   shopifyIntegrationSteps,
   lightfunnelsWebhookSteps,
   lightfunnelsApiSteps,
+  lightfunnelsAutomaticSteps,
 } from './steps';
 
 export const PROVIDER_CONNECTION_MODE = {
@@ -30,6 +31,7 @@ export interface ProviderModalConfig {
   modalTitle: string;
   modalDescription: string;
   webhookSteps: string[];
+  automaticWebhookSteps?: string[];
   apiSteps: string[];
   videoUrl?: string;
   metadataFields?: MetadataField[];
@@ -85,6 +87,7 @@ export const providerConfigs: Record<string, ProviderModalConfig> = {
     modalTitle: 'ربط المتاجر - Lightfunnels',
     modalDescription: 'قم بربط متجرك لمراقبة الطلبات تلقائياً عبر Lightfunnels',
     webhookSteps: lightfunnelsWebhookSteps,
+    automaticWebhookSteps: lightfunnelsAutomaticSteps,
     apiSteps: lightfunnelsApiSteps,
     connectionMode: PROVIDER_CONNECTION_MODE.WEBHOOK_AND_OAUTH,
     generatedWebhookToken: true,

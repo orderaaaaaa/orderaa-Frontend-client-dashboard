@@ -2,25 +2,64 @@
 
 import { useState } from 'react';
 import { LiaPlusSolid } from 'react-icons/lia';
+import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Can } from '@/components/Can';
 import { PERMISSION_CODES } from '@/lib/generated/permission-codes';
+import { getApiErrorMessage } from '@/utils/apiError';
 import {
   LIGHTFUNNELS_CONNECTION_STATUS,
+  LIGHTFUNNELS_SHARED_APP_REASON,
+  LIGHTFUNNELS_WEBHOOK_MODE,
   type IntegrationResponse,
+  type LightfunnelsConnection,
+  type LightfunnelsWebhookMode,
 } from '../types/apiIntegration';
 import { useLightfunnelsConnections } from '../hooks/useLightfunnelsConnections';
+import { useIntegrations } from '../hooks/useIntegrations';
+import { getLightfunnelsSharedAppError } from '../utils/lightfunnelsErrors';
 import LightfunnelsConnectForm from './LightfunnelsConnectForm';
 import LightfunnelsConnectionBadge from './LightfunnelsConnectionBadge';
+import LightfunnelsWebhookModeSelect, {
+  LIGHTFUNNELS_SWITCHING_TEXT,
+  LIGHTFUNNELS_WEBHOOK_MODE_LABEL,
+} from './LightfunnelsWebhookModeSelect';
+import LightfunnelsWebhookStatus, {
+  isLightfunnelsRegistrationFailed,
+  isLightfunnelsReregisterPending,
+} from './LightfunnelsWebhookStatus';
+import CopyableUrlField from './CopyableUrlField';
 
 const RECONNECT_REQUIRED_MESSAGE = 'انتهت صلاحية ربط Lightfunnels، أعد الربط';
+const CONNECT_BEFORE_MODE_TOOLTIP = 'أكمل ربط Lightfunnels عبر API أولاً';
+const SWITCH_TO_MANUAL_WARNING =
+  'سيتم حذف الـ Webhooks من Lightfunnels. ألصق الرابط اليدوي في Lightfunnels أولاً حتى لا تفوتك طلبات';
+const MODE_SWITCH_FALLBACK_ERROR = 'تعذر تغيير طريقة استقبال الطلبات';
+
+const modeSwitchToast = (
+  mode: LightfunnelsWebhookMode,
+  connection: LightfunnelsConnection | null
+) => {
+  if (mode === LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC) {
+    toast.success('تم تسجيل الـ Webhooks في Lightfunnels، وسيتم استقبال الطلبات تلقائياً');
+    return;
+  }
+  if ((connection?.pendingDeletes ?? 0) > 0) {
+    toast.warning(
+      'تم التحويل إلى الاستقبال اليدوي، لكن تعذر حذف بعض الـ Webhooks من Lightfunnels وسنعيد المحاولة'
+    );
+    return;
+  }
+  toast.success('تم التحويل إلى الاستقبال اليدوي، تأكد من لصق الرابط في Lightfunnels');
+};
 
 interface LightfunnelsApiSectionProps {
   storeId: number;
   apiConfig?: IntegrationResponse;
   apiIsActive: boolean;
   onApiIsActiveChange: (next: boolean) => void;
+  manualWebhookUrl?: string;
   disabled?: boolean;
 }
 
@@ -29,11 +68,77 @@ export default function LightfunnelsApiSection({
   apiConfig,
   apiIsActive,
   onApiIsActiveChange,
+  manualWebhookUrl,
   disabled = false,
 }: LightfunnelsApiSectionProps) {
   const [showConnectForm, setShowConnectForm] = useState(false);
-  const { findConnection, isLoading } = useLightfunnelsConnections();
+  const [confirmManual, setConfirmManual] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const { findConnection, isLoading, setWebhookMode, isSettingWebhookMode } =
+    useLightfunnelsConnections();
   const connection = findConnection(storeId);
+  const { integrations } = useIntegrations();
+
+  const modeSwitchErrorMessage = (err: unknown): string => {
+    const fallback = getApiErrorMessage(err, MODE_SWITCH_FALLBACK_ERROR);
+    const sharedApp = getLightfunnelsSharedAppError(err);
+    if (
+      !sharedApp ||
+      sharedApp.reason !== LIGHTFUNNELS_SHARED_APP_REASON.PEER_PENDING_DELETES ||
+      sharedApp.peerStoreId === null
+    ) {
+      return fallback;
+    }
+    const peerStoreId = sharedApp.peerStoreId;
+    const peerName =
+      integrations?.find((config) => config.storeId === peerStoreId)?.store?.name ??
+      `متجر #${peerStoreId}`;
+    if (
+      findConnection(peerStoreId)?.status === LIGHTFUNNELS_CONNECTION_STATUS.NEEDS_RECONNECT
+    ) {
+      return `المتجر «${peerName}» على نفس التطبيق ما زالت لديه Webhooks لم تُحذف من Lightfunnels، وربطه يحتاج إلى إعادة. أعد ربط «${peerName}» أولاً ليُعاد حذفها، فحذفها يدوياً في Lightfunnels لا يرفع هذا المنع حتى يُعاد ربط ذلك المتجر`;
+    }
+    return `${fallback} (المتجر: «${peerName}»)`;
+  };
+
+  const isSwitching = isSettingWebhookMode || isRedirecting;
+  const isConnected = connection?.status === LIGHTFUNNELS_CONNECTION_STATUS.CONNECTED;
+  const modeDisabled = disabled || isSwitching || !isConnected;
+  const canRetryAutomatic =
+    !!connection &&
+    ((connection.webhookMode === LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC &&
+      isLightfunnelsRegistrationFailed(connection)) ||
+      isLightfunnelsReregisterPending(connection));
+  const modeDisabledTooltip = isSwitching
+    ? LIGHTFUNNELS_SWITCHING_TEXT
+    : !isConnected
+      ? CONNECT_BEFORE_MODE_TOOLTIP
+      : undefined;
+
+  const applyMode = async (mode: LightfunnelsWebhookMode) => {
+    try {
+      const response = await setWebhookMode({ storeId, mode });
+      setConfirmManual(false);
+      if (response.consentRequired) {
+        setIsRedirecting(true);
+        return;
+      }
+      modeSwitchToast(mode, response.connection);
+    } catch (err) {
+      toast.error(modeSwitchErrorMessage(err));
+    }
+  };
+
+  const handleModeChange = (mode: LightfunnelsWebhookMode) => {
+    if (
+      mode === LIGHTFUNNELS_WEBHOOK_MODE.MANUAL &&
+      connection?.webhookMode === LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC
+    ) {
+      setConfirmManual(true);
+      return;
+    }
+    applyMode(mode);
+  };
 
   if (isLoading) {
     return (
@@ -110,6 +215,79 @@ export default function LightfunnelsApiSection({
         <span className="text-gray-600">Client ID</span>
         <span className="text-gray-800 font-mono text-xs">{clientId || '—'}</span>
       </div>
+
+      {connection && (
+        <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-100">
+          <Can
+            code={PERMISSION_CODES.INTEGRATION_CONFIG_MANAGE}
+            fallback={
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">طريقة استقبال الطلبات</span>
+                <span className="text-gray-800">
+                  {LIGHTFUNNELS_WEBHOOK_MODE_LABEL[connection.webhookMode]}
+                </span>
+              </div>
+            }
+          >
+            <LightfunnelsWebhookModeSelect
+              value={connection.webhookMode}
+              onChange={handleModeChange}
+              disabled={modeDisabled || confirmManual}
+              disabledTooltip={modeDisabledTooltip}
+              showOrdersConsentHint={!connection.ordersConsentGranted}
+            />
+          </Can>
+
+          {confirmManual && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-3">
+              <p className="text-sm text-amber-800">{SWITCH_TO_MANUAL_WARNING}</p>
+              {manualWebhookUrl && (
+                <CopyableUrlField label="رابط الـ Webhook اليدوي" value={manualWebhookUrl} />
+              )}
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => applyMode(LIGHTFUNNELS_WEBHOOK_MODE.MANUAL)}
+                  disabled={disabled || isSwitching}
+                  loading={isSettingWebhookMode}
+                  className="h-8 text-xs"
+                >
+                  تأكيد التحويل إلى اليدوي
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setConfirmManual(false)}
+                  disabled={isSettingWebhookMode}
+                  className="h-8 text-xs"
+                >
+                  إلغاء
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <LightfunnelsWebhookStatus connection={connection} />
+
+          {canRetryAutomatic && (
+            <Can code={PERMISSION_CODES.INTEGRATION_CONFIG_MANAGE}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => applyMode(LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC)}
+                disabled={modeDisabled || confirmManual}
+                loading={isSettingWebhookMode}
+                className="h-8 text-xs"
+              >
+                إعادة محاولة التسجيل التلقائي
+              </Button>
+            </Can>
+          )}
+        </div>
+      )}
 
       {showConnectForm ? (
         <LightfunnelsConnectForm

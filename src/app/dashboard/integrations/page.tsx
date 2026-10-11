@@ -9,8 +9,12 @@ import { providerConfigs } from './constants/providerConfig';
 import { IntegrationCard } from './components/IntegrationCard';
 import { Notification } from './components/Notification';
 import LightfunnelsConnectResultNotifier from './components/LightfunnelsConnectResultNotifier';
+import LightfunnelsDeleteWarning, {
+  needsLightfunnelsDeleteWarning,
+} from './components/LightfunnelsDeleteWarning';
 import { useIntegrations } from './hooks/useIntegrations';
-import { IntegrationResponse } from './types/apiIntegration';
+import { useLightfunnelsConnections } from './hooks/useLightfunnelsConnections';
+import { IntegrationProvider, IntegrationResponse } from './types/apiIntegration';
 import { toast } from 'react-toastify';
 
 const IntegrationsPage = () => {
@@ -35,9 +39,28 @@ const IntegrationsPage = () => {
     integrations,
     isLoading,
     deleteIntegration,
+    isDeletePending,
     deleteStore,
     isStoreDeletePending,
   } = useIntegrations();
+
+  const isDeletingLightfunnelsStore =
+    !!deletingStore &&
+    !!integrations?.some(
+      (config) =>
+        config.storeId === deletingStore.storeId &&
+        config.provider === IntegrationProvider.LIGHTFUNNELS
+    );
+  const {
+    findConnection: findLightfunnelsConnection,
+    isLoading: isLightfunnelsConnectionsLoading,
+  } = useLightfunnelsConnections({
+    enabled: isDeletingLightfunnelsStore,
+  });
+  const deletingLightfunnelsConnection =
+    deletingStore && isDeletingLightfunnelsStore
+      ? findLightfunnelsConnection(deletingStore.storeId)
+      : undefined;
 
   const handleCardButtonClick = (platformId: string) => {
     if (providerConfigs[platformId]) {
@@ -166,8 +189,16 @@ const IntegrationsPage = () => {
           onClose={() => setDeletingStore(null)}
           onConfirm={handleConfirmDelete}
           storeName={deletingStore.storeName}
-          isLoading={isStoreDeletePending}
-        />
+          isLoading={
+            isStoreDeletePending ||
+            isDeletePending ||
+            (isDeletingLightfunnelsStore && isLightfunnelsConnectionsLoading)
+          }
+        >
+          {needsLightfunnelsDeleteWarning(deletingLightfunnelsConnection) && (
+            <LightfunnelsDeleteWarning connection={deletingLightfunnelsConnection} />
+          )}
+        </DeleteConfirmationModal>
       )}
 
       {notification && (
