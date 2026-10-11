@@ -16,6 +16,11 @@ import {
   type LightfunnelsWebhookMode,
 } from '../types/apiIntegration';
 import { useLightfunnelsConnections } from '../hooks/useLightfunnelsConnections';
+import {
+  MODE_SWITCH_FALLBACK_ERROR,
+  useLightfunnelsCleanupFlow,
+} from '../hooks/useLightfunnelsCleanupFlow';
+import LightfunnelsWebhookCleanupDialog from './LightfunnelsWebhookCleanupDialog';
 import LightfunnelsConnectForm from './LightfunnelsConnectForm';
 import LightfunnelsConnectionBadge from './LightfunnelsConnectionBadge';
 import LightfunnelsWebhookModeSelect, {
@@ -32,16 +37,8 @@ const RECONNECT_REQUIRED_MESSAGE = 'انتهت صلاحية ربط Lightfunnels�
 const CONNECT_BEFORE_MODE_TOOLTIP = 'أكمل ربط Lightfunnels عبر API أولاً';
 const SWITCH_TO_MANUAL_WARNING =
   'سيتم حذف الـ Webhooks من Lightfunnels. ألصق الرابط اليدوي في Lightfunnels أولاً حتى لا تفوتك طلبات';
-const MODE_SWITCH_FALLBACK_ERROR = 'تعذر تغيير طريقة استقبال الطلبات';
 
-const modeSwitchToast = (
-  mode: LightfunnelsWebhookMode,
-  connection: LightfunnelsConnection | null
-) => {
-  if (mode === LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC) {
-    toast.success('تم تسجيل الـ Webhooks في Lightfunnels، وسيتم استقبال الطلبات تلقائياً');
-    return;
-  }
+const manualSwitchToast = (connection: LightfunnelsConnection | null) => {
   if ((connection?.pendingDeletes ?? 0) > 0) {
     toast.warning(
       'تم التحويل إلى الاستقبال اليدوي، لكن تعذر حذف بعض الـ Webhooks من Lightfunnels وسنعيد المحاولة'
@@ -74,8 +71,14 @@ export default function LightfunnelsApiSection({
   const { findConnection, isLoading, setWebhookMode, isSettingWebhookMode } =
     useLightfunnelsConnections();
   const connection = findConnection(storeId);
+  const cleanupFlow = useLightfunnelsCleanupFlow(storeId);
 
-  const isSwitching = isSettingWebhookMode || isRedirecting;
+  const isSwitching =
+    isSettingWebhookMode ||
+    cleanupFlow.isPending ||
+    cleanupFlow.isReviewing ||
+    cleanupFlow.isRedirecting ||
+    isRedirecting;
   const isConnected = connection?.status === LIGHTFUNNELS_CONNECTION_STATUS.CONNECTED;
   const modeDisabled = disabled || isSwitching || !isConnected;
   const canRetryAutomatic =
@@ -90,6 +93,10 @@ export default function LightfunnelsApiSection({
       : undefined;
 
   const applyMode = async (mode: LightfunnelsWebhookMode) => {
+    if (mode === LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC) {
+      await cleanupFlow.switchToAutomatic();
+      return;
+    }
     try {
       const response = await setWebhookMode({ storeId, mode });
       setConfirmManual(false);
@@ -97,7 +104,7 @@ export default function LightfunnelsApiSection({
         setIsRedirecting(true);
         return;
       }
-      modeSwitchToast(mode, response.connection);
+      manualSwitchToast(response.connection);
     } catch (err) {
       toast.error(getApiErrorMessage(err, MODE_SWITCH_FALLBACK_ERROR));
     }
@@ -253,7 +260,7 @@ export default function LightfunnelsApiSection({
                 size="sm"
                 onClick={() => applyMode(LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC)}
                 disabled={modeDisabled || confirmManual}
-                loading={isSettingWebhookMode}
+                loading={cleanupFlow.isPending}
                 className="h-8 text-xs"
               >
                 إعادة محاولة التسجيل التلقائي
@@ -262,6 +269,8 @@ export default function LightfunnelsApiSection({
           )}
         </div>
       )}
+
+      <LightfunnelsWebhookCleanupDialog storeId={storeId} {...cleanupFlow.dialog} />
 
       {showConnectForm ? (
         <LightfunnelsConnectForm
