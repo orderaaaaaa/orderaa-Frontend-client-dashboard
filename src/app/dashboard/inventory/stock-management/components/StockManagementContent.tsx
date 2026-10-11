@@ -219,8 +219,8 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
       </div>
 
       <div className="flex flex-col gap-4">
-        <div className="flex flex-row items-center gap-3">
-          <div className="relative flex-1 min-w-0 px-1">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative min-w-[12rem] flex-1 px-1">
             <LiaSearchSolid className="absolute right-3 top-1/2 -translate-y-1/2 size-5 text-primary z-10" />
             <Input
               value={filters.searchQuery}
@@ -240,7 +240,8 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
           </label>
           <Button
             variant="default"
-            className="rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm px-5 relative"
+            aria-label="فلاتر متقدمة"
+            className="rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm px-3 sm:px-5 relative"
             onClick={() => {
               setShowFilters((prev) => {
                 if (prev) setFiltersOverflow(false);
@@ -249,9 +250,9 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
             }}
           >
             <LiaSlidersHSolid className="w-5 h-5" />
-            فلاتر متقدمة
+            <span className="hidden sm:inline">فلاتر متقدمة</span>
             {activeFilterCount > 0 && (
-              <span className="absolute -top-2 -left-2 bg-white text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
+              <span className="absolute -top-2 -start-2 bg-white text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
                 {activeFilterCount}
               </span>
             )}

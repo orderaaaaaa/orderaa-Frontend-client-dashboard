@@ -73,7 +73,7 @@ export type NavigationItem = {
 };
 
 export const navigation: NavigationItem[] = [
-  { name: ' الرئيسية', href: '/dashboard', icon: House },
+  { name: 'الرئيسية', href: '/dashboard', icon: House },
   {
     name: 'الإحصائيات',
     href: '/dashboard/statistics',
@@ -169,7 +169,7 @@ export const navigation: NavigationItem[] = [
     permission: PERMISSION_CODES.ROLES_READ,
   },
   {
-    name: 'إضافه طلب جديد',
+    name: 'إضافة طلب جديد',
     href: '/dashboard',
     icon: ListPlus,
     children: [
@@ -287,7 +287,7 @@ export const navigation: NavigationItem[] = [
     icon: LiaFileInvoiceDollarSolid,
     children: [
       {
-        name: 'اضافة فاتورة',
+        name: 'إضافة فاتورة',
         href: '/dashboard/purchases/add-invoice',
         icon: LiaPlusSolid,
       },
@@ -309,7 +309,7 @@ export const navigation: NavigationItem[] = [
         icon: LiaUsersSolid,
       },
       {
-        name: 'اضافة مورد',
+        name: 'إضافة مورد',
         href: '/dashboard/purchases/add-supplier',
         icon: LiaUserPlusSolid,
       },
@@ -330,9 +330,10 @@ export const navigation: NavigationItem[] = [
         ]
         : []),
       {
-        name: 'ادارة المخزن',
+        name: 'إدارة المخزن',
         href: '/dashboard/inventory/stock-management',
         icon: LiaCubesSolid,
+        permission: PERMISSION_CODES.WAREHOUSES_STOCK_READ,
       },
       {
         name: 'إدارة الاستلامات',
