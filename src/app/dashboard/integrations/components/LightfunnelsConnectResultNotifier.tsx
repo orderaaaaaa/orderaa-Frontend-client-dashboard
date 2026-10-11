@@ -31,7 +31,7 @@ export const LIGHTFUNNELS_CONNECT_RESULT_MESSAGE: Record<
   },
   STATE_EXPIRED: {
     kind: 'error',
-    message: 'انتهت مهلة الربط، ابدأ الربط من جديد خلال 10 دقائق',
+    message: 'انتهت مهلة الربط، ابدأ الربط من جديد وأكمل الموافقة في Lightfunnels خلال 10 دقائق',
   },
   EXCHANGE_FAILED: {
     kind: 'error',

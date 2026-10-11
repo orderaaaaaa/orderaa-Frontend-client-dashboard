@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -104,6 +104,12 @@ export default function LightfunnelsConnectForm({
     }
   });
 
+  const handleEnterKey = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter' || event.nativeEvent.isComposing) return;
+    event.preventDefault();
+    if (!isBusy) submit();
+  };
+
   return (
     <div className="space-y-4">
       <div className="space-y-4 bg-white p-5 rounded-xl border border-gray-100">
@@ -151,6 +157,7 @@ export default function LightfunnelsConnectForm({
           placeholder="أدخل Client ID..."
           error={form.formState.errors.clientId?.message}
           disabled={isBusy}
+          onKeyDown={handleEnterKey}
         />
         <Input
           register={form.register}
@@ -164,6 +171,7 @@ export default function LightfunnelsConnectForm({
           placeholder="أدخل Client Secret..."
           error={form.formState.errors.clientSecret?.message}
           disabled={isBusy}
+          onKeyDown={handleEnterKey}
         />
       </div>
 
