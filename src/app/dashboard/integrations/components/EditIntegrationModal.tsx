@@ -14,6 +14,7 @@ import { useIntegrations } from '../hooks/useIntegrations';
 import {
   IntegrationConfigType,
   IntegrationResponse,
+  LIGHTFUNNELS_WEBHOOK_MODE,
 } from '../types/apiIntegration';
 import { toast } from 'react-toastify';
 import { useForm } from 'react-hook-form';
@@ -28,6 +29,10 @@ import {
 import { buildWebhookUrl, generateWebhookToken } from '../utils/webhookToken';
 import StockSyncSection from './StockSyncSection';
 import LightfunnelsApiSection from './LightfunnelsApiSection';
+import { useLightfunnelsConnections } from '../hooks/useLightfunnelsConnections';
+
+const AUTOMATIC_WEBHOOK_NOTE =
+  'يتم استقبال الطلبات تلقائياً. إن كان رابط يدوي قديم ما زال مضافاً في Lightfunnels فهو يعمل أيضاً ولن تتكرر الطلبات، ويمكنك حذفه';
 
 const URL_PATTERN = /^(https?:\/\/)?[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+/;
 
@@ -117,6 +122,11 @@ const EditIntegrationModal = ({
   const isWebhookOnly = isWebhookOnlyProvider(providerConfig);
   const isOAuthConnect = isOAuthConnectProvider(providerConfig);
   const hasGeneratedToken = usesGeneratedWebhookToken(providerConfig);
+
+  const { findConnection } = useLightfunnelsConnections({ enabled: isOAuthConnect });
+  const isAutomaticWebhook =
+    isOAuthConnect &&
+    findConnection(storeId)?.webhookMode === LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC;
 
   const currentToken = tokenOverride ?? webhookConfig?.apiKey;
 
@@ -357,6 +367,11 @@ const EditIntegrationModal = ({
               </div>
             </div>
 
+            {isAutomaticWebhook ? (
+              <p className="text-sm text-gray-600 bg-white border border-gray-100 rounded-lg p-3">
+                {AUTOMATIC_WEBHOOK_NOTE}
+              </p>
+            ) : (
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="block font-medium text-sm">Webhook URL</span>
@@ -381,8 +396,9 @@ const EditIntegrationModal = ({
                 disabled
               />
             </div>
+            )}
 
-            {hasGeneratedToken ? (
+            {isAutomaticWebhook ? null : hasGeneratedToken ? (
               <div className="space-y-2">
                 {confirmRegenerate ? (
                   <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-3">
@@ -513,6 +529,7 @@ const EditIntegrationModal = ({
             apiConfig={apiConfig}
             apiIsActive={apiIsActive}
             onApiIsActiveChange={setApiIsActive}
+            manualWebhookUrl={webhookConfig ? webhookUrl : undefined}
             disabled={isLoading}
           />
         )}
