@@ -26,6 +26,13 @@ const TONE_CLASS: Record<StatusTone, string> = {
 const LIGHTFUNNELS_LEFTOVER_WEBHOOKS_TEXT =
   'احذفها يدوياً من إعدادات Lightfunnels ← Webhooks';
 
+export const isLightfunnelsReregisterPending = (
+  connection: LightfunnelsConnection
+): boolean =>
+  connection.webhookMode === LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC &&
+  connection.webhookState === LIGHTFUNNELS_WEBHOOK_STATE.NEEDS_REREGISTER &&
+  connection.status === LIGHTFUNNELS_CONNECTION_STATUS.CONNECTED;
+
 export const isLightfunnelsRegistrationFailed = (
   connection: LightfunnelsConnection
 ): boolean =>
@@ -63,7 +70,9 @@ export function getLightfunnelsWebhookStatusLines(
     lines.push({
       key: 'reregister',
       tone: 'warning',
-      text: 'تم حذف التطبيق أو انتهت صلاحيته في Lightfunnels، أعد الربط لاستئناف التسجيل التلقائي. الطلبات الموقّعة ما زالت تصل إن بقيت الـ Webhooks',
+      text: isLightfunnelsReregisterPending(connection)
+        ? 'الربط يعمل، لكن الـ Webhooks التلقائية تحتاج إلى إعادة تسجيل. اضغط «إعادة محاولة التسجيل التلقائي». الطلبات الموقّعة ما زالت تصل إن بقيت الـ Webhooks'
+        : 'تم حذف التطبيق أو انتهت صلاحيته في Lightfunnels، أعد الربط لاستئناف التسجيل التلقائي. الطلبات الموقّعة ما زالت تصل إن بقيت الـ Webhooks',
     });
   } else if (isAutomatic && state === LIGHTFUNNELS_WEBHOOK_STATE.ACTIVE) {
     lines.push({

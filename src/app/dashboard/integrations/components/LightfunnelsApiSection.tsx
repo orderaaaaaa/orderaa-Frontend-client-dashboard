@@ -24,6 +24,7 @@ import LightfunnelsWebhookModeSelect, {
 } from './LightfunnelsWebhookModeSelect';
 import LightfunnelsWebhookStatus, {
   isLightfunnelsRegistrationFailed,
+  isLightfunnelsReregisterPending,
 } from './LightfunnelsWebhookStatus';
 import CopyableUrlField from './CopyableUrlField';
 
@@ -79,8 +80,9 @@ export default function LightfunnelsApiSection({
   const modeDisabled = disabled || isSwitching || !isConnected;
   const canRetryAutomatic =
     !!connection &&
-    connection.webhookMode === LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC &&
-    isLightfunnelsRegistrationFailed(connection);
+    ((connection.webhookMode === LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC &&
+      isLightfunnelsRegistrationFailed(connection)) ||
+      isLightfunnelsReregisterPending(connection));
   const modeDisabledTooltip = isSwitching
     ? LIGHTFUNNELS_SWITCHING_TEXT
     : !isConnected
