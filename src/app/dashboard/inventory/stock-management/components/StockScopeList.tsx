@@ -110,11 +110,17 @@ function ScopeListRow({ row }: { row: ScopeRow }) {
         className={clsx(
           'group flex min-h-14 flex-col justify-center gap-1.5 px-4 py-3 transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/60',
           ROW_GRID,
-          isChild && 'border-s-2 border-s-primary/30 ps-8',
+          isChild &&
+            'border-s-2 border-s-primary/30 ps-8 md:border-s-0 md:ps-4',
           row.isInactive && 'opacity-70'
         )}
       >
-        <div className="flex min-w-0 items-center gap-3">
+        <div
+          className={clsx(
+            'flex min-w-0 items-center gap-3',
+            isChild && 'md:border-s-2 md:border-s-primary/30 md:ps-6'
+          )}
+        >
           <div className="shrink-0 rounded-lg bg-primary/10 p-2">
             <Icon className="size-5 text-primary" />
           </div>
@@ -204,7 +210,13 @@ function ListMessage({
 
 function RetryButton({ onRetry }: { onRetry: () => void }) {
   return (
-    <Button type="button" variant="outline" size="sm" onClick={onRetry}>
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      className="h-10 min-w-10 sm:h-9"
+      onClick={onRetry}
+    >
       إعادة المحاولة
     </Button>
   );
@@ -329,7 +341,7 @@ export function StockScopeList() {
             action={<RetryButton onRetry={() => physical.refetch()} />}
           />
         )}
-        {virtualEnabled && virtual.isLoading && (
+        {virtualEnabled && virtual.isLoading && !physical.isLoading && (
           <StockScopeListSkeleton count={2} />
         )}
         {virtualEnabled && virtual.isError && (

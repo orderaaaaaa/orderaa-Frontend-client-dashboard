@@ -240,8 +240,12 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
           </label>
           <Button
             variant="default"
-            aria-label="فلاتر متقدمة"
-            className="rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm px-3 sm:px-5 relative"
+            aria-label={
+              activeFilterCount > 0
+                ? `فلاتر متقدمة (${activeFilterCount})`
+                : 'فلاتر متقدمة'
+            }
+            className="h-10 min-w-10 sm:h-9 rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm px-3 sm:px-5 relative"
             onClick={() => {
               setShowFilters((prev) => {
                 if (prev) setFiltersOverflow(false);
