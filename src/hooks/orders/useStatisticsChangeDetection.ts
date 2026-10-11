@@ -14,8 +14,10 @@ export function useStatisticsChangeDetection({
   enabled = true,
 }: UseStatisticsChangeDetectionOptions = {}) {
   const queryClient = useQueryClient();
-  const previousStatisticsRef = useRef<OrderStatistics | null>(null);
-  const isInitializedRef = useRef(false);
+  const previousStatisticsRef = useRef(
+    new Map<string, OrderStatistics | null>()
+  );
+  const fetchStartedAtRef = useRef(new Map<string, number>());
   const onStatisticsChangeRef = useRef(onStatisticsChange);
 
   onStatisticsChangeRef.current = onStatisticsChange;
@@ -23,25 +25,60 @@ export function useStatisticsChangeDetection({
   useEffect(() => {
     if (!enabled) return;
 
-    const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
-      if (
-        event.type === 'updated' &&
-        event.query.queryKey[0] === QUERY_KEYS.ORDER_STATISTICS
-      ) {
-        const queryState = event.query.state;
-        const newData = queryState.data as OrderStatisticsResponse | undefined;
-        const newStatistics = newData?.success ? newData.data : null;
+    const queryCache = queryClient.getQueryCache();
 
-        if (!isInitializedRef.current) {
-          previousStatisticsRef.current = newStatistics;
-          isInitializedRef.current = true;
-          return;
-        }
+    const isStaleSince = (startedAt: number) =>
+      queryCache
+        .findAll({ queryKey: [QUERY_KEYS.ORDERS], type: 'active' })
+        .some((query) =>
+          query.state.fetchStatus === 'idle'
+            ? query.state.dataUpdatedAt < startedAt
+            : (fetchStartedAtRef.current.get(query.queryHash) ?? 0) <
+              startedAt
+        );
 
-        if (!areStatisticsEqual(previousStatisticsRef.current, newStatistics)) {
-          previousStatisticsRef.current = newStatistics;
-          onStatisticsChangeRef.current?.();
+    const unsubscribe = queryCache.subscribe((event) => {
+      if (event.type !== 'updated') return;
+
+      const root = event.query.queryKey[0];
+
+      if (root === QUERY_KEYS.ORDERS) {
+        if (event.action.type === 'fetch') {
+          fetchStartedAtRef.current.set(event.query.queryHash, Date.now());
         }
+        return;
+      }
+
+      if (root !== QUERY_KEYS.ORDER_STATISTICS) return;
+
+      const { queryHash } = event.query;
+
+      if (event.action.type === 'fetch') {
+        fetchStartedAtRef.current.set(queryHash, Date.now());
+        return;
+      }
+
+      if (event.action.type !== 'success') return;
+
+      const newData = event.query.state.data as
+        | OrderStatisticsResponse
+        | undefined;
+      const newStatistics = newData?.success ? newData.data : null;
+      const previous = previousStatisticsRef.current;
+
+      if (!previous.has(queryHash)) {
+        previous.set(queryHash, newStatistics);
+        return;
+      }
+
+      if (areStatisticsEqual(previous.get(queryHash), newStatistics)) return;
+
+      previous.set(queryHash, newStatistics);
+      const startedAt =
+        fetchStartedAtRef.current.get(queryHash) ??
+        event.query.state.dataUpdatedAt;
+      if (isStaleSince(startedAt)) {
+        onStatisticsChangeRef.current?.();
       }
     });
 
@@ -51,8 +88,8 @@ export function useStatisticsChangeDetection({
   }, [queryClient, enabled]);
 
   const resetPreviousStatistics = useCallback(() => {
-    previousStatisticsRef.current = null;
-    isInitializedRef.current = false;
+    previousStatisticsRef.current.clear();
+    fetchStartedAtRef.current.clear();
   }, []);
 
   return { resetPreviousStatistics };
