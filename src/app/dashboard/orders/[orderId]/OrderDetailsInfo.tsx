@@ -7,6 +7,8 @@ import OrderDetailsProductCard from '@/components/OrderDetails/OrderDetailsProdu
 import OrderDetailsInfoComponent from '@/components/OrderDetails/OrderDetailsInfo';
 import OrderSystemFailuresPanel from '@/components/OrderDetails/SystemFailures/OrderSystemFailuresPanel';
 import OrderChangeHistoryCard from '@/components/OrderDetails/ChangeHistory/OrderChangeHistoryCard';
+import { useHasPermission } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 
 interface OrderDetailsInfoProps {
   order: Order;
@@ -42,6 +44,8 @@ function OrderDetailsInfo({
   isBlocked,
   onUnlock,
 }: OrderDetailsInfoProps) {
+  const canReadHistory = useHasPermission(PERMISSION_CODES.ORDERS_HISTORY_READ);
+
   return (
     <section className="mx-auto mt-3 p-4 bg-white rounded-lg shadow-sm">
       <OrderDetailsCardId
@@ -54,7 +58,7 @@ function OrderDetailsInfo({
       />
       <OrderDetailsInfoStatus order={order} isLockedByOther={isLockedByOther} />
       <OrderSystemFailuresPanel order={order} />
-      <OrderChangeHistoryCard order={order} />
+      {canReadHistory && <OrderChangeHistoryCard order={order} />}
       <OrderDetailsProductCard
         order={order}
         isLockedByOther={isLockedByOther}
