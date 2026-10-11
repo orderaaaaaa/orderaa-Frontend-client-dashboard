@@ -20,11 +20,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
-  PROVIDER_CONNECTION_MODE,
   ProviderModalConfig,
+  isOAuthConnectProvider,
+  isWebhookOnlyProvider,
+  usesGeneratedWebhookToken,
 } from '../constants/providerConfig';
 import { buildWebhookUrl, generateWebhookToken } from '../utils/webhookToken';
 import StockSyncSection from './StockSyncSection';
+import LightfunnelsApiSection from './LightfunnelsApiSection';
 
 const URL_PATTERN = /^(https?:\/\/)?[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+/;
 
@@ -111,8 +114,9 @@ const EditIntegrationModal = ({
     },
   });
 
-  const isWebhookOnly =
-    providerConfig?.connectionMode === PROVIDER_CONNECTION_MODE.WEBHOOK_ONLY;
+  const isWebhookOnly = isWebhookOnlyProvider(providerConfig);
+  const isOAuthConnect = isOAuthConnectProvider(providerConfig);
+  const hasGeneratedToken = usesGeneratedWebhookToken(providerConfig);
 
   const currentToken = tokenOverride ?? webhookConfig?.apiKey;
 
@@ -122,9 +126,9 @@ const EditIntegrationModal = ({
       API_URL,
       provider,
       storeId,
-      isWebhookOnly ? currentToken : undefined
+      hasGeneratedToken ? currentToken : undefined
     );
-  }, [API_URL, provider, storeId, isWebhookOnly, currentToken]);
+  }, [API_URL, provider, storeId, hasGeneratedToken, currentToken]);
 
   const watchedFields = form.watch();
 
@@ -144,12 +148,13 @@ const EditIntegrationModal = ({
       : false;
 
     const metadataChanged =
-      (watchedFields.shopDomain || '') !== initialShopDomain ||
-      (watchedFields.clientId || '') !== initialClientId;
+      !isOAuthConnect &&
+      ((watchedFields.shopDomain || '') !== initialShopDomain ||
+        (watchedFields.clientId || '') !== initialClientId);
 
     const addingNewWebhook =
       showAddWebhook &&
-      (isWebhookOnly || !!watchedFields.newWebhookSecret?.trim());
+      (hasGeneratedToken || !!watchedFields.newWebhookSecret?.trim());
     const addingNewApi = showAddApi && !!watchedFields.newApiKey?.trim();
 
     return (
@@ -174,7 +179,8 @@ const EditIntegrationModal = ({
     initialClientId,
     showAddWebhook,
     showAddApi,
-    isWebhookOnly,
+    hasGeneratedToken,
+    isOAuthConnect,
   ]);
 
   const handleCopyUrl = () => {
@@ -244,7 +250,10 @@ const EditIntegrationModal = ({
         if (data.apiKeyValue) apiUpdates.apiKey = data.apiKeyValue.trim();
         if (apiIsActive !== apiConfig.isActive) apiUpdates.isActive = apiIsActive;
 
-        if ((data.shopDomain || '') !== initialShopDomain || (data.clientId || '') !== initialClientId) {
+        if (
+          !isOAuthConnect &&
+          ((data.shopDomain || '') !== initialShopDomain || (data.clientId || '') !== initialClientId)
+        ) {
           apiUpdates.metadata = buildMetadata(data.shopDomain, data.clientId);
         }
 
@@ -256,7 +265,7 @@ const EditIntegrationModal = ({
       }
 
       if (!webhookConfig && showAddWebhook) {
-        const newKey = isWebhookOnly
+        const newKey = hasGeneratedToken
           ? generateWebhookToken()
           : data.newWebhookSecret?.trim();
         if (newKey) {
@@ -271,7 +280,7 @@ const EditIntegrationModal = ({
         }
       }
 
-      if (!apiConfig && showAddApi && data.newApiKey?.trim()) {
+      if (!isOAuthConnect && !apiConfig && showAddApi && data.newApiKey?.trim()) {
         promises.push(
           createIntegration({
             storeId,
@@ -373,7 +382,7 @@ const EditIntegrationModal = ({
               />
             </div>
 
-            {isWebhookOnly ? (
+            {hasGeneratedToken ? (
               <div className="space-y-2">
                 {confirmRegenerate ? (
                   <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-3">
@@ -473,7 +482,7 @@ const EditIntegrationModal = ({
               />
             </div>
 
-            {isWebhookOnly ? (
+            {hasGeneratedToken ? (
               <p className="text-sm text-gray-600">
                 سيتم توليد رابط يحتوي على رمز الحماية عند الحفظ.
               </p>
@@ -498,7 +507,17 @@ const EditIntegrationModal = ({
           </Button>
         )}
 
-        {!isWebhookOnly && (
+        {isOAuthConnect && (
+          <LightfunnelsApiSection
+            storeId={storeId}
+            apiConfig={apiConfig}
+            apiIsActive={apiIsActive}
+            onApiIsActiveChange={setApiIsActive}
+            disabled={isLoading}
+          />
+        )}
+
+        {!isWebhookOnly && !isOAuthConnect && (
           <>
         {apiConfig ? (
           <div className="space-y-4 bg-gray-50 p-5 rounded-xl border border-gray-100">

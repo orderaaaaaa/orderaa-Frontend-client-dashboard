@@ -51,3 +51,12 @@ export const lightfunnelsWebhookSteps = [
   'احفظ الـ Webhook في Lightfunnels.',
   'اضغط "حفظ" هنا لإتمام الربط.',
 ];
+
+export const lightfunnelsApiSteps = [
+  'سجّل الدخول إلى partners.lightfunnels.com وأنشئ تطبيقاً جديداً',
+  'فعّل خيار External',
+  'أضف رابط إعادة التوجيه أدناه إلى Redirect URIs',
+  'فعّل صلاحية products',
+  'انسخ Client ID وClient Secret من تبويب Configurations وألصقهما أدناه',
+  'اضغط «ربط Lightfunnels» ووافق على الصلاحيات',
+];

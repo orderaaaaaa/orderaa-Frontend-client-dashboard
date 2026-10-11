@@ -36,10 +36,15 @@ import { z } from 'zod';
 import clsx from 'clsx';
 import groupBy from 'lodash/groupBy';
 import {
-  PROVIDER_CONNECTION_MODE,
   ProviderModalConfig,
+  isOAuthConnectProvider,
+  isWebhookOnlyProvider,
+  usesGeneratedWebhookToken,
 } from '../constants/providerConfig';
 import { buildWebhookUrl, generateWebhookToken } from '../utils/webhookToken';
+import { useLightfunnelsConnections } from '../hooks/useLightfunnelsConnections';
+import LightfunnelsConnectForm from './LightfunnelsConnectForm';
+import LightfunnelsConnectionBadge from './LightfunnelsConnectionBadge';
 
 const storeInfoSchema = z.object({
   storeName: z.string().min(1, 'اسم المتجر مطلوب'),
@@ -120,8 +125,11 @@ const IntegrationModal = ({
 
   const hasConnectedStore = providerIntegrations.length > 0;
 
-  const isWebhookOnly =
-    config.connectionMode === PROVIDER_CONNECTION_MODE.WEBHOOK_ONLY;
+  const isWebhookOnly = isWebhookOnlyProvider(config);
+  const isOAuthConnect = isOAuthConnectProvider(config);
+  const hasGeneratedToken = usesGeneratedWebhookToken(config);
+
+  const { findConnection } = useLightfunnelsConnections({ enabled: isOAuthConnect });
 
   const getWebhookUrl = (storeId: number, token?: string): string =>
     buildWebhookUrl(API_URL, config.provider, storeId, token);
@@ -154,7 +162,7 @@ const IntegrationModal = ({
         description: data.description?.trim() || undefined,
       });
       setCreatedStoreId(store.id);
-      if (isWebhookOnly) {
+      if (hasGeneratedToken) {
         const token = generateWebhookToken();
         webhookForm.setValue('webhookUrl', getWebhookUrl(store.id, token));
         webhookForm.setValue('webhookSecret', token);
@@ -245,6 +253,13 @@ const IntegrationModal = ({
       setIsLoading(false);
     }
   });
+
+  const handleSkipApi = () => {
+    onSuccess();
+    setShowStepper(false);
+    setCurrentStep(0);
+    resetForms();
+  };
 
   const resetForms = () => {
     storeInfoForm.reset();
@@ -463,7 +478,7 @@ const IntegrationModal = ({
                       />
                     </div>
 
-                    {!isWebhookOnly && (
+                    {!hasGeneratedToken && (
                       <Input
                         register={webhookForm.register}
                         name="webhookSecret"
@@ -501,7 +516,20 @@ const IntegrationModal = ({
                 </form>
               </StepContent>
 
-              {!isWebhookOnly && (
+              {!isWebhookOnly && isOAuthConnect && (
+              <StepContent>
+                {createdStoreId !== null && (
+                  <LightfunnelsConnectForm
+                    storeId={createdStoreId}
+                    submitLabel="ربط Lightfunnels"
+                    onCancel={handleSkipApi}
+                    cancelLabel="تخطي الآن"
+                  />
+                )}
+              </StepContent>
+              )}
+
+              {!isWebhookOnly && !isOAuthConnect && (
               <StepContent>
                 <form onSubmit={onApiKeySubmit} className="space-y-4">
                   <div className="space-y-4 bg-white p-5 rounded-xl border border-gray-100">
@@ -563,6 +591,9 @@ const IntegrationModal = ({
             <Accordion type="single" collapsible className="space-y-3 pb-5">
               {Object.entries(storeGroups).map(([storeId, configs]) => {
                 const { webhookConfig, apiConfig } = getStoreConfigs(configs);
+                const lfConnection = isOAuthConnect
+                  ? findConnection(Number(storeId))
+                  : undefined;
                 return (
                   <AccordionItem
                     key={storeId}
@@ -644,7 +675,7 @@ const IntegrationModal = ({
                             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                               Webhook
                             </p>
-                            {!isWebhookOnly && (
+                            {!hasGeneratedToken && (
                               <div className="flex items-center justify-between">
                                 <span className="text-sm text-gray-600">Secret</span>
                                 <span className="text-sm text-gray-800 font-mono">
@@ -668,7 +699,25 @@ const IntegrationModal = ({
                           </div>
                         )}
 
-                        {apiConfig && (
+                        {lfConnection && (
+                          <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                              API
+                            </p>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-600">Client ID</span>
+                              <span className="text-sm text-gray-800 font-mono">
+                                {lfConnection.clientId ?? apiConfig?.apiKey ?? '—'}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-600">حالة الربط</span>
+                              <LightfunnelsConnectionBadge status={lfConnection.status} />
+                            </div>
+                          </div>
+                        )}
+
+                        {apiConfig && !isOAuthConnect && (
                           <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                               Client Secret

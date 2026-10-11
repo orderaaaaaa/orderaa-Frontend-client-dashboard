@@ -76,6 +76,7 @@ export default function StockSyncSection({ config }: { config: IntegrationRespon
   const { hasPermission } = usePermissionCheck();
   const canManage = hasPermission(PERMISSION_CODES.INTEGRATION_CONFIG_MANAGE);
   const isShopify = config.provider === IntegrationProvider.SHOPIFY;
+  const isLightfunnels = config.provider === IntegrationProvider.LIGHTFUNNELS;
 
   const [form, setForm] = useState<StockSyncFormState>(() => seedForm(config));
   const [savedConfig, setSavedConfig] = useState<IntegrationResponse>(config);
@@ -218,9 +219,16 @@ export default function StockSyncSection({ config }: { config: IntegrationRespon
           <p className="text-xs text-gray-500">
             عند التفعيل نرسل كمية المخزن المختار إلى المتجر بعد كل تغيير.
           </p>
-          {!isShopify && (
+          {!isShopify && !isLightfunnels && (
             <p className="text-xs text-gray-500">
               عند وصول الكمية إلى صفر يتوقف المتجر عن قبول طلبات هذا المنتج.
+            </p>
+          )}
+          {isLightfunnels && (
+            <p className="text-xs text-gray-500">
+              نحدّث كمية المنتج في Lightfunnels بإعادة حفظ المنتج كاملاً؛ أي تعديل تجريه على نفس
+              المنتج في Lightfunnels أثناء لحظة المزامنة قد يُستبدل. إذا كان «حد المخزون» متوقفاً في
+              Lightfunnels فلن تؤثر الكمية على البيع.
             </p>
           )}
           {isShopify && (

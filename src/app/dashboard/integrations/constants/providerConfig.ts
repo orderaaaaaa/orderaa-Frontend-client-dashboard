@@ -5,11 +5,13 @@ import {
   shopifyWebhookSteps,
   shopifyIntegrationSteps,
   lightfunnelsWebhookSteps,
+  lightfunnelsApiSteps,
 } from './steps';
 
 export const PROVIDER_CONNECTION_MODE = {
   WEBHOOK_AND_API: 'WEBHOOK_AND_API',
   WEBHOOK_ONLY: 'WEBHOOK_ONLY',
+  WEBHOOK_AND_OAUTH: 'WEBHOOK_AND_OAUTH',
 } as const;
 
 export type ProviderConnectionMode =
@@ -32,8 +34,18 @@ export interface ProviderModalConfig {
   videoUrl?: string;
   metadataFields?: MetadataField[];
   connectionMode?: ProviderConnectionMode;
+  generatedWebhookToken?: boolean;
   successMessage?: string;
 }
+
+export const isWebhookOnlyProvider = (config?: ProviderModalConfig): boolean =>
+  config?.connectionMode === PROVIDER_CONNECTION_MODE.WEBHOOK_ONLY;
+
+export const isOAuthConnectProvider = (config?: ProviderModalConfig): boolean =>
+  config?.connectionMode === PROVIDER_CONNECTION_MODE.WEBHOOK_AND_OAUTH;
+
+export const usesGeneratedWebhookToken = (config?: ProviderModalConfig): boolean =>
+  config?.generatedWebhookToken === true;
 
 export const providerConfigs: Record<string, ProviderModalConfig> = {
   easyorder: {
@@ -73,8 +85,9 @@ export const providerConfigs: Record<string, ProviderModalConfig> = {
     modalTitle: 'ربط المتاجر - Lightfunnels',
     modalDescription: 'قم بربط متجرك لمراقبة الطلبات تلقائياً عبر Lightfunnels',
     webhookSteps: lightfunnelsWebhookSteps,
-    apiSteps: [],
-    connectionMode: PROVIDER_CONNECTION_MODE.WEBHOOK_ONLY,
+    apiSteps: lightfunnelsApiSteps,
+    connectionMode: PROVIDER_CONNECTION_MODE.WEBHOOK_AND_OAUTH,
+    generatedWebhookToken: true,
     successMessage:
       'تم ربط Lightfunnels بنجاح! سيتم استقبال الطلبات المؤكدة تلقائياً.',
   },
