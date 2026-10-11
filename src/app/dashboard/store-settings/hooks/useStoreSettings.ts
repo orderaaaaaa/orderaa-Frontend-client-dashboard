@@ -60,6 +60,7 @@ export const useMerchantSettings = () => {
     isLoading: settingsQuery.isLoading,
     isError: settingsQuery.isError,
     error: settingsQuery.error,
+    refetch: settingsQuery.refetch,
     updateSettings: updateSettingsMutation.mutate,
     isUpdating: updateSettingsMutation.isPending,
   };

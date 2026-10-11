@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { useChargeOptions, useTopUp } from '@/services/wallet';
 import { WalletChargeOption } from '@/types/wallet';
 import { LiaWalletSolid } from 'react-icons/lia';
+import { useQueryClient } from '@tanstack/react-query';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
 
 interface ChargeModalProps {
   open: boolean;
@@ -20,6 +22,10 @@ interface ChargeModalProps {
 function ChargeModal({ open, onOpenChange }: ChargeModalProps) {
   const { data: chargeOptions, isLoading, isError, refetch } = useChargeOptions();
   const topUpMutation = useTopUp();
+  const queryClient = useQueryClient();
+  const [blockedSessionUrl, setBlockedSessionUrl] = useState<string | null>(null);
+  const safetyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusType, setStatusType] = useState<'success' | 'error' | 'info'>('info');
@@ -32,16 +38,31 @@ function ChargeModal({ open, onOpenChange }: ChargeModalProps) {
       if (checkIntervalRef.current) {
         clearInterval(checkIntervalRef.current);
       }
+      if (safetyTimeoutRef.current) {
+        clearTimeout(safetyTimeoutRef.current);
+      }
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+      }
       if (popupRef.current && !popupRef.current.closed) {
         popupRef.current.close();
       }
     };
   }, []);
 
+  const refreshWalletData = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.BILLING_INFO] });
+    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.WALLET_TRANSACTIONS] });
+  }, [queryClient]);
+
   const stopPopupCheck = useCallback(() => {
     if (checkIntervalRef.current) {
       clearInterval(checkIntervalRef.current);
       checkIntervalRef.current = null;
+    }
+    if (safetyTimeoutRef.current) {
+      clearTimeout(safetyTimeoutRef.current);
+      safetyTimeoutRef.current = null;
     }
     popupRef.current = null;
   }, []);
@@ -49,6 +70,7 @@ function ChargeModal({ open, onOpenChange }: ChargeModalProps) {
   const handleSelectOption = async (optionId: number) => {
     setSelectedOption(optionId);
     setStatusMessage(null);
+    setBlockedSessionUrl(null);
 
     try {
       const session = await topUpMutation.mutateAsync(optionId);
@@ -61,8 +83,9 @@ function ChargeModal({ open, onOpenChange }: ChargeModalProps) {
       );
 
       if (!popup || popup.closed) {
-        setStatusMessage('تم فتح صفحة الدفع. إذا لم يتم فتحها تلقائياً، يرجى السماح بالنوافذ المنبثقة.');
-        setStatusType('info');
+        setBlockedSessionUrl(session.sessionUrl);
+        setStatusMessage('تعذّر فتح نافذة الدفع');
+        setStatusType('error');
         return;
       }
 
@@ -76,17 +99,18 @@ function ChargeModal({ open, onOpenChange }: ChargeModalProps) {
           stopPopupCheck();
           setStatusMessage('تم إغلاق نافذة الدفع. جاري التحقق من الرصيد...');
           setStatusType('success');
+          refreshWalletData();
 
-          // Close modal after brief delay to let user see the message
-          setTimeout(() => {
+          closeTimeoutRef.current = setTimeout(() => {
             onOpenChange(false);
           }, 2000);
         }
       }, 500);
 
       // Safety timeout — stop checking after 5 minutes
-      setTimeout(() => {
+      safetyTimeoutRef.current = setTimeout(() => {
         stopPopupCheck();
+        refreshWalletData();
       }, 5 * 60 * 1000);
     } catch (error) {
       console.error('Top-up failed:', error);
@@ -102,6 +126,7 @@ function ChargeModal({ open, onOpenChange }: ChargeModalProps) {
       // Reset state when closing
       setSelectedOption(null);
       setStatusMessage(null);
+      setBlockedSessionUrl(null);
       stopPopupCheck();
     }
     onOpenChange(newOpen);
@@ -132,6 +157,16 @@ function ChargeModal({ open, onOpenChange }: ChargeModalProps) {
             role="alert"
           >
             {statusMessage}
+            {blockedSessionUrl && (
+              <a
+                href={blockedSessionUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 block font-bold underline"
+              >
+                افتح صفحة الدفع
+              </a>
+            )}
           </div>
         )}
 
@@ -181,9 +216,7 @@ function ChargeModal({ open, onOpenChange }: ChargeModalProps) {
                   <button
                     key={option.id}
                     onClick={() => handleSelectOption(option.id)}
-                    disabled={
-                      topUpMutation.isPending && selectedOption === option.id
-                    }
+                    disabled={topUpMutation.isPending}
                     className={`
                       w-full text-right p-5 rounded-xl border-2 transition-all duration-200
                       ${

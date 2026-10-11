@@ -17,6 +17,7 @@ import {
   SettlementShippingColumnHeaders,
   SettlementShippingColumnCells,
 } from '@/app/dashboard/orders/settlement/components/SettlementShippingColumns';
+import BaseModal from '@/components/ui/base-modal';
 import ForceSettlementDialog from '@/app/dashboard/orders/settlement/components/ForceSettlementDialog';
 import SettlementAcceptedStatusesNote from '@/app/dashboard/orders/settlement/components/SettlementAcceptedStatusesNote';
 import {
@@ -47,11 +48,16 @@ export default function SettlementUploadPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [parsedRows, setParsedRows] = useState<SettlementRow[]>([]);
+  const [uploadedRows, setUploadedRows] = useState<SettlementRow[]>([]);
   const [isParsing, setIsParsing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [results, setResults] = useState<UploadSettlementResponse | null>(null);
   const [batch, setBatch] = useState<SettlementBatch | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [isBatchLoading, setIsBatchLoading] = useState(true);
+  const [batchLoadFailed, setBatchLoadFailed] = useState(false);
+  const [closeBatchOpen, setCloseBatchOpen] = useState(false);
+  const [forceSelectedOpen, setForceSelectedOpen] = useState(false);
   const [selectedForceRows, setSelectedForceRows] = useState<Set<number>>(new Set());
   const [isForcingSelected, setIsForcingSelected] = useState(false);
   const [forcingTarget, setForcingTarget] = useState<
@@ -63,11 +69,18 @@ export default function SettlementUploadPage() {
 
   // The collection lives on the server, so a closed browser does not lose it —
   // reopening the page picks the session back up.
-  useEffect(() => {
+  const loadBatch = useCallback(() => {
+    setIsBatchLoading(true);
+    setBatchLoadFailed(false);
     getCurrentSettlementBatch()
       .then(setBatch)
-      .catch(() => setBatch(null));
+      .catch(() => setBatchLoadFailed(true))
+      .finally(() => setIsBatchLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadBatch();
+  }, [loadBatch]);
 
   const handleConfirm = useCallback(async () => {
     if (!batch) return;
@@ -75,6 +88,7 @@ export default function SettlementUploadPage() {
     try {
       const confirmed = await confirmSettlementBatch(batch.id);
       setBatch(confirmed);
+      setCloseBatchOpen(false);
       toast.success(
         `تم إغلاق التحصيل ${confirmed.code} — الإجمالي ${confirmed.totalAmount} جنيه عن ${confirmed.ordersCount} طلب`,
       );
@@ -91,6 +105,8 @@ export default function SettlementUploadPage() {
 
     setSelectedFile(file);
     setResults(null);
+    setUploadedRows([]);
+    setSelectedForceRows(new Set());
     setIsParsing(true);
 
     try {
@@ -115,6 +131,13 @@ export default function SettlementUploadPage() {
       const response = await uploadSettlementRows(parsedRows, batch?.id);
       setResults(response);
       setBatch(response.batch);
+      setUploadedRows(parsedRows);
+      setParsedRows([]);
+      setSelectedFile(null);
+      setSelectedForceRows(new Set());
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
 
       if (response.success.length > 0) {
         toast.success(`تم رفع ${response.success.length} صف بنجاح`);
@@ -150,7 +173,7 @@ export default function SettlementUploadPage() {
       const sentRowIndices: number[] = [];
       const rows: SettlementRow[] = [];
       for (const idx of rowIndices) {
-        const row = parsedRows[idx];
+        const row = uploadedRows[idx];
         if (!row) continue;
         sentRowIndices.push(idx);
         rows.push({ ...row, force: true });
@@ -181,7 +204,7 @@ export default function SettlementUploadPage() {
       );
       setBatch(response.batch);
     },
-    [batch, parsedRows],
+    [batch, uploadedRows],
   );
 
   const handleForceSelected = useCallback(async () => {
@@ -190,6 +213,7 @@ export default function SettlementUploadPage() {
     try {
       await forceRows(Array.from(selectedForceRows));
       setSelectedForceRows(new Set());
+      setForceSelectedOpen(false);
     } catch (err) {
       toast.error(getApiErrorMessage(err, 'تعذر إضافة الصفوف المحددة رغم الأخطاء'));
     } finally {
@@ -223,6 +247,7 @@ export default function SettlementUploadPage() {
   const handleReset = useCallback(() => {
     setSelectedFile(null);
     setParsedRows([]);
+    setUploadedRows([]);
     setResults(null);
     setSelectedForceRows(new Set());
     if (fileInputRef.current) {
@@ -297,7 +322,7 @@ export default function SettlementUploadPage() {
             <div className="flex gap-2">
               <Button
                 onClick={handleUpload}
-                disabled={parsedRows.length === 0 || isParsing || isUploading}
+                disabled={parsedRows.length === 0 || isParsing || isUploading || batchLoadFailed || isBatchLoading}
               >
                 {isUploading ? 'جاري الرفع...' : 'رفع'}
               </Button>
@@ -321,6 +346,20 @@ export default function SettlementUploadPage() {
 
       {/* T3 — the running collection. Shown whether or not a sheet has just been
           uploaded, so a resumed session is obvious on arrival. */}
+      {batchLoadFailed && (
+        <Card className="mb-6">
+          <CardContent className="py-6 flex flex-col items-center gap-3 text-center">
+            <p className="font-semibold text-red-700">تعذّر تحميل التحصيل المفتوح</p>
+            <p className="text-sm text-muted-foreground">
+              لا نعرف إن كان هناك تحصيل مفتوح. أعد المحاولة قبل رفع أي شيت.
+            </p>
+            <Button variant="outline" onClick={loadBatch} disabled={isBatchLoading}>
+              إعادة المحاولة
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {batch && (
         <Card>
           <CardContent className="py-4 flex flex-wrap items-center justify-between gap-4">
@@ -349,7 +388,7 @@ export default function SettlementUploadPage() {
 
             {batch.status === 'OPEN' ? (
               <div className="flex flex-col items-end gap-1">
-                <Button onClick={handleConfirm} disabled={isConfirming}>
+                <Button onClick={() => setCloseBatchOpen(true)} disabled={isConfirming}>
                   {isConfirming ? 'جاري الإغلاق...' : 'تأكيد وإغلاق التحصيل'}
                 </Button>
                 {/* Rows settle on upload, not on confirmation. Saying so stops
@@ -506,7 +545,7 @@ export default function SettlementUploadPage() {
                       size="sm"
                       variant="outline"
                       disabled={selectedForceRows.size === 0 || isForcingSelected}
-                      onClick={handleForceSelected}
+                      onClick={() => setForceSelectedOpen(true)}
                     >
                       {isForcingSelected ? 'جاري الإضافة...' : 'إضافة المحدد رغم الأخطاء'}
                     </Button>
@@ -591,6 +630,44 @@ export default function SettlementUploadPage() {
           </CardContent>
         </Card>
       )}
+
+      <BaseModal
+        isOpen={closeBatchOpen}
+        onClose={() => setCloseBatchOpen(false)}
+        onConfirm={handleConfirm}
+        title="إغلاق التحصيل"
+        confirmText="تأكيد وإغلاق"
+        isLoading={isConfirming}
+        maxWidth="md:max-w-lg"
+      >
+        {batch && (
+          <div className="space-y-3 text-sm">
+            <div className="flex flex-wrap gap-x-6 gap-y-1">
+              <span>الكود: <b>{batch.code}</b></span>
+              <span>عدد الطلبات: <b>{batch.ordersCount}</b></span>
+              <span>الإجمالي: <b>{batch.totalAmount} جنيه</b></span>
+            </div>
+            <p className="text-amber-700 font-medium">لا يمكن إضافة صفوف بعد الإغلاق</p>
+          </div>
+        )}
+      </BaseModal>
+
+      <BaseModal
+        isOpen={forceSelectedOpen}
+        onClose={() => setForceSelectedOpen(false)}
+        onConfirm={handleForceSelected}
+        title="إضافة الصفوف رغم الأخطاء"
+        confirmText="تأكيد"
+        isLoading={isForcingSelected}
+        maxWidth="md:max-w-lg"
+      >
+        <div className="space-y-3 text-sm">
+          <p className="font-medium">عدد الصفوف المحددة: {selectedForceRows.size}</p>
+          <p className="text-amber-700">
+            سيتم تغيير حالة هذه الطلبات مباشرة دون إرسال لشركة الشحن ودون تحديث التغليف
+          </p>
+        </div>
+      </BaseModal>
 
       <ForceSettlementDialog
         isOpen={forcingTarget !== null}

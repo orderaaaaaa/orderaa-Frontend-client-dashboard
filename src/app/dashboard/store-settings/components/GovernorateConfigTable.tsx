@@ -12,6 +12,7 @@ import {
 } from '@/services/logistics';
 import { useGovernoratesQuery } from '@/services/lookups';
 import PageLoading from '@/components/ui/page-loading';
+import BaseModal from '@/components/ui/base-modal';
 
 const decimalString = (label: string) =>
   z
@@ -71,6 +72,7 @@ export function GovernorateConfigTable({
   } = useGovernoratesQuery(true);
 
   const [savedGovernorates, setSavedGovernorates] = useState<Set<string>>(new Set());
+  const [confirmEmptyOpen, setConfirmEmptyOpen] = useState(false);
 
   const {
     register,
@@ -78,6 +80,7 @@ export function GovernorateConfigTable({
     control,
     reset,
     watch,
+    getValues,
     formState: { errors, isDirty },
   } = useForm<GovernorateConfigFormData>({
     resolver: zodResolver(governorateConfigSchema),
@@ -114,20 +117,34 @@ export function GovernorateConfigTable({
 
   const labelByKey = new Map(governorates.map((g) => [g.key, g.label]));
 
-  const onSubmit = (data: GovernorateConfigFormData) => {
+  const send = (data: GovernorateConfigFormData, confirmEmpty: boolean) => {
     const kept = data.configs.filter(
       (row) => row.firstAttemptDelay !== '' || row.shippingCost !== '' || row.nonReceiptCost !== '',
     );
-    updateConfig({
-      shippingCompanyId,
-      rows: kept.map((row) => ({
-        governorate: row.governorate,
-        firstAttemptDelay: Number(row.firstAttemptDelay),
-        shippingCost: row.shippingCost === '' ? null : row.shippingCost,
-        nonReceiptCost: row.nonReceiptCost === '' ? null : row.nonReceiptCost,
-      })),
-      confirmEmpty: kept.length === 0 ? true : undefined,
-    });
+    updateConfig(
+      {
+        shippingCompanyId,
+        rows: kept.map((row) => ({
+          governorate: row.governorate,
+          firstAttemptDelay: Number(row.firstAttemptDelay),
+          shippingCost: row.shippingCost === '' ? null : row.shippingCost,
+          nonReceiptCost: row.nonReceiptCost === '' ? null : row.nonReceiptCost,
+        })),
+        confirmEmpty: confirmEmpty ? true : undefined,
+      },
+      { onSettled: () => setConfirmEmptyOpen(false) },
+    );
+  };
+
+  const onSubmit = (data: GovernorateConfigFormData) => {
+    const isEmpty = data.configs.every(
+      (row) => row.firstAttemptDelay === '' && row.shippingCost === '' && row.nonReceiptCost === '',
+    );
+    if (isEmpty) {
+      setConfirmEmptyOpen(true);
+      return;
+    }
+    send(data, false);
   };
 
   if (isConfigsLoading || isGovernoratesLoading) {
@@ -141,22 +158,7 @@ export function GovernorateConfigTable({
   }
 
   return (
-    <div
-      className="space-y-4"
-      onKeyDown={(event) => {
-        if (event.key !== 'Enter' || !(event.target instanceof HTMLInputElement)) return;
-        event.preventDefault();
-        void handleSubmit(onSubmit)();
-      }}
-    >
-      <div className="flex flex-wrap items-center gap-2 px-1">
-        {isDirty && (
-          <span className="text-xs text-amber-600 font-medium">
-            لديك تغييرات غير محفوظة
-          </span>
-        )}
-      </div>
-
+    <div className="space-y-4">
       {!fields.length ? (
         <div className="text-center py-8 text-gray-500 text-sm">
           لا توجد محافظات متاحة حاليًا.
@@ -244,11 +246,30 @@ export function GovernorateConfigTable({
         </div>
       )}
 
-      <div className="flex justify-end pt-2">
+      <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
+        {isDirty && (
+          <span className="text-xs text-amber-600 font-medium">
+            لديك تغييرات غير محفوظة في المحافظات
+          </span>
+        )}
         <Button type="button" onClick={handleSubmit(onSubmit)} disabled={isSaving} size="sm">
-          {isSaving ? 'جاري الحفظ...' : 'حفظ الإعدادات'}
+          {isSaving ? 'جاري الحفظ...' : 'حفظ إعدادات المحافظات'}
         </Button>
       </div>
+
+      <BaseModal
+        isOpen={confirmEmptyOpen}
+        onClose={() => setConfirmEmptyOpen(false)}
+        onConfirm={() => send(getValues(), true)}
+        title="حذف إعدادات المحافظات"
+        confirmText="نعم، احذف الكل"
+        isLoading={isSaving}
+        maxWidth="md:max-w-lg"
+      >
+        <p className="text-sm text-red-700 font-medium">
+          سيتم حذف إعدادات كل المحافظات لهذه الشركة
+        </p>
+      </BaseModal>
     </div>
   );
 }
