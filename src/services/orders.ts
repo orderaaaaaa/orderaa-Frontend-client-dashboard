@@ -211,12 +211,12 @@ export const usePrefetchOrderDetails = () => {
     [queryClient]
   );
   const claimPrefetchedOrderDetails = useCallback(
-    (id: number) => {
+    (id: number, fetchedSince: number) => {
       const state = queryClient.getQueryState<Order>(
         orderDetailsQueryOptions(id).queryKey
       );
       navigationPrefetch =
-        state?.data !== undefined
+        state?.data !== undefined && state.dataUpdatedAt >= fetchedSince
           ? { id, dataUpdatedAt: state.dataUpdatedAt }
           : null;
     },

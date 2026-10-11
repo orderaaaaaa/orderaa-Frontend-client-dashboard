@@ -431,9 +431,10 @@ export function useOrderDetailsNavigation(): UseOrderDetailsNavigationReturn {
       return pendingNavigationRef.current.done;
     }
     router.prefetch(url);
+    const prefetchStartedAt = Date.now();
     const done = prefetchOrderDetails(orderId).then(() => {
       if (!isMountedRef.current) return;
-      claimPrefetchedOrderDetails(orderId);
+      claimPrefetchedOrderDetails(orderId, prefetchStartedAt);
       router.push(url);
     });
     pendingNavigationRef.current = { url, done };
