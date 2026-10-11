@@ -54,9 +54,10 @@ export const LIGHTFUNNELS_CONNECT_RESULT_MESSAGE: Record<
     kind: 'info',
     message: 'تم الربط، وعملية تبديل أخرى جارية',
   },
-  WEBHOOK_SHARED_APP: {
-    kind: 'warning',
-    message: 'تم الربط، لكن نفس التطبيق مستخدم تلقائياً في متجر آخر',
+  WEBHOOK_CLEANUP_REQUIRED: {
+    kind: 'info',
+    message:
+      'تم الربط. وجدنا روابط Webhook قديمة على نطاقنا في Lightfunnels، راجعها وأكد حذفها لإكمال التسجيل التلقائي',
   },
 };
 

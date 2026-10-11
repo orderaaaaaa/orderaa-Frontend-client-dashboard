@@ -50,8 +50,19 @@ export const useLightfunnelsConnections = (options?: { enabled?: boolean }) => {
   });
 
   const setWebhookModeMutation = useMutation({
-    mutationFn: ({ storeId, mode }: { storeId: number; mode: LightfunnelsWebhookMode }) =>
-      lightfunnelsApi.setWebhookMode(storeId, { mode }),
+    mutationFn: ({
+      storeId,
+      mode,
+      confirmedCleanupIds,
+    }: {
+      storeId: number;
+      mode: LightfunnelsWebhookMode;
+      confirmedCleanupIds?: string[];
+    }) =>
+      lightfunnelsApi.setWebhookMode(
+        storeId,
+        confirmedCleanupIds ? { mode, confirmedCleanupIds } : { mode }
+      ),
     onSuccess: (response: SetLightfunnelsWebhookModeResponse) => {
       if (response.consentRequired && response.authorizeUrl) {
         window.location.assign(response.authorizeUrl);
@@ -92,7 +103,6 @@ export const useLightfunnelsRedirectUri = (enabled: boolean) => {
   return {
     redirectUri: redirectUriQuery.data?.redirectUri ?? '',
     scopes: redirectUriQuery.data?.scopes ?? '',
-    automaticScopes: redirectUriQuery.data?.automaticScopes ?? '',
     isLoading: redirectUriQuery.isLoading,
     isError: redirectUriQuery.isError,
     error: redirectUriQuery.error,
