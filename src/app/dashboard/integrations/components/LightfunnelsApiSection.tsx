@@ -10,12 +10,15 @@ import { PERMISSION_CODES } from '@/lib/generated/permission-codes';
 import { getApiErrorMessage } from '@/utils/apiError';
 import {
   LIGHTFUNNELS_CONNECTION_STATUS,
+  LIGHTFUNNELS_SHARED_APP_REASON,
   LIGHTFUNNELS_WEBHOOK_MODE,
   type IntegrationResponse,
   type LightfunnelsConnection,
   type LightfunnelsWebhookMode,
 } from '../types/apiIntegration';
 import { useLightfunnelsConnections } from '../hooks/useLightfunnelsConnections';
+import { useIntegrations } from '../hooks/useIntegrations';
+import { getLightfunnelsSharedAppError } from '../utils/lightfunnelsErrors';
 import LightfunnelsConnectForm from './LightfunnelsConnectForm';
 import LightfunnelsConnectionBadge from './LightfunnelsConnectionBadge';
 import LightfunnelsWebhookModeSelect, {
@@ -74,6 +77,29 @@ export default function LightfunnelsApiSection({
   const { findConnection, isLoading, setWebhookMode, isSettingWebhookMode } =
     useLightfunnelsConnections();
   const connection = findConnection(storeId);
+  const { integrations } = useIntegrations();
+
+  const modeSwitchErrorMessage = (err: unknown): string => {
+    const fallback = getApiErrorMessage(err, MODE_SWITCH_FALLBACK_ERROR);
+    const sharedApp = getLightfunnelsSharedAppError(err);
+    if (
+      !sharedApp ||
+      sharedApp.reason !== LIGHTFUNNELS_SHARED_APP_REASON.PEER_PENDING_DELETES ||
+      sharedApp.peerStoreId === null
+    ) {
+      return fallback;
+    }
+    const peerStoreId = sharedApp.peerStoreId;
+    const peerName =
+      integrations?.find((config) => config.storeId === peerStoreId)?.store?.name ??
+      `متجر #${peerStoreId}`;
+    if (
+      findConnection(peerStoreId)?.status === LIGHTFUNNELS_CONNECTION_STATUS.NEEDS_RECONNECT
+    ) {
+      return `المتجر «${peerName}» على نفس التطبيق ما زالت لديه Webhooks لم تُحذف من Lightfunnels، وربطه يحتاج إلى إعادة. أعد ربط «${peerName}» أولاً ليُعاد حذفها، فحذفها يدوياً في Lightfunnels لا يرفع هذا المنع حتى يُعاد ربط ذلك المتجر`;
+    }
+    return `${fallback} (المتجر: «${peerName}»)`;
+  };
 
   const isSwitching = isSettingWebhookMode || isRedirecting;
   const isConnected = connection?.status === LIGHTFUNNELS_CONNECTION_STATUS.CONNECTED;
@@ -99,7 +125,7 @@ export default function LightfunnelsApiSection({
       }
       modeSwitchToast(mode, response.connection);
     } catch (err) {
-      toast.error(getApiErrorMessage(err, MODE_SWITCH_FALLBACK_ERROR));
+      toast.error(modeSwitchErrorMessage(err));
     }
   };
 

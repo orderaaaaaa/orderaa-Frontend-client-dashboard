@@ -243,6 +243,22 @@ export const LIGHTFUNNELS_WEBHOOK_ERROR_CODE = {
 export type LightfunnelsWebhookErrorCode =
   (typeof LIGHTFUNNELS_WEBHOOK_ERROR_CODE)[keyof typeof LIGHTFUNNELS_WEBHOOK_ERROR_CODE];
 
+export const LIGHTFUNNELS_SHARED_APP_REASON = {
+  PEER_AUTOMATIC: 'PEER_AUTOMATIC',
+  PEER_PENDING_DELETES: 'PEER_PENDING_DELETES',
+} as const;
+
+export type LightfunnelsSharedAppReason =
+  (typeof LIGHTFUNNELS_SHARED_APP_REASON)[keyof typeof LIGHTFUNNELS_SHARED_APP_REASON];
+
+export interface LightfunnelsSharedAppError {
+  statusCode: number;
+  message: string;
+  code: typeof LIGHTFUNNELS_WEBHOOK_ERROR_CODE.AUTOMATIC_SHARED_APP;
+  reason: LightfunnelsSharedAppReason;
+  peerStoreId: number | null;
+}
+
 export interface LightfunnelsConnection {
   storeId: number;
   integrationConfigId: number | null;
