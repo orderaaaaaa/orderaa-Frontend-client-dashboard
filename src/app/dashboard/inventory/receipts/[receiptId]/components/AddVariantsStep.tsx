@@ -347,8 +347,8 @@ const AddVariantsStep = memo(
                          onClear={() => handleQuantityChange(row.id as number, key, '')}
                          min={0}
                          clearable
-                         className="w-16"
-                         inputClassName="!py-0.5 !px-1.5 text-center text-xs !rounded-full !bg-white"
+                         className="w-20 sm:w-16"
+                         inputClassName="!py-0.5 !px-1.5 text-center text-base sm:text-xs !rounded-full !bg-white"
                        />
                      </>
                    )}

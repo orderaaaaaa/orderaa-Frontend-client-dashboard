@@ -293,7 +293,7 @@ export default function CollectionsPage() {
                                   {row.orderCode}
                                 </Link>
                                 {row.isDeleted && (
-                                  <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded font-sans">
+                                  <span className="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded font-sans">
                                     محذوف
                                   </span>
                                 )}

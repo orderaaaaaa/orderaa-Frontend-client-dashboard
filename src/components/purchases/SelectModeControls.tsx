@@ -18,10 +18,12 @@ export default function SelectModeControls({
   onToggle,
   onClear,
 }: SelectModeControlsProps) {
+  const hasSelection = active && selectedCount > 0;
+
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {active && selectedCount > 0 && (
-        <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1">
+        {hasSelection && (
           <Button
             type="button"
             variant="ghost"
@@ -31,11 +33,11 @@ export default function SelectModeControls({
           >
             <X className="text-primary h-5 w-5" />
           </Button>
-          <span className="text-sm text-gray-600 whitespace-nowrap" aria-live="polite">
-            تم تحديد {selectedCount} {countLabel}
-          </span>
-        </div>
-      )}
+        )}
+        <span className="text-sm text-gray-600 whitespace-nowrap empty:hidden" aria-live="polite">
+          {hasSelection ? `تم تحديد ${selectedCount} ${countLabel}` : ''}
+        </span>
+      </div>
       <Button
         type="button"
         variant="default"

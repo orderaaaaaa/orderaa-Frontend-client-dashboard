@@ -38,7 +38,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
         <div className="flex items-start flex-col gap-1 min-w-0">
           <Link
             href={`/dashboard/purchases/all-suppliers/${supplier.id}`}
-            className="flex min-w-0 items-center gap-2 text-lg font-bold text-primary hover:underline transition-colors"
+            className="flex min-h-10 min-w-0 items-center gap-2 text-lg font-bold text-primary hover:underline transition-colors"
           >
             <LiaUserSolid className="w-6 h-6 shrink-0 text-primary" />
             <span className="break-words min-w-0">{supplier.name}</span>

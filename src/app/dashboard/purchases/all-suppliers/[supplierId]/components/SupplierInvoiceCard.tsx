@@ -109,7 +109,7 @@ const SupplierInvoiceCard = memo(
           )}
           <button
             type="button"
-            className="flex min-w-0 items-center gap-2 text-start text-lg font-bold text-primary hover:underline transition-colors"
+            className="flex min-h-10 min-w-0 items-center gap-2 text-start text-lg font-bold text-primary hover:underline transition-colors"
             onClick={() => setIsDetailOpen(true)}
           >
             <LiaFileInvoiceSolid

@@ -17,7 +17,6 @@ function formatDate(dateString: string): string {
   });
 }
 
-
 function WalletTransactionLog() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -149,11 +148,13 @@ function WalletTransactionLog() {
               className="flex flex-col gap-3 sm:grid sm:grid-cols-4 sm:items-center sm:gap-0 bg-white border border-[#ebebeb] rounded-xl p-4 sm:py-4 sm:px-6 hover:shadow-sm transition-shadow sm:text-center"
             >
               <div className="flex items-center justify-between gap-2 sm:contents">
+                {/* التاريخ */}
                 <div className="text-gray-800 font-medium">
                   <span className="sr-only">التاريخ: </span>
                   {formatDate(transaction.createdAt)}
                 </div>
 
+                {/* نوع المعاملة */}
                 <div className="sm:text-center">
                   <Badge
                     variant={transaction.type === 'CREDIT' ? 'default' : 'destructive'}
@@ -166,6 +167,7 @@ function WalletTransactionLog() {
                 </div>
               </div>
 
+              {/* المبلغ */}
               <div className="flex flex-col sm:items-center sm:justify-center">
                 <span className="text-xs text-gray-500 sm:hidden">المبلغ</span>
                 <span className="text-gray-900 font-medium">
@@ -176,6 +178,7 @@ function WalletTransactionLog() {
                 </span>
               </div>
 
+              {/* البيان */}
               <div className="flex flex-col min-w-0">
                 <span className="text-xs text-gray-500 sm:hidden">البيان</span>
                 <span className="text-gray-800 font-medium break-words">

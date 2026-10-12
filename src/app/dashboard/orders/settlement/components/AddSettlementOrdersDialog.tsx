@@ -219,7 +219,7 @@ export default function AddSettlementOrdersDialog({
                 type="text"
                 value={draft.orderCode}
                 onChange={(e) => setDraft((prev) => ({ ...prev, orderCode: e.target.value }))}
-                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm"
+                className="w-full border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm"
               />
             </div>
             <div className="space-y-1">
@@ -229,7 +229,7 @@ export default function AddSettlementOrdersDialog({
                 type="text"
                 value={draft.shippingCompanyCode}
                 onChange={(e) => setDraft((prev) => ({ ...prev, shippingCompanyCode: e.target.value }))}
-                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm"
+                className="w-full border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm"
               />
             </div>
             <div className="space-y-1">
@@ -241,7 +241,7 @@ export default function AddSettlementOrdersDialog({
                 dir="ltr"
                 value={draft.amount}
                 onChange={(e) => setDraft((prev) => ({ ...prev, amount: e.target.value }))}
-                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm"
+                className="w-full border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm"
               />
             </div>
             <div className="space-y-1">
@@ -255,7 +255,7 @@ export default function AddSettlementOrdersDialog({
                     targetStatus: e.target.value as SingleRowDraft['targetStatus'],
                   }))
                 }
-                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm bg-white"
+                className="w-full border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm bg-white"
               >
                 {SINGLE_ROW_STATUSES.map((status) => (
                   <option key={status.value} value={status.value}>
