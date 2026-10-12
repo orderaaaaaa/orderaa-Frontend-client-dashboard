@@ -38,10 +38,10 @@ import { useInvoicePrinter, useInvoiceSettings } from '../../print-orders/hooks'
 import {
   mapOrdersToInvoices,
   preloadShippingLogos,
+  printApiErrorMessage,
 } from '../../print-orders/utils';
 import { InvoiceRenderer } from '../../print-orders/components/InvoiceRenderer';
 import { claimOrdersForPrint } from '../../print-orders/services/printOrders';
-import { getApiErrorMessage } from '@/utils/apiError';
 
 export interface ShippingCompanyOption {
   key: string;
@@ -320,7 +320,7 @@ export function FilterSection({
         reprintIds: Array.from(reprintIds),
       });
     } catch (error) {
-      toast.error(getApiErrorMessage(error, 'تعذر حجز الطلبات للطباعة'));
+      toast.error(printApiErrorMessage(error, 'تعذر حجز الطلبات للطباعة'));
     } finally {
       setIsClaimingSelected(false);
     }

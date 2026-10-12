@@ -6,11 +6,11 @@ import { toast } from 'react-toastify';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
 import { Order } from '@/types/orders';
-import { getApiErrorMessage } from '@/utils/apiError';
 import {
   PRINT_COUNT_MAX,
   claimNextOrdersForPrint,
 } from '../../print-orders/services/printOrders';
+import { printApiErrorMessage } from '../../print-orders/utils/printApiError';
 
 interface PrintInvoicesModalProps {
   isOpen: boolean;
@@ -61,7 +61,7 @@ export function PrintInvoicesModal({
       onClose();
       await onClaimed(claimed);
     } catch (error) {
-      toast.error(getApiErrorMessage(error, 'حدث خطأ أثناء جلب الطلبات'));
+      toast.error(printApiErrorMessage(error, 'حدث خطأ أثناء جلب الطلبات'));
     } finally {
       setIsClaiming(false);
     }

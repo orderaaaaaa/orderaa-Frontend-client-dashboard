@@ -9,7 +9,6 @@ import {
 } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
-import { getApiErrorMessage } from '@/utils/apiError';
 import type {
   ConfirmPrintedResult,
   PrintJob,
@@ -21,6 +20,7 @@ import {
   releasePrintClaims,
 } from '../../print-orders/services/printOrders';
 import { useMarkOrdersPrinted } from '../../print-orders/hooks/useMarkOrdersPrinted';
+import { printApiErrorMessage } from '../../print-orders/utils/printApiError';
 
 interface PrintConfirmDialogProps {
   job: PrintJob | null;
@@ -82,7 +82,7 @@ export function PrintConfirmDialog({
       return ids.filter((id) => kept.has(id));
     } catch (error) {
       toast.warning(
-        getApiErrorMessage(error, 'تعذر تجديد حجز الطلبات، سيتم التحقق عند التأكيد')
+        printApiErrorMessage(error, 'تعذر تجديد حجز الطلبات، سيتم التحقق عند التأكيد')
       );
       return ids;
     }
@@ -118,14 +118,14 @@ export function PrintConfirmDialog({
         setMarkDone(true);
         reportResult({ ...result, reprintError: undefined });
         toast.error(
-          getApiErrorMessage(result.reprintError, 'تعذر تسجيل إعادة الطباعة، حاول مرة أخرى')
+          printApiErrorMessage(result.reprintError, 'تعذر تسجيل إعادة الطباعة، حاول مرة أخرى')
         );
         return;
       }
       reportResult(result);
       onClose();
     } catch (error) {
-      toast.error(getApiErrorMessage(error, 'تعذر تعليم الطلبات كمطبوعة، حاول مرة أخرى'));
+      toast.error(printApiErrorMessage(error, 'تعذر تعليم الطلبات كمطبوعة، حاول مرة أخرى'));
     } finally {
       setBusy(false);
     }
@@ -185,7 +185,7 @@ export function PrintConfirmDialog({
             type="button"
             onClick={handleConfirm}
             disabled={busy}
-            className="h-11 sm:flex-1 rounded-[28px] bg-primary text-white hover:bg-[#4B1BC4] font-bold"
+            className="h-11 sm:h-11 sm:flex-1 rounded-[28px] bg-primary text-white hover:bg-[#4B1BC4] font-bold"
           >
             <LiaCheckSolid className="size-5" />
             نعم، تمت الطباعة
@@ -196,7 +196,7 @@ export function PrintConfirmDialog({
             onClick={handleReprint}
             disabled={busy || reprintLimitReached}
             title={reprintLimitReached ? 'تم الوصول للحد الأقصى لإعادة الطباعة' : undefined}
-            className="h-11 sm:flex-1 rounded-[28px] border-primary text-primary font-bold"
+            className="h-11 sm:h-11 sm:flex-1 rounded-[28px] border-primary text-primary font-bold"
           >
             <LiaPrintSolid className="size-5" />
             إعادة الطباعة
@@ -206,7 +206,7 @@ export function PrintConfirmDialog({
             variant="outline"
             onClick={handleCancel}
             disabled={busy}
-            className="h-11 sm:flex-1 rounded-[28px] border-[#ECECEC] text-[#5F5E5E] font-bold"
+            className="h-11 sm:h-11 sm:flex-1 rounded-[28px] border-[#ECECEC] text-[#5F5E5E] font-bold"
           >
             <LiaTimesSolid className="size-5" />
             لا، إلغاء

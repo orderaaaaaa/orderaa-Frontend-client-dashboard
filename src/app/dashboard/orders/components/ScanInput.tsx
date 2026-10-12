@@ -71,7 +71,7 @@ export function ScanInput({
             enterKeyHint="go"
             autoComplete="off"
             autoCorrect="off"
-            autoCapitalize="characters"
+            autoCapitalize="off"
             spellCheck={false}
             value={value}
             onChange={(e) => setValue(e.target.value)}
@@ -91,7 +91,7 @@ export function ScanInput({
       <Button
         type="submit"
         disabled={disabled || value.trim().length === 0}
-        className="h-11 px-5 rounded-lg"
+        className="h-11 sm:h-11 px-5 rounded-lg"
       >
         إضافة
       </Button>
