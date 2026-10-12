@@ -33,10 +33,11 @@ export const employeesApi = {
   create: (data: EmployeeFormData) => {
     // Remove confirmPassword before sending to API; `roleIds` are held as
     // strings in the form and sent as the numeric ids CreateEmployeeDto expects.
-    const { confirmPassword, roleIds, address, governorate, ...apiData } =
+    const { confirmPassword, roleIds, address, governorate, email, ...apiData } =
       data;
     return Http.post<Employee>('/employees', {
       ...apiData,
+      ...(email?.trim() ? { email: email.trim() } : {}),
       ...(governorate ? { governorate } : {}),
       ...(roleIds?.length ? { roleIds: roleIds.map(Number) } : {}),
     }).then((res) => res.data);

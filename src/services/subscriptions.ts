@@ -5,6 +5,7 @@ import {
   QueryKey,
 } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { subscriptionsApi } from '@/lib/api/subscriptions';
 import { Plan, ActiveSubscription, SubscribeResponse } from '@/types/wallet';
 
@@ -38,19 +39,12 @@ export const useSubscribe = () => {
     mutationFn: async (planId: number) => {
       return subscriptionsApi.subscribe({ planId });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.ACTIVE_SUBSCRIPTION],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.BILLING_INFO],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.WALLET_BALANCE],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.WALLET_TRANSACTIONS],
-      });
-    },
+    onSuccess: () =>
+      invalidateAndWait(queryClient, [
+        [QUERY_KEYS.ACTIVE_SUBSCRIPTION],
+        [QUERY_KEYS.BILLING_INFO],
+        [QUERY_KEYS.WALLET_BALANCE],
+        [QUERY_KEYS.WALLET_TRANSACTIONS],
+      ]),
   });
 };

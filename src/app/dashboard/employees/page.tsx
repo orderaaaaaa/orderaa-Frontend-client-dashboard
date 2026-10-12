@@ -14,8 +14,16 @@ import { LimitSelector } from './components/LimitSelector';
 import { ErrorState } from '@/components/ui/state-panels';
 
 export default function AllEmployees() {
-  const { employees, totalItems, paginationProps, isLoading, isError, error, refetch } =
-    useEmployeesList();
+  const {
+    employees,
+    totalItems,
+    paginationProps,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isPlaceholderData,
+  } = useEmployeesList();
 
   const setCurrentPage = useEmployeesStore((state) => state.setCurrentPage);
   const limit = useEmployeesStore((state) => state.filterSelections.limit);
@@ -45,7 +53,10 @@ export default function AllEmployees() {
           <PageLoading className="h-64 mt-10" />
         </Then>
         <Else>
-          <div className="mt-10">
+          <div
+            aria-busy={isPlaceholderData}
+            className={`mt-10 transition-opacity ${isPlaceholderData ? 'opacity-60' : ''}`}
+          >
             <If condition={employees.length === 0}>
               <Then>
                 <div className="text-center py-8 bg-gray-50 rounded-lg">

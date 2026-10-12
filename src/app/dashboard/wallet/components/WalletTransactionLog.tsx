@@ -21,10 +21,11 @@ function WalletTransactionLog() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const { data, isLoading, isError, refetch } = useWalletTransactions({
-    page: currentPage,
-    limit: pageSize,
-  });
+  const { data, isLoading, isError, refetch, isPlaceholderData } =
+    useWalletTransactions({
+      page: currentPage,
+      limit: pageSize,
+    });
 
   const transactions = data?.data ?? [];
   const meta: PaginationMeta | undefined = data?.meta;
@@ -141,7 +142,10 @@ function WalletTransactionLog() {
         </div>
 
         {/* Table Body / Rows */}
-        <div className="flex flex-col gap-4">
+        <div
+          aria-busy={isPlaceholderData}
+          className={`flex flex-col gap-4 transition-opacity ${isPlaceholderData ? 'opacity-60' : ''}`}
+        >
           {transactions.map((transaction: WalletTransaction) => (
             <div
               key={transaction.id}

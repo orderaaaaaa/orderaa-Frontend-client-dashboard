@@ -32,9 +32,9 @@ export function LogoUploadField({
       if (file) {
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
-        setValue('logo', dataTransfer.files);
+        setValue('logo', dataTransfer.files, { shouldDirty: true });
       } else {
-        setValue('logo', undefined);
+        setValue('logo', undefined, { shouldDirty: true });
         setInitialLogo(null);
       }
     },

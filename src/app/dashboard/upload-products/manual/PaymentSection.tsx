@@ -46,11 +46,12 @@ function PaymentSection({
         <h1 className="font-bold text-[22px] mb-6">طريقة الدفع</h1>
         <div className="max-w-[502px]" data-field-error="paymentMethod">
           <div className="mb-1">
-            <label className="block font-medium text-[16px]">
+            <label htmlFor="manual-payment-method" className="block font-medium text-[16px]">
               اختر طريقة الدفع <span className="text-red-500">*</span>
             </label>
           </div>
           <SearchableSelect
+            id="manual-payment-method"
             value={displayValue}
             onValueChange={handleChange}
             options={paymentMethodOptions}

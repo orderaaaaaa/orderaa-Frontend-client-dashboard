@@ -56,10 +56,12 @@ type GovernorateConfigField = GovernorateConfigFormData['configs'][number] & {
 
 interface GovernorateConfigTableProps {
   shippingCompanyId: number;
+  onDirtyChange?: (key: string, isDirty: boolean) => void;
 }
 
 export function GovernorateConfigTable({
   shippingCompanyId,
+  onDirtyChange,
 }: GovernorateConfigTableProps) {
   const { data: configs, isLoading: isConfigsLoading } =
     useGovernorateLogisticsConfig(shippingCompanyId);
@@ -93,6 +95,13 @@ export function GovernorateConfigTable({
   });
 
   const watchedConfigs = watch('configs');
+
+  useEffect(() => {
+    if (!onDirtyChange) return;
+    const dirtyKey = `governorates-${shippingCompanyId}`;
+    onDirtyChange(dirtyKey, isDirty);
+    return () => onDirtyChange(dirtyKey, false);
+  }, [isDirty, onDirtyChange, shippingCompanyId]);
 
   useEffect(() => {
     if (isConfigsLoading || isGovernoratesLoading) return;

@@ -142,10 +142,11 @@ export function AddSupplierContent() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-gray-700">
+              <label htmlFor="add-supplier-governorate" className="text-sm font-medium text-gray-700">
                 المحافظة
               </label>
               <SearchableSelect
+                id="add-supplier-governorate"
                 value={governorate}
                 onChange={(v) =>
                   setValue('governorate', v, { shouldValidate: true })

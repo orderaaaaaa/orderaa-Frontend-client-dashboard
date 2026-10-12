@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import clsx from 'clsx';
 
 import {
   orderSettingsSchema,
@@ -20,6 +19,11 @@ import { ORDER_SETTINGS_DEFAULTS } from './schemas/store.defaults';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CustomerBadgeSettingsSection from './components/CustomerBadgeSettingsSection';
+import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
+
+const FORM_ID = 'store-settings-form';
 
 export default function OrderSettingsPage() {
   const { settings, isLoading, isError, refetch, updateSettings, isUpdating } =
@@ -32,13 +36,21 @@ export default function OrderSettingsPage() {
   } = usePageNamesQuery();
 
   const [initialized, setInitialized] = useState(false);
+  const [dirtySections, setDirtySections] = useState<Record<string, boolean>>({});
+
+  const reportSectionDirty = useCallback((key: string, isDirty: boolean) => {
+    setDirtySections((prev) =>
+      (prev[key] ?? false) === isDirty ? prev : { ...prev, [key]: isDirty }
+    );
+  }, []);
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
     watch,
     setValue,
+    getValues,
     reset,
   } = useForm<OrderSettingsFormData>({
     resolver: zodResolver(orderSettingsSchema),
@@ -52,8 +64,13 @@ export default function OrderSettingsPage() {
     }
   }, [settings, pageNames, reset, initialized]);
 
+  const sectionsDirty = Object.values(dirtySections).some(Boolean);
+  const guard = useUnsavedChangesGuard(isDirty || sectionsDirty);
+
   const onSubmit = (data: OrderSettingsFormData) => {
-    updateSettings(sanitizeOrderSettings(data, !hasShippingConfig));
+    updateSettings(sanitizeOrderSettings(data, !hasShippingConfig), {
+      onSuccess: () => reset(getValues()),
+    });
   };
 
   const loadFailed = (isError || isPageNamesError) && !initialized;
@@ -141,7 +158,11 @@ export default function OrderSettingsPage() {
         </div>
       </header>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form
+        id={FORM_ID}
+        onSubmit={handleSubmit(onSubmit)}
+        className="space-y-6"
+      >
         <Card>
           <CardContent className="p-0">
             <OrderSettingsFields
@@ -149,25 +170,39 @@ export default function OrderSettingsPage() {
               errors={errors}
               watch={watch}
               setValue={setValue}
+              onSectionDirtyChange={reportSectionDirty}
             />
           </CardContent>
         </Card>
-
-        <div className="flex justify-end">
-          <Button
-            type="submit"
-            disabled={isUpdating}
-            size="lg"
-            className={clsx(
-              'px-8 sm:px-12 py-3 rounded-full font-bold',
-              isUpdating && 'opacity-50 cursor-not-allowed'
-            )}
-          >
-            {isUpdating ? 'جاري الحفظ...' : 'حفظ البيانات'}
-          </Button>
-        </div>
       </form>
-      <CustomerBadgeSettingsSection />
+      <CustomerBadgeSettingsSection onDirtyChange={reportSectionDirty} />
+
+      <StickyFormFooter
+        isDirty={isDirty}
+        isSaving={isUpdating}
+        status={
+          !isDirty && sectionsDirty
+            ? 'لديك تغييرات غير محفوظة في قسم آخر، احفظه من زره'
+            : undefined
+        }
+      >
+        <Button
+          type="submit"
+          form={FORM_ID}
+          disabled={!isDirty || isUpdating}
+          loading={isUpdating}
+          loadingText="جاري الحفظ..."
+          className="min-h-10 rounded-full px-8 font-bold"
+        >
+          حفظ البيانات
+        </Button>
+      </StickyFormFooter>
+
+      <UnsavedChangesDialog
+        isOpen={guard.pendingHref !== null}
+        onStay={guard.cancelLeave}
+        onLeave={guard.confirmLeave}
+      />
     </div>
   );
 }

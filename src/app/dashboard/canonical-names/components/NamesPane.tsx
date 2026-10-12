@@ -13,7 +13,6 @@ import { useDebounce } from '@/utils/debounce';
 import { useCanonicalNamesQuery } from '@/services/canonicalNames';
 import type { CanonicalName, CanonicalNameDomain } from '@/types/canonicalNames';
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
-import { useHeldData } from '../hooks/useHeldData';
 
 interface NameCardProps {
   name: CanonicalName;
@@ -99,11 +98,15 @@ export default function NamesPane({
 }: NamesPaneProps) {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search.trim(), 300);
-  const { data, isFetching, isError, refetch } = useCanonicalNamesQuery(
-    domain,
-    { scopeId, search: debouncedSearch || undefined },
-  );
-  const names = useHeldData(data, `${domain}:${scopeId}`);
+  const {
+    data: names,
+    isFetching,
+    isError,
+    refetch,
+  } = useCanonicalNamesQuery(domain, {
+    scopeId,
+    search: debouncedSearch || undefined,
+  });
   const isLoading = names === undefined && !isError;
   const canCreate = canManage;
 

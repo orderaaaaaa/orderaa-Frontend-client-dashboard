@@ -21,6 +21,9 @@ import { moneyCents } from '@/utils/money';
 import { useCreateSupplierInvoiceMutation, useSuppliersQuery } from '@/services/suppliers';
 import { useEmployeesQuery } from '@/services/employees';
 import { uploadFile } from '@/lib/api/upload';
+import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 
 export function AddInvoiceContent() {
   const router = useRouter();
@@ -84,6 +87,19 @@ export function AddInvoiceContent() {
     () => payloadTotal(buildProductsPayload(items ?? [], invoiceMode)),
     [items, invoiceMode],
   );
+
+  const isSaving =
+    isSubmitting || createInvoiceMutation.isPending || isUploadingImage;
+  const hasUnsavedChanges =
+    !isSuccessModalOpen &&
+    ((items?.length ?? 0) > 0 ||
+      supplierId !== undefined ||
+      createdByEmployeeId !== undefined ||
+      (invoiceImage !== undefined && invoiceImage !== null) ||
+      invoiceType !== 'PURCHASE' ||
+      paymentStatus !== 'unpaid' ||
+      partialAmount.trim() !== '');
+  const guard = useUnsavedChangesGuard(hasUnsavedChanges && !isSaving);
 
   const handleInvoiceTypeChange = useCallback(
     (value: string) => {
@@ -316,7 +332,7 @@ export function AddInvoiceContent() {
       <form
         onSubmit={handleSubmit(onSubmit)}
         noValidate
-        className="flex flex-col gap-8 pb-8"
+        className="flex flex-col gap-8"
       >
         <AddInvoiceHeader />
 
@@ -373,17 +389,28 @@ export function AddInvoiceContent() {
           <p className="sm:px-8 text-red-500 text-sm">{submitError}</p>
         )}
 
-        <div className="flex items-center justify-end sm:px-8">
+        <StickyFormFooter
+          isDirty={hasUnsavedChanges}
+          isSaving={isSaving}
+          status={
+            isUploadingImage
+              ? 'جارٍ رفع الصورة…'
+              : isSaving
+                ? 'جارٍ حفظ الفاتورة...'
+                : `إجمالي الفاتورة: ${invoiceTotal.toLocaleString()} ج.م`
+          }
+        >
           <Button
             type="submit"
             variant="default"
-            size="lg"
-            disabled={isSubmitting || createInvoiceMutation.isPending || isSuccessModalOpen}
-            className="w-full sm:w-auto rounded-full font-semibold text-sm sm:text-base px-12"
+            disabled={isSaving || isSuccessModalOpen}
+            loading={isSaving}
+            loadingText={isUploadingImage ? 'جارٍ رفع الصورة…' : 'جارٍ الحفظ...'}
+            className="min-h-10 rounded-full font-semibold text-sm sm:text-base px-10"
           >
-            {isUploadingImage ? 'جارٍ رفع الصورة…' : 'حفظ الفاتورة'}
+            حفظ الفاتورة
           </Button>
-        </div>
+        </StickyFormFooter>
       </form>
 
       <ProductSelectionModal
@@ -393,6 +420,13 @@ export function AddInvoiceContent() {
         existingProductIds={existingNoVariantProductIds}
         existingVariantCombos={existingVariantCombos}
         allowVariants={withVariants}
+      />
+
+      <UnsavedChangesDialog
+        isOpen={guard.pendingHref !== null}
+        onStay={guard.cancelLeave}
+        onLeave={guard.confirmLeave}
+        message="إذا غادرت الصفحة الآن ستفقد بيانات الفاتورة التي أدخلتها."
       />
 
       <BaseModal

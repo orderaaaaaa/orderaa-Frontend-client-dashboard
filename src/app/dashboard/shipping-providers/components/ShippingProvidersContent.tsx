@@ -46,7 +46,11 @@ export function ShippingProvidersContent() {
     [from, to],
   );
 
-  const { data: carriers = [], isLoading } = useCarrierStatsQuery(range);
+  const {
+    data: carriers = [],
+    isLoading,
+    isPlaceholderData: isRefreshingStats,
+  } = useCarrierStatsQuery(range);
   const { data: providers, isSuccess: providersReady } = useShippingProvidersQuery();
   const { mutateAsync: updateProvider, isPending: isUpdatingProvider } =
     useUpdateShippingProvider();
@@ -160,7 +164,13 @@ export function ShippingProvidersContent() {
             لا توجد جهات شحن — أضف مندوبًا أو شركة شحن للبدء
           </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div
+            aria-busy={isRefreshingStats}
+            className={clsx(
+              'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 transition-opacity',
+              isRefreshingStats && 'opacity-60',
+            )}
+          >
             {visible.map((carrier) => {
               const finished = carrier.deliveredCount + carrier.returnedCount;
               const isProvider = carrier.kind !== 'INTEGRATION';

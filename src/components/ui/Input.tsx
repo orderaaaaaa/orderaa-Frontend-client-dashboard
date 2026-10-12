@@ -32,6 +32,8 @@ type InputProps = {
   id?: string;
   'aria-label'?: string;
   inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
+  dir?: 'ltr' | 'rtl' | 'auto';
+  autoComplete?: string;
 };
 
 type InputCoreProps = Omit<InputProps, 'control'>;

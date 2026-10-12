@@ -11,7 +11,13 @@ import {
 import { GovernorateConfigTable } from './GovernorateConfigTable';
 import PageLoading from '@/components/ui/page-loading';
 
-export function LogisticsSettingsSection() {
+interface LogisticsSettingsSectionProps {
+  onDirtyChange?: (key: string, isDirty: boolean) => void;
+}
+
+export function LogisticsSettingsSection({
+  onDirtyChange,
+}: LogisticsSettingsSectionProps = {}) {
   const { shippingCompanies: activeCompanies, isLoading } = useShippingCompanies();
 
   if (isLoading) {
@@ -66,7 +72,10 @@ export function LogisticsSettingsSection() {
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-2 pb-2">
-              <GovernorateConfigTable shippingCompanyId={company.id} />
+              <GovernorateConfigTable
+                shippingCompanyId={company.id}
+                onDirtyChange={onDirtyChange}
+              />
             </AccordionContent>
           </AccordionItem>
         ))}

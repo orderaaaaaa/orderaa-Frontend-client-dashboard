@@ -27,6 +27,7 @@ export type ClientInformationProps = {
   errors?: {
     name?: string;
     phoneNumbers?: string;
+    phoneNumberItems?: (string | undefined)[];
     address?: string;
     notes?: string;
   };

@@ -1,5 +1,45 @@
 import { z } from 'zod';
 
+const EGYPTIAN_MOBILE = /^01\d{9}$/;
+const INTERNATIONAL_PHONE = /^\d{10,15}$/;
+const PHONE_CHARACTERS = /^[\d\u0660-\u0669\u06F0-\u06F9\s+\-.()/]+$/;
+
+const normalizePhoneNumber = (phone: string) => {
+  let digits = phone
+    .replace(/[\u06F0-\u06F9]/g, (c) => String(c.charCodeAt(0) - 0x06f0))
+    .replace(/[\u0660-\u0669]/g, (c) => String(c.charCodeAt(0) - 0x0660))
+    .replace(/\D/g, '');
+  if (digits.startsWith('00')) digits = digits.slice(2);
+  if (digits.startsWith('20')) digits = digits.slice(2);
+  if (digits.length === 10 && !digits.startsWith('0')) digits = `0${digits}`;
+  return digits;
+};
+
+export const phoneNumberErrorOf = (phone: string): string | null => {
+  if (phone.trim() === '') return null;
+  if (!PHONE_CHARACTERS.test(phone.trim())) {
+    return 'رقم الهاتف يجب أن يحتوي على أرقام فقط';
+  }
+  const value = normalizePhoneNumber(phone);
+  if (value.startsWith('01')) {
+    return EGYPTIAN_MOBILE.test(value)
+      ? null
+      : `رقم الهاتف المصري يجب أن يكون 11 رقم (الرقم الحالي ${value.length} أرقام)`;
+  }
+  return INTERNATIONAL_PHONE.test(value)
+    ? null
+    : 'الرقم الدولي يجب أن يكون من 10 إلى 15 رقم';
+};
+
+const amountIssueOf = (value: string | undefined): string | null => {
+  const raw = value?.trim() ?? '';
+  if (raw === '') return null;
+  const amount = Number(raw);
+  if (!Number.isFinite(amount)) return 'يرجى إدخال رقم صحيح';
+  if (amount < 0) return 'لا يمكن أن تكون القيمة سالبة';
+  return null;
+};
+
 export const manualOrderBaseSchema = z
   .object({
     orderSource: z.object({
@@ -36,13 +76,27 @@ export const manualOrderBaseSchema = z
   });
 
 export const manualOrderSchema = manualOrderBaseSchema.superRefine((data, ctx) => {
-    if (data.shipping.shippingCost && isNaN(Number(data.shipping.shippingCost))) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'يرجى إدخال رقم صحيح',
-        path: ['shipping', 'shippingCost'],
-      });
-    }
+    data.customer.phoneNumbers.forEach((phone, index) => {
+      const message = phoneNumberErrorOf(phone);
+      if (message) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message,
+          path: ['customer', 'phoneNumbers', index],
+        });
+      }
+    });
+    const amountFields = [
+      [data.shipping.shippingCost, ['shipping', 'shippingCost']],
+      [data.shipping.returnShippingCost, ['shipping', 'returnShippingCost']],
+      [data.total, ['total']],
+    ] as const;
+    amountFields.forEach(([value, path]) => {
+      const message = amountIssueOf(value);
+      if (message) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message, path: [...path] });
+      }
+    });
     const requiresReturnContent = ['PARTIAL_RETURN', 'EXCHANGE', 'RETURN'].includes(
       data.shipping.shippingType
     );
@@ -51,13 +105,6 @@ export const manualOrderSchema = manualOrderBaseSchema.superRefine((data, ctx) =
         code: z.ZodIssueCode.custom,
         message: 'يرجى إدخال محتوى شحنة الاسترجاع',
         path: ['shipping', 'returnShipmentContent'],
-      });
-    }
-    if (data.total && isNaN(Number(data.total))) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'يرجى إدخال رقم صحيح',
-        path: ['total'],
       });
     }
   });

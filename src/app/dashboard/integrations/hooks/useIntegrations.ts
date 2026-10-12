@@ -1,5 +1,10 @@
 import { useRef, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  type QueryKey,
+} from '@tanstack/react-query';
 import { integrationApi, storeApi, stockSyncApi } from '../api/Integrations';
 import {
   CreateIntegrationRequest,
@@ -11,12 +16,15 @@ import {
   STOCK_POLICY_STATUS,
 } from '../types/apiIntegration';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { invalidateAndWait } from '@/lib/query/mutationSync';
 
 const STOCK_SYNC_LIST_PAGE_SIZE = 10;
 const STOCK_SYNC_POLICY_POLL_WINDOW_MS = 60000;
 
 export const useIntegrations = () => {
   const queryClient = useQueryClient();
+  const refreshConfigs = () =>
+    invalidateAndWait(queryClient, [[QUERY_KEYS.INTEGRATION_CONFIGS]]);
 
   const integrationsQuery = useQuery({
     queryKey: [QUERY_KEYS.INTEGRATION_CONFIGS],
@@ -25,39 +33,29 @@ export const useIntegrations = () => {
 
   const createIntegrationMutation = useMutation({
     mutationFn: (data: CreateIntegrationRequest) => integrationApi.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.INTEGRATION_CONFIGS] });
-    },
+    onSuccess: refreshConfigs,
   });
 
   const updateIntegrationMutation = useMutation({
     mutationFn: ({ configId, data }: { configId: number; data: UpdateIntegrationRequest }) =>
       integrationApi.update(configId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.INTEGRATION_CONFIGS] });
-    },
+    onSuccess: refreshConfigs,
   });
 
   const deleteIntegrationMutation = useMutation({
     mutationFn: (configId: number) => integrationApi.delete(configId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.INTEGRATION_CONFIGS] });
-    },
+    onSuccess: refreshConfigs,
   });
 
   const updateStoreMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateStoreRequest }) =>
       storeApi.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.INTEGRATION_CONFIGS] });
-    },
+    onSuccess: refreshConfigs,
   });
 
   const deleteStoreMutation = useMutation({
     mutationFn: (id: number) => storeApi.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.INTEGRATION_CONFIGS] });
-    },
+    onSuccess: refreshConfigs,
   });
 
   return {
@@ -102,15 +100,18 @@ export const useStockSync = (
     policyPollDeadlineRef.current = Date.now() + STOCK_SYNC_POLICY_POLL_WINDOW_MS;
   };
 
-  const invalidateAfterMutation = () => {
-    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.INTEGRATION_CONFIGS] });
-    queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.INTEGRATION_STOCK_PUSH_LOG, configId],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.INTEGRATION_STOCK_POLICY_LOG, configId],
-    });
-  };
+  const keepWithinConfig = <T,>(
+    previous: T | undefined,
+    previousQuery?: { queryKey: QueryKey },
+  ) => (previousQuery?.queryKey[1] === configId ? previous : undefined);
+
+  const invalidateAfterMutation = () =>
+    invalidateAndWait(queryClient, [
+      [QUERY_KEYS.INTEGRATION_CONFIGS],
+      [QUERY_KEYS.INTEGRATION_STOCK_PUSH_LOG, configId],
+      [QUERY_KEYS.INTEGRATION_STOCK_POLICY_LOG, configId],
+      [QUERY_KEYS.INTEGRATION_STOCK_UNLINKED, configId],
+    ]);
 
   const pushPendingQuery = useQuery({
     queryKey: [QUERY_KEYS.INTEGRATION_STOCK_PUSH_LOG, configId, 'pending'],
@@ -133,6 +134,7 @@ export const useStockSync = (
         page: pushLogPage,
         limit: STOCK_SYNC_LIST_PAGE_SIZE,
       }),
+    placeholderData: keepWithinConfig,
     refetchInterval: () => (hasPendingPush ? 5000 : false),
   });
 
@@ -140,6 +142,7 @@ export const useStockSync = (
     queryKey: [QUERY_KEYS.INTEGRATION_STOCK_UNLINKED, configId, unlinkedPage],
     queryFn: () =>
       stockSyncApi.getUnlinked(configId, unlinkedPage, STOCK_SYNC_LIST_PAGE_SIZE),
+    placeholderData: keepWithinConfig,
   });
 
   const locationsQuery = useQuery({
@@ -191,6 +194,7 @@ export const useStockSync = (
         limit: STOCK_SYNC_LIST_PAGE_SIZE,
       }),
     enabled: isShopify,
+    placeholderData: keepWithinConfig,
     refetchInterval: () =>
       isPolicyPollWindowActive() || hasPendingPolicy ? 5000 : false,
   });

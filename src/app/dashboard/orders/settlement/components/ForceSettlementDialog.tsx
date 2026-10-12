@@ -33,6 +33,7 @@ export default function ForceSettlementDialog({
       confirmText="تأكيد"
       maxWidth="md:max-w-lg"
       toastOnConfirmError
+      confirmErrorFallback="تعذر إضافة الطلب رغم الخطأ"
     >
       <div className="space-y-3 text-sm">
         <p className="whitespace-pre-line text-red-700 font-medium">{reason}</p>

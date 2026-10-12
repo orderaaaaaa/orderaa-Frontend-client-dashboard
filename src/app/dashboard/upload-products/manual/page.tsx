@@ -1,7 +1,7 @@
 'use client';
 import { LiaPlusSolid } from 'react-icons/lia';
 import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,11 @@ import { createManualOrder } from '@/lib/api/manualOrdersApi';
 import { locationSaveErrorTextOf } from '@/types/locationOptions';
 import { manualOrderSchema, ManualOrderFormData } from './schema';
 import { useMerchantSettings } from '@/app/dashboard/store-settings/hooks/useStoreSettings';
+import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
+
+const DIRTY = { shouldDirty: true } as const;
 
 function Manual() {
   const selectedProducts = useProductDropdownStore(
@@ -27,8 +32,9 @@ function Manual() {
     handleSubmit: handleFormSubmit,
     watch,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
     reset,
+    resetField,
     clearErrors,
   } = useForm<ManualOrderFormData>({
     resolver: zodResolver(manualOrderSchema),
@@ -65,9 +71,11 @@ function Manual() {
 
   useEffect(() => {
     if (settings?.defaultReturnShippingCost != null) {
-      setValue('shipping.returnShippingCost', String(settings.defaultReturnShippingCost));
+      resetField('shipping.returnShippingCost', {
+        defaultValue: String(settings.defaultReturnShippingCost),
+      });
     }
-  }, [settings?.defaultReturnShippingCost, setValue]);
+  }, [settings?.defaultReturnShippingCost, resetField]);
 
   useEffect(() => {
     useProductDropdownStore.getState().setSelectedProducts([]);
@@ -79,6 +87,9 @@ function Manual() {
   const [productsError, setProductsError] = useState<string | null>(null);
 
   const formValues = watch();
+  const hasUnsavedChanges =
+    !isSubmitting && (isDirty || selectedProducts.length > 0);
+  const guard = useUnsavedChangesGuard(hasUnsavedChanges);
 
   const onSubmit = async (data: ManualOrderFormData) => {
     setProductsError(null);
@@ -132,7 +143,7 @@ function Manual() {
     }
   };
 
-  const handleInvalidSubmit = () => {
+  const handleInvalidSubmit = (fieldErrors: FieldErrors<ManualOrderFormData>) => {
     if (!selectedProducts || selectedProducts.length === 0) {
       setProductsError('يجب اختيار منتج واحد على الأقل');
       const errorElement = document.querySelector('[data-field-error="products"]');
@@ -141,18 +152,20 @@ function Manual() {
     }
 
     const findFirstErrorField = (): string | null => {
-      if (errors.orderSource?.utmSource) return 'utmSource';
-      if (errors.orderSource?.pageName) return 'pageName';
-      if (errors.customer?.name) return 'name';
-      if (errors.customer?.phoneNumbers) return 'phoneNumbers';
-      if (errors.customer?.address) return 'address';
-      if (errors.shipping?.shippingCompanyId) return 'shippingCompanyId';
-      if (errors.shipping?.governorateOption) return 'governorate';
-      if (errors.shipping?.cityOption) return 'city';
-      if (errors.shipping?.shippingCost) return 'shippingCost';
-      if (errors.shipping?.shippingType) return 'shippingType';
-      if (errors.shipping?.returnShipmentContent) return 'returnShipmentContent';
-      if (errors.payment?.paymentMethod) return 'paymentMethod';
+      if (fieldErrors.orderSource?.utmSource) return 'utmSource';
+      if (fieldErrors.orderSource?.pageName) return 'pageName';
+      if (fieldErrors.customer?.name) return 'name';
+      if (fieldErrors.customer?.phoneNumbers) return 'phoneNumbers';
+      if (fieldErrors.customer?.address) return 'address';
+      if (fieldErrors.shipping?.shippingCompanyId) return 'shippingCompanyId';
+      if (fieldErrors.shipping?.governorateOption) return 'governorate';
+      if (fieldErrors.shipping?.cityOption) return 'city';
+      if (fieldErrors.shipping?.shippingCost) return 'shippingCost';
+      if (fieldErrors.shipping?.returnShippingCost) return 'returnShippingCost';
+      if (fieldErrors.shipping?.shippingType) return 'shippingType';
+      if (fieldErrors.shipping?.returnShipmentContent) return 'returnShipmentContent';
+      if (fieldErrors.payment?.paymentMethod) return 'paymentMethod';
+      if (fieldErrors.total) return 'products';
       return null;
     };
 
@@ -170,11 +183,11 @@ function Manual() {
           utmSource={formValues.orderSource.utmSource}
           pageName={formValues.orderSource.pageName}
           onUtmSourceChange={(v) => {
-            setValue('orderSource.utmSource', v);
+            setValue('orderSource.utmSource', v, DIRTY);
             clearErrors('orderSource.utmSource');
           }}
           onPageNameChange={(v) => {
-            setValue('orderSource.pageName', v);
+            setValue('orderSource.pageName', v, DIRTY);
             clearErrors('orderSource.pageName');
           }}
           errors={{
@@ -190,7 +203,7 @@ function Manual() {
             clearErrors('total');
           }}
           onPackagingNotesChange={(v) => {
-            setValue('packagingNotes', v);
+            setValue('packagingNotes', v, DIRTY);
           }}
           errors={{ products: productsError || undefined, total: errors.total?.message }}
         />
@@ -201,23 +214,26 @@ function Manual() {
           address={formValues.customer.address}
           notes={formValues.customer.notes || ''}
           onNameChange={(v) => {
-            setValue('customer.name', v);
+            setValue('customer.name', v, DIRTY);
             clearErrors('customer.name');
           }}
           onPhoneNumbersChange={(v) => {
-            setValue('customer.phoneNumbers', v);
+            setValue('customer.phoneNumbers', v, DIRTY);
             clearErrors('customer.phoneNumbers');
           }}
           onAddressChange={(v) => {
-            setValue('customer.address', v);
+            setValue('customer.address', v, DIRTY);
             clearErrors('customer.address');
           }}
           onNotesChange={(v) => {
-            setValue('customer.notes', v);
+            setValue('customer.notes', v, DIRTY);
           }}
           errors={{
             name: errors.customer?.name?.message,
             phoneNumbers: errors.customer?.phoneNumbers?.message,
+            phoneNumberItems: formValues.customer.phoneNumbers.map(
+              (_, index) => errors.customer?.phoneNumbers?.[index]?.message
+            ),
             address: errors.customer?.address?.message,
           }}
         />
@@ -231,31 +247,31 @@ function Manual() {
           shippingType={formValues.shipping.shippingType}
           returnShipmentContent={formValues.shipping.returnShipmentContent || ''}
           onShippingCompanyChange={(v) => {
-            setValue('shipping.shippingCompanyId', v);
+            setValue('shipping.shippingCompanyId', v, DIRTY);
             clearErrors('shipping.shippingCompanyId');
           }}
           onGovernorateOptionChange={(v) => {
-            setValue('shipping.governorateOption', v);
+            setValue('shipping.governorateOption', v, DIRTY);
             clearErrors('shipping.governorateOption');
           }}
           onCityOptionChange={(v) => {
-            setValue('shipping.cityOption', v);
+            setValue('shipping.cityOption', v, DIRTY);
             clearErrors('shipping.cityOption');
           }}
           onShippingCostChange={(v) => {
-            setValue('shipping.shippingCost', v);
+            setValue('shipping.shippingCost', v, DIRTY);
             clearErrors('shipping.shippingCost');
           }}
           onReturnShippingCostChange={(v) => {
-            setValue('shipping.returnShippingCost', v);
+            setValue('shipping.returnShippingCost', v, DIRTY);
             clearErrors('shipping.returnShippingCost');
           }}
           onShippingTypeChange={(v) => {
-            setValue('shipping.shippingType', v);
+            setValue('shipping.shippingType', v, DIRTY);
             clearErrors('shipping.shippingType');
           }}
           onReturnShipmentContentChange={(v) => {
-            setValue('shipping.returnShipmentContent', v);
+            setValue('shipping.returnShipmentContent', v, DIRTY);
             clearErrors('shipping.returnShipmentContent');
           }}
           errors={{
@@ -272,7 +288,7 @@ function Manual() {
         <PaymentSection
           paymentMethod={formValues.payment.paymentMethod}
           onPaymentMethodChange={(v) => {
-            setValue('payment.paymentMethod', v);
+            setValue('payment.paymentMethod', v, DIRTY);
             clearErrors('payment.paymentMethod');
           }}
           errors={{
@@ -283,31 +299,39 @@ function Manual() {
         <ConfirmationSection
           needsConfirmation={formValues.needsConfirmation}
           onNeedsConfirmationChange={(v) => {
-            setValue('needsConfirmation', v);
+            setValue('needsConfirmation', v, DIRTY);
           }}
         />
 
-        <div className="flex justify-end ml-6">
+        <StickyFormFooter
+          isDirty={hasUnsavedChanges}
+          isSaving={isSubmitting}
+          status={
+            isSubmitting
+              ? 'جاري إنشاء الطلب...'
+              : hasUnsavedChanges
+                ? 'الطلب لم يُضف بعد'
+                : 'املأ بيانات الطلب ثم اضغط إضافة طلب'
+          }
+        >
           <Button
             type="submit"
             disabled={isSubmitting}
-            size="lg"
-            className="w-40 rounded-full font-bold"
+            loading={isSubmitting}
+            loadingText="جاري الإرسال..."
+            className="min-h-10 min-w-40 rounded-full font-bold"
           >
-            {isSubmitting ? (
-              <>
-                <span className="animate-spin">⟳</span>
-                جاري الإرسال...
-              </>
-            ) : (
-              <>
-                <LiaPlusSolid className="w-6 h-6 text-white" />
-                إضافة طلب
-              </>
-            )}
+            <LiaPlusSolid className="w-5 h-5 text-white" />
+            إضافة طلب
           </Button>
-        </div>
+        </StickyFormFooter>
       </div>
+      <UnsavedChangesDialog
+        isOpen={guard.pendingHref !== null}
+        onStay={guard.cancelLeave}
+        onLeave={guard.confirmLeave}
+        message="إذا غادرت الصفحة الآن ستفقد بيانات الطلب التي أدخلتها."
+      />
     </form>
   );
 }

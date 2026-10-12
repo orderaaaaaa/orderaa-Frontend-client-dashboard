@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { shippingApi } from '../api/shippingApi';
 import { ShippingConfig } from '../types/shipping';
 
@@ -23,14 +24,17 @@ export const useShippingQuery = (providerId?: string) => {
       )
     : undefined;
 
+  const refreshConfigs = () =>
+    invalidateAndWait(queryClient, [
+      ['shipping-configs'],
+      [QUERY_KEYS.SHIPPING_COMPANIES],
+    ]);
+
   const upsertMutation = useMutation({
     mutationFn: async (data: any) => {
       return shippingApi.createConfig(data);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shipping-configs'] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SHIPPING_COMPANIES] });
-    },
+    onSuccess: refreshConfigs,
   });
 
   const updateConfig = useMutation({
@@ -43,10 +47,7 @@ export const useShippingQuery = (providerId?: string) => {
     }) => {
       return shippingApi.updateConfig(data, shippingCompany);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['shipping-configs'] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SHIPPING_COMPANIES] });
-    },
+    onSuccess: refreshConfigs,
   });
 
   return {
@@ -56,10 +57,10 @@ export const useShippingQuery = (providerId?: string) => {
     isError: configQuery.isError,
     error: configQuery.error,
     refetch: configQuery.refetch,
-    isSaving: upsertMutation.isPending,
+    isSaving: upsertMutation.isPending || updateConfig.isPending,
     saveConfig: upsertMutation.mutateAsync,
     updateConfig: updateConfig.mutateAsync,
-    isUpdatingConfig: upsertMutation.isPending,
-    errorUpdateConfig: upsertMutation.isError,
+    isUpdatingConfig: updateConfig.isPending,
+    errorUpdateConfig: updateConfig.isError,
   };
 };

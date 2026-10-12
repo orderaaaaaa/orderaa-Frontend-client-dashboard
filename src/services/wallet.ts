@@ -1,4 +1,5 @@
 import {
+  keepPreviousData,
   useQuery,
   useMutation,
   useQueryClient,
@@ -31,6 +32,7 @@ export const useWalletTransactions = (params?: GetTransactionsParams) => {
     queryFn: async () => {
       return walletApi.getTransactions(params);
     },
+    placeholderData: keepPreviousData,
   });
 };
 

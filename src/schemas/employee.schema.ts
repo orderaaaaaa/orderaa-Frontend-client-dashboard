@@ -1,99 +1,93 @@
 import { z } from 'zod';
-import { validateEgyptianPhoneNumber } from '@/utils/validators/phoneValidator';
+import {
+  validateEgyptianPhoneNumber,
+  getPhoneNumberErrorMessage,
+} from '@/utils/validators/phoneValidator';
 import type { EmployeeRoleRef } from '@/lib/api/authorization';
 
-// Employee role enum - matching backend: SUPER_ADMIN, ADMIN, MANAGER
 export const EmployeeRole = z.enum(['SUPER_ADMIN', 'ADMIN', 'MANAGER']);
 
-// Employee department enum - matching backend: CONFIRMATION, FOLLOW_UP, RETURNS
 export const EmployeeDepartment = z.enum([
   'CONFIRMATION',
   'FOLLOW_UP',
   'RETURNS',
 ]);
 
-// Employee form schema
-export const employeeFormSchema = z
-  .object({
-    // Basic info
-    accessLevel: z.string().min(1, { message: 'مستوى الصلاحية مطلوب' }),
-    department: z.string().min(1, { message: 'القسم الإداري مطلوب' }),
+const PASSWORD_MIN_LENGTH = 6;
 
-    // Contact info
-    fullName: z
-      .string()
-      .min(2, { message: 'الاسم الكامل يجب أن يكون حرفين على الأقل' }),
-    phoneNumber: z
-      .string()
-      .min(1, { message: 'رقم الهاتف مطلوب' })
-      .refine((val) => validateEgyptianPhoneNumber(val), {
-        message: 'رقم الهاتف يجب أن يكون 11 رقم ويبدأ بـ 01',
-      }),
-
-    // Location
-    address: z.string().optional(),
-    governorate: z.string().optional(),
-    email: z
-      .string()
-      .email({ message: 'البريد الإلكتروني غير صحيح' })
-      .optional()
-      .or(z.literal('')),
-
-    // Password
-    password: z
-      .string()
-      .optional()
-      .or(z.literal(''))
-      .transform((val) => (val === '' ? undefined : val)),
-
-    confirmPassword: z
-      .string()
-      .optional()
-      .or(z.literal(''))
-      .transform((val) => (val === '' ? undefined : val)),
-    // Work schedule
-    workingHours: z.string().optional(),
-
-    // ABAC roles — role ids as strings so the shared MultiSelectDropdown can
-    // drive them; `employeesApi.create` converts them to the numeric
-    // `roleIds[]` the backend CreateEmployeeDto expects.
-    roleIds: z.array(z.string()).optional(),
-  })
-  .refine(
-    (data) => {
-      if (data.password || data.confirmPassword) {
-        return data.password === data.confirmPassword;
+const employeeFieldsSchema = z.object({
+  accessLevel: z.string().min(1, { message: 'مستوى الوظيفة مطلوب' }),
+  department: z.string().min(1, { message: 'قسم الموظف مطلوب' }),
+  fullName: z
+    .string()
+    .trim()
+    .min(2, { message: 'الاسم الكامل يجب أن يكون حرفين على الأقل' }),
+  phoneNumber: z
+    .string()
+    .trim()
+    .min(1, { message: 'رقم الهاتف مطلوب' })
+    .superRefine((value, ctx) => {
+      if (value && !validateEgyptianPhoneNumber(value)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: getPhoneNumberErrorMessage(value),
+        });
       }
-      return true;
-    },
-    {
-      message: 'كلمة المرور وتأكيد كلمة المرور غير متطابقين',
-      path: ['confirmPassword'],
+    }),
+  email: z
+    .string()
+    .trim()
+    .email({ message: 'البريد الإلكتروني غير صحيح' })
+    .optional()
+    .or(z.literal('')),
+  address: z.string().nullish(),
+  governorate: z.string().nullish(),
+  password: z.string().optional(),
+  confirmPassword: z.string().optional(),
+  workingHours: z.string().nullish(),
+  roleIds: z.array(z.string()).optional(),
+});
+
+type EmployeeFormMode = 'create' | 'edit';
+
+const refinePasswords =
+  (mode: EmployeeFormMode) =>
+  (data: z.infer<typeof employeeFieldsSchema>, ctx: z.RefinementCtx) => {
+    const password = data.password ?? '';
+    const confirmPassword = data.confirmPassword ?? '';
+    if (mode === 'create' && password === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['password'],
+        message: 'كلمة المرور مطلوبة',
+      });
+      return;
     }
-  );
+    if (password !== '' && password.length < PASSWORD_MIN_LENGTH) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['password'],
+        message: `كلمة المرور يجب أن تكون ${PASSWORD_MIN_LENGTH} أحرف على الأقل`,
+      });
+    }
+    if ((password !== '' || confirmPassword !== '') && password !== confirmPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['confirmPassword'],
+        message: 'كلمة المرور وتأكيد كلمة المرور غير متطابقين',
+      });
+    }
+  };
 
-export type EmployeeFormData = z.infer<typeof employeeFormSchema>;
+export type EmployeeFormData = z.infer<typeof employeeFieldsSchema>;
 
-// Export alias for compatibility
-export const employeeSchema = employeeFormSchema;
+export const editEmployeeSchema = employeeFieldsSchema.superRefine(
+  refinePasswords('edit')
+);
 
-/**
- * Create-form schema. Under ABAC an employee with zero roles can sign in but
- * gets a 403 on every request, so the create form must not produce one.
- *
- * `requireRoles` mirrors whether the roles multi-select is actually rendered
- * (the creator holds `roles:read` + `roles:assign`):
- * - `true`  → at least one role must be picked before submitting.
- * - `false` → the field is hidden, so the requirement cannot be satisfied here;
- *   the form shows a notice that an admin has to assign roles instead.
- *
- * The edit flow keeps its own schema
- * (`employees/employee-settings/[employeeSettingId]/schemas/employee.ts`) and is
- * untouched — roles there are managed by `PUT /employees/:id/roles`, so an
- * untouched roles field is legitimate.
- */
 export const buildCreateEmployeeSchema = (requireRoles: boolean) =>
-  employeeFormSchema.superRefine((data, ctx) => {
+  employeeFieldsSchema.superRefine((data, ctx) => {
+    refinePasswords('create')(data, ctx);
     if (requireRoles && (data.roleIds?.length ?? 0) === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -102,6 +96,20 @@ export const buildCreateEmployeeSchema = (requireRoles: boolean) =>
       });
     }
   });
+
+export const EMPLOYEE_FORM_DEFAULTS: EmployeeFormData = {
+  accessLevel: '',
+  department: '',
+  fullName: '',
+  phoneNumber: '',
+  email: '',
+  address: '',
+  governorate: '',
+  password: '',
+  confirmPassword: '',
+  workingHours: '',
+  roleIds: [],
+};
 
 // Employee response type
 export interface Employee {

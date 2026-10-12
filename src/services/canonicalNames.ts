@@ -1,8 +1,14 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type QueryKey,
+} from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import http from '@/lib/api/http';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { getCanonicalNameError } from '@/app/dashboard/canonical-names/utils/canonicalNameErrors';
 import {
@@ -35,34 +41,53 @@ import {
   type SuggestionResult,
 } from '@/types/canonicalNames';
 
+const domainQueryKeys = (domain: CanonicalNameDomain): QueryKey[] => {
+  const keys: QueryKey[] = [
+    [QUERY_KEYS.CANONICAL_NAMES, domain],
+    [QUERY_KEYS.CANONICAL_NAME_GROUPS, domain],
+    [QUERY_KEYS.CANONICAL_NAME_GROUP_MEMBERS, domain],
+    [QUERY_KEYS.CANONICAL_NAME_CANDIDATES, domain],
+    [QUERY_KEYS.CANONICAL_NAME_IMPACT, domain],
+  ];
+  if (domain === CANONICAL_NAME_DOMAINS.GOVERNORATE) {
+    keys.push(
+      [QUERY_KEYS.CANONICAL_NAME_GROUPS, CANONICAL_NAME_DOMAINS.CITY],
+      [QUERY_KEYS.CANONICAL_NAME_GROUP_MEMBERS, CANONICAL_NAME_DOMAINS.CITY],
+      [QUERY_KEYS.CANONICAL_NAME_CANDIDATES, CANONICAL_NAME_DOMAINS.CITY],
+    );
+  }
+  if (domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_NAME) {
+    keys.push(
+      [QUERY_KEYS.CANONICAL_NAMES, CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION],
+      [QUERY_KEYS.CANONICAL_NAME_GROUPS, CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION],
+      [QUERY_KEYS.CANONICAL_NAME_GROUP_MEMBERS, CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION],
+      [QUERY_KEYS.CANONICAL_NAME_CANDIDATES, CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION],
+    );
+  }
+  return keys;
+};
+
 const invalidateDomainQueries = (
   queryClient: ReturnType<typeof useQueryClient>,
   domain: CanonicalNameDomain,
-) => {
-  queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CANONICAL_NAMES, domain] });
-  queryClient.invalidateQueries({
-    queryKey: [QUERY_KEYS.CANONICAL_NAME_GROUPS, domain],
-  });
-  queryClient.invalidateQueries({
-    queryKey: [QUERY_KEYS.CANONICAL_NAME_IMPACT, domain],
-  });
-  if (domain === CANONICAL_NAME_DOMAINS.GOVERNORATE) {
-    queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.CANONICAL_NAME_GROUPS, CANONICAL_NAME_DOMAINS.CITY],
-    });
-  }
-  if (domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_NAME) {
-    queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.CANONICAL_NAMES, CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [
-        QUERY_KEYS.CANONICAL_NAME_GROUPS,
-        CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION,
-      ],
-    });
-  }
+) => invalidateAndWait(queryClient, domainQueryKeys(domain));
+
+const scopeOfKey = (queryKey: QueryKey | undefined) => {
+  if (!queryKey) return null;
+  const params = queryKey[2];
+  const scopeId =
+    typeof params === 'object' && params !== null && 'scopeId' in params
+      ? params.scopeId
+      : undefined;
+  return `${String(queryKey[1])}:${String(scopeId)}`;
 };
+
+const keepWithinScope =
+  (domain: CanonicalNameDomain, scopeId: number | undefined) =>
+  <T,>(previous: T | undefined, previousQuery?: { queryKey: QueryKey }) =>
+    scopeOfKey(previousQuery?.queryKey) === `${domain}:${String(scopeId)}`
+      ? previous
+      : undefined;
 
 export const isLocationDomain = (domain: CanonicalNameDomain) =>
   domain === CANONICAL_NAME_DOMAINS.GOVERNORATE ||
@@ -80,6 +105,7 @@ export const useCanonicalNamesQuery = (
       });
       return data;
     },
+    placeholderData: keepWithinScope(domain, params.scopeId),
   });
 
 export const useSourceGroupsQuery = (
@@ -97,6 +123,7 @@ export const useSourceGroupsQuery = (
       return data;
     },
     enabled,
+    placeholderData: keepWithinScope(domain, params.scopeId),
   });
 
 export const useGroupMembersQuery = (
@@ -176,8 +203,8 @@ export const useCreateCanonicalName = (domain: CanonicalNameDomain) => {
       );
       return data;
     },
-    onSuccess: () => {
-      invalidateDomainQueries(queryClient, domain);
+    onSuccess: async () => {
+      await invalidateDomainQueries(queryClient, domain);
       toast.success('تم إنشاء الاسم الموحد');
     },
     onError: (err: unknown) => {
@@ -197,8 +224,8 @@ export const useRenameCanonicalName = (domain: CanonicalNameDomain) => {
       );
       return data;
     },
-    onSuccess: (result) => {
-      invalidateDomainQueries(queryClient, domain);
+    onSuccess: async (result) => {
+      await invalidateDomainQueries(queryClient, domain);
       toast.success(`تم تغيير الاسم الظاهر في ${result.impact.rowCount} عنصر`);
     },
     onError: (err: unknown) => {
@@ -217,8 +244,8 @@ export const useDeleteCanonicalName = (domain: CanonicalNameDomain) => {
       );
       return data;
     },
-    onSuccess: () => {
-      invalidateDomainQueries(queryClient, domain);
+    onSuccess: async () => {
+      await invalidateDomainQueries(queryClient, domain);
       toast.success('تم حذف الاسم الموحد');
     },
     onError: (err: unknown) => {
@@ -230,7 +257,7 @@ export const useDeleteCanonicalName = (domain: CanonicalNameDomain) => {
             ? 'لا يمكن حذف الاسم لأنه مرتبط بصفوف من شركات الشحن ومدن تابعة، ألغ ربطها أولا'
             : 'لا يمكن حذف الاسم لأنه مرتبط بصفوف من شركات الشحن، ألغ ربطها أولا',
         );
-        invalidateDomainQueries(queryClient, domain);
+        void invalidateDomainQueries(queryClient, domain);
         return;
       }
       toast.error(getApiErrorMessage(err, 'تعذر حذف الاسم الموحد'));
@@ -249,8 +276,8 @@ export const useApplyLinks = (domain: CanonicalNameDomain) => {
       );
       return data;
     },
-    onSuccess: (result) => {
-      invalidateDomainQueries(queryClient, domain);
+    onSuccess: async (result) => {
+      await invalidateDomainQueries(queryClient, domain);
       const rowsLinked = result.data.reduce((sum, row) => sum + row.rowsLinked, 0);
       if (rowsLinked > 0) {
         toast.success(`تم ربط ${rowsLinked} عنصر`);
@@ -271,7 +298,7 @@ export const useApplyLinks = (domain: CanonicalNameDomain) => {
         toast.error(getApiErrorMessage(err, 'تعذر تنفيذ الربط'));
         return;
       }
-      if (isRowNotFoundError(err)) invalidateDomainQueries(queryClient, domain);
+      if (isRowNotFoundError(err)) void invalidateDomainQueries(queryClient, domain);
       toast.error(locationLinkErrorMessage(err));
     },
   });

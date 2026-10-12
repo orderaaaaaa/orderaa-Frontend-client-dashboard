@@ -4,12 +4,19 @@ import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Employee } from '../types/employee';
-import { employeeSchema, EmployeeFormData } from '../schemas/employee';
+import {
+  editEmployeeSchema,
+  EMPLOYEE_FORM_DEFAULTS,
+  type EmployeeFormData,
+} from '@/schemas/employee.schema';
 import Input from '@/components/ui/Input';
 import { Button } from '@/components/ui/button';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import MultiSelectDropdown from '@/components/ui/MultiSelectDropdown';
 import WorkHoursTimePicker from '@/components/ui/WorkHoursTimePicker';
+import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useGovernoratesQuery, useDepartmentsQuery } from '@/services/lookups';
 import { useRolesQuery } from '@/services/authorization';
 import { usePermissionCheck } from '@/hooks/usePermissions';
@@ -24,14 +31,13 @@ import {
   LiaUserShieldSolid,
 } from 'react-icons/lia';
 import { ACCESS_LEVEL_OPTIONS } from '../../../constants/employeesFormOptions';
+import { Label } from '../../../add-employee/components/Label';
+
+const EMPLOYEES_HREF = '/dashboard/employees';
+const DIRTY_VALID = { shouldValidate: true, shouldDirty: true } as const;
 
 interface EmployeeFormProps {
   employee: Employee;
-  /**
-   * `roleIds` is the full desired set — the page sends it to
-   * PUT /employees/:id/roles, but ONLY when `rolesDirty` is true. A
-   * full-replace PUT built from untouched state can wipe an employee's roles.
-   */
   onSubmit: (
     data: Partial<Employee>,
     roleIds: number[],
@@ -40,13 +46,29 @@ interface EmployeeFormProps {
   isLoading?: boolean;
 }
 
+const sameIds = (a: string[], b: string[]) =>
+  a.length === b.length && [...a].sort().join(',') === [...b].sort().join(',');
+
+const toFormValues = (employee: Employee): EmployeeFormData => ({
+  ...EMPLOYEE_FORM_DEFAULTS,
+  accessLevel: employee.accessLevel ?? '',
+  department: employee.department ?? '',
+  fullName: employee.fullName ?? '',
+  phoneNumber: employee.phoneNumber ?? '',
+  email: employee.email ?? '',
+  address: employee.address ?? '',
+  governorate: employee.governorate ?? '',
+  workingHours: employee.workingHours ?? '',
+});
+
 export default function EmployeeForm({
   employee,
   onSubmit,
-  isLoading,
+  isLoading = false,
 }: EmployeeFormProps) {
   const { data: governorates = [] } = useGovernoratesQuery();
-  const { data: departments = [] } = useDepartmentsQuery();
+  const { data: departments = [], isLoading: isDepartmentsLoading } =
+    useDepartmentsQuery();
   const departmentOptions = departments.map((d) => ({
     key: d.value,
     value: d.label,
@@ -67,15 +89,11 @@ export default function EmployeeForm({
   const [roleIds, setRoleIds] = useState<string[]>(
     () => employee.roles?.map((role) => String(role.id)) ?? []
   );
-  // Only a real user interaction may trigger the full-replace roles PUT.
   const rolesDirtyRef = useRef(false);
 
   const serverRoleIds = employee.roles?.map((role) => String(role.id)) ?? [];
   const serverRoleKey = [...serverRoleIds].sort().join(',');
 
-  // The cached employee can arrive without `roles` (the profile PATCH response
-  // omits them) and be replaced by the refetched row moments later — resync
-  // until the user touches the field, so we never diff against stale state.
   useEffect(() => {
     if (!rolesDirtyRef.current) {
       setRoleIds(serverRoleIds);
@@ -93,10 +111,11 @@ export default function EmployeeForm({
     handleSubmit,
     watch,
     setValue,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<EmployeeFormData>({
-    resolver: zodResolver(employeeSchema),
-    defaultValues: employee,
+    resolver: zodResolver(editEmployeeSchema),
+    mode: 'onTouched',
+    defaultValues: toFormValues(employee),
   });
 
   const accessLevel = watch('accessLevel');
@@ -104,28 +123,31 @@ export default function EmployeeForm({
   const governorate = watch('governorate');
   const workingHours = watch('workingHours');
 
-  const onSubmitHandler = (data: EmployeeFormData) => {
-    const { passwordConfirmation, governorate: pickedGovernorate, ...rest } =
-      data;
+  const rolesChanged =
+    rolesDirtyRef.current && !sameIds(roleIds, serverRoleIds);
+  const hasUnsavedChanges = isDirty || rolesChanged;
+  const guard = useUnsavedChangesGuard(hasUnsavedChanges && !isLoading);
 
+  const onSubmitHandler = (data: EmployeeFormData) => {
+    const pickedGovernorate = data.governorate?.trim() ?? '';
     const governorateUpdate: Pick<Partial<Employee>, 'governorate'> =
       pickedGovernorate
         ? { governorate: pickedGovernorate }
         : employee.governorate
           ? { governorate: null }
           : {};
+    const email = data.email?.trim() ?? '';
 
     const updateData: Partial<Employee> = {
-      ...rest,
+      accessLevel: data.accessLevel,
+      department: data.department,
+      fullName: data.fullName,
+      phoneNumber: data.phoneNumber,
+      ...(email ? { email } : {}),
       ...governorateUpdate,
-      address: rest.address ?? undefined,
-      password: rest.password ?? undefined,
-      workingHours: rest.workingHours ?? undefined,
+      workingHours: data.workingHours ?? undefined,
+      ...(data.password?.trim() ? { password: data.password } : {}),
     };
-
-    if (!updateData.password || updateData.password.trim() === '') {
-      delete updateData.password;
-    }
 
     onSubmit(updateData, roleIds.map(Number), rolesDirtyRef.current);
   };
@@ -133,18 +155,19 @@ export default function EmployeeForm({
   return (
     <form
       onSubmit={handleSubmit(onSubmitHandler)}
-      className="space-y-6 bg-white p-6 rounded-lg shadow"
+      className="space-y-6 bg-white p-4 sm:p-6 rounded-lg shadow"
       dir="rtl"
+      noValidate
     >
       {canAssignRoles && (
-        <div className="w-full flex flex-col items-end gap-2">
-          <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <LiaUserShieldSolid className="w-6 h-6 text-primary" />
-            <span className="text-base md:text-lg font-normal">
-              أدوار الموظف
-            </span>
-          </div>
+        <div className="w-full flex flex-col gap-2">
+          <Label
+            htmlFor="edit-employee-roles"
+            icon={<LiaUserShieldSolid className="w-6 h-6 text-primary" />}
+            text="أدوار الموظف"
+          />
           <MultiSelectDropdown
+            id="edit-employee-roles"
             value={roleIds}
             onChange={handleRolesChange}
             options={roleOptions}
@@ -159,10 +182,9 @@ export default function EmployeeForm({
         </div>
       )}
 
-      {/* Without roles:assign the roles are still worth showing — read-only. */}
       {!canAssignRoles && (employee.roles?.length ?? 0) > 0 && (
-        <div className="w-full flex flex-col items-end gap-2">
-          <div className="flex items-center gap-2 mb-2 justify-start w-full">
+        <div className="w-full flex flex-col gap-2">
+          <div className="flex items-center gap-2 mb-1 justify-start w-full">
             <LiaUserShieldSolid className="w-6 h-6 text-primary" />
             <span className="text-base md:text-lg font-normal">
               أدوار الموظف
@@ -183,13 +205,14 @@ export default function EmployeeForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <LiaUserSolid className="w-6 h-6 text-primary" />
-            <span className="text-base md:text-lg font-normal">
-              الاسم الكامل <span className="text-red-500">*</span>
-            </span>
-          </div>
+          <Label
+            htmlFor="edit-employee-full-name"
+            required
+            icon={<LiaUserSolid className="w-6 h-6 text-primary" />}
+            text="الاسم الكامل"
+          />
           <Input
+            id="edit-employee-full-name"
             name="fullName"
             type="text"
             placeholder="أدخل الاسم الكامل"
@@ -198,15 +221,19 @@ export default function EmployeeForm({
           />
         </div>
         <div>
-          <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <LiaPhoneSolid className="w-6 h-6 text-primary" />
-            <span className="text-base md:text-lg font-normal">
-              رقم الهاتف <span className="text-red-500">*</span>
-            </span>
-          </div>
+          <Label
+            htmlFor="edit-employee-phone"
+            required
+            icon={<LiaPhoneSolid className="w-6 h-6 text-primary" />}
+            text="رقم الهاتف"
+          />
           <Input
+            id="edit-employee-phone"
             name="phoneNumber"
-            type="text"
+            type="tel"
+            inputMode="tel"
+            dir="ltr"
+            autoComplete="off"
             placeholder="01234567890"
             register={register}
             error={errors.phoneNumber?.message}
@@ -216,30 +243,32 @@ export default function EmployeeForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <LiaEnvelopeSolid className="w-6 h-6 text-primary" />
-            <span className="text-base md:text-lg font-normal">
-              البريد الإلكتروني <span className="text-red-500">*</span>
-            </span>
-          </div>
+          <Label
+            htmlFor="edit-employee-email"
+            icon={<LiaEnvelopeSolid className="w-6 h-6 text-primary" />}
+            text="البريد الإلكتروني"
+          />
           <Input
+            id="edit-employee-email"
             name="email"
             type="email"
+            dir="ltr"
+            autoComplete="off"
             placeholder="example@domain.com"
             register={register}
             error={errors.email?.message}
           />
         </div>
         <div>
-          <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <LiaMapMarkerAltSolid className="w-6 h-6 text-primary" />
-            <span className="text-base md:text-lg font-normal">المحافظة</span>
-          </div>
+          <Label
+            htmlFor="edit-employee-governorate"
+            icon={<LiaMapMarkerAltSolid className="w-6 h-6 text-primary" />}
+            text="المحافظة"
+          />
           <SearchableSelect
+            id="edit-employee-governorate"
             value={governorate || ''}
-            onChange={(v) =>
-              setValue('governorate', v, { shouldValidate: true })
-            }
+            onChange={(v) => setValue('governorate', v, DIRTY_VALID)}
             options={governorates}
             placeholder="اختر المحافظة"
             widthClass="w-full"
@@ -251,58 +280,56 @@ export default function EmployeeForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <LiaLockSolid className="w-6 h-6 text-primary" />
-            <span className="text-base md:text-lg font-normal">
-              كلمة المرور
-            </span>
-          </div>
+          <Label
+            htmlFor="edit-employee-password"
+            icon={<LiaLockSolid className="w-6 h-6 text-primary" />}
+            text="كلمة المرور الجديدة"
+          />
           <Input
+            id="edit-employee-password"
             name="password"
             type="password"
-            placeholder="كلمة المرور"
+            autoComplete="new-password"
+            placeholder="اتركها فارغة للإبقاء على الحالية"
             register={register}
             error={errors.password?.message}
           />
         </div>
         <div>
-          <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <LiaLockSolid className="w-6 h-6 text-primary" />
-            <span className="text-base md:text-lg font-normal">
-              تاكيد كلمة المرور
-            </span>
-          </div>
+          <Label
+            htmlFor="edit-employee-confirm-password"
+            icon={<LiaLockSolid className="w-6 h-6 text-primary" />}
+            text="تأكيد كلمة المرور"
+          />
           <Input
-            name="passwordConfirmation"
+            id="edit-employee-confirm-password"
+            name="confirmPassword"
             type="password"
+            autoComplete="new-password"
             placeholder="تأكيد كلمة المرور"
             register={register}
-            error={errors.passwordConfirmation?.message}
+            error={errors.confirmPassword?.message}
           />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <div className="flex items-center gap-2 mb-2 justify-start w-full">
-            <LiaClockSolid className="w-6 h-6 text-primary" />
-            <span className="text-base md:text-lg font-normal">
-              ساعات العمل
-            </span>
-          </div>
+          <Label
+            htmlFor="edit-employee-working-hours"
+            icon={<LiaClockSolid className="w-6 h-6 text-primary" />}
+            text="ساعات العمل"
+          />
           <WorkHoursTimePicker
+            id="edit-employee-working-hours"
             value={workingHours || ''}
-            onChange={(value) =>
-              setValue('workingHours', value, { shouldValidate: true })
-            }
+            onChange={(value) => setValue('workingHours', value, DIRTY_VALID)}
             error={errors.workingHours?.message}
             placeholder="9 : AM - 5 : PM"
           />
         </div>
       </div>
 
-      {/* Organisational data — the API still accepts these, but since ABAC they
-          are classification/reporting only and no longer grant access. */}
       <div className="rounded-lg border border-gray-200 bg-gray-50/60 p-4">
         <div className="mb-3 flex items-center gap-2">
           <LiaUserSolid className="w-5 h-5 text-gray-400" />
@@ -318,14 +345,13 @@ export default function EmployeeForm({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
-            <span className="text-sm text-gray-600">
+            <label htmlFor="edit-employee-access-level" className="text-sm text-gray-600">
               مستوى الوظيفة <span className="text-red-500">*</span>
-            </span>
+            </label>
             <SearchableSelect
+              id="edit-employee-access-level"
               value={accessLevel || ''}
-              onChange={(value) =>
-                setValue('accessLevel', value, { shouldValidate: true })
-              }
+              onChange={(value) => setValue('accessLevel', value, DIRTY_VALID)}
               options={ACCESS_LEVEL_OPTIONS}
               placeholder="اختر مستوى الوظيفة"
               widthClass="w-full"
@@ -334,15 +360,15 @@ export default function EmployeeForm({
           </div>
 
           <div className="flex flex-col gap-2">
-            <span className="text-sm text-gray-600">
+            <label htmlFor="edit-employee-department" className="text-sm text-gray-600">
               قسم الموظف <span className="text-red-500">*</span>
-            </span>
+            </label>
             <SearchableSelect
+              id="edit-employee-department"
               value={department || ''}
-              onChange={(value) =>
-                setValue('department', value, { shouldValidate: true })
-              }
+              onChange={(value) => setValue('department', value, DIRTY_VALID)}
               options={departmentOptions}
+              loading={isDepartmentsLoading}
               placeholder="اختر القسم"
               widthClass="w-full"
               error={errors?.department?.message}
@@ -351,11 +377,32 @@ export default function EmployeeForm({
         </div>
       </div>
 
-      <div className="flex justify-end gap-4 pt-4">
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? 'يتم الحفظ...' : 'حفظ التغيرات'}
+      <StickyFormFooter isDirty={hasUnsavedChanges} isSaving={isLoading}>
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-10 rounded-full px-6"
+          disabled={isLoading}
+          onClick={() => guard.requestNavigation(EMPLOYEES_HREF)}
+        >
+          رجوع
         </Button>
-      </div>
+        <Button
+          type="submit"
+          className="min-h-10 rounded-full px-8 font-semibold"
+          disabled={!hasUnsavedChanges || isLoading}
+          loading={isLoading}
+          loadingText="جاري الحفظ..."
+        >
+          حفظ التغييرات
+        </Button>
+      </StickyFormFooter>
+
+      <UnsavedChangesDialog
+        isOpen={guard.pendingHref !== null}
+        onStay={guard.cancelLeave}
+        onLeave={guard.confirmLeave}
+      />
     </form>
   );
 }

@@ -123,10 +123,11 @@ function ShippingSection({
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <div className="flex flex-col gap-2" data-field-error="shippingCompanyId">
-            <label className="font-medium text-[16px]">
+            <label htmlFor="manual-shipping-company" className="font-medium text-[16px]">
               شركة الشحن <span className="text-red-500">*</span>
             </label>
             <SearchableSelect
+              id="manual-shipping-company"
               value={shippingCompanyDisplay ? shippingCompanyId : ''}
               displayValue={shippingCompanyDisplay}
               onValueChange={handleShippingCompanyChange}
@@ -145,10 +146,11 @@ function ShippingSection({
           </div>
 
           <div className="flex flex-col gap-2" data-field-error="governorate">
-            <label className="font-medium text-[16px]">
+            <label htmlFor="manual-governorate" className="font-medium text-[16px]">
               المحافظة <span className="text-red-500">*</span>
             </label>
             <SearchableSelect
+              id="manual-governorate"
               value={governorateOption}
               onValueChange={handleGovernorateChange}
               options={governorateOptions}
@@ -196,10 +198,11 @@ function ShippingSection({
           </div>
 
           <div className="flex flex-col gap-2" data-field-error="city">
-            <label className="font-medium text-[16px]">
+            <label htmlFor="manual-city" className="font-medium text-[16px]">
               المدينة <span className="text-red-500">*</span>
             </label>
             <SearchableSelect
+              id="manual-city"
               value={cityOption}
               onValueChange={onCityOptionChange}
               options={cityOptions}
@@ -233,13 +236,17 @@ function ShippingSection({
               <p className="text-red-500 text-sm">{errors.cityOption}</p>
             )}
           </div>
-          <div>
-            <label className="block font-medium text-[16px] mb-1">
+          <div data-field-error="shippingCost">
+            <label htmlFor="manual-shipping-cost" className="block font-medium text-[16px] mb-1">
               تكلفة الشحن
             </label>
             <Input
+              id="manual-shipping-cost"
               name="shippingCost"
               type="number"
+              inputMode="decimal"
+              dir="ltr"
+              min={0}
               placeholder="أدخل تكلفة الشحن"
               className="w-full"
               inputClassName="bg-white"
@@ -248,13 +255,16 @@ function ShippingSection({
               error={errors?.shippingCost}
             />
           </div>
-          <div>
-            <label className="block font-medium text-[16px] mb-1">
+          <div data-field-error="returnShippingCost">
+            <label htmlFor="manual-return-shipping-cost" className="block font-medium text-[16px] mb-1">
               مبلغ الإلغاء فى حالة عدم الإستلام <span className="text-red-500">*</span>
             </label>
             <Input
+              id="manual-return-shipping-cost"
               name="returnShippingCost"
               type="number"
+              inputMode="decimal"
+              dir="ltr"
               placeholder="أدخل مبلغ الإلغاء..."
               className="w-full"
               inputClassName="bg-white"
@@ -266,10 +276,11 @@ function ShippingSection({
           </div>
 
           <div className="flex flex-col gap-2" data-field-error="shippingType">
-            <label className="font-medium text-[16px]">
+            <label htmlFor="manual-shipping-type" className="font-medium text-[16px]">
               نوع الشحنة <span className="text-red-500">*</span>
             </label>
             <SearchableSelect
+              id="manual-shipping-type"
               value={shippingType ? shippingTypeMap[shippingType] || '' : ''}
               onValueChange={(label) => {
                 const key = shippingTypeReverseMap[label] || '';
@@ -294,10 +305,11 @@ function ShippingSection({
 
           {requiresReturnContent && (
             <div className="flex flex-col gap-2" data-field-error="returnShipmentContent">
-              <label className="font-medium text-[16px]">
+              <label htmlFor="manual-return-content" className="font-medium text-[16px]">
                 محتوى شحنة الاسترجاع <span className="text-red-500">*</span>
               </label>
               <Input
+                id="manual-return-content"
                 name="returnShipmentContent"
                 placeholder="أدخل محتوى شحنة الاسترجاع"
                 className="w-full"
