@@ -3,10 +3,10 @@ import { useAuthStore } from '@/store/authStore';
 import { UserMenuKey } from './useSidebar';
 import { useCallback } from 'react';
 import { unlockActiveOrder } from './useOrderLock';
+import { signOut } from '@/lib/api/refresh';
 
 export function useAuthActions() {
   const router = useRouter();
-  const logout = useAuthStore((state) => state.logout);
   const user = useAuthStore((state) => state.user);
 
   const handleUserAction = useCallback(
@@ -17,13 +17,12 @@ export function useAuthActions() {
       }
       if (key === 'logout') {
         await unlockActiveOrder();
-        logout();
-        localStorage.removeItem('auth-storage');
+        await signOut();
         router.push('/signin');
         return;
       }
     },
-    [router, logout]
+    [router]
   );
 
   return {
