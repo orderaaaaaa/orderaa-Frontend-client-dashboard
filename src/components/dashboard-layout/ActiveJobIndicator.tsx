@@ -43,10 +43,17 @@ export function ActiveJobIndicator() {
         <JobWatcher key={job.jobId} job={job} />
       ))}
       {activeJobs.length > 0 && (
-        <div className="flex items-center gap-1.5 rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
-          <Loader2 className="h-3 w-3 animate-spin" />
-          <span>{activeJobs[0].label}</span>
-          {activeJobs.length > 1 && <span>({activeJobs.length})</span>}
+        <div className="flex-shrink-0 px-4 py-1">
+          <div
+            role="status"
+            className="flex min-w-0 items-center gap-1.5 rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+          >
+            <Loader2 className="h-3 w-3 shrink-0 animate-spin" />
+            <span className="truncate">{activeJobs[0].label}</span>
+            {activeJobs.length > 1 && (
+              <span className="shrink-0">({activeJobs.length})</span>
+            )}
+          </div>
         </div>
       )}
     </>

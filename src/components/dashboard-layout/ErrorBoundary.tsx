@@ -1,6 +1,8 @@
 'use client';
 
 import { Component, ReactNode } from 'react';
+import { isNotFoundError } from 'next/dist/client/components/not-found';
+import { isRedirectError } from 'next/dist/client/components/redirect';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -20,7 +22,10 @@ export class ErrorBoundary extends Component<
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(_: Error): ErrorBoundaryState {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    if (isNotFoundError(error) || isRedirectError(error)) {
+      throw error;
+    }
     return { hasError: true };
   }
 
@@ -40,7 +45,7 @@ export class ErrorBoundary extends Component<
       }
       return (
         fallback || (
-          <div>Something went wrong. Please refresh the page.</div>
+          <div>حدث خطأ ما. يرجى تحديث الصفحة.</div>
         )
       );
     }
@@ -52,7 +57,7 @@ export class ErrorBoundary extends Component<
 export function SidebarError({ onRetry }: { onRetry?: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 p-4 text-center">
-      <p className="text-red-600">.حدث خطأ في تحميل القائمة الجانبية</p>
+      <p className="text-red-600">حدث خطأ في تحميل القائمة الجانبية</p>
       {onRetry && (
         <button
           onClick={onRetry}
@@ -68,7 +73,7 @@ export function SidebarError({ onRetry }: { onRetry?: () => void }) {
 export function ContentError({ onRetry }: { onRetry?: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 p-8 text-center">
-      <p className="text-red-600">.حدث خطأ في تحميل المحتوى</p>
+      <p className="text-red-600">حدث خطأ في تحميل المحتوى</p>
       {onRetry && (
         <button
           onClick={onRetry}

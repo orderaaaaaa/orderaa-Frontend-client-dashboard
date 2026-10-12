@@ -22,6 +22,8 @@ import {
 } from '@/components/dashboard-layout';
 import { ActiveJobIndicator } from '@/components/dashboard-layout/ActiveJobIndicator';
 
+const ALL_ORDERS_PATH = '/dashboard/orders/allOrders';
+
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
@@ -50,6 +52,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const orderDetailsPattern = /^\/dashboard\/orders\/\d+$/;
     return orderDetailsPattern.test(pathname);
   }, [pathname]);
+
+  const isAutoSearchPage =
+    pathname === ALL_ORDERS_PATH || /^\/dashboard\/orders\/\d+$/.test(pathname);
 
   // Handle search - behavior depends on current page
   const handleSearch = useCallback(
@@ -139,17 +144,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 onSearch={handleSearch}
                 onClearSearch={handleClearSearch}
                 isSearching={isSearching}
+                autoSearch={isAutoSearchPage}
                 username={user?.name}
                 onUserAction={handleUserAction}
               />
             </div>
 
-            <div className="flex-shrink-0 px-4 py-1">
-              <ActiveJobIndicator />
-            </div>
+            <ActiveJobIndicator />
           </div>
 
           <ErrorBoundary
+            key={pathname}
             fallback={(reset) => <ContentError onRetry={reset} />}
           >
             <PageContent>{children}</PageContent>

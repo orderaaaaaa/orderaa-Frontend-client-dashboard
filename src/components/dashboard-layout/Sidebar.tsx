@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useMemo } from 'react';
 import { navigation, NavigationItem } from '@/constants/Navbar';
-import { SIDEBAR_WIDTH } from '@/constants/dashboard-layout';
+import { useOverflowScrollLock } from '@/hooks/useOverflowScrollLock';
+import { SIDEBAR_WIDTH, BREAKPOINTS } from '@/constants/dashboard-layout';
 import { findActiveHref, containsHref } from '@/utils/navigation';
 import Logo from '@/assets/images/updated-logo.png';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -42,6 +43,75 @@ export function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const [openSubDropdown, setOpenSubDropdown] = useState<string | null>(null);
+
+  const [isDrawer, setIsDrawer] = useState(false);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  const wasOpenRef = useRef(false);
+
+  useEffect(() => {
+    const query = window.matchMedia(`(max-width: ${BREAKPOINTS.LG - 1}px)`);
+    const sync = () => setIsDrawer(query.matches);
+    sync();
+    query.addEventListener('change', sync);
+    return () => query.removeEventListener('change', sync);
+  }, []);
+
+  const drawerOpen = open && isDrawer;
+  const drawerClosed = isDrawer && !open;
+
+  useEffect(() => {
+    if (panelRef.current) panelRef.current.inert = drawerClosed;
+  }, [drawerClosed]);
+  useOverflowScrollLock(drawerOpen);
+
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onToggle();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const panel = panelRef.current;
+      if (!panel) return;
+      const focusable = Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((node) => node.offsetParent !== null);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      if (!panel.contains(active)) {
+        event.preventDefault();
+        first.focus();
+      } else if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [drawerOpen, onToggle]);
+
+  useEffect(() => {
+    if (drawerOpen && !wasOpenRef.current) {
+      returnFocusRef.current = document.activeElement as HTMLElement | null;
+      closeButtonRef.current?.focus();
+    }
+    if (!drawerOpen && wasOpenRef.current) {
+      returnFocusRef.current?.focus();
+      returnFocusRef.current = null;
+    }
+    wasOpenRef.current = drawerOpen;
+  }, [drawerOpen]);
+
 
   const permissions = usePermissions();
 
@@ -94,10 +164,18 @@ export function Sidebar({
     <>
       {/* Mobile overlay */}
       {open && (
-        <div className="fixed inset-0 z-30 lg:hidden" onClick={onToggle} />
+        <div
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          aria-hidden="true"
+          onClick={onToggle}
+        />
       )}
 
       <div
+        ref={panelRef}
+        {...(drawerOpen
+          ? { role: 'dialog', 'aria-modal': true, 'aria-label': 'القائمة الرئيسية' }
+          : {})}
         className={`
           fixed inset-y-0 right-0 z-40 transform transition-transform duration-300
           ${open ? 'translate-x-0 pointer-events-auto' : 'translate-x-full pointer-events-none'}
@@ -116,7 +194,7 @@ export function Sidebar({
           }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between h-16 px-3 border-b border-white/10">
+          <div className="flex items-center justify-between h-[calc(4rem_+_env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] px-3 border-b border-white/10">
             <div className="flex-1 flex justify-center">
               {!collapsed && (
                 <Image
@@ -134,6 +212,7 @@ export function Sidebar({
               size="icon"
               className="hidden lg:flex text-white hover:bg-white/10"
               onClick={onCollapseToggle}
+              aria-label={collapsed ? 'توسيع القائمة' : 'تصغير القائمة'}
             >
               {collapsed ? (
                 <ChevronLeft className="h-5 w-5" />
@@ -144,9 +223,11 @@ export function Sidebar({
 
             <Button
               variant="ghost"
-              size="sm"
-              className="lg:hidden text-white hover:bg-white/10"
+              size="icon"
+              ref={closeButtonRef}
+              className="lg:hidden size-10 sm:size-10 text-white hover:bg-white/10"
               onClick={onToggle}
+              aria-label="إغلاق القائمة"
             >
               <X className="h-5 w-5" />
             </Button>
@@ -218,7 +299,7 @@ export function Sidebar({
                                           )
                                         }
                                         className={`
-                                          flex items-center justify-between w-full px-3 py-2 rounded-md cursor-pointer
+                                          flex items-center justify-between w-full px-3 py-2.5 rounded-md cursor-pointer
                                           ${
                                             hasActiveLeaf
                                               ? 'text-white'
@@ -259,7 +340,7 @@ export function Sidebar({
                                                     key={leaf.name}
                                                     href={leaf.href}
                                                     className={`
-                                                      flex items-center gap-3 px-3 py-2 rounded-md
+                                                      flex items-center gap-3 px-3 py-2.5 rounded-md
                                                       ${
                                                         isLeafActive
                                                           ? 'text-white'
@@ -289,7 +370,7 @@ export function Sidebar({
                                     key={sub.name}
                                     href={sub.href}
                                     className={`
-                                      flex items-center gap-3 px-3 py-2 rounded-md
+                                      flex items-center gap-3 px-3 py-2.5 rounded-md
                                       ${
                                         isSubActive
                                           ? 'text-white'
@@ -343,6 +424,10 @@ export function Sidebar({
               );
             })}
           </nav>
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-brand-deep to-transparent lg:hidden"
+          />
         </div>
       </div>
     </>

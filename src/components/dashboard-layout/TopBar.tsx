@@ -20,6 +20,7 @@ interface TopBarProps {
   onSearch: (query: string) => void;
   onClearSearch: () => void;
   isSearching?: boolean;
+  autoSearch?: boolean;
   username?: string;
   onUserAction: (key: UserMenuKey) => void;
 }
@@ -29,6 +30,7 @@ export function TopBar({
   onSearch,
   onClearSearch,
   isSearching = false,
+  autoSearch = false,
   username,
   onUserAction,
 }: TopBarProps) {
@@ -41,13 +43,15 @@ export function TopBar({
   // Use ref to store onSearch to avoid triggering effect when callback reference changes
   const onSearchRef = useRef(onSearch);
   onSearchRef.current = onSearch;
+  const autoSearchRef = useRef(autoSearch);
+  autoSearchRef.current = autoSearch;
 
   // Debounce search query for auto-search
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   // Auto-search when debounced query changes
   useEffect(() => {
-    if (debouncedSearchQuery.trim()) {
+    if (autoSearchRef.current && debouncedSearchQuery.trim()) {
       onSearchRef.current(debouncedSearchQuery.trim());
     }
   }, [debouncedSearchQuery]);
@@ -65,26 +69,41 @@ export function TopBar({
 
   const handleRefreshStatistics = useCallback(async () => {
     setIsRefreshing(true);
-    await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.ORDER_STATISTICS],
-    });
-    await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.PRINT_ORDER_STATISTICS],
-    });
-    setIsRefreshing(false);
+    try {
+      await queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORDER_STATISTICS],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.PRINT_ORDER_STATISTICS],
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
   }, [queryClient]);
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
+    const invalidateStatistics = () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.ORDER_STATISTICS],
       });
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.PRINT_ORDER_STATISTICS],
       });
+    };
+
+    const intervalId = setInterval(() => {
+      if (document.visibilityState === 'visible') invalidateStatistics();
     }, 30000);
 
-    return () => clearInterval(intervalId);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') invalidateStatistics();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [queryClient]);
 
   // ✅ Update the browser top bar color
@@ -118,7 +137,7 @@ export function TopBar({
             size="icon"
             className="text-white hover:bg-white/20 h-10 w-10"
             onClick={onMenuToggle}
-            aria-label="Open menu"
+            aria-label="فتح القائمة"
           >
             <Menu className="h-6 w-6" />
           </Button>
@@ -127,7 +146,7 @@ export function TopBar({
             size="icon"
             className="text-white hover:bg-white/20 h-10 w-10"
             onClick={() => setShowMobileSearch(!showMobileSearch)}
-            aria-label="Toggle search"
+            aria-label="إظهار البحث"
           >
             <Search className="h-5 w-5" />
           </Button>
@@ -175,12 +194,12 @@ export function TopBar({
               }
               inputClassName="bg-muted text-foreground-contrast placeholder:text-primary w-full placeholder:font-medium border-2 !border-primary/30 rounded-lg !pl-20 !py-2"
             />
-            <div className="absolute left-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
+            <div className="absolute end-1 top-1/2 -translate-y-1/2 flex items-center">
               {searchQuery && (
                 <Button
                   type="button"
                   onClick={handleClear}
-                  className="p-1 text-foreground-subtle hover:text-foreground-muted"
+                  className="size-10 sm:size-10 p-0 text-foreground-subtle hover:text-foreground-muted"
                   aria-label="مسح البحث"
                 >
                   <LiaTimesSolid className="h-4 w-4" />
@@ -190,7 +209,7 @@ export function TopBar({
                 type="button"
                 onClick={handleSearch}
                 disabled={isSearching}
-                className="p-1.5 bg-primary hover:bg-brand-hover text-white rounded-md disabled:opacity-70"
+                className="size-10 sm:size-10 p-0 bg-primary hover:bg-brand-hover text-white rounded-md disabled:opacity-70"
                 aria-label="بحث"
               >
                 {isSearching ? (
@@ -217,7 +236,7 @@ export function TopBar({
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
               e.key === 'Enter' && handleSearch()
             }
-            aria-label="Search"
+            aria-label="بحث"
           />
           <div className="absolute end-1 top-1/2 transform -translate-y-1/2 text-primary">
             {searchQuery && (
