@@ -134,7 +134,8 @@ function PermissionSectionCard({
           'grid gap-x-4 gap-y-1 border-t border-gray-100 px-3 pb-3 pt-2 sm:px-4',
           isStatus
             ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-            : 'grid-cols-1 sm:grid-cols-2'
+            : 'grid-cols-1 sm:grid-cols-2',
+          !expanded && 'hidden'
         )}
       >
         {visibleEntries.map((entry) => {
