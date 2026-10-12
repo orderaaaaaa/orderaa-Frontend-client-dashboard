@@ -111,7 +111,7 @@ export default function DelayedOrdersPage() {
           aria-label="الحالة"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="border border-gray-200 rounded-md px-3 py-2 text-sm bg-white"
+          className="border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm max-sm:h-10 bg-white"
         >
           <option value="">كل الحالات</option>
           {(statuses?.allStatuses ?? []).map((s) => (
@@ -125,7 +125,7 @@ export default function DelayedOrdersPage() {
           aria-label="مدة التأخير"
           value={minMinutes}
           onChange={(e) => setMinMinutes(e.target.value)}
-          className="border border-gray-200 rounded-md px-3 py-2 text-sm bg-white"
+          className="border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm max-sm:h-10 bg-white"
         >
           {DAY_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>

@@ -80,9 +80,11 @@ export default function EditSettlementAmountDialog({
         <label className="text-sm font-medium text-gray-700">المبلغ الجديد</label>
         <input
           type="text"
+          inputMode="decimal"
+          dir="ltr"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary/20"
+          className="w-full border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm focus:border-primary focus:ring-1 focus:ring-primary/20"
         />
         {difference !== null && (
           <p className="text-xs text-muted-foreground">

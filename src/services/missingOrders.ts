@@ -59,8 +59,6 @@ export const useDismissMissingOrder = (id: number) => {
       );
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [KEY] });
-    },
+    onSuccess: () => invalidateAndWait(queryClient, [[KEY]]),
   });
 };

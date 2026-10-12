@@ -69,12 +69,9 @@ export function useSubmitReturnReceiptsMutation() {
 }
 
 export function useUpdateReturnCategoriesMutation() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (payload: CategorizeCommitPayload) =>
       bulkUpdateReturnCategories(payload),
-    onSuccess: () => invalidateAndWait(queryClient, orderStatusKeys()),
     onError: (err) => {
       toast.error(pickErrorMessage(err, 'تعذر إتمام عملية التقسيم'));
     },

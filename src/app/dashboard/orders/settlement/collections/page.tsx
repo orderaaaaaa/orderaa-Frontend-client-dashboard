@@ -51,7 +51,8 @@ export default function CollectionsPage() {
 
   const batchesQuery = useSettlementBatchesQuery(status);
   const batches = batchesQuery.data?.data ?? [];
-  const loadFailed = batchesQuery.isError && !batchesQuery.isFetching;
+  const loadFailed =
+    batchesQuery.isError && !batchesQuery.data && !batchesQuery.isFetching;
   const isSwitching = batchesQuery.isPlaceholderData;
   const batchesError = batchesQuery.error;
 
