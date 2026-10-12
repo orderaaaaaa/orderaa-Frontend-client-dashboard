@@ -123,6 +123,14 @@ export const useDeleteVariant = (productId: number) => {
   });
 };
 
+/**
+ * T22 — saves المواصفات (specifications) through their own endpoint.
+ *
+ * The optimistic patch of `extraDetails.variants` is deliberately gone: that
+ * key no longer exists, and writing it was half of the collision that let one
+ * popup silently wipe the other. Specifications now round-trip through
+ * `product_specifications` instead.
+ */
 export const useUpdateProductSpecifications = (productId: number) => {
   const queryClient = useQueryClient();
 

@@ -40,12 +40,14 @@ import { SpecificationsEditor } from './SpecificationsEditor';
 import { DeleteVariantDialog } from './DeleteVariantDialog';
 import {
   type AttributeDraft,
-  type BasicDraft,
+  type BasicPatch,
   type GalleryItem,
   type NewVariantRow,
   type SpecRow,
-  type VariantEdit,
+  type VariantPatch,
   attributesFromDetail,
+  applyBasicPatch,
+  applyVariantPatch,
   basicFromDetail,
   buildAttributesPayload,
   buildScalarsPayload,
@@ -125,7 +127,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissionCheck();
   const canUpdate = hasPermission(PERMISSIONS.PRODUCTS_UPDATE);
-  const { data: detail, isLoading, isError, error, refetch } =
+  const { data: detail, isLoading, error, refetch } =
     useProductDetail(productId);
   const { data: attributeOptions } = useProductAttributeOptionsQuery(productId);
 
@@ -135,10 +137,10 @@ export function ProductEditor({ productId }: ProductEditorProps) {
   const updateSpecifications = useUpdateProductSpecifications(productId);
   const deleteVariant = useDeleteVariant(productId);
 
-  const [basicDraft, setBasicDraft] = useState<BasicDraft | null>(null);
+  const [basicPatch, setBasicPatch] = useState<BasicPatch>({});
   const [galleryDraft, setGalleryDraft] = useState<GalleryItem[] | null>(null);
   const [attributesDraft, setAttributesDraft] = useState<AttributeDraft[] | null>(null);
-  const [variantEdits, setVariantEdits] = useState<Record<number, VariantEdit>>({});
+  const [variantEdits, setVariantEdits] = useState<Record<number, VariantPatch>>({});
   const [newVariantRows, setNewVariantRows] = useState<NewVariantRow[]>([]);
   const [specsDraft, setSpecsDraft] = useState<SpecRow[] | null>(null);
 
@@ -163,7 +165,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
 
   const state = useMemo(() => {
     if (!detail) return null;
-    const basic = basicDraft ?? basicFromDetail(detail);
+    const basic = applyBasicPatch(detail, basicPatch);
     const gallery = galleryDraft ?? galleryFromDetail(detail);
     const attributes = attributesDraft ?? attributesFromDetail(detail);
     const specs = specsDraft ?? specsFromDetail(detail);
@@ -173,8 +175,14 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     const variantsDirty =
       newVariantRows.length > 0 ||
       detail.variants.some((variant) => {
-        const edit = variantEdits[variant.id];
-        return !!edit && !sameVariantEdit(edit, variantEditFromDetail(variant));
+        const patch = variantEdits[variant.id];
+        return (
+          !!patch &&
+          !sameVariantEdit(
+            applyVariantPatch(variant, patch),
+            variantEditFromDetail(variant),
+          )
+        );
       });
     const specsDirty = !sameSpecs(specs, specsFromDetail(detail));
     return {
@@ -194,7 +202,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     };
   }, [
     detail,
-    basicDraft,
+    basicPatch,
     galleryDraft,
     attributesDraft,
     variantEdits,
@@ -216,7 +224,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     return <PageLoading message="جارٍ تحميل المنتج..." />;
   }
 
-  if (isError || !detail || !state) {
+  if (!detail || !state) {
     const notFound =
       productApiErrorBody(error)?.code === 'PRODUCT_NOT_FOUND' ||
       (error as { response?: { status?: number } } | null)?.response?.status === 404;
@@ -297,7 +305,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       }
       return false;
     }
-    setBasicDraft(null);
+    setBasicPatch({});
     setGalleryDraft(null);
     return true;
   };
@@ -496,7 +504,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
             disabled={fieldsDisabled}
             error={showErrors ? state.basicErrors.name : undefined}
             onChange={(event) =>
-              setBasicDraft({ ...state.basic, name: event.target.value })
+              setBasicPatch((current) => ({ ...current, name: event.target.value }))
             }
           />
           <CompactField
@@ -506,7 +514,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
             error={skuServerError}
             onChange={(event) => {
               setSkuServerError(undefined);
-              setBasicDraft({ ...state.basic, sku: event.target.value });
+              setBasicPatch((current) => ({ ...current, sku: event.target.value }));
             }}
           />
           <CompactField
@@ -518,7 +526,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
             disabled={fieldsDisabled}
             error={showErrors ? state.basicErrors.price : undefined}
             onChange={(event) =>
-              setBasicDraft({ ...state.basic, price: event.target.value })
+              setBasicPatch((current) => ({ ...current, price: event.target.value }))
             }
           />
         </div>
@@ -570,13 +578,16 @@ export function ProductEditor({ productId }: ProductEditorProps) {
             <VariantsEditor
               detail={detail}
               edits={variantEdits}
-              onEdit={(variantId, edit) => {
+              onEdit={(variantId, patch) => {
                 setVariantServerErrors((current) => {
                   const next = { ...current };
                   delete next[existingRowKey(variantId)];
                   return next;
                 });
-                setVariantEdits((current) => ({ ...current, [variantId]: edit }));
+                setVariantEdits((current) => ({
+                  ...current,
+                  [variantId]: { ...current[variantId], ...patch },
+                }));
               }}
               newRows={newVariantRows}
               onNewRowsChange={setNewVariantRows}

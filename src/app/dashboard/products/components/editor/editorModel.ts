@@ -45,6 +45,10 @@ export interface VariantEdit {
   image: string | null;
 }
 
+export type BasicPatch = Partial<BasicDraft>;
+
+export type VariantPatch = Partial<VariantEdit>;
+
 export interface NewVariantRow extends VariantEdit {
   key: string;
   optionByAttribute: Record<number, number | undefined>;
@@ -92,6 +96,16 @@ export const variantEditFromDetail = (
   price: variant.price === null ? '' : String(variant.price),
   image: variant.image,
 });
+
+export const applyBasicPatch = (
+  detail: ProductDetail,
+  patch: BasicPatch,
+): BasicDraft => ({ ...basicFromDetail(detail), ...patch });
+
+export const applyVariantPatch = (
+  variant: ProductDetailVariant,
+  patch: VariantPatch | undefined,
+): VariantEdit => ({ ...variantEditFromDetail(variant), ...patch });
 
 export const sameVariantEdit = (a: VariantEdit, b: VariantEdit) =>
   a.sku.trim() === b.sku.trim() &&
@@ -293,14 +307,14 @@ export const existingRowKey = (variantId: number) => `variant-${variantId}`;
 
 export function validateVariants(
   detail: ProductDetail,
-  edits: Record<number, VariantEdit>,
+  edits: Record<number, VariantPatch>,
   newRows: NewVariantRow[],
 ): Record<string, string> {
   const errors: Record<string, string> = {};
   const displayed: { key: string; edit: VariantEdit }[] = [
     ...detail.variants.map((variant) => ({
       key: existingRowKey(variant.id),
-      edit: edits[variant.id] ?? variantEditFromDetail(variant),
+      edit: applyVariantPatch(variant, edits[variant.id]),
     })),
     ...newRows.map((row) => ({ key: row.key, edit: row })),
   ];
@@ -363,14 +377,15 @@ export function validateVariants(
 
 export function buildVariantPlan(
   detail: ProductDetail,
-  edits: Record<number, VariantEdit>,
+  edits: Record<number, VariantPatch>,
   newRows: NewVariantRow[],
 ): VariantPlan {
   const plan: VariantPlan = { payload: [], rows: [] };
   for (const variant of detail.variants) {
-    const edit = edits[variant.id];
-    if (!edit) continue;
+    const patch = edits[variant.id];
+    if (!patch) continue;
     const saved = variantEditFromDetail(variant);
+    const edit = applyVariantPatch(variant, patch);
     if (sameVariantEdit(edit, saved)) continue;
     const entry: UpsertVariantInput = { id: variant.id };
     if (edit.sku.trim() !== saved.sku.trim()) entry.sku = textValue(edit.sku);

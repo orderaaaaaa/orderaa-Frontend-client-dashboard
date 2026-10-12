@@ -13,15 +13,16 @@ import { VariantImagePicker } from './VariantImagePicker';
 import {
   type NewVariantRow,
   type VariantEdit,
+  type VariantPatch,
+  applyVariantPatch,
   emptyNewVariantRow,
   existingRowKey,
-  variantEditFromDetail,
 } from './editorModel';
 
 interface VariantsEditorProps {
   detail: ProductDetail;
-  edits: Record<number, VariantEdit>;
-  onEdit: (variantId: number, edit: VariantEdit) => void;
+  edits: Record<number, VariantPatch>;
+  onEdit: (variantId: number, patch: VariantPatch) => void;
   newRows: NewVariantRow[];
   onNewRowsChange: (rows: NewVariantRow[]) => void;
   rowErrors: Record<string, string>;
@@ -74,13 +75,13 @@ export function VariantsEditor({
 
   const editOf = (row: Row): VariantEdit | undefined =>
     row.variant
-      ? edits[row.variant.id] ?? variantEditFromDetail(row.variant)
+      ? applyVariantPatch(row.variant, edits[row.variant.id])
       : row.newRow;
 
-  const setField = (row: Row, patch: Partial<VariantEdit>) => {
+  const setField = (row: Row, patch: VariantPatch) => {
     const current = editOf(row);
     if (!current) return;
-    if (row.variant) onEdit(row.variant.id, { ...current, ...patch });
+    if (row.variant) onEdit(row.variant.id, patch);
     else if (row.newRow) updateNewRow(row.newRow.key, patch);
   };
 
@@ -204,7 +205,7 @@ export function VariantsEditor({
             variant="ghost"
             size="touch"
             disabled
-            aria-label={`حذف ${variantLabel(variant)}`}
+            aria-label={`حذف المتغير ${variantLabel(variant)}`}
             aria-describedby={`${row.id}-blocked`}
           >
             <Trash2 className="size-4" />
@@ -226,7 +227,7 @@ export function VariantsEditor({
         className="text-red-500 hover:bg-red-50"
         disabled={disabled || deletingId === variant.id}
         onClick={() => onDelete(variant)}
-        aria-label={`حذف ${variantLabel(variant)}`}
+        aria-label={`حذف المتغير ${variantLabel(variant)}`}
       >
         <Trash2 className="size-4" />
       </Button>

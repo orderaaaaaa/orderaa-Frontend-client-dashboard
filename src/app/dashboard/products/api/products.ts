@@ -78,6 +78,12 @@ export const productsApi = {
     return response.data;
   },
 
+  /**
+   * T22 — المواصفات, product-wide key/value facts. This used to PUT
+   * /products/:id with a `variants` body, which shared an endpoint with the
+   * variants popup and silently overwrote it. It now has its own route and
+   * its own table, so the two concepts cannot collide.
+   */
   replaceSpecifications: async (
     productId: number,
     specifications: SpecificationInput[],

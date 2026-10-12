@@ -145,6 +145,9 @@ function ProductsTableMobile({
                         checked={isSelected}
                         aria-label={`تحديد ${product.name}`}
                         onChange={() => toggleSelect(product.id)}
+                        // onChange does not bubble, but the click that triggers it
+                        // does — without this the card handler would toggle the
+                        // selection a second time and cancel it out.
                         onClick={(e) => e.stopPropagation()}
                         className="w-5 h-5 shrink-0 text-primary rounded border-gray-300"
                       />
