@@ -30,6 +30,8 @@ type InputProps = {
   step?: number | string;
   autoFocus?: boolean;
   id?: string;
+  'aria-label'?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
 };
 
 type InputCoreProps = Omit<InputProps, 'control'>;
@@ -121,7 +123,8 @@ const InputCore = forwardRef<HTMLInputElement, InputCoreProps>(function InputCor
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
             className="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 focus:outline-none"
-            tabIndex={-1}
+            aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+            aria-pressed={showPassword}
           >
             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </Button>
@@ -129,9 +132,10 @@ const InputCore = forwardRef<HTMLInputElement, InputCoreProps>(function InputCor
         {showClearButton && type !== 'password' && (
           <Button
             variant="ghost"
+            type="button"
             onClick={handleClear}
             className="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
-            tabIndex={-1}
+            aria-label="مسح"
           >
             <X size={18} />
           </Button>
