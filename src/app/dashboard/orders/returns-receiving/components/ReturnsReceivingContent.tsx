@@ -52,6 +52,7 @@ export function ReturnsReceivingContent() {
         <WizardFooter
           isStep1Valid={isStep1Valid}
           isSubmitting={submitMutation.isPending}
+          scannedCount={mainScanCodes.length}
           onSubmit={handleSubmit}
         />
       </div>
