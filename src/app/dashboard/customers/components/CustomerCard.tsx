@@ -73,6 +73,7 @@ export function CustomerCard({
           activate();
         }}
         tabIndex={0}
+        role="group"
         aria-label={
           selectionMode ? `تحديد ${customer.name}` : `تفاصيل ${customer.name}`
         }

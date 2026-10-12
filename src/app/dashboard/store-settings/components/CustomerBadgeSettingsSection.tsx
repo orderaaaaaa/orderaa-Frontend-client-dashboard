@@ -328,7 +328,6 @@ export default function CustomerBadgeSettingsSection() {
 
                       <p
                         className={`mt-3 text-sm ${isOn ? 'text-gray-700' : 'text-gray-400'}`}
-                        aria-live="polite"
                       >
                         {isOn ? describe(badge, values) : 'هذه الشارة معطّلة ولن تُمنح لأي عميل.'}
                       </p>

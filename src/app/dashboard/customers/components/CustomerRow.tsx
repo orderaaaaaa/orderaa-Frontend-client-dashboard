@@ -70,7 +70,6 @@ export const CustomerRow = memo(function CustomerRow({
           activate();
         }}
         tabIndex={0}
-        aria-selected={selectionMode ? isSelected : undefined}
         className="hover:bg-gray-50 transition-colors cursor-pointer focus-visible:outline-none focus-visible:bg-gray-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
       >
         {selectionMode && (
@@ -172,11 +171,16 @@ export const CustomerRow = memo(function CustomerRow({
         </td>
 
         <td className="px-4 py-4 text-center w-48 max-w-48">
-          <span className="block truncate font-medium text-gray-600">
-            {customer.isBlocked && customer.notes.length > 0
-              ? formatNotes(customer.notes)
-              : '—'}
-          </span>
+          {customer.isBlocked && customer.notes.length > 0 ? (
+            <span
+              className="block truncate font-medium text-gray-600"
+              title={formatNotes(customer.notes)}
+            >
+              {formatNotes(customer.notes)}
+            </span>
+          ) : (
+            <span className="block font-medium text-gray-600">—</span>
+          )}
         </td>
 
         <td
