@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { LiaPlusSolid, LiaTimesSolid } from 'react-icons/lia';
+import { LiaPlusSolid } from 'react-icons/lia';
 import {
   useForm,
   useFieldArray,
@@ -9,7 +9,6 @@ import {
   useWatch,
   Control,
   UseFormSetValue,
-  UseFormRegister,
 } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -20,6 +19,8 @@ import Input from '@/components/ui/Input';
 import { MultiImageUploadField } from '@/components/ui/multi-image-upload-field';
 import { uploadFile } from '@/lib/api/upload';
 import { useCreateProduct } from '../../hooks/useProduct';
+import { AttributeChipsEditor } from '../AttributeChipsEditor';
+import { CompactField } from '../CompactField';
 import { PRODUCT_CREATE_LIMITS } from '../../types/products';
 import {
   buildCreateProductPayload,
@@ -111,147 +112,55 @@ interface AttributeEditorProps {
   index: number;
   control: Control<AddProductFormData>;
   setValue: UseFormSetValue<AddProductFormData>;
-  register: UseFormRegister<AddProductFormData>;
   labelError?: string;
   valuesError?: string;
   onRemove: () => void;
+  disabled: boolean;
 }
 
 function AttributeEditor({
   index,
   control,
   setValue,
-  register,
   labelError,
   valuesError,
   onRemove,
+  disabled,
 }: AttributeEditorProps) {
+  const name = useWatch({ control, name: `attributes.${index}.name` }) as
+    | string
+    | undefined;
   const values = useWatch({
     control,
     name: `attributes.${index}.options`,
   }) as string[] | undefined;
   const currentValues = values ?? [];
-  const [draft, setDraft] = useState('');
-  const [isAdding, setIsAdding] = useState(false);
-  const [draftError, setDraftError] = useState<string | null>(null);
-
-  const addValue = () => {
-    const trimmed = draft.trim();
-    if (!trimmed) return;
-    const key = duplicateNameKey(trimmed);
-    if (currentValues.some((value) => duplicateNameKey(value) === key)) {
-      setDraftError(`القيمة "${trimmed}" موجودة بالفعل`);
-      setDraft('');
-      return;
-    }
-    if (currentValues.length >= PRODUCT_CREATE_LIMITS.optionsPerAttribute) {
-      setDraftError(
-        `الحد الأقصى ${PRODUCT_CREATE_LIMITS.optionsPerAttribute} قيمة لكل متغير`,
-      );
-      return;
-    }
-    setDraftError(null);
-    setValue(`attributes.${index}.options`, [...currentValues, trimmed], {
+  const setOptions = (next: string[]) =>
+    setValue(`attributes.${index}.options`, next, {
       shouldDirty: true,
       shouldValidate: true,
     });
-    setDraft('');
-  };
-
-  const removeValue = (valueIndex: number) => {
-    setDraftError(null);
-    setValue(
-      `attributes.${index}.options`,
-      currentValues.filter((_, i) => i !== valueIndex),
-      { shouldDirty: true, shouldValidate: true },
-    );
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      addValue();
-    } else if (e.key === 'Backspace' && draft === '' && currentValues.length > 0) {
-      e.preventDefault();
-      removeValue(currentValues.length - 1);
-    }
-  };
 
   return (
-    <div className="relative bg-white rounded-lg border border-gray-200 hover:border-primary/40 transition-colors">
-      <span
-        aria-hidden
-        className="absolute inset-y-0 start-0 w-1 bg-primary rounded-s-lg"
-      />
-      <div className="ps-5 pe-2 py-3">
-        <div className="flex items-center gap-2 mb-2">
-          <input
-            {...register(`attributes.${index}.name`)}
-            placeholder="اسم المتغير (مثلاً: المقاس)"
-            className="flex-1 text-base font-semibold bg-transparent border-0 border-b border-transparent focus:border-primary focus:outline-none px-0 py-1 placeholder:font-normal placeholder:text-gray-400"
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={onRemove}
-            className="text-red-500 hover:bg-red-50 shrink-0"
-            aria-label="حذف المتغير"
-          >
-            <LiaTimesSolid className="w-5 h-5" />
-          </Button>
-        </div>
-        {labelError && <p className="text-red-500 text-xs mb-2">{labelError}</p>}
-
-        <div className="flex flex-wrap items-center gap-2">
-          {currentValues.map((value, valueIndex) => (
-            <span
-              key={`${value}-${valueIndex}`}
-              className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary px-3 py-1 text-sm font-medium"
-            >
-              <span>{value}</span>
-              <button
-                type="button"
-                onClick={() => removeValue(valueIndex)}
-                className="text-primary/70 hover:text-primary cursor-pointer"
-                aria-label={`حذف ${value}`}
-              >
-                <LiaTimesSolid className="w-3.5 h-3.5" />
-              </button>
-            </span>
-          ))}
-
-          {isAdding ? (
-            <input
-              autoFocus
-              type="text"
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={handleKeyDown}
-              onBlur={() => {
-                addValue();
-                setIsAdding(false);
-              }}
-              placeholder="اكتب القيمة..."
-              className="h-8 rounded-full border border-primary/40 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 w-40"
-            />
-          ) : (
-            <button
-              type="button"
-              onClick={() => setIsAdding(true)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-gray-400 text-gray-600 hover:border-primary hover:text-primary px-3 py-1 text-sm cursor-pointer transition-colors"
-            >
-              <LiaPlusSolid className="w-3.5 h-3.5" />
-              إضافة قيمة
-            </button>
-          )}
-        </div>
-
-        {(draftError || valuesError) && (
-          <p className="text-red-500 text-xs mt-2">{draftError ?? valuesError}</p>
-        )}
-      </div>
-    </div>
+    <AttributeChipsEditor
+      name={name ?? ''}
+      onNameChange={(next) =>
+        setValue(`attributes.${index}.name`, next, {
+          shouldDirty: true,
+          shouldValidate: true,
+        })
+      }
+      values={currentValues}
+      onAddValue={(value) => setOptions([...currentValues, value])}
+      onRemoveValue={(valueIndex) =>
+        setOptions(currentValues.filter((_, i) => i !== valueIndex))
+      }
+      onRemove={onRemove}
+      maxValues={PRODUCT_CREATE_LIMITS.optionsPerAttribute}
+      nameError={labelError}
+      valuesError={valuesError}
+      disabled={disabled}
+    />
   );
 }
 
@@ -259,9 +168,10 @@ interface VariantRowsProps {
   control: Control<AddProductFormData>;
   edits: Record<string, VariantRowEdit>;
   onEdit: (key: string, edit: VariantRowEdit) => void;
+  disabled: boolean;
 }
 
-function VariantRows({ control, edits, onEdit }: VariantRowsProps) {
+function VariantRows({ control, edits, onEdit, disabled }: VariantRowsProps) {
   const watchedAttributes = useWatch({ control, name: 'attributes' });
   const watchedPrice = useWatch({ control, name: 'price' });
   const productPrice = Number(watchedPrice);
@@ -300,24 +210,32 @@ function VariantRows({ control, edits, onEdit }: VariantRowsProps) {
         return (
           <div
             key={key}
-            className="grid grid-cols-1 sm:grid-cols-4 gap-2 items-center rounded-lg border border-gray-200 bg-white p-3"
+            className="grid grid-cols-2 sm:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] gap-2 sm:items-end rounded-lg border border-gray-200 bg-white p-3"
           >
-            <span className="text-sm font-semibold text-gray-800">{label}</span>
-            <Input
-              placeholder="SKU"
+            <span className="col-span-2 sm:col-span-1 text-sm font-semibold text-gray-800 min-w-0 break-words sm:self-center">
+              {label}
+            </span>
+            <CompactField
+              label="SKU"
               value={edit.sku ?? ''}
+              disabled={disabled}
               onChange={(e) => onEdit(key, { ...edit, sku: e.target.value })}
             />
-            <Input
-              placeholder="الباركود"
+            <CompactField
+              label="الباركود"
               value={edit.barcode ?? ''}
+              disabled={disabled}
               onChange={(e) => onEdit(key, { ...edit, barcode: e.target.value })}
             />
-            <Input
+            <CompactField
+              label="السعر"
               type="number"
+              inputMode="decimal"
               min={0}
+              className="col-span-2 sm:col-span-1"
               placeholder={variantRowPricePlaceholder(productPrice, 'السعر')}
               value={edit.price ?? ''}
+              disabled={disabled}
               onChange={(e) =>
                 onEdit(key, editVariantRowPrice(edit, e.target.value))
               }
@@ -415,6 +333,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
       onClose={onClose}
       title="إضافة منتج يدوياً"
       showFooter={false}
+      isLoading={isSaving}
       maxWidth="md:max-w-3xl"
     >
       <form onSubmit={onSubmit} className="space-y-4">
@@ -467,10 +386,11 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
             <Button
               type="button"
               variant="ghost"
-              size="sm"
-              disabled={fields.length >= PRODUCT_CREATE_LIMITS.attributes}
+              disabled={
+                isSaving || fields.length >= PRODUCT_CREATE_LIMITS.attributes
+              }
               onClick={() => append({ name: '', options: [] })}
-              className="text-primary font-semibold hover:bg-primary hover:text-white"
+              className="min-h-10 text-primary font-semibold hover:bg-primary hover:text-white"
             >
               <LiaPlusSolid className="w-4 h-4" />
               إضافة متغير
@@ -489,7 +409,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                   index={index}
                   control={form.control}
                   setValue={form.setValue}
-                  register={form.register}
+                  disabled={isSaving}
                   labelError={attributesError?.[index]?.name?.message}
                   valuesError={attributesError?.[index]?.options?.message}
                   onRemove={() => remove(index)}
@@ -509,6 +429,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
           </div>
           <VariantRows
             control={form.control}
+            disabled={isSaving}
             edits={rowEdits}
             onEdit={(key, edit) =>
               setRowEdits((current) => ({ ...current, [key]: edit }))
@@ -516,13 +437,19 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
           />
         </div>
 
-        <div className="flex justify-end gap-3 pt-5 mt-2 border-t border-gray-100">
-          <Button type="button" variant="outline" onClick={onClose}>
+        <div className="sticky bottom-0 z-10 -mx-4 sm:-mx-8 -mb-6 mt-2 flex justify-end gap-3 border-t border-gray-100 bg-white px-4 sm:px-8 py-3">
+          <Button
+            type="button"
+            variant="outline"
+            className="min-h-10"
+            onClick={onClose}
+            disabled={isSaving}
+          >
             إلغاء
           </Button>
           <Button
             type="submit"
-            className="bg-primary hover:bg-primary/90"
+            className="min-h-10 bg-primary hover:bg-primary/90"
             disabled={isSaving}
           >
             {isSaving ? 'جارٍ الحفظ...' : 'حفظ المنتج'}

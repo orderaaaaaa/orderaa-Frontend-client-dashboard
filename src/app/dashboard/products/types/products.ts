@@ -8,22 +8,28 @@ export const PRODUCT_CONFIRM_OUT_OF_STOCK_MODES = {
 export type ProductConfirmOutOfStockMode =
   (typeof PRODUCT_CONFIRM_OUT_OF_STOCK_MODES)[keyof typeof PRODUCT_CONFIRM_OUT_OF_STOCK_MODES];
 
+export interface ProductListOption {
+  id: number;
+  name: string;
+}
+
+export interface ProductListAttribute {
+  id: number;
+  name: string;
+  options: ProductListOption[];
+}
+
 export interface Product {
   id: number;
   name: string;
-  description: string;
-  price: number;
-  category: string;
-  size: string;
-  color: string;
-  sku: string;
-  images: string[];
-  image: string;
+  price?: number;
+  sku?: string;
+  images?: string[];
+  image?: string;
   totalOrders: number;
   totalSold: number;
-  extraDetails: {
-    variants?: VariantItem[];
-  };
+  extraDetails?: Record<string, unknown>;
+  attributes: ProductListAttribute[];
   confirmOutOfStockMode: ProductConfirmOutOfStockMode;
   variantOptions?: VariantOption[];
   createdAt: string;
@@ -39,11 +45,6 @@ export interface ProductsResponse {
   hasPreviousPage: boolean;
   data: Product[];
 }
-
-export type VariantItem = {
-  attribute: string;
-  option: string;
-};
 
 export interface VariantOption {
   attribute: string;
@@ -70,16 +71,16 @@ export interface UpdateAttributesPayload {
   attributes: AttributeManual[];
 }
 
-export interface VariantCountItem {
-  attribute: string;
-  option: string;
+export interface AttributeCountItem {
+  label: string;
+  value: string;
   count: number;
 }
 
-export interface VariantsCountResponse {
+export interface AttributeCountsResponse {
   productId: number;
   productName: string;
-  variantCounts: VariantCountItem[];
+  attributeCounts: AttributeCountItem[];
   totalOrders: number;
 }
 
@@ -94,10 +95,6 @@ export interface ProductState {
   setSearch: (search: string) => void;
   setSortBy: (sortBy: string) => void;
   setSortOrder: (sortOrder: 'asc' | 'desc') => void;
-}
-
-export interface UpdateVariantsPayload {
-  variants: VariantItem[];
 }
 
 export interface ProductQueryParams {
@@ -272,4 +269,148 @@ export interface ProductCreateErrorBody {
     missing?: string[][];
     limit?: number;
   };
+}
+
+export const VARIANT_DELETE_BLOCKERS = [
+  'HAS_ORDER_LINES',
+  'HAS_STOCK',
+  'HAS_MOVEMENTS',
+  'HAS_INVOICE_LINES',
+] as const;
+
+export type VariantDeleteBlocker = (typeof VARIANT_DELETE_BLOCKERS)[number];
+
+export type VariantDeleteConfirmation = 'HAS_EXTERNAL_LINK';
+
+export interface ProductDetailExternalSource {
+  provider: string;
+  externalId: string;
+  storeId: number | null;
+}
+
+export interface ProductDetailOption {
+  id: number;
+  name: string;
+}
+
+export interface ProductDetailAttribute {
+  id: number;
+  name: string;
+  options: ProductDetailOption[];
+}
+
+export interface ProductDetailVariantLabel {
+  attributeId: number;
+  attribute: string;
+  optionId: number;
+  option: string;
+}
+
+export interface ProductDetailVariant {
+  id: number;
+  combinationKey: string;
+  sku: string | null;
+  barcode: string | null;
+  price: number | null;
+  image: string | null;
+  optionIds: number[];
+  labels: ProductDetailVariantLabel[];
+  deletable: boolean;
+  notDeletableReason: VariantDeleteBlocker | null;
+  deleteConfirmation: VariantDeleteConfirmation | null;
+}
+
+export interface ProductDetailSpecification {
+  name: string;
+  value: string;
+}
+
+export interface ProductDetail {
+  id: number;
+  name: string;
+  sku: string | null;
+  price: number | null;
+  image: string | null;
+  images: string[];
+  confirmOutOfStockMode: ProductConfirmOutOfStockMode;
+  merchantCuratedAt: string | null;
+  externalSources: ProductDetailExternalSource[];
+  attributes: ProductDetailAttribute[];
+  variants: ProductDetailVariant[];
+  specifications: ProductDetailSpecification[];
+}
+
+export interface ProductSpecification {
+  id: number;
+  name: string;
+  value: string;
+  position: number;
+}
+
+export interface SpecificationInput {
+  name: string;
+  value: string;
+}
+
+export interface UpdateProductScalarsPayload {
+  name?: string;
+  sku?: string | null;
+  price?: number;
+  images?: string[];
+}
+
+export interface UpsertVariantInput {
+  id?: number;
+  optionIds?: number[];
+  sku?: string | null;
+  barcode?: string | null;
+  price?: number | null;
+  image?: string | null;
+}
+
+export interface UpsertVariantsPayload {
+  variants: UpsertVariantInput[];
+}
+
+export const PRODUCT_EDIT_LIMITS = {
+  images: 20,
+  variants: 100,
+  specifications: 100,
+  specificationName: 120,
+  specificationValue: 500,
+} as const;
+
+export const PRODUCT_EDIT_ERROR_CODES = [
+  'PRODUCT_NOT_FOUND',
+  'VARIANT_NOT_FOUND',
+  'VARIANT_COMBINATION_TAKEN',
+  'VARIANT_IN_USE',
+  'VARIANT_STORE_LINK_CONFIRMATION_REQUIRED',
+  'DUPLICATE_VARIANT_IN_REQUEST',
+] as const;
+
+export type ProductEditErrorCode = (typeof PRODUCT_EDIT_ERROR_CODES)[number];
+
+export type ProductApiErrorCode = ProductCreateErrorCode | ProductEditErrorCode;
+
+export interface ProductApiErrorDetails {
+  names?: string[];
+  attribute?: string;
+  values?: string[];
+  variantIndex?: number;
+  variantIndexes?: number[];
+  requestIndex?: number;
+  variantId?: number | null;
+  variantIds?: number[];
+  reason?: VariantDeleteBlocker | VariantDeleteConfirmation | string;
+  links?: ProductDetailExternalSource[];
+  missing?: string[][];
+  limit?: number;
+  productId?: number;
+}
+
+export interface ProductApiErrorBody {
+  code: ProductApiErrorCode;
+  message: string;
+  details?: ProductApiErrorDetails;
 }

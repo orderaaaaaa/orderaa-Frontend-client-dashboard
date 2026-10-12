@@ -1,17 +1,19 @@
 import http from '@/lib/api/http';
 import {
   ProductsResponse,
-  UpdateVariantsPayload,
-  VariantsCountResponse,
+  AttributeCountsResponse,
   ProductQueryParams,
-  SyncProductsResponse,
   MergeProductsPayload,
   JobAcceptedResponse,
   UpdateAttributesPayload,
-  AttributeManual,
   ProductConfirmOutOfStockMode,
   CreateProductPayload,
   CreateProductResponse,
+  ProductDetail,
+  ProductSpecification,
+  SpecificationInput,
+  UpdateProductScalarsPayload,
+  UpsertVariantsPayload,
 } from '../types/products';
 
 export const productsApi = {
@@ -28,43 +30,62 @@ export const productsApi = {
     return response.data;
   },
 
-  getVariantOptions: async (
+  getDetail: async (productId: number): Promise<ProductDetail> => {
+    const response = await http.get<ProductDetail>(`/products/${productId}`);
+    return response.data;
+  },
+
+  patchProduct: async (
     productId: number,
-  ): Promise<VariantsCountResponse> => {
-    const response = await http.get<VariantsCountResponse>(
-      `/products/${productId}/variant-counts`,
+    payload: UpdateProductScalarsPayload,
+  ): Promise<ProductDetail> => {
+    const response = await http.patch<ProductDetail>(
+      `/products/${productId}`,
+      payload,
     );
     return response.data;
   },
 
-  getAttributeOptions: async (
+  upsertVariants: async (
     productId: number,
-  ): Promise<AttributeManual[]> => {
-    const response = await http.get<{ options: AttributeManual[] }>(
-      `/products/${productId}/attribute-options`,
+    payload: UpsertVariantsPayload,
+  ): Promise<ProductDetail> => {
+    const response = await http.put<ProductDetail>(
+      `/products/${productId}/variants`,
+      payload,
     );
-    return response.data.options ?? [];
+    return response.data;
   },
 
-  /**
-   * T22 — المواصفات, product-wide key/value facts. This used to PUT
-   * /products/:id with a `variants` body, which shared an endpoint with the
-   * variants popup and silently overwrote it. It now has its own route and
-   * its own table, so the two concepts cannot collide.
-   */
-  updateProductSpecifications: async (
+  deleteVariant: async (
     productId: number,
-    specifications: { name: string; value: string }[],
-  ) => {
-    await http.put(`/products/${productId}/specifications`, {
-      specifications,
-    });
+    variantId: number,
+    confirmStoreLink: boolean,
+  ): Promise<ProductDetail> => {
+    const response = await http.delete<ProductDetail>(
+      `/products/${productId}/variants/${variantId}`,
+      confirmStoreLink ? { params: { confirmStoreLink: true } } : undefined,
+    );
+    return response.data;
   },
 
-  getProductSpecifications: async (productId: number) => {
-    const response = await http.get<
-      { id: number; name: string; value: string; position: number }[]
-    >(`/products/${productId}/specifications`);
+  getAttributeCounts: async (
+    productId: number,
+  ): Promise<AttributeCountsResponse> => {
+    const response = await http.get<AttributeCountsResponse>(
+      `/products/${productId}/attribute-counts`,
+    );
+    return response.data;
+  },
+
+  replaceSpecifications: async (
+    productId: number,
+    specifications: SpecificationInput[],
+  ): Promise<ProductSpecification[]> => {
+    const response = await http.put<ProductSpecification[]>(
+      `/products/${productId}/specifications`,
+      { specifications },
+    );
     return response.data ?? [];
   },
 
