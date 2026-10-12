@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import http from '@/lib/api/http';
+import { invalidateAndWait, orderStatusKeys } from '@/lib/query/mutationSync';
 import type {
   MissingOrderDetail,
   MissingOrdersListFilters,
@@ -42,9 +43,8 @@ export const useRecoverMissingOrder = (id: number) => {
       );
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [KEY] });
-    },
+    onSuccess: () =>
+      invalidateAndWait(queryClient, [[KEY], ...orderStatusKeys()]),
   });
 };
 
@@ -59,8 +59,6 @@ export const useDismissMissingOrder = (id: number) => {
       );
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [KEY] });
-    },
+    onSuccess: () => invalidateAndWait(queryClient, [[KEY]]),
   });
 };

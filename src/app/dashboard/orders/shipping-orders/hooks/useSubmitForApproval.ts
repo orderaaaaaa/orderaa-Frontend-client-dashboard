@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { invalidateAndWait, orderStatusKeys } from '@/lib/query/mutationSync';
 import {
   submitForApproval,
   SubmitForApprovalRequest,
@@ -13,8 +13,6 @@ export function useSubmitForApproval() {
 
   return useMutation<SubmitForApprovalResponse, Error, SubmitForApprovalRequest>({
     mutationFn: submitForApproval,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
-    },
+    onSuccess: () => invalidateAndWait(queryClient, orderStatusKeys()),
   });
 }

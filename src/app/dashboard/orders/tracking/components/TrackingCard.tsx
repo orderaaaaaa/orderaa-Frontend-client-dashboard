@@ -261,20 +261,30 @@ export default function TrackingCard({ card }: TrackingCardProps) {
                         <button
                           type="button"
                           onClick={() => setShowFlagButtons(!showFlagButtons)}
-                          className="p-1 rounded-md hover:bg-gray-200 cursor-pointer"
+                          aria-expanded={showFlagButtons}
+                          aria-controls={`tracking-flags-${card.id}`}
+                          aria-label={showFlagButtons ? 'إخفاء تقييم تحديث المندوب' : 'تقييم تحديث المندوب'}
+                          className="inline-flex size-10 sm:size-8 items-center justify-center rounded-md hover:bg-gray-200 cursor-pointer"
                         >
                           <LiaChevronLeftSolid className={clsx('size-4 text-gray-400 transition-transform duration-300', showFlagButtons && 'rotate-180')} />
                         </button>
-                        <div className={clsx(
-                          'flex items-center gap-1.5 transition-all duration-300 ease-in-out overflow-hidden',
-                          showFlagButtons ? 'max-w-[80px] opacity-100' : 'max-w-0 opacity-0',
-                        )}>
+                        <div
+                          id={`tracking-flags-${card.id}`}
+                          aria-hidden={!showFlagButtons}
+                          className={clsx(
+                            'flex items-center gap-1.5 transition-all duration-300 ease-in-out overflow-hidden',
+                            showFlagButtons ? 'max-w-[96px] opacity-100' : 'max-w-0 opacity-0',
+                          )}
+                        >
                           <Button
                             variant="outline"
-                            size="icon-xs"
+                            size="touch"
                             className="border-green-300 text-green-600 hover:bg-green-50"
                             onClick={() => handleFlag('CORRECT')}
                             disabled={isFlagging}
+                            tabIndex={showFlagButtons ? undefined : -1}
+                            aria-label={FLAG_LABELS.CORRECT.label}
+                            title={FLAG_LABELS.CORRECT.label}
                           >
                             {isFlagging && pendingPointType === 'CORRECT' ? (
                               <LiaSpinnerSolid className="size-4 animate-spin" />
@@ -284,10 +294,13 @@ export default function TrackingCard({ card }: TrackingCardProps) {
                           </Button>
                           <Button
                             variant="outline"
-                            size="icon-xs"
+                            size="touch"
                             className="border-red-300 text-red-600 hover:bg-red-50"
                             onClick={() => handleFlag('FAKE')}
                             disabled={isFlagging}
+                            tabIndex={showFlagButtons ? undefined : -1}
+                            aria-label={FLAG_LABELS.FAKE.label}
+                            title={FLAG_LABELS.FAKE.label}
                           >
                             {isFlagging && pendingPointType === 'FAKE' ? (
                               <LiaSpinnerSolid className="size-4 animate-spin" />

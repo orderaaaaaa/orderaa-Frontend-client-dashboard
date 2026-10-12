@@ -56,7 +56,7 @@ interface AddSettlementOrdersDialogProps {
   isOpen: boolean;
   onClose: () => void;
   batchId: string;
-  onSuccess: () => void;
+  onSuccess: () => void | Promise<void>;
 }
 
 type ForcingTarget =
@@ -102,7 +102,7 @@ export default function AddSettlementOrdersDialog({
     try {
       const response = await addSettlementBatchOrders(batchId, parsedRows);
       setResults(response);
-      onSuccess();
+      await onSuccess();
       if (response.success.length > 0) {
         toast.success(`تم إضافة ${response.success.length} صف بنجاح`);
       }
@@ -132,7 +132,7 @@ export default function AddSettlementOrdersDialog({
       const response = await addSettlementBatchOrders(batchId, rows);
       setParsedRows(rows);
       setResults(response);
-      onSuccess();
+      await onSuccess();
       if (response.success.length > 0) {
         toast.success('تم إضافة الطلب بنجاح');
       }
@@ -170,7 +170,7 @@ export default function AddSettlementOrdersDialog({
             }
           : prev,
       );
-      onSuccess();
+      await onSuccess();
     },
     [batchId, parsedRows, onSuccess],
   );

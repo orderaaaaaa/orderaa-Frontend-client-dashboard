@@ -22,14 +22,18 @@ import {
   SettlementMobileList,
   SettlementMobileRow,
 } from '@/app/dashboard/orders/settlement/components/SettlementMobileList';
-import {
-  listSettlementBatches,
-  listSettlementBatchOrders,
-  type SettlementBatchListItem,
-  type SettlementBatchOrder,
+import type {
+  SettlementBatchListItem,
+  SettlementBatchOrder,
 } from '@/lib/api/settlement';
+import {
+  useSettlementBatchOrdersQuery,
+  useSettlementBatchesQuery,
+  useSettlementSync,
+  type SettlementBatchStatusFilter,
+} from '@/app/dashboard/orders/settlement/hooks/useSettlementQueries';
 
-type StatusFilter = 'ALL' | 'OPEN' | 'CONFIRMED';
+type StatusFilter = SettlementBatchStatusFilter;
 
 const FILTERS: { value: StatusFilter; label: string }[] = [
   { value: 'OPEN', label: 'مفتوح' },
@@ -39,78 +43,51 @@ const FILTERS: { value: StatusFilter; label: string }[] = [
 
 export default function CollectionsPage() {
   const [status, setStatus] = useState<StatusFilter>('OPEN');
-  const [batches, setBatches] = useState<SettlementBatchListItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
-  const [loadFailed, setLoadFailed] = useState(false);
-  const [reloadKey, setReloadKey] = useState(0);
-
   const { getStatusLabel } = useStatusLabel();
-  const [selected, setSelected] = useState<SettlementBatchListItem | null>(null);
-  const [orders, setOrders] = useState<SettlementBatchOrder[]>([]);
-  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+  const [selectedBatch, setSelectedBatch] = useState<SettlementBatchListItem | null>(null);
   const [removeTarget, setRemoveTarget] = useState<SettlementBatchOrder | null>(null);
   const [editTarget, setEditTarget] = useState<SettlementBatchOrder | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    setIsLoading(true);
-    setLoadFailed(false);
-    listSettlementBatches({
-      status: status === 'ALL' ? undefined : status,
-      limit: 50,
-    })
-      .then((result) => {
-        if (cancelled) return;
-        setBatches(result.data);
-        setHasLoadedOnce(true);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        setLoadFailed(true);
-        toast.error(getApiErrorMessage(err, 'تعذر تحميل التحصيلات'));
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [status, reloadKey]);
+  const batchesQuery = useSettlementBatchesQuery(status);
+  const batches = batchesQuery.data?.data ?? [];
+  const loadFailed =
+    batchesQuery.isError && !batchesQuery.data && !batchesQuery.isFetching;
+  const isSwitching = batchesQuery.isPlaceholderData;
+  const batchesError = batchesQuery.error;
 
-  const openBatch = useCallback(async (batch: SettlementBatchListItem) => {
-    setSelected(batch);
-    setIsLoadingOrders(true);
-    try {
-      const result = await listSettlementBatchOrders(batch.id, { limit: 100 });
-      setOrders(result.data);
-    } catch {
-      toast.error('تعذر تحميل طلبات التحصيل');
-      setOrders([]);
-    } finally {
-      setIsLoadingOrders(false);
+  const selected =
+    batches.find((batch) => batch.id === selectedBatch?.id) ?? selectedBatch;
+
+  const ordersQuery = useSettlementBatchOrdersQuery(selected?.id ?? null);
+  const orders: SettlementBatchOrder[] = ordersQuery.data?.data ?? [];
+  const isLoadingOrders = ordersQuery.isLoading;
+  const ordersError = ordersQuery.error;
+
+  const syncSettlement = useSettlementSync();
+
+  useEffect(() => {
+    if (batchesError) {
+      toast.error(getApiErrorMessage(batchesError, 'تعذر تحميل التحصيلات'));
     }
+  }, [batchesError]);
+
+  useEffect(() => {
+    if (ordersError) {
+      toast.error('تعذر تحميل طلبات التحصيل');
+    }
+  }, [ordersError]);
+
+  const openBatch = useCallback((batch: SettlementBatchListItem) => {
+    setSelectedBatch(batch);
   }, []);
 
-  const reloadAfterEdit = useCallback(async () => {
-    if (!selected) return;
-    try {
-      const [ordersResult, batchesResult] = await Promise.all([
-        listSettlementBatchOrders(selected.id, { limit: 100 }),
-        listSettlementBatches({ status: status === 'ALL' ? undefined : status, limit: 50 }),
-      ]);
-      setOrders(ordersResult.data);
-      setBatches(batchesResult.data);
-      const updatedSelected = batchesResult.data.find((b) => b.id === selected.id);
-      if (updatedSelected) setSelected(updatedSelected);
-      toast.success('تم تحديث التحصيل');
-    } catch {
-      toast.error('تعذر تحميل طلبات التحصيل');
-    }
-  }, [selected, status]);
+  const handleEdited = useCallback(async () => {
+    await syncSettlement();
+    toast.success('تم تحديث التحصيل');
+  }, [syncSettlement]);
 
-  if (isLoading && !hasLoadedOnce) {
+  if (batchesQuery.isLoading) {
     return <PageLoading message="جاري تحميل التحصيلات..." />;
   }
 
@@ -147,18 +124,21 @@ export default function CollectionsPage() {
       {loadFailed ? (
         <div className="flex flex-col items-center gap-3 py-12 text-center">
           <p className="text-sm font-semibold text-red-700">تعذّر تحميل التحصيلات</p>
-          <Button variant="outline" size="sm" onClick={() => setReloadKey((k) => k + 1)}>
+          <Button variant="outline" size="sm" onClick={() => batchesQuery.refetch()}>
             إعادة المحاولة
           </Button>
         </div>
-      ) : isLoading ? (
+      ) : batchesQuery.isFetching && !batchesQuery.data ? (
         <PageLoading size="sm" message="جاري تحميل التحصيلات..." className="py-12 min-h-0" />
       ) : batches.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-12">
           لا توجد تحصيلات بعد — ارفع شيت تحصيل للبدء
         </p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div
+          aria-busy={isSwitching}
+          className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 transition-opacity ${isSwitching ? 'opacity-60' : ''}`}
+        >
           {batches.map((batch) => (
             <div
               key={batch.id}
@@ -260,7 +240,7 @@ export default function CollectionsPage() {
                 variant="ghost"
                 size="sm"
                 className="max-sm:h-10 max-sm:flex-1"
-                onClick={() => setSelected(null)}
+                onClick={() => setSelectedBatch(null)}
               >
                 إغلاق
               </Button>
@@ -425,9 +405,9 @@ export default function CollectionsPage() {
         batchId={selected?.id ?? ''}
         orderId={removeTarget?.orderId ?? 0}
         orderStatus={removeTarget?.currentStatus ?? ''}
-        onSuccess={() => {
+        onSuccess={async () => {
+          await handleEdited();
           setRemoveTarget(null);
-          reloadAfterEdit();
         }}
       />
 
@@ -437,9 +417,9 @@ export default function CollectionsPage() {
         batchId={selected?.id ?? ''}
         orderId={editTarget?.orderId ?? 0}
         currentAmount={editTarget?.amount ?? '0.00'}
-        onSuccess={() => {
+        onSuccess={async () => {
+          await handleEdited();
           setEditTarget(null);
-          reloadAfterEdit();
         }}
       />
 
@@ -447,9 +427,7 @@ export default function CollectionsPage() {
         isOpen={isAddOpen}
         onClose={() => setIsAddOpen(false)}
         batchId={selected?.id ?? ''}
-        onSuccess={() => {
-          reloadAfterEdit();
-        }}
+        onSuccess={handleEdited}
       />
     </div>
   );

@@ -95,6 +95,41 @@ export function EmployeeListModalContent({
         keyField="id"
         headerClassName="bg-[#E5E5E5]"
         onRowClick={handleRowClick}
+        rowClassName={(row) =>
+          row.id === selectedEmployeeId ? 'bg-primary/5' : undefined
+        }
+        renderMobileRow={(row) => {
+          const config = STATUS_CONFIG[row.status] ?? STATUS_CONFIG.offline;
+          const isSelected = selectedEmployeeId === row.id;
+          return (
+            <div className="flex flex-col gap-2" aria-current={isSelected || undefined}>
+              <div className="flex items-start justify-between gap-3">
+                <span
+                  className={clsx(
+                    'min-w-0 break-words font-medium',
+                    isSelected && 'font-bold text-primary',
+                  )}
+                >
+                  {row.name}
+                </span>
+                <span className="flex shrink-0 items-center gap-2 text-gray-700">
+                  <span className={clsx('w-2 h-2 rounded-full', config.dotColor)} />
+                  {config.label}
+                </span>
+              </div>
+              <dl className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <dt className="text-gray-500">اجمالي ساعات العمل</dt>
+                  <dd className="mt-0.5 text-sm font-medium">{row.totalWorkHours}</dd>
+                </div>
+                <div>
+                  <dt className="text-gray-500">المحاولات</dt>
+                  <dd className="mt-0.5 text-sm font-medium">{row.attempts}</dd>
+                </div>
+              </dl>
+            </div>
+          );
+        }}
       />
 
       {selectedPerformance && (
@@ -106,6 +141,14 @@ export function EmployeeListModalContent({
             columns={performanceColumns}
             data={selectedPerformance.metrics}
             keyField="id"
+            renderMobileRow={(metric) => (
+              <div className="flex items-center justify-between gap-3">
+                <span className="min-w-0 break-words font-medium">{metric.label}</span>
+                <span className="shrink-0 text-gray-700">
+                  {metric.count} · {metric.percentage}%
+                </span>
+              </div>
+            )}
           />
         </div>
       )}

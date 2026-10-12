@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Breadcrumb } from '@/components/dashboard-layout/Breadcrumb';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,15 +20,16 @@ import { ShortfallSettlement } from '@/types/orders';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import {
-  getShortfallSettlements,
-  adjustSettlement,
-} from '@/lib/api/settlement';
+  useAdjustSettlementMutation,
+  useShortfallSettlementsQuery,
+  type ShortfallFilter,
+} from '@/app/dashboard/orders/settlement/hooks/useSettlementQueries';
 import {
   SettlementMobileList,
   SettlementMobileRow,
 } from '@/app/dashboard/orders/settlement/components/SettlementMobileList';
 
-type FilterValue = 'all' | 'pending' | 'finished';
+type FilterValue = ShortfallFilter;
 
 const AMOUNT_PATTERN = /^-?\d+(\.\d{1,2})?$/;
 
@@ -45,31 +46,22 @@ export default function ShortfallSettlementPage() {
   // Adjusting a settlement hits PATCH /orders/settlement/:orderId/adjust.
   const canManageSettlement = useHasPermission(PERMISSION_CODES.ORDERS_SETTLEMENT_MANAGE);
   const [filter, setFilter] = useState<FilterValue>('all');
-  const [data, setData] = useState<ShortfallSettlement[]>([]);
-  const [loading, setLoading] = useState(true);
   const [adjustAmounts, setAdjustAmounts] = useState<Record<number, string>>({});
   const [adjustingId, setAdjustingId] = useState<number | null>(null);
   const [pendingAdjust, setPendingAdjust] = useState<PendingAdjust | null>(null);
-  const [loadFailed, setLoadFailed] = useState(false);
-
-  const fetchData = useCallback(async (currentFilter: FilterValue) => {
-    setLoading(true);
-    setLoadFailed(false);
-    try {
-      const result = await getShortfallSettlements(currentFilter);
-      setData(result);
-    } catch (err) {
-      setData([]);
-      setLoadFailed(true);
-      toast.error(getApiErrorMessage(err, 'فشل في تحميل بيانات التحصيل'));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const shortfallQuery = useShortfallSettlementsQuery(filter);
+  const { mutateAsync: adjustAsync } = useAdjustSettlementMutation();
+  const data = shortfallQuery.data ?? [];
+  const loading = shortfallQuery.isFetching && !shortfallQuery.data;
+  const loadFailed = shortfallQuery.isError && !shortfallQuery.isFetching;
+  const isSwitching = shortfallQuery.isPlaceholderData;
+  const loadError = shortfallQuery.error;
 
   useEffect(() => {
-    fetchData(filter);
-  }, [filter, fetchData]);
+    if (loadError) {
+      toast.error(getApiErrorMessage(loadError, 'فشل في تحميل بيانات التحصيل'));
+    }
+  }, [loadError]);
 
   const handleFilterChange = (value: string) => {
     setFilter(value as FilterValue);
@@ -102,15 +94,14 @@ export default function ShortfallSettlementPage() {
     const { row, delta } = pendingAdjust;
     setAdjustingId(row.id);
     try {
-      await adjustSettlement(row.id, delta);
-      toast.success('تم تعديل التحصيل بنجاح');
+      await adjustAsync({ orderId: row.id, amount: delta });
       setAdjustAmounts((prev) => {
         const next = { ...prev };
         delete next[row.id];
         return next;
       });
       setPendingAdjust(null);
-      await fetchData(filter);
+      toast.success('تم تعديل التحصيل بنجاح');
     } catch (err) {
       toast.error(getApiErrorMessage(err, 'فشل في تعديل التحصيل'));
     } finally {
@@ -202,7 +193,7 @@ export default function ShortfallSettlementPage() {
                 <p className="text-red-700 text-sm font-semibold">
                   تعذّر تحميل بيانات التحصيل
                 </p>
-                <Button variant="outline" size="sm" onClick={() => fetchData(filter)}>
+                <Button variant="outline" size="sm" onClick={() => shortfallQuery.refetch()}>
                   إعادة المحاولة
                 </Button>
               </div>
@@ -213,7 +204,10 @@ export default function ShortfallSettlementPage() {
                 </p>
               </div>
             ) : (
-              <>
+              <div
+                aria-busy={isSwitching}
+                className={isSwitching ? 'opacity-60 transition-opacity' : 'transition-opacity'}
+              >
                 <SettlementMobileList>
                   {data.map((row) => (
                     <SettlementMobileRow
@@ -260,7 +254,7 @@ export default function ShortfallSettlementPage() {
                     </TableBody>
                   </Table>
                 </div>
-              </>
+              </div>
             )}
           </Tabs>
         </CardContent>

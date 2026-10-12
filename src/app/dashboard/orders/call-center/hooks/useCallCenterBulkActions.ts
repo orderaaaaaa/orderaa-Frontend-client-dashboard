@@ -1,12 +1,10 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import uniqBy from 'lodash/uniqBy';
 import type { Order } from '@/types/orders';
 import { OrderStatus } from '@/types/orders';
-import { invalidateAndWait, orderStatusKeys } from '@/lib/query/mutationSync';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import type { OrderStatusSetCode } from '@/lib/permissions';
@@ -101,7 +99,6 @@ interface UseCallCenterBulkActionsOptions {
 export function useCallCenterBulkActions({
   onCompleted,
 }: UseCallCenterBulkActionsOptions) {
-  const queryClient = useQueryClient();
   const { hasPermission } = usePermissionCheck();
   const { mutateAsync: prepareOrders } = usePrepareOrders();
   const { mutateAsync: waitForPackaging } = useWaitingForPackaging();
@@ -119,7 +116,6 @@ export function useCallCenterBulkActions({
       setIsPending(true);
       try {
         const updatedCount = await request();
-        await invalidateAndWait(queryClient, orderStatusKeys());
         toast.success(
           `تم تحديث ${updatedCount} طلب إلى ${ACTION_RULES[action].label}`
         );
@@ -133,7 +129,7 @@ export function useCallCenterBulkActions({
         setIsPending(false);
       }
     },
-    [queryClient, onCompleted]
+    [onCompleted]
   );
 
   const canSetTarget = useCallback(
