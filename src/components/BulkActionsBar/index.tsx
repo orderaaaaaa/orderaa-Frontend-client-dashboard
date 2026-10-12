@@ -41,6 +41,8 @@ interface BulkActionsBarProps {
   className?: string;
   isAllSelected?: boolean;
   totalStoreOrders?: number;
+  isLoading?: boolean;
+  disabled?: boolean;
 }
 
 const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
@@ -59,6 +61,8 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
   className = '',
   isAllSelected = false,
   totalStoreOrders = 0,
+  isLoading = false,
+  disabled = false,
 }) => {
   const { ref: scrollRef, hasMoreAtEnd } = useScrollEndFade<HTMLDivElement>();
 
@@ -72,7 +76,10 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
     absolute: 'absolute bottom-0 left-0 right-0 z-10',
   }[position];
 
+  const isDisabled = isLoading || disabled;
+
   const handleStatusSelect = (statusKey: string) => {
+    if (isDisabled) return;
     if (onEditStatus) {
       onEditStatus(statusKey);
     }
@@ -85,6 +92,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
   return (
     <div
       className={`${positionClasses} bg-white border-t border-gray-200 shadow-lg py-4 px-6 ${className}`}
+      aria-busy={isLoading || undefined}
     >
       <div className="relative">
         <div
@@ -93,11 +101,24 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
         >
           <div className="pb-1 sm:pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
             <Can code={PERMISSION_CODES.ORDERS_BULK_UPDATE}>
-              <Select onValueChange={handleStatusSelect}>
-                <SelectTrigger className="group flex items-center gap-2 px-4 pl-10 py-2 rounded-3xl bg-white border-primary !text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap w-auto h-10 focus:ring-0 focus:ring-offset-0 ring-offset-0">
-                  <LiaEditSolid className="size-5 shrink-0 group-hover:text-white" />
-                  <span className="group-hover:text-white">
-                    تعديل الحالة ({selectedCount})
+              <Select
+                value=""
+                onValueChange={handleStatusSelect}
+                disabled={isDisabled}
+              >
+                <SelectTrigger className="group flex items-center gap-2 px-4 pl-10 py-2 rounded-3xl bg-white border-primary !text-primary enabled:hover:bg-primary enabled:hover:text-white transition-colors cursor-pointer disabled:cursor-not-allowed whitespace-nowrap w-auto h-10 focus:ring-0 focus:ring-offset-0 ring-offset-0">
+                  {isLoading ? (
+                    <span
+                      aria-hidden
+                      className="size-5 shrink-0 rounded-full border-2 border-current border-t-transparent animate-spin"
+                    />
+                  ) : (
+                    <LiaEditSolid className="size-5 shrink-0 group-enabled:group-hover:text-white" />
+                  )}
+                  <span className="group-enabled:group-hover:text-white">
+                    {isLoading
+                      ? `جاري تعديل الحالة (${selectedCount})`
+                      : `تعديل الحالة (${selectedCount})`}
                   </span>
                 </SelectTrigger>
                 <SelectContent align="end" side="top" className="max-h-[300px] min-w-[180px]">
@@ -125,6 +146,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
               variant="outline"
               className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
               onClick={onExportExcel}
+              disabled={isDisabled}
             >
               <LiaFileExcelSolid className="size-5" />
               <span>مشاركة شيت اكسيل</span>
@@ -134,6 +156,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
               variant="outline"
               className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
               onClick={onShareWhatsApp}
+              disabled={isDisabled}
             >
               <LiaWhatsapp className="size-5" />
               <span>مشاركة واتساب</span>
@@ -143,6 +166,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
               variant="outline"
               className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
               onClick={onShipping}
+              disabled={isDisabled}
             >
               <LiaTruckSolid className="size-5" />
               <span>شحن</span>
@@ -152,6 +176,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
               variant="outline"
               className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
               onClick={onOther}
+              disabled={isDisabled}
             >
               <LiaEllipsisHSolid className="size-5" />
               <span>اخرى</span>

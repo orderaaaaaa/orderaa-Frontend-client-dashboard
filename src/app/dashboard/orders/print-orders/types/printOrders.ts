@@ -87,7 +87,8 @@ export interface PrepareOrdersRequest {
 
 export interface PrepareOrdersResponse {
   success: boolean;
-  message: string;
+  preparedCount: number;
+  preparedOrderIds: number[];
 }
 
 export interface WaitingForPackagingRequest {
@@ -96,7 +97,8 @@ export interface WaitingForPackagingRequest {
 
 export interface WaitingForPackagingResponse {
   success: boolean;
-  message: string;
+  movedCount: number;
+  movedOrderIds: number[];
 }
 
 export interface CallAgainOrder {
@@ -110,5 +112,6 @@ export interface CallAgainRequest {
 
 export interface CallAgainResponse {
   success: boolean;
-  message: string;
+  movedCount: number;
+  movedOrderIds: number[];
 }

@@ -41,6 +41,12 @@ import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import { Scan, ScanLine, ArrowUp, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { shippingCompanyNameOf } from '@/lib/shippingCompanies';
+import { getApiErrorMessage } from '@/utils/apiError';
+import {
+  notifyBulkStatusResult,
+  splitParkedOrders,
+  warnParkedOrdersSkipped,
+} from './utils/bulkStatusFeedback';
 
 function AllOrdersContent() {
   const [select, setSelect] = useState(false);
@@ -134,18 +140,21 @@ function AllOrdersContent() {
     return new Map(orderStatuses.allStatuses.map((s) => [s.key, s.label]));
   }, [orderStatuses]);
 
-  const { mutate: bulkUpdateOrders } = useBulkOrders({
-    onSuccess: (data) => {
-      toast.success(data.message || 'تم تحديث حالة الطلبات بنجاح');
-      setSelectedOrderIds([]);
-      setSelectAllMatchingFilters(false);
-      setSelect(false);
-    },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message;
-      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث حالة الطلبات');
-    },
-  });
+  const { mutate: bulkUpdateOrders, isPending: isBulkUpdating } =
+    useBulkOrders({
+      onSuccess: (data, variables) => {
+        notifyBulkStatusResult(
+          data.updatedCount,
+          variables.payload.ordersIds?.length
+        );
+        setSelectedOrderIds([]);
+        setSelectAllMatchingFilters(false);
+        setSelect(false);
+      },
+      onError: (err) => {
+        toast.error(getApiErrorMessage(err, 'فشل تحديث حالة الطلبات'));
+      },
+    });
 
   const { statistics } = useOrderStatistics(apiFilters);
 
@@ -220,6 +229,7 @@ function AllOrdersContent() {
   // Handle order selection
   const handleOrderSelect = useCallback(
     (orderId: number, checked: boolean) => {
+      if (isBulkUpdating) return;
       // If we were in "Select All Store" mode, interacting with individual checkbox breaks it
       if (selectAllMatchingFilters) {
         setSelectAllMatchingFilters(false);
@@ -242,11 +252,12 @@ function AllOrdersContent() {
         }
       });
     },
-    [selectAllMatchingFilters]
+    [selectAllMatchingFilters, isBulkUpdating]
   );
 
   // Handle select all toggle (Selects All Store to trigger Bulk logic)
   const handleSelectAllToggle = useCallback(() => {
+    if (isBulkUpdating) return;
     if (selectAllMatchingFilters) {
       // Deselect all
       setSelectAllMatchingFilters(false);
@@ -258,7 +269,17 @@ function AllOrdersContent() {
       // We don't need individual IDs for bulk
       setSelectedOrderIds([]);
     }
-  }, [selectAllMatchingFilters]);
+  }, [selectAllMatchingFilters, isBulkUpdating]);
+
+  const toggleSelectMode = useCallback(() => {
+    if (isBulkUpdating) return;
+    setSelect((prev) => !prev);
+  }, [isBulkUpdating]);
+
+  const exitSelectMode = useCallback(() => {
+    if (isBulkUpdating) return;
+    setSelect(false);
+  }, [isBulkUpdating]);
 
   // Handle select all matching filters (All Store)
   const handleSelectAllStore = useCallback(() => {
@@ -306,7 +327,7 @@ function AllOrdersContent() {
   // Handle Edit Status
   const handleEditStatus = useCallback(
     (statusKey: string) => {
-      if (!statusKey) return;
+      if (!statusKey || isBulkUpdating) return;
 
       if (selectAllMatchingFilters) {
         const currentStatusFilter = filters.status;
@@ -325,18 +346,26 @@ function AllOrdersContent() {
       } else {
         if (selectedOrderIds.length === 0) return;
 
+        const { parked } = splitParkedOrders(selectedOrders);
+        const parkedIds = new Set(parked.map((order) => order.id));
+        const ordersIds = selectedOrderIds.filter((id) => !parkedIds.has(id));
+        warnParkedOrdersSkipped(parked);
+        if (ordersIds.length === 0) return;
+
         bulkUpdateOrders({
           payload: {
             status: statusKey as OrderStatusKey,
-            ordersIds: selectedOrderIds,
+            ordersIds,
           },
         });
       }
     },
     [
+      isBulkUpdating,
       selectAllMatchingFilters,
       filters.status,
       selectedOrderIds,
+      selectedOrders,
       bulkUpdateOrders,
     ]
   );
@@ -453,6 +482,7 @@ function AllOrdersContent() {
                 variant="default"
                 size="sm"
                 onClick={handleSelectAllToggle}
+                disabled={isBulkUpdating}
                 className="rounded-lg"
               >
                 {selectAllMatchingFilters ? (
@@ -469,7 +499,7 @@ function AllOrdersContent() {
           {select && selectedOrderIds.length > 0 && (
             <div className="flex flex-row items-center justify-center gap-2">
               <X
-                onClick={() => setSelect(false)}
+                onClick={exitSelectMode}
                 className="cursor-pointer text-primary h-5 w-5"
               />
               <span className="text-sm text-gray-600">
@@ -479,7 +509,7 @@ function AllOrdersContent() {
           )}
           <div
             className="bg-primary flex flex-row items-center justify-center gap-3 px-5 py-2 rounded-full cursor-pointer"
-            onClick={() => setSelect(!select)}
+            onClick={toggleSelectMode}
           >
             <p>تحديد</p>
             <div>
@@ -601,6 +631,7 @@ function AllOrdersContent() {
           position="fixed"
           isAllSelected={selectAllMatchingFilters}
           totalStoreOrders={totalOrders}
+          isLoading={isBulkUpdating}
         />
       )}
 

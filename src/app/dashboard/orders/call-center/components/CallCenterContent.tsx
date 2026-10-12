@@ -7,13 +7,13 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
-import { toast } from 'react-toastify';
 import { ArrowUp } from 'lucide-react';
 
 import { Breadcrumb } from '@/components/dashboard-layout';
 import LoadingAnimation from '@/components/ui/loadingAnimation';
 import { Button } from '@/components/ui/button';
 import PrintOrdersActionsBar from '../../print-orders/components/PrintOrdersActionsBar';
+import { ChangeProductModal } from '../../print-orders/components/ChangeProductModal';
 import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
 import Footer from '@/components/orders/Footer';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
@@ -42,6 +42,12 @@ import OrdersSelectionHeader from '../../components/OrdersSelectionHeader';
 import PageTaps from '../../components/pageTaps';
 import { useDepartment, useDefaultStatusByPath } from '../../hooks';
 import { shippingCompanyNameOf } from '@/lib/shippingCompanies';
+import {
+  splitOrdersForAction,
+  useCallCenterBulkActions,
+  warnSkippedForAction,
+} from '../hooks/useCallCenterBulkActions';
+import type { Order } from '@/types/orders';
 
 export function CallCenterContent() {
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState('');
@@ -49,6 +55,7 @@ export function CallCenterContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isProductFilterActive, setIsProductFilterActive] = useState(false);
+  const [changeProductOrders, setChangeProductOrders] = useState<Order[]>([]);
   const department = useDepartment();
   const queryClient = useQueryClient();
   const DEFAULT_STATUS = useDefaultStatusByPath();
@@ -110,7 +117,6 @@ export function CallCenterContent() {
     data: ordersData,
     isLoading: loading,
     error: queryError,
-    refetch,
   } = useOrders(apiFilters);
 
   const { statistics } = useOrderStatistics(apiFilters);
@@ -142,7 +148,7 @@ export function CallCenterContent() {
     [productsData],
   );
 
-  const orders = ordersData?.data ?? [];
+  const orders = useMemo(() => ordersData?.data ?? [], [ordersData]);
   const totalOrders = ordersData?.meta?.totalItems ?? 0;
   const totalPages = ordersData?.meta?.totalPages ?? 1;
   const currentPage = ordersData?.meta?.currentPage ?? 1;
@@ -159,6 +165,52 @@ export function CallCenterContent() {
     handleSelectAllToggle,
     clearSelections,
   } = usePrintOrderBulk({ orders });
+
+  const handleBulkCompleted = useCallback(() => {
+    setChangeProductOrders([]);
+    clearSelections();
+    setSelectMode(false);
+  }, [clearSelections, setSelectMode]);
+
+  const bulkActions = useCallCenterBulkActions({
+    onCompleted: handleBulkCompleted,
+  });
+  const isBulkPending = bulkActions.isPending;
+
+  const guardedOrderSelect = useCallback(
+    (orderId: number, checked: boolean) => {
+      if (isBulkPending) return;
+      handleOrderSelect(orderId, checked);
+    },
+    [isBulkPending, handleOrderSelect]
+  );
+
+  const guardedSelectAllToggle = useCallback(() => {
+    if (isBulkPending) return;
+    handleSelectAllToggle();
+  }, [isBulkPending, handleSelectAllToggle]);
+
+  const guardedToggleSelectMode = useCallback(() => {
+    if (isBulkPending) return;
+    toggleSelectMode();
+  }, [isBulkPending, toggleSelectMode]);
+
+  const guardedSetSelectMode = useCallback(
+    (value: boolean) => {
+      if (isBulkPending) return;
+      setSelectMode(value);
+    },
+    [isBulkPending, setSelectMode]
+  );
+
+  const ordersInScope = useMemo(
+    () => (selectAllMatchingFilters ? orders : selectedOrders),
+    [selectAllMatchingFilters, orders, selectedOrders]
+  );
+
+  const offPageCount = selectAllMatchingFilters
+    ? 0
+    : selectedOrderIds.length - selectedOrders.length;
 
   const prevPageRef = useRef<number>(page);
 
@@ -205,21 +257,36 @@ export function CallCenterContent() {
     }
   }, [isInitialized, filters, reset]);
 
+  const { prepare, waitForPackaging, callAgain, canSetTarget } = bulkActions;
+
   const handlePrepared = useCallback(() => {
-    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى تم التحضير`);
-  }, [selectedOrders]);
+    prepare(ordersInScope, offPageCount);
+  }, [prepare, ordersInScope, offPageCount]);
 
   const handleAwaitingPackaging = useCallback(() => {
-    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى فى انتظار التغليف`);
-  }, [selectedOrders]);
+    waitForPackaging(ordersInScope, offPageCount);
+  }, [waitForPackaging, ordersInScope, offPageCount]);
 
   const handleCallAgain = useCallback(() => {
-    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى اعادة اتصال`);
-  }, [selectedOrders]);
+    callAgain(ordersInScope, offPageCount);
+  }, [callAgain, ordersInScope, offPageCount]);
 
   const handleChangeProduct = useCallback(() => {
-    toast.info(`سيتم تحديث ${selectedOrders.length} طلب إلى تغيير المنتج`);
-  }, [selectedOrders]);
+    if (isBulkPending) return;
+    if (!canSetTarget('changeProduct')) return;
+    const { eligible, parked, wrongStatus } = splitOrdersForAction(
+      'changeProduct',
+      ordersInScope
+    );
+    warnSkippedForAction('changeProduct', parked, wrongStatus, offPageCount);
+    if (eligible.length === 0) return;
+    setChangeProductOrders(eligible);
+  }, [isBulkPending, canSetTarget, ordersInScope, offPageCount]);
+
+  const handleCloseChangeProduct = useCallback(() => {
+    if (isBulkPending) return;
+    setChangeProductOrders([]);
+  }, [isBulkPending]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -303,9 +370,9 @@ export function CallCenterContent() {
         selectMode={selectMode}
         selectedOrderIds={selectedOrderIds}
         selectAllMatchingFilters={selectAllMatchingFilters}
-        toggleSelectMode={toggleSelectMode}
-        handleSelectAllToggle={handleSelectAllToggle}
-        setSelectMode={setSelectMode}
+        toggleSelectMode={guardedToggleSelectMode}
+        handleSelectAllToggle={guardedSelectAllToggle}
+        setSelectMode={guardedSetSelectMode}
       />
 
       {loading && orders.length === 0 ? (
@@ -329,7 +396,7 @@ export function CallCenterContent() {
                   selectedOrderIds.includes(order.id)
                 }
                 onSelectionChange={(checked) =>
-                  handleOrderSelect(order.id, checked)
+                  guardedOrderSelect(order.id, checked)
                 }
                 id={order.id}
                 code={order.code}
@@ -409,8 +476,16 @@ export function CallCenterContent() {
           position="fixed"
           isAllSelected={selectAllMatchingFilters}
           totalStoreOrders={totalOrders}
+          isLoading={isBulkPending}
         />
       )}
+      <ChangeProductModal
+        isOpen={changeProductOrders.length > 0}
+        onClose={handleCloseChangeProduct}
+        orders={changeProductOrders}
+        onSubmit={bulkActions.changeProduct}
+        isLoading={isBulkPending}
+      />
       {showBackToTop && (
         <Button
           variant="default"
