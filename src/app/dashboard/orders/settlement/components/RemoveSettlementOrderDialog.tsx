@@ -40,7 +40,7 @@ interface RemoveSettlementOrderDialogProps {
   batchId: string;
   orderId: number;
   orderStatus: string;
-  onSuccess: (result: SettlementEditResponse) => void;
+  onSuccess: (result: SettlementEditResponse) => void | Promise<void>;
 }
 
 export default function RemoveSettlementOrderDialog({
@@ -64,7 +64,7 @@ export default function RemoveSettlementOrderDialog({
   const handleConfirm = async () => {
     try {
       const result = await removeSettlementBatchOrder(batchId, orderId, mode);
-      onSuccess(result);
+      await onSuccess(result);
       onClose();
     } catch (err) {
       toast.error(getApiErrorMessage(err, 'تعذر إزالة الطلب من التحصيل'));

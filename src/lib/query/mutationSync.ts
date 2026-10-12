@@ -1,18 +1,30 @@
-import { useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import {
   partialMatchKey,
   useIsFetching,
+  useQueryClient,
+  type InvalidateQueryFilters,
   type QueryClient,
   type QueryKey,
 } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 
+export interface InvalidateAndWaitOptions {
+  refetchType?: InvalidateQueryFilters['refetchType'];
+}
+
 export const invalidateAndWait = async (
   queryClient: QueryClient,
-  keys: QueryKey[]
+  keys: QueryKey[],
+  options: InvalidateAndWaitOptions = {}
 ) => {
   await Promise.all(
-    keys.map((queryKey) => queryClient.invalidateQueries({ queryKey }))
+    keys.map((queryKey) =>
+      queryClient.invalidateQueries({
+        queryKey,
+        refetchType: options.refetchType,
+      })
+    )
   );
 };
 
@@ -25,6 +37,19 @@ export const orderStatusKeys = (orderId?: number): QueryKey[] => [
     ? [QUERY_KEYS.ORDER_DETAILS]
     : [QUERY_KEYS.ORDER_DETAILS, orderId],
 ];
+
+export function useOrderStatusSync() {
+  const queryClient = useQueryClient();
+  return useCallback(
+    (extraKeys: QueryKey[] = [], options?: InvalidateAndWaitOptions) =>
+      invalidateAndWait(
+        queryClient,
+        [...orderStatusKeys(), ...extraKeys],
+        options
+      ),
+    [queryClient]
+  );
+}
 
 export const readFreshQueryData = <T>(
   queryClient: QueryClient,

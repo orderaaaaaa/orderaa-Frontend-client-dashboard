@@ -1,7 +1,10 @@
 'use client';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { invalidateAndWait, orderStatusKeys } from '@/lib/query/mutationSync';
+import { RETURN_RECEIPTS_KEY } from '@/services/returnReceipts';
 import { uploadFile } from '@/lib/api/upload';
 import { submitReturnReceipts } from '@/lib/api/returns-receiving';
 import {
@@ -33,11 +36,30 @@ export function useUploadReceiptProofMutation() {
   });
 }
 
+const LANDING_LIST_KEYS = [
+  [QUERY_KEYS.ORDERS],
+  [QUERY_KEYS.ORDER_STATISTICS],
+];
+
 export function useSubmitReturnReceiptsMutation() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (payload: SubmitReturnReceiptsPayload) =>
       submitReturnReceipts(payload),
-    onSuccess: () => {
+    onSuccess: async () => {
+      await Promise.all([
+        invalidateAndWait(queryClient, LANDING_LIST_KEYS, {
+          refetchType: 'all',
+        }),
+        invalidateAndWait(queryClient, [
+          ...orderStatusKeys().filter(
+            (key) =>
+              !LANDING_LIST_KEYS.some((landing) => landing[0] === key[0])
+          ),
+          [RETURN_RECEIPTS_KEY],
+        ]),
+      ]);
       toast.success('تم إتمام استلام المرتجعات بنجاح');
     },
     onError: (err) => {

@@ -1,6 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import http from '@/lib/api/http';
+import { invalidateAndWait } from '@/lib/query/mutationSync';
 import type { ShippingCompanyRef } from '@/types/shippingCompanies';
 
 /** Mirrors the backend pickup read DTOs (T12). */
@@ -54,6 +60,7 @@ export const usePickupsQuery = (params: {
       }>('/orders/pickups', { params });
       return data;
     },
+    placeholderData: keepPreviousData,
   });
 
 export const usePickupQuery = (id: number | undefined) =>
@@ -77,8 +84,8 @@ export const useReviewPickup = () => {
       );
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [KEY] });
+    onSuccess: async () => {
+      await invalidateAndWait(queryClient, [[KEY]]);
       toast.success('تم تسجيل المراجعة');
     },
     onError: (err: any) => {
