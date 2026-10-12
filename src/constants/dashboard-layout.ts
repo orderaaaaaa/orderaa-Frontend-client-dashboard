@@ -8,7 +8,7 @@ export const SIDEBAR_WIDTH = {
 } as const;
 
 export const FIXED_BOTTOM_BAR_CLASS =
-  'fixed bottom-0 left-0 right-0 lg:right-[var(--sidebar-w,0px)] z-30 transition-[right] duration-300';
+  'fixed bottom-0 left-0 right-0 lg:right-[var(--sidebar-w,0px)] z-30 transition-[right] duration-300 pb-[calc(1rem_+_env(safe-area-inset-bottom))]';
 
 export const BREAKPOINTS = {
   LG: 1024,

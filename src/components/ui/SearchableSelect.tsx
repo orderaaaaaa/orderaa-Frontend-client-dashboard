@@ -236,56 +236,58 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
       >
         {name && <input type="hidden" name={name} value={value} />}
 
-        <button
-          type="button"
-          disabled={disabled || loading}
-          onClick={() => !disabled && !loading && handleOpenChange(!open)}
-          className={cn(
-            'relative px-4 py-3 rounded-lg border flex items-center justify-between truncate text-base cursor-pointer',
-            disabled || loading
-              ? 'bg-muted cursor-not-allowed text-foreground-subtle'
-              : 'bg-card',
-            error ? 'border-red-500' : 'border-surface-strong',
-            triggerClassName
-          )}
-          aria-expanded={open}
-          aria-haspopup="listbox"
-        >
-          <span
+        <div className="relative flex flex-col">
+          <button
+            type="button"
+            disabled={disabled || loading}
+            onClick={() => !disabled && !loading && handleOpenChange(!open)}
             className={cn(
-              'flex-1 truncate text-right',
-              currentDisplayValue ? 'text-foreground-body' : 'text-foreground-secondary'
+              'relative px-4 py-3 rounded-lg border flex items-center justify-between truncate text-base cursor-pointer',
+              disabled || loading
+                ? 'bg-muted cursor-not-allowed text-foreground-subtle'
+                : 'bg-card',
+              error ? 'border-red-500' : 'border-surface-strong',
+              triggerClassName
             )}
+            aria-expanded={open}
+            aria-haspopup="listbox"
           >
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                جاري التحميل...
-              </span>
-            ) : (
-              currentDisplayValue || placeholder
-            )}
-          </span>
+            <span
+              className={cn(
+                'flex-1 truncate text-right',
+                currentDisplayValue ? 'text-foreground-body' : 'text-foreground-secondary'
+              )}
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  جاري التحميل...
+                </span>
+              ) : (
+                currentDisplayValue || placeholder
+              )}
+            </span>
+
+            <ChevronDown
+              className={cn(
+                'w-4 h-4 md:w-5 md:h-5 text-foreground-subtle transition-transform',
+                open && 'rotate-180'
+              )}
+            />
+          </button>
 
           {clearable && value && !disabled && !loading && (
             <button
               type="button"
               onClick={handleClear}
-              className="absolute left-10 top-1/2 -translate-y-1/2 z-20
+              className="absolute end-10 top-1/2 -translate-y-1/2 z-20
                          text-foreground-subtle hover:text-primary cursor-pointer"
-              aria-label="Clear selection"
+              aria-label="مسح الاختيار"
             >
               <X className="w-4 h-4" />
             </button>
           )}
-
-          <ChevronDown
-            className={cn(
-              'w-4 h-4 md:w-5 md:h-5 text-foreground-subtle transition-transform',
-              open && 'rotate-180'
-            )}
-          />
-        </button>
+        </div>
 
         <AnimatePresence>
           {open && (
@@ -294,7 +296,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.15 }}
-              className="md:absolute md:top-full z-50 mt-1 w-full max-h-40 md:max-h-60 overflow-auto
+              className="md:absolute md:top-full z-50 mt-1 w-full max-h-60 overflow-auto
                          rounded-md border bg-popover text-popover-foreground shadow-lg"
               role="listbox"
             >

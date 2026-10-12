@@ -11,6 +11,8 @@ import {
   Clock3,
 } from 'lucide-react';
 import PageTab from '@/components/ui/PageTab';
+import { ScrollEndFade } from '@/components/ui/scroll-end-fade';
+import { useScrollEndFade } from '@/hooks/useScrollEndFade';
 import { useOrderStatusesQuery } from '@/services/orders';
 
 interface PageTabsProps {
@@ -41,6 +43,7 @@ export function PageTabs({
   currentStatus,
 }: PageTabsProps) {
   const { data: statusesData, isLoading: loading } = useOrderStatusesQuery();
+  const { ref: tabsRef, hasMoreAtEnd } = useScrollEndFade<HTMLDivElement>();
   // Permission-scoped on purpose — tabs, not the full label dictionary.
   const statuses = statusesData?.statuses ?? [];
 
@@ -53,7 +56,7 @@ export function PageTabs({
   if (loading) {
     return (
       <div className="w-full">
-        <div className="flex md:grid sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 overflow-x-auto pb-2 md:overflow-x-visible scrollbar-thin -mx-1 px-1">
+        <div className="flex md:grid md:grid-cols-5 lg:grid-cols-6 gap-4 overflow-x-auto pb-2 md:overflow-x-visible scrollbar-thin -mx-1 px-1">
           <div className="animate-pulse h-10 bg-gray-200 rounded-lg min-w-[150px]"></div>
           <div className="animate-pulse h-10 bg-gray-200 rounded-lg min-w-[150px]"></div>
           <div className="animate-pulse h-10 bg-gray-200 rounded-lg min-w-[150px]"></div>
@@ -63,11 +66,14 @@ export function PageTabs({
   }
 
   return (
-    <div className="w-full">
-      <div className="flex md:grid sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 overflow-x-auto pb-2 md:overflow-x-visible scrollbar-hide -mx-1 px-1">
+    <div className="w-full relative">
+      <div
+        ref={tabsRef}
+        className="flex md:grid md:grid-cols-5 lg:grid-cols-6 gap-4 overflow-x-auto pb-2 md:overflow-x-visible scrollbar-hide -mx-1 px-1"
+      >
         <PageTab
           label="جميع الطلبات"
-          count={totalOrders ?? 0}
+          count={totalOrders}
           icon={<Boxes width={18} height={18} />}
           active={currentStatus === null}
           onClick={() => handleTabClick(null)}
@@ -76,13 +82,14 @@ export function PageTabs({
           <PageTab
             key={status.key}
             label={status.label}
-            count={statusCounts?.[status.key] ?? 0}
+            count={statusCounts ? (statusCounts[status.key] ?? 0) : undefined}
             icon={getIconForStatus(status.key)}
             active={currentStatus === status.key}
             onClick={() => handleTabClick(status.key)}
           />
         ))}
       </div>
+      <ScrollEndFade visible={hasMoreAtEnd} className="md:hidden" />
     </div>
   );
 }

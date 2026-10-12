@@ -23,6 +23,11 @@ interface DataTableColumn<T> {
   sortable?: boolean
 }
 
+interface DataTableMobileRowState {
+  selected: boolean
+  toggleSelected: () => void
+}
+
 interface DataTableProps<T extends Record<string, unknown>> {
   columns: DataTableColumn<T>[]
   data: T[]
@@ -41,6 +46,8 @@ interface DataTableProps<T extends Record<string, unknown>> {
   selectable?: boolean
   selectedIds?: Set<string | number>
   onSelectionChange?: (ids: Set<string | number>) => void
+  rowClassName?: (row: T) => string | undefined
+  renderMobileRow?: (row: T, state: DataTableMobileRowState) => React.ReactNode
 }
 
 function DataTable<T extends Record<string, unknown>>({
@@ -61,6 +68,8 @@ function DataTable<T extends Record<string, unknown>>({
   selectable = false,
   selectedIds,
   onSelectionChange,
+  rowClassName,
+  renderMobileRow,
 }: DataTableProps<T>) {
   const allRowIds = data.map((row) => row[keyField] as string | number)
   const allSelected = selectable && allRowIds.length > 0 && selectedIds
@@ -93,6 +102,25 @@ function DataTable<T extends Record<string, unknown>>({
     }
     onSelectionChange(next)
   }
+
+  const handleRowKeyDown = (event: React.KeyboardEvent<HTMLElement>, row: T) => {
+    if (!onRowClick || event.target !== event.currentTarget) return
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      onRowClick(row)
+    }
+  }
+
+  const hasMobileRows = !!renderMobileRow
+  const tableWrapperClass = cn(
+    'rounded-lg border border-gray-100 shadow-md overflow-x-auto',
+    hasMobileRows && 'hidden sm:block',
+    className,
+  )
+  const mobileListClass = cn(
+    'sm:hidden rounded-lg border border-gray-100 shadow-md bg-white divide-y divide-gray-100',
+    className,
+  )
 
   const renderSortIcon = (col: DataTableColumn<T>) => {
     if (!col.sortable || !onSort) return null
@@ -131,140 +159,187 @@ function DataTable<T extends Record<string, unknown>>({
 
   if (isLoading) {
     return (
-      <div
-        className={cn(
-          'rounded-lg border border-gray-100 shadow-md overflow-x-auto',
-          className,
+      <>
+        {hasMobileRows && (
+          <div className={mobileListClass} aria-busy>
+            {Array.from({ length: skeletonRows }).map((_, i) => (
+              <div key={i} className="p-4 space-y-2">
+                <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3" />
+                <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2" />
+              </div>
+            ))}
+          </div>
         )}
-      >
+        <div className={tableWrapperClass}>
+          <Table className="w-full min-w-max sm:min-w-0 bg-white">
+            <TableHeader>
+              <TableRow className={cn('bg-[#f1eefa]', headerClassName)}>
+                {selectable && (
+                  <TableHead className="px-2 py-2 sm:px-4 sm:py-4 border-l border-gray-200 w-12 text-center">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-5 mx-auto" />
+                  </TableHead>
+                )}
+                {columns.map((col) => renderHeader(col, true))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: skeletonRows }).map((_, i) => (
+                <TableRow key={i}>
+                  {selectable && (
+                    <TableCell className="px-2 py-2 sm:px-4 sm:py-3 border-l border-gray-200 w-12 text-center">
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-5 mx-auto" />
+                    </TableCell>
+                  )}
+                  {columns.map((col) => (
+                    <TableCell
+                      key={col.key}
+                      className={cn(
+                        'px-2 py-2 sm:px-4 sm:py-3 border-l border-gray-200 last:border-l-0 whitespace-normal max-sm:!w-auto',
+                        col.className,
+                      )}
+                    >
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-full max-w-20" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </>
+    )
+  }
+
+  const isEmpty = data.length === 0 && !!(emptyMessage || emptyContent)
+
+  return (
+    <>
+      {hasMobileRows && (
+        <div className={mobileListClass}>
+          {isEmpty ? (
+            <div className="px-4 py-8 text-center text-sm text-gray-500">
+              {emptyContent ?? emptyMessage}
+            </div>
+          ) : (
+            <ul className="divide-y divide-gray-100">
+              {data.map((row) => {
+                const rowId = row[keyField] as string | number
+                const isSelected = !!(selectable && selectedIds?.has(rowId))
+                const subRowContent = renderSubRow?.(row)
+                return (
+                  <li key={String(rowId)}>
+                    <div
+                      onClick={onRowClick ? () => onRowClick(row) : undefined}
+                      onKeyDown={onRowClick ? (event) => handleRowKeyDown(event, row) : undefined}
+                      tabIndex={onRowClick ? 0 : undefined}
+                      className={cn(
+                        'p-4 text-sm',
+                        onRowClick && 'cursor-pointer hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50',
+                        isSelected && 'bg-blue-50/40',
+                        rowClassName?.(row),
+                      )}
+                    >
+                      {renderMobileRow?.(row, {
+                        selected: isSelected,
+                        toggleSelected: () => handleSelectRow(rowId),
+                      })}
+                    </div>
+                    {subRowContent}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </div>
+      )}
+      <div className={tableWrapperClass}>
         <Table className="w-full min-w-max sm:min-w-0 bg-white">
           <TableHeader>
             <TableRow className={cn('bg-[#f1eefa]', headerClassName)}>
               {selectable && (
-                <TableHead className="px-2 py-2 sm:px-4 sm:py-4 border-l border-gray-200 w-12 text-center">
-                  <div className="h-4 bg-gray-200 rounded animate-pulse w-5 mx-auto" />
+                <TableHead className="!px-2 !py-2 sm:!px-4 sm:!py-4 border-l border-gray-200 w-12">
+                  <div className="flex items-center justify-center">
+                    <Checkbox
+                      checked={allSelected ? true : someSelected ? 'indeterminate' : false}
+                      onCheckedChange={handleSelectAll}
+                    />
+                  </div>
                 </TableHead>
               )}
-              {columns.map((col) => renderHeader(col, true))}
+              {columns.map((col) => renderHeader(col))}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {Array.from({ length: skeletonRows }).map((_, i) => (
-              <TableRow key={i}>
-                {selectable && (
-                  <TableCell className="px-2 py-2 sm:px-4 sm:py-3 border-l border-gray-200 w-12 text-center">
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-5 mx-auto" />
-                  </TableCell>
-                )}
-                {columns.map((col) => (
-                  <TableCell
-                    key={col.key}
-                    className={cn(
-                      'px-2 py-2 sm:px-4 sm:py-3 border-l border-gray-200 last:border-l-0 whitespace-normal max-sm:!w-auto',
-                      col.className,
-                    )}
-                  >
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-full max-w-20" />
-                  </TableCell>
-                ))}
+            {data.length === 0 && (emptyMessage || emptyContent) ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length + (selectable ? 1 : 0)}
+                  className="px-4 py-8 text-center text-sm text-gray-500"
+                >
+                  {emptyContent ?? emptyMessage}
+                </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              data.map((row) => {
+                const rowId = row[keyField] as string | number
+                const isSelected = selectable && selectedIds?.has(rowId)
+                const subRowContent = renderSubRow?.(row)
+                return (
+                  <React.Fragment key={String(rowId)}>
+                    <TableRow
+                      onClick={() => onRowClick?.(row)}
+                      onKeyDown={onRowClick ? (event) => handleRowKeyDown(event, row) : undefined}
+                      tabIndex={onRowClick ? 0 : undefined}
+                      className={cn(
+                        onRowClick && 'cursor-pointer hover:bg-gray-50 focus-visible:outline-none focus-visible:bg-gray-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50',
+                        isSelected ? 'bg-blue-50/40' : '',
+                        rowClassName?.(row),
+                      )}
+                    >
+                      {selectable && (
+                        <TableCell className="!px-2 !py-2 sm:!px-4 sm:!py-3 border-l border-gray-200 w-12">
+                          <div className="flex items-center justify-center">
+                            <Checkbox
+                              checked={!!isSelected}
+                              onCheckedChange={() => handleSelectRow(rowId)}
+                            />
+                          </div>
+                        </TableCell>
+                      )}
+                      {columns.map((col) => (
+                        <TableCell
+                          key={col.key}
+                          className={cn(
+                            'px-2 py-2 sm:px-4 sm:py-3 border-l border-gray-200 last:border-l-0 whitespace-normal text-xs sm:text-sm max-sm:!w-auto',
+                            col.className,
+                          )}
+                        >
+                          {col.render
+                            ? col.render(row[col.key], row)
+                            : String(row[col.key] ?? '')}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                    {subRowContent && (
+                      <TableRow>
+                        <TableCell
+                          colSpan={columns.length + (selectable ? 1 : 0)}
+                          className="p-0 border-l-0"
+                        >
+                          {subRowContent}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
+                )
+              })
+            )}
           </TableBody>
         </Table>
       </div>
-    )
-  }
-
-  return (
-    <div
-      className={cn(
-        'rounded-lg border border-gray-100 shadow-md overflow-x-auto',
-        className,
-      )}
-    >
-      <Table className="w-full min-w-max sm:min-w-0 bg-white">
-        <TableHeader>
-          <TableRow className={cn('bg-[#f1eefa]', headerClassName)}>
-            {selectable && (
-              <TableHead className="!px-2 !py-2 sm:!px-4 sm:!py-4 border-l border-gray-200 w-12">
-                <div className="flex items-center justify-center">
-                  <Checkbox
-                    checked={allSelected ? true : someSelected ? 'indeterminate' : false}
-                    onCheckedChange={handleSelectAll}
-                  />
-                </div>
-              </TableHead>
-            )}
-            {columns.map((col) => renderHeader(col))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.length === 0 && (emptyMessage || emptyContent) ? (
-            <TableRow>
-              <TableCell
-                colSpan={columns.length + (selectable ? 1 : 0)}
-                className="px-4 py-8 text-center text-sm text-gray-500"
-              >
-                {emptyContent ?? emptyMessage}
-              </TableCell>
-            </TableRow>
-          ) : (
-            data.map((row) => {
-              const rowId = row[keyField] as string | number
-              const isSelected = selectable && selectedIds?.has(rowId)
-              const subRowContent = renderSubRow?.(row)
-              return (
-                <React.Fragment key={String(rowId)}>
-                  <TableRow
-                    onClick={() => onRowClick?.(row)}
-                    className={cn(
-                      onRowClick && 'cursor-pointer hover:bg-gray-50',
-                      isSelected ? 'bg-blue-50/40' : '',
-                    )}
-                  >
-                    {selectable && (
-                      <TableCell className="!px-2 !py-2 sm:!px-4 sm:!py-3 border-l border-gray-200 w-12">
-                        <div className="flex items-center justify-center">
-                          <Checkbox
-                            checked={!!isSelected}
-                            onCheckedChange={() => handleSelectRow(rowId)}
-                          />
-                        </div>
-                      </TableCell>
-                    )}
-                    {columns.map((col) => (
-                      <TableCell
-                        key={col.key}
-                        className={cn(
-                          'px-2 py-2 sm:px-4 sm:py-3 border-l border-gray-200 last:border-l-0 whitespace-normal text-xs sm:text-sm max-sm:!w-auto',
-                          col.className,
-                        )}
-                      >
-                        {col.render
-                          ? col.render(row[col.key], row)
-                          : String(row[col.key] ?? '')}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  {subRowContent && (
-                    <TableRow>
-                      <TableCell
-                        colSpan={columns.length + (selectable ? 1 : 0)}
-                        className="p-0 border-l-0"
-                      >
-                        {subRowContent}
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </React.Fragment>
-              )
-            })
-          )}
-        </TableBody>
-      </Table>
-    </div>
+    </>
   )
 }
 
 export { DataTable }
-export type { DataTableColumn, DataTableProps }
+export type { DataTableColumn, DataTableProps, DataTableMobileRowState }

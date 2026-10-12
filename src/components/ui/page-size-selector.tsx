@@ -42,7 +42,10 @@ export default function PageSizeSelector({
   return (
     <div className="relative" ref={dropdownRef}>
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
+        aria-haspopup="true"
+        aria-expanded={isOpen}
         className="flex gap-2 text-sm bg-primary rounded-full text-white py-2 px-4 justify-center items-center cursor-pointer hover:bg-[#682fee] transition-colors min-w-[80px]"
       >
         <span className="font-medium">{displayValue}</span>
@@ -55,13 +58,14 @@ export default function PageSizeSelector({
       </button>
 
       {isOpen && (
-        <div className="absolute bottom-full right-[-15px] mb-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[120px] overflow-hidden">
+        <div className="absolute bottom-full start-[-15px] mb-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[120px] overflow-hidden">
           <div className="py-1">
             {PAGE_SIZE_OPTIONS.map((size) => (
               <button
+                type="button"
                 key={size}
                 onClick={() => handleSizeSelect(size)}
-                className={`w-full text-right px-4 py-2 text-sm hover:bg-primary/10 transition-colors ${currentSize === size
+                className={`w-full text-start px-4 py-2 text-sm hover:bg-primary/10 transition-colors ${currentSize === size
                     ? 'bg-primary/20 text-primary font-medium'
                     : 'text-gray-700'
                   }`}
@@ -70,8 +74,9 @@ export default function PageSizeSelector({
               </button>
             ))}
             <button
+              type="button"
               onClick={() => handleSizeSelect(totalItems)}
-              className={`w-full text-right px-4 py-2 text-sm hover:bg-primary/10 transition-colors border-t border-gray-100 ${currentSize === totalItems
+              className={`w-full text-start px-4 py-2 text-sm hover:bg-primary/10 transition-colors border-t border-gray-100 ${currentSize === totalItems
                   ? 'bg-primary/20 text-primary font-medium'
                   : 'text-gray-700'
                 }`}

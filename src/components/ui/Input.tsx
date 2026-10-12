@@ -30,6 +30,8 @@ type InputProps = {
   step?: number | string;
   autoFocus?: boolean;
   id?: string;
+  'aria-label'?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
 };
 
 type InputCoreProps = Omit<InputProps, 'control'>;
@@ -115,27 +117,6 @@ const InputCore = forwardRef<HTMLInputElement, InputCoreProps>(function InputCor
         </label>
       )}
       <div className="relative">
-        {type === 'password' && (
-          <Button
-            variant="ghost"
-            type="button"
-            onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 focus:outline-none"
-            tabIndex={-1}
-          >
-            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-          </Button>
-        )}
-        {showClearButton && type !== 'password' && (
-          <Button
-            variant="ghost"
-            onClick={handleClear}
-            className="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
-            tabIndex={-1}
-          >
-            <X size={18} />
-          </Button>
-        )}
         <input
           ref={setInputRef}
           type={inputType}
@@ -156,6 +137,28 @@ const InputCore = forwardRef<HTMLInputElement, InputCoreProps>(function InputCor
           {...(register ? { ...register(name, registerOptions) } : {})}
           {...rest}
         />
+        {type === 'password' && (
+          <Button
+            variant="ghost"
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 focus:outline-none"
+            aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </Button>
+        )}
+        {showClearButton && type !== 'password' && (
+          <Button
+            variant="ghost"
+            type="button"
+            onClick={handleClear}
+            className="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
+            aria-label="مسح"
+          >
+            <X size={18} />
+          </Button>
+        )}
         {Icon && (
           <div className="absolute start-3 top-1/2 transform -translate-y-1/2 text-primary">
             <Icon size={20} />

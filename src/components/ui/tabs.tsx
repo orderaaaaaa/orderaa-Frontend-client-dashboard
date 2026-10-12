@@ -24,7 +24,7 @@ function TabsList({
   return (
     <TabsPrimitive.List
       className={cn(
-        'inline-flex w-full items-center justify-center rounded-full bg-gray-100 p-1',
+        'inline-flex w-full items-center justify-center-safe overflow-x-auto rounded-full bg-gray-100 p-1',
         className,
       )}
       {...props}
@@ -39,7 +39,7 @@ function TabsTrigger({
   return (
     <TabsPrimitive.Trigger
       className={cn(
-        'inline-flex flex-1 items-center justify-center rounded-full px-4 py-2 text-sm font-medium text-gray-600 transition-colors cursor-pointer',
+        'inline-flex flex-1 shrink-0 whitespace-nowrap min-h-10 items-center justify-center rounded-full px-4 py-2 text-sm font-medium text-gray-600 transition-colors cursor-pointer',
         'hover:text-gray-800',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
         'disabled:pointer-events-none disabled:opacity-50',

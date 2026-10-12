@@ -3,8 +3,10 @@
 import React, { ReactNode, useState } from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { LiaTimesSolid } from 'react-icons/lia';
+import { toast } from 'react-toastify';
 import { Button } from './button';
 import { cn } from '@/lib/utils';
+import { getApiErrorMessage } from '@/utils/apiError';
 
 export const ModalContainerContext = React.createContext<HTMLElement | null>(
   null
@@ -26,6 +28,7 @@ interface BaseModalProps {
   confirmDisabled?: boolean;
   maxWidth?: string;
   height?: string;
+  toastOnConfirmError?: boolean;
 }
 
 export default function BaseModal({
@@ -44,6 +47,7 @@ export default function BaseModal({
   confirmDisabled = false,
   maxWidth = 'md:max-w-[827px]',
   height,
+  toastOnConfirmError = false,
 }: BaseModalProps) {
   const [internalIsLoading, setInternalIsLoading] = useState(false);
   const isLoading = externalIsLoading || internalIsLoading;
@@ -56,7 +60,11 @@ export default function BaseModal({
         await onConfirm();
         setInternalIsLoading(false);
       } catch (error) {
-        console.error('Confirmation action failed:', error);
+        if (toastOnConfirmError) {
+          toast.error(getApiErrorMessage(error, 'حدث خطأ، حاول مرة أخرى'));
+        } else {
+          console.error('Confirmation action failed:', error);
+        }
         setInternalIsLoading(false);
       }
     }
@@ -78,7 +86,8 @@ export default function BaseModal({
             'bg-white rounded-[20px] shadow-xl flex flex-col max-h-[85vh]',
             'w-[95vw] sm:w-[90vw]',
             maxWidth,
-            height
+            height,
+            'max-sm:w-[95vw]'
           )}
           onPointerDownOutside={(e) => {
             if (isLoading) e.preventDefault();
@@ -89,19 +98,20 @@ export default function BaseModal({
         >
           <ModalContainerContext.Provider value={contentEl}>
             <div
-              className="h-[60px] rounded-t-[20px] flex items-center justify-center px-8 flex-shrink-0 relative"
+              className="min-h-[60px] py-3 ps-15 pe-15 rounded-t-[20px] flex items-center justify-center flex-shrink-0 relative"
               style={{
                 background:
                   'linear-gradient(105.28deg, #FFFFFF 1.48%, #CBB5FD 182.49%, #FFFFFF 187.88%)',
               }}
             >
-              <DialogPrimitive.Title className="text-xl font-bold text-black text-center">
+              <DialogPrimitive.Title className="text-xl font-bold text-black text-center break-words min-w-0">
                 {title}
               </DialogPrimitive.Title>
 
               <DialogPrimitive.Close
                 disabled={isLoading}
-                className="absolute left-8 flex items-center justify-center hover:opacity-70 transition-opacity disabled:opacity-50"
+                aria-label="إغلاق"
+                className="absolute end-5 top-1/2 -translate-y-1/2 size-10 flex items-center justify-center hover:opacity-70 transition-opacity disabled:opacity-50"
               >
                 <LiaTimesSolid className="w-4 h-4 text-black cursor-pointer" />
               </DialogPrimitive.Close>
@@ -111,7 +121,7 @@ export default function BaseModal({
               {title}
             </DialogPrimitive.Description>
 
-            <div className="flex-1 px-8 py-6 overflow-y-auto">{children}</div>
+            <div className="flex-1 px-4 sm:px-8 py-6 overflow-y-auto">{children}</div>
 
           {showFooter && (
             <div className="px-4 sm:px-8 pb-4 flex gap-2 sm:gap-4 justify-between flex-shrink-0 pt-3">
@@ -121,7 +131,7 @@ export default function BaseModal({
                 disabled={isLoading}
                 className={
                   cancelButtonClassName ||
-                  'w-[120px] h-[33px] sm:w-[146px] sm:h-[37px] bg-white border-[1.5px] border-[#ECECEC] rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-gray-50 transition-colors disabled:opacity-50'
+                  'w-[120px] h-10 sm:w-[146px] sm:h-[37px] bg-white border-[1.5px] border-[#ECECEC] rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-gray-50 transition-colors disabled:opacity-50'
                 }
               >
                 <LiaTimesSolid className="w-4 h-4 sm:w-5 sm:h-5 text-[#5F5E5E]" />
@@ -137,7 +147,7 @@ export default function BaseModal({
                   disabled={isLoading || confirmDisabled}
                   className={
                     confirmButtonClassName ||
-                    'w-[120px] h-[33px] sm:w-[146px] sm:h-[37px] bg-primary border-[1.5px] border-primary rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                    'w-[120px] h-10 sm:w-[146px] sm:h-[37px] bg-primary border-[1.5px] border-primary rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                   }
                 >
                   {confirmIcon}
