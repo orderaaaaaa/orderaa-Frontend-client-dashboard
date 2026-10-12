@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { LiaExclamationTriangleSolid, LiaGhostSolid, LiaEyeSolid } from 'react-icons/lia';
+import { LiaExclamationTriangleSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
 import { Button } from '@/components/ui/button';
+import { CustomerBadgeChip } from '../CustomerBadgeChip';
+import type { CustomerBadge } from '../../types/customer';
 
 interface CustomerBanConfirmationModalProps {
   id: string;
@@ -15,19 +17,15 @@ interface CustomerBanConfirmationModalProps {
     name: string;
     isBlocked?: boolean;
     notes?: string | string[];
+    badge?: CustomerBadge | null;
   };
 }
-
-const patches = [
-  { icon: <LiaGhostSolid className="w-4 h-4" />, state: 'عميل شبح' },
-  { icon: <LiaEyeSolid className="w-4 h-4" />, state: 'عميل متفرج' },
-];
 
 const CustomerBanConfirmationModal: React.FC<
   CustomerBanConfirmationModalProps
 > = ({ id, isOpen, onClose, onConfirm, customer }) => {
   const initialNote = Array.isArray(customer?.notes)
-    ? customer.notes.join(', ')
+    ? customer.notes.join('، ')
     : customer?.notes || '';
 
   const [note, setNote] = useState(initialNote);
@@ -65,22 +63,14 @@ const CustomerBanConfirmationModal: React.FC<
         </div>
 
         <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">
+          <h3 className="text-xl font-bold text-gray-900 break-words">
             {customer?.name}
           </h3>
-          <div className="flex flex-wrap gap-2">
-            {patches.map((patch, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-white"
-              >
-                <span className="text-primary">{patch.icon}</span>
-                <span className="text-gray-700 text-xs md:text-sm font-medium">
-                  {patch.state}
-                </span>
-              </div>
-            ))}
-          </div>
+          {customer?.badge && (
+            <div className="mt-3">
+              <CustomerBadgeChip badge={customer.badge} />
+            </div>
+          )}
         </div>
 
         {!isUnbanning && (

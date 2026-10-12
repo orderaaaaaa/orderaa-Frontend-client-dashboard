@@ -1,27 +1,24 @@
 import http from '@/lib/api/http';
-import { PaginatedCustomers } from '../types/customer';
+import { GetCustomersParams, PaginatedCustomers } from '../types/customer';
 
-export async function getCustomers(
+export async function getCustomers({
   page = 1,
   limit = 10,
-  search?: string,
-  isBlocked?: boolean,
-  latestOrderStatus?: string
-): Promise<PaginatedCustomers> {
-  const params: Record<string, any> = {
-    page,
-    limit,
-  };
+  search,
+  isBlocked,
+  latestOrderStatus,
+  badge,
+  segment,
+}: GetCustomersParams): Promise<PaginatedCustomers> {
+  const params: GetCustomersParams = { page, limit };
 
-  if (search !== undefined && search !== '') {
-    params.search = search;
-  }
-  if (isBlocked !== undefined) {
-    params.isBlocked = isBlocked;
-  }
+  if (search !== undefined && search !== '') params.search = search;
+  if (isBlocked !== undefined) params.isBlocked = isBlocked;
   if (latestOrderStatus !== undefined && latestOrderStatus !== '') {
     params.latestOrderStatus = latestOrderStatus;
   }
+  if (badge !== undefined) params.badge = badge;
+  if (segment !== undefined && segment !== 'all') params.segment = segment;
 
   const { data } = await http.get<PaginatedCustomers>('/customers', {
     params,

@@ -6,28 +6,26 @@ import LoadingAnimation from '@/components/ui/loadingAnimation';
 import { useCustomer } from '../../hooks/useGetCustomerId';
 import OrdersTab from './CustomerModalComponents/CustomersDetailsOrders';
 import StatsTab from './CustomerModalComponents/CustomersDetailsStats';
-import { Customer, Order } from '../../types/customer';
+import { CustomerBadge } from '../../types/customer';
+import { ErrorState } from '@/components/ui/state-panels';
 import { CustomersDetailsHeader } from './CustomerModalComponents/CustomersDetailsHeader';
 import CustomersDetailsShare from './CustomerModalComponents/CustomersDetailsShare';
 import CustomersDetailsTotalStats from './CustomerModalComponents/CustomersDetailsTotalStats';
 
 interface CustomerDetailsModalProps {
   customerId?: number;
+  badge: CustomerBadge | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
 const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
   customerId,
+  badge,
   isOpen,
   onClose,
 }) => {
-  const { data, isLoading, isError, refetch } = useCustomer(customerId) as {
-    data: (Customer & { orders: Order[] }) | undefined;
-    isLoading: boolean;
-    isError: boolean;
-    refetch: () => void;
-  };
+  const { data, isLoading, isError, error, refetch } = useCustomer(customerId);
 
   useEffect(() => {
     if (isOpen && customerId) {
@@ -61,14 +59,17 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
       {isLoading ? (
         <LoadingAnimation />
       ) : isError || !data ? (
-        <div className="p-10 text-center text-red-600">
-          حدث خطأ أثناء تحميل البيانات
-        </div>
+        <ErrorState
+          error={error}
+          fallback="تعذّر تحميل بيانات العميل"
+          onRetry={() => refetch()}
+        />
       ) : (
         <div>
           <CustomersDetailsHeader
             isBlocked={data.isBlocked}
             username={data.name}
+            badge={badge}
           />
 
           <CustomersDetailsShare

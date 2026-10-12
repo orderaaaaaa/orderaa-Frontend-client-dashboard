@@ -25,6 +25,7 @@ import { EmployeeCardProps } from '../add-employee/types/employee.types';
 import Link from 'next/link';
 import { Can } from '@/components/Can';
 import { PERMISSIONS } from '@/lib/permissions';
+import BaseModal from '@/components/ui/base-modal';
 
 export const EmployeeCard = memo(function EmployeeCard({
   employee,
@@ -51,11 +52,13 @@ export const EmployeeCard = memo(function EmployeeCard({
     setActivationMutation.mutate({ id: employee.id, isActive: true });
   };
 
-  const confirmDeactivate = () => {
-    setActivationMutation.mutate(
-      { id: employee.id, isActive: false },
-      { onSuccess: () => setConfirmDeactivateOpen(false) },
-    );
+  const confirmDeactivate = async () => {
+    await setActivationMutation
+      .mutateAsync({ id: employee.id, isActive: false })
+      .then(
+        () => setConfirmDeactivateOpen(false),
+        () => undefined,
+      );
   };
 
   const statusColor = isOnline ? '#3cc900' : '#9ca3af';
@@ -84,24 +87,25 @@ export const EmployeeCard = memo(function EmployeeCard({
 
   return (
     <div
-      className={`bg-white relative rounded-2xl shadow-sm border border-gray-100 p-4 max-w-[420px] ${
+      className={`bg-white relative rounded-2xl shadow-sm border border-gray-100 p-4 w-full max-w-[420px] ${
         isActive ? '' : 'opacity-60 grayscale'
       }`}
     >
       {/* Header */}
       <div className="flex flex-row-reverse items-center justify-end gap-4 mb-4">
         <Can code={PERMISSIONS.EMPLOYEES_UPDATE}>
-          <Link href={`employees/employee-settings/${employee.id}`}>
-            <Edit
-              size={20}
-              className="text-gray-600 absolute top-5 left-5 hover:text-gray-900 cursor-pointer"
-            />
+          <Link
+            href={`/dashboard/employees/employee-settings/${employee.id}`}
+            aria-label={`تعديل ${employee.fullName}`}
+            className="absolute top-3 end-5 size-10 flex items-center justify-center rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+          >
+            <Edit size={20} aria-hidden />
           </Link>
         </Can>
 
         {/* Name, roles & organisational chips */}
         <div className="text-right">
-          <h3 className="text-2xl font-bold text-gray-900 my-2">
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 my-2 pe-10 break-words">
             {employee.fullName}
           </h3>
 
@@ -276,40 +280,22 @@ export const EmployeeCard = memo(function EmployeeCard({
       </div>
 
       {/* Deactivation confirmation — states both consequences, per T17 §7. */}
-      {confirmDeactivateOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div
-            dir="rtl"
-            className="bg-white rounded-2xl p-6 max-w-[420px] w-full text-right shadow-xl"
-          >
-            <h4 className="text-lg font-bold text-gray-900 mb-3">
-              إيقاف حساب {employee.fullName}؟
-            </h4>
-            <p className="text-sm text-gray-600 mb-6 leading-relaxed">
-              لن يتمكن الموظف من استخدام النظام مباشرةً، وسيتم إلغاء قفل الطلبات
-              التي يعمل عليها ليتمكن الموظفون الآخرون من متابعتها. يمكنك تنشيط
-              الحساب مرة أخرى في أي وقت.
-            </p>
-            <div className="flex items-center gap-3 justify-start">
-              <button
-                type="button"
-                onClick={confirmDeactivate}
-                disabled={setActivationMutation.isPending}
-                className="bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-xl py-2.5 px-6 font-medium transition-colors"
-              >
-                إيقاف الحساب
-              </button>
-              <button
-                type="button"
-                onClick={() => setConfirmDeactivateOpen(false)}
-                className="border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-xl py-2.5 px-6 font-medium transition-colors"
-              >
-                إلغاء
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <BaseModal
+        isOpen={confirmDeactivateOpen}
+        onClose={() => setConfirmDeactivateOpen(false)}
+        title={`إيقاف حساب ${employee.fullName}؟`}
+        onConfirm={confirmDeactivate}
+        confirmText="إيقاف الحساب"
+        isLoading={setActivationMutation.isPending}
+        confirmButtonClassName="w-[120px] h-10 sm:w-[146px] sm:h-[37px] bg-red-600 border-[1.5px] border-red-600 rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        maxWidth="md:max-w-[420px]"
+      >
+        <p className="text-sm text-gray-600 leading-relaxed text-right">
+          لن يتمكن الموظف من استخدام النظام مباشرةً، وسيتم إلغاء قفل الطلبات
+          التي يعمل عليها ليتمكن الموظفون الآخرون من متابعتها. يمكنك تنشيط
+          الحساب مرة أخرى في أي وقت.
+        </p>
+      </BaseModal>
 
       {/* Attendance Modals */}
       <AttendanceModal

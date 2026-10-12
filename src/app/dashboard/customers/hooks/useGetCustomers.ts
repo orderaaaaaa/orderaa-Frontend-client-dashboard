@@ -1,28 +1,27 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { getCustomers } from '../api/getCustomers';
-import { PaginatedCustomers } from '../types/customer';
+import { GetCustomersParams, PaginatedCustomers } from '../types/customer';
 
-interface UseGetCustomersParams {
-  page?: number;
-  limit?: number;
-  search?: string;
-  isBlocked?: boolean;
-  latestOrderStatus?: string;
-}
+export const CUSTOMERS_QUERY_KEY = 'customers';
 
 export function useGetCustomers(
-  params: UseGetCustomersParams = {},
+  params: GetCustomersParams = {},
   options?: Omit<UseQueryOptions<PaginatedCustomers>, 'queryKey' | 'queryFn'>
 ) {
-  const { page = 1, limit = 10, search, isBlocked, latestOrderStatus } = params;
+  const {
+    page = 1,
+    limit = 10,
+    search,
+    isBlocked,
+    latestOrderStatus,
+    badge,
+    segment,
+  } = params;
+  const query = { page, limit, search, isBlocked, latestOrderStatus, badge, segment };
 
   return useQuery({
-    queryKey: [
-      'customers',
-      { page, limit, search, isBlocked, latestOrderStatus },
-    ],
-    queryFn: () =>
-      getCustomers(page, limit, search, isBlocked, latestOrderStatus),
+    queryKey: [CUSTOMERS_QUERY_KEY, query],
+    queryFn: () => getCustomers(query),
     ...options,
   });
 }

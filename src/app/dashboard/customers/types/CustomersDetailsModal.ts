@@ -1,4 +1,4 @@
-import { Order } from './customer';
+import { CustomerBadge, Order } from './customer';
 
 export interface CustomersDetailsTotalStatsProps {
   latestOrder: Order | null;
@@ -32,5 +32,6 @@ export interface NotesTabProps {
 
 export interface CustomersDetailsHeaderProps {
   isBlocked: boolean;
-  username: String;
+  username: string;
+  badge: CustomerBadge | null;
 }

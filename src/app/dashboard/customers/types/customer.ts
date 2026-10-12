@@ -1,7 +1,8 @@
-export interface Location {
-  id?: number;
-  name?: string;
-}
+export type CustomerBadge = 'ghost' | 'window' | 'high' | 'bulk' | 'loyal';
+
+export type CustomerBadgeFilter = CustomerBadge | 'none';
+
+export type CustomerSegment = 'all' | 'premium';
 
 export interface Order {
   id: number;
@@ -17,20 +18,41 @@ export interface Customer {
   phoneNumbers: string[];
   email?: string;
   numberOfOrders: number;
-  latestOrder: Order | null;
+  latestOrder?: Order;
   totalAmount: number;
-  notes: string;
+  notes: string[];
   isBlocked: boolean;
-  /** Mirrors `CustomerResponseDto.blockedUntil` — only meaningful with isBlocked. */
-  blockedUntil?: string | null;
-
-  governorate: string | null;
-  city: string | null;
-  area: string | null;
-  address: string;
-
   createdAt: string;
   updatedAt: string;
+  badge: CustomerBadge | null;
+  deliveredCount: number;
+  returnedCount: number;
+  cancelledCount: number;
+  deliveredValue: number;
+}
+
+export interface CustomerDetailOrderProduct {
+  id: number;
+}
+
+export interface CustomerDetailOrder extends Order {
+  notes: string | null;
+  order_products: CustomerDetailOrderProduct[];
+}
+
+export interface CustomerDetail {
+  id: number;
+  name: string;
+  phoneNumbers: string[];
+  email?: string;
+  numberOfOrders: number;
+  latestOrder: Order | null;
+  totalAmount: number;
+  notes: string[];
+  isBlocked: boolean;
+  createdAt: string;
+  updatedAt: string;
+  orders: CustomerDetailOrder[];
 }
 
 export interface PaginationMeta {
@@ -53,4 +75,38 @@ export interface GetCustomersParams {
   search?: string;
   isBlocked?: boolean;
   latestOrderStatus?: string;
+  badge?: CustomerBadgeFilter;
+  segment?: CustomerSegment;
+}
+
+export interface CustomerBadgeThresholds {
+  highValueMinDelivered: number;
+  bulkMinAvgPieces: number;
+  loyalMinDelivered: number;
+  loyalMinSuccessPercent: number;
+  ghostMinReturns: number;
+  windowMinOrders: number;
+  windowMinCancelled: number;
+}
+
+export interface CustomerBadgeSettings {
+  thresholds: CustomerBadgeThresholds;
+  enabledBadges: CustomerBadge[];
+  isDefault: boolean;
+}
+
+export interface UpdateCustomerBadgeSettingsPayload {
+  thresholds?: Partial<CustomerBadgeThresholds>;
+  enabledBadges?: CustomerBadge[];
+}
+
+export interface CustomerBadgeCounts {
+  total: number;
+  loyal: number;
+  bulk: number;
+  ghost: number;
+  window: number;
+  high: number;
+  none: number;
+  premium: number;
 }

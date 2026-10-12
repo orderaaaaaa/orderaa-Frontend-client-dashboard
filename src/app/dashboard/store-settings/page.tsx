@@ -19,6 +19,7 @@ import { mapSettingsToForm } from './utils/mapSettingsToForm';
 import { ORDER_SETTINGS_DEFAULTS } from './schemas/store.defaults';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import CustomerBadgeSettingsSection from './components/CustomerBadgeSettingsSection';
 
 export default function OrderSettingsPage() {
   const { settings, isLoading, isError, refetch, updateSettings, isUpdating } =
@@ -166,6 +167,7 @@ export default function OrderSettingsPage() {
           </Button>
         </div>
       </form>
+      <CustomerBadgeSettingsSection />
     </div>
   );
 }
