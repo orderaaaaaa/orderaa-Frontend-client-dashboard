@@ -482,6 +482,7 @@ const IntegrationModal = ({
                     <CopyField
                       label="رابط الاستقبال (Webhook URL)"
                       value={webhookForm.watch('webhookUrl')?.trim() ?? ''}
+                      maskToken
                       placeholder="https://..."
                       inputClassName="bg-gray-50"
                     />
@@ -491,7 +492,7 @@ const IntegrationModal = ({
                       <Input
                         register={webhookForm.register}
                         name="webhookSecret"
-                        label="Webhook Secret"
+                        label="المفتاح السري (Webhook Secret)"
                         placeholder="أدخل مفتاح Webhook..."
                         error={
                           webhookForm.formState.errors.webhookSecret?.message
@@ -570,7 +571,7 @@ const IntegrationModal = ({
                     <Input
                       register={apiKeyForm.register}
                       name="apiKey"
-                      label="Client Secret"
+                      label="المفتاح السري للتطبيق (Client Secret)"
                       placeholder="أدخل Client Secret..."
                       error={apiKeyForm.formState.errors.apiKey?.message}
                     />
@@ -751,7 +752,7 @@ const IntegrationModal = ({
                         {apiConfig && !isOAuthConnect && (
                           <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                              Client Secret
+                              الربط عبر API
                             </p>
                             <CopyField
                               label="المفتاح السري للتطبيق (Client Secret)"

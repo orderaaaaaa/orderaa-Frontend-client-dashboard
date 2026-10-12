@@ -362,7 +362,7 @@ const EditIntegrationModal = ({
                 {AUTOMATIC_WEBHOOK_NOTE}
               </p>
             ) : (
-              <CopyField label="رابط الاستقبال (Webhook URL)" value={webhookUrl} />
+              <CopyField label="رابط الاستقبال (Webhook URL)" value={webhookUrl} maskToken />
             )}
 
             {isAutomaticWebhook ? null : hasGeneratedToken ? (
@@ -439,7 +439,7 @@ const EditIntegrationModal = ({
               </Button>
             </div>
 
-            <CopyField label="رابط الاستقبال (Webhook URL)" value={webhookUrl} />
+            <CopyField label="رابط الاستقبال (Webhook URL)" value={webhookUrl} maskToken />
 
             {hasGeneratedToken ? (
               <p className="text-sm text-gray-600">
@@ -508,7 +508,7 @@ const EditIntegrationModal = ({
             <Input
               register={form.register}
               name="apiKeyValue"
-              label="Client Secret (اتركه فارغاً إن لم ترد تغييره)"
+              label="المفتاح السري الجديد للتطبيق (Client Secret) - اتركه فارغاً إن لم ترد تغييره"
               placeholder="أدخل Client Secret الجديد..."
             />
 
@@ -547,7 +547,7 @@ const EditIntegrationModal = ({
             <Input
               register={form.register}
               name="newApiKey"
-              label="Client Secret"
+              label="المفتاح السري للتطبيق (Client Secret)"
               placeholder="أدخل Client Secret..."
             />
           </div>

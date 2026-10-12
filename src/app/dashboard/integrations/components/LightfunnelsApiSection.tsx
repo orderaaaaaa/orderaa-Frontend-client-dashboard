@@ -223,7 +223,7 @@ export default function LightfunnelsApiSection({
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-3">
               <p className="text-sm text-amber-800">{SWITCH_TO_MANUAL_WARNING}</p>
               {manualWebhookUrl && (
-                <CopyField label="رابط الـ Webhook اليدوي" value={manualWebhookUrl} />
+                <CopyField label="رابط الـ Webhook اليدوي" value={manualWebhookUrl} maskToken />
               )}
               <div className="flex gap-2">
                 <Button
