@@ -22,6 +22,8 @@ import { OrderStatusItem } from '@/types/orders';
 import { Can } from '@/components/Can';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { FIXED_BOTTOM_BAR_CLASS } from '@/constants/dashboard-layout';
+import { ScrollEndFade } from '@/components/ui/scroll-end-fade';
+import { useScrollEndFade } from '@/hooks/useScrollEndFade';
 
 interface BulkActionsBarProps {
   selectedOrders: Order[];
@@ -58,6 +60,8 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
   isAllSelected = false,
   totalStoreOrders = 0,
 }) => {
+  const { ref: scrollRef, hasMoreAtEnd } = useScrollEndFade<HTMLDivElement>();
+
   if (selectedOrders.length === 0 && !isAllSelected) {
     return null;
   }
@@ -82,73 +86,79 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
     <div
       className={`${positionClasses} bg-white border-t border-gray-200 shadow-lg py-4 px-6 ${className}`}
     >
-      <div className="mx-auto overflow-x-auto scrollbar-hide">
-        <div className="pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
-          <Can code={PERMISSION_CODES.ORDERS_BULK_UPDATE}>
-            <Select onValueChange={handleStatusSelect}>
-              <SelectTrigger className="group flex items-center gap-2 px-4 pl-10 py-2 rounded-3xl bg-white border-primary !text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap w-auto h-10 focus:ring-0 focus:ring-offset-0 ring-offset-0">
-                <LiaEditSolid className="size-5 shrink-0 group-hover:text-white" />
-                <span className="group-hover:text-white">
-                  تعديل الحالة ({selectedCount})
-                </span>
-              </SelectTrigger>
-              <SelectContent align="end" side="top" className="max-h-[300px] min-w-[180px]">
-                {statusOptions.length > 0 ? (
-                  statusOptions.map((status) => (
-                    <SelectItem
-                      key={status.key}
-                      value={status.key}
-                      className="cursor-pointer justify-end hover:!text-white hover:!bg-primary"
-                    >
-                      {status.label}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <div className="p-2 text-center text-sm">
-                    لا توجد حالات متاحة
-                  </div>
-                )}
-              </SelectContent>
-            </Select>
-          </Can>
+      <div className="relative">
+        <div
+          ref={scrollRef}
+          className="mx-auto overflow-x-auto [scrollbar-width:thin] sm:[scrollbar-width:none] [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 sm:[&::-webkit-scrollbar]:hidden"
+        >
+          <div className="pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
+            <Can code={PERMISSION_CODES.ORDERS_BULK_UPDATE}>
+              <Select onValueChange={handleStatusSelect}>
+                <SelectTrigger className="group flex items-center gap-2 px-4 pl-10 py-2 rounded-3xl bg-white border-primary !text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap w-auto h-10 focus:ring-0 focus:ring-offset-0 ring-offset-0">
+                  <LiaEditSolid className="size-5 shrink-0 group-hover:text-white" />
+                  <span className="group-hover:text-white">
+                    تعديل الحالة ({selectedCount})
+                  </span>
+                </SelectTrigger>
+                <SelectContent align="end" side="top" className="max-h-[300px] min-w-[180px]">
+                  {statusOptions.length > 0 ? (
+                    statusOptions.map((status) => (
+                      <SelectItem
+                        key={status.key}
+                        value={status.key}
+                        className="cursor-pointer justify-end hover:!text-white hover:!bg-primary"
+                      >
+                        {status.label}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="p-2 text-center text-sm">
+                      لا توجد حالات متاحة
+                    </div>
+                  )}
+                </SelectContent>
+              </Select>
+            </Can>
 
 
-          <Button
-            variant="outline"
-            className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
-            onClick={onExportExcel}
-          >
-            <LiaFileExcelSolid className="size-5" />
-            <span>مشاركة شيت اكسيل</span>
-          </Button>
+            <Button
+              variant="outline"
+              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
+              onClick={onExportExcel}
+            >
+              <LiaFileExcelSolid className="size-5" />
+              <span>مشاركة شيت اكسيل</span>
+            </Button>
 
-          <Button
-            variant="outline"
-            className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
-            onClick={onShareWhatsApp}
-          >
-            <LiaWhatsapp className="size-5" />
-            <span>مشاركة واتساب</span>
-          </Button>
+            <Button
+              variant="outline"
+              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
+              onClick={onShareWhatsApp}
+            >
+              <LiaWhatsapp className="size-5" />
+              <span>مشاركة واتساب</span>
+            </Button>
 
-          <Button
-            variant="outline"
-            className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
-            onClick={onShipping}
-          >
-            <LiaTruckSolid className="size-5" />
-            <span>شحن</span>
-          </Button>
+            <Button
+              variant="outline"
+              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
+              onClick={onShipping}
+            >
+              <LiaTruckSolid className="size-5" />
+              <span>شحن</span>
+            </Button>
 
-          <Button
-            variant="outline"
-            className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
-            onClick={onOther}
-          >
-            <LiaEllipsisHSolid className="size-5" />
-            <span>اخرى</span>
-          </Button>
+            <Button
+              variant="outline"
+              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10"
+              onClick={onOther}
+            >
+              <LiaEllipsisHSolid className="size-5" />
+              <span>اخرى</span>
+            </Button>
+          </div>
         </div>
+        <ScrollEndFade visible={hasMoreAtEnd} />
       </div>
     </div>
   );
