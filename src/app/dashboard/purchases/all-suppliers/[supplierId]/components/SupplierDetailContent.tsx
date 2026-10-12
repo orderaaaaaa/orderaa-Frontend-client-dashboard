@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { formatDateToLocalDate } from '@/utils/dateRangeUtils';
 import { Scan, ScanLine, X } from 'lucide-react';
 import { LiaFileInvoiceSolid } from 'react-icons/lia';
@@ -45,11 +45,19 @@ export function SupplierDetailContent({ supplier, initialInvoicesData }: Supplie
     dateTo: formatDateToLocalDate(toDate),
   });
 
-  const data = invoicesData ?? initialInvoicesData;
+  const matchesInitialKey =
+    currentPage === 1 &&
+    pageSize === DEFAULT_PAGE_SIZE &&
+    !fromDate &&
+    !toDate;
+  const data =
+    invoicesData ?? (matchesInitialKey ? initialInvoicesData : undefined);
   const showLoading = isLoading && !data;
   const showError = isError && !data;
+  const lastMetaRef = useRef<PaginationMeta | undefined>(undefined);
+  if (data?.meta) lastMetaRef.current = data.meta;
   const invoices = data?.data ?? [];
-  const meta = data?.meta;
+  const meta = data?.meta ?? lastMetaRef.current;
   const totalItems = meta?.totalItems ?? 0;
   const totalPages = meta?.totalPages ?? 1;
 

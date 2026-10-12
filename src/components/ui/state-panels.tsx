@@ -3,7 +3,28 @@ import { AlertTriangle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { getApiErrorMessage } from '@/utils/apiError';
+
+const ARABIC_PATTERN = /[؀-ۿ]/;
+
+function toDisplayMessage(error: unknown, fallback: string): string {
+  const response = (
+    error as {
+      response?: { status?: number; data?: { message?: string | string[] } };
+    }
+  )?.response;
+  const status = response?.status;
+  if (!response || status === undefined || status >= 500) return fallback;
+  const raw = response.data?.message;
+  const parts = Array.isArray(raw) ? raw : raw ? [raw] : [];
+  const kept = Array.from(
+    new Set(
+      parts
+        .filter((part): part is string => typeof part === 'string')
+        .map((part) => (ARABIC_PATTERN.test(part) ? part : fallback)),
+    ),
+  );
+  return kept.length > 0 ? kept.join('\n') : fallback;
+}
 
 interface EmptyStateProps {
   icon?: React.ReactNode;
@@ -53,7 +74,7 @@ function ErrorState({ error, fallback, onRetry, className }: ErrorStateProps) {
     >
       <AlertTriangle className="size-10 text-red-400" aria-hidden="true" />
       <p className="text-base font-semibold text-gray-700">
-        {getApiErrorMessage(error, fallback)}
+        {toDisplayMessage(error, fallback)}
       </p>
       {onRetry && (
         <Button
