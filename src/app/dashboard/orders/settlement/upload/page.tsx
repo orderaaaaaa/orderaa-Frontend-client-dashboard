@@ -18,6 +18,7 @@ import {
   SettlementShippingColumnCells,
 } from '@/app/dashboard/orders/settlement/components/SettlementShippingColumns';
 import BaseModal from '@/components/ui/base-modal';
+import { useSettlementSync } from '@/app/dashboard/orders/settlement/hooks/useSettlementQueries';
 import ForceSettlementDialog from '@/app/dashboard/orders/settlement/components/ForceSettlementDialog';
 import SettlementAcceptedStatusesNote from '@/app/dashboard/orders/settlement/components/SettlementAcceptedStatusesNote';
 import {
@@ -70,6 +71,7 @@ export default function SettlementUploadPage() {
     | null
   >(null);
   const { getStatusLabel } = useStatusLabel();
+  const syncSettlement = useSettlementSync();
 
   // The collection lives on the server, so a closed browser does not lose it —
   // reopening the page picks the session back up.
@@ -91,6 +93,7 @@ export default function SettlementUploadPage() {
     setIsConfirming(true);
     try {
       const confirmed = await confirmSettlementBatch(batch.id);
+      await syncSettlement();
       setBatch(confirmed);
       setCloseBatchOpen(false);
       toast.success(
@@ -101,7 +104,7 @@ export default function SettlementUploadPage() {
     } finally {
       setIsConfirming(false);
     }
-  }, [batch]);
+  }, [batch, syncSettlement]);
 
   const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -133,6 +136,7 @@ export default function SettlementUploadPage() {
       // Continue the collection already on screen, so a second sheet joins the
       // same running total instead of starting a fresh one.
       const response = await uploadSettlementRows(parsedRows, batch?.id);
+      await syncSettlement();
       setResults(response);
       setBatch(response.batch);
       setUploadedRows(parsedRows);
@@ -168,7 +172,7 @@ export default function SettlementUploadPage() {
     } finally {
       setIsUploading(false);
     }
-  }, [parsedRows, batch]);
+  }, [parsedRows, batch, syncSettlement]);
 
   const forceRows = useCallback(
     async (rowIndices: number[]) => {
@@ -186,6 +190,7 @@ export default function SettlementUploadPage() {
       if (rows.length === 0) return;
 
       const response = await addSettlementBatchOrders(batch.id, rows);
+      await syncSettlement();
       const forcedSet = new Set(sentRowIndices);
       const renumber = <T extends { row: number }>(items: T[]): T[] =>
         items.map((item) => ({ ...item, row: sentRowIndices[item.row] ?? item.row }));
@@ -208,7 +213,7 @@ export default function SettlementUploadPage() {
       );
       setBatch(response.batch);
     },
-    [batch, uploadedRows],
+    [batch, uploadedRows, syncSettlement],
   );
 
   const handleForceSelected = useCallback(async () => {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { invalidateAndWait, orderStatusKeys } from '@/lib/query/mutationSync';
 import {
   prepareOrders,
   waitingForPackaging,
@@ -21,12 +21,7 @@ export function usePrepareOrders() {
 
   return useMutation<PrepareOrdersResponse, Error, PrepareOrdersRequest>({
     mutationFn: prepareOrders,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.PRINT_ORDER_STATISTICS],
-      });
-    },
+    onSuccess: () => invalidateAndWait(queryClient, orderStatusKeys()),
   });
 }
 
@@ -39,12 +34,7 @@ export function useWaitingForPackaging() {
     WaitingForPackagingRequest
   >({
     mutationFn: waitingForPackaging,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.PRINT_ORDER_STATISTICS],
-      });
-    },
+    onSuccess: () => invalidateAndWait(queryClient, orderStatusKeys()),
   });
 }
 
@@ -53,11 +43,6 @@ export function useCallAgainOrders() {
 
   return useMutation<CallAgainResponse, Error, CallAgainRequest>({
     mutationFn: callAgainOrders,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.PRINT_ORDER_STATISTICS],
-      });
-    },
+    onSuccess: () => invalidateAndWait(queryClient, orderStatusKeys()),
   });
 }

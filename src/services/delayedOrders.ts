@@ -1,6 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import http from '@/lib/api/http';
+import { invalidateAndWait } from '@/lib/query/mutationSync';
 import type { Order } from '@/types/orders';
 
 export type DelayedMarkKind = 'FOLLOWED_UP' | 'DONE';
@@ -91,6 +97,7 @@ export const useDelayedOrdersQuery = (params: {
       });
       return data;
     },
+    placeholderData: keepPreviousData,
   });
 
 export const useMarkDelayedOrder = () => {
@@ -113,9 +120,7 @@ export const useMarkDelayedOrder = () => {
         kind: payload.kind,
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [KEY] });
-    },
+    onSuccess: () => invalidateAndWait(queryClient, [[KEY, 'list']]),
     onError: (err: any) => {
       toast.error(err?.response?.data?.message ?? 'تعذر تنفيذ العملية');
     },

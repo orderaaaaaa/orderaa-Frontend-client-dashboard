@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { usePendingIds } from '@/hooks/usePendingIds';
 import { Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PageLoading from '@/components/ui/page-loading';
@@ -12,7 +13,9 @@ import {
   isRenderableDelayedOrder,
   useDelayedOrdersQuery,
   useMarkDelayedOrder,
+  type DelayedMarkKind,
   type DelayedMarksMode,
+  type DelayedOrder,
 } from '@/services/delayedOrders';
 import { describeElapsed } from '@/utils/elapsed';
 import { DelaySettingsModal } from './components/DelaySettingsModal';
@@ -40,9 +43,21 @@ export default function DelayedOrdersPage() {
 
   const { getStatusLabel } = useStatusLabel();
   const { data: statuses } = useOrderStatusesQuery();
-  const { mutate: mark } = useMarkDelayedOrder();
+  const { mutateAsync: markAsync } = useMarkDelayedOrder();
+  const { run: runMark, isPending: isOrderPending } = usePendingIds<number>();
 
-  const { data, isLoading } = useDelayedOrdersQuery({
+  const toggleMark = useCallback(
+    (order: DelayedOrder, kind: DelayedMarkKind) => {
+      const undo =
+        kind === 'FOLLOWED_UP' ? !!order.marks?.followedUp : !!order.marks?.done;
+      runMark(order.id, () =>
+        markAsync({ orderId: order.id, kind, undo })
+      ).catch(() => undefined);
+    },
+    [markAsync, runMark]
+  );
+
+  const { data, isLoading, isPlaceholderData } = useDelayedOrdersQuery({
     status: status || undefined,
     minMinutes: minMinutes ? Number(minMinutes) : undefined,
     marks,
@@ -93,6 +108,7 @@ export default function DelayedOrdersPage() {
 
       <div className="flex flex-wrap items-center gap-2">
         <select
+          aria-label="الحالة"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
           className="border border-gray-200 rounded-md px-3 py-2 text-sm bg-white"
@@ -106,6 +122,7 @@ export default function DelayedOrdersPage() {
         </select>
 
         <select
+          aria-label="مدة التأخير"
           value={minMinutes}
           onChange={(e) => setMinMinutes(e.target.value)}
           className="border border-gray-200 rounded-md px-3 py-2 text-sm bg-white"
@@ -117,13 +134,14 @@ export default function DelayedOrdersPage() {
           ))}
         </select>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {MARK_MODES.map((m) => (
             <Button
               key={m.value}
               variant={marks === m.value ? 'default' : 'outline'}
               size="sm"
-              className="rounded-full text-xs px-3"
+              aria-pressed={marks === m.value}
+              className="rounded-full text-xs px-3 max-sm:h-10"
               onClick={() => setMarks(m.value)}
             >
               {m.label}
@@ -143,8 +161,13 @@ export default function DelayedOrdersPage() {
             : 'لا توجد طلبات متأخرة'}
         </p>
       ) : (
-        <div className="flex flex-col gap-3">
-          {orders.map((order) => (
+        <div
+          className={`flex flex-col gap-3 transition-opacity ${isPlaceholderData ? 'opacity-60' : ''}`}
+          aria-busy={isPlaceholderData}
+        >
+          {orders.map((order) => {
+            const isMarkPending = isOrderPending(order.id);
+            return (
             <div key={order.id} className="flex flex-col gap-2">
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 {typeof order.delayedMinutes === 'number' && (
@@ -164,32 +187,24 @@ export default function DelayedOrdersPage() {
                   </span>
                 )}
 
-                <div className="flex gap-2 mr-auto">
+                <div className="flex gap-2 ms-auto">
                   <Button
                     size="sm"
                     variant={order.marks?.followedUp ? 'outline' : 'default'}
-                    className="rounded-full text-xs px-4"
-                    onClick={() =>
-                      mark({
-                        orderId: order.id,
-                        kind: 'FOLLOWED_UP',
-                        undo: !!order.marks?.followedUp,
-                      })
-                    }
+                    className="rounded-full text-xs px-4 max-sm:h-10"
+                    disabled={isMarkPending || isPlaceholderData}
+                    aria-busy={isMarkPending}
+                    onClick={() => toggleMark(order, 'FOLLOWED_UP')}
                   >
                     {order.marks?.followedUp ? 'إلغاء المتابعة' : 'متابعة'}
                   </Button>
                   <Button
                     size="sm"
                     variant={order.marks?.done ? 'outline' : 'default'}
-                    className="rounded-full text-xs px-4"
-                    onClick={() =>
-                      mark({
-                        orderId: order.id,
-                        kind: 'DONE',
-                        undo: !!order.marks?.done,
-                      })
-                    }
+                    className="rounded-full text-xs px-4 max-sm:h-10"
+                    disabled={isMarkPending || isPlaceholderData}
+                    aria-busy={isMarkPending}
+                    onClick={() => toggleMark(order, 'DONE')}
                   >
                     {order.marks?.done ? 'إلغاء الإنهاء' : 'انتهاء'}
                   </Button>
@@ -226,7 +241,8 @@ export default function DelayedOrdersPage() {
                 disableNavigation={false}
               />
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

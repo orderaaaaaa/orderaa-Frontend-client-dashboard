@@ -1,6 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import http from '@/lib/api/http';
+import { invalidateAndWait } from '@/lib/query/mutationSync';
 
 /** Mirrors the backend return-receipt read DTOs (T26). */
 export interface ReturnReceiptCard {
@@ -33,7 +39,8 @@ export interface ReturnReceiptDetail extends ReturnReceiptCard {
   orders: ReturnReceiptOrder[];
 }
 
-const KEY = 'return-receipts';
+export const RETURN_RECEIPTS_KEY = 'return-receipts';
+const KEY = RETURN_RECEIPTS_KEY;
 
 export const useReturnReceiptsQuery = (params: {
   reviewed?: boolean;
@@ -51,6 +58,7 @@ export const useReturnReceiptsQuery = (params: {
       }>('/orders/return-receipts', { params });
       return data;
     },
+    placeholderData: keepPreviousData,
   });
 
 export const useReturnReceiptQuery = (id: number | undefined) =>
@@ -76,8 +84,8 @@ export const useReviewReturnReceipt = () => {
       );
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [KEY] });
+    onSuccess: async () => {
+      await invalidateAndWait(queryClient, [[KEY]]);
       toast.success('تم تسجيل المراجعة');
     },
     onError: (err: any) => {

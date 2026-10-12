@@ -29,7 +29,7 @@ interface EditSettlementAmountDialogProps {
   batchId: string;
   orderId: number;
   currentAmount: string;
-  onSuccess: (result: SettlementEditResponse) => void;
+  onSuccess: (result: SettlementEditResponse) => void | Promise<void>;
 }
 
 export default function EditSettlementAmountDialog({
@@ -60,7 +60,7 @@ export default function EditSettlementAmountDialog({
     setError(null);
     try {
       const result = await updateSettlementBatchOrderAmount(batchId, orderId, Number(trimmed));
-      onSuccess(result);
+      await onSuccess(result);
       onClose();
     } catch (err) {
       toast.error(getApiErrorMessage(err, 'تعذر تعديل المبلغ'));
