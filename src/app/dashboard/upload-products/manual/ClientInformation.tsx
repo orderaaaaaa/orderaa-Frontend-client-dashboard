@@ -109,7 +109,10 @@ function ClientInformation({
                     inputClassName="bg-white"
                     value={phone}
                     onChange={(e) => handlePhoneChange(index, e.target.value)}
-                    error={index === 0 ? errors?.phoneNumbers : undefined}
+                    error={
+                      errors?.phoneNumberItems?.[index] ??
+                      (index === 0 ? errors?.phoneNumbers : undefined)
+                    }
                   />
                   {phoneNumbers.length > 1 && (
                     <Button

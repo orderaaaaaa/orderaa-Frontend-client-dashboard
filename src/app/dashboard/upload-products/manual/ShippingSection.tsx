@@ -236,7 +236,7 @@ function ShippingSection({
               <p className="text-red-500 text-sm">{errors.cityOption}</p>
             )}
           </div>
-          <div>
+          <div data-field-error="shippingCost">
             <label htmlFor="manual-shipping-cost" className="block font-medium text-[16px] mb-1">
               تكلفة الشحن
             </label>
@@ -255,7 +255,7 @@ function ShippingSection({
               error={errors?.shippingCost}
             />
           </div>
-          <div>
+          <div data-field-error="returnShippingCost">
             <label htmlFor="manual-return-shipping-cost" className="block font-medium text-[16px] mb-1">
               مبلغ الإلغاء فى حالة عدم الإستلام <span className="text-red-500">*</span>
             </label>

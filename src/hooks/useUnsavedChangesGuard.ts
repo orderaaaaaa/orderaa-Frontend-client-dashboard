@@ -41,7 +41,7 @@ export function useUnsavedChangesGuard(isDirty: boolean) {
         return;
       }
       event.preventDefault();
-      event.stopPropagation();
+      event.stopImmediatePropagation();
       setPendingHref(`${url.pathname}${url.search}${url.hash}`);
     };
 

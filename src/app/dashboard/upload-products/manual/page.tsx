@@ -1,7 +1,7 @@
 'use client';
 import { LiaPlusSolid } from 'react-icons/lia';
 import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
@@ -143,7 +143,7 @@ function Manual() {
     }
   };
 
-  const handleInvalidSubmit = () => {
+  const handleInvalidSubmit = (fieldErrors: FieldErrors<ManualOrderFormData>) => {
     if (!selectedProducts || selectedProducts.length === 0) {
       setProductsError('يجب اختيار منتج واحد على الأقل');
       const errorElement = document.querySelector('[data-field-error="products"]');
@@ -152,18 +152,20 @@ function Manual() {
     }
 
     const findFirstErrorField = (): string | null => {
-      if (errors.orderSource?.utmSource) return 'utmSource';
-      if (errors.orderSource?.pageName) return 'pageName';
-      if (errors.customer?.name) return 'name';
-      if (errors.customer?.phoneNumbers) return 'phoneNumbers';
-      if (errors.customer?.address) return 'address';
-      if (errors.shipping?.shippingCompanyId) return 'shippingCompanyId';
-      if (errors.shipping?.governorateOption) return 'governorate';
-      if (errors.shipping?.cityOption) return 'city';
-      if (errors.shipping?.shippingCost) return 'shippingCost';
-      if (errors.shipping?.shippingType) return 'shippingType';
-      if (errors.shipping?.returnShipmentContent) return 'returnShipmentContent';
-      if (errors.payment?.paymentMethod) return 'paymentMethod';
+      if (fieldErrors.orderSource?.utmSource) return 'utmSource';
+      if (fieldErrors.orderSource?.pageName) return 'pageName';
+      if (fieldErrors.customer?.name) return 'name';
+      if (fieldErrors.customer?.phoneNumbers) return 'phoneNumbers';
+      if (fieldErrors.customer?.address) return 'address';
+      if (fieldErrors.shipping?.shippingCompanyId) return 'shippingCompanyId';
+      if (fieldErrors.shipping?.governorateOption) return 'governorate';
+      if (fieldErrors.shipping?.cityOption) return 'city';
+      if (fieldErrors.shipping?.shippingCost) return 'shippingCost';
+      if (fieldErrors.shipping?.returnShippingCost) return 'returnShippingCost';
+      if (fieldErrors.shipping?.shippingType) return 'shippingType';
+      if (fieldErrors.shipping?.returnShipmentContent) return 'returnShipmentContent';
+      if (fieldErrors.payment?.paymentMethod) return 'paymentMethod';
+      if (fieldErrors.total) return 'products';
       return null;
     };
 
@@ -229,6 +231,9 @@ function Manual() {
           errors={{
             name: errors.customer?.name?.message,
             phoneNumbers: errors.customer?.phoneNumbers?.message,
+            phoneNumberItems: formValues.customer.phoneNumbers.map(
+              (_, index) => errors.customer?.phoneNumbers?.[index]?.message
+            ),
             address: errors.customer?.address?.message,
           }}
         />
