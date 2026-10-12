@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import { LiaPlusSolid, LiaTruckSolid, LiaUserSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
+import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
 import PageLoading from '@/components/ui/page-loading';
 import {
@@ -35,6 +36,10 @@ export function ShippingProvidersContent() {
   const [showInactive, setShowInactive] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [pendingRetire, setPendingRetire] = useState<{
+    carrier: CarrierStats;
+    isActive: boolean;
+  } | null>(null);
 
   const range = useMemo(
     () => ({ from: from || undefined, to: to || undefined }),
@@ -43,7 +48,8 @@ export function ShippingProvidersContent() {
 
   const { data: carriers = [], isLoading } = useCarrierStatsQuery(range);
   const { data: providers, isSuccess: providersReady } = useShippingProvidersQuery();
-  const { mutate: updateProvider } = useUpdateShippingProvider();
+  const { mutateAsync: updateProvider, isPending: isUpdatingProvider } =
+    useUpdateShippingProvider();
 
   const visible = carriers.filter((c) => {
     // Integrated carriers have no type and are always shown: goal 5 puts them
@@ -55,7 +61,7 @@ export function ShippingProvidersContent() {
 
   const selected = carriers.find((c) => c.shippingCompanyId === selectedId) ?? null;
 
-  const retire = (carrier: CarrierStats, isActive: boolean) => {
+  const retire = async (carrier: CarrierStats, isActive: boolean) => {
     const provider = providers?.find(
       (p) => p.shippingCompanyId === carrier.shippingCompanyId,
     );
@@ -63,7 +69,13 @@ export function ShippingProvidersContent() {
       toast.error('تعذر العثور على جهة الشحن، أعد تحميل الصفحة وحاول مرة أخرى');
       return;
     }
-    updateProvider({ id: provider.id, isActive });
+    await updateProvider({ id: provider.id, isActive }).catch(() => undefined);
+  };
+
+  const confirmRetire = async () => {
+    if (!pendingRetire) return;
+    await retire(pendingRetire.carrier, pendingRetire.isActive);
+    setPendingRetire(null);
   };
 
   const goToInProcess = (carrier: CarrierStats) => {
@@ -225,17 +237,21 @@ export function ShippingProvidersContent() {
                   </div>
 
                   {isProvider && (
-                    <button
+                    <Button
                       type="button"
-                      className="self-start text-xs text-gray-500 hover:text-red-600 hover:underline disabled:opacity-50 disabled:pointer-events-none"
+                      variant="ghost"
+                      className="self-start h-10 sm:h-10 px-3 text-xs text-gray-500 hover:text-red-600"
                       disabled={!providersReady}
                       onClick={(e) => {
                         e.stopPropagation();
-                        retire(carrier, !carrier.isActive);
+                        setPendingRetire({
+                          carrier,
+                          isActive: !carrier.isActive,
+                        });
                       }}
                     >
                       {carrier.isActive ? 'إيقاف' : 'إعادة تفعيل'}
-                    </button>
+                    </Button>
                   )}
 
                   <Button
@@ -264,6 +280,22 @@ export function ShippingProvidersContent() {
           />
         )}
       </div>
+
+      <BaseModal
+        isOpen={pendingRetire !== null}
+        onClose={() => setPendingRetire(null)}
+        onConfirm={confirmRetire}
+        title={pendingRetire?.isActive ? 'إعادة تفعيل جهة الشحن' : 'إيقاف جهة الشحن'}
+        confirmText={pendingRetire?.isActive ? 'إعادة تفعيل' : 'إيقاف'}
+        isLoading={isUpdatingProvider}
+        maxWidth="md:max-w-md"
+      >
+        <p className="text-sm text-gray-800 py-2">
+          {pendingRetire?.isActive
+            ? `هل تريد إعادة تفعيل «${pendingRetire.carrier.name}»؟`
+            : `هل تريد إيقاف «${pendingRetire?.carrier.name}»؟ يمكنك إعادة تفعيلها لاحقاً.`}
+        </p>
+      </BaseModal>
 
       <AddProviderModal
         isOpen={isAddOpen}

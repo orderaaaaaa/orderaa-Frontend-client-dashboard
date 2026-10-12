@@ -1,6 +1,7 @@
 'use client';
 import { useState, useMemo } from 'react';
 import PageLoading from '@/components/ui/page-loading';
+import { ErrorState } from '@/components/ui/state-panels';
 import { IntegrationCard } from './components/IntegrationCard';
 import { ShippingIntegrationModal } from './components/ShippingIntegrationModal';
 import { providers } from './constants/providers';
@@ -8,7 +9,7 @@ import { useShippingQuery } from './hooks/useShippingQuery';
 
 export default function ShippingIntegrationsPage() {
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
-  const { configs, isLoading } = useShippingQuery();
+  const { configs, isLoading, isError, error, refetch } = useShippingQuery();
 
   const sortedProviders = useMemo(() => {
     return [...providers].sort((a, b) => {
@@ -44,6 +45,12 @@ export default function ShippingIntegrationsPage() {
 
       {isLoading ? (
         <PageLoading className="h-64 mt-10" />
+      ) : isError && configs.length === 0 ? (
+        <ErrorState
+          error={error}
+          fallback="تعذّر تحميل شركات الشحن المربوطة"
+          onRetry={() => refetch()}
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {sortedProviders.map((provider) => {

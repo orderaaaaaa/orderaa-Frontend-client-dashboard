@@ -328,6 +328,12 @@ export const AutoConfirmationModal: React.FC<AutoConfirmationModalProps> = ({
               </div>
             )}
 
+            {!isSaving && !form.formState.isValid && (
+              <p id="submit-disabled-reason" className="text-xs text-gray-500">
+                أكمل الحقول المطلوبة لتفعيل الزر
+              </p>
+            )}
+
             <div className="flex gap-3 pt-4 border-t border-gray-100">
               <Button
                 type="button"
@@ -341,6 +347,11 @@ export const AutoConfirmationModal: React.FC<AutoConfirmationModalProps> = ({
               <Button
                 type="submit"
                 disabled={isSaving || isDeleting || !form.formState.isValid}
+                aria-describedby={
+                  !isSaving && !form.formState.isValid
+                    ? 'submit-disabled-reason'
+                    : undefined
+                }
                 className="flex-1 bg-primary hover:bg-[#4A1CB8] h-12 text-lg"
               >
                 {isSaving

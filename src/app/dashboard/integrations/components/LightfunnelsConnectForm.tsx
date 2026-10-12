@@ -4,9 +4,9 @@ import React, { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { LiaCheckSolid, LiaCopySolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
+import CopyField from './CopyField';
 import { getApiErrorMessage } from '@/utils/apiError';
 import {
   useLightfunnelsConnections,
@@ -68,7 +68,6 @@ export default function LightfunnelsConnectForm({
   disabled = false,
   webhookMode,
 }: LightfunnelsConnectFormProps) {
-  const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
   const [isRedirecting, setIsRedirecting] = useState(false);
 
@@ -86,13 +85,6 @@ export default function LightfunnelsConnectForm({
   const secretRequired = isLightfunnelsSecretRequired(connection, watchedClientId ?? '');
   const isBusy = disabled || isConnecting || isRedirecting;
   const requiredScopes = redirect.scopes;
-
-  const handleCopy = () => {
-    if (!redirect.redirectUri) return;
-    navigator.clipboard.writeText(redirect.redirectUri);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const submit = form.handleSubmit(async (data) => {
     setError('');
@@ -121,35 +113,17 @@ export default function LightfunnelsConnectForm({
     <div className="space-y-4">
       <div className="space-y-4 bg-white p-5 rounded-xl border border-gray-100">
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="block font-medium text-sm">Redirect URI</span>
-            <Button
-              type="button"
-              variant="default"
-              size="sm"
-              onClick={handleCopy}
-              disabled={!redirect.redirectUri}
-              className="gap-1.5 h-7 text-xs"
-            >
-              {copied ? (
-                <LiaCheckSolid className="w-3 h-3" />
-              ) : (
-                <LiaCopySolid className="w-3 h-3" />
-              )}
-              {copied ? 'تم النسخ' : 'نسخ'}
-            </Button>
-          </div>
-          <Input
+          <CopyField
+            label="رابط إعادة التوجيه (Redirect URI)"
             value={redirect.redirectUri}
-            inputClassName="text-sm bg-gray-50"
             placeholder={redirect.isLoading ? 'جاري التحميل...' : 'https://...'}
-            error={
-              redirect.isError
-                ? getApiErrorMessage(redirect.error, 'تعذر تحميل رابط إعادة التوجيه')
-                : undefined
-            }
-            disabled
+            inputClassName="bg-gray-50"
           />
+          {redirect.isError && (
+            <p className="text-xs text-red-500 mt-1">
+              {getApiErrorMessage(redirect.error, 'تعذر تحميل رابط إعادة التوجيه')}
+            </p>
+          )}
           {requiredScopes && (
             <p className="text-xs text-gray-500 mt-2">
               الصلاحيات المطلوبة: <span className="font-mono">{requiredScopes}</span>
@@ -160,7 +134,7 @@ export default function LightfunnelsConnectForm({
         <Input
           register={form.register}
           name="clientId"
-          label="Client ID *"
+          label="معرّف التطبيق (Client ID) *"
           placeholder="أدخل Client ID..."
           error={form.formState.errors.clientId?.message}
           disabled={isBusy}
@@ -172,8 +146,8 @@ export default function LightfunnelsConnectForm({
           type="password"
           label={
             secretRequired
-              ? 'Client Secret *'
-              : 'Client Secret (اتركه فارغاً إن لم ترد تغييره)'
+              ? 'المفتاح السري للتطبيق (Client Secret) *'
+              : 'المفتاح السري للتطبيق (Client Secret) - اتركه فارغاً إن لم ترد تغييره'
           }
           placeholder="أدخل Client Secret..."
           error={form.formState.errors.clientSecret?.message}

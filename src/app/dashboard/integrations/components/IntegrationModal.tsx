@@ -3,8 +3,6 @@
 import React, { useState, useRef, useMemo } from 'react';
 import {
   LiaShoppingCartSolid,
-  LiaCopySolid,
-  LiaCheckSolid,
   LiaCheckCircleSolid,
   LiaPlusSolid,
   LiaLinkSolid,
@@ -14,6 +12,7 @@ import {
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
+import CopyField from './CopyField';
 import BaseModal from '@/components/ui/base-modal';
 import { Stepper, StepContent } from '@/components/ui/stepper';
 import {
@@ -109,7 +108,6 @@ const IntegrationModal = ({
   const { user } = useAuthStore();
   const merchantId = user?.merchantId;
 
-  const [copied, setCopied] = useState(false);
   const [createdStoreId, setCreatedStoreId] = useState<number | null>(null);
   const [showStepper, setShowStepper] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -192,15 +190,6 @@ const IntegrationModal = ({
       setIsLoading(false);
     }
   });
-
-  const handleCopyUrl = () => {
-    const urlToCopy = webhookForm.getValues('webhookUrl')?.trim();
-    if (urlToCopy) {
-      navigator.clipboard.writeText(urlToCopy);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
 
   const onWebhookSubmit = webhookForm.handleSubmit(async (data) => {
     setError('');
@@ -490,41 +479,20 @@ const IntegrationModal = ({
                         لا حاجة لنسخ رابط. في الخطوة التالية أدخل Client ID وClient Secret ووافق على الصلاحيات، ثم نسجّل الـ Webhooks في Lightfunnels تلقائياً.
                       </p>
                     ) : (
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="block font-medium text-base">
-                          Webhook URL
-                        </span>
-                        <Button
-                          type="button"
-                          variant="default"
-                          size="sm"
-                          onClick={handleCopyUrl}
-                          className="gap-1.5 h-7 text-xs"
-                        >
-                          {copied ? (
-                            <LiaCheckSolid className="w-3 h-3" />
-                          ) : (
-                            <LiaCopySolid className="w-3 h-3" />
-                          )}
-                          {copied ? 'تم النسخ' : 'نسخ'}
-                        </Button>
-                      </div>
-                      <Input
-                        register={webhookForm.register}
-                        name="webhookUrl"
-                        inputClassName="text-sm bg-gray-50"
-                        placeholder="https://..."
-                        disabled
-                      />
-                    </div>
+                    <CopyField
+                      label="رابط الاستقبال (Webhook URL)"
+                      value={webhookForm.watch('webhookUrl')?.trim() ?? ''}
+                      maskToken
+                      placeholder="https://..."
+                      inputClassName="bg-gray-50"
+                    />
                     )}
 
                     {!hasGeneratedToken && (
                       <Input
                         register={webhookForm.register}
                         name="webhookSecret"
-                        label="Webhook Secret"
+                        label="المفتاح السري (Webhook Secret)"
                         placeholder="أدخل مفتاح Webhook..."
                         error={
                           webhookForm.formState.errors.webhookSecret?.message
@@ -603,7 +571,7 @@ const IntegrationModal = ({
                     <Input
                       register={apiKeyForm.register}
                       name="apiKey"
-                      label="Client Secret"
+                      label="المفتاح السري للتطبيق (Client Secret)"
                       placeholder="أدخل Client Secret..."
                       error={apiKeyForm.formState.errors.apiKey?.message}
                     />
@@ -700,7 +668,8 @@ const IntegrationModal = ({
                                 e.stopPropagation();
                                 onEditStore(Number(storeId), configs);
                               }}
-                              className="h-8 w-8 text-gray-400 hover:text-primary hover:bg-primary/5"
+                              aria-label="تعديل المتجر"
+                              className="size-10 sm:size-10 text-gray-400 hover:text-primary hover:bg-primary/5"
                             >
                               <LiaEditSolid className="w-4 h-4" />
                             </Button>
@@ -717,7 +686,8 @@ const IntegrationModal = ({
                                   configs[0]?.store?.name || `متجر #${storeId}`
                                 );
                               }}
-                              className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                              aria-label="حذف المتجر"
+                              className="size-10 sm:size-10 text-gray-400 hover:text-red-600 hover:bg-red-50"
                             >
                               <LiaTrashAltSolid className="w-4 h-4" />
                             </Button>
@@ -730,15 +700,14 @@ const IntegrationModal = ({
                         {webhookConfig && (
                           <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                              Webhook
+                              الاستقبال (Webhook)
                             </p>
                             {!hasGeneratedToken && (
-                              <div className="flex items-center justify-between">
-                                <span className="text-sm text-gray-600">Secret</span>
-                                <span className="text-sm text-gray-800 font-mono">
-                                  {webhookConfig.apiKey}
-                                </span>
-                              </div>
+                              <CopyField
+                                label="المفتاح السري (Secret)"
+                                value={webhookConfig.apiKey ?? ''}
+                                secret
+                              />
                             )}
                             <div className="flex items-center justify-between">
                               <span className="text-sm text-gray-600">الحالة</span>
@@ -762,7 +731,7 @@ const IntegrationModal = ({
                               API
                             </p>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600">Client ID</span>
+                              <span className="text-sm text-gray-600">معرّف التطبيق (Client ID)</span>
                               <span className="text-sm text-gray-800 font-mono">
                                 {lfConnection.clientId ?? apiConfig?.apiKey ?? '—'}
                               </span>
@@ -783,16 +752,13 @@ const IntegrationModal = ({
                         {apiConfig && !isOAuthConnect && (
                           <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                              Client Secret
+                              الربط عبر API
                             </p>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600">
-                                Client Secret
-                              </span>
-                              <span className="text-sm text-gray-800 font-mono">
-                                {apiConfig.apiKey}
-                              </span>
-                            </div>
+                            <CopyField
+                              label="المفتاح السري للتطبيق (Client Secret)"
+                              value={apiConfig.apiKey ?? ''}
+                              secret
+                            />
                             <div className="flex items-center justify-between">
                               <span className="text-sm text-gray-600">الحالة</span>
                               <span
