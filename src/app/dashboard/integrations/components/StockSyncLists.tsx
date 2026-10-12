@@ -54,7 +54,7 @@ export const UNLINKED_REASON_LABEL: Record<UnlinkedVariantReason, string> = {
   MISSING_TAAGER_CODE: 'لا يوجد كود تاجر',
   MISSING_INVENTORY_ITEM: 'لا يوجد عنصر مخزون',
   MISSING_LIGHTFUNNELS_PRODUCT: 'لا يوجد معرّف منتج Lightfunnels',
-  WAITING_FOR_FIRST_STOCK: 'بانتظار أول حركة مخزون',
+  WAITING_FOR_FIRST_STOCK: 'بانتظار وصول أول مخزون',
 };
 
 function formatTimestamp(value: string): string {
