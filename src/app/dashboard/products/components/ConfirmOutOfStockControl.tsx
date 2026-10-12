@@ -65,7 +65,7 @@ export function ConfirmOutOfStockControl({
           if (isProductConfirmMode(next) && next !== value) onChange(next);
         }}
         placeholder={t('products.confirmOutOfStock.placeholder')}
-        triggerClassName="h-9 text-xs"
+        triggerClassName="h-10 text-xs"
       />
       {value === PRODUCT_CONFIRM_OUT_OF_STOCK_MODES.FOLLOW_WORKFLOW && (
         <p className="text-[11px] leading-4 text-gray-500">

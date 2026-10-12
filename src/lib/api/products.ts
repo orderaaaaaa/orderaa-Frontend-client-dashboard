@@ -3,11 +3,13 @@ import api from './index';
 export interface AttributeOption {
   id: number;
   name: string;
+  displayName: string;
 }
 
 export interface AttributeOptionGroup {
   id: number;
   name: string;
+  displayName: string;
   options: AttributeOption[];
 }
 

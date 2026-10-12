@@ -1,31 +1,39 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { LiaObjectGroupSolid, LiaEditSolid, LiaListUlSolid } from 'react-icons/lia';
-import { Scan, ScanLine, X } from 'lucide-react';
+import Link from 'next/link';
+import { LiaObjectGroupSolid, LiaEditSolid } from 'react-icons/lia';
+import { PackageSearch, Scan, ScanLine, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
+import { EmptyState, ErrorState } from '@/components/ui/state-panels';
+import { ImageGalleryModal } from '@/components/receipts/ImageGalleryModal';
+import { Can } from '@/components/Can';
+import { PERMISSIONS } from '@/lib/permissions';
+import { useDebounce } from '@/utils/debounce';
 
 import {
   useGetProducts,
+  usePendingConfirmOutOfStockIds,
   useStoreConfirmOutOfStock,
   useUpdateProductConfirmOutOfStock,
 } from '../hooks/useProduct';
 import { ConfirmOutOfStockControl } from './ConfirmOutOfStockControl';
 import { useProductStore } from '../store/useProductStore';
-import { Product, VariantItem, AttributeManual } from '../types/products';
+import { Product } from '../types/products';
 import Input from '@/components/ui/Input';
-import ProductAddVariantsModal from './modals/productAddVariants';
 import MergeProductsModal from './modals/MergeProductsModal';
 import ProductVariantCountsModal from './modals/ProductVariantCountsModal';
-import EditProductAttributesModal from './modals/EditProductAttributesModal';
-import { productsApi } from '../api/products';
 import LoadingAnimation from '@/components/ui/loadingAnimation';
 import ProductsTableMobile from './ProductsTableMobile';
+import { ProductThumbnailButton } from './ProductThumbnailButton';
+import { productEditHref, productGalleryImages } from '../utils/productLinks';
 import { getTimeAgo } from '@/utils';
 import { FIXED_BOTTOM_BAR_CLASS } from '@/constants/dashboard-layout';
 
 type ProductRow = Product & Record<string, unknown>;
+
+const SEARCH_DEBOUNCE_MS = 400;
 
 function ProductsTable() {
   const {
@@ -39,26 +47,26 @@ function ProductsTable() {
     setSortOrder,
   } = useProductStore();
 
-  const { data, isLoading, isFetching } = useGetProducts({
-    page,
-    limit,
-    search,
-    sortBy,
-    sortOrder,
-  });
+  const [searchInput, setSearchInput] = useState(search);
+  const debouncedSearch = useDebounce(searchInput, SEARCH_DEBOUNCE_MS);
+
+  useEffect(() => {
+    if (debouncedSearch !== search) setSearch(debouncedSearch);
+  }, [debouncedSearch, search, setSearch]);
+
+  const { data, isLoading, isFetching, isError, error, refetch } =
+    useGetProducts({
+      page,
+      limit,
+      search,
+      sortBy,
+      sortOrder,
+    });
 
   const storeConfirmMode = useStoreConfirmOutOfStock();
-  const confirmOutOfStockMutation = useUpdateProductConfirmOutOfStock();
-  const { mutate: saveConfirmOutOfStock } = confirmOutOfStockMutation;
-  const savingConfirmProductId = confirmOutOfStockMutation.isPending
-    ? confirmOutOfStockMutation.variables?.productId
-    : undefined;
+  const { mutate: saveConfirmOutOfStock } = useUpdateProductConfirmOutOfStock();
+  const pendingConfirmIds = usePendingConfirmOutOfStockIds();
 
-  const [showModal, setShowModal] = useState(false);
-  const [activeProduct, setActiveProduct] = useState<{
-    id: number;
-    variants: VariantItem[];
-  } | null>(null);
   const [select, setSelect] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string | number>>(
     new Set(),
@@ -69,11 +77,7 @@ function ProductsTable() {
   const [showMergeModal, setShowMergeModal] = useState(false);
   const [showSoldModal, setShowSoldModal] = useState(false);
   const [soldProductId, setSoldProductId] = useState<number | null>(null);
-  const [showEditAttrsModal, setShowEditAttrsModal] = useState(false);
-  const [activeAttrsProduct, setActiveAttrsProduct] = useState<{
-    id: number;
-    attributes: AttributeManual[];
-  } | null>(null);
+  const [galleryProduct, setGalleryProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     if (!select) {
@@ -94,7 +98,7 @@ function ProductsTable() {
           const numericId = Number(id);
           if (!next.has(numericId)) {
             const product = (data?.data ?? []).find((p) => p.id === numericId);
-            if (product) next.set(numericId, product as Product);
+            if (product) next.set(numericId, product);
           }
         }
         return next;
@@ -135,33 +139,6 @@ function ProductsTable() {
     setSoldProductId(null);
   };
 
-  const openEditModal = (productId: number, variants: VariantItem[]) => {
-    setActiveProduct({ id: productId, variants });
-    setShowModal(true);
-  };
-
-  const closeModal = () => {
-    setShowModal(false);
-    setActiveProduct(null);
-  };
-
-  const openEditAttrsModal = async (productId: number) => {
-    try {
-      const attributes = await productsApi.getAttributeOptions(productId);
-      setActiveAttrsProduct({ id: productId, attributes });
-      setShowEditAttrsModal(true);
-    } catch {
-      // If fetch fails, open with empty attributes so the user can still add
-      setActiveAttrsProduct({ id: productId, attributes: [] });
-      setShowEditAttrsModal(true);
-    }
-  };
-
-  const closeEditAttrsModal = () => {
-    setShowEditAttrsModal(false);
-    setActiveAttrsProduct(null);
-  };
-
   const columns = useMemo<DataTableColumn<ProductRow>[]>(
     () => [
       {
@@ -169,12 +146,10 @@ function ProductsTable() {
         header: 'صورة المنتج',
         className: 'text-center',
         render: (_val, row) => (
-          <img
-            src={
-              row.image || row.images?.[0] || 'https://placehold.net/600x600.png'
-            }
-            alt={row.name as string}
-            className="w-20 h-20 mx-auto rounded-lg object-cover border"
+          <ProductThumbnailButton
+            product={row}
+            onOpen={setGalleryProduct}
+            className="w-20 h-20 mx-auto"
           />
         ),
       },
@@ -184,8 +159,8 @@ function ProductsTable() {
         sortable: true,
         className: 'text-center',
         render: (_val, row) => (
-          <span className="font-semibold text-foreground">
-            {row.name as string}
+          <span className="font-semibold text-foreground break-words">
+            {row.name}
           </span>
         ),
       },
@@ -210,10 +185,11 @@ function ProductsTable() {
         render: (_val, row) => (
           <Button
             variant="ghost"
-            onClick={() => openSoldModal(row.id as number)}
+            onClick={() => openSoldModal(row.id)}
             className="font-semibold text-gray-800"
+            aria-label={`تفاصيل القطع المباعة من ${row.name}`}
           >
-            {row.totalSold as number}
+            {row.totalSold}
           </Button>
         ),
       },
@@ -231,7 +207,7 @@ function ProductsTable() {
             <ConfirmOutOfStockControl
               value={row.confirmOutOfStockMode}
               storeMode={storeConfirmMode}
-              disabled={savingConfirmProductId === row.id}
+              disabled={pendingConfirmIds.includes(row.id)}
               onChange={(confirmOutOfStockMode) =>
                 saveConfirmOutOfStock({
                   productId: row.id,
@@ -247,29 +223,14 @@ function ProductsTable() {
         header: 'الإجراءات',
         className: 'text-center',
         render: (_val, row) => (
-          <div className="flex items-center justify-center gap-1">
-            <Button
-              variant="ghost"
-              onClick={() => openEditAttrsModal(row.id as number)}
-              className="text-primary"
-            >
-              <LiaEditSolid className="size-5" />
-              تعديل المتغيرات
+          <Can code={PERMISSIONS.PRODUCTS_UPDATE}>
+            <Button asChild variant="ghost" className="text-primary">
+              <Link href={productEditHref(row.id)}>
+                <LiaEditSolid className="size-5" />
+                تعديل المنتج
+              </Link>
             </Button>
-            <Button
-              variant="ghost"
-              onClick={() =>
-                openEditModal(
-                  row.id as number,
-                  (row.extraDetails as { variants?: VariantItem[] })?.variants ||
-                    [],
-                )
-              }
-            >
-              <LiaListUlSolid className="size-5" />
-              المواصفات
-            </Button>
-          </div>
+          </Can>
         ),
       },
       {
@@ -284,18 +245,72 @@ function ProductsTable() {
         ),
       },
     ],
-    [storeConfirmMode, savingConfirmProductId, saveConfirmOutOfStock],
+    [storeConfirmMode, pendingConfirmIds, saveConfirmOutOfStock],
   );
 
   const selectedArray = useMemo(() => Array.from(selectedIds) as number[], [selectedIds]);
 
   const isRefetching = isFetching && !isLoading;
+  const emptyContent = (
+    <EmptyState
+      icon={<PackageSearch className="size-10 text-gray-300" aria-hidden />}
+      title={search ? 'لا توجد منتجات تطابق البحث' : 'لا توجد منتجات'}
+      className="py-6"
+    />
+  );
+
+  const toolbar = (
+    <div className="flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center">
+      <Input
+        name="search"
+        value={searchInput}
+        onChange={(e) => setSearchInput(e.target.value)}
+        placeholder="ابحث عن المنتج"
+        aria-label="ابحث عن المنتج"
+        className="w-full sm:w-auto sm:min-w-[300px]"
+        inputClassName="bg-white !px-5"
+      />
+
+      <div className="flex flex-row items-center justify-end gap-3">
+        {select && selectedIds.size > 0 && (
+          <div className="flex flex-row items-center justify-center gap-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="touch"
+              onClick={() => setSelect(false)}
+              aria-label="إلغاء التحديد"
+              className="text-primary"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+            <span className="text-sm text-gray-600">
+              تم تحديد {selectedIds.size} منتج
+            </span>
+          </div>
+        )}
+        <button
+          type="button"
+          aria-pressed={select}
+          onClick={() => setSelect(!select)}
+          className="bg-primary text-white flex flex-row items-center justify-center gap-3 px-5 min-h-10 rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
+        >
+          <span>تحديد</span>
+          {select ? (
+            <ScanLine className="text-white" aria-hidden />
+          ) : (
+            <Scan className="text-white" aria-hidden />
+          )}
+        </button>
+      </div>
+    </div>
+  );
 
   if (isLoading) {
     return (
       <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row gap-3 sm:justify-between items-center">
-          <div className="h-10 bg-gray-200 rounded-lg animate-pulse w-[300px]" />
+          <div className="h-10 bg-gray-200 rounded-lg animate-pulse w-full sm:w-[300px]" />
           <div className="h-10 bg-gray-200 rounded-lg animate-pulse w-[150px]" />
         </div>
         <LoadingAnimation />
@@ -306,83 +321,55 @@ function ProductsTable() {
   return (
     <>
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row gap-3 sm:justify-between items-center">
-          <div className="flex gap-2 items-center flex-wrap">
-            <Input
-              name="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="ابحث عن المنتج"
-              className="!px-5 min-w-[300px]"
-              inputClassName='bg-white'
-            />
-          </div>
+        {toolbar}
 
-          <div className="flex flex-row items-center justify-center gap-3 text-white">
-            {select && selectedIds.size > 0 && (
-              <div className="flex flex-row items-center justify-center gap-2">
-                <X
-                  onClick={() => setSelect(false)}
-                  className="cursor-pointer text-primary h-5 w-5"
-                />
-                <span className="text-sm text-gray-600">
-                  تم تحديد {selectedIds.size} منتج
-                </span>
-              </div>
-            )}
-            <div
-              className="bg-primary flex flex-row items-center justify-center gap-3 px-5 py-2 rounded-full cursor-pointer"
-              onClick={() => setSelect(!select)}
-            >
-              <p>تحديد</p>
-              <div>
-                {select ? (
-                  <ScanLine className="text-white" />
-                ) : (
-                  <Scan className="text-white" />
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="hidden md:block">
-          <DataTable<ProductRow>
-            columns={columns}
-            data={(data?.data as ProductRow[]) || []}
-            isLoading={isRefetching}
-            sortBy={sortBy}
-            sortOrder={sortOrder}
-            onSort={handleSort}
-            selectable={select}
-            selectedIds={selectedIds}
-            onSelectionChange={handleSelectionChange}
-            emptyMessage="لا توجد منتجات"
+        {isError && !data ? (
+          <ErrorState
+            error={error}
+            fallback="تعذر تحميل المنتجات"
+            onRetry={() => refetch()}
           />
-        </div>
+        ) : (
+          <>
+            <div className="hidden lg:block">
+              <DataTable<ProductRow>
+                columns={columns}
+                data={(data?.data as ProductRow[]) || []}
+                isLoading={isRefetching}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSort={handleSort}
+                selectable={select}
+                selectedIds={selectedIds}
+                onSelectionChange={handleSelectionChange}
+                emptyContent={emptyContent}
+              />
+            </div>
 
-        <ProductsTableMobile
-          data={data}
-          isRefetching={isRefetching}
-          showCheckboxes={select}
-          selectedIds={selectedArray}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-          setSortBy={setSortBy}
-          setSortOrder={setSortOrder}
-          toggleSelect={(id: number) => {
-            const next = new Set(selectedIds);
-            if (next.has(id)) {
-              next.delete(id);
-            } else {
-              next.add(id);
-            }
-            handleSelectionChange(next);
-          }}
-          openSoldModal={openSoldModal}
-          openEditModal={openEditModal}
-          openEditAttrsModal={openEditAttrsModal}
-        />
+            <ProductsTableMobile
+              products={data?.data ?? []}
+              isRefetching={isRefetching}
+              showCheckboxes={select}
+              selectedIds={selectedArray}
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              setSortBy={setSortBy}
+              setSortOrder={setSortOrder}
+              toggleSelect={(id: number) => {
+                const next = new Set(selectedIds);
+                if (next.has(id)) {
+                  next.delete(id);
+                } else {
+                  next.add(id);
+                }
+                handleSelectionChange(next);
+              }}
+              openSoldModal={openSoldModal}
+              openGallery={setGalleryProduct}
+              emptyContent={emptyContent}
+            />
+          </>
+        )}
       </div>
 
       {showBulkActions && (
@@ -404,14 +391,6 @@ function ProductsTable() {
         </div>
       )}
 
-      {showModal && activeProduct && (
-        <ProductAddVariantsModal
-          productId={activeProduct.id}
-          variants={activeProduct.variants}
-          isOpen={showModal}
-          onClose={closeModal}
-        />
-      )}
       {showSoldModal && soldProductId && (
         <ProductVariantCountsModal
           productId={soldProductId}
@@ -432,14 +411,24 @@ function ProductsTable() {
         />
       )}
 
-      {showEditAttrsModal && activeAttrsProduct && (
-        <EditProductAttributesModal
-          productId={activeAttrsProduct.id}
-          attributes={activeAttrsProduct.attributes}
-          isOpen={showEditAttrsModal}
-          onClose={closeEditAttrsModal}
-        />
-      )}
+      <ImageGalleryModal
+        isOpen={galleryProduct !== null}
+        onClose={() => setGalleryProduct(null)}
+        title={galleryProduct?.name ?? ''}
+        images={galleryProduct ? productGalleryImages(galleryProduct) : []}
+        actions={
+          galleryProduct && (
+            <Can code={PERMISSIONS.PRODUCTS_UPDATE}>
+              <Button asChild className="min-h-10">
+                <Link href={productEditHref(galleryProduct.id)}>
+                  <LiaEditSolid className="size-5" />
+                  تعديل المنتج
+                </Link>
+              </Button>
+            </Can>
+          )
+        }
+      />
     </>
   );
 }

@@ -14,22 +14,27 @@ function ProductsHeader() {
 
   return (
     <header className="mb-10">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <div className="w-1 h-8 bg-primary rounded-full"></div>
-          <h1 className="text-3xl font-bold text-gray-900">صفحة المنتجات</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-1 h-8 bg-primary rounded-full shrink-0"></div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">صفحة المنتجات</h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Can code={PERMISSIONS.PRODUCTS_CREATE}>
             <Button
               variant="outline"
+              className="min-h-10"
               onClick={() => setIsAddProductModalOpen(true)}
             >
               <LiaPlusSolid className="size-5" />
               إضافة منتج يدوياً
             </Button>
           </Can>
-          <Button onClick={() => syncProducts()} disabled={isPending}>
+          <Button
+            className="min-h-10"
+            onClick={() => syncProducts()}
+            disabled={isPending}
+          >
             {isPending ? (
               <div className="size-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
             ) : (

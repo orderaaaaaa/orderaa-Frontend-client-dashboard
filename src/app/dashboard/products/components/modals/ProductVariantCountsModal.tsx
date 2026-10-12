@@ -3,7 +3,8 @@
 import React from 'react';
 import PageLoading from '@/components/ui/page-loading';
 import BaseModal from '@/components/ui/base-modal';
-import { useGetProductVariantCounts } from '../../hooks/useProduct';
+import { ErrorState } from '@/components/ui/state-panels';
+import { useGetProductAttributeCounts } from '../../hooks/useProduct';
 
 interface Props {
   productId: number;
@@ -16,9 +17,10 @@ export default function ProductVariantCountsModal({
   isOpen,
   onClose,
 }: Props) {
-  const { data, isLoading } = useGetProductVariantCounts(productId);
+  const { data, isLoading, isError, error, refetch } =
+    useGetProductAttributeCounts(productId);
 
-  const hasVariants = data?.variantCounts && data.variantCounts.length > 0;
+  const counts = data?.attributeCounts ?? [];
   const totalOrders = data?.totalOrders ?? 0;
 
   return (
@@ -31,22 +33,31 @@ export default function ProductVariantCountsModal({
     >
       {isLoading ? (
         <PageLoading size="sm" className="py-10 min-h-0" />
-      ) : !hasVariants ? (
+      ) : isError ? (
+        <ErrorState
+          error={error}
+          fallback="تعذر تحميل تفاصيل القطع المباعة"
+          onRetry={() => refetch()}
+          className="py-8"
+        />
+      ) : counts.length === 0 ? (
         <div className="text-center py-10 text-gray-500">
           لا توجد بيانات للقطع المباعة
         </div>
       ) : (
         <div className="space-y-3">
-          {data.variantCounts.map((item, index) => (
+          {counts.map((item) => (
             <div
-              key={index}
-              className="flex justify-between items-center border rounded-lg px-4 py-2"
+              key={`${item.label}|${item.value}`}
+              className="flex justify-between items-center gap-3 border rounded-lg px-4 py-2"
             >
-              <div className="text-sm text-gray-700 truncate">
-                {item.attribute}:{' '}
-                <span className="font-medium">{item.option}</span>
+              <div className="text-sm text-gray-700 min-w-0 break-words">
+                <span className="font-medium">{item.label}</span>
+                {item.value && <span>: {item.value}</span>}
               </div>
-              <span className="font-semibold text-primary">{item.count}</span>
+              <span className="font-semibold text-primary shrink-0">
+                {item.count}
+              </span>
             </div>
           ))}
 

@@ -1,32 +1,24 @@
 import React from 'react';
-import { LiaEditSolid, LiaListUlSolid } from 'react-icons/lia';
+import Link from 'next/link';
+import { LiaEditSolid } from 'react-icons/lia';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ProductConfirmOutOfStockMode, VariantItem } from '../types/products';
+import { Can } from '@/components/Can';
+import { PERMISSIONS } from '@/lib/permissions';
+import { Product } from '../types/products';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import LoadingAnimation from '@/components/ui/loadingAnimation';
 import { ConfirmOutOfStockControl } from './ConfirmOutOfStockControl';
+import { ProductThumbnailButton } from './ProductThumbnailButton';
+import { productEditHref } from '../utils/productLinks';
 import {
+  usePendingConfirmOutOfStockIds,
   useStoreConfirmOutOfStock,
   useUpdateProductConfirmOutOfStock,
 } from '../hooks/useProduct';
 
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  image?: string;
-  images: string[];
-  totalSold: number;
-  totalOrders: number;
-  confirmOutOfStockMode: ProductConfirmOutOfStockMode;
-  extraDetails?: {
-    variants?: VariantItem[];
-  };
-}
-
 interface ProductsTableMobileProps {
-  data: { data: Product[] } | undefined;
+  products: Product[];
   isRefetching: boolean;
   showCheckboxes: boolean;
   selectedIds: number[];
@@ -36,12 +28,20 @@ interface ProductsTableMobileProps {
   setSortOrder: (value: 'asc' | 'desc') => void;
   toggleSelect: (id: number) => void;
   openSoldModal: (productId: number) => void;
-  openEditModal: (productId: number, variants: VariantItem[]) => void;
-  openEditAttrsModal: (productId: number) => void;
+  openGallery: (product: Product) => void;
+  emptyContent: React.ReactNode;
 }
 
+const SORT_BY_OPTIONS = [
+  { key: 'createdAt', value: 'تاريخ الإنشاء' },
+  { key: 'name', value: 'الاسم' },
+  { key: 'price', value: 'السعر' },
+  { key: 'totalSold', value: 'عدد القطع المباعة' },
+  { key: 'totalOrders', value: 'عدد الطلبات' },
+];
+
 function ProductsTableMobile({
-  data,
+  products,
   isRefetching,
   showCheckboxes,
   selectedIds,
@@ -51,29 +51,22 @@ function ProductsTableMobile({
   setSortOrder,
   toggleSelect,
   openSoldModal,
-  openEditModal,
-  openEditAttrsModal,
+  openGallery,
+  emptyContent,
 }: ProductsTableMobileProps) {
   const storeConfirmMode = useStoreConfirmOutOfStock();
-  const confirmOutOfStockMutation = useUpdateProductConfirmOutOfStock();
-
-  const sortByOptions = [
-    { key: 'createdAt', value: 'تاريخ الإنشاء' },
-    { key: 'name', value: 'الاسم' },
-    { key: 'price', value: 'السعر' },
-    { key: 'totalSold', value: 'عدد القطع المباعة' },
-    { key: 'totalOrders', value: 'عدد الطلبات' },
-  ];
+  const { mutate: saveConfirmOutOfStock } = useUpdateProductConfirmOutOfStock();
+  const pendingConfirmIds = usePendingConfirmOutOfStockIds();
 
   return (
-    <div className="md:hidden flex flex-col gap-3">
+    <div className="lg:hidden flex flex-col gap-3">
       {/* Mobile Sort Controls */}
       <div className="flex gap-2 flex-wrap">
         <div className="flex-1 min-w-[200px]">
           <SearchableSelect
             value={sortBy}
             onChange={setSortBy}
-            options={sortByOptions}
+            options={SORT_BY_OPTIONS}
             placeholder="اختر طريقة الترتيب"
             searchPlaceholder="ابحث..."
             triggerClassName="!py-2"
@@ -84,7 +77,7 @@ function ProductsTableMobile({
         <Button
           variant="outline"
           onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-          className="min-w-[120px] justify-center"
+          className="min-w-[120px] min-h-10 justify-center"
         >
           {sortOrder === 'asc' ? (
             <>
@@ -109,129 +102,114 @@ function ProductsTableMobile({
           </div>
         )}
 
-        <div className={isRefetching ? 'opacity-50 pointer-events-none' : ''}>
-          {data?.data.map((product) => {
-            const handleCardTap = () => {
-              toggleSelect(product.id);
-            };
+        {products.length === 0 ? (
+          <div className="rounded-xl border bg-white">{emptyContent}</div>
+        ) : (
+          <ul
+            className={`grid grid-cols-1 md:grid-cols-2 gap-3 ${
+              isRefetching ? 'opacity-50 pointer-events-none' : ''
+            }`}
+          >
+            {products.map((product) => {
+              const isSelected = selectedIds.includes(product.id);
+              return (
+                <li
+                  key={product.id}
+                  {...(showCheckboxes
+                    ? { onClick: () => toggleSelect(product.id) }
+                    : {})}
+                  className={`min-w-0 border rounded-xl p-4 bg-white shadow-sm ${
+                    showCheckboxes ? 'cursor-pointer' : ''
+                  } ${isSelected ? 'ring-2 ring-primary/30 border-primary/30' : ''}`}
+                >
+                  <div className="flex gap-3 sm:gap-4 items-start">
+                    <ProductThumbnailButton
+                      product={product}
+                      onOpen={openGallery}
+                      className="w-20 h-20 sm:w-24 sm:h-24"
+                    />
+                    <div className="flex-1 min-w-0 space-y-1 text-right">
+                      <h3 className="font-semibold text-gray-900 break-words">
+                        {product.name}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        السعر: {product.price ?? '—'}
+                      </p>
+                      <span className="inline-block text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-500">
+                        الطلبات: {product.totalOrders}
+                      </span>
+                    </div>
+                    {showCheckboxes && (
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        aria-label={`تحديد ${product.name}`}
+                        onChange={() => toggleSelect(product.id)}
+                        // onChange does not bubble, but the click that triggers it
+                        // does — without this the card handler would toggle the
+                        // selection a second time and cancel it out.
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-5 h-5 shrink-0 text-primary rounded border-gray-300"
+                      />
+                    )}
+                  </div>
 
-            return (
-              <div
-                key={product.id}
-                {...(showCheckboxes ? { onClick: handleCardTap } : {})}
-                className={`border rounded-xl p-4 bg-white shadow-sm mb-3 ${
-                  showCheckboxes ? 'cursor-pointer' : ''
-                } ${
-                  selectedIds.includes(product.id)
-                    ? 'ring-2 ring-primary/30 border-primary/30'
-                    : ''
-                }`}
-              >
-                <div className="flex gap-4 items-center">
-                  <img
-                    src={
-                      product.image ||
-                      product.images[0] ||
-                      'https://placehold.net/600x600.png'
-                    }
-                    className="w-24 h-24 rounded-lg object-cover border"
-                  />
-                  <div className="flex-1 space-y-1 text-right" dir="rtl">
-                    <h3 className="font-semibold text-gray-900">
-                      {product.name}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      السعر: {product.price}
-                    </p>
-                    <span className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-500">
-                      الطلبات: {product.totalOrders}
-                    </span>
-
-                    <div className="flex flex-wrap items-center justify-between gap-2 mt-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mt-3">
+                    <Button
+                      variant="ghost"
+                      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                        e.stopPropagation();
+                        openSoldModal(product.id);
+                      }}
+                      className="text-gray-600 px-2 min-h-10"
+                    >
+                      <span>عدد القطع المباعة:</span>
+                      <span className="font-medium">{product.totalSold}</span>
+                    </Button>
+                    <Can code={PERMISSIONS.PRODUCTS_UPDATE}>
                       <Button
+                        asChild
                         variant="ghost"
-                        size="sm"
-                        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                          e.stopPropagation();
-                          openSoldModal(product.id);
-                        }}
-                        className="text-gray-600 px-1"
-                      >
-                        <span>عدد القطع المباعه:</span>
-                        <span className="font-medium">{product.totalSold}</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                          e.stopPropagation();
-                          openEditAttrsModal(product.id);
-                        }}
                         className="text-primary min-h-10"
                       >
-                        <LiaEditSolid /> تعديل المتغيرات
+                        <Link
+                          href={productEditHref(product.id)}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <LiaEditSolid /> تعديل المنتج
+                        </Link>
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                          e.stopPropagation();
-                          openEditModal(
-                            product.id,
-                            product.extraDetails?.variants || [],
-                          );
-                        }}
-                        className="min-h-10"
-                      >
-                        <LiaListUlSolid /> المواصفات
-                      </Button>
-                    </div>
+                    </Can>
+                  </div>
 
                     {/* T27 — the per-product override, same control as desktop.
                         Stops click-through so choosing it never opens the card. */}
-                    <div
-                      className="mt-2 max-w-[220px]"
-                      onClick={(e: React.MouseEvent<HTMLDivElement>) =>
-                        e.stopPropagation()
+                  <div
+                    className="mt-2 max-w-[260px]"
+                    onClick={(e: React.MouseEvent<HTMLDivElement>) =>
+                      e.stopPropagation()
+                    }
+                  >
+                    <p className="mb-1 text-xs text-gray-500">
+                      تأكيد بدون مخزون
+                    </p>
+                    <ConfirmOutOfStockControl
+                      value={product.confirmOutOfStockMode}
+                      storeMode={storeConfirmMode}
+                      disabled={pendingConfirmIds.includes(product.id)}
+                      onChange={(confirmOutOfStockMode) =>
+                        saveConfirmOutOfStock({
+                          productId: product.id,
+                          confirmOutOfStockMode,
+                        })
                       }
-                    >
-                      <p className="mb-1 text-xs text-gray-500">
-                        تأكيد بدون مخزون
-                      </p>
-                      <ConfirmOutOfStockControl
-                        value={product.confirmOutOfStockMode}
-                        storeMode={storeConfirmMode}
-                        disabled={
-                          confirmOutOfStockMutation.isPending &&
-                          confirmOutOfStockMutation.variables?.productId ===
-                            product.id
-                        }
-                        onChange={(confirmOutOfStockMode) =>
-                          confirmOutOfStockMutation.mutate({
-                            productId: product.id,
-                            confirmOutOfStockMode,
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-                  {showCheckboxes && (
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.includes(product.id)}
-                      onChange={() => toggleSelect(product.id)}
-                      // onChange does not bubble, but the click that triggers it
-                      // does — without this the card handler would toggle the
-                      // selection a second time and cancel it out.
-                      onClick={(e) => e.stopPropagation()}
-                      className="w-5 h-5 text-primary rounded border-gray-300"
                     />
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,15 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  useQuery,
+  useMutation,
+  useMutationState,
+  useQueryClient,
+  type QueryClient,
+  type QueryKey,
+} from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { merchantSettingsApi } from '@/app/dashboard/store-settings/api/storeApi';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { productsApi } from '../api/products';
 import { productKeys } from './queryKeys';
 import { useJobStore } from '@/store/useJobStore';
@@ -9,14 +18,19 @@ import { getApiErrorMessage } from '@/utils/apiError';
 import type { StoreConfirmOutOfStock } from '@/utils/storeConfirmMode';
 import {
   ProductConfirmOutOfStockMode,
-  UpdateVariantsPayload,
   UpdateAttributesPayload,
   ProductQueryParams,
-  VariantsCountResponse,
+  AttributeCountsResponse,
   CreateProductPayload,
-  ProductCreateErrorBody,
-  PRODUCT_CREATE_ERROR_CODES,
+  ProductDetail,
+  SpecificationInput,
+  UpdateProductScalarsPayload,
+  UpsertVariantsPayload,
 } from '../types/products';
+import {
+  productApiErrorBody,
+  toastProductError,
+} from '../utils/productApiError';
 
 export const useGetProducts = (params: ProductQueryParams, enabled = true) => {
   return useQuery({
@@ -27,11 +41,85 @@ export const useGetProducts = (params: ProductQueryParams, enabled = true) => {
   });
 };
 
-export const useGetProductVariantCounts = (productId: number) => {
-  return useQuery<VariantsCountResponse>({
+export const useGetProductAttributeCounts = (productId: number) => {
+  return useQuery<AttributeCountsResponse>({
     queryKey: productKeys.variants(productId),
-    queryFn: () => productsApi.getVariantOptions(productId),
+    queryFn: () => productsApi.getAttributeCounts(productId),
     enabled: !!productId,
+  });
+};
+
+export const useProductDetail = (productId: number) => {
+  return useQuery<ProductDetail>({
+    queryKey: productKeys.detail(productId),
+    queryFn: () => productsApi.getDetail(productId),
+    enabled: Number.isInteger(productId) && productId > 0,
+    retry: (failureCount, error) =>
+      productApiErrorBody(error)?.code !== 'PRODUCT_NOT_FOUND' &&
+      failureCount < 2,
+  });
+};
+
+const productEditKeys = (productId: number): QueryKey[] => [
+  productKeys.detail(productId),
+  productKeys.lists(),
+  productKeys.variants(productId),
+  [QUERY_KEYS.PRODUCT_ATTRIBUTE_OPTIONS, productId],
+  [QUERY_KEYS.PRODUCT_VARIANTS_OPTIONS, productId],
+];
+
+const applyDetail = (
+  queryClient: QueryClient,
+  productId: number,
+  detail: ProductDetail,
+) => {
+  queryClient.setQueryData(productKeys.detail(productId), detail);
+  return invalidateAndWait(queryClient, productEditKeys(productId));
+};
+
+export const usePatchProduct = (productId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: UpdateProductScalarsPayload) =>
+      productsApi.patchProduct(productId, payload),
+    onSuccess: (detail) => applyDetail(queryClient, productId, detail),
+    onError: (error: unknown) => {
+      toastProductError(error, 'تعذر حفظ بيانات المنتج');
+    },
+  });
+};
+
+export const useUpsertVariants = (productId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: UpsertVariantsPayload) =>
+      productsApi.upsertVariants(productId, payload),
+    onSuccess: (detail) => applyDetail(queryClient, productId, detail),
+    onError: (error: unknown) => {
+      toastProductError(error, 'تعذر حفظ المتغيرات');
+    },
+  });
+};
+
+export interface DeleteVariantVariables {
+  variantId: number;
+  confirmStoreLink: boolean;
+}
+
+export const useDeleteVariant = (productId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ variantId, confirmStoreLink }: DeleteVariantVariables) =>
+      productsApi.deleteVariant(productId, variantId, confirmStoreLink),
+    onSuccess: (detail) => applyDetail(queryClient, productId, detail),
+    onError: (error: unknown) => {
+      const code = productApiErrorBody(error)?.code;
+      if (code === 'VARIANT_STORE_LINK_CONFIRMATION_REQUIRED') return;
+      toastProductError(error, 'تعذر حذف المتغير');
+      if (code === 'VARIANT_IN_USE' || code === 'VARIANT_NOT_FOUND') {
+        return invalidateAndWait(queryClient, [productKeys.detail(productId)]);
+      }
+    },
   });
 };
 
@@ -47,29 +135,21 @@ export const useUpdateProductSpecifications = (productId: number) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: UpdateVariantsPayload) =>
-      productsApi.updateProductSpecifications(
-        productId,
-        payload.variants.map((item) => ({
-          name: item.attribute,
-          value: item.option,
-        })),
-      ),
-
-    onError: (_err, _payload, context: any) => {
-      if (context?.previousProducts) {
-        queryClient.setQueryData(productKeys.all, context.previousProducts);
-      }
+    mutationFn: (specifications: SpecificationInput[]) =>
+      productsApi.replaceSpecifications(productId, specifications),
+    onSuccess: (saved) => {
+      queryClient.setQueryData<ProductDetail>(
+        productKeys.detail(productId),
+        (current) =>
+          current && {
+            ...current,
+            specifications: saved.map(({ name, value }) => ({ name, value })),
+          },
+      );
+      return invalidateAndWait(queryClient, productEditKeys(productId));
     },
-
-    onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: productKeys.all,
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: productKeys.variants(productId),
-      });
+    onError: (error: unknown) => {
+      toastProductError(error, 'تعذر حفظ المواصفات');
     },
   });
 };
@@ -80,52 +160,9 @@ export const useUpdateProductAttributes = (productId: number) => {
   return useMutation({
     mutationFn: (payload: UpdateAttributesPayload) =>
       productsApi.updateProductAttributes(productId, payload),
-
-    onMutate: async (newPayload) => {
-      await queryClient.cancelQueries({ queryKey: productKeys.all });
-
-      const previousProducts = queryClient.getQueryData(productKeys.all);
-
-      queryClient.setQueriesData({ queryKey: productKeys.all }, (old: any) => {
-        if (!old || !old.data) return old;
-
-        const flatVariants = newPayload.attributes.flatMap((attr) =>
-          attr.options.map((opt) => ({ attribute: attr.name, option: opt.name })),
-        );
-
-        return {
-          ...old,
-          data: old.data.map((product: any) =>
-            product.id === productId
-              ? {
-                  ...product,
-                  extraDetails: {
-                    ...product.extraDetails,
-                    variants: flatVariants,
-                  },
-                }
-              : product,
-          ),
-        };
-      });
-
-      return { previousProducts };
-    },
-
-    onError: (_err, _payload, context) => {
-      if (context?.previousProducts) {
-        queryClient.setQueryData(productKeys.all, context.previousProducts);
-      }
-    },
-
-    onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: productKeys.all,
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: productKeys.variants(productId),
-      });
+    onSuccess: () => invalidateAndWait(queryClient, productEditKeys(productId)),
+    onError: (error: unknown) => {
+      toastProductError(error, 'تعذر حفظ الخصائص');
     },
   });
 };
@@ -144,17 +181,27 @@ export interface UpdateProductConfirmOutOfStockVariables {
   confirmOutOfStockMode: ProductConfirmOutOfStockMode;
 }
 
+const CONFIRM_OUT_OF_STOCK_MUTATION_KEY = [
+  ...productKeys.all,
+  'confirmOutOfStock',
+] as const;
+
 export const useUpdateProductConfirmOutOfStock = () => {
   const queryClient = useQueryClient();
   const { t } = useI18n();
 
   return useMutation({
+    mutationKey: CONFIRM_OUT_OF_STOCK_MUTATION_KEY,
     mutationFn: ({
       productId,
       confirmOutOfStockMode,
     }: UpdateProductConfirmOutOfStockVariables) =>
       productsApi.updateConfirmOutOfStock(productId, confirmOutOfStockMode),
-    onSuccess: () => {
+    onSuccess: async (_data, { productId }) => {
+      await invalidateAndWait(queryClient, [
+        productKeys.lists(),
+        productKeys.detail(productId),
+      ]);
       toast.success(t('products.confirmOutOfStock.saved'));
     },
     onError: (error: unknown) => {
@@ -162,11 +209,16 @@ export const useUpdateProductConfirmOutOfStock = () => {
         getApiErrorMessage(error, t('products.confirmOutOfStock.saveFailed')),
       );
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: productKeys.all });
-    },
   });
 };
+
+export const usePendingConfirmOutOfStockIds = (): number[] =>
+  useMutationState({
+    filters: { mutationKey: CONFIRM_OUT_OF_STOCK_MUTATION_KEY, status: 'pending' },
+    select: (mutation) =>
+      (mutation.state.variables as UpdateProductConfirmOutOfStockVariables)
+        .productId,
+  });
 
 export const useSyncProducts = () => {
   return useMutation({
@@ -175,54 +227,10 @@ export const useSyncProducts = () => {
       toast.info('تم بدء مزامنة المنتجات...', { autoClose: 2000 });
       useJobStore.getState().addJob({ jobId: data.jobId, type: 'SYNC', label: 'مزامنة المنتجات' });
     },
+    onError: (error: unknown) => {
+      toastProductError(error, 'تعذر بدء مزامنة المنتجات، حاول مرة أخرى');
+    },
   });
-};
-
-const joinValues = (values?: string[]) =>
-  values && values.length > 0 ? `: ${values.join('، ')}` : '';
-
-const productCreateErrorBody = (
-  error: unknown,
-): ProductCreateErrorBody | null => {
-  const data = (error as { response?: { data?: Partial<ProductCreateErrorBody> } })
-    ?.response?.data;
-  const code = data?.code;
-  if (!code || !PRODUCT_CREATE_ERROR_CODES.includes(code)) return null;
-  return { code, message: data.message ?? '', details: data.details };
-};
-
-export const getProductCreateErrorMessage = (error: unknown): string => {
-  const body = productCreateErrorBody(error);
-  if (!body) return getApiErrorMessage(error, 'تعذر حفظ المنتج، حاول مرة أخرى');
-  const details = body.details ?? {};
-  switch (body.code) {
-    case 'DUPLICATE_ATTRIBUTE_NAME':
-      return `يوجد متغيران بنفس الاسم${joinValues(details.names)}`;
-    case 'DUPLICATE_OPTION_NAME':
-      return `توجد قيمتان متكررتان في المتغير ${details.attribute ?? ''}${joinValues(details.names)}`;
-    case 'VARIANT_OPTIONS_INVALID':
-      return 'أحد صفوف المتغيرات لا يطابق قيم المتغيرات، راجع الصفوف وحاول مرة أخرى';
-    case 'DUPLICATE_VARIANT_COMBINATION':
-      return 'يوجد صفان بنفس مجموعة القيم';
-    case 'VARIANT_COMBINATIONS_INCOMPLETE':
-      return 'يجب إضافة صف لكل مجموعة من قيم المتغيرات';
-    case 'TOO_MANY_VARIANTS':
-      return `الحد الأقصى لعدد صفوف المتغيرات هو ${details.limit ?? 100}`;
-    case 'TOO_MANY_ATTRIBUTES':
-      return `الحد الأقصى لعدد المتغيرات هو ${details.limit ?? 10}`;
-    case 'TOO_MANY_OPTIONS':
-      return `الحد الأقصى لقيم المتغير ${details.attribute ?? ''} هو ${details.limit ?? 100}`;
-    case 'IMAGE_URL_INVALID':
-      return 'تعذر استخدام إحدى الصور، أعد رفعها وحاول مرة أخرى';
-    case 'DUPLICATE_SKU_IN_REQUEST':
-      return `رمز SKU مكرر بين صفوف المتغيرات${joinValues(details.values)}`;
-    case 'DUPLICATE_BARCODE_IN_REQUEST':
-      return `الباركود مكرر بين صفوف المتغيرات${joinValues(details.values)}`;
-    case 'SKU_TAKEN':
-      return `رمز SKU مستخدم بالفعل${joinValues(details.values)}`;
-    case 'BARCODE_TAKEN':
-      return `الباركود مستخدم بالفعل${joinValues(details.values)}`;
-  }
 };
 
 export const useCreateProduct = () => {
@@ -230,14 +238,12 @@ export const useCreateProduct = () => {
 
   return useMutation({
     mutationFn: (payload: CreateProductPayload) => productsApi.create(payload),
-    onSuccess: () => {
+    onSuccess: async () => {
+      await invalidateAndWait(queryClient, [productKeys.lists()]);
       toast.success('تم إضافة المنتج بنجاح');
     },
     onError: (error: unknown) => {
-      toast.error(getProductCreateErrorMessage(error));
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: productKeys.all });
+      toastProductError(error, 'تعذر حفظ المنتج، حاول مرة أخرى');
     },
   });
 };
