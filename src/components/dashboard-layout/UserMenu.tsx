@@ -59,6 +59,7 @@ export function UserMenu({
           <DropdownMenuPrimitive.Content
             align="start"
             sideOffset={4}
+            collisionPadding={8}
             className="z-50 min-w-[150px] overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-lg dark:border dark:border-border"
           >
             {USER_MENU_OPTIONS.map((option) => (

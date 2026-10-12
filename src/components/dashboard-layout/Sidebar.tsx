@@ -46,6 +46,7 @@ export function Sidebar({
 
   const [isDrawer, setIsDrawer] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
   const wasOpenRef = useRef(false);
 
@@ -58,12 +59,42 @@ export function Sidebar({
   }, []);
 
   const drawerOpen = open && isDrawer;
+  const drawerClosed = isDrawer && !open;
+
+  useEffect(() => {
+    if (panelRef.current) panelRef.current.inert = drawerClosed;
+  }, [drawerClosed]);
   useOverflowScrollLock(drawerOpen);
 
   useEffect(() => {
     if (!drawerOpen) return;
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onToggle();
+      if (event.key === 'Escape') {
+        onToggle();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const panel = panelRef.current;
+      if (!panel) return;
+      const focusable = Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((node) => node.offsetParent !== null);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      if (!panel.contains(active)) {
+        event.preventDefault();
+        first.focus();
+      } else if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
@@ -81,7 +112,6 @@ export function Sidebar({
     wasOpenRef.current = drawerOpen;
   }, [drawerOpen]);
 
-  const drawerClosed = isDrawer && !open;
 
   const permissions = usePermissions();
 
@@ -142,7 +172,7 @@ export function Sidebar({
       )}
 
       <div
-        {...(drawerClosed ? { inert: '' as unknown as boolean } : {})}
+        ref={panelRef}
         {...(drawerOpen
           ? { role: 'dialog', 'aria-modal': true, 'aria-label': 'القائمة الرئيسية' }
           : {})}
