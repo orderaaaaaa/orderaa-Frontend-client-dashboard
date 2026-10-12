@@ -9,10 +9,10 @@ import clsx from 'clsx';
 
 const TIME_PERIOD_OPTIONS: { value: TimePeriod; label: string }[] = [
   { value: 'day', label: 'يوم' },
-  { value: 'week', label: 'اسبوع' },
+  { value: 'week', label: 'أسبوع' },
   { value: 'month', label: 'شهر' },
   { value: 'quarter', label: 'ربع سنوي' },
-  { value: 'year', label: 'سنه' },
+  { value: 'year', label: 'سنة' },
 ];
 
 const TIME_PERIOD_LABELS = TIME_PERIOD_OPTIONS.map((opt) => opt.label);
