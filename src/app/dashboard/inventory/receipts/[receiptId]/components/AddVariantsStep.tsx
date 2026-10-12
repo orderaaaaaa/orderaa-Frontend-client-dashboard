@@ -156,6 +156,87 @@ const AddVariantsStep = memo(
       [products, enteredByProduct],
     );
 
+    const renderReceivedInput = useCallback(
+      (row: ProductRow, inputClassName?: string) => {
+        const variants = productVariants[row.id as number] ?? [];
+        const isMulti = variants.length > 1;
+        const value = isMulti
+          ? variants.reduce((sum, v) => sum + (typeof v.quantity === 'number' ? v.quantity : 0), 0)
+          : (variants[0]?.quantity ?? '');
+        return (
+          <div className="flex flex-col gap-1">
+            <Input
+              type="number"
+              inputMode="numeric"
+              aria-label={`الكمية المستلمة — ${row.name as string}`}
+              value={value}
+              onChange={(e) => handleRowReceivedChange(row.id as number, e.target.value)}
+              onFocus={(e) => e.currentTarget.select()}
+              onClear={() => handleRowReceivedChange(row.id as number, '')}
+              min={0}
+              clearable
+              disabled={isMulti}
+              placeholder="0"
+              className={inputClassName}
+            />
+            {isMulti && (
+              <span className="text-xs text-gray-500">حدد الكمية لكل متغير بالأسفل</span>
+            )}
+          </div>
+        );
+      },
+      [productVariants, handleRowReceivedChange],
+    );
+
+    const renderDifference = useCallback(
+      (row: ProductRow) => {
+        const entered = enteredByProduct(row.id as number);
+        const invoiced = row.quantity as number;
+        const difference = entered - invoiced;
+        return (
+          <div className="flex flex-col gap-0.5">
+            <span
+              className={clsx(
+                'text-xs font-semibold whitespace-nowrap',
+                difference === 0 ? 'text-green-600' : 'text-amber-600',
+              )}
+            >
+              {difference === 0
+                ? 'مطابق'
+                : `${difference > 0 ? '+' : ''}${difference}`}
+            </span>
+            <span className="text-xs text-gray-500 whitespace-nowrap">
+              المفوتر {invoiced} — المُدخل {entered}
+            </span>
+          </div>
+        );
+      },
+      [enteredByProduct],
+    );
+
+    const renderAddVariantButton = useCallback(
+      (row: ProductRow, className?: string) => {
+        const variants = productVariants[row.id as number] ?? [];
+        const count = variants.filter((v) => v.attributeOptionIds.length > 0).length;
+        return (
+          <Button
+            type="button"
+            variant="default"
+            size="sm"
+            className={clsx('rounded-full text-xs font-semibold flex items-center gap-1.5', className)}
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+              e.stopPropagation();
+              handleAddVariant(row as InvoiceProductRow);
+            }}
+          >
+            <LiaPlusSolid className="w-4 h-4" />
+            إضافة متغير{count > 0 ? ` (${count})` : ''}
+          </Button>
+        );
+      },
+      [productVariants, handleAddVariant],
+    );
+
     const columns: DataTableColumn<ProductRow>[] = useMemo(
       () => [
         {
@@ -186,32 +267,7 @@ const AddVariantsStep = memo(
           key: 'received',
           header: 'الكمية المستلمة',
           className: 'w-40',
-          render: (_value: unknown, row: ProductRow) => {
-            const variants = productVariants[row.id as number] ?? [];
-            const isMulti = variants.length > 1;
-            const value = isMulti
-              ? variants.reduce((sum, v) => sum + (typeof v.quantity === 'number' ? v.quantity : 0), 0)
-              : (variants[0]?.quantity ?? '');
-            return (
-              <span
-                className="inline-block"
-                title={isMulti ? 'حدد الكمية لكل متغير بالأسفل' : undefined}
-              >
-                <Input
-                  type="number"
-                  value={value}
-                  onChange={(e) => handleRowReceivedChange(row.id as number, e.target.value)}
-                  onFocus={(e) => e.currentTarget.select()}
-                  onClear={() => handleRowReceivedChange(row.id as number, '')}
-                  min={0}
-                  clearable
-                  disabled={isMulti}
-                  placeholder="0"
-                  className="w-28"
-                />
-              </span>
-            );
-          },
+          render: (_value: unknown, row: ProductRow) => renderReceivedInput(row, 'w-28'),
         },
         {
           key: 'difference',
@@ -220,50 +276,39 @@ const AddVariantsStep = memo(
           // The per-product reconciliation: invoiced vs counted, live as it is
           // typed, so a mismatch is visible here rather than a surprise at
           // submit time — approving one rewrites the invoice's total amount.
-          render: (_value: unknown, row: ProductRow) => {
-            const entered = enteredByProduct(row.id as number);
-            const invoiced = row.quantity as number;
-            const difference = entered - invoiced;
-            return (
-              <span
-                className={clsx(
-                  'text-xs font-semibold whitespace-nowrap',
-                  difference === 0 ? 'text-green-600' : 'text-amber-600',
-                )}
-                title={`المفوتر ${invoiced} — المُدخل ${entered}`}
-              >
-                {difference === 0
-                  ? 'مطابق'
-                  : `${difference > 0 ? '+' : ''}${difference}`}
-              </span>
-            );
-          },
+          render: (_value: unknown, row: ProductRow) => renderDifference(row),
         },
         {
           key: 'actions',
           header: '',
           className: 'w-44',
-          render: (_value: unknown, row: ProductRow) => {
-            const variants = productVariants[row.id as number] ?? [];
-            const count = variants.filter((v) => v.attributeOptionIds.length > 0).length;
-            return (
-              <Button
-                variant="default"
-                size="sm"
-                className="rounded-full text-xs font-semibold flex items-center gap-1.5"
-                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                  e.stopPropagation();
-                  handleAddVariant(row as InvoiceProductRow);
-                }}
-              >
-                <LiaPlusSolid className="w-4 h-4" />
-                إضافة متغير{count > 0 ? ` (${count})` : ''}
-              </Button>
-            );
-          },
+          render: (_value: unknown, row: ProductRow) => renderAddVariantButton(row),
         },
       ],
-      [handleAddVariant, handleRowReceivedChange, productVariants, enteredByProduct],
+      [renderReceivedInput, renderDifference, renderAddVariantButton],
+    );
+
+    const renderMobileRow = useCallback(
+      (row: ProductRow) => (
+        <div className="flex flex-col gap-3">
+          <div className="flex items-start justify-between gap-3">
+            <span className="font-semibold text-gray-800 break-words min-w-0">{row.name as string}</span>
+            <span className="shrink-0 text-xs text-gray-600">المفوتر {row.quantity as number} قطعة</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3 items-start">
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-gray-600">الكمية المستلمة</span>
+              {renderReceivedInput(row)}
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-gray-600">الفرق</span>
+              {renderDifference(row)}
+            </div>
+          </div>
+          {renderAddVariantButton(row, 'h-10 w-full justify-center')}
+        </div>
+      ),
+      [renderReceivedInput, renderDifference, renderAddVariantButton],
     );
 
     const renderSubRow = useCallback(
@@ -276,7 +321,7 @@ const AddVariantsStep = memo(
         const showPerVariantQty = variants.length > 1;
 
         return (
-          <div className="bg-gray-50/80 px-4 sm:px-6 py-3 flex flex-col sm:flex-row sm:flex-wrap items-start gap-2">
+          <div className="bg-gray-50/80 px-4 sm:px-6 py-3 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-start gap-2">
             {variants.map((v) => {
               const key = variantKey(v);
               const displayLabel =
@@ -286,14 +331,16 @@ const AddVariantsStep = memo(
               return (
                 <div
                   key={key}
-                  className="flex items-center gap-2 bg-white border border-primary/20 rounded-full px-3 py-1.5 text-xs w-fit"
+                  className="flex items-center gap-2 bg-white border border-primary/20 rounded-full ps-3 pe-1 py-0.5 text-xs sm:w-fit"
                 >
-                  <span className="text-primary font-medium">{displayLabel}</span>
+                  <span className="text-primary font-medium flex-1 min-w-0 break-words">{displayLabel}</span>
                    {showPerVariantQty && (
                      <>
                        <span className="text-gray-400">|</span>
                        <Input
                          type="number"
+                         inputMode="numeric"
+                         aria-label={`كمية المتغير ${displayLabel}`}
                          value={v.quantity}
                          onChange={(e) => handleQuantityChange(row.id as number, key, e.target.value)}
                          onFocus={(e) => e.currentTarget.select()}
@@ -306,12 +353,14 @@ const AddVariantsStep = memo(
                      </>
                    )}
                   <Button
+                    type="button"
                     variant="ghost"
-                    size="icon"
-                    className="w-5 h-5 min-w-0 p-0 text-gray-400 hover:text-red-500 transition-colors"
+                    size="touch"
+                    aria-label={`إزالة المتغير ${displayLabel}`}
+                    className="shrink-0 rounded-full text-gray-500 hover:text-red-500 transition-colors"
                     onClick={() => handleRemoveVariant(row.id as number, key)}
                   >
-                    <LiaTimesSolid className="w-3.5 h-3.5" />
+                    <LiaTimesSolid className="w-4 h-4" />
                   </Button>
                 </div>
               );
@@ -327,7 +376,7 @@ const AddVariantsStep = memo(
         <div className="flex flex-col gap-2">
           <h2 className="text-xl font-bold text-gray-800">مرحلة إضافة المتغيرات</h2>
           <p className="text-sm text-gray-500">
-            يرجاء التاكد من عدد القطع كل صنف قبل تحديد المتغيرات
+            يرجى التأكد من عدد القطع لكل صنف قبل تحديد المتغيرات
           </p>
         </div>
 
@@ -337,9 +386,10 @@ const AddVariantsStep = memo(
           keyField="id"
           emptyMessage="لا توجد منتجات في هذا الاستلام"
           renderSubRow={renderSubRow}
+          renderMobileRow={renderMobileRow}
         />
 
-        <div className="flex flex-row items-center justify-between px-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4">
           <p className="text-base font-bold text-gray-800">إجمالي المنتجات {totalProducts}</p>
           <p
             className={clsx(

@@ -19,6 +19,10 @@ import RemoveSettlementOrderDialog from '@/app/dashboard/orders/settlement/compo
 import EditSettlementAmountDialog from '@/app/dashboard/orders/settlement/components/EditSettlementAmountDialog';
 import AddSettlementOrdersDialog from '@/app/dashboard/orders/settlement/components/AddSettlementOrdersDialog';
 import {
+  SettlementMobileList,
+  SettlementMobileRow,
+} from '@/app/dashboard/orders/settlement/components/SettlementMobileList';
+import {
   listSettlementBatches,
   listSettlementBatchOrders,
   type SettlementBatchListItem,
@@ -130,7 +134,8 @@ export default function CollectionsPage() {
               key={f.value}
               variant={status === f.value ? 'default' : 'outline'}
               size="sm"
-              className="rounded-full text-xs px-4"
+              aria-pressed={status === f.value}
+              className="rounded-full text-xs px-4 max-sm:h-10 max-sm:flex-1"
               onClick={() => setStatus(f.value)}
             >
               {f.label}
@@ -236,17 +241,27 @@ export default function CollectionsPage() {
 
       {selected && (
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-3">
-            <CardTitle className="text-base flex items-center gap-1.5">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <CardTitle className="text-base flex flex-wrap items-center gap-1.5">
               طلبات التحصيل {selected.code}
               <CopyButton value={selected.code} label="نسخ كود التحصيل" />
               — {selected.totalAmount} جنيه عن {selected.ordersCount} طلب
             </CardTitle>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => setIsAddOpen(true)}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="max-sm:h-10 max-sm:flex-1"
+                onClick={() => setIsAddOpen(true)}
+              >
                 إضافة طلبات
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => setSelected(null)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="max-sm:h-10 max-sm:flex-1"
+                onClick={() => setSelected(null)}
+              >
                 إغلاق
               </Button>
             </div>
@@ -259,81 +274,146 @@ export default function CollectionsPage() {
                 لا توجد طلبات في هذا التحصيل
               </p>
             ) : (
-              <div className="rounded-md border overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted">
-                    <tr>
-                      <th className="px-4 py-2 text-right font-medium">كود الطلب</th>
-                      <th className="px-4 py-2 text-right font-medium">كود الشحن</th>
-                      <th className="px-4 py-2 text-right font-medium">العميل</th>
-                      <th className="px-4 py-2 text-right font-medium">المبلغ في هذا التحصيل</th>
-                      <th className="px-4 py-2 text-right font-medium">الحالة وقتها</th>
-                      <th className="px-4 py-2 text-right font-medium">الحالة الآن</th>
-                      <SettlementShippingColumnHeaders />
-                      <th className="px-4 py-2 text-right font-medium">إجراءات</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orders.map((row) => {
-                      // Showing both is the point: an order can move on after
-                      // it was settled.
-                      const moved = row.currentStatus !== row.targetStatus;
-                      return (
-                        <tr key={row.orderId} className="border-t">
-                          <td className="px-4 py-2 font-mono">
-                            <Link
-                              href={`/dashboard/orders/${row.orderId}`}
-                              className="text-primary hover:underline"
-                            >
-                              {row.orderCode}
-                            </Link>
-                            {row.isDeleted && (
-                              <span className="mr-2 text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">
-                                محذوف
+              <>
+                <SettlementMobileList>
+                  {orders.map((row) => {
+                    const moved = row.currentStatus !== row.targetStatus;
+                    return (
+                      <SettlementMobileRow
+                        key={row.orderId}
+                        fields={[
+                          {
+                            label: 'كود الطلب',
+                            value: (
+                              <span className="flex flex-wrap items-center gap-2 font-mono">
+                                <Link
+                                  href={`/dashboard/orders/${row.orderId}`}
+                                  className="text-primary hover:underline"
+                                >
+                                  {row.orderCode}
+                                </Link>
+                                {row.isDeleted && (
+                                  <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded font-sans">
+                                    محذوف
+                                  </span>
+                                )}
                               </span>
-                            )}
-                          </td>
-                          <td className="px-4 py-2 font-mono">
-                            {row.shippingCode ?? '—'}
-                          </td>
-                          <td className="px-4 py-2">{row.customerName ?? '—'}</td>
-                          <td className="px-4 py-2 font-semibold">{row.amount}</td>
-                          <td className="px-4 py-2">{getStatusLabel(row.targetStatus)}</td>
-                          <td
-                            className={`px-4 py-2 ${moved ? 'text-amber-700 font-semibold' : ''}`}
-                          >
-                            {getStatusLabel(row.currentStatus)}
-                            {moved && (
-                              <ChevronLeft className="inline w-3 h-3 mr-1" />
-                            )}
-                          </td>
-                          <SettlementShippingColumnCells shipping={row.shipping} />
-                          <td className="px-4 py-2">
-                            {!row.isDeleted && (
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => setEditTarget(row)}
-                                >
-                                  تعديل المبلغ
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => setRemoveTarget(row)}
-                                >
-                                  إزالة
-                                </Button>
-                              </div>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                            ),
+                          },
+                          { label: 'المبلغ في هذا التحصيل', value: <span className="font-semibold">{row.amount}</span> },
+                          { label: 'كود الشحن', value: <span className="font-mono">{row.shippingCode ?? '—'}</span> },
+                          { label: 'العميل', value: row.customerName ?? '—' },
+                          { label: 'الحالة وقتها', value: getStatusLabel(row.targetStatus) },
+                          {
+                            label: 'الحالة الآن',
+                            value: (
+                              <span className={moved ? 'text-amber-700 font-semibold' : undefined}>
+                                {getStatusLabel(row.currentStatus)}
+                              </span>
+                            ),
+                          },
+                        ]}
+                        shipping={row.shipping}
+                        actions={
+                          row.isDeleted ? undefined : (
+                            <>
+                              <Button
+                                variant="outline"
+                                className="h-10 flex-1"
+                                onClick={() => setEditTarget(row)}
+                              >
+                                تعديل المبلغ
+                              </Button>
+                              <Button
+                                variant="outline"
+                                className="h-10 flex-1"
+                                onClick={() => setRemoveTarget(row)}
+                              >
+                                إزالة
+                              </Button>
+                            </>
+                          )
+                        }
+                      />
+                    );
+                  })}
+                </SettlementMobileList>
+                <div className="hidden sm:block rounded-md border overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted">
+                      <tr>
+                        <th className="px-4 py-2 text-right font-medium">كود الطلب</th>
+                        <th className="px-4 py-2 text-right font-medium">كود الشحن</th>
+                        <th className="px-4 py-2 text-right font-medium">العميل</th>
+                        <th className="px-4 py-2 text-right font-medium">المبلغ في هذا التحصيل</th>
+                        <th className="px-4 py-2 text-right font-medium">الحالة وقتها</th>
+                        <th className="px-4 py-2 text-right font-medium">الحالة الآن</th>
+                        <SettlementShippingColumnHeaders />
+                        <th className="px-4 py-2 text-right font-medium">إجراءات</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orders.map((row) => {
+                        // Showing both is the point: an order can move on after
+                        // it was settled.
+                        const moved = row.currentStatus !== row.targetStatus;
+                        return (
+                          <tr key={row.orderId} className="border-t">
+                            <td className="px-4 py-2 font-mono">
+                              <Link
+                                href={`/dashboard/orders/${row.orderId}`}
+                                className="text-primary hover:underline"
+                              >
+                                {row.orderCode}
+                              </Link>
+                              {row.isDeleted && (
+                                <span className="mr-2 text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">
+                                  محذوف
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-4 py-2 font-mono">
+                              {row.shippingCode ?? '—'}
+                            </td>
+                            <td className="px-4 py-2">{row.customerName ?? '—'}</td>
+                            <td className="px-4 py-2 font-semibold">{row.amount}</td>
+                            <td className="px-4 py-2">{getStatusLabel(row.targetStatus)}</td>
+                            <td
+                              className={`px-4 py-2 ${moved ? 'text-amber-700 font-semibold' : ''}`}
+                            >
+                              {getStatusLabel(row.currentStatus)}
+                              {moved && (
+                                <ChevronLeft className="inline w-3 h-3 mr-1" />
+                              )}
+                            </td>
+                            <SettlementShippingColumnCells shipping={row.shipping} />
+                            <td className="px-4 py-2">
+                              {!row.isDeleted && (
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => setEditTarget(row)}
+                                  >
+                                    تعديل المبلغ
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => setRemoveTarget(row)}
+                                  >
+                                    إزالة
+                                  </Button>
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
