@@ -80,17 +80,17 @@ export function useCanAssignRoles(): boolean {
  * reassigning their own roles) so the UI stops reflecting stale permissions.
  */
 export function useRefreshCurrentUser() {
-  const token = useAuthStore((state) => state.token);
+  const hasUser = useAuthStore((state) => state.user !== null);
   const setUser = useAuthStore((state) => state.setUser);
 
   return useCallback(async () => {
-    if (!token) return;
+    if (!hasUser) return;
     try {
-      const user = await fetchMe(token);
+      const user = await fetchMe();
       setUser(user);
     } catch {
       // A failed refresh must never break the mutation that triggered it —
       // the stale payload stays until the next sign-in or successful refresh.
     }
-  }, [token, setUser]);
+  }, [hasUser, setUser]);
 }

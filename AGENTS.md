@@ -72,7 +72,14 @@ React Query manages caching, loading, error states. Zustand for client-only stat
 
 ## Auth token flow
 
-Zustand `authStore` uses `persist` middleware → `localStorage('auth-storage')`. Axios request interceptor reads token **directly from localStorage** (`auth-storage` key), not from Zustand store. Response 401 interceptor clears localStorage and redirects to `/signin`.
+Short-lived access token plus a rotating refresh cookie (T16, design `docs/superpowers/specs/2026-10-11-refresh-token-auth-design.md` §8).
+
+- `authStore` keeps the access token **in memory only**. `persist` (`auth-storage`, version 1) stores `{ user, legacyAccessToken }`. A pre-T16 `{ token }` migrates to `legacyAccessToken` and is used, without any refresh, until its `exp`.
+- The refresh token is an httpOnly cookie on the API host (`Path=/auth`), never readable by JS. `lib/api/refresh.ts` owns `POST /auth/refresh` and `POST /auth/logout` (JSON body `{ principal: 'MERCHANT' }`, `withCredentials`; never `sendBeacon` or a form post).
+- Refresh is single-flight per tab, serialized across tabs by the Web Lock `orderaa-auth-refresh` (10 s timeout, then proceeds), and shares the new access token over the BroadcastChannel `orderaa-auth`. A tab adopts a broadcast token instead of refreshing when it is newer than the one its request used. A network error is retried once after 2 s.
+- The request interceptor reads `useAuthStore.getState().token` and refreshes proactively 30 s before `exp` (never for the legacy token). The response interceptor answers a 401 with one refresh and one replay; a second 401 or a refresh 401 signs out everywhere. A refresh 429, 5xx or network error never signs out. 403 `MERCHANT_PAUSED` clears, calls logout and goes to `/paused`.
+- `providers/AuthBootstrap.tsx` refreshes once on load when a user is persisted but no token is in memory; `useAuthGuard` waits for `hasHydrated && bootstrapSettled`. `QueryProvider` clears the cache on a user identity change, not on a token change.
+- Sign-in sends `rememberMe` («تذكرني», unchecked by default) and commits the token only after `/auth/me` succeeds. Sign-out and change password call `/auth/logout`.
 
 ## Service layer — 2 patterns coexist
 
@@ -130,7 +137,7 @@ Print orders sub-module handles invoice generation. Two print formats: A4 for st
 
 ### Auth Flow
 
-Signin page at `/signin` sends credentials, server returns JWT, persisted to `localStorage('auth-storage')` via Zustand persist middleware. Forgot password is a 3-step flow: identify account (phone/email) -> verify OTP -> reset password. Signup at `/signup` uses cascading governorate/city selects (data from lookups API, endpoint structure inferred from backend). Axios interceptor reads token from localStorage directly. 401 response clears storage and redirects to `/signin`.
+Signin page at `/signin` sends credentials and «تذكرني» as `rememberMe`; the server returns a short-lived access token (kept in memory) and sets the refresh cookie. See "Auth token flow". Forgot password is a 3-step flow: identify account (phone/email) -> verify OTP -> reset password. Signup at `/signup` uses cascading governorate/city selects (data from lookups API, endpoint structure inferred from backend). Axios interceptors refresh and replay once on 401; see "Auth token flow".
 
 ### Wallet Flow
 

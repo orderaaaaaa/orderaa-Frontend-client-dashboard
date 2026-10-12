@@ -29,8 +29,13 @@ export default function QueryProvider({ children }: QueryProviderProps) {
   useEffect(
     () =>
       useAuthStore.subscribe((state, previous) => {
-        if (previous.token !== null && state.token !== previous.token) {
+        const previousUserId = previous.user?.id ?? null;
+        const nextUserId = state.user?.id ?? null;
+        if (previousUserId === null || nextUserId === previousUserId) return;
+        if (nextUserId === null) {
           queryClient.clear();
+        } else {
+          void queryClient.resetQueries();
         }
       }),
     [queryClient]

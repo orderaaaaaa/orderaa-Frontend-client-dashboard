@@ -14,6 +14,7 @@ import Input from '../../../components/ui/Input';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 import { useAuthGuard } from '@/hooks/useAuthGuard';
+import { announceSignIn, logoutSession } from '@/lib/api/refresh';
 
 export default function LoginPage() {
   const [error, setError] = useState('');
@@ -21,8 +22,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { isChecking } = useAuthGuard(false);
 
-  const setToken = useAuthStore((state) => state.setToken);
-  const setUser = useAuthStore((state) => state.setUser);
+  const setSession = useAuthStore((state) => state.setSession);
 
   const form = useForm<SignInSchema>({
     resolver: zodResolver(signInSchema),
@@ -35,14 +35,16 @@ export default function LoginPage() {
   const onSubmit = async (values: SignInSchema) => {
     setError('');
     try {
-      const data = await signIn(values);
+      const data = await signIn({ ...values, rememberMe: isChecked });
 
       if (data?.access_token) {
-        setToken(data.access_token);
+        const userData = await fetchMe(data.access_token).catch(async (meError: unknown) => {
+          await logoutSession();
+          throw meError;
+        });
 
-        const userData = await fetchMe(data.access_token);
-
-        setUser(userData);
+        setSession(data.access_token, userData);
+        announceSignIn(userData.id);
 
         router.push('/dashboard');
       } else {

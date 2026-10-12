@@ -34,8 +34,8 @@ export function syncPermissionsVersion(
   const value = parseInt(headerValue, 10);
   if (Number.isNaN(value)) return;
 
-  const { token, user } = useAuthStore.getState();
-  if (!token || !user) return;
+  const { user } = useAuthStore.getState();
+  if (!user) return;
   if (user.permissionsVersion === value) return;
 
   refreshPermissions(client);

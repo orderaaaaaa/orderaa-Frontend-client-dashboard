@@ -6,12 +6,11 @@ import { useAuthStore } from '@/store/authStore';
 import { fetchMe } from '@/lib/api/auth';
 
 const refreshUserData = async (maxRetries = 3): Promise<void> => {
-  const token = useAuthStore.getState().token;
-  if (!token) return;
+  if (!useAuthStore.getState().user) return;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const userData = await fetchMe(token);
+      const userData = await fetchMe();
       useAuthStore.getState().setUser(userData);
       return;
     } catch {

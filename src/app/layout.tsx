@@ -5,6 +5,7 @@ import 'react-day-picker/dist/style.css';
 import './globals.css';
 import ToastifyProvider from '@/components/ToastifyProvider';
 import QueryProvider from '@/providers/QueryProvider';
+import AuthBootstrap from '@/providers/AuthBootstrap';
 import { I18nProvider } from '@/i18n/I18nProvider';
 import { AppThemeProvider } from '@/providers/AppThemeProvider';
 
@@ -41,7 +42,10 @@ export default function RootLayout({
       <body className={`${beiruti.variable} font-sans m-0`}>
         <AppThemeProvider>
           <I18nProvider>
-            <QueryProvider>{children}</QueryProvider>
+            <QueryProvider>
+              <AuthBootstrap />
+              {children}
+            </QueryProvider>
           </I18nProvider>
           <Analytics />
           <ToastifyProvider />
