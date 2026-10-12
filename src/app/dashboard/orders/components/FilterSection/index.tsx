@@ -146,6 +146,7 @@ export function FilterSection({
 
   const hasInitializedRef = useRef(false);
   const printer = useInvoicePrinter();
+  const printJobOrdersRef = useRef<Order[]>([]);
   const { storeInfo, language } = useInvoiceSettings();
   const isPrintFlowOpen =
     isPrintModalOpen || isClaimingSelected || printJob !== null;
@@ -271,8 +272,19 @@ export function FilterSection({
   };
 
   const startPrintJob = async (printable: Order[], job: PrintJob) => {
+    printJobOrdersRef.current = printable;
     await printer.print(mapOrdersToInvoices(printable, language));
     setPrintJob(job);
+  };
+
+  const keepPrintJobOrders = (job: PrintJob, claimedIds: number[]) => {
+    const allowed = new Set([...claimedIds, ...job.markIds, ...job.reprintIds]);
+    const kept = printJobOrdersRef.current.filter((order) => allowed.has(order.id));
+    if (kept.length !== printJobOrdersRef.current.length) {
+      printJobOrdersRef.current = kept;
+      printer.replace(mapOrdersToInvoices(kept, language));
+    }
+    return kept.length;
   };
 
   const handleCountClaimed = async (claimed: Order[]) => {
@@ -328,6 +340,7 @@ export function FilterSection({
 
   const handlePrintJobClose = () => {
     setPrintJob(null);
+    printJobOrdersRef.current = [];
     printer.clear();
   };
 
@@ -392,6 +405,7 @@ export function FilterSection({
                 size="lg"
                 onClick={handlePrintClick}
                 disabled={isClaimingSelected}
+                className="h-10 min-w-10 sm:h-10"
                 aria-label="طباعة الفواتير"
                 title="طباعة الفواتير"
               >
@@ -441,6 +455,7 @@ export function FilterSection({
       <PrintConfirmDialog
         job={printJob}
         invoiceCount={printer.invoices.length}
+        onKeep={keepPrintJobOrders}
         onReprint={() => printer.print()}
         onClose={handlePrintJobClose}
       />

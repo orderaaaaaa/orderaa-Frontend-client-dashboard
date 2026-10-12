@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import {
   LiaCheckSolid,
@@ -25,9 +25,12 @@ import { printApiErrorMessage } from '../../print-orders/utils/printApiError';
 interface PrintConfirmDialogProps {
   job: PrintJob | null;
   invoiceCount: number;
+  onKeep: (job: PrintJob, claimedIds: number[]) => number;
   onReprint: () => Promise<void>;
   onClose: () => void;
 }
+
+const NOTHING_LEFT_MESSAGE = 'لم يعد أي طلب متاحًا للطباعة';
 
 function warnLostClaims(skipped: PrintSkippedOrder[]) {
   const movedCount = skipped.filter(
@@ -64,9 +67,14 @@ function reportResult(result: ConfirmPrintedResult) {
 export function PrintConfirmDialog({
   job,
   invoiceCount,
+  onKeep,
   onReprint,
   onClose,
 }: PrintConfirmDialogProps) {
+  const onKeepRef = useRef(onKeep);
+  const onCloseRef = useRef(onClose);
+  onKeepRef.current = onKeep;
+  onCloseRef.current = onClose;
   const [claimedIds, setClaimedIds] = useState<number[]>([]);
   const [printTimes, setPrintTimes] = useState(1);
   const [markDone, setMarkDone] = useState(false);
@@ -99,6 +107,10 @@ export function PrintConfirmDialog({
       if (!active) return;
       setClaimedIds(kept);
       setBusy(false);
+      if (onKeepRef.current(job, kept) === 0) {
+        toast.error(NOTHING_LEFT_MESSAGE);
+        onCloseRef.current();
+      }
     });
     return () => {
       active = false;
@@ -132,11 +144,16 @@ export function PrintConfirmDialog({
   };
 
   const handleReprint = async () => {
-    if (!job || busy || printTimes >= PRINT_TIMES_MAX) return;
+    if (!job || busy || markDone || printTimes >= PRINT_TIMES_MAX) return;
     setBusy(true);
     try {
-      const kept = markDone ? claimedIds : await refreshClaims(claimedIds);
+      const kept = await refreshClaims(claimedIds);
       setClaimedIds(kept);
+      if (onKeep(job, kept) === 0) {
+        toast.error(NOTHING_LEFT_MESSAGE);
+        onClose();
+        return;
+      }
       await onReprint();
       setPrintTimes((times) => times + 1);
     } finally {
@@ -154,6 +171,11 @@ export function PrintConfirmDialog({
   };
 
   const reprintLimitReached = printTimes >= PRINT_TIMES_MAX;
+  const reprintTitle = markDone
+    ? 'تم تعليم الطلبات كمطبوعة، أكمل تسجيل إعادة الطباعة'
+    : reprintLimitReached
+      ? 'تم الوصول للحد الأقصى لإعادة الطباعة'
+      : undefined;
 
   return (
     <BaseModal
@@ -194,8 +216,8 @@ export function PrintConfirmDialog({
             type="button"
             variant="outline"
             onClick={handleReprint}
-            disabled={busy || reprintLimitReached}
-            title={reprintLimitReached ? 'تم الوصول للحد الأقصى لإعادة الطباعة' : undefined}
+            disabled={busy || markDone || reprintLimitReached}
+            title={reprintTitle}
             className="h-11 sm:h-11 sm:flex-1 rounded-[28px] border-primary text-primary font-bold"
           >
             <LiaPrintSolid className="size-5" />

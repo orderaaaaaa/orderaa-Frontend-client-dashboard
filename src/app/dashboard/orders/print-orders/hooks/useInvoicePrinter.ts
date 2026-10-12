@@ -17,7 +17,9 @@ export function useInvoicePrinter() {
     window.print();
   }, []);
 
+  const replace = useCallback((next: InvoiceData[]) => setInvoices(next), []);
+
   const clear = useCallback(() => setInvoices([]), []);
 
-  return { invoices, containerRef, print, clear };
+  return { invoices, containerRef, print, replace, clear };
 }

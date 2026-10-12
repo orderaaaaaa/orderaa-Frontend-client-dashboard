@@ -727,7 +727,7 @@ export function PrintOrdersContent() {
             variant="default"
             onClick={toggleSelectMode}
             aria-pressed={selectMode}
-            className="rounded-full px-5"
+            className="h-10 sm:h-9 rounded-full px-5"
           >
             <ListChecks />
             <span>{selectMode ? 'إنهاء التحديد' : 'تحديد'}</span>
