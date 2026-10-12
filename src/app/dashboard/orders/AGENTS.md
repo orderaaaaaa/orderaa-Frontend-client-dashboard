@@ -33,7 +33,7 @@ Orders is the largest frontend module (~100+ files, 12 subdirs). Root patterns (
 
 ## Barcode Scanner System
 
-`print-orders/hooks/useBarcodeScanner.ts` — buffer-based hardware scanner detection (keyboard wedge via key timing). Average time threshold (30ms) with character accumulation + AudioContext feedback. Two variants: `useBarcodeScanner` (generic) and `useFocusedBarcodeScanner` (returns-receiving, with input focus management).
+`print-orders/hooks/useBarcodeScanner.ts` is the only scanner hook (print-orders, shipping-orders, returns `MainScanPanel`). It listens for keyboard-wedge input while no text field has focus. An Enter-terminated buffer is accepted whatever the key timing (slow Bluetooth scanners); a buffer without Enter is accepted only when its average key gap is under `avgTimeThreshold` (30ms). Rejected buffers call `onUnrecognized` (default toast «لم يتم التعرف على الكود»). `enabled: false` clears the buffer; callers pass `!anyModalOpen`. The `window.simulateBarcodeScan` / `testBarcodeScan` / `checkBarcodeScanner` hooks exist only in development. Phones and tablets use the visible `components/ScanInput.tsx`, which calls the same `handleScan` (also rendered inside `ScannedOrdersModal` through `onManualScan`). There is no camera scanner.
 
 ## Invoice / Print Architecture
 
@@ -82,13 +82,15 @@ Module imports from **7 react-icon families** (not just `lucide-react`): Boxes (
 
 - **`print-orders/` sub-module** (~25 files) — self-contained with own hooks (`usePrintOrdersFilters`, `useBarcodeScanner`, `useScannerFeedback`, `usePrintOrderBulk`, `useOrderActions`, `useInvoiceSettings`, `useMarkOrdersPrinted`), services (`printOrders.ts`, `scannedOrders.ts`), types, constants (`invoiceLabels.ts`), utils (`invoiceMapper.ts`, `printAssets.ts`).
 - **Print queue UI** — select orders via checkboxes, bulk print action navigates from main orders page. `PrintOrdersContent.tsx` orchestrates the print flow.
+- **Print claims and confirmation (U6b, R84/R101)** — `components/FilterSection/index.tsx` owns the flow. The count modal (`PrintInvoicesModal`, 1..20) calls `POST /orders/print/claim-next`; printing the selection calls `POST /orders/print/claim`. Selected orders skipped as `PRINTED` are reprinted, `NOT_CONFIRMED` ones are printed unclaimed and marked on yes, and `CLAIMED_BY_OTHER` / `PARKED` / `NOT_FOUND` are toasted and not printed. After `window.print()` the invoices are kept and `PrintConfirmDialog` asks «هل تمت الطباعة؟»: it refreshes the claim on open and before each «إعادة الطباعة», «نعم» sends `PUT /orders/print/mark {ordersIds, printTimes}` plus one `POST /orders/print/reprint` for printed orders, and «لا» or closing sends `POST /orders/print/release`. Nothing is marked or counted without «نعم». A closed tab leaves the claim to expire after 10 minutes. The legacy `POST /orders/print {count}` (claims and marks in one call) is no longer used by the dashboard.
 - **Invoice formats**: A4 letter (`Invoice/` component) for standard printers, 100mm x 150mm thermal (`BostaInvoice/` component) for Bosta shipping labels — both rendered via `jspdf` + `jspdf-autotable`.
 - **Data transformation** — `invoiceMapper.ts` converts `Order` data into invoice-specific props. `invoiceLabels.ts` holds Arabic label constants.
 - **Printer CSS** in global styles — `@media print` rules for `.a4-invoice`, `.bosta-invoice`, `.generic-invoice` classes.
 
 ## Barcode Scanner UX (expanded)
 
-- **Two variants**: `useBarcodeScanner` (generic, used in `print-orders/hooks/`) — keyboard wedge via buffer accumulation with 30ms average keystroke threshold to distinguish scanner from human typing. `useFocusedBarcodeScanner` (`returns-receiving/hooks/`) — same mechanics with input focus management for the returns workflow.
+- **One hook**: `useBarcodeScanner` (see Barcode Scanner System) plus the visible `ScanInput` field for phones, tablets and scanners that type into a focused field.
+- **Returns scanning** (`returns-receiving/components/Step1Receive/MainScanPanel.tsx`): the barcode field is never disabled during a lookup. Codes are queued, shown as pending rows and resolved in order; duplicates vibrate. «تأكيد استلام المرتجعات» opens a confirmation with the scanned count.
 - **Audio feedback**: `useScannerFeedback` hook in `print-orders/hooks/` plays a beep via `AudioContext` on successful scan.
 - **Dual mode**: scanning used in `shipping-orders/` (assign orders to carrier, approve for shipment) and `returns-receiving/` (register return, verify order exists).
 
