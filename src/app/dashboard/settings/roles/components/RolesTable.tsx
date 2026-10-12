@@ -58,6 +58,8 @@ function RoleActions({
   onReset,
   buttonClassName,
 }: RoleActionsProps) {
+  /* System roles are readable by anyone who can list roles,
+      but never editable — the backend answers 403. */
   if (role.isSystem) {
     return (
       <Button

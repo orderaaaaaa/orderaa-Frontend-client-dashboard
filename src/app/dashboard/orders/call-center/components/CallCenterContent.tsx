@@ -208,6 +208,10 @@ export function CallCenterContent() {
     [selectAllMatchingFilters, orders, selectedOrders]
   );
 
+  const offPageCount = selectAllMatchingFilters
+    ? 0
+    : selectedOrderIds.length - selectedOrders.length;
+
   const prevPageRef = useRef<number>(page);
 
   useEffect(() => {
@@ -253,30 +257,31 @@ export function CallCenterContent() {
     }
   }, [isInitialized, filters, reset]);
 
-  const { prepare, waitForPackaging, callAgain } = bulkActions;
+  const { prepare, waitForPackaging, callAgain, canSetTarget } = bulkActions;
 
   const handlePrepared = useCallback(() => {
-    prepare(ordersInScope);
-  }, [prepare, ordersInScope]);
+    prepare(ordersInScope, offPageCount);
+  }, [prepare, ordersInScope, offPageCount]);
 
   const handleAwaitingPackaging = useCallback(() => {
-    waitForPackaging(ordersInScope);
-  }, [waitForPackaging, ordersInScope]);
+    waitForPackaging(ordersInScope, offPageCount);
+  }, [waitForPackaging, ordersInScope, offPageCount]);
 
   const handleCallAgain = useCallback(() => {
-    callAgain(ordersInScope);
-  }, [callAgain, ordersInScope]);
+    callAgain(ordersInScope, offPageCount);
+  }, [callAgain, ordersInScope, offPageCount]);
 
   const handleChangeProduct = useCallback(() => {
     if (isBulkPending) return;
+    if (!canSetTarget('changeProduct')) return;
     const { eligible, parked, wrongStatus } = splitOrdersForAction(
       'changeProduct',
       ordersInScope
     );
-    warnSkippedForAction('changeProduct', parked, wrongStatus);
+    warnSkippedForAction('changeProduct', parked, wrongStatus, offPageCount);
     if (eligible.length === 0) return;
     setChangeProductOrders(eligible);
-  }, [isBulkPending, ordersInScope]);
+  }, [isBulkPending, canSetTarget, ordersInScope, offPageCount]);
 
   const handleCloseChangeProduct = useCallback(() => {
     if (isBulkPending) return;

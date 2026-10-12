@@ -8,6 +8,8 @@ import type { Order } from '@/types/orders';
 import { OrderStatus } from '@/types/orders';
 import { invalidateAndWait, orderStatusKeys } from '@/lib/query/mutationSync';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { usePermissionCheck } from '@/hooks/usePermissions';
+import type { OrderStatusSetCode } from '@/lib/permissions';
 import {
   useCallAgainOrders,
   usePrepareOrders,
@@ -27,12 +29,14 @@ export type CallCenterBulkAction =
 
 interface ActionRule {
   label: string;
+  setStatusCode: OrderStatusSetCode;
   allowedFrom: ReadonlySet<string> | null;
 }
 
 const ACTION_RULES: Record<CallCenterBulkAction, ActionRule> = {
   prepare: {
     label: 'تم التحضير',
+    setStatusCode: 'orders:setStatus:PREPARED',
     allowedFrom: new Set<string>([
       OrderStatus.CONFIRMED,
       OrderStatus.WAITING_FOR_PACKAGING,
@@ -41,10 +45,19 @@ const ACTION_RULES: Record<CallCenterBulkAction, ActionRule> = {
   },
   waitingForPackaging: {
     label: 'في انتظار التغليف',
+    setStatusCode: 'orders:setStatus:WAITING_FOR_PACKAGING',
     allowedFrom: new Set<string>([OrderStatus.CONFIRMED]),
   },
-  callAgain: { label: 'اعادة اتصال', allowedFrom: null },
-  changeProduct: { label: 'تغيير المنتج', allowedFrom: null },
+  callAgain: {
+    label: 'اعادة اتصال',
+    setStatusCode: 'orders:setStatus:CALL_AGAIN',
+    allowedFrom: null,
+  },
+  changeProduct: {
+    label: 'تغيير المنتج',
+    setStatusCode: 'orders:setStatus:CALL_AGAIN',
+    allowedFrom: null,
+  },
 };
 
 export function splitOrdersForAction(
@@ -65,8 +78,14 @@ export function splitOrdersForAction(
 export function warnSkippedForAction(
   action: CallCenterBulkAction,
   parked: Order[],
-  wrongStatus: Order[]
+  wrongStatus: Order[],
+  offPageCount = 0
 ) {
+  if (offPageCount > 0) {
+    toast.warning(
+      `تم استبعاد ${offPageCount} طلب محدد من صفحات أخرى. الإجراء يطبّق على طلبات الصفحة الحالية فقط`
+    );
+  }
   warnParkedOrdersSkipped(parked);
   if (wrongStatus.length > 0) {
     toast.warning(
@@ -83,6 +102,7 @@ export function useCallCenterBulkActions({
   onCompleted,
 }: UseCallCenterBulkActionsOptions) {
   const queryClient = useQueryClient();
+  const { hasPermission } = usePermissionCheck();
   const { mutateAsync: prepareOrders } = usePrepareOrders();
   const { mutateAsync: waitForPackaging } = useWaitingForPackaging();
   const { mutateAsync: callAgainOrders } = useCallAgainOrders();
@@ -116,17 +136,29 @@ export function useCallCenterBulkActions({
     [queryClient, onCompleted]
   );
 
+  const canSetTarget = useCallback(
+    (action: CallCenterBulkAction) => {
+      const { setStatusCode, label } = ACTION_RULES[action];
+      if (hasPermission(setStatusCode)) return true;
+      toast.error(`ليس لديك صلاحية نقل الطلبات إلى «${label}»`);
+      return false;
+    },
+    [hasPermission]
+  );
+
   const runForOrders = useCallback(
     (
       action: Exclude<CallCenterBulkAction, 'changeProduct'>,
-      orders: Order[]
+      orders: Order[],
+      offPageCount: number
     ) => {
       if (pendingRef.current) return Promise.resolve(false);
+      if (!canSetTarget(action)) return Promise.resolve(false);
       const { eligible, parked, wrongStatus } = splitOrdersForAction(
         action,
         orders
       );
-      warnSkippedForAction(action, parked, wrongStatus);
+      warnSkippedForAction(action, parked, wrongStatus, offPageCount);
       if (eligible.length === 0) return Promise.resolve(false);
 
       if (action === 'prepare') {
@@ -152,7 +184,7 @@ export function useCallCenterBulkActions({
         return result.movedCount;
       });
     },
-    [run, prepareOrders, waitForPackaging, callAgainOrders]
+    [run, canSetTarget, prepareOrders, waitForPackaging, callAgainOrders]
   );
 
   const changeProduct = useCallback(
@@ -171,20 +203,24 @@ export function useCallCenterBulkActions({
   );
 
   const prepare = useCallback(
-    (orders: Order[]) => runForOrders('prepare', orders),
+    (orders: Order[], offPageCount: number) =>
+      runForOrders('prepare', orders, offPageCount),
     [runForOrders]
   );
   const waitForPackagingOrders = useCallback(
-    (orders: Order[]) => runForOrders('waitingForPackaging', orders),
+    (orders: Order[], offPageCount: number) =>
+      runForOrders('waitingForPackaging', orders, offPageCount),
     [runForOrders]
   );
   const callAgain = useCallback(
-    (orders: Order[]) => runForOrders('callAgain', orders),
+    (orders: Order[], offPageCount: number) =>
+      runForOrders('callAgain', orders, offPageCount),
     [runForOrders]
   );
 
   return {
     isPending,
+    canSetTarget,
     prepare,
     waitForPackaging: waitForPackagingOrders,
     callAgain,
