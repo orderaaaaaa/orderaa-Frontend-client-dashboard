@@ -63,6 +63,9 @@ export const useIntegrations = () => {
   return {
     integrations: integrationsQuery.data,
     isLoading: integrationsQuery.isLoading,
+    isError: integrationsQuery.isError,
+    error: integrationsQuery.error,
+    refetch: integrationsQuery.refetch,
     createIntegration: createIntegrationMutation.mutateAsync,
     isPending: createIntegrationMutation.isPending,
     updateIntegration: updateIntegrationMutation.mutateAsync,

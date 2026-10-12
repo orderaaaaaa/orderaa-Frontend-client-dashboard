@@ -16,6 +16,7 @@ import { useIntegrations } from './hooks/useIntegrations';
 import { useLightfunnelsConnections } from './hooks/useLightfunnelsConnections';
 import { IntegrationProvider, IntegrationResponse } from './types/apiIntegration';
 import { toast } from 'react-toastify';
+import { ErrorState } from '@/components/ui/state-panels';
 
 const IntegrationsPage = () => {
   const [activeModal, setActiveModal] = useState<string | null>(null);
@@ -38,6 +39,9 @@ const IntegrationsPage = () => {
   const {
     integrations,
     isLoading,
+    isError,
+    error,
+    refetch,
     deleteIntegration,
     isDeletePending,
     deleteStore,
@@ -147,6 +151,12 @@ const IntegrationsPage = () => {
                 </div>
               ))}
             </div>
+          ) : isError && !integrations ? (
+            <ErrorState
+              error={error}
+              fallback="تعذّر تحميل ربط المنصات"
+              onRetry={() => refetch()}
+            />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {platforms.map((platform) => (

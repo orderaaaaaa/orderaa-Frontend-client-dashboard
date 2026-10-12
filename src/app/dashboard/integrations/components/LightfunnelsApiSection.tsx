@@ -31,7 +31,7 @@ import LightfunnelsWebhookStatus, {
   isLightfunnelsRegistrationFailed,
   isLightfunnelsReregisterPending,
 } from './LightfunnelsWebhookStatus';
-import CopyableUrlField from './CopyableUrlField';
+import CopyField from './CopyField';
 
 const RECONNECT_REQUIRED_MESSAGE = 'انتهت صلاحية ربط Lightfunnels، أعد الربط';
 const CONNECT_BEFORE_MODE_TOOLTIP = 'أكمل ربط Lightfunnels عبر API أولاً';
@@ -223,7 +223,7 @@ export default function LightfunnelsApiSection({
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-3">
               <p className="text-sm text-amber-800">{SWITCH_TO_MANUAL_WARNING}</p>
               {manualWebhookUrl && (
-                <CopyableUrlField label="رابط الـ Webhook اليدوي" value={manualWebhookUrl} />
+                <CopyField label="رابط الـ Webhook اليدوي" value={manualWebhookUrl} />
               )}
               <div className="flex gap-2">
                 <Button

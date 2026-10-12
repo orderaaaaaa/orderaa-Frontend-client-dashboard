@@ -1,13 +1,10 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import {
-  LiaCopySolid,
-  LiaCheckSolid,
-  LiaPlusSolid,
-} from 'react-icons/lia';
+import { LiaPlusSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
+import CopyField from './CopyField';
 import BaseModal from '@/components/ui/base-modal';
 import { Switch } from '@/components/ui/switch';
 import { useIntegrations } from '../hooks/useIntegrations';
@@ -71,7 +68,6 @@ const EditIntegrationModal = ({
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [copied, setCopied] = useState(false);
   const [showAddWebhook, setShowAddWebhook] = useState(false);
   const [showAddApi, setShowAddApi] = useState(false);
   const [tokenOverride, setTokenOverride] = useState<string | null>(null);
@@ -194,14 +190,6 @@ const EditIntegrationModal = ({
     hasGeneratedToken,
     isOAuthConnect,
   ]);
-
-  const handleCopyUrl = () => {
-    if (webhookUrl) {
-      navigator.clipboard.writeText(webhookUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
 
   const handleRegenerate = async () => {
     if (!webhookConfig) return;
@@ -374,30 +362,7 @@ const EditIntegrationModal = ({
                 {AUTOMATIC_WEBHOOK_NOTE}
               </p>
             ) : (
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="block font-medium text-sm">Webhook URL</span>
-                <Button
-                  type="button"
-                  variant="default"
-                  size="sm"
-                  onClick={handleCopyUrl}
-                  className="gap-1.5 h-7 text-xs"
-                >
-                  {copied ? (
-                    <LiaCheckSolid className="w-3 h-3" />
-                  ) : (
-                    <LiaCopySolid className="w-3 h-3" />
-                  )}
-                  {copied ? 'تم النسخ' : 'نسخ'}
-                </Button>
-              </div>
-              <Input
-                value={webhookUrl}
-                inputClassName="text-sm bg-white"
-                disabled
-              />
-            </div>
+              <CopyField label="رابط الاستقبال (Webhook URL)" value={webhookUrl} />
             )}
 
             {isAutomaticWebhook ? null : hasGeneratedToken ? (
@@ -447,16 +412,15 @@ const EditIntegrationModal = ({
                 <Input
                   register={form.register}
                   name="webhookApiKey"
-                  label="Webhook Secret (اتركه فارغاً إن لم ترد تغييره)"
+                  label="المفتاح السري الجديد (Secret) - اتركه فارغاً إن لم ترد تغييره"
                   placeholder="أدخل مفتاح Webhook الجديد..."
                 />
 
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">المفتاح الحالي</span>
-                  <span className="text-gray-800 font-mono text-xs">
-                    {webhookConfig.apiKey}
-                  </span>
-                </div>
+                <CopyField
+                  label="المفتاح الحالي (Secret)"
+                  value={webhookConfig.apiKey ?? ''}
+                  secret
+                />
               </>
             )}
           </div>
@@ -475,30 +439,7 @@ const EditIntegrationModal = ({
               </Button>
             </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="block font-medium text-sm">Webhook URL</span>
-                <Button
-                  type="button"
-                  variant="default"
-                  size="sm"
-                  onClick={handleCopyUrl}
-                  className="gap-1.5 h-7 text-xs"
-                >
-                  {copied ? (
-                    <LiaCheckSolid className="w-3 h-3" />
-                  ) : (
-                    <LiaCopySolid className="w-3 h-3" />
-                  )}
-                  {copied ? 'تم النسخ' : 'نسخ'}
-                </Button>
-              </div>
-              <Input
-                value={webhookUrl}
-                inputClassName="text-sm bg-white"
-                disabled
-              />
-            </div>
+            <CopyField label="رابط الاستقبال (Webhook URL)" value={webhookUrl} />
 
             {hasGeneratedToken ? (
               <p className="text-sm text-gray-600">
@@ -508,7 +449,7 @@ const EditIntegrationModal = ({
               <Input
                 register={form.register}
                 name="newWebhookSecret"
-                label="Webhook Secret"
+                label="المفتاح السري (Secret)"
                 placeholder="أدخل مفتاح Webhook..."
               />
             )}
@@ -571,12 +512,11 @@ const EditIntegrationModal = ({
               placeholder="أدخل Client Secret الجديد..."
             />
 
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Client Secret الحالي</span>
-              <span className="text-gray-800 font-mono text-xs">
-                {apiConfig.apiKey}
-              </span>
-            </div>
+            <CopyField
+              label="المفتاح السري الحالي للتطبيق (Client Secret)"
+              value={apiConfig.apiKey ?? ''}
+              secret
+            />
           </div>
         ) : showAddApi ? (
           <div className="space-y-4 bg-blue-50/50 p-5 rounded-xl border border-blue-200">
