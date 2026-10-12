@@ -10,7 +10,7 @@ import {
 import { getStatusColor } from '../lib/getBadgeColor';
 import { formatAmount } from '../lib/formatAmount';
 import {
-  formatNotes,
+  blockReasonOf,
   formatOrderDate,
   isActivationKey,
   toWhatsAppNumber,
@@ -47,6 +47,7 @@ export const CustomerRow = memo(function CustomerRow({
   onToggleSelect,
 }: CustomerRowProps) {
   const [showBanModal, setShowBanModal] = useState(false);
+  const blockReason = blockReasonOf(customer);
   const { getStatusLabel } = useStatusLabel();
 
   const handleConfirmBan = (_id: string, note: string) => {
@@ -171,12 +172,12 @@ export const CustomerRow = memo(function CustomerRow({
         </td>
 
         <td className="px-4 py-4 text-center w-48 max-w-48">
-          {customer.isBlocked && customer.notes.length > 0 ? (
+          {blockReason ? (
             <span
               className="block truncate font-medium text-gray-600"
-              title={formatNotes(customer.notes)}
+              title={blockReason}
             >
-              {formatNotes(customer.notes)}
+              {blockReason}
             </span>
           ) : (
             <span className="block font-medium text-gray-600">—</span>

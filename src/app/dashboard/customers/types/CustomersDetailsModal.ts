@@ -1,4 +1,9 @@
-import { CustomerBadge, Order } from './customer';
+import {
+  CustomerBadge,
+  CustomerBlockEntry,
+  CustomerCurrentBlock,
+  Order,
+} from './customer';
 
 export interface CustomersDetailsTotalStatsProps {
   latestOrder: Order | null;
@@ -34,4 +39,11 @@ export interface CustomersDetailsHeaderProps {
   isBlocked: boolean;
   username: string;
   badge: CustomerBadge | null;
+}
+
+export interface CustomersDetailsBlockHistoryProps {
+  isBlocked: boolean;
+  currentBlock: CustomerCurrentBlock | null;
+  blockHistory: CustomerBlockEntry[];
+  notes: string[];
 }
