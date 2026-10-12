@@ -12,6 +12,12 @@ import { useBulkOrders } from '@/app/dashboard/orders/allOrders/hooks/useOrderBu
 import type { OrderStatusKey } from '@/app/dashboard/orders/allOrders/types/Bulk';
 import BaseModal from '@/components/ui/base-modal';
 import PageLoading from '@/components/ui/page-loading';
+import { getApiErrorMessage } from '@/utils/apiError';
+import {
+  notifyBulkStatusResult,
+  splitParkedOrders,
+  warnParkedOrdersSkipped,
+} from '@/app/dashboard/orders/allOrders/utils/bulkStatusFeedback';
 
 interface CustomerOrdersModalProps {
   isOpen: boolean;
@@ -38,7 +44,8 @@ export default function CustomerOrdersModal({
   const error = queryError ? 'فشل في تحميل طلبات العميل' : null;
 
   const { data: orderStatuses } = useOrderStatusesQuery();
-  const { mutateAsync: bulkUpdateOrders } = useBulkOrders();
+  const { mutateAsync: bulkUpdateOrders, isPending: isBulkUpdating } =
+    useBulkOrders();
 
   // The caller's own status window, filtered by `orders:status:<STATUS>`.
   // That is a visibility window, not `orders:setStatus:<STATUS>` — holding a
@@ -65,22 +72,24 @@ export default function CustomerOrdersModal({
 
   const handleCheckboxChange = useCallback(
     (orderId: number, checked: boolean) => {
+      if (isBulkUpdating) return;
       if (checked) {
         setSelectedOrderIds((prev) => [...prev, orderId]);
       } else {
         setSelectedOrderIds((prev) => prev.filter((id) => id !== orderId));
       }
     },
-    []
+    [isBulkUpdating]
   );
 
   const handleSelectAllToggle = useCallback(() => {
+    if (isBulkUpdating) return;
     if (selectedOrderIds.length === orders.length && orders.length > 0) {
       setSelectedOrderIds([]);
     } else {
       setSelectedOrderIds(orders.map((o: Order) => o.id));
     }
-  }, [orders, selectedOrderIds]);
+  }, [orders, selectedOrderIds, isBulkUpdating]);
 
   const handleExportExcel = useCallback(() => {
     try {
@@ -104,21 +113,26 @@ export default function CustomerOrdersModal({
 
   const handleEditStatus = useCallback(
     async (statusKey: string) => {
-      if (!statusKey || selectedOrderIds.length === 0) return;
+      if (!statusKey || isBulkUpdating || selectedOrderIds.length === 0) return;
+      const { parked } = splitParkedOrders(selectedOrders);
+      const parkedIds = new Set(parked.map((order) => order.id));
+      const ordersIds = selectedOrderIds.filter((id) => !parkedIds.has(id));
+      warnParkedOrdersSkipped(parked);
+      if (ordersIds.length === 0) return;
       try {
-        await bulkUpdateOrders({
+        const result = await bulkUpdateOrders({
           payload: {
             status: statusKey as OrderStatusKey,
-            ordersIds: selectedOrderIds,
+            ordersIds,
           },
         });
-        toast.success(`تم تعديل حالة ${selectedOrderIds.length} طلب بنجاح`);
+        notifyBulkStatusResult(result.updatedCount, ordersIds.length);
         setSelectedOrderIds([]);
-      } catch (err: any) {
-        toast.error(err?.response?.data?.message || 'فشل تعديل حالة الطلبات');
+      } catch (err) {
+        toast.error(getApiErrorMessage(err, 'فشل تعديل حالة الطلبات'));
       }
     },
-    [selectedOrderIds, bulkUpdateOrders]
+    [isBulkUpdating, selectedOrderIds, selectedOrders, bulkUpdateOrders]
   );
 
   const handleShareWhatsApp = useCallback(() => {
@@ -138,7 +152,6 @@ export default function CustomerOrdersModal({
     return `جميع طلبات العميل (${nameText}${customerPhone})`;
   }, [customerName, customerPhone]);
 
-  
   return (
     <BaseModal
       isOpen={isOpen}
@@ -146,6 +159,7 @@ export default function CustomerOrdersModal({
       title={modalTitle}
       showFooter={false}
       maxWidth="md:max-w-6xl"
+      isLoading={isBulkUpdating}
     >
       <div className="relative">
         {orders.length > 0 && !loading && !error && (
@@ -160,6 +174,7 @@ export default function CustomerOrdersModal({
               <Button
                 type="button"
                 onClick={handleSelectAllToggle}
+                disabled={isBulkUpdating}
                 size="sm"
                 className="px-4 py-1.5 text-sm bg-primary text-white rounded-lg hover:bg-[#682fee] transition-colors"
               >
@@ -247,6 +262,7 @@ export default function CustomerOrdersModal({
           onShipping={handleShipping}
           onOther={handleOther}
           position="absolute"
+          isLoading={isBulkUpdating}
         />
       </div>
     </BaseModal>
