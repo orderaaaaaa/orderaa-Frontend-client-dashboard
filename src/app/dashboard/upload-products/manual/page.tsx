@@ -199,7 +199,7 @@ function Manual() {
           total={formValues.total || ''}
           packagingNotes={formValues.packagingNotes || ''}
           onTotalChange={(v) => {
-            setValue('total', v, DIRTY);
+            setValue('total', v);
             clearErrors('total');
           }}
           onPackagingNotesChange={(v) => {
