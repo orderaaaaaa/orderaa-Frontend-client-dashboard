@@ -18,8 +18,12 @@ export function AddSupplierContent() {
   const router = useRouter();
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const { data: governorates = [], isLoading: loadingGovernorates } =
-    useGovernoratesQuery();
+  const {
+    data: governorates = [],
+    isLoading: loadingGovernorates,
+    isError: governoratesFailed,
+    refetch: refetchGovernorates,
+  } = useGovernoratesQuery();
   const createSupplierMutation = useCreateSupplierMutation();
 
   const {
@@ -148,6 +152,23 @@ export function AddSupplierContent() {
                 widthClass="w-full"
                 error={errors.governorate?.message}
               />
+              {governoratesFailed && (
+                <div
+                  role="alert"
+                  className="flex flex-wrap items-center gap-2 text-sm text-red-500"
+                >
+                  <span>تعذّر تحميل المحافظات</span>
+                  <button
+                    type="button"
+                    className="min-h-10 px-3 font-semibold text-primary underline"
+                    onClick={() => {
+                      refetchGovernorates();
+                    }}
+                  >
+                    إعادة المحاولة
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

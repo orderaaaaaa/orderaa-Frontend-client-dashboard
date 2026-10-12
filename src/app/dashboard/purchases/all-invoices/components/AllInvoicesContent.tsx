@@ -14,6 +14,7 @@ import InvoiceCard from './InvoiceCard';
 import InvoiceDetailModal from './InvoiceDetailModal';
 import InvoicesActionsBar from './InvoicesActionsBar';
 import PaginationFooter from '@/components/ui/pagination-footer';
+import { ErrorState } from '@/components/ui/state-panels';
 import { DEFAULT_PAGE_SIZE } from '../constants';
 import { Invoice } from '../types';
 import { useInvoiceFilters } from '../hooks';
@@ -70,7 +71,13 @@ export function AllInvoicesContent() {
   const totalAmountMax = filters.totalAmountTo ? Number(filters.totalAmountTo) : undefined;
   const employeeId = filters.employeeName ? Number(filters.employeeName) : undefined;
 
-  const { data: invoicesData, isLoading } = useSupplierInvoicesQuery({
+  const {
+    data: invoicesData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useSupplierInvoicesQuery({
     page: currentPage,
     limit: pageSize,
     supplierId: selectedSupplier?.id,
@@ -266,6 +273,14 @@ export function AllInvoicesContent() {
           <div className="flex items-center justify-center py-16">
             <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
+        ) : isError ? (
+          <ErrorState
+            error={error}
+            fallback="تعذّر تحميل الفواتير"
+            onRetry={() => {
+              refetch();
+            }}
+          />
         ) : apiInvoices.length > 0 ? (
           apiInvoices.map((invoice) => (
             <InvoiceCard

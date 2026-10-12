@@ -18,6 +18,7 @@ export function DashboardContent() {
     confirmationAttempts,
     postponedOrdersContent,
     isLoading,
+    errors,
   } = useDashboardData();
 
   return (
@@ -26,20 +27,32 @@ export function DashboardContent() {
         summary={summary}
         firstAttempt={firstAttempt}
         isLoading={isLoading}
+        error={errors.summary}
       />
-      <EmployeeStatusSection employees={employees} isLoading={isLoading} />
-      <CallDurationSection items={callDurations} isLoading={isLoading} />
+      <EmployeeStatusSection
+        employees={employees}
+        isLoading={isLoading}
+        error={errors.employees}
+      />
+      <CallDurationSection
+        items={callDurations}
+        isLoading={isLoading}
+        error={errors.callDurations}
+      />
       <OrderStatusDistributionSection
         items={orderStatusDistribution}
         isLoading={isLoading}
+        error={errors.orderStatusDistribution}
       />
       <ConfirmationAttemptsSection
         data={confirmationAttempts}
         isLoading={isLoading}
+        error={errors.confirmationAttempts}
       />
       <PostponedOrdersContentSection
         data={postponedOrdersContent}
         isLoading={isLoading}
+        error={errors.postponedOrdersContent}
       />
     </div>
   );

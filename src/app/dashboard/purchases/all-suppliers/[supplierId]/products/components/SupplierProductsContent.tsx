@@ -6,6 +6,7 @@ import { LiaBoxesSolid } from 'react-icons/lia';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import Input from '@/components/ui/Input';
+import { ErrorState } from '@/components/ui/state-panels';
 import { DataTable, DataTableColumn } from '@/components/ui/data-table';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import { Supplier } from '../../../types';
@@ -75,7 +76,13 @@ export default function SupplierProductsContent({
   const [toDate, setToDate] = useState<Date | null>(null);
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('');
 
-  const { data: products = [], isLoading } = useSupplierProductsQuery(supplier.id);
+  const {
+    data: products = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useSupplierProductsQuery(supplier.id);
 
   const handleSort = useCallback(
     (field: string) => {
@@ -183,6 +190,14 @@ export default function SupplierProductsContent({
           <div className="flex items-center justify-center py-16">
             <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
+        ) : isError ? (
+          <ErrorState
+            error={error}
+            fallback="تعذّر تحميل منتجات المورد"
+            onRetry={() => {
+              refetch();
+            }}
+          />
         ) : (
           <DataTable<ProductRecord>
             columns={columns}

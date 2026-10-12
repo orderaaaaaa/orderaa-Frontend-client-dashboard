@@ -39,6 +39,38 @@ const DEFAULT_SUMMARY: DashboardSummary = {
 
 const DEFAULT_FIRST_ATTEMPT: FirstAttemptData = { minutes: 0 };
 
+export interface QuerySectionState {
+  isError: boolean;
+  error: unknown;
+  refetch: () => void;
+}
+
+export interface DashboardSectionErrors {
+  summary: QuerySectionState;
+  employees: QuerySectionState;
+  callDurations: QuerySectionState;
+  orderStatusDistribution: QuerySectionState;
+  confirmationAttempts: QuerySectionState;
+  postponedOrdersContent: QuerySectionState;
+}
+
+interface QueryLike {
+  isError: boolean;
+  error: unknown;
+  data: unknown;
+  refetch: () => unknown;
+}
+
+function toSectionState(query: QueryLike): QuerySectionState {
+  return {
+    isError: query.isError && query.data === undefined,
+    error: query.error,
+    refetch: () => {
+      query.refetch();
+    },
+  };
+}
+
 interface UseDashboardDataReturn {
   summary: DashboardSummary;
   firstAttempt: FirstAttemptData;
@@ -48,6 +80,7 @@ interface UseDashboardDataReturn {
   confirmationAttempts: ConfirmationAttemptsData;
   postponedOrdersContent: PostponedOrderContentItem[];
   isLoading: boolean;
+  errors: DashboardSectionErrors;
 }
 
 export function useDashboardData(): UseDashboardDataReturn {
@@ -115,6 +148,15 @@ export function useDashboardData(): UseDashboardDataReturn {
     editRejectedQuery.isLoading ||
     employeesStatusQuery.isLoading;
 
+  const errors: DashboardSectionErrors = {
+    summary: toSectionState(summaryQuery),
+    employees: toSectionState(employeesStatusQuery),
+    callDurations: toSectionState(hourlyChartQuery),
+    orderStatusDistribution: toSectionState(byStatusQuery),
+    confirmationAttempts: toSectionState(attemptConversionQuery),
+    postponedOrdersContent: toSectionState(editRejectedQuery),
+  };
+
   return {
     summary,
     firstAttempt,
@@ -124,5 +166,6 @@ export function useDashboardData(): UseDashboardDataReturn {
     confirmationAttempts,
     postponedOrdersContent,
     isLoading,
+    errors,
   };
 }

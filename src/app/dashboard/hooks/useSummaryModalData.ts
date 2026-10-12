@@ -6,6 +6,7 @@ import type {
   EmployeePerformanceData,
 } from '../types';
 import type { SummaryModalType } from './useSummaryModal';
+import type { QuerySectionState } from './useDashboardData';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import {
   useAttemptedQuery,
@@ -31,6 +32,7 @@ interface UseSummaryModalDataReturn {
   stoppedEmployeesModalData: EmployeeModalData[];
   stoppedEmployeesPerformance: Record<number, EmployeePerformanceData>;
   isModalLoading: boolean;
+  modalError: QuerySectionState;
 }
 
 export function useSummaryModalData(
@@ -121,6 +123,27 @@ export function useSummaryModalData(
     (modalType === 'active' && employeesOnlineQuery.isLoading) ||
     (modalType === 'stopped' && employeesOfflineQuery.isLoading);
 
+  const activeQuery =
+    modalType === 'followUp'
+      ? attemptedQuery
+      : modalType === 'incomplete'
+        ? remainingQuery
+        : modalType === 'cancelled'
+          ? cancelledQuery
+          : modalType === 'active'
+            ? employeesOnlineQuery
+            : modalType === 'stopped'
+              ? employeesOfflineQuery
+              : null;
+
+  const modalError: QuerySectionState = {
+    isError: !!activeQuery && activeQuery.isError && activeQuery.data === undefined,
+    error: activeQuery?.error ?? null,
+    refetch: () => {
+      activeQuery?.refetch();
+    },
+  };
+
   return {
     followUpModalData,
     incompleteModalData,
@@ -131,5 +154,6 @@ export function useSummaryModalData(
     stoppedEmployeesModalData,
     stoppedEmployeesPerformance,
     isModalLoading,
+    modalError,
   };
 }

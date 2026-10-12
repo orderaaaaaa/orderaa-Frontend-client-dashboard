@@ -6,6 +6,7 @@ import {
   SummaryStatCardSkeleton,
 } from '@/components/ui/summary-stat-card';
 import BaseModal from '@/components/ui/base-modal';
+import { EmptyState, ErrorState } from '@/components/ui/state-panels';
 import { LiaStopwatchSolid } from 'react-icons/lia';
 import type { DashboardSummary, FirstAttemptData } from '../types';
 import {
@@ -13,7 +14,11 @@ import {
   buildOrderStatusCards,
   buildTotalsCards,
 } from '../constants';
-import { useSummaryModal, useSummaryModalData } from '../hooks';
+import {
+  useSummaryModal,
+  useSummaryModalData,
+  type QuerySectionState,
+} from '../hooks';
 import { formatMinutesToArabic } from '../utils';
 import {
   EmployeeListModalContent,
@@ -25,6 +30,7 @@ interface TodaySummarySectionProps {
   summary: DashboardSummary;
   firstAttempt: FirstAttemptData;
   isLoading: boolean;
+  error?: QuerySectionState;
 }
 
 const CLICKABLE_ORDER_CARDS = ['followUp', 'incomplete', 'cancelled'];
@@ -33,6 +39,7 @@ export function TodaySummarySection({
   summary,
   firstAttempt,
   isLoading,
+  error,
 }: TodaySummarySectionProps) {
   const { modalType, isOpen, openModal, closeModal } = useSummaryModal();
 
@@ -46,6 +53,7 @@ export function TodaySummarySection({
     stoppedEmployeesModalData,
     stoppedEmployeesPerformance,
     isModalLoading,
+    modalError,
   } = useSummaryModalData(modalType);
 
   const activeStoppedCards = useMemo(
@@ -119,6 +127,19 @@ export function TodaySummarySection({
     );
   }
 
+  if (error?.isError) {
+    return (
+      <section className="space-y-4">
+        <h2 className="text-lg font-bold text-primary">ملخص اليوم</h2>
+        <ErrorState
+          error={error.error}
+          fallback="تعذّر تحميل ملخص اليوم"
+          onRetry={error.refetch}
+        />
+      </section>
+    );
+  }
+
   return (
     <section className="space-y-4">
       <h2 className="text-lg font-bold text-primary">ملخص اليوم</h2>
@@ -182,8 +203,14 @@ export function TodaySummarySection({
           <div className="flex items-center justify-center py-12">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
           </div>
+        ) : modalError.isError ? (
+          <ErrorState
+            error={modalError.error}
+            fallback="تعذّر تحميل البيانات"
+            onRetry={modalError.refetch}
+          />
         ) : currentModalConfig?.data.length === 0 ? (
-          <p className="py-12 text-center text-gray-500">لا توجد بيانات</p>
+          <EmptyState title="لا توجد بيانات" />
         ) : (
           <>
             {currentModalConfig?.type === 'employee' && (

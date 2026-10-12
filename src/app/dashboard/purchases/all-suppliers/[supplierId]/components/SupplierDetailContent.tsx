@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { formatDateToLocalDate } from '@/utils/dateRangeUtils';
 import { Scan, ScanLine, X } from 'lucide-react';
 import { LiaFileInvoiceSolid } from 'react-icons/lia';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import PaginationFooter from '@/components/ui/pagination-footer';
+import { ErrorState } from '@/components/ui/state-panels';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import { Supplier } from '../../types';
 import { useSupplierInvoicesQuery } from '@/services/suppliers';
@@ -30,7 +31,13 @@ export function SupplierDetailContent({ supplier, initialInvoicesData }: Supplie
   const [toDate, setToDate] = useState<Date | null>(null);
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('');
 
-  const { data: invoicesData } = useSupplierInvoicesQuery({
+  const {
+    data: invoicesData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useSupplierInvoicesQuery({
     supplierId: supplier.id,
     page: currentPage,
     limit: pageSize,
@@ -38,9 +45,19 @@ export function SupplierDetailContent({ supplier, initialInvoicesData }: Supplie
     dateTo: formatDateToLocalDate(toDate),
   });
 
-  const data = invoicesData ?? initialInvoicesData;
+  const matchesInitialKey =
+    currentPage === 1 &&
+    pageSize === DEFAULT_PAGE_SIZE &&
+    !fromDate &&
+    !toDate;
+  const data =
+    invoicesData ?? (matchesInitialKey ? initialInvoicesData : undefined);
+  const showLoading = isLoading && !data;
+  const showError = isError && !data;
+  const lastMetaRef = useRef<PaginationMeta | undefined>(undefined);
+  if (data?.meta) lastMetaRef.current = data.meta;
   const invoices = data?.data ?? [];
-  const meta = data?.meta;
+  const meta = data?.meta ?? lastMetaRef.current;
   const totalItems = meta?.totalItems ?? 0;
   const totalPages = meta?.totalPages ?? 1;
 
@@ -136,7 +153,19 @@ export function SupplierDetailContent({ supplier, initialInvoicesData }: Supplie
       </div>
 
       <div className="px-4 sm:px-8 flex flex-col gap-4">
-        {invoices.length > 0 ? (
+        {showLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : showError ? (
+          <ErrorState
+            error={error}
+            fallback="تعذّر تحميل فواتير المورد"
+            onRetry={() => {
+              refetch();
+            }}
+          />
+        ) : invoices.length > 0 ? (
           invoices.map((invoice) => (
             <SupplierInvoiceCard
               key={invoice.id}
