@@ -35,6 +35,7 @@ export default function ProductDropdown({
     expandedProductId,
     products,
     isLoading,
+    loadError,
     hasNextPage,
     handlers,
   } = useProductDropdown();
@@ -83,6 +84,8 @@ export default function ProductDropdown({
             search={search}
             onSearchChange={handlers.handleSearchChange}
             isLoading={isLoading}
+            loadError={loadError}
+            onRetry={handlers.handleRetry}
             hasNextPage={hasNextPage}
             onLoadMore={handlers.handleLoadMore}
           />

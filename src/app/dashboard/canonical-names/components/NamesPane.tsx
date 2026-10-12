@@ -8,11 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Input from '@/components/ui/Input';
 import PageLoading from '@/components/ui/page-loading';
-import Skeleton from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { useDebounce } from '@/utils/debounce';
 import { useCanonicalNamesQuery } from '@/services/canonicalNames';
 import type { CanonicalName, CanonicalNameDomain } from '@/types/canonicalNames';
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
+import { useHeldData } from '../hooks/useHeldData';
 
 interface NameCardProps {
   name: CanonicalName;
@@ -53,15 +54,20 @@ function NameCard({
         </div>
         <p className="text-xs text-gray-500">{countLabel}</p>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => onViewImpact(name)}>
+          <Button variant="outline" size="sm" className="min-h-10" onClick={() => onViewImpact(name)}>
             عرض التأثير
           </Button>
           {canManage && !name.isSystem && (
             <>
-              <Button variant="outline" size="sm" onClick={() => onRename(name)}>
+              <Button variant="outline" size="sm" className="min-h-10" onClick={() => onRename(name)}>
                 إعادة تسمية
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => onDelete(name)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="min-h-10 text-red-600 hover:bg-red-50 hover:text-red-700"
+                onClick={() => onDelete(name)}
+              >
                 حذف
               </Button>
             </>
@@ -92,22 +98,29 @@ export default function NamesPane({
   onViewImpact,
 }: NamesPaneProps) {
   const [search, setSearch] = useState('');
-  const { data: names, isLoading, isFetching, isError, refetch } =
-    useCanonicalNamesQuery(domain, { scopeId, search: search || undefined });
+  const debouncedSearch = useDebounce(search.trim(), 300);
+  const { data, isFetching, isError, refetch } = useCanonicalNamesQuery(
+    domain,
+    { scopeId, search: debouncedSearch || undefined },
+  );
+  const names = useHeldData(data, `${domain}:${scopeId}`);
+  const isLoading = names === undefined && !isError;
   const canCreate = canManage;
 
   return (
     <div className="flex-1 min-w-0 flex flex-col gap-3">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Input
+          className="min-w-0 flex-1 basis-48"
           placeholder="بحث"
+          aria-label="بحث في الأسماء الموحدة"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           clearable
           onClear={() => setSearch('')}
         />
         {canCreate && (
-          <Button size="sm" onClick={onCreate} className="shrink-0">
+          <Button size="sm" onClick={onCreate} className="min-h-10 shrink-0">
             <Plus className="h-4 w-4" />
             إضافة اسم
           </Button>
@@ -116,30 +129,38 @@ export default function NamesPane({
 
       {isLoading && <PageLoading size="sm" />}
 
-      {isError && (
-        <div className="text-center py-8">
-          <p className="text-sm text-gray-500 mb-2">تعذر تحميل البيانات</p>
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
+      {isError && names !== undefined && (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+        >
+          تعذر تحديث القائمة، المعروض قد يكون قديماً
+          <Button variant="outline" size="sm" className="min-h-10" onClick={() => refetch()}>
             إعادة المحاولة
           </Button>
         </div>
       )}
 
-      {!isLoading && !isError && (names ?? []).length === 0 && (
+      {isError && names === undefined && (
+        <div role="alert" className="text-center py-8">
+          <p className="text-sm text-gray-500 mb-2">تعذر تحميل البيانات</p>
+          <Button variant="outline" size="sm" className="min-h-10" onClick={() => refetch()}>
+            إعادة المحاولة
+          </Button>
+        </div>
+      )}
+
+      {names !== undefined && names.length === 0 && !isFetching && (
         <p className="text-sm text-gray-500 text-center py-8">
           لا توجد أسماء موحدة بعد. أضف اسما أو استخدم اقتراح الربط.
         </p>
       )}
 
-      {!isLoading && isFetching && (
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-        </div>
-      )}
-
-      {!isLoading && !isFetching && (
-        <div className="flex flex-col gap-2">
+      {names !== undefined && (
+        <div
+          className={cn('flex flex-col gap-2 transition-opacity', isFetching && 'opacity-60')}
+          aria-busy={isFetching}
+        >
           {(names ?? []).map((name) => (
             <NameCard
               key={name.id}

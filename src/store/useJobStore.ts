@@ -5,6 +5,7 @@ export interface ActiveJob {
   jobId: string;
   type: 'SYNC' | 'MERGE';
   label: string;
+  variantLabels?: Record<number, string>;
 }
 
 interface JobStore {

@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient, QueryKey, type QueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { invalidateAndWait } from '@/lib/query/mutationSync';
+import { STOCK_VIEW_KEYS } from '@/services/warehouses';
 import {
   getSuppliers,
   getSupplierById,
@@ -109,22 +111,28 @@ export const useDeleteSupplierMutation = () => {
   });
 };
 
-const invalidateSupplierFigures = (queryClient: QueryClient) => {
-  queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIERS] });
-  queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_DETAIL] });
-  queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_PRODUCTS] });
-  queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_PRODUCT_TRANSACTIONS] });
-};
+const SUPPLIER_FIGURE_KEYS: QueryKey[] = [
+  [QUERY_KEYS.SUPPLIERS],
+  [QUERY_KEYS.SUPPLIER_DETAIL],
+  [QUERY_KEYS.SUPPLIER_PRODUCTS],
+  [QUERY_KEYS.SUPPLIER_PRODUCT_TRANSACTIONS],
+];
+
+const invalidateSupplierFigures = (
+  queryClient: QueryClient,
+  extraKeys: QueryKey[] = [],
+) => invalidateAndWait(queryClient, [...SUPPLIER_FIGURE_KEYS, ...extraKeys]);
 
 export const useCreateSupplierInvoiceMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: CreateSupplierInvoiceDto) => createSupplierInvoice(body),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_INVOICES] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIERS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_DETAIL] });
-    },
+    onSuccess: () =>
+      invalidateAndWait(queryClient, [
+        [QUERY_KEYS.SUPPLIER_INVOICES],
+        [QUERY_KEYS.SUPPLIERS],
+        [QUERY_KEYS.SUPPLIER_DETAIL],
+      ]),
   });
 };
 
@@ -132,11 +140,11 @@ export const useUpdateSupplierInvoiceMutation = (id: number) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: UpdateSupplierInvoiceDto) => updateSupplierInvoice(id, body),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_INVOICES] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_INVOICE_DETAIL, id] });
-      invalidateSupplierFigures(queryClient);
-    },
+    onSuccess: () =>
+      invalidateSupplierFigures(queryClient, [
+        [QUERY_KEYS.SUPPLIER_INVOICES],
+        [QUERY_KEYS.SUPPLIER_INVOICE_DETAIL, id],
+      ]),
   });
 };
 
@@ -144,10 +152,8 @@ export const useDeleteSupplierInvoiceMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => deleteSupplierInvoice(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_INVOICES] });
-      invalidateSupplierFigures(queryClient);
-    },
+    onSuccess: () =>
+      invalidateSupplierFigures(queryClient, [[QUERY_KEYS.SUPPLIER_INVOICES]]),
   });
 };
 
@@ -156,15 +162,12 @@ export const useApproveSupplierInvoiceMutation = () => {
   return useMutation({
     mutationFn: ({ id, body }: { id: number; body: ApproveSupplierInvoiceDto }) =>
       approveSupplierInvoice(id, body),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_INVOICES] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIER_INVOICE_DETAIL, variables.id] });
-      invalidateSupplierFigures(queryClient);
-      // Approval records INBOUND stock movements into the chosen warehouse.
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.WAREHOUSE_STOCK] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCK_MOVEMENTS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCK_PRODUCTS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCK_ANALYSIS] });
-    },
+    onSuccess: (_data, variables) =>
+      invalidateSupplierFigures(queryClient, [
+        [QUERY_KEYS.SUPPLIER_INVOICES],
+        [QUERY_KEYS.SUPPLIER_INVOICE_DETAIL, variables.id],
+        // Approval records INBOUND stock movements into the chosen warehouse.
+        ...STOCK_VIEW_KEYS,
+      ]),
   });
 };

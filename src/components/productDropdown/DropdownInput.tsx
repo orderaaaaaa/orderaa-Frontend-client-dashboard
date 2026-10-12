@@ -35,10 +35,11 @@ export const DropdownInput: React.FC<DropdownInputProps> = ({
       type="button"
       onClick={onToggle}
       className={clsx(
-        'w-full border cursor-pointer rounded-lg py-2.5 px-10 text-[18px] transition-colors text-left flex items-center justify-between',
+        'w-full min-h-10 border cursor-pointer rounded-lg py-2.5 px-4 sm:px-10 text-base sm:text-[18px] transition-colors text-right flex items-center justify-between gap-2',
         selectClassName ?? 'border-primary'
       )}
-      aria-label="Toggle dropdown"
+      aria-haspopup="dialog"
+      aria-expanded={isOpen}
     >
       <span
         className={

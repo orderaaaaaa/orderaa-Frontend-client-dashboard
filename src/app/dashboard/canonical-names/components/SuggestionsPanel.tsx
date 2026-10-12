@@ -189,7 +189,7 @@ export default function SuggestionsPanel({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline">اقتراح الربط</Button>
+        <Button variant="outline" className="min-h-10">اقتراح الربط</Button>
       </DialogTrigger>
       <DialogContent className="max-w-xl">
         <DialogHeader>

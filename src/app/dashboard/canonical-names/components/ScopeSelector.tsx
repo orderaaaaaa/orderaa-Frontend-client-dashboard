@@ -27,7 +27,7 @@ export default function ScopeSelector({ value, onChange }: ScopeSelectorProps) {
       onValueChange={(next) => onChange(Number(next))}
       disabled={isLoading}
     >
-      <SelectTrigger className="w-[220px]">
+      <SelectTrigger className="min-h-10 w-full sm:w-[220px]" aria-label="المحافظة">
         <SelectValue placeholder="اختر المحافظة" />
       </SelectTrigger>
       <SelectContent>

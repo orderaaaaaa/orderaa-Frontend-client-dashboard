@@ -49,7 +49,8 @@ export default function GroupMembersDrawer({
           <PageLoading size="sm" />
         ) : (
           <div className="max-h-96 overflow-y-auto rounded-md border">
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+            <table className="w-full min-w-[480px] text-sm">
               <thead className="bg-gray-50 text-gray-500">
                 <tr>
                   <th className="p-2 text-right">المنتج</th>
@@ -79,6 +80,7 @@ export default function GroupMembersDrawer({
                 )}
               </tbody>
             </table>
+            </div>
             <PaginationFooter
               currentPage={data.page}
               totalPages={Math.max(1, Math.ceil(data.total / data.limit))}
@@ -98,7 +100,7 @@ export default function GroupMembersDrawer({
         )}
 
         <DialogFooter>
-          <Button onClick={onClose}>إغلاق</Button>
+          <Button className="min-h-10" onClick={onClose}>إغلاق</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

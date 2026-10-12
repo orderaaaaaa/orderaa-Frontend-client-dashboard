@@ -7,6 +7,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -114,7 +122,7 @@ function SourceRowChip({
       {canManage && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="inline-flex">
+            <span className="inline-flex size-10 items-center justify-center">
               <Checkbox
                 checked={checked}
                 onCheckedChange={(next) => onToggle(next === true)}
@@ -130,10 +138,10 @@ function SourceRowChip({
           type="button"
           {...listeners}
           {...attributes}
-          className="cursor-grab text-gray-400 hover:text-gray-600"
+          className="inline-flex size-10 cursor-grab items-center justify-center text-gray-400 hover:text-gray-600"
           aria-label="سحب للربط"
         >
-          <GripVertical className="h-4 w-4" />
+          <GripVertical className="h-5 w-5" />
         </button>
       )}
       <span className="text-xs font-medium text-gray-500">
@@ -152,7 +160,7 @@ function SourceRowChip({
         <Button
           variant="ghost"
           size="sm"
-          className="h-6 px-2 text-xs"
+          className="min-h-10 px-3 text-xs"
           onClick={onUnlink}
         >
           إلغاء الربط
@@ -188,6 +196,10 @@ export default function SourceGroupRow({
   canManage,
 }: SourceGroupRowProps) {
   const [spellingsOpen, setSpellingsOpen] = useState(false);
+  const [unlinkRequest, setUnlinkRequest] = useState<{
+    label: string;
+    run: () => void;
+  } | null>(null);
   const [checkedBySource, setCheckedBySource] = useState<
     Map<LocationSource, number>
   >(new Map());
@@ -256,21 +268,23 @@ export default function SourceGroupRow({
     >
       <div className="flex items-start gap-2">
         {canManage && !isLocation && (
-          <Checkbox
-            checked={selected}
-            onCheckedChange={(checked) => onToggleSelect(checked === true)}
-            className="mt-1"
-          />
+          <span className="inline-flex size-10 shrink-0 items-center justify-center">
+            <Checkbox
+              checked={selected}
+              onCheckedChange={(checked) => onToggleSelect(checked === true)}
+              aria-label={`اختيار ${primarySpelling}`}
+            />
+          </span>
         )}
         {canManage && !isLocation && (
           <button
             type="button"
             {...listeners}
             {...attributes}
-            className="mt-1 cursor-grab text-gray-400 hover:text-gray-600"
+            className="inline-flex size-10 shrink-0 cursor-grab items-center justify-center text-gray-400 hover:text-gray-600"
             aria-label="سحب للربط"
           >
-            <GripVertical className="h-4 w-4" />
+            <GripVertical className="h-5 w-5" />
           </button>
         )}
         <div className="flex-1 min-w-0">
@@ -281,7 +295,7 @@ export default function SourceGroupRow({
             {otherSpellings.length > 0 && (
               <Popover open={spellingsOpen} onOpenChange={setSpellingsOpen}>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
+                  <Button variant="ghost" size="sm" className="min-h-10 px-3 text-xs">
                     +{otherSpellings.length} صيغ
                   </Button>
                 </PopoverTrigger>
@@ -332,10 +346,14 @@ export default function SourceGroupRow({
               checked={checkedBySource.get(row.source) === row.id}
               onToggle={(checked) => toggleRow(row, checked)}
               onUnlink={() =>
-                onDirectLink({
-                  scopeId: group.scopeId,
-                  rowIds: [row.id],
-                  unlink: true,
+                setUnlinkRequest({
+                  label: row.label,
+                  run: () =>
+                    onDirectLink({
+                      scopeId: group.scopeId,
+                      rowIds: [row.id],
+                      unlink: true,
+                    }),
                 })
               }
             />
@@ -345,7 +363,7 @@ export default function SourceGroupRow({
 
       {canManage && (
         <div className="flex flex-wrap items-center gap-2">
-          <div className="w-48">
+          <div className="w-full sm:w-48">
             <SearchableSelect
               options={nameSelectOptions}
               placeholder={linkDisabled ? 'اختر صفا للربط' : 'ربط بـ'}
@@ -378,13 +396,14 @@ export default function SourceGroupRow({
             }
           />
           {isAttributeDomain && onViewMembers && (
-            <Button variant="outline" size="sm" onClick={onViewMembers}>
+            <Button variant="outline" size="sm" className="min-h-10" onClick={onViewMembers}>
               عرض المنتجات
             </Button>
           )}
           <Button
             variant="outline"
             size="sm"
+            className="min-h-10"
             disabled={linkDisabled}
             onClick={() =>
               onDirectLink(linkTarget({ newName: primarySpelling }), clearCheckedRows)
@@ -393,12 +412,53 @@ export default function SourceGroupRow({
             إنشاء اسم من هذه القيمة
           </Button>
           {!isLocation && group.state !== 'UNLINKED' && (
-            <Button variant="ghost" size="sm" onClick={onUnlink}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="min-h-10"
+              onClick={() =>
+                setUnlinkRequest({ label: primarySpelling, run: onUnlink })
+              }
+            >
               إلغاء الربط
             </Button>
           )}
         </div>
       )}
+
+      <Dialog
+        open={unlinkRequest !== null}
+        onOpenChange={(open) => !open && setUnlinkRequest(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>إلغاء الربط</DialogTitle>
+            <DialogDescription>
+              سيتم إلغاء ربط «{unlinkRequest?.label.trim()}» بالاسم الموحد، وسيظهر
+              بإملائه الأصلي.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              className="min-h-10"
+              onClick={() => setUnlinkRequest(null)}
+            >
+              تراجع
+            </Button>
+            <Button
+              variant="destructive"
+              className="min-h-10"
+              onClick={() => {
+                unlinkRequest?.run();
+                setUnlinkRequest(null);
+              }}
+            >
+              إلغاء الربط
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

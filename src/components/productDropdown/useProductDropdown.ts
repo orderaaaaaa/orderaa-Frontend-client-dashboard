@@ -71,6 +71,12 @@ export const useProductDropdown = () => {
 
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<unknown>(null);
+  const [failedRequest, setFailedRequest] = useState<{
+    page: number;
+    search: string;
+    append: boolean;
+  } | null>(null);
   const [page, setPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [totalItems, setTotalItems] = useState(0);
@@ -80,6 +86,8 @@ export const useProductDropdown = () => {
   const fetchProducts = async (pageNum: number, searchQuery: string, append = false) => {
     try {
       setIsLoading(true);
+      setLoadError(null);
+      setFailedRequest(null);
       const response = await api.get<ProductsApiResponse>('/products', {
         params: {
           page: pageNum,
@@ -99,7 +107,12 @@ export const useProductDropdown = () => {
       setTotalItems(data.totalItems);
       setPage(data.currentPage);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      setLoadError(error);
+      setFailedRequest({ page: pageNum, search: searchQuery, append });
+      if (!append) {
+        setProducts([]);
+        setHasNextPage(false);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -111,29 +124,6 @@ export const useProductDropdown = () => {
       fetchProducts(1, debouncedSearch, false);
     }
   }, [isOpen, debouncedSearch]);
-
-  useEffect(() => {
-    const handleEscapeKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        useProductDropdownStore.setState({
-          isOpen: false,
-          expandedProductId: null,
-        });
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscapeKey);
-      document.body.style.overflow = 'hidden';
-
-      return () => {
-        document.removeEventListener('keydown', handleEscapeKey);
-        document.body.style.overflow = 'unset';
-      };
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-  }, [isOpen]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -166,6 +156,14 @@ export const useProductDropdown = () => {
     removeProductFromPending(productId);
   };
 
+  const handleRetry = () => {
+    if (failedRequest) {
+      fetchProducts(failedRequest.page, failedRequest.search, failedRequest.append);
+    } else {
+      fetchProducts(1, debouncedSearch, false);
+    }
+  };
+
   const handleLoadMore = () => {
     if (hasNextPage && !isLoading) {
       fetchProducts(page + 1, debouncedSearch, true);
@@ -181,6 +179,7 @@ export const useProductDropdown = () => {
     expandedProductId,
     products,
     isLoading,
+    loadError,
     hasNextPage,
     totalItems,
     handlers: {
@@ -194,6 +193,7 @@ export const useProductDropdown = () => {
       handleAddProductWithoutVariants,
       handleRemoveProductFromPending,
       handleLoadMore,
+      handleRetry,
     },
   };
 };

@@ -199,6 +199,7 @@ export default function CanonicalNamesWorkspace({
     isLocation && canManage ? (
       <Button
         variant="outline"
+        className="min-h-10"
         onClick={() => refreshSources.mutate()}
         disabled={refreshSources.isPending || sourcesRunning}
       >
@@ -215,7 +216,7 @@ export default function CanonicalNamesWorkspace({
       <div className="w-full max-w-full overflow-x-hidden sm:px-8 py-4 flex flex-col gap-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h1 className="text-lg sm:text-xl font-bold text-gray-900">{title}</h1>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <ScopeSelector
               value={governorateScopeId}
               onChange={setGovernorateScopeId}
@@ -243,7 +244,7 @@ export default function CanonicalNamesWorkspace({
     <div className="w-full max-w-full overflow-x-hidden sm:px-8 py-4 flex flex-col gap-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h1 className="text-lg sm:text-xl font-bold text-gray-900">{title}</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           {scopeSelector === 'governorate' && (
             <ScopeSelector
               value={governorateScopeId}
@@ -310,6 +311,12 @@ export default function CanonicalNamesWorkspace({
           initialName={
             nameForm.mode === 'rename' ? nameForm.target.name : undefined
           }
+          existingNames={nameOptionsList
+            .filter(
+              (option) =>
+                nameForm.mode !== 'rename' || option.id !== nameForm.target.id,
+            )
+            .map((option) => option.name)}
           submitting={createName.isPending}
           onClose={() => setNameForm(null)}
           onSubmit={(name) => {
@@ -389,10 +396,11 @@ export default function CanonicalNamesWorkspace({
               ))}
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setLinkWarning(null)}>
+              <Button variant="outline" className="min-h-10" onClick={() => setLinkWarning(null)}>
                 إلغاء
               </Button>
               <Button
+                className="min-h-10"
                 onClick={() => {
                   applyLinks.mutate(
                     { items: linkWarning.items },
