@@ -91,7 +91,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
           ref={scrollRef}
           className="mx-auto overflow-x-auto [scrollbar-width:thin] sm:[scrollbar-width:none] [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 sm:[&::-webkit-scrollbar]:hidden"
         >
-          <div className="pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
+          <div className="pb-1 sm:pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
             <Can code={PERMISSION_CODES.ORDERS_BULK_UPDATE}>
               <Select onValueChange={handleStatusSelect}>
                 <SelectTrigger className="group flex items-center gap-2 px-4 pl-10 py-2 rounded-3xl bg-white border-primary !text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap w-auto h-10 focus:ring-0 focus:ring-offset-0 ring-offset-0">
