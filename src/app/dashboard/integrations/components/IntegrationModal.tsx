@@ -668,7 +668,7 @@ const IntegrationModal = ({
                                 onEditStore(Number(storeId), configs);
                               }}
                               aria-label="تعديل المتجر"
-                              className="size-10 text-gray-400 hover:text-primary hover:bg-primary/5"
+                              className="size-10 sm:size-10 text-gray-400 hover:text-primary hover:bg-primary/5"
                             >
                               <LiaEditSolid className="w-4 h-4" />
                             </Button>
@@ -686,7 +686,7 @@ const IntegrationModal = ({
                                 );
                               }}
                               aria-label="حذف المتجر"
-                              className="size-10 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                              className="size-10 sm:size-10 text-gray-400 hover:text-red-600 hover:bg-red-50"
                             >
                               <LiaTrashAltSolid className="w-4 h-4" />
                             </Button>

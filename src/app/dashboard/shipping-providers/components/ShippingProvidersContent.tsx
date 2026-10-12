@@ -240,7 +240,7 @@ export function ShippingProvidersContent() {
                     <Button
                       type="button"
                       variant="ghost"
-                      className="self-start h-10 px-3 text-xs text-gray-500 hover:text-red-600"
+                      className="self-start h-10 sm:h-10 px-3 text-xs text-gray-500 hover:text-red-600"
                       disabled={!providersReady}
                       onClick={(e) => {
                         e.stopPropagation();

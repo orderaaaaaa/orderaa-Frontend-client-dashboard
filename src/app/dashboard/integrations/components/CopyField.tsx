@@ -64,7 +64,7 @@ export default function CopyField({
               onClick={() => setRevealed((prev) => !prev)}
               disabled={!value}
               aria-pressed={revealed}
-              className="h-10 min-w-16 px-3 text-xs"
+              className="h-10 sm:h-10 min-w-16 px-3 text-xs"
             >
               {revealed ? 'إخفاء' : 'إظهار'}
             </Button>
@@ -74,7 +74,7 @@ export default function CopyField({
             variant="default"
             onClick={handleCopy}
             disabled={!value}
-            className="h-10 gap-1.5 px-3 text-xs"
+            className="h-10 sm:h-10 gap-1.5 px-3 text-xs"
           >
             {copied ? (
               <LiaCheckSolid className="w-4 h-4" />
