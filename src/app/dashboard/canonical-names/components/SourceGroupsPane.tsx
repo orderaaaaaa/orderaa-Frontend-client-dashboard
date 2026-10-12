@@ -6,8 +6,9 @@ import Input from '@/components/ui/Input';
 import PageLoading from '@/components/ui/page-loading';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import SearchableSelect from '@/components/ui/SearchableSelect';
-import Skeleton from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
+import { useDebounce } from '@/utils/debounce';
 import {
   isLocationDomain,
   useRecheckLocationSourcesStatus,
@@ -24,6 +25,7 @@ import type {
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
 import SourceGroupRow from './SourceGroupRow';
 import UnscopedParentsPanel from './UnscopedParentsPanel';
+import { useHeldData } from '../hooks/useHeldData';
 
 const STATE_TABS: { value: GroupStateFilter; label: string }[] = [
   { value: 'all', label: 'الكل' },
@@ -75,24 +77,29 @@ export default function SourceGroupsPane({
   const [limit, setLimit] = useState(50);
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
-  const { data, isLoading, isFetching, isError, refetch } = useSourceGroupsQuery(
-    domain,
-    {
-      scopeId,
-      state: stateFilter === 'all' ? undefined : stateFilter,
-      search: search || undefined,
-      page,
-      limit,
-    },
-  );
+  const debouncedSearch = useDebounce(search.trim(), 300);
+  const {
+    data: freshData,
+    isFetching,
+    isError,
+    refetch,
+  } = useSourceGroupsQuery(domain, {
+    scopeId,
+    state: stateFilter === 'all' ? undefined : stateFilter,
+    search: debouncedSearch || undefined,
+    page,
+    limit,
+  });
+  const data = useHeldData(freshData, `${domain}:${scopeId}`);
+  const isLoading = data === undefined && !isError;
 
   const recheckSourcesStatus = useRecheckLocationSourcesStatus();
   const locationPageEmpty =
-    isLocationDomain(domain) && data !== undefined && data.total === 0;
+    isLocationDomain(domain) && freshData !== undefined && freshData.total === 0;
 
   useEffect(() => {
     if (locationPageEmpty) recheckSourcesStatus();
-  }, [locationPageEmpty, data, recheckSourcesStatus]);
+  }, [locationPageEmpty, freshData, recheckSourcesStatus]);
 
   const reloadedForToken = useRef<number | null>(null);
   const sourcesReady =
@@ -154,6 +161,7 @@ export default function SourceGroupsPane({
   return (
     <div className="flex-1 min-w-0 flex flex-col gap-3">
       <Tabs
+        className="max-w-full overflow-x-auto"
         value={stateFilter}
         onValueChange={(value) => {
           setStateFilter(value as GroupStateFilter);
@@ -171,21 +179,25 @@ export default function SourceGroupsPane({
 
       <Input
         placeholder="بحث"
+        aria-label="بحث في القيم"
         value={search}
         onChange={(e) => {
           setSearch(e.target.value);
           setPage(1);
         }}
         clearable
-        onClear={() => setSearch('')}
+        onClear={() => {
+          setSearch('');
+          setPage(1);
+        }}
       />
 
       {canManage && selected.size > 0 && (
-        <div className="flex items-center gap-2 rounded-md border bg-gray-50 p-2">
+        <div className="flex flex-wrap items-center gap-2 rounded-md border bg-gray-50 p-2">
           <span className="text-xs text-gray-600">
             {selected.size} محدد
           </span>
-          <div className="w-48">
+          <div className="w-full sm:w-48">
             <SearchableSelect
               options={nameSelectOptions}
               placeholder="ربط المحدد بـ"
@@ -197,16 +209,16 @@ export default function SourceGroupsPane({
 
       {isLoading && <PageLoading size="sm" />}
 
-      {isError && (
-        <div className="text-center py-8">
+      {isError && data === undefined && (
+        <div role="alert" className="text-center py-8">
           <p className="text-sm text-gray-500 mb-2">تعذر تحميل البيانات</p>
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
+          <Button variant="outline" size="sm" className="min-h-10" onClick={() => refetch()}>
             إعادة المحاولة
           </Button>
         </div>
       )}
 
-      {!isLoading && !isError && (data?.data.length ?? 0) === 0 && (
+      {data !== undefined && data.data.length === 0 && !isFetching && (
         <p className="text-sm text-gray-500 text-center py-8">
           {sourcesRunning
             ? 'جاري تحميل القوائم لأول مرة…'
@@ -214,15 +226,11 @@ export default function SourceGroupsPane({
         </p>
       )}
 
-      {!isLoading && isFetching && (
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-20 w-full" />
-        </div>
-      )}
-
-      {!isLoading && !isFetching && data && (
-        <div className="flex flex-col gap-2">
+      {data && (
+        <div
+          className={cn('flex flex-col gap-2 transition-opacity', isFetching && 'opacity-60')}
+          aria-busy={isFetching}
+        >
           {data.data.map((group) => (
             <SourceGroupRow
               key={groupKey(group)}

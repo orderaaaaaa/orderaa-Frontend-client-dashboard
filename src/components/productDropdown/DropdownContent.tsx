@@ -3,6 +3,7 @@ import { ProductRow } from './ProductRow';
 import Input from '../ui/Input';
 import type { ApiProduct } from './useProductDropdown';
 import { Button } from '../ui/button';
+import { ErrorState } from '../ui/state-panels';
 
 interface SelectedVariantValue {
   attribute: string;
@@ -26,6 +27,8 @@ interface DropdownContentProps {
   search: string;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   isLoading: boolean;
+  loadError: unknown;
+  onRetry: () => void;
   hasNextPage: boolean;
   onLoadMore: () => void;
 }
@@ -42,6 +45,8 @@ export const DropdownContent: React.FC<DropdownContentProps> = ({
   search,
   onSearchChange,
   isLoading,
+  loadError,
+  onRetry,
   hasNextPage,
   onLoadMore,
 }) => {
@@ -57,18 +62,25 @@ export const DropdownContent: React.FC<DropdownContentProps> = ({
           value={search}
           onChange={onSearchChange}
           placeholder="ابحث عن منتج..."
+          aria-label="ابحث عن منتج"
           className=""
         />
       </div>
 
-      <div className="top-0 z-10 bg-[#EAEAEA66] p-4 mx-4 mt-2 rounded-sm flex justify-between text-sm font-semibold">
+      <div aria-hidden className="top-0 z-10 bg-[#EAEAEA66] p-3 sm:p-4 mx-0 sm:mx-4 mt-2 rounded-sm flex justify-between text-sm font-semibold">
         <div className="w-1/4 text-center">الصور</div>
         <div className="w-1/2 text-center">الاسم</div>
         <div className="w-1/4 text-center">السعر</div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4">
-        {isLoading && products.length === 0 ? (
+      <div className="flex-1 overflow-y-auto px-0 sm:px-4">
+        {loadError && products.length === 0 ? (
+          <ErrorState
+            error={loadError}
+            fallback="تعذر تحميل المنتجات"
+            onRetry={onRetry}
+          />
+        ) : isLoading && products.length === 0 ? (
           <div className="pb-4">
             {Array.from({ length: 5 }).map((_, index) => (
               <div
@@ -109,11 +121,27 @@ export const DropdownContent: React.FC<DropdownContentProps> = ({
                 onRemoveProductFromPending={onRemoveProductFromPending}
               />
             ))}
-            {hasNextPage && (
-              <div className="py-4 text-center">
+            {loadError ? (
+              <div role="alert" className="py-4 flex flex-col items-center gap-2 text-sm text-red-600">
+                تعذر تحميل المزيد من المنتجات
                 <Button
+                  type="button"
                   variant="outline"
                   size="sm"
+                  className="min-h-10"
+                  onClick={onRetry}
+                  disabled={isLoading}
+                >
+                  إعادة المحاولة
+                </Button>
+              </div>
+            ) : hasNextPage && (
+              <div className="py-4 text-center">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="min-h-10"
                   onClick={onLoadMore}
                   disabled={isLoading}
                 >

@@ -4,35 +4,122 @@ import React, { useEffect, useState } from 'react';
 import PageLoading from '@/components/ui/page-loading';
 import { useRouter } from 'next/navigation';
 import { UploadResult } from '@/types/excel-upload';
+import type { BulkImportResponse, OrderCreationResult } from '@/lib/api/bulk-import';
 import { AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
+
+type StoredResults = UploadResult & {
+  backendResponse?: BulkImportResponse;
+  imported?: boolean;
+};
+
+interface RowProblem {
+  rowIndex: number;
+  messages: string[];
+}
+
+const ARABIC_PATTERN = /[؀-ۿ]/;
+
+const SERVER_VALIDATION_MESSAGES: Record<string, string> = {
+  'Full name is required': 'الاسم الكامل مطلوب',
+  'Phone number is required': 'رقم الهاتف مطلوب',
+  'Invalid phone number format': 'رقم الهاتف غير صحيح',
+  'City is required for Orderaa format': 'المدينة مطلوبة في قالب Orderaa',
+  'Address is required': 'العنوان مطلوب',
+  'Valid shipping cost is required': 'تكلفة الشحن مطلوبة ويجب أن تكون رقماً صحيحاً',
+  'At least one product is required': 'يجب إضافة منتج واحد على الأقل',
+};
+
+const ROW_ORDINALS = [
+  'الأول',
+  'الثاني',
+  'الثالث',
+  'الرابع',
+  'الخامس',
+  'السادس',
+  'السابع',
+  'الثامن',
+  'التاسع',
+  'العاشر',
+  'الحادي عشر',
+  'الثاني عشر',
+];
+
+const rowLabel = (rowIndex: number) =>
+  ROW_ORDINALS[rowIndex - 1] ?? `رقم ${rowIndex}`;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isStoredResults = (value: unknown): value is StoredResults =>
+  isRecord(value) &&
+  typeof value.successCount === 'number' &&
+  typeof value.errorCount === 'number' &&
+  Array.isArray(value.invalidOrders);
+
+const readStoredResults = (json: string): StoredResults | null => {
+  try {
+    const parsed: unknown = JSON.parse(json);
+    return isStoredResults(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
+const failureMessages = (failure: OrderCreationResult): string[] => {
+  if (failure.error === 'Validation failed' && failure.details) {
+    return failure.details
+      .split(', ')
+      .map((message) => SERVER_VALIDATION_MESSAGES[message] ?? message);
+  }
+  if (failure.error && ARABIC_PATTERN.test(failure.error)) return [failure.error];
+  return ['تعذر إنشاء هذا الطلب، راجع بياناته وحاول مرة أخرى'];
+};
+
+function RowProblems({ rows }: { rows: RowProblem[] }) {
+  return (
+    <ul className="flex flex-col gap-3 w-full">
+      {rows.map((row) => (
+        <li
+          key={row.rowIndex}
+          className="w-full rounded-lg border border-[#FF0004] bg-white"
+        >
+          <div className="flex items-start gap-2 px-3 py-2">
+            <AlertCircle className="mt-0.5 w-5 h-5 flex-shrink-0 text-[#FF0004] [stroke-width:1.5px]" />
+            <span className="min-w-0 break-words text-base sm:text-lg text-black">
+              الطلب {row.rowIndex}: في الصف {rowLabel(row.rowIndex)} تم العثور على أخطاء
+            </span>
+          </div>
+          <div className="bg-[#FF000408] px-3 py-2 text-sm leading-6 text-[#FF0004]">
+            <p className="mb-1">نحتاج إلى بعض المساعدة، يرجى توضيح ما يلي:</p>
+            <ul className="space-y-1 font-bold">
+              {row.messages.map((message, index) => (
+                <li key={index} className="break-words">
+                  {message}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 export default function ValidationResultsPage() {
   const router = useRouter();
-  const [results, setResults] = useState<UploadResult | null>(null);
+  const [results, setResults] = useState<StoredResults | null>(null);
   const [loading, setLoading] = useState(true);
-  const [imported, setImported] = useState(false);
 
   useEffect(() => {
     const resultsJson = sessionStorage.getItem('excelValidationResults');
-
-    if (!resultsJson) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const parsedResults = JSON.parse(resultsJson);
-      setResults(parsedResults);
-      setImported(!!parsedResults.imported);
-    } finally {
-      setLoading(false);
-    }
+    setResults(resultsJson ? readStoredResults(resultsJson) : null);
+    setLoading(false);
   }, []);
 
-  const clearCacheAndReload = () => {
+  const clearAndGo = (path: string) => {
     sessionStorage.removeItem('excelValidationResults');
     sessionStorage.removeItem('excelValidationOnly');
-    router.push('/dashboard/upload-products/excel');
+    router.push(path);
   };
 
   if (loading) {
@@ -41,12 +128,13 @@ export default function ValidationResultsPage() {
 
   if (!results) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-[400px] px-4">
         <div className="text-center">
           <p className="text-gray-600">لا توجد نتائج للعرض</p>
           <button
-            onClick={() => router.push('/dashboard/upload-products/excel')}
-            className="mt-4 text-primary hover:underline"
+            type="button"
+            onClick={() => clearAndGo('/dashboard/upload-products/excel')}
+            className="mt-4 min-h-10 px-4 text-primary hover:underline"
           >
             العودة
           </button>
@@ -55,177 +143,111 @@ export default function ValidationResultsPage() {
     );
   }
 
-  const { successCount, errorCount, invalidOrders } = results;
+  const imported = !!results.imported;
+  const backend = results.backendResponse?.data;
+  const createdCount = imported ? backend?.successCount ?? 0 : results.successCount;
+  const failedOrders = imported ? backend?.failedOrders ?? [] : [];
+  const failedCount = imported
+    ? backend?.failureCount ?? failedOrders.length
+    : results.errorCount;
 
-  const backendResponse = (results as any).backendResponse;
-  const backendSuccessCount = backendResponse?.data?.successCount || 0;
+  const problems: RowProblem[] = imported
+    ? failedOrders.map((failure) => ({
+        rowIndex: failure.rowIndex,
+        messages: failureMessages(failure),
+      }))
+    : results.invalidOrders.map((order) => ({
+        rowIndex: order.rowIndex,
+        messages: order.errors.map((error) => error.message),
+      }));
 
-  const displaySuccessCount = imported && backendSuccessCount > 0 ? backendSuccessCount : successCount;
+  const newUploadButton = (
+    <button
+      type="button"
+      onClick={() => clearAndGo('/dashboard/upload-products/excel')}
+      className="flex min-h-10 items-center justify-center gap-2 px-6 py-2 bg-white border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+    >
+      <ArrowRight className="w-5 h-5" />
+      رفع ملف جديد
+    </button>
+  );
 
-  return (
-    <div className="w-full bg-gray-50 p-6" dir="rtl">
-      {errorCount === 0 ? (
-        <div className="flex items-center justify-center py-12">
+  const viewOrdersButton =
+    imported && createdCount > 0 ? (
+      <button
+        type="button"
+        onClick={() => clearAndGo('/dashboard/orders/allOrders')}
+        className="min-h-10 px-6 py-2 bg-primary text-white rounded-lg hover:bg-[#4a1db5] transition-colors"
+      >
+        عرض الطلبات ({createdCount})
+      </button>
+    ) : null;
+
+  if (failedCount === 0) {
+    return (
+      <div className="w-full bg-gray-50 px-4 py-6 sm:p-6" dir="rtl">
+        <div className="flex items-center justify-center py-6 sm:py-12">
           <div className="max-w-[656px] w-full text-center">
-            <div className="bg-green-50 border border-green-200 rounded-xl p-8">
-              <CheckCircle2 className="w-20 h-20 text-green-500 mx-auto mb-6" />
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                {imported ? '🎉 تم إنشاء جميع الطلبات بنجاح!' : 'تم التحقق من جميع الطلبات بنجاح!'}
+            <div className="bg-green-50 border border-green-200 rounded-xl p-5 sm:p-8">
+              <CheckCircle2 className="w-16 h-16 sm:w-20 sm:h-20 text-green-500 mx-auto mb-6" />
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
+                {imported ? 'تم إنشاء جميع الطلبات بنجاح!' : 'تم التحقق من جميع الطلبات بنجاح!'}
               </h2>
-              <p className="text-lg text-gray-600 mb-8">
-                {imported ? `تم إنشاء ${displaySuccessCount} طلب في النظام` : `جميع الـ ${successCount} طلب جاهزة للمعالجة`}
+              <p className="text-base sm:text-lg text-gray-600 mb-8">
+                {imported
+                  ? `تم إنشاء ${createdCount} طلب في النظام`
+                  : `جميع الـ ${results.successCount} طلب صالحة. ارفع الملف مرة أخرى لإنشائها`}
               </p>
-
-              <div className="flex gap-4 justify-center">
-                <button
-                  onClick={() => {
-                    sessionStorage.removeItem('excelValidationResults');
-                    sessionStorage.removeItem('excelValidationOnly');
-                    router.push('/dashboard/upload-products/excel');
-                  }}
-                  className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  <ArrowRight className="w-5 h-5" />
-                  رفع ملف جديد
-                </button>
-
-                {!imported && (
-                  <button
-                    onClick={() => {
-                      alert('تم إرسال البيانات بالفعل! تحقق من الطلبات في قائمة الطلبات');
-                    }}
-                    className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-[#4a1db5] transition-colors"
-                  >
-                    إرسال الطلبات ({successCount})
-                  </button>
-                )}
-
-                {imported && displaySuccessCount > 0 && (
-                  <button
-                    onClick={() => {
-                      sessionStorage.removeItem('excelValidationResults');
-                      sessionStorage.removeItem('excelValidationOnly');
-                      router.push('/dashboard/orders/allOrders');
-                    }}
-                    className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-[#4a1db5] transition-colors"
-                  >
-                    عرض الطلبات ({displaySuccessCount})
-                  </button>
-                )}
+              <div className="flex flex-wrap gap-3 justify-center">
+                {newUploadButton}
+                {viewOrdersButton}
               </div>
             </div>
           </div>
         </div>
-      ) : (
-        <div className="max-w-[656px]">
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full bg-gray-50 px-4 py-6 sm:p-6" dir="rtl">
+      <div className="max-w-[656px] w-full">
+        {!imported && (
           <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center gap-2 text-blue-800" dir="rtl">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <div className="flex items-start gap-2 text-blue-800">
+              <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
               <span className="font-medium">
-                هذه نتائج محفوظة مؤقتاً. لرؤية النتائج المحدثة، يرجى رفع الملف مرة أخرى باستخدام الزر أدناه.
+                لم يتم إنشاء أي طلب. صحّح الصفوف التالية في الملف ثم ارفعه مرة أخرى.
               </span>
             </div>
           </div>
+        )}
 
-          <div
-            dir="rtl"
-            className="flex flex-row justify-start items-center gap-2 w-full max-w-[584px] h-[60px] mb-6"
-          >
-            <span className="font-bold text-[32px] leading-[60px] text-black whitespace-nowrap">
-              نتيجة التحقق تم {imported ? 'إنشاء' : 'استلام'}
-            </span>
-
-            <div className="flex flex-row items-center gap-[2px] h-[60px]">
-              <CheckCircle2 className="w-8 h-8 flex-shrink-0 text-[#2DB742] [stroke-width:2px]" />
-
-              <span className="font-bold text-[32px] leading-[60px] whitespace-nowrap text-[#2DB742]">
-                <span className="mr-2">{displaySuccessCount}</span> طلب بنجاح
-              </span>
-            </div>
-          </div>
-
-          {errorCount > 0 && (
-            <div className="mb-6">
-              <div className="text-lg font-semibold text-right text-[#FF0004]" dir="rtl">
-                يوجد {errorCount} طلبات بها أخطاء
-              </div>
-            </div>
-          )}
-
-          {errorCount > 0 && (
-            <div className="flex flex-col items-end gap-4 w-full">
-              {invalidOrders.map((order) => (
-                <div
-                  key={order.rowIndex}
-                  className="w-full max-w-[656px]"
-                >
-                  <div
-                    className="box-border flex flex-row justify-end items-center px-2 gap-4 w-full h-[46px] bg-white rounded-lg relative border border-[#FF0004]"
-                    dir="rtl"
-                  >
-                    <AlertCircle className="w-6 h-6 flex-shrink-0 text-[#FF0004] [stroke-width:1.5px]" />
-
-                    <span className="font-normal text-lg leading-[33px] text-black text-right flex-grow">
-                      الطلب {order.rowIndex}: في الصف{' '}
-                      {order.rowIndex === 1 ? 'الأول' :
-                        order.rowIndex === 2 ? 'الثاني' :
-                          order.rowIndex === 3 ? 'الثالث' :
-                            order.rowIndex === 4 ? 'الرابع' :
-                              order.rowIndex === 5 ? 'الخامس' :
-                                order.rowIndex === 6 ? 'السادس' :
-                                  order.rowIndex === 7 ? 'السابع' :
-                                    order.rowIndex === 8 ? 'الثامن' :
-                                      order.rowIndex === 9 ? 'التاسع' :
-                                        order.rowIndex === 10 ? 'العاشر' :
-                                          order.rowIndex === 11 ? 'الحادي عشر' :
-                                            order.rowIndex === 12 ? 'الثاني عشر' :
-                                              `رقم ${order.rowIndex}`} تم العثور على أخطاء
-                    </span>
-
-                    <svg
-                      className="absolute right-[25px] -bottom-[12px] w-6 h-3"
-                      style={{ filter: 'drop-shadow(0px 2.67px 2.67px rgba(0, 0, 0, 0.25))' }}
-                      viewBox="0 0 24 12"
-                    >
-                      <polygon points="12,12 0,0 24,0" fill="#FFFFFF" />
-                      <polyline points="0,0 12,12 24,0" stroke="#FF0004" strokeWidth="0.67" fill="none" />
-                    </svg>
-                  </div>
-
-                  <div className="flex flex-row justify-end items-center p-2.5 gap-2.5 w-full min-h-[87px] mt-1.5 bg-[#FF000408]">
-                    <div className="font-bold text-sm leading-[26px] text-right w-full text-[#FF0004]" dir="rtl">
-                      <div className="mb-2 font-normal block">
-                        نحتاج إلى بعض المساعدة، يرجى توضيح ما يلي:
-                      </div>
-                      {order.errors.map((error, index) => (
-                        <div key={index} className="mb-1 block">
-                          {error.message}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="mt-8 flex gap-4 justify-center">
-            <button
-              onClick={() => {
-                sessionStorage.removeItem('excelValidationResults');
-                sessionStorage.removeItem('excelValidationOnly');
-                router.push('/dashboard/upload-products/excel');
-              }}
-              className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              <ArrowRight className="w-5 h-5" />
-              رفع ملف جديد
-            </button>
-          </div>
+        <div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1">
+          <h2 className="font-bold text-xl sm:text-[28px] leading-snug text-black">
+            {imported ? 'نتيجة الرفع:' : 'نتيجة التحقق:'}
+          </h2>
+          <span className="inline-flex items-center gap-1 font-bold text-xl sm:text-[28px] leading-snug text-[#2DB742]">
+            <CheckCircle2 className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0 [stroke-width:2px]" />
+            {imported ? `تم إنشاء ${createdCount} طلب` : `${results.successCount} طلب صالح`}
+          </span>
         </div>
-      )}
+
+        <p role="alert" className="mb-6 text-lg font-semibold text-[#FF0004]">
+          {imported
+            ? `تعذر إنشاء ${failedCount} طلب`
+            : `يوجد ${failedCount} طلبات بها أخطاء`}
+        </p>
+
+        <RowProblems rows={problems} />
+
+        <div className="mt-8 flex flex-wrap gap-3 justify-center">
+          {newUploadButton}
+          {viewOrdersButton}
+        </div>
+      </div>
     </div>
   );
 }

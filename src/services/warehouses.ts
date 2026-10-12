@@ -6,6 +6,7 @@ import {
   QueryKey,
 } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { WarehouseApiItem } from '@/lib/api/warehouses';
 import type { OrderStatus } from '@/types/orders';
@@ -39,6 +40,15 @@ import {
 } from '@/lib/api/warehouses';
 
 const STALE_TIME = 30 * 1000;
+
+export const STOCK_VIEW_KEYS: QueryKey[] = [
+  [QUERY_KEYS.WAREHOUSE_STOCK],
+  [QUERY_KEYS.STOCK_MOVEMENTS],
+  [QUERY_KEYS.STOCK_PRODUCTS],
+  [QUERY_KEYS.STOCK_ANALYSIS],
+  [QUERY_KEYS.WAREHOUSE_SUMMARY],
+  [QUERY_KEYS.VIRTUAL_WAREHOUSE_SUMMARY],
+];
 
 // ---------------------------------------------------------------------------
 // Warehouses
@@ -191,16 +201,7 @@ export const useStockMovementsQuery = (params?: GetStockMovementsParams) => {
 /** Stock writes touch warehouse stock, the ledger and every product-stock view. */
 export const invalidateStockViews = (
   queryClient: ReturnType<typeof useQueryClient>
-) => {
-  queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.WAREHOUSE_STOCK] });
-  queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCK_MOVEMENTS] });
-  queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCK_PRODUCTS] });
-  queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STOCK_ANALYSIS] });
-  queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.WAREHOUSE_SUMMARY] });
-  queryClient.invalidateQueries({
-    queryKey: [QUERY_KEYS.VIRTUAL_WAREHOUSE_SUMMARY],
-  });
-};
+) => invalidateAndWait(queryClient, STOCK_VIEW_KEYS);
 
 export const useAdjustStockMutation = () => {
   const queryClient = useQueryClient();

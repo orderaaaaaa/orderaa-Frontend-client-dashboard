@@ -31,7 +31,6 @@ export interface Product {
   extraDetails?: Record<string, unknown>;
   attributes: ProductListAttribute[];
   confirmOutOfStockMode: ProductConfirmOutOfStockMode;
-  variantOptions?: VariantOption[];
   createdAt: string;
   updatedAt: string;
 }
@@ -126,6 +125,54 @@ export interface MergeProductsPayload {
   image?: string;
   images?: string[];
   variants?: VariantOption[];
+  variantPlan?: MergeVariantPlanEntry[];
+}
+
+export const MERGE_VARIANT_ACTIONS = ['KEEP', 'MERGE_INTO', 'DROP'] as const;
+
+export type MergeVariantAction = (typeof MERGE_VARIANT_ACTIONS)[number];
+
+export interface MergeVariantPlanEntry {
+  variantId: number;
+  action: MergeVariantAction;
+  intoVariantId?: number;
+  confirmStoreLink?: boolean;
+}
+
+export const MERGE_PLAN_ERROR_CODE = 'MERGE_PLAN_INVALID';
+
+export const MERGE_PLAN_ISSUE_CODES = [
+  'MERGE_PLAN_INCOMPLETE',
+  'MERGE_PLAN_DUPLICATE',
+  'MERGE_PLAN_FOREIGN_VARIANT',
+  'MERGE_PLAN_INVALID_ENTRY',
+  'MERGE_PLAN_NOTHING_KEPT',
+  'MERGE_INTO_NOT_KEPT',
+  'VARIANT_IN_USE',
+  'VARIANT_STORE_LINK_CONFIRMATION_REQUIRED',
+  'VARIANT_COMBINATION_TAKEN',
+  'MERGE_PLAN_RESULT_MISMATCH',
+] as const;
+
+export type MergePlanIssueCode = (typeof MERGE_PLAN_ISSUE_CODES)[number];
+
+export interface MergePlanIssue {
+  code: MergePlanIssueCode;
+  variantId: number | null;
+  reason?: string;
+  intoVariantId?: number | null;
+  variantIds?: number[];
+}
+
+export interface MergePlanErrorBody {
+  code: typeof MERGE_PLAN_ERROR_CODE;
+  message: string;
+  details: { issues: MergePlanIssue[] };
+}
+
+export interface MergeJobError {
+  code: typeof MERGE_PLAN_ERROR_CODE;
+  issues: MergePlanIssue[];
 }
 
 export interface JobAcceptedResponse {

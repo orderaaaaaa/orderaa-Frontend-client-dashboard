@@ -12,12 +12,13 @@ export interface UpdateCustomerPayload {
 }
 
 export interface UpdateCustomerResponse {
+  id: number;
   name: string;
-  phoneNumbers: string[];
-  governorate: string;
-  city: string;
-  address: string;
-  email?: string;
+  email: string | null;
   isBlocked: boolean;
-  notes?: string;
+  notes: string[];
+  blockedUntil: string | null;
+  merchantId: number;
+  createdAt: string;
+  updatedAt: string;
 }

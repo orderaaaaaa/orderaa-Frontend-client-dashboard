@@ -35,8 +35,8 @@ const DownloadTemplate = ({ onDownload }: DownloadTemplateProps) => {
   };
 
   return (
-    <div className="bg-gray-50 px-6 flex items-center justify-center" dir="rtl">
-      <div className="w-full bg-white border border-gray-200 rounded-xl max-sm:p-2 p-8 shadow-sm">
+    <div className="bg-gray-50 px-4 sm:px-6 flex items-center justify-center" dir="rtl">
+      <div className="w-full min-w-0 bg-white border border-gray-200 rounded-xl p-4 sm:p-8 shadow-sm">
         <div className="flex gap-4 items-start">
           {/* Icon Container */}
           <div className="flex-shrink-0 p-4 max-sm:p-2 bg-[#CCCCCC99] rounded-lg">
@@ -44,8 +44,8 @@ const DownloadTemplate = ({ onDownload }: DownloadTemplateProps) => {
           </div>
 
           {/* Content */}
-          <div className="flex-col py-3 w-full">
-            <h3 className="text-2xl text-gray-900 mb-6">تحميل نموذج إكسل</h3>
+          <div className="flex-col py-3 w-full min-w-0">
+            <h3 className="text-2xl max-sm:text-[19px] max-sm:font-semibold text-gray-900 mb-3 sm:mb-6">تحميل نموذج إكسل</h3>
 
             <p className="text-gray-600 leading-relaxed max-sm:text-sm mb-6">
               قم بتنزيل نموذج Excel الخاص بنا لضمان تنسيق بياناتك بشكل صحيح.
@@ -56,7 +56,7 @@ const DownloadTemplate = ({ onDownload }: DownloadTemplateProps) => {
             <div className="flex gap-4 max-sm:flex-col">
               <button
                 onClick={handleDownloadAppFormat}
-                className="flex cursor-pointer max-sm:text-sm hover:bg-gray-100 justify-center w-full max-w-[320px] h-[46px] text-lg items-center gap-2 px-6 py-3 font-normal rounded-lg border-2 border-gray-300 text-gray-700 transition-all whitespace-nowrap"
+                className="flex cursor-pointer max-sm:text-sm hover:bg-gray-100 justify-center w-full max-w-[320px] min-h-10 sm:h-[46px] text-lg items-center gap-2 px-4 sm:px-6 font-normal rounded-lg border-2 border-gray-300 text-gray-700 transition-all"
               >
                 <Download className="w-5 h-5" />
                 تحميل قالب Orderaa
@@ -64,7 +64,7 @@ const DownloadTemplate = ({ onDownload }: DownloadTemplateProps) => {
 
               <button
                 onClick={handleDownloadEasyOrderFormat}
-                className="flex cursor-pointer max-sm:text-sm hover:bg-gray-100 justify-center w-full max-w-[320px] h-[46px] text-lg items-center gap-2 px-6 py-3 font-normal rounded-lg border-2 border-gray-300 text-gray-700 transition-all whitespace-nowrap"
+                className="flex cursor-pointer max-sm:text-sm hover:bg-gray-100 justify-center w-full max-w-[320px] min-h-10 sm:h-[46px] text-lg items-center gap-2 px-4 sm:px-6 font-normal rounded-lg border-2 border-gray-300 text-gray-700 transition-all"
               >
                 <Download className="w-5 h-5" />
                 تحميل قالب EasyOrder

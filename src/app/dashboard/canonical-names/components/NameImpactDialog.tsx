@@ -114,7 +114,8 @@ export default function NameImpactDialog({
 
             {impact.products.data.length > 0 && (
               <div className="max-h-64 overflow-y-auto rounded-md border">
-                <table className="w-full text-sm">
+                <div className="overflow-x-auto">
+                <table className="w-full min-w-[420px] text-sm">
                   <thead className="bg-gray-50 text-gray-500">
                     <tr>
                       <th className="p-2 text-right">المنتج</th>
@@ -140,6 +141,7 @@ export default function NameImpactDialog({
                     )}
                   </tbody>
                 </table>
+                </div>
                 <PaginationFooter
                   currentPage={impact.products.page}
                   totalPages={Math.max(
@@ -168,14 +170,19 @@ export default function NameImpactDialog({
 
         <DialogFooter>
           {mode === 'view' ? (
-            <Button onClick={onClose}>إغلاق</Button>
+            <Button className="min-h-10" onClick={onClose}>إغلاق</Button>
           ) : (
             <>
-              <Button variant="outline" onClick={onClose}>
+              <Button variant="outline" className="min-h-10" onClick={onClose}>
                 إلغاء
               </Button>
-              <Button onClick={onConfirm} disabled={confirming || deleteBlocked}>
-                تأكيد
+              <Button
+                variant={mode === 'confirm-delete' ? 'destructive' : 'default'}
+                className="min-h-10"
+                onClick={onConfirm}
+                disabled={confirming || deleteBlocked}
+              >
+                {mode === 'confirm-delete' ? 'حذف' : 'تأكيد'}
               </Button>
             </>
           )}

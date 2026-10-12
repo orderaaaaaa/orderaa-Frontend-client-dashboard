@@ -50,9 +50,12 @@ export const ProductRow: React.FC<ProductRowProps> = ({
 
   return (
     <div className={getRowClassName()}>
-      <div
-        className="flex items-center p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+      <button
+        type="button"
+        className="flex w-full min-h-14 items-center p-3 text-right cursor-pointer hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         onClick={() => onProductClick(product)}
+        aria-expanded={isExpanded}
+        aria-label={`${product.name}، ${product.price} ج.م${isAlreadyInOrder ? '، في الطلب' : ''}`}
       >
         <div className="w-1/4 flex justify-center">
           <div className="relative h-12 w-12 overflow-hidden rounded-md border border-gray-200 bg-gray-100">
@@ -71,14 +74,14 @@ export const ProductRow: React.FC<ProductRowProps> = ({
               </>
             ) : (
               <div className="flex items-center justify-center h-full text-gray-400 text-xs">
-                لا تورد صور
+                لا توجد صورة
               </div>
             )}
           </div>
         </div>
 
-        <div className="w-1/2 text-center font-medium flex flex-col items-center gap-1">
-          <span>{product.name}</span>
+        <div className="w-1/2 min-w-0 text-center font-medium flex flex-col items-center gap-1">
+          <span className="break-words">{product.name}</span>
           {isAlreadyInOrder && (
             <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
               في الطلب
@@ -87,7 +90,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
         </div>
 
         <div className="w-1/4 text-center text-gray-700">{product.price} ج.م</div>
-      </div>
+      </button>
 
       {isExpanded && hasVariants && (
         <div
@@ -109,6 +112,8 @@ export const ProductRow: React.FC<ProductRowProps> = ({
                         type="button"
                         variant={isValueSelected ? 'default' : 'outline'}
                         size="sm"
+                        className="min-h-10"
+                        aria-pressed={isValueSelected}
                         onClick={() => onVariantSelect(product.id, option.attribute, opt)}
                       >
                         {opt}
@@ -133,7 +138,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
               variant="outline"
               size="sm"
               onClick={() => onRemoveProductFromPending(product.id)}
-              className="text-red-500 border-red-300 hover:bg-red-50"
+              className="min-h-10 text-red-500 border-red-300 hover:bg-red-50"
             >
               إزالة المنتج
             </Button>
@@ -142,6 +147,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({
               type="button"
               variant="default"
               size="sm"
+              className="min-h-10"
               onClick={() => onAddProductWithoutVariants(product)}
             >
               إضافة المنتج

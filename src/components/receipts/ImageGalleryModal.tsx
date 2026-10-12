@@ -16,6 +16,7 @@ interface ImageGalleryModalProps {
    */
   images: string[];
   actions?: ReactNode;
+  initialIndex?: number;
 }
 
 const SWIPE_THRESHOLD = 40;
@@ -33,13 +34,14 @@ export function ImageGalleryModal({
   title,
   images,
   actions,
+  initialIndex = 0,
 }: ImageGalleryModalProps) {
   const [index, setIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
-    if (isOpen) setIndex(0);
-  }, [isOpen]);
+    if (isOpen) setIndex(Math.max(0, initialIndex));
+  }, [isOpen, initialIndex]);
 
   const total = images.length;
   const safeIndex = Math.min(index, Math.max(0, total - 1));

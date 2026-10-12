@@ -1,4 +1,8 @@
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useQuery,
+  UseQueryOptions,
+} from '@tanstack/react-query';
 import { getCustomers } from '../api/getCustomers';
 import { GetCustomersParams, PaginatedCustomers } from '../types/customer';
 
@@ -22,6 +26,7 @@ export function useGetCustomers(
   return useQuery({
     queryKey: [CUSTOMERS_QUERY_KEY, query],
     queryFn: () => getCustomers(query),
+    placeholderData: keepPreviousData,
     ...options,
   });
 }
