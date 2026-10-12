@@ -76,4 +76,5 @@ export interface ScannedOrdersModalProps {
   onChangeProductBack?: () => void;
   packagingNotes?: Record<string, string>;
   onPackagingNoteChange?: (code: string, note: string) => void;
+  onManualScan?: (code: string) => void;
 }

@@ -1,86 +1,43 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useState } from 'react';
 import { LiaPrintSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
-import { useQueryClient } from '@tanstack/react-query';
-import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
-import { InvoiceData } from '../../print-orders/types/invoice';
-import { mapOrdersToInvoices } from '../../print-orders/utils/invoiceMapper';
+import { Order } from '@/types/orders';
 import {
-  preloadShippingLogos,
-  waitForImagesInContainer,
-} from '../../print-orders/utils/printAssets';
-import { InvoiceRenderer } from '../../print-orders/components/InvoiceRenderer';
-import { printOrders } from '../../print-orders/services/printOrders';
-import { useInvoiceSettings } from '../../print-orders/hooks/useInvoiceSettings';
+  PRINT_COUNT_MAX,
+  claimNextOrdersForPrint,
+} from '../../print-orders/services/printOrders';
+import { printApiErrorMessage } from '../../print-orders/utils/printApiError';
 
 interface PrintInvoicesModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onClaimed: (orders: Order[]) => Promise<void>;
+}
+
+function countErrorOf(value: string): string | undefined {
+  if (value === '') return undefined;
+  const count = Number(value);
+  if (!Number.isInteger(count) || count < 1) {
+    return 'أدخل عددًا صحيحًا أكبر من صفر';
+  }
+  if (count > PRINT_COUNT_MAX) {
+    return `الحد الأقصى ${PRINT_COUNT_MAX} طلب في المرة الواحدة`;
+  }
+  return undefined;
 }
 
 export function PrintInvoicesModal({
   isOpen,
   onClose,
+  onClaimed,
 }: PrintInvoicesModalProps) {
-  const queryClient = useQueryClient();
   const [invoiceCount, setInvoiceCount] = useState<string>('');
-  const [isPrinting, setIsPrinting] = useState(false);
-  const [invoicesToPrint, setInvoicesToPrint] = useState<InvoiceData[]>([]);
-  const { storeInfo, language } = useInvoiceSettings();
-
-  useEffect(() => {
-    preloadShippingLogos();
-  }, []);
-
-  const handlePrint = async () => {
-    const count = parseInt(invoiceCount, 10);
-    if (count > 0) {
-      setIsPrinting(true);
-      try {
-        const response = await printOrders(count);
-        const orders = response.orders;
-        if (!orders || orders.length === 0) {
-          toast.error('لا توجد طلبات متاحة للطباعة');
-          setIsPrinting(false);
-          return;
-        }
-        const invoices = mapOrdersToInvoices(orders, language);
-        setInvoicesToPrint(invoices);
-
-        setTimeout(async () => {
-          const container = document.querySelector(
-            '.print-container',
-          ) as HTMLElement | null;
-          await waitForImagesInContainer(container);
-          window.print();
-          setTimeout(() => {
-            setIsPrinting(false);
-            setInvoicesToPrint([]);
-            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
-            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PRINT_ORDER_STATISTICS] });
-            toast.success('تم إنشاء الفاتورة بنجاح');
-            handleReset();
-            onClose();
-          }, 500);
-        }, 100);
-      } catch (error: any) {
-        const errorMessage = error?.response?.data?.message;
-        if (Array.isArray(errorMessage)) {
-          toast.error(errorMessage[0]);
-        } else if (typeof errorMessage === 'string') {
-          toast.error(errorMessage);
-        } else {
-          toast.error('حدث خطأ أثناء جلب الطلبات');
-        }
-        setIsPrinting(false);
-      }
-    }
-  };
+  const [isClaiming, setIsClaiming] = useState(false);
+  const countError = countErrorOf(invoiceCount);
 
   const handleReset = () => {
     setInvoiceCount('');
@@ -91,57 +48,62 @@ export function PrintInvoicesModal({
     onClose();
   };
 
+  const handlePrint = async () => {
+    if (invoiceCount === '' || countError) return;
+    setIsClaiming(true);
+    try {
+      const { claimed } = await claimNextOrdersForPrint(Number(invoiceCount));
+      if (claimed.length === 0) {
+        toast.error('لا توجد طلبات متاحة للطباعة');
+        return;
+      }
+      handleReset();
+      onClose();
+      await onClaimed(claimed);
+    } catch (error) {
+      toast.error(printApiErrorMessage(error, 'حدث خطأ أثناء جلب الطلبات'));
+    } finally {
+      setIsClaiming(false);
+    }
+  };
+
   return (
-    <>
-      <BaseModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        title="طباعة الفواتير"
-        onConfirm={handlePrint}
-        confirmText="طباعة"
-        confirmIcon={<LiaPrintSolid className="size-5 text-white" />}
-        confirmDisabled={!invoiceCount || parseInt(invoiceCount, 10) <= 0}
-        isLoading={isPrinting}
-        maxWidth="w-[500px]"
-      >
-        <div className="space-y-6">
-          <div className="grid grid-cols-[auto_1fr] items-center gap-3">
-            <LiaPrintSolid className="size-10 text-primary" />
-            <div>
-              <p className="font-bold text-xl">طباعة الفواتير</p>
-              <p className="text-gray-500 text-base">
-                أدخل عدد الطلبات المراد طباعتها من الطلبات المؤكدة
-              </p>
-            </div>
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="طباعة الفواتير"
+      onConfirm={handlePrint}
+      confirmText="طباعة"
+      confirmIcon={<LiaPrintSolid className="size-5 text-white" />}
+      confirmDisabled={invoiceCount === '' || countError !== undefined}
+      isLoading={isClaiming}
+      maxWidth="max-w-[500px]"
+    >
+      <div className="space-y-6">
+        <div className="grid grid-cols-[auto_1fr] items-center gap-3">
+          <LiaPrintSolid className="size-10 text-primary" />
+          <div>
+            <p className="font-bold text-xl">طباعة الفواتير</p>
+            <p className="text-gray-500 text-base">
+              أدخل عدد الطلبات المراد طباعتها من الطلبات المؤكدة (حتى{' '}
+              {PRINT_COUNT_MAX} طلب)
+            </p>
           </div>
-
-          <Input
-            label="عدد الطلبات للطباعة"
-            type="number"
-            min={1}
-            value={invoiceCount}
-            onChange={(e) => setInvoiceCount(e.target.value)}
-            placeholder="أدخل عدد الطلبات"
-            disabled={isPrinting}
-          />
         </div>
-      </BaseModal>
 
-      {isPrinting &&
-        typeof document !== 'undefined' &&
-        createPortal(
-          <div className="print-container hidden print:block">
-            {invoicesToPrint.map((invoice, index) => (
-              <InvoiceRenderer
-                key={invoice.orderCode || index}
-                data={invoice}
-                storeInfo={storeInfo}
-                language={language}
-              />
-            ))}
-          </div>,
-          document.body
-        )}
-    </>
+        <Input
+          label="عدد الطلبات للطباعة"
+          type="number"
+          inputMode="numeric"
+          min={1}
+          max={PRINT_COUNT_MAX}
+          value={invoiceCount}
+          onChange={(e) => setInvoiceCount(e.target.value)}
+          placeholder="أدخل عدد الطلبات"
+          disabled={isClaiming}
+          error={countError}
+        />
+      </div>
+    </BaseModal>
   );
 }

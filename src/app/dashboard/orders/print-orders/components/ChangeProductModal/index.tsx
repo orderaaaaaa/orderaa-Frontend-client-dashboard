@@ -62,15 +62,15 @@ export function ChangeProductModal({
       confirmIcon={<LiaExchangeAltSolid className="w-5 h-5 text-white" />}
       confirmDisabled={!allFieldsFilled}
       isLoading={isLoading}
-      maxWidth="w-[600px]"
+      maxWidth="max-w-[600px]"
       height="max-h-[80vh]"
     >
       <div className="space-y-4">
         <p className="text-sm text-gray-600 mb-4">
           يرجى إدخال ملاحظة التغليف لكل طلب
         </p>
-        <div className="border rounded-lg overflow-hidden">
-          <table className="w-full">
+        <div className="border rounded-lg overflow-x-auto">
+          <table className="w-full min-w-[440px]">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700 w-1/3">

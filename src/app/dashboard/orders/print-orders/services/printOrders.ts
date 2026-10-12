@@ -4,7 +4,10 @@ import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { Order } from '@/types/orders';
 import {
   PrintOrderStatisticsResponse,
-  PrintOrdersResponse,
+  ClaimNextPrintOrdersResponse,
+  ClaimPrintOrdersResponse,
+  ReleasePrintClaimsResponse,
+  ReprintOrdersResponse,
   MarkOrdersPrintedRequest,
   MarkOrdersPrintedResponse,
   PrepareOrdersRequest,
@@ -27,11 +30,76 @@ export const usePrintOrderStatisticsQuery = () => {
   });
 };
 
-export async function printOrders(count: number): Promise<PrintOrdersResponse> {
-  const response = await http.post<PrintOrdersResponse>('/orders/print', {
-    count,
-  });
+export const PRINT_CLAIM_MAX_IDS = 100;
+export const PRINT_TIMES_MAX = 10;
+export const PRINT_COUNT_MAX = 20;
+
+function chunkIds(ids: number[]): number[][] {
+  const unique = Array.from(new Set(ids));
+  const chunks: number[][] = [];
+  for (let i = 0; i < unique.length; i += PRINT_CLAIM_MAX_IDS) {
+    chunks.push(unique.slice(i, i + PRINT_CLAIM_MAX_IDS));
+  }
+  return chunks;
+}
+
+export async function claimNextOrdersForPrint(
+  count: number
+): Promise<ClaimNextPrintOrdersResponse> {
+  const response = await http.post<ClaimNextPrintOrdersResponse>(
+    '/orders/print/claim-next',
+    { count }
+  );
   return response.data;
+}
+
+export async function claimOrdersForPrint(
+  ordersIds: number[]
+): Promise<ClaimPrintOrdersResponse> {
+  const result: ClaimPrintOrdersResponse = { claimed: [], skipped: [] };
+  for (const chunk of chunkIds(ordersIds)) {
+    const response = await http.post<ClaimPrintOrdersResponse>(
+      '/orders/print/claim',
+      { ordersIds: chunk }
+    );
+    result.claimed.push(...response.data.claimed);
+    result.skipped.push(...response.data.skipped);
+  }
+  return result;
+}
+
+export async function releasePrintClaims(
+  ordersIds: number[]
+): Promise<ReleasePrintClaimsResponse> {
+  let released = 0;
+  for (const chunk of chunkIds(ordersIds)) {
+    const response = await http.post<ReleasePrintClaimsResponse>(
+      '/orders/print/release',
+      { ordersIds: chunk }
+    );
+    released += response.data.released;
+  }
+  return { released };
+}
+
+export async function reprintOrders(
+  ordersIds: number[],
+  printTimes: number
+): Promise<ReprintOrdersResponse> {
+  const result: ReprintOrdersResponse = {
+    success: true,
+    reprintedCount: 0,
+    skippedIds: [],
+  };
+  for (const chunk of chunkIds(ordersIds)) {
+    const response = await http.post<ReprintOrdersResponse>(
+      '/orders/print/reprint',
+      { ordersIds: chunk, printTimes }
+    );
+    result.reprintedCount += response.data.reprintedCount;
+    result.skippedIds.push(...response.data.skippedIds);
+  }
+  return result;
 }
 
 export async function markOrdersAsPrinted(
@@ -39,7 +107,7 @@ export async function markOrdersAsPrinted(
 ): Promise<MarkOrdersPrintedResponse> {
   const response = await http.put<MarkOrdersPrintedResponse>(
     '/orders/print/mark',
-    { ordersIds: payload.ordersIds }
+    { ordersIds: payload.ordersIds, printTimes: payload.printTimes ?? 1 }
   );
   return response.data;
 }

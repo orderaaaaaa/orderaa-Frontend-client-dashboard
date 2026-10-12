@@ -10,8 +10,9 @@ import React, {
 import { toast } from 'react-toastify';
 import uniq from 'lodash/uniq';
 import uniqBy from 'lodash/uniqBy';
-import { ArrowUp, Scan, ScanLine, X } from 'lucide-react';
+import { ArrowUp, ListChecks, X } from 'lucide-react';
 import {
+  UNRECOGNIZED_SCAN_MESSAGE,
   useBarcodeScanner,
   useScannerFeedback,
   usePrepareOrders,
@@ -22,6 +23,8 @@ import { useScannedOrders } from '../../hooks';
 import { getOrderByCode } from '../services/printOrders';
 import { ORDER_STATUS_ARABIC_LABELS } from '../../../constants/statusMappings';
 import { ScannedOrdersModal } from '../../components/ScannedOrdersModal';
+import { ScanInput } from '../../components/ScanInput';
+import { ErrorState } from '@/components/ui/state-panels';
 import { ChangeProductModal } from './ChangeProductModal';
 import { PrintedOrdersConfirmModal } from './PrintedOrdersConfirmModal';
 
@@ -85,6 +88,7 @@ export function PrintOrdersContent() {
     useState(false);
   const [isPrintedConfirmModalOpen, setIsPrintedConfirmModalOpen] =
     useState(false);
+  const [isPrintFlowOpen, setIsPrintFlowOpen] = useState(false);
   const pendingActionRef = useRef<(() => void | Promise<void>) | null>(null);
   const [excludedPrintedIds, setExcludedPrintedIds] = useState<Set<number>>(
     new Set(),
@@ -199,11 +203,6 @@ export function PrintOrdersContent() {
   const totalOrders = ordersData?.meta?.totalItems ?? 0;
   const totalPages = ordersData?.meta?.totalPages ?? 1;
   const currentPage = ordersData?.meta?.currentPage ?? 1;
-  const error = useMemo(() => {
-    if (!queryError) return null;
-    const axiosError = queryError as { response?: { data?: { message?: string } } };
-    return axiosError.response?.data?.message || queryError.message;
-  }, [queryError]);
 
   const {
     selectMode,
@@ -277,12 +276,30 @@ export function PrintOrdersContent() {
     [addOrder, hasOrder, playSuccessSound, playErrorSound, isScannedOrdersModalOpen]
   );
 
+  const handleUnrecognizedScan = useCallback(() => {
+    playErrorSound();
+    toast.error(UNRECOGNIZED_SCAN_MESSAGE);
+  }, [playErrorSound]);
+
+  const anyModalOpen =
+    isModalOpen ||
+    isReportModalOpen ||
+    isChangeProductModalOpen ||
+    isPrintedConfirmModalOpen ||
+    isPrintFlowOpen;
+
   useBarcodeScanner({
     onScan: handleScan,
-    enabled: true,
+    onUnrecognized: handleUnrecognizedScan,
+    enabled: !anyModalOpen,
     minCharLength: 1,
     maxCharLength: 1000,
   });
+
+  const handleClearSelection = useCallback(() => {
+    clearSelections();
+    setSelectMode(false);
+  }, [clearSelections, setSelectMode]);
 
   const handleScannerPrepared = useCallback(async () => {
     if (actionableOrders.length === 0) return;
@@ -309,7 +326,7 @@ export function PrintOrdersContent() {
       await waitingMutation({
         orderIds: uniq(actionableOrders.map((o) => o.id)),
       });
-      toast.success('تم تحديث الطلبات إلى فى انتظار التغليف');
+      toast.success('تم تحديث الطلبات إلى في انتظار التغليف');
       clearOrders();
       setIsScannedOrdersModalOpen(false);
     } catch (error: any) {
@@ -502,7 +519,7 @@ export function PrintOrdersContent() {
       await waitingMutation({
         orderIds: uniq(ordersToProcess.map((o) => o.id)),
       });
-      toast.success('تم تحديث الطلبات إلى فى انتظار التغليف');
+      toast.success('تم تحديث الطلبات إلى في انتظار التغليف');
       clearSelections();
       setSelectMode(false);
     } catch (error: any) {
@@ -664,7 +681,18 @@ export function PrintOrdersContent() {
         selectedOrders={selectedOrders}
         showPrintStatusToggle={filters.status === 'CONFIRMED'}
         hiddenFilters={[]}
+        onPrintFlowOpenChange={setIsPrintFlowOpen}
       />
+
+      <div className="mt-4 bg-white rounded-xl shadow-sm px-4 py-3">
+        <ScanInput
+          onSubmit={handleScan}
+          isBusy={isScanLoading}
+          disabled={anyModalOpen}
+          label="مسح أو إدخال كود الطلب"
+          className="max-w-xl"
+        />
+      </div>
 
       <div className="flex flex-col sm:flex-row justify-between gap-2 mt-10 mb-6 select-none">
         <div className="flex justify-center sm:justify-start items-center gap-4">
@@ -679,10 +707,17 @@ export function PrintOrdersContent() {
         <div className="flex flex-row items-center justify-center gap-3 text-white">
           {selectMode && selectedOrderIds.length > 0 && (
             <div className="flex flex-row items-center justify-center gap-2">
-              <X
-                onClick={() => setSelectMode(false)}
-                className="cursor-pointer text-primary h-5 w-5"
-              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="touch"
+                onClick={handleClearSelection}
+                aria-label="إلغاء التحديد"
+                title="إلغاء التحديد"
+                className="text-primary"
+              >
+                <X className="size-5" />
+              </Button>
               <span className="text-sm text-gray-600">
                 تم تحديد {selectedOrderIds.length} طلب
               </span>
@@ -691,10 +726,11 @@ export function PrintOrdersContent() {
           <Button
             variant="default"
             onClick={toggleSelectMode}
-            className="rounded-full px-5"
+            aria-pressed={selectMode}
+            className="h-10 sm:h-9 rounded-full px-5"
           >
-            <span>تحديد</span>
-            {selectMode ? <ScanLine /> : <Scan />}
+            <ListChecks />
+            <span>{selectMode ? 'إنهاء التحديد' : 'تحديد'}</span>
           </Button>
         </div>
       </div>
@@ -708,12 +744,13 @@ export function PrintOrdersContent() {
             </div>
           </div>
         </div>
-      ) : error ? (
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center text-red-600">
-            <p>{error}</p>
-          </div>
-        </div>
+      ) : queryError ? (
+        <ErrorState
+          error={queryError}
+          fallback="تعذر تحميل الطلبات"
+          onRetry={() => refetch()}
+          className="min-h-[400px]"
+        />
       ) : (
         <>
           <div className="grid container mx-auto grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 my-4 justify-items-center [&>*]:max-w-[300px]">
@@ -850,6 +887,7 @@ export function PrintOrdersContent() {
         onChangeProductBack={handleScannerChangeProduct}
         packagingNotes={scannerPackagingNotes}
         onPackagingNoteChange={handleScannerPackagingNoteChange}
+        onManualScan={handleScan}
         actionsBar={
           <PrintOrdersActionsBar
             forceShow

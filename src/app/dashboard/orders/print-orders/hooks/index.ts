@@ -6,3 +6,4 @@ export * from './useScannerFeedback';
 export * from './useMarkOrdersPrinted';
 export * from './useOrderActions';
 export * from './useInvoiceSettings';
+export * from './useInvoicePrinter';

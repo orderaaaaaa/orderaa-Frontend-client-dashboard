@@ -27,18 +27,21 @@ import { PERMISSION_CODES } from '@/lib/permissions';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import { PrintStatusToggle } from './PrintStatusToggle';
 import { PrintInvoicesModal } from './PrintInvoicesModal';
+import { PrintConfirmDialog } from './PrintConfirmDialog';
 import {
   PrintStatus,
   PrintOrderStatistics,
-  InvoiceData,
+  PrintJob,
+  PrintSkippedOrder,
 } from '../../print-orders/types';
-import { useMarkOrdersPrinted, useInvoiceSettings } from '../../print-orders/hooks';
+import { useInvoicePrinter, useInvoiceSettings } from '../../print-orders/hooks';
 import {
   mapOrdersToInvoices,
   preloadShippingLogos,
-  waitForImagesInContainer,
+  printApiErrorMessage,
 } from '../../print-orders/utils';
 import { InvoiceRenderer } from '../../print-orders/components/InvoiceRenderer';
+import { claimOrdersForPrint } from '../../print-orders/services/printOrders';
 
 export interface ShippingCompanyOption {
   key: string;
@@ -65,6 +68,22 @@ interface FilterSectionProps {
   onActiveFiltersChange?: (activeFilters: FilterKey[]) => void;
   currentStatus?: string | null;
   hiddenFilters?: FilterKey[];
+  onPrintFlowOpenChange?: (open: boolean) => void;
+}
+
+const UNPRINTABLE_SKIP_MESSAGES: Partial<
+  Record<PrintSkippedOrder['reason'], (count: number) => string>
+> = {
+  CLAIMED_BY_OTHER: (count) => `${count} طلب يطبعه مستخدم آخر الآن`,
+  PARKED: (count) => `${count} طلب معلّق بسبب إيقاف المتجر مؤقتًا`,
+  NOT_FOUND: (count) => `${count} طلب غير موجود`,
+};
+
+function warnUnprintable(skipped: PrintSkippedOrder[]) {
+  for (const [reason, message] of Object.entries(UNPRINTABLE_SKIP_MESSAGES)) {
+    const count = skipped.filter((s) => s.reason === reason).length;
+    if (count > 0 && message) toast.warning(message(count));
+  }
 }
 
 function getActiveFiltersFromFormValues(
@@ -116,17 +135,25 @@ export function FilterSection({
   onActiveFiltersChange,
   currentStatus,
   hiddenFilters = [],
+  onPrintFlowOpenChange,
 }: FilterSectionProps) {
   const [activeFilters, setActiveFilters] = useState<FilterKey[]>(() =>
     getActiveFiltersFromFormValues(initialFormFilters, hiddenFilters)
   );
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
-  const [invoicesToPrint, setInvoicesToPrint] = useState<InvoiceData[]>([]);
-  const [isMarkingPrinted, setIsMarkingPrinted] = useState(false);
+  const [isClaimingSelected, setIsClaimingSelected] = useState(false);
+  const [printJob, setPrintJob] = useState<PrintJob | null>(null);
 
   const hasInitializedRef = useRef(false);
-  const { mutateAsync: markAsPrinted } = useMarkOrdersPrinted();
+  const printer = useInvoicePrinter();
+  const printJobOrdersRef = useRef<Order[]>([]);
   const { storeInfo, language } = useInvoiceSettings();
+  const isPrintFlowOpen =
+    isPrintModalOpen || isClaimingSelected || printJob !== null;
+
+  useEffect(() => {
+    onPrintFlowOpenChange?.(isPrintFlowOpen);
+  }, [isPrintFlowOpen, onPrintFlowOpenChange]);
 
   useEffect(() => {
     preloadShippingLogos();
@@ -244,39 +271,77 @@ export function FilterSection({
     }
   };
 
+  const startPrintJob = async (printable: Order[], job: PrintJob) => {
+    printJobOrdersRef.current = printable;
+    await printer.print(mapOrdersToInvoices(printable, language));
+    setPrintJob(job);
+  };
+
+  const keepPrintJobOrders = (job: PrintJob, claimedIds: number[]) => {
+    const allowed = new Set([...claimedIds, ...job.markIds, ...job.reprintIds]);
+    const kept = printJobOrdersRef.current.filter((order) => allowed.has(order.id));
+    if (kept.length !== printJobOrdersRef.current.length) {
+      printJobOrdersRef.current = kept;
+      printer.replace(mapOrdersToInvoices(kept, language));
+    }
+    return kept.length;
+  };
+
+  const handleCountClaimed = async (claimed: Order[]) => {
+    await startPrintJob(claimed, {
+      claimedIds: claimed.map((order) => order.id),
+      markIds: [],
+      reprintIds: [],
+    });
+  };
+
   const handlePrintSelectedOrders = async () => {
-    if (!selectedOrders || selectedOrders.length === 0) return;
+    if (!selectedOrders || selectedOrders.length === 0 || isClaimingSelected) {
+      return;
+    }
 
-    const unprintedOrders = selectedOrders.filter((order) => !order.isPrinted);
-
-    setIsMarkingPrinted(true);
-
+    setIsClaimingSelected(true);
     try {
-      if (unprintedOrders.length > 0) {
-        await markAsPrinted({
-          ordersIds: unprintedOrders.map((order) => order.id),
-        });
-        toast.success('تم تحديث حالة الطباعة بنجاح');
+      const { claimed, skipped } = await claimOrdersForPrint(
+        selectedOrders.map((order) => order.id)
+      );
+      const claimedById = new Map(claimed.map((order) => [order.id, order]));
+      const reprintIds = new Set(
+        skipped.filter((s) => s.reason === 'PRINTED').map((s) => s.id)
+      );
+      const markIds = new Set(
+        skipped.filter((s) => s.reason === 'NOT_CONFIRMED').map((s) => s.id)
+      );
+      warnUnprintable(skipped);
+
+      const printable = selectedOrders
+        .map((order) =>
+          claimedById.get(order.id) ??
+          (reprintIds.has(order.id) || markIds.has(order.id) ? order : null)
+        )
+        .filter((order): order is Order => order !== null);
+
+      if (printable.length === 0) {
+        toast.error('لا توجد طلبات متاحة للطباعة');
+        return;
       }
 
-      const invoices = mapOrdersToInvoices(selectedOrders, language);
-      setInvoicesToPrint(invoices);
-
-      setTimeout(async () => {
-        const container = document.querySelector(
-          '.print-container',
-        ) as HTMLElement | null;
-        await waitForImagesInContainer(container);
-        window.print();
-        setTimeout(() => setInvoicesToPrint([]), 500);
-      }, 100);
-    } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message || 'فشل تحديث حالة الطباعة'
-      );
+      await startPrintJob(printable, {
+        claimedIds: Array.from(claimedById.keys()),
+        markIds: Array.from(markIds),
+        reprintIds: Array.from(reprintIds),
+      });
+    } catch (error) {
+      toast.error(printApiErrorMessage(error, 'تعذر حجز الطلبات للطباعة'));
     } finally {
-      setIsMarkingPrinted(false);
+      setIsClaimingSelected(false);
     }
+  };
+
+  const handlePrintJobClose = () => {
+    setPrintJob(null);
+    printJobOrdersRef.current = [];
+    printer.clear();
   };
 
   return (
@@ -335,7 +400,15 @@ export function FilterSection({
 
           {showPrintButton && (
             <Can code={PERMISSION_CODES.ORDERS_PRINT}>
-              <Button variant="outline" size="lg" onClick={handlePrintClick}>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={handlePrintClick}
+                disabled={isClaimingSelected}
+                className="h-10 min-w-10 sm:h-10"
+                aria-label="طباعة الفواتير"
+                title="طباعة الفواتير"
+              >
                 <LiaPrintSolid className="size-5" />
               </Button>
             </Can>
@@ -376,13 +449,25 @@ export function FilterSection({
       <PrintInvoicesModal
         isOpen={isPrintModalOpen}
         onClose={() => setIsPrintModalOpen(false)}
+        onClaimed={handleCountClaimed}
+      />
+
+      <PrintConfirmDialog
+        job={printJob}
+        invoiceCount={printer.invoices.length}
+        onKeep={keepPrintJobOrders}
+        onReprint={() => printer.print()}
+        onClose={handlePrintJobClose}
       />
 
       {typeof window !== 'undefined' &&
-        invoicesToPrint.length > 0 &&
+        printer.invoices.length > 0 &&
         createPortal(
-          <div className="print-container hidden print:block">
-            {invoicesToPrint.map((invoice, index) => (
+          <div
+            ref={printer.containerRef}
+            className="print-container hidden print:block"
+          >
+            {printer.invoices.map((invoice, index) => (
               <InvoiceRenderer
                 key={index}
                 data={invoice}
