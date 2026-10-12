@@ -141,6 +141,58 @@ export const resolveMergePlan = (
   return resolved;
 };
 
+export interface PlanChange {
+  overrides: MergePlanOverrides;
+  revertedIds: number[];
+}
+
+export const applyPlanEntry = (
+  plan: Map<number, MergeVariantPlanEntry>,
+  overrides: MergePlanOverrides,
+  entry: MergeVariantPlanEntry,
+): PlanChange => {
+  const next: MergePlanOverrides = { ...overrides, [entry.variantId]: entry };
+  const revertedIds: number[] = [];
+  if (entry.action !== 'KEEP') {
+    plan.forEach((dependent, dependentId) => {
+      if (
+        dependentId === entry.variantId ||
+        dependent.action !== 'MERGE_INTO' ||
+        dependent.intoVariantId !== entry.variantId
+      ) {
+        return;
+      }
+      if (
+        entry.action === 'MERGE_INTO' &&
+        entry.intoVariantId !== undefined &&
+        entry.intoVariantId !== dependentId
+      ) {
+        next[dependentId] = {
+          variantId: dependentId,
+          action: 'MERGE_INTO',
+          intoVariantId: entry.intoVariantId,
+        };
+        return;
+      }
+      next[dependentId] = { variantId: dependentId, action: 'KEEP' };
+      revertedIds.push(dependentId);
+    });
+  }
+  return { overrides: next, revertedIds };
+};
+
+export const autoMergedIds = (
+  plan: Map<number, MergeVariantPlanEntry>,
+  overrides: MergePlanOverrides,
+): Set<number> =>
+  new Set(
+    Array.from(plan.values())
+      .filter(
+        (entry) => entry.action === 'MERGE_INTO' && !(entry.variantId in overrides),
+      )
+      .map((entry) => entry.variantId),
+  );
+
 export const keptCollisions = (
   refs: MergeVariantRef[],
   plan: Map<number, MergeVariantPlanEntry>,
@@ -166,12 +218,30 @@ const isIssueCode = (value: unknown): value is MergePlanIssue['code'] =>
   typeof value === 'string' &&
   (MERGE_PLAN_ISSUE_CODES as readonly string[]).includes(value);
 
+const toId = (value: unknown): number | null =>
+  typeof value === 'number' && Number.isInteger(value) ? value : null;
+
+const toIssue = (value: unknown): MergePlanIssue | null => {
+  if (!isRecord(value) || !isIssueCode(value.code)) return null;
+  const issue: MergePlanIssue = {
+    code: value.code,
+    variantId: toId(value.variantId),
+  };
+  if (typeof value.reason === 'string') issue.reason = value.reason;
+  if ('intoVariantId' in value) issue.intoVariantId = toId(value.intoVariantId);
+  if (Array.isArray(value.variantIds)) {
+    issue.variantIds = value.variantIds.filter(
+      (id): id is number => toId(id) !== null,
+    );
+  }
+  return issue;
+};
+
 const toIssues = (value: unknown): MergePlanIssue[] =>
   Array.isArray(value)
-    ? value.filter(
-        (issue): issue is MergePlanIssue =>
-          isRecord(issue) && isIssueCode(issue.code),
-      )
+    ? value
+        .map(toIssue)
+        .filter((issue): issue is MergePlanIssue => issue !== null)
     : [];
 
 export function mergePlanErrorBody(error: unknown): MergePlanErrorBody | null {

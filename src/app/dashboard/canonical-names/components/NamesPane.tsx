@@ -129,6 +129,18 @@ export default function NamesPane({
 
       {isLoading && <PageLoading size="sm" />}
 
+      {isError && names !== undefined && (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+        >
+          تعذر تحديث القائمة، المعروض قد يكون قديماً
+          <Button variant="outline" size="sm" className="min-h-10" onClick={() => refetch()}>
+            إعادة المحاولة
+          </Button>
+        </div>
+      )}
+
       {isError && names === undefined && (
         <div role="alert" className="text-center py-8">
           <p className="text-sm text-gray-500 mb-2">تعذر تحميل البيانات</p>

@@ -27,7 +27,9 @@ function JobFailure({ job, error }: { job: ActiveJob; error?: string }) {
   if (!parsed) {
     return (
       <span>
-        {error && ARABIC_PATTERN.test(error) ? error : failureFallback(job)}
+        {error && !error.trimStart().startsWith('{') && ARABIC_PATTERN.test(error)
+          ? error
+          : failureFallback(job)}
       </span>
     );
   }
@@ -38,16 +40,18 @@ function JobFailure({ job, error }: { job: ActiveJob; error?: string }) {
   return (
     <div className="space-y-1 text-sm">
       <p className="font-semibold">{failureFallback(job)}</p>
-      <ul className="list-disc space-y-0.5 ps-4">
-        {listed.map((issue, index) => (
-          <li key={`${issue.code}-${issue.variantId ?? 'none'}-${index}`}>
-            {issue.variantId !== null && (
-              <span className="font-medium">{labelOf(issue.variantId)}: </span>
-            )}
-            {describeMergeIssue(issue, labelOf)}
-          </li>
-        ))}
-      </ul>
+      {listed.length > 0 && (
+        <ul className="list-disc space-y-0.5 ps-4">
+          {listed.map((issue, index) => (
+            <li key={`${issue.code}-${issue.variantId ?? 'none'}-${index}`}>
+              {issue.variantId !== null && (
+                <span className="font-medium">{labelOf(issue.variantId)}: </span>
+              )}
+              {describeMergeIssue(issue, labelOf)}
+            </li>
+          ))}
+        </ul>
+      )}
       {hidden > 0 && <p>و{hidden} مشكلة أخرى</p>}
     </div>
   );

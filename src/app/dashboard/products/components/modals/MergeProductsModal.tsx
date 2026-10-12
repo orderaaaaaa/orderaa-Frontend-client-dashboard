@@ -38,6 +38,8 @@ import {
   useMergeProducts,
 } from '../../hooks/useMergeProducts';
 import {
+  applyPlanEntry,
+  autoMergedIds,
   collectMergeVariants,
   describeMergeIssue,
   keptCollisions,
@@ -59,7 +61,11 @@ import {
 const mergeSchema = z.object({
   name: z.string().min(1, 'اسم المنتج مطلوب'),
   sku: z.string().optional(),
-  price: z.coerce.number().min(0, 'السعر يجب أن يكون 0 أو أكثر').optional(),
+  price: z.preprocess(
+    (value) =>
+      value === '' || value === null || value === undefined ? undefined : value,
+    z.coerce.number().min(0, 'السعر يجب أن يكون 0 أو أكثر').optional(),
+  ),
 });
 
 type MergeFormData = z.infer<typeof mergeSchema>;
@@ -239,6 +245,7 @@ const MergeProductsModal = ({
   const plan = useMemo(() => resolveMergePlan(refs, overrides), [refs, overrides]);
   const collisions = useMemo(() => keptCollisions(refs, plan), [refs, plan]);
   const collidingIds = useMemo(() => new Set(collisions.flat()), [collisions]);
+  const autoMerged = useMemo(() => autoMergedIds(plan, overrides), [plan, overrides]);
   const keptRefs = refs.filter((ref) => plan.get(ref.variant.id)?.action === 'KEEP');
   const nothingKept = refs.length > 0 && keptRefs.length === 0;
   const droppedCount = refs.filter(
@@ -260,13 +267,20 @@ const MergeProductsModal = ({
   });
 
   const setEntry = (variantId: number, entry: MergeVariantPlanEntry) => {
-    setOverrides((prev) => ({ ...prev, [variantId]: entry }));
+    const change = applyPlanEntry(plan, overrides, entry);
+    setOverrides(change.overrides);
     setChipErrors((prev) => {
       if (!(variantId in prev)) return prev;
       const next = { ...prev };
       delete next[variantId];
       return next;
     });
+    if (change.revertedIds.length > 0) {
+      toast.info(
+        `لن يُدمج ${change.revertedIds.map(labelOf).join('، ')} بعد الآن، وسيبقى كمتغير منفصل`,
+        { autoClose: 6000 },
+      );
+    }
   };
 
   const handleChoose = (ref: MergeVariantRef, choice: MergeChipChoice) => {
@@ -346,7 +360,6 @@ const MergeProductsModal = ({
     const byVariant: Record<number, string[]> = {};
     const general: string[] = [];
     body.details.issues.forEach((issue) => {
-      const message = describeMergeIssue(issue, labelOf);
       const ids =
         issue.code === 'VARIANT_COMBINATION_TAKEN' && issue.variantIds
           ? issue.variantIds
@@ -355,6 +368,7 @@ const MergeProductsModal = ({
             : [];
       const known = ids.filter((id) => refById.has(id));
       if (known.length === 0) {
+        const message = describeMergeIssue(issue, labelOf);
         general.push(
           issue.variantId !== null
             ? `${labelOf(issue.variantId)}: ${message}`
@@ -363,7 +377,8 @@ const MergeProductsModal = ({
         return;
       }
       known.forEach((id) => {
-        byVariant[id] = [...(byVariant[id] ?? []), message];
+        const chipMessage = describeMergeIssue({ ...issue, variantId: id }, labelOf);
+        byVariant[id] = [...(byVariant[id] ?? []), chipMessage];
       });
     });
     const hasChipErrors = Object.keys(byVariant).length > 0;
@@ -459,6 +474,7 @@ const MergeProductsModal = ({
                 )}
                 errors={chipErrors[ref.variant.id] ?? []}
                 colliding={collidingIds.has(ref.variant.id)}
+                autoMerged={autoMerged.has(ref.variant.id)}
                 disabled={isPending}
                 onChoose={(choice) => handleChoose(ref, choice)}
               />
@@ -496,6 +512,19 @@ const MergeProductsModal = ({
             الدمج في الخلفية، وتظهر نتيجته في مؤشر المهام.
           </p>
         </div>
+
+        {allLoaded && autoMerged.size > 0 && (
+          <div
+            role="status"
+            className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
+          >
+            <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
+            <p>
+              تم دمج {autoMerged.size} متغير تلقائياً لأن لها نفس القيم، راجعها قبل
+              الدمج.
+            </p>
+          </div>
+        )}
 
         {detailsQuery.error && !allLoaded ? (
           <ErrorState

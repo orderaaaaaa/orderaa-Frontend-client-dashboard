@@ -72,6 +72,11 @@ export const useProductDropdown = () => {
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<unknown>(null);
+  const [failedRequest, setFailedRequest] = useState<{
+    page: number;
+    search: string;
+    append: boolean;
+  } | null>(null);
   const [page, setPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [totalItems, setTotalItems] = useState(0);
@@ -82,6 +87,7 @@ export const useProductDropdown = () => {
     try {
       setIsLoading(true);
       setLoadError(null);
+      setFailedRequest(null);
       const response = await api.get<ProductsApiResponse>('/products', {
         params: {
           page: pageNum,
@@ -102,6 +108,11 @@ export const useProductDropdown = () => {
       setPage(data.currentPage);
     } catch (error) {
       setLoadError(error);
+      setFailedRequest({ page: pageNum, search: searchQuery, append });
+      if (!append) {
+        setProducts([]);
+        setHasNextPage(false);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -146,7 +157,11 @@ export const useProductDropdown = () => {
   };
 
   const handleRetry = () => {
-    fetchProducts(products.length > 0 ? page + 1 : 1, debouncedSearch, products.length > 0);
+    if (failedRequest) {
+      fetchProducts(failedRequest.page, failedRequest.search, failedRequest.append);
+    } else {
+      fetchProducts(1, debouncedSearch, false);
+    }
   };
 
   const handleLoadMore = () => {

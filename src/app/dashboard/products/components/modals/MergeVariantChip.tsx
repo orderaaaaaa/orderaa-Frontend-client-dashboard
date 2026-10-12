@@ -29,6 +29,7 @@ interface MergeVariantChipProps {
   mergeTargets: MergeVariantRef[];
   errors: string[];
   colliding: boolean;
+  autoMerged: boolean;
   disabled: boolean;
   onChoose: (choice: MergeChipChoice) => void;
 }
@@ -68,6 +69,7 @@ export function MergeVariantChip({
   mergeTargets,
   errors,
   colliding,
+  autoMerged,
   disabled,
   onChoose,
 }: MergeVariantChipProps) {
@@ -77,7 +79,6 @@ export function MergeVariantChip({
   const storeLinked = variant.deleteConfirmation === 'HAS_EXTERNAL_LINK';
   const blockedReason = dropReason(variant);
   const {
-    attributes,
     listeners,
     setNodeRef: setDragRef,
     isDragging,
@@ -100,9 +101,7 @@ export function MergeVariantChip({
   return (
     <div
       ref={setRefs}
-      {...attributes}
       {...listeners}
-      tabIndex={-1}
       role="group"
       aria-label={`${label}، ${actionText(variantRef, entry, intoRef)}`}
       className={cn(
@@ -138,6 +137,11 @@ export function MergeVariantChip({
               <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
                 <Link2 className="size-3" aria-hidden />
                 مرتبط بالمتجر
+              </span>
+            )}
+            {autoMerged && (
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900">
+                دمج تلقائي
               </span>
             )}
             {variant.sku && (
