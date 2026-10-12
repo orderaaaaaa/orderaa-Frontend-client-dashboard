@@ -266,8 +266,8 @@ export function CallCenterContent() {
         <Breadcrumb items={[{ title: 'الطلبات' }, { title: 'كول سنتر' }]} />
       </div>
       <PageTaps
-        statusCounts={statistics?.statusCounts || {}}
-        totalOrders={statistics?.totalOrders || 0}
+        statusCounts={statistics?.statusCounts}
+        totalOrders={statistics?.totalOrders}
         onStatusChange={setStatus}
         currentStatus={filters.status}
         allowedStatuses={departmentStatuses}

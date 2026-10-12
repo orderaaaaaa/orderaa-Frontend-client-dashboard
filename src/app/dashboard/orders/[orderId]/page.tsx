@@ -207,8 +207,8 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
           </div>
         </div>
         <PageTaps
-          statusCounts={statistics?.statusCounts || {}}
-          totalOrders={statistics?.totalOrders || 0}
+          statusCounts={statistics?.statusCounts}
+          totalOrders={statistics?.totalOrders}
           onStatusChange={setStatus}
           currentStatus={status}
         />
@@ -328,8 +328,8 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
         </div>
       </div>
       <PageTaps
-        statusCounts={statistics?.statusCounts || {}}
-        totalOrders={statistics?.totalOrders || 0}
+        statusCounts={statistics?.statusCounts}
+        totalOrders={statistics?.totalOrders}
         onStatusChange={setStatus}
         currentStatus={status}
       />

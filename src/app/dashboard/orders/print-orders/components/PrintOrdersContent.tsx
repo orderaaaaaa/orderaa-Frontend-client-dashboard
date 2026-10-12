@@ -631,8 +631,8 @@ export function PrintOrdersContent() {
       </div>
 
       <PageTaps
-        statusCounts={statistics?.statusCounts || {}}
-        totalOrders={statistics?.totalOrders || 0}
+        statusCounts={statistics?.statusCounts}
+        totalOrders={statistics?.totalOrders}
         onStatusChange={setStatus}
         currentStatus={filters.status}
         allowedStatuses={departmentStatuses}

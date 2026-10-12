@@ -39,7 +39,6 @@ import { BsInboxes } from 'react-icons/bs';
 import { LiaBusinessTimeSolid, LiaCheckDoubleSolid } from 'react-icons/lia';
 
 interface PageTapsProps {
-  data?: any[];
   statusCounts?: Record<string, number>;
   totalOrders?: number;
   onStatusChange?: (status: string | null) => void;
@@ -90,7 +89,6 @@ export const getIconForStatus = (statusValue: string): React.ReactNode => {
 };
 
 function PageTaps({
-  data,
   statusCounts,
   totalOrders,
   onStatusChange,
@@ -144,7 +142,7 @@ function PageTaps({
         {showAllOrdersTab && (
           <PageTab
             label="جميع الطلبات"
-            count={totalOrders ?? data?.length ?? 0}
+            count={totalOrders}
             icon={<BsInboxes className={ICON_SIZE} />}
             active={selectedStatus === null}
             onClick={() => handleTabClick(null)}
@@ -154,7 +152,7 @@ function PageTaps({
           <PageTab
             key={status.key}
             label={status.label}
-            count={statusCounts?.[status.key] ?? 0}
+            count={statusCounts ? (statusCounts[status.key] ?? 0) : undefined}
             icon={getIconForStatus(status.key)}
             active={selectedStatus === status.key}
             onClick={() => handleTabClick(status.key)}
