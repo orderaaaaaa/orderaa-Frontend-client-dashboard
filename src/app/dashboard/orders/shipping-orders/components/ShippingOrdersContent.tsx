@@ -16,7 +16,13 @@ import { Button } from '@/components/ui/button';
 import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
 import { ShippingActionsBar } from './ShippingActionsBar';
 import { ScannedOrdersModal } from '../../components/ScannedOrdersModal';
-import { useBarcodeScanner, useScannerFeedback } from '../../print-orders/hooks';
+import {
+  UNRECOGNIZED_SCAN_MESSAGE,
+  useBarcodeScanner,
+  useScannerFeedback,
+} from '../../print-orders/hooks';
+import { ScanInput } from '../../components/ScanInput';
+import { ErrorState } from '@/components/ui/state-panels';
 import { useScannedOrders } from '../../hooks';
 import { useSubmitForApproval } from '../hooks';
 import { getOrderByCodeWithShipping } from '../services/shippingOrders';
@@ -66,6 +72,7 @@ export function ShippingOrdersContent() {
   const [flashingCode, setFlashingCode] = useState<string | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [isScanLoading, setIsScanLoading] = useState(false);
+  const [isPrintFlowOpen, setIsPrintFlowOpen] = useState(false);
 
   const department = useDepartment();
   const queryClient = useQueryClient();
@@ -158,7 +165,6 @@ export function ShippingOrdersContent() {
   const totalOrders = ordersData?.meta?.totalItems ?? 0;
   const totalPages = ordersData?.meta?.totalPages ?? 1;
   const currentPage = ordersData?.meta?.currentPage ?? 1;
-  const error = queryError?.message ?? null;
 
   const {
     selectMode,
@@ -258,9 +264,17 @@ export function ShippingOrdersContent() {
     ]
   );
 
+  const handleUnrecognizedScan = useCallback(() => {
+    playErrorSound();
+    toast.error(UNRECOGNIZED_SCAN_MESSAGE);
+  }, [playErrorSound]);
+
+  const anyModalOpen = isModalOpen || isPrintFlowOpen;
+
   useBarcodeScanner({
     onScan: handleScan,
-    enabled: true,
+    onUnrecognized: handleUnrecognizedScan,
+    enabled: !anyModalOpen,
     minCharLength: 1,
     maxCharLength: 1000,
   });
@@ -438,7 +452,18 @@ export function ShippingOrdersContent() {
         onShippingCompanyChange={setSelectedShippingCompany}
         isLoadingShippingCompanies={isLoadingShippingCompanies}
         hiddenFilters={[]}
+        onPrintFlowOpenChange={setIsPrintFlowOpen}
       />
+
+      <div className="mt-4 bg-white rounded-xl shadow-sm px-4 py-3">
+        <ScanInput
+          onSubmit={handleScan}
+          isBusy={isScanLoading}
+          disabled={anyModalOpen}
+          label="مسح أو إدخال كود الطلب"
+          className="max-w-xl"
+        />
+      </div>
 
       <OrdersSelectionHeader
         totalOrders={totalOrders}
@@ -452,12 +477,13 @@ export function ShippingOrdersContent() {
 
       {loading && orders.length === 0 ? (
         <LoadingAnimation />
-      ) : error ? (
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center text-red-600">
-            <p>{error}</p>
-          </div>
-        </div>
+      ) : queryError ? (
+        <ErrorState
+          error={queryError}
+          fallback="تعذر تحميل الطلبات"
+          onRetry={() => refetch()}
+          className="min-h-[400px]"
+        />
       ) : (
         // TODO: Create a reusable component for the orders grid
         <>
@@ -579,6 +605,7 @@ export function ShippingOrdersContent() {
         onSearchChange={setSearchQuery}
         isScanLoading={isScanLoading}
         flashingCode={flashingCode}
+        onManualScan={handleScan}
         actionsBar={
           <ShippingActionsBar
             forceShow

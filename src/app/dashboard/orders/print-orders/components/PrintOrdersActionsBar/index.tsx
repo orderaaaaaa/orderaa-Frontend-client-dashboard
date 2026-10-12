@@ -64,10 +64,10 @@ const PrintOrdersActionsBar: React.FC<PrintOrdersActionsBarProps> = ({
   if (isChangeProductMode) {
     return (
       <div
-        className={`${positionClasses} bg-white border-t border-gray-200 shadow-lg py-4 px-6 ${className}`}
+        className={`${positionClasses} bg-white border-t border-gray-200 shadow-lg py-3 sm:py-4 px-4 sm:px-6 ${className}`}
       >
-        <div className="mx-auto overflow-x-auto scrollbar-hide">
-          <div className="pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
+        <div className="mx-auto">
+          <div className="flex flex-row gap-2 items-center justify-center max-w-7xl mx-auto">
             <Button
               variant="outline"
               className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-primary border-primary text-white hover:bg-[#4B1BC4] transition-colors cursor-pointer whitespace-nowrap h-10 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -89,14 +89,14 @@ const PrintOrdersActionsBar: React.FC<PrintOrdersActionsBarProps> = ({
 
   return (
     <div
-      className={`${positionClasses} bg-white border-t border-gray-200 shadow-lg py-4 px-6 ${className}`}
+      className={`${positionClasses} bg-white border-t border-gray-200 shadow-lg py-3 sm:py-4 px-4 sm:px-6 ${className}`}
     >
-      <div className="mx-auto overflow-x-auto scrollbar-hide">
-        <div className="pb-2 flex flex-row gap-2 items-center justify-center max-w-7xl w-max mx-auto">
+      <div className="mx-auto">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:flex-wrap sm:items-center sm:justify-center max-w-7xl mx-auto">
           {canPrepare && (
             <Button
               variant="outline"
-              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="grid grid-cols-[auto_1fr] items-center gap-2 px-3 sm:px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-normal sm:whitespace-nowrap h-auto min-h-10 sm:h-10 disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={onPrepared}
               disabled={isDisabled}
             >
@@ -108,19 +108,19 @@ const PrintOrdersActionsBar: React.FC<PrintOrdersActionsBarProps> = ({
           {canAwaitPackaging && (
             <Button
               variant="outline"
-              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="grid grid-cols-[auto_1fr] items-center gap-2 px-3 sm:px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-normal sm:whitespace-nowrap h-auto min-h-10 sm:h-10 disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={onAwaitingPackaging}
               disabled={isDisabled}
             >
               {isLoading ? <Spinner /> : <LiaBoxSolid className="size-5" />}
-              <span>فى انتظار التغليف</span>
+              <span>في انتظار التغليف</span>
             </Button>
           )}
 
           {canCallAgain && (
             <Button
               variant="outline"
-              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="grid grid-cols-[auto_1fr] items-center gap-2 px-3 sm:px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-normal sm:whitespace-nowrap h-auto min-h-10 sm:h-10 disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={onCallAgain}
               disabled={isDisabled}
             >
@@ -132,7 +132,7 @@ const PrintOrdersActionsBar: React.FC<PrintOrdersActionsBarProps> = ({
           {canCallAgain && (
             <Button
               variant="outline"
-              className="grid grid-cols-[auto_1fr] items-center gap-2 px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-nowrap h-10 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="grid grid-cols-[auto_1fr] items-center gap-2 px-3 sm:px-4 py-2 rounded-3xl bg-white border-primary text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer whitespace-normal sm:whitespace-nowrap h-auto min-h-10 sm:h-10 disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={onChangeProduct}
               disabled={isDisabled}
             >

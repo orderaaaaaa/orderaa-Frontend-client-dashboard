@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Input from '@/components/ui/Input';
 import {
   LiaSearchSolid,
@@ -9,6 +9,7 @@ import {
   LiaArrowRightSolid,
 } from 'react-icons/lia';
 import { ScannedOrdersTable } from './ScannedOrdersTable';
+import { ScanInput } from '../ScanInput';
 import { Button } from '@/components/ui/button';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import {
@@ -42,8 +43,8 @@ function ChangeProductTable({
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="border rounded-lg overflow-hidden">
-        <table className="w-full">
+      <div className="border rounded-lg overflow-x-auto">
+        <table className="w-full min-w-[480px]">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700 w-1/4">
@@ -77,8 +78,9 @@ function ChangeProductTable({
                   <Button
                     variant="ghost"
                     onClick={() => onRemove(order.code)}
-                    className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                    className="size-10 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
                     title="حذف الطلب"
+                    aria-label={`حذف الطلب ${order.code}`}
                   >
                     <LiaTrashAltSolid className="size-5" />
                   </Button>
@@ -178,8 +180,9 @@ function NonConfirmedSection({
                       <Button
                         variant="ghost"
                         onClick={() => onRemove(order.code)}
-                        className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                        className="size-10 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
                         title="حذف الطلب"
+                        aria-label={`حذف الطلب ${order.code}`}
                       >
                         <LiaTrashAltSolid className="size-4" />
                       </Button>
@@ -216,17 +219,54 @@ export function ScannedOrdersModal({
   onChangeProductBack,
   packagingNotes = {},
   onPackagingNoteChange,
+  onManualScan,
 }: ScannedOrdersModalProps) {
   useBodyScrollLock(isOpen);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    if (!dialogRef.current?.contains(document.activeElement)) {
+      dialogRef.current?.focus({ preventScroll: true });
+    }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onCloseRef.current();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      previouslyFocused?.focus({ preventScroll: true });
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   const inChangeProductMode = showChangeProductMode && isChangeProductMode;
+  const headingId = 'scanned-orders-modal-title';
 
   return (
-    <div className="fixed inset-0 z-[99999] bg-white flex flex-col">
+    <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={headingId}
+      tabIndex={-1}
+      className="fixed inset-0 z-[99999] bg-white flex flex-col outline-none"
+    >
       <div
-        className="h-[60px] flex items-center justify-center px-8 flex-shrink-0 relative"
+        className="min-h-[60px] flex flex-wrap items-center gap-x-3 gap-y-1 px-4 sm:px-8 py-2 flex-shrink-0"
         style={{
           background:
             'linear-gradient(105.28deg, #FFFFFF 1.48%, #CBB5FD 182.49%, #FFFFFF 187.88%)',
@@ -235,15 +275,22 @@ export function ScannedOrdersModal({
         <Button
           variant="ghost"
           onClick={onClose}
-          className="absolute right-8 p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
+          aria-label="إغلاق"
+          className="size-10 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
         >
           <LiaTimesSolid className="size-5" />
         </Button>
-        <h2 className="text-xl font-bold text-black">
+        <h2
+          id={headingId}
+          className="flex-1 min-w-0 text-lg sm:text-xl font-bold text-black text-center sm:text-start truncate"
+        >
           {inChangeProductMode ? 'تغيير المنتج' : title}
         </h2>
-        <div className="absolute left-8 flex items-center gap-3 text-gray-700">
-          <span className="text-lg font-medium">عدد الطلبات</span>
+        <div
+          className="basis-full sm:basis-auto flex items-center justify-center gap-2 sm:gap-3 text-gray-700 pb-1 sm:pb-0"
+          aria-live="polite"
+        >
+          <span className="text-base sm:text-lg font-medium">عدد الطلبات</span>
           <span className="inline-flex items-center justify-center min-w-[40px] h-10 px-3 rounded-full bg-primary text-white text-xl font-bold">
             {actionableOrders.length}
           </span>
@@ -255,22 +302,23 @@ export function ScannedOrdersModal({
 
       {inChangeProductMode ? (
         <>
-          <div className="px-8 py-4 border-b border-gray-200">
+          <div className="px-4 sm:px-8 py-3 sm:py-4 border-b border-gray-200">
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 onClick={onChangeProductBack}
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
+                className="size-10 p-0 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
                 title="رجوع"
+                aria-label="رجوع"
               >
                 <LiaArrowRightSolid className="size-5" />
               </Button>
-              <p className="text-sm text-amber-600 mt-2 mr-10">
+              <p className="text-sm text-amber-600">
                 يجب إدخال ملاحظة التغليف لجميع الطلبات
               </p>
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto px-8 py-4">
+          <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-4">
             <ChangeProductTable
               orders={actionableFilteredOrders}
               packagingNotes={packagingNotes}
@@ -281,20 +329,32 @@ export function ScannedOrdersModal({
         </>
       ) : (
         <>
-          <div className="px-8 py-4 border-b border-gray-200">
-            <div className="relative max-w-md">
-              <LiaSearchSolid className="absolute right-3 top-1/2 -translate-y-1/2 size-5 text-primary z-10" />
+          <div className="px-4 sm:px-8 py-3 sm:py-4 border-b border-gray-200 flex flex-col md:flex-row md:items-end gap-3">
+            {onManualScan && (
+              <ScanInput
+                onSubmit={onManualScan}
+                isBusy={isScanLoading}
+                label="إضافة طلب آخر"
+                className="md:max-w-md"
+              />
+            )}
+            <div className="relative w-full md:max-w-md">
+              <LiaSearchSolid
+                aria-hidden="true"
+                className="absolute right-3 top-1/2 -translate-y-1/2 size-5 text-primary z-10"
+              />
               <Input
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
                 onClear={() => onSearchChange('')}
                 clearable
                 placeholder="بحث بكود الطلب..."
+                aria-label="بحث في الطلبات الممسوحة بكود الطلب"
                 inputClassName="pr-10"
               />
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto px-8 py-4">
+          <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-4">
             <div className="flex flex-col lg:flex-row lg:items-stretch gap-6 h-full">
               <div className="flex-1 min-w-0">
                 <h3 className="text-base font-semibold text-gray-700 mb-4">
@@ -347,8 +407,9 @@ export function ScannedOrdersModal({
                               <Button
                                 variant="ghost"
                                 onClick={() => onRemoveOrder(order.code)}
-                                className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors flex-shrink-0"
+                                className="size-10 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors flex-shrink-0"
                                 title="حذف الطلب"
+                                aria-label={`حذف الطلب ${order.code}`}
                               >
                                 <LiaTrashAltSolid className="size-4" />
                               </Button>

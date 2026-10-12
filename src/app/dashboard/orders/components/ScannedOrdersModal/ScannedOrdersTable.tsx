@@ -45,7 +45,7 @@ export function ScannedOrdersTable({
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {isScanLoading && <LoadingCard />}
         {orders.map((order) => (
           <div
@@ -68,8 +68,9 @@ export function ScannedOrdersTable({
             <Button
               variant="ghost"
               onClick={() => onRemove(order.code)}
-              className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+              className="size-10 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
               title="حذف الطلب"
+              aria-label={`حذف الطلب ${order.code}`}
             >
               <LiaTrashAltSolid className="size-5" />
             </Button>

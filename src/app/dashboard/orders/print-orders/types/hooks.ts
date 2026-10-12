@@ -2,11 +2,13 @@ import type { Order } from '@/types/orders';
 
 export interface UseBarcodeScannerOptions {
   onScan: (barcode: string) => void;
+  onUnrecognized?: (raw: string) => void;
   enabled?: boolean;
   minCharLength?: number;
   maxCharLength?: number;
   avgTimeThreshold?: number;
   debounceTimeout?: number;
+  bufferResetTimeout?: number;
 }
 
 export interface UseBarcodeScannerReturn {
