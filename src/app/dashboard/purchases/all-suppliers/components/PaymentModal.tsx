@@ -8,7 +8,12 @@ import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import { useCreateSupplierInvoiceMutation } from '@/services/suppliers';
-import { moneyCents } from '@/utils/money';
+import {
+  MONEY_DECIMALS_MESSAGE,
+  hasAtMostTwoDecimals,
+  moneyCents,
+} from '@/utils/money';
+import { getApiErrorMessage } from '@/utils/apiError';
 import { formatCurrency, formatSupplierBalance } from '../utils';
 
 const paymentSchema = z.object({
@@ -17,7 +22,8 @@ const paymentSchema = z.object({
     .min(1, 'المبلغ مطلوب')
     .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
       message: 'يجب أن يكون المبلغ أكبر من صفر',
-    }),
+    })
+    .refine(hasAtMostTwoDecimals, { message: MONEY_DECIMALS_MESSAGE }),
 });
 
 type PaymentFormValues = z.infer<typeof paymentSchema>;
@@ -74,8 +80,8 @@ export default function PaymentModal({
         setTimeout(() => {
           handleClose();
         }, 1200);
-      } catch (err: any) {
-        setSubmitError(err?.response?.data?.message || 'حدث خطأ أثناء تسجيل الدفع');
+      } catch (err: unknown) {
+        setSubmitError(getApiErrorMessage(err, 'حدث خطأ أثناء تسجيل الدفع'));
       }
     },
     [supplierId, handleClose, createInvoiceMutation],
@@ -176,6 +182,7 @@ export default function PaymentModal({
         <>
           <form
             onSubmit={handleSubmit(onSubmit)}
+            noValidate
             className="flex flex-col gap-6"
           >
             <Input

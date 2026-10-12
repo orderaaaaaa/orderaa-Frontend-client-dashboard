@@ -86,6 +86,8 @@ const InvoiceItemsTable = memo(
         <Input
           type="number"
           inputMode="numeric"
+          step="1"
+          min="0"
           aria-label={`${isPackage ? 'عدد الطرود' : 'العدد'} — ${row.name}`}
           value={row.count || ''}
           onChange={(e) => onQuantityChange(index, Number(e.target.value) || 0)}
@@ -118,6 +120,8 @@ const InvoiceItemsTable = memo(
         <Input
           type="number"
           inputMode="numeric"
+          step="1"
+          min="0"
           aria-label={`عدد القطع في الطرد — ${row.name}`}
           value={row.piecesPerPackage || ''}
           onChange={(e) => onPieceCountChange(index, Number(e.target.value) || 0)}

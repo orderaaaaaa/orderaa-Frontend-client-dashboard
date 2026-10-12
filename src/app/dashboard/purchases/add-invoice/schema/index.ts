@@ -29,6 +29,7 @@ const invoiceItemSchema = z.object({
     },
     z
       .number({ required_error: 'الكمية مطلوبة', invalid_type_error: 'الكمية مطلوبة' })
+      .int('الكمية يجب أن تكون عدداً صحيحاً بدون كسور')
       .min(0, 'الكمية لا يمكن ان تكون سالبة'),
   ),
   unitPrice: z.preprocess(
@@ -38,7 +39,11 @@ const invoiceItemSchema = z.object({
   total: z.number(),
   piecesPerPackage: z.preprocess(
     (val) => (val === '' || val === null || val === undefined ? 0 : Number(val)),
-    z.number().min(0).optional(),
+    z
+      .number()
+      .int('عدد القطع في الطرد يجب أن يكون عدداً صحيحاً بدون كسور')
+      .min(0)
+      .optional(),
   ),
   piecePrice: z.number().optional(),
   variants: z

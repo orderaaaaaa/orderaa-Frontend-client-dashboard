@@ -66,7 +66,7 @@ Module imports from **7 react-icon families** (not just `lucide-react`): Boxes (
 - **`useOrderBulk` hook** in `allOrders/hooks/useOrderBulk.ts` — wraps `bulkOrders()` mutation from `allOrders/api/orders.ts`. Accepts `BulkRequest` payload and optional `currentStatus`. Used for status transitions and bulk operations.
 - **Bulk types** in `allOrders/types/Bulk.ts` — `BulkRequest`, `BulkUpdateResponse` interfaces.
 - **Pending until refetched** — `useOrderBulk` awaits `invalidateAndWait(orderStatusKeys())` before the caller's `onSuccess`; pass its `isPending` to `BulkActionsBar isLoading` (Select and buttons disabled, spinner). Selection changes are ignored while pending.
-- **Partial results** — `allOrders/utils/bulkStatusFeedback.ts`: parked orders are excluded client-side with a warning; `PATCH /orders/bulk` silently skips parked/deleted rows, so `updatedCount < sent ids` shows a warning. Used by allOrders and `CustomerOrdersModal`.
+- **Partial results** — `allOrders/utils/bulkStatusFeedback.ts`: parked orders are excluded client-side with a warning; `PATCH /orders/bulk` silently skips parked/deleted rows and does not count an order already in the target status (`updatedCount` = orders actually changed), so `updatedCount < sent ids` shows a warning. Used by allOrders and `CustomerOrdersModal`.
 - **Call-center bar** — `call-center/hooks/useCallCenterBulkActions.ts` reuses the print-orders mutations, filters by the backend's allowed source statuses (prepare: CONFIRMED / WAITING_FOR_PACKAGING / CALL_AGAIN; waiting-for-packaging: CONFIRMED), excludes parked orders with a warning, and stays pending until list + counts refetch. «تغيير المنتج» opens `ChangeProductModal` (call-again with packaging notes).
 
 ## Order Detail UX
