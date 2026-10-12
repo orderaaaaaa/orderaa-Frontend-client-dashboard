@@ -2,25 +2,35 @@
 
 import { memo, useMemo } from 'react';
 import SearchableSelect from '@/components/ui/SearchableSelect';
-import { clientStatusOptions, activityTypeOptions, customerOptions } from '../constants';
+import {
+  clientStatusOptions,
+  buildBadgeFilterOptions,
+  segmentOptions,
+} from '../constants';
 import { useOrderStatusesQuery } from '@/services/orders';
+import type { CustomerBadge } from '../types/customer';
 
-interface CustomerFilters {
+export interface CustomerFilters {
   clientStatus: string;
   orderStatus: string;
-  activityType: string;
-  allCustomers: string;
+  badge: string;
+  segment: string;
 }
 
 interface CustomersFilterBarProps {
   filters: CustomerFilters;
+  enabledBadges: readonly CustomerBadge[];
   onFilterChange: (key: keyof CustomerFilters, value: string) => void;
   onClearFilter: (key: keyof CustomerFilters) => void;
 }
 
 const CustomersFilterBar = memo(
-  ({ filters, onFilterChange, onClearFilter }: CustomersFilterBarProps) => {
+  ({ filters, enabledBadges, onFilterChange, onClearFilter }: CustomersFilterBarProps) => {
     const { data: statusesData } = useOrderStatusesQuery();
+    const badgeOptions = useMemo(
+      () => buildBadgeFilterOptions(enabledBadges),
+      [enabledBadges]
+    );
 
     const orderStatusOptions = useMemo(() => {
       const baseOption = { key: 'all', value: 'جميع الحالات' };
@@ -54,21 +64,21 @@ const CustomersFilterBar = memo(
         />
 
         <SearchableSelect
-          options={activityTypeOptions}
-          value={filters.activityType}
-          onChange={(v) => onFilterChange('activityType', v)}
+          options={badgeOptions}
+          value={filters.badge}
+          onChange={(v) => onFilterChange('badge', v)}
           placeholder="نوع الشارة"
           clearable
-          onClear={() => onClearFilter('activityType')}
+          onClear={() => onClearFilter('badge')}
         />
 
         <SearchableSelect
-          options={customerOptions}
-          value={filters.allCustomers}
-          onChange={(v) => onFilterChange('allCustomers', v)}
+          options={segmentOptions}
+          value={filters.segment}
+          onChange={(v) => onFilterChange('segment', v)}
           placeholder="جميع العملاء"
           clearable
-          onClear={() => onClearFilter('allCustomers')}
+          onClear={() => onClearFilter('segment')}
         />
       </div>
     );

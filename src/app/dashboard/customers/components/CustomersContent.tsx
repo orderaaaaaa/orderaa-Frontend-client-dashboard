@@ -13,48 +13,47 @@ import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import LoadingAnimation from '@/components/ui/loadingAnimation';
 import CustomersSearchBar from './CustomersSearchBar';
-import CustomersFilterBar from './CustomersFilterBar';
-import CustomerStates from './CustomerStates';
+import CustomersFilterBar, { CustomerFilters } from './CustomersFilterBar';
+import CustomerStates, { CustomerStatSelection } from './CustomerStates';
 import { CustomerRow } from './CustomerRow';
 import { CustomerCard } from './CustomerCard';
 import CustomerDetailsModal from './modals/CustomerDetailsModal';
-import { TABLE_HEADERS } from '../constants';
+import { TABLE_HEADERS, CUSTOMER_BADGE_PRIORITY } from '../constants';
 import { useGetCustomers, useEditCustomer } from '../hooks';
 import { useDebounce } from '@/utils/debounce';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import { Can } from '@/components/Can';
 import { PERMISSIONS } from '@/lib/permissions';
 import { FIXED_BOTTOM_BAR_CLASS } from '@/constants/dashboard-layout';
-import { Customer } from '../types/customer';
+import {
+  Customer,
+  CustomerBadge,
+  CustomerBadgeFilter,
+  CustomerSegment,
+} from '../types/customer';
 import { MergeableCustomer } from '../types/merge';
 import CustomerMergeModal from '@/components/OrderDetails/CustomerMergeModal';
+import { ErrorState } from '@/components/ui/state-panels';
+import { usePermissionCheck } from '@/hooks/usePermissions';
+import { useCustomerBadgeSettings } from '@/app/dashboard/store-settings/hooks/useCustomerBadgeSettings';
+import { toast } from 'react-toastify';
 
 /** List-page `Customer` → the shape the shared merge popup renders. */
 function toMergeableCustomer(customer: Customer): MergeableCustomer {
-  const notes = Array.isArray(customer.notes)
-    ? customer.notes
-    : customer.notes
-      ? [customer.notes]
-      : [];
-
   return {
     id: customer.id,
     name: customer.name,
     email: customer.email,
     phoneNumbers: customer.phoneNumbers,
-    notes,
+    notes: customer.notes,
     isBlocked: customer.isBlocked,
-    blockedUntil: customer.blockedUntil ?? null,
+    blockedUntil: null,
     ordersCount: customer.numberOfOrders,
   };
 }
 
-interface CustomerFilters {
-  clientStatus: string;
-  orderStatus: string;
-  activityType: string;
-  allCustomers: string;
-}
+const isSegment = (value: string): value is CustomerSegment =>
+  value === 'all' || value === 'premium';
 
 export function CustomersContent() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -65,7 +64,7 @@ export function CustomersContent() {
   const [fromDate, setFromDate] = useState<Date | null>(null);
   const [toDate, setToDate] = useState<Date | null>(null);
   const [timePeriod, setTimePeriod] = useState<TimePeriod | ''>('');
-  const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   // Selection mode for merging duplicate customers (T4) — modelled on the
@@ -77,11 +76,32 @@ export function CustomersContent() {
   const [filters, setFilters] = useState<CustomerFilters>({
     clientStatus: '',
     orderStatus: '',
-    activityType: '',
-    allCustomers: '',
+    badge: '',
+    segment: '',
   });
 
   const debouncedSearch = useDebounce(searchQuery, 500);
+
+  const { hasPermission } = usePermissionCheck();
+  const canReadBadgeSettings = hasPermission(PERMISSIONS.MERCHANT_SETTINGS_READ);
+  const { data: badgeSettings } = useCustomerBadgeSettings({
+    enabled: canReadBadgeSettings,
+  });
+  const enabledBadges: readonly CustomerBadge[] =
+    badgeSettings?.enabledBadges ?? CUSTOMER_BADGE_PRIORITY;
+
+  const badgeParam = useMemo((): CustomerBadgeFilter | undefined => {
+    if (filters.badge === 'none') return 'none';
+    return enabledBadges.find((badge) => badge === filters.badge);
+  }, [filters.badge, enabledBadges]);
+
+  const segmentParam = isSegment(filters.segment) ? filters.segment : undefined;
+
+  useEffect(() => {
+    if (filters.badge && filters.badge !== 'none' && !badgeParam) {
+      setFilters((prev) => ({ ...prev, badge: '' }));
+    }
+  }, [filters.badge, badgeParam]);
 
   const isBlockedParam = useMemo(() => {
     if (!filters.clientStatus) return undefined;
@@ -96,27 +116,22 @@ export function CustomersContent() {
     return filters.orderStatus;
   }, [filters.orderStatus]);
 
-  const { data, isLoading, isError, error } = useGetCustomers({
+  const { data, isLoading, isError, error, refetch } = useGetCustomers({
     page: currentPage,
     limit: pageSize,
     search: debouncedSearch,
     isBlocked: isBlockedParam,
     latestOrderStatus: orderStatusParam,
+    badge: badgeParam,
+    segment: segmentParam,
   });
 
-  const hasBlockedCustomers = useMemo(() => {
-    return data?.data.some((customer: any) => customer.isBlocked) || false;
-  }, [data]);
-
-  const activeHeaders = useMemo(() => {
-    return TABLE_HEADERS.filter(
-      (header) =>
-        !header.isConditional || (header.isConditional && hasBlockedCustomers)
-    );
-  }, [hasBlockedCustomers]);
-
   const editCustomerMutation = useEditCustomer({
-    onSuccess: () => {},
+    onSuccess: (_data, variables) => {
+      toast.success(
+        variables.payload.isBlocked ? 'تم الحظر بنجاح' : 'تم إلغاء الحظر بنجاح'
+      );
+    },
   });
 
   const handleToggleBlock = useCallback(
@@ -132,8 +147,8 @@ export function CustomersContent() {
     [editCustomerMutation]
   );
 
-  const handleRowClick = useCallback((customerId: number) => {
-    setSelectedCustomerId(customerId);
+  const handleRowClick = useCallback((customer: Customer) => {
+    setSelectedCustomer(customer);
     setIsDetailsModalOpen(true);
   }, []);
 
@@ -144,13 +159,13 @@ export function CustomersContent() {
     });
   }, []);
 
-  const handleToggleSelect = useCallback((customerId: number) => {
+  const handleToggleSelect = useCallback((customer: Customer) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      if (next.has(customerId)) {
-        next.delete(customerId);
+      if (next.has(customer.id)) {
+        next.delete(customer.id);
       } else {
-        next.add(customerId);
+        next.add(customer.id);
       }
       return next;
     });
@@ -193,13 +208,27 @@ export function CustomersContent() {
     setFilters((prev) => ({ ...prev, [key]: '' }));
   }, []);
 
+  const handleStatSelect = useCallback((selection: CustomerStatSelection) => {
+    setFilters((prev) => ({
+      ...prev,
+      badge: selection.kind === 'badge' ? selection.badge : '',
+      segment: selection.kind === 'premium' ? 'premium' : '',
+    }));
+  }, []);
+
   const clearSearchQuery = useCallback(() => {
     setSearchQuery('');
   }, []);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, filters.clientStatus, filters.orderStatus]);
+  }, [
+    debouncedSearch,
+    filters.clientStatus,
+    filters.orderStatus,
+    filters.badge,
+    filters.segment,
+  ]);
 
   useEffect(() => {
     setSelectedIds((prev) => (prev.size === 0 ? prev : new Set()));
@@ -209,8 +238,8 @@ export function CustomersContent() {
     let count = 0;
     if (filters.clientStatus) count++;
     if (filters.orderStatus && filters.orderStatus !== 'all') count++;
-    if (filters.activityType) count++;
-    if (filters.allCustomers) count++;
+    if (filters.badge) count++;
+    if (filters.segment && filters.segment !== 'all') count++;
     return count;
   }, [filters]);
 
@@ -223,57 +252,74 @@ export function CustomersContent() {
         <Breadcrumb items={[{ title: 'العملاء' }, { title: 'إدارة العملاء' }]} />
       </div>
 
-      <CustomerStates />
+      <CustomerStates
+        enabledBadges={enabledBadges}
+        activeBadge={badgeParam ?? ''}
+        activeSegment={segmentParam ?? ''}
+        onSelect={handleStatSelect}
+      />
 
-      <div className="sm:px-4 py-3 flex flex-col gap-4">
-        <div className="flex flex-row items-center gap-3">
-          <div className="flex-1">
+      <div className="px-4 py-3 flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="w-full sm:flex-1 min-w-0">
             <CustomersSearchBar
               value={searchQuery}
               onChange={setSearchQuery}
               onClear={clearSearchQuery}
             />
           </div>
-          <Button
-            variant="default"
-            className="rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm px-5 relative"
-            onClick={() => {
-              setShowFilters((prev) => {
-                if (prev) setFiltersOverflow(false);
-                return !prev;
-              });
-            }}
-          >
-            <LiaSlidersHSolid className="w-5 h-5" />
-            فلاتر متقدمة
-            {activeFilterCount > 0 && (
-              <span className="absolute -top-2 -left-2 bg-white text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
-                {activeFilterCount}
-              </span>
-            )}
-          </Button>
-
-          <Can code={PERMISSIONS.CUSTOMERS_MERGE}>
-            <div
-              className="bg-primary flex flex-row items-center justify-center gap-2 px-5 py-2 rounded-full cursor-pointer text-white text-xs sm:text-sm flex-shrink-0"
-              onClick={handleToggleSelectMode}
+          <div className="flex flex-row items-center gap-3">
+            <Button
+              type="button"
+              variant="default"
+              aria-expanded={showFilters}
+              className="h-10 rounded-full font-semibold flex items-center gap-2 text-sm px-5 relative flex-1 sm:flex-none"
+              onClick={() => {
+                setShowFilters((prev) => {
+                  if (prev) setFiltersOverflow(false);
+                  return !prev;
+                });
+              }}
             >
-              <p>تحديد</p>
-              {selectMode ? (
-                <ScanLine className="w-5 h-5" />
-              ) : (
-                <Scan className="w-5 h-5" />
+              <LiaSlidersHSolid className="w-5 h-5" />
+              فلاتر متقدمة
+              {activeFilterCount > 0 && (
+                <span className="absolute -top-2 -end-2 bg-white text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
+                  {activeFilterCount}
+                </span>
               )}
-            </div>
-          </Can>
+            </Button>
+
+            <Can code={PERMISSIONS.CUSTOMERS_MERGE}>
+              <Button
+                type="button"
+                variant="default"
+                aria-pressed={selectMode}
+                onClick={handleToggleSelectMode}
+                className="h-10 rounded-full flex items-center justify-center gap-2 px-5 text-sm flex-1 sm:flex-none"
+              >
+                <span>تحديد</span>
+                {selectMode ? (
+                  <ScanLine className="w-5 h-5" />
+                ) : (
+                  <Scan className="w-5 h-5" />
+                )}
+              </Button>
+            </Can>
+          </div>
         </div>
 
         {selectMode && (
-          <div className="flex flex-row items-center gap-2">
-            <X
+          <div className="flex flex-row flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="touch"
+              aria-label="إلغاء التحديد"
               onClick={handleToggleSelectMode}
-              className="cursor-pointer text-primary h-5 w-5"
-            />
+            >
+              <X className="text-primary h-5 w-5" />
+            </Button>
             <span className="text-sm text-gray-600">
               تم تحديد {selectedIds.size} عميل (اختر عميلين للدمج)
             </span>
@@ -293,6 +339,7 @@ export function CustomersContent() {
           <div className={filtersOverflow ? 'overflow-visible' : 'overflow-hidden'}>
             <CustomersFilterBar
               filters={filters}
+              enabledBadges={enabledBadges}
               onFilterChange={handleFilterChange}
               onClearFilter={handleClearFilter}
             />
@@ -315,11 +362,12 @@ export function CustomersContent() {
       {isLoading ? (
         <LoadingAnimation />
       ) : isError ? (
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center text-red-600">
-            <p>حدث خطأ في تحميل البيانات: {error?.message}</p>
-          </div>
-        </div>
+        <ErrorState
+          error={error}
+          fallback="تعذّر تحميل العملاء"
+          onRetry={() => refetch()}
+          className="min-h-[400px]"
+        />
       ) : data?.data && data.data.length > 0 ? (
         <>
           <div className="hidden lg:block bg-white rounded-lg shadow-sm overflow-hidden mx-4">
@@ -328,9 +376,9 @@ export function CustomersContent() {
                 <thead>
                   <tr className="bg-[#f1eefa]">
                     {selectMode && <th className="px-4 py-4 w-10" />}
-                    {activeHeaders.map((header, index) => (
+                    {TABLE_HEADERS.map((header) => (
                       <th
-                        key={index}
+                        key={header.label}
                         className={`px-4 py-4 md:text-md font-medium text-gray-700 whitespace-nowrap text-${header.align}`}
                       >
                         {header.label}
@@ -339,14 +387,13 @@ export function CustomersContent() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {data.data.map((customer: any) => (
+                  {data.data.map((customer) => (
                     <CustomerRow
                       key={customer.id}
                       customer={customer}
                       onToggleBlock={handleToggleBlock}
                       onRowClick={handleRowClick}
                       isPending={editCustomerMutation.isPending}
-                      showNotesColumn={hasBlockedCustomers}
                       selectionMode={selectMode}
                       isSelected={selectedIds.has(customer.id)}
                       onToggleSelect={handleToggleSelect}
@@ -359,7 +406,7 @@ export function CustomersContent() {
 
           <div className="lg:hidden px-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center">
-              {data.data.map((customer: any) => (
+              {data.data.map((customer) => (
                 <div key={customer.id} className="w-full max-w-md">
                   <CustomerCard
                     customer={customer}
@@ -376,7 +423,7 @@ export function CustomersContent() {
           </div>
         </>
       ) : (
-        <div className="flex flex-col items-center justify-center py-16 gap-3">
+        <div className="flex flex-col items-center justify-center py-16 gap-3 px-4 text-center">
           <LiaUsersSolid className="w-16 h-16 text-gray-300" />
           {debouncedSearch || activeFilterCount > 0 ? (
             <>
@@ -395,11 +442,12 @@ export function CustomersContent() {
       )}
 
       <CustomerDetailsModal
-        customerId={selectedCustomerId || undefined}
+        customerId={selectedCustomer?.id}
+        badge={selectedCustomer?.badge ?? null}
         isOpen={isDetailsModalOpen}
         onClose={() => {
           setIsDetailsModalOpen(false);
-          setSelectedCustomerId(null);
+          setSelectedCustomer(null);
         }}
       />
 

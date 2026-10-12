@@ -7,6 +7,8 @@ interface StatsCardProps {
   label: string;
   value: string;
   subtitle?: string;
+  isActive?: boolean;
+  onClick?: () => void;
 }
 
 export const StatsCard: React.FC<StatsCardProps> = ({
@@ -14,20 +16,27 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   label,
   value,
   subtitle,
+  isActive = false,
+  onClick,
 }) => (
-  <div
+  <button
+    type="button"
+    onClick={onClick}
+    aria-pressed={isActive}
     className={cn(
-      'bg-white flex items-center gap-3 rounded-xl px-3 py-3 border border-gray-100',
-      'hover:shadow-sm transition-shadow min-w-0'
+      'w-full text-right bg-white flex items-center gap-3 rounded-xl px-3 py-3 border',
+      'hover:shadow-sm transition-shadow min-w-0 cursor-pointer',
+      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
+      isActive ? 'border-primary ring-1 ring-primary/40' : 'border-gray-100'
     )}
   >
     <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-[#f1eefa] shrink-0">
-      <SvgIcon src={iconSrc} className="w-5 h-5" alt={label} />
+      <SvgIcon src={iconSrc} className="w-5 h-5" alt="" />
     </div>
     <div className="min-w-0 flex-1">
       <span className="text-gray-500 text-xs block truncate">{label}</span>
       <div className="text-lg font-bold text-gray-900 leading-tight">{value}</div>
       {subtitle ? <div className="text-[10px] text-gray-400 truncate">{subtitle}</div> : null}
     </div>
-  </div>
+  </button>
 );

@@ -15,6 +15,9 @@ export function useEmployeesList() {
     data: paginatedData,
     isLoading,
     isError,
+    error,
+    refetch,
+    isFetching,
   } = useFilteredEmployees(filters);
 
   const { employees, totalItems, paginationProps } = React.useMemo(() => {
@@ -37,5 +40,8 @@ export function useEmployeesList() {
     paginationProps,
     isLoading,
     isError,
+    error,
+    refetch,
+    isFetching,
   };
 }

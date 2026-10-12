@@ -1,11 +1,11 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getCustomer } from '../api/getCustomerById';
-import { CustomerId } from '../types/customerId';
+import { CustomerDetail } from '../types/customer';
 
 export const useCustomer = (id?: number) => {
   const queryClient = useQueryClient();
 
-  const query = useQuery<CustomerId>({
+  const query = useQuery<CustomerDetail>({
     queryKey: ['customer', id],
     queryFn: () => {
       if (!id) throw new Error('Customer ID is required');

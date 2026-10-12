@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import PageLoading from '@/components/ui/page-loading';
 import { If, Then, Else } from 'react-if';
 import { useEmployeesList } from '@/app/dashboard/employees/hooks/useEmployeesList';
@@ -11,34 +11,31 @@ import { EmployeeCard } from './components/EmployeeCard';
 import { Pagination } from '../../../components/Pagination';
 import { useEmployeesStore } from '@/app/dashboard/employees/store/employeesStore';
 import { LimitSelector } from './components/LimitSelector';
-import { useDepartmentsQuery } from '@/services/lookups';
+import { ErrorState } from '@/components/ui/state-panels';
 
 export default function AllEmployees() {
-  const { employees, totalItems, paginationProps, isLoading, isError } =
+  const { employees, totalItems, paginationProps, isLoading, isError, error, refetch } =
     useEmployeesList();
 
   const setCurrentPage = useEmployeesStore((state) => state.setCurrentPage);
   const limit = useEmployeesStore((state) => state.filterSelections.limit);
   const setLimit = useEmployeesStore((state) => state.setLimit);
 
-  const { data: departments } = useDepartmentsQuery();
-
-  useEffect(() => {
-    if (departments !== undefined) {
-      console.log('GET /lookups/departments response:', departments);
-    }
-  }, [departments]);
-
   if (isError) {
     return (
-      <div className="p-4 bg-red-50 text-red-700 rounded-lg">
-        Failed to load employees. Please try again later.
+      <div className="px-4 py-4 sm:p-6">
+        <EmployeeHeader />
+        <ErrorState
+          error={error}
+          fallback="تعذّر تحميل الموظفين"
+          onRetry={() => refetch()}
+        />
       </div>
     );
   }
 
   return (
-    <div className="p-6">
+    <div className="px-4 py-4 sm:p-6">
       <EmployeeHeader />
       <StatCardsSection totalItems={totalItems} />
       <EmployeeSearchFilter />
@@ -56,7 +53,7 @@ export default function AllEmployees() {
                 </div>
               </Then>
               <Else>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6 mb-8 justify-items-center md:justify-items-stretch">
                   {employees.map((employee) => (
                     <EmployeeCard key={employee.id} employee={employee} />
                   ))}

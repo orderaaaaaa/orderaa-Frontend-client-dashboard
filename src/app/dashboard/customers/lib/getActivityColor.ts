@@ -1,9 +1,11 @@
-export const getActivityColor = (activity: string) => {
-  const colors: Record<string, string> = {
-    'Loyal Buyer': 'bg-green-50 text-green-600 border border-green-200',
-    'bulk buyer': 'bg-purple-50 text-purple-600 border border-purple-200',
-    'Window shopper': 'bg-purple-50 text-purple-600 border border-purple-200',
-    'No Show': 'bg-[#fef0ef] text-[#ff0004] border border-red-200',
-  };
-  return colors[activity] || 'bg-gray-50 text-gray-600 border border-gray-200';
+import type { CustomerBadge } from '../types/customer';
+
+const BADGE_COLORS: Record<CustomerBadge, string> = {
+  loyal: 'bg-green-50 text-green-700 border border-green-200',
+  bulk: 'bg-purple-50 text-purple-700 border border-purple-200',
+  high: 'bg-amber-50 text-amber-700 border border-amber-200',
+  ghost: 'bg-[#fef0ef] text-[#d00003] border border-red-200',
+  window: 'bg-slate-50 text-slate-700 border border-slate-200',
 };
+
+export const getActivityColor = (badge: CustomerBadge) => BADGE_COLORS[badge];

@@ -1,8 +1,7 @@
-// api/getCustomer.ts
 import http from '@/lib/api/http';
-import { CustomerId } from '../types/customerId';
+import { CustomerDetail } from '../types/customer';
 
-export async function getCustomer(id: number): Promise<CustomerId> {
-  const { data } = await http.get<CustomerId>(`/customers/${id}`);
+export async function getCustomer(id: number): Promise<CustomerDetail> {
+  const { data } = await http.get<CustomerDetail>(`/customers/${id}`);
   return data;
 }

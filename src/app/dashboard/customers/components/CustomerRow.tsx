@@ -1,107 +1,76 @@
 'use client';
-import React, { memo, useEffect, useRef, useState } from 'react';
-import { LiaShoppingBagSolid, LiaWhatsapp, LiaCalendarAltSolid, LiaEllipsisVSolid } from 'react-icons/lia';
-import { LiaEnvelopeSolid, LiaCircleSolid } from 'react-icons/lia';
-import { If, Then } from 'react-if';
+import React, { memo, useState } from 'react';
+import {
+  LiaShoppingBagSolid,
+  LiaWhatsapp,
+  LiaCalendarAltSolid,
+  LiaEnvelopeSolid,
+  LiaCircleSolid,
+} from 'react-icons/lia';
 import { getStatusColor } from '../lib/getBadgeColor';
-import { getActivityColor } from '../lib/getActivityColor';
+import { formatAmount } from '../lib/formatAmount';
+import {
+  formatNotes,
+  formatOrderDate,
+  isActivationKey,
+  toWhatsAppNumber,
+} from '../lib/contact';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import CustomerBanConfirmationModal from './modals/CustomerBanConfirmationModal';
-import { useEditCustomer } from '../hooks/useEditCustomer';
-import { toast } from 'react-toastify';
+import { CustomerBadgeChip } from './CustomerBadgeChip';
+import { CustomerActionsMenu } from './CustomerActionsMenu';
+import { Customer } from '../types/customer';
 
 interface CustomerRowProps {
-  customer: any;
+  customer: Customer;
   onToggleBlock: (
     customerId: number,
     currentBlockStatus: boolean,
     note?: string
   ) => void;
   isPending: boolean;
-  onRowClick: (customerId: number) => void;
-  showNotesColumn: boolean;
+  onRowClick: (customer: Customer) => void;
   /** Selection mode for the merge flow (T4) — تحديد toggle on the page header. */
   selectionMode?: boolean;
   isSelected?: boolean;
-  onToggleSelect?: (customerId: number) => void;
+  onToggleSelect?: (customer: Customer) => void;
 }
-
-const toWhatsAppNumber = (phone: string) => {
-  const cleaned = phone.replace(/\s+/g, '');
-  if (cleaned.startsWith('0')) {
-    return `+20${cleaned.slice(1)}`;
-  }
-  return cleaned;
-};
 
 export const CustomerRow = memo(function CustomerRow({
   customer,
+  onToggleBlock,
   isPending,
   onRowClick,
-  showNotesColumn,
   selectionMode = false,
   isSelected = false,
   onToggleSelect,
 }: CustomerRowProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
-  const menuRef = useRef<HTMLDivElement | null>(null);
   const { getStatusLabel } = useStatusLabel();
 
-  // Hook handles the mutation and notifications
-  const { mutate: editCustomer, isPending: isUpdating } = useEditCustomer({
-    onSuccess: (data, variables) => {
-      if (variables.payload.isBlocked) {
-        toast.success('تم الحظر بنجاح');
-      } else {
-        toast.success('تم إلغاء الحظر بنجاح');
-      }
-    },
-    onError: () => {},
-  });
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        isMenuOpen &&
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node)
-      ) {
-        setIsMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isMenuOpen]);
-
-  const handleBanClick = () => {
-    setIsMenuOpen(false);
-    setShowBanModal(true);
-  };
-
-  const handleConfirmBan = (id: string, note: string) => {
-    editCustomer({
-      customerId: customer.id,
-      payload: {
-        isBlocked: !customer.isBlocked,
-        notes: note,
-      },
-    });
+  const handleConfirmBan = (_id: string, note: string) => {
+    onToggleBlock(customer.id, customer.isBlocked, note);
     setShowBanModal(false);
   };
 
-  const phone = customer.phoneNumbers?.[0];
+  const activate = () =>
+    selectionMode ? onToggleSelect?.(customer) : onRowClick(customer);
+
+  const phone = customer.phoneNumbers[0];
   const whatsappNumber = phone ? toWhatsAppNumber(phone) : null;
 
   return (
     <>
       <tr
-        onClick={() =>
-          selectionMode ? onToggleSelect?.(customer.id) : onRowClick(customer.id)
-        }
-        className="hover:bg-gray-50 transition-colors cursor-pointer"
+        onClick={activate}
+        onKeyDown={(event) => {
+          if (!isActivationKey(event)) return;
+          event.preventDefault();
+          activate();
+        }}
+        tabIndex={0}
+        className="hover:bg-gray-50 transition-colors cursor-pointer focus-visible:outline-none focus-visible:bg-gray-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
       >
         {selectionMode && (
           <td
@@ -110,17 +79,19 @@ export const CustomerRow = memo(function CustomerRow({
           >
             <Checkbox
               checked={isSelected}
-              onCheckedChange={() => onToggleSelect?.(customer.id)}
+              onCheckedChange={() => onToggleSelect?.(customer)}
+              aria-label={`تحديد ${customer.name}`}
             />
           </td>
         )}
         <td className="px-4 py-4 whitespace-nowrap">
           <div className="flex items-center gap-1">
-            <If condition={customer.isBlocked}>
-              <Then>
-                <LiaCircleSolid className="text-[#f61515] w-5 h-5" />
-              </Then>
-            </If>
+            {customer.isBlocked && (
+              <LiaCircleSolid
+                className="text-[#f61515] w-5 h-5"
+                aria-label="محظور"
+              />
+            )}
             <span className="font-semibold text-gray-900">{customer.name}</span>
           </div>
         </td>
@@ -133,12 +104,14 @@ export const CustomerRow = memo(function CustomerRow({
                   href={`https://wa.me/${whatsappNumber}`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={`واتساب ${phone}`}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <LiaWhatsapp className="w-5 h-5 text-primary hover:opacity-80" />
                 </a>
                 <a
                   href={`tel:${phone}`}
+                  dir="ltr"
                   onClick={(e) => e.stopPropagation()}
                   className="font-medium hover:underline"
                 >
@@ -146,35 +119,29 @@ export const CustomerRow = memo(function CustomerRow({
                 </a>
               </div>
             )}
-            <If condition={customer.email}>
-              <Then>
-                <div className="flex items-center gap-2">
-                  <LiaEnvelopeSolid className="w-5 h-5 text-gray-600" />
-                  <span className="font-medium">{customer.email}</span>
-                </div>
-              </Then>
-            </If>
+            {customer.email && (
+              <div className="flex items-center gap-2">
+                <LiaEnvelopeSolid className="w-5 h-5 text-gray-600" aria-hidden />
+                <span dir="ltr" className="font-medium">
+                  {customer.email}
+                </span>
+              </div>
+            )}
           </div>
         </td>
 
         <td className="px-4 py-4 text-center whitespace-nowrap">
           <div className="inline-flex items-center gap-2">
-            <LiaShoppingBagSolid className="w-5 h-5 text-gray-500" />
-            <span className="font-medium text-lg">
-              {customer.numberOfOrders}
-            </span>
+            <LiaShoppingBagSolid className="w-5 h-5 text-gray-500" aria-hidden />
+            <span className="font-medium text-lg">{customer.numberOfOrders}</span>
           </div>
         </td>
 
         <td className="px-4 py-4 text-center whitespace-nowrap">
           <div className="inline-flex items-center gap-2">
-            <LiaCalendarAltSolid className="w-5 h-5 text-gray-500" />
+            <LiaCalendarAltSolid className="w-5 h-5 text-gray-500" aria-hidden />
             <span className="font-medium">
-              {customer.latestOrder?.createdAt
-                ? new Date(customer.latestOrder.createdAt).toLocaleDateString(
-                  'en-GB'
-                )
-                : '-'}
+              {formatOrderDate(customer.latestOrder?.createdAt)}
             </span>
           </div>
         </td>
@@ -192,57 +159,40 @@ export const CustomerRow = memo(function CustomerRow({
         </td>
 
         <td className="px-4 py-4 text-center whitespace-nowrap">
-          <span
-            className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium ${getActivityColor(
-              'Loyal Buyer'
-            )}`}
-          >
-            <span>🏆</span>
-            <span>Loyal Buyer</span>
-          </span>
+          {customer.badge ? (
+            <CustomerBadgeChip badge={customer.badge} />
+          ) : (
+            <span className="text-gray-400">—</span>
+          )}
         </td>
 
         <td className="px-4 py-4 text-center whitespace-nowrap">
-          <span className="font-medium">{customer.totalAmount} جنية</span>
+          <span className="font-medium">{formatAmount(customer.totalAmount)}</span>
         </td>
 
-        {showNotesColumn && (
-          <td className="px-4 py-4 text-center whitespace-nowrap">
-            <span className="font-medium text-gray-600">
-              {customer.isBlocked ? customer.notes || '—' : '—'}
+        <td className="px-4 py-4 text-center w-48 max-w-48">
+          {customer.isBlocked && customer.notes.length > 0 ? (
+            <span
+              className="block truncate font-medium text-gray-600"
+              title={formatNotes(customer.notes)}
+            >
+              {formatNotes(customer.notes)}
             </span>
-          </td>
-        )}
+          ) : (
+            <span className="block font-medium text-gray-600">—</span>
+          )}
+        </td>
 
         <td
           className="px-4 py-4 text-center whitespace-nowrap"
           onClick={(e) => e.stopPropagation()}
         >
-          <div ref={menuRef} className="relative">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setIsMenuOpen((v) => !v)}
-            >
-              <LiaEllipsisVSolid className="w-5 h-5 text-gray-600" />
-            </Button>
-            {isMenuOpen && (
-              <div className="absolute left-0 mt-1 bg-white rounded-lg shadow-lg border z-10 min-w-[140px]">
-                <Button
-                  variant="ghost"
-                  onClick={handleBanClick}
-                  disabled={isPending || isUpdating}
-                  className={`w-full justify-start ${customer.isBlocked ? 'text-green-600 hover:text-green-700' : 'text-red-600 hover:text-red-700'}`}
-                >
-                  {isPending || isUpdating
-                    ? 'جاري...'
-                    : customer.isBlocked
-                      ? 'إلغاء الحظر'
-                      : 'حظر'}
-                </Button>
-              </div>
-            )}
-          </div>
+          <CustomerActionsMenu
+            customerName={customer.name}
+            isBlocked={customer.isBlocked}
+            isPending={isPending}
+            onToggleBlockRequest={() => setShowBanModal(true)}
+          />
         </td>
       </tr>
       <CustomerBanConfirmationModal

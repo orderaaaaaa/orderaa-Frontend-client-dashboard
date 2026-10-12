@@ -9,6 +9,7 @@ import React from 'react';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { getStatusColor } from '../../../lib/getBadgeColor';
 import { CustomersDetailsTotalStatsProps } from '../../../types/CustomersDetailsModal';
+import { formatAmount } from '../../../lib/formatAmount';
 
 function CustomersDetailsTotalStats({
   latestOrder,
@@ -70,9 +71,8 @@ function CustomersDetailsTotalStats({
         <div className="bg-white p-4">
           <div className="flex items-center gap-2">
             <LiaMoneyBillWaveSolid className="text-gray-600 w-5 h-5" />
-            <p className="text-xl font-bold">{totalAmount.toLocaleString()}</p>
+            <p className="text-xl font-bold">{formatAmount(totalAmount)}</p>
           </div>
-          <p className="text-xs text-gray-500 mt-1">جنيه مصري</p>
         </div>
       </div>
 
@@ -87,6 +87,7 @@ function CustomersDetailsTotalStats({
                 <LiaPhoneSolid className="w-4 h-4 text-gray-400" />
                 <a
                   href={`tel:${phone}`}
+                  dir="ltr"
                   className="font-bold text-sm hover:underline text-gray-900"
                 >
                   {phone}
@@ -99,7 +100,8 @@ function CustomersDetailsTotalStats({
               {email ? (
                 <a
                   href={`mailto:${email}`}
-                  className="font-bold text-sm hover:underline text-gray-900"
+                  dir="ltr"
+                  className="font-bold text-sm hover:underline text-gray-900 break-all"
                 >
                   {email}
                 </a>

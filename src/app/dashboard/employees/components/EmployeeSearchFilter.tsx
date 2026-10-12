@@ -71,18 +71,19 @@ export function EmployeeSearchFilter({
 
   return (
     <div className={`relative ${className}`}>
-      <div className="flex relative items-center mt-12 md:w-1/2 bg-white border border-gray-200 rounded-full shadow-sm px-4 py-2">
+      <div className="flex relative items-center mt-6 sm:mt-12 md:w-1/2 bg-white border border-gray-200 rounded-full shadow-sm ps-4 pe-1 py-1">
         {/* أيقونة البحث على اليسار */}
-        <div className="flex-shrink-0 pl-3">
-          <Search className="text-gray-400" size={20} />
+        <div className="flex-shrink-0">
+          <Search className="text-gray-400" size={20} aria-hidden />
         </div>
 
         {/* حقل البحث في الوسط */}
-        <div className="flex-1 flex items-center px-4">
+        <div className="flex-1 min-w-0 flex items-center px-3">
           <input
-            type="text"
+            type="search"
+            aria-label="البحث عن موظف"
             placeholder={placeholder}
-            className="flex-1 border-none bg-transparent focus:outline-none  focus:ring-0 text-gray-700 text-[12px] sm:text-lg font-semibold placeholder:text-gray-400 text-right"
+            className="flex-1 min-w-0 h-10 border-none bg-transparent focus:outline-none focus:ring-0 text-gray-700 text-base sm:text-lg font-semibold placeholder:text-gray-400 placeholder:text-sm sm:placeholder:text-base text-right"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
           />
@@ -91,7 +92,9 @@ export function EmployeeSearchFilter({
         <button
           type="button"
           onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-          className={`flex-shrink-0 hover:bg-gray-100 rounded-full p-1 cursor-pointer transition-colors ${
+          aria-label="الفلاتر"
+          aria-expanded={showFilterDropdown}
+          className={`flex-shrink-0 size-10 flex items-center justify-center hover:bg-gray-100 rounded-full cursor-pointer transition-colors ${
             hasActiveFilters ? 'text-primary' : 'text-gray-600'
           }`}
         >
@@ -106,7 +109,7 @@ export function EmployeeSearchFilter({
               onClick={() => setShowFilterDropdown(false)}
             />
 
-            <div className="absolute left-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-[500px] overflow-y-auto">
+            <div className="absolute inset-x-0 sm:inset-x-auto sm:end-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-[70vh] sm:max-h-[500px] overflow-y-auto">
               {/* Header */}
               <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3  items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">الفلاتر</h3>
@@ -120,7 +123,7 @@ export function EmployeeSearchFilter({
                   </button>
                 )}
               </div>
-              <div className="grid grid-cols-3">
+              <div className="grid grid-cols-2 lg:grid-cols-4">
                 {/* Access Level Filter */}
                 <div className="p-4 border-b border-gray-100">
                   <label className="block text-[12px] sm:text-sm max-sm:text-center font-bold text-gray-700 mb-2">
