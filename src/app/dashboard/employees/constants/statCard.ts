@@ -1,4 +1,5 @@
 import { StatCardConfig } from '../types/stat.types';
+import { ACCESS_LEVEL_LABELS } from './accessLevels';
 
 export const STAT_CARDS: StatCardConfig[] = [
   {
@@ -10,14 +11,14 @@ export const STAT_CARDS: StatCardConfig[] = [
     alt: 'Total Employees icon',
   },
   {
-    title: 'موظف',
+    title: ACCESS_LEVEL_LABELS.EMPLOYEE,
     accessLevel: 'EMPLOYEE',
     borderColor: 'border-[#C9E9D2]',
     iconBgColor: 'bg-[#fbfdfb]',
     iconPath: '/Icons/employee.svg',
   },
   {
-    title: 'مدير',
+    title: ACCESS_LEVEL_LABELS.MANAGER,
     accessLevel: 'MANAGER',
     borderColor: 'border-[#D2E0FB]',
     iconBgColor: 'bg-[#fbfdff]',
@@ -25,7 +26,7 @@ export const STAT_CARDS: StatCardConfig[] = [
     alt: 'Manager icon',
   },
   {
-    title: 'ادمن',
+    title: ACCESS_LEVEL_LABELS.ADMIN,
     accessLevel: 'ADMIN',
     borderColor: 'border-[#2489E114]',
     iconBgColor: 'bg-[#edf6fd]',
@@ -33,7 +34,7 @@ export const STAT_CARDS: StatCardConfig[] = [
     alt: 'Admin icon',
   },
   {
-    title: 'سوبر ادمن',
+    title: ACCESS_LEVEL_LABELS.SUPER_ADMIN,
     accessLevel: 'SUPER_ADMIN',
     borderColor: 'border-[#5D24E114]',
     iconBgColor: 'bg-[#f2edfd]',

@@ -4,8 +4,12 @@ import {
   getPhoneNumberErrorMessage,
 } from '@/utils/validators/phoneValidator';
 import type { EmployeeRoleRef } from '@/lib/api/authorization';
+import {
+  EMPLOYEE_ACCESS_LEVELS,
+  isEmployeeAccessLevel,
+} from '@/app/dashboard/employees/constants/accessLevels';
 
-export const EmployeeRole = z.enum(['SUPER_ADMIN', 'ADMIN', 'MANAGER']);
+export const EmployeeRole = z.enum(EMPLOYEE_ACCESS_LEVELS);
 
 export const EmployeeDepartment = z.enum([
   'CONFIRMATION',
@@ -16,7 +20,12 @@ export const EmployeeDepartment = z.enum([
 const PASSWORD_MIN_LENGTH = 6;
 
 const employeeFieldsSchema = z.object({
-  accessLevel: z.string().min(1, { message: 'مستوى الوظيفة مطلوب' }),
+  accessLevel: z
+    .string()
+    .min(1, { message: 'مستوى الوظيفة مطلوب' })
+    .refine((value): boolean => value === '' || isEmployeeAccessLevel(value), {
+      message: 'مستوى الوظيفة غير صحيح',
+    }),
   department: z.string().min(1, { message: 'قسم الموظف مطلوب' }),
   fullName: z
     .string()

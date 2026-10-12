@@ -1,13 +1,7 @@
-export const getAccessLevelLabel = (accessLevel: string): string => {
-  const labels: Record<string, string> = {
-    SUPER_ADMIN: 'سوبر أدمن',
-    ADMIN: 'أدمن',
-    MANAGER: 'مدير',
-    EMPLOYEE: 'موظف',
-  };
+import { ACCESS_LEVEL_LABELS, isEmployeeAccessLevel } from '../constants/accessLevels';
 
-  return labels[accessLevel] || accessLevel;
-};
+export const getAccessLevelLabel = (accessLevel: string): string =>
+  isEmployeeAccessLevel(accessLevel) ? ACCESS_LEVEL_LABELS[accessLevel] : accessLevel;
 
 export const getActivationLabel = (isActive: boolean): string =>
   isActive ? 'نشط' : 'غير نشط';
