@@ -86,7 +86,7 @@ export function GovernorateConfigTable({
 }: GovernorateConfigTableProps) {
   const { data: configs, isLoading: isConfigsLoading } =
     useGovernorateLogisticsConfig(shippingCompanyId);
-  const { mutate: updateConfig, isPending: isSaving } =
+  const { mutateAsync: updateConfig, isPending: isSaving } =
     useUpdateGovernorateLogisticsConfig();
   const {
     data: governorates = [],
@@ -97,6 +97,14 @@ export function GovernorateConfigTable({
   const [savedGovernorates, setSavedGovernorates] = useState<Set<string>>(new Set());
   const [confirmEmptyOpen, setConfirmEmptyOpen] = useState(false);
   const savedRowsRef = useRef<GovernorateConfigRow[] | null>(null);
+  const isMountedRef = useRef(false);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const {
     register,
@@ -193,6 +201,7 @@ export function GovernorateConfigTable({
     const kept = data.configs.filter(
       (row) => row.firstAttemptDelay !== '' || row.shippingCost !== '' || row.nonReceiptCost !== '',
     );
+    const submittedRows = data.configs.map((row) => ({ ...row }));
     updateConfig(
       {
         shippingCompanyId,
@@ -204,8 +213,16 @@ export function GovernorateConfigTable({
         })),
         confirmEmpty: confirmEmpty ? true : undefined,
       },
-      { onSettled: () => setConfirmEmptyOpen(false) },
-    );
+    )
+      .then(() => {
+        savedRowsRef.current = submittedRows;
+        syncDraft();
+        if (!isMountedRef.current) {
+          onDirtyChange?.(shippingCompanyId, !!draftStore?.get(shippingCompanyId));
+        }
+      })
+      .catch(() => undefined)
+      .finally(() => setConfirmEmptyOpen(false));
   };
 
   const onSubmit = (data: GovernorateConfigFormData) => {
