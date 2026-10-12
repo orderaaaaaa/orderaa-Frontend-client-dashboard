@@ -17,7 +17,12 @@ import InvoiceImageSection from './InvoiceImageSection';
 import { addInvoiceSchema, AddInvoiceFormData } from '../schema';
 import { InvoiceMode } from '../types';
 import { buildProductsPayload, payloadTotal } from '../utils';
-import { moneyCents } from '@/utils/money';
+import {
+  MONEY_DECIMALS_MESSAGE,
+  hasAtMostTwoDecimals,
+  moneyCents,
+} from '@/utils/money';
+import { getApiErrorMessage } from '@/utils/apiError';
 import { useCreateSupplierInvoiceMutation, useSuppliersQuery } from '@/services/suppliers';
 import { useEmployeesQuery } from '@/services/employees';
 import { uploadFile } from '@/lib/api/upload';
@@ -250,6 +255,10 @@ export function AddInvoiceContent() {
         if (paymentStatus === 'full') {
           resolvedPaymentAmount = totalAmount;
         } else if (paymentStatus === 'partial') {
+          if (!hasAtMostTwoDecimals(partialAmount)) {
+            setPartialError(MONEY_DECIMALS_MESSAGE);
+            return;
+          }
           const partialCents = moneyCents(Number(partialAmount) || 0);
           if (partialCents <= 0) {
             setPartialError('أدخل المبلغ المدفوع');
@@ -295,8 +304,7 @@ export function AddInvoiceContent() {
           router.push('/dashboard/purchases/all-invoices');
         }, 2000);
       } catch (err: unknown) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setSubmitError(axiosErr?.response?.data?.message || 'حدث خطأ أثناء إضافة الفاتورة');
+        setSubmitError(getApiErrorMessage(err, 'حدث خطأ أثناء إضافة الفاتورة'));
       }
     },
     [createInvoiceMutation, router, paymentStatus, partialAmount, invoiceMode],

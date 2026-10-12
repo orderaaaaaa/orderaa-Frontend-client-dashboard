@@ -5,9 +5,9 @@ import { toast } from 'react-toastify';
 import uniqBy from 'lodash/uniqBy';
 import type { Order } from '@/types/orders';
 import { OrderStatus } from '@/types/orders';
-import { getApiErrorMessage } from '@/utils/apiError';
-import { usePermissionCheck } from '@/hooks/usePermissions';
-import type { OrderStatusSetCode } from '@/lib/permissions';
+import { getApiErrorMessage, getApiErrorStatus } from '@/utils/apiError';
+import { useOrderStatusSetGuard } from '@/hooks/orders/useOrderStatusSetGuard';
+import { orderStatusFromCode, type OrderStatusSetCode } from '@/lib/permissions';
 import {
   useCallAgainOrders,
   usePrepareOrders,
@@ -99,7 +99,7 @@ interface UseCallCenterBulkActionsOptions {
 export function useCallCenterBulkActions({
   onCompleted,
 }: UseCallCenterBulkActionsOptions) {
-  const { hasPermission } = usePermissionCheck();
+  const canSetStatus = useOrderStatusSetGuard();
   const { mutateAsync: prepareOrders } = usePrepareOrders();
   const { mutateAsync: waitForPackaging } = useWaitingForPackaging();
   const { mutateAsync: callAgainOrders } = useCallAgainOrders();
@@ -122,7 +122,9 @@ export function useCallCenterBulkActions({
         onCompleted();
         return true;
       } catch (err) {
-        toast.error(getApiErrorMessage(err, 'فشل تحديث الطلبات'));
+        if (getApiErrorStatus(err) !== 403) {
+          toast.error(getApiErrorMessage(err, 'فشل تحديث الطلبات'));
+        }
         return false;
       } finally {
         pendingRef.current = false;
@@ -135,11 +137,9 @@ export function useCallCenterBulkActions({
   const canSetTarget = useCallback(
     (action: CallCenterBulkAction) => {
       const { setStatusCode, label } = ACTION_RULES[action];
-      if (hasPermission(setStatusCode)) return true;
-      toast.error(`ليس لديك صلاحية نقل الطلبات إلى «${label}»`);
-      return false;
+      return canSetStatus(orderStatusFromCode(setStatusCode), label);
     },
-    [hasPermission]
+    [canSetStatus]
   );
 
   const runForOrders = useCallback(

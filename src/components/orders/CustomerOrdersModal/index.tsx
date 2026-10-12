@@ -12,7 +12,8 @@ import { useBulkOrders } from '@/app/dashboard/orders/allOrders/hooks/useOrderBu
 import type { OrderStatusKey } from '@/app/dashboard/orders/allOrders/types/Bulk';
 import BaseModal from '@/components/ui/base-modal';
 import PageLoading from '@/components/ui/page-loading';
-import { getApiErrorMessage } from '@/utils/apiError';
+import { getApiErrorMessage, getApiErrorStatus } from '@/utils/apiError';
+import { useOrderStatusSetGuard } from '@/hooks/orders/useOrderStatusSetGuard';
 import {
   notifyBulkStatusResult,
   splitParkedOrders,
@@ -52,6 +53,7 @@ export default function CustomerOrdersModal({
   // status here does not by itself mean the caller may move an order into it.
   // Passed through unchanged from before T10.
   const statusOptions = orderStatuses?.statuses;
+  const canSetStatus = useOrderStatusSetGuard();
 
   // Labels for export come from the complete dictionary, so an order sitting in
   // a status outside this employee's window still exports a translated label.
@@ -114,6 +116,11 @@ export default function CustomerOrdersModal({
   const handleEditStatus = useCallback(
     async (statusKey: string) => {
       if (!statusKey || isBulkUpdating || selectedOrderIds.length === 0) return;
+      const statusLabel =
+        statusOptions?.find((option) => option.key === statusKey)?.label ??
+        statusLabelsMap.get(statusKey) ??
+        statusKey;
+      if (!canSetStatus(statusKey, statusLabel)) return;
       const { parked } = splitParkedOrders(selectedOrders);
       const parkedIds = new Set(parked.map((order) => order.id));
       const ordersIds = selectedOrderIds.filter((id) => !parkedIds.has(id));
@@ -129,10 +136,19 @@ export default function CustomerOrdersModal({
         notifyBulkStatusResult(result.updatedCount, ordersIds.length);
         setSelectedOrderIds([]);
       } catch (err) {
+        if (getApiErrorStatus(err) === 403) return;
         toast.error(getApiErrorMessage(err, 'فشل تعديل حالة الطلبات'));
       }
     },
-    [isBulkUpdating, selectedOrderIds, selectedOrders, bulkUpdateOrders]
+    [
+      isBulkUpdating,
+      selectedOrderIds,
+      selectedOrders,
+      statusOptions,
+      statusLabelsMap,
+      canSetStatus,
+      bulkUpdateOrders,
+    ]
   );
 
   const handleShareWhatsApp = useCallback(() => {

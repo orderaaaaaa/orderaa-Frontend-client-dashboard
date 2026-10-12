@@ -33,14 +33,14 @@ export function notifyBulkStatusResult(
 ) {
   if (updatedCount === 0) {
     toast.warning(
-      'لم يتم تحديث أي طلب. قد تكون الطلبات معلّقة أو محذوفة أو تغيّرت حالتها'
+      'لم يتم تحديث أي طلب. قد تكون الطلبات معلّقة أو محذوفة أو تغيّرت حالتها أو في الحالة المطلوبة بالفعل'
     );
     return;
   }
   toast.success(`تم تحديث حالة ${updatedCount} طلب بنجاح`);
   if (requestedCount !== undefined && updatedCount < requestedCount) {
     toast.warning(
-      `لم يتم تحديث ${requestedCount - updatedCount} من ${requestedCount} طلب لأنها معلّقة أو محذوفة`
+      `لم يتم تحديث ${requestedCount - updatedCount} من ${requestedCount} طلب لأنها معلّقة أو محذوفة أو في الحالة المطلوبة بالفعل`
     );
   }
 }

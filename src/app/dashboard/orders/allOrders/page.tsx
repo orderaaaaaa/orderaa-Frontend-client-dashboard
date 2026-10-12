@@ -41,7 +41,8 @@ import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import { Scan, ScanLine, ArrowUp, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { shippingCompanyNameOf } from '@/lib/shippingCompanies';
-import { getApiErrorMessage } from '@/utils/apiError';
+import { getApiErrorMessage, getApiErrorStatus } from '@/utils/apiError';
+import { useOrderStatusSetGuard } from '@/hooks/orders/useOrderStatusSetGuard';
 import {
   notifyBulkStatusResult,
   splitParkedOrders,
@@ -132,6 +133,7 @@ function AllOrdersContent() {
   // status here does not by itself mean the caller may move an order into it.
   // Passed through unchanged from before T10.
   const statusOptions = orderStatuses?.statuses;
+  const canSetStatus = useOrderStatusSetGuard();
 
   // Labels for export come from the complete dictionary, so an order sitting in
   // a status outside this employee's window still exports a translated label.
@@ -152,6 +154,7 @@ function AllOrdersContent() {
         setSelect(false);
       },
       onError: (err) => {
+        if (getApiErrorStatus(err) === 403) return;
         toast.error(getApiErrorMessage(err, 'فشل تحديث حالة الطلبات'));
       },
     });
@@ -329,6 +332,11 @@ function AllOrdersContent() {
     (statusKey: string) => {
       if (!statusKey || isBulkUpdating) return;
 
+      const statusLabel =
+        statusOptions?.find((option) => option.key === statusKey)?.label ??
+        statusLabelsMap.get(statusKey) ??
+        statusKey;
+
       if (selectAllMatchingFilters) {
         const currentStatusFilter = filters.status;
 
@@ -336,6 +344,8 @@ function AllOrdersContent() {
           toast.warning('يجب تحديد  فلتر الطلبات قبل استخدام تحديث الكل');
           return;
         }
+
+        if (!canSetStatus(statusKey, statusLabel)) return;
 
         bulkUpdateOrders({
           payload: {
@@ -345,6 +355,7 @@ function AllOrdersContent() {
         });
       } else {
         if (selectedOrderIds.length === 0) return;
+        if (!canSetStatus(statusKey, statusLabel)) return;
 
         const { parked } = splitParkedOrders(selectedOrders);
         const parkedIds = new Set(parked.map((order) => order.id));
@@ -362,6 +373,9 @@ function AllOrdersContent() {
     },
     [
       isBulkUpdating,
+      statusOptions,
+      statusLabelsMap,
+      canSetStatus,
       selectAllMatchingFilters,
       filters.status,
       selectedOrderIds,

@@ -11,8 +11,11 @@
  * route helpers). Inside components use `@/hooks/usePermissions` or `<Can />`.
  */
 import {
+  ORDER_STATUSES,
   ORDER_STATUS_READ_PREFIX,
   ORDER_STATUS_SET_PREFIX,
+  type OrderStatusKey,
+  type OrderStatusSetCode,
   type PermissionCode,
 } from '@/lib/generated/permission-codes';
 
@@ -45,6 +48,16 @@ export const isOrderStatusSetCode = (code: string) =>
 /** Extracts `CONFIRMED` from `orders:status:CONFIRMED` / `orders:setStatus:CONFIRMED`. */
 export const orderStatusFromCode = (code: string): string =>
   code.slice(code.lastIndexOf(':') + 1);
+
+const ORDER_STATUS_KEYS: ReadonlySet<string> = new Set(ORDER_STATUSES);
+
+export const isOrderStatusKey = (status: string): status is OrderStatusKey =>
+  ORDER_STATUS_KEYS.has(status);
+
+export const orderStatusSetCodeOf = (
+  status: string
+): OrderStatusSetCode | null =>
+  isOrderStatusKey(status) ? `${ORDER_STATUS_SET_PREFIX}${status}` : null;
 
 /**
  * Fail-closed membership check against a known permission list.
