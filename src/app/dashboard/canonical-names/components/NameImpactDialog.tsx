@@ -68,7 +68,7 @@ export default function NameImpactDialog({
         {isLoading || !impact ? (
           <PageLoading size="sm" />
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="flex min-w-0 flex-col gap-4">
             {isLocation ? (
               <p className="text-sm text-gray-700">
                 مرتبط بـ {impact.rowCount} صف من شركات الشحن
