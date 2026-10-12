@@ -31,34 +31,32 @@ const PaginationFooter: React.FC<PaginationFooterProps> = ({
   hasSelectedItems = false,
 }) => {
   const getPageNumbers = () => {
-    const pages = [];
+    const pages: (number | '...')[] = [];
     const maxVisiblePages = 5;
 
     if (totalPages <= maxVisiblePages) {
-      for (let i = totalPages; i >= 1; i--) {
+      for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      pages.push(totalPages);
+      pages.push(1);
 
       const start = Math.max(2, currentPage - 1);
       const end = Math.min(totalPages - 1, currentPage + 1);
-
-      if (end < totalPages - 1) {
-        pages.push('...');
-      }
-
-      for (let i = end; i >= start; i--) {
-        pages.push(i);
-      }
 
       if (start > 2) {
         pages.push('...');
       }
 
-      if (totalPages > 1) {
-        pages.push(1);
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
       }
+
+      if (end < totalPages - 1) {
+        pages.push('...');
+      }
+
+      pages.push(totalPages);
     }
 
     return pages;
@@ -66,8 +64,12 @@ const PaginationFooter: React.FC<PaginationFooterProps> = ({
 
   const pageNumbers = getPageNumbers();
 
-  const startItem = (currentPage - 1) * currentPageSize + 1;
   const endItem = Math.min(currentPage * currentPageSize, totalItems);
+  const startItem = Math.min((currentPage - 1) * currentPageSize + 1, endItem);
+  const rangeText =
+    totalItems > 0
+      ? `عرض ${startItem}-${endItem} من ${totalItems}`
+      : 'لا توجد نتائج';
 
   return (
     <div
@@ -83,55 +85,61 @@ const PaginationFooter: React.FC<PaginationFooterProps> = ({
             onSizeChange={onPageSizeChange}
           />
           <span className="hidden sm:inline text-sm text-gray-500">
-            عرض {startItem}-{endItem} من {totalItems}
+            {rangeText}
           </span>
         </div>
-        <div className="flex justify-center items-center space-x-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onNext}
-          disabled={!hasNextPage}
-          className="h-8 w-8 p-0 cursor-pointer"
+        <nav
+          aria-label="التنقل بين الصفحات"
+          className="flex justify-center items-center gap-2"
         >
-          <ChevronRight className="h-4 w-4 text-[#682fee]" />
-        </Button>
-        <div className="flex items-center space-x-1">
-          {pageNumbers.map((page, index) => (
-            <React.Fragment key={index}>
-              {page === '...' ? (
-                <span className="px-2 py-1 text-gray-500">...</span>
-              ) : (
-                <Button
-                  variant={page === currentPage ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => onPageChange(page as number)}
-                  className={`h-8 w-8 p-0 cursor-pointer ${
-                    page === currentPage
-                      ? 'bg-primary text-white hover:bg-purple-700'
-                      : 'text-[#682fee] hover:bg-gray-50'
-                  }`}
-                >
-                  {page}
-                </Button>
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onPrevious}
-          disabled={!hasPreviousPage}
-          className="h-8 w-8 p-0 bg-white cursor-pointer"
-        >
-          <ChevronLeft className="h-4 w-4 text-[#682fee]" />
-        </Button>
-        </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onPrevious}
+            disabled={!hasPreviousPage}
+            aria-label="الصفحة السابقة"
+            className="size-10 sm:size-8 p-0 bg-white cursor-pointer"
+          >
+            <ChevronRight className="h-4 w-4 text-[#682fee]" />
+          </Button>
+          <div className="flex items-center gap-1">
+            {pageNumbers.map((page, index) => (
+              <React.Fragment key={index}>
+                {page === '...' ? (
+                  <span className="px-2 py-1 text-gray-500">...</span>
+                ) : (
+                  <Button
+                    variant={page === currentPage ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => onPageChange(page)}
+                    aria-label={`صفحة ${page}`}
+                    aria-current={page === currentPage ? 'page' : undefined}
+                    className={`size-10 sm:size-8 p-0 cursor-pointer ${
+                      page === currentPage
+                        ? 'bg-primary text-white hover:bg-purple-700'
+                        : 'text-[#682fee] hover:bg-gray-50'
+                    }`}
+                  >
+                    {page}
+                  </Button>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onNext}
+            disabled={!hasNextPage}
+            aria-label="الصفحة التالية"
+            className="size-10 sm:size-8 p-0 bg-white cursor-pointer"
+          >
+            <ChevronLeft className="h-4 w-4 text-[#682fee]" />
+          </Button>
+        </nav>
       </div>
       <span className="sm:hidden text-sm text-gray-500 text-center">
-        عرض {startItem}-{endItem} من {totalItems}
+        {rangeText}
       </span>
     </div>
   );
