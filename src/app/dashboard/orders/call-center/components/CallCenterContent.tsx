@@ -148,7 +148,7 @@ export function CallCenterContent() {
     [productsData],
   );
 
-  const orders = ordersData?.data ?? [];
+  const orders = useMemo(() => ordersData?.data ?? [], [ordersData]);
   const totalOrders = ordersData?.meta?.totalItems ?? 0;
   const totalPages = ordersData?.meta?.totalPages ?? 1;
   const currentPage = ordersData?.meta?.currentPage ?? 1;

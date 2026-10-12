@@ -1,9 +1,14 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useId, useMemo, useState } from 'react';
+import { LiaAngleDownSolid } from 'react-icons/lia';
 import { Checkbox } from '@/components/ui/checkbox';
+import Input from '@/components/ui/Input';
 import { cn } from '@/lib/utils';
-import type { PermissionCatalogGroup } from '@/lib/api/authorization';
+import type {
+  PermissionCatalogEntry,
+  PermissionCatalogGroup,
+} from '@/lib/api/authorization';
 import {
   buildPermissionSections,
   countSelectedInSection,
@@ -21,111 +26,148 @@ interface PermissionSelectorProps {
 
 interface SectionProps {
   section: PermissionSection;
+  visibleEntries: PermissionCatalogEntry[];
   selectedSet: Set<string>;
   disabled: boolean;
+  expanded: boolean;
+  onToggleExpanded: (key: string) => void;
   onToggleCode: (code: string) => void;
-  onToggleSection: (section: PermissionSection, checked: boolean) => void;
+  onToggleEntries: (entries: PermissionCatalogEntry[], checked: boolean) => void;
 }
 
-function SectionHeader({
-  section,
-  selectedCount,
-  disabled,
-  onToggleSection,
-}: {
-  section: PermissionSection;
-  selectedCount: number;
-  disabled: boolean;
-  onToggleSection: (section: PermissionSection, checked: boolean) => void;
-}) {
-  const total = section.entries.length;
-  const allSelected = selectedCount === total;
+const SM_QUERY = '(min-width: 640px)';
 
-  return (
-    <div className="mb-3 flex items-start justify-between gap-4">
-      <div>
-        <h4 className="text-sm font-semibold text-gray-900">{section.title}</h4>
-        {section.description && (
-          <p className="mt-0.5 text-xs text-gray-400">{section.description}</p>
-        )}
-      </div>
+const expandedByDefault = () =>
+  typeof window === 'undefined' || window.matchMedia(SM_QUERY).matches;
 
-      <label
-        className={cn(
-          'flex shrink-0 items-center gap-2 text-xs',
-          disabled ? 'text-gray-400' : 'cursor-pointer text-primary'
-        )}
-      >
-        <span className="tabular-nums text-gray-400">
-          {selectedCount}/{total}
-        </span>
-        <Checkbox
-          className="h-4 w-4"
-          checked={allSelected}
-          disabled={disabled}
-          onCheckedChange={(checked) =>
-            onToggleSection(section, checked === true)
-          }
-        />
-        <span>تحديد الكل</span>
-      </label>
-    </div>
-  );
+const normalize = (value: string) => value.trim().toLowerCase();
+
+function entryMatches(
+  entry: PermissionCatalogEntry,
+  isStatus: boolean,
+  query: string
+) {
+  if (!query) return true;
+  const haystack = [
+    entry.label,
+    entry.code,
+    isStatus ? orderStatusLabel(entry.code) : '',
+  ]
+    .join(' ')
+    .toLowerCase();
+  return haystack.includes(query);
 }
 
 function PermissionSectionCard({
   section,
+  visibleEntries,
   selectedSet,
   disabled,
+  expanded,
+  onToggleExpanded,
   onToggleCode,
-  onToggleSection,
+  onToggleEntries,
 }: SectionProps) {
+  const panelId = useId();
   const selectedCount = countSelectedInSection(section, selectedSet);
+  const total = section.entries.length;
+  const visibleSelected = visibleEntries.filter((entry) =>
+    selectedSet.has(entry.code)
+  ).length;
+  const allVisibleSelected =
+    visibleEntries.length > 0 && visibleSelected === visibleEntries.length;
+  const isStatus = section.variant === 'statusGrid';
 
   return (
-    <div className="rounded-lg border border-gray-200 p-4">
-      <SectionHeader
-        section={section}
-        selectedCount={selectedCount}
-        disabled={disabled}
-        onToggleSection={onToggleSection}
-      />
+    <div className="rounded-lg border border-gray-200">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-3 py-2 sm:px-4">
+        <button
+          type="button"
+          onClick={() => onToggleExpanded(section.key)}
+          aria-expanded={expanded}
+          aria-controls={panelId}
+          className="flex min-h-10 min-w-0 flex-1 items-center gap-2 rounded-md text-start outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        >
+          <LiaAngleDownSolid
+            aria-hidden
+            className={cn(
+              'size-4 shrink-0 text-gray-500 transition-transform',
+              expanded && 'rotate-180'
+            )}
+          />
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-semibold text-gray-900">
+              {section.title}
+            </span>
+            {section.description && (
+              <span className="mt-0.5 block text-xs text-gray-500">
+                {section.description}
+              </span>
+            )}
+          </span>
+          <span className="shrink-0 tabular-nums text-xs text-gray-500">
+            {selectedCount}/{total}
+          </span>
+        </button>
+
+        <label
+          className={cn(
+            'flex min-h-10 shrink-0 items-center gap-2 text-sm',
+            disabled ? 'text-gray-400' : 'cursor-pointer text-primary'
+          )}
+        >
+          <Checkbox
+            checked={allVisibleSelected}
+            disabled={disabled || visibleEntries.length === 0}
+            onCheckedChange={(checked) =>
+              onToggleEntries(visibleEntries, checked === true)
+            }
+          />
+          <span>تحديد الكل</span>
+        </label>
+      </div>
 
       <div
+        id={panelId}
+        hidden={!expanded}
         className={cn(
-          'grid gap-x-4 gap-y-2',
-          section.variant === 'statusGrid'
-            ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'
+          'grid gap-x-4 gap-y-1 border-t border-gray-100 px-3 pb-3 pt-2 sm:px-4',
+          isStatus
+            ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
             : 'grid-cols-1 sm:grid-cols-2'
         )}
       >
-        {section.entries.map((entry) => {
+        {visibleEntries.map((entry) => {
           const checked = selectedSet.has(entry.code);
-          const isStatus = section.variant === 'statusGrid';
 
           return (
             <label
               key={entry.code}
-              // The server label for a status code is a whole sentence; the grid
-              // shows the status name and keeps the sentence as the tooltip.
-              title={entry.label}
               className={cn(
-                'flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors',
+                'flex min-h-10 items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors',
                 disabled
-                  ? 'cursor-not-allowed text-gray-400'
+                  ? 'cursor-not-allowed text-gray-600'
                   : 'cursor-pointer text-gray-700 hover:bg-gray-50',
-                checked && !disabled && 'bg-primary/5'
+                checked && 'bg-primary/5'
               )}
             >
               <Checkbox
-                className="h-4 w-4"
                 checked={checked}
                 disabled={disabled}
                 onCheckedChange={() => onToggleCode(entry.code)}
               />
-              <span className="truncate">
-                {isStatus ? orderStatusLabel(entry.code) : entry.label}
-              </span>
+              {isStatus ? (
+                <span className="min-w-0">
+                  <span className="block font-medium">
+                    {orderStatusLabel(entry.code)}
+                  </span>
+                  <span className="mt-0.5 block text-xs text-gray-500">
+                    {entry.label}
+                  </span>
+                </span>
+              ) : (
+                <span className="min-w-0 break-words">{entry.label}</span>
+              )}
             </label>
           );
         })}
@@ -159,11 +201,18 @@ export function PermissionSelector({
     [selected, onChange, disabled]
   );
 
-  const onToggleSection = useCallback(
-    (section: PermissionSection, checked: boolean) => {
+  const [query, setQuery] = useState('');
+  const normalizedQuery = normalize(query);
+  const [expandedDefault] = useState(expandedByDefault);
+  const [expandedOverrides, setExpandedOverrides] = useState<
+    Record<string, boolean>
+  >({});
+
+  const onToggleEntries = useCallback(
+    (entries: PermissionCatalogEntry[], checked: boolean) => {
       if (disabled) return;
       const next = new Set(selected);
-      section.entries.forEach((entry) => {
+      entries.forEach((entry) => {
         if (checked) next.add(entry.code);
         else next.delete(entry.code);
       });
@@ -171,6 +220,33 @@ export function PermissionSelector({
     },
     [selected, onChange, disabled]
   );
+
+  const visibleSections = useMemo(
+    () =>
+      sections
+        .map((section) => ({
+          section,
+          visibleEntries: section.entries.filter((entry) =>
+            entryMatches(
+              entry,
+              section.variant === 'statusGrid',
+              normalizedQuery
+            )
+          ),
+        }))
+        .filter(({ visibleEntries }) => visibleEntries.length > 0),
+    [sections, normalizedQuery]
+  );
+
+  const isExpanded = (key: string) =>
+    normalizedQuery !== '' || (expandedOverrides[key] ?? expandedDefault);
+
+  const onToggleExpanded = (key: string) => {
+    setExpandedOverrides((prev) => ({
+      ...prev,
+      [key]: !(prev[key] ?? expandedDefault),
+    }));
+  };
 
   if (sections.length === 0) {
     return (
@@ -182,16 +258,35 @@ export function PermissionSelector({
 
   return (
     <div className="space-y-3">
-      {sections.map((section) => (
-        <PermissionSectionCard
-          key={section.key}
-          section={section}
-          selectedSet={selectedSet}
-          disabled={disabled}
-          onToggleCode={onToggleCode}
-          onToggleSection={onToggleSection}
-        />
-      ))}
+      <Input
+        value={query}
+        inputMode="search"
+        onChange={(event) => setQuery(event.target.value)}
+        clearable
+        onClear={() => setQuery('')}
+        placeholder="ابحث عن صلاحية أو حالة"
+        aria-label="بحث في الصلاحيات"
+      />
+
+      {visibleSections.length === 0 ? (
+        <p className="py-6 text-center text-sm text-gray-500" role="status">
+          لا توجد صلاحيات مطابقة لـ «{query.trim()}»
+        </p>
+      ) : (
+        visibleSections.map(({ section, visibleEntries }) => (
+          <PermissionSectionCard
+            key={section.key}
+            section={section}
+            visibleEntries={visibleEntries}
+            selectedSet={selectedSet}
+            disabled={disabled}
+            expanded={isExpanded(section.key)}
+            onToggleExpanded={onToggleExpanded}
+            onToggleCode={onToggleCode}
+            onToggleEntries={onToggleEntries}
+          />
+        ))
+      )}
     </div>
   );
 }

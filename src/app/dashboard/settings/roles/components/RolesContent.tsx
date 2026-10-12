@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import BaseModal from '@/components/ui/base-modal';
 import PageLoading from '@/components/ui/page-loading';
+import { ErrorState } from '@/components/ui/state-panels';
 import { Can } from '@/components/Can';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSIONS } from '@/lib/permissions';
@@ -42,9 +43,16 @@ export function RolesContent() {
     data: roles = [],
     isLoading,
     isError,
+    error: rolesError,
+    refetch: refetchRoles,
   } = useRolesQuery(canReadRoles);
-  const { data: catalog = [], isLoading: isCatalogLoading } =
-    usePermissionCatalogQuery(canReadRoles);
+  const {
+    data: catalog = [],
+    isLoading: isCatalogLoading,
+    isError: isCatalogError,
+    error: catalogError,
+    refetch: refetchCatalog,
+  } = usePermissionCatalogQuery(canReadRoles);
   const deleteMutation = useDeleteRoleMutation();
   const resetMutation = useResetRoleToTemplateMutation();
   const resetAllMutation = useResetAllRolesMutation();
@@ -174,21 +182,20 @@ export function RolesContent() {
           {isLoading ? (
             <PageLoading size="sm" className="min-h-0 py-10" />
           ) : isError ? (
-            <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-              <LiaUserShieldSolid className="mb-4 size-16 text-red-300" />
-              <p className="text-lg font-medium text-red-500">
-                تعذر تحميل قائمة الأدوار
-              </p>
-            </div>
+            <ErrorState
+              error={rolesError}
+              fallback="تعذر تحميل قائمة الأدوار"
+              onRetry={() => refetchRoles()}
+            />
           ) : (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-sm text-gray-500">
                   {roles.length ? `${roles.length} دور` : 'لا توجد أدوار بعد'}
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Can code={PERMISSIONS.ROLES_CREATE}>
-                    <Button className="rounded-full" onClick={openCreate}>
+                    <Button className="h-10 rounded-full sm:h-9" onClick={openCreate}>
                       <LiaPlusSolid className="ml-1 size-4" />
                       إضافة دور
                     </Button>
@@ -197,7 +204,7 @@ export function RolesContent() {
                     <Can code={PERMISSIONS.ROLES_UPDATE}>
                       <Button
                         variant="outline"
-                        className="rounded-full"
+                        className="h-10 rounded-full sm:h-9"
                         onClick={() => setIsResetAllOpen(true)}
                       >
                         <LiaUndoSolid className="ml-1 size-4" />
@@ -258,6 +265,8 @@ export function RolesContent() {
         role={editing}
         catalog={catalog}
         isCatalogLoading={isCatalogLoading}
+        catalogError={isCatalogError ? catalogError : undefined}
+        onRetryCatalog={() => refetchCatalog()}
       />
 
       <BaseModal
@@ -265,7 +274,7 @@ export function RolesContent() {
         onClose={closeDelete}
         title="حذف الدور"
         confirmText={forceDelete ? 'حذف وإلغاء الإسناد' : 'حذف'}
-        confirmButtonClassName="bg-red-600 hover:bg-red-700 w-[170px] h-[33px] sm:w-[200px] sm:h-[37px] border-[1.5px] border-red-600 rounded-[28px] flex items-center justify-center"
+        confirmButtonClassName="bg-red-600 hover:bg-red-700 min-w-[120px] px-4 h-10 sm:min-w-[200px] sm:h-[37px] border-[1.5px] border-red-600 rounded-[28px] flex items-center justify-center"
         onConfirm={confirmDelete}
         isLoading={deleteMutation.isPending}
         maxWidth="md:max-w-[460px]"

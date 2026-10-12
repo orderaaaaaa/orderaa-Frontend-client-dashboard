@@ -6,12 +6,18 @@ interface UnsavedChangesDialogProps {
   isOpen: boolean;
   onStay: () => void;
   onLeave: () => void;
+  message?: string;
+  leaveText?: string;
+  stayText?: string;
 }
 
 export function UnsavedChangesDialog({
   isOpen,
   onStay,
   onLeave,
+  message = 'إذا غادرت الصفحة الآن ستفقد التغييرات التي لم تحفظها.',
+  leaveText = 'مغادرة',
+  stayText = 'البقاء',
 }: UnsavedChangesDialogProps) {
   return (
     <BaseModal
@@ -19,13 +25,11 @@ export function UnsavedChangesDialog({
       onClose={onStay}
       title="لديك تغييرات غير محفوظة"
       onConfirm={onLeave}
-      confirmText="مغادرة"
-      cancelText="البقاء"
+      confirmText={leaveText}
+      cancelText={stayText}
       maxWidth="md:max-w-md"
     >
-      <p className="text-sm text-gray-700">
-        إذا غادرت الصفحة الآن ستفقد التغييرات التي لم تحفظها.
-      </p>
+      <p className="text-sm text-gray-700">{message}</p>
     </BaseModal>
   );
 }
