@@ -2,9 +2,9 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { formatDateToLocalDate } from '@/utils/dateRangeUtils';
-import { Scan, ScanLine, X } from 'lucide-react';
 import { LiaFileInvoiceSolid, LiaSlidersHSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
+import SelectModeControls from '@/components/purchases/SelectModeControls';
 import InvoicesHeader from './InvoicesHeader';
 import InvoicesSearchBar from './InvoicesSearchBar';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
@@ -114,17 +114,6 @@ export function AllInvoicesContent() {
 
   const showActionsBar = select && selectedIds.length > 0;
 
-  useEffect(() => {
-    if (showActionsBar) {
-      document.body.style.paddingBottom = '80px';
-    } else {
-      document.body.style.paddingBottom = '0px';
-    }
-    return () => {
-      document.body.style.paddingBottom = '0px';
-    };
-  }, [showActionsBar]);
-
   const handleToggleSelect = useCallback(() => {
     setSelect((prev) => {
       if (prev) {
@@ -132,6 +121,11 @@ export function AllInvoicesContent() {
       }
       return !prev;
     });
+  }, []);
+
+  const handleClearSelection = useCallback(() => {
+    setSelectedIds([]);
+    setSelect(false);
   }, []);
 
   const handleSelectionChange = useCallback(
@@ -179,7 +173,7 @@ export function AllInvoicesContent() {
 
       <div className="sm:px-8 py-3 flex flex-col gap-4">
         <div className="flex flex-row items-center gap-3">
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <InvoicesSearchBar
               value={filters.searchQuery}
               onChange={setSearchQuery}
@@ -187,8 +181,10 @@ export function AllInvoicesContent() {
             />
           </div>
           <Button
+            type="button"
             variant="default"
-            className="rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm px-5 relative"
+            aria-expanded={showFilters}
+            className="h-10 rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm px-5 relative shrink-0"
             onClick={() => {
               setShowFilters((prev) => {
                 if (prev) setFiltersOverflow(false);
@@ -199,7 +195,7 @@ export function AllInvoicesContent() {
             <LiaSlidersHSolid className="w-5 h-5" />
             فلاتر متقدمة
             {activeFilterCount > 0 && (
-              <span className="absolute -top-2 -left-2 bg-white text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
+              <span className="absolute -top-2 -end-2 bg-white text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
                 {activeFilterCount}
               </span>
             )}
@@ -237,34 +233,13 @@ export function AllInvoicesContent() {
             onTimePeriodChange={setTimePeriod}
             className="px-3 sm:pe-8"
           />
-          <div className="flex items-center gap-3">
-            {select && selectedIds.length > 0 && (
-              <div className="flex flex-row items-center justify-center gap-2">
-                <X
-                  onClick={() => {
-                    setSelectedIds([]);
-                    setSelect(false);
-                  }}
-                  className="cursor-pointer text-primary h-5 w-5"
-                />
-                <span className="text-sm text-gray-600 whitespace-nowrap">
-                  تم تحديد {selectedIds.length} طلب
-                </span>
-              </div>
-            )}
-            <Button
-              variant="default"
-              className="rounded-full font-semibold flex items-center gap-3 px-5"
-              onClick={handleToggleSelect}
-            >
-              تحديد
-              {select ? (
-                <ScanLine className="w-5 h-5" />
-              ) : (
-                <Scan className="w-5 h-5" />
-              )}
-            </Button>
-          </div>
+          <SelectModeControls
+            active={select}
+            selectedCount={selectedIds.length}
+            countLabel="فاتورة"
+            onToggle={handleToggleSelect}
+            onClear={handleClearSelection}
+          />
         </div>
       </div>
 

@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { Scan, ScanLine, X } from 'lucide-react';
 import { LiaFileInvoiceSolid, LiaSlidersHSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import ToggleGroup from '@/components/ui/toggle-group';
 import SharedInvoiceCard, { InvoiceCardData } from '@/components/purchases/InvoiceCard';
+import SelectModeControls from '@/components/purchases/SelectModeControls';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import PageLoading from '@/components/ui/page-loading';
 import { ErrorState } from '@/components/ui/state-panels';
@@ -139,17 +139,6 @@ export function ReceiptsContent() {
 
   const showActionsBar = select && selectedIds.length > 0;
 
-  useEffect(() => {
-    if (showActionsBar) {
-      document.body.style.paddingBottom = '80px';
-    } else {
-      document.body.style.paddingBottom = '0px';
-    }
-    return () => {
-      document.body.style.paddingBottom = '0px';
-    };
-  }, [showActionsBar]);
-
   const handleToggleSelect = useCallback(() => {
     setSelect((prev) => {
       if (prev) {
@@ -157,6 +146,11 @@ export function ReceiptsContent() {
       }
       return !prev;
     });
+  }, []);
+
+  const handleClearSelection = useCallback(() => {
+    setSelectedIds([]);
+    setSelect(false);
   }, []);
 
   const handleSelectionChange = useCallback(
@@ -194,7 +188,7 @@ export function ReceiptsContent() {
 
       <div className="sm:px-8 py-3 flex flex-col gap-4">
         <div className="flex flex-row items-center gap-3">
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <ReceiptsSearchBar
               value={filters.searchQuery}
               onChange={setSearchQuery}
@@ -202,8 +196,10 @@ export function ReceiptsContent() {
             />
           </div>
           <Button
+            type="button"
             variant="default"
-            className="rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm px-5 relative"
+            aria-expanded={showFilters}
+            className="h-10 rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm px-5 relative shrink-0"
             onClick={() => {
               setShowFilters((prev) => {
                 if (prev) setFiltersOverflow(false);
@@ -214,7 +210,7 @@ export function ReceiptsContent() {
             <LiaSlidersHSolid className="w-5 h-5" />
             فلاتر متقدمة
             {activeFilterCount > 0 && (
-              <span className="absolute -top-2 -left-2 bg-white text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
+              <span className="absolute -top-2 -end-2 bg-white text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
                 {activeFilterCount}
               </span>
             )}
@@ -237,7 +233,7 @@ export function ReceiptsContent() {
             />
           </div>
         </div>
-        <div className="flex flex-row items-center justify-between gap-4">
+        <div className="flex flex-row flex-wrap items-center justify-between gap-3">
           <ToggleGroup
             options={RECEIVING_STATUS_OPTIONS}
             value={filters.receivingStatus}
@@ -252,35 +248,13 @@ export function ReceiptsContent() {
             onTimePeriodChange={setTimePeriod}
             className="px-3 sm:pe-8"
           />
-          <div className="flex flex-row items-center gap-3">
-            {select && selectedIds.length > 0 && (
-              <div className="flex flex-row items-center justify-center gap-2">
-                <X
-                  onClick={() => {
-                    setSelectedIds([]);
-                    setSelect(false);
-                  }}
-                  className="cursor-pointer text-primary h-5 w-5"
-                />
-                <span className="text-sm text-gray-600 whitespace-nowrap">
-                  تم تحديد {selectedIds.length} استلام
-                </span>
-              </div>
-            )}
-            <div
-              className="bg-primary flex flex-row items-center justify-center gap-3 px-5 py-2 rounded-full cursor-pointer text-white whitespace-nowrap"
-              onClick={handleToggleSelect}
-            >
-              <p>تحديد</p>
-              <div>
-                {select ? (
-                  <ScanLine className="text-white w-5 h-5" />
-                ) : (
-                  <Scan className="text-white w-5 h-5" />
-                )}
-              </div>
-            </div>
-          </div>
+          <SelectModeControls
+            active={select}
+            selectedCount={selectedIds.length}
+            countLabel="استلام"
+            onToggle={handleToggleSelect}
+            onClear={handleClearSelection}
+          />
         </div>
       </div>
 

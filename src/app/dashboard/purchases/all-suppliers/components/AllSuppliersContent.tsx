@@ -140,7 +140,7 @@ export function AllSuppliersContent() {
 
       <div className="sm:px-8 py-3 flex flex-col gap-4">
         <div className="flex flex-row items-center gap-3">
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <SuppliersSearchBar
               value={filters.searchQuery}
               onChange={setSearchQuery}
@@ -148,8 +148,10 @@ export function AllSuppliersContent() {
             />
           </div>
           <Button
+            type="button"
             variant="default"
-            className="rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm px-5 relative"
+            aria-expanded={showFilters}
+            className="h-10 rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm px-5 relative shrink-0"
             onClick={() => {
               setShowFilters((prev) => {
                 if (prev) setFiltersOverflow(false);
@@ -160,7 +162,7 @@ export function AllSuppliersContent() {
             <LiaSlidersHSolid className="w-5 h-5" />
             فلاتر متقدمة
             {activeFilterCount > 0 && (
-              <span className="absolute -top-2 -left-2 bg-white text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
+              <span className="absolute -top-2 -end-2 bg-white text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
                 {activeFilterCount}
               </span>
             )}

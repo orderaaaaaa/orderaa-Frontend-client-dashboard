@@ -8,6 +8,7 @@ import {
   LiaBalanceScaleSolid,
 } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
+import { formatMoney } from '@/utils/formatMoney';
 import { DataTable, DataTableColumn } from '@/components/ui/data-table';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
@@ -104,17 +105,17 @@ export default function ProductDetailModal({
     () => [
       {
         label: 'إجمالي المشتريات',
-        value: product.totalPurchaseAmount.toLocaleString(),
+        value: formatMoney(String(product.totalPurchaseAmount)),
         icon: LiaMoneyBillWaveSolid,
       },
       {
         label: 'إجمالي المرتجعات',
-        value: product.totalReturnAmount.toLocaleString(),
+        value: formatMoney(String(product.totalReturnAmount)),
         icon: LiaUndoAltSolid,
       },
       {
         label: 'إجمالي صافي شراء',
-        value: product.netAmount.toLocaleString(),
+        value: formatMoney(String(product.netAmount)),
         icon: LiaBalanceScaleSolid,
       },
     ],
@@ -151,7 +152,7 @@ export default function ProductDetailModal({
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {stats.map((stat) => (
             <div
               key={stat.label}

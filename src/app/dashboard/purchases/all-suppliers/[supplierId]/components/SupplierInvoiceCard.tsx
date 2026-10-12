@@ -16,6 +16,7 @@ import {
 } from 'react-icons/lia';
 import { Checkbox } from '@/components/ui/checkbox';
 import { getTimeAgo } from '@/utils/timeAgo';
+import { formatMoney } from '@/utils/formatMoney';
 import { SupplierInvoice } from '../types';
 import { formatDate } from '../utils';
 import InvoiceDetailModal from './InvoiceDetailModal';
@@ -78,7 +79,7 @@ const SupplierInvoiceCard = memo(
         },
         {
           label: 'المبلغ الاجمالي',
-          value: `${isNegativeAmount ? '-' : '+'}${Math.abs(invoice.totalAmount).toLocaleString()} جنيه`,
+          value: `${isNegativeAmount ? '-' : '+'}${formatMoney(String(Math.abs(invoice.totalAmount)))}`,
           icon: LiaMoneyBillWaveSolid,
           valueClassName: typeColors.text,
           iconClassName: typeColors.iconColor,
@@ -96,38 +97,36 @@ const SupplierInvoiceCard = memo(
 
     return (
       <div className="w-full bg-white border border-gray-200 rounded-xl p-5 transition-all duration-200 hover:shadow-md">
-        <div className="flex items-start justify-between">
-          <div className="flex flex-col items-start gap-1">
-            <div className="flex items-center gap-2">
-              <LiaFileInvoiceSolid
-                className="text-primary shrink-0"
-                style={{ width: 24, height: 24 }}
-              />
-              <span
-                className="text-lg font-bold text-primary cursor-pointer hover:text-primary hover:underline transition-colors"
-                onClick={() => setIsDetailOpen(true)}
-              >
-                فاتورة رقم {invoice.code}
-              </span>
-            </div>
-          </div>
-
+        <div className="flex items-start gap-2">
           {select && (
-            <Checkbox
-              checked={isSelected}
-              onCheckedChange={(checked) => onSelectionChange(checked === true)}
-              className="mt-1"
-            />
+            <label className="-ms-2 -mt-1.5 flex size-10 shrink-0 cursor-pointer items-center justify-center">
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={(checked) => onSelectionChange(checked === true)}
+                aria-label={`تحديد الفاتورة ${invoice.code}`}
+              />
+            </label>
           )}
+          <button
+            type="button"
+            className="flex min-w-0 items-center gap-2 text-start text-lg font-bold text-primary hover:underline transition-colors"
+            onClick={() => setIsDetailOpen(true)}
+          >
+            <LiaFileInvoiceSolid
+              className="text-primary shrink-0"
+              style={{ width: 24, height: 24 }}
+            />
+            <span className="break-all">فاتورة رقم {invoice.code}</span>
+          </button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-6 px-10">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-6 px-0 sm:px-10">
           {fields.map((field) => (
             <div
               key={field.label}
               className="flex flex-col items-start sm:items-center gap-1.5"
             >
-              <span className="text-base text-gray-400">{field.label}</span>
+              <span className="text-sm sm:text-base text-gray-600">{field.label}</span>
               <div className="flex items-center gap-1.5">
                 <field.icon
                   className={clsx('w-4 h-4', field.iconClassName ?? 'text-primary')}
@@ -142,7 +141,7 @@ const SupplierInvoiceCard = memo(
                 </span>
               </div>
               {field.subtitle && (
-                <span className="text-sm text-gray-400">{field.subtitle}</span>
+                <span className="text-sm text-gray-600">{field.subtitle}</span>
               )}
             </div>
           ))}

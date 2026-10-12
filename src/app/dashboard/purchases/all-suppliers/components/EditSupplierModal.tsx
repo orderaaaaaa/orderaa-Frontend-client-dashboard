@@ -114,11 +114,12 @@ export default function EditSupplierModal({
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-700">
+            <label htmlFor="edit-supplier-nickname" className="text-sm font-medium text-gray-700">
               اللقب / Nickname
             </label>
             <Input
               name="nickname"
+              id="edit-supplier-nickname"
               register={register}
               placeholder="المورد الذهبي"
               inputClassName="bg-white"
@@ -127,11 +128,12 @@ export default function EditSupplierModal({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-700">
+            <label htmlFor="edit-supplier-officialName" className="text-sm font-medium text-gray-700">
               الاسم الرسمي
             </label>
             <Input
               name="officialName"
+              id="edit-supplier-officialName"
               register={register}
               placeholder="احمد محمد"
               inputClassName="bg-white"
@@ -140,28 +142,32 @@ export default function EditSupplierModal({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-700">
+            <label htmlFor="edit-supplier-phone" className="text-sm font-medium text-gray-700">
               رقم التواصل
             </label>
             <Input
               name="phone"
+              id="edit-supplier-phone"
+              type="tel"
+              inputMode="tel"
               register={register}
               placeholder="01200345678"
-              inputClassName="bg-white"
+              inputClassName="bg-white [direction:ltr] text-left"
               error={errors.phone?.message}
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-700">
+            <label htmlFor="edit-supplier-email" className="text-sm font-medium text-gray-700">
               البريد الالكتروني (اختياري)
             </label>
             <Input
               name="email"
+              id="edit-supplier-email"
               type="email"
               register={register}
               placeholder="ahmed@gmail.com"
-              inputClassName="bg-white"
+              inputClassName="bg-white [direction:ltr] text-left"
               error={errors.email?.message}
             />
           </div>

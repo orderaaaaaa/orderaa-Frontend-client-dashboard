@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { LiaFileInvoiceSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import { getTimeAgo } from '@/utils/timeAgo';
+import { formatMoney } from '@/utils/formatMoney';
 import { Invoice } from '../types';
 import { formatDate } from '../utils';
 import { INVOICE_TYPE_LABEL } from '../../constants';
@@ -34,7 +35,7 @@ const InvoiceDetailModal = memo(
       ],
       [
         { label: 'التاريخ و الوقت', value: getTimeAgo(invoice.createdAt), subtitle: formatDate(invoice.createdAt) },
-        { label: 'المبلغ', value: invoice.totalAmount.toLocaleString() },
+        { label: 'المبلغ', value: formatMoney(String(invoice.totalAmount)) },
       ],
     ];
 
@@ -55,15 +56,15 @@ const InvoiceDetailModal = memo(
           </div>
 
           {fieldRows.map((row, rowIndex) => (
-            <div key={rowIndex} className="grid grid-cols-2 gap-x-4 border-t border-gray-200 py-4">
+            <div key={rowIndex} className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 border-t border-gray-200 py-4">
               {row.map((field) => (
                 <div key={field.label} className="flex flex-col items-start gap-1">
                   <span className="text-sm font-bold text-black">{field.label}</span>
                   {field.value && (
-                    <span className="text-base font-semibold text-gray-400">{field.value}</span>
+                    <span className="text-base font-semibold text-gray-700">{field.value}</span>
                   )}
                   {field.subtitle && (
-                    <span className="text-sm text-gray-400">{field.subtitle}</span>
+                    <span className="text-sm text-gray-600 break-words">{field.subtitle}</span>
                   )}
                 </div>
               ))}

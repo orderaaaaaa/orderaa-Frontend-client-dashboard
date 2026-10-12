@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import {
   LiaUserTieSolid,
@@ -14,6 +14,8 @@ import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
 import { Button } from '@/components/ui/button';
 import { getTimeAgo } from '@/utils/timeAgo';
+import { formatCount, formatMoney } from '@/utils/formatMoney';
+import { ImageGalleryModal } from '@/components/receipts/ImageGalleryModal';
 import { SupplierInvoice, SupplierInvoiceItem } from '../types';
 import { formatDate, exportInvoiceToExcel, exportInvoiceToPDF } from '../utils';
 
@@ -41,11 +43,11 @@ function buildProductColumns(
           } as DataTableColumn<SupplierInvoiceItem & Record<string, unknown>>,
         ]
       : []),
-    { key: 'price', header: 'السعر', render: (value, row) => (value as number).toLocaleString() + ' جنيه' },
+    { key: 'price', header: 'السعر', render: (value) => formatMoney(String(value)) },
     {
       key: 'total',
       header: 'الاجمالي',
-      render: (_value, row) => (row.quantity * row.price).toLocaleString(),
+      render: (_value, row) => formatMoney(String(row.quantity * row.price)),
     },
   ];
   return cols;
@@ -74,6 +76,7 @@ export default function InvoiceDetailModal({
 
   const grandTotal = invoice.totalAmount;
   const isPayment = invoice.type === 'PAID';
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
   return (
     <BaseModal
@@ -128,25 +131,31 @@ export default function InvoiceDetailModal({
               <LiaImageSolid className="w-5 h-5 text-primary" />
               صورة الفاتورة
             </h3>
-            <div className="flex flex-wrap gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
               {invoice.images.map((url, idx) => (
-                <a
+                <button
                   key={idx}
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block rounded-lg overflow-hidden border border-gray-200 hover:border-primary transition-colors"
+                  type="button"
+                  aria-label={`عرض صور الفاتورة (${invoice.images.length})`}
+                  onClick={() => setIsGalleryOpen(true)}
+                  className="block aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-primary transition-colors"
                 >
                   <Image
                     src={url}
                     alt={`صورة الفاتورة ${idx + 1}`}
                     width={200}
                     height={200}
-                    className="object-cover w-[200px] h-[200px]"
+                    className="object-cover w-full h-full"
                   />
-                </a>
+                </button>
               ))}
             </div>
+            <ImageGalleryModal
+              isOpen={isGalleryOpen}
+              onClose={() => setIsGalleryOpen(false)}
+              title={`صور الفاتورة ${invoice.code}`}
+              images={invoice.images}
+            />
           </div>
         )}
 
@@ -157,7 +166,7 @@ export default function InvoiceDetailModal({
                 إجمالي عدد القطع
               </span>
               <span className="text-base font-bold text-gray-800">
-                {totalQuantity} قطعة
+                {formatCount(totalQuantity)} قطعة
               </span>
             </div>
           )}
@@ -166,12 +175,12 @@ export default function InvoiceDetailModal({
               {isPayment ? 'المبلغ المدفوع' : 'المبلغ الاجمالي'}
             </span>
             <span className="text-base font-bold text-gray-800">
-              {grandTotal.toFixed(2)} جنيه
+              {formatMoney(String(grandTotal))}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-3">
           <Button
             variant="default"
             className="rounded-xl font-semibold text-sm px-6 flex items-center gap-2"
