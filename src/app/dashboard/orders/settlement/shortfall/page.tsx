@@ -23,6 +23,10 @@ import {
   getShortfallSettlements,
   adjustSettlement,
 } from '@/lib/api/settlement';
+import {
+  SettlementMobileList,
+  SettlementMobileRow,
+} from '@/app/dashboard/orders/settlement/components/SettlementMobileList';
 
 type FilterValue = 'all' | 'pending' | 'finished';
 
@@ -114,6 +118,49 @@ export default function ShortfallSettlementPage() {
     }
   };
 
+  const renderStatusBadge = (row: ShortfallSettlement) => (
+    <span
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+        row.settlementResolved
+          ? 'bg-green-100 text-green-700'
+          : 'bg-yellow-100 text-yellow-700'
+      }`}
+    >
+      {row.settlementResolved ? 'منتهي' : 'معلق'}
+    </span>
+  );
+
+  const renderAdjustControls = (row: ShortfallSettlement, inputClassName: string) => (
+    <div className="flex items-center gap-2">
+      <input
+        type="text"
+        inputMode="decimal"
+        dir="ltr"
+        aria-label={`تعديل (+/−) للطلب ${row.code}`}
+        placeholder="± المبلغ"
+        value={adjustAmounts[row.id] ?? ''}
+        onChange={(e) =>
+          handleAdjustAmountChange(row.id, e.target.value)
+        }
+        className={`${inputClassName} border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 disabled:opacity-50`}
+        disabled={adjustingId === row.id}
+      />
+      <Button
+        size="sm"
+        className="max-sm:h-10"
+        onClick={() => requestAdjust(row)}
+        disabled={
+          adjustingId === row.id ||
+          !adjustAmounts[row.id] ||
+          adjustAmounts[row.id].trim() === ''
+        }
+        loading={adjustingId === row.id}
+      >
+        تأكيد
+      </Button>
+    </div>
+  );
+
   const tabs = [
     { value: 'all', label: 'كل' },
     { value: 'pending', label: 'معلق' },
@@ -166,68 +213,54 @@ export default function ShortfallSettlementPage() {
                 </p>
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>كود الطلب</TableHead>
-                    <TableHead>مبلغ التحصيل</TableHead>
-                    <TableHead>الحالة</TableHead>
-                    {canManageSettlement && <TableHead>تعديل (+/−)</TableHead>}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <>
+                <SettlementMobileList>
                   {data.map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell className="font-medium">
-                        {row.code}
-                      </TableCell>
-                      <TableCell>{Number(row.settlementAmount)}</TableCell>
-                      <TableCell>
-                        <span
-                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                            row.settlementResolved
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-yellow-100 text-yellow-700'
-                          }`}
-                        >
-                          {row.settlementResolved ? 'منتهي' : 'معلق'}
-                        </span>
-                      </TableCell>
-                      {canManageSettlement && (
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            inputMode="decimal"
-                            dir="ltr"
-                            aria-label={`تعديل (+/−) للطلب ${row.code}`}
-                            placeholder="± المبلغ"
-                            value={adjustAmounts[row.id] ?? ''}
-                            onChange={(e) =>
-                              handleAdjustAmountChange(row.id, e.target.value)
-                            }
-                            className="w-28 border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 disabled:opacity-50"
-                            disabled={adjustingId === row.id}
-                          />
-                          <Button
-                            size="sm"
-                            onClick={() => requestAdjust(row)}
-                            disabled={
-                              adjustingId === row.id ||
-                              !adjustAmounts[row.id] ||
-                              adjustAmounts[row.id].trim() === ''
-                            }
-                            loading={adjustingId === row.id}
-                          >
-                            تأكيد
-                          </Button>
-                        </div>
-                      </TableCell>
-                      )}
-                    </TableRow>
+                    <SettlementMobileRow
+                      key={row.id}
+                      fields={[
+                        { label: 'كود الطلب', value: row.code },
+                        { label: 'الحالة', value: renderStatusBadge(row) },
+                        { label: 'مبلغ التحصيل', value: Number(row.settlementAmount) },
+                      ]}
+                      actions={
+                        canManageSettlement ? (
+                          <div className="flex w-full flex-col gap-1">
+                            <span className="text-xs text-muted-foreground">تعديل (+/−)</span>
+                            {renderAdjustControls(row, 'h-10 min-w-0 flex-1')}
+                          </div>
+                        ) : undefined
+                      }
+                    />
                   ))}
-                </TableBody>
-              </Table>
+                </SettlementMobileList>
+                <div className="hidden sm:block">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>كود الطلب</TableHead>
+                        <TableHead>مبلغ التحصيل</TableHead>
+                        <TableHead>الحالة</TableHead>
+                        {canManageSettlement && <TableHead>تعديل (+/−)</TableHead>}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {data.map((row) => (
+                        <TableRow key={row.id}>
+                          <TableCell className="font-medium">
+                            {row.code}
+                          </TableCell>
+                          <TableCell>{Number(row.settlementAmount)}</TableCell>
+                          <TableCell>{renderStatusBadge(row)}</TableCell>
+                          {canManageSettlement && (
+                          <TableCell>{renderAdjustControls(row, 'w-28')}</TableCell>
+                          )}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
             )}
           </Tabs>
         </CardContent>

@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { formatDateToLocalDate } from '@/utils/dateRangeUtils';
-import { Scan, ScanLine, X } from 'lucide-react';
 import { LiaFileInvoiceSolid } from 'react-icons/lia';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import PaginationFooter from '@/components/ui/pagination-footer';
+import SelectModeControls from '@/components/purchases/SelectModeControls';
 import { ErrorState } from '@/components/ui/state-panels';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import { Supplier } from '../../types';
@@ -63,22 +63,16 @@ export function SupplierDetailContent({ supplier, initialInvoicesData }: Supplie
 
   const showActionsBar = select && selectedIds.length > 0;
 
-  useEffect(() => {
-    if (showActionsBar) {
-      document.body.style.paddingBottom = '80px';
-    } else {
-      document.body.style.paddingBottom = '0px';
-    }
-    return () => {
-      document.body.style.paddingBottom = '0px';
-    };
-  }, [showActionsBar]);
-
   const handleToggleSelect = useCallback(() => {
     setSelect((prev) => {
       if (prev) setSelectedIds([]);
       return !prev;
     });
+  }, []);
+
+  const handleClearSelection = useCallback(() => {
+    setSelectedIds([]);
+    setSelect(false);
   }, []);
 
   const handleSelectionChange = useCallback(
@@ -121,34 +115,14 @@ export function SupplierDetailContent({ supplier, initialInvoicesData }: Supplie
       <SupplierDetailHeader supplier={supplier} />
 
       <div className="px-4 sm:px-8 py-3 flex flex-col gap-4">
-        <div className="flex flex-row items-center justify-end gap-3">
-          {select && selectedIds.length > 0 && (
-            <div className="flex flex-row items-center justify-center gap-2">
-              <X
-                onClick={() => {
-                  setSelectedIds([]);
-                  setSelect(false);
-                }}
-                className="cursor-pointer text-primary h-5 w-5"
-              />
-              <span className="text-sm text-gray-600 whitespace-nowrap">
-                تم تحديد {selectedIds.length} فاتورة
-              </span>
-            </div>
-          )}
-          <div
-            className="bg-primary flex flex-row items-center justify-center gap-3 px-5 py-2 rounded-full cursor-pointer text-white whitespace-nowrap"
-            onClick={handleToggleSelect}
-          >
-            <p>تحديد</p>
-            <div>
-              {select ? (
-                <ScanLine className="text-white w-5 h-5" />
-              ) : (
-                <Scan className="text-white w-5 h-5" />
-              )}
-            </div>
-          </div>
+        <div className="flex flex-row items-center justify-end">
+          <SelectModeControls
+            active={select}
+            selectedCount={selectedIds.length}
+            countLabel="فاتورة"
+            onToggle={handleToggleSelect}
+            onClear={handleClearSelection}
+          />
         </div>
       </div>
 

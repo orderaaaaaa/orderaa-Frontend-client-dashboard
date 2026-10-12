@@ -63,17 +63,17 @@ const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
   return (
     <div className="px-4 sm:px-8 py-4 flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 min-w-0 w-full sm:w-auto">
           <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-orange-400 flex items-center justify-center shrink-0">
             <LiaUserSolid className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
           </div>
-          <h1 className="flex flex-row gap-2 text-lg sm:text-2xl font-bold text-gray-800">
-            فواتير <span>{supplier.name}</span>
+          <h1 className="min-w-0 break-words text-lg sm:text-2xl font-bold text-gray-800">
+            فواتير {supplier.name}
           </h1>
         </div>
         <Button
           variant="default"
-          className="rounded-full font-semibold text-sm px-6 w-full sm:w-auto"
+          className="h-10 rounded-full font-semibold text-sm px-6 w-full sm:w-auto"
           onClick={() => setIsPaymentOpen(true)}
         >
           دفع
@@ -97,10 +97,10 @@ const SupplierDetailHeader = memo(({ supplier }: SupplierDetailHeaderProps) => {
               idx === stats.length - 1 && stats.length % 2 !== 0 && 'col-span-2 sm:col-span-1 max-w-[50%] sm:max-w-none mx-auto sm:mx-0',
             )}
           >
-            <span className="text-xs sm:text-sm text-gray-400">{stat.label}</span>
-            <div className="flex items-center gap-1.5">
+            <span className="text-xs sm:text-sm text-gray-600 text-center">{stat.label}</span>
+            <div className="flex min-w-0 flex-wrap items-center justify-center gap-1.5">
               <stat.icon className={clsx('w-4 h-4 sm:w-5 sm:h-5', stat.className ?? 'text-primary')} />
-              <span className={clsx('text-base sm:text-lg font-bold', stat.className ?? 'text-gray-800')}>{stat.value}</span>
+              <span className={clsx('text-base sm:text-lg font-bold text-center break-words', stat.className ?? 'text-gray-800')}>{stat.value}</span>
             </div>
           </div>
         ))}

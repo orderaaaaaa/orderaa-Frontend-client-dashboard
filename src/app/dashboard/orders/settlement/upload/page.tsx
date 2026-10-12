@@ -21,6 +21,10 @@ import BaseModal from '@/components/ui/base-modal';
 import ForceSettlementDialog from '@/app/dashboard/orders/settlement/components/ForceSettlementDialog';
 import SettlementAcceptedStatusesNote from '@/app/dashboard/orders/settlement/components/SettlementAcceptedStatusesNote';
 import {
+  SettlementMobileList,
+  SettlementMobileRow,
+} from '@/app/dashboard/orders/settlement/components/SettlementMobileList';
+import {
   uploadSettlementRows,
   addSettlementBatchOrders,
   getCurrentSettlementBatch,
@@ -223,13 +227,8 @@ export default function SettlementUploadPage() {
 
   const handleConfirmForceTarget = useCallback(async () => {
     if (!forcingTarget) return;
-    try {
-      await forceRows([forcingTarget.row]);
-      setForcingTarget(null);
-    } catch (err) {
-      toast.error(getApiErrorMessage(err, 'تعذر إضافة الطلب رغم الخطأ'));
-      throw err;
-    }
+    await forceRows([forcingTarget.row]);
+    setForcingTarget(null);
   }, [forceRows, forcingTarget]);
 
   const toggleForceRowSelection = useCallback((row: number) => {
@@ -243,6 +242,16 @@ export default function SettlementUploadPage() {
       return next;
     });
   }, []);
+
+  const bypassableFailedRows = (results?.failed ?? [])
+    .filter((item) => item.bypassable)
+    .map((item) => item.row);
+  const allBypassableSelected =
+    bypassableFailedRows.length > 0 &&
+    bypassableFailedRows.every((row) => selectedForceRows.has(row));
+  const toggleAllBypassable = (checked: boolean) => {
+    setSelectedForceRows(checked ? new Set(bypassableFailedRows) : new Set());
+  };
 
   const handleReset = useCallback(() => {
     setSelectedFile(null);
@@ -276,7 +285,7 @@ export default function SettlementUploadPage() {
             قم بتنزيل قالب Excel لضمان تنسيق البيانات بشكل صحيح.
           </p>
           <Button variant="outline" onClick={handleDownloadTemplate}>
-            <Download className="w-4 h-4 ml-2" />
+            <Download className="w-4 h-4 me-2" />
             تحميل القالب
           </Button>
           <SettlementAcceptedStatusesNote className="mt-4" />
@@ -294,7 +303,7 @@ export default function SettlementUploadPage() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3 min-w-0">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -308,8 +317,10 @@ export default function SettlementUploadPage() {
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isParsing || isUploading}
               >
-                <FileSpreadsheet className="w-4 h-4 ml-2" />
-                {selectedFile ? selectedFile.name : 'اختر ملف Excel'}
+                <FileSpreadsheet className="w-4 h-4 me-2 shrink-0" />
+                <span className="truncate max-w-[60vw] sm:max-w-xs">
+                  {selectedFile ? selectedFile.name : 'اختر ملف Excel'}
+                </span>
               </Button>
 
               {parsedRows.length > 0 && (
@@ -387,13 +398,13 @@ export default function SettlementUploadPage() {
             </div>
 
             {batch.status === 'OPEN' ? (
-              <div className="flex flex-col items-end gap-1">
+              <div className="flex flex-col items-stretch sm:items-end gap-1 w-full sm:w-auto">
                 <Button onClick={() => setCloseBatchOpen(true)} disabled={isConfirming}>
                   {isConfirming ? 'جاري الإغلاق...' : 'تأكيد وإغلاق التحصيل'}
                 </Button>
                 {/* Rows settle on upload, not on confirmation. Saying so stops
                     anyone believing this button is what commits the money. */}
-                <span className="text-[11px] text-muted-foreground max-w-xs text-left">
+                <span className="text-[11px] text-muted-foreground sm:max-w-xs text-start sm:text-end">
                   تم تسوية الصفوف بالفعل عند رفعها؛ التأكيد يغلق التحصيل ويثبّت إجماليه فقط
                 </span>
               </div>
@@ -420,7 +431,23 @@ export default function SettlementUploadPage() {
                   <CheckCircle2 className="w-4 h-4" />
                   نجح ({results.success.length})
                 </h3>
-                <div className="rounded-md border overflow-x-auto">
+                <SettlementMobileList>
+                  {results.success.map((item) => (
+                    <SettlementMobileRow
+                      key={item.row}
+                      fields={[
+                        { label: '#', value: item.row + 1 },
+                        { label: 'المبلغ', value: item.amount },
+                        { label: 'كود الطلب', value: <span className="font-mono">{item.orderCode}</span> },
+                        { label: 'كود الشحن', value: <span className="font-mono">{item.shippingCode ?? '—'}</span> },
+                        { label: 'الحالة الحالية', value: getStatusLabel(item.currentStatus) },
+                        { label: 'الحالة الجديدة', value: getStatusLabel(item.newStatus) },
+                      ]}
+                      shipping={item.shipping}
+                    />
+                  ))}
+                </SettlementMobileList>
+                <div className="hidden sm:block rounded-md border overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-muted">
                       <tr>
@@ -459,7 +486,54 @@ export default function SettlementUploadPage() {
                   <AlertTriangle className="w-4 h-4" />
                   تم تحصيلها مسبقاً ({results.alreadyCollected.length})
                 </h3>
-                <div className="rounded-md border border-amber-200 overflow-x-auto">
+                <SettlementMobileList className="border-amber-200">
+                  {results.alreadyCollected.map((item, i) => {
+                    const differs =
+                      Number(item.sheetAmount) !== Number(item.collectedAmount);
+                    const amountClass = differs ? 'font-bold text-amber-800' : undefined;
+                    return (
+                      <SettlementMobileRow
+                        key={i}
+                        className={differs ? 'bg-amber-100/70' : undefined}
+                        fields={[
+                          { label: '#', value: item.row + 1 },
+                          { label: 'كود الطلب', value: <span className="font-mono">{item.orderCode}</span> },
+                          { label: 'المبلغ في الشيت', value: <span className={amountClass}>{item.sheetAmount}</span> },
+                          { label: 'المبلغ المحصل مسبقاً', value: <span className={amountClass}>{item.collectedAmount}</span> },
+                          { label: 'كود الشحن', value: <span className="font-mono">{item.shippingCode ?? '—'}</span> },
+                          {
+                            label: 'تاريخ التحصيل',
+                            value: item.collectedAt
+                              ? new Date(item.collectedAt).toLocaleDateString('ar-EG')
+                              : '—',
+                          },
+                          {
+                            label: 'التحصيل السابق',
+                            className: 'col-span-2',
+                            value: item.batch
+                              ? `${item.batch.code}${item.batch.actorName ? ` — ${item.batch.actorName}` : ''}`
+                              : (item.source ?? '—'),
+                          },
+                        ]}
+                        shipping={item.shipping}
+                        actions={
+                          item.bypassable && !item.sameBatch ? (
+                            <Button
+                              variant="outline"
+                              className="h-10 w-full"
+                              onClick={() =>
+                                setForcingTarget({ source: 'alreadyCollected', row: item.row })
+                              }
+                            >
+                              نقل إلى هذا التحصيل
+                            </Button>
+                          ) : undefined
+                        }
+                      />
+                    );
+                  })}
+                </SettlementMobileList>
+                <div className="hidden sm:block rounded-md border border-amber-200 overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-amber-50">
                       <tr>
@@ -535,7 +609,7 @@ export default function SettlementUploadPage() {
             {/* Failed rows */}
             {results.failed.length > 0 && (
               <div>
-                <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                   <h3 className="text-sm font-semibold text-red-700 flex items-center gap-2">
                     <XCircle className="w-4 h-4" />
                     فشل ({results.failed.length})
@@ -544,6 +618,7 @@ export default function SettlementUploadPage() {
                     <Button
                       size="sm"
                       variant="outline"
+                      className="max-sm:h-10"
                       disabled={selectedForceRows.size === 0 || isForcingSelected}
                       onClick={() => setForceSelectedOpen(true)}
                     >
@@ -551,27 +626,76 @@ export default function SettlementUploadPage() {
                     </Button>
                   )}
                 </div>
-                <div className="rounded-md border overflow-x-auto">
+                {results.failed.some((item) => item.bypassable) && (
+                  <label className="sm:hidden flex min-h-10 items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={allBypassableSelected}
+                      onChange={(e) => toggleAllBypassable(e.target.checked)}
+                    />
+                    تحديد كل ما يمكن إضافته رغم الخطأ
+                  </label>
+                )}
+                <SettlementMobileList>
+                  {results.failed.map((item, i) => (
+                    <SettlementMobileRow
+                      key={i}
+                      alert={
+                        <p className="whitespace-pre-line text-sm font-medium text-red-600">
+                          {item.reason}
+                        </p>
+                      }
+                      leading={
+                        item.bypassable ? (
+                          <label className="-m-2 flex size-10 shrink-0 items-center justify-center">
+                            <input
+                              type="checkbox"
+                              aria-label={`تحديد الصف ${item.row + 1}`}
+                              checked={selectedForceRows.has(item.row)}
+                              onChange={() => toggleForceRowSelection(item.row)}
+                            />
+                          </label>
+                        ) : undefined
+                      }
+                      fields={[
+                        { label: '#', value: item.row + 1 },
+                        { label: 'المبلغ', value: item.amount ?? '—' },
+                        { label: 'كود الطلب', value: <span className="font-mono">{item.orderCode ?? '—'}</span> },
+                        { label: 'كود الشحن', value: <span className="font-mono">{item.shippingCode ?? '—'}</span> },
+                        {
+                          label: 'الحالة الحالية',
+                          value: item.currentStatus ? getStatusLabel(item.currentStatus) : '—',
+                        },
+                        {
+                          label: 'الحالة المطلوبة',
+                          value: item.targetStatus ? getStatusLabel(item.targetStatus) : '—',
+                        },
+                      ]}
+                      shipping={item.shipping}
+                      actions={
+                        item.bypassable ? (
+                          <Button
+                            variant="outline"
+                            className="h-10 w-full"
+                            onClick={() => setForcingTarget({ source: 'failed', row: item.row })}
+                          >
+                            إضافة رغم الخطأ
+                          </Button>
+                        ) : undefined
+                      }
+                    />
+                  ))}
+                </SettlementMobileList>
+                <div className="hidden sm:block rounded-md border overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-muted">
                       <tr>
                         <th className="px-4 py-2 text-right font-medium">
                           <input
                             type="checkbox"
-                            checked={
-                              results.failed.some((item) => item.bypassable) &&
-                              results.failed
-                                .filter((item) => item.bypassable)
-                                .every((item) => selectedForceRows.has(item.row))
-                            }
-                            onChange={(e) => {
-                              const bypassableRows = results.failed
-                                .filter((item) => item.bypassable)
-                                .map((item) => item.row);
-                              setSelectedForceRows(
-                                e.target.checked ? new Set(bypassableRows) : new Set(),
-                              );
-                            }}
+                            aria-label="تحديد الكل"
+                            checked={allBypassableSelected}
+                            onChange={(e) => toggleAllBypassable(e.target.checked)}
                           />
                         </th>
                         <th className="px-4 py-2 text-right font-medium">#</th>
@@ -592,6 +716,7 @@ export default function SettlementUploadPage() {
                             {item.bypassable && (
                               <input
                                 type="checkbox"
+                                aria-label={`تحديد الصف ${item.row + 1}`}
                                 checked={selectedForceRows.has(item.row)}
                                 onChange={() => toggleForceRowSelection(item.row)}
                               />

@@ -8,6 +8,7 @@ import { getApiErrorMessage } from '@/utils/apiError';
 import { parseSettlementFile } from '@/lib/excel/parse-settlement-file';
 import ForceSettlementDialog from './ForceSettlementDialog';
 import SettlementAcceptedStatusesNote from './SettlementAcceptedStatusesNote';
+import { SettlementMobileList, SettlementMobileRow } from './SettlementMobileList';
 import {
   addSettlementBatchOrders,
   type SettlementRow,
@@ -176,13 +177,8 @@ export default function AddSettlementOrdersDialog({
 
   const handleConfirmForceTarget = useCallback(async () => {
     if (!forcingTarget) return;
-    try {
-      await forceRow(forcingTarget.row);
-      setForcingTarget(null);
-    } catch (err) {
-      toast.error(getApiErrorMessage(err, 'تعذر إضافة الطلب رغم الخطأ'));
-      throw err;
-    }
+    await forceRow(forcingTarget.row);
+    setForcingTarget(null);
   }, [forceRow, forcingTarget]);
 
   const handleClose = () => {
@@ -217,35 +213,41 @@ export default function AddSettlementOrdersDialog({
           <p className="text-sm font-medium text-gray-700">إضافة طلب واحد</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">كود الطلب</label>
+              <label htmlFor="settlement-add-order-code" className="text-sm font-medium text-gray-700">كود الطلب</label>
               <input
+                id="settlement-add-order-code"
                 type="text"
                 value={draft.orderCode}
                 onChange={(e) => setDraft((prev) => ({ ...prev, orderCode: e.target.value }))}
-                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm"
+                className="w-full border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">كود الشحن</label>
+              <label htmlFor="settlement-add-shipping-code" className="text-sm font-medium text-gray-700">كود الشحن</label>
               <input
+                id="settlement-add-shipping-code"
                 type="text"
                 value={draft.shippingCompanyCode}
                 onChange={(e) => setDraft((prev) => ({ ...prev, shippingCompanyCode: e.target.value }))}
-                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm"
+                className="w-full border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">المبلغ</label>
+              <label htmlFor="settlement-add-amount" className="text-sm font-medium text-gray-700">المبلغ</label>
               <input
+                id="settlement-add-amount"
                 type="text"
+                inputMode="decimal"
+                dir="ltr"
                 value={draft.amount}
                 onChange={(e) => setDraft((prev) => ({ ...prev, amount: e.target.value }))}
-                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm"
+                className="w-full border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">الحالة المطلوبة</label>
+              <label htmlFor="settlement-add-target-status" className="text-sm font-medium text-gray-700">الحالة المطلوبة</label>
               <select
+                id="settlement-add-target-status"
                 value={draft.targetStatus}
                 onChange={(e) =>
                   setDraft((prev) => ({
@@ -253,7 +255,7 @@ export default function AddSettlementOrdersDialog({
                     targetStatus: e.target.value as SingleRowDraft['targetStatus'],
                   }))
                 }
-                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm bg-white"
+                className="w-full border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm bg-white"
               >
                 {SINGLE_ROW_STATUSES.map((status) => (
                   <option key={status.value} value={status.value}>
@@ -265,20 +267,26 @@ export default function AddSettlementOrdersDialog({
           </div>
           <SettlementAcceptedStatusesNote />
           {draftError && <p className="text-xs text-red-600">{draftError}</p>}
-          <Button size="sm" disabled={isUploading} onClick={handleAddSingleRow}>
+          <Button size="sm" className="max-sm:h-10 max-sm:w-full" disabled={isUploading} onClick={handleAddSingleRow}>
             {isUploading ? 'جاري الإضافة...' : 'إضافة الطلب'}
           </Button>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <input
             ref={fileInputRef}
             type="file"
             accept=".xlsx"
+            aria-label="ملف Excel"
             onChange={handleFileChange}
-            className="text-sm"
+            className="text-sm min-w-0 max-w-full"
           />
-          <Button size="sm" disabled={parsedRows.length === 0 || isUploading} onClick={handleUpload}>
+          <Button
+            size="sm"
+            className="max-sm:h-10 max-sm:w-full"
+            disabled={parsedRows.length === 0 || isUploading}
+            onClick={handleUpload}
+          >
             {isUploading
               ? 'جاري الإضافة...'
               : `إضافة${parsedRows.length ? ` (${parsedRows.length})` : ''}`}
@@ -290,7 +298,37 @@ export default function AddSettlementOrdersDialog({
         {results && (
           <div className="space-y-4">
             {results.failed.length > 0 && (
-              <div className="rounded-md border border-red-200 overflow-x-auto">
+              <SettlementMobileList className="border-red-200">
+                {results.failed.map((item) => (
+                  <SettlementMobileRow
+                    key={item.row}
+                    alert={
+                      <p className="whitespace-pre-line text-sm font-medium text-red-700">
+                        {item.reason}
+                      </p>
+                    }
+                    fields={[
+                      { label: '#', value: item.row + 1 },
+                      { label: 'كود الطلب', value: <span className="font-mono">{item.orderCode ?? '—'}</span> },
+                    ]}
+                    actions={
+                      item.bypassable ? (
+                        <Button
+                          variant="outline"
+                          className="h-10 w-full"
+                          onClick={() => setForcingTarget({ source: 'failed', row: item.row })}
+                        >
+                          إضافة رغم الخطأ
+                        </Button>
+                      ) : undefined
+                    }
+                  />
+                ))}
+              </SettlementMobileList>
+            )}
+
+            {results.failed.length > 0 && (
+              <div className="hidden sm:block rounded-md border border-red-200 overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-red-50">
                     <tr>
@@ -325,7 +363,34 @@ export default function AddSettlementOrdersDialog({
             )}
 
             {results.alreadyCollected.length > 0 && (
-              <div className="rounded-md border border-amber-200 overflow-x-auto">
+              <SettlementMobileList className="border-amber-200">
+                {results.alreadyCollected.map((item) => (
+                  <SettlementMobileRow
+                    key={item.row}
+                    fields={[
+                      { label: '#', value: item.row + 1 },
+                      { label: 'كود الطلب', value: <span className="font-mono">{item.orderCode}</span> },
+                    ]}
+                    actions={
+                      item.bypassable && !item.sameBatch ? (
+                        <Button
+                          variant="outline"
+                          className="h-10 w-full"
+                          onClick={() =>
+                            setForcingTarget({ source: 'alreadyCollected', row: item.row })
+                          }
+                        >
+                          نقل إلى هذا التحصيل
+                        </Button>
+                      ) : undefined
+                    }
+                  />
+                ))}
+              </SettlementMobileList>
+            )}
+
+            {results.alreadyCollected.length > 0 && (
+              <div className="hidden sm:block rounded-md border border-amber-200 overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-amber-50">
                     <tr>

@@ -8,6 +8,12 @@ import { DataTable, DataTableColumn } from '@/components/ui/data-table';
 import { OrderDetailsProps } from './types';
 import Input from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/textarea';
+import { roundMoney } from '@/utils/money';
+
+function toPrice(price: string): number {
+  const value = Number(price);
+  return Number.isFinite(value) ? value : 0;
+}
 
 interface ProductTableRow {
   id: number;
@@ -61,11 +67,13 @@ function OrderDetails({
   };
 
   const calculatedTotal = useMemo(() => {
-    return selectedProducts.reduce((sum, product) => {
-      const price = parseInt(product.price) || 0;
-      const quantity = product.quantity || 1;
-      return sum + price * quantity;
-    }, 0);
+    return roundMoney(
+      selectedProducts.reduce((sum, product) => {
+        const price = toPrice(product.price);
+        const quantity = product.quantity || 1;
+        return sum + price * quantity;
+      }, 0)
+    );
   }, [selectedProducts]);
 
   const onTotalChangeRef = useRef(onTotalChange);
@@ -93,128 +101,145 @@ function OrderDetails({
     }));
   }, [selectedProducts]);
 
-  const columns = useMemo<DataTableColumn<Record<string, unknown>>[]>(
-    () => [
-      {
-        key: 'product',
-        header: 'المنتج',
-        className: 'min-w-[120px]',
-        render: (_, rowData) => {
-          const row = rowData as unknown as ProductTableRow;
-          const isFailing = failingProductIndex === row.index;
-          return (
-            <div
-              className={
-                isFailing
-                  ? 'border-2 border-red-500 rounded-lg p-2'
-                  : undefined
-              }
-            >
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="relative w-10 h-10 sm:w-14 sm:h-14 overflow-hidden rounded border border-gray-200 bg-gray-100 flex-shrink-0">
-                  {row.image ? (
-                    <img
-                      src={row.image}
-                      alt={row.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-gray-400 text-[8px] sm:text-[10px]">
-                      لا صورة
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <span className="font-semibold text-xs sm:text-sm">{row.name}</span>
-                  {row.selectedVariants.map((variant) => (
-                    <span
-                      key={variant.attribute}
-                      className="text-gray-500 text-[10px] sm:text-xs"
-                    >
-                      {variant.attribute}: {variant.option}
-                    </span>
-                  ))}
-                </div>
+  const renderProduct = (row: ProductTableRow) => {
+    const isFailing = failingProductIndex === row.index;
+    return (
+      <div
+        className={
+          isFailing
+            ? 'border-2 border-red-500 rounded-lg p-2'
+            : undefined
+        }
+      >
+        <div className="flex items-center gap-3">
+          <div className="relative w-14 h-14 overflow-hidden rounded border border-gray-200 bg-gray-100 flex-shrink-0">
+            {row.image ? (
+              <img
+                src={row.image}
+                alt={row.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-500 text-xs">
+                لا صورة
               </div>
-              {isFailing && (
-                <p className="text-red-600 text-xs mt-1">اختر خيارات هذا المنتج</p>
-              )}
-            </div>
-          );
-        },
-      },
-      {
-        key: 'quantity',
-        header: 'الكمية',
-        className: 'text-center min-w-[100px]',
-        render: (_, rowData) => {
-          const row = rowData as unknown as ProductTableRow;
-          return (
-            <div className="flex items-center justify-center gap-1 sm:gap-2">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  updateQuantity(row.id, row.variantKey, -1);
-                }}
-                disabled={row.quantity <= 1}
-                className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            )}
+          </div>
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <span className="font-semibold text-sm break-words">{row.name}</span>
+            {row.selectedVariants.map((variant) => (
+              <span
+                key={variant.attribute}
+                className="text-gray-600 text-xs"
               >
-                <LiaMinusSolid className="w-3 h-3" />
-              </button>
-              <span className="text-gray-700 font-medium min-w-[1.5rem] text-center text-xs sm:text-sm">
-                {row.quantity}
+                {variant.attribute}: {variant.option}
               </span>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  updateQuantity(row.id, row.variantKey, 1);
-                }}
-                className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 cursor-pointer"
-              >
-                <LiaPlusSolid className="w-3 h-3" />
-              </button>
-            </div>
-          );
-        },
-      },
-      {
-        key: 'total',
-        header: 'الاجمالي',
-        className: 'text-center min-w-[80px]',
-        render: (_, rowData) => {
-          const row = rowData as unknown as ProductTableRow;
-          return (
-            <span className="text-gray-700 font-medium text-xs sm:text-sm">
-              {parseInt(row.price) * row.quantity} ج.م
-            </span>
-          );
-        },
-      },
-      {
-        key: 'actions',
-        header: '',
-        className: 'text-center w-[50px]',
-        render: (_, rowData) => {
-          const row = rowData as unknown as ProductTableRow;
-          return (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                removeProduct(row.id, row.variantKey);
-              }}
-              className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-red-500 hover:text-red-700 hover:bg-red-50 rounded cursor-pointer"
-            >
-              <LiaTrashSolid className="w-3 h-3 sm:w-4 sm:h-4" />
-            </button>
-          );
-        },
-      },
-    ],
-    [updateQuantity, removeProduct, failingProductIndex]
+            ))}
+          </div>
+        </div>
+        {isFailing && (
+          <p className="text-red-600 text-xs mt-1">اختر خيارات هذا المنتج</p>
+        )}
+      </div>
+    );
+  };
+
+  const renderQuantity = (row: ProductTableRow) => (
+    <div className="flex items-center justify-center gap-2">
+      <button
+        type="button"
+        aria-label={`إنقاص كمية ${row.name}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          updateQuantity(row.id, row.variantKey, -1);
+        }}
+        disabled={row.quantity <= 1}
+        className="size-10 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+      >
+        <LiaMinusSolid className="w-4 h-4" />
+      </button>
+      <span
+        aria-live="polite"
+        className="text-gray-700 font-medium min-w-[1.5rem] text-center text-sm"
+      >
+        {row.quantity}
+      </span>
+      <button
+        type="button"
+        aria-label={`زيادة كمية ${row.name}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          updateQuantity(row.id, row.variantKey, 1);
+        }}
+        className="size-10 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 cursor-pointer"
+      >
+        <LiaPlusSolid className="w-4 h-4" />
+      </button>
+    </div>
   );
+
+  const renderLineTotal = (row: ProductTableRow) => (
+    <span className="text-gray-700 font-medium text-sm whitespace-nowrap">
+      {roundMoney(toPrice(row.price) * row.quantity)} ج.م
+    </span>
+  );
+
+  const renderRemove = (row: ProductTableRow) => (
+    <button
+      type="button"
+      aria-label={`حذف ${row.name}`}
+      onClick={(e) => {
+        e.stopPropagation();
+        removeProduct(row.id, row.variantKey);
+      }}
+      className="size-10 flex items-center justify-center text-red-500 hover:text-red-700 hover:bg-red-50 rounded cursor-pointer"
+    >
+      <LiaTrashSolid className="w-5 h-5" />
+    </button>
+  );
+
+  const columns: DataTableColumn<Record<string, unknown>>[] = [
+    {
+      key: 'product',
+      header: 'المنتج',
+      className: 'min-w-[120px]',
+      render: (_, rowData) => renderProduct(rowData as unknown as ProductTableRow),
+    },
+    {
+      key: 'quantity',
+      header: 'الكمية',
+      className: 'text-center min-w-[100px]',
+      render: (_, rowData) => renderQuantity(rowData as unknown as ProductTableRow),
+    },
+    {
+      key: 'total',
+      header: 'الإجمالي',
+      className: 'text-center min-w-[80px]',
+      render: (_, rowData) => renderLineTotal(rowData as unknown as ProductTableRow),
+    },
+    {
+      key: 'actions',
+      header: 'حذف',
+      className: 'text-center w-[50px]',
+      render: (_, rowData) => renderRemove(rowData as unknown as ProductTableRow),
+    },
+  ];
+
+  const renderMobileRow = (rowData: Record<string, unknown>) => {
+    const row = rowData as unknown as ProductTableRow;
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">{renderProduct(row)}</div>
+          {renderRemove(row)}
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          {renderQuantity(row)}
+          {renderLineTotal(row)}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center">
@@ -245,6 +270,7 @@ function OrderDetails({
                 data={tableData as unknown as Record<string, unknown>[]}
                 keyField="index"
                 className="border-0 shadow-none"
+                renderMobileRow={renderMobileRow}
               />
             </div>
 

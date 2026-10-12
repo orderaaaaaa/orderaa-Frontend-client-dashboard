@@ -21,6 +21,7 @@ import BaseModal from '@/components/ui/base-modal';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { getTimeAgo } from '@/utils/timeAgo';
 import type { InvoicePaymentStatus } from '@/lib/api/suppliers';
+import { formatCount, formatMoney } from '@/utils/formatMoney';
 import { receivedBadgeLabel } from './receivingStatus';
 
 const TRANSACTION_TYPE_CONFIG: Record<string, { text: string; iconColor: string; icon: IconType }> = {
@@ -82,7 +83,7 @@ function buildProductColumns(
     {
       key: 'quantity',
       header: 'إجمالي عدد القطع',
-      render: (value) => <span>{(value as number).toLocaleString()}</span>,
+      render: (value) => <span>{formatCount(value as number)}</span>,
     },
     ...(hasPackageColumns
       ? [
@@ -90,27 +91,27 @@ function buildProductColumns(
             key: 'packageCount',
             header: 'عدد الطرود',
             render: (value: unknown) =>
-              value != null ? <span>{(value as number).toLocaleString()}</span> : null,
+              value != null ? <span>{formatCount(value as number)}</span> : null,
           } as DataTableColumn<InvoiceCardProduct & Record<string, unknown>>,
           {
             key: 'piecesPerPackage',
             header: 'عدد القطع في الطرد',
             render: (value: unknown) =>
-              value != null ? <span>{(value as number).toLocaleString()}</span> : null,
+              value != null ? <span>{formatCount(value as number)}</span> : null,
           } as DataTableColumn<InvoiceCardProduct & Record<string, unknown>>,
         ]
       : []),
     {
       key: 'price',
       header: 'السعر',
-      render: (value) => <span>{(value as number).toLocaleString()} جنيه</span>,
+      render: (value) => <span>{formatMoney(String(value))}</span>,
     },
     {
       key: 'total',
       header: 'الإجمالي',
       render: (_value, row) => (
         <span className="font-semibold">
-          {(row.quantity * row.price).toLocaleString()} جنيه
+          {formatMoney(String(row.quantity * row.price))}
         </span>
       ),
     },
@@ -152,6 +153,7 @@ const InvoiceCard = memo(
     const isNegativeAmount = invoice.transactionType === 'استبدال' || invoice.transactionType === 'مرتجع';
 
     const paymentStatus = PAYMENT_STATUS_RIBBON[invoice.paymentStatus];
+    const showRibbon = invoice.invoiceType !== 'RETURN';
 
     const productColumns = useMemo(
       () => buildProductColumns(invoice.products),
@@ -173,7 +175,7 @@ const InvoiceCard = memo(
         },
         {
           label: 'إجمالي عدد القطع',
-          value: `${invoice.totalPieces.toLocaleString()}`,
+          value: formatCount(invoice.totalPieces),
           icon: LiaBoxOpenSolid,
           onClick: invoice.products?.length ? () => setIsProductsModalOpen(true) : undefined,
         },
@@ -194,7 +196,7 @@ const InvoiceCard = memo(
           ? [
               {
                 label: 'المبلغ الإجمالي',
-                value: `${invoice.totalAmount.toLocaleString()} جنيه`,
+                value: formatMoney(String(invoice.totalAmount)),
                 icon: LiaMoneyBillWaveSolid,
               },
             ]
@@ -205,8 +207,8 @@ const InvoiceCard = memo(
 
     return (
       <div className="relative w-full bg-white border border-gray-200 rounded-xl p-5 transition-all duration-200 hover:shadow-md overflow-hidden">
-        {invoice.invoiceType !== 'RETURN' && (
-          <div className="absolute top-0 end-0 w-28 h-28 overflow-hidden pointer-events-none">
+        {showRibbon && (
+          <div className="absolute top-0 end-0 w-28 h-28 overflow-hidden pointer-events-none" aria-hidden="true">
             <div
               className={clsx(
                 'absolute top-5 -end-10 w-40 text-center text-base font-bold py-1 shadow-sm rotate-45 rtl:-rotate-45',
@@ -219,15 +221,26 @@ const InvoiceCard = memo(
           </div>
         )}
 
-        <div className="flex items-start justify-between">
-          <div className="flex flex-col items-start gap-1">
+        {showRibbon && <span className="sr-only">{paymentStatus.label}</span>}
+
+        <div className={clsx('flex items-start gap-2', showRibbon && 'pe-20')}>
+          {select && (
+            <label className="-ms-2 -mt-1.5 flex size-10 shrink-0 cursor-pointer items-center justify-center">
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={(checked) => onSelectionChange(checked === true)}
+                aria-label={`تحديد الفاتورة ${invoice.invoiceNumber}`}
+              />
+            </label>
+          )}
+          <div className="flex flex-col items-start gap-1 min-w-0">
             {titleHref ? (
               <Link
                 href={titleHref}
                 className="flex items-center gap-2 p-0 h-auto hover:text-primary hover:underline"
               >
                 <LiaFileInvoiceSolid className="text-primary shrink-0" style={{ width: 24, height: 24 }} />
-                <span className="text-lg font-bold text-primary">
+                <span className="text-lg font-bold text-primary break-all">
                   فاتورة رقم  {invoice.invoiceNumber}
                 </span>
               </Link>
@@ -243,8 +256,8 @@ const InvoiceCard = memo(
                 </span>
               </Button>
             )}
-            <div className="ps-11 flex items-center gap-2">
-              <span className="text-lg font-bold">{invoice.companyName}</span>
+            <div className="ps-8 flex flex-wrap items-center gap-2 min-w-0">
+              <span className="text-lg font-bold break-words min-w-0">{invoice.companyName}</span>
               {invoice.invoiceType !== 'PAID' && (
                 <span className={clsx('rounded-full px-2.5 py-0.5 text-xs font-semibold', invoice.isApproved ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground')}>
                   {receivedBadgeLabel(invoice.isApproved)}
@@ -252,19 +265,11 @@ const InvoiceCard = memo(
               )}
             </div>
           </div>
-
-          {select && (
-            <Checkbox
-              checked={isSelected}
-              onCheckedChange={(checked) => onSelectionChange(checked === true)}
-              className="mt-1"
-            />
-          )}
         </div>
 
         <div
           className={clsx(
-            'grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 px-10',
+            'grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 px-0 sm:px-10',
             fields.length === 5 ? 'lg:grid-cols-5' : fields.length === 6 ? 'lg:grid-cols-6' : 'lg:grid-cols-4',
           )}
         >
@@ -276,7 +281,7 @@ const InvoiceCard = memo(
                 className="flex flex-col items-start sm:items-center gap-1.5 group cursor-pointer"
                 onClick={field.onClick}
               >
-                <span className="text-base text-gray-400">{field.label}</span>
+                <span className="text-sm sm:text-base text-gray-600">{field.label}</span>
                 <div className="flex items-center gap-1.5 bg-primary/5 border border-primary/20 rounded-full px-3 py-1 group-hover:bg-primary/10 group-hover:border-primary/40 transition-colors">
                   <field.icon className="w-4 h-4 text-primary" />
                   <span className="text-base font-semibold text-primary">
@@ -286,7 +291,7 @@ const InvoiceCard = memo(
               </button>
             ) : (
               <div key={field.label} className="flex flex-col items-start sm:items-center gap-1.5">
-                <span className="text-base text-gray-400">{field.label}</span>
+                <span className="text-sm sm:text-base text-gray-600">{field.label}</span>
                 <div className="flex items-center gap-1.5">
                   <field.icon className={clsx('w-4 h-4', field.iconClassName ?? 'text-primary')} />
                   <span className={clsx('text-base font-semibold', field.valueClassName ?? 'text-gray-800')}>
@@ -294,7 +299,7 @@ const InvoiceCard = memo(
                   </span>
                 </div>
                 {field.subtitle && (
-                  <span className="text-sm text-gray-400">{field.subtitle}</span>
+                  <span className="text-sm text-gray-600">{field.subtitle}</span>
                 )}
               </div>
             ),

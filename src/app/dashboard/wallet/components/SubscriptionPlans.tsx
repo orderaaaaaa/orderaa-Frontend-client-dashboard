@@ -126,7 +126,7 @@ function SubscriptionPlans() {
             <div
               key={plan.id}
               className={`
-                relative rounded-2xl p-6 border min-h-[420px] flex flex-col transition-all duration-300 hover:scale-105 overflow-hidden text-right
+                relative rounded-2xl p-6 border sm:min-h-[420px] flex flex-col transition-all duration-300 [@media(hover:hover)_and_(pointer:fine)]:hover:scale-105 overflow-hidden text-right
                 ${
                   isEconomical
                     ? 'bg-gradient-to-br from-purple-600 via-purple-700 to-purple-900 border-purple-900 text-white shadow-xl shadow-purple-500/25'
@@ -137,7 +137,7 @@ function SubscriptionPlans() {
               `}
             >
               {isActive && (
-                <div className="absolute top-3 left-3 z-10">
+                <div className="absolute top-3 end-3 z-10">
                   <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
                     مشترك حالياً
                   </Badge>
@@ -145,7 +145,7 @@ function SubscriptionPlans() {
               )}
 
               {isEconomical && !isActive && (
-                <div className="absolute top-3 left-3 z-10">
+                <div className="absolute top-3 end-3 z-10">
                   <Badge className="bg-yellow-300 text-yellow-900 border-yellow-400">
                     <LiaGem className="w-3 h-3 ml-1" />
                     الأفضل قيمة

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import { useCreateSupplierInvoiceMutation } from '@/services/suppliers';
 import { moneyCents } from '@/utils/money';
-import { formatSupplierBalance } from '../utils';
+import { formatCurrency, formatSupplierBalance } from '../utils';
 
 const paymentSchema = z.object({
   amount: z
@@ -143,7 +143,7 @@ export default function PaymentModal({
       ) : pendingAmount !== null ? (
         <div className="flex flex-col gap-6">
           <p className="text-base leading-7 text-gray-700">
-            المبلغ ({pendingAmount.toLocaleString()} ج.م) أكبر من المتبقي للمورد ({formatSupplierBalance(remaining).text}). بعد الدفع سيصبح الرصيد {formatSupplierBalance(remaining - pendingAmount).text}. هل تريد المتابعة؟
+            المبلغ ({formatCurrency(pendingAmount)}) أكبر من المتبقي للمورد ({formatSupplierBalance(remaining).text}). بعد الدفع سيصبح الرصيد {formatSupplierBalance(remaining - pendingAmount).text}. هل تريد المتابعة؟
           </p>
 
           {submitError && (
