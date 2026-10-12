@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { LiaAngleDownSolid } from 'react-icons/lia';
 import { USER_MENU_OPTIONS } from '@/constants/dashboard-layout';
 import { UserMenuKey } from '@/hooks/useSidebar';
 import { useAuthStore } from '@/store/authStore';
-import { Button } from '../ui/button';
 
 interface UserMenuProps {
   username?: string;
@@ -20,39 +19,11 @@ export function UserMenu({
   onUserAction,
   variant = 'desktop',
 }: UserMenuProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
   const authUser = useAuthStore((state) => state.user);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
 
   const isMobile = variant === 'mobile';
   const displayName = authUser?.name || username || email;
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen]);
-
-  const handleOptionClick = (key: string) => {
-    setIsOpen(false);
-    if (key === 'settings' || key === 'logout') {
-      onUserAction(key as UserMenuKey);
-    } else {
-      console.warn(`Invalid user menu key: ${key}`);
-    }
-  };
 
   if (!hasHydrated || !displayName) {
     return (
@@ -63,7 +34,7 @@ export function UserMenu({
   }
 
   return (
-    <div ref={menuRef} className="relative flex flex-row items-center">
+    <div className="relative flex flex-row items-center">
       <span
         className={
           isMobile
@@ -73,37 +44,35 @@ export function UserMenu({
       >
         اهلا يا
       </span>
-      <Button
-        variant="ghost"
-        onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center !p-1  cursor-pointer ${
-          isMobile
-            ? 'font-normal text-white text-[16px] hover:text-white'
-            : 'font-bold text-foreground-heading text-base'
-        } transition-colors hover:bg-transparent`}
-      >
-        <span>{displayName}</span>
-        <LiaAngleDownSolid
-          className={`w-4 h-4 transition-transform duration-200 ${
-            isOpen ? 'rotate-180' : ''
+      <DropdownMenuPrimitive.Root dir="rtl">
+        <DropdownMenuPrimitive.Trigger
+          className={`group flex items-center gap-1 p-1 cursor-pointer rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition-colors ${
+            isMobile
+              ? 'font-normal text-white text-[16px] hover:text-white'
+              : 'font-bold text-foreground-heading text-base'
           }`}
-        />
-      </Button>
-
-      {isOpen && (
-        <ul className="absolute z-50 top-full mt-1 left-0 min-w-[150px] bg-popover text-popover-foreground dark:border dark:border-border rounded-lg max-h-48 overflow-y-auto shadow-lg">
-          {USER_MENU_OPTIONS.map((option) => (
-            <li
-              key={option.key}
-              className="px-3 py-2 cursor-pointer text-foreground-body hover:bg-primary hover:text-white"
-              style={{ direction: 'rtl' }}
-              onClick={() => handleOptionClick(option.key)}
-            >
-              {option.value}
-            </li>
-          ))}
-        </ul>
-      )}
+        >
+          <span>{displayName}</span>
+          <LiaAngleDownSolid className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+        </DropdownMenuPrimitive.Trigger>
+        <DropdownMenuPrimitive.Portal>
+          <DropdownMenuPrimitive.Content
+            align="start"
+            sideOffset={4}
+            className="z-50 min-w-[150px] overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-lg dark:border dark:border-border"
+          >
+            {USER_MENU_OPTIONS.map((option) => (
+              <DropdownMenuPrimitive.Item
+                key={option.key}
+                onSelect={() => onUserAction(option.key)}
+                className="cursor-pointer px-3 py-2.5 text-foreground-body outline-none data-[highlighted]:bg-primary data-[highlighted]:text-white"
+              >
+                {option.value}
+              </DropdownMenuPrimitive.Item>
+            ))}
+          </DropdownMenuPrimitive.Content>
+        </DropdownMenuPrimitive.Portal>
+      </DropdownMenuPrimitive.Root>
     </div>
   );
 }

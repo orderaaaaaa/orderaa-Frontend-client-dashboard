@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 export interface BreadcrumbItem {
   title: string;
@@ -11,61 +11,91 @@ interface BreadcrumbProps {
   className?: string;
 }
 
+const FIRST_ITEM_CLASSES =
+  'text-primary font-bold text-xl md:text-3xl transition-all hover:opacity-80';
+
+const SECONDARY_ITEM_CLASSES =
+  'font-normal text-lg md:text-xl text-foreground-heading transition-all hover:text-primary';
+
+function findBackItem(items: BreadcrumbItem[]) {
+  for (let index = items.length - 2; index >= 0; index -= 1) {
+    if (items[index].href) return items[index];
+  }
+  return undefined;
+}
+
 export function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
   if (items.length === 0) return null;
 
-  // Check if the second item (index 1) has an href
-  const hasSecondItemHref = items[1]?.href;
+  const lastItem = items[items.length - 1];
+  const backItem = findBackItem(items);
+  const showOnMobile = Boolean(lastItem.href || backItem);
 
   return (
-    <div
-      // On mobile: Hide if second item has no href. On PC: Always show.
-      className={`${hasSecondItemHref ? 'flex' : 'hidden'
-        } md:flex items-center gap-2 font-semibold ${className}`}
-      style={{ direction: 'rtl' }}
-    >
-      {items.map((item, index) => {
-        const isFirst = index === 0;
-        const isLast = index === items.length - 1;
+    <>
+      {showOnMobile && (
+        <div
+          className={`flex md:hidden items-center gap-2 font-semibold ${className}`}
+          style={{ direction: 'rtl' }}
+        >
+          {backItem && (
+            <>
+              <Link
+                href={backItem.href as string}
+                className={`${SECONDARY_ITEM_CLASSES} flex items-center gap-1`}
+              >
+                <ArrowRight className="h-4 w-4 shrink-0 text-icon-neutral" />
+                {backItem.title}
+              </Link>
+              <span aria-hidden="true" className="text-icon-neutral">
+                /
+              </span>
+              <span aria-current="page" className={SECONDARY_ITEM_CLASSES}>
+                {lastItem.title}
+              </span>
+            </>
+          )}
+          {!backItem && lastItem.href && (
+            <Link href={lastItem.href} className={SECONDARY_ITEM_CLASSES}>
+              {lastItem.title}
+            </Link>
+          )}
+        </div>
+      )}
 
-        const firstItemClasses =
-          'text-primary font-bold text-xl md:text-3xl transition-all hover:opacity-80';
+      <div
+        className={`hidden md:flex items-center gap-2 font-semibold ${className}`}
+        style={{ direction: 'rtl' }}
+      >
+        {items.map((item, index) => {
+          const isFirst = index === 0;
+          const isLast = index === items.length - 1;
+          const itemClasses = isFirst
+            ? FIRST_ITEM_CLASSES
+            : SECONDARY_ITEM_CLASSES;
 
-        const secondaryItemClasses =
-          'font-normal text-lg md:text-xl text-foreground-heading transition-all hover:text-primary';
-
-        return (
-          <div key={index} className="flex items-center gap-2">
-            {/* The Text Content */}
-            <div className={isFirst ? 'hidden md:block' : 'block'}>
+          return (
+            <div key={index} className="flex items-center gap-2">
               {item.href ? (
-                <Link
-                  href={item.href}
-                  className={isFirst ? firstItemClasses : secondaryItemClasses}
-                >
+                <Link href={item.href} className={itemClasses}>
                   {item.title}
                 </Link>
               ) : (
-                <span
-                  className={isFirst ? firstItemClasses : secondaryItemClasses}
-                >
-                  {item.title}
-                </span>
+                <span className={itemClasses}>{item.title}</span>
+              )}
+
+              {!isLast && (
+                <ArrowLeft
+                  className="h-4 w-4 shrink-0 text-icon-neutral"
+                  color="currentColor"
+                  width={15}
+                  height={15}
+                />
               )}
             </div>
-
-            {/* The Arrow: Always show if not last item */}
-            {!isLast && (
-              <ArrowLeft
-                className="h-4 w-4 shrink-0 text-icon-neutral"
-                color="currentColor"
-                width={15}
-                height={15}
-              />
-            )}
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </>
   );
 }
