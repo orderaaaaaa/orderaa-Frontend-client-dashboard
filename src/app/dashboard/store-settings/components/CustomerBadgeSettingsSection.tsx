@@ -161,19 +161,15 @@ const describe = (badge: CustomerBadge, values: ThresholdValues) => {
 const sameBadges = (a: readonly CustomerBadge[], b: readonly CustomerBadge[]) =>
   a.length === b.length && a.every((badge) => b.includes(badge));
 
-function useBeforeUnloadGuard(active: boolean) {
-  useEffect(() => {
-    if (!active) return;
-    const handler = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = '';
-    };
-    window.addEventListener('beforeunload', handler);
-    return () => window.removeEventListener('beforeunload', handler);
-  }, [active]);
+const DIRTY_KEY = 'customer-badges';
+
+interface CustomerBadgeSettingsSectionProps {
+  onDirtyChange?: (key: string, isDirty: boolean) => void;
 }
 
-export default function CustomerBadgeSettingsSection() {
+export default function CustomerBadgeSettingsSection({
+  onDirtyChange,
+}: CustomerBadgeSettingsSectionProps = {}) {
   const { hasPermission } = usePermissionCheck();
   const canEdit = hasPermission(PERMISSIONS.MERCHANT_SETTINGS_UPDATE);
   const { data, isLoading, isError, error, refetch } = useCustomerBadgeSettings();
@@ -218,7 +214,11 @@ export default function CustomerBadgeSettingsSection() {
     return thresholdsChanged || !sameBadges(enabled, loaded.enabledBadges);
   }, [loaded, values, enabled]);
 
-  useBeforeUnloadGuard(isDirty);
+  useEffect(() => {
+    if (!onDirtyChange) return;
+    onDirtyChange(DIRTY_KEY, isDirty);
+    return () => onDirtyChange(DIRTY_KEY, false);
+  }, [isDirty, onDirtyChange]);
 
   const isBusy = updateMutation.isPending || resetMutation.isPending;
 

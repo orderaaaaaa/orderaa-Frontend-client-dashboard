@@ -12,6 +12,8 @@ import PasswordStrengthIndicator from '@/components/ui/PasswordStrengthIndicator
 import { Button } from '@/components/ui/button';
 import { LiaLockSolid, LiaShieldAltSolid } from 'react-icons/lia';
 import useChangePassword from '../hooks/useChangePassword';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 
 export default function AccountSecurity() {
   const { changePassword, isLoading, isSuccess } = useChangePassword();
@@ -19,7 +21,7 @@ export default function AccountSecurity() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
     watch,
     reset,
   } = useForm<AccountSecurityFormData>({
@@ -38,6 +40,7 @@ export default function AccountSecurity() {
   const hasAllValues = Boolean(
     oldPassword?.trim() && password?.trim() && confirmPassword?.trim()
   );
+  const guard = useUnsavedChangesGuard(isDirty && !isLoading && !isSuccess);
 
   const onSubmit = async (data: AccountSecurityFormData) => {
     changePassword({
@@ -66,12 +69,14 @@ export default function AccountSecurity() {
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="flex flex-col gap-5 md:w-[70%]">
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <label htmlFor="security-old-password" className="flex items-center gap-2 text-sm font-medium text-gray-700">
               <LiaLockSolid className="w-5 h-5 text-primary !cursor-pointer" />
               <span>كلمة المرور الحالية</span>
             </label>
             <Input
               label=""
+              id="security-old-password"
+              autoComplete="current-password"
               name="oldPassword"
               type="password"
               placeholder="أدخل كلمة المرور الحالية"
@@ -82,12 +87,14 @@ export default function AccountSecurity() {
           </div>
 
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <label htmlFor="security-new-password" className="flex items-center gap-2 text-sm font-medium text-gray-700">
               <LiaLockSolid className="w-5 h-5 text-primary !cursor-pointer" />
               <span>كلمة المرور الجديدة</span>
             </label>
             <Input
               label=""
+              id="security-new-password"
+              autoComplete="new-password"
               name="password"
               type="password"
               placeholder="أدخل كلمة المرور الجديدة"
@@ -98,12 +105,14 @@ export default function AccountSecurity() {
           </div>
 
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <label htmlFor="security-confirm-password" className="flex items-center gap-2 text-sm font-medium text-gray-700">
               <LiaLockSolid className="w-5 h-5 text-primary !cursor-pointer" />
               <span>تأكيد كلمة المرور الجديدة</span>
             </label>
             <Input
               label=""
+              id="security-confirm-password"
+              autoComplete="new-password"
               name="confirmPassword"
               type="password"
               placeholder="أعد إدخال كلمة المرور الجديدة"
@@ -118,16 +127,30 @@ export default function AccountSecurity() {
           </div>
         </div>
 
-        <div className="mt-8 flex justify-start">
+        <div className="mt-8 flex flex-wrap items-center justify-start gap-3">
           <Button
             type="submit"
             size="lg"
+            className="min-h-10"
             disabled={!hasAllValues || isLoading}
+            loading={isLoading}
+            loadingText="جاري التحديث..."
+            aria-describedby={hasAllValues ? undefined : 'security-submit-hint'}
           >
-            {isLoading ? 'جاري التحديث...' : 'تحديث كلمة المرور'}
+            تحديث كلمة المرور
           </Button>
+          {!hasAllValues && (
+            <span id="security-submit-hint" className="text-sm text-gray-500">
+              أدخل كلمة المرور الحالية والجديدة وتأكيدها لتفعيل الزر
+            </span>
+          )}
         </div>
       </form>
+      <UnsavedChangesDialog
+        isOpen={guard.pendingHref !== null}
+        onStay={guard.cancelLeave}
+        onLeave={guard.confirmLeave}
+      />
     </div>
   );
 }

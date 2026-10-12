@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { useRefreshCurrentUser } from '@/hooks/usePermissions';
+import { invalidateAndWait } from '@/lib/query/mutationSync';
 import {
   createRole,
   deleteRole,
@@ -67,14 +68,17 @@ const useRolesInvalidation = () => {
   const refreshCurrentUser = useRefreshCurrentUser();
 
   return async () => {
-    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ROLES] });
-    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ROLE_DETAIL] });
-    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.EMPLOYEE_ROLES] });
-    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.EMPLOYEES] });
-    // employee-settings/[employeeSettingId] caches its detail under ['employee', id]
-    queryClient.invalidateQueries({ queryKey: ['employee'] });
-    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.AUTH_ME] });
-    await refreshCurrentUser();
+    await Promise.all([
+      invalidateAndWait(queryClient, [
+        [QUERY_KEYS.ROLES],
+        [QUERY_KEYS.ROLE_DETAIL],
+        [QUERY_KEYS.EMPLOYEE_ROLES],
+        [QUERY_KEYS.EMPLOYEES],
+        ['employee'],
+        [QUERY_KEYS.AUTH_ME],
+      ]),
+      refreshCurrentUser(),
+    ]);
   };
 };
 

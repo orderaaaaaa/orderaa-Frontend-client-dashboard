@@ -76,7 +76,7 @@ export default function InvoiceDetailModal({
 
   const grandTotal = invoice.totalAmount;
   const isPayment = invoice.type === 'PAID';
-  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
 
   return (
     <BaseModal
@@ -136,8 +136,8 @@ export default function InvoiceDetailModal({
                 <button
                   key={idx}
                   type="button"
-                  aria-label={`عرض صور الفاتورة (${invoice.images.length})`}
-                  onClick={() => setIsGalleryOpen(true)}
+                  aria-label={`عرض صورة الفاتورة ${idx + 1} من ${invoice.images.length}`}
+                  onClick={() => setGalleryIndex(idx)}
                   className="block aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-primary transition-colors"
                 >
                   <Image
@@ -151,8 +151,9 @@ export default function InvoiceDetailModal({
               ))}
             </div>
             <ImageGalleryModal
-              isOpen={isGalleryOpen}
-              onClose={() => setIsGalleryOpen(false)}
+              isOpen={galleryIndex !== null}
+              onClose={() => setGalleryIndex(null)}
+              initialIndex={galleryIndex ?? 0}
               title={`صور الفاتورة ${invoice.code}`}
               images={invoice.images}
             />

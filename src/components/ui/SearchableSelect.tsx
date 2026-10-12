@@ -47,6 +47,8 @@ interface SearchableSelectProps {
   clearable?: boolean;
   onOpenChange?: (open: boolean) => void;
   onSearch?: (query: string) => void;
+  id?: string;
+  'aria-label'?: string;
 }
 
 const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
@@ -75,6 +77,8 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
       clearable = false,
       onOpenChange,
       onSearch,
+      id,
+      'aria-label': ariaLabel,
     },
     ref
   ) {
@@ -239,6 +243,8 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
         <div className="relative flex flex-col">
           <button
             type="button"
+            id={id}
+            aria-label={ariaLabel}
             disabled={disabled || loading}
             onClick={() => !disabled && !loading && handleOpenChange(!open)}
             className={cn(

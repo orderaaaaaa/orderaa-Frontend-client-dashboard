@@ -1,4 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { toast } from 'react-toastify';
 import { employeesApi } from '@/app/dashboard/employees/api/employees.api';
 import {
@@ -31,6 +37,7 @@ export const useFilteredEmployees = (
       return await employeesApi.getFiltered(filters);
     },
     enabled: options?.enabled ?? true,
+    placeholderData: keepPreviousData,
   });
 
 // Employee summary (counts by role)
@@ -56,8 +63,8 @@ export const useUpdateEmployee = () => {
     }) => {
       return await employeesApi.update(id, data);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
+    onSuccess: async () => {
+      await invalidateAndWait(queryClient, [['employees']]);
     },
   });
 };
@@ -69,9 +76,9 @@ export const useUpdateEmployeeStatus = () => {
     mutationFn: async ({ id, isOnline }: { id: number; isOnline: boolean }) => {
       return await employeesApi.updateStatus(id, isOnline);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('تم تحديث حالة الموظف بنجاح');
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
+      await invalidateAndWait(queryClient, [['employees']]);
     },
     onError: (error: any) => {
       toast.error(
@@ -99,9 +106,9 @@ export const useUpdateEmployeePerformance = () => {
         performanceChange,
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('تم تحديث أداء الموظف بنجاح');
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
+      await invalidateAndWait(queryClient, [['employees']]);
     },
     onError: (error: any) => {
       toast.error(
@@ -129,9 +136,9 @@ export const useUpdateEmployeeAttendance = () => {
         leaveDays,
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('تم تحديث حضور الموظف بنجاح');
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
+      await invalidateAndWait(queryClient, [['employees']]);
     },
     onError: (error: any) => {
       toast.error(
@@ -156,14 +163,14 @@ export const useSetEmployeeActivation = () => {
     }) => {
       return await employeesApi.setActivation(id, isActive);
     },
-    onSuccess: (_data, variables) => {
+    onSuccess: async (_data, variables) => {
       toast.success(
         variables.isActive
           ? 'تم تنشيط حساب الموظف بنجاح'
           : 'تم إيقاف حساب الموظف بنجاح'
       );
       // The ['employees'] prefix also covers the filtered list and the summary.
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
+      await invalidateAndWait(queryClient, [['employees']]);
     },
     onError: (error: any) => {
       toast.error(

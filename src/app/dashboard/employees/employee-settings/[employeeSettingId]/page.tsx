@@ -3,6 +3,7 @@
 import { useParams } from 'next/navigation';
 import { toast } from 'react-toastify';
 import PageLoading from '@/components/ui/page-loading';
+import { ErrorState } from '@/components/ui/state-panels';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { PERMISSIONS } from '@/lib/permissions';
 import { useReplaceEmployeeRolesMutation } from '@/services/authorization';
@@ -24,6 +25,7 @@ export default function Page() {
     isLoading,
     isError,
     error,
+    refetch,
   } = useEmployeeById(employeeSettingId);
   const { mutate: updateEmployee, isPending } = useUpdateEmployee();
   const replaceRoles = useReplaceEmployeeRolesMutation();
@@ -34,20 +36,30 @@ export default function Page() {
     PERMISSIONS.ROLES_ASSIGN,
   ]);
 
-  if (!employeeSettingId) return <p>Invalid employee ID</p>;
+  if (!employeeSettingId) {
+    return <p className="p-6 text-gray-600">رابط الموظف غير صالح</p>;
+  }
   if (isLoading) return <PageLoading className="h-64 mt-10" />;
-  if (isError) return <p>Error: {error?.message}</p>;
-  if (!employee) return <p>No employee found</p>;
+  if (isError) {
+    return (
+      <div className="p-4 sm:p-6">
+        <ErrorState
+          error={error}
+          fallback="تعذّر تحميل بيانات الموظف"
+          onRetry={() => refetch()}
+        />
+      </div>
+    );
+  }
+  if (!employee) return <p className="p-6 text-gray-600">لم يتم العثور على الموظف</p>;
 
-  // Roles live on their own endpoint (PUT /employees/:id/roles) and are only
-  // sent when they actually changed; the profile PATCH runs afterwards because
-  // it redirects away on success.
   const handleSubmit = async (
     data: Partial<Employee>,
     roleIds: number[],
     rolesDirty: boolean,
   ) => {
     const currentRoleIds = employee.roles?.map((role) => role.id) ?? [];
+    let rolesSaved = false;
 
     if (canAssignRoles && rolesDirty && !sameRoleSet(currentRoleIds, roleIds)) {
       try {
@@ -55,18 +67,19 @@ export default function Page() {
           employeeId: Number(employeeSettingId),
           roleIds,
         });
+        rolesSaved = true;
       } catch (err: unknown) {
         toast.error(getApiErrorMessage(err, 'تعذر تحديث أدوار الموظف'));
         return;
       }
     }
 
-    updateEmployee({ id: employeeSettingId, updates: data });
+    updateEmployee({ id: employeeSettingId, updates: data, rolesSaved });
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">تعديل بيانات الموظف</h1>
+    <div className="p-4 sm:p-6">
+      <h1 className="text-xl sm:text-2xl font-bold mb-6">تعديل بيانات الموظف</h1>
       <EmployeeForm
         employee={employee}
         onSubmit={handleSubmit}

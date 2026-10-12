@@ -46,7 +46,7 @@ export default function PageSizeSelector({
         onClick={() => setIsOpen(!isOpen)}
         aria-haspopup="true"
         aria-expanded={isOpen}
-        className="flex gap-2 text-sm bg-primary rounded-full text-white py-2 px-4 justify-center items-center cursor-pointer hover:bg-[#682fee] transition-colors min-w-[80px]"
+        className="flex gap-2 min-h-10 text-sm bg-primary rounded-full text-white py-2 px-4 justify-center items-center cursor-pointer hover:bg-[#682fee] transition-colors min-w-[80px]"
       >
         <span className="font-medium">{displayValue}</span>
         <ChevronDown
@@ -65,7 +65,7 @@ export default function PageSizeSelector({
                 type="button"
                 key={size}
                 onClick={() => handleSizeSelect(size)}
-                className={`w-full text-start px-4 py-2 text-sm hover:bg-primary/10 transition-colors ${currentSize === size
+                className={`w-full min-h-10 text-start px-4 py-2 text-sm hover:bg-primary/10 transition-colors ${currentSize === size
                     ? 'bg-primary/20 text-primary font-medium'
                     : 'text-gray-700'
                   }`}
@@ -76,7 +76,7 @@ export default function PageSizeSelector({
             <button
               type="button"
               onClick={() => handleSizeSelect(totalItems)}
-              className={`w-full text-start px-4 py-2 text-sm hover:bg-primary/10 transition-colors border-t border-gray-100 ${currentSize === totalItems
+              className={`w-full min-h-10 text-start px-4 py-2 text-sm hover:bg-primary/10 transition-colors border-t border-gray-100 ${currentSize === totalItems
                   ? 'bg-primary/20 text-primary font-medium'
                   : 'text-gray-700'
                 }`}

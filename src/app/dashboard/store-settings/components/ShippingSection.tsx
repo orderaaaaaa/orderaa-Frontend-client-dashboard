@@ -71,7 +71,9 @@ export function ShippingSection({
         </div>
         <FormSwitch
           checked={!!watch('canOpenShipment')}
-          onCheckedChange={(checked) => setValue('canOpenShipment', checked)}
+          onCheckedChange={(checked) =>
+            setValue('canOpenShipment', checked, { shouldDirty: true })
+          }
         />
       </div>
 
@@ -93,7 +95,9 @@ export function ShippingSection({
           </div>
           <FormSwitch
             checked={!!watch('employeeCanEditContent')}
-            onCheckedChange={(checked) => setValue('employeeCanEditContent', checked)}
+            onCheckedChange={(checked) =>
+              setValue('employeeCanEditContent', checked, { shouldDirty: true })
+            }
           />
         </div>
 

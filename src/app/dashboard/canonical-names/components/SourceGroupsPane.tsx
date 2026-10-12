@@ -25,7 +25,6 @@ import type {
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
 import SourceGroupRow from './SourceGroupRow';
 import UnscopedParentsPanel from './UnscopedParentsPanel';
-import { useHeldData } from '../hooks/useHeldData';
 
 const STATE_TABS: { value: GroupStateFilter; label: string }[] = [
   { value: 'all', label: 'الكل' },
@@ -78,28 +77,26 @@ export default function SourceGroupsPane({
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const debouncedSearch = useDebounce(search.trim(), 300);
-  const {
-    data: freshData,
-    isFetching,
-    isError,
-    refetch,
-  } = useSourceGroupsQuery(domain, {
+  const { data, isFetching, isPlaceholderData, isError, refetch } =
+    useSourceGroupsQuery(domain, {
     scopeId,
     state: stateFilter === 'all' ? undefined : stateFilter,
     search: debouncedSearch || undefined,
     page,
     limit,
   });
-  const data = useHeldData(freshData, `${domain}:${scopeId}`);
   const isLoading = data === undefined && !isError;
 
   const recheckSourcesStatus = useRecheckLocationSourcesStatus();
   const locationPageEmpty =
-    isLocationDomain(domain) && freshData !== undefined && freshData.total === 0;
+    isLocationDomain(domain) &&
+    !isPlaceholderData &&
+    data !== undefined &&
+    data.total === 0;
 
   useEffect(() => {
     if (locationPageEmpty) recheckSourcesStatus();
-  }, [locationPageEmpty, freshData, recheckSourcesStatus]);
+  }, [locationPageEmpty, data, recheckSourcesStatus]);
 
   const reloadedForToken = useRef<number | null>(null);
   const sourcesReady =

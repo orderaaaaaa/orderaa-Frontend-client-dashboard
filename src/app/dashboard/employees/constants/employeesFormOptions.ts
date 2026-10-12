@@ -4,9 +4,3 @@ export const ACCESS_LEVEL_OPTIONS = [
   { key: 'ADMIN', value: 'ادمن' },
   { key: 'MANAGER', value: 'مدير' },
 ];
-
-export const DEPARTMENT_OPTIONS = [
-  { key: 'CALL_CENTER', value: 'خدمة العملاء' },
-  { key: 'PACKAGING', value: 'التغليف' },
-  { key: 'SHIPPING', value: 'الشحن' },
-];

@@ -26,6 +26,7 @@ interface Props {
   errors: FieldErrors<OrderSettingsFormData>;
   watch: UseFormWatch<OrderSettingsFormData>;
   setValue: UseFormSetValue<OrderSettingsFormData>;
+  onSectionDirtyChange?: (key: string, isDirty: boolean) => void;
 }
 
 export default function OrderSettingsFields({
@@ -33,6 +34,7 @@ export default function OrderSettingsFields({
   errors,
   watch,
   setValue,
+  onSectionDirtyChange,
 }: Props) {
   const { hasShippingConfig } = useShippingConfig();
 
@@ -63,7 +65,7 @@ export default function OrderSettingsFields({
 
         {/* 4. اللوجستيات والشحن / Logistics & Shipping */}
         <GroupSection title="اللوجستيات والشحن">
-          <LogisticsSettingsSection />
+          <LogisticsSettingsSection onDirtyChange={onSectionDirtyChange} />
           <If condition={hasShippingConfig}>
             <Then>
               <ShippingSection

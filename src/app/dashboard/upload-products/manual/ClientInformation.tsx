@@ -59,11 +59,12 @@ function ClientInformation({
         <div className="grid grid-cols-2 max-sm:grid-cols-1 gap-8">
           <div data-field-error="name">
             <div className="mb-1">
-              <label className="block font-medium text-[16px]">
+              <label htmlFor="manual-customer-name" className="block font-medium text-[16px]">
                 اسم العميل <span className="text-red-500">*</span>
               </label>
             </div>
             <Input
+              id="manual-customer-name"
               name="name"
               type="text"
               placeholder="أدخل الاسم الكامل للعميل"
@@ -76,7 +77,7 @@ function ClientInformation({
           </div>
           <div data-field-error="phoneNumbers">
             <div className="mb-1 flex items-center justify-between">
-              <label className="block font-medium text-[16px]">
+              <label htmlFor="manual-customer-phone-0" className="block font-medium text-[16px]">
                 رقم الهاتف <span className="text-red-500">*</span>
               </label>
               {phoneNumbers.length < 2 && (
@@ -85,7 +86,7 @@ function ClientInformation({
                   variant="ghost"
                   size="sm"
                   onClick={handleAddPhone}
-                  className="flex items-center gap-1 text-primary hover:text-[#4B1BC4] hover:bg-purple-50 px-2 py-1 h-auto"
+                  className="flex min-h-10 items-center gap-1 text-primary hover:text-[#4B1BC4] hover:bg-purple-50 px-2 py-1 h-auto"
                 >
                   <LiaPlusSolid className="w-4 h-4" />
                   <span className="text-sm font-medium">إضافة رقم</span>
@@ -96,9 +97,14 @@ function ClientInformation({
               {phoneNumbers.map((phone, index) => (
                 <div key={index} className="flex items-center gap-2 relative">
                   <Input
+                    id={`manual-customer-phone-${index}`}
                     name={`phoneNumber-${index}`}
-                    type="text"
-                    placeholder="أدخل رقم الهاتف"
+                    type="tel"
+                    inputMode="tel"
+                    dir="ltr"
+                    autoComplete="off"
+                    aria-label={index === 0 ? undefined : `رقم الهاتف ${index + 1}`}
+                    placeholder="01xxxxxxxxx"
                     className="max-w-[502px] flex-1"
                     inputClassName="bg-white"
                     value={phone}
@@ -111,7 +117,8 @@ function ClientInformation({
                       variant="ghost"
                       size="icon"
                       onClick={() => handleRemovePhone(index)}
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50 h-9 w-9 shrink-0"
+                      aria-label={`حذف رقم الهاتف ${index + 1}`}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50 size-10 sm:size-10 shrink-0"
                     >
                       <LiaTrashSolid className="w-5 h-5" />
                     </Button>
@@ -142,11 +149,12 @@ function ClientInformation({
         <div className="flex flex-col gap-10 mt-7">
           <div data-field-error="address">
             <div className="mb-1">
-              <label className="block font-medium text-[16px]">
+              <label htmlFor="manual-customer-address" className="block font-medium text-[16px]">
                 العنوان <span className="text-red-500">*</span>
               </label>
             </div>
             <Textarea
+              id="manual-customer-address"
               name="address"
               placeholder="اسم الشارع، رقم المبنى، الشقة، إلخ"
               className="max-w-[1158px] h-[162px] bg-white"
@@ -157,11 +165,12 @@ function ClientInformation({
           </div>
           <div data-field-error="notes">
             <div className="mb-1">
-              <label className="block font-medium text-[16px]">
+              <label htmlFor="manual-customer-notes" className="block font-medium text-[16px]">
                 ملاحظات العميل
               </label>
             </div>
             <Textarea
+              id="manual-customer-notes"
               name="notes"
               placeholder="ملاحظات إضافية (اختياري)"
               className="max-w-[1158px] h-[162px] bg-white mb-10"

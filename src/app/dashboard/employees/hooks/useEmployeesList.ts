@@ -18,6 +18,7 @@ export function useEmployeesList() {
     error,
     refetch,
     isFetching,
+    isPlaceholderData,
   } = useFilteredEmployees(filters);
 
   const { employees, totalItems, paginationProps } = React.useMemo(() => {
@@ -43,5 +44,6 @@ export function useEmployeesList() {
     error,
     refetch,
     isFetching,
+    isPlaceholderData,
   };
 }

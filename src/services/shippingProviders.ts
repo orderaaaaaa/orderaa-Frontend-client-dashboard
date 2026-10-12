@@ -7,6 +7,7 @@ import {
 import { toast } from 'react-toastify';
 import http from '@/lib/api/http';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { getApiErrorMessage } from '@/utils/apiError';
 import type {
   CarrierStats,
@@ -44,6 +45,7 @@ export const useCarrierStatsQuery = (range: StatsRange) =>
       });
       return data;
     },
+    placeholderData: keepPreviousData,
   });
 
 export const useCarrierLocationStatsQuery = (
@@ -96,9 +98,11 @@ export const useCreateShippingProvider = () => {
       const { data } = await http.post<ShippingProvider>(BASE, payload);
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [KEY] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SHIPPING_COMPANIES] });
+    onSuccess: async () => {
+      await invalidateAndWait(queryClient, [
+        [KEY],
+        [QUERY_KEYS.SHIPPING_COMPANIES],
+      ]);
       toast.success('تمت إضافة جهة الشحن بنجاح');
     },
     onError: (err: unknown) => {
@@ -125,9 +129,11 @@ export const useUpdateShippingProvider = () => {
       );
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [KEY] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SHIPPING_COMPANIES] });
+    onSuccess: async () => {
+      await invalidateAndWait(queryClient, [
+        [KEY],
+        [QUERY_KEYS.SHIPPING_COMPANIES],
+      ]);
       toast.success('تم حفظ التعديل');
     },
     onError: (err: unknown) => {

@@ -10,6 +10,7 @@ import { getApiErrorMessage } from '@/utils/apiError';
 type UpdateEmployeeArgs = {
   id: string;
   updates: Partial<Employee>;
+  rolesSaved?: boolean;
 };
 
 export default function useUpdateEmployee() {
@@ -28,8 +29,13 @@ export default function useUpdateEmployee() {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       router.push('/dashboard/employees');
     },
-    onError: (error: unknown) => {
-      toast.error(getApiErrorMessage(error, 'تعذر تحديث بيانات الموظف'));
+    onError: (error: unknown, variables) => {
+      const reason = getApiErrorMessage(error, 'تعذر تحديث بيانات الموظف');
+      toast.error(
+        variables.rolesSaved
+          ? `تم حفظ الأدوار ولم يتم حفظ البيانات: ${reason}`
+          : reason
+      );
     },
   });
 }

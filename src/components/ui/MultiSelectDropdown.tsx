@@ -45,6 +45,7 @@ interface MultiSelectDropdownProps {
   showSelectAll?: boolean;
   selectAllLabel?: string;
   clearAllLabel?: string;
+  id?: string;
 }
 
 const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>(
@@ -68,6 +69,7 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
       showSelectAll = false,
       selectAllLabel = 'تحديد الكل',
       clearAllLabel = 'إلغاء التحديد',
+      id,
     },
     ref
   ) {
@@ -189,6 +191,7 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
       >
         <button
           type="button"
+          id={id}
           disabled={disabled || loading}
           onClick={() => !disabled && !loading && setOpen(!open)}
           className={cn(

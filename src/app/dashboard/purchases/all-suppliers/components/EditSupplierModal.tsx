@@ -173,10 +173,11 @@ export default function EditSupplierModal({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-700">
+            <label htmlFor="edit-supplier-governorate" className="text-sm font-medium text-gray-700">
               المحافظة
             </label>
             <SearchableSelect
+              id="edit-supplier-governorate"
               value={governorate}
               onChange={(v) =>
                 setValue('governorate', v, { shouldValidate: true })

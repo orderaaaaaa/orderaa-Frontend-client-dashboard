@@ -7,6 +7,7 @@ interface WorkHoursTimePickerProps {
   onChange: (value: string) => void;
   error?: string;
   placeholder?: string;
+  id?: string;
 }
 
 export default function WorkHoursTimePicker({
@@ -14,6 +15,7 @@ export default function WorkHoursTimePicker({
   onChange,
   error,
   placeholder = 'اختر ساعات العمل',
+  id,
 }: WorkHoursTimePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [tempStartHour, setTempStartHour] = useState<number | null>(null);
@@ -88,6 +90,7 @@ export default function WorkHoursTimePicker({
     <>
       <div className="w-full relative">
         <input
+          id={id}
           type="text"
           value={value}
           onClick={() => setIsOpen(true)}

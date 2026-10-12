@@ -29,6 +29,7 @@ interface BaseModalProps {
   maxWidth?: string;
   height?: string;
   toastOnConfirmError?: boolean;
+  confirmErrorFallback?: string;
 }
 
 export default function BaseModal({
@@ -48,6 +49,7 @@ export default function BaseModal({
   maxWidth = 'md:max-w-[827px]',
   height,
   toastOnConfirmError = false,
+  confirmErrorFallback = 'حدث خطأ، حاول مرة أخرى',
 }: BaseModalProps) {
   const [internalIsLoading, setInternalIsLoading] = useState(false);
   const isLoading = externalIsLoading || internalIsLoading;
@@ -61,7 +63,7 @@ export default function BaseModal({
         setInternalIsLoading(false);
       } catch (error) {
         if (toastOnConfirmError) {
-          toast.error(getApiErrorMessage(error, 'حدث خطأ، حاول مرة أخرى'));
+          toast.error(getApiErrorMessage(error, confirmErrorFallback));
         } else {
           console.error('Confirmation action failed:', error);
         }

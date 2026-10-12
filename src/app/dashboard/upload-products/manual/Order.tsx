@@ -22,11 +22,12 @@ function Order({
         <div className="grid grid-cols-2 max-sm:grid-cols-1 gap-8 max-sm:gap-6 mb-8">
           <div className="max-w-[502px]" data-field-error="utmSource">
             <div className="mb-1">
-              <label className="block font-medium text-[16px]">
+              <label htmlFor="manual-utm-source" className="block font-medium text-[16px]">
                 المنصة <span className="text-red-500">*</span>
               </label>
             </div>
             <SearchableSelect
+              id="manual-utm-source"
               name="utmSource"
               placeholder="اختر المنصة"
               value={utmSource}
@@ -39,11 +40,12 @@ function Order({
           </div>
           <div className="max-w-[502px]" data-field-error="pageName">
             <div className="mb-1">
-              <label className="block font-medium text-[16px]">
+              <label htmlFor="manual-page-name" className="block font-medium text-[16px]">
                 اسم الصفحة <span className="text-red-500">*</span>
               </label>
             </div>
             <SearchableSelect
+              id="manual-page-name"
               name="pageName"
               placeholder="اختر اسم الصفحة"
               value={pageName}

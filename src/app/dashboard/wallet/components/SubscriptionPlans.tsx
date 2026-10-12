@@ -221,7 +221,10 @@ function SubscriptionPlans() {
                 `}
                 onClick={() => !isActive && handleSubscribe(plan.id)}
                 disabled={isActive || subscribeMutation.isPending}
-                loading={subscribeMutation.isPending}
+                loading={
+                  subscribeMutation.isPending &&
+                  subscribeMutation.variables === plan.id
+                }
                 loadingText="جاري الاشتراك..."
               >
                 {isActive ? 'مشترك حالياً' : 'اشترك الآن'}
