@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LiaTruckSolid } from 'react-icons/lia';
 import useShippingCompanies from '@/hooks/useShippingCompanies';
 import {
@@ -8,7 +9,11 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '@/components/ui/accordion';
-import { GovernorateConfigTable } from './GovernorateConfigTable';
+import {
+  GovernorateConfigTable,
+  type GovernorateConfigDraft,
+  type GovernorateConfigDraftStore,
+} from './GovernorateConfigTable';
 import PageLoading from '@/components/ui/page-loading';
 
 interface LogisticsSettingsSectionProps {
@@ -19,6 +24,54 @@ export function LogisticsSettingsSection({
   onDirtyChange,
 }: LogisticsSettingsSectionProps = {}) {
   const { shippingCompanies: activeCompanies, isLoading } = useShippingCompanies();
+  const draftsRef = useRef(new Map<number, GovernorateConfigDraft>());
+  const [dirtyCompanyIds, setDirtyCompanyIds] = useState<ReadonlySet<number>>(
+    () => new Set()
+  );
+
+  const draftStore = useMemo<GovernorateConfigDraftStore>(
+    () => ({
+      get: (shippingCompanyId) => draftsRef.current.get(shippingCompanyId),
+      set: (shippingCompanyId, draft) => {
+        draftsRef.current.set(shippingCompanyId, draft);
+      },
+      remove: (shippingCompanyId) => {
+        draftsRef.current.delete(shippingCompanyId);
+      },
+    }),
+    []
+  );
+
+  const handleDirtyChange = useCallback(
+    (shippingCompanyId: number, isDirty: boolean) => {
+      setDirtyCompanyIds((prev) => {
+        if (prev.has(shippingCompanyId) === isDirty) return prev;
+        const next = new Set(prev);
+        if (isDirty) {
+          next.add(shippingCompanyId);
+        } else {
+          next.delete(shippingCompanyId);
+        }
+        return next;
+      });
+      onDirtyChange?.(`governorates-${shippingCompanyId}`, isDirty);
+    },
+    [onDirtyChange]
+  );
+
+  useEffect(() => {
+    if (isLoading) return;
+    const activeIds = new Set(activeCompanies.map((company) => company.id));
+    const trackedIds = new Set([
+      ...Array.from(draftsRef.current.keys()),
+      ...Array.from(dirtyCompanyIds),
+    ]);
+    trackedIds.forEach((shippingCompanyId) => {
+      if (activeIds.has(shippingCompanyId)) return;
+      draftsRef.current.delete(shippingCompanyId);
+      handleDirtyChange(shippingCompanyId, false);
+    });
+  }, [activeCompanies, dirtyCompanyIds, handleDirtyChange, isLoading]);
 
   if (isLoading) {
     return <PageLoading size="sm" className="py-6 min-h-0" />;
@@ -69,12 +122,18 @@ export function LogisticsSettingsSection({
                 <span className="font-semibold text-gray-900">
                   {company.name}
                 </span>
+                {dirtyCompanyIds.has(company.id) && (
+                  <span className="text-xs text-amber-600 font-medium">
+                    تغييرات غير محفوظة
+                  </span>
+                )}
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-2 pb-2">
               <GovernorateConfigTable
                 shippingCompanyId={company.id}
-                onDirtyChange={onDirtyChange}
+                onDirtyChange={handleDirtyChange}
+                draftStore={draftStore}
               />
             </AccordionContent>
           </AccordionItem>

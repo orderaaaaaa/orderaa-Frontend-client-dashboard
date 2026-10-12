@@ -1,6 +1,6 @@
-export const ACCESS_LEVEL_OPTIONS = [
-  { key: 'EMPLOYEE', value: 'موظف' },
-  { key: 'SUPER_ADMIN', value: 'سوبر ادمن' },
-  { key: 'ADMIN', value: 'ادمن' },
-  { key: 'MANAGER', value: 'مدير' },
-];
+import { ACCESS_LEVEL_LABELS, EMPLOYEE_ACCESS_LEVELS } from './accessLevels';
+
+export const ACCESS_LEVEL_OPTIONS = EMPLOYEE_ACCESS_LEVELS.map((level) => ({
+  key: level,
+  value: ACCESS_LEVEL_LABELS[level],
+}));

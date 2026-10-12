@@ -1,11 +1,13 @@
+import { ACCESS_LEVEL_LABELS, EMPLOYEE_ACCESS_LEVELS } from './accessLevels';
+
 export const FILTER_ALL = 'ALL' as const;
 
 export const ACCESS_LEVEL_OPTIONS = [
   { value: FILTER_ALL, label: 'جميع المستويات' },
-  { value: 'SUPER_ADMIN', label: 'سوبر أدمن' },
-  { value: 'ADMIN', label: 'أدمن' },
-  { value: 'MANAGER', label: 'مدير' },
-  { value: 'EMPLOYEE', label: 'موظف' },
+  ...EMPLOYEE_ACCESS_LEVELS.map((level) => ({
+    value: level,
+    label: ACCESS_LEVEL_LABELS[level],
+  })),
 ];
 
 export const DEPARTMENT_OPTIONS = [

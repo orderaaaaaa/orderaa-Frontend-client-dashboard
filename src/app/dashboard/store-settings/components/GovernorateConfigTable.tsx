@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -50,18 +50,39 @@ type GovernorateConfigFormData = z.infer<typeof governorateConfigSchema>;
 // `useFieldArray`'s own types do not resolve in this project (the known
 // react-hook-form module-resolution issue), so the row shape is named here
 // rather than left to fall back to `any`, which .FE-RULES bans.
-type GovernorateConfigField = GovernorateConfigFormData['configs'][number] & {
+type GovernorateConfigRow = GovernorateConfigFormData['configs'][number];
+
+type GovernorateConfigField = GovernorateConfigRow & {
   id: string;
 };
 
+export type GovernorateConfigDraft = Record<string, GovernorateConfigRow>;
+
+export interface GovernorateConfigDraftStore {
+  get: (shippingCompanyId: number) => GovernorateConfigDraft | undefined;
+  set: (shippingCompanyId: number, draft: GovernorateConfigDraft) => void;
+  remove: (shippingCompanyId: number) => void;
+}
+
+const isSameValue = (a: string, b: string) =>
+  a === b ||
+  (a.trim() !== '' && b.trim() !== '' && Number.isFinite(Number(a)) && Number(a) === Number(b));
+
+const isSameRow = (a: GovernorateConfigRow, b: GovernorateConfigRow) =>
+  isSameValue(a.firstAttemptDelay, b.firstAttemptDelay) &&
+  isSameValue(a.shippingCost, b.shippingCost) &&
+  isSameValue(a.nonReceiptCost, b.nonReceiptCost);
+
 interface GovernorateConfigTableProps {
   shippingCompanyId: number;
-  onDirtyChange?: (key: string, isDirty: boolean) => void;
+  onDirtyChange?: (shippingCompanyId: number, isDirty: boolean) => void;
+  draftStore?: GovernorateConfigDraftStore;
 }
 
 export function GovernorateConfigTable({
   shippingCompanyId,
   onDirtyChange,
+  draftStore,
 }: GovernorateConfigTableProps) {
   const { data: configs, isLoading: isConfigsLoading } =
     useGovernorateLogisticsConfig(shippingCompanyId);
@@ -75,6 +96,7 @@ export function GovernorateConfigTable({
 
   const [savedGovernorates, setSavedGovernorates] = useState<Set<string>>(new Set());
   const [confirmEmptyOpen, setConfirmEmptyOpen] = useState(false);
+  const savedRowsRef = useRef<GovernorateConfigRow[] | null>(null);
 
   const {
     register,
@@ -96,33 +118,74 @@ export function GovernorateConfigTable({
 
   const watchedConfigs = watch('configs');
 
+  const syncDraft = useCallback(() => {
+    const savedRows = savedRowsRef.current;
+    if (!draftStore || !savedRows) return;
+    const savedByGovernorate = new Map(savedRows.map((row) => [row.governorate, row]));
+    const draft: GovernorateConfigDraft = {};
+    for (const row of getValues('configs') ?? []) {
+      const saved = savedByGovernorate.get(row.governorate);
+      if (!saved || !isSameRow(row, saved)) {
+        draft[row.governorate] = { ...row };
+      }
+    }
+    if (Object.keys(draft).length > 0) {
+      draftStore.set(shippingCompanyId, draft);
+    } else {
+      draftStore.remove(shippingCompanyId);
+    }
+  }, [draftStore, getValues, shippingCompanyId]);
+
+  useEffect(() => {
+    const subscription = watch(() => syncDraft());
+    return () => subscription.unsubscribe();
+  }, [watch, syncDraft]);
+
   useEffect(() => {
     if (!onDirtyChange) return;
-    const dirtyKey = `governorates-${shippingCompanyId}`;
-    onDirtyChange(dirtyKey, isDirty);
-    return () => onDirtyChange(dirtyKey, false);
-  }, [isDirty, onDirtyChange, shippingCompanyId]);
+    onDirtyChange(
+      shippingCompanyId,
+      isDirty || (savedRowsRef.current === null && !!draftStore?.get(shippingCompanyId))
+    );
+    return () => onDirtyChange(shippingCompanyId, !!draftStore?.get(shippingCompanyId));
+  }, [draftStore, isDirty, onDirtyChange, shippingCompanyId]);
 
   useEffect(() => {
     if (isConfigsLoading || isGovernoratesLoading) return;
     const configByGovernorate = new Map(
       (configs ?? []).flatMap((c) => (c.governorateKey ? [[c.governorateKey, c] as const] : []))
     );
-    reset({
-      configs: governorates.map((g) => {
-        const existing = configByGovernorate.get(g.key);
-        return {
-          governorate: g.key,
-          firstAttemptDelay: existing ? String(existing.firstAttemptDelay) : '',
-          shippingCost: existing?.shippingCost ?? '',
-          nonReceiptCost: existing?.nonReceiptCost ?? '',
-        };
-      }),
+    const savedRows: GovernorateConfigRow[] = governorates.map((g) => {
+      const existing = configByGovernorate.get(g.key);
+      return {
+        governorate: g.key,
+        firstAttemptDelay: existing ? String(existing.firstAttemptDelay) : '',
+        shippingCost: existing?.shippingCost ?? '',
+        nonReceiptCost: existing?.nonReceiptCost ?? '',
+      };
     });
+    const draft = draftStore?.get(shippingCompanyId);
+    savedRowsRef.current = savedRows;
+    reset({ configs: savedRows });
+    const pendingRows = savedRows.map((row) => {
+      const draftRow = draft?.[row.governorate];
+      return draftRow && !isSameRow(draftRow, row) ? draftRow : row;
+    });
+    if (pendingRows.some((row, index) => row !== savedRows[index])) {
+      reset({ configs: pendingRows }, { keepDefaultValues: true });
+    }
     setSavedGovernorates(
       new Set((configs ?? []).flatMap((c) => (c.governorateKey ? [c.governorateKey] : [])))
     );
-  }, [configs, governorates, isConfigsLoading, isGovernoratesLoading, reset]);
+  }, [
+    configs,
+    draftStore,
+    governorates,
+    isConfigsLoading,
+    isGovernoratesLoading,
+    reset,
+    shippingCompanyId,
+  ]);
 
   const labelByKey = new Map(governorates.map((g) => [g.key, g.label]));
 
