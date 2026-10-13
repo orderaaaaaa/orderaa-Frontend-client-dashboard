@@ -9,7 +9,7 @@ import { Breadcrumb } from '@/components/dashboard-layout';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { generateSettlementTemplate } from '@/lib/excel/template-generator';
-import { parseSettlementFile } from '@/lib/excel/parse-settlement-file';
+import { parseSettlementFile, type SettlementSheetError } from '@/lib/excel/parse-settlement-file';
 import CopyButton from '@/components/ui/copy-button';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { getApiErrorMessage } from '@/utils/apiError';
@@ -21,6 +21,8 @@ import BaseModal from '@/components/ui/base-modal';
 import { useSettlementSync } from '@/app/dashboard/orders/settlement/hooks/useSettlementQueries';
 import ForceSettlementDialog from '@/app/dashboard/orders/settlement/components/ForceSettlementDialog';
 import SettlementAcceptedStatusesNote from '@/app/dashboard/orders/settlement/components/SettlementAcceptedStatusesNote';
+import SettlementSheetNamesNote from '@/app/dashboard/orders/settlement/components/SettlementSheetNamesNote';
+import SettlementSheetErrors from '@/app/dashboard/orders/settlement/components/SettlementSheetErrors';
 import {
   SettlementMobileList,
   SettlementMobileRow,
@@ -53,6 +55,7 @@ export default function SettlementUploadPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [parsedRows, setParsedRows] = useState<SettlementRow[]>([]);
+  const [sheetErrors, setSheetErrors] = useState<SettlementSheetError[]>([]);
   const [uploadedRows, setUploadedRows] = useState<SettlementRow[]>([]);
   const [isParsing, setIsParsing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -117,12 +120,19 @@ export default function SettlementUploadPage() {
     setIsParsing(true);
 
     try {
-      const rows = await parseSettlementFile(file);
+      const { rows, errors } = await parseSettlementFile(file);
       setParsedRows(rows);
-      toast.success(`تم تحليل ${rows.length} صف بنجاح`);
+      setSheetErrors(errors);
+      if (rows.length > 0) {
+        toast.success(`تم تحليل ${rows.length} صف بنجاح`);
+      }
+      if (errors.length > 0) {
+        toast.error(`${errors.length} صف بحالة غير معروفة لن يُرفع`);
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'خطأ في تحليل الملف');
       setParsedRows([]);
+      setSheetErrors([]);
     } finally {
       setIsParsing(false);
     }
@@ -261,6 +271,7 @@ export default function SettlementUploadPage() {
   const handleReset = useCallback(() => {
     setSelectedFile(null);
     setParsedRows([]);
+    setSheetErrors([]);
     setUploadedRows([]);
     setResults(null);
     setSelectedForceRows(new Set());
@@ -293,6 +304,7 @@ export default function SettlementUploadPage() {
             <Download className="w-4 h-4 me-2" />
             تحميل القالب
           </Button>
+          <SettlementSheetNamesNote className="mt-4" />
           <SettlementAcceptedStatusesNote className="mt-4" />
         </CardContent>
       </Card>
@@ -356,6 +368,8 @@ export default function SettlementUploadPage() {
               جاري تحليل الملف...
             </p>
           )}
+
+          <SettlementSheetErrors errors={sheetErrors} className="mt-3" />
         </CardContent>
       </Card>
       )}
