@@ -1,5 +1,6 @@
 import {
   useQuery,
+  useQueries,
   useMutation,
   useInfiniteQuery,
   useQueryClient,
@@ -421,20 +422,49 @@ export const resolveAttributeOptionIds = (
   );
 };
 
+const fetchProductVariantsOptions = async (productId: number) => {
+  const { options: attributeOptions } = await getProductAttributeOptions(productId);
+  return (attributeOptions || []).map((attribute, index) => ({
+    attribute: attribute.name || `attribute_${index}`,
+    options: (attribute.options || []).map((option) => ({
+      id: option.id,
+      name: option.name,
+    })),
+  })) as VariantOption[];
+};
+
 export const useProductVariantsOptions = (productId: number | null) => {
   return useQuery({
     queryKey: [QUERY_KEYS.PRODUCT_VARIANTS_OPTIONS, productId] as QueryKey,
-    queryFn: async () => {
-      const { options: attributeOptions } = await getProductAttributeOptions(productId!);
-      return (attributeOptions || []).map((attribute, index) => ({
-        attribute: attribute.name || `attribute_${index}`,
-        options: (attribute.options || []).map((option) => ({
-          id: option.id,
-          name: option.name,
-        })),
-      })) as VariantOption[];
-    },
+    queryFn: () => fetchProductVariantsOptions(productId!),
     enabled: !!productId,
+  });
+};
+
+export interface ProductsVariantsOptions {
+  byProductId: Map<number, VariantOption[]>;
+  isPending: boolean;
+}
+
+export const useProductsVariantsOptions = (
+  productIds: readonly number[]
+): ProductsVariantsOptions => {
+  const uniqueIds = Array.from(new Set(productIds));
+  return useQueries({
+    queries: uniqueIds.map((productId) => ({
+      queryKey: [QUERY_KEYS.PRODUCT_VARIANTS_OPTIONS, productId] as QueryKey,
+      queryFn: () => fetchProductVariantsOptions(productId),
+    })),
+    combine: (results) => {
+      const byProductId = new Map<number, VariantOption[]>();
+      results.forEach((result, index) => {
+        if (result.data) byProductId.set(uniqueIds[index], result.data);
+      });
+      return {
+        byProductId,
+        isPending: results.some((result) => result.isPending),
+      };
+    },
   });
 };
 

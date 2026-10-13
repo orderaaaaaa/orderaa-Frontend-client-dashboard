@@ -41,7 +41,9 @@ export function MissingOrderHeader({ row }: MissingOrderHeaderProps) {
           </div>
           <div>
             <span className="block text-xs text-gray-500">سبب الفشل</span>
-            <span className="font-semibold">{MISSING_ORDER_FAILURE_LABELS[row.failureCode]}</span>
+            <span className="font-semibold">
+              {row.failureMessage ?? MISSING_ORDER_FAILURE_LABELS[row.failureCode]}
+            </span>
           </div>
           <div>
             <span className="block text-xs text-gray-500">عدد المحاولات</span>

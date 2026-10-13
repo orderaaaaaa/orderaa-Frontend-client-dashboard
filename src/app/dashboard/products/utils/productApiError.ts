@@ -36,6 +36,8 @@ export function productApiErrorBody(error: unknown): ProductApiErrorBody | null 
   return { code: data.code, message: data.message ?? '', details: data.details };
 }
 
+const ARABIC_TEXT = /[؀-ۿ]/;
+
 const joinValues = (values?: string[]) =>
   values && values.length > 0 ? `: ${values.join('، ')}` : '';
 
@@ -46,7 +48,7 @@ export function productApiErrorMessage(error: unknown, fallback: string): string
       ?.status;
     if (status === undefined || status >= 500) return fallback;
     const message = getApiErrorMessage(error, fallback);
-    return /[؀-ۿ]/.test(message) ? message : fallback;
+    return ARABIC_TEXT.test(message) ? message : fallback;
   }
   const details = body.details ?? {};
   switch (body.code) {
@@ -55,7 +57,9 @@ export function productApiErrorMessage(error: unknown, fallback: string): string
     case 'DUPLICATE_OPTION_NAME':
       return `توجد قيمتان متكررتان في المتغير ${details.attribute ?? ''}${joinValues(details.names)}`;
     case 'VARIANT_OPTIONS_INVALID':
-      return 'أحد صفوف المتغيرات لا يطابق قيم المتغيرات، راجع الصفوف وحاول مرة أخرى';
+      return ARABIC_TEXT.test(body.message)
+        ? body.message
+        : 'أحد صفوف المتغيرات لا يطابق قيم المتغيرات، راجع الصفوف وحاول مرة أخرى';
     case 'DUPLICATE_VARIANT_COMBINATION':
       return 'يوجد صفان بنفس مجموعة القيم';
     case 'VARIANT_COMBINATIONS_INCOMPLETE':
