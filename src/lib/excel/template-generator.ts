@@ -1,4 +1,9 @@
 import * as XLSX from 'xlsx';
+import {
+  SETTLEMENT_TARGETS,
+  SETTLEMENT_TARGET_NAMES,
+  settlementTargetAcceptedNames,
+} from '@/lib/excel/settlement-target-names';
 
 /**
  * Generate App Format Excel template
@@ -80,8 +85,8 @@ export function generateSettlementTemplate(): Blob {
   ];
 
   const sampleData = [
-    ['ORD-123', '', '-15', 'COLLECTED'],
-    ['', 'SHIP-ABC-999', '120.50', 'RETURNED_SETTLED'],
+    ['ORD-123', '', '-15', SETTLEMENT_TARGET_NAMES.COLLECTED.names[0]],
+    ['', 'SHIP-ABC-999', '120.50', SETTLEMENT_TARGET_NAMES.RETURNED_SETTLED.names[0]],
   ];
 
   const worksheet = XLSX.utils.aoa_to_sheet([headers, ...sampleData]);
@@ -91,6 +96,16 @@ export function generateSettlementTemplate(): Blob {
   // Set column widths
   const colWidths = headers.map(() => ({ wch: 22 }));
   worksheet['!cols'] = colWidths;
+
+  const namesSheet = XLSX.utils.aoa_to_sheet([
+    ['الحالة', 'الأسماء المقبولة في عمود targetStatus'],
+    ...SETTLEMENT_TARGETS.map((target) => [
+      SETTLEMENT_TARGET_NAMES[target].label,
+      settlementTargetAcceptedNames(target).join('، '),
+    ]),
+  ]);
+  namesSheet['!cols'] = [{ wch: 12 }, { wch: 80 }];
+  XLSX.utils.book_append_sheet(workbook, namesSheet, 'الحالات المقبولة');
 
   const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
   return new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });

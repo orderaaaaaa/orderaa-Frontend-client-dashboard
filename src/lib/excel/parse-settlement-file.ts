@@ -1,7 +1,21 @@
 import * as XLSX from 'xlsx';
 import type { SettlementRow } from '@/lib/api/settlement';
+import { resolveSettlementTarget } from '@/lib/excel/settlement-target-names';
 
-export function parseSettlementFile(file: File): Promise<SettlementRow[]> {
+export interface SettlementSheetError {
+  sheetRow: number;
+  value: string;
+  message: string;
+}
+
+export interface ParsedSettlementSheet {
+  rows: SettlementRow[];
+  errors: SettlementSheetError[];
+}
+
+const FIRST_DATA_ROW = 2;
+
+export function parseSettlementFile(file: File): Promise<ParsedSettlementSheet> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -29,39 +43,46 @@ export function parseSettlementFile(file: File): Promise<SettlementRow[]> {
           return;
         }
 
-        const validStatuses = ['COLLECTED', 'RETURNED_SETTLED'] as const;
         const result: SettlementRow[] = [];
+        const errors: SettlementSheetError[] = [];
 
-        for (const row of rows) {
+        rows.forEach((row, index) => {
           const orderCode = String(row.orderCode ?? '').trim();
           const shippingCompanyCode = String(row.shippingCompanyCode ?? '').trim();
 
-          if (!orderCode && !shippingCompanyCode) continue;
+          if (!orderCode && !shippingCompanyCode) return;
 
           const rawAmount = row.settlementAmount;
           const settlementAmount =
             typeof rawAmount === 'number' ? rawAmount : Number(rawAmount);
-          if (Number.isNaN(settlementAmount)) continue;
+          if (Number.isNaN(settlementAmount)) return;
 
-          const targetStatus = String(row.targetStatus ?? '').trim() as
-            | (typeof validStatuses)[number]
-            | '';
-          if (!validStatuses.includes(targetStatus as (typeof validStatuses)[number])) continue;
+          const rawStatus = String(row.targetStatus ?? '').trim();
+          const targetStatus = resolveSettlementTarget(row.targetStatus);
+          if (!targetStatus) {
+            const rowNumber: unknown = Object.getOwnPropertyDescriptor(row, '__rowNum__')?.value;
+            errors.push({
+              sheetRow: typeof rowNumber === 'number' ? rowNumber + 1 : index + FIRST_DATA_ROW,
+              value: rawStatus,
+              message: rawStatus ? `الحالة «${rawStatus}» غير معروفة` : 'خانة الحالة فارغة',
+            });
+            return;
+          }
 
           result.push({
             orderCode: orderCode || undefined,
             shippingCompanyCode: shippingCompanyCode || undefined,
             settlementAmount,
-            targetStatus: targetStatus as (typeof validStatuses)[number],
+            targetStatus,
           });
-        }
+        });
 
-        if (result.length === 0) {
+        if (result.length === 0 && errors.length === 0) {
           reject(new Error('لا توجد صفوف صالحة في الملف'));
           return;
         }
 
-        resolve(result);
+        resolve({ rows: result, errors });
       } catch (err) {
         reject(
           new Error(
