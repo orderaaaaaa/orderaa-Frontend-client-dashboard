@@ -30,6 +30,7 @@ interface ProductTableRow {
   quantity: number;
   selectedVariants: Array<{ attribute: string; option: string }>;
   variantKey: string;
+  sourceIndex?: number;
   variantEdited: boolean;
 }
 
@@ -94,7 +95,13 @@ function OrderDetails({
     const twinIndex = selectedProducts.findIndex(
       (p, i) => i !== index && p.id === edited.id && getVariantKey(p) === editedKey
     );
-    if (twinIndex === -1) {
+    const twin = twinIndex === -1 ? undefined : selectedProducts[twinIndex];
+    const keepsBothBindings =
+      twin !== undefined &&
+      twin.sourceIndex !== undefined &&
+      edited.sourceIndex !== undefined &&
+      twin.sourceIndex !== edited.sourceIndex;
+    if (twin === undefined || keepsBothBindings) {
       setSelectedProducts(
         selectedProducts.map((p, i) => (i === index ? edited : p))
       );
@@ -105,7 +112,12 @@ function OrderDetails({
         if (i === index) return [];
         if (i === twinIndex) {
           return [
-            { ...p, quantity: (p.quantity || 1) + (edited.quantity || 1) },
+            {
+              ...p,
+              quantity: (p.quantity || 1) + (edited.quantity || 1),
+              sourceIndex: p.sourceIndex ?? edited.sourceIndex,
+              variantEdited: true,
+            },
           ];
         }
         return [p];
@@ -158,12 +170,16 @@ function OrderDetails({
       quantity: product.quantity || 1,
       selectedVariants: product.selectedVariants,
       variantKey: getVariantKey(product),
+      sourceIndex: product.sourceIndex,
       variantEdited: product.variantEdited === true,
     }));
   }, [selectedProducts]);
 
   const renderProduct = (row: ProductTableRow) => {
-    const isFailing = failingProductIndex === row.index && !row.variantEdited;
+    const isFailing =
+      failingProductIndex !== null &&
+      row.sourceIndex === failingProductIndex &&
+      !row.variantEdited;
     return (
       <div
         className={

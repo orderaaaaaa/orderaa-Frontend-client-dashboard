@@ -45,13 +45,27 @@ export default function EditProductModal({
     );
   }, [selectedValues, currentVariants]);
 
+  const chosenValues = useMemo(
+    () =>
+      Object.fromEntries(
+        variantOptions
+          .filter((option) =>
+            option.options.some(
+              (o) => o.name === selectedValues[option.attribute]
+            )
+          )
+          .map((option) => [option.attribute, selectedValues[option.attribute]])
+      ),
+    [variantOptions, selectedValues]
+  );
+
   const missingAttributes = useMemo(
     () =>
       missingAttributesOf(
         variantOptions.map((option) => option.attribute),
-        Object.keys(selectedValues).filter((key) => selectedValues[key])
+        Object.keys(chosenValues)
       ),
-    [variantOptions, selectedValues]
+    [variantOptions, chosenValues]
   );
 
   const handleValueChange = (attribute: string, optionValue: string) => {
@@ -64,11 +78,6 @@ export default function EditProductModal({
   const handleSave = () => {
     if (!hasChanges || missingAttributes.length > 0) return;
 
-    const chosenValues = Object.fromEntries(
-      variantOptions
-        .filter((option) => selectedValues[option.attribute])
-        .map((option) => [option.attribute, selectedValues[option.attribute]])
-    );
     const attributeOptionIds = resolveAttributeOptionIds(
       variantOptions,
       chosenValues
