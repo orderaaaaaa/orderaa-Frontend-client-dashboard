@@ -33,6 +33,7 @@ export type SettlementRowCode =
   | 'SETTLEMENT_AMOUNT_UNCHANGED'
   | 'SETTLEMENT_BATCH_ALREADY_CONFIRMED'
   | 'SETTLEMENT_BATCH_CREATE_FAILED'
+  | 'SETTLEMENT_UNKNOWN_TARGET_STATUS'
   | 'OUT_OF_STOCK_CONFIRMATION_BLOCKED';
 
 export interface SettlementRow {
@@ -52,8 +53,16 @@ export const SETTLEMENT_DIRECT_SOURCE_STATUSES: Record<
     OrderStatus.SHIPPING,
     OrderStatus.WITH_DRIVER,
     OrderStatus.DELIVERED,
+    OrderStatus.RETURNED_DELIVERED,
   ],
-  RETURNED_SETTLED: [OrderStatus.RETURNED_DELIVERED, OrderStatus.RETURNED_COLLECTED],
+  RETURNED_SETTLED: [
+    OrderStatus.WAITING_FOR_APPROVAL,
+    OrderStatus.SHIPPING,
+    OrderStatus.WITH_DRIVER,
+    OrderStatus.DELIVERED,
+    OrderStatus.RETURNED_DELIVERED,
+    OrderStatus.RETURNED_COLLECTED,
+  ],
 };
 
 export interface SettlementSuccessItem {

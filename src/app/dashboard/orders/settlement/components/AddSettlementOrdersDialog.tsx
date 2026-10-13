@@ -5,9 +5,11 @@ import { toast } from 'react-toastify';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import { getApiErrorMessage } from '@/utils/apiError';
-import { parseSettlementFile } from '@/lib/excel/parse-settlement-file';
+import { parseSettlementFile, type SettlementSheetError } from '@/lib/excel/parse-settlement-file';
 import ForceSettlementDialog from './ForceSettlementDialog';
 import SettlementAcceptedStatusesNote from './SettlementAcceptedStatusesNote';
+import SettlementSheetNamesNote from './SettlementSheetNamesNote';
+import SettlementSheetErrors from './SettlementSheetErrors';
 import { SettlementMobileList, SettlementMobileRow } from './SettlementMobileList';
 import {
   addSettlementBatchOrders,
@@ -71,6 +73,7 @@ export default function AddSettlementOrdersDialog({
 }: AddSettlementOrdersDialogProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [parsedRows, setParsedRows] = useState<SettlementRow[]>([]);
+  const [sheetErrors, setSheetErrors] = useState<SettlementSheetError[]>([]);
   const [isParsing, setIsParsing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [results, setResults] = useState<UploadSettlementResponse | null>(null);
@@ -85,12 +88,19 @@ export default function AddSettlementOrdersDialog({
     if (!file) return;
     setIsParsing(true);
     try {
-      const rows = await parseSettlementFile(file);
+      const { rows, errors } = await parseSettlementFile(file);
       setParsedRows(rows);
-      toast.success(`تم تحليل ${rows.length} صف بنجاح`);
+      setSheetErrors(errors);
+      if (rows.length > 0) {
+        toast.success(`تم تحليل ${rows.length} صف بنجاح`);
+      }
+      if (errors.length > 0) {
+        toast.error(`${errors.length} صف بحالة غير معروفة لن يُرفع`);
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'خطأ في تحليل الملف');
       setParsedRows([]);
+      setSheetErrors([]);
     } finally {
       setIsParsing(false);
     }
@@ -183,6 +193,7 @@ export default function AddSettlementOrdersDialog({
 
   const handleClose = () => {
     setParsedRows([]);
+    setSheetErrors([]);
     setResults(null);
     setForcingTarget(null);
     setDraft({ orderCode: '', shippingCompanyCode: '', amount: '', targetStatus: 'COLLECTED' });
@@ -293,7 +304,11 @@ export default function AddSettlementOrdersDialog({
           </Button>
         </div>
 
+        <SettlementSheetNamesNote />
+
         {isParsing && <p className="text-sm text-muted-foreground">جاري التحليل...</p>}
+
+        <SettlementSheetErrors errors={sheetErrors} />
 
         {results && (
           <div className="space-y-4">
