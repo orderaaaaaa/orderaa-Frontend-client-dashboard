@@ -45,10 +45,9 @@ export const shopifyIntegrationSteps = [
 export const lightfunnelsWebhookSteps = [
   'قم بتسجيل الدخول إلى لوحة تحكم Lightfunnels.',
   'انتقل إلى الإعدادات (Settings) ثم اختر Webhooks.',
-  'اضغط على "Add new Webhook".',
-  'اختر نوع الحدث "order/confirmed".',
-  'انسخ الرابط أدناه (يحتوي على رمز الحماية) وألصقه في حقل URL.',
-  'احفظ الـ Webhook في Lightfunnels.',
+  'اضغط على "Add new Webhook" واختر نوع الحدث "order/created".',
+  'انسخ الرابط أدناه (يحتوي على رمز الحماية) وألصقه في حقل URL ثم احفظ الـ Webhook.',
+  'أضف Webhook ثانياً بنوع الحدث "order/confirmed" وبنفس الرابط ثم احفظه.',
   'اضغط "حفظ" هنا لإتمام الربط.',
 ];
 

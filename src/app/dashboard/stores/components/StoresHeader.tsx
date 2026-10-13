@@ -62,10 +62,10 @@ export default function StoresHeader({
             </SelectTrigger>
             <SelectContent className="[&_[data-state=checked]]:text-primary">
               <SelectItem value="day">يوم</SelectItem>
-              <SelectItem value="week">اسبوع</SelectItem>
+              <SelectItem value="week">أسبوع</SelectItem>
               <SelectItem value="month">شهر</SelectItem>
               <SelectItem value="quarter">ربع سنوي</SelectItem>
-              <SelectItem value="year">سنه</SelectItem>
+              <SelectItem value="year">سنة</SelectItem>
             </SelectContent>
           </Select>
           {timePeriod && (

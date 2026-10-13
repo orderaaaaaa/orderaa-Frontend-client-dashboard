@@ -71,7 +71,7 @@ function StopHours() {
           </div>
           <div className="flex flex-col justify-center h-[200px] w-[200px] shadow-xl items-center py-5 bg-gradient-to-b from-[#321082] to-[#7849E6] rounded-full text-white">
             <h3 className="font-medium text-[32px]">50</h3>
-            <p className="text-xl">ساعه</p>
+            <p className="text-xl">ساعة</p>
           </div>
         </div>
       </div>
