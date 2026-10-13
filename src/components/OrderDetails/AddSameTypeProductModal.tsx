@@ -9,6 +9,8 @@ import {
 } from '@/services/orders';
 import { Button } from '../ui/button';
 import BaseModal from '@/components/ui/base-modal';
+import { MissingAttributesHint } from '@/components/ui/missing-attributes-hint';
+import { missingAttributesOf } from '@/utils/variantSelection';
 
 interface AddSameTypeProductModalProps {
   isOpen: boolean;
@@ -43,6 +45,15 @@ export default function AddSameTypeProductModal({
     const hasVariants = variantOptions.length === 0 || Object.keys(selectedVariants).length === variantOptions.length;
     return hasVariants && quantity > 0;
   }, [selectedVariants, quantity, variantOptions.length]);
+
+  const missingAttributes = useMemo(
+    () =>
+      missingAttributesOf(
+        variantOptions.map((option) => option.attribute),
+        Object.keys(selectedVariants)
+      ),
+    [variantOptions, selectedVariants]
+  );
 
   const handleVariantChange = (attribute: string, optionValue: string) => {
     setSelectedVariants((prev) => ({
@@ -155,6 +166,7 @@ export default function AddSameTypeProductModal({
             ))
           )}
         </div>
+        {!isLoading && <MissingAttributesHint missing={missingAttributes} />}
       </div>
     </BaseModal>
   );

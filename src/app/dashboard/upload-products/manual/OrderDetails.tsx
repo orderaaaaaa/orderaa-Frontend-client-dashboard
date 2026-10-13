@@ -1,9 +1,15 @@
 'use client';
 
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useRef, useState } from 'react';
 import ProductDropdown from '@/components/productDropdown';
+import EditProductModal from '@/components/OrderDetails/EditProductModal';
 import { useProductDropdownStore } from '@/store/productDropdownStore';
-import { LiaPlusSolid, LiaMinusSolid, LiaTrashSolid } from 'react-icons/lia';
+import {
+  LiaPlusSolid,
+  LiaMinusSolid,
+  LiaTrashSolid,
+  LiaEditSolid,
+} from 'react-icons/lia';
 import { DataTable, DataTableColumn } from '@/components/ui/data-table';
 import { OrderDetailsProps } from './types';
 import Input from '@/components/ui/Input';
@@ -24,6 +30,7 @@ interface ProductTableRow {
   quantity: number;
   selectedVariants: Array<{ attribute: string; option: string }>;
   variantKey: string;
+  variantEdited: boolean;
 }
 
 function OrderDetails({
@@ -40,6 +47,8 @@ function OrderDetails({
   const setSelectedProducts = useProductDropdownStore(
     (state) => state.setSelectedProducts
   );
+
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   const getVariantKey = (product: (typeof selectedProducts)[0]) => {
     return JSON.stringify(
@@ -65,6 +74,57 @@ function OrderDetails({
     );
     setSelectedProducts(updatedProducts);
   };
+
+  const replaceVariant = (
+    index: number,
+    attributeOptionIds: number[],
+    chosenValues: Record<string, string>
+  ) => {
+    const current = selectedProducts[index];
+    if (!current) return;
+    const edited = {
+      ...current,
+      selectedVariants: Object.entries(chosenValues).map(
+        ([attribute, option]) => ({ attribute, option })
+      ),
+      attributeOptionIds,
+      variantEdited: true,
+    };
+    const editedKey = getVariantKey(edited);
+    const twinIndex = selectedProducts.findIndex(
+      (p, i) => i !== index && p.id === edited.id && getVariantKey(p) === editedKey
+    );
+    if (twinIndex === -1) {
+      setSelectedProducts(
+        selectedProducts.map((p, i) => (i === index ? edited : p))
+      );
+      return;
+    }
+    setSelectedProducts(
+      selectedProducts.flatMap((p, i) => {
+        if (i === index) return [];
+        if (i === twinIndex) {
+          return [
+            { ...p, quantity: (p.quantity || 1) + (edited.quantity || 1) },
+          ];
+        }
+        return [p];
+      })
+    );
+  };
+
+  const editingProduct =
+    editingIndex === null ? undefined : selectedProducts[editingIndex];
+  const editingVariants = useMemo(
+    () =>
+      Object.fromEntries(
+        (editingProduct?.selectedVariants ?? []).map((variant) => [
+          variant.attribute,
+          variant.option,
+        ])
+      ),
+    [editingProduct]
+  );
 
   const calculatedTotal = useMemo(() => {
     return roundMoney(
@@ -98,11 +158,12 @@ function OrderDetails({
       quantity: product.quantity || 1,
       selectedVariants: product.selectedVariants,
       variantKey: getVariantKey(product),
+      variantEdited: product.variantEdited === true,
     }));
   }, [selectedProducts]);
 
   const renderProduct = (row: ProductTableRow) => {
-    const isFailing = failingProductIndex === row.index;
+    const isFailing = failingProductIndex === row.index && !row.variantEdited;
     return (
       <div
         className={
@@ -140,6 +201,18 @@ function OrderDetails({
         {isFailing && (
           <p className="text-red-600 text-xs mt-1">اختر خيارات هذا المنتج</p>
         )}
+        <button
+          type="button"
+          aria-label={`تعديل خيارات ${row.name}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            setEditingIndex(row.index);
+          }}
+          className="mt-2 min-h-10 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline cursor-pointer"
+        >
+          <LiaEditSolid className="w-4 h-4" />
+          تعديل الخيارات
+        </button>
       </div>
     );
   };
@@ -292,6 +365,20 @@ function OrderDetails({
               </div>
             </div>
           </>
+        )}
+
+        {editingProduct && (
+          <EditProductModal
+            isOpen={editingIndex !== null}
+            onClose={() => setEditingIndex(null)}
+            onSave={(attributeOptionIds, chosenValues) => {
+              if (editingIndex !== null) {
+                replaceVariant(editingIndex, attributeOptionIds, chosenValues);
+              }
+            }}
+            productId={editingProduct.id}
+            currentVariants={editingVariants}
+          />
         )}
 
         <div className="mt-6">

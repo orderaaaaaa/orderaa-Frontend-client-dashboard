@@ -83,6 +83,7 @@ export interface MissingOrderDetail extends MissingOrderListItem {
   paymentStatus: OrderPaymentStatus | null;
   prepaidAmount: string | null;
   failureProductIndex: number | null;
+  failureMessage: string | null;
   dismissReason: string | null;
   handledAt: string | null;
   diagnostic: string | null;

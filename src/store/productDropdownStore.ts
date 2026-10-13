@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { missingAttributesOf } from '@/utils/variantSelection';
 
 interface VariantOption {
   attribute: string;
@@ -25,10 +26,16 @@ interface SelectedVariantValue {
   option: string;
 }
 
-interface PendingProduct {
+export interface PendingProduct {
   product: ApiProduct;
   selectedVariants: SelectedVariantValue[];
 }
+
+export const missingAttributesOfPending = (pending: PendingProduct): string[] =>
+  missingAttributesOf(
+    pending.product.variantOptions.map((option) => option.attribute),
+    pending.selectedVariants.map((variant) => variant.attribute)
+  );
 
 export interface SelectedProduct {
   id: number;
@@ -39,6 +46,7 @@ export interface SelectedProduct {
   selectedVariants: SelectedVariantValue[];
   attributeOptionIds: number[];
   sourceIndex?: number;
+  variantEdited?: boolean;
 }
 
 interface ProductDropdownState {
@@ -239,7 +247,15 @@ export const useProductDropdownStore = create<ProductDropdownState>(
     confirmSelections: () => {
       const { pendingSelections, selectedProducts } = get();
 
-      const newProducts: SelectedProduct[] = Object.values(pendingSelections).map(
+      const pending = Object.values(pendingSelections);
+      const complete = pending.filter(
+        (selection) => missingAttributesOfPending(selection).length === 0
+      );
+      const incomplete = pending.filter(
+        (selection) => missingAttributesOfPending(selection).length > 0
+      );
+
+      const newProducts: SelectedProduct[] = complete.map(
         (selection) => ({
           id: selection.product.id,
           name: selection.product.name,
@@ -278,8 +294,15 @@ export const useProductDropdownStore = create<ProductDropdownState>(
 
       set({
         selectedProducts: merged,
-        pendingSelections: {},
-        selectedVariants: {},
+        pendingSelections: Object.fromEntries(
+          incomplete.map((selection) => [selection.product.id, selection])
+        ),
+        selectedVariants: Object.fromEntries(
+          incomplete.map((selection) => [
+            selection.product.id,
+            selection.selectedVariants,
+          ])
+        ),
       });
 
       return merged;

@@ -6,6 +6,8 @@ import { useProductDropdown } from './useProductDropdown';
 import { DropdownContent } from './DropdownContent';
 import { DropdownInput } from './DropdownInput';
 import BaseModal from '../ui/base-modal';
+import { MissingAttributesHint } from '../ui/missing-attributes-hint';
+import { missingAttributesOfPending } from '@/store/productDropdownStore';
 
 interface ProductDropdownProps {
   label?: string;
@@ -32,6 +34,7 @@ export default function ProductDropdown({
     search,
     selectedProducts,
     selectedVariants,
+    pendingSelections,
     expandedProductId,
     products,
     isLoading,
@@ -41,6 +44,13 @@ export default function ProductDropdown({
   } = useProductDropdown();
 
   const pendingSelectionsCount = Object.keys(selectedVariants).length;
+  const incompleteSelections = Object.values(pendingSelections)
+    .map((pending) => ({
+      productId: pending.product.id,
+      productName: pending.product.name,
+      missing: missingAttributesOfPending(pending),
+    }))
+    .filter((selection) => selection.missing.length > 0);
 
   return (
     <div ref={ref} className={`${className}`}>
@@ -69,7 +79,9 @@ export default function ProductDropdown({
           onConfirm={handlers.handleAddProduct}
           confirmText={`إضافة (${pendingSelectionsCount})`}
           confirmIcon={<LiaPlusSolid className="w-5 h-5 text-white" />}
-          confirmDisabled={pendingSelectionsCount === 0}
+          confirmDisabled={
+            pendingSelectionsCount === 0 || incompleteSelections.length > 0
+          }
           maxWidth="md:max-w-5xl"
         >
           <DropdownContent
@@ -89,6 +101,17 @@ export default function ProductDropdown({
             hasNextPage={hasNextPage}
             onLoadMore={handlers.handleLoadMore}
           />
+          {incompleteSelections.length > 0 && (
+            <div className="mt-3 flex flex-col gap-1 px-0 sm:px-4">
+              {incompleteSelections.map((selection) => (
+                <MissingAttributesHint
+                  key={selection.productId}
+                  productName={selection.productName}
+                  missing={selection.missing}
+                />
+              ))}
+            </div>
+          )}
         </BaseModal>
       </div>
     </div>

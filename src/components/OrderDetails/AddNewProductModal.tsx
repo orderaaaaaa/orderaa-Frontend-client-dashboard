@@ -19,6 +19,8 @@ import {
 } from './VariantAvailabilityList';
 import { Button } from '../ui/button';
 import BaseModal from '@/components/ui/base-modal';
+import { MissingAttributesHint } from '@/components/ui/missing-attributes-hint';
+import { missingAttributesOf } from '@/utils/variantSelection';
 
 interface AddNewProductModalProps {
   isOpen: boolean;
@@ -95,6 +97,15 @@ export default function AddNewProductModal({
   useEffect(() => {
     setSelectedVariants({});
   }, [selectedProduct?.id]);
+
+  const missingAttributes = useMemo(
+    () =>
+      missingAttributesOf(
+        variantOptions.map((option) => option.attribute),
+        Object.keys(selectedVariants)
+      ),
+    [variantOptions, selectedVariants]
+  );
 
   const isFormValid = useMemo(() => {
     const hasProduct = !!selectedProduct;
@@ -271,6 +282,10 @@ export default function AddNewProductModal({
               ))
             ))}
         </div>
+
+        {selectedProduct && !isLoadingVariants && (
+          <MissingAttributesHint missing={missingAttributes} />
+        )}
 
         {/* T27 — availability beside each size and colour, resolved through
             THIS order so the numbers match the order cards'. */}

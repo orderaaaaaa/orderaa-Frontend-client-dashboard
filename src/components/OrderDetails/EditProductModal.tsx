@@ -8,11 +8,16 @@ import {
 } from '@/services/orders';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import BaseModal from '@/components/ui/base-modal';
+import { MissingAttributesHint } from '@/components/ui/missing-attributes-hint';
+import { missingAttributesOf } from '@/utils/variantSelection';
 
 interface EditProductModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (attributeOptionIds: number[]) => void;
+  onSave: (
+    attributeOptionIds: number[],
+    selectedValues: Record<string, string>
+  ) => void;
   productId: number;
   currentVariants: Record<string, string>;
 }
@@ -40,6 +45,15 @@ export default function EditProductModal({
     );
   }, [selectedValues, currentVariants]);
 
+  const missingAttributes = useMemo(
+    () =>
+      missingAttributesOf(
+        variantOptions.map((option) => option.attribute),
+        Object.keys(selectedValues).filter((key) => selectedValues[key])
+      ),
+    [variantOptions, selectedValues]
+  );
+
   const handleValueChange = (attribute: string, optionValue: string) => {
     setSelectedValues((prev) => ({
       ...prev,
@@ -48,14 +62,19 @@ export default function EditProductModal({
   };
 
   const handleSave = () => {
-    if (!hasChanges) return;
+    if (!hasChanges || missingAttributes.length > 0) return;
 
+    const chosenValues = Object.fromEntries(
+      variantOptions
+        .filter((option) => selectedValues[option.attribute])
+        .map((option) => [option.attribute, selectedValues[option.attribute]])
+    );
     const attributeOptionIds = resolveAttributeOptionIds(
       variantOptions,
-      selectedValues
+      chosenValues
     );
 
-    onSave(attributeOptionIds);
+    onSave(attributeOptionIds, chosenValues);
     onClose();
   };
 
@@ -67,7 +86,7 @@ export default function EditProductModal({
       onConfirm={handleSave}
       confirmText="حفظ"
       confirmIcon={<LiaCheckSolid className="w-5 h-5 text-white" />}
-      confirmDisabled={!hasChanges}
+      confirmDisabled={!hasChanges || missingAttributes.length > 0}
     >
       <div className="flex flex-col md:flex-row gap-4 justify-start flex-wrap">
         {isLoading ? (
@@ -96,6 +115,9 @@ export default function EditProductModal({
           ))
         )}
       </div>
+      {!isLoading && (
+        <MissingAttributesHint missing={missingAttributes} className="mt-4" />
+      )}
     </BaseModal>
   );
 }

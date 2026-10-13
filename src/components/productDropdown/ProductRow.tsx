@@ -2,6 +2,8 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import type { ApiProduct } from './useProductDropdown';
+import { MissingAttributesHint } from '@/components/ui/missing-attributes-hint';
+import { missingAttributesOf } from '@/utils/variantSelection';
 
 interface SelectedVariantValue {
   attribute: string;
@@ -33,6 +35,14 @@ export const ProductRow: React.FC<ProductRowProps> = ({
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const hasVariants = product.variantOptions && product.variantOptions.length > 0;
+
+  const missingAttributes =
+    isSelected && hasVariants
+      ? missingAttributesOf(
+          product.variantOptions.map((option) => option.attribute),
+          selectedVariants.map((variant) => variant.attribute)
+        )
+      : [];
 
   const getSelectedValue = (attribute: string): string | undefined => {
     return selectedVariants.find((v) => v.attribute === attribute)?.option;
@@ -126,6 +136,11 @@ export const ProductRow: React.FC<ProductRowProps> = ({
           </div>
         </div>
       )}
+
+      <MissingAttributesHint
+        missing={missingAttributes}
+        className="px-6 pb-3"
+      />
 
       {isExpanded && !hasVariants && (
         <div
