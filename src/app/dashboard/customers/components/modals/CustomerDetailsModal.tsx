@@ -11,6 +11,7 @@ import { ErrorState } from '@/components/ui/state-panels';
 import { CustomersDetailsHeader } from './CustomerModalComponents/CustomersDetailsHeader';
 import CustomersDetailsShare from './CustomerModalComponents/CustomersDetailsShare';
 import CustomersDetailsTotalStats from './CustomerModalComponents/CustomersDetailsTotalStats';
+import { CustomersDetailsBlockHistory } from './CustomerModalComponents/CustomersDetailsBlockHistory';
 
 interface CustomerDetailsModalProps {
   customerId?: number;
@@ -75,6 +76,13 @@ const CustomerDetailsModal: React.FC<CustomerDetailsModalProps> = ({
           <CustomersDetailsShare
             email={data.email}
             phoneNumbers={data.phoneNumbers}
+          />
+
+          <CustomersDetailsBlockHistory
+            isBlocked={data.isBlocked}
+            currentBlock={data.currentBlock}
+            blockHistory={data.blockHistory}
+            notes={data.notes}
           />
 
           <CustomersDetailsTotalStats

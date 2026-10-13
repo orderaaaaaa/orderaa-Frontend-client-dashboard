@@ -4,6 +4,19 @@ export type CustomerBadgeFilter = CustomerBadge | 'none';
 
 export type CustomerSegment = 'all' | 'premium';
 
+export interface CustomerCurrentBlock {
+  reason: string | null;
+  blockedAt: string;
+  blockedUntil: string | null;
+}
+
+export interface CustomerBlockEntry {
+  id: number;
+  reason: string | null;
+  blockedUntil: string | null;
+  createdAt: string;
+}
+
 export interface Order {
   id: number;
   code: string;
@@ -22,6 +35,7 @@ export interface Customer {
   totalAmount: number;
   notes: string[];
   isBlocked: boolean;
+  currentBlock: CustomerCurrentBlock | null;
   createdAt: string;
   updatedAt: string;
   badge: CustomerBadge | null;
@@ -50,6 +64,8 @@ export interface CustomerDetail {
   totalAmount: number;
   notes: string[];
   isBlocked: boolean;
+  currentBlock: CustomerCurrentBlock | null;
+  blockHistory: CustomerBlockEntry[];
   createdAt: string;
   updatedAt: string;
   orders: CustomerDetailOrder[];

@@ -13,7 +13,7 @@ import {
 import { getStatusColor } from '../lib/getBadgeColor';
 import { formatAmount } from '../lib/formatAmount';
 import {
-  formatNotes,
+  blockReasonOf,
   formatOrderDate,
   isActivationKey,
   toWhatsAppNumber,
@@ -50,6 +50,7 @@ export function CustomerCard({
   onToggleSelect,
 }: CustomerCardProps) {
   const [showBanModal, setShowBanModal] = useState(false);
+  const blockReason = blockReasonOf(customer);
   const { getStatusLabel } = useStatusLabel();
 
   const handleConfirmBan = (_id: string, note: string) => {
@@ -168,10 +169,10 @@ export function CustomerCard({
           </div>
         </div>
 
-        {customer.isBlocked && customer.notes.length > 0 && (
+        {blockReason && (
           <div className="flex flex-wrap gap-1 mx-4 mb-3 items-center p-1 px-3 bg-[#ececec] rounded-sm font-semibold break-words">
             <span>سبب الحظر:</span>
-            <span className="font-normal">{formatNotes(customer.notes)}</span>
+            <span className="font-normal">{blockReason}</span>
           </div>
         )}
 

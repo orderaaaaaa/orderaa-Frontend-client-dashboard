@@ -16,7 +16,6 @@ interface CustomerBanConfirmationModalProps {
   customer?: {
     name: string;
     isBlocked?: boolean;
-    notes?: string | string[];
     badge?: CustomerBadge | null;
   };
 }
@@ -24,15 +23,11 @@ interface CustomerBanConfirmationModalProps {
 const CustomerBanConfirmationModal: React.FC<
   CustomerBanConfirmationModalProps
 > = ({ id, isOpen, onClose, onConfirm, customer }) => {
-  const initialNote = Array.isArray(customer?.notes)
-    ? customer.notes.join('، ')
-    : customer?.notes || '';
-
-  const [note, setNote] = useState(initialNote);
+  const [note, setNote] = useState('');
 
   useEffect(() => {
-    if (isOpen) setNote(initialNote);
-  }, [isOpen, initialNote]);
+    if (isOpen) setNote('');
+  }, [isOpen]);
 
   const isUnbanning = customer?.isBlocked;
 
