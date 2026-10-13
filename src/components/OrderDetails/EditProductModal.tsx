@@ -9,7 +9,10 @@ import {
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import BaseModal from '@/components/ui/base-modal';
 import { MissingAttributesHint } from '@/components/ui/missing-attributes-hint';
-import { missingAttributesOf } from '@/utils/variantSelection';
+import {
+  chosenCatalogValues,
+  missingCatalogAttributesOf,
+} from '@/utils/variantSelection';
 
 interface EditProductModalProps {
   isOpen: boolean;
@@ -46,26 +49,13 @@ export default function EditProductModal({
   }, [selectedValues, currentVariants]);
 
   const chosenValues = useMemo(
-    () =>
-      Object.fromEntries(
-        variantOptions
-          .filter((option) =>
-            option.options.some(
-              (o) => o.name === selectedValues[option.attribute]
-            )
-          )
-          .map((option) => [option.attribute, selectedValues[option.attribute]])
-      ),
+    () => chosenCatalogValues(variantOptions, selectedValues),
     [variantOptions, selectedValues]
   );
 
   const missingAttributes = useMemo(
-    () =>
-      missingAttributesOf(
-        variantOptions.map((option) => option.attribute),
-        Object.keys(chosenValues)
-      ),
-    [variantOptions, chosenValues]
+    () => missingCatalogAttributesOf(variantOptions, selectedValues),
+    [variantOptions, selectedValues]
   );
 
   const handleValueChange = (attribute: string, optionValue: string) => {

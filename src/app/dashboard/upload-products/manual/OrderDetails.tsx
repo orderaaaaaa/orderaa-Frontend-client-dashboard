@@ -3,6 +3,7 @@
 import React, { useMemo, useEffect, useRef, useState } from 'react';
 import ProductDropdown from '@/components/productDropdown';
 import EditProductModal from '@/components/OrderDetails/EditProductModal';
+import { MissingAttributesHint } from '@/components/ui/missing-attributes-hint';
 import { useProductDropdownStore } from '@/store/productDropdownStore';
 import {
   LiaPlusSolid,
@@ -41,6 +42,7 @@ function OrderDetails({
   onPackagingNotesChange,
   errors,
   failingProductIndex = null,
+  incompleteLines,
 }: OrderDetailsProps) {
   const selectedProducts = useProductDropdownStore(
     (state) => state.selectedProducts
@@ -176,14 +178,16 @@ function OrderDetails({
   }, [selectedProducts]);
 
   const renderProduct = (row: ProductTableRow) => {
+    const missing = incompleteLines?.get(row.index) ?? [];
     const isFailing =
       failingProductIndex !== null &&
       row.sourceIndex === failingProductIndex &&
       !row.variantEdited;
     return (
       <div
+        data-incomplete-variant={missing.length > 0 ? 'true' : undefined}
         className={
-          isFailing
+          isFailing || missing.length > 0
             ? 'border-2 border-red-500 rounded-lg p-2'
             : undefined
         }
@@ -214,8 +218,12 @@ function OrderDetails({
             ))}
           </div>
         </div>
-        {isFailing && (
-          <p className="text-red-600 text-xs mt-1">اختر خيارات هذا المنتج</p>
+        {missing.length > 0 ? (
+          <MissingAttributesHint missing={missing} className="mt-1" />
+        ) : (
+          isFailing && (
+            <p className="text-red-600 text-xs mt-1">اختر خيارات هذا المنتج</p>
+          )
         )}
         <button
           type="button"

@@ -13,6 +13,7 @@ export type OrderDetailsProps = {
   onPackagingNotesChange: (v: string) => void;
   errors?: { products?: string; total?: string };
   failingProductIndex?: number | null;
+  incompleteLines?: ReadonlyMap<number, readonly string[]>;
 };
 
 export type ClientInformationProps = {

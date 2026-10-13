@@ -13,6 +13,8 @@ import OrderDetails from '@/app/dashboard/upload-products/manual/OrderDetails';
 import ShippingSection from '@/app/dashboard/upload-products/manual/ShippingSection';
 import ConfirmationSection from '@/app/dashboard/upload-products/manual/ConfirmationSection';
 import { useProductDropdownStore } from '@/store/productDropdownStore';
+import { useIncompleteVariantLines } from '@/hooks/useIncompleteVariantLines';
+import { incompleteLinesMessage } from '@/utils/variantSelection';
 import { buildManualOrderPayload } from '@/utils/manualOrder/payload';
 import { locationSaveErrorTextOf } from '@/types/locationOptions';
 import { PERMISSION_CODES } from '@/lib/permissions';
@@ -61,6 +63,13 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
   const selectedProducts = useProductDropdownStore((state) => state.selectedProducts);
   const [productsError, setProductsError] = useState<string | null>(null);
   const { mutateAsync: recover } = useRecoverMissingOrder(id);
+  const variantCheck = useIncompleteVariantLines(selectedProducts);
+  const variantsBlocked =
+    variantCheck.isChecking || variantCheck.lines.length > 0;
+  const incompleteLines = useMemo(
+    () => new Map(variantCheck.lines.map((line) => [line.index, line.missing])),
+    [variantCheck.lines]
+  );
 
   useEffect(() => {
     useProductDropdownStore.getState().setSelectedProducts(initialProducts);
@@ -93,6 +102,8 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
       setProductsError('يجب اختيار منتج واحد على الأقل');
       return;
     }
+
+    if (variantsBlocked) return;
 
     const basePayload = buildManualOrderPayload({
       utmSource: data.orderSource.utmSource,
@@ -228,6 +239,7 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
           }}
           errors={{ products: productsError || undefined, total: errors.total?.message }}
           failingProductIndex={failingProductIndex}
+          incompleteLines={incompleteLines}
         />
 
         <ShippingSection
@@ -304,6 +316,16 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
           }}
         />
 
+        {variantCheck.lines.length > 0 && (
+          <p
+            role="alert"
+            data-testid="incomplete-variants-message"
+            className="text-red-600 text-sm font-semibold"
+          >
+            {incompleteLinesMessage(variantCheck.lines)}
+          </p>
+        )}
+
         <div className="flex justify-end gap-3 ml-6">
           <Can code={PERMISSION_CODES.ORDERS_MISSING_MANAGE}>
             <Button
@@ -317,7 +339,7 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || variantsBlocked}
               size="lg"
               className="w-40 rounded-full font-bold"
             >
