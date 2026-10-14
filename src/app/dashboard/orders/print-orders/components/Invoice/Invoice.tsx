@@ -123,9 +123,9 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
       </div>
 
       {/* Order Barcode */}
-      <div className="grid place-items-center my-1">
+      <div className="grid place-items-center my-1 px-4">
         <div
-          className="w-full relative bg-white p-2 grid place-items-center
+          className="w-full max-w-[92%] mx-auto overflow-hidden relative bg-white p-2 grid place-items-center
             before:absolute before:top-0 before:left-0 before:h-1 before:w-full
             before:bg-[repeating-linear-gradient(-45deg,#000_0_15px,transparent_15px_20px)]
             after:absolute after:bottom-0 after:left-0 after:h-1 after:w-full
@@ -258,14 +258,14 @@ export function Invoice({ data, storeInfo, language }: InvoiceProps) {
 
       {/* Shipping Barcode + Shipping Company Logo */}
       {(data.shippingId || data.shippingCompanyName) && (
-        <div className="grid grid-cols-2 items-center my-1 border-y border-black py-2">
-          <div className="flex flex-col items-center justify-center px-2">
+        <div className="grid grid-cols-2 items-center my-1 border-y border-black py-2 px-2">
+          <div className="flex flex-col items-center justify-center px-2 max-w-full overflow-hidden">
             {data.shippingId ? (
               <>
                 <span className="font-bold text-[9px]">{labels.shippingBarcode}</span>
                 <Barcode
                   value={data.shippingId}
-                  width={1.6}
+                  width={1.2}
                   height={25}
                   fontSize={0}
                   margin={0}
