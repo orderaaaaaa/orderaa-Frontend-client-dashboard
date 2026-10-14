@@ -198,6 +198,8 @@ export function ShippingOrdersContent() {
 
   const handleScan = useCallback(
     async (barcode: string) => {
+      const normalized = barcode.trim().toUpperCase();
+      if (!normalized) return;
       if (!selectedShippingCompany) {
         playErrorSound();
         toast.error('يرجى اختيار شركة الشحن أولاً');
@@ -208,7 +210,7 @@ export function ShippingOrdersContent() {
         setIsScannedOrdersModalOpen(true);
       }
 
-      if (hasOrder(barcode)) {
+      if (hasOrder(normalized)) {
         playErrorSound();
         toast.warning('هذا الطلب تم مسحه مسبقاً');
         return;
@@ -217,12 +219,12 @@ export function ShippingOrdersContent() {
       setIsScanLoading(true);
       try {
         const order = await getOrderByCodeWithShipping(
-          barcode,
+          normalized,
           selectedShippingCompany
         );
         addOrder({
           id: order.id,
-          code: barcode,
+          code: order.code,
           status: order.status,
           cancelReason: order.cancelReason,
           packagingWarning: order.packagingWarning,
@@ -230,7 +232,7 @@ export function ShippingOrdersContent() {
           editRejectedNote: order.editRejectedNote,
           isShadowed: order.isShadowed,
         });
-        setFlashingCode(barcode);
+        setFlashingCode(order.code);
         setTimeout(() => setFlashingCode(null), 600);
         const warning = getOrderWarning(order);
         if (warning) {

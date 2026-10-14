@@ -385,6 +385,16 @@ html {
     margin: 0;
   }
 
+  @page turbo {
+    size: 100mm 150mm;
+    margin: 0;
+  }
+
+  @page jt-express {
+    size: 100mm 150mm;
+    margin: 0;
+  }
+
   @page generic-invoice {
     size: 100mm 150mm;
     margin: 0;
@@ -404,7 +414,7 @@ html {
     page-break-after: auto;
   }
 
-  .invoice-page:not(.bosta-invoice-page) {
+  .invoice-page:not(.bosta-invoice-page):not(.turbo-invoice-page):not(.jt-invoice-page) {
     page: generic-invoice;
     width: 100mm !important;
     height: 150mm !important;
@@ -413,6 +423,18 @@ html {
 
   .bosta-invoice-page {
     page: bosta;
+    width: 100mm !important;
+    height: 150mm !important;
+  }
+
+  .turbo-invoice-page {
+    page: turbo;
+    width: 100mm !important;
+    height: 150mm !important;
+  }
+
+  .jt-invoice-page {
+    page: jt-express;
     width: 100mm !important;
     height: 150mm !important;
   }
