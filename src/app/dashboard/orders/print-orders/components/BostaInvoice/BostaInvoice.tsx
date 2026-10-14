@@ -85,15 +85,17 @@ export function BostaInvoice({ data, storeInfo, language }: InvoiceProps) {
         </div>
       )}
 
-      {/* 1. Top Barcode - full width */}
-      <div ref={fullWidthBarcode} className="border-b-2 border-black py-1 px-4">
-        <Barcode
-          value={data.shippingId || ''}
-          height={30}
-          fontSize={5}
-          margin={0}
-          textMargin={1}
-        />
+      {/* 1. Top Barcode - centered with side clearance so thermal printers don't clip edges */}
+      <div className="border-b-2 border-black py-1 px-6 flex justify-center">
+        <div ref={fullWidthBarcode} className="w-[86%] max-w-full">
+          <Barcode
+            value={data.shippingId || ''}
+            height={30}
+            fontSize={5}
+            margin={0}
+            textMargin={1}
+          />
+        </div>
       </div>
 
       {/* 2. Header: توصيل (start/right) | hub (center) | bosta logo (end/left) */}
@@ -221,7 +223,7 @@ export function BostaInvoice({ data, storeInfo, language }: InvoiceProps) {
         </div>
 
         {/* End (LEFT in RTL): Tracking barcode + codes */}
-        <div className="pt-1 flex flex-col items-center justify-center gap-0.5 min-w-[28mm]">
+        <div className="pt-1 px-2 flex flex-col items-center justify-center gap-0.5 min-w-[28mm] max-w-[34mm]">
           <p className="text-[7px] text-black font-bold">{labels.trackingNumber}</p>
           <Barcode
             value={data.shippingId || ''}
@@ -242,7 +244,7 @@ export function BostaInvoice({ data, storeInfo, language }: InvoiceProps) {
       </div>
 
       {/* 11. Order Code Barcode */}
-      <div className="border-t-2 border-black py-1 grid place-items-center">
+      <div className="border-t-2 border-black py-1 px-6 grid place-items-center">
         <Barcode
           value={data.orderCode}
           width={1.5}
