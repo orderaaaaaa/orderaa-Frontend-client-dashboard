@@ -54,15 +54,14 @@ export const lightfunnelsWebhookSteps = [
 export const lightfunnelsApiSteps = [
   'سجّل الدخول إلى partners.lightfunnels.com وافتح صفحة Apps ثم اضغط زر «Create a new app» أعلى اليمين لفتح نافذة إنشاء التطبيق',
   'في النافذة املأ App Name وApp URL، والصق رابط إعادة التوجيه (Redirect URI) من الأسفل في حقل Redirect URIs، وأدخل App Cookies Prefix (حتى ٥ أحرف مثل ord)، وفعّل خيار External app، ثم اضغط «Create app»',
-  'ادخل إلى التطبيق الذي أنشأته ثم انتقل إلى صفحة Configuration',
-  'فعّل صلاحيتي products وorders في صفحة Configuration',
-  'انسخ Client ID وClient Secret من صفحة Configuration والصقهما في الحقول أدناه',
-  'اضغط «ربط Lightfunnels» ووافق على الصلاحيات في Lightfunnels',
+  'ادخل إلى التطبيق الذي أنشأته ثم انتقل إلى تبويب Configurations',
+  'انسخ Client ID وClient secret من قسم App Credentials (أيقونة النسخ) والصقهما في الحقول أدناه',
+  'اضغط «ربط Lightfunnels» — ستُحوَّل إلى شاشة تثبيت التطبيق في Lightfunnels وستجد صلاحيتي products وorders محددتين مسبقاً، اضغط «Install app» دون تغيير أي شيء',
 ];
 
 export const lightfunnelsAutomaticSteps = [
   'اختر «تلقائي» في خطوة إعدادات Webhook ثم اضغط «التالي»',
   'سجّل الدخول إلى partners.lightfunnels.com وأنشئ تطبيقاً من النافذة المنبثقة كما في خطوات ربط الـ API',
-  'انسخ Client ID وClient Secret من صفحة Configuration داخل تطبيقك وأدخلهما في الخطوة التالية ووافق على الصلاحيات في Lightfunnels',
-  'بعد الموافقة نسجّل الـ Webhooks في Lightfunnels تلقائياً، ولا تحتاج إلى نسخ أي رابط',
+  'انسخ Client ID وClient secret من تبويب Configurations داخل تطبيقك وأدخلهما في الخطوة التالية، ثم في شاشة التثبيت اضغط «Install app» دون تغيير أي شيء (صلاحيتا products وorders محددتان مسبقاً)',
+  'بعد التثبيت نسجّل الـ Webhooks في Lightfunnels تلقائياً، ولا تحتاج إلى نسخ أي رابط',
 ];
