@@ -238,13 +238,11 @@ export function PrintOrdersContent() {
 
   const handleScan = useCallback(
     async (barcode: string) => {
-      const normalized = barcode.trim().toUpperCase();
-      if (!normalized) return;
       if (!isScannedOrdersModalOpen) {
         setIsScannedOrdersModalOpen(true);
       }
 
-      if (hasOrder(normalized)) {
+      if (hasOrder(barcode)) {
         playErrorSound();
         toast.warning('هذا الطلب تم مسحه مسبقاً');
         return;
@@ -252,9 +250,9 @@ export function PrintOrdersContent() {
 
       setIsScanLoading(true);
       try {
-        const order = await getOrderByCode(normalized);
-        addOrder({ id: order.id, code: order.code, status: order.status, cancelReason: order.cancelReason, packagingWarning: order.packagingWarning, editRejectedNote: order.editRejectedNote, isShadowed: order.isShadowed, printCount: order.printCount });
-        setFlashingCode(order.code);
+        const order = await getOrderByCode(barcode);
+        addOrder({ id: order.id, code: barcode, status: order.status, cancelReason: order.cancelReason, packagingWarning: order.packagingWarning, editRejectedNote: order.editRejectedNote, isShadowed: order.isShadowed, printCount: order.printCount });
+        setFlashingCode(barcode);
         setTimeout(() => setFlashingCode(null), 600);
         const warning = getOrderWarning(order);
         if (warning) {
