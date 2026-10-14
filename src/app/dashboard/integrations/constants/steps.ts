@@ -52,17 +52,18 @@ export const lightfunnelsWebhookSteps = [
 ];
 
 export const lightfunnelsApiSteps = [
-  'سجّل الدخول إلى partners.lightfunnels.com وأنشئ تطبيقاً جديداً',
-  'فعّل خيار External',
-  'أضف رابط إعادة التوجيه أدناه إلى Redirect URIs',
-  'فعّل صلاحيتي products وorders',
-  'انسخ Client ID وClient Secret من تبويب Configurations وألصقهما أدناه',
-  'اضغط «ربط Lightfunnels» ووافق على الصلاحيات',
+  'سجّل الدخول إلى partners.lightfunnels.com واضغط زر إنشاء تطبيق جديد لفتح نافذة إنشاء التطبيق',
+  'في النافذة المنبثقة أدخل اسم التطبيق واختر نوع External ثم اضغط إنشاء',
+  'ادخل إلى التطبيق الذي أنشأته ثم انتقل إلى صفحة Configuration',
+  'انسخ رابط إعادة التوجيه (Redirect URI) من الأسفل وأضفه إلى Redirect URIs في صفحة Configuration',
+  'فعّل صلاحيتي products وorders في صفحة Configuration',
+  'انسخ Client ID وClient Secret من صفحة Configuration والصقهما في الحقول أدناه',
+  'اضغط «ربط Lightfunnels» ووافق على الصلاحيات في Lightfunnels',
 ];
 
 export const lightfunnelsAutomaticSteps = [
   'اختر «تلقائي» في خطوة إعدادات Webhook ثم اضغط «التالي»',
-  'سجّل الدخول إلى partners.lightfunnels.com وأنشئ تطبيقاً كما في خطوات ربط الـ API',
-  'أدخل Client ID وClient Secret في الخطوة التالية ووافق على الصلاحيات في Lightfunnels',
+  'سجّل الدخول إلى partners.lightfunnels.com وأنشئ تطبيقاً من النافذة المنبثقة كما في خطوات ربط الـ API',
+  'انسخ Client ID وClient Secret من صفحة Configuration داخل تطبيقك وأدخلهما في الخطوة التالية ووافق على الصلاحيات في Lightfunnels',
   'بعد الموافقة نسجّل الـ Webhooks في Lightfunnels تلقائياً، ولا تحتاج إلى نسخ أي رابط',
 ];

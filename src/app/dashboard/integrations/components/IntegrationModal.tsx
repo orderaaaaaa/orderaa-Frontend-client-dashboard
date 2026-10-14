@@ -476,7 +476,7 @@ const IntegrationModal = ({
 
                     {isAutomaticWizard ? (
                       <p className="text-sm text-gray-600 bg-gray-50 border border-gray-100 rounded-lg p-3">
-                        لا حاجة لنسخ رابط. في الخطوة التالية أدخل Client ID وClient Secret ووافق على الصلاحيات، ثم نسجّل الـ Webhooks في Lightfunnels تلقائياً.
+                        لا حاجة لنسخ رابط. انسخ Client ID وClient Secret من صفحة Configuration داخل تطبيقك في Lightfunnels، وأدخلهما في الخطوة التالية ووافق على الصلاحيات، ثم نسجّل الـ Webhooks تلقائياً.
                       </p>
                     ) : (
                     <CopyField
