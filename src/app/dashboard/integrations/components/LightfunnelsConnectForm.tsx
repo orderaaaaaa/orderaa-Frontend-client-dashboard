@@ -136,6 +136,7 @@ export default function LightfunnelsConnectForm({
           name="clientId"
           label="معرّف التطبيق (Client ID) *"
           placeholder="أدخل Client ID..."
+          autoComplete="off"
           error={form.formState.errors.clientId?.message}
           disabled={isBusy}
           onKeyDown={handleEnterKey}
@@ -144,6 +145,7 @@ export default function LightfunnelsConnectForm({
           register={form.register}
           name="clientSecret"
           type="password"
+          autoComplete="new-password"
           label={
             secretRequired
               ? 'المفتاح السري للتطبيق (Client Secret) *'
