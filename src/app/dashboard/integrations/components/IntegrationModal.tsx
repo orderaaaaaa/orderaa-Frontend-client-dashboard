@@ -573,6 +573,7 @@ const IntegrationModal = ({
                       name="apiKey"
                       label="المفتاح السري للتطبيق (Client Secret)"
                       placeholder="أدخل Client Secret..."
+                      autoComplete="new-password"
                       error={apiKeyForm.formState.errors.apiKey?.message}
                     />
                   </div>
