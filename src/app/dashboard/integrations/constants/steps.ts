@@ -52,10 +52,9 @@ export const lightfunnelsWebhookSteps = [
 ];
 
 export const lightfunnelsApiSteps = [
-  'سجّل الدخول إلى partners.lightfunnels.com واضغط زر إنشاء تطبيق جديد لفتح نافذة إنشاء التطبيق',
-  'في النافذة المنبثقة أدخل اسم التطبيق واختر نوع External ثم اضغط إنشاء',
+  'سجّل الدخول إلى partners.lightfunnels.com وافتح صفحة Apps ثم اضغط زر «Create a new app» أعلى اليمين لفتح نافذة إنشاء التطبيق',
+  'في النافذة املأ App Name وApp URL، والصق رابط إعادة التوجيه (Redirect URI) من الأسفل في حقل Redirect URIs، وأدخل App Cookies Prefix (حتى ٥ أحرف مثل ord)، وفعّل خيار External app، ثم اضغط «Create app»',
   'ادخل إلى التطبيق الذي أنشأته ثم انتقل إلى صفحة Configuration',
-  'انسخ رابط إعادة التوجيه (Redirect URI) من الأسفل وأضفه إلى Redirect URIs في صفحة Configuration',
   'فعّل صلاحيتي products وorders في صفحة Configuration',
   'انسخ Client ID وClient Secret من صفحة Configuration والصقهما في الحقول أدناه',
   'اضغط «ربط Lightfunnels» ووافق على الصلاحيات في Lightfunnels',
