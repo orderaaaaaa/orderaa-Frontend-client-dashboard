@@ -414,6 +414,7 @@ const EditIntegrationModal = ({
                   name="webhookApiKey"
                   label="المفتاح السري الجديد (Secret) - اتركه فارغاً إن لم ترد تغييره"
                   placeholder="أدخل مفتاح Webhook الجديد..."
+                  autoComplete="off"
                 />
 
                 <CopyField
@@ -451,6 +452,7 @@ const EditIntegrationModal = ({
                 name="newWebhookSecret"
                 label="المفتاح السري (Secret)"
                 placeholder="أدخل مفتاح Webhook..."
+                autoComplete="off"
               />
             )}
           </div>
@@ -510,6 +512,7 @@ const EditIntegrationModal = ({
               name="apiKeyValue"
               label="المفتاح السري الجديد للتطبيق (Client Secret) - اتركه فارغاً إن لم ترد تغييره"
               placeholder="أدخل Client Secret الجديد..."
+              autoComplete="new-password"
             />
 
             <CopyField
@@ -549,6 +552,7 @@ const EditIntegrationModal = ({
               name="newApiKey"
               label="المفتاح السري للتطبيق (Client Secret)"
               placeholder="أدخل Client Secret..."
+              autoComplete="new-password"
             />
           </div>
         ) : (
