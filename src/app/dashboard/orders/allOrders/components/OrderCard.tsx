@@ -353,10 +353,10 @@ export default function OrderCard({
             {unseenSystemFailureCount > 0 && (
               <span
                 className="flex items-center gap-1 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full"
-                title="أعطال نظام لم يتم الاطلاع عليها"
+                title="تنبيهات لم يتم الاطلاع عليها"
               >
                 <LiaExclamationCircleSolid className="w-3.5 h-3.5" />
-                أعطال النظام
+                تنبيهات
                 <span className="min-w-4 h-4 px-1 rounded-full bg-white text-red-600 text-[11px] font-bold flex items-center justify-center">
                   {unseenSystemFailureCount}
                 </span>

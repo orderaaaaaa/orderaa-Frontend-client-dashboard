@@ -78,7 +78,7 @@ export const useMarkAllSystemFailuresSeen = (orderId: number) => {
       invalidate();
     },
     onError: (err) => {
-      toast.error(getApiErrorMessage(err, 'تعذر تعليم الأعطال كمقروءة'));
+      toast.error(getApiErrorMessage(err, 'تعذر تعليم التنبيهات كمقروءة'));
     },
   });
 };
