@@ -74,7 +74,7 @@ export const lightfunnelsWebhookSteps: GuideStep[] = [
     { value: 'order/confirmed' },
     ' وبنفس الرابط ثم احفظه.',
   ],
-  ['اضغط ', { ui: 'التالي' }, ' هنا لإتمام الربط.'],
+  ['اضغط ', { ui: 'التالي' }, ' للانتقال إلى خطوة ربط الـ API وإتمام الربط.'],
 ];
 
 export const lightfunnelsApiSteps: GuideStep[] = [

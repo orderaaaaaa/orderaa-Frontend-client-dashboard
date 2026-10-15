@@ -472,6 +472,7 @@ const IntegrationModal = ({
                         name="webhookSecret"
                         label="المفتاح السري (Webhook Secret)"
                         placeholder="أدخل مفتاح Webhook..."
+                        autoComplete={CREDENTIAL_AUTOCOMPLETE.webhookSecret}
                         error={
                           webhookForm.formState.errors.webhookSecret?.message
                         }
