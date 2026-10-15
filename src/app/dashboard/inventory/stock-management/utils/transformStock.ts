@@ -89,15 +89,10 @@ function resolveVariantAxisValues(
   return { size, color };
 }
 
-export interface StockTransformOptions {
-  onlyReturnedVariants?: boolean;
-}
-
 function buildVariantRows(
   variants: StockVariantCombination[] | undefined | null,
   sizeAxis: AxisIndex,
-  colorAxis: AxisIndex,
-  options: StockTransformOptions
+  colorAxis: AxisIndex
 ): { rows: ProductVariantRow[]; sizes: string[]; colors: string[] } {
   const sizes = sizeAxis.names.length > 0 ? [...sizeAxis.names] : [PLACEHOLDER_SIZE];
   const colors =
@@ -107,7 +102,7 @@ function buildVariantRows(
   for (const size of sizes) {
     const row: Record<string, VariantCell> = {};
     for (const color of colors) {
-      row[color] = options.onlyReturnedVariants ? null : 'missing';
+      row[color] = 'missing';
     }
     stocksBySize.set(size, row);
   }
@@ -140,16 +135,12 @@ export function apiSkuOrEmpty(api: StockProductApi): string {
   return typeof api.sku === 'string' ? api.sku : '';
 }
 
-export function apiToStockProduct(
-  api: StockProductApi,
-  options: StockTransformOptions = {}
-): StockProduct {
+export function apiToStockProduct(api: StockProductApi): StockProduct {
   const { sizeAxis, colorAxis } = buildAxes(api.attributes);
   const { rows, sizes, colors } = buildVariantRows(
     api.variants,
     sizeAxis,
-    colorAxis,
-    options
+    colorAxis
   );
 
   return {
@@ -163,9 +154,6 @@ export function apiToStockProduct(
   };
 }
 
-export function apiListToStockProducts(
-  list: StockProductApi[],
-  options: StockTransformOptions = {}
-): StockProduct[] {
-  return list.map((api) => apiToStockProduct(api, options));
+export function apiListToStockProducts(list: StockProductApi[]): StockProduct[] {
+  return list.map((api) => apiToStockProduct(api));
 }

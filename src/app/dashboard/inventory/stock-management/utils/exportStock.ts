@@ -21,9 +21,7 @@ async function loadAllProducts(
 ): Promise<StockProduct[]> {
   try {
     const apiList = await fetchAllStockProducts(filters);
-    return apiListToStockProducts(apiList, {
-      onlyReturnedVariants: filters.outOfStockOnly === true,
-    });
+    return apiListToStockProducts(apiList);
   } catch (err) {
     const message =
       (err as { response?: { data?: { message?: string } } })?.response?.data
@@ -63,10 +61,8 @@ function flattenProducts(
   for (const product of products) {
     for (const variant of product.variants) {
       for (const color of product.colors) {
-        const cell = variant.stocks[color];
-        if (cell === null) continue;
         const { quantity, status } = flattenCell(
-          displayCell(cell, indicators)
+          displayCell(variant.stocks[color], indicators)
         );
         rows.push({
           'اسم المنتج': product.name,
@@ -140,7 +136,7 @@ const PDF_BADGE_COLORS: Record<StockStatus, string> = {
 };
 
 function pdfCellHtml(cell: VariantCell | undefined, indicators: StockIndicators): string {
-  if (cell === null || cell === undefined) return '<td></td>';
+  if (cell === undefined) return '<td></td>';
   const view = displayCell(cell, indicators);
   if (view.kind === 'missing') return '<td>-</td>';
   if (view.kind === 'hidden') return '<td></td>';
