@@ -13,6 +13,11 @@ import {
 import { useWarehouseSummaryQuery } from '@/services/warehouses';
 import { STOCK_SCOPE_KINDS } from '../constants';
 import type { SummaryCardItem } from '../components/SummaryCards';
+import {
+  ALL_STOCK_INDICATORS,
+  indicatorsFromFlags,
+  type StockIndicators,
+} from '../utils/stockIndicators';
 import type { StockScope } from '../types';
 
 interface StockScopeSummary {
@@ -20,6 +25,13 @@ interface StockScopeSummary {
   notFound: boolean;
   items: SummaryCardItem[] | null;
   isLoading: boolean;
+  indicators: StockIndicators;
+}
+
+function presentCards(
+  cards: (SummaryCardItem | null)[]
+): SummaryCardItem[] {
+  return cards.filter((card): card is SummaryCardItem => card !== null);
 }
 
 export function useStockScopeSummary(scope: StockScope): StockScopeSummary {
@@ -45,33 +57,38 @@ export function useStockScopeSummary(scope: StockScope): StockScopeSummary {
       name: card?.name ?? null,
       notFound: false,
       isLoading: physicalSummary.isLoading,
+      indicators: indicatorsFromFlags(card),
       items: card
-        ? [
+        ? presentCards([
             {
               key: 'quantity',
               label: 'الكمية الكلية',
               icon: LiaBoxesSolid,
               color: 'text-emerald-600',
               bgColor: 'bg-emerald-50',
-              value: card.totalQuantity,
+              value: card.visibleTotalQuantity,
             },
-            {
-              key: 'lowStock',
-              label: 'مخزون منخفض',
-              icon: LiaExclamationTriangleSolid,
-              color: 'text-amber-600',
-              bgColor: 'bg-amber-50',
-              value: card.lowStockVariantCount,
-            },
-            {
-              key: 'outOfStock',
-              label: 'غير متوفر',
-              icon: LiaTimesCircleSolid,
-              color: 'text-red-600',
-              bgColor: 'bg-red-50',
-              value: card.outOfStockVariantCount,
-            },
-          ]
+            card.lowStockVariantCount === null
+              ? null
+              : {
+                  key: 'lowStock',
+                  label: 'مخزون منخفض',
+                  icon: LiaExclamationTriangleSolid,
+                  color: 'text-amber-600',
+                  bgColor: 'bg-amber-50',
+                  value: card.lowStockVariantCount,
+                },
+            card.outOfStockVariantCount === null
+              ? null
+              : {
+                  key: 'outOfStock',
+                  label: 'غير متوفر',
+                  icon: LiaTimesCircleSolid,
+                  color: 'text-red-600',
+                  bgColor: 'bg-red-50',
+                  value: card.outOfStockVariantCount,
+                },
+          ])
         : null,
     };
   }
@@ -85,36 +102,47 @@ export function useStockScopeSummary(scope: StockScope): StockScopeSummary {
       name: virtualWarehouse.data?.name ?? card?.name ?? null,
       notFound: !canReadVirtual || detailStatus === 404,
       isLoading: virtualSummary.isLoading || virtualWarehouse.isLoading,
+      indicators: indicatorsFromFlags(virtualWarehouse.data ?? card),
       items: card
-        ? [
+        ? presentCards([
             {
               key: 'quantity',
               label: 'الكمية الكلية',
               icon: LiaBoxesSolid,
               color: 'text-emerald-600',
               bgColor: 'bg-emerald-50',
-              value: card.totalQuantity,
+              value: card.visibleTotalQuantity,
             },
-            {
-              key: 'outOfStock',
-              label: 'غير متوفر',
-              icon: LiaTimesCircleSolid,
-              color: 'text-amber-600',
-              bgColor: 'bg-amber-50',
-              value: card.outOfStockVariantCount,
-            },
-            {
-              key: 'shortfall',
-              label: 'العجز',
-              icon: LiaMinusCircleSolid,
-              color: 'text-red-600',
-              bgColor: 'bg-red-50',
-              value: card.shortfallUnits,
-            },
-          ]
+            card.outOfStockVariantCount === null
+              ? null
+              : {
+                  key: 'outOfStock',
+                  label: 'غير متوفر',
+                  icon: LiaTimesCircleSolid,
+                  color: 'text-amber-600',
+                  bgColor: 'bg-amber-50',
+                  value: card.outOfStockVariantCount,
+                },
+            card.shortfallUnits === null
+              ? null
+              : {
+                  key: 'shortfall',
+                  label: 'العجز',
+                  icon: LiaMinusCircleSolid,
+                  color: 'text-red-600',
+                  bgColor: 'bg-red-50',
+                  value: card.shortfallUnits,
+                },
+          ])
         : null,
     };
   }
 
-  return { name: null, notFound: false, items: null, isLoading: false };
+  return {
+    name: null,
+    notFound: false,
+    items: null,
+    isLoading: false,
+    indicators: ALL_STOCK_INDICATORS,
+  };
 }

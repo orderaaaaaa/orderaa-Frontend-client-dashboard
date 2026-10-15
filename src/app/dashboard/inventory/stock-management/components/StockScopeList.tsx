@@ -34,7 +34,7 @@ interface ScopeRow {
   parentName?: string;
   total: number;
   low: number | null;
-  out: number;
+  out: number | null;
   shortfall: number | null;
 }
 
@@ -119,7 +119,9 @@ function ScopeCard({ row }: { row: ScopeRow }) {
           {row.low !== null && (
             <MetricLine label="مخزون منخفض" value={row.low} tone="warning" />
           )}
-          <MetricLine label="غير متوفر" value={row.out} tone="danger" />
+          {row.out !== null && (
+            <MetricLine label="غير متوفر" value={row.out} tone="danger" />
+          )}
           {row.shortfall !== null && (
             <MetricLine label="العجز" value={row.shortfall} tone="danger" />
           )}
@@ -224,7 +226,7 @@ export function StockScopeList() {
           isVirtual: false,
           isInactive: !entry.card.isActive,
           parentName: parentNames.get(entry.card.id),
-          total: entry.card.totalQuantity,
+          total: entry.card.visibleTotalQuantity,
           low: entry.card.lowStockVariantCount,
           out: entry.card.outOfStockVariantCount,
           shortfall: null,
@@ -239,7 +241,7 @@ export function StockScopeList() {
           icon: LiaLayerGroupSolid,
           isVirtual: true,
           isInactive: false,
-          total: entry.card.totalQuantity,
+          total: entry.card.visibleTotalQuantity,
           low: null,
           out: entry.card.outOfStockVariantCount,
           shortfall: entry.card.shortfallUnits,

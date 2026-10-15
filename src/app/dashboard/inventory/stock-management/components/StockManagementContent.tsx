@@ -70,7 +70,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
     colorOptions,
     sizeOptions,
     filterDtoBase,
-  } = useStockFilters(scope);
+  } = useStockFilters(scope, scopeSummary.indicators);
 
   const [showFilters, setShowFilters] = useState(false);
   const [filtersOverflow, setFiltersOverflow] = useState(false);
@@ -126,22 +126,22 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
   const handleExportExcel = useCallback(async () => {
     setIsExporting(true);
     try {
-      await exportStockToExcel(filterDtoBase);
+      await exportStockToExcel(filterDtoBase, scopeSummary.indicators);
     } finally {
       setIsExporting(false);
       setExportOpen(false);
     }
-  }, [filterDtoBase]);
+  }, [filterDtoBase, scopeSummary.indicators]);
 
   const handleExportPDF = useCallback(async () => {
     setIsExporting(true);
     try {
-      await exportStockToPDF(filterDtoBase);
+      await exportStockToPDF(filterDtoBase, scopeSummary.indicators);
     } finally {
       setIsExporting(false);
       setExportOpen(false);
     }
-  }, [filterDtoBase]);
+  }, [filterDtoBase, scopeSummary.indicators]);
 
   const errorMessage =
     (error as { response?: { data?: { message?: string } } })?.response?.data
@@ -220,13 +220,15 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
               inputClassName="pr-10 bg-white"
             />
           </div>
-          <label className="flex min-h-10 w-full shrink-0 items-center gap-2 text-sm font-medium text-gray-700 md:w-auto">
-            <FormSwitch
-              checked={outOfStockOnly}
-              onCheckedChange={setOutOfStockOnly}
-            />
-            غير المتوفر فقط
-          </label>
+          {scopeSummary.indicators.outOfStock && (
+            <label className="flex min-h-10 w-full shrink-0 items-center gap-2 text-sm font-medium text-gray-700 md:w-auto">
+              <FormSwitch
+                checked={outOfStockOnly}
+                onCheckedChange={setOutOfStockOnly}
+              />
+              غير المتوفر فقط
+            </label>
+          )}
           <Button
             variant="default"
             aria-label={
@@ -322,6 +324,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
               product={product}
               filterColor={filters.color}
               filterSize={filters.size}
+              indicators={scopeSummary.indicators}
             />
           ))}
         </div>
