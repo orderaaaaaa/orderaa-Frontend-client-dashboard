@@ -37,6 +37,7 @@ export interface OrderCardProps {
   isPrinted?: boolean;
   printCount?: number;
   disableNavigation?: boolean;
+  toggleOnCardClick?: boolean;
   hideCustomerInfo?: boolean;
   showAllItems?: boolean;
   states?: OrderState[];

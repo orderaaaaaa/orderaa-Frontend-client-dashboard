@@ -554,6 +554,7 @@ function AllOrdersContent() {
               <OrderCard
                 key={order.id}
                 select={select}
+                toggleOnCardClick
                 isSelected={
                   selectAllMatchingFilters ||
                   selectedOrderIds.includes(order.id)

@@ -492,6 +492,7 @@ export function ShippingOrdersContent() {
               <OrderCard
                 key={order.id}
                 select={selectMode}
+                toggleOnCardClick
                 isSelected={
                   selectAllMatchingFilters ||
                   selectedOrderIds.includes(order.id)

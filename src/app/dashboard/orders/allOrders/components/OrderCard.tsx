@@ -67,6 +67,7 @@ export default function OrderCard({
   isPrinted = false,
   printCount = 0,
   disableNavigation = false,
+  toggleOnCardClick = false,
   hideCustomerInfo = false,
   showAllItems = false,
   shippingType,
@@ -83,7 +84,7 @@ export default function OrderCard({
   };
 
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (select) {
+    if (select && toggleOnCardClick) {
       if (!e.currentTarget.contains(e.target as Node)) return;
       const interactive = (e.target as HTMLElement).closest(CARD_INTERACTIVE_SELECTOR);
       if (interactive && e.currentTarget.contains(interactive)) return;
