@@ -87,7 +87,7 @@ function ScopeCard({ row }: { row: ScopeRow }) {
       <Link
         href={row.href}
         className={clsx(
-          'group flex min-h-14 flex-col gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60',
+          'group flex min-h-14 flex-col gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/60',
           row.isInactive && 'opacity-70'
         )}
       >

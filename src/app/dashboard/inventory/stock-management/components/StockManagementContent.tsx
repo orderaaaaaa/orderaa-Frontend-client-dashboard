@@ -155,7 +155,6 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
     return <StockScopeNotFound />;
   }
 
-
   return (
     <div
       ref={containerRef}

@@ -10,7 +10,6 @@ export interface SummaryCardItem {
   icon: IconType;
   color: string;
   bgColor: string;
-  suffix?: string;
 }
 
 interface SummaryCardsProps {
