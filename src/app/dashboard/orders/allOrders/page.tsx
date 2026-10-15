@@ -15,7 +15,6 @@ import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
 import Footer from '@/components/orders/Footer';
 import CustomerOrdersModal from '@/components/orders/CustomerOrdersModal';
 import BulkActionsBar from '@/components/BulkActionsBar';
-import type { Order } from '@/types/orders';
 import { mapOrderProductToVariantInfo } from '@/types/orders';
 import PageTaps from '../components/pageTaps';
 import { buildApiFiltersFromUrlState } from '@/hooks/orders/useUnifiedFilters';
