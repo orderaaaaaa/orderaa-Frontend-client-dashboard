@@ -172,7 +172,7 @@ export function ShippingOrdersContent() {
     setSelectMode,
     selectedOrderIds,
     selectedOrders,
-    selectAllMatchingFilters,
+    allVisibleSelected,
     handleOrderSelect,
     handleSelectAllToggle,
     clearSelections,
@@ -301,13 +301,12 @@ export function ShippingOrdersContent() {
   }, [actionableOrders, submitForApprovalMutation, clearOrders]);
 
   const handleShipSelectedOrders = useCallback(async () => {
-    const ordersToProcess = selectAllMatchingFilters ? orders : selectedOrders;
-    if (ordersToProcess.length === 0) return;
+    if (selectedOrders.length === 0) return;
 
     setIsActionLoading(true);
     try {
       await submitForApprovalMutation({
-        orderIds: ordersToProcess.map((o) => o.id),
+        orderIds: selectedOrders.map((o) => o.id),
       });
       toast.success('تم إرسال الطلبات للشحن بنجاح');
       clearSelections();
@@ -318,8 +317,6 @@ export function ShippingOrdersContent() {
       setIsActionLoading(false);
     }
   }, [
-    selectAllMatchingFilters,
-    orders,
     selectedOrders,
     submitForApprovalMutation,
     clearSelections,
@@ -397,8 +394,7 @@ export function ShippingOrdersContent() {
     setSelectedCustomerName('');
   }, []);
 
-  const showBulkActions =
-    (selectedOrders.length > 0 || selectAllMatchingFilters) && !isModalOpen;
+  const showBulkActions = selectedOrders.length > 0 && !isModalOpen;
 
   useEffect(() => {
     if (showBulkActions) {
@@ -444,7 +440,7 @@ export function ShippingOrdersContent() {
         currentStatus={filters.status}
         printStatus={printStatus}
         onPrintStatusChange={setPrintStatus}
-        selectedOrders={selectAllMatchingFilters ? orders : selectedOrders}
+        selectedOrders={selectedOrders}
         showPrintStatusToggle={false}
         showShippingCompanySelect
         shippingCompanyOptions={shippingCompanyOptions}
@@ -468,8 +464,8 @@ export function ShippingOrdersContent() {
       <OrdersSelectionHeader
         totalOrders={totalOrders}
         selectMode={selectMode}
-        selectedCount={selectAllMatchingFilters ? orders.length : selectedOrderIds.length}
-        selectAllMatchingFilters={selectAllMatchingFilters}
+        selectedCount={selectedOrderIds.length}
+        allVisibleSelected={allVisibleSelected}
         toggleSelectMode={toggleSelectMode}
         handleSelectAllToggle={handleSelectAllToggle}
         setSelectMode={setSelectMode}
@@ -494,7 +490,6 @@ export function ShippingOrdersContent() {
                 select={selectMode}
                 toggleOnCardClick
                 isSelected={
-                  selectAllMatchingFilters ||
                   selectedOrderIds.includes(order.id)
                 }
                 onSelectionChange={(checked) =>
@@ -573,7 +568,7 @@ export function ShippingOrdersContent() {
           onShip={handleShipSelectedOrders}
           position="fixed"
           isLoading={isActionLoading}
-          selectedCount={selectAllMatchingFilters ? totalOrders : selectedOrders.length}
+          selectedCount={selectedOrders.length}
         />
       )}
       {showBackToTop && (

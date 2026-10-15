@@ -6,7 +6,7 @@ interface OrdersSelectionHeaderProps {
   totalOrders: number;
   selectMode: boolean;
   selectedCount: number;
-  selectAllMatchingFilters: boolean;
+  allVisibleSelected: boolean;
   toggleSelectMode: () => void;
   handleSelectAllToggle: () => void;
   setSelectMode: (value: boolean) => void;
@@ -18,7 +18,7 @@ export const OrdersSelectionHeader: React.FC<OrdersSelectionHeaderProps> =
       totalOrders,
       selectMode,
       selectedCount,
-      selectAllMatchingFilters,
+      allVisibleSelected,
       toggleSelectMode,
       handleSelectAllToggle,
       setSelectMode,
@@ -28,7 +28,7 @@ export const OrdersSelectionHeader: React.FC<OrdersSelectionHeaderProps> =
           <p className="text-gray-700">عدد جميع الطلبات: {totalOrders}</p>
           {selectMode && (
             <Button variant="default" size="sm" onClick={handleSelectAllToggle}>
-              {selectAllMatchingFilters ? 'إلغاء تحديد الكل' : 'تحديد الكل'}
+              {allVisibleSelected ? 'إلغاء تحديد الكل' : 'تحديد الكل'}
             </Button>
           )}
         </div>

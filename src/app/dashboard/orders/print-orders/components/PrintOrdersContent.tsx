@@ -209,7 +209,7 @@ export function PrintOrdersContent() {
     setSelectMode,
     selectedOrderIds,
     selectedOrders,
-    selectAllMatchingFilters,
+    allVisibleSelected,
     handleOrderSelect,
     handleSelectAllToggle,
     clearSelections,
@@ -432,14 +432,14 @@ export function PrintOrdersContent() {
     }
   }, [isInitialized, filters, reset]);
 
-  const printedOrdersInSelection = useMemo(() => {
-    const ordersToProcess = selectAllMatchingFilters ? orders : selectedOrders;
-    return ordersToProcess.filter((o) => o.isPrinted);
-  }, [selectAllMatchingFilters, orders, selectedOrders]);
+  const printedOrdersInSelection = useMemo(
+    () => selectedOrders.filter((o) => o.isPrinted),
+    [selectedOrders]
+  );
 
   const hasPrintedOrdersInSelection = printedOrdersInSelection.length > 0;
 
-  const selectedCount = selectAllMatchingFilters ? orders.length : selectedOrderIds.length;
+  const selectedCount = selectedOrderIds.length;
 
   const withPrintedCheck = useCallback(
     (action: (excludedPrintedIds: ReadonlySet<number>) => void | Promise<void>) => {
@@ -475,7 +475,7 @@ export function PrintOrdersContent() {
   );
 
   const executePrepared = useCallback(async (excludedPrintedIds: ReadonlySet<number>) => {
-    const baseOrders = selectAllMatchingFilters ? orders : selectedOrders;
+    const baseOrders = selectedOrders;
     const ordersToProcess = baseOrders.filter(
       (o) => !excludedPrintedIds.has(o.id),
     );
@@ -496,14 +496,14 @@ export function PrintOrdersContent() {
     } finally {
       setIsActionLoading(false);
     }
-  }, [selectAllMatchingFilters, orders, selectedOrders, prepareOrdersMutation, clearSelections, setSelectMode]);
+  }, [selectedOrders, prepareOrdersMutation, clearSelections, setSelectMode]);
 
   const handlePrepared = useCallback(() => {
     withPrintedCheck(executePrepared);
   }, [withPrintedCheck, executePrepared]);
 
   const executeAwaitingPackaging = useCallback(async (excludedPrintedIds: ReadonlySet<number>) => {
-    const baseOrders = selectAllMatchingFilters ? orders : selectedOrders;
+    const baseOrders = selectedOrders;
     const ordersToProcess = baseOrders.filter(
       (o) => !excludedPrintedIds.has(o.id),
     );
@@ -524,14 +524,14 @@ export function PrintOrdersContent() {
     } finally {
       setIsActionLoading(false);
     }
-  }, [selectAllMatchingFilters, orders, selectedOrders, waitingMutation, clearSelections, setSelectMode]);
+  }, [selectedOrders, waitingMutation, clearSelections, setSelectMode]);
 
   const handleAwaitingPackaging = useCallback(() => {
     withPrintedCheck(executeAwaitingPackaging);
   }, [withPrintedCheck, executeAwaitingPackaging]);
 
   const executeCallAgain = useCallback(async () => {
-    const ordersToProcess = selectAllMatchingFilters ? orders : selectedOrders;
+    const ordersToProcess = selectedOrders;
     if (ordersToProcess.length === 0) return;
     setIsActionLoading(true);
     try {
@@ -547,7 +547,7 @@ export function PrintOrdersContent() {
     } finally {
       setIsActionLoading(false);
     }
-  }, [selectAllMatchingFilters, orders, selectedOrders, callAgainMutation, clearSelections, setSelectMode]);
+  }, [selectedOrders, callAgainMutation, clearSelections, setSelectMode]);
 
   const handleCallAgain = useCallback(() => {
     executeCallAgain();
@@ -558,10 +558,10 @@ export function PrintOrdersContent() {
   }, []);
 
   const handleChangeProduct = useCallback(() => {
-    const ordersToProcess = selectAllMatchingFilters ? orders : selectedOrders;
+    const ordersToProcess = selectedOrders;
     if (ordersToProcess.length === 0) return;
     executeChangeProduct();
-  }, [selectAllMatchingFilters, orders, selectedOrders, executeChangeProduct]);
+  }, [selectedOrders, executeChangeProduct]);
 
   const handleChangeProductSubmit = useCallback(
     async (ordersWithNotes: { id: number; packagingNote: string }[]) => {
@@ -610,8 +610,7 @@ export function PrintOrdersContent() {
     setSelectedCustomerName('');
   }, []);
 
-  const showBulkActions =
-    (selectedOrders.length > 0 || selectAllMatchingFilters) && !isModalOpen;
+  const showBulkActions = selectedOrders.length > 0 && !isModalOpen;
 
   useEffect(() => {
     if (showBulkActions) {
@@ -673,7 +672,7 @@ export function PrintOrdersContent() {
         printStatus={printStatus}
         onPrintStatusChange={setPrintStatus}
         printStatistics={printStatistics}
-        selectedOrders={selectAllMatchingFilters ? orders : selectedOrders}
+        selectedOrders={selectedOrders}
         showPrintStatusToggle={filters.status === 'CONFIRMED'}
         hiddenFilters={[]}
         onPrintFlowOpenChange={setIsPrintFlowOpen}
@@ -694,7 +693,7 @@ export function PrintOrdersContent() {
           <p className="text-gray-700">عدد جميع الطلبات: {totalOrders}</p>
           {selectMode && (
             <Button variant="default" size="sm" onClick={handleSelectAllToggle}>
-              {selectAllMatchingFilters ? 'إلغاء تحديد الكل' : 'تحديد الكل'}
+              {allVisibleSelected ? 'إلغاء تحديد الكل' : 'تحديد الكل'}
             </Button>
           )}
         </div>
@@ -755,7 +754,6 @@ export function PrintOrdersContent() {
                 select={selectMode}
                 toggleOnCardClick
                 isSelected={
-                  selectAllMatchingFilters ||
                   selectedOrderIds.includes(order.id)
                 }
                 onSelectionChange={(checked) =>
@@ -840,8 +838,6 @@ export function PrintOrdersContent() {
           onCallAgain={handleCallAgain}
           onChangeProduct={handleChangeProduct}
           position="fixed"
-          isAllSelected={selectAllMatchingFilters}
-          totalStoreOrders={totalOrders}
           isLoading={isActionLoading}
           hideAwaitingPackaging={filters.status === 'WAITING_FOR_PACKAGING'}
         />
@@ -927,7 +923,7 @@ export function PrintOrdersContent() {
       <ChangeProductModal
         isOpen={isChangeProductModalOpen}
         onClose={() => setIsChangeProductModalOpen(false)}
-        orders={selectAllMatchingFilters ? orders : selectedOrders}
+        orders={selectedOrders}
         onSubmit={handleChangeProductSubmit}
         isLoading={isActionLoading}
       />

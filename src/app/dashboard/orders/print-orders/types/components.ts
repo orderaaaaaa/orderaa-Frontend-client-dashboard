@@ -13,8 +13,6 @@ export interface PrintOrdersActionsBarProps extends OrderActionCallbacks {
   selectedOrders?: Order[];
   position?: PositionType;
   className?: string;
-  isAllSelected?: boolean;
-  totalStoreOrders?: number;
   isLoading?: boolean;
   forceShow?: boolean;
   disableActions?: boolean;

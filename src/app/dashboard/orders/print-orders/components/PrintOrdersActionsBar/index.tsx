@@ -27,7 +27,6 @@ const PrintOrdersActionsBar: React.FC<PrintOrdersActionsBarProps> = ({
   onChangeProduct,
   position = 'fixed',
   className = '',
-  isAllSelected = false,
   isLoading = false,
   forceShow = false,
   disableActions = false,
@@ -44,7 +43,7 @@ const PrintOrdersActionsBar: React.FC<PrintOrdersActionsBarProps> = ({
   const canCallAgain = hasPermission(PERMISSION_CODES.ORDERS_CALL_AGAIN);
   const hasAnyAction = canPrepare || canAwaitPackaging || canCallAgain;
 
-  if (!forceShow && selectedOrders.length === 0 && !isAllSelected) {
+  if (!forceShow && selectedOrders.length === 0) {
     return null;
   }
 

@@ -27,7 +27,6 @@ import { useScrollEndFade } from '@/hooks/useScrollEndFade';
 
 interface BulkActionsBarProps {
   selectedOrders: Order[];
-  selectedCount?: number;
   onEditStatus?: (statusKey: string) => void;
   statusOptions?: OrderStatusItem[];
   onExportExcel?: () => void;
@@ -40,15 +39,12 @@ interface BulkActionsBarProps {
   onChangeProduct?: () => void;
   position?: 'fixed' | 'sticky' | 'absolute';
   className?: string;
-  isAllSelected?: boolean;
-  totalStoreOrders?: number;
   isLoading?: boolean;
   disabled?: boolean;
 }
 
 const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
   selectedOrders,
-  selectedCount = selectedOrders.length,
   onEditStatus,
   statusOptions = [],
   onExportExcel,
@@ -61,14 +57,12 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
   onChangeProduct,
   position = 'fixed',
   className = '',
-  isAllSelected = false,
-  totalStoreOrders = 0,
   isLoading = false,
   disabled = false,
 }) => {
   const { ref: scrollRef, hasMoreAtEnd } = useScrollEndFade<HTMLDivElement>();
 
-  if (selectedCount === 0 && !isAllSelected) {
+  if (selectedOrders.length === 0) {
     return null;
   }
 
@@ -86,8 +80,6 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
       onEditStatus(statusKey);
     }
   };
-
-  const displayedCount = isAllSelected ? totalStoreOrders : selectedCount;
 
   return (
     <div
@@ -117,8 +109,8 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
                   )}
                   <span className="group-enabled:group-hover:text-white">
                     {isLoading
-                      ? `جاري تعديل الحالة (${displayedCount})`
-                      : `تعديل الحالة (${displayedCount})`}
+                      ? `جاري تعديل الحالة (${selectedOrders.length})`
+                      : `تعديل الحالة (${selectedOrders.length})`}
                   </span>
                 </SelectTrigger>
                 <SelectContent align="end" side="top" className="max-h-[300px] min-w-[180px]">

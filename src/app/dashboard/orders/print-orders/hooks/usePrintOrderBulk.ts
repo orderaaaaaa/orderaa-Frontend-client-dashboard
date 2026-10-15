@@ -8,51 +8,62 @@ export function usePrintOrderBulk({
   orders,
 }: UsePrintOrderBulkProps): UsePrintOrderBulkReturn {
   const [selectMode, setSelectMode] = useState(false);
-  const [selectedOrderIds, setSelectedOrderIds] = useState<number[]>([]);
-  const [selectAllMatchingFilters, setSelectAllMatchingFilters] = useState(false);
+  const [selectedById, setSelectedById] = useState<Map<number, Order>>(
+    () => new Map()
+  );
 
-  const selectedOrders = useMemo(() => {
-    return orders.filter((order) => selectedOrderIds.includes(order.id));
-  }, [orders, selectedOrderIds]);
+  const pageById = useMemo(
+    () => new Map(orders.map((order) => [order.id, order])),
+    [orders]
+  );
+
+  const selectedOrders = useMemo(
+    () =>
+      Array.from(selectedById.values(), (order) => pageById.get(order.id) ?? order),
+    [selectedById, pageById]
+  );
+
+  const selectedOrderIds = useMemo(
+    () => selectedOrders.map((order) => order.id),
+    [selectedOrders]
+  );
+
+  const allVisibleSelected =
+    orders.length > 0 && orders.every((order) => selectedById.has(order.id));
 
   const handleOrderSelect = useCallback(
     (orderId: number, checked: boolean) => {
-      if (selectAllMatchingFilters) {
-        setSelectAllMatchingFilters(false);
+      setSelectedById((prev) => {
+        const next = new Map(prev);
         if (checked) {
-          setSelectedOrderIds([orderId]);
+          const order = pageById.get(orderId);
+          if (order) next.set(orderId, order);
         } else {
-          const allOrderIds = orders.map((order) => order.id);
-          setSelectedOrderIds(allOrderIds.filter((id) => id !== orderId));
+          next.delete(orderId);
         }
-        return;
-      }
-
-      setSelectedOrderIds((prev) => {
-        if (checked) {
-          return [...prev, orderId];
-        } else {
-          return prev.filter((id) => id !== orderId);
-        }
+        return next;
       });
     },
-    [selectAllMatchingFilters, orders]
+    [pageById]
   );
 
   const handleSelectAllToggle = useCallback(() => {
-    if (selectAllMatchingFilters) {
-      setSelectAllMatchingFilters(false);
-      setSelectedOrderIds([]);
-    } else {
-      setSelectAllMatchingFilters(true);
-      setSelectedOrderIds([]);
-    }
-  }, [selectAllMatchingFilters]);
+    setSelectedById((prev) => {
+      const next = new Map(prev);
+      for (const order of orders) {
+        if (allVisibleSelected) {
+          next.delete(order.id);
+        } else {
+          next.set(order.id, order);
+        }
+      }
+      return next;
+    });
+  }, [orders, allVisibleSelected]);
 
   useEffect(() => {
     if (!selectMode) {
-      setSelectedOrderIds([]);
-      setSelectAllMatchingFilters(false);
+      setSelectedById(new Map());
     }
   }, [selectMode]);
 
@@ -61,8 +72,7 @@ export function usePrintOrderBulk({
   }, []);
 
   const clearSelections = useCallback(() => {
-    setSelectedOrderIds([]);
-    setSelectAllMatchingFilters(false);
+    setSelectedById(new Map());
   }, []);
 
   return {
@@ -71,7 +81,7 @@ export function usePrintOrderBulk({
     toggleSelectMode,
     selectedOrderIds,
     selectedOrders,
-    selectAllMatchingFilters,
+    allVisibleSelected,
     handleOrderSelect,
     handleSelectAllToggle,
     clearSelections,

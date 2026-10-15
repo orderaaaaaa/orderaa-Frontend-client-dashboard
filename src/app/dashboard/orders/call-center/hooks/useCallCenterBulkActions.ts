@@ -76,14 +76,8 @@ export function splitOrdersForAction(
 export function warnSkippedForAction(
   action: CallCenterBulkAction,
   parked: Order[],
-  wrongStatus: Order[],
-  offPageCount = 0
+  wrongStatus: Order[]
 ) {
-  if (offPageCount > 0) {
-    toast.warning(
-      `تم استبعاد ${offPageCount} طلب محدد من صفحات أخرى. الإجراء يطبّق على طلبات الصفحة الحالية فقط`
-    );
-  }
   warnParkedOrdersSkipped(parked);
   if (wrongStatus.length > 0) {
     toast.warning(
@@ -145,8 +139,7 @@ export function useCallCenterBulkActions({
   const runForOrders = useCallback(
     (
       action: Exclude<CallCenterBulkAction, 'changeProduct'>,
-      orders: Order[],
-      offPageCount: number
+      orders: Order[]
     ) => {
       if (pendingRef.current) return Promise.resolve(false);
       if (!canSetTarget(action)) return Promise.resolve(false);
@@ -154,7 +147,7 @@ export function useCallCenterBulkActions({
         action,
         orders
       );
-      warnSkippedForAction(action, parked, wrongStatus, offPageCount);
+      warnSkippedForAction(action, parked, wrongStatus);
       if (eligible.length === 0) return Promise.resolve(false);
 
       if (action === 'prepare') {
@@ -199,18 +192,15 @@ export function useCallCenterBulkActions({
   );
 
   const prepare = useCallback(
-    (orders: Order[], offPageCount: number) =>
-      runForOrders('prepare', orders, offPageCount),
+    (orders: Order[]) => runForOrders('prepare', orders),
     [runForOrders]
   );
   const waitForPackagingOrders = useCallback(
-    (orders: Order[], offPageCount: number) =>
-      runForOrders('waitingForPackaging', orders, offPageCount),
+    (orders: Order[]) => runForOrders('waitingForPackaging', orders),
     [runForOrders]
   );
   const callAgain = useCallback(
-    (orders: Order[], offPageCount: number) =>
-      runForOrders('callAgain', orders, offPageCount),
+    (orders: Order[]) => runForOrders('callAgain', orders),
     [runForOrders]
   );
 

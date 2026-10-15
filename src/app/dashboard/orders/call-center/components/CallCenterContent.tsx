@@ -160,7 +160,7 @@ export function CallCenterContent() {
     setSelectMode,
     selectedOrderIds,
     selectedOrders,
-    selectAllMatchingFilters,
+    allVisibleSelected,
     handleOrderSelect,
     handleSelectAllToggle,
     clearSelections,
@@ -202,15 +202,6 @@ export function CallCenterContent() {
     },
     [isBulkPending, setSelectMode]
   );
-
-  const ordersInScope = useMemo(
-    () => (selectAllMatchingFilters ? orders : selectedOrders),
-    [selectAllMatchingFilters, orders, selectedOrders]
-  );
-
-  const offPageCount = selectAllMatchingFilters
-    ? 0
-    : selectedOrderIds.length - selectedOrders.length;
 
   const prevPageRef = useRef<number>(page);
 
@@ -260,28 +251,28 @@ export function CallCenterContent() {
   const { prepare, waitForPackaging, callAgain, canSetTarget } = bulkActions;
 
   const handlePrepared = useCallback(() => {
-    prepare(ordersInScope, offPageCount);
-  }, [prepare, ordersInScope, offPageCount]);
+    prepare(selectedOrders);
+  }, [prepare, selectedOrders]);
 
   const handleAwaitingPackaging = useCallback(() => {
-    waitForPackaging(ordersInScope, offPageCount);
-  }, [waitForPackaging, ordersInScope, offPageCount]);
+    waitForPackaging(selectedOrders);
+  }, [waitForPackaging, selectedOrders]);
 
   const handleCallAgain = useCallback(() => {
-    callAgain(ordersInScope, offPageCount);
-  }, [callAgain, ordersInScope, offPageCount]);
+    callAgain(selectedOrders);
+  }, [callAgain, selectedOrders]);
 
   const handleChangeProduct = useCallback(() => {
     if (isBulkPending) return;
     if (!canSetTarget('changeProduct')) return;
     const { eligible, parked, wrongStatus } = splitOrdersForAction(
       'changeProduct',
-      ordersInScope
+      selectedOrders
     );
-    warnSkippedForAction('changeProduct', parked, wrongStatus, offPageCount);
+    warnSkippedForAction('changeProduct', parked, wrongStatus);
     if (eligible.length === 0) return;
     setChangeProductOrders(eligible);
-  }, [isBulkPending, canSetTarget, ordersInScope, offPageCount]);
+  }, [isBulkPending, canSetTarget, selectedOrders]);
 
   const handleCloseChangeProduct = useCallback(() => {
     if (isBulkPending) return;
@@ -313,8 +304,7 @@ export function CallCenterContent() {
     setSelectedCustomerName('');
   }, []);
 
-  const showBulkActions =
-    (selectedOrders.length > 0 || selectAllMatchingFilters) && !isModalOpen;
+  const showBulkActions = selectedOrders.length > 0 && !isModalOpen;
 
   useEffect(() => {
     if (showBulkActions) {
@@ -368,8 +358,8 @@ export function CallCenterContent() {
       <OrdersSelectionHeader
         totalOrders={totalOrders}
         selectMode={selectMode}
-        selectedCount={selectAllMatchingFilters ? orders.length : selectedOrderIds.length}
-        selectAllMatchingFilters={selectAllMatchingFilters}
+        selectedCount={selectedOrderIds.length}
+        allVisibleSelected={allVisibleSelected}
         toggleSelectMode={guardedToggleSelectMode}
         handleSelectAllToggle={guardedSelectAllToggle}
         setSelectMode={guardedSetSelectMode}
@@ -393,7 +383,6 @@ export function CallCenterContent() {
                 select={selectMode}
                 toggleOnCardClick
                 isSelected={
-                  selectAllMatchingFilters ||
                   selectedOrderIds.includes(order.id)
                 }
                 onSelectionChange={(checked) =>
@@ -475,8 +464,6 @@ export function CallCenterContent() {
           onCallAgain={handleCallAgain}
           onChangeProduct={handleChangeProduct}
           position="fixed"
-          isAllSelected={selectAllMatchingFilters}
-          totalStoreOrders={totalOrders}
           isLoading={isBulkPending}
         />
       )}

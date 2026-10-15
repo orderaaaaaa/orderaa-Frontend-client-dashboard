@@ -27,7 +27,7 @@ export interface UsePrintOrderBulkReturn {
   toggleSelectMode: () => void;
   selectedOrderIds: number[];
   selectedOrders: Order[];
-  selectAllMatchingFilters: boolean;
+  allVisibleSelected: boolean;
   handleOrderSelect: (orderId: number, checked: boolean) => void;
   handleSelectAllToggle: () => void;
   clearSelections: () => void;

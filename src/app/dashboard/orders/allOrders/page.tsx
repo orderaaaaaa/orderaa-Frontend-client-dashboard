@@ -30,6 +30,7 @@ import {
   useOrderStatusesQuery,
 } from '@/services/orders';
 import { useBulkOrders } from './hooks/useOrderBulk';
+import { usePrintOrderBulk } from '../print-orders/hooks';
 import type { OrderStatusKey } from './types/Bulk';
 import { useQueryClient } from '@tanstack/react-query';
 import { useUrlFilters } from '@/hooks/useUrlFilters';
@@ -50,10 +51,6 @@ import {
 } from './utils/bulkStatusFeedback';
 
 function AllOrdersContent() {
-  const [select, setSelect] = useState(false);
-  const [selectedOrderIds, setSelectedOrderIds] = useState<number[]>([]);
-  const [selectAllMatchingFilters, setSelectAllMatchingFilters] =
-    useState(false);
   const queryClient = useQueryClient();
   const [selectedCustomerPhone, setSelectedCustomerPhone] =
     useState<string>('');
@@ -149,8 +146,7 @@ function AllOrdersContent() {
           data.updatedCount,
           variables.payload.ordersIds?.length
         );
-        setSelectedOrderIds([]);
-        setSelectAllMatchingFilters(false);
+        clearSelections();
         setSelect(false);
       },
       onError: (err) => {
@@ -176,6 +172,42 @@ function AllOrdersContent() {
 
   const orders = ordersData?.data ?? [];
   const totalOrders = ordersData?.meta?.totalItems ?? 0;
+
+  const {
+    selectMode: select,
+    setSelectMode: setSelect,
+    toggleSelectMode: toggleSelectModeBase,
+    selectedOrderIds,
+    selectedOrders,
+    allVisibleSelected,
+    handleOrderSelect: selectOrder,
+    handleSelectAllToggle: toggleAllVisible,
+    clearSelections,
+  } = usePrintOrderBulk({ orders });
+
+  const handleOrderSelect = useCallback(
+    (orderId: number, checked: boolean) => {
+      if (isBulkUpdating) return;
+      selectOrder(orderId, checked);
+    },
+    [isBulkUpdating, selectOrder]
+  );
+
+  const handleSelectAllToggle = useCallback(() => {
+    if (isBulkUpdating) return;
+    toggleAllVisible();
+  }, [isBulkUpdating, toggleAllVisible]);
+
+  const toggleSelectMode = useCallback(() => {
+    if (isBulkUpdating) return;
+    toggleSelectModeBase();
+  }, [isBulkUpdating, toggleSelectModeBase]);
+
+  const exitSelectMode = useCallback(() => {
+    if (isBulkUpdating) return;
+    setSelect(false);
+  }, [isBulkUpdating, setSelect]);
+
   const totalPages = ordersData?.meta?.totalPages ?? 1;
   const currentPage = ordersData?.meta?.currentPage ?? 1;
   const error = queryError?.message ?? null;
@@ -190,11 +222,6 @@ function AllOrdersContent() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [page]);
-
-  // Get selected orders as Order objects for BulkActionsBar (only relevant for current page visual)
-  const selectedOrders = useMemo(() => {
-    return orders.filter((order) => selectedOrderIds.includes(order.id));
-  }, [orders, selectedOrderIds]);
 
   // React Hook Form setup
   const handleFormSubmit = useCallback(
@@ -229,103 +256,25 @@ function AllOrdersContent() {
     }
   }, [isInitialized, filters, reset]);
 
-  // Handle order selection
-  const handleOrderSelect = useCallback(
-    (orderId: number, checked: boolean) => {
-      if (isBulkUpdating) return;
-      // If we were in "Select All Store" mode, interacting with individual checkbox breaks it
-      if (selectAllMatchingFilters) {
-        setSelectAllMatchingFilters(false);
-        // If unchecked, we can't easily keep "all except one" without complex logic, so we reset to empty or current page
-        // For simplicity, we just fallback to selecting only the current page (minus the one unchecked)??
-        // Or just start fresh:
-        if (checked) {
-          setSelectedOrderIds([orderId]);
-        } else {
-          setSelectedOrderIds([]);
-        }
-        return;
-      }
-
-      setSelectedOrderIds((prev) => {
-        if (checked) {
-          return [...prev, orderId];
-        } else {
-          return prev.filter((id) => id !== orderId);
-        }
-      });
-    },
-    [selectAllMatchingFilters, isBulkUpdating]
-  );
-
-  // Handle select all toggle (Selects All Store to trigger Bulk logic)
-  const handleSelectAllToggle = useCallback(() => {
-    if (isBulkUpdating) return;
-    if (selectAllMatchingFilters) {
-      // Deselect all
-      setSelectAllMatchingFilters(false);
-      setSelectedOrderIds([]);
-    } else {
-      // Select ALL matching filters (Bulk Mode)
-      // "When ever the user touches this تحديد الكل button then select the state use bulk"
-      setSelectAllMatchingFilters(true);
-      // We don't need individual IDs for bulk
-      setSelectedOrderIds([]);
-    }
-  }, [selectAllMatchingFilters, isBulkUpdating]);
-
-  const toggleSelectMode = useCallback(() => {
-    if (isBulkUpdating) return;
-    setSelect((prev) => !prev);
-  }, [isBulkUpdating]);
-
-  const exitSelectMode = useCallback(() => {
-    if (isBulkUpdating) return;
-    setSelect(false);
-  }, [isBulkUpdating]);
-
-  // Handle select all matching filters (All Store)
-  const handleSelectAllStore = useCallback(() => {
-    setSelectAllMatchingFilters(true);
-  }, []);
-
-  // Clear selection when select mode is turned off
-  useEffect(() => {
-    if (!select) {
-      setSelectedOrderIds([]);
-      setSelectAllMatchingFilters(false);
-    }
-  }, [select]);
-
   const handleExportExcel = useCallback(() => {
     try {
-      let ordersToExport: Order[];
-
-      if (selectAllMatchingFilters) {
-        ordersToExport = orders;
-      } else {
-        ordersToExport = orders.filter((order) =>
-          selectedOrderIds.includes(order.id)
-        );
-      }
-
-      if (ordersToExport.length === 0) {
+      if (selectedOrders.length === 0) {
         toast.warning('الرجاء تحديد طلبات للتصدير');
         return;
       }
 
       const fileName = exportOrdersToExcel(
-        ordersToExport,
-        selectAllMatchingFilters ? 'all_orders' : 'selected_orders',
+        selectedOrders,
+        'selected_orders',
         statusLabelsMap
       );
       toast.success(
-        `تم تصدير ${ordersToExport.length} طلب بنجاح! \nاسم الملف: ${fileName}`
+        `تم تصدير ${selectedOrders.length} طلب بنجاح! \nاسم الملف: ${fileName}`
       );
     } catch (error) {
       toast.error('فشل في تصدير الطلبات. الرجاء المحاولة مرة أخرى.');
     }
-  }, [selectAllMatchingFilters, selectedOrderIds, orders, statusLabelsMap]);
+  }, [selectedOrders, statusLabelsMap]);
 
   // Handle Edit Status
   const handleEditStatus = useCallback(
@@ -337,47 +286,27 @@ function AllOrdersContent() {
         statusLabelsMap.get(statusKey) ??
         statusKey;
 
-      if (selectAllMatchingFilters) {
-        const currentStatusFilter = filters.status;
+      if (selectedOrderIds.length === 0) return;
+      if (!canSetStatus(statusKey, statusLabel)) return;
 
-        if (!currentStatusFilter) {
-          toast.warning('يجب تحديد  فلتر الطلبات قبل استخدام تحديث الكل');
-          return;
-        }
+      const { parked } = splitParkedOrders(selectedOrders);
+      const parkedIds = new Set(parked.map((order) => order.id));
+      const ordersIds = selectedOrderIds.filter((id) => !parkedIds.has(id));
+      warnParkedOrdersSkipped(parked);
+      if (ordersIds.length === 0) return;
 
-        if (!canSetStatus(statusKey, statusLabel)) return;
-
-        bulkUpdateOrders({
-          payload: {
-            status: statusKey as OrderStatusKey,
-          },
-          currentStatus: currentStatusFilter,
-        });
-      } else {
-        if (selectedOrderIds.length === 0) return;
-        if (!canSetStatus(statusKey, statusLabel)) return;
-
-        const { parked } = splitParkedOrders(selectedOrders);
-        const parkedIds = new Set(parked.map((order) => order.id));
-        const ordersIds = selectedOrderIds.filter((id) => !parkedIds.has(id));
-        warnParkedOrdersSkipped(parked);
-        if (ordersIds.length === 0) return;
-
-        bulkUpdateOrders({
-          payload: {
-            status: statusKey as OrderStatusKey,
-            ordersIds,
-          },
-        });
-      }
+      bulkUpdateOrders({
+        payload: {
+          status: statusKey as OrderStatusKey,
+          ordersIds,
+        },
+      });
     },
     [
       isBulkUpdating,
       statusOptions,
       statusLabelsMap,
       canSetStatus,
-      selectAllMatchingFilters,
-      filters.status,
       selectedOrderIds,
       selectedOrders,
       bulkUpdateOrders,
@@ -431,8 +360,7 @@ function AllOrdersContent() {
     setSelectedCustomerName('');
   }, []);
 
-  const showBulkActions =
-    (selectedOrderIds.length > 0 || selectAllMatchingFilters) && !isModalOpen;
+  const showBulkActions = selectedOrders.length > 0 && !isModalOpen;
 
   // Add padding to body when bulk actions bar is visible
   useEffect(() => {
@@ -499,7 +427,7 @@ function AllOrdersContent() {
                 disabled={isBulkUpdating}
                 className="rounded-lg"
               >
-                {selectAllMatchingFilters ? (
+                {allVisibleSelected ? (
                   'إلغاء تحديد الكل'
                 ) : (
                   <span className="flex items-center gap-2">تحديد الكل</span>
@@ -556,7 +484,6 @@ function AllOrdersContent() {
                 select={select}
                 toggleOnCardClick
                 isSelected={
-                  selectAllMatchingFilters ||
                   selectedOrderIds.includes(order.id)
                 }
                 onSelectionChange={(checked) =>
@@ -637,7 +564,6 @@ function AllOrdersContent() {
       {showBulkActions && (
         <BulkActionsBar
           selectedOrders={selectedOrders}
-          selectedCount={selectedOrderIds.length}
           onEditStatus={handleEditStatus}
           statusOptions={statusOptions || []}
           onExportExcel={handleExportExcel}
@@ -645,8 +571,6 @@ function AllOrdersContent() {
           onShipping={handleShipping}
           onOther={handleOther}
           position="fixed"
-          isAllSelected={selectAllMatchingFilters}
-          totalStoreOrders={totalOrders}
           isLoading={isBulkUpdating}
         />
       )}
