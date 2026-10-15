@@ -265,16 +265,35 @@ export const useDeleteCanonicalName = (domain: CanonicalNameDomain) => {
   });
 };
 
+const LINK_ITEMS_PER_REQUEST = 500;
+
 export const useApplyLinks = (domain: CanonicalNameDomain) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (payload: ApplyLinksRequest) => {
-      const { data } = await http.put<ApplyLinksResponse>(
-        `/canonical-names/${domain}/links`,
-        payload,
-      );
-      return data;
+      const result: ApplyLinksResponse = { data: [] };
+      let sentChunks = 0;
+      try {
+        for (
+          let start = 0;
+          start < payload.items.length;
+          start += LINK_ITEMS_PER_REQUEST
+        ) {
+          const { data } = await http.put<ApplyLinksResponse>(
+            `/canonical-names/${domain}/links`,
+            {
+              items: payload.items.slice(start, start + LINK_ITEMS_PER_REQUEST),
+            },
+          );
+          sentChunks += 1;
+          result.data.push(...data.data);
+        }
+      } catch (err) {
+        if (sentChunks > 0) await invalidateDomainQueries(queryClient, domain);
+        throw err;
+      }
+      return result;
     },
     onSuccess: async (result) => {
       await invalidateDomainQueries(queryClient, domain);
