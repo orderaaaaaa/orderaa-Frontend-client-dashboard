@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import clsx from 'clsx';
 import Link from 'next/link';
 import {
   LiaArrowRightSolid,
@@ -61,6 +62,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
     totalItems,
     hasNextPage,
     hasPreviousPage,
+    isLoading,
     isFetching,
     isError,
     error,
@@ -207,8 +209,8 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
       </div>
 
       <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative min-w-[12rem] flex-1 px-1">
+        <div className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-white shadow-sm p-3 md:flex-row md:flex-wrap md:items-center md:border-0 md:bg-transparent md:shadow-none md:p-0">
+          <div className="relative w-full px-1 md:w-auto md:min-w-[12rem] md:flex-1">
             <LiaSearchSolid className="absolute right-3 top-1/2 -translate-y-1/2 size-5 text-primary z-10" />
             <Input
               value={filters.searchQuery}
@@ -219,7 +221,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
               inputClassName="pr-10 bg-white"
             />
           </div>
-          <label className="flex shrink-0 items-center gap-2 text-sm font-medium text-gray-700">
+          <label className="flex min-h-10 w-full shrink-0 items-center gap-2 text-sm font-medium text-gray-700 md:w-auto">
             <FormSwitch
               checked={outOfStockOnly}
               onCheckedChange={setOutOfStockOnly}
@@ -233,7 +235,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
                 ? `فلاتر متقدمة (${activeFilterCount})`
                 : 'فلاتر متقدمة'
             }
-            className="h-10 min-w-10 sm:h-9 rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm px-3 sm:px-5 relative"
+            className="h-10 w-full md:w-auto min-w-10 sm:h-9 rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm px-3 sm:px-5 relative"
             onClick={() => {
               setShowFilters((prev) => {
                 if (prev) setFiltersOverflow(false);
@@ -242,7 +244,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
             }}
           >
             <LiaSlidersHSolid className="w-5 h-5" />
-            <span className="hidden sm:inline">فلاتر متقدمة</span>
+            <span>فلاتر متقدمة</span>
             {activeFilterCount > 0 && (
               <span className="absolute -top-2 -start-2 bg-white text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
                 {activeFilterCount}
@@ -280,7 +282,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
         <SummaryCards items={scopeSummary.items} />
       ) : null}
 
-      {isFetching ? (
+      {isLoading ? (
         <StockListSkeleton count={pageSize} />
       ) : isError ? (
         <div className="flex flex-col items-center justify-center py-20 text-gray-400">
@@ -311,7 +313,10 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
           )}
         </div>
       ) : (
-        <div className="space-y-6">
+        <div
+          aria-busy={isFetching}
+          className={clsx('space-y-6 transition-opacity', isFetching && 'opacity-60')}
+        >
           {filteredProducts.map((product) => (
             <ProductStockTable
               key={product.id}
@@ -323,7 +328,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
         </div>
       )}
 
-      {!isFetching && !isError && totalPages > 0 && (
+      {!isLoading && !isError && totalPages > 0 && (
         <PaginationFooter
           currentPage={currentPage}
           totalPages={totalPages}

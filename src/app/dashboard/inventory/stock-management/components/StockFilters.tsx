@@ -35,7 +35,7 @@ export function StockFilters({
   const { t } = useI18n();
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex min-w-0 w-full flex-col gap-3 rounded-xl border border-gray-100 bg-white shadow-sm p-3 md:border-0 md:bg-transparent md:shadow-none md:p-0">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <SearchableSelect
           options={colorOptions}

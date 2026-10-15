@@ -146,7 +146,75 @@ export function ProductStockTable({
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="flex flex-col gap-3 px-4 py-4 md:hidden">
+        {visibleVariants.length === 0 ? (
+          <p className="py-8 text-center text-sm text-gray-500">لا توجد متغيرات مطابقة</p>
+        ) : (
+          <>
+            {visibleVariants.map((variant) => (
+              <div key={variant.size} className="rounded-lg border border-gray-200 p-3">
+                <div className="flex items-start justify-between gap-3 border-b border-gray-100 pb-2">
+                  <span className="min-w-0 break-words font-semibold text-gray-800">
+                    {variant.size}
+                  </span>
+                  <span className="shrink-0 text-sm font-bold text-gray-800">
+                    {formatStockNumber(rowTotal(variant))}
+                  </span>
+                </div>
+                <div className="flex flex-col">
+                  {visibleColors.map((color) => {
+                    const stock = variant.stocks[color];
+
+                    if (stock) {
+                      return (
+                        <button
+                          key={color}
+                          type="button"
+                          className="flex min-h-10 w-full items-center justify-between gap-3 text-start"
+                          onClick={() => setSelectedCell({ stock, color, size: variant.size })}
+                        >
+                          <span className="min-w-0 break-words text-sm text-gray-600">{color}</span>
+                          <StockBadge stock={stock} />
+                        </button>
+                      );
+                    }
+
+                    return (
+                      <div
+                        key={color}
+                        className="flex min-h-10 items-center justify-between gap-3"
+                      >
+                        <span className="min-w-0 break-words text-sm text-gray-600">{color}</span>
+                        {stock === null ? null : (
+                          <span className="text-sm text-gray-300">-</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+            <div className="flex flex-col gap-2 rounded-lg bg-gray-50 p-3">
+              <span className="text-xs font-bold text-gray-600">عدد الإجمالي لكل متغير</span>
+              {columnTotals.map((total, idx) => (
+                <div
+                  key={visibleColors[idx]}
+                  className="flex items-center justify-between gap-3 text-sm"
+                >
+                  <span className="min-w-0 break-words text-gray-600">{visibleColors[idx]}</span>
+                  <span className="font-bold text-gray-800">{formatStockNumber(total)}</span>
+                </div>
+              ))}
+              <div className="flex items-center justify-between gap-3 border-t border-gray-200 pt-2 text-sm">
+                <span className="font-bold text-gray-600">الإجمالي</span>
+                <span className="font-bold text-primary">{formatStockNumber(grandTotal)}</span>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="hidden md:block">
         <Table>
           <TableHeader>
             <TableRow className="bg-[#f1eefa]">
@@ -179,8 +247,8 @@ export function ProductStockTable({
             ) : (
               <>
                 {visibleVariants.map((variant) => (
-                  <TableRow key={variant.size} className="hover:bg-gray-50/50">
-                    <TableCell className="sticky start-0 z-[1] bg-white px-4 py-3 text-center text-sm font-semibold text-gray-800 border-l border-gray-200 last:border-l-0">
+                  <TableRow key={variant.size} className="group hover:bg-gray-50/50">
+                    <TableCell className="sticky start-0 z-[1] bg-white group-hover:bg-gray-50 px-4 py-3 text-center text-sm font-semibold text-gray-800 border-l border-gray-200 last:border-l-0">
                       {variant.size}
                     </TableCell>
                     {visibleColors.map((color) => {
