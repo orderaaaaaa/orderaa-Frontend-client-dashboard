@@ -1,7 +1,6 @@
 export type StockStatus = 'high' | 'medium' | 'low' | 'out_of_stock' | 'shortage';
 
 export type StockScope =
-  | { kind: 'all' }
   | { kind: 'physical'; id: number }
   | { kind: 'virtual'; id: number };
 
@@ -31,7 +30,6 @@ export interface StockFilters {
   searchQuery: string;
   color: string;
   size: string;
-  warehouseId: string;
   fromDate: Date | null;
   toDate: Date | null;
   timePeriod: '' | 'day' | 'week' | 'month' | 'quarter' | 'year';

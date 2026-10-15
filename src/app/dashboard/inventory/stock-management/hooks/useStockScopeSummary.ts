@@ -25,7 +25,7 @@ interface StockScopeSummary {
 export function useStockScopeSummary(scope: StockScope): StockScopeSummary {
   const isPhysical = scope.kind === STOCK_SCOPE_KINDS.PHYSICAL;
   const isVirtual = scope.kind === STOCK_SCOPE_KINDS.VIRTUAL;
-  const scopeId = scope.kind === STOCK_SCOPE_KINDS.ALL ? undefined : scope.id;
+  const scopeId = scope.id;
   const canReadVirtual = useHasPermission(
     PERMISSION_CODES.VIRTUAL_WAREHOUSES_READ
   );

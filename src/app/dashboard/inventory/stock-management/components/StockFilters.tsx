@@ -4,8 +4,6 @@ import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import { TimePeriod } from '@/utils/dateRangeUtils';
 import type { StockFilters as Filters } from '../types';
-import { ALL_WAREHOUSES_OPTION } from '@/constants/warehouses';
-import { useWarehouseOptions } from '@/services/warehouses';
 import { useI18n } from '@/i18n/I18nProvider';
 
 interface StockFilterOption {
@@ -22,8 +20,6 @@ interface StockFiltersProps {
   onFromDateChange: (date: Date | null) => void;
   onToDateChange: (date: Date | null) => void;
   onTimePeriodChange: (period: TimePeriod | '') => void;
-  onWarehouseChange?: (value: string) => void;
-  showWarehouseFilter?: boolean;
 }
 
 export function StockFilters({
@@ -35,11 +31,8 @@ export function StockFilters({
   onFromDateChange,
   onToDateChange,
   onTimePeriodChange,
-  onWarehouseChange,
-  showWarehouseFilter = true,
 }: StockFiltersProps) {
   const { t } = useI18n();
-  const { options: warehouseOptions } = useWarehouseOptions();
 
   return (
     <div className="flex flex-col gap-3">
@@ -60,14 +53,6 @@ export function StockFilters({
           placeholder="المقاس"
           clearable
         />
-        {showWarehouseFilter && (
-          <SearchableSelect
-            options={[ALL_WAREHOUSES_OPTION, ...warehouseOptions]}
-            value={filters.warehouseId}
-            onChange={(val) => onWarehouseChange?.(val)}
-            placeholder="المخزن"
-          />
-        )}
       </div>
       <DateRangeFilter
         fromDate={filters.fromDate}

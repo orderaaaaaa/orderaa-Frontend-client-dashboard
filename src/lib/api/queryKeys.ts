@@ -15,7 +15,6 @@ export const QUERY_KEYS = {
   PRODUCT_ATTRIBUTE_OPTIONS: 'product-attribute-options',
 
   // Stock
-  STOCK_ANALYSIS: 'stock-analysis',
   STOCK_PRODUCTS: 'stock-products',
   STOCK_FILTER_OPTIONS: 'stock-filter-options',
 
