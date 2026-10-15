@@ -43,6 +43,9 @@ export interface WarehouseApiItem {
   parentWarehouseId: number | null;
   presetKey: string | null;
   displayPosition: number | null;
+  showShortageIndicator: boolean;
+  showOutOfStockIndicator: boolean;
+  showLowStockIndicator: boolean;
   createdAt: string;
   updatedAt: string;
   children?: WarehouseApiItem[];
@@ -123,8 +126,12 @@ export interface WarehouseSummaryCard {
   isActive: boolean;
   displayPosition: number | null;
   totalQuantity: number;
-  lowStockVariantCount: number;
-  outOfStockVariantCount: number;
+  visibleTotalQuantity: number;
+  showShortageIndicator: boolean;
+  showOutOfStockIndicator: boolean;
+  showLowStockIndicator: boolean;
+  lowStockVariantCount: number | null;
+  outOfStockVariantCount: number | null;
 }
 
 export interface WarehouseRef {

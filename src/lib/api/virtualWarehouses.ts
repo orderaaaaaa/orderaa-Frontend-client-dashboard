@@ -61,6 +61,9 @@ export interface VirtualWarehouse {
   isActive: boolean;
   presetKey: string | null;
   displayPosition: number | null;
+  showShortageIndicator: boolean;
+  showOutOfStockIndicator: boolean;
+  showLowStockIndicator: boolean;
   terms: VirtualWarehouseTermView[];
 }
 
@@ -70,9 +73,13 @@ export interface VirtualWarehouseSummaryCard {
   presetKey: string | null;
   displayPosition: number | null;
   totalQuantity: number;
-  outOfStockVariantCount: number;
-  shortfallVariantCount: number;
-  shortfallUnits: number;
+  visibleTotalQuantity: number;
+  showShortageIndicator: boolean;
+  showOutOfStockIndicator: boolean;
+  showLowStockIndicator: boolean;
+  outOfStockVariantCount: number | null;
+  shortfallVariantCount: number | null;
+  shortfallUnits: number | null;
 }
 
 export type VirtualWarehousePresetKey = 'CALL_CENTER_DEMAND';
