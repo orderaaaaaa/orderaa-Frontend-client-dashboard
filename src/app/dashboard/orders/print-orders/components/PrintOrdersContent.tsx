@@ -89,10 +89,9 @@ export function PrintOrdersContent() {
   const [isPrintedConfirmModalOpen, setIsPrintedConfirmModalOpen] =
     useState(false);
   const [isPrintFlowOpen, setIsPrintFlowOpen] = useState(false);
-  const pendingActionRef = useRef<(() => void | Promise<void>) | null>(null);
-  const [excludedPrintedIds, setExcludedPrintedIds] = useState<Set<number>>(
-    new Set(),
-  );
+  const pendingActionRef = useRef<
+    ((excludedPrintedIds: ReadonlySet<number>) => void | Promise<void>) | null
+  >(null);
   const [isScannerChangeProductMode, setIsScannerChangeProductMode] =
     useState(false);
   const [scannerPackagingNotes, setScannerPackagingNotes] = useState<
@@ -440,13 +439,15 @@ export function PrintOrdersContent() {
 
   const hasPrintedOrdersInSelection = printedOrdersInSelection.length > 0;
 
+  const selectedCount = selectAllMatchingFilters ? orders.length : selectedOrderIds.length;
+
   const withPrintedCheck = useCallback(
-    (action: () => void | Promise<void>) => {
+    (action: (excludedPrintedIds: ReadonlySet<number>) => void | Promise<void>) => {
       if (hasPrintedOrdersInSelection) {
         pendingActionRef.current = action;
         setIsPrintedConfirmModalOpen(true);
       } else {
-        action();
+        action(new Set());
       }
     },
     [hasPrintedOrdersInSelection]
@@ -455,7 +456,6 @@ export function PrintOrdersContent() {
   const handlePrintedConfirmClose = useCallback(() => {
     setIsPrintedConfirmModalOpen(false);
     pendingActionRef.current = null;
-    setExcludedPrintedIds(new Set());
   }, []);
 
   const handlePrintedConfirm = useCallback(
@@ -465,23 +465,21 @@ export function PrintOrdersContent() {
       for (const o of printedOrdersInSelection) {
         if (!included.has(o.id)) excluded.add(o.id);
       }
-      setExcludedPrintedIds(excluded);
       setIsPrintedConfirmModalOpen(false);
       if (pendingActionRef.current) {
-        pendingActionRef.current();
+        pendingActionRef.current(excluded);
         pendingActionRef.current = null;
       }
     },
     [printedOrdersInSelection],
   );
 
-  const executePrepared = useCallback(async () => {
+  const executePrepared = useCallback(async (excludedPrintedIds: ReadonlySet<number>) => {
     const baseOrders = selectAllMatchingFilters ? orders : selectedOrders;
     const ordersToProcess = baseOrders.filter(
       (o) => !excludedPrintedIds.has(o.id),
     );
     if (ordersToProcess.length === 0) {
-      setExcludedPrintedIds(new Set());
       return;
     }
     setIsActionLoading(true);
@@ -497,21 +495,19 @@ export function PrintOrdersContent() {
       toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
     } finally {
       setIsActionLoading(false);
-      setExcludedPrintedIds(new Set());
     }
-  }, [selectAllMatchingFilters, orders, selectedOrders, excludedPrintedIds, prepareOrdersMutation, clearSelections, setSelectMode]);
+  }, [selectAllMatchingFilters, orders, selectedOrders, prepareOrdersMutation, clearSelections, setSelectMode]);
 
   const handlePrepared = useCallback(() => {
     withPrintedCheck(executePrepared);
   }, [withPrintedCheck, executePrepared]);
 
-  const executeAwaitingPackaging = useCallback(async () => {
+  const executeAwaitingPackaging = useCallback(async (excludedPrintedIds: ReadonlySet<number>) => {
     const baseOrders = selectAllMatchingFilters ? orders : selectedOrders;
     const ordersToProcess = baseOrders.filter(
       (o) => !excludedPrintedIds.has(o.id),
     );
     if (ordersToProcess.length === 0) {
-      setExcludedPrintedIds(new Set());
       return;
     }
     setIsActionLoading(true);
@@ -527,9 +523,8 @@ export function PrintOrdersContent() {
       toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
     } finally {
       setIsActionLoading(false);
-      setExcludedPrintedIds(new Set());
     }
-  }, [selectAllMatchingFilters, orders, selectedOrders, excludedPrintedIds, waitingMutation, clearSelections, setSelectMode]);
+  }, [selectAllMatchingFilters, orders, selectedOrders, waitingMutation, clearSelections, setSelectMode]);
 
   const handleAwaitingPackaging = useCallback(() => {
     withPrintedCheck(executeAwaitingPackaging);
@@ -678,7 +673,7 @@ export function PrintOrdersContent() {
         printStatus={printStatus}
         onPrintStatusChange={setPrintStatus}
         printStatistics={printStatistics}
-        selectedOrders={selectedOrders}
+        selectedOrders={selectAllMatchingFilters ? orders : selectedOrders}
         showPrintStatusToggle={filters.status === 'CONFIRMED'}
         hiddenFilters={[]}
         onPrintFlowOpenChange={setIsPrintFlowOpen}
@@ -705,7 +700,7 @@ export function PrintOrdersContent() {
         </div>
 
         <div className="flex flex-row items-center justify-center gap-3 text-white">
-          {selectMode && selectedOrderIds.length > 0 && (
+          {selectMode && selectedCount > 0 && (
             <div className="flex flex-row items-center justify-center gap-2">
               <Button
                 type="button"
@@ -719,7 +714,7 @@ export function PrintOrdersContent() {
                 <X className="size-5" />
               </Button>
               <span className="text-sm text-gray-600">
-                تم تحديد {selectedOrderIds.length} طلب
+                تم تحديد {selectedCount} طلب
               </span>
             </div>
           )}

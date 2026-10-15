@@ -31,6 +31,8 @@ const SHIPPING_TYPE_BADGE: Record<string, { label: string; icon: IconType; bg: s
   [ShippingType.PARTIAL_RETURN]: { label: 'تسليم جزئي', icon: LiaRandomSolid, bg: 'bg-amber-100', text: 'text-amber-600' },
 };
 
+const CARD_INTERACTIVE_SELECTOR = 'button, a, input, select, textarea, label';
+
 export default function OrderCard({
   id,
   code,
@@ -80,7 +82,14 @@ export default function OrderCard({
     onSelectionChange?.(e.target.checked);
   };
 
-  const handleCardClick = () => {
+  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (select) {
+      if (!e.currentTarget.contains(e.target as Node)) return;
+      const interactive = (e.target as HTMLElement).closest(CARD_INTERACTIVE_SELECTOR);
+      if (interactive && e.currentTarget.contains(interactive)) return;
+      onSelectionChange?.(!isSelected);
+      return;
+    }
     if (disableNavigation) return;
     const url = filterParams
       ? `/dashboard/orders/${id}?${filterParams}`

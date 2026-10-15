@@ -444,7 +444,7 @@ export function ShippingOrdersContent() {
         currentStatus={filters.status}
         printStatus={printStatus}
         onPrintStatusChange={setPrintStatus}
-        selectedOrders={selectedOrders}
+        selectedOrders={selectAllMatchingFilters ? orders : selectedOrders}
         showPrintStatusToggle={false}
         showShippingCompanySelect
         shippingCompanyOptions={shippingCompanyOptions}
@@ -468,7 +468,7 @@ export function ShippingOrdersContent() {
       <OrdersSelectionHeader
         totalOrders={totalOrders}
         selectMode={selectMode}
-        selectedOrderIds={selectedOrderIds}
+        selectedCount={selectAllMatchingFilters ? orders.length : selectedOrderIds.length}
         selectAllMatchingFilters={selectAllMatchingFilters}
         toggleSelectMode={toggleSelectMode}
         handleSelectAllToggle={handleSelectAllToggle}

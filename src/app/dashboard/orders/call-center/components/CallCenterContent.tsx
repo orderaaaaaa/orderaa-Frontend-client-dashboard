@@ -368,7 +368,7 @@ export function CallCenterContent() {
       <OrdersSelectionHeader
         totalOrders={totalOrders}
         selectMode={selectMode}
-        selectedOrderIds={selectedOrderIds}
+        selectedCount={selectAllMatchingFilters ? orders.length : selectedOrderIds.length}
         selectAllMatchingFilters={selectAllMatchingFilters}
         toggleSelectMode={guardedToggleSelectMode}
         handleSelectAllToggle={guardedSelectAllToggle}

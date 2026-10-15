@@ -432,7 +432,7 @@ function AllOrdersContent() {
   }, []);
 
   const showBulkActions =
-    (selectedOrders.length > 0 || selectAllMatchingFilters) && !isModalOpen;
+    (selectedOrderIds.length > 0 || selectAllMatchingFilters) && !isModalOpen;
 
   // Add padding to body when bulk actions bar is visible
   useEffect(() => {
@@ -636,6 +636,7 @@ function AllOrdersContent() {
       {showBulkActions && (
         <BulkActionsBar
           selectedOrders={selectedOrders}
+          selectedCount={selectedOrderIds.length}
           onEditStatus={handleEditStatus}
           statusOptions={statusOptions || []}
           onExportExcel={handleExportExcel}

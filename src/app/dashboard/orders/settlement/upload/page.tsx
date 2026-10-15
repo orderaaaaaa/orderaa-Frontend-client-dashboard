@@ -243,6 +243,11 @@ export default function SettlementUploadPage() {
   const handleConfirmForceTarget = useCallback(async () => {
     if (!forcingTarget) return;
     await forceRows([forcingTarget.row]);
+    setSelectedForceRows((prev) => {
+      const next = new Set(prev);
+      next.delete(forcingTarget.row);
+      return next;
+    });
     setForcingTarget(null);
   }, [forceRows, forcingTarget]);
 

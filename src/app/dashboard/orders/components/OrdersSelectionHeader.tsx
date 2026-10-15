@@ -5,7 +5,7 @@ import React from 'react';
 interface OrdersSelectionHeaderProps {
   totalOrders: number;
   selectMode: boolean;
-  selectedOrderIds: number[];
+  selectedCount: number;
   selectAllMatchingFilters: boolean;
   toggleSelectMode: () => void;
   handleSelectAllToggle: () => void;
@@ -17,7 +17,7 @@ export const OrdersSelectionHeader: React.FC<OrdersSelectionHeaderProps> =
     ({
       totalOrders,
       selectMode,
-      selectedOrderIds,
+      selectedCount,
       selectAllMatchingFilters,
       toggleSelectMode,
       handleSelectAllToggle,
@@ -34,14 +34,14 @@ export const OrdersSelectionHeader: React.FC<OrdersSelectionHeaderProps> =
         </div>
 
         <div className="flex flex-row items-center justify-center gap-3 text-white">
-          {selectMode && selectedOrderIds.length > 0 && (
+          {selectMode && selectedCount > 0 && (
             <div className="flex flex-row items-center justify-center gap-2">
               <X
                 onClick={() => setSelectMode(false)}
                 className="cursor-pointer text-primary h-5 w-5"
               />
               <span className="text-sm text-gray-600">
-                تم تحديد {selectedOrderIds.length} طلب
+                تم تحديد {selectedCount} طلب
               </span>
             </div>
           )}
