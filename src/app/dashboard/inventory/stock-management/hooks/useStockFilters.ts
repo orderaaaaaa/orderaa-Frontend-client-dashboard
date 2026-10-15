@@ -153,10 +153,8 @@ export function useStockFilters(
 
   const filteredProducts: StockProduct[] = useMemo(() => {
     if (!productsQuery.data) return [];
-    return apiListToStockProducts(productsQuery.data.data, {
-      onlyReturnedVariants: filterDtoBase.outOfStockOnly === true,
-    });
-  }, [productsQuery.data, filterDtoBase.outOfStockOnly]);
+    return apiListToStockProducts(productsQuery.data.data);
+  }, [productsQuery.data]);
 
   const hasActiveFilters =
     !!debouncedSearchQuery.trim() ||

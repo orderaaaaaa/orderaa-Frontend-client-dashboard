@@ -11,7 +11,7 @@ export interface VariantStock {
   status: StockStatus;
 }
 
-export type VariantCell = VariantStock | 'missing' | null;
+export type VariantCell = VariantStock | 'missing';
 
 export interface ProductVariantRow {
   size: string;

@@ -44,7 +44,7 @@ export function displayCell(
   cell: VariantCell | undefined,
   indicators: StockIndicators
 ): StockCellView {
-  if (cell === undefined || cell === null) return { kind: 'hidden' };
+  if (cell === undefined) return { kind: 'hidden' };
   if (cell === 'missing') return { kind: 'missing' };
   if (cell.status === 'shortage' && !indicators.shortage) {
     return { kind: 'hidden' };
