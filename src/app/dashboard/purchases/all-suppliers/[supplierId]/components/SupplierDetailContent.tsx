@@ -24,7 +24,9 @@ interface SupplierDetailContentProps {
 
 export function SupplierDetailContent({ supplier, initialInvoicesData }: SupplierDetailContentProps) {
   const [select, setSelect] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [selectedById, setSelectedById] = useState<Map<number, SupplierInvoiceApiItem>>(
+    () => new Map(),
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [fromDate, setFromDate] = useState<Date | null>(null);
@@ -61,25 +63,31 @@ export function SupplierDetailContent({ supplier, initialInvoicesData }: Supplie
   const totalItems = meta?.totalItems ?? 0;
   const totalPages = meta?.totalPages ?? 1;
 
-  const showActionsBar = select && selectedIds.length > 0;
+  const showActionsBar = select && selectedById.size > 0;
 
   const handleToggleSelect = useCallback(() => {
     setSelect((prev) => {
-      if (prev) setSelectedIds([]);
+      if (prev) setSelectedById(new Map());
       return !prev;
     });
   }, []);
 
   const handleClearSelection = useCallback(() => {
-    setSelectedIds([]);
+    setSelectedById(new Map());
     setSelect(false);
   }, []);
 
   const handleSelectionChange = useCallback(
-    (invoiceId: number, checked: boolean) => {
-      setSelectedIds((prev) =>
-        checked ? [...prev, invoiceId] : prev.filter((id) => id !== invoiceId),
-      );
+    (invoice: SupplierInvoiceApiItem, checked: boolean) => {
+      setSelectedById((prev) => {
+        const next = new Map(prev);
+        if (checked) {
+          next.set(invoice.id, invoice);
+        } else {
+          next.delete(invoice.id);
+        }
+        return next;
+      });
     },
     [],
   );
@@ -95,9 +103,8 @@ export function SupplierDetailContent({ supplier, initialInvoicesData }: Supplie
   }, []);
 
   const handleExportExcel = useCallback(() => {
-    const selectedInvoices = invoices.filter((inv) => selectedIds.includes(inv.id));
-    exportSupplierInvoicesToExcel(selectedInvoices, supplier.name);
-  }, [invoices, selectedIds, supplier.name]);
+    exportSupplierInvoicesToExcel(Array.from(selectedById.values()), supplier.name);
+  }, [selectedById, supplier.name]);
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">
@@ -118,7 +125,7 @@ export function SupplierDetailContent({ supplier, initialInvoicesData }: Supplie
         <div className="flex flex-row items-center justify-end">
           <SelectModeControls
             active={select}
-            selectedCount={selectedIds.length}
+            selectedCount={selectedById.size}
             countLabel="فاتورة"
             onToggle={handleToggleSelect}
             onClear={handleClearSelection}
@@ -145,9 +152,9 @@ export function SupplierDetailContent({ supplier, initialInvoicesData }: Supplie
               key={invoice.id}
               invoice={invoice}
               select={select}
-              isSelected={selectedIds.includes(invoice.id)}
+              isSelected={selectedById.has(invoice.id)}
               onSelectionChange={(checked) =>
-                handleSelectionChange(invoice.id, checked)
+                handleSelectionChange(invoice, checked)
               }
             />
           ))
@@ -181,7 +188,7 @@ export function SupplierDetailContent({ supplier, initialInvoicesData }: Supplie
       </div>
 
       <SupplierInvoicesActionsBar
-        selectedCount={selectedIds.length}
+        selectedCount={selectedById.size}
         isVisible={showActionsBar}
         onExportExcel={handleExportExcel}
       />

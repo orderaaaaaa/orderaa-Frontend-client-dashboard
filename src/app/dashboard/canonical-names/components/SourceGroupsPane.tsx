@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import PageLoading from '@/components/ui/page-loading';
@@ -74,7 +74,9 @@ export default function SourceGroupsPane({
   const [stateFilter, setStateFilter] = useState<GroupStateFilter>('all');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(50);
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [selectedGroups, setSelectedGroups] = useState<Map<string, SourceGroup>>(
+    () => new Map(),
+  );
 
   const debouncedSearch = useDebounce(search.trim(), 300);
   const { data, isFetching, isPlaceholderData, isError, refetch } =
@@ -111,22 +113,16 @@ export default function SourceGroupsPane({
     refetch();
   }, [locationPageEmpty, sourcesReady, refreshToken, refetch]);
 
-  const groupsByKey = useMemo(() => {
-    const map = new Map<string, SourceGroup>();
-    (data?.data ?? []).forEach((group) => map.set(groupKey(group), group));
-    return map;
-  }, [data]);
-
   const nameSelectOptions = nameOptions.map((name) => ({
     key: String(name.id),
     label: name.name,
   }));
 
-  const toggleSelected = (key: string, checked: boolean) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (checked) next.add(key);
-      else next.delete(key);
+  const toggleSelected = (group: SourceGroup, checked: boolean) => {
+    setSelectedGroups((prev) => {
+      const next = new Map(prev);
+      if (checked) next.set(groupKey(group), group);
+      else next.delete(groupKey(group));
       return next;
     });
   };
@@ -134,9 +130,7 @@ export default function SourceGroupsPane({
   const applyBulkLink = (targetId: string) => {
     const target = nameOptions.find((n) => String(n.id) === targetId);
     if (!target) return;
-    const groups = Array.from(selected)
-      .map((key) => groupsByKey.get(key))
-      .filter((g): g is SourceGroup => !!g);
+    const groups = Array.from(selectedGroups.values());
     const items: LinkItem[] = groups.map((group) => ({
       scopeId: group.scopeId,
       normalizedText: group.normalizedText,
@@ -144,7 +138,7 @@ export default function SourceGroupsPane({
     }));
     if (items.length === 0) return;
     onRequestLink(items, groups);
-    setSelected(new Set());
+    setSelectedGroups(new Map());
   };
 
   if (!scopeReady) {
@@ -189,10 +183,10 @@ export default function SourceGroupsPane({
         }}
       />
 
-      {canManage && selected.size > 0 && (
+      {canManage && selectedGroups.size > 0 && (
         <div className="flex flex-wrap items-center gap-2 rounded-md border bg-gray-50 p-2">
           <span className="text-xs text-gray-600">
-            {selected.size} محدد
+            {selectedGroups.size} محدد
           </span>
           <div className="w-full sm:w-48">
             <SearchableSelect
@@ -246,10 +240,8 @@ export default function SourceGroupsPane({
               domain={domain}
               group={group}
               nameOptions={nameOptions}
-              selected={selected.has(groupKey(group))}
-              onToggleSelect={(checked) =>
-                toggleSelected(groupKey(group), checked)
-              }
+              selected={selectedGroups.has(groupKey(group))}
+              onToggleSelect={(checked) => toggleSelected(group, checked)}
               onRequestLink={(item, sourceGroup, onLinked) =>
                 onRequestLink([item], [sourceGroup], onLinked)
               }
