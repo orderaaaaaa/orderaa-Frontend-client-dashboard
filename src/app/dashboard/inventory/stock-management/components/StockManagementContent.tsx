@@ -113,8 +113,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
     let count = 0;
     if (filters.color) count++;
     if (filters.size) count++;
-    if (filters.fromDate || filters.toDate) count++;
-    if (filters.timePeriod) count++;
+    if (filters.timePeriod || filters.fromDate || filters.toDate) count++;
     return count;
   }, [
     filters.color,
