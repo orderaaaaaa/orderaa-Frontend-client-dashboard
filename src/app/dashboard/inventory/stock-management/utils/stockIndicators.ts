@@ -18,15 +18,20 @@ export const ALL_STOCK_INDICATORS: StockIndicators = {
   lowStock: true,
 };
 
-export function indicatorsFromFlags(
-  flags: StockIndicatorFlags | undefined
-): StockIndicators {
-  if (!flags) return ALL_STOCK_INDICATORS;
+export function indicatorsFromFlags(flags: StockIndicatorFlags): StockIndicators {
   return {
     shortage: flags.showShortageIndicator,
     outOfStock: flags.showOutOfStockIndicator,
     lowStock: flags.showLowStockIndicator,
   };
+}
+
+export function resolveIndicators(
+  flags: StockIndicatorFlags | undefined,
+  settled: boolean
+): StockIndicators | null {
+  if (flags) return indicatorsFromFlags(flags);
+  return settled ? ALL_STOCK_INDICATORS : null;
 }
 
 export type StockCellView =
@@ -75,7 +80,7 @@ export function sumVisibleQuantity(
 
 export function effectiveOutOfStockOnly(
   requested: boolean,
-  indicators: StockIndicators
+  indicators: StockIndicators | null
 ): boolean {
-  return requested && indicators.outOfStock;
+  return requested && indicators !== null && indicators.outOfStock;
 }

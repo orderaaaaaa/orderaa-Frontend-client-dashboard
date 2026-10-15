@@ -41,6 +41,7 @@ interface StockManagementContentProps {
 
 export function StockManagementContent({ scope }: StockManagementContentProps) {
   const scopeSummary = useStockScopeSummary(scope);
+  const indicators = scopeSummary.indicators;
 
   const {
     filters,
@@ -124,6 +125,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
   ]);
 
   const handleExportExcel = useCallback(async () => {
+    if (!scopeSummary.indicators) return;
     setIsExporting(true);
     try {
       await exportStockToExcel(filterDtoBase, scopeSummary.indicators);
@@ -134,6 +136,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
   }, [filterDtoBase, scopeSummary.indicators]);
 
   const handleExportPDF = useCallback(async () => {
+    if (!scopeSummary.indicators) return;
     setIsExporting(true);
     try {
       await exportStockToPDF(filterDtoBase, scopeSummary.indicators);
@@ -177,7 +180,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
         <Popover open={exportOpen} onOpenChange={setExportOpen}>
           <PopoverTrigger asChild>
             <Button
-              disabled={isExporting}
+              disabled={isExporting || !scopeSummary.indicators}
               className="gap-2 whitespace-nowrap bg-primary hover:bg-primary/90 text-white px-5"
             >
               <LiaFileDownloadSolid className="size-5" />
@@ -188,7 +191,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
             <Button
               variant="ghost"
               onClick={handleExportExcel}
-              disabled={isExporting}
+              disabled={isExporting || !scopeSummary.indicators}
               className="flex w-full items-center justify-start gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
             >
               <LiaFileExcelSolid className="size-5 text-emerald-600" />
@@ -197,7 +200,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
             <Button
               variant="ghost"
               onClick={handleExportPDF}
-              disabled={isExporting}
+              disabled={isExporting || !scopeSummary.indicators}
               className="flex w-full items-center justify-start gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
             >
               <LiaFilePdfSolid className="size-5 text-red-600" />
@@ -220,7 +223,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
               inputClassName="pr-10 bg-white"
             />
           </div>
-          {scopeSummary.indicators.outOfStock && (
+          {scopeSummary.indicators?.outOfStock && (
             <label className="flex min-h-10 w-full shrink-0 items-center gap-2 text-sm font-medium text-gray-700 md:w-auto">
               <FormSwitch
                 checked={outOfStockOnly}
@@ -283,7 +286,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
         <SummaryCards items={scopeSummary.items} />
       ) : null}
 
-      {isLoading ? (
+      {isLoading || !indicators ? (
         <StockListSkeleton count={pageSize} />
       ) : isError ? (
         <div className="flex flex-col items-center justify-center py-20 text-gray-400">
@@ -324,7 +327,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
               product={product}
               filterColor={filters.color}
               filterSize={filters.size}
-              indicators={scopeSummary.indicators}
+              indicators={indicators}
             />
           ))}
         </div>

@@ -155,7 +155,7 @@ export function ProductStockTable({
       indicators
     );
 
-  const renderDesktopCell = (view: StockCellView, color: string, size: string) => {
+  const renderGridCell = (view: StockCellView, color: string, size: string) => {
     if (view.kind === 'hidden') return null;
     if (view.kind === 'missing') return <StockCellValue view={view} />;
     const { stock } = view;
@@ -331,7 +331,7 @@ export function ProductStockTable({
                         key={color}
                         className="px-4 py-3 border-l border-gray-200 last:border-l-0"
                       >
-                        {renderDesktopCell(
+                        {renderGridCell(
                           displayCell(variant.stocks[color], indicators),
                           color,
                           variant.size

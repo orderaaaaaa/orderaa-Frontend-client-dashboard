@@ -44,7 +44,7 @@ function endOfDayIsoOrUndefined(date: Date | null): string | undefined {
 
 export function useStockFilters(
   scope: StockScope,
-  indicators: StockIndicators
+  indicators: StockIndicators | null
 ) {
   const [filters, setFilters] = useState<StockFilters>(INITIAL_FILTERS);
   const [outOfStockRequested, setOutOfStockOnly] = useState(false);
@@ -146,7 +146,7 @@ export function useStockFilters(
       page,
       limit: pageSize,
     },
-    { enabled: isScopeReadable }
+    { enabled: isScopeReadable && indicators !== null }
   );
 
   const filterOptionsQuery = useStockFilterOptions();

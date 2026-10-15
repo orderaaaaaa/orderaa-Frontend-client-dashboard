@@ -15,7 +15,7 @@ import { STOCK_SCOPE_KINDS } from '../constants';
 import type { SummaryCardItem } from '../components/SummaryCards';
 import {
   ALL_STOCK_INDICATORS,
-  indicatorsFromFlags,
+  resolveIndicators,
   type StockIndicators,
 } from '../utils/stockIndicators';
 import type { StockScope } from '../types';
@@ -25,7 +25,7 @@ interface StockScopeSummary {
   notFound: boolean;
   items: SummaryCardItem[] | null;
   isLoading: boolean;
-  indicators: StockIndicators;
+  indicators: StockIndicators | null;
 }
 
 function presentCards(
@@ -57,7 +57,10 @@ export function useStockScopeSummary(scope: StockScope): StockScopeSummary {
       name: card?.name ?? null,
       notFound: false,
       isLoading: physicalSummary.isLoading,
-      indicators: indicatorsFromFlags(card),
+      indicators: resolveIndicators(
+        card,
+        physicalSummary.isSuccess || physicalSummary.isError
+      ),
       items: card
         ? presentCards([
             {
@@ -102,7 +105,11 @@ export function useStockScopeSummary(scope: StockScope): StockScopeSummary {
       name: virtualWarehouse.data?.name ?? card?.name ?? null,
       notFound: !canReadVirtual || detailStatus === 404,
       isLoading: virtualSummary.isLoading || virtualWarehouse.isLoading,
-      indicators: indicatorsFromFlags(virtualWarehouse.data ?? card),
+      indicators: resolveIndicators(
+        card ?? virtualWarehouse.data,
+        (virtualSummary.isSuccess || virtualSummary.isError || !canReadVirtual) &&
+          (virtualWarehouse.isSuccess || virtualWarehouse.isError || !canReadVirtual)
+      ),
       items: card
         ? presentCards([
             {
