@@ -140,8 +140,8 @@ export function ProductStockTable({
             }}
           />
         </div>
-        <div>
-          <h3 className="text-base font-bold text-gray-900">{product.name}</h3>
+        <div className="min-w-0">
+          <h3 className="break-words text-base font-bold text-gray-900">{product.name}</h3>
           {/* <p className="text-sm text-gray-400">SKU: {product.sku}</p> */}
         </div>
       </div>
@@ -247,8 +247,8 @@ export function ProductStockTable({
             ) : (
               <>
                 {visibleVariants.map((variant) => (
-                  <TableRow key={variant.size} className="group hover:bg-gray-50/50">
-                    <TableCell className="sticky start-0 z-[1] bg-white group-hover:bg-gray-50 px-4 py-3 text-center text-sm font-semibold text-gray-800 border-l border-gray-200 last:border-l-0">
+                  <TableRow key={variant.size} className="group hover:bg-gray-50">
+                    <TableCell className="sticky start-0 z-[1] bg-white group-hover:bg-gray-50 transition-colors px-4 py-3 text-center text-sm font-semibold text-gray-800 border-l border-gray-200 last:border-l-0">
                       {variant.size}
                     </TableCell>
                     {visibleColors.map((color) => {

@@ -235,7 +235,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
                 ? `فلاتر متقدمة (${activeFilterCount})`
                 : 'فلاتر متقدمة'
             }
-            className="h-10 w-full md:w-auto min-w-10 sm:h-9 rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm px-3 sm:px-5 relative"
+            className="h-10 w-full md:w-auto min-w-10 md:h-9 rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm px-3 sm:px-5 relative"
             onClick={() => {
               setShowFilters((prev) => {
                 if (prev) setFiltersOverflow(false);
