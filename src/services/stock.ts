@@ -2,15 +2,6 @@ import { useQuery, QueryKey, keepPreviousData } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import http from '@/lib/api/http';
 
-export interface StockAnalysisResponse {
-  totalProducts: number;
-  totalQuantity: number;
-  lowStockCount: number;
-  totalAvailableCount?: number;
-  productsBelowMinStockCount?: number;
-  productsAboveMaxStockCount?: number;
-}
-
 export interface StockAttributeRef {
   id: number;
   name: string;
@@ -113,7 +104,6 @@ export interface StockFilterOptionsResponse {
 }
 
 const STOCK_BASE_URL = '/products/stock';
-const STOCK_ANALYSIS_URL = '/products/stock-analysis';
 const STOCK_FILTER_OPTIONS_URL = '/products/stock/filter-options';
 
 function normalizeStockList(payload: StockListResponse): NormalizedStockList {
@@ -157,19 +147,6 @@ function buildStockParams(filters: StockFiltersDto) {
   if (filters.toDate) params.toDate = filters.toDate;
   return params;
 }
-
-export const useStockAnalysis = (options?: { enabled?: boolean }) => {
-  return useQuery({
-    queryKey: [QUERY_KEYS.STOCK_ANALYSIS] as QueryKey,
-    enabled: options?.enabled ?? true,
-    queryFn: async () => {
-      const response = await http.get<StockAnalysisResponse>(
-        STOCK_ANALYSIS_URL
-      );
-      return response.data;
-    },
-  });
-};
 
 export const useStockProducts = (
   filters: StockFiltersDto,

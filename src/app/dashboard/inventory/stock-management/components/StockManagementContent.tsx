@@ -21,7 +21,7 @@ import {
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { FormSwitch } from '@/components/ui/form-switch';
 import { StockFilters } from './StockFilters';
-import { SummaryCards, buildStockAnalysisCards } from './SummaryCards';
+import { SummaryCards } from './SummaryCards';
 import { StockScopeNotFound } from './StockScopeNotFound';
 import { ProductStockTable } from './ProductStockTable';
 import {
@@ -31,7 +31,7 @@ import {
 import { useStockFilters } from '../hooks/useStockFilters';
 import { useStockScopeSummary } from '../hooks/useStockScopeSummary';
 import { exportStockToExcel, exportStockToPDF } from '../utils/exportStock';
-import { STOCK_MANAGEMENT_BASE_PATH, STOCK_SCOPE_KINDS } from '../constants';
+import { STOCK_MANAGEMENT_BASE_PATH } from '../constants';
 import type { StockScope } from '../types';
 
 interface StockManagementContentProps {
@@ -39,15 +39,11 @@ interface StockManagementContentProps {
 }
 
 export function StockManagementContent({ scope }: StockManagementContentProps) {
-  const isAllScope = scope.kind === STOCK_SCOPE_KINDS.ALL;
   const scopeSummary = useStockScopeSummary(scope);
 
   const {
     filters,
     filteredProducts,
-    totalProducts,
-    totalQuantity,
-    lowStockCount,
     hasActiveFilters,
     setSearchQuery,
     setFilter,
@@ -55,7 +51,6 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
     setFromDate,
     setToDate,
     setTimePeriod,
-    setWarehouseId,
     outOfStockOnly,
     setOutOfStockOnly,
     pageSize,
@@ -67,7 +62,6 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
     hasNextPage,
     hasPreviousPage,
     isFetching,
-    isAnalysisLoading,
     isError,
     error,
     productsError,
@@ -117,15 +111,12 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
     let count = 0;
     if (filters.color) count++;
     if (filters.size) count++;
-    if (isAllScope && filters.warehouseId) count++;
     if (filters.fromDate || filters.toDate) count++;
     if (filters.timePeriod) count++;
     return count;
   }, [
-    isAllScope,
     filters.color,
     filters.size,
-    filters.warehouseId,
     filters.fromDate,
     filters.toDate,
     filters.timePeriod,
@@ -157,15 +148,12 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
 
   const scopeNotFound =
     scopeSummary.notFound ||
-    (!isAllScope &&
-      (productsError as { response?: { status?: number } } | null)?.response
-        ?.status === 404);
+    (productsError as { response?: { status?: number } } | null)?.response
+      ?.status === 404;
 
   if (scopeNotFound) {
     return <StockScopeNotFound />;
   }
-
-  const title = isAllScope ? 'كل المخازن' : (scopeSummary.name ?? '');
 
   return (
     <div
@@ -182,7 +170,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
             كل المخازن
           </Link>
           <h1 className="truncate text-2xl font-bold text-gray-900">
-            {title}
+            {scopeSummary.name ?? ''}
           </h1>
         </div>
         <Popover open={exportOpen} onOpenChange={setExportOpen}>
@@ -280,27 +268,13 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
               onFromDateChange={setFromDate}
               onToDateChange={setToDate}
               onTimePeriodChange={setTimePeriod}
-              onWarehouseChange={setWarehouseId}
-              showWarehouseFilter={isAllScope}
             />
           </div>
         </div>
       </div>
 
 
-      {isAllScope ? (
-        isAnalysisLoading ? (
-          <SummaryCardsSkeleton />
-        ) : (
-          <SummaryCards
-            items={buildStockAnalysisCards({
-              totalProducts,
-              totalQuantity,
-              lowStockCount,
-            })}
-          />
-        )
-      ) : scopeSummary.isLoading ? (
+      {scopeSummary.isLoading ? (
         <SummaryCardsSkeleton />
       ) : scopeSummary.items ? (
         <SummaryCards items={scopeSummary.items} />

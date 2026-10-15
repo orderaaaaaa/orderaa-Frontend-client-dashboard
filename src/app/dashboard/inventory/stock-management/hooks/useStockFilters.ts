@@ -6,7 +6,6 @@ import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { calculateDateRangeFromPeriod, TimePeriod } from '@/utils/dateRangeUtils';
 import {
-  useStockAnalysis,
   useStockProducts,
   useStockFilterOptions,
   type StockFiltersDto,
@@ -19,7 +18,6 @@ const INITIAL_FILTERS: StockFilters = {
   searchQuery: '',
   color: '',
   size: '',
-  warehouseId: '',
   fromDate: null,
   toDate: null,
   timePeriod: '',
@@ -44,8 +42,7 @@ export function useStockFilters(scope: StockScope) {
   const [filters, setFilters] = useState<StockFilters>(INITIAL_FILTERS);
   const [outOfStockOnly, setOutOfStockOnly] = useState(false);
   const scopeKind = scope.kind;
-  const scopeId = scope.kind === STOCK_SCOPE_KINDS.ALL ? null : scope.id;
-  const isAllScope = scopeKind === STOCK_SCOPE_KINDS.ALL;
+  const scopeId = scope.id;
   const canReadVirtual = useHasPermission(
     PERMISSION_CODES.VIRTUAL_WAREHOUSES_READ
   );
@@ -66,10 +63,6 @@ export function useStockFilters(scope: StockScope) {
     },
     []
   );
-
-  const setWarehouseId = useCallback((value: string) => {
-    setFilters((prev) => ({ ...prev, warehouseId: value }));
-  }, []);
 
   const clearFilter = useCallback((key: keyof StockFilters) => {
     setFilters((prev) => ({ ...prev, [key]: INITIAL_FILTERS[key] }));
@@ -108,11 +101,7 @@ export function useStockFilters(scope: StockScope) {
       color: filters.color || undefined,
       size: filters.size || undefined,
       warehouseId:
-        scopeKind === STOCK_SCOPE_KINDS.PHYSICAL
-          ? String(scopeId)
-          : scopeKind === STOCK_SCOPE_KINDS.ALL
-            ? filters.warehouseId || undefined
-            : undefined,
+        scopeKind === STOCK_SCOPE_KINDS.PHYSICAL ? String(scopeId) : undefined,
       virtualWarehouseId:
         scopeKind === STOCK_SCOPE_KINDS.VIRTUAL ? String(scopeId) : undefined,
       outOfStockOnly: outOfStockOnly || undefined,
@@ -123,7 +112,6 @@ export function useStockFilters(scope: StockScope) {
       debouncedSearchQuery,
       filters.color,
       filters.size,
-      filters.warehouseId,
       filters.fromDate,
       filters.toDate,
       scopeKind,
@@ -150,8 +138,6 @@ export function useStockFilters(scope: StockScope) {
     { enabled: isScopeReadable }
   );
 
-  const analysisQuery = useStockAnalysis({ enabled: isAllScope });
-
   const filterOptionsQuery = useStockFilterOptions();
 
   const filteredProducts: StockProduct[] = useMemo(() => {
@@ -161,15 +147,10 @@ export function useStockFilters(scope: StockScope) {
     });
   }, [productsQuery.data, filterDtoBase.outOfStockOnly]);
 
-  const totalProducts = analysisQuery.data?.totalProducts ?? 0;
-  const totalQuantity = analysisQuery.data?.totalAvailableCount ?? 0;
-  const lowStockCount = analysisQuery.data?.productsBelowMinStockCount ?? 0;
-
   const hasActiveFilters =
     !!debouncedSearchQuery.trim() ||
     !!filters.color ||
     !!filters.size ||
-    (isAllScope && !!filters.warehouseId) ||
     outOfStockOnly ||
     !!filters.fromDate ||
     !!filters.toDate;
@@ -177,14 +158,10 @@ export function useStockFilters(scope: StockScope) {
   return {
     filters,
     filteredProducts,
-    totalProducts,
-    totalQuantity,
-    lowStockCount,
     hasActiveFilters,
     setSearchQuery,
     setFilter,
     clearFilter,
-    setWarehouseId,
     setFromDate,
     setToDate,
     setTimePeriod,
@@ -203,9 +180,8 @@ export function useStockFilters(scope: StockScope) {
 
     isLoading: productsQuery.isLoading,
     isFetching: productsQuery.isFetching,
-    isAnalysisLoading: isAllScope && analysisQuery.isLoading,
-    isError: productsQuery.isError || (isAllScope && analysisQuery.isError),
-    error: productsQuery.error || (isAllScope ? analysisQuery.error : null),
+    isError: productsQuery.isError,
+    error: productsQuery.error,
     productsError: productsQuery.error,
 
     colorOptions: filterOptionsQuery.data?.colors ?? [],

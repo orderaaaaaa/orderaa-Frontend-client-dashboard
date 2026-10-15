@@ -1,12 +1,6 @@
 'use client';
 
 import type { IconType } from 'react-icons';
-import {
-  LiaBoxesSolid,
-  LiaCubesSolid,
-  LiaExclamationTriangleSolid,
-} from 'react-icons/lia';
-import { LOW_STOCK_THRESHOLD } from '../constants';
 import { formatStockNumber } from '../utils/formatNumber';
 
 export interface SummaryCardItem {
@@ -16,51 +10,10 @@ export interface SummaryCardItem {
   icon: IconType;
   color: string;
   bgColor: string;
-  suffix?: string;
 }
 
 interface SummaryCardsProps {
   items: SummaryCardItem[];
-}
-
-interface StockAnalysisCardsInput {
-  totalProducts: number;
-  totalQuantity: number;
-  lowStockCount: number;
-}
-
-export function buildStockAnalysisCards({
-  totalProducts,
-  totalQuantity,
-  lowStockCount,
-}: StockAnalysisCardsInput): SummaryCardItem[] {
-  return [
-    {
-      key: 'products',
-      label: 'إجمالي المنتجات',
-      icon: LiaCubesSolid,
-      color: 'text-primary',
-      bgColor: 'bg-primary/10',
-      value: totalProducts,
-    },
-    {
-      key: 'quantity',
-      label: 'الكمية الكلية',
-      icon: LiaBoxesSolid,
-      color: 'text-emerald-600',
-      bgColor: 'bg-emerald-50',
-      value: totalQuantity,
-    },
-    {
-      key: 'lowStock',
-      label: 'مخزون منخفض',
-      icon: LiaExclamationTriangleSolid,
-      color: 'text-red-600',
-      bgColor: 'bg-red-50',
-      value: lowStockCount,
-      suffix: `(<${LOW_STOCK_THRESHOLD})`,
-    },
-  ];
 }
 
 export function SummaryCards({ items }: SummaryCardsProps) {
