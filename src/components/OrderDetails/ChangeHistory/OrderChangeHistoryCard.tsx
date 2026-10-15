@@ -133,10 +133,14 @@ function OrderChangeHistoryCard({ order }: OrderChangeHistoryCardProps) {
       }}
     >
       <AccordionItem value={HISTORY_ITEM} className="font-medium p-4 bg-gray-50 mt-8 rounded-xl border-b-0">
-        <AccordionTrigger className="py-0 text-start">
+        <AccordionTrigger className="py-2 text-start">
           <span className="text-lg text-primary font-bold">سجل التعديلات</span>
         </AccordionTrigger>
-        <AccordionContent forceMount={everOpened ? true : undefined} className="pt-4 pb-0">
+        <AccordionContent
+          forceMount={everOpened || undefined}
+          hidden={open !== HISTORY_ITEM}
+          className="pt-4 pb-0"
+        >
           {everOpened && <OrderChangeHistoryList order={order} onUnavailable={markUnavailable} />}
         </AccordionContent>
       </AccordionItem>

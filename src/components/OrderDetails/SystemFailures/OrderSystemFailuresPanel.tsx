@@ -44,8 +44,8 @@ function PanelCard({
         className="font-medium p-4 bg-gray-50 mt-8 rounded-xl border-b-0"
       >
         <div className="flex flex-wrap items-center gap-2">
-          <div className="min-w-0 flex-1">
-            <AccordionTrigger className="py-0 text-start">
+          <div className="min-w-0 flex-1 basis-full sm:basis-auto">
+            <AccordionTrigger className="py-2 text-start">
               <span className="flex items-center gap-2">
                 <span className="text-lg text-primary font-bold">تنبيهات الطلب</span>
                 {!!unseenTotal && (
@@ -86,6 +86,11 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
   const [open, setOpen] = useState('');
   const [autoDecided, setAutoDecided] = useState(false);
 
+  const handleOpenChange = (value: string) => {
+    setAutoDecided(true);
+    setOpen(value);
+  };
+
   const firstPage = data?.pages[0];
   const unseenTotal = firstPage?.unseenTotal ?? 0;
 
@@ -98,7 +103,7 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
     const status = getApiErrorStatus(error);
     if (status !== undefined && HIDDEN_ERROR_STATUSES.has(status)) return null;
     return (
-      <PanelCard open={open} onOpenChange={setOpen}>
+      <PanelCard open={open} onOpenChange={handleOpenChange}>
         <div className="flex flex-col items-center gap-3 py-4">
           <p className="text-sm text-red-600">تعذر تحميل تنبيهات الطلب</p>
           <Button
@@ -117,7 +122,7 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
 
   if (isLoading || !data) {
     return (
-      <PanelCard open={open} onOpenChange={setOpen}>
+      <PanelCard open={open} onOpenChange={handleOpenChange}>
         <div className="flex flex-col gap-3">
           <Skeleton className="h-20 w-full" />
           <Skeleton className="h-20 w-full" />
@@ -143,7 +148,7 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
     ) : undefined;
 
   return (
-    <PanelCard open={open} onOpenChange={setOpen} unseenTotal={unseenTotal} action={markAllAction}>
+    <PanelCard open={open} onOpenChange={handleOpenChange} unseenTotal={unseenTotal} action={markAllAction}>
       {failures.length === 0 ? (
         <p className="text-sm text-gray-400 text-center py-4">لا توجد تنبيهات لهذا الطلب</p>
       ) : (

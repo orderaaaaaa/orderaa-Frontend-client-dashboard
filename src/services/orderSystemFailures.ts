@@ -53,12 +53,12 @@ export const useMarkSystemFailureSeen = (orderId: number) => {
     },
     onSuccess: (row) => {
       if (!row.seenAt) {
-        toast.info('تكرر هذا العطل مرة أخرى قبل تعليمه، راجع آخر حدوث ثم أعد المحاولة');
+        toast.info('تكرر هذا التنبيه مرة أخرى قبل تعليمه، راجع آخر حدوث ثم أعد المحاولة');
       }
       invalidate();
     },
     onError: (err) => {
-      toast.error(getApiErrorMessage(err, 'تعذر تعليم العطل كمقروء'));
+      toast.error(getApiErrorMessage(err, 'تعذر تعليم التنبيه كمقروء'));
     },
   });
 };
