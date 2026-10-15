@@ -20,12 +20,19 @@ import BaseModal from '@/components/ui/base-modal';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { STOCK_STATUS_CONFIG } from '../constants';
 import { formatStockNumber } from '../utils/formatNumber';
+import {
+  displayCell,
+  sumVisibleQuantity,
+  type StockCellView,
+  type StockIndicators,
+} from '../utils/stockIndicators';
 import type { StockProduct, VariantStock, ProductVariantRow } from '../types';
 
 interface SelectedCell {
   stock: VariantStock;
   color: string;
   size: string;
+  showStatus: boolean;
 }
 
 function StockBadge({ stock }: { stock: VariantStock }) {
@@ -90,16 +97,39 @@ function StockBadge({ stock }: { stock: VariantStock }) {
   );
 }
 
+function StockCellValue({ view }: { view: StockCellView }) {
+  if (view.kind === 'badge') return <StockBadge stock={view.stock} />;
+  if (view.kind === 'plain') {
+    return (
+      <div className="flex items-center justify-center gap-2">
+        <span className="text-sm font-semibold text-gray-800">
+          {formatStockNumber(view.stock.quantity)}
+        </span>
+      </div>
+    );
+  }
+  if (view.kind === 'missing') {
+    return (
+      <div className="flex items-center justify-center">
+        <span className="text-sm text-gray-300">-</span>
+      </div>
+    );
+  }
+  return null;
+}
+
 interface ProductStockTableProps {
   product: StockProduct;
   filterColor?: string;
   filterSize?: string;
+  indicators: StockIndicators;
 }
 
 export function ProductStockTable({
   product,
   filterColor,
   filterSize,
+  indicators,
 }: ProductStockTableProps) {
   const isMobile = useIsMobile();
   const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
@@ -113,17 +143,54 @@ export function ProductStockTable({
     : product.variants;
 
   const columnTotals = visibleColors.map((color) =>
-    visibleVariants.reduce(
-      (sum, variant) => sum + (variant.stocks[color]?.quantity ?? 0),
-      0
+    sumVisibleQuantity(
+      visibleVariants.map((variant) => variant.stocks[color]),
+      indicators
     )
   );
 
   const rowTotal = (variant: ProductVariantRow) =>
-    visibleColors.reduce(
-      (sum, color) => sum + (variant.stocks[color]?.quantity ?? 0),
-      0
+    sumVisibleQuantity(
+      visibleColors.map((color) => variant.stocks[color]),
+      indicators
     );
+
+  const renderGridCell = (view: StockCellView, color: string, size: string) => {
+    if (view.kind === 'hidden') return null;
+    if (view.kind === 'missing') return <StockCellValue view={view} />;
+    const { stock } = view;
+    const showStatus = view.kind === 'badge';
+
+    if (isMobile) {
+      return (
+        <button
+          type="button"
+          className="w-full cursor-pointer"
+          onClick={() => setSelectedCell({ stock, color, size, showStatus })}
+        >
+          <StockCellValue view={view} />
+        </button>
+      );
+    }
+
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="cursor-default">
+            <StockCellValue view={view} />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="top">
+          <div className="flex flex-row items-center gap-2 font-semibold whitespace-nowrap">
+            <span>{formatStockNumber(stock.quantity)}</span>
+            <span>{color}</span>
+            <span>{size}</span>
+          </div>
+          <TooltipArrow />
+        </TooltipContent>
+      </Tooltip>
+    );
+  };
 
   const grandTotal = columnTotals.reduce((sum, total) => sum + total, 0);
 
@@ -163,18 +230,28 @@ export function ProductStockTable({
                 </div>
                 <div className="flex flex-col">
                   {visibleColors.map((color) => {
-                    const stock = variant.stocks[color];
+                    const view = displayCell(variant.stocks[color], indicators);
+                    const label = (
+                      <span className="min-w-0 break-words text-sm text-gray-600">{color}</span>
+                    );
 
-                    if (stock) {
+                    if (view.kind === 'badge' || view.kind === 'plain') {
                       return (
                         <button
                           key={color}
                           type="button"
                           className="flex min-h-10 w-full items-center justify-between gap-3 text-start"
-                          onClick={() => setSelectedCell({ stock, color, size: variant.size })}
+                          onClick={() =>
+                            setSelectedCell({
+                              stock: view.stock,
+                              color,
+                              size: variant.size,
+                              showStatus: view.kind === 'badge',
+                            })
+                          }
                         >
-                          <span className="min-w-0 break-words text-sm text-gray-600">{color}</span>
-                          <StockBadge stock={stock} />
+                          {label}
+                          <StockCellValue view={view} />
                         </button>
                       );
                     }
@@ -184,10 +261,8 @@ export function ProductStockTable({
                         key={color}
                         className="flex min-h-10 items-center justify-between gap-3"
                       >
-                        <span className="min-w-0 break-words text-sm text-gray-600">{color}</span>
-                        {stock === null ? null : (
-                          <span className="text-sm text-gray-300">-</span>
-                        )}
+                        {label}
+                        <StockCellValue view={view} />
                       </div>
                     );
                   })}
@@ -251,50 +326,18 @@ export function ProductStockTable({
                     <TableCell className="sticky start-0 z-[1] bg-white group-hover:bg-gray-50 transition-colors px-4 py-3 text-center text-sm font-semibold text-gray-800 border-l border-gray-200 last:border-l-0">
                       {variant.size}
                     </TableCell>
-                    {visibleColors.map((color) => {
-                      const stock = variant.stocks[color];
-
-                      return (
-                        <TableCell
-                          key={color}
-                          className="px-4 py-3 border-l border-gray-200 last:border-l-0"
-                        >
-                          {stock ? (
-                            isMobile ? (
-                              <button
-                                type="button"
-                                className="w-full cursor-pointer"
-                                onClick={() =>
-                                  setSelectedCell({ stock, color, size: variant.size })
-                                }
-                              >
-                                <StockBadge stock={stock} />
-                              </button>
-                            ) : (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="cursor-default">
-                                    <StockBadge stock={stock} />
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent side="top">
-                                  <div className="flex flex-row items-center gap-2 font-semibold whitespace-nowrap">
-                                    <span>{formatStockNumber(stock.quantity)}</span>
-                                    <span>{color}</span>
-                                    <span>{variant.size}</span>
-                                  </div>
-                                  <TooltipArrow />
-                                </TooltipContent>
-                              </Tooltip>
-                            )
-                          ) : stock === null ? null : (
-                            <span className="block text-center text-sm text-gray-300">
-                              -
-                            </span>
-                          )}
-                        </TableCell>
-                      );
-                    })}
+                    {visibleColors.map((color) => (
+                      <TableCell
+                        key={color}
+                        className="px-4 py-3 border-l border-gray-200 last:border-l-0"
+                      >
+                        {renderGridCell(
+                          displayCell(variant.stocks[color], indicators),
+                          color,
+                          variant.size
+                        )}
+                      </TableCell>
+                    ))}
                     <TableCell className="px-4 py-3 text-center text-sm font-bold text-gray-800 border-l border-gray-200 last:border-l-0">
                       {formatStockNumber(rowTotal(variant))}
                     </TableCell>
@@ -346,24 +389,26 @@ export function ProductStockTable({
               <span className="text-gray-500">الكمية</span>
               <span className="font-semibold text-gray-800">{formatStockNumber(selectedCell.stock.quantity)}</span>
             </div>
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-gray-500">الحالة</span>
-              <span
-                className={clsx(
-                  'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
-                  STOCK_STATUS_CONFIG[selectedCell.stock.status].bgColor,
-                  STOCK_STATUS_CONFIG[selectedCell.stock.status].color
-                )}
-              >
+            {selectedCell.showStatus && (
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-gray-500">الحالة</span>
                 <span
                   className={clsx(
-                    'size-1.5 rounded-full',
-                    STOCK_STATUS_CONFIG[selectedCell.stock.status].dotColor
+                    'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
+                    STOCK_STATUS_CONFIG[selectedCell.stock.status].bgColor,
+                    STOCK_STATUS_CONFIG[selectedCell.stock.status].color
                   )}
-                />
-                {STOCK_STATUS_CONFIG[selectedCell.stock.status].label}
-              </span>
-            </div>
+                >
+                  <span
+                    className={clsx(
+                      'size-1.5 rounded-full',
+                      STOCK_STATUS_CONFIG[selectedCell.stock.status].dotColor
+                    )}
+                  />
+                  {STOCK_STATUS_CONFIG[selectedCell.stock.status].label}
+                </span>
+              </div>
+            )}
           </div>
         )}
       </BaseModal>

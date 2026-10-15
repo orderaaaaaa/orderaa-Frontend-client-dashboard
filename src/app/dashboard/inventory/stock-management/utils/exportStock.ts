@@ -6,9 +6,15 @@ import {
   fetchAllStockProducts,
   type StockFiltersDto,
 } from '@/services/stock';
-import type { StockProduct, StockStatus } from '../types';
+import type { StockProduct, StockStatus, VariantCell } from '../types';
 import { STOCK_STATUS_CONFIG } from '../constants';
 import { apiListToStockProducts } from './transformStock';
+import {
+  displayCell,
+  sumVisibleQuantity,
+  type StockCellView,
+  type StockIndicators,
+} from './stockIndicators';
 
 async function loadAllProducts(
   filters: Omit<StockFiltersDto, 'page' | 'limit'>
@@ -32,24 +38,43 @@ interface FlatStockRow {
   SKU: string;
   المقاس: string;
   اللون: string;
-  الكمية: number;
+  الكمية: number | string;
   الحالة: string;
 }
 
-function flattenProducts(products: StockProduct[]): FlatStockRow[] {
+function flattenCell(view: StockCellView): {
+  quantity: number | string;
+  status: string;
+} {
+  if (view.kind === 'missing') return { quantity: '-', status: '' };
+  if (view.kind === 'hidden') return { quantity: '', status: '' };
+  return {
+    quantity: view.stock.quantity,
+    status:
+      view.kind === 'badge' ? STOCK_STATUS_CONFIG[view.stock.status].label : '',
+  };
+}
+
+function flattenProducts(
+  products: StockProduct[],
+  indicators: StockIndicators
+): FlatStockRow[] {
   const rows: FlatStockRow[] = [];
   for (const product of products) {
     for (const variant of product.variants) {
       for (const color of product.colors) {
-        const stock = variant.stocks[color];
-        if (!stock) continue;
+        const cell = variant.stocks[color];
+        if (cell === null) continue;
+        const { quantity, status } = flattenCell(
+          displayCell(cell, indicators)
+        );
         rows.push({
           'اسم المنتج': product.name,
           SKU: product.sku,
           المقاس: variant.size,
           اللون: color,
-          الكمية: stock.quantity,
-          الحالة: STOCK_STATUS_CONFIG[stock.status].label,
+          الكمية: quantity,
+          الحالة: status,
         });
       }
     }
@@ -58,7 +83,8 @@ function flattenProducts(products: StockProduct[]): FlatStockRow[] {
 }
 
 export async function exportStockToExcel(
-  filters: Omit<StockFiltersDto, 'page' | 'limit'>
+  filters: Omit<StockFiltersDto, 'page' | 'limit'>,
+  indicators: StockIndicators
 ) {
   const products = await loadAllProducts(filters);
   if (products.length === 0) {
@@ -66,7 +92,7 @@ export async function exportStockToExcel(
     return;
   }
 
-  const rows = flattenProducts(products);
+  const rows = flattenProducts(products, indicators);
   if (rows.length === 0) {
     toast.error('لا توجد بيانات لتصديرها');
     return;
@@ -113,7 +139,21 @@ const PDF_BADGE_COLORS: Record<StockStatus, string> = {
   shortage: '#dc2626',
 };
 
-function buildProductsHtml(products: StockProduct[]): string {
+function pdfCellHtml(cell: VariantCell | undefined, indicators: StockIndicators): string {
+  if (cell === null || cell === undefined) return '<td></td>';
+  const view = displayCell(cell, indicators);
+  if (view.kind === 'missing') return '<td>-</td>';
+  if (view.kind === 'hidden') return '<td></td>';
+  if (view.kind === 'plain') return `<td>${view.stock.quantity}</td>`;
+  const config = STOCK_STATUS_CONFIG[view.stock.status];
+  const badgeColor = PDF_BADGE_COLORS[view.stock.status];
+  return `<td>${view.stock.quantity} <span class="badge" style="color:${badgeColor}">(${escapeHtml(config.label)})</span></td>`;
+}
+
+function buildProductsHtml(
+  products: StockProduct[],
+  indicators: StockIndicators
+): string {
   return products
     .map((product) => {
       const headerCells = ['المقاس', ...product.colors]
@@ -123,14 +163,7 @@ function buildProductsHtml(products: StockProduct[]): string {
       const bodyRows = product.variants
         .map((variant, i) => {
           const cells = product.colors
-            .map((color) => {
-              const stock = variant.stocks[color];
-              if (stock === null) return '<td></td>';
-              if (!stock) return '<td>-</td>';
-              const config = STOCK_STATUS_CONFIG[stock.status];
-              const badgeColor = PDF_BADGE_COLORS[stock.status];
-              return `<td>${stock.quantity} <span class="badge" style="color:${badgeColor}">(${escapeHtml(config.label)})</span></td>`;
-            })
+            .map((color) => pdfCellHtml(variant.stocks[color], indicators))
             .join('');
           return `<tr class="${i % 2 === 0 ? 'row-even' : 'row-odd'}"><td class="size-cell">${escapeHtml(variant.size)}</td>${cells}</tr>`;
         })
@@ -138,9 +171,9 @@ function buildProductsHtml(products: StockProduct[]): string {
 
       const totalCells = product.colors
         .map((color) => {
-          const total = product.variants.reduce(
-            (sum, v) => sum + (v.stocks[color]?.quantity ?? 0),
-            0
+          const total = sumVisibleQuantity(
+            product.variants.map((v) => v.stocks[color]),
+            indicators
           );
           return `<td class="total-cell">${total}</td>`;
         })
@@ -299,7 +332,8 @@ function chunkProducts<T>(items: T[], size: number): T[][] {
 }
 
 export async function exportStockToPDF(
-  filters: Omit<StockFiltersDto, 'page' | 'limit'>
+  filters: Omit<StockFiltersDto, 'page' | 'limit'>,
+  indicators: StockIndicators
 ) {
   const products = await loadAllProducts(filters);
   if (products.length === 0) {
@@ -333,7 +367,8 @@ export async function exportStockToPDF(
     for (let i = 0; i < chunks.length; i++) {
       const isFirst = i === 0;
       const bodyHtml =
-        (isFirst ? buildHeaderHtml() : '') + buildProductsHtml(chunks[i]);
+        (isFirst ? buildHeaderHtml() : '') +
+        buildProductsHtml(chunks[i], indicators);
       const captured = await captureChunkAsImage(iframe, bodyHtml);
 
       if (!captured) {

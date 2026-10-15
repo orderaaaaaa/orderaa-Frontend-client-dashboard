@@ -8,7 +8,7 @@ import type {
   ProductVariantRow,
   StockProduct,
   StockStatus,
-  VariantStock,
+  VariantCell,
 } from '../types';
 
 const SIZE_ATTR_PATTERN = /مقاس|size/i;
@@ -103,13 +103,11 @@ function buildVariantRows(
   const colors =
     colorAxis.names.length > 0 ? [...colorAxis.names] : [PLACEHOLDER_COLOR];
 
-  const stocksBySize = new Map<string, Record<string, VariantStock | null>>();
+  const stocksBySize = new Map<string, Record<string, VariantCell>>();
   for (const size of sizes) {
-    const row: Record<string, VariantStock | null> = {};
+    const row: Record<string, VariantCell> = {};
     for (const color of colors) {
-      row[color] = options.onlyReturnedVariants
-        ? null
-        : { quantity: 0, status: 'out_of_stock' };
+      row[color] = options.onlyReturnedVariants ? null : 'missing';
     }
     stocksBySize.set(size, row);
   }

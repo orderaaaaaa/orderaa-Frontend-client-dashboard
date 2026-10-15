@@ -12,6 +12,10 @@ import {
 } from '@/services/stock';
 import { apiListToStockProducts } from '../utils/transformStock';
 import { STOCK_SCOPE_KINDS } from '../constants';
+import {
+  effectiveOutOfStockOnly,
+  type StockIndicators,
+} from '../utils/stockIndicators';
 import type { StockFilters, StockProduct, StockScope } from '../types';
 
 const INITIAL_FILTERS: StockFilters = {
@@ -38,9 +42,16 @@ function endOfDayIsoOrUndefined(date: Date | null): string | undefined {
   return end.toISOString();
 }
 
-export function useStockFilters(scope: StockScope) {
+export function useStockFilters(
+  scope: StockScope,
+  indicators: StockIndicators | null
+) {
   const [filters, setFilters] = useState<StockFilters>(INITIAL_FILTERS);
-  const [outOfStockOnly, setOutOfStockOnly] = useState(false);
+  const [outOfStockRequested, setOutOfStockOnly] = useState(false);
+  const outOfStockOnly = effectiveOutOfStockOnly(
+    outOfStockRequested,
+    indicators
+  );
   const scopeKind = scope.kind;
   const scopeId = scope.id;
   const canReadVirtual = useHasPermission(
@@ -135,7 +146,7 @@ export function useStockFilters(scope: StockScope) {
       page,
       limit: pageSize,
     },
-    { enabled: isScopeReadable }
+    { enabled: isScopeReadable && indicators !== null }
   );
 
   const filterOptionsQuery = useStockFilterOptions();

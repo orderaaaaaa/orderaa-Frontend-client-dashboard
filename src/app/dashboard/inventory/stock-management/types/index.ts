@@ -11,9 +11,11 @@ export interface VariantStock {
   status: StockStatus;
 }
 
+export type VariantCell = VariantStock | 'missing' | null;
+
 export interface ProductVariantRow {
   size: string;
-  stocks: Record<string, VariantStock | null>;
+  stocks: Record<string, VariantCell>;
 }
 
 export interface StockProduct {
