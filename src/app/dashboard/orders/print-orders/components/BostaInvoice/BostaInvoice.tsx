@@ -85,7 +85,6 @@ export function BostaInvoice({ data, storeInfo, language }: InvoiceProps) {
         </div>
       )}
 
-      {/* 1. Top Barcode - centered with wide side clearance so thermal printers don't clip edges */}
       <div className="border-b-2 border-black py-1 px-8 flex justify-center">
         <div ref={fullWidthBarcode} className="w-[76%] max-w-full">
           <Barcode

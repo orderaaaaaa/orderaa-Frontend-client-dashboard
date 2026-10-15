@@ -28,6 +28,7 @@ import { buildWebhookUrl, generateWebhookToken } from '../utils/webhookToken';
 import StockSyncSection from './StockSyncSection';
 import LightfunnelsApiSection from './LightfunnelsApiSection';
 import { useLightfunnelsConnections } from '../hooks/useLightfunnelsConnections';
+import { CREDENTIAL_AUTOCOMPLETE } from '../constants/autofill';
 
 const AUTOMATIC_WEBHOOK_NOTE =
   'يتم استقبال الطلبات تلقائياً. إن كان رابط يدوي قديم ما زال مضافاً في Lightfunnels فهو يعمل أيضاً ولن تتكرر الطلبات، ويمكنك حذفه';
@@ -414,7 +415,7 @@ const EditIntegrationModal = ({
                   name="webhookApiKey"
                   label="المفتاح السري الجديد (Secret) - اتركه فارغاً إن لم ترد تغييره"
                   placeholder="أدخل مفتاح Webhook الجديد..."
-                  autoComplete="off"
+                  autoComplete={CREDENTIAL_AUTOCOMPLETE.webhookSecret}
                 />
 
                 <CopyField
@@ -452,7 +453,7 @@ const EditIntegrationModal = ({
                 name="newWebhookSecret"
                 label="المفتاح السري (Secret)"
                 placeholder="أدخل مفتاح Webhook..."
-                autoComplete="off"
+                autoComplete={CREDENTIAL_AUTOCOMPLETE.webhookSecret}
               />
             )}
           </div>
@@ -512,7 +513,7 @@ const EditIntegrationModal = ({
               name="apiKeyValue"
               label="المفتاح السري الجديد للتطبيق (Client Secret) - اتركه فارغاً إن لم ترد تغييره"
               placeholder="أدخل Client Secret الجديد..."
-              autoComplete="new-password"
+              autoComplete={CREDENTIAL_AUTOCOMPLETE.appSecret}
             />
 
             <CopyField
@@ -552,7 +553,7 @@ const EditIntegrationModal = ({
               name="newApiKey"
               label="المفتاح السري للتطبيق (Client Secret)"
               placeholder="أدخل Client Secret..."
-              autoComplete="new-password"
+              autoComplete={CREDENTIAL_AUTOCOMPLETE.appSecret}
             />
           </div>
         ) : (

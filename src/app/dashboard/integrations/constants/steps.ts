@@ -1,3 +1,6 @@
+export type GuideSegment = string | { ui: string } | { value: string };
+export type GuideStep = string | GuideSegment[];
+
 export const webhookSteps = [
   'قم بتسجيل الدخول إلى حسابك في منصة Easy Orders من خلال موقعهم الرسمي.',
   'انتقل إلى الاعدادات (Settings).',
@@ -42,26 +45,141 @@ export const shopifyIntegrationSteps = [
   'الصق المفتاح في الحقل أدناه لإتمام الربط.',
 ];
 
-export const lightfunnelsWebhookSteps = [
-  'قم بتسجيل الدخول إلى لوحة تحكم Lightfunnels.',
-  'انتقل إلى الإعدادات (Settings) ثم اختر Webhooks.',
-  'اضغط على "Add new Webhook" واختر نوع الحدث "order/created".',
-  'انسخ الرابط أدناه (يحتوي على رمز الحماية) وألصقه في حقل URL ثم احفظ الـ Webhook.',
-  'أضف Webhook ثانياً بنوع الحدث "order/confirmed" وبنفس الرابط ثم احفظه.',
-  'اضغط "حفظ" هنا لإتمام الربط.',
+export const lightfunnelsWebhookSteps: GuideStep[] = [
+  [
+    'سجّل الدخول إلى لوحة تحكم متجرك في Lightfunnels على ',
+    { value: 'app.lightfunnels.com' },
+    '.',
+  ],
+  [
+    'افتح ',
+    { ui: 'Settings' },
+    ' ثم ',
+    { ui: 'Webhooks' },
+    ' واضغط ',
+    { ui: 'Add new Webhook' },
+    '.',
+  ],
+  [
+    'اختر نوع الحدث ',
+    { value: 'order/created' },
+    '، ثم انسخ ',
+    { ui: 'رابط الاستقبال (Webhook URL)' },
+    ' من الأسفل (يتضمن رمز الحماية) والصقه في حقل ',
+    { ui: 'URL' },
+    ' واحفظ الـ Webhook.',
+  ],
+  [
+    'أضف Webhook ثانياً بنوع الحدث ',
+    { value: 'order/confirmed' },
+    ' وبنفس الرابط ثم احفظه.',
+  ],
+  ['اضغط ', { ui: 'التالي' }, ' هنا لإتمام الربط.'],
 ];
 
-export const lightfunnelsApiSteps = [
-  'سجّل الدخول إلى partners.lightfunnels.com وافتح صفحة Apps ثم اضغط زر «Create a new app» أعلى اليمين لفتح نافذة إنشاء التطبيق',
-  'في النافذة املأ App Name وApp URL، والصق رابط إعادة التوجيه (Redirect URI) من الأسفل في حقل Redirect URIs، وأدخل App Cookies Prefix (حتى ٥ أحرف مثل ord)، وفعّل خيار External app، ثم اضغط «Create app»',
-  'ادخل إلى التطبيق الذي أنشأته ثم انتقل إلى تبويب Configurations',
-  'انسخ Client ID وClient secret من قسم App Credentials (أيقونة النسخ) والصقهما في الحقول أدناه',
-  'اضغط «ربط Lightfunnels» — ستُحوَّل إلى شاشة تثبيت التطبيق في Lightfunnels وستجد صلاحيتي products وorders محددتين مسبقاً، اضغط «Install app» دون تغيير أي شيء',
+export const lightfunnelsApiSteps: GuideStep[] = [
+  [
+    'سجّل الدخول إلى ',
+    { value: 'partners.lightfunnels.com' },
+    '، وافتح صفحة ',
+    { ui: 'Apps' },
+    ' من القائمة الجانبية، ثم اضغط ',
+    { ui: 'Create a new app' },
+    ' أعلى الصفحة.',
+  ],
+  [
+    'في نافذة إنشاء التطبيق اكتب اسماً لتطبيقك في حقل ',
+    { ui: 'App Name' },
+    '، وأدخل ',
+    { value: 'https://orderaa.com' },
+    ' في حقل ',
+    { ui: 'App URL' },
+    '.',
+  ],
+  [
+    'انسخ ',
+    { ui: 'رابط إعادة التوجيه (Redirect URI)' },
+    ' من الأسفل والصقه في حقل ',
+    { ui: 'Redirect URIs' },
+    '.',
+  ],
+  [
+    'فعّل مفتاح ',
+    { ui: 'External app' },
+    '، واكتب في حقل ',
+    { ui: 'App Cookies Prefix' },
+    ' بادئة من حروف إنجليزية فقط بحد أقصى ٥ أحرف (مثل ',
+    { value: 'ord' },
+    ')، ثم اضغط ',
+    { ui: 'Create app' },
+    '.',
+  ],
+  [
+    'افتح التطبيق الذي أنشأته وانتقل إلى تبويب ',
+    { ui: 'Configurations' },
+    '، ومن قسم ',
+    { ui: 'App Credentials' },
+    ' انسخ ',
+    { ui: 'Client ID' },
+    ' و',
+    { ui: 'Client secret' },
+    ' بأيقونة النسخ بجانب كل منهما.',
+  ],
+  [
+    'الصق ',
+    { ui: 'Client ID' },
+    ' في حقل ',
+    { ui: 'معرّف التطبيق (Client ID)' },
+    '، و',
+    { ui: 'Client secret' },
+    ' في حقل ',
+    { ui: 'المفتاح السري للتطبيق (Client Secret)' },
+    ' بالأسفل.',
+  ],
+  [
+    'اضغط ',
+    { ui: 'ربط Lightfunnels' },
+    '، وستنتقل إلى شاشة التثبيت في Lightfunnels حيث تكون صلاحيتا ',
+    { value: 'products' },
+    ' و',
+    { value: 'orders' },
+    ' محددتين مسبقاً؛ اضغط ',
+    { ui: 'Install app' },
+    ' دون تغيير أي شيء.',
+  ],
 ];
 
-export const lightfunnelsAutomaticSteps = [
-  'اختر «تلقائي» في خطوة إعدادات Webhook ثم اضغط «التالي»',
-  'سجّل الدخول إلى partners.lightfunnels.com وأنشئ تطبيقاً من النافذة المنبثقة كما في خطوات ربط الـ API',
-  'انسخ Client ID وClient secret من تبويب Configurations داخل تطبيقك وأدخلهما في الخطوة التالية، ثم في شاشة التثبيت اضغط «Install app» دون تغيير أي شيء (صلاحيتا products وorders محددتان مسبقاً)',
-  'بعد التثبيت نسجّل الـ Webhooks في Lightfunnels تلقائياً، ولا تحتاج إلى نسخ أي رابط',
+export const lightfunnelsAutomaticSteps: GuideStep[] = [
+  [
+    'اختر ',
+    { ui: 'تلقائي' },
+    ' في خطوة إعدادات الـ Webhook ثم اضغط ',
+    { ui: 'التالي' },
+    '.',
+  ],
+  [
+    'أنشئ تطبيقاً في ',
+    { value: 'partners.lightfunnels.com' },
+    ' وانسخ ',
+    { ui: 'Client ID' },
+    ' و',
+    { ui: 'Client secret' },
+    ' من تبويب ',
+    { ui: 'Configurations' },
+    ' كما في خطوات ربط الـ API.',
+  ],
+  [
+    'أدخلهما في الخطوة التالية واضغط ',
+    { ui: 'ربط Lightfunnels' },
+    '، ثم اضغط ',
+    { ui: 'Install app' },
+    ' في شاشة التثبيت دون تغيير الصلاحيات.',
+  ],
+  [
+    'بعد التثبيت نسجّل Webhooks الطلبات (',
+    { value: 'order/created' },
+    ' و',
+    { value: 'order/confirmed' },
+    ') في Lightfunnels تلقائياً، ولا تحتاج إلى نسخ أي رابط.',
+  ],
 ];

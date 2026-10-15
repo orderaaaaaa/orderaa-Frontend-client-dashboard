@@ -18,6 +18,9 @@ const MODE_HELPER_TEXT: Record<LightfunnelsWebhookMode, string> = {
 
 export const LIGHTFUNNELS_SWITCHING_TEXT = 'جاري التبديل...';
 
+const AUTOMATIC_UNSUPPORTED_WARNING =
+  'تنبيه: Lightfunnels لا يدعم حالياً تسجيل الـ Webhook تلقائياً، لذا استخدم الطريقة اليدوية.';
+
 const ORDERS_CONSENT_HINT =
   'سيطلب منك Lightfunnels الموافقة على صلاحية orders مرة واحدة قبل التسجيل التلقائي';
 
@@ -57,6 +60,9 @@ export default function LightfunnelsWebhookModeSelect({
           disabledTooltip={disabledTooltip}
         />
       </div>
+      <p className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800">
+        {AUTOMATIC_UNSUPPORTED_WARNING}
+      </p>
       <p className="text-xs text-gray-500">{MODE_HELPER_TEXT[value]}</p>
       {showOrdersConsentHint && value === LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC && (
         <p className="text-xs text-gray-500">{ORDERS_CONSENT_HINT}</p>

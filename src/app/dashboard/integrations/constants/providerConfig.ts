@@ -7,6 +7,7 @@ import {
   lightfunnelsWebhookSteps,
   lightfunnelsApiSteps,
   lightfunnelsAutomaticSteps,
+  type GuideStep,
 } from './steps';
 
 export const PROVIDER_CONNECTION_MODE = {
@@ -30,9 +31,9 @@ export interface ProviderModalConfig {
   provider: IntegrationProvider;
   modalTitle: string;
   modalDescription: string;
-  webhookSteps: string[];
-  automaticWebhookSteps?: string[];
-  apiSteps: string[];
+  webhookSteps: GuideStep[];
+  automaticWebhookSteps?: GuideStep[];
+  apiSteps: GuideStep[];
   videoUrl?: string;
   metadataFields?: MetadataField[];
   connectionMode?: ProviderConnectionMode;

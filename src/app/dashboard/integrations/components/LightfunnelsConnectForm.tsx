@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import CopyField from './CopyField';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { CREDENTIAL_AUTOCOMPLETE } from '../constants/autofill';
 import {
   useLightfunnelsConnections,
   useLightfunnelsRedirectUri,
@@ -136,7 +137,7 @@ export default function LightfunnelsConnectForm({
           name="clientId"
           label="معرّف التطبيق (Client ID) *"
           placeholder="أدخل Client ID..."
-          autoComplete="off"
+          autoComplete={CREDENTIAL_AUTOCOMPLETE.identifier}
           error={form.formState.errors.clientId?.message}
           disabled={isBusy}
           onKeyDown={handleEnterKey}
@@ -145,7 +146,7 @@ export default function LightfunnelsConnectForm({
           register={form.register}
           name="clientSecret"
           type="password"
-          autoComplete="new-password"
+          autoComplete={CREDENTIAL_AUTOCOMPLETE.appSecret}
           label={
             secretRequired
               ? 'المفتاح السري للتطبيق (Client Secret) *'

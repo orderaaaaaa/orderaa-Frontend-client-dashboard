@@ -43,9 +43,11 @@ import {
   usesGeneratedWebhookToken,
 } from '../constants/providerConfig';
 import { buildWebhookUrl, generateWebhookToken } from '../utils/webhookToken';
+import { CREDENTIAL_AUTOCOMPLETE } from '../constants/autofill';
 import { useLightfunnelsConnections } from '../hooks/useLightfunnelsConnections';
 import LightfunnelsConnectForm from './LightfunnelsConnectForm';
 import LightfunnelsConnectionBadge from './LightfunnelsConnectionBadge';
+import GuideStepList from './GuideStepList';
 import LightfunnelsWebhookModeSelect, {
   LIGHTFUNNELS_WEBHOOK_MODE_LABEL,
 } from './LightfunnelsWebhookModeSelect';
@@ -356,19 +358,7 @@ const IntegrationModal = ({
             </div>
             <div className="relative">
               <div className="absolute right-[11px] top-3 bottom-3" />
-              {guideWebhookSteps.map((step, i) => (
-                <div
-                  key={i}
-                  className="relative flex items-start gap-3 pb-4 last:pb-0"
-                >
-                  <span className="relative z-10 flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
-                    {i + 1}
-                  </span>
-                  <p className="text-sm text-gray-600 leading-relaxed pt-0.5">
-                    {step}
-                  </p>
-                </div>
-              ))}
+              <GuideStepList steps={guideWebhookSteps} />
             </div>
           </div>
 
@@ -382,19 +372,7 @@ const IntegrationModal = ({
             </div>
             <div className="relative">
               <div className="absolute right-[11px] top-3 bottom-3" />
-              {config.apiSteps.map((step, i) => (
-                <div
-                  key={i}
-                  className="relative flex items-start gap-3 pb-4 last:pb-0"
-                >
-                  <span className="relative z-10 flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
-                    {i + 1}
-                  </span>
-                  <p className="text-sm text-gray-600 leading-relaxed pt-0.5">
-                    {step}
-                  </p>
-                </div>
-              ))}
+              <GuideStepList steps={config.apiSteps} />
             </div>
           </div>
           )}
@@ -476,7 +454,7 @@ const IntegrationModal = ({
 
                     {isAutomaticWizard ? (
                       <p className="text-sm text-gray-600 bg-gray-50 border border-gray-100 rounded-lg p-3">
-                        لا حاجة لنسخ رابط. انسخ Client ID وClient Secret من صفحة Configuration داخل تطبيقك في Lightfunnels، وأدخلهما في الخطوة التالية ووافق على الصلاحيات، ثم نسجّل الـ Webhooks تلقائياً.
+                        لا حاجة لنسخ رابط. انسخ Client ID وClient secret من قسم «App Credentials» في تبويب «Configurations» داخل تطبيقك في Lightfunnels، وأدخلهما في الخطوة التالية، ثم نسجّل الـ Webhooks تلقائياً.
                       </p>
                     ) : (
                     <CopyField
@@ -573,7 +551,7 @@ const IntegrationModal = ({
                       name="apiKey"
                       label="المفتاح السري للتطبيق (Client Secret)"
                       placeholder="أدخل Client Secret..."
-                      autoComplete="new-password"
+                      autoComplete={CREDENTIAL_AUTOCOMPLETE.appSecret}
                       error={apiKeyForm.formState.errors.apiKey?.message}
                     />
                   </div>
