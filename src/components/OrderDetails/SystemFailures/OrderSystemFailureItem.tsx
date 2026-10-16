@@ -16,7 +16,6 @@ import type { OrderSystemFailure } from '@/types/orderSystemFailures';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { FailureDetails } from './details/FailureDetails';
 
-
 export interface OrderSystemFailureItemProps {
   failure: OrderSystemFailure;
   order: Order;

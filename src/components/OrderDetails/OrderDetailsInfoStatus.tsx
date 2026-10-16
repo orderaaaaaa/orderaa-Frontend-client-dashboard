@@ -1,6 +1,6 @@
 'use client';
 
-import { formatDate } from '@/utils/format';
+import { formatDate, formatWeekdayDate } from '@/utils/format';
 import { useRef, useEffect, useState } from 'react';
 import { Order, OrderEvent } from '@/types/orders';
 import { getTimeAgo } from '@/utils/timeAgo';
@@ -173,7 +173,7 @@ function buildFullTimeline(events: MappedEvent[]): DayGroup[] {
     } else if (key === yesterdayKey) {
       label = 'أمس';
     } else {
-      label = formatDate(current);
+      label = formatWeekdayDate(current);
     }
 
     result.push({

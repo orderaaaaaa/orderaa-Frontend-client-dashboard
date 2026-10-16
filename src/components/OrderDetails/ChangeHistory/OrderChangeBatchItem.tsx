@@ -6,7 +6,6 @@ import type { OrderChangeBatch, OrderChangeEntry } from '@/types/orderChangeHist
 import { getTimeAgo } from '@/utils/timeAgo';
 import { OrderChangeValue, isLineValue, lineValueText } from './OrderChangeValue';
 
-
 const LINE_KIND_LABELS = {
   LINE_ADDED: 'أُضيف',
   LINE_REMOVED: 'حُذف',

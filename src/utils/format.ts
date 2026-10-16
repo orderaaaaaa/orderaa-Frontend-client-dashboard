@@ -16,6 +16,13 @@ const dateFormatter = new Intl.DateTimeFormat(APP_LOCALE, {
   year: 'numeric',
 });
 
+const weekdayDateFormatter = new Intl.DateTimeFormat(APP_LOCALE, {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
 const timeFormatter = new Intl.DateTimeFormat(APP_LOCALE, {
   hour: 'numeric',
   minute: '2-digit',
@@ -47,6 +54,11 @@ export const formatNumber = (value: number, options?: FractionDigitsOptions): st
 export const formatDate = (value: DateInput): string => {
   const date = toValidDate(value);
   return date ? dateFormatter.format(date) : EMPTY_VALUE;
+};
+
+export const formatWeekdayDate = (value: DateInput): string => {
+  const date = toValidDate(value);
+  return date ? weekdayDateFormatter.format(date) : EMPTY_VALUE;
 };
 
 export const formatTime = (value: DateInput): string => {
