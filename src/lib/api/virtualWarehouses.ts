@@ -64,6 +64,7 @@ export interface VirtualWarehouse {
   showShortageIndicator: boolean;
   showOutOfStockIndicator: boolean;
   showLowStockIndicator: boolean;
+  showOnlyExistingItems: boolean;
   terms: VirtualWarehouseTermView[];
 }
 
@@ -77,6 +78,7 @@ export interface VirtualWarehouseSummaryCard {
   showShortageIndicator: boolean;
   showOutOfStockIndicator: boolean;
   showLowStockIndicator: boolean;
+  showOnlyExistingItems: boolean;
   outOfStockVariantCount: number | null;
   shortfallVariantCount: number | null;
   shortfallUnits: number | null;

@@ -18,11 +18,12 @@ import {
 } from './stockIndicators';
 
 async function loadAllProducts(
-  filters: Omit<StockFiltersDto, 'page' | 'limit'>
+  filters: Omit<StockFiltersDto, 'page' | 'limit'>,
+  dropEmptyAxes: boolean
 ): Promise<StockProduct[]> {
   try {
     const apiList = await fetchAllStockProducts(filters);
-    return apiListToStockProducts(apiList);
+    return apiListToStockProducts(apiList, { dropEmptyAxes });
   } catch (err) {
     const message =
       (err as { response?: { data?: { message?: string } } })?.response?.data
@@ -83,7 +84,7 @@ export async function exportStockToExcel(
   filters: Omit<StockFiltersDto, 'page' | 'limit'>,
   indicators: StockIndicators
 ) {
-  const products = await loadAllProducts(filters);
+  const products = await loadAllProducts(filters, indicators.existingOnly);
   if (products.length === 0) {
     toast.error('لا توجد منتجات لتصديرها');
     return;
@@ -328,7 +329,7 @@ export async function exportStockToPDF(
   filters: Omit<StockFiltersDto, 'page' | 'limit'>,
   indicators: StockIndicators
 ) {
-  const products = await loadAllProducts(filters);
+  const products = await loadAllProducts(filters, indicators.existingOnly);
   if (products.length === 0) {
     toast.error('لا توجد منتجات لتصديرها');
     return;

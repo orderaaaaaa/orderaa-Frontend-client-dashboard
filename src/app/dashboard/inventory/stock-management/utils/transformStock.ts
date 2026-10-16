@@ -135,25 +135,66 @@ export function apiSkuOrEmpty(api: StockProductApi): string {
   return typeof api.sku === 'string' ? api.sku : '';
 }
 
-export function apiToStockProduct(api: StockProductApi): StockProduct {
-  const { sizeAxis, colorAxis } = buildAxes(api.attributes);
-  const { rows, sizes, colors } = buildVariantRows(
-    api.variants,
-    sizeAxis,
-    colorAxis
+export interface StockProductTransformOptions {
+  dropEmptyAxes: boolean;
+}
+
+const DEFAULT_TRANSFORM_OPTIONS: StockProductTransformOptions = {
+  dropEmptyAxes: false,
+};
+
+function isMissingCell(cell: VariantCell | undefined): boolean {
+  return cell === undefined || cell === 'missing';
+}
+
+function dropEmptyAxisValues(
+  sizes: string[],
+  colors: string[],
+  rows: ProductVariantRow[]
+): { sizes: string[]; colors: string[]; variants: ProductVariantRow[] } {
+  const keptColors = colors.filter((color) =>
+    rows.some((row) => !isMissingCell(row.stocks[color]))
   );
+  const variants = rows
+    .map((row) => ({
+      size: row.size,
+      stocks: Object.fromEntries(
+        keptColors.map((color) => [color, row.stocks[color]] as const)
+      ),
+    }))
+    .filter((row) =>
+      keptColors.some((color) => !isMissingCell(row.stocks[color]))
+    );
+  const keptSizes = sizes.filter((size) =>
+    variants.some((row) => row.size === size)
+  );
+  return { sizes: keptSizes, colors: keptColors, variants };
+}
+
+export function apiToStockProduct(
+  api: StockProductApi,
+  options: StockProductTransformOptions = DEFAULT_TRANSFORM_OPTIONS
+): StockProduct {
+  const { sizeAxis, colorAxis } = buildAxes(api.attributes);
+  const built = buildVariantRows(api.variants, sizeAxis, colorAxis);
+  const axes = options.dropEmptyAxes
+    ? dropEmptyAxisValues(built.sizes, built.colors, built.rows)
+    : { sizes: built.sizes, colors: built.colors, variants: built.rows };
 
   return {
     id: api.id,
     name: api.name,
     sku: apiSkuOrEmpty(api),
     image: api.image,
-    colors,
-    sizes,
-    variants: rows,
+    colors: axes.colors,
+    sizes: axes.sizes,
+    variants: axes.variants,
   };
 }
 
-export function apiListToStockProducts(list: StockProductApi[]): StockProduct[] {
-  return list.map((api) => apiToStockProduct(api));
+export function apiListToStockProducts(
+  list: StockProductApi[],
+  options: StockProductTransformOptions = DEFAULT_TRANSFORM_OPTIONS
+): StockProduct[] {
+  return list.map((api) => apiToStockProduct(api, options));
 }

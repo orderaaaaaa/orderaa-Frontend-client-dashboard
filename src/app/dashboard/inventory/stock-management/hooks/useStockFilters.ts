@@ -8,6 +8,7 @@ import { calculateDateRangeFromPeriod, TimePeriod } from '@/utils/dateRangeUtils
 import {
   useStockProducts,
   useStockFilterOptions,
+  type StockFilterOptionsScope,
   type StockFiltersDto,
 } from '@/services/stock';
 import { apiListToStockProducts } from '../utils/transformStock';
@@ -52,6 +53,7 @@ export function useStockFilters(
     outOfStockRequested,
     indicators
   );
+  const existingOnly = indicators?.existingOnly ?? false;
   const scopeKind = scope.kind;
   const scopeId = scope.id;
   const canReadVirtual = useHasPermission(
@@ -149,12 +151,21 @@ export function useStockFilters(
     { enabled: isScopeReadable && indicators !== null }
   );
 
-  const filterOptionsQuery = useStockFilterOptions();
+  const filterOptionsScope = useMemo<StockFilterOptionsScope>(
+    () =>
+      scopeKind === STOCK_SCOPE_KINDS.PHYSICAL
+        ? { warehouseId: scopeId }
+        : { virtualWarehouseId: scopeId },
+    [scopeKind, scopeId]
+  );
+  const filterOptionsQuery = useStockFilterOptions(filterOptionsScope);
 
   const filteredProducts: StockProduct[] = useMemo(() => {
     if (!productsQuery.data) return [];
-    return apiListToStockProducts(productsQuery.data.data);
-  }, [productsQuery.data]);
+    return apiListToStockProducts(productsQuery.data.data, {
+      dropEmptyAxes: existingOnly,
+    });
+  }, [productsQuery.data, existingOnly]);
 
   const hasActiveFilters =
     !!debouncedSearchQuery.trim() ||

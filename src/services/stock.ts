@@ -165,16 +165,24 @@ export const useStockProducts = (
   });
 };
 
-export const useStockFilterOptions = () => {
+export interface StockFilterOptionsScope {
+  warehouseId?: number;
+  virtualWarehouseId?: number;
+}
+
+export const useStockFilterOptions = (scope: StockFilterOptionsScope = {}) => {
+  const isScoped =
+    scope.warehouseId !== undefined || scope.virtualWarehouseId !== undefined;
   return useQuery({
-    queryKey: [QUERY_KEYS.STOCK_FILTER_OPTIONS] as QueryKey,
+    queryKey: [QUERY_KEYS.STOCK_FILTER_OPTIONS, scope] as QueryKey,
     queryFn: async () => {
       const response = await http.get<StockFilterOptionsResponse>(
-        STOCK_FILTER_OPTIONS_URL
+        STOCK_FILTER_OPTIONS_URL,
+        { params: scope }
       );
       return response.data;
     },
-    staleTime: Infinity,
+    ...(isScoped ? {} : { staleTime: Infinity }),
   });
 };
 

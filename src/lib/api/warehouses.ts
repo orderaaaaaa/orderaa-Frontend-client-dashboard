@@ -46,6 +46,7 @@ export interface WarehouseApiItem {
   showShortageIndicator: boolean;
   showOutOfStockIndicator: boolean;
   showLowStockIndicator: boolean;
+  showOnlyExistingItems: boolean;
   createdAt: string;
   updatedAt: string;
   children?: WarehouseApiItem[];
@@ -130,6 +131,7 @@ export interface WarehouseSummaryCard {
   showShortageIndicator: boolean;
   showOutOfStockIndicator: boolean;
   showLowStockIndicator: boolean;
+  showOnlyExistingItems: boolean;
   lowStockVariantCount: number | null;
   outOfStockVariantCount: number | null;
 }

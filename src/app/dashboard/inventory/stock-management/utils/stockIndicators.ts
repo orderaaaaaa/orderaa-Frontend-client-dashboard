@@ -4,25 +4,29 @@ export interface StockIndicators {
   shortage: boolean;
   outOfStock: boolean;
   lowStock: boolean;
+  existingOnly: boolean;
 }
 
 export interface StockIndicatorFlags {
   showShortageIndicator: boolean;
   showOutOfStockIndicator: boolean;
   showLowStockIndicator: boolean;
+  showOnlyExistingItems: boolean;
 }
 
 export const ALL_STOCK_INDICATORS: StockIndicators = {
   shortage: true,
   outOfStock: true,
   lowStock: true,
+  existingOnly: false,
 };
 
 export function indicatorsFromFlags(flags: StockIndicatorFlags): StockIndicators {
   return {
     shortage: flags.showShortageIndicator,
-    outOfStock: flags.showOutOfStockIndicator,
+    outOfStock: flags.showOutOfStockIndicator && !flags.showOnlyExistingItems,
     lowStock: flags.showLowStockIndicator,
+    existingOnly: flags.showOnlyExistingItems,
   };
 }
 
