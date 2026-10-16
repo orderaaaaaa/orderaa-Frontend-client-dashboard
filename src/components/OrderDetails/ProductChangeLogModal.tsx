@@ -1,5 +1,6 @@
 'use client';
 
+import { formatDateTime } from '@/utils/format';
 import BaseModal from '@/components/ui/base-modal';
 
 interface ProductChangeLogModalProps {
@@ -43,17 +44,6 @@ const changeTypeLabels: Record<string, string> = {
   MODIFY_VARIANT: 'تعديل',
 };
 
-function formatDate(dateStr: string) {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('ar-EG', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
 export default function ProductChangeLogModal({
   isOpen,
   onClose,
@@ -82,7 +72,7 @@ export default function ProductChangeLogModal({
           <tbody>
             {mockLogs.map((log) => (
               <tr key={log.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-3 text-gray-600">{formatDate(log.createdAt)}</td>
+                <td className="px-4 py-3 text-gray-600">{formatDateTime(log.createdAt)}</td>
                 <td className="px-4 py-3 font-medium text-[#1E1E1E]">{log.employeeName}</td>
                 <td className="px-4 py-3">
                   <span

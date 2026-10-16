@@ -1,2 +1,3 @@
-export const formatStockNumber = (value: number) =>
-  value.toLocaleString('ar-EG');
+import { formatNumber } from '@/utils/format';
+
+export const formatStockNumber = (value: number) => formatNumber(value);

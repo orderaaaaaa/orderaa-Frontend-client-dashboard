@@ -1,3 +1,4 @@
+import { formatDate } from '@/utils/format';
 import {
   LiaCalendarAltSolid,
   LiaEnvelopeSolid,
@@ -33,7 +34,7 @@ function CustomersDetailsTotalStats({
             <LiaCalendarAltSolid className="w-4 h-4 text-gray-400" />
             <p className="font-bold text-sm">
               {latestOrder?.createdAt
-                ? new Date(latestOrder.createdAt).toLocaleDateString()
+                ? formatDate(latestOrder.createdAt)
                 : '—'}
             </p>
           </div>

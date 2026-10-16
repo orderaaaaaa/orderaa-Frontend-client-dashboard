@@ -1,3 +1,4 @@
+import { formatDate, formatNumber } from '@/utils/format';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -15,7 +16,7 @@ function sanitizeHtml(value: unknown): string {
     .replace(/'/g, '&#39;');
 }
 
-export function formatDate(dateStr: string): string {
+function formatExcelDate(dateStr: string): string {
   const date = new Date(dateStr);
   const day = date.getDate();
   const month = date.getMonth() + 1;
@@ -33,7 +34,7 @@ export function exportSupplierInvoicesToExcel(
     'رقم الفاتورة': inv.code,
     'انشأ بواسطة': inv.createdByEmployee ? getDepartmentLabel(inv.createdByEmployee.department) : 'غير محدد',
     'عدد الاصناف': inv.products.length,
-    'التاريخ': formatDate(inv.createdAt),
+    'التاريخ': formatExcelDate(inv.createdAt),
     'المبلغ': inv.totalAmount,
     'نوع الفاتورة': INVOICE_TYPE_LABEL[inv.type] ?? inv.type,
   }));
@@ -204,7 +205,7 @@ export async function exportInvoiceToPDF(invoice: SupplierInvoice) {
               <td>${sanitizeHtml(item.quantity)}</td>
               ${hasPackageFields ? `<td>${sanitizeHtml(item.packageCount ?? '')}</td><td>${sanitizeHtml(item.piecesPerPackage ?? '')}</td>` : ''}
               <td>${sanitizeHtml(item.price.toFixed(1))}</td>
-              <td style="font-weight:600;">${sanitizeHtml((item.quantity * item.price).toLocaleString())}</td>
+              <td style="font-weight:600;">${sanitizeHtml(formatNumber(item.quantity * item.price))}</td>
             </tr>`,
             )
             .join('')}

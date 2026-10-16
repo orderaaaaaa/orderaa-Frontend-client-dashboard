@@ -1,5 +1,6 @@
 'use client';
 
+import { formatDate, formatNumber } from '@/utils/format';
 import { useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle2, FileImage, Images } from 'lucide-react';
@@ -73,7 +74,7 @@ export default function ReturnReceiptsPage() {
   );
 
   const renderTotal = (order: ReturnReceiptOrder) =>
-    order.totalCost === null ? '—' : `${order.totalCost.toLocaleString()} جنيه`;
+    order.totalCost === null ? '—' : `${formatNumber(order.totalCost)} جنيه`;
 
   const renderReviewState = (receipt: ReturnReceiptCard) =>
     receipt.reviewedAt ? (
@@ -81,7 +82,7 @@ export default function ReturnReceiptsPage() {
         <CheckCircle2 className="w-3.5 h-3.5" />
         روجعت
         {receipt.reviewedByName ? ` — ${receipt.reviewedByName}` : ''}
-        {` · ${new Date(receipt.reviewedAt).toLocaleDateString('ar-EG')}`}
+        {` · ${formatDate(receipt.reviewedAt)}`}
       </span>
     ) : (
       <span className="text-xs font-semibold text-amber-600">
@@ -156,7 +157,7 @@ export default function ReturnReceiptsPage() {
                     إيصال #{receipt.id}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {new Date(receipt.createdAt).toLocaleDateString('ar-EG')}
+                    {formatDate(receipt.createdAt)}
                     {receipt.receivedByName
                       ? ` — ${receipt.receivedByName}`
                       : ''}

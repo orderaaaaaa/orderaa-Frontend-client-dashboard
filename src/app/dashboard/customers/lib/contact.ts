@@ -1,3 +1,4 @@
+import { formatDate } from '@/utils/format';
 import type { KeyboardEvent } from 'react';
 import type { CustomerCurrentBlock } from '../types/customer';
 
@@ -10,7 +11,7 @@ export const toWhatsAppNumber = (phone: string) => {
 };
 
 export const formatOrderDate = (value?: string) =>
-  value ? new Date(value).toLocaleDateString('en-GB') : '-';
+  value ? formatDate(value) : '-';
 
 export const formatNotes = (notes: string[]) => notes.join('، ');
 

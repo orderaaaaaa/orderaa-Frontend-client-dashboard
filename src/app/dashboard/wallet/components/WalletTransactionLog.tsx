@@ -1,5 +1,6 @@
 'use client';
 
+import { formatDate } from '@/utils/format';
 import React, { useState } from 'react';
 import { useWalletTransactions } from '@/services/wallet';
 import { WalletTransaction, PaginationMeta } from '@/types/wallet';
@@ -7,15 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { Wallet, RefreshCw } from 'lucide-react';
 import { formatWalletAmount as formatAmount } from '../utils/formatWalletAmount';
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('ar-EG', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-}
 
 function WalletTransactionLog() {
   const [currentPage, setCurrentPage] = useState(1);

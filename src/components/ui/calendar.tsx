@@ -1,5 +1,6 @@
 "use client"
 
+import { APP_LOCALE } from '@/utils/format';
 import * as React from "react"
 import {
   ChevronDownIcon,
@@ -196,7 +197,7 @@ const CalendarDayButton = React.forwardRef<HTMLButtonElement, React.ComponentPro
       ref={ref}
       variant="ghost"
       size="icon"
-      data-day={day.date.toLocaleDateString()}
+      data-day={day.date.toLocaleDateString(APP_LOCALE)}
       data-selected-single={
         modifiers.selected &&
         !modifiers.range_start &&

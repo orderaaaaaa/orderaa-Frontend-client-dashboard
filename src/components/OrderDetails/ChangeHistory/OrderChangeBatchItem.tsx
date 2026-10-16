@@ -1,3 +1,4 @@
+import { formatDateTime } from '@/utils/format';
 import React from 'react';
 import { actorTypeLabelOf } from '@/constants/orderSystemFailures';
 import { orderChangeOriginLabelOf, orderFieldLabelOf } from '@/constants/orderFieldLabels';
@@ -5,7 +6,6 @@ import type { OrderChangeBatch, OrderChangeEntry } from '@/types/orderChangeHist
 import { getTimeAgo } from '@/utils/timeAgo';
 import { OrderChangeValue, isLineValue, lineValueText } from './OrderChangeValue';
 
-const formatDateTime = (value: string) => new Date(value).toLocaleString('ar-EG');
 
 const LINE_KIND_LABELS = {
   LINE_ADDED: 'أُضيف',

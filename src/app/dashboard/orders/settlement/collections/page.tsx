@@ -1,5 +1,6 @@
 'use client';
 
+import { formatDate } from '@/utils/format';
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
@@ -194,7 +195,7 @@ export default function CollectionsPage() {
 
               <div className="flex items-center justify-between gap-2 border-t border-gray-100 pt-2">
                 <span className="text-[11px] text-muted-foreground">
-                  {new Date(batch.createdAt).toLocaleDateString('ar-EG')}
+                  {formatDate(batch.createdAt)}
                   {batch.actorName ? ` — ${batch.actorName}` : ''}
                 </span>
                 {batch.status === 'OPEN' && (

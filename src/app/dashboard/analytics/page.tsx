@@ -1,5 +1,6 @@
 'use client';
 
+import { formatNumber } from '@/utils/format';
 import { AuthGuard } from '@/components/auth-guard';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -64,7 +65,7 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                ${currentMonth.revenue.toLocaleString()}
+                ${formatNumber(currentMonth.revenue)}
               </div>
               <div className="flex items-center text-xs text-green-600">
                 <TrendingUp className="mr-1 h-3 w-3" />+{revenueGrowth}% from
@@ -149,7 +150,7 @@ export default function AnalyticsPage() {
                       </div>
                     </div>
                     <div className="text-sm font-medium">
-                      ${data.revenue.toLocaleString()}
+                      ${formatNumber(data.revenue)}
                     </div>
                   </div>
                 ))}
@@ -184,7 +185,7 @@ export default function AnalyticsPage() {
                       </div>
                     </div>
                     <div className="text-sm font-medium">
-                      ${product.revenue.toLocaleString()}
+                      ${formatNumber(product.revenue)}
                     </div>
                   </div>
                 ))}

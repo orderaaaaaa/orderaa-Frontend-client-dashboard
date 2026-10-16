@@ -4,7 +4,7 @@ import { memo } from 'react';
 import SharedInvoiceCard, { InvoiceCardData } from '@/components/purchases/InvoiceCard';
 import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
 import { Invoice } from '../types';
-import { formatDate } from '../utils';
+import { formatDate } from '@/utils/format';
 import { INVOICE_TYPE_LABEL } from '../../constants';
 
 interface InvoiceCardProps {

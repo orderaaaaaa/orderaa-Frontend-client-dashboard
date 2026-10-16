@@ -452,7 +452,7 @@ function ScenePackage() {
             </div>
           </div>
           <span className="rounded-full bg-[#22C55E]/15 px-2.5 py-1 text-base font-semibold text-[#22C55E]">
-            ✓ ٣٩
+            ✓ 39
           </span>
         </div>
         <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.04]">

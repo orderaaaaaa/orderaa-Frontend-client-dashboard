@@ -108,7 +108,7 @@ export const lightfunnelsApiSteps: GuideStep[] = [
     { ui: 'External app' },
     '، واكتب في حقل ',
     { ui: 'App Cookies Prefix' },
-    ' بادئة من حروف إنجليزية فقط بحد أقصى ٥ أحرف (مثل ',
+    ' بادئة من حروف إنجليزية فقط بحد أقصى 5 أحرف (مثل ',
     { value: 'ord' },
     ')، ثم اضغط ',
     { ui: 'Create app' },

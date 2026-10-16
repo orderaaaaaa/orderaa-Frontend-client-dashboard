@@ -1,3 +1,4 @@
+import { formatDate } from '@/utils/format';
 import React, { useState } from 'react';
 import { Copy, TriangleAlert, History } from 'lucide-react';
 import { Order, OrderLockedBy } from '@/types/orders';
@@ -84,7 +85,7 @@ const OrderDetailsCardId = ({
               />
             </h3>
             <p className="text-xs font-bold sm:mr-7 mb-4">
-              {createdDate.toLocaleDateString('ar-EG')} <span>{timeAgo}</span>
+              {formatDate(createdDate)} <span>{timeAgo}</span>
             </p>
             <If condition={order.postponedUntil}>
               <Then>

@@ -1,5 +1,6 @@
 'use client';
 
+import { formatDate, formatNumber } from '@/utils/format';
 import { useMemo, useState } from 'react';
 import clsx from 'clsx';
 import {
@@ -26,11 +27,6 @@ interface ProductDetailModalProps {
 
 type TransactionRecord = Record<string, unknown> & ProductTransaction;
 
-function formatDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-}
-
 const transactionColumns: DataTableColumn<TransactionRecord>[] = [
   {
     key: 'createdAt',
@@ -52,7 +48,7 @@ const transactionColumns: DataTableColumn<TransactionRecord>[] = [
   {
     key: 'totalPrice',
     header: 'إجمالي السعر',
-    render: (val) => (val as number).toLocaleString(),
+    render: (val) => formatNumber(val as number),
   },
   {
     key: 'invoiceType',

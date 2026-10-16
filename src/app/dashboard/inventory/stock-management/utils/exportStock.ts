@@ -1,3 +1,4 @@
+import { formatDate } from '@/utils/format';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -238,11 +239,7 @@ ${bodyHtml}
 }
 
 function buildHeaderHtml(): string {
-  const today = new Date().toLocaleDateString('ar-EG', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const today = formatDate(new Date());
   return `<div class="header">
   <h1>تقرير المخزن</h1>
   <p>${escapeHtml(today)}</p>

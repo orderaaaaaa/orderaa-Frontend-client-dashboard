@@ -1,5 +1,6 @@
 'use client';
 
+import { formatDate, formatNumber } from '@/utils/format';
 import { useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle2, FileImage } from 'lucide-react';
@@ -70,7 +71,7 @@ export default function PickupsPage() {
   );
 
   const renderTotal = (order: PickupOrder) =>
-    order.totalCost === null ? '—' : `${order.totalCost.toLocaleString()} جنيه`;
+    order.totalCost === null ? '—' : `${formatNumber(order.totalCost)} جنيه`;
 
   const renderReviewState = (pickup: PickupCard) =>
     pickup.reviewedAt ? (
@@ -78,7 +79,7 @@ export default function PickupsPage() {
         <CheckCircle2 className="w-3.5 h-3.5" />
         روجعت
         {pickup.reviewedByName ? ` — ${pickup.reviewedByName}` : ''}
-        {` · ${new Date(pickup.reviewedAt).toLocaleDateString('ar-EG')}`}
+        {` · ${formatDate(pickup.reviewedAt)}`}
       </span>
     ) : (
       <span className="text-xs font-semibold text-amber-600">
@@ -151,7 +152,7 @@ export default function PickupsPage() {
                     {pickup.code}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {new Date(pickup.createdAt).toLocaleDateString('ar-EG')}
+                    {formatDate(pickup.createdAt)}
                     {pickup.submittedByName
                       ? ` — ${pickup.submittedByName}`
                       : ''}

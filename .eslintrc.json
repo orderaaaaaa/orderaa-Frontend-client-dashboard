@@ -1,4 +1,29 @@
 {
   "root": true,
-  "extends": "next/core-web-vitals"
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "CallExpression[callee.property.name=/^toLocale(Date|Time)?String$/][arguments.length=0]",
+        "message": "Use formatNumber / formatDate / formatDateTime / formatTime from @/utils/format instead of a no-argument toLocale*String()."
+      },
+      {
+        "selector": "CallExpression[callee.property.name=/^toLocale(Date|Time)?String$/] > Literal[value=/^ar(?!-EG-u-nu-latn$)/]",
+        "message": "Display locale must be APP_LOCALE ('ar-EG-u-nu-latn') from @/utils/format."
+      },
+      {
+        "selector": "NewExpression[callee.object.name='Intl'][callee.property.name=/Format$/] > Literal[value=/^ar(?!-EG-u-nu-latn$)/]",
+        "message": "Display locale must be APP_LOCALE ('ar-EG-u-nu-latn') from @/utils/format."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/utils/format.ts"],
+      "rules": {
+        "no-restricted-syntax": "off"
+      }
+    }
+  ]
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { formatNumber } from '@/utils/format';
 import { memo } from 'react';
 import { LiaTagSolid, LiaUserTieSolid, LiaMoneyBillWaveSolid } from 'react-icons/lia';
 import SearchableSelect from '@/components/ui/SearchableSelect';
@@ -98,7 +99,7 @@ const InvoiceDropdowns = memo(
               type="number"
               value={partialAmount}
               onChange={(e) => onPartialAmountChange(e.target.value)}
-              placeholder={`ادخل المبلغ المدفوع (الإجمالي ${invoiceTotal.toLocaleString()} ج.م)`}
+              placeholder={`ادخل المبلغ المدفوع (الإجمالي ${formatNumber(invoiceTotal)} ج.م)`}
               error={partialError ?? undefined}
             />
           </div>

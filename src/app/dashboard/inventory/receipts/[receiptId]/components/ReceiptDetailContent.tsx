@@ -25,7 +25,8 @@ import { useI18n } from '@/i18n/I18nProvider';
 import ReceiptHeader from './ReceiptHeader';
 import AddVariantsStep, { InvoiceProductRow } from './AddVariantsStep';
 import { SelectedVariant } from '../types';
-import { formatDate, isEveryLineCounted } from '../../utils';
+import { isEveryLineCounted } from '../../utils';
+import { formatDate } from '@/utils/format';
 import type { ApproveSupplierInvoiceVariantDto } from '@/lib/api/suppliers';
 import { WAREHOUSES_PAGE_ENABLED } from '@/constants/warehouses';
 

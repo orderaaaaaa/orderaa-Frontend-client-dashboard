@@ -1,5 +1,6 @@
 'use client';
 
+import { formatDateTime } from '@/utils/format';
 import { LiaExchangeAltSolid } from 'react-icons/lia';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
@@ -15,15 +16,6 @@ import {
   REFERENCE_TYPE_LABELS,
 } from '../constants';
 import { useMovementsFilters } from '../hooks/useMovementsFilters';
-
-const formatDate = (iso: string): string =>
-  new Date(iso).toLocaleString('ar-EG', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
 
 /**
  * Signed quantity from the selected warehouse's point of view: stock leaving
@@ -163,7 +155,7 @@ export function StockMovementsTab() {
                     className="border-b border-gray-100 hover:bg-gray-50/50"
                   >
                     <td className="py-2.5 px-3 whitespace-nowrap text-gray-600">
-                      {formatDate(movement.createdAt)}
+                      {formatDateTime(movement.createdAt)}
                     </td>
                     <td className="py-2.5 px-3">
                       <span

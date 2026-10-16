@@ -21,7 +21,7 @@ import ReceiptsActionsBar from './ReceiptsActionsBar';
 import { DEFAULT_PAGE_SIZE } from '../constants';
 import { Receipt } from '../types';
 import { useReceiptFilters } from '../hooks';
-import { formatDate } from '../utils';
+import { formatDate } from '@/utils/format';
 import { RECEIVING_STATUS_OPTIONS, receivingStatusToApproved } from '@/components/purchases/receivingStatus';
 
 function toCardData(receipt: Receipt): InvoiceCardData {

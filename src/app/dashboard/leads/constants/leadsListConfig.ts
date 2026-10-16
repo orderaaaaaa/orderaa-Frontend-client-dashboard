@@ -22,7 +22,7 @@ export const DAYS_STATUS_CONFIG = {
     borderColor: 'border-[#ff0004]',
   },
   threeDaysRemaining: {
-    label: '٣ أيام متبقية',
+    label: '3 أيام متبقية',
     bgColor: 'bg-[#fffbf5]',
     textColor: 'text-[#ff9800]',
     borderColor: 'border-[#ff9800]',

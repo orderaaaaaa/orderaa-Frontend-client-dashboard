@@ -1,5 +1,6 @@
 'use client';
 
+import { formatNumber } from '@/utils/format';
 import { useCallback, useRef, useState, useMemo } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -265,7 +266,7 @@ export function AddInvoiceContent() {
             return;
           }
           if (partialCents > moneyCents(totalAmount)) {
-            setPartialError(`المبلغ المدفوع لا يمكن أن يتجاوز إجمالي الفاتورة (${totalAmount.toLocaleString()} ج.م)`);
+            setPartialError(`المبلغ المدفوع لا يمكن أن يتجاوز إجمالي الفاتورة (${formatNumber(totalAmount)} ج.م)`);
             return;
           }
           resolvedPaymentAmount = Number(partialAmount);
@@ -405,7 +406,7 @@ export function AddInvoiceContent() {
               ? 'جارٍ رفع الصورة…'
               : isSaving
                 ? 'جارٍ حفظ الفاتورة...'
-                : `إجمالي الفاتورة: ${invoiceTotal.toLocaleString()} ج.م`
+                : `إجمالي الفاتورة: ${formatNumber(invoiceTotal)} ج.م`
           }
         >
           <Button

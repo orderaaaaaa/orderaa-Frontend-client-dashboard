@@ -53,7 +53,7 @@ export default function CandidatesPopover({
               <div>
                 <p className="text-sm text-gray-900">{candidate.name}</p>
                 <p className="text-xs text-gray-400">
-                  {Math.round(candidate.score * 100)}٪
+                  {Math.round(candidate.score * 100)}%
                 </p>
               </div>
               <Button

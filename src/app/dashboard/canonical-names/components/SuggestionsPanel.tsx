@@ -237,7 +237,7 @@ export default function SuggestionsPanel({
                         <span className="text-gray-400">→</span>
                         <span>{link.name}</span>
                         <span className="text-gray-400 text-xs">
-                          {Math.round(link.score * 100)}٪
+                          {Math.round(link.score * 100)}%
                         </span>
                         {!available && (
                           <span className="text-gray-400 text-xs">

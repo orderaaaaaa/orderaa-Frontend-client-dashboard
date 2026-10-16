@@ -18,7 +18,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { formatMoney } from '@/utils/formatMoney';
 import { SupplierInvoice } from '../types';
-import { formatDate } from '../utils';
+import { formatDate } from '@/utils/format';
 import InvoiceDetailModal from './InvoiceDetailModal';
 import { INVOICE_TYPE_LABEL } from '../../../constants';
 

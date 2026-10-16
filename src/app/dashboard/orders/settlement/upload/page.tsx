@@ -1,5 +1,6 @@
 'use client';
 
+import { formatDate } from '@/utils/format';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Download, Upload, FileSpreadsheet, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -528,7 +529,7 @@ export default function SettlementUploadPage() {
                           {
                             label: 'تاريخ التحصيل',
                             value: item.collectedAt
-                              ? new Date(item.collectedAt).toLocaleDateString('ar-EG')
+                              ? formatDate(item.collectedAt)
                               : '—',
                           },
                           {
@@ -596,7 +597,7 @@ export default function SettlementUploadPage() {
                             </td>
                             <td className="px-4 py-2">
                               {item.collectedAt
-                                ? new Date(item.collectedAt).toLocaleDateString('ar-EG')
+                                ? formatDate(item.collectedAt)
                                 : '—'}
                             </td>
                             <td className="px-4 py-2">

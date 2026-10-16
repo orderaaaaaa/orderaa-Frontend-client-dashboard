@@ -1,5 +1,6 @@
 'use client';
 
+import { formatDateTime } from '@/utils/format';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Can } from '@/components/Can';
@@ -59,7 +60,7 @@ export const UNLINKED_REASON_LABEL: Record<UnlinkedVariantReason, string> = {
 
 function formatTimestamp(value: string): string {
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString('ar-EG');
+  return Number.isNaN(date.getTime()) ? value : formatDateTime(date);
 }
 
 function useClampedPage(

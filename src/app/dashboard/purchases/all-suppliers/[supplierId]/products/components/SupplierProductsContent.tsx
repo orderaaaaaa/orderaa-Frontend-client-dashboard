@@ -1,5 +1,6 @@
 'use client';
 
+import { formatNumber } from '@/utils/format';
 import { useState, useMemo, useCallback } from 'react';
 import { Search } from 'lucide-react';
 import { LiaBoxesSolid } from 'react-icons/lia';
@@ -47,19 +48,19 @@ const columns: DataTableColumn<ProductRecord>[] = [
     key: 'totalPurchaseAmount',
     header: 'إجمالي الشراء',
     sortable: true,
-    render: (val) => (val as number).toLocaleString(),
+    render: (val) => formatNumber(val as number),
   },
   {
     key: 'totalReturnAmount',
     header: 'إجمالي المرتجع',
     sortable: true,
-    render: (val) => (val as number).toLocaleString(),
+    render: (val) => formatNumber(val as number),
   },
   {
     key: 'netAmount',
     header: 'إجمالي الصافي',
     sortable: true,
-    render: (val) => (val as number).toLocaleString(),
+    render: (val) => formatNumber(val as number),
   },
 ];
 

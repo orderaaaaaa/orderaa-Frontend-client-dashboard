@@ -1,5 +1,6 @@
 'use client';
 
+import { formatDate } from '@/utils/format';
 import React from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import { OrderEvent } from '@/types/orders';
@@ -66,7 +67,7 @@ export default function OrderHistoryModal({
   const parseEvents = (): ParsedEvent[] => {
     return events.map((event, index) => {
       const statusLabel = event.name ? getStatusLabel(event.name) : 'حدث';
-      const displayDate = new Date(event.createdAt).toLocaleDateString('ar-EG');
+      const displayDate = formatDate(event.createdAt);
       const timeAgo = getTimeAgo(event.createdAt);
 
       return {

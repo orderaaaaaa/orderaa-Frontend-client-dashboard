@@ -154,7 +154,7 @@ export function resolveCardContextChip(
   if (field === 'collectedOrders') {
     if (totals.totalOrders === 0) return undefined;
     const percent = Math.round((totals.collectedOrders / totals.totalOrders) * 100);
-    return { tone: 'neutral', text: `${percent}٪ من الطلبات` };
+    return { tone: 'neutral', text: `${percent}% من الطلبات` };
   }
   if (field === 'suppliedAmount') {
     if (totals.collectedWithoutSettlement <= 0) return undefined;
@@ -181,8 +181,8 @@ export function formatTrendTooltip(previousRange: { from: string; to: string }):
 }
 
 export function formatTrendAriaLabel(direction: 'up' | 'down' | 'flat', percent: number): string {
-  if (direction === 'up') return `زيادة ${percent}٪ مقارنة بالفترة السابقة`;
-  if (direction === 'down') return `انخفاض ${percent}٪ مقارنة بالفترة السابقة`;
+  if (direction === 'up') return `زيادة ${percent}% مقارنة بالفترة السابقة`;
+  if (direction === 'down') return `انخفاض ${percent}% مقارنة بالفترة السابقة`;
   return 'بدون تغيير مقارنة بالفترة السابقة';
 }
 

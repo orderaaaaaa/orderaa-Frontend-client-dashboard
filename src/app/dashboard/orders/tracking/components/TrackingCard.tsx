@@ -1,5 +1,6 @@
 'use client';
 
+import { formatDate, formatDateTime } from '@/utils/format';
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import {
@@ -349,12 +350,12 @@ export default function TrackingCard({ card }: TrackingCardProps) {
                 )}
                 {card.agentStatus === 'POSTPONED' && card.postponedUntil && (
                   <p className="text-xs text-gray-500">
-                    تأجيل إلى: {new Date(card.postponedUntil).toLocaleDateString('ar-EG')}
+                    تأجيل إلى: {formatDate(card.postponedUntil)}
                   </p>
                 )}
                 {card.agentEventAt && (
                   <p className="text-xs text-gray-400">
-                    {new Date(card.agentEventAt).toLocaleString('ar-EG')}
+                    {formatDateTime(card.agentEventAt)}
                   </p>
                 )}
               </div>
@@ -367,7 +368,7 @@ export default function TrackingCard({ card }: TrackingCardProps) {
 
           {card.completedAt && (
             <p className="text-xs text-gray-400 text-center pt-1">
-              تم الإكمال: {new Date(card.completedAt).toLocaleString('ar-EG')}
+              تم الإكمال: {formatDateTime(card.completedAt)}
             </p>
           )}
         </CardContent>

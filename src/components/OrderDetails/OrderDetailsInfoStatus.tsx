@@ -1,5 +1,6 @@
 'use client';
 
+import { formatDate } from '@/utils/format';
 import { useRef, useEffect, useState } from 'react';
 import { Order, OrderEvent } from '@/types/orders';
 import { getTimeAgo } from '@/utils/timeAgo';
@@ -172,12 +173,7 @@ function buildFullTimeline(events: MappedEvent[]): DayGroup[] {
     } else if (key === yesterdayKey) {
       label = 'أمس';
     } else {
-      label = current.toLocaleDateString('ar-EG', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        weekday: 'long',
-      });
+      label = formatDate(current);
     }
 
     result.push({
@@ -297,7 +293,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
     return {
       id: event.id || index + 1,
       status: statusLabel,
-      date: createdDate.toLocaleDateString('ar-EG'),
+      date: formatDate(createdDate),
       rawDate: createdDate.toISOString().split('T')[0],
       time: getTimeAgo(event.createdAt),
       eventType: event.name || 'NEW_ORDER',

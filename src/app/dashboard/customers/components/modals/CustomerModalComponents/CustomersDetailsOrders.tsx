@@ -1,5 +1,6 @@
 'use client';
 
+import { formatDate } from '@/utils/format';
 import React from 'react';
 import { LuHistory } from 'react-icons/lu';
 import { getStatusColor } from '../../../lib/getBadgeColor';
@@ -11,9 +12,6 @@ import { CustomerDetailOrder } from '../../../types/customer';
 interface OrdersTabProps {
   orders: CustomerDetailOrder[];
 }
-
-const formatDate = (value: string) =>
-  new Date(value).toLocaleDateString('en-GB');
 
 const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
   const { getStatusLabel } = useStatusLabel();

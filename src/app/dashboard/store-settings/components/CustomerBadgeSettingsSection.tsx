@@ -154,7 +154,7 @@ const describe = (badge: CustomerBadge, values: ThresholdValues) => {
     case 'bulk':
       return `مشتري بالجملة: متوسط ${v('bulkMinAvgPieces')} قطع أو أكثر في كل طلب مستلم`;
     case 'loyal':
-      return `عميل وفي: ${v('loyalMinDelivered')} طلبات مستلمة على الأقل ونسبة نجاح ${v('loyalMinSuccessPercent')}٪ أو أكثر`;
+      return `عميل وفي: ${v('loyalMinDelivered')} طلبات مستلمة على الأقل ونسبة نجاح ${v('loyalMinSuccessPercent')}% أو أكثر`;
   }
 };
 

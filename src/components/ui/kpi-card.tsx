@@ -109,7 +109,7 @@ function KpiTrend({
               {glyph}
             </span>
           )}
-          {`${percent}٪`}
+          {`${percent}%`}
         </span>
       </TooltipTrigger>
       <TooltipContent>{tooltip}</TooltipContent>

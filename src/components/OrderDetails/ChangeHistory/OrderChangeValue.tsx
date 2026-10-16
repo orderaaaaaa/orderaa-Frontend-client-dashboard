@@ -1,3 +1,4 @@
+import { formatDate, formatDateTime } from '@/utils/format';
 import React from 'react';
 import {
   ORDER_PAYMENT_METHOD_LABELS,
@@ -39,11 +40,11 @@ const formatNumber = (value: OrderChangeJsonValue) => {
   return Number.isFinite(parsed) ? parsed.toLocaleString('en-US') : String(value);
 };
 
-const formatDate = (value: OrderChangeJsonValue, withTime: boolean) => {
+const formatChangeDate = (value: OrderChangeJsonValue, withTime: boolean) => {
   if (typeof value !== 'string') return String(value);
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return withTime ? date.toLocaleString('ar-EG') : date.toLocaleDateString('ar-EG');
+  return withTime ? formatDateTime(date) : formatDate(date);
 };
 
 export const customVariantsText = (value: OrderChangeJsonValue) => {
@@ -84,9 +85,9 @@ export const formatChangeValue = (
     case 'BOOLEAN':
       return value === true ? 'نعم' : value === false ? 'لا' : String(value);
     case 'DATETIME':
-      return formatDate(value, true);
+      return formatChangeDate(value, true);
     case 'DATE':
-      return formatDate(value, false);
+      return formatChangeDate(value, false);
     case 'REF':
       return isRefValue(value) ? value.label ?? UNKNOWN_REF_LABEL : UNKNOWN_REF_LABEL;
     case 'STRING_LIST':

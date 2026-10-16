@@ -31,7 +31,7 @@ const DAY_OPTIONS = [
   { value: '', label: 'حسب الإعدادات' },
   { value: '1440', label: 'يوم' },
   { value: '2880', label: 'يومان' },
-  { value: '4320', label: '٣ أيام' },
+  { value: '4320', label: '3 أيام' },
   { value: '10080', label: 'أسبوع' },
 ];
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { formatDateTime } from '@/utils/format';
 import React, { useState } from 'react';
 import { LiaCheckSolid, LiaChevronDownSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
@@ -15,7 +16,6 @@ import type { OrderSystemFailure } from '@/types/orderSystemFailures';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { FailureDetails } from './details/FailureDetails';
 
-const formatDateTime = (value: string) => new Date(value).toLocaleString('ar-EG');
 
 export interface OrderSystemFailureItemProps {
   failure: OrderSystemFailure;

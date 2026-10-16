@@ -17,7 +17,8 @@ import { getTimeAgo } from '@/utils/timeAgo';
 import { formatCount, formatMoney } from '@/utils/formatMoney';
 import { ImageGalleryModal } from '@/components/receipts/ImageGalleryModal';
 import { SupplierInvoice, SupplierInvoiceItem } from '../types';
-import { formatDate, exportInvoiceToExcel, exportInvoiceToPDF } from '../utils';
+import { exportInvoiceToExcel, exportInvoiceToPDF } from '../utils';
+import { formatDate } from '@/utils/format';
 
 function buildProductColumns(
   products: SupplierInvoiceItem[],

@@ -1,5 +1,6 @@
 'use client';
 
+import { formatDateTime } from '@/utils/format';
 import { Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type {
@@ -18,7 +19,7 @@ const REFRESH_ERROR_LABELS: Record<LocationRefreshErrorCode, string> = {
 
 const formatDate = (value: string) => {
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString('ar-EG');
+  return Number.isNaN(date.getTime()) ? value : formatDateTime(date);
 };
 
 interface LocationSourcesStatusStripProps {
