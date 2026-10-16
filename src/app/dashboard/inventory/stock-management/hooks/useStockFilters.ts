@@ -158,7 +158,9 @@ export function useStockFilters(
         : { virtualWarehouseId: scopeId },
     [scopeKind, scopeId]
   );
-  const filterOptionsQuery = useStockFilterOptions(filterOptionsScope);
+  const filterOptionsQuery = useStockFilterOptions(filterOptionsScope, {
+    enabled: isScopeReadable,
+  });
 
   const filteredProducts: StockProduct[] = useMemo(() => {
     if (!productsQuery.data) return [];

@@ -170,11 +170,15 @@ export interface StockFilterOptionsScope {
   virtualWarehouseId?: number;
 }
 
-export const useStockFilterOptions = (scope: StockFilterOptionsScope = {}) => {
+export const useStockFilterOptions = (
+  scope: StockFilterOptionsScope = {},
+  options?: { enabled?: boolean }
+) => {
   const isScoped =
     scope.warehouseId !== undefined || scope.virtualWarehouseId !== undefined;
   return useQuery({
     queryKey: [QUERY_KEYS.STOCK_FILTER_OPTIONS, scope] as QueryKey,
+    enabled: options?.enabled ?? true,
     queryFn: async () => {
       const response = await http.get<StockFilterOptionsResponse>(
         STOCK_FILTER_OPTIONS_URL,
