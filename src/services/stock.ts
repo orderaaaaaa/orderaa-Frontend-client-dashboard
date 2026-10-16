@@ -165,10 +165,10 @@ export const useStockProducts = (
   });
 };
 
-export interface StockFilterOptionsScope {
-  warehouseId?: number;
-  virtualWarehouseId?: number;
-}
+export type StockFilterOptionsScope =
+  | { warehouseId: number; virtualWarehouseId?: never }
+  | { virtualWarehouseId: number; warehouseId?: never }
+  | { warehouseId?: undefined; virtualWarehouseId?: undefined };
 
 export const useStockFilterOptions = (
   scope: StockFilterOptionsScope = {},
