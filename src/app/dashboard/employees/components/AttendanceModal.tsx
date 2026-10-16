@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { CalendarClock, CalendarDays, Loader2 } from 'lucide-react';
 import { AttendanceModalProps } from '../types/attendance.types';
+import { formatDate } from '@/utils/format';
 
 export function AttendanceModal({
   isOpen,
@@ -32,15 +33,6 @@ export function AttendanceModal({
     type === 'attendance'
       ? 'لا توجد أيام عمل مسجلة لهذا الشهر'
       : 'لا توجد أيام إجازة مسجلة لهذا الشهر';
-
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return format(date, 'dd/MM/yyyy', { locale: ar });
-    } catch {
-      return dateString;
-    }
-  };
 
   const getMonthName = (monthString: string) => {
     try {
