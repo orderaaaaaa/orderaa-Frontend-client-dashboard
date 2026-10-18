@@ -119,8 +119,6 @@ export function PrintOrdersContent() {
     ignoreDateRange: true,
     forceDefaultStatus: true,
   });
-  const { statistics: printStatistics, loading: statsLoading } =
-    usePrintOrderStatistics();
 
   useEffect(() => {
     if (filters.status !== 'CONFIRMED') {
@@ -139,6 +137,9 @@ export function PrintOrdersContent() {
 
     return baseFilters;
   }, [filters, printStatus]);
+
+  const { statistics: printStatistics, loading: statsLoading } =
+    usePrintOrderStatistics(apiFilters);
 
   const statisticsCards = useMemo(
     () => buildStatisticsCards(printStatistics),

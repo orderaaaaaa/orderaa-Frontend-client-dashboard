@@ -4,25 +4,24 @@
 
 Next.js 14.2 / React 18 / Tailwind 4 (`@tailwindcss/postcss`) / shadcn-ui New York / React Query (TanStack) / Zustand / Axios / React Hook Form + Zod / RTL Arabic layout.
 
-## Commands (run inside `orderaa-web-frontend/`)
+## Commands (run inside `frontend/`)
 
 | Action | Command |
 |--------|---------|
-| Dev server (port 4001) | `npm run dev` |
-| Build | `npm run build` |
-| Lint | `npm run lint` |
-| Type check | `npm run type-check` |
-| Deploy Vercel | `npm run deploy` |
+| Dev server (port 4001) | `pnpm dev` |
+| Build | `pnpm build` |
+| Lint | `pnpm lint` |
+| Type check | `pnpm run type-check` |
 
-**Package manager: npm** — never pnpm in frontend.
+**Package manager: pnpm.** Never run `pnpm deploy`: it runs `git push` and triggers a Vercel deploy hook.
 
 ## Critical: no test suite
 
-Frontend has **zero test files, zero test framework, no test scripts**. Do not try to run tests. Verification = `npm run type-check && npm run lint`.
+Frontend has **zero test files, zero test framework, no test scripts**. Do not try to run tests. Verification = `pnpm run type-check && pnpm lint`.
 
 ## Lint config
 
-No `.eslintrc.*` file. Lint via `next lint` (Next.js built-in ESLint config). Prettier config inline in `package.json`: `singleQuote: true`.
+Lint via `next lint` with `.eslintrc.json` extending `next/core-web-vitals`. Prettier config inline in `package.json`: `singleQuote: true`.
 
 ## Git hooks (Husky)
 
@@ -149,7 +148,7 @@ Subscription plans fetched dynamically from API (`plans` endpoint). Plan `benefi
 
 ### Reports Flow
 
-Reports dashboard at `/dashboard/reports` with 12+ chart types: call distribution bar chart, monthly orders line chart, employee performance metrics. Date range picker for all report filters. Export buttons for each report. Charts via `apexcharts` + `recharts`. Data from reports backend module (28 CQRS query handlers).
+Reports dashboard at `/dashboard/reports` with 12+ chart types: call distribution bar chart, monthly orders line chart, employee performance metrics. Date range picker for all report filters. Export buttons for each report. Charts via `apexcharts` + `recharts`. Data from reports backend module.
 
 ## Navigation Tree
 
@@ -193,32 +192,9 @@ Specific UX decisions that differ from typical patterns:
 - **iOS Safari zoom fix**: All form inputs use `font-size: 16px !important` to prevent iOS Safari auto-zoom on focus. Without this, the browser zooms into inputs on tap.
 - **Safe area insets**: Dashboard layout uses `pt-[env(safe-area-inset-top)]` for notch/camera cutout on modern mobile devices.
 
-## Required Analysis Tools
-
-Frontend is Next.js 14.2. Use these tools before and during code changes:
-
-**CodeGraph** (preferred for code discovery) — symbol index with blast radius. Indexed: 780 files, 6,420 nodes, 13,028 edges. Use `codegraph explore "<query>"` or MCP `codegraph_explore` tool to find components, hooks, types, and trace their callers faster than grep.
-
-**codebase-memory-mcp** — persistent knowledge graph (tree-sitter AST + hybrid LSP, 4,797 nodes, 10,552 edges). Faster than grep for finding symbols, tracing call paths, and reading source. Use MCP tools in priority order: `search_graph` → `trace_path` → `get_code_snippet` → `query_graph` → `get_architecture`. Project name: `Volumes-Data-code-orderaa-orderaa-web-frontend`.
-
-**Serena MCP** — code analysis, symbol search, find references, find implementations, diagnostics, rename. Essential before deleting/refactoring/renaming components, hooks, stores, or types.
-
-**Next.js MCP** — Next.js-specific tools:
-- `nextjs_index` — discover available MCP tools from running dev server
-- `nextjs_call` — call tool by name (routes, errors, build status, cache)
-- `nextjs_browser_eval` — open pages, click, screenshot, capture console errors
-- `nextjs_docs` — version-accurate Next.js docs from installed package
-
-Always use Serena + Next.js MCP before modifying code. Lets you verify routes, check runtime errors, explore component tree, and find references without guessing.
-
-Before starting: read `mem:core` then `mem:frontend/core` for component tree, routes, data flow patterns.
-
 ## Living Rules — self-extending from chat
 
-`opencode.json` loads `.FE-RULES` as instruction every session.
-
-**When user states a general pattern/constraint during conversation** (not a one-time task instruction), append it verbatim to `.FE-RULES`:
-- file: `orderaa-web-frontend/.FE-RULES`
+**When user states a general pattern/constraint during conversation** (not a one-time task instruction), append it verbatim to `frontend/.FE-RULES`.
 
 Signal this is a rule: instruction applies to all future work, not just current task. When unsure, ask "is this a permanent rule for all future work?". If yes, append it.
 
@@ -230,14 +206,12 @@ Before editing any code, create isolated worktree:
 
 1. Verify `.gitignore` has `.temp-worktree-parallel-tasks/` — if missing, append it
 2. Generate task slug from description
-3. Create branch: `git checkout -b <slug>`
-4. Create worktree: `git worktree add .temp-worktree-parallel-tasks/<slug>/frontend <slug>`
-5. Work inside worktree: `cd .temp-worktree-parallel-tasks/<slug>/frontend`
-6. Install deps: `npm install`
-7. Initialize CodeGraph index: `codegraph init`
+3. Create branch and worktree: `git worktree add -b <slug> .temp-worktree-parallel-tasks/<slug>/frontend`
+4. Work inside worktree: `cd .temp-worktree-parallel-tasks/<slug>/frontend`
+5. Install deps: `pnpm install`
 
 Read-only tasks (analysis, docs, no code changes) skip this step.
 
 ## Verify step
 
-Every frontend task must end with: `npm run type-check && npm run lint`. Fix any errors. Only skip if change is entirely non-code (assets).
+Every frontend task must end with: `pnpm run type-check && pnpm lint`. Fix any errors. Only skip if change is entirely non-code (assets).

@@ -1,7 +1,8 @@
-import { useQuery, QueryKey } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, QueryKey } from '@tanstack/react-query';
 import http from '@/lib/api/http';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
-import { Order } from '@/types/orders';
+import { useHeldUntilSettled } from '@/lib/query/mutationSync';
+import { FilterOrdersDto, Order } from '@/types/orders';
 import {
   PrintOrderStatisticsResponse,
   ClaimNextPrintOrdersResponse,
@@ -18,16 +19,36 @@ import {
   CallAgainResponse,
 } from '../types';
 
-export const usePrintOrderStatisticsQuery = () => {
-  return useQuery({
-    queryKey: [QUERY_KEYS.PRINT_ORDER_STATISTICS] as QueryKey,
+export const usePrintOrderStatisticsQuery = (filters?: FilterOrdersDto) => {
+  // The packaging cards pin their own status and print split, so the caller's
+  // `status` and `isPrinted` are stripped from both the request and the query
+  // key: honouring them would zero a card and churn the query on every tab or
+  // print toggle. Every other filter narrows the cards, exactly like the list.
+  const {
+    page,
+    limit,
+    skipFilters,
+    orderByDirection,
+    status,
+    isPrinted,
+    ...statisticsFilters
+  } = filters ?? {};
+
+  const query = useQuery({
+    queryKey: [QUERY_KEYS.PRINT_ORDER_STATISTICS, statisticsFilters] as QueryKey,
     queryFn: async () => {
       const response = await http.get<PrintOrderStatisticsResponse>(
-        '/orders/packaging/statistics'
+        '/orders/packaging/statistics',
+        { params: statisticsFilters }
       );
       return response.data;
     },
+    placeholderData: keepPreviousData,
   });
+  const data = useHeldUntilSettled(query.data, query.dataUpdatedAt, [
+    [QUERY_KEYS.ORDERS],
+  ]);
+  return { ...query, data };
 };
 
 export const PRINT_CLAIM_MAX_IDS = 100;

@@ -96,8 +96,6 @@ export function ShippingOrdersContent() {
     setPrintStatus,
     isInitialized,
   } = usePrintOrdersFilters('orderFilters', { ignoreDateRange: true });
-  const { statistics: printStatistics, loading: statsLoading } =
-    usePrintOrderStatistics();
 
   const apiFilters = useMemo(() => {
     const baseFilters = buildApiFiltersFromUrlState(filters);
@@ -106,6 +104,9 @@ export function ShippingOrdersContent() {
     }
     return baseFilters;
   }, [filters, selectedShippingCompany]);
+
+  const { statistics: printStatistics, loading: statsLoading } =
+    usePrintOrderStatistics(apiFilters);
 
   const orderDetailsFilterParams = useMemo(() => {
     const params = new URLSearchParams();
