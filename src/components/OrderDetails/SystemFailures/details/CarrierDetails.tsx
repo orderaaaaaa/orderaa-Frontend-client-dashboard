@@ -1,6 +1,7 @@
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { integrationLabelOf } from '@/lib/shippingCompanies';
 import type {
+  CarrierStatusIgnoredOutsideWindowDetails,
   CarrierStatusIgnoredPartialReturnDetails,
   CarrierStatusIgnoredStaleDetails,
   CarrierStatusNotAppliedDetails,
@@ -13,6 +14,7 @@ type CarrierDetailsValue =
   | CarrierStatusUnmappedDetails
   | CarrierStatusIgnoredPartialReturnDetails
   | CarrierStatusIgnoredStaleDetails
+  | CarrierStatusIgnoredOutsideWindowDetails
   | CarrierStatusNotAppliedDetails;
 
 export function CarrierDetails({ details }: { details: CarrierDetailsValue }) {

@@ -6,6 +6,7 @@ import type {
   AutomationSendFailedDetails,
   AutomationStatusNotAppliedDetails,
   CarrierFailureDetailsBase,
+  CarrierStatusIgnoredOutsideWindowDetails,
   CarrierStatusIgnoredPartialReturnDetails,
   CarrierStatusIgnoredStaleDetails,
   CarrierStatusNotAppliedDetails,
@@ -91,6 +92,14 @@ const isCarrierBase = (value: unknown): value is CarrierFailureDetailsBase =>
 const isCarrierStatusIgnoredStale = (
   value: unknown
 ): value is CarrierStatusIgnoredStaleDetails =>
+  isCarrierBase(value) &&
+  isRecord(value) &&
+  isString(value.incomingStatus) &&
+  isStringOrNull(value.currentStatus);
+
+const isCarrierStatusIgnoredOutsideWindow = (
+  value: unknown
+): value is CarrierStatusIgnoredOutsideWindowDetails =>
   isCarrierBase(value) &&
   isRecord(value) &&
   isString(value.incomingStatus) &&
@@ -210,6 +219,8 @@ export function narrowFailureDetails(
       return isCarrierStatusIgnoredStale(details) ? { code, details } : null;
     case 'CARRIER_STATUS_IGNORED_PARTIAL_RETURN':
       return isCarrierStatusIgnoredPartialReturn(details) ? { code, details } : null;
+    case 'CARRIER_STATUS_IGNORED_OUTSIDE_WINDOW':
+      return isCarrierStatusIgnoredOutsideWindow(details) ? { code, details } : null;
     case 'CARRIER_STATUS_NOT_APPLIED':
       return isCarrierStatusNotApplied(details) ? { code, details } : null;
     case 'SHIPMENT_NOT_CREATED_MISSING_ADDRESS':

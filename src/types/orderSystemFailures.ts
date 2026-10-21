@@ -11,6 +11,7 @@ export type CarrierWebhookFailureCode =
   | 'CARRIER_STATUS_UNMAPPED'
   | 'CARRIER_STATUS_IGNORED_STALE'
   | 'CARRIER_STATUS_IGNORED_PARTIAL_RETURN'
+  | 'CARRIER_STATUS_IGNORED_OUTSIDE_WINDOW'
   | 'CARRIER_STATUS_NOT_APPLIED';
 
 export type ShippingDispatchFailureCode =
@@ -107,6 +108,12 @@ export interface CarrierStatusIgnoredStaleDetails
 export interface CarrierStatusIgnoredPartialReturnDetails
   extends CarrierFailureDetailsBase {
   incomingStatus: string;
+}
+
+export interface CarrierStatusIgnoredOutsideWindowDetails
+  extends CarrierFailureDetailsBase {
+  incomingStatus: string;
+  currentStatus: string | null;
 }
 
 export interface CarrierStatusNotAppliedDetails
@@ -266,6 +273,7 @@ export interface OrderSystemFailureDetailsByCode {
   CARRIER_STATUS_UNMAPPED: CarrierStatusUnmappedDetails;
   CARRIER_STATUS_IGNORED_STALE: CarrierStatusIgnoredStaleDetails;
   CARRIER_STATUS_IGNORED_PARTIAL_RETURN: CarrierStatusIgnoredPartialReturnDetails;
+  CARRIER_STATUS_IGNORED_OUTSIDE_WINDOW: CarrierStatusIgnoredOutsideWindowDetails;
   CARRIER_STATUS_NOT_APPLIED: CarrierStatusNotAppliedDetails;
   SHIPMENT_NOT_CREATED_MISSING_ADDRESS: ShipmentMissingAddressDetails;
   SHIPMENT_NOT_CREATED_MISSING_PHONE: ShipmentMissingPhoneDetails;

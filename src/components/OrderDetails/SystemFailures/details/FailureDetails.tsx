@@ -42,6 +42,7 @@ export function FailureDetails({
     case 'CARRIER_STATUS_UNMAPPED':
     case 'CARRIER_STATUS_IGNORED_STALE':
     case 'CARRIER_STATUS_IGNORED_PARTIAL_RETURN':
+    case 'CARRIER_STATUS_IGNORED_OUTSIDE_WINDOW':
     case 'CARRIER_STATUS_NOT_APPLIED':
       return <CarrierDetails details={narrowed.details} />;
     case 'SHIPMENT_NOT_CREATED_MISSING_ADDRESS':

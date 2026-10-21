@@ -15,6 +15,7 @@ export const ORDER_SYSTEM_FAILURE_LABELS: Record<OrderSystemFailureCode, string>
   CARRIER_STATUS_UNMAPPED: 'وصلت حالة من شركة الشحن غير معروفة للنظام',
   CARRIER_STATUS_IGNORED_STALE: 'تم تجاهل حالة من شركة الشحن لأنها أقدم من حالة الطلب',
   CARRIER_STATUS_IGNORED_PARTIAL_RETURN: 'تم تجاهل حالة المرتجع من شركة الشحن لأن للطلب مرتجعاً جزئياً',
+  CARRIER_STATUS_IGNORED_OUTSIDE_WINDOW: 'تم تجاهل حالة شركة الشحن لأن الطلب خارج مرحلة الشحن',
   CARRIER_STATUS_NOT_APPLIED: 'لم يتم تطبيق حالة شركة الشحن',
   SHIPMENT_NOT_CREATED_MISSING_ADDRESS: 'لم يتم إرسال الطلب للشحن: المحافظة أو المدينة غير موجودة',
   SHIPMENT_NOT_CREATED_MISSING_PHONE: 'لم يتم إرسال الطلب للشحن: رقم الهاتف غير موجود',
@@ -99,6 +100,7 @@ export const SHIPMENT_MISSING_ADDRESS_FIELD_LABELS: Record<ShipmentMissingAddres
 export const NOTICE_CODES: readonly OrderSystemFailureCode[] = [
   'CARRIER_STATUS_IGNORED_STALE',
   'CARRIER_STATUS_IGNORED_PARTIAL_RETURN',
+  'CARRIER_STATUS_IGNORED_OUTSIDE_WINDOW',
 ];
 
 export const isOrderSystemFailureCode = (code: string): code is OrderSystemFailureCode =>
