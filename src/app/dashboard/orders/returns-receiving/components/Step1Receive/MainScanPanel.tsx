@@ -19,15 +19,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { OrderStatus } from '@/types/orders';
 import { getReturnOrderByCode } from '@/lib/api/returns-receiving';
 import {
   UNRECOGNIZED_SCAN_MESSAGE,
   useBarcodeScanner,
   useScannerFeedback,
 } from '@/app/dashboard/orders/print-orders/hooks';
+import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
 import { getCustomerDisplay, type ReturnOrder } from '../../types';
-import { getOrderWarning } from '../../../utils/getOrderWarning';
+import { isReturnReceivableStatus } from '../../constants/returnStatuses';
 import { ScanCountChip } from './ScanCountChip';
 
 interface MainScanPanelProps {
@@ -152,20 +152,19 @@ export function MainScanPanel({
 
       try {
         const order = await getReturnOrderByCode(code);
-        const warning = getOrderWarning(order);
-        if (warning) {
+        if (!isReturnReceivableStatus(order.status)) {
           playErrorSound();
-          toast.error(warning);
-        } else if (order.status === OrderStatus.FINAL_RETURN) {
-          playErrorSound();
-          toast.warn(`تم تحويل الطلب ${code} لمرتجع نهائي مسبقاً`);
+          const statusLabel =
+            ORDER_STATUS_ARABIC_LABELS[order.status] ?? order.status;
+          toast.warn(
+            `الطلب ${code} ليس في حالة قابلة للاستلام (الحالة: ${statusLabel})`,
+          );
           return;
-        } else {
-          playSuccessSound();
-          scannedCodesRef.current = [code, ...scannedCodesRef.current];
-          addMainScanCode(code);
-          setOrderCache((prev) => ({ ...prev, [code]: order }));
         }
+        playSuccessSound();
+        scannedCodesRef.current = [code, ...scannedCodesRef.current];
+        addMainScanCode(code);
+        setOrderCache((prev) => ({ ...prev, [code]: order }));
       } catch (err) {
         playErrorSound();
         const anyErr = err as {

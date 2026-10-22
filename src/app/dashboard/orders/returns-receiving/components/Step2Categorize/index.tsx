@@ -64,7 +64,10 @@ export function Step2Categorize({
       setIsResolving(true);
       try {
         const order = await getReturnOrderByCode(code);
-        if (order.status === OrderStatus.FINAL_RETURN) {
+        if (
+          order.status === OrderStatus.RETURNED_FINAL ||
+          order.status === OrderStatus.FINAL_RETURN
+        ) {
           toast.warn(`الطلب ${code} مُرتجع نهائي بالفعل`);
           return;
         }
