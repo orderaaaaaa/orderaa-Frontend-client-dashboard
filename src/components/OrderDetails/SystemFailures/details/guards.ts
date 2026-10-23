@@ -23,9 +23,11 @@ import type {
   ShipmentDispatchFailureReason,
   ShipmentMissingAddressDetails,
   ShipmentMissingPhoneDetails,
+  MachineTransitionStockShortageDetails,
   StockMovementBypassedDetails,
   StockMovementSkippedDetails,
   StockTransitionBlockedDetails,
+  StoreCreateCreationStockShortageDetails,
   StoreUpdateFailedDetails,
   StoreUpdateNotAppliedCode,
   StoreUpdateNotAppliedDetails,
@@ -205,6 +207,25 @@ const isStockTransitionBlocked = (value: unknown): value is StockTransitionBlock
   Array.isArray(value.lines) &&
   value.lines.every(isFailureStockShortageLine);
 
+const isMachineTransitionStockShortage = (
+  value: unknown
+): value is MachineTransitionStockShortageDetails =>
+  isRecord(value) &&
+  (value.job === 'SCHEDULED' ||
+    value.job === 'VROBO' ||
+    value.job === 'PARKED_RELEASE' ||
+    value.job === 'SHADOW_RELEASE') &&
+  isStringOrNull(value.fromStatus) &&
+  isString(value.intendedStatus);
+
+const isStoreCreateCreationStockShortage = (
+  value: unknown
+): value is StoreCreateCreationStockShortageDetails =>
+  isRecord(value) &&
+  isString(value.targetStatus) &&
+  Array.isArray(value.lines) &&
+  value.lines.every(isFailureStockShortageLine);
+
 const isScheduledTransitionFailed = (
   value: unknown
 ): value is ScheduledTransitionFailedDetails =>
@@ -276,6 +297,10 @@ export function narrowFailureDetails(
       return isStockMovementBypassed(details) ? { code, details } : null;
     case 'STOCK_TRANSITION_BLOCKED':
       return isStockTransitionBlocked(details) ? { code, details } : null;
+    case 'MACHINE_TRANSITION_STOCK_SHORTAGE':
+      return isMachineTransitionStockShortage(details) ? { code, details } : null;
+    case 'STORE_CREATE_CREATION_STOCK_SHORTAGE':
+      return isStoreCreateCreationStockShortage(details) ? { code, details } : null;
     case 'SCHEDULED_TRANSITION_FAILED':
       return isScheduledTransitionFailed(details) ? { code, details } : null;
     case 'ORDER_SHADOWED':

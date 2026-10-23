@@ -211,6 +211,23 @@ export interface StockTransitionBlockedDetails {
   lines: FailureStockShortageLine[];
 }
 
+export type MachineShortageJob =
+  | 'SCHEDULED'
+  | 'VROBO'
+  | 'PARKED_RELEASE'
+  | 'SHADOW_RELEASE';
+
+export interface MachineTransitionStockShortageDetails {
+  job: MachineShortageJob;
+  fromStatus: string | null;
+  intendedStatus: string;
+}
+
+export interface StoreCreateCreationStockShortageDetails {
+  targetStatus: string;
+  lines: FailureStockShortageLine[];
+}
+
 export type ScheduledTransitionJob = 'RESET_ATTEMPTED' | 'POSTPONED_DUE';
 
 export interface ScheduledTransitionFailedDetails {
@@ -316,6 +333,8 @@ export interface OrderSystemFailureDetailsByCode {
   STOCK_MOVEMENT_SKIPPED: StockMovementSkippedDetails;
   STOCK_MOVEMENT_BYPASSED: StockMovementBypassedDetails;
   STOCK_TRANSITION_BLOCKED: StockTransitionBlockedDetails;
+  MACHINE_TRANSITION_STOCK_SHORTAGE: MachineTransitionStockShortageDetails;
+  STORE_CREATE_CREATION_STOCK_SHORTAGE: StoreCreateCreationStockShortageDetails;
   SCHEDULED_TRANSITION_FAILED: ScheduledTransitionFailedDetails;
   ORDER_SHADOWED: OrderShadowedDetails;
   SHADOW_ACTIVATION_FAILED: ShadowActivationFailedDetails;
