@@ -109,6 +109,7 @@ export const PERMISSION_CODES = {
   STOCK_MOVEMENTS_READ: 'stock-movements:read',
   STOCK_MOVEMENTS_ADJUST: 'stock-movements:adjust',
   STOCK_MOVEMENTS_TRANSFER: 'stock-movements:transfer',
+  STOCK_MOVEMENTS_REPAIR_ORDER: 'stock-movements:repair-order',
   STOCK_WORKFLOWS_READ: 'stock-workflows:read',
   STOCK_WORKFLOWS_CREATE: 'stock-workflows:create',
   STOCK_WORKFLOWS_UPDATE: 'stock-workflows:update',
