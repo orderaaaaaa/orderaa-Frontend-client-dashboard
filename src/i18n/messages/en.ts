@@ -150,6 +150,7 @@ const en: Record<keyof typeof ar, string> = {
     'Stock may not be enough for this status, and the system may refuse the confirmation:',
   'stockShortage.reasonShortage': 'Not enough stock',
   'stockShortage.reasonBlocked': 'Confirmation blocked by stock',
+  'stockShortage.event.title': 'Stock shortage blocked a status change',
   'stockShortage.event.transitionBlocked': 'Stock shortage blocked the change from {from} to {to}',
   'stockShortage.event.transitionBlockedWarehouse':
     'Stock shortage in {warehouse} blocked the change from {from} to {to}',
