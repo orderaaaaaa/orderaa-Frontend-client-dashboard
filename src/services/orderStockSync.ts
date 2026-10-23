@@ -1,30 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import api from '@/lib/api';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
-import type {
-  OrderStockRepairResult,
-  PreparedDriftPage,
-} from '@/types/orderStockSync';
-
-export const getPreparedDrift = async (
-  page: number,
-  pageSize: number
-): Promise<PreparedDriftPage> => {
-  const response = await api.get<PreparedDriftPage>(
-    '/stock-movements/orders/prepared-drift',
-    { params: { page, pageSize } }
-  );
-  return response.data;
-};
-
-export const repairOrderStock = async (
-  orderId: number
-): Promise<OrderStockRepairResult> => {
-  const response = await api.post<OrderStockRepairResult>(
-    `/stock-movements/orders/${orderId}/repair`
-  );
-  return response.data;
-};
+import { getPreparedDrift, repairOrderStock } from '@/lib/api/orderStockSync';
 
 export const useOrderStockDriftQuery = (
   page: number,
