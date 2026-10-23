@@ -3,13 +3,13 @@ import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { getPreparedDrift, repairOrderStock } from '@/lib/api/orderStockSync';
 
 export const useOrderStockDriftQuery = (
-  page: number,
-  pageSize: number,
+  cursor: number | null,
+  limit: number,
   enabled: boolean
 ) =>
   useQuery({
-    queryKey: [QUERY_KEYS.ORDER_STOCK_DRIFT, page, pageSize],
-    queryFn: () => getPreparedDrift(page, pageSize),
+    queryKey: [QUERY_KEYS.ORDER_STOCK_DRIFT, cursor, limit],
+    queryFn: () => getPreparedDrift(cursor, limit),
     enabled,
     staleTime: 0,
   });

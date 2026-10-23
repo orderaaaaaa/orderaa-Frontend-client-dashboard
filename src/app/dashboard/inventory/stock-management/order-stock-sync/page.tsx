@@ -24,8 +24,16 @@ const PAGE_SIZE = 50;
 export default function OrderStockSyncPage() {
   const canRead = useHasPermission(PERMISSION_CODES.STOCK_MOVEMENTS_READ);
   const canRepair = useHasPermission(PERMISSION_CODES.STOCK_MOVEMENTS_REPAIR_ORDER);
-  const [page, setPage] = useState(1);
-  const { data, isLoading, isError } = useOrderStockDriftQuery(page, PAGE_SIZE, canRead);
+  const [cursors, setCursors] = useState<(number | null)[]>([null]);
+  const currentCursor = cursors[cursors.length - 1];
+  const { data, isLoading, isError } = useOrderStockDriftQuery(currentCursor, PAGE_SIZE, canRead);
+  const nextCursor = data?.nextCursor ?? null;
+
+  const goNext = () => {
+    if (nextCursor !== null) setCursors((stack) => [...stack, nextCursor]);
+  };
+
+  const goPrevious = () => setCursors((stack) => stack.slice(0, -1));
   const repair = useRepairOrderStockMutation();
 
   const handleRepair = (orderId: number) => {
@@ -58,24 +66,24 @@ export default function OrderStockSyncPage() {
           <Button
             size="sm"
             variant="outline"
-            onClick={() => setPage((current) => current - 1)}
-            disabled={page <= 1}
+            onClick={goPrevious}
+            disabled={cursors.length <= 1}
           >
             السابق
           </Button>
-          <span className="text-sm text-gray-600">صفحة {page}</span>
+          <span className="text-sm text-gray-600">صفحة {cursors.length}</span>
           <Button
             size="sm"
             variant="outline"
-            onClick={() => setPage((current) => current + 1)}
-            disabled={data.items.length < PAGE_SIZE}
+            onClick={goNext}
+            disabled={nextCursor === null}
           >
             التالي
           </Button>
         </div>
       )}
 
-      {data && data.items.length === 0 && (
+      {data && data.items.length === 0 && nextCursor === null && (
         <p className="text-sm text-gray-500">لا توجد طلبات تحتاج مزامنة</p>
       )}
 

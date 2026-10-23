@@ -12,9 +12,8 @@ export interface OrderStockDriftItem {
 }
 
 export interface PreparedDriftPage {
-  page: number;
-  pageSize: number;
   items: OrderStockDriftItem[];
+  nextCursor: number | null;
 }
 
 export interface RepairedVariant {

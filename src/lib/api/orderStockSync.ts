@@ -5,12 +5,12 @@ import type {
 } from '@/types/orderStockSync';
 
 export const getPreparedDrift = async (
-  page: number,
-  pageSize: number
+  cursor: number | null,
+  limit: number
 ): Promise<PreparedDriftPage> => {
   const response = await api.get<PreparedDriftPage>(
     '/stock-movements/orders/prepared-drift',
-    { params: { page, pageSize } }
+    { params: { limit, ...(cursor !== null ? { cursor } : {}) } }
   );
   return response.data;
 };
