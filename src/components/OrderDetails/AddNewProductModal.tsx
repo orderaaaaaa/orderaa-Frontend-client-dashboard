@@ -32,7 +32,7 @@ interface AddNewProductModalProps {
     productId: number,
     attributeOptionIds: number[],
     quantity: number
-  ) => Promise<void>;
+  ) => Promise<boolean>;
 }
 
 export default function AddNewProductModal({
@@ -155,7 +155,12 @@ export default function AddNewProductModal({
         selectedVariants
       );
 
-      await onSave(selectedProduct.id, attributeOptionIds, quantity);
+      const applied = await onSave(
+        selectedProduct.id,
+        attributeOptionIds,
+        quantity
+      );
+      if (!applied) return;
       toast.success('تم إضافة المنتج بنجاح');
       onClose();
     } catch (error: any) {

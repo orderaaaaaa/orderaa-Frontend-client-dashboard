@@ -4,6 +4,10 @@ import type {
   BatchShortageOrder,
   ShortageRenderLine,
 } from '@/lib/api/stockShortage';
+import {
+  ORDER_LINE_EDIT_CONFLICT,
+  type OrderLineEditConflictBody,
+} from '@/types/orderLineEdits';
 
 /**
  * NestJS class-validator failures return `message` as a string array
@@ -148,4 +152,23 @@ export function getOutOfStockBlock(
     message: data.message ?? translate(locale, 'stockShortage.confirmBlocked'),
     lines: data.lines ?? [],
   };
+}
+
+function isOrderLineEditConflictBody(
+  data: unknown
+): data is OrderLineEditConflictBody {
+  if (typeof data !== 'object' || data === null) return false;
+  const body = data as { statusCode?: unknown; code?: unknown; message?: unknown };
+  return (
+    body.statusCode === 409 &&
+    typeof body.message === 'string' &&
+    Object.values(ORDER_LINE_EDIT_CONFLICT).some((code) => code === body.code)
+  );
+}
+
+export function getOrderLineEditConflict(
+  err: unknown
+): OrderLineEditConflictBody | null {
+  const data = (err as { response?: { data?: unknown } })?.response?.data;
+  return isOrderLineEditConflictBody(data) ? data : null;
 }

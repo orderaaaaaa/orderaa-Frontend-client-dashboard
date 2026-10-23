@@ -16,11 +16,14 @@ import AddSameTypeProductModal from './AddSameTypeProductModal';
 import AddNewProductModal from './AddNewProductModal';
 import ProductDetailsModal from './ProductDetailsModal';
 import ProductChangeLogModal from './ProductChangeLogModal';
+import SendBackConfirmModal from './SendBackConfirmModal';
 import {
   useUpdateOrderProduct,
   useDeleteOrderProduct,
   useAddOrderProduct,
 } from '@/services/orders';
+import { ORDER_LINE_EDIT_CONFLICT } from '@/types/orderLineEdits';
+import { getOrderLineEditConflict } from '@/utils/apiError';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { usePermissionCheck } from '@/hooks/usePermissions';
@@ -33,6 +36,11 @@ import Image from 'next/image';
 interface OrderDetailsProductCardProps {
   order: Order;
   isLockedByOther?: boolean;
+}
+
+interface PendingSendBack {
+  retry: () => Promise<unknown>;
+  onApplied: () => void;
 }
 
 function OrderDetailsProductCard({
@@ -66,6 +74,9 @@ function OrderDetailsProductCard({
     useState(false);
   const [viewingProductId, setViewingProductId] = useState<number | null>(null);
   const [isChangeLogOpen, setIsChangeLogOpen] = useState(false);
+  const [pendingSendBack, setPendingSendBack] = useState<PendingSendBack | null>(
+    null
+  );
   const buildProductsData = (orderArg: Order) =>
     orderArg.order_products?.map((orderProduct) => {
       const extra = orderProduct.products.extraDetails;
@@ -114,17 +125,50 @@ function OrderDetailsProductCard({
     setViewingProductId(productId);
   };
 
+  const runLineEdit = async (
+    send: (sendBackToPackaging: boolean) => Promise<unknown>,
+    onApplied: () => void
+  ): Promise<boolean> => {
+    try {
+      await send(false);
+      return true;
+    } catch (err: unknown) {
+      const conflict = getOrderLineEditConflict(err);
+      if (conflict?.code === ORDER_LINE_EDIT_CONFLICT.SEND_BACK_REQUIRED) {
+        setPendingSendBack({ retry: () => send(true), onApplied });
+        return false;
+      }
+      if (conflict?.code === ORDER_LINE_EDIT_CONFLICT.RETURN_REQUIRED) {
+        toast.error(conflict.message);
+        return false;
+      }
+      throw err;
+    }
+  };
+
+  const handleConfirmSendBack = async () => {
+    if (!pendingSendBack) return;
+    await pendingSendBack.retry();
+    pendingSendBack.onApplied();
+    setPendingSendBack(null);
+  };
+
   const handleSaveEdit = async (
     productId: number,
     attributeOptionIds: number[]
   ) => {
+    const notifyUpdated = () => toast.success('تم تحديث المنتج بنجاح');
     try {
-      await updateOrderProductMutation.mutateAsync({
-        orderProductId: productId,
-        attributeOptionIds,
-      });
-
-      toast.success('تم تحديث المنتج بنجاح');
+      const applied = await runLineEdit(
+        (sendBackToPackaging) =>
+          updateOrderProductMutation.mutateAsync({
+            orderProductId: productId,
+            attributeOptionIds,
+            sendBackToPackaging,
+          }),
+        notifyUpdated
+      );
+      if (applied) notifyUpdated();
     } catch (error: any) {
       const message = error?.response?.data?.message;
       toast.error(message || 'فشل في تحديث المنتج');
@@ -132,8 +176,19 @@ function OrderDetailsProductCard({
   };
 
   const handleConfirmDelete = async () => {
-    if (!deletingProductId) return;
-    await deleteOrderProductMutation.mutateAsync(deletingProductId);
+    if (!deletingProductId) return false;
+    const productId = deletingProductId;
+    return runLineEdit(
+      (sendBackToPackaging) =>
+        deleteOrderProductMutation.mutateAsync({
+          orderProductId: productId,
+          sendBackToPackaging,
+        }),
+      () => {
+        setDeletingProductId(null);
+        toast.success('تم حذف المنتج بنجاح');
+      }
+    );
   };
 
   const editingProduct = productsData.find(
@@ -148,6 +203,8 @@ function OrderDetailsProductCard({
     (orderProduct) => orderProduct.id === viewingProductId
   );
 
+  const notifyAdded = () => toast.success('تم إضافة المنتج بنجاح');
+
   const handleAddSameTypeProduct = async (
     attributeOptionIds: number[],
     quantity: number
@@ -159,14 +216,18 @@ function OrderDetailsProductCard({
         return;
       }
 
-      await addOrderProductMutation.mutateAsync({
-        orderId: order.id,
-        productId: referenceProduct.productId,
-        attributeOptionIds,
-        quantity,
-      });
-
-      toast.success('تم إضافة المنتج بنجاح');
+      const applied = await runLineEdit(
+        (sendBackToPackaging) =>
+          addOrderProductMutation.mutateAsync({
+            orderId: order.id,
+            productId: referenceProduct.productId,
+            attributeOptionIds,
+            quantity,
+            sendBackToPackaging,
+          }),
+        notifyAdded
+      );
+      if (applied) notifyAdded();
     } catch (err: any) {
       const msg = err?.response?.data?.message;
       toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في إضافة المنتج');
@@ -177,14 +238,21 @@ function OrderDetailsProductCard({
     productId: number,
     attributeOptionIds: number[],
     quantity: number
-  ) => {
-    await addOrderProductMutation.mutateAsync({
-      orderId: order.id,
-      productId,
-      attributeOptionIds,
-      quantity,
-    });
-  };
+  ): Promise<boolean> =>
+    runLineEdit(
+      (sendBackToPackaging) =>
+        addOrderProductMutation.mutateAsync({
+          orderId: order.id,
+          productId,
+          attributeOptionIds,
+          quantity,
+          sendBackToPackaging,
+        }),
+      () => {
+        notifyAdded();
+        setIsAddNewProductModalOpen(false);
+      }
+    );
 
   return (
     <>
@@ -384,6 +452,12 @@ function OrderDetailsProductCard({
         orderId={order.id}
         onClose={() => setIsAddNewProductModalOpen(false)}
         onSave={handleAddNewProduct}
+      />
+
+      <SendBackConfirmModal
+        isOpen={pendingSendBack !== null}
+        onClose={() => setPendingSendBack(null)}
+        onConfirm={handleConfirmSendBack}
       />
 
       <ProductDetailsModal

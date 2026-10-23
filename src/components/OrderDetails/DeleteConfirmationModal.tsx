@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 interface DeleteConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => Promise<void>;
+  onConfirm: () => Promise<boolean>;
   productName: string;
 }
 
@@ -23,7 +23,8 @@ export default function DeleteConfirmationModal({
   const handleConfirm = async () => {
     setIsDeleting(true);
     try {
-      await onConfirm();
+      const applied = await onConfirm();
+      if (!applied) return;
       toast.success('تم حذف المنتج بنجاح');
       onClose();
     } catch (err: any) {
