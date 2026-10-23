@@ -39,6 +39,7 @@ export type OrderSystemFailureCode =
   | AutomationFailureCode
   | 'STOCK_MOVEMENT_SKIPPED'
   | 'STOCK_MOVEMENT_BYPASSED'
+  | 'STOCK_TRANSITION_BLOCKED'
   | 'SCHEDULED_TRANSITION_FAILED'
   | 'ORDER_SHADOWED'
   | 'SHADOW_ACTIVATION_FAILED'
@@ -67,6 +68,7 @@ export type StockShortageCode =
 export interface FailureStockShortageLine {
   variantId: number;
   warehouseId?: number;
+  warehouseName?: string;
   productName: string;
   variantLabel: string;
   required: number;
@@ -75,6 +77,7 @@ export interface FailureStockShortageLine {
 
 export interface FailureStockShortageBlock {
   warehouseId: number | null;
+  warehouseName?: string;
   lines: FailureStockShortageLine[];
 }
 
@@ -198,6 +201,14 @@ export interface StockMovementBypassedDetails {
   lines: StockMovementBypassedLine[];
 }
 
+export interface StockTransitionBlockedDetails {
+  fromStatus: string | null;
+  toStatus: string;
+  ruleId: number;
+  warehouseName: string | null;
+  lines: FailureStockShortageLine[];
+}
+
 export type ScheduledTransitionJob = 'RESET_ATTEMPTED' | 'POSTPONED_DUE';
 
 export interface ScheduledTransitionFailedDetails {
@@ -302,6 +313,7 @@ export interface OrderSystemFailureDetailsByCode {
   AUTOMATION_STATUS_NOT_APPLIED: AutomationStatusNotAppliedDetails;
   STOCK_MOVEMENT_SKIPPED: StockMovementSkippedDetails;
   STOCK_MOVEMENT_BYPASSED: StockMovementBypassedDetails;
+  STOCK_TRANSITION_BLOCKED: StockTransitionBlockedDetails;
   SCHEDULED_TRANSITION_FAILED: ScheduledTransitionFailedDetails;
   ORDER_SHADOWED: OrderShadowedDetails;
   SHADOW_ACTIVATION_FAILED: ShadowActivationFailedDetails;

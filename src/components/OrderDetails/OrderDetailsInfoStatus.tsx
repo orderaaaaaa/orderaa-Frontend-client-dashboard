@@ -5,6 +5,8 @@ import { useRef, useEffect, useState } from 'react';
 import { Order, OrderEvent } from '@/types/orders';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
+import { readStoredLocale } from '@/i18n/locale';
+import { translate } from '@/i18n/translate';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
 import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
 import { POST_SHIPPING_STATUSES } from '@/types/logistics';
@@ -108,6 +110,35 @@ function EventCard({
       </div>
     </div>
   );
+}
+
+const STOCK_TRANSITION_BLOCKED_EVENT = 'STOCK_TRANSITION_BLOCKED';
+
+function renderOrderEventNote(
+  name: string | null | undefined,
+  note: string | null | undefined,
+  statusLabelOf: (statusKey: string) => string
+): string | null {
+  if (name !== STOCK_TRANSITION_BLOCKED_EVENT || !note) return note || null;
+  let params: Record<string, unknown>;
+  try {
+    const parsed: unknown = JSON.parse(note);
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return note;
+    params = parsed as Record<string, unknown>;
+  } catch {
+    return note;
+  }
+  const { fromStatus, toStatus, warehouseName } = params;
+  if (typeof toStatus !== 'string') return note;
+  const values = {
+    from: typeof fromStatus === 'string' ? statusLabelOf(fromStatus) : '',
+    to: statusLabelOf(toStatus),
+  };
+  const locale = readStoredLocale();
+  if (typeof warehouseName === 'string' && warehouseName !== '') {
+    return translate(locale, 'stockShortage.event.transitionBlockedWarehouse', { ...values, warehouse: warehouseName });
+  }
+  return translate(locale, 'stockShortage.event.transitionBlocked', values);
 }
 
 const LOGISTICS_DEPARTMENTS = new Set(['LOGISTICS', 'COURIER', 'SHIPPING']);
@@ -297,7 +328,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
       rawDate: createdDate.toISOString().split('T')[0],
       time: getTimeAgo(event.createdAt),
       eventType: event.name || 'NEW_ORDER',
-      note: event.note || null,
+      note: renderOrderEventNote(event.name, event.note, getStatusLabel),
       employee: event.employee,
       utmSource: undefined as string | undefined,
       pageName: undefined as string | null | undefined,

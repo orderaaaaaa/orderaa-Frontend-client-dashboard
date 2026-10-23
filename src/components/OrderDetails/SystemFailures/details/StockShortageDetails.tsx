@@ -2,7 +2,7 @@ import { STOCK_SHORTAGE_CODE_LABELS } from '@/constants/orderSystemFailures';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useWarehousesQuery } from '@/services/warehouses';
-import type { FailureStockShortage } from '@/types/orderSystemFailures';
+import type { FailureStockShortage, FailureStockShortageBlock } from '@/types/orderSystemFailures';
 
 export function StockShortageDetails({ shortage }: { shortage: FailureStockShortage }) {
   const canReadWarehouses = useHasPermission(PERMISSION_CODES.WAREHOUSES_READ);
@@ -12,10 +12,11 @@ export function StockShortageDetails({ shortage }: { shortage: FailureStockShort
     { enabled: canReadWarehouses && hasWarehouseBlock }
   );
 
-  const warehouseLabelOf = (warehouseId: number | null) => {
-    if (warehouseId === null) return 'بدون مخزن محدد';
-    const name = warehouses?.data?.find((warehouse) => warehouse.id === warehouseId)?.name;
-    return name ?? `المخزن رقم ${warehouseId}`;
+  const warehouseLabelOf = (block: FailureStockShortageBlock) => {
+    if (block.warehouseName) return block.warehouseName;
+    if (block.warehouseId === null) return 'بدون مخزن محدد';
+    const name = warehouses?.data?.find((warehouse) => warehouse.id === block.warehouseId)?.name;
+    return name ?? `المخزن رقم ${block.warehouseId}`;
   };
 
   return (
@@ -26,7 +27,7 @@ export function StockShortageDetails({ shortage }: { shortage: FailureStockShort
       {shortage.blocks.map((block, blockIndex) => (
         <div key={`${block.warehouseId ?? 'none'}-${blockIndex}`} className="flex flex-col gap-1">
           <span className="text-xs font-semibold text-gray-600">
-            {warehouseLabelOf(block.warehouseId)}
+            {warehouseLabelOf(block)}
           </span>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

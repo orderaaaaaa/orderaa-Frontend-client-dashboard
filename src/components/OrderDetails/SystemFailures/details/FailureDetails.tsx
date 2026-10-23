@@ -15,6 +15,7 @@ import { GenericDetails } from './GenericDetails';
 import { isStoreUpdateNotAppliedFailure, narrowFailureDetails } from './guards';
 import { BypassedVariantsDetails } from './BypassedVariantsDetails';
 import { SkippedVariantsDetails } from './SkippedVariantsDetails';
+import { StockTransitionBlockedDetails } from './StockTransitionBlockedDetails';
 import { StoreUpdateDetails } from './StoreUpdateDetails';
 
 const labelOf = <K extends string>(labels: Record<K, string>, value: K) => labels[value] ?? value;
@@ -149,6 +150,8 @@ export function FailureDetails({
       );
     case 'STOCK_MOVEMENT_BYPASSED':
       return <BypassedVariantsDetails details={narrowed.details} />;
+    case 'STOCK_TRANSITION_BLOCKED':
+      return <StockTransitionBlockedDetails details={narrowed.details} />;
     case 'SCHEDULED_TRANSITION_FAILED':
       return (
         <div className="flex flex-col gap-3">

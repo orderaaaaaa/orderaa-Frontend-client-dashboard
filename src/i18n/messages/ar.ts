@@ -164,6 +164,9 @@ const ar = {
     'المخزون قد لا يكفي لهذه الحالة، وقد يرفض النظام التأكيد:',
   'stockShortage.reasonShortage': 'المخزون لا يكفي',
   'stockShortage.reasonBlocked': 'التأكيد ممنوع بسبب المخزون',
+  'stockShortage.event.transitionBlocked': 'منع نقص المخزون تغيير الحالة من {from} إلى {to}',
+  'stockShortage.event.transitionBlockedWarehouse':
+    'منع نقص المخزون في {warehouse} تغيير الحالة من {from} إلى {to}',
   'orderDetails.stock.bypassed': 'لا تُحرّك حركة مخزون',
 } as const;
 

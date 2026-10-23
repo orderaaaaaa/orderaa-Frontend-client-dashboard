@@ -12,6 +12,7 @@ import type {
   CarrierStatusNotAppliedDetails,
   FailureReason,
   FailureStockShortage,
+  FailureStockShortageLine,
   OrderShadowedDetails,
   OrderSystemFailure,
   OrderSystemFailureCode,
@@ -24,6 +25,7 @@ import type {
   ShipmentMissingPhoneDetails,
   StockMovementBypassedDetails,
   StockMovementSkippedDetails,
+  StockTransitionBlockedDetails,
   StoreUpdateFailedDetails,
   StoreUpdateNotAppliedCode,
   StoreUpdateNotAppliedDetails,
@@ -47,6 +49,15 @@ const isStringOrNull = (value: unknown): value is string | null =>
 const isNumberArray = (value: unknown): value is number[] =>
   Array.isArray(value) && value.every((item) => typeof item === 'number');
 
+const isFailureStockShortageLine = (value: unknown): value is FailureStockShortageLine =>
+  isRecord(value) &&
+  typeof value.variantId === 'number' &&
+  isString(value.productName) &&
+  isString(value.variantLabel) &&
+  typeof value.required === 'number' &&
+  typeof value.available === 'number' &&
+  (value.warehouseName === undefined || isString(value.warehouseName));
+
 export const isFailureStockShortage = (value: unknown): value is FailureStockShortage =>
   isRecord(value) &&
   isString(value.code) &&
@@ -57,15 +68,7 @@ export const isFailureStockShortage = (value: unknown): value is FailureStockSho
       isRecord(block) &&
       (block.warehouseId === null || typeof block.warehouseId === 'number') &&
       Array.isArray(block.lines) &&
-      block.lines.every(
-        (line) =>
-          isRecord(line) &&
-          typeof line.variantId === 'number' &&
-          isString(line.productName) &&
-          isString(line.variantLabel) &&
-          typeof line.required === 'number' &&
-          typeof line.available === 'number'
-      )
+      block.lines.every(isFailureStockShortageLine)
   );
 
 export const isFailureReason = (value: unknown): value is FailureReason => {
@@ -193,6 +196,15 @@ const isStockMovementBypassed = (value: unknown): value is StockMovementBypassed
       line.predecessorKeys.every(isString)
   );
 
+const isStockTransitionBlocked = (value: unknown): value is StockTransitionBlockedDetails =>
+  isRecord(value) &&
+  isStringOrNull(value.fromStatus) &&
+  isString(value.toStatus) &&
+  typeof value.ruleId === 'number' &&
+  isStringOrNull(value.warehouseName) &&
+  Array.isArray(value.lines) &&
+  value.lines.every(isFailureStockShortageLine);
+
 const isScheduledTransitionFailed = (
   value: unknown
 ): value is ScheduledTransitionFailedDetails =>
@@ -262,6 +274,8 @@ export function narrowFailureDetails(
       return isStockMovementSkipped(details) ? { code, details } : null;
     case 'STOCK_MOVEMENT_BYPASSED':
       return isStockMovementBypassed(details) ? { code, details } : null;
+    case 'STOCK_TRANSITION_BLOCKED':
+      return isStockTransitionBlocked(details) ? { code, details } : null;
     case 'SCHEDULED_TRANSITION_FAILED':
       return isScheduledTransitionFailed(details) ? { code, details } : null;
     case 'ORDER_SHADOWED':
