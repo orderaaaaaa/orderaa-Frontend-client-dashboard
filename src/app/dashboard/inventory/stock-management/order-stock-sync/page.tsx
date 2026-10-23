@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useState } from 'react';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { getApiErrorMessage, getOutOfStockBlock, formatStockShortageLines } from '@/utils/apiError';
@@ -23,7 +24,8 @@ const PAGE_SIZE = 50;
 export default function OrderStockSyncPage() {
   const canRead = useHasPermission(PERMISSION_CODES.STOCK_MOVEMENTS_READ);
   const canRepair = useHasPermission(PERMISSION_CODES.STOCK_MOVEMENTS_REPAIR_ORDER);
-  const { data, isLoading, isError } = useOrderStockDriftQuery(1, PAGE_SIZE, canRead);
+  const [page, setPage] = useState(1);
+  const { data, isLoading, isError } = useOrderStockDriftQuery(page, PAGE_SIZE, canRead);
   const repair = useRepairOrderStockMutation();
 
   const handleRepair = (orderId: number) => {
@@ -50,6 +52,28 @@ export default function OrderStockSyncPage() {
 
       {isLoading && <p className="text-sm text-gray-500">جارٍ التحميل…</p>}
       {isError && <p className="text-sm text-red-600">تعذر تحميل الطلبات</p>}
+
+      {data && (
+        <div className="flex items-center justify-between gap-3">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setPage((current) => current - 1)}
+            disabled={page <= 1}
+          >
+            السابق
+          </Button>
+          <span className="text-sm text-gray-600">صفحة {page}</span>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setPage((current) => current + 1)}
+            disabled={data.items.length < PAGE_SIZE}
+          >
+            التالي
+          </Button>
+        </div>
+      )}
 
       {data && data.items.length === 0 && (
         <p className="text-sm text-gray-500">لا توجد طلبات تحتاج مزامنة</p>
