@@ -59,6 +59,7 @@ export const QUERY_KEYS = {
   WAREHOUSE_DETAIL: 'warehouse-detail',
   WAREHOUSE_STOCK: 'warehouse-stock',
   STOCK_WORKFLOWS: 'stock-workflows',
+  STOCK_MODE: 'stock-mode',
   ORDER_STOCK_AVAILABILITY: 'order-stock-availability',
   PRODUCT_VARIANT_AVAILABILITY: 'product-variant-availability',
   STOCK_MOVEMENTS: 'stock-movements',

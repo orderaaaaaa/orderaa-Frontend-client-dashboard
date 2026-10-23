@@ -1,6 +1,6 @@
 'use client';
 
-import { StockScopeList } from './components';
+import { StockModeSection, StockScopeList } from './components';
 
 export default function StockManagementPage() {
   return (
@@ -11,6 +11,7 @@ export default function StockManagementPage() {
           اختر مخزنًا لعرض أرصدة المنتجات فيه
         </p>
       </div>
+      <StockModeSection />
       <StockScopeList />
     </div>
   );
