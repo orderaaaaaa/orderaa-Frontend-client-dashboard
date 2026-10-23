@@ -17,6 +17,7 @@ import AddNewProductModal from './AddNewProductModal';
 import ProductDetailsModal from './ProductDetailsModal';
 import ProductChangeLogModal from './ProductChangeLogModal';
 import SendBackConfirmModal from './SendBackConfirmModal';
+import OrderStockReturnRequiredModal from './OrderStockReturnRequiredModal';
 import {
   useUpdateOrderProduct,
   useDeleteOrderProduct,
@@ -75,6 +76,9 @@ function OrderDetailsProductCard({
   const [viewingProductId, setViewingProductId] = useState<number | null>(null);
   const [isChangeLogOpen, setIsChangeLogOpen] = useState(false);
   const [pendingSendBack, setPendingSendBack] = useState<PendingSendBack | null>(
+    null
+  );
+  const [pendingStockReturn, setPendingStockReturn] = useState<string | null>(
     null
   );
   const buildProductsData = (orderArg: Order) =>
@@ -139,7 +143,7 @@ function OrderDetailsProductCard({
         return false;
       }
       if (conflict?.code === ORDER_LINE_EDIT_CONFLICT.RETURN_REQUIRED) {
-        toast.error(conflict.message);
+        setPendingStockReturn(conflict.message);
         return false;
       }
       throw err;
@@ -474,6 +478,13 @@ function OrderDetailsProductCard({
         isOpen={pendingSendBack !== null}
         onClose={() => setPendingSendBack(null)}
         onConfirm={handleConfirmSendBack}
+      />
+
+      <OrderStockReturnRequiredModal
+        isOpen={pendingStockReturn !== null}
+        onClose={() => setPendingStockReturn(null)}
+        orderId={order.id}
+        message={pendingStockReturn ?? ''}
       />
 
       <ProductDetailsModal
