@@ -69,7 +69,7 @@ export default function OrderStockSyncPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.items.map((item) => (
+              {data.items.map((item, index) => (
                 <TableRow key={`${item.orderId}-${item.variantId}`}>
                   <TableCell>{item.orderCode}</TableCell>
                   <TableCell>{item.variantId}</TableCell>
@@ -78,13 +78,15 @@ export default function OrderStockSyncPage() {
                   <TableCell className="text-red-600">{item.difference}</TableCell>
                   {canRepair && (
                     <TableCell>
-                      <Button
-                        size="sm"
-                        onClick={() => handleRepair(item.orderId)}
-                        disabled={repair.isPending}
-                      >
-                        مزامنة المخزون
-                      </Button>
+                      {data.items.findIndex((other) => other.orderId === item.orderId) === index && (
+                        <Button
+                          size="sm"
+                          onClick={() => handleRepair(item.orderId)}
+                          disabled={repair.isPending}
+                        >
+                          مزامنة المخزون
+                        </Button>
+                      )}
                     </TableCell>
                   )}
                 </TableRow>
