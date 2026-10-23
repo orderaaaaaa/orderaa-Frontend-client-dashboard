@@ -131,6 +131,16 @@ export function WarehouseDetailContent({
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
+            onClick={() =>
+              router.push(
+                `/dashboard/inventory/stock-management/opening-count?warehouseId=${warehouseId}`
+              )
+            }
+          >
+            عدّ المخزون الافتتاحي
+          </Button>
+          <Button
+            variant="outline"
             disabled={selectedItems.length === 0}
             onClick={() => setIsAdjustOpen(true)}
           >
