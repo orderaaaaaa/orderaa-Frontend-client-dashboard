@@ -156,6 +156,8 @@ const ar = {
   'stockShortage.lineNoVariant': '{product}: المطلوب {required}، المتاح {available}',
   'stockShortage.confirmBlocked':
     'لا يمكن تأكيد الطلب لأن المنتجات التالية غير متوفرة بالمخزون وإعداداتها تمنع التأكيد، اختر منتجًا آخر:',
+  'stockShortage.insufficientFallback': 'المخزون غير كافٍ لإتمام هذه العملية.',
+  'stockShortage.batchFallback': 'لم تُحفظ العملية لأن بعض الطلبات لا يكفيها المخزون.',
   'stockShortage.transferOverAvailable':
     'الكمية المنقولة أكبر من المتاح في المخزن:',
 } as const;

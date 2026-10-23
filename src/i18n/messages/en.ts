@@ -142,6 +142,8 @@ const en: Record<keyof typeof ar, string> = {
   'stockShortage.lineNoVariant': '{product}: required {required}, available {available}',
   'stockShortage.confirmBlocked':
     'Cannot confirm: the following products are out of stock and their settings forbid it, choose another product:',
+  'stockShortage.insufficientFallback': 'There is not enough stock to complete this action.',
+  'stockShortage.batchFallback': 'The batch was not saved because some orders lack stock.',
   'stockShortage.transferOverAvailable':
     'The quantity to transfer exceeds what is available in the warehouse:',
 };

@@ -38,15 +38,6 @@ export function getApiErrorStatus(err: unknown): number | undefined {
  * disabled from the availability response. It fires when stock moved between
  * the agent seeing the number and pressing confirm.
  */
-export interface OutOfStockBlockedLine {
-  orderProductId: number;
-  variantId: number;
-  productName: string;
-  variantLabel: string;
-  required: number;
-  available: number;
-}
-
 export interface StockShortageLineInput {
   variantId: number;
   productName: string;
@@ -103,13 +94,12 @@ export function getOutOfStockBlock(
   )
     return null;
 
-  const message =
-    data.message ??
-    translate(readStoredLocale(), 'stockShortage.confirmBlocked');
+  const locale = readStoredLocale();
 
   if (data.code === 'BATCH_INSUFFICIENT_STOCK') {
     return {
-      message,
+      message:
+        data.message ?? translate(locale, 'stockShortage.batchFallback'),
       lines: (data.orders ?? []).flatMap((order) =>
         order.lines.map((line) => ({
           ...line,
@@ -119,5 +109,16 @@ export function getOutOfStockBlock(
     };
   }
 
-  return { message, lines: data.lines ?? [] };
+  if (data.code === 'INSUFFICIENT_STOCK_FOR_VARIANT') {
+    return {
+      message:
+        data.message ?? translate(locale, 'stockShortage.insufficientFallback'),
+      lines: data.lines ?? [],
+    };
+  }
+
+  return {
+    message: data.message ?? translate(locale, 'stockShortage.confirmBlocked'),
+    lines: data.lines ?? [],
+  };
 }
