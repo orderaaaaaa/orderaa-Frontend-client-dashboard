@@ -840,7 +840,10 @@ export function PrintOrdersContent() {
           onChangeProduct={handleChangeProduct}
           position="fixed"
           isLoading={isActionLoading}
-          hideAwaitingPackaging={filters.status === 'WAITING_FOR_PACKAGING'}
+          hideAwaitingPackaging={
+            filters.status === 'WAITING_FOR_PACKAGING' ||
+            filters.status === 'PREPARED'
+          }
         />
       )}
 
