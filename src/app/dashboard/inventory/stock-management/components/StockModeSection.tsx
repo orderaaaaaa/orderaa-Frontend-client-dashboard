@@ -16,6 +16,7 @@ import {
 import { getApiErrorMessage } from '@/utils/apiError';
 
 const COUNT_PAGE_HREF = '/dashboard/inventory/stock-management/opening-count';
+const ORDER_STOCK_SYNC_HREF = '/dashboard/inventory/stock-management/order-stock-sync';
 
 const MODE_LABELS = {
   TRIAL: 'وضع التجربة: تُسجَّل الحركات حتى لو كان الرصيد سالبًا، ولا يتم منع أي طلب بسبب المخزون.',
@@ -30,6 +31,7 @@ export function StockModeSection() {
   const { hasPermission } = usePermissionCheck();
   const canRead = hasPermission(PERMISSION_CODES.STOCK_WORKFLOWS_READ);
   const canUpdate = hasPermission(PERMISSION_CODES.STOCK_WORKFLOWS_UPDATE);
+  const canReadMovements = hasPermission(PERMISSION_CODES.STOCK_MOVEMENTS_READ);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const { data: mode } = useStockModeQuery(canRead);
@@ -94,6 +96,14 @@ export function StockModeSection() {
           >
             عدّ المخزون الافتتاحي
           </Link>
+          {canReadMovements && (
+            <Link
+              href={ORDER_STOCK_SYNC_HREF}
+              className="text-sm text-primary underline-offset-4 hover:underline"
+            >
+              مزامنة مخزون الطلبات
+            </Link>
+          )}
           {canUpdate && mode.mode === 'TRIAL' && (
             <Button size="sm" onClick={() => setDialogOpen(true)}>
               بدء التشغيل الفعلي للمخزون
