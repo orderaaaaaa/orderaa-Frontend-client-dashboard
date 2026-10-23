@@ -197,7 +197,7 @@ function lineEditSentBackNote(note: string | null | undefined): string | null {
   }
   const bypassed = params.bypassedVariantIds;
   if (Array.isArray(bypassed) && bypassed.length > 0) {
-    parts.push(translate(locale, 'lineEdit.event.bypassed'));
+    parts.push(translate(locale, 'lineEdit.event.bypassed', { count: bypassed.length }));
   }
   return parts.length > 0 ? parts.join('، ') : null;
 }

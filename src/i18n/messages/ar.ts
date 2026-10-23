@@ -169,7 +169,7 @@ const ar = {
   'lineEdit.event.action.add': 'إضافة منتج',
   'lineEdit.event.action.update': 'تعديل منتج',
   'lineEdit.event.action.delete': 'حذف منتج',
-  'lineEdit.event.bypassed': 'لم تُنقل كمية لبعض المتغيرات',
+  'lineEdit.event.bypassed': 'لم تُنقل كمية {count} من المتغيرات',
   'stockShortage.event.transitionBlocked': 'منع نقص المخزون تغيير الحالة من {fromStatus} إلى {toStatus}',
   'stockShortage.event.transitionBlockedWarehouse':
     'منع نقص المخزون في {warehouseName} تغيير الحالة من {fromStatus} إلى {toStatus}',
