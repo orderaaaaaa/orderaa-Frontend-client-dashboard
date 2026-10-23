@@ -155,6 +155,25 @@ const en: Record<keyof typeof ar, string> = {
   'stockShortage.event.transitionBlockedWarehouse':
     'Stock shortage in {warehouse} blocked the change from {from} to {to}',
   'orderDetails.stock.bypassed': 'No stock movement',
+  'stockShortage.event.carrierNotApplied':
+    'The carrier reported {status} but the status was not updated: stock shortage for {productName} in {warehouseName}',
+  'stockShortage.event.machineTransition':
+    'The transition to {status} was not applied due to a stock shortage: {productName} in {warehouseName}',
+  'stockShortage.event.storeCreation':
+    'The store order arrived but its stock was not reserved due to a stock shortage: {productName} in {warehouseName}',
+  'stockShortage.event.carrierNotAppliedNoWarehouse':
+    'The carrier reported {status} but the status was not updated: stock shortage for {productName}',
+  'stockShortage.event.machineTransitionNoWarehouse':
+    'The transition to {status} was not applied due to a stock shortage: {productName}',
+  'stockShortage.event.storeCreationNoWarehouse':
+    'The store order arrived but its stock was not reserved due to a stock shortage: {productName}',
+  'stockShortage.event.shortageTitle': 'Stock shortage',
+  'stockShortage.event.retryTitle': 'Re-apply status',
+  'stockShortage.event.retryApplied':
+    'The status was re-applied after the stock was fixed: {status}',
+  'orderSystemFailures.retry.action': 'Re-apply status',
+  'orderSystemFailures.retry.success': 'Status re-applied',
+  'orderSystemFailures.retry.failed': 'Could not re-apply the status',
 };
 
 export default en;

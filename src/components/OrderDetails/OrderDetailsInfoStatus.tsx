@@ -112,33 +112,97 @@ function EventCard({
   );
 }
 
-const STOCK_TRANSITION_BLOCKED_EVENT = 'STOCK_TRANSITION_BLOCKED';
+const STOCK_SHORTAGE_EVENT_MESSAGES = {
+  STOCK_SHORTAGE_CARRIER_STATUS_NOT_APPLIED: {
+    key: 'stockShortage.event.carrierNotApplied',
+    withoutWarehouseKey: 'stockShortage.event.carrierNotAppliedNoWarehouse',
+    title: 'stockShortage.event.shortageTitle',
+    fields: ['status', 'productName', 'warehouseName'],
+  },
+  STOCK_SHORTAGE_MACHINE_TRANSITION: {
+    key: 'stockShortage.event.machineTransition',
+    withoutWarehouseKey: 'stockShortage.event.machineTransitionNoWarehouse',
+    title: 'stockShortage.event.shortageTitle',
+    fields: ['status', 'productName', 'warehouseName'],
+  },
+  STOCK_SHORTAGE_STORE_CREATION: {
+    key: 'stockShortage.event.storeCreation',
+    withoutWarehouseKey: 'stockShortage.event.storeCreationNoWarehouse',
+    title: 'stockShortage.event.shortageTitle',
+    fields: ['productName', 'warehouseName'],
+  },
+  STOCK_SHORTAGE_RETRY_APPLIED: {
+    key: 'stockShortage.event.retryApplied',
+    withoutWarehouseKey: null,
+    title: 'stockShortage.event.retryTitle',
+    fields: ['status'],
+  },
+} as const;
+
+type StockShortageEventName = keyof typeof STOCK_SHORTAGE_EVENT_MESSAGES;
+
+function isStockShortageEventName(
+  name: string
+): name is StockShortageEventName {
+  return Object.prototype.hasOwnProperty.call(
+    STOCK_SHORTAGE_EVENT_MESSAGES,
+    name
+  );
+}
+
+function parseEventParams(note: string): Record<string, unknown> | null {
+  try {
+    const parsed: unknown = JSON.parse(note);
+    if (
+      typeof parsed !== 'object' ||
+      parsed === null ||
+      Array.isArray(parsed)
+    ) {
+      return null;
+    }
+    return parsed as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+function timelineEventTitle(
+  name: string,
+  statusLabelOf: (statusKey: string) => string
+): string {
+  if (!isStockShortageEventName(name)) return statusLabelOf(name);
+  return translate(readStoredLocale(), STOCK_SHORTAGE_EVENT_MESSAGES[name].title);
+}
 
 function renderOrderEventNote(
   name: string | null | undefined,
   note: string | null | undefined,
   statusLabelOf: (statusKey: string) => string
 ): string | null {
-  if (name !== STOCK_TRANSITION_BLOCKED_EVENT || !note) return note || null;
-  let params: Record<string, unknown>;
-  try {
-    const parsed: unknown = JSON.parse(note);
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return note;
-    params = parsed as Record<string, unknown>;
-  } catch {
-    return note;
+  if (!name || !isStockShortageEventName(name)) return note || null;
+  const message = STOCK_SHORTAGE_EVENT_MESSAGES[name];
+  const params = note ? parseEventParams(note) : null;
+  if (!params) return name;
+  const warehouseName = params.warehouseName;
+  const warehouseMissing =
+    typeof warehouseName !== 'string' || warehouseName === '';
+  const omitWarehouse =
+    warehouseMissing && message.withoutWarehouseKey !== null;
+  const key =
+    omitWarehouse && message.withoutWarehouseKey !== null
+      ? message.withoutWarehouseKey
+      : message.key;
+  const values: Record<string, string> = {};
+  for (const field of message.fields) {
+    if (omitWarehouse && field === 'warehouseName') continue;
+    const value = params[field];
+    if (typeof value !== 'string' || value === '') return name;
+    values[field] = value;
   }
-  const { fromStatus, toStatus, warehouseName } = params;
-  if (typeof toStatus !== 'string') return note;
-  const values = {
-    from: typeof fromStatus === 'string' ? statusLabelOf(fromStatus) : '',
-    to: statusLabelOf(toStatus),
-  };
-  const locale = readStoredLocale();
-  if (typeof warehouseName === 'string' && warehouseName !== '') {
-    return translate(locale, 'stockShortage.event.transitionBlockedWarehouse', { ...values, warehouse: warehouseName });
+  if (values.status !== undefined) {
+    values.status = statusLabelOf(values.status);
   }
-  return translate(locale, 'stockShortage.event.transitionBlocked', values);
+  return translate(readStoredLocale(), key, values);
 }
 
 const LOGISTICS_DEPARTMENTS = new Set(['LOGISTICS', 'COURIER', 'SHIPPING']);
@@ -319,12 +383,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
   const isPostShipping = POST_SHIPPING_STATUSES.has(order.status);
 
   const events: MappedEvent[] = allEvents.map((event: OrderEvent, index: number) => {
-    const statusLabel =
-      event.name === STOCK_TRANSITION_BLOCKED_EVENT
-        ? translate(readStoredLocale(), 'stockShortage.event.title')
-        : event.name
-          ? getStatusLabel(event.name)
-          : 'حدث';
+    const statusLabel = event.name ? timelineEventTitle(event.name, getStatusLabel) : 'حدث';
     const createdDate = new Date(event.createdAt);
     return {
       id: event.id || index + 1,
