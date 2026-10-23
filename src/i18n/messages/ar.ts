@@ -165,6 +165,11 @@ const ar = {
   'stockShortage.reasonShortage': 'المخزون لا يكفي',
   'stockShortage.reasonBlocked': 'التأكيد ممنوع بسبب المخزون',
   'stockShortage.event.title': 'منع نقص المخزون تغيير الحالة',
+  'lineEdit.event.title': 'أُعيد إلى التغليف لتعديل المنتجات',
+  'lineEdit.event.action.add': 'إضافة منتج',
+  'lineEdit.event.action.update': 'تعديل منتج',
+  'lineEdit.event.action.delete': 'حذف منتج',
+  'lineEdit.event.bypassed': 'لم تُنقل كمية لبعض المتغيرات',
   'stockShortage.event.transitionBlocked': 'منع نقص المخزون تغيير الحالة من {fromStatus} إلى {toStatus}',
   'stockShortage.event.transitionBlockedWarehouse':
     'منع نقص المخزون في {warehouseName} تغيير الحالة من {fromStatus} إلى {toStatus}',

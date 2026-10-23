@@ -172,10 +172,43 @@ function parseEventParams(note: string): Record<string, unknown> | null {
   }
 }
 
+const LINE_EDIT_SENT_BACK_EVENT = 'ORDER_SENT_BACK_FOR_LINE_EDIT';
+
+const LINE_EDIT_ACTION_LABEL_KEYS = {
+  ADD: 'lineEdit.event.action.add',
+  UPDATE: 'lineEdit.event.action.update',
+  DELETE: 'lineEdit.event.action.delete',
+} as const;
+
+function isLineEditAction(
+  value: string
+): value is keyof typeof LINE_EDIT_ACTION_LABEL_KEYS {
+  return Object.prototype.hasOwnProperty.call(LINE_EDIT_ACTION_LABEL_KEYS, value);
+}
+
+function lineEditSentBackNote(note: string | null | undefined): string | null {
+  const params = note ? parseEventParams(note) : null;
+  if (!params) return null;
+  const locale = readStoredLocale();
+  const parts: string[] = [];
+  const action = params.lineAction;
+  if (typeof action === 'string' && isLineEditAction(action)) {
+    parts.push(translate(locale, LINE_EDIT_ACTION_LABEL_KEYS[action]));
+  }
+  const bypassed = params.bypassedVariantIds;
+  if (Array.isArray(bypassed) && bypassed.length > 0) {
+    parts.push(translate(locale, 'lineEdit.event.bypassed'));
+  }
+  return parts.length > 0 ? parts.join('، ') : null;
+}
+
 function timelineEventTitle(
   name: string,
   statusLabelOf: (statusKey: string) => string
 ): string {
+  if (name === LINE_EDIT_SENT_BACK_EVENT) {
+    return translate(readStoredLocale(), 'lineEdit.event.title');
+  }
   if (!isStockShortageEventName(name)) return statusLabelOf(name);
   return translate(readStoredLocale(), STOCK_SHORTAGE_EVENT_MESSAGES[name].title);
 }
@@ -185,6 +218,7 @@ function renderOrderEventNote(
   note: string | null | undefined,
   statusLabelOf: (statusKey: string) => string
 ): string | null {
+  if (name === LINE_EDIT_SENT_BACK_EVENT) return lineEditSentBackNote(note);
   if (!name || !isStockShortageEventName(name)) return note || null;
   const message = STOCK_SHORTAGE_EVENT_MESSAGES[name];
   const params = note ? parseEventParams(note) : null;

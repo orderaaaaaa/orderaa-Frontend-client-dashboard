@@ -151,6 +151,11 @@ const en: Record<keyof typeof ar, string> = {
   'stockShortage.reasonShortage': 'Not enough stock',
   'stockShortage.reasonBlocked': 'Confirmation blocked by stock',
   'stockShortage.event.title': 'Stock shortage blocked a status change',
+  'lineEdit.event.title': 'Sent back to packaging to edit products',
+  'lineEdit.event.action.add': 'Product added',
+  'lineEdit.event.action.update': 'Product edited',
+  'lineEdit.event.action.delete': 'Product deleted',
+  'lineEdit.event.bypassed': 'Stock was not moved for some variants',
   'stockShortage.event.transitionBlocked': 'Stock shortage blocked the change from {fromStatus} to {toStatus}',
   'stockShortage.event.transitionBlockedWarehouse':
     'Stock shortage in {warehouseName} blocked the change from {fromStatus} to {toStatus}',
