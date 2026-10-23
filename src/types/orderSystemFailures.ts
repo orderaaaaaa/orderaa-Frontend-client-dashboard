@@ -38,6 +38,7 @@ export type OrderSystemFailureCode =
   | ShippingDispatchFailureCode
   | AutomationFailureCode
   | 'STOCK_MOVEMENT_SKIPPED'
+  | 'STOCK_MOVEMENT_BYPASSED'
   | 'SCHEDULED_TRANSITION_FAILED'
   | 'ORDER_SHADOWED'
   | 'SHADOW_ACTIVATION_FAILED'
@@ -181,6 +182,22 @@ export interface StockMovementSkippedDetails {
   variantIdsTruncatedCount?: number;
 }
 
+export interface StockMovementBypassedLine {
+  variantId: number;
+  productName: string;
+  variantLabel: string;
+  fromWarehouseName: string | null;
+  ruleId: number;
+  predecessorKeys: string[];
+}
+
+export interface StockMovementBypassedDetails {
+  fromStatus: string | null;
+  toStatus: string;
+  appliedVariantIds: number[];
+  lines: StockMovementBypassedLine[];
+}
+
 export type ScheduledTransitionJob = 'RESET_ATTEMPTED' | 'POSTPONED_DUE';
 
 export interface ScheduledTransitionFailedDetails {
@@ -284,6 +301,7 @@ export interface OrderSystemFailureDetailsByCode {
   AUTOMATION_RESULT_NOT_APPLIED: AutomationResultNotAppliedDetails;
   AUTOMATION_STATUS_NOT_APPLIED: AutomationStatusNotAppliedDetails;
   STOCK_MOVEMENT_SKIPPED: StockMovementSkippedDetails;
+  STOCK_MOVEMENT_BYPASSED: StockMovementBypassedDetails;
   SCHEDULED_TRANSITION_FAILED: ScheduledTransitionFailedDetails;
   ORDER_SHADOWED: OrderShadowedDetails;
   SHADOW_ACTIVATION_FAILED: ShadowActivationFailedDetails;

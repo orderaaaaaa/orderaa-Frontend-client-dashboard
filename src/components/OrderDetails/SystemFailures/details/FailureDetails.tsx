@@ -13,6 +13,7 @@ import { DetailField, DetailGrid, EMPTY_VALUE, formatDetailValue } from './Detai
 import { FailureReasonDetails } from './FailureReasonDetails';
 import { GenericDetails } from './GenericDetails';
 import { isStoreUpdateNotAppliedFailure, narrowFailureDetails } from './guards';
+import { BypassedVariantsDetails } from './BypassedVariantsDetails';
 import { SkippedVariantsDetails } from './SkippedVariantsDetails';
 import { StoreUpdateDetails } from './StoreUpdateDetails';
 
@@ -146,6 +147,8 @@ export function FailureDetails({
           orderProducts={order.order_products ?? []}
         />
       );
+    case 'STOCK_MOVEMENT_BYPASSED':
+      return <BypassedVariantsDetails details={narrowed.details} />;
     case 'SCHEDULED_TRANSITION_FAILED':
       return (
         <div className="flex flex-col gap-3">

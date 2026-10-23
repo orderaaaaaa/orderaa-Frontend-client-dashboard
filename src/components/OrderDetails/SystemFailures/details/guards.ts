@@ -22,6 +22,7 @@ import type {
   ShipmentDispatchFailureReason,
   ShipmentMissingAddressDetails,
   ShipmentMissingPhoneDetails,
+  StockMovementBypassedDetails,
   StockMovementSkippedDetails,
   StoreUpdateFailedDetails,
   StoreUpdateNotAppliedCode,
@@ -174,6 +175,24 @@ const isStockMovementSkipped = (value: unknown): value is StockMovementSkippedDe
   (value.variantIdsTruncatedCount === undefined ||
     typeof value.variantIdsTruncatedCount === 'number');
 
+const isStockMovementBypassed = (value: unknown): value is StockMovementBypassedDetails =>
+  isRecord(value) &&
+  isStringOrNull(value.fromStatus) &&
+  isString(value.toStatus) &&
+  isNumberArray(value.appliedVariantIds) &&
+  Array.isArray(value.lines) &&
+  value.lines.every(
+    (line) =>
+      isRecord(line) &&
+      typeof line.variantId === 'number' &&
+      isString(line.productName) &&
+      isString(line.variantLabel) &&
+      isStringOrNull(line.fromWarehouseName) &&
+      typeof line.ruleId === 'number' &&
+      Array.isArray(line.predecessorKeys) &&
+      line.predecessorKeys.every(isString)
+  );
+
 const isScheduledTransitionFailed = (
   value: unknown
 ): value is ScheduledTransitionFailedDetails =>
@@ -241,6 +260,8 @@ export function narrowFailureDetails(
       return isAutomationStatusNotApplied(details) ? { code, details } : null;
     case 'STOCK_MOVEMENT_SKIPPED':
       return isStockMovementSkipped(details) ? { code, details } : null;
+    case 'STOCK_MOVEMENT_BYPASSED':
+      return isStockMovementBypassed(details) ? { code, details } : null;
     case 'SCHEDULED_TRANSITION_FAILED':
       return isScheduledTransitionFailed(details) ? { code, details } : null;
     case 'ORDER_SHADOWED':
