@@ -180,6 +180,7 @@ export interface StockWorkflowApiItem {
   allowNegative: boolean;
   onInsufficient: InsufficientStockBehavior;
   presetKey: string | null;
+  predecessorKeys: string[];
   createdAt: string;
   updatedAt: string;
   /** null exactly when `fromWarehouseId` is. */
@@ -239,6 +240,7 @@ export interface CreateStockWorkflowDto {
   toWarehouseId: number;
   allowNegative?: boolean;
   onInsufficient?: InsufficientStockBehavior;
+  predecessorKeys?: string[];
 }
 
 /**

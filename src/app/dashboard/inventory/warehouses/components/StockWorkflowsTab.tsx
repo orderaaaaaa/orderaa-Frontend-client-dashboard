@@ -9,6 +9,7 @@ import BaseModal from '@/components/ui/base-modal';
 import PageLoading from '@/components/ui/page-loading';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { FormSwitch } from '@/components/ui/form-switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { TranslationKey } from '@/i18n/translate';
 import { OrderStatus } from '@/types/orders';
@@ -80,6 +81,8 @@ interface RuleRow extends StatusRuleSides {
   onInsufficient: InsufficientStockBehavior;
   dirty: boolean;
   touched: boolean;
+  templateOwned: boolean;
+  predecessorKeys: string[];
 }
 
 /** The status half of the payload — the only part that varies by event type. */
@@ -119,6 +122,10 @@ const isCardRule = (rule: StockWorkflowApiItem): rule is CardRule =>
 
 const RULE_SIDES: RuleSide[] = ['from', 'to'];
 
+const PREDECESSOR_RULE_REF_PREFIX = 'rule:';
+
+const predecessorRef = (id: number) => `${PREDECESSOR_RULE_REF_PREFIX}${id}`;
+
 const statusOptions = WORKFLOW_ORDER_STATUSES.map((status) => ({
   key: status,
   value: ORDER_STATUS_ARABIC_LABELS[status] ?? status,
@@ -148,6 +155,8 @@ const toRow = (rule: CardRule): RuleRow => ({
   onInsufficient: rule.onInsufficient,
   dirty: false,
   touched: false,
+  templateOwned: rule.presetKey !== null,
+  predecessorKeys: rule.predecessorKeys,
 });
 
 /**
@@ -171,6 +180,8 @@ const emptyRow = (): RuleRow => ({
   // card isn't red before the user has typed anything.
   dirty: true,
   touched: false,
+  templateOwned: false,
+  predecessorKeys: [],
 });
 
 const rangeOf = (row: RuleRow, side: RuleSide) =>
@@ -362,6 +373,63 @@ const toRowPatch = (
         ...('rangeEnd' in patch ? { toRangeEnd: patch.rangeEnd } : {}),
       };
 
+function PredecessorPicker({
+  row,
+  choices,
+  onChange,
+}: {
+  row: RuleRow;
+  choices: StockWorkflowApiItem[];
+  onChange: (predecessorKeys: string[]) => void;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <span className="block text-xs font-medium text-gray-600">
+        المراحل السابقة
+      </span>
+      {row.templateOwned ? (
+        <p className="text-sm text-gray-600">
+          {row.predecessorKeys.length > 0
+            ? row.predecessorKeys.join('، ')
+            : 'بدون مراحل سابقة'}
+        </p>
+      ) : choices.length === 0 ? (
+        <p className="text-[11px] text-gray-400">
+          لا توجد قواعد انتقال خاصة بك لاختيارها بعد.
+        </p>
+      ) : (
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {choices.map((choice) => {
+            const ref = predecessorRef(choice.id);
+            return (
+              <label
+                key={choice.id}
+                className="flex items-center gap-2 text-sm text-gray-700"
+              >
+                <Checkbox
+                  checked={row.predecessorKeys.includes(ref)}
+                  onCheckedChange={(next) =>
+                    onChange(
+                      next === true
+                        ? [...row.predecessorKeys, ref]
+                        : row.predecessorKeys.filter((key) => key !== ref)
+                    )
+                  }
+                />
+                القاعدة رقم {choice.id}
+              </label>
+            );
+          })}
+        </div>
+      )}
+      <p className="text-[11px] leading-4 text-gray-400">
+        ينفَّذ هذا الانتقال إذا نُفِّذت أي من المراحل المختارة لنفس الطلب
+        والمنتج، وإلا يتم تجاوزه دون حركة مخزون.
+      </p>
+    </div>
+  );
+}
+
 export function StockWorkflowsTab() {
   const { t, dir } = useI18n();
 
@@ -380,6 +448,14 @@ export function StockWorkflowsTab() {
     scope.scope === 'GLOBAL'
       ? undefined
       : { productId: scope.productId, variantId: scope.variantId }
+  );
+  const { data: allRules } = useStockWorkflowsQuery();
+  const predecessorChoices = useMemo(
+    () =>
+      (allRules ?? []).filter(
+        (rule) => rule.presetKey === null && rule.eventType === 'TRANSITION'
+      ),
+    [allRules]
   );
   // `pickerOptions`, not `options`: a rule WRITES a warehouse id, and an
   // inactive warehouse must not be the one it writes. It still renders (marked
@@ -518,6 +594,11 @@ export function StockWorkflowsTab() {
       onInsufficient: row.onInsufficient,
     };
 
+    const predecessorBody =
+      row.eventType === 'TRANSITION' && !row.templateOwned
+        ? { predecessorKeys: row.predecessorKeys }
+        : {};
+
     const rowKey = row.id ? `rule-${row.id}` : `new-${index}`;
     setSavingKey(rowKey);
     try {
@@ -526,7 +607,7 @@ export function StockWorkflowsTab() {
         // neither. Every side is sent whole — the API merges a side wholesale.
         await updateMutation.mutateAsync({
           id: row.id,
-          body: { ...shape, ...settings },
+          body: { ...shape, ...settings, ...predecessorBody },
         });
         // Clear dirty so the merge effect stops preferring the local copy
         // and the Save button confirms the write landed.
@@ -540,6 +621,7 @@ export function StockWorkflowsTab() {
           eventType: row.eventType,
           ...shape,
           ...settings,
+          ...predecessorBody,
           // The new rule belongs to whichever scope the screen is editing.
           ...(scope.scope === 'PRODUCT' ? { productId: scope.productId } : {}),
           ...(scope.scope === 'VARIANT' ? { variantId: scope.variantId } : {}),
@@ -755,6 +837,18 @@ export function StockWorkflowsTab() {
                     );
                   })}
                 </div>
+              )}
+
+              {row.eventType === 'TRANSITION' && (
+                <PredecessorPicker
+                  row={row}
+                  choices={predecessorChoices.filter(
+                    (rule) => rule.id !== row.id
+                  )}
+                  onChange={(predecessorKeys) =>
+                    patchRow(index, { predecessorKeys })
+                  }
+                />
               )}
 
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
