@@ -31,6 +31,7 @@ export interface BatchShortageOrder {
 }
 
 export interface BatchInsufficientStockBody {
+  statusCode: number;
   code: 'BATCH_INSUFFICIENT_STOCK';
   message: string;
   orders: BatchShortageOrder[];
