@@ -71,7 +71,7 @@ export default function ActionConfirmationDialog({
           </div>
         )}
 
-        <p className="text-base text-[#1F1F1F] text-center py-6">
+        <p className="text-base text-[#1F1F1F] text-center py-6 whitespace-pre-line">
           {message}
         </p>
       </div>

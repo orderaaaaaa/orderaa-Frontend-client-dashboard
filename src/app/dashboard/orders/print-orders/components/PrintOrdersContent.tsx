@@ -8,6 +8,7 @@ import React, {
   useRef,
 } from 'react';
 import { toast } from 'react-toastify';
+import { getBatchErrorMessage } from '@/utils/apiError';
 import uniq from 'lodash/uniq';
 import uniqBy from 'lodash/uniqBy';
 import { ArrowUp, ListChecks, X } from 'lucide-react';
@@ -312,8 +313,7 @@ export function PrintOrdersContent() {
       clearOrders();
       setIsScannedOrdersModalOpen(false);
     } catch (error: any) {
-      const msg = error?.response?.data?.message;
-      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
+      toast.error(getBatchErrorMessage(error, 'فشل تحديث الطلبات'));
     } finally {
       setIsActionLoading(false);
     }
@@ -330,8 +330,7 @@ export function PrintOrdersContent() {
       clearOrders();
       setIsScannedOrdersModalOpen(false);
     } catch (error: any) {
-      const msg = error?.response?.data?.message;
-      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
+      toast.error(getBatchErrorMessage(error, 'فشل تحديث الطلبات'));
     } finally {
       setIsActionLoading(false);
     }
@@ -348,8 +347,7 @@ export function PrintOrdersContent() {
       clearOrders();
       setIsScannedOrdersModalOpen(false);
     } catch (error: any) {
-      const msg = error?.response?.data?.message;
-      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
+      toast.error(getBatchErrorMessage(error, 'فشل تحديث الطلبات'));
     } finally {
       setIsActionLoading(false);
     }
@@ -492,8 +490,7 @@ export function PrintOrdersContent() {
       clearSelections();
       setSelectMode(false);
     } catch (error: any) {
-      const msg = error?.response?.data?.message;
-      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
+      toast.error(getBatchErrorMessage(error, 'فشل تحديث الطلبات'));
     } finally {
       setIsActionLoading(false);
     }
@@ -520,8 +517,7 @@ export function PrintOrdersContent() {
       clearSelections();
       setSelectMode(false);
     } catch (error: any) {
-      const msg = error?.response?.data?.message;
-      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
+      toast.error(getBatchErrorMessage(error, 'فشل تحديث الطلبات'));
     } finally {
       setIsActionLoading(false);
     }
@@ -543,8 +539,7 @@ export function PrintOrdersContent() {
       clearSelections();
       setSelectMode(false);
     } catch (error: any) {
-      const msg = error?.response?.data?.message;
-      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الطلبات');
+      toast.error(getBatchErrorMessage(error, 'فشل تحديث الطلبات'));
     } finally {
       setIsActionLoading(false);
     }

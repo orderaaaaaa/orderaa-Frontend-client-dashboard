@@ -102,7 +102,12 @@ function StockCellValue({ view }: { view: StockCellView }) {
   if (view.kind === 'plain') {
     return (
       <div className="flex items-center justify-center gap-2">
-        <span className="text-sm font-semibold text-gray-800">
+        <span
+          className={clsx(
+            'text-sm font-semibold',
+            view.stock.quantity < 0 ? 'text-red-600' : 'text-gray-800'
+          )}
+        >
           {formatStockNumber(view.stock.quantity)}
         </span>
       </div>
@@ -182,7 +187,11 @@ export function ProductStockTable({
         </TooltipTrigger>
         <TooltipContent side="top">
           <div className="flex flex-row items-center gap-2 font-semibold whitespace-nowrap">
-            <span>{formatStockNumber(stock.quantity)}</span>
+            <span
+              className={stock.quantity < 0 ? 'text-red-600' : undefined}
+            >
+              {formatStockNumber(stock.quantity)}
+            </span>
             <span>{color}</span>
             <span>{size}</span>
           </div>
@@ -387,7 +396,7 @@ export function ProductStockTable({
             </div>
             <div className="flex items-center justify-between gap-4">
               <span className="text-gray-500">الكمية</span>
-              <span className="font-semibold text-gray-800">{formatStockNumber(selectedCell.stock.quantity)}</span>
+              <span className={clsx('font-semibold', selectedCell.stock.quantity < 0 ? 'text-red-600' : 'text-gray-800')}>{formatStockNumber(selectedCell.stock.quantity)}</span>
             </div>
             {selectedCell.showStatus && (
               <div className="flex items-center justify-between gap-4">

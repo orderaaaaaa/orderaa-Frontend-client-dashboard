@@ -8,6 +8,7 @@ import React, {
   useRef,
 } from 'react';
 import { toast } from 'react-toastify';
+import { getBatchErrorMessage } from '@/utils/apiError';
 import { ArrowUp } from 'lucide-react';
 
 import { Breadcrumb } from '@/components/dashboard-layout';
@@ -292,10 +293,7 @@ export function ShippingOrdersContent() {
       clearOrders();
       setIsScannedOrdersModalOpen(false);
     } catch (error: any) {
-      const msg = error?.response?.data?.message;
-      toast.error(
-        Array.isArray(msg) ? msg.join('\n') : msg || 'فشل إرسال الطلبات للشحن'
-      );
+      toast.error(getBatchErrorMessage(error, 'فشل إرسال الطلبات للشحن'));
     } finally {
       setIsActionLoading(false);
     }
@@ -313,7 +311,7 @@ export function ShippingOrdersContent() {
       clearSelections();
       setSelectMode(false);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'فشل إرسال الطلبات للشحن');
+      toast.error(getBatchErrorMessage(error, 'فشل إرسال الطلبات للشحن'));
     } finally {
       setIsActionLoading(false);
     }

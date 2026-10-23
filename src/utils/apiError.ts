@@ -71,6 +71,48 @@ export function formatStockShortageLines(
   return rendered.join('\n');
 }
 
+function formatBatchShortageRow(order: BatchShortageOrder): string {
+  const locale = readStoredLocale();
+  const reason = translate(
+    locale,
+    order.reason === 'CONFIRMATION_BLOCKED'
+      ? 'stockShortage.reasonBlocked'
+      : 'stockShortage.reasonShortage'
+  );
+  const head = [order.orderCode, reason, order.warehouseName]
+    .filter(Boolean)
+    .join(' - ');
+  const lines = formatStockShortageLines(order.lines);
+  return lines ? `${head}\n${lines}` : head;
+}
+
+export function getBatchShortageMessage(err: unknown): string | null {
+  const data = (
+    err as {
+      response?: {
+        data?: {
+          code?: string;
+          message?: string;
+          orders?: BatchShortageOrder[];
+        };
+      };
+    }
+  )?.response?.data;
+
+  if (data?.code !== 'BATCH_INSUFFICIENT_STOCK') return null;
+
+  const locale = readStoredLocale();
+  const rows = (data.orders ?? []).map(formatBatchShortageRow);
+  return [
+    data.message ?? translate(locale, 'stockShortage.batchFallback'),
+    ...rows,
+  ].join('\n');
+}
+
+export function getBatchErrorMessage(err: unknown, fallback: string): string {
+  return getBatchShortageMessage(err) ?? getApiErrorMessage(err, fallback);
+}
+
 export function getOutOfStockBlock(
   err: unknown
 ): { message: string; lines: ShortageRenderLine[] } | null {
@@ -81,7 +123,6 @@ export function getOutOfStockBlock(
           code?: string;
           message?: string;
           lines?: ShortageRenderLine[];
-          orders?: BatchShortageOrder[];
         };
       };
     }
@@ -89,25 +130,11 @@ export function getOutOfStockBlock(
 
   if (
     data?.code !== 'OUT_OF_STOCK_CONFIRMATION_BLOCKED' &&
-    data?.code !== 'INSUFFICIENT_STOCK_FOR_VARIANT' &&
-    data?.code !== 'BATCH_INSUFFICIENT_STOCK'
+    data?.code !== 'INSUFFICIENT_STOCK_FOR_VARIANT'
   )
     return null;
 
   const locale = readStoredLocale();
-
-  if (data.code === 'BATCH_INSUFFICIENT_STOCK') {
-    return {
-      message:
-        data.message ?? translate(locale, 'stockShortage.batchFallback'),
-      lines: (data.orders ?? []).flatMap((order) =>
-        order.lines.map((line) => ({
-          ...line,
-          warehouseName: line.warehouseName ?? order.warehouseName,
-        }))
-      ),
-    };
-  }
 
   if (data.code === 'INSUFFICIENT_STOCK_FOR_VARIANT') {
     return {

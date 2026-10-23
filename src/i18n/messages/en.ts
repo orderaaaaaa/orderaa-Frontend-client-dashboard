@@ -146,6 +146,11 @@ const en: Record<keyof typeof ar, string> = {
   'stockShortage.batchFallback': 'The batch was not saved because some orders lack stock.',
   'stockShortage.transferOverAvailable':
     'The quantity to transfer exceeds what is available in the warehouse:',
+  'stockShortage.confirmWarning':
+    'Stock may not be enough for this status, and the system may refuse the confirmation:',
+  'stockShortage.reasonShortage': 'Not enough stock',
+  'stockShortage.reasonBlocked': 'Confirmation blocked by stock',
+  'orderDetails.stock.bypassed': 'No stock movement',
 };
 
 export default en;

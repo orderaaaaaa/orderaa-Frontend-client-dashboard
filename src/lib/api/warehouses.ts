@@ -469,11 +469,19 @@ export interface AvailabilityLine {
   /** short AND this product's settings forbid confirming — blocks the order */
   blocked: boolean;
   confirmMode: ConfirmMode;
+  bypassed: boolean;
 }
+
+export const NEXT_STOCK_TARGET = 'NEXT' as const;
+
+export type StockAvailabilityTarget =
+  | OrderStatus
+  | typeof NEXT_STOCK_TARGET;
 
 export interface OrderStockAvailability {
   orderId: number;
-  targetStatus: OrderStatus;
+  orderCode: string;
+  targetStatus: OrderStatus | null;
   lines: AvailabilityLine[];
   canConfirm: boolean;
   blockingLines: number[];
@@ -495,6 +503,7 @@ export interface VariantAvailability {
 export interface OutOfStockConfirmationBlocked {
   code: 'OUT_OF_STOCK_CONFIRMATION_BLOCKED';
   message: string;
+  orderCode: string;
   lines: {
     orderProductId: number;
     variantId: number;
@@ -507,7 +516,7 @@ export interface OutOfStockConfirmationBlocked {
 
 export async function getOrderStockAvailability(
   orderId: number,
-  targetStatus?: OrderStatus
+  targetStatus?: StockAvailabilityTarget
 ): Promise<OrderStockAvailability> {
   const response = await api.get(`/orders/${orderId}/stock-availability`, {
     params: targetStatus ? { targetStatus } : undefined,
@@ -518,7 +527,7 @@ export async function getOrderStockAvailability(
 export async function getProductVariantAvailability(
   productId: number,
   orderId: number,
-  targetStatus?: OrderStatus
+  targetStatus?: StockAvailabilityTarget
 ): Promise<VariantAvailability[]> {
   const response = await api.get(
     `/products/${productId}/variants/availability`,

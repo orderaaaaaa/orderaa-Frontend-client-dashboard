@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import uniqBy from 'lodash/uniqBy';
 import type { Order } from '@/types/orders';
 import { OrderStatus } from '@/types/orders';
-import { getApiErrorMessage, getApiErrorStatus } from '@/utils/apiError';
+import { getApiErrorStatus, getBatchErrorMessage } from '@/utils/apiError';
 import { useOrderStatusSetGuard } from '@/hooks/orders/useOrderStatusSetGuard';
 import { orderStatusFromCode, type OrderStatusSetCode } from '@/lib/permissions';
 import {
@@ -117,7 +117,7 @@ export function useCallCenterBulkActions({
         return true;
       } catch (err) {
         if (getApiErrorStatus(err) !== 403) {
-          toast.error(getApiErrorMessage(err, 'فشل تحديث الطلبات'));
+          toast.error(getBatchErrorMessage(err, 'فشل تحديث الطلبات'));
         }
         return false;
       } finally {

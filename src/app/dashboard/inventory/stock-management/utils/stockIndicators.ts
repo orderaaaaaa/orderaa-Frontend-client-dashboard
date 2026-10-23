@@ -51,7 +51,7 @@ export function displayCell(
   if (cell === undefined) return { kind: 'hidden' };
   if (cell === 'missing') return { kind: 'missing' };
   if (cell.status === 'shortage' && !indicators.shortage) {
-    return { kind: 'hidden' };
+    return { kind: 'plain', stock: cell };
   }
   if (cell.status === 'out_of_stock' && !indicators.outOfStock) {
     return { kind: 'hidden' };

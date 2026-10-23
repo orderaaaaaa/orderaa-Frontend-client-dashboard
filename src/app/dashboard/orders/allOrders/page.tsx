@@ -41,7 +41,7 @@ import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import { Scan, ScanLine, ArrowUp, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { shippingCompanyNameOf } from '@/lib/shippingCompanies';
-import { getApiErrorMessage, getApiErrorStatus } from '@/utils/apiError';
+import { getApiErrorStatus, getBatchErrorMessage } from '@/utils/apiError';
 import { useOrderStatusSetGuard } from '@/hooks/orders/useOrderStatusSetGuard';
 import {
   notifyBulkStatusResult,
@@ -150,7 +150,7 @@ function AllOrdersContent() {
       },
       onError: (err) => {
         if (getApiErrorStatus(err) === 403) return;
-        toast.error(getApiErrorMessage(err, 'فشل تحديث حالة الطلبات'));
+        toast.error(getBatchErrorMessage(err, 'فشل تحديث حالة الطلبات'));
       },
     });
 

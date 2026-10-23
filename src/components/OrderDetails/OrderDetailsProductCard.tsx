@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useOrderStockAvailabilityQuery } from '@/services/warehouses';
+import { NEXT_STOCK_TARGET } from '@/lib/api/warehouses';
 import { StockAvailabilityBadge } from './StockAvailabilityBadge';
 import Image from 'next/image';
 
@@ -48,7 +49,10 @@ function OrderDetailsProductCard({
   // T27: availability against CONFIRMED — the transition an agent on this
   // screen is about to make. Keyed by orderProductId because each LINE resolves
   // its own rule and therefore its own source warehouse.
-  const { data: availability } = useOrderStockAvailabilityQuery(order.id);
+  const { data: availability } = useOrderStockAvailabilityQuery(
+    order.id,
+    NEXT_STOCK_TARGET
+  );
   const availabilityByLine = new Map(
     (availability?.lines ?? []).map((line) => [line.orderProductId, line])
   );

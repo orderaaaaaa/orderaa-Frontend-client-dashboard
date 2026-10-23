@@ -159,13 +159,23 @@ function OrderDetailsInfoComponent({
   const stockGate = useMemo(() => {
     // Undefined while loading — do NOT block on that, or the confirm button is
     // dead on every first paint.
+    const warned = stockAvailability?.lines.filter((line) => !line.safe) ?? [];
+    const warning =
+      warned.length > 0
+        ? `${translate(readStoredLocale(), 'stockShortage.confirmWarning')}\n${formatStockShortageLines(warned)}`
+        : undefined;
     if (!stockAvailability || stockAvailability.canConfirm) {
-      return { canConfirm: true, reason: undefined as string | undefined };
+      return {
+        canConfirm: true,
+        reason: undefined as string | undefined,
+        warning,
+      };
     }
     const blocking = stockAvailability.lines.filter((line) => line.blocked);
     return {
       canConfirm: false,
       reason: `${translate(readStoredLocale(), 'stockShortage.confirmBlocked')}\n${formatStockShortageLines(blocking)}`,
+      warning,
     };
   }, [stockAvailability]);
 
@@ -187,7 +197,9 @@ function OrderDetailsInfoComponent({
       setConfirmationDialog({
         isOpen: true,
         title: 'تأكيد الطلب',
-        message: 'هل أنت متأكد من تأكيد هذا الطلب؟',
+        message: stockGate.warning
+          ? `هل أنت متأكد من تأكيد هذا الطلب؟\n\n${stockGate.warning}`
+          : 'هل أنت متأكد من تأكيد هذا الطلب؟',
         action: 'confirm',
       })
     );

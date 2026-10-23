@@ -9,7 +9,6 @@ import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { WarehouseApiItem } from '@/lib/api/warehouses';
-import type { OrderStatus } from '@/types/orders';
 import {
   getWarehouses,
   getWarehouseById,
@@ -37,6 +36,7 @@ import {
   UpdateStockWorkflowDto,
   AdjustStockDto,
   TransferStockDto,
+  StockAvailabilityTarget,
 } from '@/lib/api/warehouses';
 
 const STALE_TIME = 30 * 1000;
@@ -355,7 +355,7 @@ export const useWarehouseOptions = () => {
  */
 export const useOrderStockAvailabilityQuery = (
   orderId: number | undefined,
-  targetStatus?: OrderStatus
+  targetStatus?: StockAvailabilityTarget
 ) => {
   return useQuery({
     queryKey: [
@@ -372,7 +372,7 @@ export const useOrderStockAvailabilityQuery = (
 export const useProductVariantAvailabilityQuery = (
   productId: number | undefined,
   orderId: number | undefined,
-  targetStatus?: OrderStatus
+  targetStatus?: StockAvailabilityTarget
 ) => {
   return useQuery({
     queryKey: [

@@ -160,6 +160,11 @@ const ar = {
   'stockShortage.batchFallback': 'لم تُحفظ العملية لأن بعض الطلبات لا يكفيها المخزون.',
   'stockShortage.transferOverAvailable':
     'الكمية المنقولة أكبر من المتاح في المخزن:',
+  'stockShortage.confirmWarning':
+    'المخزون قد لا يكفي لهذه الحالة، وقد يرفض النظام التأكيد:',
+  'stockShortage.reasonShortage': 'المخزون لا يكفي',
+  'stockShortage.reasonBlocked': 'التأكيد ممنوع بسبب المخزون',
+  'orderDetails.stock.bypassed': 'لا تُحرّك حركة مخزون',
 } as const;
 
 export default ar;
