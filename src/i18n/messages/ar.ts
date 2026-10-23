@@ -165,9 +165,9 @@ const ar = {
   'stockShortage.reasonShortage': 'المخزون لا يكفي',
   'stockShortage.reasonBlocked': 'التأكيد ممنوع بسبب المخزون',
   'stockShortage.event.title': 'منع نقص المخزون تغيير الحالة',
-  'stockShortage.event.transitionBlocked': 'منع نقص المخزون تغيير الحالة من {from} إلى {to}',
+  'stockShortage.event.transitionBlocked': 'منع نقص المخزون تغيير الحالة من {fromStatus} إلى {toStatus}',
   'stockShortage.event.transitionBlockedWarehouse':
-    'منع نقص المخزون في {warehouse} تغيير الحالة من {from} إلى {to}',
+    'منع نقص المخزون في {warehouseName} تغيير الحالة من {fromStatus} إلى {toStatus}',
   'orderDetails.stock.bypassed': 'لا تُحرّك حركة مخزون',
   'stockShortage.event.carrierNotApplied':
     'الشركة أبلغت بـ{status} ولم يتم تحديث الحالة: نقص مخزون {productName} في {warehouseName}',

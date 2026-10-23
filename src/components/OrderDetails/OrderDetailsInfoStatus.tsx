@@ -137,6 +137,12 @@ const STOCK_SHORTAGE_EVENT_MESSAGES = {
     title: 'stockShortage.event.retryTitle',
     fields: ['status'],
   },
+  STOCK_TRANSITION_BLOCKED: {
+    key: 'stockShortage.event.transitionBlockedWarehouse',
+    withoutWarehouseKey: 'stockShortage.event.transitionBlocked',
+    title: 'stockShortage.event.title',
+    fields: ['fromStatus', 'toStatus', 'warehouseName'],
+  },
 } as const;
 
 type StockShortageEventName = keyof typeof STOCK_SHORTAGE_EVENT_MESSAGES;
@@ -199,8 +205,11 @@ function renderOrderEventNote(
     if (typeof value !== 'string' || value === '') return name;
     values[field] = value;
   }
-  if (values.status !== undefined) {
-    values.status = statusLabelOf(values.status);
+  for (const statusField of ['status', 'fromStatus', 'toStatus']) {
+    const statusValue = values[statusField];
+    if (statusValue !== undefined) {
+      values[statusField] = statusLabelOf(statusValue);
+    }
   }
   return translate(readStoredLocale(), key, values);
 }
