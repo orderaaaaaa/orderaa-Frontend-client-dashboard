@@ -25,6 +25,7 @@ import {
 import type {
   CreateStockWorkflowDto,
   InsufficientStockBehavior,
+  StatusSelectionType,
   StockWorkflowApiItem,
 } from '@/lib/api/warehouses';
 import {
@@ -125,6 +126,59 @@ const RULE_SIDES: RuleSide[] = ['from', 'to'];
 const PREDECESSOR_RULE_REF_PREFIX = 'rule:';
 
 const predecessorRef = (id: number) => `${PREDECESSOR_RULE_REF_PREFIX}${id}`;
+
+const statusLabel = (status: OrderStatus) =>
+  ORDER_STATUS_ARABIC_LABELS[status] ?? status;
+
+const sideLabel = (
+  type: StatusSelectionType | null,
+  statuses: OrderStatus[],
+  rangeStart: OrderStatus | null,
+  rangeEnd: OrderStatus | null,
+  anyLabel: string
+) => {
+  if (type === 'ANY') return anyLabel;
+  if (type === 'RANGE')
+    return rangeStart && rangeEnd
+      ? `${statusLabel(rangeStart)} إلى ${statusLabel(rangeEnd)}`
+      : '';
+  return statuses.map(statusLabel).join('، ');
+};
+
+interface RuleDescriptionLabels {
+  any: string;
+  product: string;
+  variant: string;
+}
+
+const describeRule = (
+  rule: StockWorkflowApiItem,
+  labels: RuleDescriptionLabels
+) => {
+  const from = sideLabel(
+    rule.fromSelection,
+    rule.fromStatuses,
+    rule.fromRangeStart,
+    rule.fromRangeEnd,
+    labels.any
+  );
+  const to = sideLabel(
+    rule.toSelection,
+    rule.toStatuses,
+    rule.toRangeStart,
+    rule.toRangeEnd,
+    labels.any
+  );
+  const route = `${rule.fromWarehouse?.name ?? ''} → ${rule.toWarehouse.name}`;
+  const scope =
+    rule.variantId != null
+      ? labels.variant
+      : rule.productId != null
+        ? labels.product
+        : null;
+  const summary = `${route}: ${from} → ${to}`;
+  return scope ? `${summary} (${scope})` : summary;
+};
 
 const statusOptions = WORKFLOW_ORDER_STATUSES.map((status) => ({
   key: status,
@@ -376,12 +430,16 @@ const toRowPatch = (
 function PredecessorPicker({
   row,
   choices,
+  rules,
   loading,
+  describe,
   onChange,
 }: {
   row: RuleRow;
   choices: StockWorkflowApiItem[];
+  rules: StockWorkflowApiItem[];
   loading: boolean;
+  describe: (rule: StockWorkflowApiItem) => string;
   onChange: (predecessorKeys: string[]) => void;
 }) {
   const titleId = useId();
@@ -390,12 +448,29 @@ function PredecessorPicker({
     (key) => key.startsWith(PREDECESSOR_RULE_REF_PREFIX) && !knownRefs.has(key)
   );
   const entries = [
-    ...choices.map((choice) => predecessorRef(choice.id)),
-    ...savedUnlistedRefs,
-  ].map((ref) => ({
-    ref,
-    label: ref.slice(PREDECESSOR_RULE_REF_PREFIX.length),
+    ...choices.map((choice) => ({
+      ref: predecessorRef(choice.id),
+      rule: choice,
+    })),
+    ...savedUnlistedRefs.map((ref) => ({
+      ref,
+      rule:
+        rules.find((candidate) => predecessorRef(candidate.id) === ref) ??
+        null,
+    })),
+  ].map((entry) => ({
+    ref: entry.ref,
+    label: entry.rule
+      ? `القاعدة رقم ${entry.rule.id}: ${describe(entry.rule)}`
+      : `القاعدة رقم ${entry.ref.slice(PREDECESSOR_RULE_REF_PREFIX.length)}`,
   }));
+
+  const templateSummary = row.predecessorKeys
+    .map((key) => {
+      const match = rules.find((rule) => rule.presetKey === key);
+      return match ? describe(match) : key;
+    })
+    .join('، ');
 
   return (
     <div className="space-y-1.5">
@@ -405,7 +480,7 @@ function PredecessorPicker({
       {row.templateOwned ? (
         <p className="text-sm text-gray-600">
           {row.predecessorKeys.length > 0
-            ? row.predecessorKeys.join('، ')
+            ? templateSummary
             : 'بدون مراحل سابقة'}
         </p>
       ) : loading ? (
@@ -435,7 +510,7 @@ function PredecessorPicker({
                   )
                 }
               />
-              القاعدة رقم {entry.label}
+              {entry.label}
             </label>
           ))}
         </div>
@@ -469,6 +544,12 @@ export function StockWorkflowsTab() {
   );
   const { data: allRules, isLoading: allRulesLoading } =
     useStockWorkflowsQuery();
+  const describePredecessor = (rule: StockWorkflowApiItem) =>
+    describeRule(rule, {
+      any: t('stockRules.selection.any'),
+      product: t(RULE_SCOPE_LABEL_KEYS.PRODUCT),
+      variant: t(RULE_SCOPE_LABEL_KEYS.VARIANT),
+    });
   const predecessorChoices = useMemo(
     () =>
       (allRules ?? []).filter(
@@ -864,7 +945,9 @@ export function StockWorkflowsTab() {
                   choices={predecessorChoices.filter(
                     (rule) => rule.id !== row.id
                   )}
+                  rules={allRules ?? []}
                   loading={allRulesLoading}
+                  describe={describePredecessor}
                   onChange={(predecessorKeys) =>
                     patchRow(index, { predecessorKeys })
                   }
