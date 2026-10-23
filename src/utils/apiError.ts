@@ -1,5 +1,9 @@
 import { readStoredLocale } from '@/i18n/locale';
 import { translate } from '@/i18n/translate';
+import type {
+  BatchShortageOrder,
+  ShortageRenderLine,
+} from '@/lib/api/stockShortage';
 
 /**
  * NestJS class-validator failures return `message` as a string array
@@ -78,25 +82,42 @@ export function formatStockShortageLines(
 
 export function getOutOfStockBlock(
   err: unknown
-): { message: string; lines: OutOfStockBlockedLine[] } | null {
+): { message: string; lines: ShortageRenderLine[] } | null {
   const data = (
     err as {
       response?: {
         data?: {
           code?: string;
           message?: string;
-          lines?: OutOfStockBlockedLine[];
+          lines?: ShortageRenderLine[];
+          orders?: BatchShortageOrder[];
         };
       };
     }
   )?.response?.data;
 
-  if (data?.code !== 'OUT_OF_STOCK_CONFIRMATION_BLOCKED') return null;
+  if (
+    data?.code !== 'OUT_OF_STOCK_CONFIRMATION_BLOCKED' &&
+    data?.code !== 'INSUFFICIENT_STOCK_FOR_VARIANT' &&
+    data?.code !== 'BATCH_INSUFFICIENT_STOCK'
+  )
+    return null;
 
-  return {
-    message:
-      data.message ??
-      translate(readStoredLocale(), 'stockShortage.confirmBlocked'),
-    lines: data.lines ?? [],
-  };
+  const message =
+    data.message ??
+    translate(readStoredLocale(), 'stockShortage.confirmBlocked');
+
+  if (data.code === 'BATCH_INSUFFICIENT_STOCK') {
+    return {
+      message,
+      lines: (data.orders ?? []).flatMap((order) =>
+        order.lines.map((line) => ({
+          ...line,
+          warehouseName: line.warehouseName ?? order.warehouseName,
+        }))
+      ),
+    };
+  }
+
+  return { message, lines: data.lines ?? [] };
 }
