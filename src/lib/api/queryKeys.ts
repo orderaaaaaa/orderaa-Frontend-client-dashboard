@@ -62,6 +62,7 @@ export const QUERY_KEYS = {
   STOCK_MODE: 'stock-mode',
   STOCK_COUNT_SHEET: 'stock-count-sheet',
   ORDER_STOCK_AVAILABILITY: 'order-stock-availability',
+  ORDER_STOCK_DRIFT: 'order-stock-drift',
   PRODUCT_VARIANT_AVAILABILITY: 'product-variant-availability',
   STOCK_MOVEMENTS: 'stock-movements',
   WAREHOUSE_SUMMARY: 'warehouse-summary',
