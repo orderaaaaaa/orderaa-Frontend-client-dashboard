@@ -14,6 +14,7 @@ import {
   useStockModeQuery,
 } from '@/services/stockMode';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { formatDate } from '@/utils/format';
 
 const COUNT_PAGE_HREF = '/dashboard/inventory/stock-management/opening-count';
 const ORDER_STOCK_SYNC_HREF = '/dashboard/inventory/stock-management/order-stock-sync';
@@ -85,7 +86,7 @@ export function StockModeSection() {
           {mode.stockTrackingStartedAt && (
             <p className="text-xs text-gray-500">
               بدأ التتبع في{' '}
-              {new Date(mode.stockTrackingStartedAt).toLocaleDateString('ar-EG')}
+              {formatDate(mode.stockTrackingStartedAt)}
             </p>
           )}
         </div>
