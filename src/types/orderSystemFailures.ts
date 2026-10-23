@@ -202,9 +202,9 @@ export interface StockMovementBypassedDetails {
 }
 
 export interface StockTransitionBlockedDetails {
-  fromStatus: string | null;
+  fromStatus: string;
   toStatus: string;
-  ruleId: number;
+  ruleId: number | null;
   warehouseName: string | null;
   lines: FailureStockShortageLine[];
 }

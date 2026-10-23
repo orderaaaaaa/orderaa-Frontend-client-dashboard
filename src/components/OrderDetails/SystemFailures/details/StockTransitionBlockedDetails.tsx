@@ -4,7 +4,7 @@ import type {
   FailureStockShortageBlock,
   StockTransitionBlockedDetails as StockTransitionBlockedPayload,
 } from '@/types/orderSystemFailures';
-import { DetailField, DetailGrid, EMPTY_VALUE } from './DetailFields';
+import { DetailField, DetailGrid } from './DetailFields';
 import { StockShortageDetails } from './StockShortageDetails';
 
 const toShortage = (
@@ -32,9 +32,7 @@ export function StockTransitionBlockedDetails({
   return (
     <div className="flex flex-col gap-3">
       <DetailGrid>
-        <DetailField label="من حالة">
-          {details.fromStatus ? getStatusLabel(details.fromStatus) : EMPTY_VALUE}
-        </DetailField>
+        <DetailField label="من حالة">{getStatusLabel(details.fromStatus)}</DetailField>
         <DetailField label="إلى حالة">{getStatusLabel(details.toStatus)}</DetailField>
       </DetailGrid>
       <StockShortageDetails shortage={toShortage(details)} />

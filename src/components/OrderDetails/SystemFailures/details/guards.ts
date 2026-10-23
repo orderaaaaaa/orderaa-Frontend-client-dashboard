@@ -198,9 +198,9 @@ const isStockMovementBypassed = (value: unknown): value is StockMovementBypassed
 
 const isStockTransitionBlocked = (value: unknown): value is StockTransitionBlockedDetails =>
   isRecord(value) &&
-  isStringOrNull(value.fromStatus) &&
+  isString(value.fromStatus) &&
   isString(value.toStatus) &&
-  typeof value.ruleId === 'number' &&
+  (value.ruleId === null || typeof value.ruleId === 'number') &&
   isStringOrNull(value.warehouseName) &&
   Array.isArray(value.lines) &&
   value.lines.every(isFailureStockShortageLine);
