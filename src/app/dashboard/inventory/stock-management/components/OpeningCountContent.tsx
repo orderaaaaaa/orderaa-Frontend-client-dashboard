@@ -9,7 +9,8 @@ import PageLoading from '@/components/ui/page-loading';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { usePermissionCheck } from '@/hooks/usePermissions';
-import type { CountSheetRowApi } from '@/lib/api/stockCount';
+import { getCountSheet, type CountSheetParams, type CountSheetRowApi } from '@/lib/api/stockCount';
+import type { AdjustStockDto } from '@/lib/api/warehouses';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useCountSheetQuery } from '@/services/stockCount';
 import { useAdjustStockMutation, useWarehouseOptions } from '@/services/warehouses';
@@ -20,8 +21,8 @@ import { OpeningCountTable } from './OpeningCountTable';
 const PAGE_SIZE = 50;
 
 interface CountEdit {
-  quantity: number;
   raw: string;
+  query: CountSheetParams;
 }
 
 const isInvalidCount = (raw: string) => {
@@ -45,20 +46,21 @@ export function OpeningCountContent() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE);
   const [edits, setEdits] = useState<Record<number, CountEdit>>({});
+  const [isPreparing, setIsPreparing] = useState(false);
   const debouncedSearch = useDebounce(search, 300);
 
   const warehouseNumber = Number(warehouseId);
   const hasWarehouse = Number.isInteger(warehouseNumber) && warehouseNumber > 0;
 
+  const activeQuery: CountSheetParams = {
+    warehouseId: warehouseNumber,
+    search: debouncedSearch.trim() || undefined,
+    page,
+    pageSize,
+  };
+
   const { data, isLoading } = useCountSheetQuery(
-    hasWarehouse && canRead
-      ? {
-          warehouseId: warehouseNumber,
-          search: debouncedSearch.trim() || undefined,
-          page,
-          pageSize,
-        }
-      : null
+    hasWarehouse && canRead ? activeQuery : null
   );
 
   const rows = data?.data ?? [];
@@ -70,17 +72,9 @@ export function OpeningCountContent() {
   const onCountedChange = (row: CountSheetRowApi, raw: string) => {
     setEdits((current) => ({
       ...current,
-      [row.variantId]: { quantity: row.quantity, raw },
+      [row.variantId]: { raw, query: activeQuery },
     }));
   };
-
-  const adjustments = Object.entries(edits)
-    .filter(([, edit]) => !isInvalidCount(edit.raw))
-    .map(([variantId, edit]) => ({
-      variantId: Number(variantId),
-      delta: Number(edit.raw) - edit.quantity,
-    }))
-    .filter((entry) => entry.delta !== 0);
 
   const hasInvalid =
     rows.some((row) => isInvalidCount(countedValueOf(row))) ||
@@ -92,12 +86,80 @@ export function OpeningCountContent() {
     setPage(1);
   };
 
+  const freshQuantitiesFor = async (entries: [string, CountEdit][]) => {
+    const queries = new Map<string, CountSheetParams>();
+    entries.forEach(([, edit]) => {
+      queries.set(JSON.stringify(edit.query), edit.query);
+    });
+    const sheets = await Promise.all(
+      Array.from(queries.values()).map((query) => getCountSheet(query))
+    );
+    const quantities = new Map<number, number>();
+    sheets.forEach((sheet) =>
+      sheet.data.forEach((row) => quantities.set(row.variantId, row.quantity))
+    );
+    return quantities;
+  };
+
   const onSubmit = async () => {
     if (!hasWarehouse) return;
     if (hasInvalid) {
       toast.error('العدد الفعلي يجب أن يكون رقمًا صحيحًا غير سالب');
       return;
     }
+    const entries = Object.entries(edits);
+    if (entries.length === 0) {
+      toast.error('لا يوجد فرق بين الكمية بالنظام والعدد الفعلي');
+      return;
+    }
+
+    setIsPreparing(true);
+    let quantities: Map<number, number> | null = null;
+    try {
+      quantities = await freshQuantitiesFor(entries);
+    } catch (err: unknown) {
+      toast.error(getApiErrorMessage(err, 'تعذر تحديث كميات الجرد'), {
+        autoClose: 8000,
+      });
+    } finally {
+      setIsPreparing(false);
+    }
+    if (quantities === null) return;
+
+    const adjustments: AdjustStockDto['adjustments'] = [];
+    const dropped = new Set<number>();
+    let removedFromSheet = 0;
+    entries.forEach(([key, edit]) => {
+      const variantId = Number(key);
+      const fresh = quantities.get(variantId);
+      if (fresh === undefined) {
+        removedFromSheet += 1;
+        dropped.add(variantId);
+        return;
+      }
+      const delta = Number(edit.raw) - fresh;
+      if (delta === 0) {
+        dropped.add(variantId);
+        return;
+      }
+      adjustments.push({ variantId, delta });
+    });
+
+    setEdits((current) => {
+      const remaining: Record<number, CountEdit> = {};
+      Object.entries(current).forEach(([key, edit]) => {
+        if (!dropped.has(Number(key))) remaining[Number(key)] = edit;
+      });
+      return remaining;
+    });
+
+    if (removedFromSheet > 0) {
+      toast.warning(
+        `أُزيل من الجرد ${removedFromSheet} متغير لأنه لم يعد موجودًا في الصفحة التي عُدّل فيها`,
+        { autoClose: 8000 }
+      );
+    }
+
     if (adjustments.length === 0) {
       toast.error('لا يوجد فرق بين الكمية بالنظام والعدد الفعلي');
       return;
@@ -184,10 +246,11 @@ export function OpeningCountContent() {
             !canAdjust ||
             !hasWarehouse ||
             hasInvalid ||
-            adjustments.length === 0 ||
+            Object.keys(edits).length === 0 ||
+            isPreparing ||
             adjustMutation.isPending
           }
-          loading={adjustMutation.isPending}
+          loading={isPreparing || adjustMutation.isPending}
         >
           حفظ الجرد
         </Button>
