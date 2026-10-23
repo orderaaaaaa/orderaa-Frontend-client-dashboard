@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   LiaTrashAltSolid,
   LiaBoxSolid,
@@ -156,7 +156,7 @@ function OrderDetailsProductCard({
   const handleSaveEdit = async (
     productId: number,
     attributeOptionIds: number[]
-  ) => {
+  ): Promise<boolean> => {
     const notifyUpdated = () => toast.success('تم تحديث المنتج بنجاح');
     try {
       const applied = await runLineEdit(
@@ -166,12 +166,17 @@ function OrderDetailsProductCard({
             attributeOptionIds,
             sendBackToPackaging,
           }),
-        notifyUpdated
+        () => {
+          notifyUpdated();
+          setEditingProductId(null);
+        }
       );
       if (applied) notifyUpdated();
+      return applied;
     } catch (error: any) {
       const message = error?.response?.data?.message;
       toast.error(message || 'فشل في تحديث المنتج');
+      return false;
     }
   };
 
@@ -195,6 +200,15 @@ function OrderDetailsProductCard({
     (item) => item.id === editingProductId
   );
 
+  const editingCurrentVariants = useMemo(
+    () =>
+      (editingProduct?.attributes ?? []).reduce<Record<string, string>>((acc, attr) => {
+        if (attr.name && attr.value) acc[attr.name] = attr.value;
+        return acc;
+      }, {}),
+    [editingProduct]
+  );
+
   const deletingProduct = productsData.find(
     (item) => item.id === deletingProductId
   );
@@ -208,12 +222,12 @@ function OrderDetailsProductCard({
   const handleAddSameTypeProduct = async (
     attributeOptionIds: number[],
     quantity: number
-  ) => {
+  ): Promise<boolean> => {
     try {
       const referenceProduct = productsData[0];
       if (!referenceProduct) {
         toast.error('لا توجد منتجات في الطلب');
-        return;
+        return false;
       }
 
       const applied = await runLineEdit(
@@ -225,12 +239,17 @@ function OrderDetailsProductCard({
             quantity,
             sendBackToPackaging,
           }),
-        notifyAdded
+        () => {
+          notifyAdded();
+          setIsAddSameTypeModalOpen(false);
+        }
       );
       if (applied) notifyAdded();
+      return applied;
     } catch (err: any) {
       const msg = err?.response?.data?.message;
       toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل في إضافة المنتج');
+      return false;
     }
   };
 
@@ -423,10 +442,7 @@ function OrderDetailsProductCard({
             handleSaveEdit(editingProduct.id, attributeOptionIds)
           }
           productId={editingProduct.productId}
-          currentVariants={editingProduct.attributes.reduce<Record<string,string>>((acc, attr) => {
-            if (attr.name && attr.value) acc[attr.name] = attr.value;
-            return acc;
-          }, {})}
+          currentVariants={editingCurrentVariants}
         />
       )}
 

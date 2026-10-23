@@ -20,7 +20,7 @@ interface EditProductModalProps {
   onSave: (
     attributeOptionIds: number[],
     selectedValues: Record<string, string>
-  ) => void;
+  ) => Promise<boolean>;
   productId: number;
   currentVariants: Record<string, string>;
 }
@@ -65,7 +65,7 @@ export default function EditProductModal({
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!hasChanges || missingAttributes.length > 0) return;
 
     const attributeOptionIds = resolveAttributeOptionIds(
@@ -73,8 +73,8 @@ export default function EditProductModal({
       chosenValues
     );
 
-    onSave(attributeOptionIds, chosenValues);
-    onClose();
+    const applied = await onSave(attributeOptionIds, chosenValues);
+    if (applied) onClose();
   };
 
   return (

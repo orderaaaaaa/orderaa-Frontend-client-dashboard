@@ -15,7 +15,7 @@ import { missingAttributesOf } from '@/utils/variantSelection';
 interface AddSameTypeProductModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (attributeOptionIds: number[], quantity: number) => void;
+  onSave: (attributeOptionIds: number[], quantity: number) => Promise<boolean>;
   productType: string;
   productId: number | null;
 }
@@ -62,7 +62,7 @@ export default function AddSameTypeProductModal({
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!isFormValid) return;
 
     const attributeOptionIds = resolveAttributeOptionIds(
@@ -70,8 +70,8 @@ export default function AddSameTypeProductModal({
       selectedVariants
     );
 
-    onSave(attributeOptionIds, quantity);
-    onClose();
+    const applied = await onSave(attributeOptionIds, quantity);
+    if (applied) onClose();
   };
 
   const incrementQuantity = () => {
