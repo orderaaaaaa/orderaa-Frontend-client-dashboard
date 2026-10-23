@@ -13,6 +13,7 @@ import {
 } from '@/services/orders';
 import { useDebounce } from '@/utils/debounce';
 import { useProductVariantAvailabilityQuery } from '@/services/warehouses';
+import { NEXT_STOCK_TARGET } from '@/lib/api/warehouses';
 import {
   VariantAvailabilityList,
   matchVariant,
@@ -72,7 +73,7 @@ export default function AddNewProductModal({
   const { data: variantAvailability = [] } = useProductVariantAvailabilityQuery(
     selectedProduct?.id,
     orderId,
-    undefined,
+    NEXT_STOCK_TARGET,
     { quantity }
   );
   const selectedVariantAvailability = useMemo(
