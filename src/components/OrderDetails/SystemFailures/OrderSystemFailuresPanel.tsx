@@ -6,10 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
+import { readStoredLocale } from '@/i18n/locale';
+import { translate } from '@/i18n/translate';
 import {
   useMarkAllSystemFailuresSeen,
   useMarkSystemFailureSeen,
   useOrderSystemFailures,
+  useRetryHeldTransitionMutation,
 } from '@/services/orderSystemFailures';
 import type { Order } from '@/types/orders';
 import type { OrderSystemFailure } from '@/types/orderSystemFailures';
@@ -18,6 +21,10 @@ import { OrderSystemFailureItem } from './OrderSystemFailureItem';
 
 const HIDDEN_ERROR_STATUSES = new Set([403, 404]);
 const ALERTS_ITEM = 'alerts';
+const RETRYABLE_HELD_CODES = new Set([
+  'CARRIER_STATUS_NOT_APPLIED',
+  'MACHINE_TRANSITION_STOCK_SHORTAGE',
+]);
 
 export interface OrderSystemFailuresPanelProps {
   order: Order;
@@ -83,6 +90,8 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
   } = useOrderSystemFailures(order.id);
   const markSeen = useMarkSystemFailureSeen(order.id);
   const markAllSeen = useMarkAllSystemFailuresSeen(order.id);
+  const retryHeld = useRetryHeldTransitionMutation(order.id);
+  const canRetryHeld = canMarkSeen;
   const [open, setOpen] = useState('');
   const [autoDecided, setAutoDecided] = useState(false);
 
@@ -133,6 +142,20 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
 
   const failures = data.pages.flatMap((page) => page.data);
   const markingFailureId = markSeen.isPending ? markSeen.variables?.id : undefined;
+  const retryingFailureId = retryHeld.isPending ? retryHeld.variables : undefined;
+
+  const renderRetryAction = (failure: OrderSystemFailure) =>
+    canRetryHeld && failure.seenAt === null && RETRYABLE_HELD_CODES.has(failure.code) ? (
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        loading={retryingFailureId === failure.id}
+        onClick={() => retryHeld.mutate(failure.id)}
+      >
+        {translate(readStoredLocale(), 'orderSystemFailures.retry.action')}
+      </Button>
+    ) : null;
 
   const markAllAction =
     canMarkSeen && unseenTotal > 0 && firstPage ? (
@@ -161,7 +184,12 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
               canMarkSeen={canMarkSeen}
               isMarkingSeen={markingFailureId === failure.id}
               onMarkSeen={(row) => markSeen.mutate(row)}
-              renderActions={renderActions}
+              renderActions={(row) => (
+                <>
+                  {renderRetryAction(row)}
+                  {renderActions?.(row)}
+                </>
+              )}
             />
           ))}
           {hasNextPage && (

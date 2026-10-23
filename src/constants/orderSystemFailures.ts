@@ -27,6 +27,8 @@ export const ORDER_SYSTEM_FAILURE_LABELS: Record<OrderSystemFailureCode, string>
   AUTOMATION_STATUS_NOT_APPLIED: 'لم يتم تطبيق الحالة القادمة من الأتمتة',
   STOCK_MOVEMENT_SKIPPED: 'تم تخطي حركة المخزون لعدم كفاية الكمية',
   STOCK_MOVEMENT_BYPASSED: 'تم تخطي جزء من حركة المخزون لأن مرحلة سابقة لم تحركه',
+  MACHINE_TRANSITION_STOCK_SHORTAGE: 'لم يُطبَّق الانتقال بسبب نقص المخزون',
+  STORE_CREATE_CREATION_STOCK_SHORTAGE: 'وصل طلب من المتجر ولم يُحجز مخزونه لعدم كفاية المخزون',
   SCHEDULED_TRANSITION_FAILED: 'فشل تغيير حالة الطلب التلقائي',
   ORDER_SHADOWED: 'تم تعليق الطلب (فوترة)',
   SHADOW_ACTIVATION_FAILED: 'فشل تفعيل الطلب المعلق (فوترة)',

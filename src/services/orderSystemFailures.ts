@@ -2,7 +2,11 @@ import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-q
 import { toast } from 'react-toastify';
 import http from '@/lib/api/http';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
-import { getApiErrorMessage } from '@/utils/apiError';
+import { retryHeldTransition } from '@/lib/api/orderSystemFailures';
+import { invalidateAndWait, orderStatusKeys } from '@/lib/query/mutationSync';
+import { readStoredLocale } from '@/i18n/locale';
+import { translate } from '@/i18n/translate';
+import { getApiErrorMessage, getOutOfStockBlock } from '@/utils/apiError';
 import type {
   MarkAllSystemFailuresSeenResponse,
   OrderSystemFailure,
@@ -79,6 +83,29 @@ export const useMarkAllSystemFailuresSeen = (orderId: number) => {
     },
     onError: (err) => {
       toast.error(getApiErrorMessage(err, 'تعذر تعليم التنبيهات كمقروءة'));
+    },
+  });
+};
+
+export const useRetryHeldTransitionMutation = (orderId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (failureId: number) => retryHeldTransition(orderId, failureId),
+    onSuccess: async () => {
+      toast.success(translate(readStoredLocale(), 'orderSystemFailures.retry.success'));
+      await invalidateAndWait(queryClient, [
+        orderSystemFailuresKey(orderId),
+        ...orderStatusKeys(orderId),
+      ]);
+    },
+    onError: (err) => {
+      const outOfStock = getOutOfStockBlock(err);
+      toast.error(
+        outOfStock?.message ??
+          getApiErrorMessage(err, translate(readStoredLocale(), 'orderSystemFailures.retry.failed')),
+        outOfStock ? { autoClose: 8000 } : undefined
+      );
     },
   });
 };

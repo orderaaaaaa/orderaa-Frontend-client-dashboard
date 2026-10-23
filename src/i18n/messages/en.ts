@@ -159,6 +159,9 @@ const en: Record<keyof typeof ar, string> = {
     'The store order arrived but its stock was not reserved due to a stock shortage: {productName} in {warehouseName}',
   'stockShortage.event.retryApplied':
     'The status was re-applied after the stock was fixed: {status}',
+  'orderSystemFailures.retry.action': 'Re-apply status',
+  'orderSystemFailures.retry.success': 'Status re-applied',
+  'orderSystemFailures.retry.failed': 'Could not re-apply the status',
 };
 
 export default en;

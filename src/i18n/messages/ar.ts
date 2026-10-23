@@ -173,6 +173,9 @@ const ar = {
     'وصل الطلب من المتجر ولم يُحجز مخزونه لعدم كفاية المخزون: {productName} في {warehouseName}',
   'stockShortage.event.retryApplied':
     'أعيد تطبيق الحالة بعد إصلاح المخزون: {status}',
+  'orderSystemFailures.retry.action': 'إعادة تطبيق الحالة',
+  'orderSystemFailures.retry.success': 'تمت إعادة تطبيق الحالة',
+  'orderSystemFailures.retry.failed': 'تعذر إعادة تطبيق الحالة',
 } as const;
 
 export default ar;
