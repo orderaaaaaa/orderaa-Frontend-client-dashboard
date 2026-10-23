@@ -33,9 +33,11 @@ export function StockModeSection() {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const { data: mode } = useStockModeQuery(canRead);
-  const { data: summary, isLoading: summaryLoading } = useGoLiveSummaryQuery(
-    dialogOpen && canRead
-  );
+  const {
+    data: summary,
+    isLoading: summaryLoading,
+    error: summaryError,
+  } = useGoLiveSummaryQuery(dialogOpen && canRead);
   const goLive = useGoLiveMutation();
 
   if (!canRead || !mode) return null;
@@ -109,6 +111,11 @@ export function StockModeSection() {
       >
         <div className="space-y-4">
           <p className="text-sm text-gray-600">{summaryText}</p>
+          {summaryError && (
+            <p className="text-sm text-red-500">
+              {getApiErrorMessage(summaryError, 'تعذر تحميل ملخص الأرصدة')}
+            </p>
+          )}
           <div className="flex flex-wrap justify-end gap-2">
             <Button variant="outline" onClick={onCountFirst}>
               إجراء الجرد الآن

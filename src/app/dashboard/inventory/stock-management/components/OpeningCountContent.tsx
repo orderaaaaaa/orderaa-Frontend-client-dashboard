@@ -82,9 +82,9 @@ export function OpeningCountContent() {
     }))
     .filter((entry) => entry.delta !== 0);
 
-  const hasInvalid = Object.values(edits).some((edit) =>
-    isInvalidCount(edit.raw)
-  );
+  const hasInvalid =
+    rows.some((row) => isInvalidCount(countedValueOf(row))) ||
+    Object.values(edits).some((edit) => isInvalidCount(edit.raw));
 
   const onWarehouseChange = (next: string) => {
     setWarehouseId(next);
@@ -138,7 +138,11 @@ export function OpeningCountContent() {
         />
       </div>
 
-      {!hasWarehouse ? (
+      {!canRead ? (
+        <p className="py-8 text-center text-sm text-gray-500">
+          ليس لديك صلاحية لعرض أرصدة المخزن للجرد.
+        </p>
+      ) : !hasWarehouse ? (
         <p className="py-8 text-center text-sm text-gray-500">
           اختر مخزنًا لبدء الجرد.
         </p>
