@@ -395,10 +395,10 @@ function OrderDetails({
           <EditProductModal
             isOpen={editingIndex !== null}
             onClose={() => setEditingIndex(null)}
-            onSave={(attributeOptionIds, chosenValues) => {
-              if (editingIndex !== null) {
-                replaceVariant(editingIndex, attributeOptionIds, chosenValues);
-              }
+            onSave={async (attributeOptionIds, chosenValues) => {
+              if (editingIndex === null) return false;
+              replaceVariant(editingIndex, attributeOptionIds, chosenValues);
+              return true;
             }}
             productId={editingProduct.id}
             currentVariants={editingVariants}
