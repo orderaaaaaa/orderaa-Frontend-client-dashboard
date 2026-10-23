@@ -151,6 +151,14 @@ const en: Record<keyof typeof ar, string> = {
   'stockShortage.reasonShortage': 'Not enough stock',
   'stockShortage.reasonBlocked': 'Confirmation blocked by stock',
   'orderDetails.stock.bypassed': 'No stock movement',
+  'stockShortage.event.carrierNotApplied':
+    'The carrier reported {status} but the status was not updated: stock shortage for {productName} in {warehouseName}',
+  'stockShortage.event.machineTransition':
+    'The transition to {status} was not applied due to a stock shortage: {productName} in {warehouseName}',
+  'stockShortage.event.storeCreation':
+    'The store order arrived but its stock was not reserved due to a stock shortage: {productName} in {warehouseName}',
+  'stockShortage.event.retryApplied':
+    'The status was re-applied after the stock was fixed: {status}',
 };
 
 export default en;

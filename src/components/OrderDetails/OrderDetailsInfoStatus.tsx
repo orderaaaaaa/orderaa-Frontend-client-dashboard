@@ -5,6 +5,8 @@ import { useRef, useEffect, useState } from 'react';
 import { Order, OrderEvent } from '@/types/orders';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
+import { readStoredLocale } from '@/i18n/locale';
+import { translate } from '@/i18n/translate';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
 import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
 import { POST_SHIPPING_STATUSES } from '@/types/logistics';
@@ -108,6 +110,64 @@ function EventCard({
       </div>
     </div>
   );
+}
+
+const STOCK_SHORTAGE_EVENT_MESSAGES = {
+  STOCK_SHORTAGE_CARRIER_STATUS_NOT_APPLIED: {
+    key: 'stockShortage.event.carrierNotApplied',
+    fields: ['status', 'productName', 'warehouseName'],
+  },
+  STOCK_SHORTAGE_MACHINE_TRANSITION: {
+    key: 'stockShortage.event.machineTransition',
+    fields: ['status', 'productName', 'warehouseName'],
+  },
+  STOCK_SHORTAGE_STORE_CREATION: {
+    key: 'stockShortage.event.storeCreation',
+    fields: ['productName', 'warehouseName'],
+  },
+  STOCK_SHORTAGE_RETRY_APPLIED: {
+    key: 'stockShortage.event.retryApplied',
+    fields: ['status'],
+  },
+} as const;
+
+type StockShortageEventName = keyof typeof STOCK_SHORTAGE_EVENT_MESSAGES;
+
+function isStockShortageEventName(name: string): name is StockShortageEventName {
+  return Object.prototype.hasOwnProperty.call(STOCK_SHORTAGE_EVENT_MESSAGES, name);
+}
+
+function parseEventParams(note: string): Record<string, unknown> | null {
+  try {
+    const parsed: unknown = JSON.parse(note);
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+      return null;
+    }
+    return parsed as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+function renderOrderEventNote(
+  name: string | null | undefined,
+  note: string | null | undefined,
+  statusLabelOf: (statusKey: string) => string
+): string | null {
+  if (!name || !isStockShortageEventName(name)) return note || null;
+  const message = STOCK_SHORTAGE_EVENT_MESSAGES[name];
+  const params = note ? parseEventParams(note) : null;
+  if (!params) return name;
+  const values: Record<string, string> = {};
+  for (const field of message.fields) {
+    const value = params[field];
+    if (typeof value !== 'string' || value === '') return name;
+    values[field] = value;
+  }
+  if (values.status !== undefined) {
+    values.status = statusLabelOf(values.status);
+  }
+  return translate(readStoredLocale(), message.key, values);
 }
 
 const LOGISTICS_DEPARTMENTS = new Set(['LOGISTICS', 'COURIER', 'SHIPPING']);
@@ -297,7 +357,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
       rawDate: createdDate.toISOString().split('T')[0],
       time: getTimeAgo(event.createdAt),
       eventType: event.name || 'NEW_ORDER',
-      note: event.note || null,
+      note: renderOrderEventNote(event.name, event.note, getStatusLabel),
       employee: event.employee,
       utmSource: undefined as string | undefined,
       pageName: undefined as string | null | undefined,

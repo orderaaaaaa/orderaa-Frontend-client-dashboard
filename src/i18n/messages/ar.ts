@@ -165,6 +165,14 @@ const ar = {
   'stockShortage.reasonShortage': 'المخزون لا يكفي',
   'stockShortage.reasonBlocked': 'التأكيد ممنوع بسبب المخزون',
   'orderDetails.stock.bypassed': 'لا تُحرّك حركة مخزون',
+  'stockShortage.event.carrierNotApplied':
+    'الشركة أبلغت بـ{status} ولم يتم تحديث الحالة: نقص مخزون {productName} في {warehouseName}',
+  'stockShortage.event.machineTransition':
+    'لم يُطبَّق الانتقال إلى {status} بسبب نقص المخزون: {productName} في {warehouseName}',
+  'stockShortage.event.storeCreation':
+    'وصل الطلب من المتجر ولم يُحجز مخزونه لعدم كفاية المخزون: {productName} في {warehouseName}',
+  'stockShortage.event.retryApplied':
+    'أعيد تطبيق الحالة بعد إصلاح المخزون: {status}',
 } as const;
 
 export default ar;
