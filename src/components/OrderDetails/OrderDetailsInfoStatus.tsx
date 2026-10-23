@@ -115,21 +115,25 @@ function EventCard({
 const STOCK_SHORTAGE_EVENT_MESSAGES = {
   STOCK_SHORTAGE_CARRIER_STATUS_NOT_APPLIED: {
     key: 'stockShortage.event.carrierNotApplied',
+    withoutWarehouseKey: 'stockShortage.event.carrierNotAppliedNoWarehouse',
     title: 'stockShortage.event.shortageTitle',
     fields: ['status', 'productName', 'warehouseName'],
   },
   STOCK_SHORTAGE_MACHINE_TRANSITION: {
     key: 'stockShortage.event.machineTransition',
+    withoutWarehouseKey: 'stockShortage.event.machineTransitionNoWarehouse',
     title: 'stockShortage.event.shortageTitle',
     fields: ['status', 'productName', 'warehouseName'],
   },
   STOCK_SHORTAGE_STORE_CREATION: {
     key: 'stockShortage.event.storeCreation',
+    withoutWarehouseKey: 'stockShortage.event.storeCreationNoWarehouse',
     title: 'stockShortage.event.shortageTitle',
     fields: ['productName', 'warehouseName'],
   },
   STOCK_SHORTAGE_RETRY_APPLIED: {
     key: 'stockShortage.event.retryApplied',
+    withoutWarehouseKey: null,
     title: 'stockShortage.event.retryTitle',
     fields: ['status'],
   },
@@ -179,8 +183,18 @@ function renderOrderEventNote(
   const message = STOCK_SHORTAGE_EVENT_MESSAGES[name];
   const params = note ? parseEventParams(note) : null;
   if (!params) return name;
+  const warehouseName = params.warehouseName;
+  const warehouseMissing =
+    typeof warehouseName !== 'string' || warehouseName === '';
+  const omitWarehouse =
+    warehouseMissing && message.withoutWarehouseKey !== null;
+  const key =
+    omitWarehouse && message.withoutWarehouseKey !== null
+      ? message.withoutWarehouseKey
+      : message.key;
   const values: Record<string, string> = {};
   for (const field of message.fields) {
+    if (omitWarehouse && field === 'warehouseName') continue;
     const value = params[field];
     if (typeof value !== 'string' || value === '') return name;
     values[field] = value;
@@ -188,7 +202,7 @@ function renderOrderEventNote(
   if (values.status !== undefined) {
     values.status = statusLabelOf(values.status);
   }
-  return translate(readStoredLocale(), message.key, values);
+  return translate(readStoredLocale(), key, values);
 }
 
 const LOGISTICS_DEPARTMENTS = new Set(['LOGISTICS', 'COURIER', 'SHIPPING']);

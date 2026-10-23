@@ -171,6 +171,12 @@ const ar = {
     'لم يُطبَّق الانتقال إلى {status} بسبب نقص المخزون: {productName} في {warehouseName}',
   'stockShortage.event.storeCreation':
     'وصل الطلب من المتجر ولم يُحجز مخزونه لعدم كفاية المخزون: {productName} في {warehouseName}',
+  'stockShortage.event.carrierNotAppliedNoWarehouse':
+    'الشركة أبلغت بـ{status} ولم يتم تحديث الحالة: نقص مخزون {productName}',
+  'stockShortage.event.machineTransitionNoWarehouse':
+    'لم يُطبَّق الانتقال إلى {status} بسبب نقص المخزون: {productName}',
+  'stockShortage.event.storeCreationNoWarehouse':
+    'وصل الطلب من المتجر ولم يُحجز مخزونه لعدم كفاية المخزون: {productName}',
   'stockShortage.event.shortageTitle': 'نقص المخزون',
   'stockShortage.event.retryTitle': 'إعادة تطبيق الحالة',
   'stockShortage.event.retryApplied':
