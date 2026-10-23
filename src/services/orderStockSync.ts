@@ -19,8 +19,14 @@ export const useRepairOrderStockMutation = () => {
   return useMutation({
     mutationFn: (orderId: number) => repairOrderStock(orderId),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.ORDER_STOCK_DRIFT],
+      [
+        QUERY_KEYS.ORDER_STOCK_DRIFT,
+        QUERY_KEYS.ORDER_STOCK_AVAILABILITY,
+        QUERY_KEYS.PRODUCT_VARIANT_AVAILABILITY,
+        QUERY_KEYS.STOCK_MOVEMENTS,
+        QUERY_KEYS.WAREHOUSE_SUMMARY,
+      ].forEach((key) => {
+        queryClient.invalidateQueries({ queryKey: [key] });
       });
     },
   });
