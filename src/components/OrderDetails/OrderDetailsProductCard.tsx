@@ -129,7 +129,9 @@ function OrderDetailsProductCard({
 
   const handleConfirmDelete = async () => {
     if (!deletingProductId) return;
-    await deleteOrderProductMutation.mutateAsync(deletingProductId);
+    await deleteOrderProductMutation.mutateAsync({
+      orderProductId: deletingProductId,
+    });
   };
 
   const editingProduct = productsData.find(

@@ -283,12 +283,15 @@ export const useUpdateOrderProduct = () => {
     mutationFn: async ({
       orderProductId,
       attributeOptionIds,
+      sendBackToPackaging,
     }: {
       orderProductId: number;
       attributeOptionIds: number[];
+      sendBackToPackaging?: boolean;
     }) => {
       const response = await http.patch(`/orders/order-product/${orderProductId}`, {
         attributeOptionIds,
+        ...(sendBackToPackaging ? { sendBackToPackaging: true } : {}),
       });
       return response.data;
     },
@@ -305,9 +308,16 @@ export const useDeleteOrderProduct = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (orderProductId: number) => {
+    mutationFn: async ({
+      orderProductId,
+      sendBackToPackaging,
+    }: {
+      orderProductId: number;
+      sendBackToPackaging?: boolean;
+    }) => {
       const response = await http.delete(
-        `/orders/order-product/${orderProductId}`
+        `/orders/order-product/${orderProductId}`,
+        { params: sendBackToPackaging ? { sendBackToPackaging: true } : undefined }
       );
       return response.data;
     },
@@ -329,16 +339,19 @@ export const useAddOrderProduct = () => {
       productId,
       attributeOptionIds,
       quantity,
+      sendBackToPackaging,
     }: {
       orderId: number;
       productId: number;
       attributeOptionIds: number[];
       quantity: number;
+      sendBackToPackaging?: boolean;
     }) => {
       const response = await http.post(`/orders/${orderId}/products`, {
         productId,
         attributeOptionIds,
         quantity,
+        ...(sendBackToPackaging ? { sendBackToPackaging: true } : {}),
       });
       return response.data;
     },
