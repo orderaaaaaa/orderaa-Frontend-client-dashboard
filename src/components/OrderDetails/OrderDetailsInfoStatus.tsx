@@ -115,18 +115,22 @@ function EventCard({
 const STOCK_SHORTAGE_EVENT_MESSAGES = {
   STOCK_SHORTAGE_CARRIER_STATUS_NOT_APPLIED: {
     key: 'stockShortage.event.carrierNotApplied',
+    title: 'stockShortage.event.shortageTitle',
     fields: ['status', 'productName', 'warehouseName'],
   },
   STOCK_SHORTAGE_MACHINE_TRANSITION: {
     key: 'stockShortage.event.machineTransition',
+    title: 'stockShortage.event.shortageTitle',
     fields: ['status', 'productName', 'warehouseName'],
   },
   STOCK_SHORTAGE_STORE_CREATION: {
     key: 'stockShortage.event.storeCreation',
+    title: 'stockShortage.event.shortageTitle',
     fields: ['productName', 'warehouseName'],
   },
   STOCK_SHORTAGE_RETRY_APPLIED: {
     key: 'stockShortage.event.retryApplied',
+    title: 'stockShortage.event.retryTitle',
     fields: ['status'],
   },
 } as const;
@@ -156,6 +160,14 @@ function parseEventParams(note: string): Record<string, unknown> | null {
   } catch {
     return null;
   }
+}
+
+function timelineEventTitle(
+  name: string,
+  statusLabelOf: (statusKey: string) => string
+): string {
+  if (!isStockShortageEventName(name)) return statusLabelOf(name);
+  return translate(readStoredLocale(), STOCK_SHORTAGE_EVENT_MESSAGES[name].title);
 }
 
 function renderOrderEventNote(
@@ -357,7 +369,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
   const isPostShipping = POST_SHIPPING_STATUSES.has(order.status);
 
   const events: MappedEvent[] = allEvents.map((event: OrderEvent, index: number) => {
-    const statusLabel = event.name ? getStatusLabel(event.name) : 'حدث';
+    const statusLabel = event.name ? timelineEventTitle(event.name, getStatusLabel) : 'حدث';
     const createdDate = new Date(event.createdAt);
     return {
       id: event.id || index + 1,

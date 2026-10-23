@@ -157,6 +157,8 @@ const en: Record<keyof typeof ar, string> = {
     'The transition to {status} was not applied due to a stock shortage: {productName} in {warehouseName}',
   'stockShortage.event.storeCreation':
     'The store order arrived but its stock was not reserved due to a stock shortage: {productName} in {warehouseName}',
+  'stockShortage.event.shortageTitle': 'Stock shortage',
+  'stockShortage.event.retryTitle': 'Re-apply status',
   'stockShortage.event.retryApplied':
     'The status was re-applied after the stock was fixed: {status}',
   'orderSystemFailures.retry.action': 'Re-apply status',
