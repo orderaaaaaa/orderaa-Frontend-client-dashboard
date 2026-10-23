@@ -71,7 +71,9 @@ export default function AddNewProductModal({
   // T27 — availability beside each size and colour.
   const { data: variantAvailability = [] } = useProductVariantAvailabilityQuery(
     selectedProduct?.id,
-    orderId
+    orderId,
+    undefined,
+    { quantity }
   );
   const selectedVariantAvailability = useMemo(
     () => matchVariant(variantAvailability, selectedVariants),

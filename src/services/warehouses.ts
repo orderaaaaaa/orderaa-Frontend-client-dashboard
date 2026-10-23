@@ -37,6 +37,7 @@ import {
   AdjustStockDto,
   TransferStockDto,
   StockAvailabilityTarget,
+  StockEditIntent,
 } from '@/lib/api/warehouses';
 
 const STALE_TIME = 30 * 1000;
@@ -372,7 +373,8 @@ export const useOrderStockAvailabilityQuery = (
 export const useProductVariantAvailabilityQuery = (
   productId: number | undefined,
   orderId: number | undefined,
-  targetStatus?: StockAvailabilityTarget
+  targetStatus?: StockAvailabilityTarget,
+  edit?: StockEditIntent
 ) => {
   return useQuery({
     queryKey: [
@@ -380,12 +382,14 @@ export const useProductVariantAvailabilityQuery = (
       productId,
       orderId,
       targetStatus ?? null,
+      edit?.quantity ?? null,
     ] as QueryKey,
     queryFn: () =>
       getProductVariantAvailability(
         productId as number,
         orderId as number,
-        targetStatus
+        targetStatus,
+        edit
       ),
     enabled: typeof productId === 'number' && typeof orderId === 'number',
     staleTime: 0,

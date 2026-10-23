@@ -524,14 +524,25 @@ export async function getOrderStockAvailability(
   return response.data as OrderStockAvailability;
 }
 
+export interface StockEditIntent {
+  quantity: number;
+}
+
 export async function getProductVariantAvailability(
   productId: number,
   orderId: number,
-  targetStatus?: StockAvailabilityTarget
+  targetStatus?: StockAvailabilityTarget,
+  edit?: StockEditIntent
 ): Promise<VariantAvailability[]> {
   const response = await api.get(
     `/products/${productId}/variants/availability`,
-    { params: { orderId, ...(targetStatus ? { targetStatus } : {}) } }
+    {
+      params: {
+        orderId,
+        ...(targetStatus ? { targetStatus } : {}),
+        ...(edit ? { forEdit: true, quantity: edit.quantity } : {}),
+      },
+    }
   );
   return response.data as VariantAvailability[];
 }
