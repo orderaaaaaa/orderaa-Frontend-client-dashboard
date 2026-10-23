@@ -399,7 +399,9 @@ export function ProductStockTable({
               <span
                 className={clsx(
                   'font-semibold',
-                  selectedCell.stock.quantity < 0 ? 'text-red-600' : 'text-gray-800'
+                  selectedCell.stock.quantity < 0
+                    ? 'text-red-600'
+                    : 'text-gray-800'
                 )}
               >
                 {formatStockNumber(selectedCell.stock.quantity)}

@@ -65,7 +65,10 @@ export function useSubmitReturnReceiptsMutation() {
     },
     onError: (err) => {
       toast.error(
-        getBatchErrorMessage(err, pickErrorMessage(err, 'تعذر إتمام استلام المرتجعات'))
+        getBatchErrorMessage(
+          err,
+          pickErrorMessage(err, 'تعذر إتمام استلام المرتجعات')
+        )
       );
     },
   });
