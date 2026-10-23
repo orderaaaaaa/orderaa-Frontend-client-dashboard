@@ -93,7 +93,9 @@ export const useRetryHeldTransitionMutation = (orderId: number) => {
   return useMutation({
     mutationFn: (failureId: number) => retryHeldTransition(orderId, failureId),
     onSuccess: async () => {
-      toast.success(translate(readStoredLocale(), 'orderSystemFailures.retry.success'));
+      toast.success(
+        translate(readStoredLocale(), 'orderSystemFailures.retry.success')
+      );
       await invalidateAndWait(queryClient, [
         orderSystemFailuresKey(orderId),
         ...orderStatusKeys(orderId),
@@ -103,7 +105,10 @@ export const useRetryHeldTransitionMutation = (orderId: number) => {
       const outOfStock = getOutOfStockBlock(err);
       toast.error(
         outOfStock?.message ??
-          getApiErrorMessage(err, translate(readStoredLocale(), 'orderSystemFailures.retry.failed')),
+          getApiErrorMessage(
+            err,
+            translate(readStoredLocale(), 'orderSystemFailures.retry.failed')
+          ),
         outOfStock ? { autoClose: 8000 } : undefined
       );
     },

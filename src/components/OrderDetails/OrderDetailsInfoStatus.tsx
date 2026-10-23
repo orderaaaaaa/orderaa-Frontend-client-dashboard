@@ -133,14 +133,23 @@ const STOCK_SHORTAGE_EVENT_MESSAGES = {
 
 type StockShortageEventName = keyof typeof STOCK_SHORTAGE_EVENT_MESSAGES;
 
-function isStockShortageEventName(name: string): name is StockShortageEventName {
-  return Object.prototype.hasOwnProperty.call(STOCK_SHORTAGE_EVENT_MESSAGES, name);
+function isStockShortageEventName(
+  name: string
+): name is StockShortageEventName {
+  return Object.prototype.hasOwnProperty.call(
+    STOCK_SHORTAGE_EVENT_MESSAGES,
+    name
+  );
 }
 
 function parseEventParams(note: string): Record<string, unknown> | null {
   try {
     const parsed: unknown = JSON.parse(note);
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    if (
+      typeof parsed !== 'object' ||
+      parsed === null ||
+      Array.isArray(parsed)
+    ) {
       return null;
     }
     return parsed as Record<string, unknown>;

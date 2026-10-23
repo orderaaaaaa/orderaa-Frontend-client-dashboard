@@ -91,7 +91,6 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
   const markSeen = useMarkSystemFailureSeen(order.id);
   const markAllSeen = useMarkAllSystemFailuresSeen(order.id);
   const retryHeld = useRetryHeldTransitionMutation(order.id);
-  const canRetryHeld = canMarkSeen;
   const [open, setOpen] = useState('');
   const [autoDecided, setAutoDecided] = useState(false);
 
@@ -145,7 +144,7 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
   const retryingFailureId = retryHeld.isPending ? retryHeld.variables : undefined;
 
   const renderRetryAction = (failure: OrderSystemFailure) =>
-    canRetryHeld && failure.seenAt === null && RETRYABLE_HELD_CODES.has(failure.code) ? (
+    canMarkSeen && failure.seenAt === null && RETRYABLE_HELD_CODES.has(failure.code) ? (
       <Button
         type="button"
         variant="outline"
