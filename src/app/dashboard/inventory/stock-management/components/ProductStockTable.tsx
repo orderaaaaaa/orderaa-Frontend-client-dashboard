@@ -396,7 +396,14 @@ export function ProductStockTable({
             </div>
             <div className="flex items-center justify-between gap-4">
               <span className="text-gray-500">الكمية</span>
-              <span className={clsx('font-semibold', selectedCell.stock.quantity < 0 ? 'text-red-600' : 'text-gray-800')}>{formatStockNumber(selectedCell.stock.quantity)}</span>
+              <span
+                className={clsx(
+                  'font-semibold',
+                  selectedCell.stock.quantity < 0 ? 'text-red-600' : 'text-gray-800'
+                )}
+              >
+                {formatStockNumber(selectedCell.stock.quantity)}
+              </span>
             </div>
             {selectedCell.showStatus && (
               <div className="flex items-center justify-between gap-4">

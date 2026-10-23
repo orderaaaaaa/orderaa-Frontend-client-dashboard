@@ -383,8 +383,7 @@ export function PrintOrdersContent() {
       setIsScannerChangeProductMode(false);
       setIsScannedOrdersModalOpen(false);
     } catch (error: any) {
-      const msg = error?.response?.data?.message;
-      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تغيير المنتج');
+      toast.error(getBatchErrorMessage(error, 'فشل تغيير المنتج'));
     } finally {
       setIsActionLoading(false);
     }
@@ -571,8 +570,7 @@ export function PrintOrdersContent() {
         clearSelections();
         setSelectMode(false);
       } catch (error: any) {
-        const msg = error?.response?.data?.message;
-      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تغيير المنتج');
+        toast.error(getBatchErrorMessage(error, 'فشل تغيير المنتج'));
         throw error;
       } finally {
         setIsActionLoading(false);

@@ -6,6 +6,7 @@ import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { invalidateAndWait, orderStatusKeys } from '@/lib/query/mutationSync';
 import { RETURN_RECEIPTS_KEY } from '@/services/returnReceipts';
 import { uploadFile } from '@/lib/api/upload';
+import { getBatchErrorMessage } from '@/utils/apiError';
 import { submitReturnReceipts } from '@/lib/api/returns-receiving';
 import {
   bulkUpdateReturnCategories,
@@ -63,7 +64,9 @@ export function useSubmitReturnReceiptsMutation() {
       toast.success('تم إتمام استلام المرتجعات بنجاح');
     },
     onError: (err) => {
-      toast.error(pickErrorMessage(err, 'تعذر إتمام استلام المرتجعات'));
+      toast.error(
+        getBatchErrorMessage(err, pickErrorMessage(err, 'تعذر إتمام استلام المرتجعات'))
+      );
     },
   });
 }

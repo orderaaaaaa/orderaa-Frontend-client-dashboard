@@ -12,7 +12,7 @@ import { useBulkOrders } from '@/app/dashboard/orders/allOrders/hooks/useOrderBu
 import type { OrderStatusKey } from '@/app/dashboard/orders/allOrders/types/Bulk';
 import BaseModal from '@/components/ui/base-modal';
 import PageLoading from '@/components/ui/page-loading';
-import { getApiErrorMessage, getApiErrorStatus } from '@/utils/apiError';
+import { getApiErrorStatus, getBatchErrorMessage } from '@/utils/apiError';
 import { useOrderStatusSetGuard } from '@/hooks/orders/useOrderStatusSetGuard';
 import {
   notifyBulkStatusResult,
@@ -137,7 +137,7 @@ export default function CustomerOrdersModal({
         setSelectedOrderIds([]);
       } catch (err) {
         if (getApiErrorStatus(err) === 403) return;
-        toast.error(getApiErrorMessage(err, 'فشل تعديل حالة الطلبات'));
+        toast.error(getBatchErrorMessage(err, 'فشل تعديل حالة الطلبات'));
       }
     },
     [

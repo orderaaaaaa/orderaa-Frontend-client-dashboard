@@ -86,7 +86,7 @@ function formatBatchShortageRow(order: BatchShortageOrder): string {
   return lines ? `${head}\n${lines}` : head;
 }
 
-export function getBatchShortageMessage(err: unknown): string | null {
+function getBatchShortageMessage(err: unknown): string | null {
   const data = (
     err as {
       response?: {
