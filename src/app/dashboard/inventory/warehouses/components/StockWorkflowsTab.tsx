@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { LiaPlusSolid, LiaTrashSolid, LiaSaveSolid } from 'react-icons/lia';
@@ -376,15 +376,30 @@ const toRowPatch = (
 function PredecessorPicker({
   row,
   choices,
+  loading,
   onChange,
 }: {
   row: RuleRow;
   choices: StockWorkflowApiItem[];
+  loading: boolean;
   onChange: (predecessorKeys: string[]) => void;
 }) {
+  const titleId = useId();
+  const knownRefs = new Set(choices.map((choice) => predecessorRef(choice.id)));
+  const savedUnlistedRefs = row.predecessorKeys.filter(
+    (key) => key.startsWith(PREDECESSOR_RULE_REF_PREFIX) && !knownRefs.has(key)
+  );
+  const entries = [
+    ...choices.map((choice) => predecessorRef(choice.id)),
+    ...savedUnlistedRefs,
+  ].map((ref) => ({
+    ref,
+    label: ref.slice(PREDECESSOR_RULE_REF_PREFIX.length),
+  }));
+
   return (
     <div className="space-y-1.5">
-      <span className="block text-xs font-medium text-gray-600">
+      <span id={titleId} className="block text-xs font-medium text-gray-600">
         المراحل السابقة
       </span>
       {row.templateOwned ? (
@@ -393,33 +408,36 @@ function PredecessorPicker({
             ? row.predecessorKeys.join('، ')
             : 'بدون مراحل سابقة'}
         </p>
-      ) : choices.length === 0 ? (
+      ) : loading ? (
+        <p className="text-[11px] text-gray-400">جارٍ تحميل القواعد...</p>
+      ) : entries.length === 0 ? (
         <p className="text-[11px] text-gray-400">
           لا توجد قواعد انتقال خاصة بك لاختيارها بعد.
         </p>
       ) : (
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {choices.map((choice) => {
-            const ref = predecessorRef(choice.id);
-            return (
-              <label
-                key={choice.id}
-                className="flex items-center gap-2 text-sm text-gray-700"
-              >
-                <Checkbox
-                  checked={row.predecessorKeys.includes(ref)}
-                  onCheckedChange={(next) =>
-                    onChange(
-                      next === true
-                        ? [...row.predecessorKeys, ref]
-                        : row.predecessorKeys.filter((key) => key !== ref)
-                    )
-                  }
-                />
-                القاعدة رقم {choice.id}
-              </label>
-            );
-          })}
+        <div
+          role="group"
+          aria-labelledby={titleId}
+          className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3"
+        >
+          {entries.map((entry) => (
+            <label
+              key={entry.ref}
+              className="flex items-center gap-2 text-sm text-gray-700"
+            >
+              <Checkbox
+                checked={row.predecessorKeys.includes(entry.ref)}
+                onCheckedChange={(next) =>
+                  onChange(
+                    next === true
+                      ? [...row.predecessorKeys, entry.ref]
+                      : row.predecessorKeys.filter((key) => key !== entry.ref)
+                  )
+                }
+              />
+              القاعدة رقم {entry.label}
+            </label>
+          ))}
         </div>
       )}
       <p className="text-[11px] leading-4 text-gray-400">
@@ -449,7 +467,8 @@ export function StockWorkflowsTab() {
       ? undefined
       : { productId: scope.productId, variantId: scope.variantId }
   );
-  const { data: allRules } = useStockWorkflowsQuery();
+  const { data: allRules, isLoading: allRulesLoading } =
+    useStockWorkflowsQuery();
   const predecessorChoices = useMemo(
     () =>
       (allRules ?? []).filter(
@@ -845,6 +864,7 @@ export function StockWorkflowsTab() {
                   choices={predecessorChoices.filter(
                     (rule) => rule.id !== row.id
                   )}
+                  loading={allRulesLoading}
                   onChange={(predecessorKeys) =>
                     patchRow(index, { predecessorKeys })
                   }
