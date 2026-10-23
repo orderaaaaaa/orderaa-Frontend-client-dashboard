@@ -85,7 +85,7 @@ export default function OrderStockSyncPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>رقم الطلب</TableHead>
-                <TableHead>رقم المتغير</TableHead>
+                <TableHead>المنتج</TableHead>
                 <TableHead>عدد القطع في الطلب</TableHead>
                 <TableHead>المخزون المحجوز</TableHead>
                 <TableHead>الفرق</TableHead>
@@ -96,7 +96,11 @@ export default function OrderStockSyncPage() {
               {data.items.map((item, index) => (
                 <TableRow key={`${item.orderId}-${item.variantId}`}>
                   <TableCell>{item.orderCode}</TableCell>
-                  <TableCell>{item.variantId}</TableCell>
+                  <TableCell>
+                    {item.variantLabel
+                      ? `${item.productName} – ${item.variantLabel}`
+                      : item.productName}
+                  </TableCell>
                   <TableCell>{item.lines}</TableCell>
                   <TableCell>{item.net}</TableCell>
                   <TableCell className="text-red-600">{item.difference}</TableCell>

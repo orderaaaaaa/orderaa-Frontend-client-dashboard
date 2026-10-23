@@ -2,6 +2,8 @@ export interface OrderStockDriftItem {
   orderId: number;
   orderCode: string;
   variantId: number;
+  productName: string;
+  variantLabel: string;
   fromWarehouseId: number | null;
   toWarehouseId: number | null;
   lines: number;
