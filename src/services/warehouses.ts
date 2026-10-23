@@ -145,11 +145,15 @@ export const useDeleteWarehouseMutation = () => {
 // Stock workflow rules
 // ---------------------------------------------------------------------------
 
-export const useStockWorkflowsQuery = (params?: GetStockWorkflowsParams) => {
+export const useStockWorkflowsQuery = (
+  params?: GetStockWorkflowsParams,
+  options?: { enabled?: boolean }
+) => {
   return useQuery({
     queryKey: [QUERY_KEYS.STOCK_WORKFLOWS, params] as QueryKey,
     queryFn: () => getStockWorkflows(params),
     staleTime: STALE_TIME,
+    enabled: options?.enabled ?? true,
   });
 };
 

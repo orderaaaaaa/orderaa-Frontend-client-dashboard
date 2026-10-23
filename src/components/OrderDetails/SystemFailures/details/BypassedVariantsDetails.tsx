@@ -1,5 +1,7 @@
 import type { StockWorkflowApiItem } from '@/lib/api/warehouses';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
+import { usePermissionCheck } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 import { useStockWorkflowsQuery } from '@/services/warehouses';
 import type { StockMovementBypassedDetails } from '@/types/orderSystemFailures';
 import { DetailField, DetailGrid, EMPTY_VALUE } from './DetailFields';
@@ -12,7 +14,10 @@ export function BypassedVariantsDetails({
   details: StockMovementBypassedDetails;
 }) {
   const { getStatusLabel } = useStatusLabel();
-  const { data: rules } = useStockWorkflowsQuery();
+  const { hasPermission } = usePermissionCheck();
+  const { data: rules } = useStockWorkflowsQuery(undefined, {
+    enabled: hasPermission(PERMISSION_CODES.STOCK_WORKFLOWS_READ),
+  });
 
   const findPredecessorRule = (key: string): StockWorkflowApiItem | undefined => {
     if (key.startsWith(PREDECESSOR_RULE_REF_PREFIX)) {
@@ -42,7 +47,9 @@ export function BypassedVariantsDetails({
     new Set(
       details.lines.map((line) => {
         const warehouse = line.fromWarehouseName ?? 'المخزون';
-        const predecessors = line.predecessorKeys.map(predecessorLabel).join('، ');
+        const predecessors = Array.from(
+          new Set(line.predecessorKeys.map(predecessorLabel))
+        ).join('، ');
         return `لم يُنقل مخزون ${warehouse} في «${getStatusLabel(details.toStatus)}» لأن «${predecessors}» لم يحركه`;
       })
     )
