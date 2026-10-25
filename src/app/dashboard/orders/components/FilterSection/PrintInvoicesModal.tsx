@@ -52,7 +52,10 @@ export function PrintInvoicesModal({
     if (invoiceCount === '' || countError) return;
     setIsClaiming(true);
     try {
-      const { claimed } = await claimNextOrdersForPrint(Number(invoiceCount));
+      const { claimed, skipped } = await claimNextOrdersForPrint(Number(invoiceCount));
+      for (const item of skipped) {
+        if (item.reason === 'NO_SHIPPING_CODE') toast.warning(item.message);
+      }
       if (claimed.length === 0) {
         toast.error('لا توجد طلبات متاحة للطباعة');
         return;
