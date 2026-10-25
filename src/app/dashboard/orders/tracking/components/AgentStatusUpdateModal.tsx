@@ -14,10 +14,15 @@ import {
   LiaPhoneSlashSolid,
   LiaUserSlashSolid,
   LiaSpinnerSolid,
+  LiaCheckCircleSolid,
+  LiaTimesCircleSolid,
+  LiaUndoAltSolid,
 } from 'react-icons/lia';
+import Link from 'next/link';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import Input from '@/components/ui/Input';
 import { DatePicker } from '@/components/ui/datepicker';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import ProductSelectionModal, {
@@ -28,16 +33,22 @@ import {
   useFollowupPostponedMutation,
   useFollowupChangeProductsMutation,
   useFollowupSendAgainMutation,
+  useFollowupCloseMutation,
+  useFollowupRefuseMutation,
   useFollowupCancelledMutation,
   useFollowupOverdueMutation,
+  useFollowupUndoClosureMutation,
 } from '@/services/followup';
 import { useCancellationReasons } from '@/services/orders';
+import type { FollowupClosure, FollowupClosureKind } from '@/types/logistics';
 
 type ActionType =
   | 'FOLLOW_UP'
   | 'POSTPONE'
   | 'CHANGE_PRODUCT'
   | 'RESEND'
+  | 'CLOSE'
+  | 'REFUSE'
   | 'CANCEL'
   | 'LATE';
 
@@ -54,9 +65,48 @@ const ACTION_OPTIONS: {
   { value: 'POSTPONE', label: 'تأجيل', icon: LiaCalendarAltSolid, color: 'text-amber-600', activeColor: 'border-amber-500 bg-amber-50 ring-1 ring-amber-200' },
   { value: 'CHANGE_PRODUCT', label: 'تغيير منتج', icon: LiaExchangeAltSolid, color: 'text-violet-600', activeColor: 'border-violet-500 bg-violet-50 ring-1 ring-violet-200' },
   { value: 'RESEND', label: 'اعادة ارسال', icon: LiaRedoAltSolid, color: 'text-cyan-600', activeColor: 'border-cyan-500 bg-cyan-50 ring-1 ring-cyan-200' },
+  { value: 'CLOSE', label: 'إغلاق اليوم', icon: LiaCheckCircleSolid, color: 'text-slate-600', activeColor: 'border-slate-500 bg-slate-50 ring-1 ring-slate-200' },
+  { value: 'REFUSE', label: 'رفض التسليم', icon: LiaTimesCircleSolid, color: 'text-rose-600', activeColor: 'border-rose-500 bg-rose-50 ring-1 ring-rose-200' },
   { value: 'CANCEL', label: 'الغاء', icon: LiaBanSolid, color: 'text-red-600', activeColor: 'border-red-500 bg-red-50 ring-1 ring-red-200' },
   { value: 'LATE', label: 'متاخر', icon: LiaClockSolid, color: 'text-orange-600', activeColor: 'border-orange-500 bg-orange-50 ring-1 ring-orange-200' },
 ];
+
+const REASON_COPY: Record<
+  'CANCEL' | 'REFUSE',
+  {
+    placeholder: string;
+    empty: string;
+    settingsLink: string;
+    loadError: string;
+    containerClassName: string;
+  }
+> = {
+  CANCEL: {
+    placeholder: 'اختر سبب الالغاء',
+    empty: 'لا توجد أسباب إلغاء متاحة',
+    settingsLink: 'أضف أسباب الإلغاء من إعدادات المتجر',
+    loadError: 'تعذر تحميل أسباب الإلغاء',
+    containerClassName: 'bg-red-50/50 border-red-100',
+  },
+  REFUSE: {
+    placeholder: 'اختر سبب الرفض',
+    empty: 'لا توجد أسباب رفض متاحة',
+    settingsLink: 'أضف أسباب الرفض من إعدادات المتجر',
+    loadError: 'تعذر تحميل أسباب الرفض',
+    containerClassName: 'bg-rose-50/50 border-rose-100',
+  },
+};
+
+export const FOLLOWUP_CLOSURE_KIND_LABELS: Record<FollowupClosureKind, string> = {
+  CLOSED_TODAY: 'مغلق لليوم',
+  REFUSE: 'مرفوض',
+  CANCEL: 'ملغي',
+};
+
+function isActionLockedByClosure(action: ActionType, kind: FollowupClosureKind | null): boolean {
+  if (kind === 'REFUSE' || kind === 'CANCEL') return true;
+  return action === 'CLOSE' && kind === 'CLOSED_TODAY';
+}
 
 const FOLLOW_UP_OPTIONS: {
   value: FollowUpSubStatus;
@@ -80,43 +130,68 @@ interface AgentStatusUpdateModalProps {
   isOpen: boolean;
   onClose: () => void;
   orderId: number;
+  closure?: FollowupClosure | null;
 }
 
 export default function AgentStatusUpdateModal({
   isOpen,
   onClose,
   orderId,
+  closure = null,
 }: AgentStatusUpdateModalProps) {
+  const closeMutation = useFollowupCloseMutation();
   const attemptedMutation = useFollowupAttemptedMutation();
   const postponedMutation = useFollowupPostponedMutation();
   const changeProductsMutation = useFollowupChangeProductsMutation();
   const sendAgainMutation = useFollowupSendAgainMutation();
+  const refuseMutation = useFollowupRefuseMutation();
   const cancelledMutation = useFollowupCancelledMutation();
   const overdueMutation = useFollowupOverdueMutation();
-
-  const { data: cancellationReasons, isLoading: isLoadingCancellationReasons } = useCancellationReasons(isOpen);
+  const undoMutation = useFollowupUndoClosureMutation();
 
   const [selectedAction, setSelectedAction] = useState<ActionType | null>(null);
   const [followUpStatus, setFollowUpStatus] = useState<FollowUpSubStatus | null>(null);
   const [postponeDate, setPostponeDate] = useState<Date | null>(null);
-  const [cancelReasonId, setCancelReasonId] = useState('');
+  const [reasonId, setReasonId] = useState('');
+  const [reasonText, setReasonText] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<SelectableProduct | null>(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 
+  const cancellationReasonsQuery = useCancellationReasons(
+    isOpen && selectedAction === 'CANCEL',
+    'SHIPPING_CANCELLATION'
+  );
+  const refusalReasonsQuery = useCancellationReasons(
+    isOpen && selectedAction === 'REFUSE',
+    'REFUSAL_TO_ACCEPT'
+  );
+  const reasonsQuery = selectedAction === 'REFUSE' ? refusalReasonsQuery : cancellationReasonsQuery;
+  const reasonOptions = (reasonsQuery.data ?? []).map((r) => ({
+    key: String(r.id),
+    label: r.reasonName,
+  }));
+  const reasonsReady = reasonsQuery.isSuccess && reasonOptions.length > 0;
+
+  const closureKind = closure?.kind ?? null;
+
   const isSubmitting =
+    closeMutation.isPending ||
     attemptedMutation.isPending ||
     postponedMutation.isPending ||
     changeProductsMutation.isPending ||
     sendAgainMutation.isPending ||
+    refuseMutation.isPending ||
     cancelledMutation.isPending ||
-    overdueMutation.isPending;
+    overdueMutation.isPending ||
+    undoMutation.isPending;
 
   const resetForm = useCallback(() => {
     setSelectedAction(null);
     setFollowUpStatus(null);
     setPostponeDate(null);
-    setCancelReasonId('');
+    setReasonId('');
+    setReasonText('');
     setNotes('');
     setSelectedProduct(null);
   }, []);
@@ -130,13 +205,15 @@ export default function AgentStatusUpdateModal({
     setSelectedAction((prev) => (prev === action ? null : action));
     setFollowUpStatus(null);
     setPostponeDate(null);
-    setCancelReasonId('');
+    setReasonId('');
+    setReasonText('');
     setNotes('');
     setSelectedProduct(null);
   }, []);
 
   const isConfirmDisabled = useCallback(() => {
     if (!selectedAction) return true;
+    if (isActionLockedByClosure(selectedAction, closureKind)) return true;
     switch (selectedAction) {
       case 'FOLLOW_UP':
         return !followUpStatus;
@@ -144,8 +221,11 @@ export default function AgentStatusUpdateModal({
         return !postponeDate;
       case 'CHANGE_PRODUCT':
         return !selectedProduct;
+      case 'CLOSE':
+        return false;
+      case 'REFUSE':
       case 'CANCEL':
-        return !cancelReasonId;
+        return !reasonsReady || (!reasonId && !reasonText.trim());
       case 'LATE':
         return !notes.trim();
       case 'RESEND':
@@ -153,13 +233,16 @@ export default function AgentStatusUpdateModal({
       default:
         return true;
     }
-  }, [selectedAction, followUpStatus, postponeDate, selectedProduct, cancelReasonId, notes]);
+  }, [selectedAction, closureKind, followUpStatus, postponeDate, selectedProduct, reasonsReady, reasonId, reasonText, notes]);
 
   const handleConfirm = useCallback(async () => {
     if (!selectedAction) return;
 
     try {
       switch (selectedAction) {
+        case 'CLOSE':
+          await closeMutation.mutateAsync({ orderId });
+          break;
         case 'FOLLOW_UP':
           if (!followUpStatus) return;
           await attemptedMutation.mutateAsync({
@@ -194,18 +277,22 @@ export default function AgentStatusUpdateModal({
             reason: notes.trim(),
           });
           break;
+        case 'REFUSE':
         case 'CANCEL': {
-          if (!cancelReasonId) return;
-          const reasonObj = cancellationReasons?.find((r) => String(r.id) === cancelReasonId);
-          if (!reasonObj) {
-            toast.error('سبب الإلغاء غير موجود');
-            return;
-          }
-          await cancelledMutation.mutateAsync({
+          if (!reasonsReady || (!reasonId && !reasonText.trim())) return;
+          const reasonPayload = reasonId
+            ? { reasonId: Number(reasonId) }
+            : { reasonText: reasonText.trim() };
+          const payload = {
             orderId,
-            reason: reasonObj.reasonName,
-            cancellationNotes: notes.trim() || undefined,
-          });
+            ...reasonPayload,
+            notes: notes.trim() || undefined,
+          };
+          if (selectedAction === 'REFUSE') {
+            await refuseMutation.mutateAsync(payload);
+          } else {
+            await cancelledMutation.mutateAsync(payload);
+          }
           break;
         }
         case 'LATE':
@@ -227,26 +314,90 @@ export default function AgentStatusUpdateModal({
     followUpStatus,
     postponeDate,
     selectedProduct,
-    cancelReasonId,
-    cancellationReasons,
+    reasonsReady,
+    reasonId,
+    reasonText,
     notes,
     orderId,
+    closeMutation,
     attemptedMutation,
     postponedMutation,
     changeProductsMutation,
     sendAgainMutation,
+    refuseMutation,
     cancelledMutation,
     overdueMutation,
     handleClose,
   ]);
 
+  const handleUndo = useCallback(async () => {
+    try {
+      await undoMutation.mutateAsync({ orderId });
+      toast.success('تم إعادة فتح الطلب');
+      handleClose();
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل إعادة فتح الطلب');
+    }
+  }, [orderId, undoMutation, handleClose]);
+
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  const cancellationOptions = (cancellationReasons || []).map((r) => ({
-    key: String(r.id),
-    label: r.reasonName,
-  }));
+  const renderReasonSection = (kind: 'CANCEL' | 'REFUSE') => {
+    const copy = REASON_COPY[kind];
+    return (
+      <div className={clsx('flex flex-col gap-3 p-4 rounded-xl border', copy.containerClassName)}>
+        {reasonsQuery.isLoading ? (
+          <div className="flex items-center justify-center py-4">
+            <LiaSpinnerSolid className="size-5 animate-spin text-gray-400" />
+          </div>
+        ) : reasonsQuery.isError ? (
+          <p className="text-sm text-red-600">{copy.loadError}</p>
+        ) : reasonOptions.length === 0 ? (
+          <div className="flex flex-col gap-2 rounded-lg border border-dashed border-[#ECECEC] bg-white p-4 text-sm text-gray-700">
+            <p>{copy.empty}</p>
+            <Link href="/dashboard/store-settings" className="font-semibold text-primary hover:underline">
+              {copy.settingsLink}
+            </Link>
+          </div>
+        ) : (
+          <SearchableSelect
+            value={reasonId}
+            onChange={(v) => {
+              setReasonId(v);
+              setReasonText('');
+            }}
+            options={reasonOptions}
+            placeholder={copy.placeholder}
+            searchPlaceholder="بحث..."
+            emptyMessage="لا توجد أسباب متاحة"
+            disabled={isSubmitting}
+          />
+        )}
+        <Input
+          type="text"
+          value={reasonText}
+          onChange={(e) => {
+            setReasonText(e.target.value);
+            setReasonId('');
+          }}
+          onClear={() => setReasonText('')}
+          clearable
+          placeholder="أو اكتب السبب"
+          disabled={isSubmitting}
+          inputClassName="bg-white"
+        />
+        <Textarea
+          name={kind === 'CANCEL' ? 'cancelNotes' : 'refuseNotes'}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="ملاحظات (اختياري)"
+          className="min-h-[80px] text-sm bg-white"
+        />
+      </div>
+    );
+  };
 
   const renderSubContent = () => {
     if (!selectedAction) return null;
@@ -341,27 +492,8 @@ export default function AgentStatusUpdateModal({
         );
 
       case 'CANCEL':
-        return (
-          <div className="flex flex-col gap-3 p-4 bg-red-50/50 rounded-xl border border-red-100">
-            <SearchableSelect
-              value={cancelReasonId}
-              onChange={setCancelReasonId}
-              options={cancellationOptions}
-              placeholder="اختر سبب الالغاء"
-              searchPlaceholder="بحث..."
-              emptyMessage="لا توجد أسباب متاحة"
-              loading={isLoadingCancellationReasons}
-              disabled={isSubmitting}
-            />
-            <Textarea
-              name="cancelNotes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="ملاحظات (اختياري)"
-              className="min-h-[80px] text-sm bg-white"
-            />
-          </div>
-        );
+      case 'REFUSE':
+        return renderReasonSection(selectedAction);
 
       case 'LATE':
         return (
@@ -395,22 +527,47 @@ export default function AgentStatusUpdateModal({
         maxWidth="md:max-w-2xl"
       >
         <div className="flex flex-col gap-4" dir="rtl">
+          {closure && (
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 p-3">
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <span className="text-sm font-semibold text-gray-800">
+                  {FOLLOWUP_CLOSURE_KIND_LABELS[closure.kind]}
+                </span>
+                {(closure.reasonName || closure.reasonText) && (
+                  <span className="truncate text-xs text-gray-500">
+                    {closure.reasonName || closure.reasonText}
+                  </span>
+                )}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0 gap-1.5"
+                onClick={handleUndo}
+                disabled={isSubmitting}
+              >
+                <LiaUndoAltSolid className="size-3.5" />
+                إعادة فتح
+              </Button>
+            </div>
+          )}
           <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
             {ACTION_OPTIONS.map((action) => {
               const Icon = action.icon;
               const isSelected = selectedAction === action.value;
+              const isLocked = isActionLockedByClosure(action.value, closureKind);
               return (
                 <button
                   key={action.value}
                   type="button"
                   onClick={() => handleSelectAction(action.value)}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isLocked}
                   className={clsx(
                     'flex flex-col items-center justify-center gap-1.5 py-3 px-3 min-w-[75px] shrink-0 md:flex-1 md:min-w-0 rounded-xl border-2 transition-all duration-200 cursor-pointer',
                     isSelected
                       ? action.activeColor
                       : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm',
-                    isSubmitting && 'opacity-60 cursor-not-allowed',
+                    (isSubmitting || isLocked) && 'opacity-60 cursor-not-allowed',
                   )}
                 >
                   <div className={clsx(
