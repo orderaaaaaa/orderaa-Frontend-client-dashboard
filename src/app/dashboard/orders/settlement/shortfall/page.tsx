@@ -16,12 +16,14 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import BaseModal from '@/components/ui/base-modal';
 import PaginationFooter from '@/components/ui/pagination-footer';
-import { getApiErrorMessage } from '@/utils/apiError';
+import { getApiErrorMessage, getSettleFinalAmountMessage } from '@/utils/apiError';
+import { readStoredLocale } from '@/i18n/locale';
+import { translate } from '@/i18n/translate';
 import type { ShortfallSettlement } from '@/lib/api/settlement';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import {
-  useAdjustSettlementMutation,
+  useSettleFinalAmountMutation,
   useShortfallSettlementsQuery,
   type ShortfallFilter,
 } from '@/app/dashboard/orders/settlement/hooks/useSettlementQueries';
@@ -32,13 +34,13 @@ import {
 
 type FilterValue = ShortfallFilter;
 
-const AMOUNT_PATTERN = /^-?\d+(\.\d{1,2})?$/;
+const FINAL_AMOUNT_PATTERN = /^-?\d{1,10}(\.\d{1,2})?$/;
 const SHORTFALL_PAGE_SIZE = 20;
 
-interface PendingAdjust {
+interface PendingSettle {
   row: ShortfallSettlement;
-  current: number;
-  delta: number;
+  currentAmount: string;
+  finalAmount: string;
 }
 
 function formatMoney(value: number): string {
@@ -55,11 +57,11 @@ export default function ShortfallSettlementPage() {
   const [filter, setFilter] = useState<FilterValue>('pending');
   const [page, setPage] = useState(1);
   const limit = SHORTFALL_PAGE_SIZE;
-  const [adjustAmounts, setAdjustAmounts] = useState<Record<number, string>>({});
-  const [adjustingId, setAdjustingId] = useState<number | null>(null);
-  const [pendingAdjust, setPendingAdjust] = useState<PendingAdjust | null>(null);
+  const [finalAmounts, setFinalAmounts] = useState<Record<number, string>>({});
+  const [settlingId, setSettlingId] = useState<number | null>(null);
+  const [pendingSettle, setPendingSettle] = useState<PendingSettle | null>(null);
   const shortfallQuery = useShortfallSettlementsQuery(filter, page, limit);
-  const { mutateAsync: adjustAsync } = useAdjustSettlementMutation();
+  const { mutateAsync: settleAsync } = useSettleFinalAmountMutation();
   const data = shortfallQuery.data?.data ?? [];
   const total = shortfallQuery.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / limit));
@@ -85,48 +87,57 @@ export default function ShortfallSettlementPage() {
     setPage(1);
   };
 
-  const handleAdjustAmountChange = (orderId: number, value: string) => {
-    setAdjustAmounts((prev) => ({ ...prev, [orderId]: value }));
+  const handleFinalAmountChange = (orderId: number, value: string) => {
+    setFinalAmounts((prev) => ({ ...prev, [orderId]: value }));
   };
 
-  const requestAdjust = (row: ShortfallSettlement) => {
-    const current = row.settlementAmount === null ? 0 : Number(row.settlementAmount);
-    const amountStr = (adjustAmounts[row.id] ?? '').trim();
-    if (amountStr === '') {
-      toast.error('يرجى إدخال المبلغ');
+  const requestSettle = (row: ShortfallSettlement) => {
+    const locale = readStoredLocale();
+    const currentAmount = row.settlementAmount;
+    if (currentAmount === null) return;
+    const finalStr = (finalAmounts[row.id] ?? '').trim();
+    if (finalStr === '') {
+      toast.error(translate(locale, 'settlementFinal.empty'));
       return;
     }
-    if (!AMOUNT_PATTERN.test(amountStr)) {
-      toast.error('أدخل مبلغًا صحيحًا بحد أقصى رقمين عشريين');
+    if (!FINAL_AMOUNT_PATTERN.test(finalStr)) {
+      toast.error(translate(locale, 'settlementFinal.formatInvalid'));
       return;
     }
-    const delta = Number(amountStr);
-    if (delta === 0) {
-      toast.error('التعديل لا يمكن أن يساوي صفرًا');
+    if (Math.round(Number(finalStr) * 100) === Math.round(Number(currentAmount) * 100)) {
+      toast.error(translate(locale, 'settlementFinal.unchanged'));
       return;
     }
-    setPendingAdjust({ row, current, delta });
+    setPendingSettle({ row, currentAmount, finalAmount: finalStr });
   };
 
-  const handleAdjust = async () => {
-    if (!pendingAdjust) return;
-    const { row, delta } = pendingAdjust;
-    setAdjustingId(row.id);
+  const handleSettle = async () => {
+    if (!pendingSettle) return;
+    const locale = readStoredLocale();
+    const { row, currentAmount, finalAmount } = pendingSettle;
+    setSettlingId(row.id);
     try {
-      await adjustAsync({ orderId: row.id, amount: delta });
-      setAdjustAmounts((prev) => {
+      await settleAsync({ orderId: row.id, amount: finalAmount, expectedAmount: currentAmount });
+      setFinalAmounts((prev) => {
         const next = { ...prev };
         delete next[row.id];
         return next;
       });
-      setPendingAdjust(null);
-      toast.success('تم تعديل التحصيل بنجاح');
+      setPendingSettle(null);
+      toast.success(translate(locale, 'settlementFinal.saved'));
     } catch (err) {
-      toast.error(getApiErrorMessage(err, 'فشل في تعديل التحصيل'));
+      setPendingSettle(null);
+      toast.error(
+        getSettleFinalAmountMessage(err, translate(locale, 'settlementFinal.failed'))
+      );
     } finally {
-      setAdjustingId(null);
+      setSettlingId(null);
     }
   };
+
+  const pendingChange = pendingSettle
+    ? Math.round((Number(pendingSettle.finalAmount) - Number(pendingSettle.currentAmount)) * 100) / 100
+    : 0;
 
   const renderStatusBadge = (row: ShortfallSettlement) => (
     <span
@@ -140,31 +151,32 @@ export default function ShortfallSettlementPage() {
     </span>
   );
 
-  const renderAdjustControls = (row: ShortfallSettlement, inputClassName: string) => (
+  const renderSettleControls = (row: ShortfallSettlement, inputClassName: string) => (
     <div className="flex items-center gap-2">
       <input
         type="text"
         inputMode="decimal"
         dir="ltr"
-        aria-label={`تعديل (+/−) للطلب ${row.code}`}
-        placeholder="± المبلغ"
-        value={adjustAmounts[row.id] ?? ''}
+        aria-label={`المبلغ النهائي للطلب ${row.code}`}
+        placeholder="المبلغ النهائي"
+        value={finalAmounts[row.id] ?? ''}
         onChange={(e) =>
-          handleAdjustAmountChange(row.id, e.target.value)
+          handleFinalAmountChange(row.id, e.target.value)
         }
         className={`${inputClassName} border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 disabled:opacity-50`}
-        disabled={adjustingId === row.id}
+        disabled={settlingId === row.id || row.settlementAmount === null}
       />
       <Button
         size="sm"
         className="max-sm:h-10"
-        onClick={() => requestAdjust(row)}
+        onClick={() => requestSettle(row)}
         disabled={
-          adjustingId === row.id ||
-          !adjustAmounts[row.id] ||
-          adjustAmounts[row.id].trim() === ''
+          settlingId === row.id ||
+          row.settlementAmount === null ||
+          !finalAmounts[row.id] ||
+          finalAmounts[row.id].trim() === ''
         }
-        loading={adjustingId === row.id}
+        loading={settlingId === row.id}
       >
         تأكيد
       </Button>
@@ -239,8 +251,8 @@ export default function ShortfallSettlementPage() {
                       actions={
                         canManageSettlement ? (
                           <div className="flex w-full flex-col gap-1">
-                            <span className="text-xs text-muted-foreground">تعديل (+/−)</span>
-                            {renderAdjustControls(row, 'h-10 min-w-0 flex-1')}
+                            <span className="text-xs text-muted-foreground">المبلغ النهائي</span>
+                            {renderSettleControls(row, 'h-10 min-w-0 flex-1')}
                           </div>
                         ) : undefined
                       }
@@ -254,7 +266,7 @@ export default function ShortfallSettlementPage() {
                         <TableHead>كود الطلب</TableHead>
                         <TableHead>مبلغ التحصيل</TableHead>
                         <TableHead>الحالة</TableHead>
-                        {canManageSettlement && <TableHead>تعديل (+/−)</TableHead>}
+                        {canManageSettlement && <TableHead>المبلغ النهائي</TableHead>}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -266,7 +278,7 @@ export default function ShortfallSettlementPage() {
                           <TableCell>{displayAmount(row.settlementAmount)}</TableCell>
                           <TableCell>{renderStatusBadge(row)}</TableCell>
                           {canManageSettlement && (
-                          <TableCell>{renderAdjustControls(row, 'w-28')}</TableCell>
+                          <TableCell>{renderSettleControls(row, 'w-28')}</TableCell>
                           )}
                         </TableRow>
                       ))}
@@ -293,26 +305,35 @@ export default function ShortfallSettlementPage() {
       </Card>
 
       <BaseModal
-        isOpen={pendingAdjust !== null}
-        onClose={() => setPendingAdjust(null)}
-        onConfirm={handleAdjust}
-        title="تأكيد تعديل التحصيل"
-        confirmText="تأكيد التعديل"
-        isLoading={adjustingId !== null}
+        isOpen={pendingSettle !== null}
+        onClose={() => setPendingSettle(null)}
+        onConfirm={handleSettle}
+        title="تأكيد المبلغ النهائي للتحصيل"
+        confirmText="تأكيد"
+        isLoading={settlingId !== null}
         maxWidth="md:max-w-md"
       >
-        {pendingAdjust && (
+        {pendingSettle && (
           <div className="space-y-3 text-sm">
-            <p className="font-medium">الطلب {pendingAdjust.row.code}</p>
+            <p className="font-medium">الطلب {pendingSettle.row.code}</p>
             <p dir="rtl">
-              التحصيل الحالي {formatMoney(pendingAdjust.current)} + التعديل{' '}
-              <span dir="ltr">{formatMoney(pendingAdjust.delta)}</span> ={' '}
+              المبلغ الحالي <span dir="ltr">{formatMoney(Number(pendingSettle.currentAmount))}</span>
+            </p>
+            <p dir="rtl">
+              المبلغ النهائي{' '}
               <b>
-                {formatMoney(pendingAdjust.current + pendingAdjust.delta)}{' '}
+                <span dir="ltr">{formatMoney(Number(pendingSettle.finalAmount))}</span>{' '}
                 جنيه
               </b>
             </p>
-            <p className="text-amber-700">التعديل يُضاف إلى التحصيل الحالي ولا يستبدله</p>
+            <p dir="rtl">
+              الفرق{' '}
+              <span dir="ltr">
+                {pendingChange > 0 ? '+' : ''}
+                {formatMoney(pendingChange)}
+              </span>
+            </p>
+            <p className="text-amber-700">بعد التأكيد سينتقل الطلب إلى تبويب منتهي</p>
           </div>
         )}
       </BaseModal>
