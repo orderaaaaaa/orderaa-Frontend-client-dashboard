@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 import PartialDeliveryModal from '@/components/OrderDetails/ActionModals/PartialDeliveryModal';
 import { Button } from '@/components/ui/button';
 import { usePermissionCheck } from '@/hooks/usePermissions';
@@ -9,6 +10,7 @@ import { useI18n } from '@/i18n/I18nProvider';
 import { PERMISSIONS, type PermissionCode } from '@/lib/permissions';
 import { orderDetailsQueryOptions } from '@/services/orders';
 import { useCloseClosure, useUndoClosure } from '@/services/shippingProviders';
+import { getApiErrorMessage } from '@/utils/apiError';
 import type { FollowupClosure, FollowupClosureKind } from '@/types/logistics';
 import { ClosureReasonModal, type ClosureReasonKind } from './ClosureReasonModal';
 
@@ -47,6 +49,12 @@ export function ShipmentRowActions({ orderId, closure, partialDelivery }: Shipme
   const closeMutation = useCloseClosure();
   const undoMutation = useUndoClosure();
   const orderQuery = useQuery({ ...orderDetailsQueryOptions(orderId), enabled: isPartialOpen });
+
+  useEffect(() => {
+    if (!orderQuery.isError) return;
+    toast.error(getApiErrorMessage(orderQuery.error, 'تعذر تحميل تفاصيل الطلب'));
+    setIsPartialOpen(false);
+  }, [orderQuery.isError, orderQuery.error]);
 
   const isLocked = closure?.kind === 'REFUSE' || closure?.kind === 'CANCEL';
   const isPending = closeMutation.isPending || undoMutation.isPending;
