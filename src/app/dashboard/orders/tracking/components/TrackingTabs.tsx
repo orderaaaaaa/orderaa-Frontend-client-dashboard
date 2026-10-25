@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import clsx from 'clsx';
 import {
   LiaClipboardListSolid,
   LiaClockSolid,
@@ -11,7 +12,13 @@ import Input from '@/components/ui/Input';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import LoadingAnimation from '@/components/ui/loadingAnimation';
 import PaginationFooter from '@/components/ui/pagination-footer';
-import type { TrackingCard as TrackingCardType, FollowupOrder, FollowupFilters } from '@/types/logistics';
+import {
+  FOLLOWUP_WORK_STATES,
+  type TrackingCard as TrackingCardType,
+  type FollowupOrder,
+  type FollowupFilters,
+  type FollowupWorkState,
+} from '@/types/logistics';
 import { useShippingEventsQuery } from '@/services/lookups';
 import {
   useFollowupNewOrdersQuery,
@@ -115,25 +122,33 @@ type FollowupTabValue = 'pending' | 'overdue' | 'completed';
 
 const DEFAULT_PAGE_SIZE = 20;
 
+const FOLLOWUP_WORK_STATE_LABELS: Record<FollowupWorkState, string> = {
+  open: 'مفتوح',
+  closed: 'مغلق',
+  all: 'الكل',
+};
+
 export default function TrackingTabs() {
   const [activeTab, setActiveTab] = useState<FollowupTabValue>('pending');
   const [visitedTabs, setVisitedTabs] = useState<Set<FollowupTabValue>>(() => new Set(['pending']));
   const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
+  const [workState, setWorkState] = useState<FollowupWorkState>('open');
+  const workStateExtras = useMemo<Partial<FollowupFilters>>(() => ({ workState }), [workState]);
 
   const [pendingSearch, setPendingSearch] = useState('');
   const [pendingShippingEvent, setPendingShippingEvent] = useState('');
   const [pendingPage, setPendingPage] = useState(1);
-  const [pendingExtras] = useState<Partial<FollowupFilters>>({});
+  const pendingExtras = workStateExtras;
 
   const [overdueSearch, setOverdueSearch] = useState('');
   const [overdueShippingEvent, setOverdueShippingEvent] = useState('');
   const [overduePage, setOverduePage] = useState(1);
-  const [overdueExtras] = useState<Partial<FollowupFilters>>({});
+  const overdueExtras = workStateExtras;
 
   const [executedSearch, setExecutedSearch] = useState('');
   const [executedShippingEvent, setExecutedShippingEvent] = useState('');
   const [executedPage, setExecutedPage] = useState(1);
-  const [executedExtras] = useState<Partial<FollowupFilters>>({});
+  const executedExtras = workStateExtras;
 
   const debouncedPendingSearch = useDebounce(pendingSearch, 300);
   const debouncedOverdueSearch = useDebounce(overdueSearch, 300);
@@ -155,15 +170,15 @@ export default function TrackingTabs() {
 
   useEffect(() => {
     setPendingPage(1);
-  }, [debouncedPendingSearch, pendingShippingEvent, pageSize]);
+  }, [debouncedPendingSearch, pendingShippingEvent, pageSize, workState]);
 
   useEffect(() => {
     setOverduePage(1);
-  }, [debouncedOverdueSearch, overdueShippingEvent, pageSize]);
+  }, [debouncedOverdueSearch, overdueShippingEvent, pageSize, workState]);
 
   useEffect(() => {
     setExecutedPage(1);
-  }, [debouncedExecutedSearch, executedShippingEvent, pageSize]);
+  }, [debouncedExecutedSearch, executedShippingEvent, pageSize, workState]);
 
   const handlePageSizeChange = (size: number) => {
     setPageSize(size);
@@ -233,6 +248,23 @@ export default function TrackingTabs() {
           </span>
         </TabsTrigger>
       </TabsList>
+
+      <div role="group" aria-label="حالة الطلبات" dir="rtl" className="mt-4 inline-flex w-fit gap-1 rounded-lg border border-gray-200 bg-white p-1">
+        {FOLLOWUP_WORK_STATES.map((value) => (
+          <button
+            key={value}
+            type="button"
+            aria-pressed={workState === value}
+            onClick={() => setWorkState(value)}
+            className={clsx(
+              'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+              workState === value ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100',
+            )}
+          >
+            {FOLLOWUP_WORK_STATE_LABELS[value]}
+          </button>
+        ))}
+      </div>
 
       <TabsContent value="pending" dir="rtl">
         <TrackingFiltersBar

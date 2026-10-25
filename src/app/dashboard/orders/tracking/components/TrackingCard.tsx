@@ -25,8 +25,9 @@ import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
 import { getStatusColor } from '@/app/dashboard/customers/lib/getBadgeColor';
+import { shippingCompanyNameOf } from '@/lib/shippingCompanies';
 import type { TrackingCard as TrackingCardType, ShippingPointType } from '@/types/logistics';
-import AgentStatusUpdateModal from './AgentStatusUpdateModal';
+import AgentStatusUpdateModal, { FOLLOWUP_CLOSURE_KIND_LABELS } from './AgentStatusUpdateModal';
 
 const AGENT_STATUS_LABELS: Record<string, string> = {
   ATTEMPTED: 'تم المحاولة',
@@ -66,6 +67,10 @@ export default function TrackingCard({ card }: TrackingCardProps) {
   const pendingPointType = recordEventPointMutation.variables?.pointType;
 
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+
+  const closure = card.order?.closure ?? null;
+  const isClosureLocked = closure?.kind === 'REFUSE' || closure?.kind === 'CANCEL';
+  const carrierName = shippingCompanyNameOf(card.order?.shippingCompanyRef) || 'شركة الشحن';
 
   const customerPhone = card.order?.customers?.phone_numbers?.[0];
   const customerName = card.order?.customers?.name;
@@ -262,6 +267,7 @@ export default function TrackingCard({ card }: TrackingCardProps) {
                         <button
                           type="button"
                           onClick={() => setShowFlagButtons(!showFlagButtons)}
+                          disabled={isClosureLocked}
                           aria-expanded={showFlagButtons}
                           aria-controls={`tracking-flags-${card.id}`}
                           aria-label={showFlagButtons ? 'إخفاء تقييم تحديث المندوب' : 'تقييم تحديث المندوب'}
@@ -282,7 +288,7 @@ export default function TrackingCard({ card }: TrackingCardProps) {
                             size="touch"
                             className="border-green-300 text-green-600 hover:bg-green-50"
                             onClick={() => handleFlag('CORRECT')}
-                            disabled={isFlagging}
+                            disabled={isFlagging || isClosureLocked}
                             tabIndex={showFlagButtons ? undefined : -1}
                             aria-label={FLAG_LABELS.CORRECT.label}
                             title={FLAG_LABELS.CORRECT.label}
@@ -298,7 +304,7 @@ export default function TrackingCard({ card }: TrackingCardProps) {
                             size="touch"
                             className="border-red-300 text-red-600 hover:bg-red-50"
                             onClick={() => handleFlag('FAKE')}
-                            disabled={isFlagging}
+                            disabled={isFlagging || isClosureLocked}
                             tabIndex={showFlagButtons ? undefined : -1}
                             aria-label={FLAG_LABELS.FAKE.label}
                             title={FLAG_LABELS.FAKE.label}
@@ -334,6 +340,19 @@ export default function TrackingCard({ card }: TrackingCardProps) {
                 </Button>
               )}
             </div>
+
+            {closure && (
+              <div className="flex flex-col gap-1.5 rounded-lg border border-gray-200 bg-gray-50 p-3">
+                <span className="inline-flex w-fit items-center rounded-full border border-gray-300 bg-white px-2.5 py-1 text-xs font-medium text-gray-700">
+                  {FOLLOWUP_CLOSURE_KIND_LABELS[closure.kind]}
+                </span>
+                {closure.kind === 'CANCEL' && closure.carrierHoldsParcel && (
+                  <p className="text-xs text-red-600">
+                    مغلق بينما تحتفظ {carrierName} بالشحنة: ألغِ الطلب لدى الشركة يدويًا
+                  </p>
+                )}
+              </div>
+            )}
 
             {card.agentStatus ? (
               <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 space-y-1.5">
@@ -378,6 +397,7 @@ export default function TrackingCard({ card }: TrackingCardProps) {
         isOpen={isStatusModalOpen}
         onClose={() => setIsStatusModalOpen(false)}
         orderId={card.orderId}
+        closure={closure}
       />
     </>
   );
