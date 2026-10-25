@@ -14,7 +14,9 @@ export type CarrierWebhookFailureCode =
   | 'CARRIER_STATUS_IGNORED_STALE'
   | 'CARRIER_STATUS_IGNORED_PARTIAL_RETURN'
   | 'CARRIER_STATUS_IGNORED_OUTSIDE_WINDOW'
-  | 'CARRIER_STATUS_NOT_APPLIED';
+  | 'CARRIER_STATUS_NOT_APPLIED'
+  | 'CARRIER_CANCELLED_LANE_APPLIED'
+  | 'CARRIER_CANCELLED_LANE_STOCK';
 
 export type ShippingDispatchFailureCode =
   | 'SHIPMENT_NOT_CREATED_MISSING_ADDRESS'
@@ -130,6 +132,35 @@ export interface CarrierStatusNotAppliedDetails
   extends CarrierFailureDetailsBase {
   incomingStatus: string;
   reason: FailureReason;
+}
+
+export interface CarrierCancelledLaneAppliedDetails
+  extends CarrierFailureDetailsBase {
+  incomingStatus: string;
+  cancelReason: string | null;
+}
+
+export interface CancelledLaneMovedLine {
+  productName: string;
+  variantLabel: string;
+  ruleId: number;
+  fromWarehouseName: string | null;
+  toWarehouseName: string | null;
+  quantity: number;
+}
+
+export interface CancelledLaneUnmovedLine {
+  productName: string;
+  variantLabel: string;
+  warehouseName: string | null;
+}
+
+export interface CarrierCancelledLaneStockDetails
+  extends CarrierFailureDetailsBase {
+  incomingStatus: string;
+  fromStatus: string;
+  moved: CancelledLaneMovedLine[];
+  unmoved: CancelledLaneUnmovedLine[];
 }
 
 export type ShipmentMissingAddressField = 'governorate' | 'city';
@@ -372,6 +403,8 @@ export interface OrderSystemFailureDetailsByCode {
   CARRIER_STATUS_IGNORED_PARTIAL_RETURN: CarrierStatusIgnoredPartialReturnDetails;
   CARRIER_STATUS_IGNORED_OUTSIDE_WINDOW: CarrierStatusIgnoredOutsideWindowDetails;
   CARRIER_STATUS_NOT_APPLIED: CarrierStatusNotAppliedDetails;
+  CARRIER_CANCELLED_LANE_APPLIED: CarrierCancelledLaneAppliedDetails;
+  CARRIER_CANCELLED_LANE_STOCK: CarrierCancelledLaneStockDetails;
   SHIPMENT_NOT_CREATED_MISSING_ADDRESS: ShipmentMissingAddressDetails;
   SHIPMENT_NOT_CREATED_MISSING_PHONE: ShipmentMissingPhoneDetails;
   SHIPMENT_DISPATCH_FAILED: ShipmentDispatchFailedDetails;

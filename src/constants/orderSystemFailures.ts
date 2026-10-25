@@ -19,6 +19,8 @@ export const ORDER_SYSTEM_FAILURE_LABELS: Record<OrderSystemFailureCode, string>
   CARRIER_STATUS_IGNORED_PARTIAL_RETURN: 'تم تجاهل حالة المرتجع من شركة الشحن لأن للطلب مرتجعاً جزئياً',
   CARRIER_STATUS_IGNORED_OUTSIDE_WINDOW: 'تم تجاهل حالة شركة الشحن لأن الطلب خارج مرحلة الشحن',
   CARRIER_STATUS_NOT_APPLIED: 'لم يتم تطبيق حالة شركة الشحن',
+  CARRIER_CANCELLED_LANE_APPLIED: 'تم تطبيق حالة من شركة الشحن على طلب ملغي، راجعه',
+  CARRIER_CANCELLED_LANE_STOCK: 'تم تطبيق حالة شركة الشحن على طلب ملغي: تحقق من المخزون',
   SHIPMENT_NOT_CREATED_MISSING_ADDRESS: 'لم يتم إرسال الطلب للشحن: المحافظة أو المدينة غير موجودة',
   SHIPMENT_NOT_CREATED_MISSING_PHONE: 'لم يتم إرسال الطلب للشحن: رقم الهاتف غير موجود',
   SHIPMENT_DISPATCH_FAILED: 'فشل إرسال الطلب لشركة الشحن',

@@ -6,6 +6,10 @@ import type {
   AutomationResultNotAppliedDetails,
   AutomationSendFailedDetails,
   AutomationStatusNotAppliedDetails,
+  CancelledLaneMovedLine,
+  CancelledLaneUnmovedLine,
+  CarrierCancelledLaneAppliedDetails,
+  CarrierCancelledLaneStockDetails,
   CarrierFailureDetailsBase,
   CarrierStatusIgnoredOutsideWindowDetails,
   CarrierStatusIgnoredPartialReturnDetails,
@@ -127,6 +131,39 @@ const isCarrierStatusNotApplied = (value: unknown): value is CarrierStatusNotApp
   isRecord(value) &&
   isString(value.incomingStatus) &&
   isFailureReason(value.reason);
+
+const isCancelledLaneMovedLine = (value: unknown): value is CancelledLaneMovedLine =>
+  isRecord(value) &&
+  isString(value.productName) &&
+  isString(value.variantLabel) &&
+  typeof value.ruleId === 'number' &&
+  isStringOrNull(value.fromWarehouseName) &&
+  isStringOrNull(value.toWarehouseName) &&
+  typeof value.quantity === 'number';
+
+const isCancelledLaneUnmovedLine = (value: unknown): value is CancelledLaneUnmovedLine =>
+  isRecord(value) &&
+  isString(value.productName) &&
+  isString(value.variantLabel) &&
+  isStringOrNull(value.warehouseName);
+
+const isCarrierCancelledLaneApplied = (
+  value: unknown
+): value is CarrierCancelledLaneAppliedDetails =>
+  isCarrierBase(value) &&
+  isRecord(value) &&
+  isString(value.incomingStatus) &&
+  isStringOrNull(value.cancelReason);
+
+const isCarrierCancelledLaneStock = (value: unknown): value is CarrierCancelledLaneStockDetails =>
+  isCarrierBase(value) &&
+  isRecord(value) &&
+  isString(value.incomingStatus) &&
+  isString(value.fromStatus) &&
+  Array.isArray(value.moved) &&
+  value.moved.every(isCancelledLaneMovedLine) &&
+  Array.isArray(value.unmoved) &&
+  value.unmoved.every(isCancelledLaneUnmovedLine);
 
 const isShipmentMissingAddress = (value: unknown): value is ShipmentMissingAddressDetails =>
   isRecord(value) &&
@@ -340,6 +377,10 @@ export function narrowFailureDetails(
       return isCarrierStatusIgnoredOutsideWindow(details) ? { code, details } : null;
     case 'CARRIER_STATUS_NOT_APPLIED':
       return isCarrierStatusNotApplied(details) ? { code, details } : null;
+    case 'CARRIER_CANCELLED_LANE_APPLIED':
+      return isCarrierCancelledLaneApplied(details) ? { code, details } : null;
+    case 'CARRIER_CANCELLED_LANE_STOCK':
+      return isCarrierCancelledLaneStock(details) ? { code, details } : null;
     case 'SHIPMENT_NOT_CREATED_MISSING_ADDRESS':
       return isShipmentMissingAddress(details) ? { code, details } : null;
     case 'SHIPMENT_NOT_CREATED_MISSING_PHONE':

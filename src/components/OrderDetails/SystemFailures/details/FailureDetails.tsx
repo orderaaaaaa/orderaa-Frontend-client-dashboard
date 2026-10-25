@@ -9,6 +9,7 @@ import {
 } from '@/constants/orderSystemFailures';
 import type { Order } from '@/types/orders';
 import type { OrderSystemFailure } from '@/types/orderSystemFailures';
+import { CancelledLaneAppliedDetails, CancelledLaneStockDetails } from './CancelledLaneDetails';
 import { CarrierDetails } from './CarrierDetails';
 import { DetailField, DetailGrid, EMPTY_VALUE, formatDetailValue } from './DetailFields';
 import { FailureReasonDetails } from './FailureReasonDetails';
@@ -48,6 +49,10 @@ export function FailureDetails({
     case 'CARRIER_STATUS_IGNORED_OUTSIDE_WINDOW':
     case 'CARRIER_STATUS_NOT_APPLIED':
       return <CarrierDetails details={narrowed.details} />;
+    case 'CARRIER_CANCELLED_LANE_APPLIED':
+      return <CancelledLaneAppliedDetails details={narrowed.details} />;
+    case 'CARRIER_CANCELLED_LANE_STOCK':
+      return <CancelledLaneStockDetails details={narrowed.details} />;
     case 'SHIPMENT_NOT_CREATED_MISSING_ADDRESS':
       return (
         <DetailGrid>
