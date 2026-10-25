@@ -319,8 +319,11 @@ export function InProcessShipmentsContent({
   const [searchInput, setSearchInput] = useState(search);
   const debouncedSearch = useDebounce(searchInput, SEARCH_DEBOUNCE_MS);
   const lastWrittenSearch = useRef(search);
+  const lastDebouncedSearch = useRef(debouncedSearch);
 
   useEffect(() => {
+    if (debouncedSearch === lastDebouncedSearch.current) return;
+    lastDebouncedSearch.current = debouncedSearch;
     const nextSearch = debouncedSearch.trim();
     if (nextSearch === search) return;
     lastWrittenSearch.current = nextSearch;
