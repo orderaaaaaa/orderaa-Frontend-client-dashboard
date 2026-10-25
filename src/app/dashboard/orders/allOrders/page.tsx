@@ -10,6 +10,7 @@ import React, {
   Suspense,
 } from 'react';
 import { toast } from 'react-toastify';
+import Link from 'next/link';
 import FilterSection from './components/FilterSection';
 import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
 import Footer from '@/components/orders/Footer';
@@ -33,6 +34,7 @@ import { usePrintOrderBulk } from '../print-orders/hooks';
 import type { OrderStatusKey } from './types/Bulk';
 import { useQueryClient } from '@tanstack/react-query';
 import { useUrlFilters } from '@/hooks/useUrlFilters';
+import { useHasPermission } from '@/hooks/usePermissions';
 import { useStatisticsChangeDetection } from '@/hooks/orders/useStatisticsChangeDetection';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { formatDateForUrl } from '@/utils/urlFilters';
@@ -41,6 +43,7 @@ import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import { Scan, ScanLine, ArrowUp, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { shippingCompanyNameOf } from '@/lib/shippingCompanies';
+import { PERMISSION_CODES } from '@/lib/permissions';
 import { getApiErrorStatus, getBatchErrorMessage } from '@/utils/apiError';
 import { useOrderStatusSetGuard } from '@/hooks/orders/useOrderStatusSetGuard';
 import {
@@ -51,6 +54,7 @@ import {
 
 function AllOrdersContent() {
   const queryClient = useQueryClient();
+  const canReadCarrierSends = useHasPermission(PERMISSION_CODES.ORDERS_READ);
   const [selectedCustomerPhone, setSelectedCustomerPhone] =
     useState<string>('');
   const [selectedCustomerName, setSelectedCustomerName] = useState<string>('');
@@ -378,15 +382,25 @@ function AllOrdersContent() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-7 w-full">
         <Breadcrumb items={[{ title: 'الطلبات' }, { title: 'جميع الطلبات' }]} />
 
-        <DateRangeFilter
-          fromDate={fromDate}
-          toDate={toDate}
-          timePeriod={timePeriod}
-          onFromDateChange={setFromDate}
-          onToDateChange={setToDate}
-          onTimePeriodChange={setTimePeriod}
-          className="px-3"
-        />
+        <div className="flex flex-wrap items-center gap-3">
+          {canReadCarrierSends && (
+            <Link
+              href="/dashboard/orders/carrier-sends"
+              className="px-4 py-2 rounded-full bg-primary text-white text-sm font-semibold hover:bg-primary/90"
+            >
+              إرساليات شركات الشحن المفتوحة
+            </Link>
+          )}
+          <DateRangeFilter
+            fromDate={fromDate}
+            toDate={toDate}
+            timePeriod={timePeriod}
+            onFromDateChange={setFromDate}
+            onToDateChange={setToDate}
+            onTimePeriodChange={setTimePeriod}
+            className="px-3"
+          />
+        </div>
       </div>
 
       <PageTaps
