@@ -1,36 +1,34 @@
 'use client';
 
 import { formatDate } from '@/utils/format';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
-import { ChevronLeft, Wallet } from 'lucide-react';
+import { Trash2, Wallet } from 'lucide-react';
+import { LiaSearchSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import Input from '@/components/ui/Input';
 import { Breadcrumb } from '@/components/dashboard-layout';
 import PageLoading from '@/components/ui/page-loading';
 import CopyButton from '@/components/ui/copy-button';
+import PaginationFooter from '@/components/ui/pagination-footer';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { getApiErrorMessage } from '@/utils/apiError';
-import { useStatusLabel } from '@/hooks/useStatusLabel';
-import {
-  SettlementShippingColumnHeaders,
-  SettlementShippingColumnCells,
-} from '@/app/dashboard/orders/settlement/components/SettlementShippingColumns';
-import RemoveSettlementOrderDialog from '@/app/dashboard/orders/settlement/components/RemoveSettlementOrderDialog';
-import EditSettlementAmountDialog from '@/app/dashboard/orders/settlement/components/EditSettlementAmountDialog';
-import AddSettlementOrdersDialog from '@/app/dashboard/orders/settlement/components/AddSettlementOrdersDialog';
-import {
-  SettlementMobileList,
-  SettlementMobileRow,
-} from '@/app/dashboard/orders/settlement/components/SettlementMobileList';
+import { useDebounce } from '@/utils/debounce';
+import { useHasPermission } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/generated/permission-codes';
+import DeleteSettlementBatchDialog from '@/app/dashboard/orders/settlement/components/DeleteSettlementBatchDialog';
+import SettlementBatchOrderDialogs from '@/app/dashboard/orders/settlement/components/SettlementBatchOrderDialogs';
+import SettlementBatchOrdersPanel from '@/app/dashboard/orders/settlement/components/SettlementBatchOrdersPanel';
 import type {
   SettlementBatchListItem,
   SettlementBatchOrder,
+  SettlementOriginCounts,
 } from '@/lib/api/settlement';
 import {
   useSettlementBatchOrdersQuery,
   useSettlementBatchesQuery,
-  useSettlementSync,
   type SettlementBatchStatusFilter,
 } from '@/app/dashboard/orders/settlement/hooks/useSettlementQueries';
 
@@ -42,16 +40,83 @@ const FILTERS: { value: StatusFilter; label: string }[] = [
   { value: 'ALL', label: 'الكل' },
 ];
 
+const ORIGIN_LABELS: { key: keyof SettlementOriginCounts; label: string }[] = [
+  { key: 'delivered', label: 'مُسلَّم' },
+  { key: 'returned', label: 'مرتجع' },
+  { key: 'withDrivers', label: 'مع المندوب' },
+  { key: 'other', label: 'أخرى' },
+];
+
+const BATCHES_PAGE_SIZE = 20;
+const INLINE_ORDERS_PARAMS = { q: '', page: 1, limit: 100 };
+const COLLECTIONS_HREF = '/dashboard/orders/settlement/collections';
+
+interface BatchDeleteButtonProps {
+  batch: SettlementBatchListItem;
+  onRequestDelete: (batch: SettlementBatchListItem) => void;
+}
+
+function BatchDeleteButton({ batch, onRequestDelete }: BatchDeleteButtonProps) {
+  if (batch.ordersCount > 0) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex" onClick={(e) => e.stopPropagation()}>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label="حذف التحصيل"
+              disabled
+              className="text-red-600"
+            >
+              <Trash2 />
+            </Button>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>لا يمكن حذف تحصيل يحتوي على طلبات</TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      aria-label="حذف التحصيل"
+      className="text-red-600"
+      onClick={(e) => {
+        e.stopPropagation();
+        onRequestDelete(batch);
+      }}
+    >
+      <Trash2 />
+    </Button>
+  );
+}
+
 export default function CollectionsPage() {
   const [status, setStatus] = useState<StatusFilter>('OPEN');
-  const { getStatusLabel } = useStatusLabel();
+  const [searchInput, setSearchInput] = useState('');
+  const q = useDebounce(searchInput, 300).trim();
+  const effectiveStatus: StatusFilter = q ? 'ALL' : status;
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(BATCHES_PAGE_SIZE);
   const [selectedBatch, setSelectedBatch] = useState<SettlementBatchListItem | null>(null);
   const [removeTarget, setRemoveTarget] = useState<SettlementBatchOrder | null>(null);
   const [editTarget, setEditTarget] = useState<SettlementBatchOrder | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<SettlementBatchListItem | null>(null);
 
-  const batchesQuery = useSettlementBatchesQuery(status);
+  const canDeleteBatch = useHasPermission(PERMISSION_CODES.ORDERS_SETTLEMENT_DELETE);
+
+  const batchesQuery = useSettlementBatchesQuery(effectiveStatus, {
+    q,
+    page,
+    limit,
+  });
   const batches = batchesQuery.data?.data ?? [];
+  const total = batchesQuery.data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
   const loadFailed =
     batchesQuery.isError && !batchesQuery.data && !batchesQuery.isFetching;
   const isSwitching = batchesQuery.isPlaceholderData;
@@ -60,12 +125,12 @@ export default function CollectionsPage() {
   const selected =
     batches.find((batch) => batch.id === selectedBatch?.id) ?? selectedBatch;
 
-  const ordersQuery = useSettlementBatchOrdersQuery(selected?.id ?? null);
+  const ordersQuery = useSettlementBatchOrdersQuery(
+    selected?.id ?? null,
+    INLINE_ORDERS_PARAMS,
+  );
   const orders: SettlementBatchOrder[] = ordersQuery.data?.data ?? [];
-  const isLoadingOrders = ordersQuery.isLoading;
   const ordersError = ordersQuery.error;
-
-  const syncSettlement = useSettlementSync();
 
   useEffect(() => {
     if (batchesError) {
@@ -79,14 +144,21 @@ export default function CollectionsPage() {
     }
   }, [ordersError]);
 
-  const openBatch = useCallback((batch: SettlementBatchListItem) => {
-    setSelectedBatch(batch);
-  }, []);
+  useEffect(() => {
+    setPage(1);
+  }, [effectiveStatus, q]);
 
-  const handleEdited = useCallback(async () => {
-    await syncSettlement();
-    toast.success('تم تحديث التحصيل');
-  }, [syncSettlement]);
+  useEffect(() => {
+    if (batchesQuery.isSuccess && batches.length === 0 && page > 1) {
+      setPage(1);
+    }
+  }, [batchesQuery.isSuccess, batches.length, page]);
+
+  const handleBatchDeleted = () => {
+    if (deleteTarget && selectedBatch?.id === deleteTarget.id) {
+      setSelectedBatch(null);
+    }
+  };
 
   if (batchesQuery.isLoading) {
     return <PageLoading message="جاري تحميل التحصيلات..." />;
@@ -110,16 +182,31 @@ export default function CollectionsPage() {
           {FILTERS.map((f) => (
             <Button
               key={f.value}
-              variant={status === f.value ? 'default' : 'outline'}
+              variant={effectiveStatus === f.value ? 'default' : 'outline'}
               size="sm"
-              aria-pressed={status === f.value}
+              aria-pressed={effectiveStatus === f.value}
               className="rounded-full text-xs px-4 max-sm:h-10 max-sm:flex-1"
-              onClick={() => setStatus(f.value)}
+              onClick={() => {
+                setStatus(f.value);
+                setSearchInput('');
+              }}
             >
               {f.label}
             </Button>
           ))}
         </div>
+      </div>
+
+      <div className="relative max-w-md">
+        <LiaSearchSolid className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 pointer-events-none" />
+        <Input
+          placeholder="ابحث بكود التحصيل أو كود الطلب أو كود الشحن..."
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          clearable
+          onClear={() => setSearchInput('')}
+          inputClassName="pr-10 bg-white"
+        />
       </div>
 
       {loadFailed ? (
@@ -133,91 +220,125 @@ export default function CollectionsPage() {
         <PageLoading size="sm" message="جاري تحميل التحصيلات..." className="py-12 min-h-0" />
       ) : batches.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-12">
-          لا توجد تحصيلات بعد — ارفع شيت تحصيل للبدء
+          {q
+            ? 'لا توجد تحصيلات مطابقة للبحث'
+            : 'لا توجد تحصيلات بعد — ارفع شيت تحصيل للبدء'}
         </p>
       ) : (
-        <div
-          aria-busy={isSwitching}
-          className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 transition-opacity ${isSwitching ? 'opacity-60' : ''}`}
-        >
-          {batches.map((batch) => (
-            <div
-              key={batch.id}
-              role="button"
-              tabIndex={0}
-              aria-pressed={selected?.id === batch.id}
-              onClick={() => openBatch(batch)}
-              onKeyDown={(e) => {
-                if (e.target !== e.currentTarget) return;
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  openBatch(batch);
-                }
-              }}
-              className={`border rounded-xl p-4 flex flex-col gap-3 bg-white cursor-pointer text-right transition-colors ${
-                selected?.id === batch.id
-                  ? 'border-primary'
-                  : 'border-gray-200 hover:border-primary/40'
-              }`}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <Wallet className="w-5 h-5 text-primary shrink-0" />
-                  <span className="font-bold text-gray-900 truncate">
-                    {batch.code}
-                  </span>
-                  <CopyButton value={batch.code} label="نسخ كود التحصيل" />
+        <>
+          <div
+            aria-busy={isSwitching}
+            className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 transition-opacity ${isSwitching ? 'opacity-60' : ''}`}
+          >
+            {batches.map((batch) => (
+              <div
+                key={batch.id}
+                role="button"
+                tabIndex={0}
+                aria-pressed={selected?.id === batch.id}
+                onClick={() => setSelectedBatch(batch)}
+                onKeyDown={(e) => {
+                  if (e.target !== e.currentTarget) return;
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedBatch(batch);
+                  }
+                }}
+                className={`border rounded-xl p-4 flex flex-col gap-3 bg-white cursor-pointer text-right transition-colors ${
+                  selected?.id === batch.id
+                    ? 'border-primary'
+                    : 'border-gray-200 hover:border-primary/40'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Wallet className="w-5 h-5 text-primary shrink-0" />
+                    <span className="font-bold text-gray-900 truncate">
+                      {batch.code}
+                    </span>
+                    <CopyButton value={batch.code} label="نسخ كود التحصيل" />
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                        batch.status === 'OPEN'
+                          ? 'bg-amber-100 text-amber-700'
+                          : 'bg-green-100 text-green-700'
+                      }`}
+                    >
+                      {batch.status === 'OPEN' ? 'مفتوح' : 'مكتمل'}
+                    </span>
+                    {canDeleteBatch && (
+                      <BatchDeleteButton batch={batch} onRequestDelete={setDeleteTarget} />
+                    )}
+                  </div>
                 </div>
-                <span
-                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${
-                    batch.status === 'OPEN'
-                      ? 'bg-amber-100 text-amber-700'
-                      : 'bg-green-100 text-green-700'
-                  }`}
-                >
-                  {batch.status === 'OPEN' ? 'مفتوح' : 'مكتمل'}
-                </span>
-              </div>
 
-              <div className="flex gap-6">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-xs text-muted-foreground">الإجمالي</span>
-                  {/* A decimal string, rendered as-is. */}
-                  <span className="text-lg font-bold text-primary">
-                    {batch.totalAmount} جنيه
-                  </span>
+                <div className="flex gap-6">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xs text-muted-foreground">الإجمالي</span>
+                    {/* A decimal string, rendered as-is. */}
+                    <span className="text-lg font-bold text-primary">
+                      {batch.totalAmount} جنيه
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xs text-muted-foreground">عدد الطلبات</span>
+                    <span className="text-lg font-bold">{batch.ordersCount}</span>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-xs text-muted-foreground">عدد الطلبات</span>
-                  <span className="text-lg font-bold">{batch.ordersCount}</span>
-                </div>
-              </div>
 
-              <div className="flex items-center justify-between gap-2 border-t border-gray-100 pt-2">
-                <span className="text-[11px] text-muted-foreground">
-                  {formatDate(batch.createdAt)}
-                  {batch.actorName ? ` — ${batch.actorName}` : ''}
-                </span>
+                <dl className="grid grid-cols-4 gap-2 border-t border-gray-100 pt-2">
+                  {ORIGIN_LABELS.map(({ key, label }) => (
+                    <div key={key} className="flex flex-col items-center gap-0.5">
+                      <dt className="text-[10px] text-muted-foreground">{label}</dt>
+                      <dd className="text-sm font-semibold">{batch.origins[key]}</dd>
+                    </div>
+                  ))}
+                </dl>
+
+                <div className="flex items-center justify-between gap-2 border-t border-gray-100 pt-2">
+                  <span className="text-[11px] text-muted-foreground">
+                    {formatDate(batch.createdAt)}
+                    {batch.actorName ? ` — ${batch.actorName}` : ''}
+                  </span>
+                  {batch.status === 'OPEN' && (
+                    <Link
+                      href="/dashboard/orders/settlement/upload"
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-[11px] font-semibold text-primary hover:underline"
+                    >
+                      متابعة الرفع
+                    </Link>
+                  )}
+                </div>
+
+                {/* An open collection's total is still moving. */}
                 {batch.status === 'OPEN' && (
-                  <Link
-                    href="/dashboard/orders/settlement/upload"
-                    onClick={(e) => e.stopPropagation()}
-                    className="text-[11px] font-semibold text-primary hover:underline"
-                  >
-                    متابعة الرفع
-                  </Link>
+                  <span className="text-[10px] text-amber-600">
+                    الإجمالي غير نهائي — التحصيل ما زال مفتوحًا
+                  </span>
                 )}
               </div>
+            ))}
+          </div>
 
-              {/* An open collection's total is still moving. */}
-              {batch.status === 'OPEN' && (
-                <span className="text-[10px] text-amber-600">
-                  الإجمالي غير نهائي — التحصيل ما زال مفتوحًا
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
+          <PaginationFooter
+            currentPage={page}
+            totalPages={totalPages}
+            totalItems={total}
+            hasNextPage={page < totalPages}
+            hasPreviousPage={page > 1}
+            onPageChange={setPage}
+            onPrevious={() => setPage((p) => Math.max(1, p - 1))}
+            onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
+            currentPageSize={limit}
+            onPageSizeChange={(size) => {
+              setLimit(size);
+              setPage(1);
+            }}
+          />
+        </>
       )}
 
       {selected && (
@@ -227,6 +348,12 @@ export default function CollectionsPage() {
               طلبات التحصيل {selected.code}
               <CopyButton value={selected.code} label="نسخ كود التحصيل" />
               — {selected.totalAmount} جنيه عن {selected.ordersCount} طلب
+              <Link
+                href={`${COLLECTIONS_HREF}/${selected.id}`}
+                className="text-xs font-normal text-primary hover:underline"
+              >
+                فتح في صفحة مستقلة
+              </Link>
             </CardTitle>
             <div className="flex items-center gap-2">
               <Button
@@ -248,187 +375,32 @@ export default function CollectionsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            {isLoadingOrders ? (
-              <PageLoading size="sm" className="py-6 min-h-0" />
-            ) : orders.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-6">
-                لا توجد طلبات في هذا التحصيل
-              </p>
-            ) : (
-              <>
-                <SettlementMobileList>
-                  {orders.map((row) => {
-                    const moved = row.currentStatus !== row.targetStatus;
-                    return (
-                      <SettlementMobileRow
-                        key={row.orderId}
-                        fields={[
-                          {
-                            label: 'كود الطلب',
-                            value: (
-                              <span className="flex flex-wrap items-center gap-2 font-mono">
-                                <Link
-                                  href={`/dashboard/orders/${row.orderId}`}
-                                  className="text-primary hover:underline"
-                                >
-                                  {row.orderCode}
-                                </Link>
-                                {row.isDeleted && (
-                                  <span className="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded font-sans">
-                                    محذوف
-                                  </span>
-                                )}
-                              </span>
-                            ),
-                          },
-                          { label: 'المبلغ في هذا التحصيل', value: <span className="font-semibold">{row.amount}</span> },
-                          { label: 'كود الشحن', value: <span className="font-mono">{row.shippingCode ?? '—'}</span> },
-                          { label: 'العميل', value: row.customerName ?? '—' },
-                          { label: 'الحالة وقتها', value: getStatusLabel(row.targetStatus) },
-                          {
-                            label: 'الحالة الآن',
-                            value: (
-                              <span className={moved ? 'text-amber-700 font-semibold' : undefined}>
-                                {getStatusLabel(row.currentStatus)}
-                              </span>
-                            ),
-                          },
-                        ]}
-                        shipping={row.shipping}
-                        actions={
-                          row.isDeleted ? undefined : (
-                            <>
-                              <Button
-                                variant="outline"
-                                className="h-10 flex-1"
-                                onClick={() => setEditTarget(row)}
-                              >
-                                تعديل المبلغ
-                              </Button>
-                              <Button
-                                variant="outline"
-                                className="h-10 flex-1"
-                                onClick={() => setRemoveTarget(row)}
-                              >
-                                إزالة
-                              </Button>
-                            </>
-                          )
-                        }
-                      />
-                    );
-                  })}
-                </SettlementMobileList>
-                <div className="hidden sm:block rounded-md border overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-muted">
-                      <tr>
-                        <th className="px-4 py-2 text-right font-medium">كود الطلب</th>
-                        <th className="px-4 py-2 text-right font-medium">كود الشحن</th>
-                        <th className="px-4 py-2 text-right font-medium">العميل</th>
-                        <th className="px-4 py-2 text-right font-medium">المبلغ في هذا التحصيل</th>
-                        <th className="px-4 py-2 text-right font-medium">الحالة وقتها</th>
-                        <th className="px-4 py-2 text-right font-medium">الحالة الآن</th>
-                        <SettlementShippingColumnHeaders />
-                        <th className="px-4 py-2 text-right font-medium">إجراءات</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {orders.map((row) => {
-                        // Showing both is the point: an order can move on after
-                        // it was settled.
-                        const moved = row.currentStatus !== row.targetStatus;
-                        return (
-                          <tr key={row.orderId} className="border-t">
-                            <td className="px-4 py-2 font-mono">
-                              <Link
-                                href={`/dashboard/orders/${row.orderId}`}
-                                className="text-primary hover:underline"
-                              >
-                                {row.orderCode}
-                              </Link>
-                              {row.isDeleted && (
-                                <span className="mr-2 text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">
-                                  محذوف
-                                </span>
-                              )}
-                            </td>
-                            <td className="px-4 py-2 font-mono">
-                              {row.shippingCode ?? '—'}
-                            </td>
-                            <td className="px-4 py-2">{row.customerName ?? '—'}</td>
-                            <td className="px-4 py-2 font-semibold">{row.amount}</td>
-                            <td className="px-4 py-2">{getStatusLabel(row.targetStatus)}</td>
-                            <td
-                              className={`px-4 py-2 ${moved ? 'text-amber-700 font-semibold' : ''}`}
-                            >
-                              {getStatusLabel(row.currentStatus)}
-                              {moved && (
-                                <ChevronLeft className="inline w-3 h-3 mr-1" />
-                              )}
-                            </td>
-                            <SettlementShippingColumnCells shipping={row.shipping} />
-                            <td className="px-4 py-2">
-                              {!row.isDeleted && (
-                                <div className="flex items-center gap-2">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => setEditTarget(row)}
-                                  >
-                                    تعديل المبلغ
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => setRemoveTarget(row)}
-                                  >
-                                    إزالة
-                                  </Button>
-                                </div>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
+            <SettlementBatchOrdersPanel
+              orders={orders}
+              isLoading={ordersQuery.isLoading}
+              onEdit={(row) => setEditTarget(row)}
+              onRemove={(row) => setRemoveTarget(row)}
+            />
           </CardContent>
         </Card>
       )}
 
-      <RemoveSettlementOrderDialog
-        isOpen={removeTarget !== null}
-        onClose={() => setRemoveTarget(null)}
+      <SettlementBatchOrderDialogs
         batchId={selected?.id ?? ''}
-        orderId={removeTarget?.orderId ?? 0}
-        orderStatus={removeTarget?.currentStatus ?? ''}
-        onSuccess={async () => {
-          await handleEdited();
-          setRemoveTarget(null);
-        }}
+        editTarget={editTarget}
+        onEditClose={() => setEditTarget(null)}
+        removeTarget={removeTarget}
+        onRemoveClose={() => setRemoveTarget(null)}
+        isAddOpen={isAddOpen}
+        onAddClose={() => setIsAddOpen(false)}
       />
 
-      <EditSettlementAmountDialog
-        isOpen={editTarget !== null}
-        onClose={() => setEditTarget(null)}
-        batchId={selected?.id ?? ''}
-        orderId={editTarget?.orderId ?? 0}
-        currentAmount={editTarget?.amount ?? '0.00'}
-        onSuccess={async () => {
-          await handleEdited();
-          setEditTarget(null);
-        }}
-      />
-
-      <AddSettlementOrdersDialog
-        isOpen={isAddOpen}
-        onClose={() => setIsAddOpen(false)}
-        batchId={selected?.id ?? ''}
-        onSuccess={handleEdited}
+      <DeleteSettlementBatchDialog
+        isOpen={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        batchId={deleteTarget?.id ?? ''}
+        batchCode={deleteTarget?.code ?? ''}
+        onSuccess={handleBatchDeleted}
       />
     </div>
   );
