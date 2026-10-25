@@ -97,6 +97,8 @@ export interface ShipmentRowBase {
 
 export interface InProcessShipment extends ShipmentRowBase {
   lateness: LatenessInfo | null;
+  courierName: string | null;
+  courierPhone: string | null;
   netAmount?: string;
 }
 
