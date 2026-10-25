@@ -29,8 +29,8 @@ const SETTLEMENT_KEY = 'settlement';
 
 export const settlementKeys = {
   all: [SETTLEMENT_KEY] as const,
-  shortfall: (filter: ShortfallFilter) =>
-    [SETTLEMENT_KEY, 'shortfall', filter] as const,
+  shortfall: (filter: ShortfallFilter, page: number, limit: number) =>
+    [SETTLEMENT_KEY, 'shortfall', filter, page, limit] as const,
   batches: (
     status: SettlementBatchStatusFilter,
     q: string,
@@ -42,10 +42,14 @@ export const settlementKeys = {
   batch: (batchId: string) => [SETTLEMENT_KEY, 'batch', batchId] as const,
 };
 
-export function useShortfallSettlementsQuery(filter: ShortfallFilter) {
+export function useShortfallSettlementsQuery(
+  filter: ShortfallFilter,
+  page: number,
+  limit: number,
+) {
   return useQuery({
-    queryKey: settlementKeys.shortfall(filter),
-    queryFn: () => getShortfallSettlements(filter),
+    queryKey: settlementKeys.shortfall(filter, page, limit),
+    queryFn: () => getShortfallSettlements(filter, page, limit),
     placeholderData: keepPreviousData,
   });
 }

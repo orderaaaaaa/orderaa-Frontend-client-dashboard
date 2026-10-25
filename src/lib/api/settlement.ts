@@ -254,10 +254,12 @@ export async function confirmSettlementBatch(
 
 export async function getShortfallSettlements(
   filter: 'pending' | 'finished' | 'all',
-): Promise<ShortfallSettlement[]> {
-  const { data } = await api.get<ShortfallSettlement[]>(
+  page: number,
+  limit: number,
+): Promise<Paginated<ShortfallSettlement>> {
+  const { data } = await api.get<Paginated<ShortfallSettlement>>(
     '/orders/settlement/shortfall',
-    { params: { filter } },
+    { params: { filter, page, limit } },
   );
   return data;
 }

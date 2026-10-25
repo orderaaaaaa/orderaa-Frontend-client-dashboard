@@ -15,6 +15,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import BaseModal from '@/components/ui/base-modal';
+import PaginationFooter from '@/components/ui/pagination-footer';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { ShortfallSettlement } from '@/types/orders';
 import { useHasPermission } from '@/hooks/usePermissions';
@@ -45,13 +46,17 @@ function formatMoney(value: number): string {
 export default function ShortfallSettlementPage() {
   // Adjusting a settlement hits PATCH /orders/settlement/:orderId/adjust.
   const canManageSettlement = useHasPermission(PERMISSION_CODES.ORDERS_SETTLEMENT_MANAGE);
-  const [filter, setFilter] = useState<FilterValue>('all');
+  const [filter, setFilter] = useState<FilterValue>('pending');
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
   const [adjustAmounts, setAdjustAmounts] = useState<Record<number, string>>({});
   const [adjustingId, setAdjustingId] = useState<number | null>(null);
   const [pendingAdjust, setPendingAdjust] = useState<PendingAdjust | null>(null);
-  const shortfallQuery = useShortfallSettlementsQuery(filter);
+  const shortfallQuery = useShortfallSettlementsQuery(filter, page, limit);
   const { mutateAsync: adjustAsync } = useAdjustSettlementMutation();
-  const data = shortfallQuery.data ?? [];
+  const data = shortfallQuery.data?.data ?? [];
+  const total = shortfallQuery.data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
   const loading = shortfallQuery.isFetching && !shortfallQuery.data;
   const loadFailed = shortfallQuery.isError && !shortfallQuery.isFetching;
   const isSwitching = shortfallQuery.isPlaceholderData;
@@ -63,8 +68,15 @@ export default function ShortfallSettlementPage() {
     }
   }, [loadError]);
 
+  useEffect(() => {
+    if (shortfallQuery.data && !shortfallQuery.isPlaceholderData && page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [shortfallQuery.data, shortfallQuery.isPlaceholderData, page, totalPages]);
+
   const handleFilterChange = (value: string) => {
     setFilter(value as FilterValue);
+    setPage(1);
   };
 
   const handleAdjustAmountChange = (orderId: number, value: string) => {
@@ -255,6 +267,23 @@ export default function ShortfallSettlementPage() {
                   </Table>
                 </div>
               </div>
+            )}
+            {!loadFailed && total > 0 && (
+              <PaginationFooter
+                currentPage={page}
+                totalPages={totalPages}
+                totalItems={total}
+                hasNextPage={page < totalPages}
+                hasPreviousPage={page > 1}
+                onPageChange={setPage}
+                onPrevious={() => setPage((p) => Math.max(1, p - 1))}
+                onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
+                currentPageSize={limit}
+                onPageSizeChange={(size) => {
+                  setLimit(size);
+                  setPage(1);
+                }}
+              />
             )}
           </Tabs>
         </CardContent>
