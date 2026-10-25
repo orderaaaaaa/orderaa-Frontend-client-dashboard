@@ -21,7 +21,10 @@ import {
   useSendAgainCarrierSend,
   type CloseCarrierSendBody,
 } from '@/services/carrierSends';
-import { useOrderSystemFailures } from '@/services/orderSystemFailures';
+import {
+  useMarkSystemFailureSeen,
+  useOrderSystemFailures,
+} from '@/services/orderSystemFailures';
 import type {
   CarrierSendCloseChoice,
   CarrierSendState,
@@ -32,6 +35,7 @@ import type { Order } from '@/types/orders';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { formatDateTime } from '@/utils/format';
 import { CARRIER_SEND_NOT_SENT_WARNING } from '@/utils/manualOrder/carrierSend';
+import { OrderSystemFailureItem } from './SystemFailures/OrderSystemFailureItem';
 import { narrowFailureDetails } from './SystemFailures/details/guards';
 
 const HELD_LINE =
@@ -43,6 +47,13 @@ const SHIPMENT_ID_MAX_LENGTH = 64;
 const NOTE_MAX_LENGTH = 255;
 
 type OldShipmentRow = { shippingId: string; oldCompanyId: number };
+
+const CARRIER_SEND_ROW_CODES = new Set<string>(['SHIPMENT_UPDATE_NOT_SENT', 'SHIPMENT_OUTCOME_UNKNOWN']);
+
+const markerRowsOf = (failures: OrderSystemFailure[], markerId: number) =>
+  failures.filter(
+    (failure) => CARRIER_SEND_ROW_CODES.has(failure.code) && failure.details?.markerId === markerId,
+  );
 
 const oldShipmentRowsOf = (failures: OrderSystemFailure[]) => {
   const rows = new Map<string, OldShipmentRow>();
@@ -142,12 +153,22 @@ function CloseCarrierSendForm({
   );
 }
 
-function CarrierSendMarkerBlock({ orderId, marker }: { orderId: number; marker: CarrierSendView }) {
+function CarrierSendMarkerBlock({
+  order,
+  marker,
+  rows,
+}: {
+  order: Order;
+  marker: CarrierSendView;
+  rows: OrderSystemFailure[];
+}) {
+  const orderId = order.id;
   const canClose = useHasPermission(PERMISSION_CODES.ORDERS_CARRIER_SENDS_CLOSE);
   const canUpdate = useHasPermission(PERMISSION_CODES.ORDERS_UPDATE);
   const dispatchMutation = useDispatchCarrierSend();
   const sendAgainMutation = useSendAgainCarrierSend();
   const closeMutation = useCloseCarrierSend();
+  const markSeenMutation = useMarkSystemFailureSeen(orderId);
 
   const isOpen = CARRIER_SEND_OPEN_STATES.includes(marker.state);
   const isRejectedOrClosed = marker.state === 'REJECTED' || marker.state === 'CLOSED_NONE';
@@ -222,6 +243,21 @@ function CarrierSendMarkerBlock({ orderId, marker }: { orderId: number; marker: 
       {canClose && isOpen && (
         <CloseCarrierSendForm key={marker.id} pending={busy} onSubmit={handleClose} />
       )}
+
+      {rows.length > 0 && (
+        <div className="flex flex-col gap-3">
+          {rows.map((failure) => (
+            <OrderSystemFailureItem
+              key={failure.id}
+              failure={failure}
+              order={order}
+              canMarkSeen={canUpdate}
+              isMarkingSeen={markSeenMutation.isPending && markSeenMutation.variables?.id === failure.id}
+              onMarkSeen={(row) => markSeenMutation.mutate(row)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -233,7 +269,8 @@ export function CarrierSendPanel({ order }: { order: Order }) {
   const oldShipmentMutation = useOldShipmentCancelledByHand();
 
   const marker: CarrierSendView | null = markers?.[0] ?? null;
-  const oldShipmentRows = oldShipmentRowsOf(failuresPages?.pages.flatMap((page) => page.data) ?? []);
+  const failures = failuresPages?.pages.flatMap((page) => page.data) ?? [];
+  const oldShipmentRows = oldShipmentRowsOf(failures);
   if (!marker && oldShipmentRows.length === 0) return null;
 
   const handleOldShipmentCancelled = (row: OldShipmentRow) =>
@@ -252,7 +289,9 @@ export function CarrierSendPanel({ order }: { order: Order }) {
     <section className="mt-6 flex flex-col gap-4 rounded-xl bg-gray-50 p-4">
       <h3 className="text-lg font-bold text-primary">إرسال شركة الشحن</h3>
 
-      {marker && <CarrierSendMarkerBlock orderId={order.id} marker={marker} />}
+      {marker && (
+        <CarrierSendMarkerBlock order={order} marker={marker} rows={markerRowsOf(failures, marker.id)} />
+      )}
 
       {canUpdate &&
         oldShipmentRows.map((row) => (
