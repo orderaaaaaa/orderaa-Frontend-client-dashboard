@@ -12,12 +12,11 @@ export type ShippingProviderId =
   | 'torod';
 
 export interface ShippingConfig {
-  id?: string;
+  id: number;
   shippingCompany?: string;
-  authKey?: string;
+  hasAuthKey: boolean;
   clientCode?: string;
   webhookUrl?: string; // keeping compatible just in case, though Turbo uses specific keys
-  webhookSecret?: string;
   isActive: boolean;
   metadata?: Record<string, any>;
 }

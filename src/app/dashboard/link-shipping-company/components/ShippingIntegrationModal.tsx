@@ -20,10 +20,19 @@ import {
 } from '@/components/ui/accordion';
 import { getStepsByProvider } from '../constants/steps';
 import { ShippingConfig } from '../types/shipping';
+import {
+  SavedSecretStatus,
+  SECRET_KEEP_PLACEHOLDER,
+} from '@/components/SavedSecretStatus';
 
-const createShippingSchema = (showClientCode: boolean) =>
+const createShippingSchema = (
+  showClientCode: boolean,
+  requiresAuthKey: boolean
+) =>
   z.object({
-    authKey: z.string().min(1, 'يرجى إدخال Authentication Key'),
+    authKey: requiresAuthKey
+      ? z.string().min(1, 'يرجى إدخال Authentication Key')
+      : z.string().optional(),
     clientCode: showClientCode
       ? z.string().min(1, 'يرجى إدخال Client Code')
       : z.string().optional(),
@@ -53,12 +62,13 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
   const requiresClientCode = providerLower === 'turbo';
   const steps = getStepsByProvider(providerId);
 
-  const isEditing = !!config?.authKey;
+  const isEditing = config?.hasAuthKey === true;
   const showClientCode = isRedOrHashtag || requiresClientCode || isEditing;
+  const requiresAuthKey = !isEditing;
 
   const schema = useMemo(
-    () => createShippingSchema(showClientCode),
-    [showClientCode]
+    () => createShippingSchema(showClientCode, requiresAuthKey),
+    [showClientCode, requiresAuthKey]
   );
 
   const form = useForm<ShippingFormData>({
@@ -69,14 +79,10 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
 
   useEffect(() => {
     if (!isOpen) return;
-    if (config) {
-      form.reset({
-        authKey: config.authKey || '',
-        clientCode: config.clientCode || '',
-      });
-    } else {
-      form.reset({ authKey: '', clientCode: '' });
-    }
+    form.reset({
+      authKey: '',
+      clientCode: config?.clientCode || '',
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
@@ -123,15 +129,18 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
 
     try {
       const basePayload: Record<string, unknown> = {
-        authKey: data.authKey.trim(),
         isActive: true,
       };
+
+      if (data.authKey?.trim()) {
+        basePayload.authKey = data.authKey.trim();
+      }
 
       if (showClientCode && data.clientCode?.trim()) {
         basePayload.clientCode = data.clientCode.trim();
       }
 
-      if (!config?.authKey) {
+      if (!isEditing) {
         await saveConfig({
           shippingCompany: providerId.toUpperCase(),
           ...basePayload,
@@ -256,12 +265,17 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                   error={form.formState.errors.clientCode?.message}
                   disabled={isSaving}
                 />
+                {isEditing && (
+                  <SavedSecretStatus label="كلمة المرور" saved={isEditing} />
+                )}
                 <Input
                   register={form.register}
                   name="authKey"
                   label="كلمة المرور"
                   type="text"
-                  placeholder="أدخل كلمة المرور"
+                  placeholder={
+                    isEditing ? SECRET_KEEP_PLACEHOLDER : 'أدخل كلمة المرور'
+                  }
                   error={form.formState.errors.authKey?.message}
                   disabled={isSaving}
                 />
@@ -280,12 +294,22 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                   />
                 )}
 
+                {isEditing && (
+                  <SavedSecretStatus
+                    label="Authentication Key"
+                    saved={isEditing}
+                  />
+                )}
                 <Input
                   register={form.register}
                   name="authKey"
                   label="Authentication Key"
                   type="text"
-                  placeholder="أدخل Authentication Key"
+                  placeholder={
+                    isEditing
+                      ? SECRET_KEEP_PLACEHOLDER
+                      : 'أدخل Authentication Key'
+                  }
                   error={form.formState.errors.authKey?.message}
                   disabled={isSaving}
                 />

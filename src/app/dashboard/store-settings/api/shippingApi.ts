@@ -4,7 +4,7 @@ export interface ShippingConfig {
   id: number;
   merchantId: number;
   shippingCompany: string;
-  authKey: string;
+  hasAuthKey: boolean;
   clientCode: string;
   isActive: boolean;
   createdAt: string;
