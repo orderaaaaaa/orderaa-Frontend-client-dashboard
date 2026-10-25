@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient, keepPreviousData, type QueryKey } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import {
   getFollowupNewOrders,
@@ -14,10 +15,17 @@ import {
   markFollowupCancelled,
   markFollowupOverdue,
   undoFollowupClosure,
+  getFollowupNotes,
+  addFollowupNote,
+  editFollowupNote,
+  deleteFollowupNote,
+  getFollowupActionEvents,
   type FollowupChangeProductInput,
+  type FollowupNotePartyValue,
   type FollowupReasonBody,
 } from '@/lib/api/followup';
 import type { FollowupFilters, ShippingPointType } from '@/types/logistics';
+import { getApiErrorMessage } from '@/utils/apiError';
 
 export const useFollowupNewOrdersQuery = (filters: FollowupFilters = {}, enabled: boolean = true) => {
   return useQuery({
@@ -153,5 +161,84 @@ export const useFollowupOverdueMutation = () => {
     mutationFn: ({ orderId, lateNotes }: { orderId: number; lateNotes: string }) =>
       markFollowupOverdue(orderId, lateNotes),
     onSuccess: invalidate,
+  });
+};
+
+export const useFollowupNotesQuery = (orderId: number, enabled: boolean = true) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.FOLLOWUP_NOTES, orderId] as QueryKey,
+    queryFn: () => getFollowupNotes(orderId),
+    enabled,
+    staleTime: 0,
+  });
+};
+
+export const useFollowupActionEventsQuery = (orderId: number, enabled: boolean = true) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.FOLLOWUP_ACTION_EVENTS, orderId] as QueryKey,
+    queryFn: () => getFollowupActionEvents(orderId),
+    enabled,
+    staleTime: 0,
+  });
+};
+
+interface AddFollowupNoteVariables {
+  orderId: number;
+  party: FollowupNotePartyValue;
+  body: string;
+}
+
+export const useAddFollowupNoteMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ orderId, party, body }: AddFollowupNoteVariables) =>
+      addFollowupNote(orderId, { party, body }),
+    onSuccess: (_note, { orderId }) => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.FOLLOWUP_NOTES, orderId] });
+      toast.success('تمت إضافة الملاحظة');
+    },
+    onError: (err: unknown) => {
+      toast.error(getApiErrorMessage(err, 'تعذر إضافة الملاحظة'));
+    },
+  });
+};
+
+interface EditFollowupNoteVariables {
+  orderId: number;
+  noteId: number;
+  body: string;
+}
+
+export const useEditFollowupNoteMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ orderId, noteId, body }: EditFollowupNoteVariables) =>
+      editFollowupNote(orderId, noteId, { body }),
+    onSuccess: (_note, { orderId }) => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.FOLLOWUP_NOTES, orderId] });
+      toast.success('تم حفظ الملاحظة');
+    },
+    onError: (err: unknown) => {
+      toast.error(getApiErrorMessage(err, 'تعذر حفظ الملاحظة'));
+    },
+  });
+};
+
+interface DeleteFollowupNoteVariables {
+  orderId: number;
+  noteId: number;
+}
+
+export const useDeleteFollowupNoteMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ orderId, noteId }: DeleteFollowupNoteVariables) => deleteFollowupNote(orderId, noteId),
+    onSuccess: (_result, { orderId }) => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.FOLLOWUP_NOTES, orderId] });
+      toast.success('تم حذف الملاحظة');
+    },
+    onError: (err: unknown) => {
+      toast.error(getApiErrorMessage(err, 'تعذر حذف الملاحظة'));
+    },
   });
 };
