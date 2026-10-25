@@ -120,3 +120,7 @@ export interface ShippingSwitchMissingFieldsErrorBody {
   code: 'SHIPPING_SWITCH_MISSING_FIELDS';
   missing: ShippingSwitchMissingField[];
 }
+
+export interface CarrierSendBearingResponse {
+  carrierSend?: CarrierSendBlock | null;
+}

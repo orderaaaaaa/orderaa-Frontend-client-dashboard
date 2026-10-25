@@ -20,6 +20,11 @@ import {
 } from '@/lib/query/mutationSync';
 import http from '@/lib/api/http';
 import { getProductAttributeOptions } from '@/lib/api/products';
+import type { CarrierSendBearingResponse } from '@/types/carrierSends';
+import {
+  CARRIER_SEND_NOT_SENT_WARNING,
+  carrierSendNeedsAttention,
+} from '@/utils/manualOrder/carrierSend';
 import {
   Order,
   FilterOrdersDto,
@@ -252,6 +257,12 @@ export const useCustomerOrders = (
   });
 };
 
+const warnIfCarrierSendNeedsAttention = (response: CarrierSendBearingResponse | undefined) => {
+  if (carrierSendNeedsAttention(response?.carrierSend)) {
+    toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
+  }
+};
+
 // Update order mutation
 export const useUpdateOrder = () => {
   const queryClient = useQueryClient();
@@ -266,7 +277,8 @@ export const useUpdateOrder = () => {
     }) => {
       const response = await http.patch<Order>(`/orders/${orderId}`, data);
       const respondedAt = Date.now();
-      await invalidateAndWait(queryClient, orderStatusKeys(orderId));
+      await invalidateAndWait(queryClient, [...orderStatusKeys(orderId), [QUERY_KEYS.CARRIER_SENDS]]);
+      warnIfCarrierSendNeedsAttention(response.data);
       return readFreshQueryData(
         queryClient,
         [QUERY_KEYS.ORDER_DETAILS, orderId],
@@ -291,17 +303,20 @@ export const useUpdateOrderProduct = () => {
       attributeOptionIds: number[];
       sendBackToPackaging?: boolean;
     }) => {
-      const response = await http.patch(`/orders/order-product/${orderProductId}`, {
+      const response = await http.patch<CarrierSendBearingResponse>(`/orders/order-product/${orderProductId}`, {
         attributeOptionIds,
         ...(sendBackToPackaging ? { sendBackToPackaging: true } : {}),
       });
       return response.data;
     },
-    onSuccess: () =>
-      invalidateAndWait(queryClient, [
+    onSuccess: (data) => {
+      warnIfCarrierSendNeedsAttention(data);
+      return invalidateAndWait(queryClient, [
         [QUERY_KEYS.ORDER_DETAILS],
         [QUERY_KEYS.ORDERS],
-      ]),
+        [QUERY_KEYS.CARRIER_SENDS],
+      ]);
+    },
   });
 };
 
@@ -317,17 +332,20 @@ export const useDeleteOrderProduct = () => {
       orderProductId: number;
       sendBackToPackaging?: boolean;
     }) => {
-      const response = await http.delete(
+      const response = await http.delete<CarrierSendBearingResponse>(
         `/orders/order-product/${orderProductId}`,
         { params: sendBackToPackaging ? { sendBackToPackaging: true } : undefined }
       );
       return response.data;
     },
-    onSuccess: () =>
-      invalidateAndWait(queryClient, [
+    onSuccess: (data) => {
+      warnIfCarrierSendNeedsAttention(data);
+      return invalidateAndWait(queryClient, [
         [QUERY_KEYS.ORDER_DETAILS],
         [QUERY_KEYS.ORDERS],
-      ]),
+        [QUERY_KEYS.CARRIER_SENDS],
+      ]);
+    },
   });
 };
 
@@ -349,7 +367,7 @@ export const useAddOrderProduct = () => {
       quantity: number;
       sendBackToPackaging?: boolean;
     }) => {
-      const response = await http.post(`/orders/${orderId}/products`, {
+      const response = await http.post<CarrierSendBearingResponse>(`/orders/${orderId}/products`, {
         productId,
         attributeOptionIds,
         quantity,
@@ -357,11 +375,14 @@ export const useAddOrderProduct = () => {
       });
       return response.data;
     },
-    onSuccess: () =>
-      invalidateAndWait(queryClient, [
+    onSuccess: (data) => {
+      warnIfCarrierSendNeedsAttention(data);
+      return invalidateAndWait(queryClient, [
         [QUERY_KEYS.ORDER_DETAILS],
         [QUERY_KEYS.ORDERS],
-      ]),
+        [QUERY_KEYS.CARRIER_SENDS],
+      ]);
+    },
   });
 };
 
@@ -385,17 +406,20 @@ export const useUpdateCustomer = () => {
         address?: string;
       };
     }) => {
-      const response = await http.patch(`/customers/${customerId}`, data, {
+      const response = await http.patch<CarrierSendBearingResponse>(`/customers/${customerId}`, data, {
         params: orderId === undefined ? undefined : { orderId },
       });
       return response.data;
     },
-    onSuccess: () =>
-      invalidateAndWait(queryClient, [
+    onSuccess: (data) => {
+      warnIfCarrierSendNeedsAttention(data);
+      return invalidateAndWait(queryClient, [
         [QUERY_KEYS.ORDER_DETAILS],
         [QUERY_KEYS.ORDERS],
         [QUERY_KEYS.CUSTOMER_ORDERS],
-      ]),
+        [QUERY_KEYS.CARRIER_SENDS],
+      ]);
+    },
   });
 };
 
