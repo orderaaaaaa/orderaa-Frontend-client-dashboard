@@ -244,7 +244,7 @@ const OrderDetailsCardId = ({
       <OrderHistoryModal
         isOpen={isHistoryModalOpen}
         onClose={() => setIsHistoryModalOpen(false)}
-        events={order.order_events || []}
+        order={order}
       />
     </div>
   );
