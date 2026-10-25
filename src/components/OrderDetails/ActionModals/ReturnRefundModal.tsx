@@ -49,11 +49,12 @@ export default function ReturnRefundModal({
 
   const handleConfirm = () => {
     if (selectedProductId === null || selectedReasonId === null || refundMethod === null) return;
+    if (amountValue === null || amountInvalid) return;
     refundMutation.mutate(
       {
         orderId,
         returnedOrderProductId: selectedProductId,
-        amount: amount ? Number(amount) : 0,
+        amount: amountValue,
         refundMethod,
         reasonId: selectedReasonId,
       },
@@ -79,7 +80,10 @@ export default function ReturnRefundModal({
     onClose();
   };
 
-  const isFormValid = selectedProductId !== null && selectedReasonId !== null && refundMethod !== null;
+  const amountValue = amount === '' ? null : Number(amount);
+  const amountInvalid = amountValue === null || !Number.isFinite(amountValue) || amountValue < 0;
+  const isFormValid =
+    selectedProductId !== null && selectedReasonId !== null && refundMethod !== null && !amountInvalid;
 
   return (
     <BaseModal
@@ -150,17 +154,22 @@ export default function ReturnRefundModal({
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F]">المبلغ</label>
-          <p className="text-xs text-gray-500">
-            سالب = المندوب يدفع للعميل، موجب = العميل يدفع
-          </p>
+          <label className="font-bold text-[#1F1F1F]">
+            المبلغ <span className="text-red-600">*</span>
+          </label>
           <input
             type="number"
+            min={0}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder="0"
             className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
+          {amountInvalid && (
+            <p className="text-xs text-red-600">
+              المبلغ مطلوب ويجب أن يكون صفرًا أو أكبر
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col gap-2">
