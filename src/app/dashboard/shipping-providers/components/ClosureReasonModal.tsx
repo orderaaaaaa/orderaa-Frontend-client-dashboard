@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import clsx from 'clsx';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
@@ -86,12 +87,13 @@ export function ClosureReasonModal({ kind, orderId, onClose }: ClosureReasonModa
             <div className="flex items-center justify-center py-4">
               <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
-          ) : isError ? (
-            <p className="text-sm text-red-600">تعذر تحميل الأسباب</p>
-          ) : reasons.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-[#ECECEC] p-4 text-sm text-[#1F1F1F]">
-              لا توجد أسباب متاحة، أضفها من إعدادات المتجر
-            </p>
+          ) : isError || reasons.length === 0 ? (
+            <div className="flex flex-col gap-2 rounded-lg border border-dashed border-[#ECECEC] p-4 text-sm text-[#1F1F1F]">
+              <p>لا توجد أسباب متاحة</p>
+              <Link href="/dashboard/store-settings" className="font-semibold text-primary hover:underline">
+                أضف الأسباب من إعدادات المتجر
+              </Link>
+            </div>
           ) : (
             <div className="grid sm:grid-cols-3 grid-cols-1 gap-2">
               {reasons.map((reason) => (
