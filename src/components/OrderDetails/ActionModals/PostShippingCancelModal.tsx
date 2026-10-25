@@ -125,6 +125,7 @@ export default function PostShippingCancelModal({
             onClear={() => setReasonText('')}
             clearable
             placeholder="أو اكتب السبب"
+            maxLength={255}
             disabled={refuseMutation.isPending}
             inputClassName="bg-white"
           />
@@ -137,6 +138,7 @@ export default function PostShippingCancelModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="أضف ملاحظات إضافية..."
+            maxLength={2000}
           />
         </div>
       </div>

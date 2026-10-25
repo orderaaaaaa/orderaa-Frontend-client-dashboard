@@ -27,6 +27,7 @@ type InputProps = {
   disabled?: boolean;
   min?: number | string;
   max?: number | string;
+  maxLength?: number;
   step?: number | string;
   autoFocus?: boolean;
   id?: string;

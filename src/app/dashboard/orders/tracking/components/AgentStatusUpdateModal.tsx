@@ -41,6 +41,7 @@ import {
 } from '@/services/followup';
 import { useCancellationReasons } from '@/services/orders';
 import type { FollowupClosure, FollowupClosureKind } from '@/types/logistics';
+import { formatDateTime } from '@/utils/format';
 
 type ActionType =
   | 'FOLLOW_UP'
@@ -385,6 +386,7 @@ export default function AgentStatusUpdateModal({
           onClear={() => setReasonText('')}
           clearable
           placeholder="أو اكتب السبب"
+          maxLength={255}
           disabled={isSubmitting}
           inputClassName="bg-white"
         />
@@ -393,6 +395,7 @@ export default function AgentStatusUpdateModal({
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="ملاحظات (اختياري)"
+          maxLength={2000}
           className="min-h-[80px] text-sm bg-white"
         />
       </div>
@@ -538,6 +541,10 @@ export default function AgentStatusUpdateModal({
                     {closure.reasonName || closure.reasonText}
                   </span>
                 )}
+                {closure.notes && (
+                  <span className="text-xs text-gray-500">{closure.notes}</span>
+                )}
+                <span className="text-xs text-gray-400">{formatDateTime(closure.closedAt)}</span>
               </div>
               <Button
                 variant="outline"
