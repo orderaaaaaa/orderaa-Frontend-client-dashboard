@@ -43,6 +43,7 @@ export const FOLLOWUP_LEGACY_NAME_LABELS: Partial<Record<string, string>> = {
 export const FOLLOWUP_NOTES_BUTTON_LABEL = 'الملاحظات';
 export const FOLLOWUP_ACTION_LOG_BUTTON_LABEL = 'سجل الإجراءات';
 export const FOLLOWUP_COURIER_COLUMN_LABEL = 'المندوب';
+export const FOLLOWUP_ACTIONS_COLUMN_LABEL = 'المتابعة';
 
 export const ACTION_LOG_TITLE = 'سجل الإجراءات';
 export const ACTION_LOG_EMPTY = 'لا توجد إجراءات مسجلة لهذا الطلب';

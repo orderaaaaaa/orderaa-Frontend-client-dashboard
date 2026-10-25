@@ -24,10 +24,15 @@ import {
 import { getTimeAgoCompact } from '@/utils/timeAgo';
 import { DeliveryWindowModal } from './DeliveryWindowModal';
 import { formatDate, formatNumber } from './formatNumber';
-import { FOLLOWUP_COURIER_COLUMN_LABEL } from './followupNotesConstants';
+import {
+  FOLLOWUP_ACTION_LOG_BUTTON_LABEL,
+  FOLLOWUP_ACTIONS_COLUMN_LABEL,
+  FOLLOWUP_COURIER_COLUMN_LABEL,
+  FOLLOWUP_NOTES_BUTTON_LABEL,
+} from './followupNotesConstants';
 import { LateMarkModal } from './LateMarkModal';
 import { SendAgainAction } from './SendAgainAction';
-import { ShipmentRowActions, type FollowupRowTools } from './ShipmentRowActions';
+import { ShipmentRowActions } from './ShipmentRowActions';
 
 const FLAG_DOT_CLASSES: Record<LatenessFlag | 'NONE', string> = {
   RED: 'bg-red-500',
@@ -316,15 +321,14 @@ export function InProcessShipmentsTable({
           </Can>
           <th className={HEAD_CLASS}>شركة الشحن</th>
           <th className={HEAD_CLASS}>{FOLLOWUP_COURIER_COLUMN_LABEL}</th>
+          <Can code={PERMISSIONS.FOLLOWUP_READ}>
+            <th className={HEAD_CLASS}>{FOLLOWUP_ACTIONS_COLUMN_LABEL}</th>
+          </Can>
           <th className={HEAD_CLASS}>الإغلاق</th>
         </tr>
       </thead>
       <tbody>
         {shipments.map((row) => {
-          const followupTools: FollowupRowTools = {
-            onOpenNotes: () => onOpenNotes(row.id),
-            onOpenActionLog: () => onOpenActionLog(row.id),
-          };
           const locked = isLockedRow(row);
           return (
             <tr key={row.id} className="border-b border-gray-100">
@@ -370,11 +374,34 @@ export function InProcessShipmentsTable({
               <td className={CELL_CLASS}>
                 <CourierCell name={row.courierName} phone={row.courierPhone} />
               </td>
+              <Can code={PERMISSIONS.FOLLOWUP_READ}>
+                <td className={CELL_CLASS}>
+                  <div className="flex flex-col items-start gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-xs"
+                      onClick={() => onOpenNotes(row.id)}
+                    >
+                      {FOLLOWUP_NOTES_BUTTON_LABEL}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-xs"
+                      onClick={() => onOpenActionLog(row.id)}
+                    >
+                      {FOLLOWUP_ACTION_LOG_BUTTON_LABEL}
+                    </Button>
+                  </div>
+                </td>
+              </Can>
               <td className={CELL_CLASS}>
                 <ShipmentRowActions
                   orderId={row.id}
                   closure={row.closure}
-                  followupTools={followupTools}
                   partialDelivery={{
                     pending: isShippingCompaniesLoading,
                     blockedReason: isShippingCompaniesLoading

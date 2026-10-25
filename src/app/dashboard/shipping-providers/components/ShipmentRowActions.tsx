@@ -5,7 +5,6 @@ import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import PartialDeliveryModal from '@/components/OrderDetails/ActionModals/PartialDeliveryModal';
 import { Button } from '@/components/ui/button';
-import { Can } from '@/components/Can';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { useI18n } from '@/i18n/I18nProvider';
 import { closureKindAnyOfCodes } from '@/lib/followupClosurePermissions';
@@ -15,10 +14,6 @@ import { useCloseClosure, useUndoClosure } from '@/services/shippingProviders';
 import { getApiErrorMessage } from '@/utils/apiError';
 import type { FollowupClosure, FollowupClosureKind } from '@/types/logistics';
 import { ClosureReasonModal, type ClosureReasonKind } from './ClosureReasonModal';
-import {
-  FOLLOWUP_ACTION_LOG_BUTTON_LABEL,
-  FOLLOWUP_NOTES_BUTTON_LABEL,
-} from './followupNotesConstants';
 
 type ClosureActionId = 'partial' | 'close' | 'refuse' | 'cancel' | 'reopen';
 
@@ -50,24 +45,13 @@ const CLOSURE_KIND_LABELS: Record<FollowupClosureKind, string> = {
   CANCEL: 'ملغي',
 };
 
-export interface FollowupRowTools {
-  onOpenNotes: () => void;
-  onOpenActionLog: () => void;
-}
-
 interface ShipmentRowActionsProps {
   orderId: number;
   closure: FollowupClosure | null;
   partialDelivery?: PartialDeliveryAccess;
-  followupTools?: FollowupRowTools;
 }
 
-export function ShipmentRowActions({
-  orderId,
-  closure,
-  partialDelivery,
-  followupTools,
-}: ShipmentRowActionsProps) {
+export function ShipmentRowActions({ orderId, closure, partialDelivery }: ShipmentRowActionsProps) {
   const { t } = useI18n();
   const { hasAllPermissions, hasAnyPermission } = usePermissionCheck();
   const [reasonKind, setReasonKind] = useState<ClosureReasonKind | null>(null);
@@ -167,30 +151,6 @@ export function ShipmentRowActions({
             </Button>
           ))}
         </div>
-      )}
-      {followupTools && (
-        <Can code={PERMISSIONS.FOLLOWUP_READ}>
-          <div className="flex flex-wrap gap-1">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-xs"
-              onClick={followupTools.onOpenNotes}
-            >
-              {FOLLOWUP_NOTES_BUTTON_LABEL}
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-xs"
-              onClick={followupTools.onOpenActionLog}
-            >
-              {FOLLOWUP_ACTION_LOG_BUTTON_LABEL}
-            </Button>
-          </div>
-        </Can>
       )}
       {reasonKind !== null && (
         <ClosureReasonModal
