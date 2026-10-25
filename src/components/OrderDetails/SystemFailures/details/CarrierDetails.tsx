@@ -1,6 +1,8 @@
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { integrationLabelOf } from '@/lib/shippingCompanies';
 import type {
+  CarrierReturnAtMerchantDetails,
+  CarrierStatusCorrectedDetails,
   CarrierStatusIgnoredOutsideWindowDetails,
   CarrierStatusIgnoredPartialReturnDetails,
   CarrierStatusIgnoredStaleDetails,
@@ -15,7 +17,9 @@ type CarrierDetailsValue =
   | CarrierStatusIgnoredPartialReturnDetails
   | CarrierStatusIgnoredStaleDetails
   | CarrierStatusIgnoredOutsideWindowDetails
-  | CarrierStatusNotAppliedDetails;
+  | CarrierStatusNotAppliedDetails
+  | CarrierStatusCorrectedDetails
+  | CarrierReturnAtMerchantDetails;
 
 export function CarrierDetails({ details }: { details: CarrierDetailsValue }) {
   const { getStatusLabel } = useStatusLabel();
@@ -38,6 +42,12 @@ export function CarrierDetails({ details }: { details: CarrierDetailsValue }) {
           <DetailField label="حالة الطلب وقتها">
             {details.currentStatus ? getStatusLabel(details.currentStatus) : EMPTY_VALUE}
           </DetailField>
+        )}
+        {'fromStatus' in details && (
+          <DetailField label="الحالة قبل التصحيح">{getStatusLabel(details.fromStatus)}</DetailField>
+        )}
+        {'toStatus' in details && (
+          <DetailField label="الحالة بعد التصحيح">{getStatusLabel(details.toStatus)}</DetailField>
         )}
       </DetailGrid>
       {'reason' in details && <FailureReasonDetails reason={details.reason} />}

@@ -11,6 +11,7 @@ import type {
   CarrierCancelledLaneAppliedDetails,
   CarrierCancelledLaneStockDetails,
   CarrierFailureDetailsBase,
+  CarrierStatusCorrectedDetails,
   CarrierStatusIgnoredOutsideWindowDetails,
   CarrierStatusIgnoredPartialReturnDetails,
   CarrierStatusIgnoredStaleDetails,
@@ -164,6 +165,12 @@ const isCarrierCancelledLaneStock = (value: unknown): value is CarrierCancelledL
   value.moved.every(isCancelledLaneMovedLine) &&
   Array.isArray(value.unmoved) &&
   value.unmoved.every(isCancelledLaneUnmovedLine);
+
+const isCarrierStatusCorrected = (value: unknown): value is CarrierStatusCorrectedDetails =>
+  isCarrierBase(value) &&
+  isRecord(value) &&
+  isString(value.fromStatus) &&
+  isString(value.toStatus);
 
 const isShipmentMissingAddress = (value: unknown): value is ShipmentMissingAddressDetails =>
   isRecord(value) &&
@@ -381,6 +388,10 @@ export function narrowFailureDetails(
       return isCarrierCancelledLaneApplied(details) ? { code, details } : null;
     case 'CARRIER_CANCELLED_LANE_STOCK':
       return isCarrierCancelledLaneStock(details) ? { code, details } : null;
+    case 'CARRIER_STATUS_CORRECTED':
+      return isCarrierStatusCorrected(details) ? { code, details } : null;
+    case 'CARRIER_RETURN_AT_MERCHANT':
+      return isCarrierBase(details) ? { code, details } : null;
     case 'SHIPMENT_NOT_CREATED_MISSING_ADDRESS':
       return isShipmentMissingAddress(details) ? { code, details } : null;
     case 'SHIPMENT_NOT_CREATED_MISSING_PHONE':
