@@ -276,6 +276,7 @@ export function OrderActionModals({
       />
 
       <PostShippingCancelModal
+        orderId={order.id}
         isOpen={modals.postShippingCancel.isOpen}
         onClose={modals.postShippingCancel.close}
       />

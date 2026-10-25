@@ -1,43 +1,65 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
+import { toast } from 'react-toastify';
 import BaseModal from '@/components/ui/base-modal';
 import { Textarea } from '@/components/ui/textarea';
+import Input from '@/components/ui/Input';
 import { useCancellationReasons } from '@/services/orders';
+import { useFollowupRefuseMutation } from '@/services/followup';
 import clsx from 'clsx';
 
 interface PostShippingCancelModalProps {
+  orderId: number;
   isOpen: boolean;
   onClose: () => void;
 }
 
 export default function PostShippingCancelModal({
+  orderId,
   isOpen,
   onClose,
 }: PostShippingCancelModalProps) {
   const [selectedReasonId, setSelectedReasonId] = useState<number | null>(null);
+  const [reasonText, setReasonText] = useState('');
   const [notes, setNotes] = useState('');
 
-  const { data: reasons = [], isLoading } = useCancellationReasons(isOpen, 'REFUSAL_TO_ACCEPT');
+  const { data: reasons = [], isLoading, isError } = useCancellationReasons(isOpen, 'REFUSAL_TO_ACCEPT');
+  const refuseMutation = useFollowupRefuseMutation();
 
-  const handleConfirm = () => {
-    if (!selectedReasonId) return;
-    console.log('[PostShippingCancel]', {
-      reasonId: selectedReasonId,
-      notes,
-    });
-    handleReset();
-    onClose();
-  };
+  const reasonsReady = !isLoading && !isError && reasons.length > 0;
+  const isConfirmDisabled =
+    !reasonsReady || (!selectedReasonId && !reasonText.trim()) || refuseMutation.isPending;
 
   const handleReset = () => {
     setSelectedReasonId(null);
+    setReasonText('');
     setNotes('');
   };
 
   const handleClose = () => {
     handleReset();
     onClose();
+  };
+
+  const handleConfirm = async () => {
+    if (isConfirmDisabled) return;
+    const reasonPayload = selectedReasonId
+      ? { reasonId: selectedReasonId }
+      : { reasonText: reasonText.trim() };
+    try {
+      await refuseMutation.mutateAsync({
+        orderId,
+        ...reasonPayload,
+        notes: notes.trim() || undefined,
+      });
+      toast.success('تم تحديث الحالة بنجاح');
+      handleClose();
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join('\n') : msg || 'فشل تحديث الحالة');
+    }
   };
 
   return (
@@ -47,7 +69,8 @@ export default function PostShippingCancelModal({
       title="إلغاء بعد الشحن"
       onConfirm={handleConfirm}
       confirmText="تأكيد الإلغاء"
-      confirmDisabled={!selectedReasonId}
+      confirmDisabled={isConfirmDisabled}
+      isLoading={refuseMutation.isPending}
       confirmButtonClassName="px-8 py-2 bg-red-600 rounded-[28px] font-bold text-white hover:bg-red-700 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
     >
       <div className="space-y-6">
@@ -59,6 +82,15 @@ export default function PostShippingCancelModal({
           {isLoading ? (
             <div className="flex items-center justify-center py-4">
               <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : isError ? (
+            <p className="text-sm text-red-600">تعذر تحميل أسباب الرفض</p>
+          ) : reasons.length === 0 ? (
+            <div className="flex flex-col gap-2 rounded-lg border border-dashed border-[#ECECEC] p-4 text-sm text-[#1F1F1F]">
+              <p>لا توجد أسباب رفض متاحة</p>
+              <Link href="/dashboard/store-settings" className="font-semibold text-primary hover:underline">
+                أضف أسباب الرفض من إعدادات المتجر
+              </Link>
             </div>
           ) : (
             <div className="grid sm:grid-cols-3 grid-cols-1 gap-2">
@@ -72,18 +104,30 @@ export default function PostShippingCancelModal({
                       ? 'border-primary bg-[#F6F2FC] text-primary font-semibold'
                       : 'border-[#ECECEC] hover:border-[#CBB5FD] hover:bg-[#FDFBFF] text-[#1F1F1F]'
                   )}
-                  onClick={() => setSelectedReasonId(reason.id)}
+                  onClick={() => {
+                    setSelectedReasonId(reason.id);
+                    setReasonText('');
+                  }}
                 >
                   {reason.reasonName}
                 </button>
               ))}
-              {reasons.length === 0 && (
-                <p className="text-sm text-gray-400 col-span-full text-center py-4">
-                  لا توجد أسباب متاحة
-                </p>
-              )}
             </div>
           )}
+
+          <Input
+            type="text"
+            value={reasonText}
+            onChange={(e) => {
+              setReasonText(e.target.value);
+              setSelectedReasonId(null);
+            }}
+            onClear={() => setReasonText('')}
+            clearable
+            placeholder="أو اكتب السبب"
+            disabled={refuseMutation.isPending}
+            inputClassName="bg-white"
+          />
         </div>
 
         <div className="flex flex-col gap-2">
