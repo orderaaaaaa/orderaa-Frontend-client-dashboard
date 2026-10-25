@@ -200,6 +200,7 @@ const ar = {
   'settlementFinal.unchanged': 'المبلغ الجديد مساو للمبلغ الحالي',
   'settlementFinal.saved': 'تم تحديد المبلغ النهائي للتحصيل',
   'settlementFinal.failed': 'فشل في تحديد المبلغ النهائي',
+  'settlementFinal.changeTooLarge': 'الفرق بين المبلغ النهائي والمبلغ الحالي كبير جدًا',
 } as const;
 
 export default ar;

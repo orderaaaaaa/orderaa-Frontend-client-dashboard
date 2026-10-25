@@ -186,6 +186,7 @@ const en: Record<keyof typeof ar, string> = {
   'settlementFinal.unchanged': 'The new amount equals the current amount.',
   'settlementFinal.saved': 'The final settlement amount was saved.',
   'settlementFinal.failed': 'The final settlement amount could not be saved.',
+  'settlementFinal.changeTooLarge': 'The difference between the final and current amount is too large',
 };
 
 export default en;

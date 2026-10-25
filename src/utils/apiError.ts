@@ -143,6 +143,10 @@ export function getSettleFinalAmountMessage(err: unknown, fallback: string): str
     });
   }
 
+  if (data?.code === 'SETTLEMENT_AMOUNT_CHANGE_TOO_LARGE') {
+    return translate(locale, 'settlementFinal.changeTooLarge');
+  }
+
   const message = data?.message;
   if (Array.isArray(message) && message.includes('SETTLEMENT_AMOUNT_FORMAT_INVALID')) {
     return translate(locale, 'settlementFinal.formatInvalid');
