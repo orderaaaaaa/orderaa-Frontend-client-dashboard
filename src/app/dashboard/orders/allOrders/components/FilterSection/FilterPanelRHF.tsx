@@ -192,10 +192,14 @@ export default function FilterPanel({
   const { data: governorates = [] } = useGovernoratesQuery(isGovernorateActive || isCityActive);
   const { data: cities = [], isLoading: isLoadingCities } = useCitiesQuery(isCityActive ? selectedGovernorate : undefined);
   const { data: cancellationReasons = [] } = useCancellationReasons(isCancellationReasonActive);
-  const cancellationReasonOptions = React.useMemo(
-    () => cancellationReasons.map((r) => ({ key: String(r.id), value: r.reasonName })),
-    [cancellationReasons]
-  );
+  const cancellationReasonOptions = React.useMemo(() => {
+    const seenNames = new Set<string>();
+    return cancellationReasons.flatMap((r) => {
+      if (seenNames.has(r.reasonName)) return [];
+      seenNames.add(r.reasonName);
+      return [{ key: String(r.id), value: r.reasonName }];
+    });
+  }, [cancellationReasons]);
   const { data: storeOptions = [], isLoading: isLoadingStores } = useQuery({
     queryKey: ['stores-filter-options'],
     queryFn: async () => {

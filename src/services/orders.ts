@@ -9,7 +9,9 @@ import {
   QueryKey,
 } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef } from 'react';
+import { toast } from 'react-toastify';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { getApiErrorMessage } from '@/utils/apiError';
 import {
   invalidateAndWait,
   orderStatusKeys,
@@ -527,24 +529,41 @@ export const useFetchOrdersForSearch = () => {
   return { fetchOrdersForSearch };
 };
 
+export type CancellationReasonType = 'GENERAL' | 'SHIPPING_CANCELLATION' | 'REFUSAL_TO_ACCEPT';
+
 // Cancellation reason interface
 export interface CancellationReason {
   id: number;
   reasonName: string;
+  type: CancellationReasonType;
   isActive: boolean;
-  displayOrder: number;
   usageCount: number;
   lastUsedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
+export type TopCancellationReason = Pick<CancellationReason, 'id' | 'reasonName' | 'usageCount'>;
+
+export interface CreateCancellationReasonPayload {
+  reasonName: string;
+  type: CancellationReasonType;
+}
+
+export interface UpdateCancellationReasonPayload {
+  reasonName?: string;
+  type?: CancellationReasonType;
+  isActive?: boolean;
+}
+
 // Fetch all cancellation reasons
-export const useCancellationReasons = (enabled: boolean = true) => {
+export const useCancellationReasons = (enabled: boolean = true, type?: CancellationReasonType) => {
   return useQuery({
-    queryKey: [QUERY_KEYS.CANCELLATION_REASONS] as QueryKey,
+    queryKey: [QUERY_KEYS.CANCELLATION_REASONS, type] as QueryKey,
     queryFn: async () => {
-      const response = await http.get<CancellationReason[]>('/cancellation-reasons');
+      const response = await http.get<CancellationReason[]>('/cancellation-reasons', {
+        params: { type },
+      });
       return response.data;
     },
     enabled,
@@ -553,15 +572,53 @@ export const useCancellationReasons = (enabled: boolean = true) => {
 };
 
 // Fetch top 5 cancellation reasons
-export const useTopCancellationReasons = (enabled: boolean = true) => {
+export const useTopCancellationReasons = (enabled: boolean = true, type?: CancellationReasonType) => {
   return useQuery({
-    queryKey: [QUERY_KEYS.TOP_CANCELLATION_REASONS] as QueryKey,
+    queryKey: [QUERY_KEYS.TOP_CANCELLATION_REASONS, type] as QueryKey,
     queryFn: async () => {
-      const response = await http.get<CancellationReason[]>('/cancellation-reasons/top');
+      const response = await http.get<TopCancellationReason[]>('/cancellation-reasons/top', {
+        params: { type },
+      });
       return response.data;
     },
     enabled,
     staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+export const useCreateCancellationReason = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: CreateCancellationReasonPayload) => {
+      const response = await http.post<CancellationReason>('/cancellation-reasons', payload);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CANCELLATION_REASONS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.TOP_CANCELLATION_REASONS] });
+    },
+    onError: (err) => {
+      toast.error(getApiErrorMessage(err, 'تعذر حفظ السبب'));
+    },
+  });
+};
+
+export const useUpdateCancellationReason = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, payload }: { id: number; payload: UpdateCancellationReasonPayload }) => {
+      const response = await http.patch<CancellationReason>(`/cancellation-reasons/${id}`, payload);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CANCELLATION_REASONS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.TOP_CANCELLATION_REASONS] });
+    },
+    onError: (err) => {
+      toast.error(getApiErrorMessage(err, 'تعذر تحديث السبب'));
+    },
   });
 };
 
