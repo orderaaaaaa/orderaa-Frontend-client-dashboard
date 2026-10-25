@@ -19,6 +19,7 @@ import {
   useWarehouseStockQuery,
 } from '@/services/warehouses';
 import type { WarehouseStockItemApi } from '@/lib/api/warehouses';
+import { variantOptionLabel } from '@/lib/variantOptionLabel';
 import { useDebounce } from '@/utils/debounce';
 import { AdjustStockModal } from './AdjustStockModal';
 import { TransferStockModal } from './TransferStockModal';
@@ -28,8 +29,7 @@ interface WarehouseDetailContentProps {
 }
 
 const variantLabel = (item: WarehouseStockItemApi): string =>
-  item.options.map((option) => option.option.name).join(' / ') ||
-  item.combinationKey;
+  variantOptionLabel(item.options) || item.combinationKey;
 
 export function WarehouseDetailContent({
   warehouseId,
