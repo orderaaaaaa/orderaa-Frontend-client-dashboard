@@ -201,6 +201,10 @@ const ar = {
   'settlementFinal.saved': 'تم تحديد المبلغ النهائي للتحصيل',
   'settlementFinal.failed': 'فشل في تحديد المبلغ النهائي',
   'settlementFinal.changeTooLarge': 'الفرق بين المبلغ النهائي والمبلغ الحالي كبير جدًا',
+  'closure.close': 'إغلاق اليوم',
+  'closure.refuse': 'رفض التسليم',
+  'closure.cancel': 'إلغاء',
+  'closure.reopen': 'إعادة فتح',
 } as const;
 
 export default ar;
