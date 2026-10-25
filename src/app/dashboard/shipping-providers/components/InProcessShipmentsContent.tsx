@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Can } from '@/components/Can';
@@ -9,6 +9,7 @@ import Input from '@/components/ui/Input';
 import PageLoading from '@/components/ui/page-loading';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
+import { usePermissionCheck } from '@/hooks/usePermissions';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { PERMISSIONS } from '@/lib/permissions';
 import { useGovernoratesQuery, useCitiesQuery } from '@/services/lookups';
@@ -38,8 +39,17 @@ const WORK_STATE_LABELS: Record<FollowupWorkState, string> = {
   all: 'الكل',
 };
 
-const readView = (value: string | null): ShipmentView =>
-  value === 'returned' ? 'returned' : 'in-process';
+const resolveView = (
+  requested: string | null,
+  canInProcess: boolean,
+  canReturned: boolean,
+): ShipmentView => {
+  const wanted: ShipmentView = requested === 'returned' ? 'returned' : 'in-process';
+  if (wanted === 'returned' ? canReturned : canInProcess) return wanted;
+  if (canInProcess) return 'in-process';
+  if (canReturned) return 'returned';
+  return wanted;
+};
 
 const readWorkState = (value: string | null): FollowupWorkState =>
   FOLLOWUP_WORK_STATES.find((state) => state === value) ?? 'open';
@@ -118,7 +128,7 @@ function InProcessList({
 
       <div className="flex flex-wrap gap-6 border-b border-gray-100 pb-4">
         <div className="flex flex-col gap-0.5">
-          <span className="text-xs text-gray-500">عدد الشحنات</span>
+          <span className="text-xs text-gray-500">نتائج العرض</span>
           <span className="text-lg font-bold text-gray-900">{formatNumber(total)}</span>
         </div>
         <Can code={PERMISSIONS.FOLLOWUP_NET_AMOUNT_READ}>
@@ -291,8 +301,11 @@ export function InProcessShipmentsContent({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { getStatusLabel } = useStatusLabel();
+  const { hasPermission } = usePermissionCheck();
+  const canInProcess = hasPermission(PERMISSIONS.FOLLOWUP_CARRIERS_IN_TRANSIT_VIEW);
+  const canReturned = hasPermission(PERMISSIONS.FOLLOWUP_CARRIERS_RETURNED_VIEW);
 
-  const view = readView(searchParams.get('view'));
+  const view = resolveView(searchParams.get('view'), canInProcess, canReturned);
   const from = searchParams.get('from') ?? '';
   const to = searchParams.get('to') ?? '';
   const status = readStatus(searchParams.get('status'));
@@ -305,14 +318,22 @@ export function InProcessShipmentsContent({
   const [limit, setLimit] = useState(DEFAULT_PAGE_SIZE);
   const [searchInput, setSearchInput] = useState(search);
   const debouncedSearch = useDebounce(searchInput, SEARCH_DEBOUNCE_MS);
+  const lastWrittenSearch = useRef(search);
 
   useEffect(() => {
     const nextSearch = debouncedSearch.trim();
     if (nextSearch === search) return;
+    lastWrittenSearch.current = nextSearch;
     router.replace(buildSearchUrl(pathname, searchParams, { search: nextSearch, page: '' }), {
       scroll: false,
     });
   }, [debouncedSearch, search, pathname, router, searchParams]);
+
+  useEffect(() => {
+    if (search === lastWrittenSearch.current) return;
+    lastWrittenSearch.current = search;
+    setSearchInput(search);
+  }, [search]);
 
   const updateParams = (patch: Record<string, string>) =>
     router.replace(buildSearchUrl(pathname, searchParams, patch), { scroll: false });
@@ -358,24 +379,28 @@ export function InProcessShipmentsContent({
             رجوع إلى جهات الشحن
           </Link>
           <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              variant={isInProcess ? 'default' : 'outline'}
-              size="sm"
-              className="rounded-full text-xs px-4"
-              onClick={() => updateParams({ view: '', page: '' })}
-            >
-              الشحنات الحالية
-            </Button>
-            <Button
-              type="button"
-              variant={isInProcess ? 'outline' : 'default'}
-              size="sm"
-              className="rounded-full text-xs px-4"
-              onClick={() => updateParams({ view: 'returned', page: '' })}
-            >
-              مرتجع في الشركة
-            </Button>
+            {canInProcess && (
+              <Button
+                type="button"
+                variant={isInProcess ? 'default' : 'outline'}
+                size="sm"
+                className="rounded-full text-xs px-4"
+                onClick={() => updateParams({ view: '', page: '' })}
+              >
+                الشحنات الحالية
+              </Button>
+            )}
+            {canReturned && (
+              <Button
+                type="button"
+                variant={isInProcess ? 'outline' : 'default'}
+                size="sm"
+                className="rounded-full text-xs px-4"
+                onClick={() => updateParams({ view: 'returned', page: '' })}
+              >
+                مرتجع في الشركة
+              </Button>
+            )}
           </div>
         </div>
 
