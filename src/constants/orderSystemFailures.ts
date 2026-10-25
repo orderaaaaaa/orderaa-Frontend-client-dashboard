@@ -1,6 +1,8 @@
 import type {
   AutomationMappingNotSavedReason,
   AutomationNotSentReason,
+  CarrierSendRowReason,
+  CarrierUnknownReason,
   FailureActorType,
   FailureReasonKind,
   OrderShadowedReason,
@@ -44,6 +46,36 @@ export const ORDER_SYSTEM_FAILURE_LABELS: Record<OrderSystemFailureCode, string>
 };
 
 export const ORDER_SYSTEM_FAILURE_FALLBACK_LABEL = 'عطل في النظام';
+
+export const SHIPMENT_UPDATE_NOT_SENT_REASON_SENTENCES: Record<
+  Exclude<CarrierSendRowReason, CarrierUnknownReason>,
+  string
+> = {
+  EXPLICIT: 'لم يتم إرسال التعديل لشركة الشحن {carrier}: تحقق منها، ثم أعد الإرسال',
+  NOT_DISPATCHED: 'لم يتم إرسال التعديل لشركة الشحن {carrier}: تحقق منها، ثم أعد الإرسال',
+  UNSUPPORTED_OPERATION: 'لم يتم إرسال التعديل لشركة الشحن {carrier}: تحقق منها، ثم أعد الإرسال',
+  HELD_CHECK_REQUIRED: 'لم يتم إرسال التعديل لشركة الشحن {carrier}: تحقق من شركة الشحن، ثم أكد الإرسال',
+  PREVIOUS_SEND_OPEN:
+    'لم يتم إرسال التعديل لشركة الشحن {carrier}: يوجد إرسال سابق لهذا الطلب ما زال مفتوحاً، تحقق منه أولاً',
+  GUARD_CHANGED: 'لم يتم إرسال التعديل لشركة الشحن {carrier}: تغيّر الطلب قبل الإرسال، احفظ التعديل مرة أخرى',
+};
+
+export const SHIPMENT_OUTCOME_UNKNOWN_SENTENCE = 'النتيجة غير معروفة: تحقق من شركة الشحن {carrier} قبل إعادة الإرسال';
+
+export const isShipmentUpdateNotSentReason = (
+  reason: CarrierSendRowReason
+): reason is keyof typeof SHIPMENT_UPDATE_NOT_SENT_REASON_SENTENCES =>
+  Object.prototype.hasOwnProperty.call(SHIPMENT_UPDATE_NOT_SENT_REASON_SENTENCES, reason);
+
+export const shipmentCarrierSendSentenceOf = (
+  code: 'SHIPMENT_UPDATE_NOT_SENT' | 'SHIPMENT_OUTCOME_UNKNOWN',
+  reason: CarrierSendRowReason,
+  carrier: string
+): string | null => {
+  if (code === 'SHIPMENT_OUTCOME_UNKNOWN') return SHIPMENT_OUTCOME_UNKNOWN_SENTENCE.replace('{carrier}', carrier);
+  if (!isShipmentUpdateNotSentReason(reason)) return null;
+  return SHIPMENT_UPDATE_NOT_SENT_REASON_SENTENCES[reason].replace('{carrier}', carrier);
+};
 
 export const ORDER_SYSTEM_FAILURE_SOURCE_LABELS: Record<OrderSystemFailureSource, string> = {
   CARRIER_WEBHOOK: 'شركة الشحن',

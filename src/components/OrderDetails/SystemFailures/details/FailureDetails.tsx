@@ -5,6 +5,7 @@ import {
   ORDER_SHADOWED_REASON_LABELS,
   SCHEDULED_TRANSITION_JOB_LABELS,
   SHIPMENT_MISSING_ADDRESS_FIELD_LABELS,
+  shipmentCarrierSendSentenceOf,
 } from '@/constants/orderSystemFailures';
 import type { Order } from '@/types/orders';
 import type { OrderSystemFailure } from '@/types/orderSystemFailures';
@@ -85,8 +86,12 @@ export function FailureDetails({
           <DetailField label="شركة الشحن" ltr>
             {narrowed.details.carrier}
           </DetailField>
-          <DetailField label="السبب" ltr>
-            {narrowed.details.reason}
+          <DetailField label="التفاصيل">
+            {shipmentCarrierSendSentenceOf(
+              narrowed.code,
+              narrowed.details.reason,
+              narrowed.details.carrier
+            ) ?? EMPTY_VALUE}
           </DetailField>
         </DetailGrid>
       );
