@@ -26,3 +26,6 @@ export const NO_SHIPPING_COMPANY_FILTER = 'none';
 export const NO_SHIPPING_COMPANY_LABEL = 'بدون شركة شحن';
 
 export const SHIPPING_COMPANY_REQUIRED_MESSAGE = 'يرجى اختيار شركة الشحن أولاً';
+
+export const CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE =
+  'هذه الشركة لا تدعم تعديل السعر أو تكلفة المرتجع. أنشئ الشحنة من جديد يدوياً.';

@@ -27,6 +27,7 @@ export interface EditableTextFieldProps {
    * pass the result of the ABAC permission check that gates the save endpoint.
    */
   canEdit?: boolean;
+  readOnlyReason?: string;
 }
 
 /**
@@ -47,6 +48,7 @@ export function EditableTextField({
   inputType = 'text',
   validationSchema,
   canEdit = true,
+  readOnlyReason,
 }: EditableTextFieldProps) {
   const field = useEditableField({
     initialValue: value,
@@ -135,6 +137,7 @@ export function EditableTextField({
           </div>
         )}
       </div>
+      {readOnlyReason && <p className="text-xs text-red-600">{readOnlyReason}</p>}
     </div>
   );
 }

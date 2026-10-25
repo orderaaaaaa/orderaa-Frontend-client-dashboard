@@ -8,6 +8,7 @@ import { ShippingTypeSelect } from '../fields/ShippingTypeSelect';
 import { Order } from '@/types/orders';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
+import { CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE } from '@/types/shippingCompanies';
 
 // Validation schema for price fields - only numbers allowed
 const priceSchema = z.string().refine(
@@ -45,6 +46,7 @@ export function PricingSection({
   // Every field here saves through PATCH /orders/:id (`orders:update`).
   const { hasPermission } = usePermissionCheck();
   const canEdit = hasPermission(PERMISSION_CODES.ORDERS_UPDATE);
+  const priceLocked = order.shippingCompanyRef?.carrierSupportsUpdate === false;
 
   // T8. Every amount is a decimal string from the API and is rendered as-is —
   // parsing it into a number to do arithmetic here would put money through a
@@ -94,7 +96,8 @@ export function PricingSection({
           onSave={async (value) => {
             await onUpdate('totalCost', Number(value));
           }}
-          canEdit={canEdit}
+          canEdit={canEdit && !priceLocked}
+          readOnlyReason={priceLocked ? CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE : undefined}
         />
         <EditableTextField
           label="سعر الشحن"
