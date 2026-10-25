@@ -47,6 +47,7 @@ export type OrderSystemFailureCode =
   | AutomationFailureCode
   | 'STOCK_MOVEMENT_SKIPPED'
   | 'STOCK_MOVEMENT_BYPASSED'
+  | 'STOCK_MOVEMENT_ALL_BYPASSED'
   | 'STOCK_TRANSITION_BLOCKED'
   | 'MACHINE_TRANSITION_STOCK_SHORTAGE'
   | 'STORE_CREATE_CREATION_STOCK_SHORTAGE'
@@ -294,6 +295,12 @@ export interface StockMovementBypassedDetails {
   lines: StockMovementBypassedLine[];
 }
 
+export interface StockMovementAllBypassedDetails {
+  fromStatus: string | null;
+  toStatus: string;
+  lines: StockMovementBypassedLine[];
+}
+
 export interface StockTransitionBlockedDetails {
   fromStatus: string;
   toStatus: string;
@@ -429,6 +436,7 @@ export interface OrderSystemFailureDetailsByCode {
   AUTOMATION_STATUS_NOT_APPLIED: AutomationStatusNotAppliedDetails;
   STOCK_MOVEMENT_SKIPPED: StockMovementSkippedDetails;
   STOCK_MOVEMENT_BYPASSED: StockMovementBypassedDetails;
+  STOCK_MOVEMENT_ALL_BYPASSED: StockMovementAllBypassedDetails;
   STOCK_TRANSITION_BLOCKED: StockTransitionBlockedDetails;
   MACHINE_TRANSITION_STOCK_SHORTAGE: MachineTransitionStockShortageDetails;
   STORE_CREATE_CREATION_STOCK_SHORTAGE: StoreCreateCreationStockShortageDetails;

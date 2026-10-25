@@ -15,6 +15,7 @@ import { DetailField, DetailGrid, EMPTY_VALUE, formatDetailValue } from './Detai
 import { FailureReasonDetails } from './FailureReasonDetails';
 import { GenericDetails } from './GenericDetails';
 import { isStoreUpdateNotAppliedFailure, narrowFailureDetails } from './guards';
+import { AllBypassedDetails } from './AllBypassedDetails';
 import { BypassedVariantsDetails } from './BypassedVariantsDetails';
 import { SkippedVariantsDetails } from './SkippedVariantsDetails';
 import { StockTransitionBlockedDetails } from './StockTransitionBlockedDetails';
@@ -174,6 +175,8 @@ export function FailureDetails({
       );
     case 'STOCK_MOVEMENT_BYPASSED':
       return <BypassedVariantsDetails details={narrowed.details} />;
+    case 'STOCK_MOVEMENT_ALL_BYPASSED':
+      return <AllBypassedDetails details={narrowed.details} />;
     case 'STOCK_TRANSITION_BLOCKED':
       return <StockTransitionBlockedDetails details={narrowed.details} />;
     case 'SCHEDULED_TRANSITION_FAILED':

@@ -35,6 +35,7 @@ import type {
   ShipmentOutcomeUnknownDetails,
   ShipmentUpdateNotSentDetails,
   MachineTransitionStockShortageDetails,
+  StockMovementAllBypassedDetails,
   StockMovementBypassedDetails,
   StockMovementSkippedDetails,
   StockTransitionBlockedDetails,
@@ -289,13 +290,9 @@ const isStockMovementSkipped = (value: unknown): value is StockMovementSkippedDe
   (value.variantIdsTruncatedCount === undefined ||
     typeof value.variantIdsTruncatedCount === 'number');
 
-const isStockMovementBypassed = (value: unknown): value is StockMovementBypassedDetails =>
-  isRecord(value) &&
-  isStringOrNull(value.fromStatus) &&
-  isString(value.toStatus) &&
-  isNumberArray(value.appliedVariantIds) &&
-  Array.isArray(value.lines) &&
-  value.lines.every(
+const areBypassedLines = (lines: unknown): boolean =>
+  Array.isArray(lines) &&
+  lines.every(
     (line) =>
       isRecord(line) &&
       typeof line.variantId === 'number' &&
@@ -306,6 +303,19 @@ const isStockMovementBypassed = (value: unknown): value is StockMovementBypassed
       Array.isArray(line.predecessorKeys) &&
       line.predecessorKeys.every(isString)
   );
+
+const isStockMovementBypassed = (value: unknown): value is StockMovementBypassedDetails =>
+  isRecord(value) &&
+  isStringOrNull(value.fromStatus) &&
+  isString(value.toStatus) &&
+  isNumberArray(value.appliedVariantIds) &&
+  areBypassedLines(value.lines);
+
+const isStockMovementAllBypassed = (value: unknown): value is StockMovementAllBypassedDetails =>
+  isRecord(value) &&
+  isStringOrNull(value.fromStatus) &&
+  isString(value.toStatus) &&
+  areBypassedLines(value.lines);
 
 const isStockTransitionBlocked = (value: unknown): value is StockTransitionBlockedDetails =>
   isRecord(value) &&
@@ -416,6 +426,8 @@ export function narrowFailureDetails(
       return isStockMovementSkipped(details) ? { code, details } : null;
     case 'STOCK_MOVEMENT_BYPASSED':
       return isStockMovementBypassed(details) ? { code, details } : null;
+    case 'STOCK_MOVEMENT_ALL_BYPASSED':
+      return isStockMovementAllBypassed(details) ? { code, details } : null;
     case 'STOCK_TRANSITION_BLOCKED':
       return isStockTransitionBlocked(details) ? { code, details } : null;
     case 'MACHINE_TRANSITION_STOCK_SHORTAGE':
