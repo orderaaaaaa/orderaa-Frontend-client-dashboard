@@ -8,7 +8,6 @@ import {
   LiaWhatsapp,
   LiaStopCircleSolid,
   LiaLockSolid,
-  LiaBoxOpenSolid,
   LiaExchangeAltSolid,
   LiaUndoAltSolid,
   LiaRedoAltSolid,
@@ -37,14 +36,11 @@ const arrowOptions: ActionOption[] = [
 ];
 
 const postShippingOptions: ActionOption[] = [
-  { label: 'تسليم جزئي', action: 'partial_delivery', icon: <LiaBoxOpenSolid className="w-5 h-5" /> },
   { label: 'استبدال', action: 'exchange', icon: <LiaExchangeAltSolid className="w-5 h-5" /> },
   { label: 'مرتجع', action: 'return_refund', icon: <LiaUndoAltSolid className="w-5 h-5" /> },
   { label: 'إعادة إرسال', action: 'resend', icon: <LiaRedoAltSolid className="w-5 h-5" /> },
   { label: 'متأخر', action: 'late', icon: <LiaClockSolid className="w-5 h-5" /> },
 ];
-
-const PARTIAL_DELIVERY_STATUSES = new Set(['WITH_DRIVER', 'DELIVERED']);
 
 export interface ActionsDropdownProps {
   isOpen: boolean;
@@ -81,14 +77,7 @@ export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, onAction
     });
 
     if (isPostShipping && canUpdate) {
-      return [
-        ...base,
-        ...postShippingOptions.filter(
-          (option) =>
-            option.action !== 'partial_delivery' ||
-            PARTIAL_DELIVERY_STATUSES.has(orderStatus)
-        ),
-      ];
+      return [...base, ...postShippingOptions];
     }
 
     return base;

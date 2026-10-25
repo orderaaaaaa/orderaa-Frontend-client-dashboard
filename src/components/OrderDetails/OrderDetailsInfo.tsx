@@ -99,7 +99,6 @@ function OrderDetailsInfoComponent({
     'shipping',
     'packagingNotes',
     'confirmAction',
-    'partialDelivery',
     'exchange',
     'returnRefund',
     'postShippingCancel',
@@ -244,9 +243,6 @@ function OrderDetailsInfoComponent({
         break;
       case 'whatsapp':
         modals.whatsapp.open();
-        break;
-      case 'partial_delivery':
-        modals.partialDelivery.open();
         break;
       case 'exchange':
         modals.exchange.open();

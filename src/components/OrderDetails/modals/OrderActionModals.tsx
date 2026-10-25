@@ -16,7 +16,6 @@ import {
   RejectModificationModal,
   WhatsappModal,
   WaitingPaymentModal,
-  PartialDeliveryModal,
   ExchangeModal,
   ReturnRefundModal,
   PostShippingCancelModal,
@@ -257,15 +256,6 @@ export function OrderActionModals({
           </div>
         </div>
       </BaseModal>
-
-      <PartialDeliveryModal
-        isOpen={modals.partialDelivery.isOpen}
-        onClose={modals.partialDelivery.close}
-        orderId={order.id}
-        orderStatus={order.status}
-        orderProducts={order.order_products || []}
-        totalCost={order.totalCost}
-      />
 
       <ExchangeModal
         isOpen={modals.exchange.isOpen}

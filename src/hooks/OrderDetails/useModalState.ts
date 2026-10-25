@@ -16,7 +16,6 @@ export type ModalName =
   | 'shipping'
   | 'packagingNotes'
   | 'confirmAction'
-  | 'partialDelivery'
   | 'exchange'
   | 'returnRefund'
   | 'postShippingCancel'
