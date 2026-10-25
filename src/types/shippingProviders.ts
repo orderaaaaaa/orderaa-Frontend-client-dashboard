@@ -19,6 +19,7 @@ export interface ShippingProvider {
 }
 
 export interface CarrierStats {
+  key: string;
   shippingCompanyId: number;
   kind: ShippingCompanyKind;
   implementation: ShippingImplementation;
