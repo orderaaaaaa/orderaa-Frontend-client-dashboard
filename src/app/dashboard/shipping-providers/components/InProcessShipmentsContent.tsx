@@ -2,19 +2,283 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Can } from '@/components/Can';
 import { Button } from '@/components/ui/button';
+import Input from '@/components/ui/Input';
 import PageLoading from '@/components/ui/page-loading';
 import PaginationFooter from '@/components/ui/pagination-footer';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
+import { useStatusLabel } from '@/hooks/useStatusLabel';
+import { PERMISSIONS } from '@/lib/permissions';
+import { useGovernoratesQuery, useCitiesQuery } from '@/services/lookups';
 import {
-  useCarrierShipmentsQuery,
-  useCarrierStatsQuery,
+  useInProcessShipmentsQuery,
+  useReturnedShipmentsQuery,
 } from '@/services/shippingProviders';
+import { FOLLOWUP_WORK_STATES, type FollowupWorkState } from '@/types/logistics';
+import {
+  IN_PROCESS_STATUSES,
+  type InProcessFilters,
+  type InProcessStatus,
+} from '@/types/shippingProviders';
+import { useDebounce } from '@/utils/debounce';
 import { formatNumber } from './formatNumber';
-import { ShipmentsTable } from './ShipmentsTable';
+import { InProcessShipmentsTable, ReturnedShipmentsTable } from './ShipmentsTable';
 
-const MIN_PAGE_SIZE = 1;
 const MAX_PAGE_SIZE = 100;
+const DEFAULT_PAGE_SIZE = 25;
+const SEARCH_DEBOUNCE_MS = 500;
+
+type ShipmentView = 'in-process' | 'returned';
+
+const WORK_STATE_LABELS: Record<FollowupWorkState, string> = {
+  open: 'مفتوح',
+  closed: 'مغلق',
+  all: 'الكل',
+};
+
+const readView = (value: string | null): ShipmentView =>
+  value === 'returned' ? 'returned' : 'in-process';
+
+const readWorkState = (value: string | null): FollowupWorkState =>
+  FOLLOWUP_WORK_STATES.find((state) => state === value) ?? 'open';
+
+const readStatus = (value: string | null): InProcessStatus | undefined =>
+  IN_PROCESS_STATUSES.find((status) => status === value);
+
+const readPage = (value: string | null): number => {
+  const page = Number(value);
+  return Number.isInteger(page) && page >= 1 ? page : 1;
+};
+
+const buildSearchUrl = (
+  pathname: string,
+  current: URLSearchParams,
+  patch: Record<string, string>,
+): string => {
+  const next = new URLSearchParams(current.toString());
+  Object.entries(patch).forEach(([key, value]) => {
+    if (value) next.set(key, value);
+    else next.delete(key);
+  });
+  const query = next.toString();
+  return query ? `${pathname}?${query}` : pathname;
+};
+
+interface ListProps {
+  shippingCompanyId: number;
+  page: number;
+  limit: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
+}
+
+interface InProcessListProps extends ListProps {
+  filters: InProcessFilters;
+}
+
+function InProcessList({
+  shippingCompanyId,
+  filters,
+  page,
+  limit,
+  onPageChange,
+  onPageSizeChange,
+}: InProcessListProps) {
+  const {
+    data,
+    isLoading,
+    isError,
+    isSuccess,
+    refetch,
+  } = useInProcessShipmentsQuery(shippingCompanyId, filters);
+
+  const shipments = data?.data ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const carrierName = data?.carrier.name ?? '';
+
+  useEffect(() => {
+    if (isSuccess && shipments.length === 0 && page > 1) {
+      onPageChange(1);
+    }
+  }, [isSuccess, shipments.length, page, onPageChange]);
+
+  return (
+    <>
+      <div>
+        <h1 className="text-lg sm:text-xl font-bold text-gray-900">
+          الشحنات الحالية - {carrierName}
+        </h1>
+        <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+          طلبات لدى جهة الشحن لم تُسلَّم ولم تُرتجع بعد
+        </p>
+      </div>
+
+      <div className="flex flex-wrap gap-6 border-b border-gray-100 pb-4">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-xs text-gray-500">عدد الشحنات</span>
+          <span className="text-lg font-bold text-gray-900">{formatNumber(total)}</span>
+        </div>
+        <Can code={PERMISSIONS.FOLLOWUP_NET_AMOUNT_READ}>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-xs text-gray-500">صافي الشحنات الحالية</span>
+            <span className="text-lg font-bold text-gray-900">
+              {formatNumber(data?.summary.netAmount, 2)} جنيه
+            </span>
+          </div>
+        </Can>
+      </div>
+
+      {isLoading ? (
+        <PageLoading message="جاري تحميل الشحنات الحالية..." />
+      ) : isError ? (
+        <ListError onRetry={() => refetch()} />
+      ) : total === 0 ? (
+        <p className="text-sm text-gray-500 text-center py-10">
+          لا توجد شحنات جارية لهذه الجهة في هذه الفترة
+        </p>
+      ) : (
+        <>
+          <div className="border border-gray-200 rounded-xl bg-white overflow-x-auto">
+            {data && (
+              <InProcessShipmentsTable
+                shipments={shipments}
+                carrier={data.carrier}
+                shippingCompanyId={shippingCompanyId}
+              />
+            )}
+          </div>
+          <ListPagination
+            page={page}
+            limit={limit}
+            total={total}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+            onPageSizeChange={onPageSizeChange}
+          />
+        </>
+      )}
+    </>
+  );
+}
+
+function ReturnedList({
+  shippingCompanyId,
+  page,
+  limit,
+  onPageChange,
+  onPageSizeChange,
+}: ListProps) {
+  const {
+    data,
+    isLoading,
+    isError,
+    isSuccess,
+    refetch,
+  } = useReturnedShipmentsQuery(shippingCompanyId, { page, limit });
+
+  const shipments = data?.data ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const carrierName = data?.carrier.name ?? '';
+
+  useEffect(() => {
+    if (isSuccess && shipments.length === 0 && page > 1) {
+      onPageChange(1);
+    }
+  }, [isSuccess, shipments.length, page, onPageChange]);
+
+  return (
+    <>
+      <div>
+        <h1 className="text-lg sm:text-xl font-bold text-gray-900">
+          مرتجع في الشركة - {carrierName}
+        </h1>
+        <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+          طلبات أعادتها جهة الشحن إلينا، ولا تتغير حالتها من هذه الصفحة
+        </p>
+      </div>
+
+      <div className="flex flex-wrap gap-6 border-b border-gray-100 pb-4">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-xs text-gray-500">عدد الطلبات</span>
+          <span className="text-lg font-bold text-gray-900">{formatNumber(total)}</span>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <PageLoading message="جاري تحميل المرتجعات..." />
+      ) : isError ? (
+        <ListError onRetry={() => refetch()} />
+      ) : total === 0 ? (
+        <p className="text-sm text-gray-500 text-center py-10">لا توجد طلبات مرتجعة لهذه الجهة</p>
+      ) : (
+        <>
+          <div className="border border-gray-200 rounded-xl bg-white overflow-x-auto">
+            {data && <ReturnedShipmentsTable shipments={shipments} carrier={data.carrier} />}
+          </div>
+          <ListPagination
+            page={page}
+            limit={limit}
+            total={total}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+            onPageSizeChange={onPageSizeChange}
+          />
+        </>
+      )}
+    </>
+  );
+}
+
+function ListError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="flex flex-col items-center gap-3 py-10">
+      <p className="text-sm text-gray-500">تعذر تحميل الشحنات</p>
+      <div className="flex items-center gap-3">
+        <Button type="button" variant="outline" size="sm" onClick={onRetry}>
+          إعادة المحاولة
+        </Button>
+        <Link href="/dashboard/shipping-providers" className="text-sm text-primary hover:underline">
+          رجوع إلى جهات الشحن
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function ListPagination({
+  page,
+  limit,
+  total,
+  totalPages,
+  onPageChange,
+  onPageSizeChange,
+}: {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
+}) {
+  return (
+    <PaginationFooter
+      currentPage={page}
+      totalPages={totalPages}
+      totalItems={total}
+      hasNextPage={page < totalPages}
+      hasPreviousPage={page > 1}
+      onPageChange={onPageChange}
+      onPrevious={() => onPageChange(Math.max(1, page - 1))}
+      onNext={() => onPageChange(Math.min(totalPages, page + 1))}
+      currentPageSize={limit}
+      onPageSizeChange={onPageSizeChange}
+    />
+  );
+}
 
 interface InProcessShipmentsContentProps {
   shippingCompanyId: number;
@@ -23,39 +287,65 @@ interface InProcessShipmentsContentProps {
 export function InProcessShipmentsContent({
   shippingCompanyId,
 }: InProcessShipmentsContentProps) {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const from = searchParams.get('from') || undefined;
-  const to = searchParams.get('to') || undefined;
+  const { getStatusLabel } = useStatusLabel();
 
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(25);
+  const view = readView(searchParams.get('view'));
+  const from = searchParams.get('from') ?? '';
+  const to = searchParams.get('to') ?? '';
+  const status = readStatus(searchParams.get('status'));
+  const governorate = searchParams.get('governorate') ?? '';
+  const city = searchParams.get('city') ?? '';
+  const search = searchParams.get('search') ?? '';
+  const workState = readWorkState(searchParams.get('workState'));
+  const page = readPage(searchParams.get('page'));
 
-  const { data: carriers = [] } = useCarrierStatsQuery({ from, to });
-  const carrier = carriers.find((c) => c.shippingCompanyId === shippingCompanyId);
-
-  const {
-    data: shipmentsPage,
-    isLoading,
-    isError,
-    isSuccess,
-    refetch,
-  } = useCarrierShipmentsQuery(shippingCompanyId, {
-    from,
-    to,
-    status: 'IN_PROCESS',
-    page,
-    limit,
-  });
-
-  const shipments = shipmentsPage?.data ?? [];
-  const total = shipmentsPage?.total ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const [limit, setLimit] = useState(DEFAULT_PAGE_SIZE);
+  const [searchInput, setSearchInput] = useState(search);
+  const debouncedSearch = useDebounce(searchInput, SEARCH_DEBOUNCE_MS);
 
   useEffect(() => {
-    if (isSuccess && shipments.length === 0 && page > 1) {
-      setPage(1);
-    }
-  }, [isSuccess, shipments.length, page]);
+    const nextSearch = debouncedSearch.trim();
+    if (nextSearch === search) return;
+    router.replace(buildSearchUrl(pathname, searchParams, { search: nextSearch, page: '' }), {
+      scroll: false,
+    });
+  }, [debouncedSearch, search, pathname, router, searchParams]);
+
+  const updateParams = (patch: Record<string, string>) =>
+    router.replace(buildSearchUrl(pathname, searchParams, patch), { scroll: false });
+
+  const { data: governorates = [] } = useGovernoratesQuery();
+  const { data: cities = [], isLoading: citiesLoading } = useCitiesQuery(governorate || undefined);
+
+  const statusOptions = IN_PROCESS_STATUSES.map((value) => ({
+    key: value,
+    label: getStatusLabel(value),
+  }));
+
+  const filters: InProcessFilters = {
+    from: from || undefined,
+    to: to || undefined,
+    status,
+    governorate: governorate || undefined,
+    city: city || undefined,
+    search: search || undefined,
+    workState,
+    page,
+    limit,
+  };
+
+  const handlePageChange = (nextPage: number) =>
+    updateParams({ page: nextPage > 1 ? String(nextPage) : '' });
+
+  const handlePageSizeChange = (size: number) => {
+    setLimit(Math.min(Math.max(size, 1), MAX_PAGE_SIZE));
+    updateParams({ page: '' });
+  };
+
+  const isInProcess = view === 'in-process';
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">
@@ -67,86 +357,135 @@ export function InProcessShipmentsContent({
           >
             رجوع إلى جهات الشحن
           </Link>
-          <div>
-            <h1 className="text-lg sm:text-xl font-bold text-gray-900">
-              الشحنات الحالية - {carrier?.name ?? ''}
-            </h1>
-            <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
-              طلبات لدى جهة الشحن لم تُسلَّم ولم تُرتجع بعد
-            </p>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant={isInProcess ? 'default' : 'outline'}
+              size="sm"
+              className="rounded-full text-xs px-4"
+              onClick={() => updateParams({ view: '', page: '' })}
+            >
+              الشحنات الحالية
+            </Button>
+            <Button
+              type="button"
+              variant={isInProcess ? 'outline' : 'default'}
+              size="sm"
+              className="rounded-full text-xs px-4"
+              onClick={() => updateParams({ view: 'returned', page: '' })}
+            >
+              مرتجع في الشركة
+            </Button>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-6 border-b border-gray-100 pb-4">
-          <div className="flex flex-col gap-0.5">
-            <span className="text-xs text-gray-500">عدد الشحنات</span>
-            <span className="text-lg font-bold text-gray-900">
-              {formatNumber(carrier?.inTransitCount)}
-            </span>
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="text-xs text-gray-500">صافي الشحنات الحالية</span>
-            <span className="text-lg font-bold text-gray-900">
-              {formatNumber(carrier?.inProcessNetAmount, 2)} جنيه
-            </span>
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="text-xs text-gray-500">من</span>
-            <span className="text-sm text-gray-700">{from ?? '—'}</span>
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="text-xs text-gray-500">إلى</span>
-            <span className="text-sm text-gray-700">{to ?? '—'}</span>
-          </div>
-        </div>
-
-        {isLoading ? (
-          <PageLoading message="جاري تحميل الشحنات الحالية..." />
-        ) : isError ? (
-          <div className="flex flex-col items-center gap-3 py-10">
-            <p className="text-sm text-gray-500">تعذر تحميل الشحنات</p>
-            <div className="flex items-center gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => refetch()}
-              >
-                إعادة المحاولة
-              </Button>
-              <Link
-                href="/dashboard/shipping-providers"
-                className="text-sm text-primary hover:underline"
-              >
-                رجوع إلى جهات الشحن
-              </Link>
-            </div>
-          </div>
-        ) : total === 0 ? (
-          <p className="text-sm text-gray-500 text-center py-10">
-            لا توجد شحنات جارية لهذه الجهة في هذه الفترة
-          </p>
-        ) : (
+        {isInProcess && (
           <>
-            <div className="border border-gray-200 rounded-xl bg-white overflow-x-auto">
-              <ShipmentsTable shipments={shipments} />
+            <div className="flex flex-wrap items-end gap-3">
+              <div className="flex flex-col gap-1 w-44">
+                <span className="text-xs text-gray-500">الحالة</span>
+                <SearchableSelect
+                  id="in-process-status"
+                  value={status ?? ''}
+                  onChange={(value) => updateParams({ status: value, page: '' })}
+                  options={statusOptions}
+                  placeholder="كل الحالات"
+                  clearable
+                  widthClass="w-full"
+                />
+              </div>
+              <div className="flex flex-col gap-1 w-44">
+                <span className="text-xs text-gray-500">المحافظة</span>
+                <SearchableSelect
+                  id="in-process-governorate"
+                  value={governorate}
+                  onChange={(value) => updateParams({ governorate: value, city: '', page: '' })}
+                  options={governorates}
+                  placeholder="كل المحافظات"
+                  clearable
+                  widthClass="w-full"
+                />
+              </div>
+              <div className="flex flex-col gap-1 w-44">
+                <span className="text-xs text-gray-500">المنطقة</span>
+                <SearchableSelect
+                  id="in-process-city"
+                  value={city}
+                  onChange={(value) => updateParams({ city: value, page: '' })}
+                  options={cities}
+                  placeholder={governorate ? 'كل المناطق' : 'اختر المحافظة أولاً'}
+                  disabled={!governorate || citiesLoading}
+                  clearable
+                  widthClass="w-full"
+                />
+              </div>
+              <Input
+                type="date"
+                label="استلام من"
+                value={from}
+                onChange={(e) => updateParams({ from: e.target.value, page: '' })}
+                className="w-40"
+              />
+              <Input
+                type="date"
+                label="استلام إلى"
+                value={to}
+                onChange={(e) => updateParams({ to: e.target.value, page: '' })}
+                className="w-40"
+              />
+              <Input
+                type="text"
+                label="بحث"
+                placeholder="الكود، رقم الشحنة، العميل أو الهاتف"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onClear={() => setSearchInput('')}
+                clearable
+                maxLength={100}
+                className="w-72"
+              />
             </div>
-            <PaginationFooter
-              currentPage={page}
-              totalPages={totalPages}
-              totalItems={total}
-              hasNextPage={page < totalPages}
-              hasPreviousPage={page > 1}
-              onPageChange={setPage}
-              onPrevious={() => setPage((p) => Math.max(1, p - 1))}
-              onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
-              currentPageSize={limit}
-              onPageSizeChange={(size) => {
-                setLimit(Math.min(Math.max(size, MIN_PAGE_SIZE), MAX_PAGE_SIZE));
-                setPage(1);
-              }}
-            />
+
+            {search && (
+              <p className="text-xs text-amber-700">
+                البحث يعرض كل الحالات ويتجاهل الفلاتر الأخرى
+              </p>
+            )}
+
+            <div className="flex gap-2">
+              {FOLLOWUP_WORK_STATES.map((state) => (
+                <Button
+                  key={state}
+                  type="button"
+                  variant={workState === state ? 'default' : 'outline'}
+                  size="sm"
+                  className="rounded-full text-xs px-4"
+                  onClick={() => updateParams({ workState: state, page: '' })}
+                >
+                  {WORK_STATE_LABELS[state]}
+                </Button>
+              ))}
+            </div>
           </>
+        )}
+
+        {isInProcess ? (
+          <InProcessList
+            shippingCompanyId={shippingCompanyId}
+            filters={filters}
+            page={page}
+            limit={limit}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
+        ) : (
+          <ReturnedList
+            shippingCompanyId={shippingCompanyId}
+            page={page}
+            limit={limit}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
         )}
       </div>
     </div>
