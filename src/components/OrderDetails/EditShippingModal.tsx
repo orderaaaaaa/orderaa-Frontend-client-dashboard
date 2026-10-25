@@ -235,7 +235,7 @@ export default function EditShippingModal({
       (formData.governorateOption ?? null) !== (initialData.governorateOption ?? null) ||
       (formData.cityOption ?? null) !== (initialData.cityOption ?? null) ||
       formData.address !== initialData.address ||
-      formData.returnShippingCost !== initialData.returnShippingCost ||
+      (formData.returnShippingCost ?? null) !== (initialData.returnShippingCost ?? null) ||
       timeChanged
     );
   }, [formData, initialData, startHour, startPeriod, endHour, endPeriod, initialFromParsed, initialToParsed]);
@@ -244,6 +244,7 @@ export default function EditShippingModal({
     (formData.shippingCompanyId ?? null) !== (initialData.shippingCompanyId ?? null);
   const attestedShipment = companyChanged ? (oldIntegrationShipment ?? null) : null;
   const costLocked = carrierSupportsUpdate === false;
+  const attestationMissing = attestedShipment !== null && !oldCancelledByHand;
 
   const switchMissingFields: ShippingSwitchMissingField[] = [];
   if (companyChanged) {
@@ -259,7 +260,9 @@ export default function EditShippingModal({
       const defaultCost =
         initialData.returnShippingCost != null
           ? initialData.returnShippingCost
-          : settings?.defaultReturnShippingCost ?? undefined;
+          : costLocked
+            ? undefined
+            : settings?.defaultReturnShippingCost ?? undefined;
 
       setFormData({ ...initialData, returnShippingCost: defaultCost });
       setReturnShippingCostError('');
@@ -273,7 +276,7 @@ export default function EditShippingModal({
       setEndPeriod(toParsed.period);
     }
     wasOpenRef.current = isOpen;
-  }, [isOpen, initialData, settings?.defaultReturnShippingCost]);
+  }, [isOpen, initialData, settings?.defaultReturnShippingCost, costLocked]);
 
   const handleSave = async () => {
     if (!hasChanges || isSaving) return;
@@ -284,7 +287,9 @@ export default function EditShippingModal({
     }
     setShippingCompanyError('');
 
-    if (formData.returnShippingCost === undefined || formData.returnShippingCost === null) {
+    if (attestationMissing) return;
+
+    if (!costLocked && (formData.returnShippingCost === undefined || formData.returnShippingCost === null)) {
       setReturnShippingCostError('هذا الحقل مطلوب');
       return;
     } else {
@@ -296,6 +301,9 @@ export default function EditShippingModal({
     const dataToSave: ShippingData = { ...formData };
     if (attestedShipment) {
       dataToSave.oldShipmentCancelledByHand = oldCancelledByHand;
+    }
+    if (costLocked) {
+      dataToSave.returnShippingCost = initialData.returnShippingCost;
     }
     if (startHour && startPeriod) {
       dataToSave.availableFrom = `${startHour} ${startPeriod}`;
@@ -353,7 +361,7 @@ export default function EditShippingModal({
       confirmText={isSaving ? 'جاري الحفظ...' : 'حفظ'}
       confirmIcon={<LiaCheckSolid className="w-5 h-5 text-white" />}
       isLoading={isSaving}
-      confirmDisabled={!hasChanges || switchMissingFields.length > 0}
+      confirmDisabled={!hasChanges || switchMissingFields.length > 0 || attestationMissing}
     >
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -390,6 +398,11 @@ export default function EditShippingModal({
                   ألغيت الشحنة القديمة {attestedShipment.shippingId} لدى {attestedShipment.carrierName} يدوياً
                 </span>
               </label>
+            )}
+            {attestationMissing && (
+              <p className="text-xs text-red-600">
+                أكّد إلغاء الشحنة القديمة يدوياً لدى شركة الشحن السابقة لحفظ تغيير الشركة
+              </p>
             )}
           </div>
 
