@@ -2,20 +2,20 @@
 
 import { LiaBanSolid } from 'react-icons/lia';
 import {
-  useShippingCancellationReasons,
-  useCreateShippingCancellationReason,
-  useDeleteShippingCancellationReason,
-} from '@/services/logistics';
+  useCancellationReasons,
+  useCreateCancellationReason,
+  useUpdateCancellationReason,
+} from '@/services/orders';
 import { TagListField } from './TagListField';
 
 export function ShippingCancellationReasonsField() {
-  const { data: reasons, isLoading } = useShippingCancellationReasons();
-  const { mutate: createReason, isPending: isCreating } = useCreateShippingCancellationReason();
+  const { data: reasons, isLoading } = useCancellationReasons(true, 'SHIPPING_CANCELLATION');
+  const { mutate: createReason, isPending: isCreating } = useCreateCancellationReason();
   const {
-    mutate: deleteReason,
-    isPending: isDeleting,
-    variables: deletingId,
-  } = useDeleteShippingCancellationReason();
+    mutate: updateReason,
+    isPending: isUpdating,
+    variables: updatingVariables,
+  } = useUpdateCancellationReason();
 
   return (
     <TagListField
@@ -29,10 +29,10 @@ export function ShippingCancellationReasonsField() {
         key: reason.id,
         label: reason.reasonName,
       }))}
-      onAdd={(value) => createReason(value)}
-      onRemove={(item) => deleteReason(Number(item.key))}
+      onAdd={(value) => createReason({ reasonName: value, type: 'SHIPPING_CANCELLATION' })}
+      onRemove={(item) => updateReason({ id: Number(item.key), payload: { isActive: false } })}
       isAdding={isCreating}
-      removingKey={isDeleting ? deletingId : null}
+      removingKey={isUpdating ? (updatingVariables?.id ?? null) : null}
     />
   );
 }

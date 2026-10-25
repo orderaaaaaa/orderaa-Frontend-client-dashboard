@@ -2,20 +2,20 @@
 
 import { LiaUndoAltSolid } from 'react-icons/lia';
 import {
-  usePostShippingReasons,
-  useCreatePostShippingReason,
-  useDeletePostShippingReason,
-} from '@/services/logistics';
+  useCancellationReasons,
+  useCreateCancellationReason,
+  useUpdateCancellationReason,
+} from '@/services/orders';
 import { TagListField } from './TagListField';
 
 export function PostShippingReasonsField() {
-  const { data: reasons, isLoading } = usePostShippingReasons();
-  const { mutate: createReason, isPending: isCreating } = useCreatePostShippingReason();
+  const { data: reasons, isLoading } = useCancellationReasons(true, 'REFUSAL_TO_ACCEPT');
+  const { mutate: createReason, isPending: isCreating } = useCreateCancellationReason();
   const {
-    mutate: deleteReason,
-    isPending: isDeleting,
-    variables: deletingId,
-  } = useDeletePostShippingReason();
+    mutate: updateReason,
+    isPending: isUpdating,
+    variables: updatingVariables,
+  } = useUpdateCancellationReason();
 
   return (
     <TagListField
@@ -29,10 +29,10 @@ export function PostShippingReasonsField() {
         key: reason.id,
         label: reason.reasonName,
       }))}
-      onAdd={(value) => createReason(value)}
-      onRemove={(item) => deleteReason(Number(item.key))}
+      onAdd={(value) => createReason({ reasonName: value, type: 'REFUSAL_TO_ACCEPT' })}
+      onRemove={(item) => updateReason({ id: Number(item.key), payload: { isActive: false } })}
       isAdding={isCreating}
-      removingKey={isDeleting ? deletingId : null}
+      removingKey={isUpdating ? (updatingVariables?.id ?? null) : null}
     />
   );
 }
