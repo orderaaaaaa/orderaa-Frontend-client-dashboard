@@ -9,6 +9,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import {
+  CARRIER_SEND_OPEN_STATES,
+  CARRIER_SEND_OPERATION_LABELS,
+  CARRIER_SEND_STATE_LABELS,
+} from '@/constants/carrierSends';
+import {
   useCarrierSendsForOrder,
   useCloseCarrierSend,
   useDispatchCarrierSend,
@@ -22,41 +27,12 @@ import type {
   CarrierSendState,
   CarrierSendView,
 } from '@/types/carrierSends';
-import type { CarrierSendOperation, OrderSystemFailure } from '@/types/orderSystemFailures';
+import type { OrderSystemFailure } from '@/types/orderSystemFailures';
 import type { Order } from '@/types/orders';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { formatDateTime } from '@/utils/format';
 import { CARRIER_SEND_NOT_SENT_WARNING } from '@/utils/manualOrder/carrierSend';
 import { narrowFailureDetails } from './SystemFailures/details/guards';
-
-const OPEN_STATES: readonly CarrierSendState[] = ['PENDING', 'SEND_ATTEMPTED', 'UNKNOWN'];
-
-const STATE_LABELS: Record<CarrierSendState, string> = {
-  PENDING: 'بانتظار الإرسال',
-  SEND_ATTEMPTED: 'جارٍ الإرسال',
-  SENT: 'تم الإرسال',
-  REJECTED: 'رفضته شركة الشحن',
-  UNKNOWN: 'النتيجة غير معروفة',
-  CLOSED_NONE: 'أُغلق بدون شحنة',
-};
-
-const OPERATION_LABELS: Record<CarrierSendOperation, string> = {
-  EDIT: 'تعديل بيانات الطلب',
-  SWITCH: 'تغيير شركة الشحن',
-  BULK_SWITCH: 'تغيير الشركة بالجملة',
-  CREATION: 'إنشاء الشحنة',
-  MISSING_ORDER_RECOVERY: 'استرجاع طلب مفقود',
-  FOLLOWUP_CHILD: 'طلب متابعة',
-  PARKED_RELEASE: 'إطلاق طلب معلّق',
-  HELD_ACTIVATION: 'تفعيل طلب محجوز',
-  BULK_CONFIRM: 'تأكيد بالجملة',
-  SUBMIT_FOR_APPROVAL: 'إرسال للموافقة',
-};
-
-const CLOSE_OUTCOME_LABELS: Record<CarrierSendCloseChoice, string> = {
-  SHIPMENT_RECORDED: 'الشحنة موجودة لدى شركة الشحن',
-  NONE: 'لا توجد شحنة لدى شركة الشحن',
-};
 
 const HELD_LINE =
   'تم الحفظ ولم يُرسل. رفضت شركة الشحن التعديل السابق. تحقق من شركة الشحن لهذا الطلب، ثم أكد الإرسال.';
@@ -173,7 +149,7 @@ function CarrierSendMarkerBlock({ orderId, marker }: { orderId: number; marker: 
   const sendAgainMutation = useSendAgainCarrierSend();
   const closeMutation = useCloseCarrierSend();
 
-  const isOpen = OPEN_STATES.includes(marker.state);
+  const isOpen = CARRIER_SEND_OPEN_STATES.includes(marker.state);
   const isRejectedOrClosed = marker.state === 'REJECTED' || marker.state === 'CLOSED_NONE';
   const busy = dispatchMutation.isPending || sendAgainMutation.isPending || closeMutation.isPending;
 
@@ -207,9 +183,9 @@ function CarrierSendMarkerBlock({ orderId, marker }: { orderId: number; marker: 
 
       <div className="flex flex-col gap-1 text-sm text-gray-800">
         <p>
-          <span className="font-semibold">{OPERATION_LABELS[marker.operation]}</span>
+          <span className="font-semibold">{CARRIER_SEND_OPERATION_LABELS[marker.operation]}</span>
           {' — '}
-          {STATE_LABELS[marker.state]}
+          {CARRIER_SEND_STATE_LABELS[marker.state]}
           {marker.held && ' (محجوز)'}
         </p>
         <p className="text-xs text-gray-500">
