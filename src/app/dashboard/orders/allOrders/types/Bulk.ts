@@ -44,7 +44,15 @@ export interface BulkRequest {
   excludeIds?: number[];
 }
 
+export interface BulkRefusedOrder {
+  id: number;
+  code: string;
+  reason: 'NO_COMPANY' | 'NO_SHIPPING_CODE' | 'OUT_OF_WINDOW';
+  message: string;
+}
+
 export interface BulkUpdateResponse {
   updatedCount: number;
   message: string;
+  refused: BulkRefusedOrder[];
 }
