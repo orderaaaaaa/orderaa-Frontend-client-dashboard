@@ -493,6 +493,10 @@ export function useOrderActions({
           orderId: order.id,
           data: {
             ...(companyChanged && { shippingCompanyId: data.shippingCompanyId ?? null }),
+            ...(companyChanged &&
+              data.oldShipmentCancelledByHand !== undefined && {
+                oldShipmentCancelledByHand: data.oldShipmentCancelledByHand,
+              }),
             ...(sendPick && {
               governorateOption: data.governorateOption,
               ...(data.cityOption && { cityOption: data.cityOption }),

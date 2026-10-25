@@ -4,6 +4,7 @@ import { ModalStates } from '@/hooks/OrderDetails/useModalState';
 import { OrderActionsState } from '@/hooks/OrderDetails/useOrderActions';
 import ActionConfirmationDialog from '../ActionConfirmationDialog';
 import EditShippingModal, { ShippingData } from '../EditShippingModal';
+import { attestedIntegrationShipmentOf, orderHasCustomerPhone } from '@/utils/orderShippingSwitch';
 import BaseModal from '@/components/ui/base-modal';
 import {
   UrgentModal,
@@ -155,6 +156,9 @@ export function OrderActionModals({
         onSave={handleShippingSave}
         requireCompany={order.status === 'CONFIRMED'}
         orderId={order.id}
+        customerHasPhone={orderHasCustomerPhone(order)}
+        carrierSupportsUpdate={order.shippingCompanyRef?.carrierSupportsUpdate}
+        oldIntegrationShipment={attestedIntegrationShipmentOf(order)}
         initialData={{
           shippingCompanyId: order.shippingCompanyId ?? null,
           shippingCompanyName: order.shippingCompanyRef?.name,

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { LiaCheckSolid, LiaClockSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
+import { Checkbox } from '@/components/ui/checkbox';
 import Input from '@/components/ui/Input';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useShippingCompanies } from '@/hooks';
@@ -19,7 +20,11 @@ import {
   shippingCompanyIdOf,
   shippingCompanySelectOptionsOf,
 } from '@/lib/shippingCompanies';
-import { SHIPPING_COMPANY_REQUIRED_MESSAGE } from '@/types/shippingCompanies';
+import {
+  CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE,
+  SHIPPING_COMPANY_REQUIRED_MESSAGE,
+} from '@/types/shippingCompanies';
+import type { ShippingSwitchMissingField } from '@/types/carrierSends';
 import { useMerchantSettings } from '@/app/dashboard/store-settings/hooks/useStoreSettings';
 import clsx from 'clsx';
 
@@ -30,6 +35,9 @@ interface EditShippingModalProps {
   initialData: ShippingData;
   requireCompany?: boolean;
   orderId?: number;
+  customerHasPhone: boolean;
+  carrierSupportsUpdate?: boolean;
+  oldIntegrationShipment?: { shippingId: string; carrierName: string } | null;
 }
 
 export interface ShippingData {
@@ -44,7 +52,14 @@ export interface ShippingData {
   returnShippingCost?: number;
   availableFrom?: string;
   availableTo?: string;
+  oldShipmentCancelledByHand?: boolean;
 }
+
+const SWITCH_MISSING_FIELD_LABELS: Record<ShippingSwitchMissingField, string> = {
+  governorate: 'المحافظة',
+  city: 'المنطقة',
+  phone: 'رقم الهاتف',
+};
 
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 1);
 const PERIODS = [
@@ -131,10 +146,14 @@ export default function EditShippingModal({
   initialData,
   requireCompany = false,
   orderId,
+  customerHasPhone,
+  carrierSupportsUpdate,
+  oldIntegrationShipment,
 }: EditShippingModalProps) {
   const [formData, setFormData] = useState<ShippingData>(initialData);
 
   const [isSaving, setIsSaving] = useState(false);
+  const [oldCancelledByHand, setOldCancelledByHand] = useState(false);
   const [returnShippingCostError, setReturnShippingCostError] = useState('');
   const [shippingCompanyError, setShippingCompanyError] = useState('');
 
@@ -221,6 +240,18 @@ export default function EditShippingModal({
     );
   }, [formData, initialData, startHour, startPeriod, endHour, endPeriod, initialFromParsed, initialToParsed]);
 
+  const companyChanged =
+    (formData.shippingCompanyId ?? null) !== (initialData.shippingCompanyId ?? null);
+  const attestedShipment = companyChanged ? (oldIntegrationShipment ?? null) : null;
+  const costLocked = carrierSupportsUpdate === false;
+
+  const switchMissingFields: ShippingSwitchMissingField[] = [];
+  if (companyChanged) {
+    if (!formData.governorateOption && !initialData.governorate) switchMissingFields.push('governorate');
+    if (!formData.cityOption && !initialData.city) switchMissingFields.push('city');
+    if (!customerHasPhone) switchMissingFields.push('phone');
+  }
+
   const wasOpenRef = React.useRef(false);
 
   useEffect(() => {
@@ -233,6 +264,7 @@ export default function EditShippingModal({
       setFormData({ ...initialData, returnShippingCost: defaultCost });
       setReturnShippingCostError('');
       setShippingCompanyError('');
+      setOldCancelledByHand(false);
       const fromParsed = parseTime(initialData.availableFrom);
       const toParsed = parseTime(initialData.availableTo);
       setStartHour(fromParsed.hour);
@@ -259,7 +291,12 @@ export default function EditShippingModal({
       setReturnShippingCostError('');
     }
 
+    if (switchMissingFields.length > 0) return;
+
     const dataToSave: ShippingData = { ...formData };
+    if (attestedShipment) {
+      dataToSave.oldShipmentCancelledByHand = oldCancelledByHand;
+    }
     if (startHour && startPeriod) {
       dataToSave.availableFrom = `${startHour} ${startPeriod}`;
     }
@@ -316,7 +353,7 @@ export default function EditShippingModal({
       confirmText={isSaving ? 'جاري الحفظ...' : 'حفظ'}
       confirmIcon={<LiaCheckSolid className="w-5 h-5 text-white" />}
       isLoading={isSaving}
-      confirmDisabled={!hasChanges}
+      confirmDisabled={!hasChanges || switchMissingFields.length > 0}
     >
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -337,6 +374,23 @@ export default function EditShippingModal({
               searchThreshold={5}
               loading={loadingShippingCompanies}
             />
+            {switchMissingFields.length > 0 && (
+              <p className="text-xs text-red-600">
+                لا يمكن تغيير شركة الشحن قبل إدخال: {switchMissingFields.map((field) => SWITCH_MISSING_FIELD_LABELS[field]).join('، ')}
+              </p>
+            )}
+            {attestedShipment && (
+              <label className="flex items-start gap-2 text-sm text-gray-800">
+                <Checkbox
+                  checked={oldCancelledByHand}
+                  onCheckedChange={(checked) => setOldCancelledByHand(checked === true)}
+                  className="mt-0.5"
+                />
+                <span>
+                  ألغيت الشحنة القديمة {attestedShipment.shippingId} لدى {attestedShipment.carrierName} يدوياً
+                </span>
+              </label>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -457,8 +511,12 @@ export default function EditShippingModal({
             }}
             placeholder="أدخل مبلغ الإلغاء..."
             min={0}
+            disabled={costLocked}
             error={returnShippingCostError}
           />
+          {costLocked && (
+            <p className="text-xs text-red-600">{CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE}</p>
+          )}
         </div>
 
         <div className="space-y-3">
