@@ -133,6 +133,8 @@ export interface ShortfallSettlement {
   settlementAmount: string | null;
   status: string;
   settlementResolved: boolean;
+  settlementRecordedAt: string | null;
+  totalCost: number;
 }
 
 export interface AdjustSettlementPayload {
