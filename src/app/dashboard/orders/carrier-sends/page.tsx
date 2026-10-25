@@ -41,7 +41,7 @@ function CarrierSendRow({ row }: { row: CarrierSendView }) {
 
 export default function CarrierSendsOpenPage() {
   const canRead = useHasPermission(PERMISSION_CODES.ORDERS_READ);
-  const query = useCarrierSendsOpen();
+  const query = useCarrierSendsOpen({ enabled: canRead });
   const rows = query.data?.pages.flatMap((page) => page.data) ?? [];
 
   return (

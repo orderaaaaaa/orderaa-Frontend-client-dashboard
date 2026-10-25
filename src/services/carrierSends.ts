@@ -44,9 +44,10 @@ export const useCarrierSendsForOrder = (orderId: number) =>
     enabled: !!orderId,
   });
 
-export const useCarrierSendsOpen = () =>
+export const useCarrierSendsOpen = ({ enabled = true }: { enabled?: boolean } = {}) =>
   useInfiniteQuery({
     queryKey: carrierSendsOpenKey,
+    enabled,
     queryFn: async ({ pageParam }) => {
       const { data } = await http.get<CarrierSendOpenPage>('/carrier-sends/open', {
         params: { limit: CARRIER_SENDS_OPEN_PAGE_LIMIT, cursor: pageParam ?? undefined },
