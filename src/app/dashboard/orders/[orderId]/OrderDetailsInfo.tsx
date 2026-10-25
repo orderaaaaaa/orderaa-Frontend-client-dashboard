@@ -6,6 +6,7 @@ import OrderDetailsInfoStatus from '@/components/OrderDetails/OrderDetailsInfoSt
 import OrderDetailsProductCard from '@/components/OrderDetails/OrderDetailsProductCard';
 import OrderDetailsInfoComponent from '@/components/OrderDetails/OrderDetailsInfo';
 import OrderSystemFailuresPanel from '@/components/OrderDetails/SystemFailures/OrderSystemFailuresPanel';
+import { CarrierSendPanel } from '@/components/OrderDetails/CarrierSendPanel';
 import OrderChangeHistoryCard from '@/components/OrderDetails/ChangeHistory/OrderChangeHistoryCard';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
@@ -60,6 +61,7 @@ function OrderDetailsInfo({
       />
       <OrderDetailsInfoStatus order={order} isLockedByOther={isLockedByOther} />
       <OrderSystemFailuresPanel order={order} />
+      <CarrierSendPanel order={order} />
       {canReadHistory && <OrderChangeHistoryCard order={order} />}
       <OrderDetailsProductCard
         order={order}
