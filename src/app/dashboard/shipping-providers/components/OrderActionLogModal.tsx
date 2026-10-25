@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { OrderChangeBatchItem } from '@/components/OrderDetails/ChangeHistory/OrderChangeBatchItem';
 import { OrderChangeHistorySkeleton } from '@/components/OrderDetails/ChangeHistory/OrderChangeHistoryStates';
 import BaseModal from '@/components/ui/base-modal';
@@ -10,6 +11,7 @@ import type { FollowupActionEvent } from '@/lib/api/followup';
 import { PERMISSIONS } from '@/lib/permissions';
 import { useOrderChangeHistory } from '@/services/orderChangeHistory';
 import { useFollowupActionEventsQuery } from '@/services/followup';
+import { orderDetailsQueryOptions } from '@/services/orders';
 import type { OrderChangeBatch } from '@/types/orderChangeHistory';
 import { getApiErrorStatus } from '@/utils/apiError';
 import { formatDateTime } from '@/utils/format';
@@ -26,7 +28,6 @@ import {
 } from './followupNotesConstants';
 
 const FORBIDDEN_STATUS = 403;
-const NO_LINE_PRODUCT_NAMES: ReadonlyMap<number, string> = new Map();
 
 const historyNoticeOf = (
   canReadHistory: boolean,
@@ -72,6 +73,16 @@ function ActionLogContent({ orderId, canReadHistory }: { orderId: number; canRea
   const { getStatusLabel } = useStatusLabel();
   const historyQuery = useOrderChangeHistory(orderId, canReadHistory);
   const eventsQuery = useFollowupActionEventsQuery(orderId, true);
+  const orderQuery = useQuery(orderDetailsQueryOptions(orderId));
+  const lineProductNames = useMemo(
+    () =>
+      new Map(
+        (orderQuery.data?.order_products ?? []).flatMap((line) =>
+          line.products?.name ? [[line.id, line.products.name] as const] : []
+        )
+      ),
+    [orderQuery.data]
+  );
   const { fetchNextPage, hasNextPage, isFetchingNextPage, isError: isHistoryError } = historyQuery;
 
   useEffect(() => {
@@ -119,7 +130,9 @@ function ActionLogContent({ orderId, canReadHistory }: { orderId: number; canRea
     return <p className="py-6 text-center text-sm text-red-600">{ACTION_LOG_EVENTS_ERROR}</p>;
   }
 
-  const isLoading = eventsQuery.isLoading || (canReadHistory && historyQuery.isLoading);
+  const isHistoryPending =
+    canReadHistory && (historyQuery.isLoading || (historyQuery.hasNextPage && !isHistoryError));
+  const isLoading = eventsQuery.isLoading || orderQuery.isLoading || isHistoryPending;
 
   return (
     <div className="flex flex-col gap-3" dir="rtl">
@@ -139,13 +152,12 @@ function ActionLogContent({ orderId, canReadHistory }: { orderId: number; canRea
                 key={entry.key}
                 batch={entry.batch}
                 getStatusLabel={getStatusLabel}
-                lineProductNames={NO_LINE_PRODUCT_NAMES}
+                lineProductNames={lineProductNames}
               />
             ) : (
               <ActionEventRow key={entry.key} event={entry.event} />
             )
           )}
-          {canReadHistory && hasNextPage && !isHistoryError && <OrderChangeHistorySkeleton />}
         </div>
       )}
     </div>
