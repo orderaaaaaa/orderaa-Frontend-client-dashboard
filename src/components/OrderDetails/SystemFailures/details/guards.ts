@@ -12,6 +12,7 @@ import type {
   CarrierCancelledLaneAppliedDetails,
   CarrierCancelledLaneStockDetails,
   CarrierFailureDetailsBase,
+  CarrierMessageAfterSwitchDetails,
   CarrierStatusCorrectedDetails,
   CarrierStatusIgnoredOutsideWindowDetails,
   CarrierStatusIgnoredPartialReturnDetails,
@@ -22,6 +23,7 @@ import type {
   FailureReason,
   FailureStockShortage,
   FailureStockShortageLine,
+  OldShipmentStillLiveDetails,
   OrderShadowedDetails,
   OrderSystemFailure,
   OrderSystemFailureCode,
@@ -248,6 +250,18 @@ const isShipmentCarrierSend = (value: unknown): value is ShipmentCarrierSendDeta
   isStringOrNull(value.carrierText) &&
   isStringOrNull(value.oldShippingId);
 
+const isCarrierMessageAfterSwitch = (value: unknown): value is CarrierMessageAfterSwitchDetails =>
+  isRecord(value) &&
+  isString(value.carrier) &&
+  typeof value.oldCompanyId === 'number' &&
+  isString(value.shippingId);
+
+const isOldShipmentStillLive = (value: unknown): value is OldShipmentStillLiveDetails =>
+  isRecord(value) &&
+  typeof value.oldCompanyId === 'number' &&
+  typeof value.newCompanyId === 'number' &&
+  isString(value.shippingId);
+
 const isShipmentUpdateNotSent = (value: unknown): value is ShipmentUpdateNotSentDetails =>
   isShipmentCarrierSend(value);
 
@@ -409,6 +423,8 @@ export function narrowFailureDetails(
       return isCarrierStatusCorrected(details) ? { code, details } : null;
     case 'CARRIER_RETURN_AT_MERCHANT':
       return isCarrierBase(details) ? { code, details } : null;
+    case 'CARRIER_MESSAGE_AFTER_SWITCH':
+      return isCarrierMessageAfterSwitch(details) ? { code, details } : null;
     case 'SHIPMENT_NOT_CREATED_MISSING_ADDRESS':
       return isShipmentMissingAddress(details) ? { code, details } : null;
     case 'SHIPMENT_NOT_CREATED_MISSING_PHONE':
@@ -419,6 +435,8 @@ export function narrowFailureDetails(
       return isShipmentUpdateNotSent(details) ? { code, details } : null;
     case 'SHIPMENT_OUTCOME_UNKNOWN':
       return isShipmentOutcomeUnknown(details) ? { code, details } : null;
+    case 'OLD_SHIPMENT_STILL_LIVE':
+      return isOldShipmentStillLive(details) ? { code, details } : null;
     case 'AUTOMATION_NOT_SENT':
       return isAutomationNotSent(details) ? { code, details } : null;
     case 'AUTOMATION_SEND_FAILED':

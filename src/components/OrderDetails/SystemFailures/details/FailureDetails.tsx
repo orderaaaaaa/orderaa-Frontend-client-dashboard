@@ -1,4 +1,5 @@
 import { useStatusLabel } from '@/hooks/useStatusLabel';
+import { integrationLabelOf } from '@/lib/shippingCompanies';
 import {
   AUTOMATION_MAPPING_NOT_SAVED_REASON_LABELS,
   AUTOMATION_NOT_SENT_REASON_LABELS,
@@ -8,7 +9,10 @@ import {
   shipmentCarrierSendSentenceOf,
 } from '@/constants/orderSystemFailures';
 import type { Order } from '@/types/orders';
-import type { OrderSystemFailure } from '@/types/orderSystemFailures';
+import type {
+  OrderSystemFailure,
+  ShipmentCarrierSendDetails,
+} from '@/types/orderSystemFailures';
 import { formatStockShortageLines } from '@/utils/apiError';
 import { CancelledLaneAppliedDetails, CancelledLaneStockDetails } from './CancelledLaneDetails';
 import { CarrierDetails } from './CarrierDetails';
@@ -25,6 +29,20 @@ import { StoreUpdateDetails } from './StoreUpdateDetails';
 const labelOf = <K extends string>(labels: Record<K, string>, value: K) => labels[value] ?? value;
 
 const SWITCH_DEACTIVATED_NOTE = 'كان الطلب قيد التحويل لشركة شحن أخرى، فتم إلغاء تفعيل الشحنة السابقة';
+
+const companyNameOf = (order: Order, companyId: number) => {
+  const ref =
+    order.shippingCompanyRef?.id === companyId
+      ? order.shippingCompanyRef
+      : order.shipping_ids?.find((row) => row.shippingCompanyId === companyId)?.shippingCompanyRef;
+  return ref?.name ?? null;
+};
+
+const switchOldShipmentClauseOf = (details: ShipmentCarrierSendDetails) => {
+  if (details.operation !== 'SWITCH' || !details.sourceCarrier || !details.oldShippingId) return '';
+  const carrier = integrationLabelOf(details.sourceCarrier) ?? details.sourceCarrier;
+  return `؛ تم إلغاء الشحنة ${details.oldShippingId} لدى ${carrier} يدوياً`;
+};
 
 export function FailureDetails({
   failure,
@@ -89,18 +107,44 @@ export function FailureDetails({
         </div>
       );
     case 'SHIPMENT_UPDATE_NOT_SENT':
-    case 'SHIPMENT_OUTCOME_UNKNOWN':
+    case 'SHIPMENT_OUTCOME_UNKNOWN': {
+      const sentence = shipmentCarrierSendSentenceOf(
+        narrowed.code,
+        narrowed.details.reason,
+        narrowed.details.carrier
+      );
       return (
         <DetailGrid>
           <DetailField label="شركة الشحن" ltr>
             {narrowed.details.carrier}
           </DetailField>
           <DetailField label="التفاصيل">
-            {shipmentCarrierSendSentenceOf(
-              narrowed.code,
-              narrowed.details.reason,
-              narrowed.details.carrier
-            ) ?? EMPTY_VALUE}
+            {sentence
+              ? `${sentence}${switchOldShipmentClauseOf(narrowed.details)}`
+              : EMPTY_VALUE}
+          </DetailField>
+        </DetailGrid>
+      );
+    }
+    case 'CARRIER_MESSAGE_AFTER_SWITCH':
+      return (
+        <DetailGrid>
+          <DetailField label="شركة الشحن السابقة" ltr>
+            {narrowed.details.carrier}
+          </DetailField>
+          <DetailField label="رقم الشحنة" ltr>
+            {narrowed.details.shippingId}
+          </DetailField>
+        </DetailGrid>
+      );
+    case 'OLD_SHIPMENT_STILL_LIVE':
+      return (
+        <DetailGrid>
+          <DetailField label="شركة الشحن السابقة">
+            {companyNameOf(order, narrowed.details.oldCompanyId) ?? EMPTY_VALUE}
+          </DetailField>
+          <DetailField label="رقم الشحنة" ltr>
+            {narrowed.details.shippingId}
           </DetailField>
         </DetailGrid>
       );
