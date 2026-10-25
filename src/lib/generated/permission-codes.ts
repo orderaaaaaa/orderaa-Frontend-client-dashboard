@@ -62,6 +62,7 @@ export const PERMISSION_CODES = {
   ORDERS_RETURN_RECEIPTS_REVIEW: 'orders:return-receipts:review',
   ORDERS_PICKUPS_REVIEW: 'orders:pickups:review',
   ORDERS_SETTLEMENT_MANAGE: 'orders:settlement:manage',
+  ORDERS_SETTLEMENT_DELETE: 'orders:settlement:delete',
   ORDERS_STATISTICS_READ: 'orders:statistics:read',
   ORDERS_BYPASS_LOCK: 'orders:bypass-lock',
   ORDERS_LOCK_ACQUIRE: 'orders:lock:acquire',
