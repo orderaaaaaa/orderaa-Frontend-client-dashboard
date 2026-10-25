@@ -38,6 +38,10 @@ export default function DeleteSettlementBatchDialog({
         await syncSettlement();
       }
       toast.error(getApiErrorMessage(err, 'تعذر حذف التحصيل'));
+      if (status === 404) {
+        await onSuccess();
+        onClose();
+      }
     }
   };
 
