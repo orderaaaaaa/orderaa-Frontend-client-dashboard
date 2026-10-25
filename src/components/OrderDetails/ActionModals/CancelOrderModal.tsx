@@ -21,7 +21,7 @@ export default function CancelOrderModal({
   const [selectedReasonId, setSelectedReasonId] = useState<number | null>(null);
   const [notes, setNotes] = useState('');
 
-  const { data: allReasons = [], isLoading: loadingAllReasons } = useCancellationReasons(isOpen);
+  const { data: allReasons = [], isLoading: loadingAllReasons, isError: isAllReasonsError } = useCancellationReasons(isOpen);
   const { data: topReasons = [], isLoading: loadingTopReasons } = useTopCancellationReasons(isOpen);
 
   const selectedReason = allReasons.find(r => r.id === selectedReasonId);
@@ -77,6 +77,8 @@ export default function CancelOrderModal({
             <div className="flex items-center justify-center py-4">
               <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
             </div>
+          ) : isAllReasonsError ? (
+            <p className="text-sm text-red-600">تعذر تحميل أسباب الإلغاء</p>
           ) : (
             <>
               <div className="grid sm:grid-cols-3 grid-cols-1 gap-2">
