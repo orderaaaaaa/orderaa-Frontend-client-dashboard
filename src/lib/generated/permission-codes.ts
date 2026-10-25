@@ -68,6 +68,7 @@ export const PERMISSION_CODES = {
   ORDERS_MISSING_READ: 'orders:missing:read',
   ORDERS_MISSING_MANAGE: 'orders:missing:manage',
   ORDERS_HISTORY_READ: 'orders:history:read',
+  ORDERS_BULK_COMPANY_SWITCH: 'orders:bulk-company-switch',
   FOLLOWUP_READ: 'followup:read',
   FOLLOWUP_MANAGE: 'followup:manage',
   CUSTOMERS_READ: 'customers:read',
