@@ -166,6 +166,7 @@ const ar = {
   'stockShortage.reasonBlocked': 'التأكيد ممنوع بسبب المخزون',
   'stockShortage.event.title': 'منع نقص المخزون تغيير الحالة',
   'lineEdit.event.title': 'أُعيد إلى التغليف لتعديل المنتجات',
+  'orderEvent.returnRefundRecorded': 'تسجيل مرتجع',
   'lineEdit.event.action.add': 'إضافة منتج',
   'lineEdit.event.action.update': 'تعديل منتج',
   'lineEdit.event.action.delete': 'حذف منتج',

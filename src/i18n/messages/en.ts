@@ -152,6 +152,7 @@ const en: Record<keyof typeof ar, string> = {
   'stockShortage.reasonBlocked': 'Confirmation blocked by stock',
   'stockShortage.event.title': 'Stock shortage blocked a status change',
   'lineEdit.event.title': 'Sent back to packing to edit products',
+  'orderEvent.returnRefundRecorded': 'Return refund recorded',
   'lineEdit.event.action.add': 'Add product',
   'lineEdit.event.action.update': 'Edit product',
   'lineEdit.event.action.delete': 'Delete product',

@@ -1,4 +1,5 @@
 import { Order, OrderEvent, OrderProduct, OrderStatus } from './orders';
+import type { CarrierSendBlock } from './manual-order';
 
 /** Mirrors the backend GovernorateSettingResponseDto. */
 export interface GovernorateLogisticsConfig {
@@ -76,6 +77,7 @@ export interface PartialDeliveryData {
   orderId: number;
   returnedOrderProductIds: number[];
   adjustedTotalCost?: number;
+  returnShipmentContent?: string;
 }
 
 export interface PartialDeliveryOrderSummary {
@@ -89,6 +91,7 @@ export interface PartialDeliveryResponse {
   baseOrder: PartialDeliveryOrderSummary;
   returnOrder: PartialDeliveryOrderSummary;
   movedOrderProductIds: number[];
+  carrierSend: CarrierSendBlock | null;
 }
 
 export interface ExchangeData {
@@ -99,11 +102,21 @@ export interface ExchangeData {
   priceDifference: number;
 }
 
+export const REFUND_METHODS = ['CASH', 'BANK_TRANSFER', 'E_WALLET', 'OTHER'] as const;
+
+export type RefundMethod = (typeof REFUND_METHODS)[number];
+
 export interface ReturnRefundData {
   orderId: number;
   returnedOrderProductId: number;
   amount: number;
+  refundMethod: RefundMethod;
   reasonId: number;
+}
+
+export interface ReturnRefundResponse {
+  success: true;
+  eventId: number;
 }
 
 export interface OrderProductChangeLog {

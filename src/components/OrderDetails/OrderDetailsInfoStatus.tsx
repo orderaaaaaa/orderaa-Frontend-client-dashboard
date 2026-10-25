@@ -174,6 +174,8 @@ function parseEventParams(note: string): Record<string, unknown> | null {
 
 const LINE_EDIT_SENT_BACK_EVENT = 'ORDER_SENT_BACK_FOR_LINE_EDIT';
 
+const RETURN_REFUND_RECORDED_EVENT = 'RETURN_REFUND_RECORDED';
+
 const LINE_EDIT_ACTION_LABEL_KEYS = {
   ADD: 'lineEdit.event.action.add',
   UPDATE: 'lineEdit.event.action.update',
@@ -208,6 +210,9 @@ function timelineEventTitle(
 ): string {
   if (name === LINE_EDIT_SENT_BACK_EVENT) {
     return translate(readStoredLocale(), 'lineEdit.event.title');
+  }
+  if (name === RETURN_REFUND_RECORDED_EVENT) {
+    return translate(readStoredLocale(), 'orderEvent.returnRefundRecorded');
   }
   if (!isStockShortageEventName(name)) return statusLabelOf(name);
   return translate(readStoredLocale(), STOCK_SHORTAGE_EVENT_MESSAGES[name].title);

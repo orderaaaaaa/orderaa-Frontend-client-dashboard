@@ -19,7 +19,7 @@ import {
 } from '@/types/logistics';
 import { PaginatedResponse } from '@/types/orders';
 import { toast } from 'react-toastify';
-import { recordPartialDelivery } from '@/lib/api/order';
+import { recordPartialDelivery, recordReturnRefund } from '@/lib/api/order';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { invalidateStockViews } from '@/services/warehouses';
 
@@ -166,19 +166,20 @@ export const useExchangeOrder = () => {
   });
 };
 
-// TODO: Replace mock with real API when backend implements POST /orders/:orderId/return
 export const useReturnRefund = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: ReturnRefundData) => {
-      console.log('[useReturnRefund] payload:', data);
-      await new Promise((r) => setTimeout(r, 500));
-      return { success: true };
-    },
-    onSuccess: () => {
+    mutationFn: (data: ReturnRefundData) => recordReturnRefund(data),
+    onSuccess: (_result, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.ORDER_DETAILS, variables.orderId],
+      });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
       toast.success('تم تأكيد الاسترجاع بنجاح');
+    },
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, 'تعذر تسجيل المرتجع'));
     },
   });
 };

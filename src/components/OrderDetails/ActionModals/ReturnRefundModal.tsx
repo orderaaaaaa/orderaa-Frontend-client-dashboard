@@ -5,24 +5,42 @@ import BaseModal from '@/components/ui/base-modal';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { OrderProduct } from '@/types/orders';
 import { useCancellationReasons } from '@/services/orders';
+import { useReturnRefund } from '@/services/logistics';
+import { REFUND_METHODS, type RefundMethod } from '@/types/logistics';
 import clsx from 'clsx';
+
+const REFUND_METHOD_LABELS: Record<RefundMethod, string> = {
+  CASH: 'نقدًا',
+  BANK_TRANSFER: 'تحويل بنكي',
+  E_WALLET: 'محفظة إلكترونية',
+  OTHER: 'أخرى',
+};
+
+const refundMethodOptions = REFUND_METHODS.map((method) => ({
+  key: method,
+  value: REFUND_METHOD_LABELS[method],
+}));
 
 interface ReturnRefundModalProps {
   isOpen: boolean;
   onClose: () => void;
+  orderId: number;
   orderProducts: OrderProduct[];
 }
 
 export default function ReturnRefundModal({
   isOpen,
   onClose,
+  orderId,
   orderProducts,
 }: ReturnRefundModalProps) {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [amount, setAmount] = useState('');
+  const [refundMethod, setRefundMethod] = useState<RefundMethod | null>(null);
   const [selectedReasonId, setSelectedReasonId] = useState<number | null>(null);
 
   const { data: reasons = [], isLoading: loadingReasons } = useCancellationReasons(isOpen, 'REFUSAL_TO_ACCEPT');
+  const refundMutation = useReturnRefund();
 
   const reasonOptions = reasons.map((r) => ({
     key: String(r.id),
@@ -30,27 +48,38 @@ export default function ReturnRefundModal({
   }));
 
   const handleConfirm = () => {
-    console.log('[ReturnRefund]', {
-      returnedOrderProductId: selectedProductId,
-      amount: amount ? Number(amount) : 0,
-      reasonId: selectedReasonId,
-    });
-    handleReset();
-    onClose();
+    if (selectedProductId === null || selectedReasonId === null || refundMethod === null) return;
+    refundMutation.mutate(
+      {
+        orderId,
+        returnedOrderProductId: selectedProductId,
+        amount: amount ? Number(amount) : 0,
+        refundMethod,
+        reasonId: selectedReasonId,
+      },
+      {
+        onSuccess: () => {
+          handleReset();
+          onClose();
+        },
+      }
+    );
   };
 
   const handleReset = () => {
     setSelectedProductId(null);
     setAmount('');
+    setRefundMethod(null);
     setSelectedReasonId(null);
   };
 
   const handleClose = () => {
+    if (refundMutation.isPending) return;
     handleReset();
     onClose();
   };
 
-  const isFormValid = selectedProductId !== null && selectedReasonId !== null;
+  const isFormValid = selectedProductId !== null && selectedReasonId !== null && refundMethod !== null;
 
   return (
     <BaseModal
@@ -58,8 +87,8 @@ export default function ReturnRefundModal({
       onClose={handleClose}
       title="مرتجع"
       onConfirm={handleConfirm}
-      confirmText="تأكيد المرتجع"
-      confirmDisabled={!isFormValid}
+      confirmText={refundMutation.isPending ? 'جاري التنفيذ...' : 'تأكيد المرتجع'}
+      confirmDisabled={!isFormValid || refundMutation.isPending}
     >
       <div className="space-y-6">
         <div className="flex flex-col gap-2">
@@ -131,6 +160,22 @@ export default function ReturnRefundModal({
             onChange={(e) => setAmount(e.target.value)}
             placeholder="0"
             className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <label className="font-bold text-[#1F1F1F]">
+            طريقة الاسترداد <span className="text-red-600">*</span>
+          </label>
+          <SearchableSelect
+            value={refundMethod ?? ''}
+            onValueChange={(v) => setRefundMethod(REFUND_METHODS.find((method) => method === v) ?? null)}
+            options={refundMethodOptions}
+            placeholder="اختر طريقة الاسترداد..."
+            searchPlaceholder="بحث عن طريقة..."
+            emptyMessage="لا توجد طرق متاحة"
+            noResultsMessage="لا توجد نتائج للبحث"
+            clearable
           />
         </div>
 

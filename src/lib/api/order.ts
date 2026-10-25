@@ -1,6 +1,11 @@
 import api from './index';
 import { Order, FilterOrdersDto, PaginatedResponse, FilterOptionsResponse, OrderStatisticsResponse, LockOrderResponse, UnlockOrderResponse } from '@/types/orders';
-import type { PartialDeliveryData, PartialDeliveryResponse } from '@/types/logistics';
+import type {
+  PartialDeliveryData,
+  PartialDeliveryResponse,
+  ReturnRefundData,
+  ReturnRefundResponse,
+} from '@/types/logistics';
 
 export async function getOrders(
   filters?: FilterOrdersDto
@@ -186,6 +191,17 @@ export async function recordPartialDelivery({
 }: PartialDeliveryData): Promise<PartialDeliveryResponse> {
   const response = await api.post<PartialDeliveryResponse>(
     `/orders/${orderId}/partial-delivery`,
+    body
+  );
+  return response.data;
+}
+
+export async function recordReturnRefund({
+  orderId,
+  ...body
+}: ReturnRefundData): Promise<ReturnRefundResponse> {
+  const response = await api.post<ReturnRefundResponse>(
+    `/orders/${orderId}/return-refund`,
     body
   );
   return response.data;

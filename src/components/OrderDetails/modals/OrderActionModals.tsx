@@ -266,6 +266,7 @@ export function OrderActionModals({
       <ReturnRefundModal
         isOpen={modals.returnRefund.isOpen}
         onClose={modals.returnRefund.close}
+        orderId={order.id}
         orderProducts={order.order_products || []}
       />
 
