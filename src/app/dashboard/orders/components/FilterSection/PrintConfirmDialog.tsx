@@ -33,10 +33,14 @@ interface PrintConfirmDialogProps {
 const NOTHING_LEFT_MESSAGE = 'لم يعد أي طلب متاحًا للطباعة';
 
 function warnLostClaims(skipped: PrintSkippedOrder[]) {
-  const movedCount = skipped.filter(
+  for (const item of skipped) {
+    if (item.reason === 'NO_SHIPPING_CODE') toast.warning(item.message);
+  }
+  const lost = skipped.filter((s) => s.reason !== 'NO_SHIPPING_CODE');
+  const movedCount = lost.filter(
     (s) => s.reason === 'CLAIMED_BY_OTHER' || s.reason === 'PRINTED'
   ).length;
-  const goneCount = skipped.length - movedCount;
+  const goneCount = lost.length - movedCount;
   if (movedCount > 0) {
     toast.warning(`${movedCount} طلب انتقل لمستخدم آخر ولن يُعلَّم كمطبوع`);
   }
