@@ -1,26 +1,33 @@
+import type { ReactNode } from 'react';
 import { ChevronDown } from 'lucide-react';
 import ShippingMatchCell, { ShippingMatchBadge, shippingExpectationText } from './ShippingMatchCell';
 import type { SettlementShippingInfo } from '@/lib/api/settlement';
 
-export function SettlementShippingColumnHeaders() {
+interface SettlementShippingColumnSlotProps {
+  betweenTotalAndCost?: ReactNode;
+}
+
+export function SettlementShippingColumnHeaders({ betweenTotalAndCost }: SettlementShippingColumnSlotProps = {}) {
   return (
     <>
       <th className="px-4 py-2 text-right font-medium">المحافظة</th>
       <th className="px-4 py-2 text-right font-medium">إجمالي الطلب</th>
+      {betweenTotalAndCost}
       <th className="px-4 py-2 text-right font-medium">تكلفة الشحن</th>
     </>
   );
 }
 
-interface SettlementShippingColumnCellsProps {
+interface SettlementShippingColumnCellsProps extends SettlementShippingColumnSlotProps {
   shipping: SettlementShippingInfo | null;
 }
 
-export function SettlementShippingColumnCells({ shipping }: SettlementShippingColumnCellsProps) {
+export function SettlementShippingColumnCells({ shipping, betweenTotalAndCost }: SettlementShippingColumnCellsProps) {
   return (
     <>
       <td className="px-4 py-2">{shipping?.governorate ?? '—'}</td>
       <td className="px-4 py-2">{shipping?.totalCost ?? '—'}</td>
+      {betweenTotalAndCost}
       <td className="px-4 py-2">
         <ShippingMatchCell shipping={shipping} />
       </td>
