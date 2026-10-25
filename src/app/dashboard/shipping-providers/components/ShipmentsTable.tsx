@@ -273,7 +273,7 @@ export function InProcessShipmentsTable({
   carrier,
   shippingCompanyId,
 }: InProcessShipmentsTableProps) {
-  const { shippingCompanies } = useShippingCompanies();
+  const { shippingCompanies, isLoading: isShippingCompaniesLoading } = useShippingCompanies();
   const isTurboCarrier =
     shippingCompanies.find((company) => company.id === shippingCompanyId)?.implementation === 'TURBO';
 
@@ -347,11 +347,14 @@ export function InProcessShipmentsTable({
                   orderId={row.id}
                   closure={row.closure}
                   partialDelivery={{
-                    blockedReason: partialDeliveryBlockReasonOf({
-                      isTurboCarrier,
-                      locked,
-                      status: row.status,
-                    }),
+                    pending: isShippingCompaniesLoading,
+                    blockedReason: isShippingCompaniesLoading
+                      ? null
+                      : partialDeliveryBlockReasonOf({
+                          isTurboCarrier,
+                          locked,
+                          status: row.status,
+                        }),
                   }}
                 />
               </td>

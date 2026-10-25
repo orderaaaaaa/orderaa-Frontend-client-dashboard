@@ -7,7 +7,7 @@ import PartialDeliveryModal from '@/components/OrderDetails/ActionModals/Partial
 import { Button } from '@/components/ui/button';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { useI18n } from '@/i18n/I18nProvider';
-import { PERMISSIONS, type PermissionCode } from '@/lib/permissions';
+import { PERMISSIONS, orderStatusSetCodeOf, type PermissionCode } from '@/lib/permissions';
 import { orderDetailsQueryOptions } from '@/services/orders';
 import { useCloseClosure, useUndoClosure } from '@/services/shippingProviders';
 import { getApiErrorMessage } from '@/utils/apiError';
@@ -19,7 +19,7 @@ type ClosureActionId = 'partial' | 'close' | 'refuse' | 'cancel' | 'reopen';
 interface RowAction {
   id: ClosureActionId;
   labelKey: 'closure.partial' | 'closure.close' | 'closure.refuse' | 'closure.cancel' | 'closure.reopen';
-  code: PermissionCode;
+  codes: PermissionCode[];
   disabled: boolean;
   disabledReason?: string;
   onSelect: () => void;
@@ -27,7 +27,15 @@ interface RowAction {
 
 export interface PartialDeliveryAccess {
   blockedReason: string | null;
+  pending: boolean;
 }
+
+const PARTIAL_DELIVERY_STATUS_KEYS = ['RETURNED_DELIVERED', 'DELIVERED'] as const;
+
+const PARTIAL_DELIVERY_CODES: PermissionCode[] = [
+  PERMISSIONS.ORDERS_UPDATE,
+  ...PARTIAL_DELIVERY_STATUS_KEYS.flatMap((status) => orderStatusSetCodeOf(status) ?? []),
+];
 
 const CLOSURE_KIND_LABELS: Record<FollowupClosureKind, string> = {
   CLOSED_TODAY: 'مغلق لليوم',
@@ -43,7 +51,7 @@ interface ShipmentRowActionsProps {
 
 export function ShipmentRowActions({ orderId, closure, partialDelivery }: ShipmentRowActionsProps) {
   const { t } = useI18n();
-  const { hasPermission } = usePermissionCheck();
+  const { hasAllPermissions } = usePermissionCheck();
   const [reasonKind, setReasonKind] = useState<ClosureReasonKind | null>(null);
   const [isPartialOpen, setIsPartialOpen] = useState(false);
   const closeMutation = useCloseClosure();
@@ -58,7 +66,8 @@ export function ShipmentRowActions({ orderId, closure, partialDelivery }: Shipme
 
   const isLocked = closure?.kind === 'REFUSE' || closure?.kind === 'CANCEL';
   const isPending = closeMutation.isPending || undoMutation.isPending;
-  const partialBlockedReason = partialDelivery?.blockedReason ?? null;
+  const partialUnavailable =
+    partialDelivery !== undefined && (partialDelivery.pending || partialDelivery.blockedReason !== null);
 
   const actions: RowAction[] = [
     ...(partialDelivery
@@ -66,9 +75,9 @@ export function ShipmentRowActions({ orderId, closure, partialDelivery }: Shipme
           {
             id: 'partial' as const,
             labelKey: 'closure.partial' as const,
-            code: PERMISSIONS.ORDERS_UPDATE,
-            disabled: partialBlockedReason !== null,
-            disabledReason: partialBlockedReason ?? undefined,
+            codes: PARTIAL_DELIVERY_CODES,
+            disabled: partialUnavailable,
+            disabledReason: partialDelivery?.blockedReason ?? undefined,
             onSelect: () => setIsPartialOpen(true),
           },
         ]
@@ -76,21 +85,21 @@ export function ShipmentRowActions({ orderId, closure, partialDelivery }: Shipme
     {
       id: 'close',
       labelKey: 'closure.close',
-      code: PERMISSIONS.FOLLOWUP_MANAGE,
+      codes: [PERMISSIONS.FOLLOWUP_MANAGE],
       disabled: closure !== null,
       onSelect: () => closeMutation.mutate(orderId),
     },
     {
       id: 'refuse',
       labelKey: 'closure.refuse',
-      code: PERMISSIONS.FOLLOWUP_MANAGE,
+      codes: [PERMISSIONS.FOLLOWUP_MANAGE],
       disabled: isLocked,
       onSelect: () => setReasonKind('REFUSE'),
     },
     {
       id: 'cancel',
       labelKey: 'closure.cancel',
-      code: PERMISSIONS.FOLLOWUP_MANAGE,
+      codes: [PERMISSIONS.FOLLOWUP_MANAGE],
       disabled: isLocked,
       onSelect: () => setReasonKind('CANCEL'),
     },
@@ -100,13 +109,13 @@ export function ShipmentRowActions({ orderId, closure, partialDelivery }: Shipme
     actions.push({
       id: 'reopen',
       labelKey: 'closure.reopen',
-      code: PERMISSIONS.FOLLOWUP_MANAGE,
+      codes: [PERMISSIONS.FOLLOWUP_MANAGE],
       disabled: false,
       onSelect: () => undoMutation.mutate(orderId),
     });
   }
 
-  const visibleActions = actions.filter((action) => hasPermission(action.code));
+  const visibleActions = actions.filter((action) => hasAllPermissions(action.codes));
   const closureReason = closure?.reasonName ?? closure?.reasonText ?? null;
 
   return (
