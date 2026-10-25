@@ -129,7 +129,7 @@ export interface UploadSettlementResponse {
 export interface ShortfallSettlement {
   id: number;
   code: string;
-  settlementAmount: string;
+  settlementAmount: string | null;
   status: string;
   settlementResolved: boolean;
 }

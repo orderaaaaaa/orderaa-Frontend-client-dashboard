@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import BaseModal from '@/components/ui/base-modal';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { getApiErrorMessage } from '@/utils/apiError';
-import { ShortfallSettlement } from '@/types/orders';
+import type { ShortfallSettlement } from '@/lib/api/settlement';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import {
@@ -33,9 +33,11 @@ import {
 type FilterValue = ShortfallFilter;
 
 const AMOUNT_PATTERN = /^-?\d+(\.\d{1,2})?$/;
+const SHORTFALL_PAGE_SIZE = 20;
 
 interface PendingAdjust {
   row: ShortfallSettlement;
+  current: number;
   delta: number;
 }
 
@@ -43,12 +45,16 @@ function formatMoney(value: number): string {
   return (Math.round(value * 100) / 100).toFixed(2);
 }
 
+function displayAmount(value: string | null): number | string {
+  return value === null ? '—' : Number(value);
+}
+
 export default function ShortfallSettlementPage() {
   // Adjusting a settlement hits PATCH /orders/settlement/:orderId/adjust.
   const canManageSettlement = useHasPermission(PERMISSION_CODES.ORDERS_SETTLEMENT_MANAGE);
   const [filter, setFilter] = useState<FilterValue>('pending');
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
+  const limit = SHORTFALL_PAGE_SIZE;
   const [adjustAmounts, setAdjustAmounts] = useState<Record<number, string>>({});
   const [adjustingId, setAdjustingId] = useState<number | null>(null);
   const [pendingAdjust, setPendingAdjust] = useState<PendingAdjust | null>(null);
@@ -84,6 +90,8 @@ export default function ShortfallSettlementPage() {
   };
 
   const requestAdjust = (row: ShortfallSettlement) => {
+    if (row.settlementAmount === null) return;
+    const current = Number(row.settlementAmount);
     const amountStr = (adjustAmounts[row.id] ?? '').trim();
     if (amountStr === '') {
       toast.error('يرجى إدخال المبلغ');
@@ -98,7 +106,7 @@ export default function ShortfallSettlementPage() {
       toast.error('التعديل لا يمكن أن يساوي صفرًا');
       return;
     }
-    setPendingAdjust({ row, delta });
+    setPendingAdjust({ row, current, delta });
   };
 
   const handleAdjust = async () => {
@@ -146,7 +154,7 @@ export default function ShortfallSettlementPage() {
           handleAdjustAmountChange(row.id, e.target.value)
         }
         className={`${inputClassName} border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 disabled:opacity-50`}
-        disabled={adjustingId === row.id}
+        disabled={adjustingId === row.id || row.settlementAmount === null}
       />
       <Button
         size="sm"
@@ -154,6 +162,7 @@ export default function ShortfallSettlementPage() {
         onClick={() => requestAdjust(row)}
         disabled={
           adjustingId === row.id ||
+          row.settlementAmount === null ||
           !adjustAmounts[row.id] ||
           adjustAmounts[row.id].trim() === ''
         }
@@ -227,7 +236,7 @@ export default function ShortfallSettlementPage() {
                       fields={[
                         { label: 'كود الطلب', value: row.code },
                         { label: 'الحالة', value: renderStatusBadge(row) },
-                        { label: 'مبلغ التحصيل', value: Number(row.settlementAmount) },
+                        { label: 'مبلغ التحصيل', value: displayAmount(row.settlementAmount) },
                       ]}
                       actions={
                         canManageSettlement ? (
@@ -256,7 +265,7 @@ export default function ShortfallSettlementPage() {
                           <TableCell className="font-medium">
                             {row.code}
                           </TableCell>
-                          <TableCell>{Number(row.settlementAmount)}</TableCell>
+                          <TableCell>{displayAmount(row.settlementAmount)}</TableCell>
                           <TableCell>{renderStatusBadge(row)}</TableCell>
                           {canManageSettlement && (
                           <TableCell>{renderAdjustControls(row, 'w-28')}</TableCell>
@@ -279,10 +288,6 @@ export default function ShortfallSettlementPage() {
                 onPrevious={() => setPage((p) => Math.max(1, p - 1))}
                 onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
                 currentPageSize={limit}
-                onPageSizeChange={(size) => {
-                  setLimit(size);
-                  setPage(1);
-                }}
               />
             )}
           </Tabs>
@@ -302,12 +307,10 @@ export default function ShortfallSettlementPage() {
           <div className="space-y-3 text-sm">
             <p className="font-medium">الطلب {pendingAdjust.row.code}</p>
             <p dir="rtl">
-              التحصيل الحالي {formatMoney(Number(pendingAdjust.row.settlementAmount))} + التعديل{' '}
+              التحصيل الحالي {formatMoney(pendingAdjust.current)} + التعديل{' '}
               <span dir="ltr">{formatMoney(pendingAdjust.delta)}</span> ={' '}
               <b>
-                {formatMoney(
-                  Number(pendingAdjust.row.settlementAmount) + pendingAdjust.delta,
-                )}{' '}
+                {formatMoney(pendingAdjust.current + pendingAdjust.delta)}{' '}
                 جنيه
               </b>
             </p>
