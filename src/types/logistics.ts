@@ -115,7 +115,7 @@ export interface ReturnRefundData {
 }
 
 export interface ReturnRefundResponse {
-  success: true;
+  success: boolean;
   eventId: number;
 }
 

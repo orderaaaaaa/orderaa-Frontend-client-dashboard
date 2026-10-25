@@ -165,7 +165,7 @@ export default function ReturnRefundModal({
             placeholder="0"
             className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
-          {amountInvalid && (
+          {amountValue !== null && amountInvalid && (
             <p className="text-xs text-red-600">
               المبلغ مطلوب ويجب أن يكون صفرًا أو أكبر
             </p>
