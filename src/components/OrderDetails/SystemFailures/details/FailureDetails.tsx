@@ -78,6 +78,18 @@ export function FailureDetails({
           <FailureReasonDetails reason={narrowed.details.reason} />
         </div>
       );
+    case 'SHIPMENT_UPDATE_NOT_SENT':
+    case 'SHIPMENT_OUTCOME_UNKNOWN':
+      return (
+        <DetailGrid>
+          <DetailField label="شركة الشحن" ltr>
+            {narrowed.details.carrier}
+          </DetailField>
+          <DetailField label="السبب" ltr>
+            {narrowed.details.reason}
+          </DetailField>
+        </DetailGrid>
+      );
     case 'AUTOMATION_NOT_SENT':
       return (
         <DetailGrid>

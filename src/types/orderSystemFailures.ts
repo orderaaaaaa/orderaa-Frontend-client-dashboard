@@ -17,7 +17,9 @@ export type CarrierWebhookFailureCode =
 export type ShippingDispatchFailureCode =
   | 'SHIPMENT_NOT_CREATED_MISSING_ADDRESS'
   | 'SHIPMENT_NOT_CREATED_MISSING_PHONE'
-  | 'SHIPMENT_DISPATCH_FAILED';
+  | 'SHIPMENT_DISPATCH_FAILED'
+  | 'SHIPMENT_UPDATE_NOT_SENT'
+  | 'SHIPMENT_OUTCOME_UNKNOWN';
 
 export type AutomationFailureCode =
   | 'AUTOMATION_NOT_SENT'
@@ -144,6 +146,52 @@ export interface ShipmentDispatchFailedDetails {
   companyName?: string;
   reason: ShipmentDispatchFailureReason;
 }
+
+export type CarrierSendOperation =
+  | 'EDIT'
+  | 'SWITCH'
+  | 'BULK_SWITCH'
+  | 'CREATION'
+  | 'MISSING_ORDER_RECOVERY'
+  | 'FOLLOWUP_CHILD'
+  | 'PARKED_RELEASE'
+  | 'HELD_ACTIVATION'
+  | 'BULK_CONFIRM'
+  | 'SUBMIT_FOR_APPROVAL';
+
+export type CarrierUnknownReason =
+  | 'TIMEOUT'
+  | 'DEADLINE'
+  | 'NO_RESPONSE'
+  | 'SERVER_ERROR'
+  | 'UNPARSEABLE'
+  | 'SUCCESS_WITHOUT_ID'
+  | 'ID_WRITE_FAILED'
+  | 'STALE_ATTEMPT'
+  | 'UNCLASSIFIED';
+
+export type CarrierRejectKind = 'EXPLICIT' | 'NOT_DISPATCHED' | 'UNSUPPORTED_OPERATION';
+
+export type CarrierSendRowReason =
+  | CarrierUnknownReason
+  | CarrierRejectKind
+  | 'GUARD_CHANGED'
+  | 'PREVIOUS_SEND_OPEN'
+  | 'HELD_CHECK_REQUIRED';
+
+export interface ShipmentCarrierSendDetails {
+  carrier: string;
+  carrierCompanyId: number;
+  markerId: number;
+  operation: CarrierSendOperation;
+  reason: CarrierSendRowReason;
+  carrierText: string | null;
+  oldShippingId: string | null;
+}
+
+export type ShipmentUpdateNotSentDetails = ShipmentCarrierSendDetails;
+
+export type ShipmentOutcomeUnknownDetails = ShipmentCarrierSendDetails;
 
 export type AutomationNotSentReason = 'NO_API_KEY' | 'NO_STRATEGY';
 
@@ -325,6 +373,8 @@ export interface OrderSystemFailureDetailsByCode {
   SHIPMENT_NOT_CREATED_MISSING_ADDRESS: ShipmentMissingAddressDetails;
   SHIPMENT_NOT_CREATED_MISSING_PHONE: ShipmentMissingPhoneDetails;
   SHIPMENT_DISPATCH_FAILED: ShipmentDispatchFailedDetails;
+  SHIPMENT_UPDATE_NOT_SENT: ShipmentUpdateNotSentDetails;
+  SHIPMENT_OUTCOME_UNKNOWN: ShipmentOutcomeUnknownDetails;
   AUTOMATION_NOT_SENT: AutomationNotSentDetails;
   AUTOMATION_SEND_FAILED: AutomationSendFailedDetails;
   AUTOMATION_MAPPING_NOT_SAVED: AutomationMappingNotSavedDetails;

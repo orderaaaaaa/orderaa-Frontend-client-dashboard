@@ -9,6 +9,8 @@ import type {
   CarrierStatusIgnoredOutsideWindowDetails,
   CarrierStatusIgnoredPartialReturnDetails,
   CarrierStatusIgnoredStaleDetails,
+  CarrierSendOperation,
+  CarrierSendRowReason,
   CarrierStatusNotAppliedDetails,
   FailureReason,
   FailureStockShortage,
@@ -20,9 +22,12 @@ import type {
   ScheduledTransitionFailedDetails,
   ShadowActivationFailedDetails,
   ShipmentDispatchFailedDetails,
+  ShipmentCarrierSendDetails,
   ShipmentDispatchFailureReason,
   ShipmentMissingAddressDetails,
   ShipmentMissingPhoneDetails,
+  ShipmentOutcomeUnknownDetails,
+  ShipmentUpdateNotSentDetails,
   MachineTransitionStockShortageDetails,
   StockMovementBypassedDetails,
   StockMovementSkippedDetails,
@@ -136,6 +141,53 @@ const isShipmentDispatchFailed = (value: unknown): value is ShipmentDispatchFail
   value.trigger === 'PARKED_RELEASE' &&
   (value.companyName === undefined || isString(value.companyName)) &&
   isShipmentDispatchReason(value.reason);
+
+const CARRIER_SEND_OPERATIONS: readonly CarrierSendOperation[] = [
+  'EDIT',
+  'SWITCH',
+  'BULK_SWITCH',
+  'CREATION',
+  'MISSING_ORDER_RECOVERY',
+  'FOLLOWUP_CHILD',
+  'PARKED_RELEASE',
+  'HELD_ACTIVATION',
+  'BULK_CONFIRM',
+  'SUBMIT_FOR_APPROVAL',
+];
+
+const CARRIER_SEND_ROW_REASONS: readonly CarrierSendRowReason[] = [
+  'TIMEOUT',
+  'DEADLINE',
+  'NO_RESPONSE',
+  'SERVER_ERROR',
+  'UNPARSEABLE',
+  'SUCCESS_WITHOUT_ID',
+  'ID_WRITE_FAILED',
+  'STALE_ATTEMPT',
+  'UNCLASSIFIED',
+  'EXPLICIT',
+  'NOT_DISPATCHED',
+  'UNSUPPORTED_OPERATION',
+  'GUARD_CHANGED',
+  'PREVIOUS_SEND_OPEN',
+  'HELD_CHECK_REQUIRED',
+];
+
+const isShipmentCarrierSend = (value: unknown): value is ShipmentCarrierSendDetails =>
+  isRecord(value) &&
+  isString(value.carrier) &&
+  typeof value.carrierCompanyId === 'number' &&
+  typeof value.markerId === 'number' &&
+  CARRIER_SEND_OPERATIONS.some((operation) => operation === value.operation) &&
+  CARRIER_SEND_ROW_REASONS.some((reason) => reason === value.reason) &&
+  isStringOrNull(value.carrierText) &&
+  isStringOrNull(value.oldShippingId);
+
+const isShipmentUpdateNotSent = (value: unknown): value is ShipmentUpdateNotSentDetails =>
+  isShipmentCarrierSend(value);
+
+const isShipmentOutcomeUnknown = (value: unknown): value is ShipmentOutcomeUnknownDetails =>
+  isShipmentCarrierSend(value);
 
 const isAutomationNotSent = (value: unknown): value is AutomationNotSentDetails =>
   isRecord(value) &&
@@ -281,6 +333,10 @@ export function narrowFailureDetails(
       return isShipmentMissingPhone(details) ? { code, details } : null;
     case 'SHIPMENT_DISPATCH_FAILED':
       return isShipmentDispatchFailed(details) ? { code, details } : null;
+    case 'SHIPMENT_UPDATE_NOT_SENT':
+      return isShipmentUpdateNotSent(details) ? { code, details } : null;
+    case 'SHIPMENT_OUTCOME_UNKNOWN':
+      return isShipmentOutcomeUnknown(details) ? { code, details } : null;
     case 'AUTOMATION_NOT_SENT':
       return isAutomationNotSent(details) ? { code, details } : null;
     case 'AUTOMATION_SEND_FAILED':

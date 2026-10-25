@@ -20,6 +20,8 @@ export const ORDER_SYSTEM_FAILURE_LABELS: Record<OrderSystemFailureCode, string>
   SHIPMENT_NOT_CREATED_MISSING_ADDRESS: 'لم يتم إرسال الطلب للشحن: المحافظة أو المدينة غير موجودة',
   SHIPMENT_NOT_CREATED_MISSING_PHONE: 'لم يتم إرسال الطلب للشحن: رقم الهاتف غير موجود',
   SHIPMENT_DISPATCH_FAILED: 'فشل إرسال الطلب لشركة الشحن',
+  SHIPMENT_UPDATE_NOT_SENT: 'لم يتم إرسال التعديل لشركة الشحن: تحقق من الشركة قبل إعادة الإرسال',
+  SHIPMENT_OUTCOME_UNKNOWN: 'لم يتم الإرسال: النتيجة غير معروفة، تحقق من شركة الشحن قبل إعادة الإرسال',
   AUTOMATION_NOT_SENT: 'لم يتم إرسال الطلب للأتمتة',
   AUTOMATION_SEND_FAILED: 'فشل إرسال الطلب للأتمتة',
   AUTOMATION_MAPPING_NOT_SAVED: 'لم يتم حفظ ربط الطلب مع الأتمتة',
