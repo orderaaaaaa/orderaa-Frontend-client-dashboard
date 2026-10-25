@@ -2,6 +2,8 @@ import type {
   ShippingCompanyKind,
   ShippingImplementation,
 } from '@/types/shippingCompanies';
+import type { FollowupClosure, FollowupWorkState } from '@/types/logistics';
+import { OrderStatus } from '@/types/orders';
 
 /** Mirrors the backend shipping-provider DTOs (T16). */
 
@@ -31,7 +33,7 @@ export interface CarrierStats {
   /** NULL — never 0 — when nothing has finished yet. */
   deliveryRate: number | null;
   returnRate: number | null;
-  inProcessNetAmount: string;
+  inProcessNetAmount?: string;
 }
 
 export interface LocationStats {
@@ -42,27 +44,127 @@ export interface LocationStats {
   returnRate: number | null;
 }
 
-export interface ProviderShipment {
-  id: number;
-  code: string;
-  status: string;
-  governorate: string | null;
-  city: string | null;
-  totalCost: number | null;
-  /** When it went to this carrier — a shipping event, not the order date. */
-  takenAt: string | null;
-}
-
 export interface StatsRange {
   from?: string;
   to?: string;
 }
 
-export type ShipmentStatusFilter = 'IN_PROCESS' | 'DELIVERED' | 'RETURNED' | 'ALL';
+export const IN_PROCESS_STATUSES = [
+  OrderStatus.WAITING_FOR_APPROVAL,
+  OrderStatus.SHIPPING,
+  OrderStatus.WITH_DRIVER,
+] as const;
 
-export interface ProviderShipmentsPage {
-  data: ProviderShipment[];
+export type InProcessStatus = (typeof IN_PROCESS_STATUSES)[number];
+
+export const LATENESS_FLAGS = ['RED', 'YELLOW', 'GREEN'] as const;
+
+export type LatenessFlag = (typeof LATENESS_FLAGS)[number];
+
+export const LATE_MARK_KINDS = ['LATE', 'ON_TIME', 'AUTO'] as const;
+
+export type LateMarkKind = (typeof LATE_MARK_KINDS)[number];
+
+export type LatenessOverride = Exclude<LateMarkKind, 'AUTO'>;
+
+export interface LatenessInfo {
+  flag: LatenessFlag | null;
+  daysLate: number | null;
+  dueDay: string | null;
+  override: LatenessOverride | null;
+}
+
+export interface ShipmentCustomer {
+  name: string | null;
+  phones: string[];
+}
+
+export interface ShipmentRowBase {
+  id: number;
+  code: string;
+  status: OrderStatus;
+  governorate: string | null;
+  city: string | null;
+  totalCost: number | null;
+  /** When it went to this carrier — a shipping event, not the order date. */
+  takenAt: string | null;
+  availableFrom: string | null;
+  availableTo: string | null;
+  customer: ShipmentCustomer;
+  closure: FollowupClosure | null;
+}
+
+export interface InProcessShipment extends ShipmentRowBase {
+  lateness: LatenessInfo | null;
+  netAmount?: string;
+}
+
+export interface ReturnedShipment extends ShipmentRowBase {
+  lateness: null;
+}
+
+export interface CarrierHeader {
+  shippingCompanyId: number;
+  name: string;
+  phone: string | null;
+}
+
+export interface InProcessSummary {
+  netAmount?: string;
+}
+
+export interface InProcessShipmentsPage {
+  carrier: CarrierHeader;
+  summary: InProcessSummary;
+  data: InProcessShipment[];
   page: number;
   limit: number;
   total: number;
+}
+
+export interface ReturnedShipmentsPage {
+  carrier: CarrierHeader;
+  summary: Record<string, never>;
+  data: ReturnedShipment[];
+  page: number;
+  limit: number;
+  total: number;
+}
+
+export interface InProcessFilters {
+  from?: string;
+  to?: string;
+  status?: InProcessStatus;
+  governorate?: string;
+  city?: string;
+  search?: string;
+  workState: FollowupWorkState;
+  page: number;
+  limit: number;
+}
+
+export interface ReturnedFilters {
+  page: number;
+  limit: number;
+}
+
+export interface LateMarkBody {
+  kind: LateMarkKind;
+  note?: string;
+}
+
+export interface LateMarkResponse {
+  orderId: number;
+  lateness: LatenessInfo | null;
+}
+
+export interface DeliveryWindowBody {
+  availableFrom: string | null;
+  availableTo: string | null;
+}
+
+export interface DeliveryWindowResponse {
+  orderId: number;
+  availableFrom: string | null;
+  availableTo: string | null;
 }
