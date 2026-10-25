@@ -24,6 +24,7 @@ import { getTimeAgoCompact } from '@/utils/timeAgo';
 import { DeliveryWindowModal } from './DeliveryWindowModal';
 import { formatDate, formatNumber } from './formatNumber';
 import { LateMarkModal } from './LateMarkModal';
+import { SendAgainAction } from './SendAgainAction';
 import { ShipmentRowActions } from './ShipmentRowActions';
 
 const FLAG_DOT_CLASSES: Record<LatenessFlag | 'NONE', string> = {
@@ -369,7 +370,14 @@ export function ReturnedShipmentsTable({ shipments, carrier }: ReturnedShipments
               <CarrierCell carrier={carrier} />
             </td>
             <td className={CELL_CLASS}>
-              <ShipmentRowActions orderId={row.id} closure={row.closure} />
+              <div className="flex flex-col gap-2">
+                <ShipmentRowActions orderId={row.id} closure={row.closure} />
+                <SendAgainAction
+                  orderId={row.id}
+                  eligible={row.sendAgainEligible}
+                  blockedReason={row.sendAgainBlockedReason}
+                />
+              </div>
             </td>
           </tr>
         ))}
