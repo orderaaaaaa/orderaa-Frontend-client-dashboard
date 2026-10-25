@@ -122,5 +122,5 @@ export interface ShippingSwitchMissingFieldsErrorBody {
 }
 
 export interface CarrierSendBearingResponse {
-  carrierSend?: CarrierSendBlock | null;
+  carrierSend: CarrierSendBlock | null;
 }

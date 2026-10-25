@@ -107,6 +107,13 @@ export type SendAgainBlockedReason =
   | 'NO_CARRIER_STATUS'
   | 'RETURNED_TO_MERCHANT';
 
+export interface SendAgainNotEligibleErrorBody {
+  statusCode: number;
+  code: 'SEND_AGAIN_NOT_ELIGIBLE';
+  reason: SendAgainBlockedReason;
+  message: string;
+}
+
 export interface ReturnedShipment extends ShipmentRowBase {
   lateness: null;
   sendAgainEligible: boolean;

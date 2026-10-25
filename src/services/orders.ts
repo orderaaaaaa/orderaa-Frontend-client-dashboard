@@ -257,7 +257,7 @@ export const useCustomerOrders = (
   });
 };
 
-const warnIfCarrierSendNeedsAttention = (response: CarrierSendBearingResponse | undefined) => {
+const warnIfCarrierSendNeedsAttention = (response: CarrierSendBearingResponse | null | undefined) => {
   if (carrierSendNeedsAttention(response?.carrierSend)) {
     toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
   }
@@ -275,7 +275,7 @@ export const useUpdateOrder = () => {
       orderId: number;
       data: Partial<Order> | Record<string, unknown>;
     }) => {
-      const response = await http.patch<Order>(`/orders/${orderId}`, data);
+      const response = await http.patch<Order & CarrierSendBearingResponse>(`/orders/${orderId}`, data);
       const respondedAt = Date.now();
       await invalidateAndWait(queryClient, [...orderStatusKeys(orderId), [QUERY_KEYS.CARRIER_SENDS]]);
       warnIfCarrierSendNeedsAttention(response.data);
