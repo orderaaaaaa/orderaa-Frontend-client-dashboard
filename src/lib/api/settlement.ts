@@ -192,13 +192,6 @@ export interface SettlementBatchOrder {
   shipping: SettlementShippingInfo;
 }
 
-export interface SettlementBatchDeleteErrorBody {
-  statusCode: 404 | 409;
-  code: 'SETTLEMENT_BATCH_NOT_FOUND' | 'SETTLEMENT_BATCH_NOT_EMPTY';
-  message: string;
-  params: { ordersCount?: number };
-}
-
 export interface Paginated<T> {
   data: T[];
   page: number;
