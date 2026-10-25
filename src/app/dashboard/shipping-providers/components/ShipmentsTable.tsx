@@ -24,9 +24,10 @@ import {
 import { getTimeAgoCompact } from '@/utils/timeAgo';
 import { DeliveryWindowModal } from './DeliveryWindowModal';
 import { formatDate, formatNumber } from './formatNumber';
+import { FOLLOWUP_COURIER_COLUMN_LABEL } from './followupNotesConstants';
 import { LateMarkModal } from './LateMarkModal';
 import { SendAgainAction } from './SendAgainAction';
-import { ShipmentRowActions } from './ShipmentRowActions';
+import { ShipmentRowActions, type FollowupRowTools } from './ShipmentRowActions';
 
 const FLAG_DOT_CLASSES: Record<LatenessFlag | 'NONE', string> = {
   RED: 'bg-red-500',
@@ -262,16 +263,35 @@ function CarrierCell({ carrier }: { carrier: CarrierHeader }) {
   );
 }
 
+function CourierCell({ name, phone }: { name: string | null; phone: string | null }) {
+  if (name === null && phone === null) return <span>-</span>;
+
+  return (
+    <div className="flex flex-col">
+      <span className="text-gray-900 whitespace-nowrap">{name ?? '-'}</span>
+      {phone && (
+        <span dir="ltr" className="text-xs text-gray-500 font-mono whitespace-nowrap">
+          {phone}
+        </span>
+      )}
+    </div>
+  );
+}
+
 interface InProcessShipmentsTableProps {
   shipments: InProcessShipment[];
   carrier: CarrierHeader;
   shippingCompanyId: number;
+  onOpenNotes: (orderId: number) => void;
+  onOpenActionLog: (orderId: number) => void;
 }
 
 export function InProcessShipmentsTable({
   shipments,
   carrier,
   shippingCompanyId,
+  onOpenNotes,
+  onOpenActionLog,
 }: InProcessShipmentsTableProps) {
   const { shippingCompanies, isLoading: isShippingCompaniesLoading } = useShippingCompanies();
   const isTurboCarrier =
@@ -295,11 +315,16 @@ export function InProcessShipmentsTable({
             <th className={HEAD_CLASS}>الصافي</th>
           </Can>
           <th className={HEAD_CLASS}>شركة الشحن</th>
+          <th className={HEAD_CLASS}>{FOLLOWUP_COURIER_COLUMN_LABEL}</th>
           <th className={HEAD_CLASS}>الإغلاق</th>
         </tr>
       </thead>
       <tbody>
         {shipments.map((row) => {
+          const followupTools: FollowupRowTools = {
+            onOpenNotes: () => onOpenNotes(row.id),
+            onOpenActionLog: () => onOpenActionLog(row.id),
+          };
           const locked = isLockedRow(row);
           return (
             <tr key={row.id} className="border-b border-gray-100">
@@ -343,9 +368,13 @@ export function InProcessShipmentsTable({
                 <CarrierCell carrier={carrier} />
               </td>
               <td className={CELL_CLASS}>
+                <CourierCell name={row.courierName} phone={row.courierPhone} />
+              </td>
+              <td className={CELL_CLASS}>
                 <ShipmentRowActions
                   orderId={row.id}
                   closure={row.closure}
+                  followupTools={followupTools}
                   partialDelivery={{
                     pending: isShippingCompaniesLoading,
                     blockedReason: isShippingCompaniesLoading

@@ -24,7 +24,9 @@ import {
   type InProcessStatus,
 } from '@/types/shippingProviders';
 import { useDebounce } from '@/utils/debounce';
+import { FollowupNotesModal } from './FollowupNotesModal';
 import { formatNumber } from './formatNumber';
+import { OrderActionLogModal } from './OrderActionLogModal';
 import { InProcessShipmentsTable, ReturnedShipmentsTable } from './ShipmentsTable';
 
 const MAX_PAGE_SIZE = 100;
@@ -86,6 +88,8 @@ interface ListProps {
 
 interface InProcessListProps extends ListProps {
   filters: InProcessFilters;
+  onOpenNotes: (orderId: number) => void;
+  onOpenActionLog: (orderId: number) => void;
 }
 
 function InProcessList({
@@ -95,6 +99,8 @@ function InProcessList({
   limit,
   onPageChange,
   onPageSizeChange,
+  onOpenNotes,
+  onOpenActionLog,
 }: InProcessListProps) {
   const {
     data,
@@ -157,6 +163,8 @@ function InProcessList({
                 shipments={shipments}
                 carrier={data.carrier}
                 shippingCompanyId={shippingCompanyId}
+                onOpenNotes={onOpenNotes}
+                onOpenActionLog={onOpenActionLog}
               />
             )}
           </div>
@@ -370,6 +378,8 @@ export function InProcessShipmentsContent({
   };
 
   const isInProcess = view === 'in-process';
+  const [notesOrderId, setNotesOrderId] = useState<number | null>(null);
+  const [actionLogOrderId, setActionLogOrderId] = useState<number | null>(null);
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">
@@ -505,6 +515,8 @@ export function InProcessShipmentsContent({
             limit={limit}
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
+            onOpenNotes={setNotesOrderId}
+            onOpenActionLog={setActionLogOrderId}
           />
         ) : (
           <ReturnedList
@@ -516,6 +528,12 @@ export function InProcessShipmentsContent({
           />
         )}
       </div>
+      {notesOrderId !== null && (
+        <FollowupNotesModal orderId={notesOrderId} onClose={() => setNotesOrderId(null)} />
+      )}
+      {actionLogOrderId !== null && (
+        <OrderActionLogModal orderId={actionLogOrderId} onClose={() => setActionLogOrderId(null)} />
+      )}
     </div>
   );
 }
