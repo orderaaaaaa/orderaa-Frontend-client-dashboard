@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import { Textarea } from '@/components/ui/textarea';
-import { usePostShippingReasons } from '@/services/logistics';
+import { useCancellationReasons } from '@/services/orders';
 import clsx from 'clsx';
 
 interface PostShippingCancelModalProps {
@@ -18,7 +18,7 @@ export default function PostShippingCancelModal({
   const [selectedReasonId, setSelectedReasonId] = useState<number | null>(null);
   const [notes, setNotes] = useState('');
 
-  const { data: reasons = [], isLoading } = usePostShippingReasons(isOpen);
+  const { data: reasons = [], isLoading } = useCancellationReasons(isOpen, 'REFUSAL_TO_ACCEPT');
 
   const handleConfirm = () => {
     if (!selectedReasonId) return;

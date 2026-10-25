@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { OrderProduct } from '@/types/orders';
-import { usePostShippingReasons } from '@/services/logistics';
+import { useCancellationReasons } from '@/services/orders';
 import clsx from 'clsx';
 
 interface ReturnRefundModalProps {
@@ -22,7 +22,7 @@ export default function ReturnRefundModal({
   const [amount, setAmount] = useState('');
   const [selectedReasonId, setSelectedReasonId] = useState<number | null>(null);
 
-  const { data: reasons = [], isLoading: loadingReasons } = usePostShippingReasons(isOpen);
+  const { data: reasons = [], isLoading: loadingReasons } = useCancellationReasons(isOpen, 'REFUSAL_TO_ACCEPT');
 
   const reasonOptions = reasons.map((r) => ({
     key: String(r.id),

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import BaseModal from '@/components/ui/base-modal';
+import Link from 'next/link';
 import { LiaCommentDotsSolid } from 'react-icons/lia';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useCancellationReasons, useTopCancellationReasons } from '@/services/orders';
@@ -47,12 +48,14 @@ export default function CancelOrderModal({
 
   const isLoading = loadingAllReasons || loadingTopReasons;
 
-  const handleSelectFromDropdown = (reasonName: string) => {
-    const reason = allReasons.find(r => r.reasonName === reasonName);
+  const handleSelectFromDropdown = (reasonKey: string) => {
+    const reason = allReasons.find(r => String(r.id) === reasonKey);
     if (reason) {
       setSelectedReasonId(reason.id);
     }
   };
+
+  const allReasonOptions = allReasons.map(r => ({ key: String(r.id), label: r.reasonName }));
 
   return (
     <BaseModal
@@ -109,12 +112,12 @@ export default function CancelOrderModal({
               </div>
 
               {/* Searchable Select for All Reasons */}
-              {allReasons.length > 0 && (
+              {allReasons.length > 0 ? (
                 <div className="mt-2">
                   <SearchableSelect
-                    value={selectedReason && !isSelectedFromTopReasons ? selectedReason.reasonName : undefined}
+                    value={selectedReason && !isSelectedFromTopReasons ? String(selectedReason.id) : undefined}
                     onValueChange={handleSelectFromDropdown}
-                    options={allReasons.map(r => r.reasonName)}
+                    options={allReasonOptions}
                     placeholder="اختر سبب آخر..."
                     searchPlaceholder="بحث عن سبب..."
                     emptyMessage="لا توجد أسباب متاحة"
@@ -125,6 +128,13 @@ export default function CancelOrderModal({
                       }`}
                     clearable
                   />
+                </div>
+              ) : (
+                <div className="mt-2 flex flex-col gap-2 rounded-lg border border-dashed border-[#ECECEC] p-4 text-sm text-[#1F1F1F]">
+                  <p>لا توجد أسباب إلغاء متاحة</p>
+                  <Link href="/dashboard/store-settings" className="font-semibold text-primary hover:underline">
+                    أضف أسباب الإلغاء من إعدادات المتجر
+                  </Link>
                 </div>
               )}
             </>
