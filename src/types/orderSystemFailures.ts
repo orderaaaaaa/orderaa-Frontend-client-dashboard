@@ -27,7 +27,8 @@ export type ShippingDispatchFailureCode =
   | 'SHIPMENT_DISPATCH_FAILED'
   | 'SHIPMENT_UPDATE_NOT_SENT'
   | 'SHIPMENT_OUTCOME_UNKNOWN'
-  | 'OLD_SHIPMENT_STILL_LIVE';
+  | 'OLD_SHIPMENT_STILL_LIVE'
+  | 'SHIPMENT_CANCEL_AT_CARRIER';
 
 export type AutomationFailureCode =
   | 'AUTOMATION_NOT_SENT'
@@ -259,6 +260,12 @@ export type ShipmentUpdateNotSentDetails = ShipmentCarrierSendDetails;
 
 export type ShipmentOutcomeUnknownDetails = ShipmentCarrierSendDetails;
 
+export interface ShipmentCancelAtCarrierDetails {
+  shippingCompanyId: number;
+  carrierName: string;
+  shippingId: string;
+}
+
 export type AutomationNotSentReason = 'NO_API_KEY' | 'NO_STRATEGY';
 
 export type AutomationMappingNotSavedReason =
@@ -457,6 +464,7 @@ export interface OrderSystemFailureDetailsByCode {
   SHIPMENT_UPDATE_NOT_SENT: ShipmentUpdateNotSentDetails;
   SHIPMENT_OUTCOME_UNKNOWN: ShipmentOutcomeUnknownDetails;
   OLD_SHIPMENT_STILL_LIVE: OldShipmentStillLiveDetails;
+  SHIPMENT_CANCEL_AT_CARRIER: ShipmentCancelAtCarrierDetails;
   AUTOMATION_NOT_SENT: AutomationNotSentDetails;
   AUTOMATION_SEND_FAILED: AutomationSendFailedDetails;
   AUTOMATION_MAPPING_NOT_SAVED: AutomationMappingNotSavedDetails;

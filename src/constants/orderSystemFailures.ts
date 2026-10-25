@@ -30,6 +30,7 @@ export const ORDER_SYSTEM_FAILURE_LABELS: Record<OrderSystemFailureCode, string>
   SHIPMENT_UPDATE_NOT_SENT: 'لم يتم إرسال التعديل لشركة الشحن: تحقق من الشركة قبل إعادة الإرسال',
   SHIPMENT_OUTCOME_UNKNOWN: 'لم يتم الإرسال: النتيجة غير معروفة، تحقق من شركة الشحن قبل إعادة الإرسال',
   OLD_SHIPMENT_STILL_LIVE: 'الشحنة القديمة ما زالت فعالة لدى شركة الشحن السابقة: ألغِها هناك',
+  SHIPMENT_CANCEL_AT_CARRIER: 'الشحنة ما زالت لدى شركة الشحن، ألغِها يدويًا لدى الشركة',
   AUTOMATION_NOT_SENT: 'لم يتم إرسال الطلب للأتمتة',
   AUTOMATION_SEND_FAILED: 'فشل إرسال الطلب للأتمتة',
   AUTOMATION_MAPPING_NOT_SAVED: 'لم يتم حفظ ربط الطلب مع الأتمتة',

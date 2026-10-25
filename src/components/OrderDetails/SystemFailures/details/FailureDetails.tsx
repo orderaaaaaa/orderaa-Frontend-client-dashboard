@@ -148,6 +148,15 @@ export function FailureDetails({
           </DetailField>
         </DetailGrid>
       );
+    case 'SHIPMENT_CANCEL_AT_CARRIER':
+      return (
+        <DetailGrid>
+          <DetailField label="شركة الشحن">{narrowed.details.carrierName}</DetailField>
+          <DetailField label="رقم الشحنة" ltr>
+            {narrowed.details.shippingId}
+          </DetailField>
+        </DetailGrid>
+      );
     case 'AUTOMATION_NOT_SENT':
       return (
         <DetailGrid>

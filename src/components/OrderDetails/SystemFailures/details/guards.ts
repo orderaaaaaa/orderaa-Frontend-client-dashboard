@@ -30,6 +30,7 @@ import type {
   OrderSystemFailureDetailsByCode,
   ScheduledTransitionFailedDetails,
   ShadowActivationFailedDetails,
+  ShipmentCancelAtCarrierDetails,
   ShipmentDispatchFailedDetails,
   ShipmentCarrierSendDetails,
   ShipmentDispatchFailureReason,
@@ -263,6 +264,12 @@ const isOldShipmentStillLive = (value: unknown): value is OldShipmentStillLiveDe
   typeof value.newCompanyId === 'number' &&
   isString(value.shippingId);
 
+const isShipmentCancelAtCarrier = (value: unknown): value is ShipmentCancelAtCarrierDetails =>
+  isRecord(value) &&
+  typeof value.shippingCompanyId === 'number' &&
+  isString(value.carrierName) &&
+  isString(value.shippingId);
+
 const isShipmentUpdateNotSent = (value: unknown): value is ShipmentUpdateNotSentDetails =>
   isShipmentCarrierSend(value);
 
@@ -438,6 +445,8 @@ export function narrowFailureDetails(
       return isShipmentOutcomeUnknown(details) ? { code, details } : null;
     case 'OLD_SHIPMENT_STILL_LIVE':
       return isOldShipmentStillLive(details) ? { code, details } : null;
+    case 'SHIPMENT_CANCEL_AT_CARRIER':
+      return isShipmentCancelAtCarrier(details) ? { code, details } : null;
     case 'AUTOMATION_NOT_SENT':
       return isAutomationNotSent(details) ? { code, details } : null;
     case 'AUTOMATION_SEND_FAILED':
