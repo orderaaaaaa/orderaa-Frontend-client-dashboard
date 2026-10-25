@@ -47,7 +47,7 @@ export default function OrderSettingsPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isDirty },
+    formState: { errors, isDirty, dirtyFields },
     watch,
     setValue,
     getValues,
@@ -68,7 +68,11 @@ export default function OrderSettingsPage() {
   const guard = useUnsavedChangesGuard(isDirty || sectionsDirty);
 
   const onSubmit = (data: OrderSettingsFormData) => {
-    updateSettings(sanitizeOrderSettings(data, !hasShippingConfig), {
+    const payload = sanitizeOrderSettings(data, !hasShippingConfig);
+    if (!dirtyFields.cancellationReasons) {
+      delete payload.cancellationReasons;
+    }
+    updateSettings(payload, {
       onSuccess: () => reset(getValues()),
     });
   };
