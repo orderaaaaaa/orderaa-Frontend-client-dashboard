@@ -17,7 +17,7 @@ export interface AutoConfirmationConfig {
   merchantId: number;
   provider: AutomationProvider;
   configType: AutomationConfigType;
-  apiKey: string | null;
+  hasApiKey: boolean;
   metadata: Record<string, unknown> | null;
   isActive: boolean;
   createdAt: string;

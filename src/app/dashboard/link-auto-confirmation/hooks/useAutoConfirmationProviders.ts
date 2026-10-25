@@ -9,7 +9,7 @@ import { useAutoConfirmationConfigs } from './useAutoConfirmationConfigs';
 
 export interface AutoConfirmationConfigInput {
   provider: AutoConfirmationProviderId;
-  apiKey: string;
+  apiKey?: string;
   accountId?: string;
   isActive: boolean;
 }
@@ -50,12 +50,13 @@ export const useAutoConfirmationProviders = () => {
         await updateConfig({
           configId: existing.id,
           data: {
-            apiKey: input.apiKey,
+            ...(input.apiKey ? { apiKey: input.apiKey } : {}),
             isActive: input.isActive,
             metadata,
           },
         });
       } else {
+        if (!input.apiKey) throw new Error('يرجى إدخال مفتاح API');
         await createConfig({
           provider: input.provider,
           configType: 'API',

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,6 +14,10 @@ import {
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
+import {
+  SavedSecretStatus,
+  SECRET_KEEP_PLACEHOLDER,
+} from '@/components/SavedSecretStatus';
 import { Switch } from '@/components/ui/switch';
 import {
   Accordion,
@@ -54,10 +58,16 @@ export const AutoConfirmationModal: React.FC<AutoConfirmationModalProps> = ({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const isEditing = !!existingConfig;
+  const hasStoredApiKey = !!existingConfig?.hasApiKey;
   const steps = provider ? autoConfirmationSetupSteps[provider.id] : [];
 
+  const resolver = useMemo(
+    () => zodResolver(autoConfirmationConfigSchema(!hasStoredApiKey)),
+    [hasStoredApiKey]
+  );
+
   const form = useForm<AutoConfirmationFormData>({
-    resolver: zodResolver(autoConfirmationConfigSchema),
+    resolver,
     defaultValues: {
       apiKey: '',
       accountId: '',
@@ -72,7 +82,7 @@ export const AutoConfirmationModal: React.FC<AutoConfirmationModalProps> = ({
     setConfirmDelete(false);
     if (existingConfig) {
       form.reset({
-        apiKey: existingConfig.apiKey ?? '',
+        apiKey: '',
         accountId: getAccountIdFromMetadata(existingConfig.metadata) ?? '',
         isActive: existingConfig.isActive,
       });
@@ -96,7 +106,7 @@ export const AutoConfirmationModal: React.FC<AutoConfirmationModalProps> = ({
     try {
       await saveConfig({
         provider: provider.id,
-        apiKey: data.apiKey.trim(),
+        apiKey: data.apiKey?.trim() || undefined,
         accountId: data.accountId?.trim() || undefined,
         isActive: data.isActive,
       });
@@ -244,13 +254,21 @@ export const AutoConfirmationModal: React.FC<AutoConfirmationModalProps> = ({
           )}
 
           <div className="space-y-4">
+            {isEditing && (
+              <SavedSecretStatus label="مفتاح API" saved={hasStoredApiKey} />
+            )}
+
             <Input
               register={form.register}
               name="apiKey"
               label="مفتاح API"
-              required
+              required={!hasStoredApiKey}
               type="text"
-              placeholder={`أدخل مفتاح API الخاص بـ ${provider.name}`}
+              placeholder={
+                hasStoredApiKey
+                  ? SECRET_KEEP_PLACEHOLDER
+                  : `أدخل مفتاح API الخاص بـ ${provider.name}`
+              }
               error={form.formState.errors.apiKey?.message}
               disabled={isSaving}
             />
