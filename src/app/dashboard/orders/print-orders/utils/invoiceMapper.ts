@@ -21,7 +21,7 @@ export function mapOrderToInvoice(
   const isCOD = order.paymentMethod?.toLowerCase().includes('delivery') ||
                 order.paymentMethod?.toLowerCase() === 'cod';
 
-  const activeShipping = order.shipping_ids?.find((s) => s.isActive) ?? order.shipping_ids?.[0];
+  const activeShipping = order.shipping_ids?.find((s) => s.isActive);
   const resolvedShippingId = order.shippingId || activeShipping?.shippingId || undefined;
   const resolvedShippingCompanyCode =
     order.shippingCompanyRef === undefined
