@@ -61,7 +61,7 @@ export interface TrackingCard {
   shippingEventId?: number | null;
   createdAt: string;
   updatedAt: string;
-  order?: Partial<Order>;
+  order?: Partial<FollowupOrder>;
 }
 
 export interface TrackingCardsFilter {
@@ -150,12 +150,30 @@ export interface FollowupOrderEvent extends OrderEvent {
   type?: FollowupEventType;
 }
 
+export type FollowupClosureKind = 'CLOSED_TODAY' | 'REFUSE' | 'CANCEL';
+
+export interface FollowupClosure {
+  kind: FollowupClosureKind;
+  reasonId: number | null;
+  reasonName: string | null;
+  reasonText: string | null;
+  notes: string | null;
+  closedAt: string;
+  closedByEmployeeId: number | null;
+  carrierHoldsParcel: boolean;
+}
+
+export const FOLLOWUP_WORK_STATES = ['open', 'closed', 'all'] as const;
+
+export type FollowupWorkState = (typeof FOLLOWUP_WORK_STATES)[number];
+
 export interface FollowupOrder extends Order {
   shippingEvents?: FollowupOrderEvent[];
   followupEvents?: FollowupOrderEvent[];
   firstAttemptAt?: string | null;
   delegateName?: string | null;
   delegatePhone?: string | null;
+  closure?: FollowupClosure | null;
 }
 
 export type FollowupTab = 'NEW_ORDERS' | 'OVERDUE' | 'EXECUTED';
@@ -176,6 +194,7 @@ export interface FollowupFilters {
   customerPhone?: string;
   productName?: string;
   shippingStatuses?: string[];
+  workState?: FollowupWorkState;
 }
 
 export const POST_SHIPPING_STATUSES = new Set([

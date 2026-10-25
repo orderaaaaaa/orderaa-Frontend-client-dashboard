@@ -1,5 +1,10 @@
 import http from './http';
-import type { FollowupOrder, FollowupFilters, ShippingPointType } from '@/types/logistics';
+import type {
+  FollowupOrder,
+  FollowupFilters,
+  FollowupClosureKind,
+  ShippingPointType,
+} from '@/types/logistics';
 
 export interface FollowupPaginationMeta {
   total: number;
@@ -30,6 +35,7 @@ function buildParams(filters: FollowupFilters): Record<string, unknown> {
   if (filters.customerPhone) params.customerPhone = filters.customerPhone;
   if (filters.productName) params.productName = filters.productName;
   if (filters.shippingStatuses?.length) params.shippingStatuses = filters.shippingStatuses;
+  if (filters.workState) params.workState = filters.workState;
   return params;
 }
 
@@ -118,14 +124,46 @@ export async function markFollowupSendAgain(orderId: number, reason: string): Pr
   return data;
 }
 
+export interface FollowupReasonBody {
+  reasonId?: number;
+  reasonText?: string;
+  notes?: string;
+}
+
+export interface FollowupClosureResponse {
+  success: boolean;
+  kind: FollowupClosureKind;
+  closedAt: string;
+}
+
+export interface FollowupClosureUndoResponse {
+  success: boolean;
+  undoneKind: FollowupClosureKind;
+}
+
+export async function markFollowupClosed(orderId: number): Promise<FollowupClosureResponse> {
+  const { data } = await http.post<FollowupClosureResponse>(`/orders/followup/${orderId}/close`);
+  return data;
+}
+
+export async function markFollowupRefused(
+  orderId: number,
+  body: FollowupReasonBody
+): Promise<FollowupClosureResponse> {
+  const { data } = await http.post<FollowupClosureResponse>(`/orders/followup/${orderId}/refuse`, body);
+  return data;
+}
+
 export async function markFollowupCancelled(
   orderId: number,
-  reason: string,
-  cancellationNotes?: string
-): Promise<FollowupSuccessResponse> {
-  const body: { reason: string; cancellationNotes?: string } = { reason };
-  if (cancellationNotes) body.cancellationNotes = cancellationNotes;
-  const { data } = await http.post<FollowupSuccessResponse>(`/orders/followup/${orderId}/cancelled`, body);
+  body: FollowupReasonBody
+): Promise<FollowupClosureResponse> {
+  const { data } = await http.post<FollowupClosureResponse>(`/orders/followup/${orderId}/cancelled`, body);
+  return data;
+}
+
+export async function undoFollowupClosure(orderId: number): Promise<FollowupClosureUndoResponse> {
+  const { data } = await http.post<FollowupClosureUndoResponse>(`/orders/followup/${orderId}/closure/undo`);
   return data;
 }
 

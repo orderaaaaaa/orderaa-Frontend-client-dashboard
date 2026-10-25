@@ -9,9 +9,13 @@ import {
   markFollowupPostponed,
   markFollowupChangeProducts,
   markFollowupSendAgain,
+  markFollowupClosed,
+  markFollowupRefused,
   markFollowupCancelled,
   markFollowupOverdue,
+  undoFollowupClosure,
   type FollowupChangeProductInput,
+  type FollowupReasonBody,
 } from '@/lib/api/followup';
 import type { FollowupFilters, ShippingPointType } from '@/types/logistics';
 
@@ -109,18 +113,36 @@ export const useFollowupSendAgainMutation = () => {
   });
 };
 
+export const useFollowupCloseMutation = () => {
+  const invalidate = useFollowupListsInvalidation();
+  return useMutation({
+    mutationFn: ({ orderId }: { orderId: number }) => markFollowupClosed(orderId),
+    onSuccess: invalidate,
+  });
+};
+
+export const useFollowupRefuseMutation = () => {
+  const invalidate = useFollowupListsInvalidation();
+  return useMutation({
+    mutationFn: ({ orderId, ...body }: { orderId: number } & FollowupReasonBody) =>
+      markFollowupRefused(orderId, body),
+    onSuccess: invalidate,
+  });
+};
+
 export const useFollowupCancelledMutation = () => {
   const invalidate = useFollowupListsInvalidation();
   return useMutation({
-    mutationFn: ({
-      orderId,
-      reason,
-      cancellationNotes,
-    }: {
-      orderId: number;
-      reason: string;
-      cancellationNotes?: string;
-    }) => markFollowupCancelled(orderId, reason, cancellationNotes),
+    mutationFn: ({ orderId, ...body }: { orderId: number } & FollowupReasonBody) =>
+      markFollowupCancelled(orderId, body),
+    onSuccess: invalidate,
+  });
+};
+
+export const useFollowupUndoClosureMutation = () => {
+  const invalidate = useFollowupListsInvalidation();
+  return useMutation({
+    mutationFn: ({ orderId }: { orderId: number }) => undoFollowupClosure(orderId),
     onSuccess: invalidate,
   });
 };
