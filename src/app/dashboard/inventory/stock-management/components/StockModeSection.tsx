@@ -31,7 +31,9 @@ export function StockModeSection() {
   const router = useRouter();
   const { hasPermission } = usePermissionCheck();
   const canRead = hasPermission(PERMISSION_CODES.STOCK_WORKFLOWS_READ);
-  const canUpdate = hasPermission(PERMISSION_CODES.STOCK_WORKFLOWS_UPDATE);
+  const canSwitchMode = hasPermission(
+    PERMISSION_CODES.STOCK_WORKFLOWS_MODE_SWITCH,
+  );
   const canReadMovements = hasPermission(PERMISSION_CODES.STOCK_MOVEMENTS_READ);
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -105,7 +107,7 @@ export function StockModeSection() {
               مزامنة مخزون الطلبات
             </Link>
           )}
-          {canUpdate && mode.mode === 'TRIAL' && (
+          {canSwitchMode && mode.mode === 'TRIAL' && (
             <Button size="sm" onClick={() => setDialogOpen(true)}>
               بدء التشغيل الفعلي للمخزون
             </Button>
