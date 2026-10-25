@@ -242,8 +242,9 @@ export interface ShipmentCarrierSendDetails {
   sourceCarrier?: ShippingImplementation | null;
 }
 
-export interface CarrierMessageAfterSwitchDetails
-  extends CarrierFailureDetailsBase {
+export interface CarrierMessageAfterSwitchDetails {
+  carrier: ShippingImplementation;
+  carrierName: string;
   oldCompanyId: number;
   shippingId: string;
 }

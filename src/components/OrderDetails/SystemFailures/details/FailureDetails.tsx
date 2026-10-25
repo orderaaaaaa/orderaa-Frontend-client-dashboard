@@ -129,8 +129,8 @@ export function FailureDetails({
     case 'CARRIER_MESSAGE_AFTER_SWITCH':
       return (
         <DetailGrid>
-          <DetailField label="شركة الشحن السابقة" ltr>
-            {narrowed.details.carrier}
+          <DetailField label="شركة الشحن السابقة">
+            {narrowed.details.carrierName}
           </DetailField>
           <DetailField label="رقم الشحنة" ltr>
             {narrowed.details.shippingId}

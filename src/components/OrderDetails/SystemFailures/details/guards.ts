@@ -253,6 +253,7 @@ const isShipmentCarrierSend = (value: unknown): value is ShipmentCarrierSendDeta
 const isCarrierMessageAfterSwitch = (value: unknown): value is CarrierMessageAfterSwitchDetails =>
   isRecord(value) &&
   isString(value.carrier) &&
+  isString(value.carrierName) &&
   typeof value.oldCompanyId === 'number' &&
   isString(value.shippingId);
 
