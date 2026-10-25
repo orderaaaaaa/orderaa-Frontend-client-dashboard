@@ -155,16 +155,18 @@ function LatenessCell({
       {override !== null && (
         <span className="text-xs text-primary whitespace-nowrap">{OVERRIDE_LABELS[override]}</span>
       )}
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="h-6 px-1.5 text-xs self-start"
-        disabled={locked}
-        onClick={() => setIsLateMarkOpen(true)}
-      >
-        حالة التأخير
-      </Button>
+      <Can code={PERMISSIONS.FOLLOWUP_CARRIERS_LATE_MANAGE}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-6 px-1.5 text-xs self-start"
+          disabled={locked}
+          onClick={() => setIsLateMarkOpen(true)}
+        >
+          حالة التأخير
+        </Button>
+      </Can>
       {isLateMarkOpen && (
         <LateMarkModal
           shippingCompanyId={shippingCompanyId}
@@ -199,16 +201,18 @@ function DeliveryWindowCell({
   return (
     <div className="flex items-center gap-1">
       <span className="whitespace-nowrap">{label}</span>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="h-6 px-1.5 text-xs"
-        disabled={locked}
-        onClick={() => setIsWindowOpen(true)}
-      >
-        تعديل
-      </Button>
+      <Can code={PERMISSIONS.FOLLOWUP_CARRIERS_DELIVERY_MANAGE}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-6 px-1.5 text-xs"
+          disabled={locked}
+          onClick={() => setIsWindowOpen(true)}
+        >
+          تعديل
+        </Button>
+      </Can>
       {isWindowOpen && (
         <DeliveryWindowModal
           shippingCompanyId={shippingCompanyId}
