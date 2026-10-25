@@ -185,7 +185,6 @@ const en: Record<keyof typeof ar, string> = {
   'settlementFinal.formatInvalid': 'Enter an amount of at most 10 digits before the decimal point and 2 after, for example 30 or -12.50.',
   'settlementFinal.empty': 'Enter the final amount.',
   'settlementFinal.unchanged': 'The new amount equals the current amount.',
-  'settlementFinal.saved': 'The final settlement amount was saved.',
   'settlementFinal.failed': 'The final settlement amount could not be saved.',
   'settlementFinal.changeTooLarge': 'The difference between the final and current amount is too large',
   'closure.close': 'Close',
