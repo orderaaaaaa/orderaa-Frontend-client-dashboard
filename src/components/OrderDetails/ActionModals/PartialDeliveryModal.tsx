@@ -5,6 +5,10 @@ import { LiaMinusSolid, LiaPlusSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import { OrderProduct, OrderStatus } from '@/types/orders';
 import { usePartialDelivery } from '@/services/logistics';
+import {
+  RETURN_SHIPMENT_CONTENT_MAX_LENGTH,
+  returnShipmentContentOf,
+} from '@/utils/partialDelivery/returnShipmentContent';
 
 interface PartialDeliveryModalProps {
   isOpen: boolean;
@@ -50,6 +54,7 @@ export default function PartialDeliveryModal({
     {},
   );
   const [overridePrice, setOverridePrice] = useState<string>('');
+  const [contentOverride, setContentOverride] = useState<string | null>(null);
   const partialDelivery = usePartialDelivery();
 
   const groups = useMemo<VariantGroup[]>(() => {
@@ -92,6 +97,9 @@ export default function PartialDeliveryModal({
   }, [orderProducts, selectedIds]);
 
   const calculatedPrice = roundMoney(totalCost - refusedValue);
+  const selectedSet = new Set(selectedIds);
+  const remainingUnits = orderProducts.filter((op) => !selectedSet.has(op.id));
+  const returnShipmentContent = contentOverride ?? returnShipmentContentOf(remainingUnits);
   const totalUnits = orderProducts.length;
   const refusesAll = totalUnits > 0 && selectedIds.length === totalUnits;
   const overrideValue = overridePrice === '' ? undefined : Number(overridePrice);
@@ -109,6 +117,7 @@ export default function PartialDeliveryModal({
   const handleReset = () => {
     setRefusedByGroup({});
     setOverridePrice('');
+    setContentOverride(null);
   };
 
   const handleClose = () => {
@@ -124,6 +133,7 @@ export default function PartialDeliveryModal({
         orderId,
         returnedOrderProductIds: selectedIds,
         adjustedTotalCost: overrideValue,
+        returnShipmentContent,
       },
       {
         onSuccess: () => {
@@ -236,7 +246,7 @@ export default function PartialDeliveryModal({
 
         <div className="flex flex-col gap-2">
           <label className="font-bold text-[#1F1F1F]">
-            تعديل السعر النهائي (اختياري)
+            السعر الجديد للطلب الأصلي (اختياري)
           </label>
           <input
             type="number"
@@ -252,6 +262,18 @@ export default function PartialDeliveryModal({
               السعر النهائي يجب أن يكون رقمًا غير سالب
             </p>
           )}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <label className="font-bold text-[#1F1F1F]">محتوى شحنة المرتجع</label>
+          <input
+            type="text"
+            value={returnShipmentContent}
+            maxLength={RETURN_SHIPMENT_CONTENT_MAX_LENGTH}
+            disabled={isPending}
+            onChange={(e) => setContentOverride(e.target.value)}
+            className="w-full border border-[#ECECEC] rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100"
+          />
         </div>
       </div>
     </BaseModal>

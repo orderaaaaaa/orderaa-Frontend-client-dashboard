@@ -34,7 +34,7 @@ import type {
 } from '@/types/shippingProviders';
 
 const BASE = '/shipping/providers';
-const KEY = 'shipping-providers';
+export const KEY = 'shipping-providers';
 
 export const useShippingProvidersQuery = (filters?: {
   type?: ShippingProviderType;

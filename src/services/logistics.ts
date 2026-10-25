@@ -22,6 +22,11 @@ import { toast } from 'react-toastify';
 import { recordPartialDelivery, recordReturnRefund } from '@/lib/api/order';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { invalidateStockViews } from '@/services/warehouses';
+import { KEY as SHIPPING_PROVIDERS_KEY } from '@/services/shippingProviders';
+import {
+  CARRIER_SEND_NOT_SENT_WARNING,
+  carrierSendNeedsAttention,
+} from '@/utils/manualOrder/carrierSend';
 
 // ─── Mock Data (UI preview until backend is ready) ───────────────────────────
 // The governorate logistics config is no longer mocked — it calls
@@ -140,8 +145,12 @@ export const usePartialDelivery = () => {
         queryKey: [QUERY_KEYS.ORDER_STATISTICS],
       });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CUSTOMER_ORDERS] });
+      queryClient.invalidateQueries({ queryKey: [SHIPPING_PROVIDERS_KEY] });
       invalidateStockViews(queryClient);
       toast.success(`تم إنشاء طلب المرتجع ${result.returnOrder.code}`);
+      if (carrierSendNeedsAttention(result.carrierSend)) {
+        toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
+      }
     },
     onError: (error: unknown) => {
       toast.error(getApiErrorMessage(error, 'تعذر تنفيذ التسليم الجزئي'));
