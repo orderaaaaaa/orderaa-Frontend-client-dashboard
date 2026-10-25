@@ -14,6 +14,8 @@ import {
   getShortfallSettlements,
   listSettlementBatchOrders,
   listSettlementBatches,
+  settleFinalAmount,
+  type SettleFinalAmountPayload,
 } from '@/lib/api/settlement';
 
 export type ShortfallFilter = 'all' | 'pending' | 'finished';
@@ -117,5 +119,14 @@ export function useAdjustSettlementMutation() {
     mutationFn: ({ orderId, amount }: { orderId: number; amount: number }) =>
       adjustSettlement(orderId, amount),
     onSuccess: () => syncSettlement(),
+  });
+}
+
+export function useSettleFinalAmountMutation() {
+  const syncSettlement = useSettlementSync();
+  return useMutation({
+    mutationFn: ({ orderId, amount, expectedAmount }: SettleFinalAmountPayload) =>
+      settleFinalAmount(orderId, amount, expectedAmount),
+    onSettled: () => syncSettlement(),
   });
 }

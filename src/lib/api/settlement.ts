@@ -272,6 +272,32 @@ export async function adjustSettlement(
   await api.patch(`/orders/settlement/${orderId}/adjust`, { amount });
 }
 
+export interface SettleFinalAmountPayload {
+  orderId: number;
+  amount: string;
+  expectedAmount: string;
+}
+
+export interface SettleFinalAmountResult {
+  id: number;
+  code: string;
+  status: string;
+  settlementAmount: string;
+  settlementResolved: boolean;
+}
+
+export async function settleFinalAmount(
+  orderId: number,
+  amount: string,
+  expectedAmount: string,
+): Promise<SettleFinalAmountResult> {
+  const { data } = await api.patch<SettleFinalAmountResult>(
+    `/orders/settlement/${orderId}/final-amount`,
+    { amount, expectedAmount },
+  );
+  return data;
+}
+
 export const SETTLEMENT_REMOVAL_MODES = ['REVERT', 'CLEAR', 'DETACH'] as const;
 
 export type SettlementRemovalMode = (typeof SETTLEMENT_REMOVAL_MODES)[number];
