@@ -126,6 +126,8 @@ export default function SettlementBatchOrdersPanel({
           </thead>
           <tbody>
             {orders.map((row) => {
+              // Showing both is the point: an order can move on after
+              // it was settled.
               const moved = row.currentStatus !== row.targetStatus;
               return (
                 <tr key={row.orderId} className="border-t">
