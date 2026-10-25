@@ -154,6 +154,17 @@ export default function CollectionsPage() {
     }
   }, [batchesQuery.isSuccess, batches.length, page]);
 
+  useEffect(() => {
+    if (
+      batchesQuery.isSuccess &&
+      !batchesQuery.isPlaceholderData &&
+      selectedBatch &&
+      !batches.some((batch) => batch.id === selectedBatch.id)
+    ) {
+      setSelectedBatch(null);
+    }
+  }, [batchesQuery.isSuccess, batchesQuery.isPlaceholderData, batches, selectedBatch]);
+
   const handleBatchDeleted = () => {
     if (deleteTarget && selectedBatch?.id === deleteTarget.id) {
       setSelectedBatch(null);
