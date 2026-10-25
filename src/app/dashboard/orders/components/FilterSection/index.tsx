@@ -84,6 +84,9 @@ function warnUnprintable(skipped: PrintSkippedOrder[]) {
     const count = skipped.filter((s) => s.reason === reason).length;
     if (count > 0 && message) toast.warning(message(count));
   }
+  for (const item of skipped) {
+    if (item.reason === 'NO_SHIPPING_CODE') toast.warning(item.message);
+  }
 }
 
 function getActiveFiltersFromFormValues(
@@ -305,21 +308,20 @@ export function FilterSection({
       const { claimed, skipped } = await claimOrdersForPrint(
         selectedOrders.map((order) => order.id)
       );
-      const claimedById = new Map(claimed.map((order) => [order.id, order]));
-      const reprintIds = new Set(
-        skipped.filter((s) => s.reason === 'PRINTED').map((s) => s.id)
-      );
-      const markIds = new Set(
-        skipped.filter((s) => s.reason === 'NOT_CONFIRMED').map((s) => s.id)
-      );
+      const invoiceById = new Map(claimed.map((order) => [order.id, order]));
+      const reprintIds = new Set<number>();
+      const markIds = new Set<number>();
+      for (const item of skipped) {
+        if (item.reason !== 'PRINTED' && item.reason !== 'NOT_CONFIRMED') continue;
+        if (!item.invoice) continue;
+        invoiceById.set(item.id, item.invoice);
+        (item.reason === 'PRINTED' ? reprintIds : markIds).add(item.id);
+      }
       warnUnprintable(skipped);
 
       const printable = selectedOrders
-        .map((order) =>
-          claimedById.get(order.id) ??
-          (reprintIds.has(order.id) || markIds.has(order.id) ? order : null)
-        )
-        .filter((order): order is Order => order !== null);
+        .map((order) => invoiceById.get(order.id))
+        .filter((order): order is Order => order !== undefined);
 
       if (printable.length === 0) {
         toast.error('لا توجد طلبات متاحة للطباعة');
@@ -327,7 +329,7 @@ export function FilterSection({
       }
 
       await startPrintJob(printable, {
-        claimedIds: Array.from(claimedById.keys()),
+        claimedIds: claimed.map((order) => order.id),
         markIds: Array.from(markIds),
         reprintIds: Array.from(reprintIds),
       });
