@@ -195,7 +195,7 @@ export interface ShipmentMissingPhoneDetails {
 }
 
 export interface ShipmentDispatchFailedDetails {
-  trigger: 'PARKED_RELEASE';
+  trigger: 'PARKED_RELEASE' | 'HELD_ACTIVATION';
   companyName?: string;
   reason: ShipmentDispatchFailureReason;
 }

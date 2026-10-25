@@ -194,7 +194,7 @@ const isShipmentMissingPhone = (value: unknown): value is ShipmentMissingPhoneDe
 
 const isShipmentDispatchFailed = (value: unknown): value is ShipmentDispatchFailedDetails =>
   isRecord(value) &&
-  value.trigger === 'PARKED_RELEASE' &&
+  (value.trigger === 'PARKED_RELEASE' || value.trigger === 'HELD_ACTIVATION') &&
   (value.companyName === undefined || isString(value.companyName)) &&
   isShipmentDispatchReason(value.reason);
 
