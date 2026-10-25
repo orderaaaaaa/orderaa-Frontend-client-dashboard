@@ -6,11 +6,12 @@ import type {
   CarrierCancelledLaneAppliedDetails,
   CarrierCancelledLaneStockDetails,
 } from '@/types/orderSystemFailures';
-import { DetailField, DetailGrid, EMPTY_VALUE } from './DetailFields';
-
-const productLabelOf = (productName: string, variantLabel: string) =>
-  [productName, variantLabel].filter((part) => part !== '').join(' - ') ||
-  EMPTY_VALUE;
+import {
+  DetailField,
+  DetailGrid,
+  EMPTY_VALUE,
+  productLabelOf,
+} from './DetailFields';
 
 const movedLineText = (line: CancelledLaneMovedLine) =>
   `${productLabelOf(line.productName, line.variantLabel)}: من ` +
@@ -104,7 +105,9 @@ export function CancelledLaneStockDetails({
           </span>
           <ul className="list-disc ps-5 text-sm">
             {details.trialSkipped.map((line, index) => (
-              <li key={index}>{productLabelOf(line.productName, line.variantLabel)}</li>
+              <li key={index}>
+                {productLabelOf(line.productName, line.variantLabel)}
+              </li>
             ))}
           </ul>
         </div>

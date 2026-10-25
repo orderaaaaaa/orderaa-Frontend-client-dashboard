@@ -2,6 +2,10 @@ import React from 'react';
 
 export const EMPTY_VALUE = '—';
 
+export const productLabelOf = (productName: string, variantLabel: string) =>
+  [productName, variantLabel].filter((part) => part !== '').join(' - ') ||
+  EMPTY_VALUE;
+
 export const formatDetailValue = (value: unknown): string => {
   if (value === null || value === undefined || value === '') return EMPTY_VALUE;
   if (typeof value === 'boolean') return value ? 'نعم' : 'لا';
