@@ -2,6 +2,7 @@
 
 import Input from '@/components/ui/Input';
 import type { CountSheetRowApi } from '@/lib/api/stockCount';
+import { variantOptionLabel } from '@/lib/variantOptionLabel';
 
 interface OpeningCountTableProps {
   rows: CountSheetRowApi[];
@@ -42,7 +43,11 @@ export function OpeningCountTable({
               <tr key={row.variantId} className="border-b border-gray-100">
                 <td className="py-2 px-3">
                   <p className="font-medium text-gray-900">{row.productName}</p>
-                  <p className="text-xs text-gray-400">{row.combinationKey}</p>
+                  {variantOptionLabel(row.options) && (
+                    <p className="text-xs text-gray-400">
+                      {variantOptionLabel(row.options)}
+                    </p>
+                  )}
                 </td>
                 <td className="py-2 px-3 text-gray-600">{row.sku ?? '—'}</td>
                 <td className="py-2 px-3 text-gray-600">{row.quantity}</td>

@@ -1,4 +1,5 @@
 import api from './index';
+import type { WarehouseVariantOption } from './warehouses';
 
 export interface CountSheetParams {
   warehouseId: number;
@@ -15,6 +16,7 @@ export interface CountSheetRowApi {
   barcode: string | null;
   combinationKey: string;
   quantity: number;
+  options: WarehouseVariantOption[];
 }
 
 export interface CountSheetPageApi {
