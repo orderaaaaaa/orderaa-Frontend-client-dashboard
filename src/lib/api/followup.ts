@@ -186,11 +186,9 @@ export interface FollowupNoteView {
   canDelete: boolean;
 }
 
-export type FollowupLegacyNoteName = 'ATTEMPTED' | 'POSTPONED' | 'OVERDUE';
-
 export interface FollowupLegacyNote {
   id: number;
-  name: FollowupLegacyNoteName;
+  name: string;
   note: string;
   employeeName: string | null;
   createdAt: string;
@@ -206,6 +204,7 @@ export interface FollowupCarrierContact {
   at: string;
   name: string | null;
   phone: string | null;
+  repeats: number;
 }
 
 export interface FollowupNoteDay {

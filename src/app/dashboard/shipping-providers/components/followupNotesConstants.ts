@@ -1,8 +1,4 @@
-import type {
-  FollowupActionEventSource,
-  FollowupLegacyNoteName,
-  FollowupNotePartyValue,
-} from '@/lib/api/followup';
+import type { FollowupActionEventSource, FollowupNotePartyValue } from '@/lib/api/followup';
 
 export const FOLLOWUP_NOTE_MAX_LENGTH = 2000;
 
@@ -38,7 +34,7 @@ export const FOLLOWUP_CARRIER_TEXTS_LABEL = 'حالات جهة الشحن';
 export const FOLLOWUP_CARRIER_CONTACTS_LABEL = 'بيانات المندوب';
 export const FOLLOWUP_CARRIER_REPEAT_PREFIX = '×';
 
-export const FOLLOWUP_LEGACY_NAME_LABELS: Record<FollowupLegacyNoteName, string> = {
+export const FOLLOWUP_LEGACY_NAME_LABELS: Partial<Record<string, string>> = {
   ATTEMPTED: 'متابعة',
   POSTPONED: 'تأجيل',
   OVERDUE: 'متأخر',

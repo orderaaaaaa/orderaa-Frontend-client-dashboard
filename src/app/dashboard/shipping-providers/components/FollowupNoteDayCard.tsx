@@ -68,6 +68,7 @@ function CarrierContactList({ contacts }: { contacts: FollowupCarrierContact[] }
               {contact.phone}
             </span>
           )}
+          {repeatsSuffix(contact.repeats)}
         </li>
       ))}
     </ul>
@@ -127,7 +128,7 @@ function LegacyNoteList({ legacyNotes }: { legacyNotes: FollowupLegacyNote[] }) 
             <span className="rounded-full bg-gray-100 px-2 py-0.5 font-semibold text-gray-700">
               {FOLLOWUP_LEGACY_TAG}
             </span>
-            <span>{FOLLOWUP_LEGACY_NAME_LABELS[legacy.name]}</span>
+            <span>{FOLLOWUP_LEGACY_NAME_LABELS[legacy.name] ?? legacy.name}</span>
             <span>
               {legacy.employeeName ?? FOLLOWUP_NOTE_NO_WRITER} - {formatDateTime(legacy.createdAt)}
             </span>
