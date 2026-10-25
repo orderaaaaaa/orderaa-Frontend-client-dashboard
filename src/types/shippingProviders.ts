@@ -118,6 +118,8 @@ export interface SendAgainNotEligibleErrorBody {
 
 export interface ReturnedShipment extends ShipmentRowBase {
   lateness: null;
+  courierName: string | null;
+  courierPhone: string | null;
   sendAgainEligible: boolean;
   sendAgainBlockedReason: SendAgainBlockedReason | null;
 }
