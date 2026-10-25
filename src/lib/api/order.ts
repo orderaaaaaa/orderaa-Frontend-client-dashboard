@@ -159,35 +159,6 @@ export async function getNextOrderId(
   }
 }
 
-export interface CancellationReason {
-  id: number;
-  reasonName: string;
-  isActive: boolean;
-  displayOrder: number;
-  usageCount: number;
-  lastUsedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export async function getCancellationReasons(): Promise<CancellationReason[]> {
-  try {
-    const response = await api.get<CancellationReason[]>('/cancellation-reasons');
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-}
-
-export async function getTopCancellationReasons(): Promise<CancellationReason[]> {
-  try {
-    const response = await api.get<CancellationReason[]>('/cancellation-reasons/top');
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-}
-
 export async function cancelOrder(
   orderId: number,
   data: { cancelReasonId: number; notes?: string }

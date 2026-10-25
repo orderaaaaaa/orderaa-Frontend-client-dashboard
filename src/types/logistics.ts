@@ -72,30 +72,6 @@ export interface TrackingCardsFilter {
   limit?: number;
 }
 
-export interface PostShippingReason {
-  id: number;
-  reasonName: string;
-  type: 'POST_SHIPPING';
-  isActive: boolean;
-  displayOrder: number;
-  usageCount: number;
-  lastUsedAt?: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ShippingCancellationReason {
-  id: number;
-  reasonName: string;
-  type: 'SHIPPING_CANCELLATION';
-  isActive: boolean;
-  displayOrder: number;
-  usageCount: number;
-  lastUsedAt?: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface PartialDeliveryData {
   orderId: number;
   returnedOrderProductIds: number[];

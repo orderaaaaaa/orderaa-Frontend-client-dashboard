@@ -11,8 +11,6 @@ import {
   GovernorateLogisticsConfigRow,
   TrackingCard,
   TrackingCardsFilter,
-  PostShippingReason,
-  ShippingCancellationReason,
   PartialDeliveryData,
   ExchangeData,
   ReturnRefundData,
@@ -31,25 +29,6 @@ import { invalidateStockViews } from '@/services/warehouses';
 // deliberately: it spelled labels as 'القاهرة' while the canonical lookup
 // emits 'القاهره', which is exactly the mismatch that keeps these settings
 // from ever matching an order. Governorates now come from /lookups/governorates.
-
-let mockPostShippingReasons: PostShippingReason[] = [
-  { id: 1, reasonName: 'العميل رفض المعاينة', type: 'POST_SHIPPING', isActive: true, displayOrder: 1, usageCount: 12, lastUsedAt: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: 2, reasonName: 'الخامة غير مطابقة', type: 'POST_SHIPPING', isActive: true, displayOrder: 2, usageCount: 8, lastUsedAt: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: 3, reasonName: 'السعر مختلف عن الموقع', type: 'POST_SHIPPING', isActive: true, displayOrder: 3, usageCount: 5, lastUsedAt: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: 4, reasonName: 'العميل مسافر', type: 'POST_SHIPPING', isActive: true, displayOrder: 4, usageCount: 3, lastUsedAt: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: 5, reasonName: 'عدم توفر سيولة', type: 'POST_SHIPPING', isActive: true, displayOrder: 5, usageCount: 7, lastUsedAt: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: 6, reasonName: 'تم الشراء من مكان آخر', type: 'POST_SHIPPING', isActive: true, displayOrder: 6, usageCount: 2, lastUsedAt: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-];
-
-let mockReasonNextId = 7;
-
-let mockShippingCancellationReasons: ShippingCancellationReason[] = [
-  { id: 1, reasonName: 'تأخر الشحنة', type: 'SHIPPING_CANCELLATION', isActive: true, displayOrder: 1, usageCount: 10, lastUsedAt: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: 2, reasonName: 'عنوان خاطئ', type: 'SHIPPING_CANCELLATION', isActive: true, displayOrder: 2, usageCount: 6, lastUsedAt: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: 3, reasonName: 'العميل غير متاح', type: 'SHIPPING_CANCELLATION', isActive: true, displayOrder: 3, usageCount: 4, lastUsedAt: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-];
-
-let mockShippingCancellationNextId = 4;
 
 // ─── Governorate Logistics Config ────────────────────────────────────────────
 
@@ -140,157 +119,6 @@ export const useUpdateTrackingCard = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.TRACKING_CARDS],
-      });
-    },
-  });
-};
-
-// ─── Post-Shipping Reasons ───────────────────────────────────────────────────
-// TODO: Replace mock with real API when backend implements GET /post-shipping-reasons
-
-export const usePostShippingReasons = (enabled = true) => {
-  return useQuery({
-    queryKey: [QUERY_KEYS.POST_SHIPPING_REASONS] as QueryKey,
-    queryFn: async () => {
-      await new Promise((r) => setTimeout(r, 200));
-      return [...mockPostShippingReasons];
-    },
-    enabled,
-    staleTime: 5 * 60 * 1000,
-  });
-};
-
-// TODO: Replace mock with real API when backend implements GET /post-shipping-reasons/top
-export const useTopPostShippingReasons = (enabled = true) => {
-  return useQuery({
-    queryKey: [QUERY_KEYS.TOP_POST_SHIPPING_REASONS] as QueryKey,
-    queryFn: async () => {
-      await new Promise((r) => setTimeout(r, 200));
-      return [...mockPostShippingReasons].slice(0, 5);
-    },
-    enabled,
-    staleTime: 5 * 60 * 1000,
-  });
-};
-
-// TODO: Replace mock with real API when backend implements POST /post-shipping-reasons
-export const useCreatePostShippingReason = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (reasonName: string) => {
-      console.log('[useCreatePostShippingReason] payload:', { reasonName });
-      await new Promise((r) => setTimeout(r, 300));
-      const newReason: PostShippingReason = {
-        id: mockReasonNextId++,
-        reasonName,
-        type: 'POST_SHIPPING',
-        isActive: true,
-        displayOrder: mockPostShippingReasons.length + 1,
-        usageCount: 0,
-        lastUsedAt: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      mockPostShippingReasons.push(newReason);
-      return newReason;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.POST_SHIPPING_REASONS],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.TOP_POST_SHIPPING_REASONS],
-      });
-    },
-  });
-};
-
-// TODO: Replace mock with real API when backend implements DELETE /post-shipping-reasons/:reasonId
-export const useDeletePostShippingReason = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (reasonId: number) => {
-      console.log('[useDeletePostShippingReason] payload:', { reasonId });
-      await new Promise((r) => setTimeout(r, 300));
-      mockPostShippingReasons = mockPostShippingReasons.filter(
-        (r) => r.id !== reasonId
-      );
-      return { success: true };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.POST_SHIPPING_REASONS],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.TOP_POST_SHIPPING_REASONS],
-      });
-    },
-  });
-};
-
-// ─── Shipping Cancellation Reasons ──────────────────────────────────────────
-// TODO: Replace mock with real API when backend implements GET /shipping-cancellation-reasons
-
-export const useShippingCancellationReasons = (enabled = true) => {
-  return useQuery({
-    queryKey: [QUERY_KEYS.SHIPPING_CANCELLATION_REASONS] as QueryKey,
-    queryFn: async () => {
-      await new Promise((r) => setTimeout(r, 200));
-      return [...mockShippingCancellationReasons];
-    },
-    enabled,
-    staleTime: 5 * 60 * 1000,
-  });
-};
-
-// TODO: Replace mock with real API when backend implements POST /shipping-cancellation-reasons
-export const useCreateShippingCancellationReason = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (reasonName: string) => {
-      console.log('[useCreateShippingCancellationReason] payload:', { reasonName });
-      await new Promise((r) => setTimeout(r, 300));
-      const newReason: ShippingCancellationReason = {
-        id: mockShippingCancellationNextId++,
-        reasonName,
-        type: 'SHIPPING_CANCELLATION',
-        isActive: true,
-        displayOrder: mockShippingCancellationReasons.length + 1,
-        usageCount: 0,
-        lastUsedAt: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      mockShippingCancellationReasons.push(newReason);
-      return newReason;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.SHIPPING_CANCELLATION_REASONS],
-      });
-    },
-  });
-};
-
-// TODO: Replace mock with real API when backend implements DELETE /shipping-cancellation-reasons/:reasonId
-export const useDeleteShippingCancellationReason = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (reasonId: number) => {
-      console.log('[useDeleteShippingCancellationReason] payload:', { reasonId });
-      await new Promise((r) => setTimeout(r, 300));
-      mockShippingCancellationReasons = mockShippingCancellationReasons.filter(
-        (r) => r.id !== reasonId
-      );
-      return { success: true };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.SHIPPING_CANCELLATION_REASONS],
       });
     },
   });
