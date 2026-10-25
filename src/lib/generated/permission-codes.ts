@@ -113,6 +113,7 @@ export const PERMISSION_CODES = {
   STOCK_WORKFLOWS_READ: 'stock-workflows:read',
   STOCK_WORKFLOWS_CREATE: 'stock-workflows:create',
   STOCK_WORKFLOWS_UPDATE: 'stock-workflows:update',
+  STOCK_WORKFLOWS_MODE_SWITCH: 'stock-workflows:mode:switch',
   STOCK_WORKFLOWS_DELETE: 'stock-workflows:delete',
   VIRTUAL_WAREHOUSES_READ: 'virtual-warehouses:read',
   VIRTUAL_WAREHOUSES_MANAGE: 'virtual-warehouses:manage',
