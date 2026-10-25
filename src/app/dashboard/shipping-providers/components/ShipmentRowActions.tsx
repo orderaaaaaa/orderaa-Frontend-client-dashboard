@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Can } from '@/components/Can';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { useI18n } from '@/i18n/I18nProvider';
+import { closureKindAnyOfCodes } from '@/lib/followupClosurePermissions';
 import { PERMISSIONS, orderStatusSetCodeOf, type PermissionCode } from '@/lib/permissions';
 import { orderDetailsQueryOptions } from '@/services/orders';
 import { useCloseClosure, useUndoClosure } from '@/services/shippingProviders';
@@ -25,6 +26,7 @@ interface RowAction {
   id: ClosureActionId;
   labelKey: 'closure.partial' | 'closure.close' | 'closure.refuse' | 'closure.cancel' | 'closure.reopen';
   codes: PermissionCode[];
+  anyOfCodes?: PermissionCode[];
   disabled: boolean;
   disabledReason?: string;
   onSelect: () => void;
@@ -67,7 +69,7 @@ export function ShipmentRowActions({
   followupTools,
 }: ShipmentRowActionsProps) {
   const { t } = useI18n();
-  const { hasAllPermissions } = usePermissionCheck();
+  const { hasAllPermissions, hasAnyPermission } = usePermissionCheck();
   const [reasonKind, setReasonKind] = useState<ClosureReasonKind | null>(null);
   const [isPartialOpen, setIsPartialOpen] = useState(false);
   const closeMutation = useCloseClosure();
@@ -101,21 +103,24 @@ export function ShipmentRowActions({
     {
       id: 'close',
       labelKey: 'closure.close',
-      codes: [PERMISSIONS.FOLLOWUP_MANAGE],
+      codes: [],
+      anyOfCodes: closureKindAnyOfCodes('CLOSED_TODAY'),
       disabled: closure !== null,
       onSelect: () => closeMutation.mutate(orderId),
     },
     {
       id: 'refuse',
       labelKey: 'closure.refuse',
-      codes: [PERMISSIONS.FOLLOWUP_MANAGE],
+      codes: [],
+      anyOfCodes: closureKindAnyOfCodes('REFUSE'),
       disabled: isLocked,
       onSelect: () => setReasonKind('REFUSE'),
     },
     {
       id: 'cancel',
       labelKey: 'closure.cancel',
-      codes: [PERMISSIONS.FOLLOWUP_MANAGE],
+      codes: [],
+      anyOfCodes: closureKindAnyOfCodes('CANCEL'),
       disabled: isLocked,
       onSelect: () => setReasonKind('CANCEL'),
     },
@@ -125,13 +130,16 @@ export function ShipmentRowActions({
     actions.push({
       id: 'reopen',
       labelKey: 'closure.reopen',
-      codes: [PERMISSIONS.FOLLOWUP_MANAGE],
+      codes: [],
+      anyOfCodes: closureKindAnyOfCodes(closure.kind),
       disabled: false,
       onSelect: () => undoMutation.mutate(orderId),
     });
   }
 
-  const visibleActions = actions.filter((action) => hasAllPermissions(action.codes));
+  const isActionVisible = (action: RowAction): boolean =>
+    hasAllPermissions(action.codes) && (!action.anyOfCodes || hasAnyPermission(action.anyOfCodes));
+  const visibleActions = actions.filter(isActionVisible);
   const closureReason = closure?.reasonName ?? closure?.reasonText ?? null;
 
   return (

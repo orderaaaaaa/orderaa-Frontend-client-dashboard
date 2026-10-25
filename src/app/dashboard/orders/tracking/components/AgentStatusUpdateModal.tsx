@@ -40,6 +40,8 @@ import {
   useFollowupUndoClosureMutation,
 } from '@/services/followup';
 import { useCancellationReasons } from '@/services/orders';
+import { usePermissionCheck } from '@/hooks/usePermissions';
+import { closureKindAnyOfCodes } from '@/lib/followupClosurePermissions';
 import type { FollowupClosure, FollowupClosureKind } from '@/types/logistics';
 import { formatDateTime } from '@/utils/format';
 
@@ -104,6 +106,12 @@ export const FOLLOWUP_CLOSURE_KIND_LABELS: Record<FollowupClosureKind, string> =
   CANCEL: 'ملغي',
 };
 
+const CLOSURE_ACTION_KINDS: Partial<Record<ActionType, FollowupClosureKind>> = {
+  CLOSE: 'CLOSED_TODAY',
+  REFUSE: 'REFUSE',
+  CANCEL: 'CANCEL',
+};
+
 function isActionLockedByClosure(action: ActionType, kind: FollowupClosureKind | null): boolean {
   if (kind === 'REFUSE' || kind === 'CANCEL') return true;
   return action === 'CLOSE' && kind === 'CLOSED_TODAY';
@@ -149,6 +157,7 @@ export default function AgentStatusUpdateModal({
   const cancelledMutation = useFollowupCancelledMutation();
   const overdueMutation = useFollowupOverdueMutation();
   const undoMutation = useFollowupUndoClosureMutation();
+  const { hasAnyPermission } = usePermissionCheck();
 
   const [selectedAction, setSelectedAction] = useState<ActionType | null>(null);
   const [followUpStatus, setFollowUpStatus] = useState<FollowUpSubStatus | null>(null);
@@ -175,6 +184,11 @@ export default function AgentStatusUpdateModal({
   const reasonsReady = reasonsQuery.isSuccess && reasonOptions.length > 0;
 
   const closureKind = closure?.kind ?? null;
+  const canReopenClosure = closure !== null && hasAnyPermission(closureKindAnyOfCodes(closure.kind));
+  const canUseAction = (action: ActionType): boolean => {
+    const kind = CLOSURE_ACTION_KINDS[action];
+    return kind === undefined || hasAnyPermission(closureKindAnyOfCodes(kind));
+  };
 
   const isSubmitting =
     closeMutation.isPending ||
@@ -546,20 +560,22 @@ export default function AgentStatusUpdateModal({
                 )}
                 <span className="text-xs text-gray-400">{formatDateTime(closure.closedAt)}</span>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="shrink-0 gap-1.5"
-                onClick={handleUndo}
-                disabled={isSubmitting}
-              >
-                <LiaUndoAltSolid className="size-3.5" />
-                إعادة فتح
-              </Button>
+              {canReopenClosure && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0 gap-1.5"
+                  onClick={handleUndo}
+                  disabled={isSubmitting}
+                >
+                  <LiaUndoAltSolid className="size-3.5" />
+                  إعادة فتح
+                </Button>
+              )}
             </div>
           )}
           <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-            {ACTION_OPTIONS.map((action) => {
+            {ACTION_OPTIONS.filter((action) => canUseAction(action.value)).map((action) => {
               const Icon = action.icon;
               const isSelected = selectedAction === action.value;
               const isLocked = isActionLockedByClosure(action.value, closureKind);
