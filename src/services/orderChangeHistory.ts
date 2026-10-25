@@ -8,7 +8,7 @@ const PAGE_LIMIT = 20;
 export const orderChangeHistoryKey = (orderId: number) =>
   [QUERY_KEYS.ORDER_DETAILS, orderId, 'change-history'] as const;
 
-export const useOrderChangeHistory = (orderId: number) =>
+export const useOrderChangeHistory = (orderId: number, enabled = true) =>
   useInfiniteQuery({
     queryKey: orderChangeHistoryKey(orderId),
     queryFn: async ({ pageParam }) => {
@@ -21,6 +21,6 @@ export const useOrderChangeHistory = (orderId: number) =>
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
       lastPage.page * lastPage.limit < lastPage.total ? lastPage.page + 1 : undefined,
-    enabled: !!orderId,
+    enabled: enabled && !!orderId,
     staleTime: 0,
   });
