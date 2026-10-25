@@ -21,6 +21,8 @@ export const ORDER_SYSTEM_FAILURE_LABELS: Record<OrderSystemFailureCode, string>
   CARRIER_STATUS_NOT_APPLIED: 'لم يتم تطبيق حالة شركة الشحن',
   CARRIER_CANCELLED_LANE_APPLIED: 'تم تطبيق حالة من شركة الشحن على طلب ملغي، راجعه',
   CARRIER_CANCELLED_LANE_STOCK: 'تم تطبيق حالة شركة الشحن على طلب ملغي: تحقق من المخزون',
+  CARRIER_STATUS_CORRECTED: 'غيّرت شركة الشحن حالة طلب كنا قد حددناها. راجع الطلب',
+  CARRIER_RETURN_AT_MERCHANT: 'شركة الشحن تفيد بأن الشحنة عادت إلى التاجر، ولم تتغير حالة الطلب',
   SHIPMENT_NOT_CREATED_MISSING_ADDRESS: 'لم يتم إرسال الطلب للشحن: المحافظة أو المدينة غير موجودة',
   SHIPMENT_NOT_CREATED_MISSING_PHONE: 'لم يتم إرسال الطلب للشحن: رقم الهاتف غير موجود',
   SHIPMENT_DISPATCH_FAILED: 'فشل إرسال الطلب لشركة الشحن',
@@ -141,6 +143,7 @@ export const NOTICE_CODES: readonly OrderSystemFailureCode[] = [
   'CARRIER_STATUS_IGNORED_STALE',
   'CARRIER_STATUS_IGNORED_PARTIAL_RETURN',
   'CARRIER_STATUS_IGNORED_OUTSIDE_WINDOW',
+  'CARRIER_RETURN_AT_MERCHANT',
 ];
 
 export const isOrderSystemFailureCode = (code: string): code is OrderSystemFailureCode =>

@@ -16,7 +16,9 @@ export type CarrierWebhookFailureCode =
   | 'CARRIER_STATUS_IGNORED_OUTSIDE_WINDOW'
   | 'CARRIER_STATUS_NOT_APPLIED'
   | 'CARRIER_CANCELLED_LANE_APPLIED'
-  | 'CARRIER_CANCELLED_LANE_STOCK';
+  | 'CARRIER_CANCELLED_LANE_STOCK'
+  | 'CARRIER_STATUS_CORRECTED'
+  | 'CARRIER_RETURN_AT_MERCHANT';
 
 export type ShippingDispatchFailureCode =
   | 'SHIPMENT_NOT_CREATED_MISSING_ADDRESS'
@@ -162,6 +164,14 @@ export interface CarrierCancelledLaneStockDetails
   moved: CancelledLaneMovedLine[];
   unmoved: CancelledLaneUnmovedLine[];
 }
+
+export interface CarrierStatusCorrectedDetails
+  extends CarrierFailureDetailsBase {
+  fromStatus: string;
+  toStatus: string;
+}
+
+export type CarrierReturnAtMerchantDetails = CarrierFailureDetailsBase;
 
 export type ShipmentMissingAddressField = 'governorate' | 'city';
 
@@ -405,6 +415,8 @@ export interface OrderSystemFailureDetailsByCode {
   CARRIER_STATUS_NOT_APPLIED: CarrierStatusNotAppliedDetails;
   CARRIER_CANCELLED_LANE_APPLIED: CarrierCancelledLaneAppliedDetails;
   CARRIER_CANCELLED_LANE_STOCK: CarrierCancelledLaneStockDetails;
+  CARRIER_STATUS_CORRECTED: CarrierStatusCorrectedDetails;
+  CARRIER_RETURN_AT_MERCHANT: CarrierReturnAtMerchantDetails;
   SHIPMENT_NOT_CREATED_MISSING_ADDRESS: ShipmentMissingAddressDetails;
   SHIPMENT_NOT_CREATED_MISSING_PHONE: ShipmentMissingPhoneDetails;
   SHIPMENT_DISPATCH_FAILED: ShipmentDispatchFailedDetails;
