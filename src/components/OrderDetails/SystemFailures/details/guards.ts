@@ -1,4 +1,5 @@
 import { STOCK_SHORTAGE_CODE_LABELS, isOrderSystemFailureCode } from '@/constants/orderSystemFailures';
+import type { ShippingImplementation } from '@/types/shippingCompanies';
 import type {
   AutomationMappingNotSavedDetails,
   AutomationNotSentDetails,
@@ -142,6 +143,18 @@ const isShipmentDispatchFailed = (value: unknown): value is ShipmentDispatchFail
   (value.companyName === undefined || isString(value.companyName)) &&
   isShipmentDispatchReason(value.reason);
 
+const SHIPPING_IMPLEMENTATIONS: readonly ShippingImplementation[] = [
+  'TURBO',
+  'BOSTA',
+  'HASHTAG',
+  'QUICK_CONNECT',
+  'ACCURATE',
+  'RM_EXPRESS',
+  'JT_EXPRESS',
+  'TOROD',
+  'CARRIER_NOOP',
+];
+
 const CARRIER_SEND_OPERATIONS: readonly CarrierSendOperation[] = [
   'EDIT',
   'SWITCH',
@@ -175,7 +188,7 @@ const CARRIER_SEND_ROW_REASONS: readonly CarrierSendRowReason[] = [
 
 const isShipmentCarrierSend = (value: unknown): value is ShipmentCarrierSendDetails =>
   isRecord(value) &&
-  isString(value.carrier) &&
+  SHIPPING_IMPLEMENTATIONS.some((implementation) => implementation === value.carrier) &&
   typeof value.carrierCompanyId === 'number' &&
   typeof value.markerId === 'number' &&
   CARRIER_SEND_OPERATIONS.some((operation) => operation === value.operation) &&

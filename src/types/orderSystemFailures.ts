@@ -1,3 +1,5 @@
+import type { ShippingImplementation } from '@/types/shippingCompanies';
+
 export type OrderSystemFailureSource =
   | 'CARRIER_WEBHOOK'
   | 'SHIPPING_DISPATCH'
@@ -180,7 +182,7 @@ export type CarrierSendRowReason =
   | 'HELD_CHECK_REQUIRED';
 
 export interface ShipmentCarrierSendDetails {
-  carrier: string;
+  carrier: ShippingImplementation;
   carrierCompanyId: number;
   markerId: number;
   operation: CarrierSendOperation;
