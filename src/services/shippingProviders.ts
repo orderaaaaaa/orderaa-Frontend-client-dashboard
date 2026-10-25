@@ -16,6 +16,7 @@ import {
   undoFollowupClosure,
   type FollowupReasonBody,
 } from '@/lib/api/followup';
+import type { SuccessResponse } from '@/types/carrierSends';
 import type {
   CarrierStats,
   DeliveryWindowBody,
@@ -129,6 +130,18 @@ const useShippingProvidersActionMutation = <TVariables, TResult>(
     },
   });
 };
+
+export const useSendAgainRecordMutation = () =>
+  useShippingProvidersActionMutation(
+    async ({ orderId, reason }: { orderId: number; reason: string }) => {
+      const { data } = await http.post<SuccessResponse>(
+        `/orders/${orderId}/send-again-record`,
+        { reason },
+      );
+      return data;
+    },
+    { success: 'تم تسجيل إعادة الإرسال', error: 'تعذر تسجيل إعادة الإرسال' },
+  );
 
 export const useSetLateMark = (shippingCompanyId: number | undefined) =>
   useShippingProvidersActionMutation(
