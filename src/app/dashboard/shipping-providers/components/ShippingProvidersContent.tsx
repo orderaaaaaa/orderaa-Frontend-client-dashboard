@@ -7,8 +7,10 @@ import { useRouter } from 'next/navigation';
 import { LiaPlusSolid, LiaTruckSolid, LiaUserSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import BaseModal from '@/components/ui/base-modal';
+import { Can } from '@/components/Can';
 import Input from '@/components/ui/Input';
 import PageLoading from '@/components/ui/page-loading';
+import { PERMISSIONS } from '@/lib/permissions';
 import {
   useCarrierStatsQuery,
   useShippingProvidersQuery,
@@ -222,12 +224,14 @@ export function ShippingProvidersContent() {
                     </span>
                   </div>
 
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-xs text-gray-500">صافي الشحنات الحالية</span>
-                    <span className="text-lg font-bold text-gray-900">
-                      {formatNumber(carrier.inProcessNetAmount, 2)} جنيه
-                    </span>
-                  </div>
+                  <Can code={PERMISSIONS.FOLLOWUP_NET_AMOUNT_READ}>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-xs text-gray-500">صافي الشحنات الحالية</span>
+                      <span className="text-lg font-bold text-gray-900">
+                        {formatNumber(carrier.inProcessNetAmount, 2)} جنيه
+                      </span>
+                    </div>
+                  </Can>
 
                   <div className="flex gap-4 border-t border-gray-100 pt-2">
                     <RateBadge
