@@ -90,8 +90,7 @@ export default function ShortfallSettlementPage() {
   };
 
   const requestAdjust = (row: ShortfallSettlement) => {
-    if (row.settlementAmount === null) return;
-    const current = Number(row.settlementAmount);
+    const current = row.settlementAmount === null ? 0 : Number(row.settlementAmount);
     const amountStr = (adjustAmounts[row.id] ?? '').trim();
     if (amountStr === '') {
       toast.error('يرجى إدخال المبلغ');
@@ -154,7 +153,7 @@ export default function ShortfallSettlementPage() {
           handleAdjustAmountChange(row.id, e.target.value)
         }
         className={`${inputClassName} border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 disabled:opacity-50`}
-        disabled={adjustingId === row.id || row.settlementAmount === null}
+        disabled={adjustingId === row.id}
       />
       <Button
         size="sm"
@@ -162,7 +161,6 @@ export default function ShortfallSettlementPage() {
         onClick={() => requestAdjust(row)}
         disabled={
           adjustingId === row.id ||
-          row.settlementAmount === null ||
           !adjustAmounts[row.id] ||
           adjustAmounts[row.id].trim() === ''
         }
