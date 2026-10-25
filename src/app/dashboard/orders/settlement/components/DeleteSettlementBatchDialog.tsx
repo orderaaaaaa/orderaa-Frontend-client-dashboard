@@ -2,8 +2,11 @@
 
 import { toast } from 'react-toastify';
 import BaseModal from '@/components/ui/base-modal';
-import { getApiErrorMessage } from '@/utils/apiError';
-import { useDeleteSettlementBatchMutation } from '@/app/dashboard/orders/settlement/hooks/useSettlementQueries';
+import { getApiErrorMessage, getApiErrorStatus } from '@/utils/apiError';
+import {
+  useDeleteSettlementBatchMutation,
+  useSettlementSync,
+} from '@/app/dashboard/orders/settlement/hooks/useSettlementQueries';
 
 interface DeleteSettlementBatchDialogProps {
   isOpen: boolean;
@@ -21,6 +24,7 @@ export default function DeleteSettlementBatchDialog({
   onSuccess,
 }: DeleteSettlementBatchDialogProps) {
   const deleteBatch = useDeleteSettlementBatchMutation();
+  const syncSettlement = useSettlementSync();
 
   const handleConfirm = async () => {
     try {
@@ -29,6 +33,10 @@ export default function DeleteSettlementBatchDialog({
       onClose();
       toast.success('تم حذف التحصيل');
     } catch (err) {
+      const status = getApiErrorStatus(err);
+      if (status === 404 || status === 409) {
+        await syncSettlement();
+      }
       toast.error(getApiErrorMessage(err, 'تعذر حذف التحصيل'));
     }
   };
