@@ -97,6 +97,18 @@ export function CancelledLaneStockDetails({
           </ul>
         )}
       </div>
+      {details.trialSkipped !== undefined && details.trialSkipped.length > 0 && (
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-gray-500">
+            أُنشئ الطلب في فترة التجربة؛ لم تُحرَّك هذه المنتجات في المخزون
+          </span>
+          <ul className="list-disc ps-5 text-sm">
+            {details.trialSkipped.map((line, index) => (
+              <li key={index}>{productLabelOf(line.productName, line.variantLabel)}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

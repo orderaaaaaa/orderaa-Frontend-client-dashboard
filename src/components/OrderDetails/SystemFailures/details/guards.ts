@@ -7,6 +7,7 @@ import type {
   AutomationSendFailedDetails,
   AutomationStatusNotAppliedDetails,
   CancelledLaneMovedLine,
+  CancelledLaneTrialSkippedLine,
   CancelledLaneUnmovedLine,
   CarrierCancelledLaneAppliedDetails,
   CarrierCancelledLaneStockDetails,
@@ -149,6 +150,9 @@ const isCancelledLaneUnmovedLine = (value: unknown): value is CancelledLaneUnmov
   isString(value.variantLabel) &&
   isStringOrNull(value.warehouseName);
 
+const isCancelledLaneTrialSkippedLine = (value: unknown): value is CancelledLaneTrialSkippedLine =>
+  isRecord(value) && isString(value.productName) && isString(value.variantLabel);
+
 const isCarrierCancelledLaneApplied = (
   value: unknown
 ): value is CarrierCancelledLaneAppliedDetails =>
@@ -165,7 +169,10 @@ const isCarrierCancelledLaneStock = (value: unknown): value is CarrierCancelledL
   Array.isArray(value.moved) &&
   value.moved.every(isCancelledLaneMovedLine) &&
   Array.isArray(value.unmoved) &&
-  value.unmoved.every(isCancelledLaneUnmovedLine);
+  value.unmoved.every(isCancelledLaneUnmovedLine) &&
+  (value.trialSkipped === undefined ||
+    (Array.isArray(value.trialSkipped) &&
+      value.trialSkipped.every(isCancelledLaneTrialSkippedLine)));
 
 const isCarrierStatusCorrected = (value: unknown): value is CarrierStatusCorrectedDetails =>
   isCarrierBase(value) &&

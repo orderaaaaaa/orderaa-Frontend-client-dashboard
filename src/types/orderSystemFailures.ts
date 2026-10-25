@@ -158,12 +158,18 @@ export interface CancelledLaneUnmovedLine {
   warehouseName: string | null;
 }
 
+export interface CancelledLaneTrialSkippedLine {
+  productName: string;
+  variantLabel: string;
+}
+
 export interface CarrierCancelledLaneStockDetails
   extends CarrierFailureDetailsBase {
   incomingStatus: string;
   fromStatus: string;
   moved: CancelledLaneMovedLine[];
   unmoved: CancelledLaneUnmovedLine[];
+  trialSkipped?: CancelledLaneTrialSkippedLine[];
 }
 
 export interface CarrierStatusCorrectedDetails
