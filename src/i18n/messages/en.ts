@@ -189,6 +189,7 @@ const en: Record<keyof typeof ar, string> = {
   'settlementFinal.failed': 'The final settlement amount could not be saved.',
   'settlementFinal.changeTooLarge': 'The difference between the final and current amount is too large',
   'closure.close': 'Close',
+  'closure.partial': 'Partial delivery',
   'closure.refuse': 'Refuse',
   'closure.cancel': 'Cancel',
   'closure.reopen': 'Reopen',

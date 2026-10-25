@@ -1,22 +1,30 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import PartialDeliveryModal from '@/components/OrderDetails/ActionModals/PartialDeliveryModal';
 import { Button } from '@/components/ui/button';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { useI18n } from '@/i18n/I18nProvider';
 import { PERMISSIONS, type PermissionCode } from '@/lib/permissions';
+import { orderDetailsQueryOptions } from '@/services/orders';
 import { useCloseClosure, useUndoClosure } from '@/services/shippingProviders';
 import type { FollowupClosure, FollowupClosureKind } from '@/types/logistics';
 import { ClosureReasonModal, type ClosureReasonKind } from './ClosureReasonModal';
 
-type ClosureActionId = 'close' | 'refuse' | 'cancel' | 'reopen';
+type ClosureActionId = 'partial' | 'close' | 'refuse' | 'cancel' | 'reopen';
 
 interface RowAction {
   id: ClosureActionId;
-  labelKey: 'closure.close' | 'closure.refuse' | 'closure.cancel' | 'closure.reopen';
+  labelKey: 'closure.partial' | 'closure.close' | 'closure.refuse' | 'closure.cancel' | 'closure.reopen';
   code: PermissionCode;
   disabled: boolean;
+  disabledReason?: string;
   onSelect: () => void;
+}
+
+export interface PartialDeliveryAccess {
+  blockedReason: string | null;
 }
 
 const CLOSURE_KIND_LABELS: Record<FollowupClosureKind, string> = {
@@ -28,19 +36,35 @@ const CLOSURE_KIND_LABELS: Record<FollowupClosureKind, string> = {
 interface ShipmentRowActionsProps {
   orderId: number;
   closure: FollowupClosure | null;
+  partialDelivery?: PartialDeliveryAccess;
 }
 
-export function ShipmentRowActions({ orderId, closure }: ShipmentRowActionsProps) {
+export function ShipmentRowActions({ orderId, closure, partialDelivery }: ShipmentRowActionsProps) {
   const { t } = useI18n();
   const { hasPermission } = usePermissionCheck();
   const [reasonKind, setReasonKind] = useState<ClosureReasonKind | null>(null);
+  const [isPartialOpen, setIsPartialOpen] = useState(false);
   const closeMutation = useCloseClosure();
   const undoMutation = useUndoClosure();
+  const orderQuery = useQuery({ ...orderDetailsQueryOptions(orderId), enabled: isPartialOpen });
 
   const isLocked = closure?.kind === 'REFUSE' || closure?.kind === 'CANCEL';
   const isPending = closeMutation.isPending || undoMutation.isPending;
+  const partialBlockedReason = partialDelivery?.blockedReason ?? null;
 
   const actions: RowAction[] = [
+    ...(partialDelivery
+      ? [
+          {
+            id: 'partial' as const,
+            labelKey: 'closure.partial' as const,
+            code: PERMISSIONS.ORDERS_UPDATE,
+            disabled: partialBlockedReason !== null,
+            disabledReason: partialBlockedReason ?? undefined,
+            onSelect: () => setIsPartialOpen(true),
+          },
+        ]
+      : []),
     {
       id: 'close',
       labelKey: 'closure.close',
@@ -95,6 +119,7 @@ export function ShipmentRowActions({ orderId, closure }: ShipmentRowActionsProps
               size="sm"
               className="h-7 px-2 text-xs"
               disabled={action.disabled || isPending}
+              title={action.disabledReason}
               onClick={action.onSelect}
             >
               {t(action.labelKey)}
@@ -107,6 +132,16 @@ export function ShipmentRowActions({ orderId, closure }: ShipmentRowActionsProps
           kind={reasonKind}
           orderId={orderId}
           onClose={() => setReasonKind(null)}
+        />
+      )}
+      {isPartialOpen && orderQuery.data && (
+        <PartialDeliveryModal
+          isOpen
+          onClose={() => setIsPartialOpen(false)}
+          orderId={orderId}
+          orderStatus={orderQuery.data.status}
+          orderProducts={orderQuery.data.order_products}
+          totalCost={orderQuery.data.totalCost}
         />
       )}
     </div>

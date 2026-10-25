@@ -203,6 +203,7 @@ const ar = {
   'settlementFinal.failed': 'فشل في تحديد المبلغ النهائي',
   'settlementFinal.changeTooLarge': 'الفرق بين المبلغ النهائي والمبلغ الحالي كبير جدًا',
   'closure.close': 'إغلاق اليوم',
+  'closure.partial': 'تسليم جزئي',
   'closure.refuse': 'رفض التسليم',
   'closure.cancel': 'إلغاء',
   'closure.reopen': 'إعادة فتح',

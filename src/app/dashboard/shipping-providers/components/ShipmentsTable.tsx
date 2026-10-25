@@ -7,10 +7,11 @@ import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import CopyButton from '@/components/ui/copy-button';
 import { formatDisplayTime } from '@/components/OrderDetails/fields/TimeRangeField';
+import useShippingCompanies from '@/hooks/useShippingCompanies';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
-import type { OrderStatus } from '@/types/orders';
+import { OrderStatus } from '@/types/orders';
 import {
   IN_PROCESS_STATUSES,
   type CarrierHeader,
@@ -46,6 +47,27 @@ const isLockedRow = (row: ShipmentRowBase): boolean =>
   row.closure?.kind === 'REFUSE' ||
   row.closure?.kind === 'CANCEL' ||
   !(IN_PROCESS_STATUSES as readonly OrderStatus[]).includes(row.status);
+
+const PARTIAL_DELIVERY_BLOCK_REASONS = {
+  carrier: 'التسليم الجزئي متاح لشركة تربو فقط',
+  locked: 'الطلب مغلق في المتابعة',
+  status: 'التسليم الجزئي متاح للطلبات مع المندوب فقط',
+} as const;
+
+const partialDeliveryBlockReasonOf = ({
+  isTurboCarrier,
+  locked,
+  status,
+}: {
+  isTurboCarrier: boolean;
+  locked: boolean;
+  status: OrderStatus;
+}): string | null => {
+  if (!isTurboCarrier) return PARTIAL_DELIVERY_BLOCK_REASONS.carrier;
+  if (locked) return PARTIAL_DELIVERY_BLOCK_REASONS.locked;
+  if (status !== OrderStatus.WITH_DRIVER) return PARTIAL_DELIVERY_BLOCK_REASONS.status;
+  return null;
+};
 
 const renderTotal = (totalCost: number | null) =>
   totalCost === null ? '—' : `${formatNumber(totalCost, 2)} جنيه`;
@@ -251,6 +273,10 @@ export function InProcessShipmentsTable({
   carrier,
   shippingCompanyId,
 }: InProcessShipmentsTableProps) {
+  const { shippingCompanies } = useShippingCompanies();
+  const isTurboCarrier =
+    shippingCompanies.find((company) => company.id === shippingCompanyId)?.implementation === 'TURBO';
+
   return (
     <table className="w-full text-sm whitespace-nowrap" dir="rtl">
       <thead>
@@ -317,7 +343,17 @@ export function InProcessShipmentsTable({
                 <CarrierCell carrier={carrier} />
               </td>
               <td className={CELL_CLASS}>
-                <ShipmentRowActions orderId={row.id} closure={row.closure} />
+                <ShipmentRowActions
+                  orderId={row.id}
+                  closure={row.closure}
+                  partialDelivery={{
+                    blockedReason: partialDeliveryBlockReasonOf({
+                      isTurboCarrier,
+                      locked,
+                      status: row.status,
+                    }),
+                  }}
+                />
               </td>
             </tr>
           );
