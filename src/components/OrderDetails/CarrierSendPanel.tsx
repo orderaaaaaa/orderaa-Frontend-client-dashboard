@@ -12,6 +12,8 @@ import {
   CARRIER_SEND_OPEN_STATES,
   CARRIER_SEND_OPERATION_LABELS,
   CARRIER_SEND_STATE_LABELS,
+  CLOSE_KIND_LABELS,
+  CLOSE_OUTCOME_LABELS,
 } from '@/constants/carrierSends';
 import {
   useCarrierSendsForOrder,
@@ -48,12 +50,15 @@ const NOTE_MAX_LENGTH = 255;
 
 type OldShipmentRow = { shippingId: string; oldCompanyId: number };
 
-const CARRIER_SEND_ROW_CODES = new Set<string>(['SHIPMENT_UPDATE_NOT_SENT', 'SHIPMENT_OUTCOME_UNKNOWN']);
-
 const markerRowsOf = (failures: OrderSystemFailure[], markerId: number) =>
-  failures.filter(
-    (failure) => CARRIER_SEND_ROW_CODES.has(failure.code) && failure.details?.markerId === markerId,
-  );
+  failures.filter((failure) => {
+    const narrowed = narrowFailureDetails(failure);
+    return (
+      narrowed !== null &&
+      (narrowed.code === 'SHIPMENT_UPDATE_NOT_SENT' || narrowed.code === 'SHIPMENT_OUTCOME_UNKNOWN') &&
+      narrowed.details.markerId === markerId
+    );
+  });
 
 const oldShipmentRowsOf = (failures: OrderSystemFailure[]) => {
   const rows = new Map<string, OldShipmentRow>();
@@ -213,6 +218,7 @@ function CarrierSendMarkerBlock({
           {formatDateTime(marker.createdAt)} · {marker.targetCarrier}
           {marker.carrierShippingId && ` · ${marker.carrierShippingId}`}
         </p>
+        {marker.closeKind && <p className="text-xs text-gray-600">{CLOSE_KIND_LABELS[marker.closeKind]}</p>}
         {marker.stale && <p className="text-xs text-amber-700">{STALE_LINE}</p>}
       </div>
 
