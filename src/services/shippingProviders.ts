@@ -9,11 +9,24 @@ import http from '@/lib/api/http';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { getApiErrorMessage } from '@/utils/apiError';
+import {
+  markFollowupCancelled,
+  markFollowupClosed,
+  markFollowupRefused,
+  undoFollowupClosure,
+  type FollowupReasonBody,
+} from '@/lib/api/followup';
 import type {
   CarrierStats,
+  DeliveryWindowBody,
+  DeliveryWindowResponse,
+  InProcessFilters,
+  InProcessShipmentsPage,
+  LateMarkBody,
+  LateMarkResponse,
   LocationStats,
-  ProviderShipmentsPage,
-  ShipmentStatusFilter,
+  ReturnedFilters,
+  ReturnedShipmentsPage,
   ShippingProvider,
   ShippingProviderType,
   StatsRange,
@@ -65,25 +78,106 @@ export const useCarrierLocationStatsQuery = (
     enabled: !!shippingCompanyId,
   });
 
-export const useCarrierShipmentsQuery = (
+export const useInProcessShipmentsQuery = (
   shippingCompanyId: number | undefined,
-  params: StatsRange & {
-    status: ShipmentStatusFilter;
-    page: number;
-    limit: number;
-  },
+  filters: InProcessFilters,
 ) =>
   useQuery({
-    queryKey: [KEY, shippingCompanyId, 'shipments', params],
+    queryKey: [KEY, shippingCompanyId, 'in-process', filters],
     queryFn: async () => {
-      const { data } = await http.get<ProviderShipmentsPage>(
+      const { data } = await http.get<InProcessShipmentsPage>(
         `${BASE}/${shippingCompanyId}/shipments`,
-        { params },
+        { params: filters },
       );
       return data;
     },
     enabled: !!shippingCompanyId,
     placeholderData: keepPreviousData,
+  });
+
+export const useReturnedShipmentsQuery = (
+  shippingCompanyId: number | undefined,
+  filters: ReturnedFilters,
+) =>
+  useQuery({
+    queryKey: [KEY, shippingCompanyId, 'returned', filters],
+    queryFn: async () => {
+      const { data } = await http.get<ReturnedShipmentsPage>(
+        `${BASE}/${shippingCompanyId}/returned-shipments`,
+        { params: filters },
+      );
+      return data;
+    },
+    enabled: !!shippingCompanyId,
+    placeholderData: keepPreviousData,
+  });
+
+const useShippingProvidersActionMutation = <TVariables, TResult>(
+  mutationFn: (variables: TVariables) => Promise<TResult>,
+  messages: { success: string; error: string },
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn,
+    onSuccess: async () => {
+      await invalidateAndWait(queryClient, [[KEY]]);
+      toast.success(messages.success);
+    },
+    onError: (err: unknown) => {
+      toast.error(getApiErrorMessage(err, messages.error));
+    },
+  });
+};
+
+export const useSetLateMark = (shippingCompanyId: number | undefined) =>
+  useShippingProvidersActionMutation(
+    async ({ orderId, body }: { orderId: number; body: LateMarkBody }) => {
+      const { data } = await http.post<LateMarkResponse>(
+        `${BASE}/${shippingCompanyId}/shipments/${orderId}/late-marks`,
+        body,
+      );
+      return data;
+    },
+    { success: 'تم حفظ حالة التأخير', error: 'تعذر حفظ حالة التأخير' },
+  );
+
+export const useSetDeliveryWindow = (shippingCompanyId: number | undefined) =>
+  useShippingProvidersActionMutation(
+    async ({ orderId, body }: { orderId: number; body: DeliveryWindowBody }) => {
+      const { data } = await http.patch<DeliveryWindowResponse>(
+        `${BASE}/${shippingCompanyId}/shipments/${orderId}/delivery-window`,
+        body,
+      );
+      return data;
+    },
+    { success: 'تم حفظ وقت التوصيل', error: 'تعذر حفظ وقت التوصيل' },
+  );
+
+export const useCloseClosure = () =>
+  useShippingProvidersActionMutation((orderId: number) => markFollowupClosed(orderId), {
+    success: 'تم إغلاق الطلب لليوم',
+    error: 'تعذر إغلاق الطلب',
+  });
+
+export const useRefuseClosure = () =>
+  useShippingProvidersActionMutation(
+    ({ orderId, body }: { orderId: number; body: FollowupReasonBody }) =>
+      markFollowupRefused(orderId, body),
+    { success: 'تم تسجيل رفض التسليم', error: 'تعذر تسجيل رفض التسليم' },
+  );
+
+export const useCancelClosure = () =>
+  useShippingProvidersActionMutation(
+    ({ orderId, body }: { orderId: number; body: FollowupReasonBody }) =>
+      markFollowupCancelled(orderId, body),
+    { success: 'تم إلغاء الطلب', error: 'تعذر إلغاء الطلب' },
+  );
+
+export const useUndoClosure = () =>
+  useShippingProvidersActionMutation((orderId: number) => undoFollowupClosure(orderId), {
+    success: 'تمت إعادة فتح الطلب',
+    error: 'تعذر إعادة فتح الطلب',
   });
 
 export const useCreateShippingProvider = () => {
