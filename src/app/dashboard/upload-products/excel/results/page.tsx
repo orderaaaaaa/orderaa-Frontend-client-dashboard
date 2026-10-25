@@ -157,7 +157,7 @@ export default function ValidationResultsPage() {
   const carrierUnsentLine =
     carrierUnsentCount > 0 ? (
       <p className="font-semibold text-amber-700">
-        {`${carrierUnsentCount} طلب لم يُرسل إلى شركة الشحن بعد`}
+        {`عدد الطلبات التي لم يتم تأكيد إرسالها إلى شركة الشحن: ${carrierUnsentCount}`}
       </p>
     ) : null;
 
