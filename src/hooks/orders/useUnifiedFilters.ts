@@ -6,6 +6,12 @@ import { formatLocalStartOfDay, formatLocalEndOfDay } from '@/utils/dateRangeUti
 import { toast } from 'react-toastify';
 import { UrlFilterState } from '@/utils/urlFilters';
 
+export const CANCELLATION_REASON_KEY_SEPARATOR = '|';
+
+export function expandCancellationReasonKeys(keys: string[]): string[] {
+    return keys.flatMap((key) => key.split(CANCELLATION_REASON_KEY_SEPARATOR));
+}
+
 export function buildApiFiltersFromUrlState(urlFilters: UrlFilterState): FilterOrdersDto {
     const filters: FilterOrdersDto = {
         page: urlFilters.page,
@@ -78,7 +84,7 @@ export function buildApiFiltersFromUrlState(urlFilters: UrlFilterState): FilterO
         filters.employeeName = localFilters.employeeName;
     }
     if (localFilters.cancellationReasons?.length) {
-        filters.cancelReasonId = localFilters.cancellationReasons;
+        filters.cancelReasonId = expandCancellationReasonKeys(localFilters.cancellationReasons);
     }
 
     return filters;
@@ -196,7 +202,7 @@ export function useUnifiedFilters() {
         }
 
         if (debouncedFilters.cancellationReasons?.length) {
-            filters.cancelReasonId = debouncedFilters.cancellationReasons;
+            filters.cancelReasonId = expandCancellationReasonKeys(debouncedFilters.cancellationReasons);
         }
 
         return filters;

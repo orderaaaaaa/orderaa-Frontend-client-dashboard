@@ -18,6 +18,7 @@ import { useDebounce, useDebouncedCallback } from "@/utils/debounce";
 import { LiaTimesSolid } from "react-icons/lia";
 import { Button } from "@/components/ui/button";
 import { formatDateForUrl } from "@/utils/urlFilters";
+import { CANCELLATION_REASON_KEY_SEPARATOR } from "@/hooks/orders/useUnifiedFilters";
 
 export type FilterKey = keyof OrderFiltersFormData;
 
@@ -193,12 +194,14 @@ export default function FilterPanel({
   const { data: cities = [], isLoading: isLoadingCities } = useCitiesQuery(isCityActive ? selectedGovernorate : undefined);
   const { data: cancellationReasons = [] } = useCancellationReasons(isCancellationReasonActive);
   const cancellationReasonOptions = React.useMemo(() => {
-    const seenNames = new Set<string>();
-    return cancellationReasons.flatMap((r) => {
-      if (seenNames.has(r.reasonName)) return [];
-      seenNames.add(r.reasonName);
-      return [{ key: String(r.id), value: r.reasonName }];
+    const idsByName = new Map<string, number[]>();
+    cancellationReasons.forEach((r) => {
+      idsByName.set(r.reasonName, [...(idsByName.get(r.reasonName) ?? []), r.id]);
     });
+    return Array.from(idsByName, ([reasonName, ids]) => ({
+      key: [...ids].sort((a, b) => a - b).join(CANCELLATION_REASON_KEY_SEPARATOR),
+      value: reasonName,
+    }));
   }, [cancellationReasons]);
   const { data: storeOptions = [], isLoading: isLoadingStores } = useQuery({
     queryKey: ['stores-filter-options'],
