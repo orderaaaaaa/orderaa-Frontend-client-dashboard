@@ -18,14 +18,16 @@ export type CarrierWebhookFailureCode =
   | 'CARRIER_CANCELLED_LANE_APPLIED'
   | 'CARRIER_CANCELLED_LANE_STOCK'
   | 'CARRIER_STATUS_CORRECTED'
-  | 'CARRIER_RETURN_AT_MERCHANT';
+  | 'CARRIER_RETURN_AT_MERCHANT'
+  | 'CARRIER_MESSAGE_AFTER_SWITCH';
 
 export type ShippingDispatchFailureCode =
   | 'SHIPMENT_NOT_CREATED_MISSING_ADDRESS'
   | 'SHIPMENT_NOT_CREATED_MISSING_PHONE'
   | 'SHIPMENT_DISPATCH_FAILED'
   | 'SHIPMENT_UPDATE_NOT_SENT'
-  | 'SHIPMENT_OUTCOME_UNKNOWN';
+  | 'SHIPMENT_OUTCOME_UNKNOWN'
+  | 'OLD_SHIPMENT_STILL_LIVE';
 
 export type AutomationFailureCode =
   | 'AUTOMATION_NOT_SENT'
@@ -237,6 +239,19 @@ export interface ShipmentCarrierSendDetails {
   reason: CarrierSendRowReason;
   carrierText: string | null;
   oldShippingId: string | null;
+  sourceCarrier?: ShippingImplementation | null;
+}
+
+export interface CarrierMessageAfterSwitchDetails
+  extends CarrierFailureDetailsBase {
+  oldCompanyId: number;
+  shippingId: string;
+}
+
+export interface OldShipmentStillLiveDetails {
+  oldCompanyId: number;
+  newCompanyId: number;
+  shippingId: string;
 }
 
 export type ShipmentUpdateNotSentDetails = ShipmentCarrierSendDetails;
@@ -434,11 +449,13 @@ export interface OrderSystemFailureDetailsByCode {
   CARRIER_CANCELLED_LANE_STOCK: CarrierCancelledLaneStockDetails;
   CARRIER_STATUS_CORRECTED: CarrierStatusCorrectedDetails;
   CARRIER_RETURN_AT_MERCHANT: CarrierReturnAtMerchantDetails;
+  CARRIER_MESSAGE_AFTER_SWITCH: CarrierMessageAfterSwitchDetails;
   SHIPMENT_NOT_CREATED_MISSING_ADDRESS: ShipmentMissingAddressDetails;
   SHIPMENT_NOT_CREATED_MISSING_PHONE: ShipmentMissingPhoneDetails;
   SHIPMENT_DISPATCH_FAILED: ShipmentDispatchFailedDetails;
   SHIPMENT_UPDATE_NOT_SENT: ShipmentUpdateNotSentDetails;
   SHIPMENT_OUTCOME_UNKNOWN: ShipmentOutcomeUnknownDetails;
+  OLD_SHIPMENT_STILL_LIVE: OldShipmentStillLiveDetails;
   AUTOMATION_NOT_SENT: AutomationNotSentDetails;
   AUTOMATION_SEND_FAILED: AutomationSendFailedDetails;
   AUTOMATION_MAPPING_NOT_SAVED: AutomationMappingNotSavedDetails;

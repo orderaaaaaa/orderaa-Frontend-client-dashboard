@@ -1,3 +1,4 @@
+import type { CarrierSendBlock } from '@/types/carrierSends';
 import type { ShippingCompanyRef } from '@/types/shippingCompanies';
 // Order Status Enum (synced with backend)
 export enum OrderStatus {
@@ -379,6 +380,7 @@ export interface Order {
   shippingCompany?: string | null;
   shippingCompanyId?: number | null;
   shippingCompanyRef?: ShippingCompanyRef | null;
+  carrierSend?: CarrierSendBlock | null;
   shipmentContent?: string | null;
   canOpenShipment?: boolean;
   paymentStatus?: string;

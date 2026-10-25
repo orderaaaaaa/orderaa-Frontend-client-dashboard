@@ -100,8 +100,17 @@ export interface InProcessShipment extends ShipmentRowBase {
   netAmount?: string;
 }
 
+export type SendAgainBlockedReason =
+  | 'NOT_TURBO'
+  | 'NOT_RETURNED_DELIVERED'
+  | 'NO_ACTIVE_CODE'
+  | 'NO_CARRIER_STATUS'
+  | 'RETURNED_TO_MERCHANT';
+
 export interface ReturnedShipment extends ShipmentRowBase {
   lateness: null;
+  sendAgainEligible: boolean;
+  sendAgainBlockedReason: SendAgainBlockedReason | null;
 }
 
 export interface CarrierHeader {

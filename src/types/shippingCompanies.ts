@@ -18,6 +18,7 @@ export interface ShippingCompanyRef {
   kind: ShippingCompanyKind;
   implementation: ShippingImplementation;
   isActive: boolean;
+  carrierSupportsUpdate?: boolean;
 }
 
 export const NO_SHIPPING_COMPANY_FILTER = 'none';

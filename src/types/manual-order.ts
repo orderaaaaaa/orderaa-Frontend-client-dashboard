@@ -1,5 +1,7 @@
+import type { CarrierSendBlock } from '@/types/carrierSends';
 import type { OrderStatus } from '@/types/orders';
-import type { ShippingImplementation } from '@/types/shippingCompanies';
+
+export type { CarrierSendBlock, CarrierSendState } from '@/types/carrierSends';
 
 export type ManualOrderProduct = {
   id: number;
@@ -13,25 +15,6 @@ export type ManualOrderCustomer = {
   phoneNumbers: string[];
   address: string;
   notes?: string;
-};
-
-export type CarrierSendState =
-  | 'PENDING'
-  | 'SEND_ATTEMPTED'
-  | 'SENT'
-  | 'REJECTED'
-  | 'UNKNOWN'
-  | 'CLOSED_NONE';
-
-export type CarrierSendBlock = {
-  markerId: number;
-  state: CarrierSendState;
-  notCalled: boolean;
-  held: boolean;
-  carrierCode: ShippingImplementation;
-  carrierShippingId: string | null;
-  carrierText: string | null;
-  rowCode: string | null;
 };
 
 export type CreateOrderResponse = {
