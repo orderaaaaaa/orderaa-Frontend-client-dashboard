@@ -242,12 +242,13 @@ export default function EditShippingModal({
 
   const companyChanged =
     (formData.shippingCompanyId ?? null) !== (initialData.shippingCompanyId ?? null);
-  const attestedShipment = companyChanged ? (oldIntegrationShipment ?? null) : null;
+  const isSwitch = companyChanged && formData.shippingCompanyId != null;
+  const attestedShipment = isSwitch ? (oldIntegrationShipment ?? null) : null;
   const costLocked = carrierSupportsUpdate === false;
   const attestationMissing = attestedShipment !== null && !oldCancelledByHand;
 
   const switchMissingFields: ShippingSwitchMissingField[] = [];
-  if (companyChanged) {
+  if (isSwitch) {
     if (!formData.governorateOption && !initialData.governorate) switchMissingFields.push('governorate');
     if (!formData.cityOption && !initialData.city) switchMissingFields.push('city');
     if (!customerHasPhone) switchMissingFields.push('phone');
