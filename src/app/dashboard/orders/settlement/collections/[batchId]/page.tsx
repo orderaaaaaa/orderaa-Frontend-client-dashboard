@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { LiaSearchSolid } from 'react-icons/lia';
@@ -22,7 +22,15 @@ import {
 const COLLECTIONS_HREF = '/dashboard/orders/settlement/collections';
 const DEFAULT_PAGE_SIZE = 25;
 
-export default function SettlementCollectionPage() {
+function SettlementCollectionLoading() {
+  return (
+    <div className="w-full max-w-full overflow-x-hidden">
+      <PageLoading message="جاري تحميل التحصيل..." />
+    </div>
+  );
+}
+
+function SettlementCollectionContent() {
   const { batchId } = useParams<{ batchId: string }>();
   const [searchInput, setSearchInput] = useState('');
   const q = useDebounce(searchInput, 300).trim();
@@ -159,5 +167,13 @@ export default function SettlementCollectionPage() {
         onAddClose={() => setIsAddOpen(false)}
       />
     </div>
+  );
+}
+
+export default function SettlementCollectionPage() {
+  return (
+    <Suspense fallback={<SettlementCollectionLoading />}>
+      <SettlementCollectionContent />
+    </Suspense>
   );
 }
