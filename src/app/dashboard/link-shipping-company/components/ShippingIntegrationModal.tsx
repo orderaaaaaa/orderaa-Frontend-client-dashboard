@@ -31,7 +31,7 @@ const createShippingSchema = (
 ) =>
   z.object({
     authKey: requiresAuthKey
-      ? z.string().min(1, 'يرجى إدخال Authentication Key')
+      ? z.string().trim().min(1, 'يرجى إدخال Authentication Key')
       : z.string().optional(),
     clientCode: showClientCode
       ? z.string().min(1, 'يرجى إدخال Client Code')
@@ -266,7 +266,7 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
                   disabled={isSaving}
                 />
                 {isEditing && (
-                  <SavedSecretStatus label="كلمة المرور" saved={isEditing} />
+                  <SavedSecretStatus label="كلمة المرور الحالية" saved={isEditing} />
                 )}
                 <Input
                   register={form.register}
@@ -296,7 +296,7 @@ export const ShippingIntegrationModal: React.FC<Props> = ({
 
                 {isEditing && (
                   <SavedSecretStatus
-                    label="Authentication Key"
+                    label="Authentication Key الحالي"
                     saved={isEditing}
                   />
                 )}

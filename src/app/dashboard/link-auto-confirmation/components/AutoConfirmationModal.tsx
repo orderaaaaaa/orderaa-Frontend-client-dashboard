@@ -255,7 +255,7 @@ export const AutoConfirmationModal: React.FC<AutoConfirmationModalProps> = ({
 
           <div className="space-y-4">
             {isEditing && (
-              <SavedSecretStatus label="مفتاح API" saved={hasStoredApiKey} />
+              <SavedSecretStatus label="مفتاح API الحالي" saved={hasStoredApiKey} />
             )}
 
             <Input

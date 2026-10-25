@@ -148,12 +148,12 @@ const EditIntegrationModal = ({
       watchedFields.storeName !== storeName ||
       (watchedFields.description || '') !== storeDescription;
 
-    const webhookKeyChanged = !!watchedFields.webhookApiKey;
+    const webhookKeyChanged = !!watchedFields.webhookApiKey?.trim();
     const webhookActiveChanged = webhookConfig
       ? webhookIsActive !== webhookConfig.isActive
       : false;
 
-    const apiKeyChanged = !!watchedFields.apiKeyValue;
+    const apiKeyChanged = !!watchedFields.apiKeyValue?.trim();
     const apiActiveChanged = apiConfig
       ? apiIsActive !== apiConfig.isActive
       : false;
@@ -240,7 +240,8 @@ const EditIntegrationModal = ({
 
       if (webhookConfig) {
         const webhookUpdates: Record<string, unknown> = {};
-        if (data.webhookApiKey) webhookUpdates.apiKey = data.webhookApiKey.trim();
+        const webhookSecret = data.webhookApiKey?.trim();
+        if (webhookSecret) webhookUpdates.apiKey = webhookSecret;
         if (webhookIsActive !== webhookConfig.isActive) webhookUpdates.isActive = webhookIsActive;
 
         if (Object.keys(webhookUpdates).length > 0) {
@@ -252,7 +253,8 @@ const EditIntegrationModal = ({
 
       if (apiConfig) {
         const apiUpdates: Record<string, unknown> = {};
-        if (data.apiKeyValue) apiUpdates.apiKey = data.apiKeyValue.trim();
+        const apiSecret = data.apiKeyValue?.trim();
+        if (apiSecret) apiUpdates.apiKey = apiSecret;
         if (apiIsActive !== apiConfig.isActive) apiUpdates.isActive = apiIsActive;
 
         if (

@@ -2,7 +2,7 @@
 
 import clsx from 'clsx';
 
-export const SECRET_HELP_TEXT =
+const SECRET_HELP_TEXT =
   'القيمة المحفوظة لا تُعرض. اتركه فارغاً للإبقاء عليها، أو أدخل قيمة جديدة لتغييرها.';
 
 export const SECRET_KEEP_PLACEHOLDER = 'اتركه فارغاً للإبقاء عليه';
