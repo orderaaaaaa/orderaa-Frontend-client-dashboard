@@ -45,6 +45,10 @@ export const ORDER_STATUS_ARABIC_LABELS: Record<string, string> = {
   // to RETURNED_COLLECTED alone, and this key describes exactly this text.
   RETURN_WAREHOUSE: 'مرتجع مستلم بالمخزن',
   SETTLEMENT_UPDATED: 'تعديل التحصيل',
+  FOLLOWUP_CLOSED_TODAY: 'متابعة: إغلاق اليوم',
+  FOLLOWUP_REFUSED: 'متابعة: رفض التسليم',
+  FOLLOWUP_CLOSED_CANCEL: 'متابعة: إلغاء',
+  FOLLOWUP_CLOSURE_UNDONE: 'متابعة: إعادة فتح',
 };
 
 export const ORDER_STATUS_CHART_COLORS: Record<string, string> = {
