@@ -93,6 +93,8 @@ export const QUERY_KEYS = {
   FOLLOWUP_NEW_ORDERS: 'followup-new-orders',
   FOLLOWUP_OVERDUE: 'followup-overdue',
   FOLLOWUP_EXECUTED: 'followup-executed',
+  FOLLOWUP_NOTES: 'followup-notes',
+  FOLLOWUP_ACTION_EVENTS: 'followup-action-events',
   ORDER_PRODUCT_CHANGE_LOGS: 'order-product-change-logs',
 
   // Dashboard Reports

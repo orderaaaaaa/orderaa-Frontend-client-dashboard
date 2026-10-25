@@ -171,3 +171,116 @@ export async function markFollowupOverdue(orderId: number, lateNotes: string): P
   const { data } = await http.post<FollowupSuccessResponse>(`/orders/followup/${orderId}/overdue`, { lateNotes });
   return data;
 }
+
+export type FollowupNotePartyValue = 'CUSTOMER' | 'SHIPPING_COMPANY' | 'COURIER';
+
+export interface FollowupNoteView {
+  id: number;
+  party: FollowupNotePartyValue;
+  body: string;
+  employeeId: number;
+  employeeName: string | null;
+  createdAt: string;
+  editedAt: string | null;
+  canEdit: boolean;
+  canDelete: boolean;
+}
+
+export type FollowupLegacyNoteName = 'ATTEMPTED' | 'POSTPONED' | 'OVERDUE';
+
+export interface FollowupLegacyNote {
+  id: number;
+  name: FollowupLegacyNoteName;
+  note: string;
+  employeeName: string | null;
+  createdAt: string;
+}
+
+export interface FollowupCarrierText {
+  at: string;
+  text: string;
+  repeats: number;
+}
+
+export interface FollowupCarrierContact {
+  at: string;
+  name: string | null;
+  phone: string | null;
+}
+
+export interface FollowupNoteDay {
+  day: string;
+  isToday: boolean;
+  canAddNotes: boolean;
+  notes: FollowupNoteView[];
+  legacyNotes: FollowupLegacyNote[];
+  carrier: {
+    texts: FollowupCarrierText[];
+    contacts: FollowupCarrierContact[];
+  };
+}
+
+export interface FollowupNotesPage {
+  today: string;
+  days: FollowupNoteDay[];
+}
+
+export interface CreateFollowupNoteBody {
+  party: FollowupNotePartyValue;
+  body: string;
+}
+
+export interface EditFollowupNoteBody {
+  body: string;
+}
+
+export interface FollowupNoteDeleteResponse {
+  success: boolean;
+  id: number;
+}
+
+export type FollowupActionEventSource = 'ORDER_EVENT' | 'LATE_MARK' | 'CARRIER_SEND_AUDIT';
+
+export interface FollowupActionEvent {
+  id: number;
+  source: FollowupActionEventSource;
+  name: string;
+  note: string | null;
+  employeeName: string | null;
+  createdAt: string;
+}
+
+export interface FollowupActionEventsPage {
+  data: FollowupActionEvent[];
+}
+
+export async function getFollowupNotes(orderId: number): Promise<FollowupNotesPage> {
+  const { data } = await http.get<FollowupNotesPage>(`/orders/followup/${orderId}/notes`);
+  return data;
+}
+
+export async function addFollowupNote(orderId: number, body: CreateFollowupNoteBody): Promise<FollowupNoteView> {
+  const { data } = await http.post<FollowupNoteView>(`/orders/followup/${orderId}/notes`, body);
+  return data;
+}
+
+export async function editFollowupNote(
+  orderId: number,
+  noteId: number,
+  body: EditFollowupNoteBody
+): Promise<FollowupNoteView> {
+  const { data } = await http.post<FollowupNoteView>(`/orders/followup/${orderId}/notes/${noteId}/edits`, body);
+  return data;
+}
+
+export async function deleteFollowupNote(orderId: number, noteId: number): Promise<FollowupNoteDeleteResponse> {
+  const { data } = await http.post<FollowupNoteDeleteResponse>(
+    `/orders/followup/${orderId}/notes/${noteId}/deletions`
+  );
+  return data;
+}
+
+export async function getFollowupActionEvents(orderId: number): Promise<FollowupActionEventsPage> {
+  const { data } = await http.get<FollowupActionEventsPage>(`/orders/followup/${orderId}/action-events`);
+  return data;
+}
