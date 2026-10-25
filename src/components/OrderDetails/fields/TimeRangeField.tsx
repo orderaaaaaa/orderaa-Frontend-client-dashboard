@@ -3,7 +3,7 @@ import { LiaClockSolid } from 'react-icons/lia';
 import TimePickerModal from '../TimePickerModal';
 
 // Format display time (e.g., "10 am" -> "10:00 AM")
-const formatDisplayTime = (time?: string): string => {
+export const formatDisplayTime = (time?: string): string => {
   if (!time) return '--';
 
   // Try parsing "X am/pm" format
