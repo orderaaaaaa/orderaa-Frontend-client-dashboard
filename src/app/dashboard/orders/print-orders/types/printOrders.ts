@@ -23,16 +23,20 @@ export type PrintSkipReason =
   | 'PARKED'
   | 'NOT_CONFIRMED'
   | 'CLAIMED_BY_OTHER'
-  | 'NOT_FOUND';
+  | 'NOT_FOUND'
+  | 'NO_SHIPPING_CODE';
 
 export interface PrintSkippedOrder {
   id: number;
   reason: PrintSkipReason;
   message: string;
+  code?: string;
+  invoice?: Order;
 }
 
 export interface ClaimNextPrintOrdersResponse {
   claimed: Order[];
+  skipped: PrintSkippedOrder[];
 }
 
 export interface ClaimPrintOrdersResponse {
