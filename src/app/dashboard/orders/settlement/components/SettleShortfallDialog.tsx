@@ -110,7 +110,7 @@ export default function SettleShortfallDialog({
         <div className="space-y-3 text-sm">
           <p className="font-medium">الطلب {shownRow.code}</p>
           <p dir="rtl">
-            المبلغ الحالي{' '}
+            المبلغ الحالي:{' '}
             <span dir="ltr">
               {currentAmount === null ? '—' : `${formatAmount(Number(currentAmount))} جنيه`}
             </span>
@@ -131,7 +131,7 @@ export default function SettleShortfallDialog({
           </label>
           {delta !== null && (
             <p dir="rtl">
-              الفرق{' '}
+              الفرق:{' '}
               <span dir="ltr">
                 {delta > 0 ? '+' : ''}
                 {formatAmount(delta)}

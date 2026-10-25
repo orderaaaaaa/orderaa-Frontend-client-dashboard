@@ -99,7 +99,7 @@ export default function ShortfallSettlementPage() {
   );
 
   const renderMobileRow = (row: ShortfallSettlementRow) => (
-    <div className="flex flex-col gap-2 p-4 text-sm">
+    <div className="flex flex-col gap-2 text-sm">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <Link
@@ -224,37 +224,39 @@ export default function ShortfallSettlementPage() {
           </Button>
         </div>
       ) : (
-        <div
-          aria-busy={isSwitching}
-          className={isSwitching ? 'opacity-60 transition-opacity' : 'transition-opacity'}
-        >
-          <DataTable
-            columns={columns}
-            data={rows}
-            keyField="id"
-            isLoading={false}
-            emptyMessage={
-              filter === 'pending'
-                ? 'لا توجد طلبات تحصيل ناقص معلقة'
-                : 'لا توجد نتائج لهذا الفلتر'
-            }
-            renderMobileRow={renderMobileRow}
-          />
-        </div>
-      )}
+        <>
+          <div
+            aria-busy={isSwitching}
+            className={isSwitching ? 'opacity-60 transition-opacity' : 'transition-opacity'}
+          >
+            <DataTable
+              columns={columns}
+              data={rows}
+              keyField="id"
+              isLoading={false}
+              emptyMessage={
+                filter === 'pending'
+                  ? 'لا توجد طلبات تحصيل ناقص معلقة'
+                  : 'لا توجد نتائج لهذا الفلتر'
+              }
+              renderMobileRow={renderMobileRow}
+            />
+          </div>
 
-      {!loadFailed && total > 0 && (
-        <PaginationFooter
-          currentPage={page}
-          totalPages={totalPages}
-          totalItems={total}
-          hasNextPage={page < totalPages}
-          hasPreviousPage={page > 1}
-          onPageChange={setPage}
-          onPrevious={() => setPage((p) => Math.max(1, p - 1))}
-          onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
-          currentPageSize={limit}
-        />
+          {!loadFailed && total > 0 && (
+            <PaginationFooter
+              currentPage={page}
+              totalPages={totalPages}
+              totalItems={total}
+              hasNextPage={page < totalPages}
+              hasPreviousPage={page > 1}
+              onPageChange={setPage}
+              onPrevious={() => setPage((p) => Math.max(1, p - 1))}
+              onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
+              currentPageSize={limit}
+            />
+          )}
+        </>
       )}
 
       <SettleShortfallDialog
