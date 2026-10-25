@@ -179,6 +179,13 @@ const en: Record<keyof typeof ar, string> = {
   'orderSystemFailures.retry.action': 'Re-apply status',
   'orderSystemFailures.retry.success': 'Status re-applied',
   'orderSystemFailures.retry.failed': 'Could not re-apply the status',
+  'settlementFinal.stale': 'The settlement amount changed after the page loaded. The current amount is {currentAmount}. Refresh and try again.',
+  'settlementFinal.statusNotAllowed': 'The settlement amount cannot be changed for an order in status {status}.',
+  'settlementFinal.formatInvalid': 'Enter an amount of at most 10 digits before the decimal point and 2 after, for example 30 or -12.50.',
+  'settlementFinal.empty': 'Enter the final amount.',
+  'settlementFinal.unchanged': 'The new amount equals the current amount.',
+  'settlementFinal.saved': 'The final settlement amount was saved.',
+  'settlementFinal.failed': 'The final settlement amount could not be saved.',
 };
 
 export default en;

@@ -1,5 +1,6 @@
 import { readStoredLocale } from '@/i18n/locale';
 import { translate } from '@/i18n/translate';
+import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
 import type {
   BatchShortageOrder,
   ShortageRenderLine,
@@ -115,6 +116,39 @@ function getBatchShortageMessage(err: unknown): string | null {
 
 export function getBatchErrorMessage(err: unknown, fallback: string): string {
   return getBatchShortageMessage(err) ?? getApiErrorMessage(err, fallback);
+}
+
+interface SettleFinalAmountErrorBody {
+  code?: string;
+  params?: { currentAmount?: string; status?: string };
+  message?: string | string[];
+}
+
+export function getSettleFinalAmountMessage(err: unknown, fallback: string): string {
+  const data = (
+    err as { response?: { data?: SettleFinalAmountErrorBody } }
+  )?.response?.data;
+  const locale = readStoredLocale();
+
+  if (data?.code === 'SETTLEMENT_AMOUNT_STALE') {
+    return translate(locale, 'settlementFinal.stale', {
+      currentAmount: data.params?.currentAmount ?? '',
+    });
+  }
+
+  if (data?.code === 'SETTLEMENT_AMOUNT_STATUS_NOT_ALLOWED') {
+    const status = data.params?.status ?? '';
+    return translate(locale, 'settlementFinal.statusNotAllowed', {
+      status: ORDER_STATUS_ARABIC_LABELS[status] ?? status,
+    });
+  }
+
+  const message = data?.message;
+  if (Array.isArray(message) && message.includes('SETTLEMENT_AMOUNT_FORMAT_INVALID')) {
+    return translate(locale, 'settlementFinal.formatInvalid');
+  }
+
+  return getApiErrorMessage(err, fallback);
 }
 
 export function getOutOfStockBlock(

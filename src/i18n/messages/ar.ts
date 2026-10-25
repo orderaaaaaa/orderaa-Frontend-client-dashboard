@@ -193,6 +193,13 @@ const ar = {
   'orderSystemFailures.retry.action': 'إعادة تطبيق الحالة',
   'orderSystemFailures.retry.success': 'تمت إعادة تطبيق الحالة',
   'orderSystemFailures.retry.failed': 'تعذر إعادة تطبيق الحالة',
+  'settlementFinal.stale': 'تغيّر مبلغ التحصيل منذ فتح الصفحة، المبلغ الحالي {currentAmount}. حدّث الصفحة وأعد المحاولة',
+  'settlementFinal.statusNotAllowed': 'لا يمكن تعديل مبلغ التحصيل لطلب حالته {status}',
+  'settlementFinal.formatInvalid': 'أدخل مبلغًا بحد أقصى 10 أرقام قبل الفاصلة ورقمين بعدها، مثل 30 أو -12.50',
+  'settlementFinal.empty': 'يرجى إدخال المبلغ النهائي',
+  'settlementFinal.unchanged': 'المبلغ الجديد مساو للمبلغ الحالي',
+  'settlementFinal.saved': 'تم تحديد المبلغ النهائي للتحصيل',
+  'settlementFinal.failed': 'فشل في تحديد المبلغ النهائي',
 } as const;
 
 export default ar;
