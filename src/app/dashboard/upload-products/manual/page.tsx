@@ -14,6 +14,7 @@ import ConfirmationSection from './ConfirmationSection';
 import { useProductDropdownStore } from '@/store/productDropdownStore';
 import { buildManualOrderPayload } from '@/utils/manualOrder/payload';
 import { createManualOrder } from '@/lib/api/manualOrdersApi';
+import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
 import { locationSaveErrorTextOf } from '@/types/locationOptions';
 import { manualOrderSchema, ManualOrderFormData } from './schema';
 import { useMerchantSettings } from '@/app/dashboard/store-settings/hooks/useStoreSettings';
@@ -131,9 +132,12 @@ function Manual() {
         })),
       });
 
-      await createManualOrder(payload);
+      const created = await createManualOrder(payload);
 
       toast.success('تم إنشاء الطلب بنجاح!');
+      if (carrierSendNeedsAttention(created.carrierSend)) {
+        toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
+      }
       reset();
       useProductDropdownStore.getState().setSelectedProducts([]);
     } catch (err: unknown) {

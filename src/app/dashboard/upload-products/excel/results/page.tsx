@@ -5,6 +5,7 @@ import PageLoading from '@/components/ui/page-loading';
 import { useRouter } from 'next/navigation';
 import { UploadResult } from '@/types/excel-upload';
 import type { BulkImportResponse, OrderCreationResult } from '@/lib/api/bulk-import';
+import { carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
 import { AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
 
 type StoredResults = UploadResult & {
@@ -150,6 +151,15 @@ export default function ValidationResultsPage() {
   const failedCount = imported
     ? backend?.failureCount ?? failedOrders.length
     : results.errorCount;
+  const carrierUnsentCount = imported
+    ? (backend?.createdOrders ?? []).filter((order) => carrierSendNeedsAttention(order.carrierSend)).length
+    : 0;
+  const carrierUnsentLine =
+    carrierUnsentCount > 0 ? (
+      <p className="font-semibold text-amber-700">
+        {`${carrierUnsentCount} طلب لم يُرسل إلى شركة الشحن بعد`}
+      </p>
+    ) : null;
 
   const problems: RowProblem[] = imported
     ? failedOrders.map((failure) => ({
@@ -198,6 +208,7 @@ export default function ValidationResultsPage() {
                   ? `تم إنشاء ${createdCount} طلب في النظام`
                   : `جميع الـ ${results.successCount} طلب صالحة. ارفع الملف مرة أخرى لإنشائها`}
               </p>
+              {carrierUnsentLine}
               <div className="flex flex-wrap gap-3 justify-center">
                 {newUploadButton}
                 {viewOrdersButton}
@@ -234,6 +245,8 @@ export default function ValidationResultsPage() {
             {imported ? `تم إنشاء ${createdCount} طلب` : `${results.successCount} طلب صالح`}
           </span>
         </div>
+
+        {carrierUnsentLine}
 
         <p role="alert" className="mb-6 text-lg font-semibold text-[#FF0004]">
           {imported

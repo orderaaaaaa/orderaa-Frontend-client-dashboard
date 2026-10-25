@@ -1,5 +1,5 @@
 import type { OrderStatus } from '@/types/orders';
-import type { ManualOrderPayload } from '@/types/manual-order';
+import type { CarrierSendBlock, ManualOrderPayload } from '@/types/manual-order';
 
 export type MissingOrderStatus = 'OPEN' | 'RECOVERED' | 'DISMISSED';
 
@@ -123,6 +123,7 @@ export interface RecoverMissingOrderResponse {
   shippingCost: number;
   createdAt: string;
   missingOrderId: number;
+  carrierSend?: CarrierSendBlock;
 }
 
 export interface MissingOrderErrorBody {

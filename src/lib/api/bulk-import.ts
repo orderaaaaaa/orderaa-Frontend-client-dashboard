@@ -1,4 +1,5 @@
 import api from './index';
+import type { CarrierSendBlock } from '@/types/manual-order';
 
 export type ExcelFormat = 'app' | 'easyorder';
 
@@ -54,13 +55,21 @@ export interface OrderCreationResult {
   details?: string;
 }
 
+export interface BulkImportCreatedOrder {
+  rowIndex: number;
+  orderId: string;
+  orderCode: string;
+  status: 'created';
+  carrierSend?: CarrierSendBlock;
+}
+
 export interface BulkImportResponse {
   success: boolean;
   data: {
     totalProcessed: number;
     successCount: number;
     failureCount: number;
-    createdOrders: OrderCreationResult[];
+    createdOrders: BulkImportCreatedOrder[];
     failedOrders: OrderCreationResult[];
   };
 }

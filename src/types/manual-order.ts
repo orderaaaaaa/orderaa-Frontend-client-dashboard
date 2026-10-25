@@ -1,3 +1,6 @@
+import type { OrderStatus } from '@/types/orders';
+import type { ShippingImplementation } from '@/types/shippingCompanies';
+
 export type ManualOrderProduct = {
   id: number;
   quantity: number;
@@ -10,6 +13,38 @@ export type ManualOrderCustomer = {
   phoneNumbers: string[];
   address: string;
   notes?: string;
+};
+
+export type CarrierSendState =
+  | 'PENDING'
+  | 'SEND_ATTEMPTED'
+  | 'SENT'
+  | 'REJECTED'
+  | 'UNKNOWN'
+  | 'CLOSED_NONE';
+
+export type CarrierSendBlock = {
+  markerId: number;
+  state: CarrierSendState;
+  notCalled: boolean;
+  held: boolean;
+  carrierCode: ShippingImplementation;
+  carrierShippingId: string | null;
+  carrierText: string | null;
+  rowCode: string | null;
+};
+
+export type CreateOrderResponse = {
+  id: number;
+  code: string;
+  status: OrderStatus;
+  trackingNumber?: string;
+  customerName: string;
+  customerPhone: string;
+  totalAmount: number;
+  shippingCost: number;
+  createdAt: string;
+  carrierSend?: CarrierSendBlock;
 };
 
 export type ManualOrderPayload = {

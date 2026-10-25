@@ -16,6 +16,7 @@ import { useProductDropdownStore } from '@/store/productDropdownStore';
 import { useIncompleteVariantLines } from '@/hooks/useIncompleteVariantLines';
 import { incompleteLinesMessage } from '@/utils/variantSelection';
 import { buildManualOrderPayload } from '@/utils/manualOrder/payload';
+import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
 import { locationSaveErrorTextOf } from '@/types/locationOptions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useRecoverMissingOrder } from '@/services/missingOrders';
@@ -142,8 +143,11 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
     };
 
     try {
-      await recover(payload);
+      const recovered = await recover(payload);
       toast.success('تم إنشاء الطلب بنجاح!');
+      if (carrierSendNeedsAttention(recovered.carrierSend)) {
+        toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
+      }
       router.back();
     } catch (err: any) {
       const status = err?.response?.status;
