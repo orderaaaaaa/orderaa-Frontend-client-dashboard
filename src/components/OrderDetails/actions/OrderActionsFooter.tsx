@@ -100,7 +100,7 @@ export function OrderActionsFooter({
             <Button
               variant="ghost"
               onClick={onConfirm}
-              disabled={isBusy || !canConfirmStock}
+              disabled={isBusy}
               title={canConfirmStock ? undefined : stockBlockReason}
               className="relative top-[-6px] flex flex-col items-center gap-[2px] text-white transition-opacity h-auto p-0 hover:bg-transparent disabled:opacity-40"
             >

@@ -137,7 +137,6 @@ export function OrderActionsFooterLargeScreens({
                 <Button
                   variant="default"
                   onClick={onConfirm}
-                  disabled={!canConfirmStock}
                   loading={isBusy}
                   title={canConfirmStock ? undefined : stockBlockReason}
                   className="py-2 px-10 rounded-2xl bg-primary text-white text-sm font-bold hover:bg-[#4B1BC4] transition-all duration-700 hover:scale-105 flex items-center gap-2 disabled:opacity-40 disabled:hover:scale-100"

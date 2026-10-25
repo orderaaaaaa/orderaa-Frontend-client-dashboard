@@ -159,7 +159,7 @@ function OrderDetailsInfoComponent({
   const stockGate = useMemo(() => {
     // Undefined while loading — do NOT block on that, or the confirm button is
     // dead on every first paint.
-    const warned = stockAvailability?.lines.filter((line) => !line.safe) ?? [];
+    const warned = stockAvailability?.lines.filter((line) => !line.safe || line.blocked) ?? [];
     const warning =
       warned.length > 0
         ? `${translate(readStoredLocale(), 'stockShortage.confirmWarning')}\n${formatStockShortageLines(warned)}`
