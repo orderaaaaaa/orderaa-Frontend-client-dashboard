@@ -276,6 +276,10 @@ export interface AutomationStatusNotAppliedDetails {
   provider: string;
   targetStatus: string;
   reason: FailureReason;
+  feedbackLabel?: string;
+  feedbackSummary?: string;
+  stockLines?: FailureStockShortageLine[];
+  stockSummary?: string;
 }
 
 export interface StockMovementSkippedDetails {

@@ -9,6 +9,7 @@ import {
 } from '@/constants/orderSystemFailures';
 import type { Order } from '@/types/orders';
 import type { OrderSystemFailure } from '@/types/orderSystemFailures';
+import { formatStockShortageLines } from '@/utils/apiError';
 import { CancelledLaneAppliedDetails, CancelledLaneStockDetails } from './CancelledLaneDetails';
 import { CarrierDetails } from './CarrierDetails';
 import { DetailField, DetailGrid, EMPTY_VALUE, formatDetailValue } from './DetailFields';
@@ -163,6 +164,25 @@ export function FailureDetails({
               {getStatusLabel(narrowed.details.targetStatus)}
             </DetailField>
           </DetailGrid>
+          {(narrowed.details.feedbackLabel !== undefined ||
+            narrowed.details.feedbackSummary !== undefined) && (
+            <DetailGrid>
+              {narrowed.details.feedbackLabel !== undefined && (
+                <DetailField label="النتيجة">{narrowed.details.feedbackLabel}</DetailField>
+              )}
+              {narrowed.details.feedbackSummary !== undefined && (
+                <DetailField label="الملخص">{narrowed.details.feedbackSummary}</DetailField>
+              )}
+            </DetailGrid>
+          )}
+          {narrowed.details.stockLines !== undefined && narrowed.details.stockLines.length > 0 && (
+            <p className="whitespace-pre-line text-sm text-red-700 font-medium">
+              {formatStockShortageLines(narrowed.details.stockLines)}
+            </p>
+          )}
+          {narrowed.details.stockSummary !== undefined && (
+            <p className="text-sm text-red-700 font-medium">{narrowed.details.stockSummary}</p>
+          )}
           <FailureReasonDetails reason={narrowed.details.reason} />
         </div>
       );
