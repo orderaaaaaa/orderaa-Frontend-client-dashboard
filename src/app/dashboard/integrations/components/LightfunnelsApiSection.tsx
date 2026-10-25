@@ -54,6 +54,7 @@ interface LightfunnelsApiSectionProps {
   apiIsActive: boolean;
   onApiIsActiveChange: (next: boolean) => void;
   manualWebhookUrl?: string;
+  manualUrlUnavailable?: boolean;
   disabled?: boolean;
 }
 
@@ -63,6 +64,7 @@ export default function LightfunnelsApiSection({
   apiIsActive,
   onApiIsActiveChange,
   manualWebhookUrl,
+  manualUrlUnavailable = false,
   disabled = false,
 }: LightfunnelsApiSectionProps) {
   const [showConnectForm, setShowConnectForm] = useState(false);
@@ -159,7 +161,7 @@ export default function LightfunnelsApiSection({
     );
   }
 
-  const clientId = connection?.clientId ?? apiConfig?.apiKey ?? '';
+  const clientId = connection?.clientId ?? '';
 
   return (
     <div className="space-y-4 bg-gray-50 p-5 rounded-xl border border-gray-100">
@@ -224,6 +226,11 @@ export default function LightfunnelsApiSection({
               <p className="text-sm text-amber-800">{SWITCH_TO_MANUAL_WARNING}</p>
               {manualWebhookUrl && (
                 <CopyField label="رابط الـ Webhook اليدوي" value={manualWebhookUrl} maskToken />
+              )}
+              {manualUrlUnavailable && !manualWebhookUrl && (
+                <p className="text-sm text-amber-800">
+                  رابط الاستقبال اليدوي لا يُعرض هنا. بعد التحويل إلى الاستقبال اليدوي، أعد توليد الرابط من قسم Webhook لإنشاء رابط كامل.
+                </p>
               )}
               <div className="flex gap-2">
                 <Button

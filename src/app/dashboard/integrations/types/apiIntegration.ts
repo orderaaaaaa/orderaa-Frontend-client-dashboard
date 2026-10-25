@@ -42,7 +42,7 @@ export interface IntegrationResponse {
   merchantId: number;
   provider: IntegrationProvider;
   configType: IntegrationConfigType;
-  apiKey: string;
+  hasApiKey: boolean;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

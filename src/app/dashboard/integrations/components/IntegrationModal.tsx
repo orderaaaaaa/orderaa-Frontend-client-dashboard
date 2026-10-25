@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import CopyField from './CopyField';
+import { SavedSecretStatus } from '@/components/SavedSecretStatus';
 import BaseModal from '@/components/ui/base-modal';
 import { Stepper, StepContent } from '@/components/ui/stepper';
 import {
@@ -683,10 +684,9 @@ const IntegrationModal = ({
                               الاستقبال (Webhook)
                             </p>
                             {!hasGeneratedToken && (
-                              <CopyField
+                              <SavedSecretStatus
                                 label="المفتاح السري (Secret)"
-                                value={webhookConfig.apiKey ?? ''}
-                                secret
+                                saved={webhookConfig.hasApiKey}
                               />
                             )}
                             <div className="flex items-center justify-between">
@@ -713,7 +713,7 @@ const IntegrationModal = ({
                             <div className="flex items-center justify-between">
                               <span className="text-sm text-gray-600">معرّف التطبيق (Client ID)</span>
                               <span className="text-sm text-gray-800 font-mono">
-                                {lfConnection.clientId ?? apiConfig?.apiKey ?? '—'}
+                                {lfConnection.clientId ?? '—'}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
@@ -734,10 +734,9 @@ const IntegrationModal = ({
                             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                               الربط عبر API
                             </p>
-                            <CopyField
+                            <SavedSecretStatus
                               label="المفتاح السري للتطبيق (Client Secret)"
-                              value={apiConfig.apiKey ?? ''}
-                              secret
+                              saved={apiConfig.hasApiKey}
                             />
                             <div className="flex items-center justify-between">
                               <span className="text-sm text-gray-600">الحالة</span>

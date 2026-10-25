@@ -5,6 +5,7 @@ import { LiaPlusSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import CopyField from './CopyField';
+import { SavedSecretStatus } from '@/components/SavedSecretStatus';
 import BaseModal from '@/components/ui/base-modal';
 import { Switch } from '@/components/ui/switch';
 import { useIntegrations } from '../hooks/useIntegrations';
@@ -73,6 +74,7 @@ const EditIntegrationModal = ({
   const [showAddApi, setShowAddApi] = useState(false);
   const [tokenOverride, setTokenOverride] = useState<string | null>(null);
   const [confirmRegenerate, setConfirmRegenerate] = useState(false);
+  const [webhookRevealed, setWebhookRevealed] = useState(false);
 
   const webhookConfig = useMemo(
     () => configs.find((c) => c.configType === IntegrationConfigType.WEBHOOK),
@@ -127,7 +129,7 @@ const EditIntegrationModal = ({
     lightfunnelsConnection?.webhookMode === LIGHTFUNNELS_WEBHOOK_MODE.AUTOMATIC &&
     lightfunnelsConnection.webhookState === LIGHTFUNNELS_WEBHOOK_STATE.ACTIVE;
 
-  const currentToken = tokenOverride ?? webhookConfig?.apiKey;
+  const currentToken = tokenOverride ?? undefined;
 
   const webhookUrl = useMemo(() => {
     if (!provider) return '';
@@ -163,6 +165,7 @@ const EditIntegrationModal = ({
 
     const addingNewWebhook =
       showAddWebhook &&
+      !webhookRevealed &&
       (hasGeneratedToken || !!watchedFields.newWebhookSecret?.trim());
     const addingNewApi = showAddApi && !!watchedFields.newApiKey?.trim();
 
@@ -187,6 +190,7 @@ const EditIntegrationModal = ({
     initialShopDomain,
     initialClientId,
     showAddWebhook,
+    webhookRevealed,
     showAddApi,
     hasGeneratedToken,
     isOAuthConnect,
@@ -265,17 +269,15 @@ const EditIntegrationModal = ({
         }
       }
 
-      if (!webhookConfig && showAddWebhook) {
-        const newKey = hasGeneratedToken
-          ? generateWebhookToken()
-          : data.newWebhookSecret?.trim();
-        if (newKey) {
+      if (!webhookConfig && showAddWebhook && !hasGeneratedToken) {
+        const newSecret = data.newWebhookSecret?.trim();
+        if (newSecret) {
           promises.push(
             createIntegration({
               storeId,
               provider,
               configType: IntegrationConfigType.WEBHOOK,
-              apiKey: newKey,
+              apiKey: newSecret,
             })
           );
         }
@@ -293,14 +295,34 @@ const EditIntegrationModal = ({
         );
       }
 
-      if (promises.length === 0) {
-        onClose();
+      const pendingGeneratedWebhook =
+        !webhookConfig && showAddWebhook && !webhookRevealed && hasGeneratedToken
+          ? generateWebhookToken()
+          : null;
+
+      if (promises.length === 0 && !pendingGeneratedWebhook) {
+        if (!webhookRevealed) onClose();
         return;
       }
 
       await Promise.all(promises);
+
+      if (pendingGeneratedWebhook) {
+        await createIntegration({
+          storeId,
+          provider,
+          configType: IntegrationConfigType.WEBHOOK,
+          apiKey: pendingGeneratedWebhook,
+        });
+        setTokenOverride(pendingGeneratedWebhook);
+        setWebhookRevealed(true);
+        setShowAddWebhook(false);
+        toast.success('تم تحديث الربط بنجاح');
+        return;
+      }
+
       toast.success('تم تحديث الربط بنجاح');
-      onClose();
+      if (!webhookRevealed) onClose();
     } catch (err: any) {
       setError(err?.response?.data?.message || 'حدث خطأ أثناء التحديث');
     } finally {
@@ -362,6 +384,10 @@ const EditIntegrationModal = ({
               <p className="text-sm text-gray-600 bg-white border border-gray-100 rounded-lg p-3">
                 {AUTOMATIC_WEBHOOK_NOTE}
               </p>
+            ) : hasGeneratedToken && !tokenOverride ? (
+              <p className="text-sm text-gray-600 bg-white border border-gray-100 rounded-lg p-3">
+                الرابط لا يُعرض بعد إغلاق النافذة. أعد توليد الرابط للحصول على رابط جديد.
+              </p>
             ) : (
               <CopyField label="رابط الاستقبال (Webhook URL)" value={webhookUrl} maskToken />
             )}
@@ -418,13 +444,28 @@ const EditIntegrationModal = ({
                   autoComplete={CREDENTIAL_AUTOCOMPLETE.webhookSecret}
                 />
 
-                <CopyField
+                <SavedSecretStatus
                   label="المفتاح الحالي (Secret)"
-                  value={webhookConfig.apiKey ?? ''}
-                  secret
+                  saved={webhookConfig.hasApiKey}
                 />
               </>
             )}
+          </div>
+        ) : webhookRevealed ? (
+          <div className="space-y-4 bg-amber-50 p-5 rounded-xl border border-amber-200">
+            <h4 className="font-semibold text-gray-900 text-sm">تم إنشاء Webhook</h4>
+            <CopyField label="رابط الاستقبال (Webhook URL)" value={webhookUrl} maskToken />
+            <p className="text-sm text-amber-800">
+              احفظ الرابط الآن، لن يُعرض بعد إغلاق النافذة
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="w-full h-10"
+            >
+              إغلاق
+            </Button>
           </div>
         ) : showAddWebhook ? (
           <div className="space-y-4 bg-blue-50/50 p-5 rounded-xl border border-blue-200">
@@ -441,20 +482,21 @@ const EditIntegrationModal = ({
               </Button>
             </div>
 
-            <CopyField label="رابط الاستقبال (Webhook URL)" value={webhookUrl} maskToken />
-
             {hasGeneratedToken ? (
               <p className="text-sm text-gray-600">
-                سيتم توليد رابط يحتوي على رمز الحماية عند الحفظ.
+                سيظهر رابط الاستقبال بعد الحفظ.
               </p>
             ) : (
-              <Input
-                register={form.register}
-                name="newWebhookSecret"
-                label="المفتاح السري (Secret)"
-                placeholder="أدخل مفتاح Webhook..."
-                autoComplete={CREDENTIAL_AUTOCOMPLETE.webhookSecret}
-              />
+              <>
+                <CopyField label="رابط الاستقبال (Webhook URL)" value={webhookUrl} maskToken />
+                <Input
+                  register={form.register}
+                  name="newWebhookSecret"
+                  label="المفتاح السري (Secret)"
+                  placeholder="أدخل مفتاح Webhook..."
+                  autoComplete={CREDENTIAL_AUTOCOMPLETE.webhookSecret}
+                />
+              </>
             )}
           </div>
         ) : (
@@ -475,7 +517,8 @@ const EditIntegrationModal = ({
             apiConfig={apiConfig}
             apiIsActive={apiIsActive}
             onApiIsActiveChange={setApiIsActive}
-            manualWebhookUrl={webhookConfig ? webhookUrl : undefined}
+            manualWebhookUrl={(webhookConfig || webhookRevealed) && tokenOverride ? webhookUrl : undefined}
+            manualUrlUnavailable={(!!webhookConfig || webhookRevealed) && !tokenOverride}
             disabled={isLoading}
           />
         )}
@@ -516,10 +559,9 @@ const EditIntegrationModal = ({
               autoComplete={CREDENTIAL_AUTOCOMPLETE.appSecret}
             />
 
-            <CopyField
+            <SavedSecretStatus
               label="المفتاح السري الحالي للتطبيق (Client Secret)"
-              value={apiConfig.apiKey ?? ''}
-              secret
+              saved={apiConfig.hasApiKey}
             />
           </div>
         ) : showAddApi ? (
