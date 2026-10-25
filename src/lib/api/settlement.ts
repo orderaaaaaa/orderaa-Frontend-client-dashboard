@@ -165,8 +165,16 @@ export async function uploadSettlementRows(
   return data;
 }
 
+export interface SettlementOriginCounts {
+  delivered: number;
+  returned: number;
+  withDrivers: number;
+  other: number;
+}
+
 export interface SettlementBatchListItem extends SettlementBatch {
   actorName: string | null;
+  origins: SettlementOriginCounts;
 }
 
 export interface SettlementBatchOrder {
@@ -177,10 +185,18 @@ export interface SettlementBatchOrder {
   amount: string;
   targetStatus: string;
   currentStatus: string;
+  fromStatus: string | null;
   settledAt: string;
   customerName: string | null;
   isDeleted: boolean;
   shipping: SettlementShippingInfo;
+}
+
+export interface SettlementBatchDeleteErrorBody {
+  statusCode: 404 | 409;
+  code: 'SETTLEMENT_BATCH_NOT_FOUND' | 'SETTLEMENT_BATCH_NOT_EMPTY';
+  message: string;
+  params: { ordersCount?: number };
 }
 
 export interface Paginated<T> {
@@ -192,6 +208,7 @@ export interface Paginated<T> {
 
 export async function listSettlementBatches(params: {
   status?: 'OPEN' | 'CONFIRMED';
+  q?: string;
   page?: number;
   limit?: number;
 }): Promise<Paginated<SettlementBatchListItem>> {
@@ -204,13 +221,24 @@ export async function listSettlementBatches(params: {
 
 export async function listSettlementBatchOrders(
   batchId: string,
-  params: { page?: number; limit?: number } = {},
+  params: { q?: string; page?: number; limit?: number } = {},
 ): Promise<Paginated<SettlementBatchOrder>> {
   const { data } = await api.get<Paginated<SettlementBatchOrder>>(
     `/orders/settlement/batches/${batchId}/orders`,
     { params },
   );
   return data;
+}
+
+export async function getSettlementBatch(batchId: string): Promise<SettlementBatch> {
+  const { data } = await api.get<SettlementBatch>(
+    `/orders/settlement/batches/${batchId}`,
+  );
+  return data;
+}
+
+export async function deleteSettlementBatch(batchId: string): Promise<void> {
+  await api.delete(`/orders/settlement/batches/${batchId}`);
 }
 
 /** The caller's open collection, or null. This is what makes it resumable. */
