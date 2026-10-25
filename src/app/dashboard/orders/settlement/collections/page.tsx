@@ -100,7 +100,7 @@ export default function CollectionsPage() {
   const q = useDebounce(searchInput, 300).trim();
   const effectiveStatus: StatusFilter = q ? 'ALL' : status;
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(BATCHES_PAGE_SIZE);
+  const limit = BATCHES_PAGE_SIZE;
   const [selectedBatch, setSelectedBatch] = useState<SettlementBatchListItem | null>(null);
   const [removeTarget, setRemoveTarget] = useState<SettlementBatchOrder | null>(null);
   const [editTarget, setEditTarget] = useState<SettlementBatchOrder | null>(null);
@@ -333,10 +333,6 @@ export default function CollectionsPage() {
             onPrevious={() => setPage((p) => Math.max(1, p - 1))}
             onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
             currentPageSize={limit}
-            onPageSizeChange={(size) => {
-              setLimit(size);
-              setPage(1);
-            }}
           />
         </>
       )}

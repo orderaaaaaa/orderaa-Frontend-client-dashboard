@@ -14,7 +14,7 @@ interface PaginationFooterProps {
   onPrevious: () => void;
   onNext: () => void;
   currentPageSize: number;
-  onPageSizeChange: (size: number) => void;
+  onPageSizeChange?: (size: number) => void;
   hasSelectedItems?: boolean;
 }
 
@@ -83,11 +83,13 @@ const PaginationFooter: React.FC<PaginationFooterProps> = ({
     >
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-4">
-          <PageSizeSelector
-            currentSize={currentPageSize}
-            totalItems={totalItems}
-            onSizeChange={onPageSizeChange}
-          />
+          {onPageSizeChange && (
+            <PageSizeSelector
+              currentSize={currentPageSize}
+              totalItems={totalItems}
+              onSizeChange={onPageSizeChange}
+            />
+          )}
           <span className="text-sm text-gray-500">{rangeText}</span>
         </div>
         <nav
