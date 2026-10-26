@@ -236,7 +236,6 @@ export const SALES_COPY = {
   subPageEmptyTitle: 'لا توجد نتائج لهذا الفلتر',
   subPageEmptySubtitle: 'جرّب تغيير الفترة أو النطاق',
   subPageErrorTitle: 'تعذر تحميل القائمة',
-  exportErrorMessage: 'تعذر تصدير الملف',
 } as const;
 
 export const BREAKDOWN_GROUP_HEADINGS: Record<'STORE' | 'CARRIER' | 'PAGE', string> = {
