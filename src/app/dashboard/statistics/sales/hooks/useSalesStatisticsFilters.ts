@@ -94,7 +94,7 @@ function parseIsoDate(value: string | undefined): Date | null {
   if (!value || !ISO_DATE_PATTERN.test(value)) return null;
   const [year, month, day] = value.split('-').map(Number);
   const date = new Date(year, month - 1, day);
-  return Number.isNaN(date.getTime()) ? null : date;
+  return formatDateToLocalDate(date) === value ? date : null;
 }
 
 export function parseSalesSearchParams(
@@ -107,10 +107,11 @@ export function parseSalesSearchParams(
   };
 
   const fromDate = parseIsoDate(readFirst(searchParams.from));
-  if (fromDate) result.fromDate = fromDate;
-
   const toDate = parseIsoDate(readFirst(searchParams.to));
-  if (toDate) result.toDate = toDate;
+  if (fromDate && toDate) {
+    result.fromDate = fromDate;
+    result.toDate = toDate;
+  }
 
   const approvedOnly = readFirst(searchParams.approvedOnly);
   if (approvedOnly === 'true' || approvedOnly === 'false') {

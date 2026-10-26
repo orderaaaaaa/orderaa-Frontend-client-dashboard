@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { AlertCircle, ArrowRight, Download, Inbox } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -154,9 +155,10 @@ export function SalesSubPageContent({ set, initialFilters }: SalesSubPageContent
     </Link>
   );
 
-  let header: React.ReactNode = null;
-  let body: React.ReactNode = null;
+  let header: ReactNode = null;
+  let body: ReactNode = null;
   let exportHandler: (() => void) | null = null;
+  let exportRowCount = 0;
 
   if (orderSet !== null && ordersQuery.data) {
     const data = ordersQuery.data;
@@ -174,12 +176,13 @@ export function SalesSubPageContent({ set, initialFilters }: SalesSubPageContent
         )}
       </div>
     );
+    exportRowCount = data.rows.length;
     body =
       data.rows.length === 0 ? (
         <StatisticsState
           icon={Inbox}
-          title={SALES_COPY.subPageEmptyTitle}
-          subtitle={SALES_COPY.subPageEmptySubtitle}
+          title={SALES_COPY.emptyStateTitle}
+          subtitle={SALES_COPY.emptyStateSubtitle}
         />
       ) : (
         <SalesOrdersTable set={orderSet} rows={data.rows} />
@@ -212,12 +215,13 @@ export function SalesSubPageContent({ set, initialFilters }: SalesSubPageContent
         </p>
       </div>
     );
+    exportRowCount = piecesExport.rows.length;
     body =
       data.products.length === 0 ? (
         <StatisticsState
           icon={Inbox}
-          title={SALES_COPY.subPageEmptyTitle}
-          subtitle={SALES_COPY.subPageEmptySubtitle}
+          title={SALES_COPY.emptyStateTitle}
+          subtitle={SALES_COPY.emptyStateSubtitle}
         />
       ) : (
         <SalesPiecesTable withCost={definition.withCost} products={data.products} />
@@ -234,7 +238,7 @@ export function SalesSubPageContent({ set, initialFilters }: SalesSubPageContent
     body = (
       <StatisticsState
         icon={AlertCircle}
-        title={SALES_COPY.subPageErrorTitle}
+        title={SALES_COPY.errorStateTitle}
         actionLabel={SALES_COPY.errorStateRetry}
         onAction={() => activeQuery.refetch()}
       />
@@ -250,7 +254,12 @@ export function SalesSubPageContent({ set, initialFilters }: SalesSubPageContent
       <div className="flex flex-wrap items-start justify-between gap-3">
         {header}
         {exportHandler && (
-          <Button variant="outline" onClick={exportHandler} className="gap-2">
+          <Button
+            variant="outline"
+            onClick={exportHandler}
+            disabled={exportRowCount === 0}
+            className="gap-2"
+          >
             <Download className="size-4" aria-hidden="true" />
             {SALES_COPY.exportLabel}
           </Button>
