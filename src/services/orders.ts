@@ -35,8 +35,15 @@ import {
   Product,
 } from '@/types/orders';
 
+export interface OrderQueryFocusOptions {
+  refetchOnFocus?: boolean;
+}
+
 // Fetch orders with filters and pagination
-export const useOrders = (filters: FilterOrdersDto) => {
+export const useOrders = (
+  filters: FilterOrdersDto,
+  options?: OrderQueryFocusOptions
+) => {
   const query = useQuery({
     queryKey: [QUERY_KEYS.ORDERS, filters] as QueryKey,
     queryFn: async () => {
@@ -46,6 +53,7 @@ export const useOrders = (filters: FilterOrdersDto) => {
       );
       return response.data;
     },
+    refetchOnWindowFocus: options?.refetchOnFocus ?? false,
     placeholderData: keepPreviousData,
   });
   const data = useHeldUntilSettled(query.data, query.dataUpdatedAt, [
@@ -78,7 +86,10 @@ export const useInfiniteOrders = (filters: Omit<FilterOrdersDto, 'page'>) => {
 };
 
 // Fetch order statistics
-export const useOrderStatisticsQuery = (filters?: FilterOrdersDto) => {
+export const useOrderStatisticsQuery = (
+  filters?: FilterOrdersDto,
+  options?: OrderQueryFocusOptions
+) => {
   const {
     page,
     limit,
@@ -97,6 +108,7 @@ export const useOrderStatisticsQuery = (filters?: FilterOrdersDto) => {
       );
       return response.data;
     },
+    refetchOnWindowFocus: options?.refetchOnFocus ?? false,
     placeholderData: keepPreviousData,
   });
   const data = useHeldUntilSettled(query.data, query.dataUpdatedAt, [
@@ -207,6 +219,7 @@ export const orderDetailsQueryOptions = (id: number | null) =>
       return response.data;
     },
     staleTime: 0,
+    refetchOnWindowFocus: true,
     gcTime: ORDER_DETAILS_GC_TIME,
   });
 
@@ -315,6 +328,7 @@ export const useUpdateOrderProduct = () => {
         [QUERY_KEYS.ORDER_DETAILS],
         [QUERY_KEYS.ORDERS],
         [QUERY_KEYS.CARRIER_SENDS],
+        [QUERY_KEYS.DELAYED_ORDERS],
       ]);
     },
   });
@@ -344,6 +358,7 @@ export const useDeleteOrderProduct = () => {
         [QUERY_KEYS.ORDER_DETAILS],
         [QUERY_KEYS.ORDERS],
         [QUERY_KEYS.CARRIER_SENDS],
+        [QUERY_KEYS.DELAYED_ORDERS],
       ]);
     },
   });
@@ -381,6 +396,7 @@ export const useAddOrderProduct = () => {
         [QUERY_KEYS.ORDER_DETAILS],
         [QUERY_KEYS.ORDERS],
         [QUERY_KEYS.CARRIER_SENDS],
+        [QUERY_KEYS.DELAYED_ORDERS],
       ]);
     },
   });
@@ -418,6 +434,7 @@ export const useUpdateCustomer = () => {
         [QUERY_KEYS.ORDERS],
         [QUERY_KEYS.CUSTOMER_ORDERS],
         [QUERY_KEYS.CARRIER_SENDS],
+        [QUERY_KEYS.DELAYED_ORDERS],
       ]);
     },
   });
