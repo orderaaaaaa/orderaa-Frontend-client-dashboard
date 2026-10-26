@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { editCustomer } from '../api/editCustomer';
@@ -37,6 +38,7 @@ export function useEditCustomer(options?: {
       await invalidateAndWait(queryClient, [
         [CUSTOMERS_QUERY_KEY],
         ['customer', variables.customerId],
+        [QUERY_KEYS.DELAYED_ORDERS],
       ]);
       options?.onSuccess?.(data, variables);
     },
