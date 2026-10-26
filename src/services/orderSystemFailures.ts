@@ -14,7 +14,6 @@ import type {
 } from '@/types/orderSystemFailures';
 
 const PAGE_LIMIT = 20;
-const DELAYED_ORDERS_KEY = 'delayed-orders';
 
 export const orderSystemFailuresKey = (orderId: number) =>
   [QUERY_KEYS.ORDER_DETAILS, orderId, 'system-failures'] as const;
@@ -40,7 +39,7 @@ const useInvalidateAfterSeen = (orderId: number) => {
   return () => {
     queryClient.invalidateQueries({ queryKey: orderSystemFailuresKey(orderId) });
     queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
-    queryClient.invalidateQueries({ queryKey: [DELAYED_ORDERS_KEY] });
+    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DELAYED_ORDERS] });
   };
 };
 
