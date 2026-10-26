@@ -21,6 +21,7 @@ import { useFollowupChangeProductsMutation } from '@/services/followup';
 import { orderDetailsQueryOptions } from '@/services/orders';
 import { mapOrderProductToVariantInfo, type Order } from '@/types/orders';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
 
 const MAX_TOTAL_COST = 9_999_999;
 
@@ -161,7 +162,11 @@ export default function ChangeProductsModal({
     const body: FollowupChangeProductsBody = { products, totalCost };
     try {
       const response = await changeProductsMutation.mutateAsync({ orderId, ...body });
-      toast.success('تم تغيير المنتج بنجاح');
+      if (carrierSendNeedsAttention(response.carrierSend)) {
+        toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
+      } else {
+        toast.success('تم تغيير المنتج بنجاح');
+      }
       resetForm();
       onDone?.(response);
       onClose();

@@ -82,6 +82,7 @@ export function ShipmentRowActions({ orderId, closure, partialDelivery }: Shipme
   const isPending = closeMutation.isPending || undoMutation.isPending;
   const partialUnavailable =
     partialDelivery !== undefined && (partialDelivery.pending || partialDelivery.blockedReason !== null);
+  const isInProcessRow = partialDelivery !== undefined;
 
   const actions: RowAction[] = [
     ...(partialDelivery
@@ -96,20 +97,24 @@ export function ShipmentRowActions({ orderId, closure, partialDelivery }: Shipme
           },
         ]
       : []),
-    {
-      id: 'changeProducts',
-      labelKey: 'closure.changeProducts',
-      codes: [PERMISSIONS.FOLLOWUP_MANAGE],
-      disabled: false,
-      onSelect: () => setIsChangeProductsOpen(true),
-    },
-    {
-      id: 'exchange',
-      labelKey: 'closure.exchange',
-      codes: [PERMISSIONS.FOLLOWUP_READ],
-      disabled: false,
-      onSelect: () => setIsExchangeOpen(true),
-    },
+    ...(isInProcessRow
+      ? [
+          {
+            id: 'changeProducts' as const,
+            labelKey: 'closure.changeProducts' as const,
+            codes: [PERMISSIONS.FOLLOWUP_MANAGE],
+            disabled: isLocked,
+            onSelect: () => setIsChangeProductsOpen(true),
+          },
+          {
+            id: 'exchange' as const,
+            labelKey: 'closure.exchange' as const,
+            codes: [PERMISSIONS.FOLLOWUP_READ],
+            disabled: false,
+            onSelect: () => setIsExchangeOpen(true),
+          },
+        ]
+      : []),
     {
       id: 'close',
       labelKey: 'closure.close',

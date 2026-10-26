@@ -3,15 +3,10 @@
 import { LiaSpinnerSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
-import type { FollowupExchangeCandidate } from '@/lib/api/followup';
+import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useExchangeCandidatesQuery } from '@/services/followup';
-import { formatDateTime } from '@/utils/format';
-
-const STATUS_LABELS: Record<FollowupExchangeCandidate['status'], string> = {
-  DELIVERED: 'تم التسليم',
-  COLLECTED: 'تم التحصيل',
-};
+import { formatDateTime, formatNumber } from '@/utils/format';
 
 interface ExchangeCandidatesModalProps {
   isOpen: boolean;
@@ -53,8 +48,8 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId }: ExchangeCa
                   className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-lg border border-[#ECECEC]"
                 >
                   <span className="text-sm font-medium text-[#1F1F1F]">{candidate.code}</span>
-                  <span className="text-xs text-gray-500">{STATUS_LABELS[candidate.status]}</span>
-                  <span className="text-xs text-gray-500">{candidate.totalCost} ج.م</span>
+                  <span className="text-xs text-gray-500">{ORDER_STATUS_ARABIC_LABELS[candidate.status]}</span>
+                  <span className="text-xs text-gray-500">{formatNumber(candidate.totalCost, 2)} جنيه</span>
                   <span className="text-xs text-gray-400">{formatDateTime(candidate.createdAt)}</span>
                 </div>
               ))}
