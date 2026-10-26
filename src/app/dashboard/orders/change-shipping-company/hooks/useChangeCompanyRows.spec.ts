@@ -13,7 +13,7 @@ import {
   needsClearConfirm,
   newRowOf,
   snapshotOf,
-} from './useChangeCompanyRows';
+} from '../utils/switchRows';
 
 const CONTEXT = {
   targetId: 12,

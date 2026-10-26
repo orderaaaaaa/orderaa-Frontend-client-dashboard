@@ -2,7 +2,7 @@
 
 import { StackedList } from '@/components/ui/stacked-list';
 import { CHANGE_COMPANY_TEXT } from '../constants/changeCompany';
-import type { PickOption } from '../hooks/useChangeCompanyRows';
+import type { PickOption } from '../utils/switchRows';
 import type { ChangeCompanyRow as ChangeCompanyRowState } from '../types/bulkCompanySwitch';
 import { ChangeCompanyRow } from './ChangeCompanyRow';
 

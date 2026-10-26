@@ -5,29 +5,13 @@ import SearchableSelect from '@/components/ui/SearchableSelect';
 import { StackedRow } from '@/components/ui/stacked-list';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { useLocationOptionCities, useLocationOptionGovernorates } from '@/services/lookups';
-import {
-  CHANGE_COMPANY_TEXT,
-  localReasonTextOf,
-  resultTextOf,
-  unknownResultTextOf,
-} from '../constants/changeCompany';
-import type { PickOption } from '../hooks/useChangeCompanyRows';
+import { CHANGE_COMPANY_TEXT } from '../constants/changeCompany';
+import type { PickOption } from '../utils/switchRows';
+import { rowMessageOf } from '../utils/switchResults';
 import {
   CHANGE_COMPANY_ROW_STATUS,
   type ChangeCompanyRow as ChangeCompanyRowState,
 } from '../types/bulkCompanySwitch';
-
-export function rowMessageOf(row: ChangeCompanyRowState, targetName: string): string {
-  const names = {
-    newCarrier: row.result?.shippingCompany?.name ?? targetName,
-    oldCarrier: row.result?.previousCompany?.name ?? row.snapshot.companyName ?? '',
-  };
-  if (row.result) return resultTextOf(row.result, names);
-  if (row.status === CHANGE_COMPANY_ROW_STATUS.ERROR_UNKNOWN) return unknownResultTextOf(names);
-  if (row.errorMessage) return row.errorMessage;
-  if (row.localReason) return localReasonTextOf(row.localReason);
-  return '';
-}
 
 interface ChangeCompanyRowProps {
   row: ChangeCompanyRowState;

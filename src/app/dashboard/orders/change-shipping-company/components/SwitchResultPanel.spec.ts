@@ -8,8 +8,8 @@ import {
   type BulkCompanySwitchResponse,
   type ChangeCompanyRow,
 } from '../types/bulkCompanySwitch';
-import { newRowOf } from '../hooks/useChangeCompanyRows';
-import { resultSectionsOf } from './SwitchResultPanel';
+import { newRowOf } from '../utils/switchRows';
+import { resultSectionsOf } from '../utils/switchResults';
 
 function rowOf(id: number, status: ChangeCompanyRow['status'], result: BulkCompanySwitchResponse | null = null): ChangeCompanyRow {
   const order = { id, code: String(id), status: 'CONFIRMED', customers: { id: 1, name: 'C', phone_numbers: ['0100'] } } as Order;

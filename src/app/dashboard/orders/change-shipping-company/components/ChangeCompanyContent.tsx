@@ -18,11 +18,8 @@ import { PERMISSION_CODES } from '@/lib/permissions';
 import { shippingCompanyIdOf, shippingCompanySelectOptionsOf } from '@/lib/shippingCompanies';
 import { useAuthStore } from '@/store/authStore';
 import { CHANGE_COMPANY_TEXT } from '../constants/changeCompany';
-import {
-  applyClientChecks,
-  needsClearConfirm,
-  useChangeCompanyRows,
-} from '../hooks/useChangeCompanyRows';
+import { useChangeCompanyRows } from '../hooks/useChangeCompanyRows';
+import { applyClientChecks, needsClearConfirm } from '../utils/switchRows';
 import { useChangeCompanyRun } from '../hooks/useChangeCompanyRun';
 import { useChangeCompanyPrint } from '../hooks/useChangeCompanyPrint';
 import { httpStatusOf, serverMessageOf } from '../services/bulkCompanySwitch';
