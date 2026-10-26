@@ -353,7 +353,6 @@ export interface OrderShippingId {
   id: number;
   orderId: number;
   shippingId: string;
-  shippingCompany?: string | null;
   shippingCompanyId?: number | null;
   shippingCompanyRef?: ShippingCompanyRef | null;
   isActive: boolean;
@@ -377,7 +376,6 @@ export interface Order {
   returnShippingCost?: number;
   shippingType?: ShippingType;
   returnShipmentContent?: string | null;
-  shippingCompany?: string | null;
   shippingCompanyId?: number | null;
   shippingCompanyRef?: ShippingCompanyRef | null;
   carrierSend?: CarrierSendBlock | null;

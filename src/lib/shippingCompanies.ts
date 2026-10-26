@@ -46,7 +46,6 @@ export const shippingCompanyIdOf = (key: string | null | undefined) => {
 export const shippingIdCompanyNameOf = (
   entry: {
     shippingCompanyId?: number | null;
-    shippingCompany?: string | null;
     shippingCompanyRef?: ShippingCompanyRef | null;
   },
   orderCompany: ShippingCompanyRef | null | undefined,
@@ -56,5 +55,5 @@ export const shippingIdCompanyNameOf = (
   const id = entry.shippingCompanyId ?? null;
   if (id !== null && orderCompany?.id === id) return orderCompany.name;
   const listed = id !== null ? companies.find((company) => company.id === id) : undefined;
-  return listed?.name ?? integrationLabelOf(entry.shippingCompany) ?? '';
+  return listed?.name ?? '';
 };
