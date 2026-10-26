@@ -161,7 +161,6 @@ Reports dashboard at `/dashboard/reports` with 12+ chart types: call distributio
 │   ├── [id]/                 ← Order detail
 │   ├── shipping/             ← Barcode scanner, carrier assign, ship approval
 │   ├── returns/receive/      ← Returns 2-step stepper
-│   ├── tracking/             ← Carrier tracking lookup
 │   └── print/                ← Invoice/print queue
 ├── reports/                   ← Charts, metrics, exports
 ├── customers/                 ← Customer list and detail

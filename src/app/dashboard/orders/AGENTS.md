@@ -13,7 +13,6 @@ Orders is the largest frontend module (~100+ files, 12 subdirs). Root patterns (
 | `print-orders/` | ~25 | Largest sub-module — has own hooks/services/types/utils/constants/components |
 | `returns-receiving/` | ~15 | Step-based workflow (stepper), barcode scanning, mock services |
 | `shipping-orders/` | ~8 | Shipping approval flow, uses shared services |
-| `tracking/` | ~5 | Minimal |
 | `[orderId]/` | ~10 | Single-order detail view |
 | `hooks/` | 3 | useDefaultStatusByPath, useDepartment, useScannedOrders |
 | `components/` | 4 | PageTabs (87 lines), pageTaps (157 lines — duplicate), OrdersSelectionHeader, etc. |
