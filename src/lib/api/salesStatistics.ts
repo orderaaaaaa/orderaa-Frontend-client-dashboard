@@ -1,5 +1,8 @@
 import api from './index';
 import type {
+  SalesOrderSet,
+  SalesOrdersResponse,
+  SalesPiecesResponse,
   SalesStatisticsFilterOptions,
   SalesStatisticsParams,
   SalesStatisticsResponse,
@@ -30,5 +33,24 @@ export async function fetchSalesStatisticsFilterOptions(): Promise<SalesStatisti
   const { data } = await api.get<SalesStatisticsFilterOptions>(
     '/reports/sales-statistics/filter-options',
   );
+  return data;
+}
+
+export async function fetchSalesStatisticsOrders(
+  params: SalesStatisticsParams,
+  set: SalesOrderSet,
+): Promise<SalesOrdersResponse> {
+  const { data } = await api.get<SalesOrdersResponse>('/reports/sales-statistics/orders', {
+    params: { ...buildQueryParams(params), set },
+  });
+  return data;
+}
+
+export async function fetchSalesStatisticsPieces(
+  params: SalesStatisticsParams,
+): Promise<SalesPiecesResponse> {
+  const { data } = await api.get<SalesPiecesResponse>('/reports/sales-statistics/pieces', {
+    params: buildQueryParams(params),
+  });
   return data;
 }

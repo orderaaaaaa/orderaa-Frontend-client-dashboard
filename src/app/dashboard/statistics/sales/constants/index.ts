@@ -1,26 +1,45 @@
 import {
+  Ban,
   Banknote,
   Boxes,
+  CheckCheck,
   PackageCheck,
   Receipt,
   ShoppingBag,
   ShoppingCart,
   Tags,
+  Truck,
+  TrendingDown,
   TrendingUp,
+  Undo2,
+  Wallet,
   type LucideIcon,
 } from 'lucide-react';
 import type { KpiAccent, KpiChipTone } from '@/components/ui/kpi-card';
-import type { SalesMetrics } from '../types';
+import type {
+  SalesDerivedKind,
+  SalesMetrics,
+  SalesOrderSet,
+  SalesSubPageSet,
+} from '../types';
 
 export type SalesCardField =
   | 'totalOrders'
+  | 'runningOrders'
+  | 'deliveredOrders'
   | 'collectedOrders'
+  | 'cancelledOrders'
+  | 'returnedOrders'
   | 'suppliedAmount'
   | 'averageOrderPrice'
   | 'piecesSold'
   | 'soldPiecesCost'
   | 'purchasesTotal'
-  | 'grossMargin';
+  | 'returnsExpense'
+  | 'expenses'
+  | 'netProfit';
+
+export type SalesTrendMode = 'standard' | 'neutral' | 'amberOnUp';
 
 export interface SalesCardDefinition {
   field: SalesCardField;
@@ -29,7 +48,9 @@ export interface SalesCardDefinition {
   hint: string;
   accent: KpiAccent;
   icon: LucideIcon;
-  neutralTrend: boolean;
+  trend: SalesTrendMode;
+  link?: SalesSubPageSet;
+  placeholder?: boolean;
 }
 
 export const SALES_CARDS: SalesCardDefinition[] = [
@@ -40,7 +61,28 @@ export const SALES_CARDS: SalesCardDefinition[] = [
     hint: 'كل الحالات',
     accent: 'primary',
     icon: ShoppingCart,
-    neutralTrend: false,
+    trend: 'standard',
+    link: 'TOTAL',
+  },
+  {
+    field: 'runningOrders',
+    kind: 'count',
+    label: 'جاري تشغيل',
+    hint: 'قيد التنفيذ، بدون الملغاة والموقوفة',
+    accent: 'chart3',
+    icon: Truck,
+    trend: 'neutral',
+    link: 'RUNNING',
+  },
+  {
+    field: 'deliveredOrders',
+    kind: 'count',
+    label: 'تم التسليم',
+    hint: 'حالة تم التسليم',
+    accent: 'chart2',
+    icon: CheckCheck,
+    trend: 'standard',
+    link: 'DELIVERED',
   },
   {
     field: 'collectedOrders',
@@ -49,7 +91,28 @@ export const SALES_CARDS: SalesCardDefinition[] = [
     hint: 'حالة تم التحصيل',
     accent: 'chart2',
     icon: PackageCheck,
-    neutralTrend: false,
+    trend: 'standard',
+    link: 'COLLECTED',
+  },
+  {
+    field: 'cancelledOrders',
+    kind: 'count',
+    label: 'تم الالغاء',
+    hint: 'حالة تم الالغاء',
+    accent: 'chart4',
+    icon: Ban,
+    trend: 'amberOnUp',
+    link: 'CANCELLED',
+  },
+  {
+    field: 'returnedOrders',
+    kind: 'count',
+    label: 'المرتجعات',
+    hint: 'كل حالات المرتجع',
+    accent: 'chart5',
+    icon: Undo2,
+    trend: 'amberOnUp',
+    link: 'RETURNS',
   },
   {
     field: 'suppliedAmount',
@@ -58,7 +121,7 @@ export const SALES_CARDS: SalesCardDefinition[] = [
     hint: 'للطلبات المحصلة',
     accent: 'chart3',
     icon: Banknote,
-    neutralTrend: false,
+    trend: 'standard',
   },
   {
     field: 'averageOrderPrice',
@@ -67,7 +130,7 @@ export const SALES_CARDS: SalesCardDefinition[] = [
     hint: 'للطلبات المحصلة',
     accent: 'chart4',
     icon: Receipt,
-    neutralTrend: false,
+    trend: 'standard',
   },
   {
     field: 'piecesSold',
@@ -76,7 +139,8 @@ export const SALES_CARDS: SalesCardDefinition[] = [
     hint: 'في الطلبات المحصلة',
     accent: 'chart5',
     icon: Boxes,
-    neutralTrend: false,
+    trend: 'standard',
+    link: 'PIECES_SOLD',
   },
   {
     field: 'soldPiecesCost',
@@ -85,7 +149,8 @@ export const SALES_CARDS: SalesCardDefinition[] = [
     hint: 'متوسط سعر الشراء × القطع',
     accent: 'chart1',
     icon: Tags,
-    neutralTrend: true,
+    trend: 'neutral',
+    link: 'PIECES_COST',
   },
   {
     field: 'purchasesTotal',
@@ -94,16 +159,36 @@ export const SALES_CARDS: SalesCardDefinition[] = [
     hint: 'فواتير المشتريات، كل المتاجر',
     accent: 'primary',
     icon: ShoppingBag,
-    neutralTrend: true,
+    trend: 'neutral',
   },
   {
-    field: 'grossMargin',
+    field: 'returnsExpense',
     kind: 'money',
-    label: 'الهامش الإجمالي',
-    hint: 'المبلغ المورد − تكلفة القطع المباعة',
+    label: 'مصاريف المرتجعات',
+    hint: 'المرتجعات بالصافي؛ القيمة الموجبة تعني تكلفة',
+    accent: 'chart4',
+    icon: TrendingDown,
+    trend: 'amberOnUp',
+    link: 'RETURNS_EXPENSES',
+  },
+  {
+    field: 'expenses',
+    kind: 'money',
+    label: 'المصروفات',
+    hint: 'قريباً',
+    accent: 'chart1',
+    icon: Wallet,
+    trend: 'neutral',
+    placeholder: true,
+  },
+  {
+    field: 'netProfit',
+    kind: 'money',
+    label: 'صافي الربح',
+    hint: 'المبيعات − تكلفة القطع − مصاريف المرتجعات − المصروفات',
     accent: 'chart2',
     icon: TrendingUp,
-    neutralTrend: false,
+    trend: 'standard',
   },
 ];
 
@@ -125,12 +210,15 @@ export const SALES_COPY = {
     'القطع',
     'تكلفة القطع',
     'متوسط الطلب',
-    'الهامش',
+    'مصاريف المرتجعات',
+    'المصروفات',
+    'صافي الربح',
   ],
   totalsRowLabel: 'الإجمالي',
   sectionLabels: {
+    statuses: 'حالات الطلبات',
     sales: 'المبيعات',
-    cost: 'التكلفة والهامش',
+    costAndProfit: 'التكلفة والربح',
   },
   emptyStateTitle: 'لا توجد طلبات في هذه الفترة',
   emptyStateSubtitle: 'جرّب تغيير الفترة أو النطاق',
@@ -138,6 +226,17 @@ export const SALES_COPY = {
   errorStateRetry: 'إعادة المحاولة',
   noAccessTitle: 'ليس لديك صلاحية لعرض إحصائيات المبيعات',
   trendTooltipPrefix: 'مقارنة بالفترة السابقة',
+  backToStatistics: 'العودة إلى إحصائيات المبيعات',
+  includesDerivedNote: 'يشمل طلبات مشتقة',
+  exportLabel: 'تصدير Excel',
+  ordersCountLabel: 'عدد الطلبات',
+  amountLabel: 'إجمالي المبلغ',
+  piecesCountLabel: 'عدد القطع',
+  comingSoon: 'قريباً',
+  subPageEmptyTitle: 'لا توجد نتائج لهذا الفلتر',
+  subPageEmptySubtitle: 'جرّب تغيير الفترة أو النطاق',
+  subPageErrorTitle: 'تعذر تحميل القائمة',
+  exportErrorMessage: 'تعذر تصدير الملف',
 } as const;
 
 export const BREAKDOWN_GROUP_HEADINGS: Record<'STORE' | 'CARRIER' | 'PAGE', string> = {
@@ -145,6 +244,166 @@ export const BREAKDOWN_GROUP_HEADINGS: Record<'STORE' | 'CARRIER' | 'PAGE', stri
   CARRIER: 'شركات الشحن',
   PAGE: 'الصفحات',
 };
+
+export type SalesOrderColumn =
+  | 'code'
+  | 'customerName'
+  | 'governorate'
+  | 'city'
+  | 'totalCost'
+  | 'carrierName'
+  | 'storeOrPage'
+  | 'createdAt'
+  | 'status'
+  | 'legCode'
+  | 'shippingCode'
+  | 'settlementAmount'
+  | 'amount'
+  | 'shippingCost'
+  | 'settlementCode'
+  | 'settlementRecordedAt'
+  | 'cancelReason'
+  | 'cancelNotes';
+
+export const SALES_ORDER_COLUMN_LABELS: Record<SalesOrderColumn, string> = {
+  code: 'كود الطلب',
+  customerName: 'العميل',
+  governorate: 'المحافظة',
+  city: 'المدينة',
+  totalCost: 'إجمالي الطلب',
+  carrierName: 'شركة الشحن',
+  storeOrPage: 'المتجر/الصفحة',
+  createdAt: 'تاريخ الإنشاء',
+  status: 'الحالة',
+  legCode: 'كود الفرع R',
+  shippingCode: 'كود الشحن',
+  settlementAmount: 'المبلغ المورد',
+  amount: 'المبلغ',
+  shippingCost: 'تكلفة الشحن',
+  settlementCode: 'كود التحصيل',
+  settlementRecordedAt: 'تاريخ التحصيل',
+  cancelReason: 'سبب الإلغاء',
+  cancelNotes: 'ملاحظات الإلغاء',
+};
+
+export const SALES_DERIVED_KIND_LABELS: Record<SalesDerivedKind, string> = {
+  PARTIAL_REMAINDER: 'متبقي جزئي',
+  REPLACEMENT: 'بديل',
+  EXCHANGE_RETURN: 'تبادل مرتجع',
+};
+
+const COMMON_ORDER_COLUMNS: readonly SalesOrderColumn[] = [
+  'code',
+  'customerName',
+  'governorate',
+  'city',
+  'totalCost',
+  'carrierName',
+  'storeOrPage',
+  'createdAt',
+];
+
+export interface SalesSubPageDefinition {
+  title: string;
+  includesDerived: boolean;
+  columns: readonly SalesOrderColumn[];
+  withCost: boolean;
+}
+
+export const SALES_ORDER_SETS: readonly SalesOrderSet[] = [
+  'TOTAL',
+  'RUNNING',
+  'DELIVERED',
+  'COLLECTED',
+  'CANCELLED',
+  'RETURNS',
+  'RETURNS_EXPENSES',
+];
+
+export const SALES_SUBPAGE_SETS: Record<SalesSubPageSet, SalesSubPageDefinition> = {
+  TOTAL: {
+    title: 'إجمالي الطلبات',
+    includesDerived: false,
+    columns: [...COMMON_ORDER_COLUMNS, 'status'],
+    withCost: false,
+  },
+  RUNNING: {
+    title: 'جاري تشغيل',
+    includesDerived: true,
+    columns: [...COMMON_ORDER_COLUMNS, 'status', 'legCode'],
+    withCost: false,
+  },
+  DELIVERED: {
+    title: 'تم التسليم',
+    includesDerived: false,
+    columns: [...COMMON_ORDER_COLUMNS, 'shippingCode'],
+    withCost: false,
+  },
+  COLLECTED: {
+    title: 'الطلبات المحصلة',
+    includesDerived: false,
+    columns: [
+      ...COMMON_ORDER_COLUMNS,
+      'settlementAmount',
+      'settlementCode',
+      'shippingCode',
+      'settlementRecordedAt',
+    ],
+    withCost: false,
+  },
+  CANCELLED: {
+    title: 'تم الالغاء',
+    includesDerived: false,
+    columns: [...COMMON_ORDER_COLUMNS, 'cancelReason', 'cancelNotes'],
+    withCost: false,
+  },
+  RETURNS: {
+    title: 'المرتجعات',
+    includesDerived: true,
+    columns: [
+      ...COMMON_ORDER_COLUMNS,
+      'status',
+      'settlementAmount',
+      'shippingCode',
+      'legCode',
+    ],
+    withCost: false,
+  },
+  RETURNS_EXPENSES: {
+    title: 'مصاريف المرتجعات',
+    includesDerived: true,
+    columns: [
+      ...COMMON_ORDER_COLUMNS,
+      'shippingCode',
+      'legCode',
+      'amount',
+      'shippingCost',
+      'settlementCode',
+      'settlementRecordedAt',
+    ],
+    withCost: false,
+  },
+  PIECES_SOLD: {
+    title: 'القطع المباعة',
+    includesDerived: false,
+    columns: [],
+    withCost: false,
+  },
+  PIECES_COST: {
+    title: 'تكلفة القطع المباعة',
+    includesDerived: false,
+    columns: [],
+    withCost: true,
+  },
+};
+
+export function isSalesSubPageSet(value: string): value is SalesSubPageSet {
+  return Object.prototype.hasOwnProperty.call(SALES_SUBPAGE_SETS, value);
+}
+
+export function isSalesOrderSet(set: SalesSubPageSet): set is SalesOrderSet {
+  return (SALES_ORDER_SETS as readonly string[]).includes(set);
+}
 
 export function resolveCardContextChip(
   field: SalesCardField,
@@ -168,6 +427,10 @@ export function resolveCardContextChip(
     if (!approvedOnly) return undefined;
     return { tone: 'neutral', text: 'المستلمة فقط' };
   }
+  if (field === 'returnsExpense') {
+    if (totals.returnsWithoutSettlement <= 0) return undefined;
+    return { tone: 'warning', text: `${totals.returnsWithoutSettlement} طلبات بدون مبلغ` };
+  }
   return undefined;
 }
 
@@ -187,10 +450,11 @@ export function formatTrendAriaLabel(direction: 'up' | 'down' | 'flat', percent:
 }
 
 export function resolveTrendTone(
-  neutralTrend: boolean,
+  mode: SalesTrendMode,
   direction: 'up' | 'down' | 'flat',
 ): KpiChipTone {
-  if (neutralTrend || direction === 'flat') return 'neutral';
+  if (mode === 'neutral' || direction === 'flat') return 'neutral';
+  if (mode === 'amberOnUp') return direction === 'up' ? 'warning' : 'neutral';
   return direction === 'up' ? 'success' : 'warning';
 }
 

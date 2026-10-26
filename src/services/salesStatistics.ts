@@ -3,8 +3,13 @@ import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import {
   fetchSalesStatistics,
   fetchSalesStatisticsFilterOptions,
+  fetchSalesStatisticsOrders,
+  fetchSalesStatisticsPieces,
 } from '@/lib/api/salesStatistics';
-import type { SalesStatisticsParams } from '@/app/dashboard/statistics/sales/types';
+import type {
+  SalesOrderSet,
+  SalesStatisticsParams,
+} from '@/app/dashboard/statistics/sales/types';
 
 export const useSalesStatisticsQuery = (params: SalesStatisticsParams, enabled: boolean) => {
   return useQuery({
@@ -22,5 +27,29 @@ export const useSalesStatisticsFilterOptionsQuery = (enabled: boolean) => {
     enabled,
     queryFn: fetchSalesStatisticsFilterOptions,
     staleTime: 300_000,
+  });
+};
+
+export const useSalesStatisticsOrdersQuery = (
+  params: SalesStatisticsParams,
+  set: SalesOrderSet,
+  enabled: boolean,
+) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.SALES_STATISTICS_ORDERS, params, set] as QueryKey,
+    enabled,
+    queryFn: () => fetchSalesStatisticsOrders(params, set),
+    placeholderData: keepPreviousData,
+    staleTime: 60_000,
+  });
+};
+
+export const useSalesStatisticsPiecesQuery = (params: SalesStatisticsParams, enabled: boolean) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.SALES_STATISTICS_PIECES, params] as QueryKey,
+    enabled,
+    queryFn: () => fetchSalesStatisticsPieces(params),
+    placeholderData: keepPreviousData,
+    staleTime: 60_000,
   });
 };

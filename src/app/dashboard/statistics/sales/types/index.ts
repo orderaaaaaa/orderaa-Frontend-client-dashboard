@@ -16,7 +16,14 @@ export interface SalesMetrics {
   averageOrderPrice: string | null;
   collectedWithoutSettlement: number;
   uncostedPieces: number;
-  grossMargin: string;
+  runningOrders: number;
+  deliveredOrders: number;
+  cancelledOrders: number;
+  returnedOrders: number;
+  returnsExpense: string;
+  returnsWithoutSettlement: number;
+  expenses: string;
+  netProfit: string;
 }
 
 export interface SalesBreakdownRow {
@@ -33,6 +40,92 @@ export interface SalesStatisticsResponse {
   totals: SalesMetrics;
   previousTotals: SalesMetrics;
   breakdown: SalesBreakdownRow[];
+}
+
+export type SalesOrderSet =
+  | 'TOTAL'
+  | 'RUNNING'
+  | 'DELIVERED'
+  | 'COLLECTED'
+  | 'CANCELLED'
+  | 'RETURNS'
+  | 'RETURNS_EXPENSES';
+
+export type SalesPieceSet = 'PIECES_SOLD' | 'PIECES_COST';
+
+export type SalesSubPageSet = SalesOrderSet | SalesPieceSet;
+
+export type SalesDerivedKind = 'PARTIAL_REMAINDER' | 'REPLACEMENT' | 'EXCHANGE_RETURN';
+
+export interface SalesOrderRow {
+  orderId: number;
+  code: string;
+  status: string;
+  derivedKind: SalesDerivedKind | null;
+  createdAt: string;
+  customerName: string;
+  governorate: string | null;
+  city: string | null;
+  totalCost: string;
+  shippingCost: string | null;
+  storeName: string | null;
+  pageName: string | null;
+  carrierKey: string | null;
+  carrierName: string | null;
+  shippingCode: string | null;
+  legCode: string | null;
+  cancelReason: string | null;
+  cancelNotes: string | null;
+  settlementAmount: string | null;
+  settlementRecordedAt: string | null;
+  settlementCode: string | null;
+}
+
+export interface SalesOrdersSummary {
+  count: number;
+  amount: string | null;
+  withoutAmount: number;
+}
+
+export interface SalesOrdersResponse {
+  set: SalesOrderSet;
+  range: SalesRange;
+  approvedOnly: boolean;
+  includesDerived: boolean;
+  summary: SalesOrdersSummary;
+  rows: SalesOrderRow[];
+}
+
+export interface SalesPiecesTotals {
+  piecesSold: number;
+  soldPiecesCost: string;
+  uncostedPieces: number;
+}
+
+export interface SalesPieceVariant {
+  variantId: number;
+  label: string;
+  sku: string | null;
+  piecesSold: number;
+  avgUnitCost: string | null;
+  soldPiecesCost: string;
+  uncostedPieces: number;
+}
+
+export interface SalesPieceProduct {
+  productId: number;
+  name: string;
+  piecesSold: number;
+  soldPiecesCost: string;
+  uncostedPieces: number;
+  variants: SalesPieceVariant[];
+}
+
+export interface SalesPiecesResponse {
+  range: SalesRange;
+  approvedOnly: boolean;
+  totals: SalesPiecesTotals;
+  products: SalesPieceProduct[];
 }
 
 export interface FilterOption {

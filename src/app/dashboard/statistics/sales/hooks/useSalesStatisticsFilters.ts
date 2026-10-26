@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { formatDateToLocalDate, calculateDateRangeFromPeriod, TimePeriod } from '@/utils/dateRangeUtils';
-import type { SalesStatisticsParams } from '../types';
+import type { SalesStatisticsParams, SalesSubPageSet } from '../types';
 
 export interface SalesStatisticsFiltersState {
   fromDate: Date | null;
@@ -59,8 +59,74 @@ export function buildSalesParams(
   return params;
 }
 
-export function useSalesStatisticsFilters(): UseSalesStatisticsFiltersResult {
-  const [state, setState] = useState<SalesStatisticsFiltersState>(buildInitialState);
+type SearchParamValue = string | string[] | undefined;
+
+const SALES_SUB_PAGE_BASE_PATH = '/dashboard/statistics/sales';
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+export function buildSalesSubPageHref(
+  set: SalesSubPageSet,
+  params: SalesStatisticsParams | null,
+): string {
+  const base = `${SALES_SUB_PAGE_BASE_PATH}/${set}`;
+  if (!params) return base;
+
+  const search = new URLSearchParams();
+  search.set('from', params.from);
+  search.set('to', params.to);
+  search.set('approvedOnly', String(params.approvedOnly));
+  params.storeIds?.forEach((id) => search.append('storeIds', String(id)));
+  params.carrierKeys?.forEach((key) => search.append('carrierKeys', key));
+  params.pageNames?.forEach((name) => search.append('pageNames', name));
+  return `${base}?${search.toString()}`;
+}
+
+function readFirst(value: SearchParamValue): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function readList(value: SearchParamValue): string[] {
+  if (value === undefined) return [];
+  return (Array.isArray(value) ? value : [value]).filter((item) => item !== '');
+}
+
+function parseIsoDate(value: string | undefined): Date | null {
+  if (!value || !ISO_DATE_PATTERN.test(value)) return null;
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+export function parseSalesSearchParams(
+  searchParams: Record<string, SearchParamValue>,
+): Partial<SalesStatisticsFiltersState> {
+  const result: Partial<SalesStatisticsFiltersState> = {
+    storeIds: readList(searchParams.storeIds),
+    carrierKeys: readList(searchParams.carrierKeys),
+    pageNames: readList(searchParams.pageNames),
+  };
+
+  const fromDate = parseIsoDate(readFirst(searchParams.from));
+  if (fromDate) result.fromDate = fromDate;
+
+  const toDate = parseIsoDate(readFirst(searchParams.to));
+  if (toDate) result.toDate = toDate;
+
+  const approvedOnly = readFirst(searchParams.approvedOnly);
+  if (approvedOnly === 'true' || approvedOnly === 'false') {
+    result.approvedOnly = approvedOnly === 'true';
+  }
+
+  return result;
+}
+
+export function useSalesStatisticsFilters(
+  initial?: Partial<SalesStatisticsFiltersState>,
+): UseSalesStatisticsFiltersResult {
+  const [state, setState] = useState<SalesStatisticsFiltersState>(() => ({
+    ...buildInitialState(),
+    ...initial,
+  }));
 
   const setFromDate = useCallback((date: Date | null) => {
     setState((prev) => ({ ...prev, fromDate: date, timePeriod: '' }));
