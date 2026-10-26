@@ -83,19 +83,37 @@ export default function OrderCard({
     onSelectionChange?.(e.target.checked);
   };
 
-  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const cardUrl = filterParams
+    ? `/dashboard/orders/${id}?${filterParams}`
+    : `/dashboard/orders/${id}`;
+
+  const handleToggleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!select || !toggleOnCardClick) return;
+    if (!e.currentTarget.contains(e.target as Node)) return;
+    const interactive = (e.target as HTMLElement).closest(CARD_INTERACTIVE_SELECTOR);
+    if (interactive && e.currentTarget.contains(interactive)) return;
+    onSelectionChange?.(!isSelected);
+  };
+
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (select && toggleOnCardClick) {
-      if (!e.currentTarget.contains(e.target as Node)) return;
-      const interactive = (e.target as HTMLElement).closest(CARD_INTERACTIVE_SELECTOR);
-      if (interactive && e.currentTarget.contains(interactive)) return;
+      e.preventDefault();
       onSelectionChange?.(!isSelected);
       return;
     }
-    if (disableNavigation) return;
-    const url = filterParams
-      ? `/dashboard/orders/${id}?${filterParams}`
-      : `/dashboard/orders/${id}`;
-    router.push(url);
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    router.push(cardUrl);
+  };
+
+  const handleLinkAuxClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.button !== 1 || !select || !toggleOnCardClick) return;
+    e.preventDefault();
+    onSelectionChange?.(!isSelected);
+  };
+
+  const handleLinkMouseDown = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.button === 1) e.preventDefault();
   };
 
   const handleRepeatClick = (e: React.MouseEvent) => {
@@ -105,7 +123,7 @@ export default function OrderCard({
 
   return (
     <div
-      onClick={handleCardClick}
+      onClick={disableNavigation ? handleToggleClick : undefined}
       className={`relative w-full h-full max-w-full overflow-hidden bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.1)] rounded-[10px] transition-all duration-200 flex flex-col ${disableNavigation
         ? ''
         : 'cursor-pointer hover:shadow-[0px_6px_20px_rgba(93,36,225,0.15)]'
@@ -119,7 +137,7 @@ export default function OrderCard({
             checked={isSelected}
             onChange={handleCheckboxChange}
             onClick={(e) => e.stopPropagation()}
-            className="w-5 h-5 border-2 border-primary rounded-[4px] cursor-pointer accent-primary"
+            className="relative z-[2] w-5 h-5 border-2 border-primary rounded-[4px] cursor-pointer accent-primary"
           />
         )}
       </div>
@@ -148,7 +166,7 @@ export default function OrderCard({
             </div>
 
             <div
-              className={`flex absolute left-5 flex-col-reverse items-center gap-3
+              className={`flex absolute left-5 z-[2] flex-col-reverse items-center gap-3
                 ${select ? 'top-10' : 'top-5'}
                 `}
             >
@@ -508,6 +526,16 @@ export default function OrderCard({
           )}
         </div>
       </BaseModal>
+      {!disableNavigation && (
+        <a
+          href={cardUrl}
+          aria-label={code && code !== 'غير محدد' ? `فتح الطلب ${code}` : 'فتح الطلب'}
+          onClick={handleLinkClick}
+          onAuxClick={handleLinkAuxClick}
+          onMouseDown={handleLinkMouseDown}
+          className="absolute inset-0 z-[1] rounded-[10px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        />
+      )}
     </div>
   );
 }
