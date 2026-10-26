@@ -3,14 +3,16 @@
 import { useState } from 'react';
 import { Copy } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { cn } from '@/lib/utils';
 
 interface CopyButtonProps {
   value: string;
   label?: string;
   successMessage?: string;
+  className?: string;
 }
 
-export default function CopyButton({ value, label, successMessage }: CopyButtonProps) {
+export default function CopyButton({ value, label, successMessage, className }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async (e: React.MouseEvent) => {
@@ -43,7 +45,7 @@ export default function CopyButton({ value, label, successMessage }: CopyButtonP
       type="button"
       onClick={handleCopy}
       aria-label={label ?? 'نسخ الكود'}
-      className="inline-flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
+      className={cn('inline-flex items-center justify-center text-muted-foreground hover:text-primary transition-colors', className)}
     >
       <Copy className={`w-3.5 h-3.5 ${copied ? 'text-green-600' : ''}`} />
     </button>
