@@ -527,7 +527,7 @@ function AllOrdersContent() {
                 cancelNotes={order.cancelNotes}
                 postponedUntil={order.postponedUntil}
                 showAllItems
-                states={order.states}
+                events={order.order_events}
               />
             ))}
           </div>

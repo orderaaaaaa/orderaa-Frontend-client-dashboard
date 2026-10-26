@@ -16,6 +16,7 @@ import { getTimeAgo } from '@/utils/timeAgo';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { If, Then } from 'react-if';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
+import { renderOrderEventNote } from '@/lib/orderEventNote';
 import { getRemainingTime } from '@/utils/getRemainingTime';
 import { LiaClock, LiaPrintSolid, LiaBanSolid, LiaExclamationCircleSolid, LiaExchangeAltSolid, LiaUndoAltSolid, LiaRandomSolid, LiaPauseCircleSolid } from 'react-icons/lia';
 import { OrderCardProps } from '@/app/dashboard/orders/allOrders/types/OrderProps';
@@ -71,7 +72,7 @@ export default function OrderCard({
   hideCustomerInfo = false,
   showAllItems = false,
   shippingType,
-  states,
+  events,
   parkedAt,
   unseenSystemFailureCount = 0,
 }: OrderCardProps) {
@@ -102,6 +103,18 @@ export default function OrderCard({
     e.stopPropagation();
     onRepeatClick?.();
   };
+
+  // Same formatting the order-details timeline uses, so stock-workflow notes
+  // (stored as JSON) read as Arabic sentences here instead of raw JSON.
+  const noteEvents = (events ?? [])
+    .filter((event) => event.note && !event.note.startsWith('Cancelled'))
+    .map((event) => ({
+      id: event.id,
+      text: renderOrderEventNote(event.name, event.note, getStatusLabel),
+    }))
+    .filter(
+      (event): event is { id: number; text: string } => Boolean(event.text)
+    );
 
   return (
     <div
@@ -399,16 +412,16 @@ export default function OrderCard({
           </div>
         )}
 
-        {states && states.length > 0 && (
+        {noteEvents.length > 0 && (
           <div className="flex flex-col gap-2 w-full">
-            {states.filter((state) => !state.note?.startsWith('Cancelled')).map((state, index) => (
-              <div key={index} className="flex items-start gap-2">
+            {noteEvents.map((event) => (
+              <div key={event.id} className="flex items-start gap-2">
                 <FileText
                   className="w-[18px] h-[18px] flex-shrink-0 mt-0.5"
                   style={{ strokeWidth: 1.5, color: 'rgba(220,38,38,0.7)' }}
                 />
                 <span className="text-base font-medium text-red-600 break-words min-w-0">
-                  {state.note}
+                  {event.text}
                 </span>
               </div>
             ))}

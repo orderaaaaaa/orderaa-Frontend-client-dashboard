@@ -260,7 +260,7 @@ export default function CustomerOrdersModal({
                 createdAt={order.createdAt}
                 repeatCount={orders.length}
                 showAllItems
-                states={order.states}
+                events={order.order_events}
                 isBlocked={order.customers.isBlocked}
                 customerNotes={order.customers.notes}
                 hideCustomerInfo

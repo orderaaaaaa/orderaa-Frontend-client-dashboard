@@ -531,7 +531,7 @@ export function ShippingOrdersContent() {
                 cancelNotes={order.cancelNotes}
                 postponedUntil={order.postponedUntil}
                 showAllItems
-                states={order.states}
+                events={order.order_events}
                 isBlocked={order.customers.isBlocked}
                 customerNotes={order.customers.notes}
               />
