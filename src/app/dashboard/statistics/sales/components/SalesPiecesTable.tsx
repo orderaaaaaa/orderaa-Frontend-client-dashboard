@@ -62,7 +62,7 @@ export function buildSalesPieceExport(
 }
 
 export function SalesPiecesTable({ withCost, products }: SalesPiecesTableProps) {
-  const [expandedIds, setExpandedIds] = useState<ReadonlySet<number>>(() => new Set());
+  const [expandedIds, setExpandedIds] = useState<ReadonlySet<number>>(() => new Set<number>());
 
   const toggleProduct = (productId: number) => {
     setExpandedIds((prev) => {
