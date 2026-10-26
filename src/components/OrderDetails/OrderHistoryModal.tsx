@@ -17,6 +17,7 @@ import {
   OrderChangeHistorySkeleton,
 } from './ChangeHistory/OrderChangeHistoryStates';
 import { useOrderChangeBatches } from './ChangeHistory/useOrderChangeBatches';
+import { orderEventLabelOf } from '@/app/dashboard/orders/constants/orderEventLabels';
 
 interface OrderHistoryModalProps {
   isOpen: boolean;
@@ -69,7 +70,9 @@ function OrderEventRow({
   event: OrderEvent;
   getStatusLabel: (status: string) => string;
 }) {
-  const statusLabel = event.name ? getStatusLabel(event.name) : 'حدث';
+  const statusLabel = event.name
+    ? (orderEventLabelOf(event.name) ?? getStatusLabel(event.name))
+    : 'حدث';
   const note = event.note || statusLabel;
 
   return (

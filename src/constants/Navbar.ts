@@ -108,6 +108,12 @@ export const navigation: NavigationItem[] = [
         icon: LiaBoxOpenSolid,
       },
       {
+        name: 'تغيير شركة الشحن بالجملة',
+        href: '/dashboard/orders/change-shipping-company',
+        icon: LiaBoxOpenSolid,
+        permission: PERMISSION_CODES.ORDERS_BULK_COMPANY_SWITCH,
+      },
+      {
         name: 'قسم الشحن',
         href: '/dashboard/orders/shipping-orders',
         icon: LiaShippingFastSolid,
