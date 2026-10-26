@@ -6,7 +6,8 @@ import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useExchangeCandidatesQuery } from '@/services/followup';
-import { formatDateTime, formatNumber } from '@/utils/format';
+import { formatDateTime } from '@/utils/format';
+import { formatNumber } from './formatNumber';
 
 interface ExchangeCandidatesModalProps {
   isOpen: boolean;
