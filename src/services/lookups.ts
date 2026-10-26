@@ -123,7 +123,7 @@ export const usePageNamesQuery = () => {
   });
 };
 
-const retryUnlessClientError = (failureCount: number, error: unknown) => {
+export const retryUnlessClientError = (failureCount: number, error: unknown) => {
   const status = (error as { response?: { status?: number } })?.response?.status;
   if (status !== undefined && status >= 400 && status < 500) return false;
   return failureCount < 2;

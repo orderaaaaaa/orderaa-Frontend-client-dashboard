@@ -32,6 +32,7 @@ export function useChangeCompanyPrint() {
       printingRef.current = true;
       try {
         const { claimed, skipped } = await claimOrdersForPrint(orderIds);
+        if (!mountedRef.current) return;
         const invoiceById = new Map(claimed.map((order) => [order.id, order]));
         const reprintIds: number[] = [];
         const markIds: number[] = [];

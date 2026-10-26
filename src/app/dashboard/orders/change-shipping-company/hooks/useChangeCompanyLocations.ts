@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useQueries, useQuery, type QueryKey } from '@tanstack/react-query';
 import { getLocationOptionCities, getLocationOptionGovernorates } from '@/lib/api/lookups';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { retryUnlessClientError } from '@/services/lookups';
 import type { LocationOption } from '@/types/locationOptions';
 import type { ChangeCompanyRow } from '../types/bulkCompanySwitch';
 import type { PickOption } from '../utils/switchRows';
@@ -27,6 +28,7 @@ export function useChangeCompanyLocations({
     queryKey: [QUERY_KEYS.LOCATION_OPTION_GOVERNORATES, targetId, null] as QueryKey,
     queryFn: () => getLocationOptionGovernorates(targetId as number),
     enabled: targetId !== null,
+    retry: retryUnlessClientError,
   });
   const governorateData = governorates.data;
 
@@ -42,6 +44,7 @@ export function useChangeCompanyLocations({
         ] as QueryKey,
         queryFn: () => getLocationOptionCities(targetId as number, governorateOption as string),
         enabled: targetId !== null && governorateOption !== null,
+        retry: retryUnlessClientError,
       };
     }),
   });
