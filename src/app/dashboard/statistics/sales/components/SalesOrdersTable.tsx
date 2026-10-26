@@ -1,6 +1,7 @@
 'use client';
 
 import CopyButton from '@/components/ui/copy-button';
+import CopyableCode from '@/components/ui/copyable-code';
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
 import type { SalesExportCell } from '@/lib/excel/export-sales-statistics';
@@ -91,10 +92,19 @@ function isCopyableColumn(set: SalesOrderSet, column: SalesOrderColumn): boolean
   return false;
 }
 
+function plainCopyLabelOf(set: SalesOrderSet, column: SalesOrderColumn): string | null {
+  if (column === 'legCode') return 'نسخ كود الفرع';
+  if (column === 'shippingCode' && set === 'RETURNS') return 'نسخ كود الشحن';
+  return null;
+}
+
 function renderOrderCell(row: SalesOrderRow, column: SalesOrderColumn, set: SalesOrderSet) {
   const text = salesOrderText(row, column);
   if (MONEY_COLUMNS.has(column)) return formatMoney(text);
   if (text === null || text === '') return '—';
+
+  const copyLabel = plainCopyLabelOf(set, column);
+  if (copyLabel) return <CopyableCode value={text} label={copyLabel}>{text}</CopyableCode>;
 
   const label = SALES_ORDER_COLUMN_LABELS[column];
   const copyable = isCopyableColumn(set, column);
