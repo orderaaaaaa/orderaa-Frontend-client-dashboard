@@ -1,6 +1,7 @@
 'use client';
 
 import BaseModal from '@/components/ui/base-modal';
+import CopyableCode from '@/components/ui/copyable-code';
 import { Button } from '../ui/button';
 import { OrderProduct } from '@/types/orders';
 
@@ -24,12 +25,23 @@ export default function ProductDetailsModal({
   const DetailRow = ({
     label,
     value,
+    copyValue,
+    copyLabel,
   }: {
     label: string;
     value: string | number | undefined | null;
+    copyValue?: string | null;
+    copyLabel?: string;
   }) => {
     const displayValue = value || '-';
     const isEmpty = !value;
+    const valueNode = copyValue ? (
+      <CopyableCode value={copyValue} label={copyLabel ?? ''} className="min-w-0 max-w-full">
+        {displayValue}
+      </CopyableCode>
+    ) : (
+      displayValue
+    );
 
     return (
       <div className="flex justify-between items-center py-2 border-b border-gray-100">
@@ -37,7 +49,7 @@ export default function ProductDetailsModal({
         <span
           className={`text-sm ${isEmpty ? 'text-red-500' : 'text-[#5F5E5E]'}`}
         >
-          {displayValue}
+          {valueNode}
         </span>
       </div>
     );
@@ -86,7 +98,12 @@ export default function ProductDetailsModal({
               معلومات المنتج
             </h4>
             <div className="bg-gray-50/50 rounded-xl px-4 py-2">
-              <DetailRow label="SKU" value={orderProduct?.sku || product.sku} />
+              <DetailRow
+                label="SKU"
+                value={orderProduct?.sku || product.sku}
+                copyValue={orderProduct?.sku || product.sku}
+                copyLabel="نسخ كود المنتج"
+              />
               <DetailRow
                 label="السعر"
                 value={price != null ? `${price} جنيه` : undefined}

@@ -3,6 +3,7 @@
 import React from 'react';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
+import CopyableCode from '@/components/ui/copyable-code';
 import { AlertTriangle, Check, ChevronDown, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -146,7 +147,7 @@ export function MergeVariantChip({
             )}
             {variant.sku && (
               <span className="text-xs text-gray-500" dir="ltr">
-                {variant.sku}
+                <CopyableCode value={variant.sku} label="نسخ كود المنتج">{variant.sku}</CopyableCode>
               </span>
             )}
           </div>

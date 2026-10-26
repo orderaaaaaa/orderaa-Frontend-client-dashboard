@@ -2,6 +2,7 @@
 
 import { useProductDropdownStore } from '@/store/productDropdownStore';
 import type { MissingOrderDetail } from '@/types/missing-orders';
+import CopyableCode from '@/components/ui/copyable-code';
 
 const LINKABLE_FORMAT = 'LIGHTFUNNELS';
 const NO_LINK_VALUE = '';
@@ -72,7 +73,7 @@ export function RawStoreDataCard({ row }: RawStoreDataCardProps) {
                 >
                   <span className="font-semibold">{product.name || NOT_AVAILABLE}</span>
                   <span className="text-xs text-gray-500">
-                    SKU: {product.sku || NOT_AVAILABLE} — الكمية: {product.quantity ?? NOT_AVAILABLE}
+                    SKU: <CopyableCode value={product.sku} label="نسخ كود المنتج">{product.sku || NOT_AVAILABLE}</CopyableCode> — الكمية: {product.quantity ?? NOT_AVAILABLE}
                   </span>
                   {product.variants.length > 0 && (
                     <span className="text-xs text-gray-500">

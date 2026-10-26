@@ -2,6 +2,7 @@
 
 import { formatDateTime } from '@/utils/format';
 import { LiaExchangeAltSolid } from 'react-icons/lia';
+import CopyableCode from '@/components/ui/copyable-code';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
 import PaginationFooter from '@/components/ui/pagination-footer';
@@ -169,7 +170,7 @@ export function StockMovementsTab() {
                         {movement.variant.product.name}
                       </p>
                       <p className="text-xs text-gray-400">
-                        {movement.variant.sku ?? movement.variant.combinationKey}
+                        <CopyableCode value={movement.variant.sku} label="نسخ كود المنتج">{movement.variant.sku ?? movement.variant.combinationKey}</CopyableCode>
                       </p>
                     </td>
                     <td

@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import ReactDOM from 'react-dom';
+import CopyableCode from '@/components/ui/copyable-code';
 import {
   DndContext,
   DragOverlay,
@@ -159,7 +160,7 @@ function ProductColumn({
           <p className="text-xs text-gray-500">
             {sku && (
               <span dir="ltr" className="me-1">
-                {sku} ·
+                <CopyableCode value={sku} label="نسخ كود المنتج">{sku}</CopyableCode> ·
               </span>
             )}
             {formatPrice(price)}

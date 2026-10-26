@@ -33,6 +33,7 @@ import { useOrderStockAvailabilityQuery } from '@/services/warehouses';
 import { NEXT_STOCK_TARGET } from '@/lib/api/warehouses';
 import { StockAvailabilityBadge } from './StockAvailabilityBadge';
 import Image from 'next/image';
+import CopyableCode from '@/components/ui/copyable-code';
 
 interface OrderDetailsProductCardProps {
   order: Order;
@@ -341,7 +342,7 @@ function OrderDetailsProductCard({
 
                   {item.sku && (
                     <p className="text-sm font-medium text-gray-500">
-                      SKU: {item.sku}
+                      SKU: <CopyableCode value={item.sku} label="نسخ كود المنتج">{item.sku}</CopyableCode>
                     </p>
                   )}
 

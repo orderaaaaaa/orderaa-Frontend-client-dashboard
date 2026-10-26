@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import CopyableCode from '@/components/ui/copyable-code';
 import {
   LiaArrowRightSolid,
   LiaBoxOpenSolid,
@@ -252,7 +253,7 @@ export function WarehouseDetailContent({
                         {variantLabel(item)}
                       </td>
                       <td className="py-2.5 px-3 text-gray-500">
-                        {item.sku ?? '—'}
+                        <CopyableCode value={item.sku} label="نسخ كود المنتج">{item.sku ?? '—'}</CopyableCode>
                       </td>
                       <td
                         className={`py-2.5 px-3 font-semibold ${

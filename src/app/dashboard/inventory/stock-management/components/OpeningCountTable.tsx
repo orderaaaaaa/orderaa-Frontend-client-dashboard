@@ -1,6 +1,7 @@
 'use client';
 
 import Input from '@/components/ui/Input';
+import CopyableCode from '@/components/ui/copyable-code';
 import type { CountSheetRowApi } from '@/lib/api/stockCount';
 import { variantOptionLabel } from '@/lib/variantOptionLabel';
 
@@ -49,7 +50,7 @@ export function OpeningCountTable({
                     </p>
                   )}
                 </td>
-                <td className="py-2 px-3 text-gray-600">{row.sku ?? '—'}</td>
+                <td className="py-2 px-3 text-gray-600"><CopyableCode value={row.sku} label="نسخ كود المنتج">{row.sku ?? '—'}</CopyableCode></td>
                 <td className="py-2 px-3 text-gray-600">{row.quantity}</td>
                 <td className="py-2 px-3">
                   <Input

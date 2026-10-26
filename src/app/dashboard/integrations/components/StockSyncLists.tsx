@@ -3,6 +3,7 @@
 import { formatDateTime } from '@/utils/format';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import CopyableCode from '@/components/ui/copyable-code';
 import { Can } from '@/components/Can';
 import { PERMISSION_CODES } from '@/lib/generated/permission-codes';
 import type {
@@ -193,7 +194,7 @@ export function FailedPushList({
                 </Can>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
-                {row.sku && <span>SKU: {row.sku}</span>}
+                {row.sku && <span>SKU: <CopyableCode value={row.sku} label="نسخ كود المنتج">{row.sku}</CopyableCode></span>}
                 <span>الكمية: {row.quantity}</span>
                 <span>محاولة {row.attempts}</span>
                 <span>{formatTimestamp(row.updatedAt)}</span>
@@ -246,7 +247,7 @@ export function UnlinkedVariantList({
                 {row.productName} — {row.variantLabel}
               </div>
               <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
-                {row.sku && <span>SKU: {row.sku}</span>}
+                {row.sku && <span>SKU: <CopyableCode value={row.sku} label="نسخ كود المنتج">{row.sku}</CopyableCode></span>}
                 <span>{UNLINKED_REASON_LABEL[row.reason]}</span>
               </div>
             </div>
@@ -319,7 +320,7 @@ export function PolicyLogList({
                 {row.productName} — {row.variantLabel}
               </div>
               <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
-                {row.sku && <span>SKU: {row.sku}</span>}
+                {row.sku && <span>SKU: <CopyableCode value={row.sku} label="نسخ كود المنتج">{row.sku}</CopyableCode></span>}
                 <span>{formatTimestamp(row.updatedAt)}</span>
               </div>
               <div className="text-xs text-red-600">{pushErrorLabel(row.lastErrorCode)}</div>
