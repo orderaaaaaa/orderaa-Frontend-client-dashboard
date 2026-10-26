@@ -91,6 +91,7 @@ export type OrderChangeOrigin =
   | 'ORDER_EDIT'
   | 'LINE_EDIT'
   | 'BULK_UPDATE'
+  | 'BULK_COMPANY_SWITCH'
   | 'CANCEL'
   | 'PRINT'
   | 'PREPARE'

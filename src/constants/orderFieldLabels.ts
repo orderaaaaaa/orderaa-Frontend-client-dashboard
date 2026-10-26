@@ -77,6 +77,7 @@ export const ORDER_CHANGE_ORIGIN_LABELS: Record<OrderChangeOrigin, string> = {
   ORDER_EDIT: 'تعديل الطلب',
   LINE_EDIT: 'تعديل المنتجات',
   BULK_UPDATE: 'تعديل جماعي',
+  BULK_COMPANY_SWITCH: 'تغيير شركة الشحن (جماعي)',
   CANCEL: 'إلغاء',
   PRINT: 'طباعة',
   PREPARE: 'تجهيز',
