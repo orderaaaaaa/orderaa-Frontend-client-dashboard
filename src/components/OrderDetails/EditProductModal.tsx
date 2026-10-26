@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { LiaCheckSolid } from 'react-icons/lia';
 import {
   useProductVariantsOptions,
@@ -38,9 +38,12 @@ export default function EditProductModal({
     isOpen ? productId : null
   );
 
+  const wasOpenRef = useRef(false);
+
   useEffect(() => {
-    setSelectedValues(currentVariants);
-  }, [currentVariants]);
+    if (isOpen && !wasOpenRef.current) setSelectedValues(currentVariants);
+    wasOpenRef.current = isOpen;
+  }, [isOpen, currentVariants]);
 
   const hasChanges = useMemo(() => {
     return Object.keys(selectedValues).some(

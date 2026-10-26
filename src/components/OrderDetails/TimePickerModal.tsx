@@ -50,8 +50,10 @@ export default function TimePickerModal({
   const [tempEndHour, setTempEndHour] = useState<number | null>(null);
   const [tempEndPeriod, setTempEndPeriod] = useState<string | null>(null);
 
+  const wasOpenRef = React.useRef(false);
+
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !wasOpenRef.current) {
       const fromParsed = parseArabicTime(initialFrom);
       const toParsed = parseArabicTime(initialTo);
 
@@ -60,6 +62,7 @@ export default function TimePickerModal({
       setTempEndHour(toParsed.hour);
       setTempEndPeriod(toParsed.period);
     }
+    wasOpenRef.current = isOpen;
   }, [isOpen, initialFrom, initialTo]);
 
   const hours = Array.from({ length: 12 }, (_, i) => i + 1);
