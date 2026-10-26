@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import type { Order } from '@/types/orders';
 import { useInvoicePrinter } from '@/app/dashboard/orders/print-orders/hooks/useInvoicePrinter';
@@ -17,10 +17,18 @@ export function useChangeCompanyPrint() {
   const [job, setJob] = useState<PrintJob | null>(null);
   const printablesRef = useRef<Order[]>([]);
   const printingRef = useRef(false);
+  const mountedRef = useRef(false);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const printSwitched = useCallback(
     async (orderIds: number[]) => {
-      if (orderIds.length === 0 || printingRef.current) return;
+      if (!mountedRef.current || orderIds.length === 0 || printingRef.current) return;
       printingRef.current = true;
       try {
         const { claimed, skipped } = await claimOrdersForPrint(orderIds);
@@ -28,13 +36,13 @@ export function useChangeCompanyPrint() {
         const reprintIds: number[] = [];
         const markIds: number[] = [];
         for (const item of skipped) {
-          if (item.reason !== 'PRINTED' && item.reason !== 'NOT_CONFIRMED') {
-            toast.warning(item.message || CHANGE_COMPANY_TEXT.printSkipped);
+          const invoice = item.invoice;
+          if ((item.reason === 'PRINTED' || item.reason === 'NOT_CONFIRMED') && invoice) {
+            invoiceById.set(item.id, invoice);
+            (item.reason === 'PRINTED' ? reprintIds : markIds).push(item.id);
             continue;
           }
-          if (!item.invoice) continue;
-          invoiceById.set(item.id, item.invoice);
-          (item.reason === 'PRINTED' ? reprintIds : markIds).push(item.id);
+          toast.warning(item.message || CHANGE_COMPANY_TEXT.printSkipped);
         }
 
         const printable = orderIds

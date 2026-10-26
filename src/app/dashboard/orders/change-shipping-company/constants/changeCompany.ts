@@ -46,7 +46,6 @@ export const CHANGE_COMPANY_TEXT = {
   resultOldIdMissing: 'رقم الشحنة القديم غير مسجل، راجع الطلب',
   resultNotSwitched: 'لم يتم التغيير',
   resultSkipped: 'متخطاة',
-  openOrder: 'فتح الطلب',
   skippedStateChanged: 'تم تخطي هذا الطلب لأنه تغيّر منذ تحميل الصفحة، ولم يتغير شيء.',
   carrierRejectedNoPrevious:
     'لم يتم التحويل: رفضت {newCarrier} الشحنة، ولا توجد شركة شحن سابقة للطلب.',

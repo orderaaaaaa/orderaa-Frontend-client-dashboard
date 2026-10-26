@@ -109,7 +109,7 @@ export function ChangeCompanyContent() {
   useBarcodeScanner({
     onScan: handleScan,
     onUnrecognized: handleUnrecognized,
-    enabled: !anyModalOpen,
+    enabled: !anyModalOpen && !isRunning,
     minCharLength: 1,
     maxCharLength: 1000,
   });
