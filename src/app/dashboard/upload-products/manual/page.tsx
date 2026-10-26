@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useForm, type FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
+import { useQueryClient } from '@tanstack/react-query';
+import { invalidateAndWait, orderStatusKeys } from '@/lib/query/mutationSync';
 import { Button } from '@/components/ui/button';
 import ClientInformation from './ClientInformation';
 import Order from './Order';
@@ -25,6 +27,7 @@ import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 const DIRTY = { shouldDirty: true } as const;
 
 function Manual() {
+  const queryClient = useQueryClient();
   const selectedProducts = useProductDropdownStore(
     (state) => state.selectedProducts
   );
@@ -133,6 +136,7 @@ function Manual() {
       });
 
       const created = await createManualOrder(payload);
+      await invalidateAndWait(queryClient, orderStatusKeys());
 
       toast.success('تم إنشاء الطلب بنجاح!');
       if (carrierSendNeedsAttention(created.carrierSend)) {
