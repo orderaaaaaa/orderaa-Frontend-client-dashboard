@@ -104,7 +104,13 @@ function renderOrderCell(row: SalesOrderRow, column: SalesOrderColumn, set: Sale
   if (text === null || text === '') return '—';
 
   const copyLabel = plainCopyLabelOf(set, column);
-  if (copyLabel) return <CopyableCode value={text} label={copyLabel}>{text}</CopyableCode>;
+  if (copyLabel) {
+    return (
+      <CopyableCode value={text} label={copyLabel}>
+        <span dir="ltr">{text}</span>
+      </CopyableCode>
+    );
+  }
 
   const label = SALES_ORDER_COLUMN_LABELS[column];
   const copyable = isCopyableColumn(set, column);
