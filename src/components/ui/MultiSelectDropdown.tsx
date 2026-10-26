@@ -46,6 +46,9 @@ interface MultiSelectDropdownProps {
   selectAllLabel?: string;
   clearAllLabel?: string;
   id?: string;
+  overlayOnMobile?: boolean;
+  summarizeSelection?: boolean;
+  triggerClassName?: string;
 }
 
 const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>(
@@ -70,6 +73,9 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
       selectAllLabel = 'تحديد الكل',
       clearAllLabel = 'إلغاء التحديد',
       id,
+      overlayOnMobile = false,
+      summarizeSelection = false,
+      triggerClassName,
     },
     ref
   ) {
@@ -199,7 +205,8 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
             disabled || loading
               ? 'bg-muted cursor-not-allowed text-foreground-subtle'
               : 'bg-card',
-            error ? 'border-red-500' : 'border-border-strong'
+            error ? 'border-red-500' : 'border-border-strong',
+            triggerClassName
           )}
           aria-expanded={open}
           aria-haspopup="listbox"
@@ -211,20 +218,24 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
             )}
           >
             {value.length > 0 ? (
-              <span className="flex flex-wrap gap-1">
-                {selectedDisplayValues.map((display, idx) => (
-                  <span
-                    key={value[idx]}
-                    className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full"
-                  >
-                    {display}
-                    <X
-                      className="w-3 h-3 cursor-pointer hover:text-red-500"
-                      onClick={(e) => removeItem(e, value[idx])}
-                    />
-                  </span>
-                ))}
-              </span>
+              summarizeSelection ? (
+                <span>{value.length} محدد</span>
+              ) : (
+                <span className="flex flex-wrap gap-1">
+                  {selectedDisplayValues.map((display, idx) => (
+                    <span
+                      key={value[idx]}
+                      className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full"
+                    >
+                      {display}
+                      <X
+                        className="w-3 h-3 cursor-pointer hover:text-red-500"
+                        onClick={(e) => removeItem(e, value[idx])}
+                      />
+                    </span>
+                  ))}
+                </span>
+              )
             ) : (
               placeholder
             )}
@@ -245,7 +256,10 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.15 }}
-              className="md:absolute md:top-full z-50 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-lg"
+              className={cn(
+                overlayOnMobile ? 'absolute top-full' : 'md:absolute md:top-full',
+                'z-50 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-lg'
+              )}
               role="listbox"
               aria-multiselectable="true"
             >

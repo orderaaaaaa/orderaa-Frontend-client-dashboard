@@ -56,9 +56,9 @@ export function SalesHeroBar({
   const emptyMessage = filterOptionsError ? SALES_COPY.filterOptionsErrorMessage : undefined;
 
   return (
-    <div className="relative bg-card text-card-foreground border border-border rounded-2xl shadow-sm p-4 sm:p-6 overflow-hidden">
+    <div className="relative bg-card text-card-foreground border border-border rounded-2xl shadow-sm p-4 sm:p-6">
       {isFetching && (
-        <div className="absolute inset-x-0 top-0 h-0.5 bg-primary" aria-hidden="true" />
+        <div className="absolute inset-x-0 top-0 h-0.5 rounded-t-2xl bg-primary" aria-hidden="true" />
       )}
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -74,6 +74,8 @@ export function SalesHeroBar({
           onFromDateChange={onFromDateChange}
           onToDateChange={onToDateChange}
           onTimePeriodChange={onTimePeriodChange}
+          overlayOnMobile
+          timeTriggerClassName="py-3 rounded-lg min-h-[44px]"
         />
       </div>
 
@@ -88,6 +90,9 @@ export function SalesHeroBar({
             loading={filterOptionsLoading}
             showSelectAll
             widthClass="w-full sm:w-[200px]"
+            overlayOnMobile
+            summarizeSelection
+            triggerClassName="py-3 rounded-lg min-h-[44px]"
           />
           <MultiSelectDropdown
             value={carrierKeys}
@@ -98,6 +103,9 @@ export function SalesHeroBar({
             loading={filterOptionsLoading}
             showSelectAll
             widthClass="w-full sm:w-[200px]"
+            overlayOnMobile
+            summarizeSelection
+            triggerClassName="py-3 rounded-lg min-h-[44px]"
           />
           <MultiSelectDropdown
             value={pageNames}
@@ -108,6 +116,9 @@ export function SalesHeroBar({
             loading={filterOptionsLoading}
             showSelectAll
             widthClass="w-full sm:w-[200px]"
+            overlayOnMobile
+            summarizeSelection
+            triggerClassName="py-3 rounded-lg min-h-[44px]"
           />
 
           <div className="flex items-center gap-2">

@@ -35,6 +35,8 @@ interface DateRangeFilterProps {
   onToDateChange: (date: Date | null) => void;
   onTimePeriodChange: (period: TimePeriod | '') => void;
   className?: string;
+  overlayOnMobile?: boolean;
+  timeTriggerClassName?: string;
 }
 
 const DateRangeFilter = memo(
@@ -46,6 +48,8 @@ const DateRangeFilter = memo(
     onToDateChange,
     onTimePeriodChange,
     className,
+    overlayOnMobile,
+    timeTriggerClassName,
   }: DateRangeFilterProps) => {
     return (
       <div
@@ -87,7 +91,9 @@ const DateRangeFilter = memo(
             triggerClassName={clsx(
               'w-full',
               timePeriod && 'text-primary font-bold',
+              timeTriggerClassName,
             )}
+            overlayOnMobile={overlayOnMobile}
             searchThreshold={10}
             clearable
           />

@@ -49,6 +49,7 @@ interface SearchableSelectProps {
   onSearch?: (query: string) => void;
   id?: string;
   'aria-label'?: string;
+  overlayOnMobile?: boolean;
 }
 
 const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
@@ -79,6 +80,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
       onSearch,
       id,
       'aria-label': ariaLabel,
+      overlayOnMobile = false,
     },
     ref
   ) {
@@ -302,8 +304,10 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.15 }}
-              className="md:absolute md:top-full z-50 mt-1 w-full max-h-60 overflow-auto
-                         rounded-md border bg-popover text-popover-foreground shadow-lg"
+              className={cn(
+                overlayOnMobile ? 'absolute top-full' : 'md:absolute md:top-full',
+                'z-50 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-lg'
+              )}
               role="listbox"
             >
               {showSearch && (
