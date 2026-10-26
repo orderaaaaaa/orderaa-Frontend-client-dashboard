@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { AlertCircle, Inbox } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { getApiErrorMessage } from '@/utils/apiError';
@@ -21,13 +22,23 @@ import {
   resolveTrendTone,
   type SalesCardDefinition,
 } from '../constants';
-import { useSalesStatisticsFilters } from '../hooks/useSalesStatisticsFilters';
+import {
+  buildSalesSubPageHref,
+  useSalesStatisticsFilters,
+} from '../hooks/useSalesStatisticsFilters';
 import { SalesHeroBar } from './SalesHeroBar';
 import { SalesBreakdownTable } from './SalesBreakdownTable';
 import { StatisticsState } from './StatisticsState';
 import type { SalesStatisticsParams, SalesStatisticsResponse } from '../types';
 
 const EMPTY_PARAMS: SalesStatisticsParams = { from: '', to: '', approvedOnly: true };
+
+const STATUS_SECTION_CARDS = SALES_CARDS.slice(0, 6);
+const SALES_SECTION_CARDS = SALES_CARDS.slice(6, 9);
+const COST_SECTION_CARDS = SALES_CARDS.slice(9);
+
+const CARD_LINK_CLASS =
+  'rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary';
 
 const PAGE_CONTAINER = 'mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6';
 
@@ -147,13 +158,18 @@ export function SalesStatisticsContent() {
     return (
       <div className={PAGE_CONTAINER}>
         {heroBar}
-        <KpiSection title={SALES_COPY.sectionLabels.sales} columns={4}>
-          {SALES_CARDS.slice(0, 4).map((card) => (
+        <KpiSection title={SALES_COPY.sectionLabels.statuses} columns={3}>
+          {STATUS_SECTION_CARDS.map((card) => (
             <KpiCardSkeleton key={card.field} />
           ))}
         </KpiSection>
-        <KpiSection title={SALES_COPY.sectionLabels.cost} columns={4}>
-          {SALES_CARDS.slice(4).map((card) => (
+        <KpiSection title={SALES_COPY.sectionLabels.sales} columns={3}>
+          {SALES_SECTION_CARDS.map((card) => (
+            <KpiCardSkeleton key={card.field} />
+          ))}
+        </KpiSection>
+        <KpiSection title={SALES_COPY.sectionLabels.costAndProfit} columns={3}>
+          {COST_SECTION_CARDS.map((card) => (
             <KpiCardSkeleton key={card.field} />
           ))}
         </KpiSection>
@@ -173,22 +189,24 @@ export function SalesStatisticsContent() {
   const isEmpty = totals.totalOrders === 0 && totals.purchasesTotal === '0.00';
 
   const renderCard = (card: SalesCardDefinition) => {
-    const value = totals[card.field];
+    const value = card.placeholder ? '0.00' : totals[card.field];
     const previousValue = previousTotals[card.field];
-    const trendResult = computeTrend(value, previousValue);
+    const trendResult = card.placeholder ? null : computeTrend(value, previousValue);
     const trend = trendResult
       ? {
           direction: trendResult.direction,
           percent: trendResult.percent,
-          tone: resolveTrendTone(card.neutralTrend, trendResult.direction),
+          tone: resolveTrendTone(card.trend, trendResult.direction),
           tooltip: formatTrendTooltip(previousRange),
           ariaLabel: formatTrendAriaLabel(trendResult.direction, trendResult.percent),
         }
       : undefined;
-    const chip = resolveCardContextChip(card.field, totals, dataApprovedOnly);
+    const chip = card.placeholder
+      ? undefined
+      : resolveCardContextChip(card.field, totals, dataApprovedOnly);
     const Icon = card.icon;
 
-    return (
+    const kpi = (
       <KpiCard
         key={card.field}
         label={card.label}
@@ -205,16 +223,31 @@ export function SalesStatisticsContent() {
         dimmed={isDimmed}
       />
     );
+
+    if (!card.link) return kpi;
+
+    return (
+      <Link
+        key={card.field}
+        href={buildSalesSubPageHref(card.link, params)}
+        className={CARD_LINK_CLASS}
+      >
+        {kpi}
+      </Link>
+    );
   };
 
   return (
     <div className={PAGE_CONTAINER}>
       {heroBar}
-      <KpiSection title={SALES_COPY.sectionLabels.sales} columns={4}>
-        {SALES_CARDS.slice(0, 4).map(renderCard)}
+      <KpiSection title={SALES_COPY.sectionLabels.statuses} columns={3}>
+        {STATUS_SECTION_CARDS.map(renderCard)}
       </KpiSection>
-      <KpiSection title={SALES_COPY.sectionLabels.cost} columns={4}>
-        {SALES_CARDS.slice(4).map(renderCard)}
+      <KpiSection title={SALES_COPY.sectionLabels.sales} columns={3}>
+        {SALES_SECTION_CARDS.map(renderCard)}
+      </KpiSection>
+      <KpiSection title={SALES_COPY.sectionLabels.costAndProfit} columns={3}>
+        {COST_SECTION_CARDS.map(renderCard)}
       </KpiSection>
       {breakdown.length > 0 && <SalesBreakdownTable breakdown={breakdown} totals={totals} />}
       {isEmpty && (

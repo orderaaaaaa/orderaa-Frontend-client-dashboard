@@ -25,7 +25,9 @@ function metricCells(metrics: SalesMetrics) {
     formatCount(metrics.piecesSold),
     formatMoney(metrics.soldPiecesCost),
     formatMoney(metrics.averageOrderPrice),
-    formatMoney(metrics.grossMargin),
+    formatMoney(metrics.returnsExpense),
+    formatMoney(metrics.expenses),
+    formatMoney(metrics.netProfit),
   ];
 }
 
