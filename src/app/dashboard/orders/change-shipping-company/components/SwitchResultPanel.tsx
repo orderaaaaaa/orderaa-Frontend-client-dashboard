@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import CopyableCode from '@/components/ui/copyable-code';
 import { CHANGE_COMPANY_TEXT } from '../constants/changeCompany';
 import type { ChangeCompanyRow as ChangeCompanyRowState } from '../types/bulkCompanySwitch';
 import {
@@ -25,20 +26,28 @@ function ResultItem({
   section: SectionKey;
   targetName: string;
 }) {
+  const oldShippingId = row.result?.previousShippingId;
   const detail =
-    section === 'cancelOld'
-      ? `${row.result?.previousCompany?.name ?? ''}: ${
-          row.result?.previousShippingId ?? CHANGE_COMPANY_TEXT.resultOldIdMissing
-        }`
-      : rowMessageOf(row, targetName);
+    section === 'cancelOld' ? (
+      <>
+        {`${row.result?.previousCompany?.name ?? ''}: `}
+        <CopyableCode value={oldShippingId} label="نسخ كود الشحن">
+          {oldShippingId ?? CHANGE_COMPANY_TEXT.resultOldIdMissing}
+        </CopyableCode>
+      </>
+    ) : (
+      rowMessageOf(row, targetName)
+    );
   return (
     <li className="flex flex-col gap-1 p-3 text-sm">
-      <Link
-        href={`/dashboard/orders/${row.order.id}`}
-        className="font-mono text-primary hover:underline"
-      >
-        {row.order.code}
-      </Link>
+      <CopyableCode value={row.order.code} label="نسخ كود الطلب">
+        <Link
+          href={`/dashboard/orders/${row.order.id}`}
+          className="font-mono text-primary hover:underline"
+        >
+          {row.order.code}
+        </Link>
+      </CopyableCode>
       <span className="break-words text-gray-700">{detail}</span>
     </li>
   );

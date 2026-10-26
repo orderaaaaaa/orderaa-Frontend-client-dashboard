@@ -2,6 +2,7 @@
 
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import { StackedRow } from '@/components/ui/stacked-list';
+import CopyableCode from '@/components/ui/copyable-code';
 import type { LocationOption } from '@/types/locationOptions';
 import { CHANGE_COMPANY_TEXT } from '../constants/changeCompany';
 import {
@@ -101,7 +102,11 @@ export function ChangeCompanyRow({
     return (
       <StackedRow
         alert={warning}
-        title={<span className="font-mono">{row.order.code}</span>}
+        title={
+          <CopyableCode value={row.order.code} label="نسخ كود الطلب">
+            <span className="font-mono">{row.order.code}</span>
+          </CopyableCode>
+        }
         fields={[
           { label: CHANGE_COMPANY_TEXT.colStatus, value: statusLabel },
           { label: CHANGE_COMPANY_TEXT.colAddress, value: row.order.address ?? '' },
@@ -118,7 +123,9 @@ export function ChangeCompanyRow({
     <tr className="border-t align-top">
       <td className="py-2 px-3 font-mono text-gray-900">
         <div className="flex flex-col gap-1">
-          <span>{row.order.code}</span>
+          <CopyableCode value={row.order.code} label="نسخ كود الطلب">
+            <span>{row.order.code}</span>
+          </CopyableCode>
           {warning}
         </div>
       </td>
