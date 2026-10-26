@@ -206,6 +206,9 @@ const ar = {
   'closure.refuse': 'رفض التسليم',
   'closure.cancel': 'إلغاء',
   'closure.reopen': 'إعادة فتح',
+  'closure.changeProducts': 'تغيير منتج',
+  'closure.exchange': 'استبدال',
+  'exchange.notice': 'الاستبدال لم يكتمل بعد، ولا يمكن تنفيذه من هنا حاليًا',
 } as const;
 
 export default ar;

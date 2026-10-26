@@ -192,6 +192,9 @@ const en: Record<keyof typeof ar, string> = {
   'closure.refuse': 'Refuse',
   'closure.cancel': 'Cancel',
   'closure.reopen': 'Reopen',
+  'closure.changeProducts': 'Change product',
+  'closure.exchange': 'Exchange',
+  'exchange.notice': 'Exchange is not completed yet. It cannot be carried out from here yet.',
 };
 
 export default en;

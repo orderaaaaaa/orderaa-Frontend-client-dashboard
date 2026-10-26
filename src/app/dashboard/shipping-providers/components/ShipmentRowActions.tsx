@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
+import ChangeProductsModal from '@/components/orders/ChangeProductsModal';
 import PartialDeliveryModal from '@/components/OrderDetails/ActionModals/PartialDeliveryModal';
 import { Button } from '@/components/ui/button';
 import { usePermissionCheck } from '@/hooks/usePermissions';
@@ -10,16 +11,24 @@ import { useI18n } from '@/i18n/I18nProvider';
 import { closureKindAnyOfCodes } from '@/lib/followupClosurePermissions';
 import { PERMISSIONS, orderStatusSetCodeOf, type PermissionCode } from '@/lib/permissions';
 import { orderDetailsQueryOptions } from '@/services/orders';
-import { useCloseClosure, useUndoClosure } from '@/services/shippingProviders';
+import { KEY as SHIPPING_PROVIDERS_KEY, useCloseClosure, useUndoClosure } from '@/services/shippingProviders';
 import { getApiErrorMessage } from '@/utils/apiError';
 import type { FollowupClosure, FollowupClosureKind } from '@/types/logistics';
 import { ClosureReasonModal, type ClosureReasonKind } from './ClosureReasonModal';
+import { ExchangeCandidatesModal } from './ExchangeCandidatesModal';
 
-type ClosureActionId = 'partial' | 'close' | 'refuse' | 'cancel' | 'reopen';
+type ClosureActionId = 'partial' | 'changeProducts' | 'exchange' | 'close' | 'refuse' | 'cancel' | 'reopen';
 
 interface RowAction {
   id: ClosureActionId;
-  labelKey: 'closure.partial' | 'closure.close' | 'closure.refuse' | 'closure.cancel' | 'closure.reopen';
+  labelKey:
+    | 'closure.partial'
+    | 'closure.changeProducts'
+    | 'closure.exchange'
+    | 'closure.close'
+    | 'closure.refuse'
+    | 'closure.cancel'
+    | 'closure.reopen';
   codes: PermissionCode[];
   anyOfCodes?: PermissionCode[];
   disabled: boolean;
@@ -56,6 +65,9 @@ export function ShipmentRowActions({ orderId, closure, partialDelivery }: Shipme
   const { hasAllPermissions, hasAnyPermission } = usePermissionCheck();
   const [reasonKind, setReasonKind] = useState<ClosureReasonKind | null>(null);
   const [isPartialOpen, setIsPartialOpen] = useState(false);
+  const [isChangeProductsOpen, setIsChangeProductsOpen] = useState(false);
+  const [isExchangeOpen, setIsExchangeOpen] = useState(false);
+  const queryClient = useQueryClient();
   const closeMutation = useCloseClosure();
   const undoMutation = useUndoClosure();
   const orderQuery = useQuery({ ...orderDetailsQueryOptions(orderId), enabled: isPartialOpen });
@@ -84,6 +96,20 @@ export function ShipmentRowActions({ orderId, closure, partialDelivery }: Shipme
           },
         ]
       : []),
+    {
+      id: 'changeProducts',
+      labelKey: 'closure.changeProducts',
+      codes: [PERMISSIONS.FOLLOWUP_MANAGE],
+      disabled: false,
+      onSelect: () => setIsChangeProductsOpen(true),
+    },
+    {
+      id: 'exchange',
+      labelKey: 'closure.exchange',
+      codes: [PERMISSIONS.FOLLOWUP_READ],
+      disabled: false,
+      onSelect: () => setIsExchangeOpen(true),
+    },
     {
       id: 'close',
       labelKey: 'closure.close',
@@ -158,6 +184,19 @@ export function ShipmentRowActions({ orderId, closure, partialDelivery }: Shipme
           orderId={orderId}
           onClose={() => setReasonKind(null)}
         />
+      )}
+      {isChangeProductsOpen && (
+        <ChangeProductsModal
+          isOpen
+          onClose={() => setIsChangeProductsOpen(false)}
+          orderId={orderId}
+          onDone={() => {
+            void queryClient.invalidateQueries({ queryKey: [SHIPPING_PROVIDERS_KEY] });
+          }}
+        />
+      )}
+      {isExchangeOpen && (
+        <ExchangeCandidatesModal isOpen onClose={() => setIsExchangeOpen(false)} orderId={orderId} />
       )}
       {isPartialOpen && orderQuery.data && (
         <PartialDeliveryModal
