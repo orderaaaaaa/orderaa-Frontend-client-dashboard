@@ -1,4 +1,5 @@
 
+import type { CarrierSendBlock } from '@/types/carrierSends';
 import { FilterOrdersDto } from '@/types/orders';
 
 /* =========================
@@ -51,8 +52,53 @@ export interface BulkRefusedOrder {
   message: string;
 }
 
+export type BulkCarrierResultOutcome =
+  | 'SENT'
+  | 'REJECTED'
+  | 'UNKNOWN'
+  | 'HELD'
+  | 'DEFERRED'
+  | 'SKIPPED';
+
+export type BulkCarrierResultReason =
+  | 'STATUS_NOT_ALLOWED'
+  | 'SHADOWED'
+  | 'PARKED'
+  | 'LOCKED_BY_OTHER'
+  | 'TARGET_NOT_ACTIVE'
+  | 'LOCATION_MISSING'
+  | 'LOCATION_UNRESOLVED'
+  | 'PHONE_MISSING'
+  | 'ADDRESS_MISSING'
+  | 'OPEN_MARKER'
+  | 'LEDGER_REFUSED'
+  | 'CLAIM_FAILED'
+  | 'CODE_NOT_ISSUED'
+  | 'RETIRED_INTEGRATION'
+  | 'REPLACED_PARENT_NO_CARRIER_SYNC'
+  | 'CARRIER_ACCEPTED'
+  | 'LOCAL_SWITCH'
+  | 'LOCAL_SAME'
+  | 'UPDATED_ON_CARRIER'
+  | 'CARRIER_REJECTED'
+  | 'OUTCOME_UNKNOWN'
+  | 'STATE_CHANGED'
+  | 'HELD_CHECK_REQUIRED'
+  | 'CAP_REACHED'
+  | 'BUDGET_REACHED';
+
+export interface BulkCarrierResult {
+  orderId: number;
+  code: string;
+  outcome: BulkCarrierResultOutcome;
+  reason: BulkCarrierResultReason;
+  carrierSend: CarrierSendBlock | null;
+  skipRowCode: string | null;
+}
+
 export interface BulkUpdateResponse {
   updatedCount: number;
   message: string;
   refused: BulkRefusedOrder[];
+  carrierResults?: BulkCarrierResult[];
 }

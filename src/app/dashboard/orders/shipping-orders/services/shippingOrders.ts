@@ -1,3 +1,4 @@
+import type { BulkCarrierResult } from '@/app/dashboard/orders/allOrders/types/Bulk';
 import http from '@/lib/api/http';
 import { Order } from '@/types/orders';
 
@@ -10,6 +11,8 @@ export interface SubmitForApprovalResponse {
   submittedCount: number;
   submittedOrderIds: number[];
   pickupCode: string;
+  pickupId: number;
+  carrierResults?: BulkCarrierResult[];
 }
 
 export async function getOrderByCodeWithShipping(
