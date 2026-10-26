@@ -15,6 +15,8 @@ export type StockMovementSource =
 
 export type InsufficientStockBehavior = 'THROW' | 'SKIP';
 
+export type StockTrialStep = 'SKIP' | 'COUNT';
+
 /**
  * T29 — what makes a rule fire.
  *
@@ -179,6 +181,7 @@ export interface StockWorkflowApiItem {
   toWarehouseId: number;
   allowNegative: boolean;
   onInsufficient: InsufficientStockBehavior;
+  trialStep: StockTrialStep;
   presetKey: string | null;
   predecessorKeys: string[];
   createdAt: string;
@@ -240,6 +243,7 @@ export interface CreateStockWorkflowDto {
   toWarehouseId: number;
   allowNegative?: boolean;
   onInsufficient?: InsufficientStockBehavior;
+  trialStep?: StockTrialStep;
   predecessorKeys?: string[];
 }
 

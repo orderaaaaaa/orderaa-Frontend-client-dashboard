@@ -4,6 +4,7 @@ import type {
   InsufficientStockBehavior,
   StatusSelectionType,
   StockMovementSource,
+  StockTrialStep,
   StockWorkflowEventType,
 } from '@/lib/api/warehouses';
 
@@ -61,6 +62,14 @@ export const INSUFFICIENT_STOCK_OPTIONS: {
 }[] = [
   { key: 'THROW', value: 'منع العملية' },
   { key: 'SKIP', value: 'تخطي الحركة' },
+];
+
+export const TRIAL_STEP_OPTIONS: {
+  key: StockTrialStep;
+  value: string;
+}[] = [
+  { key: 'SKIP', value: 'تخطي' },
+  { key: 'COUNT', value: 'عدّ' },
 ];
 
 export const MOVEMENT_SOURCE_LABELS: Record<StockMovementSource, string> = {

@@ -26,12 +26,14 @@ import type {
   CreateStockWorkflowDto,
   InsufficientStockBehavior,
   StatusSelectionType,
+  StockTrialStep,
   StockWorkflowApiItem,
 } from '@/lib/api/warehouses';
 import {
   EVENT_TYPE_LABEL_KEYS,
   INSUFFICIENT_STOCK_OPTIONS,
   RULE_SCOPE_LABEL_KEYS,
+  TRIAL_STEP_OPTIONS,
   WORKFLOW_ORDER_STATUSES,
 } from '../constants';
 import {
@@ -80,6 +82,7 @@ interface RuleRow extends StatusRuleSides {
   toWarehouseId: string;
   allowNegative: boolean;
   onInsufficient: InsufficientStockBehavior;
+  trialStep: StockTrialStep;
   dirty: boolean;
   touched: boolean;
   templateOwned: boolean;
@@ -207,6 +210,7 @@ const toRow = (rule: CardRule): RuleRow => ({
   toWarehouseId: String(rule.toWarehouseId),
   allowNegative: rule.allowNegative,
   onInsufficient: rule.onInsufficient,
+  trialStep: rule.trialStep,
   dirty: false,
   touched: false,
   templateOwned: rule.presetKey !== null,
@@ -230,6 +234,7 @@ const emptyRow = (): RuleRow => ({
   toWarehouseId: '',
   allowNegative: false,
   onInsufficient: 'THROW',
+  trialStep: 'SKIP',
   // `dirty` enables Save; `touched` gates inline errors so a freshly added
   // card isn't red before the user has typed anything.
   dirty: true,
@@ -699,6 +704,8 @@ export function StockWorkflowsTab() {
         ? { predecessorKeys: row.predecessorKeys }
         : {};
 
+    const trialStepBody = row.templateOwned ? {} : { trialStep: row.trialStep };
+
     const rowKey = row.id ? `rule-${row.id}` : `new-${index}`;
     setSavingKey(rowKey);
     try {
@@ -707,7 +714,7 @@ export function StockWorkflowsTab() {
         // neither. Every side is sent whole — the API merges a side wholesale.
         await updateMutation.mutateAsync({
           id: row.id,
-          body: { ...shape, ...settings, ...predecessorBody },
+          body: { ...shape, ...settings, ...trialStepBody, ...predecessorBody },
         });
         // Clear dirty so the merge effect stops preferring the local copy
         // and the Save button confirms the write landed.
@@ -721,6 +728,7 @@ export function StockWorkflowsTab() {
           eventType: row.eventType,
           ...shape,
           ...settings,
+          ...trialStepBody,
           ...predecessorBody,
           // The new rule belongs to whichever scope the screen is editing.
           ...(scope.scope === 'PRODUCT' ? { productId: scope.productId } : {}),
@@ -1017,6 +1025,23 @@ export function StockWorkflowsTab() {
                         ? 'يُمنع تغيير حالة الطلب عند نقص المخزون'
                         : 'يتم تخطي الحركة وتستمر حالة الطلب'}
                   </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-gray-600">
+                    خطوة التجربة
+                  </label>
+                  <SearchableSelect
+                    options={TRIAL_STEP_OPTIONS}
+                    value={row.trialStep}
+                    onValueChange={(next) =>
+                      patchRow(index, {
+                        trialStep: next as StockTrialStep,
+                      })
+                    }
+                    placeholder="خطوة التجربة"
+                    disabled={row.templateOwned}
+                  />
                 </div>
               </div>
 
