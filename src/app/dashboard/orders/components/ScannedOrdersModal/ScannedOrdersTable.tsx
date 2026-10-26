@@ -3,6 +3,7 @@
 import React from 'react';
 import { LiaTrashAltSolid, LiaPrintSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
+import CopyableCode from '@/components/ui/copyable-code';
 import clsx from 'clsx';
 import type { ScannedOrdersTableProps } from '../../types/scannedOrders';
 
@@ -57,7 +58,9 @@ export function ScannedOrdersTable({
             )}
           >
             <div className="flex items-center gap-2">
-              <span className="text-lg font-medium">{order.code}</span>
+              <CopyableCode value={order.code} label="نسخ كود الطلب">
+                <span className="text-lg font-medium">{order.code}</span>
+              </CopyableCode>
               {order.printCount !== undefined && order.printCount > 0 && (
                 <span className="flex items-center gap-1 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                   <LiaPrintSolid className="w-3.5 h-3.5" />

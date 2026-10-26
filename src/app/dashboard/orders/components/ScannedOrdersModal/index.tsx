@@ -11,6 +11,7 @@ import {
 import { ScannedOrdersTable } from './ScannedOrdersTable';
 import { ScanInput } from '../ScanInput';
 import { Button } from '@/components/ui/button';
+import CopyableCode from '@/components/ui/copyable-code';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import {
   ORDER_STATUS_ARABIC_LABELS,
@@ -62,7 +63,7 @@ function ChangeProductTable({
             {orders.map((order) => (
               <tr key={order.code} className="hover:bg-gray-50">
                 <td className="px-4 py-3 text-sm text-gray-900 font-medium">
-                  {order.code}
+                  <CopyableCode value={order.code} label="نسخ كود الطلب">{order.code}</CopyableCode>
                 </td>
                 <td className="px-4 py-3">
                   <Input
@@ -152,9 +153,11 @@ function NonConfirmedSection({
                     className="flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-sm font-medium text-gray-800">
-                        {order.code}
-                      </span>
+                      <CopyableCode value={order.code} label="نسخ كود الطلب">
+                        <span className="text-sm font-medium text-gray-800">
+                          {order.code}
+                        </span>
+                      </CopyableCode>
                       {onForceActionable && (
                         <Button
                           variant="outline"
@@ -401,9 +404,11 @@ export function ScannedOrdersModal({
                               key={order.code}
                               className="flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors"
                             >
-                              <span className="text-sm font-medium text-gray-800">
-                                {order.code}
-                              </span>
+                              <CopyableCode value={order.code} label="نسخ كود الطلب">
+                                <span className="text-sm font-medium text-gray-800">
+                                  {order.code}
+                                </span>
+                              </CopyableCode>
                               <Button
                                 variant="ghost"
                                 onClick={() => onRemoveOrder(order.code)}

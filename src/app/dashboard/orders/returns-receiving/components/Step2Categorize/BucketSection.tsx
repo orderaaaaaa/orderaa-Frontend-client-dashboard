@@ -8,6 +8,7 @@ import {
 } from 'react-icons/lia';
 import type { IconType } from 'react-icons';
 import { Button } from '@/components/ui/button';
+import CopyableCode from '@/components/ui/copyable-code';
 import { getCustomerDisplay, type ReturnOrder } from '../../types';
 
 export interface BucketSectionProps {
@@ -91,9 +92,11 @@ export function BucketSection({
                     className="flex items-center justify-between px-4 py-2 text-gray-900"
                   >
                     <div className="flex flex-col gap-0.5 min-w-0">
-                      <span className="font-mono text-sm font-semibold">
-                        {code}
-                      </span>
+                      <CopyableCode value={code} label="نسخ كود الطلب">
+                        <span className="font-mono text-sm font-semibold">
+                          {code}
+                        </span>
+                      </CopyableCode>
                       {order && display && (
                         <span className="text-xs text-gray-500 truncate">
                           {display.name} · {order.governorate}

@@ -14,6 +14,7 @@ import {
 } from 'react-icons/lia';
 import Input from '@/components/ui/Input';
 import { Button } from '@/components/ui/button';
+import CopyableCode from '@/components/ui/copyable-code';
 import {
   AccordionContent,
   AccordionItem,
@@ -409,9 +410,11 @@ export function MainScanPanel({
                       )}
                     >
                       <div className="flex flex-col gap-0.5 min-w-0">
-                        <span className="font-mono text-sm font-semibold text-gray-900">
-                          {code}
-                        </span>
+                        <CopyableCode value={code} label="نسخ كود الطلب">
+                          <span className="font-mono text-sm font-semibold text-gray-900">
+                            {code}
+                          </span>
+                        </CopyableCode>
                         {order && display && (
                           <span className="text-xs text-gray-500 truncate">
                             {display.name} · {order.governorate}
