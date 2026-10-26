@@ -1,25 +1,25 @@
 'use client';
 
-import { useEffect } from 'react';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import { StackedRow } from '@/components/ui/stacked-list';
-import { useStatusLabel } from '@/hooks/useStatusLabel';
-import { useLocationOptionCities, useLocationOptionGovernorates } from '@/services/lookups';
+import type { LocationOption } from '@/types/locationOptions';
 import { CHANGE_COMPANY_TEXT } from '../constants/changeCompany';
-import type { PickOption } from '../utils/switchRows';
-import { rowMessageOf } from '../utils/switchResults';
 import {
   CHANGE_COMPANY_ROW_STATUS,
   type ChangeCompanyRow as ChangeCompanyRowState,
 } from '../types/bulkCompanySwitch';
+import type { PickOption } from '../utils/switchRows';
+import { rowMessageOf } from '../utils/switchResults';
 
 interface ChangeCompanyRowProps {
   row: ChangeCompanyRowState;
   variant: 'table' | 'stacked';
+  statusLabel: string;
+  governorateOptions: LocationOption[];
+  cityOptions: LocationOption[];
   targetId: number | null;
   targetName: string;
   disabled: boolean;
-  onPatch: (orderId: number, patch: Partial<ChangeCompanyRowState>) => void;
   onPickGovernorate: (orderId: number, option: PickOption | null) => void;
   onPickCity: (orderId: number, option: PickOption | null) => void;
 }
@@ -35,66 +35,25 @@ function PackagingWarningBadge({ text }: { text: string }) {
 export function ChangeCompanyRow({
   row,
   variant,
+  statusLabel,
+  governorateOptions,
+  cityOptions,
   targetId,
   targetName,
   disabled,
-  onPatch,
   onPickGovernorate,
   onPickCity,
 }: ChangeCompanyRowProps) {
-  const { getStatusLabel } = useStatusLabel();
   const orderId = row.order.id;
   const governorateOption = row.picks.governorateOption;
-  const governorates = useLocationOptionGovernorates(targetId);
-  const cities = useLocationOptionCities(targetId, governorateOption ?? undefined);
-  const governorateItems = (governorates.data?.options ?? []).map((option) => ({
+  const governorateItems = governorateOptions.map((option) => ({
     key: option.value,
     label: option.label,
   }));
-  const cityItems = (cities.data?.options ?? []).map((option) => ({
+  const cityItems = cityOptions.map((option) => ({
     key: option.value,
     label: option.label,
   }));
-
-  useEffect(() => {
-    if (targetId === null || !governorates.data) return;
-    if (row.prefillTargetId === targetId) return;
-    const current = (row.order.governorate ?? '').trim();
-    const match = governorates.data.options.find((option) => option.label.trim() === current);
-    if (match && row.picks.governorateOption === null) {
-      onPickGovernorate(orderId, { value: match.value, label: match.label });
-    }
-    onPatch(orderId, { prefillTargetId: targetId });
-  }, [
-    targetId,
-    governorates.data,
-    row.prefillTargetId,
-    row.picks.governorateOption,
-    row.order.governorate,
-    orderId,
-    onPatch,
-    onPickGovernorate,
-  ]);
-
-  useEffect(() => {
-    if (governorateOption === null || !cities.data) return;
-    if (row.cityPrefillKey === governorateOption) return;
-    const current = (row.order.city ?? '').trim();
-    const match = cities.data.options.find((option) => option.label.trim() === current);
-    if (match && row.picks.cityOption === null) {
-      onPickCity(orderId, { value: match.value, label: match.label });
-    }
-    onPatch(orderId, { cityPrefillKey: governorateOption });
-  }, [
-    governorateOption,
-    cities.data,
-    row.cityPrefillKey,
-    row.picks.cityOption,
-    row.order.city,
-    orderId,
-    onPatch,
-    onPickCity,
-  ]);
 
   const editable =
     row.status === CHANGE_COMPANY_ROW_STATUS.READY ||
@@ -112,6 +71,7 @@ export function ChangeCompanyRow({
 
   const governorateSelect = (
     <SearchableSelect
+      aria-label={CHANGE_COMPANY_TEXT.colGovernorate}
       options={governorateItems}
       value={governorateOption ?? ''}
       placeholder={CHANGE_COMPANY_TEXT.colGovernorate}
@@ -125,6 +85,7 @@ export function ChangeCompanyRow({
 
   const citySelect = (
     <SearchableSelect
+      aria-label={CHANGE_COMPANY_TEXT.colCity}
       options={cityItems}
       value={row.picks.cityOption ?? ''}
       placeholder={CHANGE_COMPANY_TEXT.colCity}
@@ -142,7 +103,7 @@ export function ChangeCompanyRow({
         alert={warning}
         title={<span className="font-mono">{row.order.code}</span>}
         fields={[
-          { label: CHANGE_COMPANY_TEXT.colStatus, value: getStatusLabel(row.order.status) },
+          { label: CHANGE_COMPANY_TEXT.colStatus, value: statusLabel },
           { label: CHANGE_COMPANY_TEXT.colAddress, value: row.order.address ?? '' },
           { label: CHANGE_COMPANY_TEXT.colCurrentCompany, value: currentCompany },
           { label: CHANGE_COMPANY_TEXT.colGovernorate, value: governorateSelect },
@@ -161,7 +122,7 @@ export function ChangeCompanyRow({
           {warning}
         </div>
       </td>
-      <td className="py-2 px-3 text-gray-600">{getStatusLabel(row.order.status)}</td>
+      <td className="py-2 px-3 text-gray-600">{statusLabel}</td>
       <td className="py-2 px-3 text-gray-600 break-words">{row.order.address ?? ''}</td>
       <td className="py-2 px-3 text-gray-600">{currentCompany}</td>
       <td className="py-2 px-3 min-w-[140px]">{governorateSelect}</td>

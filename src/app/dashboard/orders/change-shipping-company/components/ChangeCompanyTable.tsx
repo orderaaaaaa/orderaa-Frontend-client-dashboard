@@ -1,9 +1,11 @@
 'use client';
 
 import { StackedList } from '@/components/ui/stacked-list';
+import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { CHANGE_COMPANY_TEXT } from '../constants/changeCompany';
-import type { PickOption } from '../utils/switchRows';
+import { useChangeCompanyLocations } from '../hooks/useChangeCompanyLocations';
 import type { ChangeCompanyRow as ChangeCompanyRowState } from '../types/bulkCompanySwitch';
+import type { PickOption } from '../utils/switchRows';
 import { ChangeCompanyRow } from './ChangeCompanyRow';
 
 const TABLE_HEAD = [
@@ -35,11 +37,20 @@ export function ChangeCompanyTable({
   onPickGovernorate,
   onPickCity,
 }: ChangeCompanyTableProps) {
+  const { getStatusLabel } = useStatusLabel();
+  const { governorateOptions, cityOptionsByRow } = useChangeCompanyLocations({
+    rows,
+    targetId,
+    onPatch,
+    onPickGovernorate,
+    onPickCity,
+  });
+
   const sharedProps = {
+    governorateOptions,
     targetId,
     targetName,
     disabled,
-    onPatch,
     onPickGovernorate,
     onPickCity,
   };
@@ -47,8 +58,15 @@ export function ChangeCompanyTable({
   return (
     <>
       <StackedList label={CHANGE_COMPANY_TEXT.title}>
-        {rows.map((row) => (
-          <ChangeCompanyRow key={row.order.id} row={row} variant="stacked" {...sharedProps} />
+        {rows.map((row, index) => (
+          <ChangeCompanyRow
+            key={row.order.id}
+            row={row}
+            variant="stacked"
+            statusLabel={getStatusLabel(row.order.status)}
+            cityOptions={cityOptionsByRow[index] ?? []}
+            {...sharedProps}
+          />
         ))}
       </StackedList>
       <div className="hidden sm:block rounded-md border overflow-x-auto">
@@ -66,8 +84,15 @@ export function ChangeCompanyTable({
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
-              <ChangeCompanyRow key={row.order.id} row={row} variant="table" {...sharedProps} />
+            {rows.map((row, index) => (
+              <ChangeCompanyRow
+                key={row.order.id}
+                row={row}
+                variant="table"
+                statusLabel={getStatusLabel(row.order.status)}
+                cityOptions={cityOptionsByRow[index] ?? []}
+                {...sharedProps}
+              />
             ))}
           </tbody>
         </table>
