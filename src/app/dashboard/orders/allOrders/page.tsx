@@ -124,7 +124,7 @@ function AllOrdersContent() {
     data: ordersData,
     isLoading: loading,
     error: queryError,
-  } = useOrders(apiFilters);
+  } = useOrders(apiFilters, { refetchOnFocus: true });
 
   const { data: orderStatuses } = useOrderStatusesQuery();
 
@@ -158,7 +158,7 @@ function AllOrdersContent() {
       },
     });
 
-  const { statistics } = useOrderStatistics(apiFilters);
+  const { statistics } = useOrderStatistics(apiFilters, { refetchOnFocus: true });
 
   const handleStatisticsChange = useCallback(() => {
     queryClient.invalidateQueries({
