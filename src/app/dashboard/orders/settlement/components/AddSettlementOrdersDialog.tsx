@@ -9,6 +9,7 @@ import { parseSettlementFile, type SettlementSheetError } from '@/lib/excel/pars
 import ForceSettlementDialog from './ForceSettlementDialog';
 import SettlementAcceptedStatusesNote from './SettlementAcceptedStatusesNote';
 import SettlementSheetNamesNote from './SettlementSheetNamesNote';
+import CopyableCode from '@/components/ui/copyable-code';
 import SettlementSheetErrors from './SettlementSheetErrors';
 import { SettlementMobileList, SettlementMobileRow } from './SettlementMobileList';
 import {
@@ -324,7 +325,7 @@ export default function AddSettlementOrdersDialog({
                     }
                     fields={[
                       { label: '#', value: item.row + 1 },
-                      { label: 'كود الطلب', value: <span className="font-mono">{item.orderCode ?? '—'}</span> },
+                      { label: 'كود الطلب', value: <CopyableCode value={item.orderCode} label="نسخ كود الطلب"><span className="font-mono">{item.orderCode ?? '—'}</span></CopyableCode> },
                     ]}
                     actions={
                       item.bypassable ? (
@@ -357,7 +358,7 @@ export default function AddSettlementOrdersDialog({
                     {results.failed.map((item) => (
                       <tr key={item.row} className="border-t">
                         <td className="px-3 py-2 text-muted-foreground">{item.row + 1}</td>
-                        <td className="px-3 py-2 font-mono">{item.orderCode ?? '—'}</td>
+                        <td className="px-3 py-2 font-mono"><CopyableCode value={item.orderCode} label="نسخ كود الطلب">{item.orderCode ?? '—'}</CopyableCode></td>
                         <td className="whitespace-pre-line px-3 py-2 text-red-700">{item.reason}</td>
                         <td className="px-3 py-2">
                           {item.bypassable && (
@@ -384,7 +385,7 @@ export default function AddSettlementOrdersDialog({
                     key={item.row}
                     fields={[
                       { label: '#', value: item.row + 1 },
-                      { label: 'كود الطلب', value: <span className="font-mono">{item.orderCode}</span> },
+                      { label: 'كود الطلب', value: <CopyableCode value={item.orderCode} label="نسخ كود الطلب"><span className="font-mono">{item.orderCode}</span></CopyableCode> },
                     ]}
                     actions={
                       item.bypassable && !item.sameBatch ? (
@@ -418,7 +419,7 @@ export default function AddSettlementOrdersDialog({
                     {results.alreadyCollected.map((item) => (
                       <tr key={item.row} className="border-t">
                         <td className="px-3 py-2 text-muted-foreground">{item.row + 1}</td>
-                        <td className="px-3 py-2 font-mono">{item.orderCode}</td>
+                        <td className="px-3 py-2 font-mono"><CopyableCode value={item.orderCode} label="نسخ كود الطلب">{item.orderCode}</CopyableCode></td>
                         <td className="px-3 py-2">
                           {item.bypassable && !item.sameBatch && (
                             <Button

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import CopyableCode from '@/components/ui/copyable-code';
 import PageLoading from '@/components/ui/page-loading';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import type { SettlementBatchOrder } from '@/lib/api/settlement';
@@ -55,12 +56,14 @@ export default function SettlementBatchOrdersPanel({
                   label: 'كود الطلب',
                   value: (
                     <span className="flex flex-wrap items-center gap-2 font-mono">
-                      <Link
-                        href={`/dashboard/orders/${row.orderId}`}
-                        className="text-primary hover:underline"
-                      >
-                        {row.orderCode}
-                      </Link>
+                      <CopyableCode value={row.orderCode} label="نسخ كود الطلب">
+                        <Link
+                          href={`/dashboard/orders/${row.orderId}`}
+                          className="text-primary hover:underline"
+                        >
+                          {row.orderCode}
+                        </Link>
+                      </CopyableCode>
                       {row.isDeleted && (
                         <span className="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded font-sans">
                           محذوف
@@ -70,7 +73,7 @@ export default function SettlementBatchOrdersPanel({
                   ),
                 },
                 { label: 'المبلغ في هذا التحصيل', value: <span className="font-semibold">{row.amount}</span> },
-                { label: 'كود الشحن', value: <span className="font-mono">{row.shippingCode ?? '—'}</span> },
+                { label: 'كود الشحن', value: <CopyableCode value={row.shippingCode} label="نسخ كود الشحن"><span className="font-mono">{row.shippingCode ?? '—'}</span></CopyableCode> },
                 { label: 'العميل', value: row.customerName ?? '—' },
                 { label: 'الحالة وقتها', value: getStatusLabel(row.fromStatus) || '—' },
                 {
@@ -132,12 +135,14 @@ export default function SettlementBatchOrdersPanel({
               return (
                 <tr key={row.orderId} className="border-t">
                   <td className="px-4 py-2 font-mono">
-                    <Link
-                      href={`/dashboard/orders/${row.orderId}`}
-                      className="text-primary hover:underline"
-                    >
-                      {row.orderCode}
-                    </Link>
+                    <CopyableCode value={row.orderCode} label="نسخ كود الطلب">
+                      <Link
+                        href={`/dashboard/orders/${row.orderId}`}
+                        className="text-primary hover:underline"
+                      >
+                        {row.orderCode}
+                      </Link>
+                    </CopyableCode>
                     {row.isDeleted && (
                       <span className="mr-2 text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">
                         محذوف
@@ -145,7 +150,9 @@ export default function SettlementBatchOrdersPanel({
                     )}
                   </td>
                   <td className="px-4 py-2 font-mono">
-                    {row.shippingCode ?? '—'}
+                    <CopyableCode value={row.shippingCode} label="نسخ كود الشحن">
+                      {row.shippingCode ?? '—'}
+                    </CopyableCode>
                   </td>
                   <td className="px-4 py-2">{row.customerName ?? '—'}</td>
                   <td className="px-4 py-2">{getStatusLabel(row.fromStatus) || '—'}</td>

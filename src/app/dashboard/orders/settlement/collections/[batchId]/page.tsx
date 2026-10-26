@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { LiaSearchSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
+import CopyableCode from '@/components/ui/copyable-code';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Input from '@/components/ui/Input';
 import PageLoading from '@/components/ui/page-loading';
@@ -93,7 +94,7 @@ function SettlementCollectionContent() {
         {backLink}
         <div>
           <h1 className="text-lg sm:text-xl font-bold text-gray-900">
-            طلبات التحصيل {batch.code}
+            طلبات التحصيل <CopyableCode value={batch.code} label="نسخ كود التحصيل">{batch.code}</CopyableCode>
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
             {batch.totalAmount} جنيه عن {batch.ordersCount} طلب

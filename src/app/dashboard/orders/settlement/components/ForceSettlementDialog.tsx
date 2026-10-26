@@ -1,6 +1,7 @@
 'use client';
 
 import BaseModal from '@/components/ui/base-modal';
+import CopyableCode from '@/components/ui/copyable-code';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 
 interface ForceSettlementDialogProps {
@@ -46,7 +47,7 @@ export default function ForceSettlementDialog({
 
         {moveFromBatchCode && (
           <p className="text-amber-700">
-            سيتم نقل الطلب من التحصيل {moveFromBatchCode} إلى التحصيل الحالي
+            سيتم نقل الطلب من التحصيل <CopyableCode value={moveFromBatchCode} label="نسخ كود التحصيل">{moveFromBatchCode}</CopyableCode> إلى التحصيل الحالي
           </p>
         )}
       </div>

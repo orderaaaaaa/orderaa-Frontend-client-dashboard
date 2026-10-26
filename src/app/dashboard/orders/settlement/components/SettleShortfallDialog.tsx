@@ -7,6 +7,7 @@ import { readStoredLocale } from '@/i18n/locale';
 import { translate } from '@/i18n/translate';
 import type { ShortfallSettlement } from '@/lib/api/settlement';
 import { getSettleFinalAmountMessage } from '@/utils/apiError';
+import CopyableCode from '@/components/ui/copyable-code';
 import { useSettleFinalAmountMutation } from '@/app/dashboard/orders/settlement/hooks/useSettlementQueries';
 
 export type ShortfallSettlementRow = { [K in keyof ShortfallSettlement]: ShortfallSettlement[K] };
@@ -108,7 +109,7 @@ export default function SettleShortfallDialog({
     >
       {shownRow && (
         <div className="space-y-3 text-sm">
-          <p className="font-medium">الطلب {shownRow.code}</p>
+          <p className="font-medium">الطلب <CopyableCode value={shownRow.code} label="نسخ كود الطلب">{shownRow.code}</CopyableCode></p>
           <p dir="rtl">
             المبلغ الحالي:{' '}
             <span dir="ltr">
