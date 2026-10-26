@@ -101,7 +101,7 @@ Uses `@import 'tailwindcss'` syntax (not legacy `@tailwind` directives). `@tailw
 - Infinite scroll for order list via `useInfiniteOrders` in `services/orders.ts`
 - `NEXT_PUBLIC_API_URL` in `.env.local` (default: `https://api.orderaa.com`)
 - Axios base URL from `NEXT_PUBLIC_API_URL`, default headers: `Accept-Language: ar`
-- React Query QueryClient config: `retry: false`, `refetchOnWindowFocus: false`, `staleTime: 30000` Per-query overrides: refetchOnWindowFocus true on the delayed-orders queries, the All Orders list and statistics (option refetchOnFocus), and order details.
+- React Query QueryClient config: `retry: false`, `refetchOnWindowFocus: false`, `staleTime: 30000`. Per-query overrides: refetchOnWindowFocus true on the delayed-orders queries, the All Orders list and statistics (option refetchOnFocus), and order details.
 - React Query devtools available in dev via `QueryProvider`
 - 2 toast libraries coexisting: `react-toastify` (used in auth guard hooks) + `sonner` (installed — verify before using)
 - `react-day-picker` styles imported globally in `layout.tsx`
