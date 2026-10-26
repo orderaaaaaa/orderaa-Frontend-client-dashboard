@@ -33,6 +33,7 @@ export const orderStatusKeys = (orderId?: number): QueryKey[] => [
   [QUERY_KEYS.ORDERS],
   [QUERY_KEYS.PRINT_ORDER_STATISTICS],
   [QUERY_KEYS.CUSTOMER_ORDERS],
+  [QUERY_KEYS.DELAYED_ORDERS],
   orderId === undefined
     ? [QUERY_KEYS.ORDER_DETAILS]
     : [QUERY_KEYS.ORDER_DETAILS, orderId],

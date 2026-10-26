@@ -8,6 +8,7 @@ export const QUERY_KEYS = {
   DEPARTMENT_STATUSES: 'department-statuses',
   CUSTOMER_ORDERS: 'customer-orders',
   PRINT_ORDER_STATISTICS: 'print-order-statistics',
+  DELAYED_ORDERS: 'delayed-orders',
   CARRIER_SENDS: 'carrier-sends',
 
   // Products
