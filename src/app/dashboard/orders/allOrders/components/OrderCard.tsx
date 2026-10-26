@@ -23,6 +23,7 @@ import { ShippingType } from '@/types/orders';
 import { MdBlock } from 'react-icons/md';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
+import CopyableCode from '@/components/ui/copyable-code';
 import { IconType } from 'react-icons';
 
 const SHIPPING_TYPE_BADGE: Record<string, { label: string; icon: IconType; bg: string; text: string }> = {
@@ -147,7 +148,9 @@ export default function OrderCard({
         {/* Code */}
         {code && code !== 'غير محدد' && (
           <div className="flex flex-row-reverse items-start gap-2 max-w-full">
-            <span className="text-base font-medium text-black break-words min-w-0">{code}</span>
+            <CopyableCode value={code} label="نسخ كود الطلب" className="min-w-0 max-w-full">
+              <span className="text-base font-medium text-black break-words min-w-0">{code}</span>
+            </CopyableCode>
             <span className="text-base font-normal text-black flex-shrink-0">الكود :</span>
             <CiBarcode className="opacity-50 w-4 h-4 flex-shrink-0 mt-1" />
           </div>
@@ -309,7 +312,9 @@ export default function OrderCard({
                   <span className="text-sm font-semibold text-black">SKU:</span>
                   {productVariants.filter((pv) => pv.sku).map((pv, index) => (
                     <span key={index} className="text-sm font-medium text-black">
-                      {pv.sku}
+                      <CopyableCode value={pv.sku} label="نسخ كود المنتج" className="min-w-0 max-w-full">
+                        {pv.sku}
+                      </CopyableCode>
                     </span>
                   ))}
                 </div>
@@ -325,7 +330,9 @@ export default function OrderCard({
                 <span className="text-sm font-semibold text-black">SKU:</span>
                 {itemSkus.filter(Boolean).map((sku, index) => (
                   <span key={index} className="text-sm font-medium text-black">
-                    {sku}
+                    <CopyableCode value={sku} label="نسخ كود المنتج" className="min-w-0 max-w-full">
+                      {sku}
+                    </CopyableCode>
                   </span>
                 ))}
               </div>
@@ -397,9 +404,11 @@ export default function OrderCard({
         {shippingId && (
           <div className="flex flex-row items-center gap-2 max-w-full flex-wrap">
             <Truck className="opacity-30 flex-shrink-0" height={18} />
-            <span className="text-base font-medium text-black break-words min-w-0">
-              {shippingId}
-            </span>
+            <CopyableCode value={shippingId} label="نسخ كود الشحن" className="min-w-0 max-w-full">
+              <span className="text-base font-medium text-black break-words min-w-0">
+                {shippingId}
+              </span>
+            </CopyableCode>
             {shippingCompanyName && (
               <span className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs font-semibold px-2 py-0.5 rounded-full break-words">
                 {shippingCompanyName}
