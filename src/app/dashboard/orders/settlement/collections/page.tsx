@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Input from '@/components/ui/Input';
 import { Breadcrumb } from '@/components/dashboard-layout';
 import PageLoading from '@/components/ui/page-loading';
-import CopyButton from '@/components/ui/copy-button';
+import CopyableCode from '@/components/ui/copyable-code';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { getApiErrorMessage } from '@/utils/apiError';
@@ -253,10 +253,11 @@ export default function CollectionsPage() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <Wallet className="w-5 h-5 text-primary shrink-0" />
-                    <span className="font-bold text-gray-900 truncate">
-                      {batch.code}
-                    </span>
-                    <CopyButton value={batch.code} label="نسخ كود التحصيل" />
+                    <CopyableCode value={batch.code} label="نسخ كود التحصيل" className="min-w-0 max-w-full">
+                      <span className="font-bold text-gray-900 truncate">
+                        {batch.code}
+                      </span>
+                    </CopyableCode>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <span
@@ -341,8 +342,7 @@ export default function CollectionsPage() {
         <Card>
           <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <CardTitle className="text-base flex flex-wrap items-center gap-1.5">
-              طلبات التحصيل {selected.code}
-              <CopyButton value={selected.code} label="نسخ كود التحصيل" />
+              طلبات التحصيل <CopyableCode value={selected.code} label="نسخ كود التحصيل">{selected.code}</CopyableCode>
               — {selected.totalAmount} جنيه عن {selected.ordersCount} طلب
               <Link
                 href={`${COLLECTIONS_HREF}/${selected.id}`}
