@@ -34,7 +34,11 @@ function joinStoreAndPage(row: SalesOrderRow): string | null {
   return parts.length ? parts.join(' / ') : null;
 }
 
-export function salesOrderText(row: SalesOrderRow, column: SalesOrderColumn): string | null {
+function negateMoney(value: string | null): string | null {
+  return value === null ? null : (-Number(value)).toFixed(2);
+}
+
+function salesOrderText(row: SalesOrderRow, column: SalesOrderColumn): string | null {
   switch (column) {
     case 'code':
       return row.code;
@@ -59,8 +63,9 @@ export function salesOrderText(row: SalesOrderRow, column: SalesOrderColumn): st
     case 'shippingCode':
       return row.shippingCode;
     case 'settlementAmount':
-    case 'amount':
       return row.settlementAmount;
+    case 'amount':
+      return negateMoney(row.settlementAmount);
     case 'shippingCost':
       return row.shippingCost;
     case 'settlementCode':

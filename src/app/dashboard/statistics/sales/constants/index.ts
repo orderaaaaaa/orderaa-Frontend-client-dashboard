@@ -185,7 +185,7 @@ export const SALES_CARDS: SalesCardDefinition[] = [
     field: 'netProfit',
     kind: 'money',
     label: 'صافي الربح',
-    hint: 'المبيعات − تكلفة القطع − مصاريف المرتجعات − المصروفات',
+    hint: 'المبلغ المورد − تكلفة القطع − مصاريف المرتجعات − المصروفات',
     accent: 'chart2',
     icon: TrendingUp,
     trend: 'standard',
@@ -232,10 +232,6 @@ export const SALES_COPY = {
   ordersCountLabel: 'عدد الطلبات',
   amountLabel: 'إجمالي المبلغ',
   piecesCountLabel: 'عدد القطع',
-  comingSoon: 'قريباً',
-  subPageEmptyTitle: 'لا توجد نتائج لهذا الفلتر',
-  subPageEmptySubtitle: 'جرّب تغيير الفترة أو النطاق',
-  subPageErrorTitle: 'تعذر تحميل القائمة',
 } as const;
 
 export const BREAKDOWN_GROUP_HEADINGS: Record<'STORE' | 'CARRIER' | 'PAGE', string> = {
