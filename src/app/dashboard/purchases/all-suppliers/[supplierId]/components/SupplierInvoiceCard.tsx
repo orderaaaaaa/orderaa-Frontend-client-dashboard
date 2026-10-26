@@ -15,6 +15,7 @@ import {
   LiaHandHoldingUsdSolid,
 } from 'react-icons/lia';
 import { Checkbox } from '@/components/ui/checkbox';
+import CopyableCode from '@/components/ui/copyable-code';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { formatMoney } from '@/utils/formatMoney';
 import { SupplierInvoice } from '../types';
@@ -107,17 +108,19 @@ const SupplierInvoiceCard = memo(
               />
             </label>
           )}
-          <button
-            type="button"
-            className="flex min-h-10 min-w-0 items-center gap-2 text-start text-lg font-bold text-primary hover:underline transition-colors"
-            onClick={() => setIsDetailOpen(true)}
-          >
-            <LiaFileInvoiceSolid
-              className="text-primary shrink-0"
-              style={{ width: 24, height: 24 }}
-            />
-            <span className="break-all">فاتورة رقم {invoice.code}</span>
-          </button>
+          <CopyableCode value={invoice.code} label="نسخ رقم الفاتورة" className="min-w-0 max-w-full">
+            <button
+              type="button"
+              className="flex min-h-10 min-w-0 items-center gap-2 text-start text-lg font-bold text-primary hover:underline transition-colors"
+              onClick={() => setIsDetailOpen(true)}
+            >
+              <LiaFileInvoiceSolid
+                className="text-primary shrink-0"
+                style={{ width: 24, height: 24 }}
+              />
+              <span className="break-all">فاتورة رقم {invoice.code}</span>
+            </button>
+          </CopyableCode>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-6 px-0 sm:px-10">

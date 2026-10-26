@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import BaseModal from '@/components/ui/base-modal';
+import CopyableCode from '@/components/ui/copyable-code';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { getTimeAgo } from '@/utils/timeAgo';
 import type { InvoicePaymentStatus } from '@/lib/api/suppliers';
@@ -234,28 +235,30 @@ const InvoiceCard = memo(
             </label>
           )}
           <div className="flex flex-col items-start gap-1 min-w-0">
-            {titleHref ? (
-              <Link
-                href={titleHref}
-                className="flex items-center gap-2 p-0 h-auto hover:text-primary hover:underline"
-              >
-                <LiaFileInvoiceSolid className="text-primary shrink-0" style={{ width: 24, height: 24 }} />
-                <span className="text-lg font-bold text-primary break-all">
-                  فاتورة رقم  {invoice.invoiceNumber}
-                </span>
-              </Link>
-            ) : (
-              <Button
-                variant="ghost"
-                className="flex items-center gap-2 p-0 h-auto hover:bg-transparent hover:text-primary hover:underline"
-                onClick={onTitleClick}
-              >
-                <LiaFileInvoiceSolid className="text-primary shrink-0" style={{ width: 24, height: 24 }} />
-                <span className="text-lg font-bold text-primary">
-                  فاتورة رقم  {invoice.invoiceNumber}
-                </span>
-              </Button>
-            )}
+            <CopyableCode value={invoice.invoiceNumber} label="نسخ رقم الفاتورة">
+              {titleHref ? (
+                <Link
+                  href={titleHref}
+                  className="flex items-center gap-2 p-0 h-auto hover:text-primary hover:underline"
+                >
+                  <LiaFileInvoiceSolid className="text-primary shrink-0" style={{ width: 24, height: 24 }} />
+                  <span className="text-lg font-bold text-primary break-all">
+                    فاتورة رقم  {invoice.invoiceNumber}
+                  </span>
+                </Link>
+              ) : (
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 p-0 h-auto hover:bg-transparent hover:text-primary hover:underline"
+                  onClick={onTitleClick}
+                >
+                  <LiaFileInvoiceSolid className="text-primary shrink-0" style={{ width: 24, height: 24 }} />
+                  <span className="text-lg font-bold text-primary">
+                    فاتورة رقم  {invoice.invoiceNumber}
+                  </span>
+                </Button>
+              )}
+            </CopyableCode>
             <div className="ps-8 flex flex-wrap items-center gap-2 min-w-0">
               <span className="text-lg font-bold break-words min-w-0">{invoice.companyName}</span>
               {invoice.invoiceType !== 'PAID' && (
@@ -312,6 +315,12 @@ const InvoiceCard = memo(
           title={`أصناف الفاتورة ${invoice.invoiceNumber}`}
           showFooter={false}
         >
+          <div className="flex flex-col items-start gap-1 pb-4">
+            <span className="text-sm font-bold text-black">رقم الفاتورة</span>
+            <CopyableCode value={invoice.invoiceNumber} label="نسخ رقم الفاتورة">
+              <span className="text-base font-semibold text-gray-700">{invoice.invoiceNumber}</span>
+            </CopyableCode>
+          </div>
           <DataTable
             columns={productColumns}
             data={(invoice.products ?? []) as (InvoiceCardProduct & Record<string, unknown>)[]}

@@ -1,9 +1,10 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, type ReactNode } from 'react';
 import Image from 'next/image';
 import { LiaFileInvoiceSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
+import CopyableCode from '@/components/ui/copyable-code';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { formatMoney } from '@/utils/formatMoney';
 import { Invoice } from '../types';
@@ -18,7 +19,7 @@ interface InvoiceDetailModalProps {
 
 interface DetailField {
   label: string;
-  value?: string;
+  value?: ReactNode;
   subtitle?: string;
 }
 
@@ -30,7 +31,11 @@ const InvoiceDetailModal = memo(
 
     const fieldRows: DetailField[][] = [
       [
-        { label: `رقم الفاتورة ${invoice.code}`, subtitle: invoice.supplier.name },
+        {
+          label: 'رقم الفاتورة',
+          value: <CopyableCode value={invoice.code} label="نسخ رقم الفاتورة">{invoice.code}</CopyableCode>,
+          subtitle: invoice.supplier.name,
+        },
         { label: 'نوع المعاملة', value: INVOICE_TYPE_LABEL[invoice.type] ?? invoice.type },
       ],
       [

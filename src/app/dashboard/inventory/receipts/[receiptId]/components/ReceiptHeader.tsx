@@ -2,6 +2,7 @@
 
 import { memo } from 'react';
 import { LiaFileInvoiceSolid } from 'react-icons/lia';
+import CopyableCode from '@/components/ui/copyable-code';
 
 interface ReceiptHeaderProps {
   invoiceNumber: string;
@@ -16,9 +17,11 @@ const ReceiptHeader = memo(
           <LiaFileInvoiceSolid className="text-primary w-5 h-5" />
         </div>
         <div className="flex flex-col gap-0.5">
-          <span className="text-base font-bold text-gray-800">
-            فاتورة رقم {invoiceNumber}
-          </span>
+          <CopyableCode value={invoiceNumber} label="نسخ رقم الفاتورة">
+            <span className="text-base font-bold text-gray-800">
+              فاتورة رقم {invoiceNumber}
+            </span>
+          </CopyableCode>
           <span className="text-sm text-gray-500">{companyName}</span>
         </div>
       </div>

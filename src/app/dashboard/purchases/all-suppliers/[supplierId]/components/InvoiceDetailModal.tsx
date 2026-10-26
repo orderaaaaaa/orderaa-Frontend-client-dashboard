@@ -10,6 +10,7 @@ import {
   LiaImageSolid,
 } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
+import CopyableCode from '@/components/ui/copyable-code';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
 import { Button } from '@/components/ui/button';
@@ -88,6 +89,12 @@ export default function InvoiceDetailModal({
       maxWidth="md:max-w-[700px]"
     >
       <div className="flex flex-col gap-6">
+        <div className="flex flex-col items-start gap-1">
+          <span className="text-xs text-gray-900">رقم الفاتورة</span>
+          <CopyableCode value={invoice.code} label="نسخ رقم الفاتورة">
+            <span className="text-sm font-bold text-gray-800">{invoice.code}</span>
+          </CopyableCode>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-4">
             <LiaUserTieSolid className="w-5 h-5 text-primary shrink-0" />
