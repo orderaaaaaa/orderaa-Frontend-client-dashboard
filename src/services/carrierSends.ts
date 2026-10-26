@@ -30,6 +30,7 @@ const invalidateCarrierSends = (queryClient: QueryClient) =>
     [QUERY_KEYS.CARRIER_SENDS],
     [QUERY_KEYS.ORDER_DETAILS],
     [QUERY_KEYS.ORDERS],
+    [QUERY_KEYS.DELAYED_ORDERS],
   ]);
 
 export const useCarrierSendsForOrder = (orderId: number) =>
