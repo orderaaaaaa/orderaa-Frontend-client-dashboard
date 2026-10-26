@@ -6,6 +6,7 @@ import { Can } from '@/components/Can';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import CopyButton from '@/components/ui/copy-button';
+import CopyableCode from '@/components/ui/copyable-code';
 import { formatDisplayTime } from '@/components/OrderDetails/fields/TimeRangeField';
 import useShippingCompanies from '@/hooks/useShippingCompanies';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
@@ -80,10 +81,9 @@ const renderTotal = (totalCost: number | null) =>
 
 function CodeCell({ code }: { code: string }) {
   return (
-    <div className="flex items-center gap-1">
+    <CopyableCode value={code} label="نسخ كود الطلب">
       <span className="font-mono font-medium text-gray-900">{code}</span>
-      <CopyButton value={code} successMessage="تم نسخ الكود" />
-    </div>
+    </CopyableCode>
   );
 }
 
