@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { toast } from 'react-toastify';
 import { Breadcrumb } from '@/components/dashboard-layout/Breadcrumb';
 import { Button } from '@/components/ui/button';
-import CopyButton from '@/components/ui/copy-button';
+import CopyableCode from '@/components/ui/copyable-code';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { getApiErrorMessage } from '@/utils/apiError';
@@ -102,13 +102,14 @@ export default function ShortfallSettlementPage() {
     <div className="flex flex-col gap-2 text-sm">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <Link
-            href={`/dashboard/orders/${row.id}`}
-            className="font-mono font-semibold text-primary hover:underline truncate"
-          >
-            {row.code}
-          </Link>
-          <CopyButton value={row.code} label="نسخ كود الطلب" />
+          <CopyableCode value={row.code} label="نسخ كود الطلب" className="min-w-0">
+            <Link
+              href={`/dashboard/orders/${row.id}`}
+              className="font-mono font-semibold text-primary hover:underline truncate"
+            >
+              {row.code}
+            </Link>
+          </CopyableCode>
         </div>
         {renderStatusPill(row)}
       </div>
@@ -132,13 +133,14 @@ export default function ShortfallSettlementPage() {
       header: 'كود الطلب',
       render: (_value, row) => (
         <div className="flex items-center gap-2">
-          <Link
-            href={`/dashboard/orders/${row.id}`}
-            className="text-primary hover:underline font-mono"
-          >
-            {row.code}
-          </Link>
-          <CopyButton value={row.code} label="نسخ كود الطلب" />
+          <CopyableCode value={row.code} label="نسخ كود الطلب" className="min-w-0">
+            <Link
+              href={`/dashboard/orders/${row.id}`}
+              className="text-primary hover:underline font-mono"
+            >
+              {row.code}
+            </Link>
+          </CopyableCode>
         </div>
       ),
     },
