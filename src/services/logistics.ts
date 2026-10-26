@@ -145,6 +145,7 @@ export const usePartialDelivery = () => {
         queryKey: [QUERY_KEYS.ORDER_STATISTICS],
       });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CUSTOMER_ORDERS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DELAYED_ORDERS] });
       queryClient.invalidateQueries({ queryKey: [SHIPPING_PROVIDERS_KEY] });
       invalidateStockViews(queryClient);
       toast.success(`تم إنشاء طلب المرتجع ${result.returnOrder.code}`);
