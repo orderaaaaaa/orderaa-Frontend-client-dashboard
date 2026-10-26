@@ -164,7 +164,9 @@ export default function PickupsPage() {
                   </p>
                   {pickup.shipmentPickupCode && (
                     <p className="text-xs text-gray-500 break-all">
-                      كود الشركة: <CopyableCode value={pickup.shipmentPickupCode} label="نسخ كود الشركة">{pickup.shipmentPickupCode}</CopyableCode>
+                      كود الشركة: <CopyableCode value={pickup.shipmentPickupCode} label="نسخ كود الشركة">
+                        {pickup.shipmentPickupCode}
+                      </CopyableCode>
                     </p>
                   )}
                 </div>

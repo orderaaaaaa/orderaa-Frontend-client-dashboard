@@ -73,7 +73,9 @@ export function RawStoreDataCard({ row }: RawStoreDataCardProps) {
                 >
                   <span className="font-semibold">{product.name || NOT_AVAILABLE}</span>
                   <span className="text-xs text-gray-500">
-                    SKU: <CopyableCode value={product.sku} label="نسخ كود المنتج">{product.sku || NOT_AVAILABLE}</CopyableCode> — الكمية: {product.quantity ?? NOT_AVAILABLE}
+                    SKU: <CopyableCode value={product.sku} label="نسخ كود المنتج">
+                      {product.sku || NOT_AVAILABLE}
+                    </CopyableCode> — الكمية: {product.quantity ?? NOT_AVAILABLE}
                   </span>
                   {product.variants.length > 0 && (
                     <span className="text-xs text-gray-500">

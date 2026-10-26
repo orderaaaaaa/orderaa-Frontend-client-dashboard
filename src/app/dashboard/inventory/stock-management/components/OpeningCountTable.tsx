@@ -50,7 +50,11 @@ export function OpeningCountTable({
                     </p>
                   )}
                 </td>
-                <td className="py-2 px-3 text-gray-600"><CopyableCode value={row.sku} label="نسخ كود المنتج">{row.sku ?? '—'}</CopyableCode></td>
+                <td className="py-2 px-3 text-gray-600">
+                  <CopyableCode value={row.sku} label="نسخ كود المنتج">
+                    {row.sku ?? '—'}
+                  </CopyableCode>
+                </td>
                 <td className="py-2 px-3 text-gray-600">{row.quantity}</td>
                 <td className="py-2 px-3">
                   <Input

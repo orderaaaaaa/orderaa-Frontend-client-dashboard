@@ -170,7 +170,9 @@ export function StockMovementsTab() {
                         {movement.variant.product.name}
                       </p>
                       <p className="text-xs text-gray-400">
-                        <CopyableCode value={movement.variant.sku} label="نسخ كود المنتج">{movement.variant.sku ?? movement.variant.combinationKey}</CopyableCode>
+                        <CopyableCode value={movement.variant.sku} label="نسخ كود المنتج">
+                          {movement.variant.sku ?? movement.variant.combinationKey}
+                        </CopyableCode>
                       </p>
                     </td>
                     <td

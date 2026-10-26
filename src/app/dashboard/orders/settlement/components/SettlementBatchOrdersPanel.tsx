@@ -73,7 +73,14 @@ export default function SettlementBatchOrdersPanel({
                   ),
                 },
                 { label: 'المبلغ في هذا التحصيل', value: <span className="font-semibold">{row.amount}</span> },
-                { label: 'كود الشحن', value: <CopyableCode value={row.shippingCode} label="نسخ كود الشحن"><span className="font-mono">{row.shippingCode ?? '—'}</span></CopyableCode> },
+                {
+                  label: 'كود الشحن',
+                  value: (
+                    <CopyableCode value={row.shippingCode} label="نسخ كود الشحن">
+                      <span className="font-mono">{row.shippingCode ?? '—'}</span>
+                    </CopyableCode>
+                  ),
+                },
                 { label: 'العميل', value: row.customerName ?? '—' },
                 { label: 'الحالة وقتها', value: getStatusLabel(row.fromStatus) || '—' },
                 {

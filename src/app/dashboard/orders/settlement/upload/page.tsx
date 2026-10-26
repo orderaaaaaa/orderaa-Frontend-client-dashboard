@@ -462,8 +462,22 @@ export default function SettlementUploadPage() {
                       fields={[
                         { label: '#', value: item.row + 1 },
                         { label: 'المبلغ', value: item.amount },
-                        { label: 'كود الطلب', value: <CopyableCode value={item.orderCode} label="نسخ كود الطلب"><span className="font-mono">{item.orderCode}</span></CopyableCode> },
-                        { label: 'كود الشحن', value: <CopyableCode value={item.shippingCode} label="نسخ كود الشحن"><span className="font-mono">{item.shippingCode ?? '—'}</span></CopyableCode> },
+                        {
+                          label: 'كود الطلب',
+                          value: (
+                            <CopyableCode value={item.orderCode} label="نسخ كود الطلب">
+                              <span className="font-mono">{item.orderCode}</span>
+                            </CopyableCode>
+                          ),
+                        },
+                        {
+                          label: 'كود الشحن',
+                          value: (
+                            <CopyableCode value={item.shippingCode} label="نسخ كود الشحن">
+                              <span className="font-mono">{item.shippingCode ?? '—'}</span>
+                            </CopyableCode>
+                          ),
+                        },
                         { label: 'الحالة الحالية', value: getStatusLabel(item.currentStatus) },
                         { label: 'الحالة الجديدة', value: getStatusLabel(item.newStatus) },
                       ]}
@@ -488,8 +502,16 @@ export default function SettlementUploadPage() {
                       {results.success.map((item) => (
                         <tr key={item.row} className="border-t">
                           <td className="px-4 py-2 text-muted-foreground">{item.row + 1}</td>
-                          <td className="px-4 py-2 font-mono"><CopyableCode value={item.orderCode} label="نسخ كود الطلب">{item.orderCode}</CopyableCode></td>
-                          <td className="px-4 py-2 font-mono"><CopyableCode value={item.shippingCode} label="نسخ كود الشحن">{item.shippingCode ?? "—"}</CopyableCode></td>
+                          <td className="px-4 py-2 font-mono">
+                            <CopyableCode value={item.orderCode} label="نسخ كود الطلب">
+                              {item.orderCode}
+                            </CopyableCode>
+                          </td>
+                          <td className="px-4 py-2 font-mono">
+                            <CopyableCode value={item.shippingCode} label="نسخ كود الشحن">
+                              {item.shippingCode ?? "—"}
+                            </CopyableCode>
+                          </td>
                           <td className="px-4 py-2">{item.amount}</td>
                           <td className="px-4 py-2">{getStatusLabel(item.currentStatus)}</td>
                           <td className="px-4 py-2">{getStatusLabel(item.newStatus)}</td>
@@ -521,10 +543,24 @@ export default function SettlementUploadPage() {
                         className={differs ? 'bg-amber-100/70' : undefined}
                         fields={[
                           { label: '#', value: item.row + 1 },
-                          { label: 'كود الطلب', value: <CopyableCode value={item.orderCode} label="نسخ كود الطلب"><span className="font-mono">{item.orderCode}</span></CopyableCode> },
+                          {
+                            label: 'كود الطلب',
+                            value: (
+                              <CopyableCode value={item.orderCode} label="نسخ كود الطلب">
+                                <span className="font-mono">{item.orderCode}</span>
+                              </CopyableCode>
+                            ),
+                          },
                           { label: 'المبلغ في الشيت', value: <span className={amountClass}>{item.sheetAmount}</span> },
                           { label: 'المبلغ المحصل مسبقاً', value: <span className={amountClass}>{item.collectedAmount}</span> },
-                          { label: 'كود الشحن', value: <CopyableCode value={item.shippingCode} label="نسخ كود الشحن"><span className="font-mono">{item.shippingCode ?? '—'}</span></CopyableCode> },
+                          {
+                            label: 'كود الشحن',
+                            value: (
+                              <CopyableCode value={item.shippingCode} label="نسخ كود الشحن">
+                                <span className="font-mono">{item.shippingCode ?? '—'}</span>
+                              </CopyableCode>
+                            ),
+                          },
                           {
                             label: 'تاريخ التحصيل',
                             value: item.collectedAt
@@ -591,8 +627,16 @@ export default function SettlementUploadPage() {
                             className={`border-t ${differs ? 'bg-amber-100/70' : ''}`}
                           >
                             <td className="px-4 py-2 text-muted-foreground">{item.row + 1}</td>
-                            <td className="px-4 py-2 font-mono"><CopyableCode value={item.orderCode} label="نسخ كود الطلب">{item.orderCode}</CopyableCode></td>
-                            <td className="px-4 py-2 font-mono"><CopyableCode value={item.shippingCode} label="نسخ كود الشحن">{item.shippingCode ?? '—'}</CopyableCode></td>
+                            <td className="px-4 py-2 font-mono">
+                              <CopyableCode value={item.orderCode} label="نسخ كود الطلب">
+                                {item.orderCode}
+                              </CopyableCode>
+                            </td>
+                            <td className="px-4 py-2 font-mono">
+                              <CopyableCode value={item.shippingCode} label="نسخ كود الشحن">
+                                {item.shippingCode ?? '—'}
+                              </CopyableCode>
+                            </td>
                             <td className={`px-4 py-2 ${differs ? 'font-bold text-amber-800' : ''}`}>
                               {item.sheetAmount}
                             </td>
@@ -694,8 +738,22 @@ export default function SettlementUploadPage() {
                       fields={[
                         { label: '#', value: item.row + 1 },
                         { label: 'المبلغ', value: item.amount ?? '—' },
-                        { label: 'كود الطلب', value: <CopyableCode value={item.orderCode} label="نسخ كود الطلب"><span className="font-mono">{item.orderCode ?? '—'}</span></CopyableCode> },
-                        { label: 'كود الشحن', value: <CopyableCode value={item.shippingCode} label="نسخ كود الشحن"><span className="font-mono">{item.shippingCode ?? '—'}</span></CopyableCode> },
+                        {
+                          label: 'كود الطلب',
+                          value: (
+                            <CopyableCode value={item.orderCode} label="نسخ كود الطلب">
+                              <span className="font-mono">{item.orderCode ?? '—'}</span>
+                            </CopyableCode>
+                          ),
+                        },
+                        {
+                          label: 'كود الشحن',
+                          value: (
+                            <CopyableCode value={item.shippingCode} label="نسخ كود الشحن">
+                              <span className="font-mono">{item.shippingCode ?? '—'}</span>
+                            </CopyableCode>
+                          ),
+                        },
                         {
                           label: 'الحالة الحالية',
                           value: item.currentStatus ? getStatusLabel(item.currentStatus) : '—',
@@ -757,8 +815,16 @@ export default function SettlementUploadPage() {
                             )}
                           </td>
                           <td className="px-4 py-2 text-muted-foreground">{item.row + 1}</td>
-                          <td className="px-4 py-2 font-mono"><CopyableCode value={item.orderCode} label="نسخ كود الطلب">{item.orderCode ?? "—"}</CopyableCode></td>
-                          <td className="px-4 py-2 font-mono"><CopyableCode value={item.shippingCode} label="نسخ كود الشحن">{item.shippingCode ?? "—"}</CopyableCode></td>
+                          <td className="px-4 py-2 font-mono">
+                            <CopyableCode value={item.orderCode} label="نسخ كود الطلب">
+                              {item.orderCode ?? "—"}
+                            </CopyableCode>
+                          </td>
+                          <td className="px-4 py-2 font-mono">
+                            <CopyableCode value={item.shippingCode} label="نسخ كود الشحن">
+                              {item.shippingCode ?? "—"}
+                            </CopyableCode>
+                          </td>
                           <td className="px-4 py-2">{item.amount ?? "—"}</td>
                           <td className="px-4 py-2">
                             {item.currentStatus ? getStatusLabel(item.currentStatus) : '—'}

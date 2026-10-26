@@ -47,7 +47,9 @@ export default function ForceSettlementDialog({
 
         {moveFromBatchCode && (
           <p className="text-amber-700">
-            سيتم نقل الطلب من التحصيل <CopyableCode value={moveFromBatchCode} label="نسخ كود التحصيل">{moveFromBatchCode}</CopyableCode> إلى التحصيل الحالي
+            سيتم نقل الطلب من التحصيل <CopyableCode value={moveFromBatchCode} label="نسخ كود التحصيل">
+              {moveFromBatchCode}
+            </CopyableCode> إلى التحصيل الحالي
           </p>
         )}
       </div>
