@@ -1,17 +1,21 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { usePendingIds } from '@/hooks/usePendingIds';
 import { Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PageLoading from '@/components/ui/page-loading';
+import PaginationFooter from '@/components/ui/pagination-footer';
 import OrderCard from '@/app/dashboard/orders/allOrders/components/OrderCard';
 import { mapOrderProductToVariantInfo } from '@/types/orders';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { useOrderStatusesQuery } from '@/services/orders';
 import {
   isRenderableDelayedOrder,
+  useDelayedOrderCountsQuery,
   useDelayedOrdersQuery,
+  useDelayedUnassessableQuery,
   useMarkDelayedOrder,
   type DelayedMarkKind,
   type DelayedMarksMode,
@@ -19,6 +23,14 @@ import {
 } from '@/services/delayedOrders';
 import { describeElapsed } from '@/utils/elapsed';
 import { DelaySettingsModal } from './components/DelaySettingsModal';
+import {
+  parseDelayedUrlState,
+  serializeDelayedUrlState,
+  toDayOption,
+  toOrderStatusKey,
+  toPageSize,
+  type DelayedUrlState,
+} from './delayed-url-state';
 
 const MARK_MODES: { value: DelayedMarksMode; label: string }[] = [
   { value: 'notFollowedUp', label: 'بدون متابعة' },
@@ -35,11 +47,28 @@ const DAY_OPTIONS = [
   { value: '10080', label: 'أسبوع' },
 ];
 
-export default function DelayedOrdersPage() {
-  const [status, setStatus] = useState('');
-  const [minMinutes, setMinMinutes] = useState('');
-  const [marks, setMarks] = useState<DelayedMarksMode>('notFollowedUp');
+function DelayedOrdersContent() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const urlState = useMemo(() => parseDelayedUrlState(searchParams), [searchParams]);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  const replaceUrlState = useCallback(
+    (patch: Partial<DelayedUrlState>) => {
+      const search = serializeDelayedUrlState({ ...urlState, ...patch });
+      router.replace(search ? `${pathname}?${search}` : pathname, { scroll: false });
+    },
+    [pathname, router, urlState],
+  );
+
+  const listFilter = useMemo(
+    () => ({
+      status: urlState.status ?? undefined,
+      minMinutes: urlState.minMinutes ?? undefined,
+    }),
+    [urlState.status, urlState.minMinutes],
+  );
 
   const { getStatusLabel } = useStatusLabel();
   const { data: statuses } = useOrderStatusesQuery();
@@ -57,13 +86,22 @@ export default function DelayedOrdersPage() {
     [markAsync, runMark]
   );
 
-  const { data, isLoading, isPlaceholderData } = useDelayedOrdersQuery({
-    status: status || undefined,
-    minMinutes: minMinutes ? Number(minMinutes) : undefined,
-    marks,
-    page: 1,
-    limit: 50,
+  const { data, isLoading, isPlaceholderData, isError } = useDelayedOrdersQuery({
+    ...listFilter,
+    marks: urlState.marks,
+    page: urlState.page,
+    limit: urlState.limit,
   });
+  const { data: counts } = useDelayedOrderCountsQuery(listFilter);
+  const { data: unassessable } = useDelayedUnassessableQuery();
+
+  const pageSize = data?.limit ?? urlState.limit;
+  const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize));
+
+  useEffect(() => {
+    if (!data || isPlaceholderData) return;
+    if (urlState.page > totalPages) replaceUrlState({ page: totalPages });
+  }, [data, isPlaceholderData, totalPages, urlState.page, replaceUrlState]);
 
   const orders = useMemo(() => {
     if (data === undefined) return [];
@@ -109,8 +147,10 @@ export default function DelayedOrdersPage() {
       <div className="flex flex-wrap items-center gap-2">
         <select
           aria-label="الحالة"
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
+          value={urlState.status ?? ''}
+          onChange={(e) =>
+            replaceUrlState({ status: toOrderStatusKey(e.target.value), page: 1 })
+          }
           className="border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm max-sm:h-10 bg-white"
         >
           <option value="">كل الحالات</option>
@@ -123,8 +163,10 @@ export default function DelayedOrdersPage() {
 
         <select
           aria-label="مدة التأخير"
-          value={minMinutes}
-          onChange={(e) => setMinMinutes(e.target.value)}
+          value={urlState.minMinutes === null ? '' : String(urlState.minMinutes)}
+          onChange={(e) =>
+            replaceUrlState({ minMinutes: toDayOption(e.target.value), page: 1 })
+          }
           className="border border-gray-200 rounded-md px-3 py-2 text-base sm:text-sm max-sm:h-10 bg-white"
         >
           {DAY_OPTIONS.map((o) => (
@@ -138,17 +180,23 @@ export default function DelayedOrdersPage() {
           {MARK_MODES.map((m) => (
             <Button
               key={m.value}
-              variant={marks === m.value ? 'default' : 'outline'}
+              variant={urlState.marks === m.value ? 'default' : 'outline'}
               size="sm"
-              aria-pressed={marks === m.value}
+              aria-pressed={urlState.marks === m.value}
               className="rounded-full text-xs px-3 max-sm:h-10"
-              onClick={() => setMarks(m.value)}
+              onClick={() => replaceUrlState({ marks: m.value, page: 1 })}
             >
-              {m.label}
+              {counts === undefined ? m.label : `${m.label} (${counts[m.value]})`}
             </Button>
           ))}
         </div>
       </div>
+
+      {unassessable !== undefined && unassessable.count > 0 && (
+        <p className="text-xs sm:text-sm text-gray-500">
+          {unassessable.count} طلب لا يمكن تقييم تأخيرها (لا يوجد سجل للحالة الحالية)
+        </p>
+      )}
 
       {isLoading ? (
         <PageLoading message="جاري تحميل الطلبات المتأخرة..." />
@@ -246,10 +294,40 @@ export default function DelayedOrdersPage() {
         </div>
       )}
 
+      {!isError && data !== undefined && data.total > 0 && (
+        <PaginationFooter
+          currentPage={urlState.page}
+          totalPages={totalPages}
+          totalItems={data.total}
+          hasNextPage={urlState.page < totalPages}
+          hasPreviousPage={urlState.page > 1}
+          onPageChange={(p) => {
+            window.scrollTo({ top: 0 });
+            replaceUrlState({ page: p });
+          }}
+          onPrevious={() => replaceUrlState({ page: Math.max(1, urlState.page - 1) })}
+          onNext={() => replaceUrlState({ page: Math.min(totalPages, urlState.page + 1) })}
+          currentPageSize={pageSize}
+          onPageSizeChange={(size) => {
+            const limit = toPageSize(size);
+            if (limit !== null) replaceUrlState({ limit, page: 1 });
+          }}
+          showAllPageSizeOption={false}
+        />
+      )}
+
       <DelaySettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
       />
     </div>
+  );
+}
+
+export default function DelayedOrdersPage() {
+  return (
+    <Suspense fallback={<PageLoading message="جاري تحميل الطلبات المتأخرة..." />}>
+      <DelayedOrdersContent />
+    </Suspense>
   );
 }
