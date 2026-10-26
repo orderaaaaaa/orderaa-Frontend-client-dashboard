@@ -6,8 +6,10 @@ import {
 } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import http from '@/lib/api/http';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { invalidateAndWait } from '@/lib/query/mutationSync';
 import type { Order } from '@/types/orders';
+import { getApiErrorMessage } from '@/utils/apiError';
 
 export type DelayedMarkKind = 'FOLLOWED_UP' | 'DONE';
 
@@ -43,7 +45,13 @@ export interface DelayedOrdersPage {
   thresholdsConfigured: number;
 }
 
-const KEY = 'delayed-orders';
+export type DelayedTabCounts = Record<DelayedMarksMode, number>;
+
+export interface DelayedUnassessableCount {
+  count: number;
+}
+
+const KEY = QUERY_KEYS.DELAYED_ORDERS;
 
 export const isRenderableDelayedOrder = (
   value: unknown,
@@ -76,8 +84,8 @@ export const useReplaceDelaySettings = () => {
       queryClient.invalidateQueries({ queryKey: [KEY] });
       toast.success('تم حفظ إعدادات التأخير');
     },
-    onError: (err: any) => {
-      toast.error(err?.response?.data?.message ?? 'تعذر حفظ الإعدادات');
+    onError: (err: unknown) => {
+      toast.error(getApiErrorMessage(err, 'تعذر حفظ الإعدادات'));
     },
   });
 };
@@ -98,6 +106,36 @@ export const useDelayedOrdersQuery = (params: {
       return data;
     },
     placeholderData: keepPreviousData,
+    refetchOnWindowFocus: true,
+  });
+
+export const useDelayedOrderCountsQuery = (params: {
+  status?: string;
+  minMinutes?: number;
+}) =>
+  useQuery({
+    queryKey: [KEY, 'counts', params],
+    queryFn: async () => {
+      const { data } = await http.get<DelayedTabCounts>(
+        '/orders/delayed/counts',
+        { params },
+      );
+      return data;
+    },
+    placeholderData: keepPreviousData,
+    refetchOnWindowFocus: true,
+  });
+
+export const useDelayedUnassessableQuery = () =>
+  useQuery({
+    queryKey: [KEY, 'unassessable'],
+    queryFn: async () => {
+      const { data } = await http.get<DelayedUnassessableCount>(
+        '/orders/delayed/unassessable-count',
+      );
+      return data;
+    },
+    refetchOnWindowFocus: true,
   });
 
 export const useMarkDelayedOrder = () => {
@@ -120,9 +158,9 @@ export const useMarkDelayedOrder = () => {
         kind: payload.kind,
       });
     },
-    onSuccess: () => invalidateAndWait(queryClient, [[KEY, 'list']]),
-    onError: (err: any) => {
-      toast.error(err?.response?.data?.message ?? 'تعذر تنفيذ العملية');
+    onSuccess: () => invalidateAndWait(queryClient, [[KEY]]),
+    onError: (err: unknown) => {
+      toast.error(getApiErrorMessage(err, 'تعذر تنفيذ العملية'));
     },
   });
 };
