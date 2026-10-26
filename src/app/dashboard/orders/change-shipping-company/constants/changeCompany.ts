@@ -82,7 +82,7 @@ export const REASON_TEXT: Record<BulkCompanySwitchReason, string> = {
   UPDATED_ON_CARRIER: 'تم تحديث العنوان لدى الشركة نفسها',
   CARRIER_REJECTED: 'لم يتم التحويل: رفضت {newCarrier} الشحنة، ويبقى الطلب على {oldCarrier}.',
   OUTCOME_UNKNOWN:
-    'لم يتم التحويل: النتيجة غير معروفة. تحقق من {newCarrier} من وجود شحنة لهذا الطلب قبل الإرسال مرة أخرى.',
+    'لم يتم التحويل: النتيجة لدى {newCarrier} غير معروفة. تحقق لدى شركة الشحن من وجود شحنة لهذا الطلب قبل أي إجراء آخر على الطلب.',
   STATE_CHANGED:
     'لم يتم التحويل: تغيّر الطلب. إجراء الإغلاق يسجل ما تُظهره شركة الشحن.',
   HELD_CHECK_REQUIRED: 'تم الحفظ ولم يُرسل. تحقق من الشحنة المعلّقة قبل الإرسال.',
