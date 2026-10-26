@@ -5,6 +5,7 @@ import type {
   FollowupClosureKind,
   ShippingPointType,
 } from '@/types/logistics';
+import type { CarrierSendBlock } from '@/types/manual-order';
 
 export interface FollowupPaginationMeta {
   total: number;
@@ -95,26 +96,64 @@ export async function markFollowupPostponed(orderId: number, date: string): Prom
   return data;
 }
 
+export interface FollowupChangeProductVariant {
+  name: string;
+  optionName: string;
+}
+
+export interface FollowupCustomVariant {
+  label: string;
+  value: string;
+}
+
 export interface FollowupChangeProductInput {
   productId: number;
   quantity: number;
-  attributeOptionIds: number[];
+  variants: FollowupChangeProductVariant[];
+  customVariants?: FollowupCustomVariant[];
+}
+
+export interface FollowupChangeProductsBody {
+  products: FollowupChangeProductInput[];
+  totalCost?: number;
 }
 
 export interface FollowupChangeProductsResponse {
-  success: boolean;
+  success: true;
   originalOrderCode: string;
   newOrderId: number;
   newOrderCode: string;
+  isShadowed: boolean;
+  isParked: boolean;
+  carrierSend: CarrierSendBlock | null;
 }
 
 export async function markFollowupChangeProducts(
   orderId: number,
-  products: FollowupChangeProductInput[]
+  body: FollowupChangeProductsBody
 ): Promise<FollowupChangeProductsResponse> {
   const { data } = await http.post<FollowupChangeProductsResponse>(
     `/orders/followup/${orderId}/change-products`,
-    { products }
+    body
+  );
+  return data;
+}
+
+export interface FollowupExchangeCandidate {
+  id: number;
+  code: string;
+  status: 'DELIVERED' | 'COLLECTED';
+  totalCost: number;
+  createdAt: string;
+}
+
+export interface FollowupExchangeCandidatesResponse {
+  data: FollowupExchangeCandidate[];
+}
+
+export async function getExchangeCandidates(orderId: number): Promise<FollowupExchangeCandidatesResponse> {
+  const { data } = await http.get<FollowupExchangeCandidatesResponse>(
+    `/orders/followup/${orderId}/exchange-candidates`
   );
   return data;
 }

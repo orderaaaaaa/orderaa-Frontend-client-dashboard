@@ -25,13 +25,10 @@ import { Textarea } from '@/components/ui/textarea';
 import Input from '@/components/ui/Input';
 import { DatePicker } from '@/components/ui/datepicker';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
-import ProductSelectionModal, {
-  type SelectableProduct,
-} from '@/components/ui/product-selection-modal';
+import ChangeProductsModal from '@/components/orders/ChangeProductsModal';
 import {
   useFollowupAttemptedMutation,
   useFollowupPostponedMutation,
-  useFollowupChangeProductsMutation,
   useFollowupSendAgainMutation,
   useFollowupCloseMutation,
   useFollowupRefuseMutation,
@@ -151,7 +148,6 @@ export default function AgentStatusUpdateModal({
   const closeMutation = useFollowupCloseMutation();
   const attemptedMutation = useFollowupAttemptedMutation();
   const postponedMutation = useFollowupPostponedMutation();
-  const changeProductsMutation = useFollowupChangeProductsMutation();
   const sendAgainMutation = useFollowupSendAgainMutation();
   const refuseMutation = useFollowupRefuseMutation();
   const cancelledMutation = useFollowupCancelledMutation();
@@ -165,8 +161,7 @@ export default function AgentStatusUpdateModal({
   const [reasonId, setReasonId] = useState('');
   const [reasonText, setReasonText] = useState('');
   const [notes, setNotes] = useState('');
-  const [selectedProduct, setSelectedProduct] = useState<SelectableProduct | null>(null);
-  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [isChangeProductsOpen, setIsChangeProductsOpen] = useState(false);
 
   const cancellationReasonsQuery = useCancellationReasons(
     isOpen && selectedAction === 'CANCEL',
@@ -194,7 +189,6 @@ export default function AgentStatusUpdateModal({
     closeMutation.isPending ||
     attemptedMutation.isPending ||
     postponedMutation.isPending ||
-    changeProductsMutation.isPending ||
     sendAgainMutation.isPending ||
     refuseMutation.isPending ||
     cancelledMutation.isPending ||
@@ -208,7 +202,6 @@ export default function AgentStatusUpdateModal({
     setReasonId('');
     setReasonText('');
     setNotes('');
-    setSelectedProduct(null);
   }, []);
 
   const handleClose = useCallback(() => {
@@ -223,7 +216,6 @@ export default function AgentStatusUpdateModal({
     setReasonId('');
     setReasonText('');
     setNotes('');
-    setSelectedProduct(null);
   }, []);
 
   const isConfirmDisabled = useCallback(() => {
@@ -234,8 +226,6 @@ export default function AgentStatusUpdateModal({
         return !followUpStatus;
       case 'POSTPONE':
         return !postponeDate;
-      case 'CHANGE_PRODUCT':
-        return !selectedProduct;
       case 'CLOSE':
         return false;
       case 'REFUSE':
@@ -248,7 +238,7 @@ export default function AgentStatusUpdateModal({
       default:
         return true;
     }
-  }, [selectedAction, closureKind, followUpStatus, postponeDate, selectedProduct, reasonsReady, reasonId, reasonText, notes]);
+  }, [selectedAction, closureKind, followUpStatus, postponeDate, reasonsReady, reasonId, reasonText, notes]);
 
   const handleConfirm = useCallback(async () => {
     if (!selectedAction) return;
@@ -272,19 +262,6 @@ export default function AgentStatusUpdateModal({
             date: postponeDate.toISOString(),
           });
           break;
-        case 'CHANGE_PRODUCT': {
-          if (!selectedProduct) return;
-          const attributeOptionIds = (selectedProduct.selectedVariants ?? [])
-            .map((v) => v.attributeOptionId)
-            .filter((id): id is number => id != null);
-          const products = [{
-            productId: selectedProduct.id,
-            quantity: 1,
-            attributeOptionIds,
-          }];
-          await changeProductsMutation.mutateAsync({ orderId, products });
-          break;
-        }
         case 'RESEND':
           if (!notes.trim()) return;
           await sendAgainMutation.mutateAsync({
@@ -328,7 +305,6 @@ export default function AgentStatusUpdateModal({
     selectedAction,
     followUpStatus,
     postponeDate,
-    selectedProduct,
     reasonsReady,
     reasonId,
     reasonText,
@@ -337,7 +313,6 @@ export default function AgentStatusUpdateModal({
     closeMutation,
     attemptedMutation,
     postponedMutation,
-    changeProductsMutation,
     sendAgainMutation,
     refuseMutation,
     cancelledMutation,
@@ -477,20 +452,11 @@ export default function AgentStatusUpdateModal({
             <Button
               variant="outline"
               className="justify-start gap-2 border-dashed border-violet-300 text-violet-700 hover:bg-violet-50"
-              onClick={() => setIsProductModalOpen(true)}
+              onClick={() => setIsChangeProductsOpen(true)}
             >
               <LiaExchangeAltSolid className="size-4" />
-              {selectedProduct ? selectedProduct.name : 'اختر المنتج'}
+              اختيار المنتجات
             </Button>
-            {selectedProduct?.selectedVariants && selectedProduct.selectedVariants.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {selectedProduct.selectedVariants.map((v, i) => (
-                  <span key={i} className="text-xs bg-violet-100 text-violet-700 px-2.5 py-1 rounded-full font-medium">
-                    {v.attribute}: {v.option}
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
         );
 
@@ -618,14 +584,13 @@ export default function AgentStatusUpdateModal({
         </div>
       </BaseModal>
 
-      <ProductSelectionModal
-        isOpen={isProductModalOpen}
-        onClose={() => setIsProductModalOpen(false)}
-        onConfirm={(products) => {
-          if (products.length > 0) {
-            setSelectedProduct(products[0]);
-          }
-          setIsProductModalOpen(false);
+      <ChangeProductsModal
+        isOpen={isChangeProductsOpen}
+        onClose={() => setIsChangeProductsOpen(false)}
+        orderId={orderId}
+        onDone={() => {
+          setIsChangeProductsOpen(false);
+          handleClose();
         }}
       />
     </>

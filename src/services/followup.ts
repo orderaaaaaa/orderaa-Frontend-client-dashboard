@@ -9,6 +9,7 @@ import {
   markFollowupAttempted,
   markFollowupPostponed,
   markFollowupChangeProducts,
+  getExchangeCandidates,
   markFollowupSendAgain,
   markFollowupClosed,
   markFollowupRefused,
@@ -20,7 +21,7 @@ import {
   editFollowupNote,
   deleteFollowupNote,
   getFollowupActionEvents,
-  type FollowupChangeProductInput,
+  type FollowupChangeProductsBody,
   type FollowupNotePartyValue,
   type FollowupReasonBody,
 } from '@/lib/api/followup';
@@ -106,8 +107,8 @@ export const useFollowupPostponedMutation = () => {
 export const useFollowupChangeProductsMutation = () => {
   const invalidate = useFollowupListsInvalidation();
   return useMutation({
-    mutationFn: ({ orderId, products }: { orderId: number; products: FollowupChangeProductInput[] }) =>
-      markFollowupChangeProducts(orderId, products),
+    mutationFn: ({ orderId, ...body }: { orderId: number } & FollowupChangeProductsBody) =>
+      markFollowupChangeProducts(orderId, body),
     onSuccess: invalidate,
   });
 };
@@ -168,6 +169,15 @@ export const useFollowupNotesQuery = (orderId: number, enabled: boolean = true) 
   return useQuery({
     queryKey: [QUERY_KEYS.FOLLOWUP_NOTES, orderId] as QueryKey,
     queryFn: () => getFollowupNotes(orderId),
+    enabled,
+    staleTime: 0,
+  });
+};
+
+export const useExchangeCandidatesQuery = (orderId: number, enabled: boolean = true) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.FOLLOWUP_EXCHANGE_CANDIDATES, orderId] as QueryKey,
+    queryFn: () => getExchangeCandidates(orderId),
     enabled,
     staleTime: 0,
   });

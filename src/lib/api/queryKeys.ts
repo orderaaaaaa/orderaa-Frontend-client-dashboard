@@ -95,6 +95,7 @@ export const QUERY_KEYS = {
   FOLLOWUP_EXECUTED: 'followup-executed',
   FOLLOWUP_NOTES: 'followup-notes',
   FOLLOWUP_ACTION_EVENTS: 'followup-action-events',
+  FOLLOWUP_EXCHANGE_CANDIDATES: 'followup-exchange-candidates',
   ORDER_PRODUCT_CHANGE_LOGS: 'order-product-change-logs',
 
   // Dashboard Reports
