@@ -43,6 +43,7 @@ export function useMarkOrdersPrinted() {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.PRINT_ORDER_STATISTICS],
       });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DELAYED_ORDERS] });
     },
   });
 }
