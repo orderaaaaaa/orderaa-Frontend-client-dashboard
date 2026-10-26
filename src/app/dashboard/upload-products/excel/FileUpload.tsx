@@ -1,8 +1,10 @@
 import React, { useState, useRef, useId } from 'react';
 import { Download, CircleCheck, X, Loader2, FolderOpen } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { processExcelFile } from '@/lib/excel/processor';
 import { importBulkOrders, transformToApiFormat, getMerchantIdFromUser } from '@/lib/api/bulk-import';
+import { invalidateAndWait, orderStatusKeys } from '@/lib/query/mutationSync';
 import { useAuthStore } from '@/store/authStore';
 import { Can } from '@/components/Can';
 import { PERMISSION_CODES } from '@/lib/permissions';
@@ -31,6 +33,7 @@ const FileUpload = () => {
   const inputId = useId();
   const isProcessing = stage !== null;
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { user } = useAuthStore();
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -115,6 +118,7 @@ const FileUpload = () => {
         merchantId,
         orders: apiOrders,
       });
+      await invalidateAndWait(queryClient, orderStatusKeys());
 
       const combinedResults = {
         ...results,
