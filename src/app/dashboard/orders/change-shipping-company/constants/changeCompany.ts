@@ -17,6 +17,7 @@ export const CHANGE_COMPANY_TEXT = {
   clearConfirmBody: 'سيتم حذف قائمة الإلغاء لدى الشركة القديمة من هذه الصفحة. هل تريد المتابعة؟',
   clearConfirmYes: 'مسح',
   clearConfirmNo: 'إلغاء',
+  cancel: 'إلغاء',
   saveDialogTitle: 'حفظ التغييرات',
   saveDialogBody: 'سيتم تغيير شركة الشحن لـ {sendable} طلب، وسيتم تخطي {skipped} طلب',
   saveOnly: 'حفظ فقط',
