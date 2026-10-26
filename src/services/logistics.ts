@@ -9,15 +9,11 @@ import http from '@/lib/api/http';
 import {
   GovernorateLogisticsConfig,
   GovernorateLogisticsConfigRow,
-  TrackingCard,
-  TrackingCardsFilter,
   PartialDeliveryData,
   ExchangeData,
   ReturnRefundData,
   OrderProductChangeLog,
-  UpdateTrackingCardData,
 } from '@/types/logistics';
-import { PaginatedResponse } from '@/types/orders';
 import { toast } from 'react-toastify';
 import { recordPartialDelivery, recordReturnRefund } from '@/lib/api/order';
 import { getApiErrorMessage } from '@/utils/apiError';
@@ -87,44 +83,6 @@ export const useUpdateGovernorateLogisticsConfig = () => {
       toast.error(
         err?.response?.data?.message ?? 'تعذر حفظ إعدادات المحافظات'
       );
-    },
-  });
-};
-
-// ─── Tracking Cards ──────────────────────────────────────────────────────────
-// TODO: Replace mock with real API when backend implements GET /logistics/tracking-cards
-
-export const useTrackingCards = (filters: TrackingCardsFilter) => {
-  return useQuery({
-    queryKey: [QUERY_KEYS.TRACKING_CARDS, filters] as QueryKey,
-    queryFn: async () => {
-      console.log('[useTrackingCards] filters:', filters);
-      await new Promise((r) => setTimeout(r, 300));
-      return {
-        data: [],
-        meta: { currentPage: 1, totalPages: 1, itemsPerPage: 20, totalItems: 0, hasNextPage: false, hasPreviousPage: false },
-      } as PaginatedResponse<TrackingCard>;
-    },
-  });
-};
-
-// TODO: Replace mock with real API when backend implements PATCH /logistics/tracking-cards/:cardId
-export const useUpdateTrackingCard = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: {
-      cardId: number;
-      update: UpdateTrackingCardData;
-    }) => {
-      console.log('[useUpdateTrackingCard] payload:', data);
-      await new Promise((r) => setTimeout(r, 500));
-      return { success: true };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.TRACKING_CARDS],
-      });
     },
   });
 };

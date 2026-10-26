@@ -1,4 +1,4 @@
-import { Order, OrderEvent, OrderProduct, OrderStatus } from './orders';
+import { OrderStatus } from './orders';
 import type { CarrierSendBlock } from './manual-order';
 
 /** Mirrors the backend GovernorateSettingResponseDto. */
@@ -19,58 +19,6 @@ export interface GovernorateLogisticsConfigRow {
   firstAttemptDelay: number;
   shippingCost: string | null;
   nonReceiptCost: string | null;
-}
-
-export type TrackingCardType = 'COURIER' | 'CALL_CENTER';
-
-export type TrackingCardStatus =
-  | 'PENDING'
-  | 'COMPLETED'
-  | 'OVERDUE'
-  | 'PAUSED'
-  | 'CANCELLED';
-
-export type TrackingAgentStatus =
-  | 'CLOSED'
-  | 'NO_ANSWER'
-  | 'NOT_COLLECTING'
-  | 'BUSY'
-  | 'POSTPONE';
-
-export type AgentFlag = 'CORRECT' | 'FAKE';
-
-export type ShippingPointType = 'CORRECT' | 'FAKE';
-
-export interface TrackingCard {
-  id: number;
-  orderId: number;
-  orderCode: string;
-  type: TrackingCardType;
-  scheduledDate: string;
-  status: TrackingCardStatus;
-  courierUpdate?: string | null;
-  courierName?: string | null;
-  courierPhone?: string | null;
-  agentStatus?: string | null;
-  agentFlag?: AgentFlag | null;
-  agentNote?: string | null;
-  agentEventAt?: string | null;
-  postponedUntil?: string | null;
-  completedAt?: string | null;
-  employeeId?: number | null;
-  employeeName?: string | null;
-  shippingEventId?: number | null;
-  createdAt: string;
-  updatedAt: string;
-  order?: Partial<FollowupOrder>;
-}
-
-export interface TrackingCardsFilter {
-  status?: TrackingCardStatus;
-  scheduledDate?: string;
-  completedDate?: string;
-  page?: number;
-  limit?: number;
 }
 
 export interface PartialDeliveryData {
@@ -135,34 +83,6 @@ export interface OrderProductChangeLog {
   createdAt: string;
 }
 
-export interface UpdateTrackingCardData {
-  agentStatus?: TrackingAgentStatus;
-  agentFlag?: AgentFlag;
-  agentNote?: string;
-  postponedUntil?: string;
-  courierUpdate?: string;
-  action?: string;
-  actionNote?: string;
-  deliveryDate?: string;
-  cancelReasonId?: number;
-  newProductId?: number;
-  newVariants?: { label: string; value: string }[];
-}
-
-export type FollowupEventType = 'FOLLOWUP' | 'SHIPPING_WEBHOOK' | 'SYSTEM';
-
-export type FollowupStatusName =
-  | 'ATTEMPTED'
-  | 'POSTPONED'
-  | 'CHANGE_PRODUCTS'
-  | 'SEND_AGAIN'
-  | 'CANCELLED'
-  | 'OVERDUE';
-
-export interface FollowupOrderEvent extends OrderEvent {
-  type?: FollowupEventType;
-}
-
 export type FollowupClosureKind = 'CLOSED_TODAY' | 'REFUSE' | 'CANCEL';
 
 export interface FollowupClosure {
@@ -179,36 +99,6 @@ export interface FollowupClosure {
 export const FOLLOWUP_WORK_STATES = ['open', 'closed', 'all'] as const;
 
 export type FollowupWorkState = (typeof FOLLOWUP_WORK_STATES)[number];
-
-export interface FollowupOrder extends Order {
-  shippingEvents?: FollowupOrderEvent[];
-  followupEvents?: FollowupOrderEvent[];
-  firstAttemptAt?: string | null;
-  delegateName?: string | null;
-  delegatePhone?: string | null;
-  closure?: FollowupClosure | null;
-}
-
-export type FollowupTab = 'NEW_ORDERS' | 'OVERDUE' | 'EXECUTED';
-
-export interface FollowupFilters {
-  page?: number;
-  limit?: number;
-  search?: string;
-  orderByDirection?: 'asc' | 'desc';
-  newFirst?: boolean;
-  shippingCompanyId?: string;
-  governorate?: string;
-  city?: string;
-  code?: string;
-  createdAfter?: string;
-  createdBefore?: string;
-  customerName?: string;
-  customerPhone?: string;
-  productName?: string;
-  shippingStatuses?: string[];
-  workState?: FollowupWorkState;
-}
 
 export const POST_SHIPPING_STATUSES = new Set([
   'WAITING_FOR_APPROVAL',

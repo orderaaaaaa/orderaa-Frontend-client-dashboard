@@ -90,10 +90,6 @@ export const QUERY_KEYS = {
 
   // Logistics & Tracking
   GOVERNORATE_LOGISTICS_CONFIG: 'governorate-logistics-config',
-  TRACKING_CARDS: 'tracking-cards',
-  FOLLOWUP_NEW_ORDERS: 'followup-new-orders',
-  FOLLOWUP_OVERDUE: 'followup-overdue',
-  FOLLOWUP_EXECUTED: 'followup-executed',
   FOLLOWUP_NOTES: 'followup-notes',
   FOLLOWUP_ACTION_EVENTS: 'followup-action-events',
   FOLLOWUP_EXCHANGE_CANDIDATES: 'followup-exchange-candidates',

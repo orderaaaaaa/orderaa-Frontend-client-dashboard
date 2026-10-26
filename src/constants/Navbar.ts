@@ -4,7 +4,6 @@ import {
   LiaWalletSolid,
   LiaTruckSolid,
   LiaIdCard,
-  LiaClipboardCheckSolid,
   LiaStoreSolid,
   LiaUsersCogSolid,
   LiaShippingFastSolid,
@@ -117,11 +116,6 @@ export const navigation: NavigationItem[] = [
         name: 'قسم الشحن',
         href: '/dashboard/orders/shipping-orders',
         icon: LiaShippingFastSolid,
-      },
-      {
-        name: 'متابعة الشحن',
-        href: '/dashboard/orders/tracking',
-        icon: LiaClipboardCheckSolid,
       },
       {
         name: 'الطلبات المتأخرة',
