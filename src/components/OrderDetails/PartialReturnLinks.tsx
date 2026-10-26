@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { LiaRandomSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
+import CopyableCode from '@/components/ui/copyable-code';
 import type { Order } from '@/types/orders';
 
 interface PartialReturnLinksProps {
@@ -24,7 +25,7 @@ export function PartialReturnLinks({ order }: PartialReturnLinksProps) {
         <>
           <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-700">
             <LiaRandomSolid className="size-4" />
-            تسليم جزئي من {returnOf.code}
+            تسليم جزئي من <CopyableCode value={returnOf.code} label="نسخ كود الطلب">{returnOf.code}</CopyableCode>
           </span>
           <Button
             type="button"
@@ -41,16 +42,17 @@ export function PartialReturnLinks({ order }: PartialReturnLinksProps) {
         <>
           <span className="text-sm font-medium text-amber-700">طلبات المرتجع</span>
           {partialReturns.map((item) => (
-            <Button
-              key={item.id}
-              type="button"
-              variant="outline"
-              size="sm"
-              className="rounded-full"
-              onClick={() => openOrder(item.id)}
-            >
-              {item.code}
-            </Button>
+            <CopyableCode key={item.id} value={item.code} label="نسخ كود الطلب">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="rounded-full"
+                onClick={() => openOrder(item.id)}
+              >
+                {item.code}
+              </Button>
+            </CopyableCode>
           ))}
         </>
       )}

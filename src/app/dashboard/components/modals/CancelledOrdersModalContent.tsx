@@ -2,6 +2,7 @@
 
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { ColumnChart } from '@/components/ui/charts/ColumnChart';
+import CopyableCode from '@/components/ui/copyable-code';
 import type { FollowUpModalData, CancelledOrderDetail } from '../../types';
 
 interface CancelledOrdersModalContentProps {
@@ -29,6 +30,11 @@ const orderDetailsColumns: DataTableColumn<CancelledOrderDetail>[] = [
     key: 'orderCode',
     header: 'كود الطلب',
     className: 'font-medium',
+    render: (_value, row) => (
+      <CopyableCode value={row.orderCode} label="نسخ كود الطلب">
+        {row.orderCode}
+      </CopyableCode>
+    ),
   },
   {
     key: 'customerName',

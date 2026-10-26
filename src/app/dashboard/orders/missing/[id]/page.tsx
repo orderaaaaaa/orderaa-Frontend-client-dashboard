@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Breadcrumb } from '@/components/dashboard-layout';
 import PageLoading from '@/components/ui/page-loading';
 import { Button } from '@/components/ui/button';
+import CopyableCode from '@/components/ui/copyable-code';
 import { useMissingOrderQuery } from '@/services/missingOrders';
 import { MISSING_ORDER_STATUS_LABELS } from '@/constants/missingOrders';
 import { MissingOrderHeader } from './components/MissingOrderHeader';
@@ -76,12 +77,14 @@ export default function MissingOrderDetailPage() {
             {row.recoveredOrder && (
               <div>
                 <span className="block text-xs text-gray-500">الطلب</span>
-                <Link
-                  href={`/dashboard/orders/allOrders?search=${row.recoveredOrder.code}`}
-                  className="text-primary hover:underline font-semibold"
-                >
-                  {row.recoveredOrder.code}
-                </Link>
+                <CopyableCode value={row.recoveredOrder.code} label="نسخ كود الطلب">
+                  <Link
+                    href={`/dashboard/orders/allOrders?search=${row.recoveredOrder.code}`}
+                    className="text-primary hover:underline font-semibold"
+                  >
+                    {row.recoveredOrder.code}
+                  </Link>
+                </CopyableCode>
               </div>
             )}
           </div>

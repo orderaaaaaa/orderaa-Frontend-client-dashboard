@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { LiaChevronDownSolid, LiaExclamationTriangleSolid } from 'react-icons/lia';
+import CopyableCode from '@/components/ui/copyable-code';
 import {
   MISSING_ORDER_FAILURE_LABELS,
   MISSING_ORDER_STATUS_LABELS,
@@ -37,7 +38,11 @@ export function MissingOrderHeader({ row }: MissingOrderHeaderProps) {
           </div>
           <div>
             <span className="block text-xs text-gray-500">رقم الطلب الخارجي</span>
-            <span className="font-semibold">{row.externalOrderId ?? NOT_AVAILABLE}</span>
+            <span className="font-semibold">
+              <CopyableCode value={row.externalOrderId} label="نسخ رقم الطلب الخارجي">
+                {row.externalOrderId ?? NOT_AVAILABLE}
+              </CopyableCode>
+            </span>
           </div>
           <div>
             <span className="block text-xs text-gray-500">سبب الفشل</span>

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle2, FileImage } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import CopyableCode from '@/components/ui/copyable-code';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PageLoading from '@/components/ui/page-loading';
 import { StackedList, StackedRow } from '@/components/ui/stacked-list';
@@ -56,12 +57,14 @@ export default function PickupsPage() {
 
   const renderOrderCode = (order: PickupOrder) => (
     <span className="inline-flex flex-wrap items-center gap-2 font-mono">
-      <Link
-        href={`/dashboard/orders/${order.orderId}`}
-        className="text-primary hover:underline"
-      >
-        {order.code}
-      </Link>
+      <CopyableCode value={order.code} label="نسخ كود الطلب">
+        <Link
+          href={`/dashboard/orders/${order.orderId}`}
+          className="text-primary hover:underline"
+        >
+          {order.code}
+        </Link>
+      </CopyableCode>
       {order.isDeleted && (
         <span className="text-xs sm:text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded font-sans">
           محذوف
@@ -149,7 +152,9 @@ export default function PickupsPage() {
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p className="font-bold text-gray-900 font-mono break-all">
-                    {pickup.code}
+                    <CopyableCode value={pickup.code} label="نسخ كود طلب الاستلام">
+                      {pickup.code}
+                    </CopyableCode>
                   </p>
                   <p className="text-xs text-gray-500">
                     {formatDate(pickup.createdAt)}
@@ -159,7 +164,7 @@ export default function PickupsPage() {
                   </p>
                   {pickup.shipmentPickupCode && (
                     <p className="text-xs text-gray-500 break-all">
-                      كود الشركة: {pickup.shipmentPickupCode}
+                      كود الشركة: <CopyableCode value={pickup.shipmentPickupCode} label="نسخ كود الشركة">{pickup.shipmentPickupCode}</CopyableCode>
                     </p>
                   )}
                 </div>
@@ -213,7 +218,9 @@ export default function PickupsPage() {
           <CardHeader className="flex flex-row items-start justify-between gap-3">
             <div className="min-w-0">
               <CardTitle className="text-base font-mono break-all">
-                {detail?.code ?? `#${selectedId}`}
+                <CopyableCode value={detail?.code} label="نسخ كود طلب الاستلام">
+                  {detail?.code ?? `#${selectedId}`}
+                </CopyableCode>
                 {detail ? ` — ${detail.ordersCount} طلب` : ''}
               </CardTitle>
               {detail && <div className="mt-1">{renderReviewState(detail)}</div>}

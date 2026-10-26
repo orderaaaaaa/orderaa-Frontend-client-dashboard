@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import { Checkbox } from '@/components/ui/checkbox';
+import CopyableCode from '@/components/ui/copyable-code';
 import { LiaCheckCircleSolid } from 'react-icons/lia';
 import { Order } from '@/types/orders';
 
@@ -125,7 +126,7 @@ export function PrintedOrdersConfirmModal({
                     {index + 1}
                   </td>
                   <td className="px-4 py-3 text-sm font-medium text-gray-800 break-words whitespace-normal">
-                    {order.code}
+                    <CopyableCode value={order.code} label="نسخ كود الطلب">{order.code}</CopyableCode>
                   </td>
                 </tr>
               ))}

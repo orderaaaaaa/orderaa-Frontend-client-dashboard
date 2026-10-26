@@ -5,6 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle2, FileImage, Images } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import CopyableCode from '@/components/ui/copyable-code';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PageLoading from '@/components/ui/page-loading';
 import { StackedList, StackedRow } from '@/components/ui/stacked-list';
@@ -59,12 +60,14 @@ export default function ReturnReceiptsPage() {
 
   const renderOrderCode = (order: ReturnReceiptOrder) => (
     <span className="inline-flex flex-wrap items-center gap-2 font-mono">
-      <Link
-        href={`/dashboard/orders/${order.orderId}`}
-        className="text-primary hover:underline"
-      >
-        {order.code}
-      </Link>
+      <CopyableCode value={order.code} label="نسخ كود الطلب">
+        <Link
+          href={`/dashboard/orders/${order.orderId}`}
+          className="text-primary hover:underline"
+        >
+          {order.code}
+        </Link>
+      </CopyableCode>
       {order.isDeleted && (
         <span className="text-xs sm:text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded font-sans">
           محذوف

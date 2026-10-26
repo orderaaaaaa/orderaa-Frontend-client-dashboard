@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
+import CopyableCode from '@/components/ui/copyable-code';
 import { LiaExchangeAltSolid } from 'react-icons/lia';
 import type { Order } from '@/types/orders';
 
@@ -85,7 +86,7 @@ export function ChangeProductModal({
               {orders.map((order) => (
                 <tr key={order.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm text-gray-900 font-medium">
-                    {order.code}
+                    <CopyableCode value={order.code} label="نسخ كود الطلب">{order.code}</CopyableCode>
                   </td>
                   <td className="px-4 py-3">
                     <Input

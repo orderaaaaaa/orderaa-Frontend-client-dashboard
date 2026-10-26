@@ -14,6 +14,7 @@ import type {
   ShipmentCarrierSendDetails,
 } from '@/types/orderSystemFailures';
 import { formatStockShortageLines } from '@/utils/apiError';
+import CopyableCode from '@/components/ui/copyable-code';
 import { CancelledLaneAppliedDetails, CancelledLaneStockDetails } from './CancelledLaneDetails';
 import { CarrierDetails } from './CarrierDetails';
 import { DetailField, DetailGrid, EMPTY_VALUE, formatDetailValue } from './DetailFields';
@@ -287,7 +288,9 @@ export function FailureDetails({
               {narrowed.details.provider}
             </DetailField>
             <DetailField label="رقم الطلب في المتجر" ltr>
-              {narrowed.details.externalOrderId ?? EMPTY_VALUE}
+              <CopyableCode value={narrowed.details.externalOrderId} label="نسخ رقم الطلب في المتجر">
+                {narrowed.details.externalOrderId ?? EMPTY_VALUE}
+              </CopyableCode>
             </DetailField>
           </DetailGrid>
           <FailureReasonDetails reason={narrowed.details.reason} />

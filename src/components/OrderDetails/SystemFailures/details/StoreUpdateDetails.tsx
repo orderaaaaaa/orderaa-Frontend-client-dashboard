@@ -2,6 +2,7 @@ import React from 'react';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { ORDER_PAYMENT_STATUS_LABELS, orderFieldLabelOf } from '@/constants/orderFieldLabels';
 import { mapOrderProductToVariantInfo, type Order } from '@/types/orders';
+import CopyableCode from '@/components/ui/copyable-code';
 import type {
   FailureMoney,
   StoreUpdateLine,
@@ -42,13 +43,39 @@ const customVariantsText = (value: unknown) => {
     .join(' / ');
 };
 
-const updateLineText = (line: StoreUpdateLine) => {
-  const extras = [customVariantsText(line.customVariants), line.sku ? `SKU ${line.sku}` : '']
-    .filter(Boolean)
-    .join(' - ');
-  const name = line.title ?? line.externalVariantId ?? 'منتج بدون اسم';
-  return `${name}${extras ? ` (${extras})` : ''} × ${line.quantity} — ${formatDetailValue(moneyOf(line.price))}`;
+const lineTextOf = (
+  name: string,
+  variants: string,
+  sku: string | null | undefined,
+  quantity: number,
+  price: string,
+): React.ReactNode => {
+  const hasExtras = Boolean(variants || sku);
+  return (
+    <>
+      {name}
+      {hasExtras && ' ('}
+      {variants}
+      {variants && sku ? ' - ' : ''}
+      {sku && (
+        <>
+          SKU <CopyableCode value={sku} label="نسخ كود المنتج">{sku}</CopyableCode>
+        </>
+      )}
+      {hasExtras && ')'}
+      {` × ${quantity} — ${price}`}
+    </>
+  );
 };
+
+const updateLineText = (line: StoreUpdateLine): React.ReactNode =>
+  lineTextOf(
+    line.title ?? line.externalVariantId ?? 'منتج بدون اسم',
+    customVariantsText(line.customVariants),
+    line.sku,
+    line.quantity,
+    formatDetailValue(moneyOf(line.price)),
+  );
 
 function ComparisonTable({ rows }: { rows: ComparisonRow[] }) {
   return (
@@ -128,11 +155,16 @@ export function StoreUpdateDetails({
 }) {
   const { update } = details;
   const phones = order.customers?.phone_numbers ?? [];
-  const currentLines = (order.order_products ?? []).map((op) => {
+  const currentLines = (order.order_products ?? []).map((op): React.ReactNode => {
     const info = mapOrderProductToVariantInfo(op);
     const attributes = info.attributes.map((attribute) => attribute.value).join(' / ');
-    const extras = [attributes, info.sku ? `SKU ${info.sku}` : ''].filter(Boolean).join(' - ');
-    return `${info.productName}${extras ? ` (${extras})` : ''} × ${op.quantity ?? 1} — ${formatDetailValue(moneyOf(op.price))}`;
+    return lineTextOf(
+      info.productName,
+      attributes,
+      info.sku,
+      op.quantity ?? 1,
+      formatDetailValue(moneyOf(op.price)),
+    );
   });
 
   const sections: { title: string; rows: ComparisonRow[] }[] = [
@@ -180,7 +212,9 @@ export function StoreUpdateDetails({
           {details.provider}
         </DetailField>
         <DetailField label="رقم الطلب في المتجر" ltr>
-          {details.externalOrderId ?? EMPTY_VALUE}
+          <CopyableCode value={details.externalOrderId} label="نسخ رقم الطلب في المتجر">
+            {details.externalOrderId ?? EMPTY_VALUE}
+          </CopyableCode>
         </DetailField>
         {details.event && (
           <DetailField label="نوع التحديث" ltr>

@@ -7,6 +7,7 @@ import { getStatusColor } from '../../../lib/getBadgeColor';
 import { formatAmount } from '../../../lib/formatAmount';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { getTimeAgo } from '@/utils/timeAgo';
+import CopyableCode from '@/components/ui/copyable-code';
 import { CustomerDetailOrder } from '../../../types/customer';
 
 interface OrdersTabProps {
@@ -47,7 +48,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
               >
                 <div className="flex items-start justify-between gap-2">
                   <span className="font-medium text-sm text-gray-800 break-all min-w-0">
-                    {order.code}
+                    <CopyableCode value={order.code} label="نسخ كود الطلب">{order.code}</CopyableCode>
                   </span>
                   {renderStatus(order.status)}
                 </div>
@@ -93,7 +94,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ orders }) => {
                   className="grid grid-cols-7 items-center bg-white border border-gray-100 rounded-xl py-5 px-4 hover:border-blue-100 transition-colors"
                 >
                   <div className="text-center text-gray-800 font-medium text-xs break-all px-1">
-                    {order.code}
+                    <CopyableCode value={order.code} label="نسخ كود الطلب">{order.code}</CopyableCode>
                   </div>
                   <div className="text-center text-gray-600 text-xs">
                     {formatDate(order.createdAt)}

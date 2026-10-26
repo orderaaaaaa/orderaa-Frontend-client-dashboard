@@ -2,6 +2,7 @@
 
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
+import CopyableCode from '@/components/ui/copyable-code';
 import {
   Table,
   TableBody,
@@ -103,7 +104,9 @@ export default function OrderStockSyncPage() {
             <TableBody>
               {data.items.map((item, index) => (
                 <TableRow key={`${item.orderId}-${item.variantId}`}>
-                  <TableCell>{item.orderCode}</TableCell>
+                  <TableCell>
+                    <CopyableCode value={item.orderCode} label="نسخ كود الطلب">{item.orderCode}</CopyableCode>
+                  </TableCell>
                   <TableCell>
                     {item.variantLabel
                       ? `${item.productName} – ${item.variantLabel}`

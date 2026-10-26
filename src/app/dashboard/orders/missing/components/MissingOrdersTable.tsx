@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import Link from 'next/link';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
+import CopyableCode from '@/components/ui/copyable-code';
 import { describeElapsedSince } from '@/utils/elapsed';
 import {
   MISSING_ORDER_FAILURE_LABELS,
@@ -88,12 +89,14 @@ export function MissingOrdersTable({ data, isLoading, emptyMessage }: MissingOrd
           const row = rowData as unknown as MissingOrderListItem;
           if (row.status === 'RECOVERED' && row.recoveredOrder) {
             return (
-              <Link
-                href={`/dashboard/orders/allOrders?search=${row.recoveredOrder.code}`}
-                className="text-primary hover:underline font-semibold"
-              >
-                {row.recoveredOrder.code}
-              </Link>
+              <CopyableCode value={row.recoveredOrder.code} label="نسخ كود الطلب">
+                <Link
+                  href={`/dashboard/orders/allOrders?search=${row.recoveredOrder.code}`}
+                  className="text-primary hover:underline font-semibold"
+                >
+                  {row.recoveredOrder.code}
+                </Link>
+              </CopyableCode>
             );
           }
           return (
