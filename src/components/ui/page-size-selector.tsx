@@ -5,6 +5,7 @@ interface PageSizeSelectorProps {
   currentSize: number;
   totalItems: number;
   onSizeChange: (size: number) => void;
+  showAllOption?: boolean;
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
@@ -13,6 +14,7 @@ export default function PageSizeSelector({
   currentSize,
   totalItems,
   onSizeChange,
+  showAllOption = true,
 }: PageSizeSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -37,7 +39,7 @@ export default function PageSizeSelector({
   };
 
   const displayValue =
-    currentSize === totalItems ? 'الكل' : currentSize.toString();
+    showAllOption && currentSize === totalItems ? 'الكل' : currentSize.toString();
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -73,16 +75,18 @@ export default function PageSizeSelector({
                 {size}
               </button>
             ))}
-            <button
-              type="button"
-              onClick={() => handleSizeSelect(totalItems)}
-              className={`w-full min-h-10 text-start px-4 py-2 text-sm hover:bg-primary/10 transition-colors border-t border-gray-100 ${currentSize === totalItems
-                  ? 'bg-primary/20 text-primary font-medium'
-                  : 'text-gray-700'
-                }`}
-            >
-              الكل ({totalItems})
-            </button>
+            {showAllOption && (
+              <button
+                type="button"
+                onClick={() => handleSizeSelect(totalItems)}
+                className={`w-full min-h-10 text-start px-4 py-2 text-sm hover:bg-primary/10 transition-colors border-t border-gray-100 ${currentSize === totalItems
+                    ? 'bg-primary/20 text-primary font-medium'
+                    : 'text-gray-700'
+                  }`}
+              >
+                الكل ({totalItems})
+              </button>
+            )}
           </div>
         </div>
       )}

@@ -16,6 +16,7 @@ interface PaginationFooterProps {
   currentPageSize: number;
   onPageSizeChange?: (size: number) => void;
   hasSelectedItems?: boolean;
+  showAllPageSizeOption?: boolean;
 }
 
 const PaginationFooter: React.FC<PaginationFooterProps> = ({
@@ -30,6 +31,7 @@ const PaginationFooter: React.FC<PaginationFooterProps> = ({
   currentPageSize,
   onPageSizeChange,
   hasSelectedItems = false,
+  showAllPageSizeOption = true,
 }) => {
   const isPhone = useIsMobile(640);
 
@@ -88,6 +90,7 @@ const PaginationFooter: React.FC<PaginationFooterProps> = ({
               currentSize={currentPageSize}
               totalItems={totalItems}
               onSizeChange={onPageSizeChange}
+              showAllOption={showAllPageSizeOption}
             />
           )}
           <span className="text-sm text-gray-500">{rangeText}</span>
