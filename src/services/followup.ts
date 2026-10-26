@@ -73,6 +73,7 @@ export const useRecordFollowupEventPointMutation = () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.FOLLOWUP_NEW_ORDERS] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.FOLLOWUP_OVERDUE] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.FOLLOWUP_EXECUTED] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DELAYED_ORDERS] });
     },
   });
 };
@@ -83,6 +84,7 @@ function useFollowupListsInvalidation() {
     queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.FOLLOWUP_NEW_ORDERS] });
     queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.FOLLOWUP_OVERDUE] });
     queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.FOLLOWUP_EXECUTED] });
+    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DELAYED_ORDERS] });
   };
 }
 
