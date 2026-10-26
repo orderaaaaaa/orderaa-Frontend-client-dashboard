@@ -36,7 +36,7 @@ export default function ProductDetailsModal({
     const displayValue = value || '-';
     const isEmpty = !value;
     const valueNode = copyValue ? (
-      <CopyableCode value={copyValue} label={copyLabel ?? ''} className="min-w-0 max-w-full">
+      <CopyableCode value={copyValue} label={copyLabel ?? 'نسخ كود المنتج'} className="min-w-0 max-w-full">
         {displayValue}
       </CopyableCode>
     ) : (
