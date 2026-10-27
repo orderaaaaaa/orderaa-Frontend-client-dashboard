@@ -229,7 +229,7 @@ export function SalesStatisticsContent() {
     return (
       <Link
         key={card.field}
-        href={buildSalesSubPageHref(card.link, params)}
+        href={buildSalesSubPageHref(card.link, params, timePeriod)}
         className={CARD_LINK_CLASS}
       >
         {kpi}

@@ -71,6 +71,7 @@ const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 export function buildSalesSubPageHref(
   set: SalesSubPageSet,
   params: SalesStatisticsParams | null,
+  period: TimePeriod | '' = '',
 ): string {
   const base = `${SALES_SUB_PAGE_BASE_PATH}/${set}`;
   if (!params) return base;
@@ -78,6 +79,7 @@ export function buildSalesSubPageHref(
   const search = new URLSearchParams();
   search.set('from', params.from);
   search.set('to', params.to);
+  if (period) search.set('period', period);
   search.set('approvedOnly', String(params.approvedOnly));
   params.storeIds?.forEach((id) => search.append('storeIds', String(id)));
   params.carrierKeys?.forEach((key) => search.append('carrierKeys', key));
