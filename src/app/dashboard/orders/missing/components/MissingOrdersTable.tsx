@@ -7,6 +7,7 @@ import CopyableCode from '@/components/ui/copyable-code';
 import { describeElapsedSince } from '@/utils/elapsed';
 import {
   MISSING_ORDER_FAILURE_LABELS,
+  MISSING_ORDER_MANUAL_SOURCE_LABEL,
   MISSING_ORDER_SOURCE_OPTIONS,
   MISSING_ORDER_STATUS_LABELS,
 } from '@/constants/missingOrders';
@@ -44,6 +45,7 @@ export function MissingOrdersTable({ data, isLoading, emptyMessage }: MissingOrd
         header: 'المصدر',
         render: (_, rowData) => {
           const row = rowData as unknown as MissingOrderListItem;
+          if (row.format === 'APP') return MISSING_ORDER_MANUAL_SOURCE_LABEL;
           const option = MISSING_ORDER_SOURCE_OPTIONS.find((o) => o.value === row.format);
           return option?.label ?? row.format ?? NOT_AVAILABLE;
         },

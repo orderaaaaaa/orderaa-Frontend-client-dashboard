@@ -62,6 +62,13 @@ export interface BulkImportCreatedOrder {
   carrierSend?: CarrierSendBlock;
 }
 
+export interface BulkImportMissingRow {
+  rowIndex: number;
+  missingOrderId: number;
+  status: 'missing' | 'already_missing';
+  message: string;
+}
+
 export interface BulkImportResponse {
   success: boolean;
   data: {
@@ -70,6 +77,7 @@ export interface BulkImportResponse {
     failureCount: number;
     createdOrders: BulkImportCreatedOrder[];
     failedOrders: OrderCreationResult[];
+    missingRows: BulkImportMissingRow[];
   };
 }
 

@@ -4,7 +4,11 @@ import React, { useEffect, useState } from 'react';
 import PageLoading from '@/components/ui/page-loading';
 import { useRouter } from 'next/navigation';
 import { UploadResult } from '@/types/excel-upload';
-import type { BulkImportResponse, OrderCreationResult } from '@/lib/api/bulk-import';
+import type {
+  BulkImportMissingRow,
+  BulkImportResponse,
+  OrderCreationResult,
+} from '@/lib/api/bulk-import';
 import { carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
 import { AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
 
@@ -65,6 +69,11 @@ const readStoredResults = (json: string): StoredResults | null => {
     return null;
   }
 };
+
+const missingRowText = (row: BulkImportMissingRow): string =>
+  row.status === 'already_missing'
+    ? `الطلب ${row.rowIndex}: موجود بالفعل في قائمة المفقودات`
+    : `الطلب ${row.rowIndex}: يجب اختيار نوع المنتج، وتم نقله إلى قائمة المفقودات`;
 
 const failureMessages = (failure: OrderCreationResult): string[] => {
   if (failure.error === 'Validation failed' && failure.details) {
@@ -148,6 +157,7 @@ export default function ValidationResultsPage() {
   const backend = results.backendResponse?.data;
   const createdCount = imported ? backend?.successCount ?? 0 : results.successCount;
   const failedOrders = imported ? backend?.failedOrders ?? [] : [];
+  const missingRows = imported ? backend?.missingRows ?? [] : [];
   const failedCount = imported
     ? backend?.failureCount ?? failedOrders.length
     : results.errorCount;
@@ -193,7 +203,7 @@ export default function ValidationResultsPage() {
       </button>
     ) : null;
 
-  if (failedCount === 0) {
+  if (failedCount === 0 && missingRows.length === 0) {
     return (
       <div className="w-full bg-gray-50 px-4 py-6 sm:p-6" dir="rtl">
         <div className="flex items-center justify-center py-6 sm:py-12">
@@ -248,11 +258,35 @@ export default function ValidationResultsPage() {
 
         {carrierUnsentLine}
 
-        <p role="alert" className="mb-6 text-lg font-semibold text-[#FF0004]">
-          {imported
-            ? `تعذر إنشاء ${failedCount} طلب`
-            : `يوجد ${failedCount} طلبات بها أخطاء`}
-        </p>
+        {failedCount > 0 && (
+          <p role="alert" className="mb-6 text-lg font-semibold text-[#FF0004]">
+            {imported
+              ? `تعذر إنشاء ${failedCount} طلب`
+              : `يوجد ${failedCount} طلبات بها أخطاء`}
+          </p>
+        )}
+
+        {missingRows.length > 0 && (
+          <section className="mb-6 rounded-lg border border-amber-300 bg-amber-50 p-4">
+            <h3 className="mb-2 font-bold text-amber-800">
+              {`طلبات في قائمة المفقودات: ${missingRows.length}`}
+            </h3>
+            <ul className="mb-3 space-y-1 text-sm leading-6 text-amber-900">
+              {missingRows.map((row) => (
+                <li key={row.rowIndex} className="break-words">
+                  {missingRowText(row)}
+                </li>
+              ))}
+            </ul>
+            <button
+              type="button"
+              onClick={() => clearAndGo('/dashboard/orders/missing')}
+              className="min-h-10 px-4 py-2 font-semibold text-primary hover:underline"
+            >
+              قائمة المفقودات
+            </button>
+          </section>
+        )}
 
         <RowProblems rows={problems} />
 

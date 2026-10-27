@@ -44,6 +44,8 @@ export const MISSING_ORDER_FAILURE_LABELS: Record<
 export const INTERNAL_CLASS_FAILURE_CODES: readonly MissingOrderFailureCode[] =
   ['INTERNAL', 'TIMEOUT', 'TRANSIENT_EXHAUSTED', 'STALE_RUNNING', 'STALE_PENDING'];
 
+export const MISSING_ORDER_MANUAL_SOURCE_LABEL = 'يدوي';
+
 export const MISSING_ORDER_SOURCE_OPTIONS: { value: MissingOrderSourceFormat; label: string }[] = [
   { value: 'EASYORDER', label: 'EasyOrders' },
   { value: 'SHOPIFY', label: 'Shopify' },
