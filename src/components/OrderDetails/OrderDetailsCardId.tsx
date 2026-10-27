@@ -98,7 +98,7 @@ const OrderDetailsCardId = ({
                 </p>
               </Then>
             </If>
-            <If condition={(order.shipping_ids?.length ?? 0) > 0 || !!order.shippingId}>
+            <If condition={(order.shipping_ids?.length ?? 0) > 0 || !!activeShippingIdOf(order)}>
               <Then>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {order.shipping_ids && order.shipping_ids.length > 0 ? (
