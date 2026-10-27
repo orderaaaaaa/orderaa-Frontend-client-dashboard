@@ -15,7 +15,6 @@ import type { ShippingConfig } from '../types/shipping';
 
 const NONE_VALUE = 'none';
 const NONE_LABEL = 'أقدم ربط نشط (الافتراضي)';
-const INACTIVE_LINK_LABEL = 'شركة محددة (الربط غير نشط)';
 const API_KEY_CONFIG_TYPE = 'API_KEY';
 
 interface CarrierOption {
@@ -60,26 +59,21 @@ export function DefaultCarrierCard({
   const isSaving = setMutation.isPending || clearMutation.isPending;
   const storedId = defaultQuery.data?.shippingCompanyId ?? null;
   const options = activeCarrierOptions(configs);
-  const storedInOptions = options.some(
+  const effectiveId = options.some(
     (option) => option.shippingCompanyId === storedId
-  );
-  const choices: CarrierOption[] =
-    storedId !== null && !storedInOptions
-      ? [
-          ...options,
-          { shippingCompanyId: storedId, label: INACTIVE_LINK_LABEL },
-        ]
-      : options;
-  const selectedValue = storedId === null ? NONE_VALUE : String(storedId);
+  )
+    ? storedId
+    : null;
+  const selectedValue = effectiveId === null ? NONE_VALUE : String(effectiveId);
   const radioChoices = [
     { value: NONE_VALUE, label: NONE_LABEL },
-    ...choices.map((choice) => ({
-      value: String(choice.shippingCompanyId),
-      label: choice.label,
+    ...options.map((option) => ({
+      value: String(option.shippingCompanyId),
+      label: option.label,
     })),
   ];
   const selectedLabel =
-    choices.find((choice) => choice.shippingCompanyId === storedId)?.label ??
+    options.find((option) => option.shippingCompanyId === effectiveId)?.label ??
     NONE_LABEL;
 
   const handleChange = (value: string) => {
