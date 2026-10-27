@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { formatDateToLocalDate, calculateDateRangeFromPeriod, TimePeriod } from '@/utils/dateRangeUtils';
+import { isValidTimePeriod } from '@/utils/urlFilters';
 import type { SalesStatisticsParams, SalesSubPageSet } from '../types';
 
 export interface SalesStatisticsFiltersState {
@@ -24,6 +26,8 @@ export interface UseSalesStatisticsFiltersResult extends SalesStatisticsFiltersS
   setApprovedOnly: (value: boolean) => void;
   clearScope: () => void;
 }
+
+type SalesFilterUpdate = (prev: SalesStatisticsFiltersState) => SalesStatisticsFiltersState;
 
 function firstDayOfCurrentMonth(): Date {
   const now = new Date();
@@ -107,78 +111,104 @@ export function parseSalesSearchParams(
   };
 
   const fromDate = parseIsoDate(readFirst(searchParams.from));
+  if (fromDate) result.fromDate = fromDate;
+
   const toDate = parseIsoDate(readFirst(searchParams.to));
-  if (fromDate && toDate) {
-    result.fromDate = fromDate;
-    result.toDate = toDate;
-  }
+  if (toDate) result.toDate = toDate;
 
   const approvedOnly = readFirst(searchParams.approvedOnly);
   if (approvedOnly === 'true' || approvedOnly === 'false') {
     result.approvedOnly = approvedOnly === 'true';
   }
 
+  const period = readFirst(searchParams.period);
+  if (period && isValidTimePeriod(period)) result.timePeriod = period;
+
   return result;
 }
 
-export function useSalesStatisticsFilters(
-  initial?: Partial<SalesStatisticsFiltersState>,
-): UseSalesStatisticsFiltersResult {
-  const [state, setState] = useState<SalesStatisticsFiltersState>(() => ({
-    ...buildInitialState(),
-    ...initial,
-  }));
+function toSearchRecord(searchParams: URLSearchParams): Record<string, string[]> {
+  const record: Record<string, string[]> = {};
+  searchParams.forEach((_, key) => {
+    record[key] = searchParams.getAll(key);
+  });
+  return record;
+}
 
-  const setFromDate = useCallback((date: Date | null) => {
-    setState((prev) => ({ ...prev, fromDate: date, timePeriod: '' }));
-  }, []);
+export function parseSalesUrlState(searchParams: URLSearchParams): SalesStatisticsFiltersState {
+  return { ...buildInitialState(), ...parseSalesSearchParams(toSearchRecord(searchParams)) };
+}
 
-  const setToDate = useCallback((date: Date | null) => {
-    setState((prev) => ({ ...prev, toDate: date, timePeriod: '' }));
-  }, []);
+export function serializeSalesUrlState(state: SalesStatisticsFiltersState): string {
+  const search = new URLSearchParams();
+  const from = formatDateToLocalDate(state.fromDate);
+  const to = formatDateToLocalDate(state.toDate);
+  if (from) search.set('from', from);
+  if (to) search.set('to', to);
+  if (state.timePeriod) search.set('period', state.timePeriod);
+  search.set('approvedOnly', String(state.approvedOnly));
+  state.storeIds.forEach((id) => search.append('storeIds', id));
+  state.carrierKeys.forEach((key) => search.append('carrierKeys', key));
+  state.pageNames.forEach((name) => search.append('pageNames', name));
+  return search.toString();
+}
 
-  const setTimePeriod = useCallback((period: TimePeriod | '') => {
-    if (!period) {
-      setState((prev) => ({ ...prev, timePeriod: '' }));
-      return;
-    }
-    const range = calculateDateRangeFromPeriod(period);
-    setState((prev) => ({
-      ...prev,
-      timePeriod: period,
-      fromDate: range?.from ?? prev.fromDate,
-      toDate: range?.to ?? prev.toDate,
-    }));
-  }, []);
+function applyTimePeriod(
+  prev: SalesStatisticsFiltersState,
+  period: TimePeriod | '',
+): SalesStatisticsFiltersState {
+  if (!period) return { ...prev, timePeriod: '' };
+  const range = calculateDateRangeFromPeriod(period);
+  return {
+    ...prev,
+    timePeriod: period,
+    fromDate: range?.from ?? prev.fromDate,
+    toDate: range?.to ?? prev.toDate,
+  };
+}
 
-  const setStoreIds = useCallback((values: string[]) => {
-    setState((prev) => ({ ...prev, storeIds: values }));
-  }, []);
+function useSalesFilterActions(commit: (update: SalesFilterUpdate) => void) {
+  const setFromDate = useCallback(
+    (date: Date | null) => commit((prev) => ({ ...prev, fromDate: date, timePeriod: '' })),
+    [commit],
+  );
 
-  const setCarrierKeys = useCallback((values: string[]) => {
-    setState((prev) => ({ ...prev, carrierKeys: values }));
-  }, []);
+  const setToDate = useCallback(
+    (date: Date | null) => commit((prev) => ({ ...prev, toDate: date, timePeriod: '' })),
+    [commit],
+  );
 
-  const setPageNames = useCallback((values: string[]) => {
-    setState((prev) => ({ ...prev, pageNames: values }));
-  }, []);
+  const setTimePeriod = useCallback(
+    (period: TimePeriod | '') => commit((prev) => applyTimePeriod(prev, period)),
+    [commit],
+  );
 
-  const setApprovedOnly = useCallback((value: boolean) => {
-    setState((prev) => ({ ...prev, approvedOnly: value }));
-  }, []);
+  const setStoreIds = useCallback(
+    (values: string[]) => commit((prev) => ({ ...prev, storeIds: values })),
+    [commit],
+  );
 
-  const clearScope = useCallback(() => {
-    setState((prev) => ({ ...prev, storeIds: [], carrierKeys: [], pageNames: [] }));
-  }, []);
+  const setCarrierKeys = useCallback(
+    (values: string[]) => commit((prev) => ({ ...prev, carrierKeys: values })),
+    [commit],
+  );
 
-  const params = useMemo(() => buildSalesParams(state), [state]);
+  const setPageNames = useCallback(
+    (values: string[]) => commit((prev) => ({ ...prev, pageNames: values })),
+    [commit],
+  );
 
-  const selectionCount = state.storeIds.length + state.carrierKeys.length + state.pageNames.length;
+  const setApprovedOnly = useCallback(
+    (value: boolean) => commit((prev) => ({ ...prev, approvedOnly: value })),
+    [commit],
+  );
+
+  const clearScope = useCallback(
+    () => commit((prev) => ({ ...prev, storeIds: [], carrierKeys: [], pageNames: [] })),
+    [commit],
+  );
 
   return {
-    ...state,
-    params,
-    selectionCount,
     setFromDate,
     setToDate,
     setTimePeriod,
@@ -188,4 +218,40 @@ export function useSalesStatisticsFilters(
     setApprovedOnly,
     clearScope,
   };
+}
+
+function useSalesFilterResult(
+  state: SalesStatisticsFiltersState,
+  commit: (update: SalesFilterUpdate) => void,
+): UseSalesStatisticsFiltersResult {
+  const params = useMemo(() => buildSalesParams(state), [state]);
+  const actions = useSalesFilterActions(commit);
+  const selectionCount = state.storeIds.length + state.carrierKeys.length + state.pageNames.length;
+
+  return {
+    ...state,
+    params,
+    selectionCount,
+    ...actions,
+  };
+}
+
+export function useSalesStatisticsFilters(): UseSalesStatisticsFiltersResult {
+  const [state, setState] = useState<SalesStatisticsFiltersState>(buildInitialState);
+  const commit = useCallback((update: SalesFilterUpdate) => setState(update), []);
+  return useSalesFilterResult(state, commit);
+}
+
+export function useSalesStatisticsUrlFilters(): UseSalesStatisticsFiltersResult {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const state = useMemo(() => parseSalesUrlState(searchParams), [searchParams]);
+  const commit = useCallback(
+    (update: SalesFilterUpdate) => {
+      router.push(`${pathname}?${serializeSalesUrlState(update(state))}`, { scroll: false });
+    },
+    [pathname, router, state],
+  );
+  return useSalesFilterResult(state, commit);
 }

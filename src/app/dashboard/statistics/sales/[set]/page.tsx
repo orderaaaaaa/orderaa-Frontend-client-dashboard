@@ -6,14 +6,12 @@ import { PERMISSION_CODES } from '@/lib/generated/permission-codes';
 import { SalesSubPageContent } from '../components/SalesSubPageContent';
 import { StatisticsState } from '../components/StatisticsState';
 import { SALES_COPY, isSalesSubPageSet } from '../constants';
-import { parseSalesSearchParams } from '../hooks/useSalesStatisticsFilters';
 
 interface SalesSubPageProps {
   params: { set: string };
-  searchParams: Record<string, string | string[] | undefined>;
 }
 
-export default function SalesSubPage({ params, searchParams }: SalesSubPageProps) {
+export default function SalesSubPage({ params }: SalesSubPageProps) {
   const { hasPermission } = usePermissionCheck();
   const canRead = hasPermission(PERMISSION_CODES.REPORTS_SALES_READ);
 
@@ -29,6 +27,6 @@ export default function SalesSubPage({ params, searchParams }: SalesSubPageProps
   }
 
   return (
-    <SalesSubPageContent set={set} initialFilters={parseSalesSearchParams(searchParams)} />
+    <SalesSubPageContent set={set} />
   );
 }

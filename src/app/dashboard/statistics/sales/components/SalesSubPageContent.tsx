@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import Link from 'next/link';
 import { AlertCircle, ArrowRight, Download, Inbox } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,10 +17,7 @@ import {
   SALES_SUBPAGE_SETS,
   isSalesOrderSet,
 } from '../constants';
-import {
-  type SalesStatisticsFiltersState,
-  useSalesStatisticsFilters,
-} from '../hooks/useSalesStatisticsFilters';
+import { useSalesStatisticsUrlFilters } from '../hooks/useSalesStatisticsFilters';
 import type {
   FilterOption,
   SalesOrderSet,
@@ -78,10 +75,17 @@ function SubPageSkeleton() {
 
 interface SalesSubPageContentProps {
   set: SalesSubPageSet;
-  initialFilters: Partial<SalesStatisticsFiltersState>;
 }
 
-export function SalesSubPageContent({ set, initialFilters }: SalesSubPageContentProps) {
+export function SalesSubPageContent({ set }: SalesSubPageContentProps) {
+  return (
+    <Suspense fallback={<SubPageSkeleton />}>
+      <SalesSubPageView set={set} />
+    </Suspense>
+  );
+}
+
+function SalesSubPageView({ set }: SalesSubPageContentProps) {
   const {
     params,
     fromDate,
@@ -100,7 +104,7 @@ export function SalesSubPageContent({ set, initialFilters }: SalesSubPageContent
     setPageNames,
     setApprovedOnly,
     clearScope,
-  } = useSalesStatisticsFilters(initialFilters);
+  } = useSalesStatisticsUrlFilters();
 
   const definition = SALES_SUBPAGE_SETS[set];
   const orderSet: SalesOrderSet | null = isSalesOrderSet(set) ? set : null;
