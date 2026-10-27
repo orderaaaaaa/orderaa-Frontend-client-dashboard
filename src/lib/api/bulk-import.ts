@@ -42,7 +42,6 @@ export interface OrderRow {
 
 export interface BulkImportRequest {
   format: ExcelFormat;
-  merchantId: number;
   orders: OrderRow[];
 }
 

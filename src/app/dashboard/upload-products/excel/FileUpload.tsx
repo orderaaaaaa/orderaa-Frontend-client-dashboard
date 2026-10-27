@@ -3,7 +3,7 @@ import { Download, CircleCheck, X, Loader2, FolderOpen } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { processExcelFile } from '@/lib/excel/processor';
-import { importBulkOrders, transformToApiFormat, getMerchantIdFromUser } from '@/lib/api/bulk-import';
+import { importBulkOrders, transformToApiFormat } from '@/lib/api/bulk-import';
 import { invalidateAndWait, orderStatusKeys } from '@/lib/query/mutationSync';
 import { useAuthStore } from '@/store/authStore';
 import { Can } from '@/components/Can';
@@ -108,14 +108,11 @@ const FileUpload = () => {
         results.detectedFormat
       );
 
-      const merchantId = user.merchantId ?? user.id;
-
       setImportCount(apiOrders.length);
       setStage('importing');
 
       const backendResponse = await importBulkOrders({
         format: results.detectedFormat,
-        merchantId,
         orders: apiOrders,
       });
       await invalidateAndWait(queryClient, orderStatusKeys());
