@@ -13,6 +13,7 @@ import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { PERMISSIONS } from '@/lib/permissions';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
 import { OrderStatus } from '@/types/orders';
+import { PARTIAL_DELIVERY_IMPLEMENTATIONS } from '@/types/shippingCompanies';
 import {
   IN_PROCESS_STATUSES,
   type CarrierHeader,
@@ -56,21 +57,21 @@ const isLockedRow = (row: ShipmentRowBase): boolean =>
   !(IN_PROCESS_STATUSES as readonly OrderStatus[]).includes(row.status);
 
 const PARTIAL_DELIVERY_BLOCK_REASONS = {
-  carrier: 'التسليم الجزئي متاح لشركة تربو فقط',
+  carrier: 'التسليم الجزئي متاح لشركتي تربو وبوسطة فقط',
   locked: 'الطلب مغلق في المتابعة',
   status: 'التسليم الجزئي متاح للطلبات مع المندوب فقط',
 } as const;
 
 const partialDeliveryBlockReasonOf = ({
-  isTurboCarrier,
+  isPartialCarrier,
   locked,
   status,
 }: {
-  isTurboCarrier: boolean;
+  isPartialCarrier: boolean;
   locked: boolean;
   status: OrderStatus;
 }): string | null => {
-  if (!isTurboCarrier) return PARTIAL_DELIVERY_BLOCK_REASONS.carrier;
+  if (!isPartialCarrier) return PARTIAL_DELIVERY_BLOCK_REASONS.carrier;
   if (locked) return PARTIAL_DELIVERY_BLOCK_REASONS.locked;
   if (status !== OrderStatus.WITH_DRIVER) return PARTIAL_DELIVERY_BLOCK_REASONS.status;
   return null;
@@ -299,8 +300,8 @@ export function InProcessShipmentsTable({
   onOpenActionLog,
 }: InProcessShipmentsTableProps) {
   const { shippingCompanies, isLoading: isShippingCompaniesLoading } = useShippingCompanies();
-  const isTurboCarrier =
-    shippingCompanies.find((company) => company.id === shippingCompanyId)?.implementation === 'TURBO';
+  const implementation = shippingCompanies.find((company) => company.id === shippingCompanyId)?.implementation;
+  const isPartialCarrier = implementation !== undefined && PARTIAL_DELIVERY_IMPLEMENTATIONS.includes(implementation);
 
   return (
     <table className="w-full text-sm whitespace-nowrap" dir="rtl">
@@ -407,7 +408,7 @@ export function InProcessShipmentsTable({
                     blockedReason: isShippingCompaniesLoading
                       ? null
                       : partialDeliveryBlockReasonOf({
-                          isTurboCarrier,
+                          isPartialCarrier,
                           locked,
                           status: row.status,
                         }),

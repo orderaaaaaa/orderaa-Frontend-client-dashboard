@@ -11,6 +11,8 @@ export type ShippingImplementation =
   | 'TOROD'
   | 'CARRIER_NOOP';
 
+export const PARTIAL_DELIVERY_IMPLEMENTATIONS: readonly ShippingImplementation[] = ['TURBO', 'BOSTA'];
+
 export interface ShippingCompanyRef {
   id: number;
   code: string | null;
