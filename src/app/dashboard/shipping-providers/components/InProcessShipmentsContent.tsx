@@ -31,7 +31,7 @@ import { InProcessShipmentsTable, ReturnedShipmentsTable } from './ShipmentsTabl
 
 const MAX_PAGE_SIZE = 100;
 const DEFAULT_PAGE_SIZE = 25;
-const SEARCH_DEBOUNCE_MS = 500;
+const SEARCH_DEBOUNCE_MS = 300;
 
 type ShipmentView = 'in-process' | 'returned';
 
