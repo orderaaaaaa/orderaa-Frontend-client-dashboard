@@ -10,6 +10,7 @@ import { getTimeAgo } from '@/utils/timeAgo';
 import { If, Then } from 'react-if';
 import { getRemainingTime } from '@/utils/getRemainingTime';
 import useShippingCompanies from '@/hooks/useShippingCompanies';
+import { activeShippingIdOf } from '@/utils/orderShippingSwitch';
 import {
   shippingCompanyNameOf,
   shippingIdCompanyNameOf,
@@ -165,14 +166,14 @@ const OrderDetailsCardId = ({
                   ) : (
                     <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-1.5">
                       <Copy
-                        onClick={() => handleCopy(order.shippingId!)}
+                        onClick={() => handleCopy(activeShippingIdOf(order)!)}
                         className="w-3.5 h-3.5 text-[#7038f3] cursor-pointer shrink-0"
                         role="button"
                       />
                       <div className="flex flex-col leading-tight">
                         <span className="text-[10px] text-gray-500">كود الشحن</span>
                         <span className="text-sm font-semibold text-gray-800">
-                          {order.shippingId}
+                          {activeShippingIdOf(order)}
                         </span>
                         {orderCompanyName && (
                           <span className="text-[11px] font-normal text-gray-500">
