@@ -42,6 +42,7 @@ import OrdersSelectionHeader from '../../components/OrdersSelectionHeader';
 import PageTaps from '../../components/pageTaps';
 import { useDepartment, useDefaultStatusByPath } from '../../hooks';
 import { shippingCompanyNameOf } from '@/lib/shippingCompanies';
+import { activeShippingIdOf } from '@/utils/orderShippingSwitch';
 import {
   splitOrdersForAction,
   useCallCenterBulkActions,
@@ -395,7 +396,7 @@ export function CallCenterContent() {
                 government={
                   order.governorate || order.externalGovernorate || 'غير محدد'
                 }
-                shippingId={order.shippingId}
+                shippingId={activeShippingIdOf(order)}
                 shippingCompanyName={shippingCompanyNameOf(order.shippingCompanyRef)}
                 productVariants={order.order_products.map((op) => mapOrderProductToVariantInfo(op))}
                 price={order.totalCost}

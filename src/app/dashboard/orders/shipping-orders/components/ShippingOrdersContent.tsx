@@ -62,6 +62,7 @@ import {
   shippingCompanyNameOf,
   shippingCompanySelectOptionsOf,
 } from '@/lib/shippingCompanies';
+import { activeShippingIdOf } from '@/utils/orderShippingSwitch';
 
 export function ShippingOrdersContent() {
   const [selectedCustomerPhone, setSelectedCustomerPhone] = useState('');
@@ -501,7 +502,7 @@ export function ShippingOrdersContent() {
                 government={
                   order.governorate || order.externalGovernorate || 'غير محدد'
                 }
-                shippingId={order.shippingId}
+                shippingId={activeShippingIdOf(order)}
                 shippingCompanyName={shippingCompanyNameOf(order.shippingCompanyRef)}
                 productVariants={order.order_products.map((op) => mapOrderProductToVariantInfo(op))}
                 price={order.totalCost}

@@ -1,6 +1,7 @@
 import { Order } from '@/types/orders';
 import * as XLSX from 'xlsx';
 import { toast } from 'sonner';
+import { activeShippingIdOf } from '@/utils/orderShippingSwitch';
 
 export interface ExportOrderData {
     'كود الطلب': string;
@@ -40,7 +41,7 @@ export function exportInArabicFormat(
 ) {
     const excelData: ExportOrderData[] = orders.map((order) => ({
         'كود الطلب': order.code,
-        'كود شركة الشحن': order.shippingId || '',
+        'كود شركة الشحن': activeShippingIdOf(order) || '',
         'الحالة': statusLabels.get(order.status) || order.status,
         'اسم العميل': order.customers.name,
         'رقم الهاتف': order.customers.phone_numbers?.join(', ') || '',

@@ -45,6 +45,7 @@ import { Button } from '@/components/ui/button';
 import { shippingCompanyNameOf } from '@/lib/shippingCompanies';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { getApiErrorStatus, getBatchErrorMessage } from '@/utils/apiError';
+import { activeShippingIdOf } from '@/utils/orderShippingSwitch';
 import { useOrderStatusSetGuard } from '@/hooks/orders/useOrderStatusSetGuard';
 import {
   notifyBulkStatusResult,
@@ -509,7 +510,7 @@ function AllOrdersContent() {
                 government={
                   order.governorate || order.externalGovernorate || 'غير محدد'
                 }
-                shippingId={order.shippingId}
+                shippingId={activeShippingIdOf(order)}
                 shippingCompanyName={shippingCompanyNameOf(order.shippingCompanyRef)}
                 productVariants={order.order_products.map((op) => mapOrderProductToVariantInfo(op))}
                 price={order.totalCost}
