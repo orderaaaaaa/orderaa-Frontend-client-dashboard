@@ -170,7 +170,7 @@ export default function PartialDeliveryModal({
 
         {isNoEditCarrier && (
           <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-700">
-            لن يتم تحديث بوسطة بالتسليم الجزئي، ويتم تسوية فرق مبلغ التحصيل مع بوسطة يدويًا
+            لن يتم تحديث بوسطة بالتسليم الجزئي، ويتم تسوية فرق مبلغ التحصيل مع بوسطة يدوياً
           </div>
         )}
 
