@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useQueries, useQuery, type QueryKey } from '@tanstack/react-query';
 import { getLocationOptionCities, getLocationOptionGovernorates } from '@/lib/api/lookups';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
@@ -32,22 +32,39 @@ export function useChangeCompanyLocations({
   });
   const governorateData = governorates.data;
 
+  const uniqueGovernorates = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          rows
+            .map((row) => row.picks.governorateOption)
+            .filter((governorateOption): governorateOption is string => governorateOption !== null),
+        ),
+      ),
+    [rows],
+  );
+
   const cityQueries = useQueries({
-    queries: rows.map((row) => {
-      const governorateOption = row.picks.governorateOption;
-      return {
-        queryKey: [
-          QUERY_KEYS.LOCATION_OPTION_CITIES,
-          targetId,
-          governorateOption,
-          null,
-        ] as QueryKey,
-        queryFn: () => getLocationOptionCities(targetId as number, governorateOption as string),
-        enabled: targetId !== null && governorateOption !== null,
-        retry: retryUnlessClientError,
-      };
-    }),
+    queries: uniqueGovernorates.map((governorateOption) => ({
+      queryKey: [
+        QUERY_KEYS.LOCATION_OPTION_CITIES,
+        targetId,
+        governorateOption,
+        null,
+      ] as QueryKey,
+      queryFn: () => getLocationOptionCities(targetId as number, governorateOption),
+      enabled: targetId !== null,
+      retry: retryUnlessClientError,
+    })),
   });
+
+  const cityQueryByGovernorate = useMemo(
+    () =>
+      new Map(
+        uniqueGovernorates.map((governorateOption, index) => [governorateOption, cityQueries[index]] as const),
+      ),
+    [uniqueGovernorates, cityQueries],
+  );
 
   useEffect(() => {
     if (targetId === null || !governorateData) return;
@@ -63,10 +80,11 @@ export function useChangeCompanyLocations({
   }, [targetId, governorateData, rows, onPatch, onPickGovernorate]);
 
   useEffect(() => {
-    rows.forEach((row, index) => {
+    rows.forEach((row) => {
       const governorateOption = row.picks.governorateOption;
-      const cities = cityQueries[index]?.data;
-      if (governorateOption === null || !cities) return;
+      if (governorateOption === null) return;
+      const cities = cityQueryByGovernorate.get(governorateOption)?.data;
+      if (!cities) return;
       if (row.cityPrefillKey === governorateOption) return;
       const current = (row.order.city ?? '').trim();
       const match = cities.options.find((option) => option.label.trim() === current);
@@ -75,12 +93,14 @@ export function useChangeCompanyLocations({
       }
       onPatch(row.order.id, { cityPrefillKey: governorateOption });
     });
-  }, [rows, cityQueries, onPatch, onPickCity]);
+  }, [rows, cityQueryByGovernorate, onPatch, onPickCity]);
 
   const governorateOptions: LocationOption[] = governorateData?.options ?? [];
-  const cityOptionsByRow: LocationOption[][] = rows.map(
-    (_, index) => cityQueries[index]?.data?.options ?? []
-  );
+  const cityOptionsByRow: LocationOption[][] = rows.map((row) => {
+    const governorateOption = row.picks.governorateOption;
+    if (governorateOption === null) return [];
+    return cityQueryByGovernorate.get(governorateOption)?.data?.options ?? [];
+  });
 
   return { governorateOptions, cityOptionsByRow };
 }
