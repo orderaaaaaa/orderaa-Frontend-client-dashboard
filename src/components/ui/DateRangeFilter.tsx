@@ -58,13 +58,13 @@ const DateRangeFilter = memo(
           className,
         )}
       >
-        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto min-w-0">
           <DatePicker
             selected={fromDate}
             onChange={onFromDateChange}
             placeholder="من تاريخ"
             showIcon
-            className="flex-1 sm:flex-none sm:w-[160px]"
+            className="flex-1 min-w-0 sm:flex-none sm:w-[160px]"
             maxDate={toDate || undefined}
           />
 
@@ -75,7 +75,7 @@ const DateRangeFilter = memo(
             onChange={onToDateChange}
             placeholder="إلى تاريخ"
             showIcon
-            className="flex-1 sm:flex-none sm:w-[160px]"
+            className="flex-1 min-w-0 sm:flex-none sm:w-[160px]"
             minDate={fromDate || undefined}
           />
         </div>
