@@ -39,7 +39,9 @@ export default function ShortfallSettlementPage() {
   const [page, setPage] = useState(1);
   const limit = SHORTFALL_PAGE_SIZE;
   const [settleRowId, setSettleRowId] = useState<number | null>(null);
-  const shortfallQuery = useShortfallSettlementsQuery(filter, page, limit);
+  const shortfallQuery = useShortfallSettlementsQuery(filter, page, limit, {
+    enabled: canManageSettlement,
+  });
   const rows: ShortfallSettlementRow[] = shortfallQuery.data?.data ?? [];
   const total = shortfallQuery.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / limit));

@@ -48,10 +48,12 @@ export function useShortfallSettlementsQuery(
   filter: ShortfallFilter,
   page: number,
   limit: number,
+  { enabled = true }: { enabled?: boolean } = {},
 ) {
   return useQuery({
     queryKey: settlementKeys.shortfall(filter, page, limit),
     queryFn: () => getShortfallSettlements(filter, page, limit),
+    enabled,
     placeholderData: keepPreviousData,
   });
 }
