@@ -5,7 +5,7 @@ export type ExcelFormat = 'app' | 'easyorder';
 
 export interface ProductItem {
   name: string;
-  variant?: string;
+  variants?: { name: string; optionName: string }[];
   quantity?: number;
   price?: number;
   sku?: string;
@@ -125,6 +125,14 @@ export function transformToApiFormat(
   });
 }
 
+const VARIANT_ATTRIBUTE_NAME = 'variant';
+
+function variantsOf(optionName: string | undefined): ProductItem['variants'] {
+  return optionName
+    ? [{ name: VARIANT_ATTRIBUTE_NAME, optionName }]
+    : undefined;
+}
+
 function transformAppFormatOrder(data: any, rowIndex: number): OrderRow {
   const products: ProductItem[] = [];
   for (let i = 1; i <= 20; i++) {
@@ -132,7 +140,7 @@ function transformAppFormatOrder(data: any, rowIndex: number): OrderRow {
     if (productName && productName.trim()) {
       products.push({
         name: productName.trim(),
-        variant: data[`Variant ${i}`]?.trim() || undefined,
+        variants: variantsOf(data[`Variant ${i}`]?.trim()),
         quantity: 1,
       });
     }
@@ -158,7 +166,7 @@ function transformEasyOrderFormatOrder(data: any, rowIndex: number): OrderRow {
   const products: ProductItem[] = [
     {
       name: data['Product Name']?.trim() || '',
-      variant: data.Variant?.trim() || undefined,
+      variants: variantsOf(data.Variant?.trim()),
       quantity: parseInt(data.Quantity) || 1,
       price: parseFloat(data['Item Price']) || undefined,
       sku: data.SKU?.trim() || undefined,
