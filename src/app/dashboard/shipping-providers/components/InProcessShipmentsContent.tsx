@@ -327,37 +327,35 @@ export function InProcessShipmentsContent({
   const [searchInput, setSearchInput] = useState(search);
   const debouncedSearch = useDebounce(searchInput, SEARCH_DEBOUNCE_MS);
   const [appliedSearch, setAppliedSearch] = useState(search);
-  const lastWrittenSearch = useRef(search);
+  const appliedSearchRef = useRef(search);
 
   useEffect(() => {
     const nextSearch = debouncedSearch.trim();
-    if (nextSearch === lastWrittenSearch.current) return;
-    lastWrittenSearch.current = nextSearch;
-    window.history.replaceState(
-      null,
-      '',
-      buildSearchUrl(pathname, new URLSearchParams(window.location.search), {
-        search: nextSearch,
-        page: '',
-      }),
-    );
+    const urlSearch = new URLSearchParams(window.location.search).get('search') ?? '';
+    if (nextSearch !== urlSearch) {
+      window.history.replaceState(
+        null,
+        '',
+        buildSearchUrl(pathname, new URLSearchParams(window.location.search), {
+          search: nextSearch,
+          page: '',
+        }),
+      );
+    }
+    appliedSearchRef.current = nextSearch;
     startTransition(() => setAppliedSearch(nextSearch));
   }, [debouncedSearch, pathname]);
 
   useEffect(() => {
-    const onPopState = () => {
-      const restored = new URLSearchParams(window.location.search).get('search') ?? '';
-      lastWrittenSearch.current = restored;
-      setSearchInput(restored);
-      startTransition(() => setAppliedSearch(restored));
-    };
-    window.addEventListener('popstate', onPopState);
-    return () => window.removeEventListener('popstate', onPopState);
-  }, []);
+    if (search === appliedSearchRef.current) return;
+    appliedSearchRef.current = search;
+    setSearchInput(search);
+    startTransition(() => setAppliedSearch(search));
+  }, [search]);
 
   const updateParams = (patch: Record<string, string>) =>
     router.replace(
-      buildSearchUrl(pathname, searchParams, { search: searchInput.trim(), ...patch }),
+      buildSearchUrl(pathname, searchParams, { search: appliedSearchRef.current, ...patch }),
       { scroll: false },
     );
 
