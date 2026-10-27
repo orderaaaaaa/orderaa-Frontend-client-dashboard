@@ -14,6 +14,7 @@ import { orderDetailsQueryOptions } from '@/services/orders';
 import { KEY as SHIPPING_PROVIDERS_KEY, useCloseClosure, useUndoClosure } from '@/services/shippingProviders';
 import { getApiErrorMessage } from '@/utils/apiError';
 import type { FollowupClosure, FollowupClosureKind } from '@/types/logistics';
+import type { ShippingImplementation } from '@/types/shippingCompanies';
 import { ClosureReasonModal, type ClosureReasonKind } from './ClosureReasonModal';
 import { ExchangeCandidatesModal } from './ExchangeCandidatesModal';
 
@@ -58,9 +59,15 @@ interface ShipmentRowActionsProps {
   orderId: number;
   closure: FollowupClosure | null;
   partialDelivery?: PartialDeliveryAccess;
+  carrierImplementation?: ShippingImplementation;
 }
 
-export function ShipmentRowActions({ orderId, closure, partialDelivery }: ShipmentRowActionsProps) {
+export function ShipmentRowActions({
+  orderId,
+  closure,
+  partialDelivery,
+  carrierImplementation,
+}: ShipmentRowActionsProps) {
   const { t } = useI18n();
   const { hasAllPermissions, hasAnyPermission } = usePermissionCheck();
   const [reasonKind, setReasonKind] = useState<ClosureReasonKind | null>(null);
@@ -211,6 +218,7 @@ export function ShipmentRowActions({ orderId, closure, partialDelivery }: Shipme
           orderStatus={orderQuery.data.status}
           orderProducts={orderQuery.data.order_products}
           totalCost={orderQuery.data.totalCost}
+          carrierImplementation={carrierImplementation}
         />
       )}
     </div>

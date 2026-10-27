@@ -5,6 +5,7 @@ import { LiaMinusSolid, LiaPlusSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import { OrderProduct, OrderStatus } from '@/types/orders';
 import { usePartialDelivery } from '@/services/logistics';
+import { isNoEditPartialDeliveryCarrier, type ShippingImplementation } from '@/types/shippingCompanies';
 import {
   RETURN_SHIPMENT_CONTENT_MAX_LENGTH,
   returnShipmentContentOf,
@@ -17,6 +18,7 @@ interface PartialDeliveryModalProps {
   orderStatus: string;
   orderProducts: OrderProduct[];
   totalCost: number;
+  carrierImplementation?: ShippingImplementation;
 }
 
 interface VariantGroup {
@@ -49,6 +51,7 @@ export default function PartialDeliveryModal({
   orderStatus,
   orderProducts,
   totalCost,
+  carrierImplementation,
 }: PartialDeliveryModalProps) {
   const [refusedByGroup, setRefusedByGroup] = useState<Record<string, number>>(
     {},
@@ -107,6 +110,8 @@ export default function PartialDeliveryModal({
     overrideValue !== undefined &&
     (!Number.isFinite(overrideValue) || overrideValue < 0);
   const isWithDriver = orderStatus === OrderStatus.WITH_DRIVER;
+  const isNoEditCarrier =
+    carrierImplementation !== undefined && isNoEditPartialDeliveryCarrier(carrierImplementation);
   const isPending = partialDelivery.isPending;
 
   const setRefused = (group: VariantGroup, next: number) => {
@@ -160,6 +165,12 @@ export default function PartialDeliveryModal({
           <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-700">
             الطلب مع المندوب. عند التأكيد يتحول الطلب إلى تم التسليم بالقطع
             المستلمة
+          </div>
+        )}
+
+        {isNoEditCarrier && (
+          <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-700">
+            لن يتم تحديث بوسطة بالتسليم الجزئي، ويتم تسوية فرق مبلغ التحصيل مع بوسطة يدويًا
           </div>
         )}
 

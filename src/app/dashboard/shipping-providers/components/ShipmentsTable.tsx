@@ -403,6 +403,7 @@ export function InProcessShipmentsTable({
                 <ShipmentRowActions
                   orderId={row.id}
                   closure={row.closure}
+                  carrierImplementation={implementation}
                   partialDelivery={{
                     pending: isShippingCompaniesLoading,
                     blockedReason: isShippingCompaniesLoading
