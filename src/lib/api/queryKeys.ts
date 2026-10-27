@@ -35,6 +35,7 @@ export const QUERY_KEYS = {
   PAGE_NAMES: 'page-names',
   DEPARTMENTS: 'departments',
   SHIPPING_EVENTS: 'shipping-events',
+  SHIPPING_DEFAULT_CARRIER: 'shipping-default-carrier',
 
   // Employees
   EMPLOYEES: 'employees',

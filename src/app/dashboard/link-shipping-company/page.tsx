@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react';
 import PageLoading from '@/components/ui/page-loading';
 import { ErrorState } from '@/components/ui/state-panels';
+import { DefaultCarrierCard } from './components/DefaultCarrierCard';
 import { IntegrationCard } from './components/IntegrationCard';
 import { ShippingIntegrationModal } from './components/ShippingIntegrationModal';
 import { providers } from './constants/providers';
@@ -42,6 +43,8 @@ export default function ShippingIntegrationsPage() {
           قم بربط متجرك مع شركات الشحن لتلقي تحديثات الحالات تلقائياً
         </p>
       </header>
+
+      <DefaultCarrierCard configs={configs} configsLoading={isLoading} />
 
       {isLoading ? (
         <PageLoading className="h-64 mt-10" />
