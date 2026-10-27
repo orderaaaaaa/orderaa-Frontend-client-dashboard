@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { startTransition, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Can } from '@/components/Can';
@@ -326,28 +326,40 @@ export function InProcessShipmentsContent({
   const [limit, setLimit] = useState(DEFAULT_PAGE_SIZE);
   const [searchInput, setSearchInput] = useState(search);
   const debouncedSearch = useDebounce(searchInput, SEARCH_DEBOUNCE_MS);
+  const [appliedSearch, setAppliedSearch] = useState(search);
   const lastWrittenSearch = useRef(search);
-  const lastDebouncedSearch = useRef(debouncedSearch);
 
   useEffect(() => {
-    if (debouncedSearch === lastDebouncedSearch.current) return;
-    lastDebouncedSearch.current = debouncedSearch;
     const nextSearch = debouncedSearch.trim();
-    if (nextSearch === search) return;
+    if (nextSearch === lastWrittenSearch.current) return;
     lastWrittenSearch.current = nextSearch;
-    router.replace(buildSearchUrl(pathname, searchParams, { search: nextSearch, page: '' }), {
-      scroll: false,
-    });
-  }, [debouncedSearch, search, pathname, router, searchParams]);
+    window.history.replaceState(
+      null,
+      '',
+      buildSearchUrl(pathname, new URLSearchParams(window.location.search), {
+        search: nextSearch,
+        page: '',
+      }),
+    );
+    startTransition(() => setAppliedSearch(nextSearch));
+  }, [debouncedSearch, pathname]);
 
   useEffect(() => {
-    if (search === lastWrittenSearch.current) return;
-    lastWrittenSearch.current = search;
-    setSearchInput(search);
-  }, [search]);
+    const onPopState = () => {
+      const restored = new URLSearchParams(window.location.search).get('search') ?? '';
+      lastWrittenSearch.current = restored;
+      setSearchInput(restored);
+      startTransition(() => setAppliedSearch(restored));
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
 
   const updateParams = (patch: Record<string, string>) =>
-    router.replace(buildSearchUrl(pathname, searchParams, patch), { scroll: false });
+    router.replace(
+      buildSearchUrl(pathname, searchParams, { search: searchInput.trim(), ...patch }),
+      { scroll: false },
+    );
 
   const { data: governorates = [] } = useGovernoratesQuery();
   const { data: cities = [], isLoading: citiesLoading } = useCitiesQuery(governorate || undefined);
@@ -363,7 +375,7 @@ export function InProcessShipmentsContent({
     status,
     governorate: governorate || undefined,
     city: city || undefined,
-    search: search || undefined,
+    search: appliedSearch || undefined,
     workState,
     page,
     limit,
@@ -484,7 +496,7 @@ export function InProcessShipmentsContent({
               />
             </div>
 
-            {search && (
+            {appliedSearch && (
               <p className="text-xs text-amber-700">
                 البحث يعرض كل الحالات ويتجاهل الفلاتر الأخرى
               </p>
