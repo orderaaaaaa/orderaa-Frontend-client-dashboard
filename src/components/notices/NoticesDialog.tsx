@@ -55,6 +55,7 @@ function NoticesDialogBody({ orderId, canAcknowledge }: { orderId: number; canAc
       <ErrorState
         error={query.error}
         fallback={noticeErrorMessageOf(query.error, 'تعذر تحميل التنبيهات')}
+        onRetry={() => query.refetch()}
       />
     );
   }
