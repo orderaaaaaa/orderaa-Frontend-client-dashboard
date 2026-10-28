@@ -2,8 +2,8 @@
 
 import BaseModal from '@/components/ui/base-modal';
 import { MoveStockForm, type MoveStockLine } from '@/components/stock/MoveStockForm';
+import { preventEntryGridEscape } from '@/components/stock/useEntryGrid';
 import type { WarehouseStockItemApi } from '@/lib/api/warehouses';
-import { variantPlainLabel } from '@/lib/variantOptionLabel';
 
 interface TransferStockModalProps {
   isOpen: boolean;
@@ -22,12 +22,10 @@ export function TransferStockModal({
 }: TransferStockModalProps) {
   const lines: MoveStockLine[] = items.map((item) => ({
     variantId: item.variantId,
+    productName: item.productName,
+    sku: item.sku ?? null,
+    options: item.options,
     available: item.quantity,
-    label: variantPlainLabel({
-      productName: item.productName,
-      sku: item.sku ?? null,
-      options: item.options,
-    }),
   }));
 
   return (
@@ -37,6 +35,7 @@ export function TransferStockModal({
       title="نقل المخزون"
       showFooter={false}
       maxWidth="md:max-w-[720px]"
+      onEscapeKeyDown={preventEntryGridEscape}
     >
       {isOpen && (
         <MoveStockForm

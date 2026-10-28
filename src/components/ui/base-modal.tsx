@@ -30,6 +30,7 @@ interface BaseModalProps {
   height?: string;
   toastOnConfirmError?: boolean;
   confirmErrorFallback?: string;
+  onEscapeKeyDown?: (event: KeyboardEvent) => void;
 }
 
 export default function BaseModal({
@@ -50,6 +51,7 @@ export default function BaseModal({
   height,
   toastOnConfirmError = false,
   confirmErrorFallback = 'حدث خطأ، حاول مرة أخرى',
+  onEscapeKeyDown,
 }: BaseModalProps) {
   const [internalIsLoading, setInternalIsLoading] = useState(false);
   const isLoading = externalIsLoading || internalIsLoading;
@@ -96,6 +98,7 @@ export default function BaseModal({
           }}
           onEscapeKeyDown={(e) => {
             if (isLoading) e.preventDefault();
+            onEscapeKeyDown?.(e);
           }}
         >
           <ModalContainerContext.Provider value={contentEl}>

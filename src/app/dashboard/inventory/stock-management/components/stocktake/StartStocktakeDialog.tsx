@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import BaseModal from '@/components/ui/base-modal';
 import { WarehouseSelect } from '@/components/stock/WarehouseSelect';
 import { useStartStocktakeMutation } from '@/services/stocktake';
+import { useWarehouseOptions } from '@/services/warehouses';
 import { getStocktakeErrorMessage } from '../../utils/stocktakeErrors';
 import { stocktakeSheetHref } from './stocktakeRoutes';
 
@@ -20,6 +21,7 @@ export function StartStocktakeDialog({
 }: StartStocktakeDialogProps) {
   const router = useRouter();
   const startStocktake = useStartStocktakeMutation();
+  const warehouseOptions = useWarehouseOptions();
   const [warehouseId, setWarehouseId] = useState<number | null>(initialWarehouseId);
   const [note, setNote] = useState('');
 
@@ -53,7 +55,7 @@ export function StartStocktakeDialog({
       <div className="space-y-5">
         <div className="space-y-2">
           <p className="text-sm font-medium text-foreground">المخزن</p>
-          <WarehouseSelect value={warehouseId} onChange={setWarehouseId} />
+          <WarehouseSelect value={warehouseId} onChange={setWarehouseId} source={warehouseOptions} />
           <p className="text-xs text-muted-foreground">
             لكل مخزن جلسة جرد مفتوحة واحدة في الوقت نفسه.
           </p>

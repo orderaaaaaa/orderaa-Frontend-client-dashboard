@@ -2,21 +2,16 @@
 
 import { Suspense } from 'react';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
-import { EmptyState } from '@/components/ui/state-panels';
 import PageLoading from '@/components/ui/page-loading';
 import { PERMISSION_CODES } from '@/lib/permissions';
+import { StocktakeAccessDenied } from '../components/stocktake/StocktakeAccessDenied';
 import { OperationsContent } from './components/OperationsContent';
 
 function StockOperationsGate() {
   const canView = useHasPermissionStrict(PERMISSION_CODES.PRODUCTS_STOCK_READ);
 
   if (!canView) {
-    return (
-      <EmptyState
-        title="ليس لديك صلاحية عرض عمليات المخزون"
-        description="اطلب من مدير الحساب صلاحية عرض المخزون"
-      />
-    );
+    return <StocktakeAccessDenied title="ليس لديك صلاحية عرض عمليات المخزون" />;
   }
 
   return <OperationsContent />;

@@ -4,16 +4,25 @@ import { useState, type FormEvent, type KeyboardEvent } from 'react';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { StockQuantityCell } from '@/components/stock/StockQuantityCell';
+import { VariantLabel } from '@/components/stock/VariantLabel';
 import { WarehouseSelect } from '@/components/stock/WarehouseSelect';
 import { STOCK_FIELD_CLASS, STOCK_FIELD_ERROR_CLASS, STOCK_NUMBER_FIELD_CLASS } from '@/components/stock/formStyles';
 import { useEntryGrid } from '@/components/stock/useEntryGrid';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
+import { readStoredLocale } from '@/i18n/locale';
+import { translate } from '@/i18n/translate';
+import { PERMISSION_CODES } from '@/lib/permissions';
 import { cn } from '@/lib/utils';
+import { variantPlainLabel, type VariantDisplayItem } from '@/lib/variantOptionLabel';
+import { useStockWarehouseOptions } from '@/services/productStock';
 import { useTransferStockMutation } from '@/services/warehouses';
-import { getApiErrorMessage } from '@/utils/apiError';
+import { formatStockShortageLines, getApiErrorMessage } from '@/utils/apiError';
 
 export interface MoveStockLine {
   variantId: number;
-  label: string;
+  productName: string;
+  sku: string | null;
+  options: VariantDisplayItem[];
   available: number;
 }
 
@@ -29,6 +38,8 @@ export function MoveStockForm({ fromWarehouseId, lines, onDone, onCancel }: Move
   const [quantities, setQuantities] = useState<Record<number, string>>({});
   const [note, setNote] = useState('');
   const [attempted, setAttempted] = useState(false);
+  const canReadWarehouses = useHasPermissionStrict(PERMISSION_CODES.WAREHOUSES_STOCK_READ);
+  const destinations = useStockWarehouseOptions({ enabled: canReadWarehouses });
   const transferMutation = useTransferStockMutation();
   const { registerInput, onInputKeyDown } = useEntryGrid(
     lines.map((line) => String(line.variantId))
@@ -76,7 +87,19 @@ export function MoveStockForm({ fromWarehouseId, lines, onDone, onCancel }: Move
       return;
     }
     if (hasOverAvailable) {
-      toast.error('الكمية المنقولة أكبر من المتاح في المخزن');
+      const overAvailable = lines.filter(overAvailableOf);
+      toast.error(
+        `${translate(readStoredLocale(), 'stockShortage.transferOverAvailable')}\n${formatStockShortageLines(
+          overAvailable.map((line) => ({
+            variantId: line.variantId,
+            productName: line.productName,
+            variantLabel: variantPlainLabel(line),
+            required: quantityOf(line),
+            available: line.available,
+          }))
+        )}`,
+        { autoClose: 8000 }
+      );
       return;
     }
 
@@ -115,12 +138,17 @@ export function MoveStockForm({ fromWarehouseId, lines, onDone, onCancel }: Move
         <span className="text-sm font-medium text-foreground">
           إلى مخزن <span className="text-destructive">*</span>
         </span>
-        <WarehouseSelect
-          value={toWarehouseId}
-          onChange={setToWarehouseId}
-          disabledIds={[fromWarehouseId]}
-          placeholder="اختر مخزن الوجهة"
-        />
+        {canReadWarehouses ? (
+          <WarehouseSelect
+            value={toWarehouseId}
+            onChange={setToWarehouseId}
+            source={destinations}
+            disabledIds={[fromWarehouseId]}
+            placeholder="اختر مخزن الوجهة"
+          />
+        ) : (
+          <p className="text-sm text-muted-foreground">ليس لديك صلاحية عرض المخازن.</p>
+        )}
         {attempted && toWarehouseId === null && (
           <p className="text-xs text-destructive">يرجى اختيار مخزن الوجهة</p>
         )}
@@ -147,20 +175,23 @@ export function MoveStockForm({ fromWarehouseId, lines, onDone, onCancel }: Move
               const over = overAvailableOf(line);
               return (
                 <tr key={line.variantId}>
-                  <td className="px-3 py-2.5 text-foreground">{line.label}</td>
+                  <td className="px-3 py-2.5">
+                    <VariantLabel productName={line.productName} sku={line.sku} options={line.options} size="sm" />
+                  </td>
                   <td className="px-3 py-2.5">
                     <StockQuantityCell quantity={line.available} tone="muted" />
                   </td>
                   <td className="px-3 py-2.5 align-top">
                     <input
                       ref={registerInput(String(line.variantId))}
+                      data-entry-grid
                       type="number"
                       inputMode="numeric"
                       min={0}
                       max={line.available}
                       step={1}
                       dir="ltr"
-                      aria-label={`الكمية المنقولة: ${line.label}`}
+                      aria-label={`الكمية المنقولة: ${variantPlainLabel(line)}`}
                       aria-invalid={invalid || over}
                       value={quantities[line.variantId] ?? ''}
                       onChange={(event) =>

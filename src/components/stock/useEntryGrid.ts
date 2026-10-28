@@ -1,5 +1,11 @@
 import { useCallback, useRef, type KeyboardEvent } from 'react';
 
+export function preventEntryGridEscape(event: Event) {
+  if (event.target instanceof HTMLInputElement && event.target.hasAttribute('data-entry-grid')) {
+    event.preventDefault();
+  }
+}
+
 export function useEntryGrid(keys: string[]) {
   const inputs = useRef(new Map<string, HTMLInputElement>());
 

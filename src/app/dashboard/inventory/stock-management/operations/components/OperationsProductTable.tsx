@@ -6,13 +6,14 @@ import { AdjustStockForm } from '@/components/stock/AdjustStockForm';
 import { MoveStockForm } from '@/components/stock/MoveStockForm';
 import { StockQuantityCell } from '@/components/stock/StockQuantityCell';
 import { STOCK_FIELD_CLASS } from '@/components/stock/formStyles';
+import { preventEntryGridEscape } from '@/components/stock/useEntryGrid';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState, ErrorState } from '@/components/ui/state-panels';
 import { cn } from '@/lib/utils';
-import { variantPlainLabel } from '@/lib/variantOptionLabel';
+import { variantDisplayLabel } from '@/lib/variantOptionLabel';
 import { useStockProducts, type StockProductApi, type StockVariantCombination } from '@/services/stock';
 import { useDebounce } from '@/utils/debounce';
 
@@ -30,7 +31,6 @@ interface OperationsProductTableProps {
 interface OperationsRow {
   product: StockProductApi;
   variant: StockVariantCombination;
-  label: string;
 }
 
 type SheetState =
@@ -58,15 +58,7 @@ export function OperationsProductTable({
 
   const products = stockQuery.data?.data ?? [];
   const rows: OperationsRow[] = products.flatMap((product) =>
-    product.variants.map((variant) => ({
-      product,
-      variant,
-      label: variantPlainLabel({
-        productName: product.name,
-        sku: variant.sku ?? null,
-        options: variant.options,
-      }),
-    }))
+    product.variants.map((variant) => ({ product, variant }))
   );
   const totalPages = stockQuery.data?.totalPages ?? 1;
 
@@ -150,8 +142,10 @@ export function OperationsProductTable({
                       >
                         {row.product.name}
                       </button>
-                      {row.label !== row.product.name && (
-                        <span className="block break-words text-xs text-muted-foreground">{row.label}</span>
+                      {row.variant.options.length > 0 && (
+                        <span className="block break-words text-xs text-muted-foreground">
+                          {variantDisplayLabel(row.variant.options)}
+                        </span>
                       )}
                     </td>
                     <td className="px-3 py-2.5">
@@ -216,6 +210,7 @@ export function OperationsProductTable({
         title={sheet?.kind === 'move' ? 'نقل المخزون' : 'تسوية المخزون'}
         showFooter={false}
         maxWidth="md:max-w-[720px]"
+        onEscapeKeyDown={preventEntryGridEscape}
       >
         {sheet?.kind === 'move' && (
           <MoveStockForm
@@ -223,7 +218,9 @@ export function OperationsProductTable({
             lines={[
               {
                 variantId: sheet.row.variant.id,
-                label: sheet.row.label,
+                productName: sheet.row.product.name,
+                sku: sheet.row.variant.sku ?? null,
+                options: sheet.row.variant.options,
                 available: sheet.row.variant.availableCount,
               },
             ]}
@@ -238,7 +235,9 @@ export function OperationsProductTable({
             lines={[
               {
                 variantId: sheet.row.variant.id,
-                label: sheet.row.label,
+                productName: sheet.row.product.name,
+                sku: sheet.row.variant.sku ?? null,
+                options: sheet.row.variant.options,
                 current: sheet.row.variant.availableCount,
               },
             ]}

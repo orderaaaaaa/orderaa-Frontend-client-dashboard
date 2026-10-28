@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { isInvalidCountInput } from '@/components/stock/CountSheetTable';
 import { VarianceChip } from '@/components/stock/VarianceChip';
-import { adjustmentShortagesOf } from '@/components/stock/stockAdjustmentErrors';
+import { VariantLabel } from '@/components/stock/VariantLabel';
+import { adjustmentShortagesOf, type StockAdjustmentShortage } from '@/components/stock/stockAdjustmentErrors';
 import { useEntryGrid } from '@/components/stock/useEntryGrid';
 import {
   STOCK_ADJUSTMENT_REASON_LABELS,
@@ -18,15 +19,17 @@ import { cn } from '@/lib/utils';
 import type {
   StockAdjustmentItemDto,
   StockAdjustmentReason,
-  StockAdjustmentShortageApi,
 } from '@/lib/api/warehouses';
+import { variantPlainLabel, type VariantDisplayItem } from '@/lib/variantOptionLabel';
 import { useAdjustStockBatchMutation } from '@/services/productStock';
 import { useAdjustStockMutation } from '@/services/warehouses';
 import { getApiErrorMessage } from '@/utils/apiError';
 
 export interface AdjustStockLine {
   variantId: number;
-  label: string;
+  productName: string;
+  sku: string | null;
+  options: VariantDisplayItem[];
   current: number;
 }
 
@@ -51,6 +54,11 @@ const isStockAdjustmentReason = (value: string): value is StockAdjustmentReason 
 
 const keyOf = (warehouseId: number, variantId: number) => `${warehouseId}:${variantId}`;
 
+const isBlankCount = (raw: string) => raw.trim() === '';
+
+const shortageNameOf = (shortage: StockAdjustmentShortage) =>
+  shortage.variantLabel ? `${shortage.productName} (${shortage.variantLabel})` : shortage.productName;
+
 export function AdjustStockForm(props: AdjustStockFormProps) {
   const { onDone, onCancel } = props;
   const groups: AdjustStockGroup[] =
@@ -63,7 +71,7 @@ export function AdjustStockForm(props: AdjustStockFormProps) {
   const [note, setNote] = useState('');
   const [counts, setCounts] = useState<Record<string, string>>({});
   const [attempted, setAttempted] = useState(false);
-  const [failure, setFailure] = useState<{ shortages: StockAdjustmentShortageApi[] } | null>(null);
+  const [failure, setFailure] = useState<{ shortages: StockAdjustmentShortage[] } | null>(null);
   const [refusedKeys, setRefusedKeys] = useState<Set<string>>(new Set());
   const singleMutation = useAdjustStockMutation();
   const batchMutation = useAdjustStockBatchMutation();
@@ -78,6 +86,7 @@ export function AdjustStockForm(props: AdjustStockFormProps) {
 
   const deltaOf = (warehouseId: number, line: AdjustStockLine): number | null => {
     const raw = countRawOf(warehouseId, line);
+    if (isBlankCount(raw)) return 0;
     if (isInvalidCountInput(raw)) return null;
     return Number(raw) - line.current;
   };
@@ -95,7 +104,10 @@ export function AdjustStockForm(props: AdjustStockFormProps) {
     .filter((group) => group.adjustments.length > 0);
 
   const hasInvalid = groups.some((group) =>
-    group.lines.some((line) => isInvalidCountInput(countRawOf(group.warehouseId, line)))
+    group.lines.some((line) => {
+      const raw = countRawOf(group.warehouseId, line);
+      return !isBlankCount(raw) && isInvalidCountInput(raw);
+    })
   );
   const needsNote = reason === STOCK_ADJUSTMENT_REASON_REQUIRING_NOTE;
   const noteMissing = needsNote && note.trim() === '';
@@ -178,15 +190,6 @@ export function AdjustStockForm(props: AdjustStockFormProps) {
     }
   };
 
-  const shortageLabelOf = (warehouseId: number, variantId: number) => {
-    for (const group of groups) {
-      if (group.warehouseId !== warehouseId) continue;
-      const line = group.lines.find((entry) => entry.variantId === variantId);
-      if (line) return line.label;
-    }
-    return String(variantId);
-  };
-
   return (
     <form onSubmit={onSubmit} onKeyDown={onFormKeyDown} className="flex flex-col gap-4" noValidate>
       {failure && (
@@ -196,7 +199,7 @@ export function AdjustStockForm(props: AdjustStockFormProps) {
             <ul className="flex flex-col gap-1 text-foreground">
               {failure.shortages.map((shortage) => (
                 <li key={keyOf(shortage.warehouseId, shortage.variantId)}>
-                  {shortageLabelOf(shortage.warehouseId, shortage.variantId)}: المطلوب{' '}
+                  {shortageNameOf(shortage)}: المطلوب{' '}
                   <span dir="ltr" className="tabular-nums">{shortage.required}</span>، المتاح{' '}
                   <span dir="ltr" className="tabular-nums">{Math.max(0, shortage.available)}</span>
                 </li>
@@ -326,13 +329,18 @@ function GroupRows({
       )}
       {group.lines.map((line) => {
         const raw = countRawOf(group.warehouseId, line);
-        const invalid = isInvalidCountInput(raw);
+        const invalid = !isBlankCount(raw) && isInvalidCountInput(raw);
         const refused = refusedKeys.has(keyOf(group.warehouseId, line.variantId));
         const delta = deltaOf(group.warehouseId, line);
         return (
           <tr key={line.variantId} className={cn(refused && 'bg-destructive/5')}>
             <td className="px-3 py-2.5 align-top">
-              <span className="text-foreground">{line.label}</span>
+              <VariantLabel
+                productName={line.productName}
+                sku={line.sku}
+                options={line.options}
+                size="sm"
+              />
               {refused && (
                 <span className="mt-0.5 block text-xs text-destructive">
                   مرفوض: لم يُطبق هذا السطر
@@ -347,12 +355,13 @@ function GroupRows({
             <td className="px-3 py-2.5 align-top">
               <input
                 ref={registerInput(keyOf(group.warehouseId, line.variantId))}
+                data-entry-grid
                 type="number"
                 inputMode="numeric"
                 min={0}
                 step={1}
                 dir="ltr"
-                aria-label={`العدد الفعلي: ${line.label}`}
+                aria-label={`العدد الفعلي: ${variantPlainLabel(line)}`}
                 aria-invalid={invalid}
                 value={raw}
                 onChange={(event) => onCountChange(group.warehouseId, line.variantId, event.target.value)}

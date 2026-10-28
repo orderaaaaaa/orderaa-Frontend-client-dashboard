@@ -337,10 +337,14 @@ export interface AdjustStockBatchDto {
 }
 
 export interface StockAdjustmentShortageApi {
-  warehouseId: number;
   variantId: number;
-  available: number;
+  warehouseId?: number;
+  warehouseName?: string;
+  productName: string;
+  variantLabel: string;
+  sku?: string | null;
   required: number;
+  available: number;
 }
 
 export interface StockTransferItemDto {

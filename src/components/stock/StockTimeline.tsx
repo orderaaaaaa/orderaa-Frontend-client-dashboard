@@ -170,7 +170,7 @@ function TimelineRow({ row }: { row: StockTimelineRowDto }) {
       <div className="flex flex-wrap items-center gap-2">
         <ActorChip actor={row.actor} />
         <OrderChip order={row.order} />
-        {row.order === null && <ReferenceLabel reference={row.reference} />}
+        <ReferenceLabel reference={row.reference} />
       </div>
 
       {row.note && <p className="text-xs text-muted-foreground">{row.note}</p>}

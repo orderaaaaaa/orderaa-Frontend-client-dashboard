@@ -112,5 +112,6 @@ export const useStockWarehouseOptions = (options?: { enabled?: boolean }) => {
     pickerOptions,
     isLoading: summaryQuery.isLoading,
     isError: summaryQuery.isError,
+    onRetry: () => void summaryQuery.refetch(),
   };
 };

@@ -5,6 +5,7 @@ import { Boxes, PackageX, SlidersHorizontal, Warehouse, X } from 'lucide-react';
 import { AdjustStockForm, type AdjustStockGroup } from '@/components/stock/AdjustStockForm';
 import { StockQuantityCell } from '@/components/stock/StockQuantityCell';
 import { StockTimeline } from '@/components/stock/StockTimeline';
+import { preventEntryGridEscape } from '@/components/stock/useEntryGrid';
 import { MOVEMENT_SOURCE_LABELS } from '@/components/stock/stockLabels';
 import BaseModal from '@/components/ui/base-modal';
 import DateRangeFilter from '@/components/ui/DateRangeFilter';
@@ -141,7 +142,9 @@ function ProductPanelBody({
           warehouseName: warehouse.name ?? '',
           lines: stock.variants.map((variant) => ({
             variantId: variant.variantId,
-            label: variant.variantLabel || stock.product.name,
+            productName: stock.product.name,
+            sku: variant.sku,
+            options: variant.options,
             current:
               variant.byWarehouse.find((cell) => cell.warehouseId === warehouse.id)?.quantity ?? 0,
           })),
@@ -340,6 +343,7 @@ function ProductPanelBody({
           title="تسوية المخزون عبر عدة مخازن"
           showFooter={false}
           maxWidth="md:max-w-[880px]"
+          onEscapeKeyDown={preventEntryGridEscape}
         >
           {batchOpen && (
             <AdjustStockForm

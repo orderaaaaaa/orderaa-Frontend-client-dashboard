@@ -16,6 +16,7 @@ import { EmptyState, ErrorState } from '@/components/ui/state-panels';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useStocktakesQuery } from '@/services/stocktake';
+import { useWarehouseOptions } from '@/services/warehouses';
 import { formatDateTime, formatNumber } from '@/utils/format';
 import type {
   StocktakePersonDto,
@@ -59,6 +60,7 @@ export function StocktakeListContent() {
   const searchParams = useSearchParams();
   const canRead = useHasPermissionStrict(PERMISSION_CODES.STOCK_MOVEMENTS_STOCKTAKE_READ);
   const canManage = useHasPermissionStrict(PERMISSION_CODES.STOCK_MOVEMENTS_STOCKTAKE_MANAGE);
+  const warehouseOptions = useWarehouseOptions();
 
   const warehouseId = parseWarehouseId(searchParams.get(WAREHOUSE_PARAM));
   const [status, setStatus] = useState<StatusFilter>('ALL');
@@ -221,6 +223,7 @@ export function StocktakeListContent() {
           <WarehouseSelect
             value={warehouseId}
             onChange={onWarehouseChange}
+            source={warehouseOptions}
             includeHidden
             placeholder="كل المخازن"
           />

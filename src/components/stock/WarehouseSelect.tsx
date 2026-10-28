@@ -1,13 +1,22 @@
 'use client';
 
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
-import { useHasPermissionStrict } from '@/hooks/usePermissions';
-import { PERMISSION_CODES } from '@/lib/permissions';
-import { useStockWarehouseOptions } from '@/services/productStock';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ErrorState } from '@/components/ui/state-panels';
+import type { WarehouseOption } from '@/services/warehouses';
+
+export interface WarehouseSelectSource {
+  options: WarehouseOption[];
+  pickerOptions: WarehouseOption[];
+  isLoading: boolean;
+  isError: boolean;
+  onRetry?(): void;
+}
 
 interface WarehouseSelectProps {
   value: number | null;
   onChange(id: number): void;
+  source: WarehouseSelectSource;
   includeHidden?: boolean;
   disabledIds?: number[];
   placeholder?: string;
@@ -16,22 +25,26 @@ interface WarehouseSelectProps {
 export function WarehouseSelect({
   value,
   onChange,
+  source,
   includeHidden = false,
   disabledIds = [],
   placeholder = 'اختر المخزن',
 }: WarehouseSelectProps) {
-  const canRead = useHasPermissionStrict(PERMISSION_CODES.WAREHOUSES_STOCK_READ);
-  const { options, pickerOptions } = useStockWarehouseOptions({ enabled: canRead });
-
-  if (!canRead) {
-    return <p className="text-sm text-muted-foreground">ليس لديك صلاحية عرض المخازن.</p>;
+  if (source.isLoading) {
+    return <Skeleton className="h-10 w-full" />;
   }
 
-  const source = includeHidden ? options : pickerOptions;
+  if (source.isError) {
+    return (
+      <ErrorState error={undefined} fallback="تعذر تحميل المخازن" onRetry={source.onRetry} />
+    );
+  }
+
+  const list = includeHidden ? source.options : source.pickerOptions;
 
   return (
     <SearchableSelect
-      options={source.map((option) => ({
+      options={list.map((option) => ({
         key: option.key,
         value: option.value,
         disabled:
