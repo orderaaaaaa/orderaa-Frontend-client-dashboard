@@ -250,6 +250,7 @@ export default function CustomerOrdersModal({
                 isPartiallyPaid={order.isPartiallyPaid}
                 shippingType={order.shippingType}
                 parkedAt={order.parkedAt}
+                unreadNoticeCount={order.unreadNoticeCount}
                 trys={order.numberOfTriesToReach}
                 status={order.status}
                 city={

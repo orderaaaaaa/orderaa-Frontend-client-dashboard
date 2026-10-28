@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { EmptyState, ErrorState } from '@/components/ui/state-panels';
 import { Skeleton } from '@/components/ui/skeleton';
 import { orderSystemFailureLabelOf } from '@/constants/orderSystemFailures';
+import { useI18n } from '@/i18n/I18nProvider';
 import {
   noticeErrorMessageOf,
   useMarkNoticesReadMutation,
@@ -24,11 +25,12 @@ interface NoticesDialogProps {
 }
 
 export function NoticesDialog({ open, onOpenChange, orderId, canAcknowledge }: NoticesDialogProps) {
+  const { t } = useI18n();
   return (
     <BaseModal
       isOpen={open}
       onClose={() => onOpenChange(false)}
-      title="تنبيهات الطلب"
+      title={t('orderNotices.dialog.title')}
       showFooter={false}
       maxWidth="md:max-w-[560px]"
     >
@@ -38,6 +40,7 @@ export function NoticesDialog({ open, onOpenChange, orderId, canAcknowledge }: N
 }
 
 function NoticesDialogBody({ orderId, canAcknowledge }: { orderId: number; canAcknowledge: boolean }) {
+  const { t } = useI18n();
   const query = useOrderNoticesInfiniteQuery(orderId);
   const markOne = useMarkNoticesReadMutation(orderId);
   const markAll = useMarkNoticesReadMutation(orderId);
@@ -55,7 +58,7 @@ function NoticesDialogBody({ orderId, canAcknowledge }: { orderId: number; canAc
     return (
       <ErrorState
         error={query.error}
-        fallback={noticeErrorMessageOf(query.error, 'تعذر تحميل التنبيهات')}
+        fallback={noticeErrorMessageOf(query.error, t('orderNotices.dialog.loadError'))}
         onRetry={() => query.refetch()}
       />
     );
@@ -65,7 +68,7 @@ function NoticesDialogBody({ orderId, canAcknowledge }: { orderId: number; canAc
   const hasMore = query.hasNextPage;
 
   if (notices.length === 0 && !hasMore) {
-    return <EmptyState title="لا توجد تنبيهات غير مقروءة" />;
+    return <EmptyState title={t('orderNotices.dialog.empty')} />;
   }
 
   const pendingNoticeId = markOne.isPending ? markOne.variables?.[0] : undefined;
@@ -93,7 +96,7 @@ function NoticesDialogBody({ orderId, canAcknowledge }: { orderId: number; canAc
           loading={query.isFetchingNextPage}
           onClick={() => query.fetchNextPage()}
         >
-          عرض المزيد
+          {t('orderNotices.dialog.loadMore')}
         </Button>
       )}
 
@@ -106,7 +109,7 @@ function NoticesDialogBody({ orderId, canAcknowledge }: { orderId: number; canAc
             loading={markAll.isPending}
             onClick={() => markAll.mutate(notices.map((notice) => notice.id))}
           >
-            تعليم الكل كمقروء
+            {t('orderNotices.dialog.markAll')}
           </Button>
         </div>
       )}
@@ -125,6 +128,7 @@ function NoticeRow({
   isPending: boolean;
   onAcknowledge(): void;
 }) {
+  const { t } = useI18n();
   return (
     <li className="flex flex-col gap-2 rounded-xl border border-border bg-card p-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -136,11 +140,11 @@ function NoticeRow({
             <OrderChip order={{ id: notice.orderId, code: notice.orderCode }} />
             {notice.occurrenceCount > 1 && (
               <span className="rounded-full bg-warning/10 px-2 py-0.5 text-xs font-semibold text-warning">
-                تكرر{' '}
+                {t('orderNotices.dialog.repeatedBefore')}{' '}
                 <span dir="ltr" className="tabular-nums">
                   {formatNumber(notice.occurrenceCount)}
                 </span>{' '}
-                مرة
+                {t('orderNotices.dialog.repeatedAfter')}
               </span>
             )}
           </div>
@@ -148,7 +152,7 @@ function NoticeRow({
         {canAcknowledge && (
           <Button type="button" variant="outline" size="sm" loading={isPending} onClick={onAcknowledge}>
             <Check aria-hidden="true" />
-            تم الاطلاع
+            {t('orderNotices.dialog.acknowledge')}
           </Button>
         )}
       </div>

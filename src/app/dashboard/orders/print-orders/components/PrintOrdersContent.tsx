@@ -788,6 +788,7 @@ export function PrintOrdersContent() {
                 isPartiallyPaid={order.isPartiallyPaid}
                 isPrinted={order.isPrinted}
                 printCount={order.printCount}
+                unreadNoticeCount={order.unreadNoticeCount}
                 disableNavigation
                 hideCustomerInfo
                 showAllItems

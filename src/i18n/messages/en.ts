@@ -195,6 +195,20 @@ const en: Record<keyof typeof ar, string> = {
   'closure.changeProducts': 'Change product',
   'closure.exchange': 'Exchange',
   'exchange.notice': 'Exchange is not completed yet. It cannot be carried out from here yet.',
+  'orderNotices.badge.label': 'Notices',
+  'orderNotices.badge.ariaLabel': 'Show order notices, unread {count}',
+  'orderNotices.dialog.title': 'Order notices',
+  'orderNotices.dialog.loadError': 'Could not load notices',
+  'orderNotices.dialog.empty': 'No unread notices',
+  'orderNotices.dialog.loadMore': 'Show more',
+  'orderNotices.dialog.markAll': 'Mark all as read',
+  'orderNotices.dialog.acknowledge': 'Seen',
+  'orderNotices.dialog.repeatedBefore': 'Repeated',
+  'orderNotices.dialog.repeatedAfter': 'times',
+  'orderNotices.error.idsNotFound': 'Some notices no longer belong to this order. Refresh the page and try again',
+  'orderNotices.error.orderNotFound': 'The order does not exist or you do not have access to it',
+  'orderNotices.error.forbidden': 'You do not have permission for this action',
+  'orderNotices.error.markReadFailed': 'Could not mark the notices as read',
 };
 
 export default en;

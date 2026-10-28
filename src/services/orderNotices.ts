@@ -6,6 +6,8 @@ import {
   markOrderNoticesRead,
 } from '@/lib/api/orderNotices';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { readStoredLocale } from '@/i18n/locale';
+import { translate } from '@/i18n/translate';
 import { getApiErrorStatus } from '@/utils/apiError';
 
 const UNREAD_COUNT_STALE_TIME_MS = 30_000;
@@ -24,15 +26,16 @@ const errorCodeOf = (err: unknown): string | undefined => {
 };
 
 export const noticeErrorMessageOf = (err: unknown, fallback: string): string => {
+  const locale = readStoredLocale();
   const code = errorCodeOf(err);
   if (code === 'NOTICE_IDS_NOT_FOUND') {
-    return 'بعض التنبيهات لم تعد تابعة لهذا الطلب، حدّث الصفحة وحاول مرة أخرى';
+    return translate(locale, 'orderNotices.error.idsNotFound');
   }
   if (code === 'ORDER_NOT_FOUND' || getApiErrorStatus(err) === 404) {
-    return 'الطلب غير موجود أو لا تملك صلاحية الوصول إليه';
+    return translate(locale, 'orderNotices.error.orderNotFound');
   }
   if (getApiErrorStatus(err) === 403) {
-    return 'ليس لديك صلاحية لهذا الإجراء';
+    return translate(locale, 'orderNotices.error.forbidden');
   }
   return fallback;
 };
@@ -74,9 +77,15 @@ export const useMarkNoticesReadMutation = (orderId: number) => {
       queryClient.invalidateQueries({ queryKey: orderNoticesKey(orderId) });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DELAYED_ORDERS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CUSTOMER_ORDERS] });
     },
     onError: (err) => {
-      toast.error(noticeErrorMessageOf(err, 'تعذر تعليم التنبيهات كمقروءة'));
+      toast.error(
+        noticeErrorMessageOf(
+          err,
+          translate(readStoredLocale(), 'orderNotices.error.markReadFailed')
+        )
+      );
     },
   });
 };

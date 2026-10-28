@@ -209,6 +209,20 @@ const ar = {
   'closure.changeProducts': 'تغيير منتج',
   'closure.exchange': 'استبدال',
   'exchange.notice': 'الاستبدال لم يكتمل بعد، ولا يمكن تنفيذه من هنا حاليًا',
+  'orderNotices.badge.label': 'تنبيهات',
+  'orderNotices.badge.ariaLabel': 'عرض تنبيهات الطلب، غير مقروءة {count}',
+  'orderNotices.dialog.title': 'تنبيهات الطلب',
+  'orderNotices.dialog.loadError': 'تعذر تحميل التنبيهات',
+  'orderNotices.dialog.empty': 'لا توجد تنبيهات غير مقروءة',
+  'orderNotices.dialog.loadMore': 'عرض المزيد',
+  'orderNotices.dialog.markAll': 'تعليم الكل كمقروء',
+  'orderNotices.dialog.acknowledge': 'تم الاطلاع',
+  'orderNotices.dialog.repeatedBefore': 'تكرر',
+  'orderNotices.dialog.repeatedAfter': 'مرة',
+  'orderNotices.error.idsNotFound': 'بعض التنبيهات لم تعد تابعة لهذا الطلب، حدّث الصفحة وحاول مرة أخرى',
+  'orderNotices.error.orderNotFound': 'الطلب غير موجود أو لا تملك صلاحية الوصول إليه',
+  'orderNotices.error.forbidden': 'ليس لديك صلاحية لهذا الإجراء',
+  'orderNotices.error.markReadFailed': 'تعذر تعليم التنبيهات كمقروءة',
 } as const;
 
 export default ar;
