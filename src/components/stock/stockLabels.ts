@@ -44,5 +44,6 @@ export const REFERENCE_TYPE_LABELS: Record<string, string> = {
   ADJUSTMENT_BATCH: 'تسوية',
   TRANSFER_BATCH: 'نقل',
   VARIANT_MERGE: 'دمج متغيرات',
+  VARIANT_MERGE_MARKER: 'دمج منتج',
   STOCKTAKE: 'جرد',
 };
