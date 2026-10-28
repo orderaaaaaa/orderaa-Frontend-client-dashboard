@@ -39,7 +39,8 @@ export function NoticesDialog({ open, onOpenChange, orderId, canAcknowledge }: N
 
 function NoticesDialogBody({ orderId, canAcknowledge }: { orderId: number; canAcknowledge: boolean }) {
   const query = useOrderNoticesInfiniteQuery(orderId);
-  const markRead = useMarkNoticesReadMutation(orderId);
+  const markOne = useMarkNoticesReadMutation(orderId);
+  const markAll = useMarkNoticesReadMutation(orderId);
 
   if (query.isPending) {
     return (
@@ -67,8 +68,7 @@ function NoticesDialogBody({ orderId, canAcknowledge }: { orderId: number; canAc
     return <EmptyState title="لا توجد تنبيهات غير مقروءة" />;
   }
 
-  const pendingNoticeId = markRead.isPending ? markRead.variables?.noticeIds?.[0] : undefined;
-  const markingAll = markRead.isPending && markRead.variables?.noticeIds === undefined;
+  const pendingNoticeId = markOne.isPending ? markOne.variables?.[0] : undefined;
 
   return (
     <div className="flex flex-col gap-3">
@@ -79,7 +79,7 @@ function NoticesDialogBody({ orderId, canAcknowledge }: { orderId: number; canAc
             notice={notice}
             canAcknowledge={canAcknowledge}
             isPending={pendingNoticeId === notice.id}
-            onAcknowledge={() => markRead.mutate({ noticeIds: [notice.id] })}
+            onAcknowledge={() => markOne.mutate([notice.id])}
           />
         ))}
       </ul>
@@ -97,13 +97,14 @@ function NoticesDialogBody({ orderId, canAcknowledge }: { orderId: number; canAc
         </Button>
       )}
 
-      {canAcknowledge && notices.length > 0 && (
+      {canAcknowledge && (
         <div className="flex justify-end border-t border-border pt-3">
           <Button
             type="button"
             variant="outline"
-            loading={markingAll}
-            onClick={() => markRead.mutate({})}
+            disabled={notices.length === 0}
+            loading={markAll.isPending}
+            onClick={() => markAll.mutate(notices.map((notice) => notice.id))}
           >
             تعليم الكل كمقروء
           </Button>

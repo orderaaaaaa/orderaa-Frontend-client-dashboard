@@ -7,9 +7,9 @@ import {
 } from '@/lib/api/orderNotices';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { getApiErrorStatus } from '@/utils/apiError';
-import type { MarkNoticesReadDto } from '@/types/orderSystemFailures';
 
 const UNREAD_COUNT_STALE_TIME_MS = 30_000;
+const MARK_NOTICES_READ_MAX_IDS = 200;
 
 export const orderNoticesRootKey = [QUERY_KEYS.ORDER_NOTICES] as const;
 
@@ -52,15 +52,28 @@ export const useOrderNoticesInfiniteQuery = (orderId: number) =>
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
   });
 
+const chunkNoticeIds = (noticeIds: number[]): number[][] => {
+  const chunks: number[][] = [];
+  for (let index = 0; index < noticeIds.length; index += MARK_NOTICES_READ_MAX_IDS) {
+    chunks.push(noticeIds.slice(index, index + MARK_NOTICES_READ_MAX_IDS));
+  }
+  return chunks;
+};
+
 export const useMarkNoticesReadMutation = (orderId: number) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (body: MarkNoticesReadDto) => markOrderNoticesRead(orderId, body),
-    onSuccess: () => {
+    mutationFn: async (noticeIds: number[]) => {
+      for (const chunk of chunkNoticeIds(noticeIds)) {
+        await markOrderNoticesRead(orderId, { noticeIds: chunk });
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: unreadNoticeCountKey() });
       queryClient.invalidateQueries({ queryKey: orderNoticesKey(orderId) });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DELAYED_ORDERS] });
     },
     onError: (err) => {
       toast.error(noticeErrorMessageOf(err, 'تعذر تعليم التنبيهات كمقروءة'));
