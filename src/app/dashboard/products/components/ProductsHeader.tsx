@@ -5,12 +5,14 @@ import { LiaFileImportSolid, LiaPlusSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { Can } from '@/components/Can';
 import { PERMISSIONS } from '@/lib/permissions';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { useSyncProducts } from '../hooks/useProduct';
 import AddProductModal from './modals/AddProductModal';
 
 function ProductsHeader() {
   const { mutate: syncProducts, isPending } = useSyncProducts();
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
+  const canSync = useHasPermissionStrict(PERMISSIONS.PRODUCTS_SYNC);
 
   return (
     <header className="mb-10">
@@ -30,18 +32,20 @@ function ProductsHeader() {
               إضافة منتج يدوياً
             </Button>
           </Can>
-          <Button
-            className="min-h-10"
-            onClick={() => syncProducts()}
-            disabled={isPending}
-          >
-            {isPending ? (
-              <div className="size-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <LiaFileImportSolid className="size-5" />
-            )}
-            استيراد المنتجات
-          </Button>
+          {canSync && (
+            <Button
+              className="min-h-10"
+              onClick={() => syncProducts()}
+              disabled={isPending}
+            >
+              {isPending ? (
+                <div className="size-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <LiaFileImportSolid className="size-5" />
+              )}
+              استيراد المنتجات
+            </Button>
+          )}
         </div>
       </div>
 

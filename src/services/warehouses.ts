@@ -8,7 +8,9 @@ import {
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { useI18n } from '@/i18n/I18nProvider';
-import type { WarehouseApiItem } from '@/lib/api/warehouses';
+import type { WarehouseApiItem, WarehouseSummaryCard } from '@/lib/api/warehouses';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 import {
   getWarehouses,
   getWarehouseById,
@@ -70,11 +72,14 @@ export const useWarehousesQuery = (
   });
 };
 
-export const useWarehouseQuery = (id: number | undefined) => {
+export const useWarehouseQuery = (
+  id: number | undefined,
+  options?: { enabled?: boolean }
+) => {
   return useQuery({
     queryKey: [QUERY_KEYS.WAREHOUSE_DETAIL, id] as QueryKey,
     queryFn: () => getWarehouseById(id!),
-    enabled: !!id,
+    enabled: !!id && (options?.enabled ?? true),
     staleTime: STALE_TIME,
   });
 };
@@ -237,6 +242,27 @@ export interface WarehouseOption {
   disabled?: boolean;
 }
 
+export type WarehouseTreeNode = Pick<
+  WarehouseApiItem,
+  'id' | 'name' | 'parentWarehouseId' | 'isActive'
+> & { children?: WarehouseTreeNode[] };
+
+const toWarehouseTree = (cards: WarehouseSummaryCard[]): WarehouseTreeNode[] => {
+  const toNode = (card: WarehouseSummaryCard): WarehouseTreeNode => ({
+    id: card.id,
+    name: card.name,
+    parentWarehouseId: card.parentWarehouseId,
+    isActive: card.isActive,
+  });
+
+  return cards.map((card) => ({
+    ...toNode(card),
+    children: cards
+      .filter((child) => child.parentWarehouseId === card.id)
+      .map(toNode),
+  }));
+};
+
 /**
  * Flattens the merchant's warehouse tree into SearchableSelect options.
  *
@@ -246,22 +272,37 @@ export interface WarehouseOption {
  */
 export const useWarehouseOptions = () => {
   const { t } = useI18n();
+  const canReadWarehouses = useHasPermissionStrict(PERMISSION_CODES.WAREHOUSES_READ);
+  const canReadStock = useHasPermissionStrict(PERMISSION_CODES.WAREHOUSES_STOCK_READ);
   // Pickers need the full tree; 1000 comfortably covers any real merchant.
-  const { data, isLoading, isError } = useWarehousesQuery({ limit: 1000 });
+  const treeQuery = useWarehousesQuery(
+    { limit: 1000 },
+    { enabled: canReadWarehouses }
+  );
+  const summaryQuery = useWarehouseSummaryQuery({
+    enabled: !canReadWarehouses && canReadStock,
+  });
+  const activeQuery = canReadWarehouses ? treeQuery : summaryQuery;
 
-  const warehouses = useMemo<WarehouseApiItem[]>(() => data?.data ?? [], [data]);
+  const warehouses = useMemo<WarehouseTreeNode[]>(
+    () =>
+      canReadWarehouses
+        ? treeQuery.data?.data ?? []
+        : toWarehouseTree(summaryQuery.data ?? []),
+    [canReadWarehouses, treeQuery.data, summaryQuery.data]
+  );
 
   /**
    * The tree walk itself — done ONCE, so the two option lists below can never
    * drift in ordering or membership, only in how they label and gate an entry.
    */
   const flattened = useMemo<
-    { warehouse: WarehouseApiItem; isChild: boolean }[]
+    { warehouse: WarehouseTreeNode; isChild: boolean }[]
   >(() => {
-    const rows: { warehouse: WarehouseApiItem; isChild: boolean }[] = [];
+    const rows: { warehouse: WarehouseTreeNode; isChild: boolean }[] = [];
     const seen = new Set<number>();
 
-    const push = (warehouse: WarehouseApiItem, isChild: boolean) => {
+    const push = (warehouse: WarehouseTreeNode, isChild: boolean) => {
       if (seen.has(warehouse.id)) return;
       seen.add(warehouse.id);
       rows.push({ warehouse, isChild });
@@ -282,7 +323,7 @@ export const useWarehouseOptions = () => {
     return rows;
   }, [warehouses]);
 
-  const label = (warehouse: WarehouseApiItem, isChild: boolean) =>
+  const label = (warehouse: WarehouseTreeNode, isChild: boolean) =>
     isChild ? `— ${warehouse.name}` : warehouse.name;
 
   /**
@@ -341,8 +382,8 @@ export const useWarehouseOptions = () => {
     options,
     pickerOptions,
     rootOptions,
-    isLoading,
-    isError,
+    isLoading: activeQuery.isLoading,
+    isError: activeQuery.isError,
   };
 };
 

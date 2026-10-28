@@ -18,6 +18,7 @@ import PaginationFooter from '@/components/ui/pagination-footer';
 import {
   useWarehouseQuery,
   useWarehouseStockQuery,
+  useWarehouseSummaryQuery,
 } from '@/services/warehouses';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import type { WarehouseStockItemApi } from '@/lib/api/warehouses';
@@ -51,8 +52,16 @@ export function WarehouseDetailContent({
   const canAdjust = useHasPermissionStrict(PERMISSION_CODES.STOCK_MOVEMENTS_ADJUST);
   const canTransfer = useHasPermissionStrict(PERMISSION_CODES.STOCK_MOVEMENTS_TRANSFER);
 
-  const { data: warehouse, isError: isWarehouseError } =
-    useWarehouseQuery(warehouseId);
+  const canReadWarehouses = useHasPermissionStrict(PERMISSION_CODES.WAREHOUSES_READ);
+  const canReadStock = useHasPermissionStrict(PERMISSION_CODES.WAREHOUSES_STOCK_READ);
+  const { data: warehouse, isError: isWarehouseError } = useWarehouseQuery(
+    warehouseId,
+    { enabled: canReadWarehouses }
+  );
+  const { data: summaryCards } = useWarehouseSummaryQuery({
+    enabled: !canReadWarehouses && canReadStock,
+  });
+  const summaryName = summaryCards?.find((card) => card.id === warehouseId)?.name;
   const debouncedSearch = useDebounce(search, 400);
   const {
     data: stock,
@@ -124,7 +133,7 @@ export function WarehouseDetailContent({
               <LiaArrowRightSolid className="size-4" />
             </Button>
             <h1 className="text-xl font-semibold text-gray-900">
-              {warehouse?.name ?? 'المخزن'}
+              {warehouse?.name ?? summaryName ?? 'المخزن'}
             </h1>
             {warehouse?.parentWarehouse && (
               <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">

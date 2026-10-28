@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
-import { usePermissionCheck, useHasPermissionStrict } from '@/hooks/usePermissions';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import {
   useGoLiveMutation,
@@ -30,12 +30,11 @@ const NOT_STARTED_LABEL =
 
 export function StockModeSection() {
   const router = useRouter();
-  const { hasPermission } = usePermissionCheck();
-  const canRead = hasPermission(PERMISSION_CODES.STOCK_WORKFLOWS_READ);
-  const canSwitchMode = hasPermission(
+  const canRead = useHasPermissionStrict(PERMISSION_CODES.STOCK_WORKFLOWS_READ);
+  const canSwitchMode = useHasPermissionStrict(
     PERMISSION_CODES.STOCK_WORKFLOWS_MODE_SWITCH,
   );
-  const canReadMovements = hasPermission(PERMISSION_CODES.STOCK_MOVEMENTS_READ);
+  const canReadMovements = useHasPermissionStrict(PERMISSION_CODES.STOCK_MOVEMENTS_READ);
   const canReadStocktake = useHasPermissionStrict(
     PERMISSION_CODES.STOCK_MOVEMENTS_STOCKTAKE_READ,
   );

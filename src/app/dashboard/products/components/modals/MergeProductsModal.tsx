@@ -23,6 +23,8 @@ import { toast } from 'react-toastify';
 import clsx from 'clsx';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 import Input from '@/components/ui/Input';
 import { ErrorState } from '@/components/ui/state-panels';
 import PageLoading from '@/components/ui/page-loading';
@@ -395,7 +397,9 @@ const MergeProductsModal = ({
     detailsQuery.refetch();
   };
 
+  const canMerge = useHasPermissionStrict(PERMISSION_CODES.PRODUCTS_MERGE);
   const canSubmit =
+    canMerge &&
     !isPending &&
     allLoaded &&
     products.length >= 2 &&

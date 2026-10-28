@@ -1,6 +1,6 @@
 import type { StockWorkflowApiItem } from '@/lib/api/warehouses';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
-import { usePermissionCheck } from '@/hooks/usePermissions';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useStockWorkflowsQuery } from '@/services/warehouses';
 import type { StockMovementBypassedDetails } from '@/types/orderSystemFailures';
@@ -14,9 +14,9 @@ export function BypassedVariantsDetails({
   details: StockMovementBypassedDetails;
 }) {
   const { getStatusLabel } = useStatusLabel();
-  const { hasPermission } = usePermissionCheck();
+  const canReadRules = useHasPermissionStrict(PERMISSION_CODES.STOCK_WORKFLOWS_READ);
   const { data: rules } = useStockWorkflowsQuery(undefined, {
-    enabled: hasPermission(PERMISSION_CODES.STOCK_WORKFLOWS_READ),
+    enabled: canReadRules,
   });
 
   const findPredecessorRule = (key: string): StockWorkflowApiItem | undefined => {

@@ -10,6 +10,7 @@ import { EmptyState, ErrorState } from '@/components/ui/state-panels';
 import { ImageGalleryModal } from '@/components/receipts/ImageGalleryModal';
 import { Can } from '@/components/Can';
 import { PERMISSIONS } from '@/lib/permissions';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { useDebounce } from '@/utils/debounce';
 
 import {
@@ -75,6 +76,7 @@ function ProductsTable() {
     Map<number, Product>
   >(new Map());
   const [showMergeModal, setShowMergeModal] = useState(false);
+  const canMerge = useHasPermissionStrict(PERMISSIONS.PRODUCTS_MERGE);
   const [showSoldModal, setShowSoldModal] = useState(false);
   const [soldProductId, setSoldProductId] = useState<number | null>(null);
   const [galleryProduct, setGalleryProduct] = useState<Product | null>(null);
@@ -108,9 +110,10 @@ function ProductsTable() {
   );
 
   const showBulkActions = select && selectedIds.size >= 2;
+  const showMergeBar = showBulkActions && canMerge;
 
   useEffect(() => {
-    if (showBulkActions) {
+    if (showMergeBar) {
       document.body.style.paddingBottom = '80px';
     } else {
       document.body.style.paddingBottom = '0px';
@@ -118,7 +121,7 @@ function ProductsTable() {
     return () => {
       document.body.style.paddingBottom = '0px';
     };
-  }, [showBulkActions]);
+  }, [showMergeBar]);
 
   const handleSort = (field: string) => {
     if (sortBy === field) {
@@ -372,7 +375,7 @@ function ProductsTable() {
         )}
       </div>
 
-      {showBulkActions && (
+      {showMergeBar && (
         <div
           className={`${FIXED_BOTTOM_BAR_CLASS} bg-white border-t border-gray-200 shadow-lg py-4 px-6`}
         >
