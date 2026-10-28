@@ -196,6 +196,19 @@ function buildProductsHtml(
         })
         .join('');
 
+      const otherRows = product.otherVariants
+        .map((variant) => {
+          const label = variantPlainLabel({
+            productName: product.name,
+            sku: null,
+            options: variant.options,
+          });
+          const config = STOCK_STATUS_CONFIG[variant.status];
+          const badgeColor = PDF_BADGE_COLORS[variant.status];
+          return `<tr class="other-row"><td class="size-cell">${escapeHtml(label)}</td><td colspan="${product.colors.length}">${variant.quantity} <span class="badge" style="color:${badgeColor}">(${escapeHtml(config.label)})</span></td></tr>`;
+        })
+        .join('');
+
       return `
         <div class="product-section">
           <div class="product-header">
@@ -207,6 +220,7 @@ function buildProductsHtml(
             <tbody>
               ${bodyRows}
               <tr class="total-row"><td class="size-cell">الإجمالي</td>${totalCells}</tr>
+              ${otherRows}
             </tbody>
           </table>
         </div>
