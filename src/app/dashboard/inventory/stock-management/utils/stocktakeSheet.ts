@@ -56,6 +56,7 @@ export const toRefusedLines = (
       variantId: shortage.variantId,
       productName: shortage.productName,
       variantLabel: shortage.variantLabel,
+      sku: shortage.sku ?? null,
       live: line?.currentQuantity ?? shortage.available,
       counted: line?.countedQuantity ?? null,
       required: shortage.required,

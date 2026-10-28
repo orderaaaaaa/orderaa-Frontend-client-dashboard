@@ -8,6 +8,7 @@ import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import { CountSheetTable } from '@/components/stock/CountSheetTable';
 import { StockPageHeader } from '@/components/stock/StockPageHeader';
+import { VariantLabel } from '@/components/stock/VariantLabel';
 import { VarianceChip } from '@/components/stock/VarianceChip';
 import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
 import { KpiCard, KpiCardSkeleton } from '@/components/ui/kpi-card';
@@ -378,11 +379,14 @@ export function StocktakeSheetContent({ stocktakeId }: StocktakeSheetContentProp
               </p>
               <ul className="space-y-1">
                 {refused.map((line) => (
-                  <li key={line.variantId} className="text-muted-foreground">
-                    <span className="font-medium text-foreground">
-                      {line.productName}
-                      {line.variantLabel ? ` - ${line.variantLabel}` : ''}
-                    </span>
+                  <li key={line.variantId} className="flex flex-col gap-0.5 text-muted-foreground">
+<VariantLabel
+                      productName={line.productName}
+                      sku={line.sku}
+                      options={[]}
+                      optionsLabel={line.variantLabel}
+                      size="sm"
+                    />
                     {' · '}الكمية بالنظام{' '}
                     <span dir="ltr" className="font-semibold tabular-nums text-foreground">
                       {formatNumber(line.live)}

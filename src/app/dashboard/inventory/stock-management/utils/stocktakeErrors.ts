@@ -32,6 +32,7 @@ const isShortageLine = (value: unknown): value is StocktakeShortageLineDto => {
     typeof line.variantId === 'number' &&
     typeof line.productName === 'string' &&
     typeof line.variantLabel === 'string' &&
+    (line.sku === undefined || line.sku === null || typeof line.sku === 'string') &&
     typeof line.required === 'number' &&
     typeof line.available === 'number'
   );

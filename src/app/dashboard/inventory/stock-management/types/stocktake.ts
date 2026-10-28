@@ -99,6 +99,7 @@ export type StocktakeShortageLineDto = {
   warehouseName: string;
   productName: string;
   variantLabel: string;
+  sku?: string | null;
   required: number;
   available: number;
 };
@@ -107,6 +108,7 @@ export type StocktakeRefusedLine = {
   variantId: number;
   productName: string;
   variantLabel: string;
+  sku: string | null;
   live: number;
   counted: number | null;
   required: number;
