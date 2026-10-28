@@ -76,10 +76,7 @@ export function hasPermissionCode(
   return permissions.includes(code);
 }
 
-export function hasPermissionCodeStrict(
-  permissions: string[] | undefined,
-  code: PermissionCode
-): boolean {
+export function hasPermissionCodeStrict(permissions: readonly string[] | undefined | null, code: string) {
   return Boolean(permissions?.includes(code));
 }
 
