@@ -14,7 +14,7 @@ import {
   type CountSheetLine,
 } from '@/components/stock/CountSheetTable';
 import { OPENING_COUNT_ADJUSTMENT_REASON } from '@/components/stock/stockLabels';
-import { usePermissionCheck } from '@/hooks/usePermissions';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { getCountSheet, type CountSheetParams, type CountSheetRowApi } from '@/lib/api/stockCount';
 import type { AdjustStockDto } from '@/lib/api/warehouses';
 import { PERMISSION_CODES } from '@/lib/permissions';
@@ -42,9 +42,8 @@ const toCountSheetLine = (row: CountSheetRowApi): CountSheetLine => ({
 export function OpeningCountContent() {
   const searchParams = useSearchParams();
   const { pickerOptions } = useWarehouseOptions();
-  const { hasPermission } = usePermissionCheck();
-  const canRead = hasPermission(PERMISSION_CODES.STOCK_MOVEMENTS_READ);
-  const canAdjust = hasPermission(PERMISSION_CODES.STOCK_MOVEMENTS_ADJUST);
+  const canRead = useHasPermissionStrict(PERMISSION_CODES.STOCK_MOVEMENTS_READ);
+  const canAdjust = useHasPermissionStrict(PERMISSION_CODES.STOCK_MOVEMENTS_ADJUST);
   const adjustMutation = useAdjustStockMutation();
 
   const [warehouseId, setWarehouseId] = useState(

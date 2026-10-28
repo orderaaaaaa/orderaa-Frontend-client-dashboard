@@ -5,7 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { isRetryableHeld } from '@/constants/orderSystemFailures';
-import { usePermissionCheck } from '@/hooks/usePermissions';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { readStoredLocale } from '@/i18n/locale';
 import { translate } from '@/i18n/translate';
@@ -72,8 +72,7 @@ function PanelCard({
 }
 
 function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresPanelProps) {
-  const { hasPermission } = usePermissionCheck();
-  const canMarkSeen = hasPermission(PERMISSION_CODES.ORDERS_UPDATE);
+  const canMarkSeen = useHasPermissionStrict(PERMISSION_CODES.ORDERS_UPDATE);
   const {
     data,
     error,

@@ -19,7 +19,9 @@ import {
   useWarehouseQuery,
   useWarehouseStockQuery,
 } from '@/services/warehouses';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import type { WarehouseStockItemApi } from '@/lib/api/warehouses';
+import { PERMISSION_CODES } from '@/lib/permissions';
 import { variantPlainLabel } from '@/lib/variantOptionLabel';
 import { useDebounce } from '@/utils/debounce';
 import { AdjustStockModal } from './AdjustStockModal';
@@ -46,6 +48,8 @@ export function WarehouseDetailContent({
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [isAdjustOpen, setIsAdjustOpen] = useState(false);
   const [isTransferOpen, setIsTransferOpen] = useState(false);
+  const canAdjust = useHasPermissionStrict(PERMISSION_CODES.STOCK_MOVEMENTS_ADJUST);
+  const canTransfer = useHasPermissionStrict(PERMISSION_CODES.STOCK_MOVEMENTS_TRANSFER);
 
   const { data: warehouse, isError: isWarehouseError } =
     useWarehouseQuery(warehouseId);
@@ -144,21 +148,25 @@ export function WarehouseDetailContent({
           >
             عدّ المخزون الافتتاحي
           </Button>
-          <Button
-            variant="outline"
-            disabled={selectedItems.length === 0}
-            onClick={() => setIsAdjustOpen(true)}
-          >
-            <LiaBalanceScaleSolid className="ml-1 size-4" />
-            تسوية المخزون
-          </Button>
-          <Button
-            disabled={selectedItems.length === 0}
-            onClick={() => setIsTransferOpen(true)}
-          >
-            <LiaExchangeAltSolid className="ml-1 size-4" />
-            نقل مخزون
-          </Button>
+          {canAdjust && (
+            <Button
+              variant="outline"
+              disabled={selectedItems.length === 0}
+              onClick={() => setIsAdjustOpen(true)}
+            >
+              <LiaBalanceScaleSolid className="ml-1 size-4" />
+              تسوية المخزون
+            </Button>
+          )}
+          {canTransfer && (
+            <Button
+              disabled={selectedItems.length === 0}
+              onClick={() => setIsTransferOpen(true)}
+            >
+              <LiaExchangeAltSolid className="ml-1 size-4" />
+              نقل مخزون
+            </Button>
+          )}
         </div>
       </div>
 

@@ -3,18 +3,22 @@
 import { useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { LiaTimesSolid, LiaSaveSolid } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/Input';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import BaseModal from '@/components/ui/base-modal';
+import { EmptyState } from '@/components/ui/state-panels';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 import AddSupplierHeader from './AddSupplierHeader';
 import { addSupplierSchema, AddSupplierFormData } from '../schema';
 import { useGovernoratesQuery } from '@/services/lookups';
 import { useCreateSupplierMutation } from '@/services/suppliers';
 
-export function AddSupplierContent() {
+function AddSupplierForm() {
   const router = useRouter();
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -254,4 +258,26 @@ export function AddSupplierContent() {
       </BaseModal>
     </div>
   );
+}
+
+function AddSupplierNotice({ title }: { title: string }) {
+  return (
+    <EmptyState
+      title={title}
+      action={
+        <Button asChild variant="outline" className="rounded-full">
+          <Link href="/dashboard/purchases/all-suppliers">العودة إلى الموردين</Link>
+        </Button>
+      }
+    />
+  );
+}
+
+export function AddSupplierContent() {
+  const canCreate = useHasPermissionStrict(PERMISSION_CODES.SUPPLIERS_CREATE);
+
+  if (!canCreate) {
+    return <AddSupplierNotice title="ليست لديك صلاحية إضافة الموردين" />;
+  }
+  return <AddSupplierForm />;
 }
