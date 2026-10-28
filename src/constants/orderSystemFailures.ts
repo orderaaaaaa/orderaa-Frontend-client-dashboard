@@ -143,11 +143,15 @@ export const SHIPMENT_MISSING_ADDRESS_FIELD_LABELS: Record<ShipmentMissingAddres
   city: 'المدينة',
 };
 
-export const NOTICE_CODES: readonly OrderSystemFailureCode[] = [
+export const INFO_CODES: readonly OrderSystemFailureCode[] = [
   'CARRIER_STATUS_IGNORED_STALE',
   'CARRIER_STATUS_IGNORED_PARTIAL_RETURN',
   'CARRIER_STATUS_IGNORED_OUTSIDE_WINDOW',
   'CARRIER_RETURN_AT_MERCHANT',
+  'CARRIER_STATUS_CORRECTED',
+  'STORE_UPDATE_NOT_NEW',
+  'STORE_UPDATE_EMPLOYEE_EDITED',
+  'ORDER_SHADOWED',
 ];
 
 export const isOrderSystemFailureCode = (code: string): code is OrderSystemFailureCode =>
@@ -156,8 +160,8 @@ export const isOrderSystemFailureCode = (code: string): code is OrderSystemFailu
 export const orderSystemFailureLabelOf = (code: string) =>
   isOrderSystemFailureCode(code) ? ORDER_SYSTEM_FAILURE_LABELS[code] : ORDER_SYSTEM_FAILURE_FALLBACK_LABEL;
 
-export const isNoticeCode = (code: string) =>
-  isOrderSystemFailureCode(code) && NOTICE_CODES.includes(code);
+export const isInfoCode = (code: string) =>
+  isOrderSystemFailureCode(code) && INFO_CODES.includes(code);
 
 const isFailureActorType = (value: string): value is FailureActorType =>
   Object.prototype.hasOwnProperty.call(ACTOR_TYPE_LABELS, value);

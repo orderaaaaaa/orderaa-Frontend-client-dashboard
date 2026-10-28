@@ -511,7 +511,7 @@ export function ShippingOrdersContent() {
                 isPartiallyPaid={order.isPartiallyPaid}
                 shippingType={order.shippingType}
                 parkedAt={order.parkedAt}
-                unseenSystemFailureCount={order.unseenSystemFailureCount}
+                unreadNoticeCount={order.unreadNoticeCount}
                 trys={order.numberOfTriesToReach}
                 status={order.status}
                 city={

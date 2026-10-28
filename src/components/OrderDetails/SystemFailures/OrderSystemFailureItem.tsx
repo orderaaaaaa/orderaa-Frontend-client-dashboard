@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import {
   ORDER_SYSTEM_FAILURE_SOURCE_LABELS,
   actorTypeLabelOf,
-  isNoticeCode,
+  isInfoCode,
   orderSystemFailureLabelOf,
 } from '@/constants/orderSystemFailures';
 import { cn } from '@/lib/utils';
@@ -35,7 +35,7 @@ export function OrderSystemFailureItem({
 }: OrderSystemFailureItemProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const isUnseen = failure.seenAt === null;
-  const isNotice = isNoticeCode(failure.code);
+  const isInfo = isInfoCode(failure.code);
   const actorLabel = actorTypeLabelOf(failure.actorType);
   const repeated = failure.occurrenceCount > 1;
 
@@ -44,7 +44,7 @@ export function OrderSystemFailureItem({
       className={cn(
         'flex flex-col gap-2 rounded-lg border border-gray-200 bg-white p-3',
         isUnseen && 'border-s-4',
-        isUnseen && (isNotice ? 'border-s-gray-400' : 'border-s-red-500'),
+        isUnseen && (isInfo ? 'border-s-muted-foreground' : 'border-s-destructive'),
         !isUnseen && 'opacity-70'
       )}
     >
@@ -55,14 +55,14 @@ export function OrderSystemFailureItem({
               <span
                 className={cn(
                   'w-2 h-2 rounded-full shrink-0',
-                  isNotice ? 'bg-gray-400' : 'bg-red-500'
+                  isInfo ? 'bg-muted-foreground' : 'bg-destructive'
                 )}
               />
             )}
             <span
               className={cn(
                 'text-sm font-bold break-words',
-                isNotice ? 'text-gray-700' : 'text-[#1F1F1F]'
+                isInfo ? 'text-muted-foreground' : 'text-foreground'
               )}
             >
               {orderSystemFailureLabelOf(failure.code)}

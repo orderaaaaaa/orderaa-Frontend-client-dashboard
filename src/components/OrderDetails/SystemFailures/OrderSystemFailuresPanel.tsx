@@ -21,10 +21,6 @@ import { OrderSystemFailureItem } from './OrderSystemFailureItem';
 
 const HIDDEN_ERROR_STATUSES = new Set([403, 404]);
 const ALERTS_ITEM = 'alerts';
-const RETRYABLE_HELD_CODES = new Set([
-  'CARRIER_STATUS_NOT_APPLIED',
-  'MACHINE_TRANSITION_STOCK_SHORTAGE',
-]);
 
 export interface OrderSystemFailuresPanelProps {
   order: Order;
@@ -54,11 +50,11 @@ function PanelCard({
           <div className="min-w-0 flex-1 basis-full sm:basis-auto">
             <AccordionTrigger className="py-2 text-start">
               <span className="flex items-center gap-2">
-                <span className="text-lg text-primary font-bold">تنبيهات الطلب</span>
+                <span className="text-lg text-primary font-bold">حالات الطلب</span>
                 {!!unseenTotal && (
                   <span
                     className="min-w-6 h-6 px-1.5 text-sm rounded-full bg-red-600 text-white flex items-center justify-center"
-                    title="تنبيهات لم يتم الاطلاع عليها"
+                    title="حالات لم يتم الاطلاع عليها"
                   >
                     {unseenTotal}
                   </span>
@@ -113,7 +109,7 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
     return (
       <PanelCard open={open} onOpenChange={handleOpenChange}>
         <div className="flex flex-col items-center gap-3 py-4">
-          <p className="text-sm text-red-600">تعذر تحميل تنبيهات الطلب</p>
+          <p className="text-sm text-destructive">تعذر تحميل حالات الطلب</p>
           <Button
             type="button"
             variant="outline"
@@ -144,7 +140,7 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
   const retryingFailureId = retryHeld.isPending ? retryHeld.variables : undefined;
 
   const renderRetryAction = (failure: OrderSystemFailure) =>
-    canMarkSeen && failure.seenAt === null && RETRYABLE_HELD_CODES.has(failure.code) ? (
+    canMarkSeen && failure.seenAt === null && failure.kind === 'HELD' ? (
       <Button
         type="button"
         variant="outline"
@@ -172,7 +168,7 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
   return (
     <PanelCard open={open} onOpenChange={handleOpenChange} unseenTotal={unseenTotal} action={markAllAction}>
       {failures.length === 0 ? (
-        <p className="text-sm text-gray-400 text-center py-4">لا توجد تنبيهات لهذا الطلب</p>
+        <p className="text-sm text-muted-foreground text-center py-4">لا توجد حالات لهذا الطلب</p>
       ) : (
         <div className="flex flex-col gap-3">
           {failures.map((failure) => (

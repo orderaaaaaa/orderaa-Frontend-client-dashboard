@@ -7,6 +7,7 @@ import { invalidateAndWait, orderStatusKeys } from '@/lib/query/mutationSync';
 import { readStoredLocale } from '@/i18n/locale';
 import { translate } from '@/i18n/translate';
 import { getApiErrorMessage, getOutOfStockBlock } from '@/utils/apiError';
+import { orderNoticesRootKey } from '@/services/orderNotices';
 import type {
   MarkAllSystemFailuresSeenResponse,
   OrderSystemFailure,
@@ -40,6 +41,7 @@ const useInvalidateAfterSeen = (orderId: number) => {
     queryClient.invalidateQueries({ queryKey: orderSystemFailuresKey(orderId) });
     queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORDERS] });
     queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DELAYED_ORDERS] });
+    queryClient.invalidateQueries({ queryKey: orderNoticesRootKey });
   };
 };
 
@@ -97,6 +99,7 @@ export const useRetryHeldTransitionMutation = (orderId: number) => {
       );
       await invalidateAndWait(queryClient, [
         orderSystemFailuresKey(orderId),
+        orderNoticesRootKey,
         ...orderStatusKeys(orderId),
       ]);
     },

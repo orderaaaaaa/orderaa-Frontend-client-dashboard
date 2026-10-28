@@ -25,6 +25,10 @@ import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import CopyableCode from '@/components/ui/copyable-code';
 import { IconType } from 'react-icons';
+import { NoticeBadge } from '@/components/notices/NoticeBadge';
+import { NoticesDialog } from '@/components/notices/NoticesDialog';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 
 const SHIPPING_TYPE_BADGE: Record<string, { label: string; icon: IconType; bg: string; text: string }> = {
   [ShippingType.EXCHANGE]: { label: 'استبدال', icon: LiaExchangeAltSolid, bg: 'bg-orange-100', text: 'text-orange-600' },
@@ -74,12 +78,14 @@ export default function OrderCard({
   shippingType,
   states,
   parkedAt,
-  unseenSystemFailureCount = 0,
+  unreadNoticeCount = 0,
 }: OrderCardProps) {
   const router = useRouter();
   const { getStatusLabel } = useStatusLabel();
   const { classes, Icon } = getStatusBadgeConfig(status);
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
+  const [isNoticesOpen, setIsNoticesOpen] = useState(false);
+  const canAcknowledgeNotices = useHasPermissionStrict(PERMISSION_CODES.ORDERS_NOTICES_ACKNOWLEDGE);
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onSelectionChange?.(e.target.checked);
   };
@@ -377,7 +383,7 @@ export default function OrderCard({
           </div>
         )}
 
-        {(parkedAt || unseenSystemFailureCount > 0) && (
+        {(parkedAt || unreadNoticeCount > 0) && (
           <div className="flex flex-wrap items-start gap-2 max-w-full">
             {parkedAt && (
               <span className="flex items-center gap-1 bg-amber-100 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded-full">
@@ -385,18 +391,7 @@ export default function OrderCard({
                 معلّق
               </span>
             )}
-            {unseenSystemFailureCount > 0 && (
-              <span
-                className="flex items-center gap-1 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full"
-                title="تنبيهات لم يتم الاطلاع عليها"
-              >
-                <LiaExclamationCircleSolid className="w-3.5 h-3.5" />
-                تنبيهات
-                <span className="min-w-4 h-4 px-1 rounded-full bg-white text-red-600 text-[11px] font-bold flex items-center justify-center">
-                  {unseenSystemFailureCount}
-                </span>
-              </span>
-            )}
+            <NoticeBadge count={unreadNoticeCount} onClick={() => setIsNoticesOpen(true)} />
           </div>
         )}
 
@@ -535,6 +530,12 @@ export default function OrderCard({
           )}
         </div>
       </BaseModal>
+      <NoticesDialog
+        open={isNoticesOpen}
+        onOpenChange={setIsNoticesOpen}
+        orderId={id}
+        canAcknowledge={canAcknowledgeNotices}
+      />
       {!disableNavigation && (
         <a
           href={cardUrl}

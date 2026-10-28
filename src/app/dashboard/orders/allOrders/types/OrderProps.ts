@@ -42,5 +42,5 @@ export interface OrderCardProps {
   showAllItems?: boolean;
   states?: OrderState[];
   parkedAt: string | null;
-  unseenSystemFailureCount?: number;
+  unreadNoticeCount?: number;
 }

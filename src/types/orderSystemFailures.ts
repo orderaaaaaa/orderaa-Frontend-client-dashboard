@@ -489,10 +489,13 @@ export interface OrderSystemFailureDetailsByCode {
 
 export type FailureDetailsRecord = Record<string, unknown>;
 
+export type OrderSystemFailureKind = 'NOTICE' | 'HELD' | 'INFO' | 'ARCHIVED';
+
 export interface OrderSystemFailure {
   id: number;
   source: OrderSystemFailureSource;
   code: string;
+  kind: OrderSystemFailureKind;
   details: FailureDetailsRecord | null;
   occurrenceCount: number;
   firstOccurredAt: string;
@@ -515,4 +518,33 @@ export interface OrderSystemFailuresPage {
 
 export interface MarkAllSystemFailuresSeenResponse {
   updated: number;
+}
+
+export interface OrderNoticeDto {
+  id: number;
+  orderId: number;
+  orderCode: string;
+  code: string;
+  source: OrderSystemFailureSource;
+  details: FailureDetailsRecord | null;
+  occurrenceCount: number;
+  lastOccurredAt: string;
+  read: boolean;
+}
+
+export interface OrderNoticesPageDto {
+  data: OrderNoticeDto[];
+  nextCursor: number | null;
+}
+
+export interface UnreadNoticeCountDto {
+  total: number;
+}
+
+export interface MarkNoticesReadDto {
+  noticeIds?: number[];
+}
+
+export interface MarkNoticesReadResponseDto {
+  marked: number;
 }

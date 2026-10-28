@@ -2,6 +2,7 @@ export const QUERY_KEYS = {
   // Orders
   ORDERS: 'orders',
   ORDER_DETAILS: 'order-details',
+  ORDER_NOTICES: 'order-notices',
   ORDER_STATISTICS: 'order-statistics',
   ORDER_FILTER_OPTIONS: 'order-filter-options',
   ORDER_STATUSES: 'order-statuses',
