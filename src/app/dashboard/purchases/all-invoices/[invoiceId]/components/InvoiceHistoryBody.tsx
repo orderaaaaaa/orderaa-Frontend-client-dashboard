@@ -10,9 +10,14 @@ interface Change<T> {
   after: T;
 }
 
-interface LineSnapshot {
+interface LineIdentity {
   productId: number;
   variantId: number | null;
+  productName?: string | null;
+  variantLabel?: string | null;
+}
+
+interface LineSnapshot extends LineIdentity {
   quantity: number;
   price: number;
   packageCount: number | null;
@@ -38,7 +43,7 @@ interface UpdatedChanges {
   lines?: {
     added: LineSnapshot[];
     removed: LineSnapshot[];
-    changed: { productId: number; variantId: number | null; before: Partial<LineFields>; after: Partial<LineFields> }[];
+    changed: (LineIdentity & { before: Partial<LineFields>; after: Partial<LineFields> })[];
   };
 }
 
@@ -91,12 +96,15 @@ function ChangeList({ children }: { children: ReactNode }) {
   return <ul className="flex flex-col gap-2">{children}</ul>;
 }
 
-const productRef = (productId: number) => ltr(`#${productId}`);
+const lineTitle = (line: LineIdentity): string => {
+  if (!line.productName) return `منتج #${line.productId}`;
+  return line.variantLabel ? `${line.productName} · ${line.variantLabel}` : line.productName;
+};
 
 function lineSummary(line: LineSnapshot) {
   return (
     <>
-      منتج {productRef(line.productId)} · الكمية {ltr(formatCount(line.quantity))} · السعر{' '}
+      {lineTitle(line)} · الكمية {ltr(formatCount(line.quantity))} · السعر{' '}
       {moneyOf(line.price)}
     </>
   );
@@ -189,7 +197,7 @@ function UpdatedBody({ changes }: { changes: UpdatedChanges | null }) {
         rows.push(
           <ChangeRow
             key={`changed-${index}-${field}`}
-            label={`${LINE_FIELD_LABEL[key]} · منتج #${line.productId}`}
+            label={`${LINE_FIELD_LABEL[key]} · ${lineTitle(line)}`}
             before={lineFieldValue(key, line.before[key])}
             after={lineFieldValue(key, line.after[key])}
           />,

@@ -12,6 +12,7 @@ import { Invoice } from '../types';
 import { formatDate } from '@/utils/format';
 import { INVOICE_TYPE_LABEL } from '../../constants';
 import { DeleteInvoiceModal } from './DeleteInvoiceModal';
+import { PaymentInvoiceEditModal } from './PaymentInvoiceEditModal';
 
 interface InvoiceCardProps {
   invoice: Invoice;
@@ -30,11 +31,13 @@ const InvoiceCard = memo(
     onTitleClick,
   }: InvoiceCardProps) => {
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+    const [isPaymentEditOpen, setIsPaymentEditOpen] = useState(false);
 
     const canRead = useHasPermissionStrict(PERMISSION_CODES.SUPPLIER_INVOICES_READ);
     const canUpdate = useHasPermissionStrict(PERMISSION_CODES.SUPPLIER_INVOICES_UPDATE);
     const canDelete = useHasPermissionStrict(PERMISSION_CODES.SUPPLIER_INVOICES_DELETE);
     const canEdit = canUpdate && !invoice.isApproved && invoice.type !== 'PAID';
+    const canEditPayment = canUpdate && !invoice.isApproved && invoice.type === 'PAID';
     const canRemove = canDelete && !invoice.isApproved;
 
     const creatorDepartment = invoice.createdByEmployee?.department;
@@ -64,7 +67,7 @@ const InvoiceCard = memo(
     };
 
     const actions =
-      canRead || canEdit || canRemove ? (
+      canRead || canEdit || canEditPayment || canRemove ? (
         <>
           {canRead && (
             <Button asChild variant="outline" size="sm" className="rounded-full">
@@ -74,6 +77,17 @@ const InvoiceCard = memo(
           {canEdit && (
             <Button asChild variant="outline" size="sm" className="rounded-full">
               <Link href={`/dashboard/purchases/add-invoice?invoiceId=${invoice.id}`}>تعديل</Link>
+            </Button>
+          )}
+          {canEditPayment && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-full"
+              onClick={() => setIsPaymentEditOpen(true)}
+            >
+              تعديل
             </Button>
           )}
           {canRemove && (
@@ -101,6 +115,13 @@ const InvoiceCard = memo(
           formatDate={formatDate}
           actions={actions}
         />
+        {isPaymentEditOpen && (
+          <PaymentInvoiceEditModal
+            isOpen={isPaymentEditOpen}
+            onClose={() => setIsPaymentEditOpen(false)}
+            invoice={invoice}
+          />
+        )}
         {canRemove && (
           <DeleteInvoiceModal
             isOpen={isDeleteOpen}

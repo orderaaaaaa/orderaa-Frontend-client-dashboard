@@ -16,8 +16,8 @@ import {
   LiaEditSolid,
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
-import { Can } from '@/components/Can';
-import { PERMISSIONS } from '@/lib/permissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { Supplier } from '../types';
 import { formatCurrency, formatSupplierBalance } from '../utils';
 import PaymentModal from './PaymentModal';
@@ -30,6 +30,7 @@ interface SupplierCardProps {
 const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const canUpdateSupplier = useHasPermissionStrict(PERMISSION_CODES.SUPPLIERS_UPDATE);
   const remainingLabel = useMemo(() => formatSupplierBalance(supplier.remaining), [supplier.remaining]);
 
   return (
@@ -51,7 +52,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
           {/* suppliers:update is in MANAGER_EXCLUDED_CODES, so an ungated
               button would 403 for Managers. */}
-          <Can code={PERMISSIONS.SUPPLIERS_UPDATE}>
+          {canUpdateSupplier && (
             <Button
               variant="outline"
               size="sm"
@@ -61,7 +62,7 @@ const SupplierCard = memo(({ supplier }: SupplierCardProps) => {
               <LiaEditSolid className="w-4 h-4" />
               تعديل
             </Button>
-          </Can>
+          )}
           <Button
             asChild
             variant="outline"

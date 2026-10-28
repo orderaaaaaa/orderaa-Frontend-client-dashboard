@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EmptyState, ErrorState } from '@/components/ui/state-panels';
 import { receivedBadgeLabel } from '@/components/purchases/receivingStatus';
 import { DeleteInvoiceModal } from '@/app/dashboard/purchases/all-invoices/components/DeleteInvoiceModal';
+import { PaymentInvoiceEditModal } from '@/app/dashboard/purchases/all-invoices/components/PaymentInvoiceEditModal';
 import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
 import { INVOICE_PAYMENT_STATUS_LABEL, INVOICE_TYPE_LABEL } from '@/app/dashboard/purchases/constants';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
@@ -159,6 +160,7 @@ interface InvoiceDetailContentProps {
 export function InvoiceDetailContent({ invoiceId }: InvoiceDetailContentProps) {
   const router = useRouter();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isPaymentEditOpen, setIsPaymentEditOpen] = useState(false);
   const isValidId = Number.isInteger(invoiceId) && invoiceId > 0;
 
   const { data: invoice, isPending, error, refetch } = useSupplierInvoiceByIdQuery(
@@ -202,13 +204,14 @@ export function InvoiceDetailContent({ invoiceId }: InvoiceDetailContentProps) {
   }
 
   const showEdit = canUpdate && !invoice.isApproved && invoice.type !== 'PAID';
+  const showPaymentEdit = canUpdate && !invoice.isApproved && invoice.type === 'PAID';
   const showDelete = canDelete && !invoice.isApproved;
   const isReturn = invoice.type === 'RETURN';
   const paid = isReturn ? null : roundMoney(invoice.paymentAmount ?? 0);
   const remaining = paid === null ? null : Math.max(roundMoney(invoice.totalAmount - paid), 0);
 
   const actions =
-    showEdit || showDelete ? (
+    showEdit || showPaymentEdit || showDelete ? (
       <>
         {showEdit && (
           <Button asChild variant="outline" className="rounded-full">
@@ -216,6 +219,17 @@ export function InvoiceDetailContent({ invoiceId }: InvoiceDetailContentProps) {
               <LiaPencilAltSolid className="size-4" />
               تعديل الفاتورة
             </Link>
+          </Button>
+        )}
+        {showPaymentEdit && (
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-full"
+            onClick={() => setIsPaymentEditOpen(true)}
+          >
+            <LiaPencilAltSolid className="size-4" />
+            تعديل الدفعة
           </Button>
         )}
         {showDelete && (
@@ -309,6 +323,14 @@ export function InvoiceDetailContent({ invoiceId }: InvoiceDetailContentProps) {
           </TabsContent>
         )}
       </Tabs>
+
+      {isPaymentEditOpen && (
+        <PaymentInvoiceEditModal
+          isOpen={isPaymentEditOpen}
+          onClose={() => setIsPaymentEditOpen(false)}
+          invoice={invoice}
+        />
+      )}
 
       {showDelete && (
         <DeleteInvoiceModal
