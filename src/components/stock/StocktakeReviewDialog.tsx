@@ -3,7 +3,11 @@
 import { useState } from 'react';
 import BaseModal from '@/components/ui/base-modal';
 import { EmptyState } from '@/components/ui/state-panels';
-import type { StocktakeLineDto } from '@/app/dashboard/inventory/stock-management/types/stocktake';
+import type {
+  StocktakeLineDto,
+  StocktakeRefusedLine,
+} from '@/app/dashboard/inventory/stock-management/types/stocktake';
+import { formatNumber } from '@/utils/format';
 import { StockQuantityCell } from './StockQuantityCell';
 import { VariantLabel } from './VariantLabel';
 import { VarianceChip } from './VarianceChip';
@@ -15,6 +19,7 @@ interface StocktakeReviewDialogProps {
   netDelta: number | null;
   onConfirm(note: string): void;
   isPending: boolean;
+  refused?: StocktakeRefusedLine[];
 }
 
 const HEADER_CELL_CLASS = 'px-3 py-2.5 text-start text-xs font-semibold text-muted-foreground';
@@ -30,8 +35,10 @@ export function StocktakeReviewDialog({
   netDelta,
   onConfirm,
   isPending,
+  refused = [],
 }: StocktakeReviewDialogProps) {
   const [note, setNote] = useState('');
+  const refusedIds = refused.map((line) => line.variantId);
 
   return (
     <BaseModal
@@ -44,6 +51,41 @@ export function StocktakeReviewDialog({
       maxWidth="md:max-w-[760px]"
     >
       <div className="space-y-5">
+        {refused.length > 0 && (
+          <div
+            role="alert"
+            className="space-y-3 rounded-xl border border-destructive/40 bg-destructive/5 p-4"
+          >
+            <p className="text-sm font-semibold text-destructive">
+              تعذر الترحيل: الرصيد الحالي لا يكفي للأسطر التالية، ولم يتم ترحيل أي سطر. عدّل
+              هذه الأسطر ثم أعد المراجعة.
+            </p>
+            <ul className="space-y-2 text-sm">
+              {refused.map((line) => (
+                <li key={line.variantId} className="flex flex-col gap-0.5">
+                  <span className="font-medium text-foreground">
+                    {line.productName}
+                    {line.variantLabel ? ` - ${line.variantLabel}` : ''}
+                  </span>
+                  <span className="text-muted-foreground">
+                    الكمية بالنظام{' '}
+                    <span dir="ltr" className="font-semibold tabular-nums text-foreground">
+                      {formatNumber(line.live)}
+                    </span>
+                    {' · '}المعدود{' '}
+                    <span dir="ltr" className="font-semibold tabular-nums text-foreground">
+                      {line.counted === null ? '—' : formatNumber(line.counted)}
+                    </span>
+                    {' · '}المطلوب خصمه{' '}
+                    <span dir="ltr" className="font-semibold tabular-nums text-foreground">
+                      {formatNumber(line.required)}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <dl className="grid grid-cols-2 gap-3">
           <div className="rounded-xl border border-border bg-card p-4">
             <dt className="text-xs text-muted-foreground">عدد الأسطر المتغيرة</dt>
@@ -90,7 +132,11 @@ export function StocktakeReviewDialog({
                 {lines.map((line) => (
                   <tr
                     key={line.variantId}
-                    className="border-b border-border last:border-b-0"
+                    className={
+                      refusedIds.includes(line.variantId)
+                        ? 'border-b border-border bg-destructive/5 last:border-b-0'
+                        : 'border-b border-border last:border-b-0'
+                    }
                   >
                     <td className={BODY_CELL_CLASS}>
                       <VariantLabel

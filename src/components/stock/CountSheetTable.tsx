@@ -47,6 +47,7 @@ interface CountSheetTableProps {
   onSave(): void;
   allowBlank?: boolean;
   readOnly?: boolean;
+  flaggedVariantIds?: number[];
 }
 
 export function CountSheetTable({
@@ -58,6 +59,7 @@ export function CountSheetTable({
   onSave,
   allowBlank = false,
   readOnly = false,
+  flaggedVariantIds = [],
 }: CountSheetTableProps) {
   const inputs = useRef(new Map<number, HTMLInputElement>());
   const showExpected = lines.some((line) => line.expected !== null);
@@ -137,10 +139,14 @@ export function CountSheetTable({
             const raw = valueOf(line);
             const invalid =
               isInvalidCountInput(raw) && !(allowBlank && isBlankCount(raw));
+            const flagged = flaggedVariantIds.includes(line.variantId);
             return (
               <tr
                 key={line.variantId}
-                className="border-b border-border last:border-b-0 transition-colors hover:bg-muted/40"
+                className={cn(
+                  'border-b border-border last:border-b-0 transition-colors hover:bg-muted/40',
+                  flagged && 'bg-destructive/5'
+                )}
               >
                 <td className={BODY_CELL_CLASS}>
                   <VariantLabel
@@ -150,6 +156,11 @@ export function CountSheetTable({
                     optionsLabel={line.optionsLabel}
                     size="sm"
                   />
+                  {flagged && (
+                    <p className="mt-1 text-xs font-medium text-destructive">
+                      تعذر ترحيل هذا السطر: الرصيد لا يكفي
+                    </p>
+                  )}
                 </td>
                 <td className={BODY_CELL_CLASS}>
                   <CopyableCode value={line.sku} label="نسخ كود المنتج">

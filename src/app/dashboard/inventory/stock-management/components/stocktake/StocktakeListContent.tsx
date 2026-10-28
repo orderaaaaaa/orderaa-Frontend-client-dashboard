@@ -204,7 +204,7 @@ export function StocktakeListContent() {
               accent="primary"
             />
             <KpiCard
-              label="جلسات مرحّلة"
+              label="جلسات مرحّلة (كل الفترات)"
               value={<span dir="ltr">{formatNumber(postedProbe.data?.total ?? 0)}</span>}
               icon={<FileCheck2 className="size-5" aria-hidden="true" />}
               accent="chart2"

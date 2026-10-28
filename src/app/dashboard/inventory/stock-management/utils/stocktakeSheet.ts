@@ -1,6 +1,10 @@
 import type { CountSheetLine } from '@/components/stock/CountSheetTable';
 import { isInvalidCountInput } from '@/components/stock/CountSheetTable';
-import type { StocktakeLineDto } from '../types/stocktake';
+import type {
+  StocktakeLineDto,
+  StocktakeRefusedLine,
+  StocktakeShortageLineDto,
+} from '../types/stocktake';
 
 export const STOCKTAKE_SAVE_BATCH_SIZE = 20;
 export const STOCKTAKE_LINES_WRITE_LIMIT = 200;
@@ -39,4 +43,23 @@ export const chunkLines = <T>(items: T[], size: number): T[][] => {
     chunks.push(items.slice(index, index + size));
   }
   return chunks;
+};
+
+export const toRefusedLines = (
+  shortages: StocktakeShortageLineDto[],
+  reviewLines: StocktakeLineDto[],
+): StocktakeRefusedLine[] => {
+  const byVariant = new Map(reviewLines.map((line) => [line.variantId, line]));
+  return shortages.map((shortage) => {
+    const line = byVariant.get(shortage.variantId);
+    return {
+      variantId: shortage.variantId,
+      productName: shortage.productName,
+      variantLabel: shortage.variantLabel,
+      live: line?.currentQuantity ?? shortage.available,
+      counted: line?.countedQuantity ?? null,
+      required: shortage.required,
+      available: shortage.available,
+    };
+  });
 };

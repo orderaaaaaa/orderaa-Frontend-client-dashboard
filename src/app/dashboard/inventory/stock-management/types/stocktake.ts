@@ -92,3 +92,23 @@ export type StocktakeLinesQueryDto = {
   page?: number;
   pageSize?: number;
 };
+
+export type StocktakeShortageLineDto = {
+  variantId: number;
+  warehouseId: number;
+  warehouseName: string;
+  productName: string;
+  variantLabel: string;
+  required: number;
+  available: number;
+};
+
+export type StocktakeRefusedLine = {
+  variantId: number;
+  productName: string;
+  variantLabel: string;
+  live: number;
+  counted: number | null;
+  required: number;
+  available: number;
+};

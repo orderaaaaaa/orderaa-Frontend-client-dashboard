@@ -1,4 +1,5 @@
 import { getApiErrorMessage, getApiErrorStatus } from '@/utils/apiError';
+import type { StocktakeShortageLineDto } from '../types/stocktake';
 
 export const STOCKTAKE_ERROR_MESSAGES: Record<string, string> = {
   STOCKTAKE_ALREADY_OPEN: 'توجد جلسة جرد مفتوحة لهذا المخزن بالفعل',
@@ -22,4 +23,23 @@ export function getStocktakeErrorMessage(err: unknown, fallback: string): string
     return STOCKTAKE_ERROR_MESSAGES[code];
   }
   return getApiErrorMessage(err, fallback);
+}
+
+const isShortageLine = (value: unknown): value is StocktakeShortageLineDto => {
+  if (typeof value !== 'object' || value === null) return false;
+  const line = value as Record<string, unknown>;
+  return (
+    typeof line.variantId === 'number' &&
+    typeof line.productName === 'string' &&
+    typeof line.variantLabel === 'string' &&
+    typeof line.required === 'number' &&
+    typeof line.available === 'number'
+  );
+};
+
+export function getStocktakeShortageLines(err: unknown): StocktakeShortageLineDto[] {
+  const data = (err as { response?: { data?: { code?: unknown; lines?: unknown } } })
+    ?.response?.data;
+  if (data?.code !== 'ADJUSTMENT_BELOW_ZERO' || !Array.isArray(data.lines)) return [];
+  return data.lines.filter(isShortageLine);
 }

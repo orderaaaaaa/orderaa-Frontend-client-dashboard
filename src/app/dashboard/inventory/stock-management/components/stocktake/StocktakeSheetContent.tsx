@@ -33,8 +33,12 @@ import type {
   StocktakeLineDto,
   StocktakeLineFilter,
   StocktakeLineInputDto,
+  StocktakeRefusedLine,
 } from '../../types/stocktake';
-import { getStocktakeErrorMessage } from '../../utils/stocktakeErrors';
+import {
+  getStocktakeErrorMessage,
+  getStocktakeShortageLines,
+} from '../../utils/stocktakeErrors';
 import {
   STOCKTAKE_LINES_PAGE_SIZE,
   STOCKTAKE_LINES_WRITE_LIMIT,
@@ -43,6 +47,7 @@ import {
   countedValueText,
   netDeltaOf,
   parseCountDraft,
+  toRefusedLines,
   toStocktakeCountSheetLine,
 } from '../../utils/stocktakeSheet';
 import { StocktakeAccessDenied } from './StocktakeAccessDenied';
@@ -77,6 +82,7 @@ export function StocktakeSheetContent({ stocktakeId }: StocktakeSheetContentProp
   const [drafts, setDrafts] = useState<Drafts>({});
   const draftsRef = useRef<Drafts>(drafts);
   const [review, setReview] = useState<ReviewState | null>(null);
+  const [refused, setRefused] = useState<StocktakeRefusedLine[]>([]);
   const [cancelOpen, setCancelOpen] = useState(false);
 
   const summaryQuery = useStocktakeQuery(stocktakeId, canRead);
@@ -174,6 +180,7 @@ export function StocktakeSheetContent({ stocktakeId }: StocktakeSheetContentProp
   );
 
   const onReview = async () => {
+    setRefused([]);
     const saved = await flushDrafts();
     if (!saved || Object.keys(draftsRef.current).length > 0) return;
     try {
@@ -190,10 +197,16 @@ export function StocktakeSheetContent({ stocktakeId }: StocktakeSheetContentProp
       {
         onSuccess: (result) => {
           toast.success(`تم ترحيل الجرد (${formatNumber(result.movementCount)} حركة)`);
+          setRefused([]);
           setReview(null);
         },
         onError: (err: unknown) => {
           toast.error(getStocktakeErrorMessage(err, 'تعذر ترحيل الجرد'));
+          const shortages = getStocktakeShortageLines(err);
+          if (shortages.length > 0) {
+            setRefused(toRefusedLines(shortages, review?.lines ?? []));
+            return;
+          }
           setReview(null);
         },
       },
@@ -350,16 +363,47 @@ export function StocktakeSheetContent({ stocktakeId }: StocktakeSheetContentProp
           description="غيّر البحث أو الفلتر لعرض أسطر أخرى"
         />
       ) : (
-        <CountSheetTable
-          lines={sheetLines}
-          valueOf={valueOf}
-          onCountedChange={onCountedChange}
-          onCancelEdit={onCancelEdit}
-          onCountBlur={() => void flushDrafts()}
-          onSave={() => void flushDrafts()}
-          allowBlank
-          readOnly={!isEditable}
-        />
+        <>
+          {refused.length > 0 && !review && (
+            <div
+              role="alert"
+              className="space-y-2 rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm"
+            >
+              <p className="font-semibold text-destructive">
+                تعذر ترحيل الجرد: الرصيد الحالي لا يكفي للأسطر التالية، ولم يتم ترحيل أي سطر
+              </p>
+              <ul className="space-y-1">
+                {refused.map((line) => (
+                  <li key={line.variantId} className="text-muted-foreground">
+                    <span className="font-medium text-foreground">
+                      {line.productName}
+                      {line.variantLabel ? ` - ${line.variantLabel}` : ''}
+                    </span>
+                    {' · '}الكمية بالنظام{' '}
+                    <span dir="ltr" className="font-semibold tabular-nums text-foreground">
+                      {formatNumber(line.live)}
+                    </span>
+                    {' · '}المعدود{' '}
+                    <span dir="ltr" className="font-semibold tabular-nums text-foreground">
+                      {line.counted === null ? '—' : formatNumber(line.counted)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <CountSheetTable
+            lines={sheetLines}
+            valueOf={valueOf}
+            onCountedChange={onCountedChange}
+            onCancelEdit={onCancelEdit}
+            onCountBlur={() => void flushDrafts()}
+            onSave={() => void flushDrafts()}
+            allowBlank
+            readOnly={!isEditable}
+            flaggedVariantIds={refused.map((line) => line.variantId)}
+          />
+        </>
       )}
 
       {!linesQuery.isError && sheetLines.length > 0 && (
@@ -417,6 +461,7 @@ export function StocktakeSheetContent({ stocktakeId }: StocktakeSheetContentProp
           netDelta={netDeltaOf(review.lines)}
           onConfirm={onPost}
           isPending={postStocktake.isPending}
+          refused={refused}
         />
       )}
 
