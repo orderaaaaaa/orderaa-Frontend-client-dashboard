@@ -1,8 +1,17 @@
 'use client';
 
+import { EmptyState } from '@/components/ui/state-panels';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 import { StockModeSection, StockScopeList } from './components';
 
 export default function StockManagementPage() {
+  const canRead = useHasPermissionStrict(PERMISSION_CODES.WAREHOUSES_STOCK_READ);
+
+  if (!canRead) {
+    return <EmptyState title="ليست لديك صلاحية عرض المخزن" />;
+  }
+
   return (
     <div className="w-full max-w-full space-y-6 overflow-x-hidden">
       <div>

@@ -2,6 +2,9 @@
 
 import { Suspense } from 'react';
 import PageLoading from '@/components/ui/page-loading';
+import { EmptyState } from '@/components/ui/state-panels';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 import { AllInvoicesContent } from './components';
 
 function AllInvoicesLoading() {
@@ -13,6 +16,12 @@ function AllInvoicesLoading() {
 }
 
 export default function AllInvoicesPage() {
+  const canRead = useHasPermissionStrict(PERMISSION_CODES.SUPPLIER_INVOICES_READ);
+
+  if (!canRead) {
+    return <EmptyState title="ليست لديك صلاحية عرض فواتير الموردين" />;
+  }
+
   return (
     <Suspense fallback={<AllInvoicesLoading />}>
       <AllInvoicesContent />
