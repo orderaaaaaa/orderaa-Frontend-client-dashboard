@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { CircleHelp, Cpu, ShieldCheck, User, type LucideIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -22,10 +23,19 @@ const ACTOR_ICONS: Record<ActorKind, LucideIcon> = {
   UNKNOWN: CircleHelp,
 };
 
-const labelOf = ({ kind, name }: ActorChipActor): string => {
+const labelOf = ({ kind, id, name }: ActorChipActor): ReactNode => {
   if (kind === 'SYSTEM') return 'النظام';
   if (kind === 'PLATFORM') return 'إدارة المنصة';
-  if (kind === 'EMPLOYEE') return name?.trim() || UNREGISTERED_LABEL;
+  if (kind !== 'EMPLOYEE') return UNREGISTERED_LABEL;
+  const trimmed = name?.trim();
+  if (trimmed) return trimmed;
+  if (id !== null) {
+    return (
+      <>
+        موظف #<span dir="ltr">{id}</span>
+      </>
+    );
+  }
   return UNREGISTERED_LABEL;
 };
 

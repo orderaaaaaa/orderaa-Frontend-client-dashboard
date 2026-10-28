@@ -9,6 +9,7 @@ import {
 } from '@/services/stock';
 import type { StockProduct, StockStatus, VariantCell } from '../types';
 import { STOCK_STATUS_CONFIG } from '../constants';
+import { variantPlainLabel } from '@/lib/variantOptionLabel';
 import { apiListToStockProducts } from './transformStock';
 import {
   displayCell,
@@ -36,6 +37,7 @@ async function loadAllProducts(
 interface FlatStockRow {
   'اسم المنتج': string;
   SKU: string;
+  المتغير: string;
   المقاس: string;
   اللون: string;
   الكمية: number | string;
@@ -69,12 +71,28 @@ function flattenProducts(
         rows.push({
           'اسم المنتج': product.name,
           SKU: product.sku,
+          المتغير: '',
           المقاس: variant.size,
           اللون: color,
           الكمية: quantity,
           الحالة: status,
         });
       }
+    }
+    for (const variant of product.otherVariants) {
+      rows.push({
+        'اسم المنتج': product.name,
+        SKU: product.sku,
+        المتغير: variantPlainLabel({
+          productName: product.name,
+          sku: null,
+          options: variant.options,
+        }),
+        المقاس: variant.size ?? '-',
+        اللون: variant.color ?? '-',
+        الكمية: variant.quantity,
+        الحالة: STOCK_STATUS_CONFIG[variant.status].label,
+      });
     }
   }
   return rows;
@@ -98,12 +116,13 @@ export async function exportStockToExcel(
 
   const workbook = XLSX.utils.book_new();
   const worksheet = XLSX.utils.json_to_sheet(rows, {
-    header: ['اسم المنتج', 'SKU', 'المقاس', 'اللون', 'الكمية', 'الحالة'],
+    header: ['اسم المنتج', 'SKU', 'المتغير', 'المقاس', 'اللون', 'الكمية', 'الحالة'],
   });
 
   worksheet['!cols'] = [
     { wch: 32 },
     { wch: 18 },
+    { wch: 28 },
     { wch: 10 },
     { wch: 16 },
     { wch: 10 },
