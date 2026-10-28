@@ -48,8 +48,13 @@ interface UpdatedChanges {
   };
 }
 
+interface CreatorChange extends Change<number> {
+  beforeName: string | null;
+  afterName: string | null;
+}
+
 interface AttributedChanges {
-  creator?: Change<number>;
+  creator?: CreatorChange;
 }
 
 interface ApprovedChanges {
@@ -218,8 +223,8 @@ function AttributedBody({ changes }: { changes: AttributedChanges | null }) {
     <ChangeList>
       <ChangeRow
         label="المنشئ"
-        before={ltr(`#${creator.before}`)}
-        after={ltr(`#${creator.after}`)}
+        before={creator.beforeName || ltr(`#${creator.before}`)}
+        after={creator.afterName || ltr(`#${creator.after}`)}
       />
     </ChangeList>
   );

@@ -54,6 +54,7 @@ import {
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { useEmployeesQuery } from '@/services/employees';
+import { employeeDisplayName } from '@/components/audit/actors';
 import { uploadFile } from '@/lib/api/upload';
 import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
@@ -96,10 +97,14 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
   );
 
   const { data: employeesData } = useEmployeesQuery();
-  const employeeOptions = useMemo(
-    () => (employeesData ?? []).map((e) => ({ key: String(e.id), value: e.fullName })),
-    [employeesData],
-  );
+  const creator = initialInvoice?.createdByEmployee;
+  const employeeOptions = useMemo(() => {
+    const options = (employeesData ?? []).map((e) => ({ key: String(e.id), value: e.fullName }));
+    if (creator && !options.some((option) => option.key === String(creator.id))) {
+      options.push({ key: String(creator.id), value: employeeDisplayName(creator) });
+    }
+    return options;
+  }, [employeesData, creator]);
 
   const {
     control,
