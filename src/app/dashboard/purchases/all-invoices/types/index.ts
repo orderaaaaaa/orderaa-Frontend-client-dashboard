@@ -1,5 +1,5 @@
 import { ReceivingStatus } from '@/components/purchases/receivingStatus';
-import type { InvoicePaymentStatus } from '@/lib/api/suppliers';
+import type { InvoicePaymentStatus, SupplierEmployeeRef } from '@/lib/api/suppliers';
 
 export interface InvoiceProduct {
   id: number;
@@ -19,7 +19,8 @@ export interface Invoice {
   type: 'PURCHASE' | 'PAID' | 'RETURN';
   supplierId: number;
   supplier: { id: number; name: string; nickname: string };
-  createdByEmployee?: { id: number; accessLevel: string; department: string };
+  createdByEmployee?: SupplierEmployeeRef | null;
+  approvedByEmployee?: SupplierEmployeeRef | null;
   totalAmount: number;
   paymentAmount?: number;
   paymentStatus: InvoicePaymentStatus;

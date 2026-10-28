@@ -1,3 +1,5 @@
+import type { SupplierEmployeeRef } from '@/lib/api/suppliers';
+
 export interface SupplierInvoiceItem {
   id: number;
   productId: number;
@@ -13,10 +15,10 @@ export interface SupplierInvoice {
   code: string;
   type: 'PURCHASE' | 'PAID' | 'RETURN';
   totalAmount: number;
-  paymentAmount?: number;
-  externalInvoiceNumber?: string;
+  paymentAmount?: number | null;
+  externalInvoiceNumber?: string | null;
   createdAt: string;
-  createdByEmployee?: { id: number; accessLevel: string; department: string };
+  createdByEmployee?: SupplierEmployeeRef | null;
   products: SupplierInvoiceItem[];
   images: string[];
 }

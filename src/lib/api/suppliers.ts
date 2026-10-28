@@ -83,25 +83,54 @@ export interface InvoiceProductApiItem {
 
 export type InvoicePaymentStatus = 'NOT_PAID' | 'PARTIALLY_PAID' | 'PAID';
 
+export interface SupplierEmployeeRef {
+  id: number;
+  accessLevel: string;
+  department: string | null;
+  fullName?: string | null;
+  phoneNumber?: string | null;
+  email?: string | null;
+}
+
+export type SupplierInvoiceEntryMode = 'SINGULAR' | 'PACKAGE';
+
 export interface SupplierInvoiceApiItem {
   id: number;
   code: string;
   type: 'PURCHASE' | 'PAID' | 'RETURN';
+  entryMode: SupplierInvoiceEntryMode | null;
   supplierId: number;
   merchantId: number;
-  createdByEmployeeId?: number;
+  createdByEmployeeId: number;
+  approvedByEmployeeId: number | null;
   totalAmount: number;
-  paymentAmount?: number;
+  paymentAmount: number | null;
   paymentStatus: InvoicePaymentStatus;
-  externalInvoiceNumber?: string;
+  externalInvoiceNumber: string | null;
   createdAt: string;
   updatedAt: string;
   images: string[];
-  supplier: { id: number; name: string; nickname: string };
-  createdByEmployee?: { id: number; accessLevel: string; department: string };
+  supplier: { id: number; name: string; nickname: string | null };
+  createdByEmployee: SupplierEmployeeRef | null;
+  approvedByEmployee: SupplierEmployeeRef | null;
   products: InvoiceProductApiItem[];
   isApproved: boolean;
   approvedAt: string | null;
+}
+
+export type SupplierInvoiceEventAction = 'CREATED' | 'UPDATED' | 'ATTRIBUTED' | 'APPROVED' | 'DELETED';
+
+export interface SupplierInvoiceEvent {
+  id: number;
+  action: SupplierInvoiceEventAction;
+  createdAt: string;
+  actor: { id: number; name: string | null } | null;
+  changes: Record<string, unknown> | null;
+}
+
+export interface SupplierInvoiceHistoryPage {
+  data: SupplierInvoiceEvent[];
+  nextCursor: number | null;
 }
 
 export interface GetSuppliersParams {
@@ -271,6 +300,14 @@ export async function updateSupplierInvoice(
 
 export async function deleteSupplierInvoice(id: number): Promise<void> {
   await api.delete(`/supplier-invoices/${id}`);
+}
+
+export async function getSupplierInvoiceHistory(
+  id: number,
+  params?: { cursor?: number; limit?: number },
+): Promise<SupplierInvoiceHistoryPage> {
+  const response = await api.get(`/supplier-invoices/${id}/history`, { params });
+  return response.data as SupplierInvoiceHistoryPage;
 }
 
 export async function approveSupplierInvoice(

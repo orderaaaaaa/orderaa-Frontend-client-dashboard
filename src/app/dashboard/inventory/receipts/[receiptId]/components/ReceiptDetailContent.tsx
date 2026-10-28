@@ -3,7 +3,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { notFound, useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
+import { ActorChip } from '@/components/audit/ActorChip';
+import { employeeActor } from '@/components/audit/actors';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { invalidateAndWait } from '@/lib/query/mutationSync';
+import { PERMISSION_CODES } from '@/lib/permissions';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { LiaSaveSolid, LiaCheckCircleSolid } from 'react-icons/lia';
 import PageLoading from '@/components/ui/page-loading';
@@ -63,6 +70,8 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
   const clearReceipt = useReceiptStore((s) => s.clearReceipt);
 
   const approveMutation = useApproveSupplierInvoiceMutation();
+  const queryClient = useQueryClient();
+  const canApprove = useHasPermissionStrict(PERMISSION_CODES.SUPPLIER_INVOICES_APPROVE);
   const isReturn = apiReceipt?.type === 'RETURN';
 
   const { pickerOptions: warehouseOptions } = useWarehouseOptions();
@@ -246,6 +255,9 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
 
         setPendingMismatches(null);
         toast.error(getApiErrorMessage(err, 'فشل تأكيد الإيصال، حاول مرة أخرى'));
+        if (response?.status === 409) {
+          await invalidateAndWait(queryClient, [[QUERY_KEYS.SUPPLIER_INVOICE_DETAIL, numericId]]);
+        }
       }
     },
     [
@@ -258,6 +270,8 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
       clearReceipt,
       receiptId,
       router,
+      queryClient,
+      numericId,
     ],
   );
 
@@ -326,9 +340,13 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
               </span>
             </div>
             {apiReceipt.approvedAt !== null && (
-              <p className="mt-1 text-sm text-gray-600">
-                {isReturn ? 'تاريخ التسليم:' : 'تاريخ الاستلام:'} {formatDate(apiReceipt.approvedAt)}
-              </p>
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                <span>
+                  {isReturn ? 'تاريخ التسليم:' : 'تاريخ الاستلام:'} {formatDate(apiReceipt.approvedAt)}
+                </span>
+                <span>اعتمده</span>
+                <ActorChip actor={employeeActor(apiReceipt.approvedByEmployee)} />
+              </div>
             )}
           </div>
 
@@ -396,6 +414,7 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
           nextLabel={isReturn ? 'تأكيد تسليم المرتجع' : 'تأكيد الإيصال'}
           nextIcon={LiaSaveSolid}
           nextDisabled={approveMutation.isPending}
+          showNext={canApprove}
           productVariants={productVariants}
           onProductVariantsChange={handleProductVariantsChange}
         />
@@ -485,14 +504,16 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
             >
               إلغاء
             </Button>
-            <Button
-              variant="default"
-              className="rounded-full font-semibold px-6"
-              disabled={approveMutation.isPending}
-              onClick={() => approve(true)}
-            >
-              تأكيد التعديل والحفظ
-            </Button>
+            {canApprove && (
+              <Button
+                variant="default"
+                className="rounded-full font-semibold px-6"
+                disabled={approveMutation.isPending}
+                onClick={() => approve(true)}
+              >
+                تأكيد التعديل والحفظ
+              </Button>
+            )}
           </div>
         </div>
       </BaseModal>

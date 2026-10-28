@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient, QueryKey, type QueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient, QueryKey, type QueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { STOCK_VIEW_KEYS } from '@/services/warehouses';
@@ -17,6 +17,7 @@ import {
   updateSupplierInvoice,
   deleteSupplierInvoice,
   approveSupplierInvoice,
+  getSupplierInvoiceHistory,
   GetSuppliersParams,
   GetSupplierInvoicesParams,
   CreateSupplierDto,
@@ -87,6 +88,26 @@ export const useSupplierInvoiceByIdQuery = (id: number | undefined) => {
     queryFn: () => getSupplierInvoiceById(id!),
     enabled: !!id,
     staleTime: 30 * 1000,
+  });
+};
+
+export const SUPPLIER_INVOICE_HISTORY_PAGE_SIZE = 50;
+
+export const supplierInvoiceHistoryKey = (invoiceId: number) =>
+  [QUERY_KEYS.SUPPLIER_INVOICE_DETAIL, invoiceId, 'history'] as const;
+
+export const useSupplierInvoiceHistoryQuery = (invoiceId: number | undefined, enabled = true) => {
+  return useInfiniteQuery({
+    queryKey: supplierInvoiceHistoryKey(invoiceId!),
+    queryFn: ({ pageParam }) =>
+      getSupplierInvoiceHistory(invoiceId!, {
+        cursor: pageParam,
+        limit: SUPPLIER_INVOICE_HISTORY_PAGE_SIZE,
+      }),
+    initialPageParam: undefined as number | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    enabled: enabled && !!invoiceId,
+    staleTime: 0,
   });
 };
 
@@ -162,8 +183,11 @@ export const useDeleteSupplierInvoiceMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => deleteSupplierInvoice(id),
-    onSuccess: () =>
-      invalidateSupplierFigures(queryClient, [[QUERY_KEYS.SUPPLIER_INVOICES]]),
+    onSuccess: (_data, id) =>
+      invalidateSupplierFigures(queryClient, [
+        [QUERY_KEYS.SUPPLIER_INVOICES],
+        [QUERY_KEYS.SUPPLIER_INVOICE_DETAIL, id],
+      ]),
   });
 };
 

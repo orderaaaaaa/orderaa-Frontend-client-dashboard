@@ -27,6 +27,7 @@ interface AddVariantsStepProps {
   nextLabel?: string;
   nextIcon?: IconType;
   nextDisabled?: boolean;
+  showNext?: boolean;
 }
 
 const PLACEHOLDER_IMAGE = 'https://placehold.co/60x60/eeeeee/333?text=%E2%80%94';
@@ -46,6 +47,7 @@ const AddVariantsStep = memo(
     nextLabel,
     nextIcon: NextIcon,
     nextDisabled,
+    showNext = true,
   }: AddVariantsStepProps) => {
     const [selectedProduct, setSelectedProduct] = useState<InvoiceProductRow | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -422,16 +424,18 @@ const AddVariantsStep = memo(
               لا يمكن تأكيد إيصال كل كمياته صفر
             </span>
           )}
-          <Button
-            variant="default"
-            size="lg"
-            className="rounded-full font-semibold flex items-center gap-2 px-12"
-            onClick={onNext}
-            disabled={nextDisabled || !everyLineCounted || totalEntered === 0}
-          >
-            {NextIcon && <NextIcon className="w-5 h-5" />}
-            {nextLabel ?? 'التالي'}
-          </Button>
+          {showNext && (
+            <Button
+              variant="default"
+              size="lg"
+              className="rounded-full font-semibold flex items-center gap-2 px-12"
+              onClick={onNext}
+              disabled={nextDisabled || !everyLineCounted || totalEntered === 0}
+            >
+              {NextIcon && <NextIcon className="w-5 h-5" />}
+              {nextLabel ?? 'التالي'}
+            </Button>
+          )}
         </div>
 
         {selectedProduct && (

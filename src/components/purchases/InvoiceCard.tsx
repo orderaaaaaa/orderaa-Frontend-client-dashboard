@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useMemo, useState } from 'react';
+import { memo, useMemo, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import clsx from 'clsx';
 import { IconType } from 'react-icons';
@@ -24,6 +24,7 @@ import { getTimeAgo } from '@/utils/timeAgo';
 import type { InvoicePaymentStatus } from '@/lib/api/suppliers';
 import { formatCount, formatMoney } from '@/utils/formatMoney';
 import { receivedBadgeLabel } from './receivingStatus';
+import { ActorChip, type ActorChipActor } from '@/components/audit/ActorChip';
 
 const TRANSACTION_TYPE_CONFIG: Record<string, { text: string; iconColor: string; icon: IconType }> = {
   'استبدال': { text: 'text-orange-500', iconColor: 'text-orange-500', icon: LiaExchangeAltSolid },
@@ -52,7 +53,8 @@ export interface InvoiceCardData {
   itemsCount: number;
   totalPieces: number;
   products?: InvoiceCardProduct[];
-  employeeName: string;
+  creator: ActorChipActor;
+  creatorSubtitle?: string;
   createdAt: string;
   totalAmount: number;
   invoiceType: 'PURCHASE' | 'PAID' | 'RETURN';
@@ -64,7 +66,7 @@ export interface InvoiceCardData {
 
 interface CardField {
   label: string;
-  value: string;
+  value: ReactNode;
   icon: IconType;
   subtitle?: string;
   valueClassName?: string;
@@ -129,6 +131,7 @@ interface InvoiceCardProps {
   titleHref?: string;
   formatDate: (dateStr: string) => string;
   showAmount?: boolean;
+  actions?: ReactNode;
 }
 
 const InvoiceCard = memo(
@@ -141,6 +144,7 @@ const InvoiceCard = memo(
     titleHref,
     formatDate,
     showAmount = true,
+    actions,
   }: InvoiceCardProps) => {
     const [isProductsModalOpen, setIsProductsModalOpen] = useState(false);
 
@@ -164,9 +168,10 @@ const InvoiceCard = memo(
     const fields: CardField[] = useMemo(
       () => [
         {
-          label: 'موظف مشتريات',
-          value: invoice.employeeName,
+          label: 'أنشأها',
+          value: <ActorChip actor={invoice.creator} />,
           icon: LiaUserTieSolid,
+          subtitle: invoice.creatorSubtitle,
         },
         {
           label: 'عدد الأصناف',
@@ -308,6 +313,12 @@ const InvoiceCard = memo(
             ),
           )}
         </div>
+
+        {actions && (
+          <div className="mt-6 flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
+            {actions}
+          </div>
+        )}
 
         <BaseModal
           isOpen={isProductsModalOpen}

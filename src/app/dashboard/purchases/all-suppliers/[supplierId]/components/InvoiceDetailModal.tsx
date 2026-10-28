@@ -13,6 +13,8 @@ import BaseModal from '@/components/ui/base-modal';
 import CopyableCode from '@/components/ui/copyable-code';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
+import { ActorChip } from '@/components/audit/ActorChip';
+import { employeeActor } from '@/components/audit/actors';
 import { Button } from '@/components/ui/button';
 import { getTimeAgo } from '@/utils/timeAgo';
 import { formatCount, formatMoney } from '@/utils/formatMoney';
@@ -98,11 +100,14 @@ export default function InvoiceDetailModal({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-4">
             <LiaUserTieSolid className="w-5 h-5 text-primary shrink-0" />
-            <div className="flex flex-col">
-              <span className="text-xs text-gray-900">موظف المشتريات</span>
-              <span className="text-sm font-bold text-gray-800">
-                {invoice.createdByEmployee ? getDepartmentLabel(invoice.createdByEmployee.department) : 'غير محدد'}
-              </span>
+            <div className="flex flex-col items-start gap-1">
+              <span className="text-xs text-muted-foreground">أنشأها</span>
+              <ActorChip actor={employeeActor(invoice.createdByEmployee)} />
+              {invoice.createdByEmployee?.department && (
+                <span className="text-xs text-muted-foreground">
+                  {getDepartmentLabel(invoice.createdByEmployee.department)}
+                </span>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-4">

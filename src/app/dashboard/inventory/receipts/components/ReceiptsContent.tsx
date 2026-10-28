@@ -22,6 +22,7 @@ import { DEFAULT_PAGE_SIZE } from '../constants';
 import { Receipt } from '../types';
 import { useReceiptFilters } from '../hooks';
 import { formatDate } from '@/utils/format';
+import { employeeActor } from '@/components/audit/actors';
 import { RECEIVING_STATUS_OPTIONS, receivingStatusToApproved } from '@/components/purchases/receivingStatus';
 
 function toCardData(receipt: Receipt): InvoiceCardData {
@@ -38,7 +39,7 @@ function toCardData(receipt: Receipt): InvoiceCardData {
       packageCount: p.packageCount,
       piecesPerPackage: p.piecesPerPackage,
     })),
-    employeeName: receipt.createdByEmployee?.fullName ?? 'غير محدد',
+    creator: employeeActor(receipt.createdByEmployee),
     createdAt: receipt.createdAt,
     totalAmount: receipt.totalAmount,
     invoiceType: receipt.type,

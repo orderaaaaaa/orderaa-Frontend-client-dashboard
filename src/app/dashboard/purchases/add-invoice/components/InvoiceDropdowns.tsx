@@ -29,6 +29,8 @@ interface InvoiceDropdownsProps {
   showPayment: boolean;
   invoiceTotal: number;
   errors?: { supplierId?: string };
+  supplierLocked?: boolean;
+  creatorLocked?: boolean;
 }
 
 const InvoiceDropdowns = memo(
@@ -47,6 +49,8 @@ const InvoiceDropdowns = memo(
     showPayment,
     invoiceTotal,
     errors,
+    supplierLocked = false,
+    creatorLocked = false,
   }: InvoiceDropdownsProps) => {
     return (
       <div className="sm:px-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -61,6 +65,7 @@ const InvoiceDropdowns = memo(
             options={supplierOptions}
             placeholder="اختر المورد"
             error={errors?.supplierId}
+            disabled={supplierLocked}
           />
         </div>
         <div className="flex flex-col gap-2">
@@ -73,6 +78,7 @@ const InvoiceDropdowns = memo(
             onChange={(val) => onEmployeeChange(Number(val))}
             options={employeeOptions}
             placeholder="اختر الموظف"
+            disabled={creatorLocked}
           />
         </div>
         {showPayment && (

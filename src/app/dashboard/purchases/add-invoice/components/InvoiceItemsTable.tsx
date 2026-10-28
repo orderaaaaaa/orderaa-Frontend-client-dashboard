@@ -50,6 +50,7 @@ interface InvoiceItemsTableProps {
   onRemoveItem: (index: number) => void;
   onAddItemClick: () => void;
   itemErrors?: Record<number, ItemFieldError>;
+  structureLocked?: boolean;
 }
 
 const InvoiceItemsTable = memo(
@@ -68,6 +69,7 @@ const InvoiceItemsTable = memo(
     onRemoveItem,
     onAddItemClick,
     itemErrors,
+    structureLocked = false,
   }: InvoiceItemsTableProps) => {
     const isPackage = mode === 'package';
 
@@ -267,7 +269,7 @@ const InvoiceItemsTable = memo(
                 options={INVOICE_MODE_OPTIONS}
                 value={mode}
                 onChange={onModeChange}
-                disabled={hasItems}
+                disabled={hasItems || structureLocked}
               />
               <SearchableSelect
                 value={invoiceType}
@@ -276,6 +278,7 @@ const InvoiceItemsTable = memo(
                 placeholder="نوع الفاتورة"
                 error={invoiceTypeError}
                 widthClass="w-40"
+                disabled={structureLocked}
               />
 
               <label className="flex items-center gap-2 min-h-10">

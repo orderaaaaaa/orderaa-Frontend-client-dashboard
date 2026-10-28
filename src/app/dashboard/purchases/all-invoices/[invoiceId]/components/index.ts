@@ -1,0 +1,1 @@
+export { InvoiceDetailContent } from './InvoiceDetailContent';

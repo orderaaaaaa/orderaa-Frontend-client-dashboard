@@ -1,11 +1,16 @@
 'use client';
 
 import { formatNumber } from '@/utils/format';
-import { useCallback, useRef, useState, useMemo } from 'react';
+import { useCallback, useRef, useState, useMemo, type ReactNode } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
+import PageLoading from '@/components/ui/page-loading';
+import { EmptyState, ErrorState } from '@/components/ui/state-panels';
 import BaseModal from '@/components/ui/base-modal';
 import ProductSelectionModal, {
   SelectableProduct,
@@ -17,32 +22,69 @@ import InvoiceItemsTable from './InvoiceItemsTable';
 import InvoiceImageSection from './InvoiceImageSection';
 import { addInvoiceSchema, AddInvoiceFormData } from '../schema';
 import { InvoiceMode } from '../types';
-import { buildProductsPayload, payloadTotal } from '../utils';
+import {
+  buildProductsPayload,
+  invoiceFormDefaults,
+  partialAmountOfInvoice,
+  paymentStatusOfInvoice,
+  payloadTotal,
+  variantKeyOf,
+} from '../utils';
 import {
   MONEY_DECIMALS_MESSAGE,
   hasAtMostTwoDecimals,
   moneyCents,
 } from '@/utils/money';
-import { getApiErrorMessage } from '@/utils/apiError';
-import { useCreateSupplierInvoiceMutation, useSuppliersQuery } from '@/services/suppliers';
+import { getApiErrorMessage, getApiErrorStatus } from '@/utils/apiError';
+import {
+  useCreateSupplierInvoiceMutation,
+  useSuppliersQuery,
+  useSupplierInvoiceByIdQuery,
+  useUpdateSupplierInvoiceMutation,
+} from '@/services/suppliers';
+import type { SupplierInvoiceApiItem, UpdateSupplierInvoiceDto } from '@/lib/api/suppliers';
+import { QUERY_KEYS } from '@/lib/api/queryKeys';
+import { invalidateAndWait } from '@/lib/query/mutationSync';
+import {
+  SUPPLIER_INVOICE_APPROVED_MESSAGE,
+  SUPPLIER_INVOICE_NOT_FOUND_MESSAGE,
+  supplierInvoiceErrorMessage,
+  supplierInvoiceErrorStatus,
+} from '@/lib/api/supplierInvoiceErrors';
+import { PERMISSION_CODES } from '@/lib/permissions';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { useEmployeesQuery } from '@/services/employees';
 import { uploadFile } from '@/lib/api/upload';
 import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 
-export function AddInvoiceContent() {
+interface AddInvoiceFormProps {
+  initialInvoice?: SupplierInvoiceApiItem;
+}
+
+function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const isEdit = initialInvoice !== undefined;
+  const canAttribute = useHasPermissionStrict(PERMISSION_CODES.SUPPLIER_INVOICES_ATTRIBUTE);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [invoiceMode, setInvoiceMode] = useState<InvoiceMode>('singular');
+  const [invoiceMode, setInvoiceMode] = useState<InvoiceMode>(() =>
+    initialInvoice?.entryMode === 'PACKAGE' ? 'package' : 'singular',
+  );
   const [withVariants, setWithVariants] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('unpaid');
-  const [partialAmount, setPartialAmount] = useState('');
+  const [initialPayment] = useState(() => ({
+    status: paymentStatusOfInvoice(initialInvoice),
+    amount: partialAmountOfInvoice(initialInvoice),
+  }));
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>(initialPayment.status);
+  const [partialAmount, setPartialAmount] = useState(initialPayment.amount);
   const [partialError, setPartialError] = useState<string | null>(null);
 
   const createInvoiceMutation = useCreateSupplierInvoiceMutation();
+  const updateInvoiceMutation = useUpdateSupplierInvoiceMutation(initialInvoice?.id ?? 0);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const { data: suppliersData } = useSuppliersQuery({ limit: 200 });
@@ -64,15 +106,17 @@ export function AddInvoiceContent() {
     setValue,
     watch,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<AddInvoiceFormData>({
     resolver: zodResolver(addInvoiceSchema),
-    defaultValues: {
-      invoiceType: 'PURCHASE',
-      supplierId: undefined,
-      items: [],
-      invoiceImage: undefined,
-    },
+    defaultValues: initialInvoice
+      ? invoiceFormDefaults(initialInvoice, invoiceMode)
+      : {
+          invoiceType: 'PURCHASE',
+          supplierId: undefined,
+          items: [],
+          invoiceImage: undefined,
+        },
   });
 
   const { append, remove, update, replace } = useFieldArray({
@@ -98,13 +142,18 @@ export function AddInvoiceContent() {
     isSubmitting || createInvoiceMutation.isPending || isUploadingImage;
   const hasUnsavedChanges =
     !isSuccessModalOpen &&
-    ((items?.length ?? 0) > 0 ||
-      supplierId !== undefined ||
-      createdByEmployeeId !== undefined ||
-      (invoiceImage !== undefined && invoiceImage !== null) ||
-      invoiceType !== 'PURCHASE' ||
-      paymentStatus !== 'unpaid' ||
-      partialAmount.trim() !== '');
+    (isEdit
+      ? isDirty ||
+        (invoiceImage !== undefined && invoiceImage !== null) ||
+        paymentStatus !== initialPayment.status ||
+        partialAmount.trim() !== initialPayment.amount
+      : (items?.length ?? 0) > 0 ||
+        supplierId !== undefined ||
+        createdByEmployeeId !== undefined ||
+        (invoiceImage !== undefined && invoiceImage !== null) ||
+        invoiceType !== 'PURCHASE' ||
+        paymentStatus !== 'unpaid' ||
+        partialAmount.trim() !== '');
   const guard = useUnsavedChangesGuard(hasUnsavedChanges && !isSaving);
 
   const handleInvoiceTypeChange = useCallback(
@@ -199,7 +248,22 @@ export function AddInvoiceContent() {
 
   const handleAddProducts = useCallback(
     (products: SelectableProduct[]) => {
+      const takenKeys = new Set(
+        isEdit
+          ? (items ?? []).map((item) =>
+              variantKeyOf(item.productId, (item.variants ?? []).map((v) => v.attributeOptionId)),
+            )
+          : [],
+      );
       products.forEach((product) => {
+        const key = variantKeyOf(
+          product.id,
+          (product.selectedVariants ?? []).map((v) => v.attributeOptionId),
+        );
+        if (isEdit) {
+          if (takenKeys.has(key)) return;
+          takenKeys.add(key);
+        }
         const variantSuffix = product.selectedVariants?.length
           ? ` - ${product.selectedVariants.map((v) => v.option).join(' - ')}`
           : '';
@@ -223,7 +287,7 @@ export function AddInvoiceContent() {
       });
       setIsProductModalOpen(false);
     },
-    [append],
+    [append, isEdit, items],
   );
 
   const handleRemoveItem = useCallback(
@@ -290,6 +354,27 @@ export function AddInvoiceContent() {
           }
         }
 
+        if (initialInvoice) {
+          const body: UpdateSupplierInvoiceDto = { products };
+          if (data.invoiceType === 'PURCHASE') {
+            body.paymentAmount = resolvedPaymentAmount ?? 0;
+          }
+          if (images) {
+            body.images = images;
+          }
+          if (
+            canAttribute &&
+            data.createdByEmployeeId !== undefined &&
+            data.createdByEmployeeId !== initialInvoice.createdByEmployeeId
+          ) {
+            body.createdByEmployeeId = data.createdByEmployeeId;
+          }
+          await updateInvoiceMutation.mutateAsync(body);
+          toast.success('تم حفظ تعديلات الفاتورة');
+          router.push(`/dashboard/purchases/all-invoices/${initialInvoice.id}`);
+          return;
+        }
+
         await createInvoiceMutation.mutateAsync({
           type: data.invoiceType,
           supplierId: data.supplierId,
@@ -305,10 +390,31 @@ export function AddInvoiceContent() {
           router.push('/dashboard/purchases/all-invoices');
         }, 2000);
       } catch (err: unknown) {
+        if (initialInvoice) {
+          toast.error(supplierInvoiceErrorMessage(err, 'حدث خطأ أثناء حفظ الفاتورة'));
+          const status = getApiErrorStatus(err);
+          if (status === 404 || status === 409) {
+            await invalidateAndWait(queryClient, [
+              [QUERY_KEYS.SUPPLIER_INVOICES],
+              [QUERY_KEYS.SUPPLIER_INVOICE_DETAIL, initialInvoice.id],
+            ]);
+          }
+          return;
+        }
         setSubmitError(getApiErrorMessage(err, 'حدث خطأ أثناء إضافة الفاتورة'));
       }
     },
-    [createInvoiceMutation, router, paymentStatus, partialAmount, invoiceMode],
+    [
+      createInvoiceMutation,
+      updateInvoiceMutation,
+      initialInvoice,
+      canAttribute,
+      queryClient,
+      router,
+      paymentStatus,
+      partialAmount,
+      invoiceMode,
+    ],
   );
 
   const imageFile =
@@ -343,15 +449,17 @@ export function AddInvoiceContent() {
         noValidate
         className="flex flex-col gap-8"
       >
-        <AddInvoiceHeader />
+        <AddInvoiceHeader isEdit={isEdit} code={initialInvoice?.code} />
 
         <InvoiceDropdowns
           supplierId={supplierId}
+          supplierLocked={isEdit}
           onSupplierChange={(value) =>
             setValue('supplierId', value, { shouldValidate: true })
           }
           supplierOptions={supplierOptions}
           employeeId={createdByEmployeeId}
+          creatorLocked={isEdit && !canAttribute}
           onEmployeeChange={(value) => setValue('createdByEmployeeId', value)}
           employeeOptions={employeeOptions}
           showPayment={invoiceType === 'PURCHASE'}
@@ -374,6 +482,7 @@ export function AddInvoiceContent() {
           invoiceTypeError={errors.invoiceType?.message}
           withVariants={withVariants}
           onWithVariantsChange={setWithVariants}
+          structureLocked={isEdit}
           onModeChange={handleModeChange}
           onQuantityChange={handleQuantityChange}
           onPriceChange={handlePriceChange}
@@ -417,7 +526,7 @@ export function AddInvoiceContent() {
             loadingText={isUploadingImage ? 'جارٍ رفع الصورة…' : 'جارٍ الحفظ...'}
             className="min-h-10 rounded-full font-semibold text-sm sm:text-base px-10"
           >
-            حفظ الفاتورة
+            {isEdit ? 'حفظ التعديلات' : 'حفظ الفاتورة'}
           </Button>
         </StickyFormFooter>
       </form>
@@ -484,4 +593,77 @@ export function AddInvoiceContent() {
       </BaseModal>
     </div>
   );
+}
+
+function AddInvoiceNotice({ title, action }: { title: string; action?: ReactNode }) {
+  return (
+    <EmptyState
+      title={title}
+      action={
+        action ?? (
+          <Button asChild variant="outline" className="rounded-full">
+            <Link href="/dashboard/purchases/all-invoices">العودة إلى الفواتير</Link>
+          </Button>
+        )
+      }
+    />
+  );
+}
+
+function EditInvoiceRoute({ invoiceId }: { invoiceId: number }) {
+  const isValidId = Number.isInteger(invoiceId) && invoiceId > 0;
+  const canUpdate = useHasPermissionStrict(PERMISSION_CODES.SUPPLIER_INVOICES_UPDATE);
+  const { data: invoice, isPending, isError, error, refetch } = useSupplierInvoiceByIdQuery(
+    isValidId ? invoiceId : undefined,
+  );
+
+  if (!isValidId || (isError && supplierInvoiceErrorStatus(error) === 404)) {
+    return <AddInvoiceNotice title={SUPPLIER_INVOICE_NOT_FOUND_MESSAGE} />;
+  }
+  if (!canUpdate) {
+    return <AddInvoiceNotice title="ليست لديك صلاحية تعديل فواتير الموردين" />;
+  }
+  if (isPending) {
+    return <PageLoading message="جاري تحميل الفاتورة..." />;
+  }
+  if (!invoice) {
+    return <ErrorState error={error} fallback="تعذّر تحميل الفاتورة" onRetry={() => void refetch()} />;
+  }
+
+  const detailAction = (
+    <Button asChild variant="outline" className="rounded-full">
+      <Link href={`/dashboard/purchases/all-invoices/${invoice.id}`}>عرض الفاتورة</Link>
+    </Button>
+  );
+
+  if (invoice.isApproved) {
+    return <AddInvoiceNotice title={SUPPLIER_INVOICE_APPROVED_MESSAGE} action={detailAction} />;
+  }
+  if (invoice.type === 'PAID') {
+    return (
+      <AddInvoiceNotice
+        title="المدفوعات المستقلة لا تُعدَّل من نموذج الفاتورة"
+        action={detailAction}
+      />
+    );
+  }
+
+  return <AddInvoiceForm key={invoice.id} initialInvoice={invoice} />;
+}
+
+interface AddInvoiceContentProps {
+  invoiceId?: number;
+}
+
+export function AddInvoiceContent({ invoiceId }: AddInvoiceContentProps) {
+  const canCreate = useHasPermissionStrict(PERMISSION_CODES.SUPPLIER_INVOICES_CREATE);
+
+  if (invoiceId === undefined) {
+    if (!canCreate) {
+      return <AddInvoiceNotice title="ليست لديك صلاحية إضافة فواتير الموردين" />;
+    }
+    return <AddInvoiceForm />;
+  }
+
+  return <EditInvoiceRoute invoiceId={invoiceId} />;
 }

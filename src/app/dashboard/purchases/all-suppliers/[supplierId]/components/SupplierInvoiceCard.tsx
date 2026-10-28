@@ -4,6 +4,9 @@ import { memo, useMemo, useState } from 'react';
 import clsx from 'clsx';
 import { IconType } from 'react-icons';
 import { getDepartmentLabel } from '@/app/dashboard/employees/utils/employeeMappers';
+import { ActorChip } from '@/components/audit/ActorChip';
+import { employeeActor } from '@/components/audit/actors';
+import type { ReactNode } from 'react';
 import {
   LiaFileInvoiceSolid,
   LiaUserTieSolid,
@@ -41,7 +44,7 @@ interface SupplierInvoiceCardProps {
 
 interface CardField {
   label: string;
-  value: string;
+  value: ReactNode;
   icon: IconType;
   subtitle?: string;
   valueClassName?: string;
@@ -63,9 +66,12 @@ const SupplierInvoiceCard = memo(
     const fields: CardField[] = useMemo(
       () => [
         {
-          label: 'موظف مشتريات',
-          value: invoice.createdByEmployee ? getDepartmentLabel(invoice.createdByEmployee.department) : 'غير محدد',
+          label: 'أنشأها',
+          value: <ActorChip actor={employeeActor(invoice.createdByEmployee)} />,
           icon: LiaUserTieSolid,
+          subtitle: invoice.createdByEmployee?.department
+            ? getDepartmentLabel(invoice.createdByEmployee.department)
+            : undefined,
         },
         {
           label: 'عدد الاصناف',
