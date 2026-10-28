@@ -1,12 +1,17 @@
 'use client';
 
 import { EmptyState } from '@/components/ui/state-panels';
-import { useHasPermissionStrict } from '@/hooks/usePermissions';
-import { PERMISSION_CODES } from '@/lib/permissions';
+import { usePermissions } from '@/hooks/usePermissions';
+import { PERMISSION_CODES, hasPermissionCodeStrict } from '@/lib/permissions';
 import { StockModeSection, StockScopeList } from './components';
 
 export default function StockManagementPage() {
-  const canRead = useHasPermissionStrict(PERMISSION_CODES.WAREHOUSES_STOCK_READ);
+  const permissions = usePermissions();
+  const canRead = [
+    PERMISSION_CODES.WAREHOUSES_STOCK_READ,
+    PERMISSION_CODES.STOCK_WORKFLOWS_READ,
+    PERMISSION_CODES.VIRTUAL_WAREHOUSES_READ,
+  ].some((code) => hasPermissionCodeStrict(permissions, code));
 
   if (!canRead) {
     return <EmptyState title="ليست لديك صلاحية عرض المخزن" />;
