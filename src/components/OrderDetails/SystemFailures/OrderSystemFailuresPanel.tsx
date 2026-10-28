@@ -7,8 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { isRetryableHeld } from '@/constants/orderSystemFailures';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
-import { readStoredLocale } from '@/i18n/locale';
-import { translate } from '@/i18n/translate';
+import { useI18n } from '@/i18n/I18nProvider';
 import {
   useMarkAllSystemFailuresSeen,
   useMarkSystemFailureSeen,
@@ -41,6 +40,7 @@ function PanelCard({
   action?: React.ReactNode;
   children: React.ReactNode;
 }) {
+  const { t } = useI18n();
   return (
     <Accordion type="single" collapsible value={open} onValueChange={onOpenChange}>
       <AccordionItem
@@ -51,11 +51,11 @@ function PanelCard({
           <div className="min-w-0 flex-1 basis-full sm:basis-auto">
             <AccordionTrigger className="py-2 text-start">
               <span className="flex items-center gap-2">
-                <span className="text-lg text-primary font-bold">حالات الطلب</span>
+                <span className="text-lg text-primary font-bold">{t('orderSystemFailures.panel.title')}</span>
                 {!!unseenTotal && (
                   <span
                     className="min-w-6 h-6 px-1.5 text-sm rounded-full bg-red-600 text-white flex items-center justify-center"
-                    title="حالات لم يتم الاطلاع عليها"
+                    title={t('orderSystemFailures.panel.unseenTitle')}
                   >
                     {unseenTotal}
                   </span>
@@ -72,6 +72,7 @@ function PanelCard({
 }
 
 function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresPanelProps) {
+  const { t } = useI18n();
   const canMarkSeen = useHasPermissionStrict(PERMISSION_CODES.ORDERS_UPDATE);
   const {
     data,
@@ -109,7 +110,7 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
     return (
       <PanelCard open={open} onOpenChange={handleOpenChange}>
         <div className="flex flex-col items-center gap-3 py-4">
-          <p className="text-sm text-destructive">تعذر تحميل حالات الطلب</p>
+          <p className="text-sm text-destructive">{t('orderSystemFailures.panel.loadError')}</p>
           <Button
             type="button"
             variant="outline"
@@ -117,7 +118,7 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
             loading={isRefetching}
             onClick={() => refetch()}
           >
-            إعادة المحاولة
+            {t('common.retry')}
           </Button>
         </div>
       </PanelCard>
@@ -148,7 +149,7 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
         loading={retryingFailureId === failure.id}
         onClick={() => retryHeld.mutate(failure.id)}
       >
-        {translate(readStoredLocale(), 'orderSystemFailures.retry.action')}
+        {t('orderSystemFailures.retry.action')}
       </Button>
     ) : null;
 
@@ -161,14 +162,14 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
         loading={markAllSeen.isPending}
         onClick={() => markAllSeen.mutate(firstPage.asOf)}
       >
-        تعليم الكل كمقروء
+        {t('orderSystemFailures.panel.markAll')}
       </Button>
     ) : undefined;
 
   return (
     <PanelCard open={open} onOpenChange={handleOpenChange} unseenTotal={unseenTotal} action={markAllAction}>
       {failures.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-4">لا توجد حالات لهذا الطلب</p>
+        <p className="text-sm text-muted-foreground text-center py-4">{t('orderSystemFailures.panel.empty')}</p>
       ) : (
         <div className="flex flex-col gap-3">
           {failures.map((failure) => (
@@ -196,7 +197,7 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
               loading={isFetchingNextPage}
               onClick={() => fetchNextPage()}
             >
-              عرض المزيد
+              {t('orderSystemFailures.panel.loadMore')}
             </Button>
           )}
         </div>

@@ -5,6 +5,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { LiaTimesSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
 import { Button } from './button';
+import { useI18n } from '@/i18n/I18nProvider';
 import { cn } from '@/lib/utils';
 import { getApiErrorMessage } from '@/utils/apiError';
 
@@ -53,6 +54,7 @@ export default function BaseModal({
   confirmErrorFallback = 'حدث خطأ، حاول مرة أخرى',
   onEscapeKeyDown,
 }: BaseModalProps) {
+  const { t } = useI18n();
   const [internalIsLoading, setInternalIsLoading] = useState(false);
   const isLoading = externalIsLoading || internalIsLoading;
   const [contentEl, setContentEl] = useState<HTMLElement | null>(null);
@@ -115,7 +117,7 @@ export default function BaseModal({
 
               <DialogPrimitive.Close
                 disabled={isLoading}
-                aria-label="إغلاق"
+                aria-label={t('common.close')}
                 className="absolute end-5 top-1/2 -translate-y-1/2 size-10 flex items-center justify-center hover:opacity-70 transition-opacity disabled:opacity-50"
               >
                 <LiaTimesSolid className="w-4 h-4 text-black cursor-pointer" />

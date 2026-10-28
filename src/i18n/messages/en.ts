@@ -257,6 +257,21 @@ const en: Record<keyof typeof ar, string> = {
   'timeAgo.unit.hour.other': 'hours',
   'timeAgo.unit.minute.one': 'minute',
   'timeAgo.unit.minute.other': 'minutes',
+  'common.retry': 'Retry',
+  'common.close': 'Close',
+  'orderSystemFailures.panel.title': 'Order issues',
+  'orderSystemFailures.panel.unseenTitle': 'Issues not yet seen',
+  'orderSystemFailures.panel.loadError': 'Could not load order issues',
+  'orderSystemFailures.panel.markAll': 'Mark all as read',
+  'orderSystemFailures.panel.empty': 'No issues for this order',
+  'orderSystemFailures.panel.loadMore': 'Show more',
+  'orderSystemFailures.item.repeated': 'Repeated {count} times',
+  'orderSystemFailures.item.seen': 'Seen',
+  'orderSystemFailures.item.firstOccurred': 'First: {time}',
+  'orderSystemFailures.item.lastOccurred': 'Last: {time} ({ago})',
+  'orderSystemFailures.item.seenBy': 'Seen by {name}',
+  'orderSystemFailures.item.seenDone': 'Seen',
+  'orderSystemFailures.item.details': 'Details',
 };
 
 export default en;

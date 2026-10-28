@@ -2,6 +2,7 @@ import * as React from 'react';
 import { AlertTriangle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/i18n/I18nProvider';
 import { cn } from '@/lib/utils';
 
 const ARABIC_PATTERN = /[؀-ۿ]/;
@@ -64,6 +65,7 @@ interface ErrorStateProps {
 }
 
 function ErrorState({ error, fallback, onRetry, className }: ErrorStateProps) {
+  const { t } = useI18n();
   return (
     <div
       role="alert"
@@ -83,7 +85,7 @@ function ErrorState({ error, fallback, onRetry, className }: ErrorStateProps) {
           className="h-10 px-5"
           onClick={onRetry}
         >
-          إعادة المحاولة
+          {t('common.retry')}
         </Button>
       )}
     </div>

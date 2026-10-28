@@ -40,7 +40,7 @@ export function NoticesDialog({ open, onOpenChange, orderId, canAcknowledge }: N
 }
 
 function NoticesDialogBody({ orderId, canAcknowledge }: { orderId: number; canAcknowledge: boolean }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const query = useOrderNoticesInfiniteQuery(orderId);
   const markOne = useMarkNoticesReadMutation(orderId);
   const markAll = useMarkNoticesReadMutation(orderId);
@@ -58,7 +58,7 @@ function NoticesDialogBody({ orderId, canAcknowledge }: { orderId: number; canAc
     return (
       <ErrorState
         error={query.error}
-        fallback={noticeErrorMessageOf(query.error, t('orderNotices.dialog.loadError'))}
+        fallback={noticeErrorMessageOf(query.error, locale, t('orderNotices.dialog.loadError'))}
         onRetry={() => query.refetch()}
       />
     );

@@ -34,7 +34,7 @@ export function OrderSystemFailureItem({
   onMarkSeen,
   renderActions,
 }: OrderSystemFailureItemProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [detailsOpen, setDetailsOpen] = useState(false);
   const isUnseen = failure.seenAt === null;
   const isInfo = isInfoCode(failure.code);
@@ -81,7 +81,7 @@ export function OrderSystemFailureItem({
             )}
             {repeated && (
               <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
-                تكرر {failure.occurrenceCount} مرة
+                {t('orderSystemFailures.item.repeated', { count: failure.occurrenceCount })}
               </span>
             )}
           </div>
@@ -98,7 +98,7 @@ export function OrderSystemFailureItem({
               onClick={() => onMarkSeen(failure)}
             >
               <LiaCheckSolid />
-              تم الاطلاع
+              {t('orderSystemFailures.item.seen')}
             </Button>
           )}
         </div>
@@ -107,21 +107,26 @@ export function OrderSystemFailureItem({
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
         {repeated ? (
           <>
-            <span>أول مرة: {formatDateTime(failure.firstOccurredAt)}</span>
+            <span>{t('orderSystemFailures.item.firstOccurred', { time: formatDateTime(failure.firstOccurredAt) })}</span>
             <span>
-              آخر مرة: {formatDateTime(failure.lastOccurredAt)} ({getTimeAgo(failure.lastOccurredAt)})
+              {t('orderSystemFailures.item.lastOccurred', {
+                time: formatDateTime(failure.lastOccurredAt),
+                ago: getTimeAgo(failure.lastOccurredAt, locale),
+              })}
             </span>
           </>
         ) : (
           <span>
-            {formatDateTime(failure.lastOccurredAt)} ({getTimeAgo(failure.lastOccurredAt)})
+            {formatDateTime(failure.lastOccurredAt)} ({getTimeAgo(failure.lastOccurredAt, locale)})
           </span>
         )}
       </div>
 
       {!isUnseen && failure.seenAt && (
         <span className="text-xs text-gray-500">
-          {failure.seenByName ? `اطّلع عليه ${failure.seenByName}` : 'تم الاطلاع عليه'}{' '}
+          {failure.seenByName
+            ? t('orderSystemFailures.item.seenBy', { name: failure.seenByName })
+            : t('orderSystemFailures.item.seenDone')}{' '}
           {formatDateTime(failure.seenAt)}
         </span>
       )}
@@ -133,7 +138,7 @@ export function OrderSystemFailureItem({
             onClick={() => setDetailsOpen((open) => !open)}
             className="flex items-center gap-1 text-sm font-semibold text-primary"
           >
-            التفاصيل
+            {t('orderSystemFailures.item.details')}
             <LiaChevronDownSolid
               className={cn('w-4 h-4 transition-transform', detailsOpen && 'rotate-180')}
             />

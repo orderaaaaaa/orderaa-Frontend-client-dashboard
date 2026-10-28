@@ -271,6 +271,21 @@ const ar = {
   'timeAgo.unit.hour.other': 'ساعات',
   'timeAgo.unit.minute.one': 'دقيقة',
   'timeAgo.unit.minute.other': 'دقائق',
+  'common.retry': 'إعادة المحاولة',
+  'common.close': 'إغلاق',
+  'orderSystemFailures.panel.title': 'حالات الطلب',
+  'orderSystemFailures.panel.unseenTitle': 'حالات لم يتم الاطلاع عليها',
+  'orderSystemFailures.panel.loadError': 'تعذر تحميل حالات الطلب',
+  'orderSystemFailures.panel.markAll': 'تعليم الكل كمقروء',
+  'orderSystemFailures.panel.empty': 'لا توجد حالات لهذا الطلب',
+  'orderSystemFailures.panel.loadMore': 'عرض المزيد',
+  'orderSystemFailures.item.repeated': 'تكرر {count} مرة',
+  'orderSystemFailures.item.seen': 'تم الاطلاع',
+  'orderSystemFailures.item.firstOccurred': 'أول مرة: {time}',
+  'orderSystemFailures.item.lastOccurred': 'آخر مرة: {time} ({ago})',
+  'orderSystemFailures.item.seenBy': 'اطّلع عليه {name}',
+  'orderSystemFailures.item.seenDone': 'تم الاطلاع عليه',
+  'orderSystemFailures.item.details': 'التفاصيل',
 } as const;
 
 export default ar;

@@ -6,7 +6,8 @@ import {
   markOrderNoticesRead,
 } from '@/lib/api/orderNotices';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
-import { readStoredLocale } from '@/i18n/locale';
+import { useI18n } from '@/i18n/I18nProvider';
+import type { Locale } from '@/i18n/locale';
 import { translate } from '@/i18n/translate';
 import { getApiErrorStatus } from '@/utils/apiError';
 
@@ -25,8 +26,7 @@ const errorCodeOf = (err: unknown): string | undefined => {
   return typeof code === 'string' ? code : undefined;
 };
 
-export const noticeErrorMessageOf = (err: unknown, fallback: string): string => {
-  const locale = readStoredLocale();
+export const noticeErrorMessageOf = (err: unknown, locale: Locale, fallback: string): string => {
   const code = errorCodeOf(err);
   if (code === 'NOTICE_IDS_NOT_FOUND') {
     return translate(locale, 'orderNotices.error.idsNotFound');
@@ -65,6 +65,7 @@ const chunkNoticeIds = (noticeIds: number[]): number[][] => {
 
 export const useMarkNoticesReadMutation = (orderId: number) => {
   const queryClient = useQueryClient();
+  const { locale } = useI18n();
 
   return useMutation({
     mutationFn: async (noticeIds: number[]) => {
@@ -83,7 +84,8 @@ export const useMarkNoticesReadMutation = (orderId: number) => {
       toast.error(
         noticeErrorMessageOf(
           err,
-          translate(readStoredLocale(), 'orderNotices.error.markReadFailed')
+          locale,
+          translate(locale, 'orderNotices.error.markReadFailed')
         )
       );
     },
