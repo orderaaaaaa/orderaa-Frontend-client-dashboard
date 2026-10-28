@@ -15,6 +15,7 @@ interface LineIdentity {
   variantId: number | null;
   productName?: string | null;
   variantLabel?: string | null;
+  sku?: string | null;
 }
 
 interface LineSnapshot extends LineIdentity {
