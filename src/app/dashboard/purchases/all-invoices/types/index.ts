@@ -22,9 +22,9 @@ export interface Invoice {
   createdByEmployee?: SupplierEmployeeRef | null;
   approvedByEmployee?: SupplierEmployeeRef | null;
   totalAmount: number;
-  paymentAmount?: number;
+  paymentAmount: number | null;
   paymentStatus: InvoicePaymentStatus;
-  externalInvoiceNumber?: string;
+  externalInvoiceNumber: string | null;
   products: InvoiceProduct[];
   images: string[];
   createdAt: string;

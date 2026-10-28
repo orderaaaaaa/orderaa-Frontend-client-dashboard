@@ -52,6 +52,8 @@ interface QuantityMismatch {
   difference: number;
 }
 
+const STALE_APPROVE_STATUSES = [400, 404, 409];
+
 export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
   const { t } = useI18n();
   const router = useRouter();
@@ -255,8 +257,12 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
 
         setPendingMismatches(null);
         toast.error(getApiErrorMessage(err, 'فشل تأكيد الإيصال، حاول مرة أخرى'));
-        if (response?.status === 409) {
-          await invalidateAndWait(queryClient, [[QUERY_KEYS.SUPPLIER_INVOICE_DETAIL, numericId]]);
+        if (response?.status !== undefined && STALE_APPROVE_STATUSES.includes(response.status)) {
+          toast.info('تم تحديث بيانات الفاتورة، راجع البنود وأعد التأكيد');
+          await invalidateAndWait(queryClient, [
+            [QUERY_KEYS.SUPPLIER_INVOICES],
+            [QUERY_KEYS.SUPPLIER_INVOICE_DETAIL, numericId],
+          ]);
         }
       }
     },
