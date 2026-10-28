@@ -22,7 +22,7 @@ export default function StocktakeSheetPage({ params }: StocktakeSheetPageProps) 
       {stocktakeId === null ? (
         <ErrorState error={null} fallback="رقم جلسة الجرد غير صحيح" />
       ) : (
-        <StocktakeSheetContent stocktakeId={stocktakeId} />
+        <StocktakeSheetContent key={stocktakeId} stocktakeId={stocktakeId} />
       )}
     </div>
   );

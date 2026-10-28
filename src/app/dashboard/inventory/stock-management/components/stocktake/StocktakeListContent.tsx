@@ -45,6 +45,9 @@ const actorOf = (ref: StocktakePersonDto | null): ActorChipActor =>
     ? { kind: 'EMPLOYEE', id: ref.id, name: ref.name }
     : { kind: 'UNKNOWN', id: null, name: null };
 
+const countText = (probe: { data?: { total: number }; isError: boolean }): string =>
+  probe.data && !probe.isError ? formatNumber(probe.data.total) : '—';
+
 const parseWarehouseId = (raw: string | null): number | null => {
   const id = Number(raw);
   return raw !== null && Number.isInteger(id) && id > 0 ? id : null;
@@ -199,13 +202,13 @@ export function StocktakeListContent() {
           <>
             <KpiCard
               label="جلسات مفتوحة"
-              value={<span dir="ltr">{formatNumber(openProbe.data?.total ?? 0)}</span>}
+              value={<span dir="ltr">{countText(openProbe)}</span>}
               icon={<ClipboardCheck className="size-5" aria-hidden="true" />}
               accent="primary"
             />
             <KpiCard
               label="جلسات مرحّلة (كل الفترات)"
-              value={<span dir="ltr">{formatNumber(postedProbe.data?.total ?? 0)}</span>}
+              value={<span dir="ltr">{countText(postedProbe)}</span>}
               icon={<FileCheck2 className="size-5" aria-hidden="true" />}
               accent="chart2"
             />

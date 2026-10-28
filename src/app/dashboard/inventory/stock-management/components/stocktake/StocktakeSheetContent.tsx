@@ -182,7 +182,11 @@ export function StocktakeSheetContent({ stocktakeId }: StocktakeSheetContentProp
   const onReview = async () => {
     setRefused([]);
     const saved = await flushDrafts();
-    if (!saved || Object.keys(draftsRef.current).length > 0) return;
+    if (!saved) return;
+    if (Object.keys(draftsRef.current).length > 0) {
+      toast.error('ما زالت بعض الأعداد قيد الحفظ، أعد المحاولة بعد لحظات');
+      return;
+    }
     try {
       const lines = await loadChangedLines(stocktakeId);
       setReview({ lines });
