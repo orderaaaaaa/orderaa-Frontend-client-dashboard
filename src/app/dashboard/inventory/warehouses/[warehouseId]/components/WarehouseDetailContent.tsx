@@ -154,7 +154,7 @@ export function WarehouseDetailContent({
               disabled={selectedItems.length === 0}
               onClick={() => setIsAdjustOpen(true)}
             >
-              <LiaBalanceScaleSolid className="ml-1 size-4" />
+              <LiaBalanceScaleSolid className="me-1 size-4" />
               تسوية المخزون
             </Button>
           )}
@@ -163,7 +163,7 @@ export function WarehouseDetailContent({
               disabled={selectedItems.length === 0}
               onClick={() => setIsTransferOpen(true)}
             >
-              <LiaExchangeAltSolid className="ml-1 size-4" />
+              <LiaExchangeAltSolid className="me-1 size-4" />
               نقل مخزون
             </Button>
           )}

@@ -251,6 +251,7 @@ export function OpeningCountContent() {
           onCountedChange={onCountedChange}
           onCancelEdit={onCancelEdit}
           onSave={onSave}
+          readOnly={!canAdjust}
         />
       )}
 
