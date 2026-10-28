@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { isRetryableHeld } from '@/constants/orderSystemFailures';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { readStoredLocale } from '@/i18n/locale';
@@ -140,7 +141,7 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
   const retryingFailureId = retryHeld.isPending ? retryHeld.variables : undefined;
 
   const renderRetryAction = (failure: OrderSystemFailure) =>
-    canMarkSeen && failure.seenAt === null && failure.kind === 'HELD' ? (
+    canMarkSeen && failure.seenAt === null && isRetryableHeld(failure) ? (
       <Button
         type="button"
         variant="outline"

@@ -6,6 +6,7 @@ import type {
   FailureActorType,
   FailureReasonKind,
   OrderShadowedReason,
+  OrderSystemFailure,
   OrderSystemFailureCode,
   OrderSystemFailureSource,
   ScheduledTransitionJob,
@@ -162,6 +163,18 @@ export const orderSystemFailureLabelOf = (code: string) =>
 
 export const isInfoCode = (code: string) =>
   isOrderSystemFailureCode(code) && INFO_CODES.includes(code);
+
+const RETRYABLE_HELD_SOURCE_CODES: readonly {
+  source: OrderSystemFailureSource;
+  code: OrderSystemFailureCode;
+}[] = [
+  { source: 'CARRIER_WEBHOOK', code: 'CARRIER_STATUS_NOT_APPLIED' },
+  { source: 'STOCK_WORKFLOW', code: 'MACHINE_TRANSITION_STOCK_SHORTAGE' },
+];
+
+export const isRetryableHeld = (failure: OrderSystemFailure) =>
+  failure.kind === 'HELD' &&
+  RETRYABLE_HELD_SOURCE_CODES.some(({ source, code }) => source === failure.source && code === failure.code);
 
 const isFailureActorType = (value: string): value is FailureActorType =>
   Object.prototype.hasOwnProperty.call(ACTOR_TYPE_LABELS, value);
