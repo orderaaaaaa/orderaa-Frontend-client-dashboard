@@ -63,7 +63,7 @@ export function StocktakeReviewDialog({
             <ul className="space-y-2 text-sm">
               {refused.map((line) => (
                 <li key={line.variantId} className="flex flex-col gap-0.5">
-<VariantLabel
+                  <VariantLabel
                     productName={line.productName}
                     sku={line.sku}
                     options={[]}

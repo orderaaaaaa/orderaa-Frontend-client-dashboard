@@ -380,20 +380,22 @@ export function StocktakeSheetContent({ stocktakeId }: StocktakeSheetContentProp
               <ul className="space-y-1">
                 {refused.map((line) => (
                   <li key={line.variantId} className="flex flex-col gap-0.5 text-muted-foreground">
-<VariantLabel
+                    <VariantLabel
                       productName={line.productName}
                       sku={line.sku}
                       options={[]}
                       optionsLabel={line.variantLabel}
                       size="sm"
                     />
-                    {' · '}الكمية بالنظام{' '}
-                    <span dir="ltr" className="font-semibold tabular-nums text-foreground">
-                      {formatNumber(line.live)}
-                    </span>
-                    {' · '}المعدود{' '}
-                    <span dir="ltr" className="font-semibold tabular-nums text-foreground">
-                      {line.counted === null ? '—' : formatNumber(line.counted)}
+                    <span className="text-muted-foreground">
+                      {'الكمية بالنظام '}
+                      <span dir="ltr" className="font-semibold tabular-nums text-foreground">
+                        {formatNumber(line.live)}
+                      </span>
+                      {' · المعدود '}
+                      <span dir="ltr" className="font-semibold tabular-nums text-foreground">
+                        {line.counted === null ? '—' : formatNumber(line.counted)}
+                      </span>
                     </span>
                   </li>
                 ))}
