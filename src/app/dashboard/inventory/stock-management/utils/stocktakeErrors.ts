@@ -7,6 +7,8 @@ export const STOCKTAKE_ERROR_MESSAGES: Record<string, string> = {
   STOCKTAKE_LINE_UNKNOWN_VARIANT: 'أحد المتغيرات لا ينتمي إلى هذه الجلسة',
   STOCKTAKE_NOTHING_COUNTED: 'لم يتم إدخال أي عدد قبل الترحيل',
   WAREHOUSE_NOT_FOUND: 'المخزن غير موجود',
+  WAREHOUSE_INACTIVE: 'المخزن غير مفعّل، لا يمكن بدء جرد فيه',
+  DUPLICATE_VARIANTS_IN_BATCH: 'تكرر المتغير نفسه في الحفظ، أعد المحاولة',
   ADJUSTMENT_BELOW_ZERO:
     'تعذر الترحيل لأن الرصيد الحالي لا يكفي لأحد الفروقات السالبة، ولم يتم ترحيل أي سطر',
 };

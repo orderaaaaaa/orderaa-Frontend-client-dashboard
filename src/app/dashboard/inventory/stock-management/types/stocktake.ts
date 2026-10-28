@@ -2,7 +2,12 @@ export type StocktakeStatusWire = 'OPEN' | 'POSTED' | 'CANCELLED';
 
 export type StocktakeLineFilter = 'ALL' | 'UNCOUNTED' | 'CHANGED';
 
-export type StocktakeActorRef = {
+export type StocktakeWarehouseDto = {
+  id: number;
+  name: string;
+};
+
+export type StocktakePersonDto = {
   id: number;
   name: string | null;
 };
@@ -10,11 +15,11 @@ export type StocktakeActorRef = {
 export type StocktakeSummaryDto = {
   id: number;
   status: StocktakeStatusWire;
-  warehouse: { id: number; name: string };
+  warehouse: StocktakeWarehouseDto;
   note: string | null;
   createdAt: string;
-  createdBy: StocktakeActorRef | null;
-  postedBy: StocktakeActorRef | null;
+  createdBy: StocktakePersonDto | null;
+  postedBy: StocktakePersonDto | null;
   postedAt: string | null;
   lineCount: number;
   countedCount: number;
@@ -35,19 +40,19 @@ export type StocktakeLineDto = {
   postedDelta: number | null;
 };
 
-export type StocktakesPageDto = {
-  data: StocktakeSummaryDto[];
+export type StocktakeLinesPageDto = {
+  data: StocktakeLineDto[];
   total: number;
   page: number;
   pageSize: number;
   totalPages: number;
 };
 
-export type StocktakeLinesPageDto = {
-  data: StocktakeLineDto[];
+export type StocktakeListDto = {
+  data: StocktakeSummaryDto[];
   total: number;
   page: number;
-  pageSize: number;
+  limit: number;
   totalPages: number;
 };
 
@@ -74,14 +79,14 @@ export type PostStocktakeDto = {
   note?: string | null;
 };
 
-export type ListStocktakesParams = {
+export type ListStocktakesQueryDto = {
   warehouseId?: number;
   status?: StocktakeStatusWire;
   page?: number;
   limit?: number;
 };
 
-export type StocktakeLinesParams = {
+export type StocktakeLinesQueryDto = {
   search?: string;
   filter?: StocktakeLineFilter;
   page?: number;

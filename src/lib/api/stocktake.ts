@@ -1,14 +1,14 @@
 import api from './index';
 import type {
   CreateStocktakeDto,
-  ListStocktakesParams,
+  ListStocktakesQueryDto,
   PostStocktakeDto,
   PostStocktakeResultDto,
   StocktakeLineDto,
   StocktakeLinesPageDto,
-  StocktakeLinesParams,
+  StocktakeLinesQueryDto,
+  StocktakeListDto,
   StocktakeSummaryDto,
-  StocktakesPageDto,
   UpdateStocktakeLinesDto,
 } from '@/app/dashboard/inventory/stock-management/types/stocktake';
 
@@ -16,10 +16,10 @@ const STOCKTAKES_PATH = '/stock-movements/stocktakes';
 const CHANGED_LINES_PAGE_SIZE = 100;
 
 export async function getStocktakes(
-  params?: ListStocktakesParams
-): Promise<StocktakesPageDto> {
+  params?: ListStocktakesQueryDto
+): Promise<StocktakeListDto> {
   const response = await api.get(STOCKTAKES_PATH, { params });
-  return response.data as StocktakesPageDto;
+  return response.data as StocktakeListDto;
 }
 
 export async function startStocktake(
@@ -36,7 +36,7 @@ export async function getStocktake(id: number): Promise<StocktakeSummaryDto> {
 
 export async function getStocktakeLines(
   id: number,
-  params?: StocktakeLinesParams
+  params?: StocktakeLinesQueryDto
 ): Promise<StocktakeLinesPageDto> {
   const response = await api.get(`${STOCKTAKES_PATH}/${id}/lines`, { params });
   return response.data as StocktakeLinesPageDto;
@@ -64,8 +64,9 @@ export async function getAllChangedStocktakeLines(
 export async function updateStocktakeLines(
   id: number,
   body: UpdateStocktakeLinesDto
-): Promise<void> {
-  await api.patch(`${STOCKTAKES_PATH}/${id}/lines`, body);
+): Promise<StocktakeSummaryDto> {
+  const response = await api.patch(`${STOCKTAKES_PATH}/${id}/lines`, body);
+  return response.data as StocktakeSummaryDto;
 }
 
 export async function postStocktake(

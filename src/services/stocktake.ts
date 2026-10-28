@@ -19,16 +19,16 @@ import {
 import { STOCK_VIEW_KEYS } from '@/services/warehouses';
 import type {
   CreateStocktakeDto,
-  ListStocktakesParams,
+  ListStocktakesQueryDto,
   PostStocktakeDto,
-  StocktakeLinesParams,
+  StocktakeLinesQueryDto,
   UpdateStocktakeLinesDto,
 } from '@/app/dashboard/inventory/stock-management/types/stocktake';
 
 const STALE_TIME = 30 * 1000;
 
 export const useStocktakesQuery = (
-  params: ListStocktakesParams,
+  params: ListStocktakesQueryDto,
   enabled: boolean
 ) =>
   useQuery({
@@ -49,7 +49,7 @@ export const useStocktakeQuery = (id: number | null, enabled: boolean) =>
 
 export const useStocktakeLinesQuery = (
   id: number | null,
-  params: StocktakeLinesParams,
+  params: StocktakeLinesQueryDto,
   enabled: boolean
 ) =>
   useQuery({

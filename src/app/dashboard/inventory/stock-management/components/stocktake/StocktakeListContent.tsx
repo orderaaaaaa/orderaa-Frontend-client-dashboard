@@ -18,7 +18,7 @@ import { PERMISSION_CODES } from '@/lib/permissions';
 import { useStocktakesQuery } from '@/services/stocktake';
 import { formatDateTime, formatNumber } from '@/utils/format';
 import type {
-  StocktakeActorRef,
+  StocktakePersonDto,
   StocktakeStatusWire,
   StocktakeSummaryDto,
 } from '../../types/stocktake';
@@ -40,7 +40,7 @@ const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: 'CANCELLED', label: 'ملغاة' },
 ];
 
-const actorOf = (ref: StocktakeActorRef | null): ActorChipActor =>
+const actorOf = (ref: StocktakePersonDto | null): ActorChipActor =>
   ref
     ? { kind: 'EMPLOYEE', id: ref.id, name: ref.name }
     : { kind: 'UNKNOWN', id: null, name: null };
