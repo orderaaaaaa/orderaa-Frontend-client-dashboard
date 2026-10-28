@@ -20,6 +20,7 @@ export interface StockVariantOptionPair {
 export interface StockVariantCombination {
   id: number;
   combinationKey: string;
+  sku?: string;
   availableCount: number;
   options: StockVariantOptionPair[];
 }

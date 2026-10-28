@@ -1,5 +1,9 @@
 import { OrderStatus } from '@/types/orders';
 import type { TranslationKey } from '@/i18n/translate';
+import {
+  MOVEMENT_SOURCE_LABELS,
+  REFERENCE_TYPE_LABELS,
+} from '@/components/stock/stockLabels';
 import type {
   InsufficientStockBehavior,
   StatusSelectionType,
@@ -72,13 +76,7 @@ export const TRIAL_STEP_OPTIONS: {
   { key: 'COUNT', value: 'عدّ' },
 ];
 
-export const MOVEMENT_SOURCE_LABELS: Record<StockMovementSource, string> = {
-  INBOUND: 'وارد من مورد',
-  WORKFLOW: 'حركة حالة طلب',
-  ADJUSTMENT: 'تسوية',
-  TRANSFER: 'نقل',
-  OUTBOUND: 'صادر لمورد',
-};
+export { MOVEMENT_SOURCE_LABELS, REFERENCE_TYPE_LABELS };
 
 export const MOVEMENT_SOURCE_CLASSES: Record<StockMovementSource, string> = {
   INBOUND: 'bg-green-100 text-green-700',
@@ -86,15 +84,7 @@ export const MOVEMENT_SOURCE_CLASSES: Record<StockMovementSource, string> = {
   ADJUSTMENT: 'bg-amber-100 text-amber-700',
   TRANSFER: 'bg-purple-100 text-purple-700',
   OUTBOUND: 'bg-red-100 text-red-700',
-};
-
-/** Ledger `referenceType` values emitted by the backend. */
-export const REFERENCE_TYPE_LABELS: Record<string, string> = {
-  SUPPLIER_INVOICE: 'فاتورة مورد',
-  ORDER: 'طلب',
-  ADJUSTMENT_BATCH: 'تسوية',
-  TRANSFER_BATCH: 'نقل',
-  VARIANT_MERGE: 'دمج متغيرات',
+  MERGE: 'bg-muted text-muted-foreground',
 };
 
 export const MOVEMENT_SOURCE_OPTIONS = [

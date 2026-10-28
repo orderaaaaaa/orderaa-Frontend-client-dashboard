@@ -49,6 +49,8 @@ export const STOCK_VIEW_KEYS: QueryKey[] = [
   [QUERY_KEYS.WAREHOUSE_SUMMARY],
   [QUERY_KEYS.VIRTUAL_WAREHOUSE_SUMMARY],
   [QUERY_KEYS.STOCK_COUNT_SHEET],
+  [QUERY_KEYS.PRODUCT_STOCK],
+  [QUERY_KEYS.STOCK_TIMELINE],
 ];
 
 // ---------------------------------------------------------------------------

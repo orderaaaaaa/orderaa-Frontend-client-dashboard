@@ -13,6 +13,7 @@ import {
   isInvalidCountInput,
   type CountSheetLine,
 } from '@/components/stock/CountSheetTable';
+import { OPENING_COUNT_ADJUSTMENT_REASON } from '@/components/stock/stockLabels';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { getCountSheet, type CountSheetParams, type CountSheetRowApi } from '@/lib/api/stockCount';
 import type { AdjustStockDto } from '@/lib/api/warehouses';
@@ -194,6 +195,7 @@ export function OpeningCountContent() {
       await adjustMutation.mutateAsync({
         warehouseId: warehouseNumber,
         adjustments,
+        reason: OPENING_COUNT_ADJUSTMENT_REASON,
       });
       toast.success('تم حفظ الجرد بنجاح');
       setEdits({});

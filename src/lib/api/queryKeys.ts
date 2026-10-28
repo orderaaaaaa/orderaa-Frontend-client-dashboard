@@ -74,6 +74,8 @@ export const QUERY_KEYS = {
   WAREHOUSE_SUMMARY: 'warehouse-summary',
   VIRTUAL_WAREHOUSES: 'virtual-warehouses',
   VIRTUAL_WAREHOUSE_SUMMARY: 'virtual-warehouse-summary',
+  PRODUCT_STOCK: 'product-stock',
+  STOCK_TIMELINE: 'stock-timeline',
 
   // Integrations
   INTEGRATION_CONFIGS: 'integration-configs',

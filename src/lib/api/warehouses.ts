@@ -11,7 +11,15 @@ export type StockMovementSource =
   | 'WORKFLOW'
   | 'ADJUSTMENT'
   | 'TRANSFER'
-  | 'OUTBOUND';
+  | 'OUTBOUND'
+  | 'MERGE';
+
+export type StockAdjustmentReason =
+  | 'COUNT_CORRECTION'
+  | 'DAMAGED'
+  | 'LOST'
+  | 'FOUND'
+  | 'OTHER';
 
 export type InsufficientStockBehavior = 'THROW' | 'SKIP';
 
@@ -313,7 +321,26 @@ export interface StockAdjustmentItemDto {
 export interface AdjustStockDto {
   warehouseId: number;
   adjustments: StockAdjustmentItemDto[];
-  note?: string;
+  reason: StockAdjustmentReason;
+  note?: string | null;
+}
+
+export interface StockAdjustmentBatchWarehouseDto {
+  warehouseId: number;
+  adjustments: StockAdjustmentItemDto[];
+}
+
+export interface AdjustStockBatchDto {
+  reason: StockAdjustmentReason;
+  note?: string | null;
+  warehouses: StockAdjustmentBatchWarehouseDto[];
+}
+
+export interface StockAdjustmentShortageApi {
+  warehouseId: number;
+  variantId: number;
+  available: number;
+  requested: number;
 }
 
 export interface StockTransferItemDto {
@@ -331,6 +358,68 @@ export interface TransferStockDto {
 export interface StockBatchResult {
   batchId: string;
   count: number;
+}
+
+export type StockTimelineDirection = 'IN' | 'OUT' | 'MOVE' | 'ZERO';
+
+export type StockTimelineActorKind = 'EMPLOYEE' | 'SYSTEM' | 'PLATFORM' | 'UNKNOWN';
+
+export interface StockTimelineActorDto {
+  kind: StockTimelineActorKind;
+  id: number | null;
+  name: string | null;
+}
+
+export interface StockTimelineWarehouseDto {
+  id: number;
+  name: string;
+}
+
+export interface StockTimelineReferenceDto {
+  type: string;
+  id: string;
+  label: string | null;
+  href: string | null;
+}
+
+export interface StockTimelineRowDto {
+  id: number;
+  createdAt: string;
+  source: StockMovementSource;
+  direction: StockTimelineDirection;
+  reason: StockAdjustmentReason | null;
+  note: string | null;
+  quantity: number;
+  variant: {
+    id: number;
+    sku: string | null;
+    label: string;
+    productId: number;
+    productName: string;
+  };
+  fromWarehouse: StockTimelineWarehouseDto | null;
+  toWarehouse: StockTimelineWarehouseDto | null;
+  fromBalanceAfter: number | null;
+  toBalanceAfter: number | null;
+  actor: StockTimelineActorDto;
+  order: { id: number; code: string } | null;
+  reference: StockTimelineReferenceDto;
+}
+
+export interface StockTimelinePageDto {
+  data: StockTimelineRowDto[];
+  nextCursor: number | null;
+}
+
+export interface StockTimelineQueryParams {
+  productId?: number;
+  variantId?: number;
+  warehouseId?: number;
+  source?: StockMovementSource;
+  from?: string;
+  to?: string;
+  cursor?: string;
+  limit?: number;
 }
 
 // ---------------------------------------------------------------------------

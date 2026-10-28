@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import clsx from 'clsx';
+import { ArrowLeftRight } from 'lucide-react';
 import {
   Table,
   TableHeader,
@@ -220,10 +222,17 @@ export function ProductStockTable({
             }}
           />
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h3 className="break-words text-base font-bold text-gray-900">{product.name}</h3>
           {/* <p className="text-sm text-gray-400">SKU: {product.sku}</p> */}
         </div>
+        <Link
+          href={`/dashboard/inventory/stock-management/operations?productId=${product.id}`}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
+        >
+          <ArrowLeftRight className="size-4" aria-hidden="true" />
+          <span>العمليات</span>
+        </Link>
       </div>
 
       <div className="flex flex-col gap-3 px-4 py-4 md:hidden">
