@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
-import { usePermissionCheck } from '@/hooks/usePermissions';
+import { usePermissionCheck, useHasPermissionStrict } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import {
   useGoLiveMutation,
@@ -15,6 +15,7 @@ import {
 } from '@/services/stockMode';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { formatDate } from '@/utils/format';
+import { STOCKTAKE_LIST_HREF } from './stocktake/stocktakeRoutes';
 
 const COUNT_PAGE_HREF = '/dashboard/inventory/stock-management/opening-count';
 const ORDER_STOCK_SYNC_HREF = '/dashboard/inventory/stock-management/order-stock-sync';
@@ -35,6 +36,9 @@ export function StockModeSection() {
     PERMISSION_CODES.STOCK_WORKFLOWS_MODE_SWITCH,
   );
   const canReadMovements = hasPermission(PERMISSION_CODES.STOCK_MOVEMENTS_READ);
+  const canReadStocktake = useHasPermissionStrict(
+    PERMISSION_CODES.STOCK_MOVEMENTS_STOCKTAKE_READ,
+  );
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const { data: mode } = useStockModeQuery(canRead);
@@ -99,6 +103,14 @@ export function StockModeSection() {
           >
             عدّ المخزون الافتتاحي
           </Link>
+          {canReadStocktake && (
+            <Link
+              href={STOCKTAKE_LIST_HREF}
+              className="text-sm text-primary underline-offset-4 hover:underline"
+            >
+              جرد المخزون
+            </Link>
+          )}
           {canReadMovements && (
             <Link
               href={ORDER_STOCK_SYNC_HREF}

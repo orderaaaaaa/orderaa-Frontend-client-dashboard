@@ -13,8 +13,10 @@ export interface CountSheetLine {
   productName: string;
   sku: string | null;
   options: VariantDisplayItem[];
+  optionsLabel?: string;
   live: number | null;
   expected: number | null;
+  postedDelta?: number | null;
 }
 
 export const isInvalidCountInput = (raw: string) => {
@@ -23,7 +25,9 @@ export const isInvalidCountInput = (raw: string) => {
   return !Number.isInteger(value) || value < 0;
 };
 
-const referenceOf = (line: CountSheetLine) => line.expected ?? line.live;
+const referenceOf = (line: CountSheetLine) => line.live ?? line.expected;
+
+const isBlankCount = (raw: string) => raw.trim() === '';
 
 const deltaOf = (line: CountSheetLine, raw: string): number | null => {
   const reference = referenceOf(line);
@@ -39,7 +43,10 @@ interface CountSheetTableProps {
   valueOf(line: CountSheetLine): string;
   onCountedChange(variantId: number, raw: string): void;
   onCancelEdit?(variantId: number): void;
+  onCountBlur?(variantId: number): void;
   onSave(): void;
+  allowBlank?: boolean;
+  readOnly?: boolean;
 }
 
 export function CountSheetTable({
@@ -47,7 +54,10 @@ export function CountSheetTable({
   valueOf,
   onCountedChange,
   onCancelEdit,
+  onCountBlur,
   onSave,
+  allowBlank = false,
+  readOnly = false,
 }: CountSheetTableProps) {
   const inputs = useRef(new Map<number, HTMLInputElement>());
   const showExpected = lines.some((line) => line.expected !== null);
@@ -125,7 +135,8 @@ export function CountSheetTable({
         <tbody>
           {lines.map((line, index) => {
             const raw = valueOf(line);
-            const invalid = isInvalidCountInput(raw);
+            const invalid =
+              isInvalidCountInput(raw) && !(allowBlank && isBlankCount(raw));
             return (
               <tr
                 key={line.variantId}
@@ -136,6 +147,7 @@ export function CountSheetTable({
                     productName={line.productName}
                     sku={line.sku}
                     options={line.options}
+                    optionsLabel={line.optionsLabel}
                     size="sm"
                   />
                 </td>
@@ -163,26 +175,47 @@ export function CountSheetTable({
                   </td>
                 )}
                 <td className={BODY_CELL_CLASS}>
-                  <input
-                    ref={(node) => registerInput(line.variantId, node)}
-                    type="number"
-                    inputMode="numeric"
-                    dir="ltr"
-                    value={raw}
-                    aria-label={`العدد الفعلي ${line.productName}`}
-                    aria-invalid={invalid || undefined}
-                    onChange={(event) =>
-                      onCountedChange(line.variantId, event.target.value)
-                    }
-                    onKeyDown={(event) => onInputKeyDown(event, index, line)}
-                    className={cn(
-                      'h-10 w-28 rounded-lg border bg-card px-3 text-center text-base font-semibold tabular-nums text-foreground outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring',
-                      invalid ? 'border-destructive' : 'border-input'
-                    )}
-                  />
+                  {readOnly ? (
+                    <span
+                      dir="ltr"
+                      className={cn(
+                        'font-semibold tabular-nums',
+                        isBlankCount(raw)
+                          ? 'text-muted-foreground'
+                          : 'text-foreground'
+                      )}
+                    >
+                      {isBlankCount(raw) ? '—' : raw}
+                    </span>
+                  ) : (
+                    <input
+                      ref={(node) => registerInput(line.variantId, node)}
+                      type="number"
+                      inputMode="numeric"
+                      dir="ltr"
+                      value={raw}
+                      aria-label={`العدد الفعلي ${line.productName}`}
+                      aria-invalid={invalid || undefined}
+                      onChange={(event) =>
+                        onCountedChange(line.variantId, event.target.value)
+                      }
+                      onBlur={() => onCountBlur?.(line.variantId)}
+                      onKeyDown={(event) => onInputKeyDown(event, index, line)}
+                      className={cn(
+                        'h-10 w-28 rounded-lg border bg-card px-3 text-center text-base font-semibold tabular-nums text-foreground outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring',
+                        invalid ? 'border-destructive' : 'border-input'
+                      )}
+                    />
+                  )}
                 </td>
                 <td className={BODY_CELL_CLASS}>
-                  <VarianceChip delta={deltaOf(line, raw)} />
+                  <VarianceChip
+                    delta={
+                      readOnly
+                        ? (line.postedDelta ?? null)
+                        : deltaOf(line, raw)
+                    }
+                  />
                 </td>
               </tr>
             );

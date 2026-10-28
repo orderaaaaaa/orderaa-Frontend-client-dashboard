@@ -8,6 +8,7 @@ import {
   hasAllPermissionCodes,
   hasAnyPermissionCode,
   hasPermissionCode,
+  hasPermissionCodeStrict,
   type PermissionCode,
 } from '@/lib/permissions';
 
@@ -61,6 +62,11 @@ export function usePermissionCheck() {
 export function useHasPermission(code: PermissionCode): boolean {
   const permissions = usePermissions();
   return hasPermissionCode(permissions, code);
+}
+
+export function useHasPermissionStrict(code: PermissionCode): boolean {
+  const permissions = usePermissions();
+  return hasPermissionCodeStrict(permissions, code);
 }
 
 /**

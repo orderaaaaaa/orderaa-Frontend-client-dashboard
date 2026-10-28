@@ -8,6 +8,7 @@ interface VariantLabelProps {
   productName: string;
   sku: string | null;
   options: VariantDisplayItem[];
+  optionsLabel?: string;
   size?: 'sm' | 'md';
 }
 
@@ -15,9 +16,10 @@ export function VariantLabel({
   productName,
   sku,
   options,
+  optionsLabel: serverOptionsLabel,
   size = 'md',
 }: VariantLabelProps) {
-  const optionsLabel = variantDisplayLabel(options);
+  const optionsLabel = serverOptionsLabel || variantDisplayLabel(options);
   const isSmall = size === 'sm';
 
   return (
