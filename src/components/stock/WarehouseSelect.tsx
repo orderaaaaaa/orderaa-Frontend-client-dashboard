@@ -1,7 +1,9 @@
 'use client';
 
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
-import { useWarehouseOptions } from '@/services/warehouses';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
+import { useStockWarehouseOptions } from '@/services/productStock';
 
 interface WarehouseSelectProps {
   value: number | null;
@@ -18,7 +20,13 @@ export function WarehouseSelect({
   disabledIds = [],
   placeholder = 'اختر المخزن',
 }: WarehouseSelectProps) {
-  const { options, pickerOptions } = useWarehouseOptions();
+  const canRead = useHasPermissionStrict(PERMISSION_CODES.WAREHOUSES_STOCK_READ);
+  const { options, pickerOptions } = useStockWarehouseOptions({ enabled: canRead });
+
+  if (!canRead) {
+    return <p className="text-sm text-muted-foreground">ليس لديك صلاحية عرض المخازن.</p>;
+  }
+
   const source = includeHidden ? options : pickerOptions;
 
   return (

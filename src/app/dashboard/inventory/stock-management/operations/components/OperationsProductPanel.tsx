@@ -16,8 +16,9 @@ import { EmptyState, ErrorState } from '@/components/ui/state-panels';
 import { ALL_WAREHOUSES_OPTION } from '@/constants/warehouses';
 import type { ProductStockDto } from '@/lib/api/productStock';
 import type { StockMovementSource, StockTimelineQueryParams } from '@/lib/api/warehouses';
-import { useProductStockQuery, useStockTimelineQuery } from '@/services/productStock';
-import { useWarehouseOptions } from '@/services/warehouses';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
+import { useProductStockQuery, useStockTimelineQuery, useStockWarehouseOptions } from '@/services/productStock';
 import { calculateDateRangeFromPeriod, type TimePeriod } from '@/utils/dateRangeUtils';
 import { formatNumber } from '@/utils/format';
 
@@ -115,7 +116,8 @@ function ProductPanelBody({
   const [fromDate, setFromDate] = useState<Date | null>(null);
   const [toDate, setToDate] = useState<Date | null>(null);
   const [timePeriod, setTimePeriod] = useState<TimePeriod | ''>('');
-  const { options: warehouseOptions } = useWarehouseOptions();
+  const canWarehouseFilter = useHasPermissionStrict(PERMISSION_CODES.WAREHOUSES_STOCK_READ);
+  const { options: warehouseOptions } = useStockWarehouseOptions({ enabled: canWarehouseFilter });
 
   const timelineParams: StockTimelineQueryParams | null = canHistory
     ? {
@@ -292,12 +294,14 @@ function ProductPanelBody({
                 onValueChange={(value) => setSource(value as StockMovementSource | '')}
                 placeholder="كل المصادر"
               />
-              <SearchableSelect
-                options={[ALL_WAREHOUSES_OPTION, ...warehouseOptions]}
-                value={warehouseFilter}
-                onValueChange={setWarehouseFilter}
-                placeholder="كل المخازن"
-              />
+              {canWarehouseFilter && (
+                <SearchableSelect
+                  options={[ALL_WAREHOUSES_OPTION, ...warehouseOptions]}
+                  value={warehouseFilter}
+                  onValueChange={setWarehouseFilter}
+                  placeholder="كل المخازن"
+                />
+              )}
             </div>
             <DateRangeFilter
               fromDate={fromDate}
