@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { ArrowLeft } from 'lucide-react';
 import { ActorChip } from '@/components/audit/ActorChip';
-import { OrderChip } from '@/components/stock/OrderChip';
+import { OrderChip, orderHrefOf } from '@/components/stock/OrderChip';
 import {
   MOVEMENT_SOURCE_LABELS,
   MOVEMENT_SOURCE_MARKER_CLASSES,
@@ -131,6 +131,9 @@ function ReferenceLabel({ reference }: { reference: StockTimelineReferenceDto })
   );
 }
 
+const referenceRepeatsOrder = (row: StockTimelineRowDto) =>
+  row.order !== null && row.reference.href === orderHrefOf(row.order.id);
+
 function TimelineRow({ row }: { row: StockTimelineRowDto }) {
   const quantity = quantityViewOf(row);
   const hasVariantLine = row.variant.label !== '' && row.variant.label !== row.variant.productName;
@@ -170,7 +173,7 @@ function TimelineRow({ row }: { row: StockTimelineRowDto }) {
       <div className="flex flex-wrap items-center gap-2">
         <ActorChip actor={row.actor} />
         <OrderChip order={row.order} />
-        <ReferenceLabel reference={row.reference} />
+        {!referenceRepeatsOrder(row) && <ReferenceLabel reference={row.reference} />}
       </div>
 
       {row.note && <p className="text-xs text-muted-foreground">{row.note}</p>}
