@@ -96,12 +96,14 @@ export function StockModeSection() {
           )}
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Link
-            href={COUNT_PAGE_HREF}
-            className="text-sm text-primary underline-offset-4 hover:underline"
-          >
-            عدّ المخزون الافتتاحي
-          </Link>
+          {canReadMovements && (
+            <Link
+              href={COUNT_PAGE_HREF}
+              className="text-sm text-primary underline-offset-4 hover:underline"
+            >
+              عدّ المخزون الافتتاحي
+            </Link>
+          )}
           {canReadStocktake && (
             <Link
               href={STOCKTAKE_LIST_HREF}

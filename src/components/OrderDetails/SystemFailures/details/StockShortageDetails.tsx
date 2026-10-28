@@ -1,21 +1,14 @@
 import { STOCK_SHORTAGE_CODE_LABELS } from '@/constants/orderSystemFailures';
-import { useHasPermission } from '@/hooks/usePermissions';
-import { PERMISSION_CODES } from '@/lib/permissions';
-import { useWarehousesQuery } from '@/services/warehouses';
+import { useWarehouseOptions } from '@/services/warehouses';
 import type { FailureStockShortage, FailureStockShortageBlock } from '@/types/orderSystemFailures';
 
 export function StockShortageDetails({ shortage }: { shortage: FailureStockShortage }) {
-  const canReadWarehouses = useHasPermission(PERMISSION_CODES.WAREHOUSES_READ);
-  const hasWarehouseBlock = shortage.blocks.some((block) => block.warehouseId !== null);
-  const { data: warehouses } = useWarehousesQuery(
-    { limit: 1000 },
-    { enabled: canReadWarehouses && hasWarehouseBlock }
-  );
+  const { warehouses } = useWarehouseOptions();
 
   const warehouseLabelOf = (block: FailureStockShortageBlock) => {
     if (block.warehouseName) return block.warehouseName;
     if (block.warehouseId === null) return 'بدون مخزن محدد';
-    const name = warehouses?.data?.find((warehouse) => warehouse.id === block.warehouseId)?.name;
+    const name = warehouses.find((warehouse) => warehouse.id === block.warehouseId)?.name;
     return name ?? `المخزن رقم ${block.warehouseId}`;
   };
 
