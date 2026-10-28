@@ -41,6 +41,23 @@ const STOCK_SHORTAGE_EVENT_MESSAGES = {
   },
 } as const;
 
+const RETRY_APPLIED_MESSAGES_BY_CODE = {
+  STORE_CREATE_CREATION_STOCK_SHORTAGE: {
+    key: 'stockShortage.event.retryStoreCreationApplied',
+    withoutWarehouseKey: null,
+    title: 'stockShortage.event.retryStoreCreationTitle',
+    fields: [],
+  },
+  STORE_UPDATE_CREATION_STOCK_SHORTAGE: {
+    key: 'stockShortage.event.retryStoreUpdateApplied',
+    withoutWarehouseKey: null,
+    title: 'stockShortage.event.retryStoreUpdateTitle',
+    fields: [],
+  },
+} as const;
+
+const RETRY_APPLIED_EVENT = 'STOCK_SHORTAGE_RETRY_APPLIED';
+
 type StockShortageEventName = keyof typeof STOCK_SHORTAGE_EVENT_MESSAGES;
 
 function isStockShortageEventName(
@@ -50,6 +67,21 @@ function isStockShortageEventName(
     STOCK_SHORTAGE_EVENT_MESSAGES,
     name
   );
+}
+
+function stockShortageMessage(
+  name: StockShortageEventName,
+  params: Record<string, unknown> | null
+) {
+  const code = params?.code;
+  if (
+    name === RETRY_APPLIED_EVENT &&
+    typeof code === 'string' &&
+    Object.prototype.hasOwnProperty.call(RETRY_APPLIED_MESSAGES_BY_CODE, code)
+  ) {
+    return RETRY_APPLIED_MESSAGES_BY_CODE[code as keyof typeof RETRY_APPLIED_MESSAGES_BY_CODE];
+  }
+  return STOCK_SHORTAGE_EVENT_MESSAGES[name];
 }
 
 function parseEventParams(note: string): Record<string, unknown> | null {
@@ -102,7 +134,8 @@ function lineEditSentBackNote(note: string | null | undefined): string | null {
 
 export function orderEventTitle(
   name: string,
-  statusLabelOf: (statusKey: string) => string
+  statusLabelOf: (statusKey: string) => string,
+  note?: string | null
 ): string {
   if (name === LINE_EDIT_SENT_BACK_EVENT) {
     return translate(readStoredLocale(), 'lineEdit.event.title');
@@ -111,7 +144,8 @@ export function orderEventTitle(
     return translate(readStoredLocale(), 'orderEvent.returnRefundRecorded');
   }
   if (!isStockShortageEventName(name)) return statusLabelOf(name);
-  return translate(readStoredLocale(), STOCK_SHORTAGE_EVENT_MESSAGES[name].title);
+  const params = note ? parseEventParams(note) : null;
+  return translate(readStoredLocale(), stockShortageMessage(name, params).title);
 }
 
 export function renderOrderEventNote(
@@ -121,9 +155,9 @@ export function renderOrderEventNote(
 ): string | null {
   if (name === LINE_EDIT_SENT_BACK_EVENT) return lineEditSentBackNote(note);
   if (!name || !isStockShortageEventName(name)) return note || null;
-  const message = STOCK_SHORTAGE_EVENT_MESSAGES[name];
   const params = note ? parseEventParams(note) : null;
   if (!params) return name;
+  const message = stockShortageMessage(name, params);
   const warehouseName = params.warehouseName;
   const warehouseMissing =
     typeof warehouseName !== 'string' || warehouseName === '';

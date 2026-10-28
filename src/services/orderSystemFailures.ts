@@ -8,6 +8,7 @@ import { readStoredLocale } from '@/i18n/locale';
 import { translate } from '@/i18n/translate';
 import { getApiErrorMessage, getOutOfStockBlock } from '@/utils/apiError';
 import { orderNoticesRootKey } from '@/services/orderNotices';
+import { heldRetryMessagesOf } from '@/constants/orderSystemFailures';
 import type {
   MarkAllSystemFailuresSeenResponse,
   OrderSystemFailure,
@@ -92,10 +93,13 @@ export const useRetryHeldTransitionMutation = (orderId: number) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (failureId: number) => retryHeldTransition(orderId, failureId),
-    onSuccess: async () => {
+    mutationFn: (failure: OrderSystemFailure) => retryHeldTransition(orderId, failure.id),
+    onSuccess: async (_row, failure) => {
       toast.success(
-        translate(readStoredLocale(), 'orderSystemFailures.retry.success')
+        translate(
+          readStoredLocale(),
+          heldRetryMessagesOf(failure)?.success ?? 'orderSystemFailures.retry.success'
+        )
       );
       await invalidateAndWait(queryClient, [
         orderSystemFailuresKey(orderId),
@@ -103,13 +107,16 @@ export const useRetryHeldTransitionMutation = (orderId: number) => {
         ...orderStatusKeys(orderId),
       ]);
     },
-    onError: (err) => {
+    onError: (err, failure) => {
       const outOfStock = getOutOfStockBlock(err);
       toast.error(
         outOfStock?.message ??
           getApiErrorMessage(
             err,
-            translate(readStoredLocale(), 'orderSystemFailures.retry.failed')
+            translate(
+              readStoredLocale(),
+              heldRetryMessagesOf(failure)?.failed ?? 'orderSystemFailures.retry.failed'
+            )
           ),
         outOfStock ? { autoClose: 8000 } : undefined
       );

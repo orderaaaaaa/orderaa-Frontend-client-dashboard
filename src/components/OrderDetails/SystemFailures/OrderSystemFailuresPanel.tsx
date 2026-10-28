@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { isRetryableHeld } from '@/constants/orderSystemFailures';
+import { heldRetryMessagesOf } from '@/constants/orderSystemFailures';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -138,20 +138,22 @@ function OrderSystemFailuresPanel({ order, renderActions }: OrderSystemFailuresP
 
   const failures = data.pages.flatMap((page) => page.data);
   const markingFailureId = markSeen.isPending ? markSeen.variables?.id : undefined;
-  const retryingFailureId = retryHeld.isPending ? retryHeld.variables : undefined;
+  const retryingFailureId = retryHeld.isPending ? retryHeld.variables?.id : undefined;
 
-  const renderRetryAction = (failure: OrderSystemFailure) =>
-    canMarkSeen && failure.seenAt === null && isRetryableHeld(failure) ? (
+  const renderRetryAction = (failure: OrderSystemFailure) => {
+    const retryMessages = heldRetryMessagesOf(failure);
+    return canMarkSeen && failure.seenAt === null && retryMessages ? (
       <Button
         type="button"
         variant="outline"
         size="sm"
         loading={retryingFailureId === failure.id}
-        onClick={() => retryHeld.mutate(failure.id)}
+        onClick={() => retryHeld.mutate(failure)}
       >
-        {t('orderSystemFailures.retry.action')}
+        {t(retryMessages.action)}
       </Button>
     ) : null;
+  };
 
   const markAllAction =
     canMarkSeen && unseenTotal > 0 && firstPage ? (

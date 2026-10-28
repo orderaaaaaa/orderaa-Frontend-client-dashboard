@@ -165,17 +165,54 @@ export const orderSystemFailureLabelKeyOf = (code: string): TranslationKey =>
 export const isInfoCode = (code: string) =>
   isOrderSystemFailureCode(code) && INFO_CODES.includes(code);
 
+export interface HeldRetryMessages {
+  action: TranslationKey;
+  success: TranslationKey;
+  failed: TranslationKey;
+}
+
+const STATUS_RETRY_MESSAGES: HeldRetryMessages = {
+  action: 'orderSystemFailures.retry.action',
+  success: 'orderSystemFailures.retry.success',
+  failed: 'orderSystemFailures.retry.failed',
+};
+
+const STORE_CREATION_RETRY_MESSAGES: HeldRetryMessages = {
+  action: 'orderSystemFailures.retryStoreCreation.action',
+  success: 'orderSystemFailures.retryStoreCreation.success',
+  failed: 'orderSystemFailures.retryStoreCreation.failed',
+};
+
+const STORE_UPDATE_RETRY_MESSAGES: HeldRetryMessages = {
+  action: 'orderSystemFailures.retryStoreUpdate.action',
+  success: 'orderSystemFailures.retryStoreUpdate.success',
+  failed: 'orderSystemFailures.retryStoreUpdate.failed',
+};
+
 const RETRYABLE_HELD_SOURCE_CODES: readonly {
   source: OrderSystemFailureSource;
   code: OrderSystemFailureCode;
+  messages: HeldRetryMessages;
 }[] = [
-  { source: 'CARRIER_WEBHOOK', code: 'CARRIER_STATUS_NOT_APPLIED' },
-  { source: 'STOCK_WORKFLOW', code: 'MACHINE_TRANSITION_STOCK_SHORTAGE' },
+  { source: 'CARRIER_WEBHOOK', code: 'CARRIER_STATUS_NOT_APPLIED', messages: STATUS_RETRY_MESSAGES },
+  { source: 'STOCK_WORKFLOW', code: 'MACHINE_TRANSITION_STOCK_SHORTAGE', messages: STATUS_RETRY_MESSAGES },
+  {
+    source: 'INTEGRATION_ORDER_UPDATE',
+    code: 'STORE_CREATE_CREATION_STOCK_SHORTAGE',
+    messages: STORE_CREATION_RETRY_MESSAGES,
+  },
+  {
+    source: 'INTEGRATION_ORDER_UPDATE',
+    code: 'STORE_UPDATE_CREATION_STOCK_SHORTAGE',
+    messages: STORE_UPDATE_RETRY_MESSAGES,
+  },
 ];
 
-export const isRetryableHeld = (failure: OrderSystemFailure) =>
-  failure.kind === 'HELD' &&
-  RETRYABLE_HELD_SOURCE_CODES.some(({ source, code }) => source === failure.source && code === failure.code);
+export const heldRetryMessagesOf = (failure: OrderSystemFailure): HeldRetryMessages | null =>
+  failure.kind === 'HELD'
+    ? (RETRYABLE_HELD_SOURCE_CODES.find(({ source, code }) => source === failure.source && code === failure.code)
+        ?.messages ?? null)
+    : null;
 
 const isFailureActorType = (value: string): value is FailureActorType =>
   Object.prototype.hasOwnProperty.call(ACTOR_TYPE_LABELS, value);

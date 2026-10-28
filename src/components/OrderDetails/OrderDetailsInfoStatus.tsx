@@ -292,7 +292,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
   const isPostShipping = POST_SHIPPING_STATUSES.has(order.status);
 
   const events: MappedEvent[] = allEvents.map((event: OrderEvent, index: number) => {
-    const statusLabel = event.name ? orderEventTitle(event.name, getStatusLabel) : 'حدث';
+    const statusLabel = event.name ? orderEventTitle(event.name, getStatusLabel, event.note) : 'حدث';
     const createdDate = new Date(event.createdAt);
     return {
       id: event.id || index + 1,
