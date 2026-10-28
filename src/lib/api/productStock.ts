@@ -13,10 +13,16 @@ export interface ProductStockCellDto {
   quantity: number;
 }
 
+export interface ProductStockOptionDto {
+  attribute: { id: number; name: string };
+  option: { id: number; name: string };
+}
+
 export interface ProductStockVariantDto {
   variantId: number;
   variantLabel: string;
   sku: string | null;
+  options: ProductStockOptionDto[];
   totalQuantity: number;
   byWarehouse: ProductStockCellDto[];
 }

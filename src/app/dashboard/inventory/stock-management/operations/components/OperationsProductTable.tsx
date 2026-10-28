@@ -91,8 +91,8 @@ export function OperationsProductTable({
           setSearch(event.target.value);
           setPage(1);
         }}
-        placeholder="ابحث باسم المنتج أو SKU"
-        aria-label="ابحث باسم المنتج أو SKU"
+        placeholder="ابحث باسم المنتج"
+        aria-label="ابحث باسم المنتج"
         className={cn(STOCK_FIELD_CLASS, 'md:max-w-md')}
       />
 

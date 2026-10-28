@@ -11,22 +11,27 @@ const shortageOf = (entry: unknown): StockAdjustmentShortageApi | null => {
   const warehouseId = toNumber(entry.warehouseId);
   const variantId = toNumber(entry.variantId);
   const available = toNumber(entry.available);
-  const requested = toNumber(entry.requested) ?? toNumber(entry.required);
-  if (warehouseId === null || variantId === null || available === null || requested === null) {
+  const required = toNumber(entry.required);
+  if (warehouseId === null || variantId === null || available === null || required === null) {
     return null;
   }
-  return { warehouseId, variantId, available, requested };
+  return { warehouseId, variantId, available, required };
 };
 
-export const adjustmentShortagesOf = (err: unknown): StockAdjustmentShortageApi[] => {
+export const adjustmentShortagesOf = (
+  err: unknown,
+  mode: 'single' | 'batch'
+): StockAdjustmentShortageApi[] => {
   const data = isRecord(err) && isRecord(err.response) ? err.response.data : undefined;
   if (!isRecord(data)) return [];
-  const details = isRecord(data.details) ? data.details.shortages : undefined;
-  const source: unknown[] = Array.isArray(details)
-    ? details
-    : Array.isArray(data.lines)
-      ? data.lines
-      : [];
+  const source =
+    mode === 'batch'
+      ? isRecord(data.details) && Array.isArray(data.details.shortages)
+        ? data.details.shortages
+        : []
+      : Array.isArray(data.lines)
+        ? data.lines
+        : [];
   return source
     .map(shortageOf)
     .filter((shortage): shortage is StockAdjustmentShortageApi => shortage !== null);

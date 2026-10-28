@@ -340,7 +340,7 @@ export interface StockAdjustmentShortageApi {
   warehouseId: number;
   variantId: number;
   available: number;
-  requested: number;
+  required: number;
 }
 
 export interface StockTransferItemDto {

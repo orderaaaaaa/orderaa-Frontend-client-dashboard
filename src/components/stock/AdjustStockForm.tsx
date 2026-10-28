@@ -159,7 +159,7 @@ export function AdjustStockForm(props: AdjustStockFormProps) {
       toast.success('تم حفظ التسوية بنجاح');
       onDone();
     } catch (err: unknown) {
-      const shortages = adjustmentShortagesOf(err);
+      const shortages = adjustmentShortagesOf(err, isBatch ? 'batch' : 'single');
       setFailure({ shortages });
       setRefusedKeys(new Set(shortages.map((shortage) => keyOf(shortage.warehouseId, shortage.variantId))));
       toast.error(getApiErrorMessage(err, 'تعذر حفظ التسوية'), { autoClose: 8000 });
@@ -197,7 +197,7 @@ export function AdjustStockForm(props: AdjustStockFormProps) {
               {failure.shortages.map((shortage) => (
                 <li key={keyOf(shortage.warehouseId, shortage.variantId)}>
                   {shortageLabelOf(shortage.warehouseId, shortage.variantId)}: المطلوب{' '}
-                  <span dir="ltr" className="tabular-nums">{shortage.requested}</span>، المتاح{' '}
+                  <span dir="ltr" className="tabular-nums">{shortage.required}</span>، المتاح{' '}
                   <span dir="ltr" className="tabular-nums">{Math.max(0, shortage.available)}</span>
                 </li>
               ))}
