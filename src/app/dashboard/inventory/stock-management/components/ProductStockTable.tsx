@@ -24,11 +24,11 @@ import { STOCK_STATUS_CONFIG } from '../constants';
 import { formatStockNumber } from '../utils/formatNumber';
 import {
   displayCell,
-  sumVisibleQuantity,
   type StockCellView,
   type StockIndicators,
 } from '../utils/stockIndicators';
-import type { StockProduct, VariantStock, ProductVariantRow } from '../types';
+import { productStockTotals } from '../utils/stockTotals';
+import type { StockProduct, VariantStock } from '../types';
 
 interface SelectedCell {
   stock: VariantStock;
@@ -155,18 +155,14 @@ export function ProductStockTable({
       (!filterColor || variant.color === filterColor)
   );
 
-  const columnTotals = visibleColors.map((color) =>
-    sumVisibleQuantity(
-      visibleVariants.map((variant) => variant.stocks[color]),
-      indicators
-    )
+  const totals = productStockTotals(
+    visibleColors,
+    visibleVariants,
+    visibleOtherVariants,
+    indicators
   );
-
-  const rowTotal = (variant: ProductVariantRow) =>
-    sumVisibleQuantity(
-      visibleColors.map((color) => variant.stocks[color]),
-      indicators
-    );
+  const columnTotals = totals.byColor;
+  const rowTotal = (index: number) => totals.byRow[index] ?? 0;
 
   const renderGridCell = (view: StockCellView, color: string, size: string) => {
     if (view.kind === 'hidden') return null;
@@ -209,7 +205,7 @@ export function ProductStockTable({
     );
   };
 
-  const grandTotal = columnTotals.reduce((sum, total) => sum + total, 0);
+  const grandTotal = totals.grandTotal;
 
   return (
     <div className="rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden">
@@ -235,14 +231,14 @@ export function ProductStockTable({
           <p className="py-8 text-center text-sm text-gray-500">لا توجد متغيرات مطابقة</p>
         ) : (
           <>
-            {visibleVariants.map((variant) => (
+            {visibleVariants.map((variant, rowIndex) => (
               <div key={variant.size} className="rounded-lg border border-gray-200 p-3">
                 <div className="flex items-start justify-between gap-3 border-b border-gray-100 pb-2">
                   <span className="min-w-0 break-words font-semibold text-gray-800">
                     {variant.size}
                   </span>
                   <span className="shrink-0 text-sm font-bold text-gray-800">
-                    {formatStockNumber(rowTotal(variant))}
+                    {formatStockNumber(rowTotal(rowIndex))}
                   </span>
                 </div>
                 <div className="flex flex-col">
@@ -338,7 +334,7 @@ export function ProductStockTable({
               </TableRow>
             ) : (
               <>
-                {visibleVariants.map((variant) => (
+                {visibleVariants.map((variant, rowIndex) => (
                   <TableRow key={variant.size} className="group hover:bg-gray-50">
                     <TableCell className="sticky start-0 z-[1] bg-white group-hover:bg-gray-50 transition-colors px-4 py-3 text-center text-sm font-semibold text-gray-800 border-l border-gray-200 last:border-l-0">
                       {variant.size}
@@ -356,7 +352,7 @@ export function ProductStockTable({
                       </TableCell>
                     ))}
                     <TableCell className="px-4 py-3 text-center text-sm font-bold text-gray-800 border-l border-gray-200 last:border-l-0">
-                      {formatStockNumber(rowTotal(variant))}
+                      {formatStockNumber(rowTotal(rowIndex))}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -411,6 +407,10 @@ export function ProductStockTable({
               </li>
             ))}
           </ul>
+          <div className="flex items-center justify-between gap-3 border-t border-border pt-2 text-sm">
+            <span className="font-semibold text-foreground">إجمالي خيارات أخرى</span>
+            <StockQuantityCell quantity={totals.otherTotal} />
+          </div>
         </section>
       )}
 

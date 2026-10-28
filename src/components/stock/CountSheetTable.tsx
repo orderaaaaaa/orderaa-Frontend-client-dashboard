@@ -65,16 +65,18 @@ export function CountSheetTable({
     node?.select();
   };
 
+  const onContainerKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
+      event.preventDefault();
+      onSave();
+    }
+  };
+
   const onInputKeyDown = (
     event: KeyboardEvent<HTMLInputElement>,
     index: number,
     line: CountSheetLine
   ) => {
-    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
-      event.preventDefault();
-      onSave();
-      return;
-    }
     if (event.key === 'Enter') {
       event.preventDefault();
       focusLine(index + 1);
@@ -91,7 +93,10 @@ export function CountSheetTable({
   };
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-border bg-card">
+    <div
+      className="overflow-x-auto rounded-xl border border-border bg-card"
+      onKeyDown={onContainerKeyDown}
+    >
       <table className="w-full min-w-[32rem] text-sm">
         <thead className="bg-muted/50">
           <tr className="border-b border-border">

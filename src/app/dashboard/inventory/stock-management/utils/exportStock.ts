@@ -13,10 +13,10 @@ import { variantPlainLabel } from '@/lib/variantOptionLabel';
 import { apiListToStockProducts } from './transformStock';
 import {
   displayCell,
-  sumVisibleQuantity,
   type StockCellView,
   type StockIndicators,
 } from './stockIndicators';
+import { productStockTotals } from './stockTotals';
 
 async function loadAllProducts(
   filters: Omit<StockFiltersDto, 'page' | 'limit'>,
@@ -173,7 +173,14 @@ function buildProductsHtml(
 ): string {
   return products
     .map((product) => {
-      const headerCells = ['المقاس', ...product.colors]
+      const totals = productStockTotals(
+        product.colors,
+        product.variants,
+        product.otherVariants,
+        indicators
+      );
+
+      const headerCells = ['المقاس', ...product.colors, 'الإجمالي']
         .map((h) => `<th>${escapeHtml(h)}</th>`)
         .join('');
 
@@ -182,19 +189,14 @@ function buildProductsHtml(
           const cells = product.colors
             .map((color) => pdfCellHtml(variant.stocks[color], indicators))
             .join('');
-          return `<tr class="${i % 2 === 0 ? 'row-even' : 'row-odd'}"><td class="size-cell">${escapeHtml(variant.size)}</td>${cells}</tr>`;
+          return `<tr class="${i % 2 === 0 ? 'row-even' : 'row-odd'}"><td class="size-cell">${escapeHtml(variant.size)}</td>${cells}<td class="total-cell">${totals.byRow[i] ?? 0}</td></tr>`;
         })
         .join('');
 
-      const totalCells = product.colors
-        .map((color) => {
-          const total = sumVisibleQuantity(
-            product.variants.map((v) => v.stocks[color]),
-            indicators
-          );
-          return `<td class="total-cell">${total}</td>`;
-        })
-        .join('');
+      const totalCells = [
+        ...totals.byColor.map((total) => `<td class="total-cell">${total}</td>`),
+        `<td class="total-cell">${totals.grandTotal}</td>`,
+      ].join('');
 
       const otherRows = product.otherVariants
         .map((variant) => {
@@ -205,7 +207,7 @@ function buildProductsHtml(
           });
           const config = STOCK_STATUS_CONFIG[variant.status];
           const badgeColor = PDF_BADGE_COLORS[variant.status];
-          return `<tr class="other-row"><td class="size-cell">${escapeHtml(label)}</td><td colspan="${product.colors.length}">${variant.quantity} <span class="badge" style="color:${badgeColor}">(${escapeHtml(config.label)})</span></td></tr>`;
+          return `<tr class="other-row"><td class="size-cell">${escapeHtml(label)}</td><td colspan="${product.colors.length + 1}">${variant.quantity} <span class="badge" style="color:${badgeColor}">(${escapeHtml(config.label)})</span></td></tr>`;
         })
         .join('');
 
