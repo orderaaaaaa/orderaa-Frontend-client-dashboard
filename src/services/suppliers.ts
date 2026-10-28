@@ -4,6 +4,7 @@ import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { STOCK_VIEW_KEYS } from '@/services/warehouses';
 import {
   getSuppliers,
+  getSuppliersSummary,
   getSupplierById,
   createSupplier,
   updateSupplier,
@@ -29,6 +30,15 @@ export const useSuppliersQuery = (params?: GetSuppliersParams) => {
   return useQuery({
     queryKey: [QUERY_KEYS.SUPPLIERS, params] as QueryKey,
     queryFn: () => getSuppliers(params),
+    staleTime: 30 * 1000,
+  });
+};
+
+export const useSuppliersSummaryQuery = (enabled: boolean) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.SUPPLIERS, 'summary'] as QueryKey,
+    queryFn: getSuppliersSummary,
+    enabled,
     staleTime: 30 * 1000,
   });
 };

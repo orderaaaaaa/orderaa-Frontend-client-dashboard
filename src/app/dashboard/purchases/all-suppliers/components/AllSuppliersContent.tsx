@@ -15,7 +15,9 @@ import PaginationFooter from '@/components/ui/pagination-footer';
 import { DEFAULT_PAGE_SIZE } from '../constants';
 import { formatCurrency } from '../utils';
 import { useSupplierFilters } from '../hooks';
-import { useSuppliersQuery } from '@/services/suppliers';
+import { useSuppliersQuery, useSuppliersSummaryQuery } from '@/services/suppliers';
+import { usePermissions } from '@/hooks/usePermissions';
+import { PERMISSION_CODES, hasPermissionCodeStrict } from '@/lib/permissions';
 
 export function AllSuppliersContent() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -74,6 +76,10 @@ export function AllSuppliersContent() {
     ...parsedInvoicesCount,
   });
 
+  const permissions = usePermissions();
+  const canReadSupplierSummary = hasPermissionCodeStrict(permissions, PERMISSION_CODES.SUPPLIERS_READ);
+  const { data: supplierSummary } = useSuppliersSummaryQuery(canReadSupplierSummary);
+
   const suppliers = suppliersData?.data ?? [];
   const meta = suppliersData?.meta;
   const totalItems = meta?.totalItems ?? 0;
@@ -123,20 +129,22 @@ export function AllSuppliersContent() {
     <div className="w-full max-w-full overflow-x-hidden">
       <SuppliersHeader />
 
-      <div className="sm:px-8 pt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <SummaryStatCard
-          icon={<LiaArrowUpSolid className="w-6 h-6 text-red-600" />}
-          iconBgClassName="bg-red-100"
-          label="مديون (إجمالي)"
-          value={formatCurrency(0)}
-        />
-        <SummaryStatCard
-          icon={<LiaArrowDownSolid className="w-6 h-6 text-green-600" />}
-          iconBgClassName="bg-green-100"
-          label="ليّ فلوس (إجمالي)"
-          value={formatCurrency(0)}
-        />
-      </div>
+      {canReadSupplierSummary && (
+        <div className="sm:px-8 pt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <SummaryStatCard
+            icon={<LiaArrowUpSolid className="w-6 h-6 text-red-600" />}
+            iconBgClassName="bg-red-100"
+            label="مديون (إجمالي)"
+            value={supplierSummary ? formatCurrency(supplierSummary.owedToSuppliers) : '—'}
+          />
+          <SummaryStatCard
+            icon={<LiaArrowDownSolid className="w-6 h-6 text-green-600" />}
+            iconBgClassName="bg-green-100"
+            label="ليّ فلوس (إجمالي)"
+            value={supplierSummary ? formatCurrency(supplierSummary.owedBySuppliers) : '—'}
+          />
+        </div>
+      )}
 
       <div className="sm:px-8 py-3 flex flex-col gap-4">
         <div className="flex flex-row items-center gap-3">

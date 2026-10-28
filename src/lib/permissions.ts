@@ -76,6 +76,13 @@ export function hasPermissionCode(
   return permissions.includes(code);
 }
 
+export function hasPermissionCodeStrict(
+  permissions: string[] | undefined,
+  code: PermissionCode
+): boolean {
+  return Boolean(permissions?.includes(code));
+}
+
 export function hasAnyPermissionCode(
   permissions: string[] | undefined,
   codes: PermissionCode[]

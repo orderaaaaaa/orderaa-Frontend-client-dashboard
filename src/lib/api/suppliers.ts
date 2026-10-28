@@ -26,6 +26,13 @@ export interface SupplierApiItem {
   updatedAt: string;
 }
 
+export interface SupplierBalancesSummaryApiItem {
+  owedToSuppliers: number;
+  owedBySuppliers: number;
+  supplierCount: number;
+  asOf: string;
+}
+
 export interface SupplierProductApiItem {
   productId: number;
   productName: string;
@@ -198,6 +205,11 @@ export async function getSuppliers(
 ): Promise<{ data: SupplierApiItem[]; meta: PaginationMeta }> {
   const response = await api.get('/suppliers', { params });
   return response.data as { data: SupplierApiItem[]; meta: PaginationMeta };
+}
+
+export async function getSuppliersSummary(): Promise<SupplierBalancesSummaryApiItem> {
+  const response = await api.get('/suppliers/summary');
+  return response.data as SupplierBalancesSummaryApiItem;
 }
 
 export async function getSupplierById(id: number): Promise<SupplierApiItem> {
