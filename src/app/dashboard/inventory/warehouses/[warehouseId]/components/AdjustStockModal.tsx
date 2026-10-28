@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { getApiErrorMessage } from '@/utils/apiError';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
+import { VariantLabel } from '@/components/stock/VariantLabel';
 import { useAdjustStockMutation } from '@/services/warehouses';
 import type { WarehouseStockItemApi } from '@/lib/api/warehouses';
 
@@ -15,10 +16,6 @@ interface AdjustStockModalProps {
   items: WarehouseStockItemApi[];
   onSuccess: () => void;
 }
-
-const variantLabel = (item: WarehouseStockItemApi): string =>
-  item.options.map((option) => option.option.name).join(' / ') ||
-  item.combinationKey;
 
 export function AdjustStockModal({
   isOpen,
@@ -135,12 +132,12 @@ export function AdjustStockModal({
                     className="border-b border-gray-100"
                   >
                     <td className="py-2 px-3">
-                      <p className="font-medium text-gray-900">
-                        {item.productName}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {variantLabel(item)}
-                      </p>
+                      <VariantLabel
+                        productName={item.productName}
+                        sku={item.sku ?? null}
+                        options={item.options}
+                        size="sm"
+                      />
                     </td>
                     <td className="py-2 px-3 text-gray-600">{item.quantity}</td>
                     <td className="py-2 px-3">

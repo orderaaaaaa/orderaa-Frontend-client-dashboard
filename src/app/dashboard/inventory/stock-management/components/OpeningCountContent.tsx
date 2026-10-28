@@ -8,6 +8,11 @@ import Input from '@/components/ui/Input';
 import PageLoading from '@/components/ui/page-loading';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
+import {
+  CountSheetTable,
+  isInvalidCountInput,
+  type CountSheetLine,
+} from '@/components/stock/CountSheetTable';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { getCountSheet, type CountSheetParams, type CountSheetRowApi } from '@/lib/api/stockCount';
 import type { AdjustStockDto } from '@/lib/api/warehouses';
@@ -16,7 +21,6 @@ import { useCountSheetQuery } from '@/services/stockCount';
 import { useAdjustStockMutation, useWarehouseOptions } from '@/services/warehouses';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { useDebounce } from '@/utils/debounce';
-import { OpeningCountTable } from './OpeningCountTable';
 
 const PAGE_SIZE = 50;
 
@@ -25,11 +29,14 @@ interface CountEdit {
   query: CountSheetParams;
 }
 
-const isInvalidCount = (raw: string) => {
-  if (raw.trim() === '') return true;
-  const value = Number(raw);
-  return !Number.isInteger(value) || value < 0;
-};
+const toCountSheetLine = (row: CountSheetRowApi): CountSheetLine => ({
+  variantId: row.variantId,
+  productName: row.productName,
+  sku: row.sku,
+  options: row.options,
+  live: row.quantity,
+  expected: null,
+});
 
 export function OpeningCountContent() {
   const searchParams = useSearchParams();
@@ -64,21 +71,40 @@ export function OpeningCountContent() {
   );
 
   const rows = data?.data ?? [];
+  const lines = rows.map(toCountSheetLine);
   const totalPages = data?.totalPages ?? 1;
 
-  const countedValueOf = (row: CountSheetRowApi) =>
-    edits[row.variantId]?.raw ?? String(row.quantity);
+  const countedValueOf = (line: CountSheetLine) =>
+    edits[line.variantId]?.raw ?? String(line.live ?? 0);
 
-  const onCountedChange = (row: CountSheetRowApi, raw: string) => {
+  const onCountedChange = (variantId: number, raw: string) => {
     setEdits((current) => ({
       ...current,
-      [row.variantId]: { raw, query: activeQuery },
+      [variantId]: { raw, query: activeQuery },
     }));
   };
 
+  const onCancelEdit = (variantId: number) => {
+    setEdits((current) => {
+      const remaining: Record<number, CountEdit> = {};
+      Object.entries(current).forEach(([key, edit]) => {
+        if (Number(key) !== variantId) remaining[Number(key)] = edit;
+      });
+      return remaining;
+    });
+  };
+
   const hasInvalid =
-    rows.some((row) => isInvalidCount(countedValueOf(row))) ||
-    Object.values(edits).some((edit) => isInvalidCount(edit.raw));
+    lines.some((line) => isInvalidCountInput(countedValueOf(line))) ||
+    Object.values(edits).some((edit) => isInvalidCountInput(edit.raw));
+
+  const canSave =
+    canAdjust &&
+    hasWarehouse &&
+    !hasInvalid &&
+    Object.keys(edits).length > 0 &&
+    !isPreparing &&
+    !adjustMutation.isPending;
 
   const onWarehouseChange = (next: string) => {
     setWarehouseId(next);
@@ -178,6 +204,11 @@ export function OpeningCountContent() {
     }
   };
 
+  const onSave = () => {
+    if (!canSave) return;
+    void onSubmit();
+  };
+
   return (
     <div className="space-y-4" dir="rtl">
       <h1 className="text-2xl font-bold text-gray-900">الجرد الافتتاحي</h1>
@@ -213,11 +244,12 @@ export function OpeningCountContent() {
       ) : rows.length === 0 ? (
         <p className="py-8 text-center text-sm text-gray-500">لا توجد متغيرات</p>
       ) : (
-        <OpeningCountTable
-          rows={rows}
-          countedValueOf={countedValueOf}
-          isInvalid={isInvalidCount}
+        <CountSheetTable
+          lines={lines}
+          valueOf={countedValueOf}
           onCountedChange={onCountedChange}
+          onCancelEdit={onCancelEdit}
+          onSave={onSave}
         />
       )}
 
@@ -242,14 +274,7 @@ export function OpeningCountContent() {
       <div className="flex justify-end">
         <Button
           onClick={onSubmit}
-          disabled={
-            !canAdjust ||
-            !hasWarehouse ||
-            hasInvalid ||
-            Object.keys(edits).length === 0 ||
-            isPreparing ||
-            adjustMutation.isPending
-          }
+          disabled={!canSave}
           loading={isPreparing || adjustMutation.isPending}
         >
           حفظ الجرد

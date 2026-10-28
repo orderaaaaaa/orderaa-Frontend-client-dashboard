@@ -18,6 +18,8 @@ import {
 } from '@/components/ui/tooltip';
 import BaseModal from '@/components/ui/base-modal';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { StockQuantityCell } from '@/components/stock/StockQuantityCell';
+import { VariantLabel } from '@/components/stock/VariantLabel';
 import { STOCK_STATUS_CONFIG } from '../constants';
 import { formatStockNumber } from '../utils/formatNumber';
 import {
@@ -146,6 +148,12 @@ export function ProductStockTable({
   const visibleVariants = filterSize
     ? product.variants.filter((v) => v.size === filterSize)
     : product.variants;
+
+  const visibleOtherVariants = product.otherVariants.filter(
+    (variant) =>
+      (!filterSize || variant.size === filterSize) &&
+      (!filterColor || variant.color === filterColor)
+  );
 
   const columnTotals = visibleColors.map((color) =>
     sumVisibleQuantity(
@@ -373,6 +381,38 @@ export function ProductStockTable({
           </TableBody>
         </Table>
       </div>
+
+      {visibleOtherVariants.length > 0 && (
+        <section className="flex flex-col gap-3 border-t border-border px-4 py-4 md:px-5">
+          <div className="flex flex-col gap-0.5">
+            <h4 className="text-sm font-semibold text-foreground">خيارات أخرى</h4>
+            <p className="text-xs text-muted-foreground">
+              متغيرات لا تُعرض في شبكة المقاس واللون
+            </p>
+          </div>
+          <ul className="flex flex-col divide-y divide-border">
+            {visibleOtherVariants.map((variant) => (
+              <li
+                key={variant.variantId}
+                className="flex items-center justify-between gap-3 py-2.5"
+              >
+                <VariantLabel
+                  productName={product.name}
+                  sku={null}
+                  options={variant.options}
+                  size="sm"
+                />
+                <div className="flex shrink-0 items-center gap-3">
+                  <StockQuantityCell quantity={variant.quantity} />
+                  <span className="text-xs text-muted-foreground">
+                    {STOCK_STATUS_CONFIG[variant.status].label}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <BaseModal
         isOpen={!!selectedCell}

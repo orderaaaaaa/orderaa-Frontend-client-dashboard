@@ -34,6 +34,7 @@ import {
 import { OrderStatus } from '@/types/orders';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { useDebounce } from '@/utils/debounce';
+import { variantPlainLabel } from '@/lib/variantOptionLabel';
 import {
   MAX_VIRTUAL_WAREHOUSE_TERMS,
   emptyVirtualWarehouseForm,
@@ -416,9 +417,11 @@ function VirtualWarehousePreviewPanel({
     if (!product) return [];
     return product.variants.map((variant) => ({
       key: String(variant.id),
-      value:
-        variant.options.map((pair) => pair.option.name).join(' / ') ||
-        variant.combinationKey,
+      value: variantPlainLabel({
+        productName: product.name,
+        sku: null,
+        options: variant.options,
+      }),
     }));
   }, [products, productId]);
 

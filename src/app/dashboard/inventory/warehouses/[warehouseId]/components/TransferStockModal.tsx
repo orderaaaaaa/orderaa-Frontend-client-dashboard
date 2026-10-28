@@ -8,11 +8,13 @@ import { translate } from '@/i18n/translate';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
+import { VariantLabel } from '@/components/stock/VariantLabel';
 import {
   useTransferStockMutation,
   useWarehouseOptions,
 } from '@/services/warehouses';
 import type { WarehouseStockItemApi } from '@/lib/api/warehouses';
+import { variantPlainLabel } from '@/lib/variantOptionLabel';
 
 interface TransferStockModalProps {
   isOpen: boolean;
@@ -21,10 +23,6 @@ interface TransferStockModalProps {
   items: WarehouseStockItemApi[];
   onSuccess: () => void;
 }
-
-const variantLabel = (item: WarehouseStockItemApi): string =>
-  item.options.map((option) => option.option.name).join(' / ') ||
-  item.combinationKey;
 
 export function TransferStockModal({
   isOpen,
@@ -63,7 +61,11 @@ export function TransferStockModal({
         quantity,
         available: item.quantity,
         productName: item.productName,
-        variantLabel: variantLabel(item),
+        variantLabel: variantPlainLabel({
+          productName: item.productName,
+          sku: item.sku,
+          options: item.options,
+        }),
       };
     })
     .filter((entry) => entry.quantity > 0);
@@ -186,12 +188,12 @@ export function TransferStockModal({
                 return (
                   <tr key={item.variantId} className="border-b border-gray-100">
                     <td className="py-2 px-3">
-                      <p className="font-medium text-gray-900">
-                        {item.productName}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {variantLabel(item)}
-                      </p>
+                      <VariantLabel
+                        productName={item.productName}
+                        sku={item.sku ?? null}
+                        options={item.options}
+                        size="sm"
+                      />
                     </td>
                     <td className="py-2 px-3 text-gray-600">{item.quantity}</td>
                     <td className="py-2 px-3">

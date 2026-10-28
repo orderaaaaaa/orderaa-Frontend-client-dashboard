@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useStockProducts } from '@/services/stock';
+import { variantPlainLabel } from '@/lib/variantOptionLabel';
 import { RULE_SCOPE_LABEL_KEYS } from '../constants';
 
 /** Derived from the label map so a new scope cannot be added to only one side. */
@@ -83,9 +84,11 @@ export function StockRuleScopeSelector({ value, onChange }: Props) {
     if (!product) return [];
     return product.variants.map((variant) => ({
       key: String(variant.id),
-      value:
-        variant.options.map((pair) => pair.option.name).join(' / ') ||
-        variant.combinationKey,
+      value: variantPlainLabel({
+        productName: product.name,
+        sku: null,
+        options: variant.options,
+      }),
     }));
   }, [products, activeProductId]);
 

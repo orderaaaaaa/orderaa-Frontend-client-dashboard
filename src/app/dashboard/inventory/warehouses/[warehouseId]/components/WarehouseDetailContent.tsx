@@ -20,7 +20,7 @@ import {
   useWarehouseStockQuery,
 } from '@/services/warehouses';
 import type { WarehouseStockItemApi } from '@/lib/api/warehouses';
-import { variantOptionLabel } from '@/lib/variantOptionLabel';
+import { variantPlainLabel } from '@/lib/variantOptionLabel';
 import { useDebounce } from '@/utils/debounce';
 import { AdjustStockModal } from './AdjustStockModal';
 import { TransferStockModal } from './TransferStockModal';
@@ -30,7 +30,11 @@ interface WarehouseDetailContentProps {
 }
 
 const variantLabel = (item: WarehouseStockItemApi): string =>
-  variantOptionLabel(item.options) || item.combinationKey;
+  variantPlainLabel({
+    productName: item.productName,
+    sku: item.sku,
+    options: item.options,
+  });
 
 export function WarehouseDetailContent({
   warehouseId,

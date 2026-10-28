@@ -1,3 +1,5 @@
+import type { VariantDisplayItem } from '@/lib/variantOptionLabel';
+
 export type StockStatus = 'high' | 'medium' | 'low' | 'out_of_stock' | 'shortage';
 
 export type StockScope =
@@ -18,6 +20,15 @@ export interface ProductVariantRow {
   stocks: Record<string, VariantCell>;
 }
 
+export interface OtherOptionVariant {
+  variantId: number;
+  size: string | null;
+  color: string | null;
+  options: VariantDisplayItem[];
+  quantity: number;
+  status: StockStatus;
+}
+
 export interface StockProduct {
   id: number;
   name: string;
@@ -26,6 +37,7 @@ export interface StockProduct {
   colors: string[];
   sizes: string[];
   variants: ProductVariantRow[];
+  otherVariants: OtherOptionVariant[];
 }
 
 export interface StockFilters {

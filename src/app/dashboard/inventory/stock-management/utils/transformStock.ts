@@ -5,6 +5,7 @@ import type {
 } from '@/services/stock';
 import { LOW_STOCK_THRESHOLD } from '../constants';
 import type {
+  OtherOptionVariant,
   ProductVariantRow,
   StockProduct,
   StockStatus,
@@ -93,7 +94,12 @@ function buildVariantRows(
   variants: StockVariantCombination[] | undefined | null,
   sizeAxis: AxisIndex,
   colorAxis: AxisIndex
-): { rows: ProductVariantRow[]; sizes: string[]; colors: string[] } {
+): {
+  rows: ProductVariantRow[];
+  sizes: string[];
+  colors: string[];
+  others: OtherOptionVariant[];
+} {
   const sizes = sizeAxis.names.length > 0 ? [...sizeAxis.names] : [PLACEHOLDER_SIZE];
   const colors =
     colorAxis.names.length > 0 ? [...colorAxis.names] : [PLACEHOLDER_COLOR];
@@ -107,20 +113,31 @@ function buildVariantRows(
     stocksBySize.set(size, row);
   }
 
+  const others: OtherOptionVariant[] = [];
   for (const variant of variants ?? []) {
     const { size, color } = resolveVariantAxisValues(variant, sizeAxis, colorAxis);
     const sizeKey = size ?? (sizeAxis.names.length === 0 ? PLACEHOLDER_SIZE : null);
     const colorKey =
       color ?? (colorAxis.names.length === 0 ? PLACEHOLDER_COLOR : null);
-    if (!sizeKey || !colorKey) continue;
-
-    const row = stocksBySize.get(sizeKey);
-    if (!row || !(colorKey in row)) continue;
-
     const quantity = typeof variant.availableCount === 'number'
       ? variant.availableCount
       : 0;
-    row[colorKey] = { quantity, status: statusFromQuantity(quantity) };
+    const status = statusFromQuantity(quantity);
+
+    const row = sizeKey === null ? undefined : stocksBySize.get(sizeKey);
+    if (row && colorKey !== null && row[colorKey] === 'missing') {
+      row[colorKey] = { quantity, status };
+      continue;
+    }
+
+    others.push({
+      variantId: variant.id,
+      size,
+      color,
+      options: variant.options ?? [],
+      quantity,
+      status,
+    });
   }
 
   const rows: ProductVariantRow[] = sizes.map((size) => ({
@@ -128,7 +145,7 @@ function buildVariantRows(
     stocks: stocksBySize.get(size) ?? {},
   }));
 
-  return { rows, sizes, colors };
+  return { rows, sizes, colors, others };
 }
 
 export function apiSkuOrEmpty(api: StockProductApi): string {
@@ -189,6 +206,7 @@ export function apiToStockProduct(
     colors: axes.colors,
     sizes: axes.sizes,
     variants: axes.variants,
+    otherVariants: built.others,
   };
 }
 
