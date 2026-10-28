@@ -6,7 +6,7 @@ import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import { EmptyState, ErrorState } from '@/components/ui/state-panels';
 import { Skeleton } from '@/components/ui/skeleton';
-import { orderSystemFailureLabelOf } from '@/constants/orderSystemFailures';
+import { orderSystemFailureLabelKeyOf } from '@/constants/orderSystemFailures';
 import { useI18n } from '@/i18n/I18nProvider';
 import {
   noticeErrorMessageOf,
@@ -128,13 +128,13 @@ function NoticeRow({
   isPending: boolean;
   onAcknowledge(): void;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   return (
     <li className="flex flex-col gap-2 rounded-xl border border-border bg-card p-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex min-w-0 flex-col gap-1.5">
           <span className="text-sm font-semibold break-words text-foreground">
-            {orderSystemFailureLabelOf(notice.code)}
+            {t(orderSystemFailureLabelKeyOf(notice.code))}
           </span>
           <div className="flex flex-wrap items-center gap-2">
             <OrderChip order={{ id: notice.orderId, code: notice.orderCode }} />
@@ -160,7 +160,7 @@ function NoticeRow({
         <span dir="ltr" className="tabular-nums">
           {formatDateTime(notice.lastOccurredAt)}
         </span>{' '}
-        · {getTimeAgo(notice.lastOccurredAt)}
+        · {getTimeAgo(notice.lastOccurredAt, locale)}
       </p>
     </li>
   );

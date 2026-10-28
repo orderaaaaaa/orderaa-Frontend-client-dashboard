@@ -8,8 +8,9 @@ import {
   ORDER_SYSTEM_FAILURE_SOURCE_LABELS,
   actorTypeLabelOf,
   isInfoCode,
-  orderSystemFailureLabelOf,
+  orderSystemFailureLabelKeyOf,
 } from '@/constants/orderSystemFailures';
+import { useI18n } from '@/i18n/I18nProvider';
 import { cn } from '@/lib/utils';
 import type { Order } from '@/types/orders';
 import type { OrderSystemFailure } from '@/types/orderSystemFailures';
@@ -33,6 +34,7 @@ export function OrderSystemFailureItem({
   onMarkSeen,
   renderActions,
 }: OrderSystemFailureItemProps) {
+  const { t } = useI18n();
   const [detailsOpen, setDetailsOpen] = useState(false);
   const isUnseen = failure.seenAt === null;
   const isInfo = isInfoCode(failure.code);
@@ -65,7 +67,7 @@ export function OrderSystemFailureItem({
                 isInfo ? 'text-muted-foreground' : 'text-foreground'
               )}
             >
-              {orderSystemFailureLabelOf(failure.code)}
+              {t(orderSystemFailureLabelKeyOf(failure.code))}
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-1.5">

@@ -1,3 +1,18 @@
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/locale';
+import { translate, type TranslationKey } from '@/i18n/translate';
+
+const UNIT_KEYS: Record<'day' | 'hour' | 'minute', readonly [TranslationKey, TranslationKey]> = {
+  day: ['timeAgo.unit.day.one', 'timeAgo.unit.day.other'],
+  hour: ['timeAgo.unit.hour.one', 'timeAgo.unit.hour.other'],
+  minute: ['timeAgo.unit.minute.one', 'timeAgo.unit.minute.other'],
+};
+
+const amountOf = (locale: Locale, count: number, unit: keyof typeof UNIT_KEYS) =>
+  translate(locale, 'timeAgo.amount', {
+    count,
+    unit: translate(locale, UNIT_KEYS[unit][count === 1 ? 0 : 1]),
+  });
+
 function parseDate(dateInput: string | Date): Date {
   if (typeof dateInput === 'string') {
     return new Date(dateInput);
@@ -5,7 +20,10 @@ function parseDate(dateInput: string | Date): Date {
   return dateInput;
 }
 
-export function getTimeAgo(dateInput?: string | Date | null): string {
+export function getTimeAgo(
+  dateInput?: string | Date | null,
+  locale: Locale = DEFAULT_LOCALE
+): string {
   if (!dateInput) return '';
 
   const date = parseDate(dateInput);
@@ -24,26 +42,26 @@ export function getTimeAgo(dateInput?: string | Date | null): string {
 
   if (diffDays > 0) {
     const remainingHours = diffHours % 24;
-    const daysLabel = diffDays === 1 ? 'يوم' : 'ايام';
 
     if (remainingHours > 0) {
-      const hoursLabel = remainingHours === 1 ? 'ساعة' : 'ساعات';
-      return `منذ ${diffDays} ${daysLabel} و ${remainingHours} ${hoursLabel}`;
+      const value = translate(locale, 'timeAgo.pair', {
+        first: amountOf(locale, diffDays, 'day'),
+        second: amountOf(locale, remainingHours, 'hour'),
+      });
+      return translate(locale, 'timeAgo.ago', { value });
     }
-    return `منذ ${diffDays} ${daysLabel}`;
+    return translate(locale, 'timeAgo.ago', { value: amountOf(locale, diffDays, 'day') });
   }
 
   if (diffHours > 0) {
-    const hoursLabel = diffHours === 1 ? 'ساعة' : 'ساعات';
-    return `منذ ${diffHours} ${hoursLabel}`;
+    return translate(locale, 'timeAgo.ago', { value: amountOf(locale, diffHours, 'hour') });
   }
 
   if (diffMinutes > 0) {
-    const minutesLabel = diffMinutes === 1 ? 'دقيقة' : 'دقائق';
-    return `منذ ${diffMinutes} ${minutesLabel}`;
+    return translate(locale, 'timeAgo.ago', { value: amountOf(locale, diffMinutes, 'minute') });
   }
 
-  return 'الآن';
+  return translate(locale, 'timeAgo.now');
 }
 
 const CAIRO_TIME_ZONE = 'Africa/Cairo';
