@@ -1,4 +1,8 @@
-import { OrderState, OrderProductVariantInfo, ShippingType } from '@/types/orders';
+import {
+  OrderEvent,
+  OrderProductVariantInfo,
+  ShippingType,
+} from '@/types/orders';
 
 export interface OrderCardProps {
   id: number;
@@ -40,7 +44,7 @@ export interface OrderCardProps {
   toggleOnCardClick?: boolean;
   hideCustomerInfo?: boolean;
   showAllItems?: boolean;
-  states?: OrderState[];
+  events?: OrderEvent[];
   parkedAt: string | null;
   unreadNoticeCount?: number;
 }

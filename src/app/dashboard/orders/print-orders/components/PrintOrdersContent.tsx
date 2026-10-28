@@ -791,7 +791,7 @@ export function PrintOrdersContent() {
                 disableNavigation
                 hideCustomerInfo
                 showAllItems
-                states={order.states}
+                events={order.order_events}
                 isBlocked={order.customers.isBlocked}
                 customerNotes={order.customers.notes}
               />
