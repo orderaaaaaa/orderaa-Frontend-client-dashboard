@@ -14,8 +14,10 @@ import {
 } from './editorModel';
 
 interface VariantReshapeDialogProps {
+  open: boolean;
   plan: VariantReshapePlan | null;
   selections: ReshapeSelections;
+  discardedLabels: string[];
   onSelect: (key: string, optionId: number | null) => void;
   onCancel: () => void;
   onConfirm: () => Promise<void>;
@@ -82,15 +84,17 @@ function ValueRemovalField({
 }
 
 export function VariantReshapeDialog({
+  open,
   plan,
   selections,
+  discardedLabels,
   onSelect,
   onCancel,
   onConfirm,
 }: VariantReshapeDialogProps) {
   return (
     <BaseModal
-      isOpen={plan !== null}
+      isOpen={open}
       onClose={onCancel}
       title="تأكيد تعديل المتغيرات"
       onConfirm={onConfirm}
@@ -103,6 +107,18 @@ export function VariantReshapeDialog({
         <div className="space-y-5 text-sm text-gray-700">
           <p>تعديل الخصائص سيغيّر المتغيرات التالية، راجعها قبل التأكيد.</p>
 
+          {discardedLabels.length > 0 && (
+            <div
+              role="alert"
+              className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-amber-900"
+            >
+              <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
+              <span className="break-words">
+                ستُلغى التعديلات غير المحفوظة على: {discardedLabels.join('، ')}
+              </span>
+            </div>
+          )}
+
           {plan.merges.length > 0 && (
             <section className="space-y-2">
               <h3 className={SECTION_HEADING_CLASS}>متغيرات سيتم دمجها</h3>
@@ -112,7 +128,7 @@ export function VariantReshapeDialog({
                     {merge.sourceLabels.join(' + ')} ← {merge.resultLabel}
                     <span className="text-gray-500">
                       {' '}
-                      ({merge.stock} قطعة، {merge.orderLineCount} سطر طلب، {merge.storeLinkCount} ربط متجر)
+                      ({merge.stock} قطعة، {merge.orderLineCount} سطر طلب، {merge.invoiceLineCount} سطر فاتورة، {merge.storeLinkCount} ربط متجر)
                     </span>
                   </li>
                 ))}

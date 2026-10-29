@@ -28,9 +28,9 @@ import {
   UpsertVariantsPayload,
 } from '../types/products';
 import {
-  isVariantReshapeError,
   productApiErrorBody,
   toastProductError,
+  variantReshapePlanOf,
 } from '../utils/productApiError';
 
 export const useGetProducts = (params: ProductQueryParams, enabled = true) => {
@@ -163,7 +163,7 @@ export const useUpdateProductAttributes = (productId: number) => {
       productsApi.updateProductAttributes(productId, payload),
     onSuccess: () => invalidateAndWait(queryClient, productEditKeys(productId)),
     onError: (error: unknown) => {
-      if (isVariantReshapeError(error)) return;
+      if (variantReshapePlanOf(error)) return;
       toastProductError(error, 'تعذر حفظ الخصائص');
     },
   });

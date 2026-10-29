@@ -308,6 +308,14 @@ export type ReshapeSelections = Record<string, number | null>;
 export interface ReshapeState {
   plan: VariantReshapePlan;
   selections: ReshapeSelections;
+  discardedIds: number[];
+  discardedLabels: string[];
+}
+
+export interface ReshapeDecision {
+  variantTargets: VariantTarget[];
+  discardedIds: number[];
+  selections: ReshapeSelections;
 }
 
 export const reshapeSelectionKey = (removal: {
@@ -317,12 +325,20 @@ export const reshapeSelectionKey = (removal: {
 
 export const reshapeSelectionsFromPlan = (
   plan: VariantReshapePlan,
+  previous: ReshapeSelections = {},
 ): ReshapeSelections =>
   Object.fromEntries(
-    plan.valueRemovals.map((removal): [string, number | null] => [
-      reshapeSelectionKey(removal),
-      removal.chosenOptionId,
-    ]),
+    plan.valueRemovals.map((removal): [string, number | null] => {
+      const key = reshapeSelectionKey(removal);
+      const kept = previous[key] ?? null;
+      return [
+        key,
+        kept !== null &&
+        removal.candidateOptions.some((option) => option.id === kept)
+          ? kept
+          : removal.chosenOptionId,
+      ];
+    }),
   );
 
 export const reshapeTargets = (
@@ -354,17 +370,18 @@ const textValue = (value: string): string | null =>
 
 export const existingRowKey = (variantId: number) => `variant-${variantId}`;
 
-const referencesRemovedAttributeOrOption = (
-  detail: ProductDetail,
-  attributes: AttributeDraft[],
-  row: NewVariantRow,
-) =>
-  detail.attributes.some((saved) => {
-    const optionId = row.optionByAttribute[saved.id];
+interface LiveAttribute {
+  id?: number;
+  options: { id?: number }[];
+}
+
+const hasDeadReference = (row: NewVariantRow, attributes: LiveAttribute[]) =>
+  Object.keys(row.optionByAttribute).some((key) => {
+    const optionId = row.optionByAttribute[Number(key)];
     if (optionId === undefined) return false;
-    const draft = attributes.find((attribute) => attribute.id === saved.id);
+    const attribute = attributes.find((item) => item.id === Number(key));
     return (
-      !draft || !draft.options.some((option) => option.id === optionId)
+      !attribute || !attribute.options.some((option) => option.id === optionId)
     );
   });
 
@@ -419,7 +436,7 @@ export function validateVariants(
     ]),
   );
   for (const row of newRows) {
-    if (referencesRemovedAttributeOrOption(detail, attributes, row)) {
+    if (hasDeadReference(row, attributes)) {
       errors[row.key] ??= STALE_VARIANT_ROW_MESSAGE;
       continue;
     }
@@ -468,20 +485,20 @@ export function buildVariantPlan(
     plan.rows.push({ key: existingRowKey(variant.id), variantId: variant.id });
   }
   for (const row of newRows) {
-    const optionIds = detail.attributes
-      .map((attribute) => row.optionByAttribute[attribute.id])
-      .filter((id): id is number => id !== undefined);
-    const referenced = Object.values(row.optionByAttribute).filter(
-      (id): id is number => id !== undefined,
-    );
     if (
-      optionIds.length !== detail.attributes.length ||
-      referenced.length !== detail.attributes.length
+      hasDeadReference(row, detail.attributes) ||
+      detail.attributes.some(
+        (attribute) => row.optionByAttribute[attribute.id] === undefined,
+      )
     ) {
       plan.staleKeys.push(row.key);
       continue;
     }
-    const entry: UpsertVariantInput = { optionIds };
+    const entry: UpsertVariantInput = {
+      optionIds: detail.attributes
+        .map((attribute) => row.optionByAttribute[attribute.id])
+        .filter((id): id is number => id !== undefined),
+    };
     const sku = textValue(row.sku);
     const barcode = textValue(row.barcode);
     const price = priceValue(row.price);

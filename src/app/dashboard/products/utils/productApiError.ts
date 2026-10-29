@@ -6,6 +6,7 @@ import {
   type ProductApiErrorBody,
   type ProductApiErrorCode,
   type VariantDeleteBlocker,
+  type VariantReshapePlan,
 } from '../types/products';
 
 const KNOWN_CODES: readonly string[] = [
@@ -105,12 +106,16 @@ export function productApiErrorMessage(error: unknown, fallback: string): string
   }
 }
 
-export const isVariantReshapeError = (error: unknown): boolean => {
-  const code = productApiErrorBody(error)?.code;
-  return (
-    code === 'VARIANT_RESHAPE_CONFIRMATION_REQUIRED' ||
-    code === 'VARIANT_REMOVAL_TARGET_REQUIRED'
-  );
+export const variantReshapePlanOf = (
+  error: unknown,
+): VariantReshapePlan | null => {
+  const body = productApiErrorBody(error);
+  const plan = body?.details?.plan;
+  if (!plan) return null;
+  return body?.code === 'VARIANT_RESHAPE_CONFIRMATION_REQUIRED' ||
+    body?.code === 'VARIANT_REMOVAL_TARGET_REQUIRED'
+    ? plan
+    : null;
 };
 
 export function toastProductError(error: unknown, fallback: string) {

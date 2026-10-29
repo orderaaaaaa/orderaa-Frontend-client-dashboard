@@ -30,12 +30,11 @@ import type {
   ProductDetail,
   ProductDetailVariant,
   VariantReshapePlan,
-  VariantTarget,
 } from '../../types/products';
 import {
-  isVariantReshapeError,
   productApiErrorBody,
   productApiErrorMessage,
+  variantReshapePlanOf,
 } from '../../utils/productApiError';
 import { CompactField } from '../CompactField';
 import { EditorSection } from './EditorSection';
@@ -50,6 +49,8 @@ import {
   type BasicPatch,
   type GalleryItem,
   type NewVariantRow,
+  type ReshapeDecision,
+  type ReshapeSelections,
   type ReshapeState,
   type SpecRow,
   type VariantPatch,
@@ -67,6 +68,7 @@ import {
   galleryUrls,
   hasAttributeErrors,
   hasSpecErrors,
+  isReshapeBlocked,
   isStoreLinked,
   reshapeSelectionsFromPlan,
   reshapeTargets,
@@ -84,6 +86,9 @@ import {
 } from './editorModel';
 
 const PRODUCTS_HREF = '/dashboard/products';
+
+const ORPHANED_EDITS_MESSAGE =
+  'تعذر حفظ التعديلات، أحد المتغيرات لم يعد موجوداً، أعد تحميل الصفحة';
 
 type SectionKey = 'basic' | 'images' | 'attributes' | 'variants' | 'specifications';
 
@@ -163,7 +168,8 @@ export function ProductEditor({ productId }: ProductEditorProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ProductDetailVariant | null>(null);
   const [reshape, setReshape] = useState<ReshapeState | null>(null);
-  const reshapeDecision = useRef<((targets: VariantTarget[] | null) => void) | null>(null);
+  const [reshapeOpen, setReshapeOpen] = useState(false);
+  const reshapeDecision = useRef<((decision: ReshapeDecision | null) => void) | null>(null);
 
   const displayNames = useMemo(
     () =>
@@ -323,24 +329,55 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     return true;
   };
 
-  const requestReshapeDecision = (plan: VariantReshapePlan) =>
-    new Promise<VariantTarget[] | null>((resolve) => {
+  const requestReshapeDecision = (
+    plan: VariantReshapePlan,
+    picks?: ReshapeSelections,
+  ) =>
+    new Promise<ReshapeDecision | null>((resolve) => {
       reshapeDecision.current = resolve;
-      setReshape({ plan, selections: reshapeSelectionsFromPlan(plan) });
+      const mergedAway = new Set(
+        plan.merges.flatMap((merge) => merge.mergedVariantIds),
+      );
+      const affected = freshDetail().variants.filter(
+        (variant) =>
+          mergedAway.has(variant.id) && variantEdits[variant.id] !== undefined,
+      );
+      const discardedLabels = affected
+        .filter(
+          (variant) =>
+            !sameVariantEdit(
+              applyVariantPatch(variant, variantEdits[variant.id]),
+              variantEditFromDetail(variant),
+            ),
+        )
+        .map((variant) => variantLabelOf(variant));
+      setReshape({
+        plan,
+        selections: reshapeSelectionsFromPlan(plan, picks),
+        discardedIds: affected.map((variant) => variant.id),
+        discardedLabels,
+      });
+      setReshapeOpen(true);
     });
 
   const confirmReshape = () => {
-    if (!reshape) return;
-    reshapeDecision.current?.(reshapeTargets(reshape.plan, reshape.selections));
+    if (!reshape || isReshapeBlocked(reshape.plan, reshape.selections)) return;
+    reshapeDecision.current?.({
+      variantTargets: reshapeTargets(reshape.plan, reshape.selections),
+      discardedIds: reshape.discardedIds,
+      selections: reshape.selections,
+    });
+    setReshapeOpen(false);
   };
 
   const cancelReshape = () => {
     reshapeDecision.current?.(null);
+    setReshapeOpen(false);
   };
 
-  const saveAttributes = async () => {
+  const saveAttributes = async (discarded: Set<number>) => {
     const attributes = buildAttributesPayload(state.attributes);
-    let reshapeReply: { variantTargets: VariantTarget[] } | null = null;
+    let reshapeReply: ReshapeDecision | null = null;
     for (;;) {
       try {
         await updateAttributes.mutateAsync({
@@ -354,12 +391,14 @@ export function ProductEditor({ productId }: ProductEditorProps) {
         });
         break;
       } catch (saveError) {
-        const plan = productApiErrorBody(saveError)?.details?.plan;
-        if (isVariantReshapeError(saveError) && plan) {
-          const targets = await requestReshapeDecision(plan);
-          setReshape(null);
-          if (targets === null) return false;
-          reshapeReply = { variantTargets: targets };
+        const plan = variantReshapePlanOf(saveError);
+        if (plan) {
+          const decision = await requestReshapeDecision(
+            plan,
+            reshapeReply?.selections,
+          );
+          if (decision === null) return false;
+          reshapeReply = decision;
           continue;
         }
         failSection(
@@ -369,12 +408,31 @@ export function ProductEditor({ productId }: ProductEditorProps) {
         return false;
       }
     }
+    if (reshapeReply) {
+      const merged = reshapeReply.discardedIds;
+      merged.forEach((id) => discarded.add(id));
+      setVariantEdits((current) => {
+        const next = { ...current };
+        merged.forEach((id) => delete next[id]);
+        return next;
+      });
+    }
     setAttributesDraft(null);
     return true;
   };
 
-  const saveVariants = async () => {
-    const plan = buildVariantPlan(freshDetail(), variantEdits, newVariantRows);
+  const saveVariants = async (discarded: Set<number>) => {
+    const fresh = freshDetail();
+    const liveVariantIds = new Set(fresh.variants.map((variant) => variant.id));
+    const orphaned = Object.keys(variantEdits)
+      .map(Number)
+      .filter((id) => !liveVariantIds.has(id) && !discarded.has(id));
+    if (orphaned.length > 0) {
+      toast.error(ORPHANED_EDITS_MESSAGE);
+      failSection('variants', ORPHANED_EDITS_MESSAGE);
+      return false;
+    }
+    const plan = buildVariantPlan(fresh, variantEdits, newVariantRows);
     if (plan.staleKeys.length > 0) {
       setVariantServerErrors(
         Object.fromEntries(
@@ -464,10 +522,11 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     }
 
     setIsSaving(true);
+    const discarded = new Set<number>();
     try {
       if ((state.basicDirty || state.galleryDirty) && !(await saveProductScalars())) return;
-      if (state.attributesDirty && !(await saveAttributes())) return;
-      if (state.variantsDirty && !(await saveVariants())) return;
+      if (state.attributesDirty && !(await saveAttributes(discarded))) return;
+      if (state.variantsDirty && !(await saveVariants(discarded))) return;
       if (state.specsDirty && !(await saveSpecifications())) return;
       setShowErrors(false);
       toast.success('تم حفظ التغييرات');
@@ -716,8 +775,10 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       </div>
 
       <VariantReshapeDialog
+        open={reshapeOpen}
         plan={reshape?.plan ?? null}
         selections={reshape?.selections ?? {}}
+        discardedLabels={reshape?.discardedLabels ?? []}
         onSelect={(key, optionId) =>
           setReshape((current) =>
             current && {
