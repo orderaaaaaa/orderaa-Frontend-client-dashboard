@@ -9,9 +9,7 @@ import CopyButton from '@/components/ui/copy-button';
 import CopyableCode from '@/components/ui/copyable-code';
 import { formatDisplayTime } from '@/components/OrderDetails/fields/TimeRangeField';
 import useShippingCompanies from '@/hooks/useShippingCompanies';
-import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { PERMISSIONS } from '@/lib/permissions';
-import { getStatusBadgeConfig } from '@/lib/status-badges';
 import { OrderStatus } from '@/types/orders';
 import { PARTIAL_DELIVERY_IMPLEMENTATIONS } from '@/types/shippingCompanies';
 import {
@@ -35,12 +33,20 @@ import {
 import { LateMarkModal } from './LateMarkModal';
 import { SendAgainAction } from './SendAgainAction';
 import { ShipmentRowActions } from './ShipmentRowActions';
+import { ShipmentStatusBadge } from './ShipmentStatusBadge';
 
 const FLAG_DOT_CLASSES: Record<LatenessFlag | 'NONE', string> = {
   RED: 'bg-red-500',
   YELLOW: 'bg-amber-400',
   GREEN: 'bg-green-500',
   NONE: 'bg-gray-300',
+};
+
+const FLAG_LABELS: Record<LatenessFlag | 'NONE', string> = {
+  RED: 'متأخر',
+  YELLOW: 'موعده اليوم',
+  GREEN: 'في الموعد',
+  NONE: 'بدون موعد محسوب',
 };
 
 const OVERRIDE_LABELS = {
@@ -88,23 +94,6 @@ function CodeCell({ code }: { code: string }) {
   );
 }
 
-function StatusBadge({ status }: { status: OrderStatus }) {
-  const { getStatusLabel } = useStatusLabel();
-  const { classes, Icon } = getStatusBadgeConfig(status);
-
-  return (
-    <span
-      className={clsx(
-        'flex items-center gap-2 px-4 py-2 rounded-full font-medium w-fit whitespace-nowrap',
-        classes,
-      )}
-    >
-      <Icon className="w-4 h-4" />
-      <span className="text-xs font-medium">{getStatusLabel(status)}</span>
-    </span>
-  );
-}
-
 function PhoneCell({ phones }: { phones: string[] }) {
   const [isListOpen, setIsListOpen] = useState(false);
   const [first] = phones;
@@ -116,7 +105,7 @@ function PhoneCell({ phones }: { phones: string[] }) {
       <span dir="ltr" className="font-mono whitespace-nowrap">
         {first}
       </span>
-      <CopyButton value={first} successMessage="تم نسخ الرقم" />
+      <CopyButton value={first} label="نسخ رقم الهاتف" successMessage="تم نسخ الرقم" />
       {phones.length > 1 && (
         <>
           <Button
@@ -141,7 +130,7 @@ function PhoneCell({ phones }: { phones: string[] }) {
                   <span dir="ltr" className="font-mono">
                     {phone}
                   </span>
-                  <CopyButton value={phone} successMessage="تم نسخ الرقم" />
+                  <CopyButton value={phone} label="نسخ رقم الهاتف" successMessage="تم نسخ الرقم" />
                 </li>
               ))}
             </ul>
@@ -173,7 +162,9 @@ function LatenessCell({
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-1.5">
         <span
-          title={flag ?? 'بدون موعد محسوب'}
+          role="img"
+          aria-label={FLAG_LABELS[flag ?? 'NONE']}
+          title={FLAG_LABELS[flag ?? 'NONE']}
           className={clsx('w-2.5 h-2.5 rounded-full shrink-0', FLAG_DOT_CLASSES[flag ?? 'NONE'])}
         />
         <span className="text-gray-900 whitespace-nowrap">{dueDay ? formatDate(dueDay) : '—'}</span>
@@ -341,7 +332,7 @@ export function InProcessShipmentsTable({
                 <PhoneCell phones={row.customer.phones} />
               </td>
               <td className={CELL_CLASS}>
-                <StatusBadge status={row.status} />
+                <ShipmentStatusBadge status={row.status} />
               </td>
               <td className={CELL_CLASS}>{formatDate(row.takenAt)}</td>
               <td className={CELL_CLASS}>
@@ -402,6 +393,9 @@ export function InProcessShipmentsTable({
               <td className={CELL_CLASS}>
                 <ShipmentRowActions
                   orderId={row.id}
+                  orderCode={row.code}
+                  customerName={row.customer.name}
+                  status={row.status}
                   closure={row.closure}
                   carrierImplementation={implementation}
                   partialDelivery={{
@@ -457,7 +451,7 @@ export function ReturnedShipmentsTable({ shipments, carrier }: ReturnedShipments
               <PhoneCell phones={row.customer.phones} />
             </td>
             <td className={CELL_CLASS}>
-              <StatusBadge status={row.status} />
+              <ShipmentStatusBadge status={row.status} />
             </td>
             <td className={CELL_CLASS}>{formatDate(row.takenAt)}</td>
             <td className={CELL_CLASS}>{row.governorate ?? '—'}</td>
@@ -468,7 +462,13 @@ export function ReturnedShipmentsTable({ shipments, carrier }: ReturnedShipments
             </td>
             <td className={CELL_CLASS}>
               <div className="flex flex-col gap-2">
-                <ShipmentRowActions orderId={row.id} closure={row.closure} />
+                <ShipmentRowActions
+                  orderId={row.id}
+                  orderCode={row.code}
+                  customerName={row.customer.name}
+                  status={row.status}
+                  closure={row.closure}
+                />
                 <SendAgainAction
                   orderId={row.id}
                   eligible={row.sendAgainEligible}

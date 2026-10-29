@@ -434,6 +434,7 @@ export function InProcessShipmentsContent({
                 <span className="text-xs text-gray-500">الحالة</span>
                 <SearchableSelect
                   id="in-process-status"
+                  aria-label="الحالة"
                   value={status ?? ''}
                   onChange={(value) => updateParams({ status: value, page: '' })}
                   options={statusOptions}
@@ -446,6 +447,7 @@ export function InProcessShipmentsContent({
                 <span className="text-xs text-gray-500">المحافظة</span>
                 <SearchableSelect
                   id="in-process-governorate"
+                  aria-label="المحافظة"
                   value={governorate}
                   onChange={(value) => updateParams({ governorate: value, city: '', page: '' })}
                   options={governorates}
@@ -458,6 +460,7 @@ export function InProcessShipmentsContent({
                 <span className="text-xs text-gray-500">المنطقة</span>
                 <SearchableSelect
                   id="in-process-city"
+                  aria-label="المنطقة"
                   value={city}
                   onChange={(value) => updateParams({ city: value, page: '' })}
                   options={cities}

@@ -51,7 +51,7 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId }: ExchangeCa
                   <span className="text-sm font-medium text-[#1F1F1F]">{candidate.code}</span>
                   <span className="text-xs text-gray-500">{ORDER_STATUS_ARABIC_LABELS[candidate.status]}</span>
                   <span className="text-xs text-gray-500">{formatNumber(candidate.totalCost, 2)} جنيه</span>
-                  <span className="text-xs text-gray-400">{formatDateTime(candidate.createdAt)}</span>
+                  <span className="text-xs text-gray-500">{formatDateTime(candidate.createdAt)}</span>
                 </div>
               ))}
             </div>

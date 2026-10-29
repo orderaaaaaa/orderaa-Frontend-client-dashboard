@@ -143,7 +143,7 @@ function ActionLogContent({ orderId, canReadHistory }: { orderId: number; canRea
       {isLoading ? (
         <OrderChangeHistorySkeleton />
       ) : entries.length === 0 ? (
-        <p className="py-6 text-center text-sm text-gray-400">{ACTION_LOG_EMPTY}</p>
+        <p className="py-6 text-center text-sm text-gray-500">{ACTION_LOG_EMPTY}</p>
       ) : (
         <div className="flex flex-col gap-3">
           {entries.map((entry) =>

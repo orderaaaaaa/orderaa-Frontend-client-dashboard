@@ -134,7 +134,7 @@ export function ClosureReasonModal({ kind, orderId, onClose }: ClosureReasonModa
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="font-bold text-[#1F1F1F]">ملاحظات (اختياري)</label>
+          <label htmlFor="closureNotes" className="font-bold text-[#1F1F1F]">ملاحظات (اختياري)</label>
           <Textarea
             name="closureNotes"
             value={notes}

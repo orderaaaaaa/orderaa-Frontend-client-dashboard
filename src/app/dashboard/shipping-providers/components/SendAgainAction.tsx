@@ -49,7 +49,7 @@ function SendAgainReasonModal({ orderId, onClose }: { orderId: number; onClose: 
         <p className="text-sm text-gray-600">
           يُسجَّل السبب في سجل الطلب، ولا يتم إرسال أي شيء إلى شركة الشحن.
         </p>
-        <label className="font-bold text-[#1F1F1F]">
+        <label htmlFor="sendAgainReason" className="font-bold text-[#1F1F1F]">
           سبب إعادة الإرسال <span className="text-red-600">*</span>
         </label>
         <Textarea

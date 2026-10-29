@@ -62,6 +62,7 @@ export function DeliveryWindowModal({
             <span className="font-bold text-[#1F1F1F]">من</span>
             <SearchableSelect
               id="delivery-window-from"
+              aria-label="من"
               value={from}
               onChange={setFrom}
               options={HOUR_OPTIONS}
@@ -74,6 +75,7 @@ export function DeliveryWindowModal({
             <span className="font-bold text-[#1F1F1F]">إلى</span>
             <SearchableSelect
               id="delivery-window-to"
+              aria-label="إلى"
               value={to}
               onChange={setTo}
               options={HOUR_OPTIONS}
