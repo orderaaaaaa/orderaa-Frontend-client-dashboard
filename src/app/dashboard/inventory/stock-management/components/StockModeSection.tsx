@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import { LiaClipboardCheckSolid, LiaClipboardListSolid, LiaSyncSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
@@ -16,6 +17,13 @@ import {
 import { getApiErrorMessage } from '@/utils/apiError';
 import { formatDate } from '@/utils/format';
 import { STOCKTAKE_LIST_HREF } from './stocktake/stocktakeRoutes';
+import { StockActionsMenu, type StockActionItem } from './StockActionsMenu';
+import {
+  formatStockAmount,
+  formatStockNumber,
+  formatVariantCount,
+  ORDER_FORMS,
+} from '../utils/formatNumber';
 
 const COUNT_PAGE_HREF = '/dashboard/inventory/stock-management/opening-count';
 const ORDER_STOCK_SYNC_HREF = '/dashboard/inventory/stock-management/order-stock-sync';
@@ -59,10 +67,26 @@ export function StockModeSection() {
   const warehouseCount = summary ? summary.negativeBalances.length : 0;
 
   const summaryText = summary
-    ? `يوجد ${negativeCount} متغير برصيد سالب في ${warehouseCount} مخزن، و${summary.inFlightOrderCount} طلب قيد التنفيذ. يمكنك إجراء الجرد أولًا، أو التفعيل الآن.`
+    ? `يوجد ${formatVariantCount(negativeCount)} برصيد سالب في ${formatStockNumber(warehouseCount)} مخزن، و${formatStockAmount(summary.inFlightOrderCount, ORDER_FORMS)} قيد التنفيذ. يمكنك إجراء الجرد أولًا، أو التفعيل الآن.`
     : summaryLoading
       ? 'جارٍ تحميل ملخص الأرصدة...'
       : '';
+
+  const goLiveVisible = canSwitchMode && mode.mode === 'TRIAL';
+  const stocktakeVisible = canReadStocktake;
+  const primary = goLiveVisible ? 'goLive' : stocktakeVisible ? 'stocktake' : null;
+
+  const menuItems: StockActionItem[] = [
+    ...(canReadMovements
+      ? [{ key: 'count', label: 'عدّ المخزون الافتتاحي', href: COUNT_PAGE_HREF, icon: LiaClipboardListSolid }]
+      : []),
+    ...(canReadStocktake && primary !== 'stocktake'
+      ? [{ key: 'stocktake', label: 'جرد المخزون', href: STOCKTAKE_LIST_HREF, icon: LiaClipboardCheckSolid }]
+      : []),
+    ...(canReadMovements
+      ? [{ key: 'sync', label: 'مزامنة مخزون الطلبات', href: ORDER_STOCK_SYNC_HREF, icon: LiaSyncSolid }]
+      : []),
+  ];
 
   const onConfirmGoLive = async () => {
     try {
@@ -95,36 +119,22 @@ export function StockModeSection() {
             </p>
           )}
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          {canReadMovements && (
-            <Link
-              href={COUNT_PAGE_HREF}
-              className="text-sm text-primary underline-offset-4 hover:underline"
+        <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
+          {primary === 'goLive' && (
+            <Button
+              size="sm"
+              className="h-10 w-full sm:h-9 sm:w-auto"
+              onClick={() => setDialogOpen(true)}
             >
-              عدّ المخزون الافتتاحي
-            </Link>
-          )}
-          {canReadStocktake && (
-            <Link
-              href={STOCKTAKE_LIST_HREF}
-              className="text-sm text-primary underline-offset-4 hover:underline"
-            >
-              جرد المخزون
-            </Link>
-          )}
-          {canReadMovements && (
-            <Link
-              href={ORDER_STOCK_SYNC_HREF}
-              className="text-sm text-primary underline-offset-4 hover:underline"
-            >
-              مزامنة مخزون الطلبات
-            </Link>
-          )}
-          {canSwitchMode && mode.mode === 'TRIAL' && (
-            <Button size="sm" onClick={() => setDialogOpen(true)}>
               بدء التشغيل الفعلي للمخزون
             </Button>
           )}
+          {primary === 'stocktake' && (
+            <Button asChild size="sm" className="h-10 w-full sm:h-9 sm:w-auto">
+              <Link href={STOCKTAKE_LIST_HREF}>جرد المخزون</Link>
+            </Button>
+          )}
+          <StockActionsMenu items={menuItems} />
         </div>
       </div>
 

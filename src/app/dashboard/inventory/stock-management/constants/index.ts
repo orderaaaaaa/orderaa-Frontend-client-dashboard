@@ -11,6 +11,12 @@ export function stockScopeHref(scope: StockScope): string {
   return `${STOCK_MANAGEMENT_BASE_PATH}/${scope.kind}/${scope.id}`;
 }
 
+export const STOCK_OUT_OF_STOCK_QUERY_PARAM = 'outOfStock';
+
+export function stockScopeOutOfStockHref(scope: StockScope): string {
+  return `${stockScopeHref(scope)}?${STOCK_OUT_OF_STOCK_QUERY_PARAM}=1`;
+}
+
 export const STOCK_STATUS_CONFIG: Record<
   StockStatus,
   { label: string; color: string; bgColor: string; dotColor: string }

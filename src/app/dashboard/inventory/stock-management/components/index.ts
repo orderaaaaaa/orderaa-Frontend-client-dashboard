@@ -3,3 +3,4 @@ export { StockModeSection } from './StockModeSection';
 export { StockScopeList } from './StockScopeList';
 export { StockScopeListSkeleton } from './StockScopeListSkeleton';
 export { StockScopeNotFound } from './StockScopeNotFound';
+export { StockActionsMenu } from './StockActionsMenu';

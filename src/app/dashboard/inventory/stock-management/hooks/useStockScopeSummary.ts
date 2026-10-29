@@ -66,6 +66,7 @@ export function useStockScopeSummary(scope: StockScope): StockScopeSummary {
             {
               key: 'quantity',
               label: 'الكمية الكلية',
+              unit: 'quantity',
               icon: LiaBoxesSolid,
               color: 'text-emerald-600',
               bgColor: 'bg-emerald-50',
@@ -76,6 +77,7 @@ export function useStockScopeSummary(scope: StockScope): StockScopeSummary {
               : {
                   key: 'lowStock',
                   label: 'مخزون منخفض',
+                  unit: 'variant',
                   icon: LiaExclamationTriangleSolid,
                   color: 'text-amber-600',
                   bgColor: 'bg-amber-50',
@@ -86,6 +88,7 @@ export function useStockScopeSummary(scope: StockScope): StockScopeSummary {
               : {
                   key: 'outOfStock',
                   label: 'غير متوفر',
+                  unit: 'variant',
                   icon: LiaTimesCircleSolid,
                   color: 'text-red-600',
                   bgColor: 'bg-red-50',
@@ -115,6 +118,7 @@ export function useStockScopeSummary(scope: StockScope): StockScopeSummary {
             {
               key: 'quantity',
               label: 'الكمية الكلية',
+              unit: 'quantity',
               icon: LiaBoxesSolid,
               color: 'text-emerald-600',
               bgColor: 'bg-emerald-50',
@@ -125,6 +129,7 @@ export function useStockScopeSummary(scope: StockScope): StockScopeSummary {
               : {
                   key: 'outOfStock',
                   label: 'غير متوفر',
+                  unit: 'variant',
                   icon: LiaTimesCircleSolid,
                   color: 'text-amber-600',
                   bgColor: 'bg-amber-50',
@@ -135,6 +140,7 @@ export function useStockScopeSummary(scope: StockScope): StockScopeSummary {
               : {
                   key: 'shortfall',
                   label: 'العجز',
+                  unit: 'quantity',
                   icon: LiaMinusCircleSolid,
                   color: 'text-red-600',
                   bgColor: 'bg-red-50',

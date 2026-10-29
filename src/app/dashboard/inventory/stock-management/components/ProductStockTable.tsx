@@ -20,7 +20,8 @@ import {
 } from '@/components/ui/tooltip';
 import BaseModal from '@/components/ui/base-modal';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { StockQuantityCell } from '@/components/stock/StockQuantityCell';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 import { VariantLabel } from '@/components/stock/VariantLabel';
 import { STOCK_STATUS_CONFIG } from '../constants';
 import { formatStockNumber } from '../utils/formatNumber';
@@ -120,7 +121,8 @@ function StockCellValue({ view }: { view: StockCellView }) {
   if (view.kind === 'missing') {
     return (
       <div className="flex items-center justify-center">
-        <span className="text-sm text-gray-300">-</span>
+        <span aria-hidden="true" className="text-sm text-gray-300">—</span>
+        <span className="sr-only">لا يوجد متغير بهذا المقاس واللون</span>
       </div>
     );
   }
@@ -141,6 +143,7 @@ export function ProductStockTable({
   indicators,
 }: ProductStockTableProps) {
   const isMobile = useIsMobile();
+  const canViewOperations = useHasPermissionStrict(PERMISSION_CODES.PRODUCTS_STOCK_READ);
   const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
 
   const visibleColors = filterColor
@@ -187,7 +190,12 @@ export function ProductStockTable({
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="cursor-default">
+          <div
+            tabIndex={0}
+            role="group"
+            aria-label={`${formatStockNumber(stock.quantity)} ${color} ${size}`}
+            className="cursor-default"
+          >
             <StockCellValue view={view} />
           </div>
         </TooltipTrigger>
@@ -226,13 +234,16 @@ export function ProductStockTable({
           <h3 className="break-words text-base font-bold text-gray-900">{product.name}</h3>
           {/* <p className="text-sm text-gray-400">SKU: {product.sku}</p> */}
         </div>
-        <Link
-          href={`/dashboard/inventory/stock-management/operations?productId=${product.id}`}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
-        >
-          <ArrowLeftRight className="size-4" aria-hidden="true" />
-          <span>العمليات</span>
-        </Link>
+        {canViewOperations && (
+          <Link
+            href={`/dashboard/inventory/stock-management/operations?productId=${product.id}`}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
+          >
+            <ArrowLeftRight className="size-4" aria-hidden="true" />
+            <span>العمليات</span>
+            <span className="sr-only">على {product.name}</span>
+          </Link>
+        )}
       </div>
 
       <div className="flex flex-col gap-3 px-4 py-4 md:hidden">
@@ -408,7 +419,9 @@ export function ProductStockTable({
                   size="sm"
                 />
                 <div className="flex shrink-0 items-center gap-3">
-                  <StockQuantityCell quantity={variant.quantity} />
+                  <span dir="ltr" className="font-semibold tabular-nums text-gray-800">
+                    {formatStockNumber(variant.quantity)}
+                  </span>
                   <span className="text-xs text-muted-foreground">
                     {STOCK_STATUS_CONFIG[variant.status].label}
                   </span>
@@ -418,7 +431,9 @@ export function ProductStockTable({
           </ul>
           <div className="flex items-center justify-between gap-3 border-t border-border pt-2 text-sm">
             <span className="font-semibold text-foreground">إجمالي خيارات أخرى</span>
-            <StockQuantityCell quantity={totals.otherTotal} />
+            <span dir="ltr" className="font-semibold tabular-nums text-gray-800">
+              {formatStockNumber(totals.otherTotal)}
+            </span>
           </div>
         </section>
       )}

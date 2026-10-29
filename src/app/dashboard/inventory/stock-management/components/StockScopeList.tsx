@@ -17,8 +17,16 @@ import { PERMISSION_CODES } from '@/lib/permissions';
 import { useVirtualWarehouseSummaryQuery } from '@/services/virtualWarehouses';
 import { useWarehouseSummaryQuery } from '@/services/warehouses';
 import { getApiErrorMessage } from '@/utils/apiError';
-import { STOCK_SCOPE_KINDS, stockScopeHref } from '../constants';
-import { formatStockNumber } from '../utils/formatNumber';
+import {
+  STOCK_SCOPE_KINDS,
+  stockScopeHref,
+  stockScopeOutOfStockHref,
+} from '../constants';
+import {
+  formatStockQuantity,
+  formatVariantCount,
+  isFiniteNumber,
+} from '../utils/formatNumber';
 import { resolveParentNames, sortScopeEntries } from '../utils/scopeOrder';
 import { StockScopeListSkeleton } from './StockScopeListSkeleton';
 
@@ -27,6 +35,7 @@ type Tone = 'total' | 'warning' | 'danger';
 interface ScopeRow {
   key: string;
   href: string;
+  outHref: string;
   title: string;
   icon: IconType;
   isVirtual: boolean;
@@ -48,19 +57,44 @@ function toneClass(value: number, tone: Tone) {
 
 function MetricLine({
   label,
-  value,
+  text,
   tone,
+  value,
+  href,
+  hrefLabel,
 }: {
   label: string;
-  value: number;
+  text: string;
   tone: Tone;
+  value: unknown;
+  href?: string;
+  hrefLabel?: string;
 }) {
+  const isNegative = isFiniteNumber(value) && value < 0;
+  const valueClass = clsx(
+    'text-base font-bold',
+    toneClass(isFiniteNumber(value) ? value : 0, tone)
+  );
   return (
     <div className="flex items-center justify-between gap-3">
       <span className="text-sm text-gray-500">{label}</span>
-      <span className={clsx('text-base font-bold', toneClass(value, tone))}>
-        {formatStockNumber(value)}
-      </span>
+      {href ? (
+        <Link
+          href={href}
+          dir={isNegative ? 'ltr' : undefined}
+          className={clsx(
+            valueClass,
+            'relative z-10 inline-flex min-h-10 items-center rounded underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60'
+          )}
+        >
+          {text}
+          {hrefLabel && <span className="sr-only">{hrefLabel}</span>}
+        </Link>
+      ) : (
+        <span className={valueClass} dir={isNegative ? 'ltr' : undefined}>
+          {text}
+        </span>
+      )}
     </div>
   );
 }
@@ -83,50 +117,72 @@ function ScopeCard({ row }: { row: ScopeRow }) {
   const parentLabel = row.parentName ? `تابع لـ ${row.parentName}` : null;
 
   return (
-    <li>
-      <Link
-        href={row.href}
-        className={clsx(
-          'group flex min-h-14 flex-col gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/60',
-          row.isInactive && 'opacity-70'
-        )}
-      >
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="shrink-0 rounded-lg bg-primary/10 p-2">
-            <Icon className="size-5 text-primary" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <span className="truncate text-sm font-bold text-gray-900 group-hover:text-primary md:text-base">
-                {row.title}
-              </span>
-              {row.isVirtual && (
-                <Badge className="bg-purple-100 text-purple-700">افتراضي</Badge>
-              )}
-              {row.isInactive && (
-                <Badge className="bg-gray-100 text-gray-600">غير نشط</Badge>
-              )}
-            </div>
-            {parentLabel && (
-              <p className="truncate text-xs text-gray-500">{parentLabel}</p>
+    <li
+      className={clsx(
+        'group relative flex min-h-14 flex-col gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition hover:bg-gray-50 focus-within:ring-2 focus-within:ring-primary/60',
+        row.isInactive && 'opacity-70'
+      )}
+    >
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="shrink-0 rounded-lg bg-primary/10 p-2">
+          <Icon className="size-5 text-primary" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <Link
+              href={row.href}
+              className="truncate rounded text-sm font-bold text-gray-900 after:absolute after:inset-0 after:content-[''] hover:text-primary focus-visible:outline-none md:text-base"
+            >
+              {row.title}
+            </Link>
+            {row.isVirtual && (
+              <Badge className="bg-purple-100 text-purple-700">افتراضي</Badge>
+            )}
+            {row.isInactive && (
+              <Badge className="bg-gray-100 text-gray-600">غير نشط</Badge>
             )}
           </div>
-          <LiaAngleLeftSolid className="size-4 shrink-0 text-gray-400" />
+          {parentLabel && (
+            <p className="truncate text-xs text-gray-500">{parentLabel}</p>
+          )}
         </div>
+        <LiaAngleLeftSolid className="size-4 shrink-0 text-gray-400" />
+      </div>
 
-        <div className="flex flex-col gap-1.5 border-t border-gray-100 pt-3">
-          <MetricLine label="الكمية الكلية" value={row.total} tone="total" />
-          {row.low !== null && (
-            <MetricLine label="مخزون منخفض" value={row.low} tone="warning" />
-          )}
-          {row.out !== null && (
-            <MetricLine label="غير متوفر" value={row.out} tone="danger" />
-          )}
-          {row.shortfall !== null && (
-            <MetricLine label="العجز" value={row.shortfall} tone="danger" />
-          )}
-        </div>
-      </Link>
+      <div className="flex flex-col gap-1.5 border-t border-gray-100 pt-3">
+        <MetricLine
+          label="الكمية الكلية"
+          text={formatStockQuantity(row.total)}
+          tone="total"
+          value={row.total}
+        />
+        {row.low !== null && (
+          <MetricLine
+            label="مخزون منخفض"
+            text={formatVariantCount(row.low)}
+            tone="warning"
+            value={row.low}
+          />
+        )}
+        {row.out !== null && (
+          <MetricLine
+            label="غير متوفر"
+            text={formatVariantCount(row.out)}
+            tone="danger"
+            value={row.out}
+            href={row.outHref}
+            hrefLabel="عرض المتغيرات غير المتوفرة"
+          />
+        )}
+        {row.shortfall !== null && (
+          <MetricLine
+            label="العجز"
+            text={formatStockQuantity(row.shortfall)}
+            tone="danger"
+            value={row.shortfall}
+          />
+        )}
+      </div>
     </li>
   );
 }
@@ -221,6 +277,10 @@ export function StockScopeList() {
             kind: STOCK_SCOPE_KINDS.PHYSICAL,
             id: entry.card.id,
           }),
+          outHref: stockScopeOutOfStockHref({
+            kind: STOCK_SCOPE_KINDS.PHYSICAL,
+            id: entry.card.id,
+          }),
           title: entry.card.name,
           icon: LiaWarehouseSolid,
           isVirtual: false,
@@ -234,6 +294,10 @@ export function StockScopeList() {
       : {
           key: `virtual-${entry.card.id}`,
           href: stockScopeHref({
+            kind: STOCK_SCOPE_KINDS.VIRTUAL,
+            id: entry.card.id,
+          }),
+          outHref: stockScopeOutOfStockHref({
             kind: STOCK_SCOPE_KINDS.VIRTUAL,
             id: entry.card.id,
           }),

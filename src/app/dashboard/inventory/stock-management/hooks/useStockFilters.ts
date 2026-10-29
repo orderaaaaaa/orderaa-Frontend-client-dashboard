@@ -45,10 +45,13 @@ function endOfDayIsoOrUndefined(date: Date | null): string | undefined {
 
 export function useStockFilters(
   scope: StockScope,
-  indicators: StockIndicators | null
+  indicators: StockIndicators | null,
+  options?: { initialOutOfStock?: boolean }
 ) {
   const [filters, setFilters] = useState<StockFilters>(INITIAL_FILTERS);
-  const [outOfStockRequested, setOutOfStockOnly] = useState(false);
+  const [outOfStockRequested, setOutOfStockOnly] = useState(
+    options?.initialOutOfStock ?? false
+  );
   const outOfStockOnly = effectiveOutOfStockOnly(
     outOfStockRequested,
     indicators
@@ -106,6 +109,12 @@ export function useStockFilters(
       fromDate: range?.from ?? null,
       toDate: range?.to ?? null,
     }));
+  }, []);
+
+  const clearAllFilters = useCallback(() => {
+    setFilters(INITIAL_FILTERS);
+    setOutOfStockOnly(false);
+    setPage(DEFAULT_PAGE);
   }, []);
 
   const filterDtoBase = useMemo<Omit<StockFiltersDto, 'page' | 'limit'>>(
@@ -189,6 +198,7 @@ export function useStockFilters(
     setTimePeriod,
     outOfStockOnly,
     setOutOfStockOnly,
+    clearAllFilters,
 
     page,
     pageSize,
@@ -203,6 +213,7 @@ export function useStockFilters(
     isLoading: productsQuery.isLoading,
     isFetching: productsQuery.isFetching,
     isError: productsQuery.isError,
+    refetch: productsQuery.refetch,
     error: productsQuery.error,
     productsError: productsQuery.error,
 

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
 import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   LiaArrowRightSolid,
   LiaBoxOpenSolid,
@@ -21,6 +22,12 @@ import {
 } from '@/components/ui/popover';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { FormSwitch } from '@/components/ui/form-switch';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { StockFilters } from './StockFilters';
 import { SummaryCards } from './SummaryCards';
 import { StockScopeNotFound } from './StockScopeNotFound';
@@ -32,14 +39,27 @@ import {
 import { useStockFilters } from '../hooks/useStockFilters';
 import { useStockScopeSummary } from '../hooks/useStockScopeSummary';
 import { exportStockToExcel, exportStockToPDF } from '../utils/exportStock';
-import { STOCK_MANAGEMENT_BASE_PATH } from '../constants';
+import { formatStockNumber } from '../utils/formatNumber';
+import {
+  STOCK_MANAGEMENT_BASE_PATH,
+  STOCK_OUT_OF_STOCK_QUERY_PARAM,
+} from '../constants';
 import type { StockScope } from '../types';
+
+const EXPORT_HINT_TEXT = 'جارٍ تحميل بيانات المخزن قبل التصدير';
+const EXPORT_HINT_ID = 'stock-export-hint';
 
 interface StockManagementContentProps {
   scope: StockScope;
 }
 
 export function StockManagementContent({ scope }: StockManagementContentProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const initialOutOfStock =
+    searchParams.get(STOCK_OUT_OF_STOCK_QUERY_PARAM) === '1';
+
   const scopeSummary = useStockScopeSummary(scope);
   const indicators = scopeSummary.indicators;
 
@@ -55,6 +75,8 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
     setTimePeriod,
     outOfStockOnly,
     setOutOfStockOnly,
+    clearAllFilters,
+    refetch,
     pageSize,
     setPage,
     setPageSize,
@@ -71,7 +93,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
     colorOptions,
     sizeOptions,
     filterDtoBase,
-  } = useStockFilters(scope, scopeSummary.indicators);
+  } = useStockFilters(scope, scopeSummary.indicators, { initialOutOfStock });
 
   const [showFilters, setShowFilters] = useState(false);
   const [filtersOverflow, setFiltersOverflow] = useState(false);
@@ -108,6 +130,23 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
       setPage(1);
     },
     [setPage, setPageSize]
+  );
+
+  const handleOutOfStockChange = useCallback(
+    (checked: boolean) => {
+      setOutOfStockOnly(checked);
+      const params = new URLSearchParams(searchParams.toString());
+      if (checked) {
+        params.set(STOCK_OUT_OF_STOCK_QUERY_PARAM, '1');
+      } else {
+        params.delete(STOCK_OUT_OF_STOCK_QUERY_PARAM);
+      }
+      const query = params.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname, {
+        scroll: false,
+      });
+    },
+    [pathname, router, searchParams, setOutOfStockOnly]
   );
 
   const activeFilterCount = useMemo(() => {
@@ -159,6 +198,9 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
     return <StockScopeNotFound />;
   }
 
+  const exportHint =
+    !scopeSummary.indicators && !isExporting ? EXPORT_HINT_TEXT : null;
+
   return (
     <div
       ref={containerRef}
@@ -173,20 +215,40 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
             <LiaArrowRightSolid className="size-4" />
             كل المخازن
           </Link>
-          <h1 className="truncate text-2xl font-bold text-gray-900">
-            {scopeSummary.name ?? ''}
-          </h1>
+          {scopeSummary.name === null && scopeSummary.isLoading ? (
+            <Skeleton className="h-7 w-48" />
+          ) : (
+            <h1 className="truncate text-2xl font-bold text-gray-900">
+              {scopeSummary.name ?? ''}
+            </h1>
+          )}
         </div>
         <Popover open={exportOpen} onOpenChange={setExportOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              disabled={isExporting || !scopeSummary.indicators}
-              className="gap-2 whitespace-nowrap bg-primary hover:bg-primary/90 text-white px-5"
-            >
-              <LiaFileDownloadSolid className="size-5" />
-              {isExporting ? 'جاري التصدير...' : 'تصدير التقرير'}
-            </Button>
-          </PopoverTrigger>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                tabIndex={exportHint ? 0 : undefined}
+                aria-describedby={exportHint ? EXPORT_HINT_ID : undefined}
+                className="inline-flex w-full rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 sm:w-auto"
+              >
+                <PopoverTrigger asChild>
+                  <Button
+                    disabled={isExporting || !scopeSummary.indicators}
+                    className="h-10 w-full gap-2 whitespace-nowrap bg-primary hover:bg-primary/90 text-white px-5 sm:h-9 sm:w-auto"
+                  >
+                    <LiaFileDownloadSolid className="size-5" />
+                    {isExporting ? 'جاري التصدير...' : 'تصدير التقرير'}
+                  </Button>
+                </PopoverTrigger>
+                {exportHint && (
+                  <span id={EXPORT_HINT_ID} className="sr-only">
+                    {exportHint}
+                  </span>
+                )}
+              </span>
+            </TooltipTrigger>
+            {exportHint && <TooltipContent>{exportHint}</TooltipContent>}
+          </Tooltip>
           <PopoverContent align="end" className="w-48 p-2">
             <Button
               variant="ghost"
@@ -227,16 +289,16 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
             <label className="flex min-h-10 w-full shrink-0 items-center gap-2 text-sm font-medium text-gray-700 md:w-auto">
               <FormSwitch
                 checked={outOfStockOnly}
-                onCheckedChange={setOutOfStockOnly}
+                onCheckedChange={handleOutOfStockChange}
               />
               غير المتوفر فقط
             </label>
           )}
           <Button
-            variant="default"
+            variant="outline"
             aria-label={
               activeFilterCount > 0
-                ? `فلاتر متقدمة (${activeFilterCount})`
+                ? `فلاتر متقدمة (${formatStockNumber(activeFilterCount)})`
                 : 'فلاتر متقدمة'
             }
             className="h-10 w-full md:w-auto min-w-10 md:h-9 rounded-full font-semibold flex items-center gap-2 text-xs sm:text-sm px-3 sm:px-5 relative"
@@ -251,7 +313,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
             <span>فلاتر متقدمة</span>
             {activeFilterCount > 0 && (
               <span className="absolute -top-2 -start-2 bg-white text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-primary/20">
-                {activeFilterCount}
+                {formatStockNumber(activeFilterCount)}
               </span>
             )}
           </Button>
@@ -292,6 +354,15 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
         <div className="flex flex-col items-center justify-center py-20 text-gray-400">
           <LiaBoxOpenSolid className="size-16 mb-4 text-red-300" />
           <p className="text-lg font-medium text-red-500">{errorMessage}</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-4 h-10 min-w-10 sm:h-9"
+            onClick={() => refetch()}
+          >
+            إعادة المحاولة
+          </Button>
         </div>
       ) : filteredProducts.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-gray-400">
@@ -304,6 +375,15 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
               <p className="text-sm text-gray-400 mt-1">
                 جرّب تغيير معايير البحث أو إزالة الفلاتر
               </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-4 h-10 min-w-10 sm:h-9"
+                onClick={clearAllFilters}
+              >
+                إزالة الفلاتر
+              </Button>
             </>
           ) : (
             <>
