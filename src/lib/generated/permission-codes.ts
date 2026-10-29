@@ -93,6 +93,7 @@ export const PERMISSION_CODES = {
   PRODUCTS_SYNC: 'products:sync',
   PRODUCTS_MERGE: 'products:merge',
   PRODUCTS_STOCK_READ: 'products:stock:read',
+  PRODUCTS_LINKS_RESOLVE: 'products:links:resolve',
   EMPLOYEES_READ: 'employees:read',
   EMPLOYEES_CREATE: 'employees:create',
   EMPLOYEES_UPDATE: 'employees:update',
