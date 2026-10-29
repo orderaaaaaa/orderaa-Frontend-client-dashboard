@@ -4,7 +4,6 @@ import { useProductDropdownStore } from '@/store/productDropdownStore';
 import type { MissingOrderDetail } from '@/types/missing-orders';
 import CopyableCode from '@/components/ui/copyable-code';
 
-const LINKABLE_FORMAT = 'LIGHTFUNNELS';
 const NO_LINK_VALUE = '';
 
 const NOT_AVAILABLE = 'غير متوفر';
@@ -15,7 +14,6 @@ interface RawStoreDataCardProps {
 
 export function RawStoreDataCard({ row }: RawStoreDataCardProps) {
   const unknownProducts = row.products.filter((product) => product.productId === null);
-  const canLink = row.format === LINKABLE_FORMAT;
   const selectedProducts = useProductDropdownStore((state) => state.selectedProducts);
   const setSelectedProducts = useProductDropdownStore((state) => state.setSelectedProducts);
 
@@ -86,28 +84,26 @@ export function RawStoreDataCard({ row }: RawStoreDataCardProps) {
                         .join(' — ')}
                     </span>
                   )}
-                  {canLink && (
-                    <label className="mt-2 flex flex-col gap-1 text-xs text-gray-600">
-                      ربط بمنتج
-                      <select
-                        className="border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white"
-                        value={linkedPositionOf(product.index)}
-                        onChange={(event) => handleLink(product.index, event.target.value)}
-                        disabled={selectedProducts.length === 0}
-                      >
-                        <option value={NO_LINK_VALUE}>
-                          {selectedProducts.length === 0
-                            ? 'اختر منتجاً في الطلب أولاً'
-                            : 'بدون ربط'}
+                  <label className="mt-2 flex flex-col gap-1 text-xs text-gray-600">
+                    ربط بمنتج
+                    <select
+                      className="border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white"
+                      value={linkedPositionOf(product.index)}
+                      onChange={(event) => handleLink(product.index, event.target.value)}
+                      disabled={selectedProducts.length === 0}
+                    >
+                      <option value={NO_LINK_VALUE}>
+                        {selectedProducts.length === 0
+                          ? 'اختر منتجاً في الطلب أولاً'
+                          : 'بدون ربط'}
+                      </option>
+                      {selectedProducts.map((selected, position) => (
+                        <option key={`${selected.id}-${position}`} value={String(position)}>
+                          {selected.name}
                         </option>
-                        {selectedProducts.map((selected, position) => (
-                          <option key={`${selected.id}-${position}`} value={String(position)}>
-                            {selected.name}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  )}
+                      ))}
+                    </select>
+                  </label>
                 </div>
               ))}
             </div>

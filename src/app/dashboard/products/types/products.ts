@@ -1,3 +1,5 @@
+import type { IntegrationProvider } from '@/app/dashboard/integrations/types/apiIntegration';
+
 export const PRODUCT_CONFIRM_OUT_OF_STOCK_MODES = {
   INHERIT: 'INHERIT',
   FOLLOW_WORKFLOW: 'FOLLOW_WORKFLOW',
@@ -402,7 +404,7 @@ export type VariantDeleteBlocker = (typeof VARIANT_DELETE_BLOCKERS)[number];
 export type VariantDeleteConfirmation = 'HAS_EXTERNAL_LINK';
 
 export interface ProductDetailExternalSource {
-  provider: string;
+  provider: IntegrationProvider;
   externalId: string;
   storeId: number | null;
 }

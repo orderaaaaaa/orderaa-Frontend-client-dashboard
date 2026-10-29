@@ -19,6 +19,7 @@ const ar = {
   // Verbatim from the rule-card buttons this page already renders raw.
   'common.save': 'حفظ',
   'common.delete': 'حذف',
+  'common.cancel': 'إلغاء',
   // Fires only when a 403 arrives with no body message; the backend normally
   // sends its own copy in whatever `Accept-Language` asked for.
   'common.errors.forbidden': 'ليس لديك صلاحية للقيام بهذا الإجراء',
@@ -706,6 +707,10 @@ const ar = {
   'canonical.shipping.cityLoadError': 'تعذر تحميل المدن',
   'canonical.shipping.noListCarrier': 'لا توجد قائمة محافظات لشركة {carrier} بعد.',
   'canonical.shipping.phoneLabel': 'رقم الهاتف',
+  'storeLinks.moveConfirm.title': 'تأكيد نقل الربط',
+  'storeLinks.moveConfirm.line':
+    'هذا المنتج في المتجر مربوط حالياً بـ {fromProductName} / {fromVariantLabel}. هل تريد نقل الربط إلى الصنف المختار؟',
+  'storeLinks.moveConfirm.confirm': 'نقل الربط',
 } as const;
 
 export default ar;

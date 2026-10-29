@@ -110,6 +110,7 @@ export interface MissingOrdersListFilters {
 export type RecoverMissingOrderPayload = ManualOrderPayload & {
   paymentStatus: OrderPaymentStatus;
   prepaidAmount: number | null;
+  confirmStoreLinkMoves?: number[];
 };
 
 export interface RecoverMissingOrderResponse {

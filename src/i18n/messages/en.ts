@@ -15,6 +15,7 @@ const en: Record<keyof typeof ar, string> = {
   'common.loading': 'Loading…',
   'common.save': 'Save',
   'common.delete': 'Delete',
+  'common.cancel': 'Cancel',
   'common.errors.forbidden':
     'You do not have permission to perform this action',
 
@@ -693,6 +694,10 @@ const en: Record<keyof typeof ar, string> = {
   'canonical.shipping.cityLoadError': 'Could not load cities',
   'canonical.shipping.noListCarrier': 'There is no governorate list for {carrier} yet.',
   'canonical.shipping.phoneLabel': 'Phone number',
+  'storeLinks.moveConfirm.title': 'Confirm link move',
+  'storeLinks.moveConfirm.line':
+    'This store product is currently linked to {fromProductName} / {fromVariantLabel}. Do you want to move the link to the selected variant?',
+  'storeLinks.moveConfirm.confirm': 'Move link',
 };
 
 export default en;

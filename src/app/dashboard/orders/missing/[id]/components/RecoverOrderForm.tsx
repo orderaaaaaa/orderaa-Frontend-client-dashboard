@@ -20,6 +20,8 @@ import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/util
 import { locationSaveErrorTextOf } from '@/types/locationOptions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useRecoverMissingOrder } from '@/services/missingOrders';
+import { StoreLinkMoveConfirmModal } from '@/components/storeLinks/StoreLinkMoveConfirmModal';
+import { isStoreLinkMoveConfirmationBody, type StoreLinkMove } from '@/types/storeLinks';
 import type {
   MissingOrderDetail,
   MissingOrderErrorBody,
@@ -41,9 +43,15 @@ function isMissingOrderErrorBody(value: unknown): value is MissingOrderErrorBody
   return typeof value === 'object' && value !== null;
 }
 
+interface PendingStoreLinkMoves {
+  payload: RecoverMissingOrderPayload;
+  moves: StoreLinkMove[];
+}
+
 export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
   const router = useRouter();
   const [isDismissOpen, setIsDismissOpen] = useState(false);
+  const [pendingStoreLinkMoves, setPendingStoreLinkMoves] = useState<PendingStoreLinkMoves | null>(null);
   const { defaultValues, initialProducts, highlightFields } = useMemo(
     () => buildMissingOrderPrefill(row),
     [row],
@@ -63,7 +71,7 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
 
   const selectedProducts = useProductDropdownStore((state) => state.selectedProducts);
   const [productsError, setProductsError] = useState<string | null>(null);
-  const { mutateAsync: recover } = useRecoverMissingOrder(id);
+  const { mutateAsync: recover, isPending: isRecovering } = useRecoverMissingOrder(id);
   const variantCheck = useIncompleteVariantLines(selectedProducts);
   const variantsBlocked =
     variantCheck.isChecking || variantCheck.lines.length > 0;
@@ -93,6 +101,54 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
     if (status === 'CASH_ON_DELIVERY') {
       setValue('payment.prepaidAmount', '');
       clearErrors('payment.prepaidAmount');
+    }
+  };
+
+  const submitRecovery = async (payload: RecoverMissingOrderPayload) => {
+    try {
+      const recovered = await recover(payload);
+      setPendingStoreLinkMoves(null);
+      toast.success('تم إنشاء الطلب بنجاح!');
+      if (carrierSendNeedsAttention(recovered.carrierSend)) {
+        toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
+      }
+      router.back();
+    } catch (err: any) {
+      setPendingStoreLinkMoves(null);
+      const status = err?.response?.status;
+      const body: unknown = err?.response?.data;
+
+      if (status === 409 && isStoreLinkMoveConfirmationBody(body)) {
+        setPendingStoreLinkMoves({ payload, moves: body.moves });
+        return;
+      }
+
+      if (
+        status === 409 &&
+        isMissingOrderErrorBody(body) &&
+        body.code === 'ORDER_ALREADY_EXISTS'
+      ) {
+        toast.success(`تم إنشاء هذا الطلب بالفعل — ${body.orderCode ?? ''}`);
+        router.back();
+        return;
+      }
+
+      if (
+        status === 409 &&
+        isMissingOrderErrorBody(body) &&
+        typeof body.message === 'string'
+      ) {
+        toast.error(body.message);
+        return;
+      }
+
+      toast.error(
+        locationSaveErrorTextOf(err, 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.'),
+      );
+
+      if (status === 500) {
+        toast.error('تواصل مع الدعم');
+      }
     }
   };
 
@@ -142,44 +198,15 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
       prepaidAmount: data.payment.prepaidAmount ? Number(data.payment.prepaidAmount) : null,
     };
 
-    try {
-      const recovered = await recover(payload);
-      toast.success('تم إنشاء الطلب بنجاح!');
-      if (carrierSendNeedsAttention(recovered.carrierSend)) {
-        toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
-      }
-      router.back();
-    } catch (err: any) {
-      const status = err?.response?.status;
-      const body: unknown = err?.response?.data;
+    await submitRecovery(payload);
+  };
 
-      if (
-        status === 409 &&
-        isMissingOrderErrorBody(body) &&
-        body.code === 'ORDER_ALREADY_EXISTS'
-      ) {
-        toast.success(`تم إنشاء هذا الطلب بالفعل — ${body.orderCode ?? ''}`);
-        router.back();
-        return;
-      }
-
-      if (
-        status === 409 &&
-        isMissingOrderErrorBody(body) &&
-        typeof body.message === 'string'
-      ) {
-        toast.error(body.message);
-        return;
-      }
-
-      toast.error(
-        locationSaveErrorTextOf(err, 'حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.'),
-      );
-
-      if (status === 500) {
-        toast.error('تواصل مع الدعم');
-      }
-    }
+  const confirmStoreLinkMoves = async () => {
+    if (!pendingStoreLinkMoves) return;
+    await submitRecovery({
+      ...pendingStoreLinkMoves.payload,
+      confirmStoreLinkMoves: pendingStoreLinkMoves.moves.map((move) => move.sourceIndex),
+    });
   };
 
   const failingProductIndex = row.failureProductIndex;
@@ -359,6 +386,13 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
           </Can>
         </div>
       </div>
+
+      <StoreLinkMoveConfirmModal
+        moves={pendingStoreLinkMoves?.moves ?? []}
+        onConfirm={confirmStoreLinkMoves}
+        onClose={() => setPendingStoreLinkMoves(null)}
+        isLoading={isRecovering}
+      />
 
       <DismissDialog
         id={id}
