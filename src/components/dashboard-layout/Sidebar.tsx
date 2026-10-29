@@ -21,6 +21,7 @@ import { findActiveHref, containsHref } from '@/utils/navigation';
 import Logo from '@/assets/images/updated-logo.png';
 import { usePermissions } from '@/hooks/usePermissions';
 import { hasPermissionCode } from '@/lib/permissions';
+import { UnreadNoticesNavBadge } from '@/components/notices/UnreadNoticesNavBadge';
 
 interface SidebarProps {
   open: boolean;
@@ -259,11 +260,17 @@ export function Sidebar({
                         ...(hasActiveChild ? activeItemStyle : {}),
                       }}
                     >
-                      <span className="flex items-center gap-2">
+                      <span className="relative flex items-center gap-2">
                         {item.icon && <item.icon className="h-5 w-5" />}
                         {!collapsed && item.name}
+                        {collapsed && item.badge === 'unreadNotices' && (
+                          <UnreadNoticesNavBadge className="absolute -top-1.5 -end-1.5" />
+                        )}
                       </span>
 
+                      {!collapsed && item.badge === 'unreadNotices' && (
+                        <UnreadNoticesNavBadge className="ms-auto me-2" />
+                      )}
                       {!collapsed &&
                         (isOpen ? (
                           <ChevronUp className="h-4 w-4" />
@@ -382,6 +389,9 @@ export function Sidebar({
                                   >
                                     {SubIcon && <SubIcon className="h-5 w-5" />}
                                     {sub.name}
+                                    {sub.badge === 'unreadNotices' && (
+                                      <UnreadNoticesNavBadge className="ms-auto" />
+                                    )}
                                   </Link>
                                 );
                               })}

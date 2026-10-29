@@ -69,6 +69,7 @@ export type NavigationItem = {
    * hidden entries — and any parent left without visible children.
    */
   permission?: PermissionCode;
+  badge?: 'unreadNotices';
 };
 
 export const navigation: NavigationItem[] = [
@@ -90,11 +91,13 @@ export const navigation: NavigationItem[] = [
     name: 'الطلبات',
     href: '/dashboard/orders',
     icon: Package,
+    badge: 'unreadNotices',
     children: [
       {
         name: 'جميع الطلبات',
         href: '/dashboard/orders/allOrders',
         icon: CartIcon,
+        badge: 'unreadNotices',
       },
       {
         name: 'قسم الكول سنتر',

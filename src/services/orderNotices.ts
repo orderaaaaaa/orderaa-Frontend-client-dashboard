@@ -12,6 +12,7 @@ import { translate } from '@/i18n/translate';
 import { getApiErrorStatus } from '@/utils/apiError';
 
 const UNREAD_COUNT_STALE_TIME_MS = 30_000;
+const UNREAD_COUNT_POLL_INTERVAL_MS = 30_000;
 const MARK_NOTICES_READ_MAX_IDS = 200;
 
 export const orderNoticesRootKey = [QUERY_KEYS.ORDER_NOTICES] as const;
@@ -40,11 +41,13 @@ export const noticeErrorMessageOf = (err: unknown, locale: Locale, fallback: str
   return fallback;
 };
 
-export const useUnreadNoticeCountQuery = () =>
+export const useUnreadNoticeCountQuery = ({ enabled = true }: { enabled?: boolean } = {}) =>
   useQuery({
     queryKey: unreadNoticeCountKey(),
     queryFn: getUnreadNoticeCount,
     staleTime: UNREAD_COUNT_STALE_TIME_MS,
+    enabled,
+    refetchInterval: enabled ? UNREAD_COUNT_POLL_INTERVAL_MS : false,
   });
 
 export const useOrderNoticesInfiniteQuery = (orderId: number) =>
