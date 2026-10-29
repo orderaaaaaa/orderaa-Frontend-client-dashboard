@@ -106,6 +106,12 @@ export function VariantReshapeDialog({
   onConfirm,
 }: VariantReshapeDialogProps) {
   const partialIds = plan ? partialReshapeVariantIds(plan, selections) : [];
+  const visibleRelinks = plan
+    ? plan.relinks.filter((relink) => !relink.keyOnly)
+    : [];
+  const keyOnlyCount = plan
+    ? plan.relinks.filter((relink) => relink.keyOnly).length
+    : 0;
   return (
     <BaseModal
       isOpen={open}
@@ -150,17 +156,23 @@ export function VariantReshapeDialog({
             </section>
           )}
 
-          {plan.relinks.length > 0 && (
+          {visibleRelinks.length > 0 && (
             <section className="space-y-2">
               <h3 className={SECTION_HEADING_CLASS}>متغيرات سيتم إعادة ربطها</h3>
               <ul className="list-disc space-y-1 ps-5">
-                {plan.relinks.map((relink) => (
+                {visibleRelinks.map((relink) => (
                   <li key={relink.variantId} className="break-words">
                     {relink.fromLabel} ← {relink.toLabel}
                   </li>
                 ))}
               </ul>
             </section>
+          )}
+
+          {keyOnlyCount > 0 && (
+            <p className="text-xs text-gray-500">
+              سيتم أيضاً تصحيح مفاتيح داخلية لـ {keyOnlyCount} متغير
+            </p>
           )}
 
           {plan.valueRemovals.length > 0 && (
