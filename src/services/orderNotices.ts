@@ -42,6 +42,7 @@ export const useOrderNoticesInfiniteQuery = (orderId: number) =>
     queryFn: ({ pageParam }) => getOrderNotices(orderId, pageParam),
     initialPageParam: undefined as number | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    staleTime: 0,
   });
 
 const chunkNoticeIds = (noticeIds: number[]): number[][] => {

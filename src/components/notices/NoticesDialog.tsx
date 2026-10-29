@@ -47,13 +47,20 @@ function NoticesDialogBody({ orderId, canAcknowledge }: { orderId: number; canAc
   const [unreadAtOpen, setUnreadAtOpen] = useState<Set<number> | null>(null);
   const snapshotTakenRef = useRef(false);
   const markedOnOpenRef = useRef(false);
-  const firstPage = query.data?.pages[0];
+  const { data, isFetchedAfterMount, isFetching } = query;
 
   useEffect(() => {
-    if (!firstPage || snapshotTakenRef.current) return;
+    if (!data || !isFetchedAfterMount || isFetching || snapshotTakenRef.current) return;
     snapshotTakenRef.current = true;
-    setUnreadAtOpen(new Set(firstPage.data.filter((notice) => !notice.read).map((notice) => notice.id)));
-  }, [firstPage]);
+    setUnreadAtOpen(
+      new Set(
+        data.pages
+          .flatMap((page) => page.data)
+          .filter((notice) => !notice.read)
+          .map((notice) => notice.id)
+      )
+    );
+  }, [data, isFetchedAfterMount, isFetching]);
 
   useEffect(() => {
     if (!canAcknowledge || !unreadAtOpen || unreadAtOpen.size === 0 || markedOnOpenRef.current) return;

@@ -259,7 +259,7 @@ export function Sidebar({
                         ...(hasActiveChild ? activeItemStyle : {}),
                       }}
                     >
-                      <span className="relative flex items-center gap-2">
+                      <span className="flex items-center gap-2">
                         {item.icon && <item.icon className="h-5 w-5" />}
                         {!collapsed && item.name}
                       </span>
