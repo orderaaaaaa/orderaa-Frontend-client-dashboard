@@ -2,7 +2,7 @@
 
 import { useProductDropdownStore } from '@/store/productDropdownStore';
 import type { MissingOrderDetail } from '@/types/missing-orders';
-import { capturedStoreLineIndexes, resolveStoreLineLinks } from '@/utils/manualOrder/storeLineLinks';
+import { blockedStoreLinesOf, capturedStoreLineIndexes } from '@/utils/manualOrder/storeLineLinks';
 import CopyableCode from '@/components/ui/copyable-code';
 
 const NO_LINK_VALUE = '';
@@ -17,7 +17,7 @@ export function RawStoreDataCard({ row }: RawStoreDataCardProps) {
   const unknownProducts = row.products.filter((product) => product.productId === null);
   const selectedProducts = useProductDropdownStore((state) => state.selectedProducts);
   const setSelectedProducts = useProductDropdownStore((state) => state.setSelectedProducts);
-  const { blockedStoreLines } = resolveStoreLineLinks(selectedProducts, capturedStoreLineIndexes(row.products));
+  const blockedStoreLines = blockedStoreLinesOf(selectedProducts, capturedStoreLineIndexes(row.products));
 
   const linkedPositionOf = (sourceIndex: number): string => {
     const position = selectedProducts.findIndex((p) => p.sourceIndex === sourceIndex);
