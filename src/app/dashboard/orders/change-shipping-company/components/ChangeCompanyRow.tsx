@@ -77,6 +77,7 @@ export function ChangeCompanyRow({
       value={governorateOption ?? ''}
       placeholder={CHANGE_COMPANY_TEXT.colGovernorate}
       disabled={governorateDisabled}
+      portal
       onValueChange={(key) => {
         const option = governorateItems.find((item) => item.key === key);
         onPickGovernorate(orderId, option ? { value: option.key, label: option.label } : null);
@@ -91,6 +92,7 @@ export function ChangeCompanyRow({
       value={row.picks.cityOption ?? ''}
       placeholder={CHANGE_COMPANY_TEXT.colCity}
       disabled={cityDisabled}
+      portal
       onValueChange={(key) => {
         const option = cityItems.find((item) => item.key === key);
         onPickCity(orderId, option ? { value: option.key, label: option.label } : null);

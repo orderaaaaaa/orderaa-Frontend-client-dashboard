@@ -13,6 +13,7 @@ import { CheckIcon, ChevronDown, Loader2, X } from 'lucide-react';
 import { Controller, type Control } from 'react-hook-form';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/utils/debounce';
+import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover';
 
 type OptionObject = {
   key: string;
@@ -50,6 +51,7 @@ interface SearchableSelectProps {
   id?: string;
   'aria-label'?: string;
   overlayOnMobile?: boolean;
+  portal?: boolean;
 }
 
 const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
@@ -81,6 +83,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
       id,
       'aria-label': ariaLabel,
       overlayOnMobile = false,
+      portal = false,
     },
     ref
   ) {
@@ -90,6 +93,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
 
     const internalRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const listRef = useRef<HTMLDivElement>(null);
 
     const debouncedQuery = useDebounce(searchQuery, debounceMs);
 
@@ -160,6 +164,9 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
 
     useEffect(() => {
       function onDocClick(e: MouseEvent) {
+        if (listRef.current && listRef.current.contains(e.target as Node)) {
+          return;
+        }
         const container = (ref ||
           internalRef) as React.RefObject<HTMLDivElement>;
         if (
@@ -235,6 +242,120 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
       return null;
     };
 
+    const triggerBlock = (
+      <div className="relative flex flex-col">
+        <button
+          type="button"
+          id={id}
+          aria-label={ariaLabel}
+          disabled={disabled || loading}
+          onClick={() => !disabled && !loading && handleOpenChange(!open)}
+          className={cn(
+            'relative px-4 py-3 rounded-lg border flex items-center justify-between truncate text-base cursor-pointer',
+            disabled || loading
+              ? 'bg-muted cursor-not-allowed text-foreground-subtle'
+              : 'bg-card',
+            error ? 'border-red-500' : 'border-surface-strong',
+            triggerClassName
+          )}
+          aria-expanded={open}
+          aria-haspopup="listbox"
+        >
+          <span
+            className={cn(
+              'flex-1 truncate text-right',
+              currentDisplayValue ? 'text-foreground-body' : 'text-foreground-secondary'
+            )}
+          >
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                جاري التحميل...
+              </span>
+            ) : (
+              currentDisplayValue || placeholder
+            )}
+          </span>
+
+          <ChevronDown
+            className={cn(
+              'w-4 h-4 md:w-5 md:h-5 text-foreground-subtle transition-transform',
+              open && 'rotate-180'
+            )}
+          />
+        </button>
+
+        {clearable && value && !disabled && !loading && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="absolute end-10 top-1/2 -translate-y-1/2 z-20
+                       text-foreground-subtle hover:text-primary cursor-pointer"
+            aria-label="مسح الاختيار"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+    );
+
+    const listContent = (
+      <>
+        {showSearch && (
+          <div className="p-1.5 md:p-2 border-b">
+            <input
+              ref={inputRef}
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                onSearch?.(e.target.value);
+              }}
+              placeholder={searchPlaceholder}
+              className="w-full px-2 py-1 md:py-1.5 rounded border text-xs md:text-sm
+                         focus:outline-none focus:border-primary"
+            />
+          </div>
+        )}
+
+        <ul className="py-1">
+          {renderEmptyState() ||
+            filtered.map((opt, idx) => {
+              const key = getOptionKey(opt);
+              const selected = value === key;
+              const optionDisabled = isOptionDisabled(opt);
+
+              return (
+                <li
+                  key={key}
+                  role="option"
+                  aria-selected={selected}
+                  aria-disabled={optionDisabled || undefined}
+                  onMouseEnter={() =>
+                    !optionDisabled && setActiveIdx(idx)
+                  }
+                  onMouseLeave={() => setActiveIdx(-1)}
+                  onClick={() => commitSelect(opt)}
+                  className={cn(
+                    'px-2 py-1.5 md:px-3 md:py-2 flex justify-between items-center text-sm md:text-base',
+                    optionDisabled
+                      ? 'text-foreground-subtle cursor-not-allowed'
+                      : 'cursor-pointer hover:bg-primary hover:text-white',
+                    selected && !optionDisabled && 'bg-primary text-white',
+                    activeIdx === idx &&
+                      !selected &&
+                      !optionDisabled &&
+                      'bg-accent'
+                  )}
+                >
+                  <span>{getDisplayText(opt)}</span>
+                  {selected && <CheckIcon className="w-4 h-4" />}
+                </li>
+              );
+            })}
+        </ul>
+      </>
+    );
+
     return (
       <div
         ref={ref || internalRef}
@@ -242,129 +363,53 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
       >
         {name && <input type="hidden" name={name} value={value} />}
 
-        <div className="relative flex flex-col">
-          <button
-            type="button"
-            id={id}
-            aria-label={ariaLabel}
-            disabled={disabled || loading}
-            onClick={() => !disabled && !loading && handleOpenChange(!open)}
-            className={cn(
-              'relative px-4 py-3 rounded-lg border flex items-center justify-between truncate text-base cursor-pointer',
-              disabled || loading
-                ? 'bg-muted cursor-not-allowed text-foreground-subtle'
-                : 'bg-card',
-              error ? 'border-red-500' : 'border-surface-strong',
-              triggerClassName
-            )}
-            aria-expanded={open}
-            aria-haspopup="listbox"
-          >
-            <span
-              className={cn(
-                'flex-1 truncate text-right',
-                currentDisplayValue ? 'text-foreground-body' : 'text-foreground-secondary'
-              )}
-            >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  جاري التحميل...
-                </span>
-              ) : (
-                currentDisplayValue || placeholder
-              )}
-            </span>
-
-            <ChevronDown
-              className={cn(
-                'w-4 h-4 md:w-5 md:h-5 text-foreground-subtle transition-transform',
-                open && 'rotate-180'
-              )}
-            />
-          </button>
-
-          {clearable && value && !disabled && !loading && (
-            <button
-              type="button"
-              onClick={handleClear}
-              className="absolute end-10 top-1/2 -translate-y-1/2 z-20
-                         text-foreground-subtle hover:text-primary cursor-pointer"
-              aria-label="مسح الاختيار"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-
-        <AnimatePresence>
-          {open && (
-            <motion.div
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
-              className={cn(
-                overlayOnMobile ? 'absolute top-full' : 'md:absolute md:top-full',
-                'z-50 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-lg'
-              )}
-              role="listbox"
-            >
-              {showSearch && (
-                <div className="p-1.5 md:p-2 border-b">
-                  <input
-                    ref={inputRef}
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      onSearch?.(e.target.value);
-                    }}
-                    placeholder={searchPlaceholder}
-                    className="w-full px-2 py-1 md:py-1.5 rounded border text-xs md:text-sm
-                               focus:outline-none focus:border-primary"
-                  />
+        {portal ? (
+          <Popover open={open}>
+            <PopoverAnchor asChild>{triggerBlock}</PopoverAnchor>
+            {open && (
+              <PopoverContent
+                align="start"
+                sideOffset={4}
+                onOpenAutoFocus={(e) => e.preventDefault()}
+                onCloseAutoFocus={(e) => e.preventDefault()}
+                onInteractOutside={(e) => e.preventDefault()}
+                onEscapeKeyDown={(e) => e.preventDefault()}
+                role="presentation"
+                className="p-0 border-0 w-(--radix-popover-trigger-width)"
+              >
+                <div
+                  ref={listRef}
+                  role="listbox"
+                  className="max-h-60 overflow-auto rounded-md border"
+                >
+                  {listContent}
                 </div>
+              </PopoverContent>
+            )}
+          </Popover>
+        ) : (
+          <>
+            {triggerBlock}
+
+            <AnimatePresence>
+              {open && (
+                <motion.div
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.15 }}
+                  className={cn(
+                    overlayOnMobile ? 'absolute top-full' : 'md:absolute md:top-full',
+                    'z-50 mt-1 w-full max-h-60 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-lg'
+                  )}
+                  role="listbox"
+                >
+                  {listContent}
+                </motion.div>
               )}
-
-              <ul className="py-1">
-                {renderEmptyState() ||
-                  filtered.map((opt, idx) => {
-                    const key = getOptionKey(opt);
-                    const selected = value === key;
-                    const optionDisabled = isOptionDisabled(opt);
-
-                    return (
-                      <li
-                        key={key}
-                        role="option"
-                        aria-selected={selected}
-                        aria-disabled={optionDisabled || undefined}
-                        onMouseEnter={() =>
-                          !optionDisabled && setActiveIdx(idx)
-                        }
-                        onMouseLeave={() => setActiveIdx(-1)}
-                        onClick={() => commitSelect(opt)}
-                        className={cn(
-                          'px-2 py-1.5 md:px-3 md:py-2 flex justify-between items-center text-sm md:text-base',
-                          optionDisabled
-                            ? 'text-foreground-subtle cursor-not-allowed'
-                            : 'cursor-pointer hover:bg-primary hover:text-white',
-                          selected && !optionDisabled && 'bg-primary text-white',
-                          activeIdx === idx &&
-                            !selected &&
-                            !optionDisabled &&
-                            'bg-accent'
-                        )}
-                      >
-                        <span>{getDisplayText(opt)}</span>
-                        {selected && <CheckIcon className="w-4 h-4" />}
-                      </li>
-                    );
-                  })}
-              </ul>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </AnimatePresence>
+          </>
+        )}
 
         {error && <span className="text-xs text-red-500">{error}</span>}
       </div>
