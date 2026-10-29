@@ -129,13 +129,11 @@ export default function OrderCard({
     onRepeatClick?.();
   };
 
-  // Same formatting the order-details timeline uses, so stock-workflow notes
-  // (stored as JSON) read as Arabic sentences here instead of raw JSON.
   const noteEvents = (events ?? [])
     .filter((event) => event.note && !event.note.startsWith('Cancelled'))
     .map((event) => ({
       id: event.id,
-      text: renderOrderEventNote(event.name, event.note, getStatusLabel),
+      text: renderOrderEventNote(event.name, event.note),
     }))
     .filter(
       (event): event is { id: number; text: string } => Boolean(event.text)

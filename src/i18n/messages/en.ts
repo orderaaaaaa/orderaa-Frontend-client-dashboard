@@ -150,37 +150,13 @@ const en: Record<keyof typeof ar, string> = {
     'Stock may not be enough for this status, and the system may refuse the confirmation:',
   'stockShortage.reasonShortage': 'Not enough stock',
   'stockShortage.reasonBlocked': 'Confirmation blocked by stock',
-  'stockShortage.event.title': 'Stock shortage blocked a status change',
   'lineEdit.event.title': 'Sent back to packing to edit products',
   'orderEvent.returnRefundRecorded': 'Return refund recorded',
   'lineEdit.event.action.add': 'Add product',
   'lineEdit.event.action.update': 'Edit product',
   'lineEdit.event.action.delete': 'Delete product',
   'lineEdit.event.bypassed': 'Stock not moved for {count} variants',
-  'stockShortage.event.transitionBlocked': 'Stock shortage blocked the change from {fromStatus} to {toStatus}',
-  'stockShortage.event.transitionBlockedWarehouse':
-    'Stock shortage in {warehouseName} blocked the change from {fromStatus} to {toStatus}',
   'orderDetails.stock.bypassed': 'No stock movement',
-  'stockShortage.event.carrierNotApplied':
-    'The carrier reported {status} but the status was not updated: stock shortage for {productName} in {warehouseName}',
-  'stockShortage.event.machineTransition':
-    'The transition to {status} was not applied due to a stock shortage: {productName} in {warehouseName}',
-  'stockShortage.event.storeCreation':
-    'The store order arrived but its stock was not reserved due to a stock shortage: {productName} in {warehouseName}',
-  'stockShortage.event.carrierNotAppliedNoWarehouse':
-    'The carrier reported {status} but the status was not updated: stock shortage for {productName}',
-  'stockShortage.event.machineTransitionNoWarehouse':
-    'The transition to {status} was not applied due to a stock shortage: {productName}',
-  'stockShortage.event.storeCreationNoWarehouse':
-    'The store order arrived but its stock was not reserved due to a stock shortage: {productName}',
-  'stockShortage.event.shortageTitle': 'Stock shortage',
-  'stockShortage.event.retryTitle': 'Re-apply status',
-  'stockShortage.event.retryApplied':
-    'The status was re-applied after the stock was fixed: {status}',
-  'stockShortage.event.retryStoreCreationTitle': 'Re-apply stock',
-  'stockShortage.event.retryStoreCreationApplied': "The order's stock was reserved after the stock was fixed",
-  'stockShortage.event.retryStoreUpdateTitle': 'Re-apply store update',
-  'stockShortage.event.retryStoreUpdateApplied': 'The store update was applied after the stock was fixed',
   'orderSystemFailures.retry.action': 'Re-apply status',
   'orderSystemFailures.retry.success': 'Status re-applied',
   'orderSystemFailures.retry.failed': 'Could not re-apply the status',

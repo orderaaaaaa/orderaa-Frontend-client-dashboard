@@ -164,37 +164,13 @@ const ar = {
     'المخزون قد لا يكفي لهذه الحالة، وقد يرفض النظام التأكيد:',
   'stockShortage.reasonShortage': 'المخزون لا يكفي',
   'stockShortage.reasonBlocked': 'التأكيد ممنوع بسبب المخزون',
-  'stockShortage.event.title': 'منع نقص المخزون تغيير الحالة',
   'lineEdit.event.title': 'أُعيد إلى التغليف لتعديل المنتجات',
   'orderEvent.returnRefundRecorded': 'تسجيل مرتجع',
   'lineEdit.event.action.add': 'إضافة منتج',
   'lineEdit.event.action.update': 'تعديل منتج',
   'lineEdit.event.action.delete': 'حذف منتج',
   'lineEdit.event.bypassed': 'لم تُنقل كمية {count} من المتغيرات',
-  'stockShortage.event.transitionBlocked': 'منع نقص المخزون تغيير الحالة من {fromStatus} إلى {toStatus}',
-  'stockShortage.event.transitionBlockedWarehouse':
-    'منع نقص المخزون في {warehouseName} تغيير الحالة من {fromStatus} إلى {toStatus}',
   'orderDetails.stock.bypassed': 'لا تُحرّك حركة مخزون',
-  'stockShortage.event.carrierNotApplied':
-    'الشركة أبلغت بـ{status} ولم يتم تحديث الحالة: نقص مخزون {productName} في {warehouseName}',
-  'stockShortage.event.machineTransition':
-    'لم يُطبَّق الانتقال إلى {status} بسبب نقص المخزون: {productName} في {warehouseName}',
-  'stockShortage.event.storeCreation':
-    'وصل الطلب من المتجر ولم يُحجز مخزونه لعدم كفاية المخزون: {productName} في {warehouseName}',
-  'stockShortage.event.carrierNotAppliedNoWarehouse':
-    'الشركة أبلغت بـ{status} ولم يتم تحديث الحالة: نقص مخزون {productName}',
-  'stockShortage.event.machineTransitionNoWarehouse':
-    'لم يُطبَّق الانتقال إلى {status} بسبب نقص المخزون: {productName}',
-  'stockShortage.event.storeCreationNoWarehouse':
-    'وصل الطلب من المتجر ولم يُحجز مخزونه لعدم كفاية المخزون: {productName}',
-  'stockShortage.event.shortageTitle': 'نقص المخزون',
-  'stockShortage.event.retryTitle': 'إعادة تطبيق الحالة',
-  'stockShortage.event.retryApplied':
-    'أعيد تطبيق الحالة بعد إصلاح المخزون: {status}',
-  'stockShortage.event.retryStoreCreationTitle': 'إعادة تطبيق المخزون',
-  'stockShortage.event.retryStoreCreationApplied': 'أعيد حجز مخزون الطلب بعد إصلاح المخزون',
-  'stockShortage.event.retryStoreUpdateTitle': 'إعادة تطبيق تحديث المتجر',
-  'stockShortage.event.retryStoreUpdateApplied': 'طُبّق تحديث المتجر بعد إصلاح المخزون',
   'orderSystemFailures.retry.action': 'إعادة تطبيق الحالة',
   'orderSystemFailures.retry.success': 'تمت إعادة تطبيق الحالة',
   'orderSystemFailures.retry.failed': 'تعذر إعادة تطبيق الحالة',
