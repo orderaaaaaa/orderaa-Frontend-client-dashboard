@@ -707,6 +707,7 @@ const ar = {
   'canonical.shipping.cityLoadError': 'تعذر تحميل المدن',
   'canonical.shipping.noListCarrier': 'لا توجد قائمة محافظات لشركة {carrier} بعد.',
   'canonical.shipping.phoneLabel': 'رقم الهاتف',
+  'storeLinks.recover.unlinkedBlocked': 'اربط كل منتج من بيانات المتجر بالصنف المختار قبل الاسترجاع',
   'storeLinks.moveConfirm.title': 'تأكيد نقل الربط',
   'storeLinks.moveConfirm.line':
     'هذا المنتج في المتجر مربوط حالياً بـ {fromProductName} / {fromVariantLabel}. هل تريد نقل الربط إلى الصنف المختار؟',

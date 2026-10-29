@@ -22,6 +22,8 @@ import { PERMISSION_CODES } from '@/lib/permissions';
 import { useRecoverMissingOrder } from '@/services/missingOrders';
 import { StoreLinkMoveConfirmModal } from '@/components/storeLinks/StoreLinkMoveConfirmModal';
 import { isStoreLinkMoveConfirmationBody, type StoreLinkMove } from '@/types/storeLinks';
+import { useI18n } from '@/i18n/I18nProvider';
+import { capturedStoreLineIndexes, resolveStoreLineLinks } from '@/utils/manualOrder/storeLineLinks';
 import type {
   MissingOrderDetail,
   MissingOrderErrorBody,
@@ -70,6 +72,9 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
   });
 
   const selectedProducts = useProductDropdownStore((state) => state.selectedProducts);
+  const setSelectedProducts = useProductDropdownStore((state) => state.setSelectedProducts);
+  const { t } = useI18n();
+  const storeLineIndexes = useMemo(() => capturedStoreLineIndexes(row.products), [row]);
   const [productsError, setProductsError] = useState<string | null>(null);
   const { mutateAsync: recover, isPending: isRecovering } = useRecoverMissingOrder(id);
   const variantCheck = useIncompleteVariantLines(selectedProducts);
@@ -160,6 +165,15 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
       return;
     }
 
+    const storeLineLinks = resolveStoreLineLinks(selectedProducts, storeLineIndexes);
+    if (storeLineLinks.blockedStoreLines.length > 0) {
+      setProductsError(t('storeLinks.recover.unlinkedBlocked'));
+      return;
+    }
+    if (storeLineLinks.products !== selectedProducts) {
+      setSelectedProducts(storeLineLinks.products);
+    }
+
     if (variantsBlocked) return;
 
     const basePayload = buildManualOrderPayload({
@@ -184,7 +198,7 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
       needsConfirmation: data.needsConfirmation,
       total: data.total,
       packagingNotes: data.packagingNotes,
-      selectedProducts: selectedProducts.map((p) => ({
+      selectedProducts: storeLineLinks.products.map((p) => ({
         id: p.id,
         quantity: p.quantity || 1,
         attributeOptionIds: p.attributeOptionIds || [],
