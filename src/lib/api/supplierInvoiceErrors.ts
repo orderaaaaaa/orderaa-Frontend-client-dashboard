@@ -4,12 +4,15 @@ export const SUPPLIER_INVOICE_ERROR_CODES = {
   APPROVED: 'SUPPLIER_INVOICE_APPROVED',
   ATTRIBUTE_FORBIDDEN: 'SUPPLIER_INVOICE_ATTRIBUTE_FORBIDDEN',
   NOT_FOUND: 'SUPPLIER_INVOICE_NOT_FOUND',
+  CREATOR_NOT_FOUND: 'SUPPLIER_INVOICE_CREATOR_NOT_FOUND',
 } as const;
 
 export const SUPPLIER_INVOICE_APPROVED_MESSAGE = 'الفاتورة معتمدة ولا يمكن تعديلها أو حذفها';
 export const SUPPLIER_INVOICE_ATTRIBUTE_FORBIDDEN_MESSAGE =
   'لا تملك صلاحية تغيير منشئ الفاتورة';
 export const SUPPLIER_INVOICE_NOT_FOUND_MESSAGE = 'الفاتورة غير موجودة أو تم حذفها';
+export const SUPPLIER_INVOICE_CREATOR_NOT_FOUND_MESSAGE =
+  'الموظف المختار كمنشئ للفاتورة لا ينتمي إلى هذا المتجر';
 
 interface SupplierInvoiceErrorBody {
   status?: number;
@@ -40,6 +43,8 @@ export function supplierInvoiceErrorMessage(err: unknown, fallback: string): str
       return SUPPLIER_INVOICE_ATTRIBUTE_FORBIDDEN_MESSAGE;
     case SUPPLIER_INVOICE_ERROR_CODES.NOT_FOUND:
       return SUPPLIER_INVOICE_NOT_FOUND_MESSAGE;
+    case SUPPLIER_INVOICE_ERROR_CODES.CREATOR_NOT_FOUND:
+      return SUPPLIER_INVOICE_CREATOR_NOT_FOUND_MESSAGE;
     default:
       return getApiErrorMessage(err, fallback);
   }
