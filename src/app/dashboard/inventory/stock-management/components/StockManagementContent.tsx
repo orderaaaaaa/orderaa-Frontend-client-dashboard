@@ -132,9 +132,8 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
     [setPage, setPageSize]
   );
 
-  const handleOutOfStockChange = useCallback(
+  const writeOutOfStockParam = useCallback(
     (checked: boolean) => {
-      setOutOfStockOnly(checked);
       const params = new URLSearchParams(searchParams.toString());
       if (checked) {
         params.set(STOCK_OUT_OF_STOCK_QUERY_PARAM, '1');
@@ -146,8 +145,21 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
         scroll: false,
       });
     },
-    [pathname, router, searchParams, setOutOfStockOnly]
+    [pathname, router, searchParams]
   );
+
+  const handleOutOfStockChange = useCallback(
+    (checked: boolean) => {
+      setOutOfStockOnly(checked);
+      writeOutOfStockParam(checked);
+    },
+    [setOutOfStockOnly, writeOutOfStockParam]
+  );
+
+  const handleClearFilters = useCallback(() => {
+    clearAllFilters();
+    writeOutOfStockParam(false);
+  }, [clearAllFilters, writeOutOfStockParam]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -380,7 +392,7 @@ export function StockManagementContent({ scope }: StockManagementContentProps) {
                 variant="outline"
                 size="sm"
                 className="mt-4 h-10 min-w-10 sm:h-9"
-                onClick={clearAllFilters}
+                onClick={handleClearFilters}
               >
                 إزالة الفلاتر
               </Button>

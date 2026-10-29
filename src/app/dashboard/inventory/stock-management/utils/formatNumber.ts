@@ -12,7 +12,6 @@ export interface ArabicPluralForms {
 export const STOCK_QUANTITY_FORMS: ArabicPluralForms = { one: 'قطعة', two: 'قطعتان', few: 'قطع', many: 'قطعة' };
 export const VARIANT_COUNT_FORMS: ArabicPluralForms = { one: 'متغير', two: 'متغيران', few: 'متغيرات', many: 'متغيرًا' };
 export const ORDER_FORMS: ArabicPluralForms = { one: 'طلب', two: 'طلبان', few: 'طلبات', many: 'طلبًا' };
-export const WAREHOUSE_FORMS: ArabicPluralForms = { one: 'مخزن', two: 'مخزنان', few: 'مخازن', many: 'مخزنًا' };
 
 export const isFiniteNumber = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value);
@@ -25,6 +24,7 @@ export const pluralArabic = (count: number, forms: ArabicPluralForms): string =>
   if (n === 1) return forms.one;
   if (n === 2) return forms.two;
   const tail = n % 100;
+  if (n >= 100 && tail <= 2) return forms.one;
   if (tail >= 3 && tail <= 10) return forms.few;
   return forms.many;
 };

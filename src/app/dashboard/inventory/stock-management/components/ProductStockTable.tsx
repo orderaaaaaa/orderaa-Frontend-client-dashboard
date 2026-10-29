@@ -102,6 +102,12 @@ function StockBadge({ stock }: { stock: VariantStock }) {
   );
 }
 
+function stockQuantityToneClass(quantity: number) {
+  if (quantity < 0) return 'text-red-600';
+  if (quantity === 0) return 'text-gray-400';
+  return 'text-gray-800';
+}
+
 function StockCellValue({ view }: { view: StockCellView }) {
   if (view.kind === 'badge') return <StockBadge stock={view.stock} />;
   if (view.kind === 'plain') {
@@ -193,7 +199,7 @@ export function ProductStockTable({
           <div
             tabIndex={0}
             role="group"
-            aria-label={`${formatStockNumber(stock.quantity)} ${color} ${size}`}
+            aria-label={[formatStockNumber(stock.quantity), color, size, showStatus ? STOCK_STATUS_CONFIG[stock.status].label : null].filter(Boolean).join(' ')}
             className="cursor-default"
           >
             <StockCellValue view={view} />
@@ -419,7 +425,7 @@ export function ProductStockTable({
                   size="sm"
                 />
                 <div className="flex shrink-0 items-center gap-3">
-                  <span dir="ltr" className="font-semibold tabular-nums text-gray-800">
+                  <span dir="ltr" className={clsx('font-semibold tabular-nums', stockQuantityToneClass(variant.quantity))}>
                     {formatStockNumber(variant.quantity)}
                   </span>
                   <span className="text-xs text-muted-foreground">
@@ -431,7 +437,7 @@ export function ProductStockTable({
           </ul>
           <div className="flex items-center justify-between gap-3 border-t border-border pt-2 text-sm">
             <span className="font-semibold text-foreground">إجمالي خيارات أخرى</span>
-            <span dir="ltr" className="font-semibold tabular-nums text-gray-800">
+            <span dir="ltr" className={clsx('font-semibold tabular-nums', stockQuantityToneClass(totals.otherTotal))}>
               {formatStockNumber(totals.otherTotal)}
             </span>
           </div>
