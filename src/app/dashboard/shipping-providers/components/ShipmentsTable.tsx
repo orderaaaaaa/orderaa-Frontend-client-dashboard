@@ -1,72 +1,57 @@
 'use client';
 
 import { useState } from 'react';
-import clsx from 'clsx';
 import { Can } from '@/components/Can';
 import BaseModal from '@/components/ui/base-modal';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import CopyButton from '@/components/ui/copy-button';
 import CopyableCode from '@/components/ui/copyable-code';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatDisplayTime } from '@/components/OrderDetails/fields/TimeRangeField';
 import useShippingCompanies from '@/hooks/useShippingCompanies';
+import { useI18n } from '@/i18n/I18nProvider';
+import type { TranslationKey } from '@/i18n/translate';
 import { PERMISSIONS } from '@/lib/permissions';
+import { cn } from '@/lib/utils';
+import type { FollowupClosure } from '@/types/logistics';
 import { OrderStatus } from '@/types/orders';
 import { PARTIAL_DELIVERY_IMPLEMENTATIONS } from '@/types/shippingCompanies';
 import {
   IN_PROCESS_STATUSES,
-  type CarrierHeader,
   type InProcessShipment,
-  type LatenessFlag,
-  type LatenessInfo,
+  type LatenessOverride,
   type ReturnedShipment,
   type ShipmentRowBase,
 } from '@/types/shippingProviders';
 import { getTimeAgoCompact } from '@/utils/timeAgo';
-import { DeliveryWindowModal } from './DeliveryWindowModal';
 import { formatDate, formatNumber } from './formatNumber';
-import {
-  FOLLOWUP_ACTION_LOG_BUTTON_LABEL,
-  FOLLOWUP_ACTIONS_COLUMN_LABEL,
-  FOLLOWUP_COURIER_COLUMN_LABEL,
-  FOLLOWUP_NOTES_BUTTON_LABEL,
-} from './followupNotesConstants';
-import { LateMarkModal } from './LateMarkModal';
+import { LatenessChip, latenessChipOf, type LatenessChipModel } from './LatenessChip';
+import { CLOSURE_KIND_LABEL_KEYS, ShipmentRowActions, closureReasonOf } from './ShipmentRowActions';
 import { SendAgainAction } from './SendAgainAction';
-import { ShipmentRowActions } from './ShipmentRowActions';
 import { ShipmentStatusBadge } from './ShipmentStatusBadge';
 
-const FLAG_DOT_CLASSES: Record<LatenessFlag | 'NONE', string> = {
-  RED: 'bg-red-500',
-  YELLOW: 'bg-amber-400',
-  GREEN: 'bg-green-500',
-  NONE: 'bg-gray-300',
+const OVERRIDE_LABEL_KEYS: Record<LatenessOverride, TranslationKey> = {
+  LATE: 'inProcess.lateness.manualLate',
+  ON_TIME: 'inProcess.lateness.manualOnTime',
 };
 
-const FLAG_LABELS: Record<LatenessFlag | 'NONE', string> = {
-  RED: 'متأخر',
-  YELLOW: 'موعده اليوم',
-  GREEN: 'في الموعد',
-  NONE: 'بدون موعد محسوب',
-};
-
-const OVERRIDE_LABELS = {
-  LATE: 'متأخر يدوياً',
-  ON_TIME: 'في الموعد يدوياً',
-} as const;
-
-const HEAD_CLASS = 'text-right py-2 px-3 font-semibold text-gray-700 whitespace-nowrap';
-const CELL_CLASS = 'py-2 px-3 text-gray-600 align-top';
+const HEAD_CLASS = 'whitespace-nowrap bg-muted px-3 py-2.5 text-start font-medium text-foreground';
+const CELL_CLASS = 'px-3 py-2.5 align-top text-sm text-foreground';
+const SECONDARY_TEXT_CLASS = 'text-xs text-muted-foreground';
+const STICKY_CELL_CLASS = 'sticky z-[1] bg-card group-hover:bg-muted';
+const ROW_CLASS = 'group border-b transition-colors duration-150 hover:bg-surface-hover/40';
 
 const isLockedRow = (row: ShipmentRowBase): boolean =>
   row.closure?.kind === 'REFUSE' ||
   row.closure?.kind === 'CANCEL' ||
   !(IN_PROCESS_STATUSES as readonly OrderStatus[]).includes(row.status);
 
-const PARTIAL_DELIVERY_BLOCK_REASONS = {
-  carrier: 'التسليم الجزئي متاح لشركتي تربو وبوسطة فقط',
-  locked: 'الطلب مغلق في المتابعة',
-  status: 'التسليم الجزئي متاح للطلبات مع المندوب فقط',
-} as const;
+const PARTIAL_DELIVERY_BLOCK_REASON_KEYS = {
+  carrier: 'inProcess.reason.partialCarrier',
+  locked: 'inProcess.reason.locked',
+  status: 'inProcess.reason.partialStatus',
+} as const satisfies Record<string, TranslationKey>;
 
 const partialDeliveryBlockReasonOf = ({
   isPartialCarrier,
@@ -76,25 +61,29 @@ const partialDeliveryBlockReasonOf = ({
   isPartialCarrier: boolean;
   locked: boolean;
   status: OrderStatus;
-}): string | null => {
-  if (!isPartialCarrier) return PARTIAL_DELIVERY_BLOCK_REASONS.carrier;
-  if (locked) return PARTIAL_DELIVERY_BLOCK_REASONS.locked;
-  if (status !== OrderStatus.WITH_DRIVER) return PARTIAL_DELIVERY_BLOCK_REASONS.status;
+}): TranslationKey | null => {
+  if (!isPartialCarrier) return PARTIAL_DELIVERY_BLOCK_REASON_KEYS.carrier;
+  if (locked) return PARTIAL_DELIVERY_BLOCK_REASON_KEYS.locked;
+  if (status !== OrderStatus.WITH_DRIVER) return PARTIAL_DELIVERY_BLOCK_REASON_KEYS.status;
   return null;
 };
 
-const renderTotal = (totalCost: number | null) =>
-  totalCost === null ? '—' : `${formatNumber(totalCost, 2)} جنيه`;
+const moneyTextOf = (value: number | string | null | undefined): string =>
+  value === null || value === undefined ? '—' : `${formatNumber(value, 2)} جنيه`;
+
+const deliveryWindowTextOf = (from: string | null, to: string | null): string =>
+  from && to ? `${formatDisplayTime(from)} - ${formatDisplayTime(to)}` : '—';
 
 function CodeCell({ code }: { code: string }) {
   return (
     <CopyableCode value={code} label="نسخ كود الطلب">
-      <span className="font-mono font-medium text-gray-900">{code}</span>
+      <span className="font-mono font-semibold text-foreground">{code}</span>
     </CopyableCode>
   );
 }
 
 function PhoneCell({ phones }: { phones: string[] }) {
+  const { t } = useI18n();
   const [isListOpen, setIsListOpen] = useState(false);
   const [first] = phones;
 
@@ -105,14 +94,14 @@ function PhoneCell({ phones }: { phones: string[] }) {
       <span dir="ltr" className="font-mono whitespace-nowrap">
         {first}
       </span>
-      <CopyButton value={first} label="نسخ رقم الهاتف" successMessage="تم نسخ الرقم" />
+      <CopyButton value={first} label={t('inProcess.table.copyPhone')} successMessage="تم نسخ الرقم" />
       {phones.length > 1 && (
         <>
           <Button
             type="button"
             variant="ghost"
-            size="sm"
-            className="h-6 px-1.5 text-xs"
+            size="xs"
+            aria-label={t('inProcess.table.morePhones', { n: phones.length })}
             onClick={() => setIsListOpen(true)}
           >
             +{phones.length - 1}
@@ -130,7 +119,7 @@ function PhoneCell({ phones }: { phones: string[] }) {
                   <span dir="ltr" className="font-mono">
                     {phone}
                   </span>
-                  <CopyButton value={phone} label="نسخ رقم الهاتف" successMessage="تم نسخ الرقم" />
+                  <CopyButton value={phone} label={t('inProcess.table.copyPhone')} successMessage="تم نسخ الرقم" />
                 </li>
               ))}
             </ul>
@@ -141,133 +130,77 @@ function PhoneCell({ phones }: { phones: string[] }) {
   );
 }
 
-function LatenessCell({
-  shippingCompanyId,
-  orderId,
-  lateness,
-  locked,
-}: {
-  shippingCompanyId: number;
-  orderId: number;
-  lateness: LatenessInfo | null;
-  locked: boolean;
-}) {
-  const [isLateMarkOpen, setIsLateMarkOpen] = useState(false);
-  const flag = lateness?.flag ?? null;
-  const dueDay = lateness?.dueDay ?? null;
-  const daysLate = lateness?.daysLate ?? null;
-  const override = lateness?.override ?? null;
-
+function CustomerCell({ name, phones }: { name: string | null; phones: string[] }) {
   return (
-    <div className="flex flex-col gap-1">
-      <div className="flex items-center gap-1.5">
-        <span
-          role="img"
-          aria-label={FLAG_LABELS[flag ?? 'NONE']}
-          title={FLAG_LABELS[flag ?? 'NONE']}
-          className={clsx('w-2.5 h-2.5 rounded-full shrink-0', FLAG_DOT_CLASSES[flag ?? 'NONE'])}
-        />
-        <span className="text-gray-900 whitespace-nowrap">{dueDay ? formatDate(dueDay) : '—'}</span>
-      </div>
-      {dueDay && <span className="text-xs text-gray-500 whitespace-nowrap">{getTimeAgoCompact(dueDay)}</span>}
-      {flag !== null && daysLate !== null && daysLate > 0 && (
-        <span className="text-xs font-semibold text-red-600 whitespace-nowrap">تأخير {daysLate} يوم</span>
+    <div className="flex flex-col items-start gap-1">
+      <span className="font-medium">{name ?? '—'}</span>
+      <PhoneCell phones={phones} />
+    </div>
+  );
+}
+
+function StatusCell({ status, closure }: { status: OrderStatus; closure: FollowupClosure | null }) {
+  const { t } = useI18n();
+  return (
+    <div className="flex flex-col items-start gap-1.5">
+      <ShipmentStatusBadge status={status} />
+      {closure !== null && (
+        <div className="flex flex-col items-start gap-0.5">
+          <Badge variant="outline" className={closure.kind === 'CLOSED_TODAY' ? 'text-muted-foreground' : 'text-destructive'}>
+            {t(CLOSURE_KIND_LABEL_KEYS[closure.kind])}
+          </Badge>
+          {closureReasonOf(closure) && <span className={SECONDARY_TEXT_CLASS}>{closureReasonOf(closure)}</span>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DueCell({
+  model,
+  dueDay,
+  override,
+}: {
+  model: LatenessChipModel;
+  dueDay: string | null;
+  override: LatenessOverride | null;
+}) {
+  const { t } = useI18n();
+  return (
+    <div className="flex flex-col items-start gap-1">
+      <LatenessChip model={model} />
+      {dueDay ? (
+        <div className="flex flex-col">
+          <span className="whitespace-nowrap">{formatDate(dueDay)}</span>
+          <span className={cn(SECONDARY_TEXT_CLASS, 'whitespace-nowrap')}>{getTimeAgoCompact(dueDay)}</span>
+        </div>
+      ) : (
+        <span className="text-muted-foreground">—</span>
       )}
       {override !== null && (
-        <span className="text-xs text-primary whitespace-nowrap">{OVERRIDE_LABELS[override]}</span>
-      )}
-      <Can code={PERMISSIONS.FOLLOWUP_CARRIERS_LATE_MANAGE}>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="h-6 px-1.5 text-xs self-start"
-          disabled={locked}
-          onClick={() => setIsLateMarkOpen(true)}
-        >
-          حالة التأخير
-        </Button>
-      </Can>
-      {isLateMarkOpen && (
-        <LateMarkModal
-          shippingCompanyId={shippingCompanyId}
-          orderId={orderId}
-          lateness={lateness}
-          onClose={() => setIsLateMarkOpen(false)}
-        />
-      )}
-    </div>
-  );
-}
-
-function DeliveryWindowCell({
-  shippingCompanyId,
-  orderId,
-  availableFrom,
-  availableTo,
-  locked,
-}: {
-  shippingCompanyId: number;
-  orderId: number;
-  availableFrom: string | null;
-  availableTo: string | null;
-  locked: boolean;
-}) {
-  const [isWindowOpen, setIsWindowOpen] = useState(false);
-  const label =
-    availableFrom && availableTo
-      ? `${formatDisplayTime(availableFrom)} - ${formatDisplayTime(availableTo)}`
-      : '-';
-
-  return (
-    <div className="flex items-center gap-1">
-      <span className="whitespace-nowrap">{label}</span>
-      <Can code={PERMISSIONS.FOLLOWUP_CARRIERS_DELIVERY_MANAGE}>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="h-6 px-1.5 text-xs"
-          disabled={locked}
-          onClick={() => setIsWindowOpen(true)}
-        >
-          تعديل
-        </Button>
-      </Can>
-      {isWindowOpen && (
-        <DeliveryWindowModal
-          shippingCompanyId={shippingCompanyId}
-          orderId={orderId}
-          availableFrom={availableFrom}
-          availableTo={availableTo}
-          onClose={() => setIsWindowOpen(false)}
-        />
-      )}
-    </div>
-  );
-}
-
-function CarrierCell({ carrier }: { carrier: CarrierHeader }) {
-  return (
-    <div className="flex flex-col">
-      <span className="text-gray-900 whitespace-nowrap">{carrier.name}</span>
-      {carrier.phone && (
-        <span dir="ltr" className="text-xs text-gray-500 font-mono whitespace-nowrap">
-          {carrier.phone}
-        </span>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span tabIndex={0} className="inline-flex rounded-md outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
+              <Badge variant="outline" className="text-primary">
+                {t('inProcess.lateness.manual')}
+              </Badge>
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>{t(OVERRIDE_LABEL_KEYS[override])}</TooltipContent>
+        </Tooltip>
       )}
     </div>
   );
 }
 
 function CourierCell({ name, phone }: { name: string | null; phone: string | null }) {
-  if (name === null && phone === null) return <span>-</span>;
+  if (name === null && phone === null) return <span>—</span>;
 
   return (
     <div className="flex flex-col">
-      <span className="text-gray-900 whitespace-nowrap">{name ?? '-'}</span>
+      <span className="whitespace-nowrap">{name ?? '—'}</span>
       {phone && (
-        <span dir="ltr" className="text-xs text-gray-500 font-mono whitespace-nowrap">
+        <span dir="ltr" className={cn(SECONDARY_TEXT_CLASS, 'font-mono whitespace-nowrap')}>
           {phone}
         </span>
       )}
@@ -277,7 +210,6 @@ function CourierCell({ name, phone }: { name: string | null; phone: string | nul
 
 interface InProcessShipmentsTableProps {
   shipments: InProcessShipment[];
-  carrier: CarrierHeader;
   shippingCompanyId: number;
   onOpenNotes: (orderId: number) => void;
   onOpenActionLog: (orderId: number) => void;
@@ -285,112 +217,106 @@ interface InProcessShipmentsTableProps {
 
 export function InProcessShipmentsTable({
   shipments,
-  carrier,
   shippingCompanyId,
   onOpenNotes,
   onOpenActionLog,
 }: InProcessShipmentsTableProps) {
+  const { t } = useI18n();
   const { shippingCompanies, isLoading: isShippingCompaniesLoading } = useShippingCompanies();
   const implementation = shippingCompanies.find((company) => company.id === shippingCompanyId)?.implementation;
   const isPartialCarrier = implementation !== undefined && PARTIAL_DELIVERY_IMPLEMENTATIONS.includes(implementation);
 
   return (
-    <table className="w-full text-sm whitespace-nowrap" dir="rtl">
-      <thead>
-        <tr className="border-b border-gray-200 bg-gray-50">
-          <th className={HEAD_CLASS}>الكود</th>
-          <th className={HEAD_CLASS}>العميل</th>
-          <th className={HEAD_CLASS}>الهاتف</th>
-          <th className={HEAD_CLASS}>الحالة</th>
-          <th className={HEAD_CLASS}>تاريخ الاستلام</th>
-          <th className={HEAD_CLASS}>الموعد</th>
-          <th className={HEAD_CLASS}>وقت التوصيل</th>
-          <th className={HEAD_CLASS}>المحافظة</th>
-          <th className={HEAD_CLASS}>المنطقة</th>
-          <th className={HEAD_CLASS}>الإجمالي</th>
+    <table dir="rtl" className="w-full caption-bottom text-sm">
+      <caption className="sr-only">{t('inProcess.table.captionInProcess')}</caption>
+      <thead className="sticky top-0 z-10 bg-muted">
+        <tr className="border-b">
+          <th scope="col" className={cn(HEAD_CLASS, 'sticky start-0 z-20')}>
+            {t('inProcess.table.columns.code')}
+          </th>
+          <th scope="col" className={cn(HEAD_CLASS, 'min-w-40')}>
+            {t('inProcess.table.columns.customer')}
+          </th>
+          <th scope="col" className={HEAD_CLASS}>
+            {t('inProcess.table.columns.status')}
+          </th>
+          <th scope="col" className={HEAD_CLASS}>
+            {t('inProcess.table.columns.due')}
+          </th>
+          <th scope="col" className={HEAD_CLASS}>
+            {t('inProcess.table.columns.takenAt')}
+          </th>
+          <th scope="col" className={HEAD_CLASS}>
+            {t('inProcess.table.columns.window')}
+          </th>
+          <th scope="col" className={cn(HEAD_CLASS, 'min-w-32')}>
+            {t('inProcess.table.columns.address')}
+          </th>
+          <th scope="col" className={HEAD_CLASS}>
+            {t('inProcess.table.columns.courier')}
+          </th>
+          <th scope="col" className={cn(HEAD_CLASS, 'text-end')}>
+            {t('inProcess.table.columns.total')}
+          </th>
           <Can code={PERMISSIONS.FOLLOWUP_NET_AMOUNT_READ}>
-            <th className={HEAD_CLASS}>الصافي</th>
+            <th scope="col" className={cn(HEAD_CLASS, 'text-end')}>
+              {t('inProcess.table.columns.net')}
+            </th>
           </Can>
-          <th className={HEAD_CLASS}>شركة الشحن</th>
-          <th className={HEAD_CLASS}>{FOLLOWUP_COURIER_COLUMN_LABEL}</th>
-          <Can code={PERMISSIONS.FOLLOWUP_READ}>
-            <th className={HEAD_CLASS}>{FOLLOWUP_ACTIONS_COLUMN_LABEL}</th>
-          </Can>
-          <th className={HEAD_CLASS}>الإغلاق</th>
+          <th scope="col" className={cn(HEAD_CLASS, 'sticky end-0 z-20')}>
+            <span className="sr-only">{t('inProcess.table.actions')}</span>
+          </th>
         </tr>
       </thead>
       <tbody>
         {shipments.map((row) => {
           const locked = isLockedRow(row);
+          const chip = latenessChipOf(row.lateness, t);
+          const partialBlockKey = partialDeliveryBlockReasonOf({
+            isPartialCarrier,
+            locked,
+            status: row.status,
+          });
           return (
-            <tr key={row.id} className="border-b border-gray-100">
-              <td className={clsx(CELL_CLASS, 'font-medium text-gray-900')}>
+            <tr key={row.id} className={ROW_CLASS}>
+              <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'start-0 border-s-[3px] whitespace-nowrap', chip.borderClassName)}>
                 <CodeCell code={row.code} />
               </td>
-              <td className={CELL_CLASS}>{row.customer.name ?? '—'}</td>
-              <td className={CELL_CLASS}>
-                <PhoneCell phones={row.customer.phones} />
+              <td className={cn(CELL_CLASS, 'min-w-40')}>
+                <CustomerCell name={row.customer.name} phones={row.customer.phones} />
               </td>
               <td className={CELL_CLASS}>
-                <ShipmentStatusBadge status={row.status} />
+                <StatusCell status={row.status} closure={row.closure} />
               </td>
-              <td className={CELL_CLASS}>{formatDate(row.takenAt)}</td>
               <td className={CELL_CLASS}>
-                <LatenessCell
-                  shippingCompanyId={shippingCompanyId}
-                  orderId={row.id}
-                  lateness={row.lateness}
-                  locked={locked}
+                <DueCell
+                  model={chip}
+                  dueDay={row.lateness?.dueDay ?? null}
+                  override={row.lateness?.override ?? null}
                 />
               </td>
-              <td className={CELL_CLASS}>
-                <DeliveryWindowCell
-                  shippingCompanyId={shippingCompanyId}
-                  orderId={row.id}
-                  availableFrom={row.availableFrom}
-                  availableTo={row.availableTo}
-                  locked={locked}
-                />
+              <td className={cn(CELL_CLASS, 'whitespace-nowrap')}>{formatDate(row.takenAt)}</td>
+              <td className={cn(CELL_CLASS, 'whitespace-nowrap')}>
+                {deliveryWindowTextOf(row.availableFrom, row.availableTo)}
               </td>
-              <td className={CELL_CLASS}>{row.governorate ?? '—'}</td>
-              <td className={CELL_CLASS}>{row.city ?? '—'}</td>
-              <td className={CELL_CLASS}>{renderTotal(row.totalCost)}</td>
-              <Can code={PERMISSIONS.FOLLOWUP_NET_AMOUNT_READ}>
-                <td className={CELL_CLASS}>
-                  {row.netAmount === undefined ? '—' : `${formatNumber(row.netAmount, 2)} جنيه`}
-                </td>
-              </Can>
-              <td className={CELL_CLASS}>
-                <CarrierCell carrier={carrier} />
+              <td className={cn(CELL_CLASS, 'min-w-32')}>
+                <div className="flex flex-col items-start gap-0.5">
+                  <span className="font-medium">{row.governorate ?? '—'}</span>
+                  <span className={SECONDARY_TEXT_CLASS}>{row.city ?? '—'}</span>
+                </div>
               </td>
               <td className={CELL_CLASS}>
                 <CourierCell name={row.courierName} phone={row.courierPhone} />
               </td>
-              <Can code={PERMISSIONS.FOLLOWUP_READ}>
-                <td className={CELL_CLASS}>
-                  <div className="flex flex-col items-start gap-1">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 px-2 text-xs"
-                      onClick={() => onOpenNotes(row.id)}
-                    >
-                      {FOLLOWUP_NOTES_BUTTON_LABEL}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 px-2 text-xs"
-                      onClick={() => onOpenActionLog(row.id)}
-                    >
-                      {FOLLOWUP_ACTION_LOG_BUTTON_LABEL}
-                    </Button>
-                  </div>
+              <td className={cn(CELL_CLASS, 'whitespace-nowrap text-end tabular-nums')}>
+                {moneyTextOf(row.totalCost)}
+              </td>
+              <Can code={PERMISSIONS.FOLLOWUP_NET_AMOUNT_READ}>
+                <td className={cn(CELL_CLASS, 'whitespace-nowrap text-end tabular-nums')}>
+                  {moneyTextOf(row.netAmount)}
                 </td>
               </Can>
-              <td className={CELL_CLASS}>
+              <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'end-0')}>
                 <ShipmentRowActions
                   orderId={row.id}
                   orderCode={row.code}
@@ -400,14 +326,16 @@ export function InProcessShipmentsTable({
                   carrierImplementation={implementation}
                   partialDelivery={{
                     pending: isShippingCompaniesLoading,
-                    blockedReason: isShippingCompaniesLoading
-                      ? null
-                      : partialDeliveryBlockReasonOf({
-                          isPartialCarrier,
-                          locked,
-                          status: row.status,
-                        }),
+                    blockedReason:
+                      isShippingCompaniesLoading || partialBlockKey === null ? null : t(partialBlockKey),
                   }}
+                  shippingCompanyId={shippingCompanyId}
+                  lateness={row.lateness}
+                  availableFrom={row.availableFrom}
+                  availableTo={row.availableTo}
+                  rowLocked={locked}
+                  onOpenNotes={() => onOpenNotes(row.id)}
+                  onOpenActionLog={() => onOpenActionLog(row.id)}
                 />
               </td>
             </tr>
@@ -420,55 +348,64 @@ export function InProcessShipmentsTable({
 
 interface ReturnedShipmentsTableProps {
   shipments: ReturnedShipment[];
-  carrier: CarrierHeader;
 }
 
-export function ReturnedShipmentsTable({ shipments, carrier }: ReturnedShipmentsTableProps) {
+export function ReturnedShipmentsTable({ shipments }: ReturnedShipmentsTableProps) {
+  const { t } = useI18n();
+
   return (
-    <table className="w-full text-sm whitespace-nowrap" dir="rtl">
-      <thead>
-        <tr className="border-b border-gray-200 bg-gray-50">
-          <th className={HEAD_CLASS}>الكود</th>
-          <th className={HEAD_CLASS}>العميل</th>
-          <th className={HEAD_CLASS}>الهاتف</th>
-          <th className={HEAD_CLASS}>الحالة</th>
-          <th className={HEAD_CLASS}>تاريخ الاستلام</th>
-          <th className={HEAD_CLASS}>المحافظة</th>
-          <th className={HEAD_CLASS}>المنطقة</th>
-          <th className={HEAD_CLASS}>الإجمالي</th>
-          <th className={HEAD_CLASS}>شركة الشحن</th>
-          <th className={HEAD_CLASS}>الإغلاق</th>
+    <table dir="rtl" className="w-full caption-bottom text-sm">
+      <caption className="sr-only">{t('inProcess.table.captionReturned')}</caption>
+      <thead className="sticky top-0 z-10 bg-muted">
+        <tr className="border-b">
+          <th scope="col" className={cn(HEAD_CLASS, 'sticky start-0 z-20')}>
+            {t('inProcess.table.columns.code')}
+          </th>
+          <th scope="col" className={cn(HEAD_CLASS, 'min-w-40')}>
+            {t('inProcess.table.columns.customer')}
+          </th>
+          <th scope="col" className={HEAD_CLASS}>
+            {t('inProcess.table.columns.status')}
+          </th>
+          <th scope="col" className={HEAD_CLASS}>
+            {t('inProcess.table.columns.takenAt')}
+          </th>
+          <th scope="col" className={cn(HEAD_CLASS, 'min-w-32')}>
+            {t('inProcess.table.columns.address')}
+          </th>
+          <th scope="col" className={cn(HEAD_CLASS, 'text-end')}>
+            {t('inProcess.table.columns.total')}
+          </th>
+          <th scope="col" className={cn(HEAD_CLASS, 'sticky end-0 z-20')}>
+            <span className="sr-only">{t('inProcess.table.actions')}</span>
+          </th>
         </tr>
       </thead>
       <tbody>
         {shipments.map((row) => (
-          <tr key={row.id} className="border-b border-gray-100">
-            <td className={clsx(CELL_CLASS, 'font-medium text-gray-900')}>
+          <tr key={row.id} className={ROW_CLASS}>
+            <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'start-0 whitespace-nowrap')}>
               <CodeCell code={row.code} />
             </td>
-            <td className={CELL_CLASS}>{row.customer.name ?? '—'}</td>
-            <td className={CELL_CLASS}>
-              <PhoneCell phones={row.customer.phones} />
+            <td className={cn(CELL_CLASS, 'min-w-40')}>
+              <CustomerCell name={row.customer.name} phones={row.customer.phones} />
             </td>
             <td className={CELL_CLASS}>
-              <ShipmentStatusBadge status={row.status} />
+              <StatusCell status={row.status} closure={row.closure} />
             </td>
-            <td className={CELL_CLASS}>{formatDate(row.takenAt)}</td>
-            <td className={CELL_CLASS}>{row.governorate ?? '—'}</td>
-            <td className={CELL_CLASS}>{row.city ?? '—'}</td>
-            <td className={CELL_CLASS}>{renderTotal(row.totalCost)}</td>
-            <td className={CELL_CLASS}>
-              <CarrierCell carrier={carrier} />
+            <td className={cn(CELL_CLASS, 'whitespace-nowrap')}>{formatDate(row.takenAt)}</td>
+            <td className={cn(CELL_CLASS, 'min-w-32')}>
+              <div className="flex flex-col items-start gap-0.5">
+                <span className="font-medium">{row.governorate ?? '—'}</span>
+                <span className={SECONDARY_TEXT_CLASS}>{row.city ?? '—'}</span>
+              </div>
             </td>
-            <td className={CELL_CLASS}>
+            <td className={cn(CELL_CLASS, 'whitespace-nowrap text-end tabular-nums')}>
+              {moneyTextOf(row.totalCost)}
+            </td>
+            <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'end-0')}>
               <div className="flex flex-col gap-2">
-                <ShipmentRowActions
-                  orderId={row.id}
-                  orderCode={row.code}
-                  customerName={row.customer.name}
-                  status={row.status}
-                  closure={row.closure}
-                />
+                <ShipmentRowActions orderId={row.id} orderCode={row.code} customerName={row.customer.name} status={row.status} closure={row.closure} />
                 <SendAgainAction
                   orderId={row.id}
                   eligible={row.sendAgainEligible}

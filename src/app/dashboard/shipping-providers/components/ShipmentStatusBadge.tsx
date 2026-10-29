@@ -12,7 +12,7 @@ export function ShipmentStatusBadge({ status }: { status: OrderStatus }) {
   return (
     <span
       className={clsx(
-        'flex items-center gap-2 px-4 py-2 rounded-full font-medium w-fit whitespace-nowrap',
+        'flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full font-medium w-fit whitespace-nowrap',
         classes,
       )}
     >

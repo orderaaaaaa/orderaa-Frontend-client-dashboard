@@ -52,8 +52,8 @@ function EmptyState({
       )}
     >
       {icon}
-      <p className="text-lg font-semibold text-gray-400">{title}</p>
-      {description && <p className="text-sm text-gray-400">{description}</p>}
+      <p className="text-lg font-semibold text-foreground">{title}</p>
+      {description && <p className="text-sm text-muted-foreground">{description}</p>}
       {action}
     </div>
   );

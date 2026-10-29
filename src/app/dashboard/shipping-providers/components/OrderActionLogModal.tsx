@@ -56,9 +56,9 @@ function ActionEventRow({ event }: { event: FollowupActionEvent }) {
           <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
             {nameLabel}
           </span>
-          <span className="text-xs text-gray-500">{ACTION_EVENT_SOURCE_LABELS[event.source]}</span>
+          <span className="text-xs text-muted-foreground">{ACTION_EVENT_SOURCE_LABELS[event.source]}</span>
         </div>
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-muted-foreground">
           {formatDateTime(event.createdAt)} ({getTimeAgo(event.createdAt)})
         </span>
       </div>
@@ -143,7 +143,7 @@ function ActionLogContent({ orderId, canReadHistory }: { orderId: number; canRea
       {isLoading ? (
         <OrderChangeHistorySkeleton />
       ) : entries.length === 0 ? (
-        <p className="py-6 text-center text-sm text-gray-500">{ACTION_LOG_EMPTY}</p>
+        <p className="py-6 text-center text-sm text-muted-foreground">{ACTION_LOG_EMPTY}</p>
       ) : (
         <div className="flex flex-col gap-3">
           {entries.map((entry) =>

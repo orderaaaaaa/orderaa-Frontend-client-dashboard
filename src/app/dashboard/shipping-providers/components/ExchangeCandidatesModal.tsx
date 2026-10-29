@@ -39,7 +39,7 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId }: ExchangeCa
         ) : candidatesQuery.isError ? (
           <p className="text-sm text-red-600">تعذر تحميل الطلبات</p>
         ) : candidates.length === 0 ? (
-          <p className="text-sm text-gray-500">لا توجد طلبات مكتملة لهذا العميل</p>
+          <p className="text-sm text-muted-foreground">لا توجد طلبات مكتملة لهذا العميل</p>
         ) : (
           <>
             <div className="flex flex-col gap-2">
@@ -49,9 +49,9 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId }: ExchangeCa
                   className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-lg border border-[#ECECEC]"
                 >
                   <span className="text-sm font-medium text-[#1F1F1F]">{candidate.code}</span>
-                  <span className="text-xs text-gray-500">{ORDER_STATUS_ARABIC_LABELS[candidate.status]}</span>
-                  <span className="text-xs text-gray-500">{formatNumber(candidate.totalCost, 2)} جنيه</span>
-                  <span className="text-xs text-gray-500">{formatDateTime(candidate.createdAt)}</span>
+                  <span className="text-xs text-muted-foreground">{ORDER_STATUS_ARABIC_LABELS[candidate.status]}</span>
+                  <span className="text-xs text-muted-foreground">{formatNumber(candidate.totalCost, 2)} جنيه</span>
+                  <span className="text-xs text-muted-foreground">{formatDateTime(candidate.createdAt)}</span>
                 </div>
               ))}
             </div>
