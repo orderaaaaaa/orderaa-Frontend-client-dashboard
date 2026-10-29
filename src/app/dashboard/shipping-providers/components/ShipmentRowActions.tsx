@@ -3,7 +3,6 @@
 import { Fragment, useEffect, useId, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ArrowLeftRight,
   Ban,
   CalendarX,
   Clock,
@@ -20,6 +19,7 @@ import { LiaEllipsisVSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
 import ChangeProductsModal from '@/components/orders/ChangeProductsModal';
 import PartialDeliveryModal from '@/components/OrderDetails/ActionModals/PartialDeliveryModal';
+import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import CopyableCode from '@/components/ui/copyable-code';
 import { Separator } from '@/components/ui/separator';
@@ -46,12 +46,13 @@ import type { LatenessInfo } from '@/types/shippingProviders';
 import type { ShippingImplementation } from '@/types/shippingCompanies';
 import { ClosureReasonModal, type ClosureReasonKind } from './ClosureReasonModal';
 import { DeliveryWindowModal } from './DeliveryWindowModal';
-import { ExchangeCandidatesModal } from './ExchangeCandidatesModal';
 import { LatenessChip, latenessChipOf } from './LatenessChip';
 import { LateMarkModal } from './LateMarkModal';
 import { ShipmentStatusBadge } from './ShipmentStatusBadge';
 
 type ActionGroupId = 'follow' | 'delivery' | 'closure' | 'final';
+
+type ConfirmKind = 'close' | 'reopen';
 
 interface RowAction {
   id: string;
@@ -140,7 +141,7 @@ export function ShipmentRowActions({
   const [isPartialOpen, setIsPartialOpen] = useState(false);
   const [partialRequested, setPartialRequested] = useState(false);
   const [isChangeProductsOpen, setIsChangeProductsOpen] = useState(false);
-  const [isExchangeOpen, setIsExchangeOpen] = useState(false);
+  const [confirmKind, setConfirmKind] = useState<ConfirmKind | null>(null);
   const [isLateMarkOpen, setIsLateMarkOpen] = useState(false);
   const [isWindowOpen, setIsWindowOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -257,16 +258,6 @@ export function ShipmentRowActions({
             disabledReason: lockedReason,
             onSelect: () => setIsChangeProductsOpen(true),
           },
-          {
-            id: 'exchange',
-            labelKey: 'closure.exchange' as const,
-            icon: ArrowLeftRight,
-            group: 'delivery' as const,
-            opensModal: true,
-            codes: [PERMISSIONS.FOLLOWUP_READ],
-            disabled: false,
-            onSelect: () => setIsExchangeOpen(true),
-          },
         ]
       : []),
     {
@@ -274,12 +265,12 @@ export function ShipmentRowActions({
       labelKey: 'closure.close',
       icon: CalendarX,
       group: 'closure',
-      opensModal: false,
+      opensModal: true,
       codes: [],
       anyOfCodes: closureKindAnyOfCodes('CLOSED_TODAY'),
       disabled: closure !== null,
       disabledReason: closure !== null ? t('inProcess.reason.alreadyClosed') : undefined,
-      onSelect: () => closeMutation.mutate(orderId),
+      onSelect: () => setConfirmKind('close'),
     },
     {
       id: 'refuse',
@@ -315,11 +306,11 @@ export function ShipmentRowActions({
       labelKey: 'closure.reopen',
       icon: RotateCcw,
       group: 'closure',
-      opensModal: false,
+      opensModal: true,
       codes: [],
       anyOfCodes: closureKindAnyOfCodes(closure.kind),
       disabled: false,
-      onSelect: () => undoMutation.mutate(orderId),
+      onSelect: () => setConfirmKind('reopen'),
     });
   }
 
@@ -470,8 +461,25 @@ export function ShipmentRowActions({
           }}
         />
       )}
-      {isExchangeOpen && (
-        <ExchangeCandidatesModal isOpen onClose={() => setIsExchangeOpen(false)} orderId={orderId} />
+      {confirmKind !== null && (
+        <BaseModal
+          isOpen
+          onClose={() => setConfirmKind(null)}
+          title={t(
+            confirmKind === 'close' ? 'inProcess.confirm.closeTitle' : 'inProcess.confirm.reopenTitle',
+            { code: orderCode },
+          )}
+          onConfirm={() => {
+            const mutation = confirmKind === 'close' ? closeMutation : undoMutation;
+            mutation.mutate(orderId, { onSuccess: () => setConfirmKind(null) });
+          }}
+          confirmText={t('inProcess.confirm.confirm')}
+          cancelText={t('inProcess.confirm.cancel')}
+          isLoading={isPending}
+          maxWidth="md:max-w-sm"
+        >
+          {null}
+        </BaseModal>
       )}
       {isLateMarkOpen && shippingCompanyId !== undefined && (
         <LateMarkModal

@@ -169,6 +169,16 @@ export interface ReturnedFilters {
   limit: number;
 }
 
+export type InProcessCountFilters = Pick<
+  InProcessFilters,
+  'from' | 'to' | 'status' | 'governorate' | 'city' | 'search'
+>;
+
+export interface ShipmentCounts {
+  inProcess: { open: number; closed: number; all: number };
+  returned: number | null;
+}
+
 export interface LateMarkBody {
   kind: LateMarkKind;
   note?: string;

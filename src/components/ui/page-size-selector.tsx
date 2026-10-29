@@ -6,6 +6,7 @@ interface PageSizeSelectorProps {
   totalItems: number;
   onSizeChange: (size: number) => void;
   showAllOption?: boolean;
+  maxSize?: number;
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
@@ -15,6 +16,7 @@ export default function PageSizeSelector({
   totalItems,
   onSizeChange,
   showAllOption = true,
+  maxSize,
 }: PageSizeSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -38,8 +40,17 @@ export default function PageSizeSelector({
     setIsOpen(false);
   };
 
-  const displayValue =
-    showAllOption && currentSize === totalItems ? 'الكل' : currentSize.toString();
+  const isCapped = maxSize !== undefined && totalItems > maxSize;
+  const allSize = isCapped ? maxSize : totalItems;
+  const allLabel = isCapped ? `أول ${maxSize} من ${totalItems}` : `الكل (${totalItems})`;
+
+  const isCappedSelected = showAllOption && isCapped && currentSize === maxSize;
+  const isAllSelected = showAllOption && currentSize === totalItems;
+  const displayValue = isCappedSelected
+    ? allLabel
+    : isAllSelected
+      ? 'الكل'
+      : currentSize.toString();
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -67,7 +78,7 @@ export default function PageSizeSelector({
                 type="button"
                 key={size}
                 onClick={() => handleSizeSelect(size)}
-                className={`w-full min-h-10 text-start px-4 py-2 text-sm hover:bg-primary/10 transition-colors ${currentSize === size
+                className={`w-full min-h-10 text-start px-4 py-2 text-sm hover:bg-primary/10 transition-colors ${currentSize === size && !(isCapped && size === maxSize)
                     ? 'bg-primary/20 text-primary font-medium'
                     : 'text-gray-700'
                   }`}
@@ -78,13 +89,13 @@ export default function PageSizeSelector({
             {showAllOption && (
               <button
                 type="button"
-                onClick={() => handleSizeSelect(totalItems)}
-                className={`w-full min-h-10 text-start px-4 py-2 text-sm hover:bg-primary/10 transition-colors border-t border-gray-100 ${currentSize === totalItems
+                onClick={() => handleSizeSelect(allSize)}
+                className={`w-full min-h-10 text-start px-4 py-2 text-sm hover:bg-primary/10 transition-colors border-t border-gray-100 ${currentSize === allSize
                     ? 'bg-primary/20 text-primary font-medium'
                     : 'text-gray-700'
                   }`}
               >
-                الكل ({totalItems})
+                {allLabel}
               </button>
             )}
           </div>

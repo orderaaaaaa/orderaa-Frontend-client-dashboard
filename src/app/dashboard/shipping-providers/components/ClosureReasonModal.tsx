@@ -6,6 +6,7 @@ import clsx from 'clsx';
 import BaseModal from '@/components/ui/base-modal';
 import Input from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/textarea';
+import { useI18n } from '@/i18n/I18nProvider';
 import type { FollowupReasonBody } from '@/lib/api/followup';
 import {
   useCancellationReasons,
@@ -40,11 +41,12 @@ const MODAL_COPY: Record<ClosureReasonKind, { title: string; confirmText: string
 };
 
 export function ClosureReasonModal({ kind, orderId, onClose }: ClosureReasonModalProps) {
+  const { t } = useI18n();
   const [selectedReasonId, setSelectedReasonId] = useState<number | null>(null);
   const [reasonText, setReasonText] = useState('');
   const [notes, setNotes] = useState('');
 
-  const { data: reasons = [], isLoading, isError } = useCancellationReasons(
+  const { data: reasonsData, isLoading, isError } = useCancellationReasons(
     true,
     REASON_TYPE[kind],
   );
@@ -53,15 +55,18 @@ export function ClosureReasonModal({ kind, orderId, onClose }: ClosureReasonModa
   const mutation = kind === 'REFUSE' ? refuseMutation : cancelMutation;
   const copy = MODAL_COPY[kind];
 
-  const reasonsReady = !isLoading && !isError && reasons.length > 0;
+  const reasons = reasonsData ?? [];
+  const hasNoReasons = reasonsData !== undefined && reasonsData.length === 0;
+  const reasonsReady = !isLoading && !isError && reasonsData !== undefined;
   const isConfirmDisabled =
     !reasonsReady || (!selectedReasonId && !reasonText.trim()) || mutation.isPending;
 
   const handleConfirm = async () => {
     if (isConfirmDisabled) return;
-    const body: FollowupReasonBody = selectedReasonId
-      ? { reasonId: selectedReasonId }
-      : { reasonText: reasonText.trim() };
+    const body: FollowupReasonBody =
+      selectedReasonId !== null
+        ? { reasonId: selectedReasonId }
+        : { reasonText: reasonText.trim() };
     if (notes.trim()) body.notes = notes.trim();
     await mutation.mutateAsync({ orderId, body }).then(onClose).catch(() => undefined);
   };
@@ -87,13 +92,15 @@ export function ClosureReasonModal({ kind, orderId, onClose }: ClosureReasonModa
             <div className="flex items-center justify-center py-4">
               <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
-          ) : isError || reasons.length === 0 ? (
+          ) : isError ? (
             <div className="flex flex-col gap-2 rounded-lg border border-dashed border-[#ECECEC] p-4 text-sm text-[#1F1F1F]">
               <p>لا توجد أسباب متاحة</p>
               <Link href="/dashboard/store-settings" className="font-semibold text-primary hover:underline">
                 أضف الأسباب من إعدادات المتجر
               </Link>
             </div>
+          ) : hasNoReasons ? (
+            <p className="text-sm text-muted-foreground">{t('inProcess.closureReason.freeTextOnly')}</p>
           ) : (
             <div className="grid sm:grid-cols-3 grid-cols-1 gap-2">
               {reasons.map((reason) => (

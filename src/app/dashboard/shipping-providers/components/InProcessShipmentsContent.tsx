@@ -13,8 +13,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ChevronRight, CircleDollarSign, ClipboardList, Info, PackageSearch, Search, X } from 'lucide-react';
+import { toast } from 'react-toastify';
 import { Can } from '@/components/Can';
 import { Alert } from '@/components/ui/alert';
+import BaseModal from '@/components/ui/base-modal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardTitle } from '@/components/ui/card';
@@ -26,7 +28,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState, ErrorState } from '@/components/ui/state-panels';
 import { SummaryStatCard, SummaryStatCardSkeleton } from '@/components/ui/summary-stat-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import type { BulkCloseResultItem } from '@/lib/api/followup';
 import useShippingCompanies from '@/hooks/useShippingCompanies';
+import { getApiErrorMessage } from '@/utils/apiError';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -36,14 +40,18 @@ import { integrationLogoOf } from '@/lib/shippingCompanies';
 import { cn } from '@/lib/utils';
 import { useGovernoratesQuery, useCitiesQuery } from '@/services/lookups';
 import {
+  useBulkCloseClosure,
+  useInProcessCountsQuery,
   useInProcessShipmentsQuery,
   useReturnedShipmentsQuery,
 } from '@/services/shippingProviders';
 import { FOLLOWUP_WORK_STATES, type FollowupWorkState } from '@/types/logistics';
 import type { ShippingImplementation } from '@/types/shippingCompanies';
+import type { FollowupClosure } from '@/types/logistics';
 import {
   IN_PROCESS_STATUSES,
   type CarrierHeader,
+  type InProcessCountFilters,
   type InProcessFilters,
   type InProcessStatus,
 } from '@/types/shippingProviders';
@@ -51,12 +59,15 @@ import { useDebounce } from '@/utils/debounce';
 import { FollowupNotesModal } from './FollowupNotesModal';
 import { formatNumber } from './formatNumber';
 import { OrderActionLogModal } from './OrderActionLogModal';
+import { InProcessShipmentCards, ReturnedShipmentCards } from './ShipmentCards';
 import { InProcessShipmentsTable, ReturnedShipmentsTable } from './ShipmentsTable';
 
 const MAX_PAGE_SIZE = 100;
 const DEFAULT_PAGE_SIZE = 25;
 const SEARCH_DEBOUNCE_MS = 300;
 const SKELETON_ROWS = 8;
+const SKELETON_CARD_COUNT = 5;
+const MAX_ERROR_TOASTS = 5;
 const NET_COLUMN_INDEX = 9;
 const SEARCH_NOTICE_ID = 'in-process-search-notice';
 const IN_PROCESS_SKELETON_WIDTHS = [
@@ -78,6 +89,7 @@ const WORK_STATE_OPTIONS: { value: FollowupWorkState; labelKey: TranslationKey }
   { value: 'closed', labelKey: 'inProcess.workState.closed' },
   { value: 'all', labelKey: 'inProcess.workState.all' },
 ];
+const EMPTY_SELECTION: Set<number> = new Set<number>();
 const EMPTY_STATE_ICON = <PackageSearch className="size-10 text-muted-foreground" aria-hidden="true" />;
 
 type ShipmentView = 'in-process' | 'returned';
@@ -100,6 +112,27 @@ const readWorkState = (value: string | null): FollowupWorkState =>
 
 const readStatus = (value: string | null): InProcessStatus | undefined =>
   IN_PROCESS_STATUSES.find((status) => status === value);
+
+const readLimit = (value: string | null): number => {
+  if (value === null || !/^-?\d+$/.test(value)) return DEFAULT_PAGE_SIZE;
+  return Math.min(Math.max(Number(value), 1), MAX_PAGE_SIZE);
+};
+
+const isSelectableRow = (row: { closure: FollowupClosure | null }): boolean => row.closure === null;
+
+type FailedBulkClose = Extract<BulkCloseResultItem, { ok: false }>;
+type WorkStateCounts = Partial<Record<FollowupWorkState, number>>;
+
+interface ShipmentTabCounts {
+  inProcess: number | undefined;
+  returned: number | undefined;
+  workState: WorkStateCounts;
+}
+
+interface SelectionState {
+  scope: string;
+  ids: Set<number>;
+}
 
 const readPage = (value: string | null): number => {
   const page = Number(value);
@@ -126,6 +159,7 @@ interface ViewSwitchProps {
   canReturned: boolean;
   onViewChange: (view: ShipmentView) => void;
   restoreFocusRef: { current: boolean };
+  counts: ShipmentTabCounts;
 }
 
 interface ListProps {
@@ -213,12 +247,22 @@ function ListHeader({ view, carrier, implementation, isLoading }: ListHeaderProp
   );
 }
 
+function TabCount({ value }: { value: number | undefined }) {
+  if (value === undefined) return null;
+  return (
+    <span className="ms-2 rounded-full bg-current/10 px-2 py-0.5 text-xs font-semibold tabular-nums">
+      {formatNumber(value)}
+    </span>
+  );
+}
+
 function ViewTabs({
   view,
   canInProcess,
   canReturned,
   onViewChange,
   restoreFocusRef,
+  counts,
   children,
 }: ViewSwitchProps & { children: ReactNode }) {
   const { t } = useI18n();
@@ -239,9 +283,17 @@ function ViewTabs({
       >
         <TabsList>
           {canInProcess && (
-            <TabsTrigger value="in-process">{t('inProcess.title.inProcess')}</TabsTrigger>
+            <TabsTrigger value="in-process">
+              {t('inProcess.title.inProcess')}
+              <TabCount value={counts.inProcess} />
+            </TabsTrigger>
           )}
-          {canReturned && <TabsTrigger value="returned">{t('inProcess.title.returned')}</TabsTrigger>}
+          {canReturned && (
+            <TabsTrigger value="returned">
+              {t('inProcess.title.returned')}
+              <TabCount value={counts.returned} />
+            </TabsTrigger>
+          )}
         </TabsList>
         <TabsContent value={view} className="flex flex-col gap-5">
           {children}
@@ -266,7 +318,7 @@ function ResultsFrame({ busy, children }: { busy: boolean; children: ReactNode }
       <div
         aria-busy={busy}
         className={cn(
-          'max-h-[calc(100dvh-16rem)] overflow-auto rounded-xl border bg-card',
+          'md:max-h-[calc(100dvh-16rem)] md:overflow-auto md:rounded-xl md:border md:bg-card',
           busy && 'opacity-60',
         )}
       >
@@ -291,6 +343,20 @@ function ListSkeleton({ widths }: { widths: string[] }) {
         ))}
       </tbody>
     </table>
+  );
+}
+
+function CardsSkeleton() {
+  return (
+    <div className="flex flex-col gap-3" aria-hidden="true">
+      {Array.from({ length: SKELETON_CARD_COUNT }, (_, card) => (
+        <div key={card} className="flex flex-col gap-3 rounded-xl border bg-card p-4">
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-4 w-2/3" />
+          <Skeleton className="h-4 w-full" />
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -321,6 +387,7 @@ function ListPagination({
       onNext={() => onPageChange(Math.min(totalPages, page + 1))}
       currentPageSize={limit}
       onPageSizeChange={onPageSizeChange}
+      maxPageSize={MAX_PAGE_SIZE}
     />
   );
 }
@@ -343,6 +410,8 @@ interface InProcessControlsProps {
   onClearAll: () => void;
   onSearchChange: (value: string) => void;
   searchInputRef: RefObject<HTMLInputElement>;
+  searchActive: boolean;
+  workStateCounts: WorkStateCounts;
 }
 
 function InProcessControls({
@@ -363,9 +432,12 @@ function InProcessControls({
   onClearAll,
   onSearchChange,
   searchInputRef,
+  searchActive,
+  workStateCounts,
 }: InProcessControlsProps) {
   const { t } = useI18n();
   const hasActiveFilters = activeCount > 0;
+  const dimWhenSearching = searchActive ? 'opacity-60' : undefined;
 
   return (
     <>
@@ -421,7 +493,7 @@ function InProcessControls({
         )}
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="flex flex-col gap-1.5">
+          <div className={cn('flex flex-col gap-1.5', dimWhenSearching)}>
             <label htmlFor="in-process-status" className="text-xs text-muted-foreground">
               {t('inProcess.filters.status')}
             </label>
@@ -433,10 +505,11 @@ function InProcessControls({
               options={statusOptions}
               placeholder={t('inProcess.filters.allStatuses')}
               clearable
+              disabled={searchActive}
               widthClass="w-full"
             />
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div className={cn('flex flex-col gap-1.5', dimWhenSearching)}>
             <label htmlFor="in-process-governorate" className="text-xs text-muted-foreground">
               {t('inProcess.filters.governorate')}
             </label>
@@ -448,10 +521,11 @@ function InProcessControls({
               options={governorates}
               placeholder={t('inProcess.filters.allGovernorates')}
               clearable
+              disabled={searchActive}
               widthClass="w-full"
             />
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div className={cn('flex flex-col gap-1.5', dimWhenSearching)}>
             <label htmlFor="in-process-city" className="text-xs text-muted-foreground">
               {t('inProcess.filters.city')}
             </label>
@@ -466,12 +540,12 @@ function InProcessControls({
                   ? t('inProcess.filters.allAreas')
                   : t('inProcess.filters.chooseGovernorateFirst')
               }
-              disabled={!governorate || citiesLoading}
+              disabled={!governorate || citiesLoading || searchActive}
               clearable
               widthClass="w-full"
             />
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div className={cn('flex flex-col gap-1.5', dimWhenSearching)}>
             <label htmlFor="in-process-from" className="text-xs text-muted-foreground">
               {t('inProcess.filters.from')}
             </label>
@@ -479,10 +553,11 @@ function InProcessControls({
               id="in-process-from"
               type="date"
               value={from}
+              disabled={searchActive}
               onChange={(e) => onPatch({ from: e.target.value, page: '' })}
             />
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div className={cn('flex flex-col gap-1.5', dimWhenSearching)}>
             <label htmlFor="in-process-to" className="text-xs text-muted-foreground">
               {t('inProcess.filters.to')}
             </label>
@@ -490,6 +565,7 @@ function InProcessControls({
               id="in-process-to"
               type="date"
               value={to}
+              disabled={searchActive}
               onChange={(e) => onPatch({ to: e.target.value, page: '' })}
             />
           </div>
@@ -501,7 +577,7 @@ function InProcessControls({
         <div
           role="radiogroup"
           aria-label={t('inProcess.workState.label')}
-          className="inline-flex w-max max-w-full items-center gap-1 overflow-x-auto rounded-full bg-muted p-1"
+          className={cn('inline-flex w-max max-w-full items-center gap-1 overflow-x-auto rounded-full bg-muted p-1', dimWhenSearching)}
         >
           {WORK_STATE_OPTIONS.map((option) => {
             const isActive = workState === option.value;
@@ -514,9 +590,11 @@ function InProcessControls({
                 variant={isActive ? 'default' : 'ghost'}
                 size="sm"
                 className="rounded-full px-4 text-xs"
+                disabled={searchActive}
                 onClick={() => onPatch({ workState: option.value, page: '' })}
               >
                 {t(option.labelKey)}
+                <TabCount value={workStateCounts[option.value]} />
               </Button>
             );
           })}
@@ -552,11 +630,34 @@ function InProcessList({
     error,
     refetch,
   } = useInProcessShipmentsQuery(shippingCompanyId, filters);
+  const bulkClose = useBulkCloseClosure();
+  const [isBulkConfirmOpen, setIsBulkConfirmOpen] = useState(false);
 
   const hasNet = hasPermission(PERMISSIONS.FOLLOWUP_NET_AMOUNT_READ);
-  const skeletonWidths = hasNet
+  const canCloseSelection = hasPermission(PERMISSIONS.FOLLOWUP_CARRIERS_CLOSE_MANAGE);
+  const columnWidths = hasNet
     ? IN_PROCESS_SKELETON_WIDTHS
     : IN_PROCESS_SKELETON_WIDTHS.filter((_, column) => column !== NET_COLUMN_INDEX);
+  const skeletonWidths = canCloseSelection ? ['w-4', ...columnWidths] : columnWidths;
+
+  const scopeKey = JSON.stringify({ shippingCompanyId, filters });
+  const [selectionState, setSelectionState] = useState<SelectionState>({
+    scope: scopeKey,
+    ids: new Set<number>(),
+  });
+  const selectedIds = selectionState.scope === scopeKey ? selectionState.ids : EMPTY_SELECTION;
+  const updateSelection = (update: (ids: Set<number>) => Set<number>) =>
+    setSelectionState((prev) => ({
+      scope: scopeKey,
+      ids: update(prev.scope === scopeKey ? prev.ids : new Set<number>()),
+    }));
+  const scopeRef = useRef(scopeKey);
+  useEffect(() => {
+    scopeRef.current = scopeKey;
+    setSelectionState((prev) =>
+      prev.scope === scopeKey ? prev : { scope: scopeKey, ids: new Set<number>() },
+    );
+  }, [scopeKey]);
 
   const shipments = data?.data ?? [];
   const total = data?.total ?? 0;
@@ -571,6 +672,71 @@ function InProcessList({
       onPageChange(1);
     }
   }, [isSuccess, shipments.length, page, onPageChange]);
+
+  useEffect(() => {
+    if (!data) return;
+    const selectable = new Set(data.data.filter(isSelectableRow).map((row) => row.id));
+    setSelectionState((prev) => {
+      if (prev.scope !== scopeKey) return prev;
+      const kept = new Set(Array.from(prev.ids).filter((id) => selectable.has(id)));
+      return kept.size === prev.ids.size ? prev : { scope: scopeKey, ids: kept };
+    });
+  }, [data, scopeKey]);
+
+  const selection = canCloseSelection
+    ? {
+        selectedIds,
+        onToggle: (orderId: number) =>
+          updateSelection((ids) => {
+            const next = new Set(ids);
+            if (next.has(orderId)) next.delete(orderId);
+            else next.add(orderId);
+            return next;
+          }),
+        onToggleAll: (orderIds: number[], checked: boolean) =>
+          updateSelection((ids) => {
+            const next = new Set(ids);
+            orderIds.forEach((id) => {
+              if (checked) next.add(id);
+              else next.delete(id);
+            });
+            return next;
+          }),
+      }
+    : undefined;
+
+  const handleBulkClose = () => {
+    const scope = scopeKey;
+    bulkClose.mutate(Array.from(selectedIds), {
+      onSuccess: (response) => {
+        setIsBulkConfirmOpen(false);
+        const isSameScope = scopeRef.current === scope;
+        const failed = response.results.filter(
+          (item): item is FailedBulkClose => !item.ok,
+        );
+        if (failed.length === 0) {
+          toast.success(t('inProcess.bulk.success', { count: response.succeeded }));
+          if (isSameScope) updateSelection(() => new Set<number>());
+          return;
+        }
+        toast.warning(
+          t('inProcess.bulk.partial', { succeeded: response.succeeded, failed: failed.length }),
+        );
+        const shown = failed.slice(0, MAX_ERROR_TOASTS);
+        const remaining = failed.length - shown.length;
+        shown.forEach((item, index) => {
+          const suffix = remaining > 0 && index === shown.length - 1 ? ` (+${remaining})` : '';
+          toast.error(`${item.message}${suffix}`);
+        });
+        const failedIds = new Set(failed.map((item) => item.orderId));
+        if (isSameScope) updateSelection(() => failedIds);
+      },
+      onError: (err: unknown) => {
+        setIsBulkConfirmOpen(false);
+        toast.error(getApiErrorMessage(err, t('inProcess.bulk.error')));
+      },
+    });
+  };
 
   return (
     <>
@@ -613,7 +779,12 @@ function InProcessList({
         </p>
         {isLoading ? (
           <ResultsFrame busy={false}>
-            <ListSkeleton widths={skeletonWidths} />
+            <div className="hidden md:block">
+              <ListSkeleton widths={skeletonWidths} />
+            </div>
+            <div className="md:hidden">
+              <CardsSkeleton />
+            </div>
           </ResultsFrame>
         ) : isError ? (
           <ErrorState error={error} fallback={t('inProcess.error.load')} onRetry={() => refetch()} />
@@ -636,15 +807,54 @@ function InProcessList({
         ) : (
           <>
             <ResultsFrame busy={isFetching}>
-              {data && (
-                <InProcessShipmentsTable
-                  shipments={shipments}
-                  shippingCompanyId={shippingCompanyId}
-                  onOpenNotes={onOpenNotes}
-                  onOpenActionLog={onOpenActionLog}
-                />
-              )}
+              <div className="hidden md:block">
+                {data && (
+                  <InProcessShipmentsTable
+                    shipments={shipments}
+                    shippingCompanyId={shippingCompanyId}
+                    onOpenNotes={onOpenNotes}
+                    onOpenActionLog={onOpenActionLog}
+                    selection={selection}
+                  />
+                )}
+              </div>
+              <div className="md:hidden">
+                {data && (
+                  <InProcessShipmentCards
+                    shipments={shipments}
+                    shippingCompanyId={shippingCompanyId}
+                    onOpenNotes={onOpenNotes}
+                    onOpenActionLog={onOpenActionLog}
+                    selection={selection}
+                  />
+                )}
+              </div>
             </ResultsFrame>
+            {selection && selectedIds.size > 0 && (
+              <div className="sticky bottom-0 z-20 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 shadow-lg">
+                <span className="text-sm font-medium text-foreground">
+                  {t('inProcess.bulk.selected', { count: selectedIds.size })}
+                </span>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => updateSelection(() => new Set<number>())}
+                  >
+                    {t('inProcess.bulk.clear')}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={bulkClose.isPending}
+                    onClick={() => setIsBulkConfirmOpen(true)}
+                  >
+                    {t('inProcess.bulk.close', { count: selectedIds.size })}
+                  </Button>
+                </div>
+              </div>
+            )}
             <ListPagination
               page={page}
               limit={limit}
@@ -656,6 +866,23 @@ function InProcessList({
           </>
         )}
       </ViewTabs>
+
+      {isBulkConfirmOpen && (
+        <BaseModal
+          isOpen
+          onClose={() => setIsBulkConfirmOpen(false)}
+          title={t('inProcess.bulk.confirmTitle', { count: selectedIds.size })}
+          onConfirm={handleBulkClose}
+          confirmText={t('inProcess.confirm.confirm')}
+          cancelText={t('inProcess.confirm.cancel')}
+          confirmDisabled={bulkClose.isPending || selectedIds.size === 0}
+          isLoading={bulkClose.isPending}
+        >
+          <p className="text-sm text-muted-foreground">
+            {t('inProcess.bulk.selected', { count: selectedIds.size })}
+          </p>
+        </BaseModal>
+      )}
     </>
   );
 }
@@ -721,7 +948,12 @@ function ReturnedList({
         </p>
         {isLoading ? (
           <ResultsFrame busy={false}>
-            <ListSkeleton widths={RETURNED_SKELETON_WIDTHS} />
+            <div className="hidden md:block">
+              <ListSkeleton widths={RETURNED_SKELETON_WIDTHS} />
+            </div>
+            <div className="md:hidden">
+              <CardsSkeleton />
+            </div>
           </ResultsFrame>
         ) : isError ? (
           <ErrorState error={error} fallback={t('inProcess.error.load')} onRetry={() => refetch()} />
@@ -730,7 +962,12 @@ function ReturnedList({
         ) : (
           <>
             <ResultsFrame busy={isFetching}>
-              {data && <ReturnedShipmentsTable shipments={shipments} />}
+              <div className="hidden md:block">
+                {data && <ReturnedShipmentsTable shipments={shipments} />}
+              </div>
+              <div className="md:hidden">
+                {data && <ReturnedShipmentCards shipments={shipments} />}
+              </div>
             </ResultsFrame>
             <ListPagination
               page={page}
@@ -772,7 +1009,7 @@ export function InProcessShipmentsContent({
   const workState = readWorkState(searchParams.get('workState'));
   const page = readPage(searchParams.get('page'));
 
-  const [limit, setLimit] = useState(DEFAULT_PAGE_SIZE);
+  const limit = readLimit(searchParams.get('limit'));
   const [searchInput, setSearchInput] = useState(search);
   const debouncedSearch = useDebounce(searchInput, SEARCH_DEBOUNCE_MS);
   const [appliedSearch, setAppliedSearch] = useState(search);
@@ -834,8 +1071,11 @@ export function InProcessShipmentsContent({
     updateParams({ page: nextPage > 1 ? String(nextPage) : '' });
 
   const handlePageSizeChange = (size: number) => {
-    setLimit(Math.min(Math.max(size, 1), MAX_PAGE_SIZE));
-    updateParams({ page: '' });
+    const nextLimit = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
+    updateParams({
+      limit: nextLimit === DEFAULT_PAGE_SIZE ? '' : String(nextLimit),
+      page: '',
+    });
   };
 
   const isInProcess = view === 'in-process';
@@ -843,6 +1083,27 @@ export function InProcessShipmentsContent({
   const [actionLogOrderId, setActionLogOrderId] = useState<number | null>(null);
 
   const activeCount = [status, governorate, city, from, to, appliedSearch].filter(Boolean).length;
+  const searchActive = appliedSearch !== '';
+
+  const countFilters: InProcessCountFilters = searchActive
+    ? { search: appliedSearch }
+    : {
+        from: from || undefined,
+        to: to || undefined,
+        status,
+        governorate: governorate || undefined,
+        city: city || undefined,
+      };
+  const { data: countsData } = useInProcessCountsQuery(shippingCompanyId, countFilters);
+  const tabCounts: ShipmentTabCounts = {
+    inProcess: countsData?.inProcess.all,
+    returned: countsData?.returned ?? undefined,
+    workState: {
+      open: countsData?.inProcess.open,
+      closed: countsData?.inProcess.closed,
+      all: countsData?.inProcess.all,
+    },
+  };
 
   const clearAllFilters = () => {
     setSearchInput('');
@@ -863,6 +1124,7 @@ export function InProcessShipmentsContent({
     canInProcess,
     canReturned,
     restoreFocusRef: viewFocusRef,
+    counts: tabCounts,
     onViewChange: (next) => {
       viewFocusRef.current = true;
       updateParams({ view: next === 'returned' ? 'returned' : '', page: '' });
@@ -870,7 +1132,7 @@ export function InProcessShipmentsContent({
   };
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden">
+    <div className="w-full max-w-full overflow-x-clip">
       <div className="px-4 sm:px-8 py-4 flex flex-col gap-5">
         {isInProcess ? (
           <InProcessList
@@ -902,6 +1164,8 @@ export function InProcessShipmentsContent({
                 onClearAll={clearAllFilters}
                 onSearchChange={setSearchInput}
                 searchInputRef={searchInputRef}
+                searchActive={searchActive}
+                workStateCounts={tabCounts.workState}
               />
             }
             onOpenNotes={setNotesOrderId}

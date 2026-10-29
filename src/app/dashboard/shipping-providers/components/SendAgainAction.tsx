@@ -9,11 +9,14 @@ import type { TranslationKey } from '@/i18n/translate';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useSendAgainRecordMutation } from '@/services/shippingProviders';
+import type { FollowupClosure } from '@/types/logistics';
 import type { SendAgainBlockedReason } from '@/types/shippingProviders';
 
-const BLOCKED_REASON_KEYS: Partial<Record<SendAgainBlockedReason, TranslationKey>> = {
-  NO_CARRIER_STATUS: 'inProcess.reason.sendAgainNoStatus',
+const BLOCKED_REASON_KEYS: Record<SendAgainBlockedReason, TranslationKey> = {
   NOT_TURBO: 'inProcess.reason.sendAgainTurbo',
+  NOT_RETURNED_DELIVERED: 'inProcess.reason.sendAgainNotReturnedDelivered',
+  NO_ACTIVE_CODE: 'inProcess.reason.sendAgainNoActiveCode',
+  NO_CARRIER_STATUS: 'inProcess.reason.sendAgainNoStatus',
   RETURNED_TO_MERCHANT: 'inProcess.reason.sendAgainReturnedToMerchant',
 };
 
@@ -21,6 +24,7 @@ interface SendAgainActionProps {
   orderId: number;
   eligible: boolean;
   blockedReason: SendAgainBlockedReason | null;
+  closure: FollowupClosure | null;
 }
 
 function SendAgainReasonModal({ orderId, onClose }: { orderId: number; onClose: () => void }) {
@@ -66,14 +70,24 @@ function SendAgainReasonModal({ orderId, onClose }: { orderId: number; onClose: 
   );
 }
 
-export function SendAgainAction({ orderId, eligible, blockedReason }: SendAgainActionProps) {
+export function SendAgainAction({
+  orderId,
+  eligible,
+  blockedReason,
+  closure,
+}: SendAgainActionProps) {
   const { t } = useI18n();
   const { hasPermission } = usePermissionCheck();
   const [isOpen, setIsOpen] = useState(false);
 
   if (!hasPermission(PERMISSION_CODES.FOLLOWUP_MANAGE)) return null;
 
-  const blockedKey = !eligible && blockedReason ? BLOCKED_REASON_KEYS[blockedReason] : undefined;
+  const isClosureBlocking = closure?.kind === 'REFUSE' || closure?.kind === 'CANCEL';
+  const blockedKey: TranslationKey | undefined = isClosureBlocking
+    ? 'inProcess.reason.locked'
+    : !eligible && blockedReason
+      ? BLOCKED_REASON_KEYS[blockedReason]
+      : undefined;
 
   return (
     <div className="flex flex-col gap-1">
@@ -82,7 +96,7 @@ export function SendAgainAction({ orderId, eligible, blockedReason }: SendAgainA
         variant="outline"
         size="sm"
         className="h-7 px-2 text-xs"
-        disabled={blockedKey !== undefined}
+        disabled={isClosureBlocking || !eligible}
         onClick={() => setIsOpen(true)}
       >
         إعادة الإرسال

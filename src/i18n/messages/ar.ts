@@ -352,6 +352,22 @@ const ar = {
   'inProcess.empty.returned': 'لا توجد طلبات مرتجعة لهذه الجهة',
   'inProcess.error.load': 'تعذر تحميل الشحنات',
   'inProcess.refreshing': 'جاري تحديث القائمة',
+  'inProcess.confirm.closeTitle': 'إغلاق الطلب {code} لليوم؟',
+  'inProcess.confirm.reopenTitle': 'إعادة فتح الطلب {code}؟',
+  'inProcess.confirm.confirm': 'تأكيد',
+  'inProcess.confirm.cancel': 'إلغاء',
+  'inProcess.bulk.selected': 'تم تحديد {count}',
+  'inProcess.bulk.close': 'إغلاق اليوم للمحدد ({count})',
+  'inProcess.bulk.clear': 'إلغاء التحديد',
+  'inProcess.bulk.confirmTitle': 'إغلاق {count} طلب لليوم؟',
+  'inProcess.bulk.success': 'تم إغلاق {count} طلب لليوم',
+  'inProcess.bulk.partial': 'تم إغلاق {succeeded} طلب، وتعذر إغلاق {failed}',
+  'inProcess.bulk.error': 'تعذر إغلاق الطلبات المحددة',
+  'inProcess.select.row': 'تحديد الطلب {code}',
+  'inProcess.select.all': 'تحديد كل الطلبات القابلة للإغلاق في الصفحة',
+  'inProcess.reason.sendAgainNotReturnedDelivered': 'الطلب لم يصل إلى حالة مرتجع مُسلَّم',
+  'inProcess.reason.sendAgainNoActiveCode': 'لا يوجد كود شحن نشط',
+  'inProcess.closureReason.freeTextOnly': 'لا توجد أسباب محفوظة، اكتب السبب',
 } as const;
 
 export default ar;

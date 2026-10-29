@@ -9,9 +9,9 @@ const STATUS_COLORS: Record<string, string> = {
 
   PREPARED: 'bg-[#f2edfd] text-primary border border-[#f2edfd]',
   SHIPPING: 'bg-[#f2edfd] text-primary border border-[#f2edfd]',
-  WITH_DRIVER: 'bg-[#f2edfd] text-primary border border-[#f2edfd]',
+  WITH_DRIVER: 'bg-[#e6f6f4] text-[#0f766e] border border-[#e6f6f4]',
   WAITING_FOR_PACKAGING: 'bg-[#fff7eb] text-[#ff9800] border border-[#ffefd8]',
-  WAITING_FOR_APPROVAL: 'bg-[#fff7eb] text-[#ff9800] border border-[#ffefd8]',
+  WAITING_FOR_APPROVAL: 'bg-[#fff7eb] text-[#b45309] border border-[#ffefd8]',
 
   DELIVERED: 'bg-[#effbeb] text-[#49c116] border border-[#d2f3c5]',
   COLLECTED: 'bg-[#effbeb] text-[#15803d] border border-[#d2f3c5]',

@@ -102,6 +102,21 @@ export async function markFollowupCancelled(
   return data;
 }
 
+export type BulkCloseResultItem =
+  | { orderId: number; ok: true }
+  | { orderId: number; ok: false; code: string; message: string };
+
+export interface BulkCloseResponse {
+  results: BulkCloseResultItem[];
+  succeeded: number;
+  failed: number;
+}
+
+export async function markFollowupClosedBulk(orderIds: number[]): Promise<BulkCloseResponse> {
+  const { data } = await http.post<BulkCloseResponse>('/orders/followup/close-bulk', { orderIds });
+  return data;
+}
+
 export async function undoFollowupClosure(orderId: number): Promise<FollowupClosureUndoResponse> {
   const { data } = await http.post<FollowupClosureUndoResponse>(`/orders/followup/${orderId}/closure/undo`);
   return data;

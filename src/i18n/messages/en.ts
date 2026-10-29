@@ -338,6 +338,22 @@ const en: Record<keyof typeof ar, string> = {
   'inProcess.empty.returned': 'No returned orders for this carrier',
   'inProcess.error.load': 'Could not load shipments',
   'inProcess.refreshing': 'Updating the list',
+  'inProcess.confirm.closeTitle': 'Close order {code} for today?',
+  'inProcess.confirm.reopenTitle': 'Reopen order {code}?',
+  'inProcess.confirm.confirm': 'Confirm',
+  'inProcess.confirm.cancel': 'Cancel',
+  'inProcess.bulk.selected': '{count} selected',
+  'inProcess.bulk.close': 'Close selected for today ({count})',
+  'inProcess.bulk.clear': 'Clear selection',
+  'inProcess.bulk.confirmTitle': 'Close {count} orders for today?',
+  'inProcess.bulk.success': 'Closed {count} orders for today',
+  'inProcess.bulk.partial': 'Closed {succeeded}, could not close {failed}',
+  'inProcess.bulk.error': 'Could not close the selected orders',
+  'inProcess.select.row': 'Select order {code}',
+  'inProcess.select.all': 'Select all closable orders on this page',
+  'inProcess.reason.sendAgainNotReturnedDelivered': 'The order has not reached returned-delivered',
+  'inProcess.reason.sendAgainNoActiveCode': 'There is no active shipment code',
+  'inProcess.closureReason.freeTextOnly': 'No saved reasons; type the reason',
 };
 
 export default en;

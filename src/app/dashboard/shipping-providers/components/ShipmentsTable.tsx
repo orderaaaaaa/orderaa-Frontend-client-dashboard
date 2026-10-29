@@ -5,10 +5,12 @@ import { Can } from '@/components/Can';
 import BaseModal from '@/components/ui/base-modal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import CopyButton from '@/components/ui/copy-button';
 import CopyableCode from '@/components/ui/copyable-code';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatDisplayTime } from '@/components/OrderDetails/fields/TimeRangeField';
+import { usePermissionCheck } from '@/hooks/usePermissions';
 import useShippingCompanies from '@/hooks/useShippingCompanies';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { TranslationKey } from '@/i18n/translate';
@@ -16,7 +18,7 @@ import { PERMISSIONS } from '@/lib/permissions';
 import { cn } from '@/lib/utils';
 import type { FollowupClosure } from '@/types/logistics';
 import { OrderStatus } from '@/types/orders';
-import { PARTIAL_DELIVERY_IMPLEMENTATIONS } from '@/types/shippingCompanies';
+import { PARTIAL_DELIVERY_IMPLEMENTATIONS, type ShippingImplementation } from '@/types/shippingCompanies';
 import {
   IN_PROCESS_STATUSES,
   type InProcessShipment,
@@ -42,7 +44,7 @@ const SECONDARY_TEXT_CLASS = 'text-xs text-muted-foreground';
 const STICKY_CELL_CLASS = 'sticky z-[1] bg-card group-hover:bg-muted';
 const ROW_CLASS = 'group border-b transition-colors duration-150 hover:bg-surface-hover/40';
 
-const isLockedRow = (row: ShipmentRowBase): boolean =>
+export const isLockedRow = (row: ShipmentRowBase): boolean =>
   row.closure?.kind === 'REFUSE' ||
   row.closure?.kind === 'CANCEL' ||
   !(IN_PROCESS_STATUSES as readonly OrderStatus[]).includes(row.status);
@@ -53,7 +55,7 @@ const PARTIAL_DELIVERY_BLOCK_REASON_KEYS = {
   status: 'inProcess.reason.partialStatus',
 } as const satisfies Record<string, TranslationKey>;
 
-const partialDeliveryBlockReasonOf = ({
+export const partialDeliveryBlockReasonOf = ({
   isPartialCarrier,
   locked,
   status,
@@ -68,13 +70,30 @@ const partialDeliveryBlockReasonOf = ({
   return null;
 };
 
-const moneyTextOf = (value: number | string | null | undefined): string =>
+export const moneyTextOf = (value: number | string | null | undefined): string =>
   value === null || value === undefined ? '—' : `${formatNumber(value, 2)} جنيه`;
 
-const deliveryWindowTextOf = (from: string | null, to: string | null): string =>
+export const deliveryWindowTextOf = (from: string | null, to: string | null): string =>
   from && to ? `${formatDisplayTime(from)} - ${formatDisplayTime(to)}` : '—';
 
-function CodeCell({ code }: { code: string }) {
+export function useInProcessCarrier(shippingCompanyId: number) {
+  const { shippingCompanies, isLoading } = useShippingCompanies();
+  const implementation: ShippingImplementation | undefined = shippingCompanies.find(
+    (company) => company.id === shippingCompanyId,
+  )?.implementation;
+  const isPartialCarrier = implementation !== undefined && PARTIAL_DELIVERY_IMPLEMENTATIONS.includes(implementation);
+  return { implementation, isPartialCarrier, isShippingCompaniesLoading: isLoading };
+}
+
+export type InProcessCarrier = ReturnType<typeof useInProcessCarrier>;
+
+export function useIsBulkClosable(): (row: ShipmentRowBase) => boolean {
+  const { hasPermission } = usePermissionCheck();
+  const canCloseToday = hasPermission(PERMISSIONS.FOLLOWUP_CARRIERS_CLOSE_MANAGE);
+  return (row) => row.closure === null && canCloseToday;
+}
+
+export function CodeCell({ code }: { code: string }) {
   return (
     <CopyableCode value={code} label="نسخ كود الطلب">
       <span className="font-mono font-semibold text-foreground">{code}</span>
@@ -82,7 +101,7 @@ function CodeCell({ code }: { code: string }) {
   );
 }
 
-function PhoneCell({ phones }: { phones: string[] }) {
+export function PhoneCell({ phones }: { phones: string[] }) {
   const { t } = useI18n();
   const [isListOpen, setIsListOpen] = useState(false);
   const [first] = phones;
@@ -130,7 +149,7 @@ function PhoneCell({ phones }: { phones: string[] }) {
   );
 }
 
-function CustomerCell({ name, phones }: { name: string | null; phones: string[] }) {
+export function CustomerCell({ name, phones }: { name: string | null; phones: string[] }) {
   return (
     <div className="flex flex-col items-start gap-1">
       <span className="font-medium">{name ?? '—'}</span>
@@ -139,7 +158,7 @@ function CustomerCell({ name, phones }: { name: string | null; phones: string[] 
   );
 }
 
-function StatusCell({ status, closure }: { status: OrderStatus; closure: FollowupClosure | null }) {
+export function StatusCell({ status, closure }: { status: OrderStatus; closure: FollowupClosure | null }) {
   const { t } = useI18n();
   return (
     <div className="flex flex-col items-start gap-1.5">
@@ -156,7 +175,7 @@ function StatusCell({ status, closure }: { status: OrderStatus; closure: Followu
   );
 }
 
-function DueCell({
+export function DueCell({
   model,
   dueDay,
   override,
@@ -193,7 +212,7 @@ function DueCell({
   );
 }
 
-function CourierCell({ name, phone }: { name: string | null; phone: string | null }) {
+export function CourierCell({ name, phone }: { name: string | null; phone: string | null }) {
   if (name === null && phone === null) return <span>—</span>;
 
   return (
@@ -208,11 +227,102 @@ function CourierCell({ name, phone }: { name: string | null; phone: string | nul
   );
 }
 
-interface InProcessShipmentsTableProps {
+export interface ShipmentSelection {
+  selectedIds: ReadonlySet<number>;
+  onToggle: (id: number) => void;
+  onToggleAll: (ids: number[], checked: boolean) => void;
+}
+
+export function ShipmentSelectCheckbox({
+  code,
+  checked,
+  onCheckedChange,
+}: {
+  code: string;
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+}) {
+  const { t } = useI18n();
+  return (
+    <Checkbox
+      aria-label={t('inProcess.select.row', { code })}
+      checked={checked}
+      onCheckedChange={(value) => onCheckedChange(value === true)}
+    />
+  );
+}
+
+export function InProcessRowActions({
+  row,
+  shippingCompanyId,
+  carrier,
+  onOpenNotes,
+  onOpenActionLog,
+}: {
+  row: InProcessShipment;
+  shippingCompanyId: number;
+  carrier: InProcessCarrier;
+  onOpenNotes: (orderId: number) => void;
+  onOpenActionLog: (orderId: number) => void;
+}) {
+  const { t } = useI18n();
+  const locked = isLockedRow(row);
+  const partialBlockKey = partialDeliveryBlockReasonOf({
+    isPartialCarrier: carrier.isPartialCarrier,
+    locked,
+    status: row.status,
+  });
+
+  return (
+    <ShipmentRowActions
+      orderId={row.id}
+      orderCode={row.code}
+      customerName={row.customer.name}
+      status={row.status}
+      closure={row.closure}
+      carrierImplementation={carrier.implementation}
+      partialDelivery={{
+        pending: carrier.isShippingCompaniesLoading,
+        blockedReason:
+          carrier.isShippingCompaniesLoading || partialBlockKey === null ? null : t(partialBlockKey),
+      }}
+      shippingCompanyId={shippingCompanyId}
+      lateness={row.lateness}
+      availableFrom={row.availableFrom}
+      availableTo={row.availableTo}
+      rowLocked={locked}
+      onOpenNotes={() => onOpenNotes(row.id)}
+      onOpenActionLog={() => onOpenActionLog(row.id)}
+    />
+  );
+}
+
+export function ReturnedRowActions({ row }: { row: ReturnedShipment }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <ShipmentRowActions
+        orderId={row.id}
+        orderCode={row.code}
+        customerName={row.customer.name}
+        status={row.status}
+        closure={row.closure}
+      />
+      <SendAgainAction
+        orderId={row.id}
+        eligible={row.sendAgainEligible}
+        blockedReason={row.sendAgainBlockedReason}
+        closure={row.closure}
+      />
+    </div>
+  );
+}
+
+export interface InProcessShipmentsTableProps {
   shipments: InProcessShipment[];
   shippingCompanyId: number;
   onOpenNotes: (orderId: number) => void;
   onOpenActionLog: (orderId: number) => void;
+  selection?: ShipmentSelection;
 }
 
 export function InProcessShipmentsTable({
@@ -220,11 +330,19 @@ export function InProcessShipmentsTable({
   shippingCompanyId,
   onOpenNotes,
   onOpenActionLog,
+  selection,
 }: InProcessShipmentsTableProps) {
   const { t } = useI18n();
-  const { shippingCompanies, isLoading: isShippingCompaniesLoading } = useShippingCompanies();
-  const implementation = shippingCompanies.find((company) => company.id === shippingCompanyId)?.implementation;
-  const isPartialCarrier = implementation !== undefined && PARTIAL_DELIVERY_IMPLEMENTATIONS.includes(implementation);
+  const carrier = useInProcessCarrier(shippingCompanyId);
+  const isBulkClosable = useIsBulkClosable();
+  const selectableIds = shipments.filter(isBulkClosable).map((row) => row.id);
+  const selectedCount = selection ? selectableIds.filter((id) => selection.selectedIds.has(id)).length : 0;
+  const headChecked: boolean | 'indeterminate' =
+    selectableIds.length > 0 && selectedCount === selectableIds.length
+      ? true
+      : selectedCount > 0
+        ? 'indeterminate'
+        : false;
 
   return (
     <table dir="rtl" className="w-full caption-bottom text-sm">
@@ -232,7 +350,18 @@ export function InProcessShipmentsTable({
       <thead className="sticky top-0 z-10 bg-muted">
         <tr className="border-b">
           <th scope="col" className={cn(HEAD_CLASS, 'sticky start-0 z-20')}>
-            {t('inProcess.table.columns.code')}
+            <div className="flex items-center gap-2">
+              {selection && (
+                <Checkbox
+                  aria-label={t('inProcess.select.all')}
+                  className="data-[state=indeterminate]:border-primary data-[state=indeterminate]:bg-primary"
+                  checked={headChecked}
+                  disabled={selectableIds.length === 0}
+                  onCheckedChange={(value) => selection.onToggleAll(selectableIds, value === true)}
+                />
+              )}
+              {t('inProcess.table.columns.code')}
+            </div>
           </th>
           <th scope="col" className={cn(HEAD_CLASS, 'min-w-40')}>
             {t('inProcess.table.columns.customer')}
@@ -270,17 +399,23 @@ export function InProcessShipmentsTable({
       </thead>
       <tbody>
         {shipments.map((row) => {
-          const locked = isLockedRow(row);
           const chip = latenessChipOf(row.lateness, t);
-          const partialBlockKey = partialDeliveryBlockReasonOf({
-            isPartialCarrier,
-            locked,
-            status: row.status,
-          });
           return (
             <tr key={row.id} className={ROW_CLASS}>
               <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'start-0 border-s-[3px] whitespace-nowrap', chip.borderClassName)}>
-                <CodeCell code={row.code} />
+                <div className="flex items-center gap-2">
+                  {selection &&
+                    (isBulkClosable(row) ? (
+                      <ShipmentSelectCheckbox
+                        code={row.code}
+                        checked={selection.selectedIds.has(row.id)}
+                        onCheckedChange={() => selection.onToggle(row.id)}
+                      />
+                    ) : (
+                      <span aria-hidden className="size-5 shrink-0" />
+                    ))}
+                  <CodeCell code={row.code} />
+                </div>
               </td>
               <td className={cn(CELL_CLASS, 'min-w-40')}>
                 <CustomerCell name={row.customer.name} phones={row.customer.phones} />
@@ -317,25 +452,12 @@ export function InProcessShipmentsTable({
                 </td>
               </Can>
               <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'end-0')}>
-                <ShipmentRowActions
-                  orderId={row.id}
-                  orderCode={row.code}
-                  customerName={row.customer.name}
-                  status={row.status}
-                  closure={row.closure}
-                  carrierImplementation={implementation}
-                  partialDelivery={{
-                    pending: isShippingCompaniesLoading,
-                    blockedReason:
-                      isShippingCompaniesLoading || partialBlockKey === null ? null : t(partialBlockKey),
-                  }}
+                <InProcessRowActions
+                  row={row}
                   shippingCompanyId={shippingCompanyId}
-                  lateness={row.lateness}
-                  availableFrom={row.availableFrom}
-                  availableTo={row.availableTo}
-                  rowLocked={locked}
-                  onOpenNotes={() => onOpenNotes(row.id)}
-                  onOpenActionLog={() => onOpenActionLog(row.id)}
+                  carrier={carrier}
+                  onOpenNotes={onOpenNotes}
+                  onOpenActionLog={onOpenActionLog}
                 />
               </td>
             </tr>
@@ -346,7 +468,7 @@ export function InProcessShipmentsTable({
   );
 }
 
-interface ReturnedShipmentsTableProps {
+export interface ReturnedShipmentsTableProps {
   shipments: ReturnedShipment[];
 }
 
@@ -404,14 +526,7 @@ export function ReturnedShipmentsTable({ shipments }: ReturnedShipmentsTableProp
               {moneyTextOf(row.totalCost)}
             </td>
             <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'end-0')}>
-              <div className="flex flex-col gap-2">
-                <ShipmentRowActions orderId={row.id} orderCode={row.code} customerName={row.customer.name} status={row.status} closure={row.closure} />
-                <SendAgainAction
-                  orderId={row.id}
-                  eligible={row.sendAgainEligible}
-                  blockedReason={row.sendAgainBlockedReason}
-                />
-              </div>
+              <ReturnedRowActions row={row} />
             </td>
           </tr>
         ))}

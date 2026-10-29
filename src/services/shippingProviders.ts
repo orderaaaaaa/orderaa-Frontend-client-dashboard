@@ -12,6 +12,7 @@ import { getApiErrorMessage } from '@/utils/apiError';
 import {
   markFollowupCancelled,
   markFollowupClosed,
+  markFollowupClosedBulk,
   markFollowupRefused,
   undoFollowupClosure,
   type FollowupReasonBody,
@@ -21,6 +22,7 @@ import type {
   CarrierStats,
   DeliveryWindowBody,
   DeliveryWindowResponse,
+  InProcessCountFilters,
   InProcessFilters,
   InProcessShipmentsPage,
   LateMarkBody,
@@ -29,6 +31,7 @@ import type {
   ReturnedFilters,
   ReturnedShipmentsPage,
   ShippingProvider,
+  ShipmentCounts,
   ShippingProviderType,
   StatsRange,
 } from '@/types/shippingProviders';
@@ -88,6 +91,23 @@ export const useInProcessShipmentsQuery = (
     queryFn: async () => {
       const { data } = await http.get<InProcessShipmentsPage>(
         `${BASE}/${shippingCompanyId}/shipments`,
+        { params: filters },
+      );
+      return data;
+    },
+    enabled: !!shippingCompanyId,
+    placeholderData: keepPreviousData,
+  });
+
+export const useInProcessCountsQuery = (
+  shippingCompanyId: number | undefined,
+  filters: InProcessCountFilters,
+) =>
+  useQuery({
+    queryKey: [KEY, shippingCompanyId, 'in-process-counts', filters],
+    queryFn: async () => {
+      const { data } = await http.get<ShipmentCounts>(
+        `${BASE}/${shippingCompanyId}/shipments/counts`,
         { params: filters },
       );
       return data;
@@ -172,6 +192,17 @@ export const useCloseClosure = () =>
     success: 'تم إغلاق الطلب لليوم',
     error: 'تعذر إغلاق الطلب',
   });
+
+export const useBulkCloseClosure = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (orderIds: number[]) => markFollowupClosedBulk(orderIds),
+    onSuccess: async () => {
+      await invalidateAndWait(queryClient, [[KEY]]);
+    },
+  });
+};
 
 export const useRefuseClosure = () =>
   useShippingProvidersActionMutation(
