@@ -1,6 +1,8 @@
 'use client';
 
+import type { MouseEvent } from 'react';
 import { Bell } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
@@ -18,23 +20,20 @@ export function NoticeBadge({ count, onClick }: NoticeBadgeProps) {
   if (!canReadNotices || count <= 0) return null;
 
   return (
-    <button
-      type="button"
-      onClick={(event) => {
+    <Button
+      variant="ghost"
+      onClick={(event: MouseEvent) => {
         event.stopPropagation();
         onClick();
       }}
+      className="relative hover:scale-110 transition-transform p-0 h-auto"
+      title={t('orderNotices.badge.title')}
       aria-label={t('orderNotices.badge.ariaLabel', { count: formatNumber(count) })}
-      className="relative z-[2] inline-flex max-w-full items-center gap-1.5 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <Bell aria-hidden="true" className="size-3.5 shrink-0" />
-      <span>{t('orderNotices.badge.label')}</span>
-      <span
-        dir="ltr"
-        className="flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[11px] font-bold tabular-nums text-destructive-foreground"
-      >
+      <Bell className="w-6 h-6 text-red-600 cursor-pointer" style={{ strokeWidth: 1.5 }} />
+      <span className="absolute top-3 right-[-4px] w-4 h-4 text-[11px] font-bold bg-white text-red-600 rounded-full flex items-center justify-center">
         {formatNumber(count)}
       </span>
-    </button>
+    </Button>
   );
 }

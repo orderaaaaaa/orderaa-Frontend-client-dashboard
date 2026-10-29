@@ -1,6 +1,6 @@
 'use client';
 
-import { Check } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { OrderChip } from '@/components/stock/OrderChip';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { EmptyState, ErrorState } from '@/components/ui/state-panels';
 import { Skeleton } from '@/components/ui/skeleton';
 import { orderSystemFailureLabelKeyOf } from '@/constants/orderSystemFailures';
 import { useI18n } from '@/i18n/I18nProvider';
+import { cn } from '@/lib/utils';
 import {
   noticeErrorMessageOf,
   useMarkNoticesReadMutation,
@@ -42,8 +43,23 @@ export function NoticesDialog({ open, onOpenChange, orderId, canAcknowledge }: N
 function NoticesDialogBody({ orderId, canAcknowledge }: { orderId: number; canAcknowledge: boolean }) {
   const { t, locale } = useI18n();
   const query = useOrderNoticesInfiniteQuery(orderId);
-  const markOne = useMarkNoticesReadMutation(orderId);
-  const markAll = useMarkNoticesReadMutation(orderId);
+  const { mutate: markNoticesRead } = useMarkNoticesReadMutation(orderId);
+  const [unreadAtOpen, setUnreadAtOpen] = useState<Set<number> | null>(null);
+  const snapshotTakenRef = useRef(false);
+  const markedOnOpenRef = useRef(false);
+  const firstPage = query.data?.pages[0];
+
+  useEffect(() => {
+    if (!firstPage || snapshotTakenRef.current) return;
+    snapshotTakenRef.current = true;
+    setUnreadAtOpen(new Set(firstPage.data.filter((notice) => !notice.read).map((notice) => notice.id)));
+  }, [firstPage]);
+
+  useEffect(() => {
+    if (!canAcknowledge || !unreadAtOpen || unreadAtOpen.size === 0 || markedOnOpenRef.current) return;
+    markedOnOpenRef.current = true;
+    markNoticesRead(undefined);
+  }, [canAcknowledge, unreadAtOpen, markNoticesRead]);
 
   if (query.isPending) {
     return (
@@ -64,26 +80,21 @@ function NoticesDialogBody({ orderId, canAcknowledge }: { orderId: number; canAc
     );
   }
 
-  const notices = query.data.pages.flatMap((page) => page.data).filter((notice) => !notice.read);
+  const notices = query.data.pages.flatMap((page) => page.data);
   const hasMore = query.hasNextPage;
 
   if (notices.length === 0 && !hasMore) {
     return <EmptyState title={t('orderNotices.dialog.empty')} />;
   }
 
-  const pendingNoticeId = markOne.isPending ? markOne.variables?.[0] : undefined;
+  const isUnread = (notice: OrderNoticeDto) =>
+    canAcknowledge && unreadAtOpen ? unreadAtOpen.has(notice.id) : !notice.read;
 
   return (
     <div className="flex flex-col gap-3">
       <ul className="flex flex-col gap-3">
         {notices.map((notice) => (
-          <NoticeRow
-            key={notice.id}
-            notice={notice}
-            canAcknowledge={canAcknowledge}
-            isPending={pendingNoticeId === notice.id}
-            onAcknowledge={() => markOne.mutate([notice.id])}
-          />
+          <NoticeRow key={notice.id} notice={notice} unread={isUnread(notice)} />
         ))}
       </ul>
 
@@ -99,41 +110,23 @@ function NoticesDialogBody({ orderId, canAcknowledge }: { orderId: number; canAc
           {t('orderNotices.dialog.loadMore')}
         </Button>
       )}
-
-      {canAcknowledge && (
-        <div className="flex justify-end border-t border-border pt-3">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={notices.length === 0}
-            loading={markAll.isPending}
-            onClick={() => markAll.mutate(notices.map((notice) => notice.id))}
-          >
-            {t('orderNotices.dialog.markAll')}
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
 
-function NoticeRow({
-  notice,
-  canAcknowledge,
-  isPending,
-  onAcknowledge,
-}: {
-  notice: OrderNoticeDto;
-  canAcknowledge: boolean;
-  isPending: boolean;
-  onAcknowledge(): void;
-}) {
+function NoticeRow({ notice, unread }: { notice: OrderNoticeDto; unread: boolean }) {
   const { t, locale } = useI18n();
   return (
-    <li className="flex flex-col gap-2 rounded-xl border border-border bg-card p-3">
+    <li
+      className={cn(
+        'flex flex-col gap-2 rounded-xl border p-3',
+        unread ? 'border-destructive/40 bg-destructive/5' : 'border-border bg-card'
+      )}
+    >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex min-w-0 flex-col gap-1.5">
-          <span className="text-sm font-semibold break-words text-foreground">
+          <span className="flex items-center gap-2 text-sm font-semibold break-words text-foreground">
+            {unread && <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-destructive" />}
             {t(orderSystemFailureLabelKeyOf(notice.code))}
           </span>
           <div className="flex flex-wrap items-center gap-2">
@@ -149,12 +142,6 @@ function NoticeRow({
             )}
           </div>
         </div>
-        {canAcknowledge && (
-          <Button type="button" variant="outline" size="sm" loading={isPending} onClick={onAcknowledge}>
-            <Check aria-hidden="true" />
-            {t('orderNotices.dialog.acknowledge')}
-          </Button>
-        )}
       </div>
       <p className="text-xs text-muted-foreground">
         <span dir="ltr" className="tabular-nums">
