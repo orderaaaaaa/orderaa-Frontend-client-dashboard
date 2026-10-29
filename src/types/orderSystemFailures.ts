@@ -339,7 +339,7 @@ export interface StockTransitionBlockedDetails {
   toStatus: string;
   ruleId: number | null;
   warehouseName: string | null;
-  lines: FailureStockShortageLine[];
+  lines?: FailureStockShortageLine[];
 }
 
 export type MachineShortageJob =

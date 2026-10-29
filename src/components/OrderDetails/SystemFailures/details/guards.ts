@@ -352,8 +352,8 @@ const isStockTransitionBlocked = (value: unknown): value is StockTransitionBlock
   isString(value.toStatus) &&
   (value.ruleId === null || typeof value.ruleId === 'number') &&
   isStringOrNull(value.warehouseName) &&
-  Array.isArray(value.lines) &&
-  value.lines.every(isFailureStockShortageLine);
+  (value.lines === undefined ||
+    (Array.isArray(value.lines) && value.lines.every(isFailureStockShortageLine)));
 
 const isMachineTransitionStockShortage = (
   value: unknown

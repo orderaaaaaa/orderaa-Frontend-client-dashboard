@@ -390,7 +390,7 @@ export function Sidebar({
                                     {SubIcon && <SubIcon className="h-5 w-5" />}
                                     {sub.name}
                                     {sub.badge === 'unreadNotices' && (
-                                      <UnreadNoticesNavBadge className="ms-auto" />
+                                      <UnreadNoticesNavBadge className="ms-auto" poll={false} />
                                     )}
                                   </Link>
                                 );

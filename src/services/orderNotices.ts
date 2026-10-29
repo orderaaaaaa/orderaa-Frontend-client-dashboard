@@ -41,13 +41,16 @@ export const noticeErrorMessageOf = (err: unknown, locale: Locale, fallback: str
   return fallback;
 };
 
-export const useUnreadNoticeCountQuery = ({ enabled = true }: { enabled?: boolean } = {}) =>
+export const useUnreadNoticeCountQuery = ({
+  enabled = true,
+  polling = true,
+}: { enabled?: boolean; polling?: boolean } = {}) =>
   useQuery({
     queryKey: unreadNoticeCountKey(),
     queryFn: getUnreadNoticeCount,
     staleTime: UNREAD_COUNT_STALE_TIME_MS,
     enabled,
-    refetchInterval: enabled ? UNREAD_COUNT_POLL_INTERVAL_MS : false,
+    refetchInterval: enabled && polling ? UNREAD_COUNT_POLL_INTERVAL_MS : false,
   });
 
 export const useOrderNoticesInfiniteQuery = (orderId: number) =>

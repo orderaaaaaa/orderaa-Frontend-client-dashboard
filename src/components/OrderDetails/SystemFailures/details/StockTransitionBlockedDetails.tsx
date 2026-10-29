@@ -9,7 +9,8 @@ import { StockShortageDetails } from './StockShortageDetails';
 
 const toShortage = (
   details: StockTransitionBlockedPayload
-): FailureStockShortage => {
+): FailureStockShortage | null => {
+  if (!details.lines) return null;
   const blocks = new Map<string, FailureStockShortageBlock>();
   for (const line of details.lines) {
     const warehouseName = line.warehouseName ?? details.warehouseName ?? undefined;
@@ -28,14 +29,18 @@ export function StockTransitionBlockedDetails({
   details: StockTransitionBlockedPayload;
 }) {
   const { getStatusLabel } = useStatusLabel();
+  const shortage = toShortage(details);
 
   return (
     <div className="flex flex-col gap-3">
       <DetailGrid>
         <DetailField label="من حالة">{getStatusLabel(details.fromStatus)}</DetailField>
         <DetailField label="إلى حالة">{getStatusLabel(details.toStatus)}</DetailField>
+        {!shortage && details.warehouseName && (
+          <DetailField label="المخزن">{details.warehouseName}</DetailField>
+        )}
       </DetailGrid>
-      <StockShortageDetails shortage={toShortage(details)} />
+      {shortage && <StockShortageDetails shortage={shortage} />}
     </div>
   );
 }

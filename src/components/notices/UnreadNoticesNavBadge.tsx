@@ -9,11 +9,12 @@ import { formatNumber } from '@/utils/format';
 
 interface UnreadNoticesNavBadgeProps {
   className?: string;
+  poll?: boolean;
 }
 
-export function UnreadNoticesNavBadge({ className }: UnreadNoticesNavBadgeProps) {
+export function UnreadNoticesNavBadge({ className, poll = true }: UnreadNoticesNavBadgeProps) {
   const canReadNotices = useHasPermissionStrict(PERMISSION_CODES.ORDERS_NOTICES_READ);
-  const { data } = useUnreadNoticeCountQuery({ enabled: canReadNotices });
+  const { data } = useUnreadNoticeCountQuery({ enabled: canReadNotices, polling: poll });
   const { t } = useI18n();
 
   const total = data?.total ?? 0;
