@@ -191,6 +191,7 @@ export function VariantReshapeDialog({
                     value={selections[key]}
                     partialHint={
                       firstOfVariant &&
+                      !removal.targetRequired &&
                       partialIds.includes(removal.variantId)
                     }
                     onSelect={onSelect}

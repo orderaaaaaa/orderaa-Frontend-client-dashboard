@@ -93,6 +93,8 @@ export interface VariantReshapeRelink {
   variantId: number;
   fromLabel: string;
   toLabel: string;
+  fromKey: string;
+  toKey: string;
   keyOnly: boolean;
   resultOptionIds: number[];
 }
