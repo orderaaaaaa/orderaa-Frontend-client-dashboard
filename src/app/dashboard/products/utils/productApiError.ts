@@ -57,6 +57,10 @@ export function productApiErrorMessage(error: unknown, fallback: string): string
       return `يوجد متغيران بنفس الاسم${joinValues(details.names)}`;
     case 'DUPLICATE_OPTION_NAME':
       return `توجد قيمتان متكررتان في المتغير ${details.attribute ?? ''}${joinValues(details.names)}`;
+    case 'ATTRIBUTE_NAME_HELD_BY_REMOVED':
+      return 'هذا الاسم مستخدم لخاصية محذوفة، أعد إضافتها بنفس الاسم بدلاً من إعادة التسمية';
+    case 'OPTION_NAME_HELD_BY_REMOVED':
+      return 'هذا الاسم مستخدم لقيمة محذوفة، أعد إضافتها بنفس الاسم بدلاً من إعادة التسمية';
     case 'VARIANT_OPTIONS_INVALID':
       return ARABIC_TEXT.test(body.message)
         ? body.message
@@ -100,7 +104,9 @@ export function productApiErrorMessage(error: unknown, fallback: string): string
     case 'VARIANT_REMOVAL_TARGET_REQUIRED':
       return 'اختر قيمة بديلة للمتغيرات التي لها مخزون قبل الحفظ';
     case 'INVALID_VARIANT_TARGET':
-      return 'القيمة البديلة المختارة لا تصلح لهذا المتغير، اختر قيمة أخرى';
+      return details.reason === 'PARTIAL_TARGETS'
+        ? 'اختر بديلاً لكل القيم المحذوفة لهذا المتغير أو لا تختر أي بديل'
+        : 'القيمة البديلة المختارة لا تصلح لهذا المتغير، اختر قيمة أخرى';
     case 'VARIANT_MERGE_CONFLICT':
       return 'تعارض أثناء دمج المتغيرات، أعد تحميل الصفحة وحاول مرة أخرى';
   }

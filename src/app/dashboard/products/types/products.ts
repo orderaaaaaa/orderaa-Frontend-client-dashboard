@@ -124,6 +124,19 @@ export interface VariantReshapePlan {
   retired: VariantReshapeRetired[];
 }
 
+export type VariantTargetIssueReason =
+  | 'VARIANT_NOT_ON_PRODUCT'
+  | 'NOT_A_KEPT_OPTION'
+  | 'VARIANT_NOT_AFFECTED'
+  | 'DUPLICATE_TARGET'
+  | 'PARTIAL_TARGETS';
+
+export interface VariantTargetIssue {
+  variantId: number;
+  optionId: number;
+  reason: VariantTargetIssueReason;
+}
+
 export interface AttributeCountItem {
   label: string;
   value: string;
@@ -343,6 +356,8 @@ export const PRODUCT_CREATE_LIMITS = {
 export const PRODUCT_CREATE_ERROR_CODES = [
   'DUPLICATE_ATTRIBUTE_NAME',
   'DUPLICATE_OPTION_NAME',
+  'ATTRIBUTE_NAME_HELD_BY_REMOVED',
+  'OPTION_NAME_HELD_BY_REMOVED',
   'VARIANT_OPTIONS_INVALID',
   'DUPLICATE_VARIANT_COMBINATION',
   'VARIANT_COMBINATIONS_INCOMPLETE',
@@ -514,7 +529,12 @@ export interface ProductApiErrorDetails {
   productId?: number;
   plan?: VariantReshapePlan;
   optionId?: number;
+  issues?: VariantTargetIssue[];
+  id?: number;
+  name?: string;
+  removedId?: number;
   table?: string;
+  stocktakeId?: number;
   sourceVariantId?: number;
   targetVariantId?: number;
 }
