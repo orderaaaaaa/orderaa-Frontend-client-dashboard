@@ -7,9 +7,11 @@ import type {
   VariantReshapePlan,
   VariantReshapeValueRemoval,
 } from '../../types/products';
+import { PARTIAL_TARGETS_MESSAGE } from '../../utils/productApiError';
 import {
   type ReshapeSelections,
   isReshapeBlocked,
+  partialReshapeVariantIds,
   reshapeSelectionKey,
 } from './editorModel';
 
@@ -31,10 +33,12 @@ const SELECT_CLASS =
 function ValueRemovalField({
   removal,
   value,
+  partialHint,
   onSelect,
 }: {
   removal: VariantReshapeValueRemoval;
   value: number | null | undefined;
+  partialHint: boolean;
   onSelect: (key: string, optionId: number | null) => void;
 }) {
   const key = reshapeSelectionKey(removal);
@@ -68,6 +72,15 @@ function ValueRemovalField({
           </option>
         ))}
       </select>
+      {partialHint && (
+        <div
+          role="alert"
+          className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-amber-900"
+        >
+          <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
+          <span>{PARTIAL_TARGETS_MESSAGE}</span>
+        </div>
+      )}
       {removal.targetRequired && (
         <div
           role="alert"
@@ -92,6 +105,7 @@ export function VariantReshapeDialog({
   onCancel,
   onConfirm,
 }: VariantReshapeDialogProps) {
+  const partialIds = plan ? partialReshapeVariantIds(plan, selections) : [];
   return (
     <BaseModal
       isOpen={open}
@@ -152,13 +166,21 @@ export function VariantReshapeDialog({
           {plan.valueRemovals.length > 0 && (
             <section className="space-y-3">
               <h3 className={SECTION_HEADING_CLASS}>قيم محذوفة من الخصائص</h3>
-              {plan.valueRemovals.map((removal) => {
+              {plan.valueRemovals.map((removal, index) => {
                 const key = reshapeSelectionKey(removal);
+                const firstOfVariant =
+                  plan.valueRemovals.findIndex(
+                    (entry) => entry.variantId === removal.variantId,
+                  ) === index;
                 return (
                   <ValueRemovalField
                     key={key}
                     removal={removal}
                     value={selections[key]}
+                    partialHint={
+                      firstOfVariant &&
+                      partialIds.includes(removal.variantId)
+                    }
                     onSelect={onSelect}
                   />
                 );

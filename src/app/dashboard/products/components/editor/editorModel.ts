@@ -352,10 +352,31 @@ export const reshapeTargets = (
       : [{ variantId: removal.variantId, optionId }];
   });
 
+export const partialReshapeVariantIds = (
+  plan: VariantReshapePlan,
+  selections: ReshapeSelections,
+): number[] => {
+  const counts = new Map<number, { total: number; chosen: number }>();
+  for (const removal of plan.valueRemovals) {
+    const entry = counts.get(removal.variantId) ?? { total: 0, chosen: 0 };
+    entry.total += 1;
+    if ((selections[reshapeSelectionKey(removal)] ?? null) !== null) {
+      entry.chosen += 1;
+    }
+    counts.set(removal.variantId, entry);
+  }
+  return [...counts]
+    .filter(
+      ([, { total, chosen }]) => total > 1 && chosen > 0 && chosen < total,
+    )
+    .map(([variantId]) => variantId);
+};
+
 export const isReshapeBlocked = (
   plan: VariantReshapePlan,
   selections: ReshapeSelections,
 ) =>
+  partialReshapeVariantIds(plan, selections).length > 0 ||
   plan.valueRemovals.some(
     (removal) =>
       removal.targetRequired &&

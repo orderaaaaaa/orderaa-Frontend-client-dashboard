@@ -29,6 +29,9 @@ export const isVariantDeleteBlocker = (
 ): value is VariantDeleteBlocker =>
   typeof value === 'string' && value in VARIANT_DELETE_REASON_LABELS;
 
+export const PARTIAL_TARGETS_MESSAGE =
+  'اختر بديلاً لكل القيم المحذوفة لهذا المتغير أو لا تختر أي بديل';
+
 export function productApiErrorBody(error: unknown): ProductApiErrorBody | null {
   const data = (
     error as { response?: { data?: Partial<ProductApiErrorBody> } }
@@ -105,7 +108,7 @@ export function productApiErrorMessage(error: unknown, fallback: string): string
       return 'اختر قيمة بديلة للمتغيرات التي لها مخزون قبل الحفظ';
     case 'INVALID_VARIANT_TARGET':
       return details.reason === 'PARTIAL_TARGETS'
-        ? 'اختر بديلاً لكل القيم المحذوفة لهذا المتغير أو لا تختر أي بديل'
+        ? PARTIAL_TARGETS_MESSAGE
         : 'القيمة البديلة المختارة لا تصلح لهذا المتغير، اختر قيمة أخرى';
     case 'VARIANT_MERGE_CONFLICT':
       return 'تعارض أثناء دمج المتغيرات، أعد تحميل الصفحة وحاول مرة أخرى';
