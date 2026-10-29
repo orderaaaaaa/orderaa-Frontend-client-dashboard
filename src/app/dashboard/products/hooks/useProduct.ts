@@ -28,6 +28,7 @@ import {
   UpsertVariantsPayload,
 } from '../types/products';
 import {
+  isVariantReshapeError,
   productApiErrorBody,
   toastProductError,
 } from '../utils/productApiError';
@@ -162,6 +163,7 @@ export const useUpdateProductAttributes = (productId: number) => {
       productsApi.updateProductAttributes(productId, payload),
     onSuccess: () => invalidateAndWait(queryClient, productEditKeys(productId)),
     onError: (error: unknown) => {
+      if (isVariantReshapeError(error)) return;
       toastProductError(error, 'تعذر حفظ الخصائص');
     },
   });

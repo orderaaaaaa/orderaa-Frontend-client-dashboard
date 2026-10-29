@@ -66,8 +66,62 @@ export interface AttributeManual {
   options: AttributeOptionManual[];
 }
 
+export interface VariantTarget {
+  variantId: number;
+  optionId: number;
+}
+
 export interface UpdateAttributesPayload {
   attributes: AttributeManual[];
+  variantTargets?: VariantTarget[];
+  confirmVariantReshape?: boolean;
+}
+
+export interface VariantReshapeMerge {
+  survivorVariantId: number;
+  mergedVariantIds: number[];
+  sourceLabels: string[];
+  resultLabel: string;
+  resultOptionIds: number[];
+  stock: number;
+  orderLineCount: number;
+  invoiceLineCount: number;
+  storeLinkCount: number;
+}
+
+export interface VariantReshapeRelink {
+  variantId: number;
+  fromLabel: string;
+  toLabel: string;
+  resultOptionIds: number[];
+}
+
+export interface VariantReshapeCandidateOption {
+  id: number;
+  name: string;
+}
+
+export interface VariantReshapeValueRemoval {
+  variantId: number;
+  label: string;
+  attributeId: number;
+  removedOptionId: number;
+  stock: number;
+  targetRequired: boolean;
+  candidateOptions: VariantReshapeCandidateOption[];
+  chosenOptionId: number | null;
+}
+
+export interface VariantReshapeRetired {
+  variantId: number;
+  label: string;
+}
+
+export interface VariantReshapePlan {
+  merges: VariantReshapeMerge[];
+  relinks: VariantReshapeRelink[];
+  valueRemovals: VariantReshapeValueRemoval[];
+  retired: VariantReshapeRetired[];
 }
 
 export interface AttributeCountItem {
@@ -434,6 +488,10 @@ export const PRODUCT_EDIT_ERROR_CODES = [
   'VARIANT_IN_USE',
   'VARIANT_STORE_LINK_CONFIRMATION_REQUIRED',
   'DUPLICATE_VARIANT_IN_REQUEST',
+  'VARIANT_RESHAPE_CONFIRMATION_REQUIRED',
+  'VARIANT_REMOVAL_TARGET_REQUIRED',
+  'INVALID_VARIANT_TARGET',
+  'VARIANT_MERGE_CONFLICT',
 ] as const;
 
 export type ProductEditErrorCode = (typeof PRODUCT_EDIT_ERROR_CODES)[number];
@@ -454,6 +512,11 @@ export interface ProductApiErrorDetails {
   missing?: string[][];
   limit?: number;
   productId?: number;
+  plan?: VariantReshapePlan;
+  optionId?: number;
+  table?: string;
+  sourceVariantId?: number;
+  targetVariantId?: number;
 }
 
 export interface ProductApiErrorBody {

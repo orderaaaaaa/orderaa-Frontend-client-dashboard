@@ -94,8 +94,24 @@ export function productApiErrorMessage(error: unknown, fallback: string): string
       return 'هذا المتغير مرتبط بمتجرك، أكّد الحذف أولاً';
     case 'DUPLICATE_VARIANT_IN_REQUEST':
       return 'نفس المتغير مذكور مرتين';
+    case 'VARIANT_RESHAPE_CONFIRMATION_REQUIRED':
+      return 'تعديل الخصائص يدمج متغيرات، أكّد التغيير أولاً';
+    case 'VARIANT_REMOVAL_TARGET_REQUIRED':
+      return 'اختر قيمة بديلة للمتغيرات التي لها مخزون قبل الحفظ';
+    case 'INVALID_VARIANT_TARGET':
+      return 'القيمة البديلة المختارة لا تصلح لهذا المتغير، اختر قيمة أخرى';
+    case 'VARIANT_MERGE_CONFLICT':
+      return 'تعارض أثناء دمج المتغيرات، أعد تحميل الصفحة وحاول مرة أخرى';
   }
 }
+
+export const isVariantReshapeError = (error: unknown): boolean => {
+  const code = productApiErrorBody(error)?.code;
+  return (
+    code === 'VARIANT_RESHAPE_CONFIRMATION_REQUIRED' ||
+    code === 'VARIANT_REMOVAL_TARGET_REQUIRED'
+  );
+};
 
 export function toastProductError(error: unknown, fallback: string) {
   const status = (error as { response?: { status?: number } })?.response

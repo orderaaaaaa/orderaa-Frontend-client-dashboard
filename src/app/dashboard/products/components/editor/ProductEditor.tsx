@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
@@ -26,8 +26,14 @@ import {
   useUpsertVariants,
 } from '../../hooks/useProduct';
 import { productKeys } from '../../hooks/queryKeys';
-import type { ProductDetail, ProductDetailVariant } from '../../types/products';
+import type {
+  ProductDetail,
+  ProductDetailVariant,
+  VariantReshapePlan,
+  VariantTarget,
+} from '../../types/products';
 import {
+  isVariantReshapeError,
   productApiErrorBody,
   productApiErrorMessage,
 } from '../../utils/productApiError';
@@ -38,13 +44,16 @@ import { AttributesEditor } from './AttributesEditor';
 import { VariantsEditor } from './VariantsEditor';
 import { SpecificationsEditor } from './SpecificationsEditor';
 import { DeleteVariantDialog } from './DeleteVariantDialog';
+import { VariantReshapeDialog } from './VariantReshapeDialog';
 import {
   type AttributeDraft,
   type BasicPatch,
   type GalleryItem,
   type NewVariantRow,
+  type ReshapeState,
   type SpecRow,
   type VariantPatch,
+  STALE_VARIANT_ROW_MESSAGE,
   attributesFromDetail,
   applyBasicPatch,
   applyVariantPatch,
@@ -59,6 +68,8 @@ import {
   hasAttributeErrors,
   hasSpecErrors,
   isStoreLinked,
+  reshapeSelectionsFromPlan,
+  reshapeTargets,
   sameAttributes,
   sameBasic,
   sameGallery,
@@ -151,6 +162,8 @@ export function ProductEditor({ productId }: ProductEditorProps) {
   const [variantServerErrors, setVariantServerErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ProductDetailVariant | null>(null);
+  const [reshape, setReshape] = useState<ReshapeState | null>(null);
+  const reshapeDecision = useRef<((targets: VariantTarget[] | null) => void) | null>(null);
 
   const displayNames = useMemo(
     () =>
@@ -197,7 +210,7 @@ export function ProductEditor({ productId }: ProductEditorProps) {
       specsDirty,
       basicErrors: validateBasic(basic, detail),
       attributeErrors: validateAttributes(attributes, detail.attributes.length),
-      variantErrors: validateVariants(detail, variantEdits, newVariantRows),
+      variantErrors: validateVariants(detail, variantEdits, newVariantRows, attributes),
       specErrors: validateSpecs(specs),
     };
   }, [
@@ -310,17 +323,51 @@ export function ProductEditor({ productId }: ProductEditorProps) {
     return true;
   };
 
+  const requestReshapeDecision = (plan: VariantReshapePlan) =>
+    new Promise<VariantTarget[] | null>((resolve) => {
+      reshapeDecision.current = resolve;
+      setReshape({ plan, selections: reshapeSelectionsFromPlan(plan) });
+    });
+
+  const confirmReshape = () => {
+    if (!reshape) return;
+    reshapeDecision.current?.(reshapeTargets(reshape.plan, reshape.selections));
+  };
+
+  const cancelReshape = () => {
+    reshapeDecision.current?.(null);
+  };
+
   const saveAttributes = async () => {
-    try {
-      await updateAttributes.mutateAsync({
-        attributes: buildAttributesPayload(state.attributes),
-      });
-    } catch (saveError) {
-      failSection(
-        'attributes',
-        productApiErrorMessage(saveError, 'تعذر حفظ الخصائص'),
-      );
-      return false;
+    const attributes = buildAttributesPayload(state.attributes);
+    let reshapeReply: { variantTargets: VariantTarget[] } | null = null;
+    for (;;) {
+      try {
+        await updateAttributes.mutateAsync({
+          attributes,
+          ...(reshapeReply
+            ? {
+                variantTargets: reshapeReply.variantTargets,
+                confirmVariantReshape: true,
+              }
+            : {}),
+        });
+        break;
+      } catch (saveError) {
+        const plan = productApiErrorBody(saveError)?.details?.plan;
+        if (isVariantReshapeError(saveError) && plan) {
+          const targets = await requestReshapeDecision(plan);
+          setReshape(null);
+          if (targets === null) return false;
+          reshapeReply = { variantTargets: targets };
+          continue;
+        }
+        failSection(
+          'attributes',
+          productApiErrorMessage(saveError, 'تعذر حفظ الخصائص'),
+        );
+        return false;
+      }
     }
     setAttributesDraft(null);
     return true;
@@ -328,6 +375,18 @@ export function ProductEditor({ productId }: ProductEditorProps) {
 
   const saveVariants = async () => {
     const plan = buildVariantPlan(freshDetail(), variantEdits, newVariantRows);
+    if (plan.staleKeys.length > 0) {
+      setVariantServerErrors(
+        Object.fromEntries(
+          plan.staleKeys.map((key): [string, string] => [
+            key,
+            STALE_VARIANT_ROW_MESSAGE,
+          ]),
+        ),
+      );
+      failSection('variants', STALE_VARIANT_ROW_MESSAGE);
+      return false;
+    }
     if (plan.payload.length === 0) {
       setVariantEdits({});
       setNewVariantRows([]);
@@ -655,6 +714,21 @@ export function ProductEditor({ productId }: ProductEditorProps) {
           </div>
         </div>
       </div>
+
+      <VariantReshapeDialog
+        plan={reshape?.plan ?? null}
+        selections={reshape?.selections ?? {}}
+        onSelect={(key, optionId) =>
+          setReshape((current) =>
+            current && {
+              ...current,
+              selections: { ...current.selections, [key]: optionId },
+            },
+          )
+        }
+        onCancel={cancelReshape}
+        onConfirm={async () => confirmReshape()}
+      />
 
       <DeleteVariantDialog
         variant={deleteTarget}

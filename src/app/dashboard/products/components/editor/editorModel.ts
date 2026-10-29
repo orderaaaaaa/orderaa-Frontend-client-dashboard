@@ -5,6 +5,8 @@ import type {
   SpecificationInput,
   UpdateProductScalarsPayload,
   UpsertVariantInput,
+  VariantReshapePlan,
+  VariantTarget,
 } from '../../types/products';
 import { PRODUCT_CREATE_LIMITS, PRODUCT_EDIT_LIMITS } from '../../types/products';
 import { duplicateNameKey, duplicateNames } from '../../utils/manualProduct';
@@ -295,7 +297,54 @@ export interface VariantRowRef {
 export interface VariantPlan {
   payload: UpsertVariantInput[];
   rows: VariantRowRef[];
+  staleKeys: string[];
 }
+
+export const STALE_VARIANT_ROW_MESSAGE =
+  'هذا المتغير يستخدم قيمة أو خاصية محذوفة';
+
+export type ReshapeSelections = Record<string, number | null>;
+
+export interface ReshapeState {
+  plan: VariantReshapePlan;
+  selections: ReshapeSelections;
+}
+
+export const reshapeSelectionKey = (removal: {
+  variantId: number;
+  removedOptionId: number;
+}) => `${removal.variantId}:${removal.removedOptionId}`;
+
+export const reshapeSelectionsFromPlan = (
+  plan: VariantReshapePlan,
+): ReshapeSelections =>
+  Object.fromEntries(
+    plan.valueRemovals.map((removal): [string, number | null] => [
+      reshapeSelectionKey(removal),
+      removal.chosenOptionId,
+    ]),
+  );
+
+export const reshapeTargets = (
+  plan: VariantReshapePlan,
+  selections: ReshapeSelections,
+): VariantTarget[] =>
+  plan.valueRemovals.flatMap((removal) => {
+    const optionId = selections[reshapeSelectionKey(removal)];
+    return optionId === null || optionId === undefined
+      ? []
+      : [{ variantId: removal.variantId, optionId }];
+  });
+
+export const isReshapeBlocked = (
+  plan: VariantReshapePlan,
+  selections: ReshapeSelections,
+) =>
+  plan.valueRemovals.some(
+    (removal) =>
+      removal.targetRequired &&
+      (selections[reshapeSelectionKey(removal)] ?? null) === null,
+  );
 
 const priceValue = (price: string): number | null =>
   price.trim() === '' ? null : Number(price.trim());
@@ -305,10 +354,25 @@ const textValue = (value: string): string | null =>
 
 export const existingRowKey = (variantId: number) => `variant-${variantId}`;
 
+const referencesRemovedAttributeOrOption = (
+  detail: ProductDetail,
+  attributes: AttributeDraft[],
+  row: NewVariantRow,
+) =>
+  detail.attributes.some((saved) => {
+    const optionId = row.optionByAttribute[saved.id];
+    if (optionId === undefined) return false;
+    const draft = attributes.find((attribute) => attribute.id === saved.id);
+    return (
+      !draft || !draft.options.some((option) => option.id === optionId)
+    );
+  });
+
 export function validateVariants(
   detail: ProductDetail,
   edits: Record<number, VariantPatch>,
   newRows: NewVariantRow[],
+  attributes: AttributeDraft[],
 ): Record<string, string> {
   const errors: Record<string, string> = {};
   const displayed: { key: string; edit: VariantEdit }[] = [
@@ -355,6 +419,10 @@ export function validateVariants(
     ]),
   );
   for (const row of newRows) {
+    if (referencesRemovedAttributeOrOption(detail, attributes, row)) {
+      errors[row.key] ??= STALE_VARIANT_ROW_MESSAGE;
+      continue;
+    }
     const optionIds = detail.attributes.map(
       (attribute) => row.optionByAttribute[attribute.id],
     );
@@ -380,7 +448,7 @@ export function buildVariantPlan(
   edits: Record<number, VariantPatch>,
   newRows: NewVariantRow[],
 ): VariantPlan {
-  const plan: VariantPlan = { payload: [], rows: [] };
+  const plan: VariantPlan = { payload: [], rows: [], staleKeys: [] };
   for (const variant of detail.variants) {
     const patch = edits[variant.id];
     if (!patch) continue;
@@ -400,11 +468,20 @@ export function buildVariantPlan(
     plan.rows.push({ key: existingRowKey(variant.id), variantId: variant.id });
   }
   for (const row of newRows) {
-    const entry: UpsertVariantInput = {
-      optionIds: detail.attributes
-        .map((attribute) => row.optionByAttribute[attribute.id])
-        .filter((id): id is number => id !== undefined),
-    };
+    const optionIds = detail.attributes
+      .map((attribute) => row.optionByAttribute[attribute.id])
+      .filter((id): id is number => id !== undefined);
+    const referenced = Object.values(row.optionByAttribute).filter(
+      (id): id is number => id !== undefined,
+    );
+    if (
+      optionIds.length !== detail.attributes.length ||
+      referenced.length !== detail.attributes.length
+    ) {
+      plan.staleKeys.push(row.key);
+      continue;
+    }
+    const entry: UpsertVariantInput = { optionIds };
     const sku = textValue(row.sku);
     const barcode = textValue(row.barcode);
     const price = priceValue(row.price);
