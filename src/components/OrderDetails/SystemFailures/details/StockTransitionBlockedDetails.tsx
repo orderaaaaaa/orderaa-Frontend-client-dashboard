@@ -1,4 +1,5 @@
 import { useStatusLabel } from '@/hooks/useStatusLabel';
+import { useI18n } from '@/i18n/I18nProvider';
 import type {
   FailureStockShortage,
   FailureStockShortageBlock,
@@ -29,17 +30,31 @@ export function StockTransitionBlockedDetails({
   details: StockTransitionBlockedPayload;
 }) {
   const { getStatusLabel } = useStatusLabel();
+  const { t } = useI18n();
   const shortage = toShortage(details);
+  const sameStatus = details.fromStatus === details.toStatus;
+  const showWarehouse = !shortage && !!details.warehouseName;
 
   return (
     <div className="flex flex-col gap-3">
-      <DetailGrid>
-        <DetailField label="من حالة">{getStatusLabel(details.fromStatus)}</DetailField>
-        <DetailField label="إلى حالة">{getStatusLabel(details.toStatus)}</DetailField>
-        {!shortage && details.warehouseName && (
-          <DetailField label="المخزن">{details.warehouseName}</DetailField>
-        )}
-      </DetailGrid>
+      {sameStatus && (
+        <p className="text-sm font-medium text-[#1F1F1F]">
+          {t('orderDetails.stockTransition.sameStatus', {
+            status: getStatusLabel(details.fromStatus),
+          })}
+        </p>
+      )}
+      {(!sameStatus || showWarehouse) && (
+        <DetailGrid>
+          {!sameStatus && (
+            <DetailField label="من حالة">{getStatusLabel(details.fromStatus)}</DetailField>
+          )}
+          {!sameStatus && (
+            <DetailField label="إلى حالة">{getStatusLabel(details.toStatus)}</DetailField>
+          )}
+          {showWarehouse && <DetailField label="المخزن">{details.warehouseName}</DetailField>}
+        </DetailGrid>
+      )}
       {shortage && <StockShortageDetails shortage={shortage} />}
     </div>
   );

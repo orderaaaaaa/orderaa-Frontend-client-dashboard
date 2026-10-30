@@ -113,6 +113,7 @@ const en: Record<keyof typeof ar, string> = {
   'products.confirmOutOfStock.saved': 'Confirmation setting saved',
   'products.confirmOutOfStock.saveFailed': 'Could not save the setting',
 
+  'orderDetails.stockTransition.sameStatus': 'In status {status}',
   'orderDetails.stock.available': 'Available: {count}',
   'orderDetails.stock.availableWithRequired':
     'Available: {available} (required: {required})',
