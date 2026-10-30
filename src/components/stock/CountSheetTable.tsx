@@ -144,6 +144,8 @@ export function CountSheetTable({
               isInvalidCountInput(raw) && !(allowBlank && isBlankCount(raw));
             const flagged = flaggedVariantIds.includes(line.variantId);
             const uncounted = line.uncounted ?? isBlankCount(raw);
+            const showUncountedLabel =
+              Boolean(uncountedLabel) && uncounted && (readOnly || isBlankCount(raw));
             return (
               <tr
                 key={line.variantId}
@@ -228,13 +230,17 @@ export function CountSheetTable({
                   )}
                 </td>
                 <td className={BODY_CELL_CLASS}>
-                  <VarianceChip
-                    delta={
-                      readOnly
-                        ? (line.postedDelta ?? null)
-                        : deltaOf(line, raw)
-                    }
-                  />
+                  {showUncountedLabel ? (
+                    <span className="text-gray-400">{uncountedLabel}</span>
+                  ) : (
+                    <VarianceChip
+                      delta={
+                        readOnly
+                          ? (line.postedDelta ?? null)
+                          : deltaOf(line, raw)
+                      }
+                    />
+                  )}
                 </td>
               </tr>
             );

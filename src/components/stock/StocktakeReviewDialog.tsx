@@ -168,7 +168,11 @@ export function StocktakeReviewDialog({
                       )}
                     </td>
                     <td className={BODY_CELL_CLASS}>
-                      <VarianceChip delta={deltaOfLine(line)} />
+                      {line.countedAt === null ? (
+                        <span className="text-gray-400">لم يُعد بعد</span>
+                      ) : (
+                        <VarianceChip delta={deltaOfLine(line)} />
+                      )}
                     </td>
                   </tr>
                 ))}
