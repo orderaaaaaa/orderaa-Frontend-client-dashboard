@@ -94,14 +94,12 @@ function buildProductColumns(
           {
             key: 'packageCount',
             header: 'عدد الطرود',
-            render: (value: unknown) =>
-              value != null ? <span>{formatStockNumber(value)}</span> : null,
+            render: (value: unknown) => <span>{formatStockNumber(value)}</span>,
           } as DataTableColumn<InvoiceCardProduct & Record<string, unknown>>,
           {
             key: 'piecesPerPackage',
             header: 'عدد القطع في الطرد',
-            render: (value: unknown) =>
-              value != null ? <span>{formatStockNumber(value)}</span> : null,
+            render: (value: unknown) => <span>{formatStockNumber(value)}</span>,
           } as DataTableColumn<InvoiceCardProduct & Record<string, unknown>>,
         ]
       : []),

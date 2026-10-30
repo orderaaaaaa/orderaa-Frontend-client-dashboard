@@ -60,8 +60,8 @@ export function StockAvailabilityBadge({ line }: Props) {
         <span>
           {line.required > 1
             ? t('orderDetails.stock.availableWithRequired', {
-                available: line.available,
-                required: line.required,
+                available: toStockNumber(line.available),
+                required: toStockNumber(line.required),
               })
             : t('orderDetails.stock.available', { count: toStockNumber(line.available) })}
         </span>

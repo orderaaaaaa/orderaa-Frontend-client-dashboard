@@ -42,22 +42,16 @@ export function InvoiceLinesTab({ products }: InvoiceLinesTabProps) {
           {
             key: 'packageCount',
             header: 'عدد الطرود',
-            render: (_value: unknown, row: LineRow) =>
-              row.packageCount != null ? (
-                <span className="tabular-nums" dir="ltr">{formatStockNumber(row.packageCount)}</span>
-              ) : (
-                '—'
-              ),
+            render: (_value: unknown, row: LineRow) => (
+              <span className="tabular-nums" dir="ltr">{formatStockNumber(row.packageCount)}</span>
+            ),
           } as DataTableColumn<LineRow>,
           {
             key: 'piecesPerPackage',
             header: 'القطع في الطرد',
-            render: (_value: unknown, row: LineRow) =>
-              row.piecesPerPackage != null ? (
-                <span className="tabular-nums" dir="ltr">{formatStockNumber(row.piecesPerPackage)}</span>
-              ) : (
-                '—'
-              ),
+            render: (_value: unknown, row: LineRow) => (
+              <span className="tabular-nums" dir="ltr">{formatStockNumber(row.piecesPerPackage)}</span>
+            ),
           } as DataTableColumn<LineRow>,
         ]
       : []),

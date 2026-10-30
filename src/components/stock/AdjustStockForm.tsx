@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent, type KeyboardEvent } from 'react';
 import { toast } from 'react-toastify';
-import { formatStockNumber } from '@/utils/format';
+import { formatStockNumber, toStockNumber } from '@/utils/format';
 import { Button } from '@/components/ui/button';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { isInvalidCountInput } from '@/components/stock/CountSheetTable';
@@ -202,7 +202,7 @@ export function AdjustStockForm(props: AdjustStockFormProps) {
                 <li key={keyOf(shortage.warehouseId, shortage.variantId)}>
                   {shortageNameOf(shortage)}: المطلوب{' '}
                   <span dir="ltr" className="tabular-nums">{formatStockNumber(shortage.required)}</span>، المتاح{' '}
-                  <span dir="ltr" className="tabular-nums">{formatStockNumber(shortage.available)}</span>
+                  <span dir="ltr" className="tabular-nums">{formatStockNumber(Math.max(0, toStockNumber(shortage.available)))}</span>
                 </li>
               ))}
             </ul>

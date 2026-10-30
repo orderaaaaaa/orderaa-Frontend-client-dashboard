@@ -19,7 +19,7 @@ import { formatDate } from '@/utils/format';
 import { STOCKTAKE_LIST_HREF } from './stocktake/stocktakeRoutes';
 import { StockActionsMenu, type StockActionItem } from './StockActionsMenu';
 import {
-  formatStockAmount,
+  formatCountAmount,
   formatStockNumber,
   formatVariantCount,
   ORDER_FORMS,
@@ -67,7 +67,7 @@ export function StockModeSection() {
   const warehouseCount = summary ? summary.negativeBalances.length : 0;
 
   const summaryText = summary
-    ? `يوجد ${formatVariantCount(negativeCount)} برصيد سالب في ${formatStockNumber(warehouseCount)} مخزن، و${formatStockAmount(summary.inFlightOrderCount, ORDER_FORMS)} قيد التنفيذ. يمكنك إجراء الجرد أولًا، أو التفعيل الآن.`
+    ? `يوجد ${formatVariantCount(negativeCount)} برصيد سالب في ${formatStockNumber(warehouseCount)} مخزن، و${formatCountAmount(summary.inFlightOrderCount, ORDER_FORMS)} قيد التنفيذ. يمكنك إجراء الجرد أولًا، أو التفعيل الآن.`
     : summaryLoading
       ? 'جارٍ تحميل ملخص الأرصدة...'
       : '';
