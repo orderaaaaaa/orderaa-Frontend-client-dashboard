@@ -17,6 +17,7 @@ export interface CountSheetLine {
   live: number | null;
   expected: number | null;
   postedDelta?: number | null;
+  uncounted?: boolean;
 }
 
 export const isInvalidCountInput = (raw: string) => {
@@ -48,6 +49,7 @@ interface CountSheetTableProps {
   allowBlank?: boolean;
   readOnly?: boolean;
   flaggedVariantIds?: number[];
+  uncountedLabel?: string;
 }
 
 export function CountSheetTable({
@@ -60,6 +62,7 @@ export function CountSheetTable({
   allowBlank = false,
   readOnly = false,
   flaggedVariantIds = [],
+  uncountedLabel,
 }: CountSheetTableProps) {
   const inputs = useRef(new Map<number, HTMLInputElement>());
   const showExpected = lines.some((line) => line.expected !== null);
@@ -140,6 +143,7 @@ export function CountSheetTable({
             const invalid =
               isInvalidCountInput(raw) && !(allowBlank && isBlankCount(raw));
             const flagged = flaggedVariantIds.includes(line.variantId);
+            const uncounted = line.uncounted ?? isBlankCount(raw);
             return (
               <tr
                 key={line.variantId}
@@ -187,17 +191,21 @@ export function CountSheetTable({
                 )}
                 <td className={BODY_CELL_CLASS}>
                   {readOnly ? (
-                    <span
-                      dir="ltr"
-                      className={cn(
-                        'font-semibold tabular-nums',
-                        isBlankCount(raw)
-                          ? 'text-muted-foreground'
-                          : 'text-foreground'
-                      )}
-                    >
-                      {isBlankCount(raw) ? '—' : raw}
-                    </span>
+                    uncounted && uncountedLabel ? (
+                      <span className="text-gray-400">{uncountedLabel}</span>
+                    ) : (
+                      <span
+                        dir="ltr"
+                        className={cn(
+                          'font-semibold tabular-nums',
+                          isBlankCount(raw)
+                            ? 'text-muted-foreground'
+                            : 'text-foreground'
+                        )}
+                      >
+                        {isBlankCount(raw) ? '—' : raw}
+                      </span>
+                    )
                   ) : (
                     <input
                       ref={(node) => registerInput(line.variantId, node)}

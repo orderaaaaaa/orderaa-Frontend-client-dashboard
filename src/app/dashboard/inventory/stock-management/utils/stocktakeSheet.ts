@@ -28,6 +28,7 @@ export const toStocktakeCountSheetLine = (line: StocktakeLineDto): CountSheetLin
   live: line.currentQuantity,
   expected: line.expectedQuantity,
   postedDelta: line.postedDelta,
+  uncounted: line.countedAt === null,
 });
 
 export const netDeltaOf = (lines: StocktakeLineDto[]): number =>
