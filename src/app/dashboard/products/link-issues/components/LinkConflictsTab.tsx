@@ -58,7 +58,7 @@ export function LinkConflictsTab() {
             <div className="flex flex-wrap items-center gap-2 text-sm text-gray-700">
               <Badge variant="outline">{providerLabel(issue.provider)}</Badge>
               <span>
-                {issue.existing.storeLinks.find((link) => link.storeId === issue.storeId)?.storeName ??
+                {issue.storeName ??
                   (issue.storeId === null
                     ? t('linkIssues.common.storeUnknown')
                     : t('linkIssues.common.storeId', { storeId: issue.storeId }))}

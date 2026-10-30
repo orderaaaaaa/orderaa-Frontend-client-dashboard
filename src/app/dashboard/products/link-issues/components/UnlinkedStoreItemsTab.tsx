@@ -159,10 +159,6 @@ export function UnlinkedStoreItemsTab({
   );
   const plan = usePlanUnlinkedLinks();
   const save = useSaveUnlinkedLinks();
-  const storeNameOfConfig = (selectedConfigId: number) => {
-    const config = configs.find((candidate) => candidate.id === selectedConfigId);
-    return config?.store?.name ?? (config ? `#${config.storeId}` : '');
-  };
 
   useEffect(() => {
     onTotalChange(configId === null ? undefined : listQuery.data?.total);
@@ -294,7 +290,7 @@ export function UnlinkedStoreItemsTab({
                 item={item}
                 pick={picks[item.issueKey] ? picks[item.issueKey].pick : suggestedPick(item)}
                 canReadProducts={canReadProducts}
-                storeLabel={storeNameOfConfig(item.configId)}
+                storeLabel={item.storeName ?? t('linkIssues.common.storeId', { storeId: item.storeId })}
                 onPickChange={(pick) =>
                   setPicks((previous) => ({ ...previous, [item.issueKey]: { item, pick } }))
                 }

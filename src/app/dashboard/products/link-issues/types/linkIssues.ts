@@ -158,6 +158,7 @@ export interface LinkConflictIssue {
   id: number;
   provider: IntegrationProvider;
   storeId: number | null;
+  storeName: string | null;
   externalId: string;
   externalSku: string | null;
   source: StoreLinkConflictSource;
@@ -205,6 +206,7 @@ export interface UnlinkedStoreItem {
   configId: number;
   provider: IntegrationProvider;
   storeId: number;
+  storeName: string | null;
   externalProductId: string;
   externalVariantId: string | null;
   productName: string;
