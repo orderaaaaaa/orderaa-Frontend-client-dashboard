@@ -4,6 +4,7 @@ import { useRef, type KeyboardEvent } from 'react';
 import CopyableCode from '@/components/ui/copyable-code';
 import { cn } from '@/lib/utils';
 import type { VariantDisplayItem } from '@/lib/variantOptionLabel';
+import { isFiniteNumber } from '@/utils/format';
 import { StockQuantityCell } from './StockQuantityCell';
 import { VariantLabel } from './VariantLabel';
 import { VarianceChip } from './VarianceChip';
@@ -146,6 +147,11 @@ export function CountSheetTable({
             const uncounted = line.uncounted ?? isBlankCount(raw);
             const showUncountedLabel =
               Boolean(uncountedLabel) && uncounted && (readOnly || isBlankCount(raw));
+            const varianceDelta = !readOnly
+              ? deltaOf(line, raw)
+              : isFiniteNumber(line.postedDelta) || !uncountedLabel
+                ? (line.postedDelta ?? null)
+                : deltaOf(line, raw);
             return (
               <tr
                 key={line.variantId}
@@ -233,13 +239,7 @@ export function CountSheetTable({
                   {showUncountedLabel ? (
                     <span className="text-gray-400">{uncountedLabel}</span>
                   ) : (
-                    <VarianceChip
-                      delta={
-                        readOnly
-                          ? (line.postedDelta ?? null)
-                          : deltaOf(line, raw)
-                      }
-                    />
+                    <VarianceChip delta={varianceDelta} />
                   )}
                 </td>
               </tr>
