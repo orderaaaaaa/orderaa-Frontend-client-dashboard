@@ -354,7 +354,9 @@ function LinkComboPanel({
       })}
       {noOptions && (
         <p role="status" className="px-3 py-2 text-sm text-muted-foreground">
-          {t('canonical.combobox.empty', { query: text })}
+          {text === ''
+            ? t('canonical.name.empty.none')
+            : t('canonical.combobox.empty', { query: text })}
         </p>
       )}
     </div>

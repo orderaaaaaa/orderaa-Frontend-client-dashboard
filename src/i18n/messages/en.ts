@@ -474,6 +474,7 @@ const en: Record<keyof typeof ar, string> = {
   'canonical.impact.locRename': 'The old spelling “{old}” will be kept as an alias of the new name.',
   'canonical.impact.blocked': 'This name cannot be deleted because it is linked to {rows} {locationNoun}. Unlink them first in the details section.',
   'canonical.impact.blockedCities': 'It is also linked through child cities with locations: {cities}.',
+  'canonical.impact.blockedCitiesOnly': 'Cannot delete: cities under this governorate are linked to carrier rows.',
   'canonical.impact.rowsLabel': 'Carrier locations',
   'canonical.impact.aliasesTitle': 'Aliases',
   'canonical.impact.aliasesEmpty': 'No aliases yet.',

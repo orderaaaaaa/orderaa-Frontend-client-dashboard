@@ -488,6 +488,7 @@ const ar = {
   'canonical.impact.locRename': 'ستُحفظ الكتابة القديمة «{old}» مرادفا للاسم الجديد.',
   'canonical.impact.blocked': 'لا يمكن حذف هذا الاسم لأنه مرتبط بـ{rows} {locationNoun}. فك الربط أولا من قسم المواقع في التفاصيل.',
   'canonical.impact.blockedCities': 'ومرتبط أيضا بمدن تابعة لها مواقع: {cities}.',
+  'canonical.impact.blockedCitiesOnly': 'لا يمكن الحذف: مدن تابعة لهذه المحافظة مرتبطة بصفوف شركات الشحن.',
   'canonical.impact.rowsLabel': 'مواقع من شركات الشحن',
   'canonical.impact.aliasesTitle': 'المرادفات',
   'canonical.impact.aliasesEmpty': 'لا توجد مرادفات بعد.',

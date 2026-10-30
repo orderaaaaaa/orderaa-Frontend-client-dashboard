@@ -240,7 +240,9 @@ function NameDetailsContent({
       onOpenChange(false);
     } catch (err) {
       setConfirmError(
-        reportWriteError(err, (error) => deleteNameErrorMessage(error, name.name)),
+        reportWriteError(err, (error) =>
+          deleteNameErrorMessage(error, name.name),
+        ),
       );
     }
   };
@@ -338,7 +340,9 @@ function NameDetailsContent({
           cities: blockedCityNames.join('، '),
         })
       : null;
-  const deleteReason = blockedRowsText ?? blockedCitiesText;
+  const deleteReason =
+    blockedRowsText ??
+    (blockedCitiesText ? t('canonical.impact.blockedCitiesOnly') : null);
 
   const body = (
     <div className="flex flex-col gap-6">
@@ -611,10 +615,11 @@ function NameDetailsContent({
             deleteReason
               ? {
                   reason: deleteReason,
-                  items:
-                    blockedRowsText && blockedCitiesText
+                  items: blockedRowsText
+                    ? blockedCitiesText
                       ? [blockedCitiesText]
-                      : undefined,
+                      : undefined
+                    : blockedCityNames,
                 }
               : undefined
           }
