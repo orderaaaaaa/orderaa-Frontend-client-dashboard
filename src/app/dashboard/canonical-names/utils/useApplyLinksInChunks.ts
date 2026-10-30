@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
+import { useI18n } from '@/i18n/I18nProvider';
 import type { ApplyResult } from '@/components/entity-manager/types';
 import { runChunks } from '@/components/entity-manager/runChunks';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
@@ -32,6 +33,7 @@ export interface LinkPartialState {
 
 export const useApplyLinksInChunks = (domain: CanonicalNameDomain) => {
   const queryClient = useQueryClient();
+  const { t } = useI18n();
   const { mutateAsync } = useApplyLinks(domain);
   const [applying, setApplying] = useState(false);
   const [partial, setPartial] = useState<LinkPartialState | null>(null);
@@ -59,7 +61,7 @@ export const useApplyLinksInChunks = (domain: CanonicalNameDomain) => {
         }
         const reason = location
           ? locationLinkErrorMessage(run.error)
-          : getApiErrorMessage(run.error, 'تعذر تنفيذ الربط');
+          : getApiErrorMessage(run.error, t('canonical.toast.linkFailed'));
         if (run.saved > 0) {
           setPartial({
             saved: run.saved,
@@ -82,9 +84,9 @@ export const useApplyLinksInChunks = (domain: CanonicalNameDomain) => {
       const results = run.results.flat();
       const rowsLinked = results.reduce((sum, row) => sum + row.rowsLinked, 0);
       if (rowsLinked > 0) {
-        toast.success(`تم ربط ${rowsLinked} عنصر`);
+        toast.success(t('canonical.toast.linkedCount', { count: rowsLinked }));
       } else {
-        toast.success('تم تحديث الربط');
+        toast.success(t('canonical.toast.linkUpdated'));
       }
 
       if (isLocationDomain(domain)) {

@@ -67,7 +67,7 @@ export function LinkContextWarning({
               </p>
               <p className="text-muted-foreground">
                 {t('canonical.queue.row.contexts', {
-                  names: row.contexts.map((context) => context.name).join('، '),
+                  names: row.contexts.map((context) => context.name).join(t('canonical.list.separator')),
                 })}
               </p>
             </div>

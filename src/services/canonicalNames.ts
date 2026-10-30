@@ -9,6 +9,8 @@ import { toast } from 'react-toastify';
 import http from '@/lib/api/http';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { invalidateAndWait } from '@/lib/query/mutationSync';
+import { readStoredLocale } from '@/i18n/locale';
+import { translate, type TranslationKey } from '@/i18n/translate';
 import { getApiErrorMessage } from '@/utils/apiError';
 import {
   canonicalNameErrorMessage,
@@ -163,6 +165,8 @@ export const useLinkCandidatesQuery = (
     enabled,
   });
 
+const toastText = (key: TranslationKey) => translate(readStoredLocale(), key);
+
 export const useLinkSuggestionsMutation = (domain: CanonicalNameDomain) =>
   useMutation({
     mutationFn: async (payload: SuggestRequest) => {
@@ -173,7 +177,7 @@ export const useLinkSuggestionsMutation = (domain: CanonicalNameDomain) =>
       return data;
     },
     onError: (err: unknown) => {
-      toast.error(getApiErrorMessage(err, 'تعذر توليد الاقتراحات'));
+      toast.error(getApiErrorMessage(err, toastText('canonical.toast.suggestFailed')));
     },
   });
 
@@ -208,7 +212,7 @@ export const useCreateCanonicalName = (domain: CanonicalNameDomain) => {
     },
     onSuccess: async () => {
       await invalidateDomainQueries(queryClient, domain);
-      toast.success('تم إنشاء الاسم الموحد');
+      toast.success(toastText('canonical.toast.nameCreated'));
     },
   });
 };
@@ -232,7 +236,7 @@ export const useRenameCanonicalName = (domain: CanonicalNameDomain) => {
 
 export const deleteNameErrorMessage = (err: unknown, name: string) =>
   canonicalNameErrorMessage(err, { name }) ??
-  getApiErrorMessage(err, 'تعذر حذف الاسم الموحد');
+  getApiErrorMessage(err, toastText('canonical.toast.deleteFailed'));
 
 export const useDeleteCanonicalName = (domain: CanonicalNameDomain) => {
   const queryClient = useQueryClient();
@@ -246,7 +250,7 @@ export const useDeleteCanonicalName = (domain: CanonicalNameDomain) => {
     },
     onSuccess: async () => {
       await invalidateDomainQueries(queryClient, domain);
-      toast.success('تم حذف الاسم الموحد');
+      toast.success(toastText('canonical.toast.nameDeleted'));
     },
     onError: (err: unknown) => {
       if (getCanonicalNameError(err)?.code === CANONICAL_NAME_ERROR_CODES.NAME_HAS_LINKED_ROWS) {
@@ -378,13 +382,13 @@ export const useRefreshLocationSources = () => {
         queryKey: [QUERY_KEYS.CANONICAL_NAME_SOURCES_STATUS],
       });
       if (result.status === REFRESH_REQUEST_STATUSES.ALREADY_RUNNING) {
-        toast.info('التحديث قيد التشغيل بالفعل');
+        toast.info(toastText('canonical.toast.refreshAlreadyRunning'));
       } else {
-        toast.success('بدأ تحديث القوائم');
+        toast.success(toastText('canonical.toast.refreshStarted'));
       }
     },
     onError: (err: unknown) => {
-      toast.error(getApiErrorMessage(err, 'تعذر بدء تحديث القوائم'));
+      toast.error(getApiErrorMessage(err, toastText('canonical.toast.refreshFailed')));
     },
   });
 };

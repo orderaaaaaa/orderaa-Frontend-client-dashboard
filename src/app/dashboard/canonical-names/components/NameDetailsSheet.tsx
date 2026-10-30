@@ -311,7 +311,7 @@ function NameDetailsContent({
       {isGovernorate && impact.children.length > 0 && (
         <p>
           {t('canonical.impact.locDelete', {
-            cities: impact.children.map((child) => child.name).join('، '),
+            cities: impact.children.map((child) => child.name).join(t('canonical.list.separator')),
           })}
         </p>
       )}
@@ -339,7 +339,7 @@ function NameDetailsContent({
   const blockedCitiesText =
     blockedCityNames.length > 0
       ? t('canonical.impact.blockedCities', {
-          cities: blockedCityNames.join('، '),
+          cities: blockedCityNames.join(t('canonical.list.separator')),
         })
       : null;
   const deleteReason =

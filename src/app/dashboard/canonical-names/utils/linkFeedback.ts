@@ -41,8 +41,8 @@ export function skippedAliasesMessage(
           : undefined;
       lines.push(
         other
-          ? `النص «${alias.spelling}» مرتبط بالفعل باسم آخر «${other.name}» ولن يتغير`
-          : `النص «${alias.spelling}» مرتبط بالفعل باسم آخر ولن يتغير`,
+          ? translate(readStoredLocale(), 'canonical.link.alreadyLinkedTo', { spelling: alias.spelling, other: other.name })
+          : translate(readStoredLocale(), 'canonical.link.alreadyLinked', { spelling: alias.spelling }),
       );
     });
   });

@@ -30,7 +30,7 @@ export function AttributeRowContent({ domain, group }: AttributeRowContentProps)
       {showContexts && (
         <Badge variant={contextCount > 1 ? 'destructive' : 'outline'}>
           {t('canonical.queue.row.contexts', {
-            names: group.attributeContexts.map((context) => context.name).join('، '),
+            names: group.attributeContexts.map((context) => context.name).join(t('canonical.list.separator')),
           })}
         </Badge>
       )}

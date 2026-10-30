@@ -1,3 +1,5 @@
+import { readStoredLocale } from '@/i18n/locale';
+import { translate, type TranslationKey } from '@/i18n/translate';
 import {
   LOCATION_SYNC_STATUSES,
   type LocationSourceSync,
@@ -50,11 +52,10 @@ export const LOCATION_OPTION_ERROR_CODES = {
 export type LocationOptionErrorCode =
   (typeof LOCATION_OPTION_ERROR_CODES)[keyof typeof LOCATION_OPTION_ERROR_CODES];
 
-export const LOCATION_OPTION_ERROR_MESSAGES: Record<LocationOptionErrorCode, string> = {
-  LOCATION_OPTION_INVALID:
-    'المحافظة أو المدينة المختارة لم تعد متاحة، اخترها من القائمة مرة أخرى',
-  LOCATION_PICK_CONFLICT: 'تعذر حفظ الموقع، أعد اختيار المحافظة والمدينة من القائمة',
-  PROVIDER_NOT_SUPPORTED: 'شركة الشحن هذه لا تدعم اختيار المحافظة والمدينة من القائمة',
+export const LOCATION_OPTION_ERROR_MESSAGES: Record<LocationOptionErrorCode, TranslationKey> = {
+  LOCATION_OPTION_INVALID: 'canonical.location.optionInvalid',
+  LOCATION_PICK_CONFLICT: 'canonical.location.pickConflict',
+  PROVIDER_NOT_SUPPORTED: 'canonical.location.providerNotSupported',
 };
 
 const KNOWN_LOCATION_OPTION_ERROR_CODES = new Set<string>(
@@ -71,24 +72,24 @@ export const locationOptionErrorCodeOf = (
     : null;
 };
 
-export const LOCATION_OPTION_STALE_HINT = 'لم يعد في قائمة الشركة';
+export const LOCATION_OPTION_STALE_HINT: TranslationKey = 'canonical.location.staleHint';
 
 export const locationSelectOptionsOf = (options: LocationOption[]) =>
   options.map((option) => ({
     key: option.value,
     label: option.stale
-      ? `${option.label} (${LOCATION_OPTION_STALE_HINT})`
+      ? `${option.label} (${translate(readStoredLocale(), LOCATION_OPTION_STALE_HINT)})`
       : option.label,
   }));
 
 export const locationOptionsErrorTextOf = (error: unknown, fallback: string) => {
   const code = locationOptionErrorCodeOf(error);
-  return code ? LOCATION_OPTION_ERROR_MESSAGES[code] : fallback;
+  return code ? translate(readStoredLocale(), LOCATION_OPTION_ERROR_MESSAGES[code]) : fallback;
 };
 
 export const locationSaveErrorTextOf = (error: unknown, fallback: string) => {
   const code = locationOptionErrorCodeOf(error);
-  if (code) return LOCATION_OPTION_ERROR_MESSAGES[code];
+  if (code) return translate(readStoredLocale(), LOCATION_OPTION_ERROR_MESSAGES[code]);
   const message = (error as { response?: { data?: { message?: unknown } } })
     ?.response?.data?.message;
   if (Array.isArray(message)) return message.join('\n');

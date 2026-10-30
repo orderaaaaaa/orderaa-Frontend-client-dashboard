@@ -1,3 +1,4 @@
+import type { TranslationKey } from '@/i18n/translate';
 export const CANONICAL_NAME_DOMAINS = {
   ATTRIBUTE_NAME: 'ATTRIBUTE_NAME',
   ATTRIBUTE_OPTION: 'ATTRIBUTE_OPTION',
@@ -30,13 +31,13 @@ export type GroupStateFilter = (typeof GROUP_STATE_FILTERS)[number];
 
 export const CANONICAL_DOMAIN_ROUTES: Record<
   CanonicalNameDomain,
-  { segment: string; title: string }
+  { segment: string; titleKey: TranslationKey }
 > = {
-  ATTRIBUTE_NAME: { segment: 'attribute-names', title: 'أسماء الخصائص' },
-  ATTRIBUTE_OPTION: { segment: 'attribute-options', title: 'قيم الخصائص' },
-  GOVERNORATE: { segment: 'governorates', title: 'المحافظات' },
-  CITY: { segment: 'cities', title: 'المدن' },
-  PRODUCT: { segment: 'products', title: 'أسماء المنتجات' },
+  ATTRIBUTE_NAME: { segment: 'attribute-names', titleKey: 'canonical.domain.attributeNames.title' },
+  ATTRIBUTE_OPTION: { segment: 'attribute-options', titleKey: 'canonical.domain.attributeOptions.title' },
+  GOVERNORATE: { segment: 'governorates', titleKey: 'canonical.domain.governorates.title' },
+  CITY: { segment: 'cities', titleKey: 'canonical.domain.cities.title' },
+  PRODUCT: { segment: 'products', titleKey: 'canonical.domain.products.title' },
 };
 
 export const CANONICAL_NAME_ERROR_CODES = {

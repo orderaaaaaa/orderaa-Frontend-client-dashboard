@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useI18n } from '@/i18n/I18nProvider';
 import {
   Dialog,
   DialogContent,
@@ -29,6 +30,7 @@ export default function GroupMembersDrawer({
   normalizedText,
   onClose,
 }: GroupMembersDrawerProps) {
+  const { t } = useI18n();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(50);
   const { data, isLoading } = useGroupMembersQuery(
@@ -42,7 +44,7 @@ export default function GroupMembersDrawer({
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>المنتجات المرتبطة بهذه القيمة</DialogTitle>
+          <DialogTitle>{t('canonical.members.title')}</DialogTitle>
         </DialogHeader>
 
         {isLoading || !data ? (
@@ -51,14 +53,14 @@ export default function GroupMembersDrawer({
           <div className="max-h-96 overflow-y-auto rounded-md border">
             <div className="overflow-x-auto">
             <table className="w-full text-sm sm:min-w-[480px]">
-              <thead className="hidden bg-gray-50 text-gray-500 sm:table-header-group">
+              <thead className="hidden bg-muted text-muted-foreground sm:table-header-group">
                 <tr>
-                  <th className="p-2 text-right">المنتج</th>
-                  <th className="p-2 text-right">الإملاء المخزن</th>
+                  <th className="p-2 text-start">{t('canonical.members.product')}</th>
+                  <th className="p-2 text-start">{t('canonical.members.spelling')}</th>
                   {isAttributeOption && (
-                    <th className="p-2 text-right">الخاصية</th>
+                    <th className="p-2 text-start">{t('canonical.members.attribute')}</th>
                   )}
-                  <th className="p-2 text-right">الاسم الموحد</th>
+                  <th className="p-2 text-start">{t('canonical.members.name')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -73,7 +75,7 @@ export default function GroupMembersDrawer({
                         <td className="block px-2 py-1 sm:table-cell sm:p-2">{row.attributeName ?? ''}</td>
                       )}
                       <td className="block px-2 py-1 sm:table-cell sm:p-2">
-                        {row.canonicalNameId ? 'مرتبط' : 'غير مرتبط'}
+                        {row.canonicalNameId ? t('canonical.members.linked') : t('canonical.members.unlinked')}
                       </td>
                     </tr>
                   )),
@@ -100,7 +102,7 @@ export default function GroupMembersDrawer({
         )}
 
         <DialogFooter>
-          <Button className="min-h-11 sm:min-h-10" onClick={onClose}>إغلاق</Button>
+          <Button className="min-h-11 sm:min-h-10" onClick={onClose}>{t('common.close')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

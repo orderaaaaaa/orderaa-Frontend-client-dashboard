@@ -75,7 +75,7 @@ export function canonicalNameErrorMessage(
     case CANONICAL_NAME_ERROR_CODES.CHILD_ROWS_LINKED:
       if (!error.details) return null;
       return withName('canonical.errors.childRowsLinked', context, {
-        cities: error.details.rows.map((row) => row.label).join('، '),
+        cities: error.details.rows.map((row) => row.label).join(translateNow('canonical.list.separator')),
       });
     case CANONICAL_NAME_ERROR_CODES.UNSCOPED_GROUP:
       return translateNow('canonical.errors.unscopedGroup');

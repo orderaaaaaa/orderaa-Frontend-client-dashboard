@@ -6,6 +6,7 @@ import { ShippingConfig, ShippingProvider } from '../types/shipping';
 import { LiaCheckCircleSolid } from 'react-icons/lia';
 import { LocationSyncNotice } from '@/components/shipping/LocationSyncNotice';
 import { useLocationSyncRetry } from '@/services/shippingLocationSync';
+import { useI18n } from '@/i18n/I18nProvider';
 
 interface IntegrationCardProps {
   provider: ShippingProvider;
@@ -18,14 +19,15 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
   config,
   onConnect,
 }) => {
+  const { t } = useI18n();
   const isConnected = config?.isActive ?? false;
   const canInteract = provider.isActive;
   const isDisabled = !canInteract;
   const syncRetry = useLocationSyncRetry(config?.shippingCompany);
 
   const getButtonText = () => {
-    if (!canInteract) return 'قريباً';
-    return isConnected ? 'إدارة الربط' : 'إنشاء ربط جديد';
+    if (!canInteract) return t('canonical.shipping.integration.soon');
+    return isConnected ? t('canonical.shipping.integration.manage') : t('canonical.shipping.integration.create');
   };
 
   return (
@@ -33,7 +35,7 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
       {isConnected && canInteract && (
         <div className="absolute top-4 left-4 bg-green-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
           <LiaCheckCircleSolid className="w-3 h-3" />
-          متصل
+          {t('canonical.shipping.integration.connected')}
         </div>
       )}
 
@@ -53,7 +55,7 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
 
       {/* Title */}
       <h3 className="text-xl font-semibold text-center text-gray-900 mb-2">
-        ربط {provider.name}
+        {t('canonical.shipping.integration.title', { name: provider.name })}
       </h3>
 
       {/* Description */}
