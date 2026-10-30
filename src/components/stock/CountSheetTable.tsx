@@ -51,6 +51,7 @@ interface CountSheetTableProps {
   readOnly?: boolean;
   flaggedVariantIds?: number[];
   uncountedLabel?: string;
+  varianceUnavailable?: boolean;
 }
 
 export function CountSheetTable({
@@ -64,6 +65,7 @@ export function CountSheetTable({
   readOnly = false,
   flaggedVariantIds = [],
   uncountedLabel,
+  varianceUnavailable = false,
 }: CountSheetTableProps) {
   const inputs = useRef(new Map<number, HTMLInputElement>());
   const showExpected = lines.some((line) => line.expected !== null);
@@ -236,7 +238,9 @@ export function CountSheetTable({
                   )}
                 </td>
                 <td className={BODY_CELL_CLASS}>
-                  {showUncountedLabel ? (
+                  {varianceUnavailable ? (
+                    <span className="text-gray-400">—</span>
+                  ) : showUncountedLabel ? (
                     <span className="text-gray-400">{uncountedLabel}</span>
                   ) : (
                     <VarianceChip delta={varianceDelta} />

@@ -417,6 +417,7 @@ export function StocktakeSheetContent({ stocktakeId }: StocktakeSheetContentProp
             readOnly={!isEditable}
             flaggedVariantIds={refused.map((line) => line.variantId)}
           uncountedLabel="لم يُعد بعد"
+            varianceUnavailable={summary.status === 'CANCELLED'}
           />
         </>
       )}
