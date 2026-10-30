@@ -111,6 +111,7 @@ export type StocktakeRefusedLine = {
   sku: string | null;
   live: number;
   counted: number | null;
+  countedAt: string | null;
   required: number;
   available: number;
 };

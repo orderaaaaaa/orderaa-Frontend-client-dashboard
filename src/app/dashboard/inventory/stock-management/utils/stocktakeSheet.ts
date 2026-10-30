@@ -59,6 +59,7 @@ export const toRefusedLines = (
       sku: shortage.sku ?? null,
       live: line?.currentQuantity ?? shortage.available,
       counted: line?.countedQuantity ?? null,
+      countedAt: line?.countedAt ?? null,
       required: shortage.required,
       available: shortage.available,
     };

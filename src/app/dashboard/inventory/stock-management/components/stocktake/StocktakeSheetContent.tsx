@@ -393,9 +393,13 @@ export function StocktakeSheetContent({ stocktakeId }: StocktakeSheetContentProp
                         {formatStockNumber(line.live)}
                       </span>
                       {' · المعدود '}
-                      <span dir="ltr" className="font-semibold tabular-nums text-foreground">
-                        {formatStockNumber(line.counted)}
-                      </span>
+                      {line.countedAt === null ? (
+                        <span className="text-gray-400">لم يُعد بعد</span>
+                      ) : (
+                        <span dir="ltr" className="font-semibold tabular-nums text-foreground">
+                          {formatStockNumber(line.counted)}
+                        </span>
+                      )}
                     </span>
                   </li>
                 ))}

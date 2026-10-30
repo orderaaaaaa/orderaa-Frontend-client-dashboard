@@ -90,12 +90,14 @@ function WarehouseSide({
     <span className="inline-flex flex-wrap items-center gap-1">
       <span>{label}</span>
       <span className="font-medium text-foreground">{warehouse.name}</span>
-      <span className="text-xs">
-        رصيد{' '}
-        <span dir="ltr" className="font-semibold tabular-nums text-foreground">
-          {formatStockNumber(balance)}
+      {balance !== null && (
+        <span className="text-xs">
+          رصيد{' '}
+          <span dir="ltr" className="font-semibold tabular-nums text-foreground">
+            {formatStockNumber(balance)}
+          </span>
         </span>
-      </span>
+      )}
     </span>
   );
 }
