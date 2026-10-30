@@ -1,3 +1,5 @@
+import type { LocationSyncStatus } from '@/types/canonicalNames';
+
 export type ShippingProviderId =
   | 'aramex'
   | 'shipblu'
@@ -13,6 +15,21 @@ export type ShippingProviderId =
 
 export type ShippingConfigType = 'WEBHOOK' | 'API_KEY';
 
+export interface ShippingLocationSync {
+  status: LocationSyncStatus;
+  attempts: number;
+  nextRetryAt: string | null;
+  lastErrorCode: string | null;
+  lastSuccessAt: string | null;
+}
+
+export interface ShippingConfigPayload {
+  shippingCompany?: string;
+  isActive?: boolean;
+  authKey?: string;
+  clientCode?: string;
+}
+
 export interface ShippingConfig {
   id: number;
   merchantId: number;
@@ -24,6 +41,7 @@ export interface ShippingConfig {
   webhookUrl?: string; // keeping compatible just in case, though Turbo uses specific keys
   isActive: boolean;
   metadata?: Record<string, any>;
+  locationSync?: ShippingLocationSync | null;
 }
 
 export interface ShippingProvider {

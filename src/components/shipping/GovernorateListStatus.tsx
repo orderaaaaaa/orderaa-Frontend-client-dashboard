@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n/I18nProvider';
+import { LocationSyncNotice, type LocationSyncRetry, type LocationSyncView } from './LocationSyncNotice';
 import {
   LOCATION_OPTION_ERROR_CODES,
   locationOptionErrorCodeOf,
@@ -29,13 +30,16 @@ export function GovernorateCanonicalLink() {
 
 interface GovernorateSourceEmptyProps {
   canRead: boolean;
+  sync?: LocationSyncView | null;
+  retry?: LocationSyncRetry | null;
 }
 
-export function GovernorateSourceEmpty({ canRead }: GovernorateSourceEmptyProps) {
+export function GovernorateSourceEmpty({ canRead, sync, retry }: GovernorateSourceEmptyProps) {
   const { t } = useI18n();
   return (
     <div className="flex flex-col gap-2 text-xs text-muted-foreground">
       <p>{t('canonical.shipping.noList')}</p>
+      <LocationSyncNotice sync={sync} retry={retry} />
       {canRead ? (
         <>
           <p>{t('canonical.shipping.noListHelp')}</p>

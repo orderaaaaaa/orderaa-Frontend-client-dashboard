@@ -1,3 +1,9 @@
+import {
+  LOCATION_SYNC_STATUSES,
+  type LocationSourceSync,
+  type LocationSyncStatus,
+} from '@/types/canonicalNames';
+
 export const LOCATION_OPTION_KINDS = {
   CANONICAL: 'CANONICAL',
   ROW: 'ROW',
@@ -18,7 +24,22 @@ export interface LocationOption {
 export interface LocationOptionsResponse {
   sourceHasRows: boolean;
   options: LocationOption[];
+  sync?: LocationSourceSync | null;
 }
+
+export const isLocationSyncInFlight = (
+  sync: { status: LocationSyncStatus } | null | undefined
+): boolean =>
+  sync?.status === LOCATION_SYNC_STATUSES.QUEUED ||
+  sync?.status === LOCATION_SYNC_STATUSES.RUNNING;
+
+export const hasLocationSyncInFlight = (
+  configs: { locationSync?: { status: LocationSyncStatus } | null }[] | undefined
+): boolean => configs?.some((config) => isLocationSyncInFlight(config.locationSync)) ?? false;
+
+export const locationOptionsSyncPending = (
+  data: LocationOptionsResponse | undefined
+): boolean => data?.sourceHasRows === false && isLocationSyncInFlight(data.sync);
 
 export const LOCATION_OPTION_ERROR_CODES = {
   LOCATION_OPTION_INVALID: 'LOCATION_OPTION_INVALID',

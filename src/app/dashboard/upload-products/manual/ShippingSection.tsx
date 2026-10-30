@@ -14,6 +14,7 @@ import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import useShippingCompanies from '@/hooks/useShippingCompanies';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
+import { useLocationSyncRetry } from '@/services/shippingLocationSync';
 import {
   useLocationOptionCities,
   useLocationOptionGovernorates,
@@ -52,6 +53,9 @@ function ShippingSection({
 
   const selectedCompanyId = shippingCompanyIdOf(shippingCompanyId);
   const governoratesQuery = useLocationOptionGovernorates(selectedCompanyId);
+  const selectedCompanyCode =
+    shippingCompanies.find((company) => company.id === selectedCompanyId)?.code ?? null;
+  const syncRetry = useLocationSyncRetry(selectedCompanyCode);
   const citiesQuery = useLocationOptionCities(
     selectedCompanyId,
     governorateOption || undefined
@@ -177,7 +181,11 @@ function ShippingSection({
               searchThreshold={5}
             />
             {noGovernorateList && (
-              <GovernorateSourceEmpty canRead={canReadCanonicalNames} />
+              <GovernorateSourceEmpty
+                canRead={canReadCanonicalNames}
+                sync={governoratesQuery.data?.sync}
+                retry={syncRetry}
+              />
             )}
             {governoratesQuery.isError && (
               <GovernorateListError

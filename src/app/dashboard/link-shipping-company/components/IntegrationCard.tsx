@@ -2,12 +2,14 @@ import React from 'react';
 import Image from 'next/image';
 import clsx from 'clsx';
 import { Button } from '@/components/ui/button';
-import { ShippingProvider } from '../types/shipping';
+import { ShippingConfig, ShippingProvider } from '../types/shipping';
 import { LiaCheckCircleSolid } from 'react-icons/lia';
+import { LocationSyncNotice } from '@/components/shipping/LocationSyncNotice';
+import { useLocationSyncRetry } from '@/services/shippingLocationSync';
 
 interface IntegrationCardProps {
   provider: ShippingProvider;
-  config?: any; // Config received from parent
+  config?: ShippingConfig;
   onConnect: () => void;
 }
 
@@ -19,6 +21,7 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
   const isConnected = config?.isActive ?? false;
   const canInteract = provider.isActive;
   const isDisabled = !canInteract;
+  const syncRetry = useLocationSyncRetry(config?.shippingCompany);
 
   const getButtonText = () => {
     if (!canInteract) return 'قريباً';
@@ -55,6 +58,12 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
 
       {/* Description */}
       <p className="text-center text-gray-600 mb-6">{provider.description}</p>
+
+      {isConnected && canInteract && config?.locationSync && (
+        <div className="mb-4 flex justify-center text-center">
+          <LocationSyncNotice sync={config.locationSync} retry={syncRetry} />
+        </div>
+      )}
 
       {/* Action Button */}
       <Button

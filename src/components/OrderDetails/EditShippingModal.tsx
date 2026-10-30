@@ -12,6 +12,7 @@ import { useShippingCompanies } from '@/hooks';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
+import { useLocationSyncRetry } from '@/services/shippingLocationSync';
 import {
   useLocationOptionCities,
   useLocationOptionGovernorates,
@@ -186,6 +187,9 @@ export default function EditShippingModal({
   const loadingGovernorates = governoratesQuery.isLoading;
   const loadingCities = citiesQuery.isLoading;
   const noGovernorateList = governoratesQuery.data?.sourceHasRows === false;
+  const selectedCompanyCode =
+    shippingCompanies.find((company) => company.id === selectedShippingCompanyId)?.code ?? null;
+  const syncRetry = useLocationSyncRetry(selectedCompanyCode);
 
   const shippingCompanyOptions = useMemo(
     () => shippingCompanySelectOptionsOf(shippingCompanies),
@@ -438,7 +442,11 @@ export default function EditShippingModal({
               searchThreshold={5}
             />
             {noGovernorateList && (
-              <GovernorateSourceEmpty canRead={canReadCanonicalNames} />
+              <GovernorateSourceEmpty
+                canRead={canReadCanonicalNames}
+                sync={governoratesQuery.data?.sync}
+                retry={syncRetry}
+              />
             )}
             {governoratesQuery.isError && (
               <GovernorateListError

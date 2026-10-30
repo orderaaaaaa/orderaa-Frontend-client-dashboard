@@ -2,7 +2,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { shippingApi } from '../api/shippingApi';
-import { ShippingConfig } from '../types/shipping';
+import { hasLocationSyncInFlight } from '@/types/locationOptions';
+import { ShippingConfig, ShippingConfigPayload } from '../types/shipping';
+
+const SHIPPING_CONFIG_POLL_MS = 5000;
 
 export const useShippingQuery = (providerId?: string) => {
   const queryClient = useQueryClient();
@@ -13,6 +16,8 @@ export const useShippingQuery = (providerId?: string) => {
       const data = await shippingApi.getConfig();
       return Array.isArray(data) ? data : [];
     },
+    refetchInterval: (query) =>
+      hasLocationSyncInFlight(query.state.data) ? SHIPPING_CONFIG_POLL_MS : false,
   });
 
   // Find specific config based on providerId
@@ -31,7 +36,7 @@ export const useShippingQuery = (providerId?: string) => {
     ]);
 
   const upsertMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: ShippingConfigPayload) => {
       return shippingApi.createConfig(data);
     },
     onSuccess: refreshConfigs,
@@ -42,7 +47,7 @@ export const useShippingQuery = (providerId?: string) => {
       data,
       shippingCompany,
     }: {
-      data: any;
+      data: ShippingConfigPayload;
       shippingCompany: string;
     }) => {
       return shippingApi.updateConfig(data, shippingCompany);
