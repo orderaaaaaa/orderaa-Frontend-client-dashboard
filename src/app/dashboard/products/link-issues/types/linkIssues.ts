@@ -1,4 +1,5 @@
 import type { IntegrationProvider } from '@/app/dashboard/integrations/types/apiIntegration';
+import type { StoreLinkMove } from '@/types/storeLinks';
 import type { MergeVariantPlanEntry } from '../../types/products';
 
 export const LINK_ISSUE_TYPE = {
@@ -227,15 +228,8 @@ export interface UnlinkedLinkCreate {
   externalSku: string | null;
 }
 
-export interface UnlinkedLinkMove {
-  linkKind: LinkKind;
+export interface UnlinkedLinkMove extends StoreLinkMove {
   externalProductId: string;
-  externalVariantId: string | null;
-  fromProductId: number;
-  fromVariantId: number | null;
-  fromVariantLabel: string | null;
-  toProductId: number;
-  toVariantId: number | null;
 }
 
 export interface UnlinkedLinkResult {

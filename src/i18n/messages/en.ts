@@ -777,7 +777,6 @@ const en: Record<keyof typeof ar, string> = {
   'linkIssues.unlinked.chooseStore': 'Choose a store to see its unlinked products',
   'linkIssues.unlinked.confirmSave': 'Confirm save',
   'linkIssues.unlinked.creates': 'New links',
-  'linkIssues.unlinked.moveChanged': 'A link changed while saving, review the updated preview',
   'linkIssues.unlinked.moveLine': '{store} is linked to {from} and will move to {to}',
   'linkIssues.unlinked.moves': 'Links to move',
   'linkIssues.unlinked.noPermission': 'You need integration settings permission to view unlinked products and save links',

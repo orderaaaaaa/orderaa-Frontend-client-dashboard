@@ -790,7 +790,6 @@ const ar = {
   'linkIssues.unlinked.chooseStore': 'اختر المتجر لعرض المنتجات غير المربوطة',
   'linkIssues.unlinked.confirmSave': 'تأكيد الحفظ',
   'linkIssues.unlinked.creates': 'روابط جديدة',
-  'linkIssues.unlinked.moveChanged': 'تغيّر ربط أحد المنتجات أثناء الحفظ، راجع المعاينة المحدثة',
   'linkIssues.unlinked.moveLine': '{store} مرتبط حالياً بـ {from} وسينتقل إلى {to}',
   'linkIssues.unlinked.moves': 'روابط سيتم نقلها',
   'linkIssues.unlinked.noPermission': 'تحتاج صلاحية إعدادات التكامل لعرض المنتجات غير المربوطة وحفظ الروابط',

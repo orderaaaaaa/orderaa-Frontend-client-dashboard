@@ -20,7 +20,9 @@ import type {
   UnlinkedStoreItem,
 } from '../types/linkIssues';
 import { UNLINKED_SUGGESTION_KIND } from '../types/linkIssues';
-import { isUnlinkedMoveConflict, linkIssueErrorMessage } from '../utils/linkIssueErrors';
+import { linkIssueErrorMessage, responseDataOf } from '../utils/linkIssueErrors';
+import { StoreLinkMoveConfirmModal } from '@/components/storeLinks/StoreLinkMoveConfirmModal';
+import { isStoreLinkMoveConfirmationBody, type StoreLinkMove } from '@/types/storeLinks';
 import { IssuePreviewDialog } from './IssuePreviewDialog';
 import { IssueRowShell, providerLabel } from './LinkIssueParts';
 import { LinkIssueList, LINK_ISSUE_PAGE_LIMIT } from './LinkIssueList';
@@ -157,6 +159,11 @@ function UnlinkedStoreItemsContent({
   const [page, setPage] = useState(1);
   const [picks, setPicks] = useState<Record<string, PendingPick>>({});
   const [planState, setPlanState] = useState<PlanState | null>(null);
+  const [moveConfirm, setMoveConfirm] = useState<{
+    configId: number;
+    links: UnlinkedLinkEntry[];
+    moves: StoreLinkMove[];
+  } | null>(null);
   const listQuery = useUnlinkedStoreItems(
     configId !== null ? { configId, page, limit: LINK_ISSUE_PAGE_LIMIT } : null,
   );
@@ -221,25 +228,32 @@ function UnlinkedStoreItemsContent({
     }
   };
 
-  const handleSave = async () => {
-    if (!planState) return;
-    const moveKeys = new Set(planState.result.moves.map((move) => linkKeyOf(move)));
-    const links = planState.links.map((link) =>
-      moveKeys.has(linkKeyOf(link)) ? { ...link, confirmMove: true } : link,
+  const withMovesConfirmed = (links: UnlinkedLinkEntry[], moves: StoreLinkMove[]) =>
+    links.map((link, index) =>
+      moves.some((move) => move.sourceIndex === index) ? { ...link, confirmMove: true } : link,
     );
+
+  const submitLinks = async (selectedConfigId: number, links: UnlinkedLinkEntry[]) => {
     try {
-      const result = await save.mutateAsync({ configId: planState.configId, links });
+      const result = await save.mutateAsync({ configId: selectedConfigId, links });
       toast.success(t('linkIssues.unlinked.saved', { count: result.created + result.moved }));
       setPlanState(null);
+      setMoveConfirm(null);
       setPicks({});
     } catch (error) {
-      if (isUnlinkedMoveConflict(error)) {
-        toast.error(t('linkIssues.unlinked.moveChanged'));
-        await runPlan(planState.configId, planState.links);
+      const data = responseDataOf(error);
+      if (isStoreLinkMoveConfirmationBody(data)) {
+        setMoveConfirm({ configId: selectedConfigId, links, moves: data.moves });
         return;
       }
+      setMoveConfirm(null);
       toast.error(linkIssueErrorMessage(error, t('linkIssues.common.actionFailed')));
     }
+  };
+
+  const handleSave = async () => {
+    if (!planState) return;
+    await submitLinks(planState.configId, withMovesConfirmed(planState.links, planState.result.moves));
   };
 
   const storeOptions = integrations.map((config) => ({
@@ -363,6 +377,17 @@ function UnlinkedStoreItemsContent({
           </>
         )}
       </IssuePreviewDialog>
+
+      {moveConfirm !== null && (
+        <StoreLinkMoveConfirmModal
+          moves={moveConfirm.moves}
+          onConfirm={() =>
+            submitLinks(moveConfirm.configId, withMovesConfirmed(moveConfirm.links, moveConfirm.moves))
+          }
+          onClose={() => setMoveConfirm(null)}
+          isLoading={save.isPending}
+        />
+      )}
     </div>
   );
 }
