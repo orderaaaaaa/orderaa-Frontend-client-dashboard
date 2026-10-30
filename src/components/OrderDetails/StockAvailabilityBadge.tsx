@@ -75,8 +75,8 @@ export function StockAvailabilityBadge({ line }: Props) {
         <LiaExclamationTriangleSolid className="size-4 shrink-0" />
         <span>
           {t('orderDetails.stock.unavailable', {
-            available: line.available,
-            required: line.required,
+            available: toStockNumber(line.available),
+            required: toStockNumber(line.required),
           })}
         </span>
       </p>
