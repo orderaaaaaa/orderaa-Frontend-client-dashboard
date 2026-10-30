@@ -22,6 +22,8 @@ import {
 } from '@/services/locationSourceSync';
 import { locationSourceLabel } from '../utils/locationSourceLabel';
 import { ErrorWithRetry, StaleBanner } from '@/components/entity-manager/StateViews';
+import { LocationSyncBusyCopy } from '@/components/shipping/LocationSyncNotice';
+import { isLocationSyncInFlight } from '@/types/locationOptions';
 
 type Translate = ReturnType<typeof useI18n>['t'];
 
@@ -41,20 +43,8 @@ const failureReasonOf = (source: LocationSourceStatus, t: Translate): string | n
   });
 };
 
-const syncTextOf = (sync: LocationSourceSync, t: Translate): string | null => {
-  switch (sync.status) {
-    case LOCATION_SYNC_STATUSES.RUNNING:
-      return t('canonical.sync.running');
-    case LOCATION_SYNC_STATUSES.QUEUED:
-      return sync.attempts > 0 && sync.nextRetryAt
-        ? t('canonical.sync.retryScheduled', { date: formatDate(sync.nextRetryAt) })
-        : t('canonical.sync.queued');
-    case LOCATION_SYNC_STATUSES.FAILED:
-      return t('canonical.sync.failed');
-    default:
-      return null;
-  }
-};
+const syncTextOf = (sync: LocationSourceSync, t: Translate): string | null =>
+  sync.status === LOCATION_SYNC_STATUSES.FAILED ? t('canonical.sync.failed') : null;
 
 const outcomeOf = (sources: LocationSourceStatus[]) => {
   const failed = sources.filter((source) => source.lastErrorCode !== null).length;
@@ -79,9 +69,7 @@ function SourceRow({ source, canManage }: SourceRowProps) {
     Date.parse(source.lastSuccessAt) < Date.parse(source.lastAttemptAt)
       ? source.lastSuccessAt
       : null;
-  const syncBusy =
-    sync?.status === LOCATION_SYNC_STATUSES.QUEUED ||
-    sync?.status === LOCATION_SYNC_STATUSES.RUNNING;
+  const syncBusy = isLocationSyncInFlight(sync);
   const counts = t('canonical.status.counts', {
     governorates: source.governorateCount,
     governorateNoun: pluralAr(t, 'governorate', source.governorateCount),
@@ -95,6 +83,7 @@ function SourceRow({ source, canManage }: SourceRowProps) {
         <span className="font-medium text-foreground">
           {locationSourceLabel(source.source)}
         </span>
+        {sync && isLocationSyncInFlight(sync) && <LocationSyncBusyCopy sync={sync} />}
         {syncText && <span className="text-muted-foreground">{syncText}</span>}
         {canManage && sync?.status === LOCATION_SYNC_STATUSES.FAILED && (
           <Button

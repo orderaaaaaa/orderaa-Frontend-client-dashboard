@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n/I18nProvider';
 import { formatDateTime } from '@/utils/format';
 import { LOCATION_SYNC_STATUSES, type LocationSyncStatus } from '@/types/canonicalNames';
+import { isLocationSyncInFlight } from '@/types/locationOptions';
 
 export interface LocationSyncView {
   status: LocationSyncStatus;
@@ -28,23 +29,33 @@ interface LocationSyncNoticeProps {
   retry?: LocationSyncRetry | null;
 }
 
+export function LocationSyncBusyCopy({ sync }: { sync: LocationSyncView }) {
+  const { t } = useI18n();
+  const retryAt =
+    sync.status === LOCATION_SYNC_STATUSES.QUEUED && sync.attempts > 0 ? sync.nextRetryAt : null;
+  return (
+    <>
+      <span className="flex items-center gap-2 text-muted-foreground">
+        <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+        {t('canonical.sync.running')}
+      </span>
+      {retryAt && (
+        <span className="text-muted-foreground">
+          {t('canonical.sync.retryScheduled', { date: formatDate(retryAt) })}
+        </span>
+      )}
+    </>
+  );
+}
+
 export function LocationSyncNotice({ sync, retry }: LocationSyncNoticeProps) {
   const { t } = useI18n();
   if (!sync) return null;
 
-  if (
-    sync.status === LOCATION_SYNC_STATUSES.RUNNING ||
-    sync.status === LOCATION_SYNC_STATUSES.QUEUED
-  ) {
-    const retryAt =
-      sync.status === LOCATION_SYNC_STATUSES.QUEUED && sync.attempts > 0 ? sync.nextRetryAt : null;
+  if (isLocationSyncInFlight(sync)) {
     return (
-      <div className="space-y-1 text-xs text-muted-foreground">
-        <p className="flex items-center gap-2">
-          <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-          {t('canonical.sync.running')}
-        </p>
-        {retryAt && <p>{t('canonical.sync.retryScheduled', { date: formatDate(retryAt) })}</p>}
+      <div className="flex flex-col gap-1 text-xs">
+        <LocationSyncBusyCopy sync={sync} />
       </div>
     );
   }
