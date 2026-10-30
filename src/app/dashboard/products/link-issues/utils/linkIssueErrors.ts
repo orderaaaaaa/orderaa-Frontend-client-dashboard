@@ -3,26 +3,20 @@ import {
   describeMergeIssue,
   mergePlanErrorBody,
 } from '../../utils/mergePlan';
-import type { UnlinkedLinkMoveConflictBody, UnlinkedLinkMove } from '../types/linkIssues';
 
 const STORE_LINK_MOVE_CONFIRMATION_REQUIRED = 'STORE_LINK_MOVE_CONFIRMATION_REQUIRED';
 
 const responseDataOf = (error: unknown): unknown =>
   (error as { response?: { data?: unknown } } | null)?.response?.data;
 
-export function unlinkedMoveConflictOf(
-  error: unknown,
-): UnlinkedLinkMoveConflictBody | null {
+export function isUnlinkedMoveConflict(error: unknown): boolean {
   const data = responseDataOf(error);
-  if (typeof data !== 'object' || data === null) return null;
-  if (!('code' in data) || data.code !== STORE_LINK_MOVE_CONFIRMATION_REQUIRED) return null;
-  if (!('moves' in data) || !Array.isArray(data.moves)) return null;
-  return {
-    statusCode: 409,
-    code: STORE_LINK_MOVE_CONFIRMATION_REQUIRED,
-    message: 'message' in data && typeof data.message === 'string' ? data.message : '',
-    moves: data.moves as UnlinkedLinkMove[],
-  };
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'code' in data &&
+    data.code === STORE_LINK_MOVE_CONFIRMATION_REQUIRED
+  );
 }
 
 export function linkIssueErrorMessage(

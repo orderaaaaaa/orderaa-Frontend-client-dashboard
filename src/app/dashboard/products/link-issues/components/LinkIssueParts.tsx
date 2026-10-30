@@ -69,7 +69,7 @@ export function VariantRefCard({ heading, variant }: VariantRefCardProps) {
       <p className="font-semibold text-gray-900 truncate">{variant.productName}</p>
       <p className="text-sm text-gray-700">{variant.label}</p>
       <p className="text-xs text-gray-500" dir="ltr">
-        SKU: {variant.sku ?? t('linkIssues.common.noSku')}
+        {t('linkIssues.common.sku')}: {variant.sku ?? t('linkIssues.common.noSku')}
       </p>
       <CountsInline
         counts={{

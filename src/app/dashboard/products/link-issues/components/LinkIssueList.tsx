@@ -22,7 +22,6 @@ interface LinkIssueListProps<T> {
   onPageChange: (page: number) => void;
   getKey: (item: T) => string;
   renderItem: (item: T) => ReactNode;
-  emptyTitle?: string;
 }
 
 export function LinkIssueList<T>({
@@ -31,7 +30,6 @@ export function LinkIssueList<T>({
   onPageChange,
   getKey,
   renderItem,
-  emptyTitle,
 }: LinkIssueListProps<T>) {
   const { t } = useI18n();
 
@@ -57,7 +55,7 @@ export function LinkIssueList<T>({
   const rows = query.data?.data ?? [];
 
   if (rows.length === 0) {
-    return <EmptyState title={emptyTitle ?? t('linkIssues.common.empty')} />;
+    return <EmptyState title={t('linkIssues.common.empty')} />;
   }
 
   return (

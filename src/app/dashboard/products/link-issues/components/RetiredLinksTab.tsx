@@ -1,20 +1,24 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n/I18nProvider';
-import { productsApi } from '../../api/products';
-import { productKeys } from '../../hooks/queryKeys';
+import { useMergeProductDetails } from '../../hooks/useMergeProducts';
 import { variantDisplayLabel } from '../../utils/mergePlan';
-import { useMoveRetiredLinks, useRetiredLinkPreview, useRetiredLinks } from '../hooks/useLinkIssues';
+import {
+  useDismissLinkIssue,
+  useMoveRetiredLinks,
+  useRetiredLinkPreview,
+  useRetiredLinks,
+} from '../hooks/useLinkIssues';
+import { LINK_ISSUE_TYPE } from '../types/linkIssues';
 import type { RetiredLinkIssue, RetiredLinkPreviewParams } from '../types/linkIssues';
 import { linkIssueErrorMessage } from '../utils/linkIssueErrors';
 import { ItemSelect } from './ItemSelect';
 import { IssuePreviewDialog } from './IssuePreviewDialog';
 import { IssueRowShell, VariantRefCard } from './LinkIssueParts';
 import { LinkIssueList, LINK_ISSUE_PAGE_LIMIT } from './LinkIssueList';
-import { toast } from 'react-toastify';
 
 function RetiredLinkRow({
   issue,
@@ -24,26 +28,51 @@ function RetiredLinkRow({
   onPreview: (params: RetiredLinkPreviewParams) => void;
 }) {
   const { t } = useI18n();
-  const detailQuery = useQuery({
-    queryKey: productKeys.detail(issue.variant.productId),
-    queryFn: () => productsApi.getDetail(issue.variant.productId),
-  });
-  const options = (detailQuery.data?.variants ?? [])
+  const details = useMergeProductDetails([issue.variant.productId]);
+  const dismiss = useDismissLinkIssue();
+  const options = (details.details[0]?.variants ?? [])
     .filter((variant) => variant.id !== issue.variant.variantId)
     .map((variant) => ({ id: variant.id, label: variantDisplayLabel(variant) }));
   const [targetId, setTargetId] = useState<number | null>(issue.suggestedTarget?.variantId ?? null);
 
+  const handleDismiss = async () => {
+    try {
+      await dismiss.mutateAsync({
+        issueType: LINK_ISSUE_TYPE.RETIRED_WITH_LINKS,
+        issueKey: issue.issueKey,
+        confirm: true,
+      });
+      toast.success(t('linkIssues.common.dismissed'));
+    } catch (error) {
+      toast.error(linkIssueErrorMessage(error, t('linkIssues.common.actionFailed')));
+    }
+  };
+
   return (
     <IssueRowShell
       actions={
-        <Button
-          type="button"
-          size="sm"
-          disabled={targetId === null}
-          onClick={() => targetId !== null && onPreview({ variantId: issue.variant.variantId, targetVariantId: targetId })}
-        >
-          {t('linkIssues.common.preview')}
-        </Button>
+        <>
+          <Button
+            type="button"
+            size="sm"
+            disabled={targetId === null}
+            onClick={() =>
+              targetId !== null &&
+              onPreview({ variantId: issue.variant.variantId, targetVariantId: targetId })
+            }
+          >
+            {t('linkIssues.common.preview')}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={dismiss.isPending}
+            onClick={handleDismiss}
+          >
+            {t('linkIssues.common.dismiss')}
+          </Button>
+        </>
       }
     >
       <VariantRefCard heading={t('linkIssues.retired.retiredVariant')} variant={issue.variant} />
@@ -53,8 +82,10 @@ function RetiredLinkRow({
           value={targetId}
           options={options}
           onChange={setTargetId}
-          placeholder={issue.suggestedTarget ? issue.suggestedTarget.label : t('linkIssues.retired.noTarget')}
-          disabled={detailQuery.isLoading || options.length === 0}
+          placeholder={
+            issue.suggestedTarget ? issue.suggestedTarget.label : t('linkIssues.retired.noTarget')
+          }
+          disabled={details.isPending || options.length === 0}
           ariaLabel={t('linkIssues.retired.target')}
         />
       </div>
@@ -90,9 +121,7 @@ export function RetiredLinksTab() {
         page={page}
         onPageChange={setPage}
         getKey={(issue) => issue.issueKey}
-        renderItem={(issue) => (
-          <RetiredLinkRow issue={issue} onPreview={setPreviewParams} />
-        )}
+        renderItem={(issue) => <RetiredLinkRow issue={issue} onPreview={setPreviewParams} />}
       />
 
       <IssuePreviewDialog

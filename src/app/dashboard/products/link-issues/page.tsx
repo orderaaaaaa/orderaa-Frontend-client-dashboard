@@ -15,7 +15,6 @@ import { LookAlikeVariantsTab } from './components/LookAlikeVariantsTab';
 import { RetiredLinksTab } from './components/RetiredLinksTab';
 import { UnlinkedStoreItemsTab } from './components/UnlinkedStoreItemsTab';
 import { useLinkIssueCounts } from './hooks/useLinkIssues';
-import { useIntegrationConfigs } from './hooks/useIntegrationConfigs';
 
 const TAB = {
   DUPLICATES: 'duplicates',

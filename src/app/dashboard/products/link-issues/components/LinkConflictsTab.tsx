@@ -65,7 +65,7 @@ export function LinkConflictsTab() {
               </span>
               <span dir="ltr" className="font-mono text-xs">{issue.externalId}</span>
               <span className="text-xs text-gray-500" dir="ltr">
-                SKU: {issue.externalSku ?? t('linkIssues.common.noSku')}
+                {t('linkIssues.common.sku')}: {issue.externalSku ?? t('linkIssues.common.noSku')}
               </span>
               <Badge variant="secondary">
                 {t(`linkIssues.conflicts.source.${issue.source}`)}

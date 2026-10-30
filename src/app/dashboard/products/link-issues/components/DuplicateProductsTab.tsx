@@ -8,7 +8,12 @@ import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useMergeProductDetails } from '../../hooks/useMergeProducts';
 import { variantDisplayLabel } from '../../utils/mergePlan';
-import { useDismissLinkIssue, useDuplicateProductPreview, useDuplicateProducts, useMergeDuplicateProduct } from '../hooks/useLinkIssues';
+import {
+  useDismissLinkIssue,
+  useDuplicateProductPreview,
+  useDuplicateProducts,
+  useMergeDuplicateProduct,
+} from '../hooks/useLinkIssues';
 import type { DuplicateProductPreviewParams, DuplicateProductIssue } from '../types/linkIssues';
 import { LINK_ISSUE_TYPE } from '../types/linkIssues';
 import { linkIssueErrorMessage } from '../utils/linkIssueErrors';
@@ -123,7 +128,7 @@ export function DuplicateProductsTab() {
                 <p className="text-xs text-gray-500">{t('linkIssues.duplicates.fromStore')}</p>
                 <p className="font-semibold text-gray-900">{issue.source.name}</p>
                 <p className="text-xs text-gray-500" dir="ltr">
-                  SKU: {issue.source.sku ?? t('linkIssues.common.noSku')}
+                  {t('linkIssues.common.sku')}: {issue.source.sku ?? t('linkIssues.common.noSku')}
                 </p>
                 <StoreLinkBadges links={issue.source.storeLinks} />
               </div>
@@ -131,7 +136,7 @@ export function DuplicateProductsTab() {
                 <p className="text-xs text-gray-500">{t('linkIssues.duplicates.ourProduct')}</p>
                 <p className="font-semibold text-gray-900">{issue.target.name}</p>
                 <p className="text-xs text-gray-500" dir="ltr">
-                  SKU: {issue.target.sku ?? t('linkIssues.common.noSku')}
+                  {t('linkIssues.common.sku')}: {issue.target.sku ?? t('linkIssues.common.noSku')}
                 </p>
               </div>
             </div>

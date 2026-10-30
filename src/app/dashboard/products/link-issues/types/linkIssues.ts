@@ -18,24 +18,13 @@ export const LINK_CONFLICT_RESOLUTION = {
 export type LinkConflictResolution =
   (typeof LINK_CONFLICT_RESOLUTION)[keyof typeof LINK_CONFLICT_RESOLUTION];
 
-export const STORE_LINK_CONFLICT_STATUS = {
-  OPEN: 'OPEN',
-  MOVED: 'MOVED',
-  KEPT: 'KEPT',
-} as const;
-
-export type StoreLinkConflictStatus =
-  (typeof STORE_LINK_CONFLICT_STATUS)[keyof typeof STORE_LINK_CONFLICT_STATUS];
-
-export const STORE_LINK_CONFLICT_SOURCE = {
-  PRODUCT_SYNC: 'PRODUCT_SYNC',
-  ORDER_WEBHOOK: 'ORDER_WEBHOOK',
-  MISSING_ORDER_RECOVERY: 'MISSING_ORDER_RECOVERY',
-  MANUAL_LINK: 'MANUAL_LINK',
-} as const;
+export type StoreLinkConflictStatus = 'OPEN' | 'MOVED' | 'KEPT';
 
 export type StoreLinkConflictSource =
-  (typeof STORE_LINK_CONFLICT_SOURCE)[keyof typeof STORE_LINK_CONFLICT_SOURCE];
+  | 'PRODUCT_SYNC'
+  | 'ORDER_WEBHOOK'
+  | 'MISSING_ORDER_RECOVERY'
+  | 'MANUAL_LINK';
 
 export const UNLINKED_SUGGESTION_KIND = {
   MATCHED: 'MATCHED',
@@ -46,12 +35,7 @@ export const UNLINKED_SUGGESTION_KIND = {
 export type UnlinkedSuggestionKind =
   (typeof UNLINKED_SUGGESTION_KIND)[keyof typeof UNLINKED_SUGGESTION_KIND];
 
-export const LINK_KIND = {
-  PRODUCT: 'PRODUCT',
-  VARIANT: 'VARIANT',
-} as const;
-
-export type LinkKind = (typeof LINK_KIND)[keyof typeof LINK_KIND];
+export type LinkKind = 'PRODUCT' | 'VARIANT';
 
 export interface LinkIssuePage<T> {
   data: T[];
@@ -260,13 +244,6 @@ export interface UnlinkedLinkResult {
   moves: UnlinkedLinkMove[];
   created: number;
   moved: number;
-}
-
-export interface UnlinkedLinkMoveConflictBody {
-  statusCode: number;
-  code: 'STORE_LINK_MOVE_CONFIRMATION_REQUIRED';
-  message: string;
-  moves: UnlinkedLinkMove[];
 }
 
 export interface LinkIssueDismissBody {

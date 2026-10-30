@@ -5,10 +5,10 @@ import { toast } from 'react-toastify';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/state-panels';
+import { useIntegrations } from '@/app/dashboard/integrations/hooks/useIntegrations';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useMergeProductDetails } from '../../hooks/useMergeProducts';
 import { variantDisplayLabel } from '../../utils/mergePlan';
-import { useIntegrationConfigs } from '../hooks/useIntegrationConfigs';
 import {
   usePlanUnlinkedLinks,
   useSaveUnlinkedLinks,
@@ -20,21 +20,21 @@ import type {
   UnlinkedStoreItem,
 } from '../types/linkIssues';
 import { UNLINKED_SUGGESTION_KIND } from '../types/linkIssues';
-import { linkIssueErrorMessage, unlinkedMoveConflictOf } from '../utils/linkIssueErrors';
-import { ItemSelect } from './ItemSelect';
-import { ProductPicker } from './ProductPicker';
+import { isUnlinkedMoveConflict, linkIssueErrorMessage } from '../utils/linkIssueErrors';
 import { IssuePreviewDialog } from './IssuePreviewDialog';
 import { IssueRowShell, providerLabel } from './LinkIssueParts';
 import { LinkIssueList, LINK_ISSUE_PAGE_LIMIT } from './LinkIssueList';
+import { ItemSelect } from './ItemSelect';
+import { ProductPicker } from './ProductPicker';
 
-interface Pick {
+interface RowPick {
   productId: number;
   variantId: number | null;
 }
 
 interface PendingPick {
   item: UnlinkedStoreItem;
-  pick: Pick | null;
+  pick: RowPick | null;
 }
 
 interface PlanState {
@@ -46,7 +46,7 @@ interface PlanState {
 const linkKeyOf = (link: { externalProductId: string; externalVariantId: string | null }) =>
   `${link.externalProductId}|${link.externalVariantId ?? ''}`;
 
-const suggestedPick = (item: UnlinkedStoreItem): Pick | null => {
+const suggestedPick = (item: UnlinkedStoreItem): RowPick | null => {
   const { suggestion } = item;
   if (suggestion.kind !== UNLINKED_SUGGESTION_KIND.MATCHED || suggestion.productId === null) {
     return null;
@@ -54,7 +54,7 @@ const suggestedPick = (item: UnlinkedStoreItem): Pick | null => {
   return { productId: suggestion.productId, variantId: suggestion.variantId };
 };
 
-const entryOf = (item: UnlinkedStoreItem, pick: Pick | null): UnlinkedLinkEntry | null => {
+const entryOf = (item: UnlinkedStoreItem, pick: RowPick | null): UnlinkedLinkEntry | null => {
   if (!pick) return null;
   if (item.externalVariantId !== null && pick.variantId === null) return null;
   return {
@@ -68,13 +68,15 @@ const entryOf = (item: UnlinkedStoreItem, pick: Pick | null): UnlinkedLinkEntry 
 function UnlinkedItemRow({
   item,
   pick,
+  suggested,
   onPickChange,
   canReadProducts,
   storeLabel,
 }: {
   item: UnlinkedStoreItem;
-  pick: Pick | null;
-  onPickChange: (pick: Pick | null) => void;
+  pick: RowPick | null;
+  suggested: RowPick | null;
+  onPickChange: (pick: RowPick | null) => void;
   canReadProducts: boolean;
   storeLabel: string;
 }) {
@@ -88,9 +90,11 @@ function UnlinkedItemRow({
   return (
     <IssueRowShell
       actions={
-        <Badge variant={pick ? 'default' : 'outline'}>
-          {pick ? t('linkIssues.unlinked.picked') : t('linkIssues.unlinked.notPicked')}
-        </Badge>
+        !pick && suggested !== null ? (
+          <Button type="button" size="sm" onClick={() => onPickChange(suggested)}>
+            {t('linkIssues.unlinked.confirmSuggestion')}
+          </Button>
+        ) : null
       }
     >
       <div className="flex flex-wrap items-center gap-2 text-sm text-gray-700">
@@ -106,7 +110,9 @@ function UnlinkedItemRow({
           {item.externalProductId}
           {item.externalVariantId ? ` / ${item.externalVariantId}` : ''}
         </span>
-        <span dir="ltr">SKU: {item.externalSku ?? t('linkIssues.common.noSku')}</span>
+        <span dir="ltr">
+          {t('linkIssues.common.sku')}: {item.externalSku ?? t('linkIssues.common.noSku')}
+        </span>
         <span>{t(`linkIssues.unlinked.suggestion.${item.suggestion.kind}`)}</span>
       </div>
       <div className="grid gap-2 md:grid-cols-2">
@@ -134,28 +140,25 @@ function UnlinkedItemRow({
   );
 }
 
-interface UnlinkedStoreItemsTabProps {
-  canRead: boolean;
+interface UnlinkedStoreItemsContentProps {
   canReadProducts: boolean;
   canManage: boolean;
   onTotalChange: (total: number | undefined) => void;
 }
 
-export function UnlinkedStoreItemsTab({
-  canRead,
+function UnlinkedStoreItemsContent({
   canReadProducts,
   canManage,
   onTotalChange,
-}: UnlinkedStoreItemsTabProps) {
+}: UnlinkedStoreItemsContentProps) {
   const { t } = useI18n();
-  const configsQuery = useIntegrationConfigs(canRead);
-  const configs = configsQuery.data ?? [];
+  const { integrations = [] } = useIntegrations();
   const [configId, setConfigId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
   const [picks, setPicks] = useState<Record<string, PendingPick>>({});
   const [planState, setPlanState] = useState<PlanState | null>(null);
   const listQuery = useUnlinkedStoreItems(
-    canRead && configId !== null ? { configId, page, limit: LINK_ISSUE_PAGE_LIMIT } : null,
+    configId !== null ? { configId, page, limit: LINK_ISSUE_PAGE_LIMIT } : null,
   );
   const plan = usePlanUnlinkedLinks();
   const save = useSaveUnlinkedLinks();
@@ -168,21 +171,16 @@ export function UnlinkedStoreItemsTab({
 
   const entries = useMemo(() => {
     const collected = new Map<string, UnlinkedLinkEntry>();
-    for (const item of items) {
-      const pending = picks[item.issueKey];
-      const entry = entryOf(item, pending ? pending.pick : suggestedPick(item));
-      if (entry) collected.set(linkKeyOf(entry), entry);
-    }
     for (const pending of Object.values(picks)) {
       const entry = entryOf(pending.item, pending.pick);
       if (entry) collected.set(linkKeyOf(entry), entry);
     }
     return [...collected.values()];
-  }, [items, picks]);
+  }, [picks]);
 
   const itemsByKey = useMemo(() => {
     const byKey = new Map<string, UnlinkedStoreItem>();
-    for (const item of items) byKey.set(`${item.externalProductId}|${item.externalVariantId ?? ''}`, item);
+    for (const item of items) byKey.set(linkKeyOf(item), item);
     for (const pending of Object.values(picks)) {
       byKey.set(linkKeyOf(pending.item), pending.item);
     }
@@ -235,7 +233,7 @@ export function UnlinkedStoreItemsTab({
       setPlanState(null);
       setPicks({});
     } catch (error) {
-      if (unlinkedMoveConflictOf(error)) {
+      if (isUnlinkedMoveConflict(error)) {
         toast.error(t('linkIssues.unlinked.moveChanged'));
         await runPlan(planState.configId, planState.links);
         return;
@@ -244,11 +242,7 @@ export function UnlinkedStoreItemsTab({
     }
   };
 
-  if (!canRead) {
-    return <EmptyState title={t('linkIssues.unlinked.noPermission')} />;
-  }
-
-  const storeOptions = configs.map((config) => ({
+  const storeOptions = integrations.map((config) => ({
     id: config.id,
     label: `${providerLabel(config.provider)} - ${config.store?.name ?? `#${config.storeId}`}`,
   }));
@@ -288,7 +282,8 @@ export function UnlinkedStoreItemsTab({
             renderItem={(item) => (
               <UnlinkedItemRow
                 item={item}
-                pick={picks[item.issueKey] ? picks[item.issueKey].pick : suggestedPick(item)}
+                pick={picks[item.issueKey]?.pick ?? null}
+                suggested={suggestedPick(item)}
                 canReadProducts={canReadProducts}
                 storeLabel={item.storeName ?? t('linkIssues.common.storeId', { storeId: item.storeId })}
                 onPickChange={(pick) =>
@@ -369,5 +364,33 @@ export function UnlinkedStoreItemsTab({
         )}
       </IssuePreviewDialog>
     </div>
+  );
+}
+
+interface UnlinkedStoreItemsTabProps {
+  canRead: boolean;
+  canReadProducts: boolean;
+  canManage: boolean;
+  onTotalChange: (total: number | undefined) => void;
+}
+
+export function UnlinkedStoreItemsTab({
+  canRead,
+  canReadProducts,
+  canManage,
+  onTotalChange,
+}: UnlinkedStoreItemsTabProps) {
+  const { t } = useI18n();
+
+  if (!canRead) {
+    return <EmptyState title={t('linkIssues.unlinked.noPermission')} />;
+  }
+
+  return (
+    <UnlinkedStoreItemsContent
+      canReadProducts={canReadProducts}
+      canManage={canManage}
+      onTotalChange={onTotalChange}
+    />
   );
 }
