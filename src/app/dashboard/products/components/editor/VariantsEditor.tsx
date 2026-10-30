@@ -6,6 +6,7 @@ import { Link2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import type { ProductDetail, ProductDetailVariant } from '../../types/products';
+import { VariantStoreLinks } from './VariantStoreLinks';
 import { PRODUCT_EDIT_LIMITS } from '../../types/products';
 import { VARIANT_DELETE_REASON_LABELS } from '../../utils/productApiError';
 import { CompactField } from '../CompactField';
@@ -249,6 +250,7 @@ export function VariantsEditor({
       render: (_value, row) => (
         <div className="space-y-1">
           {renderIdentity(row)}
+          <VariantStoreLinks links={row.variant?.storeLinks ?? []} />
           {renderRowError(row)}
         </div>
       ),

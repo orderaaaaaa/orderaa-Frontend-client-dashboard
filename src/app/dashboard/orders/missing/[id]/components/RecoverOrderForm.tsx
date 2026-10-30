@@ -21,7 +21,11 @@ import { locationSaveErrorTextOf } from '@/types/locationOptions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useRecoverMissingOrder } from '@/services/missingOrders';
 import { StoreLinkMoveConfirmModal } from '@/components/storeLinks/StoreLinkMoveConfirmModal';
-import { isStoreLinkMoveConfirmationBody, type StoreLinkMove } from '@/types/storeLinks';
+import {
+  isStoreLinkChangedConcurrentlyBody,
+  isStoreLinkMoveConfirmationBody,
+  type StoreLinkMove,
+} from '@/types/storeLinks';
 import { useI18n } from '@/i18n/I18nProvider';
 import { blockedStoreLinesOf, capturedStoreLineIndexes } from '@/utils/manualOrder/storeLineLinks';
 import type {
@@ -127,6 +131,11 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
         return;
       }
 
+      if (status === 409 && isStoreLinkChangedConcurrentlyBody(body)) {
+        toast.error(t('storeLinks.recover.changedConcurrently'));
+        return;
+      }
+
       if (
         status === 409 &&
         isMissingOrderErrorBody(body) &&
@@ -214,7 +223,9 @@ export function RecoverOrderForm({ id, row }: RecoverOrderFormProps) {
     if (!pendingStoreLinkMoves) return;
     await submitRecovery({
       ...pendingStoreLinkMoves.payload,
-      confirmStoreLinkMoves: pendingStoreLinkMoves.moves.map((move) => move.sourceIndex),
+      confirmStoreLinkMoves: Array.from(
+        new Set(pendingStoreLinkMoves.moves.map((move) => move.sourceIndex)),
+      ),
     });
   };
 

@@ -695,6 +695,13 @@ const en: Record<keyof typeof ar, string> = {
   'canonical.shipping.noListCarrier': 'There is no governorate list for {carrier} yet.',
   'canonical.shipping.phoneLabel': 'Phone number',
   'storeLinks.recover.unlinkedBlocked': 'Link each store product to its selected item before recovering',
+  'storeLinks.recover.changedConcurrently': 'The store link changed while saving. Try again.',
+  'storeLinks.moveConfirm.product': 'This store product is currently linked to product {fromProductName}. Do you want to move the link to the selected product?',
+  'storeLinks.moveConfirm.productStock': 'The store stock link with {fromProductName} will also be moved.',
+  'storeLinks.variant.heading': 'Store links',
+  'storeLinks.variant.store': 'Store #{storeId}',
+  'storeLinks.variant.storeUnknown': 'Unknown store',
+  'storeLinks.variant.externalSku': 'Store SKU: {sku}',
   'storeLinks.moveConfirm.title': 'Confirm link move',
   'storeLinks.moveConfirm.line':
     'This store product is currently linked to {fromProductName} / {fromVariantLabel}. Do you want to move the link to the selected variant?',

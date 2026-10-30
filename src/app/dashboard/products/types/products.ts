@@ -407,6 +407,7 @@ export interface ProductDetailExternalSource {
   provider: IntegrationProvider;
   externalId: string;
   storeId: number | null;
+  externalSku: string | null;
 }
 
 export interface ProductDetailOption {
@@ -427,6 +428,13 @@ export interface ProductDetailVariantLabel {
   option: string;
 }
 
+export interface ProductDetailVariantStoreLink {
+  provider: IntegrationProvider;
+  storeId: number | null;
+  externalId: string;
+  externalSku: string | null;
+}
+
 export interface ProductDetailVariant {
   id: number;
   combinationKey: string;
@@ -439,6 +447,7 @@ export interface ProductDetailVariant {
   deletable: boolean;
   notDeletableReason: VariantDeleteBlocker | null;
   deleteConfirmation: VariantDeleteConfirmation | null;
+  storeLinks: ProductDetailVariantStoreLink[];
 }
 
 export interface ProductDetailSpecification {

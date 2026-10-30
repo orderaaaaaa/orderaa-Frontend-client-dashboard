@@ -708,6 +708,13 @@ const ar = {
   'canonical.shipping.noListCarrier': 'لا توجد قائمة محافظات لشركة {carrier} بعد.',
   'canonical.shipping.phoneLabel': 'رقم الهاتف',
   'storeLinks.recover.unlinkedBlocked': 'اربط كل منتج من بيانات المتجر بالصنف المختار قبل الاسترجاع',
+  'storeLinks.recover.changedConcurrently': 'تغيّر ربط المتجر أثناء الحفظ، أعد المحاولة',
+  'storeLinks.moveConfirm.product': 'منتج المتجر مربوط حالياً بالمنتج {fromProductName}. هل تريد نقل الربط إلى المنتج المختار؟',
+  'storeLinks.moveConfirm.productStock': 'ربط مخزون المنتج في المتجر مع {fromProductName} سيُنقل أيضاً',
+  'storeLinks.variant.heading': 'روابط المتاجر',
+  'storeLinks.variant.store': 'المتجر #{storeId}',
+  'storeLinks.variant.storeUnknown': 'متجر غير محدد',
+  'storeLinks.variant.externalSku': 'SKU المتجر: {sku}',
   'storeLinks.moveConfirm.title': 'تأكيد نقل الربط',
   'storeLinks.moveConfirm.line':
     'هذا المنتج في المتجر مربوط حالياً بـ {fromProductName} / {fromVariantLabel}. هل تريد نقل الربط إلى الصنف المختار؟',
