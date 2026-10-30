@@ -3,6 +3,7 @@ import { translate } from '@/i18n/translate';
 import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
 import {
   OUTBOUND_INSUFFICIENT_STOCK_CODE,
+  AVAILABLE_WAREHOUSE_NOT_SET_CODE,
   type BatchShortageOrder,
   type OutboundInsufficientStockBody,
   type OutboundShortageLineApi,
@@ -25,7 +26,7 @@ export function getApiErrorMessage(err: unknown, fallback: string): string {
     }
   )?.response?.data;
 
-  if (data?.code === 'AVAILABLE_WAREHOUSE_NOT_SET') {
+  if (data?.code === AVAILABLE_WAREHOUSE_NOT_SET_CODE) {
     return translate(readStoredLocale(), 'orderDetails.stock.availableWarehouseNotSet');
   }
 
@@ -149,6 +150,12 @@ export function formatStockShortageLines(
 
 function formatBatchShortageRow(order: BatchShortageOrder): string {
   const locale = readStoredLocale();
+  if (order.reason === AVAILABLE_WAREHOUSE_NOT_SET_CODE) {
+    return [
+      order.orderCode,
+      translate(locale, 'orderDetails.stock.availableWarehouseNotSet'),
+    ].join(' - ');
+  }
   const reason = translate(
     locale,
     order.reason === 'CONFIRMATION_BLOCKED'

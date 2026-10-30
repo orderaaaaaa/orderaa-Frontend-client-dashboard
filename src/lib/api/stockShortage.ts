@@ -1,4 +1,5 @@
 export const OUTBOUND_INSUFFICIENT_STOCK_CODE = 'OUTBOUND_INSUFFICIENT_STOCK';
+export const AVAILABLE_WAREHOUSE_NOT_SET_CODE = 'AVAILABLE_WAREHOUSE_NOT_SET';
 
 export interface ShortageLineApi {
   variantId: number;
@@ -41,7 +42,7 @@ export interface OutboundInsufficientStockBody {
 
 export interface BatchShortageOrder {
   orderCode: string;
-  reason: 'SHORTAGE' | 'CONFIRMATION_BLOCKED';
+  reason: 'SHORTAGE' | 'CONFIRMATION_BLOCKED' | typeof AVAILABLE_WAREHOUSE_NOT_SET_CODE;
   warehouseName?: string;
   lines: ShortageRenderLine[];
 }

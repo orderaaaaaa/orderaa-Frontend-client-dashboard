@@ -13,8 +13,10 @@ import type {
   OrderSystemFailure,
   ShipmentCarrierSendDetails,
 } from '@/types/orderSystemFailures';
+import { AVAILABLE_WAREHOUSE_NOT_SET_CODE } from '@/lib/api/stockShortage';
 import { formatStockShortageLines } from '@/utils/apiError';
 import CopyableCode from '@/components/ui/copyable-code';
+import { AvailableWarehouseNotSetNotice } from './AvailableWarehouseNotSetNotice';
 import { CancelledLaneAppliedDetails, CancelledLaneStockDetails } from './CancelledLaneDetails';
 import { CarrierDetails } from './CarrierDetails';
 import { DetailField, DetailGrid, EMPTY_VALUE, formatDetailValue } from './DetailFields';
@@ -253,6 +255,11 @@ export function FailureDetails({
       return <AllBypassedDetails details={narrowed.details} />;
     case 'STOCK_TRANSITION_BLOCKED':
       return <StockTransitionBlockedDetails details={narrowed.details} />;
+    case 'MACHINE_TRANSITION_STOCK_SHORTAGE':
+      if (narrowed.details.errorCode === AVAILABLE_WAREHOUSE_NOT_SET_CODE) {
+        return <AvailableWarehouseNotSetNotice />;
+      }
+      return failure.details ? <GenericDetails details={failure.details} /> : null;
     case 'SCHEDULED_TRANSITION_FAILED':
       return (
         <div className="flex flex-col gap-3">

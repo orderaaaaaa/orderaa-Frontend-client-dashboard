@@ -353,7 +353,8 @@ const isStockTransitionBlocked = (value: unknown): value is StockTransitionBlock
   (value.ruleId === null || typeof value.ruleId === 'number') &&
   isStringOrNull(value.warehouseName) &&
   (value.lines === undefined ||
-    (Array.isArray(value.lines) && value.lines.every(isFailureStockShortageLine)));
+    (Array.isArray(value.lines) && value.lines.every(isFailureStockShortageLine))) &&
+  (value.errorCode === undefined || isStringOrNull(value.errorCode));
 
 const isMachineTransitionStockShortage = (
   value: unknown
@@ -364,7 +365,8 @@ const isMachineTransitionStockShortage = (
     value.job === 'PARKED_RELEASE' ||
     value.job === 'SHADOW_RELEASE') &&
   isStringOrNull(value.fromStatus) &&
-  isString(value.intendedStatus);
+  isString(value.intendedStatus) &&
+  (value.errorCode === undefined || isStringOrNull(value.errorCode));
 
 const isStoreCreateCreationStockShortage = (
   value: unknown

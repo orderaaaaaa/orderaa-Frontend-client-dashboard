@@ -5,6 +5,8 @@ import type {
   FailureStockShortageBlock,
   StockTransitionBlockedDetails as StockTransitionBlockedPayload,
 } from '@/types/orderSystemFailures';
+import { AVAILABLE_WAREHOUSE_NOT_SET_CODE } from '@/lib/api/stockShortage';
+import { AvailableWarehouseNotSetNotice } from './AvailableWarehouseNotSetNotice';
 import { DetailField, DetailGrid } from './DetailFields';
 import { StockShortageDetails } from './StockShortageDetails';
 
@@ -55,6 +57,7 @@ export function StockTransitionBlockedDetails({
           {showWarehouse && <DetailField label="المخزن">{details.warehouseName}</DetailField>}
         </DetailGrid>
       )}
+      {details.errorCode === AVAILABLE_WAREHOUSE_NOT_SET_CODE && <AvailableWarehouseNotSetNotice />}
       {shortage && <StockShortageDetails shortage={shortage} />}
     </div>
   );
