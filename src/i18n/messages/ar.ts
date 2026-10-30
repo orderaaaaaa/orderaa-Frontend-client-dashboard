@@ -156,6 +156,7 @@ const ar = {
   'stockShortage.lineNoVariant': '{product}: المطلوب {required}، المتاح {available}',
   'stockShortage.returnLine': '{label}: مطلوب {required}، المتاح {available} في {warehouse}',
   'returnStock.exceedsAvailable': 'الكمية أكبر من المتاح',
+  'returnStock.variantUnresolved': 'تعذر تحديد المتغير لهذا الصنف',
   'returnStock.uncovered': 'لا يوجد مخزن استلام لهذا الصنف — تواصل مع الإدارة',
   'returnStock.loadFailed': 'تعذر تحميل المخزون، أعد المحاولة',
   'returnStock.retry': 'إعادة المحاولة',

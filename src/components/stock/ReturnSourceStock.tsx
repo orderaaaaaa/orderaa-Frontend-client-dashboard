@@ -8,6 +8,7 @@ import type { ReturnStockLine } from '@/lib/api/suppliers';
 
 export interface ReturnStockCell {
   warehouseName: string | null;
+  variantResolved: boolean;
   available: number;
   requested: number;
 }
@@ -54,6 +55,7 @@ export function buildReturnStockCells(
     if (!line) continue;
     cells[request.key] = {
       warehouseName: line.warehouseName,
+      variantResolved: line.variantId !== null,
       available: line.available,
       requested: requestedByGroup[groupKeyOf(line)] ?? 0,
     };
@@ -68,7 +70,7 @@ export function isReturnStockExceeded(cell: ReturnStockCell): boolean {
 
 export function isReturnStockBlocked(cell: ReturnStockCell): boolean {
   if (cell.requested <= 0) return false;
-  return cell.warehouseName === null || isReturnStockExceeded(cell);
+  return !cell.variantResolved || cell.warehouseName === null || isReturnStockExceeded(cell);
 }
 
 export function isReturnStockBlocking(state: ReturnStockState): boolean {
@@ -89,6 +91,12 @@ interface ReturnSourceStockProps {
 
 export function ReturnSourceStock({ cell }: ReturnSourceStockProps) {
   const { t } = useI18n();
+
+  if (!cell.variantResolved) {
+    return (
+      <span className="text-xs font-semibold text-red-600">{t('returnStock.variantUnresolved')}</span>
+    );
+  }
 
   if (cell.warehouseName === null) {
     return (

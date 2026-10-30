@@ -468,11 +468,10 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
           <label className="text-sm font-medium text-gray-700">
             {isReturn ? 'مخزن صرف المرتجع' : 'مخزن الاستلام'}
           </label>
-          {isReturn ? (
-            <Input value={returnWarehouseNames || '—'} disabled />
-          ) : (
-          /* Clearable: leaving it empty is the normal path, so there has to
-              be a way back to it after picking a warehouse by mistake. */
+          {isReturn && <Input value={returnWarehouseNames || '—'} disabled />}
+          {/* Clearable: leaving it empty is the normal path, so there has to
+              be a way back to it after picking a warehouse by mistake. */}
+          {!isReturn && (
           <SearchableSelect
             options={warehouseOptions}
             value={warehouseId}
