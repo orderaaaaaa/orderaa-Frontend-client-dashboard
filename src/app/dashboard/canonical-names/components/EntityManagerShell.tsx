@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import Link from 'next/link';
 import { CircleHelp, ListChecks, Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyPanel } from '@/components/entity-manager/StateViews';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { useI18n } from '@/i18n/I18nProvider';
-import { PERMISSION_CODES } from '@/lib/permissions';
 import {
   CANONICAL_DOMAIN_CONFIGS,
   CANONICAL_NAV_DOMAINS,
@@ -34,9 +33,13 @@ export interface EntityManagerShellProps {
   children?: ReactNode;
 }
 
-function DisabledReason({ text }: { text?: string }) {
+function DisabledReason({ id, text }: { id: string; text?: string }) {
   if (!text) return null;
-  return <span className="text-xs text-muted-foreground">{text}</span>;
+  return (
+    <span id={id} className="text-xs text-muted-foreground">
+      {text}
+    </span>
+  );
 }
 
 export function EntityManagerShell({
@@ -52,7 +55,11 @@ export function EntityManagerShell({
   children,
 }: EntityManagerShellProps) {
   const { t } = useI18n();
-  const canManage = useHasPermission(PERMISSION_CODES.CANONICAL_NAMES_MANAGE);
+  const canManage = useHasPermission(config.permissions.manage);
+  const refreshReasonId = useId();
+  const createReasonId = useId();
+  const refreshReason = refresh?.disabled ? refresh.disabledReason : undefined;
+  const createReason = primaryAction?.disabled ? primaryAction.disabledReason : undefined;
 
   return (
     <div className="w-full max-w-full overflow-x-hidden sm:px-8 py-4 flex flex-col gap-5">
@@ -82,20 +89,31 @@ export function EntityManagerShell({
             )}
             {canManage && config.actions.refresh && refresh && (
               <div className="flex items-center gap-2">
-                <Button type="button" variant="outline" onClick={refresh.onClick} disabled={refresh.disabled}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={refresh.onClick}
+                  disabled={refresh.disabled}
+                  aria-describedby={refreshReason ? refreshReasonId : undefined}
+                >
                   <RefreshCw aria-hidden="true" />
                   {t('canonical.shell.refresh')}
                 </Button>
-                <DisabledReason text={refresh.disabled ? refresh.disabledReason : undefined} />
+                <DisabledReason id={refreshReasonId} text={refreshReason} />
               </div>
             )}
             {canManage && config.showCreate && primaryAction && (
               <div className="flex items-center gap-2">
-                <Button type="button" onClick={primaryAction.onClick} disabled={primaryAction.disabled}>
+                <Button
+                  type="button"
+                  onClick={primaryAction.onClick}
+                  disabled={primaryAction.disabled}
+                  aria-describedby={createReason ? createReasonId : undefined}
+                >
                   <Plus aria-hidden="true" />
                   {t('canonical.shell.createName')}
                 </Button>
-                <DisabledReason text={primaryAction.disabled ? primaryAction.disabledReason : undefined} />
+                <DisabledReason id={createReasonId} text={createReason} />
               </div>
             )}
             <Button

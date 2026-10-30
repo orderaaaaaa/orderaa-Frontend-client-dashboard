@@ -1,5 +1,6 @@
 import type { PluralNoun } from '@/i18n/pluralAr';
 import type { TranslationKey } from '@/i18n/translate';
+import type { PermissionCode } from '@/lib/permissions';
 
 export type QueueItemState = 'unlinked' | 'partial' | 'mixed' | 'linked' | 'implicit' | 'stale';
 
@@ -85,8 +86,8 @@ export interface EntityManagerConfig<TDomain extends string> {
   showCreate: boolean;
   showTabCounts: boolean;
   permissions: {
-    read: string;
-    manage: string;
+    read: PermissionCode;
+    manage: PermissionCode;
   };
   warnMultiContext: boolean;
 }

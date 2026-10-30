@@ -59,7 +59,10 @@ export function ConfirmImpactDialog({
 
   const handleConfirm = async () => {
     setPending(true);
-    await onConfirm().catch(() => undefined);
+    const attempt = async () => {
+      await onConfirm();
+    };
+    await attempt().catch(() => undefined);
     setPending(false);
   };
 
