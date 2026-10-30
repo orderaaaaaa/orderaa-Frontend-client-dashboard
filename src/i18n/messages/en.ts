@@ -398,6 +398,7 @@ const en: Record<keyof typeof ar, string> = {
   'canonical.queue.empty.none': 'No spellings yet. They appear here when this section has data.',
   'canonical.queue.empty.filtered': 'No results match the current search or filter.',
   'canonical.queue.clearFilters': 'Clear search and filters',
+  'canonical.queue.pageSize': 'Rows per page',
   'canonical.queue.loading': 'Loading spellings…',
   'canonical.queue.error': 'Could not load spellings. Check the connection and try again.',
   'canonical.queue.unscoped.title': 'Governorates with unlinked cities',

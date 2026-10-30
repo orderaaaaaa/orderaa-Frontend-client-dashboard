@@ -412,6 +412,7 @@ const ar = {
   'canonical.queue.empty.none': 'لا توجد صيغ بعد. تظهر الصيغ هنا عند وجود بيانات لهذا القسم.',
   'canonical.queue.empty.filtered': 'لا توجد نتائج تطابق البحث أو الفلتر الحالي.',
   'canonical.queue.clearFilters': 'مسح البحث والفلاتر',
+  'canonical.queue.pageSize': 'عدد الصفوف في الصفحة',
   'canonical.queue.loading': 'جاري تحميل الصيغ…',
   'canonical.queue.error': 'تعذر تحميل الصيغ. تحقق من الاتصال ثم أعد المحاولة.',
   'canonical.queue.unscoped.title': 'محافظات لها مدن غير مرتبطة',
