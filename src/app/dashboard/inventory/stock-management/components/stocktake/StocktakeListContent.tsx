@@ -145,7 +145,12 @@ export function StocktakeListContent() {
     {
       key: 'netDelta',
       header: 'صافي الفرق',
-      render: (_value, row) => <VarianceChip delta={row.netDelta} />,
+      render: (_value, row) =>
+        row.status === 'CANCELLED' ? (
+          <span className="text-gray-400">—</span>
+        ) : (
+          <VarianceChip delta={row.netDelta} />
+        ),
     },
     {
       key: 'createdBy',

@@ -313,7 +313,13 @@ export function StocktakeSheetContent({ stocktakeId }: StocktakeSheetContentProp
         />
         <KpiCard
           label="صافي الفرق"
-          value={<VarianceChip delta={summary.netDelta} />}
+          value={
+            summary.status === 'CANCELLED' ? (
+              <span className="text-gray-400">—</span>
+            ) : (
+              <VarianceChip delta={summary.netDelta} />
+            )
+          }
           icon={<Sigma className="size-5" aria-hidden="true" />}
           accent="chart4"
         />
