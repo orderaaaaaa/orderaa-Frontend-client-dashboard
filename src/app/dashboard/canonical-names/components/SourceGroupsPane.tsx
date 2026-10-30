@@ -255,7 +255,8 @@ export default function SourceGroupsPane({
               }
               onViewMembers={
                 domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_NAME ||
-                domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION
+                domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION ||
+                domain === CANONICAL_NAME_DOMAINS.PRODUCT
                   ? () => onViewMembers(group.scopeId, group.normalizedText)
                   : undefined
               }

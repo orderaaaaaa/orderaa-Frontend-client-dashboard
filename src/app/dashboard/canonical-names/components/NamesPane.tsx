@@ -37,7 +37,8 @@ function NameCard({
   });
   const isAttributeDomain =
     domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_NAME ||
-    domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION;
+    domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION ||
+    domain === CANONICAL_NAME_DOMAINS.PRODUCT;
   const countLabel = isAttributeDomain
     ? `مرتبط بـ ${name.rowCount} عنصر في ${name.productCount} منتج`
     : `مرتبط بـ ${name.orderCount} طلب`;

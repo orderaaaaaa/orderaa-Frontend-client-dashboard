@@ -3,6 +3,7 @@ export const CANONICAL_NAME_DOMAINS = {
   ATTRIBUTE_OPTION: 'ATTRIBUTE_OPTION',
   GOVERNORATE: 'GOVERNORATE',
   CITY: 'CITY',
+  PRODUCT: 'PRODUCT',
 } as const;
 
 export type CanonicalNameDomain =
@@ -35,6 +36,7 @@ export const CANONICAL_DOMAIN_ROUTES: Record<
   ATTRIBUTE_OPTION: { segment: 'attribute-options', title: 'قيم الخصائص' },
   GOVERNORATE: { segment: 'governorates', title: 'المحافظات' },
   CITY: { segment: 'cities', title: 'المدن' },
+  PRODUCT: { segment: 'products', title: 'أسماء المنتجات' },
 };
 
 export const CANONICAL_NAME_ERROR_CODES = {

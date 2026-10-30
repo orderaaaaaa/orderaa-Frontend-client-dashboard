@@ -197,7 +197,9 @@ export default function SourceGroupRow({
   const otherSpellings = group.spellings.slice(1);
   const isAttributeOption = domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION;
   const isAttributeDomain =
-    domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_NAME || isAttributeOption;
+    domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_NAME ||
+    domain === CANONICAL_NAME_DOMAINS.PRODUCT ||
+    isAttributeOption;
   const hasMultipleContexts = group.attributeContexts.length >= 2;
   const countLabel = isAttributeDomain
     ? `${group.productCount} منتج`
