@@ -43,12 +43,14 @@ const domainQueryKeys = (domain: CanonicalNameDomain): QueryKey[] => {
     [QUERY_KEYS.CANONICAL_NAME_GROUP_MEMBERS, domain],
     [QUERY_KEYS.CANONICAL_NAME_CANDIDATES, domain],
     [QUERY_KEYS.CANONICAL_NAME_IMPACT, domain],
+    [QUERY_KEYS.CANONICAL_NAME_GROUP_COUNTS, domain],
   ];
   if (domain === CANONICAL_NAME_DOMAINS.GOVERNORATE) {
     keys.push(
       [QUERY_KEYS.CANONICAL_NAME_GROUPS, CANONICAL_NAME_DOMAINS.CITY],
       [QUERY_KEYS.CANONICAL_NAME_GROUP_MEMBERS, CANONICAL_NAME_DOMAINS.CITY],
       [QUERY_KEYS.CANONICAL_NAME_CANDIDATES, CANONICAL_NAME_DOMAINS.CITY],
+      [QUERY_KEYS.CANONICAL_NAME_GROUP_COUNTS, CANONICAL_NAME_DOMAINS.CITY],
     );
   }
   if (domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_NAME) {
@@ -57,6 +59,7 @@ const domainQueryKeys = (domain: CanonicalNameDomain): QueryKey[] => {
       [QUERY_KEYS.CANONICAL_NAME_GROUPS, CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION],
       [QUERY_KEYS.CANONICAL_NAME_GROUP_MEMBERS, CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION],
       [QUERY_KEYS.CANONICAL_NAME_CANDIDATES, CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION],
+      [QUERY_KEYS.CANONICAL_NAME_GROUP_COUNTS, CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION],
     );
   }
   return keys;
@@ -91,6 +94,7 @@ export const isLocationDomain = (domain: CanonicalNameDomain) =>
 export const useCanonicalNamesQuery = (
   domain: CanonicalNameDomain,
   params: ListNamesParams = {},
+  enabled = true,
 ) =>
   useQuery({
     queryKey: [QUERY_KEYS.CANONICAL_NAMES, domain, params],
@@ -101,6 +105,7 @@ export const useCanonicalNamesQuery = (
       return data;
     },
     placeholderData: keepWithinScope(domain, params.scopeId),
+    enabled,
   });
 
 export const useSourceGroupsQuery = (
@@ -219,14 +224,21 @@ export const useRenameCanonicalName = (domain: CanonicalNameDomain) => {
       );
       return data;
     },
-    onSuccess: async (result) => {
+    onSuccess: async () => {
       await invalidateDomainQueries(queryClient, domain);
-      toast.success(`تم تغيير الاسم الظاهر في ${result.impact.rowCount} عنصر`);
-    },
-    onError: (err: unknown) => {
-      toast.error(getApiErrorMessage(err, 'تعذر تغيير الاسم'));
     },
   });
+};
+
+export const deleteNameErrorMessage = (err: unknown) => {
+  const error = getCanonicalNameError(err);
+  if (error?.code === CANONICAL_NAME_ERROR_CODES.NAME_HAS_LINKED_ROWS) {
+    const withCities = (error.details?.cityNameIds ?? []).length > 0;
+    return withCities
+      ? 'لا يمكن حذف الاسم لأنه مرتبط بصفوف من شركات الشحن ومدن تابعة، ألغ ربطها أولا'
+      : 'لا يمكن حذف الاسم لأنه مرتبط بصفوف من شركات الشحن، ألغ ربطها أولا';
+  }
+  return getApiErrorMessage(err, 'تعذر حذف الاسم الموحد');
 };
 
 export const useDeleteCanonicalName = (domain: CanonicalNameDomain) => {
@@ -244,18 +256,9 @@ export const useDeleteCanonicalName = (domain: CanonicalNameDomain) => {
       toast.success('تم حذف الاسم الموحد');
     },
     onError: (err: unknown) => {
-      const error = getCanonicalNameError(err);
-      if (error?.code === CANONICAL_NAME_ERROR_CODES.NAME_HAS_LINKED_ROWS) {
-        const withCities = (error.details?.cityNameIds ?? []).length > 0;
-        toast.error(
-          withCities
-            ? 'لا يمكن حذف الاسم لأنه مرتبط بصفوف من شركات الشحن ومدن تابعة، ألغ ربطها أولا'
-            : 'لا يمكن حذف الاسم لأنه مرتبط بصفوف من شركات الشحن، ألغ ربطها أولا',
-        );
+      if (getCanonicalNameError(err)?.code === CANONICAL_NAME_ERROR_CODES.NAME_HAS_LINKED_ROWS) {
         void invalidateDomainQueries(queryClient, domain);
-        return;
       }
-      toast.error(getApiErrorMessage(err, 'تعذر حذف الاسم الموحد'));
     },
   });
 };
@@ -340,6 +343,12 @@ export const useLocationSourcesStatus = (enabled: boolean) => {
       });
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.CANONICAL_NAME_GROUPS, CANONICAL_NAME_DOMAINS.CITY],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.CANONICAL_NAME_GROUP_COUNTS, CANONICAL_NAME_DOMAINS.GOVERNORATE],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.CANONICAL_NAME_GROUP_COUNTS, CANONICAL_NAME_DOMAINS.CITY],
       });
       seen.current = { running: false, latestAttempt, sourceCount, changed: false };
       return;

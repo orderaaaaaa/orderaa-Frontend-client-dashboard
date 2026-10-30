@@ -20,7 +20,7 @@ import type { ComboGroup, ComboOption, LinkTarget } from './types';
 
 export interface LinkComboboxProps {
   groups: ComboGroup[];
-  onSelect: (target: LinkTarget) => void;
+  onSelect: (target: LinkTarget, option: ComboOption) => void;
   onCreate?: (name: string) => void;
   createLabel?: string;
   triggerLabel: string;
@@ -51,7 +51,7 @@ export function LinkCombobox({
     if (option.target.kind === 'new' && onCreate) {
       onCreate(option.target.newName);
     } else {
-      onSelect(option.target);
+      onSelect(option.target, option);
     }
     setOpen(false);
   };

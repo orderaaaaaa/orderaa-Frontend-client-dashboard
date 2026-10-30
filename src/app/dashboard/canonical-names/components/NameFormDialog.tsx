@@ -20,6 +20,9 @@ interface NameFormDialogProps {
   onClose: () => void;
 }
 
+const NAME_MAX_LENGTH = 191;
+const NAME_COUNTER_AFTER = 150;
+
 const comparable = (value: string) => value.trim().replace(/\s+/g, ' ').toLowerCase();
 
 export default function NameFormDialog({
@@ -71,8 +74,14 @@ export default function NameFormDialog({
               setTouched(true);
             }}
             error={error}
+            maxLength={NAME_MAX_LENGTH}
             autoFocus
           />
+          {name.length > NAME_COUNTER_AFTER && (
+            <p className="text-xs text-muted-foreground text-end">
+              {name.length}/{NAME_MAX_LENGTH}
+            </p>
+          )}
           <DialogFooter>
             <Button type="button" variant="outline" className="min-h-10" onClick={onClose}>
               إلغاء

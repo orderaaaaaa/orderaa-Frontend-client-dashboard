@@ -11,16 +11,14 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { useHasPermission } from '@/hooks/usePermissions';
+import { useI18n } from '@/i18n/I18nProvider';
+import { pluralAr } from '@/i18n/pluralAr';
+import { getApiErrorMessage } from '@/utils/apiError';
+import { toast } from 'react-toastify';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import {
+  deleteNameErrorMessage,
   isLocationDomain,
   useCanonicalNamesQuery,
   useCreateCanonicalName,
@@ -39,6 +37,13 @@ import type {
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
 import { useApplyLinksInChunks } from '@/app/dashboard/canonical-names/utils/useApplyLinksInChunks';
 import GroupMembersDrawer from './GroupMembersDrawer';
+import {
+  LinkContextWarning,
+  describeLinkGroup,
+  multiContextRows,
+  type LinkContextRow,
+  type LinkWarningState,
+} from './LinkContextWarning';
 import LocationSourcesStatusStrip from './LocationSourcesStatusStrip';
 import NameFormDialog from './NameFormDialog';
 import NameImpactDialog from './NameImpactDialog';
@@ -57,22 +62,6 @@ type ImpactDialogState =
   | { mode: 'confirm-delete'; target: CanonicalName };
 
 type MembersDrawerState = { scopeId: number; normalizedText: string };
-
-type LinkWarningState = {
-  items: LinkItem[];
-  rows: LinkContextRow[];
-  onLinked?: () => void;
-};
-
-interface LinkContextRow {
-  spellingLabel: string;
-  contexts: GroupAttributeContext[];
-}
-
-const describeGroup = (group: SourceGroup): LinkContextRow => ({
-  spellingLabel: group.spellings[0]?.text ?? group.normalizedText,
-  contexts: group.attributeContexts,
-});
 
 interface CanonicalNamesWorkspaceProps {
   domain: CanonicalNameDomain;
@@ -116,6 +105,7 @@ export default function CanonicalNamesWorkspace({
   const { applyLinks, applying } = useApplyLinksInChunks(domain);
   const createName = useCreateCanonicalName(domain);
   const renameName = useRenameCanonicalName(domain);
+  const { t } = useI18n();
   const deleteName = useDeleteCanonicalName(domain);
 
   const sensors = useSensors(
@@ -128,8 +118,7 @@ export default function CanonicalNamesWorkspace({
     groups: SourceGroup[],
     onLinked?: () => void,
   ) => {
-    const rows = groups.map(describeGroup);
-    const warnRows = rows.filter((row) => row.contexts.length >= 2);
+    const warnRows = multiContextRows(groups.map(describeLinkGroup));
     if (
       domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION &&
       warnRows.length > 0
@@ -182,7 +171,7 @@ export default function CanonicalNamesWorkspace({
         contexts: dragData.attributeContexts ?? [],
       },
     ];
-    const warnRows = rows.filter((row) => row.contexts.length >= 2);
+    const warnRows = multiContextRows(rows);
     if (
       domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION &&
       warnRows.length > 0
@@ -357,15 +346,35 @@ export default function CanonicalNamesWorkspace({
           onClose={() => setImpactDialog(null)}
           onConfirm={() => {
             if (impactDialog.mode === 'confirm-rename') {
+              const renamed = impactDialog.pendingName;
               renameName.mutate(
-                { id: impactDialog.target.id, name: impactDialog.pendingName },
-                { onSuccess: () => setImpactDialog(null) },
+                { id: impactDialog.target.id, name: renamed },
+                {
+                  onSuccess: (result) => {
+                    setImpactDialog(null);
+                    const orders = result.impact.orderCount;
+                    toast.success(
+                      isLocation
+                        ? t('canonical.name.renamedCount', {
+                            orders,
+                            ordersNoun: pluralAr(t, 'order', orders),
+                          })
+                        : t('canonical.name.renamed', { name: renamed }),
+                    );
+                  },
+                  onError: (err: unknown) => {
+                    toast.error(getApiErrorMessage(err, t('canonical.errors.generic')));
+                  },
+                },
               );
               return;
             }
             if (impactDialog.mode === 'confirm-delete') {
               deleteName.mutate(impactDialog.target.id, {
                 onSuccess: () => setImpactDialog(null),
+                onError: (err: unknown) => {
+                  toast.error(deleteNameErrorMessage(err));
+                },
               });
             }
           }}
@@ -381,37 +390,14 @@ export default function CanonicalNamesWorkspace({
         />
       )}
 
-      {linkWarning && (
-        <Dialog open onOpenChange={(open) => !open && setLinkWarning(null)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>تنبيه الربط</DialogTitle>
-            </DialogHeader>
-            <div className="flex flex-col gap-2 text-sm text-gray-700">
-              {linkWarning.rows.map((row) => (
-                <p key={row.spellingLabel}>
-                  هذه القيمة &quot;{row.spellingLabel}&quot; تظهر تحت{' '}
-                  {row.contexts.length} خصائص. سيظهر الاسم الموحد فيها كلها.
-                </p>
-              ))}
-            </div>
-            <DialogFooter>
-              <Button variant="outline" className="min-h-10" onClick={() => setLinkWarning(null)}>
-                إلغاء
-              </Button>
-              <Button
-                className="min-h-10"
-                onClick={() => {
-                  void applyLinks({ items: linkWarning.items }, linkWarning.onLinked);
-                  setLinkWarning(null);
-                }}
-              >
-                تأكيد
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+      <LinkContextWarning
+        warning={linkWarning}
+        onCancel={() => setLinkWarning(null)}
+        onConfirm={(warning) => {
+          void applyLinks({ items: warning.items }, warning.onLinked);
+          setLinkWarning(null);
+        }}
+      />
     </div>
   );
 }
