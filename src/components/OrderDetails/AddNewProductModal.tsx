@@ -12,8 +12,12 @@ import {
   resolveAttributeOptionIds,
 } from '@/services/orders';
 import { useDebounce } from '@/utils/debounce';
-import { useProductVariantAvailabilityQuery } from '@/services/warehouses';
+import {
+  useOrderStockAvailabilityQuery,
+  useProductVariantAvailabilityQuery,
+} from '@/services/warehouses';
 import { NEXT_STOCK_TARGET } from '@/lib/api/warehouses';
+import { getApiErrorMessage } from '@/utils/apiError';
 import {
   VariantAvailabilityList,
   matchVariant,
@@ -81,6 +85,11 @@ export default function AddNewProductModal({
     [variantAvailability, selectedVariants]
   );
 
+  const { data: orderAvailability } = useOrderStockAvailabilityQuery(orderId);
+  const availableWarehouseNotSet =
+    orderAvailability?.availableWarehouseSet === false ||
+    variantAvailability.some((variant) => variant.available === null);
+
   const productOptions = useMemo(() => productsData.map((p) => p.name), [productsData]);
 
   const productsByName = useMemo(() => {
@@ -119,7 +128,8 @@ export default function AddNewProductModal({
 
     // T27: a variant the product's settings refuse cannot be added. `!== false`
     // so an unresolved or still-loading match never blocks the form.
-    const stockAllows = selectedVariantAvailability?.selectable !== false;
+    const stockAllows =
+      !availableWarehouseNotSet && selectedVariantAvailability?.selectable !== false;
 
     return (
       hasProduct &&
@@ -134,6 +144,7 @@ export default function AddNewProductModal({
     selectedVariants,
     isLoadingVariants,
     selectedVariantAvailability,
+    availableWarehouseNotSet,
     quantity,
   ]);
 
@@ -168,10 +179,9 @@ export default function AddNewProductModal({
       onClose();
     } catch (error: any) {
       console.error('Failed to add product:', error);
-      const apiErrorMessage =
-        error?.response?.data?.message ||
-        'فشل في إضافة المنتج. يرجى المحاولة مرة أخرى.';
-      toast.error(apiErrorMessage);
+      toast.error(
+        getApiErrorMessage(error, 'فشل في إضافة المنتج. يرجى المحاولة مرة أخرى.')
+      );
     } finally {
       setIsSaving(false);
     }
@@ -300,6 +310,7 @@ export default function AddNewProductModal({
         <VariantAvailabilityList
           variants={variantAvailability}
           selected={selectedVariantAvailability}
+          availableWarehouseNotSet={availableWarehouseNotSet}
         />
       </div>
     </BaseModal>

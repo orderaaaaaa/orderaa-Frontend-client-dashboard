@@ -9,6 +9,7 @@ interface Props {
   variants: VariantAvailability[];
   /** the variant the current attribute selection resolves to, if any */
   selected: VariantAvailability | null;
+  availableWarehouseNotSet: boolean;
 }
 
 /**
@@ -40,13 +41,15 @@ export const matchVariant = (
   );
 };
 
-export function VariantAvailabilityList({ variants, selected }: Props) {
+export function VariantAvailabilityList({
+  variants,
+  selected,
+  availableWarehouseNotSet,
+}: Props) {
   // Above the empty bail-out: hooks cannot sit behind an early return.
   const { t, dir } = useI18n();
 
-  if (variants.length === 0) return null;
-
-  const notSet = variants.some((variant) => variant.available === null);
+  if (variants.length === 0 && !availableWarehouseNotSet) return null;
 
   return (
     <div className="rounded-2xl border border-[#ECECEC] bg-white p-3" dir={dir}>
@@ -94,7 +97,7 @@ export function VariantAvailabilityList({ variants, selected }: Props) {
         })}
       </div>
 
-      {notSet ? (
+      {availableWarehouseNotSet ? (
         <p className="mt-2 text-xs font-semibold text-red-600">
           {t('orderDetails.stock.availableWarehouseNotSet')}
         </p>
