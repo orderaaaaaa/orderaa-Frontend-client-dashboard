@@ -59,7 +59,7 @@ export default function ScopeSelector({ value, onChange, urlSync = false }: Scop
           id={id}
           aria-label={t('canonical.queue.scope.label')}
           aria-describedby={value === undefined ? gateId : undefined}
-          className="min-h-10 w-full sm:w-[220px]"
+          className="min-h-11 sm:min-h-10 w-full sm:w-[220px]"
         >
           <SelectValue placeholder={t('canonical.queue.scope.placeholder')} />
         </SelectTrigger>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -11,15 +11,20 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core';
 import { ConfirmImpactDialog } from '@/components/entity-manager/ConfirmImpactDialog';
+import { useOverflowFade } from '@/components/entity-manager/useOverflowFade';
+import { usePhone } from '@/components/entity-manager/useMediaQuery';
 import { ShortcutSheet } from '@/components/entity-manager/ShortcutSheet';
 import { buildDragAccessibility } from '@/components/entity-manager/dragAccessibility';
 import { useFinePointer } from '@/components/entity-manager/useFinePointer';
 import { useReturnFocus } from '@/components/entity-manager/useReturnFocus';
 import type { ReviewRowState } from '@/components/entity-manager/ReviewListCore';
 import { PartialSuccessNotice, QueueSkeleton } from '@/components/entity-manager/StateViews';
+import { ScrollEndFade } from '@/components/ui/scroll-end-fade';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { useI18n } from '@/i18n/I18nProvider';
 import { pluralAr } from '@/i18n/pluralAr';
+import { cn } from '@/lib/utils';
 import {
   isLocationDomain,
   useCanonicalNamesQuery,
@@ -103,6 +108,8 @@ interface ReviewState {
   only?: string[];
 }
 
+type PhonePane = 'queue' | 'names';
+
 function CanonicalDomainContent({ domain, initialSearch }: CanonicalDomainPageProps) {
   const { t } = useI18n();
   const config = CANONICAL_DOMAIN_CONFIGS[domain];
@@ -136,11 +143,15 @@ function CanonicalDomainContent({ domain, initialSearch }: CanonicalDomainPagePr
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [announcement, setAnnouncement] = useState('');
   const [dragLabel, setDragLabel] = useState<string | null>(null);
+  const [phonePane, setPhonePane] = useState<PhonePane>('queue');
+  const phone = usePhone();
+  const phoneTabsRef = useRef<HTMLDivElement>(null);
+  const phoneTabsOverflow = useOverflowFade(phoneTabsRef);
   const shortcutsFocus = useReturnFocus();
   const finePointer = useFinePointer();
   const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 6 } });
   const sensors = useSensors(...(finePointer ? [pointerSensor] : []));
-  const dragEnabled = finePointer && canManage;
+  const dragEnabled = finePointer && canManage && !phone;
   const { remember } = shortcutsFocus;
 
   useEffect(() => {
@@ -391,20 +402,37 @@ function CanonicalDomainContent({ domain, initialSearch }: CanonicalDomainPagePr
             onDragEnd={onDragEnd}
             onDragCancel={() => setDragLabel(null)}
           >
+            <div className="relative sm:hidden">
+              <div ref={phoneTabsRef} className="overflow-x-auto">
+                <Tabs value={phonePane} onValueChange={(next) => setPhonePane(next as PhonePane)}>
+                  <TabsList className="w-max min-w-full justify-start">
+                    <TabsTrigger value="queue" className="min-h-11">
+                      {t('canonical.phone.queueTab')}
+                    </TabsTrigger>
+                    <TabsTrigger value="names" className="min-h-11">
+                      {t('canonical.phone.namesTab')}
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+              <ScrollEndFade visible={phoneTabsOverflow} />
+            </div>
             <div className="grid gap-4 lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start">
-              <NamesIndex
-                key={initialSearch ?? ''}
-                domain={domain}
-                scopeId={scopeId}
-                selectedId={selectedNameId}
-                onSelect={(id) => {
-                  setSelectedNameId(id);
-                  setDetailsOpen(true);
-                }}
-                initialSearch={initialSearch}
-                dragEnabled={dragEnabled}
-              />
-              <div className="min-w-0">
+              <div className={cn('min-w-0', phonePane === 'queue' && 'max-sm:hidden')}>
+                <NamesIndex
+                  key={initialSearch ?? ''}
+                  domain={domain}
+                  scopeId={scopeId}
+                  selectedId={selectedNameId}
+                  onSelect={(id) => {
+                    setSelectedNameId(id);
+                    setDetailsOpen(true);
+                  }}
+                  initialSearch={initialSearch}
+                  dragEnabled={dragEnabled}
+                />
+              </div>
+              <div className={cn('min-w-0', phonePane === 'names' && 'max-sm:hidden')}>
                 <ReviewQueue
                   domain={domain}
                   canManage={canManage}

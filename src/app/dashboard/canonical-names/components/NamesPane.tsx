@@ -54,18 +54,18 @@ function NameCard({
         </div>
         <p className="text-xs text-gray-500">{countLabel}</p>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" className="min-h-10" onClick={() => onViewImpact(name)}>
+          <Button variant="outline" size="sm" className="min-h-11 sm:min-h-10" onClick={() => onViewImpact(name)}>
             عرض التأثير
           </Button>
           {canManage && !name.isSystem && (
             <>
-              <Button variant="outline" size="sm" className="min-h-10" onClick={() => onRename(name)}>
+              <Button variant="outline" size="sm" className="min-h-11 sm:min-h-10" onClick={() => onRename(name)}>
                 إعادة تسمية
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                className="min-h-10 text-red-600 hover:bg-red-50 hover:text-red-700"
+                className="min-h-11 sm:min-h-10 text-red-600 hover:bg-red-50 hover:text-red-700"
                 onClick={() => onDelete(name)}
               >
                 حذف
@@ -124,7 +124,7 @@ export default function NamesPane({
           onClear={() => setSearch('')}
         />
         {canCreate && (
-          <Button size="sm" onClick={onCreate} className="min-h-10 shrink-0">
+          <Button size="sm" onClick={onCreate} className="min-h-11 sm:min-h-10 shrink-0">
             <Plus className="h-4 w-4" />
             إضافة اسم
           </Button>
@@ -139,7 +139,7 @@ export default function NamesPane({
           className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
         >
           تعذر تحديث القائمة، المعروض قد يكون قديماً
-          <Button variant="outline" size="sm" className="min-h-10" onClick={() => refetch()}>
+          <Button variant="outline" size="sm" className="min-h-11 sm:min-h-10" onClick={() => refetch()}>
             إعادة المحاولة
           </Button>
         </div>
@@ -148,7 +148,7 @@ export default function NamesPane({
       {isError && names === undefined && (
         <div role="alert" className="text-center py-8">
           <p className="text-sm text-gray-500 mb-2">تعذر تحميل البيانات</p>
-          <Button variant="outline" size="sm" className="min-h-10" onClick={() => refetch()}>
+          <Button variant="outline" size="sm" className="min-h-11 sm:min-h-10" onClick={() => refetch()}>
             إعادة المحاولة
           </Button>
         </div>

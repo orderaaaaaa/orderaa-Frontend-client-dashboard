@@ -35,7 +35,7 @@ export default function CandidatesPopover({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="min-h-10" disabled={disabled}>
+        <Button variant="outline" size="sm" className="min-h-11 sm:min-h-10" disabled={disabled}>
           اقتراحات
         </Button>
       </PopoverTrigger>
@@ -58,7 +58,7 @@ export default function CandidatesPopover({
               </div>
               <Button
                 size="sm"
-                className="min-h-10"
+                className="min-h-11 sm:min-h-10"
                 onClick={() => {
                   onSelect(candidate);
                   setOpen(false);

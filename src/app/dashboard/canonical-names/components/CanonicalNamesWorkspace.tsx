@@ -190,7 +190,7 @@ export default function CanonicalNamesWorkspace({
     isLocation && canManage ? (
       <Button
         variant="outline"
-        className="min-h-10"
+        className="min-h-11 sm:min-h-10"
         onClick={() => refreshSources.mutate()}
         disabled={refreshSources.isPending || sourcesRunning}
       >

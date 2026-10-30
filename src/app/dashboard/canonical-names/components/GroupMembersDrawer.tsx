@@ -50,8 +50,8 @@ export default function GroupMembersDrawer({
         ) : (
           <div className="max-h-96 overflow-y-auto rounded-md border">
             <div className="overflow-x-auto">
-            <table className="w-full min-w-[480px] text-sm">
-              <thead className="bg-gray-50 text-gray-500">
+            <table className="w-full text-sm sm:min-w-[480px]">
+              <thead className="hidden bg-gray-50 text-gray-500 sm:table-header-group">
                 <tr>
                   <th className="p-2 text-right">المنتج</th>
                   <th className="p-2 text-right">الإملاء المخزن</th>
@@ -64,15 +64,15 @@ export default function GroupMembersDrawer({
               <tbody>
                 {data.data.map((product) =>
                   product.rows.map((row) => (
-                    <tr key={row.id} className="border-t">
-                      <td className="p-2">{product.productName}</td>
-                      <td className="p-2">
+                    <tr key={row.id} className="block border-t py-2 sm:table-row">
+                      <td className="block px-2 py-1 sm:table-cell sm:p-2">{product.productName}</td>
+                      <td className="block px-2 py-1 sm:table-cell sm:p-2">
                         <VisualizedSpelling text={row.storedName} />
                       </td>
                       {isAttributeOption && (
-                        <td className="p-2">{row.attributeName ?? ''}</td>
+                        <td className="block px-2 py-1 sm:table-cell sm:p-2">{row.attributeName ?? ''}</td>
                       )}
-                      <td className="p-2">
+                      <td className="block px-2 py-1 sm:table-cell sm:p-2">
                         {row.canonicalNameId ? 'مرتبط' : 'غير مرتبط'}
                       </td>
                     </tr>
@@ -100,7 +100,7 @@ export default function GroupMembersDrawer({
         )}
 
         <DialogFooter>
-          <Button className="min-h-10" onClick={onClose}>إغلاق</Button>
+          <Button className="min-h-11 sm:min-h-10" onClick={onClose}>إغلاق</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

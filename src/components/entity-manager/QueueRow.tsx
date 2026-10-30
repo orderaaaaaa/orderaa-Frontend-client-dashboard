@@ -60,6 +60,40 @@ export interface QueueRowSelectEvent {
   shift: boolean;
 }
 
+export function QueueStateBadge({ state }: { state: QueueItemState }) {
+  const { t } = useI18n();
+  const view = STATE_VIEW[state];
+  const StateIcon = view.icon;
+  return (
+    <Badge variant="outline" className={cn('gap-1 border-transparent text-foreground', view.badgeClassName)}>
+      <StateIcon aria-hidden="true" className={cn('size-3.5', view.iconClassName)} />
+      {t(view.labelKey)}
+    </Badge>
+  );
+}
+
+export function QueueSelectCheckbox({
+  selected,
+  label,
+  onToggleSelect,
+}: {
+  selected: boolean;
+  label: string;
+  onToggleSelect: (event: QueueRowSelectEvent) => void;
+}) {
+  return (
+    <label
+      className="flex size-11 shrink-0 cursor-pointer items-center justify-center"
+      onClick={(event) => {
+        event.preventDefault();
+        onToggleSelect({ shift: event.shiftKey });
+      }}
+    >
+      <Checkbox checked={selected} aria-label={label} />
+    </label>
+  );
+}
+
 export interface QueueRowProps {
   row: QueueItem;
   selected: boolean;
@@ -97,8 +131,6 @@ export const QueueRow = forwardRef<HTMLDivElement, QueueRowProps>(function Queue
   ref,
 ) {
   const { t } = useI18n();
-  const view = STATE_VIEW[row.state];
-  const StateIcon = view.icon;
 
   return (
     <div
@@ -119,25 +151,14 @@ export const QueueRow = forwardRef<HTMLDivElement, QueueRowProps>(function Queue
       )}
     >
       {canManage && (
-        <label
-          className="flex size-11 shrink-0 cursor-pointer items-center justify-center"
-          onClick={(event) => {
-            event.preventDefault();
-            onToggleSelect({ shift: event.shiftKey });
-          }}
-        >
-          <Checkbox checked={selected} aria-label={checkboxLabel} />
-        </label>
+        <QueueSelectCheckbox selected={selected} label={checkboxLabel} onToggleSelect={onToggleSelect} />
       )}
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="min-w-0 text-base font-medium text-foreground">
           <VisualizedSpelling text={row.spelling} wrap />
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline" className={cn('gap-1 border-transparent text-foreground', view.badgeClassName)}>
-            <StateIcon aria-hidden="true" className={cn('size-3.5', view.iconClassName)} />
-            {t(view.labelKey)}
-          </Badge>
+          <QueueStateBadge state={row.state} />
           {counts && <span className="text-sm text-muted-foreground">{counts}</span>}
         </div>
         {chips && <div className="flex flex-wrap gap-2">{chips}</div>}

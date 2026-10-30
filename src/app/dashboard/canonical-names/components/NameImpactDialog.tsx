@@ -177,15 +177,15 @@ export default function NameImpactDialog({
 
         <DialogFooter>
           {mode === 'view' ? (
-            <Button className="min-h-10" onClick={onClose}>إغلاق</Button>
+            <Button className="min-h-11 sm:min-h-10" onClick={onClose}>إغلاق</Button>
           ) : (
             <>
-              <Button variant="outline" className="min-h-10" onClick={onClose}>
+              <Button variant="outline" className="min-h-11 sm:min-h-10" onClick={onClose}>
                 إلغاء
               </Button>
               <Button
                 variant={mode === 'confirm-delete' ? 'destructive' : 'default'}
-                className="min-h-10"
+                className="min-h-11 sm:min-h-10"
                 onClick={onConfirm}
                 disabled={confirming || deleteBlocked || !impact}
               >

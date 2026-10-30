@@ -6,7 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { TranslationKey } from '@/i18n/translate';
 import { cn } from '@/lib/utils';
+import { ScrollEndFade } from '@/components/ui/scroll-end-fade';
+import { StackedList } from '@/components/ui/stacked-list';
 import { EmptyPanel, ErrorWithRetry, QueueSkeleton } from './StateViews';
+import { usePhone } from './useMediaQuery';
+import { useOverflowFade } from './useOverflowFade';
 import type { QueueItem, QueueTab, ReviewListStatus, TabCounts } from './types';
 import {
   BULK_BAR_ATTR,
@@ -148,6 +152,9 @@ export function ReviewListCore<Row extends QueueItem, TTab extends string = Queu
 }: ReviewListCoreProps<Row, TTab>) {
   const { t } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
+  const phone = usePhone();
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const tabsOverflow = useOverflowFade(tabsRef);
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const rowIds = rows.map((row) => row.id);
 
@@ -192,6 +199,19 @@ export function ReviewListCore<Row extends QueueItem, TTab extends string = Queu
       : label;
   };
 
+  const rowNodes = rows.map((row) => (
+    <Fragment key={row.id}>
+      {renderRow(row, {
+        selected: selection.ids.has(row.id),
+        onToggleSelect: (event) =>
+          onSelectionChange(toggleReviewSelection(selection, rows, row.id, event)),
+        tabIndex: queueRowTabIndex(rowIds, focusedId, row.id),
+        focused: focusedId === row.id,
+        onLinked: () => focusNextUnlinked(row.id),
+      })}
+    </Fragment>
+  ));
+
   return (
     <section className="flex flex-col gap-4">
       {header}
@@ -202,13 +222,18 @@ export function ReviewListCore<Row extends QueueItem, TTab extends string = Queu
           if (match) onTabChange(match.value);
         }}
       >
-        <TabsList className="w-full">
-          {tabs.map((definition) => (
-            <TabsTrigger key={definition.value} value={definition.value} className="min-h-11">
-              {tabLabel(definition)}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="relative">
+          <div ref={tabsRef} className="overflow-x-auto">
+            <TabsList className="w-max min-w-full justify-start">
+              {tabs.map((definition) => (
+                <TabsTrigger key={definition.value} value={definition.value} className="min-h-11">
+                  {tabLabel(definition)}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+          <ScrollEndFade visible={tabsOverflow} />
+        </div>
         <TabsContent value={tab} className="flex flex-col gap-4">
           <div
             ref={containerRef}
@@ -236,28 +261,28 @@ export function ReviewListCore<Row extends QueueItem, TTab extends string = Queu
                   <div className="h-full w-1/3 animate-pulse bg-primary motion-reduce:animate-none" />
                 </div>
               )}
-              <div
-                role="list"
-                aria-label={listLabel}
-                aria-busy={isRefetching}
-                className={cn(
-                  'flex flex-col transition-opacity motion-reduce:transition-none',
-                  isRefetching && 'opacity-60',
-                )}
-              >
-                {rows.map((row) => (
-                  <Fragment key={row.id}>
-                    {renderRow(row, {
-                      selected: selection.ids.has(row.id),
-                      onToggleSelect: (event) =>
-                        onSelectionChange(toggleReviewSelection(selection, rows, row.id, event)),
-                      tabIndex: queueRowTabIndex(rowIds, focusedId, row.id),
-                      focused: focusedId === row.id,
-                      onLinked: () => focusNextUnlinked(row.id),
-                    })}
-                  </Fragment>
-                ))}
-              </div>
+              {phone ? (
+                <div
+                  aria-busy={isRefetching}
+                  className={cn('transition-opacity motion-reduce:transition-none', isRefetching && 'opacity-60')}
+                >
+                  <StackedList label={listLabel} className="bg-card">
+                    {rowNodes}
+                  </StackedList>
+                </div>
+              ) : (
+                <div
+                  role="list"
+                  aria-label={listLabel}
+                  aria-busy={isRefetching}
+                  className={cn(
+                    'flex flex-col transition-opacity motion-reduce:transition-none',
+                    isRefetching && 'opacity-60',
+                  )}
+                >
+                  {rowNodes}
+                </div>
+              )}
             </div>
           )}
           </div>

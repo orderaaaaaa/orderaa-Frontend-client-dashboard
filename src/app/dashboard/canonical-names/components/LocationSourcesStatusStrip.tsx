@@ -101,7 +101,7 @@ function SourceRow({ source, canManage }: SourceRowProps) {
             type="button"
             variant="outline"
             size="sm"
-            className="min-h-8"
+            className="min-h-11 sm:min-h-8"
             onClick={() => retry.mutate()}
             disabled={retry.isPending || syncBusy}
           >

@@ -105,13 +105,13 @@ export function ConfirmImpactDialog({
         )}
 
         <DialogFooter>
-          <Button type="button" variant="outline" className="min-h-10" onClick={onClose} disabled={pending}>
+          <Button type="button" variant="outline" className="min-h-11 sm:min-h-10" onClick={onClose} disabled={pending}>
             {t('canonical.action.cancel')}
           </Button>
           <Button
             type="button"
             variant={tone === 'destructive' ? 'destructive' : 'default'}
-            className="min-h-10"
+            className="min-h-11 sm:min-h-10"
             onClick={handleConfirm}
             disabled={confirmDisabled}
             aria-busy={pending}

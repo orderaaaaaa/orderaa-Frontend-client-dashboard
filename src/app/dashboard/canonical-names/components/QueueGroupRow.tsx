@@ -5,11 +5,15 @@ import { useDraggable } from '@dnd-kit/core';
 import { GripVertical } from 'lucide-react';
 import { LinkCombobox } from '@/components/entity-manager/LinkCombobox';
 import type { ComboGroup, LinkTarget } from '@/components/entity-manager/types';
-import { QueueRow } from '@/components/entity-manager/QueueRow';
+import { QueueRow, QueueSelectCheckbox, QueueStateBadge } from '@/components/entity-manager/QueueRow';
+import { usePhone } from '@/components/entity-manager/useMediaQuery';
+import { VisualizedSpelling } from '@/components/entity-manager/VisualizedSpelling';
+import { StackedRow } from '@/components/ui/stacked-list';
 import type { ReviewRowState } from '@/components/entity-manager/ReviewListCore';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useI18n } from '@/i18n/I18nProvider';
+import { cn } from '@/lib/utils';
 import { isLocationDomain, useLinkCandidatesQuery } from '@/services/canonicalNames';
 import {
   CANONICAL_NAME_DOMAINS,
@@ -51,6 +55,7 @@ export interface QueueGroupRowProps {
 
 export function QueueGroupRow({ domain, row, state, canManage, names, actions, dragEnabled }: QueueGroupRowProps) {
   const { t } = useI18n();
+  const phone = usePhone();
   const isLocation = isLocationDomain(domain);
   const isCity = domain === CANONICAL_NAME_DOMAINS.CITY;
   const group = row.group;
@@ -129,6 +134,58 @@ export function QueueGroupRow({ domain, row, state, canManage, names, actions, d
       </TooltipProvider>
     ) : null;
 
+  const counts = isLocation ? (
+    <LocationRowContent group={group} />
+  ) : (
+    <AttributeRowContent domain={domain} group={group} />
+  );
+  const chips = isLocation ? (
+    <LocationChips
+      group={group}
+      picks={picks.picks}
+      canManage={canManage}
+      onTogglePick={picks.togglePick}
+      onUnlinkRow={(target) => actions.unlinkRow(group, target)}
+    />
+  ) : undefined;
+  const actionsSlot = (
+    <>
+      {linkControl}
+      {dragHandle}
+      {!isLocation && (
+        <Button type="button" variant="ghost" size="sm" className="min-h-11" onClick={() => actions.viewProducts(group)}>
+          {t('canonical.action.viewProducts')}
+        </Button>
+      )}
+    </>
+  );
+
+  if (phone) {
+    return (
+      <StackedRow
+        className={cn(state.selected && 'bg-primary/5')}
+        leading={
+          canManage ? (
+            <QueueSelectCheckbox
+              selected={state.selected}
+              label={`${t('canonical.keys.select')}: ${row.spelling}`}
+              onToggleSelect={state.onToggleSelect}
+            />
+          ) : undefined
+        }
+        title={<VisualizedSpelling text={row.spelling} wrap />}
+        fields={[]}
+        actions={actionsSlot}
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <QueueStateBadge state={row.state} />
+          {counts && <span className="text-sm text-muted-foreground">{counts}</span>}
+        </div>
+        {chips}
+      </StackedRow>
+    );
+  }
+
   return (
     <QueueRow
       row={row}
@@ -138,24 +195,8 @@ export function QueueGroupRow({ domain, row, state, canManage, names, actions, d
       focused={state.focused}
       checkboxLabel={`${t('canonical.keys.select')}: ${row.spelling}`}
       onToggleSelect={state.onToggleSelect}
-      counts={
-        isLocation ? (
-          <LocationRowContent group={group} />
-        ) : (
-          <AttributeRowContent domain={domain} group={group} />
-        )
-      }
-      chips={
-        isLocation ? (
-          <LocationChips
-            group={group}
-            picks={picks.picks}
-            canManage={canManage}
-            onTogglePick={picks.togglePick}
-            onUnlinkRow={(target) => actions.unlinkRow(group, target)}
-          />
-        ) : undefined
-      }
+      counts={counts}
+      chips={chips}
       linkControl={linkControl}
       overflow={
         <>

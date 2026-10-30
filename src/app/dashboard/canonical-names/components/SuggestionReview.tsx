@@ -292,7 +292,7 @@ export function SuggestionReview({
           )}
           {ambiguousAndUnmatched > 0 && (
             <div>
-              <Button
+              <Button className="min-h-11 sm:min-h-0"
                 type="button"
                 variant="outline"
                 size="sm"
@@ -366,7 +366,7 @@ export function SuggestionReview({
                         />
                       </span>
                       <span className="font-medium text-foreground">{cluster.name}</span>
-                      <Button
+                      <Button className="min-h-11 sm:min-h-0"
                         type="button"
                         variant="ghost"
                         size="sm"
@@ -477,7 +477,7 @@ export function SuggestionReview({
             <p className="text-xs text-muted-foreground">{t('canonical.link.noUndo')}</p>
           )}
           <div className="flex flex-wrap gap-2">
-            <Button
+            <Button className="min-h-11 sm:min-h-0"
               variant="outline"
               onClick={() => handleOpenChange(false)}
               disabled={applying}
@@ -485,7 +485,7 @@ export function SuggestionReview({
               {t('canonical.action.cancel')}
             </Button>
             {listReady && (
-              <Button
+              <Button className="min-h-11 sm:min-h-0"
                 variant="outline"
                 onClick={acceptConfident}
                 disabled={applying || confidentKeys.length === 0}
@@ -494,7 +494,7 @@ export function SuggestionReview({
               </Button>
             )}
             {listReady && (
-              <Button
+              <Button className="min-h-11 sm:min-h-0"
                 onClick={() => void applyItems(plan.items, plan.links + plan.names)}
                 disabled={applying || partial !== null || plan.items.length === 0}
               >

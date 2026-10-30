@@ -17,6 +17,7 @@ import {
 import { useI18n } from '@/i18n/I18nProvider';
 import { normalizeArabic } from '@/utils/arabicNormalize';
 import type { ComboGroup, ComboOption, LinkTarget } from './types';
+import { usePhone } from './useMediaQuery';
 
 export interface LinkComboboxProps {
   groups: ComboGroup[];
@@ -80,9 +81,12 @@ export function LinkCombobox({
     </Button>
   );
 
+  const phone = usePhone();
+  const bottomSheet = placement === 'bottomSheet' || phone;
+
   return (
     <div className="inline-flex flex-col items-start gap-1">
-      {placement === 'popover' ? (
+      {!bottomSheet ? (
         <Popover
           open={open && !disabled}
           onOpenChange={(next) => setOpen(next && !disabled)}

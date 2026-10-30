@@ -137,7 +137,7 @@ function SourceRowChip({
         <Button
           variant="ghost"
           size="sm"
-          className="min-h-10 px-3 text-xs"
+          className="min-h-11 sm:min-h-10 px-3 text-xs"
           onClick={onUnlink}
         >
           إلغاء الربط
@@ -274,7 +274,7 @@ export default function SourceGroupRow({
             {otherSpellings.length > 0 && (
               <Popover open={spellingsOpen} onOpenChange={setSpellingsOpen}>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" size="sm" className="min-h-10 px-3 text-xs">
+                  <Button variant="ghost" size="sm" className="min-h-11 sm:min-h-10 px-3 text-xs">
                     +{otherSpellings.length} صيغ
                   </Button>
                 </PopoverTrigger>
@@ -375,14 +375,14 @@ export default function SourceGroupRow({
             }
           />
           {isAttributeDomain && onViewMembers && (
-            <Button variant="outline" size="sm" className="min-h-10" onClick={onViewMembers}>
+            <Button variant="outline" size="sm" className="min-h-11 sm:min-h-10" onClick={onViewMembers}>
               عرض المنتجات
             </Button>
           )}
           <Button
             variant="outline"
             size="sm"
-            className="min-h-10"
+            className="min-h-11 sm:min-h-10"
             disabled={linkDisabled}
             onClick={() =>
               onDirectLink(linkTarget({ newName: primarySpelling }), clearCheckedRows)
@@ -394,7 +394,7 @@ export default function SourceGroupRow({
             <Button
               variant="ghost"
               size="sm"
-              className="min-h-10"
+              className="min-h-11 sm:min-h-10"
               onClick={() =>
                 setUnlinkRequest({ label: primarySpelling, run: onUnlink })
               }
@@ -420,14 +420,14 @@ export default function SourceGroupRow({
           <DialogFooter>
             <Button
               variant="outline"
-              className="min-h-10"
+              className="min-h-11 sm:min-h-10"
               onClick={() => setUnlinkRequest(null)}
             >
               تراجع
             </Button>
             <Button
               variant="destructive"
-              className="min-h-10"
+              className="min-h-11 sm:min-h-10"
               onClick={() => {
                 unlinkRequest?.run();
                 setUnlinkRequest(null);

@@ -94,12 +94,12 @@ export default function NameFormDialog({
             </p>
           )}
           <DialogFooter>
-            <Button type="button" variant="outline" className="min-h-10" onClick={onClose}>
+            <Button type="button" variant="outline" className="min-h-11 sm:min-h-10" onClick={onClose}>
               {t('canonical.action.cancel')}
             </Button>
             <Button
               type="submit"
-              className="min-h-10"
+              className="min-h-11 sm:min-h-10"
               disabled={!trimmed || duplicate || unchanged || submitting}
             >
               {mode === 'create' ? t('canonical.shell.createName') : t('canonical.action.continueToImpact')}

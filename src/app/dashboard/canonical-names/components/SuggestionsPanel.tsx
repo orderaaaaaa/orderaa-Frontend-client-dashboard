@@ -189,7 +189,7 @@ export default function SuggestionsPanel({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="min-h-10">اقتراح الربط</Button>
+        <Button variant="outline" className="min-h-11 sm:min-h-10">اقتراح الربط</Button>
       </DialogTrigger>
       <DialogContent className="max-w-xl">
         <DialogHeader>
@@ -377,10 +377,10 @@ export default function SuggestionsPanel({
         <DialogFooter>
           {step === 'confirm' ? (
             <>
-              <Button variant="outline" onClick={() => setStep('select')}>
+              <Button className="min-h-11 sm:min-h-0" variant="outline" onClick={() => setStep('select')}>
                 رجوع
               </Button>
-              <Button
+              <Button className="min-h-11 sm:min-h-0"
                 onClick={handleConfirm}
                 disabled={confirmItems.length === 0 || applying}
               >
@@ -389,11 +389,11 @@ export default function SuggestionsPanel({
             </>
           ) : (
             <>
-              <Button variant="outline" onClick={() => setOpen(false)}>
+              <Button className="min-h-11 sm:min-h-0" variant="outline" onClick={() => setOpen(false)}>
                 إغلاق
               </Button>
               {step === 'select' && (
-                <Button
+                <Button className="min-h-11 sm:min-h-0"
                   onClick={handleApply}
                   disabled={selected.size === 0 || applying || !listReady}
                 >

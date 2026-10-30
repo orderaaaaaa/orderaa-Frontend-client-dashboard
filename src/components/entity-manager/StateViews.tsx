@@ -80,7 +80,7 @@ export function EmptyPanel({ variant, query, onClear, titleKey }: EmptyPanelProp
         {t(title, { query: query ?? '' })}
       </p>
       {showClear && (
-        <Button type="button" variant="outline" size="sm" onClick={onClear}>
+        <Button className="min-h-11 sm:min-h-0" type="button" variant="outline" size="sm" onClick={onClear}>
           <X aria-hidden="true" />
           {t('canonical.queue.clearFilters')}
         </Button>
@@ -105,7 +105,7 @@ export function ErrorWithRetry({ message, reason, onRetry }: ErrorWithRetryProps
         {message}
       </p>
       {reason && <p className="text-sm text-muted-foreground">{reason}</p>}
-      <Button
+      <Button className="min-h-11 sm:min-h-0"
         type="button"
         variant="outline"
         size="sm"
@@ -145,7 +145,7 @@ export function PartialSuccessNotice({ saved, total, failed, reason, onRetry }: 
       </div>
       {onRetry && (
         <div>
-          <Button type="button" variant="outline" size="sm" onClick={onRetry}>
+          <Button className="min-h-11 sm:min-h-0" type="button" variant="outline" size="sm" onClick={onRetry}>
             {t('canonical.bulk.retryRest')}
           </Button>
         </div>
