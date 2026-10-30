@@ -239,7 +239,9 @@ function NameDetailsContent({
       setConfirm(null);
       onOpenChange(false);
     } catch (err) {
-      setConfirmError(reportWriteError(err, deleteNameErrorMessage));
+      setConfirmError(
+        reportWriteError(err, (error) => deleteNameErrorMessage(error, name.name)),
+      );
     }
   };
 

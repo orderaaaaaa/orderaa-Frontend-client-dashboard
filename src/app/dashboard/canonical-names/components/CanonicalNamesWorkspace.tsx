@@ -36,6 +36,7 @@ import type {
 } from '@/types/canonicalNames';
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
 import { useApplyLinksInChunks } from '@/app/dashboard/canonical-names/utils/useApplyLinksInChunks';
+import { PartialSuccessNotice } from '@/components/entity-manager/StateViews';
 import GroupMembersDrawer from './GroupMembersDrawer';
 import {
   LinkContextWarning,
@@ -102,7 +103,8 @@ export default function CanonicalNamesWorkspace({
   const refreshSources = useRefreshLocationSources();
   const sourcesRunning = sourcesStatus?.running ?? false;
 
-  const { applyLinks, applying } = useApplyLinksInChunks(domain);
+  const { applyLinks, applying, partial, retryPartial } =
+    useApplyLinksInChunks(domain);
   const createName = useCreateCanonicalName(domain);
   const renameName = useRenameCanonicalName(domain);
   const { t } = useI18n();
@@ -258,6 +260,16 @@ export default function CanonicalNamesWorkspace({
 
       {statusStrip}
 
+      {partial && (
+        <PartialSuccessNotice
+          saved={partial.saved}
+          total={partial.total}
+          failed={partial.failed}
+          reason={partial.reason}
+          onRetry={retryPartial}
+        />
+      )}
+
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -373,7 +385,9 @@ export default function CanonicalNamesWorkspace({
               deleteName.mutate(impactDialog.target.id, {
                 onSuccess: () => setImpactDialog(null),
                 onError: (err: unknown) => {
-                  toast.error(deleteNameErrorMessage(err));
+                  toast.error(
+                    deleteNameErrorMessage(err, impactDialog.target.name),
+                  );
                 },
               });
             }

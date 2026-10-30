@@ -10,7 +10,10 @@ import http from '@/lib/api/http';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { getApiErrorMessage } from '@/utils/apiError';
-import { getCanonicalNameError } from '@/app/dashboard/canonical-names/utils/canonicalNameErrors';
+import {
+  canonicalNameErrorMessage,
+  getCanonicalNameError,
+} from '@/app/dashboard/canonical-names/utils/canonicalNameErrors';
 import {
   CANONICAL_NAME_DOMAINS,
   CANONICAL_NAME_ERROR_CODES,
@@ -230,16 +233,9 @@ export const useRenameCanonicalName = (domain: CanonicalNameDomain) => {
   });
 };
 
-export const deleteNameErrorMessage = (err: unknown) => {
-  const error = getCanonicalNameError(err);
-  if (error?.code === CANONICAL_NAME_ERROR_CODES.NAME_HAS_LINKED_ROWS) {
-    const withCities = (error.details?.cityNameIds ?? []).length > 0;
-    return withCities
-      ? 'لا يمكن حذف الاسم لأنه مرتبط بصفوف من شركات الشحن ومدن تابعة، ألغ ربطها أولا'
-      : 'لا يمكن حذف الاسم لأنه مرتبط بصفوف من شركات الشحن، ألغ ربطها أولا';
-  }
-  return getApiErrorMessage(err, 'تعذر حذف الاسم الموحد');
-};
+export const deleteNameErrorMessage = (err: unknown, name: string) =>
+  canonicalNameErrorMessage(err, { name }) ??
+  getApiErrorMessage(err, 'تعذر حذف الاسم الموحد');
 
 export const useDeleteCanonicalName = (domain: CanonicalNameDomain) => {
   const queryClient = useQueryClient();

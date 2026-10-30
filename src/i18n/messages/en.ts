@@ -406,6 +406,7 @@ const en: Record<keyof typeof ar, string> = {
   'canonical.queue.unscoped.linkParent': 'Link governorate',
   'canonical.queue.unscoped.showCities': 'Show cities',
   'canonical.queue.unscoped.hideCities': 'Hide cities',
+  'canonical.queue.unscoped.citiesEmpty': 'No unlinked cities for this governorate.',
   'canonical.queue.row.linkedTo': 'Linked to {name}',
   'canonical.queue.row.unlinked': 'Unlinked',
   'canonical.queue.row.partial': '{linked} of {total} locations linked',

@@ -420,6 +420,7 @@ const ar = {
   'canonical.queue.unscoped.linkParent': 'اربط المحافظة',
   'canonical.queue.unscoped.showCities': 'عرض المدن',
   'canonical.queue.unscoped.hideCities': 'إخفاء المدن',
+  'canonical.queue.unscoped.citiesEmpty': 'لا توجد مدن غير مرتبطة لهذه المحافظة.',
   'canonical.queue.row.linkedTo': 'مرتبط بـ{name}',
   'canonical.queue.row.unlinked': 'غير مرتبط',
   'canonical.queue.row.partial': '{linked} من {total} مواقع مرتبطة',

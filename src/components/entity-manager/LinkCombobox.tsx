@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState, type KeyboardEvent } from 'react';
+import { useEffect, useId, useState, type KeyboardEvent } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -184,6 +184,12 @@ function LinkComboPanel({
   const activeIndex =
     flat.length === 0 || active < 0 ? -1 : Math.min(active, flat.length - 1);
   const activeOption = activeIndex >= 0 ? flat[activeIndex] : undefined;
+  const activeDomId = activeIndex >= 0 ? `${baseId}-opt-${activeIndex}` : null;
+
+  useEffect(() => {
+    if (activeDomId === null) return;
+    document.getElementById(activeDomId)?.scrollIntoView({ block: 'nearest' });
+  }, [activeDomId]);
 
   const move = (step: 1 | -1) => {
     if (flat.length === 0) return;
@@ -236,6 +242,16 @@ function LinkComboPanel({
     </div>
   );
 
+  const readySections = sections.filter(
+    ({ group, options }) => group.status === 'ready' && options.length > 0,
+  );
+  const pendingSections = sections.filter(
+    ({ group }) => group.status !== 'ready',
+  );
+  const noOptions =
+    flat.length === 0 &&
+    sections.every(({ group }) => group.status === 'ready');
+
   return (
     <div className="flex flex-col gap-2">
       <input
@@ -245,14 +261,14 @@ function LinkComboPanel({
         aria-expanded
         aria-controls={listboxId}
         aria-autocomplete="list"
-        aria-activedescendant={activeOption ? optionId(activeIndex) : undefined}
+        aria-activedescendant={activeDomId ?? undefined}
         autoComplete="off"
         autoFocus
         placeholder={t('canonical.action.linkPlaceholder')}
         value={query}
         onChange={(event) => {
           setQuery(event.target.value);
-          setActive(0);
+          setActive(-1);
         }}
         onKeyDown={handleKeyDown}
         className="min-h-11 w-full rounded-md border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -269,80 +285,78 @@ function LinkComboPanel({
         className="flex max-h-72 flex-col overflow-y-auto"
       >
         {createOptions.map((option) => renderOption(option, 0))}
-        {sections.map(({ group, options, start }) => {
-          const headingId = `${baseId}-heading-${group.id}`;
-          const loadingKey =
-            group.id === 'suggested'
-              ? 'canonical.suggest.loading'
-              : 'canonical.combobox.loading';
-          const errorKey =
-            group.id === 'suggested'
-              ? 'canonical.combobox.candidatesError'
-              : 'canonical.combobox.error';
-          if (
-            group.id === 'suggested' &&
-            group.status === 'ready' &&
-            options.length === 0
-          ) {
-            return null;
-          }
-          return (
-            <div
-              key={group.id}
-              role="group"
-              aria-labelledby={headingId}
-              className="flex flex-col"
+        {readySections.map(({ group, options, start }) => (
+          <div
+            key={group.id}
+            role="group"
+            aria-labelledby={`${baseId}-heading-${group.id}`}
+            className="flex flex-col"
+          >
+            <p
+              id={`${baseId}-heading-${group.id}`}
+              className="px-3 pt-2 pb-1 text-xs font-semibold text-muted-foreground"
             >
-              <p
-                id={headingId}
-                className="px-3 pt-2 pb-1 text-xs font-semibold text-muted-foreground"
-              >
-                {t(group.headingKey)}
-              </p>
-              {group.status === 'loading' && (
-                <p
-                  role="status"
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground"
-                >
-                  <Loader2
-                    className="size-4 animate-spin motion-reduce:animate-none"
-                    aria-hidden="true"
-                  />
-                  {t(loadingKey)}
-                </p>
-              )}
-              {group.status === 'error' && (
-                <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm text-destructive">
-                  <p>{t(errorKey)}</p>
-                  {group.onRetry && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="min-h-11 min-w-11"
-                      onClick={group.onRetry}
-                    >
-                      {t('common.retry')}
-                    </Button>
-                  )}
-                </div>
-              )}
-              {group.status === 'ready' &&
-                options.map((option, index) =>
-                  renderOption(option, start + index),
-                )}
-              {group.id === 'all' &&
-                group.status === 'ready' &&
-                options.length === 0 &&
-                text !== '' && (
-                  <p className="px-3 py-2 text-sm text-muted-foreground">
-                    {t('canonical.combobox.empty', { query: text })}
-                  </p>
-                )}
-            </div>
-          );
-        })}
+              {t(group.headingKey)}
+            </p>
+            {options.map((option, index) =>
+              renderOption(option, start + index),
+            )}
+          </div>
+        ))}
       </div>
+      {pendingSections.map(({ group }) => {
+        const loadingKey =
+          group.id === 'suggested'
+            ? 'canonical.suggest.loading'
+            : 'canonical.combobox.loading';
+        const errorKey =
+          group.id === 'suggested'
+            ? 'canonical.combobox.candidatesError'
+            : 'canonical.combobox.error';
+        return (
+          <div key={group.id} className="flex flex-col">
+            <p className="px-3 pt-2 pb-1 text-xs font-semibold text-muted-foreground">
+              {t(group.headingKey)}
+            </p>
+            {group.status === 'loading' && (
+              <p
+                role="status"
+                className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground"
+              >
+                <Loader2
+                  className="size-4 animate-spin motion-reduce:animate-none"
+                  aria-hidden="true"
+                />
+                {t(loadingKey)}
+              </p>
+            )}
+            {group.status === 'error' && (
+              <div
+                role="alert"
+                className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm text-destructive"
+              >
+                <p>{t(errorKey)}</p>
+                {group.onRetry && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="min-h-11 min-w-11"
+                    onClick={group.onRetry}
+                  >
+                    {t('common.retry')}
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+      {noOptions && (
+        <p role="status" className="px-3 py-2 text-sm text-muted-foreground">
+          {t('canonical.combobox.empty', { query: text })}
+        </p>
+      )}
     </div>
   );
 }

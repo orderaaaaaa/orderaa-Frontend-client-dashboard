@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
+import type { ApplyResult } from '@/components/entity-manager/types';
 import { runChunks } from '@/components/entity-manager/runChunks';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import {
@@ -12,6 +13,7 @@ import type {
   ApplyLinksRequest,
   CanonicalName,
   CanonicalNameDomain,
+  LinkItem,
 } from '@/types/canonicalNames';
 import { getApiErrorMessage } from '@/utils/apiError';
 import {
@@ -20,36 +22,61 @@ import {
   skippedAliasesMessage,
 } from './linkFeedback';
 
+export interface LinkPartialState {
+  saved: number;
+  total: number;
+  failed: number;
+  reason: string;
+  items: LinkItem[];
+}
+
 export const useApplyLinksInChunks = (domain: CanonicalNameDomain) => {
   const queryClient = useQueryClient();
   const { mutateAsync } = useApplyLinks(domain);
   const [applying, setApplying] = useState(false);
+  const [partial, setPartial] = useState<LinkPartialState | null>(null);
 
   const applyLinks = async (
     payload: ApplyLinksRequest,
     onLinked?: () => void,
-  ) => {
+  ): Promise<ApplyResult> => {
     setApplying(true);
+    setPartial(null);
     try {
       const run = await runChunks(payload.items, async (items) => {
         const response = await mutateAsync({ items });
         return response.data;
       });
 
-      if (run.error === null || run.saved > 0) {
+      if (run.ok || run.saved > 0) {
         await invalidateDomainQueries(queryClient, domain);
       }
 
-      if (run.error !== null) {
-        if (!isLocationDomain(domain)) {
-          toast.error(getApiErrorMessage(run.error, 'تعذر تنفيذ الربط'));
-          return;
-        }
-        if (isRowNotFoundError(run.error)) {
+      if (!run.ok) {
+        const location = isLocationDomain(domain);
+        if (location && isRowNotFoundError(run.error)) {
           await invalidateDomainQueries(queryClient, domain);
         }
-        toast.error(locationLinkErrorMessage(run.error));
-        return;
+        const reason = location
+          ? locationLinkErrorMessage(run.error)
+          : getApiErrorMessage(run.error, 'تعذر تنفيذ الربط');
+        if (run.saved > 0) {
+          setPartial({
+            saved: run.saved,
+            total: run.total,
+            failed: run.failed,
+            reason,
+            items: payload.items.slice(run.saved),
+          });
+        } else {
+          toast.error(reason);
+        }
+        return {
+          saved: run.saved,
+          total: run.total,
+          failed: run.failed,
+          reason,
+        };
       }
 
       const results = run.results.flat();
@@ -71,10 +98,16 @@ export const useApplyLinksInChunks = (domain: CanonicalNameDomain) => {
       }
 
       onLinked?.();
+      return { saved: run.saved, total: run.total, failed: 0, reason: null };
     } finally {
       setApplying(false);
     }
   };
 
-  return { applyLinks, applying };
+  const retryPartial = () => {
+    if (!partial) return;
+    void applyLinks({ items: partial.items });
+  };
+
+  return { applyLinks, applying, partial, retryPartial };
 };

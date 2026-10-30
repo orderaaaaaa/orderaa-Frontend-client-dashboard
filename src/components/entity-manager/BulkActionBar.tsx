@@ -30,13 +30,46 @@ export function BulkActionBar({
 }: BulkActionBarProps) {
   const { t } = useI18n();
 
-  if (count === 0) return null;
+  return (
+    <>
+      <p role="status" className="sr-only">
+        {count > 0 ? t('canonical.bulk.selected', { count }) : ''}
+      </p>
+      {count > 0 && (
+        <BulkBar
+          count={count}
+          pageCount={pageCount}
+          onSelectPage={onSelectPage}
+          onClear={onClear}
+          bulkLink={bulkLink}
+          acceptSuggestions={acceptSuggestions}
+          disabledReason={disabledReason}
+          progress={progress}
+          partial={partial}
+        />
+      )}
+    </>
+  );
+}
+
+function BulkBar({
+  count,
+  pageCount,
+  onSelectPage,
+  onClear,
+  bulkLink,
+  acceptSuggestions,
+  disabledReason,
+  progress,
+  partial,
+}: BulkActionBarProps) {
+  const { t } = useI18n();
 
   return (
     <div className="sticky bottom-0 z-10 flex flex-col gap-2 rounded-xl border bg-card p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-sm sm:top-0 sm:bottom-auto sm:p-4">
       <div className="flex flex-wrap items-center gap-2">
         <p
-          role="status"
+          aria-hidden="true"
           className="me-auto text-sm font-semibold text-foreground"
         >
           {t('canonical.bulk.selected', { count })}
