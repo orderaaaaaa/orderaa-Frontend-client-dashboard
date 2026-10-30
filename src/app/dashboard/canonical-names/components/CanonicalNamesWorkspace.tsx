@@ -22,7 +22,6 @@ import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import {
   isLocationDomain,
-  useApplyLinks,
   useCanonicalNamesQuery,
   useCreateCanonicalName,
   useDeleteCanonicalName,
@@ -38,6 +37,7 @@ import type {
   SourceGroup,
 } from '@/types/canonicalNames';
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
+import { useApplyLinksInChunks } from '@/app/dashboard/canonical-names/utils/useApplyLinksInChunks';
 import GroupMembersDrawer from './GroupMembersDrawer';
 import LocationSourcesStatusStrip from './LocationSourcesStatusStrip';
 import NameFormDialog from './NameFormDialog';
@@ -113,7 +113,7 @@ export default function CanonicalNamesWorkspace({
   const refreshSources = useRefreshLocationSources();
   const sourcesRunning = sourcesStatus?.running ?? false;
 
-  const applyLinks = useApplyLinks(domain);
+  const { applyLinks, applying } = useApplyLinksInChunks(domain);
   const createName = useCreateCanonicalName(domain);
   const renameName = useRenameCanonicalName(domain);
   const deleteName = useDeleteCanonicalName(domain);
@@ -137,11 +137,11 @@ export default function CanonicalNamesWorkspace({
       setLinkWarning({ items, rows: warnRows, onLinked });
       return;
     }
-    applyLinks.mutate({ items }, { onSuccess: () => onLinked?.() });
+    void applyLinks({ items }, onLinked);
   };
 
   const directLink = (item: LinkItem, onLinked?: () => void) => {
-    applyLinks.mutate({ items: [item] }, { onSuccess: () => onLinked?.() });
+    void applyLinks({ items: [item] }, onLinked);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -159,7 +159,7 @@ export default function CanonicalNamesWorkspace({
     if (!dropData?.nameId) return;
     if (isLocationDomain(domain)) {
       if (!dragData?.rowId) return;
-      applyLinks.mutate({
+      void applyLinks({
         items: [
           {
             scopeId: dragData.scopeId ?? 0,
@@ -190,7 +190,7 @@ export default function CanonicalNamesWorkspace({
       setLinkWarning({ items: [item], rows: warnRows });
       return;
     }
-    applyLinks.mutate({ items: [item] });
+    void applyLinks({ items: [item] });
   };
 
   const nameOptionsList = useMemo(() => nameOptions ?? [], [nameOptions]);
@@ -225,8 +225,8 @@ export default function CanonicalNamesWorkspace({
               <SuggestionsPanel
                 domain={domain}
                 scopeId={undefined}
-                onApply={(items) => applyLinks.mutate({ items })}
-                applying={applyLinks.isPending}
+                onApply={(items) => void applyLinks({ items })}
+                applying={applying}
               />
             )}
             {refreshButton}
@@ -259,8 +259,8 @@ export default function CanonicalNamesWorkspace({
                   ? governorateScopeId
                   : undefined
               }
-              onApply={(items) => applyLinks.mutate({ items })}
-              applying={applyLinks.isPending}
+              onApply={(items) => void applyLinks({ items })}
+              applying={applying}
             />
           )}
           {refreshButton}
@@ -402,10 +402,7 @@ export default function CanonicalNamesWorkspace({
               <Button
                 className="min-h-10"
                 onClick={() => {
-                  applyLinks.mutate(
-                    { items: linkWarning.items },
-                    { onSuccess: () => linkWarning.onLinked?.() },
-                  );
+                  void applyLinks({ items: linkWarning.items }, linkWarning.onLinked);
                   setLinkWarning(null);
                 }}
               >

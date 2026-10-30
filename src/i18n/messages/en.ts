@@ -433,6 +433,7 @@ const en: Record<keyof typeof ar, string> = {
   'canonical.action.selectPage': 'Select this page ({count})',
   'canonical.action.bulkLink': 'Link selected to…',
   'canonical.action.acceptConfident': 'Accept clear suggestions ({count})',
+  'canonical.action.acceptSelected': 'Accept selected suggestions ({count})',
   'canonical.action.disabledNoRow': 'Select a location first',
   'canonical.action.disabledNoManage': 'You do not have edit access',
   'canonical.bulk.selected': 'Selected: {count}',

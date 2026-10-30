@@ -12,11 +12,6 @@ import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { getCanonicalNameError } from '@/app/dashboard/canonical-names/utils/canonicalNameErrors';
 import {
-  isRowNotFoundError,
-  locationLinkErrorMessage,
-  skippedAliasesMessage,
-} from '@/app/dashboard/canonical-names/utils/linkFeedback';
-import {
   CANONICAL_NAME_DOMAINS,
   CANONICAL_NAME_ERROR_CODES,
   REFRESH_REQUEST_STATUSES,
@@ -67,7 +62,7 @@ const domainQueryKeys = (domain: CanonicalNameDomain): QueryKey[] => {
   return keys;
 };
 
-const invalidateDomainQueries = (
+export const invalidateDomainQueries = (
   queryClient: ReturnType<typeof useQueryClient>,
   domain: CanonicalNameDomain,
 ) => invalidateAndWait(queryClient, domainQueryKeys(domain));
@@ -265,63 +260,16 @@ export const useDeleteCanonicalName = (domain: CanonicalNameDomain) => {
   });
 };
 
-const LINK_ITEMS_PER_REQUEST = 500;
-
-export const useApplyLinks = (domain: CanonicalNameDomain) => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+export const useApplyLinks = (domain: CanonicalNameDomain) =>
+  useMutation({
     mutationFn: async (payload: ApplyLinksRequest) => {
-      const result: ApplyLinksResponse = { data: [] };
-      let sentChunks = 0;
-      try {
-        for (
-          let start = 0;
-          start < payload.items.length;
-          start += LINK_ITEMS_PER_REQUEST
-        ) {
-          const { data } = await http.put<ApplyLinksResponse>(
-            `/canonical-names/${domain}/links`,
-            {
-              items: payload.items.slice(start, start + LINK_ITEMS_PER_REQUEST),
-            },
-          );
-          sentChunks += 1;
-          result.data.push(...data.data);
-        }
-      } catch (err) {
-        if (sentChunks > 0) await invalidateDomainQueries(queryClient, domain);
-        throw err;
-      }
-      return result;
-    },
-    onSuccess: async (result) => {
-      await invalidateDomainQueries(queryClient, domain);
-      const rowsLinked = result.data.reduce((sum, row) => sum + row.rowsLinked, 0);
-      if (rowsLinked > 0) {
-        toast.success(`تم ربط ${rowsLinked} عنصر`);
-      } else {
-        toast.success('تم تحديث الربط');
-      }
-      if (!isLocationDomain(domain)) return;
-      const names = queryClient
-        .getQueriesData<CanonicalName[]>({
-          queryKey: [QUERY_KEYS.CANONICAL_NAMES, domain],
-        })
-        .flatMap(([, data]) => data ?? []);
-      const skipped = skippedAliasesMessage(result.data, names);
-      if (skipped) toast.info(skipped);
-    },
-    onError: (err: unknown) => {
-      if (!isLocationDomain(domain)) {
-        toast.error(getApiErrorMessage(err, 'تعذر تنفيذ الربط'));
-        return;
-      }
-      if (isRowNotFoundError(err)) void invalidateDomainQueries(queryClient, domain);
-      toast.error(locationLinkErrorMessage(err));
+      const { data } = await http.put<ApplyLinksResponse>(
+        `/canonical-names/${domain}/links`,
+        payload,
+      );
+      return data;
     },
   });
-};
 
 const STATUS_POLL_MS = 5000;
 const STATUS_WATCH_MS = 60000;

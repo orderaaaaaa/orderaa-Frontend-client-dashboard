@@ -447,6 +447,7 @@ const ar = {
   'canonical.action.selectPage': 'تحديد كل الصفحة ({count})',
   'canonical.action.bulkLink': 'ربط المحدد بـ…',
   'canonical.action.acceptConfident': 'قبول الاقتراحات الواضحة ({count})',
+  'canonical.action.acceptSelected': 'قبول الاقتراحات المحددة ({count})',
   'canonical.action.disabledNoRow': 'اختر موقعا أولا',
   'canonical.action.disabledNoManage': 'لا تملك صلاحية التعديل',
   'canonical.bulk.selected': 'المحدد: {count}',
