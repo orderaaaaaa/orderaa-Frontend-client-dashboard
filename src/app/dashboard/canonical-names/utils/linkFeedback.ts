@@ -4,8 +4,13 @@ import {
   type CanonicalName,
   type LinkResult,
 } from '@/types/canonicalNames';
-import { getCanonicalNameError } from './canonicalNameErrors';
-import { locationSourceLabel } from './locationSourceLabel';
+import { readStoredLocale } from '@/i18n/locale';
+import { translate } from '@/i18n/translate';
+import {
+  canonicalNameErrorMessage,
+  getCanonicalNameError,
+  type CanonicalErrorContext,
+} from './canonicalNameErrors';
 
 export function isRowNotFoundError(err: unknown) {
   return (
@@ -13,36 +18,11 @@ export function isRowNotFoundError(err: unknown) {
   );
 }
 
-export function locationLinkErrorMessage(err: unknown) {
-  const fallback = getApiErrorMessage(err, 'تعذر تنفيذ الربط');
-  const error = getCanonicalNameError(err);
-  if (!error) return fallback;
-
-  switch (error.code) {
-    case CANONICAL_NAME_ERROR_CODES.ROW_IDS_REQUIRED:
-      return 'اختر صفا واحدا على الأقل للربط';
-    case CANONICAL_NAME_ERROR_CODES.ROW_NOT_FOUND:
-      return 'بعض الصفوف لم تعد موجودة، تم تحديث القائمة';
-    case CANONICAL_NAME_ERROR_CODES.DUPLICATE_SOURCE_IN_REQUEST:
-      return error.details
-        ? `اختر صفا واحدا فقط من ${locationSourceLabel(error.details.source)}`
-        : fallback;
-    case CANONICAL_NAME_ERROR_CODES.SOURCE_ALREADY_LINKED:
-      return error.details
-        ? `هذا الاسم مربوط بالفعل بصف من ${locationSourceLabel(error.details.source)}، ألغ ربطه أولا`
-        : 'هذا الاسم مربوط بالفعل بصف من نفس شركة الشحن، ألغ ربطه أولا';
-    case CANONICAL_NAME_ERROR_CODES.CHILD_ROWS_LINKED:
-      return [
-        'ألغ ربط المدن التابعة أولا',
-        ...(error.details?.rows ?? []).map(
-          (row) => `${locationSourceLabel(row.source)}: ${row.label}`,
-        ),
-      ].join('\n');
-    case CANONICAL_NAME_ERROR_CODES.UNSCOPED_GROUP:
-      return 'اربط المحافظة أولا';
-    default:
-      return fallback;
-  }
+export function locationLinkErrorMessage(err: unknown, context: CanonicalErrorContext = {}) {
+  return (
+    canonicalNameErrorMessage(err, context) ??
+    getApiErrorMessage(err, translate(readStoredLocale(), 'canonical.errors.generic'))
+  );
 }
 
 export function skippedAliasesMessage(
