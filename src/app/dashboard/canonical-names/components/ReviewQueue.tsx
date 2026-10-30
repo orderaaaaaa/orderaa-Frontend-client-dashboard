@@ -96,9 +96,14 @@ export interface ReviewBulkContext {
   onClearSelection: () => void;
 }
 
+export interface ReviewQueueKeyboard {
+  onOpenRow: (row: GroupQueueRow) => void;
+}
+
 export interface ReviewQueueProps {
   domain: CanonicalNameDomain;
   canManage: boolean;
+  keyboard: ReviewQueueKeyboard;
   renderRow: (row: GroupQueueRow, state: ReviewRowState) => ReactNode;
   renderBulkBar?: (context: ReviewBulkContext) => ReactNode;
   renderUnscopedParents?: (parents: UnscopedParent[]) => ReactNode;
@@ -108,6 +113,7 @@ export interface ReviewQueueProps {
 function ReviewQueueContent({
   domain,
   canManage,
+  keyboard,
   renderRow,
   renderBulkBar,
   renderUnscopedParents,
@@ -274,6 +280,7 @@ function ReviewQueueContent({
         })
       }
       pagination={pagination}
+      keyboard={{ onOpenRow: keyboard.onOpenRow }}
     />
   );
 }

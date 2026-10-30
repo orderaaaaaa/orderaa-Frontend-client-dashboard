@@ -68,21 +68,23 @@ export function QueueBulkBar({
 
   return (
     <>
-      <BulkActionBar
-        count={count}
-        pageCount={context.pageRows.length}
-        onSelectPage={context.onSelectPage}
-        onClear={context.onClearSelection}
-        bulkLink={bulkCombobox ? { combobox: bulkCombobox } : undefined}
-        acceptSuggestions={
-          onAcceptSelected && count > 0
-            ? {
-                count,
-                onClick: () => onAcceptSelected(selected.map((row) => row.group)),
-              }
-            : undefined
-        }
-      />
+      <div data-bulk-bar className="contents">
+        <BulkActionBar
+          count={count}
+          pageCount={context.pageRows.length}
+          onSelectPage={context.onSelectPage}
+          onClear={context.onClearSelection}
+          bulkLink={bulkCombobox ? { combobox: <span data-link-control>{bulkCombobox}</span> } : undefined}
+          acceptSuggestions={
+            onAcceptSelected && count > 0
+              ? {
+                  count,
+                  onClick: () => onAcceptSelected(selected.map((row) => row.group)),
+                }
+              : undefined
+          }
+        />
+      </div>
       {pending !== null && (
         <ConfirmImpactDialog
           title={t('canonical.bulk.confirmLink', {

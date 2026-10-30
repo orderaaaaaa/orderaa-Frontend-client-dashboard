@@ -106,6 +106,7 @@ export const QueueRow = forwardRef<HTMLDivElement, QueueRowProps>(function Queue
       role="listitem"
       tabIndex={tabIndex}
       onKeyDown={onKeyDown}
+      data-queue-row={row.id}
       data-state={row.state}
       data-selected={selected ? 'true' : undefined}
       aria-busy={pending || undefined}

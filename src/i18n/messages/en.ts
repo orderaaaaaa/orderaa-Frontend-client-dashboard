@@ -543,7 +543,7 @@ const en: Record<keyof typeof ar, string> = {
   'canonical.a11y.dragOver': 'Over “{name}”.',
   'canonical.a11y.dragDrop': 'Dropped “{item}” on “{name}”.',
   'canonical.a11y.dragCancel': 'Drag cancelled.',
-  'canonical.a11y.dragInstructions': 'Press Space to pick up this item, then use the arrow keys to move it, Space to drop, or Escape to cancel.',
+  'canonical.a11y.dragInstructions': 'Drag the spelling onto a canonical name to link it. With the keyboard, press L.',
   'canonical.a11y.refreshDone': 'Refresh finished: {status}.',
   'canonical.state.unlinked': 'Unlinked',
   'canonical.state.partial': 'Partly linked',

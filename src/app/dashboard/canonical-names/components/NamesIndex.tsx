@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useDroppable } from '@dnd-kit/core';
 import { Badge } from '@/components/ui/badge';
 import Input from '@/components/ui/Input';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -20,7 +21,7 @@ export interface NamesIndexProps {
   onSelect: (id: number) => void;
   initialSearch?: string;
   onSearchChange?: (value: string) => void;
-  onDropGroup?: (nameId: number) => void;
+  dragEnabled?: boolean;
 }
 
 export function NamesIndex(props: NamesIndexProps) {
@@ -38,6 +39,7 @@ function NamesList({
   onSelect,
   initialSearch,
   onSearchChange,
+  dragEnabled = false,
 }: NamesIndexProps) {
   const { t } = useI18n();
   const [search, setSearch] = useState(initialSearch ?? '');
@@ -117,6 +119,7 @@ function NamesList({
               isLocation={isLocationDomain(domain)}
               selected={name.id === selectedId}
               onSelect={onSelect}
+              dragEnabled={dragEnabled}
             />
           ))}
         </ul>
@@ -130,10 +133,16 @@ interface NameItemProps {
   isLocation: boolean;
   selected: boolean;
   onSelect: (id: number) => void;
+  dragEnabled: boolean;
 }
 
-function NameItem({ name, isLocation, selected, onSelect }: NameItemProps) {
+function NameItem({ name, isLocation, selected, onSelect, dragEnabled }: NameItemProps) {
   const { t } = useI18n();
+  const drop = useDroppable({
+    id: `name:${name.id}`,
+    data: { label: name.name, nameId: name.id },
+    disabled: !dragEnabled,
+  });
   const countText = isLocation
     ? t('canonical.name.orderCount', {
         count: name.orderCount,
@@ -145,7 +154,7 @@ function NameItem({ name, isLocation, selected, onSelect }: NameItemProps) {
       });
 
   return (
-    <li>
+    <li ref={drop.setNodeRef}>
       <button
         type="button"
         onClick={() => onSelect(name.id)}
@@ -153,6 +162,7 @@ function NameItem({ name, isLocation, selected, onSelect }: NameItemProps) {
         className={cn(
           'flex min-h-11 w-full flex-col items-start gap-1 rounded-md border px-3 py-2 text-start transition-colors hover:bg-accent',
           selected ? 'border-primary bg-primary/5' : 'border-border bg-card',
+          drop.isOver && 'ring-2 ring-ring',
         )}
       >
         <span className="flex w-full min-w-0 flex-wrap items-center gap-2">

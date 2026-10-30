@@ -1,11 +1,25 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core';
 import { ConfirmImpactDialog } from '@/components/entity-manager/ConfirmImpactDialog';
+import { ShortcutSheet } from '@/components/entity-manager/ShortcutSheet';
+import { buildDragAccessibility } from '@/components/entity-manager/dragAccessibility';
+import { useFinePointer } from '@/components/entity-manager/useFinePointer';
+import { useReturnFocus } from '@/components/entity-manager/useReturnFocus';
 import type { ReviewRowState } from '@/components/entity-manager/ReviewListCore';
 import { PartialSuccessNotice, QueueSkeleton } from '@/components/entity-manager/StateViews';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { useI18n } from '@/i18n/I18nProvider';
+import { pluralAr } from '@/i18n/pluralAr';
 import {
   isLocationDomain,
   useCanonicalNamesQuery,
@@ -61,6 +75,24 @@ export interface CanonicalDomainPageProps {
   initialSearch?: string;
 }
 
+interface DragPayload {
+  label: string;
+  group?: SourceGroup;
+  nameId?: number;
+}
+
+const TEXT_ENTRY_SELECTOR =
+  'input, textarea, select, [contenteditable="true"], [contenteditable=""], [role="combobox"], [role="dialog"], [role="alertdialog"]';
+const OPEN_LAYER_SELECTOR =
+  '[role="dialog"][data-state="open"], [role="alertdialog"], [role="combobox"][aria-expanded="true"]';
+
+function isShortcutBlocked(target: EventTarget | null): boolean {
+  if (target instanceof HTMLElement && (target.isContentEditable || target.closest(TEXT_ENTRY_SELECTOR) !== null)) {
+    return true;
+  }
+  return document.querySelector(OPEN_LAYER_SELECTOR) !== null;
+}
+
 interface UnlinkTarget {
   group: SourceGroup;
   row: SourceRow;
@@ -101,6 +133,39 @@ function CanonicalDomainContent({ domain, initialSearch }: CanonicalDomainPagePr
   const [unlinkTarget, setUnlinkTarget] = useState<UnlinkTarget | null>(null);
   const [aliasTarget, setAliasTarget] = useState<NameImpactAlias | null>(null);
   const [membersOf, setMembersOf] = useState<SourceGroup | null>(null);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [announcement, setAnnouncement] = useState('');
+  const [dragLabel, setDragLabel] = useState<string | null>(null);
+  const shortcutsFocus = useReturnFocus();
+  const finePointer = useFinePointer();
+  const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 6 } });
+  const sensors = useSensors(...(finePointer ? [pointerSensor] : []));
+  const dragEnabled = finePointer && canManage;
+  const { remember } = shortcutsFocus;
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.isComposing || event.ctrlKey || event.metaKey || event.altKey) return;
+      if (isShortcutBlocked(event.target)) return;
+      if (event.code === 'Slash') {
+        event.preventDefault();
+        if (event.shiftKey) {
+          remember();
+          setShortcutsOpen(true);
+        } else {
+          document.querySelector<HTMLInputElement>('[data-queue-search]')?.focus();
+        }
+        return;
+      }
+      if (event.code === 'KeyN' && canManage && !gated) {
+        event.preventDefault();
+        setCreateError(null);
+        setCreateOpen(true);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [canManage, gated, remember]);
 
   const selectedName = names.data?.find((name) => name.id === selectedNameId) ?? null;
   const detailsVisible = detailsOpen && selectedName !== null;
@@ -121,17 +186,50 @@ function CanonicalDomainContent({ domain, initialSearch }: CanonicalDomainPagePr
     (group) => !isLocation || locationPicksOf(group).length > 0,
   );
 
+  const nameOf = (item: LinkItem): string | null =>
+    item.canonicalNameId !== undefined
+      ? (names.data?.find((name) => name.id === item.canonicalNameId)?.name ?? null)
+      : (item.newName ?? null);
+
+  const runLink = (items: LinkItem[], rows: LinkContextRow[], onLinked?: () => void) => {
+    void applyLinks({ items }, onLinked).then((result) => {
+      const name = items.length > 0 ? nameOf(items[0]) : null;
+      if (name === null || result.saved === 0) return;
+      if (items.length === 1 && rows.length === 1) {
+        setAnnouncement(t('canonical.a11y.linked', { spelling: rows[0].spellingLabel, name }));
+      } else {
+        setAnnouncement(
+          t('canonical.bulk.ok', {
+            count: result.saved,
+            spellingNoun: pluralAr(t, config.labels.spellingNoun, result.saved),
+            name,
+          }),
+        );
+      }
+    });
+  };
+
   const requestLink = (items: LinkItem[], rows: LinkContextRow[], onLinked?: () => void) => {
     if (config.warnMultiContext && multiContextRows(rows).length > 0) {
       setWarning({ items, rows, onLinked });
       return;
     }
-    void applyLinks({ items }, onLinked);
+    runLink(items, rows, onLinked);
   };
 
   const confirmWarning = (pending: LinkWarningState) => {
     setWarning(null);
-    void applyLinks({ items: pending.items }, pending.onLinked);
+    runLink(pending.items, pending.rows, pending.onLinked);
+  };
+
+  const openShortcuts = () => {
+    shortcutsFocus.remember();
+    setShortcutsOpen(true);
+  };
+
+  const openCreate = () => {
+    setCreateError(null);
+    setCreateOpen(true);
   };
 
   const confirmUnlink = async () => {
@@ -150,12 +248,30 @@ function CanonicalDomainContent({ domain, initialSearch }: CanonicalDomainPagePr
     });
   };
 
+  const linkGroupTo = (group: SourceGroup, nameId: number) => {
+    const item: LinkItem = isLocation
+      ? { scopeId: group.scopeId, rowIds: locationPicksOf(group), canonicalNameId: nameId }
+      : { scopeId: group.scopeId, normalizedText: group.normalizedText, canonicalNameId: nameId };
+    requestLink([item], [describeLinkGroup(group)]);
+  };
+
   const addSynonym = async (group: SourceGroup) => {
     if (selectedName === null) return;
-    const item: LinkItem = isLocation
-      ? { scopeId: group.scopeId, rowIds: locationPicksOf(group), canonicalNameId: selectedName.id }
-      : { scopeId: group.scopeId, normalizedText: group.normalizedText, canonicalNameId: selectedName.id };
-    requestLink([item], [describeLinkGroup(group)]);
+    linkGroupTo(group, selectedName.id);
+  };
+
+  const payloadOf = (data: { current?: unknown } | undefined) =>
+    data?.current as DragPayload | undefined;
+
+  const onDragStart = (event: DragStartEvent) => {
+    setDragLabel(payloadOf(event.active.data)?.label ?? null);
+  };
+
+  const onDragEnd = (event: DragEndEvent) => {
+    setDragLabel(null);
+    const group = payloadOf(event.active.data)?.group;
+    const nameId = payloadOf(event.over?.data)?.nameId;
+    if (group && nameId !== undefined) linkGroupTo(group, nameId);
   };
 
   const acceptSelected = (groups: SourceGroup[]) =>
@@ -176,6 +292,7 @@ function CanonicalDomainContent({ domain, initialSearch }: CanonicalDomainPagePr
       canManage={canManage}
       names={names}
       actions={rowActions}
+      dragEnabled={dragEnabled}
     />
   );
 
@@ -221,10 +338,7 @@ function CanonicalDomainContent({ domain, initialSearch }: CanonicalDomainPagePr
     : undefined;
 
   const createAction = {
-    onClick: () => {
-      setCreateError(null);
-      setCreateOpen(true);
-    },
+    onClick: openCreate,
     disabled: gated,
     disabledReason: gated ? t('canonical.queue.scope.gate') : undefined,
   };
@@ -256,7 +370,8 @@ function CanonicalDomainContent({ domain, initialSearch }: CanonicalDomainPagePr
       primaryAction={createAction}
       refresh={refreshAction}
       review={reviewAction}
-      onOpenShortcuts={() => undefined}
+      onOpenShortcuts={openShortcuts}
+      announcement={announcement}
     >
       {canRead && (
         <div className="flex flex-col gap-4">
@@ -269,29 +384,46 @@ function CanonicalDomainContent({ domain, initialSearch }: CanonicalDomainPagePr
               onRetry={retryPartial}
             />
           )}
-          <div className="grid gap-4 lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start">
-            <NamesIndex
-              key={initialSearch ?? ''}
-              domain={domain}
-              scopeId={scopeId}
-              selectedId={selectedNameId}
-              onSelect={(id) => {
-                setSelectedNameId(id);
-                setDetailsOpen(true);
-              }}
-              initialSearch={initialSearch}
-            />
-            <div className="min-w-0">
-              <ReviewQueue
+          <DndContext
+            sensors={sensors}
+            accessibility={buildDragAccessibility(t)}
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+            onDragCancel={() => setDragLabel(null)}
+          >
+            <div className="grid gap-4 lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start">
+              <NamesIndex
+                key={initialSearch ?? ''}
                 domain={domain}
-                canManage={canManage}
-                renderRow={renderRow}
-                renderBulkBar={renderBulkBar}
-                renderUnscopedParents={renderUnscopedParents}
-                scopeSlot={scopeSlot}
+                scopeId={scopeId}
+                selectedId={selectedNameId}
+                onSelect={(id) => {
+                  setSelectedNameId(id);
+                  setDetailsOpen(true);
+                }}
+                initialSearch={initialSearch}
+                dragEnabled={dragEnabled}
               />
+              <div className="min-w-0">
+                <ReviewQueue
+                  domain={domain}
+                  canManage={canManage}
+                  keyboard={{ onOpenRow: (row) => setMembersOf(row.group) }}
+                  renderRow={renderRow}
+                  renderBulkBar={renderBulkBar}
+                  renderUnscopedParents={renderUnscopedParents}
+                  scopeSlot={scopeSlot}
+                />
+              </div>
             </div>
-          </div>
+            <DragOverlay>
+              {dragLabel !== null && (
+                <div className="rounded-md border bg-card px-3 py-2 text-sm font-medium text-foreground shadow-md">
+                  {dragLabel}
+                </div>
+              )}
+            </DragOverlay>
+          </DndContext>
 
           <LinkContextWarning
             warning={warning}
@@ -375,6 +507,12 @@ function CanonicalDomainContent({ domain, initialSearch }: CanonicalDomainPagePr
               setAliasTarget(alias);
             }}
             onAddSynonym={addSynonym}
+          />
+
+          <ShortcutSheet
+            open={shortcutsOpen}
+            onOpenChange={setShortcutsOpen}
+            onCloseAutoFocus={shortcutsFocus.onCloseAutoFocus}
           />
 
           {canManage && config.actions.suggest && (

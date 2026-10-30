@@ -52,6 +52,7 @@ export function QueueToolbar({
         <div className="flex min-w-0 flex-1 basis-64 flex-col gap-1">
           <Input
             ref={searchInputRef}
+            data-queue-search
             type="text"
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}

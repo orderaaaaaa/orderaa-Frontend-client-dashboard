@@ -18,9 +18,6 @@ export interface QueueKeyboardOptions {
   onLinkRow: (id: string) => void;
   onLinkSelection?: () => void;
   onOpenRow: (id: string) => void;
-  onFocusSearch: () => void;
-  onNewName?: () => void;
-  onOpenHelp: () => void;
 }
 
 export interface QueueKeyboard {
@@ -84,9 +81,6 @@ export function useQueueKeyboard(options: QueueKeyboardOptions): QueueKeyboard {
     onLinkRow,
     onLinkSelection,
     onOpenRow,
-    onFocusSearch,
-    onNewName,
-    onOpenHelp,
   } = options;
 
   const onKeyDown = useCallback(
@@ -121,11 +115,6 @@ export function useQueueKeyboard(options: QueueKeyboardOptions): QueueKeyboard {
         case 'KeyK':
           move(-1);
           return;
-        case 'Slash':
-          event.preventDefault();
-          if (event.shiftKey) onOpenHelp();
-          else onFocusSearch();
-          return;
         case 'Space':
           if (!canManage || ownId === null) return;
           event.preventDefault();
@@ -146,11 +135,6 @@ export function useQueueKeyboard(options: QueueKeyboardOptions): QueueKeyboard {
             event.preventDefault();
             onLinkSelection();
           }
-          return;
-        case 'KeyN':
-          if (!canManage || !onNewName) return;
-          event.preventDefault();
-          onNewName();
           return;
         case 'Enter':
           if (ownId === null) return;
@@ -173,9 +157,6 @@ export function useQueueKeyboard(options: QueueKeyboardOptions): QueueKeyboard {
       onLinkRow,
       onLinkSelection,
       onOpenRow,
-      onFocusSearch,
-      onNewName,
-      onOpenHelp,
     ],
   );
 

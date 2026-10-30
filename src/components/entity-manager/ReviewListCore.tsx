@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, type ComponentProps, type ReactNode } from 'react';
+import { Fragment, useRef, useState, type ComponentProps, type ReactNode } from 'react';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -8,6 +8,24 @@ import type { TranslationKey } from '@/i18n/translate';
 import { cn } from '@/lib/utils';
 import { EmptyPanel, ErrorWithRetry, QueueSkeleton } from './StateViews';
 import type { QueueItem, QueueTab, ReviewListStatus, TabCounts } from './types';
+import {
+  BULK_BAR_ATTR,
+  QUEUE_ROW_ATTR,
+  focusQueueRow,
+  queueRowTabIndex,
+  useQueueKeyboard,
+} from './useQueueKeyboard';
+
+const isUnlinkedRow = (row: QueueItem) => row.state === 'unlinked' || row.state === 'implicit';
+
+function rowElementOf(root: HTMLElement | null, id: string): HTMLElement | null {
+  const rows = Array.from(root?.querySelectorAll<HTMLElement>(`[${QUEUE_ROW_ATTR}]`) ?? []);
+  return rows.find((element) => element.getAttribute(QUEUE_ROW_ATTR) === id) ?? null;
+}
+
+function clickWithin(root: HTMLElement | null, selector: string) {
+  root?.querySelector<HTMLElement>(selector)?.click();
+}
 
 export interface ReviewSelection {
   ids: ReadonlySet<string>;
@@ -27,6 +45,13 @@ export type ReviewPagination = Omit<
 export interface ReviewRowState {
   selected: boolean;
   onToggleSelect: (event: { shift: boolean }) => void;
+  tabIndex: 0 | -1;
+  focused: boolean;
+  onLinked: () => void;
+}
+
+export interface ReviewKeyboardHandlers<Row> {
+  onOpenRow: (row: Row) => void;
 }
 
 export interface ReviewListQuery {
@@ -56,6 +81,7 @@ export interface ReviewListCoreProps<Row extends QueueItem, TTab extends string 
   header?: ReactNode;
   bulkBar?: ReactNode;
   pagination: ReviewPagination;
+  keyboard?: ReviewKeyboardHandlers<Row>;
 }
 
 export function toggleReviewSelection(
@@ -118,8 +144,40 @@ export function ReviewListCore<Row extends QueueItem, TTab extends string = Queu
   header,
   bulkBar,
   pagination,
+  keyboard,
 }: ReviewListCoreProps<Row, TTab>) {
   const { t } = useI18n();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [focusedId, setFocusedId] = useState<string | null>(null);
+  const rowIds = rows.map((row) => row.id);
+
+  const focusNextUnlinked = (afterId: string) => {
+    const index = rows.findIndex((row) => row.id === afterId);
+    const next =
+      rows.slice(index + 1).find(isUnlinkedRow) ?? rows.slice(0, Math.max(index, 0)).find(isUnlinkedRow);
+    if (!next) return;
+    requestAnimationFrame(() => focusQueueRow(containerRef.current, next.id));
+  };
+
+  const { onKeyDown } = useQueueKeyboard({
+    containerRef,
+    rowIds,
+    focusedId,
+    canManage,
+    onFocusRow: setFocusedId,
+    onToggleRow: (id) => onSelectionChange(toggleReviewSelection(selection, rows, id, { shift: false })),
+    onRangeRow: (id) => onSelectionChange(toggleReviewSelection(selection, rows, id, { shift: true })),
+    onLinkRow: (id) => clickWithin(rowElementOf(containerRef.current, id), '[data-link-control] button'),
+    onLinkSelection: () =>
+      clickWithin(
+        containerRef.current?.querySelector<HTMLElement>(`[${BULK_BAR_ATTR}]`) ?? null,
+        '[data-link-control] button',
+      ),
+    onOpenRow: (id) => {
+      const row = rows.find((candidate) => candidate.id === id);
+      if (row) keyboard?.onOpenRow(row);
+    },
+  });
 
   const isLoading = status === 'loading' || (status === 'refetching' && rows.length === 0);
   const isError = status === 'error';
@@ -152,6 +210,15 @@ export function ReviewListCore<Row extends QueueItem, TTab extends string = Queu
           ))}
         </TabsList>
         <TabsContent value={tab} className="flex flex-col gap-4">
+          <div
+            ref={containerRef}
+            className="flex flex-col gap-4"
+            onKeyDown={onKeyDown}
+            onFocus={(event) => {
+              const id = event.target instanceof HTMLElement ? event.target.getAttribute(QUEUE_ROW_ATTR) : null;
+              if (id !== null) setFocusedId(id);
+            }}
+          >
           {bulkBar}
           {isLoading && <QueueSkeleton />}
           {isError && <ErrorWithRetry message={t('canonical.queue.error')} onRetry={onRetry} />}
@@ -184,12 +251,16 @@ export function ReviewListCore<Row extends QueueItem, TTab extends string = Queu
                       selected: selection.ids.has(row.id),
                       onToggleSelect: (event) =>
                         onSelectionChange(toggleReviewSelection(selection, rows, row.id, event)),
+                      tabIndex: queueRowTabIndex(rowIds, focusedId, row.id),
+                      focused: focusedId === row.id,
+                      onLinked: () => focusNextUnlinked(row.id),
                     })}
                   </Fragment>
                 ))}
               </div>
             </div>
           )}
+          </div>
           {!isLoading && !isError && !isEmpty && (
             <PaginationFooter
               {...pagination}
