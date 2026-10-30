@@ -48,7 +48,7 @@ function UnscopedParentCities({ scopeId, parentRowId }: UnscopedParentCitiesProp
   }
 
   if (data.data.length === 0) {
-    return <p className="py-2 text-sm text-muted-foreground">{t('canonical.queue.empty.none')}</p>;
+    return <p className="py-2 text-sm text-muted-foreground">{t('canonical.queue.unscoped.citiesEmpty')}</p>;
   }
 
   return (

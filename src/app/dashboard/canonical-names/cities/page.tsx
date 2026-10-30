@@ -1,12 +1,6 @@
-import CanonicalNamesWorkspace from '../components/CanonicalNamesWorkspace';
+import CanonicalDomainPage from '../components/CanonicalDomainPage';
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
 
 export default function CitiesPage() {
-  return (
-    <CanonicalNamesWorkspace
-      domain={CANONICAL_NAME_DOMAINS.CITY}
-      title="المدن"
-      scopeSelector="governorate"
-    />
-  );
+  return <CanonicalDomainPage domain={CANONICAL_NAME_DOMAINS.CITY} />;
 }
