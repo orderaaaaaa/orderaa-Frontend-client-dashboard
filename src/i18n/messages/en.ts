@@ -143,6 +143,7 @@ const en: Record<keyof typeof ar, string> = {
   'stockShortage.lineNoVariant': '{product}: required {required}, available {available}',
   'stockShortage.returnLine': '{label}: required {required}, available {available} in {warehouse}',
   'returnStock.exceedsAvailable': 'Quantity exceeds available stock',
+  'returnStock.variantNotStocked': 'This variant has no stock, so it cannot be returned',
   'returnStock.variantUnresolved': 'Could not determine the variant for this item',
   'returnStock.uncovered': 'No receiving warehouse for this item — contact the admin',
   'returnStock.loadFailed': 'Could not load stock, try again',

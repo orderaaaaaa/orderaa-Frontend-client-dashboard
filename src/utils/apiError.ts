@@ -70,6 +70,15 @@ export function getInboundRuleMissingMessage(err: unknown): string | null {
   return translate(readStoredLocale(), 'returnStock.uncovered');
 }
 
+export function getReturnVariantNotStockedMessage(err: unknown): string | null {
+  const data = (
+    err as { response?: { data?: { code?: string; message?: unknown } } }
+  )?.response?.data;
+  if (data?.code !== 'RETURN_VARIANT_NOT_STOCKED') return null;
+  if (typeof data.message === 'string' && data.message.length > 0) return data.message;
+  return translate(readStoredLocale(), 'returnStock.variantNotStocked');
+}
+
 export function getReturnWarehouseLockedMessage(err: unknown): string | null {
   const data = (
     err as {

@@ -4,6 +4,7 @@ import { translate } from '@/i18n/translate';
 import {
   getInboundRuleMissingMessage,
   getOutboundShortageLines,
+  getReturnVariantNotStockedMessage,
   getReturnWarehouseLockedMessage,
 } from '@/utils/apiError';
 
@@ -35,6 +36,12 @@ export function reportReturnSubmitError(err: unknown): boolean {
   const locked = getReturnWarehouseLockedMessage(err);
   if (locked !== null) {
     toast.error(locked);
+    return true;
+  }
+
+  const notStocked = getReturnVariantNotStockedMessage(err);
+  if (notStocked !== null) {
+    toast.error(notStocked);
     return true;
   }
 
