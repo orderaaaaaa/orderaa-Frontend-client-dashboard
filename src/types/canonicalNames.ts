@@ -400,6 +400,34 @@ export interface RefreshRequestStatus {
   status: (typeof REFRESH_REQUEST_STATUSES)[keyof typeof REFRESH_REQUEST_STATUSES];
 }
 
+export const LOCATION_SYNC_STATUSES = {
+  QUEUED: 'QUEUED',
+  RUNNING: 'RUNNING',
+  OK: 'OK',
+  FAILED: 'FAILED',
+} as const;
+
+export type LocationSyncStatus =
+  (typeof LOCATION_SYNC_STATUSES)[keyof typeof LOCATION_SYNC_STATUSES];
+
+export interface LocationSourceSync {
+  status: LocationSyncStatus;
+  attempts: number;
+  nextRetryAt: string | null;
+  lastErrorCode: string | null;
+  trigger: string;
+  requestedAt: string;
+}
+
+export const LOCATION_SOURCE_REFRESH_STATUSES = {
+  QUEUED: 'QUEUED',
+  ALREADY_RUNNING: 'ALREADY_RUNNING',
+} as const;
+
+export interface LocationSourceRefreshResponse {
+  status: (typeof LOCATION_SOURCE_REFRESH_STATUSES)[keyof typeof LOCATION_SOURCE_REFRESH_STATUSES];
+}
+
 export interface LocationSourceStatus {
   source: LocationSource;
   lastAttemptAt: string;
@@ -408,6 +436,7 @@ export interface LocationSourceStatus {
   failedGovernorateKeys: string[];
   governorateCount: number;
   cityCount: number;
+  sync?: LocationSourceSync | null;
 }
 
 export interface LocationSourcesStatus {
