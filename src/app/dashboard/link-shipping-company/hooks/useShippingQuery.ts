@@ -1,8 +1,10 @@
+import { useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { shippingApi } from '../api/shippingApi';
-import { hasLocationSyncInFlight } from '@/types/locationOptions';
+import { hasLocationSyncInFlight, isLocationSyncInFlight } from '@/types/locationOptions';
+import { invalidateLocationOptionQueries } from '@/services/locationSourceSync';
 import { ShippingConfig, ShippingConfigPayload } from '../types/shipping';
 
 const SHIPPING_CONFIG_POLL_MS = 5000;
@@ -19,6 +21,20 @@ export const useShippingQuery = (providerId?: string) => {
     refetchInterval: (query) =>
       hasLocationSyncInFlight(query.state.data) ? SHIPPING_CONFIG_POLL_MS : false,
   });
+
+  const inFlightCompanies = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    const inFlight = new Set(
+      (configQuery.data ?? [])
+        .filter((config) => isLocationSyncInFlight(config.locationSync))
+        .map((config) => config.shippingCompany)
+        .filter((company): company is string => company !== undefined),
+    );
+    const settled = Array.from(inFlightCompanies.current).some((company) => !inFlight.has(company));
+    if (settled) invalidateLocationOptionQueries(queryClient);
+    inFlightCompanies.current = inFlight;
+  }, [configQuery.data, queryClient]);
 
   // Find specific config based on providerId
   const config = providerId

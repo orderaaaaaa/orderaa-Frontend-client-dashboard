@@ -14,7 +14,6 @@ export const shippingApi = {
     return data;
   },
 
-  // POST: Re-sync the carrier's governorate and city list
   requestLocationSync: async (shippingCompany: string) => {
     const { data } = await http.post<LocationSourceRefreshResponse>(
       `/shipping-config/${shippingCompany}/location-sync`

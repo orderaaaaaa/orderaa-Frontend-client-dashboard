@@ -32,21 +32,21 @@ export function LocationSyncNotice({ sync, retry }: LocationSyncNoticeProps) {
   const { t } = useI18n();
   if (!sync) return null;
 
-  if (sync.status === LOCATION_SYNC_STATUSES.RUNNING) {
+  if (
+    sync.status === LOCATION_SYNC_STATUSES.RUNNING ||
+    sync.status === LOCATION_SYNC_STATUSES.QUEUED
+  ) {
+    const retryAt =
+      sync.status === LOCATION_SYNC_STATUSES.QUEUED && sync.attempts > 0 ? sync.nextRetryAt : null;
     return (
-      <p className="flex items-center gap-2 text-xs text-muted-foreground">
-        <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-        {t('canonical.sync.running')}
-      </p>
+      <div className="space-y-1 text-xs text-muted-foreground">
+        <p className="flex items-center gap-2">
+          <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+          {t('canonical.sync.running')}
+        </p>
+        {retryAt && <p>{t('canonical.sync.retryScheduled', { date: formatDate(retryAt) })}</p>}
+      </div>
     );
-  }
-
-  if (sync.status === LOCATION_SYNC_STATUSES.QUEUED) {
-    const text =
-      sync.attempts > 0 && sync.nextRetryAt
-        ? t('canonical.sync.retryScheduled', { date: formatDate(sync.nextRetryAt) })
-        : t('canonical.sync.queued');
-    return <p className="text-xs text-muted-foreground">{text}</p>;
   }
 
   if (sync.status === LOCATION_SYNC_STATUSES.FAILED) {

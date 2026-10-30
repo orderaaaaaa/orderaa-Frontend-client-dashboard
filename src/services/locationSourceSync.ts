@@ -1,13 +1,13 @@
 import { useEffect, useRef } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import http from '@/lib/api/http';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { useI18n } from '@/i18n/I18nProvider';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { isLocationSyncInFlight } from '@/types/locationOptions';
 import {
   LOCATION_SOURCE_REFRESH_STATUSES,
-  LOCATION_SYNC_STATUSES,
   type LocationSource,
   type LocationSourceRefreshResponse,
   type LocationSourcesStatus,
@@ -17,12 +17,12 @@ const SYNC_POLL_MS = 5000;
 
 export const isLocationSyncActive = (status: LocationSourcesStatus | undefined): boolean =>
   status !== undefined &&
-  (status.running ||
-    status.sources.some(
-      (source) =>
-        source.sync?.status === LOCATION_SYNC_STATUSES.QUEUED ||
-        source.sync?.status === LOCATION_SYNC_STATUSES.RUNNING,
-    ));
+  (status.running || status.sources.some((source) => isLocationSyncInFlight(source.sync)));
+
+export const invalidateLocationOptionQueries = (queryClient: QueryClient) => {
+  void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.LOCATION_OPTION_GOVERNORATES] });
+  void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.LOCATION_OPTION_CITIES] });
+};
 
 export const fetchLocationSourcesStatus = async (): Promise<LocationSourcesStatus> => {
   const { data } = await http.get<LocationSourcesStatus>(
@@ -45,8 +45,7 @@ export const useLocationSourceSyncWatch = (status: LocationSourcesStatus | undef
 
   useEffect(() => {
     if (wasActive.current && !active) {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.LOCATION_OPTION_GOVERNORATES] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.LOCATION_OPTION_CITIES] });
+      invalidateLocationOptionQueries(queryClient);
     }
     wasActive.current = active;
   }, [active, queryClient]);

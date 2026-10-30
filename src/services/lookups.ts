@@ -1,7 +1,10 @@
 import { useQuery, QueryKey } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { getGovernorates, getCities, getPaymentMethods, getPaymentStatuses, getUtmSources, getPageNames, getDepartments, getShippingEvents, getLocationOptionGovernorates, getLocationOptionCities } from '@/lib/api/lookups';
-import { locationOptionsSyncPending } from '@/types/locationOptions';
+import {
+  isLocationSyncInFlight,
+  type LocationOptionsResponse,
+} from '@/types/locationOptions';
 
 // `GET /lookups/governorates` returns `{ key, label }` — the enum key plus the
 // canonical Arabic label. This was declared as `value` and never matched the
@@ -132,6 +135,9 @@ export const retryUnlessClientError = (failureCount: number, error: unknown) => 
 
 const LOCATION_SYNC_POLL_MS = 5000;
 
+const locationOptionPollInterval = (data: LocationOptionsResponse | undefined) =>
+  isLocationSyncInFlight(data?.sync) ? LOCATION_SYNC_POLL_MS : false;
+
 export const useLocationOptionGovernorates = (
   shippingCompanyId: number | null | undefined,
   orderId?: number
@@ -145,8 +151,7 @@ export const useLocationOptionGovernorates = (
     queryFn: () => getLocationOptionGovernorates(shippingCompanyId as number, orderId),
     enabled: !!shippingCompanyId,
     retry: retryUnlessClientError,
-    refetchInterval: (query) =>
-      locationOptionsSyncPending(query.state.data) ? LOCATION_SYNC_POLL_MS : false,
+    refetchInterval: (query) => locationOptionPollInterval(query.state.data),
   });
 
 export const useLocationOptionCities = (
@@ -169,4 +174,5 @@ export const useLocationOptionCities = (
       ),
     enabled: !!shippingCompanyId && !!governorateOption,
     retry: retryUnlessClientError,
+    refetchInterval: (query) => locationOptionPollInterval(query.state.data),
   });

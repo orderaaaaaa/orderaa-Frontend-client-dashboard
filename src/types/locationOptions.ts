@@ -39,10 +39,6 @@ export const hasLocationSyncInFlight = (
   configs: { locationSync?: { status: LocationSyncStatus } | null }[] | undefined
 ): boolean => configs?.some((config) => isLocationSyncInFlight(config.locationSync)) ?? false;
 
-export const locationOptionsSyncPending = (
-  data: LocationOptionsResponse | undefined
-): boolean => data?.sourceHasRows === false && isLocationSyncInFlight(data.sync);
-
 export const LOCATION_OPTION_ERROR_CODES = {
   LOCATION_OPTION_INVALID: 'LOCATION_OPTION_INVALID',
   LOCATION_PICK_CONFLICT: 'LOCATION_PICK_CONFLICT',
