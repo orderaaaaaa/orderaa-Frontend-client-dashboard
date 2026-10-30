@@ -768,6 +768,7 @@ const en: Record<keyof typeof ar, string> = {
   'linkIssues.retired.noTarget': 'Choose the new variant',
   'linkIssues.retired.previewTitle': 'Move links preview',
   'linkIssues.retired.retiredVariant': 'Retired variant',
+  'linkIssues.retired.suggestedTarget': 'Suggested variant store links',
   'linkIssues.retired.target': 'New variant',
   'linkIssues.tabs.conflicts': 'Link conflicts',
   'linkIssues.tabs.duplicates': 'Duplicate products',

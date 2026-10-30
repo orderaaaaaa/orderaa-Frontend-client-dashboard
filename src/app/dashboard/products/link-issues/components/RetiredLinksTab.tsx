@@ -17,7 +17,7 @@ import type { RetiredLinkIssue, RetiredLinkPreviewParams } from '../types/linkIs
 import { linkIssueErrorMessage } from '../utils/linkIssueErrors';
 import { ItemSelect } from './ItemSelect';
 import { IssuePreviewDialog } from './IssuePreviewDialog';
-import { IssueRowShell, VariantRefCard } from './LinkIssueParts';
+import { IssueRowShell, StoreLinkBadges, VariantRefCard } from './LinkIssueParts';
 import { LinkIssueList, LINK_ISSUE_PAGE_LIMIT } from './LinkIssueList';
 
 function RetiredLinkRow({
@@ -89,6 +89,12 @@ function RetiredLinkRow({
           ariaLabel={t('linkIssues.retired.target')}
         />
       </div>
+      {issue.suggestedTarget && (
+        <div className="space-y-1">
+          <p className="text-xs font-medium text-gray-500">{t('linkIssues.retired.suggestedTarget')}</p>
+          <StoreLinkBadges links={issue.suggestedTarget.storeLinks} />
+        </div>
+      )}
     </IssueRowShell>
   );
 }

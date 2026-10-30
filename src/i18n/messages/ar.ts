@@ -781,6 +781,7 @@ const ar = {
   'linkIssues.retired.noTarget': 'اختر الصنف الجديد',
   'linkIssues.retired.previewTitle': 'معاينة نقل الروابط',
   'linkIssues.retired.retiredVariant': 'الصنف الموقوف',
+  'linkIssues.retired.suggestedTarget': 'روابط الصنف المقترح في المتجر',
   'linkIssues.retired.target': 'الصنف الجديد',
   'linkIssues.tabs.conflicts': 'تعارض الربط',
   'linkIssues.tabs.duplicates': 'منتجات مكررة',
