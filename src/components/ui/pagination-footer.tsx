@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import PageSizeSelector from './page-size-selector';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { formatNumber } from '@/utils/format';
 
 interface PaginationFooterProps {
   currentPage: number;
@@ -76,7 +77,7 @@ const PaginationFooter: React.FC<PaginationFooterProps> = ({
   const startItem = Math.min((currentPage - 1) * currentPageSize + 1, endItem);
   const rangeText =
     totalItems > 0
-      ? `عرض ${startItem}-${endItem} من ${totalItems}`
+      ? `عرض ${formatNumber(startItem)}-${formatNumber(endItem)} من ${formatNumber(totalItems)}`
       : 'لا توجد نتائج';
 
   return (

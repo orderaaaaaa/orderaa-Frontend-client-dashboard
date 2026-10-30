@@ -1,10 +1,10 @@
 'use client';
 
 import type { IconType } from 'react-icons';
+import { isFiniteNumber } from '@/utils/format';
 import {
   formatStockQuantity,
   formatVariantCount,
-  isFiniteNumber,
 } from '../utils/formatNumber';
 
 export interface SummaryCardItem {

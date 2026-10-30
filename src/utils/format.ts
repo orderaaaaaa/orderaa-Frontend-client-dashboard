@@ -48,8 +48,11 @@ const toValidDate = (value: DateInput): Date | null => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
-export const formatNumber = (value: number, options?: FractionDigitsOptions): string =>
-  getNumberFormatter(options).format(value);
+export const isFiniteNumber = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value);
+
+export const formatNumber = (value: number | null | undefined, options?: FractionDigitsOptions): string =>
+  isFiniteNumber(value) ? getNumberFormatter(options).format(value) : EMPTY_VALUE;
 
 export const formatDate = (value: DateInput): string => {
   const date = toValidDate(value);

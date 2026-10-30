@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { formatNumber } from '@/utils/format';
 
 interface PageSizeSelectorProps {
   currentSize: number;
@@ -42,7 +43,9 @@ export default function PageSizeSelector({
 
   const isCapped = maxSize !== undefined && totalItems > maxSize;
   const allSize = isCapped ? maxSize : totalItems;
-  const allLabel = isCapped ? `أول ${maxSize} من ${totalItems}` : `الكل (${totalItems})`;
+  const allLabel = isCapped
+    ? `أول ${formatNumber(maxSize)} من ${formatNumber(totalItems)}`
+    : `الكل (${formatNumber(totalItems)})`;
 
   const isCappedSelected = showAllOption && isCapped && currentSize === maxSize;
   const isAllSelected = showAllOption && currentSize === totalItems;
@@ -50,7 +53,7 @@ export default function PageSizeSelector({
     ? allLabel
     : isAllSelected
       ? 'الكل'
-      : currentSize.toString();
+      : formatNumber(currentSize);
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -83,7 +86,7 @@ export default function PageSizeSelector({
                     : 'text-gray-700'
                   }`}
               >
-                {size}
+                {formatNumber(size)}
               </button>
             ))}
             {showAllOption && (

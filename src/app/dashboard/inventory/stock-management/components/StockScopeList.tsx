@@ -22,10 +22,10 @@ import {
   stockScopeHref,
   stockScopeOutOfStockHref,
 } from '../constants';
+import { isFiniteNumber } from '@/utils/format';
 import {
   formatStockQuantity,
   formatVariantCount,
-  isFiniteNumber,
 } from '../utils/formatNumber';
 import { resolveParentNames, sortScopeEntries } from '../utils/scopeOrder';
 import { StockScopeListSkeleton } from './StockScopeListSkeleton';
