@@ -49,7 +49,6 @@ export interface IntegrationResponse {
   store?: StoreInfoDto;
   metadata?: Record<string, unknown>;
   stockSyncEnabled: boolean;
-  stockSyncWarehouseId: number | null;
   stockSyncLocationId: string | null;
   stockSyncStopSellingEnabled: boolean;
 }
@@ -124,7 +123,6 @@ export type UnlinkedVariantReason =
 
 export interface StockSyncRequest {
   enabled: boolean;
-  warehouseId?: number | null;
   locationId?: string | null;
   stopSellingEnabled?: boolean;
 }

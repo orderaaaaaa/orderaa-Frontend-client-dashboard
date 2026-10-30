@@ -8,7 +8,6 @@ import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { Can } from '@/components/Can';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/generated/permission-codes';
-import { useWarehouseOptions } from '@/services/warehouses';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { useStockSync } from '../hooks/useIntegrations';
 import {
@@ -22,7 +21,6 @@ const FALLBACK_ERROR = 'حدث خطأ أثناء التحديث';
 
 export interface StockSyncFormState {
   enabled: boolean;
-  warehouseId: string;
   locationId: string;
   stopSellingEnabled: boolean;
 }
@@ -43,9 +41,6 @@ export function buildStockSyncRequest(
   provider: IntegrationProvider
 ): StockSyncRequest {
   const request: StockSyncRequest = { enabled: form.enabled };
-  if (form.warehouseId !== '') {
-    request.warehouseId = Number(form.warehouseId);
-  }
   if (provider === IntegrationProvider.SHOPIFY) {
     if (form.locationId !== '') {
       request.locationId = form.locationId;
@@ -65,8 +60,6 @@ export function shouldRestorePolicy(
 export function seedForm(config: IntegrationResponse): StockSyncFormState {
   return {
     enabled: config.stockSyncEnabled,
-    warehouseId:
-      config.stockSyncWarehouseId !== null ? String(config.stockSyncWarehouseId) : '',
     locationId: config.stockSyncLocationId ?? '',
     stopSellingEnabled: config.stockSyncStopSellingEnabled,
   };
@@ -91,14 +84,10 @@ export default function StockSyncSection({ config }: { config: IntegrationRespon
     const saved = seedForm(savedConfig);
     return (
       form.enabled !== saved.enabled ||
-      form.warehouseId !== saved.warehouseId ||
       form.locationId !== saved.locationId ||
       form.stopSellingEnabled !== saved.stopSellingEnabled
     );
   }, [form, savedConfig]);
-
-  const { pickerOptions: warehouseOptions, isLoading: warehousesLoading } =
-    useWarehouseOptions();
 
   const {
     pushLogQuery,
@@ -137,16 +126,8 @@ export default function StockSyncSection({ config }: { config: IntegrationRespon
     [locationsQuery.data]
   );
 
-  const showManagedWarehouseValue =
-    form.warehouseId !== '' &&
-    !warehouseOptions.some((option) => option.key === form.warehouseId);
-
   const handleSave = async () => {
     setSectionError('');
-    if (form.enabled && form.warehouseId === '') {
-      setSectionError('اختر المخزن المصدر');
-      return;
-    }
     if (form.enabled && isShopify && form.locationId === '') {
       setSectionError('اختر موقع المخزون في Shopify');
       return;
@@ -217,7 +198,7 @@ export default function StockSyncSection({ config }: { config: IntegrationRespon
         <div className="space-y-1">
           <span className="block text-sm font-medium text-gray-900">مزامنة المخزون</span>
           <p className="text-xs text-gray-500">
-            عند التفعيل نرسل كمية المخزن المختار إلى المتجر بعد كل تغيير.
+            عند التفعيل نرسل كمية مخزن المتاح الذي تحدده الإدارة إلى المتجر بعد كل تغيير.
           </p>
           {!isShopify && !isLightfunnels && (
             <p className="text-xs text-gray-500">
@@ -250,16 +231,6 @@ export default function StockSyncSection({ config }: { config: IntegrationRespon
           disabled={!canManage}
         />
       </div>
-
-      <SearchableSelect
-        options={warehouseOptions}
-        value={form.warehouseId}
-        onValueChange={(next) => setForm((prev) => ({ ...prev, warehouseId: next }))}
-        placeholder="المخزن المصدر"
-        disabled={!canManage}
-        loading={warehousesLoading}
-        {...(showManagedWarehouseValue ? { displayValue: 'مخزن مُدار' } : {})}
-      />
 
       {isShopify && (
         <SearchableSelect
