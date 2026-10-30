@@ -102,5 +102,5 @@ export function useChangeCompanyLocations({
     return cityQueryByGovernorate.get(governorateOption)?.data?.options ?? [];
   });
 
-  return { governorateOptions, cityOptionsByRow };
+  return { governorateQuery: governorates, governorateOptions, cityOptionsByRow };
 }

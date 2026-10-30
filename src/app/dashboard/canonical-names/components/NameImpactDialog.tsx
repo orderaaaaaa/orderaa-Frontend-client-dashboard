@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import PaginationFooter from '@/components/ui/pagination-footer';
 import PageLoading from '@/components/ui/page-loading';
+import { ErrorState } from '@/components/ui/state-panels';
 import { isLocationDomain, useNameImpactQuery } from '@/services/canonicalNames';
 import type { CanonicalNameDomain } from '@/types/canonicalNames';
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
@@ -38,12 +39,10 @@ export default function NameImpactDialog({
 }: NameImpactDialogProps) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(50);
-  const { data: impact, isLoading } = useNameImpactQuery(
-    domain,
-    id,
-    { page, limit },
-    true,
-  );
+  const impactQuery = useNameImpactQuery(domain, id, { page, limit }, true);
+  const impact = impactQuery.data;
+  const showError = impactQuery.isError && !impactQuery.isFetching;
+  const retrying = impactQuery.isError && impactQuery.isFetching;
   const isAttributeOption = domain === CANONICAL_NAME_DOMAINS.ATTRIBUTE_OPTION;
   const isGovernorate = domain === CANONICAL_NAME_DOMAINS.GOVERNORATE;
   const isLocation = isLocationDomain(domain);
@@ -65,7 +64,13 @@ export default function NameImpactDialog({
           </DialogTitle>
         </DialogHeader>
 
-        {isLoading || !impact ? (
+        {showError ? (
+          <ErrorState
+            error={impactQuery.error}
+            fallback="تعذر تحميل تأثير الإجراء."
+            onRetry={() => void impactQuery.refetch()}
+          />
+        ) : impactQuery.isLoading || retrying || !impact ? (
           <PageLoading size="sm" />
         ) : (
           <div className="flex min-w-0 flex-col gap-4">
@@ -180,7 +185,7 @@ export default function NameImpactDialog({
                 variant={mode === 'confirm-delete' ? 'destructive' : 'default'}
                 className="min-h-10"
                 onClick={onConfirm}
-                disabled={confirming || deleteBlocked}
+                disabled={confirming || deleteBlocked || !impact}
               >
                 {mode === 'confirm-delete' ? 'حذف' : 'تأكيد'}
               </Button>

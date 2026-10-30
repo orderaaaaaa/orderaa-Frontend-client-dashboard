@@ -38,15 +38,17 @@ export function ChangeCompanyTable({
   onPickCity,
 }: ChangeCompanyTableProps) {
   const { getStatusLabel } = useStatusLabel();
-  const { governorateOptions, cityOptionsByRow } = useChangeCompanyLocations({
-    rows,
-    targetId,
-    onPatch,
-    onPickGovernorate,
-    onPickCity,
-  });
+  const { governorateQuery, governorateOptions, cityOptionsByRow } =
+    useChangeCompanyLocations({
+      rows,
+      targetId,
+      onPatch,
+      onPickGovernorate,
+      onPickCity,
+    });
 
   const sharedProps = {
+    governorateQuery,
     governorateOptions,
     targetId,
     targetName,

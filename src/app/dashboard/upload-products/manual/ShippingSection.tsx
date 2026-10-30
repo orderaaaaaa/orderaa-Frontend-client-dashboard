@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import Input from '@/components/ui/Input';
+import {
+  GovernorateListError,
+  GovernorateSourceEmpty,
+} from '@/components/shipping/GovernorateListStatus';
 import { getShippingTypes } from '@/lib/api/lookups';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import useShippingCompanies from '@/hooks/useShippingCompanies';
@@ -172,25 +175,13 @@ function ShippingSection({
               searchThreshold={5}
             />
             {noGovernorateList && (
-              <p className="text-xs text-gray-500">
-                لا توجد قائمة محافظات لهذه الشركة بعد
-                {canReadCanonicalNames && (
-                  <>
-                    {' '}
-                    <Link
-                      href="/dashboard/canonical-names/governorates"
-                      className="text-primary underline"
-                    >
-                      المحافظات الموحدة
-                    </Link>
-                  </>
-                )}
-              </p>
+              <GovernorateSourceEmpty canRead={canReadCanonicalNames} />
             )}
             {governoratesQuery.isError && (
-              <p className="text-xs text-red-500">
-                {locationOptionsErrorTextOf(governoratesQuery.error, 'تعذر تحميل المحافظات')}
-              </p>
+              <GovernorateListError
+                error={governoratesQuery.error}
+                onRetry={() => void governoratesQuery.refetch()}
+              />
             )}
             {errors?.governorateOption && (
               <p className="text-red-500 text-sm">{errors.governorateOption}</p>

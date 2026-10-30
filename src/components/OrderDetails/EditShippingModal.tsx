@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import Link from 'next/link';
 import { LiaCheckSolid, LiaClockSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
 import { Checkbox } from '@/components/ui/checkbox';
 import Input from '@/components/ui/Input';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
+import {
+  GovernorateListError,
+  GovernorateSourceEmpty,
+} from '@/components/shipping/GovernorateListStatus';
 import { useShippingCompanies } from '@/hooks';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
@@ -57,7 +60,7 @@ export interface ShippingData {
 
 const SWITCH_MISSING_FIELD_LABELS: Record<ShippingSwitchMissingField, string> = {
   governorate: 'المحافظة',
-  city: 'المنطقة',
+  city: 'المدينة',
   phone: 'رقم الهاتف',
 };
 
@@ -408,8 +411,10 @@ export default function EditShippingModal({
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="font-bold text-[#1F1F1F]">المحافظة</label>
+            <label htmlFor="edit-shipping-governorate" className="font-bold text-[#1F1F1F]">المحافظة</label>
             <SearchableSelect
+              id="edit-shipping-governorate"
+              aria-label="المحافظة"
               value={formData.governorateOption || ''}
               displayValue={governorateDisplay}
               onValueChange={handleGovernorateChange}
@@ -432,25 +437,13 @@ export default function EditShippingModal({
               searchThreshold={5}
             />
             {noGovernorateList && (
-              <p className="text-xs text-gray-500">
-                لا توجد قائمة محافظات لهذه الشركة بعد
-                {canReadCanonicalNames && (
-                  <>
-                    {' '}
-                    <Link
-                      href="/dashboard/canonical-names/governorates"
-                      className="text-primary underline"
-                    >
-                      المحافظات الموحدة
-                    </Link>
-                  </>
-                )}
-              </p>
+              <GovernorateSourceEmpty canRead={canReadCanonicalNames} />
             )}
             {governoratesQuery.isError && (
-              <p className="text-xs text-red-500">
-                {locationOptionsErrorTextOf(governoratesQuery.error, 'تعذر تحميل المحافظات')}
-              </p>
+              <GovernorateListError
+                error={governoratesQuery.error}
+                onRetry={() => void governoratesQuery.refetch()}
+              />
             )}
             {storedGovernorateText && !formData.governorateOption && (
               <p className="text-xs text-gray-500">
@@ -460,8 +453,10 @@ export default function EditShippingModal({
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="font-bold text-[#1F1F1F]">المنطقة</label>
+            <label htmlFor="edit-shipping-city" className="font-bold text-[#1F1F1F]">المدينة</label>
             <SearchableSelect
+              id="edit-shipping-city"
+              aria-label="المدينة"
               value={formData.cityOption || ''}
               displayValue={cityDisplay}
               onValueChange={handleCityChange}
@@ -471,7 +466,7 @@ export default function EditShippingModal({
                   ? 'اختر الشركة أولاً'
                   : !selectedGovernorateOption
                     ? 'اختر المحافظة أولاً'
-                    : 'اختر المنطقة'
+                    : 'اختر المدينة'
               }
               searchPlaceholder="بحث عن منطقة..."
               emptyMessage={
@@ -489,7 +484,7 @@ export default function EditShippingModal({
             />
             {citiesQuery.isError && (
               <p className="text-xs text-red-500">
-                {locationOptionsErrorTextOf(citiesQuery.error, 'تعذر تحميل المناطق')}
+                {locationOptionsErrorTextOf(citiesQuery.error, 'تعذر تحميل المدن')}
               </p>
             )}
             {storedCityText && !formData.cityOption && (

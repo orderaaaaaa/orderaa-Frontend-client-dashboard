@@ -1,9 +1,16 @@
 'use client';
 
+import type { UseQueryResult } from '@tanstack/react-query';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import { StackedRow } from '@/components/ui/stacked-list';
 import CopyableCode from '@/components/ui/copyable-code';
-import type { LocationOption } from '@/types/locationOptions';
+import {
+  GovernorateCanonicalLink,
+  GovernorateListError,
+} from '@/components/shipping/GovernorateListStatus';
+import { useHasPermission } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
+import type { LocationOption, LocationOptionsResponse } from '@/types/locationOptions';
 import { CHANGE_COMPANY_TEXT } from '../constants/changeCompany';
 import {
   CHANGE_COMPANY_ROW_STATUS,
@@ -16,6 +23,7 @@ interface ChangeCompanyRowProps {
   row: ChangeCompanyRowState;
   variant: 'table' | 'stacked';
   statusLabel: string;
+  governorateQuery: UseQueryResult<LocationOptionsResponse, unknown>;
   governorateOptions: LocationOption[];
   cityOptions: LocationOption[];
   targetId: number | null;
@@ -37,6 +45,7 @@ export function ChangeCompanyRow({
   row,
   variant,
   statusLabel,
+  governorateQuery,
   governorateOptions,
   cityOptions,
   targetId,
@@ -47,6 +56,8 @@ export function ChangeCompanyRow({
 }: ChangeCompanyRowProps) {
   const orderId = row.order.id;
   const governorateOption = row.picks.governorateOption;
+  const canReadCanonicalNames = useHasPermission(PERMISSION_CODES.CANONICAL_NAMES_READ);
+  const governorateSourceEmpty = governorateQuery.data?.sourceHasRows === false;
   const governorateItems = governorateOptions.map((option) => ({
     key: option.value,
     label: option.label,
@@ -59,7 +70,8 @@ export function ChangeCompanyRow({
   const editable =
     row.status === CHANGE_COMPANY_ROW_STATUS.READY ||
     row.status === CHANGE_COMPANY_ROW_STATUS.SKIPPED_LOCAL;
-  const governorateDisabled = disabled || !editable || targetId === null;
+  const governorateDisabled =
+    disabled || !editable || targetId === null || governorateQuery.isError;
   const cityDisabled = governorateDisabled || governorateOption === null;
   const warning = row.order.packagingWarning ? (
     <PackagingWarningBadge text={row.order.packagingWarning} />
@@ -77,12 +89,30 @@ export function ChangeCompanyRow({
       value={governorateOption ?? ''}
       placeholder={CHANGE_COMPANY_TEXT.colGovernorate}
       disabled={governorateDisabled}
+      emptyMessage={
+        governorateSourceEmpty
+          ? CHANGE_COMPANY_TEXT.governorateListMissing.replace('{carrier}', targetName)
+          : undefined
+      }
       portal
       onValueChange={(key) => {
         const option = governorateItems.find((item) => item.key === key);
         onPickGovernorate(orderId, option ? { value: option.key, label: option.label } : null);
       }}
     />
+  );
+
+  const governorateField = (
+    <div className="flex flex-col gap-2">
+      {governorateSelect}
+      {governorateQuery.isError && (
+        <GovernorateListError
+          error={governorateQuery.error}
+          onRetry={() => void governorateQuery.refetch()}
+        />
+      )}
+      {governorateSourceEmpty && canReadCanonicalNames && <GovernorateCanonicalLink />}
+    </div>
   );
 
   const citySelect = (
@@ -113,7 +143,7 @@ export function ChangeCompanyRow({
           { label: CHANGE_COMPANY_TEXT.colStatus, value: statusLabel },
           { label: CHANGE_COMPANY_TEXT.colAddress, value: row.order.address ?? '' },
           { label: CHANGE_COMPANY_TEXT.colCurrentCompany, value: currentCompany },
-          { label: CHANGE_COMPANY_TEXT.colGovernorate, value: governorateSelect },
+          { label: CHANGE_COMPANY_TEXT.colGovernorate, value: governorateField },
           { label: CHANGE_COMPANY_TEXT.colCity, value: citySelect },
           { label: CHANGE_COMPANY_TEXT.colResult, value: resultText },
         ]}
@@ -134,7 +164,7 @@ export function ChangeCompanyRow({
       <td className="py-2 px-3 text-gray-600">{statusLabel}</td>
       <td className="py-2 px-3 text-gray-600 break-words">{row.order.address ?? ''}</td>
       <td className="py-2 px-3 text-gray-600">{currentCompany}</td>
-      <td className="py-2 px-3 min-w-[140px]">{governorateSelect}</td>
+      <td className="py-2 px-3 min-w-[140px]">{governorateField}</td>
       <td className="py-2 px-3 min-w-[140px]">{citySelect}</td>
       <td className="py-2 px-3 text-gray-600 break-words">{resultText}</td>
     </tr>
