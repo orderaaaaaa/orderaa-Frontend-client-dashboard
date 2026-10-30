@@ -54,6 +54,10 @@ export const isFiniteNumber = (value: unknown): value is number =>
 export const formatNumber = (value: number | null | undefined, options?: FractionDigitsOptions): string =>
   isFiniteNumber(value) ? getNumberFormatter(options).format(value) : EMPTY_VALUE;
 
+export const toStockNumber = (value: unknown): number => (isFiniteNumber(value) ? value : 0);
+
+export const formatStockNumber = (value: unknown): string => formatNumber(toStockNumber(value));
+
 export const formatDate = (value: DateInput): string => {
   const date = toValidDate(value);
   return date ? dateFormatter.format(date) : EMPTY_VALUE;

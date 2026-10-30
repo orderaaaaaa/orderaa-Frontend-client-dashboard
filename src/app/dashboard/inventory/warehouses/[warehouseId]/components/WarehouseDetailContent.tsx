@@ -1,5 +1,6 @@
 'use client';
 
+import { formatStockNumber } from '@/utils/format';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import CopyableCode from '@/components/ui/copyable-code';
@@ -198,7 +199,7 @@ export function WarehouseDetailContent({
               className="w-full sm:w-72"
             />
             <p className="text-sm text-gray-500">
-              إجمالي الكمية: {stock?.totalAvailable ?? 0}
+              إجمالي الكمية: {formatStockNumber(stock?.totalAvailable)}
               {selectedItems.length > 0 &&
                 ` · محدد: ${selectedItems.length}`}
             </p>
@@ -281,7 +282,7 @@ export function WarehouseDetailContent({
                           item.quantity < 0 ? 'text-red-600' : 'text-gray-900'
                         }`}
                       >
-                        {item.quantity}
+                        {formatStockNumber(item.quantity)}
                       </td>
                     </tr>
                   ))}

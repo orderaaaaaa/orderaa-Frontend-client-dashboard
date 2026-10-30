@@ -33,7 +33,7 @@ import ReceiptHeader from './ReceiptHeader';
 import AddVariantsStep, { InvoiceProductRow } from './AddVariantsStep';
 import { SelectedVariant } from '../types';
 import { isEveryLineCounted } from '../../utils';
-import { formatDate } from '@/utils/format';
+import { formatDate, formatStockNumber } from '@/utils/format';
 import type { ApproveSupplierInvoiceVariantDto } from '@/lib/api/suppliers';
 import { WAREHOUSES_PAGE_ENABLED } from '@/constants/warehouses';
 
@@ -327,7 +327,7 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
   if (isReceived) {
     const receivedColumns: DataTableColumn<ReceivedLineRow>[] = [
       { key: 'name', header: 'المنتج' },
-      { key: 'quantity', header: 'الكمية' },
+      { key: 'quantity', header: 'الكمية', render: (value) => formatStockNumber(value) },
     ];
 
     return (
@@ -437,7 +437,7 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
       >
         <div className="flex flex-col gap-2 text-sm text-gray-800">
           <p>
-            إجمالي القطع: <b>{totalApprovedPieces}</b>
+            إجمالي القطع: <b>{formatStockNumber(totalApprovedPieces)}</b>
           </p>
           <p>
             عدد المنتجات: <b>{invoiceProducts.length}</b>

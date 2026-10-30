@@ -17,7 +17,7 @@ import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useStocktakesQuery } from '@/services/stocktake';
 import { useWarehouseOptions } from '@/services/warehouses';
-import { formatDateTime, formatNumber } from '@/utils/format';
+import { formatDateTime, formatStockNumber } from '@/utils/format';
 import type {
   StocktakePersonDto,
   StocktakeStatusWire,
@@ -47,7 +47,7 @@ const actorOf = (ref: StocktakePersonDto | null): ActorChipActor =>
     : { kind: 'UNKNOWN', id: null, name: null };
 
 const countText = (probe: { data?: { total: number }; isError: boolean }): string =>
-  probe.data && !probe.isError ? formatNumber(probe.data.total) : '—';
+  probe.data && !probe.isError ? formatStockNumber(probe.data.total) : '—';
 
 const parseWarehouseId = (raw: string | null): number | null => {
   const id = Number(raw);
@@ -129,7 +129,7 @@ export function StocktakeListContent() {
       header: 'المعدود / الأسطر',
       render: (_value, row) => (
         <span dir="ltr" className="tabular-nums">
-          {formatNumber(row.countedCount)} / {formatNumber(row.lineCount)}
+          {formatStockNumber(row.countedCount)} / {formatStockNumber(row.lineCount)}
         </span>
       ),
     },
@@ -138,7 +138,7 @@ export function StocktakeListContent() {
       header: 'الأسطر المتغيرة',
       render: (_value, row) => (
         <span dir="ltr" className="tabular-nums">
-          {formatNumber(row.changedCount)}
+          {formatStockNumber(row.changedCount)}
         </span>
       ),
     },

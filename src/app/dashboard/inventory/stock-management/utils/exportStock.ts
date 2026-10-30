@@ -48,8 +48,8 @@ function flattenCell(view: StockCellView): {
   quantity: number | string;
   status: string;
 } {
-  if (view.kind === 'missing') return { quantity: '-', status: '' };
-  if (view.kind === 'hidden') return { quantity: '', status: '' };
+  if (view.kind === 'missing' || view.kind === 'empty') return { quantity: 0, status: '' };
+  if (view.kind === 'suppressed') return { quantity: '', status: '' };
   return {
     quantity: view.stock.quantity,
     status:
@@ -157,10 +157,9 @@ const PDF_BADGE_COLORS: Record<StockStatus, string> = {
 };
 
 function pdfCellHtml(cell: VariantCell | undefined, indicators: StockIndicators): string {
-  if (cell === undefined) return '<td></td>';
   const view = displayCell(cell, indicators);
-  if (view.kind === 'missing') return '<td>-</td>';
-  if (view.kind === 'hidden') return '<td></td>';
+  if (view.kind === 'missing' || view.kind === 'empty') return '<td>0</td>';
+  if (view.kind === 'suppressed') return '<td></td>';
   if (view.kind === 'plain') return `<td>${view.stock.quantity}</td>`;
   const config = STOCK_STATUS_CONFIG[view.stock.status];
   const badgeColor = PDF_BADGE_COLORS[view.stock.status];

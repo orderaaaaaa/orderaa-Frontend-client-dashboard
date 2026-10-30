@@ -22,7 +22,8 @@ import CopyableCode from '@/components/ui/copyable-code';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { getTimeAgo } from '@/utils/timeAgo';
 import type { InvoicePaymentStatus } from '@/lib/api/suppliers';
-import { formatCount, formatMoney } from '@/utils/formatMoney';
+import { formatMoney } from '@/utils/formatMoney';
+import { formatStockNumber } from '@/utils/format';
 import { receivedBadgeLabel } from './receivingStatus';
 import { ActorChip, type ActorChipActor } from '@/components/audit/ActorChip';
 
@@ -86,7 +87,7 @@ function buildProductColumns(
     {
       key: 'quantity',
       header: 'إجمالي عدد القطع',
-      render: (value) => <span>{formatCount(value as number)}</span>,
+      render: (value) => <span>{formatStockNumber(value)}</span>,
     },
     ...(hasPackageColumns
       ? [
@@ -94,13 +95,13 @@ function buildProductColumns(
             key: 'packageCount',
             header: 'عدد الطرود',
             render: (value: unknown) =>
-              value != null ? <span>{formatCount(value as number)}</span> : null,
+              value != null ? <span>{formatStockNumber(value)}</span> : null,
           } as DataTableColumn<InvoiceCardProduct & Record<string, unknown>>,
           {
             key: 'piecesPerPackage',
             header: 'عدد القطع في الطرد',
             render: (value: unknown) =>
-              value != null ? <span>{formatCount(value as number)}</span> : null,
+              value != null ? <span>{formatStockNumber(value)}</span> : null,
           } as DataTableColumn<InvoiceCardProduct & Record<string, unknown>>,
         ]
       : []),
@@ -181,7 +182,7 @@ const InvoiceCard = memo(
         },
         {
           label: 'إجمالي عدد القطع',
-          value: formatCount(invoice.totalPieces),
+          value: formatStockNumber(invoice.totalPieces),
           icon: LiaBoxOpenSolid,
           onClick: invoice.products?.length ? () => setIsProductsModalOpen(true) : undefined,
         },

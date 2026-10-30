@@ -39,7 +39,8 @@ export function resolveIndicators(
 }
 
 export type StockCellView =
-  | { kind: 'hidden' }
+  | { kind: 'suppressed' }
+  | { kind: 'empty' }
   | { kind: 'missing' }
   | { kind: 'plain'; stock: VariantStock }
   | { kind: 'badge'; stock: VariantStock };
@@ -48,13 +49,13 @@ export function displayCell(
   cell: VariantCell | undefined,
   indicators: StockIndicators
 ): StockCellView {
-  if (cell === undefined) return { kind: 'hidden' };
+  if (cell === undefined) return { kind: 'empty' };
   if (cell === 'missing') return { kind: 'missing' };
   if (cell.status === 'shortage' && !indicators.shortage) {
     return { kind: 'plain', stock: cell };
   }
   if (cell.status === 'out_of_stock' && !indicators.outOfStock) {
-    return { kind: 'hidden' };
+    return { kind: 'suppressed' };
   }
   if (cell.status === 'low' && !indicators.lowStock) {
     return { kind: 'plain', stock: cell };

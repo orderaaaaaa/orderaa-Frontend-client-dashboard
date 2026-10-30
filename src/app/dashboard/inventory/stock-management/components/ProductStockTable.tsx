@@ -124,11 +124,10 @@ function StockCellValue({ view }: { view: StockCellView }) {
       </div>
     );
   }
-  if (view.kind === 'missing') {
+  if (view.kind === 'missing' || view.kind === 'empty') {
     return (
       <div className="flex items-center justify-center">
-        <span aria-hidden="true" className="text-sm text-gray-300">—</span>
-        <span className="sr-only">لا يوجد متغير بهذا المقاس واللون</span>
+        <span className="text-sm font-semibold text-gray-400">{formatStockNumber(0)}</span>
       </div>
     );
   }
@@ -176,8 +175,8 @@ export function ProductStockTable({
   const rowTotal = (index: number) => totals.byRow[index] ?? 0;
 
   const renderGridCell = (view: StockCellView, color: string, size: string) => {
-    if (view.kind === 'hidden') return null;
-    if (view.kind === 'missing') return <StockCellValue view={view} />;
+    if (view.kind === 'suppressed') return null;
+    if (view.kind === 'missing' || view.kind === 'empty') return <StockCellValue view={view} />;
     const { stock } = view;
     const showStatus = view.kind === 'badge';
 

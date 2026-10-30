@@ -1,6 +1,6 @@
 'use client';
 
-import { formatDateTime } from '@/utils/format';
+import { formatDateTime, formatStockNumber } from '@/utils/format';
 import { LiaExchangeAltSolid } from 'react-icons/lia';
 import CopyableCode from '@/components/ui/copyable-code';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
@@ -180,7 +180,7 @@ export function StockMovementsTab() {
                         quantity < 0 ? 'text-red-600' : 'text-green-600'
                       }`}
                     >
-                      {quantity > 0 ? `+${quantity}` : quantity}
+                      {quantity > 0 ? `+${formatStockNumber(quantity)}` : formatStockNumber(quantity)}
                     </td>
                     <td className="py-2.5 px-3 text-gray-600">
                       {movement.fromWarehouse?.name ?? '—'}

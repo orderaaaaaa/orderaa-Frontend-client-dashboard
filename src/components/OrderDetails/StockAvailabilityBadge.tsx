@@ -1,5 +1,6 @@
 'use client';
 
+import { toStockNumber } from '@/utils/format';
 import { LiaExclamationTriangleSolid, LiaBoxSolid } from 'react-icons/lia';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { AvailabilityLine } from '@/lib/api/warehouses';
@@ -43,7 +44,7 @@ export function StockAvailabilityBadge({ line }: Props) {
       <p className="flex items-center gap-1 text-sm text-gray-500">
         <LiaBoxSolid className="size-4 shrink-0" />
         <span>
-          {t('orderDetails.stock.available', { count: line.available })}
+          {t('orderDetails.stock.available', { count: toStockNumber(line.available) })}
         </span>
       </p>
     );
@@ -62,7 +63,7 @@ export function StockAvailabilityBadge({ line }: Props) {
                 available: line.available,
                 required: line.required,
               })
-            : t('orderDetails.stock.available', { count: line.available })}
+            : t('orderDetails.stock.available', { count: toStockNumber(line.available) })}
         </span>
       </p>
     );

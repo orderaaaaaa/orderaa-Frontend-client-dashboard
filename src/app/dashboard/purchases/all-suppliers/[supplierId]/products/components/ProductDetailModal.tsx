@@ -1,6 +1,6 @@
 'use client';
 
-import { formatDate, formatNumber } from '@/utils/format';
+import { formatDate, formatNumber, formatStockNumber } from '@/utils/format';
 import { useMemo, useState } from 'react';
 import clsx from 'clsx';
 import {
@@ -44,6 +44,7 @@ const transactionColumns: DataTableColumn<TransactionRecord>[] = [
   {
     key: 'quantity',
     header: 'الكمية',
+    render: (val) => formatStockNumber(val),
   },
   {
     key: 'totalPrice',

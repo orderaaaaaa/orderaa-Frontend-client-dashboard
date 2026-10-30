@@ -21,7 +21,7 @@ import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useProductStockQuery, useStockTimelineQuery, useStockWarehouseOptions } from '@/services/productStock';
 import { calculateDateRangeFromPeriod, type TimePeriod } from '@/utils/dateRangeUtils';
-import { formatNumber } from '@/utils/format';
+import { formatStockNumber } from '@/utils/format';
 
 const TIMELINE_PAGE_SIZE = 50;
 const SOURCE_OPTIONS = [
@@ -205,19 +205,19 @@ function ProductPanelBody({
       <div className="grid gap-3 sm:grid-cols-3">
         <KpiCard
           label="إجمالي الكمية"
-          value={formatNumber(stock.summary.totalQuantity)}
+          value={formatStockNumber(stock.summary.totalQuantity)}
           icon={<Boxes className="size-5" aria-hidden="true" />}
           accent="primary"
         />
         <KpiCard
           label="مخازن بها مخزون"
-          value={formatNumber(stock.summary.warehousesWithStock)}
+          value={formatStockNumber(stock.summary.warehousesWithStock)}
           icon={<Warehouse className="size-5" aria-hidden="true" />}
           accent="chart2"
         />
         <KpiCard
           label="متغيرات نافدة"
-          value={formatNumber(stock.summary.outOfStockVariants)}
+          value={formatStockNumber(stock.summary.outOfStockVariants)}
           icon={<PackageX className="size-5" aria-hidden="true" />}
           accent="chart5"
         />

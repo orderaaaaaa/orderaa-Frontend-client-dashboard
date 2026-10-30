@@ -18,7 +18,7 @@ import { EmptyState } from '@/components/ui/state-panels';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import type { StockTimelineReferenceDto, StockTimelineRowDto, StockTimelineWarehouseDto } from '@/lib/api/warehouses';
-import { formatNumber, formatTime } from '@/utils/format';
+import { formatStockNumber, formatTime } from '@/utils/format';
 
 interface StockTimelineProps {
   rows: StockTimelineRowDto[];
@@ -90,14 +90,12 @@ function WarehouseSide({
     <span className="inline-flex flex-wrap items-center gap-1">
       <span>{label}</span>
       <span className="font-medium text-foreground">{warehouse.name}</span>
-      {balance !== null && (
-        <span className="text-xs">
-          رصيد{' '}
-          <span dir="ltr" className="font-semibold tabular-nums text-foreground">
-            {formatNumber(balance)}
-          </span>
+      <span className="text-xs">
+        رصيد{' '}
+        <span dir="ltr" className="font-semibold tabular-nums text-foreground">
+          {formatStockNumber(balance)}
         </span>
-      )}
+      </span>
     </span>
   );
 }
@@ -157,7 +155,7 @@ function TimelineRow({ row }: { row: StockTimelineRowDto }) {
         </div>
         <span dir="ltr" className={cn('text-base font-bold tabular-nums', quantity.tone)}>
           {quantity.sign}
-          {formatNumber(quantity.magnitude)}
+          {formatStockNumber(quantity.magnitude)}
         </span>
       </div>
 

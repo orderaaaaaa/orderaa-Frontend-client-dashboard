@@ -1,5 +1,6 @@
 'use client';
 
+import { formatStockNumber } from '@/utils/format';
 import { useEffect, useMemo, useState } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -509,7 +510,7 @@ function VirtualWarehousePreviewPanel({
                 preview.data.quantity < 0 ? 'text-red-600' : 'text-gray-900'
               }`}
             >
-              الكمية المحسوبة: {preview.data.quantity}
+              الكمية المحسوبة: {formatStockNumber(preview.data.quantity)}
             </p>
             <ul className="space-y-1">
               {breakdown.map((entry) => (

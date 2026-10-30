@@ -17,11 +17,11 @@ import { ActorChip } from '@/components/audit/ActorChip';
 import { employeeActor } from '@/components/audit/actors';
 import { Button } from '@/components/ui/button';
 import { getTimeAgo } from '@/utils/timeAgo';
-import { formatCount, formatMoney } from '@/utils/formatMoney';
+import { formatMoney } from '@/utils/formatMoney';
 import { ImageGalleryModal } from '@/components/receipts/ImageGalleryModal';
 import { SupplierInvoice, SupplierInvoiceItem } from '../types';
 import { exportInvoiceToExcel, exportInvoiceToPDF } from '../utils';
-import { formatDate } from '@/utils/format';
+import { formatDate, formatStockNumber } from '@/utils/format';
 
 function buildProductColumns(
   products: SupplierInvoiceItem[],
@@ -32,7 +32,7 @@ function buildProductColumns(
 
   const cols: DataTableColumn<SupplierInvoiceItem & Record<string, unknown>>[] = [
     { key: 'product', header: 'اسم الصنف', render: (_value, row) => row.product.name },
-    { key: 'quantity', header: 'إجمالي عدد القطع' },
+    { key: 'quantity', header: 'إجمالي عدد القطع', render: (val) => formatStockNumber(val) },
     ...(hasPackageColumns
       ? [
           {
@@ -180,7 +180,7 @@ export default function InvoiceDetailModal({
                 إجمالي عدد القطع
               </span>
               <span className="text-base font-bold text-gray-800">
-                {formatCount(totalQuantity)} قطعة
+                {formatStockNumber(totalQuantity)} قطعة
               </span>
             </div>
           )}

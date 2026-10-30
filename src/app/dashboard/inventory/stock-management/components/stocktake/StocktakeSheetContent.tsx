@@ -29,7 +29,7 @@ import {
   useUpdateStocktakeLinesMutation,
 } from '@/services/stocktake';
 import { useDebounce } from '@/utils/debounce';
-import { formatNumber } from '@/utils/format';
+import { formatStockNumber } from '@/utils/format';
 import type {
   StocktakeLineDto,
   StocktakeLineFilter,
@@ -201,7 +201,7 @@ export function StocktakeSheetContent({ stocktakeId }: StocktakeSheetContentProp
       { id: stocktakeId, body: { note: note || null } },
       {
         onSuccess: (result) => {
-          toast.success(`تم ترحيل الجرد (${formatNumber(result.movementCount)} حركة)`);
+          toast.success(`تم ترحيل الجرد (${formatStockNumber(result.movementCount)} حركة)`);
           setRefused([]);
           setReview(null);
         },
@@ -295,19 +295,19 @@ export function StocktakeSheetContent({ stocktakeId }: StocktakeSheetContentProp
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           label="الأسطر"
-          value={<span dir="ltr">{formatNumber(summary.lineCount)}</span>}
+          value={<span dir="ltr">{formatStockNumber(summary.lineCount)}</span>}
           icon={<ListChecks className="size-5" aria-hidden="true" />}
           accent="primary"
         />
         <KpiCard
           label="تم عدها"
-          value={<span dir="ltr">{formatNumber(summary.countedCount)}</span>}
+          value={<span dir="ltr">{formatStockNumber(summary.countedCount)}</span>}
           icon={<PencilLine className="size-5" aria-hidden="true" />}
           accent="chart2"
         />
         <KpiCard
           label="متغيرة"
-          value={<span dir="ltr">{formatNumber(summary.changedCount)}</span>}
+          value={<span dir="ltr">{formatStockNumber(summary.changedCount)}</span>}
           icon={<Sigma className="size-5" aria-hidden="true" />}
           accent="chart3"
         />
@@ -390,11 +390,11 @@ export function StocktakeSheetContent({ stocktakeId }: StocktakeSheetContentProp
                     <span className="text-muted-foreground">
                       {'الكمية بالنظام '}
                       <span dir="ltr" className="font-semibold tabular-nums text-foreground">
-                        {formatNumber(line.live)}
+                        {formatStockNumber(line.live)}
                       </span>
                       {' · المعدود '}
                       <span dir="ltr" className="font-semibold tabular-nums text-foreground">
-                        {line.counted === null ? '—' : formatNumber(line.counted)}
+                        {formatStockNumber(line.counted)}
                       </span>
                     </span>
                   </li>
@@ -436,8 +436,8 @@ export function StocktakeSheetContent({ stocktakeId }: StocktakeSheetContentProp
           isSaving={updateLines.isPending}
           status={
             pendingCount > 0
-              ? `${formatNumber(pendingCount)} سطر بانتظار الحفظ`
-              : `تم عد ${formatNumber(summary.countedCount)} من ${formatNumber(summary.lineCount)} سطر`
+              ? `${formatStockNumber(pendingCount)} سطر بانتظار الحفظ`
+              : `تم عد ${formatStockNumber(summary.countedCount)} من ${formatStockNumber(summary.lineCount)} سطر`
           }
         >
           <Button

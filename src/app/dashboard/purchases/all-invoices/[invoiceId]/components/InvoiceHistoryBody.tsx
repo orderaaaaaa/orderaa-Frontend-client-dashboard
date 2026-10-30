@@ -1,5 +1,6 @@
 'use client';
 
+import { formatStockNumber } from '@/utils/format';
 import type { ReactNode } from 'react';
 import type { SupplierInvoiceEvent } from '@/lib/api/suppliers';
 import { INVOICE_PAYMENT_STATUS_LABEL } from '@/app/dashboard/purchases/constants';
@@ -82,8 +83,8 @@ const paymentStatusOf = (value: string | null | undefined) =>
   value == null ? '—' : INVOICE_PAYMENT_STATUS_LABEL[value as keyof typeof INVOICE_PAYMENT_STATUS_LABEL] ?? value;
 
 const lineFieldValue = (field: keyof LineFields, value: number | null | undefined): ReactNode => {
-  if (value == null) return '—';
-  return field === 'price' ? moneyOf(value) : ltr(formatCount(value));
+  if (field === 'price') return value == null ? '—' : moneyOf(value);
+  return ltr(formatStockNumber(value));
 };
 
 function ChangeRow({ label, before, after }: { label: string; before: ReactNode; after: ReactNode }) {
@@ -110,7 +111,7 @@ const lineTitle = (line: LineIdentity): string => {
 function lineSummary(line: LineSnapshot) {
   return (
     <>
-      {lineTitle(line)} · الكمية {ltr(formatCount(line.quantity))} · السعر{' '}
+      {lineTitle(line)} · الكمية {ltr(formatStockNumber(line.quantity))} · السعر{' '}
       {moneyOf(line.price)}
     </>
   );

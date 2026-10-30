@@ -7,7 +7,7 @@ import type {
   StocktakeLineDto,
   StocktakeRefusedLine,
 } from '@/app/dashboard/inventory/stock-management/types/stocktake';
-import { formatNumber } from '@/utils/format';
+import { formatStockNumber } from '@/utils/format';
 import { StockQuantityCell } from './StockQuantityCell';
 import { VariantLabel } from './VariantLabel';
 import { VarianceChip } from './VarianceChip';
@@ -73,15 +73,15 @@ export function StocktakeReviewDialog({
                   <span className="text-muted-foreground">
                     الكمية بالنظام{' '}
                     <span dir="ltr" className="font-semibold tabular-nums text-foreground">
-                      {formatNumber(line.live)}
+                      {formatStockNumber(line.live)}
                     </span>
                     {' · '}المعدود{' '}
                     <span dir="ltr" className="font-semibold tabular-nums text-foreground">
-                      {line.counted === null ? '—' : formatNumber(line.counted)}
+                      {formatStockNumber(line.counted)}
                     </span>
                     {' · '}المطلوب خصمه{' '}
                     <span dir="ltr" className="font-semibold tabular-nums text-foreground">
-                      {formatNumber(line.required)}
+                      {formatStockNumber(line.required)}
                     </span>
                   </span>
                 </li>

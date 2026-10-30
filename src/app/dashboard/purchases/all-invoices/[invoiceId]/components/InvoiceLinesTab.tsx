@@ -2,7 +2,8 @@
 
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import type { InvoiceProductApiItem } from '@/lib/api/suppliers';
-import { formatCount, formatMoney } from '@/utils/formatMoney';
+import { formatMoney } from '@/utils/formatMoney';
+import { formatStockNumber } from '@/utils/format';
 
 type LineRow = InvoiceProductApiItem & Record<string, unknown>;
 
@@ -43,7 +44,7 @@ export function InvoiceLinesTab({ products }: InvoiceLinesTabProps) {
             header: 'عدد الطرود',
             render: (_value: unknown, row: LineRow) =>
               row.packageCount != null ? (
-                <span className="tabular-nums" dir="ltr">{formatCount(row.packageCount)}</span>
+                <span className="tabular-nums" dir="ltr">{formatStockNumber(row.packageCount)}</span>
               ) : (
                 '—'
               ),
@@ -53,7 +54,7 @@ export function InvoiceLinesTab({ products }: InvoiceLinesTabProps) {
             header: 'القطع في الطرد',
             render: (_value: unknown, row: LineRow) =>
               row.piecesPerPackage != null ? (
-                <span className="tabular-nums" dir="ltr">{formatCount(row.piecesPerPackage)}</span>
+                <span className="tabular-nums" dir="ltr">{formatStockNumber(row.piecesPerPackage)}</span>
               ) : (
                 '—'
               ),
@@ -64,7 +65,7 @@ export function InvoiceLinesTab({ products }: InvoiceLinesTabProps) {
       key: 'quantity',
       header: 'إجمالي القطع',
       render: (value: unknown) => (
-        <span className="tabular-nums" dir="ltr">{formatCount(value as number)}</span>
+        <span className="tabular-nums" dir="ltr">{formatStockNumber(value)}</span>
       ),
     },
     {

@@ -22,12 +22,13 @@ import {
   stockScopeHref,
   stockScopeOutOfStockHref,
 } from '../constants';
-import { isFiniteNumber } from '@/utils/format';
+import { isFiniteNumber, toStockNumber } from '@/utils/format';
 import {
   formatStockQuantity,
   formatVariantCount,
 } from '../utils/formatNumber';
 import { resolveParentNames, sortScopeEntries } from '../utils/scopeOrder';
+import { indicatorsFromFlags } from '../utils/stockIndicators';
 import { StockScopeListSkeleton } from './StockScopeListSkeleton';
 
 type Tone = 'total' | 'warning' | 'danger';
@@ -287,8 +288,12 @@ export function StockScopeList() {
           isInactive: !entry.card.isActive,
           parentName: parentNames.get(entry.card.id),
           total: entry.card.visibleTotalQuantity,
-          low: entry.card.lowStockVariantCount,
-          out: entry.card.outOfStockVariantCount,
+          low: entry.card.showLowStockIndicator
+            ? toStockNumber(entry.card.lowStockVariantCount)
+            : null,
+          out: indicatorsFromFlags(entry.card).outOfStock
+            ? toStockNumber(entry.card.outOfStockVariantCount)
+            : null,
           shortfall: null,
         }
       : {
@@ -307,8 +312,12 @@ export function StockScopeList() {
           isInactive: false,
           total: entry.card.visibleTotalQuantity,
           low: null,
-          out: entry.card.outOfStockVariantCount,
-          shortfall: entry.card.shortfallUnits,
+          out: indicatorsFromFlags(entry.card).outOfStock
+            ? toStockNumber(entry.card.outOfStockVariantCount)
+            : null,
+          shortfall: entry.card.showShortageIndicator
+            ? toStockNumber(entry.card.shortfallUnits)
+            : null,
         }
   );
 

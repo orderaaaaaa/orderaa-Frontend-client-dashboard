@@ -1,6 +1,6 @@
-import { formatNumber, isFiniteNumber } from '@/utils/format';
+import { formatNumber, formatStockNumber, toStockNumber } from '@/utils/format';
 
-const EMPTY_STOCK_VALUE = '—';
+export { formatStockNumber };
 
 export interface ArabicPluralForms {
   one: string;
@@ -13,8 +13,6 @@ export const STOCK_QUANTITY_FORMS: ArabicPluralForms = { one: 'قطعة', two: '
 export const VARIANT_COUNT_FORMS: ArabicPluralForms = { one: 'متغير', two: 'متغيران', few: 'متغيرات', many: 'متغيرًا' };
 export const ORDER_FORMS: ArabicPluralForms = { one: 'طلب', two: 'طلبان', few: 'طلبات', many: 'طلبًا' };
 
-export const formatStockNumber = formatNumber;
-
 export const pluralArabic = (count: number, forms: ArabicPluralForms): string => {
   const n = Math.abs(count);
   if (n === 1) return forms.one;
@@ -25,8 +23,10 @@ export const pluralArabic = (count: number, forms: ArabicPluralForms): string =>
   return forms.many;
 };
 
-export const formatStockAmount = (value: unknown, forms: ArabicPluralForms): string =>
-  isFiniteNumber(value) ? `${formatNumber(value)} ${pluralArabic(value, forms)}` : EMPTY_STOCK_VALUE;
+export const formatStockAmount = (value: unknown, forms: ArabicPluralForms): string => {
+  const amount = toStockNumber(value);
+  return `${formatNumber(amount)} ${pluralArabic(amount, forms)}`;
+};
 
 export const formatStockQuantity = (value: unknown): string => formatStockAmount(value, STOCK_QUANTITY_FORMS);
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { formatStockNumber } from '@/utils/format';
 import { LiaBanSolid, LiaExclamationCircleSolid } from 'react-icons/lia';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { VariantAvailability } from '@/lib/api/warehouses';
@@ -82,7 +83,7 @@ export function VariantAvailabilityList({ variants, selected }: Props) {
                   <LiaBanSolid className="size-3.5 shrink-0" />
                 ))}
               <span>
-                {variant.variantLabel}: {variant.available}
+                {variant.variantLabel}: {formatStockNumber(variant.available)}
               </span>
             </span>
           );

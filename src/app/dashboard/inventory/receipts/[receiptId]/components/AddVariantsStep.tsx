@@ -1,5 +1,6 @@
 'use client';
 
+import { formatStockNumber } from '@/utils/format';
 import { memo, useMemo, useState, useCallback } from 'react';
 import Image from 'next/image';
 import clsx from 'clsx';
@@ -399,7 +400,7 @@ const AddVariantsStep = memo(
               isCountComplete ? 'text-gray-800' : 'text-red-600',
             )}
           >
-            إجمالي عدد القطع المُدخلة {totalEntered} / {totalItems} قطعة
+            إجمالي عدد القطع المُدخلة {formatStockNumber(totalEntered)} / {formatStockNumber(totalItems)} قطعة
           </p>
         </div>
 

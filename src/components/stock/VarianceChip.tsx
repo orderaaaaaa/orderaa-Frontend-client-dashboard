@@ -1,22 +1,19 @@
 import { cn } from '@/lib/utils';
-import { formatNumber } from '@/utils/format';
+import { formatStockNumber, toStockNumber } from '@/utils/format';
 
 interface VarianceChipProps {
   delta: number | null;
 }
 
 export function VarianceChip({ delta }: VarianceChipProps) {
-  if (delta === null) {
-    return <span className="text-muted-foreground">—</span>;
-  }
-
+  const amount = toStockNumber(delta);
   const toneClass =
-    delta > 0
+    amount > 0
       ? 'bg-success/10 text-success'
-      : delta < 0
+      : amount < 0
         ? 'bg-destructive/10 text-destructive'
         : 'bg-muted text-muted-foreground';
-  const text = delta > 0 ? `+${formatNumber(delta)}` : formatNumber(delta);
+  const text = amount > 0 ? `+${formatStockNumber(amount)}` : formatStockNumber(amount);
 
   return (
     <span

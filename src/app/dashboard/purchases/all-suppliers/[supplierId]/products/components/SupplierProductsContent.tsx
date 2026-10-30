@@ -1,6 +1,6 @@
 'use client';
 
-import { formatNumber } from '@/utils/format';
+import { formatNumber, formatStockNumber } from '@/utils/format';
 import { useState, useMemo, useCallback } from 'react';
 import { Search } from 'lucide-react';
 import { LiaBoxesSolid } from 'react-icons/lia';
@@ -43,6 +43,7 @@ const columns: DataTableColumn<ProductRecord>[] = [
     key: 'totalQuantityPurchased',
     header: 'الكمية المشتراة',
     sortable: true,
+    render: (val) => formatStockNumber(val),
   },
   {
     key: 'totalPurchaseAmount',

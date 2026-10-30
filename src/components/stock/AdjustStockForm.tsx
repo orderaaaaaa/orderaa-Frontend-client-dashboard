@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent, type KeyboardEvent } from 'react';
 import { toast } from 'react-toastify';
+import { formatStockNumber } from '@/utils/format';
 import { Button } from '@/components/ui/button';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { isInvalidCountInput } from '@/components/stock/CountSheetTable';
@@ -200,8 +201,8 @@ export function AdjustStockForm(props: AdjustStockFormProps) {
               {failure.shortages.map((shortage) => (
                 <li key={keyOf(shortage.warehouseId, shortage.variantId)}>
                   {shortageNameOf(shortage)}: المطلوب{' '}
-                  <span dir="ltr" className="tabular-nums">{shortage.required}</span>، المتاح{' '}
-                  <span dir="ltr" className="tabular-nums">{Math.max(0, shortage.available)}</span>
+                  <span dir="ltr" className="tabular-nums">{formatStockNumber(shortage.required)}</span>، المتاح{' '}
+                  <span dir="ltr" className="tabular-nums">{formatStockNumber(shortage.available)}</span>
                 </li>
               ))}
             </ul>
@@ -349,7 +350,7 @@ function GroupRows({
             </td>
             <td className="px-3 py-2.5 align-top">
               <span dir="ltr" className="font-semibold tabular-nums text-muted-foreground">
-                {line.current}
+                {formatStockNumber(line.current)}
               </span>
             </td>
             <td className="px-3 py-2.5 align-top">

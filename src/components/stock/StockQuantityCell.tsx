@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { formatNumber } from '@/utils/format';
+import { formatStockNumber } from '@/utils/format';
 
 interface StockQuantityCellProps {
   quantity: number;
@@ -19,7 +19,7 @@ export function StockQuantityCell({
 
   return (
     <span dir="ltr" className={cn('font-semibold tabular-nums', toneClass)}>
-      {formatNumber(quantity)}
+      {formatStockNumber(quantity)}
     </span>
   );
 }
