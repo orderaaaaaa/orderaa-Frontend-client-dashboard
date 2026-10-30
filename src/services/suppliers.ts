@@ -17,7 +17,9 @@ import {
   updateSupplierInvoice,
   deleteSupplierInvoice,
   approveSupplierInvoice,
+  getReturnStock,
   getSupplierInvoiceHistory,
+  ReturnStockRequestBody,
   GetSuppliersParams,
   GetSupplierInvoicesParams,
   CreateSupplierDto,
@@ -88,6 +90,15 @@ export const useSupplierInvoiceByIdQuery = (id: number | undefined) => {
     queryFn: () => getSupplierInvoiceById(id!),
     enabled: !!id,
     staleTime: 30 * 1000,
+  });
+};
+
+export const useReturnStockQuery = (body: ReturnStockRequestBody, enabled: boolean) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.SUPPLIER_RETURN_STOCK, body] as QueryKey,
+    queryFn: () => getReturnStock(body),
+    enabled,
+    staleTime: 0,
   });
 };
 

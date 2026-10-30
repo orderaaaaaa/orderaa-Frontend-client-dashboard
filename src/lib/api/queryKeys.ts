@@ -57,6 +57,7 @@ export const QUERY_KEYS = {
   // Supplier Invoices
   SUPPLIER_INVOICES: 'supplier-invoices',
   SUPPLIER_INVOICE_DETAIL: 'supplier-invoice-detail',
+  SUPPLIER_RETURN_STOCK: 'supplier-return-stock',
 
   // Warehouses & Stock Movements
   WAREHOUSES: 'warehouses',

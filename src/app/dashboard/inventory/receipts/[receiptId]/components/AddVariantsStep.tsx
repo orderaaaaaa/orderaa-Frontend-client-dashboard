@@ -12,6 +12,7 @@ import { DataTable, DataTableColumn } from '@/components/ui/data-table';
 import { SelectedVariant } from '../types';
 import { isEveryLineCounted } from '../../utils';
 import AddVariantsModal from './AddVariantsModal';
+import { ReturnSourceStock, type ReturnStockCell } from '@/components/stock/ReturnSourceStock';
 
 export interface InvoiceProductRow {
   id: number;
@@ -29,6 +30,7 @@ interface AddVariantsStepProps {
   nextIcon?: IconType;
   nextDisabled?: boolean;
   showNext?: boolean;
+  returnStockFor?: (row: InvoiceProductRow, variant: SelectedVariant | null) => ReturnStockCell | undefined;
 }
 
 const PLACEHOLDER_IMAGE = 'https://placehold.co/60x60/eeeeee/333?text=%E2%80%94';
@@ -49,6 +51,7 @@ const AddVariantsStep = memo(
     nextIcon: NextIcon,
     nextDisabled,
     showNext = true,
+    returnStockFor,
   }: AddVariantsStepProps) => {
     const [selectedProduct, setSelectedProduct] = useState<InvoiceProductRow | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -166,6 +169,8 @@ const AddVariantsStep = memo(
         const value = isMulti
           ? variants.reduce((sum, v) => sum + (typeof v.quantity === 'number' ? v.quantity : 0), 0)
           : (variants[0]?.quantity ?? '');
+        const hasRealVariants = variants.some((v) => v.attributeOptionIds.length > 0);
+        const plainStock = hasRealVariants ? undefined : returnStockFor?.(row as InvoiceProductRow, null);
         return (
           <div className="flex flex-col gap-1">
             <Input
@@ -185,10 +190,11 @@ const AddVariantsStep = memo(
             {isMulti && (
               <span className="text-xs text-gray-500">حدد الكمية لكل متغير بالأسفل</span>
             )}
+            {plainStock && <ReturnSourceStock cell={plainStock} />}
           </div>
         );
       },
-      [productVariants, handleRowReceivedChange],
+      [productVariants, handleRowReceivedChange, returnStockFor],
     );
 
     const renderDifference = useCallback(
@@ -331,12 +337,14 @@ const AddVariantsStep = memo(
                 v.attributeLabels.length > 0
                   ? v.attributeLabels.join(' | ')
                   : v.variantName ?? 'متغير';
+              const stock = returnStockFor?.(row as InvoiceProductRow, v);
               return (
                 <div
                   key={key}
                   className="flex items-center gap-2 bg-white border border-primary/20 rounded-full ps-3 pe-1 py-0.5 text-xs sm:w-fit"
                 >
                   <span className="text-primary font-medium flex-1 min-w-0 break-words">{displayLabel}</span>
+                  {stock && <ReturnSourceStock cell={stock} />}
                    {showPerVariantQty && (
                      <>
                        <span className="text-gray-400">|</span>
@@ -371,7 +379,7 @@ const AddVariantsStep = memo(
           </div>
         );
       },
-      [productVariants, handleRemoveVariant, handleQuantityChange],
+      [productVariants, handleRemoveVariant, handleQuantityChange, returnStockFor],
     );
 
     return (

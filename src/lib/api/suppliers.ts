@@ -217,6 +217,31 @@ export interface ApproveSupplierInvoiceProductDto {
   variants: ApproveSupplierInvoiceVariantDto[];
 }
 
+export interface ReturnStockLineRequest {
+  key: string;
+  productId: number;
+  variantId?: number;
+  attributeOptionIds?: number[];
+}
+
+export interface ReturnStockRequestBody {
+  warehouseId?: number;
+  lines: ReturnStockLineRequest[];
+}
+
+export interface ReturnStockLine {
+  key: string;
+  productId: number;
+  variantId: number | null;
+  warehouseId: number | null;
+  warehouseName: string | null;
+  available: number;
+}
+
+export interface ReturnStockResponse {
+  lines: ReturnStockLine[];
+}
+
 export interface ApproveSupplierInvoiceDto {
   products: ApproveSupplierInvoiceProductDto[];
   /** destination warehouse for the approved stock */
@@ -316,4 +341,9 @@ export async function approveSupplierInvoice(
 ): Promise<SupplierInvoiceApiItem> {
   const response = await api.post(`/supplier-invoices/${id}/approve`, body);
   return response.data as SupplierInvoiceApiItem;
+}
+
+export async function getReturnStock(body: ReturnStockRequestBody): Promise<ReturnStockResponse> {
+  const response = await api.post('/supplier-invoices/return-stock', body);
+  return response.data as ReturnStockResponse;
 }

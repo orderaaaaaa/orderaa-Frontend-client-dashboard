@@ -28,6 +28,8 @@ import {
   partialAmountOfInvoice,
   paymentStatusOfInvoice,
   payloadTotal,
+  returnStockLinesOf,
+  returnStockQuantityOf,
   variantKeyOf,
 } from '../utils';
 import {
@@ -35,9 +37,10 @@ import {
   hasAtMostTwoDecimals,
   moneyCents,
 } from '@/utils/money';
-import { getApiErrorMessage, getApiErrorStatus } from '@/utils/apiError';
+import { getApiErrorMessage, getApiErrorStatus, getOutboundShortageMessage } from '@/utils/apiError';
 import {
   useCreateSupplierInvoiceMutation,
+  useReturnStockQuery,
   useSuppliersQuery,
   useSupplierInvoiceByIdQuery,
   useUpdateSupplierInvoiceMutation,
@@ -59,6 +62,7 @@ import { uploadFile } from '@/lib/api/upload';
 import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
+import { isReturnStockBlocked, type ReturnStockCell } from '@/components/stock/ReturnSourceStock';
 
 interface AddInvoiceFormProps {
   initialInvoice?: SupplierInvoiceApiItem;
@@ -137,6 +141,34 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
   const createdByEmployeeId = watch('createdByEmployeeId');
   const items = watch('items');
   const invoiceImage = watch('invoiceImage');
+  const isReturn = invoiceType === 'RETURN';
+
+  const returnStockLines = useMemo(
+    () => (isReturn ? returnStockLinesOf(items ?? []) : []),
+    [isReturn, items],
+  );
+  const returnStockQuery = useReturnStockQuery(
+    { lines: returnStockLines },
+    isReturn && returnStockLines.length > 0,
+  );
+  const returnStockByItemId = useMemo<Record<string, ReturnStockCell>>(() => {
+    const cells: Record<string, ReturnStockCell> = {};
+    if (!isReturn) return cells;
+    for (const item of items ?? []) {
+      const line = returnStockQuery.data?.lines.find((l) => l.key === item.id);
+      if (!line) continue;
+      cells[item.id] = {
+        warehouseName: line.warehouseName,
+        available: line.available,
+        requested: returnStockQuantityOf(item, invoiceMode),
+      };
+    }
+    return cells;
+  }, [isReturn, items, invoiceMode, returnStockQuery.data]);
+  const returnStockBlocked =
+    isReturn &&
+    (Object.values(returnStockByItemId).some(isReturnStockBlocked) ||
+      (returnStockLines.length > 0 && returnStockQuery.isPending));
 
   const invoiceTotal = useMemo(
     () => payloadTotal(buildProductsPayload(items ?? [], invoiceMode)),
@@ -318,6 +350,7 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
   const onSubmit = useCallback(
     async (data: AddInvoiceFormData) => {
       setSubmitError(null);
+      if (returnStockBlocked) return;
       const products = buildProductsPayload(data.items, invoiceMode);
       const totalAmount = payloadTotal(products);
       let resolvedPaymentAmount: number | undefined;
@@ -395,6 +428,12 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
           router.push('/dashboard/purchases/all-invoices');
         }, 2000);
       } catch (err: unknown) {
+        const outboundMessage = getOutboundShortageMessage(err);
+        if (outboundMessage !== null) {
+          toast.error(outboundMessage);
+          await invalidateAndWait(queryClient, [[QUERY_KEYS.SUPPLIER_RETURN_STOCK]]);
+          return;
+        }
         if (initialInvoice) {
           toast.error(supplierInvoiceErrorMessage(err, 'حدث خطأ أثناء حفظ الفاتورة'));
           const status = getApiErrorStatus(err);
@@ -419,6 +458,7 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
       paymentStatus,
       partialAmount,
       invoiceMode,
+      returnStockBlocked,
     ],
   );
 
@@ -495,6 +535,7 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
           onRemoveItem={handleRemoveItem}
           onAddItemClick={handleOpenProductModal}
           itemErrors={errors.items as Record<number, { count?: { message?: string }; unitPrice?: { message?: string }; piecesPerPackage?: { message?: string }; name?: { message?: string } }> | undefined}
+          returnStockByItemId={isReturn ? returnStockByItemId : undefined}
         />
         {errors.items?.message && (
           <p className="sm:px-8 text-red-500 text-sm -mt-6">
@@ -526,7 +567,7 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
           <Button
             type="submit"
             variant="default"
-            disabled={isSaving || isSuccessModalOpen}
+            disabled={isSaving || isSuccessModalOpen || returnStockBlocked}
             loading={isSaving}
             loadingText={isUploadingImage ? 'جارٍ رفع الصورة…' : 'جارٍ الحفظ...'}
             className="min-h-10 rounded-full font-semibold text-sm sm:text-base px-10"

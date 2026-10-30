@@ -11,7 +11,7 @@ import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
-import { getApiErrorMessage } from '@/utils/apiError';
+import { getApiErrorMessage, getOutboundShortageMessage } from '@/utils/apiError';
 import { LiaSaveSolid, LiaCheckCircleSolid } from 'react-icons/lia';
 import PageLoading from '@/components/ui/page-loading';
 import BaseModal from '@/components/ui/base-modal';
@@ -23,6 +23,7 @@ import { useShallow } from 'zustand/react/shallow';
 import {
   useSupplierInvoiceByIdQuery,
   useApproveSupplierInvoiceMutation,
+  useReturnStockQuery,
 } from '@/services/suppliers';
 import {
   useStockWorkflowsQuery,
@@ -34,7 +35,8 @@ import AddVariantsStep, { InvoiceProductRow } from './AddVariantsStep';
 import { SelectedVariant } from '../types';
 import { isEveryLineCounted } from '../../utils';
 import { formatDate, formatStockNumber } from '@/utils/format';
-import type { ApproveSupplierInvoiceVariantDto } from '@/lib/api/suppliers';
+import type { ApproveSupplierInvoiceVariantDto, ReturnStockLineRequest } from '@/lib/api/suppliers';
+import { isReturnStockBlocked, type ReturnStockCell } from '@/components/stock/ReturnSourceStock';
 import { WAREHOUSES_PAGE_ENABLED } from '@/constants/warehouses';
 
 type ReceivedLineRow = InvoiceProductRow & Record<string, unknown>;
@@ -53,6 +55,11 @@ interface QuantityMismatch {
 }
 
 const STALE_APPROVE_STATUSES = [400, 404, 409];
+
+function approvalLineKey(invoiceProductId: number, attributeOptionIds: number[]): string {
+  if (attributeOptionIds.length === 0) return String(invoiceProductId);
+  return `${invoiceProductId}:${[...attributeOptionIds].sort((a, b) => a - b).join('-')}`;
+}
 
 export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
   const { t } = useI18n();
@@ -172,6 +179,67 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
     [productVariants],
   );
 
+  const approvalStockLines = useMemo<ReturnStockLineRequest[]>(
+    () =>
+      invoiceProducts.flatMap((p) => {
+        const real = (productVariants[p.id] ?? []).filter((v) => v.attributeOptionIds.length > 0);
+        if (real.length === 0) return [{ key: approvalLineKey(p.id, []), productId: p.productId }];
+        return real.map((v) => ({
+          key: approvalLineKey(p.id, v.attributeOptionIds),
+          productId: p.productId,
+          attributeOptionIds: v.attributeOptionIds,
+        }));
+      }),
+    [invoiceProducts, productVariants],
+  );
+
+  const approvalRequested = useMemo(() => {
+    const requested: Record<string, number> = {};
+    for (const p of invoiceProducts) {
+      const real = (productVariants[p.id] ?? []).filter((v) => v.attributeOptionIds.length > 0);
+      if (real.length === 0) {
+        requested[approvalLineKey(p.id, [])] = countedFor(p.id);
+      } else {
+        for (const v of real) {
+          requested[approvalLineKey(p.id, v.attributeOptionIds)] =
+            typeof v.quantity === 'number' ? v.quantity : 0;
+        }
+      }
+    }
+    return requested;
+  }, [invoiceProducts, productVariants, countedFor]);
+
+  const returnStockQuery = useReturnStockQuery(
+    {
+      ...(warehouseId ? { warehouseId: Number(warehouseId) } : {}),
+      lines: approvalStockLines,
+    },
+    isReturn && approvalStockLines.length > 0,
+  );
+
+  const approvalStockCells = useMemo<Record<string, ReturnStockCell>>(() => {
+    const cells: Record<string, ReturnStockCell> = {};
+    for (const line of returnStockQuery.data?.lines ?? []) {
+      cells[line.key] = {
+        warehouseName: line.warehouseName,
+        available: line.available,
+        requested: approvalRequested[line.key] ?? 0,
+      };
+    }
+    return cells;
+  }, [returnStockQuery.data, approvalRequested]);
+
+  const approvalStockFor = useCallback(
+    (row: InvoiceProductRow, variant: SelectedVariant | null) =>
+      approvalStockCells[approvalLineKey(row.id, variant?.attributeOptionIds ?? [])],
+    [approvalStockCells],
+  );
+
+  const returnStockBlocked =
+    isReturn &&
+    (Object.values(approvalStockCells).some(isReturnStockBlocked) ||
+      (approvalStockLines.length > 0 && returnStockQuery.isPending));
+
   /** Products whose counted total differs from what the invoice says. */
   const mismatches: QuantityMismatch[] = useMemo(
     () =>
@@ -190,6 +258,7 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
   const approve = useCallback(
     async (acknowledgeQuantityChange: boolean) => {
       if (!apiReceipt) return;
+      if (returnStockBlocked) return;
       if (!isEveryLineCounted(invoiceProducts.map((p) => p.id), productVariants)) return;
 
       const productsPayload = invoiceProducts.map((p) => {
@@ -255,6 +324,14 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
           return;
         }
 
+        const outboundMessage = getOutboundShortageMessage(err);
+        if (outboundMessage !== null) {
+          setPendingMismatches(null);
+          toast.error(outboundMessage);
+          await invalidateAndWait(queryClient, [[QUERY_KEYS.SUPPLIER_RETURN_STOCK]]);
+          return;
+        }
+
         setPendingMismatches(null);
         toast.error(getApiErrorMessage(err, 'فشل تأكيد الإيصال، حاول مرة أخرى'));
         if (response?.status !== undefined && STALE_APPROVE_STATUSES.includes(response.status)) {
@@ -270,6 +347,7 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
       apiReceipt,
       isReturn,
       warehouseId,
+      returnStockBlocked,
       invoiceProducts,
       productVariants,
       approveMutation,
@@ -284,8 +362,9 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
   const handleSubmit = useCallback(async () => {
     if (!apiReceipt) return;
     if (!isEveryLineCounted(invoiceProducts.map((p) => p.id), productVariants)) return;
+    if (returnStockBlocked) return;
     setIsConfirmOpen(true);
-  }, [apiReceipt, invoiceProducts, productVariants]);
+  }, [apiReceipt, invoiceProducts, productVariants, returnStockBlocked]);
 
   const totalApprovedPieces = useMemo(
     () => invoiceProducts.reduce((sum, p) => sum + countedFor(p.id), 0),
@@ -419,10 +498,11 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
           onNext={handleSubmit}
           nextLabel={isReturn ? 'تأكيد تسليم المرتجع' : 'تأكيد الإيصال'}
           nextIcon={LiaSaveSolid}
-          nextDisabled={approveMutation.isPending}
+          nextDisabled={approveMutation.isPending || returnStockBlocked}
           showNext={canApprove}
           productVariants={productVariants}
           onProductVariantsChange={handleProductVariantsChange}
+          returnStockFor={isReturn ? approvalStockFor : undefined}
         />
       </div>
 

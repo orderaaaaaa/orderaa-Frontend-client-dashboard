@@ -1,4 +1,9 @@
-import type { CreateInvoiceProductDto, InvoiceProductApiItem, SupplierInvoiceApiItem } from '@/lib/api/suppliers';
+import type {
+  CreateInvoiceProductDto,
+  InvoiceProductApiItem,
+  ReturnStockLineRequest,
+  SupplierInvoiceApiItem,
+} from '@/lib/api/suppliers';
 import { roundMoney } from '@/utils/money';
 import type { AddInvoiceFormData } from '../schema';
 import type { InvoiceMode } from '../types';
@@ -21,6 +26,27 @@ export function buildProductsPayload(
       piecesPerPackage: invoiceMode === 'package' ? item.piecesPerPackage : undefined,
       attributeOptionIds: (item.variants ?? []).map((v) => v.attributeOptionId).filter((id): id is number => id !== undefined),
     }));
+}
+
+export function returnStockQuantityOf(
+  item: AddInvoiceFormData['items'][number],
+  invoiceMode: InvoiceMode,
+): number {
+  const count = item.count ?? 0;
+  return invoiceMode === 'package' ? count * (item.piecesPerPackage ?? 0) : count;
+}
+
+export function returnStockLinesOf(items: AddInvoiceFormData['items']): ReturnStockLineRequest[] {
+  return items.map((item) => {
+    const attributeOptionIds = (item.variants ?? [])
+      .map((v) => v.attributeOptionId)
+      .filter((id): id is number => id !== undefined);
+    return {
+      key: item.id,
+      productId: item.productId,
+      ...(attributeOptionIds.length > 0 ? { attributeOptionIds } : {}),
+    };
+  });
 }
 
 export function payloadTotal(products: CreateInvoiceProductDto[]): number {

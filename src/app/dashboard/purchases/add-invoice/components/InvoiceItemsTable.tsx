@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { InvoiceItem, InvoiceMode } from '../types';
 import { INVOICE_TYPES } from '../constants';
 import { formatMoney } from '@/utils/formatMoney';
+import { ReturnSourceStock, type ReturnStockCell } from '@/components/stock/ReturnSourceStock';
 
 interface ItemFieldError {
   count?: { message?: string };
@@ -51,6 +52,7 @@ interface InvoiceItemsTableProps {
   onAddItemClick: () => void;
   itemErrors?: Record<number, ItemFieldError>;
   structureLocked?: boolean;
+  returnStockByItemId?: Record<string, ReturnStockCell>;
 }
 
 const InvoiceItemsTable = memo(
@@ -70,6 +72,7 @@ const InvoiceItemsTable = memo(
     onAddItemClick,
     itemErrors,
     structureLocked = false,
+    returnStockByItemId,
   }: InvoiceItemsTableProps) => {
     const isPackage = mode === 'package';
 
@@ -156,6 +159,12 @@ const InvoiceItemsTable = memo(
         {
           key: 'name',
           header: 'اسم الصنف',
+          render: (_value: unknown, row: InvoiceRow) => (
+            <div className="flex flex-col gap-1 min-w-0">
+              <span className="break-words">{row.name}</span>
+              {returnStockByItemId?.[row.id] && <ReturnSourceStock cell={returnStockByItemId[row.id]} />}
+            </div>
+          ),
         },
         {
           key: 'count',
@@ -210,7 +219,7 @@ const InvoiceItemsTable = memo(
       });
 
       return cols;
-    }, [isPackage, indexOf, renderCountInput, renderPriceInput, renderPiecesInput, renderRemoveButton]);
+    }, [isPackage, indexOf, renderCountInput, renderPriceInput, renderPiecesInput, renderRemoveButton, returnStockByItemId]);
 
     const renderMobileRow = useCallback(
       (row: InvoiceRow) => {
@@ -218,7 +227,10 @@ const InvoiceItemsTable = memo(
         return (
           <div className="flex flex-col gap-3">
             <div className="flex items-start justify-between gap-2">
-              <span className="font-semibold text-gray-800 break-words min-w-0 pt-2">{row.name}</span>
+              <div className="flex flex-col gap-1 min-w-0 pt-2">
+                <span className="font-semibold text-gray-800 break-words">{row.name}</span>
+                {returnStockByItemId?.[row.id] && <ReturnSourceStock cell={returnStockByItemId[row.id]} />}
+              </div>
               {renderRemoveButton(row, index)}
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -254,7 +266,7 @@ const InvoiceItemsTable = memo(
           </div>
         );
       },
-      [isPackage, indexOf, renderCountInput, renderPriceInput, renderPiecesInput, renderRemoveButton],
+      [isPackage, indexOf, renderCountInput, renderPriceInput, renderPiecesInput, renderRemoveButton, returnStockByItemId],
     );
 
     const tableData = items as InvoiceRow[];

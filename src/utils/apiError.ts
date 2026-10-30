@@ -1,9 +1,12 @@
 import { readStoredLocale } from '@/i18n/locale';
 import { translate } from '@/i18n/translate';
 import { ORDER_STATUS_ARABIC_LABELS } from '@/app/dashboard/constants/statusMappings';
-import type {
-  BatchShortageOrder,
-  ShortageRenderLine,
+import {
+  OUTBOUND_INSUFFICIENT_STOCK_CODE,
+  type BatchShortageOrder,
+  type OutboundInsufficientStockBody,
+  type ShortageLineApi,
+  type ShortageRenderLine,
 } from '@/lib/api/stockShortage';
 import {
   ORDER_LINE_EDIT_CONFLICT,
@@ -29,6 +32,34 @@ export function getApiErrorMessage(err: unknown, fallback: string): string {
 
 export function getApiErrorStatus(err: unknown): number | undefined {
   return (err as { response?: { status?: number } })?.response?.status;
+}
+
+function shortageLineLabel(line: Pick<ShortageLineApi, 'productName' | 'variantLabel'>): string {
+  return line.variantLabel ? `${line.productName} - ${line.variantLabel}` : line.productName;
+}
+
+export function getOutboundShortageMessage(err: unknown): string | null {
+  const data = (
+    err as { response?: { data?: Partial<OutboundInsufficientStockBody> } }
+  )?.response?.data;
+
+  if (data?.code !== OUTBOUND_INSUFFICIENT_STOCK_CODE) return null;
+
+  const locale = readStoredLocale();
+  const lines = data.lines ?? [];
+  if (lines.length === 0) {
+    return data.message ?? translate(locale, 'stockShortage.insufficientFallback');
+  }
+  return lines
+    .map((line) =>
+      translate(locale, 'stockShortage.returnLine', {
+        label: shortageLineLabel(line),
+        required: line.required,
+        available: Math.max(0, line.available),
+        warehouse: line.warehouseName,
+      })
+    )
+    .join('\n');
 }
 
 /**

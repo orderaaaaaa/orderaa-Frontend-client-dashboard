@@ -154,6 +154,9 @@ const ar = {
     'لا يمكن تأكيد طلب يحتوي على منتج غير متوفر.',
   'stockShortage.line': '{product} - {variant}: المطلوب {required}، المتاح {available}',
   'stockShortage.lineNoVariant': '{product}: المطلوب {required}، المتاح {available}',
+  'stockShortage.returnLine': '{label}: مطلوب {required}، المتاح {available} في {warehouse}',
+  'returnStock.exceedsAvailable': 'الكمية أكبر من المتاح',
+  'returnStock.uncovered': 'لا يوجد مخزن لهذا الصنف — راجع قواعد الاستلام',
   'stockShortage.confirmBlocked':
     'لا يمكن تأكيد الطلب لأن المنتجات التالية غير متوفرة بالمخزون وإعداداتها تمنع التأكيد، اختر منتجًا آخر:',
   'stockShortage.insufficientFallback': 'المخزون غير كافٍ لإتمام هذه العملية.',
