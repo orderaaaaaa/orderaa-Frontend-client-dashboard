@@ -11,12 +11,14 @@ import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import { invalidateAndWait } from '@/lib/query/mutationSync';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
-import { getApiErrorMessage, getOutboundShortageMessage } from '@/utils/apiError';
+import { getApiErrorMessage } from '@/utils/apiError';
+import { reportReturnSubmitError, warnReturnBlocked } from '@/components/stock/returnStockToasts';
 import { LiaSaveSolid, LiaCheckCircleSolid } from 'react-icons/lia';
 import PageLoading from '@/components/ui/page-loading';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
+import Input from '@/components/ui/Input';
 import { DataTable, DataTableColumn } from '@/components/ui/data-table';
 import { useReceiptStore } from '@/store/receiptStore';
 import { useShallow } from 'zustand/react/shallow';
@@ -36,7 +38,14 @@ import { SelectedVariant } from '../types';
 import { isEveryLineCounted } from '../../utils';
 import { formatDate, formatStockNumber } from '@/utils/format';
 import type { ApproveSupplierInvoiceVariantDto, ReturnStockLineRequest } from '@/lib/api/suppliers';
-import { isReturnStockBlocked, type ReturnStockCell } from '@/components/stock/ReturnSourceStock';
+import {
+  buildReturnStockCells,
+  isReturnStockBlocking,
+  ReturnStockLoadError,
+  returnWarehouseNamesOf,
+  type ReturnStockCell,
+  type ReturnStockRequest,
+} from '@/components/stock/ReturnSourceStock';
 import { WAREHOUSES_PAGE_ENABLED } from '@/constants/warehouses';
 
 type ReceivedLineRow = InvoiceProductRow & Record<string, unknown>;
@@ -209,25 +218,25 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
     return requested;
   }, [invoiceProducts, productVariants, countedFor]);
 
+  const approvalStockRequests = useMemo<ReturnStockRequest[]>(
+    () =>
+      approvalStockLines.map((line) => ({
+        key: line.key,
+        quantity: approvalRequested[line.key] ?? 0,
+      })),
+    [approvalStockLines, approvalRequested],
+  );
+
   const returnStockQuery = useReturnStockQuery(
-    {
-      ...(warehouseId ? { warehouseId: Number(warehouseId) } : {}),
-      lines: approvalStockLines,
-    },
+    { lines: approvalStockLines },
     isReturn && approvalStockLines.length > 0,
   );
 
-  const approvalStockCells = useMemo<Record<string, ReturnStockCell>>(() => {
-    const cells: Record<string, ReturnStockCell> = {};
-    for (const line of returnStockQuery.data?.lines ?? []) {
-      cells[line.key] = {
-        warehouseName: line.warehouseName,
-        available: line.available,
-        requested: approvalRequested[line.key] ?? 0,
-      };
-    }
-    return cells;
-  }, [returnStockQuery.data, approvalRequested]);
+  const approvalStockState = useMemo(
+    () => buildReturnStockCells(approvalStockRequests, returnStockQuery.data?.lines),
+    [approvalStockRequests, returnStockQuery.data],
+  );
+  const approvalStockCells = approvalStockState.cells;
 
   const approvalStockFor = useCallback(
     (row: InvoiceProductRow, variant: SelectedVariant | null) =>
@@ -235,10 +244,11 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
     [approvalStockCells],
   );
 
-  const returnStockBlocked =
+  const returnStockBlocked = isReturn && isReturnStockBlocking(approvalStockState);
+  const returnStockLoadFailed =
     isReturn &&
-    (Object.values(approvalStockCells).some(isReturnStockBlocked) ||
-      (approvalStockLines.length > 0 && returnStockQuery.isPending));
+    (returnStockQuery.isError || (returnStockQuery.isSuccess && approvalStockState.incomplete));
+  const returnWarehouseNames = returnWarehouseNamesOf(approvalStockCells);
 
   /** Products whose counted total differs from what the invoice says. */
   const mismatches: QuantityMismatch[] = useMemo(
@@ -258,7 +268,10 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
   const approve = useCallback(
     async (acknowledgeQuantityChange: boolean) => {
       if (!apiReceipt) return;
-      if (returnStockBlocked) return;
+      if (returnStockBlocked) {
+        warnReturnBlocked();
+        return;
+      }
       if (!isEveryLineCounted(invoiceProducts.map((p) => p.id), productVariants)) return;
 
       const productsPayload = invoiceProducts.map((p) => {
@@ -288,7 +301,7 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
             // Omitted unless the user actually overrode it — sending a value
             // is what STOPS the backend from routing per line via the inbound
             // rules, so an empty pick must not become `Number('') === 0`.
-            ...(warehouseId ? { warehouseId: Number(warehouseId) } : {}),
+            ...(warehouseId && !isReturn ? { warehouseId: Number(warehouseId) } : {}),
             // Sent only when the user has just confirmed. Never sticky.
             ...(acknowledgeQuantityChange
               ? { acknowledgeQuantityChange: true }
@@ -324,10 +337,8 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
           return;
         }
 
-        const outboundMessage = getOutboundShortageMessage(err);
-        if (outboundMessage !== null) {
+        if (isReturn && reportReturnSubmitError(err)) {
           setPendingMismatches(null);
-          toast.error(outboundMessage);
           await invalidateAndWait(queryClient, [[QUERY_KEYS.SUPPLIER_RETURN_STOCK]]);
           return;
         }
@@ -457,8 +468,11 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
           <label className="text-sm font-medium text-gray-700">
             {isReturn ? 'مخزن صرف المرتجع' : 'مخزن الاستلام'}
           </label>
-          {/* Clearable: leaving it empty is the normal path, so there has to
-              be a way back to it after picking a warehouse by mistake. */}
+          {isReturn ? (
+            <Input value={returnWarehouseNames || '—'} disabled />
+          ) : (
+          /* Clearable: leaving it empty is the normal path, so there has to
+              be a way back to it after picking a warehouse by mistake. */
           <SearchableSelect
             options={warehouseOptions}
             value={warehouseId}
@@ -468,14 +482,18 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
             placeholder={t('receipts.warehouseAuto')}
             emptyMessage="لا توجد مخازن — أنشئ مخزنًا أولًا"
           />
+          )}
           {isReturn && (
             <p className="text-xs leading-5 text-gray-600">
               تأكيد هذا المرتجع يخصم الكميات المُسلّمة للمورد من المخزن.
             </p>
           )}
+          {isReturn && (
+            <p className="text-xs leading-5 text-gray-600">{t('returnStock.warehouseLockedHint')}</p>
+          )}
           {/* Only while no override is chosen: with one, the missing global
               rule no longer stops this receipt from being confirmed. */}
-          {!rulesLoading && !hasGlobalInboundRule && !warehouseId && (
+          {!isReturn && !rulesLoading && !hasGlobalInboundRule && !warehouseId && (
             <p className="rounded-md border border-amber-200 bg-amber-50 p-2 text-xs leading-5 text-amber-900">
               {t('receipts.noInboundWarning')}
               {WAREHOUSES_PAGE_ENABLED && (
@@ -492,6 +510,10 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
             </p>
           )}
         </div>
+
+        {returnStockLoadFailed && (
+          <ReturnStockLoadError onRetry={() => void returnStockQuery.refetch()} />
+        )}
 
         <AddVariantsStep
           products={invoiceProducts}
@@ -513,6 +535,7 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
         title={isReturn ? 'تأكيد تسليم المرتجع' : 'تأكيد الإيصال'}
         confirmText={isReturn ? 'تأكيد التسليم' : 'تأكيد الإيصال'}
         isLoading={approveMutation.isPending}
+        confirmDisabled={returnStockBlocked}
         maxWidth="md:max-w-lg"
       >
         <div className="flex flex-col gap-2 text-sm text-gray-800">
@@ -523,9 +546,11 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
             عدد المنتجات: <b>{invoiceProducts.length}</b>
           </p>
           <p>
-            {selectedWarehouseLabel
-              ? `إلى ${selectedWarehouseLabel}`
-              : 'تُوزّع حسب قواعد المخزون'}
+            {isReturn
+              ? `من ${returnWarehouseNames || '—'}`
+              : selectedWarehouseLabel
+                ? `إلى ${selectedWarehouseLabel}`
+                : 'تُوزّع حسب قواعد المخزون'}
           </p>
           <p className="text-xs text-amber-700">
             {isReturn
@@ -594,7 +619,7 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
               <Button
                 variant="default"
                 className="rounded-full font-semibold px-6"
-                disabled={approveMutation.isPending}
+                disabled={approveMutation.isPending || returnStockBlocked}
                 onClick={() => approve(true)}
               >
                 تأكيد التعديل والحفظ

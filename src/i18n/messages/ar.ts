@@ -156,7 +156,12 @@ const ar = {
   'stockShortage.lineNoVariant': '{product}: المطلوب {required}، المتاح {available}',
   'stockShortage.returnLine': '{label}: مطلوب {required}، المتاح {available} في {warehouse}',
   'returnStock.exceedsAvailable': 'الكمية أكبر من المتاح',
-  'returnStock.uncovered': 'لا يوجد مخزن لهذا الصنف — راجع قواعد الاستلام',
+  'returnStock.uncovered': 'لا يوجد مخزن استلام لهذا الصنف — تواصل مع الإدارة',
+  'returnStock.loadFailed': 'تعذر تحميل المخزون، أعد المحاولة',
+  'returnStock.retry': 'إعادة المحاولة',
+  'returnStock.blocked': 'لا يمكن تأكيد المرتجع قبل تصحيح الكميات أو المخزن',
+  'returnStock.warehouseLockedFallback': 'لا يمكن صرف المرتجع إلا من مخزن الاستلام المحدد',
+  'returnStock.warehouseLockedHint': 'المرتجع يُصرف من مخزن الاستلام ولا يمكن تغييره',
   'stockShortage.confirmBlocked':
     'لا يمكن تأكيد الطلب لأن المنتجات التالية غير متوفرة بالمخزون وإعداداتها تمنع التأكيد، اختر منتجًا آخر:',
   'stockShortage.insufficientFallback': 'المخزون غير كافٍ لإتمام هذه العملية.',

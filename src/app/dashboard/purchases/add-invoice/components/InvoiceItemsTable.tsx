@@ -159,12 +159,16 @@ const InvoiceItemsTable = memo(
         {
           key: 'name',
           header: 'اسم الصنف',
-          render: (_value: unknown, row: InvoiceRow) => (
-            <div className="flex flex-col gap-1 min-w-0">
-              <span className="break-words">{row.name}</span>
-              {returnStockByItemId?.[row.id] && <ReturnSourceStock cell={returnStockByItemId[row.id]} />}
-            </div>
-          ),
+          render: (_value: unknown, row: InvoiceRow) => {
+            const cell = returnStockByItemId?.[row.id];
+            if (!cell) return row.name;
+            return (
+              <div className="flex flex-col gap-1 min-w-0">
+                <span className="break-words">{row.name}</span>
+                <ReturnSourceStock cell={cell} />
+              </div>
+            );
+          },
         },
         {
           key: 'count',
@@ -227,10 +231,14 @@ const InvoiceItemsTable = memo(
         return (
           <div className="flex flex-col gap-3">
             <div className="flex items-start justify-between gap-2">
-              <div className="flex flex-col gap-1 min-w-0 pt-2">
-                <span className="font-semibold text-gray-800 break-words">{row.name}</span>
-                {returnStockByItemId?.[row.id] && <ReturnSourceStock cell={returnStockByItemId[row.id]} />}
-              </div>
+              {returnStockByItemId?.[row.id] ? (
+                <div className="flex flex-col gap-1 min-w-0 pt-2">
+                  <span className="font-semibold text-gray-800 break-words">{row.name}</span>
+                  <ReturnSourceStock cell={returnStockByItemId[row.id]} />
+                </div>
+              ) : (
+                <span className="font-semibold text-gray-800 break-words min-w-0 pt-2">{row.name}</span>
+              )}
               {renderRemoveButton(row, index)}
             </div>
             <div className="grid grid-cols-2 gap-3">

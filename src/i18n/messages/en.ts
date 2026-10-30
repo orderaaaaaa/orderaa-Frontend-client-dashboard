@@ -142,7 +142,12 @@ const en: Record<keyof typeof ar, string> = {
   'stockShortage.lineNoVariant': '{product}: required {required}, available {available}',
   'stockShortage.returnLine': '{label}: required {required}, available {available} in {warehouse}',
   'returnStock.exceedsAvailable': 'Quantity exceeds available stock',
-  'returnStock.uncovered': 'No warehouse for this item — check the receiving rules',
+  'returnStock.uncovered': 'No receiving warehouse for this item — contact the admin',
+  'returnStock.loadFailed': 'Could not load stock, try again',
+  'returnStock.retry': 'Retry',
+  'returnStock.blocked': 'Fix the quantities or stock before confirming the return',
+  'returnStock.warehouseLockedFallback': 'A return can only be issued from the receiving warehouse',
+  'returnStock.warehouseLockedHint': 'Returns are issued from the receiving warehouse and cannot be changed',
   'stockShortage.confirmBlocked':
     'Cannot confirm: the following products are out of stock and their settings forbid it, choose another product:',
   'stockShortage.insufficientFallback': 'There is not enough stock to complete this action.',

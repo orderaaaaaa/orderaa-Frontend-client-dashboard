@@ -38,7 +38,7 @@ function shortageLineLabel(line: Pick<ShortageLineApi, 'productName' | 'variantL
   return line.variantLabel ? `${line.productName} - ${line.variantLabel}` : line.productName;
 }
 
-export function getOutboundShortageMessage(err: unknown): string | null {
+export function getOutboundShortageLines(err: unknown): string[] | null {
   const data = (
     err as { response?: { data?: Partial<OutboundInsufficientStockBody> } }
   )?.response?.data;
@@ -48,18 +48,31 @@ export function getOutboundShortageMessage(err: unknown): string | null {
   const locale = readStoredLocale();
   const lines = data.lines ?? [];
   if (lines.length === 0) {
-    return data.message ?? translate(locale, 'stockShortage.insufficientFallback');
+    return [data.message ?? translate(locale, 'stockShortage.insufficientFallback')];
   }
-  return lines
-    .map((line) =>
-      translate(locale, 'stockShortage.returnLine', {
-        label: shortageLineLabel(line),
-        required: line.required,
-        available: Math.max(0, line.available),
-        warehouse: line.warehouseName,
-      })
-    )
-    .join('\n');
+  return lines.map((line) =>
+    translate(locale, 'stockShortage.returnLine', {
+      label: shortageLineLabel(line),
+      required: line.required,
+      available: Math.max(0, line.available),
+      warehouse: line.warehouseName,
+    })
+  );
+}
+
+export function getInboundRuleMissingMessage(err: unknown): string | null {
+  const data = (err as { response?: { data?: { code?: string } } })?.response?.data;
+  if (data?.code !== 'INBOUND_RULE_MISSING') return null;
+  return translate(readStoredLocale(), 'returnStock.uncovered');
+}
+
+export function getReturnWarehouseLockedMessage(err: unknown): string | null {
+  const data = (
+    err as { response?: { data?: { code?: string; message?: unknown } } }
+  )?.response?.data;
+  if (data?.code !== 'RETURN_WAREHOUSE_LOCKED') return null;
+  if (typeof data.message === 'string' && data.message.length > 0) return data.message;
+  return translate(readStoredLocale(), 'returnStock.warehouseLockedFallback');
 }
 
 /**

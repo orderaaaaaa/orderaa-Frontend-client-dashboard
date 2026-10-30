@@ -225,7 +225,6 @@ export interface ReturnStockLineRequest {
 }
 
 export interface ReturnStockRequestBody {
-  warehouseId?: number;
   lines: ReturnStockLineRequest[];
 }
 

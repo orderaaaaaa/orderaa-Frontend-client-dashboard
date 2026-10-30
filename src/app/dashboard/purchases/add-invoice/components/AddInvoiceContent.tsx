@@ -37,7 +37,8 @@ import {
   hasAtMostTwoDecimals,
   moneyCents,
 } from '@/utils/money';
-import { getApiErrorMessage, getApiErrorStatus, getOutboundShortageMessage } from '@/utils/apiError';
+import { getApiErrorMessage, getApiErrorStatus } from '@/utils/apiError';
+import { reportReturnSubmitError, warnReturnBlocked } from '@/components/stock/returnStockToasts';
 import {
   useCreateSupplierInvoiceMutation,
   useReturnStockQuery,
@@ -62,7 +63,13 @@ import { uploadFile } from '@/lib/api/upload';
 import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
-import { isReturnStockBlocked, type ReturnStockCell } from '@/components/stock/ReturnSourceStock';
+import {
+  buildReturnStockCells,
+  isReturnStockBlocking,
+  ReturnStockLoadError,
+  type ReturnStockCell,
+  type ReturnStockRequest,
+} from '@/components/stock/ReturnSourceStock';
 
 interface AddInvoiceFormProps {
   initialInvoice?: SupplierInvoiceApiItem;
@@ -143,6 +150,16 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
   const invoiceImage = watch('invoiceImage');
   const isReturn = invoiceType === 'RETURN';
 
+  const returnStockRequests = useMemo<ReturnStockRequest[]>(
+    () =>
+      isReturn
+        ? (items ?? []).map((item) => ({
+            key: item.id,
+            quantity: returnStockQuantityOf(item, invoiceMode),
+          }))
+        : [],
+    [isReturn, items, invoiceMode],
+  );
   const returnStockLines = useMemo(
     () => (isReturn ? returnStockLinesOf(items ?? []) : []),
     [isReturn, items],
@@ -151,24 +168,18 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
     { lines: returnStockLines },
     isReturn && returnStockLines.length > 0,
   );
-  const returnStockByItemId = useMemo<Record<string, ReturnStockCell>>(() => {
-    const cells: Record<string, ReturnStockCell> = {};
-    if (!isReturn) return cells;
-    for (const item of items ?? []) {
-      const line = returnStockQuery.data?.lines.find((l) => l.key === item.id);
-      if (!line) continue;
-      cells[item.id] = {
-        warehouseName: line.warehouseName,
-        available: line.available,
-        requested: returnStockQuantityOf(item, invoiceMode),
-      };
-    }
-    return cells;
-  }, [isReturn, items, invoiceMode, returnStockQuery.data]);
-  const returnStockBlocked =
+  const returnStockState = useMemo(
+    () => buildReturnStockCells(returnStockRequests, returnStockQuery.data?.lines),
+    [returnStockRequests, returnStockQuery.data],
+  );
+  const returnStockByItemId = useMemo<Record<string, ReturnStockCell>>(
+    () => (isReturn ? returnStockState.cells : {}),
+    [isReturn, returnStockState],
+  );
+  const returnStockBlocked = isReturn && isReturnStockBlocking(returnStockState);
+  const returnStockLoadFailed =
     isReturn &&
-    (Object.values(returnStockByItemId).some(isReturnStockBlocked) ||
-      (returnStockLines.length > 0 && returnStockQuery.isPending));
+    (returnStockQuery.isError || (returnStockQuery.isSuccess && returnStockState.incomplete));
 
   const invoiceTotal = useMemo(
     () => payloadTotal(buildProductsPayload(items ?? [], invoiceMode)),
@@ -304,11 +315,9 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
         const variantSuffix = product.selectedVariants?.length
           ? ` - ${product.selectedVariants.map((v) => v.option).join(' - ')}`
           : '';
-        const variantKey = product.selectedVariants?.length
-          ? product.selectedVariants.map((v) => v.option).join('_')
-          : '';
-        const uniqueId = variantKey
-          ? `${product.id}_${variantKey}`
+        const optionIds = (product.selectedVariants ?? []).map((v) => v.attributeOptionId);
+        const uniqueId = optionIds.length
+          ? variantKeyOf(product.id, optionIds)
           : `${product.id}_${Date.now()}`;
         append({
           id: uniqueId,
@@ -350,7 +359,10 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
   const onSubmit = useCallback(
     async (data: AddInvoiceFormData) => {
       setSubmitError(null);
-      if (returnStockBlocked) return;
+      if (returnStockBlocked) {
+        warnReturnBlocked();
+        return;
+      }
       const products = buildProductsPayload(data.items, invoiceMode);
       const totalAmount = payloadTotal(products);
       let resolvedPaymentAmount: number | undefined;
@@ -428,9 +440,7 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
           router.push('/dashboard/purchases/all-invoices');
         }, 2000);
       } catch (err: unknown) {
-        const outboundMessage = getOutboundShortageMessage(err);
-        if (outboundMessage !== null) {
-          toast.error(outboundMessage);
+        if (isReturn && reportReturnSubmitError(err)) {
           await invalidateAndWait(queryClient, [[QUERY_KEYS.SUPPLIER_RETURN_STOCK]]);
           return;
         }
@@ -459,6 +469,7 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
       partialAmount,
       invoiceMode,
       returnStockBlocked,
+      isReturn,
     ],
   );
 
@@ -548,6 +559,12 @@ function AddInvoiceForm({ initialInvoice }: AddInvoiceFormProps) {
           onChange={handleImageChange}
           error={errors.invoiceImage?.message as string}
         />
+
+        {returnStockLoadFailed && (
+          <div className="sm:px-8">
+            <ReturnStockLoadError onRetry={() => void returnStockQuery.refetch()} />
+          </div>
+        )}
 
         {submitError && (
           <p className="sm:px-8 text-red-500 text-sm">{submitError}</p>
