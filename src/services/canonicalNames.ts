@@ -281,7 +281,7 @@ const extendStatusWatch = () => {
 
 const latestAttemptOf = (status: LocationSourcesStatus) =>
   status.sources.reduce(
-    (latest, source) => Math.max(latest, Date.parse(source.lastAttemptAt) || 0),
+    (latest, source) => Math.max(latest, Date.parse(source.lastAttemptAt ?? '') || 0),
     0,
   );
 

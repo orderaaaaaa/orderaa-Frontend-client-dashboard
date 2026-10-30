@@ -75,6 +75,7 @@ function SourceRow({ source, canManage }: SourceRowProps) {
   const reason = failureReasonOf(source, t);
   const staleSince =
     source.lastSuccessAt !== null &&
+    source.lastAttemptAt !== null &&
     Date.parse(source.lastSuccessAt) < Date.parse(source.lastAttemptAt)
       ? source.lastSuccessAt
       : null;
@@ -115,7 +116,9 @@ function SourceRow({ source, canManage }: SourceRowProps) {
           : t('canonical.status.neverSucceeded')}
       </p>
       <p className="text-muted-foreground">
-        {t('canonical.status.lastAttempt', { date: formatDate(source.lastAttemptAt) })}
+        {source.lastAttemptAt
+          ? t('canonical.status.lastAttempt', { date: formatDate(source.lastAttemptAt) })
+          : t('canonical.sync.queued')}
       </p>
       <p className="text-muted-foreground">{counts}</p>
       {reason && <p className="text-destructive">{reason}</p>}

@@ -444,7 +444,7 @@ export interface LocationSourceRefreshResponse {
 
 export interface LocationSourceStatus {
   source: LocationSource;
-  lastAttemptAt: string;
+  lastAttemptAt: string | null;
   lastSuccessAt: string | null;
   lastErrorCode: LocationRefreshErrorCode | null;
   failedGovernorateKeys: string[];
