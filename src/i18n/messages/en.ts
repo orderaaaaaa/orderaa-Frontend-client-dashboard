@@ -121,6 +121,8 @@ const en: Record<keyof typeof ar, string> = {
     'Out of stock — {available} available, {required} required',
   'orderDetails.stock.blocked':
     'This order cannot be confirmed with this product — choose another one',
+  'orderDetails.stock.availableWarehouseNotSet':
+    'The available-stock warehouse is not set — contact the administration',
 
   'orderDetails.variants.title': 'Available in stock',
   'orderDetails.variants.blockedSelection':

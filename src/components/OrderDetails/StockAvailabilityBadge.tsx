@@ -27,25 +27,11 @@ export function StockAvailabilityBadge({ line }: Props) {
 
   if (!line) return null;
 
-  if (line.bypassed) {
+  if (line.available === null || line.availableWarehouse === null) {
     return (
-      <p className="flex items-center gap-1 text-sm text-gray-500">
-        <LiaBoxSolid className="size-4 shrink-0" />
-        <span>{t('orderDetails.stock.bypassed')}</span>
-      </p>
-    );
-  }
-
-  // No rule matched, so no stock will move for this line. The number is the
-  // cross-warehouse total, shown as information with no judgement attached —
-  // flagging it would warn about a movement that is not going to happen.
-  if (!line.movesStock) {
-    return (
-      <p className="flex items-center gap-1 text-sm text-gray-500">
-        <LiaBoxSolid className="size-4 shrink-0" />
-        <span>
-          {t('orderDetails.stock.available', { count: toStockNumber(line.available) })}
-        </span>
+      <p className="flex items-center gap-1 text-sm font-semibold text-red-600">
+        <LiaExclamationTriangleSolid className="size-4 shrink-0" />
+        <span>{t('orderDetails.stock.availableWarehouseNotSet')}</span>
       </p>
     );
   }

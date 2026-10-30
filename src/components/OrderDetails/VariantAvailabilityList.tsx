@@ -46,6 +46,8 @@ export function VariantAvailabilityList({ variants, selected }: Props) {
 
   if (variants.length === 0) return null;
 
+  const notSet = variants.some((variant) => variant.available === null);
+
   return (
     <div className="rounded-2xl border border-[#ECECEC] bg-white p-3" dir={dir}>
       <p className="mb-2 text-sm font-bold text-[#1F1F1F]">
@@ -54,7 +56,7 @@ export function VariantAvailabilityList({ variants, selected }: Props) {
       <div className="flex flex-wrap gap-2">
         {variants.map((variant) => {
           const isSelected = selected?.variantId === variant.variantId;
-          const unavailable = variant.available <= 0;
+          const unavailable = variant.available === null || variant.available <= 0;
 
           return (
             <span
@@ -83,17 +85,26 @@ export function VariantAvailabilityList({ variants, selected }: Props) {
                   <LiaBanSolid className="size-3.5 shrink-0" />
                 ))}
               <span>
-                {variant.variantLabel}: {formatStockNumber(variant.available)}
+                {variant.available === null
+                  ? variant.variantLabel
+                  : `${variant.variantLabel}: ${formatStockNumber(variant.available)}`}
               </span>
             </span>
           );
         })}
       </div>
 
-      {selected && !selected.selectable && (
+      {notSet ? (
         <p className="mt-2 text-xs font-semibold text-red-600">
-          {t('orderDetails.variants.blockedSelection')}
+          {t('orderDetails.stock.availableWarehouseNotSet')}
         </p>
+      ) : (
+        selected &&
+        !selected.selectable && (
+          <p className="mt-2 text-xs font-semibold text-red-600">
+            {t('orderDetails.variants.blockedSelection')}
+          </p>
+        )
       )}
     </div>
   );

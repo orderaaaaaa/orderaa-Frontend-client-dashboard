@@ -19,9 +19,17 @@ import {
  * return a plain string. Normalize both into something toastable.
  */
 export function getApiErrorMessage(err: unknown, fallback: string): string {
-  const message = (
-    err as { response?: { data?: { message?: string | string[] } } }
-  )?.response?.data?.message;
+  const data = (
+    err as {
+      response?: { data?: { code?: string; message?: string | string[] } };
+    }
+  )?.response?.data;
+
+  if (data?.code === 'AVAILABLE_WAREHOUSE_NOT_SET') {
+    return translate(readStoredLocale(), 'orderDetails.stock.availableWarehouseNotSet');
+  }
+
+  const message = data?.message;
 
   if (Array.isArray(message)) {
     return message.length > 0 ? message.join('\n') : fallback;

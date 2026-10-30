@@ -541,6 +541,12 @@ export const CONFIRM_MODES = {
 
 export type ConfirmMode = (typeof CONFIRM_MODES)[keyof typeof CONFIRM_MODES];
 
+export interface AvailableStockWarehouse {
+  kind: 'WAREHOUSE' | 'VIRTUAL';
+  id: number;
+  name: string;
+}
+
 export interface AvailabilityLine {
   orderProductId: number;
   variantId: number;
@@ -556,7 +562,8 @@ export interface AvailabilityLine {
   fromWarehouseId: number | null;
   /** the order's aggregated quantity for this variant, not this line's count */
   required: number;
-  available: number;
+  available: number | null;
+  availableWarehouse: AvailableStockWarehouse | null;
   shortfall: number;
   /**
    * false only when the move would genuinely fail. A shortage the rule permits
@@ -582,12 +589,15 @@ export interface OrderStockAvailability {
   lines: AvailabilityLine[];
   canConfirm: boolean;
   blockingLines: number[];
+  availableWarehouse: AvailableStockWarehouse | null;
+  availableWarehouseSet: boolean;
 }
 
 export interface VariantAvailability {
   variantId: number;
   variantLabel: string;
-  available: number;
+  available: number | null;
+  availableWarehouse: AvailableStockWarehouse | null;
   movesStock: boolean;
   fromWarehouseId: number | null;
   safe: boolean;

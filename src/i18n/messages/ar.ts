@@ -135,6 +135,7 @@ const ar = {
     'غير متوفر بالمخزون — المتاح {available} والمطلوب {required}',
   'orderDetails.stockTransition.sameStatus': 'في حالة {status}',
   'orderDetails.stock.blocked': 'لا يمكن تأكيد الطلب بهذا المنتج — اختر منتجًا آخر',
+  'orderDetails.stock.availableWarehouseNotSet': 'لم يتم تحديد مخزن المتاح — تواصل مع الإدارة',
 
   'orderDetails.variants.title': 'المتاح بالمخزون',
   'orderDetails.variants.blockedSelection':
