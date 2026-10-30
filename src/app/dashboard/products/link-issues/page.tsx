@@ -15,7 +15,7 @@ import { LookAlikeVariantsTab } from './components/LookAlikeVariantsTab';
 import { RetiredLinksTab } from './components/RetiredLinksTab';
 import { UnlinkedStoreItemsTab } from './components/UnlinkedStoreItemsTab';
 import { useLinkIssueCounts } from './hooks/useLinkIssues';
-import { useStoreNames } from './hooks/useStoreNames';
+import { useIntegrationConfigs } from './hooks/useIntegrationConfigs';
 
 const TAB = {
   DUPLICATES: 'duplicates',
@@ -31,7 +31,7 @@ export default function ProductLinkIssuesPage() {
   const canReadIntegrations = useHasPermissionStrict(PERMISSION_CODES.INTEGRATION_CONFIG_READ);
   const canManageIntegrations = useHasPermissionStrict(PERMISSION_CODES.INTEGRATION_CONFIG_MANAGE);
   const countsQuery = useLinkIssueCounts(canResolve);
-  const storeNameOf = useStoreNames(canReadIntegrations);
+  const canReadProducts = useHasPermissionStrict(PERMISSION_CODES.PRODUCTS_READ);
   const [activeTab, setActiveTab] = useState<string>(TAB.DUPLICATES);
   const [unlinkedTotal, setUnlinkedTotal] = useState<number | undefined>(undefined);
 
@@ -74,20 +74,21 @@ export default function ProductLinkIssuesPage() {
         </TabsList>
 
         <TabsContent value={TAB.DUPLICATES}>
-          <DuplicateProductsTab storeNameOf={storeNameOf} />
+          <DuplicateProductsTab />
         </TabsContent>
         <TabsContent value={TAB.LOOK_ALIKE}>
-          <LookAlikeVariantsTab storeNameOf={storeNameOf} />
+          <LookAlikeVariantsTab />
         </TabsContent>
         <TabsContent value={TAB.CONFLICTS}>
-          <LinkConflictsTab storeNameOf={storeNameOf} />
+          <LinkConflictsTab />
         </TabsContent>
         <TabsContent value={TAB.RETIRED}>
-          <RetiredLinksTab storeNameOf={storeNameOf} />
+          <RetiredLinksTab />
         </TabsContent>
         <TabsContent value={TAB.UNLINKED}>
           <UnlinkedStoreItemsTab
             canRead={canReadIntegrations}
+            canReadProducts={canReadProducts}
             canManage={canManageIntegrations}
             onTotalChange={setUnlinkedTotal}
           />

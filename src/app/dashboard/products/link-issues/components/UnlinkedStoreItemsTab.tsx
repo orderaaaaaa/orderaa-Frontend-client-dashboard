@@ -6,10 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/state-panels';
 import { useI18n } from '@/i18n/I18nProvider';
-import { useGetProducts } from '../../hooks/useProduct';
 import { useMergeProductDetails } from '../../hooks/useMergeProducts';
 import { variantDisplayLabel } from '../../utils/mergePlan';
-import { useIntegrationConfigs } from '../hooks/useStoreNames';
+import { useIntegrationConfigs } from '../hooks/useIntegrationConfigs';
 import {
   usePlanUnlinkedLinks,
   useSaveUnlinkedLinks,
@@ -23,11 +22,10 @@ import type {
 import { UNLINKED_SUGGESTION_KIND } from '../types/linkIssues';
 import { linkIssueErrorMessage, unlinkedMoveConflictOf } from '../utils/linkIssueErrors';
 import { ItemSelect } from './ItemSelect';
+import { ProductPicker } from './ProductPicker';
 import { IssuePreviewDialog } from './IssuePreviewDialog';
 import { IssueRowShell, providerLabel } from './LinkIssueParts';
 import { LinkIssueList, LINK_ISSUE_PAGE_LIMIT } from './LinkIssueList';
-
-const PRODUCT_OPTIONS_LIMIT = 100;
 
 interface Pick {
   productId: number;
@@ -71,13 +69,13 @@ function UnlinkedItemRow({
   item,
   pick,
   onPickChange,
-  productOptions,
+  canReadProducts,
   storeLabel,
 }: {
   item: UnlinkedStoreItem;
   pick: Pick | null;
   onPickChange: (pick: Pick | null) => void;
-  productOptions: { id: number; label: string }[];
+  canReadProducts: boolean;
   storeLabel: string;
 }) {
   const { t } = useI18n();
@@ -112,12 +110,14 @@ function UnlinkedItemRow({
         <span>{t(`linkIssues.unlinked.suggestion.${item.suggestion.kind}`)}</span>
       </div>
       <div className="grid gap-2 md:grid-cols-2">
-        <ItemSelect
-          value={pick?.productId ?? null}
-          options={productOptions}
-          placeholder={t('linkIssues.unlinked.pickProduct')}
-          ariaLabel={t('linkIssues.unlinked.pickProduct')}
-          onChange={(productId) => onPickChange({ productId, variantId: null })}
+        <ProductPicker
+          canRead={canReadProducts}
+          selected={
+            pick
+              ? { id: pick.productId, label: pickedProduct.details[0]?.name ?? `#${pick.productId}` }
+              : null
+          }
+          onSelect={(productId) => onPickChange({ productId, variantId: null })}
         />
         {item.externalVariantId !== null && (
           <ItemSelect
@@ -136,11 +136,17 @@ function UnlinkedItemRow({
 
 interface UnlinkedStoreItemsTabProps {
   canRead: boolean;
+  canReadProducts: boolean;
   canManage: boolean;
   onTotalChange: (total: number | undefined) => void;
 }
 
-export function UnlinkedStoreItemsTab({ canRead, canManage, onTotalChange }: UnlinkedStoreItemsTabProps) {
+export function UnlinkedStoreItemsTab({
+  canRead,
+  canReadProducts,
+  canManage,
+  onTotalChange,
+}: UnlinkedStoreItemsTabProps) {
   const { t } = useI18n();
   const configsQuery = useIntegrationConfigs(canRead);
   const configs = configsQuery.data ?? [];
@@ -150,10 +156,6 @@ export function UnlinkedStoreItemsTab({ canRead, canManage, onTotalChange }: Unl
   const [planState, setPlanState] = useState<PlanState | null>(null);
   const listQuery = useUnlinkedStoreItems(
     canRead && configId !== null ? { configId, page, limit: LINK_ISSUE_PAGE_LIMIT } : null,
-  );
-  const productsQuery = useGetProducts(
-    { page: 1, limit: PRODUCT_OPTIONS_LIMIT },
-    canRead && configId !== null,
   );
   const plan = usePlanUnlinkedLinks();
   const save = useSaveUnlinkedLinks();
@@ -167,10 +169,6 @@ export function UnlinkedStoreItemsTab({ canRead, canManage, onTotalChange }: Unl
   }, [configId, listQuery.data?.total, onTotalChange]);
 
   const items = useMemo(() => listQuery.data?.data ?? [], [listQuery.data]);
-  const productOptions = (productsQuery.data?.data ?? []).map((product) => ({
-    id: product.id,
-    label: product.name,
-  }));
 
   const entries = useMemo(() => {
     const collected = new Map<string, UnlinkedLinkEntry>();
@@ -295,7 +293,7 @@ export function UnlinkedStoreItemsTab({ canRead, canManage, onTotalChange }: Unl
               <UnlinkedItemRow
                 item={item}
                 pick={picks[item.issueKey] ? picks[item.issueKey].pick : suggestedPick(item)}
-                productOptions={productOptions}
+                canReadProducts={canReadProducts}
                 storeLabel={storeNameOfConfig(item.configId)}
                 onPickChange={(pick) =>
                   setPicks((previous) => ({ ...previous, [item.issueKey]: { item, pick } }))

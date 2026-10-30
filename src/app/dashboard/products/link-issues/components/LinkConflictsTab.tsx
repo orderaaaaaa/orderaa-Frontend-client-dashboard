@@ -17,11 +17,7 @@ import { IssuePreviewDialog } from './IssuePreviewDialog';
 import { IssueRowShell, VariantRefCard, providerLabel } from './LinkIssueParts';
 import { LinkIssueList, LINK_ISSUE_PAGE_LIMIT } from './LinkIssueList';
 
-interface LinkConflictsTabProps {
-  storeNameOf: (storeId: number | null) => string | null;
-}
-
-export function LinkConflictsTab({ storeNameOf }: LinkConflictsTabProps) {
+export function LinkConflictsTab() {
   const { t } = useI18n();
   const [page, setPage] = useState(1);
   const [conflictId, setConflictId] = useState<number | null>(null);
@@ -61,7 +57,12 @@ export function LinkConflictsTab({ storeNameOf }: LinkConflictsTabProps) {
           >
             <div className="flex flex-wrap items-center gap-2 text-sm text-gray-700">
               <Badge variant="outline">{providerLabel(issue.provider)}</Badge>
-              <span>{storeNameOf(issue.storeId) ?? t('linkIssues.common.storeUnknown')}</span>
+              <span>
+                {issue.existing.storeLinks.find((link) => link.storeId === issue.storeId)?.storeName ??
+                  (issue.storeId === null
+                    ? t('linkIssues.common.storeUnknown')
+                    : t('linkIssues.common.storeId', { storeId: issue.storeId }))}
+              </span>
               <span dir="ltr" className="font-mono text-xs">{issue.externalId}</span>
               <span className="text-xs text-gray-500" dir="ltr">
                 SKU: {issue.externalSku ?? t('linkIssues.common.noSku')}
@@ -74,8 +75,8 @@ export function LinkConflictsTab({ storeNameOf }: LinkConflictsTabProps) {
               </span>
             </div>
             <div className="flex flex-col gap-3 md:flex-row">
-              <VariantRefCard heading={t('linkIssues.conflicts.current')} variant={issue.existing} storeNameOf={storeNameOf} />
-              <VariantRefCard heading={t('linkIssues.conflicts.attempted')} variant={issue.attempted} storeNameOf={storeNameOf} />
+              <VariantRefCard heading={t('linkIssues.conflicts.current')} variant={issue.existing} />
+              <VariantRefCard heading={t('linkIssues.conflicts.attempted')} variant={issue.attempted} />
             </div>
           </IssueRowShell>
         )}
@@ -101,8 +102,8 @@ export function LinkConflictsTab({ storeNameOf }: LinkConflictsTabProps) {
               </p>
             )}
             <div className="flex flex-col gap-3 md:flex-row">
-              <VariantRefCard heading={t('linkIssues.conflicts.moveFrom')} variant={preview.moveFrom} storeNameOf={storeNameOf} />
-              <VariantRefCard heading={t('linkIssues.conflicts.moveTo')} variant={preview.moveTo} storeNameOf={storeNameOf} />
+              <VariantRefCard heading={t('linkIssues.conflicts.moveFrom')} variant={preview.moveFrom} />
+              <VariantRefCard heading={t('linkIssues.conflicts.moveTo')} variant={preview.moveTo} />
             </div>
             <div className="flex justify-start">
               <Button

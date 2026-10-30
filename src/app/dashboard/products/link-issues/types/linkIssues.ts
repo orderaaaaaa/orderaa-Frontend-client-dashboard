@@ -77,6 +77,7 @@ export interface LinkIssueCounts {
 export interface StoreLinkSummary {
   provider: IntegrationProvider;
   storeId: number | null;
+  storeName: string | null;
   externalId: string;
   externalSku: string | null;
 }

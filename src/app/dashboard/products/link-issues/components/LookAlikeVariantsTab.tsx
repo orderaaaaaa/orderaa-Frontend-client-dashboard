@@ -18,11 +18,7 @@ import { IssuePreviewDialog } from './IssuePreviewDialog';
 import { IssueRowShell, VariantRefCard } from './LinkIssueParts';
 import { LinkIssueList, LINK_ISSUE_PAGE_LIMIT } from './LinkIssueList';
 
-interface LookAlikeVariantsTabProps {
-  storeNameOf: (storeId: number | null) => string | null;
-}
-
-export function LookAlikeVariantsTab({ storeNameOf }: LookAlikeVariantsTabProps) {
+export function LookAlikeVariantsTab() {
   const { t } = useI18n();
   const [page, setPage] = useState(1);
   const [previewParams, setPreviewParams] = useState<LookAlikeVariantPreviewParams | null>(null);
@@ -97,8 +93,8 @@ export function LookAlikeVariantsTab({ storeNameOf }: LookAlikeVariantsTabProps)
               {t(issue.reason === 'SAME_LABEL' ? 'linkIssues.lookAlike.reason.SAME_LABEL' : 'linkIssues.lookAlike.reason.REPAIR_MERGE')}
             </Badge>
             <div className="flex flex-col gap-3 md:flex-row">
-              <VariantRefCard heading={t('linkIssues.lookAlike.mergedAway')} variant={issue.source} storeNameOf={storeNameOf} />
-              <VariantRefCard heading={t('linkIssues.lookAlike.kept')} variant={issue.target} storeNameOf={storeNameOf} />
+              <VariantRefCard heading={t('linkIssues.lookAlike.mergedAway')} variant={issue.source} />
+              <VariantRefCard heading={t('linkIssues.lookAlike.kept')} variant={issue.target} />
             </div>
           </IssueRowShell>
         )}
@@ -118,8 +114,8 @@ export function LookAlikeVariantsTab({ storeNameOf }: LookAlikeVariantsTabProps)
       >
         {preview && (
           <div className="flex flex-col gap-3 md:flex-row">
-            <VariantRefCard heading={t('linkIssues.lookAlike.mergedAway')} variant={preview.source} storeNameOf={storeNameOf} />
-            <VariantRefCard heading={t('linkIssues.lookAlike.kept')} variant={preview.target} storeNameOf={storeNameOf} />
+            <VariantRefCard heading={t('linkIssues.lookAlike.mergedAway')} variant={preview.source} />
+            <VariantRefCard heading={t('linkIssues.lookAlike.kept')} variant={preview.target} />
           </div>
         )}
       </IssuePreviewDialog>

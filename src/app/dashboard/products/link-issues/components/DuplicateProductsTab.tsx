@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
+import { useJobStore } from '@/store/useJobStore';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -15,11 +16,7 @@ import { CountsInline, IssueRowShell, StoreLinkBadges } from './LinkIssueParts';
 import { IssuePreviewDialog } from './IssuePreviewDialog';
 import { LinkIssueList, LINK_ISSUE_PAGE_LIMIT } from './LinkIssueList';
 
-interface DuplicateProductsTabProps {
-  storeNameOf: (storeId: number | null) => string | null;
-}
-
-export function DuplicateProductsTab({ storeNameOf }: DuplicateProductsTabProps) {
+export function DuplicateProductsTab() {
   const { t } = useI18n();
   const [page, setPage] = useState(1);
   const [previewParams, setPreviewParams] = useState<DuplicateProductPreviewParams | null>(null);
@@ -52,6 +49,12 @@ export function DuplicateProductsTab({ storeNameOf }: DuplicateProductsTabProps)
         targetProductId: preview.target.productId,
         variantPlan: preview.variantPlan,
         confirm: true,
+      });
+      useJobStore.getState().addJob({
+        jobId: result.jobId,
+        type: 'MERGE',
+        label: t('linkIssues.duplicates.jobLabel'),
+        variantLabels: Object.fromEntries(labelById),
       });
       toast.success(t('linkIssues.duplicates.queued', { jobId: result.jobId }));
       setPreviewParams(null);
@@ -122,7 +125,7 @@ export function DuplicateProductsTab({ storeNameOf }: DuplicateProductsTabProps)
                 <p className="text-xs text-gray-500" dir="ltr">
                   SKU: {issue.source.sku ?? t('linkIssues.common.noSku')}
                 </p>
-                <StoreLinkBadges links={issue.source.storeLinks} storeNameOf={storeNameOf} />
+                <StoreLinkBadges links={issue.source.storeLinks} />
               </div>
               <div className="space-y-1">
                 <p className="text-xs text-gray-500">{t('linkIssues.duplicates.ourProduct')}</p>

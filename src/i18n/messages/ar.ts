@@ -809,6 +809,11 @@ const ar = {
   "linkIssues.unlinked.suggestion.MATCHED": "مطابقة مقترحة",
   "linkIssues.unlinked.suggestion.NONE": "لا توجد مطابقة",
   "linkIssues.unlinked.summary": "روابط جديدة: {creates} — روابط سيتم نقلها: {moves}",
+  "linkIssues.duplicates.jobLabel": "دمج المنتجات المكررة",
+  "linkIssues.unlinked.productReadRequired": "تحتاج صلاحية عرض المنتجات لاختيار منتج من هنا",
+  "linkIssues.unlinked.productSearch": "ابحث باسم المنتج",
+  "linkIssues.unlinked.productSearchHint": "اكتب اسم المنتج لعرض النتائج",
+  "linkIssues.unlinked.searching": "جارٍ البحث...",
 } as const;
 
 export default ar;

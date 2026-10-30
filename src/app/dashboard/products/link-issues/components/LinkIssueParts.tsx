@@ -15,10 +15,9 @@ export const providerLabel = (provider: string): string =>
 
 interface StoreLinkBadgesProps {
   links: StoreLinkSummary[];
-  storeNameOf: (storeId: number | null) => string | null;
 }
 
-export function StoreLinkBadges({ links, storeNameOf }: StoreLinkBadgesProps) {
+export function StoreLinkBadges({ links }: StoreLinkBadgesProps) {
   const { t } = useI18n();
 
   if (links.length === 0) {
@@ -28,7 +27,7 @@ export function StoreLinkBadges({ links, storeNameOf }: StoreLinkBadgesProps) {
   return (
     <ul className="flex flex-wrap gap-2">
       {links.map((link) => {
-        const storeName = storeNameOf(link.storeId);
+        const storeName = link.storeName;
         return (
           <li
             key={`${link.provider}-${link.storeId ?? 'none'}-${link.externalId}`}
@@ -60,10 +59,9 @@ export function StoreLinkBadges({ links, storeNameOf }: StoreLinkBadgesProps) {
 interface VariantRefCardProps {
   heading: string;
   variant: LinkIssueVariantRef;
-  storeNameOf: (storeId: number | null) => string | null;
 }
 
-export function VariantRefCard({ heading, variant, storeNameOf }: VariantRefCardProps) {
+export function VariantRefCard({ heading, variant }: VariantRefCardProps) {
   const { t } = useI18n();
   return (
     <div className="flex-1 min-w-0 space-y-2 rounded-xl border border-gray-200 bg-white p-3">
@@ -80,7 +78,7 @@ export function VariantRefCard({ heading, variant, storeNameOf }: VariantRefCard
           storeLinks: variant.storeLinks.length,
         }}
       />
-      <StoreLinkBadges links={variant.storeLinks} storeNameOf={storeNameOf} />
+      <StoreLinkBadges links={variant.storeLinks} />
     </div>
   );
 }

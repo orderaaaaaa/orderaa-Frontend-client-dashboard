@@ -796,6 +796,11 @@ const en: Record<keyof typeof ar, string> = {
   "linkIssues.unlinked.suggestion.MATCHED": "Suggested match",
   "linkIssues.unlinked.suggestion.NONE": "No match",
   "linkIssues.unlinked.summary": "New links: {creates} — links to move: {moves}",
+  "linkIssues.duplicates.jobLabel": "Duplicate product merge",
+  "linkIssues.unlinked.productReadRequired": "You need product view permission to pick a product here",
+  "linkIssues.unlinked.productSearch": "Search by product name",
+  "linkIssues.unlinked.productSearchHint": "Type a product name to see matches",
+  "linkIssues.unlinked.searching": "Searching...",
 };
 
 export default en;

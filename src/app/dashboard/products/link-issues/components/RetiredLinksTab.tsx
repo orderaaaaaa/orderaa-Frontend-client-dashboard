@@ -16,17 +16,11 @@ import { IssueRowShell, VariantRefCard } from './LinkIssueParts';
 import { LinkIssueList, LINK_ISSUE_PAGE_LIMIT } from './LinkIssueList';
 import { toast } from 'react-toastify';
 
-interface RetiredLinksTabProps {
-  storeNameOf: (storeId: number | null) => string | null;
-}
-
 function RetiredLinkRow({
   issue,
-  storeNameOf,
   onPreview,
 }: {
   issue: RetiredLinkIssue;
-  storeNameOf: (storeId: number | null) => string | null;
   onPreview: (params: RetiredLinkPreviewParams) => void;
 }) {
   const { t } = useI18n();
@@ -52,7 +46,7 @@ function RetiredLinkRow({
         </Button>
       }
     >
-      <VariantRefCard heading={t('linkIssues.retired.retiredVariant')} variant={issue.variant} storeNameOf={storeNameOf} />
+      <VariantRefCard heading={t('linkIssues.retired.retiredVariant')} variant={issue.variant} />
       <div className="space-y-1">
         <p className="text-xs font-medium text-gray-500">{t('linkIssues.retired.target')}</p>
         <ItemSelect
@@ -68,7 +62,7 @@ function RetiredLinkRow({
   );
 }
 
-export function RetiredLinksTab({ storeNameOf }: RetiredLinksTabProps) {
+export function RetiredLinksTab() {
   const { t } = useI18n();
   const [page, setPage] = useState(1);
   const [previewParams, setPreviewParams] = useState<RetiredLinkPreviewParams | null>(null);
@@ -97,7 +91,7 @@ export function RetiredLinksTab({ storeNameOf }: RetiredLinksTabProps) {
         onPageChange={setPage}
         getKey={(issue) => issue.issueKey}
         renderItem={(issue) => (
-          <RetiredLinkRow issue={issue} storeNameOf={storeNameOf} onPreview={setPreviewParams} />
+          <RetiredLinkRow issue={issue} onPreview={setPreviewParams} />
         )}
       />
 
@@ -119,8 +113,8 @@ export function RetiredLinksTab({ storeNameOf }: RetiredLinksTabProps) {
               {t('linkIssues.retired.linksMoving', { count: preview.linksMoving })}
             </p>
             <div className="flex flex-col gap-3 md:flex-row">
-              <VariantRefCard heading={t('linkIssues.retired.retiredVariant')} variant={preview.variant} storeNameOf={storeNameOf} />
-              <VariantRefCard heading={t('linkIssues.retired.target')} variant={preview.target} storeNameOf={storeNameOf} />
+              <VariantRefCard heading={t('linkIssues.retired.retiredVariant')} variant={preview.variant} />
+              <VariantRefCard heading={t('linkIssues.retired.target')} variant={preview.target} />
             </div>
           </>
         )}
