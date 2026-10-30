@@ -32,7 +32,6 @@ export const CHANGE_COMPANY_TEXT = {
   colResult: 'النتيجة',
   noCompany: 'بدون شركة',
   pickRequired: 'اختر المحافظة والمدينة',
-  governorateListMissing: 'لا توجد قائمة محافظات لشركة {carrier} بعد.',
   sending: 'جاري الإرسال...',
   emptyRows: 'امسح طلباً لبدء تغيير شركة الشحن',
   duplicateScan: 'هذا الطلب تم مسحه مسبقاً',

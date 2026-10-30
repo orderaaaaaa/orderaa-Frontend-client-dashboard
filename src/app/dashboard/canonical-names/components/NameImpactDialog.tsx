@@ -13,6 +13,7 @@ import {
 import PaginationFooter from '@/components/ui/pagination-footer';
 import PageLoading from '@/components/ui/page-loading';
 import { ErrorState } from '@/components/ui/state-panels';
+import { useI18n } from '@/i18n/I18nProvider';
 import { isLocationDomain, useNameImpactQuery } from '@/services/canonicalNames';
 import type { CanonicalNameDomain } from '@/types/canonicalNames';
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
@@ -39,6 +40,7 @@ export default function NameImpactDialog({
 }: NameImpactDialogProps) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(50);
+  const { t } = useI18n();
   const impactQuery = useNameImpactQuery(domain, id, { page, limit }, true);
   const impact = impactQuery.data;
   const showError = impactQuery.isError && !impactQuery.isFetching;
@@ -67,7 +69,7 @@ export default function NameImpactDialog({
         {showError ? (
           <ErrorState
             error={impactQuery.error}
-            fallback="تعذر تحميل تأثير الإجراء."
+            fallback={t('canonical.impact.loadError')}
             onRetry={() => void impactQuery.refetch()}
           />
         ) : impactQuery.isLoading || retrying || !impact ? (

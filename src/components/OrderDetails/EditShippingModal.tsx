@@ -9,6 +9,7 @@ import {
   GovernorateSourceEmpty,
 } from '@/components/shipping/GovernorateListStatus';
 import { useShippingCompanies } from '@/hooks';
+import { useI18n } from '@/i18n/I18nProvider';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import {
@@ -57,12 +58,6 @@ export interface ShippingData {
   availableTo?: string;
   oldShipmentCancelledByHand?: boolean;
 }
-
-const SWITCH_MISSING_FIELD_LABELS: Record<ShippingSwitchMissingField, string> = {
-  governorate: 'المحافظة',
-  city: 'المدينة',
-  phone: 'رقم الهاتف',
-};
 
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 1);
 const PERIODS = [
@@ -168,6 +163,12 @@ export default function EditShippingModal({
   const [endPeriod, setEndPeriod] = useState<string | null>(initialToParsed.period);
 
   const { settings } = useMerchantSettings();
+  const { t } = useI18n();
+  const switchMissingFieldLabels: Record<ShippingSwitchMissingField, string> = {
+    governorate: t('canonical.shipping.governorateLabel'),
+    city: t('canonical.shipping.cityLabel'),
+    phone: t('canonical.shipping.phoneLabel'),
+  };
   const { shippingCompanies, isLoading: loadingShippingCompanies } = useShippingCompanies(isOpen);
   const canReadCanonicalNames = useHasPermission(PERMISSION_CODES.CANONICAL_NAMES_READ);
 
@@ -388,7 +389,7 @@ export default function EditShippingModal({
             />
             {switchMissingFields.length > 0 && (
               <p className="text-xs text-red-600">
-                لا يمكن تغيير شركة الشحن قبل إدخال: {switchMissingFields.map((field) => SWITCH_MISSING_FIELD_LABELS[field]).join('، ')}
+                لا يمكن تغيير شركة الشحن قبل إدخال: {switchMissingFields.map((field) => switchMissingFieldLabels[field]).join('، ')}
               </p>
             )}
             {attestedShipment && (
@@ -411,10 +412,10 @@ export default function EditShippingModal({
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="edit-shipping-governorate" className="font-bold text-[#1F1F1F]">المحافظة</label>
+            <label htmlFor="edit-shipping-governorate" className="font-bold text-[#1F1F1F]">{t('canonical.shipping.governorateLabel')}</label>
             <SearchableSelect
               id="edit-shipping-governorate"
-              aria-label="المحافظة"
+              aria-label={t('canonical.shipping.governorateLabel')}
               value={formData.governorateOption || ''}
               displayValue={governorateDisplay}
               onValueChange={handleGovernorateChange}
@@ -453,10 +454,10 @@ export default function EditShippingModal({
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="edit-shipping-city" className="font-bold text-[#1F1F1F]">المدينة</label>
+            <label htmlFor="edit-shipping-city" className="font-bold text-[#1F1F1F]">{t('canonical.shipping.cityLabel')}</label>
             <SearchableSelect
               id="edit-shipping-city"
-              aria-label="المدينة"
+              aria-label={t('canonical.shipping.cityLabel')}
               value={formData.cityOption || ''}
               displayValue={cityDisplay}
               onValueChange={handleCityChange}
@@ -466,15 +467,15 @@ export default function EditShippingModal({
                   ? 'اختر الشركة أولاً'
                   : !selectedGovernorateOption
                     ? 'اختر المحافظة أولاً'
-                    : 'اختر المدينة'
+                    : t('canonical.shipping.cityPlaceholder')
               }
-              searchPlaceholder="بحث عن منطقة..."
+              searchPlaceholder={t('canonical.shipping.citySearch')}
               emptyMessage={
                 selectedShippingCompanyId === null
                   ? 'اختر الشركة أولاً'
                   : !selectedGovernorateOption
                     ? 'اختر المحافظة أولاً'
-                    : 'لا توجد مناطق متاحة'
+                    : t('canonical.shipping.cityEmpty')
               }
               noResultsMessage="لا توجد نتائج للبحث"
               triggerClassName="w-full border-[#CED4DA] rounded-lg h-12"
@@ -484,7 +485,7 @@ export default function EditShippingModal({
             />
             {citiesQuery.isError && (
               <p className="text-xs text-red-500">
-                {locationOptionsErrorTextOf(citiesQuery.error, 'تعذر تحميل المدن')}
+                {locationOptionsErrorTextOf(citiesQuery.error, t('canonical.shipping.cityLoadError'))}
               </p>
             )}
             {storedCityText && !formData.cityOption && (

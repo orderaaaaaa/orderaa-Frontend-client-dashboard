@@ -8,6 +8,7 @@ import {
   GovernorateCanonicalLink,
   GovernorateListError,
 } from '@/components/shipping/GovernorateListStatus';
+import { useI18n } from '@/i18n/I18nProvider';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
 import type { LocationOption, LocationOptionsResponse } from '@/types/locationOptions';
@@ -56,6 +57,7 @@ export function ChangeCompanyRow({
 }: ChangeCompanyRowProps) {
   const orderId = row.order.id;
   const governorateOption = row.picks.governorateOption;
+  const { t } = useI18n();
   const canReadCanonicalNames = useHasPermission(PERMISSION_CODES.CANONICAL_NAMES_READ);
   const governorateSourceEmpty = governorateQuery.data?.sourceHasRows === false;
   const governorateItems = governorateOptions.map((option) => ({
@@ -91,7 +93,7 @@ export function ChangeCompanyRow({
       disabled={governorateDisabled}
       emptyMessage={
         governorateSourceEmpty
-          ? CHANGE_COMPANY_TEXT.governorateListMissing.replace('{carrier}', targetName)
+          ? t('canonical.shipping.noListCarrier', { carrier: targetName })
           : undefined
       }
       portal

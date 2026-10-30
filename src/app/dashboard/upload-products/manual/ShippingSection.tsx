@@ -4,6 +4,7 @@ import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import Input from '@/components/ui/Input';
+import { useI18n } from '@/i18n/I18nProvider';
 import {
   GovernorateListError,
   GovernorateSourceEmpty,
@@ -44,6 +45,7 @@ function ShippingSection({
   onReturnShipmentContentChange,
   errors,
 }: ShippingSectionProps) {
+  const { t } = useI18n();
   const { shippingCompanies, isLoading: loadingShippingCompanies } =
     useShippingCompanies(true);
   const canReadCanonicalNames = useHasPermission(PERMISSION_CODES.CANONICAL_NAMES_READ);
@@ -165,7 +167,7 @@ function ShippingSection({
                 !selectedCompanyId
                   ? 'اختر شركة الشحن أولاً'
                   : noGovernorateList
-                    ? 'لا توجد قائمة محافظات لهذه الشركة بعد'
+                    ? t('canonical.shipping.noList')
                     : 'لا توجد محافظات متاحة'
               }
               noResultsMessage="لا توجد نتائج للبحث"
@@ -220,7 +222,7 @@ function ShippingSection({
             />
             {citiesQuery.isError && (
               <p className="text-xs text-red-500">
-                {locationOptionsErrorTextOf(citiesQuery.error, 'تعذر تحميل المدن')}
+                {locationOptionsErrorTextOf(citiesQuery.error, t('canonical.shipping.cityLoadError'))}
               </p>
             )}
             {errors?.cityOption && (

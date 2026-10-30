@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/i18n/I18nProvider';
 import {
   LOCATION_OPTION_ERROR_CODES,
   locationOptionErrorCodeOf,
@@ -11,15 +12,16 @@ import {
 export const CANONICAL_GOVERNORATES_HREF = '/dashboard/canonical-names/governorates';
 
 export function GovernorateCanonicalLink() {
+  const { t } = useI18n();
   return (
     <div className="flex flex-col items-start gap-1">
       <Button asChild variant="outline" size="sm">
         <Link href={CANONICAL_GOVERNORATES_HREF} target="_blank" rel="noopener">
-          افتح صفحة المحافظات الموحدة
+          {t('canonical.shipping.openPage')}
         </Link>
       </Button>
       <p className="text-xs text-muted-foreground">
-        تفتح في نافذة جديدة. بياناتك في هذا النموذج لن تتغير.
+        {t('canonical.shipping.openPageHint')}
       </p>
     </div>
   );
@@ -30,19 +32,17 @@ interface GovernorateSourceEmptyProps {
 }
 
 export function GovernorateSourceEmpty({ canRead }: GovernorateSourceEmptyProps) {
+  const { t } = useI18n();
   return (
     <div className="flex flex-col gap-2 text-xs text-muted-foreground">
-      <p>لا توجد قائمة محافظات لهذه الشركة بعد.</p>
+      <p>{t('canonical.shipping.noList')}</p>
       {canRead ? (
         <>
-          <p>
-            تُحدَّث القائمة تلقائيا مرة يوميا. إن كانت لديك صلاحية، افتح صفحة المحافظات
-            الموحدة للتحقق منها.
-          </p>
+          <p>{t('canonical.shipping.noListHelp')}</p>
           <GovernorateCanonicalLink />
         </>
       ) : (
-        <p>اطلب من مسؤول الحساب التحقق من قائمة المحافظات لهذه الشركة.</p>
+        <p>{t('canonical.shipping.askAdmin')}</p>
       )}
     </div>
   );
@@ -54,15 +54,17 @@ interface GovernorateListErrorProps {
 }
 
 export function GovernorateListError({ error, onRetry }: GovernorateListErrorProps) {
-  const canRetry = locationOptionErrorCodeOf(error) !== LOCATION_OPTION_ERROR_CODES.PROVIDER_NOT_SUPPORTED;
+  const { t } = useI18n();
+  const canRetry =
+    locationOptionErrorCodeOf(error) !== LOCATION_OPTION_ERROR_CODES.PROVIDER_NOT_SUPPORTED;
   return (
     <div className="flex flex-col items-start gap-2">
       <p className="text-xs text-destructive">
-        {locationOptionsErrorTextOf(error, 'تعذر تحميل المحافظات لهذه الشركة.')}
+        {locationOptionsErrorTextOf(error, t('canonical.shipping.loadError'))}
       </p>
       {canRetry && (
         <Button type="button" variant="outline" size="sm" onClick={onRetry}>
-          إعادة المحاولة
+          {t('common.retry')}
         </Button>
       )}
     </div>
