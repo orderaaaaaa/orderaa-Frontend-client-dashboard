@@ -15,9 +15,9 @@ export type ShortageRenderLine = Pick<
   'variantId' | 'productName' | 'variantLabel' | 'required' | 'available'
 > & { warehouseName?: string };
 
-export interface InsufficientStockBody<Code extends string = 'INSUFFICIENT_STOCK_FOR_VARIANT'> {
+export interface InsufficientStockBody {
   statusCode: number;
-  code: Code;
+  code: 'INSUFFICIENT_STOCK_FOR_VARIANT';
   message: string;
   warehouseId: number;
   warehouseName: string;
@@ -25,7 +25,19 @@ export interface InsufficientStockBody<Code extends string = 'INSUFFICIENT_STOCK
   orderCode?: string;
 }
 
-export type OutboundInsufficientStockBody = InsufficientStockBody<typeof OUTBOUND_INSUFFICIENT_STOCK_CODE>;
+export interface OutboundShortageLineApi extends Omit<ShortageLineApi, 'variantId'> {
+  variantId: number | null;
+}
+
+export interface OutboundInsufficientStockBody {
+  statusCode: number;
+  code: typeof OUTBOUND_INSUFFICIENT_STOCK_CODE;
+  message: string;
+  warehouseId: number;
+  warehouseName: string;
+  lines: OutboundShortageLineApi[];
+  orderCode?: string;
+}
 
 export interface BatchShortageOrder {
   orderCode: string;

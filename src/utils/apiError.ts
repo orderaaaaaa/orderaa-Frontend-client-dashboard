@@ -5,7 +5,7 @@ import {
   OUTBOUND_INSUFFICIENT_STOCK_CODE,
   type BatchShortageOrder,
   type OutboundInsufficientStockBody,
-  type ShortageLineApi,
+  type OutboundShortageLineApi,
   type ShortageRenderLine,
 } from '@/lib/api/stockShortage';
 import {
@@ -34,8 +34,12 @@ export function getApiErrorStatus(err: unknown): number | undefined {
   return (err as { response?: { status?: number } })?.response?.status;
 }
 
-function shortageLineLabel(line: Pick<ShortageLineApi, 'productName' | 'variantLabel'>): string {
-  return line.variantLabel ? `${line.productName} - ${line.variantLabel}` : line.productName;
+function shortageLineLabel(
+  line: Pick<OutboundShortageLineApi, 'productName' | 'variantId' | 'variantLabel'>
+): string {
+  return line.variantId !== null && line.variantLabel
+    ? `${line.productName} - ${line.variantLabel}`
+    : line.productName;
 }
 
 export function getOutboundShortageLines(err: unknown): string[] | null {
