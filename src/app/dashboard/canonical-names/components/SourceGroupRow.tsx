@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { GripVertical } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -36,32 +36,9 @@ import type {
   SourceRow,
 } from '@/types/canonicalNames';
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
+import { VisualizedSpelling } from '@/components/entity-manager/VisualizedSpelling';
 import { locationSourceLabel } from '../utils/locationSourceLabel';
 import CandidatesPopover from './CandidatesPopover';
-
-export function VisualizedSpelling({ text }: { text: string }) {
-  const leadingMatch = text.match(/^\s+/);
-  const trailingMatch = text.match(/\s+$/);
-  const leading = leadingMatch?.[0] ?? '';
-  const trailing = trailingMatch?.[0] ?? '';
-  const core = text.slice(leading.length, text.length - trailing.length);
-
-  return (
-    <span dir="rtl" className="whitespace-pre">
-      {leading && (
-        <span className="text-gray-400" aria-hidden>
-          {'·'.repeat(leading.length)}
-        </span>
-      )}
-      {core || <Fragment>&nbsp;</Fragment>}
-      {trailing && (
-        <span className="text-gray-400" aria-hidden>
-          {'·'.repeat(trailing.length)}
-        </span>
-      )}
-    </span>
-  );
-}
 
 const stateBadge = (group: SourceGroup, isLocation: boolean) => {
   if (isLocation && group.sourceRows.every((row) => row.canonicalNameId === null)) {

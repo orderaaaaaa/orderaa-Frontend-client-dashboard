@@ -14,7 +14,7 @@ import PageLoading from '@/components/ui/page-loading';
 import { useGroupMembersQuery } from '@/services/canonicalNames';
 import type { CanonicalNameDomain } from '@/types/canonicalNames';
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
-import { VisualizedSpelling } from './SourceGroupRow';
+import { VisualizedSpelling } from '@/components/entity-manager/VisualizedSpelling';
 
 interface GroupMembersDrawerProps {
   domain: CanonicalNameDomain;

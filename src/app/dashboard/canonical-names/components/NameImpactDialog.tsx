@@ -17,7 +17,7 @@ import { useI18n } from '@/i18n/I18nProvider';
 import { isLocationDomain, useNameImpactQuery } from '@/services/canonicalNames';
 import type { CanonicalNameDomain } from '@/types/canonicalNames';
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
-import { VisualizedSpelling } from './SourceGroupRow';
+import { VisualizedSpelling } from '@/components/entity-manager/VisualizedSpelling';
 
 interface NameImpactDialogProps {
   domain: CanonicalNameDomain;

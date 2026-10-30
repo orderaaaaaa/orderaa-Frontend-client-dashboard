@@ -38,7 +38,7 @@ import {
 } from '../utils/locationSuggestions';
 import { locationSourceLabel } from '../utils/locationSourceLabel';
 import ScopeSelector from './ScopeSelector';
-import { VisualizedSpelling } from './SourceGroupRow';
+import { VisualizedSpelling } from '@/components/entity-manager/VisualizedSpelling';
 
 const UNAVAILABLE_LABEL = 'غير متاح، ابحث عنه في القائمة';
 

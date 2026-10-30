@@ -10,7 +10,7 @@ import { useSourceGroupsQuery } from '@/services/canonicalNames';
 import type { UnscopedParent } from '@/types/canonicalNames';
 import { CANONICAL_NAME_DOMAINS } from '@/types/canonicalNames';
 import { locationSourceLabel } from '../utils/locationSourceLabel';
-import { VisualizedSpelling } from './SourceGroupRow';
+import { VisualizedSpelling } from '@/components/entity-manager/VisualizedSpelling';
 
 interface UnscopedParentCitiesProps {
   scopeId: number;
