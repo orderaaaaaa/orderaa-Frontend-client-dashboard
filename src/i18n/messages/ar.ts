@@ -796,6 +796,7 @@ const ar = {
   'linkIssues.unlinked.noPermission': 'تحتاج صلاحية إعدادات التكامل لعرض المنتجات غير المربوطة وحفظ الروابط',
   'linkIssues.unlinked.pickProduct': 'اختر المنتج',
   'linkIssues.unlinked.pickVariant': 'اختر الصنف',
+  'linkIssues.unlinked.variantRequired': 'اختر الصنف لربط هذا العنصر',
   'linkIssues.unlinked.previewTitle': 'معاينة الربط',
   'linkIssues.unlinked.readOnly': 'لديك صلاحية العرض فقط، لا يمكن حفظ الروابط',
   'linkIssues.unlinked.save': 'حفظ الروابط',

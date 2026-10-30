@@ -138,6 +138,9 @@ function UnlinkedItemRow({
           />
         )}
       </div>
+      {item.externalVariantId !== null && pick !== null && pick.variantId === null && (
+        <p className="text-xs text-amber-700">{t('linkIssues.unlinked.variantRequired')}</p>
+      )}
     </IssueRowShell>
   );
 }
@@ -243,6 +246,7 @@ function UnlinkedStoreItemsContent({
     } catch (error) {
       const data = responseDataOf(error);
       if (isStoreLinkMoveConfirmationBody(data)) {
+        setPlanState(null);
         setMoveConfirm({ configId: selectedConfigId, links, moves: data.moves });
         return;
       }

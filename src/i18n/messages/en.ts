@@ -783,6 +783,7 @@ const en: Record<keyof typeof ar, string> = {
   'linkIssues.unlinked.noPermission': 'You need integration settings permission to view unlinked products and save links',
   'linkIssues.unlinked.pickProduct': 'Choose product',
   'linkIssues.unlinked.pickVariant': 'Choose variant',
+  'linkIssues.unlinked.variantRequired': 'Choose a variant to link this item',
   'linkIssues.unlinked.previewTitle': 'Link preview',
   'linkIssues.unlinked.readOnly': 'View only: you cannot save links',
   'linkIssues.unlinked.save': 'Save links',
