@@ -7,7 +7,7 @@ import { LinkCombobox } from '@/components/entity-manager/LinkCombobox';
 import type { LinkTarget } from '@/components/entity-manager/types';
 import { useI18n } from '@/i18n/I18nProvider';
 import { pluralAr } from '@/i18n/pluralAr';
-import type { CanonicalNameDomain, LinkItem } from '@/types/canonicalNames';
+import type { CanonicalNameDomain, LinkItem, SourceGroup } from '@/types/canonicalNames';
 import { CANONICAL_DOMAIN_CONFIGS } from '../config/domainConfigs';
 import { linkFieldsOf, namesGroup } from '../utils/linkOptions';
 import type { ReviewBulkContext } from './ReviewQueue';
@@ -20,9 +20,17 @@ export interface QueueBulkBarProps {
   names: GroupRowNames;
   context: ReviewBulkContext;
   onLink: (items: LinkItem[], rows: LinkContextRow[], onLinked: () => void) => void;
+  onAcceptSelected?: (groups: SourceGroup[]) => void;
 }
 
-export function QueueBulkBar({ domain, canManage, names, context, onLink }: QueueBulkBarProps) {
+export function QueueBulkBar({
+  domain,
+  canManage,
+  names,
+  context,
+  onLink,
+  onAcceptSelected,
+}: QueueBulkBarProps) {
   const { t } = useI18n();
   const config = CANONICAL_DOMAIN_CONFIGS[domain];
   const [pending, setPending] = useState<LinkTarget | null>(null);
@@ -66,6 +74,14 @@ export function QueueBulkBar({ domain, canManage, names, context, onLink }: Queu
         onSelectPage={context.onSelectPage}
         onClear={context.onClearSelection}
         bulkLink={bulkCombobox ? { combobox: bulkCombobox } : undefined}
+        acceptSuggestions={
+          onAcceptSelected && count > 0
+            ? {
+                count,
+                onClick: () => onAcceptSelected(selected.map((row) => row.group)),
+              }
+            : undefined
+        }
       />
       {pending !== null && (
         <ConfirmImpactDialog

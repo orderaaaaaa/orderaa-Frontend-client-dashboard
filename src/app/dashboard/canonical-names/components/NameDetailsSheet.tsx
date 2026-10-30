@@ -18,6 +18,7 @@ import type {
 } from '@/components/entity-manager/types';
 import { VisualizedSpelling } from '@/components/entity-manager/VisualizedSpelling';
 import { isRowNotFoundError } from '@/app/dashboard/canonical-names/utils/linkFeedback';
+import { canonicalNameErrorMessage } from '@/app/dashboard/canonical-names/utils/canonicalNameErrors';
 import { useI18n } from '@/i18n/I18nProvider';
 import { pluralAr } from '@/i18n/pluralAr';
 import {
@@ -226,6 +227,7 @@ function NameDetailsContent({
     } catch (err) {
       setConfirmError(
         reportWriteError(err, (error) =>
+          canonicalNameErrorMessage(error, { name: pendingName }) ??
           getApiErrorMessage(error, t('canonical.errors.generic')),
         ),
       );

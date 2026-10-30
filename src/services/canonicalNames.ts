@@ -210,9 +210,6 @@ export const useCreateCanonicalName = (domain: CanonicalNameDomain) => {
       await invalidateDomainQueries(queryClient, domain);
       toast.success('تم إنشاء الاسم الموحد');
     },
-    onError: (err: unknown) => {
-      toast.error(getApiErrorMessage(err, 'تعذر إنشاء الاسم الموحد'));
-    },
   });
 };
 

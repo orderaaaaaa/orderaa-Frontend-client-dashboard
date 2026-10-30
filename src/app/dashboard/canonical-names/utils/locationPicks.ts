@@ -49,6 +49,10 @@ export function pickedRowIds(picks: SourcePicks): number[] {
   );
 }
 
+export function locationPicksOf(group: SourceGroup): number[] {
+  return pickedRowIds(prePickFor(group));
+}
+
 export function useLocationPicks(group: SourceGroup) {
   const [manual, setManual] = useState<SourcePicks | null>(null);
   const picks = manual ?? prePickFor(group);

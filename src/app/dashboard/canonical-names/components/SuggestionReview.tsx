@@ -77,6 +77,7 @@ interface SuggestionReviewProps {
   onOpenChange: (open: boolean) => void;
   domain: CanonicalNameDomain;
   initialScopeId?: number;
+  onlyNormalizedTexts?: string[];
 }
 
 export function SuggestionReview({
@@ -84,6 +85,7 @@ export function SuggestionReview({
   onOpenChange,
   domain,
   initialScopeId,
+  onlyNormalizedTexts,
 }: SuggestionReviewProps) {
   const { t } = useI18n();
   const queryClient = useQueryClient();
@@ -127,7 +129,21 @@ export function SuggestionReview({
     [isLocation, isCity, groups.groupsByText],
   );
 
-  const result = suggest.data;
+  const result = useMemo(() => {
+    const data = suggest.data;
+    if (!data || !onlyNormalizedTexts) return data;
+    const only = new Set(onlyNormalizedTexts);
+    return {
+      ...data,
+      proposedLinks: data.proposedLinks.filter((link) => only.has(link.normalizedText)),
+      proposedNames: data.proposedNames.flatMap((cluster) => {
+        const members = cluster.members.filter((member) => only.has(member.normalizedText));
+        return members.length > 0 ? [{ ...cluster, members }] : [];
+      }),
+      ambiguous: 0,
+      unmatched: 0,
+    };
+  }, [suggest.data, onlyNormalizedTexts]);
   const listReady = !!result && (!isLocation || (!groups.loading && !groups.error));
 
   const plan = useMemo(

@@ -10,12 +10,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import Input from '@/components/ui/Input';
+import { useI18n } from '@/i18n/I18nProvider';
 
 interface NameFormDialogProps {
   mode: 'create' | 'rename';
   initialName?: string;
   existingNames?: string[];
   submitting?: boolean;
+  submitError?: string | null;
   onSubmit: (name: string) => void;
   onClose: () => void;
 }
@@ -30,9 +32,11 @@ export default function NameFormDialog({
   initialName,
   existingNames = [],
   submitting,
+  submitError,
   onSubmit,
   onClose,
 }: NameFormDialogProps) {
+  const { t } = useI18n();
   const [name, setName] = useState(initialName ?? '');
   const [touched, setTouched] = useState(false);
   const trimmed = name.trim();
@@ -41,12 +45,12 @@ export default function NameFormDialog({
     existingNames.some((existing) => comparable(existing) === comparable(trimmed));
   const unchanged =
     mode === 'rename' && initialName !== undefined && trimmed === initialName.trim();
-  const error = !touched
+  const fieldError = !touched
     ? undefined
     : trimmed.length === 0
-      ? 'الاسم مطلوب'
+      ? t('canonical.name.required')
       : duplicate
-        ? 'يوجد اسم موحد بنفس الاسم'
+        ? t('canonical.name.duplicate')
         : undefined;
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -62,18 +66,20 @@ export default function NameFormDialog({
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
           <DialogHeader>
             <DialogTitle>
-              {mode === 'create' ? 'إضافة اسم موحد' : 'إعادة تسمية'}
+              {mode === 'create'
+                ? t('canonical.name.create.title')
+                : t('canonical.name.rename.title', { name: initialName ?? '' })}
             </DialogTitle>
           </DialogHeader>
           <Input
             id="canonical-name-input"
-            label="الاسم"
+            label={t('canonical.name.label')}
             value={name}
             onChange={(e) => {
               setName(e.target.value);
               setTouched(true);
             }}
-            error={error}
+            error={fieldError}
             maxLength={NAME_MAX_LENGTH}
             autoFocus
           />
@@ -82,16 +88,21 @@ export default function NameFormDialog({
               {name.length}/{NAME_MAX_LENGTH}
             </p>
           )}
+          {submitError && (
+            <p role="alert" className="text-sm text-destructive">
+              {submitError}
+            </p>
+          )}
           <DialogFooter>
             <Button type="button" variant="outline" className="min-h-10" onClick={onClose}>
-              إلغاء
+              {t('canonical.action.cancel')}
             </Button>
             <Button
               type="submit"
               className="min-h-10"
               disabled={!trimmed || duplicate || unchanged || submitting}
             >
-              {mode === 'create' ? 'إضافة' : 'متابعة'}
+              {mode === 'create' ? t('canonical.shell.createName') : t('canonical.action.continueToImpact')}
             </Button>
           </DialogFooter>
         </form>

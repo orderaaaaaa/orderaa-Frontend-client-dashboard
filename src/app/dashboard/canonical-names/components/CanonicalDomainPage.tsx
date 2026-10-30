@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, type ReactNode } from 'react';
+import { Suspense, useState } from 'react';
 import { ConfirmImpactDialog } from '@/components/entity-manager/ConfirmImpactDialog';
 import type { ReviewRowState } from '@/components/entity-manager/ReviewListCore';
 import { PartialSuccessNotice, QueueSkeleton } from '@/components/entity-manager/StateViews';
@@ -14,15 +14,20 @@ import {
   useLocationSourcesStatus,
   useRefreshLocationSources,
   useRenameCanonicalName,
+  useSourceGroupsQuery,
 } from '@/services/canonicalNames';
 import type {
   CanonicalNameDomain,
   LinkItem,
+  NameImpactAlias,
   SourceGroup,
   SourceRow,
   UnscopedParent,
 } from '@/types/canonicalNames';
+import { getApiErrorMessage } from '@/utils/apiError';
 import { CANONICAL_DOMAIN_CONFIGS } from '../config/domainConfigs';
+import { canonicalNameErrorMessage } from '../utils/canonicalNameErrors';
+import { locationPicksOf } from '../utils/locationPicks';
 import { useApplyLinksInChunks } from '../utils/useApplyLinksInChunks';
 import { useQueueUrlState } from '../utils/queueUrlState';
 import { locationSourceLabel } from '../utils/locationSourceLabel';
@@ -34,6 +39,7 @@ import GroupMembersDrawer from './GroupMembersDrawer';
 import UnscopedParentsPanel from './UnscopedParentsPanel';
 import ScopeSelector from './ScopeSelector';
 import LocationSourcesStatusStrip from './LocationSourcesStatusStrip';
+import { SuggestionReview } from './SuggestionReview';
 import {
   LinkContextWarning,
   describeLinkGroup,
@@ -53,11 +59,6 @@ import {
 export interface CanonicalDomainPageProps {
   domain: CanonicalNameDomain;
   initialSearch?: string;
-  renderSuggestionReview?: (props: {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    initialScopeId?: number;
-  }) => ReactNode;
 }
 
 interface UnlinkTarget {
@@ -65,7 +66,12 @@ interface UnlinkTarget {
   row: SourceRow;
 }
 
-function CanonicalDomainContent({ domain, initialSearch, renderSuggestionReview }: CanonicalDomainPageProps) {
+interface ReviewState {
+  open: boolean;
+  only?: string[];
+}
+
+function CanonicalDomainContent({ domain, initialSearch }: CanonicalDomainPageProps) {
   const { t } = useI18n();
   const config = CANONICAL_DOMAIN_CONFIGS[domain];
   const canRead = useHasPermission(config.permissions.read);
@@ -89,12 +95,15 @@ function CanonicalDomainContent({ domain, initialSearch, renderSuggestionReview 
   const [selectedNameId, setSelectedNameId] = useState<number | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
-  const [reviewOpen, setReviewOpen] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [review, setReview] = useState<ReviewState>({ open: false });
   const [warning, setWarning] = useState<LinkWarningState | null>(null);
   const [unlinkTarget, setUnlinkTarget] = useState<UnlinkTarget | null>(null);
+  const [aliasTarget, setAliasTarget] = useState<NameImpactAlias | null>(null);
   const [membersOf, setMembersOf] = useState<SourceGroup | null>(null);
 
   const selectedName = names.data?.find((name) => name.id === selectedNameId) ?? null;
+  const detailsVisible = detailsOpen && selectedName !== null;
 
   const createName = useCreateCanonicalName(domain);
   const renameName = useRenameCanonicalName(domain);
@@ -102,6 +111,15 @@ function CanonicalDomainContent({ domain, initialSearch, renderSuggestionReview 
   const { applyLinks, partial, retryPartial } = useApplyLinksInChunks(domain);
   const statusQuery = useLocationSourcesStatus(isLocation && canRead);
   const refreshSources = useRefreshLocationSources();
+
+  const unlinkedQuery = useSourceGroupsQuery(
+    domain,
+    { scopeId: scopeId ?? undefined, state: 'unlinked', page: 1, limit: 500 },
+    detailsVisible && canManage && !gated,
+  );
+  const unlinkedGroups = (unlinkedQuery.data?.data ?? []).filter(
+    (group) => !isLocation || locationPicksOf(group).length > 0,
+  );
 
   const requestLink = (items: LinkItem[], rows: LinkContextRow[], onLinked?: () => void) => {
     if (config.warnMultiContext && multiContextRows(rows).length > 0) {
@@ -122,6 +140,26 @@ function CanonicalDomainContent({ domain, initialSearch, renderSuggestionReview 
     setUnlinkTarget(null);
     await applyLinks({ items: [{ scopeId: group.scopeId, rowIds: [row.id], unlink: true }] });
   };
+
+  const confirmAliasUnlink = async () => {
+    if (aliasTarget === null) return;
+    const alias = aliasTarget;
+    setAliasTarget(null);
+    await applyLinks({
+      items: [{ scopeId: scopeId ?? 0, normalizedText: alias.normalizedText, unlink: true }],
+    });
+  };
+
+  const addSynonym = async (group: SourceGroup) => {
+    if (selectedName === null) return;
+    const item: LinkItem = isLocation
+      ? { scopeId: group.scopeId, rowIds: locationPicksOf(group), canonicalNameId: selectedName.id }
+      : { scopeId: group.scopeId, normalizedText: group.normalizedText, canonicalNameId: selectedName.id };
+    requestLink([item], [describeLinkGroup(group)]);
+  };
+
+  const acceptSelected = (groups: SourceGroup[]) =>
+    setReview({ open: true, only: [...new Set(groups.map((group) => group.normalizedText))] });
 
   const rowActions: GroupRowActions = {
     link: requestLink,
@@ -148,6 +186,7 @@ function CanonicalDomainContent({ domain, initialSearch, renderSuggestionReview 
       names={names}
       context={context}
       onLink={requestLink}
+      onAcceptSelected={isLocation ? acceptSelected : undefined}
     />
   );
 
@@ -182,12 +221,32 @@ function CanonicalDomainContent({ domain, initialSearch, renderSuggestionReview 
     : undefined;
 
   const createAction = {
-    onClick: () => setCreateOpen(true),
+    onClick: () => {
+      setCreateError(null);
+      setCreateOpen(true);
+    },
     disabled: gated,
     disabledReason: gated ? t('canonical.queue.scope.gate') : undefined,
   };
 
-  const review = renderSuggestionReview ? { onClick: () => setReviewOpen(true) } : undefined;
+  const reviewAction = config.actions.suggest
+    ? { onClick: () => setReview({ open: true }) }
+    : undefined;
+
+  const submitCreate = (name: string) => {
+    setCreateError(null);
+    createName.mutate(
+      { name, parentId: config.hasScope && scopeId !== null ? scopeId : undefined },
+      {
+        onSuccess: () => setCreateOpen(false),
+        onError: (err) =>
+          setCreateError(
+            canonicalNameErrorMessage(err, { name }) ??
+              getApiErrorMessage(err, t('canonical.errors.generic')),
+          ),
+      },
+    );
+  };
 
   return (
     <EntityManagerShell
@@ -196,7 +255,7 @@ function CanonicalDomainContent({ domain, initialSearch, renderSuggestionReview 
       statusStrip={statusStrip}
       primaryAction={createAction}
       refresh={refreshAction}
-      review={review}
+      review={reviewAction}
       onOpenShortcuts={() => undefined}
     >
       {canRead && (
@@ -258,6 +317,20 @@ function CanonicalDomainContent({ domain, initialSearch, renderSuggestionReview 
             />
           )}
 
+          {aliasTarget && (
+            <ConfirmImpactDialog
+              title={t('canonical.action.unlink')}
+              description={aliasTarget.sourceText}
+              impact={{ state: 'ready', onRetry: () => undefined }}
+              body={<p className="text-sm text-muted-foreground">{t('canonical.link.noUndo')}</p>}
+              tone="default"
+              confirmLabel={t('canonical.action.unlink')}
+              pendingLabel={t('canonical.action.unlink')}
+              onConfirm={confirmAliasUnlink}
+              onClose={() => setAliasTarget(null)}
+            />
+          )}
+
           {membersOf && (
             <GroupMembersDrawer
               domain={domain}
@@ -272,22 +345,22 @@ function CanonicalDomainContent({ domain, initialSearch, renderSuggestionReview 
               mode="create"
               existingNames={(names.data ?? []).map((name) => name.name)}
               submitting={createName.isPending}
-              onClose={() => setCreateOpen(false)}
-              onSubmit={(name) => {
-                createName.mutate(
-                  { name, parentId: config.hasScope && scopeId !== null ? scopeId : undefined },
-                  { onSuccess: () => setCreateOpen(false) },
-                );
+              submitError={createError}
+              onClose={() => {
+                setCreateError(null);
+                setCreateOpen(false);
               }}
+              onSubmit={submitCreate}
             />
           )}
 
           <NameDetailsSheet
             domain={domain}
             name={selectedName}
-            open={detailsOpen && selectedName !== null}
+            open={detailsVisible}
             onOpenChange={setDetailsOpen}
             canManage={canManage}
+            unlinkedGroups={unlinkedGroups}
             onRename={async (newName) => {
               if (selectedName === null) return;
               await renameName.mutateAsync({ id: selectedName.id, name: newName });
@@ -298,13 +371,21 @@ function CanonicalDomainContent({ domain, initialSearch, renderSuggestionReview 
               setDetailsOpen(false);
               setSelectedNameId(null);
             }}
+            onUnlinkAlias={async (alias) => {
+              setAliasTarget(alias);
+            }}
+            onAddSynonym={addSynonym}
           />
 
-          {renderSuggestionReview?.({
-            open: reviewOpen,
-            onOpenChange: setReviewOpen,
-            initialScopeId: scopeId ?? undefined,
-          })}
+          {canManage && config.actions.suggest && (
+            <SuggestionReview
+              open={review.open}
+              onOpenChange={(open) => setReview((prev) => ({ ...prev, open }))}
+              domain={domain}
+              initialScopeId={scopeId ?? undefined}
+              onlyNormalizedTexts={review.only}
+            />
+          )}
         </div>
       )}
     </EntityManagerShell>
