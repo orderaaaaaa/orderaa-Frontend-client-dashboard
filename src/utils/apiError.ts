@@ -68,11 +68,17 @@ export function getInboundRuleMissingMessage(err: unknown): string | null {
 
 export function getReturnWarehouseLockedMessage(err: unknown): string | null {
   const data = (
-    err as { response?: { data?: { code?: string; message?: unknown } } }
+    err as {
+      response?: { data?: { code?: string; message?: unknown; warehouseName?: unknown } };
+    }
   )?.response?.data;
   if (data?.code !== 'RETURN_WAREHOUSE_LOCKED') return null;
   if (typeof data.message === 'string' && data.message.length > 0) return data.message;
-  return translate(readStoredLocale(), 'returnStock.warehouseLockedFallback');
+  const locale = readStoredLocale();
+  if (typeof data.warehouseName === 'string' && data.warehouseName.length > 0) {
+    return translate(locale, 'returnStock.warehouseLocked', { warehouse: data.warehouseName });
+  }
+  return translate(locale, 'returnStock.warehouseLockedFallback');
 }
 
 /**

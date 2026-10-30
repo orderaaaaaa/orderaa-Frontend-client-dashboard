@@ -146,6 +146,7 @@ const en: Record<keyof typeof ar, string> = {
   'returnStock.loadFailed': 'Could not load stock, try again',
   'returnStock.retry': 'Retry',
   'returnStock.blocked': 'Fix the quantities or stock before confirming the return',
+  'returnStock.warehouseLocked': 'A return can only be issued from the receiving warehouse {warehouse}',
   'returnStock.warehouseLockedFallback': 'A return can only be issued from the receiving warehouse',
   'returnStock.warehouseLockedHint': 'Returns are issued from the receiving warehouse and cannot be changed',
   'stockShortage.confirmBlocked':

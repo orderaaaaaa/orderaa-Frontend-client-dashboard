@@ -160,6 +160,7 @@ const ar = {
   'returnStock.loadFailed': 'تعذر تحميل المخزون، أعد المحاولة',
   'returnStock.retry': 'إعادة المحاولة',
   'returnStock.blocked': 'لا يمكن تأكيد المرتجع قبل تصحيح الكميات أو المخزن',
+  'returnStock.warehouseLocked': 'لا يمكن صرف المرتجع إلا من مخزن الاستلام {warehouse}',
   'returnStock.warehouseLockedFallback': 'لا يمكن صرف المرتجع إلا من مخزن الاستلام المحدد',
   'returnStock.warehouseLockedHint': 'المرتجع يُصرف من مخزن الاستلام ولا يمكن تغييره',
   'stockShortage.confirmBlocked':
