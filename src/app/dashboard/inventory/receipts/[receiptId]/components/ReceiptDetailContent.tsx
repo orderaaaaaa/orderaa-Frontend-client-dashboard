@@ -65,9 +65,14 @@ interface QuantityMismatch {
 
 const STALE_APPROVE_STATUSES = [400, 404, 409];
 
+function positiveOptionIds(attributeOptionIds: number[]): number[] {
+  return attributeOptionIds.filter((id) => id > 0);
+}
+
 function approvalLineKey(invoiceProductId: number, attributeOptionIds: number[]): string {
-  if (attributeOptionIds.length === 0) return String(invoiceProductId);
-  return `${invoiceProductId}:${[...attributeOptionIds].sort((a, b) => a - b).join('-')}`;
+  const ids = positiveOptionIds(attributeOptionIds);
+  if (ids.length === 0) return String(invoiceProductId);
+  return `${invoiceProductId}:${[...ids].sort((a, b) => a - b).join('-')}`;
 }
 
 export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
@@ -191,12 +196,14 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
   const approvalStockLines = useMemo<ReturnStockLineRequest[]>(
     () =>
       invoiceProducts.flatMap((p) => {
-        const real = (productVariants[p.id] ?? []).filter((v) => v.attributeOptionIds.length > 0);
+        const real = (productVariants[p.id] ?? [])
+          .map((v) => positiveOptionIds(v.attributeOptionIds))
+          .filter((ids) => ids.length > 0);
         if (real.length === 0) return [{ key: approvalLineKey(p.id, []), productId: p.productId }];
-        return real.map((v) => ({
-          key: approvalLineKey(p.id, v.attributeOptionIds),
+        return real.map((ids) => ({
+          key: approvalLineKey(p.id, ids),
           productId: p.productId,
-          attributeOptionIds: v.attributeOptionIds,
+          attributeOptionIds: ids,
         }));
       }),
     [invoiceProducts, productVariants],
@@ -205,7 +212,9 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
   const approvalRequested = useMemo(() => {
     const requested: Record<string, number> = {};
     for (const p of invoiceProducts) {
-      const real = (productVariants[p.id] ?? []).filter((v) => v.attributeOptionIds.length > 0);
+      const real = (productVariants[p.id] ?? []).filter(
+        (v) => positiveOptionIds(v.attributeOptionIds).length > 0,
+      );
       if (real.length === 0) {
         requested[approvalLineKey(p.id, [])] = countedFor(p.id);
       } else {
@@ -472,15 +481,15 @@ export function ReceiptDetailContent({ receiptId }: ReceiptDetailContentProps) {
           {/* Clearable: leaving it empty is the normal path, so there has to
               be a way back to it after picking a warehouse by mistake. */}
           {!isReturn && (
-          <SearchableSelect
-            options={warehouseOptions}
-            value={warehouseId}
-            onValueChange={setWarehouseId}
-            onClear={() => setWarehouseId('')}
-            clearable
-            placeholder={t('receipts.warehouseAuto')}
-            emptyMessage="لا توجد مخازن — أنشئ مخزنًا أولًا"
-          />
+            <SearchableSelect
+              options={warehouseOptions}
+              value={warehouseId}
+              onValueChange={setWarehouseId}
+              onClear={() => setWarehouseId('')}
+              clearable
+              placeholder={t('receipts.warehouseAuto')}
+              emptyMessage="لا توجد مخازن — أنشئ مخزنًا أولًا"
+            />
           )}
           {isReturn && (
             <p className="text-xs leading-5 text-gray-600">

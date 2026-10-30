@@ -40,7 +40,7 @@ export function returnStockLinesOf(items: AddInvoiceFormData['items']): ReturnSt
   return items.map((item) => {
     const attributeOptionIds = (item.variants ?? [])
       .map((v) => v.attributeOptionId)
-      .filter((id): id is number => id !== undefined);
+      .filter((id): id is number => id !== undefined && id > 0);
     return {
       key: item.id,
       productId: item.productId,
