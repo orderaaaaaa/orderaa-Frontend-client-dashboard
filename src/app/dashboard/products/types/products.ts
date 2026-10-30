@@ -408,6 +408,7 @@ export interface ProductDetailExternalSource {
   externalId: string;
   storeId: number | null;
   externalSku: string | null;
+  storeName: string | null;
 }
 
 export interface ProductDetailOption {
@@ -433,6 +434,7 @@ export interface ProductDetailVariantStoreLink {
   storeId: number | null;
   externalId: string;
   externalSku: string | null;
+  storeName: string | null;
 }
 
 export interface ProductDetailVariant {

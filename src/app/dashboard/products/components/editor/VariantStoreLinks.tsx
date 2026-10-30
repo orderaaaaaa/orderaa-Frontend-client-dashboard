@@ -27,9 +27,10 @@ export function VariantStoreLinks({ links }: VariantStoreLinksProps) {
               {platforms.find((platform) => platform.providerKey === link.provider)?.name ?? link.provider}
             </Badge>
             <span>
-              {link.storeId === null
-                ? t('storeLinks.variant.storeUnknown')
-                : t('storeLinks.variant.store', { storeId: link.storeId })}
+              {link.storeName ??
+                (link.storeId === null
+                  ? t('storeLinks.variant.storeUnknown')
+                  : t('storeLinks.variant.store', { storeId: link.storeId }))}
             </span>
             {link.externalSku !== null && (
               <span>{t('storeLinks.variant.externalSku', { sku: link.externalSku })}</span>

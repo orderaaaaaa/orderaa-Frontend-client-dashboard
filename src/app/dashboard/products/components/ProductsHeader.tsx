@@ -8,6 +8,7 @@ import { PERMISSIONS } from '@/lib/permissions';
 import { useHasPermissionStrict } from '@/hooks/usePermissions';
 import { useSyncProducts } from '../hooks/useProduct';
 import AddProductModal from './modals/AddProductModal';
+import { ProductLinkIssuesButton } from './ProductLinkIssuesButton';
 
 function ProductsHeader() {
   const { mutate: syncProducts, isPending } = useSyncProducts();
@@ -22,6 +23,7 @@ function ProductsHeader() {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">صفحة المنتجات</h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <ProductLinkIssuesButton />
           <Can code={PERMISSIONS.PRODUCTS_CREATE}>
             <Button
               variant="outline"
