@@ -72,11 +72,11 @@ export function QueueBulkBar({
         <BulkActionBar
           count={count}
           pageCount={context.pageRows.length}
-          onSelectPage={context.onSelectPage}
+          onSelectPage={canManage ? context.onSelectPage : undefined}
           onClear={context.onClearSelection}
           bulkLink={bulkCombobox ? { combobox: <span data-link-control>{bulkCombobox}</span> } : undefined}
           acceptSuggestions={
-            onAcceptSelected && count > 0
+            onAcceptSelected && canManage && count > 0
               ? {
                   count,
                   onClick: () => onAcceptSelected(selected.map((row) => row.group)),

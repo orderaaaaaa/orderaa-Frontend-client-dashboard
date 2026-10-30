@@ -8,7 +8,7 @@ import { PartialSuccessNotice } from './StateViews';
 export interface BulkActionBarProps {
   count: number;
   pageCount: number;
-  onSelectPage: () => void;
+  onSelectPage?: () => void;
   onClear: () => void;
   bulkLink?: { combobox: ReactNode };
   acceptSuggestions?: { count: number; onClick: () => void };
@@ -74,15 +74,17 @@ function BulkBar({
         >
           {t('canonical.bulk.selected', { count })}
         </p>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="min-h-11 min-w-11"
-          onClick={onSelectPage}
-        >
-          {t('canonical.action.selectPage', { count: pageCount })}
-        </Button>
+        {onSelectPage && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="min-h-11 min-w-11"
+            onClick={onSelectPage}
+          >
+            {t('canonical.action.selectPage', { count: pageCount })}
+          </Button>
+        )}
         {bulkLink?.combobox}
         {acceptSuggestions && (
           <Button

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type KeyboardEvent, type ReactNode } from 'react';
+import { useEffect, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { Badge } from '@/components/ui/badge';
@@ -95,6 +95,14 @@ function NameDetailsContent({
   const [confirmError, setConfirmError] = useState<string | null>(null);
   const [aliasError, setAliasError] = useState<string | null>(null);
   const [unlinking, setUnlinking] = useState<string | null>(null);
+
+  useEffect(() => {
+    setPage(1);
+    setLimit(PAGE_SIZE);
+    setEditing(false);
+    setDraft('');
+    setDraftError(null);
+  }, [open]);
 
   const isLocation = isLocationDomain(domain);
   const isGovernorate = domain === CANONICAL_NAME_DOMAINS.GOVERNORATE;

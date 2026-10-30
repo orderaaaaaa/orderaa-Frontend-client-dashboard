@@ -59,12 +59,12 @@ export function QueueGroupRow({ domain, row, state, canManage, names, actions, d
   const isLocation = isLocationDomain(domain);
   const isCity = domain === CANONICAL_NAME_DOMAINS.CITY;
   const group = row.group;
+  const picks = useLocationPicks(group);
   const drag = useDraggable({
     id: row.id,
-    data: { label: row.spelling, group },
+    data: { label: row.spelling, group, rowIds: picks.rowIds },
     disabled: !dragEnabled || !canManage,
   });
-  const picks = useLocationPicks(group);
   const noPicks = isLocation && picks.rowIds.length === 0;
   const [wantsCandidates, setWantsCandidates] = useState(false);
   const candidates = useLinkCandidatesQuery(

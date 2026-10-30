@@ -83,6 +83,7 @@ export interface CanonicalDomainPageProps {
 interface DragPayload {
   label: string;
   group?: SourceGroup;
+  rowIds?: number[];
   nameId?: number;
 }
 
@@ -259,9 +260,9 @@ function CanonicalDomainContent({ domain, initialSearch }: CanonicalDomainPagePr
     });
   };
 
-  const linkGroupTo = (group: SourceGroup, nameId: number) => {
+  const linkGroupTo = (group: SourceGroup, nameId: number, rowIds: number[] = locationPicksOf(group)) => {
     const item: LinkItem = isLocation
-      ? { scopeId: group.scopeId, rowIds: locationPicksOf(group), canonicalNameId: nameId }
+      ? { scopeId: group.scopeId, rowIds, canonicalNameId: nameId }
       : { scopeId: group.scopeId, normalizedText: group.normalizedText, canonicalNameId: nameId };
     requestLink([item], [describeLinkGroup(group)]);
   };
@@ -280,9 +281,14 @@ function CanonicalDomainContent({ domain, initialSearch }: CanonicalDomainPagePr
 
   const onDragEnd = (event: DragEndEvent) => {
     setDragLabel(null);
-    const group = payloadOf(event.active.data)?.group;
+    const payload = payloadOf(event.active.data);
     const nameId = payloadOf(event.over?.data)?.nameId;
-    if (group && nameId !== undefined) linkGroupTo(group, nameId);
+    if (!payload?.group || nameId === undefined) return;
+    if (isLocation && (payload.rowIds ?? []).length === 0) {
+      setAnnouncement(t('canonical.action.disabledNoRow'));
+      return;
+    }
+    linkGroupTo(payload.group, nameId, payload.rowIds);
   };
 
   const acceptSelected = (groups: SourceGroup[]) =>
@@ -314,7 +320,7 @@ function CanonicalDomainContent({ domain, initialSearch }: CanonicalDomainPagePr
       names={names}
       context={context}
       onLink={requestLink}
-      onAcceptSelected={isLocation ? acceptSelected : undefined}
+      onAcceptSelected={isLocation && canManage ? acceptSelected : undefined}
     />
   );
 
@@ -436,7 +442,11 @@ function CanonicalDomainContent({ domain, initialSearch }: CanonicalDomainPagePr
                 <ReviewQueue
                   domain={domain}
                   canManage={canManage}
-                  keyboard={{ onOpenRow: (row) => setMembersOf(row.group) }}
+                  keyboard={{
+                    onOpenRow: (row) => {
+                      if (config.actions.viewProducts) setMembersOf(row.group);
+                    },
+                  }}
                   renderRow={renderRow}
                   renderBulkBar={renderBulkBar}
                   renderUnscopedParents={renderUnscopedParents}
