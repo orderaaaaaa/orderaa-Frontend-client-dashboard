@@ -222,7 +222,7 @@ export interface UnlinkedLinkBody {
 export interface UnlinkedLinkCreate {
   linkKind: LinkKind;
   externalProductId: string;
-  externalVariantId: string | null;
+  externalVariantId: string;
   productId: number;
   variantId: number | null;
   externalSku: string | null;
