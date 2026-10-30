@@ -11,7 +11,7 @@ export const QUEUE_PAGE_SIZES = [25, 50, 100, 500] as const;
 
 export const QUEUE_MAX_PAGE_SIZE = 500;
 
-const QUEUE_DEFAULT_PAGE_SIZE = 25;
+export const QUEUE_DEFAULT_PAGE_SIZE = 25;
 
 export function clampQueuePageSize(size: number | undefined): number {
   if (size === undefined || !Number.isFinite(size)) return QUEUE_DEFAULT_PAGE_SIZE;

@@ -139,6 +139,7 @@ export const QUERY_KEYS = {
 
   CANONICAL_NAMES: 'canonical-names',
   CANONICAL_NAME_GROUPS: 'canonical-name-groups',
+  CANONICAL_NAME_GROUP_COUNTS: 'canonical-name-group-counts',
   CANONICAL_NAME_GROUP_MEMBERS: 'canonical-name-group-members',
   CANONICAL_NAME_CANDIDATES: 'canonical-name-candidates',
   CANONICAL_NAME_IMPACT: 'canonical-name-impact',

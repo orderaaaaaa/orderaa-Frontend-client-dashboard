@@ -227,6 +227,20 @@ export interface SourceGroupPage {
   unscopedParents: UnscopedParent[];
 }
 
+export interface ListGroupCountsParams {
+  scopeId?: number;
+  parentRowId?: number;
+  search?: string;
+}
+
+export interface GroupCounts {
+  all: number;
+  unlinked: number;
+  partial: number;
+  mixed: number;
+  linked: number;
+}
+
 export interface GroupMemberRow {
   id: number;
   storedName: string;
