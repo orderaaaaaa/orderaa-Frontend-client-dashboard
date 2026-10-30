@@ -557,6 +557,7 @@ const ar = {
   'canonical.a11y.dragOver': 'فوق «{name}».',
   'canonical.a11y.dragDrop': 'أُفلتت «{item}» على «{name}».',
   'canonical.a11y.dragCancel': 'أُلغي السحب.',
+  'canonical.a11y.dragInstructions': 'اضغط مسافة لالتقاط العنصر، ثم استخدم الأسهم لنقله، ومسافة للإفلات، أو Esc للإلغاء.',
   'canonical.a11y.refreshDone': 'انتهى تحديث القوائم: {status}.',
   'canonical.state.unlinked': 'غير مرتبط',
   'canonical.state.partial': 'مرتبط جزئيا',
