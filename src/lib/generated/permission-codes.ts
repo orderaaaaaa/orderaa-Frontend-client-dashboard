@@ -174,8 +174,6 @@ export const PERMISSION_CODES = {
   PLATFORM_CHARGE_OPTIONS_MANAGE: 'platform:charge-options:manage',
   PLATFORM_WAREHOUSES_READ: 'platform:warehouses:read',
   PLATFORM_WAREHOUSES_MANAGE: 'platform:warehouses:manage',
-  PLATFORM_AVAILABLE_STOCK_WAREHOUSE_READ: 'platform:available-stock-warehouse:read',
-  PLATFORM_AVAILABLE_STOCK_WAREHOUSE_MANAGE: 'platform:available-stock-warehouse:manage',
   PLATFORM_STOCK_WORKFLOWS_READ: 'platform:stock-workflows:read',
   PLATFORM_STOCK_WORKFLOWS_MANAGE: 'platform:stock-workflows:manage',
   PLATFORM_STOCK_PRESETS_READ: 'platform:stock-presets:read',
