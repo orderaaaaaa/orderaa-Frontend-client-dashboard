@@ -26,7 +26,7 @@ import type {
 import { PERMISSIONS } from '@/lib/permissions';
 import { useCreateExchangeMutation, useExchangeCandidatesQuery } from '@/services/followup';
 import { getApiErrorMessage } from '@/utils/apiError';
-import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
+import { carrierSendNeedsAttention, carrierSendNotSentWarningAfter } from '@/utils/manualOrder/carrierSend';
 import { ExchangeCandidateStep } from './ExchangeCandidateStep';
 import { ExchangeProductsStep, itemKeyOf, type ExchangeLine } from './ExchangeProductsStep';
 import { ExchangeStepIndicator } from './ExchangeStepIndicator';
@@ -224,9 +224,11 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
     };
     try {
       const response = await createMutation.mutateAsync({ orderId, ...body });
-      toast.success(t('exchange.create.success', { code: response.newOrderCode }));
+      const createdText = t('exchange.create.success', { code: response.newOrderCode });
       if (carrierSendNeedsAttention(response.carrierSend)) {
-        toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
+        toast.warning(carrierSendNotSentWarningAfter(createdText));
+      } else {
+        toast.success(createdText);
       }
       onDone?.(response);
       onClose();
