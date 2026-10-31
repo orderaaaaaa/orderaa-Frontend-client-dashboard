@@ -1,6 +1,7 @@
 import type { OrderStatus } from '@/types/orders';
 
-export type CustomerReturnUnitState = 'SELECTABLE' | 'IN_RETURN' | 'IN_EXCHANGE';
+export type CustomerReturnUnitState =
+  'SELECTABLE' | 'IN_RETURN' | 'IN_EXCHANGE';
 
 export type CustomerReturnUnitHolder = {
   orderId: number;

@@ -19,20 +19,27 @@ type CustomerPickerProps = {
 
 const RESULT_LIMIT = 8;
 
-export default function CustomerPicker({ id = 'customer-picker', value, onChange, error }: CustomerPickerProps) {
+export default function CustomerPicker({
+  id = 'customer-picker',
+  value,
+  onChange,
+  error,
+}: CustomerPickerProps) {
   const { t } = useI18n();
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query.trim(), 300);
   const customersQuery = useGetCustomers(
     { search: debouncedQuery, limit: RESULT_LIMIT },
-    { enabled: value === null }
+    { enabled: value === null },
   );
 
   if (value) {
     return (
       <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/40 px-4 py-3">
         <div className="flex min-w-0 flex-col">
-          <span className="truncate font-semibold text-foreground">{value.name}</span>
+          <span className="truncate font-semibold text-foreground">
+            {value.name}
+          </span>
           <span dir="ltr" className="text-start text-sm text-muted-foreground">
             {value.phoneNumbers[0] ?? ''}
           </span>
@@ -101,8 +108,13 @@ export default function CustomerPicker({ id = 'customer-picker', value, onChange
                 onClick={() => onChange(customer)}
                 className="flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-start hover:bg-muted"
               >
-                <span className="truncate font-medium text-foreground">{customer.name}</span>
-                <span dir="ltr" className="shrink-0 text-sm text-muted-foreground">
+                <span className="truncate font-medium text-foreground">
+                  {customer.name}
+                </span>
+                <span
+                  dir="ltr"
+                  className="shrink-0 text-sm text-muted-foreground"
+                >
                   {customer.phoneNumbers[0] ?? ''}
                 </span>
               </button>
