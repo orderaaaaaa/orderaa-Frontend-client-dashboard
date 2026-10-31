@@ -6,7 +6,6 @@ import {
   LiaBoxSolid,
   LiaPlusCircleSolid,
   LiaLongArrowAltLeftSolid,
-  LiaClipboardListSolid,
   LiaEditSolid,
 } from 'react-icons/lia';
 import { Order } from '@/types/orders';
@@ -15,7 +14,6 @@ import DeleteConfirmationModal from './DeleteConfirmationModal';
 import AddSameTypeProductModal from './AddSameTypeProductModal';
 import AddNewProductModal from './AddNewProductModal';
 import ProductDetailsModal from './ProductDetailsModal';
-import ProductChangeLogModal from './ProductChangeLogModal';
 import SendBackConfirmModal from './SendBackConfirmModal';
 import OrderStockReturnRequiredModal from './OrderStockReturnRequiredModal';
 import {
@@ -75,7 +73,6 @@ function OrderDetailsProductCard({
   const [isAddNewProductModalOpen, setIsAddNewProductModalOpen] =
     useState(false);
   const [viewingProductId, setViewingProductId] = useState<number | null>(null);
-  const [isChangeLogOpen, setIsChangeLogOpen] = useState(false);
   const [pendingSendBack, setPendingSendBack] = useState<PendingSendBack | null>(
     null
   );
@@ -425,17 +422,6 @@ function OrderDetailsProductCard({
               </Button>
             </div>
           )}
-
-          <div className="flex justify-center">
-            <Button
-              onClick={() => setIsChangeLogOpen(true)}
-              variant="outline"
-              className="flex items-center gap-2 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <LiaClipboardListSolid className="w-5 h-5 shrink-0" />
-              <span className="text-sm font-bold whitespace-nowrap">سجل التغييرات</span>
-            </Button>
-          </div>
         </div>
       </div>
 
@@ -492,12 +478,6 @@ function OrderDetailsProductCard({
         isOpen={viewingProductId !== null}
         onClose={() => setViewingProductId(null)}
         orderProduct={viewingOrderProduct || null}
-      />
-
-      <ProductChangeLogModal
-        isOpen={isChangeLogOpen}
-        onClose={() => setIsChangeLogOpen(false)}
-        orderId={order.id}
       />
     </>
   );
