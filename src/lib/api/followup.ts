@@ -45,12 +45,64 @@ export async function markFollowupChangeProducts(
   return data;
 }
 
+export interface FollowupExchangeCandidateItem {
+  productId: number;
+  variantId: number;
+  productName: string;
+  variantLabel: string;
+  unitPrice: number;
+  quantity: number;
+}
+
 export interface FollowupExchangeCandidate {
   id: number;
   code: string;
   status: 'DELIVERED' | 'COLLECTED';
   totalCost: number;
   createdAt: string;
+  items: FollowupExchangeCandidateItem[];
+  openExchangeCode: string | null;
+}
+
+export type FollowupExchangeReason = 'SIZE_OR_COLOR' | 'DIFFERENT_PRODUCT' | 'DEFECT_OR_WRONG_ITEM';
+
+export type FollowupExchangeShippingPayer = 'CUSTOMER' | 'MERCHANT';
+
+export interface FollowupExchangeReturnItemInput {
+  productId: number;
+  variantId?: number;
+  quantity: number;
+}
+
+export interface FollowupExchangeBody {
+  sourceOrderId: number;
+  reason: FollowupExchangeReason;
+  returnItems: FollowupExchangeReturnItemInput[];
+  products: FollowupChangeProductInput[];
+  shippingPaidBy?: FollowupExchangeShippingPayer;
+  totalCost?: number;
+  returnShipmentContent: string;
+  notes?: string;
+}
+
+export interface FollowupExchangeResponse {
+  success: true;
+  originalOrderCode: string;
+  newOrderId: number;
+  newOrderCode: string;
+  isShadowed: boolean;
+  isParked: boolean;
+  refundDue: number;
+  codAmount: number;
+  carrierSend: CarrierSendBlock | null;
+}
+
+export async function createFollowupExchange(
+  orderId: number,
+  body: FollowupExchangeBody
+): Promise<FollowupExchangeResponse> {
+  const { data } = await http.post<FollowupExchangeResponse>(`/orders/followup/${orderId}/exchange`, body);
+  return data;
 }
 
 export interface FollowupExchangeCandidatesResponse {

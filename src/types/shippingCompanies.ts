@@ -23,6 +23,18 @@ export const PARTIAL_DELIVERY_IMPLEMENTATIONS = Object.keys(
 export const isNoEditPartialDeliveryCarrier = (implementation: ShippingImplementation) =>
   PARTIAL_DELIVERY_CARRIER_EDITS[implementation] === false;
 
+export type CarrierCapabilityReason = 'CARRIER_RESEND_NOT_DOCUMENTED' | 'CARRIER_EXCHANGE_TYPE_NOT_SENT';
+
+export interface CarrierCapability {
+  supported: boolean;
+  reason: CarrierCapabilityReason | null;
+}
+
+export interface CarrierCapabilities {
+  resend: CarrierCapability;
+  exchangeShipment: CarrierCapability;
+}
+
 export interface ShippingCompanyRef {
   id: number;
   code: string | null;
@@ -31,6 +43,7 @@ export interface ShippingCompanyRef {
   implementation: ShippingImplementation;
   isActive: boolean;
   carrierSupportsUpdate?: boolean;
+  capabilities?: CarrierCapabilities;
 }
 
 export const NO_SHIPPING_COMPANY_FILTER = 'none';

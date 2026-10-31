@@ -29,7 +29,7 @@ import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/util
 
 const MAX_TOTAL_COST = 9_999_999;
 
-interface ChangeProductsLine {
+export interface ChangeProductsLine {
   key: string;
   productId: number;
   name: string;
@@ -53,7 +53,7 @@ interface ChangeProductsModalProps {
   onDone?: (response: FollowupChangeProductsResponse) => void;
 }
 
-const lineKeyOf = (
+export const lineKeyOf = (
   productId: number,
   variants: FollowupChangeProductVariant[],
   customVariants: FollowupCustomVariant[],
@@ -64,7 +64,7 @@ const lineKeyOf = (
     customVariants.map((c) => [c.label, c.value]),
   ]);
 
-const mergeLines = (
+export const mergeLines = (
   current: ChangeProductsLine[],
   incoming: ChangeProductsLine[],
 ): ChangeProductsLine[] => {
@@ -79,15 +79,15 @@ const mergeLines = (
   return Array.from(merged.values());
 };
 
-const isLineComplete = (line: ChangeProductsLine): boolean =>
+export const isLineComplete = (line: ChangeProductsLine): boolean =>
   line.variantOptions.every((option) => line.variants.some((v) => v.name === option.attribute));
 
-const missingAttributesOf = (line: ChangeProductsLine): string[] =>
+export const missingAttributesOf = (line: ChangeProductsLine): string[] =>
   line.variantOptions
     .filter((option) => !line.variants.some((v) => v.name === option.attribute))
     .map((option) => option.attribute);
 
-const incompleteVariantMessageOf = (missing: string[]): string =>
+export const incompleteVariantMessageOf = (missing: string[]): string =>
   missing.length > 1 ? `اختر المتغيرات الناقصة: ${missing.join('، ')}` : `اختر ${missing[0]} لإكمال المنتج`;
 
 const currentProductsFromOrder = (order: Order): CurrentProductRow[] =>
@@ -104,7 +104,7 @@ const currentProductsFromOrder = (order: Order): CurrentProductRow[] =>
     };
   });
 
-const orderVariants = (
+export const orderVariants = (
   variantOptions: VariantOption[],
   variants: FollowupChangeProductVariant[],
 ): FollowupChangeProductVariant[] =>
@@ -113,7 +113,7 @@ const orderVariants = (
     return variant ? [variant] : [];
   });
 
-const linesFromPicker = (products: SelectableProduct[]): ChangeProductsLine[] =>
+export const linesFromPicker = (products: SelectableProduct[]): ChangeProductsLine[] =>
   products.map((product) => {
     const variantOptions = product.variantOptions ?? [];
     const variants = orderVariants(

@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 import { QUERY_KEYS } from '@/lib/api/queryKeys';
 import {
   markFollowupChangeProducts,
+  createFollowupExchange,
   getExchangeCandidates,
   markFollowupClosed,
   markFollowupRefused,
@@ -14,6 +15,7 @@ import {
   deleteFollowupNote,
   getFollowupActionEvents,
   type FollowupChangeProductsBody,
+  type FollowupExchangeBody,
   type FollowupNotePartyValue,
   type FollowupReasonBody,
 } from '@/lib/api/followup';
@@ -33,6 +35,15 @@ export const useFollowupChangeProductsMutation = () => {
   return useMutation({
     mutationFn: ({ orderId, ...body }: { orderId: number } & FollowupChangeProductsBody) =>
       markFollowupChangeProducts(orderId, body),
+    onSuccess: invalidate,
+  });
+};
+
+export const useCreateExchangeMutation = () => {
+  const invalidate = useFollowupListsInvalidation();
+  return useMutation({
+    mutationFn: ({ orderId, ...body }: { orderId: number } & FollowupExchangeBody) =>
+      createFollowupExchange(orderId, body),
     onSuccess: invalidate,
   });
 };
