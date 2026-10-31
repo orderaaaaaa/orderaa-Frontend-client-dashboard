@@ -4,13 +4,17 @@ import * as React from 'react'
 import * as TabsPrimitive from '@radix-ui/react-tabs'
 
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/i18n/I18nProvider'
 
 function Tabs({
   className,
+  dir,
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.Root>) {
+  const { dir: i18nDir } = useI18n()
   return (
     <TabsPrimitive.Root
+      dir={dir ?? i18nDir}
       className={cn('flex flex-col gap-4', className)}
       {...props}
     />

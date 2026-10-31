@@ -199,16 +199,7 @@ export function DueCell({
 export function CourierCell({ name, phone }: { name: string | null; phone: string | null }) {
   if (name === null && phone === null) return <span>—</span>;
 
-  return (
-    <div className="flex flex-col">
-      <span className="break-words">{name ?? '—'}</span>
-      {phone && (
-        <span dir="ltr" className={cn(SECONDARY_TEXT_CLASS, 'font-mono whitespace-nowrap')}>
-          {phone}
-        </span>
-      )}
-    </div>
-  );
+  return <CustomerCell name={name} phones={phone ? [phone] : []} />;
 }
 
 export interface ShipmentSelection {

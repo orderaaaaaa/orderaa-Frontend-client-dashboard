@@ -242,6 +242,8 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
       return null;
     };
 
+    const showClear = clearable && !!value && !disabled && !loading;
+
     const triggerBlock = (
       <div className="relative flex flex-col">
         <button
@@ -264,6 +266,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
           <span
             className={cn(
               'flex-1 truncate text-right',
+              showClear && 'pe-6',
               currentDisplayValue ? 'text-foreground-body' : 'text-foreground-secondary'
             )}
           >
@@ -285,7 +288,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
           />
         </button>
 
-        {clearable && value && !disabled && !loading && (
+        {showClear && (
           <button
             type="button"
             onClick={handleClear}
