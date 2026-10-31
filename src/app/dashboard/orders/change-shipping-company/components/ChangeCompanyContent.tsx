@@ -169,6 +169,7 @@ export function ChangeCompanyContent() {
             value={targetId !== null ? String(targetId) : ''}
             placeholder={CHANGE_COMPANY_TEXT.targetLabel}
             disabled={isRunning || companiesLoading}
+            portal
             onValueChange={(key) => setTarget(shippingCompanyIdOf(key))}
           />
         </div>
