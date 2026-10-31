@@ -83,7 +83,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
       id,
       'aria-label': ariaLabel,
       overlayOnMobile = false,
-      portal = false,
+      portal = true,
     },
     ref
   ) {
@@ -370,6 +370,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
               <PopoverContent
                 align="start"
                 sideOffset={4}
+                collisionPadding={8}
                 onOpenAutoFocus={(e) => e.preventDefault()}
                 onCloseAutoFocus={(e) => e.preventDefault()}
                 onInteractOutside={(e) => e.preventDefault()}
@@ -380,7 +381,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
                 <div
                   ref={listRef}
                   role="listbox"
-                  className="max-h-60 overflow-auto rounded-md border"
+                  className="max-h-[min(15rem,var(--radix-popover-content-available-height))] overflow-y-auto rounded-md border"
                 >
                   {listContent}
                 </div>
