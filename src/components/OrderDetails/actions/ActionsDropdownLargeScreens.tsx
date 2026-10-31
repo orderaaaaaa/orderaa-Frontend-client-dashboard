@@ -134,8 +134,8 @@ export function OrderActionsFooterLargeScreens({
           <div className="relative" ref={actionsDropdown.ref}>
             <div className="flex flex-row gap-2">
               {canUpdate && orderStatus !== 'CONFIRMED' && !canConfirmStock && stockBlockReason && (
-                <p className="max-w-md self-center text-xs font-medium leading-5 text-red-700 line-clamp-2">
-                  {stockBlockReason.split('\n')[0]}
+                <p className="max-w-md max-h-32 self-center overflow-y-auto whitespace-pre-line text-xs font-medium leading-5 text-red-700">
+                  {stockBlockReason}
                 </p>
               )}
               {canUpdate && orderStatus !== 'CONFIRMED' && (
