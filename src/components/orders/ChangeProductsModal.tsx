@@ -64,10 +64,7 @@ export const lineKeyOf = (
     customVariants.map((c) => [c.label, c.value]),
   ]);
 
-export const mergeLines = (
-  current: ChangeProductsLine[],
-  incoming: ChangeProductsLine[],
-): ChangeProductsLine[] => {
+export const mergeLines = <T extends ChangeProductsLine>(current: T[], incoming: T[]): T[] => {
   const merged = new Map(current.map((line) => [line.key, line]));
   incoming.forEach((line) => {
     const existing = merged.get(line.key);

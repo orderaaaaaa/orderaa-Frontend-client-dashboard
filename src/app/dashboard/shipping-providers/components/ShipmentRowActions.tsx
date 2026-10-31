@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useId, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  ArrowLeftRight,
   Ban,
   BadgeDollarSign,
   CalendarX,
@@ -54,6 +55,7 @@ import type { LatenessInfo, SendAgainBlockedReason, ShipmentRowBase } from '@/ty
 import { CARRIER_UPDATE_NOT_SUPPORTED_MESSAGE, type ShippingImplementation } from '@/types/shippingCompanies';
 import { ClosureReasonModal, type ClosureReasonKind } from './ClosureReasonModal';
 import { DeliveryWindowModal } from './DeliveryWindowModal';
+import { ExchangeCandidatesModal } from './ExchangeCandidatesModal';
 import { LatenessChip, latenessChipOf } from './LatenessChip';
 import { LateMarkModal } from './LateMarkModal';
 import { OrderEditModal, type OrderEditKind } from './OrderEditModals';
@@ -130,6 +132,7 @@ export interface ShipmentRowActionsProps {
   onOpenActionLog?: () => void;
   sendAgain?: { eligible: boolean; blockedReason: SendAgainBlockedReason | null };
   carrierResendSupported?: boolean;
+  carrierExchangeSupported?: boolean;
   editRow?: ShipmentRowBase;
   carrierSupportsUpdate?: boolean;
 }
@@ -151,6 +154,7 @@ export function ShipmentRowActions({
   onOpenActionLog,
   sendAgain,
   carrierResendSupported,
+  carrierExchangeSupported,
   editRow,
   carrierSupportsUpdate,
 }: ShipmentRowActionsProps) {
@@ -164,6 +168,7 @@ export function ShipmentRowActions({
   const [isPartialOpen, setIsPartialOpen] = useState(false);
   const [partialRequested, setPartialRequested] = useState(false);
   const [isChangeProductsOpen, setIsChangeProductsOpen] = useState(false);
+  const [isExchangeOpen, setIsExchangeOpen] = useState(false);
   const [confirmKind, setConfirmKind] = useState<ConfirmKind | null>(null);
   const [isLateMarkOpen, setIsLateMarkOpen] = useState(false);
   const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -349,6 +354,21 @@ export function ShipmentRowActions({
             disabled: isLocked,
             disabledReason: lockedReason,
             onSelect: () => setIsChangeProductsOpen(true),
+          },
+          {
+            id: 'exchange',
+            labelKey: 'closure.exchange' as const,
+            descriptionKey: 'inProcess.sheet.desc.exchange' as const,
+            icon: ArrowLeftRight,
+            group: 'delivery' as const,
+            opensModal: true,
+            codes: [PERMISSIONS.FOLLOWUP_READ],
+            disabled: isLocked || rowLocked || carrierExchangeSupported === false,
+            disabledReason:
+              lockedReason ??
+              rowLockedReason ??
+              (carrierExchangeSupported === false ? t('inProcess.reason.exchangeUnsupported') : undefined),
+            onSelect: () => setIsExchangeOpen(true),
           },
         ]
       : []),
@@ -593,6 +613,9 @@ export function ShipmentRowActions({
           orderId={orderId}
           onClose={() => setReasonKind(null)}
         />
+      )}
+      {isExchangeOpen && (
+        <ExchangeCandidatesModal isOpen onClose={() => setIsExchangeOpen(false)} orderId={orderId} />
       )}
       {isChangeProductsOpen && (
         <ChangeProductsModal

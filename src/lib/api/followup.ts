@@ -1,6 +1,7 @@
 import http from './http';
 import type { FollowupClosureKind } from '@/types/logistics';
 import type { CarrierSendBlock } from '@/types/manual-order';
+import type { OrderStatus } from '@/types/orders';
 
 export interface FollowupChangeProductVariant {
   name: string;
@@ -57,7 +58,7 @@ export interface FollowupExchangeCandidateItem {
 export interface FollowupExchangeCandidate {
   id: number;
   code: string;
-  status: 'DELIVERED' | 'COLLECTED';
+  status: OrderStatus;
   totalCost: number;
   createdAt: string;
   items: FollowupExchangeCandidateItem[];

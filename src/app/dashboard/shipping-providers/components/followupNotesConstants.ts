@@ -65,6 +65,7 @@ export const ACTION_EVENT_NAME_LABELS: Partial<Record<string, string>> = {
   OVERDUE: 'متأخر',
   CHANGE_PRODUCTS: 'تغيير منتج',
   SEND_AGAIN: 'إعادة إرسال',
+  EXCHANGE: 'استبدال',
   CANCELLED: 'إلغاء',
   FOLLOWUP_CLOSED_TODAY: 'إغلاق لليوم',
   FOLLOWUP_REFUSED: 'رفض التسليم',
