@@ -81,7 +81,7 @@ function OrderChangeHistoryCard({ order }: OrderChangeHistoryCardProps) {
         if (next) setEverOpened(true);
       }}
     >
-      <AccordionItem value={HISTORY_ITEM} className="font-medium p-4 bg-muted/50 mt-8 rounded-xl border-b-0">
+      <AccordionItem value={HISTORY_ITEM} className="font-medium p-4 bg-card border border-border mt-8 rounded-xl">
         <AccordionTrigger className="py-2 text-start">
           <span className="text-lg text-primary font-bold">سجل التعديلات</span>
         </AccordionTrigger>

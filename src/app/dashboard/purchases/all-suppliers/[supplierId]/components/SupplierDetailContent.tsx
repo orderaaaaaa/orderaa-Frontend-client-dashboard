@@ -161,10 +161,10 @@ export function SupplierDetailContent({ supplier, initialInvoicesData }: Supplie
         ) : (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
             <LiaFileInvoiceSolid className="w-16 h-16 text-gray-300" />
-            <p className="text-lg font-semibold text-gray-400">
+            <p className="text-lg font-semibold text-muted-foreground">
               لا توجد فواتير
             </p>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-muted-foreground">
               لا توجد فواتير لهذا المورد
             </p>
           </div>

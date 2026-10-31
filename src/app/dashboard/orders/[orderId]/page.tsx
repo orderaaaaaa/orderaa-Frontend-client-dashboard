@@ -233,7 +233,7 @@ function OrderDetailsContent({ params }: { params: { orderId: string } }) {
         </div>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <p className="text-gray-600 text-lg">لا يوجد طلبات</p>
+            <p className="text-muted-foreground text-lg">لا يوجد طلبات</p>
           </div>
         </div>
       </AuthGuard>

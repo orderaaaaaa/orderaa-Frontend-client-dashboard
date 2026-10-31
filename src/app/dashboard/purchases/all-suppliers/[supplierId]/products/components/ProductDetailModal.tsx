@@ -36,7 +36,7 @@ const transactionColumns: DataTableColumn<TransactionRecord>[] = [
       return (
         <div className="flex flex-col items-center">
           <span className="text-sm text-gray-800">{getTimeAgo(dateStr)}</span>
-          <span className="text-xs text-gray-400">{formatDate(dateStr)}</span>
+          <span className="text-xs text-muted-foreground">{formatDate(dateStr)}</span>
         </div>
       );
     },

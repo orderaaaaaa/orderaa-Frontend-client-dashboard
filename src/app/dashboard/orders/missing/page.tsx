@@ -79,7 +79,7 @@ function MissingOrdersContent() {
   if (!canRead) {
     return (
       <div className="w-full max-w-full overflow-x-hidden sm:px-8 py-4">
-        <p className="text-sm text-gray-500 text-center py-12">
+        <p className="text-sm text-muted-foreground text-center py-12">
           ليس لديك صلاحية لعرض قائمة المفقودات
         </p>
       </div>

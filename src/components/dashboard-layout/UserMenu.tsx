@@ -34,11 +34,11 @@ export function UserMenu({
   }
 
   return (
-    <div className="relative flex flex-row items-center">
+    <div className={`relative flex flex-row items-center ${isMobile ? 'min-w-0 whitespace-nowrap' : ''}`}>
       <span
         className={
           isMobile
-            ? 'font-normal text-white text-[16px]'
+            ? 'shrink-0 font-normal text-white text-[16px]'
             : 'font-bold text-foreground-heading text-base'
         }
       >
@@ -48,12 +48,12 @@ export function UserMenu({
         <DropdownMenuPrimitive.Trigger
           className={`group flex items-center gap-1 p-1 cursor-pointer rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition-colors ${
             isMobile
-              ? 'font-normal text-white text-[16px] hover:text-white'
+              ? 'min-w-0 font-normal text-white text-[16px] hover:text-white'
               : 'font-bold text-foreground-heading text-base'
           }`}
         >
-          <span>{displayName}</span>
-          <LiaAngleDownSolid className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+          <span className={isMobile ? 'min-w-0 truncate' : undefined}>{displayName}</span>
+          <LiaAngleDownSolid className="w-4 h-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" />
         </DropdownMenuPrimitive.Trigger>
         <DropdownMenuPrimitive.Portal>
           <DropdownMenuPrimitive.Content

@@ -27,7 +27,7 @@ export const ColumnChart = memo(function ColumnChart({
   const isDark = resolvedTheme === 'dark';
 
   useEffect(() => {
-    if (!chartRef.current) return;
+    if (!chartRef.current || !resolvedTheme) return;
 
     let mounted = true;
 
@@ -152,7 +152,7 @@ export const ColumnChart = memo(function ColumnChart({
         chartInstance.current = null;
       }
     };
-  }, [categories, series, color, height, isDark]);
+  }, [categories, series, color, height, isDark, resolvedTheme]);
 
   return <div ref={chartRef} />;
 });

@@ -131,7 +131,7 @@ export function TopBar({
     >
       {/* Top row with menu, search icon, and user name */}
       <div className="flex items-center justify-between w-full lg:hidden">
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <Button
             variant="ghost"
             size="icon"
@@ -152,7 +152,7 @@ export function TopBar({
           </Button>
         </div>
         {/* ✅ Mobile: Language + Refresh + User dropdown */}
-        <div className="lg:hidden flex items-center gap-1">
+        <div className="lg:hidden flex min-w-0 items-center gap-1">
           <ThemeToggle className="text-white hover:bg-white/20 h-10 w-10" />
           <LanguageSwitcher
             compact

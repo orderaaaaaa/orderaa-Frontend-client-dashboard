@@ -19,7 +19,7 @@ export default function SupplierDetailPage() {
   if (isError || !supplier) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <p className="text-lg font-semibold text-gray-400">
+        <p className="text-lg font-semibold text-muted-foreground">
           المورد غير موجود
         </p>
       </div>

@@ -22,7 +22,7 @@ export const PolarAreaChart = memo(function PolarAreaChart({
   const isDark = resolvedTheme === 'dark';
 
   useEffect(() => {
-    if (!chartRef.current) return;
+    if (!chartRef.current || !resolvedTheme) return;
 
     let mounted = true;
 
@@ -128,7 +128,7 @@ export const PolarAreaChart = memo(function PolarAreaChart({
         chartInstance.current = null;
       }
     };
-  }, [series, labels, color, height, isDark]);
+  }, [series, labels, color, height, isDark, resolvedTheme]);
 
   return <div ref={chartRef} />;
 });

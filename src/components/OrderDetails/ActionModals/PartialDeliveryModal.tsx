@@ -187,16 +187,16 @@ export default function PartialDeliveryModal({
                       {group.name}
                     </span>
                     {group.variantLabel && (
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-muted-foreground">
                         {group.variantLabel}
                       </span>
                     )}
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-muted-foreground">
                       {group.unitPrice} ج.م • {group.rows.length} قطعة
                     </span>
                   </div>
                   <div className="flex flex-col items-center gap-1 shrink-0">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-muted-foreground">
                       الكمية المرفوضة
                     </span>
                     <div className="flex items-center gap-2">
@@ -236,15 +236,15 @@ export default function PartialDeliveryModal({
 
         <div className="flex flex-col gap-2 bg-gray-50 rounded-lg p-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">الإجمالي الأصلي</span>
+            <span className="text-sm text-muted-foreground">الإجمالي الأصلي</span>
             <span className="text-sm font-bold">{totalCost} ج.م</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">قيمة القطع المرفوضة</span>
+            <span className="text-sm text-muted-foreground">قيمة القطع المرفوضة</span>
             <span className="text-sm font-bold">{refusedValue} ج.م</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">السعر بعد الخصم</span>
+            <span className="text-sm text-muted-foreground">السعر بعد الخصم</span>
             <span className="text-sm font-bold text-primary">
               {calculatedPrice} ج.م
             </span>

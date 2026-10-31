@@ -548,7 +548,7 @@ function AllOrdersContent() {
           </div>
 
           {orders.length === 0 && (
-            <div className="text-center py-12 text-gray-500">لا توجد طلبات</div>
+            <div className="text-center py-12 text-muted-foreground">لا توجد طلبات</div>
           )}
         </>
       )}

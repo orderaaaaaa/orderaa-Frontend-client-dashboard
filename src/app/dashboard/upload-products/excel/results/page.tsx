@@ -205,7 +205,7 @@ export default function ValidationResultsPage() {
 
   if (failedCount === 0 && missingRows.length === 0) {
     return (
-      <div className="w-full bg-gray-50 px-4 py-6 sm:p-6" dir="rtl">
+      <div className="w-full bg-card px-4 py-6 sm:p-6" dir="rtl">
         <div className="flex items-center justify-center py-6 sm:py-12">
           <div className="max-w-[656px] w-full text-center">
             <div className="bg-green-50 border border-green-200 rounded-xl p-5 sm:p-8">
@@ -231,7 +231,7 @@ export default function ValidationResultsPage() {
   }
 
   return (
-    <div className="w-full bg-gray-50 px-4 py-6 sm:p-6" dir="rtl">
+    <div className="w-full bg-card px-4 py-6 sm:p-6" dir="rtl">
       <div className="max-w-[656px] w-full">
         {!imported && (
           <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">

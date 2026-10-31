@@ -2,8 +2,8 @@ import React from 'react';
 
 const StaticSection = () => {
   return (
-    <div className="bg-gray-50 px-4 sm:px-6 flex items-center justify-center" dir="rtl">
-      <div className="w-full bg-muted/40 border border-border rounded-xl p-4 sm:p-8 shadow-sm">
+    <div className="bg-card px-4 sm:px-6 flex items-center justify-center" dir="rtl">
+      <div className="w-full bg-card border border-border rounded-xl p-4 sm:p-8 shadow-sm">
         <h3 className="font-semibold text-xl sm:text-[24px] text-gray-900 mb-4 sm:mb-6 text-right">
           تعليمات مهمة
         </h3>

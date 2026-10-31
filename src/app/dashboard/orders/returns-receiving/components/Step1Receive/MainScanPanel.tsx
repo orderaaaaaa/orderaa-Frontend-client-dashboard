@@ -374,7 +374,7 @@ export function MainScanPanel({
               )}
             </div>
             {scanned === 0 && pendingCodes.length === 0 ? (
-              <div className="p-6 text-center text-sm text-gray-400">
+              <div className="p-6 text-center text-sm text-muted-foreground">
                 لم يتم مسح أي طلب بعد — ابدأ بمسح الأكواد أعلاه
               </div>
             ) : (

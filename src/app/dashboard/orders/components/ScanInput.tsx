@@ -52,9 +52,9 @@ export function ScanInput({
       role="search"
       aria-label="إضافة طلب بالكود"
       onSubmit={handleSubmit}
-      className={clsx('flex items-end gap-2 w-full', className)}
+      className={clsx('flex flex-wrap items-end gap-2 w-full', className)}
     >
-      <div className="flex-1 min-w-0">
+      <div className="w-full min-w-0 sm:w-auto sm:flex-1">
         <label htmlFor={inputId} className="block font-medium text-sm mb-1.5 text-foreground">
           {label}
         </label>
@@ -78,7 +78,7 @@ export function ScanInput({
             placeholder={placeholder}
             disabled={disabled}
             aria-busy={isBusy}
-            className="w-full h-11 border border-input rounded-lg ps-10 pe-10 text-base text-foreground placeholder:text-muted-foreground bg-muted dark:bg-input/30 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-muted/50 disabled:cursor-not-allowed"
+            className="w-full min-w-0 h-11 border border-input rounded-lg ps-10 pe-10 text-base text-foreground placeholder:text-muted-foreground bg-muted dark:bg-input/30 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-muted/50 disabled:cursor-not-allowed"
           />
           {isBusy && (
             <span
@@ -91,7 +91,7 @@ export function ScanInput({
       <Button
         type="submit"
         disabled={disabled || value.trim().length === 0}
-        className="h-11 sm:h-11 px-5 rounded-lg"
+        className="h-11 sm:h-11 w-full sm:w-auto px-5 rounded-lg"
       >
         إضافة
       </Button>

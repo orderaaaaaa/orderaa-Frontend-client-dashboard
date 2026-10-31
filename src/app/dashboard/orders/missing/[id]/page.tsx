@@ -26,7 +26,7 @@ export default function MissingOrderDetailPage() {
   if (isError && status === 404) {
     return (
       <div className="w-full max-w-full overflow-x-hidden sm:px-8 py-4">
-        <p className="text-sm text-gray-500 text-center py-12">هذا الطلب غير موجود</p>
+        <p className="text-sm text-muted-foreground text-center py-12">هذا الطلب غير موجود</p>
       </div>
     );
   }

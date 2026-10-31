@@ -534,7 +534,7 @@ export default function OrderCard({
           ) : (
             <div className="flex flex-col items-center justify-center py-8 gap-3">
               <MdBlock size={40} className="text-gray-300" />
-              <p className="text-base text-gray-400">لا توجد ملاحظات لهذا العميل</p>
+              <p className="text-base text-muted-foreground">لا توجد ملاحظات لهذا العميل</p>
             </div>
           )}
         </div>

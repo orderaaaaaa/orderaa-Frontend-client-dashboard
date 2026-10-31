@@ -181,7 +181,8 @@ const FilterSection = React.memo(function FilterSection({
           </PopoverTrigger>
           <PopoverContent
             align="end"
-            className="w-[220px] p-0 border border-gray-200"
+            collisionPadding={16}
+            className="w-[min(220px,calc(100vw-3rem))] p-0 border border-gray-200"
           >
             <div className="p-2 border-b border-gray-200">
               <Input
@@ -196,7 +197,7 @@ const FilterSection = React.memo(function FilterSection({
 
             <ul className="max-h-48 overflow-y-auto py-1">
               {filteredOptions.length === 0 ? (
-                <li className="px-3 py-2 text-gray-500 text-base text-center">
+                <li className="px-3 py-2 text-muted-foreground text-base text-center">
                   {availableFilters.length === 0 ? 'تم اضافة جميع الفلاتر' : 'لا توجد نتائج'}
                 </li>
               ) : (

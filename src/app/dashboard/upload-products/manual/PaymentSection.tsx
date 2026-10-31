@@ -41,7 +41,7 @@ function PaymentSection({
   const displayValue = paymentMethod ? paymentMethodMap[paymentMethod] || '' : '';
 
   return (
-    <div className="bg-gray-50 max-sm:px-0 px-6 flex items-center justify-center">
+    <div className="bg-card max-sm:px-0 px-6 flex items-center justify-center">
       <div className="w-full bg-card border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
         <h1 className="font-bold text-[22px] mb-6">طريقة الدفع</h1>
         <div className="max-w-[502px]" data-field-error="paymentMethod">

@@ -198,7 +198,7 @@ function WarehouseTab({
       </div>
 
       {!isLoading && rows.length === 0 ? (
-        <p className="py-12 text-center text-gray-500">لا توجد بيانات</p>
+        <p className="py-12 text-center text-muted-foreground">لا توجد بيانات</p>
       ) : (
         <DataTable
           columns={columns}

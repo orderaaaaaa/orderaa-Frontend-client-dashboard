@@ -10,7 +10,7 @@ import {
   type RefObject,
 } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { BrandLogo } from '@/components/ui/brand-logo';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ChevronRight, CircleDollarSign, ClipboardList, Info, PackageSearch, Search, X } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -209,7 +209,7 @@ function ListHeader({ view, carrier, implementation, isLoading }: ListHeaderProp
       <div className="flex items-center gap-3">
         {logo && (
           <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border bg-surface-subtle p-1.5">
-            <Image src={logo} alt="" width={28} height={28} className="object-contain" unoptimized />
+            <BrandLogo src={logo} alt="" width={28} height={28} className="object-contain" unoptimized />
           </div>
         )}
         <div className="flex min-w-0 flex-col gap-1">

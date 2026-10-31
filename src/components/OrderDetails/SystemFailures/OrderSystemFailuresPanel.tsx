@@ -45,7 +45,7 @@ function PanelCard({
     <Accordion type="single" collapsible value={open} onValueChange={onOpenChange}>
       <AccordionItem
         value={ALERTS_ITEM}
-        className="font-medium p-4 bg-gray-50 mt-8 rounded-xl border-b-0"
+        className="font-medium p-4 bg-card border border-border mt-8 rounded-xl"
       >
         <div className="flex flex-wrap items-center gap-2">
           <div className="min-w-0 flex-1 basis-full sm:basis-auto">

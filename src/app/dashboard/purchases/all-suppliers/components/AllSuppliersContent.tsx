@@ -217,19 +217,19 @@ export function AllSuppliersContent() {
             <LiaUsersSolid className="w-16 h-16 text-gray-300" />
             {hasActiveFilters ? (
               <>
-                <p className="text-lg font-semibold text-gray-400">
+                <p className="text-lg font-semibold text-muted-foreground">
                   لا توجد نتائج
                 </p>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-muted-foreground">
                   لا توجد نتائج مطابقة للبحث أو الفلاتر المحددة
                 </p>
               </>
             ) : (
               <>
-                <p className="text-lg font-semibold text-gray-400">
+                <p className="text-lg font-semibold text-muted-foreground">
                   لا يوجد موردين
                 </p>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-muted-foreground">
                   قم بإضافة مورد جديد للبدء
                 </p>
               </>

@@ -25,7 +25,7 @@ import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 
 const SELECT_TRIGGER_CLASS =
-  'h-12 w-full rounded-lg border border-gray-200 bg-gray-50 px-4 text-right text-base text-gray-900 transition-colors hover:border-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary';
+  'h-12 w-full rounded-lg border border-gray-200 bg-muted dark:bg-input/30 px-4 text-right text-base text-gray-900 transition-colors hover:border-primary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary';
 
 export default function PersonalData() {
   const { data: governorates = [], isLoading: loadingGovernorates } = useGovernoratesQuery();

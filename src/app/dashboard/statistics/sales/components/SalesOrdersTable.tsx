@@ -144,16 +144,17 @@ export function SalesOrdersTable({ set, rows }: SalesOrdersTableProps) {
   return (
     <div className="bg-card border border-border rounded-2xl">
       <div className="overflow-x-auto max-h-[640px] overflow-y-auto">
-        <table className="w-full caption-bottom text-sm">
+        <table className="w-full min-w-[640px] caption-bottom text-sm">
           <TableHeader>
             <TableRow className="hover:bg-transparent border-b-0">
-              {columns.map((column) => (
+              {columns.map((column, index) => (
                 <TableHead
                   key={column}
                   scope="col"
                   className={cn(
                     'whitespace-nowrap',
                     STICKY_HEADER,
+                    index === 0 && 'start-0 z-20',
                     MONEY_COLUMNS.has(column) && 'text-end tabular-nums',
                   )}
                 >
@@ -165,11 +166,12 @@ export function SalesOrdersTable({ set, rows }: SalesOrdersTableProps) {
           <TableBody>
             {rows.map((row) => (
               <TableRow key={row.orderId} className="hover:bg-accent/50">
-                {columns.map((column) => (
+                {columns.map((column, index) => (
                   <TableCell
                     key={column}
                     className={cn(
                       'whitespace-nowrap',
+                      index === 0 && 'sticky start-0 z-[1] bg-card',
                       MONEY_COLUMNS.has(column) && 'tabular-nums text-end',
                     )}
                   >

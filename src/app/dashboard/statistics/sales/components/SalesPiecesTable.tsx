@@ -76,10 +76,10 @@ export function SalesPiecesTable({ withCost, products }: SalesPiecesTableProps) 
   return (
     <div className="bg-card border border-border rounded-2xl">
       <div className="overflow-x-auto max-h-[640px] overflow-y-auto">
-        <table className="w-full caption-bottom text-sm">
+        <table className="w-full min-w-[480px] caption-bottom text-sm">
           <TableHeader>
             <TableRow className="hover:bg-transparent border-b-0">
-              <TableHead scope="col" className={cn('whitespace-nowrap', STICKY_HEADER)}>
+              <TableHead scope="col" className={cn('whitespace-nowrap start-0 z-20', STICKY_HEADER)}>
                 {PIECE_TABLE_HEADERS.name}
               </TableHead>
               <TableHead scope="col" className={cn('whitespace-nowrap text-end', STICKY_HEADER)}>
@@ -106,7 +106,7 @@ export function SalesPiecesTable({ withCost, products }: SalesPiecesTableProps) 
               return (
                 <Fragment key={product.productId}>
                   <TableRow className="hover:bg-accent/50">
-                    <TableCell className="whitespace-nowrap">
+                    <TableCell className="whitespace-nowrap sticky start-0 z-[1] bg-card">
                       <button
                         type="button"
                         aria-expanded={isExpanded}

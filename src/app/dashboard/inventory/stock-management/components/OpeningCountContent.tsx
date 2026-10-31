@@ -233,17 +233,17 @@ export function OpeningCountContent() {
       </div>
 
       {!canRead ? (
-        <p className="py-8 text-center text-sm text-gray-500">
+        <p className="py-8 text-center text-sm text-muted-foreground">
           ليس لديك صلاحية لعرض أرصدة المخزن للجرد.
         </p>
       ) : !hasWarehouse ? (
-        <p className="py-8 text-center text-sm text-gray-500">
+        <p className="py-8 text-center text-sm text-muted-foreground">
           اختر مخزنًا لبدء الجرد.
         </p>
       ) : isLoading ? (
         <PageLoading size="sm" className="min-h-0 py-10" />
       ) : rows.length === 0 ? (
-        <p className="py-8 text-center text-sm text-gray-500">لا توجد متغيرات</p>
+        <p className="py-8 text-center text-sm text-muted-foreground">لا توجد متغيرات</p>
       ) : (
         <CountSheetTable
           lines={lines}
@@ -277,6 +277,7 @@ export function OpeningCountContent() {
         <Button
           onClick={onSubmit}
           disabled={!canSave}
+          className="disabled:bg-primary disabled:text-primary-foreground disabled:hover:bg-primary"
           loading={isPreparing || adjustMutation.isPending}
         >
           حفظ الجرد

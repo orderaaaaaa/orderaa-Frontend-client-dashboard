@@ -203,7 +203,7 @@ function DelayedOrdersContent() {
       ) : orders.length === 0 ? (
         // "Nothing is delayed" and "nothing is configured" look identical on an
         // empty page and mean completely different things.
-        <p className="text-sm text-gray-500 text-center py-12">
+        <p className="text-sm text-muted-foreground text-center py-12">
           {data?.thresholdsConfigured === 0
             ? 'لم يتم ضبط أي مدة تأخير بعد — افتح إعدادات التأخير وحدد المدة لكل حالة'
             : 'لا توجد طلبات متأخرة'}

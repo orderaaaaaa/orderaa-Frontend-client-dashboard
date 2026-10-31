@@ -116,12 +116,14 @@ export function MissingOrdersTable({ data, isLoading, emptyMessage }: MissingOrd
   );
 
   return (
-    <DataTable
-      columns={columns}
-      data={data as unknown as Record<string, unknown>[]}
-      keyField="id"
-      isLoading={isLoading}
-      emptyMessage={emptyMessage}
-    />
+    <div className="w-full min-w-0 overflow-x-auto">
+      <DataTable
+        columns={columns}
+        data={data as unknown as Record<string, unknown>[]}
+        keyField="id"
+        isLoading={isLoading}
+        emptyMessage={emptyMessage}
+      />
+    </div>
   );
 }

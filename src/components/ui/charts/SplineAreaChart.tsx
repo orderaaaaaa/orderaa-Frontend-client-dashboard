@@ -27,7 +27,7 @@ export const SplineAreaChart = memo(function SplineAreaChart({
   const isDark = resolvedTheme === 'dark';
 
   useEffect(() => {
-    if (!chartRef.current) return;
+    if (!chartRef.current || !resolvedTheme) return;
 
     let mounted = true;
 
@@ -114,7 +114,7 @@ export const SplineAreaChart = memo(function SplineAreaChart({
         chartInstance.current = null;
       }
     };
-  }, [categories, series, height, colors, isDark]);
+  }, [categories, series, height, colors, isDark, resolvedTheme]);
 
   return <div ref={chartRef} />;
 });

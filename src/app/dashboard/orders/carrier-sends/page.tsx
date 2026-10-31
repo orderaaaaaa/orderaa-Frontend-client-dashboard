@@ -56,7 +56,7 @@ export default function CarrierSendsOpenPage() {
         ) : query.isError ? (
           <p className="text-sm text-red-600 text-center py-10">تعذر تحميل الإرساليات المفتوحة</p>
         ) : rows.length === 0 ? (
-          <p className="text-sm text-gray-500 text-center py-10">لا توجد إرساليات مفتوحة</p>
+          <p className="text-sm text-muted-foreground text-center py-10">لا توجد إرساليات مفتوحة</p>
         ) : (
           <div className="flex flex-col gap-4">
             <ul className="flex flex-col gap-3">

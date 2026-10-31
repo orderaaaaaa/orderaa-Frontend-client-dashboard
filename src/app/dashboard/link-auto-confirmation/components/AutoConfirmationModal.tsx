@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import Image from 'next/image';
+import { BrandLogo } from '@/components/ui/brand-logo';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
@@ -167,7 +167,7 @@ export const AutoConfirmationModal: React.FC<AutoConfirmationModalProps> = ({
           <div className="rounded-xl flex items-center p-6 bg-primary/5 border border-primary/10">
             <div className="flex items-center gap-4 w-full">
               <div className="flex items-center justify-center w-16 h-16 bg-card border border-primary/30 shadow-sm rounded-lg overflow-hidden">
-                <Image
+                <BrandLogo
                   src={provider.logo}
                   alt={provider.name}
                   width={56}

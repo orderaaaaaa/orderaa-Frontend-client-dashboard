@@ -78,7 +78,7 @@ export function BucketSection({
       {open && (
         <div className="border-t border-current/10 bg-card">
           {count === 0 ? (
-            <div className="p-4 text-center text-xs text-gray-500">
+            <div className="p-4 text-center text-xs text-muted-foreground">
               {emptyMessage}
             </div>
           ) : (

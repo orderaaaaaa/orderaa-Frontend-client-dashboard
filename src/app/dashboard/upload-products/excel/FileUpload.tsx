@@ -167,7 +167,7 @@ const FileUpload = () => {
         : null;
 
   return (
-    <div className="bg-gray-50 px-4 sm:px-6 flex items-center justify-center" dir="rtl">
+    <div className="bg-card px-4 sm:px-6 flex items-center justify-center" dir="rtl">
       <div className="w-full min-w-0 bg-card border border-gray-200 rounded-xl p-4 sm:p-8 shadow-sm">
         <div className="flex gap-3 sm:gap-4 items-start">
           {/* Icon Container */}

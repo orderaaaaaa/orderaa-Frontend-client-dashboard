@@ -349,7 +349,7 @@ export function FilterSection({
   return (
     <div className="bg-card rounded-xl py-[3px] mt-6 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-4 px-4 py-2">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 w-full min-w-0 sm:w-auto">
           <Popover open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
             <PopoverTrigger asChild>
               <Button variant="default" size="lg">
@@ -365,7 +365,8 @@ export function FilterSection({
             </PopoverTrigger>
             <PopoverContent
               align="end"
-              className="w-[220px] p-0 border border-gray-200"
+              collisionPadding={16}
+              className="w-[min(220px,calc(100vw-3rem))] p-0 border border-gray-200"
             >
               <div className="p-2 border-b border-gray-200">
                 <input
@@ -380,7 +381,7 @@ export function FilterSection({
 
               <ul className="max-h-48 overflow-y-auto py-1">
                 {filteredOptions.length === 0 ? (
-                  <li className="px-3 py-2 text-gray-500 text-base text-center">
+                  <li className="px-3 py-2 text-muted-foreground text-base text-center">
                     {availableFilters.length === 0
                       ? 'تم اضافة جميع الفلاتر'
                       : 'لا توجد نتائج'}
@@ -423,7 +424,7 @@ export function FilterSection({
               options={shippingCompanyOptions}
               placeholder="شركة الشحن"
               loading={isLoadingShippingCompanies}
-              widthClass="w-[180px]"
+              widthClass="w-full min-w-0 sm:w-[180px]"
             />
           )}
         </div>

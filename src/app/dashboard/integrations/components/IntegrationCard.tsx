@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { LiaCheckCircleSolid } from 'react-icons/lia';
-import Image from 'next/image';
+import { BrandLogo } from '@/components/ui/brand-logo';
 import { Else, If, Then } from 'react-if';
 import { IntegrationCardProps } from '../types/platformAndIntegrationCard';
 import { useMemo } from 'react';
@@ -37,7 +37,7 @@ export const IntegrationCard = ({
 
       <div className="flex justify-center mb-6 mt-4">
         <div className="w-32 h-32 flex items-center justify-center">
-          <Image
+          <BrandLogo
             src={platform.logo}
             alt={`${platform.name} logo`}
             width={128}
@@ -56,12 +56,12 @@ export const IntegrationCard = ({
       <Button
         onClick={() => platform.isActive && onButtonClick(platform.id)}
         className={clsx(
-          'w-full h-12 rounded-lg font-medium text-white transition-all duration-200',
+          'w-full h-12 rounded-lg font-medium transition-all duration-200',
           platform.isActive
             ? hasConnection
-              ? 'bg-gray-500 hover:brightness-90'
-              : 'bg-primary hover:bg-brand-hover active:bg-[#3D17A0]'
-            : 'bg-gray-400 cursor-not-allowed'
+              ? 'bg-muted-foreground text-background hover:brightness-90'
+              : 'bg-primary text-white hover:bg-brand-hover active:bg-[#3D17A0]'
+            : 'bg-muted-foreground text-background cursor-not-allowed'
         )}
         disabled={!platform.isActive}
       >

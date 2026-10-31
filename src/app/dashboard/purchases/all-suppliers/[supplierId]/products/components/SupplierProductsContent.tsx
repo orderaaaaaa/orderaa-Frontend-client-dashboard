@@ -143,11 +143,11 @@ export default function SupplierProductsContent({
   const emptyContent = (
     <div className="flex flex-col items-center gap-3">
       <LiaBoxesSolid className="w-16 h-16 text-gray-300" />
-      <p className="text-lg font-semibold text-gray-400">لا توجد منتجات</p>
+      <p className="text-lg font-semibold text-muted-foreground">لا توجد منتجات</p>
       {searchQuery.trim() ? (
-        <p className="text-sm text-gray-400">لا توجد نتائج تطابق البحث</p>
+        <p className="text-sm text-muted-foreground">لا توجد نتائج تطابق البحث</p>
       ) : (
-        <p className="text-sm text-gray-400">لا توجد منتجات لهذا المورد</p>
+        <p className="text-sm text-muted-foreground">لا توجد منتجات لهذا المورد</p>
       )}
     </div>
   );

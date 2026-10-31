@@ -1,5 +1,5 @@
 import React from 'react';
-import Image from 'next/image';
+import { BrandLogo } from '@/components/ui/brand-logo';
 import clsx from 'clsx';
 import { Button } from '@/components/ui/button';
 import { ShippingConfig, ShippingProvider } from '../types/shipping';
@@ -42,7 +42,7 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
       {/* Logo */}
       <div className="flex justify-center mb-6 mt-2">
         <div className="w-32 h-32 flex items-center justify-center">
-          <Image
+          <BrandLogo
             src={provider.logo}
             alt={provider.name}
             width={128}
@@ -72,12 +72,12 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
         onClick={onConnect}
         disabled={isDisabled}
         className={clsx(
-          'w-full h-12 rounded-lg font-medium text-white transition-all duration-200 mt-auto',
+          'w-full h-12 rounded-lg font-medium transition-all duration-200 mt-auto',
           canInteract
             ? isConnected
-              ? 'bg-gray-500 hover:brightness-90'
-              : 'bg-primary hover:bg-brand-hover active:bg-[#3D17A0]'
-            : 'bg-gray-400 cursor-not-allowed'
+              ? 'bg-muted-foreground text-background hover:brightness-90'
+              : 'bg-primary text-white hover:bg-brand-hover active:bg-[#3D17A0]'
+            : 'bg-muted-foreground text-background cursor-not-allowed'
         )}
       >
         {getButtonText()}

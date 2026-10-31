@@ -263,7 +263,7 @@ export function GovernorateConfigTable({
         <div className="overflow-x-auto">
           <table className="w-full text-sm" dir="rtl">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
+              <tr className="border-b border-gray-200 bg-muted/50">
                 <th className="text-right py-3 px-4 font-semibold text-gray-700 w-[30%]">
                   المحافظة
                 </th>
@@ -288,7 +288,7 @@ export function GovernorateConfigTable({
                   (rowValues?.nonReceiptCost ?? '') === '';
                 return (
                   <Fragment key={field.id}>
-                    <tr className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
+                    <tr className="border-b border-gray-100 hover:bg-muted/50 transition-colors">
                       <td className="py-2.5 px-4 text-gray-900 font-medium">
                         {labelByKey.get(field.governorate) ?? field.governorate}
                         <input

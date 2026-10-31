@@ -254,10 +254,12 @@ export function StocktakeListContent() {
           skeletonRows={6}
           onRowClick={(row) => router.push(stocktakeSheetHref(row.id))}
           emptyContent={
-            <EmptyState
-              title="لا توجد جلسات جرد"
-              description="ابدأ جلسة جرد لمعرفة الفروقات بين العد والرصيد"
-            />
+            <div className="sticky start-0 w-[calc(100vw-4rem)] max-w-full">
+              <EmptyState
+                title="لا توجد جلسات جرد"
+                description="ابدأ جلسة جرد لمعرفة الفروقات بين العد والرصيد"
+              />
+            </div>
           }
         />
       )}

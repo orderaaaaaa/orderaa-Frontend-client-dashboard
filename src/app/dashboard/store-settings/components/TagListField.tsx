@@ -82,7 +82,7 @@ export function TagListField({
       {isLoading ? (
         <PageLoading size="sm" className="py-6 min-h-0" />
       ) : (
-        <div className="w-full rounded-xl border-2 border-gray-200 bg-gray-50 p-2 sm:p-3 focus-within:border-primary transition-colors">
+        <div className="w-full rounded-xl border-2 border-gray-200 bg-muted dark:bg-input/30 p-2 sm:p-3 focus-within:border-primary transition-colors">
           {items.length > 0 && (
             <ul className="flex flex-wrap items-center gap-2 mb-2" aria-label={title}>
               {items.map((item) => (

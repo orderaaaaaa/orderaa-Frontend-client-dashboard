@@ -116,7 +116,7 @@ export function LogisticsSettingsSection({
             value={String(company.id)}
             className="border border-gray-200 rounded-lg mb-3 last:mb-0 overflow-hidden"
           >
-            <AccordionTrigger className="px-4 py-3 hover:bg-gray-50">
+            <AccordionTrigger className="px-4 py-3 hover:bg-muted/50">
               <div className="flex items-center gap-3">
                 <LiaTruckSolid className="w-5 h-5 text-primary" />
                 <span className="font-semibold text-gray-900">

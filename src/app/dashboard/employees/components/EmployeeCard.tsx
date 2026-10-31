@@ -264,7 +264,7 @@ export const EmployeeCard = memo(function EmployeeCard({
             disabled={setActivationMutation.isPending}
             className={`col-span-2 rounded-2xl py-3 px-5 flex items-center justify-center gap-2 transition-colors font-medium border-2 disabled:opacity-60 ${
               isActive
-                ? 'bg-card border-red-500 text-red-600 hover:bg-red-50'
+                ? 'bg-card border-red-500 text-destructive hover:bg-red-50'
                 : 'bg-card border-green-600 text-green-700 hover:bg-green-50'
             }`}
           >
