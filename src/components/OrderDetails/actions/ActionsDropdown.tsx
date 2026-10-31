@@ -99,7 +99,7 @@ export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, classNam
   return (
     <div
       className={cn(
-        'absolute bottom-full mb-2 right-0 min-w-[200px] bg-card border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50',
+        'absolute bottom-full mb-2 right-0 min-w-[200px] bg-card border border-gray-200 rounded-lg shadow-lg overflow-y-auto z-50',
         className,
       )}
       dir="rtl"
