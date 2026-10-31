@@ -18,7 +18,7 @@ import { PERMISSIONS } from '@/lib/permissions';
 import { cn } from '@/lib/utils';
 import type { FollowupClosure } from '@/types/logistics';
 import { OrderStatus } from '@/types/orders';
-import { PARTIAL_DELIVERY_IMPLEMENTATIONS, type ShippingImplementation } from '@/types/shippingCompanies';
+import type { ShippingImplementation } from '@/types/shippingCompanies';
 import {
   IN_PROCESS_STATUSES,
   type InProcessShipment,
@@ -26,6 +26,7 @@ import {
   type ReturnedShipment,
   type ShipmentRowBase,
 } from '@/types/shippingProviders';
+import { partialDeliveryBlockReasonOf } from '@/utils/partialDelivery/partialDeliveryGate';
 import { getTimeAgoCompact } from '@/utils/timeAgo';
 import { formatDate, formatNumber } from './formatNumber';
 import { LatenessChip, latenessChipOf, type LatenessChipModel } from './LatenessChip';
@@ -50,27 +51,6 @@ export const isLockedRow = (row: ShipmentRowBase): boolean =>
   row.closure?.kind === 'CANCEL' ||
   !(IN_PROCESS_STATUSES as readonly OrderStatus[]).includes(row.status);
 
-const PARTIAL_DELIVERY_BLOCK_REASON_KEYS = {
-  carrier: 'inProcess.reason.partialCarrier',
-  locked: 'inProcess.reason.locked',
-  status: 'inProcess.reason.partialStatus',
-} as const satisfies Record<string, TranslationKey>;
-
-export const partialDeliveryBlockReasonOf = ({
-  isPartialCarrier,
-  locked,
-  status,
-}: {
-  isPartialCarrier: boolean;
-  locked: boolean;
-  status: OrderStatus;
-}): TranslationKey | null => {
-  if (!isPartialCarrier) return PARTIAL_DELIVERY_BLOCK_REASON_KEYS.carrier;
-  if (locked) return PARTIAL_DELIVERY_BLOCK_REASON_KEYS.locked;
-  if (status !== OrderStatus.WITH_DRIVER) return PARTIAL_DELIVERY_BLOCK_REASON_KEYS.status;
-  return null;
-};
-
 export const moneyTextOf = (value: number | string | null | undefined): string =>
   value === null || value === undefined ? '—' : `${formatNumber(value, 2)} جنيه`;
 
@@ -81,10 +61,8 @@ export function useInProcessCarrier(shippingCompanyId: number) {
   const { shippingCompanies, isLoading } = useShippingCompanies();
   const company = shippingCompanies.find((candidate) => candidate.id === shippingCompanyId);
   const implementation: ShippingImplementation | undefined = company?.implementation;
-  const isPartialCarrier = implementation !== undefined && PARTIAL_DELIVERY_IMPLEMENTATIONS.includes(implementation);
   return {
     implementation,
-    isPartialCarrier,
     isShippingCompaniesLoading: isLoading,
     capabilities: company?.capabilities,
   };
@@ -276,7 +254,6 @@ export function InProcessRowActions({
   const { t } = useI18n();
   const locked = isLockedRow(row);
   const partialBlockKey = partialDeliveryBlockReasonOf({
-    isPartialCarrier: carrier.isPartialCarrier,
     locked,
     status: row.status,
   });

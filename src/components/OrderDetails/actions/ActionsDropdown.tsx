@@ -12,11 +12,13 @@ import {
   LiaUndoAltSolid,
   LiaRedoAltSolid,
   LiaClockSolid,
+  LiaBoxOpenSolid,
 } from 'react-icons/lia';
 import { Button } from '@/components/ui/button';
 import { POST_SHIPPING_STATUSES } from '@/types/logistics';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { PERMISSION_CODES } from '@/lib/permissions';
+import { PARTIAL_DELIVERY_CODES, partialDeliveryBlockReasonOf } from '@/utils/partialDelivery/partialDeliveryGate';
 
 interface ActionOption {
   label: string;
@@ -31,6 +33,7 @@ const arrowOptions: ActionOption[] = [
   { label: 'تأجيل ساعات', action: 'postpone_hours', icon: <LiaHourglassSolid className="w-5 h-5" /> },
   { label: 'تأجيل أيام', action: 'postpone_days', icon: <LiaCalendarAltSolid className="w-5 h-5" /> },
   { label: 'متابعة واتساب', action: 'whatsapp', icon: <LiaWhatsapp className="w-5 h-5" /> },
+  { label: 'تسليم جزئي', action: 'partial_delivery', icon: <LiaBoxOpenSolid className="w-5 h-5" /> },
   { label: 'وقف التشغيل', action: 'stop_operation', icon: <LiaStopCircleSolid className="w-5 h-5" /> },
   { label: 'في انتظار الدفع', action: 'waiting_payment', icon: <LiaLockSolid className="w-5 h-5" /> },
 ];
@@ -52,7 +55,7 @@ export interface ActionsDropdownProps {
 export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, onActionClick }: ActionsDropdownProps) {
   const isPostShipping = POST_SHIPPING_STATUSES.has(orderStatus);
   // `cancel` posts to /orders/:id/cancel, every other action patches the order.
-  const { hasPermission } = usePermissionCheck();
+  const { hasPermission, hasAllPermissions } = usePermissionCheck();
   const canCancel = hasPermission(PERMISSION_CODES.ORDERS_CANCEL);
   const canUpdate = hasPermission(PERMISSION_CODES.ORDERS_UPDATE);
 
@@ -63,6 +66,12 @@ export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, onAction
       }
       if (!canUpdate) {
         return false;
+      }
+      if (option.action === 'partial_delivery') {
+        return (
+          hasAllPermissions(PARTIAL_DELIVERY_CODES) &&
+          partialDeliveryBlockReasonOf({ locked: false, status: orderStatus }) === null
+        );
       }
       if (option.action === 'stop_operation') {
         return orderStatus === 'CONFIRMED';
@@ -81,7 +90,7 @@ export function ActionsDropdown({ isOpen, orderStatus, lastEventStatus, onAction
     }
 
     return base;
-  }, [orderStatus, lastEventStatus, isPostShipping, canCancel, canUpdate]);
+  }, [orderStatus, lastEventStatus, isPostShipping, canCancel, canUpdate, hasAllPermissions]);
 
   if (!isOpen || filteredOptions.length === 0) return null;
 

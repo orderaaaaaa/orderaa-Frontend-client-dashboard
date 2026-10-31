@@ -45,11 +45,12 @@ import { usePermissionCheck } from '@/hooks/usePermissions';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { TranslationKey } from '@/i18n/translate';
 import { closureKindAnyOfCodes } from '@/lib/followupClosurePermissions';
-import { PERMISSIONS, orderStatusSetCodeOf, type PermissionCode } from '@/lib/permissions';
+import { PERMISSIONS, type PermissionCode } from '@/lib/permissions';
 import { cn } from '@/lib/utils';
 import { orderDetailsQueryOptions } from '@/services/orders';
 import { KEY as SHIPPING_PROVIDERS_KEY, useCloseClosure, useUndoClosure } from '@/services/shippingProviders';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { PARTIAL_DELIVERY_CODES } from '@/utils/partialDelivery/partialDeliveryGate';
 import type { FollowupClosure, FollowupClosureKind } from '@/types/logistics';
 import type { OrderStatus } from '@/types/orders';
 import type { LatenessInfo, SendAgainBlockedReason, ShipmentRowBase } from '@/types/shippingProviders';
@@ -92,13 +93,6 @@ export interface PartialDeliveryAccess {
 }
 
 const ADDRESS_LOCATIONS_REASON = 'تحتاج صلاحية عرض المحافظات والمدن';
-
-const PARTIAL_DELIVERY_STATUS_KEYS = ['RETURNED_DELIVERED', 'DELIVERED'] as const;
-
-const PARTIAL_DELIVERY_CODES: PermissionCode[] = [
-  PERMISSIONS.ORDERS_UPDATE,
-  ...PARTIAL_DELIVERY_STATUS_KEYS.flatMap((status) => orderStatusSetCodeOf(status) ?? []),
-];
 
 export const CLOSURE_KIND_LABEL_KEYS: Record<FollowupClosureKind, TranslationKey> = {
   CLOSED_TODAY: 'inProcess.closure.closedToday',
@@ -702,7 +696,6 @@ export function ShipmentRowActions({
           isOpen
           onClose={() => setIsPartialOpen(false)}
           orderId={orderId}
-          orderStatus={orderQuery.data.status}
           orderProducts={orderQuery.data.order_products}
           totalCost={orderQuery.data.totalCost}
           carrierImplementation={carrierImplementation}

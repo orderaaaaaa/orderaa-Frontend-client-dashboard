@@ -19,6 +19,7 @@ export type ModalName =
   | 'exchange'
   | 'returnRefund'
   | 'postShippingCancel'
+  | 'partialDelivery'
   | 'resend'
   | 'late'
   | 'changeProduct'

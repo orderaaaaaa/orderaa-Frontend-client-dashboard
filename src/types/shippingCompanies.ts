@@ -11,17 +11,7 @@ export type ShippingImplementation =
   | 'TOROD'
   | 'CARRIER_NOOP';
 
-export const PARTIAL_DELIVERY_CARRIER_EDITS: Partial<Record<ShippingImplementation, boolean>> = {
-  TURBO: true,
-  BOSTA: false,
-};
-
-export const PARTIAL_DELIVERY_IMPLEMENTATIONS = Object.keys(
-  PARTIAL_DELIVERY_CARRIER_EDITS,
-) as readonly ShippingImplementation[];
-
-export const isNoEditPartialDeliveryCarrier = (implementation: ShippingImplementation) =>
-  PARTIAL_DELIVERY_CARRIER_EDITS[implementation] === false;
+export const isNoEditPartialDeliveryCarrier = (implementation: ShippingImplementation) => implementation !== 'TURBO';
 
 export type CarrierCapabilityReason = 'CARRIER_RESEND_NOT_DOCUMENTED' | 'CARRIER_EXCHANGE_TYPE_NOT_SENT';
 

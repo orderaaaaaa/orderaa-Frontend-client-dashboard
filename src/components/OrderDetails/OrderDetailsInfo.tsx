@@ -105,6 +105,7 @@ function OrderDetailsInfoComponent({
     'exchange',
     'returnRefund',
     'postShippingCancel',
+    'partialDelivery',
     'resend',
     'late',
   ]);
@@ -271,6 +272,9 @@ function OrderDetailsInfoComponent({
         break;
       case 'cancel_post_shipping':
         modals.postShippingCancel.open();
+        break;
+      case 'partial_delivery':
+        modals.partialDelivery.open();
         break;
       case 'resend':
         console.log('[Resend] action triggered for order:', order.id);

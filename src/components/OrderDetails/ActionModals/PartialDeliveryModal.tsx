@@ -3,7 +3,8 @@
 import React, { useMemo, useState } from 'react';
 import { LiaMinusSolid, LiaPlusSolid } from 'react-icons/lia';
 import BaseModal from '@/components/ui/base-modal';
-import { OrderProduct, OrderStatus } from '@/types/orders';
+import { useI18n } from '@/i18n/I18nProvider';
+import { OrderProduct } from '@/types/orders';
 import { usePartialDelivery } from '@/services/logistics';
 import { isNoEditPartialDeliveryCarrier, type ShippingImplementation } from '@/types/shippingCompanies';
 import {
@@ -15,7 +16,6 @@ interface PartialDeliveryModalProps {
   isOpen: boolean;
   onClose: () => void;
   orderId: number;
-  orderStatus: string;
   orderProducts: OrderProduct[];
   totalCost: number;
   carrierImplementation?: ShippingImplementation;
@@ -48,7 +48,6 @@ export default function PartialDeliveryModal({
   isOpen,
   onClose,
   orderId,
-  orderStatus,
   orderProducts,
   totalCost,
   carrierImplementation,
@@ -59,6 +58,7 @@ export default function PartialDeliveryModal({
   const [overridePrice, setOverridePrice] = useState<string>('');
   const [contentOverride, setContentOverride] = useState<string | null>(null);
   const partialDelivery = usePartialDelivery();
+  const { t } = useI18n();
 
   const groups = useMemo<VariantGroup[]>(() => {
     const byKey = new Map<string, VariantGroup>();
@@ -109,7 +109,6 @@ export default function PartialDeliveryModal({
   const overrideInvalid =
     overrideValue !== undefined &&
     (!Number.isFinite(overrideValue) || overrideValue < 0);
-  const isWithDriver = orderStatus === OrderStatus.WITH_DRIVER;
   const isNoEditCarrier =
     carrierImplementation !== undefined && isNoEditPartialDeliveryCarrier(carrierImplementation);
   const isPending = partialDelivery.isPending;
@@ -153,7 +152,7 @@ export default function PartialDeliveryModal({
     <BaseModal
       isOpen={isOpen}
       onClose={handleClose}
-      title="تسليم جزئي"
+      title={t('closure.partial')}
       onConfirm={handleConfirm}
       confirmText={isPending ? 'جاري التنفيذ...' : 'تأكيد'}
       confirmDisabled={
@@ -161,16 +160,13 @@ export default function PartialDeliveryModal({
       }
     >
       <div className="space-y-6">
-        {isWithDriver && (
-          <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-700">
-            الطلب مع المندوب. عند التأكيد يتحول الطلب إلى تم التسليم بالقطع
-            المستلمة
-          </div>
-        )}
+        <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-700">
+          {t('partialDelivery.banner.confirmOutcome')}
+        </div>
 
         {isNoEditCarrier && (
           <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-700">
-            لن يتم تحديث بوسطة بالتسليم الجزئي، ويتم تسوية فرق مبلغ التحصيل مع بوسطة يدوياً
+            {t('partialDelivery.banner.noCarrierEdit')}
           </div>
         )}
 

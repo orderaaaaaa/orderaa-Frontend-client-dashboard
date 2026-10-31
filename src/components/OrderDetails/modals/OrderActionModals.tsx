@@ -19,6 +19,7 @@ import {
   ExchangeModal,
   ReturnRefundModal,
   PostShippingCancelModal,
+  PartialDeliveryModal,
 } from '../ActionModals';
 
 export interface OrderActionModalsProps {
@@ -275,6 +276,17 @@ export function OrderActionModals({
         isOpen={modals.postShippingCancel.isOpen}
         onClose={modals.postShippingCancel.close}
       />
+
+      {modals.partialDelivery.isOpen && (
+        <PartialDeliveryModal
+          isOpen
+          onClose={modals.partialDelivery.close}
+          orderId={order.id}
+          orderProducts={order.order_products || []}
+          totalCost={order.totalCost}
+          carrierImplementation={order.shippingCompanyRef?.implementation}
+        />
+      )}
     </>
   );
 }
