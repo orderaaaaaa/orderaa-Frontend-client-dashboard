@@ -120,7 +120,10 @@ const ar = {
   'stockRules.available.kindVirtual': 'افتراضي',
   'stockRules.available.setAction': 'تحديد المخزن',
   'stockRules.available.empty':
-    'بدون مخزن متاح لن يتم تأكيد الطلبات ولن يُدفع المخزون إلى المتاجر.',
+    'لم يتم تحديد المخزن المتاح بعد — اختر مخزنًا ليظهر رصيده في الطلبات ويُرسل إلى المتاجر',
+  'stockRules.available.loadFailed':
+    'تعذر تحميل بيانات المخزن المتاح. أعد تحميل الصفحة ثم حاول مرة أخرى.',
+  'stockRules.available.loadingVirtual': 'جارٍ تحميل المخازن الافتراضية...',
   'stockRules.available.locked':
     'هذه القاعدة مُدارة بواسطة القالب ولا يمكن تغييرها من هنا.',
   'stockRules.available.loading': 'جارٍ تحميل المخزن المتاح...',

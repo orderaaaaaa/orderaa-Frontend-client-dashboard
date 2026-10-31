@@ -549,8 +549,11 @@ export function StockWorkflowsTab() {
       ? undefined
       : { productId: scope.productId, variantId: scope.variantId }
   );
-  const { data: allRules, isLoading: allRulesLoading } =
-    useStockWorkflowsQuery();
+  const {
+    data: allRules,
+    isLoading: allRulesLoading,
+    isError: allRulesError,
+  } = useStockWorkflowsQuery();
   const describePredecessor = (rule: StockWorkflowApiItem) =>
     describeRule(rule, {
       any: t('stockRules.selection.any'),
@@ -838,6 +841,7 @@ export function StockWorkflowsTab() {
       <AvailableWarehouseSection
         availableRule={availableRule}
         isLoading={allRulesLoading}
+        isError={allRulesError}
       />
 
       <InboundDestinationSection

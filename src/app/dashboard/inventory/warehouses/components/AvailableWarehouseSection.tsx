@@ -18,6 +18,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useI18n } from '@/i18n/I18nProvider';
+import { useHasPermissionStrict } from '@/hooks/usePermissions';
+import { PERMISSION_CODES } from '@/lib/permissions';
 import {
   useCreateStockWorkflowMutation,
   useDeleteStockWorkflowMutation,
@@ -31,6 +33,7 @@ import { withReferencedWarehouseOptions } from '../utils/withReferencedWarehouse
 interface Props {
   availableRule: StockWorkflowApiItem | undefined;
   isLoading: boolean;
+  isError: boolean;
 }
 
 interface TargetChoice {
@@ -70,11 +73,21 @@ const isVirtualValue = (value: string) => value.startsWith(VIRTUAL_PREFIX);
 
 const idOfValue = (value: string) => Number(value.slice(VIRTUAL_PREFIX.length));
 
-export function AvailableWarehouseSection({ availableRule, isLoading }: Props) {
+export function AvailableWarehouseSection({
+  availableRule,
+  isLoading,
+  isError,
+}: Props) {
   const { t, dir } = useI18n();
   const { pickerOptions } = useWarehouseOptions();
-  const virtualQuery = useVirtualWarehousesQuery();
+  const canReadVirtualWarehouses = useHasPermissionStrict(
+    PERMISSION_CODES.VIRTUAL_WAREHOUSES_READ
+  );
+  const virtualQuery = useVirtualWarehousesQuery(undefined, {
+    enabled: canReadVirtualWarehouses,
+  });
   const virtualData = virtualQuery.data;
+  const isVirtualLoading = canReadVirtualWarehouses && virtualQuery.isLoading;
 
   const createMutation = useCreateStockWorkflowMutation();
   const updateMutation = useUpdateStockWorkflowMutation();
@@ -105,11 +118,13 @@ export function AvailableWarehouseSection({ availableRule, isLoading }: Props) {
   );
 
   const virtualChoices = useMemo<TargetChoice[]>(() => {
-    const rows = (virtualData ?? []).map((warehouse) => ({
-      id: warehouse.id,
-      name: warehouse.name,
-      isActive: warehouse.isActive,
-    }));
+    const rows = (canReadVirtualWarehouses ? virtualData ?? [] : []).map(
+      (warehouse) => ({
+        id: warehouse.id,
+        name: warehouse.name,
+        isActive: warehouse.isActive,
+      })
+    );
     const referenced = availableRule?.toVirtualWarehouse;
     if (referenced && !rows.some((row) => row.id === referenced.id)) {
       rows.push({ id: referenced.id, name: referenced.name, isActive: false });
@@ -121,7 +136,7 @@ export function AvailableWarehouseSection({ availableRule, isLoading }: Props) {
         label: row.name,
         disabled: !row.isActive,
       }));
-  }, [virtualData, availableRule, savedValue]);
+  }, [canReadVirtualWarehouses, virtualData, availableRule, savedValue]);
 
   const save = async () => {
     if (!value || !isDirty) return;
@@ -162,25 +177,23 @@ export function AvailableWarehouseSection({ availableRule, isLoading }: Props) {
     </Badge>
   );
 
-  return (
-    <div
-      className="space-y-3 rounded-lg border border-gray-200 bg-white p-4"
-      dir={dir}
-    >
-      <div className="space-y-1">
-        <h3 className="text-sm font-semibold text-gray-900">
-          {t('stockRules.available.title')}
-        </h3>
-        <p className="text-[11px] leading-4 text-gray-500">
-          {t('stockRules.available.hint')}
+  const renderBody = () => {
+    if (isError) {
+      return (
+        <p className="rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-700">
+          {t('stockRules.available.loadFailed')}
         </p>
-      </div>
-
-      {isLoading ? (
+      );
+    }
+    if (isLoading) {
+      return (
         <p className="text-[11px] text-gray-400">
           {t('stockRules.available.loading')}
         </p>
-      ) : isLocked ? (
+      );
+    }
+    if (isLocked) {
+      return (
         <div className="space-y-2">
           {saved && (
             <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -196,103 +209,122 @@ export function AvailableWarehouseSection({ availableRule, isLoading }: Props) {
             {t('stockRules.available.locked')}
           </p>
         </div>
-      ) : (
-        <>
-          {saved && (
-            <div className="flex flex-wrap items-center gap-2 text-sm">
-              <span className="text-gray-500">
-                {t('stockRules.available.current')}
-              </span>
-              {renderKindBadge(saved.isVirtual)}
-              <span className="font-medium text-gray-900">{saved.name}</span>
-            </div>
-          )}
+      );
+    }
+    return (
+      <>
+        {saved && (
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="text-gray-500">
+              {t('stockRules.available.current')}
+            </span>
+            {renderKindBadge(saved.isVirtual)}
+            <span className="font-medium text-gray-900">{saved.name}</span>
+          </div>
+        )}
 
-          {!saved && (
-            <div className="space-y-1 rounded-md border border-amber-200 bg-amber-50 p-2 text-amber-900">
-              <p className="text-xs font-medium">
-                {t('orderDetails.stock.availableWarehouseNotSet')}
-              </p>
-              <p className="text-[11px] leading-4">
-                {t('stockRules.available.empty')}
-              </p>
-            </div>
-          )}
+        {!saved && (
+          <p className="rounded-md border border-amber-200 bg-amber-50 p-2 text-[11px] leading-4 text-amber-900">
+            {t('stockRules.available.empty')}
+          </p>
+        )}
 
-          <div className="flex flex-wrap items-end gap-3">
-            <div className="min-w-[240px] flex-1 sm:max-w-sm">
-              <Select
-                value={value}
-                onValueChange={(next) => setPick(next)}
-                disabled={isSaving}
-              >
-                <SelectTrigger className="w-full" dir={dir}>
-                  <SelectValue
-                    placeholder={t('stockRules.available.placeholder')}
-                  />
-                </SelectTrigger>
-                <SelectContent dir={dir}>
-                  {physicalChoices.length > 0 && (
-                    <SelectGroup>
-                      <SelectLabel>
-                        {t('stockRules.available.groupPhysical')}
-                      </SelectLabel>
-                      {physicalChoices.map((choice) => (
-                        <SelectItem
-                          key={choice.value}
-                          value={choice.value}
-                          disabled={choice.disabled}
-                        >
-                          {choice.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  )}
-                  {virtualChoices.length > 0 && (
-                    <SelectGroup>
-                      <SelectLabel>
-                        {t('stockRules.available.groupVirtual')}
-                      </SelectLabel>
-                      {virtualChoices.map((choice) => (
-                        <SelectItem
-                          key={choice.value}
-                          value={choice.value}
-                          disabled={choice.disabled}
-                        >
-                          {choice.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="min-w-[240px] flex-1 sm:max-w-sm">
+            <Select
+              value={value}
+              onValueChange={(next) => setPick(next)}
+              disabled={isSaving}
+            >
+              <SelectTrigger className="w-full" dir={dir}>
+                <SelectValue
+                  placeholder={t('stockRules.available.placeholder')}
+                />
+              </SelectTrigger>
+              <SelectContent dir={dir}>
+                {physicalChoices.length > 0 && (
+                  <SelectGroup>
+                    <SelectLabel>
+                      {t('stockRules.available.groupPhysical')}
+                    </SelectLabel>
+                    {physicalChoices.map((choice) => (
+                      <SelectItem
+                        key={choice.value}
+                        value={choice.value}
+                        disabled={choice.disabled}
+                      >
+                        {choice.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                )}
+                {canReadVirtualWarehouses && (
+                  <SelectGroup>
+                    <SelectLabel>
+                      {t('stockRules.available.groupVirtual')}
+                    </SelectLabel>
+                    {isVirtualLoading && (
+                      <p className="px-2 py-1.5 text-[11px] text-gray-400">
+                        {t('stockRules.available.loadingVirtual')}
+                      </p>
+                    )}
+                    {virtualChoices.map((choice) => (
+                      <SelectItem
+                        key={choice.value}
+                        value={choice.value}
+                        disabled={choice.disabled}
+                      >
+                        {choice.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
 
+          <Button
+            size="sm"
+            onClick={save}
+            disabled={!value || !isDirty || isSaving}
+            loading={isSaving}
+          >
+            <LiaSaveSolid className="me-1 size-4" />
+            {availableRule
+              ? t('common.save')
+              : t('stockRules.available.setAction')}
+          </Button>
+
+          {availableRule && (
             <Button
               size="sm"
-              onClick={save}
-              disabled={!value || !isDirty || isSaving}
-              loading={isSaving}
+              variant="outline"
+              className="text-red-600 hover:bg-red-50"
+              onClick={() => setConfirmingDelete(true)}
             >
-              <LiaSaveSolid className="me-1 size-4" />
-              {availableRule
-                ? t('common.save')
-                : t('stockRules.available.setAction')}
+              <LiaTrashSolid className="size-4" />
             </Button>
+          )}
+        </div>
+      </>
+    );
+  };
 
-            {availableRule && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-red-600 hover:bg-red-50"
-                onClick={() => setConfirmingDelete(true)}
-              >
-                <LiaTrashSolid className="size-4" />
-              </Button>
-            )}
-          </div>
-        </>
-      )}
+  return (
+    <div
+      className="space-y-3 rounded-lg border border-gray-200 bg-white p-4"
+      dir={dir}
+    >
+      <div className="space-y-1">
+        <h3 className="text-sm font-semibold text-gray-900">
+          {t('stockRules.available.title')}
+        </h3>
+        <p className="text-[11px] leading-4 text-gray-500">
+          {t('stockRules.available.hint')}
+        </p>
+      </div>
+
+      {renderBody()}
 
       <BaseModal
         isOpen={confirmingDelete}

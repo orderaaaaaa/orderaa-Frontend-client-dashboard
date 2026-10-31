@@ -98,7 +98,7 @@ const en: Record<keyof typeof ar, string> = {
 
   'stockRules.available.title': 'Available stock warehouse',
   'stockRules.available.hint':
-    'This warehouse is the available number: it shows on order screens and is pushed to the linked stores.',
+    'The stock of this warehouse is what order screens show and what is pushed to your stores.',
   'stockRules.available.placeholder': 'Select the available stock warehouse',
   'stockRules.available.current': 'Current target',
   'stockRules.available.groupPhysical': 'Physical warehouses',
@@ -107,7 +107,10 @@ const en: Record<keyof typeof ar, string> = {
   'stockRules.available.kindVirtual': 'Virtual',
   'stockRules.available.setAction': 'Set warehouse',
   'stockRules.available.empty':
-    'Without an available warehouse, orders cannot be confirmed and stock is not pushed to the stores.',
+    'No available-stock warehouse is set yet. Choose one so its stock shows on orders and is pushed to your stores.',
+  'stockRules.available.loadFailed':
+    'Could not load the available-stock warehouse. Reload the page and try again.',
+  'stockRules.available.loadingVirtual': 'Loading virtual warehouses...',
   'stockRules.available.locked':
     'This rule is managed by the template and cannot be changed here.',
   'stockRules.available.loading': 'Loading the available stock warehouse...',

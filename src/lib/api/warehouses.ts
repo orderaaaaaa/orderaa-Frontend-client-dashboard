@@ -260,11 +260,15 @@ interface StockWorkflowDtoBase {
   predecessorKeys?: string[];
 }
 
-export type CreateStockWorkflowDto = StockWorkflowDtoBase &
-  (
-    | { toWarehouseId: number; toVirtualWarehouseId?: never }
-    | { toWarehouseId?: never; toVirtualWarehouseId: number }
-  );
+type NonAvailableStockWorkflowEventType = Exclude<StockWorkflowEventType, 'AVAILABLE'>;
+
+export type CreateStockWorkflowDto =
+  | (StockWorkflowDtoBase & {
+      eventType: NonAvailableStockWorkflowEventType;
+      toWarehouseId: number;
+      toVirtualWarehouseId?: never;
+    })
+  | (StockWorkflowDtoBase & { eventType: 'AVAILABLE' } & AvailableStockWorkflowTarget);
 
 /**
  * Scope AND event type are fixed at creation — delete and recreate to change
@@ -272,12 +276,15 @@ export type CreateStockWorkflowDto = StockWorkflowDtoBase &
  * whole from-side (selection + statuses + range), so a partial side patch is
  * not a thing the API offers.
  */
-export type UpdateStockWorkflowDto = Partial<
-  Omit<StockWorkflowDtoBase, 'eventType' | 'productId' | 'variantId'>
-> & {
-  toWarehouseId?: number;
-  toVirtualWarehouseId?: number;
-};
+export type AvailableStockWorkflowTarget =
+  | { toWarehouseId: number; toVirtualWarehouseId?: never }
+  | { toWarehouseId?: never; toVirtualWarehouseId: number };
+
+export type UpdateStockWorkflowDto =
+  | (Partial<Omit<StockWorkflowDtoBase, 'eventType' | 'productId' | 'variantId'>> & {
+      toWarehouseId?: number;
+    })
+  | AvailableStockWorkflowTarget;
 
 export interface StockMovementVariantRef {
   id: number;
