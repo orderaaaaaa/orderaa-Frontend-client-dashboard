@@ -38,8 +38,8 @@ const OVERRIDE_LABEL_KEYS: Record<LatenessOverride, TranslationKey> = {
   ON_TIME: 'inProcess.lateness.manualOnTime',
 };
 
-const HEAD_CLASS = 'whitespace-nowrap bg-muted px-3 py-2.5 text-start font-medium text-foreground';
-const CELL_CLASS = 'px-3 py-2.5 align-top text-sm text-foreground';
+const HEAD_CLASS = 'whitespace-nowrap bg-muted px-2 py-2.5 text-start font-medium text-foreground';
+const CELL_CLASS = 'px-2 py-2.5 align-top text-sm text-foreground';
 const SECONDARY_TEXT_CLASS = 'text-xs text-muted-foreground';
 const STICKY_CELL_CLASS = 'sticky z-[1] bg-card group-hover:bg-muted';
 const PINNED_END_CUE_CLASS =
