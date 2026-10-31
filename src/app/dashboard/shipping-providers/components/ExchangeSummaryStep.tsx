@@ -65,7 +65,16 @@ export function ExchangeSummaryStep({
         </div>
         <div className="flex flex-col gap-0.5">
           <span className="text-xs text-muted-foreground">{t('exchange.create.step3.difference')}</span>
-          <span className="font-medium tabular-nums">{`${formatNumber(difference, 2)} ${t('exchange.create.currency')}`}</span>
+          <span className="font-medium tabular-nums">{`${formatNumber(Math.abs(difference), 2)} ${t('exchange.create.currency')}`}</span>
+          <span className="text-xs text-muted-foreground">
+            {t(
+              difference === 0
+                ? 'exchange.create.step3.differenceNone'
+                : difference < 0
+                  ? 'exchange.create.step3.differenceRefund'
+                  : 'exchange.create.step3.differenceCustomer',
+            )}
+          </span>
         </div>
       </div>
       <p className="text-xs text-muted-foreground">{t('exchange.create.step3.newValueHint')}</p>
