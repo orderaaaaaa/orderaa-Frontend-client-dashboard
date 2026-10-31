@@ -178,7 +178,7 @@ export function OrderActionsFooter({
                     isOpen={actionsDropdown.isOpen}
                     orderStatus={orderStatus}
                     lastEventStatus={lastEventStatus}
-                    className="max-h-[60vh] max-w-full overflow-y-auto"
+                    className="max-h-[60vh] max-w-full"
                     onActionClick={(label, action) => {
                       actionsDropdown.close();
                       onActionClick(label, action);
