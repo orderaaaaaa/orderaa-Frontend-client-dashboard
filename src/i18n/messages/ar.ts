@@ -108,6 +108,27 @@ const ar = {
     'يتبع هذا النطاق وجهة الاستلام الأعلى منه.',
   'stockRules.inbound.saved': 'تم حفظ وجهة الاستلام بنجاح',
   'stockRules.inbound.deleted': 'تم حذف وجهة الاستلام',
+
+  'stockRules.available.title': 'المخزن المتاح',
+  'stockRules.available.hint':
+    'هذا المخزن هو الرقم المتاح للبيع: يظهر في شاشات الطلبات ويُرسل إلى المتاجر المرتبطة.',
+  'stockRules.available.placeholder': 'اختر المخزن المتاح',
+  'stockRules.available.current': 'الهدف الحالي',
+  'stockRules.available.groupPhysical': 'مخازن فعلية',
+  'stockRules.available.groupVirtual': 'مخازن افتراضية',
+  'stockRules.available.kindPhysical': 'فعلي',
+  'stockRules.available.kindVirtual': 'افتراضي',
+  'stockRules.available.setAction': 'تحديد المخزن',
+  'stockRules.available.empty':
+    'بدون مخزن متاح لن يتم تأكيد الطلبات ولن يُدفع المخزون إلى المتاجر.',
+  'stockRules.available.locked':
+    'هذه القاعدة مُدارة بواسطة القالب ولا يمكن تغييرها من هنا.',
+  'stockRules.available.loading': 'جارٍ تحميل المخزن المتاح...',
+  'stockRules.available.saved': 'تم حفظ المخزن المتاح بنجاح',
+  'stockRules.available.deleted': 'تم حذف المخزن المتاح',
+  'stockRules.available.deleteTitle': 'حذف المخزن المتاح',
+  'stockRules.available.deleteWarning':
+    'بحذف المخزن المتاح سيتوقف تأكيد الطلبات ودفع المخزون إلى المتاجر حتى تحدد مخزنًا متاحًا جديدًا.',
   // Appended to a warehouse's display label wherever a picker still needs to
   // show it (e.g. a rule saved against a warehouse that was later deactivated).
   'stockRules.warehouseInactiveSuffix': ' (موقوف)',

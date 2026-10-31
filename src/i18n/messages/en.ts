@@ -95,6 +95,27 @@ const en: Record<keyof typeof ar, string> = {
     'This scope follows the receiving destination above it.',
   'stockRules.inbound.saved': 'Receiving destination saved successfully',
   'stockRules.inbound.deleted': 'Receiving destination deleted',
+
+  'stockRules.available.title': 'Available stock warehouse',
+  'stockRules.available.hint':
+    'This warehouse is the available number: it shows on order screens and is pushed to the linked stores.',
+  'stockRules.available.placeholder': 'Select the available stock warehouse',
+  'stockRules.available.current': 'Current target',
+  'stockRules.available.groupPhysical': 'Physical warehouses',
+  'stockRules.available.groupVirtual': 'Virtual warehouses',
+  'stockRules.available.kindPhysical': 'Physical',
+  'stockRules.available.kindVirtual': 'Virtual',
+  'stockRules.available.setAction': 'Set warehouse',
+  'stockRules.available.empty':
+    'Without an available warehouse, orders cannot be confirmed and stock is not pushed to the stores.',
+  'stockRules.available.locked':
+    'This rule is managed by the template and cannot be changed here.',
+  'stockRules.available.loading': 'Loading the available stock warehouse...',
+  'stockRules.available.saved': 'Available stock warehouse saved successfully',
+  'stockRules.available.deleted': 'Available stock warehouse deleted',
+  'stockRules.available.deleteTitle': 'Delete the available stock warehouse',
+  'stockRules.available.deleteWarning':
+    'Deleting the available stock warehouse blocks order confirmation and stock push to the stores until a new one is set.',
   'stockRules.warehouseInactiveSuffix': ' (inactive)',
 
   'warehouses.deactivateHint':

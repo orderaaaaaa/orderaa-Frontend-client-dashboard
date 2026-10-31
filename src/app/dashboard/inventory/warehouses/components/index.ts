@@ -4,5 +4,6 @@ export { WarehouseTable } from './WarehouseTable';
 export { WarehouseFormModal } from './WarehouseFormModal';
 export { StockWorkflowsTab } from './StockWorkflowsTab';
 export { InboundDestinationSection } from './InboundDestinationSection';
+export { AvailableWarehouseSection } from './AvailableWarehouseSection';
 export { StockMovementsTab } from './StockMovementsTab';
 export { VirtualWarehousesTab } from './VirtualWarehousesTab';

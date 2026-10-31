@@ -47,6 +47,7 @@ import {
 } from './RuleStatusSideEditor';
 import { StockRuleCoverageNotice } from './StockRuleCoverageNotice';
 import { InboundDestinationSection } from './InboundDestinationSection';
+import { AvailableWarehouseSection } from './AvailableWarehouseSection';
 import {
   StockRuleScopeSelector,
   type ScopeSelection,
@@ -122,7 +123,7 @@ type CardRule = StockWorkflowApiItem & { eventType: EditableEventType };
  * API rejects. It belongs to the panel above, not here.
  */
 const isCardRule = (rule: StockWorkflowApiItem): rule is CardRule =>
-  rule.eventType !== 'INBOUND';
+  rule.eventType !== 'INBOUND' && rule.eventType !== 'AVAILABLE';
 
 const RULE_SIDES: RuleSide[] = ['from', 'to'];
 
@@ -172,7 +173,7 @@ const describeRule = (
     rule.toRangeEnd,
     labels.any
   );
-  const route = `${rule.fromWarehouse?.name ?? ''} → ${rule.toWarehouse.name}`;
+  const route = `${rule.fromWarehouse?.name ?? ''} → ${rule.toWarehouse?.name ?? ''}`;
   const scope =
     rule.variantId != null
       ? labels.variant
@@ -207,7 +208,8 @@ const toRow = (rule: CardRule): RuleRow => ({
   // "null" in the picker rather than leaving it unset.
   fromWarehouseId:
     rule.fromWarehouseId == null ? '' : String(rule.fromWarehouseId),
-  toWarehouseId: String(rule.toWarehouseId),
+  toWarehouseId:
+    rule.toWarehouseId == null ? '' : String(rule.toWarehouseId),
   allowNegative: rule.allowNegative,
   onInsufficient: rule.onInsufficient,
   trialStep: rule.trialStep,
@@ -623,6 +625,11 @@ export function StockWorkflowsTab() {
 
   const cardRules = useMemo(() => scopedRules.filter(isCardRule), [scopedRules]);
 
+  const availableRule = useMemo(
+    () => (allRules ?? []).find((rule) => rule.eventType === 'AVAILABLE'),
+    [allRules]
+  );
+
   const scopeKey = `${scope.scope}:${scope.productId ?? ''}:${scope.variantId ?? ''}`;
 
   // Switching scope discards in-progress cards: an unsaved card carries the old
@@ -827,6 +834,11 @@ export function StockWorkflowsTab() {
       {scope.scope !== 'GLOBAL' && (
         <StockRuleCoverageNotice rules={cardRules} scopeLabel={scopeLabel} />
       )}
+
+      <AvailableWarehouseSection
+        availableRule={availableRule}
+        isLoading={allRulesLoading}
+      />
 
       <InboundDestinationSection
         scope={scope}

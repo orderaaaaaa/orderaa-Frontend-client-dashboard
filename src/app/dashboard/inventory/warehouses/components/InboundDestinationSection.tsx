@@ -76,7 +76,8 @@ export function InboundDestinationSection({
     setPick(null);
   }, [scopeKey]);
 
-  const savedValue = inboundRule ? String(inboundRule.toWarehouseId) : '';
+  const savedValue =
+    inboundRule?.toWarehouseId == null ? '' : String(inboundRule.toWarehouseId);
   const value = pick ?? savedValue;
   const isDirty = value !== savedValue;
   const isSaving = createMutation.isPending || updateMutation.isPending;
@@ -91,7 +92,7 @@ export function InboundDestinationSection({
           id: inboundRule.id,
           body: { toWarehouseId: Number(value) },
         });
-        setPick(String(updated.toWarehouseId));
+        setPick(String(updated.toWarehouseId ?? ''));
       } else {
         const created = await createMutation.mutateAsync({
           eventType: 'INBOUND',
@@ -101,7 +102,7 @@ export function InboundDestinationSection({
           ...(scope.scope === 'PRODUCT' ? { productId: scope.productId } : {}),
           ...(scope.scope === 'VARIANT' ? { variantId: scope.variantId } : {}),
         });
-        setPick(String(created.toWarehouseId));
+        setPick(String(created.toWarehouseId ?? ''));
       }
       toast.success(t('stockRules.inbound.saved'));
     } catch (err: unknown) {

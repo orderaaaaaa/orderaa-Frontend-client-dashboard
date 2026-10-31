@@ -32,7 +32,11 @@ export type StockTrialStep = 'SKIP' | 'COUNT';
  * REJECTS creating one and the rule builder offers no affordance for it —
  * T30 owns that surface.
  */
-export type StockWorkflowEventType = 'CREATION' | 'TRANSITION' | 'INBOUND';
+export type StockWorkflowEventType =
+  | 'CREATION'
+  | 'TRANSITION'
+  | 'INBOUND'
+  | 'AVAILABLE';
 
 /**
  * T29 — how ONE side (source or target) of a transition rule matches a status.
@@ -186,7 +190,8 @@ export interface StockWorkflowApiItem {
   variantId: number | null;
   /** null ONLY for an INBOUND rule, which has no source warehouse (T30). */
   fromWarehouseId: number | null;
-  toWarehouseId: number;
+  toWarehouseId: number | null;
+  toVirtualWarehouseId: number | null;
   allowNegative: boolean;
   onInsufficient: InsufficientStockBehavior;
   trialStep: StockTrialStep;
@@ -196,7 +201,8 @@ export interface StockWorkflowApiItem {
   updatedAt: string;
   /** null exactly when `fromWarehouseId` is. */
   fromWarehouse: WarehouseRef | null;
-  toWarehouse: WarehouseRef;
+  toWarehouse: WarehouseRef | null;
+  toVirtualWarehouse: { id: number; name: string } | null;
   product: { id: number; name: string } | null;
   variant: {
     id: number;
@@ -231,7 +237,7 @@ export interface GetStockWorkflowsParams {
  * Anything else is a 400 — the backend CHECK constraints reject hybrid rows,
  * so a stale range left over from a type switch must never be shipped.
  */
-export interface CreateStockWorkflowDto {
+interface StockWorkflowDtoBase {
   /** Required, no default — explicitness is the point (T29 decision 10). */
   eventType: StockWorkflowEventType;
   fromSelection?: StatusSelectionType;
@@ -248,12 +254,17 @@ export interface CreateStockWorkflowDto {
   variantId?: number;
   /** Omitted ONLY for an INBOUND rule, which has no source warehouse (T30). */
   fromWarehouseId?: number;
-  toWarehouseId: number;
   allowNegative?: boolean;
   onInsufficient?: InsufficientStockBehavior;
   trialStep?: StockTrialStep;
   predecessorKeys?: string[];
 }
+
+export type CreateStockWorkflowDto = StockWorkflowDtoBase &
+  (
+    | { toWarehouseId: number; toVirtualWarehouseId?: never }
+    | { toWarehouseId?: never; toVirtualWarehouseId: number }
+  );
 
 /**
  * Scope AND event type are fixed at creation — delete and recreate to change
@@ -262,8 +273,11 @@ export interface CreateStockWorkflowDto {
  * not a thing the API offers.
  */
 export type UpdateStockWorkflowDto = Partial<
-  Omit<CreateStockWorkflowDto, 'eventType' | 'productId' | 'variantId'>
->;
+  Omit<StockWorkflowDtoBase, 'eventType' | 'productId' | 'variantId'>
+> & {
+  toWarehouseId?: number;
+  toVirtualWarehouseId?: number;
+};
 
 export interface StockMovementVariantRef {
   id: number;
