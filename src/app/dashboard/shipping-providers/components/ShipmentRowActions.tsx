@@ -12,6 +12,8 @@ import {
   PackageCheck,
   PackageSearch,
   RotateCcw,
+  Send,
+  Truck,
   XCircle,
   type LucideIcon,
 } from 'lucide-react';
@@ -25,8 +27,10 @@ import CopyableCode from '@/components/ui/copyable-code';
 import { Separator } from '@/components/ui/separator';
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -42,13 +46,14 @@ import { KEY as SHIPPING_PROVIDERS_KEY, useCloseClosure, useUndoClosure } from '
 import { getApiErrorMessage } from '@/utils/apiError';
 import type { FollowupClosure, FollowupClosureKind } from '@/types/logistics';
 import type { OrderStatus } from '@/types/orders';
-import type { LatenessInfo } from '@/types/shippingProviders';
+import type { LatenessInfo, SendAgainBlockedReason } from '@/types/shippingProviders';
 import type { ShippingImplementation } from '@/types/shippingCompanies';
 import { ClosureReasonModal, type ClosureReasonKind } from './ClosureReasonModal';
 import { DeliveryWindowModal } from './DeliveryWindowModal';
 import { LatenessChip, latenessChipOf } from './LatenessChip';
 import { LateMarkModal } from './LateMarkModal';
 import { ShipmentStatusBadge } from './ShipmentStatusBadge';
+import { useSendAgainAction } from './SendAgainAction';
 
 type ActionGroupId = 'follow' | 'delivery' | 'closure' | 'final';
 
@@ -57,6 +62,7 @@ type ConfirmKind = 'close' | 'reopen';
 interface RowAction {
   id: string;
   labelKey: TranslationKey;
+  descriptionKey: TranslationKey;
   icon: LucideIcon;
   group: ActionGroupId;
   opensModal: boolean;
@@ -67,6 +73,7 @@ interface RowAction {
   anyOfCodes?: PermissionCode[];
   disabled: boolean;
   disabledReason?: string;
+  pending?: boolean;
   onSelect: () => void;
 }
 
@@ -113,6 +120,7 @@ export interface ShipmentRowActionsProps {
   rowLocked?: boolean;
   onOpenNotes?: () => void;
   onOpenActionLog?: () => void;
+  sendAgain?: { eligible: boolean; blockedReason: SendAgainBlockedReason | null };
 }
 
 export function ShipmentRowActions({
@@ -130,6 +138,7 @@ export function ShipmentRowActions({
   rowLocked = false,
   onOpenNotes,
   onOpenActionLog,
+  sendAgain,
 }: ShipmentRowActionsProps) {
   const { t } = useI18n();
   const { hasAllPermissions, hasAnyPermission } = usePermissionCheck();
@@ -169,6 +178,12 @@ export function ShipmentRowActions({
   const isInProcessRow = partialDelivery !== undefined;
   const lockedReason = isLocked ? t('inProcess.reason.locked') : undefined;
   const rowLockedReason = rowLocked ? t('inProcess.reason.locked') : undefined;
+  const sendAgainAction = useSendAgainAction({
+    orderId,
+    eligible: sendAgain?.eligible ?? false,
+    blockedReason: sendAgain?.blockedReason ?? null,
+    closure,
+  });
 
   const actions: RowAction[] = [
     ...(onOpenNotes
@@ -176,6 +191,7 @@ export function ShipmentRowActions({
           {
             id: 'notes',
             labelKey: 'inProcess.action.notes' as const,
+            descriptionKey: 'inProcess.sheet.desc.notes' as const,
             icon: MessageSquareText,
             group: 'follow' as const,
             opensModal: true,
@@ -191,6 +207,7 @@ export function ShipmentRowActions({
           {
             id: 'log',
             labelKey: 'inProcess.action.log' as const,
+            descriptionKey: 'inProcess.sheet.desc.log' as const,
             icon: History,
             group: 'follow' as const,
             opensModal: true,
@@ -206,6 +223,7 @@ export function ShipmentRowActions({
           {
             id: 'late',
             labelKey: 'inProcess.action.late' as const,
+            descriptionKey: 'inProcess.sheet.desc.late' as const,
             icon: Flag,
             group: 'follow' as const,
             opensModal: true,
@@ -217,6 +235,7 @@ export function ShipmentRowActions({
           {
             id: 'deliveryWindow',
             labelKey: 'inProcess.action.deliveryWindow' as const,
+            descriptionKey: 'inProcess.sheet.desc.deliveryWindow' as const,
             icon: Clock,
             group: 'follow' as const,
             opensModal: true,
@@ -232,6 +251,7 @@ export function ShipmentRowActions({
           {
             id: 'partial',
             labelKey: 'closure.partial' as const,
+            descriptionKey: 'inProcess.sheet.desc.partial' as const,
             icon: PackageCheck,
             group: 'delivery' as const,
             opensModal: true,
@@ -250,6 +270,7 @@ export function ShipmentRowActions({
           {
             id: 'changeProducts',
             labelKey: 'closure.changeProducts' as const,
+            descriptionKey: 'inProcess.sheet.desc.changeProducts' as const,
             icon: PackageSearch,
             group: 'delivery' as const,
             opensModal: true,
@@ -260,9 +281,28 @@ export function ShipmentRowActions({
           },
         ]
       : []),
+    ...(sendAgain !== undefined
+      ? [
+          {
+            id: 'sendAgain',
+            labelKey: 'inProcess.action.sendAgain' as const,
+            descriptionKey: 'inProcess.sheet.desc.sendAgain' as const,
+            icon: Send,
+            group: 'delivery' as const,
+            opensModal: true,
+            pending: sendAgainAction.isPending,
+            codes: [PERMISSIONS.FOLLOWUP_MANAGE],
+            disabled: sendAgainAction.isDisabled || sendAgainAction.isPending,
+            disabledReason:
+              sendAgainAction.blockedKey !== undefined ? t(sendAgainAction.blockedKey) : undefined,
+            onSelect: sendAgainAction.open,
+          },
+        ]
+      : []),
     {
       id: 'close',
       labelKey: 'closure.close',
+      descriptionKey: 'inProcess.sheet.desc.close',
       icon: CalendarX,
       group: 'closure',
       opensModal: true,
@@ -275,6 +315,7 @@ export function ShipmentRowActions({
     {
       id: 'refuse',
       labelKey: 'closure.refuse',
+      descriptionKey: 'inProcess.sheet.desc.refuse',
       icon: Ban,
       group: 'final',
       opensModal: true,
@@ -288,6 +329,7 @@ export function ShipmentRowActions({
     {
       id: 'cancel',
       labelKey: 'closure.cancel',
+      descriptionKey: 'inProcess.sheet.desc.cancel',
       icon: XCircle,
       group: 'final',
       opensModal: true,
@@ -304,6 +346,7 @@ export function ShipmentRowActions({
     actions.push({
       id: 'reopen',
       labelKey: 'closure.reopen',
+      descriptionKey: 'inProcess.sheet.desc.reopen',
       icon: RotateCcw,
       group: 'closure',
       opensModal: true,
@@ -361,20 +404,30 @@ export function ShipmentRowActions({
         type="button"
         variant="ghost"
         className={cn(
-          'h-auto w-full justify-start gap-3 py-3 text-sm',
-          action.destructive && 'text-destructive hover:bg-destructive/10',
+          'h-auto w-full justify-start gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+          action.destructive && 'hover:bg-destructive/10',
         )}
         disabled={isDisabled}
-        loading={action.awaitsDetails === true && partialRequested}
+        loading={(action.awaitsDetails === true && partialRequested) || action.pending === true}
         title={action.disabledReason}
         aria-describedby={showReason ? reasonId : undefined}
         onClick={() => chooseAction(action)}
       >
-        <Icon className={cn('size-4', action.destructive ? 'text-destructive' : 'text-gray-600')} />
-        <span className="flex flex-col items-start gap-0.5 text-start">
-          <span>{t(action.labelKey)}</span>
+        <span
+          className={cn(
+            'flex size-9 shrink-0 items-center justify-center rounded-md bg-muted',
+            action.destructive && 'bg-destructive/10',
+          )}
+        >
+          <Icon className={cn('size-4', action.destructive ? 'text-destructive' : 'text-muted-foreground')} />
+        </span>
+        <span className="flex min-w-0 flex-col items-start gap-0.5 text-start">
+          <span className={cn('font-medium', action.destructive ? 'text-destructive' : 'text-foreground')}>
+            {t(action.labelKey)}
+          </span>
+          <span className="text-xs whitespace-normal text-muted-foreground">{t(action.descriptionKey)}</span>
           {showReason && (
-            <span id={reasonId} className="text-xs text-gray-500 whitespace-normal">
+            <span id={reasonId} className="text-xs whitespace-normal text-muted-foreground">
               {reason}
             </span>
           )}
@@ -397,36 +450,45 @@ export function ShipmentRowActions({
               aria-label={t('inProcess.sheet.actionsFor', { code: orderCode })}
               aria-haspopup="dialog"
             >
-              <LiaEllipsisVSolid className="size-5 text-gray-600" />
+              <LiaEllipsisVSolid className="size-5 text-muted-foreground" />
             </Button>
           </SheetTrigger>
           <SheetContent
-            side="right"
-            className="w-full sm:max-w-sm p-0 gap-0"
+            side="left"
+            className="w-full gap-0 p-0 sm:max-w-md data-[state=open]:duration-300 data-[state=closed]:duration-200"
             onCloseAutoFocus={handleSheetCloseAutoFocus}
           >
-            <SheetHeader className="border-b p-4 text-start">
-              <SheetTitle>{t('inProcess.sheet.title')}</SheetTitle>
-              <SheetDescription>اختر الإجراء المطلوب لهذا الطلب</SheetDescription>
-              <div className="flex flex-col gap-2 pt-2">
-                <CopyableCode value={orderCode} label="نسخ كود الطلب">
-                  <span className="font-mono font-medium text-gray-900">{orderCode}</span>
-                </CopyableCode>
-                <p className="text-sm text-gray-700">{customerName ?? '—'}</p>
+            <SheetHeader className="gap-3 border-b p-4 pe-12 text-start">
+              <div className="flex items-start gap-3">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Truck className="size-5" />
+                </span>
+                <div className="flex min-w-0 flex-1 flex-col gap-1">
+                  <span className="text-xs text-muted-foreground">{t('inProcess.sheet.title')}</span>
+                  <SheetTitle className="text-lg">
+                    <CopyableCode value={orderCode} label={t('inProcess.sheet.copyCode')}>
+                      <span dir="ltr" className="font-mono font-semibold text-foreground">
+                        {orderCode}
+                      </span>
+                    </CopyableCode>
+                  </SheetTitle>
+                  <p className="truncate text-sm text-muted-foreground">{customerName ?? '—'}</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
                 <ShipmentStatusBadge status={status} />
                 {isInProcessRow && <LatenessChip model={latenessChipOf(lateness ?? null, t)} />}
-                {closure !== null && (
-                  <p className="text-xs text-gray-700">
-                    <span className="font-semibold">{t(CLOSURE_KIND_LABEL_KEYS[closure.kind])}</span>
-                    {closureReasonOf(closure) && (
-                      <span className="text-gray-500"> - {closureReasonOf(closure)}</span>
-                    )}
-                  </p>
-                )}
-                {closure?.notes ? <p className="text-sm text-muted-foreground">{closure.notes}</p> : null}
               </div>
+              {closure !== null && (
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-semibold text-foreground">{t(CLOSURE_KIND_LABEL_KEYS[closure.kind])}</span>
+                  {closureReasonOf(closure) && <span> - {closureReasonOf(closure)}</span>}
+                </p>
+              )}
+              {closure?.notes ? <p className="text-sm text-muted-foreground">{closure.notes}</p> : null}
             </SheetHeader>
-            <div className="flex-1 overflow-y-auto p-2">
+            <div className="min-h-0 flex-1 overflow-y-auto p-2">
+              <SheetDescription className="px-3 pt-3 pb-1">{t('inProcess.sheet.pickAction')}</SheetDescription>
               {ACTION_GROUPS.map((group) => {
                 const groupActions = visibleActions.filter((action) => action.group === group.id);
                 if (groupActions.length === 0) return null;
@@ -434,16 +496,26 @@ export function ShipmentRowActions({
                   <Fragment key={group.id}>
                     {group.id === 'final' && hasNonFinalActions && <Separator className="my-2" />}
                     <section className="flex flex-col gap-1">
-                      <h3 className="px-3 pt-2 text-xs font-semibold text-gray-500">{t(group.titleKey)}</h3>
+                      <h3 className="px-3 pt-3 pb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                        {t(group.titleKey)}
+                      </h3>
                       {groupActions.map(renderAction)}
                     </section>
                   </Fragment>
                 );
               })}
             </div>
+            <SheetFooter className="border-t p-4">
+              <SheetClose asChild>
+                <Button type="button" variant="outline" className="w-full">
+                  {t('inProcess.sheet.close')}
+                </Button>
+              </SheetClose>
+            </SheetFooter>
           </SheetContent>
         </Sheet>
       )}
+      {sendAgainAction.modal}
       {reasonKind !== null && (
         <ClosureReasonModal
           kind={reasonKind}

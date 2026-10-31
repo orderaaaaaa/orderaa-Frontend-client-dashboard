@@ -455,7 +455,7 @@ function InProcessControls({
             )}
           </div>
           {hasActiveFilters && (
-            <Button type="button" variant="ghost" size="sm" onClick={onClearAll}>
+            <Button type="button" variant="ghost" size="sm" className="h-10 sm:h-10" onClick={onClearAll}>
               <X aria-hidden="true" />
               {t('inProcess.filters.clear')}
             </Button>
@@ -477,6 +477,7 @@ function InProcessControls({
             onClear={() => onSearchChange('')}
             clearable
             maxLength={100}
+            inputClassName="h-10 py-0!"
             aria-describedby={appliedSearch ? SEARCH_NOTICE_ID : undefined}
           />
         </div>
@@ -507,6 +508,7 @@ function InProcessControls({
               clearable
               disabled={searchActive}
               widthClass="w-full"
+              triggerClassName="h-10 py-0"
             />
           </div>
           <div className={cn('flex flex-col gap-1.5', dimWhenSearching)}>
@@ -523,6 +525,7 @@ function InProcessControls({
               clearable
               disabled={searchActive}
               widthClass="w-full"
+              triggerClassName="h-10 py-0"
             />
           </div>
           <div className={cn('flex flex-col gap-1.5', dimWhenSearching)}>
@@ -543,6 +546,7 @@ function InProcessControls({
               disabled={!governorate || citiesLoading || searchActive}
               clearable
               widthClass="w-full"
+              triggerClassName="h-10 py-0"
             />
           </div>
           <div className={cn('flex flex-col gap-1.5', dimWhenSearching)}>
@@ -552,6 +556,7 @@ function InProcessControls({
             <Input
               id="in-process-from"
               type="date"
+              inputClassName="h-10 py-0!"
               value={from}
               disabled={searchActive}
               onChange={(e) => onPatch({ from: e.target.value, page: '' })}
@@ -564,6 +569,7 @@ function InProcessControls({
             <Input
               id="in-process-to"
               type="date"
+              inputClassName="h-10 py-0!"
               value={to}
               disabled={searchActive}
               onChange={(e) => onPatch({ to: e.target.value, page: '' })}

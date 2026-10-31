@@ -306,6 +306,7 @@ export function ReturnedRowActions({ row }: { row: ReturnedShipment }) {
         customerName={row.customer.name}
         status={row.status}
         closure={row.closure}
+        sendAgain={{ eligible: row.sendAgainEligible, blockedReason: row.sendAgainBlockedReason }}
       />
       <SendAgainAction
         orderId={row.id}

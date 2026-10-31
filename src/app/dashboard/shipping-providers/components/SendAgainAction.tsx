@@ -27,9 +27,18 @@ interface SendAgainActionProps {
   closure: FollowupClosure | null;
 }
 
-function SendAgainReasonModal({ orderId, onClose }: { orderId: number; onClose: () => void }) {
+type SendAgainMutation = ReturnType<typeof useSendAgainRecordMutation>;
+
+function SendAgainReasonModal({
+  orderId,
+  mutation,
+  onClose,
+}: {
+  orderId: number;
+  mutation: SendAgainMutation;
+  onClose: () => void;
+}) {
   const [reason, setReason] = useState('');
-  const mutation = useSendAgainRecordMutation();
   const trimmedReason = reason.trim();
   const isConfirmDisabled = !trimmedReason || mutation.isPending;
 
@@ -70,17 +79,10 @@ function SendAgainReasonModal({ orderId, onClose }: { orderId: number; onClose: 
   );
 }
 
-export function SendAgainAction({
-  orderId,
-  eligible,
-  blockedReason,
-  closure,
-}: SendAgainActionProps) {
-  const { t } = useI18n();
+export function useSendAgainAction({ orderId, eligible, blockedReason, closure }: SendAgainActionProps) {
   const { hasPermission } = usePermissionCheck();
   const [isOpen, setIsOpen] = useState(false);
-
-  if (!hasPermission(PERMISSION_CODES.FOLLOWUP_MANAGE)) return null;
+  const mutation = useSendAgainRecordMutation();
 
   const isClosureBlocking = closure?.kind === 'REFUSE' || closure?.kind === 'CANCEL';
   const blockedKey: TranslationKey | undefined = isClosureBlocking
@@ -89,6 +91,24 @@ export function SendAgainAction({
       ? BLOCKED_REASON_KEYS[blockedReason]
       : undefined;
 
+  return {
+    isVisible: hasPermission(PERMISSION_CODES.FOLLOWUP_MANAGE),
+    isDisabled: isClosureBlocking || !eligible,
+    blockedKey,
+    isPending: mutation.isPending,
+    open: () => setIsOpen(true),
+    modal: isOpen ? (
+      <SendAgainReasonModal orderId={orderId} mutation={mutation} onClose={() => setIsOpen(false)} />
+    ) : null,
+  };
+}
+
+export function SendAgainAction(props: SendAgainActionProps) {
+  const { t } = useI18n();
+  const action = useSendAgainAction(props);
+
+  if (!action.isVisible) return null;
+
   return (
     <div className="flex flex-col gap-1">
       <Button
@@ -96,13 +116,13 @@ export function SendAgainAction({
         variant="outline"
         size="sm"
         className="h-7 px-2 text-xs"
-        disabled={isClosureBlocking || !eligible}
-        onClick={() => setIsOpen(true)}
+        disabled={action.isDisabled}
+        onClick={() => action.open()}
       >
         إعادة الإرسال
       </Button>
-      {blockedKey && <p className="text-xs text-muted-foreground">{t(blockedKey)}</p>}
-      {isOpen && <SendAgainReasonModal orderId={orderId} onClose={() => setIsOpen(false)} />}
+      {action.blockedKey && <p className="text-xs text-muted-foreground">{t(action.blockedKey)}</p>}
+      {action.modal}
     </div>
   );
 }

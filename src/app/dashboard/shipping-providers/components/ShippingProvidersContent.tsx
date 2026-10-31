@@ -169,7 +169,7 @@ export function ShippingProvidersContent() {
           <div
             aria-busy={isRefreshingStats}
             className={clsx(
-              'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 transition-opacity',
+              'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch transition-opacity',
               isRefreshingStats && 'opacity-60',
             )}
           >
@@ -181,7 +181,7 @@ export function ShippingProvidersContent() {
                 <div
                   key={carrier.shippingCompanyId}
                   className={clsx(
-                    'border rounded-xl p-4 flex flex-col gap-3 bg-white transition-colors cursor-pointer',
+                    'h-full border rounded-xl p-4 flex flex-col gap-3 bg-card transition-colors cursor-pointer',
                     selectedId === carrier.shippingCompanyId
                       ? 'border-primary'
                       : 'border-gray-200 hover:border-primary/40',
@@ -195,91 +195,101 @@ export function ShippingProvidersContent() {
                     )
                   }
                 >
-                  <div className="flex items-start gap-2">
-                    {carrier.type === 'DELEGATE' ? (
-                      <LiaUserSolid className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                    ) : (
-                      <LiaTruckSolid className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-gray-900 truncate">
-                        {carrier.name}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {carrier.phone ??
-                          (isProvider ? 'بدون رقم' : 'شركة شحن مدمجة')}
-                      </p>
-                    </div>
-                    {!carrier.isActive && (
-                      <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
-                        غير نشط
+                  <div className="flex flex-1 flex-col gap-3">
+                    <div className="flex min-h-12 items-start gap-2">
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                        {carrier.type === 'DELEGATE' ? (
+                          <LiaUserSolid className="size-5 text-primary" />
+                        ) : (
+                          <LiaTruckSolid className="size-5 text-primary" />
+                        )}
                       </span>
-                    )}
-                  </div>
+                      <div className="min-w-0 flex-1">
+                        <p title={carrier.name} className="truncate font-semibold text-foreground">
+                          {carrier.name}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {carrier.phone ??
+                            (isProvider ? 'بدون رقم' : 'شركة شحن مدمجة')}
+                        </p>
+                      </div>
+                      {!carrier.isActive && (
+                        <span className="shrink-0 text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                          غير نشط
+                        </span>
+                      )}
+                    </div>
 
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-xs text-gray-500">شحنات حالية</span>
-                    <span className="text-lg font-bold text-gray-900">
-                      {carrier.inTransitCount}
-                    </span>
-                  </div>
-
-                  <Can code={PERMISSIONS.FOLLOWUP_NET_AMOUNT_READ}>
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-xs text-gray-500">صافي الشحنات الحالية</span>
-                      <span className="text-lg font-bold text-gray-900">
-                        {formatNumber(carrier.inProcessNetAmount, 2)} جنيه
+                    <div className="flex min-w-0 flex-col gap-0.5">
+                      <span className="text-xs text-muted-foreground">شحنات حالية</span>
+                      <span className="text-lg font-bold text-foreground">
+                        {carrier.inTransitCount}
                       </span>
                     </div>
-                  </Can>
 
-                  <div className="flex gap-4 border-t border-gray-100 pt-2">
-                    <RateBadge
-                      label="تسليم"
-                      rate={carrier.deliveryRate}
-                      part={carrier.deliveredCount}
-                      total={finished}
-                      tone="delivered"
-                    />
-                    <RateBadge
-                      label="استرجاع"
-                      rate={carrier.returnRate}
-                      part={carrier.returnedCount}
-                      total={finished}
-                      tone="returned"
-                    />
+                    <Can code={PERMISSIONS.FOLLOWUP_NET_AMOUNT_READ}>
+                      <div className="flex min-w-0 flex-col gap-0.5">
+                        <span className="text-xs text-muted-foreground">صافي الشحنات الحالية</span>
+                        <span className="truncate text-lg font-bold text-foreground">
+                          {formatNumber(carrier.inProcessNetAmount, 2)} جنيه
+                        </span>
+                      </div>
+                    </Can>
+
+                    <div className="flex gap-4 border-t border-border pt-2">
+                      <div className="min-w-0 flex-1">
+                        <RateBadge
+                          label="تسليم"
+                          rate={carrier.deliveryRate}
+                          part={carrier.deliveredCount}
+                          total={finished}
+                          tone="delivered"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <RateBadge
+                          label="استرجاع"
+                          rate={carrier.returnRate}
+                          part={carrier.returnedCount}
+                          total={finished}
+                          tone="returned"
+                        />
+                      </div>
+                    </div>
                   </div>
 
-                  {isProvider && (
+                  <div className="mt-auto flex flex-col gap-2">
+                    {isProvider && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="self-start h-10 sm:h-10 px-3 text-xs text-muted-foreground hover:text-destructive"
+                        disabled={!providersReady}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPendingRetire({
+                            carrier,
+                            isActive: !carrier.isActive,
+                          });
+                        }}
+                      >
+                        {carrier.isActive ? 'إيقاف' : 'إعادة تفعيل'}
+                      </Button>
+                    )}
+
                     <Button
                       type="button"
-                      variant="ghost"
-                      className="self-start h-10 sm:h-10 px-3 text-xs text-gray-500 hover:text-red-600"
-                      disabled={!providersReady}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-full text-xs"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setPendingRetire({
-                          carrier,
-                          isActive: !carrier.isActive,
-                        });
+                        goToInProcess(carrier);
                       }}
                     >
-                      {carrier.isActive ? 'إيقاف' : 'إعادة تفعيل'}
+                      الشحنات الحالية
                     </Button>
-                  )}
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="rounded-full text-xs"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      goToInProcess(carrier);
-                    }}
-                  >
-                    الشحنات الحالية
-                  </Button>
+                  </div>
                 </div>
               );
             })}
