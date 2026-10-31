@@ -105,8 +105,14 @@ export function InProcessShipmentCards({
   );
 }
 
-export function ReturnedShipmentCards({ shipments, onOpenNotes, onOpenActionLog }: ReturnedShipmentCardsProps) {
+export function ReturnedShipmentCards({
+  shipments,
+  shippingCompanyId,
+  onOpenNotes,
+  onOpenActionLog,
+}: ReturnedShipmentCardsProps) {
   const { t } = useI18n();
+  const carrier = useInProcessCarrier(shippingCompanyId);
 
   return (
     <ul role="list" className="flex flex-col gap-3">
@@ -114,7 +120,12 @@ export function ReturnedShipmentCards({ shipments, onOpenNotes, onOpenActionLog 
         <li key={row.id} className={CARD_CLASS}>
           <div className="flex items-start justify-between gap-3">
             <CodeCell code={row.code} />
-            <ReturnedRowActions row={row} onOpenNotes={onOpenNotes} onOpenActionLog={onOpenActionLog} />
+            <ReturnedRowActions
+              row={row}
+              carrierResendSupported={carrier.capabilities?.resend.supported}
+              onOpenNotes={onOpenNotes}
+              onOpenActionLog={onOpenActionLog}
+            />
           </div>
           <StatusCell status={row.status} closure={row.closure} />
           <CustomerCell name={row.customer.name} phones={row.customer.phones} />

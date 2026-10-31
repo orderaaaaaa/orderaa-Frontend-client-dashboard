@@ -1,8 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { Info } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import BaseModal from '@/components/ui/base-modal';
 import { Textarea } from '@/components/ui/textarea';
+import { useI18n } from '@/i18n/I18nProvider';
 import type { TranslationKey } from '@/i18n/translate';
 import { useSendAgainRecordMutation } from '@/services/shippingProviders';
 import type { FollowupClosure } from '@/types/logistics';
@@ -21,6 +24,7 @@ interface SendAgainActionProps {
   eligible: boolean;
   blockedReason: SendAgainBlockedReason | null;
   closure: FollowupClosure | null;
+  resendSupported?: boolean;
 }
 
 type SendAgainMutation = ReturnType<typeof useSendAgainRecordMutation>;
@@ -29,11 +33,14 @@ function SendAgainReasonModal({
   orderId,
   mutation,
   onClose,
+  resendSupported,
 }: {
   orderId: number;
   mutation: SendAgainMutation;
   onClose: () => void;
+  resendSupported: boolean | undefined;
 }) {
+  const { t } = useI18n();
   const [reason, setReason] = useState('');
   const trimmedReason = reason.trim();
   const isConfirmDisabled = !trimmedReason || mutation.isPending;
@@ -60,6 +67,12 @@ function SendAgainReasonModal({
         <p className="text-sm text-foreground-secondary">
           يُسجَّل السبب في سجل الطلب، ولا يتم إرسال أي شيء إلى شركة الشحن.
         </p>
+        {resendSupported === false && (
+          <Alert>
+            <Info className="size-4" />
+            <AlertDescription>{t('inProcess.sendAgain.resendNotSupported')}</AlertDescription>
+          </Alert>
+        )}
         <label htmlFor="sendAgainReason" className="font-bold text-foreground">
           سبب إعادة الإرسال <span className="text-destructive">*</span>
         </label>
@@ -75,7 +88,7 @@ function SendAgainReasonModal({
   );
 }
 
-export function useSendAgainAction({ orderId, eligible, blockedReason, closure }: SendAgainActionProps) {
+export function useSendAgainAction({ orderId, eligible, blockedReason, closure, resendSupported }: SendAgainActionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const mutation = useSendAgainRecordMutation();
 
@@ -92,7 +105,12 @@ export function useSendAgainAction({ orderId, eligible, blockedReason, closure }
     isPending: mutation.isPending,
     open: () => setIsOpen(true),
     modal: isOpen ? (
-      <SendAgainReasonModal orderId={orderId} mutation={mutation} onClose={() => setIsOpen(false)} />
+      <SendAgainReasonModal
+        orderId={orderId}
+        mutation={mutation}
+        onClose={() => setIsOpen(false)}
+        resendSupported={resendSupported}
+      />
     ) : null,
   };
 }

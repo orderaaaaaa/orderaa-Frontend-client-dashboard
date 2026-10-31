@@ -403,6 +403,7 @@ const ar = {
   'inProcess.select.all': 'تحديد كل الطلبات القابلة للإغلاق في الصفحة',
   'inProcess.reason.sendAgainNotReturnedDelivered': 'الطلب لم يصل إلى حالة مرتجع مُسلَّم',
   'inProcess.reason.sendAgainNoActiveCode': 'لا يوجد كود شحن نشط',
+  'inProcess.sendAgain.resendNotSupported': 'شركة الشحن لا توفر واجهة موثقة لإعادة الإرسال. سيتم تسجيل الطلب في سجل الطلب فقط، ويجب التواصل مع الشركة لإعادة الإرسال.',
   'inProcess.closureReason.freeTextOnly': 'لا توجد أسباب محفوظة، اكتب السبب',
   'canonical.shell.moduleName': 'التسميات الموحدة',
   'canonical.domain.attributeNames.title': 'أسماء الخصائص',

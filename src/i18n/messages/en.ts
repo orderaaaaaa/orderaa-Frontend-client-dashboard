@@ -390,6 +390,7 @@ const en: Record<keyof typeof ar, string> = {
   'inProcess.select.all': 'Select all closable orders on this page',
   'inProcess.reason.sendAgainNotReturnedDelivered': 'The order has not reached returned-delivered',
   'inProcess.reason.sendAgainNoActiveCode': 'There is no active shipment code',
+  'inProcess.sendAgain.resendNotSupported': 'This carrier has no documented resend API. The request is only recorded in the order log; contact the carrier to re-dispatch.',
   'inProcess.closureReason.freeTextOnly': 'No saved reasons; type the reason',
   'canonical.shell.moduleName': 'Canonical names',
   'canonical.domain.attributeNames.title': 'Attribute names',

@@ -129,6 +129,7 @@ export interface ShipmentRowActionsProps {
   onOpenNotes?: () => void;
   onOpenActionLog?: () => void;
   sendAgain?: { eligible: boolean; blockedReason: SendAgainBlockedReason | null };
+  carrierResendSupported?: boolean;
   editRow?: ShipmentRowBase;
   carrierSupportsUpdate?: boolean;
 }
@@ -149,6 +150,7 @@ export function ShipmentRowActions({
   onOpenNotes,
   onOpenActionLog,
   sendAgain,
+  carrierResendSupported,
   editRow,
   carrierSupportsUpdate,
 }: ShipmentRowActionsProps) {
@@ -196,6 +198,7 @@ export function ShipmentRowActions({
     eligible: sendAgain?.eligible ?? false,
     blockedReason: sendAgain?.blockedReason ?? null,
     closure,
+    resendSupported: carrierResendSupported,
   });
 
   const canReadLocations = hasAllPermissions([PERMISSIONS.SHIPPING_LOCATIONS_READ]);

@@ -991,6 +991,7 @@ function ReturnedList({
                 {data && (
                   <ReturnedShipmentsTable
                     shipments={shipments}
+                    shippingCompanyId={shippingCompanyId}
                     onOpenNotes={onOpenNotes}
                     onOpenActionLog={onOpenActionLog}
                   />
@@ -1000,6 +1001,7 @@ function ReturnedList({
                 {data && (
                   <ReturnedShipmentCards
                     shipments={shipments}
+                    shippingCompanyId={shippingCompanyId}
                     onOpenNotes={onOpenNotes}
                     onOpenActionLog={onOpenActionLog}
                   />

@@ -5,6 +5,7 @@ import type {
 import type { FollowupClosure, FollowupWorkState } from '@/types/logistics';
 import { OrderStatus } from '@/types/orders';
 import type { CarrierSendBearingResponse } from '@/types/carrierSends';
+import type { CarrierCapabilityReason } from '@/types/shippingCompanies';
 
 /** Mirrors the backend shipping-provider DTOs (T16). */
 
@@ -114,6 +115,15 @@ export type SendAgainBlockedReason =
   | 'NO_ACTIVE_CODE'
   | 'NO_CARRIER_STATUS'
   | 'RETURNED_TO_MERCHANT';
+
+export type SendAgainCarrierResend =
+  | { attempted: false; reason: CarrierCapabilityReason | null }
+  | { attempted: true; state: 'SENT' | 'REJECTED' | 'UNKNOWN' };
+
+export interface SendAgainRecordResponse {
+  success: true;
+  carrierResend: SendAgainCarrierResend;
+}
 
 export interface SendAgainNotEligibleErrorBody {
   statusCode: number;

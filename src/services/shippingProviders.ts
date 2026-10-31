@@ -18,7 +18,7 @@ import {
   undoFollowupClosure,
   type FollowupReasonBody,
 } from '@/lib/api/followup';
-import type { CarrierSendBearingResponse, SuccessResponse } from '@/types/carrierSends';
+import type { CarrierSendBearingResponse } from '@/types/carrierSends';
 import type { Order } from '@/types/orders';
 import type {
   CarrierStats,
@@ -38,6 +38,7 @@ import type {
   ShipmentCustomerPhoneBody,
   ShipmentCustomerPhoneResponse,
   ShipmentPriceBody,
+  SendAgainRecordResponse,
   ShipmentReturnCostBody,
   ShippingProviderType,
   StatsRange,
@@ -142,15 +143,15 @@ export const useReturnedShipmentsQuery = (
 
 const useShippingProvidersActionMutation = <TVariables, TResult>(
   mutationFn: (variables: TVariables) => Promise<TResult>,
-  messages: { success: string; error: string },
+  messages: { success: string | ((result: TResult) => string); error: string },
 ) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn,
-    onSuccess: async () => {
+    onSuccess: async (result) => {
       await invalidateAndWait(queryClient, [[KEY]]);
-      toast.success(messages.success);
+      toast.success(typeof messages.success === 'string' ? messages.success : messages.success(result));
     },
     onError: (err: unknown) => {
       toast.error(getApiErrorMessage(err, messages.error));
@@ -161,13 +162,19 @@ const useShippingProvidersActionMutation = <TVariables, TResult>(
 export const useSendAgainRecordMutation = () =>
   useShippingProvidersActionMutation(
     async ({ orderId, reason }: { orderId: number; reason: string }) => {
-      const { data } = await http.post<SuccessResponse>(
+      const { data } = await http.post<SendAgainRecordResponse>(
         `/orders/${orderId}/send-again-record`,
         { reason },
       );
       return data;
     },
-    { success: 'تم تسجيل إعادة الإرسال', error: 'تعذر تسجيل إعادة الإرسال' },
+    {
+      success: (result) =>
+        result.carrierResend.attempted
+          ? 'تم تسجيل إعادة الإرسال'
+          : 'تم تسجيل طلب إعادة الإرسال في سجل الطلب فقط، ولم يُرسل إلى شركة الشحن',
+      error: 'تعذر تسجيل إعادة الإرسال',
+    },
   );
 
 export const useSetLateMark = (shippingCompanyId: number | undefined) =>

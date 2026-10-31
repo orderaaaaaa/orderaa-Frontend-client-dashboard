@@ -79,11 +79,15 @@ export const deliveryWindowTextOf = (from: string | null, to: string | null): st
 
 export function useInProcessCarrier(shippingCompanyId: number) {
   const { shippingCompanies, isLoading } = useShippingCompanies();
-  const implementation: ShippingImplementation | undefined = shippingCompanies.find(
-    (company) => company.id === shippingCompanyId,
-  )?.implementation;
+  const company = shippingCompanies.find((candidate) => candidate.id === shippingCompanyId);
+  const implementation: ShippingImplementation | undefined = company?.implementation;
   const isPartialCarrier = implementation !== undefined && PARTIAL_DELIVERY_IMPLEMENTATIONS.includes(implementation);
-  return { implementation, isPartialCarrier, isShippingCompaniesLoading: isLoading };
+  return {
+    implementation,
+    isPartialCarrier,
+    isShippingCompaniesLoading: isLoading,
+    capabilities: company?.capabilities,
+  };
 }
 
 export type InProcessCarrier = ReturnType<typeof useInProcessCarrier>;
@@ -305,10 +309,12 @@ export function InProcessRowActions({
 
 export function ReturnedRowActions({
   row,
+  carrierResendSupported,
   onOpenNotes,
   onOpenActionLog,
 }: {
   row: ReturnedShipment;
+  carrierResendSupported?: boolean;
   onOpenNotes: (orderId: number) => void;
   onOpenActionLog: (orderId: number, orderCode: string) => void;
 }) {
@@ -321,6 +327,7 @@ export function ReturnedRowActions({
         status={row.status}
         closure={row.closure}
         sendAgain={{ eligible: row.sendAgainEligible, blockedReason: row.sendAgainBlockedReason }}
+        carrierResendSupported={carrierResendSupported}
         onOpenNotes={() => onOpenNotes(row.id)}
         onOpenActionLog={() => onOpenActionLog(row.id, row.code)}
       />
@@ -484,12 +491,19 @@ export function InProcessShipmentsTable({
 
 export interface ReturnedShipmentsTableProps {
   shipments: ReturnedShipment[];
+  shippingCompanyId: number;
   onOpenNotes: (orderId: number) => void;
   onOpenActionLog: (orderId: number, orderCode: string) => void;
 }
 
-export function ReturnedShipmentsTable({ shipments, onOpenNotes, onOpenActionLog }: ReturnedShipmentsTableProps) {
+export function ReturnedShipmentsTable({
+  shipments,
+  shippingCompanyId,
+  onOpenNotes,
+  onOpenActionLog,
+}: ReturnedShipmentsTableProps) {
   const { t } = useI18n();
+  const carrier = useInProcessCarrier(shippingCompanyId);
 
   return (
     <table dir="rtl" className="w-full caption-bottom text-sm">
@@ -542,7 +556,12 @@ export function ReturnedShipmentsTable({ shipments, onOpenNotes, onOpenActionLog
               {moneyTextOf(row.totalCost)}
             </td>
             <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'end-0', PINNED_END_CUE_CLASS)}>
-              <ReturnedRowActions row={row} onOpenNotes={onOpenNotes} onOpenActionLog={onOpenActionLog} />
+              <ReturnedRowActions
+                row={row}
+                carrierResendSupported={carrier.capabilities?.resend.supported}
+                onOpenNotes={onOpenNotes}
+                onOpenActionLog={onOpenActionLog}
+              />
             </td>
           </tr>
         ))}
