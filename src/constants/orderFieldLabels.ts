@@ -91,6 +91,7 @@ export const ORDER_CHANGE_ORIGIN_LABELS: Record<OrderChangeOrigin, string> = {
   SETTLEMENT_ADJUST: 'تسوية يدوية',
   PARTIAL_DELIVERY: 'تسليم جزئي',
   FOLLOWUP_CHANGE_PRODUCTS: 'متابعة: تغيير المنتجات',
+  FOLLOWUP_EXCHANGE: 'متابعة: استبدال',
   FOLLOWUP_CANCEL: 'متابعة: إلغاء',
   PARKED_RELEASE: 'إطلاق طلب معلّق',
   BILLING_ACTIVATION: 'تفعيل بالفوترة',

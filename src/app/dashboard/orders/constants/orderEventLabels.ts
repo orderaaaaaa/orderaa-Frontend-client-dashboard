@@ -1,5 +1,6 @@
 export const ORDER_EVENT_LABELS = {
   SHIPPING_COMPANY_CHANGED: 'تغيير شركة الشحن',
+  EXCHANGE: 'استبدال',
 } as const;
 
 export type OrderEventLabelKey = keyof typeof ORDER_EVENT_LABELS;
