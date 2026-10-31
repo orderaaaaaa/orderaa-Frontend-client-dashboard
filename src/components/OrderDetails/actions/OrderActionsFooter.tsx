@@ -76,7 +76,7 @@ export function OrderActionsFooter({
       className="fixed bottom-8 left-0 right-0 z-20 flex justify-center items-center gap-4 px-4 font-sans"
     >
       {!showStopOperation && canUpdate && orderStatus !== 'CONFIRMED' && !canConfirmStock && stockBlockReason && (
-        <p className="absolute bottom-full mb-3 left-4 right-4 rounded-md border border-red-200 bg-white px-3 py-1.5 text-center text-xs font-medium leading-5 text-red-700 shadow-sm">
+        <p className="absolute bottom-full mb-3 left-4 right-4 rounded-md border border-red-200 bg-card px-3 py-1.5 text-center text-xs font-medium leading-5 text-red-700 shadow-sm">
           {stockBlockReason}
         </p>
       )}

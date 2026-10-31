@@ -312,7 +312,7 @@ export function AvailableWarehouseSection({
 
   return (
     <div
-      className="space-y-3 rounded-lg border border-gray-200 bg-white p-4"
+      className="space-y-3 rounded-lg border border-gray-200 bg-card p-4"
       dir={dir}
     >
       <div className="space-y-1">
@@ -331,7 +331,7 @@ export function AvailableWarehouseSection({
         onClose={() => setConfirmingDelete(false)}
         title={t('stockRules.available.deleteTitle')}
         confirmText={t('common.delete')}
-        confirmButtonClassName="bg-red-600 hover:bg-red-700"
+        confirmButtonClassName="bg-red-600 hover:brightness-90"
         onConfirm={confirmDelete}
         isLoading={deleteMutation.isPending}
         maxWidth="md:max-w-[420px]"
