@@ -24,6 +24,7 @@ import {
   useLocationOptionGovernorates,
 } from '@/services/lookups';
 import { shippingCompanyIdOf } from '@/lib/shippingCompanies';
+import { normalizeArabic } from '@/utils/arabicNormalize';
 import type { LocationOption } from '@/types/locationOptions';
 import { getApiErrorMessage } from '@/utils/apiError';
 import {
@@ -82,7 +83,7 @@ const SIDE_CARD_CLASS =
   'flex w-full min-w-0 flex-col gap-6 rounded-xl border border-border bg-card shadow-sm max-sm:p-5 p-8';
 
 const CONFIRM_SWITCH_CLASS =
-  'data-[state=unchecked]:bg-zinc-300 dark:data-[state=unchecked]:bg-zinc-600 border-zinc-400 dark:border-zinc-500';
+  'data-[state=unchecked]:bg-zinc-500 dark:data-[state=unchecked]:bg-zinc-400 border border-border';
 
 const TOAST_WARNING_CLASS =
   '!bg-amber-50 !text-amber-900 dark:!bg-amber-950 dark:!text-amber-100';
@@ -111,9 +112,15 @@ const matchLocationOption = (
 ): LocationOption | null => {
   const wanted = stored?.trim();
   if (!options || !wanted) return null;
+  const normalizedWanted = normalizeArabic(wanted);
   return (
     options.find((option) => option.value === wanted) ??
     options.find((option) => option.label.trim() === wanted) ??
+    options.find(
+      (option) =>
+        normalizeArabic(option.label) === normalizedWanted ||
+        normalizeArabic(option.value) === normalizedWanted,
+    ) ??
     null
   );
 };
@@ -209,19 +216,22 @@ function CustomerReturnForm() {
     draft.governorateOption,
   ]);
 
-  const lastAddressUnmatched =
-    lastAddress !== null &&
-    ((!!lastAddress.governorate && !draft.governorateOption) ||
-      (!!lastAddress.city && !draft.cityOption));
+  const hasStoredLocation =
+    !!lastAddress?.governorate || !!lastAddress?.city;
+  const storedLocationMatched =
+    !!matchedGovernorate && (!lastAddress?.city || !!matchedCity);
+  const storedLocationLabel = [matchedGovernorate?.label, matchedCity?.label]
+    .filter(Boolean)
+    .join(' - ');
 
   const locationHint =
-    lastAddress && lastAddressUnmatched ? (
+    lastAddress && hasStoredLocation ? (
       <p className="mt-4 text-sm text-muted-foreground">
-        {t('customerReturn.lastAddress.hint', {
-          governorate:
-            matchedGovernorate?.label ?? lastAddress.governorate ?? '',
-          city: matchedCity?.label ?? lastAddress.city ?? '',
-        })}
+        {storedLocationMatched
+          ? t('customerReturn.lastAddress.hint', {
+              location: storedLocationLabel,
+            })
+          : t('customerReturn.lastAddress.unmatched')}
       </p>
     ) : null;
 

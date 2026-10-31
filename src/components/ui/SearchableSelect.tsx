@@ -9,7 +9,7 @@ import React, {
   useCallback,
 } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { CheckIcon, ChevronDown, Loader2, X } from 'lucide-react';
+import { CheckIcon, ChevronDown, Info, Loader2, X } from 'lucide-react';
 import { Controller, type Control } from 'react-hook-form';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/utils/debounce';
@@ -354,7 +354,8 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
                   <span className="flex min-w-0 flex-col">
                     <span>{getDisplayText(opt)}</span>
                     {typeof opt !== 'string' && opt.description && (
-                      <span className="text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Info className="size-3 shrink-0" aria-hidden="true" />
                         {opt.description}
                       </span>
                     )}

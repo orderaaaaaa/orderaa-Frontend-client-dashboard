@@ -18,9 +18,9 @@ export default function ProductReturnOfChip({
   return (
     <Link
       href={`/dashboard/orders/${orderId}`}
-      className="inline-flex items-center gap-1.5 self-start rounded-full border border-border bg-muted px-3 py-1 text-xs font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      className="inline-flex items-center gap-1.5 self-start rounded-sm text-xs font-medium text-primary underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
     >
-      <Link2 className="size-3.5 text-muted-foreground" aria-hidden="true" />
+      <Link2 className="size-3.5 text-primary" aria-hidden="true" />
       {t('customerReturn.productSource', { code: orderCode })}
     </Link>
   );

@@ -43,10 +43,12 @@ function StatusBadge({
 
 function UnitChip({
   unit,
+  index,
   selected,
   onToggle,
 }: {
   unit: CustomerReturnUnit;
+  index: number;
   selected: boolean;
   onToggle: () => void;
 }) {
@@ -54,14 +56,23 @@ function UnitChip({
   const detailLine = [unit.productName ? unit.sku : null, unit.variantLabel]
     .filter(Boolean)
     .join(' · ');
+  const fallbackLine =
+    !unit.sku && !unit.variantLabel
+      ? t('customerReturn.unit.indexLabel', { index })
+      : null;
   const details = (
     <span className="flex min-w-0 flex-col text-start">
       <span className="truncate text-sm font-medium text-foreground">
         {unit.productName ?? unit.sku ?? '—'}
       </span>
-      {detailLine && (
-        <span className="truncate font-mono text-xs text-muted-foreground">
-          {detailLine}
+      {(detailLine || fallbackLine) && (
+        <span
+          className={cn(
+            'truncate text-xs text-muted-foreground',
+            detailLine && 'font-mono',
+          )}
+        >
+          {detailLine || fallbackLine}
         </span>
       )}
       <span className="text-xs text-muted-foreground">
@@ -168,10 +179,11 @@ function ReturnSourceOrderCard({
       </header>
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
-        {order.units.map((unit) => (
+        {order.units.map((unit, index) => (
           <UnitChip
             key={unit.orderProductId}
             unit={unit}
+            index={index + 1}
             selected={selectedIds.has(unit.orderProductId)}
             onToggle={() => onToggleUnit(unit.orderProductId)}
           />
