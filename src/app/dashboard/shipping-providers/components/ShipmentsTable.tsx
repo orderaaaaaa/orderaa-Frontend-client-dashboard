@@ -136,7 +136,7 @@ export function PhoneCell({ phones }: { phones: string[] }) {
 export function CustomerCell({ name, phones }: { name: string | null; phones: string[] }) {
   return (
     <div className="flex min-w-max flex-col items-start gap-1">
-      <span className="font-medium">{name ?? '—'}</span>
+      <span className="block max-w-32 truncate font-medium" title={name ?? undefined}>{name ?? '—'}</span>
       <PhoneCell phones={phones} />
     </div>
   );
