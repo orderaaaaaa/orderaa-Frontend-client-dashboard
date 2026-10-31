@@ -24,14 +24,13 @@ export type CustomerReturnSourceOrder = {
   code: string;
   status: OrderStatus;
   createdAt: string;
-  deliveredAt: string | null;
   shippingCompanyName: string | null;
   units: CustomerReturnUnit[];
 };
 
 export type CustomerReturnLastAddress = {
-  governorateId: string;
-  cityId: string;
+  governorateOption: string;
+  cityOption: string;
   address: string;
 };
 
@@ -60,9 +59,10 @@ export type CreateCustomerReturnPayload = {
   orderProductIds: number[];
   confirm: boolean;
   shippingCompanyId?: number;
-  governorateId?: string;
-  cityId?: string;
+  governorateOption?: string;
+  cityOption?: string;
   address?: string;
+  phoneNumbers?: string[];
   notes?: string;
 };
 
