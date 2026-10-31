@@ -909,6 +909,15 @@ const en: Record<keyof typeof ar, string> = {
   'linkIssues.unlinked.searching': 'Searching...',
   'linkIssues.common.sku': 'SKU',
   'linkIssues.unlinked.confirmSuggestion': 'Confirm suggestion',
+  'customerReturn.mode.label': 'Order type',
+  'customerReturn.mode.new': 'New order',
+  'customerReturn.mode.return': 'Return',
+  'customerReturn.customer.label': 'Customer',
+  'customerReturn.customer.placeholder': 'Search by name or phone number',
+  'customerReturn.customer.change': 'Change',
+  'customerReturn.customer.empty': 'No customers match the search',
+  'customerReturn.customer.loadError': 'Could not load customers',
+  'customerReturn.customer.required': 'Please select a customer',
 };
 
 export default en;

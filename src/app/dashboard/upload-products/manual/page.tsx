@@ -23,10 +23,15 @@ import { useMerchantSettings } from '@/app/dashboard/store-settings/hooks/useSto
 import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
+import ToggleGroup from '@/components/ui/toggle-group';
+import { useI18n } from '@/i18n/I18nProvider';
+import CustomerReturnForm from './return/CustomerReturnForm';
 
 const DIRTY = { shouldDirty: true } as const;
 
-function Manual() {
+type ManualOrderMode = 'new' | 'return';
+
+function NewOrderForm() {
   const queryClient = useQueryClient();
   const selectedProducts = useProductDropdownStore(
     (state) => state.selectedProducts
@@ -344,4 +349,28 @@ function Manual() {
   );
 }
 
-export default Manual;
+function ManualOrderPage() {
+  const { t } = useI18n();
+  const [mode, setMode] = useState<ManualOrderMode>('new');
+
+  return (
+    <div className="flex flex-col gap-[26px]">
+      <div className="flex justify-center max-sm:px-4">
+        <ToggleGroup
+          options={[
+            { value: 'new', label: t('customerReturn.mode.new') },
+            { value: 'return', label: t('customerReturn.mode.return') },
+          ]}
+          value={mode}
+          onChange={setMode}
+        />
+      </div>
+      <div hidden={mode !== 'new'}>
+        <NewOrderForm />
+      </div>
+      {mode === 'return' && <CustomerReturnForm />}
+    </div>
+  );
+}
+
+export default ManualOrderPage;

@@ -922,6 +922,15 @@ const ar = {
   'linkIssues.unlinked.searching': 'جارٍ البحث...',
   'linkIssues.common.sku': 'SKU',
   'linkIssues.unlinked.confirmSuggestion': 'تأكيد المقترح',
+  'customerReturn.mode.label': 'نوع الطلب',
+  'customerReturn.mode.new': 'طلب جديد',
+  'customerReturn.mode.return': 'استرجاع',
+  'customerReturn.customer.label': 'العميل',
+  'customerReturn.customer.placeholder': 'ابحث بالاسم أو رقم الهاتف',
+  'customerReturn.customer.change': 'تغيير',
+  'customerReturn.customer.empty': 'لا يوجد عملاء مطابقون للبحث',
+  'customerReturn.customer.loadError': 'تعذر تحميل العملاء',
+  'customerReturn.customer.required': 'يرجى اختيار العميل',
 } as const;
 
 export default ar;
