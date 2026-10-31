@@ -7,6 +7,7 @@ type ToggleFieldProps = {
   description: string;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
+  switchClassName?: string;
 };
 
 export default function ToggleField({
@@ -14,6 +15,7 @@ export default function ToggleField({
   description,
   checked,
   onCheckedChange,
+  switchClassName,
 }: ToggleFieldProps) {
   return (
     <div className="flex items-center justify-between mb-4 relative">
@@ -25,7 +27,11 @@ export default function ToggleField({
           {description}
         </p>
       </div>
-      <FormSwitch checked={checked} onCheckedChange={onCheckedChange} />
+      <FormSwitch
+        checked={checked}
+        onCheckedChange={onCheckedChange}
+        className={switchClassName}
+      />
     </div>
   );
 }

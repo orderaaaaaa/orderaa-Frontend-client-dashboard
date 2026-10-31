@@ -958,6 +958,14 @@ const en: Record<keyof typeof ar, string> = {
   'customerReturn.area.placeholder': 'Optional',
   'customerReturn.lastAddress.hint': 'Last address: {governorate} - {city}',
   'customerReturn.productSource': 'From order #{code}',
+  'customerReturn.orders.emptyHelp': 'A return can only be created for a delivered order',
+  'customerReturn.submit.missing': 'Missing ({count}): {items}',
+  'customerReturn.submit.created': 'Return {code} created',
+  'customerReturn.submit.viewOrder': 'View order details',
+  'customerReturn.field.units': 'Units to return',
+  'customerReturn.field.company': 'Shipping company',
+  'customerReturn.field.governorate': 'Governorate',
+  'customerReturn.field.city': 'City',
 };
 
 export default en;

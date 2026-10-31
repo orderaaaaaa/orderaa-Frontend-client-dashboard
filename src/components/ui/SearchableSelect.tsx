@@ -19,6 +19,7 @@ type OptionObject = {
   key: string;
   value?: string;
   label?: string;
+  description?: string;
   disabled?: boolean;
 };
 type OptionType = string | OptionObject;
@@ -341,7 +342,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
                   className={cn(
                     'px-2 py-1.5 md:px-3 md:py-2 max-sm:min-h-10 flex justify-between items-center text-sm md:text-base',
                     optionDisabled
-                      ? 'text-foreground-subtle cursor-not-allowed'
+                      ? 'text-foreground-subtle cursor-not-allowed opacity-60'
                       : 'cursor-pointer hover:bg-primary hover:text-white',
                     selected && !optionDisabled && 'bg-primary text-white',
                     activeIdx === idx &&
@@ -350,7 +351,14 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
                       'bg-accent'
                   )}
                 >
-                  <span>{getDisplayText(opt)}</span>
+                  <span className="flex min-w-0 flex-col">
+                    <span>{getDisplayText(opt)}</span>
+                    {typeof opt !== 'string' && opt.description && (
+                      <span className="text-xs text-muted-foreground">
+                        {opt.description}
+                      </span>
+                    )}
+                  </span>
                   {selected && <CheckIcon className="w-4 h-4" />}
                 </li>
               );

@@ -81,4 +81,6 @@ export type ConfirmationSectionProps = {
   description?: string;
   needsConfirmation: boolean;
   onNeedsConfirmationChange: (v: boolean) => void;
+  className?: string;
+  switchClassName?: string;
 };

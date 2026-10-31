@@ -44,7 +44,7 @@ function ReturnSummaryPanel({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-3">
         <SummaryStatCard
           icon={<Package className="size-5" aria-hidden="true" />}
           iconBgClassName="bg-primary/10 text-primary"
@@ -66,20 +66,26 @@ function ReturnSummaryPanel({
         <SummaryRow
           label={t('customerReturn.summary.shippingCompany')}
           value={
-            <span className="flex flex-col items-end gap-1">
-              <span>
-                {shippingCompanyName ?? t('customerReturn.summary.noCompany')}
+            shippingCompanyName ? (
+              <span className="flex flex-col items-end gap-1">
+                <span>{shippingCompanyName}</span>
+                {carrier && (
+                  <span
+                    className={
+                      carrier.supported
+                        ? 'text-sm text-muted-foreground'
+                        : 'text-sm text-destructive'
+                    }
+                  >
+                    {carrierState}
+                  </span>
+                )}
               </span>
-              <span
-                className={
-                  carrier && !carrier.supported
-                    ? 'text-sm text-destructive'
-                    : 'text-sm text-muted-foreground'
-                }
-              >
-                {carrierState}
+            ) : (
+              <span className="text-muted-foreground">
+                {t('customerReturn.summary.noCompany')}
               </span>
-            </span>
+            )
           }
         />
         <SummaryRow

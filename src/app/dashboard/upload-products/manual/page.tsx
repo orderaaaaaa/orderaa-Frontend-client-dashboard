@@ -358,6 +358,7 @@ function ManualOrderPage() {
       <div className="flex justify-center max-sm:px-4">
         <div role="group" aria-label={t('customerReturn.mode.label')}>
           <ToggleGroup
+            className="[&_button]:h-11 sm:[&_button]:h-8"
             options={[
               { value: 'new', label: t('customerReturn.mode.new') },
               { value: 'return', label: t('customerReturn.mode.return') },

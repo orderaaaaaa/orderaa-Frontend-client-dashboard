@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { Check, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getStatusBadgeConfig } from '@/lib/status-badges';
 import { useStatusLabel } from '@/hooks/useStatusLabel';
@@ -50,14 +51,17 @@ function UnitChip({
   onToggle: () => void;
 }) {
   const { t } = useI18n();
+  const detailLine = [unit.productName ? unit.sku : null, unit.variantLabel]
+    .filter(Boolean)
+    .join(' · ');
   const details = (
     <span className="flex min-w-0 flex-col text-start">
       <span className="truncate text-sm font-medium text-foreground">
         {unit.productName ?? unit.sku ?? '—'}
       </span>
-      {unit.variantLabel && (
-        <span className="truncate text-xs text-muted-foreground">
-          {unit.variantLabel}
+      {detailLine && (
+        <span className="truncate font-mono text-xs text-muted-foreground">
+          {detailLine}
         </span>
       )}
       <span className="text-xs text-muted-foreground">
@@ -75,10 +79,17 @@ function UnitChip({
         className={cn(
           'flex items-center gap-3 rounded-lg border px-3 py-2 text-start transition-colors',
           selected
-            ? 'border-primary bg-primary/10'
-            : 'border-border bg-card hover:bg-muted',
+            ? 'border-primary bg-primary/10 ring-1 ring-primary'
+            : 'border-border bg-card hover:border-primary/50',
         )}
       >
+        <Check
+          className={cn(
+            'size-4 shrink-0 text-primary',
+            !selected && 'invisible',
+          )}
+          aria-hidden="true"
+        />
         {details}
       </button>
     );
@@ -87,9 +98,12 @@ function UnitChip({
   return (
     <div
       aria-disabled="true"
-      className="flex flex-col gap-2 rounded-lg border border-dashed border-border bg-muted/40 px-3 py-2 opacity-70"
+      className="flex flex-col gap-2 rounded-lg border border-dashed bg-muted/40 px-3 py-2 text-muted-foreground cursor-not-allowed"
     >
-      {details}
+      <div className="flex items-center gap-3">
+        <Lock className="size-4 shrink-0" aria-hidden="true" />
+        {details}
+      </div>
       {unit.holder && (
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <span className="font-medium text-muted-foreground">

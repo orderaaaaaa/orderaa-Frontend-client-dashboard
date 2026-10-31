@@ -971,6 +971,14 @@ const ar = {
   'customerReturn.area.placeholder': 'اختياري',
   'customerReturn.lastAddress.hint': 'آخر عنوان للعميل: {governorate} - {city}',
   'customerReturn.productSource': 'من الطلب #{code}',
+  'customerReturn.orders.emptyHelp': 'لا يمكن إنشاء مرتجع إلا لطلب مُسلّم',
+  'customerReturn.submit.missing': 'ناقص ({count}): {items}',
+  'customerReturn.submit.created': 'تم إنشاء المرتجع {code}',
+  'customerReturn.submit.viewOrder': 'عرض تفاصيل الطلب',
+  'customerReturn.field.units': 'القطع المرتجعة',
+  'customerReturn.field.company': 'شركة الشحن',
+  'customerReturn.field.governorate': 'المحافظة',
+  'customerReturn.field.city': 'المدينة',
 } as const;
 
 export default ar;

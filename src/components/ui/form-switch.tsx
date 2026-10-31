@@ -6,6 +6,7 @@ import { Switch } from './switch';
 type BaseProps = {
   checked: boolean;
   disabled?: boolean;
+  className?: string;
 };
 
 type FormSwitchWithRegister<T extends FieldValues> = BaseProps & {
@@ -27,7 +28,7 @@ type FormSwitchProps<T extends FieldValues = FieldValues> =
 export function FormSwitch<T extends FieldValues = FieldValues>(
   props: FormSwitchProps<T>
 ) {
-  const { checked, disabled } = props;
+  const { checked, disabled, className } = props;
 
   if ('register' in props && props.register) {
     const { onChange, onBlur, name, ref } = props.register(props.name);
@@ -36,6 +37,7 @@ export function FormSwitch<T extends FieldValues = FieldValues>(
       <Switch
         checked={checked}
         disabled={disabled}
+        className={className}
         name={name}
         ref={ref}
         onBlur={onBlur}
@@ -56,6 +58,7 @@ export function FormSwitch<T extends FieldValues = FieldValues>(
     <Switch
       checked={checked}
       disabled={disabled}
+      className={className}
       onCheckedChange={props.onCheckedChange}
     />
   );

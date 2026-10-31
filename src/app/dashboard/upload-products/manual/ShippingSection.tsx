@@ -232,7 +232,7 @@ function ShippingSection({
         return {
           ...option,
           disabled: true,
-          label: `${option.label} (${carrierUnsupportedReasonOf(support.reason, t)})`,
+          description: carrierUnsupportedReasonOf(support.reason, t),
         };
       }),
     [shippingCompanies, carrierSupport, t]
@@ -266,7 +266,13 @@ function ShippingSection({
   };
 
   return (
-    <div className="bg-card max-sm:px-0 px-6 flex items-center justify-center">
+    <div
+      className={
+        isReturnMode
+          ? 'flex items-center justify-center'
+          : 'bg-card max-sm:px-0 px-6 flex items-center justify-center'
+      }
+    >
       <div className="w-full bg-card border border-gray-200 rounded-xl max-sm:p-5 p-8 shadow-sm">
         {isReturnMode ? (
           <h2 className="font-bold text-[22px] mb-6">الشحن</h2>
@@ -274,7 +280,13 @@ function ShippingSection({
           <h1 className="font-bold text-[22px] mb-6">الشحن</h1>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div
+          className={
+            isReturnMode
+              ? 'grid grid-cols-1 gap-6 mb-6'
+              : 'grid grid-cols-1 md:grid-cols-3 gap-6 mb-6'
+          }
+        >
           <div className="flex flex-col gap-2" data-field-error="shippingCompanyId">
             <label htmlFor={`${idPrefix}-shipping-company`} className="font-medium text-[16px]">
               شركة الشحن <span className="text-red-500">*</span>

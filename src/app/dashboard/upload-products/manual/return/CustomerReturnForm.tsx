@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
+import { AlertTriangle, PackageX } from 'lucide-react';
 import { LiaPlusSolid } from 'react-icons/lia';
 import { toast } from 'react-toastify';
 import CustomerPicker from '@/components/customers/CustomerPicker';
@@ -12,6 +14,7 @@ import { StickyFormFooter } from '@/components/ui/sticky-form-footer';
 import { Textarea } from '@/components/ui/textarea';
 import useShippingCompanies from '@/hooks/useShippingCompanies';
 import { useI18n } from '@/i18n/I18nProvider';
+import type { TranslationKey } from '@/i18n/translate';
 import {
   useCreateCustomerReturn,
   useCustomerReturnCandidates,
@@ -72,6 +75,27 @@ const EMPTY_DRAFT: ReturnDraft = {
 
 const EMPTY_SELECTED_IDS: ReadonlySet<number> = new Set();
 
+const CARD_CLASS =
+  'flex w-full min-w-0 flex-col gap-6 rounded-xl border border-border bg-card shadow-sm max-sm:p-5 p-8';
+
+const SIDE_CARD_CLASS =
+  'flex w-full min-w-0 flex-col gap-6 rounded-xl border border-border bg-card shadow-sm max-sm:p-5 p-8';
+
+const CONFIRM_SWITCH_CLASS =
+  'data-[state=unchecked]:bg-zinc-300 dark:data-[state=unchecked]:bg-zinc-600 border-zinc-400 dark:border-zinc-500';
+
+const TOAST_WARNING_CLASS =
+  '!bg-amber-50 !text-amber-900 dark:!bg-amber-950 dark:!text-amber-100';
+
+const MISSING_FIELD_KEYS: Record<ReturnErrorKey, TranslationKey> = {
+  customer: 'customerReturn.customer.label',
+  units: 'customerReturn.field.units',
+  shippingCompanyId: 'customerReturn.field.company',
+  governorateOption: 'customerReturn.field.governorate',
+  cityOption: 'customerReturn.field.city',
+  address: 'customerReturn.address.label',
+};
+
 const ERROR_FIELD_IDS: Record<ReturnErrorKey, string> = {
   customer: 'return-customer',
   units: 'return-units',
@@ -83,11 +107,15 @@ const ERROR_FIELD_IDS: Record<ReturnErrorKey, string> = {
 
 const matchLocationOption = (
   options: LocationOption[] | undefined,
-  label: string | null | undefined,
+  stored: string | null | undefined,
 ): LocationOption | null => {
-  const wanted = label?.trim();
+  const wanted = stored?.trim();
   if (!options || !wanted) return null;
-  return options.find((option) => option.label.trim() === wanted) ?? null;
+  return (
+    options.find((option) => option.value === wanted) ??
+    options.find((option) => option.label.trim() === wanted) ??
+    null
+  );
 };
 
 function CustomerReturnForm() {
@@ -98,6 +126,10 @@ function CustomerReturnForm() {
     useState<ReadonlySet<number>>(EMPTY_SELECTED_IDS);
   const [draft, setDraft] = useState<ReturnDraft>(EMPTY_DRAFT);
   const [errors, setErrors] = useState<ReturnErrors>({});
+  const [attention, setAttention] = useState<{
+    orderId: number;
+    code: string;
+  } | null>(null);
   const candidatesQuery = useCustomerReturnCandidates(customer?.id ?? null);
   const createReturn = useCreateCustomerReturn();
   const { shippingCompanies } = useShippingCompanies(true);
@@ -186,8 +218,9 @@ function CustomerReturnForm() {
     lastAddress && lastAddressUnmatched ? (
       <p className="mt-4 text-sm text-muted-foreground">
         {t('customerReturn.lastAddress.hint', {
-          governorate: lastAddress.governorate ?? '',
-          city: lastAddress.city ?? '',
+          governorate:
+            matchedGovernorate?.label ?? lastAddress.governorate ?? '',
+          city: matchedCity?.label ?? lastAddress.city ?? '',
         })}
       </p>
     ) : null;
@@ -204,6 +237,7 @@ function CustomerReturnForm() {
 
   const handleCustomerChange = (next: Customer | null) => {
     setCustomer(next);
+    setAttention(null);
     setSelectedIds(EMPTY_SELECTED_IDS);
     setDraft((current) => ({
       ...current,
@@ -244,13 +278,6 @@ function CustomerReturnForm() {
     });
   };
 
-  const resetForm = () => {
-    setCustomer(null);
-    setSelectedIds(EMPTY_SELECTED_IDS);
-    setDraft(EMPTY_DRAFT);
-    setErrors({});
-  };
-
   const validate = (): ReturnErrors => {
     const next: ReturnErrors = {};
     if (!customer) next.customer = t('customerReturn.customer.required');
@@ -281,13 +308,18 @@ function CustomerReturnForm() {
       (key) => nextErrors[key],
     );
     if (firstError) {
-      formRef.current
-        ?.querySelector(`[data-field-error="${ERROR_FIELD_IDS[firstError]}"]`)
-        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const field = formRef.current?.querySelector<HTMLElement>(
+        `[data-field-error="${ERROR_FIELD_IDS[firstError]}"]`,
+      );
+      field?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      field
+        ?.querySelector<HTMLElement>('input, textarea, button')
+        ?.focus({ preventScroll: true });
       return;
     }
     if (!customer) return;
 
+    setAttention(null);
     const notes = draft.notes.trim();
     const area = draft.area.trim();
     createReturn.mutate(
@@ -308,9 +340,14 @@ function CustomerReturnForm() {
             t('customerReturn.submit.success', { code: created.code }),
           );
           if (carrierSendNeedsAttention(created.carrierSend)) {
-            toast.warning(CARRIER_SEND_NOT_SENT_WARNING);
+            setAttention({ orderId: created.id, code: created.code });
+            toast.warning(CARRIER_SEND_NOT_SENT_WARNING, {
+              className: TOAST_WARNING_CLASS,
+            });
           }
-          resetForm();
+          setSelectedIds(EMPTY_SELECTED_IDS);
+          setDraft((current) => ({ ...current, notes: '' }));
+          setErrors({});
         },
         onError: (err: unknown) => {
           toast.error(
@@ -332,8 +369,8 @@ function CustomerReturnForm() {
     if (candidatesQuery.isLoading) {
       return (
         <div className="flex flex-col gap-4">
-          <Skeleton className="h-32 bg-muted" />
-          <Skeleton className="h-32 bg-muted" />
+          <Skeleton className="h-32 bg-muted border border-border/60" />
+          <Skeleton className="h-32 bg-muted border border-border/60" />
         </div>
       );
     }
@@ -347,7 +384,15 @@ function CustomerReturnForm() {
       );
     }
     if (orders.length === 0) {
-      return <EmptyState title={t('customerReturn.orders.empty')} />;
+      return (
+        <EmptyState
+          icon={
+            <PackageX className="size-10 text-muted-foreground" aria-hidden="true" />
+          }
+          title={t('customerReturn.orders.empty')}
+          description={t('customerReturn.orders.emptyHelp')}
+        />
+      );
     }
     return (
       <ReturnSourceOrders
@@ -362,6 +407,18 @@ function CustomerReturnForm() {
   const isDirty =
     customer !== null || selectedIds.size > 0 || draft.address !== '';
   const isPending = createReturn.isPending;
+  const missingFields = (Object.keys(ERROR_FIELD_IDS) as ReturnErrorKey[]).filter(
+    (key) => errors[key],
+  );
+  const missingStatus =
+    missingFields.length > 0
+      ? t('customerReturn.submit.missing', {
+          count: missingFields.length,
+          items: missingFields
+            .map((key) => t(MISSING_FIELD_KEYS[key]))
+            .join('، '),
+        })
+      : null;
 
   return (
     <form
@@ -373,150 +430,176 @@ function CustomerReturnForm() {
       }}
       className="flex flex-col gap-[26px]"
     >
-      <div className="bg-muted/50 max-sm:px-0 px-6 flex items-center justify-center">
-        <div className="flex w-full flex-col gap-4 bg-card border border-border rounded-xl max-sm:p-5 p-8 shadow-sm">
-          <h1 className="font-bold text-[22px]">
-            {t('customerReturn.customer.label')}
-          </h1>
-          <CustomerPicker
-            id="return-customer"
-            value={customer}
-            onChange={handleCustomerChange}
-            error={errors.customer}
-          />
-        </div>
-      </div>
-
-      <div className="bg-muted/50 max-sm:px-0 px-6 flex items-center justify-center">
-        <div className="flex w-full flex-col gap-6 bg-card border border-border rounded-xl max-sm:p-5 p-8 shadow-sm">
-          <h2 className="font-bold text-[19px]">
-            {t('customerReturn.orders.title')}
-          </h2>
-          <div data-field-error="return-units">{renderOrders()}</div>
-          {errors.units && (
-            <p className="text-sm text-destructive">{errors.units}</p>
-          )}
-        </div>
-      </div>
-
-      <ShippingSection
-        mode="return"
-        idPrefix="return"
-        carrierSupport={carrierSupportById}
-        locationHint={locationHint}
-        shippingCompanyId={draft.shippingCompanyId}
-        governorateOption={draft.governorateOption}
-        cityOption={draft.cityOption}
-        shippingCost=""
-        returnShippingCost=""
-        shippingType=""
-        returnShipmentContent=""
-        onShippingCompanyChange={(v) => updateDraft({ shippingCompanyId: v })}
-        onGovernorateOptionChange={(v) => updateDraft({ governorateOption: v })}
-        onCityOptionChange={(v) => updateDraft({ cityOption: v })}
-        onShippingCostChange={() => undefined}
-        onReturnShippingCostChange={() => undefined}
-        onShippingTypeChange={() => undefined}
-        onReturnShipmentContentChange={() => undefined}
-        errors={{
-          shippingCompanyId: errors.shippingCompanyId,
-          governorateOption: errors.governorateOption,
-          cityOption: errors.cityOption,
-        }}
-      />
-
-      <div className="bg-muted/50 max-sm:px-0 px-6 flex items-center justify-center">
-        <div className="flex w-full flex-col gap-6 bg-card border border-border rounded-xl max-sm:p-5 p-8 shadow-sm">
-          <div
-            data-field-error="return-address"
-            className="flex flex-col gap-2"
-          >
-            <label
-              htmlFor="return-address-input"
-              className="font-medium text-[16px]"
+      {attention && (
+        <div
+          role="status"
+          className="flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
+        >
+          <AlertTriangle className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="font-semibold">
+              {t('customerReturn.submit.created', { code: attention.code })}
+            </p>
+            <p className="text-sm">{CARRIER_SEND_NOT_SENT_WARNING}</p>
+            <Link
+              href={`/dashboard/orders/${attention.orderId}`}
+              className="mt-1 w-fit rounded-sm text-sm font-semibold underline underline-offset-4 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
             >
-              {t('customerReturn.address.label')}{' '}
-              <span className="text-destructive">*</span>
-            </label>
-            <Textarea
-              id="return-address-input"
-              name="address"
-              value={draft.address}
-              onChange={(e) => updateDraft({ address: e.target.value })}
-              placeholder={t('customerReturn.address.placeholder')}
-              className="bg-background"
+              {t('customerReturn.submit.viewOrder')}
+            </Link>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-[26px] lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6">
+        <div className="flex min-w-0 flex-col gap-[26px]">
+          <div className={CARD_CLASS}>
+            <h1 className="font-bold text-[22px]">
+              {t('customerReturn.customer.label')}
+            </h1>
+            <CustomerPicker
+              id="return-customer"
+              value={customer}
+              onChange={handleCustomerChange}
+              error={errors.customer}
             />
-            {errors.address && (
-              <p className="text-sm text-destructive">{errors.address}</p>
+          </div>
+
+          <div className={CARD_CLASS}>
+            <h2 className="font-bold text-[19px]">
+              {t('customerReturn.orders.title')}
+            </h2>
+            <div data-field-error="return-units">{renderOrders()}</div>
+            {errors.units && (
+              <p className="text-sm text-destructive">{errors.units}</p>
             )}
           </div>
-          <div className="flex flex-col gap-2">
-            <label
-              htmlFor="return-area-input"
-              className="font-medium text-[16px]"
+
+          <div className={CARD_CLASS}>
+            <div
+              data-field-error="return-address"
+              className="flex flex-col gap-2"
             >
-              {t('customerReturn.area.label')}
-            </label>
-            <Input
-              id="return-area-input"
-              name="area"
-              value={draft.area}
-              onChange={(e) => updateDraft({ area: e.target.value })}
-              placeholder={t('customerReturn.area.placeholder')}
-              className="w-full"
-              inputClassName="bg-background"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label
-              htmlFor="return-notes-input"
-              className="font-medium text-[16px]"
-            >
-              {t('customerReturn.notes.label')}
-            </label>
-            <Textarea
-              id="return-notes-input"
-              name="notes"
-              value={draft.notes}
-              onChange={(e) =>
-                setDraft((current) => ({ ...current, notes: e.target.value }))
-              }
-              className="bg-background"
-            />
+              <label
+                htmlFor="return-address-input"
+                className="font-medium text-[16px]"
+              >
+                {t('customerReturn.address.label')}{' '}
+                <span className="text-destructive">*</span>
+              </label>
+              <Textarea
+                id="return-address-input"
+                name="address"
+                value={draft.address}
+                onChange={(e) => updateDraft({ address: e.target.value })}
+                placeholder={t('customerReturn.address.placeholder')}
+                className="bg-background"
+              />
+              {errors.address && (
+                <p className="text-sm text-destructive">{errors.address}</p>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <label
+                htmlFor="return-area-input"
+                className="font-medium text-[16px]"
+              >
+                {t('customerReturn.area.label')}
+              </label>
+              <Input
+                id="return-area-input"
+                name="area"
+                value={draft.area}
+                onChange={(e) => updateDraft({ area: e.target.value })}
+                placeholder={t('customerReturn.area.placeholder')}
+                className="w-full"
+                inputClassName="bg-background"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label
+                htmlFor="return-notes-input"
+                className="font-medium text-[16px]"
+              >
+                {t('customerReturn.notes.label')}
+              </label>
+              <Textarea
+                id="return-notes-input"
+                name="notes"
+                value={draft.notes}
+                onChange={(e) =>
+                  setDraft((current) => ({ ...current, notes: e.target.value }))
+                }
+                className="bg-background"
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      <ConfirmationSection
-        description={t('customerReturn.confirm.description')}
-        needsConfirmation={draft.needsConfirmation}
-        onNeedsConfirmationChange={(v) => updateDraft({ needsConfirmation: v })}
-      />
-
-      <div className="bg-muted/50 max-sm:px-0 px-6 flex items-center justify-center">
-        <div className="flex w-full flex-col gap-6 bg-card border border-border rounded-xl max-sm:p-5 p-8 shadow-sm">
-          <h2 className="font-bold text-[19px]">
-            {t('customerReturn.summary.title')}
-          </h2>
-          <ReturnSummaryPanel
-            unitsCount={selectedUnits.length}
-            refundValue={refundValue}
-            shippingCompanyName={selectedCompanyName}
-            carrier={selectedCarrier}
-            pickupAddress={draft.address.trim()}
+        <aside className="flex min-w-0 flex-col gap-[26px] lg:sticky lg:top-4">
+          <ShippingSection
+            mode="return"
+            idPrefix="return"
+            carrierSupport={carrierSupportById}
+            locationHint={locationHint}
+            shippingCompanyId={draft.shippingCompanyId}
+            governorateOption={draft.governorateOption}
+            cityOption={draft.cityOption}
+            shippingCost=""
+            returnShippingCost=""
+            shippingType=""
+            returnShipmentContent=""
+            onShippingCompanyChange={(v) => updateDraft({ shippingCompanyId: v })}
+            onGovernorateOptionChange={(v) => updateDraft({ governorateOption: v })}
+            onCityOptionChange={(v) => updateDraft({ cityOption: v })}
+            onShippingCostChange={() => undefined}
+            onReturnShippingCostChange={() => undefined}
+            onShippingTypeChange={() => undefined}
+            onReturnShipmentContentChange={() => undefined}
+            errors={{
+              shippingCompanyId: errors.shippingCompanyId,
+              governorateOption: errors.governorateOption,
+              cityOption: errors.cityOption,
+            }}
           />
-        </div>
+
+          <ConfirmationSection
+            description={t('customerReturn.confirm.description')}
+            needsConfirmation={draft.needsConfirmation}
+            onNeedsConfirmationChange={(v) => updateDraft({ needsConfirmation: v })}
+            className="bg-transparent px-0"
+            switchClassName={CONFIRM_SWITCH_CLASS}
+          />
+
+          <div className={SIDE_CARD_CLASS}>
+            <h2 className="font-bold text-[19px]">
+              {t('customerReturn.summary.title')}
+            </h2>
+            <ReturnSummaryPanel
+              unitsCount={selectedUnits.length}
+              refundValue={refundValue}
+              shippingCompanyName={selectedCompanyName}
+              carrier={selectedCarrier}
+              pickupAddress={draft.address.trim()}
+            />
+          </div>
+        </aside>
       </div>
 
       <StickyFormFooter
         isDirty={isDirty}
         isSaving={isPending}
+        className="border-border shadow-[0_-4px_12px_rgb(0_0_0/0.06)] dark:shadow-none"
         status={
-          isPending
-            ? t('customerReturn.submit.statusSaving')
-            : isDirty
-              ? t('customerReturn.submit.statusDirty')
-              : t('customerReturn.submit.status')
+          isPending ? (
+            t('customerReturn.submit.statusSaving')
+          ) : missingStatus ? (
+            <span className="font-medium text-destructive">{missingStatus}</span>
+          ) : isDirty ? (
+            t('customerReturn.submit.statusDirty')
+          ) : (
+            t('customerReturn.submit.status')
+          )
         }
       >
         <Button
