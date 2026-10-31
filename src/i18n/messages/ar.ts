@@ -931,6 +931,15 @@ const ar = {
   'customerReturn.customer.empty': 'لا يوجد عملاء مطابقون للبحث',
   'customerReturn.customer.loadError': 'تعذر تحميل العملاء',
   'customerReturn.customer.required': 'يرجى اختيار العميل',
+  'customerReturn.orders.title': 'الطلبات المسلّمة',
+  'customerReturn.orders.selectCustomer': 'اختر العميل لعرض طلباته المسلّمة',
+  'customerReturn.orders.empty': 'لا توجد طلبات مسلّمة لهذا العميل',
+  'customerReturn.orders.loadError': 'تعذر تحميل طلبات العميل',
+  'customerReturn.unit.selectAll': 'تحديد الكل',
+  'customerReturn.unit.clearAll': 'إلغاء تحديد الكل',
+  'customerReturn.unit.noneAvailable': 'لا توجد قطع متاحة للاسترجاع',
+  'customerReturn.unit.inReturn': 'في مرتجع',
+  'customerReturn.unit.inExchange': 'في استبدال',
 } as const;
 
 export default ar;

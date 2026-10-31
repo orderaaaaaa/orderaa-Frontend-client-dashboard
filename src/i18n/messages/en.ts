@@ -918,6 +918,15 @@ const en: Record<keyof typeof ar, string> = {
   'customerReturn.customer.empty': 'No customers match the search',
   'customerReturn.customer.loadError': 'Could not load customers',
   'customerReturn.customer.required': 'Please select a customer',
+  'customerReturn.orders.title': 'Delivered orders',
+  'customerReturn.orders.selectCustomer': 'Select a customer to see their delivered orders',
+  'customerReturn.orders.empty': 'This customer has no delivered orders',
+  'customerReturn.orders.loadError': 'Could not load the customer\'s orders',
+  'customerReturn.unit.selectAll': 'Select all',
+  'customerReturn.unit.clearAll': 'Clear selection',
+  'customerReturn.unit.noneAvailable': 'No units available for return',
+  'customerReturn.unit.inReturn': 'In return',
+  'customerReturn.unit.inExchange': 'In exchange',
 };
 
 export default en;
