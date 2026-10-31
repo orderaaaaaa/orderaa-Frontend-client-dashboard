@@ -369,7 +369,7 @@ function OrderDetailsInfoStatus({ order }: OrderDetailsInfoStatusProps) {
                 <div className="flex items-center gap-2">
                   <LiaHeadsetSolid className="w-5 h-5 text-primary-text" />
                   <span className="text-sm font-bold text-foreground">تحديثات مركز الاتصال</span>
-                  <span className="inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold">
+                  <span className="inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full bg-primary/10 text-primary-text text-xs font-bold">
                     {callCenterEvents.length}
                   </span>
                 </div>

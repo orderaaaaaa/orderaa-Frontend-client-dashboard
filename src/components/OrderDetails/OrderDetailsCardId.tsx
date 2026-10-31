@@ -82,7 +82,7 @@ const OrderDetailsCardId = ({
               {order.code}
               <History
                 onClick={() => setIsHistoryModalOpen(true)}
-                className="bg-primary/10 w-6 h-6 cursor-pointer p-1 rounded-full text-primary border-1 border-primary/40"
+                className="bg-primary/10 w-6 h-6 cursor-pointer p-1 rounded-full text-primary-text border-1 border-primary/40"
               />
             </h3>
             <p className="text-xs font-bold sm:mr-7 mb-4">

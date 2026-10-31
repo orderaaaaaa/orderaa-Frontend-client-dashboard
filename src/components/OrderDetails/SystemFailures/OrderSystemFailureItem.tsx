@@ -71,7 +71,7 @@ export function OrderSystemFailureItem({
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+            <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary-text text-xs font-semibold">
               {ORDER_SYSTEM_FAILURE_SOURCE_LABELS[failure.source] ?? failure.source}
             </span>
             {actorLabel && (

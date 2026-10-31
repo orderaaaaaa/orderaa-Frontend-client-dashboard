@@ -74,7 +74,7 @@ export function OrderChangeBatchItem({ batch, getStatusLabel, lineProductNames }
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-1.5 min-w-0">
           <span className="text-sm font-bold text-foreground break-words">{actorLabel}</span>
-          <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+          <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary-text text-xs font-semibold">
             {orderChangeOriginLabelOf(batch.origin)}
           </span>
         </div>
