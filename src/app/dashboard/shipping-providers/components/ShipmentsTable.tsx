@@ -30,7 +30,6 @@ import { getTimeAgoCompact } from '@/utils/timeAgo';
 import { formatDate, formatNumber } from './formatNumber';
 import { LatenessChip, latenessChipOf, type LatenessChipModel } from './LatenessChip';
 import { CLOSURE_KIND_LABEL_KEYS, ShipmentRowActions, closureReasonOf } from './ShipmentRowActions';
-import { SendAgainAction } from './SendAgainAction';
 import { ShipmentStatusBadge } from './ShipmentStatusBadge';
 
 const OVERRIDE_LABEL_KEYS: Record<LatenessOverride, TranslationKey> = {
@@ -307,12 +306,6 @@ export function ReturnedRowActions({ row }: { row: ReturnedShipment }) {
         status={row.status}
         closure={row.closure}
         sendAgain={{ eligible: row.sendAgainEligible, blockedReason: row.sendAgainBlockedReason }}
-      />
-      <SendAgainAction
-        orderId={row.id}
-        eligible={row.sendAgainEligible}
-        blockedReason={row.sendAgainBlockedReason}
-        closure={row.closure}
       />
     </div>
   );

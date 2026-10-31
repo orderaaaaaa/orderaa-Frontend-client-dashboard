@@ -2,12 +2,8 @@
 
 import { useState } from 'react';
 import BaseModal from '@/components/ui/base-modal';
-import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { useI18n } from '@/i18n/I18nProvider';
 import type { TranslationKey } from '@/i18n/translate';
-import { usePermissionCheck } from '@/hooks/usePermissions';
-import { PERMISSION_CODES } from '@/lib/permissions';
 import { useSendAgainRecordMutation } from '@/services/shippingProviders';
 import type { FollowupClosure } from '@/types/logistics';
 import type { SendAgainBlockedReason } from '@/types/shippingProviders';
@@ -80,7 +76,6 @@ function SendAgainReasonModal({
 }
 
 export function useSendAgainAction({ orderId, eligible, blockedReason, closure }: SendAgainActionProps) {
-  const { hasPermission } = usePermissionCheck();
   const [isOpen, setIsOpen] = useState(false);
   const mutation = useSendAgainRecordMutation();
 
@@ -92,7 +87,6 @@ export function useSendAgainAction({ orderId, eligible, blockedReason, closure }
       : undefined;
 
   return {
-    isVisible: hasPermission(PERMISSION_CODES.FOLLOWUP_MANAGE),
     isDisabled: isClosureBlocking || !eligible,
     blockedKey,
     isPending: mutation.isPending,
@@ -101,28 +95,4 @@ export function useSendAgainAction({ orderId, eligible, blockedReason, closure }
       <SendAgainReasonModal orderId={orderId} mutation={mutation} onClose={() => setIsOpen(false)} />
     ) : null,
   };
-}
-
-export function SendAgainAction(props: SendAgainActionProps) {
-  const { t } = useI18n();
-  const action = useSendAgainAction(props);
-
-  if (!action.isVisible) return null;
-
-  return (
-    <div className="flex flex-col gap-1">
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="h-7 px-2 text-xs"
-        disabled={action.isDisabled}
-        onClick={() => action.open()}
-      >
-        إعادة الإرسال
-      </Button>
-      {action.blockedKey && <p className="text-xs text-muted-foreground">{t(action.blockedKey)}</p>}
-      {action.modal}
-    </div>
-  );
 }

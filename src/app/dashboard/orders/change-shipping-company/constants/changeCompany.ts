@@ -6,10 +6,10 @@ import {
 } from '../types/bulkCompanySwitch';
 
 export const CHANGE_COMPANY_TEXT = {
-  title: 'تبديل شركة الشحن',
+  title: 'تغيير شركة الشحن',
   subtitle: 'امسح الطلبات، ثم اختر الشركة الجديدة والمحافظة والمدينة لكل طلب',
   backToPackaging: 'رجوع إلى قسم التغليف',
-  noPermission: 'لا تملك صلاحية تبديل شركة الشحن',
+  noPermission: 'لا تملك صلاحية تغيير شركة الشحن',
   companiesFailed: 'تعذر تحميل شركات الشحن',
   targetLabel: 'الشركة الجديدة',
   save: 'حفظ',

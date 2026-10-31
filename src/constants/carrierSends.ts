@@ -26,7 +26,7 @@ export const CARRIER_SEND_STATE_LABELS: Record<CarrierSendState, string> = {
 export const CARRIER_SEND_OPERATION_LABELS: Record<CarrierSendOperation, string> = {
   EDIT: 'تعديل بيانات الطلب',
   SWITCH: 'تغيير شركة الشحن',
-  BULK_SWITCH: 'تبديل شركة الشحن',
+  BULK_SWITCH: 'تغيير شركة الشحن (جماعي)',
   CREATION: 'إنشاء الشحنة',
   MISSING_ORDER_RECOVERY: 'استرجاع طلب مفقود',
   FOLLOWUP_CHILD: 'طلب متابعة',
