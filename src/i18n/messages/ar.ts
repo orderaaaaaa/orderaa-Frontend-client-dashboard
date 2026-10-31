@@ -264,7 +264,6 @@ const ar = {
   'exchange.create.nav.confirm': 'تأكيد الاستبدال',
   'exchange.create.noPermission': 'لا تملك صلاحية إنشاء الاستبدال',
   'exchange.create.success': 'تم إنشاء طلب الاستبدال {code}',
-  'exchange.create.error': 'تعذر إنشاء الاستبدال',
   'inProcess.sheet.desc.exchange': 'إنشاء طلب استبدال من طلب مكتمل لنفس العميل',
   'inProcess.reason.exchangeUnsupported': 'شركة الشحن لا تدعم شحنات الاستبدال',
   'inProcess.reason.exchangeCarrierMissing': 'تعذر تحديد شركة الشحن',

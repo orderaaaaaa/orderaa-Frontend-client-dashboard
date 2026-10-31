@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import ProductSelectionModal, { type SelectableProduct } from '@/components/ui/product-selection-modal';
+import { Stepper } from '@/components/ui/stepper';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { useI18n } from '@/i18n/I18nProvider';
 import type {
@@ -29,7 +30,6 @@ import { getApiErrorMessage } from '@/utils/apiError';
 import { carrierSendNeedsAttention, carrierSendNotSentWarningAfter } from '@/utils/manualOrder/carrierSend';
 import { ExchangeCandidateStep } from './ExchangeCandidateStep';
 import { ExchangeProductsStep, itemKeyOf, type ExchangeLine } from './ExchangeProductsStep';
-import { ExchangeStepIndicator } from './ExchangeStepIndicator';
 import { ExchangeSummaryStep } from './ExchangeSummaryStep';
 
 const MAX_TOTAL_COST = 9_999_999;
@@ -277,13 +277,14 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
       >
         <div className="flex flex-col gap-6" dir="rtl">
           <div className="sticky top-0 z-10 -mx-5 -mt-5 border-b border-border bg-card px-5 pt-5 pb-3 sm:-mx-6 sm:px-6">
-            <ExchangeStepIndicator
-              labels={[
-                t('exchange.create.steps.order'),
-                t('exchange.create.steps.products'),
-                t('exchange.create.steps.summary'),
+            <Stepper
+              steps={[
+                { label: t('exchange.create.steps.order') },
+                { label: t('exchange.create.steps.products') },
+                { label: t('exchange.create.steps.summary') },
               ]}
               currentStep={step}
+              indicatorOnly
             />
           </div>
           {step === 0 && (

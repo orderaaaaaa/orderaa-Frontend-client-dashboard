@@ -251,7 +251,6 @@ const en: Record<keyof typeof ar, string> = {
   'exchange.create.nav.confirm': 'Confirm exchange',
   'exchange.create.noPermission': 'You do not have permission to create an exchange',
   'exchange.create.success': 'Exchange order {code} created',
-  'exchange.create.error': 'Could not create the exchange',
   'inProcess.sheet.desc.exchange': 'Create an exchange order from a completed order of this customer',
   'inProcess.reason.exchangeUnsupported': 'This carrier does not support exchange shipments',
   'inProcess.reason.exchangeCarrierMissing': 'The shipping carrier could not be determined',

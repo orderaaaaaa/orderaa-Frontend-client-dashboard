@@ -13,15 +13,24 @@ interface StepperProps {
   currentStep: number;
   completedSteps?: number[];
   onStepClick?: (step: number) => void;
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
+  indicatorOnly?: boolean;
 }
 
-function Stepper({ steps, currentStep, completedSteps, onStepClick, children, className }: StepperProps) {
+function Stepper({
+  steps,
+  currentStep,
+  completedSteps,
+  onStepClick,
+  children,
+  className,
+  indicatorOnly = false,
+}: StepperProps) {
   const childArray = Children.toArray(children);
 
   return (
-    <div className={cn('space-y-6', className)}>
+    <div className={cn(!indicatorOnly && 'space-y-6', className)}>
       <div className="flex items-center justify-center gap-0 w-full">
         {steps.map((step, index) => {
           const isCompleted = completedSteps
@@ -81,7 +90,7 @@ function Stepper({ steps, currentStep, completedSteps, onStepClick, children, cl
         })}
       </div>
 
-      <div>{childArray[currentStep]}</div>
+      {!indicatorOnly && <div>{childArray[currentStep]}</div>}
     </div>
   );
 }
