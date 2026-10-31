@@ -326,19 +326,14 @@ function ResultsFrame({ busy, children }: { busy: boolean; children: ReactNode }
       <div
         ref={scrollRef}
         aria-busy={busy}
+        data-overflow-end={hasOverflowEnd}
         className={cn(
-          'md:max-h-[calc(100dvh-16rem)] md:overflow-auto md:rounded-xl md:border md:bg-card',
+          'group/results md:max-h-[calc(100dvh-16rem)] md:overflow-auto md:rounded-xl md:border md:bg-card md:[scrollbar-width:thin] md:[scrollbar-color:var(--border)_transparent]',
           busy && 'opacity-60',
         )}
       >
         {children}
       </div>
-      {hasOverflowEnd && (
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 end-0 z-10 w-12 rounded-xl bg-linear-to-l from-card to-transparent"
-        />
-      )}
     </div>
   );
 }

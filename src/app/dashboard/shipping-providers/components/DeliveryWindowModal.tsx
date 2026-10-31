@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Eraser } from 'lucide-react';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
@@ -92,15 +93,16 @@ export function DeliveryWindowModal({
         <div className="flex justify-start">
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className="text-sm text-muted-foreground hover:text-foreground max-sm:h-10"
+            className="text-sm font-medium text-foreground hover:text-foreground max-sm:h-10"
             disabled={from === '' && to === ''}
             onClick={() => {
               setFrom('');
               setTo('');
             }}
           >
+            <Eraser aria-hidden="true" />
             مسح الوقت
           </Button>
         </div>

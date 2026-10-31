@@ -41,6 +41,8 @@ const HEAD_CLASS = 'whitespace-nowrap bg-muted px-3 py-2.5 text-start font-mediu
 const CELL_CLASS = 'px-3 py-2.5 align-top text-sm text-foreground';
 const SECONDARY_TEXT_CLASS = 'text-xs text-muted-foreground';
 const STICKY_CELL_CLASS = 'sticky z-[1] bg-card group-hover:bg-muted';
+const PINNED_END_CUE_CLASS =
+  'before:pointer-events-none before:absolute before:inset-y-0 before:-start-3 before:hidden before:w-3 before:content-[""] before:[background-image:linear-gradient(to_right,color-mix(in_oklch,var(--foreground)_14%,transparent),transparent)] group-data-[overflow-end=true]/results:before:block';
 const ROW_CLASS = 'group border-b transition-colors duration-150 hover:bg-surface-hover/40';
 
 export const isLockedRow = (row: ShipmentRowBase): boolean =>
@@ -403,7 +405,7 @@ export function InProcessShipmentsTable({
               {t('inProcess.table.columns.net')}
             </th>
           </Can>
-          <th scope="col" className={cn(HEAD_CLASS, 'sticky end-0 z-20')}>
+          <th scope="col" className={cn(HEAD_CLASS, 'sticky end-0 z-20', PINNED_END_CUE_CLASS)}>
             <span className="sr-only">{t('inProcess.table.actions')}</span>
           </th>
         </tr>
@@ -462,7 +464,7 @@ export function InProcessShipmentsTable({
                   {moneyTextOf(row.netAmount)}
                 </td>
               </Can>
-              <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'end-0')}>
+              <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'end-0', PINNED_END_CUE_CLASS)}>
                 <InProcessRowActions
                   row={row}
                   shippingCompanyId={shippingCompanyId}
@@ -512,7 +514,7 @@ export function ReturnedShipmentsTable({ shipments, onOpenNotes, onOpenActionLog
           <th scope="col" className={cn(HEAD_CLASS, 'text-end')}>
             {t('inProcess.table.columns.total')}
           </th>
-          <th scope="col" className={cn(HEAD_CLASS, 'sticky end-0 z-20')}>
+          <th scope="col" className={cn(HEAD_CLASS, 'sticky end-0 z-20', PINNED_END_CUE_CLASS)}>
             <span className="sr-only">{t('inProcess.table.actions')}</span>
           </th>
         </tr>
@@ -539,7 +541,7 @@ export function ReturnedShipmentsTable({ shipments, onOpenNotes, onOpenActionLog
             <td className={cn(CELL_CLASS, 'whitespace-nowrap text-end tabular-nums')}>
               {moneyTextOf(row.totalCost)}
             </td>
-            <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'end-0')}>
+            <td className={cn(CELL_CLASS, STICKY_CELL_CLASS, 'end-0', PINNED_END_CUE_CLASS)}>
               <ReturnedRowActions row={row} onOpenNotes={onOpenNotes} onOpenActionLog={onOpenActionLog} />
             </td>
           </tr>
