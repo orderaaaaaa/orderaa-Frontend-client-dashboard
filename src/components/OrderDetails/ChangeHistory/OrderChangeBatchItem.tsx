@@ -16,10 +16,10 @@ function LineMembershipEntry({ entry }: { entry: OrderChangeEntry }) {
   const value = isAdded ? entry.newValue : entry.oldValue;
   return (
     <li className="text-sm break-words">
-      <span className={isAdded ? 'font-semibold text-green-700' : 'font-semibold text-red-600'}>
+      <span className={isAdded ? 'font-semibold text-success' : 'font-semibold text-destructive'}>
         {isAdded ? LINE_KIND_LABELS.LINE_ADDED : LINE_KIND_LABELS.LINE_REMOVED}:
       </span>{' '}
-      <span className="text-[#1F1F1F]">
+      <span className="text-foreground">
         {isLineValue(value) ? lineValueText(value) : orderFieldLabelOf(entry.field)}
       </span>
     </li>
@@ -42,19 +42,19 @@ function FieldEntry({
     : orderFieldLabelOf(entry.field);
   return (
     <li className="text-sm break-words">
-      <span className="text-gray-600">{label}:</span>{' '}
+      <span className="text-foreground-secondary">{label}:</span>{' '}
       <OrderChangeValue
         valueType={entry.valueType}
         value={entry.oldValue}
         getStatusLabel={getStatusLabel}
-        className="text-gray-500"
+        className="text-muted-foreground"
       />
-      <span className="mx-1 text-gray-400">←</span>
+      <span className="mx-1 text-muted-foreground">←</span>
       <OrderChangeValue
         valueType={entry.valueType}
         value={entry.newValue}
         getStatusLabel={getStatusLabel}
-        className="font-semibold text-[#1F1F1F]"
+        className="font-semibold text-foreground"
       />
     </li>
   );
@@ -70,15 +70,15 @@ export function OrderChangeBatchItem({ batch, getStatusLabel, lineProductNames }
   const actorLabel = batch.actorName ?? actorTypeLabelOf(batch.actorType) ?? batch.actorType;
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-gray-200 bg-white p-3">
+    <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-          <span className="text-sm font-bold text-[#1F1F1F] break-words">{actorLabel}</span>
+          <span className="text-sm font-bold text-foreground break-words">{actorLabel}</span>
           <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold">
             {orderChangeOriginLabelOf(batch.origin)}
           </span>
         </div>
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-muted-foreground">
           {formatDateTime(batch.createdAt)} ({getTimeAgo(batch.createdAt)})
         </span>
       </div>

@@ -255,7 +255,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
             disabled || loading
               ? 'bg-muted cursor-not-allowed text-foreground-subtle'
               : 'bg-card',
-            error ? 'border-red-500' : 'border-surface-strong',
+            error ? 'border-red-500' : 'border-input',
             triggerClassName
           )}
           aria-expanded={open}
@@ -311,7 +311,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
                 onSearch?.(e.target.value);
               }}
               placeholder={searchPlaceholder}
-              className="w-full px-2 py-1 md:py-1.5 rounded border text-xs md:text-sm
+              className="w-full px-2 py-1 md:py-1.5 rounded border border-input bg-background text-foreground text-xs md:text-sm placeholder:text-muted-foreground
                          focus:outline-none focus:border-primary"
             />
           </div>
@@ -336,7 +336,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
                   onMouseLeave={() => setActiveIdx(-1)}
                   onClick={() => commitSelect(opt)}
                   className={cn(
-                    'px-2 py-1.5 md:px-3 md:py-2 flex justify-between items-center text-sm md:text-base',
+                    'px-2 py-1.5 md:px-3 md:py-2 max-sm:min-h-10 flex justify-between items-center text-sm md:text-base',
                     optionDisabled
                       ? 'text-foreground-subtle cursor-not-allowed'
                       : 'cursor-pointer hover:bg-primary hover:text-white',
@@ -412,7 +412,7 @@ const SearchableSelectCore = forwardRef<HTMLDivElement, SearchableSelectProps>(
           </>
         )}
 
-        {error && <span className="text-xs text-red-500">{error}</span>}
+        {error && <span className="text-sm text-destructive">{error}</span>}
       </div>
     );
   }

@@ -35,7 +35,7 @@ export function SaveChoiceModal({
       showFooter={false}
     >
       <div className="flex flex-col gap-4 p-1">
-        <p className="text-sm text-gray-700">{summary}</p>
+        <p className="text-sm text-foreground">{summary}</p>
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button type="button" variant="ghost" onClick={onClose}>
             {CHANGE_COMPANY_TEXT.cancel}

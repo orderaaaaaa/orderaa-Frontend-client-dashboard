@@ -208,7 +208,7 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
           disabled || loading
             ? 'bg-muted cursor-not-allowed text-foreground-subtle'
             : 'bg-card',
-          error ? 'border-red-500' : 'border-border-strong',
+          error ? 'border-red-500' : 'border-input',
           triggerClassName
         )}
         aria-expanded={open}
@@ -232,7 +232,7 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
                   >
                     {display}
                     <X
-                      className="w-3 h-3 cursor-pointer hover:text-red-500"
+                      className="w-3 h-3 cursor-pointer hover:text-destructive"
                       onClick={(e) => removeItem(e, value[idx])}
                     />
                   </span>
@@ -262,7 +262,7 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={searchPlaceholder}
-              className="w-full px-2 py-1 md:py-1.5 rounded border text-xs md:text-sm focus:outline-none focus:border-primary"
+              className="w-full px-2 py-1 md:py-1.5 rounded border border-input bg-background text-foreground text-xs md:text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary"
             />
           </div>
         )}
@@ -302,7 +302,7 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
                   aria-disabled={optionDisabled || undefined}
                   onClick={() => toggleOption(opt)}
                   className={cn(
-                    'px-2 py-1.5 md:px-3 md:py-2 flex items-center gap-2 text-sm md:text-base',
+                    'px-2 py-1.5 md:px-3 md:py-2 max-sm:min-h-10 flex items-center gap-2 text-sm md:text-base',
                     optionDisabled
                       ? 'text-foreground-subtle cursor-not-allowed'
                       : 'cursor-pointer hover:bg-accent',
@@ -386,7 +386,7 @@ const MultiSelectDropdown = forwardRef<HTMLDivElement, MultiSelectDropdownProps>
           </>
         )}
 
-        {error && <span className="text-xs text-red-500">{error}</span>}
+        {error && <span className="text-sm text-destructive">{error}</span>}
       </div>
     );
   }

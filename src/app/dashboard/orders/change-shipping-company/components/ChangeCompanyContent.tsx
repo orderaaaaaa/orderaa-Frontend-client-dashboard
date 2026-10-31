@@ -147,8 +147,8 @@ export function ChangeCompanyContent() {
         >
           {CHANGE_COMPANY_TEXT.backToPackaging}
         </Link>
-        <h1 className="text-lg sm:text-xl font-bold text-gray-900">{CHANGE_COMPANY_TEXT.title}</h1>
-        <p className="text-xs sm:text-sm text-gray-500">{CHANGE_COMPANY_TEXT.subtitle}</p>
+        <h1 className="text-lg sm:text-xl font-bold text-foreground">{CHANGE_COMPANY_TEXT.title}</h1>
+        <p className="text-xs sm:text-sm text-muted-foreground">{CHANGE_COMPANY_TEXT.subtitle}</p>
       </div>
 
       <div className="flex flex-col gap-3 md:flex-row md:items-end">
@@ -160,7 +160,7 @@ export function ChangeCompanyContent() {
           />
         </div>
         <div className="flex flex-col gap-1.5 md:w-64">
-          <span className="text-sm font-medium text-gray-700">
+          <span className="text-sm font-medium text-foreground">
             {CHANGE_COMPANY_TEXT.targetLabel}
           </span>
           <SearchableSelect
@@ -174,12 +174,13 @@ export function ChangeCompanyContent() {
           />
         </div>
         <div className="flex gap-2">
-          <Button type="button" disabled={!canSave} onClick={() => setSaveOpen(true)}>
+          <Button type="button" className="max-sm:h-10" disabled={!canSave} onClick={() => setSaveOpen(true)}>
             {CHANGE_COMPANY_TEXT.save}
           </Button>
           <Button
             type="button"
             variant="outline"
+            className="max-sm:h-10"
             disabled={isRunning || rows.length === 0}
             onClick={handleClear}
           >
@@ -189,11 +190,11 @@ export function ChangeCompanyContent() {
       </div>
 
       {companiesError && (
-        <p className="text-sm text-red-600">{CHANGE_COMPANY_TEXT.companiesFailed}</p>
+        <p className="text-sm text-destructive">{CHANGE_COMPANY_TEXT.companiesFailed}</p>
       )}
 
       {rows.length === 0 ? (
-        <p className="py-8 text-center text-sm text-gray-500">{CHANGE_COMPANY_TEXT.emptyRows}</p>
+        <p className="py-8 text-center text-sm text-muted-foreground">{CHANGE_COMPANY_TEXT.emptyRows}</p>
       ) : (
         <ChangeCompanyTable
           rows={checkedRows}
@@ -226,7 +227,7 @@ export function ChangeCompanyContent() {
         confirmText={CHANGE_COMPANY_TEXT.clearConfirmYes}
         cancelText={CHANGE_COMPANY_TEXT.clearConfirmNo}
       >
-        <p className="text-sm text-gray-700">{CHANGE_COMPANY_TEXT.clearConfirmBody}</p>
+        <p className="text-sm text-foreground">{CHANGE_COMPANY_TEXT.clearConfirmBody}</p>
       </BaseModal>
 
       <SwitchPrintLayer

@@ -59,7 +59,7 @@ export function DeleteInvoiceModal({ isOpen, onClose, invoice, onDeleted }: Dele
       title="حذف الفاتورة"
       onConfirm={handleConfirm}
       confirmText="حذف الفاتورة"
-      confirmButtonClassName="w-[120px] h-10 sm:w-[146px] sm:h-[37px] bg-destructive border-[1.5px] border-destructive rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-destructive/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      confirmButtonClassName="w-[120px] h-10 sm:w-[146px] sm:h-[37px] bg-destructive dark:bg-destructive/60 border-[1.5px] border-destructive rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-destructive/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       isLoading={deleteMutation.isPending}
       maxWidth="md:max-w-lg"
     >

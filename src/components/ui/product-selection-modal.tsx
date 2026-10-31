@@ -356,7 +356,7 @@ export default function ProductSelectionModal({
           placeholder="ابحث عن المنتج.."
         />
 
-        <div className="bg-[#EAEAEA66] p-4 mt-2 rounded-sm flex text-sm font-semibold">
+        <div className="bg-muted p-4 mt-2 rounded-sm flex text-sm font-semibold">
           <div className="w-1/2 text-center">صور المنتج</div>
           <div className="w-1/2 text-center">الاسم</div>
         </div>
@@ -367,21 +367,21 @@ export default function ProductSelectionModal({
               {Array.from({ length: 5 }).map((_, index) => (
                 <div
                   key={index}
-                  className="border-b mb-2 border-gray-100 rounded-sm bg-white"
+                  className="border-b mb-2 border-border rounded-sm bg-card"
                 >
                   <div className="flex items-center p-3">
                     <div className="w-1/2 flex justify-center">
-                      <div className="h-12 w-12 rounded-md bg-gray-200 animate-pulse" />
+                      <div className="h-12 w-12 rounded-md bg-muted animate-pulse" />
                     </div>
                     <div className="w-1/2 flex justify-center">
-                      <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+                      <div className="h-4 w-24 bg-muted rounded animate-pulse" />
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : products.length === 0 ? (
-            <div className="px-3 py-8 text-[#878A99] text-center">
+            <div className="px-3 py-8 text-muted-foreground text-center">
               لا توجد نتائج
             </div>
           ) : (
@@ -402,12 +402,12 @@ export default function ProductSelectionModal({
                   <div
                     key={product.id}
                     className={clsx(
-                      'border-b mb-2 border-gray-100 rounded-sm transition-colors',
+                      'border-b mb-2 border-border rounded-sm transition-colors',
                       isAlreadyInTable
                         ? 'bg-primary/5 opacity-60'
                         : isChecked
-                          ? 'bg-gray-50'
-                          : 'bg-white hover:bg-gray-50',
+                          ? 'bg-muted'
+                          : 'bg-card hover:bg-muted',
                     )}
                   >
                     <label
@@ -424,7 +424,7 @@ export default function ProductSelectionModal({
                       />
 
                       <div className="w-1/2 flex justify-center">
-                        <div className="relative h-12 w-12 overflow-hidden rounded-md border border-gray-200 bg-gray-100">
+                        <div className="relative h-12 w-12 overflow-hidden rounded-md border border-border bg-muted">
                           {product.image ? (
                             <Image
                               src={product.image}
@@ -433,7 +433,7 @@ export default function ProductSelectionModal({
                               className="object-cover"
                             />
                           ) : (
-                            <div className="flex items-center justify-center h-full text-gray-400 text-xs">
+                            <div className="flex items-center justify-center h-full text-muted-foreground text-xs">
                               لا توجد صورة
                             </div>
                           )}
@@ -454,7 +454,7 @@ export default function ProductSelectionModal({
                       <div className="px-4 pb-3 flex flex-col gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
                         {product.variantOptions!.map((option) => (
                           <div key={option.attribute} className="flex flex-wrap items-center gap-2">
-                            <span className="text-xs font-semibold text-gray-500 min-w-16">
+                            <span className="text-xs font-semibold text-muted-foreground min-w-16">
                               {option.attribute}:
                             </span>
                             <div className="flex flex-wrap gap-1.5">
@@ -475,8 +475,8 @@ export default function ProductSelectionModal({
                                     size="sm"
                                     disabled={disabled}
                                     className={clsx(
-                                      'rounded-full text-xs h-7 px-3',
-                                      !isSelected && !disabled && 'border-gray-300 text-gray-600 hover:border-primary hover:text-primary',
+                                      'rounded-full text-xs h-7 px-3 max-sm:h-10',
+                                      !isSelected && !disabled && 'border-input text-foreground hover:border-primary hover:text-primary',
                                     )}
                                     onClick={() => handleVariantSelect(product.id, option.attribute, value)}
                                   >
@@ -493,7 +493,7 @@ export default function ProductSelectionModal({
                             type="button"
                             variant="outline"
                             size="sm"
-                            className="rounded-full text-xs h-7 px-4"
+                            className="rounded-full text-xs h-7 px-4 max-sm:h-10"
                             onClick={() => handleAddAllVariants(product.id)}
                           >
                             <LiaPlusSolid className="w-4 h-4" />
@@ -505,7 +505,7 @@ export default function ProductSelectionModal({
                             variant="default"
                             size="sm"
                             disabled={!allAttributesFilled}
-                            className="rounded-full text-xs h-7 px-4"
+                            className="rounded-full text-xs h-7 px-4 max-sm:h-10"
                             onClick={() => handleAddCombo(product.id, allAttributes)}
                           >
                             <LiaPlusSolid className="w-4 h-4" />
@@ -516,7 +516,7 @@ export default function ProductSelectionModal({
                         {productCombos.length > 0 && (() => {
                           const existingCombosForProduct = existingVariantCombos?.get(product.id) ?? [];
                           return (
-                            <div className="flex flex-wrap gap-1.5 pt-1 border-t border-gray-100">
+                            <div className="flex flex-wrap gap-1.5 pt-1 border-t border-border">
                               {productCombos.map((combo, idx) => {
                                 const isPreExisting = existingCombosForProduct.some((existing) =>
                                   allAttributes.every(
@@ -531,7 +531,7 @@ export default function ProductSelectionModal({
                                     className={clsx(
                                       'inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full',
                                       isPreExisting
-                                        ? 'bg-gray-100 text-gray-400'
+                                        ? 'bg-muted text-muted-foreground'
                                         : 'bg-primary/10 text-primary',
                                     )}
                                   >

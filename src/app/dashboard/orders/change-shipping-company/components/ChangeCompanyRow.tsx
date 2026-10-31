@@ -155,7 +155,7 @@ export function ChangeCompanyRow({
 
   return (
     <tr className="border-t align-top">
-      <td className="py-2 px-3 font-mono text-gray-900">
+      <td className="py-2 px-3 font-mono text-foreground">
         <div className="flex flex-col gap-1">
           <CopyableCode value={row.order.code} label="نسخ كود الطلب">
             <span>{row.order.code}</span>
@@ -163,12 +163,12 @@ export function ChangeCompanyRow({
           {warning}
         </div>
       </td>
-      <td className="py-2 px-3 text-gray-600">{statusLabel}</td>
-      <td className="py-2 px-3 text-gray-600 break-words">{row.order.address ?? ''}</td>
-      <td className="py-2 px-3 text-gray-600">{currentCompany}</td>
+      <td className="py-2 px-3 text-foreground-secondary">{statusLabel}</td>
+      <td className="py-2 px-3 text-foreground-secondary break-words">{row.order.address ?? ''}</td>
+      <td className="py-2 px-3 text-foreground-secondary">{currentCompany}</td>
       <td className="py-2 px-3 min-w-[140px]">{governorateField}</td>
       <td className="py-2 px-3 min-w-[140px]">{citySelect}</td>
-      <td className="py-2 px-3 text-gray-600 break-words">{resultText}</td>
+      <td className="py-2 px-3 text-foreground-secondary break-words">{resultText}</td>
     </tr>
   );
 }

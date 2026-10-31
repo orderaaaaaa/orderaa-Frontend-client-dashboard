@@ -87,8 +87,8 @@ const InputCore = forwardRef<HTMLInputElement, InputCoreProps>(function InputCor
   const hasLeftIcon = type === 'password' || showClearButton;
 
   const inputClassName = clsx(
-    'w-full border rounded-lg py-3 text-base focus:outline-none bg-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
-    error ? 'border-red-500' : 'border-gray-200',
+    'w-full border rounded-lg py-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none bg-muted dark:bg-input/30 focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-muted/50 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
+    error ? 'border-red-500' : 'border-input',
     hasRightIcon ? 'ps-8' : 'ps-4',
     hasLeftIcon ? 'pe-8' : 'pe-4',
     customInputClassName
@@ -116,7 +116,7 @@ const InputCore = forwardRef<HTMLInputElement, InputCoreProps>(function InputCor
       {label && (
         <label htmlFor={inputId} className="block font-medium text-base mb-2">
           {label}
-          {required && <span className="text-red-500 mr-1">*</span>}
+          {required && <span className="text-destructive mr-1">*</span>}
         </label>
       )}
       <div className="relative">
@@ -145,7 +145,7 @@ const InputCore = forwardRef<HTMLInputElement, InputCoreProps>(function InputCor
             variant="ghost"
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 focus:outline-none"
+            className="absolute end-3 top-1/2 transform -translate-y-1/2 text-muted-foreground focus:outline-none"
             aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
           >
             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -156,7 +156,7 @@ const InputCore = forwardRef<HTMLInputElement, InputCoreProps>(function InputCor
             variant="ghost"
             type="button"
             onClick={handleClear}
-            className="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
+            className="absolute end-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none transition-colors"
             aria-label="مسح"
           >
             <X size={18} />
@@ -168,7 +168,7 @@ const InputCore = forwardRef<HTMLInputElement, InputCoreProps>(function InputCor
           </div>
         )}
       </div>
-      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+      {error && <p className="text-sm text-destructive mt-1">{error}</p>}
     </div>
   );
 });

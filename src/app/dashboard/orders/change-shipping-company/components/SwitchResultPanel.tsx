@@ -48,7 +48,7 @@ function ResultItem({
           {row.order.code}
         </Link>
       </CopyableCode>
-      <span className="break-words text-gray-700">{detail}</span>
+      <span className="break-words text-foreground">{detail}</span>
     </li>
   );
 }
@@ -58,8 +58,8 @@ export function SwitchResultPanel({ rows, targetName }: SwitchResultPanelProps) 
   return (
     <div className="flex flex-col gap-4">
       {SECTION_ORDER.filter((key) => sections[key].length > 0).map((key) => (
-        <section key={key} className="rounded-md border bg-white">
-          <h2 className="border-b px-3 py-2 text-sm font-semibold text-gray-900">
+        <section key={key} className="rounded-md border bg-card">
+          <h2 className="border-b px-3 py-2 text-sm font-semibold text-foreground">
             {`${SECTION_TITLES[key]} (${sections[key].length})`}
           </h2>
           <ul className="divide-y">

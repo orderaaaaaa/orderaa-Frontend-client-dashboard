@@ -13,7 +13,7 @@ function ChangeShippingCompanyGate() {
   if (!canSwitch) {
     return (
       <div className="flex flex-col gap-3">
-        <p className="text-sm text-gray-700">{CHANGE_COMPANY_TEXT.noPermission}</p>
+        <p className="text-sm text-foreground">{CHANGE_COMPANY_TEXT.noPermission}</p>
         <Link href="/dashboard/orders/print-orders" className="w-fit text-sm text-primary hover:underline">
           {CHANGE_COMPANY_TEXT.backToPackaging}
         </Link>

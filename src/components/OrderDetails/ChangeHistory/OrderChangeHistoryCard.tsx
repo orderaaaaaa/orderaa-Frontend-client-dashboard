@@ -42,7 +42,7 @@ function OrderChangeHistoryList({
   if (isLoading) return <OrderChangeHistorySkeleton />;
 
   return batches.length === 0 ? (
-    <p className="text-sm text-gray-400 text-center py-4">لا توجد تعديلات مسجلة</p>
+    <p className="text-sm text-muted-foreground text-center py-4">لا توجد تعديلات مسجلة</p>
   ) : (
     <div className="flex flex-col gap-3">
       {batches.map((batch) => (
@@ -81,7 +81,7 @@ function OrderChangeHistoryCard({ order }: OrderChangeHistoryCardProps) {
         if (next) setEverOpened(true);
       }}
     >
-      <AccordionItem value={HISTORY_ITEM} className="font-medium p-4 bg-gray-50 mt-8 rounded-xl border-b-0">
+      <AccordionItem value={HISTORY_ITEM} className="font-medium p-4 bg-muted/50 mt-8 rounded-xl border-b-0">
         <AccordionTrigger className="py-2 text-start">
           <span className="text-lg text-primary font-bold">سجل التعديلات</span>
         </AccordionTrigger>

@@ -59,6 +59,8 @@
   --surface-contrast: oklch(0.278 0.033 256.848);
   --border-strong: oklch(0.872 0.01 258.338);
   --brand-hover: #4a1db8;
+  --elevation-soft: 0 1px 2px oklch(0.145 0 0 / 0.04), 0 1px 3px oklch(0.145 0 0 / 0.06);
+  --elevation-elevated: 0 2px 6px oklch(0.145 0 0 / 0.06), 0 16px 40px -12px oklch(0.145 0 0 / 0.22);
 }
 
 .dark {
@@ -76,10 +78,10 @@
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
+  --destructive: oklch(0.637 0.237 25.331);
   --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.439 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
@@ -116,6 +118,8 @@
   --surface-contrast: oklch(0.5 0 0);
   --border-strong: oklch(0.55 0 0);
   --brand-hover: #7340ea;
+  --elevation-soft: 0 1px 2px oklch(0 0 0 / 0.4);
+  --elevation-elevated: 0 2px 6px oklch(0 0 0 / 0.35), 0 16px 40px -12px oklch(0 0 0 / 0.7);
 }
 
 @theme inline {
@@ -149,6 +153,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --shadow-soft: var(--elevation-soft);
+  --shadow-elevated: var(--elevation-elevated);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);

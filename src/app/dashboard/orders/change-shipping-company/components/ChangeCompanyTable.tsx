@@ -73,12 +73,12 @@ export function ChangeCompanyTable({
       </StackedList>
       <div className="hidden sm:block rounded-md border overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50">
+          <thead className="bg-muted/50">
             <tr>
               {TABLE_HEAD.map((label) => (
                 <th
                   key={label}
-                  className="text-right py-2 px-3 font-semibold text-gray-700 whitespace-nowrap"
+                  className="text-right py-2 px-3 font-semibold text-foreground whitespace-nowrap"
                 >
                   {label}
                 </th>

@@ -88,8 +88,9 @@ export default function BaseModal({
         <DialogPrimitive.Content
           ref={setContentEl}
           className={cn(
-            'fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2',
-            'bg-white rounded-[20px] shadow-xl flex flex-col max-h-[85vh]',
+            'fixed top-[50%] left-[50%] z-50 -translate-x-1/2 -translate-y-1/2 duration-200',
+            'flex flex-col max-h-[85vh] rounded-2xl border border-border bg-card text-card-foreground shadow-elevated',
+            'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95',
             'w-[95vw] sm:w-[90vw]',
             maxWidth,
             height,
@@ -104,23 +105,17 @@ export default function BaseModal({
           }}
         >
           <ModalContainerContext.Provider value={contentEl}>
-            <div
-              className="min-h-[60px] py-3 ps-15 pe-15 rounded-t-[20px] flex items-center justify-center flex-shrink-0 relative"
-              style={{
-                background:
-                  'linear-gradient(105.28deg, #FFFFFF 1.48%, #CBB5FD 182.49%, #FFFFFF 187.88%)',
-              }}
-            >
-              <DialogPrimitive.Title className="text-xl font-bold text-black text-center break-words min-w-0">
+            <div className="flex shrink-0 items-center gap-3 rounded-t-2xl border-b border-border bg-card px-5 py-4 sm:px-6">
+              <DialogPrimitive.Title className="min-w-0 flex-1 text-start text-lg font-semibold break-words text-foreground">
                 {title}
               </DialogPrimitive.Title>
 
               <DialogPrimitive.Close
                 disabled={isLoading}
                 aria-label={t('common.close')}
-                className="absolute end-5 top-1/2 -translate-y-1/2 size-10 flex items-center justify-center hover:opacity-70 transition-opacity disabled:opacity-50"
+                className="inline-flex size-9 shrink-0 items-center justify-center rounded-md max-sm:size-10 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
               >
-                <LiaTimesSolid className="w-4 h-4 text-black cursor-pointer" />
+                <LiaTimesSolid className="size-4" />
               </DialogPrimitive.Close>
             </div>
 
@@ -128,43 +123,38 @@ export default function BaseModal({
               {title}
             </DialogPrimitive.Description>
 
-            <div className="flex-1 px-4 sm:px-8 py-6 overflow-y-auto">{children}</div>
+            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">{children}</div>
 
-          {showFooter && (
-            <div className="px-4 sm:px-8 pb-4 flex gap-2 sm:gap-4 justify-between flex-shrink-0 pt-3">
-              <Button
-                variant="outline"
-                onClick={onClose}
-                disabled={isLoading}
-                className={
-                  cancelButtonClassName ||
-                  'w-[120px] h-10 sm:w-[146px] sm:h-[37px] bg-white border-[1.5px] border-[#ECECEC] rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-gray-50 transition-colors disabled:opacity-50'
-                }
-              >
-                <LiaTimesSolid className="w-4 h-4 sm:w-5 sm:h-5 text-[#5F5E5E]" />
-                <span className="text-sm sm:text-lg font-bold text-[#5F5E5E]">
-                  {cancelText}
-                </span>
-              </Button>
-
-              {onConfirm && (
+            {showFooter && (
+              <div className="flex shrink-0 items-center justify-between gap-3 rounded-b-2xl border-t border-border bg-card px-5 py-4 sm:px-6">
                 <Button
                   variant="outline"
-                  onClick={handleConfirm}
-                  disabled={isLoading || confirmDisabled}
+                  onClick={onClose}
+                  disabled={isLoading}
                   className={
-                    confirmButtonClassName ||
-                    'w-[120px] h-10 sm:w-[146px] sm:h-[37px] bg-primary border-[1.5px] border-primary rounded-[28px] flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-[#4B1BC4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                    cancelButtonClassName ||
+                    'h-10 min-w-[7.5rem] gap-2 rounded-lg px-5 font-medium sm:min-w-36'
                   }
                 >
-                  {confirmIcon}
-                  <span className="text-sm sm:text-lg font-bold text-white">
-                    {isLoading ? 'جاري الحفظ...' : confirmText}
-                  </span>
+                  <LiaTimesSolid className="size-4" />
+                  <span>{cancelText}</span>
                 </Button>
-              )}
-            </div>
-          )}
+
+                {onConfirm && (
+                  <Button
+                    onClick={handleConfirm}
+                    disabled={isLoading || confirmDisabled}
+                    className={
+                      confirmButtonClassName ||
+                      'h-10 min-w-[7.5rem] gap-2 rounded-lg px-5 font-semibold shadow-soft sm:min-w-36'
+                    }
+                  >
+                    {confirmIcon}
+                    <span>{isLoading ? 'جاري الحفظ...' : confirmText}</span>
+                  </Button>
+                )}
+              </div>
+            )}
           </ModalContainerContext.Provider>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

@@ -11,7 +11,7 @@ export function OrderChangeHistoryError({
 }) {
   return (
     <div className="flex flex-col items-center gap-3 py-4">
-      <p className="text-sm text-red-600">تعذر تحميل سجل التعديلات</p>
+      <p className="text-sm text-destructive">تعذر تحميل سجل التعديلات</p>
       <Button type="button" variant="outline" size="sm" loading={isRefetching} onClick={onRetry}>
         إعادة المحاولة
       </Button>
