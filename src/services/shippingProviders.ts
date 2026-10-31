@@ -141,9 +141,14 @@ export const useReturnedShipmentsQuery = (
     placeholderData: keepPreviousData,
   });
 
+export interface ActionSuccessToast {
+  kind: 'success' | 'info';
+  text: string;
+}
+
 const useShippingProvidersActionMutation = <TVariables, TResult>(
   mutationFn: (variables: TVariables) => Promise<TResult>,
-  messages: { success: string | ((result: TResult) => string); error: string },
+  messages: { success: string | ((result: TResult) => ActionSuccessToast); error: string },
 ) => {
   const queryClient = useQueryClient();
 
@@ -151,7 +156,13 @@ const useShippingProvidersActionMutation = <TVariables, TResult>(
     mutationFn,
     onSuccess: async (result) => {
       await invalidateAndWait(queryClient, [[KEY]]);
-      toast.success(typeof messages.success === 'string' ? messages.success : messages.success(result));
+      const outcome: ActionSuccessToast =
+        typeof messages.success === 'string' ? { kind: 'success', text: messages.success } : messages.success(result);
+      if (outcome.kind === 'info') {
+        toast.info(outcome.text);
+      } else {
+        toast.success(outcome.text);
+      }
     },
     onError: (err: unknown) => {
       toast.error(getApiErrorMessage(err, messages.error));
@@ -169,10 +180,13 @@ export const useSendAgainRecordMutation = () =>
       return data;
     },
     {
-      success: (result) =>
+      success: (result): ActionSuccessToast =>
         result.carrierResend.attempted
-          ? 'تم تسجيل إعادة الإرسال'
-          : 'تم تسجيل طلب إعادة الإرسال في سجل الطلب فقط، ولم يُرسل إلى شركة الشحن',
+          ? { kind: 'success', text: 'تم تسجيل إعادة الإرسال' }
+          : {
+              kind: 'info',
+              text: 'تم تسجيل طلب إعادة الإرسال في سجل الطلب فقط، ولم يُرسل إلى شركة الشحن',
+            },
       error: 'تعذر تسجيل إعادة الإرسال',
     },
   );

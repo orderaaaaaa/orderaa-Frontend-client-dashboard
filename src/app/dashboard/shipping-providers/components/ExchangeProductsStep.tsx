@@ -186,7 +186,7 @@ export function ExchangeProductsStep({
                     aria-label={t('exchange.create.step2.remove')}
                     onClick={() => onRemoveLine(line.key)}
                     disabled={disabled}
-                    className="shrink-0 rounded-md p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
+                    className="flex size-10 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
                   >
                     <LiaTimesSolid className="size-4" />
                   </button>

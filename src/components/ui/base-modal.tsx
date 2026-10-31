@@ -32,6 +32,7 @@ interface BaseModalProps {
   toastOnConfirmError?: boolean;
   confirmErrorFallback?: string;
   onEscapeKeyDown?: (event: KeyboardEvent) => void;
+  footer?: ReactNode;
 }
 
 export default function BaseModal({
@@ -53,6 +54,7 @@ export default function BaseModal({
   toastOnConfirmError = false,
   confirmErrorFallback = 'حدث خطأ، حاول مرة أخرى',
   onEscapeKeyDown,
+  footer,
 }: BaseModalProps) {
   const { t } = useI18n();
   const [internalIsLoading, setInternalIsLoading] = useState(false);
@@ -125,7 +127,13 @@ export default function BaseModal({
 
             <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">{children}</div>
 
-            {showFooter && (
+            {footer !== undefined && (
+              <div className="flex shrink-0 flex-col gap-3 rounded-b-2xl border-t border-border bg-card px-5 py-4 sm:px-6">
+                {footer}
+              </div>
+            )}
+
+            {footer === undefined && showFooter && (
               <div className="flex shrink-0 items-center justify-between gap-3 rounded-b-2xl border-t border-border bg-card px-5 py-4 sm:px-6">
                 <Button
                   variant="outline"

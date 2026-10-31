@@ -9,10 +9,10 @@ import {
   mergeLines,
   orderVariants,
 } from '@/components/orders/ChangeProductsModal';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import BaseModal from '@/components/ui/base-modal';
 import { Button } from '@/components/ui/button';
 import ProductSelectionModal, { type SelectableProduct } from '@/components/ui/product-selection-modal';
-import { Stepper } from '@/components/ui/stepper';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { useI18n } from '@/i18n/I18nProvider';
 import type {
@@ -29,6 +29,7 @@ import { getApiErrorMessage } from '@/utils/apiError';
 import { CARRIER_SEND_NOT_SENT_WARNING, carrierSendNeedsAttention } from '@/utils/manualOrder/carrierSend';
 import { ExchangeCandidateStep } from './ExchangeCandidateStep';
 import { ExchangeProductsStep, itemKeyOf, type ExchangeLine } from './ExchangeProductsStep';
+import { ExchangeStepIndicator } from './ExchangeStepIndicator';
 import { ExchangeSummaryStep } from './ExchangeSummaryStep';
 
 const MAX_TOTAL_COST = 9_999_999;
@@ -70,6 +71,7 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
   const [contentTouched, setContentTouched] = useState(false);
   const [contentInput, setContentInput] = useState('');
   const [notes, setNotes] = useState('');
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const source = candidates.find((candidate) => candidate.id === sourceId) ?? null;
   const returnedUnits = (source?.items ?? []).flatMap((item) => {
@@ -116,6 +118,11 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
   const handleClose = () => {
     if (isPending) return;
     onClose();
+  };
+
+  const goToStep = (next: number) => {
+    setSubmitError(null);
+    setStep(next);
   };
 
   const handleSelectSource = (id: number) => {
@@ -192,6 +199,7 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
 
   const handleConfirm = async () => {
     if (!canConfirm || source === null) return;
+    setSubmitError(null);
     const products: FollowupChangeProductInput[] = lines.map(
       ({ productId, quantity, variants, customVariants }) => ({
         productId,
@@ -223,9 +231,37 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
       onDone?.(response);
       onClose();
     } catch (err: unknown) {
-      toast.error(getApiErrorMessage(err, t('exchange.create.error')));
+      const message = getApiErrorMessage(err, t('exchange.create.submitError'));
+      setSubmitError(message);
+      toast.error(message);
     }
   };
+
+  const footer = (
+    <>
+      {submitError !== null && (
+        <Alert variant="destructive">
+          <AlertDescription>{submitError}</AlertDescription>
+        </Alert>
+      )}
+      {!canManage && <p className="text-sm text-muted-foreground">{t('exchange.create.noPermission')}</p>}
+      {navHint !== null && <p className="text-end text-xs text-muted-foreground">{navHint}</p>}
+      <div className="flex items-center justify-between gap-2">
+        <Button type="button" variant="outline" onClick={() => goToStep(step - 1)} disabled={step === 0 || isPending}>
+          {t('exchange.create.nav.back')}
+        </Button>
+        {step < 2 ? (
+          <Button type="button" onClick={() => goToStep(step + 1)} disabled={!canGoNext}>
+            {t('exchange.create.nav.next')}
+          </Button>
+        ) : (
+          <Button type="button" onClick={handleConfirm} disabled={!canConfirm} loading={isPending}>
+            {t('exchange.create.nav.confirm')}
+          </Button>
+        )}
+      </div>
+    </>
+  );
 
   return (
     <>
@@ -234,17 +270,21 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
         onClose={handleClose}
         title={t('exchange.create.title')}
         showFooter={false}
+        footer={footer}
         maxWidth="md:max-w-2xl"
       >
         <div className="flex flex-col gap-6" dir="rtl">
-          <Stepper
-            steps={[
-              { label: t('exchange.create.steps.order') },
-              { label: t('exchange.create.steps.products') },
-              { label: t('exchange.create.steps.summary') },
-            ]}
-            currentStep={step}
-          >
+          <div className="sticky top-0 z-10 -mx-5 -mt-5 border-b border-border bg-card px-5 pt-5 pb-3 sm:-mx-6 sm:px-6">
+            <ExchangeStepIndicator
+              labels={[
+                t('exchange.create.steps.order'),
+                t('exchange.create.steps.products'),
+                t('exchange.create.steps.summary'),
+              ]}
+              currentStep={step}
+            />
+          </div>
+          {step === 0 && (
             <ExchangeCandidateStep
               candidates={candidates}
               isLoading={candidatesQuery.isLoading}
@@ -254,6 +294,8 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
               onSelect={handleSelectSource}
               onRetry={() => void candidatesQuery.refetch()}
             />
+          )}
+          {step === 1 && (
             <ExchangeProductsStep
               returnItems={source?.items ?? []}
               returnQuantities={returnQuantities}
@@ -268,6 +310,8 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
               onChangeLineVariant={handleChangeLineVariant}
               onChangeReason={handleChangeReason}
             />
+          )}
+          {step === 2 && (
             <ExchangeSummaryStep
               returnedValue={returnedValue}
               newValue={newValue}
@@ -289,31 +333,7 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
               }}
               onChangeNotes={setNotes}
             />
-          </Stepper>
-
-          <div className="flex flex-col gap-3 border-t pt-4">
-            {!canManage && <p className="text-sm text-muted-foreground">{t('exchange.create.noPermission')}</p>}
-            {navHint !== null && <p className="text-end text-xs text-muted-foreground">{navHint}</p>}
-            <div className="flex items-center justify-between gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setStep(step - 1)}
-                disabled={step === 0 || isPending}
-              >
-                {t('exchange.create.nav.back')}
-              </Button>
-              {step < 2 ? (
-                <Button type="button" onClick={() => setStep(step + 1)} disabled={!canGoNext}>
-                  {t('exchange.create.nav.next')}
-                </Button>
-              ) : (
-                <Button type="button" onClick={handleConfirm} disabled={!canConfirm} loading={isPending}>
-                  {t('exchange.create.nav.confirm')}
-                </Button>
-              )}
-            </div>
-          </div>
+          )}
         </div>
       </BaseModal>
 

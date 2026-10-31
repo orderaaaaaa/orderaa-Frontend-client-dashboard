@@ -10,6 +10,7 @@ import {
   Clock,
   Flag,
   History,
+  Info,
   MapPin,
   MessageSquareText,
   PackageCheck,
@@ -80,6 +81,7 @@ interface RowAction {
   anyOfCodes?: PermissionCode[];
   disabled: boolean;
   disabledReason?: string;
+  reasonTone?: 'warning';
   pending?: boolean;
   onSelect: () => void;
 }
@@ -377,6 +379,7 @@ export function ShipmentRowActions({
             codes: [PERMISSIONS.FOLLOWUP_READ],
             disabled: isLocked || rowLocked || exchangeUnavailableReason !== undefined,
             disabledReason: lockedReason ?? rowLockedReason ?? exchangeUnavailableReason,
+            reasonTone: 'warning' as const,
             onSelect: () => setIsExchangeOpen(true),
           },
         ]
@@ -525,9 +528,20 @@ export function ShipmentRowActions({
           <span className={cn('font-medium', action.destructive ? 'text-destructive' : 'text-foreground')}>
             {t(action.labelKey)}
           </span>
-          <span className="text-xs whitespace-normal text-muted-foreground">{t(action.descriptionKey)}</span>
+          {!(showReason && action.reasonTone === 'warning') && (
+            <span className="text-xs whitespace-normal text-muted-foreground">{t(action.descriptionKey)}</span>
+          )}
           {showReason && (
-            <span id={reasonId} className="mt-0.5 text-xs whitespace-normal text-muted-foreground">
+            <span
+              id={reasonId}
+              className={cn(
+                'mt-0.5 text-xs whitespace-normal',
+                action.reasonTone === 'warning'
+                  ? 'flex items-center gap-1.5 font-medium text-amber-900 dark:text-amber-200'
+                  : 'text-muted-foreground',
+              )}
+            >
+              {action.reasonTone === 'warning' && <Info className="size-3.5 shrink-0" />}
               {reason}
             </span>
           )}

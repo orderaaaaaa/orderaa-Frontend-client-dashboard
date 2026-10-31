@@ -89,9 +89,9 @@ export function ExchangeSummaryStep({
           onChange={onChangePayer}
           disabled={disabled}
         />
-        {payer === 'CUSTOMER' && (
-          <p className="text-xs text-muted-foreground">{t('exchange.create.step3.shippingNote')}</p>
-        )}
+        <p className="text-xs text-muted-foreground">
+          {t(payer === 'CUSTOMER' ? 'exchange.create.step3.shippingNote' : 'exchange.create.step3.shippingNoteMerchant')}
+        </p>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -107,7 +107,9 @@ export function ExchangeSummaryStep({
           error={codInvalid ? t('exchange.create.step3.codInvalid') : undefined}
           disabled={disabled}
         />
-        <p className="text-xs text-muted-foreground">{t('exchange.create.step3.codHint')}</p>
+        <p className="text-xs text-muted-foreground">
+          {t(payer === 'CUSTOMER' ? 'exchange.create.step3.codHint' : 'exchange.create.step3.codHintMerchant')}
+        </p>
       </div>
 
       <div className="flex flex-col gap-2">

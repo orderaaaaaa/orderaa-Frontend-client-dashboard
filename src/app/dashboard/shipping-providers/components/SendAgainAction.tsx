@@ -65,17 +65,25 @@ function SendAgainReasonModal({
       isLoading={mutation.isPending}
     >
       <div className="space-y-3">
-        <p className="text-sm text-foreground-secondary">
-          يُسجَّل السبب في سجل الطلب، ولا يتم إرسال أي شيء إلى شركة الشحن.
-        </p>
-        {resendSupported === false && (
+        {resendSupported === false ? (
           <div className="flex flex-col items-start gap-2">
-            <Badge variant="secondary">{t('inProcess.sendAgain.resendBadge')}</Badge>
-            <Alert>
+            <Badge
+              variant="outline"
+              className="rounded-full border-amber-500/40 bg-amber-500/15 px-2.5 py-1 text-amber-900 dark:text-amber-200"
+            >
+              {t('inProcess.sendAgain.resendBadge')}
+            </Badge>
+            <Alert className="border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-200 [&>svg]:text-current">
               <Info className="size-4" />
-              <AlertDescription>{t('inProcess.sendAgain.resendNotSupported')}</AlertDescription>
+              <AlertDescription className="text-amber-900 dark:text-amber-200">
+                {t('inProcess.sendAgain.resendNotSupported')}
+              </AlertDescription>
             </Alert>
           </div>
+        ) : (
+          <p className="text-sm text-foreground-secondary">
+            يُسجَّل السبب في سجل الطلب، ولا يتم إرسال أي شيء إلى شركة الشحن.
+          </p>
         )}
         <label htmlFor="sendAgainReason" className="font-bold text-foreground">
           سبب إعادة الإرسال <span className="text-destructive">*</span>
