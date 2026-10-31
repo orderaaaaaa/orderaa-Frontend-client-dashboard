@@ -210,7 +210,7 @@ export function ExchangeCandidatesModal({ isOpen, onClose, orderId, onDone }: Ex
       })),
       products,
       shippingPaidBy: payer,
-      totalCost: codNumber,
+      totalCost: codTouched ? codNumber : undefined,
       returnShipmentContent: trimmedContent,
       notes: notes.trim() === '' ? undefined : notes.trim(),
     };
