@@ -170,7 +170,7 @@ export function OrderActionsFooter({
                   <div className="w-8 h-8 rounded-full border-3 bg-primary border-white flex items-center justify-center">
                     <LiaEllipsisHSolid className="w-5 h-5" />
                   </div>
-                  <span className="text-sm font-medium">اخري</span>
+                  <span className="text-sm font-medium">أخرى</span>
                 </Button>
 
                 <div className="fixed inset-x-4 bottom-[6.25rem]">
